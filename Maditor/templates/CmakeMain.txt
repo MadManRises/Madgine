@@ -1,0 +1,13 @@
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/../bin)
+
+set(CMAKE_MODULE_PATH
+	"${CMAKE_SOURCE_DIR}/../CMake"
+)
+
+include(PrecompiledHeader)
+
+find_package(Madgine)
+include_directories(${MADGINE_INCLUDE_DIRS})
+include_directories(${%1_SOURCE_DIR})
+
+%2

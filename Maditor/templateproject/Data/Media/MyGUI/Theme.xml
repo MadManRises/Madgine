@@ -1,0 +1,4 @@
+﻿<MyGUI type="List">
+	<List file="Skins.xml"/>
+  <List file="Templates.xml"/>
+</MyGUI>

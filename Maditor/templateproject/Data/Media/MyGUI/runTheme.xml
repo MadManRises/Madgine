@@ -1,0 +1,4 @@
+﻿<MyGUI type="List">
+  <List file="MyGUI_Core.xml"/>
+	<List file="Theme.xml"/>
+</MyGUI>
