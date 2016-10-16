@@ -21,7 +21,7 @@ namespace Maditor {
 
 			void setup(const QString &binaryDir, const QString &runtimeDir, Project *project);
 			
-			void update();
+			void update(bool callInit = true);
 
 		protected:
 			void addModule(Module *module);		
@@ -59,7 +59,7 @@ namespace Maditor {
 				std::list<Engine::UI::GuiHandlerBase*> mGuiHandlers;
 			};
 
-			bool loadModule(ModuleInstance &module);
+			bool loadModule(ModuleInstance &module, bool callInit);
 			bool unloadModule(ModuleInstance &module);
 
 			std::map<const Module *, ModuleInstance> mInstances;

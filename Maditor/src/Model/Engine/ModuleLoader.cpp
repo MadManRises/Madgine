@@ -88,9 +88,11 @@ namespace Maditor {
 				addModule(module.get());
 			}
 
+			update(false);
+
 		}
 
-		void ModuleLoader::update()
+		void ModuleLoader::update(bool callInit)
 		{
 			if (!mNeedReload)
 				return;
@@ -127,7 +129,7 @@ namespace Maditor {
 				ModuleInstance &instance = mInstances.find(m)->second;
 
 				qDebug() << "Reloading" << m->name();
-				loadModule(instance);
+				loadModule(instance, callInit);
 
 				for (const std::string &comp : instance.mEntityComponentNames) {
 					for (Engine::OGRE::Entity::Entity* e : mComponentEntities[comp]) {
@@ -181,7 +183,7 @@ namespace Maditor {
 			return result;
 		}
 
-		bool ModuleLoader::loadModule(ModuleInstance & module)
+		bool ModuleLoader::loadModule(ModuleInstance & module, bool callInit)
 		{
 			if (module.mLoaded)
 				return true;
@@ -241,24 +243,27 @@ namespace Maditor {
 				qDebug() << t.c_str();
 			}
 
-			bool isSceneLoaded = Engine::OGRE::SceneManager::getSingleton().isSceneLoaded();
+			
+
+			if (callInit) {
+				bool isSceneLoaded = Engine::OGRE::SceneManager::getSingleton().isSceneLoaded();
+
+				for (int i = 0; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
+					for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers)
+						h->init(i);
+
+				for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
+					h->init();
+					if (isSceneLoaded)
+						h->onSceneLoad();
+				}
 
 
-			for (int i = 0; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
-				for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers)
-					h->init(i);
-
-			for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
-				h->init();
-				if (isSceneLoaded)
-					h->onSceneLoad();
-			}			
-
-
-			for (Engine::OGRE::BaseSceneComponent *c : module.mSceneComponents) {
-				c->init();
-				if (isSceneLoaded)
-					c->onSceneLoad();
+				for (Engine::OGRE::BaseSceneComponent *c : module.mSceneComponents) {
+					c->init();
+					if (isSceneLoaded)
+						c->onSceneLoad();
+				}
 			}
 
 			module.mLoaded = true;

@@ -105,14 +105,14 @@
         <y:ProxyAutoBoundsNode>
           <y:Realizers active="0">
             <y:GroupNode>
-              <y:Geometry height="399.62646484375" width="1139.8062499999978" x="-273.21874999999903" y="125.37353515625"/>
+              <y:Geometry height="399.62646484375" width="1095.806249999998" x="-229.21874999999903" y="125.37353515625"/>
               <y:Fill color="#F5F5F5" transparent="false"/>
               <y:BorderStyle color="#000000" type="dashed" width="1.0"/>
-              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="1139.8062499999978" x="0.0" y="0.0">Madgine</y:NodeLabel>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="1095.806249999998" x="0.0" y="0.0">Madgine</y:NodeLabel>
               <y:Shape type="roundrectangle"/>
               <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
               <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
-              <y:BorderInsets bottom="20" bottomF="20.0" left="147" leftF="147.125" right="0" rightF="0.0" top="0" topF="0.0"/>
+              <y:BorderInsets bottom="20" bottomF="20.0" left="103" leftF="103.125" right="0" rightF="2.2737367544323206E-13" top="0" topF="0.0"/>
             </y:GroupNode>
             <y:GroupNode>
               <y:Geometry height="50.0" width="50.0" x="0.0" y="60.0"/>
@@ -324,7 +324,7 @@ Wrapper<y:LabelModel>
               <y:Geometry height="44.0" width="82.0" x="731.25" y="342.5"/>
               <y:Fill color="#FFCC00" transparent="false"/>
               <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
-              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" underlinedText="true" verticalTextPosition="bottom" visible="true" width="72.712890625" x="4.6435546875" y="12.6494140625">InputHandler<y:LabelModel>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="72.712890625" x="4.6435546875" y="12.6494140625">InputHandler<y:LabelModel>
                   <y:SmartNodeLabelModel distance="4.0"/>
                 </y:LabelModel>
                 <y:ModelParameter>
@@ -389,10 +389,9 @@ Wrapper<y:LabelModel>
           </data>
         </node>
         <node id="n5::n15">
-          <data key="d5"/>
           <data key="d6">
             <y:ShapeNode>
-              <y:Geometry height="44.0" width="82.0" x="310.78125000000085" y="228.74999999999997"/>
+              <y:Geometry height="44.0" width="82.0" x="591.125" y="446.0"/>
               <y:Fill color="#FFCC00" transparent="false"/>
               <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
               <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" underlinedText="true" verticalTextPosition="bottom" visible="true" width="62.705078125" x="9.6474609375" y="12.6494140625">Application<y:LabelModel>
@@ -427,7 +426,6 @@ Wrapper<y:LabelModel>
     </node>
     <node id="n7" yfiles.foldertype="group">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ProxyAutoBoundsNode>
           <y:Realizers active="0">
@@ -493,7 +491,6 @@ Wrapper<y:LabelModel>
     </node>
     <node id="n8" yfiles.foldertype="group">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ProxyAutoBoundsNode>
           <y:Realizers active="0">
@@ -543,19 +540,18 @@ Keyboard<y:LabelModel>
     </node>
     <node id="n9" yfiles.foldertype="group">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ProxyAutoBoundsNode>
           <y:Realizers active="0">
             <y:GroupNode>
-              <y:Geometry height="175.87680201416038" width="863.4812499999995" x="-273.21874999999903" y="540.37353515625"/>
+              <y:Geometry height="175.87680201416038" width="907.593749999999" x="-229.21874999999903" y="540.37353515625"/>
               <y:Fill color="#F5F5F5" transparent="false"/>
               <y:BorderStyle color="#000000" type="dashed" width="1.0"/>
-              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="863.4812499999995" x="0.0" y="0.0">UserCode</y:NodeLabel>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="907.593749999999" x="0.0" y="0.0">UserCode</y:NodeLabel>
               <y:Shape type="roundrectangle"/>
               <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
               <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
-              <y:BorderInsets bottom="0" bottomF="0.0" left="133" leftF="133.25449218749992" right="90" rightF="89.99374999999998" top="8" topF="8.0"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="89" leftF="89.25449218749992" right="178" rightF="178.10624999999948" top="8" topF="8.0"/>
             </y:GroupNode>
             <y:GroupNode>
               <y:Geometry height="50.0" width="50.0" x="0.0" y="60.0"/>
@@ -660,19 +656,18 @@ Keyboard<y:LabelModel>
     </node>
     <node id="n10" yfiles.foldertype="group">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ProxyAutoBoundsNode>
           <y:Realizers active="0">
             <y:GroupNode>
-              <y:Geometry height="108.69932565917941" width="268.0" x="-146.3361328124991" y="728.7506743408209"/>
+              <y:Geometry height="108.69932565917941" width="907.5937499999991" x="-229.21874999999903" y="728.7506743408209"/>
               <y:Fill color="#F5F5F500" transparent="false"/>
               <y:BorderStyle color="#000000" type="dashed" width="1.0"/>
-              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="268.0" x="0.0" y="0.0">UserMedia</y:NodeLabel>
+              <y:NodeLabel alignment="right" autoSizePolicy="node_width" backgroundColor="#EBEBEB" borderDistance="0.0" fontFamily="Dialog" fontSize="15" fontStyle="plain" hasLineColor="false" height="22.37646484375" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="907.5937499999991" x="0.0" y="0.0">UserMedia</y:NodeLabel>
               <y:Shape type="roundrectangle"/>
               <y:State closed="false" closedHeight="50.0" closedWidth="50.0" innerGraphDisplayEnabled="false"/>
               <y:Insets bottom="15" bottomF="15.0" left="15" leftF="15.0" right="15" rightF="15.0" top="15" topF="15.0"/>
-              <y:BorderInsets bottom="0" bottomF="0.0" left="0" leftF="0.0" right="0" rightF="0.0" top="2" topF="2.1728608154294307"/>
+              <y:BorderInsets bottom="0" bottomF="0.0" left="3" leftF="3.4062499999990905" right="66" rightF="66.0125000000005" top="2" topF="2.1728608154294307"/>
             </y:GroupNode>
             <y:GroupNode>
               <y:Geometry height="50.0" width="50.0" x="0.0" y="60.0"/>
@@ -709,7 +704,7 @@ Scripts<y:LabelModel>
         <node id="n10::n1">
           <data key="d6">
             <y:ShapeNode>
-              <y:Geometry height="52.0" width="56.0" x="-131.3361328124991" y="768.3000000000003"/>
+              <y:Geometry height="52.0" width="56.0" x="-210.81249999999994" y="768.3000000000003"/>
               <y:Fill color="#FF6600" transparent="false"/>
               <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
               <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="42.68359375" x="6.658203125" y="16.6494140625">Models<y:LabelModel>
@@ -726,11 +721,28 @@ Scripts<y:LabelModel>
         <node id="n10::n2">
           <data key="d6">
             <y:ShapeNode>
-              <y:Geometry height="52.0" width="56.0" x="-35.3361328124991" y="770.4500000000003"/>
+              <y:Geometry height="52.0" width="56.0" x="-144.3361328124991" y="770.4500000000003"/>
               <y:Fill color="#FF6600" transparent="false"/>
               <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
               <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="40.673828125" x="7.6630859375" y="9.298828125">Entity
 Scripts<y:LabelModel>
+                  <y:SmartNodeLabelModel distance="4.0"/>
+                </y:LabelModel>
+                <y:ModelParameter>
+                  <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
+                </y:ModelParameter>
+              </y:NodeLabel>
+              <y:Shape type="octagon"/>
+            </y:ShapeNode>
+          </data>
+        </node>
+        <node id="n10::n3">
+          <data key="d6">
+            <y:ShapeNode>
+              <y:Geometry height="52.0" width="56.0" x="541.3624999999996" y="768.3000000000003"/>
+              <y:Fill color="#FF6600" transparent="false"/>
+              <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="46.029296875" x="4.9853515625" y="16.6494140625">Layouts<y:LabelModel>
                   <y:SmartNodeLabelModel distance="4.0"/>
                 </y:LabelModel>
                 <y:ModelParameter>
@@ -1140,7 +1152,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="n7::e0" source="n7::n1" target="n7::n0">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1231,7 +1242,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e18" source="n11::n1" target="n5::n9">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1252,7 +1262,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="n11::e5" source="n11::n4" target="n11::n1">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1263,7 +1272,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="n9::e0" source="n9::n0" target="n9::n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1274,11 +1282,9 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e20" source="n10::n1" target="n5::n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="-182.81249999999994" y="794.3000000000003"/>
             <y:Point x="-182.81249999999994" y="364.5"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
@@ -1288,7 +1294,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e21" source="n10::n2" target="n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1299,7 +1304,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e22" source="n10::n2" target="n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1310,13 +1314,12 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e23" source="n10::n2" target="n5::n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-11.962500000000887" ty="0.0">
-            <y:Point x="-7.336132812499102" y="756.6249999999995"/>
-            <y:Point x="-181.56249999999994" y="756.6249999999995"/>
-            <y:Point x="-181.56249999999994" y="364.5"/>
+            <y:Point x="-116.3361328124991" y="756.6249999999995"/>
+            <y:Point x="-182.81249999999994" y="756.6249999999995"/>
+            <y:Point x="-182.81249999999994" y="364.5"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -1325,7 +1328,6 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="n9::e1" source="n9::n3" target="n9::n0">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -1336,6 +1338,27 @@ Scripts<y:LabelModel>
       </data>
     </edge>
     <edge id="e24" source="n5::n15" target="n11::n0">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="n5::e13" source="n5::n15" target="n5::n11">
+      <data key="d9"/>
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e25" source="n10::n3" target="n5::n0">
       <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>

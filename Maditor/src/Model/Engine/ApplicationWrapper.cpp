@@ -74,9 +74,8 @@ namespace Maditor {
 				mApplication->setupExternal(mSettings->mRootDir + "plugins.cfg", "QtOgre", target->width(), target->height(), parameters, mInput);
 				mInput->setSystem(&Engine::GUI::GUISystem::getSingleton());
 				mWatcher->notifyApplicationCreated(project->root());
-				mApplication->init(*mSettings);
 				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project);
-				mLoader->update();
+				mApplication->init(*mSettings);				
 				mWatcher->notifyApplicationInitialized();
 			});
 		}
