@@ -26,10 +26,6 @@ public:
 
     }
 
-	virtual ScopeClass getClassType() override {
-		return ScopeClassType<T>::type;
-	};
-
 };
 
 }

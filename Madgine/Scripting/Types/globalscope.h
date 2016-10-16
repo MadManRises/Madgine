@@ -11,9 +11,9 @@ namespace Scripting {
 
 	template MADGINE_EXPORT class UniqueComponentCollector<BaseGlobalAPIComponent>;
 
-class MADGINE_EXPORT Story : public ScopeImpl<Story>, public Ogre::Singleton<Story> {
+class MADGINE_EXPORT GlobalScope : public ScopeImpl<GlobalScope>, public Ogre::Singleton<GlobalScope> {
 public:
-    Story(Parsing::ScriptParser *scriptParser);
+    GlobalScope(Parsing::ScriptParser *scriptParser);
 
 	void init();
 

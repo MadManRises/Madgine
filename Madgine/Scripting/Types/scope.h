@@ -18,7 +18,7 @@ template <class T>
 struct ScopeClassType{};
 
 template <>
-struct ScopeClassType<Story> {
+struct ScopeClassType<GlobalScope> {
 	static constexpr ScopeClass type = ScopeClass::StoryClass;
 };
 

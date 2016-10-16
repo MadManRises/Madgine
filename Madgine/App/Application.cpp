@@ -7,6 +7,14 @@
 #include "GUI\MyGUI\MyGUILauncher.h"
 #include "Util\UtilMethods.h"
 
+#include "OGRE\scenemanager.h"
+
+#include "UI\UIManager.h"
+#include "configset.h"
+#include "Scripting\Types\globalscope.h"
+#include "Resources\ResourceLoader.h"
+#include "Util\Profiler.h"
+
 #include "Input\OISInputHandler.h"
 
 namespace Engine {
@@ -18,7 +26,16 @@ namespace App {
 Application::Application() :
 	mSettings(0),
 	mShutDown(true),
-	mWindow(0)
+	mWindow(0),
+	mRoot(0),
+	mSceneMgr(0),
+	mGUI(0),
+	mUI(0),
+	mLoader(0),
+	mGlobalScope(0),
+	mConfig(0),
+	mProfiler(0),
+	mInput(0)
 {
 
 }
@@ -34,7 +51,7 @@ void Application::setup(const std::string &pluginsFile, const std::string &windo
 
 	mWindow = mRoot->initialise(true, windowName); // Create Application-Window
 
-	_setup(new Input::OISInputHandler(mGUI.get(), mWindow));
+	_setup(new Input::OISInputHandler(mGUI, mWindow));
 
 }
 
@@ -58,7 +75,7 @@ void Application::init(const AppSettings & settings)
 
 	mGUI->init();
 
-	//mStory->methodCall("openLoadingScreen");
+	//mGlobalScope->methodCall("openLoadingScreen");
 	mUI->openLoadingScreen();
 
 	mLoader->load();
@@ -67,7 +84,7 @@ void Application::init(const AppSettings & settings)
 
 	mSceneMgr->init(); // Initialise all Scene-Components
 
-	mStory->init();
+	mGlobalScope->init();
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows
 
@@ -78,7 +95,7 @@ int Application::go()
 {
 	mShutDown = false;
 
-	if (!mStory->callMethodCatch("init"))
+	if (!mGlobalScope->callMethodCatch("init"))
 		return -1;
 
 	mRoot->startRendering();
@@ -99,6 +116,11 @@ int Application::run(const AppSettings &settings)
 	app.setup("plugins.cfg", settings.mWindowName);
 	app.init(settings);
 	return app.go();
+}
+
+void Application::callSafe(std::function<void()> f)
+{
+	mSafeCallQueue.emplace(f);
 }
 
 bool Application::frameStarted(const Ogre::FrameEvent & fe)
@@ -133,6 +155,14 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		mUI->update(fe.timeSinceLastFrame);
 	}
 
+	{
+		PROFILE("SafeCall", "Rendering");
+		while (!mSafeCallQueue.empty()) {
+			mSafeCallQueue.front()();
+			mSafeCallQueue.pop();
+		}
+	}
+
 	return true;
 }
 
@@ -150,9 +180,9 @@ bool Application::frameEnded(const Ogre::FrameEvent & fe)
 void Application::_setupOgre(const std::string &pluginsFile)
 {
 
-	mRoot = OGRE_MAKE_UNIQUE(Ogre::Root)(pluginsFile); // Creating Root
+	mRoot = OGRE_NEW Ogre::Root(pluginsFile); // Creating Root
 
-	mConfig = OGRE_MAKE_UNIQUE(ConfigSet)(mRoot.get(), "config.vs"); // Loading Config and configuring Root
+	mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
 
 	Util::UtilMethods::setup();
 
@@ -160,42 +190,52 @@ void Application::_setupOgre(const std::string &pluginsFile)
 
 void Application::_setup(Input::InputHandler *input)
 {
-	mLoader = OGRE_MAKE_UNIQUE(Resources::ResourceLoader)();
+	mLoader = OGRE_NEW Resources::ResourceLoader();
 
-	// Instantiate the Story class
-	mStory = OGRE_MAKE_UNIQUE(Scripting::Story)(mLoader->scriptParser());
+	// Instantiate the GlobalScope class
+	mGlobalScope = OGRE_NEW Scripting::GlobalScope(mLoader->scriptParser());
 
-	mStory->addAPI(this);
+	mGlobalScope->addAPI(this);
 
 	// Create SceneManager
-	mSceneMgr = OGRE_MAKE_UNIQUE(OGRE::SceneManager)(mRoot.get());
+	mSceneMgr = OGRE_NEW OGRE::SceneManager(mRoot);
 
 	// Initialise GUISystem 
-	mGUI = OGRE_MAKE_UNIQUE_BASE(GUI::MyGui::MyGUILauncher, GUI::GUISystem)(mWindow, mSceneMgr->getSceneManager());
+	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());
 	//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)(); 
 
 	// Create UIManager
-	mUI = OGRE_MAKE_UNIQUE(UI::UIManager)(mWindow, mSceneMgr.get(), mGUI.get());
+	mUI = OGRE_NEW UI::UIManager(mWindow, mSceneMgr, mGUI);
 
-	mInput = Ogre::unique_ptr<Input::InputHandler>(input);
+	mInput = input;
 
-	mProfiler = OGRE_MAKE_UNIQUE(Util::Profiler)();
+	mProfiler = OGRE_NEW Util::Profiler();
 }
 
 
 
 void Application::_cleanup()
 {
-	mInput.reset();
-	mProfiler.reset();
-	mLoader.reset();
-	mUI.reset();
-	mGUI.reset();
-	mSceneMgr->finalize();
-	mSceneMgr.reset();
-	mStory.reset();
-    mConfig.reset();
-    mRoot.reset();
+	if (mInput)
+		delete mInput;
+	if (mProfiler)
+		delete mProfiler;
+	if (mLoader)
+		delete mLoader;
+	if (mUI)
+		delete mUI;
+	if (mGUI)
+		delete mGUI;
+	if (mSceneMgr) {
+		mSceneMgr->finalize();
+		delete mSceneMgr;
+	}
+	if (mGlobalScope)
+		delete mGlobalScope;
+	if (mConfig)
+		delete mConfig;
+    if (mRoot)
+		delete mRoot;
 }
 
 

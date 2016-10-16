@@ -215,12 +215,16 @@ namespace Maditor {
 			std::set<Engine::UI::GameHandlerBase*> beforeGameHandlers = Engine::UI::UIManager::getSingleton().getGameHandlers();
 			std::set<Engine::UI::GuiHandlerBase*> beforeGuiHandlers = Engine::UI::UIManager::getSingleton().getGuiHandlers();
 
+			UINT errorMode = GetErrorMode();
+			SetErrorMode(SEM_FAILCRITICALERRORS);
 			try {
 				module.mHandle = LoadLibrary(runtimePath.toStdString().c_str());
 			}
 			catch (...) {
 				module.mHandle = 0;
 			}
+			SetErrorMode(errorMode);
+
 			if (!module.mHandle)
 				return false;
 

@@ -14,6 +14,8 @@
 
 #include "Watcher\ApplicationWatcher.h"
 
+#include "GUI\GUISystem.h"
+
 namespace Maditor {
 	namespace Model {
 		ApplicationWrapper::ApplicationWrapper(Watcher::ApplicationWatcher *watcher, ModuleLoader *loader) :
@@ -67,13 +69,13 @@ namespace Maditor {
 
 
 			doTask([=] () {
-				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project);
 				mApplication = new Engine::App::Application;
 				mInput = new Watcher::InputWrapper;
 				mApplication->setupExternal(mSettings->mRootDir + "plugins.cfg", "QtOgre", target->width(), target->height(), parameters, mInput);
 				mInput->setSystem(&Engine::GUI::GUISystem::getSingleton());
 				mWatcher->notifyApplicationCreated(project->root());
 				mApplication->init(*mSettings);
+				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project);
 				mLoader->update();
 				mWatcher->notifyApplicationInitialized();
 			});

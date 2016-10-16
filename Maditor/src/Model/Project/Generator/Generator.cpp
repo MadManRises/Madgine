@@ -47,7 +47,7 @@ namespace Maditor {
 
 			QString Generator::templateFile(const QString & name)
 			{
-				QFile file(QString("C:/Users/schue/Documents/Engine---Game/Maditor/templates/") + name);
+				QFile file(QString("C:/Users/schue/Desktop/GitHub/Madgine/Maditor/templates/") + name);
 				if (!file.open(QFile::ReadOnly | QFile::Text)) {
 					throw 0;
 				}

@@ -5,14 +5,14 @@
 
 #include "baseentitycomponent.h"
 
-#include "Scripting\Parsing\entitynode.h"
+#include "Scripting\Parsing\entitynodeptr.h"
 
 namespace Engine {
 namespace OGRE {
 namespace Entity {
 
 
-using namespace Scripting;
+
 
 class MADGINE_EXPORT Entity : public Scripting::ScopeImpl<Entity>
 {
@@ -96,12 +96,12 @@ protected:
 	
 	bool hasScriptMethod(const std::string &name) override;
 
-    const Parsing::MethodNodePtr &getMethod(const std::string &name) override;
+    const Scripting::Parsing::MethodNodePtr &getMethod(const std::string &name) override;
 
-    virtual void save(Serialize::SerializeOutStream &of) const override;
-    virtual void load(Serialize::SerializeInStream &ifs) override;
+    virtual void save(Scripting::Serialize::SerializeOutStream &of) const override;
+    virtual void load(Scripting::Serialize::SerializeInStream &ifs) override;
 
-	virtual void storeCreationData(Serialize::SerializeOutStream &of) override;
+	virtual void storeCreationData(Scripting::Serialize::SerializeOutStream &of) override;
 
 	
 
@@ -147,8 +147,7 @@ private:
     
     Ogre::Vector3 mLastPosition;
 
-    std::list<std::tuple<float, std::string, ArgumentList>>
-    mEnqueuedMethods;
+
 
 
     std::map<std::string, Ogre::unique_ptr<BaseEntityComponent>> mComponents;

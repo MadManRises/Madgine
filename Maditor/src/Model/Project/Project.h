@@ -27,8 +27,6 @@ namespace Maditor {
 
 			static Project *load(const QString &path);
 
-			void addView(QTreeView *view);
-
 			bool hasModule(const QString &name);
 
 			bool isValid();
@@ -46,6 +44,8 @@ namespace Maditor {
 
 			virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+			void handleContextMenuRequest(const QModelIndex &p, QMenu &menu);
+
 		protected:
 			void save();
 
@@ -55,8 +55,6 @@ namespace Maditor {
 			void copyTemplate(QMessageBox::StandardButton *answer);
 
 			void addModule(Module *module);
-
-			void handleContextMenuRequest(const QModelIndex &p, QMenu &menu);
 
 		public slots:
 			void createModule(const QString &name);
@@ -85,7 +83,6 @@ namespace Maditor {
 
 			static const QString sProjectFileName;
 
-			std::list<QMetaObject::Connection> mConnections;
 
 		};
 	}

@@ -73,8 +73,7 @@ namespace Maditor {
 
 		Project::~Project()
 		{
-			for (QMetaObject::Connection &conn : mConnections)
-				QObject::disconnect(conn);
+			
 		}
 
 
@@ -100,7 +99,7 @@ namespace Maditor {
 		void Project::copyTemplate(QMessageBox::StandardButton *answer)
 		{
 			QStringList templateFiles;
-			QString templatePath("C:/Users/schue/Documents/Engine---Game/Maditor/templateproject/");
+			QString templatePath("C:/Users/schue/Desktop/GitHub/Madgine/Maditor/templateproject/");
 			QDir dir(templatePath);
 
 			QDirIterator it(templatePath, QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs, QDirIterator::Subdirectories);
@@ -203,17 +202,6 @@ namespace Maditor {
 			return new Project(doc, path);
 		}
 
-		void Project::addView(QTreeView * view)
-		{
-			view->setModel(this);
-			view->setContextMenuPolicy(Qt::CustomContextMenu);
-			mConnections.emplace_back(connect(view, &QTreeView::customContextMenuRequested, [=](const QPoint &p) {
-				QMenu menu;
-				handleContextMenuRequest(view->indexAt(p), menu);
-				if (menu.actions().size() > 0)
-					menu.exec(view->viewport()->mapToGlobal(p));
-			}));
-		}
 
 		bool Project::hasModule(const QString & name)
 		{

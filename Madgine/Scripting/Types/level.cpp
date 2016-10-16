@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "level.h"
-#include "story.h"
+#include "globalscope.h"
 
 namespace Engine {
 namespace Scripting {
@@ -26,7 +26,7 @@ std::string Level::getIdentifier()
 
 Scope *Level::Factory::create(Serialize::SerializeInStream &in)
 {
-    return Story::getSingleton().level();
+    return GlobalScope::getSingleton().level();
 }
 
 } // namespace Scripting

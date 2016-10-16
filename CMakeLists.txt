@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 set(OGRE_PATH "" CACHE PATH "Path to FindOgre.cmake ans FindOIS.cmake")
 
+Project(Madgine)
 
 set(CMAKE_MODULE_PATH
 	"${CMAKE_SOURCE_DIR}/CMake"

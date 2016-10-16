@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "fieldaccessor.h"
-#include "Scripting/Types/story.h"
+#include "Scripting/Types/globalscope.h"
 
 namespace Engine{
 namespace Scripting{
@@ -15,13 +15,13 @@ namespace Scripting{
 
 
 GlobalFieldAccessor::GlobalFieldAccessor(const std::string &fieldName) :
-	ScopeFieldAccessor(Story::getSingleton(), fieldName)
+	ScopeFieldAccessor(GlobalScope::getSingleton(), fieldName)
 {
 
 }
 
 LevelFieldAccessor::LevelFieldAccessor(const std::string &fieldName) :
-	ScopeFieldAccessor(*Story::getSingleton().level(), fieldName) {
+	ScopeFieldAccessor(*GlobalScope::getSingleton().level(), fieldName) {
 
 }
 

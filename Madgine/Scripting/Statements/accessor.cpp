@@ -2,7 +2,7 @@
 #include "accessor.h"
 #include "Scripting/Types/scope.h"
 #include "Scripting/Datatypes/varset.h"
-#include "Scripting/Types/story.h"
+#include "Scripting/Types/globalscope.h"
 
 namespace Engine {
 namespace Scripting {
@@ -19,7 +19,7 @@ Accessor::Accessor(int line, const std::string &attName) :
 ValueType Accessor::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const
 {
     if (mAttName.empty())
-        return &Story::getSingleton();
+        return &GlobalScope::getSingleton();
     else if (mAttName == "my")
         return rootScope;
     else if (scope)

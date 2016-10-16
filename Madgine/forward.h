@@ -19,7 +19,7 @@ namespace Engine {
 		class List;
 		class Struct;
 
-		class Story;
+		class GlobalScope;
 		class Level;
 
 		namespace Serialize {
@@ -100,6 +100,7 @@ namespace Engine {
 	}
 
 	namespace Resources {
+		class ResourceLoader;
 		namespace Shading {
 			class ShaderFactoryBase;
 		}
@@ -108,6 +109,10 @@ namespace Engine {
 	namespace Util {
 		class Profiler;
 		class ProcessStats;
+	}
+
+	namespace Input {
+		class InputHandler;
 	}
 
 }

@@ -3,7 +3,7 @@
 #include "Scripting/Datatypes/argumentlist.h"
 #include "Scripting\Datatypes\valuetype.h"
 #include "api.h"
-#include "story.h"
+#include "globalscope.h"
 
 namespace Engine {
 namespace Scripting {
@@ -13,25 +13,28 @@ template <class T>
 class GlobalAPI : public API<T> {
 public:
 	GlobalAPI() :
-		mStory(&Story::getSingleton()) {
-		mStory->addAPI(this);
+		mGlobalScope(&GlobalScope::getSingleton()) {
+		mGlobalScope->addAPI(this);
 	}
 	virtual ~GlobalAPI() {
-		mStory->removeAPI(this);
+		mGlobalScope->removeAPI(this);
 	}
 
 	bool callGlobalMethod(const std::string &name, const ArgumentList &args = {}) {
-		assert(mStory);
-		return mStory->callMethodCatch(name, args);
+		return mGlobalScope->callMethodCatch(name, args);
+	}
+
+	bool callGlobalMethodIfAvailable(const std::string &name, const ArgumentList &args = {}) {
+		return mGlobalScope->callMethodIfAvailable(name, args);
 	}
 
 protected:
-	Story *story() {
-		return mStory;
+	GlobalScope *globalScope() {
+		return mGlobalScope;
 	}
 
 private:
-	Story *mStory;
+	GlobalScope *mGlobalScope;
 };
 
 

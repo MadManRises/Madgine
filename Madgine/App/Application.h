@@ -1,14 +1,8 @@
 #pragma once
 
-#include "OGRE\scenemanager.h"
 
-#include "GUI\GUISystem.h"
-#include "UI\UIManager.h"
-#include "configset.h"
-#include "Scripting\Types\story.h"
-#include "Resources\ResourceLoader.h"
-#include "Util\Profiler.h"
-#include "Input\InputHandler.h"
+
+#include "Scripting\Types\api.h"
 
 namespace Engine {
 namespace App {
@@ -42,6 +36,8 @@ public:
 
 	static int run(const AppSettings &settings);
 
+	void callSafe(std::function<void()> f);
+
 protected:
 	virtual bool frameStarted(const Ogre::FrameEvent & fe) override;
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent & fe) override;	
@@ -56,17 +52,19 @@ private:
 
 	Ogre::RenderWindow								   *mWindow;
 
-    Ogre::unique_ptr<Ogre::Root>                       mRoot;
-    Ogre::unique_ptr<OGRE::SceneManager>               mSceneMgr;
-    Ogre::unique_ptr<GUI::GUISystem>                   mGUI;
-	Ogre::unique_ptr<UI::UIManager>		               mUI;
-	Ogre::unique_ptr<Resources::ResourceLoader>		   mLoader;
-    Ogre::unique_ptr<Scripting::Story>                 mStory;
-    Ogre::unique_ptr<ConfigSet>                        mConfig;
-	Ogre::unique_ptr<Util::Profiler>				   mProfiler;
-	Ogre::unique_ptr<Input::InputHandler>           mInput;
+    Ogre::Root*                       mRoot;
+    OGRE::SceneManager*               mSceneMgr;
+    GUI::GUISystem*                   mGUI;
+	UI::UIManager*                    mUI;
+	Resources::ResourceLoader*        mLoader;
+    Scripting::GlobalScope*                 mGlobalScope;
+    ConfigSet*                        mConfig;
+	Util::Profiler*                   mProfiler;
+	Input::InputHandler*              mInput;
 
     const AppSettings *mSettings;
+
+	std::queue<std::function<void()>> mSafeCallQueue;
 
 	bool mShutDown;
 };

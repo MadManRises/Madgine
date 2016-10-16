@@ -6,6 +6,7 @@
 namespace Maditor {
 	namespace Model {
 		class ApplicationWrapper;
+		class Project;
 
 		namespace Watcher {
 			class ApplicationWatcher;

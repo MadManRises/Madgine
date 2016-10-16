@@ -80,7 +80,7 @@ namespace Maditor {
 		{
 			if (!project->isValid()) return;
 
-			mProject = std::move(project);
+			mProject = std::forward<std::unique_ptr<Project>>(project);
 
 			emit projectOpened(mProject.get());
 

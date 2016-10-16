@@ -1,6 +1,6 @@
 #pragma once
 
-#include "methodnode.h"
+#include "methodnodeptr.h"
 #include "textResource.h"
 
 namespace Engine {
@@ -31,49 +31,6 @@ private:
 };
 
 
-class EntityNodePtr : public Ogre::SharedPtr<EntityNode>
-{
-public:
-	EntityNodePtr() : Ogre::SharedPtr<EntityNode>() {}
-	explicit EntityNodePtr(EntityNode *rep) : Ogre::SharedPtr<EntityNode>(rep) {}
-	EntityNodePtr(const EntityNodePtr &r) : Ogre::SharedPtr<EntityNode>(r) {}
-	EntityNodePtr(const Ogre::ResourcePtr &r) : Ogre::SharedPtr<EntityNode>()
-	{
-		if (r.isNull())
-			return;
-		// lock & copy other mutex pointer
-		OGRE_LOCK_MUTEX(*r.OGRE_AUTO_MUTEX_NAME)
-			OGRE_COPY_AUTO_SHARED_MUTEX(r.OGRE_AUTO_MUTEX_NAME)
-			pRep = static_cast<EntityNode*>(r.getPointer());
-		pUseCount = r.useCountPointer();
-		useFreeMethod = r.freeMethod();
-		if (pUseCount)
-		{
-			++(*pUseCount);
-		}
-	}
-
-	/// Operator used to convert a ResourcePtr to a TextFilePtr
-	EntityNodePtr& operator=(const Ogre::ResourcePtr& r)
-	{
-		if (pRep == static_cast<EntityNode*>(r.getPointer()))
-			return *this;
-		release();
-		if (r.isNull())
-			return *this; // resource ptr is null, so the call to release above has done all we need to do.
-						  // lock & copy other mutex pointer
-		OGRE_LOCK_MUTEX(*r.OGRE_AUTO_MUTEX_NAME)
-			OGRE_COPY_AUTO_SHARED_MUTEX(r.OGRE_AUTO_MUTEX_NAME)
-			pRep = static_cast<EntityNode*>(r.getPointer());
-		pUseCount = r.useCountPointer();
-		useFreeMethod = r.freeMethod();
-		if (pUseCount)
-		{
-			++(*pUseCount);
-		}
-		return *this;
-	}
-};
 
 }
 }

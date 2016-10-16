@@ -1,13 +1,11 @@
 #pragma once
 
 #include <qevent.h>
-#include "LogWatcher.h"
 #include <memory>
 #include <OgreFrameListener.h>
 #include <OgreRenderTarget.h>
 #include <forward.h>
-#include "ResourceWatcher.h"
-#include "PerformanceWatcher.h"
+
 
 
 namespace Maditor {
@@ -19,6 +17,9 @@ namespace Maditor {
 		namespace Watcher {
 
 			class LogsWatcher;
+			class ResourceWatcher;
+			class PerformanceWatcher;
+			class OgreSceneWatcher;
 
 			class ApplicationWatcher : public QObject, public Ogre::FrameListener{
 				Q_OBJECT
@@ -36,6 +37,7 @@ namespace Maditor {
 				ResourceWatcher *resourceWatcher();
 				PerformanceWatcher *performanceWatcher();
 				LogsWatcher *logsWatcher();
+				OgreSceneWatcher *ogreSceneWatcher();
 
 				void resizeWindow();
 
@@ -64,6 +66,7 @@ namespace Maditor {
 				LogsWatcher *mLogsWatcher;
 				ResourceWatcher *mResourceWatcher;				
 				PerformanceWatcher *mPerformanceWatcher;
+				OgreSceneWatcher *mOgreSceneWatcher;
 
 				Ogre::RenderTarget *mSceneRenderWindow;
 				Ogre::RenderWindow *mGuiRenderWindow;

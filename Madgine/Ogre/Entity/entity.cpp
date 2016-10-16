@@ -15,6 +15,7 @@
 #include "Ogre\entityexception.h"
 
 #include "Scripting\Parsing\scriptparser.h"
+#include "Scripting\Parsing\entitynode.h"
 
 
 
@@ -61,7 +62,7 @@ Entity::~Entity()
 {
 }
 
-void Entity::init(const ArgumentList &args)
+void Entity::init(const Scripting::ArgumentList &args)
 {
     callMethodIfAvailable("init", args);
 }
@@ -105,7 +106,7 @@ void Entity::setObjectVisible(bool b)
 	mObject->setVisible(b);
 }
 
-void Entity::storeCreationData(Serialize::SerializeOutStream &of)
+void Entity::storeCreationData(Scripting::Serialize::SerializeOutStream &of)
 {
     Scope::storeCreationData(of);
     of << getName() << (mObject ? mObject->getMesh()->getName().c_str() : "") << mDescription->getName();
@@ -166,17 +167,7 @@ void Entity::positionChanged(const Ogre::Vector3 &dist)
 void Entity::update(float timeSinceLastFrame)
 {
 
-    std::list<std::tuple<float, std::string, ArgumentList>>::iterator it =
-        mEnqueuedMethods.begin();
-    while (it != mEnqueuedMethods.end()) {
-        if (std::get<0>(*it) <= timeSinceLastFrame) {
-            methodCall(std::get<1>(*it), std::get<2>(*it));
-            it = mEnqueuedMethods.erase(it);
-        } else {
-            std::get<0>(*it) -= timeSinceLastFrame;
-            ++it;
-        }
-    }
+    
 
     if (mLastPosition != getPosition()) {
         positionChanged(getPosition() - mLastPosition);
@@ -245,7 +236,7 @@ bool Entity::hasScriptMethod(const std::string &name)
     return mDescription->hasMethod(name);
 }
 
-const Parsing::MethodNodePtr &Entity::getMethod(const std::string &name)
+const Scripting::Parsing::MethodNodePtr &Entity::getMethod(const std::string &name)
 {
     return mDescription->getMethod(name);
 }
@@ -268,7 +259,7 @@ ValueType Entity::enqueueMethod(const ArgumentList &stack)
 }*/
 
 
-void Entity::save(Serialize::SerializeOutStream &of) const
+void Entity::save(Scripting::Serialize::SerializeOutStream &of) const
 {
     Scope::save(of);
 
@@ -282,10 +273,10 @@ void Entity::save(Serialize::SerializeOutStream &of) const
         of << comp.first << *comp.second;
     }
 
-    of << ValueType();
+    of << Scripting::ValueType();
 }
 
-void Entity::load(Serialize::SerializeInStream &ifs)
+void Entity::load(Scripting::Serialize::SerializeInStream &ifs)
 {
     Scope::load(ifs);
 

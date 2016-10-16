@@ -18,7 +18,14 @@ namespace Maditor {
 			}
 			QString SceneComponentGenerator::templateFileName(int index)
 			{
-				return QString();
+				switch (index) {
+				case 0:
+					return "SceneComponent.h";
+				case 1:
+					return "SceneComponent.cpp";
+				default:
+					throw 0;
+				}
 			}
 		}
 	}

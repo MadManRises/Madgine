@@ -243,7 +243,7 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
-      <widget class="QTreeView" name="ProjectWidget"/>
+      <widget class="Maditor::View::Project::ProjectView" name="ProjectWidget"/>
      </item>
     </layout>
    </widget>
@@ -304,6 +304,21 @@
         <bool>false</bool>
        </property>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="OgreSceneDockWidget">
+   <property name="windowTitle">
+    <string>OgreScene</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QGridLayout" name="gridLayout_11">
+     <item row="0" column="0">
+      <widget class="QTreeView" name="OgreSceneWidget"/>
      </item>
     </layout>
    </widget>
@@ -381,6 +396,11 @@
    <extends>QTabWidget</extends>
    <header>view/Editors/scripteditortabwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Maditor::View::Project::ProjectView</class>
+   <extends>QTreeView</extends>
+   <header>view/Project/projectview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

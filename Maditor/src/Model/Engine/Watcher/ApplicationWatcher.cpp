@@ -10,6 +10,10 @@
 #include "Model\Engine\ModuleLoader.h"
 #include <qapplication.h>
 #include "LogsWatcher.h"
+#include "OgreSceneWatcher.h"
+#include "LogWatcher.h"
+#include "ResourceWatcher.h"
+#include "PerformanceWatcher.h"
 
 namespace Maditor {
 	namespace Model {
@@ -25,6 +29,7 @@ namespace Maditor {
 				mResourceWatcher = new ResourceWatcher;
 				mPerformanceWatcher = new PerformanceWatcher;
 				mLogsWatcher = new LogsWatcher;
+				mOgreSceneWatcher = new OgreSceneWatcher;
 
 			}
 
@@ -33,6 +38,7 @@ namespace Maditor {
 				delete mResourceWatcher;
 				delete mPerformanceWatcher;
 				delete mLogsWatcher;
+				delete mOgreSceneWatcher;
 			}
 
 			void ApplicationWatcher::notifyApplicationCreated(const QString &root)
@@ -46,6 +52,8 @@ namespace Maditor {
 				mGuiRenderWindow = Engine::UI::UIManager::getSingleton().renderWindow();
 				mGuiRenderStats = &mGuiRenderWindow->getStatistics();
 				emit renderStatsSetup("Gui", mGuiRenderStats);
+
+				mOgreSceneWatcher->setRoot(Engine::OGRE::SceneManager::getSingleton().getSceneManager()->getRootSceneNode());
 
 				//mResourceWatcher.setup();
 
@@ -93,6 +101,11 @@ namespace Maditor {
 				return mLogsWatcher;
 			}
 
+			OgreSceneWatcher * ApplicationWatcher::ogreSceneWatcher()
+			{
+				return mOgreSceneWatcher;
+			}
+
 			void ApplicationWatcher::resizeWindow()
 			{
 				mResizePending = true;
@@ -103,6 +116,7 @@ namespace Maditor {
 
 				mPerformanceWatcher->update();
 				mModuleLoader->update();
+				mOgreSceneWatcher->update();
 
 				if (mResizePending) {
 					mResizePending = false;

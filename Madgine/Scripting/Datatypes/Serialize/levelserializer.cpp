@@ -1,7 +1,7 @@
 #include "libinclude.h"
 #include "levelserializer.h"
 
-#include "Scripting/Types/story.h"
+#include "Scripting/Types/globalscope.h"
 #include "Ogre/SceneManager.h"
 #include "Ogre/Entity/entity.h"
 
@@ -20,7 +20,7 @@ namespace Serialize {
 void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeComponents, bool saveStory)
 {
 
-	Story *story = &Story::getSingleton();
+	GlobalScope *global = &GlobalScope::getSingleton();
 
     out << OGRE::SceneManager::getSingleton();
 
@@ -31,13 +31,13 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
 
     std::set<Scope *> scopeSet, ignoreSet;
 
-    story->collectScopes(saveStory ? scopeSet : ignoreSet);
+    global->collectScopes(saveStory ? scopeSet : ignoreSet);
 	
 	for (OGRE::Entity::Entity *e : OGRE::SceneManager::getSingleton().entities()) {
 		e->collectScopes(scopeSet, ignoreSet);
 	}
 
-    story->level()->collectScopes(scopeSet, ignoreSet);
+    global->level()->collectScopes(scopeSet, ignoreSet);
 
     for (Scope *s : scopeSet){
         out << s;

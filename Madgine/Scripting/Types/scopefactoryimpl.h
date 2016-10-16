@@ -16,6 +16,7 @@ namespace Engine {
 			};
 
 		private:
+
 			class Factory : public ScopeFactory {
 			public:
 				Factory() : ScopeFactory(ScopeClassType<T>::type) {}
@@ -27,9 +28,6 @@ namespace Engine {
 			static Factory sFactory;
 
 		};
-
-		/*template <class T, class Base>
-		ScopeFactoryImpl<T, Base>::Factory;*/
 
 	}
 }

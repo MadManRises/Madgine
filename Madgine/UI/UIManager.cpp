@@ -166,10 +166,7 @@ namespace Engine {
 
 			mSceneMgr->update(timeSinceLastFrame, context);
 
-			while (!mSafeCallQueue.empty()) {
-				mSafeCallQueue.front()();
-				mSafeCallQueue.pop();
-			}
+			
 
 		}
 
@@ -225,11 +222,7 @@ namespace Engine {
 			handler->window()->hide();
 		}
 
-		void UIManager::callSafe(std::function<void()> f)
-		{
-			mSafeCallQueue.emplace(f);
-		}
-
+		
 		GUI::GUISystem * UIManager::gui()
 		{
 			return mGUI;

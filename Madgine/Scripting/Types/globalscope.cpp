@@ -1,5 +1,5 @@
 #include "libinclude.h"
-#include "story.h"
+#include "globalscope.h"
 #include "Scripting/Parsing/scriptparser.h"
 #include "struct.h"
 #include "list.h"
@@ -13,88 +13,88 @@ namespace Scripting {
 
 //Story::Factory Story::sFactory;
 
-	API_IMPL(Story, &log, "Struct"_(&createStruct), "List"_(&createList), &debug, &level, &getData);
+	API_IMPL(GlobalScope, &log, "Struct"_(&createStruct), "List"_(&createList), &debug, &level, &getData);
 
 
-Story::Story(Parsing::ScriptParser *scriptParser) :
+	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
 	mScriptParser(scriptParser)
 {    
 	Ogre::LogManager::getSingleton().createLog("Scripting.log");
 }
 
-void Story::init() {
+void GlobalScope::init() {
 	mGlobalAPIs = OGRE_MAKE_UNIQUE(UniqueComponentCollector<BaseGlobalAPIComponent>)();
 	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : *mGlobalAPIs) {
 		api->init();
 	}
 }
 
-Level *Story::level()
+Level *GlobalScope::level()
 {
     return &mLevel;
 }
 
-void Story::addAPI(BaseAPI * api)
+void GlobalScope::addAPI(BaseAPI * api)
 {
 	mAPIs.push_back(api);
 }
 
-void Story::removeAPI(BaseAPI * api)
+void GlobalScope::removeAPI(BaseAPI * api)
 {
 	mAPIs.remove(api);
 }
 
 
-bool Story::hasScriptMethod(const std::string &name)
+bool GlobalScope::hasScriptMethod(const std::string &name)
 {
 	return mScriptParser->hasGlobalMethod(name);
 }
 
-Struct *Story::getData(const std::string &name)
+Struct *GlobalScope::getData(const std::string &name)
 {
 	return &mScriptParser->getPrototype(name);
 }
 
-const Parsing::MethodNodePtr &Story::getMethod(const std::string &name)
+const Parsing::MethodNodePtr &GlobalScope::getMethod(const std::string &name)
 {
 	return mScriptParser->getGlobalMethod(name);
 }
 
-void Story::log(const ValueType &v)
+void GlobalScope::log(const ValueType &v)
 {
 	Util::UtilMethods::log(v.toString(), Ogre::LML_NORMAL);
 }
 
-Struct *Story::createStruct()
+Struct *GlobalScope::createStruct()
 {
     return OGRE_NEW Struct();
 }
 
-List *Story::createList()
+List *GlobalScope::createList()
 {
     return OGRE_NEW List();
 }
 
-const ValueType &Story::debug(const ValueType &v)
+const ValueType &GlobalScope::debug(const ValueType &v)
 {
     return v;
 }
 
 
 
-std::string Story::getIdentifier()
+std::string GlobalScope::getIdentifier()
 {
     return "Global Scope";
 }
 
-void Story::clear()
+void GlobalScope::clear()
 {
     Scope::clear();
     mLevel.clear();
 }
 
 
-ValueType Story::methodCall(const std::string &name, const Scripting::ArgumentList &args)
+ValueType GlobalScope::methodCall(const std::string &name, const Scripting::ArgumentList &args)
 {
 	for (BaseAPI *api : mAPIs) {
 		if (api->hasMethod(name)) {
@@ -106,9 +106,9 @@ ValueType Story::methodCall(const std::string &name, const Scripting::ArgumentLi
     return ScopeImpl::methodCall(name, args);
 }
 
-Scope *Story::Factory::create(Serialize::SerializeInStream &in)
+Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)
 {
-    return &Story::getSingleton();
+    return &GlobalScope::getSingleton();
 }
 
 }

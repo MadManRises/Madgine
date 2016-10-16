@@ -8,7 +8,7 @@ namespace OGRE {
 namespace Entity {
 
 template <class T>
-class EntityComponent : public BaseEntityComponent, public API<T>{
+class EntityComponent : public BaseEntityComponent, public Scripting::API<T>{
 public:
 	using BaseEntityComponent::BaseEntityComponent;
 

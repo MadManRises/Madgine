@@ -24,12 +24,12 @@ Entity &BaseEntityComponent::getEntity() const
     return mEntity;
 }
 
-void BaseEntityComponent::save(Serialize::SerializeOutStream &out) const
+void BaseEntityComponent::save(Scripting::Serialize::SerializeOutStream &out) const
 {
 
 }
 
-void BaseEntityComponent::load(Serialize::SerializeInStream &in)
+void BaseEntityComponent::load(Scripting::Serialize::SerializeInStream &in)
 {
 
 }

@@ -48,7 +48,7 @@ namespace Engine {
 
 			void update(float timeSinceLastFrame);
 
-			void callSafe(std::function<void()> f);
+
 
 			GUI::GUISystem *gui();
 
@@ -69,7 +69,7 @@ namespace Engine {
 
 			Ogre::RenderWindow *mWindow;
 
-			std::queue<std::function<void()>> mSafeCallQueue;
+			
 
 			OGRE::SceneManager *mSceneMgr;
 			GUI::GUISystem *mGUI;

@@ -29,6 +29,10 @@
 
 #include <qsettings.h>
 
+#include "Model\Engine\Watcher\ResourceWatcher.h"
+#include "Model\Engine\Watcher\PerformanceWatcher.h"
+#include "Model\Engine\Watcher\OgreSceneWatcher.h"
+
 
 
 namespace Maditor {
@@ -56,6 +60,7 @@ namespace Maditor {
 			ui->ResourcesWidget->setModel(watcher->resourceWatcher());
 			ui->scriptEditorTabWidget->setModel(editor->scriptEditor());
 			ui->PerformanceWidget->setModel(watcher->performanceWatcher());
+			ui->OgreSceneWidget->setModel(watcher->ogreSceneWatcher());
 
 			setupConnections();
 
@@ -302,7 +307,7 @@ namespace Maditor {
 		}
 
 		void MainWindow::onProjectOpened(Model::Project *project) {
-			project->addView(ui->ProjectWidget);	
+			ui->ProjectWidget->setProject(project);
 
 			ui->actionStart->setEnabled(true);
 		}
