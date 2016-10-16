@@ -29,7 +29,7 @@ FolderSources(sources "" "" forward.h libinclude.h libinclude.cpp Ogrememory.h s
 		FolderSources(sources GUI Windows Bar.h Button.h Checkbox.h Combobox.h Label.h Layout.h TabWindow.h Textbox.h TextureDrawer.cpp TextureDrawer.h Window.cpp Window.h WindowContainer.cpp WindowContainer.h )
 	FolderSources(sources "" Input InputHandler.h OISInputHandler.cpp OISInputHandler.h)
 	FolderSources(sources "" Math bounds.cpp bounds.h)
-	FolderSources(sources "" Ogre entityexception.h ingameoverlay.cpp ingameoverlay.h scenemanager.cpp scenemanager.h scenecomponent.cpp scenecomponent.h scenelistener.cpp scenelistener.h scenenames.h scenetexturecomponent.h texturecomponent.cpp texturecomponent.h texturelistener.h)
+	FolderSources(sources "" Ogre entityexception.h ingameoverlay.cpp ingameoverlay.h scenemanager.cpp scenemanager.h scenecomponent.cpp scenecomponent.h scenelistener.cpp scenelistener.h scenenames.h scenetexturecomponent.cpp scenetexturecomponent.h texturecomponent.cpp texturecomponent.h texturelistener.h)
 	    FolderSources(sources Ogre Entity baseentitycomponent.cpp baseentitycomponent.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 	FolderSources(sources "" Os os.h windows.cpp)
 	FolderSources(sources "" Resources ResourceLoader.cpp ResourceLoader.h)
@@ -68,8 +68,6 @@ if (MYGUI_FOUND)
   MESSAGE(STATUS ${MYGUI_LIBRARIES})
   target_link_libraries (Madgine ${MYGUI_LIBRARIES})
 endif (MYGUI_FOUND)
-
-#target_link_libraries (Madgine C:/Users/schue/Documents/Engine---Game-Libs-Build/bin/lib/debug/MyGUI.OgrePlatform_d C:/Users/schue/Documents/Engine---Game-Libs-Build/bin/lib/debug/MyGUIEngine_d)
 
 
 # Export Configuration

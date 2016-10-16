@@ -4,7 +4,6 @@
 #include "Resources/Shading/shadercollector.h"
 #include "Scripting/Datatypes/Serialize/serializable.h"
 #include "TextureComponent.h"
-#include "App/contextmasks.h"
 #include "Entity\masks.h"
 
 namespace Engine {
@@ -20,7 +19,7 @@ public:
     void init();
 	void finalize();
 
-	void update(float timeSinceLastFrame, App::ContextMask mask = App::ContextMask::SceneContext);
+	void update(float timeSinceLastFrame, App::ContextMask mask);
 
 
     void addSceneListener(SceneListener *l);

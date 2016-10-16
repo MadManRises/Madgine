@@ -3,7 +3,7 @@
 #include "UI/handler.h"
 #include "UI/windownames.h"
 #include "uniquecomponent.h"
-#include "App\contextmasks.h"
+
 #include "Scripting\Types\globalapi.h"
 
 namespace Engine {

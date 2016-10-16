@@ -52,12 +52,12 @@ namespace Maditor {
 			}
 
 			void DialogManager::showNewProjectDialog() {
-				emit newProjectDialogAccepted("C:/Users/schue/Documents/", "TT");
+				emit newProjectDialogAccepted("C:/Users/schue/Desktop/GitHub/", "TT");
 			}
 
 			void DialogManager::showLoadProjectDialog()
 			{
-				emit loadProjectDialogAccepted("C:/Users/schue/Documents/TT/");
+				emit loadProjectDialogAccepted("C:/Users/schue/Desktop/GitHub/TT/");
 			}
 
 			void DialogManager::showNewModuleDialog()

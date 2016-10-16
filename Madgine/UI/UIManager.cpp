@@ -4,8 +4,6 @@
 
 #include "GUI/GUISystem.h"
 
-#include "loadingscreenhandler.h"
-
 #include "Ogre/scenemanager.h"
 
 #include "GUI/Windows/Window.h"
@@ -62,13 +60,6 @@ namespace Engine {
 			}
 
 			windowResized(mWindow);
-		}
-		
-		void UIManager::openLoadingScreen()
-		{
-			LoadingScreenHandler *handler = &LoadingScreenHandler::getSingleton();
-			handler->init();
-			handler->open();
 		}
 
 		void UIManager::hideCursor(bool keep)

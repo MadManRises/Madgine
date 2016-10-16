@@ -1,9 +1,9 @@
 #include "libinclude.h"
 #include "valuetype.h"
 #include "Scripting/scriptexception.h"
-#include "Scripting/Types/refscope.h"
 #include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
+#include "Scripting\Types\refscope.h"
 
 namespace Engine {
 namespace Scripting {

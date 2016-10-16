@@ -1,6 +1,5 @@
 #pragma once
 
-#include "scope.h"
 #include "scopefactoryimpl.h"
 
 namespace Engine {

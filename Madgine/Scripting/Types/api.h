@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scripting/Datatypes/argumentlist.h"
+#include "Scripting\Datatypes\argumentlist.h"
 #include "Scripting\Datatypes\valuetype.h"
 #include "Util\UtilMethods.h"
 

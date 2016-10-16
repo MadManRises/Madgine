@@ -166,15 +166,10 @@ void Entity::positionChanged(const Ogre::Vector3 &dist)
 
 void Entity::update(float timeSinceLastFrame)
 {
-
-    
-
     if (mLastPosition != getPosition()) {
         positionChanged(getPosition() - mLastPosition);
         mLastPosition = getPosition();
     }
-
-
 }
 
 bool Entity::hasComponent(const std::string & name)
@@ -245,18 +240,6 @@ void Entity::remove()
 {
 	Engine::OGRE::SceneManager::getSingleton().removeLater(this);
 }
-
-
-
-
-/*
-ValueType Entity::enqueueMethod(const ArgumentList &stack)
-{
-    mEnqueuedMethods.emplace_back(stack.at(0).asFloat(), stack.at(1).asString(),
-		ArgumentList(stack.begin()+2, stack.end()));
-
-    return ValueType();
-}*/
 
 
 void Entity::save(Scripting::Serialize::SerializeOutStream &of) const

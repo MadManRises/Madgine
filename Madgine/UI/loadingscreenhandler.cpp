@@ -62,6 +62,7 @@ void LoadingScreenHandler::clearProcess()
 
 void LoadingScreenHandler::open()
 {
+	init();
 	GuiHandlerBase::open();
 	mUI->renderFrame();
 }

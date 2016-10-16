@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Scripting/Datatypes/argumentlist.h"
-#include "Scripting\Datatypes\valuetype.h"
 #include "api.h"
 #include "globalscope.h"
 

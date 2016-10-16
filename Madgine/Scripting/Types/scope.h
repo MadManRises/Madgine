@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scripting/Datatypes/varset.h"
-#include "Scripting/Datatypes/argumentlist.h"
+#include "Scripting\Datatypes\argumentlist.h"
 
 namespace Engine {
 namespace Scripting {

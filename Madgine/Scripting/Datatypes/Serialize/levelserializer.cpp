@@ -5,9 +5,6 @@
 #include "Ogre/SceneManager.h"
 #include "Ogre/Entity/entity.h"
 
-#include "Scripting/Types/list.h"
-#include "Scripting/Types/struct.h"
-
 #include "Scripting/Types/scopefactory.h"
 #include "serializestream.h"
 

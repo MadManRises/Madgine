@@ -1,8 +1,6 @@
 #include "libinclude.h"
 #include "ResourceLoader.h"
 
-#include "UI\loadingscreenhandler.h"
-
 #include "Database\messages.h"
 
 
@@ -52,8 +50,6 @@ namespace Engine {
 		void ResourceLoader::load()
 		{
 
-			UI::LoadingScreenHandler::getSingleton().setProcess(this);
-
 			startSubProcess(mRgm->getResourceGroups().size(), Database::Messages::loadingMessage("Resources"));
 
 			mRgm->addResourceGroupListener(this);
@@ -63,8 +59,6 @@ namespace Engine {
 			mRgm->removeResourceGroupListener(this);
 
 			endSubProcess();
-
-			UI::LoadingScreenHandler::getSingleton().clearProcess();
 		}
 
 		std::string ResourceLoader::getMediaPath(const std::string & filename, const std::string & folder)

@@ -29,7 +29,7 @@ namespace Maditor {
 
 				// start the program up
 				CreateProcess(NULL,   // the path
-					"cmd.exe /c \"start C:\\Users\\schue\\Documents\\TT\\build\\TT.sln\"",
+					"cmd.exe /c \"start C:/Users/schue/Desktop/GitHub/TT/build/TT.sln\"",
 					NULL,           // Process handle not inheritable
 					NULL,           // Thread handle not inheritable
 					FALSE,          // Set handle inheritance to FALSE

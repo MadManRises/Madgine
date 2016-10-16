@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scripting/Types/scopeimpl.h"
-#include "Scripting/Types/scopefactoryimpl.h"
 
 #include "baseentitycomponent.h"
 

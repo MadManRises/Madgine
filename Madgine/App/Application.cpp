@@ -75,8 +75,7 @@ void Application::init(const AppSettings & settings)
 
 	mGUI->init();
 
-	//mGlobalScope->methodCall("openLoadingScreen");
-	mUI->openLoadingScreen();
+	mGlobalScope->callMethodCatch("openLoadingScreen");
 
 	mLoader->load();
 

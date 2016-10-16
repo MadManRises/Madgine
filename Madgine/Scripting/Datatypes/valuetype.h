@@ -3,7 +3,6 @@
 namespace Engine {
 namespace Scripting {
 
-
 enum class InvScopePtr : uintptr_t {};
 
 class MADGINE_EXPORT ValueType {

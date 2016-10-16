@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 
-set(OGRE_PATH "" CACHE PATH "Path to FindOgre.cmake ans FindOIS.cmake")
+set(OGRE_PATH "" CACHE PATH "Path to FindOgre.cmake and FindOIS.cmake")
 
 Project(Madgine)
 

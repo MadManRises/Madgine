@@ -1,8 +1,6 @@
 #pragma once
 
-#include "scope.h"
 #include "scopefactoryimpl.h"
-#include "Scripting/scriptexception.h"
 #include "api.h"
 
 namespace Engine {

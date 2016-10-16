@@ -1,7 +1,6 @@
 #pragma once
 
 #include "scopeimpl.h"
-#include "scopefactoryimpl.h"
 #include "level.h"
 #include "uniquecomponentcollector.h"
 #include "baseglobalapicomponent.h"
