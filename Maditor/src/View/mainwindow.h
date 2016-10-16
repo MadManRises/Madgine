@@ -29,7 +29,6 @@ namespace Maditor {
 			~MainWindow();
 
 
-			void setupPerformanceWidget(const std::list<std::unique_ptr<Engine::OGRE::BaseSceneComponent>> &components);
 			void setupScene();
 
 			void refresh();
@@ -63,6 +62,9 @@ namespace Maditor {
 			void onProjectOpened(Model::Project *project);
 			void showGame();
 			void hideGame();
+
+			void updateRecentProjects(const QStringList &list);
+			void recentProjectClicked(QAction *action);
 
 		private:
 			Ui::MainWindow *ui;

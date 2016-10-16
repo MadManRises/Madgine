@@ -98,7 +98,7 @@ namespace Engine {
 				return (this->*sMethods.find(name)->second)(list);
 			}
 
-		protected:
+		private:
 
 
 

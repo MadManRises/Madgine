@@ -20,7 +20,7 @@ namespace Maditor {
 		public:
 			LogsTabWidget(QWidget *parent = 0);
 
-			void connectWatchers(const Model::Watcher::LogsWatcher *watcher);
+			void setModel(const Model::Watcher::LogsWatcher *watcher);
 
 		public slots:
 			void addLogWatcher(Model::Watcher::LogWatcher *log);

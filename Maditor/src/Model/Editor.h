@@ -4,6 +4,8 @@
 
 #include "editorForward.h"
 
+#include <qsettings.h>
+
 class QString;
 
 namespace Maditor {
@@ -12,6 +14,7 @@ namespace Maditor {
 			Q_OBJECT
 		public:
 			Editor();
+			~Editor();
 
 			void newProject(const QString &path, const QString &name, QWindow *target);
 			void loadProject(const QString &path, QWindow *target);
@@ -23,11 +26,16 @@ namespace Maditor {
 			Editors::VSLink *vs();
 			Project *project();
 
+			QSettings &settings();
+
+			const QStringList &recentProjects();
+
 		private:
 			void openProject(std::unique_ptr<Project> &&project, QWindow *target);
 
 		signals:
 			void projectOpened(Project *);
+			void recentProjectsChanged(const QStringList &list);
 
 		private:
 
@@ -42,6 +50,10 @@ namespace Maditor {
 			Generator::ClassGeneratorFactory *mClassGeneratorFactory;
 			Editors::ScriptEditorModel *mScriptEditor;
 			Editors::VSLink *mVS;
+
+			QSettings mSettings;
+
+			QStringList mRecentProjects;
 
 		};
 	}

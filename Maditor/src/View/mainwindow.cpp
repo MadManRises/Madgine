@@ -45,16 +45,21 @@ namespace Maditor {
 		{
 			ui->setupUi(this);
 
-			QSettings settings("MadMan Studios", "Maditor");
+			QSettings &settings = editor->settings();
+
 			restoreGeometry(settings.value("geometry").toByteArray());
 			restoreState(settings.value("state").toByteArray(), 0);
+
+			updateRecentProjects(editor->recentProjects());
 
 			mTarget = new OgreWindow(editor->application(), editor->watcher());
 			QWidget *ogre = QWidget::createWindowContainer(mTarget);
 			
 			ui->game->addWidget(ogre);
+
+
 			Model::Watcher::ApplicationWatcher *watcher = editor->watcher();
-			ui->LogsWidget->connectWatchers(watcher->logsWatcher());
+			ui->LogsWidget->setModel(watcher->logsWatcher());
 			//ui->guiRenderStats->connectWatchers("Gui", watcher);
 			//ui->sceneRenderStats->connectWatchers("Scene", watcher);
 			ui->ResourcesWidget->setModel(watcher->resourceWatcher());
@@ -72,25 +77,6 @@ namespace Maditor {
 			delete ui;
 		}
 
-
-		void MainWindow::setupPerformanceWidget(const std::list<Ogre::unique_ptr<Engine::OGRE::BaseSceneComponent>> &components)
-		{
-			QStringList headers;
-			headers << "Process" << "Time (abs)" << "Time (%/Parent)" << "Time (%/Overall)";
-			//ui->performanceWidget->setHeaderLabels(headers);
-
-			QStringList mainLoopList;
-			mainLoopList << "MainLoop" << "-" << "-";
-			mMainLoop = new QTreeWidgetItem(mainLoopList);
-			//ui->performanceWidget->addTopLevelItem(mMainLoop);
-
-			/*for (const Ogre::unique_ptr<Engine::OGRE::BaseSceneComponent> &comp : components) {
-
-				mComponents[item] = comp.get();
-			}*/
-
-			//connect(ui->performanceWidget, &QTreeWidget::itemChanged, this, &MainWindow::handleChanges);
-		}
 
 		void MainWindow::setupScene()
 		{
@@ -190,7 +176,7 @@ namespace Maditor {
 
 		void MainWindow::closeEvent(QCloseEvent *event)
 		{
-			QSettings settings("MadMan Studios", "Maditor");
+			QSettings &settings = mEditor->settings();
 			settings.setValue("geometry", saveGeometry());
 			settings.setValue("state", saveState(0));
 
@@ -199,24 +185,35 @@ namespace Maditor {
 
 		void MainWindow::setupConnections()
 		{
+			
+			//Project-related
 			connect(mEditor, &Model::Editor::projectOpened, this, &MainWindow::onProjectOpened);
 			connect(mEditor, &Model::Editor::projectOpened, &mDialogManager, &Dialogs::DialogManager::onProjectOpened);
 
-			connect(ui->ResourcesWidget, &QTreeView::doubleClicked, mEditor->watcher()->resourceWatcher(), &Model::Watcher::ResourceWatcher::itemDoubleClicked);
-			
+			connect(mEditor, &Model::Editor::recentProjectsChanged, this, &MainWindow::updateRecentProjects);
+			connect(ui->menuRecentProjects, &QMenu::triggered, this, &MainWindow::recentProjectClicked);
+
+
+			//Editor-related
 			connect(mEditor->scriptEditor(), &Model::Editors::ScriptEditorModel::showDoc, this, &MainWindow::ensureVisible);
 
+			//Watcher-related
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::showGame, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, this, &MainWindow::hideGame, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStarted, this, &MainWindow::onAppStarted, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStopped, this, &MainWindow::onAppStopped, Qt::QueuedConnection);
 
-			connect(ui->actionNew_Project, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);
-			connect(ui->actionLoad_Project, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showLoadProjectDialog);
+			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, mTarget, &OgreWindow::setInput);
+
+			connect(ui->ResourcesWidget, &QTreeView::doubleClicked, mEditor->watcher()->resourceWatcher(), &Model::Watcher::ResourceWatcher::itemDoubleClicked);
+
+			//Dialogs-related
+			connect(ui->actionNewProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);
+			connect(ui->actionLoadProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showLoadProjectDialog);
 			connect(ui->actionOpenVS, &QAction::triggered, mEditor->vs(), &Model::Editors::VSLink::openVS);
+
 			connect(&mDialogManager, &Dialogs::DialogManager::newProjectDialogAccepted, this, &MainWindow::newProject);
 			connect(&mDialogManager, &Dialogs::DialogManager::loadProjectDialogAccepted, this, &MainWindow::loadProject);
-			
 			Model::Generator::ClassGeneratorFactory *factory = mEditor->classGeneratorFactory();
 			connect(&mDialogManager, &Dialogs::DialogManager::newClassDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createClass);
 
@@ -232,9 +229,7 @@ namespace Maditor {
 			connect(&mDialogManager, &Dialogs::DialogManager::newGuiHandlerDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createGuiHandler);
 			connect(&mDialogManager, &Dialogs::DialogManager::newOtherClassDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createOtherClass);
 			connect(&mDialogManager, &Dialogs::DialogManager::newSceneComponentDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createSceneComponent);
-
-			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, mTarget, &OgreWindow::setInput);
-			
+								
 		}
 
 
@@ -293,6 +288,21 @@ namespace Maditor {
 		void MainWindow::hideGame()
 		{
 			ui->game->setCurrentIndex(1);
+		}
+
+		void MainWindow::updateRecentProjects(const QStringList & list)
+		{
+			QMenu *menu = ui->menuRecentProjects;
+			menu->clear();
+
+			for (const QString &project : list) {
+				menu->addAction(project);
+			}
+		}
+
+		void MainWindow::recentProjectClicked(QAction * action)
+		{
+			loadProject(action->text());
 		}
 
 

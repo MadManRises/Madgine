@@ -11,7 +11,7 @@ namespace Maditor {
 			QTabWidget(parent){}
 		
 
-		void LogsTabWidget::connectWatchers(const Model::Watcher::LogsWatcher * watcher)
+		void LogsTabWidget::setModel(const Model::Watcher::LogsWatcher * watcher)
 		{
 			connect(watcher, &Model::Watcher::LogsWatcher::logWatcherCreated, this, &LogsTabWidget::addLogWatcher);
 		}

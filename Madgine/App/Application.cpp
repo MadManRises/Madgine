@@ -219,8 +219,6 @@ void Application::_cleanup()
 		delete mInput;
 	if (mProfiler)
 		delete mProfiler;
-	if (mLoader)
-		delete mLoader;
 	if (mUI)
 		delete mUI;
 	if (mGUI)
@@ -231,6 +229,8 @@ void Application::_cleanup()
 	}
 	if (mGlobalScope)
 		delete mGlobalScope;
+	if (mLoader)
+		delete mLoader;
 	if (mConfig)
 		delete mConfig;
     if (mRoot)

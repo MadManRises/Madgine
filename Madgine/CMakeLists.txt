@@ -24,7 +24,6 @@ FolderSources(sources "" "" forward.h libinclude.h libinclude.cpp Ogrememory.h s
 	FolderSources(sources "" App Application.cpp Application.h appsettings.h configset.cpp configset.h contextmasks.h)
 	FolderSources(sources "" Database exceptionmessages.h message.h messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources "" GUI GUIEvents.cpp GUIEvents.h GUISystem.cpp GUISystem.h)
-#	    FolderSources(sources GUI Cegui CeguiBar.cpp CeguiBar.h CeguiButton.cpp CeguiButton.h CeguiCheckbox.cpp CeguiCheckbox.h CeguiCombobox.cpp CeguiCombobox.h ceguiexception.h CeguiLabel.cpp CeguiLabel.h Ceguilauncher.cpp Ceguilauncher.h CeguiLayout.cpp CeguiLayout.h CeguiTabWindow.cpp CeguiTabWindow.h CeguiTextbox.cpp CeguiTextbox.h CeguiTextureDrawer.cpp CeguiTextureDrawer.h CeguiWindow.cpp CeguiWindow.h)
 		FolderSources(sources GUI MyGUI MyGUIBar.cpp MyGUIBar.h MyGUIButton.cpp MyGUIButton.h MyGUICheckbox.cpp MyGUICheckbox.h MyGUICombobox.cpp MyGUICombobox.h MyGUILabel.cpp MyGUILabel.h MyGUILauncher.cpp MyGUILauncher.h MyGUILayout.cpp MyGUILayout.h MyGUITextbox.cpp MyGUITextbox.h MyGUITextureDrawer.cpp MyGUITextureDrawer.h MyGUIWindow.cpp MyGUIWindow.h)
 		FolderSources(sources GUI Windows Bar.h Button.h Checkbox.h Combobox.h Label.h Layout.h TabWindow.h Textbox.h TextureDrawer.cpp TextureDrawer.h Window.cpp Window.h WindowContainer.cpp WindowContainer.h )
 	FolderSources(sources "" Input InputHandler.h OISInputHandler.cpp OISInputHandler.h)

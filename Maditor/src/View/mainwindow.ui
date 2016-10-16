@@ -52,7 +52,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="scriptEditor">
+   <widget class="QWidget" name="scriptEditorTab">
     <attribute name="title">
      <string>Scripting</string>
     </attribute>
@@ -185,12 +185,19 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuDatei">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Datei</string>
+     <string>File</string>
     </property>
-    <addaction name="actionNew_Project"/>
-    <addaction name="actionLoad_Project"/>
+    <widget class="QMenu" name="menuRecentProjects">
+     <property name="title">
+      <string>Recent Projects</string>
+     </property>
+    </widget>
+    <addaction name="actionNewProject"/>
+    <addaction name="actionLoadProject"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecentProjects"/>
    </widget>
    <widget class="QMenu" name="menuEditor">
     <property name="title">
@@ -206,7 +213,7 @@
     <addaction name="actionStop"/>
     <addaction name="actionPause"/>
    </widget>
-   <addaction name="menuDatei"/>
+   <addaction name="menuFile"/>
    <addaction name="menuEditor"/>
    <addaction name="menuApp"/>
   </widget>
@@ -221,7 +228,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
+   <widget class="QWidget" name="LogsDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <widget class="Maditor::View::LogsTabWidget" name="LogsWidget">
@@ -240,7 +247,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3">
+   <widget class="QWidget" name="ProjectDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
       <widget class="Maditor::View::Project::ProjectView" name="ProjectWidget"/>
@@ -255,7 +262,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_4">
+   <widget class="QWidget" name="ResourcesDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_4">
      <item row="0" column="0">
       <widget class="QTreeView" name="ResourcesWidget">
@@ -277,8 +284,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew_Project"/>
-   <addaction name="actionLoad_Project"/>
+   <addaction name="actionNewProject"/>
+   <addaction name="actionLoadProject"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
@@ -293,7 +300,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QWidget" name="PerformanceDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_10">
      <item row="0" column="0">
       <widget class="QTreeView" name="PerformanceWidget">
@@ -315,7 +322,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_5">
+   <widget class="QWidget" name="OgreSceneDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_11">
      <item row="0" column="0">
       <widget class="QTreeView" name="OgreSceneWidget"/>
@@ -323,12 +330,12 @@
     </layout>
    </widget>
   </widget>
-  <action name="actionNew_Project">
+  <action name="actionNewProject">
    <property name="text">
     <string>New Project</string>
    </property>
   </action>
-  <action name="actionLoad_Project">
+  <action name="actionLoadProject">
    <property name="text">
     <string>Load Project</string>
    </property>

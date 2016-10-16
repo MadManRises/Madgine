@@ -16,7 +16,11 @@ namespace Maditor {
 		mApplicationWrapper(0),
 		mApplicationWatcher(0),
 		mVS(0),
-		mScriptEditor(0){
+		mScriptEditor(0),
+		mSettings("MadMan Studios", "Maditor") {
+
+			mRecentProjects = mSettings.value("recentProjects").toStringList();
+			
 
 			mLoader = new ModuleLoader;
 			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader);
@@ -28,6 +32,15 @@ namespace Maditor {
 
 			connect(mApplicationWatcher->logsWatcher(), &Watcher::LogsWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
 			connect(mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
+		}
+
+		Editor::~Editor()
+		{
+			mSettings.setValue("recentProjects", mRecentProjects);
+
+			delete mApplicationWrapper;
+			delete mApplicationWatcher;
+			delete mLoader;			
 		}
 
 		void Editor::newProject(const QString &path, const QString &name, QWindow *target)
@@ -76,11 +89,28 @@ namespace Maditor {
 			return mProject.get();
 		}
 
+		QSettings & Editor::settings()
+		{
+			return mSettings;
+		}
+
+		const QStringList & Editor::recentProjects()
+		{
+			return mRecentProjects;
+		}
+
 		void Editor::openProject(std::unique_ptr<Project> &&project, QWindow *target)
 		{
 			if (!project->isValid()) return;
 
 			mProject = std::forward<std::unique_ptr<Project>>(project);
+
+			QString path = mProject->root();
+			mRecentProjects.removeAll(path);
+			mRecentProjects.push_front(path);
+
+			emit recentProjectsChanged(mRecentProjects);
+
 
 			emit projectOpened(mProject.get());
 
