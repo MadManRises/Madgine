@@ -1,14 +1,20 @@
-/*! \mainpage My Personal Index Page
+/*! \mainpage Overview
  *
- * \section intro_sec Introduction
+ * \section gettingstarted Getting Started
  *
- * This is the introduction.
- * 
+ *
+ * \section types Component Types
+ *
+ * \subsection scenecomponents Scene Components
+ *
+ *
+ * \section flow Data-/Control-flow
+ *
  * \image html scheme.svg
  *
- * \section install_sec Installation
  *
- * \subsection step1 Step 1: Opening the box
+ * \section examples Examples
  *
- * etc...
+ * See <a href="../index.html#examples">Examples</a>
+ *
  */
