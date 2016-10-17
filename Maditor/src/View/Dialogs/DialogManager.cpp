@@ -10,6 +10,12 @@
 
 #include "modulepropertiesdialog.h"
 
+#include "loadprojectdialog.h"
+
+#include "settingsdialog.h"
+
+#include <qfiledialog.h>
+
 namespace Maditor {
 	namespace View {
 		namespace Dialogs {
@@ -57,7 +63,10 @@ namespace Maditor {
 
 			void DialogManager::showLoadProjectDialog()
 			{
-				emit loadProjectDialogAccepted("C:/Users/schue/Desktop/GitHub/TT/");
+				QString path = QFileDialog::getExistingDirectory(nullptr, "Project Path", QString(), QFileDialog::ShowDirsOnly );
+				
+				if (!path.isEmpty())
+					emit loadProjectDialogAccepted(path + "/");
 			}
 
 			void DialogManager::showNewModuleDialog()
@@ -125,6 +134,12 @@ namespace Maditor {
 						if (!dialog.apply())
 							done = false;
 				}
+			}
+
+			void DialogManager::showSettingsDialog(Model::Editor *editor)
+			{
+				SettingsDialog dialog(editor);
+				dialog.exec();
 			}
 
 		}

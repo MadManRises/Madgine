@@ -46,9 +46,12 @@ namespace Maditor {
 
 			void setupConnections();
 
+		signals:
+			void settingsRequest(Model::Editor *editor);
+
 		public slots:
-			void newProject(const QString &path, const QString &name);
-			void loadProject(const QString &path);
+
+			void openSettings();
 
 			void startApp();
 			void stopApp();

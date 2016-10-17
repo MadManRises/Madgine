@@ -54,7 +54,7 @@ namespace Maditor {
 
 			mTarget = new OgreWindow(editor->application(), editor->watcher());
 			QWidget *ogre = QWidget::createWindowContainer(mTarget);
-			
+
 			ui->game->addWidget(ogre);
 
 
@@ -69,7 +69,7 @@ namespace Maditor {
 
 			setupConnections();
 
-			
+			editor->init(mTarget);
 		}
 
 		MainWindow::~MainWindow()
@@ -193,9 +193,13 @@ namespace Maditor {
 			connect(mEditor, &Model::Editor::recentProjectsChanged, this, &MainWindow::updateRecentProjects);
 			connect(ui->menuRecentProjects, &QMenu::triggered, this, &MainWindow::recentProjectClicked);
 
+			
+
 
 			//Editor-related
 			connect(mEditor->scriptEditor(), &Model::Editors::ScriptEditorModel::showDoc, this, &MainWindow::ensureVisible);
+
+			connect(ui->actionOpenVS, &QAction::triggered, mEditor->vs(), &Model::Editors::VSLink::openVS);
 
 			//Watcher-related
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::showGame, Qt::QueuedConnection);
@@ -210,10 +214,10 @@ namespace Maditor {
 			//Dialogs-related
 			connect(ui->actionNewProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);
 			connect(ui->actionLoadProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showLoadProjectDialog);
-			connect(ui->actionOpenVS, &QAction::triggered, mEditor->vs(), &Model::Editors::VSLink::openVS);
+			connect(this, &MainWindow::settingsRequest, &mDialogManager, &Dialogs::DialogManager::showSettingsDialog);
 
-			connect(&mDialogManager, &Dialogs::DialogManager::newProjectDialogAccepted, this, &MainWindow::newProject);
-			connect(&mDialogManager, &Dialogs::DialogManager::loadProjectDialogAccepted, this, &MainWindow::loadProject);
+			connect(&mDialogManager, &Dialogs::DialogManager::newProjectDialogAccepted, mEditor, &Model::Editor::newProject);
+			connect(&mDialogManager, &Dialogs::DialogManager::loadProjectDialogAccepted, mEditor, &Model::Editor::loadProject);
 			Model::Generator::ClassGeneratorFactory *factory = mEditor->classGeneratorFactory();
 			connect(&mDialogManager, &Dialogs::DialogManager::newClassDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createClass);
 
@@ -233,15 +237,9 @@ namespace Maditor {
 		}
 
 
-
-		void MainWindow::newProject(const QString &path, const QString &name)
+		void MainWindow::openSettings()
 		{
-			mEditor->newProject(path, name, mTarget);
-		}
-
-		void MainWindow::loadProject(const QString & path)
-		{
-			mEditor->loadProject(path, mTarget);
+			emit settingsRequest(mEditor);
 		}
 
 		void MainWindow::startApp()
@@ -302,7 +300,7 @@ namespace Maditor {
 
 		void MainWindow::recentProjectClicked(QAction * action)
 		{
-			loadProject(action->text());
+			mEditor->loadProject(action->text());
 		}
 
 

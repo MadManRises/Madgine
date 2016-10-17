@@ -12,6 +12,7 @@ namespace Maditor {
 	namespace Model {
 		class Project;
 		class Module;
+		class Editor;
 	}
 
 	namespace View {
@@ -54,6 +55,8 @@ namespace Maditor {
 				void showNewOtherClassDialog(Model::Module *module, const QString &name);
 
 				void showModulePropertiesDialog(Model::Module *module);
+
+				void showSettingsDialog(Model::Editor *editor);
 			};
 		}
 	}

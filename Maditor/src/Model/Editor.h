@@ -16,8 +16,10 @@ namespace Maditor {
 			Editor();
 			~Editor();
 
-			void newProject(const QString &path, const QString &name, QWindow *target);
-			void loadProject(const QString &path, QWindow *target);
+			void init(QWindow *target);
+
+			void newProject(const QString &path, const QString &name);
+			void loadProject(const QString &path);
 
 			ApplicationWrapper *application();
 			Watcher::ApplicationWatcher *watcher();
@@ -26,12 +28,8 @@ namespace Maditor {
 			Editors::VSLink *vs();
 			Project *project();
 
-			QSettings &settings();
-
-			const QStringList &recentProjects();
-
 		private:
-			void openProject(std::unique_ptr<Project> &&project, QWindow *target);
+			void openProject(std::unique_ptr<Project> &&project);
 
 		signals:
 			void projectOpened(Project *);
@@ -51,10 +49,24 @@ namespace Maditor {
 			Editors::ScriptEditorModel *mScriptEditor;
 			Editors::VSLink *mVS;
 
-			QSettings mSettings;
+			QWindow *mOgreTarget;
+
+
+			//////////Properties
+
+		public:
+			QSettings &settings();
+
+			const QStringList &recentProjects();
+			bool reloadProjectProperty();
+			void setReloadProjectProperty(bool b);
+
+		private:
 
 			QStringList mRecentProjects;
+			bool mReloadProject;
 
+			QSettings mSettings;
 		};
 	}
 }

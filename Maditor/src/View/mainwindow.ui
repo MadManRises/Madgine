@@ -198,6 +198,8 @@
     <addaction name="actionLoadProject"/>
     <addaction name="separator"/>
     <addaction name="menuRecentProjects"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuEditor">
     <property name="title">
@@ -390,6 +392,11 @@
     <string>VS</string>
    </property>
   </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -462,6 +469,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSettings</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>305</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>testOgre()</slot>
@@ -469,5 +492,6 @@
   <slot>startApp()</slot>
   <slot>stopApp()</slot>
   <slot>pauseApp()</slot>
+  <slot>openSettings()</slot>
  </slots>
 </ui>
