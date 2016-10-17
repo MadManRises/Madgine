@@ -51,7 +51,7 @@ void Application::setup(const std::string &pluginsFile, const std::string &windo
 
 	mWindow = mRoot->initialise(true, windowName); // Create Application-Window
 
-	_setup(new Input::OISInputHandler(mGUI, mWindow));
+	_setup();
 
 }
 
@@ -150,7 +150,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 	}
 	
 	{
-		PROFILE("RenderQueued", "Rendering");
+		PROFILE("UIManager", "Rendering");
 		mUI->update(fe.timeSinceLastFrame);
 	}
 
@@ -206,7 +206,7 @@ void Application::_setup(Input::InputHandler *input)
 	// Create UIManager
 	mUI = OGRE_NEW UI::UIManager(mWindow, mSceneMgr, mGUI);
 
-	mInput = input;
+	mInput = input ? input : new Input::OISInputHandler(mGUI, mWindow);
 
 	mProfiler = OGRE_NEW Util::Profiler();
 }

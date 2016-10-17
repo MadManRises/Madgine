@@ -87,8 +87,6 @@ namespace Engine {
 		public:
 			virtual ~API() = default;
 
-			typedef Engine::Scripting::ValueType(API::*Method)(const Engine::Scripting::ArgumentList&);
-
 			virtual bool hasMethod(const std::string &name) const override {
 				return sMethods.find(name) != sMethods.end();
 			}
@@ -100,7 +98,7 @@ namespace Engine {
 
 		private:
 
-
+			typedef Engine::Scripting::ValueType(API::*Method)(const Engine::Scripting::ArgumentList&);
 
 			template <class R, class... _Ty>
 			struct Impl {

@@ -102,12 +102,6 @@ namespace Engine {
 			}
 		}
 
-		/*Scripting::ValueType UIManager::showCursor(const Scripting::ArgumentList & args)
-		{
-			showCursor();
-			return Scripting::ValueType();
-		}*/
-
 		bool UIManager::isCursorVisible()
 		{
 			return mGUI->isCursorVisible();

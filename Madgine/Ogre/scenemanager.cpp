@@ -519,7 +519,7 @@ bool SceneManager::rayToTerrainPoint(const Ogre::Ray &ray,
 
 void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 {
-	PROFILE("SceneManager", "RenderQueued");
+	PROFILE("SceneManager", "UIManager");
 
 	{
 		PROFILE("Entities", "SceneManager");
