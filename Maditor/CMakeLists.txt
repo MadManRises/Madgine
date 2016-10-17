@@ -39,7 +39,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 
-include_directories(${MADGINE_SOURCE_DIR})
+include_directories(${MADGINE_SOURCE_DIR}/src)
 include_directories(${Maditor_SOURCE_DIR}/src)
 
 if (OGRE_FOUND)
