@@ -24,8 +24,8 @@ struct MakeUniqueHelper{
 
 private:
     const char *const mFile;
-    const char *const mFunc;
     int mLine;
+	const char *const mFunc;
 };
 
 }

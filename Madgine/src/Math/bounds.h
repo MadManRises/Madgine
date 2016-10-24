@@ -30,7 +30,7 @@ public:
 	Ogre::Vector2 operator *(const Ogre::Vector2 &v);
 
 private:
-    float mLeft, mTop, mRight, mBottom;
+    float mLeft, mBottom, mRight, mTop;
 };
 
 } // namespace Math

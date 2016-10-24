@@ -3,7 +3,7 @@
 #include "handler.h"
 
 #include "uniquecomponent.h"
-#include "Ogre/scenelistener.h"
+#include "Scene/scenelistener.h"
 
 #include "App/contextmasks.h"
 
@@ -12,7 +12,7 @@
 namespace Engine {
 namespace UI {
 
-class MADGINE_EXPORT GameHandlerBase : public Handler, public OGRE::SceneListener {
+class MADGINE_EXPORT GameHandlerBase : public Handler, public Scene::SceneListener {
 public:
     GameHandlerBase(const std::string &windowName, App::ContextMask context = App::ContextMask::SceneContext);
 
@@ -62,18 +62,18 @@ private:
 
     std::array<MouseDragMode, GUI::MouseButton::BUTTON_COUNT> mMouseDragModes;
 
+	GUI::MouseButton::MouseButton mCurrentMouseButton;
+
     bool mDragging, mSingleClick;
 
-    Ogre::Vector2 mDragStart;
-
-    GUI::MouseButton::MouseButton mCurrentMouseButton;
+    Ogre::Vector2 mDragStart;    
 
     App::ContextMask mContext;
 };
 
 template <class T>
 class GameHandler : public UniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
-	using UniqueComponent::UniqueComponent;
+	using UniqueComponent<T, GameHandlerBase>::UniqueComponent;
 };
 
 

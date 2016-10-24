@@ -6,6 +6,7 @@
 #include "GUI\GUIEvents.h"
 
 #include "windowclass.h"
+#include "WindowContainer.h"
 
 namespace Engine {
 	namespace GUI {
@@ -52,12 +53,14 @@ namespace Engine {
 
 			template <class T>
 			T *loadLayout(const std::string &name) {
-				return mContainer->loadLayout(name)->as<T>();
+				WindowContainer *c = mContainer->loadLayout(name);
+				return c->as<T>();
 			}
 
 			template <class T>
 			T *createChild(const std::string &name, const std::string &customSkin = "") {
-				return mContainer->createChild(name, ClassId<T>::id, customSkin)->as<T>();
+				WindowContainer *c = mContainer->createChild(name, ClassId<T>::id, customSkin);
+				return c->as<T>();
 			}
 			Window *createChild(const std::string &name, Class _class = Class::WINDOW_CLASS);
 

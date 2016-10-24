@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Engine {
-	namespace OGRE {
+	namespace Scene {
 
 		class MADGINE_EXPORT IngameOverlay : public Ogre::ManualObject, public Ogre::RenderTargetListener
 		{

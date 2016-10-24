@@ -4,7 +4,7 @@
 #include <string>
 
 namespace Engine{
-namespace OGRE{
+namespace Scene{
 namespace Entity{
 
 class ComponentException : public std::exception {

@@ -5,7 +5,7 @@
 #include "Util\UtilMethods.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 namespace Entity {
 
 class MADGINE_EXPORT BaseEntityComponent : public Ogre::SceneObjAllocatedObject, public Scripting::Serialize::Serializable {

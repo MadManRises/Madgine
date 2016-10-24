@@ -2,7 +2,6 @@
 #include "OISInputHandler.h"
 #include "GUI\GUISystem.h"
 #include "GUI\GUIEvents.h"
-#include "Util\Profiler.h"
 #include "Util\UtilMethods.h"
 
 namespace Engine {

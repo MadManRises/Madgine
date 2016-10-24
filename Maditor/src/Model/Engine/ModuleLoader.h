@@ -54,7 +54,7 @@ namespace Maditor {
 				QString mName;
 
 				std::list<std::string> mEntityComponentNames;
-				std::list<Engine::OGRE::BaseSceneComponent*> mSceneComponents;
+				std::list<Engine::Scene::BaseSceneComponent*> mSceneComponents;
 				std::list<Engine::UI::GameHandlerBase*> mGameHandlers;
 				std::list<Engine::UI::GuiHandlerBase*> mGuiHandlers;
 			};

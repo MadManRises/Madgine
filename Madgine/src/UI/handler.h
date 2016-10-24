@@ -12,8 +12,9 @@ namespace Engine {
 				const std::list<std::pair<GUI::EventType, std::function<void()>>> &events = {}) :
 				mWindowName(windowName),
 				mVar((GUI::Window**)(var)),
-				mEvents(events),
-				mClass(GUI::ClassId<WindowClass>::id)
+				mClass(GUI::ClassId<WindowClass>::id),
+				mEvents(events)
+				
 			{}
 
 			WindowDescriber(const std::string &windowName,

@@ -5,7 +5,7 @@
 #include <OgreFrameListener.h>
 #include <OgreRenderTarget.h>
 #include <forward.h>
-
+#include "LogWatcher.h"
 
 
 namespace Maditor {
@@ -16,7 +16,6 @@ namespace Maditor {
 
 		namespace Watcher {
 
-			class LogsWatcher;
 			class ResourceWatcher;
 			class PerformanceWatcher;
 			class OgreSceneWatcher;
@@ -36,12 +35,16 @@ namespace Maditor {
 
 				ResourceWatcher *resourceWatcher();
 				PerformanceWatcher *performanceWatcher();
-				LogsWatcher *logsWatcher();
+				//LogsWatcher *logsWatcher();
 				OgreSceneWatcher *ogreSceneWatcher();
 
 				void resizeWindow();
 
+				void init();
+
 			signals:
+				void logCreated(OgreLogWatcher *log);
+				void logRemoved(OgreLogWatcher *log);
 				void renderStatsSetup(const QString &name, const Ogre::RenderTarget::FrameStats *stats);
 				void applicationCreated();
 				void applicationInitialized();
@@ -55,15 +58,10 @@ namespace Maditor {
 
 				void _resizeWindow();
 
-			private:
-				
-				
+			private:				
 				
 				ModuleLoader *mModuleLoader;
 
-
-
-				LogsWatcher *mLogsWatcher;
 				ResourceWatcher *mResourceWatcher;				
 				PerformanceWatcher *mPerformanceWatcher;
 				OgreSceneWatcher *mOgreSceneWatcher;
@@ -72,6 +70,8 @@ namespace Maditor {
 				Ogre::RenderWindow *mGuiRenderWindow;
 				const Ogre::RenderTarget::FrameStats *mSceneRenderStats, *mGuiRenderStats;
 
+				OgreLogWatcher *mMadgineLog;
+				OgreLogWatcher *mOgreLog;
 
 				bool mResizePending;
 

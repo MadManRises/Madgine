@@ -5,7 +5,7 @@
 #include "UI\UIManager.h"
 
 namespace Engine {
-	namespace OGRE {
+	namespace Scene {
 
 		IngameOverlay::IngameOverlay(const std::string &name):
 			Ogre::ManualObject(name)

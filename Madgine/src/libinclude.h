@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef _MSC_VER
 #pragma warning(push, 0)
+#endif
 
 #ifdef Madgine_EXPORTS
 #define MADGINE_EXPORT __declspec(dllexport)
@@ -29,6 +31,8 @@
 
 #include "singletonimpl.h"
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 

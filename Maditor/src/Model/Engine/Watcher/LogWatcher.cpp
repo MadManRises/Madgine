@@ -6,46 +6,49 @@ namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			LogWatcher::LogWatcher(Ogre::Log * log, LogType type, const QString &root) :
+
+			OgreLogWatcher::OgreLogWatcher(Ogre::Log * log, LogType type, const QString & root) :
 				mLog(log),
 				mType(type)
 			{
+				moveToThread(QApplication::instance()->thread());
 				mLog->addListener(this);
 				if (type == GuiLog) {
 					mModel = std::unique_ptr<LogTableModel>(new LogTableModel(root));
 					mModel->moveToThread(QApplication::instance()->thread());
-					connect(this, &Model::Watcher::LogWatcher::messageReceived, mModel.get(), &Model::Watcher::LogTableModel::addMessage, Qt::QueuedConnection);
-					connect(mModel.get(), &LogTableModel::openScriptFile, this, &LogWatcher::openScriptFile);
+					connect(this, &OgreLogWatcher::ogreMessageReceived, mModel.get(), &Model::Watcher::LogTableModel::addMessage, Qt::QueuedConnection);
+					connect(mModel.get(), &LogTableModel::openScriptFile, this, &OgreLogWatcher::openScriptFile);
 				}
 			}
 
-			LogWatcher::~LogWatcher()
+			OgreLogWatcher::~OgreLogWatcher()
 			{
 				mLog->removeListener(this);
 			}
 
-			const std::string & LogWatcher::getName()
-			{
-				return mLog->getName();
-			}
-
-			LogTableModel * LogWatcher::model()
-			{
-				return mModel.get();
-			}
-
-			LogWatcher::LogType LogWatcher::type()
+			OgreLogWatcher::LogType OgreLogWatcher::type()
 			{
 				return mType;
 			}
 
-			void LogWatcher::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
+			std::string OgreLogWatcher::getName()
 			{
-				QList<Engine::Util::UtilMethods::TraceBack> list;
-				for (const Engine::Util::UtilMethods::TraceBack &t : Engine::Util::UtilMethods::traceBack()) {
+				return mLog->getName();
+			}
+
+			LogTableModel * OgreLogWatcher::model()
+			{
+				return mModel.get();
+			}
+
+			void OgreLogWatcher::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
+			{
+				QList<Engine::Util::TraceBack> list;
+				for (const Engine::Util::TraceBack &t : Engine::Util::UtilMethods::traceBack()) {
 					list << t;
 				}
-				emit messageReceived(message.c_str(), lml, list);
+				emit ogreMessageReceived(message.c_str(), lml, list);
+				emit messageReceived(message.c_str());
 			}
 
 		}

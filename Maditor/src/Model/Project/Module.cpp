@@ -85,6 +85,16 @@ namespace Maditor {
 			return std::find_if(mClasses.begin(), mClasses.end(), [&](const std::unique_ptr<Generator::ClassGenerator> &ptr) {return ptr->name() == name; }) != mClasses.end();
 		}
 
+		QVariant Module::icon() const
+		{
+			QIcon icon;
+			icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_DirClosedIcon),
+				QIcon::Normal, QIcon::Off);
+			icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_DirOpenIcon),
+				QIcon::Normal, QIcon::On);
+			return icon;
+		}
+
 		Project * Module::parent()
 		{
 			return mParent;
@@ -92,11 +102,22 @@ namespace Maditor {
 
 		bool Module::addDependency(const QString & dep)
 		{
-			throw 0;
+			
+
+			Module *other = mParent->getModuleByName(dep);
+			std::list<const Module*> modules;
+			fillReloadOrder(modules);
+			if (std::find(modules.begin(), modules.end(), other) != modules.end()) {
+				return false;
+			}
+
+			QDomElement el = document().createElement("Dependency");
+			el.setAttribute("name", dep);
+			element().appendChild(el);
 
 			mCmake.addDependency(dep);
 
-			Module *other = mParent->getModuleByName(dep);
+			
 			mDependencies.insert(other);
 			other->mDependedBy.insert(this);	
 
@@ -152,6 +173,16 @@ namespace Maditor {
 				}
 				reloadOrder.push_back(this);
 			}
+		}
+
+		int Module::childCount() {
+			return mClasses.size();
+		}
+
+		Generator::ClassGenerator *Module::child(int i) {
+			auto it = mClasses.begin();
+			std::advance(it, i);
+			return it->get();
 		}
 		
 	}

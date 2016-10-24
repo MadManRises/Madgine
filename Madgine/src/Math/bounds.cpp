@@ -6,9 +6,10 @@ namespace Math {
 
 Bounds::Bounds(float left, float bottom, float right, float top) :
     mLeft(left),
-    mTop(top),
+	mBottom(bottom),    
     mRight(right),
-    mBottom(bottom)
+	mTop(top)
+    
 {
 
 }

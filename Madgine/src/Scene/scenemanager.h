@@ -7,14 +7,17 @@
 #include "Entity\masks.h"
 
 namespace Engine {
-namespace OGRE {
+
+
+
+namespace Scene {
 
 
 
 class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Scripting::Serialize::Serializable {
 public:
     SceneManager(Ogre::Root *root);
-    ~SceneManager();
+    virtual ~SceneManager();
 
     void init();
 	void finalize();
@@ -106,15 +109,22 @@ protected:
 private:
 
     Ogre::Root *mRoot;
+
 	Ogre::SceneManager *mSceneMgr;
-	Ogre::Viewport *mVp;
-	Ogre::Camera *mCamera;
-    Ogre::SceneNode *mTerrain, *mEntitiesNode;
 	Ogre::TerrainGlobalOptions *mTerrainGlobals;
 	Ogre::TerrainGroup *mTerrainGroup;
+	Ogre::Viewport *mVp;
+	
 	Ogre::RenderTexture *mRenderTexture;
 
-	Ogre::RaySceneQuery *mTerrainRayQuery;
+	bool mIsSceneLoaded;
+
+	Ogre::RaySceneQuery *mTerrainRayQuery;	
+
+	Ogre::Camera *mCamera;
+	Ogre::SceneNode *mTerrain, *mEntitiesNode;
+
+	
 
 	std::list<Ogre::Light*> mStaticLights;
 	std::vector<Ogre::SceneNode *> mTerrainEntities;
@@ -135,7 +145,7 @@ private:
     std::string mHeightmap;
 
 
-    bool mIsSceneLoaded;
+    
 
     static const float sceneRasterSize;
 

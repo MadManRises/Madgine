@@ -14,11 +14,11 @@ namespace UI {
 GuiHandlerBase::GuiHandlerBase(const std::string &windowName, WindowType type, const std::string &layoutFile, const std::string &parentName) :
     Handler(windowName),
     mLayoutFile(layoutFile),
-    mType(type),
 	mParentName(parentName),
+	mType(type),
+	mInitialized(false),
 	mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
-	mContext(App::ContextMask::NoContext),
-	mInitialized(false)
+	mContext(App::ContextMask::NoContext)	
 {
 	setInitialisationOrder(2);
 }
@@ -44,7 +44,7 @@ void GuiHandlerBase::init()
     if (!mLayoutFile.empty()){
 		window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
 		if (!window){
-			ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
+			LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
 			return;
 		}
     }

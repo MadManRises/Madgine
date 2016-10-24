@@ -5,10 +5,13 @@
 #include "gamehandler.h"
 
 namespace Engine {
-	namespace UI {
 
-		template MADGINE_EXPORT class UniqueComponentCollector<GuiHandlerBase>;
-		template MADGINE_EXPORT class UniqueComponentCollector<GameHandlerBase>;
+#ifdef _MSC_VER
+	template MADGINE_EXPORT class UniqueComponentCollector<UI::GuiHandlerBase>;
+	template MADGINE_EXPORT class UniqueComponentCollector<UI::GameHandlerBase>;
+#endif
+
+	namespace UI {
 
 		class MADGINE_EXPORT UIManager : public Ogre::Singleton<UIManager>,
 			public Ogre::WindowEventListener,
@@ -16,7 +19,7 @@ namespace Engine {
 			public Scripting::GlobalAPI<UIManager>
 		{
 		public:
-			UIManager(Ogre::RenderWindow *window, OGRE::SceneManager *sceneMgr, GUI::GUISystem *gui);
+			UIManager(Ogre::RenderWindow *window, Scene::SceneManager *sceneMgr, GUI::GUISystem *gui);
 			~UIManager();
 
 			void init();
@@ -71,7 +74,7 @@ namespace Engine {
 
 			
 
-			OGRE::SceneManager *mSceneMgr;
+			Scene::SceneManager *mSceneMgr;
 			GUI::GUISystem *mGUI;
 
 			std::stack<UI::GuiHandlerBase *> mModalWindowList;

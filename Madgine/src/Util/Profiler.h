@@ -25,7 +25,7 @@ namespace Engine {
 			const ProcessStats *parent() const;
 
 		private:
-			std::chrono::time_point<std::chrono::steady_clock> mStart;
+			std::chrono::time_point<std::chrono::high_resolution_clock> mStart;
 
 			bool mStarted;
 
@@ -47,6 +47,7 @@ namespace Engine {
 
 			const std::list<std::string> &topLevelProcesses();
 			
+			bool hasStats(const std::string &name);
 			const ProcessStats *getStats(const std::string &name);
 
 		private:

@@ -4,7 +4,7 @@
 #include "scenemanager.h"
 
 namespace Engine{
-namespace OGRE{
+namespace Scene{
 
 SceneListener::SceneListener() :
     mSceneMgr(&SceneManager::getSingleton())

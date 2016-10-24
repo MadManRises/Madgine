@@ -2,7 +2,7 @@
 
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 
 class MADGINE_EXPORT SceneListener {
 public:

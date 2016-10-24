@@ -6,9 +6,12 @@
 #include "baseglobalapicomponent.h"
 
 namespace Engine {
-namespace Scripting {
 
-	template MADGINE_EXPORT class UniqueComponentCollector<BaseGlobalAPIComponent>;
+#ifdef _MSC_VER
+	template MADGINE_EXPORT class UniqueComponentCollector<Scripting::BaseGlobalAPIComponent>;
+#endif
+
+namespace Scripting {
 
 class MADGINE_EXPORT GlobalScope : public ScopeImpl<GlobalScope>, public Ogre::Singleton<GlobalScope> {
 public:

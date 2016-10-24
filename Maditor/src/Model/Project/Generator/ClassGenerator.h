@@ -24,6 +24,13 @@ namespace Maditor {
 
 				virtual QStringList fileNames();
 
+				// Inherited via ProjectElement
+				virtual int childCount() override;
+
+				virtual TreeItem* child(int i) override;
+
+				virtual QVariant icon() const override;
+
 			protected:
 				virtual QString templateFileName(int index) = 0;
 				QString templateFileByIndex(int index);

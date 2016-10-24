@@ -28,7 +28,8 @@ namespace Maditor {
 
 			bool hasClass(const QString &name);
 
-			Project *parent();
+			virtual QVariant icon() const override;
+			
 
 			bool addDependency(const QString &dep);
 			void removeDependency(const QString &dep);
@@ -37,6 +38,13 @@ namespace Maditor {
 			void initDependencies();
 
 			void fillReloadOrder(std::list<const Module*> &reloadOrder) const;
+
+			Project *parent();
+
+			// Inherited via ProjectElement
+			virtual int childCount() override;
+
+			virtual Generator::ClassGenerator * child(int i) override;
 
 		private:
 			void addClass(Generator::ClassGenerator *generator);
@@ -55,6 +63,8 @@ namespace Maditor {
 			std::list<std::unique_ptr<Generator::ClassGenerator>> mClasses;
 			
 			std::set<Module *> mDependencies, mDependedBy;
+
+
 
 		};
 

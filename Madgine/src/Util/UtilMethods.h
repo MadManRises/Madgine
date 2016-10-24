@@ -3,23 +3,23 @@
 namespace Engine {
 	namespace Util {
 
+		class AbortException {};
+
+		struct TraceBack {
+			TraceBack(const std::string &file = "<unknown>", int line = -1, const std::string &func = "") :
+				mFile(file),
+				mLineNr(line),
+				mFunction(func) {}
+
+			std::string mFile;
+			int mLineNr;
+			std::string mFunction;
+		};
+
 		class MADGINE_EXPORT UtilMethods {
 		public:
 			static void setup();
-
 			
-
-			struct TraceBack {
-				TraceBack(const std::string &file = "<unknown>", int line = -1, const std::string &func = "") :
-					mFile(file),
-					mLineNr(line),
-					mFunction(func) {}
-
-				std::string mFile;
-				int mLineNr;
-				std::string mFunction;
-			};
-
 			static void log(const std::string &msg, Ogre::LogMessageLevel lvl, const std::list<TraceBack> &traceBack = {});
 			
 			static void popTraceBack();
@@ -37,6 +37,8 @@ namespace Engine {
 			};
 
 			static void registerException();
+
+			static void abort();
 			
 			static const std::list<TraceBack>& traceBack();
 			
@@ -50,15 +52,17 @@ namespace Engine {
 			static Ogre::Log *sLog;
 		};
 
-#define TRACEBACK Engine::Util::UtilMethods::TraceBack(__FILE__, __LINE__, __FUNCTION__)
+#define TRACEBACK Engine::Util::TraceBack(__FILE__, __LINE__, __FUNCTION__)
 #define TRACE Engine::Util::UtilMethods::Tracer __t(TRACEBACK)
-#define TRACE_S(FILE, LINE, FUNC) Engine::Util::UtilMethods::Tracer __t(Engine::Util::UtilMethods::TraceBack(FILE, LINE, FUNC));
+#define TRACE_S(FILE, LINE, FUNC) Engine::Util::UtilMethods::Tracer __t(Engine::Util::TraceBack(FILE, LINE, FUNC));
 
 #define LOG(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_NORMAL))
-#define ERROR(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_CRITICAL))
+#define LOG_ERROR(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_CRITICAL))
 #define LOG_EXCEPTION(e) Engine::Util::UtilMethods::logException(e);
 
 #define MADGINE_THROW(e) throw (Engine::Util::UtilMethods::registerException(), e)
+
+#define MADGINE_ABORT Engine::Util::UtilMethods::abort()
 
 	}
 }

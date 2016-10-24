@@ -1,4 +1,3 @@
-#pragma once
 
 #include "scenetexturecomponent.h"
 
@@ -7,7 +6,7 @@
 #include "Math\bounds.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 
 
 
@@ -65,6 +64,6 @@ namespace OGRE {
 		return clamp(line, 0, mHeight - 1) * mWidth + clamp(column, 0, mWidth - 1);
 	}
 
-} // namespace OGRE
+} // namespace Scene
 } // namespace Core
 

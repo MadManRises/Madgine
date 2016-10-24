@@ -5,15 +5,13 @@
 #include "list.h"
 #include "globalapi.h"
 #include "Database\exceptionmessages.h"
-#include "OGRE\scenemanager.h"
-#include "OGRE\Entity\entity.h"
 
 namespace Engine {
 namespace Scripting {
 
 //Story::Factory Story::sFactory;
 
-	API_IMPL(GlobalScope, &log, "Struct"_(&createStruct), "List"_(&createList), &debug, &level, &getData);
+	API_IMPL(GlobalScope, &log, &createStruct, &createList, &debug, &level, &getData);
 
 
 	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
@@ -106,7 +104,7 @@ ValueType GlobalScope::methodCall(const std::string &name, const Scripting::Argu
     return ScopeImpl::methodCall(name, args);
 }
 
-Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)
+template <> Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)
 {
     return &GlobalScope::getSingleton();
 }

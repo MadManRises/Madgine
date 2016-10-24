@@ -3,43 +3,43 @@
 #include "OgreLog.h"
 #include "LogTableModel.h"
 #include <memory>
+#include "Model\log.h"
 
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			class LogWatcher : public QObject, public Ogre::LogListener {
-				Q_OBJECT
 
+			class OgreLogWatcher : public Log, public Ogre::LogListener {
+				Q_OBJECT
 			public:
 				enum LogType {
 					TextLog,
 					GuiLog
 				};
-				
-				LogWatcher(Ogre::Log *log, LogType type, const QString &root);
-				~LogWatcher();
 
-				const std::string &getName();
-
-				LogTableModel *model();
+				OgreLogWatcher(Ogre::Log *log, LogType type, const QString &root);
+				~OgreLogWatcher();
 
 				LogType type();
 
+				virtual std::string getName() override;
+
+				LogTableModel *model();
+
 			signals:
-				void messageReceived(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::UtilMethods::TraceBack> &traceback);
-				void openScriptFile(const QString &path, int line);
+
+
+				void ogreMessageReceived(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_NORMAL, const QList<Engine::Util::TraceBack> &traceback = {});
 
 			private:
-				Ogre::Log *mLog;
-				LogType mType;
-
 				// Geerbt über LogListener
 				virtual void messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage) override;
 
 				std::unique_ptr<LogTableModel> mModel;
-
+				Ogre::Log *mLog;
+				LogType mType;
 			};
 
 		}

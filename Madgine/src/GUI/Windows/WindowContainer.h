@@ -4,6 +4,7 @@
 #include "windowclass.h"
 #include "windowid.h"
 #include "windowsizerelvector.h"
+#include "classid.h"
 
 namespace Engine {
 	namespace GUI {

@@ -114,7 +114,8 @@ void ConfigSet::setResolutionString(const std::string &s)
 {
     std::stringstream ss(s);
     int width, height;
-    ss >> width >> std::string() >> height;
+	std::string dummy;
+    ss >> width >> dummy >> height;
     setResolutionWidth(width);
     setResolutionHeight(height);
 }

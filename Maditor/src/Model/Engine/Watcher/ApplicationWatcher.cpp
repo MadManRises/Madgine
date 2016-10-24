@@ -2,14 +2,13 @@
 #include <OgreLogManager.h>
 #include <OgreRoot.h>
 #include <libinclude.h>
-#include <OGRE/scenemanager.h>
+#include <Scene/scenemanager.h>
 #include <UI\UIManager.h>
 #include <GUI/GUISystem.h>
 #include <View/OgreWidgets/OgreWindow.h>
 #include <OgreWindowEventUtilities.h>
 #include "Model\Engine\ModuleLoader.h"
 #include <qapplication.h>
-#include "LogsWatcher.h"
 #include "OgreSceneWatcher.h"
 #include "LogWatcher.h"
 #include "ResourceWatcher.h"
@@ -23,13 +22,9 @@ namespace Maditor {
 				mGuiRenderWindow(0),
 				mSceneRenderWindow(0),
 				mModuleLoader(loader),
-				mResizePending(false),
-				mLogsWatcher(0){
+				mResizePending(false){
 
-				mResourceWatcher = new ResourceWatcher;
-				mPerformanceWatcher = new PerformanceWatcher;
-				mLogsWatcher = new LogsWatcher;
-				mOgreSceneWatcher = new OgreSceneWatcher;
+
 
 			}
 
@@ -37,7 +32,6 @@ namespace Maditor {
 			{
 				delete mResourceWatcher;
 				delete mPerformanceWatcher;
-				delete mLogsWatcher;
 				delete mOgreSceneWatcher;
 			}
 
@@ -47,13 +41,14 @@ namespace Maditor {
 
 				Ogre::Root::getSingleton().addFrameListener(this);
 				
-				mLogsWatcher->setup(root);
+				mMadgineLog = new OgreLogWatcher(Ogre::LogManager::getSingleton().getLog("Madgine.log"), OgreLogWatcher::GuiLog, root);
+				emit logCreated(mMadgineLog);
+				mOgreLog = new OgreLogWatcher(Ogre::LogManager::getSingleton().getLog("Ogre.log"), OgreLogWatcher::TextLog, root);
+				emit logCreated(mOgreLog);
 
 				mGuiRenderWindow = Engine::UI::UIManager::getSingleton().renderWindow();
 				mGuiRenderStats = &mGuiRenderWindow->getStatistics();
 				emit renderStatsSetup("Gui", mGuiRenderStats);
-
-				mOgreSceneWatcher->setRoot(Engine::OGRE::SceneManager::getSingleton().getSceneManager()->getRootSceneNode());
 
 				//mResourceWatcher.setup();
 
@@ -64,7 +59,10 @@ namespace Maditor {
 
 			void ApplicationWatcher::notifyApplicationShutdown()
 			{
-				mLogsWatcher->cleanUp();
+				emit logRemoved(mMadgineLog);
+				delete mMadgineLog;
+				emit logRemoved(mOgreLog);
+				delete mOgreLog;
 				Ogre::Root::getSingleton().removeFrameListener(this);				
 			}
 
@@ -80,7 +78,7 @@ namespace Maditor {
 
 			void ApplicationWatcher::notifyApplicationInitialized()
 			{
-				//Ogre::RenderTarget *target = Engine::OGRE::SceneManager::getSingleton().getRenderTarget();
+				//Ogre::RenderTarget *target = Engine::Scene::SceneManager::getSingleton().getRenderTarget();
 				mResourceWatcher->init();
 
 				emit applicationInitialized();
@@ -96,10 +94,10 @@ namespace Maditor {
 				return mPerformanceWatcher;
 			}
 
-			LogsWatcher * ApplicationWatcher::logsWatcher()
+			/*LogsWatcher * ApplicationWatcher::logsWatcher()
 			{
 				return mLogsWatcher;
-			}
+			}*/
 
 			OgreSceneWatcher * ApplicationWatcher::ogreSceneWatcher()
 			{
@@ -109,6 +107,13 @@ namespace Maditor {
 			void ApplicationWatcher::resizeWindow()
 			{
 				mResizePending = true;
+			}
+
+			void ApplicationWatcher::init()
+			{
+				mResourceWatcher = new ResourceWatcher;
+				mPerformanceWatcher = new PerformanceWatcher;
+				mOgreSceneWatcher = new OgreSceneWatcher;
 			}
 
 			bool ApplicationWatcher::frameRenderingQueued(const Ogre::FrameEvent & ev)

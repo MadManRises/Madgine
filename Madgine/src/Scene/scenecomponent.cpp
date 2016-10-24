@@ -2,7 +2,7 @@
 #include "scenecomponent.h"
 
 namespace Engine{
-namespace OGRE{
+namespace Scene{
 
 BaseSceneComponent::BaseSceneComponent(float updateInterval, App::ContextMask context) :
     mContext(context), mUpdateInterval(updateInterval), mTimeBank(0.f), mEnabled(true)

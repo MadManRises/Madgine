@@ -3,7 +3,7 @@
 #include "entity.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 namespace Entity {
 
 BaseEntityComponent::BaseEntityComponent(Entity &entity) :

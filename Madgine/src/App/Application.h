@@ -82,7 +82,7 @@ public:
 	/**
 	 * Enqueues a task to be performed within the end of the current frame. This can be used for two purposes:
 	 * - To modify a container while iterating over it (e.g. remove an entity inside of Entity::update(), which is called by iterating over all entities)
-	 * - To insert calls from another thread, that are not thread-safe
+	 * - To insert calls, that are not thread-safe, from another thread
 	 *
 	 * @param f a functional with the task to be executed
 	 */
@@ -122,10 +122,15 @@ private:
 
 private:
 
+	const AppSettings *mSettings;
+	
+	bool mShutDown;
+	bool mPaused;
+
 	Ogre::RenderWindow								   *mWindow;
 
     Ogre::Root*                       mRoot;
-    OGRE::SceneManager*               mSceneMgr;
+    Scene::SceneManager*               mSceneMgr;
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;
@@ -134,11 +139,11 @@ private:
 	Util::Profiler*                   mProfiler;
 	Input::InputHandler*              mInput;
 
-    const AppSettings *mSettings;
+    
 
 	std::queue<std::function<void()>> mSafeCallQueue;
 
-	bool mShutDown;
+	
 };
 
 

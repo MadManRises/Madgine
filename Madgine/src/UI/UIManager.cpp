@@ -4,7 +4,7 @@
 
 #include "GUI/GUISystem.h"
 
-#include "Ogre/scenemanager.h"
+#include "Scene/scenemanager.h"
 
 #include "GUI/Windows/Window.h"
 
@@ -18,7 +18,7 @@ namespace Engine {
 	namespace UI {
 
 
-		UIManager::UIManager(Ogre::RenderWindow *window, OGRE::SceneManager *sceneMgr, GUI::GUISystem *gui) :
+		UIManager::UIManager(Ogre::RenderWindow *window, Scene::SceneManager *sceneMgr, GUI::GUISystem *gui) :
 			mKeepingCursorPos(false),
 			mWindow(window),
 			mGUI(gui),

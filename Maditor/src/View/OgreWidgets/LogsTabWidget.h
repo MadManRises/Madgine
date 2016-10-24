@@ -2,13 +2,12 @@
 
 #include <qtabwidget.h>
 #include <memory>
+#include <qmap.h>
 
 namespace Maditor {
 	namespace Model {
-		namespace Watcher {
-			class LogsWatcher;
-			class LogWatcher;
-		}
+		class LogsModel;
+		class Log;
 	}
 
 	namespace View {
@@ -20,10 +19,14 @@ namespace Maditor {
 		public:
 			LogsTabWidget(QWidget *parent = 0);
 
-			void setModel(const Model::Watcher::LogsWatcher *watcher);
+			void setModel(const Model::LogsModel *watcher);
 
 		public slots:
-			void addLogWatcher(Model::Watcher::LogWatcher *log);
+			void addLog(Model::Log *log);
+			void removeLog(Model::Log *log);
+
+		private:
+			QMap<Model::Log *, QWidget *> mTabs;
 
 		};
 	}

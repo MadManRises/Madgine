@@ -17,8 +17,7 @@ namespace Engine {
 		namespace MyGui {
 
 			MyGUILauncher::MyGUILauncher(Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr) :
-				mScrollWheel(0),
-				GUISystem()
+				mScrollWheel(0)
 			{
 				mCamera = sceneMgr->createCamera("ContentCamera");
 				mViewport = window->addViewport(mCamera);

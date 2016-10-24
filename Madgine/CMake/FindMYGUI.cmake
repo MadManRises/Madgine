@@ -22,25 +22,25 @@ IF (WIN32) #Windows
 
     MESSAGE(STATUS "Looking for MyGUI")
 
-    IF(MINGW)
-
-        FIND_PATH ( MYGUI_INCLUDE_DIRS MyGUI.h PATH_SUFFIXES MYGUI)
-        FIND_LIBRARY ( MYGUI_LIBRARIES_REL NAMES
-            libMyGUIEngine${CMAKE_SHARED_LIBRARY_SUFFIX}
-            HINTS
-            ${MYGUI_LIB_DIR}
-            PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-
-        FIND_LIBRARY ( MYGUI_LIBRARIES_DBG NAMES
-            libMyGUIEngine_d${CMAKE_SHARED_LIBRARY_SUFFIX}
-            HINTS
-            ${MYGUI_LIB_DIR}
-            PATH_SUFFIXES "" debug )
-
-        make_library_set ( MYGUI_LIBRARIES )
-
-        MESSAGE ("${MYGUI_LIBRARIES}")
-    ENDIF(MINGW)
+    #IF(MINGW)
+    #
+    #    FIND_PATH ( MYGUI_INCLUDE_DIRS MyGUI.h PATH_SUFFIXES MYGUI)
+    #    FIND_LIBRARY ( MYGUI_LIBRARIES_REL NAMES
+    #        libMyGUIEngine${CMAKE_SHARED_LIBRARY_SUFFIX}
+    #        HINTS
+    #        ${MYGUI_LIB_DIR}
+    #        PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+    #
+    #    FIND_LIBRARY ( MYGUI_LIBRARIES_DBG NAMES
+    #        libMyGUIEngine_d${CMAKE_SHARED_LIBRARY_SUFFIX}
+    #        HINTS
+    #        ${MYGUI_LIB_DIR}
+    #        PATH_SUFFIXES "" debug )
+    #
+    #    make_library_set ( MYGUI_LIBRARIES )
+    #
+    #    MESSAGE ("${MYGUI_LIBRARIES}")
+    #ENDIF(MINGW)
 
     #SET(MYGUISDK $ENV{MYGUI_HOME})
     IF (MYGUISDK)
@@ -49,6 +49,7 @@ IF (WIN32) #Windows
         STRING(REGEX REPLACE "[\\]" "/" MYGUISDK "${MYGUISDK}" )
 
         SET ( MYGUI_INCLUDE_DIRS "${MYGUISDK}/include" )
+      
 
         SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib ${MYGUISDK}/*/lib )
 
@@ -56,11 +57,21 @@ IF (WIN32) #Windows
            set(LIB_SUFFIX "Static")
            find_package(freetype)
         endif ( MYGUI_STATIC )
+        
+        if ( MINGW )
+            set(LIB_PREFIX "lib")
+        else ( MINGW )
+            set(LIB_PREFIX "")
+        endif ( MINGW )
 
-        find_library ( MYGUI_LIBRARIES_REL NAMES MyGUIEngine${LIB_SUFFIX}.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_DBG NAMES MyGUIEngine${LIB_SUFFIX}_d.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
-        find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES MyGUI.OgrePlatform${LIB_SUFFIX}.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES MyGUI.OgrePlatform${LIB_SUFFIX}_d.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        
+
+        find_library ( MYGUI_LIBRARIES_REL NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_DBG NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+
+        MESSAGE(STATUS ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX})
 
         make_library_set ( MYGUI_LIBRARIES )
         make_library_set ( MYGUI_LIBRARIES_OGRE )
@@ -127,6 +138,8 @@ SET(MYGUI_INCLUDE_DIRS ${MYGUI_INCLUDE_DIRS} CACHE PATH "")
 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
 SET(MYGUI_LIB_DIR ${MYGUI_LIB_DIR} CACHE PATH "")
 
+
+
 IF (NOT APPLE OR NOT MYGUI_STATIC) # we need explicit freetype libs only on OS X for static build, for other cases just make it TRUE
     SET(FREETYPE_LIBRARIES TRUE)
 ENDIF (NOT APPLE OR NOT MYGUI_STATIC)
@@ -142,7 +155,7 @@ IF (MYGUI_FOUND)
         MESSAGE(STATUS " includes : ${MYGUI_INCLUDE_DIRS}")
     ENDIF (NOT MYGUI_FIND_QUIETLY)
 
-    find_file(MYGUI_PREQUEST_FILE NAMES MyGUI_Prerequest.h PATHS ${MYGUI_INCLUDE_DIRS})
+    find_file(MYGUI_PREQUEST_FILE NAMES MyGUI_Prerequest.h PATHS ${MYGUI_INCLUDE_DIRS}/MYGUI)
     file(READ ${MYGUI_PREQUEST_FILE} MYGUI_TEMP_VERSION_CONTENT)
     get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MAJOR MYGUI_VERSION_MAJOR)
     get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MINOR MYGUI_VERSION_MINOR)

@@ -13,13 +13,17 @@ namespace Maditor {
 class TreeItem
 {
 public:
-	explicit TreeItem(TreeItem *parent = 0);
+	virtual ~TreeItem() = default;
 
-	int childCount();
-	int index();
-	TreeItem *child(int i) const;
+	virtual int childCount() = 0;
+	virtual int parentIndex();
+	virtual TreeItem *child(int i) = 0;
 
-	TreeItem *parentItem();
+	virtual TreeItem *parentItem() = 0;
+
+	virtual QVariant data(int col) const = 0;
+
+	virtual QVariant icon() const;
 
 	void extendContextMenu(QMenu &menu);
 
@@ -28,13 +32,9 @@ protected:
 
 
 private:
-	std::list<TreeItem*> mChildren;
-	QList<QVariant> mItemData;
-	TreeItem *mParentItem;
-
 	std::list<std::pair<QString, std::function<void()>>> mContextMenuItems;
 
-	QIcon mIcon;
+	
 };
 
 	}

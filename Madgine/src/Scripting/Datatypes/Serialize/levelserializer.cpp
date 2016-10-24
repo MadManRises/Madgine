@@ -2,8 +2,8 @@
 #include "levelserializer.h"
 
 #include "Scripting/Types/globalscope.h"
-#include "Ogre/SceneManager.h"
-#include "Ogre/Entity/entity.h"
+#include "Scene/SceneManager.h"
+#include "Scene/Entity/entity.h"
 
 #include "Scripting/Types/scopefactory.h"
 #include "serializestream.h"
@@ -19,10 +19,10 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
 
 	GlobalScope *global = &GlobalScope::getSingleton();
 
-    out << OGRE::SceneManager::getSingleton();
+    out << Scene::SceneManager::getSingleton();
 
     if (storeComponents)
-        OGRE::SceneManager::getSingleton().saveComponentData(out);
+        Scene::SceneManager::getSingleton().saveComponentData(out);
     else
         out << Scripting::ValueType();
 
@@ -30,7 +30,7 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
 
     global->collectScopes(saveStory ? scopeSet : ignoreSet);
 	
-	for (OGRE::Entity::Entity *e : OGRE::SceneManager::getSingleton().entities()) {
+	for (Scene::Entity::Entity *e : Scene::SceneManager::getSingleton().entities()) {
 		e->collectScopes(scopeSet, ignoreSet);
 	}
 
@@ -57,9 +57,9 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
 	if (in.process())
 		in.process()->startSubProcess(1, "Loading Level...");
 
-    in >> OGRE::SceneManager::getSingleton();
+    in >> Scene::SceneManager::getSingleton();
 
-    OGRE::SceneManager::getSingleton().loadComponentData(in);
+    Scene::SceneManager::getSingleton().loadComponentData(in);
 
     std::map<InvScopePtr, Scope *> scopeMap;
 
@@ -79,14 +79,14 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
         scope->applyScopeMap(scopeMap);
 
 		if (callInit) {
-			OGRE::Entity::Entity *e = scope_cast<OGRE::Entity::Entity>(scope);
+			Scene::Entity::Entity *e = scope_cast<Scene::Entity::Entity>(scope);
 			if (e) {
 				e->init();
 			}
 		}
     }
 
-    OGRE::SceneManager::getSingleton().onLoad();
+    Scene::SceneManager::getSingleton().onLoad();
 
 	if (in.process())
 		in.process()->endSubProcess();

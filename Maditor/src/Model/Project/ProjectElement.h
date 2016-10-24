@@ -12,14 +12,16 @@ namespace Maditor {
 
 		public:
 			ProjectElement(const QString &name, const QString &type, ProjectElement *parent);
-			ProjectElement(const QString &name, const QString &type, QDomDocument &doc, TreeItem *parent);
-			ProjectElement(QDomElement data, TreeItem *parent);
+			ProjectElement(const QString &name, const QString &type, QDomDocument &doc);
+			ProjectElement(QDomElement data, ProjectElement *parent = 0);
 
+			virtual ProjectElement * parentItem() override;
 
+			virtual QVariant data(int col) const override;
 
 			const QString &name() const;
-			QString type();
-
+			/*QString type();
+			*/
 
 
 			//ProjectElement *parent();
@@ -37,7 +39,10 @@ namespace Maditor {
 		private:
 			QDomElement mRootElement;
 
-			//ProjectElement *mParent;
+			ProjectElement *mParent;
+
+
+
 
 		};
 	}

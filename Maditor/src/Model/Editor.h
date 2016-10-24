@@ -5,6 +5,7 @@
 #include "editorForward.h"
 
 #include <qsettings.h>
+#include "LogsModel.h"
 
 class QString;
 
@@ -17,6 +18,7 @@ namespace Maditor {
 			~Editor();
 
 			void init(QWindow *target);
+			void onStartup();
 
 			void newProject(const QString &path, const QString &name);
 			void loadProject(const QString &path);
@@ -26,7 +28,10 @@ namespace Maditor {
 			Generator::ClassGeneratorFactory *classGeneratorFactory();
 			Editors::ScriptEditorModel *scriptEditor();
 			Editors::VSLink *vs();
+			LogsModel *logsModel();
+			
 			Project *project();
+
 
 		private:
 			void openProject(std::unique_ptr<Project> &&project);
@@ -48,6 +53,7 @@ namespace Maditor {
 			Generator::ClassGeneratorFactory *mClassGeneratorFactory;
 			Editors::ScriptEditorModel *mScriptEditor;
 			Editors::VSLink *mVS;
+			LogsModel *mLogs;
 
 			QWindow *mOgreTarget;
 

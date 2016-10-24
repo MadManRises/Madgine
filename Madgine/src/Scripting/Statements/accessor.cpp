@@ -10,8 +10,8 @@ namespace Statements {
 
 
 Accessor::Accessor(int line, const std::string &attName) :
-    mAttName(attName),
-	Statement(line)
+	Statement(line),
+	mAttName(attName)	
 {
 
 }

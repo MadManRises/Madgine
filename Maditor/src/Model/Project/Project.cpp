@@ -17,8 +17,8 @@ namespace Maditor {
 		const QString Project::sProjectFileName = "project.mad";
 
 		Project::Project(const QString & path, const QString & name, QDomDocument doc) :
-			ProjectElement(name, "MadProject", doc, new TreeItem),
-			mModelRootItem(parentItem()),
+			ProjectElement(name, "MadProject", doc),
+			TreeModel(this, 1),
 			mDocument(doc),
 			mPath(path),
 			mRoot(path + name + "/"),
@@ -47,8 +47,8 @@ namespace Maditor {
 
 
 		Project::Project(QDomDocument doc, const QString &path) :
-			ProjectElement(doc.documentElement(), new TreeItem),
-			mModelRootItem(parentItem()),
+			ProjectElement(doc.documentElement()),
+			TreeModel(this, 1),
 			mDocument(doc),
 			mPath(QFileInfo(path).absolutePath()),
 			mRoot(path),
@@ -80,16 +80,7 @@ namespace Maditor {
 
 		void Project::init()
 		{
-			mProjectIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_DirHomeIcon));
-
-			mFolderIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_DirClosedIcon),
-				QIcon::Normal, QIcon::Off);
-			mFolderIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_DirOpenIcon),
-				QIcon::Normal, QIcon::On);
-
-			mFileIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_FileIcon));
-
-			setContextMenuItems({
+			setModelContextMenuItems({
 				{ "New Module", [=]() {emit newModuleRequest(); } },
 				{ "Rebuild Structure", [=]() {generate(); } },
 				{ "Draw Dependencies", [=]() {drawDependenciesGraph(); }}
@@ -136,15 +127,7 @@ namespace Maditor {
 			emit moduleAdded(module);
 		}
 
-		void Project::handleContextMenuRequest(const QModelIndex & p, QMenu & menu)
-		{
-			extendContextMenu(menu);
-			if (p.isValid()) {
-				ProjectElement *el = static_cast<ProjectElement*>(p.internalPointer());
-				if (el != this)
-					el->extendContextMenu(menu);
-			}
-		}
+
 
 		void Project::drawDependenciesGraph()
 		{
@@ -236,84 +219,6 @@ namespace Maditor {
 		}
 
 
-		Q_INVOKABLE QModelIndex Project::index(int row, int column, const QModelIndex & parent) const
-		{
-
-			if (!hasIndex(row, column, parent))
-				return QModelIndex();
-
-			TreeItem *item;			
-			if (!parent.isValid()) {
-				item = mModelRootItem;
-			}
-			else {
-				item = static_cast<TreeItem*>(parent.internalPointer());
-			}
-
-			
-			if (item->childCount() > row) {
-				return createIndex(row, column, item->child(row));
-			}
-			else {
-				return QModelIndex();
-			}
-				
-		}
-
-		Q_INVOKABLE QModelIndex Project::parent(const QModelIndex & child) const
-		{
-			if (!child.isValid())
-				return QModelIndex();
-
-
-			TreeItem *item = static_cast<TreeItem*>(child.internalPointer());
-			if (item->parentItem() == mModelRootItem)
-				return QModelIndex();
-
-			return createIndex(item->parentItem()->index(), 0, item->parentItem());
-		}
-
-		Q_INVOKABLE int Project::rowCount(const QModelIndex & parent) const
-		{
-			TreeItem *item;
-			if (!parent.isValid())
-				item = mModelRootItem;
-			else {
-				item = static_cast<TreeItem*>(parent.internalPointer());
-			}
-			return item->childCount();
-		}
-
-		Q_INVOKABLE int Project::columnCount(const QModelIndex & parent) const
-		{
-			return 1;
-		}
-
-		Q_INVOKABLE QVariant Project::data(const QModelIndex & index, int role) const
-		{
-			if (!index.isValid())
-				return QVariant();
-
-			if (role != Qt::DisplayRole && role != Qt::DecorationRole)
-				return QVariant();
-
-			ProjectElement *el = static_cast<ProjectElement*>(static_cast<TreeItem*>(index.internalPointer()));
-			switch (role) {
-			case Qt::DisplayRole:
-				return el->name();
-			case Qt::DecorationRole:
-				if (el->type() == "MadProject")
-					return mProjectIcon;
-				else if (el->type() == "Class")
-					return mFileIcon;
-				else
-					return mFolderIcon;
-			default:
-				throw 0;
-			}
-
-		}
-
 		QVariant Project::headerData(int section, Qt::Orientation orientation, int role) const
 		{
 			if (role != Qt::DisplayRole)
@@ -339,6 +244,18 @@ namespace Maditor {
 			mDocument.save(stream, 4);
 			file.close();
 		}
+
+		int Project::childCount() {
+			return mModules.size();
+		}
+
+		Module * Project::child(int i) {
+			auto it = mModules.begin();
+			std::advance(it, i);
+			return it->get();
+		}
+
+
 
 	}
 }

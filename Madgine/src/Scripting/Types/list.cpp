@@ -119,7 +119,7 @@ void List::collectValueRefs(std::list<ValueType *> &values)
     }
 }
 
-Scope *List::Factory::create(Serialize::SerializeInStream &in)
+template <> Scope *List::Factory::create(Serialize::SerializeInStream &in)
 {
     return OGRE_NEW List();
 }

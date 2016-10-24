@@ -2,10 +2,14 @@
 
 #include "GUI\GUISystem.h"
 
+#ifdef _MSC_VER
 #pragma warning (push, 0)
+#endif
 #include <MYGUI\MyGUI.h>
 #include <MYGUI\MyGUI_OgrePlatform.h>
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 
 namespace Engine {

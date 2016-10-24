@@ -8,11 +8,11 @@
 
 #include "componentexception.h"
 
-#include "OGRE\scenemanager.h"
+#include "Scene\scenemanager.h"
 
 #include "Scripting\Datatypes\Serialize\serializestream.h"
 
-#include "Ogre\entityexception.h"
+#include "Scene\entityexception.h"
 
 #include "Scripting\Parsing\scriptparser.h"
 #include "Scripting\Parsing\entitynode.h"
@@ -21,13 +21,13 @@
 
 namespace Engine {
 
-	API_IMPL(OGRE::Entity::Entity, &addComponent, &remove, /*&enqueueMethod,*/ &getPosition, &getCenter, &setObjectVisible);
+	API_IMPL(Scene::Entity::Entity, &addComponent, &remove, /*&enqueueMethod,*/ &getPosition, &getCenter, &setObjectVisible);
 
 
 
-OGRE::Entity::Entity::Factory OGRE::Entity::Entity::sFactory;
+Scene::Entity::Entity::Factory Scene::Entity::Entity::sFactory;
 
-namespace OGRE {
+namespace Scene {
 namespace Entity {
 
 Entity *Entity::entityFromMovable(Ogre::MovableObject *o)
@@ -238,7 +238,7 @@ const Scripting::Parsing::MethodNodePtr &Entity::getMethod(const std::string &na
 
 void Entity::remove()
 {
-	Engine::OGRE::SceneManager::getSingleton().removeLater(this);
+	Engine::Scene::SceneManager::getSingleton().removeLater(this);
 }
 
 
@@ -314,11 +314,11 @@ void Entity::destroyDecoratorNode(Ogre::SceneNode * node)
 }
 }
 
-Scripting::Scope *OGRE::Entity::Entity::Factory::create(Scripting::Serialize::SerializeInStream &in)
+template <> Scripting::Scope *Scene::Entity::Entity::Factory::create(Scripting::Serialize::SerializeInStream &in)
 {
 	std::string obName, entityMesh, behaviour;
 	in >> obName >> entityMesh >> behaviour;
-	return OGRE::SceneManager::getSingleton().createEntity(obName, entityMesh, behaviour);
+	return Scene::SceneManager::getSingleton().createEntity(obName, entityMesh, behaviour);
 }
 
 }

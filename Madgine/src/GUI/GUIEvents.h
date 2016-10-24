@@ -153,7 +153,7 @@ namespace Engine {
 		};
 
 		namespace MouseButton {
-			enum MouseButton {
+			enum MouseButton : unsigned char {
 				NO_BUTTON,
 				LEFT_BUTTON,
 				RIGHT_BUTTON,
@@ -184,22 +184,26 @@ namespace Engine {
 		};
 
 		struct MouseEventArgs {
-			MouseButton::MouseButton button;
-			Ogre::Vector2 position, moveDelta;
-			float scrollWheel;
+			
 
 			MouseEventArgs(const Ogre::Vector2 &pos, GUI::MouseButton::MouseButton button) :
-			position(pos),
-			scrollWheel(0.0f),
-			button(button){}
+				position(pos),
+				button(button),
+				scrollWheel(0.0f)
+			{}
 
 			MouseEventArgs(const Ogre::Vector2 &pos, const Ogre::Vector2 &move, float scroll, GUI::MouseButton::MouseButton button = GUI::MouseButton::NO_BUTTON) :
 				position(pos),
 				moveDelta(move),
-				scrollWheel(scroll),
-				button(button){
+				button(button),
+				scrollWheel(scroll)
+				{
 				
 			}
+
+			Ogre::Vector2 position, moveDelta;
+			MouseButton::MouseButton button;			
+			float scrollWheel;
 
 		};
 	}

@@ -1,16 +1,16 @@
 #pragma once
 
-#include <qabstractitemmodel.h>
+#include "Model\TreeModel.h"
 
 #include <qtimer.h>
+
+#include "ProfilerNode.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {			
 
-			class ProfilerNode;
-
-			class PerformanceWatcher : public QAbstractItemModel {
+			class PerformanceWatcher : public TreeModel {
 				Q_OBJECT
 
 			public:
@@ -26,18 +26,6 @@ namespace Maditor {
 
 			protected:
 
-
-				// Inherited via QAbstractItemModel
-				virtual Q_INVOKABLE QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const override;
-
-				virtual Q_INVOKABLE QModelIndex parent(const QModelIndex & child) const override;
-
-				virtual Q_INVOKABLE int rowCount(const QModelIndex & parent = QModelIndex()) const override;
-
-				virtual Q_INVOKABLE int columnCount(const QModelIndex & parent = QModelIndex()) const override;
-
-				virtual Q_INVOKABLE QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
-
 				virtual void timerEvent(QTimerEvent *event) override;
 
 				virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -45,7 +33,7 @@ namespace Maditor {
 			private:
 				bool mUpdatePending;
 
-				ProfilerNode *mRootItem;
+				RootProfilerNode mRootItem;
 			};
 
 		}

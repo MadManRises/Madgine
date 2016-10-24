@@ -15,7 +15,7 @@ namespace Engine {
 				return ScopeClassType<T>::type;
 			};
 
-		private:
+		protected:
 
 			class Factory : public ScopeFactory {
 			public:
@@ -24,6 +24,8 @@ namespace Engine {
 				virtual Scope *create(Serialize::SerializeInStream &in);
 
 			};
+
+		private:
 
 			static Factory sFactory;
 

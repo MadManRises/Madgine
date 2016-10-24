@@ -3,9 +3,9 @@
 #include <qdebug.h>
 #include "Model\Project\Project.h"
 #include "libinclude.h"
-#include "OGRE\Entity\entity.h"
-#include "OGRE\scenemanager.h"
-#include "OGRE\scenecomponent.h"
+#include "Scene\Entity\entity.h"
+#include "Scene\scenemanager.h"
+#include "Scene\scenecomponent.h"
 #include "UI\UIManager.h"
 
 namespace Maditor {
@@ -105,14 +105,14 @@ namespace Maditor {
 					p.first->fillReloadOrder(reloadOrder);
 			}			
 
-			std::map<std::string, std::list<Engine::OGRE::Entity::Entity*>> mComponentEntities;
-			const std::list<Engine::OGRE::Entity::Entity*> &entities = Engine::OGRE::SceneManager::getSingleton().entities();
+			std::map<std::string, std::list<Engine::Scene::Entity::Entity*>> mComponentEntities;
+			const std::list<Engine::Scene::Entity::Entity*> &entities = Engine::Scene::SceneManager::getSingleton().entities();
 			for (const Module *m : reloadOrder) {
 				ModuleInstance &instance = mInstances.find(m)->second;
 
 				for (const std::string &comp : instance.mEntityComponentNames) {
-					std::list<Engine::OGRE::Entity::Entity*> &componentEntities = mComponentEntities[comp];
-					for (Engine::OGRE::Entity::Entity* e : entities) {
+					std::list<Engine::Scene::Entity::Entity*> &componentEntities = mComponentEntities[comp];
+					for (Engine::Scene::Entity::Entity* e : entities) {
 						if (e->hasComponent(comp)) {
 							componentEntities.push_back(e);
 							e->removeComponent(comp);
@@ -132,7 +132,7 @@ namespace Maditor {
 				loadModule(instance, callInit);
 
 				for (const std::string &comp : instance.mEntityComponentNames) {
-					for (Engine::OGRE::Entity::Entity* e : mComponentEntities[comp]) {
+					for (Engine::Scene::Entity::Entity* e : mComponentEntities[comp]) {
 						e->addComponent(comp);
 					}
 				}
@@ -163,9 +163,9 @@ namespace Maditor {
 			if (!module.mLoaded)
 				return true;
 
-			bool isSceneLoaded = Engine::OGRE::SceneManager::getSingleton().isSceneLoaded();
+			bool isSceneLoaded = Engine::Scene::SceneManager::getSingleton().isSceneLoaded();
 
-			for (Engine::OGRE::BaseSceneComponent *c : module.mSceneComponents) {
+			for (Engine::Scene::BaseSceneComponent *c : module.mSceneComponents) {
 				if (isSceneLoaded)
 					c->onSceneClear();
 			}
@@ -212,8 +212,8 @@ namespace Maditor {
 			module.mSceneComponents.clear();
 			module.mGameHandlers.clear();
 			module.mGuiHandlers.clear();
-			std::set<std::string> beforeEntityComponents = Engine::OGRE::Entity::Entity::registeredComponentNames();
-			std::set<Engine::OGRE::BaseSceneComponent*> beforeSceneComponents = Engine::OGRE::SceneManager::getSingleton().getComponents();
+			std::set<std::string> beforeEntityComponents = Engine::Scene::Entity::Entity::registeredComponentNames();
+			std::set<Engine::Scene::BaseSceneComponent*> beforeSceneComponents = Engine::Scene::SceneManager::getSingleton().getComponents();
 			std::set<Engine::UI::GameHandlerBase*> beforeGameHandlers = Engine::UI::UIManager::getSingleton().getGameHandlers();
 			std::set<Engine::UI::GuiHandlerBase*> beforeGuiHandlers = Engine::UI::UIManager::getSingleton().getGuiHandlers();
 
@@ -230,9 +230,9 @@ namespace Maditor {
 			if (!module.mHandle)
 				return false;
 
-			std::set<std::string> afterEntityComponents = Engine::OGRE::Entity::Entity::registeredComponentNames();
+			std::set<std::string> afterEntityComponents = Engine::Scene::Entity::Entity::registeredComponentNames();
 			std::set_difference(afterEntityComponents.begin(), afterEntityComponents.end(), beforeEntityComponents.begin(), beforeEntityComponents.end(), std::inserter(module.mEntityComponentNames, module.mEntityComponentNames.end()));
-			std::set<Engine::OGRE::BaseSceneComponent*> afterSceneComponents = Engine::OGRE::SceneManager::getSingleton().getComponents();
+			std::set<Engine::Scene::BaseSceneComponent*> afterSceneComponents = Engine::Scene::SceneManager::getSingleton().getComponents();
 			std::set_difference(afterSceneComponents.begin(), afterSceneComponents.end(), beforeSceneComponents.begin(), beforeSceneComponents.end(), std::inserter(module.mSceneComponents, module.mSceneComponents.end()));
 			std::set<Engine::UI::GameHandlerBase*> afterGameHandlers = Engine::UI::UIManager::getSingleton().getGameHandlers();
 			std::set_difference(afterGameHandlers.begin(), afterGameHandlers.end(), beforeGameHandlers.begin(), beforeGameHandlers.end(), std::inserter(module.mGameHandlers, module.mGameHandlers.end()));
@@ -246,7 +246,7 @@ namespace Maditor {
 			
 
 			if (callInit) {
-				bool isSceneLoaded = Engine::OGRE::SceneManager::getSingleton().isSceneLoaded();
+				bool isSceneLoaded = Engine::Scene::SceneManager::getSingleton().isSceneLoaded();
 
 				for (int i = 0; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
 					for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers)
@@ -259,7 +259,7 @@ namespace Maditor {
 				}
 
 
-				for (Engine::OGRE::BaseSceneComponent *c : module.mSceneComponents) {
+				for (Engine::Scene::BaseSceneComponent *c : module.mSceneComponents) {
 					c->init();
 					if (isSceneLoaded)
 						c->onSceneLoad();

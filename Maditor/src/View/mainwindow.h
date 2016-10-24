@@ -33,7 +33,7 @@ namespace Maditor {
 
 			void refresh();
 
-			void addEntity(Engine::OGRE::Entity::Entity *e);
+			void addEntity(Engine::Scene::Entity::Entity *e);
 
 		private:
 			void fillData(Engine::Util::Profiler &profiler, QTreeWidgetItem *item, const std::string &name, long long frameDuration, const std::string &parentName = "");
@@ -53,13 +53,17 @@ namespace Maditor {
 
 			void openSettings();
 
+			void initApp();
 			void startApp();
 			void stopApp();
 			void pauseApp();
+			void finalizeApp();
 
 			void ensureVisible(QWidget *widget);
 
 		private slots:
+			void onAppCreated();
+			void onAppInitialized();
 			void onAppStarted();
 			void onAppStopped();
 			void onProjectOpened(Model::Project *project);
@@ -72,13 +76,13 @@ namespace Maditor {
 		private:
 			Ui::MainWindow *ui;
 
-			std::map<QTreeWidgetItem*, Engine::OGRE::BaseSceneComponent*> mComponents;
+			std::map<QTreeWidgetItem*, Engine::Scene::BaseSceneComponent*> mComponents;
 
 			QTreeWidgetItem *mMainLoop;
 
 			QTreeWidgetItem *mSceneRoot, *mEntitiesNode, *mTerrain;
 
-			std::map<QTreeWidgetItem*, Engine::OGRE::Entity::Entity*> mEntities;
+			std::map<QTreeWidgetItem*, Engine::Scene::Entity::Entity*> mEntities;
 
 			Model::Editor *mEditor;
 

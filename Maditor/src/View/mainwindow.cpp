@@ -3,15 +3,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "OGRE\scenecomponent.h"
+#include "Scene\scenecomponent.h"
 
 #include "UI\UIManager.h"
 
 #include "Util\Profiler.h"
 
-#include "OGRE\scenemanager.h"
+#include "Scene\scenemanager.h"
 
-#include "OGRE\Entity\entity.h"
+#include "Scene\Entity\entity.h"
 
 #include "qevent.h"
 
@@ -57,9 +57,10 @@ namespace Maditor {
 
 			ui->game->addWidget(ogre);
 
+			editor->init(mTarget);
 
 			Model::Watcher::ApplicationWatcher *watcher = editor->watcher();
-			ui->LogsWidget->setModel(watcher->logsWatcher());
+			ui->LogsWidget->setModel(editor->logsModel());
 			//ui->guiRenderStats->connectWatchers("Gui", watcher);
 			//ui->sceneRenderStats->connectWatchers("Scene", watcher);
 			ui->ResourcesWidget->setModel(watcher->resourceWatcher());
@@ -69,7 +70,7 @@ namespace Maditor {
 
 			setupConnections();
 
-			editor->init(mTarget);
+			editor->onStartup();
 		}
 
 		MainWindow::~MainWindow()
@@ -85,7 +86,7 @@ namespace Maditor {
 			mSceneRoot = new QTreeWidgetItem({ "root" });
 			ui->sceneHierarchy->addTopLevelItem(mSceneRoot);
 
-			Ogre::SceneNode *root = Engine::OGRE::SceneManager::getSingleton().getSceneManager()->getRootSceneNode();
+			Ogre::SceneNode *root = Engine::Scene::SceneManager::getSingleton().getSceneManager()->getRootSceneNode();
 
 			mEntitiesNode = new QTreeWidgetItem(mSceneRoot, { "Entities" });
 
@@ -103,16 +104,16 @@ namespace Maditor {
 			Engine::Util::Profiler &profiler = Engine::Util::Profiler::getSingleton();
 			fillData(profiler, mMainLoop, "Frame", profiler.getStats("Frame")->averageDuration());
 
-			for (const std::pair<QTreeWidgetItem* const, Engine::OGRE::BaseSceneComponent *> &comp : mComponents) {
+			for (const std::pair<QTreeWidgetItem* const, Engine::Scene::BaseSceneComponent *> &comp : mComponents) {
 				comp.first->setCheckState(0, (comp.second->isEnabled() ? Qt::Checked : Qt::Unchecked));
 			}
 
-			for (const std::pair<QTreeWidgetItem* const, Engine::OGRE::Entity::Entity*> &ent : mEntities) {
+			for (const std::pair<QTreeWidgetItem* const, Engine::Scene::Entity::Entity*> &ent : mEntities) {
 				ent.first->setData(1, Qt::DisplayRole, QVariant(QString::fromStdString(Ogre::StringConverter::toString(ent.second->getPosition()))));
 			}
 		}
 
-		void MainWindow::addEntity(Engine::OGRE::Entity::Entity * e)
+		void MainWindow::addEntity(Engine::Scene::Entity::Entity * e)
 		{
 			QTreeWidgetItem *item = new QTreeWidgetItem(mEntitiesNode, { e->getName().c_str() });
 			buildSceneHierarchy(e->getNode(), item);
@@ -142,8 +143,8 @@ namespace Maditor {
 					fillData(profiler, item2, child, frameDuration, name);
 
 					if (name == "SceneComponents") {
-						const auto &components = Engine::OGRE::SceneManager::getSingleton().getComponents();
-						auto it = std::find_if(components.begin(), components.end(), [&](Engine::OGRE::BaseSceneComponent *comp) {return child == comp->componentName(); });
+						const auto &components = Engine::Scene::SceneManager::getSingleton().getComponents();
+						auto it = std::find_if(components.begin(), components.end(), [&](Engine::Scene::BaseSceneComponent *comp) {return child == comp->componentName(); });
 						mComponents[item2] = *it;
 						item2->setCheckState(0, ((*it)->isEnabled() ? Qt::Checked : Qt::Unchecked));
 					}
@@ -170,12 +171,13 @@ namespace Maditor {
 			}
 			for (const std::pair<Ogre::String, Ogre::MovableObject*> &p : node->getAttachedObjectIterator()) {
 				new QTreeWidgetItem(item, { (p.first + "(Object)").c_str() });
-				Engine::OGRE::Entity::Entity *e = Engine::OGRE::Entity::Entity::entityFromMovable(p.second);
+				Engine::Scene::Entity::Entity *e = Engine::Scene::Entity::Entity::entityFromMovable(p.second);
 			}
 		}
 
 		void MainWindow::closeEvent(QCloseEvent *event)
 		{
+
 			QSettings &settings = mEditor->settings();
 			settings.setValue("geometry", saveGeometry());
 			settings.setValue("state", saveState(0));
@@ -202,8 +204,8 @@ namespace Maditor {
 			connect(ui->actionOpenVS, &QAction::triggered, mEditor->vs(), &Model::Editors::VSLink::openVS);
 
 			//Watcher-related
-			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::showGame, Qt::QueuedConnection);
-			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, this, &MainWindow::hideGame, Qt::QueuedConnection);
+			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::onAppCreated, Qt::QueuedConnection);
+			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, this, &MainWindow::onAppInitialized, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStarted, this, &MainWindow::onAppStarted, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStopped, this, &MainWindow::onAppStopped, Qt::QueuedConnection);
 
@@ -242,8 +244,15 @@ namespace Maditor {
 			emit settingsRequest(mEditor);
 		}
 
+		void MainWindow::initApp()
+		{
+			ui->actionInit->setEnabled(false);
+			mEditor->application()->load(mEditor->project(), mTarget);			
+		}
+
 		void MainWindow::startApp()
 		{
+			ui->actionStart->setEnabled(false);
 			mEditor->application()->go();
 		}
 
@@ -254,6 +263,11 @@ namespace Maditor {
 
 		void MainWindow::pauseApp()
 		{
+		}
+
+		void MainWindow::finalizeApp()
+		{
+			mEditor->application()->cleanup();
 		}
 
 		void MainWindow::ensureVisible(QWidget * widget)
@@ -302,13 +316,27 @@ namespace Maditor {
 		{
 			mEditor->loadProject(action->text());
 		}
+		
 
+		void MainWindow::onAppCreated() {
+			showGame();
+			
+		}
 
+		void MainWindow::onAppInitialized() {
+			hideGame();
+
+			ui->actionInit->setEnabled(false);
+			ui->actionStart->setEnabled(true);
+			ui->actionPause->setEnabled(false);
+			ui->actionStop->setEnabled(false);
+		}
 
 		void MainWindow::onAppStopped()
 		{
 			hideGame();
 
+			ui->actionInit->setEnabled(false);
 			ui->actionStart->setEnabled(true);
 			ui->actionPause->setEnabled(false);
 			ui->actionStop->setEnabled(false);
@@ -317,16 +345,21 @@ namespace Maditor {
 		void MainWindow::onProjectOpened(Model::Project *project) {
 			ui->ProjectWidget->setProject(project);
 
-			ui->actionStart->setEnabled(true);
+			ui->actionInit->setEnabled(true);
+			ui->actionStart->setEnabled(false);
+			ui->actionPause->setEnabled(false);
+			ui->actionStop->setEnabled(false);
 		}
 
 		void MainWindow::onAppStarted() {
 			showGame();
 
+			ui->actionInit->setEnabled(false); 
 			ui->actionStart->setEnabled(false);
 			ui->actionPause->setEnabled(true);
-			ui->actionStop->setEnabled(true);
+			ui->actionStop->setEnabled(true);			
 		}
+
 
 		
 

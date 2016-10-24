@@ -1,14 +1,14 @@
 #pragma once
 
 #include "uniquecomponent.h"
-#include "Ogre/scenelistener.h"
+#include "scenelistener.h"
 #include "App/contextmasks.h"
 #include "Scripting/Datatypes/Serialize/serializable.h"
 #include "Util\UtilMethods.h"
 #include "Scripting\Types\globalapi.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 
 class MADGINE_EXPORT BaseSceneComponent : public SceneListener, public Scripting::Serialize::Serializable{
 public:
@@ -44,19 +44,23 @@ private:
 
 };
 
+#ifdef _MSC_VER
 template MADGINE_EXPORT class UniqueComponentCollector<BaseSceneComponent>;
+#endif
 
 template <class T>
 class SceneComponent : public UniqueComponent<T, BaseSceneComponent>, public Scripting::GlobalAPI<T>{
 
 public:
-	using UniqueComponent::UniqueComponent;
+	using UniqueComponent<T, BaseSceneComponent>::UniqueComponent;
 
     virtual const char *componentName() override {
         return strrchr(typeid(T).name(), ':') + 1;
     }
 
 };
+
+
 
 
 }

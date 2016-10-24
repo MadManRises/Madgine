@@ -211,6 +211,7 @@
     <property name="title">
      <string>App</string>
     </property>
+    <addaction name="actionInit"/>
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionPause"/>
@@ -289,6 +290,7 @@
    <addaction name="actionNewProject"/>
    <addaction name="actionLoadProject"/>
    <addaction name="separator"/>
+   <addaction name="actionInit"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
    <addaction name="actionPause"/>
@@ -397,6 +399,14 @@
     <string>Settings</string>
    </property>
   </action>
+  <action name="actionInit">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Init</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -485,6 +495,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionInit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>initApp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>305</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>testOgre()</slot>
@@ -493,5 +519,6 @@
   <slot>stopApp()</slot>
   <slot>pauseApp()</slot>
   <slot>openSettings()</slot>
+  <slot>initApp()</slot>
  </slots>
 </ui>

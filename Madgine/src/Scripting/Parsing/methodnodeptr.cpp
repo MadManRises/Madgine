@@ -1,4 +1,3 @@
-#pragma once
 
 #include "methodnodeptr.h"
 #include "methodnode.h"

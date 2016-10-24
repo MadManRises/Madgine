@@ -1,13 +1,15 @@
 #include "Editor.h"
 #include <qdebug.h>
 #include <qdiriterator.h>
-#include "Engine/Watcher/LogsWatcher.h"
+#include "Logsmodel.h"
 #include "Engine/Watcher/ResourceWatcher.h"
 #include "Engine/Watcher/ApplicationWatcher.h"
 #include "Engine/ApplicationWrapper.h"
 #include "Editors\VSLink.h"
 #include "Project\Generator\ClassGeneratorFactory.h"
 #include "Editors\ScriptEditorModel.h"
+#include "Project\Generator\CommandLine.h"
+#include "Project\ProjectLog.h"
 
 namespace Maditor {
 	namespace Model {
@@ -27,13 +29,6 @@ namespace Maditor {
 			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
-			mVS = new Editors::VSLink;
-			mScriptEditor = new Editors::ScriptEditorModel;
-			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
-
-			connect(mApplicationWatcher->logsWatcher(), &Watcher::LogsWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
-			connect(mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
-
 		}
 
 		Editor::~Editor()
@@ -44,12 +39,37 @@ namespace Maditor {
 			delete mApplicationWrapper;
 			delete mApplicationWatcher;
 			delete mLoader;			
+			delete mLogs;
 		}
 
 		void Editor::init(QWindow * target)
 		{
 			mOgreTarget = target;
 
+			mVS = new Editors::VSLink;
+			mScriptEditor = new Editors::ScriptEditorModel;
+			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
+			mLogs = new LogsModel;
+
+			mApplicationWatcher->init();
+
+			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logCreated, mLogs, &LogsModel::addLog);
+			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logRemoved, mLogs, &LogsModel::removeLog);
+			connect(mLogs, &LogsModel::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
+			connect(mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
+
+
+			ProjectLog *defaultLog = new ProjectLog;
+
+			mLogs->addLog(defaultLog);
+			Generator::CommandLine::setLog(defaultLog);
+
+
+
+		}
+
+		void Editor::onStartup()
+		{
 
 			if (mReloadProject && !mRecentProjects.isEmpty()) {
 				loadProject(mRecentProjects.front());
@@ -97,6 +117,11 @@ namespace Maditor {
 			return mVS;
 		}
 
+		LogsModel * Editor::logsModel()
+		{
+			return mLogs;
+		}
+
 		Project *Editor::project()
 		{
 			return mProject.get();
@@ -137,7 +162,7 @@ namespace Maditor {
 
 			emit projectOpened(mProject.get());
 
-			mApplicationWrapper->load(mProject.get(), mOgreTarget);
+			
 
 			//mApplicationWrapper.go();
 		}

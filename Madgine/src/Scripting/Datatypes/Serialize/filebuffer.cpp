@@ -51,7 +51,7 @@ FileBufferWriter::~FileBufferWriter()
 void FileBufferWriter::extend()
 {
     mDataBuffer.emplace_back();
-    setp(mDataBuffer.back().data(), mDataBuffer.back().data(), mDataBuffer.back().data() + BUFFER_SIZE);
+    setp(mDataBuffer.back().data(), mDataBuffer.back().data() + BUFFER_SIZE);
 }
 
 FileBufferWriter::int_type FileBufferWriter::overflow(int c)

@@ -1,4 +1,3 @@
-#pragma once
 
 #include "entitynodeptr.h"
 #include "entitynode.h"

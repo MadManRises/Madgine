@@ -20,7 +20,7 @@ std::string Struct::getIdentifier()
     return "Struct";
 }
 
-Scope *Struct::Factory::create(Serialize::SerializeInStream &in)
+template <> Scope *Struct::Factory::create(Serialize::SerializeInStream &in)
 {
     return OGRE_NEW Struct();
 }

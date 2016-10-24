@@ -4,10 +4,10 @@
 
 namespace Engine {
 	namespace Util {
-		std::map<const std::exception*, std::list<UtilMethods::TraceBack>> UtilMethods::sExceptions;
-		std::list<UtilMethods::TraceBack> UtilMethods::sCurrentTraceBack;
-		std::list<UtilMethods::TraceBack> UtilMethods::sExceptionTraceBack;
-		std::list<UtilMethods::TraceBack> UtilMethods::sTraceBack;
+		std::map<const std::exception*, std::list<TraceBack>> UtilMethods::sExceptions;
+		std::list<TraceBack> UtilMethods::sCurrentTraceBack;
+		std::list<TraceBack> UtilMethods::sExceptionTraceBack;
+		std::list<TraceBack> UtilMethods::sTraceBack;
 		const std::string UtilMethods::sLogFileName = "Madgine.log";
 		Ogre::Log *UtilMethods::sLog = 0;
 
@@ -41,7 +41,12 @@ namespace Engine {
 			sExceptionTraceBack = sTraceBack;
 		}
 
-		const std::list<UtilMethods::TraceBack> &UtilMethods::traceBack() {
+		void UtilMethods::abort()
+		{
+			throw AbortException();
+		}
+
+		const std::list<TraceBack> &UtilMethods::traceBack() {
 			return sCurrentTraceBack;
 		}
 

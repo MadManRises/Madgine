@@ -4,7 +4,7 @@ namespace Engine {
 	namespace App {
 		class ConfigSet;
 		struct AppSettings;
-		enum class ContextMask : size_t;
+		enum class ContextMask : unsigned int;
 		class Application;
 	}
 	namespace Scripting {
@@ -74,12 +74,12 @@ namespace Engine {
 		class Label;
 
 		namespace MouseButton {
-			enum MouseButton;
+			enum MouseButton : unsigned char;
 		}
 
 	}
 
-	namespace OGRE {
+	namespace Scene {
 
 		class SceneManager;
 		class BaseSceneComponent;
@@ -109,6 +109,7 @@ namespace Engine {
 	namespace Util {
 		class Profiler;
 		class ProcessStats;
+		struct TraceBack;
 	}
 
 	namespace Input {

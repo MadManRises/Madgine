@@ -10,8 +10,8 @@ namespace Engine {
 			ScopeFieldAccessor(Scope &scope, const std::string &fieldName);
 
 		protected:
-			const std::string mFieldName;
 			Scope &mScope;
+			const std::string mFieldName;			
 		};
 
 		class MADGINE_EXPORT GlobalFieldAccessor : public ScopeFieldAccessor
@@ -35,7 +35,7 @@ namespace Engine {
 			using Accessor::Accessor;
 
 			void operator= (T v) {
-				mScope.accessVar(mFieldName) = v;
+				this->mScope.accessVar(this->mFieldName) = v;
 			}
 
 			operator T () {
@@ -43,7 +43,8 @@ namespace Engine {
 			}
 
 			T value() {
-				return mScope.getVar(mFieldName).as<T>();
+				const ValueType &val = this->mScope.getVar(this->mFieldName);
+				return val.as<T>();
 			}
 
 		};
@@ -53,12 +54,12 @@ namespace Engine {
 		public:
 			template <class... Ty>
 			DefaultFieldAccessor(const T &defaultValue, Ty&&... args) :
-				FieldAccessor(std::forward<Ty>(args)...),
+				FieldAccessor<T, Accessor>(std::forward<Ty>(args)...),
 				mDefaultValue(defaultValue) {
 			}
 
 			void operator= (T v) {
-				mScope.accessVar(mFieldName) = v;
+				this->mScope.accessVar(this->mFieldName) = v;
 			}
 
 			operator T () {
@@ -66,7 +67,8 @@ namespace Engine {
 			}
 
 			T value() {
-				return mScope.accessVar(mFieldName).asDefault<T>(mDefaultValue);
+				ValueType &val = this->mScope.accessVar(this->mFieldName);
+				return val.asDefault<T>(mDefaultValue);
 			}
 
 		private:

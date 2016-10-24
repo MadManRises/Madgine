@@ -33,13 +33,13 @@ public:
 
 
 private:
-    template <class T, class Base>
+    template <class T, class _Base>
     friend class UniqueComponent;
 
     template <class T>
     static typename std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator registerComponent(){
 		auto f = OGRE_MAKE_UNIQUE_FUNC(T, Base);
-		UniqueComponentCollector *self = getSingletonPtr();
+		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
 		if (self) {
 			Ogre::unique_ptr<Base> component = f();
 			self->mComponents.emplace_back(std::move(component));
@@ -51,9 +51,9 @@ private:
     }
 
 	static void unregisterComponent(const typename std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator &it) {
-		std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator begin = sComponents().begin();
+		typename std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator begin = sComponents().begin();
 		int i = std::distance(begin, it);
-		UniqueComponentCollector *self = getSingletonPtr();
+		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
 		if (self) {
 			auto it2 = self->mComponents.begin();
 			std::advance(it2, i);

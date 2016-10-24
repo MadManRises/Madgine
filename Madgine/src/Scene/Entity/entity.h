@@ -7,7 +7,7 @@
 #include "Scripting\Parsing\entitynodeptr.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 namespace Entity {
 
 
@@ -54,7 +54,7 @@ public:
     void onLoad();
 
 	template <class T>
-	T *addComponent() {
+	T *addComponent_t() {
 		if (!hasComponent<T>())
 			addComponentImpl(T::componentName(), OGRE_MAKE_UNIQUE(T)(*this));
 		return getComponent<T>();
@@ -88,8 +88,8 @@ protected:
 	Scripting::ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
 
 	template <class T>
-	BaseEntityComponent *addComponentBase() {
-		return addComponent<T>();
+	BaseEntityComponent *addComponentBaseImpl() {
+		return addComponent_t<T>();
 	}
 
 	
@@ -110,7 +110,7 @@ private:
 	static void registerComponent() {
 		const char *name = T::componentName();
 		assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-		sRegisteredComponentsByName()[name] = &addComponentBase<T>;
+		sRegisteredComponentsByName()[name] = &addComponentBaseImpl<T>;
 	}
 
 	template <class T>

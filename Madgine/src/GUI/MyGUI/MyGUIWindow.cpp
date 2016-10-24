@@ -138,7 +138,7 @@ namespace Engine {
 
 			bool MyGUIWindow::isVisible()
 			{
-				return mWindow->isVisible();
+				return mWindow->getVisible();
 			}
 
 			void MyGUIWindow::releaseInput()
@@ -219,27 +219,27 @@ namespace Engine {
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void(const std::string&)> f, MyGUI::EventHandle_WidgetString &event)
 			{
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*, const std::string&>([=](MyGUI::Widget*, const std::string &name) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, const std::string&>([=](MyGUI::Widget*, const std::string &name) {
 					f(name);
 				}, event));
 			}
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetVoid &event)
 			{
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*>([=](MyGUI::Widget*) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*>([=](MyGUI::Widget*) {
 					f();
 				}, event));
 			}
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntInt &event) {
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*, int, int>([=](MyGUI::Widget* w, int left, int top) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int>([=](MyGUI::Widget* w, int left, int top) {
 					MouseEventArgs args(mGui->widgetRelative(w, left, top), mGui->relativeMoveDelta(w), 0);
 					f(args);
 				}, event));
 			}
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetInt &event) {
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*, int>([=](MyGUI::Widget* w, int wheel) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int>([=](MyGUI::Widget* w, int wheel) {
 					MouseEventArgs args(mGui->widgetRelative(w), mGui->relativeMoveDelta(w), (float)wheel);
 					f(args);
 				}, event));
@@ -247,13 +247,13 @@ namespace Engine {
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetWidget &event)
 			{
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*, MyGUI::Widget*>([=](MyGUI::Widget*, MyGUI::Widget*) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, MyGUI::Widget*>([=](MyGUI::Widget*, MyGUI::Widget*) {
 					f();
 				}, event));
 			}
 
 			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntIntButton &event) {
-				mEventHandlers[id].emplace_back(wrapEvent<MyGUI::Widget*, int, int, MyGUI::MouseButton>([=](MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int, MyGUI::MouseButton>([=](MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button) {
 					MouseEventArgs args(mGui->widgetRelative(w, left, top), mGui->relativeMoveDelta(w), 0, MyGUILauncher::convertButton(button));
 					f(args);
 				}, event));
@@ -264,7 +264,7 @@ namespace Engine {
 			{
 				const MyGUI::VectorWidgetPtr &widgets = MyGUI::LayoutManager::getInstance().loadLayout(name, "", mWindow);
 				if (widgets.size() != 1) {
-					ERROR(Database::Exceptions::loadLayoutFailure(name));
+					LOG_ERROR(Database::Exceptions::loadLayoutFailure(name));
 					return 0;
 				}
 				MyGUI::Widget *w = widgets.front();
@@ -278,7 +278,7 @@ namespace Engine {
 			{
 				std::list<WindowContainer*> result;
 				MyGUI::Widget *w = mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow;
-				for (int i = 0; i < w->getChildCount(); ++i) {
+				for (size_t i = 0; i < w->getChildCount(); ++i) {
 					result.push_back(new MyGUIWindow(w->getChildAt(i), mGui, this));
 				}
 				return result;

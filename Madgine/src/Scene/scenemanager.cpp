@@ -21,7 +21,7 @@
 #include "Util\Profiler.h"
 
 namespace Engine {
-namespace OGRE {
+namespace Scene {
 
 const float SceneManager::sceneRasterSize = .2f;
 
@@ -96,11 +96,11 @@ void SceneManager::finalize()
 void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
 {
 
+	clear();
+
 	if (in.process())
 		in.process()->startSubProcess(1 + mSceneListeners.size(), "Creating Terrain...");
-
-    clear();
-
+	
 	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
 
     createTerrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain"), in);
@@ -442,6 +442,8 @@ Ogre::SceneManager *SceneManager::getSceneManager()
 
 void SceneManager::setGameTextureSize(const Ogre::Vector2 & size)
 {
+	if (size.x <= 0 || size.y <= 0)
+		return;
     mCamera->setAspectRatio(size.x / size.y);
 
     unsigned int width = size.x;
@@ -611,6 +613,8 @@ void SceneManager::clear()
 	mStaticLights.clear();
     mTerrainEntities.clear();
 	mInfoObjects.clear();
+
+	MADGINE_ABORT;
 
     mSceneMgr->clearScene();
 

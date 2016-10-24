@@ -5,7 +5,7 @@
 #include "TextureComponent.h"
 
 namespace Engine {
-	namespace OGRE {
+	namespace Scene {
 
 		class MADGINE_EXPORT BaseSceneTextureComponent : public TextureComponent
 		{
@@ -45,10 +45,10 @@ namespace Engine {
 
 			virtual void onSceneLoad() override
 			{
-				updateTexture(sceneMgr());
+				updateTexture(this->sceneMgr());
 			}
 		};
 
-	} // namespace OGRE
+	} // namespace Scene
 } // namespace Core
 

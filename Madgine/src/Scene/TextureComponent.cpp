@@ -5,7 +5,7 @@
 #include "texturelistener.h"
 
 namespace Engine {
-	namespace OGRE {
+	namespace Scene {
 		TextureComponent::TextureComponent()
 		{
 		}

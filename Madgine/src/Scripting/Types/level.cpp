@@ -24,7 +24,7 @@ std::string Level::getIdentifier()
     return "Level";
 }
 
-Scope *Level::Factory::create(Serialize::SerializeInStream &in)
+template <> Scope *Level::Factory::create(Serialize::SerializeInStream &in)
 {
     return GlobalScope::getSingleton().level();
 }

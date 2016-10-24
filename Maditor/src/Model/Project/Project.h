@@ -8,9 +8,11 @@
 
 #include <qtreeview.h>
 
+#include "Model\TreeModel.h"
+
 namespace Maditor {
 	namespace Model {
-		class Project : public QAbstractItemModel, public ProjectElement {
+		class Project : public TreeModel, public ProjectElement {
 			Q_OBJECT
 
 		public:
@@ -35,16 +37,10 @@ namespace Maditor {
 			Module *getModuleByName(const QString &name);
 			std::list<Module *> initDependencies();
 
-			// Geerbt über QAbstractItemModel
-			virtual Q_INVOKABLE QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const override;
-			virtual Q_INVOKABLE QModelIndex parent(const QModelIndex & child) const override;
-			virtual Q_INVOKABLE int rowCount(const QModelIndex & parent = QModelIndex()) const override;
-			virtual Q_INVOKABLE int columnCount(const QModelIndex & parent = QModelIndex()) const override;
-			virtual Q_INVOKABLE QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
 			virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-			void handleContextMenuRequest(const QModelIndex &p, QMenu &menu);
+			
 
 		protected:
 			void save();
@@ -73,16 +69,18 @@ namespace Maditor {
 
 			std::list<std::unique_ptr<Module>> mModules;
 
-			QIcon mProjectIcon;
-			QIcon mFolderIcon;
 			QIcon mFileIcon;
-
-			TreeItem *mModelRootItem;
 
 			bool mValid;
 
 			static const QString sProjectFileName;
 
+
+
+			// Inherited via ProjectElement
+			virtual int childCount() override;
+
+			virtual Module * child(int i) override;
 
 		};
 	}

@@ -1,18 +1,18 @@
 #pragma once
 
 #include "window.h"
-#include "OGRE\texturelistener.h"
+#include "Scene\texturelistener.h"
 
 namespace Engine {
 	namespace GUI {
 
-		class MADGINE_EXPORT TextureDrawer : public Window, public OGRE::TextureListener
+		class MADGINE_EXPORT TextureDrawer : public Window, public Scene::TextureListener
 		{
 		public:
 			using Window::Window;
 			virtual ~TextureDrawer() = default;
 
-			void setTexture(OGRE::TextureComponent &tex);
+			void setTexture(Scene::TextureComponent &tex);
 			void setTexture(Ogre::TexturePtr &tex);
 
 			// Inherited via TextureListener

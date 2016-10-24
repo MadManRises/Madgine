@@ -78,7 +78,7 @@ private:
 
 template <class T>
 class GuiHandler : public UniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
-	using UniqueComponent::UniqueComponent;
+	using UniqueComponent<T, GuiHandlerBase>::UniqueComponent;
 };
 
 } // namespace GuiHandler

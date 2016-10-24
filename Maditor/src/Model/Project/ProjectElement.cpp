@@ -4,26 +4,26 @@
 namespace Maditor {
 	namespace Model {
 
-		ProjectElement::ProjectElement(const QString & name, const QString &type, ProjectElement * parent) :
-			TreeItem(parent),
+		ProjectElement::ProjectElement(const QString & name, const QString &type, ProjectElement *parent) :
 			mRootElement(parent->document().createElement(type)),
-			mName(name)
+			mName(name),
+			mParent(parent)
 		{
 			mRootElement.setAttribute("name", mName);
 			parent->mRootElement.appendChild(mRootElement);
 		}
-		ProjectElement::ProjectElement(const QString & name, const QString & type, QDomDocument &doc, TreeItem *parent) :
-			TreeItem(parent),
+		ProjectElement::ProjectElement(const QString & name, const QString & type, QDomDocument &doc) :
 			mRootElement(doc.createElement(type)),
-			mName(name)
+			mName(name),
+			mParent(0)
 		{
 			mRootElement.setAttribute("name", mName);
 			doc.appendChild(mRootElement);
 		}
-		ProjectElement::ProjectElement(QDomElement data, TreeItem * parent) :
-			TreeItem(parent),
+		ProjectElement::ProjectElement(QDomElement data, ProjectElement * parent) :
 			mRootElement(data),
-			mName(data.attribute("name"))
+			mName(data.attribute("name")),
+			mParent(parent)
 		{
 		}
 
@@ -31,10 +31,10 @@ namespace Maditor {
 		{
 			return mName;
 		}
-		QString ProjectElement::type()
+		/*QString ProjectElement::type()
 		{
 			return mRootElement.tagName();
-		}
+		}*/
 
 		QDomDocument ProjectElement::document()
 		{
@@ -54,6 +54,19 @@ namespace Maditor {
 		{
 			return mRootElement.attribute(name) != "0";
 		}
+
+
+		ProjectElement * ProjectElement::parentItem()
+		{
+			return mParent;
+		}
+
+		QVariant ProjectElement::data(int col) const
+		{
+			return mName;
+		}
+
+
 
 	}
 }

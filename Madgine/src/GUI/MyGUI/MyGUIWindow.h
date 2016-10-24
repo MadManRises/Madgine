@@ -3,9 +3,13 @@
 #include "GUI\Windows\WindowContainer.h"
 #include "GUI\GUIEvents.h"
 
+#ifdef _MSC_VER
 #pragma warning (push, 0)
+#endif
 #include <MYGUI\MyGUI.h>
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 namespace Engine {
 	namespace GUI {
@@ -127,13 +131,13 @@ namespace Engine {
 					virtual ~EventHandler() {
 						mEvent -= mDelegate;
 					}
-					F mFunc;
-					Delegate *mDelegate;
 					Event &mEvent;
+					F mFunc;
+					Delegate *mDelegate;					
 				};
 
 				template <class... _Ty>
-				EventHandler<_Ty...> *wrapEvent(std::function<void(_Ty...)> f, typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type &event) {
+				EventHandler<_Ty...> *wrapEvent(const std::function<void(_Ty...)> &f, typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type &event) {
 					return new EventHandler<_Ty...>(f, event);
 				}
 

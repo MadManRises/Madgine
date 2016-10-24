@@ -7,16 +7,16 @@ namespace Engine {
 namespace Scripting {
 
 template <class T, class Base = Scope>
-class ScopeImpl : public ScopeFactoryImpl<T, Base>, protected API<T> {
+class ScopeImpl : public ScopeFactoryImpl<T, Base>, public API<T> {
 
 public:
-	using ScopeFactoryImpl::ScopeFactoryImpl;
+	using ScopeFactoryImpl<T, Base>::ScopeFactoryImpl;
 
     ValueType methodCall(const std::string &name, const ArgumentList &args = {})
     {
         ValueType result;		
-        if (hasMethod(name)) {
-			result = execMethod(name, args);
+        if (this->hasMethod(name)) {
+			result = this->execMethod(name, args);
         } else {
             result = Scope::methodCall(name, args);
         }

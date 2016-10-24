@@ -95,7 +95,7 @@ private:
 
 };
 
-template MADGINE_EXPORT class UniqueComponentCollector<ShaderFactoryBase>;
+
 
 template <class T, bool b>
 const Ogre::String ShaderFactory<T, b>::sType = typeid(T).name();
@@ -139,5 +139,10 @@ private:
 
 } // namespace Shading
 } // namespace Resources
+
+#ifdef _MSC_VER
+template MADGINE_EXPORT class UniqueComponentCollector<Resources::Shading::ShaderFactoryBase>;
+#endif
+
 } // namespace Core
 

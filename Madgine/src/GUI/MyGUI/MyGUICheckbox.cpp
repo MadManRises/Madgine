@@ -3,9 +3,14 @@
 #include "MyGUICheckbox.h"
 #include "MyGUIWindow.h"
 
+
+#ifdef _MSC_VER
 #pragma warning (push, 0)
+#endif
 #include <MYGUI\MyGUI.h>
+#ifdef _MSC_VER
 #pragma warning (pop)
+#endif
 
 namespace Engine {
 	namespace GUI {
@@ -20,7 +25,7 @@ namespace Engine {
 
 			bool MyGUICheckbox::isChecked()
 			{
-				return mCheckbox->getStateCheck();
+				return mCheckbox->getStateSelected();
 			}
 
 			void MyGUICheckbox::setChecked(bool b)

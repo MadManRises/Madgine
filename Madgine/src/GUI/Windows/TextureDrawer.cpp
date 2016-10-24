@@ -2,11 +2,11 @@
 
 #include "TextureDrawer.h"
 
-#include "OGRE\TextureComponent.h"
+#include "Scene\TextureComponent.h"
 
 namespace Engine {
 	namespace GUI {
-		void Engine::GUI::TextureDrawer::setTexture(OGRE::TextureComponent & tex)
+		void Engine::GUI::TextureDrawer::setTexture(Scene::TextureComponent & tex)
 		{
 			tex.addListener(this);
 			if (!tex.isNull())

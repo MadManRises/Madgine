@@ -4,6 +4,7 @@
 #include <QDebug>
 #include "HeaderGuardGenerator.h"
 #include "Model\Project\Project.h"
+#include <qapplication.h>
 
 namespace Maditor {
 	namespace Model {
@@ -76,6 +77,23 @@ namespace Maditor {
 					{ "module", mModule->name() },
 					{ "header", mName + ".h" }
 				};
+			}
+
+			int ClassGenerator::childCount()
+			{
+				return 0;
+			}
+
+			TreeItem * ClassGenerator::child(int i)
+			{
+				throw 0;
+			}
+
+			QVariant ClassGenerator::icon() const
+			{
+				QIcon icon;
+				icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_FileIcon));
+				return icon;
 			}
 
 

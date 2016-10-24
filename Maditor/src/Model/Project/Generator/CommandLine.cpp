@@ -3,13 +3,18 @@
 #include <qdebug.h>
 #include "OgreLogManager.h"
 
+#include "Model/Project/ProjectLog.h"
+
 namespace Maditor {
 	namespace Model {
+
 		namespace Generator {
 
+			ProjectLog *CommandLine::sLog = 0;
+
 			int CommandLine::exec(const char* cmd) {
-				static Ogre::Log *log = Ogre::LogManager::getSingleton().getLog("Project.log");
-				log->logMessage(std::string("Executing Command: ") + cmd);
+				if (sLog)
+					sLog->logMessage(std::string("Executing Command: ") + cmd);
 
 				char buffer[128];
 				std::string result = "";
@@ -19,10 +24,18 @@ namespace Maditor {
 					if (fgets(buffer, 128, pipe) != NULL)
 						result += buffer;
 				}
-				log->logMessage(result);
+				if (sLog)
+					sLog->logMessage(result);
 				return _pclose(pipe);
 				
 			}
+
+			void CommandLine::setLog(ProjectLog * log)
+			{
+				sLog = log;
+			}
+
+
 
 		}
 	}

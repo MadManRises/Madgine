@@ -23,7 +23,7 @@ struct ScopeClassType<GlobalScope> {
 };
 
 template <>
-struct ScopeClassType<OGRE::Entity::Entity>{
+struct ScopeClassType<Scene::Entity::Entity>{
 	static constexpr ScopeClass type = ScopeClass::EntityClass;
 };
 
@@ -43,11 +43,7 @@ struct ScopeClassType<Level> {
 };
 
 
-template <class T>
-T *scope_cast(Scope *s) {
-	if (s->getClassType() != ScopeClassType<T>::type) return 0;
-	return (T*)s;
-}
+
 
 class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::Serializable {
 
@@ -119,6 +115,12 @@ private:
 
 	const Scope *mPrototype;
 };
+
+template <class T>
+T *scope_cast(Scope *s) {
+	if (s->getClassType() != ScopeClassType<T>::type) return 0;
+	return (T*)s;
+}
 
 
 }

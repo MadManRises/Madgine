@@ -7,7 +7,7 @@
 #include "GUI\MyGUI\MyGUILauncher.h"
 #include "Util\UtilMethods.h"
 
-#include "OGRE\scenemanager.h"
+#include "Scene\scenemanager.h"
 
 #include "UI\UIManager.h"
 #include "configset.h"
@@ -26,6 +26,7 @@ namespace App {
 Application::Application() :
 	mSettings(0),
 	mShutDown(true),
+	mPaused(false),
 	mWindow(0),
 	mRoot(0),
 	mSceneMgr(0),
@@ -93,6 +94,7 @@ void Application::init(const AppSettings & settings)
 int Application::go()
 {
 	mShutDown = false;
+	mPaused = false;
 
 	if (!mGlobalScope->callMethodCatch("init"))
 		return -1;
@@ -144,22 +146,26 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 
 	mProfiler->startProfiling("Rendering", "Frame");
 
-	{
-		PROFILE("Input", "Rendering");
-		mInput->update();
-	}
-	
-	{
-		PROFILE("UIManager", "Rendering");
-		mUI->update(fe.timeSinceLastFrame);
-	}
+	if (!mPaused) {
 
-	{
-		PROFILE("SafeCall", "Rendering");
-		while (!mSafeCallQueue.empty()) {
-			mSafeCallQueue.front()();
-			mSafeCallQueue.pop();
+		{
+			PROFILE("Input", "Rendering");
+			mInput->update();
 		}
+
+		{
+			PROFILE("UIManager", "Rendering");
+			mUI->update(fe.timeSinceLastFrame);
+		}
+
+		{
+			PROFILE("SafeCall", "Rendering");
+			while (!mSafeCallQueue.empty()) {
+				mSafeCallQueue.front()();
+				mSafeCallQueue.pop();
+			}
+		}
+
 	}
 
 	return true;
@@ -197,7 +203,7 @@ void Application::_setup(Input::InputHandler *input)
 	mGlobalScope->addAPI(this);
 
 	// Create SceneManager
-	mSceneMgr = OGRE_NEW OGRE::SceneManager(mRoot);
+	mSceneMgr = OGRE_NEW Scene::SceneManager(mRoot);
 
 	// Initialise GUISystem 
 	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());

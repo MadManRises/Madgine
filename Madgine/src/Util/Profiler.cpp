@@ -21,6 +21,11 @@ namespace Engine {
 			return mTopLevelProcesses;
 		}
 
+		bool Profiler::hasStats(const std::string & name)
+		{
+			return mProcesses.find(name) != mProcesses.end();
+		}
+
 		const ProcessStats * Profiler::getStats(const std::string & name)
 		{
 			return &mProcesses.find(name)->second;

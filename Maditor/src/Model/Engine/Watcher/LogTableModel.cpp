@@ -17,15 +17,15 @@ namespace Maditor {
 				mMsgIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxInformation));
 			}
 
-			void LogTableModel::addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::UtilMethods::TraceBack> &traceback) {
+			void LogTableModel::addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack> &traceback) {
 				beginInsertRows(QModelIndex(), mItems.size(), mItems.size());
 				QString tracebackString;
 
-				for (const Engine::Util::UtilMethods::TraceBack &t : traceback) {
+				for (const Engine::Util::TraceBack &t : traceback) {
 					if (!tracebackString.isEmpty()) tracebackString += "\n";
 					tracebackString += QString("%1(%2): %3").arg(mSourcesRoot.relativeFilePath(QString::fromStdString(t.mFile)), QString::number(t.mLineNr), QString::fromStdString(t.mFunction));
 				}
-				mItems.emplace_back(level, msg, tracebackString, traceback.empty() ? Engine::Util::UtilMethods::TraceBack() : traceback.back());
+				mItems.emplace_back(level, msg, tracebackString, traceback.empty() ? Engine::Util::TraceBack() : traceback.back());
 				endInsertRows();
 			}
 
@@ -34,7 +34,7 @@ namespace Maditor {
 				auto it = mItems.begin();
 				std::advance(it, index.row());
 
-				Engine::Util::UtilMethods::TraceBack &traceback = std::get<3>(*it);
+				Engine::Util::TraceBack &traceback = std::get<3>(*it);
 
 				if (traceback.mFile == "<unknown>")
 					return;
