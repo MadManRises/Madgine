@@ -1,5 +1,6 @@
+#include "maditorinclude.h"
+
 #include "LogWatcher.h"
-#include <qapplication.h>
 
 
 namespace Maditor {

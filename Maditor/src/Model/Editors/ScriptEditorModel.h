@@ -1,10 +1,5 @@
 #pragma once
 
-#include <qobject.h>
-#include <Qsci\qsciscintilla.h>
-#include <map>
-#include "ScriptEditor.h"
-
 namespace Maditor {
 	namespace Model {
 		namespace Editors {

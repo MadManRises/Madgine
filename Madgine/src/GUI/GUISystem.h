@@ -41,6 +41,7 @@ namespace Engine {
 			void removeWindow(const std::string &name);
 
 			void updateWindowSizes();
+			void setDirtyWindowSizes();
 
 			Window *getWindowByName(const std::string &name, Class _class = Class::WINDOW_CLASS);
 			Window *loadLayout(const std::string &name, const std::string &parent);
@@ -51,6 +52,7 @@ namespace Engine {
 			WindowContainer *mRootWindow;
 
 		private:
+			bool mWindowSizesDirty;
 
 			std::map<std::string, WindowContainer *> mWindows;
 			

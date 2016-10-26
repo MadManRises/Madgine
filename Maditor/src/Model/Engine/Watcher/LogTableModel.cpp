@@ -1,9 +1,6 @@
-#include "LogWatcher.h"
+#include "maditorinclude.h"
+
 #include "LogTableModel.h"
-#include <QApplication>
-#include <QStyle>
-#include <qdebug.h>
-#include <qfileinfo.h>
 
 
 namespace Maditor {

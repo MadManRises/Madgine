@@ -1,4 +1,5 @@
-#include "ClassGenerator.h"
+#include "maditorinclude.h"
+
 #include "EntityComponentGenerator.h"
 
 namespace Maditor {

@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "DotGenerator.h"
 #include "CommandLine.h"
 

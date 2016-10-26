@@ -1,14 +1,7 @@
 #pragma once 
 
-#include <QDialog>
-
-
 
 namespace Maditor {
-
-	namespace Model {
-		class Editor;
-	};
 
 	namespace View {
 		namespace Dialogs {

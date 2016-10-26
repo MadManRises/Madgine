@@ -1,6 +1,9 @@
+#include "maditorinclude.h"
+
 #include "newclassdialog.h"
 #include "ui_newclassdialog.h"
-#include <qpushbutton.h>
+
+#include "Model\Project\Module.h"
 
 namespace Maditor {
 namespace View {

@@ -1,10 +1,9 @@
+#include "maditorinclude.h"
+
 #include "modulepropertiesdialog.h"
 #include "ui_modulepropertiesdialog.h"
 #include "Model\Project\Module.h"
 #include "Model\Project\Project.h"
-
-#include <qpushbutton.h>
-
 
 namespace Maditor {
 	namespace View {

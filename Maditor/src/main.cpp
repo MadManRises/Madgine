@@ -1,12 +1,7 @@
-#include <qapplication.h>
+#include "maditorinclude.h"
+
 #include "View\mainwindow.h"
 #include "Model\Editor.h"
-
-#include <libinclude.h>
-#include "Util\UtilMethods.h"
-
-#include "Scripting\Datatypes\argumentlist.h"
-#include "Scripting\Datatypes\valuetype.h"
 
 
 

@@ -11,5 +11,9 @@ namespace Engine {
 
 		}
 
+		void BaseGlobalAPIComponent::clear()
+		{
+		}
+
 	}
 }

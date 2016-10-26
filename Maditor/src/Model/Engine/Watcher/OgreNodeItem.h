@@ -2,17 +2,11 @@
 
 #include "Model\TreeItem.h"
 
-namespace Ogre {
-	class SceneNode;
-	class MovableObject;
-}
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {			
 
-			class OgreSceneWatcher;
-			class OgreSceneNodeItem;
 
 			class OgreNodeItem : public QObject, public TreeItem {
 				Q_OBJECT

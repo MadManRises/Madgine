@@ -1,9 +1,5 @@
 #pragma once
 
-#include <qdom.h>
-#include <list>
-#include <functional>
-#include <qmenu.h>
 #include "Model\TreeItem.h"
 
 namespace Maditor {
@@ -20,11 +16,6 @@ namespace Maditor {
 			virtual QVariant data(int col) const override;
 
 			const QString &name() const;
-			/*QString type();
-			*/
-
-
-			//ProjectElement *parent();
 
 		protected:
 			QDomDocument document();
@@ -40,9 +31,6 @@ namespace Maditor {
 			QDomElement mRootElement;
 
 			ProjectElement *mParent;
-
-
-
 
 		};
 	}

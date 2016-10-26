@@ -1,10 +1,6 @@
+#include "maditorinclude.h"
 
 #include "ScriptEditor.h"
-
-#include <qfile.h>
-#include <qtextstream.h>
-#include <qfontdatabase.h>
-#include <qshortcut.h>
 
 #include "Qsci\qscilexercpp.h"
 

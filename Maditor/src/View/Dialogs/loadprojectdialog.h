@@ -1,8 +1,6 @@
 #ifndef LOADPROJECTDIALOG_H
 #define LOADPROJECTDIALOG_H
 
-#include <QDialog>
-
 namespace Ui {
 	class LoadProjectDialog;
 }

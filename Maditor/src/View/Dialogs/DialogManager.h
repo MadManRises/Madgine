@@ -1,19 +1,9 @@
 #pragma once
 
-#include <QMainWindow>
-#include <qtreewidget.h>
-
-#include "libinclude.h"
 
 #include "Model\Project\Generator\ClassGeneratorFactory.h"
-#include <QMessageBox>
 
 namespace Maditor {
-	namespace Model {
-		class Project;
-		class Module;
-		class Editor;
-	}
 
 	namespace View {
 		namespace Dialogs {

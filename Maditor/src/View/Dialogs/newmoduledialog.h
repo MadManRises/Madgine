@@ -1,8 +1,6 @@
 #ifndef MADITOR_VIEW_DIALOGS_NEWMODULEDIALOG_H
 #define MADITOR_VIEW_DIALOGS_NEWMODULEDIALOG_H
 
-#include <QDialog>
-#include "Model\Project\Project.h"
 
 namespace Maditor {
 namespace View {

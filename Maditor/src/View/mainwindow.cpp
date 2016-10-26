@@ -1,38 +1,23 @@
-
+#include "maditorinclude.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "Scene\scenecomponent.h"
-
-#include "UI\UIManager.h"
-
-#include "Util\Profiler.h"
-
-#include "Scene\scenemanager.h"
-
-#include "Scene\Entity\entity.h"
-
-#include "qevent.h"
-
-#include "OgreWidgets/OgreWindow.h"
 
 #include "Model/Editor.h"
 
-#include "Model/Engine\ApplicationWrapper.h"
+#include "OgreWidgets\OgreWindow.h"
 
-#include "Model/Engine\Watcher/ApplicationWatcher.h"
+#include "Model\Engine\ApplicationWrapper.h"
 
-#include "Model\Editors\ScriptEditorModel.h"
-
-#include "Model\Editors\VSLink.h"
-
-#include <qsettings.h>
-
+#include "Model\Engine\Watcher\ApplicationWatcher.h"
 #include "Model\Engine\Watcher\ResourceWatcher.h"
 #include "Model\Engine\Watcher\PerformanceWatcher.h"
 #include "Model\Engine\Watcher\OgreSceneWatcher.h"
 
+#include "Model\Editors\ScriptEditorModel.h"
+#include "Model\Editors\VSLink.h"
+#include "Model\Editors\ScriptEditor.h"
 
 
 namespace Maditor {
@@ -78,102 +63,6 @@ namespace Maditor {
 			delete ui;
 		}
 
-
-		void MainWindow::setupScene()
-		{
-			ui->sceneHierarchy->setHeaderLabels({ "Node", "Position" });
-
-			mSceneRoot = new QTreeWidgetItem({ "root" });
-			ui->sceneHierarchy->addTopLevelItem(mSceneRoot);
-
-			Ogre::SceneNode *root = Engine::Scene::SceneManager::getSingleton().getSceneManager()->getRootSceneNode();
-
-			mEntitiesNode = new QTreeWidgetItem(mSceneRoot, { "Entities" });
-
-			mTerrain = new QTreeWidgetItem(mSceneRoot, { "Terrain" });
-			Ogre::SceneNode *terrain = static_cast<Ogre::SceneNode*>(root->getChild("Terrain"));
-			assert(terrain);
-			buildSceneHierarchy(terrain, mTerrain);
-
-
-		}
-
-		void MainWindow::refresh()
-		{
-
-			Engine::Util::Profiler &profiler = Engine::Util::Profiler::getSingleton();
-			fillData(profiler, mMainLoop, "Frame", profiler.getStats("Frame")->averageDuration());
-
-			for (const std::pair<QTreeWidgetItem* const, Engine::Scene::BaseSceneComponent *> &comp : mComponents) {
-				comp.first->setCheckState(0, (comp.second->isEnabled() ? Qt::Checked : Qt::Unchecked));
-			}
-
-			for (const std::pair<QTreeWidgetItem* const, Engine::Scene::Entity::Entity*> &ent : mEntities) {
-				ent.first->setData(1, Qt::DisplayRole, QVariant(QString::fromStdString(Ogre::StringConverter::toString(ent.second->getPosition()))));
-			}
-		}
-
-		void MainWindow::addEntity(Engine::Scene::Entity::Entity * e)
-		{
-			QTreeWidgetItem *item = new QTreeWidgetItem(mEntitiesNode, { e->getName().c_str() });
-			buildSceneHierarchy(e->getNode(), item);
-
-			mEntities[item] = e;
-		}
-
-		void MainWindow::fillData(Engine::Util::Profiler &profiler, QTreeWidgetItem * item, const std::string & name, long long frameDuration, const std::string & parentName)
-		{
-			/*long long duration = profiler.averageDuration(name);
-
-			item->setData(1, Qt::DisplayRole, QVariant(duration));
-			if (!parentName.empty())
-				item->setData(2, Qt::DisplayRole, QVariant(((10000 * duration) / profiler.averageDuration(parentName)) / 100.0f));
-			item->setData(3, Qt::DisplayRole, QVariant(((10000 * duration) / frameDuration) / 100.0f));
-
-			int index = 0;
-			for (const std::string &child : Engine::Util::Profiler::getSingleton().children(name)) {
-
-				if (item->childCount() > index && item->child(index)->text(0) == QString::fromStdString(child)) {
-					fillData(profiler, item->child(index), child, frameDuration, name);
-					++index;
-				}
-				else
-				{
-					QTreeWidgetItem *item2 = new QTreeWidgetItem(item, { QString::fromStdString(child) });
-					fillData(profiler, item2, child, frameDuration, name);
-
-					if (name == "SceneComponents") {
-						const auto &components = Engine::Scene::SceneManager::getSingleton().getComponents();
-						auto it = std::find_if(components.begin(), components.end(), [&](Engine::Scene::BaseSceneComponent *comp) {return child == comp->componentName(); });
-						mComponents[item2] = *it;
-						item2->setCheckState(0, ((*it)->isEnabled() ? Qt::Checked : Qt::Unchecked));
-					}
-				}
-			}*/
-		}
-
-		void MainWindow::handleChanges(QTreeWidgetItem *item, int column)
-		{
-			if (column == 0) {
-				if (item->parent()->text(0) == "SceneComponents") {
-					auto it = mComponents.find(item);
-					it->second->setEnabled(item->checkState(0) == Qt::Checked);
-				}
-			}
-		}
-
-		void MainWindow::buildSceneHierarchy(Ogre::SceneNode * node, QTreeWidgetItem * item)
-		{
-			for (const std::pair<Ogre::String, Ogre::Node*> &p : node->getChildIterator()) {
-				Ogre::SceneNode *child = dynamic_cast<Ogre::SceneNode*>(p.second);
-				assert(child);
-				buildSceneHierarchy(child, new QTreeWidgetItem(item, { p.first.c_str() }));
-			}
-			for (const std::pair<Ogre::String, Ogre::MovableObject*> &p : node->getAttachedObjectIterator()) {
-				new QTreeWidgetItem(item, { (p.first + "(Object)").c_str() });
-				Engine::Scene::Entity::Entity *e = Engine::Scene::Entity::Entity::entityFromMovable(p.second);
-			}
-		}
 
 		void MainWindow::closeEvent(QCloseEvent *event)
 		{

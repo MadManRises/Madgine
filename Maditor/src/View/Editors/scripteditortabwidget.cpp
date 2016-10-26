@@ -1,12 +1,9 @@
+#include "maditorinclude.h"
 
 #include "scripteditortabwidget.h"
-#include <Qsci\qsciscintilla.h>
 
 #include "Model\Editors\ScriptEditorModel.h"
 #include "Model\Editors\ScriptEditor.h"
-
-#include <qfontdatabase.h>
-#include <qshortcut.h>
 
 namespace Maditor {
 	namespace View {

@@ -30,37 +30,27 @@ public:
 	~Application();
 
 	/**
-	 * Loads all plugins listed in <code>pluginsFile</code>, creates a RenderWindow with the given name and all Madgine-Components.
-	 *
-	 * @param pluginsFile path to the file listing the plugins to be loaded
-	 * @param windowName title of the Window, that will be created
-	 */
-	void setup(const std::string &pluginsFile, const std::string &windowName);
-	/**
-	 * Loads all plugins listed in <code>pluginsFile</code>, creates a RenderWindow with the given Parameters and all Madgine-Components. 
+	 * Loads all plugins listed in <code>settings.mPluginsFile</code>.
+	 * If no name is given "plugins.cfg" is used by default.
+	 * Creates a RenderWindow with the given name and all Madgine-Components.
 	 * If an InputHandler is passed, it will be used instead of the default one.
-	 * Use this method, if you want to embed the Window in an already existing GUI.
+	 * The root-directory for the Application-Resources will be set according to the <code>settings.mRootDir</code>
 	 *
-	 * @param pluginsFile path to the file listing the plugins to be loaded
-	 * @param windowName title of the Window, that will be created
-	 * @param width width of the Window, that will be created
-	 * @param height height of the Window, that will be created
-	 * @param parameters additional Paramters of the Window, that will be created (see Ogre::Root::createRenderWindow)
-	 * @param input (optional) alternate InputHandler to use
+	 * @param settings all necessary information to setup the Application
 	 */
-	void setupExternal(const std::string &pluginsFile, const std::string &windowName, int width, int height, const Ogre::NameValuePairList &parameters, Input::InputHandler *input = nullptr);
+	void setup(const AppSettings &settings);
+
 	/**
-	 * May only be called after a call to setup() or setupExternal().
-	 * Initializes all Madgine-Components. The root-directory for the Application-Resources will be set according to the <code>settings</code>.
-	 *
-	 * @param settings the settings for the Application
+	 * May only be called after a call to setup().
+	 * Initializes all Madgine-Components.
 	 */
-	void init(const AppSettings &settings);
+	void init();
 	
 	/**
 	 * Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop. 
 	 * If "init" is not found, <code>-1</code> is returned.
 	 * Otherwise the Renderloop will be started. 
+	 * After the Renderloop finished, all game components will be cleared.
 	 * Note: this method will <b>not</b> return, until the Application is shutdown.
 	 *
 	 * @return <code>0</code>, if the Application is started and shutdown properly; <code>-1</code> otherwise
@@ -116,9 +106,9 @@ protected:
 	virtual bool frameEnded(const Ogre::FrameEvent & fe) override;
 
 private:
-	void _cleanup();
-	void _setupOgre(const std::string &pluginsFile);
-	void _setup(Input::InputHandler *input = nullptr);
+	void _clear();
+	void _setupOgre();
+	void _setup();
 
 private:
 

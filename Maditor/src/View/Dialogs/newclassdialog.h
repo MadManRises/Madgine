@@ -1,8 +1,6 @@
 #ifndef MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 #define MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 
-#include <QDialog>
-#include "Model/Project\Module.h"
 #include "Model/Project\Generator/ClassGeneratorFactory.h"
 
 namespace Maditor {

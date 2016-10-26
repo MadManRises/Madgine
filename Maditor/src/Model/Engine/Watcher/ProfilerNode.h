@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Model\TreeItem.h"
-#include "forward.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
-
-			class PerformanceWatcher;
-			class StatsProfilerNode;
 
 			class ProfilerNode : public TreeItem {
 

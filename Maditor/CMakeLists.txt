@@ -15,11 +15,14 @@ add_definitions(-DCMAKE_PATH="${CMAKE_COMMAND}")
 add_definitions(-DCMAKE_GENERATOR="${CMAKE_GENERATOR}")
 add_definitions(-DQSCINTILLA_DLL)
 
+set (CMAKE_AUTOMOC_MOC_OPTIONS "-bmaditorinclude.h")
+
 set (CMAKE_AUTOUIC ON)
 set (CMAKE_AUTORCC ON)
 
 set (sources "")
-FolderSources(sources "" src main.cpp)
+FolderSources(sources "" "" maditorinclude.cpp)
+FolderSources(sources "" src maditorinclude.h main.cpp)
 FolderSources(sources src Model editor.cpp editor.h editorforward.h log.h LogsModel.cpp LogsModel.h TreeItem.cpp TreeItem.h TreeModel.cpp TreeModel.h)
 FolderSources(sources Model Editors ScriptAPI.cpp ScriptAPI.h ScriptEditor.cpp ScriptEditor.h ScriptEditorModel.cpp ScriptEditorModel.h VSLink.cpp VSLink.h)
 FolderSources(sources Model Engine ApplicationWrapper.cpp ApplicationWrapper.h InputWrapper.cpp InputWrapper.h ModuleLoader.cpp ModuleLoader.h )
@@ -48,7 +51,7 @@ endif (OGRE_FOUND)
 
 add_executable(Maditor ${sources})
 
-
+add_precompiled_header(Maditor src/maditorinclude.h FORCEINCLUDE SOURCE_CXX maditorinclude.cpp)
 
 target_link_libraries(Maditor Madgine)
 

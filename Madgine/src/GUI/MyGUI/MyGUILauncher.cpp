@@ -21,18 +21,13 @@ namespace Engine {
 			{
 				mCamera = sceneMgr->createCamera("ContentCamera");
 				mViewport = window->addViewport(mCamera);
-				
 
 				mPlatform = std::make_unique<MyGUI::OgrePlatform>();
 				mPlatform->initialise(window, sceneMgr);
-
-
-
 			}
 
 			MyGUILauncher::~MyGUILauncher()
 			{
-				printHierarchy();
 				mRootWindow->finalize();
 				delete mRootWindow;
 				if (mGUI) {

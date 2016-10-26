@@ -1,17 +1,8 @@
 #pragma once
 
-#include <qtabwidget.h>
-#include <Qsci\qscidocument.h>
-
 
 namespace Maditor {
 
-	namespace Model {
-		namespace Editors {
-			class ScriptEditorModel;
-			class ScriptEditor;
-		}
-	}
 
 	namespace View {
 		namespace Editors {

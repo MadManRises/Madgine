@@ -1,7 +1,7 @@
+#include "maditorinclude.h"
+
 #include "CmakeGenerator.h"
 #include "CmakeSubProject.h"
-
-#include <qdebug.h>
 
 namespace Maditor {
 	namespace Model {

@@ -1,8 +1,7 @@
+#include "maditorinclude.h"
+
 #include "Editor.h"
-#include <qdebug.h>
-#include <qdiriterator.h>
 #include "Logsmodel.h"
-#include "Engine/Watcher/ResourceWatcher.h"
 #include "Engine/Watcher/ApplicationWatcher.h"
 #include "Engine/ApplicationWrapper.h"
 #include "Editors\VSLink.h"
@@ -10,6 +9,9 @@
 #include "Editors\ScriptEditorModel.h"
 #include "Project\Generator\CommandLine.h"
 #include "Project\ProjectLog.h"
+#include "Engine\ModuleLoader.h"
+#include "Engine\Watcher\ResourceWatcher.h"
+#include "Engine/Watcher/LogWatcher.h"
 
 namespace Maditor {
 	namespace Model {

@@ -1,24 +1,11 @@
 #pragma once
 
-#include <qevent.h>
-#include <memory>
-#include <OgreFrameListener.h>
-#include <OgreRenderTarget.h>
-#include <forward.h>
-#include "LogWatcher.h"
 
 
 namespace Maditor {
-
 	namespace Model {
-
-		class ModuleLoader;
-
 		namespace Watcher {
 
-			class ResourceWatcher;
-			class PerformanceWatcher;
-			class OgreSceneWatcher;
 
 			class ApplicationWatcher : public QObject, public Ogre::FrameListener{
 				Q_OBJECT

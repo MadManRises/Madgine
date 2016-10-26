@@ -2,8 +2,6 @@
 
 #include "Model\TreeModel.h"
 
-#include <qtimer.h>
-
 #include "ProfilerNode.h"
 
 namespace Maditor {

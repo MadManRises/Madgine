@@ -1,21 +1,10 @@
 #pragma once
 
-#include <thread>
-#include <mutex>
-#include <queue>
-#include "ModuleLoader.h"
-
-#include "forward.h"
-
-class QWindow;
+#include "InputWrapper.h"
 
 namespace Maditor {
 	namespace Model {
 
-		namespace Watcher {
-			class InputWrapper;
-			class ApplicationWatcher;
-		}
 
 		class ApplicationWrapper {
 		public:
@@ -45,7 +34,7 @@ namespace Maditor {
 			bool mWork;
 			std::thread mWorker;
 
-			Watcher::InputWrapper *mInput;
+			Watcher::InputWrapper mInput;
 
 			Watcher::ApplicationWatcher *mWatcher;
 		};

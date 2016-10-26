@@ -1,11 +1,6 @@
-#include "Project.h"
+#include "maditorinclude.h"
 
-#include <qfile.h>
-#include <qapplication.h>
-#include <qdir>
-#include <qdiriterator>
-#include <qmenu>
-#include <qdebug>
+#include "Project.h"
 
 #include "View\Dialogs\DialogManager.h"
 

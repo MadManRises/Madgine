@@ -1,9 +1,6 @@
+#include "maditorinclude.h"
+
 #include "OgreSceneWatcher.h"
-#include <qdebug.h>
-
-#include "libinclude.h"
-
-#include "OgreNodeItem.h"
 
 namespace Maditor {
 	namespace Model {

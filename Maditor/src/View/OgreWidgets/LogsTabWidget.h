@@ -1,15 +1,7 @@
 #pragma once
 
-#include <qtabwidget.h>
-#include <memory>
-#include <qmap.h>
 
 namespace Maditor {
-	namespace Model {
-		class LogsModel;
-		class Log;
-	}
-
 	namespace View {
 
 		class LogsTabWidget : public QTabWidget

@@ -1,7 +1,6 @@
+#include "maditorinclude.h"
 
 #include "Generator.h"
-#include <qfile.h>
-#include <QMessageBox>
 #include "View\Dialogs\DialogManager.h"
 
 namespace Maditor {

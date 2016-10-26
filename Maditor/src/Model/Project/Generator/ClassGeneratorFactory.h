@@ -1,14 +1,10 @@
 #pragma once
 
-#include <qobject.h>
-#include <qdom.h>
+
 
 namespace Maditor {
 	namespace Model {
-		class Module;
-
 		namespace Generator {
-			class ClassGenerator;
 
 			class ClassGeneratorFactory : public QObject {
 				Q_OBJECT

@@ -20,7 +20,7 @@ set(MADGINE_VERSION
   ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
 
 
-
+set(sources "")
 FolderSources(sources "" "" libinclude.cpp)
 FolderSources(sources "" src forward.h libinclude.h Ogrememory.h singletonimpl.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources src App Application.cpp Application.h appsettings.h configset.cpp configset.h contextmasks.h)

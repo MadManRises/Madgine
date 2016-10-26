@@ -2,13 +2,6 @@
 
 #include "Project\Project.h"
 
-#include "editorForward.h"
-
-#include <qsettings.h>
-#include "LogsModel.h"
-
-class QString;
-
 namespace Maditor {
 	namespace Model {
 		class Editor : public QObject {

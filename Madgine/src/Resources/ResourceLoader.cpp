@@ -7,25 +7,10 @@
 namespace Engine {
 	namespace Resources {
 
-		ResourceLoader::ResourceLoader() :
-			mRgm(&Ogre::ResourceGroupManager::getSingleton())
-
+		ResourceLoader::ResourceLoader(const std::string &mediaPath) :
+			mRgm(&Ogre::ResourceGroupManager::getSingleton()),
+			mMediaPath(mediaPath)
 		{
-			mParser = OGRE_MAKE_UNIQUE(Scripting::Parsing::ScriptParser)(); // Initialise the Script Parser
-
-			mImageSetManager = OGRE_MAKE_UNIQUE(Resources::ImageSets::ImageSetManager)();
-		}
-
-		ResourceLoader::~ResourceLoader()
-		{
-
-			mRgm->shutdownAll();
-		}
-
-		void ResourceLoader::setup(const std::string &mediaPath)
-		{
-			mMediaPath = mediaPath;
-
 			// Load resource paths from config file
 			Ogre::ConfigFile cf;
 			cf.load(mediaPath + "resources.cfg");
@@ -45,7 +30,17 @@ namespace Engine {
 				}
 			}
 
+			mParser = OGRE_MAKE_UNIQUE(Scripting::Parsing::ScriptParser)(); // Initialise the Script Parser
+
+			mImageSetManager = OGRE_MAKE_UNIQUE(Resources::ImageSets::ImageSetManager)();
 		}
+
+		ResourceLoader::~ResourceLoader()
+		{
+
+			mRgm->shutdownAll();
+		}
+
 
 		void ResourceLoader::load()
 		{

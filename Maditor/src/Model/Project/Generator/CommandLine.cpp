@@ -1,8 +1,6 @@
+#include "maditorinclude.h"
 
 #include "CommandLine.h"
-#include <qdebug.h>
-#include "OgreLogManager.h"
-
 #include "Model/Project/ProjectLog.h"
 
 namespace Maditor {

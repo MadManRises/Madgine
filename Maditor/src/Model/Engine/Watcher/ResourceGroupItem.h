@@ -1,16 +1,11 @@
 #pragma once
 
 #include "Model\TreeItem.h"
-#include <unordered_map>
 
-namespace Ogre {
-	class ResourceManager;
-}
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
-			class ResourceItem;
 
 			class ResourceGroupItem : public TreeItem {
 			public:

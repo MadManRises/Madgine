@@ -6,8 +6,6 @@ namespace Maditor {
 	namespace Model {
 		namespace Generator {
 
-			class CmakeSubProject;
-
 			class CmakeGenerator : public Generator {
 			public:
 				CmakeGenerator(const QString &name, const QString &targetName = "");

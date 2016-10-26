@@ -1,8 +1,5 @@
 #pragma once
 
-#include <qtreeview.h>
-
-#include "Model\editorforward.h"
 
 namespace Maditor {
 	namespace View {

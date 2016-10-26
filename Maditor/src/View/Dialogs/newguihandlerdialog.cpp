@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "newguihandlerdialog.h"
 #include "ui_newguihandlerdialog.h"
 

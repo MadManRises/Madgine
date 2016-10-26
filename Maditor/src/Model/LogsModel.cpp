@@ -1,5 +1,7 @@
+#include "maditorinclude.h"
+
 #include "Log.h"
-#include <qapplication.h>
+
 #include "LogsModel.h"
 
 namespace Maditor {

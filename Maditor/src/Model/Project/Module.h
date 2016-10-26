@@ -1,18 +1,12 @@
 
 #pragma once
 
-#include <qdom.h>
 #include "Generator\CmakeSubProject.h"
-#include <qicon.h>
 #include "Generator\ClassGenerator.h"
-#include <memory>
 #include "ProjectElement.h"
-#include <set>
 
 namespace Maditor {
 	namespace Model {
-		class Project;
-		class TreeItem;
 
 		class Module : public QObject, public ProjectElement {
 			Q_OBJECT

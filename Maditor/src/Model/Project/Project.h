@@ -1,12 +1,8 @@
 #pragma once
 
 #include "Generator\CmakeProject.h"
-#include <qdom.h>
 #include "Module.h"
 #include "ProjectElement.h"
-#include <qMessageBox>
-
-#include <qtreeview.h>
 
 #include "Model\TreeModel.h"
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <qobject.h>
-
-#include <Windows.h>
-
 namespace Maditor {
 	namespace Model {
 		namespace Editors {

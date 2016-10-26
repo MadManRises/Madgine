@@ -1,20 +1,13 @@
+#include "maditorinclude.h"
+
 #include "ApplicationWrapper.h"
 
 #include "Model\Editor.h"
 
-#include <libinclude.h>
-#include <App\Application.h>
-#include <App\appsettings.h>
-#include <qapplication.h>
-#include <qDebug>
-#include <chrono>
-#include <qwindow>
-
-#include "InputWrapper.h"
 
 #include "Watcher\ApplicationWatcher.h"
 
-#include "GUI\GUISystem.h"
+#include "ModuleLoader.h"
 
 namespace Maditor {
 	namespace Model {
@@ -24,8 +17,7 @@ namespace Maditor {
 			mApplication(0),
 			mSettings(0),
 			mWatcher(watcher),
-			mLoader(loader),
-			mInput(0)
+			mLoader(loader)
 		{
 			std::stringstream ss;
 			ss << mWorker.get_id();
@@ -39,9 +31,14 @@ namespace Maditor {
 		void ApplicationWrapper::load(Project *project, QWindow *target)
 		{
 			mSettings = new Engine::App::AppSettings;
+			mSettings->mInput = &mInput;
+			mSettings->mUseExternalSettings = true;
 			mSettings->mWindowName = "QtOgre";
+			mSettings->mWindowWidth = target->width();
+			mSettings->mWindowHeight = target->height();
 			mSettings->mRootDir = (project->root() + "Data/").toStdString();
-			Ogre::NameValuePairList parameters;
+			mSettings->mPluginsFile = mSettings->mRootDir + "plugins.cfg";
+			Ogre::NameValuePairList &parameters = mSettings->mWindowParameters;
 
 			/*
 			Flag within the parameters set so that Ogre3D initializes an OpenGL context on it's own.
@@ -70,12 +67,12 @@ namespace Maditor {
 
 			doTask([=] () {
 				mApplication = new Engine::App::Application;
-				mInput = new Watcher::InputWrapper;
-				mApplication->setupExternal(mSettings->mRootDir + "plugins.cfg", "QtOgre", target->width(), target->height(), parameters, mInput);
-				mInput->setSystem(&Engine::GUI::GUISystem::getSingleton());
+				
+				mApplication->setup(*mSettings);
+				mInput.setSystem(&Engine::GUI::GUISystem::getSingleton());
 				mWatcher->notifyApplicationCreated(project->root());
 				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project);
-				mApplication->init(*mSettings);				
+				mApplication->init();				
 				mWatcher->notifyApplicationInitialized();
 			});
 		}
@@ -94,7 +91,7 @@ namespace Maditor {
 		{
 			if (mApplication) {
 				doTask([&]() {
-					mInput = 0;
+					mInput.clearSystem();
 					mWatcher->notifyApplicationShutdown();
 					delete mApplication;
 					mApplication = 0;
@@ -114,7 +111,7 @@ namespace Maditor {
 
 		Watcher::InputWrapper * ApplicationWrapper::input()
 		{
-			return mInput;
+			return &mInput;
 		}
 
 		void ApplicationWrapper::workerLoop()

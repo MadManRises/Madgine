@@ -1,8 +1,6 @@
 #pragma once
 
-#include "OgreLog.h"
 #include "LogTableModel.h"
-#include <memory>
 #include "Model\log.h"
 
 

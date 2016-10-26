@@ -1,9 +1,7 @@
+#include "maditorinclude.h"
+
 #include "Module.h"
 #include "Project.h"
-#include <QDir>
-#include <QDebug>
-#include "Model\TreeItem.h"
-#include <qapplication.h>
 #include "Generator\HeaderGuardGenerator.h"
 #include "Generator\ClassGeneratorFactory.h"
 

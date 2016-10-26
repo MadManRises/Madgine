@@ -1,9 +1,5 @@
 #pragma once
 
-#include <qobject.h>
-
-#include "forward.h"
-
 
 namespace Maditor {
 	namespace Model {

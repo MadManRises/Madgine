@@ -1,10 +1,9 @@
+#include "maditorinclude.h"
+
 #include "ClassGenerator.h"
 #include "Model\Project\Module.h"
-#include "Model\TreeItem.h"
-#include <QDebug>
 #include "HeaderGuardGenerator.h"
 #include "Model\Project\Project.h"
-#include <qapplication.h>
 
 namespace Maditor {
 	namespace Model {

@@ -1,6 +1,4 @@
-
-
-#include <QStringList>
+#include "maditorinclude.h"
 
 #include "treeitem.h"
 

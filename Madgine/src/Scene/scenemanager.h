@@ -85,6 +85,8 @@ public:
 
 	std::set<BaseSceneComponent*> getComponents();
 
+	void clear();
+
 protected:
     virtual void save(Scripting::Serialize::SerializeOutStream &out) const override;
     virtual void load(Scripting::Serialize::SerializeInStream &in) override;
@@ -97,11 +99,7 @@ protected:
 
 
 	void removeQueuedEntities();
-
-
-	void clear();
-    
-	
+		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
 

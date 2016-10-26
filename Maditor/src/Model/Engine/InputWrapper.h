@@ -1,12 +1,5 @@
 #pragma once
 
-#include <libinclude.h>
-#include <GUI\GUIEvents.h>
-#include <mutex>
-#include <queue>
-#include <qevent.h>
-
-#include "Input\InputHandler.h"
 
 namespace Maditor {
 	namespace Model {
@@ -18,6 +11,7 @@ namespace Maditor {
 				InputWrapper();
 
 				void setSystem(Engine::GUI::GUISystem *system);
+				void clearSystem();
 				virtual void update() override;
 
 

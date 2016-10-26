@@ -20,6 +20,8 @@
 
 #include "Util\Profiler.h"
 
+#include "sceneexception.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -27,7 +29,7 @@ const float SceneManager::sceneRasterSize = .2f;
 
 
 
-SceneManager::SceneManager(Ogre::Root *root):
+SceneManager::SceneManager(Ogre::Root *root) :
     mRoot(root),
     mSceneMgr(0),
     mTerrainGlobals(0),
@@ -107,6 +109,8 @@ void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
 	if (in.process())
 		in.process()->step();
 
+	mIsSceneLoaded = true;
+
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8, 0.8, 0.8));
 
     for (SceneListener *listener : mSceneListeners){
@@ -118,7 +122,7 @@ void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
 	if (in.process())
 		in.process()->endSubProcess();
 
-    mIsSceneLoaded = true;
+    
 }
 
 //---------------------------------------------------------------------------
@@ -272,6 +276,9 @@ std::list<Entity::Entity *> SceneManager::entities() const
 
 Math::Bounds SceneManager::getSceneBounds()
 {
+	if (!mIsSceneLoaded) {
+		MADGINE_THROW(SceneException("No Scene Loaded!"));
+	}
     mTerrain->_update(true, false);
     Ogre::AxisAlignedBox box = mTerrain->_getWorldAABB();
     return {box.getMinimum(), box.getMaximum()};
@@ -614,9 +621,9 @@ void SceneManager::clear()
     mTerrainEntities.clear();
 	mInfoObjects.clear();
 
-	MADGINE_ABORT;
-
     mSceneMgr->clearScene();
+
+	mIsSceneLoaded = false;
 
 }
 

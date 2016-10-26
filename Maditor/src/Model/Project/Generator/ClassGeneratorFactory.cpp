@@ -1,8 +1,6 @@
+#include "maditorinclude.h"
+
 #include "ClassGeneratorFactory.h"
-
-#include <qdebug.h>
-
-#include "Model\Project\Module.h"
 
 #include "GuiHandlerGenerator.h"
 #include "GameHandlerGenerator.h"
@@ -10,6 +8,8 @@
 #include "SceneComponentGenerator.h"
 #include "OtherClassGenerator.h"
 #include "EntityComponentGenerator.h"
+
+#include "Model\Project\Module.h"
 
 namespace Maditor {
 	namespace Model {

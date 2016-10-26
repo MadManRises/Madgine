@@ -1,20 +1,11 @@
 #pragma once
 
-#include <qwidget.h>
-#include <qtimer.h>
-#include <OgreRenderTarget.h>
 
 namespace Ui {
 	class RenderStatsWidget;
 }
 
 namespace Maditor {
-
-	namespace Model {
-		namespace Watcher {
-			class ApplicationWatcher;
-		}
-	}
 
 	namespace View {
 

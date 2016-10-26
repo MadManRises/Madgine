@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "ProjectElement.h"
 
 

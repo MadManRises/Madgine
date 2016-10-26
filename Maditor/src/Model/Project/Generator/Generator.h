@@ -1,8 +1,5 @@
 #pragma once
 
-#include <qstring.h>
-#include <qtextstream.h>
-
 namespace Maditor {
 	namespace Model {
 		namespace Generator {

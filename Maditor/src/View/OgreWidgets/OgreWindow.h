@@ -1,15 +1,7 @@
 #pragma once
 
-#include <qwindow.h>
 
 namespace Maditor {
-	namespace Model {
-		namespace Watcher {
-			class InputWrapper;
-			class ApplicationWatcher;
-		}
-		class ApplicationWrapper;
-	}
 	namespace View {
 		class OgreWindow : public QWindow
 		{

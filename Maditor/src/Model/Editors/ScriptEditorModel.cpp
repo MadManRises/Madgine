@@ -1,8 +1,4 @@
-
-#include <libinclude.h>
-
-#include <qdebug.h>
-#include <qfileinfo.h>
+#include "maditorinclude.h"
 
 #include "ScriptEditorModel.h"
 

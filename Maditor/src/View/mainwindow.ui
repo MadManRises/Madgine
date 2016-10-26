@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Maditor::View::MainWindow</class>
+ <widget class="QMainWindow" name="Maditor::View::MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -434,7 +434,7 @@
   <connection>
    <sender>actionStart</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>Maditor::View::MainWindow</receiver>
    <slot>startApp()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -450,7 +450,7 @@
   <connection>
    <sender>actionStop</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>Maditor::View::MainWindow</receiver>
    <slot>stopApp()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -466,7 +466,7 @@
   <connection>
    <sender>actionPause</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>Maditor::View::MainWindow</receiver>
    <slot>pauseApp()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -482,7 +482,7 @@
   <connection>
    <sender>actionSettings</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>Maditor::View::MainWindow</receiver>
    <slot>openSettings()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -498,7 +498,7 @@
   <connection>
    <sender>actionInit</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>Maditor::View::MainWindow</receiver>
    <slot>initApp()</slot>
    <hints>
     <hint type="sourcelabel">

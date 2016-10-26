@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "ProjectView.h"
 
 #include "Model\Project\Project.h"

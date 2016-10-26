@@ -1,15 +1,8 @@
 #ifndef MODULEPROPERTIESDIALOG_H
 #define MODULEPROPERTIESDIALOG_H
 
-#include <QDialog>
-
-
 
 namespace Maditor {
-	namespace Model {
-		class Module;
-	}
-
 	namespace View {
 		namespace Dialogs {
 

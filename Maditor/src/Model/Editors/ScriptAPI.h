@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Qsci\qsciabstractapis.h>
-
 namespace Maditor {
 	namespace Model {
 		namespace Editors {

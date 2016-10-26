@@ -29,13 +29,13 @@ namespace Engine {
 		void WindowContainer::setSize(const WindowSizeRelVector & size)
 		{
 			mSize = size;
-			mGui->updateWindowSizes();
+			mGui->setDirtyWindowSizes();
 		}
 
 		void WindowContainer::setPos(const WindowSizeRelVector & pos)
 		{
 			mPos = pos;
-			mGui->updateWindowSizes();
+			mGui->setDirtyWindowSizes();
 		}
 
 		void WindowContainer::updateSize(const Ogre::Vector2 &size)

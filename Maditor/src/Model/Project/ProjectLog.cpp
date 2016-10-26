@@ -1,4 +1,5 @@
-#include "ProjectLog.h"
+#include "maditorinclude.h"
+
 #include "ProjectLog.h"
 
 

@@ -1,9 +1,6 @@
+#include "maditorinclude.h"
+
 #include "InputWrapper.h"
-
-#include <GUI\GUISystem.h>
-
-#include <qdebug.h>
-
 
 namespace Maditor {
 	namespace Model {
@@ -18,6 +15,11 @@ namespace Maditor {
 			void InputWrapper::setSystem(Engine::GUI::GUISystem * system)
 			{
 				mSystem = system;
+			}
+
+			void InputWrapper::clearSystem()
+			{
+				mSystem = 0;
 			}
 
 			void InputWrapper::update()

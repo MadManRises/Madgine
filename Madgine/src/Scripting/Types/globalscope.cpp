@@ -87,8 +87,11 @@ std::string GlobalScope::getIdentifier()
 
 void GlobalScope::clear()
 {
-    Scope::clear();
-    mLevel.clear();
+	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &p : *mGlobalAPIs) {
+		p->clear();
+	}
+	mLevel.clear();
+    Scope::clear();    
 }
 
 

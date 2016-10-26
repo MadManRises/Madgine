@@ -1,8 +1,5 @@
 #pragma once
 
-#include <memory>
-
-#include "Log.h"
 
 namespace Maditor {
 	namespace Model {

@@ -1,4 +1,4 @@
-
+#include "maditorinclude.h"
 
 #include "DialogManager.h"
 #include "Model\Project\Project.h"
@@ -14,7 +14,6 @@
 
 #include "settingsdialog.h"
 
-#include <qfiledialog.h>
 
 namespace Maditor {
 	namespace View {

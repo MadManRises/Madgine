@@ -1,7 +1,6 @@
-#include <libinclude.h>
+#include "maditorinclude.h"
 
 #include "ResourceItem.h"
-#include "ResourceGroupItem.h"
 
 namespace Maditor {
 	namespace Model {

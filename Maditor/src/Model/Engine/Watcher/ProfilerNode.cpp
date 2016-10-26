@@ -1,10 +1,6 @@
-#include "libinclude.h"
+#include "maditorinclude.h"
 
 #include "ProfilerNode.h"
-
-#include <qlocale.h>
-
-#include "Util\Profiler.h"
 
 #include "PerformanceWatcher.h"
 

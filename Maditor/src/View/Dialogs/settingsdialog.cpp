@@ -1,9 +1,9 @@
+#include "maditorinclude.h"
+
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
 #include "Model\Editor.h"
-
-#include <qpushbutton.h>
 
 
 namespace Maditor {

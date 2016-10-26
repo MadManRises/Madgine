@@ -1,14 +1,10 @@
-#include "LogWatcher.h"
-#include <qapplication.h>
+#include "maditorinclude.h"
+
 #include "ResourceWatcher.h"
 
+#include "ResourceGroupItem.h"
+#include "ResourceItem.h"
 
-#include "OgreResourceManager.h"
-
-#include <libinclude.h>
-#include "Scripting\Parsing\scriptparser.h"
-#include <qdebug.h>
-#include "Scripting\Parsing\textResource.h"
 
 namespace Maditor {
 	namespace Model {

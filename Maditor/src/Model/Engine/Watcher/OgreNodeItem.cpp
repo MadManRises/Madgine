@@ -1,8 +1,7 @@
-#include "OgreSceneWatcher.h"
-#include <qdebug.h>
+#include "maditorinclude.h"
 
-#include "libinclude.h"
-#include "Scene\scenemanager.h"
+#include "OgreSceneWatcher.h"
+
 #include "OgreNodeItem.h"
 
 

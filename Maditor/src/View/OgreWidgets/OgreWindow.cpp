@@ -1,8 +1,6 @@
+#include "maditorinclude.h"
 
 #include "OgreWindow.h"
-
-#include <qapplication.h>
-#include <qpainter.h>
 
 #include "Model\Engine\InputWrapper.h"
 

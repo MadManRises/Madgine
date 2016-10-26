@@ -1,12 +1,9 @@
 #pragma once
 
 #include "Generator.h"
-#include <functional>
 
 namespace Maditor {
 	namespace Model {
-		class Module;
-
 		namespace Generator {
 
 			class HeaderGuardGenerator : public Generator {

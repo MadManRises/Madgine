@@ -1,14 +1,8 @@
+#include "maditorinclude.h"
+
 #include "ApplicationWatcher.h"
-#include <OgreLogManager.h>
-#include <OgreRoot.h>
-#include <libinclude.h>
-#include <Scene/scenemanager.h>
-#include <UI\UIManager.h>
-#include <GUI/GUISystem.h>
-#include <View/OgreWidgets/OgreWindow.h>
-#include <OgreWindowEventUtilities.h>
+
 #include "Model\Engine\ModuleLoader.h"
-#include <qapplication.h>
 #include "OgreSceneWatcher.h"
 #include "LogWatcher.h"
 #include "ResourceWatcher.h"

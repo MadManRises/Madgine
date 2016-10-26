@@ -1,8 +1,6 @@
 #ifndef NEWGUIHANDLERDIALOG_H
 #define NEWGUIHANDLERDIALOG_H
 
-#include <QDialog>
-
 
 namespace Maditor {
 	namespace View {

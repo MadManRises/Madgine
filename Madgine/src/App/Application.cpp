@@ -43,37 +43,49 @@ Application::Application() :
 
 Application::~Application()
 {
-	_cleanup();
+	if (mInput && !mSettings->mInput)
+		delete mInput;
+	if (mProfiler)
+		delete mProfiler;
+	if (mUI)
+		delete mUI;
+	if (mGUI)
+		delete mGUI;
+	if (mSceneMgr) {
+		mSceneMgr->finalize();
+		delete mSceneMgr;
+	}
+	if (mGlobalScope)
+		delete mGlobalScope;
+	if (mLoader)
+		delete mLoader;
+	if (mConfig)
+		delete mConfig;
+	if (mRoot)
+		delete mRoot;
 }
 
-void Application::setup(const std::string &pluginsFile, const std::string &windowName)
+void Application::setup(const AppSettings &settings)
 {
-	_setupOgre(pluginsFile);
+	mSettings = &settings;
 
-	mWindow = mRoot->initialise(true, windowName); // Create Application-Window
+	_setupOgre();
+
+	if (mSettings->mUseExternalSettings) {
+		mRoot->initialise(false);
+
+		mWindow = mRoot->createRenderWindow(mSettings->mWindowName, mSettings->mWindowWidth, mSettings->mWindowHeight, false, &mSettings->mWindowParameters);
+	}
+	else {
+		mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
+	}
 
 	_setup();
 
 }
 
-void Application::setupExternal(const std::string &pluginsFile, const std::string &windowName, int width, int height, const Ogre::NameValuePairList &parameters, Input::InputHandler *input)
+void Application::init()
 {
-	_setupOgre(pluginsFile);
-
-	mRoot->initialise(false);
-
-	mWindow = mRoot->createRenderWindow(windowName, width, height, false, &parameters);
-
-	_setup(input);
-
-}
-
-void Application::init(const AppSettings & settings)
-{
-	mSettings = &settings;
-
-	mLoader->setup(settings.mRootDir);
-
 	mGUI->init();
 
 	mGlobalScope->callMethodCatch("openMainLoadingScreen");
@@ -101,6 +113,8 @@ int Application::go()
 
 	mRoot->startRendering();
 
+	_clear();
+
 	return 0;
 
 }
@@ -114,8 +128,8 @@ void Application::shutdown()
 int Application::run(const AppSettings &settings)
 {
 	Application app;
-	app.setup("plugins.cfg", settings.mWindowName);
-	app.init(settings);
+	app.setup(settings);
+	app.init();
 	return app.go();
 }
 
@@ -182,10 +196,16 @@ bool Application::frameEnded(const Ogre::FrameEvent & fe)
 	return true;
 }
 
-void Application::_setupOgre(const std::string &pluginsFile)
+void Application::_clear()
+{
+	mSceneMgr->clear();
+	mGlobalScope->clear();
+}
+
+void Application::_setupOgre()
 {
 
-	mRoot = OGRE_NEW Ogre::Root(pluginsFile); // Creating Root
+	mRoot = OGRE_NEW Ogre::Root(mSettings->mPluginsFile); // Creating Root
 
 	mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
 
@@ -193,9 +213,9 @@ void Application::_setupOgre(const std::string &pluginsFile)
 
 }
 
-void Application::_setup(Input::InputHandler *input)
+void Application::_setup()
 {
-	mLoader = OGRE_NEW Resources::ResourceLoader();
+	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
 
 	// Instantiate the GlobalScope class
 	mGlobalScope = OGRE_NEW Scripting::GlobalScope(mLoader->scriptParser());
@@ -212,35 +232,9 @@ void Application::_setup(Input::InputHandler *input)
 	// Create UIManager
 	mUI = OGRE_NEW UI::UIManager(mWindow, mSceneMgr, mGUI);
 
-	mInput = input ? input : new Input::OISInputHandler(mGUI, mWindow);
+	mInput = mSettings->mInput ? mSettings->mInput : new Input::OISInputHandler(mGUI, mWindow);
 
 	mProfiler = OGRE_NEW Util::Profiler();
-}
-
-
-
-void Application::_cleanup()
-{
-	if (mInput)
-		delete mInput;
-	if (mProfiler)
-		delete mProfiler;
-	if (mUI)
-		delete mUI;
-	if (mGUI)
-		delete mGUI;
-	if (mSceneMgr) {
-		mSceneMgr->finalize();
-		delete mSceneMgr;
-	}
-	if (mGlobalScope)
-		delete mGlobalScope;
-	if (mLoader)
-		delete mLoader;
-	if (mConfig)
-		delete mConfig;
-    if (mRoot)
-		delete mRoot;
 }
 
 

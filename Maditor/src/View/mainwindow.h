@@ -1,24 +1,15 @@
 #pragma once
 
-#include <QMainWindow>
-#include <qtreewidget.h>
-
-#include "libinclude.h"
 
 #include "Dialogs\DialogManager.h"
 
-namespace Ui {
-class MainWindow;
-}
 
 namespace Maditor {
-	namespace Model {
-		class Editor;
-	}
 	namespace View {
 
-		class OgreWindow;
-		class LogWatcher;
+		namespace Ui {
+			class MainWindow;
+		}
 
 		class MainWindow : public QMainWindow
 		{
@@ -36,11 +27,11 @@ namespace Maditor {
 			void addEntity(Engine::Scene::Entity::Entity *e);
 
 		private:
-			void fillData(Engine::Util::Profiler &profiler, QTreeWidgetItem *item, const std::string &name, long long frameDuration, const std::string &parentName = "");
+			//void fillData(Engine::Util::Profiler &profiler, QTreeWidgetItem *item, const std::string &name, long long frameDuration, const std::string &parentName = "");
 
-			void handleChanges(QTreeWidgetItem *item, int column);
+			//void handleChanges(QTreeWidgetItem *item, int column);
 
-			void buildSceneHierarchy(Ogre::SceneNode *node, QTreeWidgetItem *item);
+			//void buildSceneHierarchy(Ogre::SceneNode *node, QTreeWidgetItem *item);
 
 			virtual void closeEvent(QCloseEvent * event) override;
 
@@ -75,14 +66,6 @@ namespace Maditor {
 
 		private:
 			Ui::MainWindow *ui;
-
-			std::map<QTreeWidgetItem*, Engine::Scene::BaseSceneComponent*> mComponents;
-
-			QTreeWidgetItem *mMainLoop;
-
-			QTreeWidgetItem *mSceneRoot, *mEntitiesNode, *mTerrain;
-
-			std::map<QTreeWidgetItem*, Engine::Scene::Entity::Entity*> mEntities;
 
 			Model::Editor *mEditor;
 

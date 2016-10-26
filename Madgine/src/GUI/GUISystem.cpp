@@ -9,7 +9,8 @@ namespace Engine {
 	namespace GUI {
 
 		GUISystem::GUISystem() :
-			mRootWindow(0)
+			mRootWindow(0),
+			mWindowSizesDirty(false)
 		{
 		}
 
@@ -37,6 +38,10 @@ namespace Engine {
 
 		void GUISystem::injectTimePulse(float time)
 		{
+			if (mWindowSizesDirty) {
+				mWindowSizesDirty = false;
+				updateWindowSizes();
+			}
 		}
 
 		void GUISystem::notifyDisplaySizeChanged(const Ogre::Vector2 & size)
@@ -77,6 +82,11 @@ namespace Engine {
 		{
 			if (mRootWindow)
 				mRootWindow->updateSize(getScreenSize());
+		}
+
+		void GUISystem::setDirtyWindowSizes()
+		{
+			mWindowSizesDirty = true;
 		}
 
 		Window * GUISystem::getWindowByName(const std::string & name, Class _class)

@@ -1,16 +1,9 @@
-
 #pragma once
 
-#include <QList>
-#include <QVariant>
-#include <QMenu>
-#include <qstandarditem>
-#include <functional>
 
 namespace Maditor {
 	namespace Model {
 
-		class TreeItem;
 
 class TreeModel : public QAbstractItemModel
 {

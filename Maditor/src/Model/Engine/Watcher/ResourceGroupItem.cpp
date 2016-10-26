@@ -1,6 +1,7 @@
+#include "maditorinclude.h"
+
 #include "ResourceGroupItem.h"
 
-#include <OgreResourceManager.h>
 #include "ResourceItem.h"
 
 namespace Maditor {

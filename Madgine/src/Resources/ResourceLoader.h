@@ -9,10 +9,9 @@ namespace Engine {
 
 		class MADGINE_EXPORT ResourceLoader : public UI::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
 		public:
-			ResourceLoader();
+			ResourceLoader(const std::string &mediaPath);
 			~ResourceLoader();
 
-			void setup(const std::string &mediaPath);
 			void load();
 
 			std::string getMediaPath(const std::string &filename, const std::string &folder = "");

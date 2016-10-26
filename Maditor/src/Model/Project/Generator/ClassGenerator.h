@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Generator.h"
-#include <qdom.h>
-#include <qmenu>
 #include "Model\Project\ProjectElement.h"
 
 namespace Maditor {
 	namespace Model {
-		class Module;
-		class TreeItem;
 
 		namespace Generator {
 

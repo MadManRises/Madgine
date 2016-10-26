@@ -1,9 +1,6 @@
-#include "PerformanceWatcher.h"
-#include <qdebug.h>
-#include "ProfilerNode.h"
+#include "maditorinclude.h"
 
-#include "libinclude.h"
-#include "Util\Profiler.h"
+#include "PerformanceWatcher.h"
 
 namespace Maditor {
 	namespace Model {

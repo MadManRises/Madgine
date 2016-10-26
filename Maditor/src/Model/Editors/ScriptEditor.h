@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Qsci\qsciscintilla.h>
 
 namespace Maditor {
 	namespace Model {

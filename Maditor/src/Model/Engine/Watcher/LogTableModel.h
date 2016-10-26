@@ -1,12 +1,5 @@
 #pragma once
 
-#include <QAbstractTableModel>
-#include "OgreLog.h"
-#include <qicon.h>
-#include <qdir.h>
-
-#include <libinclude.h>
-#include "Util\UtilMethods.h"
 
 namespace Maditor {
 	namespace Model {

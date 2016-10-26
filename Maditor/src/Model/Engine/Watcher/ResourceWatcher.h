@@ -2,16 +2,12 @@
 
 
 #include "Model\TreeItem.h"
-#include "ResourceGroupItem.h"
-#include "ResourceItem.h"
 #include "Model\TreeModel.h"
 
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
-
-			class ResourceGroupItem;
 
 			class ResourceWatcher : public TreeModel, public TreeItem {
 				Q_OBJECT

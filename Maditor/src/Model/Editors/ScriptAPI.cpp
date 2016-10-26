@@ -1,7 +1,6 @@
+#include "maditorinclude.h"
 
 #include "ScriptAPI.h"
-#include <qdebug.h>
-
 
 namespace Maditor {
 	namespace Model {

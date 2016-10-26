@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "RenderStatsWidget.h"
 #include "Model\Engine\Watcher\ApplicationWatcher.h"
 

@@ -1,17 +1,9 @@
 #pragma once
 
-#include <qfilesystemwatcher.h>
-#include <Windows.h>
-#include <mutex>
-#include <qset.h>
-#include "forward.h"
 
 
 namespace Maditor {
 	namespace Model {
-
-		class Module;
-		class Project;
 
 		class ModuleLoader : public QObject {
 			Q_OBJECT

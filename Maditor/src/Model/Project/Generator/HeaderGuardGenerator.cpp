@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "Model\Project\Module.h"
 #include "HeaderGuardGenerator.h"
 

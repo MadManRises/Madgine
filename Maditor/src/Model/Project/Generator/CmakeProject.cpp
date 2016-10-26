@@ -1,6 +1,6 @@
-#include "CmakeProject.h"
+#include "maditorinclude.h"
 
-#include <memory>
+#include "CmakeProject.h"
 
 #include "CommandLine.h"
 

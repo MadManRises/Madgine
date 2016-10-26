@@ -10,6 +10,7 @@ namespace Engine {
 			virtual ~BaseGlobalAPIComponent() = default;
 
 			virtual void init();
+			virtual void clear();
 		};
 
 	}

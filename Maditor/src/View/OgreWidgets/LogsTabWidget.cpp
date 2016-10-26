@@ -1,9 +1,8 @@
+#include "maditorinclude.h"
+
 #include "LogsTabWidget.h"
 #include "Model\LogsModel.h"
 #include "Model\Engine\Watcher\LogWatcher.h"
-#include <QTableView>
-#include <QHeaderView>
-#include <qplaintextedit.h>
 
 namespace Maditor {
 	namespace View {

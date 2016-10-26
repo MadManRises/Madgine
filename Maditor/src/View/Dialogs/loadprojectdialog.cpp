@@ -1,3 +1,5 @@
+#include "maditorinclude.h"
+
 #include "loadprojectdialog.h"
 #include "ui_loadprojectdialog.h"
 

@@ -1,12 +1,9 @@
+#include "maditorinclude.h"
+
 #include "ModuleLoader.h"
-#include <qdir.h>
-#include <qdebug.h>
+
 #include "Model\Project\Project.h"
-#include "libinclude.h"
-#include "Scene\Entity\entity.h"
-#include "Scene\scenemanager.h"
-#include "Scene\scenecomponent.h"
-#include "UI\UIManager.h"
+
 
 namespace Maditor {
 	namespace Model {

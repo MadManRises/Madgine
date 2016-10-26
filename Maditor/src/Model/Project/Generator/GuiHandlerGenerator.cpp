@@ -1,6 +1,6 @@
-#include "ClassGenerator.h"
+#include "maditorinclude.h"
+
 #include "GuiHandlerGenerator.h"
-#include <QDebug>
 
 
 namespace Maditor {
