@@ -51,7 +51,7 @@ IF (WIN32) #Windows
         SET ( MYGUI_INCLUDE_DIRS "${MYGUISDK}/include" )
       
 
-        SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib ${MYGUISDK}/*/lib )
+        SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib)
 
         if ( MYGUI_STATIC )
            set(LIB_SUFFIX "Static")
@@ -60,16 +60,18 @@ IF (WIN32) #Windows
         
         if ( MINGW )
             set(LIB_PREFIX "lib")
+            set(LIB_EXT ${CMAKE_SHARED_LIBRARY_SUFFIX})
         else ( MINGW )
             set(LIB_PREFIX "")
+            set(LIB_EXT ".lib")
         endif ( MINGW )
 
         
 
-        find_library ( MYGUI_LIBRARIES_REL NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_DBG NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
-        find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        find_library ( MYGUI_LIBRARIES_REL NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_DBG NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}_d${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
 
         MESSAGE(STATUS ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX})
 
@@ -78,7 +80,7 @@ IF (WIN32) #Windows
 
         set (MYGUI_LIBRARIES ${MYGUI_LIBRARIES} ${MYGUI_LIBRARIES_OGRE})        
 
-        MESSAGE ("${MYGUI_LIBRARIES}")
+        MESSAGE ("${MYGUI_LIBRARIES} ${MYGUI_LIBRARIES_OGRE}")
 
         #findpkg_finish ( "MYGUI" )
     ENDIF (MYGUISDK)
