@@ -37,8 +37,10 @@ namespace Engine {
 			sTraceBack.pop_back();
 		}
 
-		void UtilMethods::registerException() {
+		void UtilMethods::registerException(const TraceBack & t)
+		{
 			sExceptionTraceBack = sTraceBack;
+			sExceptionTraceBack.push_back(t);
 		}
 
 		void UtilMethods::abort()

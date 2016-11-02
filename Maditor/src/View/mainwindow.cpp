@@ -14,9 +14,9 @@
 #include "Model\Engine\Watcher\ResourceWatcher.h"
 #include "Model\Engine\Watcher\PerformanceWatcher.h"
 #include "Model\Engine\Watcher\OgreSceneWatcher.h"
+#include "Model\Engine\Watcher\ObjectsWatcher.h"
 
-#include "Model\Editors\ScriptEditorModel.h"
-#include "Model\Editors\VSLink.h"
+#include "Model\Editors\EditorManager.h"
 #include "Model\Editors\ScriptEditor.h"
 
 
@@ -49,9 +49,10 @@ namespace Maditor {
 			//ui->guiRenderStats->connectWatchers("Gui", watcher);
 			//ui->sceneRenderStats->connectWatchers("Scene", watcher);
 			ui->ResourcesWidget->setModel(watcher->resourceWatcher());
-			ui->scriptEditorTabWidget->setModel(editor->scriptEditor());
+			ui->scriptEditorTabWidget->setModel(editor->editorManager()->scriptEditor());
 			ui->PerformanceWidget->setModel(watcher->performanceWatcher());
 			ui->OgreSceneWidget->setModel(watcher->ogreSceneWatcher());
+			ui->ObjectsWidget->setModel(watcher->objectsWatcher());
 
 			setupConnections();
 
@@ -88,19 +89,18 @@ namespace Maditor {
 
 
 			//Editor-related
-			connect(mEditor->scriptEditor(), &Model::Editors::ScriptEditorModel::showDoc, this, &MainWindow::ensureVisible);
+			connect(mEditor->editorManager()->scriptEditor(), &Model::Editors::ScriptEditorModel::showDoc, this, &MainWindow::ensureVisible);
 
-			connect(ui->actionOpenVS, &QAction::triggered, mEditor->vs(), &Model::Editors::VSLink::openVS);
+			connect(ui->actionOpenVS, &QAction::triggered, mEditor->editorManager()->vs(), &Model::Editors::VSLink::openVS);
 
 			//Watcher-related
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::onAppCreated, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, this, &MainWindow::onAppInitialized, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStarted, this, &MainWindow::onAppStarted, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStopped, this, &MainWindow::onAppStopped, Qt::QueuedConnection);
+			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationShutdown, this, &MainWindow::onAppShutdown, Qt::QueuedConnection);
 
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, mTarget, &OgreWindow::setInput);
-
-			connect(ui->ResourcesWidget, &QTreeView::doubleClicked, mEditor->watcher()->resourceWatcher(), &Model::Watcher::ResourceWatcher::itemDoubleClicked);
 
 			//Dialogs-related
 			connect(ui->actionNewProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);
@@ -156,6 +156,10 @@ namespace Maditor {
 
 		void MainWindow::finalizeApp()
 		{
+			ui->actionStart->setEnabled(false);
+			ui->actionStop->setEnabled(false);
+			ui->actionPause->setEnabled(false);
+			ui->actionFinalize->setEnabled(false);
 			mEditor->application()->cleanup();
 		}
 
@@ -178,6 +182,11 @@ namespace Maditor {
 				
 				widget = widget->parentWidget();
 			}
+		}
+
+		void MainWindow::test()
+		{
+			ui->PerformanceWidget->sortByColumn(1, Qt::AscendingOrder);
 		}
 
 		void MainWindow::showGame()
@@ -216,6 +225,7 @@ namespace Maditor {
 			hideGame();
 
 			ui->actionInit->setEnabled(false);
+			ui->actionFinalize->setEnabled(true);
 			ui->actionStart->setEnabled(true);
 			ui->actionPause->setEnabled(false);
 			ui->actionStop->setEnabled(false);
@@ -226,15 +236,28 @@ namespace Maditor {
 			hideGame();
 
 			ui->actionInit->setEnabled(false);
+			ui->actionFinalize->setEnabled(true);
 			ui->actionStart->setEnabled(true);
 			ui->actionPause->setEnabled(false);
 			ui->actionStop->setEnabled(false);
 		}
 
-		void MainWindow::onProjectOpened(Model::Project *project) {
-			ui->ProjectWidget->setProject(project);
+		void MainWindow::onAppShutdown()
+		{
+			ui->game->setCurrentIndex(0);
 
 			ui->actionInit->setEnabled(true);
+			ui->actionFinalize->setEnabled(false);
+			ui->actionStart->setEnabled(false);
+			ui->actionPause->setEnabled(false);
+			ui->actionStop->setEnabled(false);
+		}
+
+		void MainWindow::onProjectOpened(Model::Project *project) {
+			ui->ProjectWidget->setModel(project);
+
+			ui->actionInit->setEnabled(true);
+			ui->actionFinalize->setEnabled(false);
 			ui->actionStart->setEnabled(false);
 			ui->actionPause->setEnabled(false);
 			ui->actionStop->setEnabled(false);
@@ -244,6 +267,7 @@ namespace Maditor {
 			showGame();
 
 			ui->actionInit->setEnabled(false); 
+			ui->actionFinalize->setEnabled(true);
 			ui->actionStart->setEnabled(false);
 			ui->actionPause->setEnabled(true);
 			ui->actionStop->setEnabled(true);			

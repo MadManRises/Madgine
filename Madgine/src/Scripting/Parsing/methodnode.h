@@ -20,6 +20,8 @@ public:
 
     const std::list<std::string> &arguments() const;
 
+	void clear();
+
 	virtual size_t calculateSize() const override final;
 protected:
 	virtual void loadImpl() override final;

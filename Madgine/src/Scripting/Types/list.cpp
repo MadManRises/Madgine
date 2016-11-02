@@ -47,6 +47,11 @@ void List::setAt(int i, const ValueType & v)
 	*it = v;
 }
 
+bool List::empty()
+{
+	return mItems.empty();
+}
+
 size_t List::size()
 {
 	return mItems.size();
@@ -92,6 +97,16 @@ void List::save(Serialize::SerializeOutStream &of) const
 const std::list<ValueType> &List::data() const
 {
     return mItems;
+}
+
+std::list<ValueType>::const_iterator List::begin() const
+{
+	return mItems.begin();
+}
+
+std::list<ValueType>::const_iterator List::end() const
+{
+	return mItems.end();
 }
 
 void List::collectNamedValues(std::map<std::string, ValueType *> &values)

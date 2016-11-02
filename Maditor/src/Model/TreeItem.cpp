@@ -8,12 +8,19 @@ namespace Maditor {
 
 		void TreeItem::extendContextMenu(QMenu & menu)
 		{
+			if (parentItem()) {
+				parentItem()->extendContextMenu(menu);
+			}
 			if (mContextMenuItems.empty()) return;
 			if (!menu.actions().isEmpty())
 				menu.addSeparator();
 			for (const std::pair<QString, std::function<void()>> &p : mContextMenuItems) {
 				menu.addAction(p.first, p.second);
 			}
+		}
+
+		void TreeItem::doubleClicked()
+		{
 		}
 
 		void TreeItem::setContextMenuItems(std::list<std::pair<QString, std::function<void()>>>&& contextMenuItems)

@@ -16,6 +16,7 @@ namespace Maditor {
 				OgreSceneWatcher();
 				
 				void update();
+				void clear();
 
 			protected:
 

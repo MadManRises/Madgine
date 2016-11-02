@@ -1,21 +1,21 @@
 #include "maditorinclude.h"
 
 #include "CommandLine.h"
-#include "Model/Project/ProjectLog.h"
+#include "Model\Engine\Watcher\LogWatcher.h"
 
 namespace Maditor {
 	namespace Model {
 
 		namespace Generator {
 
-			ProjectLog *CommandLine::sLog = 0;
+			Watcher::OgreLogWatcher *CommandLine::sLog = 0;
 
 			int CommandLine::exec(const char* cmd) {
 				if (sLog)
-					sLog->logMessage(std::string("Executing Command: ") + cmd);
+					sLog->logMessage(QString("Executing Command: ") + cmd);
 
 				char buffer[128];
-				std::string result = "";
+				QString result = "result: ";
 				FILE* pipe = _popen(cmd, "r");
 				if (!pipe) throw std::runtime_error("popen() failed!");
 				while (!feof(pipe)) {
@@ -28,7 +28,7 @@ namespace Maditor {
 				
 			}
 
-			void CommandLine::setLog(ProjectLog * log)
+			void CommandLine::setLog(Watcher::OgreLogWatcher * log)
 			{
 				sLog = log;
 			}

@@ -6,11 +6,17 @@
 namespace Maditor {
 	namespace Model {
 
-		TreeModel::TreeModel(TreeItem * root, int columnCount) :
+		TreeModel::TreeModel(TreeItem * root, int columnCount, bool sortByParentNodes) :
 			mRoot(root),
-			mColumnCount(columnCount)
+			mColumnCount(columnCount),
+			mSorter(sortByParentNodes)
 		{
+			mSorter.setDynamicSortFilter(true);
+			mSorter.setSourceModel(this);	
 
+			connect(this, &TreeModel::insertRowsQueued, this, &TreeModel::performRowsInsert);
+			connect(this, &TreeModel::removeRowsQueued, this, &TreeModel::performRowsRemove);
+			connect(&mSorter, &TreeSorter::doubleClicked, this, &TreeModel::itemDoubleClicked);
 		}
 
 		Q_INVOKABLE QModelIndex TreeModel::index(int row, int column, const QModelIndex & parent) const
@@ -84,29 +90,42 @@ namespace Maditor {
 			}
 		}
 
-		void TreeModel::extendContextMenu(QMenu & menu)
+		TreeSorter * TreeModel::sorted()
 		{
-			for (const std::pair<QString, std::function<void()>> &p : mContextMenuItems) {
-				menu.addAction(p.first, p.second);
-			}
+			return &mSorter;
 		}
 
-		
+		void TreeModel::performRowsInsert(const QModelIndex & parent, int start, int end)
+		{
+			beginInsertRows(parent, start, end);
+			endInsertRows();
+			QModelIndex i = index(start, 0, parent);
+			qDebug() << "Inserted" << (end - start + 1) << "items starting with " << data(i) << "at" << i;
+			if (i.parent().isValid())
+				qDebug() << "at Parent" << data(i.parent());
+		}
+
+		void TreeModel::performRowsRemove(const QModelIndex & parent, int start, int end)
+		{
+			beginRemoveRows(parent, start, end);
+			endRemoveRows();
+		}
+	
 
 		void TreeModel::handleContextMenuRequest(const QModelIndex & p, QMenu & menu)
 		{
-			extendContextMenu(menu);
 			if (p.isValid()) {
 				TreeItem *item = static_cast<TreeItem*>(p.internalPointer());
 				item->extendContextMenu(menu);
 			}
 		}
 
-		void TreeModel::setModelContextMenuItems(std::list<std::pair<QString, std::function<void()>>>&& contextMenuItems)
-		{
-			mContextMenuItems = std::forward<std::list<std::pair<QString, std::function<void()>>>>(contextMenuItems);
+		void TreeModel::itemDoubleClicked(const QModelIndex &index) {
+			if (index.isValid()) {
+				TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+				item->doubleClicked();
+			}
 		}
-
 
 	}
 }

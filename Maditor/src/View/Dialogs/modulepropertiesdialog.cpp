@@ -20,7 +20,7 @@ namespace Maditor {
 
 				connect(ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ModulePropertiesDialog::apply);
 
-				for (const std::unique_ptr<Model::Module> &dep : module->parent()->modules()) {
+				for (const std::unique_ptr<Model::Module> &dep : *module->parent()) {
 					QListWidgetItem *item = new QListWidgetItem(dep->name(), ui->dependenciesList);
 					item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 					item->setCheckState(module->dependencies().contains(dep->name()) ? Qt::Checked : Qt::Unchecked);

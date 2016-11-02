@@ -16,10 +16,14 @@ public:
     void remove(const ValueType &v);
     ValueType at(int i);
     void setAt(int i, const ValueType &v);
+	bool empty();
     size_t size();
     int index(const ValueType &v);
 
     const std::list<ValueType> &data() const;
+
+	std::list<ValueType>::const_iterator begin() const;
+	std::list<ValueType>::const_iterator end() const;
 
     virtual void collectNamedValues(std::map<std::string, ValueType*> &values) override;
 

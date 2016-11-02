@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TreeSorter.h"
 
 namespace Maditor {
 	namespace Model {
@@ -10,7 +11,7 @@ class TreeModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	TreeModel(TreeItem *root, int columnCount);
+	TreeModel(TreeItem *root, int columnCount, bool sortByParentNodes = false);
 
 	void handleContextMenuRequest(const QModelIndex &p, QMenu &menu);
 
@@ -25,18 +26,23 @@ public:
 
 	virtual Q_INVOKABLE QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
-	using QAbstractItemModel::beginInsertRows;
-	using QAbstractItemModel::endInsertRows;
-	using QAbstractItemModel::beginRemoveRows;
-	using QAbstractItemModel::endRemoveRows;
 
-protected:
-	void setModelContextMenuItems(std::list<std::pair<QString, std::function<void()>>> &&contextMenuItems);
+	TreeSorter *sorted();
 
-	void extendContextMenu(QMenu &menu);
+public slots:
+	void itemDoubleClicked(const QModelIndex &index);
+
+signals:
+	void insertRowsQueued(const QModelIndex &parent, int start, int end);
+	void removeRowsQueued(const QModelIndex &parent, int start, int end);
+
+private slots:
+	void performRowsInsert(const QModelIndex &parent, int start, int end);
+	void performRowsRemove(const QModelIndex &parent, int start, int end);
 
 private:
 	TreeItem *mRoot;
+	TreeSorter mSorter;
 	int mColumnCount;
 
 	std::list<std::pair<QString, std::function<void()>>> mContextMenuItems;

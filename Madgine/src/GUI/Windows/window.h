@@ -16,7 +16,9 @@ namespace Engine {
 			virtual ~Window() = default;
 
 			void setSize(const WindowSizeRelVector &size);
+			const WindowSizeRelVector &getSize();
 			void setPos(const WindowSizeRelVector &pos);
+			const WindowSizeRelVector &getPos();
 			Ogre::Vector2 getPixelSize();
 
 			void destroy();
@@ -74,6 +76,7 @@ namespace Engine {
 		protected:
 
 			WindowContainer *mContainer;
+
 		};
 	}
 }

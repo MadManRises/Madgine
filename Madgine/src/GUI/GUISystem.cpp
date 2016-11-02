@@ -12,19 +12,14 @@ namespace Engine {
 			mRootWindow(0),
 			mWindowSizesDirty(false)
 		{
+			
 		}
 
 
 		GUISystem::~GUISystem()
 		{
-			assert(mWindows.empty());
+			assert(mWindows.empty());			
 		}
-
-		void GUISystem::init()
-		{
-		}
-
-
 
 		void GUISystem::showCursor()
 		{
@@ -36,7 +31,7 @@ namespace Engine {
 			setCursorVisibility(false);
 		}
 
-		void GUISystem::injectTimePulse(float time)
+		void GUISystem::update(float time)
 		{
 			if (mWindowSizesDirty) {
 				mWindowSizesDirty = false;
@@ -51,6 +46,7 @@ namespace Engine {
 
 		void GUISystem::renderSingleFrame()
 		{
+			
 		}
 
 		void GUISystem::printHierarchy() {
@@ -96,12 +92,27 @@ namespace Engine {
 
 		Window * GUISystem::loadLayout(const std::string & name, const std::string & parent)
 		{
-			return mWindows.find(parent)->second->loadLayout(name)->as();
+			auto it = mWindows.find(parent);
+			if (it == mWindows.end())
+				return 0;
+			WindowContainer *w = it->second->loadLayout(name);
+			if (!w)
+				return 0;
+			return w->as();
 		}
 
 		Window * GUISystem::getRootWindow()
 		{
 			return mRootWindow->as();
+		}
+
+		void GUISystem::windowResized(Ogre::RenderWindow * rw)
+		{
+			unsigned int width, height, depth;
+			int left, top;
+			rw->getMetrics(width, height, depth, left, top);
+
+			notifyDisplaySizeChanged(Ogre::Vector2(width, height));
 		}
 
 }

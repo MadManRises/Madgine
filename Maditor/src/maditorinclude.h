@@ -20,6 +20,7 @@
 #include "Scene/scenecomponent.h"
 
 #include "Scripting\Parsing\scriptparser.h"
+#include "Scripting\Parsing\textresourceptr.h"
 
 #include "UI\UIManager.h"
 
@@ -37,6 +38,7 @@
 #include <QApplication>
 #include <qdom.h>
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <QMessageBox>
 #include <QEvent>

@@ -12,10 +12,13 @@ namespace Maditor {
 				mName(name),
 				mStats(Engine::Util::Profiler::getSingleton().getStats(name))
 			{
+				for (const std::string &child : mStats->children())
+					mChildren.emplace_back(child, this);
 			}
 
 			ProfilerNode::~ProfilerNode()
 			{
+				clear();
 			}
 
 			int ProfilerNode::childCount()
@@ -27,7 +30,7 @@ namespace Maditor {
 			{
 				auto it = mChildren.begin();
 				std::advance(it, i);
-				return *it;
+				return &*it;
 			}
 
 			ProfilerNode::ProfilerNode() :
@@ -40,20 +43,27 @@ namespace Maditor {
 
 				const std::list<std::string> &children = mStats->children();
 				if (childCount() < children.size()) {
-					watcher->beginInsertRows(index, childCount(), childCount() + children.size() - 1);
+					int oldCount = childCount();
+
 					for (const std::string &name : children) {
-						if (std::find_if(mChildren.begin(), mChildren.end(), [&](ProfilerNode* p) {return p->mName == name; }) == mChildren.end()) {
-							mChildren.push_back(new StatsProfilerNode(name, this));
+						if (std::find_if(mChildren.begin(), mChildren.end(), [&](ProfilerNode& p) {return p.mName == name; }) == mChildren.end()) {
+							mChildren.emplace_back(name, this);
 						}
 					}
-					watcher->endInsertRows();
+					watcher->insertRowsQueued(index, oldCount, childCount() - 1);
 				}
 
 				int i = 0;
-				for (StatsProfilerNode *n : mChildren) {
-					n->update(watcher, watcher->index(i, 0, index), fullFrameTime);
+				for (StatsProfilerNode &n : mChildren) {
+					n.update(watcher, watcher->index(i, 0, index), fullFrameTime);
+					++i;
 				}
 				
+			}
+
+			void ProfilerNode::clear()
+			{
+				mChildren.clear();
 			}
 
 			StatsProfilerNode::StatsProfilerNode(const std::string & name, ProfilerNode * parent) :
@@ -123,6 +133,12 @@ namespace Maditor {
 						mStats = Engine::Util::Profiler::getSingleton().getStats("Frame");
 				if (mStats)
 					ProfilerNode::update(watcher, QModelIndex(), std::max((long long)1, mStats->averageDuration()));
+			}
+
+			void RootProfilerNode::clear()
+			{
+				ProfilerNode::clear();
+				mStats = 0;
 			}
 
 			QVariant RootProfilerNode::data(int col) const

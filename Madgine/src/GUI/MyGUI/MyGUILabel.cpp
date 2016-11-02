@@ -18,7 +18,7 @@ namespace Engine {
 		namespace MyGui {
 			MyGUILabel::MyGUILabel(MyGUIWindow * w) :
 				Label(w),
-				mLabel(static_cast<MyGUI::TextBox*>(w->window()))
+				mLabel(w->window()->castType<MyGUI::TextBox>())
 			{
 			}
 			void MyGUILabel::setText(const std::string & text)

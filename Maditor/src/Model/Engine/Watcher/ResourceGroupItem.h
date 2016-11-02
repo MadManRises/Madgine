@@ -25,7 +25,7 @@ namespace Maditor {
 			private:
 				QString mName;
 
-				std::unordered_map<std::string, ResourceItem*> mResources;
+				std::unordered_map<std::string, ResourceItem> mResources;
 				TreeItem *mParent;
 
 			};

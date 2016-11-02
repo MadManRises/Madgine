@@ -23,9 +23,8 @@ namespace Engine {
 
 			MyGUITextureDrawer::MyGUITextureDrawer(MyGUIWindow *w) :
 				TextureDrawer(w),
-				mTextureDrawer(static_cast<MyGUI::ImageBox*>(w->window()))
+				mTextureDrawer(w->window()->castType<MyGUI::ImageBox>())
 			{
-				assert(mTextureDrawer->isType<MyGUI::ImageBox>());
 				mTextureDrawer->detachFromLayer();
 			}
 

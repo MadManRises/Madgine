@@ -9,24 +9,21 @@ namespace Shading {
 
 const std::string ShaderCollector::sTempShaderFolder = "shaders\\";
 
-ShaderCollector::ShaderCollector(Ogre::SceneManager *sceneMgr) :
-	mVerbose(false),
-	mSceneMgr(sceneMgr)
-{
-
-
-
+ShaderCollector::ShaderCollector() :
+	mVerbose(false)
+{	
 }
 
 ShaderCollector::~ShaderCollector()
-{
-	
+{	
 }
 
-void ShaderCollector::init()
+void ShaderCollector::init(Ogre::SceneManager *sceneMgr)
 {
 	if (!Ogre::RTShader::ShaderGenerator::initialize())
 		throw 0;
+
+	mInitialized = true;
 
 	mShaderGenerator = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
 
@@ -40,7 +37,7 @@ void ShaderCollector::init()
 	mShaderGenerator->setShaderCachePath(sTempShaderFolder);
 
 	// Set the scene manager.
-	mShaderGenerator->addSceneManager(mSceneMgr);
+	mShaderGenerator->addSceneManager(sceneMgr);
 
 	mCollector = OGRE_MAKE_UNIQUE(UniqueComponentCollector<ShaderFactoryBase>)();
 
@@ -51,9 +48,12 @@ void ShaderCollector::init()
 
 void ShaderCollector::finalize()
 {
-	Ogre::RTShader::ShaderGenerator::getSingleton().removeAllShaderBasedTechniques();
-	mCollector.reset();
-	Ogre::RTShader::ShaderGenerator::finalize();
+	if (mInitialized) {
+		Ogre::RTShader::ShaderGenerator::getSingleton().removeAllShaderBasedTechniques();
+		mCollector.reset();
+		Ogre::RTShader::ShaderGenerator::finalize();
+		mInitialized = false;
+	}
 }
 
 Ogre::Technique *ShaderCollector::handleSchemeNotFound(unsigned short schemeIndex, const Ogre::String &schemeName, Ogre::Material *originalMaterial, unsigned short lodIndex, const Ogre::Renderable *rend)

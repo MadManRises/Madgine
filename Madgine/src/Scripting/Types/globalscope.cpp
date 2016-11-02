@@ -21,10 +21,19 @@ namespace Scripting {
 }
 
 void GlobalScope::init() {
-	mGlobalAPIs = OGRE_MAKE_UNIQUE(UniqueComponentCollector<BaseGlobalAPIComponent>)();
-	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : *mGlobalAPIs) {
+	MadgineObject::init();
+
+	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
 		api->init();
 	}
+}
+
+void GlobalScope::finalize()
+{
+	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
+		api->finalize();
+	}
+	MadgineObject::finalize();
 }
 
 Level *GlobalScope::level()
@@ -87,7 +96,7 @@ std::string GlobalScope::getIdentifier()
 
 void GlobalScope::clear()
 {
-	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &p : *mGlobalAPIs) {
+	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &p : mGlobalAPIs) {
 		p->clear();
 	}
 	mLevel.clear();
@@ -105,6 +114,15 @@ ValueType GlobalScope::methodCall(const std::string &name, const Scripting::Argu
 	}
  
     return ScopeImpl::methodCall(name, args);
+}
+
+std::set<BaseGlobalAPIComponent*> GlobalScope::getGlobalAPIComponents()
+{
+	std::set<BaseGlobalAPIComponent*> result;
+	for (const std::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
+		result.insert(api.get());
+	}
+	return result;
 }
 
 template <> Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)

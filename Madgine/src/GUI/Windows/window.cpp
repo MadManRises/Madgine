@@ -16,9 +16,17 @@ namespace Engine {
 			mContainer->setSize(size);
 		}
 
+		const WindowSizeRelVector &Window::getSize() {
+			return mContainer->getSize();
+		}
+
 		void Window::setPos(const WindowSizeRelVector & pos)
 		{
 			mContainer->setPos(pos);
+		}
+
+		const WindowSizeRelVector &Window::getPos() {
+			return mContainer->getPos();
 		}
 
 		Ogre::Vector2 Window::getPixelSize()
@@ -113,7 +121,10 @@ namespace Engine {
 
 		Window * Window::getChildRecursive(const std::string & name, Class _class)
 		{
-			return mContainer->getChildRecursive(name)->as(_class);
+			WindowContainer *child = mContainer->getChildRecursive(name);
+			if (!child)
+				return 0;
+			return child->as(_class);
 		}
 
 	}

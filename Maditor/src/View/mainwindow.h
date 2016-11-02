@@ -52,11 +52,14 @@ namespace Maditor {
 
 			void ensureVisible(QWidget *widget);
 
+			void test();
+
 		private slots:
 			void onAppCreated();
 			void onAppInitialized();
 			void onAppStarted();
 			void onAppStopped();
+			void onAppShutdown();
 			void onProjectOpened(Model::Project *project);
 			void showGame();
 			void hideGame();

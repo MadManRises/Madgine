@@ -12,35 +12,44 @@
 
 #include "MyGUIWindow.h"
 
+#ifdef _MSC_VER
+#pragma warning (push, 0)
+#endif
+#include <MYGUI\MyGUI.h>
+#include <MYGUI\MyGUI_OgrePlatform.h>
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
 
 			MyGUILauncher::MyGUILauncher(Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr) :
-				mScrollWheel(0)
+				mScrollWheel(0),
+				mGUI(0),
+				mPlatform(0)
 			{
 				mCamera = sceneMgr->createCamera("ContentCamera");
 				mViewport = window->addViewport(mCamera);
 
-				mPlatform = std::make_unique<MyGUI::OgrePlatform>();
+				mPlatform = new MyGUI::OgrePlatform;
 				mPlatform->initialise(window, sceneMgr);
 			}
 
 			MyGUILauncher::~MyGUILauncher()
 			{
-				mRootWindow->finalize();
-				delete mRootWindow;
-				if (mGUI) {
-					mGUI->shutdown();
-					mGUI.reset();
-				}
 				mPlatform->shutdown();
-				mPlatform.reset();
+				delete mPlatform;
+
+				mCamera->getSceneManager()->destroyCamera(mCamera);
 			}
 
 			void MyGUILauncher::init()
 			{
-				mGUI = std::make_unique<MyGUI::Gui>();
+				GUISystem::init();
+				mGUI = new MyGUI::Gui;
 				mGUI->initialise("runTheme.xml");
 
 				mLayoutManager = &MyGUI::LayoutManager::getInstance();
@@ -49,14 +58,24 @@ namespace Engine {
 				mRenderManager = &MyGUI::OgreRenderManager::getInstance();
 				
 
-				mResourceManager->load("Project.xml");
+				//mResourceManager->load("Project.xml");
 
 				mInternRootWindow = mGUI->createWidgetRealT("Widget", "PanelEmpty", { 0, 0, 1, 1 }, MyGUI::Align::Default, "Main", WindowNames::rootWindow);
 
 				mRootWindow = new MyGUIWindow(mInternRootWindow, this, 0);
-				updateWindowSizes();
 
 				setCursorVisibility(false);
+			}
+
+			void MyGUILauncher::finalize()
+			{
+				mRootWindow->finalize();
+				delete mRootWindow;
+				if (mGUI) {
+					mGUI->shutdown();
+					delete mGUI;
+				}
+				GUISystem::finalize();
 			}
 
 			void MyGUILauncher::injectKeyPress(const KeyEventArgs & arg)

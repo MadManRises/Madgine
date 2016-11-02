@@ -2,7 +2,10 @@
 
 #include "Scripting\Datatypes\argumentlist.h"
 #include "Scripting\Datatypes\valuetype.h"
+#include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
+#include "Scripting\Types\scope.h"
+#include "Scripting\scriptexception.h"
 
 namespace Engine {
 	namespace Scripting {
@@ -27,6 +30,26 @@ namespace Engine {
 		struct Caster<const ValueType &> {
 			static auto cast(const ValueType &v) {
 				return v;
+			}
+		};
+
+		template <>
+		struct Caster<List*> {
+			static auto cast(const ValueType &v) {
+				List *list = scope_cast<List>(v.asScope());
+				if (!list)
+					throw 0;
+				return list;
+			}
+		};
+
+		template <>
+		struct Caster<Scene::Entity::Entity*> {
+			static auto cast(const ValueType &v) {
+				Scene::Entity::Entity *e = scope_cast<Scene::Entity::Entity>(v.asScope());
+				if (!e)
+					throw 0;
+				return e;
 			}
 		};
 
@@ -108,14 +131,14 @@ namespace Engine {
 			template <class R, class... _Ty>
 			std::enable_if_t<all_of<!std::is_same<std::remove_const_t<std::remove_reference_t<_Ty>>, ArgumentList>::value...>::value, ValueType> wrapped(R(T::*f)(_Ty...), const ArgumentList &list) {
 				if (list.size() != sizeof...(_Ty))
-					throw 0;
+					MADGINE_THROW(ScriptingException(Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), list.size())));
 				return Impl<R, _Ty...>::call(f, static_cast<T*>(this), list, std::make_index_sequence<sizeof...(_Ty)>());
 			}
 
 			template <class R, class... _Ty>
 			std::enable_if_t<all_of<!std::is_same<std::remove_const_t<std::remove_reference_t<_Ty>>, ArgumentList>::value...>::value, ValueType> wrapped(R(T::*f)(_Ty...) const, const ArgumentList &list) {
 				if (list.size() != sizeof...(_Ty))
-					throw 0;
+					MADGINE_THROW(ScriptingException(Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), list.size())));
 				return Impl<R, _Ty...>::call(f, static_cast<T*>(this), list, std::make_index_sequence<sizeof...(_Ty)>());
 			}
 

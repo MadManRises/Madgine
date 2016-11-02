@@ -68,7 +68,10 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
 	ScopeFactoryManager *factory = &ScopeFactoryManager::getSingleton();
 	InvScopePtr oldPtr;
     while(in.loopRead(oldPtr)){
-        scopeMap[oldPtr] = factory->create(in);
+		Scope *scope = factory->create(in);
+		if (!scope) return;
+        scopeMap[oldPtr] = scope;
+
     }
 
     while(in.loopRead(oldPtr)){

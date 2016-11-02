@@ -6,7 +6,7 @@ namespace Engine {
 namespace Database {
 namespace Exceptions {
 
-	const auto argumentCountMismatch = message("Argument Count doesnt match!");
+	const auto argumentCountMismatch = message("Argument Count doesnt match! Expected: ", " Actual: ", "");
 	const auto corruptData = message("Corrupt Data!");
 	const auto deserializationFailure = message("Deserialization failed!");
 	const auto doubleComponent = message("Add Double Component: '", "'");

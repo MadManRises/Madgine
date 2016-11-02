@@ -33,10 +33,10 @@ namespace Engine {
 					ss.str(window->getUserString("Size"));
 					float xw, xh, xa, yw, yh, ya;
 					ss >> xw >> xh >> xa >> yw >> yh >> ya;
-					setSize({ { xa, xw, xh },{ ya, yw, yh } });
+					setSize({ { xw, xh, xa },{ yw, yh, ya } });
 				}
 				else {
-					setSize({ { 0, 1, 0 } ,{ 0, 0, 1 } });
+					setSize({ { 1, 0, 0 } ,{ 0, 1, 0 } });
 				}
 
 				if (window->isUserString("Pos")) {
@@ -44,7 +44,7 @@ namespace Engine {
 					ss.str(window->getUserString("Pos"));
 					float xw, xh, xa, yw, yh, ya;
 					ss >> xw >> xh >> xa >> yw >> yh >> ya;
-					setPos({ { xa, xw, xh },{ ya, yw, yh } });
+					setPos({ { xw, xh, xa },{ yw, yh, ya } });
 				}
 				else {
 					setPos({ { 0, 0, 0 } ,{ 0, 0, 0 } });
@@ -69,7 +69,7 @@ namespace Engine {
 				registerEvent(id, mouseMove, mWindow->eventMouseWheel);
 			}
 
-			void MyGUIWindow::unregisterAllEvents(void * id)
+			void MyGUIWindow::unregisterCustomEvents(void * id)
 			{
 				mEventHandlers.erase(id);
 				mKeyHandlers.erase(id);
@@ -211,7 +211,7 @@ namespace Engine {
 					//str = CEGUI::Combobox::EventListSelectionAccepted;
 					break;*/
 				default:
-					throw 0;
+					WindowContainer::registerEvent(id, type, event);
 				}
 
 			}
@@ -262,8 +262,18 @@ namespace Engine {
 
 			WindowContainer * MyGUIWindow::loadLayoutWindow(const std::string & name)
 			{
-				const MyGUI::VectorWidgetPtr &widgets = MyGUI::LayoutManager::getInstance().loadLayout(name, "", mWindow);
-				if (widgets.size() != 1) {
+				bool failed = false;
+				MyGUI::VectorWidgetPtr widgets;
+				try {
+					widgets = MyGUI::LayoutManager::getInstance().loadLayout(name, "", mWindow);
+					if (widgets.size() != 1)
+						failed = true;
+				}
+				catch (Ogre::FileNotFoundException &e) {
+					failed = true;
+				}
+
+				if (failed) {
 					LOG_ERROR(Database::Exceptions::loadLayoutFailure(name));
 					return 0;
 				}

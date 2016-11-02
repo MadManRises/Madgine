@@ -2,6 +2,7 @@
 
 #include "GUI\GUIEvents.h"
 #include "GUI\Windows\classid.h"
+#include "Util\MadgineObject.h"
 
 namespace Engine {
 	namespace UI {
@@ -28,19 +29,23 @@ namespace Engine {
 		};
 
 
-		class MADGINE_EXPORT Handler {
+		class MADGINE_EXPORT Handler : public Util::BaseMadgineObject {
 		public:
 			Handler(const std::string &windowName);
-			virtual ~Handler();
+			virtual ~Handler() = default;
 
 			virtual void init();
+			virtual void finalize();
 
 			virtual void onMouseVisibilityChanged(bool b);
 
 			GUI::Window * window();
 
+
+			virtual void sizeChanged();
+
 		private:
-			void installToWindow(GUI::Window * w);
+			bool installToWindow(GUI::Window * w);
 
 		protected:
 			void init(GUI::Window *w);
@@ -81,7 +86,6 @@ namespace Engine {
 				std::function<void()> f);
 
 		protected:
-
 			GUI::Window * mWindow;
 
 			UI::UIManager *mUI;

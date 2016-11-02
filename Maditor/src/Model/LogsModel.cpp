@@ -11,7 +11,6 @@ namespace Maditor {
 			void LogsModel::addLog(Log * log)
 			{
 				mLogs.emplace_back(log);
-				connect(log, &Log::openScriptFile, this, &LogsModel::openScriptFile);
 				emit logWatcherCreated(log);
 			}
 

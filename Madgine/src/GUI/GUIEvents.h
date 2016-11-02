@@ -169,7 +169,8 @@ namespace Engine {
 			TextChanged,
 			ComboboxSelectionChanged,
 			MouseEntered,
-			MouseLeft
+			MouseLeft,
+			WindowResized
 		};
 
 		struct KeyEventArgs {

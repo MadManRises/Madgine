@@ -17,7 +17,7 @@ namespace Maditor {
 				~ResourceWatcher();
 
 				void init();
-
+				void clear();
 
 				// Inherited via TreeItem
 				virtual int childCount() override;
@@ -29,25 +29,20 @@ namespace Maditor {
 				virtual QVariant data(int col) const override;
 
 			signals:
-				void openScriptFile(const QString &path, int line);
+				void resetModelQueued();
 
 			public slots:
-				void itemDoubleClicked(const QModelIndex &index);
+				void reloadScriptFile(const QString &fileName, const QString &group);
+
+			private slots:				
+				void resetModel();
+
 
 			protected:
-				void open(const Ogre::ResourcePtr &res);
-							
-
-
-
 				virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 			private:
-
-				std::unordered_map<std::string, ResourceGroupItem*> mGroups;
-				
-
-				
+				std::unordered_map<std::string, ResourceGroupItem> mGroups;
 
 			};
 

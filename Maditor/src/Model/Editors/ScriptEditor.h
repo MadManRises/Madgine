@@ -14,6 +14,11 @@ namespace Maditor {
 				int index();
 				void setIndex(int index);
 
+				QString getName();
+
+			signals:
+				void saved(ScriptEditor *editor);
+
 			public slots:
 				void save();
 

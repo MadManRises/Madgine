@@ -46,6 +46,12 @@ const std::list<std::string> &MethodNode::arguments() const
     return mArguments;
 }
 
+void MethodNode::clear()
+{
+	mStatements.clear();
+	mArguments.clear();
+}
+
 void MethodNode::loadImpl()
 {
 }

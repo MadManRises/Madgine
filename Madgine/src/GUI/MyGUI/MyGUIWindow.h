@@ -28,7 +28,7 @@ namespace Engine {
 
 				// Inherited via Window
 				virtual void registerHandlerEvents(void *id, std::function<void(GUI::MouseEventArgs&)> mouseMove, std::function<void(GUI::MouseEventArgs&)> mouseDown, std::function<void(GUI::MouseEventArgs&)> mouseUp, std::function<void(GUI::MouseEventArgs&)> mouseScroll, std::function<bool(GUI::KeyEventArgs&)> keyPress) override;
-				virtual void unregisterAllEvents(void *id) override;
+				virtual void unregisterCustomEvents(void *id) override;
 
 				virtual void registerEvent(void *id, EventType type, std::function<void()> event) override;
 

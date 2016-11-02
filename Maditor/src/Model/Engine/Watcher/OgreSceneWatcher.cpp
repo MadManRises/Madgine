@@ -40,6 +40,13 @@ namespace Maditor {
 				}
 			}
 
+			void OgreSceneWatcher::clear()
+			{
+				beginResetModel();
+				mRootItem.clear();
+				endResetModel();
+			}
+
 
 			
 		}

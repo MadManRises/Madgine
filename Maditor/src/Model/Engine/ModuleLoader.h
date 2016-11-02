@@ -10,8 +10,10 @@ namespace Maditor {
 
 		public:
 			ModuleLoader();
+			~ModuleLoader();
 
-			void setup(const QString &binaryDir, const QString &runtimeDir, Project *project);
+			void setup(const QString &binaryDir, const QString &runtimeDir, ModuleList *moduleList);
+			void cleanup();
 			
 			void update(bool callInit = true);
 
@@ -49,6 +51,8 @@ namespace Maditor {
 				std::list<Engine::Scene::BaseSceneComponent*> mSceneComponents;
 				std::list<Engine::UI::GameHandlerBase*> mGameHandlers;
 				std::list<Engine::UI::GuiHandlerBase*> mGuiHandlers;
+				std::list<Engine::Scripting::BaseGlobalAPIComponent*> mGlobalAPIComponents;
+				std::list<Engine::Scene::SceneListener*> mSceneListeners;
 			};
 
 			bool loadModule(ModuleInstance &module, bool callInit);
@@ -58,11 +62,13 @@ namespace Maditor {
 
 			QString mRuntimeDir, mBinaryDir;
 
-			Project *mProject;
+			ModuleList *mModules;
 
 			std::mutex mReloadMutex;
 
 			bool mNeedReload;
+
+			bool mInit;
 		};
 	}
 }

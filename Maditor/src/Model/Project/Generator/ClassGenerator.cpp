@@ -4,6 +4,7 @@
 #include "Model\Project\Module.h"
 #include "HeaderGuardGenerator.h"
 #include "Model\Project\Project.h"
+#include "Model\Editors\EditorManager.h"
 
 namespace Maditor {
 	namespace Model {
@@ -50,9 +51,9 @@ namespace Maditor {
 			QStringList ClassGenerator::fileNames()
 			{
 				QStringList result;
-				result << (mName + ".h");
 				if (!mHeaderOnly)
 					result << (mName + ".cpp");
+				result << (mName + ".h");				
 				return result;
 			}
 
@@ -95,6 +96,25 @@ namespace Maditor {
 				return icon;
 			}
 
+			void ClassGenerator::extendContextMenu(QMenu & menu)
+			{
+				ProjectElement::extendContextMenu(menu);
+				if (!fileNames().empty()){
+					menu.addSeparator();
+					QMenu *subMenu = menu.addMenu("Open");
+					QObject::connect(subMenu, &QMenu::triggered, [this](QAction *action) {
+						Editors::EditorManager::getSingleton().openByExtension((mModule->root() + action->text()).toStdString());
+					});
+					for (const QString &file : fileNames()) {
+						subMenu->addAction(file);
+					}
+				}
+			}
+
+			void ClassGenerator::doubleClicked()
+			{
+				Editors::EditorManager::getSingleton().openByExtension((mModule->root() + fileNames().front()).toStdString());
+			}
 
 		}
 	}

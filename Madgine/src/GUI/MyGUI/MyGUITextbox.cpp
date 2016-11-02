@@ -18,7 +18,7 @@ namespace Engine {
 		namespace MyGui {
 			MyGUITextbox::MyGUITextbox(MyGUIWindow * w) :
 				Textbox(w),
-				mTextbox(static_cast<MyGUI::EditBox*>(w->window()))
+				mTextbox(w->window()->castType<MyGUI::EditBox>())
 			{
 			}
 			std::string MyGUITextbox::getText()

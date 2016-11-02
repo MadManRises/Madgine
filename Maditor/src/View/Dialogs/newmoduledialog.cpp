@@ -9,10 +9,10 @@ namespace Maditor {
 namespace View {
 namespace Dialogs {
 
-NewModuleDialog::NewModuleDialog(Model::Project *project, QWidget *parent) :
+NewModuleDialog::NewModuleDialog(Model::ModuleList *list, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::NewModuleDialog),
-	mProject(project)
+	mList(list)
 {
     ui->setupUi(this);
 
@@ -32,7 +32,7 @@ QString NewModuleDialog::name()
 
 
 void NewModuleDialog::nameChanged(const QString &name) {
-	bool alreadyExists = !name.isEmpty() && mProject->hasModule(name);
+	bool alreadyExists = !name.isEmpty() && mList->hasModule(name);
 	bool valid = !name.isEmpty() && !alreadyExists;
 	ui->alreadyExistsMsg->setVisible(alreadyExists);
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(valid);

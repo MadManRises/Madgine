@@ -20,6 +20,8 @@ namespace Maditor {
 					
 					editor = mDocuments.emplace(path, new ScriptEditor(path)).first->second;
 					
+					connect(editor, &Model::Editors::ScriptEditor::saved, this, &ScriptEditorModel::onDocumentSaved);
+
 					emit documentAdded(name, editor);
 				}
 				else {
@@ -36,6 +38,11 @@ namespace Maditor {
 				ScriptEditor *editor = it->second;
 				emit documentClosed(index);
 				mDocuments.erase(it);
+			}
+
+			void ScriptEditorModel::onDocumentSaved(ScriptEditor * editor)
+			{
+				emit documentSaved(editor->getName(), "Scripting");
 			}
 
 		}

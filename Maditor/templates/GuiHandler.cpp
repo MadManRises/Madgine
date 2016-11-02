@@ -3,11 +3,13 @@
 #include <libinclude.h>
 #include "%header"
 
+API_IMPL(%game::%module::%name);
+
 namespace %game {
 	namespace %module {
 
 		%name::%name() :
-			UniqueComponent("%window", %type%layout) {
+			GuiHandler("%window", %type%layout) {
 
 		}
 

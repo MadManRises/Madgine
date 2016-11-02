@@ -11,8 +11,8 @@ namespace Maditor {
 		class Module : public QObject, public ProjectElement {
 			Q_OBJECT
 		public:
-			Module(Project *parent, const QString &name);
-			Module(Project *parent, QDomElement data);
+			Module(ModuleList *parent, const QString &name);
+			Module(ModuleList *parent, QDomElement data);
 
 			QString root();
 
@@ -33,7 +33,7 @@ namespace Maditor {
 
 			void fillReloadOrder(std::list<const Module*> &reloadOrder) const;
 
-			Project *parent();
+			ModuleList *parent();
 
 			// Inherited via ProjectElement
 			virtual int childCount() override;
@@ -50,7 +50,7 @@ namespace Maditor {
 			void propertiesDialogRequest(Module *);
 
 		private:
-			Project *mParent;
+			ModuleList *mParent;
 
 			Generator::CmakeSubProject mCmake;
 

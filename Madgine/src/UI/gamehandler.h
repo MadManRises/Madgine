@@ -22,6 +22,10 @@ public:
 
     virtual void update(float timeSinceLastFrame);
 
+	virtual void onSceneLoad() override;
+	virtual void beforeSceneClear() override;
+	virtual void onSceneClear() override;
+
 
 protected:
     virtual void onMouseMove(GUI::MouseEventArgs &me);
@@ -74,6 +78,10 @@ private:
 template <class T>
 class GameHandler : public UniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
 	using UniqueComponent<T, GameHandlerBase>::UniqueComponent;
+
+	virtual const char *getName() override {
+		return typeid(T).name();
+	}
 };
 
 

@@ -19,7 +19,7 @@ namespace Engine {
 
 			MyGUICombobox::MyGUICombobox(MyGUIWindow *w) :
 				Combobox(w),
-				mCombobox(static_cast<MyGUI::ComboBox*>(w->window()))
+				mCombobox(w->window()->castType<MyGUI::ComboBox>())
 			{
 				mCombobox->setEditReadOnly(true);
 			}

@@ -3,7 +3,7 @@
 #include "configset.h"
 
 #include "Os\os.h"
-#include "UI\UIManager.h"
+#include "Application.h"
 
 #include "Scripting\Datatypes\Serialize\serializestream.h"
 
@@ -139,7 +139,7 @@ void ConfigSet::applyLanguage()
 
 void ConfigSet::updateWindow()
 {
-    UI::UIManager::getSingleton().setWindowProperties(getFullscreen(), getResolutionWidth(),
+    Application::getSingleton().setWindowProperties(getFullscreen(), getResolutionWidth(),
                           getResolutionHeight());
 }
 

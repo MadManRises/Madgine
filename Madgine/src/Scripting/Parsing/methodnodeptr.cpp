@@ -1,6 +1,5 @@
 
 #include "methodnodeptr.h"
-#include "methodnode.h"
 
 namespace Engine {
 namespace Scripting {

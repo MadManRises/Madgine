@@ -15,7 +15,7 @@ class NewModuleDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit NewModuleDialog(Model::Project *project, QWidget *parent = 0);
+    explicit NewModuleDialog(Model::ModuleList *list, QWidget *parent = 0);
     ~NewModuleDialog();
 
 	QString name();
@@ -26,7 +26,7 @@ public slots:
 private:
     Ui::NewModuleDialog *ui;
 
-	Model::Project *mProject;
+	Model::ModuleList *mList;
 };
 
 

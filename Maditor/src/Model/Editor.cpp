@@ -4,14 +4,13 @@
 #include "Logsmodel.h"
 #include "Engine/Watcher/ApplicationWatcher.h"
 #include "Engine/ApplicationWrapper.h"
-#include "Editors\VSLink.h"
+#include "Editors\EditorManager.h"
 #include "Project\Generator\ClassGeneratorFactory.h"
-#include "Editors\ScriptEditorModel.h"
 #include "Project\Generator\CommandLine.h"
-#include "Project\ProjectLog.h"
 #include "Engine\ModuleLoader.h"
 #include "Engine\Watcher\ResourceWatcher.h"
 #include "Engine/Watcher/LogWatcher.h"
+#include "Editors\ScriptEditorModel.h"
 
 namespace Maditor {
 	namespace Model {
@@ -19,16 +18,16 @@ namespace Maditor {
 		Editor::Editor() :
 			mApplicationWrapper(0),
 			mApplicationWatcher(0),
-			mVS(0),
-			mScriptEditor(0),
+			mEditorManager(0),
 			mOgreTarget(0),
-			mSettings("MadMan Studios", "Maditor") {
+			mSettings("MadMan Studios", "Maditor"),
+			mLog(Watcher::OgreLogWatcher::GuiLog, "Madgine.log") {
 
 			mRecentProjects = mSettings.value("recentProjects").toStringList();
 			mReloadProject = mSettings.value("reloadProject").toBool();
 
 			mLoader = new ModuleLoader;
-			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader);
+			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, &mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
 		}
@@ -40,6 +39,7 @@ namespace Maditor {
 
 			delete mApplicationWrapper;
 			delete mApplicationWatcher;
+			delete mEditorManager;
 			delete mLoader;			
 			delete mLogs;
 		}
@@ -48,8 +48,7 @@ namespace Maditor {
 		{
 			mOgreTarget = target;
 
-			mVS = new Editors::VSLink;
-			mScriptEditor = new Editors::ScriptEditorModel;
+			mEditorManager = new Editors::EditorManager;
 			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
 			mLogs = new LogsModel;
 
@@ -57,14 +56,10 @@ namespace Maditor {
 
 			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logCreated, mLogs, &LogsModel::addLog);
 			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logRemoved, mLogs, &LogsModel::removeLog);
-			connect(mLogs, &LogsModel::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
-			connect(mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::openScriptFile, mScriptEditor, &Editors::ScriptEditorModel::openScriptFile);
+			connect(mEditorManager->scriptEditor(), &Editors::ScriptEditorModel::documentSaved, mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::reloadScriptFile);
 
-
-			ProjectLog *defaultLog = new ProjectLog;
-
-			mLogs->addLog(defaultLog);
-			Generator::CommandLine::setLog(defaultLog);
+			mLogs->addLog(&mLog);
+			Generator::CommandLine::setLog(&mLog);
 
 
 
@@ -109,14 +104,9 @@ namespace Maditor {
 			return mClassGeneratorFactory;
 		}
 
-		Editors::ScriptEditorModel *Editor::scriptEditor()
+		Editors::EditorManager * Editor::editorManager()
 		{
-			return mScriptEditor;
-		}
-
-		Editors::VSLink *Editor::vs()
-		{
-			return mVS;
+			return mEditorManager;
 		}
 
 		LogsModel * Editor::logsModel()

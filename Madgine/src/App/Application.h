@@ -78,6 +78,14 @@ public:
 	 */
 	void callSafe(std::function<void()> f);
 
+	void setWindowProperties(bool fullscreen, size_t width, size_t height);
+
+	Ogre::RenderWindow *renderWindow();
+
+	void resizeWindow();
+
+	void renderFrame();
+
 protected:
 	/**
 	 * This will be called by Ogre whenever a new frame is started. It returns <code>false</code>, if the Application was shutdown().
@@ -109,6 +117,7 @@ private:
 	void _clear();
 	void _setupOgre();
 	void _setup();
+	
 
 private:
 

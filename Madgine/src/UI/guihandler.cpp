@@ -16,17 +16,13 @@ GuiHandlerBase::GuiHandlerBase(const std::string &windowName, WindowType type, c
     mLayoutFile(layoutFile),
 	mParentName(parentName),
 	mType(type),
-	mInitialized(false),
 	mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
 	mContext(App::ContextMask::NoContext)	
 {
-	setInitialisationOrder(2);
 }
 
 
-void GuiHandlerBase::sizeChanged()
-{
-}
+
 
 void GuiHandlerBase::init(int order)
 {
@@ -36,9 +32,6 @@ void GuiHandlerBase::init(int order)
 
 void GuiHandlerBase::init()
 {
-	if (mInitialized)
-		return;
-
 	GUI::Window *window = nullptr;
 
     if (!mLayoutFile.empty()){
@@ -52,11 +45,33 @@ void GuiHandlerBase::init()
 		Handler::init(window);
 	else
 		Handler::init();
-	mInitialized = true;
+
+}
+
+void GuiHandlerBase::finalize(int order)
+{
+	if (mOrder == order)
+		finalize();
+}
+
+void GuiHandlerBase::finalize()
+{
+	Handler::finalize();
+	if (mWindow && !mLayoutFile.empty()) {
+		mWindow->destroy();
+		mWindow = 0;
+	}	
 }
 
 void GuiHandlerBase::open()
 {
+	if (getState() == Util::ObjectState::CONSTRUCTED) {
+		LOG_ERROR("Failed to open unitialized GuiHandler!");
+		return;
+	}
+
+	if (isOpen()) return;
+
     switch(mType){
     case WindowType::MODAL_OVERLAY:
         mUI->openModalWindow(this);

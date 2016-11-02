@@ -2,20 +2,20 @@
 
 #include "GUI\GUISystem.h"
 
-#ifdef _MSC_VER
-#pragma warning (push, 0)
-#endif
-#include <MYGUI\MyGUI.h>
-#include <MYGUI\MyGUI_OgrePlatform.h>
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
+namespace MyGUI {
+	struct MouseButton;
+	class Widget;
+	class Gui;
+	class OgrePlatform;
+	class OgreRenderManager;
+	class LayoutManager;
+	class ResourceManager;
+	class InputManager;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
-			class MyGUIWindow;
 
 			class MyGUILauncher : public GUISystem {
 			public:
@@ -23,6 +23,7 @@ namespace Engine {
 				~MyGUILauncher();
 
 				virtual void init() override;
+				virtual void finalize() override;
 
 				// Inherited via GUISystem
 				virtual void injectKeyPress(const KeyEventArgs & arg) override;
@@ -51,8 +52,8 @@ namespace Engine {
 
 			private:
 				
-				Ogre::unique_ptr<MyGUI::Gui> mGUI;
-				Ogre::unique_ptr<MyGUI::OgrePlatform> mPlatform;
+				MyGUI::Gui *mGUI;
+				MyGUI::OgrePlatform *mPlatform;
 				MyGUI::LayoutManager *mLayoutManager;
 				MyGUI::ResourceManager *mResourceManager;
 				MyGUI::InputManager *mInputManager;

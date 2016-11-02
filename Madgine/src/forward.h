@@ -1,5 +1,10 @@
 #pragma once
 
+namespace Ogre {
+	template <class T>
+	class Singleton;
+}
+
 namespace Engine {
 	namespace App {
 		class ConfigSet;
@@ -41,7 +46,6 @@ namespace Engine {
 		namespace Statements {
 			class Statement;
 		}
-
 
 	}
 
@@ -110,6 +114,7 @@ namespace Engine {
 		class Profiler;
 		class ProcessStats;
 		struct TraceBack;
+		class BaseMadgineObject;
 	}
 
 	namespace Input {

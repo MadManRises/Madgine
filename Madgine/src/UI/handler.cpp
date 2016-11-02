@@ -17,14 +17,8 @@ Handler::Handler(const std::string &windowName) :
 
 }
 
-Handler::~Handler()
-{
-	if (mWindow)
-		mWindow->unregisterAllEvents(this);
-}
 
-
-void Handler::installToWindow(GUI::Window * w)
+bool Handler::installToWindow(GUI::Window * w)
 {
     mWindow = w;
 
@@ -34,35 +28,57 @@ void Handler::installToWindow(GUI::Window * w)
 		std::bind(&Handler::injectMouseUp, this, std::placeholders::_1),
 		std::bind(&Handler::injectMouseMove, this, std::placeholders::_1),
 		std::bind(&Handler::injectKeyPress, this, std::placeholders::_1));
+	w->registerEvent(this, GUI::EventType::WindowResized, std::bind(&Handler::sizeChanged, this));
 
 	for (const WindowDescriber &des : mWindows) {
-		GUI::Window * window = (des.mWindowName == WindowNames::thisWindow ? mWindow : w->getChildRecursive(des.mWindowName, des.mClass));
-		if (des.mVar) {
-			if (!window)
-				throw Database::Exceptions::windowNotFound(des.mWindowName);
+		GUI::Window * window = w->getChildRecursive(des.mWindowName, des.mClass);
+		
+		if (!window) {
+			LOG_ERROR(Database::Exceptions::windowNotFound(des.mWindowName));
+			return false;
+		}
+		
+		if (des.mVar) {			
 			*des.mVar = window;
 		}
-
-		if (window) {
-			for (auto &event : des.mEvents) {
-				//TODO
-				window->registerEvent(this, event.first, event.second);
-			}
-		}
+		
+		for (auto &event : des.mEvents) {
+			//TODO
+			window->registerEvent(this, event.first, event.second);
+		}		
 	}
 
-	mWindows.clear();
+	return true;
 
+}
+
+
+void Handler::sizeChanged()
+{
 }
 
 void Handler::init()
 {
-	installToWindow(mUI->gui()->getWindowByName(mWindowName));
+	if (installToWindow(mUI->gui()->getWindowByName(mWindowName))) {
+		mWindows.clear();
+		BaseMadgineObject::init();
+	}
+	
+}
+
+void Handler::finalize()
+{
+	if (mWindow)
+		mWindow->unregisterAllEvents(this);
+	BaseMadgineObject::finalize();
 }
 
 void Handler::init(GUI::Window *window)
 {
-    installToWindow(window);
+	if (installToWindow(window)) {
+		mWindows.clear();
+		BaseMadgineObject::init();
+	}	
 }
 
 void Handler::injectMouseMove(GUI::MouseEventArgs &evt)

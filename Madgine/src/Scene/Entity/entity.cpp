@@ -186,8 +186,11 @@ BaseEntityComponent *Entity::addComponent(const std::string &name){
 
 void Entity::removeComponent(const std::string & name)
 {
-	assert(hasComponent(name));
-	mComponents.erase(name);
+	
+	auto it = mComponents.find(name);
+	assert(it != mComponents.end());
+	it->second->finalize();
+	mComponents.erase(it);
 }
 
 bool Entity::existsComponent(const std::string &name)

@@ -27,6 +27,11 @@ namespace Maditor {
 
 				virtual QVariant icon() const override;
 
+				virtual void extendContextMenu(QMenu &menu) override;
+
+				virtual void doubleClicked() override;
+
+
 			protected:
 				virtual QString templateFileName(int index) = 0;
 				QString templateFileByIndex(int index);

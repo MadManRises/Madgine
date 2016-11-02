@@ -2,7 +2,7 @@
 
 #include "IngameOverlay.h"
 
-#include "UI\UIManager.h"
+#include "App\Application.h"
 
 namespace Engine {
 	namespace Scene {
@@ -15,12 +15,12 @@ namespace Engine {
 			setUseIdentityView(true);
 			setQueryFlags(0);
 
-			UI::UIManager::getSingleton().renderWindow()->addListener(this);
+			App::Application::getSingleton().renderWindow()->addListener(this);
 		}
 
 		IngameOverlay::~IngameOverlay()
 		{
-			UI::UIManager::getSingleton().renderWindow()->removeListener(this);
+			App::Application::getSingleton().renderWindow()->removeListener(this);
 		}
 
 		void IngameOverlay::preViewportUpdate(const Ogre::RenderTargetViewportEvent & ev)

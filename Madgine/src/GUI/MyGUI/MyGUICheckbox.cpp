@@ -17,7 +17,7 @@ namespace Engine {
 		namespace MyGui {
 			MyGUICheckbox::MyGUICheckbox(MyGUIWindow *w) :
 				Checkbox(w),
-				mCheckbox(static_cast<MyGUI::Button*>(w->window()))
+				mCheckbox(w->window()->castType<MyGUI::Button>())
 			{
 				mCheckbox->eventMouseButtonClick += MyGUI::newDelegate(this, &MyGUICheckbox::toggle);
 			}

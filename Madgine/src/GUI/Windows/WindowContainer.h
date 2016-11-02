@@ -36,10 +36,11 @@ public:
 		std::function<void(GUI::MouseEventArgs&)> mouseUp,
 		std::function<void(GUI::MouseEventArgs&)> mouseScroll,
 		std::function<bool(GUI::KeyEventArgs&)> keyPress) = 0;
-	virtual void unregisterAllEvents(void *id) = 0;
+	void unregisterAllEvents(void *id);
+
 
 	virtual void registerEvent(void *id,
-		EventType type, std::function<void()> event) = 0;
+		EventType type, std::function<void()> event);
 
 
 	virtual void setPixelSize(const Ogre::Vector2 &size) = 0;
@@ -47,7 +48,9 @@ public:
 	virtual void setPixelPosition(const Ogre::Vector2 &size) = 0;
 
 	void setSize(const WindowSizeRelVector &size);
+	const WindowSizeRelVector &getSize();
 	void setPos(const WindowSizeRelVector &pos);
+	const WindowSizeRelVector &getPos();
 
 	void updateSize(const Ogre::Vector2 &size);
 
@@ -77,6 +80,7 @@ public:
 
 protected:
 	
+	virtual void unregisterCustomEvents(void *id) = 0;
 
 	virtual Window *createImpl(Class _class) = 0;
 
@@ -102,6 +106,9 @@ private:
 
 	std::unique_ptr<Window> mImpl;
 	std::unique_ptr<Window> mDefaultImpl;
+
+	std::map<void*, std::list<std::function<void()>>> mResizeListeners;
+
 
 };
 

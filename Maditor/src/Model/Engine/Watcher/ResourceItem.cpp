@@ -2,6 +2,8 @@
 
 #include "ResourceItem.h"
 
+#include "Model\Editors\EditorManager.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
@@ -14,8 +16,6 @@ namespace Maditor {
 
 			ResourceItem::~ResourceItem()
 			{
-				for (ResourceItem *child : mChildren)
-					delete child;
 			}
 
 			const Ogre::ResourcePtr & ResourceItem::resource()
@@ -30,7 +30,7 @@ namespace Maditor {
 			{
 				auto it = mChildren.begin();
 				std::advance(it, i);
-				return *it;
+				return &*it;
 			}
 			TreeItem * ResourceItem::parentItem()
 			{
@@ -40,9 +40,14 @@ namespace Maditor {
 			{
 				return mName;
 			}
-			void ResourceItem::addChild(ResourceItem * child)
+			void ResourceItem::addChild(ResourceItem &&child)
 			{
-				mChildren.push_back(child);
+				mChildren.emplace_back(std::forward<ResourceItem>(child));
+			}
+			void ResourceItem::doubleClicked()
+			{
+				Editors::EditorManager::getSingleton().openResource(mResource);
+				
 			}
 		}
 	}

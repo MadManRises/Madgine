@@ -7,12 +7,9 @@
 namespace Engine {
 	namespace Scripting {
 
-		void BaseGlobalAPIComponent::init() {
 
-		}
+		void BaseGlobalAPIComponent::clear() {
 
-		void BaseGlobalAPIComponent::clear()
-		{
 		}
 
 	}

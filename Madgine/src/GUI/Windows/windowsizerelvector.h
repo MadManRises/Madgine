@@ -19,7 +19,7 @@ namespace Engine {
 			}
 
 			Ogre::Vector2 operator * (const Ogre::Vector2 &ref) {
-				return{ x[0] + x[1] * ref.x + x[2] * ref.y, y[0] + y[1] * ref.x + y[2] * ref.y };
+				return{ x[2] + x[0] * ref.x + x[1] * ref.y, y[2] + y[0] * ref.x + y[1] * ref.y };
 			}
 		};
 

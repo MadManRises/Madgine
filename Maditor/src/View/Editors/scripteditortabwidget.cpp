@@ -22,8 +22,7 @@ namespace Maditor {
 				setCurrentIndex(index);
 				connect(editor, &QsciScintilla::modificationChanged, [=](bool state) {
 					setTabText(index, name + (state ? "*" : ""));
-				});
-				
+				});				
 			}
 
 

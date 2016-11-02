@@ -7,19 +7,26 @@
 
 namespace Maditor {
 	namespace Model {
-		typedef void (*voidF)();
+
 
 		ModuleLoader::ModuleLoader() :
-			mProject(0),
-			mNeedReload(false)
+			mModules(0),
+			mNeedReload(false),
+			mInit(false)
 		{
 			connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ModuleLoader::onFileChanged);
 			connect(&mWatcher, &QFileSystemWatcher::directoryChanged, this, &ModuleLoader::onFolderChanged);
 		}
 
+
+		ModuleLoader::~ModuleLoader()
+		{
+			cleanup();
+		}
+
 		void ModuleLoader::onFileChanged(const QString &path) {
 			QFileInfo f(path);
-			ModuleInstance &module = mInstances.find(mProject->getModuleByName(f.baseName()))->second;
+			ModuleInstance &module = mInstances.find(mModules->getModuleByName(f.baseName()))->second;
 			module.mExists = f.exists();
 			if (module.mExists) {
 				mReloadMutex.lock();
@@ -32,6 +39,7 @@ namespace Maditor {
 				qDebug() << path << "was Deleted!";
 			}
 		}
+
 
 		void ModuleLoader::onFolderChanged(const QString & path)
 		{
@@ -51,8 +59,8 @@ namespace Maditor {
 
 			for (const QString &file : newFileList) {
 				QFileInfo f(file);
-				if (mProject->hasModule(f.baseName())) {
-					ModuleInstance &module = mInstances.find(mProject->getModuleByName(f.baseName()))->second;
+				if (mModules->hasModule(f.baseName())) {
+					ModuleInstance &module = mInstances.find(mModules->getModuleByName(f.baseName()))->second;
 					mReloadMutex.lock();
 					module.mExists = true;
 					module.mNeedReload = true;
@@ -63,11 +71,16 @@ namespace Maditor {
 
 		}
 
-		void ModuleLoader::setup(const QString & binaryDir, const QString & runtimeDir, Project *project)
+
+		void ModuleLoader::setup(const QString & binaryDir, const QString & runtimeDir, ModuleList *moduleList)
 		{
+			
+			assert(!mInit);
+			mInit = true;
+
 			mRuntimeDir = runtimeDir;
 			mBinaryDir = binaryDir;
-			mProject = project;
+			mModules = moduleList;
 
 			QDir dir(binaryDir);
 			mFiles = QSet<QString>::fromList(dir.entryList({"*.dll"}, QDir::NoDotAndDotDot | QDir::Files));
@@ -79,14 +92,34 @@ namespace Maditor {
 			
 			mNeedReload = true;
 
-			mInstances.clear();
 			
-			for (const std::unique_ptr<Module> &module : project->modules()) {
+			
+			for (const std::unique_ptr<Module> &module : *mModules) {
 				addModule(module.get());
 			}
 
 			update(false);
 
+		}
+
+		void ModuleLoader::cleanup()
+		{
+			std::list<const Module*> reloadOrder;
+			for (const std::pair<const Module* const, ModuleInstance> &p : mInstances) {
+				p.first->fillReloadOrder(reloadOrder);
+			}
+
+			for (const Module *m : reloadOrder) {
+				ModuleInstance &instance = mInstances.find(m)->second;
+
+				qDebug() << "Unloading" << m->name();
+				unloadModule(instance);
+				//unload
+			}
+
+			mInstances.clear();
+			
+			mInit = false;
 		}
 
 		void ModuleLoader::update(bool callInit)
@@ -160,22 +193,30 @@ namespace Maditor {
 			if (!module.mLoaded)
 				return true;
 
-			bool isSceneLoaded = Engine::Scene::SceneManager::getSingleton().isSceneLoaded();
-
-			for (Engine::Scene::BaseSceneComponent *c : module.mSceneComponents) {
-				if (isSceneLoaded)
-					c->onSceneClear();
+			if (Engine::Scene::SceneManager::getSingleton().isSceneLoaded()) {
+				for (Engine::Scene::SceneListener *listener : module.mSceneListeners) {
+					listener->beforeSceneClear();
+					listener->onSceneClear();
+				}
 			}
 
 			for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
-				if (isSceneLoaded)
-					h->onSceneClear();
+				h->finalize();
 			}
 
+			for (int i = -1; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
+				for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers) 
+					h->finalize(i);
+
+			for (Engine::Scripting::BaseGlobalAPIComponent *api : module.mGlobalAPIComponents) {
+				api->finalize();
+			}
 
 			bool result = FreeLibrary(module.mHandle);
 			if (result)
 				module.mLoaded = false;
+			else
+				throw 0;
 
 			return result;
 		}
@@ -209,10 +250,13 @@ namespace Maditor {
 			module.mSceneComponents.clear();
 			module.mGameHandlers.clear();
 			module.mGuiHandlers.clear();
+			module.mGlobalAPIComponents.clear();
 			std::set<std::string> beforeEntityComponents = Engine::Scene::Entity::Entity::registeredComponentNames();
 			std::set<Engine::Scene::BaseSceneComponent*> beforeSceneComponents = Engine::Scene::SceneManager::getSingleton().getComponents();
 			std::set<Engine::UI::GameHandlerBase*> beforeGameHandlers = Engine::UI::UIManager::getSingleton().getGameHandlers();
 			std::set<Engine::UI::GuiHandlerBase*> beforeGuiHandlers = Engine::UI::UIManager::getSingleton().getGuiHandlers();
+			std::set<Engine::Scripting::BaseGlobalAPIComponent*> beforeAPIComponents = Engine::Scripting::GlobalScope::getSingleton().getGlobalAPIComponents();
+			std::set<Engine::Scene::SceneListener*> beforeSceneListeners = Engine::Scene::SceneManager::getSingleton().getListeners();
 
 			UINT errorMode = GetErrorMode();
 			SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -235,15 +279,12 @@ namespace Maditor {
 			std::set_difference(afterGameHandlers.begin(), afterGameHandlers.end(), beforeGameHandlers.begin(), beforeGameHandlers.end(), std::inserter(module.mGameHandlers, module.mGameHandlers.end()));
 			std::set<Engine::UI::GuiHandlerBase*> afterGuiHandlers = Engine::UI::UIManager::getSingleton().getGuiHandlers();
 			std::set_difference(afterGuiHandlers.begin(), afterGuiHandlers.end(), beforeGuiHandlers.begin(), beforeGuiHandlers.end(), std::inserter(module.mGuiHandlers, module.mGuiHandlers.end()));
-
-			for (const std::string &t : module.mEntityComponentNames) {
-				qDebug() << t.c_str();
-			}
-
-			
+			std::set<Engine::Scripting::BaseGlobalAPIComponent*> afterAPIComponents = Engine::Scripting::GlobalScope::getSingleton().getGlobalAPIComponents();
+			std::set_difference(afterAPIComponents.begin(), afterAPIComponents.end(), beforeAPIComponents.begin(), beforeAPIComponents.end(), std::inserter(module.mGlobalAPIComponents, module.mGlobalAPIComponents.end()));
+			std::set<Engine::Scene::SceneListener*> afterSceneListeners = Engine::Scene::SceneManager::getSingleton().getListeners();
+			std::set_difference(afterSceneListeners.begin(), afterSceneListeners.end(), beforeSceneListeners.begin(), beforeSceneListeners.end(), std::inserter(module.mSceneListeners, module.mSceneListeners.end()));
 
 			if (callInit) {
-				bool isSceneLoaded = Engine::Scene::SceneManager::getSingleton().isSceneLoaded();
 
 				for (int i = 0; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
 					for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers)
@@ -251,16 +292,23 @@ namespace Maditor {
 
 				for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
 					h->init();
-					if (isSceneLoaded)
-						h->onSceneLoad();
 				}
 
 
 				for (Engine::Scene::BaseSceneComponent *c : module.mSceneComponents) {
 					c->init();
-					if (isSceneLoaded)
-						c->onSceneLoad();
 				}
+
+				for (Engine::Scripting::BaseGlobalAPIComponent *api : module.mGlobalAPIComponents) {
+					api->init();
+				}
+
+				if (Engine::Scene::SceneManager::getSingleton().isSceneLoaded()) {
+					for (Engine::Scene::SceneListener *listener : module.mSceneListeners) {
+						listener->onSceneLoad();
+					}
+				}
+
 			}
 
 			module.mLoaded = true;

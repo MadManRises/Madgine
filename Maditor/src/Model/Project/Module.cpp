@@ -7,7 +7,7 @@
 
 namespace Maditor {
 	namespace Model {
-		Module::Module(Project *parent, const QString & name) :
+		Module::Module(ModuleList *parent, const QString & name) :
 			ProjectElement(name, "Module", parent),
 			mParent(parent),
 			mCmake(parent->cmake(), name)
@@ -22,7 +22,7 @@ namespace Maditor {
 
 		}
 
-		Module::Module(Project *parent, QDomElement data) :
+		Module::Module(ModuleList *parent, QDomElement data) :
 			ProjectElement(data, parent),
 			mParent(parent),
 			mCmake(parent->cmake(), mName)
@@ -57,7 +57,7 @@ namespace Maditor {
 
 		QString Module::root()
 		{
-			return mParent->srcRoot() + mName + "/";
+			return mParent->root() + mName + "/";
 		}
 		void Module::addNewClass(Generator::ClassGenerator * generator)
 		{
@@ -93,7 +93,7 @@ namespace Maditor {
 			return icon;
 		}
 
-		Project * Module::parent()
+		ModuleList * Module::parent()
 		{
 			return mParent;
 		}

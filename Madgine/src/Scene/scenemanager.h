@@ -1,10 +1,11 @@
 #pragma once
 
-//#include "Ogre/scenecomponent.h"
+#include "Scene\scenecomponent.h"
 #include "Resources/Shading/shadercollector.h"
 #include "Scripting/Datatypes/Serialize/serializable.h"
 #include "TextureComponent.h"
 #include "Entity\masks.h"
+#include "Util\MadgineObject.h"
 
 namespace Engine {
 
@@ -14,13 +15,13 @@ namespace Scene {
 
 
 
-class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Scripting::Serialize::Serializable {
+class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Scripting::Serialize::Serializable, public Util::MadgineObject<SceneManager> {
 public:
     SceneManager(Ogre::Root *root);
     virtual ~SceneManager();
 
-    void init();
-	void finalize();
+    virtual void init() override;
+	virtual void finalize() override;
 
 	void update(float timeSinceLastFrame, App::ContextMask mask);
 
@@ -84,6 +85,7 @@ public:
 	void loadComponentData(Scripting::Serialize::SerializeInStream &in);
 
 	std::set<BaseSceneComponent*> getComponents();
+	std::set<SceneListener*> getListeners();
 
 	void clear();
 
@@ -136,8 +138,8 @@ private:
 
     std::list<SceneListener *> mSceneListeners;
 
-    Ogre::unique_ptr<UniqueComponentCollector<BaseSceneComponent>> mSceneComponents;
-    Ogre::unique_ptr<Resources::Shading::ShaderCollector> mShaderCollector;
+    UniqueComponentCollector<BaseSceneComponent> mSceneComponents;
+    Resources::Shading::ShaderCollector mShaderCollector;
 
     
     std::string mHeightmap;

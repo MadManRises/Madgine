@@ -223,7 +223,7 @@ ValueType Scope::execScriptMethod(const std::string &name,
         MADGINE_THROW(ScriptingException(
             Database::Exceptions::unknownMethod(name, getIdentifier())));
     if (getArguments(name).size() != args.size()) throw ScriptingException(
-            Database::Exceptions::argumentCountMismatch);
+            Database::Exceptions::argumentCountMismatch(getArguments(name).size(), args.size()));
     VarSet stack;
 
     auto it = getArguments(name).begin();

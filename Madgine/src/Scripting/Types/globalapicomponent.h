@@ -12,6 +12,9 @@ namespace Engine {
 		public:
 			using UniqueComponent::UniqueComponent;
 
+			virtual const char *getName() override {
+				return typeid(T).name();
+			}
 		};
 
 

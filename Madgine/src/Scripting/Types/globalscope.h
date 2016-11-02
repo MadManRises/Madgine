@@ -13,11 +13,12 @@ namespace Engine {
 
 namespace Scripting {
 
-class MADGINE_EXPORT GlobalScope : public ScopeImpl<GlobalScope>, public Ogre::Singleton<GlobalScope> {
+class MADGINE_EXPORT GlobalScope : public ScopeImpl<GlobalScope>, public Ogre::Singleton<GlobalScope>, public Util::MadgineObject<GlobalScope> {
 public:
     GlobalScope(Parsing::ScriptParser *scriptParser);
 
-	void init();
+	virtual void init() override;
+	virtual void finalize() override;
 
 	void addAPI(BaseAPI *api);
 	void removeAPI(BaseAPI *api);
@@ -36,6 +37,8 @@ public:
 
 	virtual ValueType methodCall(const std::string &name, const ArgumentList &args = {}) override;
 
+	std::set<BaseGlobalAPIComponent*> getGlobalAPIComponents();
+
 protected:    
     virtual std::string getIdentifier() override;
 
@@ -45,7 +48,7 @@ private:
     Level mLevel;
 
     std::list<BaseAPI*> mAPIs;
-	Ogre::unique_ptr<UniqueComponentCollector<BaseGlobalAPIComponent>> mGlobalAPIs;
+	UniqueComponentCollector<BaseGlobalAPIComponent> mGlobalAPIs;
 
 	Parsing::ScriptParser *mScriptParser;
 

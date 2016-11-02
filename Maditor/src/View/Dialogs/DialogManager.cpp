@@ -1,6 +1,7 @@
 #include "maditorinclude.h"
 
 #include "DialogManager.h"
+#include "Model\Project\ModuleList.h"
 #include "Model\Project\Project.h"
 
 #include "newmoduledialog.h"
@@ -41,11 +42,11 @@ namespace Maditor {
 			}
 
 			void DialogManager::onProjectOpened(Model::Project *project) {
-				connect(project, &Model::Project::newModuleRequest, this, &DialogManager::showNewModuleDialog);
-				connect(this, &DialogManager::newModuleDialogAccepted, project, &Model::Project::createModule);
-				connect(project, &Model::Project::moduleAdded, this, &DialogManager::onModuleAdded);
+				connect(project->moduleList(), &Model::ModuleList::newModuleRequest, this, &DialogManager::showNewModuleDialog);
+				connect(this, &DialogManager::newModuleDialogAccepted, project->moduleList(), &Model::ModuleList::createModule);
+				connect(project->moduleList(), &Model::ModuleList::moduleAdded, this, &DialogManager::onModuleAdded);
 
-				for (const std::unique_ptr<Model::Module> &module : project->modules()) {
+				for (const std::unique_ptr<Model::Module> &module : *project->moduleList()) {
 					onModuleAdded(module.get());
 				}
 			}
@@ -70,9 +71,9 @@ namespace Maditor {
 
 			void DialogManager::showNewModuleDialog()
 			{
-				Model::Project *project = static_cast<Model::Project*>(sender());
+				Model::ModuleList *list = static_cast<Model::ModuleList*>(sender());
 
-				NewModuleDialog dialog(project);
+				NewModuleDialog dialog(list);
 
 				if (dialog.exec() == QDialog::Accepted)
 					emit newModuleDialogAccepted(dialog.name());

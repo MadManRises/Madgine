@@ -36,7 +36,7 @@ namespace Engine {
 				}
 			};
 
-			static void registerException();
+			static void registerException(const TraceBack &t);
 
 			static void abort();
 			
@@ -56,11 +56,12 @@ namespace Engine {
 #define TRACE Engine::Util::UtilMethods::Tracer __t(TRACEBACK)
 #define TRACE_S(FILE, LINE, FUNC) Engine::Util::UtilMethods::Tracer __t(Engine::Util::TraceBack(FILE, LINE, FUNC));
 
-#define LOG(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_NORMAL))
+#define LOG(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_TRIVIAL))
+#define LOG_WARNING(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_NORMAL))
 #define LOG_ERROR(s) (Engine::Util::UtilMethods::Tracer(TRACEBACK), Engine::Util::UtilMethods::log(s, Ogre::LML_CRITICAL))
 #define LOG_EXCEPTION(e) Engine::Util::UtilMethods::logException(e);
 
-#define MADGINE_THROW(e) throw (Engine::Util::UtilMethods::registerException(), e)
+#define MADGINE_THROW(e) throw (Engine::Util::UtilMethods::registerException(TRACEBACK), e)
 
 #define MADGINE_ABORT Engine::Util::UtilMethods::abort()
 

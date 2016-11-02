@@ -11,10 +11,10 @@ namespace Shading {
 class ShaderCollector : public Ogre::MaterialManager::Listener, public Ogre::Singleton<ShaderCollector>, public Ogre::ResourceAllocatedObject
 {
 public:
-    ShaderCollector(Ogre::SceneManager *sceneMgr);
+    ShaderCollector();
     ~ShaderCollector();
 
-	void init();
+	void init(Ogre::SceneManager *sceneMgr);
 	void finalize();
 
     Ogre::Technique *handleSchemeNotFound(unsigned short schemeIndex, const Ogre::String &schemeName, Ogre::Material *originalMaterial, unsigned short lodIndex, const Ogre::Renderable *rend);
@@ -26,10 +26,9 @@ private:
     static const std::string sTempShaderFolder;
 
 	bool mVerbose;
+	bool mInitialized;
 
 	Ogre::unique_ptr<UniqueComponentCollector<ShaderFactoryBase>> mCollector;
-
-	Ogre::SceneManager *mSceneMgr;
 
 };
 

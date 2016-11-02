@@ -16,7 +16,6 @@ namespace Maditor {
 			signals:
 				void logWatcherCreated(Log *log);
 				void logWatcherDeleted(Log *log);
-				void openScriptFile(const QString &path, int line);
 
 			private:
 				std::list<Log*> mLogs;

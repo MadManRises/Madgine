@@ -37,7 +37,7 @@ def runCustom(report, export, context):
         return [f for f in files if re.match(t, f)]
 
     def path(s):
-        return os.path.join("C:\\Users\\schue\\Documents\\TT\\Data\\Media", s)
+        return os.path.join("C:\\Users\\schue\\Desktop\\GitHub\\TT\\Data\\Media", s)
 
 
     materialTarget = path("Material")
@@ -65,11 +65,11 @@ def runCustom(report, export, context):
         for ob in context.scene.objects:
             if ob.type == "LAMP":
                 lights.append(ob)
-            elif "Behaviour" not in ob:
-                statics.append(ob)
-            else:
+            elif "Behaviour" in ob:
                 id += 1
                 es[id] = ob
+            elif ob.data:
+                statics.append(ob)
 
         return (es, statics, lights)
 
@@ -160,11 +160,11 @@ def runCustom(report, export, context):
             writeFloat(1.0/l.data.distance)
 
             if l.data.type == 'POINT':
-                writeString('point')
+                writeInt(0)
             elif l.data.type == 'SPOT':
-                writeString('spot')
+                writeInt(2)
             elif l.data.type == 'SUN':
-                writeString('directional')
+                writeInt(1)
 
             writeFloat(l.data.energy)
 
@@ -195,7 +195,7 @@ def runCustom(report, export, context):
         for key, ob in entities.items():
             writeId(key)
             for k in ob.keys():
-                if k not in ["Behaviour", "_RNA_UI", "cycles", "owner"]:
+                if k not in ["Behaviour", "_RNA_UI", "cycles"]:
                     writeString(k)
                     writeValue(ob[k])
             writeNull()
@@ -205,10 +205,8 @@ def runCustom(report, export, context):
             writeFloat(v[0])
             writeVector([v[1], v[3], v[2]])
 
-            if "owner" in ob:
-                writeInt(ob["owner"]) #owner
-            else:
-                writeInt(2) #neutral
+            v = ob.scale
+            writeVector([v[0], v[2], -v[1]])
 
             #Components
             writeNull()

@@ -17,8 +17,11 @@ namespace Maditor {
 					GuiLog
 				};
 
-				OgreLogWatcher(Ogre::Log *log, LogType type, const QString &root);
+				OgreLogWatcher(LogType type, const std::string &name = "");
 				~OgreLogWatcher();
+
+				void listen(Ogre::Log *log, const QString &root);
+				void stopListening(bool unregister = true);
 
 				LogType type();
 
@@ -26,10 +29,12 @@ namespace Maditor {
 
 				LogTableModel *model();
 
+				void logMessage(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_TRIVIAL, const QList<Engine::Util::TraceBack> &traceback = {});
+
 			signals:
 
 
-				void ogreMessageReceived(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_NORMAL, const QList<Engine::Util::TraceBack> &traceback = {});
+				void ogreMessageReceived(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_TRIVIAL, const QList<Engine::Util::TraceBack> &traceback = {});
 
 			private:
 				// Geerbt über LogListener
@@ -38,6 +43,8 @@ namespace Maditor {
 				std::unique_ptr<LogTableModel> mModel;
 				Ogre::Log *mLog;
 				LogType mType;
+				QDir mSourcesRoot;
+				std::string mName;
 			};
 
 		}

@@ -11,7 +11,6 @@ namespace Maditor {
 			virtual std::string getName() = 0;
 
 		signals:
-			void openScriptFile(const QString &path, int line);
 			void messageReceived(const QString &msg);
 
 		};

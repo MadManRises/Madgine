@@ -15,11 +15,11 @@ namespace Maditor {
 					QString name = res.second->getName().c_str();
 					
 					if (name.contains("::")) {
-						ResourceItem *parent = mResources.find(name.mid(0, name.lastIndexOf("::")).toStdString())->second;
-						parent->addChild(new ResourceItem(parent, res.second, name.mid(name.lastIndexOf("::") + 2)));
+						ResourceItem &parent = mResources.find(name.mid(0, name.lastIndexOf("::")).toStdString())->second;
+						parent.addChild(ResourceItem(&parent, res.second, name.mid(name.lastIndexOf("::") + 2)));
 					}
 					else {
-						mResources[name.toStdString()] = new ResourceItem(this, res.second, name);
+						mResources.try_emplace(name.toStdString(), this, res.second, name);
 					}				
 
 				}
@@ -27,8 +27,6 @@ namespace Maditor {
 
 			ResourceGroupItem::~ResourceGroupItem()
 			{
-				for (const std::pair<const std::string, ResourceItem*> &p : mResources)
-					delete p.second;
 			}
 
 			int ResourceGroupItem::childCount()
@@ -40,7 +38,7 @@ namespace Maditor {
 			{
 				auto it = mResources.begin();
 				std::advance(it, i);
-				return it->second;
+				return &it->second;
 			}
 
 			TreeItem * ResourceGroupItem::parentItem()

@@ -9,14 +9,11 @@ namespace Maditor {
 				Q_OBJECT
 
 			public:
-				LogTableModel(const QString &root);
+				LogTableModel();
 
 			public slots:
 				void addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack>& traceback);
 				void doubleClicked(const QModelIndex &index);
-
-			signals:
-				void openScriptFile(const QString &path, int line);
 
 			public:
 
@@ -30,9 +27,6 @@ namespace Maditor {
 
 			private:
 				std::list<std::tuple<Ogre::LogMessageLevel, QString, QString, Engine::Util::TraceBack>> mItems;
-
-				QIcon mErrorIcon, mMsgIcon;
-				QDir mSourcesRoot;
 				
 			};
 

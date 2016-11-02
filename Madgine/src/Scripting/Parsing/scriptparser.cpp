@@ -22,6 +22,8 @@
 
 #include "Database/exceptionmessages.h"
 
+#include "Util\UtilMethods.h"
+
 
 namespace Engine {
 namespace Scripting {
@@ -59,10 +61,18 @@ float ScriptParser::getLoadingOrder() const
 }
 
 void ScriptParser::parseScript(Ogre::DataStreamPtr &stream,
-                               const Ogre::String &group)
+	const Ogre::String &group)
+{
+	parseScript(stream, group, false);
+}
+
+void ScriptParser::parseScript(Ogre::DataStreamPtr &stream,
+                               const Ogre::String &group,
+								bool reload)
 {
     mStream = stream;
 	mGroup = group;
+	mReload = reload;
 	mFile = stream->getName();
     mCurrentLine = 1;
     mLineBase = mStream->tell();
@@ -70,23 +80,32 @@ void ScriptParser::parseScript(Ogre::DataStreamPtr &stream,
     mNextText.clear();
     mNextToken = SOFToken;
 
-    doRead();
-    skipNewlines();
+	try {
 
-    while (mNextToken != EOFToken) {
+		doRead();
+		skipNewlines();
 
-        if (mNextToken != NameToken) throw 0;
-		if (mNextText == "entity") {
-			parseEntity();
-		} else if (mNextText == "data") {
-			parsePrototype();
-		} else {
-            parseMethod();
-        }
+		while (mNextToken != EOFToken) {
 
-        skipNewlines();
+			if (mNextToken != NameToken) throw 0;
+			if (mNextText == "entity") {
+				parseEntity();
+			}
+			else if (mNextText == "data") {
+				parsePrototype();
+			}
+			else {
+				parseMethod();
+			}
 
-    }
+			skipNewlines();
+
+		}
+
+	}
+	catch (ParseException &e) {		
+		LOG_ERROR(std::string("Skipping File: " + mFile));
+	}
 
 }
 
@@ -103,7 +122,7 @@ const EntityNodePtr &ScriptParser::getEntityDescription(const std::string &name)
 {
     auto it = mGlobalTypes.find(name);
     if (it == mGlobalTypes.end()) {
-        throw ScriptingException(Database::Exceptions::unknownEntityDescription(name));
+        MADGINE_THROW(ScriptingException(Database::Exceptions::unknownEntityDescription(name)));
     }
     return it->second;
 }
@@ -120,6 +139,14 @@ Struct & ScriptParser::getPrototype(const std::string & name)
 bool ScriptParser::hasGlobalMethod(const std::string &name)
 {
     return mGlobalMethods.find(name) != mGlobalMethods.end();
+}
+
+void ScriptParser::reparseFile(const Ogre::String & name, const Ogre::String &group)
+{
+	Ogre::DataStreamPtr stream =
+		Ogre::ResourceGroupManager::getSingleton().openResource(
+			name, "General", true);
+	parseScript(stream, group, true);
 }
 
 Ogre::Resource * ScriptParser::createImpl(const Ogre::String & name, Ogre::ResourceHandle handle, const Ogre::String & group, bool isManual, Ogre::ManualResourceLoader * loader, const Ogre::NameValuePairList * createParams)
@@ -173,32 +200,60 @@ void ScriptParser::parseEntity()
     consume(NameToken);
     std::string name = consume(NameToken);
 
+	EntityNodePtr node;
+
+	bool created = false;
+
     auto it = mGlobalTypes.find(name);
     if (it != mGlobalTypes.end()) {
-        throw ScriptingException(Database::Exceptions::doubleTypeDefinition(name));
-    }
+		if (!mReload)
+			throw ScriptingException(Database::Exceptions::doubleTypeDefinition(name));
 
-	Ogre::NameValuePairList param;
-	param["Type"] = "Entity";
+		node = it->second;
+		for (const std::pair<const std::string, MethodNodePtr> &method : node->getMethods()) {
+			remove(method.second->getHandle());
+		}
+		node->clear();
+	}
+	else {
+		Ogre::NameValuePairList param;
+		param["Type"] = "Entity";
 
-	EntityNodePtr node = mGlobalTypes[name] = create(name, mGroup, false, 0, &param);
+		node = mGlobalTypes[name] = create(name, mGroup, false, 0, &param);		
+		created = true;
+	}
+
 	node->_notifyOrigin(mFile);
 	node->setLineNr(mCurrentLine);
 
-	if (mNextToken == ColonToken) {
+	try {
+
+		if (mNextToken == ColonToken) {
+			doRead();
+			node->setPrototype(&getPrototype(consume(NameToken)));
+		}
+
+		skipNewlines();
+		consume(CurlyBracketOpen);
+		skipNewlines();
+
+		while (mNextToken != CurlyBracketClose) {
+			parseMethod(node);
+			skipNewlines();
+		}
 		doRead();
-		node->setPrototype(&getPrototype(consume(NameToken)));
+
 	}
-
-    skipNewlines();
-    consume(CurlyBracketOpen);
-    skipNewlines();
-
-    while (mNextToken != CurlyBracketClose) {
-        parseMethod(node);
-        skipNewlines();
-    }
-    doRead();
+	catch (ParseException &e) {
+		std::list<Util::TraceBack> traceback;
+		traceback.emplace_back(mFile, mCurrentLine, name);
+		Util::UtilMethods::log(e.what(), Ogre::LML_CRITICAL, traceback);
+		if (created) {
+			mGlobalTypes.erase(name);			
+			remove(node->getHandle());
+		}
+		throw;
+	}
 }
 
 void ScriptParser::parsePrototype()
@@ -241,39 +296,79 @@ void ScriptParser::parseMethod(const EntityNodePtr &entity)
 
 	std::string resName = (entity.isNull() ? name : entity->getName() + "::" + name);
 
-    MethodNodePtr node = create(resName, mGroup, false, 0, &param);
-	node->_notifyOrigin(mFile);
-	node->setLineNr(mCurrentLine);
+	MethodNodePtr node;
+
+	bool created = false;
 
     if (!entity.isNull()) {
-        entity->addMethod(node, name);
+		if (entity->hasMethod(name)) {
+			node = entity->getMethod(name);
+		}
     } else {
         auto it = mGlobalMethods.find(name);
         if (it != mGlobalMethods.end()) {
-            throw ScriptingException(Database::Exceptions::doubleGlobalMethodDefinition(name));
-        }
-        mGlobalMethods[name] = node;
+			if (!mReload)
+				throw ParseException(Database::Exceptions::doubleGlobalMethodDefinition(name));
+			node = it->second;
+		}
+		
     }
+	if (node.isNull()) {
+		node = create(resName, mGroup, false, 0, &param);
+		created = true;
+		if (!entity.isNull()) {
+			entity->addMethod(node, name);
+		}
+		else {
+			mGlobalMethods[name] = node;
+		}
+	}
+	else {
+		node->clear();
+	}
 
-    consume(BracketOpen);
-    if (mNextToken == BracketClose) {
-        doRead();
-    } else {
-        bool loop = true;
-        while (loop) {
-            node->addArgument(consume(NameToken));
-            if (mNextToken != CommaToken && mNextToken != BracketClose) throw 0;
-            if (mNextToken == BracketClose) loop = false;
-            doRead();
-        }
-    }
-    consume(CurlyBracketOpen);
-    skipNewlines();
-    while (mNextToken != CurlyBracketClose) {
-        node->addStatement(parseFullStatement());
-        skipNewlines();
-    }
-    doRead();
+	node->_notifyOrigin(mFile);
+	node->setLineNr(mCurrentLine);
+
+	try {
+
+		consume(BracketOpen);
+		if (mNextToken == BracketClose) {
+			doRead();
+		}
+		else {
+			bool loop = true;
+			while (loop) {
+				node->addArgument(consume(NameToken));
+				if (mNextToken != CommaToken && mNextToken != BracketClose) throw 0;
+				if (mNextToken == BracketClose) loop = false;
+				doRead();
+			}
+		}
+		consume(CurlyBracketOpen);
+		skipNewlines();
+		while (mNextToken != CurlyBracketClose) {
+			node->addStatement(parseFullStatement());
+			skipNewlines();
+		}
+		doRead();
+
+	}
+	catch (ParseException &e) {
+		std::list<Util::TraceBack> traceback;
+		traceback.emplace_back(mFile, mCurrentLine, name);
+		Util::UtilMethods::log(e.what(), Ogre::LML_CRITICAL, traceback);
+		if (created) {
+			if (!entity.isNull()) {
+				entity->removeMethod(name);
+			}
+			else {
+				mGlobalMethods.erase(name);
+			}
+			remove(node->getHandle());
+		}
+		throw;
+	}
 
 }
 
@@ -344,15 +439,25 @@ Ogre::unique_ptr<const Statements::Statement> ScriptParser::parseSingleStatement
         doRead();
         if (mNextToken == ElseToken) {
             doRead();
-            consume(CurlyBracketOpen);
-            skipNewlines();
-            while (mNextToken != CurlyBracketClose) {
-                elseStatements.emplace_back(parseFullStatement());
-                skipNewlines();
-            }
-            doRead();
-        }
-        consume(NewlineToken);
+			skipNewlines();
+			if (mNextToken == IfToken) {
+				elseStatements.emplace_back(parseSingleStatement());
+			}
+			else {
+				consume(CurlyBracketOpen);
+				skipNewlines();
+				while (mNextToken != CurlyBracketClose) {
+					elseStatements.emplace_back(parseFullStatement());
+					skipNewlines();
+				}
+				doRead();
+				consume(NewlineToken);
+			}
+		}
+		else {
+			consume(NewlineToken);
+		}
+
         return MAKE_STATEMENT(Statements::If)(line, std::move(temp), std::move(statements), std::move(elseStatements));
     }
     case WhileToken: {
@@ -543,7 +648,7 @@ std::string ScriptParser::consume()
 std::string ScriptParser::consume(ScriptParser::TokenType expected)
 {
     if (mNextToken != expected)
-        throw ParseException(Database::Exceptions::unexpectedParseType(typeToString(expected), mStream->getName(), mCurrentLine, mStream->tell() - mLineBase));
+        throw ParseException(Database::Exceptions::unexpectedParseType(typeToString(expected), mStream->getName(), mCurrentLine, mStream->tell() - mLineBase - mNextText.length()));
     return consume();
 }
 

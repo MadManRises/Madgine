@@ -47,16 +47,23 @@ Application::~Application()
 		delete mInput;
 	if (mProfiler)
 		delete mProfiler;
-	if (mUI)
+	if (mUI) {
+		mUI->finalize();
 		delete mUI;
-	if (mGUI)
+	}
+	if (mGUI) {
+		Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
+		mGUI->finalize();
 		delete mGUI;
+	}
 	if (mSceneMgr) {
 		mSceneMgr->finalize();
 		delete mSceneMgr;
 	}
-	if (mGlobalScope)
+	if (mGlobalScope) {
+		mGlobalScope->finalize();
 		delete mGlobalScope;
+	}
 	if (mLoader)
 		delete mLoader;
 	if (mConfig)
@@ -168,8 +175,18 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		}
 
 		{
+			PROFILE("GUI", "Rendering");
+			mGUI->update(fe.timeSinceLastFrame);
+		}
+
+		{
 			PROFILE("UIManager", "Rendering");
 			mUI->update(fe.timeSinceLastFrame);
+		}
+
+		{
+			PROFILE("SceneManager", "Rendering");
+			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
 		}
 
 		{
@@ -196,10 +213,24 @@ bool Application::frameEnded(const Ogre::FrameEvent & fe)
 	return true;
 }
 
+
+void Application::setWindowProperties(bool fullscreen, size_t width, size_t height)
+{
+	mWindow->setFullscreen(fullscreen, width, height);
+	resizeWindow();
+}
+
+Ogre::RenderWindow * Application::renderWindow()
+{
+	return mWindow;
+}
+
+
 void Application::_clear()
 {
 	mSceneMgr->clear();
 	mGlobalScope->clear();
+	mUI->clear();
 }
 
 void Application::_setupOgre()
@@ -227,16 +258,37 @@ void Application::_setup()
 
 	// Initialise GUISystem 
 	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());
-	//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)(); 
+	//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
+	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI);
 
 	// Create UIManager
-	mUI = OGRE_NEW UI::UIManager(mWindow, mSceneMgr, mGUI);
+	mUI = OGRE_NEW UI::UIManager(mGUI);
 
-	mInput = mSettings->mInput ? mSettings->mInput : new Input::OISInputHandler(mGUI, mWindow);
+	if (mSettings->mInput)
+		mInput = mSettings->mInput;
+	else
+		mInput = new Input::OISInputHandler(mGUI, mWindow);
 
 	mProfiler = OGRE_NEW Util::Profiler();
 }
 
+void Application::resizeWindow()
+{
+	if (mWindow) {
+		mWindow->windowMovedOrResized();
+		Ogre::WindowEventUtilities::WindowEventListeners::iterator index,
+			start = Ogre::WindowEventUtilities::_msListeners.lower_bound(mWindow),
+			end = Ogre::WindowEventUtilities::_msListeners.upper_bound(mWindow);
+		for (index = start; index != end; ++index)
+			(index->second)->windowResized(mWindow);
+	}
+}
+
+void Application::renderFrame()
+{
+	mGUI->renderSingleFrame();
+	mWindow->update();
+}
 
 
 }

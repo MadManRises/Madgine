@@ -6,6 +6,8 @@
 
 #include "GUI\Windows\window.h"
 
+#include "UI\windownames.h"
+
 namespace Engine {
 	namespace GUI {
 		
@@ -26,10 +28,32 @@ namespace Engine {
 			assert(mChildren.empty());
 		}
 
+		void WindowContainer::unregisterAllEvents(void * id)
+		{
+			unregisterCustomEvents(id);
+			mResizeListeners.erase(id);
+		}
+
+		void WindowContainer::registerEvent(void * id, EventType type, std::function<void()> event)
+		{
+			switch (type) {
+			case EventType::WindowResized:
+				mResizeListeners[id].push_back(event);
+				break;
+			default:
+				throw 0;
+			}
+		}
+
 		void WindowContainer::setSize(const WindowSizeRelVector & size)
 		{
 			mSize = size;
 			mGui->setDirtyWindowSizes();
+		}
+
+		const WindowSizeRelVector & WindowContainer::getSize()
+		{
+			return mSize;
 		}
 
 		void WindowContainer::setPos(const WindowSizeRelVector & pos)
@@ -38,9 +62,13 @@ namespace Engine {
 			mGui->setDirtyWindowSizes();
 		}
 
+		const WindowSizeRelVector & WindowContainer::getPos()
+		{
+			return mPos;
+		}
+
 		void WindowContainer::updateSize(const Ogre::Vector2 &size)
 		{
-
 			setPixelSize(mSize * size);
 			setPixelPosition(mPos * size);
 
@@ -48,6 +76,13 @@ namespace Engine {
 		
 			for (WindowContainer *w : mChildren)
 				w->updateSize(pixelSize);
+
+			for (const std::pair<void * const, std::list<std::function<void()>>> &callbacks : mResizeListeners) {
+				for (const std::function<void()> &callback : callbacks.second) {
+					callback();
+				}
+			}
+
 		}
 
 		Window * WindowContainer::as(Class _class)
@@ -77,7 +112,7 @@ namespace Engine {
 
 		WindowContainer * WindowContainer::getChildRecursive(const std::string & name)
 		{
-			if (name == getName()) return this;
+			if (name == getName() || name == WindowNames::thisWindow) return this;
 			for (WindowContainer *w : mChildren)
 				if (WindowContainer *f = w->getChildRecursive(name))
 					return f;
@@ -95,8 +130,10 @@ namespace Engine {
 		WindowContainer * WindowContainer::loadLayout(const std::string & name)
 		{
 			WindowContainer *child = loadLayoutWindow(name);
-			child->updateSize(getPixelSize());
-			mChildren.push_back(child);
+			if (child) {
+				child->updateSize(getPixelSize());
+				mChildren.push_back(child);
+			}
 			return child;
 		}
 

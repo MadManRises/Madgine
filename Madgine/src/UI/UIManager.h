@@ -14,17 +14,18 @@ namespace Engine {
 	namespace UI {
 
 		class MADGINE_EXPORT UIManager : public Ogre::Singleton<UIManager>,
-			public Ogre::WindowEventListener,
-			 public Ogre::GeneralAllocatedObject,
-			public Scripting::GlobalAPI<UIManager>
+			public Util::MadgineObject<UIManager>,
+			public Scripting::GlobalAPI<UIManager>,
+			public Ogre::GeneralAllocatedObject
 		{
 		public:
-			UIManager(Ogre::RenderWindow *window, Scene::SceneManager *sceneMgr, GUI::GUISystem *gui);
+			UIManager(GUI::GUISystem *gui);
 			~UIManager();
 
-			void init();
+			virtual void init() override;
+			virtual void finalize() override;
 
-			void openLoadingScreen();
+			void clear();
 
 			void hideCursor(bool keep = true);
 
@@ -32,12 +33,6 @@ namespace Engine {
 			//Scripting::ValueType showCursor(const Scripting::ArgumentList &args);
 
 			bool isCursorVisible();
-
-			void setWindowProperties(bool fullscreen, size_t width, size_t height);
-
-			virtual void windowResized(Ogre::RenderWindow * rw) override;
-
-			//void windowClosed(Ogre::RenderWindow * rw);
 
 			void swapCurrentRoot(GuiHandlerBase * newRoot);
 
@@ -51,30 +46,21 @@ namespace Engine {
 
 			void update(float timeSinceLastFrame);
 
-
+			App::ContextMask currentContext();
 
 			GUI::GUISystem *gui();
-
-			void renderFrame();
-
-			Ogre::RenderWindow *renderWindow();
 
 			std::set<GameHandlerBase*> getGameHandlers();
 			std::set<GuiHandlerBase*> getGuiHandlers();
 
-			static const constexpr size_t sMaxInitOrder = 4;
+			static const constexpr int sMaxInitOrder = 4;
 
 		private:
-			Ogre::unique_ptr<UniqueComponentCollector<GuiHandlerBase>> mGuiHandlers;
-			Ogre::unique_ptr<UniqueComponentCollector<GameHandlerBase>> mGameHandlers;
+			UniqueComponentCollector<GuiHandlerBase> mGuiHandlers;
+			UniqueComponentCollector<GameHandlerBase> mGameHandlers;
 
-			GuiHandlerBase *mCurrentRoot;
+			GuiHandlerBase *mCurrentRoot;			
 
-			Ogre::RenderWindow *mWindow;
-
-			
-
-			Scene::SceneManager *mSceneMgr;
 			GUI::GUISystem *mGUI;
 
 			std::stack<UI::GuiHandlerBase *> mModalWindowList;

@@ -2,13 +2,14 @@
 
 #include "GUIEvents.h"
 #include "Windows\windowclass.h"
+#include "Util\MadgineObject.h"
 
 namespace Engine {
 	namespace GUI {
 
 		
 
-		class MADGINE_EXPORT GUISystem : public Ogre::Singleton<GUISystem>, public Ogre::GeneralAllocatedObject
+		class MADGINE_EXPORT GUISystem : public Ogre::Singleton<GUISystem>, public Util::MadgineObject<GUISystem>, public Ogre::GeneralAllocatedObject, public Ogre::WindowEventListener
 		{
 		public:
 			GUISystem();
@@ -16,8 +17,7 @@ namespace Engine {
 
 			void printHierarchy();
 
-			virtual void init();
-			virtual void injectTimePulse(float time);
+			virtual void update(float time);
 			virtual void notifyDisplaySizeChanged(const Ogre::Vector2 &size);
 			virtual void renderSingleFrame();
 
@@ -47,6 +47,8 @@ namespace Engine {
 			Window *loadLayout(const std::string &name, const std::string &parent);
 
 			Window *getRootWindow();
+
+			virtual void windowResized(Ogre::RenderWindow * rw) override;
 
 		protected:
 			WindowContainer *mRootWindow;

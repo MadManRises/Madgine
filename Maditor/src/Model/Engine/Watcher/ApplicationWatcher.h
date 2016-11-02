@@ -11,19 +11,20 @@ namespace Maditor {
 				Q_OBJECT
 
 			public:
-				ApplicationWatcher(ModuleLoader *loader);
+				ApplicationWatcher(ModuleLoader *loader, OgreLogWatcher *madgineLog);
 				~ApplicationWatcher();
 
 				void notifyApplicationCreated(const QString &root);
 				void notifyApplicationShutdown();
+				void afterApplicationShutdown();
 				void notifyApplicationStarted();
 				void notifyApplicationStopped();
 				void notifyApplicationInitialized();
 
 				ResourceWatcher *resourceWatcher();
 				PerformanceWatcher *performanceWatcher();
-				//LogsWatcher *logsWatcher();
 				OgreSceneWatcher *ogreSceneWatcher();
+				ObjectsWatcher *objectsWatcher();
 
 				void resizeWindow();
 
@@ -37,13 +38,10 @@ namespace Maditor {
 				void applicationInitialized();
 				void applicationStarted();
 				void applicationStopped();
+				void applicationShutdown();
 
 			protected:
 				virtual bool frameRenderingQueued(const Ogre::FrameEvent &ev) override;
-
-			private:
-
-				void _resizeWindow();
 
 			private:				
 				
@@ -52,6 +50,7 @@ namespace Maditor {
 				ResourceWatcher *mResourceWatcher;				
 				PerformanceWatcher *mPerformanceWatcher;
 				OgreSceneWatcher *mOgreSceneWatcher;
+				ObjectsWatcher *mObjectsWatcher;
 
 				Ogre::RenderTarget *mSceneRenderWindow;
 				Ogre::RenderWindow *mGuiRenderWindow;

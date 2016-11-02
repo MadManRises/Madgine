@@ -12,6 +12,14 @@ namespace Maditor {
 				startTimer(3000);
 
 				connect(this, &PerformanceWatcher::dataChangedQueued, this, &PerformanceWatcher::updateData, Qt::QueuedConnection);
+				connect(this, &PerformanceWatcher::resetModelQueued, this, &PerformanceWatcher::resetModel, Qt::QueuedConnection);
+			}
+
+			void PerformanceWatcher::resetModel()
+			{
+				beginResetModel();
+				mRootItem.clear();
+				endResetModel();
 			}
 
 			void PerformanceWatcher::timerEvent(QTimerEvent * event)
@@ -41,9 +49,15 @@ namespace Maditor {
 				}
 			}
 
+			void PerformanceWatcher::clear()
+			{
+				emit resetModelQueued();
+			}
+
 
 			void PerformanceWatcher::updateData() {
-				emit dataChanged(QModelIndex(), QModelIndex());
+				emit dataChanged(index(0, 1), index(rowCount() - 1, 3));
+				//emit dataChanged(QModelIndex(), QModelIndex());
 			}
 
 			

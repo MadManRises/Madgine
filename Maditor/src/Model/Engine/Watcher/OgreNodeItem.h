@@ -15,6 +15,7 @@ namespace Maditor {
 				OgreNodeItem(OgreSceneNodeItem *parent, const std::string &name);
 
 				virtual QVariant data(int col) const override;
+				
 
 				virtual OgreNodeItem *parentItem() override;
 
@@ -46,6 +47,7 @@ namespace Maditor {
 				virtual ~OgreSceneNodeItem();
 
 				void update(OgreSceneWatcher *watcher, const QModelIndex &index);
+				void clear();
 
 				virtual Ogre::SceneNode *getNode();
 
@@ -59,8 +61,8 @@ namespace Maditor {
 
 
 			private:
-				std::list<OgreEntityItem*> mObjects;
-				std::list<OgreSceneNodeItem*> mNodes;
+				std::list<OgreEntityItem> mObjects;
+				std::list<OgreSceneNodeItem> mNodes;
 
 				Ogre::SceneNode *mNode;
 

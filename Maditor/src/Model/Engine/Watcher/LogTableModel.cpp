@@ -2,16 +2,14 @@
 
 #include "LogTableModel.h"
 
+#include "Model\Editors\EditorManager.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			LogTableModel::LogTableModel(const QString &root) :
-			mSourcesRoot(root + "src/"){
-				qDebug() << mSourcesRoot.path();
-				mErrorIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxCritical));
-				mMsgIcon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxInformation));
+			LogTableModel::LogTableModel()
+			{				
 			}
 
 			void LogTableModel::addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack> &traceback) {
@@ -20,7 +18,7 @@ namespace Maditor {
 
 				for (const Engine::Util::TraceBack &t : traceback) {
 					if (!tracebackString.isEmpty()) tracebackString += "\n";
-					tracebackString += QString("%1(%2): %3").arg(mSourcesRoot.relativeFilePath(QString::fromStdString(t.mFile)), QString::number(t.mLineNr), QString::fromStdString(t.mFunction));
+					tracebackString += QString("%1(%2): %3").arg(QString::fromStdString(t.mFile), QString::number(t.mLineNr), QString::fromStdString(t.mFunction));
 				}
 				mItems.emplace_back(level, msg, tracebackString, traceback.empty() ? Engine::Util::TraceBack() : traceback.back());
 				endInsertRows();
@@ -36,21 +34,7 @@ namespace Maditor {
 				if (traceback.mFile == "<unknown>")
 					return;
 
-				QFileInfo file(traceback.mFile.c_str());
-				if (file.suffix() == "script") {
-					for (Ogre::ResourceGroupManager::ResourceLocation *loc : Ogre::ResourceGroupManager::getSingleton().getResourceLocationList("Scripting")) {
-						const Ogre::StringVectorPtr& list = loc->archive->find(traceback.mFile);
-						if (!list->empty()) {
-							emit openScriptFile((loc->archive->getName() + "/" + traceback.mFile).c_str(), traceback.mLineNr);
-							return;
-						}
-					}
-					qDebug() << "Can't find Resource-File: " << traceback.mFile.c_str();
-				}
-				else if (QStringList({ "cpp", "h" }).contains(file.suffix())) {
-
-					qDebug() << file.filePath();
-				}
+				Editors::EditorManager::getSingleton().openByExtension(traceback.mFile, traceback.mLineNr);
 			}
 
 			Q_INVOKABLE int LogTableModel::rowCount(const QModelIndex & parent) const
@@ -82,10 +66,19 @@ namespace Maditor {
 				if (index.column() == 0) {
 					if (role != Qt::DecorationRole)
 						return QVariant();
-					if (std::get<0>(*it) == Ogre::LML_NORMAL)
-						return mMsgIcon;
-					else
-						return mErrorIcon;
+					QIcon icon;
+					switch (std::get<0>(*it)) {
+					case Ogre::LML_TRIVIAL:
+						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxInformation));
+						break;
+					case Ogre::LML_NORMAL:
+						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
+						break;
+					case Ogre::LML_CRITICAL:
+						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxCritical));
+						break;
+					}
+					return icon;
 				}
 				else if (index.column() == 2) {
 					if (role != Qt::DisplayRole)

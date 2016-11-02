@@ -5,7 +5,7 @@
 namespace Engine{
 
 template <class T, class Base>
-class UniqueComponent : public Base , public Ogre::Singleton<T>, public Ogre::SceneCtlAllocatedObject
+class UniqueComponent : public Base , public Ogre::Singleton<T>, public Ogre::GeneralAllocatedObject
 {
 public:
 	using Base::Base;

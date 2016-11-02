@@ -9,13 +9,14 @@
 
 #include "ModuleLoader.h"
 
+#include "Scripting\Parsing\parseexception.h"
+
 namespace Maditor {
 	namespace Model {
 		ApplicationWrapper::ApplicationWrapper(Watcher::ApplicationWatcher *watcher, ModuleLoader *loader) :
 			mWork(true),
 			mWorker(&ApplicationWrapper::workerLoop, this),
 			mApplication(0),
-			mSettings(0),
 			mWatcher(watcher),
 			mLoader(loader)
 		{
@@ -26,19 +27,20 @@ namespace Maditor {
 		ApplicationWrapper::~ApplicationWrapper()
 		{
 			cleanup();
+			mWork = false;
+			mWorker.join();
 		}
 
 		void ApplicationWrapper::load(Project *project, QWindow *target)
 		{
-			mSettings = new Engine::App::AppSettings;
-			mSettings->mInput = &mInput;
-			mSettings->mUseExternalSettings = true;
-			mSettings->mWindowName = "QtOgre";
-			mSettings->mWindowWidth = target->width();
-			mSettings->mWindowHeight = target->height();
-			mSettings->mRootDir = (project->root() + "Data/").toStdString();
-			mSettings->mPluginsFile = mSettings->mRootDir + "plugins.cfg";
-			Ogre::NameValuePairList &parameters = mSettings->mWindowParameters;
+			mSettings.mInput = &mInput;
+			mSettings.mUseExternalSettings = true;
+			mSettings.mWindowName = "QtOgre";
+			mSettings.mWindowWidth = target->width();
+			mSettings.mWindowHeight = target->height();
+			mSettings.mRootDir = (project->root() + "Data/").toStdString();
+			mSettings.mPluginsFile = mSettings.mRootDir + "plugins.cfg";
+			Ogre::NameValuePairList &parameters = mSettings.mWindowParameters;
 
 			/*
 			Flag within the parameters set so that Ogre3D initializes an OpenGL context on it's own.
@@ -68,11 +70,11 @@ namespace Maditor {
 			doTask([=] () {
 				mApplication = new Engine::App::Application;
 				
-				mApplication->setup(*mSettings);
+				mApplication->setup(mSettings);
 				mInput.setSystem(&Engine::GUI::GUISystem::getSingleton());
 				mWatcher->notifyApplicationCreated(project->root());
-				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project);
-				mApplication->init();				
+				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project->moduleList());
+				mApplication->init();
 				mWatcher->notifyApplicationInitialized();
 			});
 		}
@@ -91,17 +93,16 @@ namespace Maditor {
 		{
 			if (mApplication) {
 				doTask([&]() {
+					mLoader->cleanup();
 					mInput.clearSystem();
 					mWatcher->notifyApplicationShutdown();
 					delete mApplication;
 					mApplication = 0;
-					delete mSettings;
-					mSettings = 0;
+					mWatcher->afterApplicationShutdown();
+					
 				});
 				shutdown();
 			}
-			mWork = false;
-			mWorker.join();
 		}
 
 		void ApplicationWrapper::shutdown()

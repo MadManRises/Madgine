@@ -4,8 +4,6 @@
 
 #include "GUI/GUISystem.h"
 
-#include "Scene/scenemanager.h"
-
 #include "GUI/Windows/Window.h"
 
 #include "gamehandler.h"
@@ -18,48 +16,54 @@ namespace Engine {
 	namespace UI {
 
 
-		UIManager::UIManager(Ogre::RenderWindow *window, Scene::SceneManager *sceneMgr, GUI::GUISystem *gui) :
+		UIManager::UIManager(GUI::GUISystem *gui) :
 			mKeepingCursorPos(false),
-			mWindow(window),
 			mGUI(gui),
-			mCurrentRoot(0),
-			mSceneMgr(sceneMgr)
+			mCurrentRoot(0)
 		{
 
-			mGuiHandlers = OGRE_MAKE_UNIQUE(UniqueComponentCollector<GuiHandlerBase>)();
-
-			mGameHandlers = OGRE_MAKE_UNIQUE(UniqueComponentCollector<GameHandlerBase>)();
-
 			//Register as a Window listener
-			Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);
+			
 
 		}
 
 		UIManager::~UIManager()
-		{
-			mGuiHandlers.reset();
-			mGameHandlers.reset();
-
-			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
-		}
-
-		void UIManager::renderFrame()
-		{
-			mGUI->renderSingleFrame(); // Show Loading Screen
-			mWindow->update();
+		{			
 		}
 
 		void UIManager::init()
 		{
+			MadgineObject::init();
+
 			for (int i = 0; i < sMaxInitOrder; ++i)
-				for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : *mGuiHandlers)
+				for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
 					handler->init(i);
 
-			for (const Ogre::unique_ptr<UI::GameHandlerBase> &handler : *mGameHandlers) {
+			for (const Ogre::unique_ptr<UI::GameHandlerBase> &handler : mGameHandlers) {
 				handler->init();
 			}
 
-			windowResized(mWindow);
+		}
+
+		void UIManager::finalize()
+		{
+			for (const Ogre::unique_ptr<UI::GameHandlerBase> &handler : mGameHandlers) {
+				handler->finalize();
+			}
+
+
+			for (int i = 0; i < sMaxInitOrder; ++i)
+				for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
+					handler->finalize(i);
+
+			MadgineObject::finalize();
+		}
+
+		void UIManager::clear()
+		{
+			while (!mModalWindowList.empty()) {
+				closeModalWindow(mModalWindowList.top());
+			}
 		}
 
 		void UIManager::hideCursor(bool keep)
@@ -71,10 +75,10 @@ namespace Engine {
 				mKeptCursorPosition = { (float)mouseState.X.abs, (float)mouseState.Y.abs };*/
 			}
 			mGUI->hideCursor();
-			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : *mGameHandlers) {
+			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->onMouseVisibilityChanged(false);
 			}
-			for (const Ogre::unique_ptr<UI::GuiHandlerBase> &h : *mGuiHandlers) {
+			for (const Ogre::unique_ptr<UI::GuiHandlerBase> &h : mGuiHandlers) {
 				h->onMouseVisibilityChanged(false);
 			}
 		}
@@ -94,10 +98,10 @@ namespace Engine {
 			else {
 				mGUI->showCursor();
 			}
-			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : *mGameHandlers) {
+			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->onMouseVisibilityChanged(true);
 			}
-			for (const Ogre::unique_ptr<UI::GuiHandlerBase> &h : *mGuiHandlers) {
+			for (const Ogre::unique_ptr<UI::GuiHandlerBase> &h : mGuiHandlers) {
 				h->onMouseVisibilityChanged(true);
 			}
 		}
@@ -107,21 +111,10 @@ namespace Engine {
 			return mGUI->isCursorVisible();
 		}
 
-		void UIManager::setWindowProperties(bool fullscreen, size_t width, size_t height)
-		{
-			mWindow->setFullscreen(fullscreen, width, height);
-			windowResized(mWindow);
-		}
-		
-		Ogre::RenderWindow * UIManager::renderWindow()
-		{
-			return mWindow;
-		}
-
 		std::set<GameHandlerBase*> UIManager::getGameHandlers()
 		{
 			std::set<GameHandlerBase*> result;
-			for (const std::unique_ptr<GameHandlerBase> &h : *mGameHandlers) {
+			for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
 				result.insert(h.get());
 			}
 			return result;
@@ -130,7 +123,7 @@ namespace Engine {
 		std::set<GuiHandlerBase*> UIManager::getGuiHandlers()
 		{
 			std::set<GuiHandlerBase*> result;
-			for (const std::unique_ptr<GuiHandlerBase> &h : *mGuiHandlers) {
+			for (const std::unique_ptr<GuiHandlerBase> &h : mGuiHandlers) {
 				result.insert(h.get());
 			}
 			return result;
@@ -139,39 +132,18 @@ namespace Engine {
 		
 		void UIManager::update(float timeSinceLastFrame)
 		{
-			
-			//Need to inject timestamps to GUI System.
-			mGUI->injectTimePulse(timeSinceLastFrame);
+			App::ContextMask context = currentContext();
 
-			App::ContextMask context = (mModalWindowList.empty() ? mCurrentRoot : mModalWindowList.top())->context();
-
-			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : *mGameHandlers) {
+			for (const Ogre::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->update(timeSinceLastFrame, context);
 			}
-
-			mSceneMgr->update(timeSinceLastFrame, context);
-
-			
-
 		}
 
-		//---------------------------------------------------------------------------
-		// Adjust mouse clipping area
-		void UIManager::windowResized(Ogre::RenderWindow *rw)
+		App::ContextMask UIManager::currentContext()
 		{
-			unsigned int width, height, depth;
-			int left, top;
-			rw->getMetrics(width, height, depth, left, top);
-
-			//Ogre::LogManager::getSingleton().getLog("Madgine.log")->logMessage(std::string("Setting Resolution to: ") + std::to_string(width) + "x" + std::to_string(height));
-
-			mGUI->notifyDisplaySizeChanged(Ogre::Vector2(width, height));
-
-			for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : *mGuiHandlers) {
-				if (handler->isRootWindow())
-					handler->sizeChanged();
-			}
+			return (mModalWindowList.empty() ? mCurrentRoot : mModalWindowList.top())->context();
 		}
+
 
 		void UIManager::swapCurrentRoot(UI::GuiHandlerBase *newRoot)
 		{

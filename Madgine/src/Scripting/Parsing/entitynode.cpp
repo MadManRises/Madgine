@@ -25,6 +25,16 @@ void EntityNode::addMethod(const MethodNodePtr &method, const std::string &name)
     mMethods[name] = method;
 }
 
+void EntityNode::removeMethod(const std::string & name)
+{
+	mMethods.erase(name);
+}
+
+const std::map<std::string, MethodNodePtr>& EntityNode::getMethods() const
+{
+	return mMethods;
+}
+
 const MethodNodePtr &EntityNode::getMethod(const std::string &name) const
 {
     auto it = mMethods.find(name);
@@ -49,10 +59,16 @@ Scope * EntityNode::getPrototype() const
 	return mPrototype;
 }
 
+void EntityNode::clear()
+{
+	mPrototype = 0;
+	mMethods.clear();
+}
+
 void EntityNode::unloadImpl()
 {
 	mName.clear();
-	mPrototype = nullptr;
+	clear();
 }
 
 void EntityNode::loadImpl()

@@ -16,7 +16,7 @@ public:
     const Ogre::StringVector &getScriptPatterns() const;
     float getLoadingOrder() const;
 
-    void parseScript(Ogre::DataStreamPtr &, const Ogre::String &);
+    virtual void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &group) override;
 
     const MethodNodePtr &getGlobalMethod(const std::string &name);
 
@@ -26,7 +26,11 @@ public:
 
     bool hasGlobalMethod(const std::string &name);
 
+	void reparseFile(const Ogre::String &name, const Ogre::String &group);
+
 protected:
+	
+
 	virtual Ogre::Resource *createImpl(const Ogre::String &name, Ogre::ResourceHandle handle,
 		const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader,
 		const Ogre::NameValuePairList *createParams) final;
@@ -65,6 +69,8 @@ private:
         SemikolonToken,
         NullToken
     };
+
+	void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &group, bool reload);
 
     static std::string typeToString(TokenType type);
 
@@ -106,6 +112,7 @@ private:
     std::string mNextText;
     size_t mCurrentLine;
 	std::string mFile, mGroup;
+	bool mReload;
 };
 
 }

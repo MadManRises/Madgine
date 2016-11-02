@@ -11,6 +11,10 @@ namespace Engine {
 			public:
 				MyGUIButton(MyGUIWindow *w);
 
+				virtual void setText(const std::string &text) override;
+
+			private:
+				MyGUI::Button *mButton;
 			};
 		}
 	}

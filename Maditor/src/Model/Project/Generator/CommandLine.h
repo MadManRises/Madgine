@@ -9,10 +9,10 @@ namespace Maditor {
 			public:
 				static int exec(const char *cmd);
 
-				static void setLog(ProjectLog *log);
+				static void setLog(Watcher::OgreLogWatcher *log);
 
 			private:
-				static ProjectLog *sLog;
+				static Watcher::OgreLogWatcher *sLog;
 			};
 		}
 	}

@@ -15,12 +15,15 @@ namespace Maditor {
 				PerformanceWatcher();
 				
 				void update();
+				void clear();
 
 			signals:
 				void dataChangedQueued();
+				void resetModelQueued();
 
 			private slots:
 				void updateData();
+				void resetModel();
 
 			protected:
 

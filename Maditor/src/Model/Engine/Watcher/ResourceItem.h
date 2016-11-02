@@ -19,11 +19,13 @@ namespace Maditor {
 				virtual TreeItem * parentItem() override;
 				virtual QVariant data(int col) const override;
 
-				void addChild(ResourceItem *child);
+				void addChild(ResourceItem &&child);
+
+				virtual void doubleClicked() override;
 
 			private:
 				Ogre::ResourcePtr mResource;
-				std::list<ResourceItem *> mChildren;
+				std::list<ResourceItem> mChildren;
 				QString mName;
 				TreeItem *mParent;
 

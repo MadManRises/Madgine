@@ -19,7 +19,9 @@ public:
 
 	virtual QVariant icon() const;
 
-	void extendContextMenu(QMenu &menu);
+	virtual void extendContextMenu(QMenu &menu);
+
+	virtual void doubleClicked();
 
 protected:
 	void setContextMenuItems(std::list<std::pair<QString, std::function<void()>>> &&contextMenuItems);

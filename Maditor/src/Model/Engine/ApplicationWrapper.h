@@ -23,7 +23,7 @@ namespace Maditor {
 			void workerLoop();
 			void doTask(std::function<void()> task);
 
-			Engine::App::AppSettings *mSettings;
+			Engine::App::AppSettings mSettings;
 			Engine::App::Application *mApplication;
 
 			std::mutex mMutex;

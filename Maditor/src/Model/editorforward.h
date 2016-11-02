@@ -4,11 +4,13 @@ namespace Maditor {
 	namespace Model {
 		class ApplicationWrapper;
 		class Project;
+		class ModuleList;
 		class Module;
 
 		class Editor;
 
 		class TreeItem;
+		class TreeModel;
 
 		class Log;
 		class LogsModel;
@@ -31,6 +33,8 @@ namespace Maditor {
 			class OgreLogWatcher;		
 
 			class InputWrapper;
+
+			class ObjectsWatcher;
 			
 		}
 
@@ -44,6 +48,7 @@ namespace Maditor {
 			class ScriptEditorModel;
 			class VSLink;
 			class ScriptEditor;
+			class EditorManager;
 		}
 		
 		class ModuleLoader;

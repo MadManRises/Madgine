@@ -3131,7 +3131,7 @@ class _OgreCommonExport_(_TXML_):
             # First export during this blender run
             if self.filepath == "" and context.blend_data.filepath != "":
                 path, name = os.path.split(context.blend_data.filepath)
-                self.filepath = os.path.join('C:\\Users\\schue\\Documents\\TT\\Data\\Work\\blender\\Scenes\\output', name.split('.')[0])
+                self.filepath = os.path.join('C:\\Users\\schue\\Desktop\\GitHub\\TT\\Data\\Work\\blender\\Scenes\\output', name.split('.')[0])
             if self.filepath == "":
                 self.filepath = "blender2ogre-export"
             if self.EXPORT_TYPE == "OGRE":

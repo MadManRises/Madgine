@@ -66,6 +66,8 @@ namespace Maditor {
 				file.flush();
 				file.close();
 
+				emit saved(this);
+
 			}
 
 			int ScriptEditor::index()
@@ -76,6 +78,12 @@ namespace Maditor {
 			void ScriptEditor::setIndex(int index)
 			{
 				mIndex = index;
+			}
+
+			QString ScriptEditor::getName()
+			{
+				QFileInfo info(mPath);
+				return info.fileName();
 			}
 
 		}

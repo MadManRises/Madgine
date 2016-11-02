@@ -1,6 +1,6 @@
-#include "SceneManager.h"
-
 #include "libinclude.h"
+
+#include "SceneManager.h"
 
 #include "scenenames.h"
 #include "Entity/entity.h"
@@ -42,20 +42,7 @@ SceneManager::SceneManager(Ogre::Root *root) :
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
 
-
-	/*mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_MODULATIVE);
-	mSceneMgr->setShadowTextureSize(512);
-	mSceneMgr->setShadowFarDistance(20);
-	mSceneMgr->setShadowTextureCount(2);
-	mSceneMgr->setShadowColour(Ogre::ColourValue(0.0, 0.0, 0.6));
-	mSceneMgr->setShadowTextureSelfShadow(false);*/
-
 	createCamera();
-
-	mShaderCollector = OGRE_MAKE_UNIQUE(Resources::Shading::ShaderCollector)(mSceneMgr);
-
-	mSceneComponents = OGRE_MAKE_UNIQUE(UniqueComponentCollector<BaseSceneComponent>)();
-
 }
 
 SceneManager::~SceneManager()
@@ -64,8 +51,9 @@ SceneManager::~SceneManager()
 
 void SceneManager::init()
 {
+	MadgineObject::init();
 
-	mShaderCollector->init();
+	mShaderCollector.init(mSceneMgr);
 
 	Ogre::MovableObject::setDefaultQueryFlags(Entity::Masks::DEFAULT_MASK);
 
@@ -73,7 +61,7 @@ void SceneManager::init()
 	mTerrainRayQuery->setSortByDistance(true);
 
 
-    for (const Ogre::unique_ptr<BaseSceneComponent> &component : *mSceneComponents){
+    for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
         component->init();
     }
 }
@@ -82,7 +70,7 @@ void SceneManager::finalize()
 {
 	clear();
 
-	for (const Ogre::unique_ptr<BaseSceneComponent> &component : *mSceneComponents) {
+	for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
 		component->finalize();
 	}	
 
@@ -91,7 +79,9 @@ void SceneManager::finalize()
 
 	if (mTerrainRayQuery) mSceneMgr->destroyQuery(mTerrainRayQuery);
 
-	mShaderCollector->finalize();
+	mShaderCollector.finalize();
+
+	MadgineObject::finalize();
 
 }
 
@@ -324,7 +314,7 @@ Ogre::Vector2 SceneManager::relToScenePos(const Ogre::Vector2 &v)
 
 size_t SceneManager::getComponentCount()
 {
-	return mSceneComponents->size();
+	return mSceneComponents.size();
 }
 
 void SceneManager::onLoad()
@@ -337,7 +327,7 @@ void SceneManager::onLoad()
 
 void SceneManager::saveComponentData(Scripting::Serialize::SerializeOutStream &out) const
 {
-    for (const Ogre::unique_ptr<BaseSceneComponent> &component : *mSceneComponents){
+    for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
         out << component->componentName() << *component;
     }
     out << Scripting::ValueType();
@@ -347,7 +337,7 @@ void SceneManager::loadComponentData(Scripting::Serialize::SerializeInStream &in
 {
     std::string componentName;
     while(in.loopRead(componentName)){
-        for (const Ogre::unique_ptr<BaseSceneComponent> &component : *mSceneComponents){
+        for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
 			if (component->componentName() == componentName) {
 				in >> *component;
 			}
@@ -423,13 +413,20 @@ Entity::Entity *SceneManager::createEntity(const std::string &name, const std::s
 		node->attachObject(mesh);
 	}
 
-    Entity::Entity *e = OGRE_NEW Entity::Entity(node, behaviour, mesh);
+	Entity::Entity *e = 0;
+	try {
+		e = OGRE_NEW Entity::Entity(node, behaviour, mesh);
 
-    mEntities.emplace_back(e);
+		mEntities.emplace_back(e);
 
-    for (SceneListener *listener : mSceneListeners){
-        listener->notifyEntityAdded(e);
-    }
+		for (SceneListener *listener : mSceneListeners) {
+			listener->notifyEntityAdded(e);
+		}
+	}
+	catch (Scripting::ScriptingException &e) {
+		LOG_EXCEPTION(e);
+
+	}   
 
     return e;
 
@@ -528,7 +525,6 @@ bool SceneManager::rayToTerrainPoint(const Ogre::Ray &ray,
 
 void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 {
-	PROFILE("SceneManager", "UIManager");
 
 	{
 		PROFILE("Entities", "SceneManager");
@@ -542,7 +538,7 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 	{
 		PROFILE("SceneComponents", "SceneManager");
 		if (mIsSceneLoaded) {
-			for (const Ogre::unique_ptr<BaseSceneComponent> &component : *mSceneComponents) {
+			for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
 				PROFILE(component->componentName(), "SceneComponents");
 				component->update(timeSinceLastFrame, mask);
 			}
@@ -601,6 +597,7 @@ void SceneManager::removeQueuedEntities()
 
 void SceneManager::clear()
 {
+	if (!mIsSceneLoaded) return;
 
     for (SceneListener *listener : mSceneListeners){
         listener->beforeSceneClear();
@@ -631,10 +628,19 @@ void SceneManager::clear()
 std::set<BaseSceneComponent*> SceneManager::getComponents()
 {
 	std::set<BaseSceneComponent*> result;
-	for (const std::unique_ptr<BaseSceneComponent> &e : *mSceneComponents) {
+	for (const std::unique_ptr<BaseSceneComponent> &e : mSceneComponents) {
 		result.insert(e.get());
 	}
 	return result;
+}
+
+std::set<SceneListener*> SceneManager::getListeners()
+{
+	std::set<SceneListener*> result;
+	for (SceneListener *listener : mSceneListeners) {
+		result.insert(listener);
+	}
+	return result;	
 }
 
 // raycast from a point in to the scene.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Project\Project.h"
+#include "Engine\Watcher\LogWatcher.h"
 
 namespace Maditor {
 	namespace Model {
@@ -19,8 +20,7 @@ namespace Maditor {
 			ApplicationWrapper *application();
 			Watcher::ApplicationWatcher *watcher();
 			Generator::ClassGeneratorFactory *classGeneratorFactory();
-			Editors::ScriptEditorModel *scriptEditor();
-			Editors::VSLink *vs();
+			Editors::EditorManager *editorManager();
 			LogsModel *logsModel();
 			
 			Project *project();
@@ -35,6 +35,8 @@ namespace Maditor {
 
 		private:
 
+			Watcher::OgreLogWatcher mLog;
+
 			ModuleLoader *mLoader;
 
 			Watcher::ApplicationWatcher *mApplicationWatcher;
@@ -44,8 +46,8 @@ namespace Maditor {
 			std::unique_ptr<Project> mProject;
 
 			Generator::ClassGeneratorFactory *mClassGeneratorFactory;
-			Editors::ScriptEditorModel *mScriptEditor;
-			Editors::VSLink *mVS;
+			Editors::EditorManager *mEditorManager;
+
 			LogsModel *mLogs;
 
 			QWindow *mOgreTarget;
