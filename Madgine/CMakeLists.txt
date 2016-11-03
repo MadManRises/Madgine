@@ -98,3 +98,5 @@ configure_file(CMake/MadgineConfig.cmake.in
 configure_file(CMake/MadgineConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/MadgineConfigVersion.cmake" @ONLY)
  
+
+add_subdirectory(test)

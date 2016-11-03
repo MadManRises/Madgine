@@ -20,6 +20,8 @@ INCLUDE(Project)
 
 find_package(OGRE REQUIRED)
 
+add_subdirectory(gtest1.8.0)
+
 add_subdirectory(Madgine)
 if (BUILD_MADITOR)
 	add_subdirectory(Maditor)
