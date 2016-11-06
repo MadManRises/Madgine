@@ -1,15 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
-
-
-
 cmake_policy(SET CMP0011 OLD)
 cmake_policy(SET CMP0049 OLD)
 
-PROJECT(MADGINE)
+
+
+
+Project(MADGINE)
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
-	"${MADGINE_SOURCE_DIR}/CMake"
+  "${MADGINE_SOURCE_DIR}/CMake"
 )
 
 
@@ -98,5 +98,6 @@ configure_file(CMake/MadgineConfig.cmake.in
 configure_file(CMake/MadgineConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/MadgineConfigVersion.cmake" @ONLY)
  
-
-add_subdirectory(test)
+if (BUILD_TESTS)
+	add_subdirectory(test)
+endif(BUILD_TESTS)
