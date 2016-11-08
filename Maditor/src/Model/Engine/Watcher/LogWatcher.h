@@ -3,6 +3,8 @@
 #include "LogTableModel.h"
 #include "Model\log.h"
 
+Q_DECLARE_METATYPE(Ogre::LogMessageLevel);
+Q_DECLARE_METATYPE(QList<Engine::Util::TraceBack>);
 
 namespace Maditor {
 	namespace Model {

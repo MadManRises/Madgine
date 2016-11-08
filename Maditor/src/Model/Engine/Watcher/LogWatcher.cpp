@@ -20,6 +20,8 @@ namespace Maditor {
 					mModel = std::unique_ptr<LogTableModel>(new LogTableModel);
 					if (QApplication::instance())
 						mModel->moveToThread(QApplication::instance()->thread());
+					qRegisterMetaType<Ogre::LogMessageLevel>();
+					qRegisterMetaType<QList<Engine::Util::TraceBack>>();
 					connect(this, &OgreLogWatcher::ogreMessageReceived, mModel.get(), &Model::Watcher::LogTableModel::addMessage, Qt::QueuedConnection);
 				}
 			}
