@@ -8,7 +8,6 @@ Project(ProcessTalker)
 
 include_directories(${BOOST_PATH})
 
-add_library(ProcessTalker STATIC ProcessTalker.cpp ProcessTalker.h)
 
 
 if (BLENDER_TOOL)
@@ -19,3 +18,7 @@ if (VS_TOOL)
 endif (VS_TOOL)
 
 set(TOOLS_LIBS ${TOOLS_LIBS} PARENT_SCOPE)
+
+if (NOT TOOLS_LIBS STREQUAL "")
+	add_library(ProcessTalker STATIC ProcessTalker.cpp ProcessTalker.h)
+endif()

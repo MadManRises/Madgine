@@ -4,6 +4,6 @@
 #include <madgineinclude.h>
 #include "Model\Editor.h"
 
-TEST(GenerateNewProject, FullTest) {
+TEST(MaditorFullTest, GenerateNewProject) {
 	Maditor::Model::Editor editor;
 }
