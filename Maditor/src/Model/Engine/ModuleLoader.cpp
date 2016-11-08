@@ -105,7 +105,8 @@ namespace Maditor {
 
 		void ModuleLoader::cleanup()
 		{
-			mWatcher.removePath(mBinaryDir);
+			if (!mBinaryDir.isEmpty())
+				mWatcher.removePath(mBinaryDir);
 
 			std::list<const Module*> reloadOrder;
 

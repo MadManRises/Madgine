@@ -52,8 +52,6 @@ namespace Maditor {
 
 			void ensureVisible(QWidget *widget);
 
-			void test();
-
 		private slots:
 			void onAppCreated();
 			void onAppInitialized();

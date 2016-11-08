@@ -42,7 +42,7 @@ namespace Maditor {
 
 			ui->game->addWidget(ogre);
 
-			editor->init(mTarget);
+			editor->init();
 
 			Model::Watcher::ApplicationWatcher *watcher = editor->watcher();
 			ui->LogsWidget->setModel(editor->logsModel());
@@ -181,11 +181,6 @@ namespace Maditor {
 				
 				widget = widget->parentWidget();
 			}
-		}
-
-		void MainWindow::test()
-		{
-			ui->PerformanceWidget->sortByColumn(1, Qt::AscendingOrder);
 		}
 
 		void MainWindow::showGame()
