@@ -5,6 +5,10 @@ cmake_policy(SET CMP0049 OLD)
 
 set(QT_PATH "" CACHE PATH "Path to Qt-find script")
 
+set(CMAKE_PREFIX_PATH
+	"${QT_PATH}"
+)
+
 #Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
@@ -14,9 +18,7 @@ add_subdirectory(Tools)
 
 PROJECT(Maditor)
 
-set(CMAKE_PREFIX_PATH
-	"${QT_PATH}"
-)
+
 
 add_definitions(-DCMAKE_PATH="${CMAKE_COMMAND}")
 add_definitions(-DCMAKE_GENERATOR="${CMAKE_GENERATOR}")
