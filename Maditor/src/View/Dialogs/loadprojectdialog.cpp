@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "loadprojectdialog.h"
 #include "ui_loadprojectdialog.h"

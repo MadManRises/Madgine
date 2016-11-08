@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "newmoduledialog.h"
 #include "ui_newmoduledialog.h"

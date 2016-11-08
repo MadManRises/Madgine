@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "LogTableModel.h"
 
@@ -13,14 +13,13 @@ namespace Maditor {
 			}
 
 			void LogTableModel::addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack> &traceback) {
-				beginInsertRows(QModelIndex(), mItems.size(), mItems.size());
 				QString tracebackString;
-
 				for (const Engine::Util::TraceBack &t : traceback) {
 					if (!tracebackString.isEmpty()) tracebackString += "\n";
 					tracebackString += QString("%1(%2): %3").arg(QString::fromStdString(t.mFile), QString::number(t.mLineNr), QString::fromStdString(t.mFunction));
 				}
-				mItems.emplace_back(level, msg, tracebackString, traceback.empty() ? Engine::Util::TraceBack() : traceback.back());
+				beginInsertRows(QModelIndex(), 0, 0);
+				mItems.emplace_front(level, msg, tracebackString, traceback.empty() ? Engine::Util::TraceBack() : traceback.back());
 				endInsertRows();
 			}
 
@@ -35,6 +34,13 @@ namespace Maditor {
 					return;
 
 				Editors::EditorManager::getSingleton().openByExtension(traceback.mFile, traceback.mLineNr);
+			}
+
+			void LogTableModel::clear()
+			{
+				beginResetModel();
+				mItems.clear();
+				endResetModel();
 			}
 
 			Q_INVOKABLE int LogTableModel::rowCount(const QModelIndex & parent) const

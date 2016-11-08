@@ -9,7 +9,7 @@
 
 namespace Maditor {
 	namespace Model {
-		class ModuleList : public QObject, public ProjectElement {
+		class MADITOR_EXPORT ModuleList : public QObject, public ProjectElement {
 			Q_OBJECT
 
 		public:

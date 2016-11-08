@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "Module.h"
 #include "Project.h"

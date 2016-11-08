@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VSLink.h"
 #include "ScriptEditorModel.h"
 
 namespace Maditor {
@@ -14,16 +13,18 @@ namespace Maditor {
 				EditorManager();
 
 				void openResource(const Ogre::ResourcePtr &res);
-				QString getFullPath(const std::string &fileName, const std::string &group);
-				void open(const QString &filePath, const std::string &group, int lineNr = -1);
+				QString getFullPath(const std::string &fileName, const QString &group);
+				void open(const QString &filePath, const QString &group, int lineNr = -1);
+				void setCurrentRoot(const QString & root);
 				void openByExtension(const std::string &name, int lineNr = -1);
 
-				VSLink *vs();
 				ScriptEditorModel *scriptEditor();
 
 			private:
-				VSLink mVS;
 				ScriptEditorModel mScriptEditor;
+
+
+				QString mCurrentRoot;
 			};
 		}
 	}

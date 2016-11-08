@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "CommandLine.h"
 #include "Model\Engine\Watcher\LogWatcher.h"

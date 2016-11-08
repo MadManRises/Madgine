@@ -11,7 +11,7 @@ namespace Maditor {
 			class MainWindow;
 		}
 
-		class MainWindow : public QMainWindow
+		class MADITOR_EXPORT MainWindow : public QMainWindow
 		{
 			Q_OBJECT
 
@@ -20,11 +20,11 @@ namespace Maditor {
 			~MainWindow();
 
 
-			void setupScene();
+			/*void setupScene();
 
 			void refresh();
 
-			void addEntity(Engine::Scene::Entity::Entity *e);
+			void addEntity(Engine::Scene::Entity::Entity *e);*/
 
 		private:
 			//void fillData(Engine::Util::Profiler &profiler, QTreeWidgetItem *item, const std::string &name, long long frameDuration, const std::string &parentName = "");

@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Project\Project.h"
-#include "Engine\Watcher\LogWatcher.h"
 
 namespace Maditor {
 	namespace Model {
-		class Editor : public QObject {
+		class MADITOR_EXPORT Editor : public QObject {
 			Q_OBJECT
 		public:
 			Editor();
@@ -35,7 +34,7 @@ namespace Maditor {
 
 		private:
 
-			Watcher::OgreLogWatcher mLog;
+			Watcher::OgreLogWatcher *mLog;
 
 			ModuleLoader *mLoader;
 
@@ -68,6 +67,7 @@ namespace Maditor {
 			bool mReloadProject;
 
 			QSettings mSettings;
+
 		};
 	}
 }

@@ -35,6 +35,8 @@ namespace Maditor {
 			class InputWrapper;
 
 			class ObjectsWatcher;
+
+			class LogTableModel;
 			
 		}
 
@@ -56,6 +58,7 @@ namespace Maditor {
 	}
 
 	namespace View {
+		class MainWindow;
 		class OgreWindow;
 	}
 }

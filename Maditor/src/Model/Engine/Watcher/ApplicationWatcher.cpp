@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "ApplicationWatcher.h"
 
@@ -18,7 +18,12 @@ namespace Maditor {
 				mSceneRenderWindow(0),
 				mModuleLoader(loader),
 				mResizePending(false),
-				mMadgineLog(madgineLog){
+				mMadgineLog(madgineLog),
+				mResourceWatcher(0),
+				mPerformanceWatcher(0),
+				mOgreSceneWatcher(0),
+				mObjectsWatcher(0)
+			{
 
 
 
@@ -26,10 +31,14 @@ namespace Maditor {
 
 			ApplicationWatcher::~ApplicationWatcher()
 			{
-				delete mResourceWatcher;
-				delete mPerformanceWatcher;
-				delete mOgreSceneWatcher;
-				delete mObjectsWatcher;
+				if (mResourceWatcher)
+					delete mResourceWatcher;
+				if (mPerformanceWatcher)
+					delete mPerformanceWatcher;
+				if (mOgreSceneWatcher)
+					delete mOgreSceneWatcher;
+				if (mObjectsWatcher)
+					delete mObjectsWatcher;
 			}
 
 			void ApplicationWatcher::notifyApplicationCreated(const QString &root)

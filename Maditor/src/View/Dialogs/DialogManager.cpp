@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "DialogManager.h"
 #include "Model\Project\ModuleList.h"

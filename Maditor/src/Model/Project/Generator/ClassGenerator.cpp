@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "ClassGenerator.h"
 #include "Model\Project\Module.h"

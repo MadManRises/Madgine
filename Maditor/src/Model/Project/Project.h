@@ -9,7 +9,7 @@
 
 namespace Maditor {
 	namespace Model {
-		class Project : public TreeModel, public ProjectElement {
+		class MADITOR_EXPORT Project : public TreeModel, public ProjectElement {
 			Q_OBJECT
 
 		public:

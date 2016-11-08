@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "Generator.h"
 #include "View\Dialogs\DialogManager.h"

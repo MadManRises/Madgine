@@ -14,6 +14,7 @@ namespace Maditor {
 			public slots:
 				void addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack>& traceback);
 				void doubleClicked(const QModelIndex &index);
+				void clear();
 
 			public:
 

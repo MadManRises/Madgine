@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "newclassdialog.h"
 #include "ui_newclassdialog.h"

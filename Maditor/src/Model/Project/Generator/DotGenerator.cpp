@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "DotGenerator.h"
 #include "CommandLine.h"

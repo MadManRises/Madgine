@@ -1,37 +1,12 @@
 #pragma once
 
-#include <libinclude.h>
+#ifdef Maditor_EXPORTS
+#define MADITOR_EXPORT __declspec(dllexport)
+#else
+#define MADITOR_EXPORT __declspec(dllimport)
+#endif
 
 #include "Model/editorforward.h"
-
-#include "Util/UtilMethods.h"
-#include "Util/Profiler.h"
-
-#include "Input/InputHandler.h"
-
-#include "App/Application.h"
-#include "App/appsettings.h"
-
-#include "GUI\GUIEvents.h"
-#include "GUI\GUISystem.h"
-
-#include "Scene/scenemanager.h"
-#include "Scene\Entity\entity.h"
-#include "Scene/scenecomponent.h"
-
-#include "Scripting\Parsing\scriptparser.h"
-#include "Scripting\Parsing\textresourceptr.h"
-
-#include "UI\UIManager.h"
-
-#include <mutex>
-#include <unordered_map>
-#include <functional>
-#include <set>
-#include <queue>
-
-#include <Qsci\qsciabstractapis.h>
-#include <Qsci/qsciscintilla.h>
 
 #include <QMenu>
 #include <QStringList>
@@ -64,3 +39,13 @@
 #include <QPainter>
 #include <QPlainTextEdit>
 #include <QFileDialog>
+#include <QToolBar>
+
+#include <mutex>
+#include <unordered_map>
+#include <functional>
+#include <set>
+#include <queue>
+
+#include <Qsci\qsciabstractapis.h>
+#include <Qsci/qsciscintilla.h>

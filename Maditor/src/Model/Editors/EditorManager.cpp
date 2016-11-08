@@ -1,7 +1,8 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "EditorManager.h"
 
+#include "Addons\Addon.h"
 
 namespace Maditor {
 	namespace Model {
@@ -14,7 +15,7 @@ namespace Maditor {
 			{
 				if (res->getOrigin().empty()) return;
 
-				const Ogre::String &type = res->getCreator()->getResourceType();
+				QString type = QString::fromStdString(res->getCreator()->getResourceType());
 				int lineNr = -1;
 
 				if (type == "Scripting") {
@@ -25,11 +26,11 @@ namespace Maditor {
 				open(getFullPath(res->getOrigin(), type), type, lineNr);
 			}
 
-			QString EditorManager::getFullPath(const std::string & fileName, const std::string & group)
+			QString EditorManager::getFullPath(const std::string & fileName, const QString & group)
 			{
 				if (!Ogre::ResourceGroupManager::getSingletonPtr()) return QString();
 				QString fullPath;
-				for (Ogre::ResourceGroupManager::ResourceLocation *loc : Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(group)) {
+				for (Ogre::ResourceGroupManager::ResourceLocation *loc : Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(group.toStdString())) {
 					const Ogre::StringVectorPtr& list = loc->archive->find(fileName);
 					if (!list->empty()) {
 						fullPath = QString::fromStdString(loc->archive->getName() + "/" + fileName);
@@ -39,44 +40,60 @@ namespace Maditor {
 				return fullPath;
 			}
 
-			void EditorManager::open(const QString & filePath, const std::string &group, int lineNr)
+			void EditorManager::open(const QString & filePath, const QString &group, int lineNr)
 			{
 				if (group == "Scripting") {
 					mScriptEditor.openScriptFile(filePath, lineNr);
 				}
 				else {
-					qDebug() << "No Editor available for Resource-Type:" << QString::fromStdString(group);
+					for (Addons::Addon *addon : Addons::AddonCollector::getSingleton()) {
+						if (addon->resourceGroupName() == group) {
+							addon->openFile(filePath, lineNr);
+							return;
+						}
+					}
+					qDebug() << "No Editor available for Resource-Type:" << group;
 				}
+			}
+
+
+			void EditorManager::setCurrentRoot(const QString & root)
+			{
+				mCurrentRoot = root;
 			}
 
 			void EditorManager::openByExtension(const std::string & name, int lineNr)
 			{
 				QString qName = QString::fromStdString(name);
+
 				QFileInfo info(qName);
+				if (info.isRelative())
+					info.setFile(mCurrentRoot + qName);
 				QString suffix = info.suffix();
-				std::string group;
+				QString group;
 				if (suffix == "script") {
 					group = "Scripting";
 				}
-				else if (QStringList({ "cpp", "h" }).contains(suffix)) {
-					qDebug() << qName;
-					return;
-				}
 				else {
-					qDebug() << "Unknown Extension:" << qName;
-					return;
+					for (Addons::Addon *addon : Addons::AddonCollector::getSingleton()) {
+						if (addon->supportedFileExtensions().contains(suffix)) {
+							group = addon->resourceGroupName();
+							break;
+						}
+					}
+					if (group.isEmpty()) {
+						qDebug() << "Unknown Extension:" << qName;
+						return;
+					}
 				}
-				QString path = info.exists() ? QString::fromStdString(name) : getFullPath(name, group);
+				QString path = info.exists() ? info.filePath() : getFullPath(name, group);
 				if (!path.isEmpty())
 					open(path, group, lineNr);
 				else
 					qDebug() << "Could not find Resource-File:" << QString::fromStdString(name);
 			}
 
-			VSLink * EditorManager::vs()
-			{
-				return &mVS;
-			}
+
 			ScriptEditorModel * EditorManager::scriptEditor()
 			{
 				return &mScriptEditor;

@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "Editor.h"
 #include "Logsmodel.h"
@@ -21,13 +21,16 @@ namespace Maditor {
 			mEditorManager(0),
 			mOgreTarget(0),
 			mSettings("MadMan Studios", "Maditor"),
-			mLog(Watcher::OgreLogWatcher::GuiLog, "Madgine.log") {
+			mLogs(0)
+		{
+
+			mLog = new Watcher::OgreLogWatcher(Watcher::OgreLogWatcher::GuiLog, "Madgine.log");
 
 			mRecentProjects = mSettings.value("recentProjects").toStringList();
 			mReloadProject = mSettings.value("reloadProject").toBool();
 
 			mLoader = new ModuleLoader;
-			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, &mLog);
+			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
 		}
@@ -40,8 +43,11 @@ namespace Maditor {
 			delete mApplicationWrapper;
 			delete mApplicationWatcher;
 			delete mEditorManager;
-			delete mLoader;			
-			delete mLogs;
+			delete mLoader;		
+			if (mLogs)
+				delete mLogs;
+
+			delete mLog;
 		}
 
 		void Editor::init(QWindow * target)
@@ -58,11 +64,8 @@ namespace Maditor {
 			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logRemoved, mLogs, &LogsModel::removeLog);
 			connect(mEditorManager->scriptEditor(), &Editors::ScriptEditorModel::documentSaved, mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::reloadScriptFile);
 
-			mLogs->addLog(&mLog);
-			Generator::CommandLine::setLog(&mLog);
-
-
-
+			mLogs->addLog(mLog);
+			Generator::CommandLine::setLog(mLog);
 		}
 
 		void Editor::onStartup()
@@ -119,6 +122,7 @@ namespace Maditor {
 			return mProject.get();
 		}
 
+
 		QSettings & Editor::settings()
 		{
 			return mSettings;
@@ -154,7 +158,7 @@ namespace Maditor {
 
 			emit projectOpened(mProject.get());
 
-			
+			mEditorManager->setCurrentRoot(mProject->root() + "src/");
 
 			//mApplicationWrapper.go();
 		}

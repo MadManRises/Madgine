@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "CmakeProject.h"
 
@@ -41,6 +41,11 @@ endif (%1_FOUND)
 			void CmakeProject::addLibrary(const QString & lib)
 			{
 				mLibraries << lib;
+			}
+
+			QString CmakeProject::solutionName()
+			{
+				return mBuildDir + name() + ".sln";
 			}
 
 		}

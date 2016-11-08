@@ -1,8 +1,9 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "LogsTabWidget.h"
 #include "Model\LogsModel.h"
 #include "Model\Engine\Watcher\LogWatcher.h"
+#include "logwidget.h"
 
 namespace Maditor {
 	namespace View {
@@ -36,20 +37,12 @@ namespace Maditor {
 				addTab(edit, QString::fromStdString(log->getName()));
 				connect(log, &Model::Log::messageReceived, edit, &QPlainTextEdit::appendPlainText, Qt::QueuedConnection);
 			}else{
-				QTableView *view = new QTableView;
+				LogWidget *view = new LogWidget;
 				mTabs[log] = view;
-				view->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-				view->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-				view->horizontalHeader()->setStretchLastSection(true);
-				view->verticalHeader()->hide();
-				view->horizontalHeader()->setMinimumSectionSize(0);
-				view->setWordWrap(true);
 				view->setModel(ogreLog->model());
-				//view->setSelectionMode(QAbstractItemView::NoSelection);
-				view->setSelectionBehavior(QAbstractItemView::SelectRows);
 				addTab(view, QString::fromStdString(log->getName()));
 
-				connect(view, &QTableView::doubleClicked, ogreLog->model(), &Model::Watcher::LogTableModel::doubleClicked);
+
 			}
 			
 		}

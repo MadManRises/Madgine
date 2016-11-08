@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -91,7 +91,6 @@ namespace Maditor {
 			//Editor-related
 			connect(mEditor->editorManager()->scriptEditor(), &Model::Editors::ScriptEditorModel::showDoc, this, &MainWindow::ensureVisible);
 
-			connect(ui->actionOpenVS, &QAction::triggered, mEditor->editorManager()->vs(), &Model::Editors::VSLink::openVS);
 
 			//Watcher-related
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::onAppCreated, Qt::QueuedConnection);

@@ -1,4 +1,4 @@
-#include "maditorinclude.h"
+#include "madgineinclude.h"
 
 #include "ModuleLoader.h"
 
@@ -26,7 +26,10 @@ namespace Maditor {
 
 		void ModuleLoader::onFileChanged(const QString &path) {
 			QFileInfo f(path);
-			ModuleInstance &module = mInstances.find(mModules->getModuleByName(f.baseName()))->second;
+			auto it = mInstances.find(mModules->getModuleByName(f.baseName()));
+			//if (it == mInstances.end())
+			//	return;
+			ModuleInstance &module = it->second;
 			module.mExists = f.exists();
 			if (module.mExists) {
 				mReloadMutex.lock();
@@ -85,8 +88,6 @@ namespace Maditor {
 			QDir dir(binaryDir);
 			mFiles = QSet<QString>::fromList(dir.entryList({"*.dll"}, QDir::NoDotAndDotDot | QDir::Files));
 
-			SetDllDirectory(runtimeDir.toStdString().c_str());
-
 			mWatcher.addPath(binaryDir);
 
 			
@@ -104,17 +105,21 @@ namespace Maditor {
 
 		void ModuleLoader::cleanup()
 		{
+			mWatcher.removePath(mBinaryDir);
+
 			std::list<const Module*> reloadOrder;
+
 			for (const std::pair<const Module* const, ModuleInstance> &p : mInstances) {
 				p.first->fillReloadOrder(reloadOrder);
 			}
 
 			for (const Module *m : reloadOrder) {
-				ModuleInstance &instance = mInstances.find(m)->second;
+				auto it = mInstances.find(m);
+				ModuleInstance &instance = it->second;
 
 				qDebug() << "Unloading" << m->name();
 				unloadModule(instance);
-				//unload
+				mWatcher.removePath(mBinaryDir + m->name() + ".dll");
 			}
 
 			mInstances.clear();
@@ -265,8 +270,8 @@ namespace Maditor {
 			}
 			catch (...) {
 				module.mHandle = 0;
-			}
-			SetErrorMode(errorMode);
+			}			
+			SetErrorMode(errorMode);						
 
 			if (!module.mHandle)
 				return false;
