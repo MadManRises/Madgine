@@ -1,3 +1,5 @@
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
+
 cmake_minimum_required (VERSION 3.3)
 
 set(OGRE_SDK "" CACHE PATH "Path to Ogre install directory")
