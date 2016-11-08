@@ -69,7 +69,7 @@ const Parsing::MethodNodePtr &GlobalScope::getMethod(const std::string &name)
 
 void GlobalScope::log(const ValueType &v)
 {
-	Util::UtilMethods::log(v.toString(), Ogre::LML_NORMAL);
+	Util::UtilMethods::log(v.toString(), Ogre::LML_TRIVIAL);
 }
 
 Struct *GlobalScope::createStruct()

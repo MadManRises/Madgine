@@ -132,14 +132,6 @@ void Application::shutdown()
 	mShutDown = true;
 }
 
-int Application::run(const AppSettings &settings)
-{
-	Application app;
-	app.setup(settings);
-	app.init();
-	return app.go();
-}
-
 void Application::callSafe(std::function<void()> f)
 {
 	mSafeCallQueue.emplace(f);

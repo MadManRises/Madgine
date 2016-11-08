@@ -27,7 +27,7 @@ public:
 	 * Deletes all objects created by the Application.
 	 *
 	 */
-	~Application();
+	virtual ~Application();
 
 	/**
 	 * Loads all plugins listed in <code>settings.mPluginsFile</code>.
@@ -38,13 +38,13 @@ public:
 	 *
 	 * @param settings all necessary information to setup the Application
 	 */
-	void setup(const AppSettings &settings);
+	virtual void setup(const AppSettings &settings);
 
 	/**
 	 * May only be called after a call to setup().
 	 * Initializes all Madgine-Components.
 	 */
-	void init();
+	virtual void init();
 	
 	/**
 	 * Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop. 
@@ -55,19 +55,26 @@ public:
 	 *
 	 * @return <code>0</code>, if the Application is started and shutdown properly; <code>-1</code> otherwise
 	 */
-	int go();
+	virtual int go();
 	/**
 	 * Marks the Application as shutdown. This causes the Renderloop to return within the next frame.
 	 */
-	void shutdown();
+	virtual void shutdown();
 
 	/**
-	 * Convenience method, that calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
+	 * Convenience method, that creates the Application of type T (which defaults to Application), calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
 	 *
 	 * @return result of the call to go()
 	 * @param settings the settings for the Application
 	 */
-	static int run(const AppSettings &settings);
+	template <class T = Application>
+	static int run(const AppSettings &settings)
+	{
+		T app;
+		app.setup(settings);
+		app.init();
+		return app.go();
+	}
 
 	/**
 	 * Enqueues a task to be performed within the end of the current frame. This can be used for two purposes:
@@ -76,15 +83,15 @@ public:
 	 *
 	 * @param f a functional with the task to be executed
 	 */
-	void callSafe(std::function<void()> f);
+	virtual void callSafe(std::function<void()> f);
 
-	void setWindowProperties(bool fullscreen, size_t width, size_t height);
+	virtual void setWindowProperties(bool fullscreen, size_t width, size_t height);
 
-	Ogre::RenderWindow *renderWindow();
+	virtual Ogre::RenderWindow *renderWindow();
 
-	void resizeWindow();
+	virtual void resizeWindow();
 
-	void renderFrame();
+	virtual void renderFrame();
 
 protected:
 	/**
@@ -114,9 +121,9 @@ protected:
 	virtual bool frameEnded(const Ogre::FrameEvent & fe) override;
 
 private:
-	void _clear();
-	void _setupOgre();
-	void _setup();
+	virtual void _clear();
+	virtual void _setupOgre();
+	virtual void _setup();
 	
 
 private:
