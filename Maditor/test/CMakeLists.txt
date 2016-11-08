@@ -8,7 +8,9 @@ include_directories(${gmock_SOURCE_DIR}/include)
 
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)
-FolderSources(sources "" mocks)
+FolderSources(sources "" mocks DialogManagerMock.h)
+
+MESSAGE (STATUS ${sources})
 
 add_executable(Maditor_Test ${sources})
 
