@@ -27,7 +27,7 @@ namespace Maditor {
 
 			QFile file(mRoot + sProjectFileName);
 			if (file.exists()) {
-				if (!View::Dialogs::DialogManager::confirmFileOverwrite(mRoot + sProjectFileName, &answer)) {
+				if (!View::Dialogs::DialogManager::confirmFileOverwriteStatic(mRoot + sProjectFileName, &answer)) {
 					return;
 				}
 			}
@@ -82,7 +82,7 @@ namespace Maditor {
 					QDir().mkpath(info.path());
 					QFile targetFile(target);
 					if (targetFile.exists()) {
-						if (!View::Dialogs::DialogManager::confirmFileOverwrite(target, answer)) {
+						if (!View::Dialogs::DialogManager::confirmFileOverwriteStatic(target, answer)) {
 							if (*answer == QMessageBox::Abort)
 								return;
 							continue;

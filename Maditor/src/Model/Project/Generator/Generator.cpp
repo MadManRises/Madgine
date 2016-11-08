@@ -21,7 +21,7 @@ namespace Maditor {
 				for (QString path : paths()) {
 					QFile file(path);
 					if (mAskOverride && file.exists()) {
-						if (!View::Dialogs::DialogManager::confirmFileOverwrite(path, &answer)) {
+						if (!View::Dialogs::DialogManager::confirmFileOverwriteStatic(path, &answer)) {
 							if (answer == QMessageBox::Abort)
 								return;
 							continue;

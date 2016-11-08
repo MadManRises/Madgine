@@ -8,12 +8,15 @@ namespace Maditor {
 	namespace View {
 		namespace Dialogs {
 
-			class DialogManager : public QObject
+			class MADITOR_EXPORT DialogManager : public QObject
 			{
 				Q_OBJECT
 
 			public:
-				static bool confirmFileOverwrite(const QString &filePath, QMessageBox::StandardButton *result = 0);
+				DialogManager();
+
+				virtual bool confirmFileOverwrite(const QString &filePath, QMessageBox::StandardButton *result = 0);
+				static bool confirmFileOverwriteStatic(const QString &filePath, QMessageBox::StandardButton *result = 0);
 
 			signals:
 				void newProjectDialogAccepted(const QString &path, const QString &name);
@@ -29,24 +32,27 @@ namespace Maditor {
 				void newOtherClassDialogAccepted(Model::Module *module, const QString &name);
 
 			public slots:
-				void onProjectOpened(Model::Project *project);
-				void onModuleAdded(Model::Module *module);
+				virtual void onProjectOpened(Model::Project *project);
+				virtual void onModuleAdded(Model::Module *module);
 
-				void showNewProjectDialog();
-				void showLoadProjectDialog();
-				void showNewModuleDialog();
-				void showNewClassDialog();
+				virtual void showNewProjectDialog();
+				virtual void showLoadProjectDialog();
+				virtual void showNewModuleDialog();
+				virtual void showNewClassDialog();
 
-				void showNewGuiHandlerDialog(Model::Module *module, const QString &name);
-				void showNewGlobalAPIDialog(Model::Module *module, const QString &name);
-				void showNewEntityComponentDialog(Model::Module *module, const QString &name);
-				void showNewSceneComponentDialog(Model::Module *module, const QString &name);
-				void showNewGameHandlerDialog(Model::Module *module, const QString &name);
-				void showNewOtherClassDialog(Model::Module *module, const QString &name);
+				virtual void showNewGuiHandlerDialog(Model::Module *module, const QString &name);
+				virtual void showNewGlobalAPIDialog(Model::Module *module, const QString &name);
+				virtual void showNewEntityComponentDialog(Model::Module *module, const QString &name);
+				virtual void showNewSceneComponentDialog(Model::Module *module, const QString &name);
+				virtual void showNewGameHandlerDialog(Model::Module *module, const QString &name);
+				virtual void showNewOtherClassDialog(Model::Module *module, const QString &name);
 
-				void showModulePropertiesDialog(Model::Module *module);
+				virtual void showModulePropertiesDialog(Model::Module *module);
 
-				void showSettingsDialog(Model::Editor *editor);
+				virtual void showSettingsDialog(Model::Editor *editor);
+
+			private:
+				static DialogManager *sSingleton;
 			};
 		}
 	}

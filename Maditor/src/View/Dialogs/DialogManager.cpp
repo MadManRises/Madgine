@@ -20,6 +20,12 @@ namespace Maditor {
 	namespace View {
 		namespace Dialogs {
 
+			DialogManager *DialogManager::sSingleton = 0;
+
+			DialogManager::DialogManager() {
+				sSingleton = this;
+			}
+
 			bool DialogManager::confirmFileOverwrite(const QString &filePath, QMessageBox::StandardButton *result) {
 				if (result) {
 					if (*result & (QMessageBox::Abort | QMessageBox::NoToAll))
@@ -39,6 +45,11 @@ namespace Maditor {
 					else
 						return true;
 				}
+			}
+
+			bool DialogManager::confirmFileOverwriteStatic(const QString & filePath, QMessageBox::StandardButton * result)
+			{
+				return sSingleton->confirmFileOverwrite(filePath, result);
 			}
 
 			void DialogManager::onProjectOpened(Model::Project *project) {
