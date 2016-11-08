@@ -10,7 +10,7 @@ namespace Maditor {
 			Editor();
 			~Editor();
 
-			void init(QWindow *target);
+			void init();
 			void onStartup();
 
 			void newProject(const QString &path, const QString &name);
@@ -48,9 +48,6 @@ namespace Maditor {
 			Editors::EditorManager *mEditorManager;
 
 			LogsModel *mLogs;
-
-			QWindow *mOgreTarget;
-
 
 			//////////Properties
 

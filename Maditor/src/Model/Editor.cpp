@@ -19,7 +19,6 @@ namespace Maditor {
 			mApplicationWrapper(0),
 			mApplicationWatcher(0),
 			mEditorManager(0),
-			mOgreTarget(0),
 			mSettings("MadMan Studios", "Maditor"),
 			mLogs(0)
 		{
@@ -50,9 +49,8 @@ namespace Maditor {
 			delete mLog;
 		}
 
-		void Editor::init(QWindow * target)
+		void Editor::init()
 		{
-			mOgreTarget = target;
 
 			mEditorManager = new Editors::EditorManager;
 			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
