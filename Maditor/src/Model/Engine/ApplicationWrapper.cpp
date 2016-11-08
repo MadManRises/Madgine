@@ -20,9 +20,9 @@ namespace Maditor {
 			mWatcher(watcher),
 			mLoader(loader)
 		{
-			std::stringstream ss;
+			/*std::stringstream ss;
 			ss << mWorker.get_id();
-			qDebug() << QString::fromStdString(ss.str());
+			qDebug() << QString::fromStdString(ss.str());*/
 		}
 		ApplicationWrapper::~ApplicationWrapper()
 		{
