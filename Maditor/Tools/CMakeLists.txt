@@ -8,7 +8,7 @@ Project(ProcessTalker)
 
 include_directories(${BOOST_PATH})
 
-
+set (TOOLS_LIBS "")
 
 if (BLENDER_TOOL)
 endif (BLENDER_TOOL)
