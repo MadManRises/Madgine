@@ -18,7 +18,6 @@ TEST(MaditorFullTest, GenerateNewProject) {
 		.WillRepeatedly(Return(true));
 	
 	Maditor::Model::Editor editor;
-	editor.init();
 	editor.newProject("", "TestProject");
 
 	

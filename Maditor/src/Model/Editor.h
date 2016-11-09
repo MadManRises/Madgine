@@ -7,7 +7,7 @@ namespace Maditor {
 		class MADITOR_EXPORT Editor : public QObject {
 			Q_OBJECT
 		public:
-			Editor(Addons::AddonCollector *collector);
+			Editor(Addons::AddonCollector *collector = 0);
 			~Editor();
 
 			void onStartup();

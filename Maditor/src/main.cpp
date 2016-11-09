@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
 		Maditor::Addons::AddonCollector addons;
 
 		Maditor::Model::Editor editor(&addons);
+
+		addons.setModel(&editor);
 		{
 			Maditor::View::MainWindow w(&editor);
 

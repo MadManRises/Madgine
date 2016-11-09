@@ -34,8 +34,6 @@ namespace Maditor {
 			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
-			collector->setModel(this);
-
 			mEditorManager = new Editors::EditorManager(mAddonCollector);
 			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
 			mLogs = new LogsModel;
