@@ -8,171 +8,178 @@
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
-			OgreNodeItem::OgreNodeItem(OgreSceneNodeItem *parent, const std::string &name) :
-				mName(name),
-				mParent(parent)
+			OgreMirroredNodeItem::OgreMirroredNodeItem(const std::string &name) :
+				mName(name)
 			{
+
+
+
 			}
 
-			QVariant OgreNodeItem::data(int col) const
+			QString OgreMirroredNodeItem::name() const
 			{
 				return QString::fromStdString(mName);
 			}
 
-			
-
-			OgreNodeItem * OgreNodeItem::parentItem()
+			std::set<OgreMirroredNodeItem*> OgreMirroredNodeItem::getChildren()
 			{
-				return mParent;
+				return std::set<OgreMirroredNodeItem*>();
 			}
 
-			OgreSceneNodeItem::OgreSceneNodeItem(OgreSceneNodeItem * parent, Ogre::SceneNode * node) :
-				OgreNodeItem(parent, node->getName()),
+
+			OgreMirroredSceneNodeItem::OgreMirroredSceneNodeItem(Ogre::SceneNode * node) :
+				OgreMirroredNodeItem(node->getName()),
 				mNode(node)
 			{
 				for (const std::pair<Ogre::String, Ogre::Node *> &n : node->getChildIterator()) {
-					mNodes.emplace_back(this, static_cast<Ogre::SceneNode*>(n.second));
+					mNodes.emplace_back(static_cast<Ogre::SceneNode*>(n.second));
 				}
 				for (const std::pair<Ogre::String, Ogre::MovableObject*> &o : node->getAttachedObjectIterator()) {
-					mObjects.emplace_back(this, o.second);
+					mObjects.emplace_back(o.second->getName());
 				}
 			}
-			OgreSceneNodeItem::~OgreSceneNodeItem()
-			{
-			}
-			void OgreSceneNodeItem::update(OgreSceneWatcher *watcher, const QModelIndex &index)
-			{
-				Ogre::SceneNode *node = getNode();
 
-				std::set<Ogre::SceneNode*> nodes;
-				for (OgreSceneNodeItem &n : mNodes) {
+			void OgreMirroredSceneNodeItem::update()
+			{
+				std::set<Ogre::SceneNode *> nodes;
+				for (OgreMirroredSceneNodeItem &n : mNodes) {
 					nodes.insert(n.getNode());
 				}
-				std::set<Ogre::SceneNode *> newNodes;
+
+				std::set<Ogre::SceneNode*> newNodes;
+				Ogre::SceneNode *node = getNode();
 				for (const std::pair<Ogre::String, Ogre::Node *> &n : node->getChildIterator()) {
 					newNodes.insert(static_cast<Ogre::SceneNode*>(n.second));
 				}
-
+				
 				std::list<Ogre::SceneNode*> removedNodes;
 				std::set_difference(nodes.begin(), nodes.end(), newNodes.begin(), newNodes.end(),
 					std::inserter(removedNodes, removedNodes.begin()));
-
-				for (Ogre::SceneNode *n : removedNodes) {
-					auto it = std::find_if(mNodes.begin(), mNodes.end(), [=](OgreSceneNodeItem &item) {return item.getNode() == n; });
-					
-					it->deleteLater();
-					int i = std::distance(mNodes.begin(), it);
+				for (Ogre::SceneNode* n : removedNodes) {
+					auto it = std::find_if(mNodes.begin(), mNodes.end(), [=](OgreMirroredSceneNodeItem &item) {return item.getNode() == n; });
 					mNodes.erase(it);
-					watcher->removeRowsQueued(index, i, i);
 				}
 				
-				int i = 0;
-				for (OgreSceneNodeItem &n : mNodes) {
-					n.update(watcher, watcher->index(i, 0, index));
-					++i;
-				}
-
 				std::list<Ogre::SceneNode*> addedNodes;
 				std::set_difference(newNodes.begin(), newNodes.end(), nodes.begin(), nodes.end(),
-					std::inserter(addedNodes, addedNodes.begin()));
-
-				if (!addedNodes.empty()) {
-					int oldCount = mNodes.size();
-					for (Ogre::SceneNode* n : addedNodes) {
-						mNodes.emplace_back(this, n);
-					}
-					watcher->insertRowsQueued(index, oldCount, mNodes.size() - 1);
+				std::inserter(addedNodes, addedNodes.begin()));
+				for (Ogre::SceneNode* n : addedNodes){
+					mNodes.emplace_back(n);
 				}
 
-				std::set<Ogre::MovableObject*> objects;
-				for (OgreEntityItem &o : mObjects) {
-					objects.insert(o.object());
-				}
-				std::set<Ogre::MovableObject*> newObjects;
-				for (const std::pair<Ogre::String, Ogre::MovableObject*> &o : node->getAttachedObjectIterator()) {
-					newObjects.insert(o.second);
-				}
-
-				std::list<Ogre::MovableObject*> removedObjects;
-				std::set_difference(objects.begin(), objects.end(), newObjects.begin(), newObjects.end(),
-					std::inserter(removedObjects, removedObjects.begin()));
-
-				for (Ogre::MovableObject *o : removedObjects) {
-					auto it = std::find_if(mObjects.begin(), mObjects.end(), [=](OgreEntityItem &item) {return item.object() == o; });
-					it->deleteLater();
-					mObjects.erase(it);
-					watcher->removeRowsQueued(index, std::distance(mObjects.begin(), it) + mNodes.size(), std::distance(mObjects.begin(), it) + mNodes.size());
-				}
-
-				std::list<Ogre::MovableObject*> addedObjects;
-				std::set_difference(newObjects.begin(), newObjects.end(), objects.begin(), objects.end(),
-					std::inserter(addedObjects, addedObjects.begin()));
-
-				if (!addedObjects.empty()) {
-					int oldCount = mObjects.size();
-					for (Ogre::MovableObject* o : addedObjects) {
-						mObjects.emplace_back(this, o);
-					}
-					watcher->insertRowsQueued(index, mNodes.size() + oldCount, mNodes.size() + mObjects.size() - 1);
-				}
-
-
-			}
-			void OgreSceneNodeItem::clear()
-			{
+				for (OgreMirroredSceneNodeItem &n : mNodes)
+					n.update();
+				
 				mObjects.clear();
-				mNodes.clear();
-			}
-			OgreSceneNodeItem::OgreSceneNodeItem() :
-				OgreNodeItem(0, "")
-			{
-			}
-			int OgreSceneNodeItem::childCount()
-			{
-				return mNodes.size() + mObjects.size();
-			}
-			TreeItem * OgreSceneNodeItem::child(int i)
-			{
-				if (i < mNodes.size()) {
-					auto it = mNodes.begin();
-					std::advance(it, i);
-					return &*it;
-				}
-				else {
-					i -= mNodes.size();
-					auto it = mObjects.begin();
-					std::advance(it, i);
-					return &*it;
+				for (const std::pair<Ogre::String, Ogre::MovableObject*> &o : node->getAttachedObjectIterator()) {
+					mObjects.emplace_back(o.second->getName());
 				}
 			}
-			Ogre::SceneNode * OgreSceneNodeItem::getNode()
+			std::set<OgreMirroredNodeItem*> OgreMirroredSceneNodeItem::getChildren()
+			{
+				std::set<OgreMirroredNodeItem*> result;
+				for (OgreMirroredNodeItem &o : mObjects) {
+					result.insert(&o);
+				}
+				for (OgreMirroredSceneNodeItem &n : mNodes) {
+					result.insert(&n);
+				}
+				return result;
+			}
+			OgreMirroredSceneNodeItem::OgreMirroredSceneNodeItem() :
+				OgreMirroredNodeItem("")
+			{
+			}
+			void OgreNodeItem::clear()
+			{
+				mChildren.clear();
+			}
+			
+			Ogre::SceneNode * OgreMirroredSceneNodeItem::getNode()
 			{
 				return mNode;
 			}
-			Ogre::SceneNode * OgreRootSceneNodeItem::getNode()
+			Ogre::SceneNode * OgreMirroredRootSceneNodeItem::getNode()
 			{
 				return Engine::Scene::SceneManager::getSingleton().getSceneManager()->getRootSceneNode();
 			}
 
-			OgreEntityItem::OgreEntityItem(OgreSceneNodeItem *parent, Ogre::MovableObject * o) :
-				OgreNodeItem(parent, o->getName()),
-				mObject(o)
+			OgreNodeItem::OgreNodeItem(OgreMirroredNodeItem * mirror, OgreNodeItem * parent) :
+				mMirror(mirror),
+				mParent(parent),
+				mName(mirror->name())
 			{
 			}
 
-			Ogre::MovableObject * OgreEntityItem::object()
+			void OgreNodeItem::update(OgreSceneWatcher * watcher, const QModelIndex & index)
 			{
-				return mObject;
+
+				std::set<OgreMirroredNodeItem*> nodes;
+				for (OgreNodeItem &n : mChildren) {
+					nodes.insert(n.getMirror());
+				}
+
+				std::set<OgreMirroredNodeItem*> mirroredChildren = mMirror->getChildren();
+				std::list<OgreMirroredNodeItem*> removedNodes;
+				std::set_difference(nodes.begin(), nodes.end(), mirroredChildren.begin(), mirroredChildren.end(),
+					std::inserter(removedNodes, removedNodes.begin()));
+
+				for (OgreMirroredNodeItem *n : removedNodes) {
+					auto it = std::find_if(mChildren.begin(), mChildren.end(), [=](OgreNodeItem &item) {return item.getMirror() == n; });
+
+					int i = std::distance(mChildren.begin(), it);
+					watcher->beginRemoveRows(index, i, i);
+					mChildren.erase(it);
+					watcher->endRemoveRows();
+				}
+
+
+
+				std::list<OgreMirroredNodeItem*> addedNodes;
+				std::set_difference(mirroredChildren.begin(), mirroredChildren.end(), nodes.begin(), nodes.end(),
+					std::inserter(addedNodes, addedNodes.begin()));
+
+				if (!addedNodes.empty()) {
+					watcher->beginInsertRows(index, mChildren.size(), mChildren.size() + addedNodes.size() - 1);
+					for (OgreMirroredNodeItem* n : addedNodes) {
+						mChildren.emplace_back(n, this);
+					}
+					watcher->endInsertRows();
+				}
+
+				int i = 0;
+				for (OgreNodeItem &n : mChildren) {
+					n.update(watcher, watcher->index(i, 0, index));
+					++i;
+				}
+
 			}
 
-			int OgreEntityItem::childCount()
+			OgreMirroredNodeItem * OgreNodeItem::getMirror()
 			{
-				return 0;
+				return mMirror;
 			}
 
-			TreeItem * OgreEntityItem::child(int i)
+			int OgreNodeItem::childCount()
 			{
-				throw 0;
+				return mChildren.size();
+			}
+
+			TreeItem * OgreNodeItem::child(int i)
+			{
+				auto it = mChildren.begin();
+				std::advance(it, i);
+				return &*it;
+			}
+
+			TreeItem * OgreNodeItem::parentItem()
+			{
+				return mParent;
+			}
+
+			QVariant OgreNodeItem::data(int col) const
+			{
+				return mName;
 			}
 
 		}

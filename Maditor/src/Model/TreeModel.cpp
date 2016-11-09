@@ -24,17 +24,17 @@ namespace Maditor {
 			if (!hasIndex(row, column, parent))
 				return QModelIndex();
 
-			TreeItem *item;
+			TreeItem *it;
 			if (!parent.isValid()) {
-				item = mRoot;
+				it = mRoot;
 			}
 			else {
-				item = static_cast<TreeItem*>(parent.internalPointer());
+				it = item(parent);
 			}
 
 
-			if (item->childCount() > row) {
-				return createIndex(row, column, item->child(row));
+			if (it->childCount() > row) {
+				return createIndex(row, column, it->child(row));
 			}
 			else {
 				return QModelIndex();
@@ -47,22 +47,22 @@ namespace Maditor {
 				return QModelIndex();
 
 
-			TreeItem *item = static_cast<TreeItem*>(child.internalPointer());
-			if (item->parentItem() == mRoot)
+			TreeItem *i = item(child);
+			if (i->parentItem() == mRoot)
 				return QModelIndex();
 
-			return createIndex(item->parentItem()->parentIndex(), 0, item->parentItem());
+			return createIndex(i->parentItem()->parentIndex(), 0, i->parentItem());
 		}
 
 		Q_INVOKABLE int TreeModel::rowCount(const QModelIndex & parent) const
 		{
-			TreeItem *item;
+			TreeItem *it;
 			if (!parent.isValid())
-				item = mRoot;
+				it = mRoot;
 			else {
-				item = static_cast<TreeItem*>(parent.internalPointer());
+				it = item(parent);
 			}
-			return item->childCount();
+			return it->childCount();
 		}
 
 		Q_INVOKABLE int TreeModel::columnCount(const QModelIndex & parent) const
@@ -79,7 +79,7 @@ namespace Maditor {
 			if (role != Qt::DisplayRole && role != Qt::DecorationRole)
 				return QVariant();
 
-			TreeItem *el = static_cast<TreeItem*>(index.internalPointer());
+			TreeItem *el = item(index);
 			switch (role) {
 			case Qt::DisplayRole:
 				return el->data(index.column());
@@ -93,6 +93,11 @@ namespace Maditor {
 		TreeSorter * TreeModel::sorted()
 		{
 			return &mSorter;
+		}
+
+		TreeItem * TreeModel::item(const QModelIndex & index) const
+		{
+			return static_cast<TreeItem*>(index.internalPointer());
 		}
 
 		void TreeModel::performRowsInsert(const QModelIndex & parent, int start, int end)
@@ -115,15 +120,13 @@ namespace Maditor {
 		void TreeModel::handleContextMenuRequest(const QModelIndex & p, QMenu & menu)
 		{
 			if (p.isValid()) {
-				TreeItem *item = static_cast<TreeItem*>(p.internalPointer());
-				item->extendContextMenu(menu);
+				item(p)->extendContextMenu(menu);
 			}
 		}
 
 		void TreeModel::itemDoubleClicked(const QModelIndex &index) {
 			if (index.isValid()) {
-				TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-				item->doubleClicked();
+				item(index)->doubleClicked();
 			}
 		}
 

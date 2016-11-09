@@ -8,16 +8,17 @@ namespace Maditor {
 
 			OgreSceneWatcher::OgreSceneWatcher() :
 				mUpdatePending(false),
+				mRootItem(&mMirroredRootItem),
 				TreeModel(&mRootItem, 1)
+				
 			 {
+				connect(this, &OgreSceneWatcher::modelChanged, this, &OgreSceneWatcher::onModelChanged, Qt::QueuedConnection);
+				
 				startTimer(3000);
-
-
-
 			}
 
 			void OgreSceneWatcher::timerEvent(QTimerEvent * event)
-			{
+			{				
 				mUpdatePending = true;
 			}
 
@@ -32,11 +33,19 @@ namespace Maditor {
 					return QVariant();
 			}
 
+			void OgreSceneWatcher::performRowsRemove(const QModelIndex & parent, int from, int to)
+			{
+				TreeModel::performRowsRemove(parent, from, to);
+			}
+
 			void OgreSceneWatcher::update()
 			{
 				if (mUpdatePending) {
 					mUpdatePending = false;
-					mRootItem.update(this, QModelIndex());
+					mMutex.lock();
+					mMirroredRootItem.update();
+					mMutex.unlock();
+					emit modelChanged();
 				}
 			}
 
@@ -45,6 +54,12 @@ namespace Maditor {
 				beginResetModel();
 				mRootItem.clear();
 				endResetModel();
+			}
+
+			void OgreSceneWatcher::onModelChanged() {
+				mMutex.lock();
+				mRootItem.update(this, QModelIndex());
+				mMutex.unlock();
 			}
 
 

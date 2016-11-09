@@ -8,73 +8,73 @@ namespace Maditor {
 		namespace Watcher {			
 
 
-			class OgreNodeItem : public QObject, public TreeItem {
-				Q_OBJECT
+
+			class OgreMirroredNodeItem {
 
 			public:
-				OgreNodeItem(OgreSceneNodeItem *parent, const std::string &name);
+				OgreMirroredNodeItem(const std::string &name);
 
-				virtual QVariant data(int col) const override;
-				
+				QString name() const;
 
-				virtual OgreNodeItem *parentItem() override;
+				virtual std::set<OgreMirroredNodeItem*> getChildren();
 
 			private:
-				OgreSceneNodeItem *mParent;
 				std::string mName;
 			};
 
-			class OgreEntityItem : public OgreNodeItem {
+
+			class OgreMirroredSceneNodeItem : public OgreMirroredNodeItem {
 			public:
-				OgreEntityItem(OgreSceneNodeItem *parent, Ogre::MovableObject *o);
-
-				Ogre::MovableObject *object();
-
-				// Inherited via OgreNodeItem
-				virtual int childCount() override;
-				virtual TreeItem * child(int i) override;
-
-			private:
-				Ogre::MovableObject *mObject;
-
-
-			};
-
-
-			class OgreSceneNodeItem : public OgreNodeItem {
-			public:
-				OgreSceneNodeItem(OgreSceneNodeItem *parent, Ogre::SceneNode *node);
-				virtual ~OgreSceneNodeItem();
-
-				void update(OgreSceneWatcher *watcher, const QModelIndex &index);
-				void clear();
+				OgreMirroredSceneNodeItem(Ogre::SceneNode *node);
 
 				virtual Ogre::SceneNode *getNode();
 
-				// Inherited via OgreNodeItem
-				virtual int childCount() override;
-				virtual TreeItem * child(int i) override;
+				void update();
+
+				virtual std::set<OgreMirroredNodeItem*> getChildren() override;
 
 			protected:
-				OgreSceneNodeItem();
-
-
+				OgreMirroredSceneNodeItem();
 
 			private:
-				std::list<OgreEntityItem> mObjects;
-				std::list<OgreSceneNodeItem> mNodes;
+				std::list<OgreMirroredNodeItem> mObjects;
+				std::list<OgreMirroredSceneNodeItem> mNodes;
 
 				Ogre::SceneNode *mNode;
 
 
 			};
 
-			class OgreRootSceneNodeItem : public OgreSceneNodeItem {
+			class OgreMirroredRootSceneNodeItem : public OgreMirroredSceneNodeItem {
 			public:
 				virtual Ogre::SceneNode *getNode() override;
 			};
 
+			class OgreNodeItem : public TreeItem {
+			public:
+				OgreNodeItem(OgreMirroredNodeItem *mirror, OgreNodeItem *parent = 0);
 
+				void update(OgreSceneWatcher *watcher, const QModelIndex &index);
+
+				void clear();
+
+
+				// Inherited via TreeItem
+				virtual int childCount() override;
+				virtual TreeItem * child(int i) override;
+				virtual TreeItem * parentItem() override;
+				virtual QVariant data(int col) const override;
+
+			protected:
+				OgreMirroredNodeItem *getMirror();
+
+			private:
+				std::list<OgreNodeItem> mChildren;
+				OgreMirroredNodeItem *mMirror;
+				OgreNodeItem *mParent;
+				QString mName;
+
+			};
 
 		}
 	}

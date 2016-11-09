@@ -24,10 +24,21 @@ namespace Maditor {
 
 				virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+				virtual void performRowsRemove(const QModelIndex &parent, int from, int to) override;
+
+			signals:
+				void modelChanged();
+
+			private slots:
+				void onModelChanged();
+
 			private:
 				bool mUpdatePending;
 
-				OgreRootSceneNodeItem mRootItem;
+				OgreMirroredRootSceneNodeItem mMirroredRootItem;
+				OgreNodeItem mRootItem;				
+
+				std::mutex mMutex;
 			};
 
 		}
