@@ -7,7 +7,8 @@
 namespace Maditor {
 	namespace Model {
 		namespace Editors {
-			EditorManager::EditorManager() {
+			EditorManager::EditorManager(Addons::AddonCollector *addons) :
+			mAddonCollector(addons){
 
 			}
 			
@@ -46,10 +47,12 @@ namespace Maditor {
 					mScriptEditor.openScriptFile(filePath, lineNr);
 				}
 				else {
-					for (Addons::Addon *addon : Addons::AddonCollector::getSingleton()) {
-						if (addon->resourceGroupName() == group) {
-							addon->openFile(filePath, lineNr);
-							return;
+					if (mAddonCollector) {
+						for (Addons::Addon *addon : *mAddonCollector) {
+							if (addon->resourceGroupName() == group) {
+								addon->openFile(filePath, lineNr);
+								return;
+							}
 						}
 					}
 					qDebug() << "No Editor available for Resource-Type:" << group;
@@ -75,10 +78,12 @@ namespace Maditor {
 					group = "Scripting";
 				}
 				else {
-					for (Addons::Addon *addon : Addons::AddonCollector::getSingleton()) {
-						if (addon->supportedFileExtensions().contains(suffix)) {
-							group = addon->resourceGroupName();
-							break;
+					if (mAddonCollector) {
+						for (Addons::Addon *addon : *mAddonCollector) {
+							if (addon->supportedFileExtensions().contains(suffix)) {
+								group = addon->resourceGroupName();
+								break;
+							}
 						}
 					}
 					if (group.isEmpty()) {

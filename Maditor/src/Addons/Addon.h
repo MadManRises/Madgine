@@ -22,7 +22,7 @@ namespace Maditor {
 		class MADITOR_EXPORT AddonCollector : public QObject {
 			Q_OBJECT
 		public:
-			AddonCollector(View::MainWindow *window, Model::Editor *editor);
+			AddonCollector();
 			virtual ~AddonCollector();
 
 			virtual void timerEvent(QTimerEvent *e) override;
@@ -30,11 +30,12 @@ namespace Maditor {
 			std::list<Addon*>::const_iterator begin();
 			std::list<Addon*>::const_iterator end();
 
-			static AddonCollector &getSingleton();
+			void setWindow(View::MainWindow *window);
+			void setModel(Model::Editor *editor);
+
 		private:
 			std::list<Addon*> mAddons;
 
-			static AddonCollector *sSingleton;
 		};
 
 	}

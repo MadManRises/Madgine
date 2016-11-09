@@ -7,10 +7,9 @@ namespace Maditor {
 		class MADITOR_EXPORT Editor : public QObject {
 			Q_OBJECT
 		public:
-			Editor();
+			Editor(Addons::AddonCollector *collector);
 			~Editor();
 
-			void init();
 			void onStartup();
 
 			void newProject(const QString &path, const QString &name);
@@ -23,7 +22,6 @@ namespace Maditor {
 			LogsModel *logsModel();
 			
 			Project *project();
-
 
 		private:
 			void openProject(std::unique_ptr<Project> &&project);
@@ -41,6 +39,7 @@ namespace Maditor {
 			Watcher::ApplicationWatcher *mApplicationWatcher;
 			ApplicationWrapper *mApplicationWrapper;
 			
+			Addons::AddonCollector *mAddonCollector;
 
 			std::unique_ptr<Project> mProject;
 

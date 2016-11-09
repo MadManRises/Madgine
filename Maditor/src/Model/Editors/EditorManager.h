@@ -10,7 +10,7 @@ namespace Maditor {
 				Q_OBJECT
 				
 			public:
-				EditorManager();
+				EditorManager(Addons::AddonCollector *addons);
 
 				void openResource(const Ogre::ResourcePtr &res);
 				QString getFullPath(const std::string &fileName, const QString &group);
@@ -25,6 +25,8 @@ namespace Maditor {
 
 
 				QString mCurrentRoot;
+
+				Addons::AddonCollector *mAddonCollector;
 			};
 		}
 	}

@@ -12,14 +12,17 @@ int main(int argc, char **argv) {
 
 	int result;
 
+	QApplication app(argc, argv);
 
-	Maditor::Model::Editor editor;
+	
 	{
-		QApplication app(argc, argv);
+		Maditor::Addons::AddonCollector addons;
+
+		Maditor::Model::Editor editor(&addons);
 		{
 			Maditor::View::MainWindow w(&editor);
 
-			Maditor::Addons::AddonCollector addons(&w, &editor);
+			addons.setWindow(&w);
 
 			w.show();
 

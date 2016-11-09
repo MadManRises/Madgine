@@ -69,6 +69,8 @@ target_link_libraries(Maditor Madgine)
 target_link_libraries(Maditor Qt5::Widgets Qt5::Xml ${QSCINTILLA2_LIBRARY})
 
 
+set (CMAKE_AUTOMOC OFF)
+
 set (exesources "")
 FolderSources(exesources "" "")
 FolderSources(exesources "" src main.cpp)

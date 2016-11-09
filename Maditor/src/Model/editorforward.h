@@ -61,4 +61,8 @@ namespace Maditor {
 		class MainWindow;
 		class OgreWindow;
 	}
+
+	namespace Addons {
+		class AddonCollector;
+	}
 }

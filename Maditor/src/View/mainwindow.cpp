@@ -42,8 +42,6 @@ namespace Maditor {
 
 			ui->game->addWidget(ogre);
 
-			editor->init();
-
 			Model::Watcher::ApplicationWatcher *watcher = editor->watcher();
 			ui->LogsWidget->setModel(editor->logsModel());
 			//ui->guiRenderStats->connectWatchers("Gui", watcher);

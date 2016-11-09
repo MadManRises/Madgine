@@ -11,16 +11,18 @@
 #include "Engine\Watcher\ResourceWatcher.h"
 #include "Engine/Watcher/LogWatcher.h"
 #include "Editors\ScriptEditorModel.h"
+#include "Addons\Addon.h"
 
 namespace Maditor {
 	namespace Model {
 
-		Editor::Editor() :
+		Editor::Editor(Addons::AddonCollector *collector) :
 			mApplicationWrapper(0),
 			mApplicationWatcher(0),
 			mEditorManager(0),
 			mSettings("MadMan Studios", "Maditor"),
-			mLogs(0)
+			mLogs(0),
+			mAddonCollector(collector)
 		{
 
 			mLog = new Watcher::OgreLogWatcher(Watcher::OgreLogWatcher::GuiLog, "Madgine.log");
@@ -32,27 +34,9 @@ namespace Maditor {
 			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
-		}
+			collector->setModel(this);
 
-		Editor::~Editor()
-		{
-			mSettings.setValue("recentProjects", mRecentProjects);
-			mSettings.setValue("reloadProject", mReloadProject);
-
-			delete mApplicationWrapper;
-			delete mApplicationWatcher;
-			delete mEditorManager;
-			delete mLoader;		
-			if (mLogs)
-				delete mLogs;
-
-			delete mLog;
-		}
-
-		void Editor::init()
-		{
-
-			mEditorManager = new Editors::EditorManager;
+			mEditorManager = new Editors::EditorManager(mAddonCollector);
 			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
 			mLogs = new LogsModel;
 
@@ -64,6 +48,20 @@ namespace Maditor {
 
 			mLogs->addLog(mLog);
 			Generator::CommandLine::setLog(mLog);
+		}
+
+		Editor::~Editor()
+		{
+			mSettings.setValue("recentProjects", mRecentProjects);
+			mSettings.setValue("reloadProject", mReloadProject);
+
+			delete mApplicationWrapper;
+			delete mApplicationWatcher;
+			delete mEditorManager;
+			delete mLoader;		
+			delete mLogs;
+
+			delete mLog;
 		}
 
 		void Editor::onStartup()

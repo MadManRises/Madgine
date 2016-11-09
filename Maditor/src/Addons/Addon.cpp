@@ -42,9 +42,7 @@ QStringList Addon::supportedFileExtensions()
 }
 
 
-AddonCollector::AddonCollector(View::MainWindow *window, Model::Editor *editor) {
-
-	sSingleton = this;
+AddonCollector::AddonCollector() {
 
 	QFile inputFile("addons.txt");
 	if (inputFile.open(QIODevice::ReadOnly))
@@ -61,8 +59,7 @@ AddonCollector::AddonCollector(View::MainWindow *window, Model::Editor *editor) 
 			if (!creator)
 				continue;
 			Addon *addon = creator();
-			addon->addActions(window);
-			addon->setModel(editor);
+
 			mAddons.push_back(addon);
 		}
 		inputFile.close();
@@ -98,12 +95,18 @@ std::list<Addon*>::const_iterator AddonCollector::end()
 	return mAddons.end();
 }
 
-AddonCollector *AddonCollector::sSingleton = 0;
-
-AddonCollector & AddonCollector::getSingleton()
+void AddonCollector::setWindow(View::MainWindow * window)
 {
-	assert(sSingleton);
-	return *sSingleton;
+	for (Addon *addon : mAddons) {
+		addon->addActions(window);
+	}
+}
+
+void AddonCollector::setModel(Model::Editor * editor)
+{
+	for (Addon *addon : mAddons) {
+		addon->setModel(editor);
+	}
 }
 
 
