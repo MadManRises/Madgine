@@ -39,7 +39,7 @@ namespace Engine {
 
 		void UtilMethods::registerException(const TraceBack & t)
 		{
-			sExceptionTraceBack = sTraceBack;
+			registerException();
 			if (sExceptionTraceBack.empty() 
 				|| sExceptionTraceBack.back().mFile != t.mFile
 				|| sExceptionTraceBack.back().mFunction != t.mFunction
@@ -47,6 +47,11 @@ namespace Engine {
 				sExceptionTraceBack.push_back(t);
 			else
 				sExceptionTraceBack.back().mLineNr = t.mLineNr;
+		}
+
+		void UtilMethods::registerException()
+		{
+			sExceptionTraceBack = sTraceBack;
 		}
 
 		void UtilMethods::abort()

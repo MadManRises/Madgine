@@ -220,7 +220,7 @@ ValueType Scope::execScriptMethod(const std::string &name,
                                   const ArgumentList &args)
 {
     if (!hasScriptMethod(name))
-        MADGINE_THROW(ScriptingException(
+        MADGINE_THROW_NO_TRACE(ScriptingException(
             Database::Exceptions::unknownMethod(name, getIdentifier())));
     if (getArguments(name).size() != args.size()) throw ScriptingException(
             Database::Exceptions::argumentCountMismatch(getArguments(name).size(), args.size()));

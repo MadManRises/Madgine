@@ -37,6 +37,7 @@ namespace Engine {
 			};
 
 			static void registerException(const TraceBack &t);
+			static void registerException();
 
 			static void abort();
 			
@@ -62,6 +63,7 @@ namespace Engine {
 #define LOG_EXCEPTION(e) Engine::Util::UtilMethods::logException(e);
 
 #define MADGINE_THROW(e) throw (Engine::Util::UtilMethods::registerException(TRACEBACK), e)
+#define MADGINE_THROW_NO_TRACE(e) throw (Engine::Util::UtilMethods::registerException(), e)
 
 #define MADGINE_ABORT Engine::Util::UtilMethods::abort()
 
