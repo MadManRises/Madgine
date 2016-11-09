@@ -14,7 +14,7 @@ namespace Engine {
 namespace Scripting {
 namespace Serialize {
 
-void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeComponents, bool saveStory)
+void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeComponents, const std::set<Scope*> &ignoreSet)
 {
 
 	GlobalScope *global = &GlobalScope::getSingleton();
@@ -26,9 +26,10 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
     else
         out << Scripting::ValueType();
 
-    std::set<Scope *> scopeSet, ignoreSet;
 
-    global->collectScopes(saveStory ? scopeSet : ignoreSet);
+    std::set<Scope *> scopeSet;
+
+    global->collectScopes(scopeSet, ignoreSet);
 	
 	for (Scene::Entity::Entity *e : Scene::SceneManager::getSingleton().entities()) {
 		e->collectScopes(scopeSet, ignoreSet);
