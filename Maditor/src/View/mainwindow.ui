@@ -299,10 +299,6 @@
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
    <addaction name="actionPause"/>
-   <addaction name="separator"/>
-   <addaction name="actionOpenVS"/>
-   <addaction name="separator"/>
-   <addaction name="actionTest"/>
   </widget>
   <widget class="QDockWidget" name="PerformanceDockWidget">
    <property name="windowTitle">
@@ -418,15 +414,6 @@
     <string>Stop</string>
    </property>
   </action>
-  <action name="actionOpenVS">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/icons/VS.png</normaloff>:/icons/icons/VS.png</iconset>
-   </property>
-   <property name="text">
-    <string>VS</string>
-   </property>
-  </action>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
@@ -446,11 +433,6 @@
    </property>
    <property name="text">
     <string>Finalize</string>
-   </property>
-  </action>
-  <action name="actionTest">
-   <property name="text">
-    <string>Test</string>
    </property>
   </action>
  </widget>
@@ -573,22 +555,6 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>actionTest</sender>
-   <signal>triggered()</signal>
-   <receiver>Maditor::View::MainWindow</receiver>
-   <slot>test()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>468</x>
-     <y>305</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>newProject()</slot>
@@ -598,6 +564,5 @@
   <slot>openSettings()</slot>
   <slot>initApp()</slot>
   <slot>finalizeApp()</slot>
-  <slot>test()</slot>
  </slots>
 </ui>
