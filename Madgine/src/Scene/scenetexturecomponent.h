@@ -2,12 +2,12 @@
 
 #include "scenecomponent.h"
 
-#include "TextureComponent.h"
+#include "Resources/TextureComponent.h"
 
 namespace Engine {
 	namespace Scene {
 
-		class MADGINE_EXPORT BaseSceneTextureComponent : public TextureComponent
+		class MADGINE_EXPORT BaseSceneTextureComponent : public Resources::TextureComponent
 		{
 		public:
 			BaseSceneTextureComponent(const std::string &textureName, Ogre::PixelFormat pixelformat, int textureUsage = Ogre::TU_DYNAMIC_WRITE_ONLY);

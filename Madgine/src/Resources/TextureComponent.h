@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Engine {
-	namespace Scene {
+	namespace Resources {
 		class MADGINE_EXPORT TextureComponent {
 		public:
 			TextureComponent();

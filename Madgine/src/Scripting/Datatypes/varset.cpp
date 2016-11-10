@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "varset.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include <fstream>
 #include "Serialize/serializestream.h"
 

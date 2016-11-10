@@ -5,7 +5,7 @@
 #include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
 #include "Scripting\Types\scope.h"
-#include "Scripting\scriptexception.h"
+#include "Scripting\scriptingexception.h"
 
 namespace Engine {
 	namespace Scripting {
@@ -44,9 +44,9 @@ namespace Engine {
 		};
 
 		template <>
-		struct Caster<Scene::Entity::Entity*> {
+		struct Caster<Engine::Scene::Entity::Entity*> {
 			static auto cast(const ValueType &v) {
-				Scene::Entity::Entity *e = scope_cast<Scene::Entity::Entity>(v.asScope());
+				Engine::Scene::Entity::Entity *e = scope_cast<Engine::Scene::Entity::Entity>(v.asScope());
 				if (!e)
 					throw 0;
 				return e;

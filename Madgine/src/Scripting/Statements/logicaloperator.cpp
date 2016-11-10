@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "logicaloperator.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting/Datatypes/valuetype.h"
 
 #include "Database/exceptionmessages.h"

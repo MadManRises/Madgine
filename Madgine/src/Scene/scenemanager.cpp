@@ -2,10 +2,8 @@
 
 #include "SceneManager.h"
 
-#include "scenenames.h"
 #include "Entity/entity.h"
 
-#include "entityexception.h"
 #include "scenelistener.h"
 
 #include "Database/exceptionmessages.h"
@@ -120,7 +118,7 @@ void SceneManager::createCamera(void)
 {
     // Create the camera
 
-    mCamera = mSceneMgr->createCamera(SceneNames::camera);
+    mCamera = mSceneMgr->createCamera("MadgineSceneCamera");
     mCamera->setPosition(1,80,0);
     mCamera->lookAt(0,0,0);
 
@@ -376,9 +374,7 @@ void SceneManager::save(Scripting::Serialize::SerializeOutStream &out) const
 
 void SceneManager::load(Scripting::Serialize::SerializeInStream &in)
 {
-	createScene(in);
-
-    
+	createScene(in);    
 }
 
 Ogre::TerrainGroup *SceneManager::terrainGroup() const
@@ -586,8 +582,6 @@ void SceneManager::removeQueuedEntities()
 		e->finalize();
 		Ogre::SceneNode *node = e->getNode();
 		mEntities.erase(ent);
-		if (node->getAttachedObjectIterator().hasMoreElements())
-			throw EntityException(Database::Exceptions::nodeNotCleared);
 		mSceneMgr->getRootSceneNode()->removeChild(node);
 		mSceneMgr->destroySceneNode(node);
 
@@ -998,7 +992,7 @@ void SceneManager::getTerrainMeshInformation(size_t &vertex_count, Ogre::Vector3
 	}
 }
 
-TextureComponent & SceneManager::getGameTexture()
+Resources::TextureComponent & SceneManager::getGameTexture()
 {
 	return mGameTexture;
 }

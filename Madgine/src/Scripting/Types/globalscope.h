@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scopeimpl.h"
-#include "level.h"
+#include "scene.h"
 #include "uniquecomponentcollector.h"
 #include "baseglobalapicomponent.h"
 
@@ -27,7 +27,7 @@ public:
 	Struct *createStruct();
 	List *createList();
 	const ValueType &debug(const ValueType &v);
-	Level *level();
+	Scene *level();
 	Struct *getData(const std::string &name);
 
 
@@ -45,7 +45,7 @@ protected:
 	virtual const Parsing::MethodNodePtr &getMethod(const std::string &name) override;
 
 private:
-    Level mLevel;
+    Scene mLevel;
 
     std::list<BaseAPI*> mAPIs;
 	UniqueComponentCollector<BaseGlobalAPIComponent> mGlobalAPIs;

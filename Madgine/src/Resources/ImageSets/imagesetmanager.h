@@ -8,7 +8,10 @@ namespace Engine {
 			class MADGINE_EXPORT ImageSetManager : public Ogre::Singleton<ImageSetManager>, public Ogre::GeneralAllocatedObject {
 
 			public:
-				Ogre::TexturePtr getImageTexture(const std::string &setName, const std::string &imageName) const;
+				Ogre::TexturePtr getImageTexture(const std::string &setName, const std::string &imageName);
+
+			private:
+				std::map<std::string, std::map<std::string, Ogre::TexturePtr>> mTextures;
 
 			};
 

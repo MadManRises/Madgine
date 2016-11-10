@@ -1,23 +1,22 @@
 #include "libinclude.h"
-#include "levelserializer.h"
+#include "sceneserializer.h"
 
 #include "Scripting/Types/globalscope.h"
-#include "Scene/SceneManager.h"
-#include "Scene/Entity/entity.h"
+#include "SceneManager.h"
+#include "Entity/entity.h"
 
 #include "Scripting/Types/scopefactory.h"
-#include "serializestream.h"
+#include "Scripting/Datatypes/Serialize/serializestream.h"
 
 #include "UI/Process.h"
 
 namespace Engine {
-namespace Scripting {
-namespace Serialize {
+namespace Scene {
 
-void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeComponents, const std::set<Scope*> &ignoreSet)
+void SceneSerializer::storeCurrentScene(Scripting::Serialize::SerializeOutStream &out, bool storeComponents, const std::set<Scripting::Scope*> &ignoreSet)
 {
 
-	GlobalScope *global = &GlobalScope::getSingleton();
+	Scripting::GlobalScope *global = &Scripting::GlobalScope::getSingleton();
 
     out << Scene::SceneManager::getSingleton();
 
@@ -27,7 +26,7 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
         out << Scripting::ValueType();
 
 
-    std::set<Scope *> scopeSet;
+    std::set<Scripting::Scope *> scopeSet;
 
     global->collectScopes(scopeSet, ignoreSet);
 	
@@ -37,22 +36,22 @@ void LevelSerializer::storeCurrentLevel(SerializeOutStream &out, bool storeCompo
 
     global->level()->collectScopes(scopeSet, ignoreSet);
 
-    for (Scope *s : scopeSet){
+    for (Scripting::Scope *s : scopeSet){
         out << s;
         s->storeCreationData(out);
     }
 
-    out << ValueType();
+    out << Scripting::ValueType();
 
 
-    for (Scope *s : scopeSet){
+    for (Scripting::Scope *s : scopeSet){
         out << s << *s;
     }
 
-    out << ValueType();
+    out << Scripting::ValueType();
 }
 
-void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
+void SceneSerializer::restoreScene(Scripting::Serialize::SerializeInStream &in, bool callInit)
 {
 
 	if (in.process())
@@ -62,14 +61,14 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
 
     Scene::SceneManager::getSingleton().loadComponentData(in);
 
-    std::map<InvScopePtr, Scope *> scopeMap;
+    std::map<Scripting::InvScopePtr, Scripting::Scope *> scopeMap;
 
-    ValueType scopeIn;
+    Scripting::ValueType scopeIn;
 
-	ScopeFactoryManager *factory = &ScopeFactoryManager::getSingleton();
-	InvScopePtr oldPtr;
+	Scripting::ScopeFactoryManager *factory = &Scripting::ScopeFactoryManager::getSingleton();
+	Scripting::InvScopePtr oldPtr;
     while(in.loopRead(oldPtr)){
-		Scope *scope = factory->create(in);
+		Scripting::Scope *scope = factory->create(in);
 		if (!scope) return;
         scopeMap[oldPtr] = scope;
 
@@ -78,12 +77,12 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
     while(in.loopRead(oldPtr)){
         auto it = scopeMap.find(oldPtr);
         if (it == scopeMap.end()) throw 0;
-        Scope *scope = it->second;
+        Scripting::Scope *scope = it->second;
         in >> *scope;
         scope->applyScopeMap(scopeMap);
 
 		if (callInit) {
-			Scene::Entity::Entity *e = scope_cast<Scene::Entity::Entity>(scope);
+			Scene::Entity::Entity *e = Scripting::scope_cast<Scene::Entity::Entity>(scope);
 			if (e) {
 				e->init();
 			}
@@ -97,7 +96,6 @@ void LevelSerializer::restoreLevel(SerializeInStream &in, bool callInit)
 
 }
 
-}
 } // namespace Scripting
 } // namespace Core
 

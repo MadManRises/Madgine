@@ -25,7 +25,7 @@ namespace Engine {
 		class Struct;
 
 		class GlobalScope;
-		class Level;
+		class Scene;
 
 		namespace Serialize {
 
@@ -88,8 +88,6 @@ namespace Engine {
 		class SceneManager;
 		class BaseSceneComponent;
 		class SceneListener;
-		class TextureListener;
-		class TextureComponent;
 
 		namespace Entity {
 			class Entity;
@@ -104,6 +102,9 @@ namespace Engine {
 	}
 
 	namespace Resources {
+		class TextureListener;
+		class TextureComponent;
+
 		class ResourceLoader;
 		namespace Shading {
 			class ShaderFactoryBase;

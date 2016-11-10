@@ -36,7 +36,7 @@ void GlobalScope::finalize()
 	MadgineObject::finalize();
 }
 
-Level *GlobalScope::level()
+Scene *GlobalScope::level()
 {
     return &mLevel;
 }

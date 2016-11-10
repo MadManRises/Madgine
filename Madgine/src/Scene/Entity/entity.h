@@ -146,9 +146,6 @@ private:
     
     Ogre::Vector3 mLastPosition;
 
-
-
-
     std::map<std::string, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
 
     static std::map<std::string, ComponentAdder> &sRegisteredComponentsByName(){

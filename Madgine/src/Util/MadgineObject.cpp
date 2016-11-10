@@ -1,14 +1,11 @@
 #pragma once
 
+#include "libinclude.h"
 #include "MadgineObject.h"
 #include "MadgineObjectCollector.h"
 
 namespace Engine {
-	namespace Util {
-
-
-
-		
+	namespace Util {		
 
 		BaseMadgineObject::BaseMadgineObject() :
 			mState(ObjectState::CONSTRUCTED)

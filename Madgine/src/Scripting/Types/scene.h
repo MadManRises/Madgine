@@ -5,10 +5,10 @@
 namespace Engine {
 namespace Scripting {
 
-class Level : public ScopeFactoryImpl<Level>
+class Scene : public ScopeFactoryImpl<Scene>
 {
 public:
-    Level();
+    Scene();
 
 	virtual void clear() override;
 

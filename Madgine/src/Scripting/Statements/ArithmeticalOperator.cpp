@@ -3,7 +3,7 @@
 
 #include "Database\exceptionmessages.h"
 #include "Scripting\Datatypes\valuetype.h"
-#include "Scripting\scriptexception.h"
+#include "Scripting\scriptingexception.h"
 
 namespace Engine {
 	namespace Scripting {

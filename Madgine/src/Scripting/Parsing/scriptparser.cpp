@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "scriptparser.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting/Parsing/parseexception.h"
 
 #include "Scripting/Parsing/entitynode.h"
@@ -266,7 +266,7 @@ void ScriptParser::parsePrototype()
 	if (it != mPrototypes.end()) {
 		throw ScriptingException(Database::Exceptions::doubleTypeDefinition(name));
 	}
-	Struct *node = &(Struct&)mPrototypes[name];
+	Struct *node = mPrototypes[name].ptr();
 
 	if (mNextToken == ColonToken) {
 		doRead();

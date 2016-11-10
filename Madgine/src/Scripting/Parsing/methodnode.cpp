@@ -2,7 +2,7 @@
 #include "methodnode.h"
 #include "Scripting/Datatypes/valuetype.h"
 #include "Scripting/Statements/statement.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting\Types\scope.h"
 #include "Util\UtilMethods.h"
 

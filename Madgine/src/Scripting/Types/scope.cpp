@@ -1,7 +1,7 @@
 #include "libinclude.h"
 #include "scope.h"
 #include "Scripting/Datatypes/Serialize/serializestream.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting/Parsing/methodnodePtr.h"
 #include "Scripting/Parsing/methodnode.h"
 #include "Scripting/Datatypes/Serialize/serializeexception.h"

@@ -1,30 +1,30 @@
 #include "libinclude.h"
-#include "level.h"
+#include "scene.h"
 #include "globalscope.h"
 
 namespace Engine {
 namespace Scripting {
 
-Level::Factory Level::sFactory;
+Scene::Factory Scene::sFactory;
 
-Level::Level()
+Scene::Scene()
 {
 
 }
 
 
-void Level::clear()
+void Scene::clear()
 {
 	Scope::clear();
 }
 
 
-std::string Level::getIdentifier()
+std::string Scene::getIdentifier()
 {
     return "Level";
 }
 
-template <> Scope *Level::Factory::create(Serialize::SerializeInStream &in)
+template <> Scope *Scene::Factory::create(Serialize::SerializeInStream &in)
 {
     return GlobalScope::getSingleton().level();
 }

@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "valuetype.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
 #include "Scripting\Types\refscope.h"

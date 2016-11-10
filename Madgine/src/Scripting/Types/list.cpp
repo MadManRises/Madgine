@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "list.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting/Datatypes/Serialize/serializestream.h"
 
 namespace Engine {

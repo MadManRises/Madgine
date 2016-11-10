@@ -3,17 +3,12 @@
 #include "Scene\scenecomponent.h"
 #include "Resources/Shading/shadercollector.h"
 #include "Scripting/Datatypes/Serialize/serializable.h"
-#include "TextureComponent.h"
+#include "Resources\TextureComponent.h"
 #include "Entity\masks.h"
 #include "Util\MadgineObject.h"
 
 namespace Engine {
-
-
-
 namespace Scene {
-
-
 
 class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Scripting::Serialize::Serializable, public Util::MadgineObject<SceneManager> {
 public:
@@ -37,7 +32,7 @@ public:
 
 
 	void setGameTextureSize(const Ogre::Vector2 &size);
-	TextureComponent &getGameTexture();
+	Resources::TextureComponent &getGameTexture();
 	Ogre::Camera *camera();
 	Ogre::SceneManager *getSceneManager();
 	Ogre::Image getScreenshot();
@@ -130,7 +125,7 @@ private:
 	std::vector<Ogre::SceneNode *> mTerrainEntities;
 	std::map<std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> mInfoObjects;
 
-	TextureComponent mGameTexture;
+	Resources::TextureComponent mGameTexture;
 
 
     std::list<Ogre::unique_ptr<Entity::Entity>> mEntities;

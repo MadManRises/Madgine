@@ -32,6 +32,10 @@ public:
 		mPtr->unref();
 	}
 
+	T *ptr() {
+		return mPtr;
+	}
+
 	operator T &() {
 		return *mPtr;
 	}

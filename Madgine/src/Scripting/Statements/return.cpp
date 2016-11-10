@@ -2,7 +2,7 @@
 #include "return.h"
 
 #include "Scripting/Datatypes/valuetype.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 
 #include "Database/exceptionmessages.h"
 

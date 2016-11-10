@@ -1,7 +1,7 @@
 #include "libinclude.h"
 #include "assignment.h"
 #include "Scripting/Types/scope.h"
-#include "Scripting/scriptexception.h"
+#include "Scripting/scriptingexception.h"
 #include "Scripting/Datatypes/varset.h"
 
 #include "Database/exceptionmessages.h"

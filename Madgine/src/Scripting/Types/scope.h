@@ -23,7 +23,7 @@ struct ScopeClassType<GlobalScope> {
 };
 
 template <>
-struct ScopeClassType<Scene::Entity::Entity>{
+struct ScopeClassType<Engine::Scene::Entity::Entity>{
 	static constexpr ScopeClass type = ScopeClass::EntityClass;
 };
 
@@ -38,7 +38,7 @@ struct ScopeClassType<Struct> {
 };
 
 template <>
-struct ScopeClassType<Level> {
+struct ScopeClassType<Scene> {
 	static constexpr ScopeClass type = ScopeClass::LevelClass;
 };
 

@@ -12,7 +12,6 @@
 
 #include "Scripting\Datatypes\Serialize\serializestream.h"
 
-#include "Scene\entityexception.h"
 
 #include "Scripting\Parsing\scriptparser.h"
 #include "Scripting\Parsing\entitynode.h"
@@ -60,6 +59,8 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
 
 Entity::~Entity()
 {
+	if (mNode->getAttachedObjectIterator().hasMoreElements())
+		LOG_ERROR(Database::Exceptions::nodeNotCleared);
 }
 
 void Entity::init(const Scripting::ArgumentList &args)
@@ -69,14 +70,15 @@ void Entity::init(const Scripting::ArgumentList &args)
 
 void Entity::finalize()
 {
-	clear();
-
-	if (mObject)
-		mNode->detachObject(mObject);
 
 	for (std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &p : mComponents) {
 		p.second->finalize();
 	}
+
+	clear();
+
+	if (mObject)
+		mNode->detachObject(mObject);
 
 	mComponents.clear();
 
@@ -309,7 +311,7 @@ void Entity::destroyDecoratorNode(Ogre::SceneNode * node)
 {
 	if (node->getAttachedObjectIterator().begin() !=
 		node->getAttachedObjectIterator().end())
-		throw EntityException(Database::Exceptions::nodeNotCleared);
+		LOG_ERROR(Database::Exceptions::nodeNotCleared);
 	node->getParentSceneNode()->removeChild(node);
 	node->getCreator()->destroySceneNode(node);
 }
@@ -321,7 +323,7 @@ template <> Scripting::Scope *Scene::Entity::Entity::Factory::create(Scripting::
 {
 	std::string obName, entityMesh, behaviour;
 	in >> obName >> entityMesh >> behaviour;
-	return Scene::SceneManager::getSingleton().createEntity(obName, entityMesh, behaviour);
+	return Engine::Scene::SceneManager::getSingleton().createEntity(obName, entityMesh, behaviour);
 }
 
 }

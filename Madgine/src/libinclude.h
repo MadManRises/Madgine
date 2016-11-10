@@ -15,6 +15,9 @@
 
 #include <Ogre.h>
 
+#include <OgreFont.h>
+#include <OgreFontManager.h>
+
 #include <OgreRTShaderSystem.h>
 
 #include <OgreTerrainGroup.h>

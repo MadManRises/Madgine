@@ -31,7 +31,6 @@ namespace Engine {
 
 			void MyGUITextureDrawer::onTextureChanged(Ogre::TexturePtr &tex)
 			{
-				
 
 				if (!mTextureDrawer->_getTextureName().empty()) {
 					MyGUI::OgreRenderManager &rm = MyGUI::OgreRenderManager::getInstance();
