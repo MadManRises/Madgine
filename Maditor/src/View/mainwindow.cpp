@@ -30,12 +30,9 @@ namespace Maditor {
 		{
 			ui->setupUi(this);
 
-			QSettings &settings = editor->settings();
-
-			restoreGeometry(settings.value("geometry").toByteArray());
-			restoreState(settings.value("state").toByteArray(), 0);
-
-			updateRecentProjects(editor->recentProjects());
+			
+			updateRecentProjects(mEditor->recentProjects());
+			
 
 			mTarget = new OgreWindow(editor->application(), editor->watcher());
 			QWidget *ogre = QWidget::createWindowContainer(mTarget);
@@ -54,12 +51,24 @@ namespace Maditor {
 
 			setupConnections();
 
-			editor->onStartup();
+			
 		}
 
 		MainWindow::~MainWindow()
 		{
 			delete ui;
+		}
+
+		void MainWindow::startup()
+		{
+			QSettings &settings = mEditor->settings();
+
+			restoreGeometry(settings.value("geometry").toByteArray());
+			restoreState(settings.value("state").toByteArray(), 0);
+
+			
+
+			mEditor->onStartup();
 		}
 
 

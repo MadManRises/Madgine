@@ -206,16 +206,16 @@ namespace Maditor {
 				}
 			}
 
-			for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
-				h->finalize();
+			for (Engine::Scripting::BaseGlobalAPIComponent *api : module.mGlobalAPIComponents) {
+				api->finalize();
 			}
 
 			for (int i = -1; i < Engine::UI::UIManager::sMaxInitOrder; ++i)
-				for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers) 
+				for (Engine::UI::GuiHandlerBase *h : module.mGuiHandlers)
 					h->finalize(i);
 
-			for (Engine::Scripting::BaseGlobalAPIComponent *api : module.mGlobalAPIComponents) {
-				api->finalize();
+			for (Engine::UI::GameHandlerBase *h : module.mGameHandlers) {
+				h->finalize();
 			}
 
 			bool result = FreeLibrary(module.mHandle);

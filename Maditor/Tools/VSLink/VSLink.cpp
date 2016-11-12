@@ -69,6 +69,7 @@ void VSLink::update()
 void VSLink::addActions(Maditor::View::MainWindow * window)
 {
 	QToolBar *toolbar = new QToolBar;
+	toolbar->setObjectName("VSLink_Toolbar");
 
 	QList<QAction*> result;
 	QAction *openAction = new QAction("OpenSolution");

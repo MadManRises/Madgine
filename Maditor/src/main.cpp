@@ -26,6 +26,8 @@ int main(int argc, char **argv) {
 
 			addons.setWindow(&w);
 
+			w.startup();
+
 			w.show();
 
 			result = app.exec();

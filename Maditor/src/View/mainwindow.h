@@ -19,6 +19,7 @@ namespace Maditor {
 			explicit MainWindow(Model::Editor *editor, QWidget *parent = 0);
 			~MainWindow();
 
+			void startup();
 
 			/*void setupScene();
 
