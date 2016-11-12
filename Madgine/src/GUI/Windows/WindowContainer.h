@@ -46,6 +46,7 @@ public:
 	virtual void setPixelSize(const Ogre::Vector2 &size) = 0;
 	virtual Ogre::Vector2 getPixelSize() = 0;
 	virtual void setPixelPosition(const Ogre::Vector2 &size) = 0;
+	virtual Ogre::Vector2 getPixelPosition() = 0;
 
 	void setSize(const WindowSizeRelVector &size);
 	const WindowSizeRelVector &getSize();

@@ -45,8 +45,9 @@ namespace Engine {
 				virtual void setEnabled(bool b) override;
 
 				virtual void setPixelSize(const Ogre::Vector2 & size) override;
-				virtual void setPixelPosition(const Ogre::Vector2 & pos) override;
 				virtual Ogre::Vector2 getPixelSize() override;
+				virtual void setPixelPosition(const Ogre::Vector2 & pos) override;
+				virtual Ogre::Vector2 getPixelPosition() override;
 
 
 
@@ -66,6 +67,8 @@ namespace Engine {
 				virtual WindowContainer * createChildWindow(const std::string & name, Class _class, const std::string &customSkin = "") override;
 
 				virtual std::list<WindowContainer*> buildChildren() override;
+
+				void needMouse();
 			
 			private:
 

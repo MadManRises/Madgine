@@ -6,16 +6,41 @@
 
 namespace Engine {
 	namespace GUI {
-		void Engine::GUI::TextureDrawer::setTexture(Resources::TextureComponent & tex)
+		TextureDrawer::TextureDrawer(WindowContainer * win) :
+			Window(win),
+			mCurrentTextureComponent(0)
 		{
+		}
+		TextureDrawer::~TextureDrawer()
+		{
+			clearTextureComponent();
+		}
+		void TextureDrawer::setTexture(Resources::TextureComponent & tex)
+		{
+			clearTextureComponent();
 			tex.addListener(this);
-			if (!tex.isNull())
-				onTextureChanged(tex.texture());
+			mCurrentTextureComponent = &tex;
+			onTextureChanged(tex.texture());
 		}
 
 		void TextureDrawer::setTexture(Ogre::TexturePtr & tex)
 		{
+			clearTextureComponent();
 			onTextureChanged(tex);
+		}
+
+		void TextureDrawer::clearTexture()
+		{
+			clearTextureComponent();
+			setTexture(Ogre::TexturePtr());
+		}
+
+		void TextureDrawer::clearTextureComponent()
+		{
+			if (mCurrentTextureComponent) {
+				mCurrentTextureComponent->removeListener(this);
+				mCurrentTextureComponent = 0;				
+			}
 		}
 
 	}

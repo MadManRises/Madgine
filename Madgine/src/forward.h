@@ -74,7 +74,6 @@ namespace Engine {
 		class Combobox;
 		class TabWindow;
 		class Textbox;
-		class Layout;
 		class Label;
 
 		namespace MouseButton {

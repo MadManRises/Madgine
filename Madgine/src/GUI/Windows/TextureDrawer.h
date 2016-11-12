@@ -9,14 +9,21 @@ namespace Engine {
 		class MADGINE_EXPORT TextureDrawer : public Window, public Resources::TextureListener
 		{
 		public:
-			using Window::Window;
-			virtual ~TextureDrawer() = default;
+			TextureDrawer(WindowContainer *win);
+			virtual ~TextureDrawer();
 
 			void setTexture(Resources::TextureComponent &tex);
 			void setTexture(Ogre::TexturePtr &tex);
+			void clearTexture();
 
 			// Inherited via TextureListener
 			virtual void onTextureChanged(Ogre::TexturePtr &tex) = 0;
+
+		private:
+			void clearTextureComponent();
+
+		private:
+			Resources::TextureComponent *mCurrentTextureComponent;
 		};
 
 	}

@@ -5,7 +5,7 @@
 namespace Engine {
 	namespace GUI {
 
-		class Button : public Window {
+		class MADGINE_EXPORT Button : public Window {
 		public:
 			using Window::Window;
 			virtual ~Button() = default;

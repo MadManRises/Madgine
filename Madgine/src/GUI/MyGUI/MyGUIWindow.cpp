@@ -10,7 +10,6 @@
 #include "MyGUIBar.h"
 #include "MyGUITextureDrawer.h"
 #include "MyGUITextbox.h"
-#include "MyGUILayout.h"
 #include "MyGUIButton.h"
 #include "MyGUICheckbox.h"
 #include "MyGUICombobox.h"
@@ -51,6 +50,9 @@ namespace Engine {
 				}
 
 				mWindow->eventKeyButtonReleased += MyGUI::newDelegate(this, &MyGUIWindow::handleKeyEvent);
+
+				mWindow->setNeedMouseFocus(false);
+				mWindow->setNeedKeyFocus(false);
 			}
 
 			MyGUIWindow::~MyGUIWindow()
@@ -61,6 +63,7 @@ namespace Engine {
 			void MyGUIWindow::registerHandlerEvents(void * id, std::function<void(GUI::MouseEventArgs&)> mouseMove, std::function<void(GUI::MouseEventArgs&)> mouseDown, std::function<void(GUI::MouseEventArgs&)> mouseUp, std::function<void(GUI::MouseEventArgs&)> mouseScroll, std::function<bool(GUI::KeyEventArgs&)> keyPress)
 			{
 				mWindow->setNeedKeyFocus(true);
+				needMouse();
 				mKeyHandlers[id].push_back(keyPress);
 				registerEvent(id, mouseMove, mWindow->eventMouseMove);
 				registerEvent(id, mouseMove, mWindow->eventMouseDrag.m_event);
@@ -110,9 +113,6 @@ namespace Engine {
 					break;
 				case Class::LABEL_CLASS:
 					impl = new MyGUILabel(this);
-					break;
-				case Class::LAYOUT_CLASS:
-					impl = new MyGUILayout(this);
 					break;
 					/*case Class::TABWINDOW_CLASS:
 					impl = new MyGUIT(this);
@@ -187,6 +187,7 @@ namespace Engine {
 			{
 				switch (type) {
 				case EventType::ButtonClick:
+					needMouse();
 					registerEvent(id, event, mWindow->castType<MyGUI::Button>()->eventMouseButtonClick);
 					break;
 				case EventType::TextChanged:
@@ -294,6 +295,15 @@ namespace Engine {
 				return result;
 			}
 
+			void MyGUIWindow::needMouse()
+			{
+				MyGUI::Widget *w = mWindow;
+				while (w && !w->getNeedMouseFocus()) {
+					w->setNeedMouseFocus(true);
+					w = w->getParent();
+				}
+			}
+
 			WindowContainer * MyGUIWindow::createChildWindow(const std::string & name, Class _class, const std::string &customSkin)
 			{
 				std::string type, skin;
@@ -328,19 +338,27 @@ namespace Engine {
 
 			void MyGUIWindow::setPixelSize(const Ogre::Vector2 & size)
 			{
-				mWindow->setSize(roundf(size.x), roundf(size.y));
+				mWindow->setSize(size.x, size.y);
 			}
 
 			void MyGUIWindow::setPixelPosition(const Ogre::Vector2 & pos)
 			{
-				mWindow->setPosition(roundf(pos.x), roundf(pos.y));
+				mWindow->setPosition(pos.x, pos.y);
+			}
+
+			Ogre::Vector2 MyGUIWindow::getPixelPosition()
+			{
+				const MyGUI::IntPoint &pos = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getPosition();
+				return{ (float)pos.left, (float)pos.top };
 			}
 
 			Ogre::Vector2 MyGUIWindow::getPixelSize()
 			{
-				const MyGUI::IntSize &size = mWindow->getSize();
+				const MyGUI::IntSize &size = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getSize();
 				return{ (float)size.width, (float)size.height };
 			}
+
+
 
 			MyGUI::Widget *MyGUIWindow::window() {
 				return mWindow;

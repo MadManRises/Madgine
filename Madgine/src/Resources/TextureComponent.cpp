@@ -15,6 +15,11 @@ namespace Engine {
 			mListeners.push_back(listener);
 		}
 
+		void TextureComponent::removeListener(TextureListener * listener)
+		{
+			mListeners.remove(listener);
+		}
+
 		const Ogre::PixelBox &TextureComponent::lock() {
 			mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 			return mTexture->getBuffer()->getCurrentLock();

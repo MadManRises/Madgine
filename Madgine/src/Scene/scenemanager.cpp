@@ -444,6 +444,8 @@ void SceneManager::setGameTextureSize(const Ogre::Vector2 & size)
 {
 	if (size.x <= 0 || size.y <= 0)
 		return;
+	if (!mGameTexture.isNull() && mGameTexture.texture()->getWidth() == size.x && mGameTexture.texture()->getHeight() == size.y)
+		return;
     mCamera->setAspectRatio(size.x / size.y);
 
     unsigned int width = size.x;

@@ -69,11 +69,12 @@ namespace Engine {
 
 		void WindowContainer::updateSize(const Ogre::Vector2 &size)
 		{
-			setPixelSize(mSize * size);
-			setPixelPosition(mPos * size);
-
-			Ogre::Vector2 pixelSize = getPixelSize();
+			Ogre::Vector2 newSize = mSize * size;
+			Ogre::Vector2 newPos = mPos * size;
+			setPixelSize(newSize);
+			setPixelPosition(newPos);
 		
+			Ogre::Vector2 pixelSize = getPixelSize();
 			for (WindowContainer *w : mChildren)
 				w->updateSize(pixelSize);
 

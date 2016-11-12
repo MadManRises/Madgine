@@ -7,6 +7,7 @@ namespace Engine {
 			TextureComponent();
 
 			void addListener(TextureListener *listener);
+			void removeListener(TextureListener *listener);
 
 			const Ogre::PixelBox & lock();
 

@@ -46,11 +46,6 @@ namespace Engine {
 		};
 
 		template <>
-		struct ClassId<Layout> {
-			static constexpr Class id = Class::LAYOUT_CLASS;
-		};
-
-		template <>
 		struct ClassId<Label> {
 			static constexpr Class id = Class::LABEL_CLASS;
 		};
