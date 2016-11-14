@@ -239,8 +239,6 @@ html/
 [0-9]*_VS.glsl
 [0-9]*_FS.glsl
 
-output/
-
 *.db
 
 *.config
