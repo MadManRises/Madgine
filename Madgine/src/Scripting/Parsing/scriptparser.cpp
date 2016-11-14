@@ -263,14 +263,16 @@ void ScriptParser::parsePrototype()
 	std::string name = consume(NameToken);
 
 	auto it = mPrototypes.find(name);
-	if (it != mPrototypes.end()) {
-		throw ScriptingException(Database::Exceptions::doubleTypeDefinition(name));
+	if (it != mPrototypes.end() && !mReload) {
+		throw ParseException(Database::Exceptions::doubleTypeDefinition(name));
 	}
 	Struct *node = mPrototypes[name].ptr();
+	node->clear();
+	node->clearPrototype();
 
 	if (mNextToken == ColonToken) {
 		doRead();
-		node->setData(&getPrototype(consume(NameToken)));
+		node->setPrototype(&getPrototype(consume(NameToken)));
 	}
 
 	skipNewlines();
@@ -629,7 +631,7 @@ ValueType ScriptParser::parseConst()
 		doRead();
 		return ValueType();
 	default:
-		throw ScriptingException(Database::Exceptions::invalidExpression(mCurrentLine));
+		throw ParseException(Database::Exceptions::invalidExpression(mCurrentLine));
 	}
 }
 

@@ -6,13 +6,15 @@
 
 #include "Database/exceptionmessages.h"
 
+#include "Util\UtilMethods.h"
+
 namespace Engine {
 namespace Scripting {
 
 const ValueType &VarSet::get(const std::string &name) const
 {
-    if (!contains(name)) throw ScriptingException(
-            Database::Exceptions::unknownVariable(name));
+    if (!contains(name)) 
+		MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::unknownVariable(name)));
     return at(name);
 }
 

@@ -28,9 +28,13 @@ const ValueType &List::add(const ValueType & v)
 	return mItems.back();
 }
 
-void List::remove(const ValueType & v)
+bool List::remove(const ValueType & v)
 {
-	mItems.remove(v);
+	auto it = std::find(mItems.begin(), mItems.end(), v);
+	if (it == mItems.end())
+		return false;
+	it->clear();
+	return true;
 }
 
 ValueType List::at(int i)

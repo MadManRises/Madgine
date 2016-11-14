@@ -19,8 +19,8 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
     {"set", &set},
     {"get", &get},
     {"check", &checkFlag},
-	{"findData", &findData},
-	{"setData", &setData}
+	{"findPrototype", &findPrototype},
+	{"setPrototype", &setPrototype}
 };
 
 Scope::Scope(Scope *data) :
@@ -55,14 +55,23 @@ bool Scope::hasVar(const std::string &name) const
     return mVariables.contains(name);
 }
 
-void Scope::findData(const std::string & data)
+void Scope::findPrototype(const std::string & data)
 {
 	mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(data);
 }
 
-void Scope::setData(Scope * data)
+void Scope::setPrototype(Scope * data)
 {
 	mPrototype = data;
+}
+
+Scope *Scope::getPrototype() {
+	return mPrototype;
+}
+
+void Scope::clearPrototype()
+{
+	mPrototype = 0;
 }
 
 ValueType Scope::methodCall(const std::string &name, const ArgumentList &args)
@@ -204,15 +213,15 @@ ValueType Scope::checkFlag(const ArgumentList &stack)
     return stack.size() > 1 ? checkFlag(stack.at(0).asString(), stack.at(1).asBool()) : checkFlag(stack.at(0).asString());
 }
 
-ValueType Scope::findData(const ArgumentList & stack)
+ValueType Scope::findPrototype(const ArgumentList & stack)
 {
-	findData(stack.at(0).asString());
+	findPrototype(stack.at(0).asString());
 	return ValueType();
 }
 
-ValueType Scope::setData(const ArgumentList & stack)
+ValueType Scope::setPrototype(const ArgumentList & stack)
 {
-	setData(stack.at(0).asScope());
+	setPrototype(stack.at(0).asScope());
 	return ValueType();
 }
 

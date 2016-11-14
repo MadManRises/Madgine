@@ -57,9 +57,10 @@ public:
     bool hasVar(const std::string &name) const;
 	bool checkFlag(const std::string &name, bool defaultValue = false);
     
-	void findData(const std::string &name);
-	void setData(Scope *data);
-
+	void findPrototype(const std::string &name);
+	void setPrototype(Scope *data);
+	Scope *getPrototype();
+	void clearPrototype();
 
 	virtual bool hasScriptMethod(const std::string &name);
 	
@@ -78,9 +79,9 @@ public:
 	bool callMethodIfAvailable(const std::string &name, const ArgumentList &args = {});
 	bool callMethodCatch(const std::string &name, const ArgumentList &args = {});
 
-protected:	
-
 	virtual void clear();
+
+protected:	
 
     virtual void collectValueRefs(std::list<ValueType *> &values);
 
@@ -103,8 +104,8 @@ private:
     ValueType set(const ArgumentList &stack);
     ValueType get(const ArgumentList &stack);
     ValueType checkFlag(const ArgumentList &stack);
-	ValueType findData(const ArgumentList &stack);
-	ValueType setData(const ArgumentList &stack);
+	ValueType findPrototype(const ArgumentList &stack);
+	ValueType setPrototype(const ArgumentList &stack);
 
 private:
     typedef ValueType(Scope::*NativeMethod)(const ArgumentList &);
@@ -113,7 +114,7 @@ private:
 
 	VarSet mVariables;
 
-	const Scope *mPrototype;
+	Scope *mPrototype;
 };
 
 template <class T>

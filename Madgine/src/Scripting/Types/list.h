@@ -13,7 +13,7 @@ public:
 
     bool contains(const ValueType &v);
     const ValueType &add(const ValueType &v);
-    void remove(const ValueType &v);
+    bool remove(const ValueType &v);
     ValueType at(int i);
     void setAt(int i, const ValueType &v);
 	bool empty();

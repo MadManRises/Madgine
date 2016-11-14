@@ -52,7 +52,7 @@ private:
 
 	static void unregisterComponent(const typename std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator &it) {
 		typename std::list<std::function<Ogre::unique_ptr<Base>()>>::const_iterator begin = sComponents().begin();
-		int i = std::distance(begin, it);
+		size_t i = std::distance(begin, it);
 		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
 		if (self) {
 			auto it2 = self->mComponents.begin();

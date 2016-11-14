@@ -45,7 +45,7 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
     mLastPosition(node->getPosition())
 {
 
-	setData(mDescription->getPrototype());
+	setPrototype(mDescription->getPrototype());
 
     mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
 

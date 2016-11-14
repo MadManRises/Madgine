@@ -148,7 +148,7 @@ namespace Maditor {
 
 			TreeItem * RootProfilerNode::parentItem()
 			{
-				throw 0;
+				return 0;
 			}
 
 		}
