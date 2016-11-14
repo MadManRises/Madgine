@@ -2,12 +2,10 @@
 
 #include "scenecomponent.h"
 
-#include "Resources/TextureComponent.h"
-
 namespace Engine {
 	namespace Scene {
 
-		class MADGINE_EXPORT BaseSceneTextureComponent : public Resources::TextureComponent
+		class MADGINE_EXPORT BaseSceneTextureComponent
 		{
 		public:
 			BaseSceneTextureComponent(const std::string &textureName, Ogre::PixelFormat pixelformat, int textureUsage = Ogre::TU_DYNAMIC_WRITE_ONLY);
@@ -15,10 +13,14 @@ namespace Engine {
 			size_t width() const;
 			size_t height() const;
 
-		protected:
+			const Ogre::PixelBox &lock();
+			void unlock();
+
+			Ogre::TexturePtr texture();
+
+		protected:			
 
 			void updateTexture(SceneManager *sceneMgr);
-
 
 			float aspectRatio() const;
 
@@ -28,13 +30,7 @@ namespace Engine {
 
 		private:
 
-			const std::string mTextureName;
-			const Ogre::PixelFormat mPixelFormat;
-			const int mTextureUsage;
-
-			Ogre::uint mWidth, mHeight;
-
-
+			Ogre::TexturePtr mTexture;
 
 		};
 

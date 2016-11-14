@@ -41,6 +41,7 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
 
 	createCamera();
+
 }
 
 SceneManager::~SceneManager()
@@ -58,6 +59,25 @@ void SceneManager::init()
 	mTerrainRayQuery = mSceneMgr->createRayQuery(Ogre::Ray(), Entity::Masks::TERRAIN_MASK);
 	mTerrainRayQuery->setSortByDistance(true);
 
+	mGameTexture = mRoot->getTextureManager()->createManual(
+		"RTT",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		Ogre::TEX_TYPE_2D,
+		256,
+		256,
+		0,
+		Ogre::PF_R8G8B8,
+		Ogre::TU_RENDERTARGET);
+
+	mRenderTexture = mGameTexture->getBuffer()->getRenderTarget();
+
+	mVp = mRenderTexture->addViewport(mCamera);
+	mVp->setOverlaysEnabled(false);
+	mVp->setClearEveryFrame(true);
+	mVp->setBackgroundColour(Ogre::ColourValue::Black);
+
+
+	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
     for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
         component->init();
@@ -444,44 +464,38 @@ void SceneManager::setGameTextureSize(const Ogre::Vector2 & size)
 {
 	if (size.x <= 0 || size.y <= 0)
 		return;
-	if (!mGameTexture.isNull() && mGameTexture.texture()->getWidth() == size.x && mGameTexture.texture()->getHeight() == size.y)
+	if (mGameTexture->getWidth() == size.x && mGameTexture->getHeight() == size.y)
 		return;
     mCamera->setAspectRatio(size.x / size.y);
 
     unsigned int width = size.x;
     unsigned int height = size.y;
 
-	if (mRenderTexture)
-		mRenderTexture->removeAllViewports();
+	mRenderTexture->removeAllViewports();
 
-	mGameTexture.clear();
+	mGameTexture->freeInternalResources();
+	mGameTexture->setWidth(width);
+	mGameTexture->setHeight(height);
+	mGameTexture->createInternalResources();
+    
+    
+	mRenderTexture = mGameTexture->getBuffer()->getRenderTarget();
 
-    mGameTexture = mRoot->getTextureManager()->createManual(
-                               "RTT",
-                               Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                               Ogre::TEX_TYPE_2D,
-                               width,
-                               height,
-                               0,
-                               Ogre::PF_R8G8B8,
-                               Ogre::TU_RENDERTARGET);
-
-    mRenderTexture = mGameTexture.texture()->getBuffer()->getRenderTarget();
-
-    mVp = mRenderTexture->addViewport(mCamera);
-    mVp->setOverlaysEnabled(false);
-    mVp->setClearEveryFrame(true);
-    mVp->setBackgroundColour(Ogre::ColourValue::Black);
+	mVp = mRenderTexture->addViewport(mCamera);
+	mVp->setOverlaysEnabled(false);
+	mVp->setClearEveryFrame(true);
+	mVp->setBackgroundColour(Ogre::ColourValue::Black);
 
 
-    mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+    
 }
 
 
 Ogre::Image SceneManager::getScreenshot()
 {
 	Ogre::Image image;
-	mGameTexture.texture()->convertToImage(image);
+	mGameTexture->convertToImage(image);
 	return image;
 }
 
@@ -994,7 +1008,7 @@ void SceneManager::getTerrainMeshInformation(size_t &vertex_count, Ogre::Vector3
 	}
 }
 
-Resources::TextureComponent & SceneManager::getGameTexture()
+Ogre::TexturePtr SceneManager::getGameTexture()
 {
 	return mGameTexture;
 }

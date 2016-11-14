@@ -1,3 +1,4 @@
+#include "libinclude.h"
 
 #include "scenetexturecomponent.h"
 
@@ -10,49 +11,62 @@ namespace Scene {
 
 
 
-	BaseSceneTextureComponent::BaseSceneTextureComponent(const std::string & textureName, Ogre::PixelFormat pixelformat, int textureUsage) :
-		mTextureName(textureName),
-		mPixelFormat(pixelformat),
-		mTextureUsage(textureUsage)
+	BaseSceneTextureComponent::BaseSceneTextureComponent(const std::string & textureName, Ogre::PixelFormat pixelformat, int textureUsage)
 	{
-
+		mTexture = Ogre::TextureManager::getSingleton().createManual(
+			textureName, // Name of texture
+			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, // Name of resource group in which the texture should be created
+			Ogre::TEX_TYPE_2D, // Texture type
+			256, // Width
+			256, // Height
+			0, // Number of mipmaps
+			pixelformat, // Pixel format
+			textureUsage // usage
+		);
 	}
 
 	size_t BaseSceneTextureComponent::width() const {
-		return mWidth;
+		return mTexture->getWidth();
 	}
 
 	size_t BaseSceneTextureComponent::height() const {
-		return mHeight;
+		return mTexture->getHeight();
+	}
+
+	const Ogre::PixelBox & BaseSceneTextureComponent::lock()
+	{
+		mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+		return mTexture->getBuffer()->getCurrentLock();
+	}
+
+	void BaseSceneTextureComponent::unlock()
+	{
+		mTexture->getBuffer()->unlock();
+	}
+
+	Ogre::TexturePtr BaseSceneTextureComponent::texture()
+	{
+		return mTexture;
 	}
 
 	void BaseSceneTextureComponent::updateTexture(SceneManager * sceneMgr) {
 		const Engine::Math::Bounds &rasterizedBounds = sceneMgr->getRasterizedSceneBounds();
-		mWidth = rasterizedBounds.width() + 1;
-		mHeight = rasterizedBounds.height() + 1;
 
-		clear();
+		mTexture->freeInternalResources();
+		mTexture->setWidth(rasterizedBounds.width() + 1);
+		mTexture->setHeight(rasterizedBounds.height() + 1);
+		mTexture->createInternalResources();
 
-		set(Ogre::TextureManager::getSingleton().createManual(
-			mTextureName, // Name of texture
-			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, // Name of resource group in which the texture should be created
-			Ogre::TEX_TYPE_2D, // Texture type
-			mWidth, // Width
-			mHeight, // Height
-			0, // Number of mipmaps
-			mPixelFormat, // Pixel format
-			mTextureUsage // usage
-		));
+		mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+		const Ogre::PixelBox &pb = mTexture->getBuffer()->getCurrentLock();
+		
+		memset(pb.data, 0, Ogre::PixelUtil::getMemorySize(mTexture->getWidth(), mTexture->getHeight(), mTexture->getDepth(), mTexture->getFormat()));
 
-		const Ogre::PixelBox &pb = lock();
-
-		memset(pb.data, 0, Ogre::PixelUtil::getMemorySize(mWidth, mHeight, 1, mPixelFormat));
-
-		unlock();
+		mTexture->getBuffer()->unlock();		
 	}
 
 	float BaseSceneTextureComponent::aspectRatio() const {
-		return float(mWidth) / mHeight;
+		return float(width()) / height();
 	}
 
 	size_t BaseSceneTextureComponent::clamp(size_t x, size_t min, size_t max) {
@@ -61,7 +75,7 @@ namespace Scene {
 
 	size_t BaseSceneTextureComponent::index(size_t column, size_t line)
 	{
-		return clamp(line, 0, mHeight - 1) * mWidth + clamp(column, 0, mWidth - 1);
+		return clamp(line, 0, height() - 1) * width() + clamp(column, 0, width() - 1);
 	}
 
 } // namespace Scene

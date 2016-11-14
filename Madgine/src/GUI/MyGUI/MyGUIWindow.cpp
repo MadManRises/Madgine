@@ -203,9 +203,11 @@ namespace Engine {
 					registerEvent(id, event, mWindow->castType<MyGUI::Button>()->eventMouseButtonClick);
 					break;
 				case EventType::MouseEntered:
+					needMouse();
 					registerEvent(id, event, mWindow->eventMouseSetFocus);
 					break;
 				case EventType::MouseLeft:
+					needMouse();
 					registerEvent(id, event, mWindow->eventMouseLostFocus);
 					break;
 					/*case EventType::ComboboxSelectionChanged:
@@ -270,7 +272,7 @@ namespace Engine {
 					if (widgets.size() != 1)
 						failed = true;
 				}
-				catch (Ogre::FileNotFoundException &e) {
+				catch (Ogre::FileNotFoundException &) {
 					failed = true;
 				}
 
@@ -338,12 +340,12 @@ namespace Engine {
 
 			void MyGUIWindow::setPixelSize(const Ogre::Vector2 & size)
 			{
-				mWindow->setSize(size.x, size.y);
+				mWindow->setSize((int)size.x, (int)size.y);
 			}
 
 			void MyGUIWindow::setPixelPosition(const Ogre::Vector2 & pos)
 			{
-				mWindow->setPosition(pos.x, pos.y);
+				mWindow->setPosition((int)pos.x, (int)pos.y);
 			}
 
 			Ogre::Vector2 MyGUIWindow::getPixelPosition()

@@ -99,10 +99,10 @@ void Application::init()
 
 	mLoader->load();
 
-	mUI->init(); // Initialise all Handler
-
 	mSceneMgr->init(); // Initialise all Scene-Components
-
+	
+	mUI->init(); // Initialise all Handler
+	
 	mGlobalScope->init();
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows

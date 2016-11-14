@@ -29,22 +29,9 @@ namespace Engine {
 			}
 
 
-			void MyGUITextureDrawer::onTextureChanged(Ogre::TexturePtr &tex)
+			void MyGUITextureDrawer::setTexture(Ogre::TexturePtr &tex)
 			{
-
-				if (tex.isNull()) {
-					mTextureDrawer->setImageTexture("");
-				}
-				else {
-					MyGUI::OgreRenderManager &rm = MyGUI::OgreRenderManager::getInstance();
-					MyGUI::OgreTexture *myGUITex = static_cast<MyGUI::OgreTexture*>(rm.getTexture(tex->getName()));
-					if (myGUITex) {
-						if (myGUITex->getOgreTexture() != tex)
-							rm.destroyTexture(myGUITex);
-					}
-					mTextureDrawer->setImageTexture(tex->getName());
-				}
-				
+				mTextureDrawer->setImageTexture(tex.isNull() ? "" : tex->getName());
 			}
 		}
 	}
