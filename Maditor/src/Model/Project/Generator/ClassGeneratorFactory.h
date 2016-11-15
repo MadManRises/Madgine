@@ -32,7 +32,7 @@ namespace Maditor {
 				void createClass(Module *module, const QString &name, ClassType type);
 				void createGuiHandler(Module *module, const QString &name, const QString &window, int type, bool hasLayoutFile);
 				void createGlobalAPI(Module *module, const QString &name);
-				void createEntityComponent(Module *module, const QString &name);
+				void createEntityComponent(Module *module, const QString &name, const QString &componentName);
 				void createSceneComponent(Module *module, const QString &name);
 				void createGameHandler(Module *module, const QString &name);
 				void createOtherClass(Module *module, const QString &name);

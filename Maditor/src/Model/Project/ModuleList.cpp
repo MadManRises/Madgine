@@ -11,7 +11,7 @@ namespace Maditor {
 
 		
 		ModuleList::ModuleList(const QString &projectRoot, Project *parent, const QString &name) :
-			ProjectElement(name, "Modules", parent),
+			ProjectElement("C++", "Modules", parent),
 			mRoot(projectRoot + "src/"),
 			mCmake(mRoot, projectRoot + "build/", name),
 			mParent(parent)

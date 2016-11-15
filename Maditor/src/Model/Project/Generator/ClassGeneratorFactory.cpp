@@ -77,9 +77,9 @@ namespace Maditor {
 				module->addNewClass(gen);
 			}
 
-			void ClassGeneratorFactory::createEntityComponent(Module * module, const QString & name)
+			void ClassGeneratorFactory::createEntityComponent(Module * module, const QString & name, const QString &componentName)
 			{
-				EntityComponentGenerator *gen = new EntityComponentGenerator(module, name);
+				EntityComponentGenerator *gen = new EntityComponentGenerator(module, name, componentName);
 				module->addNewClass(gen);
 			}
 

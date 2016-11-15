@@ -29,9 +29,9 @@ namespace Maditor {
 			{
 				switch (index) {
 				case 0:
-					return "GuiHandler.h";
-				case 1:
 					return "GuiHandler.cpp";
+				case 1:
+					return "GuiHandler.h";
 				default:
 					throw 0;
 				}

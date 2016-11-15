@@ -125,7 +125,7 @@ namespace Maditor {
 
 			void DialogManager::showNewEntityComponentDialog(Model::Module * module, const QString & name)
 			{
-				emit newEntityComponentDialogAccepted(module, name);
+				emit newEntityComponentDialogAccepted(module, name, name);
 			}
 
 			void DialogManager::showNewSceneComponentDialog(Model::Module * module, const QString & name)

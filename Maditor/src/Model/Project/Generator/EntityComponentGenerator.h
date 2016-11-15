@@ -8,7 +8,7 @@ namespace Maditor {
 
 			class EntityComponentGenerator : public ClassGenerator {
 			public:
-				EntityComponentGenerator(Module *module, const QString &name);
+				EntityComponentGenerator(Module *module, const QString &name, const QString &componentName);
 				EntityComponentGenerator(Module * module, QDomElement data);
 
 				static const QString sType;
@@ -17,6 +17,8 @@ namespace Maditor {
 
 				// Inherited via ClassGenerator
 				virtual QString templateFileName(int index) override;
+
+				void init();
 			};
 
 		}

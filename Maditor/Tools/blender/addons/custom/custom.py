@@ -194,6 +194,7 @@ def runCustom(report, export, context):
 
         for key, ob in entities.items():
             writeId(key)
+            writeString("")
             for k in ob.keys():
                 if k not in ["Behaviour", "_RNA_UI", "cycles"]:
                     writeString(k)

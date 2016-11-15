@@ -26,7 +26,7 @@ namespace Maditor {
 
 				void newGuiHandlerDialogAccepted(Model::Module *module, const QString &name, const QString &window, int type, bool hasLayoutFile);
 				void newGlobalAPIDialogAccepted(Model::Module *module, const QString &name);
-				void newEntityComponentDialogAccepted(Model::Module *module, const QString &name);
+				void newEntityComponentDialogAccepted(Model::Module *module, const QString &name, const QString &componentName);
 				void newSceneComponentDialogAccepted(Model::Module *module, const QString &name);
 				void newGameHandlerDialogAccepted(Model::Module *module, const QString &name);
 				void newOtherClassDialogAccepted(Model::Module *module, const QString &name);
