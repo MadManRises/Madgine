@@ -21,7 +21,7 @@ namespace Maditor {
 
 		void TreeItem::doubleClicked()
 		{
-		}
+		}		
 
 		void TreeItem::setContextMenuItems(std::list<std::pair<QString, std::function<void()>>>&& contextMenuItems)
 		{
@@ -30,7 +30,8 @@ namespace Maditor {
 
 		int TreeItem::parentIndex()
 		{
-			for (int i = 0; i < parentItem()->childCount(); ++i) {
+			int i;
+			for (i = 0; i < parentItem()->childCount(); ++i) {
 				if (parentItem()->child(i) == this)
 					return i;
 			}

@@ -262,6 +262,8 @@ namespace Maditor {
 			ui->actionStart->setEnabled(false);
 			ui->actionPause->setEnabled(false);
 			ui->actionStop->setEnabled(false);
+
+			connect(&mDialogManager, &Dialogs::DialogManager::deleteClassDialogAccepted, project, &Model::Project::deleteClass);
 		}
 
 		void MainWindow::onAppStarted() {

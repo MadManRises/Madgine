@@ -66,6 +66,16 @@ namespace Maditor {
 			{
 				connect(module, &Model::Module::newClassRequest, this, &DialogManager::showNewClassDialog);
 				connect(module, &Model::Module::propertiesDialogRequest, this, &DialogManager::showModulePropertiesDialog);
+				connect(module, &Model::Module::classAdded, this, &DialogManager::onClassAdded);
+
+				for (const std::unique_ptr<Model::Generator::ClassGenerator> &gen : module->getClasses()) {
+					onClassAdded(gen.get());
+				}
+			}
+
+			void DialogManager::onClassAdded(Model::Generator::ClassGenerator *generator)
+			{
+				connect(generator, &Model::Generator::ClassGenerator::deleteClassRequest, this, &DialogManager::showDeleteClassDialog);
 			}
 
 			void DialogManager::showNewProjectDialog() {
@@ -151,6 +161,22 @@ namespace Maditor {
 			{
 				SettingsDialog dialog(editor);
 				dialog.exec();
+			}
+
+			void DialogManager::showDeleteClassDialog()
+			{
+				Model::Generator::ClassGenerator *generator = static_cast<Model::Generator::ClassGenerator*>(sender());
+
+				QMessageBox msgBox(QMessageBox::Icon::Question, "Delete Class?", QString("Do you really want to delete class <i>%1</i>?").arg(generator->name()), QMessageBox::No | QMessageBox::Yes);
+
+				QCheckBox cb("Delete Files");
+				cb.setChecked(true);
+				msgBox.setCheckBox(&cb);
+
+				msgBox.exec();
+
+				if (msgBox.result() == QMessageBox::Yes)
+					emit deleteClassDialogAccepted(generator, cb.isChecked());
 			}
 
 		}

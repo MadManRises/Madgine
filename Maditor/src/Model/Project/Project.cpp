@@ -157,6 +157,11 @@ namespace Maditor {
 			return &mModules;
 		}
 
+		Project * Project::project()
+		{
+			return this;
+		}
+
 		int Project::childCount() {
 			return 1;
 		}
@@ -165,6 +170,11 @@ namespace Maditor {
 			return &mModules;
 		}
 
+		void Project::deleteClass(Generator::ClassGenerator *generator, bool deleteFiles) {
+			if (deleteFiles)
+				generator->deleteFiles();
+			generator->module()->removeClass(generator);
+		}
 
 
 	}

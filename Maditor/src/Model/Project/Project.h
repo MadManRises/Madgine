@@ -29,6 +29,11 @@ namespace Maditor {
 
 			ModuleList *moduleList();
 
+			virtual Project *project() override;
+
+		public slots:
+			void deleteClass(Generator::ClassGenerator *generator, bool deleteFiles);
+
 		private:
 			void init();
 

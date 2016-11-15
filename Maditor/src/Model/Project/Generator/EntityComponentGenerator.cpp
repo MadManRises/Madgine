@@ -19,7 +19,14 @@ namespace Maditor {
 			}
 			QString EntityComponentGenerator::templateFileName(int index)
 			{
-				return QString();
+				switch (index) {
+				case 0:
+					return "EntityComponent.h";
+				case 1:
+					return "EntityComponent.cpp";
+				default:
+					throw 0;
+				}
 			}
 		}
 	}

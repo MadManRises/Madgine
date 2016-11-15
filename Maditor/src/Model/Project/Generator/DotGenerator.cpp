@@ -27,7 +27,7 @@ void Maditor::Model::Generator::DotGenerator::generate()
 	CommandLine::exec(cmd.toStdString().c_str());
 }
 
-QStringList Maditor::Model::Generator::DotGenerator::paths()
+QStringList Maditor::Model::Generator::DotGenerator::filePaths()
 {
 	return{mFolder + mName + ".dot"};
 }

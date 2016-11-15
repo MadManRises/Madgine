@@ -31,9 +31,12 @@ namespace Maditor {
 				void newGameHandlerDialogAccepted(Model::Module *module, const QString &name);
 				void newOtherClassDialogAccepted(Model::Module *module, const QString &name);
 
+				void deleteClassDialogAccepted(Model::Generator::ClassGenerator *generator, bool deleteFiles);
+
 			public slots:
 				virtual void onProjectOpened(Model::Project *project);
 				virtual void onModuleAdded(Model::Module *module);
+				virtual void onClassAdded(Model::Generator::ClassGenerator * generator);
 
 				virtual void showNewProjectDialog();
 				virtual void showLoadProjectDialog();
@@ -50,6 +53,8 @@ namespace Maditor {
 				virtual void showModulePropertiesDialog(Model::Module *module);
 
 				virtual void showSettingsDialog(Model::Editor *editor);
+
+				virtual void showDeleteClassDialog();
 
 			private:
 				static DialogManager *sSingleton;

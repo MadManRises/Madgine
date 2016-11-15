@@ -9,7 +9,7 @@ namespace Maditor {
 
 				virtual void generate();
 
-				virtual QStringList paths() = 0;
+				virtual QStringList filePaths() = 0;
 
 			protected:
 				virtual void write(QTextStream &stream, int index) = 0;

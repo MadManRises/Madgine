@@ -16,7 +16,7 @@ namespace Maditor {
 
 			protected:
 				// Inherited via Generator
-				virtual QStringList paths() override;
+				virtual QStringList filePaths() override;
 				virtual void write(QTextStream & stream, int index) override;
 
 			private:

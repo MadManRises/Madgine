@@ -12,7 +12,7 @@ namespace Maditor {
 			{
 			}
 
-			QStringList HeaderGuardGenerator::paths()
+			QStringList HeaderGuardGenerator::filePaths()
 			{
 				return{ mModule->root() + fileName() };
 			}

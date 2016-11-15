@@ -2,6 +2,7 @@
 
 #include "ProjectElement.h"
 
+#include "Project.h"
 
 namespace Maditor {
 	namespace Model {
@@ -29,6 +30,12 @@ namespace Maditor {
 		{
 		}
 
+		ProjectElement::~ProjectElement()
+		{
+			if (mParent)
+				mParent->mRootElement.removeChild(mRootElement);
+		}
+
 		const QString &ProjectElement::name() const
 		{
 			return mName;
@@ -37,6 +44,11 @@ namespace Maditor {
 		{
 			return mRootElement.tagName();
 		}*/
+
+		QModelIndex ProjectElement::ownIndex()
+		{
+			return parentItem() == 0 ? QModelIndex() : project()->index(parentIndex(), 0, parentItem()->ownIndex());
+		}
 
 		QDomDocument ProjectElement::document()
 		{

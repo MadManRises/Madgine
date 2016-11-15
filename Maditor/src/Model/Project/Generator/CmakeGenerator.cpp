@@ -25,12 +25,19 @@ namespace Maditor {
 				mFileList << files;
 			}
 
+			void CmakeGenerator::removeFiles(const QStringList & files)
+			{
+				for (const QString &file : files) {
+					mFileList.removeAll(file);
+				}
+			}
+
 			const QString & CmakeGenerator::name()
 			{
 				return mName;
 			}
 
-			QStringList CmakeGenerator::paths()
+			QStringList CmakeGenerator::filePaths()
 			{
 				return{ root() + "CmakeLists.txt" };
 			}

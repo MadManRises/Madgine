@@ -8,14 +8,15 @@ namespace Maditor {
 
 		namespace Generator {
 
-			class ClassGenerator : public Generator, public ProjectElement {
+			class ClassGenerator : public QObject, public Generator, public ProjectElement {
+				Q_OBJECT
 
 			public:
 				ClassGenerator(Module *module, const QString &name, const QString &type);
 				ClassGenerator(Module *module, QDomElement data);
 
 				// Geerbt über Generator
-				virtual QStringList paths() override;
+				virtual QStringList filePaths() override;
 				virtual void write(QTextStream & stream, int index) override;
 
 				virtual QStringList fileNames();
@@ -31,6 +32,14 @@ namespace Maditor {
 
 				virtual void doubleClicked() override;
 
+				virtual Project *project() override;
+
+				Module *module();
+
+				void deleteFiles();
+
+			signals:
+				void deleteClassRequest();
 
 			protected:
 				virtual QString templateFileName(int index) = 0;

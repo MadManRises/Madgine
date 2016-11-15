@@ -32,7 +32,7 @@ namespace Maditor {
 
 			
 			for (QDomElement generator = element().firstChildElement("Class"); !generator.isNull(); generator = generator.nextSiblingElement("Class")) {
-				addClass(Generator::ClassGeneratorFactory::load(this, generator));				
+				addClass(Generator::ClassGeneratorFactory::load(this, generator), false);				
 			}
 
 			for (QDomElement dependency = element().firstChildElement("Dependency"); !dependency.isNull(); dependency = dependency.nextSiblingElement("Dependency")) {
@@ -64,13 +64,21 @@ namespace Maditor {
 			addClass(generator);
 
 			mParent->generate();
+
+			project()->save();
 		}
-		void Module::addClass(Generator::ClassGenerator * generator)
+		void Module::addClass(Generator::ClassGenerator * generator, bool callInsert)
 		{
+			if (callInsert)
+				project()->beginInsertRows(ownIndex(), mClasses.size(), mClasses.size());
 			mClasses.emplace_back(generator);
 
 			mCmake.addFiles(generator->fileNames());
 
+			if (callInsert)
+				project()->endInsertRows();
+
+			emit classAdded(generator);
 		}
 
 		QString Module::moduleInclude()
@@ -181,6 +189,36 @@ namespace Maditor {
 			auto it = mClasses.begin();
 			std::advance(it, i);
 			return it->get();
+		}
+
+		Project * Module::project()
+		{
+			return mParent->project();
+		}
+
+		const std::list<std::unique_ptr<Generator::ClassGenerator>> &Module::getClasses()
+		{
+			return mClasses;
+		}
+
+		void Module::removeClass(Generator::ClassGenerator * generator)
+		{
+			auto it = std::find_if(mClasses.begin(), mClasses.end(), [=](const std::unique_ptr<Generator::ClassGenerator> &p) {return p.get() == generator; });
+			if (it == mClasses.end())
+				throw 0;
+			size_t i = std::distance(mClasses.begin(), it);
+
+			project()->beginRemoveRows(ownIndex(), i, i);
+			mCmake.removeFiles(generator->fileNames());
+			
+			mClasses.erase(it);			
+
+			project()->endRemoveRows();
+
+			mParent->generate();
+
+			project()->save();
+			
 		}
 		
 	}

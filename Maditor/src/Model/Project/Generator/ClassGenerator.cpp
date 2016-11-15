@@ -25,7 +25,7 @@ namespace Maditor {
 			{
 				init();
 			}
-			QStringList ClassGenerator::paths()
+			QStringList ClassGenerator::filePaths()
 			{
 				QStringList result;
 				for (QString s : fileNames()) {
@@ -77,6 +77,10 @@ namespace Maditor {
 					{ "module", mModule->name() },
 					{ "header", mName + ".h" }
 				};
+
+				setContextMenuItems({
+					{ "Delete", [this]() {emit deleteClassRequest(); } }
+				});
 			}
 
 			int ClassGenerator::childCount()
@@ -114,6 +118,20 @@ namespace Maditor {
 			void ClassGenerator::doubleClicked()
 			{
 				Editors::EditorManager::getSingleton().openByExtension((mModule->root() + fileNames().front()).toStdString());
+			}
+
+			Project * ClassGenerator::project()
+			{
+				return mModule->project();
+			}
+
+			Module * ClassGenerator::module()
+			{
+				return mModule;
+			}
+
+			void ClassGenerator::deleteFiles()
+			{
 			}
 
 		}

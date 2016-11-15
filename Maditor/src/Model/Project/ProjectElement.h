@@ -10,12 +10,17 @@ namespace Maditor {
 			ProjectElement(const QString &name, const QString &type, ProjectElement *parent);
 			ProjectElement(const QString &name, const QString &type, QDomDocument &doc);
 			ProjectElement(QDomElement data, ProjectElement *parent = 0);
+			virtual ~ProjectElement();
 
 			virtual ProjectElement * parentItem() override;
 
 			virtual QVariant data(int col) const override;
 
 			const QString &name() const;
+
+			virtual Project *project() = 0;
+
+			QModelIndex ownIndex();
 
 		protected:
 			QDomDocument document();

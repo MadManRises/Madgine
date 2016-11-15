@@ -34,6 +34,8 @@ namespace Maditor {
 
 			virtual QVariant icon() const override;
 
+			virtual Project *project() override;
+
 		private:
 			void init();
 

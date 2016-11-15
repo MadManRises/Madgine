@@ -40,6 +40,7 @@
 #include <QPlainTextEdit>
 #include <QFileDialog>
 #include <QToolBar>
+#include <QCheckBox>
 
 #include <mutex>
 #include <unordered_map>

@@ -12,7 +12,7 @@ namespace Maditor {
 				HeaderGuardGenerator(Module *module, const QString &name);
 
 				// Geerbt über Generator
-				virtual QStringList paths() override;
+				virtual QStringList filePaths() override;
 				virtual void write(QTextStream & stream, int index) override;
 
 				const QString &name();

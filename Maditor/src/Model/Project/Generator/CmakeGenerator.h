@@ -12,11 +12,12 @@ namespace Maditor {
 
 				void addFile(const QString &file);
 				void addFiles(const QStringList &files);
+				void removeFiles(const QStringList &files);
 
 				virtual QString root() = 0;
 				const QString &name();
 
-				virtual QStringList paths() override;
+				virtual QStringList filePaths() override;
 
 				void addSubProject(CmakeSubProject *sub);
 

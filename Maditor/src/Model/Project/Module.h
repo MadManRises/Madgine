@@ -40,14 +40,22 @@ namespace Maditor {
 
 			virtual Generator::ClassGenerator * child(int i) override;
 
+			virtual Project *project() override;
+
+			const std::list<std::unique_ptr<Generator::ClassGenerator>> &getClasses();
+
+			void removeClass(Generator::ClassGenerator *generator);
+
 		private:
-			void addClass(Generator::ClassGenerator *generator);
+			void addClass(Generator::ClassGenerator *generator, bool callInsert = true);
 
 			void init();
 
 		signals:
 			void newClassRequest();
 			void propertiesDialogRequest(Module *);
+
+			void classAdded(Generator::ClassGenerator *generator);
 
 		private:
 			ModuleList *mParent;
