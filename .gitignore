@@ -244,3 +244,5 @@ html/
 *.config
 
 packages/
+
+*.pyc
