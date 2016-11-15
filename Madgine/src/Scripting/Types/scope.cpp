@@ -115,12 +115,23 @@ bool Scope::callMethodCatch(const std::string & name, const ArgumentList & args)
 
 void Scope::save(Serialize::SerializeOutStream &of) const
 {
+	if (mPrototype != nullptr && mPrototypeName.empty())
+		throw Serialize::SerializeException("Cannot Save an unnamed Prototype!");
+	if (mPrototype == nullptr && !mPrototypeName.empty())
+		throw Serialize::SerializeException("Corrupt Prototype-data!");
+
+	of << mPrototypeName;	
     of << mVariables;
 }
 
 void Scope::load(Serialize::SerializeInStream &ifs)
 {
     clear();
+	ifs >> mPrototypeName;
+	if (mPrototypeName.empty())
+		mPrototype = 0;
+	else
+		mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(mPrototypeName);
     ifs >> mVariables;
 }
 

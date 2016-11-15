@@ -45,9 +45,6 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
     mLastPosition(node->getPosition())
 {
 
-	if (!mDescription->getPrototype().empty())
-		findPrototype(mDescription->getPrototype());
-
     mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
 
 	if (mObject) {
@@ -66,6 +63,9 @@ Entity::~Entity()
 
 void Entity::init(const Scripting::ArgumentList &args)
 {
+	if (!mDescription->getPrototype().empty())
+		findPrototype(mDescription->getPrototype());
+
     callMethodIfAvailable("init", args);
 }
 
