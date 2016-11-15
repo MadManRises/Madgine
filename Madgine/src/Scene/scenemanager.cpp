@@ -52,7 +52,7 @@ void SceneManager::init()
 {
 	MadgineObject::init();
 
-	mShaderCollector.init(mSceneMgr);
+	//mShaderCollector.init(mSceneMgr);
 
 	Ogre::MovableObject::setDefaultQueryFlags(Entity::Masks::DEFAULT_MASK);
 
@@ -97,7 +97,7 @@ void SceneManager::finalize()
 
 	if (mTerrainRayQuery) mSceneMgr->destroyQuery(mTerrainRayQuery);
 
-	mShaderCollector.finalize();
+	//mShaderCollector.finalize();
 
 	MadgineObject::finalize();
 
@@ -358,6 +358,7 @@ void SceneManager::loadComponentData(Scripting::Serialize::SerializeInStream &in
         for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
 			if (component->componentName() == componentName) {
 				in >> *component;
+				break;
 			}
         }
     }
