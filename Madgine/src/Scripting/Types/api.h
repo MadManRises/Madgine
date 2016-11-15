@@ -89,13 +89,13 @@ namespace Engine {
 				}
 
 				template <size_t... I>
-				static ValueType callVariadic(R(T::*f)(_Ty..., const ArgumentList &), T *my, const ArgumentList &list, const ArgumentList &variadic, const std::index_sequence<I...>) {
-					return (my->*f)(Caster<_Ty>::cast(list.at(I))..., variadic);
+				static ValueType callVariadic(R(T::*f)(const ArgumentList &, _Ty...), T *my, const ArgumentList &list, const ArgumentList &variadic, const std::index_sequence<I...>) {
+					return (my->*f)(variadic, Caster<_Ty>::cast(list.at(I))...);
 				}
 
 				template <size_t... I>
-				static ValueType callVariadic(R(T::*f)(_Ty..., const ArgumentList &) const, const T *my, const ArgumentList &list, const ArgumentList &variadic, const std::index_sequence<I...>) {
-					return (my->*f)(Caster<_Ty>::cast(list.at(I))..., variadic);
+				static ValueType callVariadic(R(T::*f)(const ArgumentList &, _Ty...) const, const T *my, const ArgumentList &list, const ArgumentList &variadic, const std::index_sequence<I...>) {
+					return (my->*f)(variadic, Caster<_Ty>::cast(list.at(I))...);
 				}
 			};
 
