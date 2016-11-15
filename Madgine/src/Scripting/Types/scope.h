@@ -48,7 +48,7 @@ struct ScopeClassType<Scene> {
 class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::Serializable {
 
 public:
-	Scope(Scope *data = nullptr);
+	Scope(const std::string &prototypeName = "");
     virtual ~Scope();
 
     void setVar(const std::string &name, const ValueType &v);
@@ -58,8 +58,8 @@ public:
 	bool checkFlag(const std::string &name, bool defaultValue = false);
     
 	void findPrototype(const std::string &name);
-	void setPrototype(Scope *data);
-	Scope *getPrototype();
+	void setPrototype(Scope *prototype);
+	const std::string &getPrototype();
 	void clearPrototype();
 
 	virtual bool hasScriptMethod(const std::string &name);
@@ -105,6 +105,7 @@ private:
     ValueType get(const ArgumentList &stack);
     ValueType checkFlag(const ArgumentList &stack);
 	ValueType findPrototype(const ArgumentList &stack);
+	ValueType getPrototype(const ArgumentList &stack);
 	ValueType setPrototype(const ArgumentList &stack);
 
 private:
@@ -115,6 +116,7 @@ private:
 	VarSet mVariables;
 
 	Scope *mPrototype;
+	std::string mPrototypeName;
 };
 
 template <class T>

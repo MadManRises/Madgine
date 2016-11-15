@@ -9,9 +9,7 @@ namespace Parsing {
 
 class MethodNode : public TextResource {
 public:
-    MethodNode(Ogre::ResourceManager *creator, const Ogre::String &name,
-		Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual = false,
-		Ogre::ManualResourceLoader *loader = 0);
+	using TextResource::TextResource;
 	MethodNode(const MethodNode &) = delete;
 
     ValueType run(Scope *scope, VarSet &stack) const;

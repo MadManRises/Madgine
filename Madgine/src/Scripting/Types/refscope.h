@@ -8,7 +8,7 @@ namespace Scripting {
 class MADGINE_EXPORT RefScope : public Scope
 {
 public:
-    RefScope();
+    RefScope(const std::string &prototype = "");
     virtual ~RefScope();
 
     void ref();

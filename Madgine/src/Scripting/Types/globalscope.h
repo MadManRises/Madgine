@@ -25,6 +25,7 @@ public:
 
 	void log(const ValueType &v);
 	Struct *createStruct();
+	Struct *createStruct_(const std::string &prototype);
 	List *createList();
 	const ValueType &debug(const ValueType &v);
 	Scene *level();
@@ -38,6 +39,8 @@ public:
 	virtual ValueType methodCall(const std::string &name, const ArgumentList &args = {}) override;
 
 	std::set<BaseGlobalAPIComponent*> getGlobalAPIComponents();
+
+	ValueType call(const ArgumentList &args, const std::string &name);
 
 protected:    
     virtual std::string getIdentifier() override;

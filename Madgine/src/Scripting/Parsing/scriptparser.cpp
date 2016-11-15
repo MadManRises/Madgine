@@ -131,7 +131,7 @@ Struct & ScriptParser::getPrototype(const std::string & name)
 {
 	auto it = mPrototypes.find(name);
 	if (it == mPrototypes.end()) {
-		throw ScriptingException(Database::Exceptions::unknownPrototype(name));
+		MADGINE_THROW(ScriptingException(Database::Exceptions::unknownPrototype(name)));
 	}
 	return it->second;
 }
@@ -230,7 +230,7 @@ void ScriptParser::parseEntity()
 
 		if (mNextToken == ColonToken) {
 			doRead();
-			node->setPrototype(&getPrototype(consume(NameToken)));
+			node->setPrototype(consume(NameToken));
 		}
 
 		skipNewlines();
@@ -262,31 +262,38 @@ void ScriptParser::parsePrototype()
 	consume(NameToken);
 	std::string name = consume(NameToken);
 
-	auto it = mPrototypes.find(name);
-	if (it != mPrototypes.end() && !mReload) {
-		throw ParseException(Database::Exceptions::doubleTypeDefinition(name));
-	}
-	Struct *node = mPrototypes[name].ptr();
-	node->clear();
-	node->clearPrototype();
+	try {
+		auto it = mPrototypes.find(name);
+		if (it != mPrototypes.end() && !mReload) {
+			throw ParseException(Database::Exceptions::doubleTypeDefinition(name));
+		}
+		Struct *node = mPrototypes[name].ptr();
+		node->clear();
+		node->clearPrototype();
 
-	if (mNextToken == ColonToken) {
-		doRead();
-		node->setPrototype(&getPrototype(consume(NameToken)));
-	}
+		if (mNextToken == ColonToken) {
+			doRead();
+			node->findPrototype(consume(NameToken));
+		}
 
-	skipNewlines();
-	consume(CurlyBracketOpen);
-	skipNewlines();
-
-	while (mNextToken != CurlyBracketClose) {
-		std::string fieldName = consume(NameToken);
-		consume(ColonToken);
-		node->setVar(fieldName, parseConst());
 		skipNewlines();
-	}
-	doRead();
+		consume(CurlyBracketOpen);
+		skipNewlines();
 
+		while (mNextToken != CurlyBracketClose) {
+			std::string fieldName = consume(NameToken);
+			consume(ColonToken);
+			node->setVar(fieldName, parseConst());
+			skipNewlines();
+		}
+		doRead();
+
+	} catch (ParseException &e) {
+		std::list<Util::TraceBack> traceback;
+		traceback.emplace_back(mFile, mCurrentLine, name);
+		Util::UtilMethods::log(e.what(), Ogre::LML_CRITICAL, traceback);
+		throw;
+	}
 }
 
 void ScriptParser::parseMethod(const EntityNodePtr &entity)
@@ -714,9 +721,9 @@ void ScriptParser::doRead()
             c = safeRead();
         }
         mNextToken = StringToken;
-    } else if ((c > 64 && c <= 90) || (c > 96 && c <= 122)) {
+    } else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_') {
         mNextText.clear();
-        while (!mStream->eof() && ((c > 64 && c <= 90) || (c > 96 && c <= 122) || (c > 47 && c <= 57))) {
+        while (!mStream->eof() && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')) {
             mNextText += c;
             mStream->read(&c, 1);
         }
@@ -826,7 +833,7 @@ void ScriptParser::doRead()
 	else if (c == ':') {
 		mNextToken = ColonToken;
     } else {
-        throw std::string("Unknown Character: ") + c;
+        throw ParseException(std::string("Unknown Character: ") + c);
     }
 
     //Ogre::LogManager::getSingleton().logMessage(std::string("Read ") + mNextText + " as " + typeToString(mNextToken));

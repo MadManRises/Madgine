@@ -10,14 +10,6 @@ namespace Engine {
 namespace Scripting {
 namespace Parsing {
 
-MethodNode::MethodNode(Ogre::ResourceManager *creator, const Ogre::String &name,
-	Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual,
-	Ogre::ManualResourceLoader *loader) :
-	TextResource(creator, name, handle, group, isManual, loader)
-{
-
-}
-
 
 ValueType MethodNode::run(Scope *scope, VarSet &stack) const
 {

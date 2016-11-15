@@ -9,11 +9,6 @@ namespace Scripting {
 
 Struct::Factory Struct::sFactory;
 
-Struct::Struct()
-{
-
-}
-
 
 std::string Struct::getIdentifier()
 {

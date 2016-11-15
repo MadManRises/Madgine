@@ -9,9 +9,7 @@ namespace Parsing {
 
 class EntityNode : public TextResource {
 public:
-    EntityNode(Ogre::ResourceManager *creator, const Ogre::String &name,
-		Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual = false,
-		Ogre::ManualResourceLoader *loader = 0);
+	using TextResource::TextResource;
 	EntityNode(const EntityNode &) = delete;
 
     void addMethod(const MethodNodePtr &method, const std::string &name);
@@ -19,8 +17,8 @@ public:
 	const std::map<std::string, MethodNodePtr> &getMethods() const;
     const MethodNodePtr &getMethod(const std::string &name) const;
     bool hasMethod(const std::string &name) const;
-	void setPrototype(Scope *prototype);
-	Scope *getPrototype() const;
+	void setPrototype(const std::string &prototype);
+	const std::string &getPrototype() const;
 	void clear();
 
 protected:
@@ -30,7 +28,7 @@ protected:
 
 private:
     std::map<std::string, MethodNodePtr> mMethods;
-	Scope *mPrototype;
+	std::string mPrototype;
 };
 
 

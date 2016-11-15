@@ -4,7 +4,8 @@
 namespace Engine {
 namespace Scripting {
 
-RefScope::RefScope() :
+RefScope::RefScope(const std::string &prototype) :
+	Scope(prototype),
     mRefCount(0)
 {
 

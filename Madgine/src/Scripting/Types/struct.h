@@ -10,7 +10,7 @@ namespace Scripting {
 
 class Struct : public ScopeFactoryImpl<Struct, RefScope> {
 public:
-    Struct();
+	using ScopeFactoryImpl::ScopeFactoryImpl;
 
 protected:
     std::string getIdentifier();

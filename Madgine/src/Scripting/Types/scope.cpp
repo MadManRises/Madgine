@@ -20,12 +20,15 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
     {"get", &get},
     {"check", &checkFlag},
 	{"findPrototype", &findPrototype},
+	{"getPrototype", &getPrototype},
 	{"setPrototype", &setPrototype}
 };
 
-Scope::Scope(Scope *data) :
-mPrototype(data)
+Scope::Scope(const std::string &prototypeName) :
+	mPrototype(0)
 {
+	if (!prototypeName.empty())
+		findPrototype(prototypeName);
 }
 
 Scope::~Scope()
@@ -58,20 +61,24 @@ bool Scope::hasVar(const std::string &name) const
 void Scope::findPrototype(const std::string & data)
 {
 	mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(data);
+	mPrototypeName = data;
 }
 
-void Scope::setPrototype(Scope * data)
+void Scope::setPrototype(Scope * prototype)
 {
-	mPrototype = data;
+	mPrototypeName.clear();
+	mPrototype = prototype;
 }
 
-Scope *Scope::getPrototype() {
-	return mPrototype;
+
+const std::string &Scope::getPrototype() {
+	return mPrototypeName;
 }
 
 void Scope::clearPrototype()
 {
 	mPrototype = 0;
+	mPrototypeName.clear();
 }
 
 ValueType Scope::methodCall(const std::string &name, const ArgumentList &args)
@@ -219,6 +226,11 @@ ValueType Scope::findPrototype(const ArgumentList & stack)
 	return ValueType();
 }
 
+ValueType Scope::getPrototype(const ArgumentList & stack)
+{
+	return getPrototype();
+}
+
 ValueType Scope::setPrototype(const ArgumentList & stack)
 {
 	setPrototype(stack.at(0).asScope());
@@ -231,8 +243,9 @@ ValueType Scope::execScriptMethod(const std::string &name,
     if (!hasScriptMethod(name))
         MADGINE_THROW_NO_TRACE(ScriptingException(
             Database::Exceptions::unknownMethod(name, getIdentifier())));
-    if (getArguments(name).size() != args.size()) throw ScriptingException(
-            Database::Exceptions::argumentCountMismatch(getArguments(name).size(), args.size()));
+    if (getArguments(name).size() != args.size()) 
+		MADGINE_THROW_NO_TRACE(ScriptingException(
+            Database::Exceptions::argumentCountMismatch(getArguments(name).size(), args.size())));
     VarSet stack;
 
     auto it = getArguments(name).begin();

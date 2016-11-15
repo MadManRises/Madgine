@@ -10,13 +10,6 @@ namespace Scripting {
 namespace Parsing {
 
 
-EntityNode::EntityNode(Ogre::ResourceManager * creator, const Ogre::String & name, Ogre::ResourceHandle handle, const Ogre::String & group, bool isManual, Ogre::ManualResourceLoader * loader) :
-	TextResource(creator, name, handle, group, isManual, loader),
-	mPrototype(0)
-{
-	
-}
-
 void EntityNode::addMethod(const MethodNodePtr &method, const std::string &name)
 {
     auto it = mMethods.find(name);
@@ -49,19 +42,19 @@ bool EntityNode::hasMethod(const std::string &name) const
 }
 
 
-void EntityNode::setPrototype(Scope * prototype)
+void EntityNode::setPrototype(const std::string &prototype)
 {
 	mPrototype = prototype;
 }
 
-Scope * EntityNode::getPrototype() const
+const std::string &EntityNode::getPrototype() const
 {
 	return mPrototype;
 }
 
 void EntityNode::clear()
 {
-	mPrototype = 0;
+	mPrototype.clear();
 	mMethods.clear();
 }
 

@@ -11,7 +11,7 @@ namespace Scripting {
 
 //Story::Factory Story::sFactory;
 
-	API_IMPL(GlobalScope, &log, &createStruct, &createList, &debug, &level, &getData);
+	API_IMPL(GlobalScope, &log, &createStruct, &createStruct_, &createList, &debug, &level, &getData, &call);
 
 
 	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
@@ -77,6 +77,11 @@ Struct *GlobalScope::createStruct()
     return OGRE_NEW Struct();
 }
 
+Struct * GlobalScope::createStruct_(const std::string &prototype)
+{
+	return OGRE_NEW Struct(prototype);
+}
+
 List *GlobalScope::createList()
 {
     return OGRE_NEW List();
@@ -123,6 +128,11 @@ std::set<BaseGlobalAPIComponent*> GlobalScope::getGlobalAPIComponents()
 		result.insert(api.get());
 	}
 	return result;
+}
+
+ValueType GlobalScope::call(const ArgumentList & args, const std::string & name)
+{
+	return methodCall(name, args);
 }
 
 template <> Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)
