@@ -16,7 +16,8 @@ private:
     enum {
         Less,
         Greater,
-        Equal
+        Equal,
+		Unequal
     } mType;
     Ogre::unique_ptr<const Statement> mFirst, mSecond;
 };

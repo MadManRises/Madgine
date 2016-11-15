@@ -1,6 +1,6 @@
 #include "libinclude.h"
 #include "comparator.h"
-#include "Scripting/scriptingexception.h"
+#include "Scripting/Parsing/parseexception.h"
 #include "Scripting/Datatypes/valuetype.h"
 
 #include "Database/exceptionmessages.h"
@@ -20,10 +20,13 @@ Comparator::Comparator(int line, const std::string &op, Ogre::unique_ptr<const S
         mType = Less;
     } else if (op == ">") {
         mType = Greater;
-    } else if (op == "==") {
-        mType = Equal;
+	}
+	else if (op == "==") {
+		mType = Equal;
+	}else if (op == "!="){
+		mType = Unequal;
     } else {
-        throw ScriptingException(Database::Exceptions::unknownCompareOperator(op));
+        throw Parsing::ParseException(Database::Exceptions::unknownCompareOperator(op));
     }
 }
 
@@ -38,6 +41,8 @@ ValueType Comparator::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *)
 		return left > right;
 	case Equal:
 		return left == right;
+	case Unequal:
+		return left != right;
 	default:
 		throw 0;
 	}

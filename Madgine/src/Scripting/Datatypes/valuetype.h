@@ -37,6 +37,7 @@ public:
 	void operator=(size_t);
 
     bool operator==(const ValueType &) const;
+	bool operator!=(const ValueType &) const;
     bool operator <(const ValueType &) const;
     bool operator >(const ValueType &) const;
 

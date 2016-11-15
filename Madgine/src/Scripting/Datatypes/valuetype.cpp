@@ -210,6 +210,11 @@ bool ValueType::operator==(const ValueType &other) const
     }
 }
 
+bool ValueType::operator!=(const ValueType &other) const
+{
+	return !(*this == other);
+}
+
 bool ValueType::operator <(const ValueType &other) const
 {
     switch(mType){
@@ -407,7 +412,7 @@ bool ValueType::isString() const
 const std::string &ValueType::asString() const
 {
     if (mType != Type::StringValue)
-		MADGINE_THROW(ScriptingException(Database::Exceptions::notValueType("String")));
+		MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::notValueType("String")));
     return *mUnion.mString;
 }
 
