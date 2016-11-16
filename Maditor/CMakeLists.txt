@@ -7,6 +7,7 @@ set(QT_PATH "" CACHE PATH "Path to Qt-find script")
 
 set(CMAKE_PREFIX_PATH
 	"${QT_PATH}"
+	"${CMAKE_CURRENT_LIST_DIR}/CMake"
 )
 
 #Find the QtWidgets library
