@@ -161,34 +161,52 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 
 	if (!mPaused) {
 
-		{
+		try{
 			PROFILE("Input", "Rendering");
 			mInput->update();
 		}
+		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception-Type:" );
+			LOG_EXCEPTION(e);
+		}
 
-		{
+		try{
 			PROFILE("GUI", "Rendering");
 			mGUI->update(fe.timeSinceLastFrame);
 		}
+		catch (const std::exception &e) {
+			LOG_EXCEPTION(e);
+		}
 
-		{
+		try{
 			PROFILE("UIManager", "Rendering");
 			mUI->update(fe.timeSinceLastFrame);
 		}
+		catch (const std::exception &e) {
+			LOG_EXCEPTION(e);
+		}
 
-		{
+		try{
 			PROFILE("SceneManager", "Rendering");
 			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
+		}
+		catch (const std::exception &e) {
+			LOG_EXCEPTION(e);
 		}
 
 		{
 			PROFILE("SafeCall", "Rendering");
 			while (!mSafeCallQueue.empty()) {
-				mSafeCallQueue.front()();
+				try {
+					mSafeCallQueue.front()();
+				}
+				catch (const std::exception &e) {
+					LOG_EXCEPTION(e);
+				}
 				mSafeCallQueue.pop();
 			}
 		}
-
+		
 	}
 
 	return true;

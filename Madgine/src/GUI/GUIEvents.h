@@ -177,7 +177,7 @@ namespace Engine {
 			Key scancode;
 			char text;
 
-			KeyEventArgs(Key key, char text = 0) :
+			KeyEventArgs(Key key = (Key)0, char text = 0) :
 			scancode(key),
 			text(text){
 
@@ -186,6 +186,7 @@ namespace Engine {
 
 		struct MouseEventArgs {
 			
+			MouseEventArgs() {}
 
 			MouseEventArgs(const Ogre::Vector2 &pos, GUI::MouseButton::MouseButton button) :
 				position(pos),

@@ -43,7 +43,7 @@ FolderSources(sources "" src forward.h libinclude.h Ogrememory.h singletonimpl.h
 		FolderSources(sources Scripting Statements accessor.cpp accessor.h ArithmeticalOperator.cpp ArithmeticalOperator.h assignment.cpp assignment.h comparator.cpp comparator.h constvalue.cpp constvalue.h for.cpp for.h if.cpp if.h logicaloperator.cpp logicaloperator.h methodcall.cpp methodcall.h negate.cpp negate.h return.cpp return.h scopesetter.cpp scopesetter.h statement.h while.cpp while.h)
 		FolderSources(sources Scripting Types api.cpp api.h baseglobalapicomponent.cpp baseglobalapicomponent.h globalapi.h globalapicomponent.h globalscope.cpp globalscope.h list.cpp list.h refscope.cpp refscope.h scene.cpp scene.h scope.cpp scope.h scopefactory.cpp scopefactory.h scopefactoryimpl.h scopeimpl.h struct.cpp struct.h)
 	FolderSources(sources src UI gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h Process.cpp Process.h ProcessListener.h UIManager.cpp UIManager.h windownames.h)
-	FolderSources(sources src Util MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h Profiler.cpp Profiler.h UtilMethods.cpp UtilMethods.h)
+	FolderSources(sources src Util MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h Profiler.cpp Profiler.h Traceback.h UtilMethods.cpp UtilMethods.h)
 
 include_directories(${MADGINE_SOURCE_DIR}/src)
 

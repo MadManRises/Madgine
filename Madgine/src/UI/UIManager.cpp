@@ -52,7 +52,7 @@ namespace Engine {
 			}
 
 
-			for (int i = 0; i < sMaxInitOrder; ++i)
+			for (int i = sMaxInitOrder - 1; i >= -1; --i)
 				for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
 					handler->finalize(i);
 

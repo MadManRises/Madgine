@@ -1,21 +1,13 @@
 #pragma once
 
+#include "Traceback.h"
+
 namespace Engine {
 	namespace Util {
 
 		class AbortException {};
 
-		struct TraceBack {
-			TraceBack(const std::string &file = "<unknown>", int line = -1, const std::string &func = "") :
-				mFile(file),
-				mLineNr(line),
-				mFunction(func) {}
-
-			std::string mFile;
-			int mLineNr;
-			std::string mFunction;
-		};
-
+		
 		class MADGINE_EXPORT UtilMethods {
 		public:
 			static void setup();
