@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "newclassdialog.h"
 #include "ui_newclassdialog.h"
@@ -31,9 +31,9 @@ QString NewClassDialog::name()
 	return ui->nameField->text();
 }
 
-Model::Generator::ClassGeneratorFactory::ClassType NewClassDialog::type()
+Model::Generators::ClassGeneratorFactory::ClassType NewClassDialog::type()
 {
-	return (Model::Generator::ClassGeneratorFactory::ClassType)ui->typeField->currentIndex();
+	return (Model::Generators::ClassGeneratorFactory::ClassType)ui->typeField->currentIndex();
 }
 
 void NewClassDialog::nameChanged(const QString &name) {

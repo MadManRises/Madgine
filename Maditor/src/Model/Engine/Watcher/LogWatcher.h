@@ -3,15 +3,17 @@
 #include "LogTableModel.h"
 #include "Model\log.h"
 
-Q_DECLARE_METATYPE(Ogre::LogMessageLevel);
-Q_DECLARE_METATYPE(QList<Engine::Util::TraceBack>);
+Q_DECLARE_METATYPE(MessageType);
+Q_DECLARE_METATYPE(Traceback);
+
+struct SharedLog;
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
 
-			class OgreLogWatcher : public Log, public Ogre::LogListener {
+			class OgreLogWatcher : public Log {
 				Q_OBJECT
 			public:
 				enum LogType {
@@ -19,11 +21,8 @@ namespace Maditor {
 					GuiLog
 				};
 
-				OgreLogWatcher(LogType type, const std::string &name = "");
+				OgreLogWatcher(LogType type, const std::string &name);
 				~OgreLogWatcher();
-
-				void listen(Ogre::Log *log, const QString &root);
-				void stopListening(bool unregister = true);
 
 				LogType type();
 
@@ -31,22 +30,20 @@ namespace Maditor {
 
 				LogTableModel *model();
 
-				void logMessage(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_TRIVIAL, const QList<Engine::Util::TraceBack> &traceback = {});
+				void logMessage(const QString &msg, MessageType level = LOG_TYPE, const Traceback &traceback = {}, const QString &fullTraceback = "");
+
+				void update();
 
 			signals:
-
-
-				void ogreMessageReceived(const QString &msg, Ogre::LogMessageLevel level = Ogre::LML_TRIVIAL, const QList<Engine::Util::TraceBack> &traceback = {});
+				void ogreMessageReceived(const QString &msg, MessageType level = LOG_TYPE, const Traceback &traceback = {}, const QString &fullTraceback = "");
 
 			private:
-				// Geerbt über LogListener
-				virtual void messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage) override;
-
 				std::unique_ptr<LogTableModel> mModel;
-				Ogre::Log *mLog;
 				LogType mType;
-				QDir mSourcesRoot;
 				std::string mName;
+
+				SharedLog &mShared;
+
 			};
 
 		}

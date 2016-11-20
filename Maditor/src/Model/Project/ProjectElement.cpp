@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "ProjectElement.h"
 
@@ -26,6 +26,12 @@ namespace Maditor {
 		ProjectElement::ProjectElement(QDomElement data, ProjectElement * parent) :
 			mRootElement(data),
 			mName(data.attribute("name")),
+			mParent(parent)
+		{
+		}
+
+		ProjectElement::ProjectElement(const QString & name, ProjectElement * parent) :
+			mName(name),
 			mParent(parent)
 		{
 		}

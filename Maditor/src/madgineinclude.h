@@ -12,17 +12,17 @@
 #include "App/Application.h"
 #include "App/appsettings.h"
 
-#include "GUI\GUIEvents.h"
-#include "GUI\GUISystem.h"
+#include "GUI/GUIEvents.h"
+#include "GUI/GUISystem.h"
 
 #include "Scene/scenemanager.h"
-#include "Scene\Entity\entity.h"
+#include "Scene/Entity/entity.h"
 #include "Scene/scenecomponent.h"
 
-#include "Scripting\Parsing\scriptparser.h"
-#include "Scripting\Parsing\textresourceptr.h"
+#include "Scripting/Parsing/scriptparser.h"
+#include "Scripting/Parsing/textresourceptr.h"
 
-#include "UI\UIManager.h"
+#include "UI/UIManager.h"
 
 
 

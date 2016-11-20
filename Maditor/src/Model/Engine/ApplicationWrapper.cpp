@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "ApplicationWrapper.h"
 
@@ -11,103 +11,94 @@
 
 #include "Scripting\Parsing\parseexception.h"
 
+#include "Common/Shared.h"
+
+#include <Windows.h>
+
+
 namespace Maditor {
 	namespace Model {
 		ApplicationWrapper::ApplicationWrapper(Watcher::ApplicationWatcher *watcher, ModuleLoader *loader) :
-			mWork(true),
-			mWorker(&ApplicationWrapper::workerLoop, this),
-			mApplication(0),
+			ProcessTalker("Maditor_Launcher", "Maditor"),
 			mWatcher(watcher),
-			mLoader(loader)
+			mLoader(loader),
+			mAppInfo(SharedMemory::getSingleton().mAppInfo)
 		{
+
 			/*std::stringstream ss;
 			ss << mWorker.get_id();
 			qDebug() << QString::fromStdString(ss.str());*/
+
+			startTimer(500);
 		}
 		ApplicationWrapper::~ApplicationWrapper()
 		{
-			cleanup();
-			mWork = false;
-			mWorker.join();
+			shutdown();
 		}
 
 		void ApplicationWrapper::load(Project *project, QWindow *target)
 		{
-			mSettings.mInput = &mInput;
-			mSettings.mUseExternalSettings = true;
-			mSettings.mWindowName = "QtOgre";
-			mSettings.mWindowWidth = target->width();
-			mSettings.mWindowHeight = target->height();
-			mSettings.mRootDir = (project->root() + "Data/").toStdString();
-			mSettings.mPluginsFile = mSettings.mRootDir + "plugins.cfg";
-			Ogre::NameValuePairList &parameters = mSettings.mWindowParameters;
-
-			/*
-			Flag within the parameters set so that Ogre3D initializes an OpenGL context on it's own.
-			*/
-			parameters["currentGLContext"] = Ogre::String("false");
-
-			/*
-			We need to supply the low level OS window handle to this QWindow so that Ogre3D knows where to draw
-			the scene. Below is a cross-platform method on how to do this.
-			If you set both options (externalWindowHandle and parentWindowHandle) this code will work with OpenGL
-			and DirectX.
-			*/
-#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-			parameters["externalWindowHandle"] = Ogre::StringConverter::toString((size_t)(target->winId()));
-			parameters["parentWindowHandle"] = Ogre::StringConverter::toString((size_t)(target->winId()));
-#else
-			parameters["externalWindowHandle"] = Ogre::StringConverter::toString((unsigned long)(this->winId()));
-			parameters["parentWindowHandle"] = Ogre::StringConverter::toString((unsigned long)(this->winId()));
-#endif
-
-#if defined(Q_OS_MAC)
-			parameters["macAPI"] = "cocoa";
-			parameters["macAPICocoaUseNSView"] = "true";
-#endif
+			mAppInfo.mMediaDir = (project->path() + "Data/").toStdString().c_str();
+			mAppInfo.mProjectDir = project->path().toStdString().c_str();
+			mAppInfo.mWindowHandle = (size_t)(target->winId());
+			mAppInfo.mWindowWidth = target->width();
+			mAppInfo.mWindowHeight = target->height();
 
 
-			doTask([=] () {
-				mApplication = new Engine::App::Application;
-				
-				mApplication->setup(mSettings);
-				mInput.setSystem(&Engine::GUI::GUISystem::getSingleton());
-				mWatcher->notifyApplicationCreated(project->root());
-				mLoader->setup(project->root() + "bin/", project->root() + "runtime/", project->moduleList());
-				mApplication->init();
-				mWatcher->notifyApplicationInitialized();
-			});
+			STARTUPINFO si;
+			PROCESS_INFORMATION pi;
+
+			// set the size of the structures
+			ZeroMemory(&si, sizeof(si));
+			si.cb = sizeof(si);
+			ZeroMemory(&pi, sizeof(pi));
+
+			// start the program up
+			CreateProcess(NULL,   // the path
+				"Maditor_Madgine_Launcher.exe",
+				NULL,           // Process handle not inheritable
+				NULL,           // Thread handle not inheritable
+				FALSE,          // Set handle inheritance to FALSE
+				0,              // No creation flags
+				NULL,           // Use parent's environment block
+				NULL,           // Use parent's starting directory 
+				&si,            // Pointer to STARTUPINFO structure
+				&pi           // Pointer to PROCESS_INFORMATION structure
+			);
+
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+			
+			mLoader->setup(project->path() + "bin/", project->moduleList());
+
+		}
+
+		bool ApplicationWrapper::sendMsg(ApplicationCmd cmd)
+		{
+			ApplicationMsg msg;
+			msg.mCmd = cmd;
+			return ProcessTalker::sendMsg(msg, "Launcher");
 		}
 
 
-		void ApplicationWrapper::go()
+		void ApplicationWrapper::start()
 		{
-			doTask([=]() {
-				mWatcher->notifyApplicationStarted();
-				mApplication->go();
-				mWatcher->notifyApplicationStopped();
-			});
-		}
-
-		void ApplicationWrapper::cleanup()
-		{
-			if (mApplication) {
-				doTask([&]() {
-					mLoader->cleanup();
-					mInput.clearSystem();
-					mWatcher->notifyApplicationShutdown();
-					delete mApplication;
-					mApplication = 0;
-					mWatcher->afterApplicationShutdown();
-					
-				});
-				shutdown();
-			}
+			sendMsg(START_APP);
 		}
 
 		void ApplicationWrapper::shutdown()
+		{
+			sendMsg(SHUTDOWN);
+		}
+
+		void ApplicationWrapper::stop()
 		{			
-			mApplication->shutdown();
+			sendMsg(STOP_APP);
+		}
+
+		void ApplicationWrapper::resizeWindow()
+		{
+			sendMsg(RESIZE_WINDOW);
 		}
 
 		Watcher::InputWrapper * ApplicationWrapper::input()
@@ -115,26 +106,39 @@ namespace Maditor {
 			return &mInput;
 		}
 
-		void ApplicationWrapper::workerLoop()
+		void ApplicationWrapper::receiveMessage(const ApplicationMsg & msg)
 		{
-			using namespace std::chrono_literals;
-			while (mWork) {
-				while (mWorkQueue.size() > 0) {
-					mMutex.lock();
-					std::function<void()> f = mWorkQueue.front();
-					mWorkQueue.pop();
-					mMutex.unlock();
-					f();
-				}
-				mLoader->update();
-				std::this_thread::sleep_for(250ms);				
+			switch (msg.mCmd) {
+			case APP_CREATED:
+				mWatcher->notifyApplicationCreated();
+				break;
+			case APP_INITIALIZED:
+				mWatcher->notifyApplicationInitialized();
+				break;
+			case APP_STARTED:
+				mWatcher->notifyApplicationStarted();
+				mInput.setEnabled(true);
+				break;
+			case APP_STOPPED:
+				mInput.setEnabled(false);
+				mWatcher->notifyApplicationStopped();
+				break;
+			case APP_SHUTDOWN:
+				mWatcher->notifyApplicationShutdown();
+				break;
+			case APP_AFTER_SHUTDOWN:
+				mWatcher->afterApplicationShutdown();
+				mLoader->clear();
+				break;
 			}
 		}
-		void ApplicationWrapper::doTask(std::function<void()> task)
+
+		void ApplicationWrapper::timerEvent(QTimerEvent * te)
 		{
-			mMutex.lock();
-			mWorkQueue.push(task);
-			mMutex.unlock();
+			update();
+			mWatcher->update();
+			mLoader->update();
 		}
+
 	}
 }

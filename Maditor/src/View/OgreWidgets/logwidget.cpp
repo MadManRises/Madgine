@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "logwidget.h"
 #include "ui_logwidget.h"

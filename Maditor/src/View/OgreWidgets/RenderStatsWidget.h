@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common\StatsInfo.h"
 
 namespace Ui {
 	class RenderStatsWidget;
@@ -20,14 +21,14 @@ namespace Maditor {
 			void connectWatchers(const QString &name, const Model::Watcher::ApplicationWatcher &watcher);
 
 		public slots:
-			void setStats(const QString &name, const Ogre::RenderTarget::FrameStats *stats);
+			void setStats(const QString &name, const FrameStats &stats);
 			void update();
 
 		private:
 			Ui::RenderStatsWidget *ui;
 
 			QTimer mTimer;
-			const Ogre::RenderTarget::FrameStats *mStats;
+			FrameStats mStats;
 			QString mName;
 		};
 	}

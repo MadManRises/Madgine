@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "Generator\CmakeSubProject.h"
-#include "Generator\ClassGenerator.h"
+#include "Generators\CmakeSubProject.h"
+#include "Generators\ClassGenerator.h"
 #include "ProjectElement.h"
 
 namespace Maditor {
@@ -12,11 +12,11 @@ namespace Maditor {
 			Q_OBJECT
 		public:
 			Module(ModuleList *parent, const QString &name);
-			Module(ModuleList *parent, QDomElement data);
+			Module(QDomElement data, ModuleList *parent);
 
-			QString root();
+			virtual QString path() const override;
 
-			void addNewClass(Generator::ClassGenerator *generator);
+			void addNewClass(Generators::ClassGenerator *generator);
 			
 			QString moduleInclude();
 
@@ -38,16 +38,16 @@ namespace Maditor {
 			// Inherited via ProjectElement
 			virtual int childCount() override;
 
-			virtual Generator::ClassGenerator * child(int i) override;
+			virtual Generators::ClassGenerator * child(int i) override;
 
 			virtual Project *project() override;
 
-			const std::list<std::unique_ptr<Generator::ClassGenerator>> &getClasses();
+			const std::list<std::unique_ptr<Generators::ClassGenerator>> &getClasses();
 
-			void removeClass(Generator::ClassGenerator *generator);
+			void removeClass(Generators::ClassGenerator *generator);
 
 		private:
-			void addClass(Generator::ClassGenerator *generator, bool callInsert = true);
+			void addClass(Generators::ClassGenerator *generator, bool callInsert = true);
 
 			void init();
 
@@ -55,14 +55,14 @@ namespace Maditor {
 			void newClassRequest();
 			void propertiesDialogRequest(Module *);
 
-			void classAdded(Generator::ClassGenerator *generator);
+			void classAdded(Generators::ClassGenerator *generator);
 
 		private:
 			ModuleList *mParent;
 
-			Generator::CmakeSubProject mCmake;
+			Generators::CmakeSubProject mCmake;
 
-			std::list<std::unique_ptr<Generator::ClassGenerator>> mClasses;
+			std::list<std::unique_ptr<Generators::ClassGenerator>> mClasses;
 			
 			std::set<Module *> mDependencies, mDependedBy;
 

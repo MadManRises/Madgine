@@ -1,5 +1,8 @@
 #pragma once
 
+#include "OgreLog.h"
+#include "Util\Traceback.h"
+#include "Common\LogInfo.h"
 
 namespace Maditor {
 	namespace Model {
@@ -12,7 +15,7 @@ namespace Maditor {
 				LogTableModel();
 
 			public slots:
-				void addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack>& traceback);
+				void addMessage(const QString &msg, MessageType level, const Traceback &traceback, const QString &fullTraceback);
 				void doubleClicked(const QModelIndex &index);
 				void clear();
 
@@ -27,7 +30,7 @@ namespace Maditor {
 
 
 			private:
-				std::list<std::tuple<Ogre::LogMessageLevel, QString, QString, Engine::Util::TraceBack>> mItems;
+				std::list<std::tuple<MessageType, QString, QString, Traceback>> mItems;
 				
 			};
 

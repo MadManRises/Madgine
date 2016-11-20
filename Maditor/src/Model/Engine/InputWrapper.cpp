@@ -1,121 +1,74 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "InputWrapper.h"
+
+#include "Common/Shared.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 			InputWrapper::InputWrapper() :
-				mSystem(0),
-				mMove(false),
-				mAccumulativeMouseMove({ 0, 0 }, { 0, 0 }, 0)
+				mEnabled(false),
+				mShared(SharedMemory::getSingleton().mInput)
 			{
+				resetAccumulativeMouseMove();
 			}
 
-			void InputWrapper::setSystem(Engine::GUI::GUISystem * system)
-			{
-				mSystem = system;
-			}
-
-			void InputWrapper::clearSystem()
-			{
-				mSystem = 0;
-			}
-
-			void InputWrapper::update()
-			{
-				mInputMutex.lock();
-				while (!mMouseClicks.empty()) {
-					const std::pair<EventType, Engine::GUI::MouseEventArgs> &p = mMouseClicks.front();
-					mInputMutex.unlock();
-					if (p.first == PRESS) {
-						mSystem->injectMousePress(p.second);
-					}
-					else {
-						mSystem->injectMouseRelease(p.second);
-					}
-					mInputMutex.lock();
-					mMouseClicks.pop();
-				}
-				while (!mKeyPresses.empty()) {
-					const std::pair<EventType, Engine::GUI::KeyEventArgs> &p = mKeyPresses.front();
-					mInputMutex.unlock();
-					if (p.first == PRESS) {
-						mSystem->injectKeyPress(p.second);
-					}
-					else {
-						mSystem->injectKeyRelease(p.second);
-					}
-					mInputMutex.lock();
-					mKeyPresses.pop();
-				}
-				if (mMove) {
-					mSystem->injectMouseMove(mAccumulativeMouseMove);
-					resetAccumulativeMouseMove();
-				}
-				mInputMutex.unlock();
+			void InputWrapper::setEnabled(bool b) {
+				mEnabled = b;
 			}
 
 			void InputWrapper::keyPressEvent(QKeyEvent * ev)
 			{
-				if (!mSystem) return;
+				if (!mEnabled) return;
 				char text = ev->text().isEmpty() ? 0 : ev->text().at(0).toLatin1();
-				mInputMutex.lock();				
-				mKeyPresses.emplace(PRESS, Engine::GUI::KeyEventArgs{ (Engine::GUI::Key)ev->nativeScanCode(), text } );
-				mInputMutex.unlock();
+				mShared.mKeyQueue.emplace(PRESS, Engine::GUI::KeyEventArgs{ (Engine::GUI::Key)ev->nativeScanCode(), text });
 			}
 
 			void InputWrapper::keyReleaseEvent(QKeyEvent * ev)
 			{
-				if (!mSystem) return;
-				char text = ev->text().isEmpty() ? 0 : ev->text().at(0).toLatin1();
-				mInputMutex.lock();				
-				mKeyPresses.emplace(RELEASE, Engine::GUI::KeyEventArgs{ (Engine::GUI::Key)ev->nativeScanCode(), text });
-				mInputMutex.unlock();
+				if (!mEnabled) return;
+				char text = ev->text().isEmpty() ? 0 : ev->text().at(0).toLatin1();			
+				mShared.mKeyQueue.emplace(RELEASE, Engine::GUI::KeyEventArgs{ (Engine::GUI::Key)ev->nativeScanCode(), text });
 			}
 
 			void InputWrapper::mouseMoveEvent(QMouseEvent * ev)
 			{
-				if (!mSystem) return;
-				mInputMutex.lock();
-				mAccumulativeMouseMove.moveDelta.x += ev->x() - mAccumulativeMouseMove.position.x;
-				mAccumulativeMouseMove.moveDelta.y += ev->y() - mAccumulativeMouseMove.position.y;
-				mAccumulativeMouseMove.position.x = ev->x();
-				mAccumulativeMouseMove.position.y = ev->y();
-				mMove = true;
-				mInputMutex.unlock();
+				if (!mEnabled) return;
+				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
+				mShared.mAccumulativeMouseMove.moveDelta.x += ev->x() - mShared.mAccumulativeMouseMove.position.x;
+				mShared.mAccumulativeMouseMove.moveDelta.y += ev->y() - mShared.mAccumulativeMouseMove.position.y;
+				mShared.mAccumulativeMouseMove.position.x = ev->x();
+				mShared.mAccumulativeMouseMove.position.y = ev->y();
+				mShared.mMove = true;
 			}
 
 			void InputWrapper::wheelEvent(QWheelEvent * ev)
 			{
-				if (!mSystem) return;
-				mInputMutex.lock();
-				mAccumulativeMouseMove.scrollWheel += ev->angleDelta().y() / 120.0f;
-				mMove = true;
-				mInputMutex.unlock();
+				if (!mEnabled) return;
+				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
+				mShared.mAccumulativeMouseMove.scrollWheel += ev->angleDelta().y() / 120.0f;
+				mShared.mMove = true;
 			}
 
 			void InputWrapper::mousePressEvent(QMouseEvent * ev)
 			{
-				if (!mSystem) return;
-				mInputMutex.lock();
-				mMouseClicks.emplace(PRESS, Engine::GUI::MouseEventArgs{ {(float)ev->x(), (float)ev->y()}, convertMouseButton(ev->button()) });
-				mInputMutex.unlock();
+				if (!mEnabled) return;
+				mShared.mMouseQueue.emplace(PRESS, Engine::GUI::MouseEventArgs{ { (float)ev->x(), (float)ev->y() }, convertMouseButton(ev->button()) });
 			}
 
 			void InputWrapper::mouseReleaseEvent(QMouseEvent * ev)
 			{
-				if (!mSystem) return;
-				mInputMutex.lock();
-				mMouseClicks.emplace(RELEASE, Engine::GUI::MouseEventArgs{ { (float)ev->x(), (float)ev->y() }, convertMouseButton(ev->button()) });
-				mInputMutex.unlock();
+				if (!mEnabled) return;
+				mShared.mMouseQueue.emplace(RELEASE, Engine::GUI::MouseEventArgs{ { (float)ev->x(), (float)ev->y() }, convertMouseButton(ev->button()) });
 			}
 
 			void InputWrapper::resetAccumulativeMouseMove()
 			{
-				mMove = false;
-				mAccumulativeMouseMove.moveDelta = { 0,0 };
-				mAccumulativeMouseMove.scrollWheel = 0;
+				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
+				mShared.mMove = false;
+				mShared.mAccumulativeMouseMove.moveDelta = { 0,0 };
+				mShared.mAccumulativeMouseMove.scrollWheel = 0;
 			}
 
 			Engine::GUI::MouseButton::MouseButton InputWrapper::convertMouseButton(Qt::MouseButton id)

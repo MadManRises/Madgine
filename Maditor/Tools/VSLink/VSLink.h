@@ -2,7 +2,7 @@
 
 #include <maditorlib.h>
 
-#include "../ProcessTalker.h"
+#include "../../src/Common/ProcessTalker.h"
 
 #include <Addons\Addon.h>
 
@@ -41,4 +41,4 @@ private:
 	Maditor::Model::Editor *mEditor;
 };
 	
-extern "C" __declspec(dllexport) Maditor::Addons::Addon *create();
+extern "C" __declspec(dllexport) Maditor::Addons::Addon *createAddon();

@@ -1,7 +1,7 @@
 #ifndef MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 #define MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 
-#include "Model/Project\Generator/ClassGeneratorFactory.h"
+#include "Model/Project\Generators/ClassGeneratorFactory.h"
 
 namespace Maditor {
 namespace View {
@@ -20,7 +20,7 @@ public:
     ~NewClassDialog();
 
 	QString name();
-	Model::Generator::ClassGeneratorFactory::ClassType type();
+	Model::Generators::ClassGeneratorFactory::ClassType type();
 
 public slots:
 	void nameChanged(const QString &name);

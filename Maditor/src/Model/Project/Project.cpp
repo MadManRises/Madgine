@@ -1,9 +1,10 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "Project.h"
 
 #include "View\Dialogs\DialogManager.h"
 
+#include "Model\Editors\EditorManager.h"
 
 
 namespace Maditor {
@@ -14,20 +15,19 @@ namespace Maditor {
 		Project::Project(const QString & path, const QString & name, QDomDocument doc) :
 			ProjectElement(name, "MadProject", doc),
 			TreeModel(this, 1),
+			Generator(false),
 			mDocument(doc),
-			mPath(path),
-			mRoot(path + name + "/"),
-			mModules(mRoot, this, name),
-			
+			mPath(path + name + "/"),
+			mModules(this),
 			mValid(false)
 		{
 			init();
 
 			QMessageBox::StandardButton answer = QMessageBox::StandardButton::Default;
 
-			QFile file(mRoot + sProjectFileName);
+			QFile file(mPath + sProjectFileName);
 			if (file.exists()) {
-				if (!View::Dialogs::DialogManager::confirmFileOverwriteStatic(mRoot + sProjectFileName, &answer)) {
+				if (!View::Dialogs::DialogManager::confirmFileOverwriteStatic(mPath + sProjectFileName, &answer)) {
 					return;
 				}
 			}
@@ -47,9 +47,8 @@ namespace Maditor {
 			ProjectElement(doc.documentElement()),
 			TreeModel(this, 1),
 			mDocument(doc),
-			mPath(QFileInfo(path).absolutePath()),
-			mRoot(path),
-			mModules(element().firstChildElement("Modules"), mRoot, this),
+			mPath(path),
+			mModules(element().firstChildElement("Modules"), this),
 			mValid(true)
 		{
 			init();		
@@ -57,14 +56,19 @@ namespace Maditor {
 		}
 
 		Project::~Project()
-		{
-			
+		{			
 		}
 
-
+		void Project::mediaDoubleClicked(const QModelIndex & index)
+		{
+			if (!mMediaFolder.isDir(index)) {
+				Editors::EditorManager::getSingleton().openByExtension(mMediaFolder.filePath(index).toStdString());
+			}
+		}
 
 		void Project::init()
 		{
+			mMediaFolder.setRootPath(mPath + "data/media");
 		}
 
 		void Project::copyTemplate(QMessageBox::StandardButton *answer)
@@ -76,7 +80,7 @@ namespace Maditor {
 			QDirIterator it(templatePath, QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs, QDirIterator::Subdirectories);
 			while (it.hasNext()) {
 				QString filePath = it.next();
-				QString target = mRoot + dir.relativeFilePath(filePath);
+				QString target = mPath + dir.relativeFilePath(filePath);
 				QFileInfo info(filePath);
 				if (info.isFile()) {
 					QDir().mkpath(info.path());
@@ -98,9 +102,21 @@ namespace Maditor {
 			}
 		}
 
-		const QString & Project::root()
+		QStringList Project::filePaths()
 		{
-			return mRoot;
+			return{ mPath + "src/main.cpp" };
+		}
+
+		void Project::write(QTextStream & stream, int index)
+		{
+			QString content = templateFile("main.cpp");
+
+			stream << content;
+		}
+
+		QString Project::path() const
+		{
+			return mPath;
 		}
 
 		Project * Project::load(const QString & path)
@@ -112,19 +128,11 @@ namespace Maditor {
 			file.close();
 			return new Project(doc, path);
 		}
-
-
 		
-
 		bool Project::isValid()
 		{
 			return mValid;
 		}
-
-		
-
-		
-
 
 		QVariant Project::headerData(int section, Qt::Orientation orientation, int role) const
 		{
@@ -145,7 +153,7 @@ namespace Maditor {
 
 		void Project::save()
 		{
-			QFile file(mRoot + sProjectFileName);
+			QFile file(mPath + sProjectFileName);
 			file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 			QTextStream stream(&file);
 			mDocument.save(stream, 4);
@@ -166,11 +174,27 @@ namespace Maditor {
 			return 1;
 		}
 
-		ModuleList * Project::child(int i) {
-			return &mModules;
+		ProjectElement * Project::child(int i) {
+			switch (i) {
+			case 0:
+				return &mModules;
+			default:
+				throw 0;
+			}
 		}
 
-		void Project::deleteClass(Generator::ClassGenerator *generator, bool deleteFiles) {
+		QFileSystemModel *Project::getMedia()
+		{
+			return &mMediaFolder;
+		}
+
+		void Project::release()
+		{
+			generate();
+			mModules.release();
+		}
+
+		void Project::deleteClass(Generators::ClassGenerator *generator, bool deleteFiles) {
 			if (deleteFiles)
 				generator->deleteFiles();
 			generator->module()->removeClass(generator);

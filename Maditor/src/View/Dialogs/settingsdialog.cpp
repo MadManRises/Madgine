@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"

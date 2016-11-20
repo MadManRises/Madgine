@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "OgreWindow.h"
 
@@ -6,7 +6,6 @@
 
 #include "Model\Engine\ApplicationWrapper.h"
 
-#include "Model\Engine\Watcher\ApplicationWatcher.h"
 
 namespace Maditor {
 	namespace View {
@@ -15,11 +14,10 @@ namespace Maditor {
 		Note that we pass any supplied QWindow parent to the base QWindow class. This is necessary should we
 		need to use our class within a container.
 		*/
-		OgreWindow::OgreWindow(Model::ApplicationWrapper *app, Model::Watcher::ApplicationWatcher *watcher, QWindow *parent)
+		OgreWindow::OgreWindow(Model::ApplicationWrapper *app, QWindow *parent)
 			: QWindow(parent),
 			mInput(0),
 			mApp(app),
-			mWatcher(watcher),
 			mUpdateSize(false)
 		{
 			installEventFilter(this);
@@ -51,7 +49,7 @@ namespace Maditor {
 			Q_UNUSED(event);
 			if (mUpdateSize) {
 				mUpdateSize = false;
-				mWatcher->resizeWindow();
+				mApp->resizeWindow();
 			}
 		}
 
@@ -68,7 +66,7 @@ namespace Maditor {
 				{
 					if (isExposed())
 					{
-						mWatcher->resizeWindow();
+						mApp->resizeWindow();
 					}
 					else {
 						mUpdateSize = true;

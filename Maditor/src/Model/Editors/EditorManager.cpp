@@ -7,12 +7,15 @@
 namespace Maditor {
 	namespace Model {
 		namespace Editors {
+
+			EditorManager *EditorManager::msSingleton = 0;
+
 			EditorManager::EditorManager(Addons::AddonCollector *addons) :
 			mAddonCollector(addons){
-
+				msSingleton = this;
 			}
 			
-			void EditorManager::openResource(const Ogre::ResourcePtr & res)
+			/*void EditorManager::openResource(const Ogre::ResourcePtr & res)
 			{
 				if (res->getOrigin().empty()) return;
 
@@ -25,7 +28,7 @@ namespace Maditor {
 				}
 
 				open(getFullPath(res->getOrigin(), type), type, lineNr);
-			}
+			}*/
 
 			QString EditorManager::getFullPath(const std::string & fileName, const QString & group)
 			{
@@ -102,6 +105,11 @@ namespace Maditor {
 			ScriptEditorModel * EditorManager::scriptEditor()
 			{
 				return &mScriptEditor;
+			}
+			EditorManager & EditorManager::getSingleton()
+			{
+				assert(msSingleton);
+				return *msSingleton;
 			}
 		}
 	}

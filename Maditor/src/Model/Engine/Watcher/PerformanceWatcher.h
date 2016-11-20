@@ -14,16 +14,7 @@ namespace Maditor {
 			public:
 				PerformanceWatcher();
 				
-				void update();
 				void clear();
-
-			signals:
-				void dataChangedQueued();
-				void resetModelQueued();
-
-			private slots:
-				void updateData();
-				void resetModel();
 
 			protected:
 
@@ -32,7 +23,6 @@ namespace Maditor {
 				virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 			private:
-				bool mUpdatePending;
 
 				RootProfilerNode mRootItem;
 			};

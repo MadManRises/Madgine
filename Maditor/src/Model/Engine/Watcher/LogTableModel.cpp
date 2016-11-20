@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "LogTableModel.h"
 
@@ -12,14 +12,9 @@ namespace Maditor {
 			{				
 			}
 
-			void LogTableModel::addMessage(const QString &msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack> &traceback) {
-				QString tracebackString;
-				for (const Engine::Util::TraceBack &t : traceback) {
-					if (!tracebackString.isEmpty()) tracebackString += "\n";
-					tracebackString += QString("%1(%2): %3").arg(QString::fromStdString(t.mFile), QString::number(t.mLineNr), QString::fromStdString(t.mFunction));
-				}
+			void LogTableModel::addMessage(const QString &msg, MessageType level, const Traceback &traceback, const QString &fullTraceback) {
 				beginInsertRows(QModelIndex(), 0, 0);
-				mItems.emplace_front(level, msg, tracebackString, traceback.empty() ? Engine::Util::TraceBack() : traceback.back());
+				mItems.emplace_front(level, msg, fullTraceback, traceback);
 				endInsertRows();
 			}
 
@@ -28,9 +23,9 @@ namespace Maditor {
 				auto it = mItems.begin();
 				std::advance(it, index.row());
 
-				Engine::Util::TraceBack &traceback = std::get<3>(*it);
-
-				if (traceback.mFile == "<unknown>")
+				Traceback &traceback = std::get<3>(*it);
+			
+				if (std::string(traceback.mFile) == "<unknown>")
 					return;
 
 				Editors::EditorManager::getSingleton().openByExtension(traceback.mFile, traceback.mLineNr);
@@ -74,13 +69,13 @@ namespace Maditor {
 						return QVariant();
 					QIcon icon;
 					switch (std::get<0>(*it)) {
-					case Ogre::LML_TRIVIAL:
+					case LOG_TYPE:
 						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxInformation));
 						break;
-					case Ogre::LML_NORMAL:
+					case WARNING_TYPE:
 						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
 						break;
-					case Ogre::LML_CRITICAL:
+					case ERROR_TYPE:
 						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxCritical));
 						break;
 					}

@@ -53,6 +53,8 @@ namespace Maditor {
 
 			void ensureVisible(QWidget *widget);
 
+			void releaseProject();
+
 		private slots:
 			void onAppCreated();
 			void onAppInitialized();

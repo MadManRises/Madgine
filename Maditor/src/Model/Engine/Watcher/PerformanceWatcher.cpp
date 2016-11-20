@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "PerformanceWatcher.h"
 
@@ -6,16 +6,12 @@ namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 			PerformanceWatcher::PerformanceWatcher() :
-				TreeModel(&mRootItem, 4),
-				mUpdatePending(false)
+				TreeModel(&mRootItem, 4)
 			{
 				startTimer(3000);
-
-				connect(this, &PerformanceWatcher::dataChangedQueued, this, &PerformanceWatcher::updateData, Qt::QueuedConnection);
-				connect(this, &PerformanceWatcher::resetModelQueued, this, &PerformanceWatcher::resetModel, Qt::QueuedConnection);
 			}
 
-			void PerformanceWatcher::resetModel()
+			void PerformanceWatcher::clear()
 			{
 				beginResetModel();
 				mRootItem.clear();
@@ -24,7 +20,9 @@ namespace Maditor {
 
 			void PerformanceWatcher::timerEvent(QTimerEvent * event)
 			{
-				mUpdatePending = true;
+
+				mRootItem.update(this);
+				emit dataChanged(index(0, 1), index(rowCount() - 1, 3));
 			}
 
 			QVariant PerformanceWatcher::headerData(int section, Qt::Orientation orientation, int role) const
@@ -38,27 +36,7 @@ namespace Maditor {
 					return QVariant();
 			}
 
-			void PerformanceWatcher::update()
-			{
-				if (mUpdatePending) {
-					mUpdatePending = false;
 
-					mRootItem.update(this);
-					
-					emit dataChangedQueued();					
-				}
-			}
-
-			void PerformanceWatcher::clear()
-			{
-				emit resetModelQueued();
-			}
-
-
-			void PerformanceWatcher::updateData() {
-				emit dataChanged(index(0, 1), index(rowCount() - 1, 3));
-				//emit dataChanged(QModelIndex(), QModelIndex());
-			}
 
 			
 		}

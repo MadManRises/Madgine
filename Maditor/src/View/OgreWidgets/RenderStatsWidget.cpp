@@ -10,8 +10,8 @@ namespace Maditor {
 
 		RenderStatsWidget::RenderStatsWidget(QWidget *parent) :
 			QWidget(parent),
-			ui(new Ui::RenderStatsWidget),
-			mStats(0){
+			ui(new Ui::RenderStatsWidget)
+		{
 			ui->setupUi(this);
 			connect(&mTimer, &QTimer::timeout, this, &RenderStatsWidget::update);
 			mTimer.start(0);
@@ -32,7 +32,7 @@ namespace Maditor {
 
 		void RenderStatsWidget::update()
 		{
-			if (mStats) {
+			/*if (mStats) {
 				ui->FPS->setText(QVariant(mStats->avgFPS).toString().mid(0, 6));
 				ui->BatchCount->setText(QVariant(mStats->batchCount).toString());
 				ui->TriangleCount->setText(QVariant(mStats->triangleCount).toString());
@@ -41,10 +41,10 @@ namespace Maditor {
 				ui->FPS->setText("-");
 				ui->BatchCount->setText("-");
 				ui->TriangleCount->setText("-");
-			}
+			}*/
 		}
 
-		void RenderStatsWidget::setStats(const QString &name, const Ogre::RenderTarget::FrameStats *stats) {
+		void RenderStatsWidget::setStats(const QString &name, const FrameStats &stats) {
 			if (name == mName)
 				mStats = stats;
 		}

@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "DialogManager.h"
 #include "Model\Project\ModuleList.h"
@@ -68,14 +68,14 @@ namespace Maditor {
 				connect(module, &Model::Module::propertiesDialogRequest, this, &DialogManager::showModulePropertiesDialog);
 				connect(module, &Model::Module::classAdded, this, &DialogManager::onClassAdded);
 
-				for (const std::unique_ptr<Model::Generator::ClassGenerator> &gen : module->getClasses()) {
+				for (const std::unique_ptr<Model::Generators::ClassGenerator> &gen : module->getClasses()) {
 					onClassAdded(gen.get());
 				}
 			}
 
-			void DialogManager::onClassAdded(Model::Generator::ClassGenerator *generator)
+			void DialogManager::onClassAdded(Model::Generators::ClassGenerator *generator)
 			{
-				connect(generator, &Model::Generator::ClassGenerator::deleteClassRequest, this, &DialogManager::showDeleteClassDialog);
+				connect(generator, &Model::Generators::ClassGenerator::deleteClassRequest, this, &DialogManager::showDeleteClassDialog);
 			}
 
 			void DialogManager::showNewProjectDialog() {
@@ -165,7 +165,7 @@ namespace Maditor {
 
 			void DialogManager::showDeleteClassDialog()
 			{
-				Model::Generator::ClassGenerator *generator = static_cast<Model::Generator::ClassGenerator*>(sender());
+				Model::Generators::ClassGenerator *generator = static_cast<Model::Generators::ClassGenerator*>(sender());
 
 				QMessageBox msgBox(QMessageBox::Icon::Question, "Delete Class?", QString("Do you really want to delete class <i>%1</i>?").arg(generator->name()), QMessageBox::No | QMessageBox::Yes);
 

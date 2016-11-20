@@ -3,7 +3,7 @@
 
 #include "ProjectElement.h"
 
-#include "Generator\CmakeProject.h"
+#include "Generators\CmakeProject.h"
 
 #include "Module.h"
 
@@ -14,15 +14,16 @@ namespace Maditor {
 
 		public:
 
-			ModuleList(const QString &projectRoot, Project *parent, const QString &name);
-			ModuleList(QDomElement element, const QString &projectRoot, Project *parent);
+			ModuleList(Project *parent);
+			ModuleList(QDomElement element, Project *parent);
 			~ModuleList();
 
-			const QString &root();
+			virtual QString path() const override;
 
 			void generate();
+			void release();
 
-			Generator::CmakeProject *cmake();
+			Generators::CmakeProject *cmake();
 
 			bool hasModule(const QString &name);
 
@@ -35,6 +36,11 @@ namespace Maditor {
 			virtual QVariant icon() const override;
 
 			virtual Project *project() override;
+
+			// Inherited via ProjectElement
+			virtual int childCount() override;
+
+			virtual Module * child(int i) override;
 
 		private:
 			void init();
@@ -53,16 +59,13 @@ namespace Maditor {
 		private:
 			Project *mParent;
 
-			QString mRoot;
+			QString mPath;
 
-			Generator::CmakeProject mCmake;
+			Generators::CmakeProject mCmake;
 
 			std::list<std::unique_ptr<Module>> mModules;
 
-			// Inherited via ProjectElement
-			virtual int childCount() override;
-
-			virtual Module * child(int i) override;
+			
 		};
 	}
 }

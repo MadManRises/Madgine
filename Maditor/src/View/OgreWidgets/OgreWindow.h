@@ -13,7 +13,7 @@ namespace Maditor {
 			Q_OBJECT
 
 		public:
-			explicit OgreWindow(Model::ApplicationWrapper *app, Model::Watcher::ApplicationWatcher *watcher, QWindow *parent = NULL);
+			explicit OgreWindow(Model::ApplicationWrapper *app, QWindow *parent = NULL);
 			~OgreWindow();
 
 			/*
@@ -47,7 +47,6 @@ namespace Maditor {
 
 		private:
 			Model::Watcher::InputWrapper *mInput;
-			Model::Watcher::ApplicationWatcher *mWatcher;
 			Model::ApplicationWrapper *mApp;
 			bool mUpdateSize;
 

@@ -11,12 +11,12 @@
 
 
 
-Maditor::Addons::Addon *create() {
+Maditor::Addons::Addon *createAddon() {
 	return new VSLink();
 }
 
 VSLink::VSLink() :
-	ProcessTalker("VSLink", "Maditor") {
+	ProcessTalker(create, "VSLink", "Maditor") {
 
 }
 

@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "LogsTabWidget.h"
 #include "Model\LogsModel.h"
@@ -25,7 +25,7 @@ namespace Maditor {
 			auto it = mTabs.find(log);
 			QWidget *w = it.value();
 			removeTab(indexOf(w));
-			w->deleteLater();
+			//w->deleteLater();
 			mTabs.erase(it);
 		}
 

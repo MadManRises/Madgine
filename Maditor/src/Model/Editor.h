@@ -17,7 +17,7 @@ namespace Maditor {
 
 			ApplicationWrapper *application();
 			Watcher::ApplicationWatcher *watcher();
-			Generator::ClassGeneratorFactory *classGeneratorFactory();
+			Generators::ClassGeneratorFactory *classGeneratorFactory();
 			Editors::EditorManager *editorManager();
 			LogsModel *logsModel();
 			
@@ -43,7 +43,7 @@ namespace Maditor {
 
 			std::unique_ptr<Project> mProject;
 
-			Generator::ClassGeneratorFactory *mClassGeneratorFactory;
+			Generators::ClassGeneratorFactory *mClassGeneratorFactory;
 			Editors::EditorManager *mEditorManager;
 
 			LogsModel *mLogs;

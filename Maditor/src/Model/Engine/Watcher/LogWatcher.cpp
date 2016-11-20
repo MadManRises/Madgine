@@ -1,7 +1,10 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "LogWatcher.h"
 
+#include "Common\LogInfo.h"
+
+#include "Common\Shared.h"
 
 namespace Maditor {
 	namespace Model {
@@ -9,44 +12,20 @@ namespace Maditor {
 
 
 			OgreLogWatcher::OgreLogWatcher(LogType type, const std::string &name) :
-				mLog(0),
 				mType(type),
-				mName(name)
+				mName(name),
+				mShared(SharedMemory::getSingleton().mLog)
 			{
-				if (QApplication::instance())
-					moveToThread(QApplication::instance()->thread());
-
 				if (mType == GuiLog) {
 					mModel = std::unique_ptr<LogTableModel>(new LogTableModel);
-					if (QApplication::instance())
-						mModel->moveToThread(QApplication::instance()->thread());
-					qRegisterMetaType<Ogre::LogMessageLevel>();
-					qRegisterMetaType<QList<Engine::Util::TraceBack>>();
-					connect(this, &OgreLogWatcher::ogreMessageReceived, mModel.get(), &Model::Watcher::LogTableModel::addMessage, Qt::QueuedConnection);
+					qRegisterMetaType<MessageType>();
+					qRegisterMetaType<Traceback>();
+					connect(this, &OgreLogWatcher::ogreMessageReceived, mModel.get(), &Model::Watcher::LogTableModel::addMessage);
 				}
 			}
 
 			OgreLogWatcher::~OgreLogWatcher()
 			{
-				if (mLog)
-					mLog->removeListener(this);
-			}
-
-			void OgreLogWatcher::listen(Ogre::Log * log, const QString & root)
-			{
-				mLog = log;
-				mSourcesRoot = root + "src/";
-				mLog->addListener(this);
-				
-			}
-
-			void OgreLogWatcher::stopListening(bool unregister)
-			{
-				if (mLog) {
-					if (unregister)
-						mLog->removeListener(this);
-					mLog = 0;
-				}
 			}
 
 			OgreLogWatcher::LogType OgreLogWatcher::type()
@@ -56,7 +35,7 @@ namespace Maditor {
 
 			std::string OgreLogWatcher::getName()
 			{
-				return mLog ? mLog->getName() : mName;
+				return mName;
 			}
 
 			LogTableModel * OgreLogWatcher::model()
@@ -64,20 +43,20 @@ namespace Maditor {
 				return mModel.get();
 			}
 
-			void OgreLogWatcher::logMessage(const QString & msg, Ogre::LogMessageLevel level, const QList<Engine::Util::TraceBack> &traceback)
+
+			void OgreLogWatcher::logMessage(const QString & msg, MessageType level, const Traceback &traceback, const QString &fullTraceback)
 			{
-				emit ogreMessageReceived(msg, level, traceback);
+				emit ogreMessageReceived(msg, level, traceback, fullTraceback);
 				emit messageReceived(msg);
 			}
 
-			void OgreLogWatcher::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
+			void OgreLogWatcher::update()
 			{
-				QList<Engine::Util::TraceBack> list;
-				for (Engine::Util::TraceBack t : Engine::Util::UtilMethods::traceBack()) {
-					t.mFile = mSourcesRoot.relativeFilePath(QString::fromStdString(t.mFile)).toStdString();
-					list << t;
+				while (!mShared.mMadgineLog.empty()) {
+					const LogMessage &msg = mShared.mMadgineLog.front();
+					logMessage(msg.mMsg.c_str(), msg.mType, msg.mTraceback, msg.mFullTraceback.c_str());
+					mShared.mMadgineLog.pop();
 				}
-				logMessage(QString::fromStdString(message), lml, list);				
 			}
 
 		}

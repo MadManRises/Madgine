@@ -2,6 +2,8 @@
 
 #include "Model\TreeItem.h"
 
+#include "Common\StatsInfo.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
@@ -9,7 +11,7 @@ namespace Maditor {
 			class ProfilerNode : public TreeItem {
 
 			public:
-				ProfilerNode(const std::string &name);
+				ProfilerNode(const std::string &name, const ProcessStats &stats, ProfilerNode *parent);
 				virtual ~ProfilerNode();
 
 				// Inherited via TreeItem
@@ -19,40 +21,29 @@ namespace Maditor {
 				
 
 			protected:
-				ProfilerNode();
 
 				virtual void update(PerformanceWatcher *watcher, const QModelIndex &index, long long fullFrameTime);
 				virtual void clear();
-				
-			protected:
-				const std::string mName;
-				const Engine::Util::ProcessStats * mStats;
-
-			private:
-				std::list<StatsProfilerNode> mChildren;			
-
-			};
-
-			class StatsProfilerNode : public ProfilerNode {
-			public:
-				StatsProfilerNode(const std::string &name, ProfilerNode *parent);
-
-				virtual void update(PerformanceWatcher *watcher, const QModelIndex &index, long long fullFrameTime) override;
-
-			private:
-
-				ProfilerNode *mParent;
-
-				long long mDuration;
-				float mRelDuration, mFullRelDuration;
-				
 
 				// Inherited via ProfilerNode
 				virtual TreeItem * parentItem() override;
 
 				virtual QVariant data(int col) const override;
+				
+			protected:
+				const std::string mName;
+				const ProcessStats &mStats;
+
+				ProfilerNode *mParent;
+
+				long long mDuration;
+				float mRelDuration, mFullRelDuration;
+
+			private:
+				std::list<ProfilerNode> mChildren;			
 
 			};
+
 
 
 			class RootProfilerNode : public ProfilerNode {
@@ -62,13 +53,11 @@ namespace Maditor {
 				static QVariant header(int col);
 
 				void update(PerformanceWatcher *watcher);
-				virtual void clear() override;
 				
+				using ProfilerNode::clear;
 
-				// Inherited via ProfilerNode
-				virtual TreeItem * parentItem() override;
-
-				virtual QVariant data(int col) const override;
+			private:
+				SharedStats &mShared;
 
 			};
 

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Generators\Generator.h"
 
 #include "ProjectElement.h"
 
@@ -9,7 +9,7 @@
 
 namespace Maditor {
 	namespace Model {
-		class MADITOR_EXPORT Project : public TreeModel, public ProjectElement {
+		class MADITOR_EXPORT Project : public TreeModel, public ProjectElement, public Generators::Generator {
 			Q_OBJECT
 
 		public:
@@ -17,7 +17,7 @@ namespace Maditor {
 			Project(QDomDocument doc, const QString &path);
 			~Project();
 
-			const QString &root();
+			virtual QString path() const override;
 
 			static Project *load(const QString &path);
 
@@ -31,8 +31,24 @@ namespace Maditor {
 
 			virtual Project *project() override;
 
+			// Inherited via ProjectElement
+			virtual int childCount() override;
+
+			virtual ProjectElement* child(int i) override;
+
+			QFileSystemModel *getMedia();
+
+			void release();
+
+			// Geerbt über Generator
+			virtual QStringList filePaths() override;
+
+			virtual void write(QTextStream & stream, int index) override;
+
 		public slots:
-			void deleteClass(Generator::ClassGenerator *generator, bool deleteFiles);
+			void deleteClass(Generators::ClassGenerator *generator, bool deleteFiles);
+
+			void mediaDoubleClicked(const QModelIndex &index);
 
 		private:
 			void init();
@@ -45,7 +61,7 @@ namespace Maditor {
 		private:
 			QDomDocument mDocument;
 			
-			QString mPath, mRoot;
+			QString mPath;
 
 			bool mValid;
 
@@ -53,10 +69,10 @@ namespace Maditor {
 
 			ModuleList mModules;
 
-			// Inherited via ProjectElement
-			virtual int childCount() override;
+			QFileSystemModel mMediaFolder;
 
-			virtual ModuleList* child(int i) override;
+
+
 
 		};
 	}

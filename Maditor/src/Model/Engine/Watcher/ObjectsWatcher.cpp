@@ -4,11 +4,14 @@
 
 #include "Util\MadgineObjectCollector.h"
 
+#include "Common/Shared.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			ObjectsWatcher::ObjectsWatcher()
+			ObjectsWatcher::ObjectsWatcher() :
+				mShared(SharedMemory::getSingleton().mObjects)
 			{
 				startTimer(3000);
 			}
@@ -16,20 +19,21 @@ namespace Maditor {
 
 			void ObjectsWatcher::timerEvent(QTimerEvent * event)
 			{
-				beginResetModel();
-				for (Object &o : mObjects) {
-					o.mState = (Engine::Util::ObjectState)-1;
-				}
-				for (Engine::Util::BaseMadgineObject *o : Engine::Util::MadgineObjectCollector::getSingleton()) {
-					auto it = std::find_if(mObjects.begin(), mObjects.end(), [=](const Object &ob) {return ob.mName == o->getName(); });
-					if (it == mObjects.end())
-						mObjects.push_back({ o->getName(), o->getState(), o });
-					else {
-						it->mState = o->getState();
-						it->mPtr = o;
+				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
+				if (mShared.mDataChanged) {
+					beginResetModel();
+					for (const ObjectInfo &o : mShared.mObjects) {
+						auto it = std::find_if(mObjects.begin(), mObjects.end(), [=](const Object &ob) {return ob.mName == o.mName.c_str(); });
+						if (it == mObjects.end())
+							mObjects.push_back({ o.mName.c_str(), o.mState, o.mPtr });
+						else {
+							it->mState = o.mState;
+							it->mPtr = o.mPtr;
+						}
 					}
+					mShared.mDataChanged = false;
+					endResetModel();
 				}
-				endResetModel();
 			}
 
 			Q_INVOKABLE int ObjectsWatcher::rowCount(const QModelIndex & parent) const

@@ -1,19 +1,23 @@
 #pragma once
 
+#define BOOST_DATE_TIME_NO_LIB
+#include <boost\interprocess\ipc\message_queue.hpp>
+
+
+#include "Common\InputInfo.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			class InputWrapper : public Engine::Input::InputHandler {
+
+
+			class InputWrapper {
 
 			public:
 				InputWrapper();
 
-				void setSystem(Engine::GUI::GUISystem *system);
-				void clearSystem();
-				virtual void update() override;
-
+				void setEnabled(bool b);
 
 				virtual void keyPressEvent(QKeyEvent * ev);
 				virtual void keyReleaseEvent(QKeyEvent * ev);
@@ -28,17 +32,12 @@ namespace Maditor {
 				Engine::GUI::MouseButton::MouseButton convertMouseButton(Qt::MouseButton button);
 
 			private:
-				std::mutex mInputMutex;
-				enum EventType {
-					PRESS,
-					RELEASE
-				};
-				std::queue<std::pair<EventType, Engine::GUI::MouseEventArgs>> mMouseClicks;
-				std::queue<std::pair<EventType, Engine::GUI::KeyEventArgs>> mKeyPresses;
-				bool mMove;
-				Engine::GUI::MouseEventArgs mAccumulativeMouseMove;
 
-				Engine::GUI::GUISystem *mSystem;
+
+				bool mEnabled;
+
+				InputShared &mShared;
+
 			};
 
 		}

@@ -1,34 +1,34 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "ModuleList.h"
 
 #include "Project.h"
 
-#include "Generator\DotGenerator.h"
+#include "Generators\DotGenerator.h"
 
 namespace Maditor {
 	namespace Model {
 
 		
-		ModuleList::ModuleList(const QString &projectRoot, Project *parent, const QString &name) :
+		ModuleList::ModuleList(Project *parent) :
 			ProjectElement("C++", "Modules", parent),
-			mRoot(projectRoot + "src/"),
-			mCmake(mRoot, projectRoot + "build/", name),
+			mPath(parent->path() + "src/"),
+			mCmake(mPath, parent->path(), parent->name()),
 			mParent(parent)
 		{
 
 		}
 
-		ModuleList::ModuleList(QDomElement element, const QString &projectRoot, Project *parent) :
+		ModuleList::ModuleList(QDomElement element, Project *parent) :
 			ProjectElement(element, parent),
-			mRoot(projectRoot + "src/"),
-			mCmake(mRoot, projectRoot + "build/", mName),
+			mPath(parent->path() + "src/"),
+			mCmake(mPath, parent->path(), parent->name()),
 			mParent(parent)
 		{
 			init();
 
 			for (QDomElement module = element.firstChildElement("Module"); !module.isNull(); module = module.nextSiblingElement("Module")) {
-				addModule(new Module(this, module));
+				addModule(new Module(module, this));
 			}
 
 			for (const std::unique_ptr<Module> &module : mModules)
@@ -63,7 +63,7 @@ namespace Maditor {
 
 		void ModuleList::drawDependenciesGraph()
 		{
-			Generator::DotGenerator dot(mParent->root() + "tmp/", "Dependencies");
+			Generators::DotGenerator dot(mParent->path() + "tmp/", "Dependencies");
 
 			for (const std::unique_ptr<Module> &module : mModules) {
 				dot.addNode(module->name());
@@ -75,15 +75,21 @@ namespace Maditor {
 			dot.generate();
 		}
 
-		const QString & ModuleList::root()
+		QString ModuleList::path() const
 		{
-			return mRoot;
+			return mPath;
 		}
 
 		void ModuleList::generate()
 		{
 			mCmake.generate();
-			mCmake.build();
+			mCmake.build("debug");
+		}
+
+		void ModuleList::release()
+		{
+			mCmake.generate();
+			mCmake.build("release");
 		}
 
 		void ModuleList::createModule(const QString & name)
@@ -96,7 +102,7 @@ namespace Maditor {
 		}
 
 
-		Generator::CmakeProject * ModuleList::cmake()
+		Generators::CmakeProject * ModuleList::cmake()
 		{
 			return &mCmake;
 		}

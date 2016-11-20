@@ -9,8 +9,8 @@ PROJECT(%1)
 
 set (sources %3)
 
-if (NOT sources STREQUAL "") 
-    add_library(%2 SHARED ${sources})
+if (NOT sources STREQUAL "")  
+    add_library(%2 ${MADGINE_LIB_TYPE} ${sources})
 endif()
 
 %4

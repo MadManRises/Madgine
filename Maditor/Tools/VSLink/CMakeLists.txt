@@ -12,6 +12,6 @@ include_directories(${MADGINE_SOURCE_DIR}/src)
 
 add_library(VSLink SHARED VSCommands.cs VSLink.cpp VSLink.h)
 
-target_link_libraries(VSLink Qt5::Widgets ProcessTalker Maditor)
+target_link_libraries(VSLink Qt5::Widgets Maditor)
 
 set(TOOLS_LIBS ${TOOLS_LIBS} VSLink PARENT_SCOPE)

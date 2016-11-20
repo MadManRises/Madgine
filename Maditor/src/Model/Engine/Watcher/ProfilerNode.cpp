@@ -1,19 +1,23 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "ProfilerNode.h"
 
 #include "PerformanceWatcher.h"
 
+#include "Common\Shared.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 			
-			ProfilerNode::ProfilerNode(const std::string & name) :
+			ProfilerNode::ProfilerNode(const std::string & name, const ProcessStats &stats, ProfilerNode *parent) :
 				mName(name),
-				mStats(Engine::Util::Profiler::getSingleton().getStats(name))
+				mStats(stats),
+				mParent(parent)
 			{
-				for (const std::string &child : mStats->children())
-					mChildren.emplace_back(child, this);
+				for (const ProcessStats &child : stats.mChildren) {
+					mChildren.emplace_back(child.mName.c_str(), child, this);
+				}
 			}
 
 			ProfilerNode::~ProfilerNode()
@@ -33,28 +37,27 @@ namespace Maditor {
 				return &*it;
 			}
 
-			ProfilerNode::ProfilerNode() :
-				mStats(0)
-			{
-			}
-
 			void ProfilerNode::update(PerformanceWatcher * watcher, const QModelIndex & index, long long fullFrameTime)
 			{
+				mDuration = mStats.mAverageDuration;
+				mRelDuration = mParent && mParent->mDuration ? ((10000 * mDuration) / mParent->mDuration) / 100.0f : 0.0f;
+				mFullRelDuration = ((10000 * mDuration) / fullFrameTime) / 100.0f;
 
-				const std::list<std::string> &children = mStats->children();
+				const SharedList<ProcessStats> &children = mStats.mChildren;
 				if (childCount() < children.size()) {
 					int oldCount = childCount();
 
-					for (const std::string &name : children) {
-						if (std::find_if(mChildren.begin(), mChildren.end(), [&](ProfilerNode& p) {return p.mName == name; }) == mChildren.end()) {
-							mChildren.emplace_back(name, this);
+					watcher->beginInsertRows(index, oldCount, children.size() - 1);
+					for (const ProcessStats &child : children) {
+						if (std::find_if(mChildren.begin(), mChildren.end(), [&](ProfilerNode& p) {return p.mName == child.mName.c_str(); }) == mChildren.end()) {
+							mChildren.emplace_back(child.mName.c_str(), child, this);
 						}
 					}
-					watcher->insertRowsQueued(index, oldCount, childCount() - 1);
+					watcher->endInsertRows();
 				}
 
 				int i = 0;
-				for (StatsProfilerNode &n : mChildren) {
+				for (ProfilerNode &n : mChildren) {
 					n.update(watcher, watcher->index(i, 0, index), fullFrameTime);
 					++i;
 				}
@@ -66,25 +69,8 @@ namespace Maditor {
 				mChildren.clear();
 			}
 
-			StatsProfilerNode::StatsProfilerNode(const std::string & name, ProfilerNode * parent) :
-				ProfilerNode(name),
-				mParent(parent)
-			{
 
-			}
-
-			void StatsProfilerNode::update(PerformanceWatcher *watcher, const QModelIndex &index, long long fullFrameTime)
-			{
-
-				mDuration = mStats->averageDuration();
-				mRelDuration = mStats->hasParent() && mStats->parent()->averageDuration() ? ((10000 * mDuration) / mStats->parent()->averageDuration()) / 100.0f : 0.0f;
-				mFullRelDuration = ((10000 * mDuration) / fullFrameTime) / 100.0f;
-
-				ProfilerNode::update(watcher, index, fullFrameTime);
-
-			}
-
-			QVariant StatsProfilerNode::data(int col) const
+			QVariant ProfilerNode::data(int col) const
 			{
 				switch (col) {
 				case 0:
@@ -101,12 +87,14 @@ namespace Maditor {
 
 			}
 
-			TreeItem * StatsProfilerNode::parentItem()
+			TreeItem * ProfilerNode::parentItem()
 			{
 				return mParent;
 			}
 
-			RootProfilerNode::RootProfilerNode()
+			RootProfilerNode::RootProfilerNode() :
+				ProfilerNode("", SharedMemory::getSingleton().mStats.mRootProcess, 0),
+				mShared(SharedMemory::getSingleton().mStats)
 			{
 			}
 
@@ -128,27 +116,8 @@ namespace Maditor {
 
 			void RootProfilerNode::update(PerformanceWatcher * watcher)
 			{
-				if (!mStats)
-					if (Engine::Util::Profiler::getSingleton().hasStats("Frame"))
-						mStats = Engine::Util::Profiler::getSingleton().getStats("Frame");
-				if (mStats)
-					ProfilerNode::update(watcher, QModelIndex(), std::max((long long)1, mStats->averageDuration()));
-			}
-
-			void RootProfilerNode::clear()
-			{
-				ProfilerNode::clear();
-				mStats = 0;
-			}
-
-			QVariant RootProfilerNode::data(int col) const
-			{
-				throw 0;				
-			}
-
-			TreeItem * RootProfilerNode::parentItem()
-			{
-				return 0;
+				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
+				ProfilerNode::update(watcher, QModelIndex(), std::max((long long)1, mStats.mAverageDuration));
 			}
 
 		}

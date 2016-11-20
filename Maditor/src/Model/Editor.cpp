@@ -5,8 +5,8 @@
 #include "Engine/Watcher/ApplicationWatcher.h"
 #include "Engine/ApplicationWrapper.h"
 #include "Editors\EditorManager.h"
-#include "Project\Generator\ClassGeneratorFactory.h"
-#include "Project\Generator\CommandLine.h"
+#include "Project\Generators\ClassGeneratorFactory.h"
+#include "Project\Generators\CommandLine.h"
 #include "Engine\ModuleLoader.h"
 #include "Engine\Watcher\ResourceWatcher.h"
 #include "Engine/Watcher/LogWatcher.h"
@@ -31,11 +31,11 @@ namespace Maditor {
 			mReloadProject = mSettings.value("reloadProject").toBool();
 
 			mLoader = new ModuleLoader;
-			mApplicationWatcher = new Watcher::ApplicationWatcher(mLoader, mLog);
+			mApplicationWatcher = new Watcher::ApplicationWatcher(mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
 			mEditorManager = new Editors::EditorManager(mAddonCollector);
-			mClassGeneratorFactory = new Generator::ClassGeneratorFactory;
+			mClassGeneratorFactory = new Generators::ClassGeneratorFactory;
 			mLogs = new LogsModel;
 
 			mApplicationWatcher->init();
@@ -45,7 +45,7 @@ namespace Maditor {
 			connect(mEditorManager->scriptEditor(), &Editors::ScriptEditorModel::documentSaved, mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::reloadScriptFile);
 
 			mLogs->addLog(mLog);
-			Generator::CommandLine::setLog(mLog);
+			Generators::CommandLine::setLog(mLog);
 		}
 
 		Editor::~Editor()
@@ -96,7 +96,7 @@ namespace Maditor {
 			return mApplicationWatcher;
 		}
 
-		Generator::ClassGeneratorFactory *Editor::classGeneratorFactory()
+		Generators::ClassGeneratorFactory *Editor::classGeneratorFactory()
 		{
 			return mClassGeneratorFactory;
 		}
@@ -143,7 +143,7 @@ namespace Maditor {
 
 			mProject = std::forward<std::unique_ptr<Project>>(project);
 
-			QString path = mProject->root();
+			QString path = mProject->path();
 			mRecentProjects.removeAll(path);
 			mRecentProjects.push_front(path);
 
@@ -152,8 +152,8 @@ namespace Maditor {
 
 			emit projectOpened(mProject.get());
 
-			mEditorManager->setCurrentRoot(mProject->root() + "src/");
-
+			mEditorManager->setCurrentRoot(mProject->moduleList()->path());
+			
 			//mApplicationWrapper.go();
 		}
 

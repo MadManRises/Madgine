@@ -3,6 +3,9 @@
 #include "Model\TreeModel.h"
 #include "OgreNodeItem.h"
 
+#include "Util\ObjectState.h"
+
+struct ObjectsShared;
 
 namespace Maditor {
 	namespace Model {
@@ -35,6 +38,9 @@ namespace Maditor {
 					void *mPtr;
 				};
 				std::list<Object> mObjects;
+
+				ObjectsShared &mShared;
+
 			};
 
 		}

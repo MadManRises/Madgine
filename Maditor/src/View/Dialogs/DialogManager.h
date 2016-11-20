@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Model\Project\Generator\ClassGeneratorFactory.h"
+#include "Model\Project\Generators\ClassGeneratorFactory.h"
 
 namespace Maditor {
 
@@ -22,7 +22,7 @@ namespace Maditor {
 				void newProjectDialogAccepted(const QString &path, const QString &name);
 				void loadProjectDialogAccepted(const QString &path);
 				void newModuleDialogAccepted(const QString &name);
-				void newClassDialogAccepted(Model::Module *module, const QString &name, Model::Generator::ClassGeneratorFactory::ClassType type);
+				void newClassDialogAccepted(Model::Module *module, const QString &name, Model::Generators::ClassGeneratorFactory::ClassType type);
 
 				void newGuiHandlerDialogAccepted(Model::Module *module, const QString &name, const QString &window, int type, bool hasLayoutFile);
 				void newGlobalAPIDialogAccepted(Model::Module *module, const QString &name);
@@ -31,12 +31,12 @@ namespace Maditor {
 				void newGameHandlerDialogAccepted(Model::Module *module, const QString &name);
 				void newOtherClassDialogAccepted(Model::Module *module, const QString &name);
 
-				void deleteClassDialogAccepted(Model::Generator::ClassGenerator *generator, bool deleteFiles);
+				void deleteClassDialogAccepted(Model::Generators::ClassGenerator *generator, bool deleteFiles);
 
 			public slots:
 				virtual void onProjectOpened(Model::Project *project);
 				virtual void onModuleAdded(Model::Module *module);
-				virtual void onClassAdded(Model::Generator::ClassGenerator * generator);
+				virtual void onClassAdded(Model::Generators::ClassGenerator * generator);
 
 				virtual void showNewProjectDialog();
 				virtual void showLoadProjectDialog();

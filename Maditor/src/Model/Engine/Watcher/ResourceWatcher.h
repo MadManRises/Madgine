@@ -44,6 +44,8 @@ namespace Maditor {
 			private:
 				std::unordered_map<std::string, ResourceGroupItem> mGroups;
 
+				bool mRunning;
+
 			};
 
 		}

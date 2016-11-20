@@ -1,20 +1,25 @@
 #pragma once
 
+#include "Common\ApplicationInfo.h"
 
+#include "Common\StatsInfo.h"
+
+#include "PerformanceWatcher.h"
+#include "ObjectsWatcher.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
 
-			class ApplicationWatcher : public QObject, public Ogre::FrameListener{
+			class ApplicationWatcher : public QObject{
 				Q_OBJECT
 
 			public:
-				ApplicationWatcher(ModuleLoader *loader, OgreLogWatcher *madgineLog);
+				ApplicationWatcher(OgreLogWatcher *madgineLog);
 				~ApplicationWatcher();
 
-				void notifyApplicationCreated(const QString &root);
+				void notifyApplicationCreated();
 				void notifyApplicationShutdown();
 				void afterApplicationShutdown();
 				void notifyApplicationStarted();
@@ -26,42 +31,33 @@ namespace Maditor {
 				OgreSceneWatcher *ogreSceneWatcher();
 				ObjectsWatcher *objectsWatcher();
 
-				void resizeWindow();
+				void update();
 
 				void init();
+
 
 			signals:
 				void logCreated(OgreLogWatcher *log);
 				void logRemoved(OgreLogWatcher *log);
-				void renderStatsSetup(const QString &name, const Ogre::RenderTarget::FrameStats *stats);
+				void renderStatsSetup(const QString &name, const FrameStats &stats);
 				void applicationCreated();
 				void applicationInitialized();
 				void applicationStarted();
 				void applicationStopped();
 				void applicationShutdown();
 
-			protected:
-				virtual bool frameRenderingQueued(const Ogre::FrameEvent &ev) override;
 
 			private:				
-				
-				ModuleLoader *mModuleLoader;
 
 				ResourceWatcher *mResourceWatcher;				
-				PerformanceWatcher *mPerformanceWatcher;
+				PerformanceWatcher mPerformanceWatcher;
 				OgreSceneWatcher *mOgreSceneWatcher;
-				ObjectsWatcher *mObjectsWatcher;
+				ObjectsWatcher mObjectsWatcher;
 
-				Ogre::RenderTarget *mSceneRenderWindow;
-				Ogre::RenderWindow *mGuiRenderWindow;
-				const Ogre::RenderTarget::FrameStats *mSceneRenderStats, *mGuiRenderStats;
 
 				OgreLogWatcher *mMadgineLog;
-				OgreLogWatcher *mOgreLog;
 
-				bool mResizePending;
 
-				QString mProjectRoot;
 			};
 
 		}

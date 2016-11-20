@@ -18,40 +18,8 @@
   </property>
   <widget class="QTabWidget" name="centralWidget">
    <property name="currentIndex">
-    <number>3</number>
+    <number>1</number>
    </property>
-   <widget class="QWidget" name="gui">
-    <attribute name="title">
-     <string>GUI</string>
-    </attribute>
-    <layout class="QGridLayout" name="gridLayout_5">
-     <item row="0" column="0">
-      <widget class="QTreeWidget" name="guiHierarchy">
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="scene">
-    <attribute name="title">
-     <string>Scene</string>
-    </attribute>
-    <layout class="QGridLayout" name="gridLayout_6">
-     <item row="0" column="0">
-      <widget class="QTreeWidget" name="sceneHierarchy">
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QWidget" name="scriptEditorTab">
     <attribute name="title">
      <string>Scripting</string>
@@ -216,6 +184,8 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionPause"/>
+    <addaction name="separator"/>
+    <addaction name="actionRelease"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEditor"/>
@@ -312,7 +282,7 @@
      <item row="0" column="0">
       <widget class="Maditor::View::TreeView" name="PerformanceWidget">
        <property name="locale">
-        <locale language="English" country="Germany"/>
+        <locale language="English" country="UnitedStates"/>
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
@@ -359,6 +329,21 @@
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="MediaDockWidget">
+   <property name="windowTitle">
+    <string>Media</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="MediaDockWidgetContent">
+    <layout class="QGridLayout" name="gridLayout_13">
+     <item row="0" column="0">
+      <widget class="QTreeView" name="MediaWidget"/>
      </item>
     </layout>
    </widget>
@@ -433,6 +418,11 @@
    </property>
    <property name="text">
     <string>Finalize</string>
+   </property>
+  </action>
+  <action name="actionRelease">
+   <property name="text">
+    <string>Release</string>
    </property>
   </action>
  </widget>
@@ -555,6 +545,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionRelease</sender>
+   <signal>triggered()</signal>
+   <receiver>Maditor::View::MainWindow</receiver>
+   <slot>releaseProject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>305</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>newProject()</slot>
@@ -564,5 +570,6 @@
   <slot>openSettings()</slot>
   <slot>initApp()</slot>
   <slot>finalizeApp()</slot>
+  <slot>releaseProject()</slot>
  </slots>
 </ui>

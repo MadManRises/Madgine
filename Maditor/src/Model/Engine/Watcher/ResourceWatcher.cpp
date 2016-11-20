@@ -12,7 +12,8 @@ namespace Maditor {
 		namespace Watcher {
 
 			ResourceWatcher::ResourceWatcher() :
-				TreeModel(this, 1, true)
+				TreeModel(this, 1, true),
+				mRunning(false)
 			{
 				connect(this, &ResourceWatcher::resetModelQueued, this, &ResourceWatcher::resetModel, Qt::QueuedConnection);
 			}
@@ -31,11 +32,14 @@ namespace Maditor {
 					++count;
 				}
 				insertRowsQueued(QModelIndex(), 0, count - 1);
+
+				mRunning = true;
 			}
 
 			
 			void ResourceWatcher::clear()
 			{
+				mRunning = false;
 				emit resetModelQueued();
 			}
 
@@ -87,7 +91,8 @@ namespace Maditor {
 
 			void ResourceWatcher::reloadScriptFile(const QString & fileName, const QString & group)
 			{
-				Engine::Scripting::Parsing::ScriptParser::getSingleton().reparseFile(fileName.toStdString(), group.toStdString());
+				if (mRunning)
+					Engine::Scripting::Parsing::ScriptParser::getSingleton().reparseFile(fileName.toStdString(), group.toStdString());
 			}
 
 		}

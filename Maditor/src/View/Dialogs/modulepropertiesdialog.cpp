@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "modulepropertiesdialog.h"
 #include "ui_modulepropertiesdialog.h"

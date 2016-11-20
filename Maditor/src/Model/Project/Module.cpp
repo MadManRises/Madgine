@@ -1,9 +1,9 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "Module.h"
 #include "Project.h"
-#include "Generator\HeaderGuardGenerator.h"
-#include "Generator\ClassGeneratorFactory.h"
+#include "Generators\HeaderGuardGenerator.h"
+#include "Generators\ClassGeneratorFactory.h"
 
 namespace Maditor {
 	namespace Model {
@@ -15,14 +15,14 @@ namespace Maditor {
 			
 			init();
 
-			QDir().mkdir(root());
+			QDir().mkdir(path());
 
-			Generator::HeaderGuardGenerator header(this, name);
+			Generators::HeaderGuardGenerator header(this, name);
 			header.generate();
 
 		}
 
-		Module::Module(ModuleList *parent, QDomElement data) :
+		Module::Module(QDomElement data, ModuleList *parent) :
 			ProjectElement(data, parent),
 			mParent(parent),
 			mCmake(parent->cmake(), mName)
@@ -32,7 +32,7 @@ namespace Maditor {
 
 			
 			for (QDomElement generator = element().firstChildElement("Class"); !generator.isNull(); generator = generator.nextSiblingElement("Class")) {
-				addClass(Generator::ClassGeneratorFactory::load(this, generator), false);				
+				addClass(Generators::ClassGeneratorFactory::load(this, generator), false);				
 			}
 
 			for (QDomElement dependency = element().firstChildElement("Dependency"); !dependency.isNull(); dependency = dependency.nextSiblingElement("Dependency")) {
@@ -52,14 +52,14 @@ namespace Maditor {
 				{ "Properties", [this]() {emit propertiesDialogRequest(this); }}
 			});
 
-			mCmake.addFile(Generator::HeaderGuardGenerator::fileName(mName));
+			mCmake.addFile(Generators::HeaderGuardGenerator::fileName(mName));
 		}
 
-		QString Module::root()
+		QString Module::path() const
 		{
-			return mParent->root() + mName + "/";
+			return mParent->path() + mName + "/";
 		}
-		void Module::addNewClass(Generator::ClassGenerator * generator)
+		void Module::addNewClass(Generators::ClassGenerator * generator)
 		{
 			addClass(generator);
 
@@ -67,7 +67,7 @@ namespace Maditor {
 
 			project()->save();
 		}
-		void Module::addClass(Generator::ClassGenerator * generator, bool callInsert)
+		void Module::addClass(Generators::ClassGenerator * generator, bool callInsert)
 		{
 			if (callInsert)
 				project()->beginInsertRows(ownIndex(), mClasses.size(), mClasses.size());
@@ -83,12 +83,12 @@ namespace Maditor {
 
 		QString Module::moduleInclude()
 		{
-			return Generator::HeaderGuardGenerator::fileName(mName);
+			return Generators::HeaderGuardGenerator::fileName(mName);
 		}
 
 		bool Module::hasClass(const QString & name)
 		{
-			return std::find_if(mClasses.begin(), mClasses.end(), [&](const std::unique_ptr<Generator::ClassGenerator> &ptr) {return ptr->name() == name; }) != mClasses.end();
+			return std::find_if(mClasses.begin(), mClasses.end(), [&](const std::unique_ptr<Generators::ClassGenerator> &ptr) {return ptr->name() == name; }) != mClasses.end();
 		}
 
 		QVariant Module::icon() const
@@ -185,7 +185,7 @@ namespace Maditor {
 			return mClasses.size();
 		}
 
-		Generator::ClassGenerator *Module::child(int i) {
+		Generators::ClassGenerator *Module::child(int i) {
 			auto it = mClasses.begin();
 			std::advance(it, i);
 			return it->get();
@@ -196,14 +196,14 @@ namespace Maditor {
 			return mParent->project();
 		}
 
-		const std::list<std::unique_ptr<Generator::ClassGenerator>> &Module::getClasses()
+		const std::list<std::unique_ptr<Generators::ClassGenerator>> &Module::getClasses()
 		{
 			return mClasses;
 		}
 
-		void Module::removeClass(Generator::ClassGenerator * generator)
+		void Module::removeClass(Generators::ClassGenerator * generator)
 		{
-			auto it = std::find_if(mClasses.begin(), mClasses.end(), [=](const std::unique_ptr<Generator::ClassGenerator> &p) {return p.get() == generator; });
+			auto it = std::find_if(mClasses.begin(), mClasses.end(), [=](const std::unique_ptr<Generators::ClassGenerator> &p) {return p.get() == generator; });
 			if (it == mClasses.end())
 				throw 0;
 			size_t i = std::distance(mClasses.begin(), it);

@@ -1,6 +1,8 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "Addon.h"
+
+#include <Windows.h>
 
 namespace Maditor {
 	namespace Addons {
@@ -55,7 +57,7 @@ AddonCollector::AddonCollector() {
 			if (!h)
 				continue;
 			typedef Addon *(*Creator)();
-			Creator creator = (Creator)GetProcAddress(h, "create");
+			Creator creator = (Creator)GetProcAddress(h, "createAddon");
 			if (!creator)
 				continue;
 			Addon *addon = creator();
@@ -63,12 +65,10 @@ AddonCollector::AddonCollector() {
 			mAddons.push_back(addon);
 		}
 		inputFile.close();
-	}
-	else {
-		throw 0;
+
+		startTimer(500);
 	}
 
-	startTimer(500);
 }
 
 AddonCollector::~AddonCollector()

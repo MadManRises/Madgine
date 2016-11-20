@@ -40,7 +40,7 @@ namespace Maditor {
 			
 		}
 
-		namespace Generator {
+		namespace Generators {
 			class ClassGeneratorFactory;
 			class ClassGenerator;
 			class CmakeSubProject;

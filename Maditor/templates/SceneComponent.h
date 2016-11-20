@@ -1,12 +1,12 @@
 #pragma once
 
 #include "%moduleHeader"
-#include "OGRE\sceneComponent.h"
+#include "Scene\sceneComponent.h"
 
 namespace %game {
 	namespace %module {
 
-		class %guard %name : public Engine::OGRE::SceneComponent<%name> {
+		class %guard %name : public Engine::Scene::SceneComponent<%name> {
 		public:
 			%name();
 		};

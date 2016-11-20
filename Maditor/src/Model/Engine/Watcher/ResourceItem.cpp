@@ -46,7 +46,7 @@ namespace Maditor {
 			}
 			void ResourceItem::doubleClicked()
 			{
-				Editors::EditorManager::getSingleton().openResource(mResource);
+				//Editors::EditorManager::getSingleton().openResource(mResource);
 				
 			}
 		}

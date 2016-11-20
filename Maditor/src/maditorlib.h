@@ -1,10 +1,13 @@
 #pragma once
 
-#ifdef Maditor_EXPORTS
+#ifdef MADITOR_STATIC
+#define MADITOR_EXPORT
+#elif Maditor_EXPORTS
 #define MADITOR_EXPORT __declspec(dllexport)
 #else
 #define MADITOR_EXPORT __declspec(dllimport)
 #endif
+
 
 #include "Model/editorforward.h"
 
@@ -41,12 +44,14 @@
 #include <QFileDialog>
 #include <QToolBar>
 #include <QCheckBox>
+#include <QFileSystemModel>
 
 #include <mutex>
 #include <unordered_map>
 #include <functional>
 #include <set>
 #include <queue>
+#include <list>
 
 #include <Qsci\qsciabstractapis.h>
 #include <Qsci/qsciscintilla.h>

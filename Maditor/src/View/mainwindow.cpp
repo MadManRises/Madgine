@@ -1,4 +1,4 @@
-#include "madgineinclude.h"
+#include "maditorlib.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -34,7 +34,7 @@ namespace Maditor {
 			updateRecentProjects(mEditor->recentProjects());
 			
 
-			mTarget = new OgreWindow(editor->application(), editor->watcher());
+			mTarget = new OgreWindow(editor->application());
 			QWidget *ogre = QWidget::createWindowContainer(mTarget);
 
 			ui->game->addWidget(ogre);
@@ -115,21 +115,21 @@ namespace Maditor {
 
 			connect(&mDialogManager, &Dialogs::DialogManager::newProjectDialogAccepted, mEditor, &Model::Editor::newProject);
 			connect(&mDialogManager, &Dialogs::DialogManager::loadProjectDialogAccepted, mEditor, &Model::Editor::loadProject);
-			Model::Generator::ClassGeneratorFactory *factory = mEditor->classGeneratorFactory();
-			connect(&mDialogManager, &Dialogs::DialogManager::newClassDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createClass);
+			Model::Generators::ClassGeneratorFactory *factory = mEditor->classGeneratorFactory();
+			connect(&mDialogManager, &Dialogs::DialogManager::newClassDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createClass);
 
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newEntityComponentRequest, &mDialogManager, &Dialogs::DialogManager::showNewEntityComponentDialog);
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newGameHandlerRequest, &mDialogManager, &Dialogs::DialogManager::showNewGameHandlerDialog);
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newGlobalAPIRequest, &mDialogManager, &Dialogs::DialogManager::showNewGlobalAPIDialog);
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newGuiHandlerRequest, &mDialogManager, &Dialogs::DialogManager::showNewGuiHandlerDialog);
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newOtherClassRequest, &mDialogManager, &Dialogs::DialogManager::showNewOtherClassDialog);
-			connect(factory, &Model::Generator::ClassGeneratorFactory::newSceneComponentRequest, &mDialogManager, &Dialogs::DialogManager::showNewSceneComponentDialog);
-			connect(&mDialogManager, &Dialogs::DialogManager::newEntityComponentDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createEntityComponent);
-			connect(&mDialogManager, &Dialogs::DialogManager::newGameHandlerDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createGameHandler);
-			connect(&mDialogManager, &Dialogs::DialogManager::newGlobalAPIDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createGlobalAPI);
-			connect(&mDialogManager, &Dialogs::DialogManager::newGuiHandlerDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createGuiHandler);
-			connect(&mDialogManager, &Dialogs::DialogManager::newOtherClassDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createOtherClass);
-			connect(&mDialogManager, &Dialogs::DialogManager::newSceneComponentDialogAccepted, factory, &Model::Generator::ClassGeneratorFactory::createSceneComponent);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newEntityComponentRequest, &mDialogManager, &Dialogs::DialogManager::showNewEntityComponentDialog);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newGameHandlerRequest, &mDialogManager, &Dialogs::DialogManager::showNewGameHandlerDialog);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newGlobalAPIRequest, &mDialogManager, &Dialogs::DialogManager::showNewGlobalAPIDialog);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newGuiHandlerRequest, &mDialogManager, &Dialogs::DialogManager::showNewGuiHandlerDialog);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newOtherClassRequest, &mDialogManager, &Dialogs::DialogManager::showNewOtherClassDialog);
+			connect(factory, &Model::Generators::ClassGeneratorFactory::newSceneComponentRequest, &mDialogManager, &Dialogs::DialogManager::showNewSceneComponentDialog);
+			connect(&mDialogManager, &Dialogs::DialogManager::newEntityComponentDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createEntityComponent);
+			connect(&mDialogManager, &Dialogs::DialogManager::newGameHandlerDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createGameHandler);
+			connect(&mDialogManager, &Dialogs::DialogManager::newGlobalAPIDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createGlobalAPI);
+			connect(&mDialogManager, &Dialogs::DialogManager::newGuiHandlerDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createGuiHandler);
+			connect(&mDialogManager, &Dialogs::DialogManager::newOtherClassDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createOtherClass);
+			connect(&mDialogManager, &Dialogs::DialogManager::newSceneComponentDialogAccepted, factory, &Model::Generators::ClassGeneratorFactory::createSceneComponent);
 								
 		}
 
@@ -148,12 +148,12 @@ namespace Maditor {
 		void MainWindow::startApp()
 		{
 			ui->actionStart->setEnabled(false);
-			mEditor->application()->go();
+			mEditor->application()->start();
 		}
 
 		void MainWindow::stopApp()
 		{
-			mEditor->application()->shutdown();
+			mEditor->application()->stop();
 		}
 
 		void MainWindow::pauseApp()
@@ -166,7 +166,7 @@ namespace Maditor {
 			ui->actionStop->setEnabled(false);
 			ui->actionPause->setEnabled(false);
 			ui->actionFinalize->setEnabled(false);
-			mEditor->application()->cleanup();
+			mEditor->application()->shutdown();
 		}
 
 		void MainWindow::ensureVisible(QWidget * widget)
@@ -188,6 +188,11 @@ namespace Maditor {
 				
 				widget = widget->parentWidget();
 			}
+		}
+
+		void MainWindow::releaseProject()
+		{
+			mEditor->project()->release();
 		}
 
 		void MainWindow::showGame()
@@ -256,6 +261,9 @@ namespace Maditor {
 
 		void MainWindow::onProjectOpened(Model::Project *project) {
 			ui->ProjectWidget->setModel(project);
+			ui->MediaWidget->setModel(project->getMedia());
+			ui->MediaWidget->setRootIndex(project->getMedia()->index(project->getMedia()->rootPath()));
+			connect(ui->MediaWidget, &QTreeView::doubleClicked, project, &Model::Project::mediaDoubleClicked);
 
 			ui->actionInit->setEnabled(true);
 			ui->actionFinalize->setEnabled(false);
