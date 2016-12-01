@@ -13,10 +13,13 @@
 #include "Editors\ScriptEditorModel.h"
 #include "Addons\Addon.h"
 
+SharedMemory *SharedMemory::msSingleton = 0;
+
 namespace Maditor {
 	namespace Model {
 
 		Editor::Editor(Addons::AddonCollector *collector) :
+			mMemory(SharedMemory::create),
 			mApplicationWrapper(0),
 			mApplicationWatcher(0),
 			mEditorManager(0),
@@ -114,6 +117,12 @@ namespace Maditor {
 		Project *Editor::project()
 		{
 			return mProject.get();
+		}
+
+		void Editor::clearRecentProjects()
+		{
+			mRecentProjects.clear();
+			emit recentProjectsChanged(mRecentProjects);
 		}
 
 

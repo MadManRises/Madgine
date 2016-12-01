@@ -29,6 +29,8 @@ namespace Maditor {
 
 				const QStringList &dependencies();
 
+				QStringList subProjects();
+
 			protected:
 				virtual void write(QTextStream &stream, int index) override final;
 

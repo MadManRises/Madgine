@@ -11,11 +11,15 @@ namespace Maditor {
 				~TreeView();
 
 				void setModel(Model::TreeModel *model);
+				void clearModel();
 
+			private slots:
+				void buildContextMenu(const QPoint &p);
 
 			private:
 
-				std::list<QMetaObject::Connection> mConnections;
+				Model::TreeModel *mModel;
+
 			};
 
 	}

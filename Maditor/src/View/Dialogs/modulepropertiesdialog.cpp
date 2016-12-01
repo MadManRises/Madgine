@@ -26,6 +26,8 @@ namespace Maditor {
 					item->setCheckState(module->dependencies().contains(dep->name()) ? Qt::Checked : Qt::Unchecked);
 				}
 				
+				ui->dependenciesList->sortItems();
+
 			}
 
 			ModulePropertiesDialog::~ModulePropertiesDialog()
@@ -55,8 +57,10 @@ namespace Maditor {
 					}
 				}
 
-				if (valid)
+				if (valid) {
+					mModule->project()->save();
 					mModule->parent()->generate();
+				}
 
 				return valid;
 			}

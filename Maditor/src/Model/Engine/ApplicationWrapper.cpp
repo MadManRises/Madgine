@@ -69,7 +69,7 @@ namespace Maditor {
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
 			
-			mLoader->setup(project->path() + "bin/", project->moduleList());
+			mLoader->setup(project->path() + "debug/bin/", project->moduleList());
 
 		}
 

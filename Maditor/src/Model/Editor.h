@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Project\Project.h"
+#include "../Common\Shared.h"
 
 namespace Maditor {
 	namespace Model {
@@ -23,6 +24,8 @@ namespace Maditor {
 			
 			Project *project();
 
+			void clearRecentProjects();
+
 		private:
 			void openProject(std::unique_ptr<Project> &&project);
 
@@ -31,6 +34,8 @@ namespace Maditor {
 			void recentProjectsChanged(const QStringList &list);
 
 		private:
+
+			SharedMemory mMemory;
 
 			Watcher::OgreLogWatcher *mLog;
 

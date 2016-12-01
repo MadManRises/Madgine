@@ -30,6 +30,7 @@ namespace Maditor {
 		{
 			ui->setupUi(this);
 
+			mRecentProjectInitialActionCount = ui->menuRecentProjects->actions().count();
 			
 			updateRecentProjects(mEditor->recentProjects());
 			
@@ -195,6 +196,11 @@ namespace Maditor {
 			mEditor->project()->release();
 		}
 
+		void MainWindow::clearRecentProjects()
+		{
+			mEditor->clearRecentProjects();
+		}
+
 		void MainWindow::showGame()
 		{
 			ui->game->setCurrentIndex(2);
@@ -208,8 +214,10 @@ namespace Maditor {
 
 		void MainWindow::updateRecentProjects(const QStringList & list)
 		{
-			QMenu *menu = ui->menuRecentProjects;
-			menu->clear();
+			QMenu *menu = ui->menuRecentProjects;			
+			for (QAction *action : menu->actions().mid(mRecentProjectInitialActionCount)) {
+				menu->removeAction(action);
+			}
 
 			for (const QString &project : list) {
 				menu->addAction(project);
@@ -218,7 +226,8 @@ namespace Maditor {
 
 		void MainWindow::recentProjectClicked(QAction * action)
 		{
-			mEditor->loadProject(action->text());
+			if (ui->menuRecentProjects->actions().indexOf(action) >= mRecentProjectInitialActionCount)
+				mEditor->loadProject(action->text());
 		}
 		
 
@@ -262,7 +271,6 @@ namespace Maditor {
 		void MainWindow::onProjectOpened(Model::Project *project) {
 			ui->ProjectWidget->setModel(project);
 			ui->MediaWidget->setModel(project->getMedia());
-			ui->MediaWidget->setRootIndex(project->getMedia()->index(project->getMedia()->rootPath()));
 			connect(ui->MediaWidget, &QTreeView::doubleClicked, project, &Model::Project::mediaDoubleClicked);
 
 			ui->actionInit->setEnabled(true);

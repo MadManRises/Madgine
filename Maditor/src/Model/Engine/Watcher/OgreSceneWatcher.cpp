@@ -33,10 +33,6 @@ namespace Maditor {
 					return QVariant();
 			}
 
-			void OgreSceneWatcher::performRowsRemove(const QModelIndex & parent, int from, int to)
-			{
-				TreeModel::performRowsRemove(parent, from, to);
-			}
 
 			void OgreSceneWatcher::update()
 			{

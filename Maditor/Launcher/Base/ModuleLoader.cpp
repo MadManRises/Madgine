@@ -1,5 +1,5 @@
 
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "ModuleLoader.h"
 
@@ -139,11 +139,11 @@
 			std::string runtimePath = mRuntimeDir + module.mName + ".dll";
 			std::string runtimePdbPath = mRuntimeDir + module.mName + ".pdb";
 			std::string binaryPath = mBinaryDir + module.mName + ".dll";
-			std::string binaryPdbPath = mBinaryDir + module.mName + ".dll";
+			std::string binaryPdbPath = mBinaryDir + module.mName + ".pdb";
 
 			{
-				std::ifstream  src(binaryPath, std::ios::binary);
-				std::ofstream  dst(runtimePath, std::ios::binary);
+				std::ifstream src(binaryPath, std::ios::binary);
+				std::ofstream dst(runtimePath, std::ios::binary);
 
 				dst << src.rdbuf();
 			}
@@ -153,6 +153,7 @@
 			module.mGameHandlers.clear();
 			module.mGuiHandlers.clear();
 			module.mGlobalAPIComponents.clear();
+			module.mSceneListeners.clear();
 			std::set<std::string> beforeEntityComponents = Engine::Scene::Entity::Entity::registeredComponentNames();
 			std::set<Engine::Scene::BaseSceneComponent*> beforeSceneComponents = Engine::Scene::SceneManager::getSingleton().getComponents();
 			std::set<Engine::UI::GameHandlerBase*> beforeGameHandlers = Engine::UI::UIManager::getSingleton().getGameHandlers();

@@ -75,6 +75,15 @@ namespace Maditor {
 				return mDependencies;
 			}
 
+			QStringList CmakeGenerator::subProjects()
+			{
+				QStringList result;
+				for (CmakeSubProject *project : mSubProjects) {
+					result << project->name();
+				}
+				return result;
+			}
+
 			void CmakeGenerator::write(QTextStream & stream, int index)
 			{
 				QString files;

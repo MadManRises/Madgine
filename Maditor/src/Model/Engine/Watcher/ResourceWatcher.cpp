@@ -31,7 +31,7 @@ namespace Maditor {
 					mGroups.try_emplace(manager->getResourceType().c_str(), this, manager);
 					++count;
 				}
-				insertRowsQueued(QModelIndex(), 0, count - 1);
+				//insertRowsQueued(QModelIndex(), 0, count - 1);
 
 				mRunning = true;
 			}

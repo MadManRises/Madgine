@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinclude.h>
+#include <madginelib.h>
 
 #include "maditorlib.h"
 

@@ -138,7 +138,7 @@ namespace Maditor {
 			void ClassGenerator::deleteFiles()
 			{
 				for (const QString &file : filePaths()) {
-					//TODO
+					QFile(file).remove();
 				}
 			}
 

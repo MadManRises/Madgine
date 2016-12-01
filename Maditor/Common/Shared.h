@@ -25,13 +25,16 @@ struct Shared {
 	SharedStats mStats;
 };
 
-struct create_t {};
-static constexpr create_t create;
-struct open_t {};
-static constexpr open_t open;
+
 
 class SharedMemory {
 public:
+
+	struct create_t {};
+	static constexpr create_t create = create_t();
+	struct open_t {};
+	static constexpr open_t open = open_t();
+
 	SharedMemory(create_t) :
 		mMemory((boost::interprocess::shared_memory_object::remove("Maditor_Memory"), boost::interprocess::create_only), "Maditor_Memory", 1000000),
 		mCreate(true)
@@ -65,7 +68,7 @@ public:
 
 private:
 	Shared *mData;
-	static SharedMemory *msSingleton;
+	static SharedMemory * msSingleton;
 
 	boost::interprocess::managed_shared_memory mMemory;
 

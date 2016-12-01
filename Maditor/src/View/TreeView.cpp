@@ -9,31 +9,43 @@ namespace Maditor {
 
 
 		TreeView::TreeView(QWidget * parent) :
-			QTreeView(parent)
+			QTreeView(parent),
+			mModel(0)
 		{
+			connect(this, &QTreeView::customContextMenuRequested, this, &TreeView::buildContextMenu);
+			setContextMenuPolicy(Qt::CustomContextMenu);
+
+			if(header()->isSortIndicatorShown())
+				header()->setSortIndicator(0, Qt::AscendingOrder);
 		}
 
 		TreeView::~TreeView()
 		{
-			for (QMetaObject::Connection &conn : mConnections)
-				QObject::disconnect(conn);
 		}
 
 		void TreeView::setModel(Model::TreeModel * model)
 		{
-			mConnections.clear();
 
 			QTreeView::setModel(model->sorted());
-			setContextMenuPolicy(Qt::CustomContextMenu);
-			mConnections.emplace_back(connect(this, &QTreeView::customContextMenuRequested, [=](const QPoint &p) {
-				QMenu menu;
-				model->handleContextMenuRequest(model->sorted()->mapToSource(indexAt(p)), menu);
-				if (menu.actions().size() > 0)
-					menu.exec(viewport()->mapToGlobal(p));
-			}));
-
-			mConnections.emplace_back(connect(this, &QTreeView::doubleClicked, model->sorted(), &Model::TreeSorter::itemDoubleClicked));
+			mModel = model;			
+			
+			if (model)
+				connect(this, &QTreeView::doubleClicked, model->sorted(), &Model::TreeSorter::itemDoubleClicked);
 
 		}
+
+		void TreeView::buildContextMenu(const QPoint &p) {
+			if (!mModel) return;
+			QMenu menu;
+			mModel->handleContextMenuRequest(mModel->sorted()->mapToSource(indexAt(p)), menu);
+			if (menu.actions().size() > 0)
+				menu.exec(viewport()->mapToGlobal(p));
+		}
+
+		void TreeView::clearModel()
+		{
+			setModel(0);
+		}		 
+
 	}
 }

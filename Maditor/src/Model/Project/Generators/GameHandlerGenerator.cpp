@@ -19,7 +19,14 @@ namespace Maditor {
 			}
 			QString GameHandlerGenerator::templateFileName(int index)
 			{
-				return QString();
+				switch (index) {
+				case 0:
+					return "GameHandler.cpp";
+				case 1:
+					return "GameHandler.h";
+				default:
+					throw 0;
+				}
 			}
 		}
 	}

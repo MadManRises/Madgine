@@ -1,5 +1,5 @@
 
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "ApplicationLauncher.h"
 
@@ -129,6 +129,7 @@
 			PROFILE("Launcher", "Frame");
 			mWatcher.update();
 			update();
+			mLoader.update();
 			return true;
 		}
 

@@ -55,6 +55,8 @@ namespace Maditor {
 
 			void releaseProject();
 
+			void clearRecentProjects();
+
 		private slots:
 			void onAppCreated();
 			void onAppInitialized();
@@ -77,6 +79,7 @@ namespace Maditor {
 
 			Dialogs::DialogManager mDialogManager;
 
+			int mRecentProjectInitialActionCount;
 
 		};
 	}

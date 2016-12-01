@@ -14,8 +14,8 @@ namespace Maditor {
 			mSorter.setDynamicSortFilter(true);
 			mSorter.setSourceModel(this);	
 
-			connect(this, &TreeModel::insertRowsQueued, this, &TreeModel::performRowsInsert);
-			connect(this, &TreeModel::removeRowsQueued, this, &TreeModel::performRowsRemove);
+			/*connect(this, &TreeModel::insertRowsQueued, this, &TreeModel::performRowsInsert);
+			connect(this, &TreeModel::removeRowsQueued, this, &TreeModel::performRowsRemove);*/
 			connect(&mSorter, &TreeSorter::doubleClicked, this, &TreeModel::itemDoubleClicked);
 		}
 
@@ -100,7 +100,7 @@ namespace Maditor {
 			return static_cast<TreeItem*>(index.internalPointer());
 		}
 
-		void TreeModel::performRowsInsert(const QModelIndex & parent, int start, int end)
+		/*void TreeModel::performRowsInsert(const QModelIndex & parent, int start, int end)
 		{
 			beginInsertRows(parent, start, end);
 			endInsertRows();
@@ -114,7 +114,7 @@ namespace Maditor {
 		{
 			beginRemoveRows(parent, start, end);
 			endRemoveRows();
-		}
+		}*/
 	
 
 		void TreeModel::handleContextMenuRequest(const QModelIndex & p, QMenu & menu)

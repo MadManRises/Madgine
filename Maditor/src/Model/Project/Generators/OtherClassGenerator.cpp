@@ -19,7 +19,14 @@ namespace Maditor {
 			}
 			QString OtherClassGenerator::templateFileName(int index)
 			{
-				return QString();
+				switch (index) {
+				case 0:
+					return "OtherClass.cpp";
+				case 1:
+					return "OtherClass.h";
+				default:
+					throw 0;
+				}
 			}
 		}
 	}

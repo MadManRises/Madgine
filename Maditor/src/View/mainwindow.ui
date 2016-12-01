@@ -24,7 +24,22 @@
     <attribute name="title">
      <string>Scripting</string>
     </attribute>
-    <layout class="QGridLayout" name="gridLayout_7">
+    <layout class="QGridLayout" name="scriptEditorTabLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="Maditor::View::Editors::ScriptEditorTabWidget" name="scriptEditorTabWidget">
        <property name="tabsClosable">
@@ -38,7 +53,22 @@
     <attribute name="title">
      <string>Game</string>
     </attribute>
-    <layout class="QGridLayout" name="gridLayout_3">
+    <layout class="QGridLayout" name="gameTabLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="QStackedWidget" name="game">
        <property name="palette">
@@ -116,7 +146,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="notLoadedLabel">
            <property name="text">
-            <string>No Project Loaded!</string>
+            <string>No Application Loaded!</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -130,7 +160,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="notStartedLabel">
            <property name="text">
-            <string>Project not Started!</string>
+            <string>Application not Started!</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -161,6 +191,8 @@
      <property name="title">
       <string>Recent Projects</string>
      </property>
+     <addaction name="actionClear_List"/>
+     <addaction name="separator"/>
     </widget>
     <addaction name="actionNewProject"/>
     <addaction name="actionLoadProject"/>
@@ -184,11 +216,16 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionPause"/>
-    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuProject">
+    <property name="title">
+     <string>Project</string>
+    </property>
     <addaction name="actionRelease"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEditor"/>
+   <addaction name="menuProject"/>
    <addaction name="menuApp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -204,6 +241,21 @@
    </attribute>
    <widget class="QWidget" name="LogsDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="Maditor::View::LogsTabWidget" name="LogsWidget">
        <property name="currentIndex">
@@ -223,8 +275,27 @@
    </attribute>
    <widget class="QWidget" name="ProjectDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_2">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
-      <widget class="Maditor::View::TreeView" name="ProjectWidget"/>
+      <widget class="Maditor::View::TreeView" name="ProjectWidget">
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -238,6 +309,21 @@
    </attribute>
    <widget class="QWidget" name="ResourcesDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_4">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="Maditor::View::TreeView" name="ResourcesWidget">
        <property name="sortingEnabled">
@@ -279,6 +365,21 @@
    </attribute>
    <widget class="QWidget" name="PerformanceDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_10">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="Maditor::View::TreeView" name="PerformanceWidget">
        <property name="locale">
@@ -301,6 +402,21 @@
    </attribute>
    <widget class="QWidget" name="OgreSceneDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_11">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="Maditor::View::TreeView" name="OgreSceneWidget">
        <property name="sortingEnabled">
@@ -320,6 +436,21 @@
    </attribute>
    <widget class="QWidget" name="ObjectsDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_12">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
       <widget class="QTableView" name="ObjectsWidget">
        <property name="selectionMode">
@@ -342,8 +473,27 @@
    </attribute>
    <widget class="QWidget" name="MediaDockWidgetContent">
     <layout class="QGridLayout" name="gridLayout_13">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item row="0" column="0">
-      <widget class="QTreeView" name="MediaWidget"/>
+      <widget class="Maditor::View::FilesView" name="MediaWidget">
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -425,6 +575,11 @@
     <string>Release</string>
    </property>
   </action>
+  <action name="actionClear_List">
+   <property name="text">
+    <string>Clear List</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -443,6 +598,11 @@
    <class>Maditor::View::TreeView</class>
    <extends>QTreeView</extends>
    <header>view/treeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Maditor::View::FilesView</class>
+   <extends>QTreeView</extends>
+   <header>view/filesview.h</header>
   </customwidget>
  </customwidgets>
  <resources>
@@ -561,6 +721,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionClear_List</sender>
+   <signal>triggered()</signal>
+   <receiver>Maditor::View::MainWindow</receiver>
+   <slot>clearRecentProjects()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>305</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>newProject()</slot>
@@ -571,5 +747,6 @@
   <slot>initApp()</slot>
   <slot>finalizeApp()</slot>
   <slot>releaseProject()</slot>
+  <slot>clearRecentProjects()</slot>
  </slots>
 </ui>

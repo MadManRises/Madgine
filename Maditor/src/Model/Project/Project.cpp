@@ -17,7 +17,7 @@ namespace Maditor {
 			TreeModel(this, 1),
 			Generator(false),
 			mDocument(doc),
-			mPath(path + name + "/"),
+			mPath(QDir(path + name).absolutePath() + "/"),
 			mModules(this),
 			mValid(false)
 		{
@@ -47,7 +47,7 @@ namespace Maditor {
 			ProjectElement(doc.documentElement()),
 			TreeModel(this, 1),
 			mDocument(doc),
-			mPath(path),
+			mPath(QDir(path).absolutePath() + "/"),
 			mModules(element().firstChildElement("Modules"), this),
 			mValid(true)
 		{

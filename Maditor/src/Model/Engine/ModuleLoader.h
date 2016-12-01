@@ -48,7 +48,7 @@ namespace Maditor {
 
 			void loadModule(ModuleInstance &module, bool callInit);
 			void unloadModule(ModuleInstance &module);
-			void reload(ModuleInstance &module);
+			void reload(Module *module);
 
 			std::map<const Module *, ModuleInstance> mInstances;
 

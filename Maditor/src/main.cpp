@@ -8,20 +8,12 @@
 #include "Common\Shared.h"
 
 
-SharedMemory *SharedMemory::msSingleton = 0;
-
 //#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 int main(int argc, char **argv) {
-
-	SharedMemory mem(create);
 
 	int result;
 
 	QApplication app(argc, argv);
-
-#ifdef MADITOR_STATIC
-	Q_INIT_RESOURCE(resources);
-#endif
 	
 	{
 		Maditor::Addons::AddonCollector addons;

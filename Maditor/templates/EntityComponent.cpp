@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libinclude.h>
+#include <madginelib.h>
 #include "%header"
 
 char const * const %game::%module::%name::sComponentName = "%componentName";

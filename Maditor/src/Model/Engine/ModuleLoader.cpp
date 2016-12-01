@@ -27,14 +27,15 @@ namespace Maditor {
 
 		void ModuleLoader::onFileChanged(const QString &path) {
 			QFileInfo f(path);
-			auto it = mInstances.find(mModules->getModuleByName(f.baseName()));
+			Module *m = mModules->getModuleByName(f.baseName());
+			auto it = mInstances.find(m);
 			//if (it == mInstances.end())
 			//	return;
 			ModuleInstance &module = it->second;
 			module.mExists = f.exists();
 			if (module.mExists) {
 				qDebug() << path << "Changed!";
-				reload(module);
+				reload(m);
 			}
 			else {
 				qDebug() << path << "was Deleted!";
@@ -61,8 +62,7 @@ namespace Maditor {
 			for (const QString &file : newFileList) {
 				QFileInfo f(file);
 				if (mModules->hasModule(f.baseName())) {
-					ModuleInstance &module = mInstances.find(mModules->getModuleByName(f.baseName()))->second;
-					reload(module);
+					reload(mModules->getModuleByName(f.baseName()));
 				}
 			}
 
@@ -138,14 +138,33 @@ namespace Maditor {
 			sendMsg(msg, "Loader");
 		}
 
-		void ModuleLoader::reload(ModuleInstance &module) {
-			unloadModule(module);
-			loadModule(module, true);
+		void ModuleLoader::reload(Module *module) {
+			std::list<const Module*> reloadOrder;
+			module->fillReloadOrder(reloadOrder);
+
+			for (const Module *m : reloadOrder) {
+				ModuleInstance &instance = mInstances.find(m)->second;
+
+				unloadModule(instance);
+			}
+			
+			reloadOrder.reverse();
+
+			for (const Module *m : reloadOrder) {
+				ModuleInstance &instance = mInstances.find(m)->second;
+
+				loadModule(instance, true);
+			}
 		}
 
 		void ModuleLoader::receiveMessage(const ModuleLoaderMsg & msg)
 		{
-			sendAll();
+			switch (msg.mCmd) {
+			case Init:
+				sendAll();
+				break;
+			}
+			
 		}
 
 
@@ -167,7 +186,7 @@ namespace Maditor {
 			strcpy_s(msg.mArg, module.mName.toStdString().c_str());
 			msg.mCallInit = callInit;
 
-			assert(sendMsg(msg, "Loader"));
+			sendMsg(msg, "Loader");
 		}
 
 	}

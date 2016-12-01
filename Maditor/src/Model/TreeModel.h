@@ -41,12 +41,12 @@ public slots:
 	void itemDoubleClicked(const QModelIndex &index);
 
 signals:
-	void insertRowsQueued(const QModelIndex &parent, int start, int end);
-	void removeRowsQueued(const QModelIndex &parent, int start, int end);
+	//void insertRowsQueued(const QModelIndex &parent, int start, int end);
+	//void removeRowsQueued(const QModelIndex &parent, int start, int end);
 
 protected slots:
-	void performRowsInsert(const QModelIndex &parent, int start, int end);
-	virtual void performRowsRemove(const QModelIndex &parent, int start, int end);
+	//void performRowsInsert(const QModelIndex &parent, int start, int end);
+	//virtual void performRowsRemove(const QModelIndex &parent, int start, int end);
 
 private:
 	TreeItem *mRoot;

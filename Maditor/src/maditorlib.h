@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef MADITOR_STATIC
-#define MADITOR_EXPORT
-#elif Maditor_EXPORTS
+#if Maditor_EXPORTS
 #define MADITOR_EXPORT __declspec(dllexport)
 #else
 #define MADITOR_EXPORT __declspec(dllimport)

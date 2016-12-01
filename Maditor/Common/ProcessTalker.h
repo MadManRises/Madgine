@@ -60,7 +60,7 @@ public:
 			boost::interprocess::message_queue queue(boost::interprocess::open_only, path.c_str());
 			return queue.try_send(&msg, sizeof(T), 0);
 		}
-		catch (boost::interprocess::interprocess_exception &e) {
+		catch (boost::interprocess::interprocess_exception &) {
 			return false;
 		}
 	}

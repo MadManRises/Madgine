@@ -30,7 +30,7 @@ endif (%1_FOUND)
 )").arg(lib);
 				}
 
-				return templateFile("CmakeMain.txt").arg(name(), libraries);
+				return templateFile("CmakeMain.txt").arg(name(), libraries, subProjects().join(' '));
 			}
 
 			QString CmakeProject::root()
