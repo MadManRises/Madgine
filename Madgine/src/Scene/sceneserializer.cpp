@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "sceneserializer.h"
 
 #include "Scripting/Types/globalscope.h"

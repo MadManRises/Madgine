@@ -27,6 +27,7 @@ public:
 	Struct *createStruct();
 	Struct *createStruct_(const std::string &prototype);
 	List *createList();
+	Array *createArray(size_t size);
 	const ValueType &debug(const ValueType &v);
 	Scene *level();
 	Struct *getData(const std::string &name);
@@ -43,7 +44,6 @@ public:
 	ValueType call(const ArgumentList &args, const std::string &name);
 
 protected:    
-    virtual std::string getIdentifier() override;
 
 	virtual const Parsing::MethodNodePtr &getMethod(const std::string &name) override;
 

@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "assignment.h"
 #include "Scripting/Types/scope.h"
 #include "Scripting/scriptingexception.h"

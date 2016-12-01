@@ -19,8 +19,9 @@ namespace Exceptions {
 	const auto invalidExpression = message("Invalid Expression at Line ", "!");
 	const auto invalidReturn = message("Invalid return-Statement!");
 	const auto invalidValueType = message("Invalid ValueType!");
+	const auto invalidTypesForOperator = message("Invalid Types for Operator '", "': ", ", ", "");
 	const auto loadLayoutFailure = message("Failed to load Layout: '", "'!");
-	const auto missingEvent = message("Reference to non-existing Event: '", "'");
+	//const auto missingEvent = message("Reference to non-existing Event: '", "'");
 	//const auto moreThanOneAttachedObject = message("Entity with more than one attached Object!");
 	//const auto noAttachedObject = message("Entity without attached Object!");
 	const auto nodeNotCleared = message("Node is not cleared on Entity-Destructor!");
@@ -31,11 +32,13 @@ namespace Exceptions {
 	const auto openFileFailure = message("Couldnt open File ", "!");
 	const auto reservedKeyword = message("Use of reserved Keyword '", "'!");
 	const auto unexpectedParseType = message("Unexpected Type ", " during Parsing in File ", ":(", ",", ")!");
-	const auto unknownBoolOperator = message("Unknown Bool-Operator: ", "");
+	const auto unexpectedScopeType = message("Unexpected Scope Type: got ", ", expected ", "!");
+	const auto unknownArithmeticalOperator = message("Unknown Arithmetical-Operator: ", "");
 	const auto unknownCompareOperator = message("Unknown Compare-Operator: ", "");
 	const auto unknownComponent = message("Unknown Component-Name: '", "'");
 	const auto unknownDeserializationType = message("Unknown Type to Deserialize!");
 	const auto unknownEntityDescription = message("Unkown Entity-Description: '", "'");
+	const auto unknownLogicalOperator = message("Unknown Bool-Operator: ", "");
 	const auto unknownMethod = message("No method ", " in ", "!");
 	const auto unknownOperator = message("Unknown Operator: '", "'");
 	const auto unknownOwner = message("Unknown Owner: ", "!");

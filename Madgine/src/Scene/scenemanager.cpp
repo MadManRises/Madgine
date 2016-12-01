@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "SceneManager.h"
 
@@ -119,7 +119,7 @@ void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
 
 	mIsSceneLoaded = true;
 
-    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8, 0.8, 0.8));
+    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 
     for (SceneListener *listener : mSceneListeners){
         listener->onSceneLoad();
@@ -469,8 +469,8 @@ void SceneManager::setGameTextureSize(const Ogre::Vector2 & size)
 		return;
     mCamera->setAspectRatio(size.x / size.y);
 
-    unsigned int width = size.x;
-    unsigned int height = size.y;
+    unsigned int width = (unsigned int)size.x;
+    unsigned int height = (unsigned int)size.y;
 
 	mRenderTexture->removeAllViewports();
 

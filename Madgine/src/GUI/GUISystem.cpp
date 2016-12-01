@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "GUISystem.h"
 #include "Windows\WindowContainer.h"

@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "scene.h"
 #include "globalscope.h"
 
@@ -19,10 +19,6 @@ void Scene::clear()
 }
 
 
-std::string Scene::getIdentifier()
-{
-    return "Level";
-}
 
 template <> Scope *Scene::Factory::create(Serialize::SerializeInStream &in)
 {

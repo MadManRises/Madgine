@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "GUIEvents.h"
 
 std::ostream &operator << (std::ostream &str, const Engine::GUI::MouseEventArgs &me) {

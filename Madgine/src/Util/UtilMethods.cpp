@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "UtilMethods.h"
 
@@ -13,6 +13,7 @@ namespace Engine {
 
 		void UtilMethods::setup() {
 			sLog = Ogre::LogManager::getSingleton().createLog(sLogFileName);
+			sLog->setLogDetail(Ogre::LL_BOREME);
 		}
 
 		void UtilMethods::log(const std::string & msg, Ogre::LogMessageLevel level, const std::list<TraceBack> &traceBack)

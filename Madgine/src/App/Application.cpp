@@ -1,6 +1,6 @@
 
 
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "Application.h"
 #include "appsettings.h"
@@ -166,7 +166,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			mInput->update();
 		}
 		catch (const std::exception &e) {
-			LOG_ERROR("Unhandled Exception-Type:" );
+			LOG_ERROR("Unhandled Exception during Input!" );
 			LOG_EXCEPTION(e);
 		}
 
@@ -175,6 +175,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			mGUI->update(fe.timeSinceLastFrame);
 		}
 		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during GUI-Update!");
 			LOG_EXCEPTION(e);
 		}
 
@@ -183,6 +184,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			mUI->update(fe.timeSinceLastFrame);
 		}
 		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during UI-Update!");
 			LOG_EXCEPTION(e);
 		}
 
@@ -191,6 +193,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
 		}
 		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during Scene-Update!");
 			LOG_EXCEPTION(e);
 		}
 
@@ -201,6 +204,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 					mSafeCallQueue.front()();
 				}
 				catch (const std::exception &e) {
+					LOG_ERROR("Unhandled Exception during SafeCall!");
 					LOG_EXCEPTION(e);
 				}
 				mSafeCallQueue.pop();
@@ -224,7 +228,7 @@ bool Application::frameEnded(const Ogre::FrameEvent & fe)
 }
 
 
-void Application::setWindowProperties(bool fullscreen, size_t width, size_t height)
+void Application::setWindowProperties(bool fullscreen, unsigned int width, unsigned int height)
 {
 	mWindow->setFullscreen(fullscreen, width, height);
 	resizeWindow();

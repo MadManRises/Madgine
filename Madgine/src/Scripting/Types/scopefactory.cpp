@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "scopefactory.h"
 #include "Scripting\Datatypes\Serialize\serializestream.h"
 

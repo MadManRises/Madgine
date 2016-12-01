@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "ArithmeticalOperator.h"
 
 #include "Database\exceptionmessages.h"
@@ -15,13 +15,19 @@ namespace Engine {
 				Statement(line)
 			{
 				if (op == "+") {
-					mType = Plus;
+					mType = Add;
+				}
+				else if (op == "-") {
+					mType = Subtract;
+				}
+				else if (op == "*") {
+					mType = Multiply;
 				}
 				else if (op == "/") {
 					mType = Divide;
-				}
+				}				
 				else {
-					throw ScriptingException(Database::Exceptions::unknownBoolOperator(op));
+					throw ScriptingException(Database::Exceptions::unknownArithmeticalOperator(op));
 				}
 			}
 
@@ -30,8 +36,12 @@ namespace Engine {
 				ValueType first = mFirst->run(rootScope, 0, stack);
 				ValueType second = mSecond->run(rootScope, 0, stack);
 				switch (mType) {
-				case Plus:
+				case Add:
 					return first + second;
+				case Subtract:
+					return first - second;
+				case Multiply:
+					return first * second;
 				case Divide:
 					return first / second;
 				default:

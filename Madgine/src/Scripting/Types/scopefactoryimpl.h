@@ -16,6 +16,9 @@ namespace Engine {
 			};
 
 		protected:
+			virtual std::string getIdentifier() override {
+				return typeid(T).name();
+			}
 
 			class Factory : public ScopeFactory {
 			public:

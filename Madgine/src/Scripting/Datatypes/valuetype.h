@@ -50,6 +50,9 @@ public:
 	void operator/=(const ValueType &);
 	ValueType operator/(const ValueType &) const;
 
+	void operator*=(const ValueType &);
+	ValueType operator*(const ValueType &) const;
+
 	const Ogre::Vector2 &asVector2() const;
 	const Ogre::Vector2 &asVector2(const Ogre::Vector2 &v);
     const Ogre::Vector3 &asVector3() const;
@@ -78,6 +81,8 @@ public:
     bool isNull() const;
 
     std::string toString() const;
+
+	std::string getTypeString() const;
 
 private:
 	template <class T, class R>

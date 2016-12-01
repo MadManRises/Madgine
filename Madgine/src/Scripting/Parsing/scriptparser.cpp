@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "scriptparser.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting/Parsing/parseexception.h"
@@ -300,11 +300,6 @@ void ScriptParser::parseMethod(const EntityNodePtr &entity)
 {
     std::string name = consume(NameToken);
 
-	Ogre::NameValuePairList param;
-	param["Type"] = "Method";
-
-	std::string resName = (entity.isNull() ? name : entity->getName() + "::" + name);
-
 	MethodNodePtr node;
 
 	bool created = false;
@@ -323,6 +318,12 @@ void ScriptParser::parseMethod(const EntityNodePtr &entity)
 		
     }
 	if (node.isNull()) {
+
+		Ogre::NameValuePairList param;
+		param["Type"] = "Method";
+
+		std::string resName = (entity.isNull() ? name : entity->getName() + "::" + name);
+
 		node = create(resName, mGroup, false, 0, &param);
 		created = true;
 		if (!entity.isNull()) {

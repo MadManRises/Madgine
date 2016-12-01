@@ -8,6 +8,7 @@ namespace Engine {
 		class OISInputHandler : public Ogre::GeneralAllocatedObject, public OIS::KeyListener, public OIS::MouseListener, public Ogre::WindowEventListener, public InputHandler {
 		public:
 			OISInputHandler(GUI::GUISystem *gui, Ogre::RenderWindow *window);
+			virtual ~OISInputHandler();
 
 		private:
 			GUI::MouseButton::MouseButton convertMouseButton(OIS::MouseButtonID id);
@@ -35,6 +36,8 @@ namespace Engine {
 			OIS::InputManager          *mInputManager;
 			OIS::Mouse                 *mMouse;
 			OIS::Keyboard              *mKeyboard;
+
+			Ogre::RenderWindow *mWindow;
 		};
 	}
 }

@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "methodnode.h"
 #include "Scripting/Datatypes/valuetype.h"
 #include "Scripting/Statements/statement.h"

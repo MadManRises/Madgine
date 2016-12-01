@@ -85,12 +85,30 @@ public:
 	 */
 	virtual void callSafe(std::function<void()> f);
 
-	virtual void setWindowProperties(bool fullscreen, size_t width, size_t height);
+	/**
+	 * Sets the properties of the Renderwindow. Might have unexpected effects, when used as embedded window.
+	 *
+	 * @param fullscreen flag indicating, if the window should be shown in fullscreen
+	 * @param width the preferred width for the Renderwindow
+	 * @param height the preferred height of the Renderwindow
+	 */
+	virtual void setWindowProperties(bool fullscreen, unsigned int width, unsigned int height);
 
+	/**
+	 * Returns the Renderwindow of the Application.
+	 *
+	 * @return the Ogre::RenderWindow, in which the application is rendered.
+	 */
 	virtual Ogre::RenderWindow *renderWindow();
 
+	/**
+	 * For embedded Applications. Resizes the Game-Components to the current size of the Renderwindow. Will be called automatically in a non-embedded environment.
+	 */
 	virtual void resizeWindow();
 
+	/**
+	 * Renders a single frame of the Application. Useful for rolling custom renderloops or updating screen during long calculations.(e.g. Loading Screen)
+	 */
 	virtual void renderFrame();
 
 protected:

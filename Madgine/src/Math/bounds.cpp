@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "bounds.h"
 
 namespace Engine {
@@ -71,6 +71,10 @@ std::array<Ogre::Vector2, 4> Bounds::corners() const
 Ogre::Vector2 Bounds::operator *(const Ogre::Vector2 &v)
 {
     return {mLeft + width() * v.x, mBottom + height() * v.y};
+}
+
+bool Bounds::isNull() const {
+	return width() <= 0 || height() <= 0;
 }
 
 } // namespace Math

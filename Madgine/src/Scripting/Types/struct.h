@@ -12,9 +12,6 @@ class Struct : public ScopeFactoryImpl<Struct, RefScope> {
 public:
 	using ScopeFactoryImpl::ScopeFactoryImpl;
 
-protected:
-    std::string getIdentifier();
-
 };
 
 } // namespace Scripting

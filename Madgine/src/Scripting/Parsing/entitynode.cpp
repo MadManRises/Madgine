@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "entitynode.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting/Parsing/methodnode.h"

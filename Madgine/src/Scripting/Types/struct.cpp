@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "struct.h"
 #include "Scripting/scriptingexception.h"
 
@@ -8,12 +8,6 @@ namespace Engine {
 namespace Scripting {
 
 Struct::Factory Struct::sFactory;
-
-
-std::string Struct::getIdentifier()
-{
-    return "Struct";
-}
 
 template <> Scope *Struct::Factory::create(Serialize::SerializeInStream &in)
 {

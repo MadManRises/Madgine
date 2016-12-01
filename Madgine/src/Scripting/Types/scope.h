@@ -2,6 +2,7 @@
 
 #include "Scripting/Datatypes/varset.h"
 #include "Scripting\Datatypes\argumentlist.h"
+#include "Util\UtilMethods.h"
 
 namespace Engine {
 namespace Scripting {
@@ -11,7 +12,8 @@ enum class ScopeClass{
     ListClass,
     StructClass,
     LevelClass,
-    StoryClass
+    StoryClass,
+	ArrayClass
 };
 
 template <class T>
@@ -42,6 +44,11 @@ struct ScopeClassType<Scene> {
 	static constexpr ScopeClass type = ScopeClass::LevelClass;
 };
 
+template <>
+struct ScopeClassType<Array> {
+	static constexpr ScopeClass type = ScopeClass::ArrayClass;
+};
+
 
 
 
@@ -66,7 +73,7 @@ public:
 	
 	void applyScopeMap(const std::map<InvScopePtr, Scope *> &map);
 	void collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &ignoreMap = {});
-	virtual void collectNamedValues(std::map<std::string, ValueType*> &values);
+	//virtual void collectNamedValues(std::map<std::string, ValueType*> &values);
 
 	virtual void storeCreationData(Serialize::SerializeOutStream &of);
 
@@ -121,7 +128,8 @@ private:
 
 template <class T>
 T *scope_cast(Scope *s) {
-	if (s->getClassType() != ScopeClassType<T>::type) return 0;
+	if (s->getClassType() != ScopeClassType<T>::type)
+		MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::unexpectedScopeType(s->getIdentifier(), typeid(T).name())));
 	return (T*)s;
 }
 

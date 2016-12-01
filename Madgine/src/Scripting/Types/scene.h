@@ -12,9 +12,6 @@ public:
 
 	virtual void clear() override;
 
-protected:
-    std::string getIdentifier();
-
 };
 
 } // namespace Scripting

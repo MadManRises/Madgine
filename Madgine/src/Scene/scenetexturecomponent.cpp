@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "scenetexturecomponent.h"
 
@@ -53,8 +53,8 @@ namespace Scene {
 		const Engine::Math::Bounds &rasterizedBounds = sceneMgr->getRasterizedSceneBounds();
 
 		mTexture->freeInternalResources();
-		mTexture->setWidth(rasterizedBounds.width() + 1);
-		mTexture->setHeight(rasterizedBounds.height() + 1);
+		mTexture->setWidth((size_t)rasterizedBounds.width() + 1);
+		mTexture->setHeight((size_t)rasterizedBounds.height() + 1);
 		mTexture->createInternalResources();
 
 		mTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD);

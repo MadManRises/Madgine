@@ -6,26 +6,27 @@
 namespace Engine {
 namespace Scripting {
 
-class MADGINE_EXPORT List : public ScopeImpl<List, RefScope>
+class MADGINE_EXPORT Array : public ScopeImpl<Array, RefScope>
 {
 public:
-    List();
+    Array(size_t size);
 
     bool contains(const ValueType &v);
-    const ValueType &add(const ValueType &v);
-    bool remove(const ValueType &v);
     ValueType at(int i);
     void setAt(int i, const ValueType &v);
-	bool empty();
-    size_t size();
+    size_t size() const;
     int index(const ValueType &v);
 
-    const std::list<ValueType> &data() const;
+    const ValueType *data() const;
 
-	std::list<ValueType>::const_iterator begin() const;
-	std::list<ValueType>::const_iterator end() const;
+	const ValueType *begin() const;
+	const ValueType *end() const;
 
     //virtual void collectNamedValues(std::map<std::string, ValueType*> &values) override;
+
+	virtual void storeCreationData(Serialize::SerializeOutStream &of) override;
+
+	static std::string getClassIdentifier();
 
 protected:
 
@@ -35,7 +36,8 @@ protected:
     virtual void save(Serialize::SerializeOutStream &of) const override;
 
 private:
-    std::list<ValueType> mItems;
+    ValueType *mItems;
+	size_t mSize;
 
 };
 

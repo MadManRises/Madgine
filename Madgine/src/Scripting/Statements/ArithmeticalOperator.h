@@ -15,7 +15,9 @@ namespace Engine {
 
 			private:
 				enum {
-					Plus,
+					Add,
+					Subtract,
+					Multiply,
 					Divide
 				} mType;
 				Ogre::unique_ptr<const Statement> mFirst, mSecond;

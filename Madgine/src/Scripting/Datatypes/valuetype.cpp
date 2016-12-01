@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "valuetype.h"
 #include "Scripting/scriptingexception.h"
 #include "Database\exceptionmessages.h"
@@ -266,7 +266,7 @@ void ValueType::operator+=(const ValueType &other)
 		}        
         break;
     }
-    throw 0;
+    MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other.getTypeString())));
 }
 
 ValueType ValueType::operator+(const ValueType &other) const
@@ -290,7 +290,7 @@ void ValueType::operator-=(const ValueType &other)
 		}
 		break;
 	}
-	throw 0;
+	MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString())));
 }
 
 ValueType ValueType::operator-(const ValueType &other) const
@@ -313,14 +313,58 @@ void ValueType::operator/=(const ValueType &other)
 			return;
 		}
 		break;
+	case Type::FloatValue:
+		switch (other.mType) {
+		case Type::IntValue:
+			mUnion.mFloat /= other.mUnion.mInt;
+			return;
+		case Type::FloatValue:
+			mUnion.mFloat /= other.mUnion.mFloat;
+			return;
+		}
+		break;
 	}
-	throw 0;
+	MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.getTypeString())));
 }
 
 ValueType ValueType::operator/(const ValueType &other) const
 {
 	ValueType result = *this;
 	result /= other;
+	return result;
+}
+
+void ValueType::operator*=(const ValueType &other)
+{
+	switch (mType) {
+	case Type::IntValue:
+		switch (other.mType) {
+		case Type::IntValue:
+			mUnion.mInt *= other.mUnion.mInt;
+			return;
+		case Type::FloatValue:
+			(*this) = mUnion.mInt * other.mUnion.mFloat;
+			return;
+		}
+		break;
+	case Type::FloatValue:
+		switch (other.mType) {
+		case Type::IntValue:
+			mUnion.mFloat *= other.mUnion.mInt;
+			return;
+		case Type::FloatValue:
+			mUnion.mFloat *= other.mUnion.mFloat;
+			return;
+		}
+		break;
+	}
+	MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.getTypeString())));
+}
+
+ValueType ValueType::operator*(const ValueType &other) const
+{
+	ValueType result = *this;
+	result *= other;
 	return result;
 }
 
@@ -456,6 +500,7 @@ bool ValueType::isUInt() const
 
 size_t ValueType::asUInt() const
 {
+	if (mType == Type::IntValue && mUnion.mInt >= 0) return mUnion.mInt;
 	if (mType != Type::UIntValue) MADGINE_THROW(ScriptingException(Database::Exceptions::notValueType("Unsigned Int")));
 	return mUnion.mUInt;
 }
@@ -544,6 +589,33 @@ std::string ValueType::toString() const
     }
 
 
+}
+
+std::string ValueType::getTypeString() const
+{
+	switch (mType) {
+	case Type::BoolValue:
+		return "Bool";
+	case Type::FloatValue:
+		return "Float";
+	case Type::IntValue:
+		return "Integer";
+	case Type::InvScopeValue:
+		return "Invalid Scope";
+	case Type::NullValue:
+		return "Null-Type";
+	case Type::ScopeValue:
+		return "Scope";
+	case Type::StringValue:
+		return "String";
+	case Type::UIntValue:
+		return "Unsigned Integer";
+	case Type::Vector2Value:
+		return "Vector2";
+	case Type::Vector3Value:
+		return "Vector3";
+	}
+	throw 0;
 }
 
 bool ValueType::setType(ValueType::Type t)

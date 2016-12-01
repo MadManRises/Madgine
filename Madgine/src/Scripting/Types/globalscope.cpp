@@ -1,8 +1,9 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "globalscope.h"
 #include "Scripting/Parsing/scriptparser.h"
 #include "struct.h"
 #include "list.h"
+#include "array.h"
 #include "globalapi.h"
 #include "Database\exceptionmessages.h"
 
@@ -11,7 +12,7 @@ namespace Scripting {
 
 //Story::Factory Story::sFactory;
 
-	API_IMPL(GlobalScope, &log, &createStruct, &createStruct_, &createList, &debug, &level, &getData, &call);
+	API_IMPL(GlobalScope, &log, &createStruct, &createStruct_, &createList, &createArray, &debug, &level, &getData, &call);
 
 
 	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
@@ -87,17 +88,16 @@ List *GlobalScope::createList()
     return OGRE_NEW List();
 }
 
+Array * GlobalScope::createArray(size_t size)
+{
+	return OGRE_NEW Array(size);
+}
+
 const ValueType &GlobalScope::debug(const ValueType &v)
 {
     return v;
 }
 
-
-
-std::string GlobalScope::getIdentifier()
-{
-    return "Global Scope";
-}
 
 void GlobalScope::clear()
 {

@@ -22,6 +22,7 @@ namespace Engine {
 		class ValueType;
 		class VarSet;
 		class List;
+		class Array;
 		class Struct;
 
 		class GlobalScope;

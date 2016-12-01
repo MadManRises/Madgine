@@ -4,7 +4,7 @@
 #pragma warning(push, 0)
 #endif
 
-#ifdef Madgine_EXPORTS
+#if defined(Madgine_EXPORTS)
 #define MADGINE_EXPORT __declspec(dllexport)
 #else
 #define MADGINE_EXPORT __declspec(dllimport)

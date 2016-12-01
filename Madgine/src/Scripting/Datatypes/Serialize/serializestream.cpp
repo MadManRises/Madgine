@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "serializestream.h"
 #include "serializeexception.h"
 

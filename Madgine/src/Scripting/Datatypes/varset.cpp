@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "varset.h"
 #include "Scripting/scriptingexception.h"
 #include <fstream>

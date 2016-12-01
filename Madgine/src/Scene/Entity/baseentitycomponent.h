@@ -23,6 +23,10 @@ public:
 
     Ogre::Vector2 getPosition2D();
     const Ogre::Vector3 &getPosition();
+	Ogre::Vector2 getCenter2D();
+	Ogre::Vector3 getCenter();
+	const Ogre::Quaternion &getOrientation();
+	const Ogre::Vector3 &getScale();
 
     Entity &getEntity() const;
 

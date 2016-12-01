@@ -42,8 +42,10 @@ public:
 	Ogre::Vector3 getCenter() const;
 	Ogre::Vector2 getPosition2D() const;
 	Ogre::Vector2 getCenter2D() const;
+	const Ogre::Quaternion &getOrientation() const;
+	const Ogre::Vector3 &getScale() const;
 
-	std::string getIdentifier() override;
+	virtual std::string getIdentifier() override;
 	std::string getName();
 
 	void setObjectVisible(bool b);

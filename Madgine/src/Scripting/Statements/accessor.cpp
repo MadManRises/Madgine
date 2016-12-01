@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "accessor.h"
 #include "Scripting/Types/scope.h"
 #include "Scripting/Datatypes/varset.h"

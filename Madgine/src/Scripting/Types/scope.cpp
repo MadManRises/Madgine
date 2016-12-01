@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "scope.h"
 #include "Scripting/Datatypes/Serialize/serializestream.h"
 #include "Scripting/scriptingexception.h"
@@ -174,13 +174,13 @@ void Scope::collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &
     return;
 }
 
-void Scope::collectNamedValues(std::map<std::string, ValueType *> &values)
+/*void Scope::collectNamedValues(std::map<std::string, ValueType *> &values)
 {
     for (std::pair<const std::string, ValueType> &p : mVariables){
         values[p.first] = &p.second;
     }
 
-}
+}*/
 
 void Scope::clear()
 {

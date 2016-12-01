@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "entity.h"
 
@@ -160,6 +160,16 @@ Ogre::Vector2 Entity::getCenter2D() const
 	return{ c.x, c.z };
 }
 
+const Ogre::Quaternion & Entity::getOrientation() const
+{
+	return mNode->getOrientation();
+}
+
+const Ogre::Vector3 & Entity::getScale() const
+{
+	return mNode->getScale();
+}
+
 void Entity::positionChanged(const Ogre::Vector3 &dist)
 {
     for (std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &p : mComponents){
@@ -280,8 +290,6 @@ void Entity::load(Scripting::Serialize::SerializeInStream &ifs)
 
 	ifs >> v;
 	mNode->setScale(v);
-
-
 
     std::string componentName;
     while(ifs.loopRead(componentName)){

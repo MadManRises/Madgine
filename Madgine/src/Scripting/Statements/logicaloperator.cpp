@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "logicaloperator.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting/Datatypes/valuetype.h"
@@ -21,7 +21,7 @@ LogicalOperator::LogicalOperator(int line, const std::string &op, Ogre::unique_p
     } else if (op == "||") {
         mType = Or;
     } else {
-        throw ScriptingException(Database::Exceptions::unknownBoolOperator(op));
+        throw ScriptingException(Database::Exceptions::unknownLogicalOperator(op));
     }
 }
 

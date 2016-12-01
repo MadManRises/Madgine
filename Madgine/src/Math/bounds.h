@@ -29,6 +29,8 @@ public:
 
 	Ogre::Vector2 operator *(const Ogre::Vector2 &v);
 
+	bool isNull() const;
+
 private:
     float mLeft, mBottom, mRight, mTop;
 };

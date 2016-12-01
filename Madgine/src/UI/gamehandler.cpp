@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "gamehandler.h"
 #include "ui\UIManager.h"
 #include "gui\GUISystem.h"

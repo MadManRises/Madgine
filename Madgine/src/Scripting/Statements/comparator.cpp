@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "comparator.h"
 #include "Scripting/Parsing/parseexception.h"
 #include "Scripting/Datatypes/valuetype.h"

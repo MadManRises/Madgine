@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "methodcall.h"
 #include <sstream>
 #include "Scripting/Types/scope.h"

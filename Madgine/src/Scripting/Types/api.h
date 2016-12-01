@@ -10,7 +10,7 @@
 namespace Engine {
 	namespace Scripting {
 
-		class BaseAPI {
+		class MADGINE_EXPORT BaseAPI {
 		public:
 			virtual ~BaseAPI() = default;
 

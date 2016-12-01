@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "baseentitycomponent.h"
 #include "entity.h"
 
@@ -44,6 +44,26 @@ Ogre::Vector2 BaseEntityComponent::getPosition2D()
 const Ogre::Vector3 &BaseEntityComponent::getPosition()
 {
     return mEntity.getPosition();
+}
+
+Ogre::Vector2 BaseEntityComponent::getCenter2D()
+{
+	return mEntity.getCenter2D();
+}
+
+Ogre::Vector3 BaseEntityComponent::getCenter()
+{
+	return mEntity.getCenter();
+}
+
+const Ogre::Quaternion & BaseEntityComponent::getOrientation()
+{
+	return mEntity.getOrientation();
+}
+
+const Ogre::Vector3 & BaseEntityComponent::getScale()
+{
+	return mEntity.getScale();
 }
 
 }

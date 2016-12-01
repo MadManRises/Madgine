@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 
 #include "MyGUICheckbox.h"
 #include "MyGUIWindow.h"

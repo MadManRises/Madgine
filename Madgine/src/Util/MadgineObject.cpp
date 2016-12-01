@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libinclude.h"
+#include "madginelib.h"
 #include "MadgineObject.h"
 #include "MadgineObjectCollector.h"
 

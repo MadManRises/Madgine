@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "OISInputHandler.h"
 #include "GUI\GUISystem.h"
 #include "GUI\GUIEvents.h"
@@ -7,7 +7,8 @@
 namespace Engine {
 	namespace Input {
 		OISInputHandler::OISInputHandler(GUI::GUISystem * gui, Ogre::RenderWindow *window) :
-			mGUI(gui)
+			mGUI(gui),
+			mWindow(window)
 		{
 			LOG("*** Initializing OIS ***");
 			OIS::ParamList pl;
@@ -36,6 +37,11 @@ namespace Engine {
 			//Set initial mouse clipping size
 			windowResized(window);
 
+		}
+
+		OISInputHandler::~OISInputHandler()
+		{
+			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
 		}
 
 		GUI::MouseButton::MouseButton OISInputHandler::convertMouseButton(OIS::MouseButtonID id)

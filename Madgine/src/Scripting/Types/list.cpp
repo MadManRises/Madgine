@@ -1,4 +1,4 @@
-#include "libinclude.h"
+#include "madginelib.h"
 #include "list.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting/Datatypes/Serialize/serializestream.h"
@@ -33,7 +33,7 @@ bool List::remove(const ValueType & v)
 	auto it = std::find(mItems.begin(), mItems.end(), v);
 	if (it == mItems.end())
 		return false;
-	it->clear();
+	mItems.erase(it);
 	return true;
 }
 
@@ -113,7 +113,7 @@ std::list<ValueType>::const_iterator List::end() const
 	return mItems.end();
 }
 
-void List::collectNamedValues(std::map<std::string, ValueType *> &values)
+/*void List::collectNamedValues(std::map<std::string, ValueType *> &values)
 {
     Scope::collectNamedValues(values);
 
@@ -121,13 +121,8 @@ void List::collectNamedValues(std::map<std::string, ValueType *> &values)
     for (ValueType &v : mItems){
         values[std::to_string(i++)] = &v;
     }
-}
+}*/
 
-
-std::string List::getIdentifier()
-{
-    return "List";
-}
 
 void List::collectValueRefs(std::list<ValueType *> &values)
 {
