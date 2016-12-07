@@ -102,10 +102,7 @@ protected:
 	bool hasScriptMethod(const std::string &name) override;
 
     const Scripting::Parsing::MethodNodePtr &getMethod(const std::string &name) override;
-
-    
 	
-
 private:
 
 	template <class T>

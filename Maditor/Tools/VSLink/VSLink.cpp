@@ -70,7 +70,7 @@ void VSLink::createInstance()
 void VSLink::sendPID(DWORD pid)
 {
 	if (pid)
-		send(VSCommands::PIDAnswer, "", pid);
+		sendMsg({ VSCommands::PIDAnswer, "", pid }, "VSInstance");
 }
 
 void VSLink::onProcessStarted(DWORD pid)

@@ -60,18 +60,18 @@ def runCustom(report, export, context):
     def collectEntities():
         statics = []
         lights = []
-        es = {}
+        entities = {}
         id = 1
         for ob in context.scene.objects:
             if ob.type == "LAMP":
                 lights.append(ob)
             elif "Behaviour" in ob:
                 id += 1
-                es[id] = ob
+                entities[id] = ob
             elif ob.data:
                 statics.append(ob)
 
-        return (es, statics, lights)
+        return (entities, statics, lights)
 
     def getMesh(ob):
         if (ob.data):
@@ -184,6 +184,16 @@ def runCustom(report, export, context):
             writeString(getMesh(ob))
             writeString(ob["Behaviour"])
 
+            v = ob.location
+            writeVector([v[0], v[2], -v[1]])
+            v = mathutils.Quaternion(ob.rotation_euler)
+            writeFloat(v[0])
+            writeVector([v[1], v[3], v[2]])
+
+            v = ob.scale
+            writeVector([v[0], v[2], -v[1]])
+
+
             #prototype
             writeString("")
             #varset
@@ -195,17 +205,6 @@ def runCustom(report, export, context):
 
             #Components
             writeNull()
-
-            v = ob.location
-            writeVector([v[0], v[2], -v[1]])
-            v = mathutils.Quaternion(ob.rotation_euler)
-            writeFloat(v[0])
-            writeVector([v[1], v[3], v[2]])
-
-            v = ob.scale
-            writeVector([v[0], v[2], -v[1]])
-
-
 
             writeId(key)
 

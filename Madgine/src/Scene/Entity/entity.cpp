@@ -260,30 +260,22 @@ void Entity::remove()
 
 void Entity::writeState(Serialize::SerializeOutStream &of) const
 {
-    Scope::writeState(of);
-
-    of << getPosition();
+	of << getPosition();
 
 	of << mNode->getOrientation();
 
 	of << mNode->getScale();
+	
+	Scope::writeState(of);
 
-    /*for (const std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &comp : mComponents){
-        of << comp.first;
-		comp.second->writeState(of);
-    }
-
-    of << ValueType();*/
 }
 
 void Entity::readState(Serialize::SerializeInStream &ifs)
 {
-    Scope::readState(ifs);
-
-    Ogre::Vector3 v;
-    ifs >> v;
-    setPosition(v);
-    mLastPosition = v;
+	Ogre::Vector3 v;
+	ifs >> v;
+	setPosition(v);
+	mLastPosition = v;
 
 	Ogre::Quaternion q;
 	ifs >> q;
@@ -292,11 +284,7 @@ void Entity::readState(Serialize::SerializeInStream &ifs)
 	ifs >> v;
 	mNode->setScale(v);
 
-    /*std::string componentName;
-    while(ifs.loopRead(componentName)){
-        addComponent(componentName)->readState(ifs);
-    }*/
-
+    Scope::readState(ifs);
 }
 
 

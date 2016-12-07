@@ -58,7 +58,7 @@ namespace Engine {
 
 		template <class R, class T, class... Args, size_t... S, class Tuple = std::tuple<Args...>>
 		static R unpack(T *t, R(T::*f)(_Ty..., Args...), _Ty&&... _ty, Tuple&& args, std::index_sequence<S...>) {
-			return (t->*f)(std::forward<_Ty>(_ty)..., std::forward<Args>(std::get<S>(std::forward<Tuple>(args)))...);
+			return (t->*f)(std::forward<_Ty>(_ty)..., std::get<S>(std::forward<Tuple>(args))...);
 		}
 		
 	};
