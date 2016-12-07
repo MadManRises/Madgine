@@ -15,18 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Desktop\GitHub\Madgine\Maditor\Tools\ProcessTalker.cpp">
+    <ClCompile Include="ProcessTalkerImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessTalkerImpl.cpp">
+    <ClCompile Include="impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Desktop\GitHub\Madgine\Maditor\Tools\ProcessTalker.h">
+    <ClInclude Include="..\..\..\..\Common\ProcessTalker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ProjectTalker\ProcessTalkerImpl.h">
+    <ClInclude Include="ProcessTalkerImpl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\VSMsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

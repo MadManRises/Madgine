@@ -9,6 +9,8 @@
 
 #include "Shared.h"
 
+#include "Network\networkmanager.h"
+
 		ApplicationLauncher::ApplicationLauncher() :
 			ProcessTalker("Maditor_Launcher", "Launcher"),
 			mRunning(true),
@@ -38,6 +40,8 @@
 			mSettings.mWindowHeight = mAppInfo.mWindowHeight;
 			mSettings.mRootDir = mAppInfo.mMediaDir.c_str();
 			mSettings.mPluginsFile = mSettings.mRootDir + "plugins.cfg";
+			mSettings.mUseNetwork = true;
+
 			Ogre::NameValuePairList &parameters = mSettings.mWindowParameters;
 
 			/*
@@ -79,6 +83,7 @@
 			mApplication->init();
 			sendMsg(APP_INITIALIZED);
 
+			Engine::Network::NetworkManager::getSingleton().startServer(1000);
 
 			Ogre::Root::getSingleton().addFrameListener(this);
 

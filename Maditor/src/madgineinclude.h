@@ -24,6 +24,8 @@
 
 #include "UI/UIManager.h"
 
+#include "Network\networkbuffer.h"
+
 
 
 

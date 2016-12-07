@@ -7,6 +7,8 @@
 #include "PerformanceWatcher.h"
 #include "ObjectsWatcher.h"
 
+#include "Model\Network\MadgineNetworkClient.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
@@ -35,6 +37,7 @@ namespace Maditor {
 
 				void init();
 
+				Network::MadgineNetworkClient *client();
 
 			signals:
 				void logCreated(OgreLogWatcher *log);
@@ -57,6 +60,7 @@ namespace Maditor {
 
 				OgreLogWatcher *mMadgineLog;
 
+				Network::MadgineNetworkClient mClient;
 
 			};
 

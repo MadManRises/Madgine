@@ -19,6 +19,8 @@
 #include "Model\Editors\EditorManager.h"
 #include "Model\Editors\ScriptEditor.h"
 
+#include "editorsettingswidget.h"
+#include "Dialogs\settingsdialog.h"
 
 namespace Maditor {
 	namespace View {
@@ -26,13 +28,16 @@ namespace Maditor {
 		MainWindow::MainWindow(Model::Editor *editor, QWidget *parent) :
 			QMainWindow(parent),
 			ui(new Ui::MainWindow),
-			mEditor(editor)
+			mEditor(editor),
+			mEditorSettingsWidget(new EditorSettingsWidget(editor))
 		{
 			ui->setupUi(this);
 
 			mRecentProjectInitialActionCount = ui->menuRecentProjects->actions().count();
 			
 			updateRecentProjects(mEditor->recentProjects());
+
+			mDialogManager.settingsDialog()->addSettingsTab(mEditorSettingsWidget, "Projects");
 			
 
 			mTarget = new OgreWindow(editor->application());
@@ -49,6 +54,7 @@ namespace Maditor {
 			ui->PerformanceWidget->setModel(watcher->performanceWatcher());
 			ui->OgreSceneWidget->setModel(watcher->ogreSceneWatcher());
 			ui->ObjectsWidget->setModel(watcher->objectsWatcher());
+			ui->NetworkWidget->setModel(watcher->client());
 
 			setupConnections();
 
@@ -57,28 +63,34 @@ namespace Maditor {
 
 		MainWindow::~MainWindow()
 		{
+			delete mEditorSettingsWidget;
 			delete ui;
 		}
 
 		void MainWindow::startup()
 		{
 			QSettings &settings = mEditor->settings();
-
+			settings.beginGroup("Window");
 			restoreGeometry(settings.value("geometry").toByteArray());
 			restoreState(settings.value("state").toByteArray(), 0);
-
-			
+			settings.endGroup();			
 
 			mEditor->onStartup();
 		}
 
+		Dialogs::DialogManager * MainWindow::dialogs()
+		{
+			return &mDialogManager;
+		}		
 
 		void MainWindow::closeEvent(QCloseEvent *event)
 		{
 
 			QSettings &settings = mEditor->settings();
+			settings.beginGroup("Window");
 			settings.setValue("geometry", saveGeometry());
 			settings.setValue("state", saveState(0));
+			settings.endGroup();
 
 			event->accept();
 		}
@@ -112,7 +124,7 @@ namespace Maditor {
 			//Dialogs-related
 			connect(ui->actionNewProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);
 			connect(ui->actionLoadProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showLoadProjectDialog);
-			connect(this, &MainWindow::settingsRequest, &mDialogManager, &Dialogs::DialogManager::showSettingsDialog);
+			connect(ui->actionSettings, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showSettingsDialog);
 
 			connect(&mDialogManager, &Dialogs::DialogManager::newProjectDialogAccepted, mEditor, &Model::Editor::newProject);
 			connect(&mDialogManager, &Dialogs::DialogManager::loadProjectDialogAccepted, mEditor, &Model::Editor::loadProject);
@@ -134,11 +146,6 @@ namespace Maditor {
 								
 		}
 
-
-		void MainWindow::openSettings()
-		{
-			emit settingsRequest(mEditor);
-		}
 
 		void MainWindow::initApp()
 		{

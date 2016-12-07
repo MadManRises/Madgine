@@ -127,7 +127,7 @@ namespace Maditor {
 			reloadOrder.reverse();
 
 			for (const Module *m : reloadOrder) {
-				ModuleInstance &instance = mInstances.find(m)->second;
+				ModuleInstance &instance = mInstances.at(m);
 
 				loadModule(instance, false);
 			}
@@ -143,7 +143,7 @@ namespace Maditor {
 			module->fillReloadOrder(reloadOrder);
 
 			for (const Module *m : reloadOrder) {
-				ModuleInstance &instance = mInstances.find(m)->second;
+				ModuleInstance &instance = mInstances.at(m);
 
 				unloadModule(instance);
 			}
@@ -151,7 +151,7 @@ namespace Maditor {
 			reloadOrder.reverse();
 
 			for (const Module *m : reloadOrder) {
-				ModuleInstance &instance = mInstances.find(m)->second;
+				ModuleInstance &instance = mInstances.at(m);
 
 				loadModule(instance, true);
 			}

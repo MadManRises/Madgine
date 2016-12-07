@@ -26,6 +26,8 @@ namespace Maditor {
 
 			void clearRecentProjects();
 
+
+
 		private:
 			void openProject(std::unique_ptr<Project> &&project);
 
@@ -44,7 +46,6 @@ namespace Maditor {
 			Watcher::ApplicationWatcher *mApplicationWatcher;
 			ApplicationWrapper *mApplicationWrapper;
 			
-			Addons::AddonCollector *mAddonCollector;
 
 			std::unique_ptr<Project> mProject;
 

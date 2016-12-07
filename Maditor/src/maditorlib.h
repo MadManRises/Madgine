@@ -6,6 +6,8 @@
 #define MADITOR_EXPORT __declspec(dllimport)
 #endif
 
+typedef unsigned long DWORD;
+typedef void* HANDLE;
 
 #include "Model/editorforward.h"
 
@@ -43,6 +45,7 @@
 #include <QToolBar>
 #include <QCheckBox>
 #include <QFileSystemModel>
+#include <QTcpSocket>
 
 #include <mutex>
 #include <unordered_map>

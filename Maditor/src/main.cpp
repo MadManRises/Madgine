@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
 		Maditor::Model::Editor editor(&addons);
 
-		addons.setModel(&editor);
+		addons.load(&editor);
 		{
 			Maditor::View::MainWindow w(&editor);
 
@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
 
 			result = app.exec();
 		}
+		addons.unload();
 	}
 
 

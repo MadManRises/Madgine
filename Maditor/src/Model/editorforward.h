@@ -17,6 +17,10 @@ namespace Maditor {
 
 		class ProjectLog;
 
+		namespace Network {
+			class MadgineNetworkClient;
+		}
+
 		namespace Watcher {
 			class ApplicationWatcher;
 			

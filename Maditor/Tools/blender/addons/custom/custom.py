@@ -177,29 +177,25 @@ def runCustom(report, export, context):
 
         writeNull() #close sceneComponentList
 
-
-
         for key, ob in entities.items():
-            writeId(key)
-            writeEntityType()
+
+            #creation data
             writeString(ob.name)
             writeString(getMesh(ob))
             writeString(ob["Behaviour"])
-            getMesh(ob)
 
-        writeId(1) #levelId
-        writeLevelType()
-
-        writeNull()
-
-        for key, ob in entities.items():
-            writeId(key)
+            #prototype
             writeString("")
+            #varset
             for k in ob.keys():
                 if k not in ["Behaviour", "_RNA_UI", "cycles"]:
                     writeString(k)
                     writeValue(ob[k])
             writeNull()
+
+            #Components
+            writeNull()
+
             v = ob.location
             writeVector([v[0], v[2], -v[1]])
             v = mathutils.Quaternion(ob.rotation_euler)
@@ -209,10 +205,16 @@ def runCustom(report, export, context):
             v = ob.scale
             writeVector([v[0], v[2], -v[1]])
 
-            #Components
-            writeNull()
 
-        writeNull()
+
+            writeId(key)
+
+
+        writeNull() #close Entity-List
+
+
+
+
 
 
     report.messages.append("Done")

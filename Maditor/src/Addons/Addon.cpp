@@ -25,10 +25,6 @@ void Addon::addActions(View::MainWindow * window)
 {
 }
 
-void Addon::setModel(Model::Editor * editor)
-{
-}
-
 QString Addon::resourceGroupName()
 {
 	return QString();
@@ -46,6 +42,18 @@ QStringList Addon::supportedFileExtensions()
 
 AddonCollector::AddonCollector() {
 
+	
+}
+
+AddonCollector::~AddonCollector()
+{
+	for (Addon *addon : mAddons) {
+		delete addon;
+	}
+}
+
+void AddonCollector::load(Model::Editor * editor)
+{
 	QFile inputFile("addons.txt");
 	if (inputFile.open(QIODevice::ReadOnly))
 	{
@@ -56,11 +64,11 @@ AddonCollector::AddonCollector() {
 			HINSTANCE h = LoadLibrary(line.toStdString().c_str());
 			if (!h)
 				continue;
-			typedef Addon *(*Creator)();
+			typedef Addon *(*Creator)(Model::Editor*);
 			Creator creator = (Creator)GetProcAddress(h, "createAddon");
 			if (!creator)
 				continue;
-			Addon *addon = creator();
+			Addon *addon = creator(editor);
 
 			mAddons.push_back(addon);
 		}
@@ -71,11 +79,12 @@ AddonCollector::AddonCollector() {
 
 }
 
-AddonCollector::~AddonCollector()
+void AddonCollector::unload()
 {
 	for (Addon *addon : mAddons) {
 		delete addon;
 	}
+	mAddons.clear();
 }
 
 void AddonCollector::timerEvent(QTimerEvent * e)
@@ -99,13 +108,6 @@ void AddonCollector::setWindow(View::MainWindow * window)
 {
 	for (Addon *addon : mAddons) {
 		addon->addActions(window);
-	}
-}
-
-void AddonCollector::setModel(Model::Editor * editor)
-{
-	for (Addon *addon : mAddons) {
-		addon->setModel(editor);
 	}
 }
 

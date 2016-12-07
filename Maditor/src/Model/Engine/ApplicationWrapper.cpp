@@ -22,15 +22,12 @@ namespace Maditor {
 			ProcessTalker("Maditor_Launcher", "Maditor"),
 			mWatcher(watcher),
 			mLoader(loader),
-			mAppInfo(SharedMemory::getSingleton().mAppInfo)
+			mAppInfo(SharedMemory::getSingleton().mAppInfo),
+			mPID(0)
 		{
-
-			/*std::stringstream ss;
-			ss << mWorker.get_id();
-			qDebug() << QString::fromStdString(ss.str());*/
-
 			startTimer(500);
 		}
+
 		ApplicationWrapper::~ApplicationWrapper()
 		{
 			shutdown();
@@ -66,9 +63,14 @@ namespace Maditor {
 				&pi           // Pointer to PROCESS_INFORMATION structure
 			);
 
-			CloseHandle(pi.hProcess);
+			mPID = pi.dwProcessId;
+			mHandle = pi.hProcess;
 			CloseHandle(pi.hThread);
 			
+			for (const auto& f : mProcessListener) {
+				f(mPID);
+			}
+
 			mLoader->setup(project->path() + "debug/bin/", project->moduleList());
 
 		}
@@ -127,17 +129,45 @@ namespace Maditor {
 				mWatcher->notifyApplicationShutdown();
 				break;
 			case APP_AFTER_SHUTDOWN:
-				mWatcher->afterApplicationShutdown();
-				mLoader->clear();
+				cleanup();
 				break;
 			}
 		}
 
 		void ApplicationWrapper::timerEvent(QTimerEvent * te)
 		{
-			update();
-			mWatcher->update();
-			mLoader->update();
+			if (mPID) {
+				DWORD exitCode = 0;
+				if (GetExitCodeProcess(mHandle, &exitCode) == FALSE)
+					throw 0;
+				if (exitCode != STILL_ACTIVE) {
+					cleanup();
+					return;
+				}
+				update();
+				mWatcher->update();
+				mLoader->update();
+			}
+		}
+
+		DWORD ApplicationWrapper::pid()
+		{
+			return mPID;
+		}
+
+		void ApplicationWrapper::addProcessListener(std::function<void(DWORD)> f)
+		{
+			mProcessListener.push_back(f);
+		}
+
+		void ApplicationWrapper::cleanup()
+		{
+			mWatcher->afterApplicationShutdown();
+			mLoader->clear();
+			if (mPID) {
+				mPID = 0;
+				CloseHandle(mHandle);
+			}
 		}
 
 	}

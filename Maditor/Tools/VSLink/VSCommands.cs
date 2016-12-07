@@ -1,6 +1,9 @@
-#if !__cplusplus    
+#if __cplusplus    
+#pragma once
+#endif
 namespace VSCommands
 {
+#if !__cplusplus    
     public
 #endif
 
@@ -8,6 +11,5 @@ namespace VSCommands
 enum VSCommand
     { OpenSolution, PIDRequest, PIDAnswer, OpenSourceFile, VSStarted };
 
-#if !__cplusplus
+
 }
-#endif

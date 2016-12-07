@@ -119,6 +119,11 @@ namespace Maditor {
 				mOgreSceneWatcher = new OgreSceneWatcher;
 			}
 
+			Network::MadgineNetworkClient * ApplicationWatcher::client()
+			{
+				return &mClient;
+			}
+
 			void ApplicationWatcher::update() {
 				mMadgineLog->update();
 			}

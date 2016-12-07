@@ -12,7 +12,6 @@ namespace Maditor {
 
 			virtual void update();
 			virtual void addActions(View::MainWindow *window);
-			virtual void setModel(Model::Editor *editor);
 
 			virtual QString resourceGroupName();
 			virtual void openFile(const QString &path, int lineNr = -1);
@@ -25,13 +24,15 @@ namespace Maditor {
 			AddonCollector();
 			virtual ~AddonCollector();
 
+			void load(Model::Editor *editor);
+			void unload();
+
 			virtual void timerEvent(QTimerEvent *e) override;
 
 			std::list<Addon*>::const_iterator begin();
 			std::list<Addon*>::const_iterator end();
 
 			void setWindow(View::MainWindow *window);
-			void setModel(Model::Editor *editor);
 
 		private:
 			std::list<Addon*> mAddons;

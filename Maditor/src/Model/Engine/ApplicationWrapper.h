@@ -6,11 +6,12 @@
 
 #include "Common\ApplicationInfo.h"
 
+
 namespace Maditor {
 	namespace Model {
 
 
-		class ApplicationWrapper : public QObject, public ProcessTalker<ApplicationMsg> {
+		class MADITOR_EXPORT ApplicationWrapper : public QObject, public ProcessTalker<ApplicationMsg> {
 			Q_OBJECT
 
 		public:
@@ -35,16 +36,27 @@ namespace Maditor {
 			
 			virtual void timerEvent(QTimerEvent *te) override;
 
+			DWORD pid();
+
+			void addProcessListener(std::function<void(DWORD)> f);
+
+		private:
+			void cleanup();
+
 		private:
 
 			ModuleLoader *mLoader;
 
+			DWORD mPID;
+			HANDLE mHandle;
 
 			Watcher::InputWrapper mInput;
 
 			Watcher::ApplicationWatcher *mWatcher;
 
 			ApplicationInfo &mAppInfo;
+
+			std::list<std::function<void(DWORD)>> mProcessListener;
 
 		};
 	}

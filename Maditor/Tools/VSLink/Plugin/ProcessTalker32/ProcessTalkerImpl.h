@@ -1,20 +1,24 @@
 #pragma once
 
-#include "ProcessTalker.h"
+
+#include "..\..\VSMsg.h"
 
 namespace ProjectTalker {
 
-	typedef void(__stdcall *MessageReceiver)(const Message &msg);
+	class pImpl;
 
-	class ProcessTalkerImpl : public ProcessTalker {
+	typedef void(__stdcall *MessageReceiver)(const VSMsg &msg);
+
+	class ProcessTalkerImpl {
 	public:
 		ProcessTalkerImpl(const std::string &processId, const std::string &name, MessageReceiver receiver);
+		virtual ~ProcessTalkerImpl();
 
-		// Inherited via ProcessTalker
-		virtual void receiveMessage(const Message &msg);
+		void run(bool *b);
+		bool sendMsg(const VSMsg &msg, const std::string &target);
 
 	private:
-		MessageReceiver mReceiver;
+		pImpl *impl;		
 	};
 
 

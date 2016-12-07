@@ -22,8 +22,14 @@ namespace Maditor {
 
 			DialogManager *DialogManager::sSingleton = 0;
 
-			DialogManager::DialogManager() {
+			DialogManager::DialogManager() :
+			mSettingsDialog(new SettingsDialog){
 				sSingleton = this;
+			}
+
+			DialogManager::~DialogManager()
+			{
+				delete mSettingsDialog;
 			}
 
 			bool DialogManager::confirmFileOverwrite(const QString &filePath, QMessageBox::StandardButton *result) {
@@ -50,6 +56,11 @@ namespace Maditor {
 			bool DialogManager::confirmFileOverwriteStatic(const QString & filePath, QMessageBox::StandardButton * result)
 			{
 				return sSingleton->confirmFileOverwrite(filePath, result);
+			}
+
+			SettingsDialog * DialogManager::settingsDialog()
+			{
+				return mSettingsDialog;
 			}
 
 			void DialogManager::onProjectOpened(Model::Project *project) {
@@ -157,10 +168,9 @@ namespace Maditor {
 				}
 			}
 
-			void DialogManager::showSettingsDialog(Model::Editor *editor)
+			void DialogManager::showSettingsDialog()
 			{
-				SettingsDialog dialog(editor);
-				dialog.exec();
+				mSettingsDialog->open();
 			}
 
 			void DialogManager::showDeleteClassDialog()

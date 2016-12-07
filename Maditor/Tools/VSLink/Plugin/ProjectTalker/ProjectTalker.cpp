@@ -22,9 +22,9 @@ namespace ProjectTalker {
 		this->!ProjectTalker();
 	}
 
-	bool ProjectTalker::send(int type, String ^ arg1, Int32 arg2, String ^ target) {
+	bool ProjectTalker::send(Int64 type, String ^ arg1, Int64 arg2, String ^ target) {
 		msclr::interop::marshal_context context;
-		return mNativeTalker->sendMsg({ type, context.marshal_as<std::string>(arg1), arg2 }, context.marshal_as<std::string>(target));
+		return mNativeTalker->sendMsg({ (VSCommands::VSCommand)type, context.marshal_as<std::string>(arg1), arg2 }, context.marshal_as<std::string>(target));
 	}
 
 	void ProjectTalker::run(BoolCarrier ^ b) {
@@ -32,9 +32,9 @@ namespace ProjectTalker {
 		mNativeTalker->run((bool*)ptr);
 	}
 
-	void ProjectTalker::receiveMessageCallback(const Message & msg)
+	void ProjectTalker::receiveMessageCallback(const VSMsg & msg)
 	{
-		receiveMessage(msg.mType, gcnew String(msg.mArg1.c_str()), msg.mArg2);
+		receiveMessage(msg.mCmd, gcnew String(msg.mArg1), msg.mArg2);
 	}
 
 }

@@ -11,6 +11,8 @@ namespace Maditor {
 			class MainWindow;
 		}
 
+		class EditorSettingsWidget;
+
 		class MADITOR_EXPORT MainWindow : public QMainWindow
 		{
 			Q_OBJECT
@@ -20,6 +22,8 @@ namespace Maditor {
 			~MainWindow();
 
 			void startup();
+
+			Dialogs::DialogManager *dialogs();
 
 			/*void setupScene();
 
@@ -38,12 +42,8 @@ namespace Maditor {
 
 			void setupConnections();
 
-		signals:
-			void settingsRequest(Model::Editor *editor);
 
 		public slots:
-
-			void openSettings();
 
 			void initApp();
 			void startApp();
@@ -80,6 +80,8 @@ namespace Maditor {
 			Dialogs::DialogManager mDialogManager;
 
 			int mRecentProjectInitialActionCount;
+
+			EditorSettingsWidget *mEditorSettingsWidget;
 
 		};
 	}

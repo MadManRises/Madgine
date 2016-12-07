@@ -24,20 +24,21 @@ namespace Maditor {
 			mApplicationWatcher(0),
 			mEditorManager(0),
 			mSettings("MadMan Studios", "Maditor"),
-			mLogs(0),
-			mAddonCollector(collector)
+			mLogs(0)
 		{
 
 			mLog = new Watcher::OgreLogWatcher(Watcher::OgreLogWatcher::GuiLog, "Madgine.log");
 
+			mSettings.beginGroup("Editor");
 			mRecentProjects = mSettings.value("recentProjects").toStringList();
 			mReloadProject = mSettings.value("reloadProject").toBool();
+			mSettings.endGroup();
 
 			mLoader = new ModuleLoader;
 			mApplicationWatcher = new Watcher::ApplicationWatcher(mLog);
 			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
 
-			mEditorManager = new Editors::EditorManager(mAddonCollector);
+			mEditorManager = new Editors::EditorManager(collector);
 			mClassGeneratorFactory = new Generators::ClassGeneratorFactory;
 			mLogs = new LogsModel;
 
@@ -53,8 +54,10 @@ namespace Maditor {
 
 		Editor::~Editor()
 		{
+			mSettings.beginGroup("Editor");
 			mSettings.setValue("recentProjects", mRecentProjects);
 			mSettings.setValue("reloadProject", mReloadProject);
+			mSettings.endGroup();
 
 			delete mApplicationWrapper;
 			delete mApplicationWatcher;

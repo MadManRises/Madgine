@@ -10,7 +10,7 @@ add_definitions(-DCMAKE_VS_DEVENV_COMMAND="${CMAKE_VS_DEVENV_COMMAND}")
 include_directories(${Maditor_SOURCE_DIR}/src)
 include_directories(${MADGINE_SOURCE_DIR}/src)
 
-add_library(VSLink SHARED VSCommands.cs VSLink.cpp VSLink.h)
+add_library(VSLink SHARED VSCommands.cs VSLink.cpp VSLink.h VSMsg.h VSSettingsWidget.cpp VSSettingsWidget.h VSSettingsWidget.ui)
 
 target_link_libraries(VSLink Qt5::Widgets Maditor)
 

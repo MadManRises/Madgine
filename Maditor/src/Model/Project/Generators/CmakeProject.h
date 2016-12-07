@@ -17,7 +17,9 @@ namespace Maditor {
 
 				void addLibrary(const QString &lib);
 
-				QString solutionName();
+				QString solutionName(const QString &buildType);
+
+				QString buildDir(const QString &buildType);
 
 			protected:
 				virtual QString preTargetCode() override;

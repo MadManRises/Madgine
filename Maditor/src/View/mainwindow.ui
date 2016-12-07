@@ -498,6 +498,36 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="NetworkDockWidget">
+   <property name="windowTitle">
+    <string>Network</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="NetworkDockWidgetContent">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="Maditor::View::NetworkView" name="NetworkWidget" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionNewProject">
    <property name="text">
     <string>New Project</string>
@@ -604,6 +634,12 @@
    <extends>QTreeView</extends>
    <header>view/filesview.h</header>
   </customwidget>
+  <customwidget>
+   <class>Maditor::View::NetworkView</class>
+   <extends>QWidget</extends>
+   <header>view/OgreWidgets/networkview.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="resources.qrc"/>
@@ -646,22 +682,6 @@
    <signal>triggered()</signal>
    <receiver>Maditor::View::MainWindow</receiver>
    <slot>pauseApp()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>468</x>
-     <y>305</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSettings</sender>
-   <signal>triggered()</signal>
-   <receiver>Maditor::View::MainWindow</receiver>
-   <slot>openSettings()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -743,7 +763,6 @@
   <slot>startApp()</slot>
   <slot>stopApp()</slot>
   <slot>pauseApp()</slot>
-  <slot>openSettings()</slot>
   <slot>initApp()</slot>
   <slot>finalizeApp()</slot>
   <slot>releaseProject()</slot>

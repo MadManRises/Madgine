@@ -1,6 +1,7 @@
 #pragma once 
 
 
+
 namespace Maditor {
 
 	namespace View {
@@ -10,22 +11,28 @@ namespace Maditor {
 				class SettingsDialog;
 			}
 
+			class SettingsTab;
 
-class SettingsDialog : public QDialog
+class MADITOR_EXPORT SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(Model::Editor *editor);
+    explicit SettingsDialog();
     ~SettingsDialog();
+
+	void addSettingsTab(SettingsTab *tab, const QString &title);
+
+	void open();
 
 public slots:
 	bool apply();
 
 private:
-	Model::Editor *mEditor;
 
     Ui::SettingsDialog *ui;
+
+	std::list<SettingsTab*> mTabs;
 };
 
 

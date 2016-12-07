@@ -8,15 +8,20 @@ namespace Maditor {
 	namespace View {
 		namespace Dialogs {
 
+			class SettingsDialog;
+
 			class MADITOR_EXPORT DialogManager : public QObject
 			{
 				Q_OBJECT
 
 			public:
 				DialogManager();
+				~DialogManager();
 
 				virtual bool confirmFileOverwrite(const QString &filePath, QMessageBox::StandardButton *result = 0);
 				static bool confirmFileOverwriteStatic(const QString &filePath, QMessageBox::StandardButton *result = 0);
+
+				SettingsDialog *settingsDialog();
 
 			signals:
 				void newProjectDialogAccepted(const QString &path, const QString &name);
@@ -52,12 +57,14 @@ namespace Maditor {
 
 				virtual void showModulePropertiesDialog(Model::Module *module);
 
-				virtual void showSettingsDialog(Model::Editor *editor);
+				virtual void showSettingsDialog();
 
 				virtual void showDeleteClassDialog();
 
 			private:
 				static DialogManager *sSingleton;
+
+				SettingsDialog *mSettingsDialog;
 			};
 		}
 	}

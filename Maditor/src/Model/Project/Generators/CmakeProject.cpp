@@ -15,7 +15,7 @@ namespace Maditor {
 			}
 			void CmakeProject::build(const QString &buildType)
 			{
-				std::string cmd = QString("\"\"" CMAKE_PATH "\" -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\" -DMADGINE_BUILD_TYPE=\"%3\"").arg(mBuildDir + buildType + "/build/", mRoot, buildType).toStdString();
+				std::string cmd = QString("\"\"" CMAKE_PATH "\" -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\" -DMADGINE_BUILD_TYPE=\"%3\"").arg(buildDir(buildType), mRoot, buildType).toStdString();
 				CommandLine::exec(cmd.c_str());
 			}
 
@@ -43,9 +43,14 @@ endif (%1_FOUND)
 				mLibraries << lib;
 			}
 
-			QString CmakeProject::solutionName()
+			QString CmakeProject::solutionName(const QString & buildType)
 			{
-				return mBuildDir + name() + ".sln";
+				return buildDir(buildType) + name() + ".sln";
+			}
+
+			QString CmakeProject::buildDir(const QString & buildType)
+			{
+				return mBuildDir + buildType + "/build/";
 			}
 
 		}

@@ -45,16 +45,16 @@ namespace MaditorPlugin
             run(mRunning);
         }
 
-        public override void receiveMessage(Int64 type, string arg1, Int32 arg2)
+        public override void receiveMessage(Int64 type, string arg1, Int64 arg2)
         {
             handle((VSCommand)type, arg1, arg2);
         }
 
-        public bool send(VSCommand cmd, string arg1 = "", Int32 arg2 = -1) {
+        public bool send(VSCommand cmd, string arg1 = "", Int64 arg2 = -1) {
             return send((int)cmd, arg1, arg2, "Maditor");
         }
 
-        private void handle(VSCommand cmd, string arg1, Int32 arg2)
+        private void handle(VSCommand cmd, string arg1, Int64 arg2)
         {
             switch (cmd)
             {
@@ -84,14 +84,14 @@ namespace MaditorPlugin
             mDTE.Solution.Open(path);
         }
 
-        private void openFile(string path, int lineNr)
+        private void openFile(string path, Int64 lineNr)
         {
             Window w = mDTE.ItemOperations.OpenFile(path);
             if (lineNr != -1)
-                ((TextSelection)mDTE.ActiveDocument.Selection).GotoLine(lineNr);
+                ((TextSelection)mDTE.ActiveDocument.Selection).GotoLine((int)lineNr);
         }
 
-        private bool attachDebugger(Int32 pid)
+        private bool attachDebugger(Int64 pid)
         {
             Processes processes = mDTE.Debugger.LocalProcesses;
             bool done = false;
