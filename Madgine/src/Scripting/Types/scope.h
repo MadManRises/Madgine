@@ -1,58 +1,14 @@
 #pragma once
 
-#include "Scripting/Datatypes/varset.h"
-#include "Scripting\Datatypes\argumentlist.h"
-#include "Util\UtilMethods.h"
+#include "Serialize\Container\observed.h"
+#include "Serialize\serializableunit.h"
+#include "Serialize\Container\map.h"
 
 namespace Engine {
 namespace Scripting {
 
-enum class ScopeClass{
-    EntityClass,
-    ListClass,
-    StructClass,
-    LevelClass,
-    StoryClass,
-	ArrayClass
-};
 
-template <class T>
-struct ScopeClassType{};
-
-template <>
-struct ScopeClassType<GlobalScope> {
-	static constexpr ScopeClass type = ScopeClass::StoryClass;
-};
-
-template <>
-struct ScopeClassType<Engine::Scene::Entity::Entity>{
-	static constexpr ScopeClass type = ScopeClass::EntityClass;
-};
-
-template <>
-struct ScopeClassType<List> {
-	static constexpr ScopeClass type = ScopeClass::ListClass;
-};
-
-template <>
-struct ScopeClassType<Struct> {
-	static constexpr ScopeClass type = ScopeClass::StructClass;
-};
-
-template <>
-struct ScopeClassType<Scene> {
-	static constexpr ScopeClass type = ScopeClass::LevelClass;
-};
-
-template <>
-struct ScopeClassType<Array> {
-	static constexpr ScopeClass type = ScopeClass::ArrayClass;
-};
-
-
-
-
-class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::Serializable {
+class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::SerializableUnit {
 
 public:
 	Scope(const std::string &prototypeName = "");
@@ -71,13 +27,11 @@ public:
 
 	virtual bool hasScriptMethod(const std::string &name);
 	
-	void applyScopeMap(const std::map<InvScopePtr, Scope *> &map);
+	void applyScopeMap(const std::map<InvPtr, Scope *> &map);
 	void collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &ignoreMap = {});
 	//virtual void collectNamedValues(std::map<std::string, ValueType*> &values);
 
-	virtual void storeCreationData(Serialize::SerializeOutStream &of);
-
-    virtual ScopeClass getClassType() = 0;
+ 
 	virtual std::string getIdentifier() = 0;	
 
 	virtual ValueType methodCall(const std::string &name,
@@ -88,12 +42,14 @@ public:
 
 	virtual void clear();
 
+
+	virtual void readState(Serialize::SerializeInStream &in) override;
+
 protected:	
 
     virtual void collectValueRefs(std::list<ValueType *> &values);
 
-    virtual void save(Scripting::Serialize::SerializeOutStream &of) const override;
-    virtual void load(Scripting::Serialize::SerializeInStream &ifs) override;
+    
 
 
 private:
@@ -120,19 +76,11 @@ private:
 
     static const std::map<std::string, NativeMethod> mBoundNativeMethods;
 
-	VarSet mVariables;
-
+	Serialize::Observed<std::string> mPrototypeName;
 	Scope *mPrototype;
-	std::string mPrototypeName;
+	
+	VarSet mVariables;
 };
-
-template <class T>
-T *scope_cast(Scope *s) {
-	if (s->getClassType() != ScopeClassType<T>::type)
-		MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::unexpectedScopeType(s->getIdentifier(), typeid(T).name())));
-	return (T*)s;
-}
-
 
 }
 }

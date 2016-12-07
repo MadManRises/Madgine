@@ -1,12 +1,13 @@
 #include "madginelib.h"
 #include "list.h"
 #include "Scripting/scriptingexception.h"
-#include "Scripting/Datatypes/Serialize/serializestream.h"
+#include "Serialize/Streams/serializestream.h"
 
 namespace Engine {
+
 namespace Scripting {
 
-List::Factory List::sFactory;
+
 
 API_IMPL(List, &contains, &add, &at, &setAt, &size, &remove, &index);
 
@@ -70,10 +71,10 @@ int List::index(const ValueType & v)
 
 
 
-void List::load(Serialize::SerializeInStream &ifs)
+void List::readState(Serialize::SerializeInStream &ifs)
 {
 
-    Scope::load(ifs);
+    Scope::readState(ifs);
 
     size_t count;
     ifs >> count;
@@ -86,9 +87,9 @@ void List::load(Serialize::SerializeInStream &ifs)
 
 }
 
-void List::save(Serialize::SerializeOutStream &of) const
+void List::writeState(Serialize::SerializeOutStream &of) const
 {
-    Scope::save(of);
+    Scope::writeState(of);
 
     of << mItems.size();
 
@@ -133,11 +134,7 @@ void List::collectValueRefs(std::list<ValueType *> &values)
     }
 }
 
-template <> Scope *List::Factory::create(Serialize::SerializeInStream &in)
-{
-    return OGRE_NEW List();
-}
-
 } // namespace Scripting
+
 } // namespace Core
 

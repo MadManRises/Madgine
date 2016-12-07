@@ -31,8 +31,8 @@ protected:
 
     virtual void collectValueRefs(std::list<ValueType *> &values) override;
 
-    virtual void load(Serialize::SerializeInStream &ifs) override;
-    virtual void save(Serialize::SerializeOutStream &of) const override;
+    virtual void readState(Serialize::SerializeInStream &ifs) override;
+    virtual void writeState(Serialize::SerializeOutStream &of) const override;
 
 private:
     std::list<ValueType> mItems;

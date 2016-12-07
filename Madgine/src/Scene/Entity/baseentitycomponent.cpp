@@ -15,7 +15,7 @@ BaseEntityComponent::~BaseEntityComponent() {
 
 }
 
-void BaseEntityComponent::finalize() {
+void BaseEntityComponent::preDelete() {
 
 }
 
@@ -24,15 +24,6 @@ Entity &BaseEntityComponent::getEntity() const
     return mEntity;
 }
 
-void BaseEntityComponent::save(Scripting::Serialize::SerializeOutStream &out) const
-{
-
-}
-
-void BaseEntityComponent::load(Scripting::Serialize::SerializeInStream &in)
-{
-
-}
 
 void BaseEntityComponent::positionChanged(const Ogre::Vector3 &){}
 

@@ -11,7 +11,7 @@ class Assignment : public Statement {
 public:
     Assignment(int line, const std::string &varName, const std::string &op, Ogre::unique_ptr<const Statement> &&value);
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const;
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const;
 
 private:
 	enum {

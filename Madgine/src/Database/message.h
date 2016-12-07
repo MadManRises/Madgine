@@ -11,7 +11,7 @@ public:
     constexpr Message(std::array<const char *, N> &&data) :
         mData(std::forward<std::array<const char *, N>>(data)){}
 
-    template <typename... Ty, typename T = std::enable_if_t<sizeof...(Ty)+1==N, void>>
+    template <typename... Ty, typename T = std::enable_if_t<sizeof...(Ty)+1==N>>
     std::string operator()(Ty&&... arg) const{
         std::stringstream ss;
         ss << mData[0];

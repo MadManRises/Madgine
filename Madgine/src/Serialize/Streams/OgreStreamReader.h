@@ -2,7 +2,6 @@
 
 
 namespace Engine {
-	namespace Scripting {
 		namespace Serialize {
 			class MADGINE_EXPORT OgreStreamReader : public std::basic_streambuf<char>{
 			public:
@@ -15,5 +14,4 @@ namespace Engine {
 				Ogre::MemoryDataStream *mPtr;
 			};
 		}
-	}
 }

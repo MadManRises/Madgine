@@ -18,15 +18,6 @@ SceneListener::~SceneListener()
         mSceneMgr->removeSceneListener(this);
 }
 
-void SceneListener::notifyEntityRemoved(Entity::Entity *)
-{
-
-}
-
-void SceneListener::notifyEntityAdded(Entity::Entity *)
-{
-
-}
 
 void SceneListener::onSceneLoad()
 {

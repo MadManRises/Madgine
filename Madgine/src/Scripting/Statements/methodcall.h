@@ -12,7 +12,7 @@ public:
     MethodCall(int line, const std::string &methodName,
                std::list<Ogre::unique_ptr<const Statement> > &&arguments);
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const;
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const;
 
 private:
     std::string mMethodName;

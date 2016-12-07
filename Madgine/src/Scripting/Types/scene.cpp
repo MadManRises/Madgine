@@ -5,26 +5,20 @@
 namespace Engine {
 namespace Scripting {
 
-Scene::Factory Scene::sFactory;
+
 
 Scene::Scene()
 {
 
 }
 
-
-void Scene::clear()
+std::string Scene::getIdentifier()
 {
-	Scope::clear();
-}
-
-
-
-template <> Scope *Scene::Factory::create(Serialize::SerializeInStream &in)
-{
-    return GlobalScope::getSingleton().level();
+	return typeid(Scene).name();
 }
 
 } // namespace Scripting
+
+
 } // namespace Core
 

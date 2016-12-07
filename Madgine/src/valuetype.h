@@ -1,9 +1,7 @@
 #pragma once
 
 namespace Engine {
-namespace Scripting {
 
-enum class InvScopePtr : uintptr_t {};
 
 class MADGINE_EXPORT ValueType {
 public:
@@ -13,13 +11,13 @@ public:
 
 	ValueType(const Ogre::Vector2 &v);
     ValueType(const Ogre::Vector3 &v);
-    ValueType(Scope *e);
+    ValueType(Scripting::Scope *e);
     ValueType(const std::string &s);
     ValueType(const char *s);
     ValueType(bool b);
     ValueType(int i);
     ValueType(float f);
-	ValueType(InvScopePtr s);
+	ValueType(InvPtr s);
 	ValueType(size_t s);
 
     ~ValueType();
@@ -27,13 +25,13 @@ public:
     void clear();
 
     void operator=(const ValueType &);
-    void operator=(Scope *);
+    void operator=(Scripting::Scope *);
     void operator=(const std::string &);
     void operator=(bool);
     void operator=(int);
     void operator=(float);
     void operator=(const char *);
-	void operator=(InvScopePtr);
+	void operator=(InvPtr);
 	void operator=(size_t);
 
     bool operator==(const ValueType &) const;
@@ -58,11 +56,11 @@ public:
     const Ogre::Vector3 &asVector3() const;
     const Ogre::Vector3 &asVector3(const Ogre::Vector3 &v);
     bool isScope() const;
-    Scope *asScope() const;
-	Scope *asScope(const Scope *s);
+	Scripting::Scope *asScope() const;
+	Scripting::Scope *asScope(const Scripting::Scope *s);
     bool isInvScope() const;
-    InvScopePtr asInvScope() const;
-	InvScopePtr asInvScope(InvScopePtr s);
+    InvPtr asInvScope() const;
+	InvPtr asInvScope(InvPtr s);
     bool isString() const;
     const std::string &asString() const;
     const std::string &asString(const std::string &s);
@@ -79,83 +77,95 @@ public:
     float asFloat() const;
     float asFloat(float f);
     bool isNull() const;
+	const ValueType &asDefault(const ValueType &default);
 
     std::string toString() const;
 
 	std::string getTypeString() const;
 
-private:
-	template <class T, class R>
-	struct _isValueType {
+	void readState(Serialize::SerializeInStream &in);
+	void writeState(Serialize::SerializeOutStream &out) const;
+	void writeCreationData(Serialize::SerializeOutStream &out) const;
 
-	};
-
-	template <class R>
-	struct _isValueType<int, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<std::string, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<Ogre::Vector3, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<Ogre::Vector2, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<float, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<bool, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<size_t, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<InvScopePtr, R> {
-		typedef R type;
-	};
-
-	template <class R>
-	struct _isValueType<Scope *, R> {
-		typedef R type;
-	};
+	bool peek(Serialize::SerializeInStream &in);
 
 public:
 	template <class T>
-	using isValueType = typename _isValueType<std::remove_const_t<std::remove_reference_t<T>>, T>::type;
+	struct isValueType {
+		constexpr static bool value = false;
+	};
+
+	template <>
+	struct isValueType<int> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<std::string> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<Ogre::Vector3> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<Ogre::Vector2> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<float> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<bool> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<size_t> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<InvPtr> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<Scripting::Scope *> {
+		constexpr static bool value = true;
+	};
+
+	template <>
+	struct isValueType<ValueType> {
+		constexpr static bool value = true;
+	};
+
+
+	template <class T>
+	using enableValueType = std::enable_if_t<isValueType<std::remove_const_t<std::remove_reference_t<T>>>::value, T>;
 
     template <class T>
-    std::enable_if_t<!std::is_class<T>::value, isValueType<T>> as() const;
+    std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> as() const;
 
     template <class T>
-    std::enable_if_t<std::is_class<T>::value, isValueType<const T&>> as() const;
+    std::enable_if_t<std::is_class<T>::value, enableValueType<const T&>> as() const;
 
     template <class T>
-    std::enable_if_t<!std::is_class<T>::value, isValueType<T>> asDefault(T defaultValue);
+	std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> asDefault(T defaultValue);
 
     template <class T>
-    std::enable_if_t<std::is_class<T>::value, isValueType<const T &>> asDefault(const T &defaultValue);
+	std::enable_if_t<std::is_class<T>::value, enableValueType<const T &>> asDefault(const T &defaultValue);
 
 private:
 	enum class Type : unsigned char {
 		BoolValue,
 		ScopeValue,
-		InvScopeValue,
+		InvPtrValue,
 		IntValue,
 		UIntValue,
         FloatValue,
@@ -167,8 +177,8 @@ private:
 
     union {
         bool mBool;
-        Scope *mScope;
-        InvScopePtr mInvScope;
+		Scripting::Scope *mScope;
+        InvPtr mInvPtr;
         int mInt;
 		size_t mUInt;
         float mFloat;
@@ -182,16 +192,13 @@ private:
     void decRef();
     void incRef();
 
-    friend class Serialize::SerializeInStream;
-    friend class Serialize::SerializeOutStream;
-
 };
 
 
-}
+
 }
 
 std::ostream &operator <<(std::ostream &stream,
-                          const Engine::Scripting::ValueType &v);
+                          const Engine::ValueType &v);
 
 

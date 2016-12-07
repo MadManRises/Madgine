@@ -10,7 +10,7 @@
 
 #include "Math\bounds.h"
 
-#include "Scripting\Datatypes\Serialize\serializestream.h"
+#include "Serialize\Streams\serializestream.h"
 
 #include "scenecomponent.h"
 
@@ -20,11 +20,12 @@
 
 #include "sceneexception.h"
 
+#include "Serialize\serializablebase.h"
+
+#include "Serialize\serializemanager.h"
+
 namespace Engine {
 namespace Scene {
-
-const float SceneManager::sceneRasterSize = .2f;
-
 
 
 SceneManager::SceneManager(Ogre::Root *root) :
@@ -35,7 +36,8 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mVp(0),
     mRenderTexture(0),
     mIsSceneLoaded(false),
-	mTerrainRayQuery(0)
+	mTerrainRayQuery(0),
+	mEntities(this, &SceneManager::createEntityData)
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
@@ -103,19 +105,18 @@ void SceneManager::finalize()
 
 }
 
-void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
+void SceneManager::readStaticScene(Serialize::SerializeInStream &in)
 {
 
 	clear();
 
-	if (in.process())
-		in.process()->startSubProcess(1 + mSceneListeners.size(), "Creating Terrain...");
+	in.process().startSubProcess(1 + mSceneListeners.size(), "Creating Terrain...");
 	
 	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
 
-    createTerrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain"), in);
-	if (in.process())
-		in.process()->step();
+    readTerrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain"), in);
+
+	in.process().step();
 
 	mIsSceneLoaded = true;
 
@@ -123,14 +124,10 @@ void SceneManager::createScene(Scripting::Serialize::SerializeInStream &in)
 
     for (SceneListener *listener : mSceneListeners){
         listener->onSceneLoad();
-		if (in.process())
-			in.process()->step();
+		in.process().step();
     }
 
-	if (in.process())
-		in.process()->endSubProcess();
-
-    
+	in.process().endSubProcess();    
 }
 
 //---------------------------------------------------------------------------
@@ -148,7 +145,7 @@ void SceneManager::createCamera(void)
 
 }
 
-void SceneManager::createTerrain(Ogre::SceneNode *terrain, Scripting::Serialize::SerializeInStream &in)
+void SceneManager::readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInStream &in)
 {
     mTerrain = terrain;
 	
@@ -270,12 +267,12 @@ void SceneManager::createTerrain(Ogre::SceneNode *terrain, Scripting::Serialize:
 
 }
 
-std::list<Entity::Entity *> SceneManager::entities() const
+std::list<Entity::Entity *> SceneManager::entities()
 {
     std::list<Entity::Entity*> result;
-    for (const std::unique_ptr<Entity::Entity> &e : mEntities){
-        if (std::find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), e.get()) == mEntityRemoveQueue.end())
-            result.push_back(e.get());
+    for (Entity::Entity &e : mEntities){
+        if (std::find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), &e) == mEntityRemoveQueue.end())
+            result.push_back(&e);
     }
     return result;
 }
@@ -297,32 +294,27 @@ Math::Bounds SceneManager::getSceneBounds()
 Math::Bounds SceneManager::getRasterizedSceneBounds()
 {
     Math::Bounds bounds = getSceneBounds();
-    float left = floorf(bounds.left() / sceneRasterSize);
-    float bottom = floorf(bounds.bottom() / sceneRasterSize);
-    float right = ceilf(bounds.right() / sceneRasterSize);
-    float top = ceilf(bounds.top() / sceneRasterSize);
+    float left = floorf(bounds.left() / sSceneRasterSize);
+    float bottom = floorf(bounds.bottom() / sSceneRasterSize);
+    float right = ceilf(bounds.right() / sSceneRasterSize);
+    float top = ceilf(bounds.top() / sSceneRasterSize);
     return Math::Bounds(left, bottom, right, top);
 }
 
 Ogre::Vector2 SceneManager::rasterizePoint(const Ogre::Vector2 &v)
 {
     Math::Bounds bounds = getRasterizedSceneBounds();
-    float x = roundf(v.x / sceneRasterSize) - bounds.left();
-    float y = roundf(v.y / sceneRasterSize) - bounds.bottom();
+    float x = roundf(v.x / sSceneRasterSize) - bounds.left();
+    float y = roundf(v.y / sSceneRasterSize) - bounds.bottom();
     return Ogre::Vector2(x, y);
 }
 
 Ogre::Vector3 SceneManager::rasterizePoint(const Ogre::Vector3 &v)
 {
     Math::Bounds bounds = getRasterizedSceneBounds();
-    float x = roundf(v.x / sceneRasterSize) - bounds.left();
-    float z = roundf(v.z / sceneRasterSize) - bounds.bottom();
+    float x = roundf(v.x / sSceneRasterSize) - bounds.left();
+    float z = roundf(v.z / sSceneRasterSize) - bounds.bottom();
     return Ogre::Vector3(x, v.y, z);
-}
-
-float SceneManager::rasterSize()
-{
-    return sceneRasterSize;
 }
 
 Ogre::Vector2 SceneManager::relToScenePos(const Ogre::Vector2 &v)
@@ -338,48 +330,55 @@ size_t SceneManager::getComponentCount()
 void SceneManager::onLoad()
 {
 
-    for (const Ogre::unique_ptr<Entity::Entity> &e : mEntities){
-        e->onLoad();
+    for (Entity::Entity &e : mEntities){
+        e.onLoad();
     }
 }
 
-void SceneManager::saveComponentData(Scripting::Serialize::SerializeOutStream &out) const
+void SceneManager::saveComponentData(Serialize::SerializeOutStream &out) const
 {
     for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
-        out << component->componentName() << *component;
+        out << component->componentName();
+		component->writeState(out);
     }
-    out << Scripting::ValueType();
+    out << ValueType();
 }
 
-void SceneManager::loadComponentData(Scripting::Serialize::SerializeInStream &in)
+void SceneManager::loadComponentData(Serialize::SerializeInStream &in)
 {
     std::string componentName;
     while(in.loopRead(componentName)){
         for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents){
 			if (component->componentName() == componentName) {
-				in >> *component;
+				component->readState(in);
 				break;
 			}
         }
     }
 }
 
-const std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>& SceneManager::getInfoObject(const std::string & name) const
+Serialize::TopLevelMadgineObject SceneManager::topLevelId()
 {
-	return mInfoObjects.find(name)->second;
+	return Serialize::SCENE_MANAGER;
 }
 
-void SceneManager::save(Scripting::Serialize::SerializeOutStream &out) const
+const std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>& SceneManager::getInfoObject(const std::string & name) const
 {
-    out << mHeightmap;
+	return mInfoObjects.at(name);
+}
+
+
+void SceneManager::writeStaticScene(Serialize::SerializeOutStream & out) const
+{
+	out << mHeightmap;
 	for (Ogre::SceneNode *n : mTerrainEntities) {
 		Ogre::Entity * ent = (Ogre::Entity*)n->getAttachedObjectIterator().getNext();
 		out << ent->getName() << ent->getMesh()->getName() << n->getPosition() << n->getOrientation();
 	}
-	for (const std::pair<std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> &t : mInfoObjects) {
+	for (const std::pair<const std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> &t : mInfoObjects) {
 		out << t.first << std::get<0>(t.second) << std::get<1>(t.second) << std::get<2>(t.second);
 	}
-	out << Scripting::ValueType();
+	out << ValueType();
 
 	for (Ogre::Light * light : mStaticLights) {
 
@@ -387,21 +386,64 @@ void SceneManager::save(Scripting::Serialize::SerializeOutStream &out) const
 
 		if (light->getType() != Ogre::Light::LT_POINT) {
 			out << light->getDirection();
-		}		
+		}
 
 	}
-	out << Scripting::ValueType();
+	out << ValueType();
 }
 
-void SceneManager::load(Scripting::Serialize::SerializeInStream &in)
+void SceneManager::writeState(Serialize::SerializeOutStream &out) const
 {
-	createScene(in);    
+	writeStaticScene(out);
+
+	saveComponentData(out);
+
+	SerializableUnit::writeState(out);
+
+    
+}
+
+void SceneManager::readState(Serialize::SerializeInStream &in)
+{
+	readStaticScene(in);
+
+	loadComponentData(in);
+	
+	SerializableUnit::readState(in);
+		
+}
+
+void SceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
+{
+	in.process().startSubProcess(1, "Loading Level...");
+
+	readState(in);
+
+	const std::map<InvPtr, Serialize::SerializableUnit *> &scopeMap = in.manager().map();
+	//apply map
+
+	if (callInit) {
+		for (Entity::Entity &e : mEntities) {
+			e.init();
+		}
+	}
+
+	onLoad();
+
+	in.process().endSubProcess();
+}
+
+void SceneManager::writeScene(Serialize::SerializeOutStream & out) const
+{
+	writeState(out);
 }
 
 Ogre::TerrainGroup *SceneManager::terrainGroup() const
 {
     return mTerrainGroup;
 }
+
+
 
 bool SceneManager::isUsingHeightmap() const
 {
@@ -418,10 +460,10 @@ const std::vector<Ogre::SceneNode*> &SceneManager::terrainEntities()
 	return mTerrainEntities;
 }
 
-Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour)
+std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> SceneManager::createEntityData(const std::string & name, const std::string & meshName, const std::string & behaviour)
 {
 
-    Ogre::SceneNode *node = mEntitiesNode->createChildSceneNode(name);
+	Ogre::SceneNode *node = mEntitiesNode->createChildSceneNode(name);
 
 	Ogre::Entity *mesh = 0;
 	if (!meshName.empty()) {
@@ -430,31 +472,19 @@ Entity::Entity *SceneManager::createEntity(const std::string &name, const std::s
 		node->attachObject(mesh);
 	}
 
-	Entity::Entity *e = 0;
-	try {
-		e = OGRE_NEW Entity::Entity(node, behaviour, mesh);
+	return{ node, behaviour, mesh };
+	
+}
 
-		mEntities.emplace_back(e);
-
-		for (SceneListener *listener : mSceneListeners) {
-			listener->notifyEntityAdded(e);
-		}
-	}
-	catch (Scripting::ScriptingException &e) {
-		LOG_EXCEPTION(e);
-
-	}   
-
-    return e;
-
+Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour)
+{
+	return &mEntities.emplaceTuple(createEntityData(name, meshName, behaviour));
 }
 
 Ogre::Camera *SceneManager::camera()
 {
     return mCamera;
 }
-
-
 
 Ogre::SceneManager *SceneManager::getSceneManager()
 {
@@ -542,8 +572,8 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 	{
 		PROFILE("Entities", "SceneManager");
 		if (mask & App::ContextMask::SceneContext && mIsSceneLoaded) {
-			for (const Ogre::unique_ptr<Entity::Entity> &e : mEntities) {
-				e->update(timeSinceLastFrame);
+			for (Entity::Entity &e : mEntities) {
+				e.update(timeSinceLastFrame);
 			}
 		}
 	}
@@ -581,26 +611,15 @@ void SceneManager::removeQueuedEntities()
 {
     std::list<Entity::Entity *>::iterator it = mEntityRemoveQueue.begin();
 
-	auto find = [&](const Ogre::unique_ptr<Entity::Entity> &ent) {return ent.get() == *it; };
+	auto find = [&](const Entity::Entity &ent) {return &ent == *it; };
 
     while (it != mEntityRemoveQueue.end()) {
 
-		std::list<Ogre::unique_ptr<Entity::Entity>>::iterator ent = std::find_if(mEntities.begin(),
+		std::list<Entity::Entity>::iterator ent = std::find_if(mEntities.begin(),
                                                                                 mEntities.end(), find);
         if (ent == mEntities.end()) throw 0;
 
-		Entity::Entity *e = *it;
-
-		
-		for (SceneListener *l : mSceneListeners) {
-			l->notifyEntityRemoved(e);
-		}
-
-		e->finalize();
-		Ogre::SceneNode *node = e->getNode();
 		mEntities.erase(ent);
-		mSceneMgr->getRootSceneNode()->removeChild(node);
-		mSceneMgr->destroySceneNode(node);
 
         it = mEntityRemoveQueue.erase(it);
     }
@@ -613,10 +632,6 @@ void SceneManager::clear()
     for (SceneListener *listener : mSceneListeners){
         listener->beforeSceneClear();
     }
-
-	for (const Ogre::unique_ptr<Entity::Entity> &e : mEntities) {
-		e->finalize();
-	}
 
     mEntities.clear();
     mEntityRemoveQueue.clear();
@@ -1024,10 +1039,10 @@ Ogre::RenderTarget * SceneManager::getRenderTarget()
 	return mRenderTexture;
 }
 
-Entity::Entity * SceneManager::findEntity(const std::string & name, bool throwIfNotFound) const
+Entity::Entity * SceneManager::findEntity(const std::string & name, bool throwIfNotFound)
 {
-	auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Ogre::unique_ptr<Entity::Entity> &ptr) {
-		return ptr->getName() == name;
+	auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
+		return e.getName() == name;
 	});
 	if (it == mEntities.end()) {
 		if (throwIfNotFound)
@@ -1035,7 +1050,7 @@ Entity::Entity * SceneManager::findEntity(const std::string & name, bool throwIf
 		return 0;
 	}
 	else
-		return it->get();
+		return &*it;
 }
 
 }

@@ -13,7 +13,7 @@ public:
     If(int line, Ogre::unique_ptr<const Statement> &&cond, std::list<Ogre::unique_ptr<const Statement>> &&statements,
        std::list<Ogre::unique_ptr<const Statement>> &&elseStatements = {});
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack,
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack,
                           bool *bReturn) const;
 
 private:

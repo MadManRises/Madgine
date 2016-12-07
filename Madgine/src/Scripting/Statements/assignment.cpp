@@ -2,7 +2,6 @@
 #include "assignment.h"
 #include "Scripting/Types/scope.h"
 #include "Scripting/scriptingexception.h"
-#include "Scripting/Datatypes/varset.h"
 
 #include "Database/exceptionmessages.h"
 
@@ -34,7 +33,7 @@ Assignment::Assignment(int line, const std::string &varName, const std::string &
 	}
 }
 
-ValueType Assignment::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const
+ValueType Assignment::run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const
 {
     const ValueType &val = mValue->run(rootScope, 0, stack);
 	ValueType &target = (scope ? scope->accessVar(mVarName) : stack[mVarName]);

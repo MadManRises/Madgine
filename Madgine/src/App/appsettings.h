@@ -15,7 +15,8 @@ struct AppSettings {
 	AppSettings() :
 		mPluginsFile("plugins.cfg"),
 		mUseExternalSettings(false),
-		mInput(0)
+		mInput(0),
+		mUseNetwork(false)
 	{
 
 	}
@@ -52,14 +53,20 @@ struct AppSettings {
 	int mWindowHeight;
 
 	/**
-	* Special Properties of the Application-window.
-	*/
+	 * Special Properties of the Application-window.
+	 */
 	Ogre::NameValuePairList mWindowParameters;
 
 	/**
 	 * (optional) might be set to specify an InputHandler. Otherwise the default one will be created.
 	 */
 	Input::InputHandler *mInput;
+
+	/**
+	 * Specifies if the Application uses Networking. (default: false)
+	 */
+	bool mUseNetwork;
+
 
 };
 

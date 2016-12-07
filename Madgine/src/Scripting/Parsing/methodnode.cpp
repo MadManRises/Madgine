@@ -1,6 +1,6 @@
 #include "madginelib.h"
 #include "methodnode.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 #include "Scripting/Statements/statement.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting\Types\scope.h"
@@ -11,7 +11,7 @@ namespace Scripting {
 namespace Parsing {
 
 
-ValueType MethodNode::run(Scope *scope, VarSet &stack) const
+ValueType MethodNode::run(Scope *scope, Stack &stack) const
 {
     bool bReturn = false;
 	for (const Ogre::unique_ptr<const Statements::Statement> &s : mStatements) {

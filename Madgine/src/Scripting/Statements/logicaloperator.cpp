@@ -1,7 +1,7 @@
 #include "madginelib.h"
 #include "logicaloperator.h"
 #include "Scripting/scriptingexception.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 #include "Database/exceptionmessages.h"
 
@@ -25,7 +25,7 @@ LogicalOperator::LogicalOperator(int line, const std::string &op, Ogre::unique_p
     }
 }
 
-ValueType LogicalOperator::run(Scope *rootScope, Scope *, VarSet &stack, bool *) const
+ValueType LogicalOperator::run(Scope *rootScope, Scope *, Stack &stack, bool *) const
 {
     bool temp = mFirst->run(rootScope, 0, stack).asBool();
     switch (mType) {

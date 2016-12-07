@@ -10,7 +10,7 @@
 
 #include "Scene\scenemanager.h"
 
-#include "Scripting\Datatypes\Serialize\serializestream.h"
+#include "Serialize\Streams/serializestream.h"
 
 
 #include "Scripting\Parsing\scriptparser.h"
@@ -22,9 +22,6 @@ namespace Engine {
 
 	API_IMPL(Scene::Entity::Entity, &addComponent, &remove, /*&enqueueMethod,*/ &getPosition, &getCenter, &setObjectVisible);
 
-
-
-Scene::Entity::Entity::Factory Scene::Entity::Entity::sFactory;
 
 namespace Scene {
 namespace Entity {
@@ -42,7 +39,8 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
 	mDescription(Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour)),
     mNode(node),
     mObject(obj),
-    mLastPosition(node->getPosition())
+    mLastPosition(node->getPosition()),
+	mComponents(this, &Entity::createComponent)
 {
 
     mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
@@ -57,23 +55,9 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
 
 Entity::~Entity()
 {
-	if (mNode->getAttachedObjectIterator().hasMoreElements())
-		LOG_ERROR(Database::Exceptions::nodeNotCleared);
-}
 
-void Entity::init(const Scripting::ArgumentList &args)
-{
-	if (!mDescription->getPrototype().empty())
-		findPrototype(mDescription->getPrototype());
-
-    callMethodIfAvailable("init", args);
-}
-
-void Entity::finalize()
-{
-
-	for (std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &p : mComponents) {
-		p.second->finalize();
+	for (const Ogre::unique_ptr<BaseEntityComponent> &c : mComponents) {
+		c->preDelete();
 	}
 
 	clear();
@@ -83,8 +67,20 @@ void Entity::finalize()
 
 	mComponents.clear();
 
+	if (mNode->getAttachedObjectIterator().hasMoreElements())
+		LOG_ERROR(Database::Exceptions::nodeNotCleared);
+
+	mNode->getParentSceneNode()->removeChild(mNode);
+	mNode->getCreator()->destroySceneNode(mNode);
 }
 
+void Entity::init(const Scripting::ArgumentList &args)
+{
+	if (!mDescription->getPrototype().empty())
+		findPrototype(mDescription->getPrototype());
+
+    callMethodIfAvailable("init", args);
+}
 
 
 void Entity::onLoad()
@@ -99,7 +95,7 @@ std::string Entity::getIdentifier()
     return mDescription->getName() + "[" + getName() + "]";
 }
 
-std::string Entity::getName()
+std::string Entity::getName() const
 {
 	return mNode->getName();
 }
@@ -109,9 +105,9 @@ void Entity::setObjectVisible(bool b)
 	mObject->setVisible(b);
 }
 
-void Entity::storeCreationData(Scripting::Serialize::SerializeOutStream &of)
+void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
-    Scope::storeCreationData(of);
+    Scope::writeCreationData(of);
     of << getName() << (mObject ? mObject->getMesh()->getName().c_str() : "") << mDescription->getName();
 }
 
@@ -172,8 +168,8 @@ const Ogre::Vector3 & Entity::getScale() const
 
 void Entity::positionChanged(const Ogre::Vector3 &dist)
 {
-    for (std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &p : mComponents){
-        p.second->positionChanged(dist);
+    for (const Ogre::unique_ptr<BaseEntityComponent> &c : mComponents){
+        c->positionChanged(dist);
     }
 }
 
@@ -187,22 +183,18 @@ void Entity::update(float timeSinceLastFrame)
 
 bool Entity::hasComponent(const std::string & name)
 {
-	return mComponents.find(name) != mComponents.end();
+	return mComponents.contains(name);
 }
 
 BaseEntityComponent *Entity::addComponent(const std::string &name){
-	auto it = sRegisteredComponentsByName().find(name);
-	if (it == sRegisteredComponentsByName().end())
-		throw ComponentException(Database::Exceptions::unknownComponent(name));
-	return (this->*(it->second))();
+	return addComponentImpl(std::get<0>(createComponent(name)));
 }
 
 void Entity::removeComponent(const std::string & name)
 {
-	
 	auto it = mComponents.find(name);
 	assert(it != mComponents.end());
-	it->second->finalize();
+	(*it)->preDelete();
 	mComponents.erase(it);
 }
 
@@ -215,29 +207,37 @@ std::set<std::string> Entity::registeredComponentNames()
 {
 	std::set<std::string> result;
 
-	for (const std::pair<const std::string, ComponentAdder> &p : sRegisteredComponentsByName()) {
+	for (const std::pair<const std::string, ComponentBuilder> &p : sRegisteredComponentsByName()) {
 		result.insert(p.first);
 	}
 
 	return result;
 }
 
-Scripting::ValueType Entity::methodCall(const std::string &name, const Scripting::ArgumentList &args)
+ValueType Entity::methodCall(const std::string &name, const Scripting::ArgumentList &args)
 {
-    for (std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &p : mComponents){
-        if(p.second->hasComponentMethod(name))
-            return p.second->execComponentMethod(name, args);
+    for (const Ogre::unique_ptr<BaseEntityComponent> &c : mComponents){
+        if(c->hasComponentMethod(name))
+            return c->execComponentMethod(name, args);
     }
     return ScopeImpl::methodCall(name, args);
 }
 
-void Entity::addComponentImpl(const std::string &name, Ogre::unique_ptr<BaseEntityComponent> &&component)
+std::tuple<std::unique_ptr<BaseEntityComponent>> Entity::createComponent(const std::string & name)
 {
-    if (mComponents.find(name) != mComponents.end())
-        throw ComponentException(Database::Exceptions::doubleComponent(name));
+	auto it = sRegisteredComponentsByName().find(name);
+	if (it == sRegisteredComponentsByName().end())
+		throw ComponentException(Database::Exceptions::unknownComponent(name));
+	return (this->*(it->second))();
+}
+
+BaseEntityComponent *Entity::addComponentImpl(Ogre::unique_ptr<BaseEntityComponent> &&component)
+{
+    if (mComponents.find(component) != mComponents.end())
+        throw ComponentException(Database::Exceptions::doubleComponent(component->getName()));
     if (&component->getEntity() != this)
         throw ComponentException(Database::Exceptions::corruptData);
-    mComponents.emplace(name, std::forward<Ogre::unique_ptr<BaseEntityComponent>>(component));
+    return mComponents.emplace(std::forward<Ogre::unique_ptr<BaseEntityComponent>>(component)).get();
 }
 
 
@@ -258,9 +258,9 @@ void Entity::remove()
 }
 
 
-void Entity::save(Scripting::Serialize::SerializeOutStream &of) const
+void Entity::writeState(Serialize::SerializeOutStream &of) const
 {
-    Scope::save(of);
+    Scope::writeState(of);
 
     of << getPosition();
 
@@ -268,16 +268,17 @@ void Entity::save(Scripting::Serialize::SerializeOutStream &of) const
 
 	of << mNode->getScale();
 
-    for (const std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &comp : mComponents){
-        of << comp.first << *comp.second;
+    /*for (const std::pair<const std::string, Ogre::unique_ptr<BaseEntityComponent>> &comp : mComponents){
+        of << comp.first;
+		comp.second->writeState(of);
     }
 
-    of << Scripting::ValueType();
+    of << ValueType();*/
 }
 
-void Entity::load(Scripting::Serialize::SerializeInStream &ifs)
+void Entity::readState(Serialize::SerializeInStream &ifs)
 {
-    Scope::load(ifs);
+    Scope::readState(ifs);
 
     Ogre::Vector3 v;
     ifs >> v;
@@ -291,10 +292,10 @@ void Entity::load(Scripting::Serialize::SerializeInStream &ifs)
 	ifs >> v;
 	mNode->setScale(v);
 
-    std::string componentName;
+    /*std::string componentName;
     while(ifs.loopRead(componentName)){
-        ifs >> *addComponent(componentName);
-    }
+        addComponent(componentName)->readState(ifs);
+    }*/
 
 }
 
@@ -328,11 +329,5 @@ void Entity::destroyDecoratorNode(Ogre::SceneNode * node)
 }
 }
 
-template <> Scripting::Scope *Scene::Entity::Entity::Factory::create(Scripting::Serialize::SerializeInStream &in)
-{
-	std::string obName, entityMesh, behaviour;
-	in >> obName >> entityMesh >> behaviour;
-	return Engine::Scene::SceneManager::getSingleton().createEntity(obName, entityMesh, behaviour);
-}
 
 }

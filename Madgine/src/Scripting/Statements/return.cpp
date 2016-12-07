@@ -1,7 +1,7 @@
 #include "madginelib.h"
 #include "return.h"
 
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 #include "Scripting/scriptingexception.h"
 
 #include "Database/exceptionmessages.h"
@@ -23,7 +23,7 @@ Return::Return(int line, Ogre::unique_ptr<const Statement> &&value) :
 
 }
 
-ValueType Return::run(Scope *rootScope, Scope *, VarSet &stack, bool *bReturn) const
+ValueType Return::run(Scope *rootScope, Scope *, Stack &stack, bool *bReturn) const
 {
     if (!bReturn)
         throw ScriptingException(Database::Exceptions::invalidReturn);

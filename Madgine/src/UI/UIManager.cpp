@@ -141,7 +141,7 @@ namespace Engine {
 
 		App::ContextMask UIManager::currentContext()
 		{
-			return (mModalWindowList.empty() ? mCurrentRoot : mModalWindowList.top())->context();
+			return (mModalWindowList.empty() ? (mCurrentRoot ? mCurrentRoot->context() : App::ContextMask::NoContext) : mModalWindowList.top()->context());
 		}
 
 

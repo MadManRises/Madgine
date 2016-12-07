@@ -135,10 +135,9 @@ ValueType GlobalScope::call(const ArgumentList & args, const std::string & name)
 	return methodCall(name, args);
 }
 
-template <> Scope *GlobalScope::Factory::create(Serialize::SerializeInStream &in)
-{
-    return &GlobalScope::getSingleton();
-}
 
 }
+
+
+
 }

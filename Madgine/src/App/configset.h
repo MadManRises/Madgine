@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scripting\Datatypes\varset.h"
+#include "Serialize\Container\map.h"
 #include "Database\translationunit.h"
 
 namespace Engine {
@@ -147,7 +147,7 @@ private:
     static const std::string noString;
 
 private:
-    Scripting::VarSet mSettings;
+    Serialize::SerializableMap<ValueType> mSettings;
     Ogre::RenderSystem *mRenderSystem;
 
 

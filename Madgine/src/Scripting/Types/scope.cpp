@@ -1,10 +1,8 @@
 #include "madginelib.h"
 #include "scope.h"
-#include "Scripting/Datatypes/Serialize/serializestream.h"
 #include "Scripting/scriptingexception.h"
 #include "Scripting/Parsing/methodnodePtr.h"
 #include "Scripting/Parsing/methodnode.h"
-#include "Scripting/Datatypes/Serialize/serializeexception.h"
 
 #include "Database/exceptionmessages.h"
 #include "Scripting\Parsing\scriptparser.h"
@@ -25,7 +23,9 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
 };
 
 Scope::Scope(const std::string &prototypeName) :
-	mPrototype(0)
+	mPrototype(0),
+	mPrototypeName(this),
+	mVariables(this)
 {
 	if (!prototypeName.empty())
 		findPrototype(prototypeName);
@@ -44,7 +44,7 @@ void Scope::setVar(const std::string &name, const ValueType &v)
 const ValueType &Scope::getVar(const std::string &name) const
 {
 	if (mPrototype == nullptr || hasVar(name))
-		return mVariables.get(name);
+		return mVariables.at(name);
 	return mPrototype->getVar(name);
 }
 
@@ -113,29 +113,18 @@ bool Scope::callMethodCatch(const std::string & name, const ArgumentList & args)
 	return false;
 }
 
-void Scope::save(Serialize::SerializeOutStream &of) const
-{
-	if (mPrototype != nullptr && mPrototypeName.empty())
-		throw Serialize::SerializeException("Cannot Save an unnamed Prototype!");
-	if (mPrototype == nullptr && !mPrototypeName.empty())
-		throw Serialize::SerializeException("Corrupt Prototype-data!");
 
-	of << mPrototypeName;	
-    of << mVariables;
-}
-
-void Scope::load(Serialize::SerializeInStream &ifs)
+void Scope::readState(Serialize::SerializeInStream &in)
 {
-    clear();
-	ifs >> mPrototypeName;
+	SerializableUnit::readState(in);
+
 	if (mPrototypeName.empty())
 		mPrototype = 0;
 	else
 		mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(mPrototypeName);
-    ifs >> mVariables;
 }
 
-void Scope::applyScopeMap(const std::map<InvScopePtr, Scope *> &map)
+void Scope::applyScopeMap(const std::map<InvPtr, Scope *> &map)
 {
     std::list<ValueType *> values;
     collectValueRefs(values);
@@ -151,11 +140,6 @@ void Scope::applyScopeMap(const std::map<InvScopePtr, Scope *> &map)
 bool Scope::checkFlag(const std::string &name, bool defaultValue)
 {
     return hasVar(name) ? mVariables[name].asBool() : defaultValue;
-}
-
-void Scope::storeCreationData(Serialize::SerializeOutStream &of)
-{
-    of << (int)getClassType();
 }
 
 void Scope::collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &ignoreMap)
@@ -189,9 +173,9 @@ void Scope::clear()
 
 void Scope::collectValueRefs(std::list<ValueType *> &values)
 {
-    for (std::pair<const std::string, ValueType> &p : mVariables){
+    /*for (const std::pair<const std::string, ValueType> &p : mVariables){
         values.push_back(&p.second);
-    }
+    }*/
 }
 
 const std::list<std::string> &Scope::getArguments(const std::string &name)
@@ -223,7 +207,7 @@ ValueType Scope::set(const ArgumentList &stack)
 
 ValueType Scope::get(const ArgumentList &stack)
 {
-    return mVariables.get(stack.at(0).asString());
+    return mVariables.at(stack.at(0).asString());
 }
 
 ValueType Scope::checkFlag(const ArgumentList &stack)
@@ -257,7 +241,7 @@ ValueType Scope::execScriptMethod(const std::string &name,
     if (getArguments(name).size() != args.size()) 
 		MADGINE_THROW_NO_TRACE(ScriptingException(
             Database::Exceptions::argumentCountMismatch(getArguments(name).size(), args.size())));
-    VarSet stack;
+    Stack stack;
 
     auto it = getArguments(name).begin();
     for (const ValueType &v : args) {

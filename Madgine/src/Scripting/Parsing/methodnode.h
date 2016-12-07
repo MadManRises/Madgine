@@ -12,7 +12,7 @@ public:
 	using TextResource::TextResource;
 	MethodNode(const MethodNode &) = delete;
 
-    ValueType run(Scope *scope, VarSet &stack) const;
+    ValueType run(Scope *scope, Stack &stack) const;
     void addArgument(const std::string &arg);
     void addStatement(Ogre::unique_ptr<const Statements::Statement> &&s);
 

@@ -36,7 +36,7 @@ namespace Engine {
 			if (it == mProcesses.end()) {
 				
 				if (!parent.empty()) {
-					mProcesses.find(parent)->second.addChild(name);
+					mProcesses.at(parent).addChild(name);
 					return &mProcesses.emplace(name, &mProcesses[parent]).first->second;
 				}
 				else {

@@ -5,15 +5,15 @@
 #include "Database/exceptionmessages.h"
 
 namespace Engine {
-namespace Scripting {
+	
+	namespace Scripting {
 
-Struct::Factory Struct::sFactory;
-
-template <> Scope *Struct::Factory::create(Serialize::SerializeInStream &in)
+std::string Struct::getIdentifier()
 {
-    return OGRE_NEW Struct();
+	return typeid(Struct).name();
 }
 
 } // namespace Scripting
+
 }
 

@@ -12,7 +12,7 @@ class For : public Statement
 public:
     For(int line, Ogre::unique_ptr<const Statement> &&init, Ogre::unique_ptr<const Statement> &&cond, Ogre::unique_ptr<const Statement> &&step, std::list<Ogre::unique_ptr<const Statement>> &&statements);
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack,
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack,
                           bool *bReturn) const override;
 
 private:

@@ -20,7 +20,7 @@ public:
 		return mLineNr;
 	}
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack,
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack,
                           bool *bReturn = 0) const = 0;
 
 private:

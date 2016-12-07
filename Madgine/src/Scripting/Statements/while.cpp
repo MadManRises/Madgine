@@ -1,6 +1,6 @@
 #include "madginelib.h"
 #include "while.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -14,7 +14,7 @@ While::While(int line, Ogre::unique_ptr<const Statement> &&cond, std::list<Ogre:
 
 }
 
-ValueType While::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *bReturn) const
+ValueType While::run(Scope *rootScope, Scope *scope, Stack &stack, bool *bReturn) const
 {
     while(mCond->run(rootScope, 0, stack).asBool()){
         for (const Ogre::unique_ptr<const Statement> &s : mStatements) {

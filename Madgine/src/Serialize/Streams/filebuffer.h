@@ -1,27 +1,29 @@
 #pragma once
 
-#include "serializable.h"
+#include "../serializable.h"
 
 namespace Engine {
-namespace Scripting {
 namespace Serialize {
 
-class MADGINE_EXPORT FileBuffer : std::vector<char>, public Serialize::Serializable{
+class MADGINE_EXPORT FileBuffer : std::vector<char>, public Serializable{
 public:
-    FileBuffer();
+	using vector::vector;
 
 	friend class FileBufferWriter;
 	friend class FileBufferReader;
 
-protected:
-    virtual void save(SerializeOutStream &out) const override;
-    virtual void load(SerializeInStream &in) override;
+    virtual void writeState(SerializeOutStream &out) const override;
+    virtual void readState(SerializeInStream &in) override;
 };
 
 class MADGINE_EXPORT FileBufferReader : public std::basic_streambuf<char> {
 public:
 	FileBufferReader(FileBuffer &buffer);
 
+	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+		std::ios_base::openmode mode = std::ios_base::in) override;
+	virtual pos_type seekpos(pos_type pos,
+		std::ios_base::openmode mode = std::ios_base::in) override;
 
 private:
 	FileBuffer &mBuffer;
@@ -52,6 +54,5 @@ private:
 
 
 } // namespace Serialize
-} // namespace Scripting
 } // namespace Core
 

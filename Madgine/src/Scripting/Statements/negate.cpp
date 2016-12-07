@@ -1,6 +1,6 @@
 #include "madginelib.h"
 #include "negate.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -13,7 +13,7 @@ Negate::Negate(int line, Ogre::unique_ptr<const Statement> &&child) :
 
 }
 
-ValueType Negate::run(Scope *rootScope, Scope *, VarSet &stack, bool *) const
+ValueType Negate::run(Scope *rootScope, Scope *, Stack &stack, bool *) const
 {
     return ValueType(!mChild->run(rootScope, 0, stack).asBool());
 }

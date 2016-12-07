@@ -50,15 +50,7 @@ void BaseSceneComponent::setUpdateInterval(float interval)
 	mUpdateInterval = interval;
 }
 
-void BaseSceneComponent::load(Scripting::Serialize::SerializeInStream &in)
-{
 
-}
-
-void BaseSceneComponent::save(Scripting::Serialize::SerializeOutStream &out) const
-{
-
-}
 
 
 

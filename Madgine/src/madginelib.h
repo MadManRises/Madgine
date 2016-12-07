@@ -10,6 +10,13 @@
 #define MADGINE_EXPORT __declspec(dllimport)
 #endif
 
+#include <stack>
+#include <memory>
+#include <map>
+#include <array>
+#include <sstream>
+#include <vector>
+#include <typeindex>
 
 #include "forward.h"
 
@@ -22,13 +29,7 @@
 
 #include <OgreTerrainGroup.h>
 
-#include <stack>
-#include <memory>
-#include <map>
-#include <array>
-#include <sstream>
-#include <vector>
-#include <typeindex>
+
 
 #include "Ogrememory.h"
 

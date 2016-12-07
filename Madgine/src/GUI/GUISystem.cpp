@@ -87,7 +87,7 @@ namespace Engine {
 
 		Window * GUISystem::getWindowByName(const std::string & name, Class _class)
 		{
-			return mWindows.find(name)->second->as(_class);
+			return mWindows.at(name)->as(_class);
 		}
 
 		Window * GUISystem::loadLayout(const std::string & name, const std::string & parent)

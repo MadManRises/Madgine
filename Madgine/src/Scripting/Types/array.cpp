@@ -1,12 +1,14 @@
 #include "madginelib.h"
 #include "array.h"
 #include "Scripting/scriptingexception.h"
-#include "Scripting/Datatypes/Serialize/serializestream.h"
+#include "Serialize/Streams/serializestream.h"
 
 namespace Engine {
-namespace Scripting {
 
-Array::Factory Array::sFactory;
+	
+	namespace Scripting {
+
+
 
 API_IMPL(Array, &contains, &at, &setAt, &size, &index);
 
@@ -52,10 +54,10 @@ int Array::index(const ValueType & v)
 
 
 
-void Array::load(Serialize::SerializeInStream &ifs)
+void Array::readState(Serialize::SerializeInStream &ifs)
 {
 
-    Scope::load(ifs);
+    Scope::readState(ifs);
 
     size_t count;
     ifs >> count;
@@ -68,9 +70,9 @@ void Array::load(Serialize::SerializeInStream &ifs)
 
 }
 
-void Array::save(Serialize::SerializeOutStream &of) const
+void Array::writeState(Serialize::SerializeOutStream &of) const
 {
-    Scope::save(of);
+    Scope::writeState(of);
 
     of << mSize;
 
@@ -106,15 +108,10 @@ const ValueType *Array::end() const
 }*/
 
 
-void Array::storeCreationData(Serialize::SerializeOutStream & of)
+void Array::writeCreationData(Serialize::SerializeOutStream & of) const
 {
-	Scope::storeCreationData(of);
+	Scope::writeCreationData(of);
 	of << mSize;
-}
-
-std::string Array::getClassIdentifier()
-{
-	return "Array";
 }
 
 
@@ -128,13 +125,8 @@ void Array::collectValueRefs(std::list<ValueType *> &values)
     }
 }
 
-template <> Scope *Array::Factory::create(Serialize::SerializeInStream &in)
-{
-	size_t size;
-	in >> size;
-    return OGRE_NEW Array(size);
-}
-
 } // namespace Scripting
+
+
 } // namespace Core
 

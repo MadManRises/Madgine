@@ -12,7 +12,7 @@ class While : public Statement
 public:
     While(int line, Ogre::unique_ptr<const Statement> &&cond, std::list<Ogre::unique_ptr<const Statement>> &&statements);
 
-    virtual ValueType run(Scope *rootScope, Scope *scope, VarSet &stack,
+    virtual ValueType run(Scope *rootScope, Scope *scope, Stack &stack,
                           bool *bReturn) const override;
 
 private:

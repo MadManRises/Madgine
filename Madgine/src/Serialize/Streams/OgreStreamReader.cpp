@@ -3,7 +3,6 @@
 #include "OgreStreamReader.h"
 
 namespace Engine {
-	namespace Scripting {
 		namespace Serialize {
 
 			OgreStreamReader::OgreStreamReader(Ogre::DataStreamPtr stream) :
@@ -39,5 +38,4 @@ namespace Engine {
 			}
 
 		}
-	}
 }

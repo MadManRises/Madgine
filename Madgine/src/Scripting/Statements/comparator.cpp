@@ -1,7 +1,7 @@
 #include "madginelib.h"
 #include "comparator.h"
 #include "Scripting/Parsing/parseexception.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 #include "Database/exceptionmessages.h"
 
@@ -30,7 +30,7 @@ Comparator::Comparator(int line, const std::string &op, Ogre::unique_ptr<const S
     }
 }
 
-ValueType Comparator::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const
+ValueType Comparator::run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const
 {
     ValueType left = mFirst->run(rootScope, scope, stack);
     ValueType right = mSecond->run(rootScope, 0, stack);

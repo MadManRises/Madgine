@@ -1,16 +1,18 @@
 #pragma once
 
 #include "refscope.h"
-#include "scopefactoryimpl.h"
+#include "scopeimpl.h"
 
 namespace Engine {
 namespace Scripting {
 
 
 
-class Struct : public ScopeFactoryImpl<Struct, RefScope> {
+class Struct : public RefScope {
 public:
-	using ScopeFactoryImpl::ScopeFactoryImpl;
+	using RefScope::RefScope;
+
+	virtual std::string getIdentifier() override;
 
 };
 

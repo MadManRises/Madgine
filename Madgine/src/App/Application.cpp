@@ -17,6 +17,10 @@
 
 #include "Input\OISInputHandler.h"
 
+#include "Network\networkmanager.h"
+
+#include "Serialize\serializemanager.h"
+
 namespace Engine {
 
 	API_IMPL(App::Application, &shutdown);
@@ -36,13 +40,16 @@ Application::Application() :
 	mGlobalScope(0),
 	mConfig(0),
 	mProfiler(0),
-	mInput(0)
+	mInput(0),
+	mNetwork(0)
 {
 
 }
 
 Application::~Application()
 {
+	if (mNetwork)
+		delete mNetwork;
 	if (mInput && !mSettings->mInput)
 		delete mInput;
 	if (mProfiler)
@@ -87,6 +94,10 @@ void Application::setup(const AppSettings &settings)
 		mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
 	}
 
+	std::ostringstream windowHndStr;
+
+	mWindow->getCustomAttribute("WINDOW", &mHwnd);
+
 	_setup();
 
 }
@@ -106,6 +117,9 @@ void Application::init()
 	mGlobalScope->init();
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows
+
+	if (mNetwork)
+		mNetwork->init();
 
 	mRoot->addFrameListener(this);
 }
@@ -211,6 +225,17 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			}
 		}
 		
+		if (mNetwork) {
+			try {
+				PROFILE("Network", "Rendering");
+				mNetwork->update();
+			}
+			catch (const std::exception &e) {
+				LOG_ERROR("Unhandled Exception during Network-Update!");
+				LOG_EXCEPTION(e);
+			}
+		}
+
 	}
 
 	return true;
@@ -284,6 +309,9 @@ void Application::_setup()
 		mInput = new Input::OISInputHandler(mGUI, mWindow);
 
 	mProfiler = OGRE_NEW Util::Profiler();
+
+	if (mSettings->mUseNetwork)
+		mNetwork = OGRE_NEW Network::NetworkManager();	
 }
 
 void Application::resizeWindow()

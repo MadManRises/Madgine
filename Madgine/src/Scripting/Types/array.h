@@ -24,16 +24,14 @@ public:
 
     //virtual void collectNamedValues(std::map<std::string, ValueType*> &values) override;
 
-	virtual void storeCreationData(Serialize::SerializeOutStream &of) override;
-
-	static std::string getClassIdentifier();
+	virtual void writeCreationData(Serialize::SerializeOutStream &of) const override;
 
 protected:
 
     virtual void collectValueRefs(std::list<ValueType *> &values) override;
 
-    virtual void load(Serialize::SerializeInStream &ifs) override;
-    virtual void save(Serialize::SerializeOutStream &of) const override;
+    virtual void readState(Serialize::SerializeInStream &ifs) override;
+    virtual void writeState(Serialize::SerializeOutStream &of) const override;
 
 private:
     ValueType *mItems;

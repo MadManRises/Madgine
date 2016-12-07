@@ -11,7 +11,7 @@ class Accessor : public Statement {
 public:
     Accessor(int line, const std::string &attName);
 
-    ValueType run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const;
+    ValueType run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const;
 
 private:
     std::string mAttName;

@@ -1,16 +1,17 @@
 #pragma once
 
-#include "scopefactoryimpl.h"
 #include "api.h"
+#include "Serialize/serializableunit.h"
 
 namespace Engine {
 namespace Scripting {
 
+
 template <class T, class Base = Scope>
-class ScopeImpl : public ScopeFactoryImpl<T, Base>, public API<T> {
+class ScopeImpl : public Base, public API<T> {
 
 public:
-	using ScopeFactoryImpl<T, Base>::ScopeFactoryImpl;
+	using Base::Base;
 
     ValueType methodCall(const std::string &name, const ArgumentList &args = {})
     {
@@ -18,11 +19,15 @@ public:
         if (this->hasMethod(name)) {
 			result = this->execMethod(name, args);
         } else {
-            result = Scope::methodCall(name, args);
+            result = Base::methodCall(name, args);
         }
         return result;
 
     }
+
+	virtual std::string getIdentifier() override {
+		return typeid(T).name();
+	}
 
 };
 

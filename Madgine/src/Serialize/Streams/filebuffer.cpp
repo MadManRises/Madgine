@@ -5,22 +5,15 @@
 
 
 namespace Engine {
-namespace Scripting {
 namespace Serialize {
 
-
-FileBuffer::FileBuffer()
-{
-
-}
-
-void FileBuffer::save(SerializeOutStream &out) const
+void FileBuffer::writeState(SerializeOutStream &out) const
 {
     out << size();
-    out.write(data(), size());
+    out.writeData(data(), size());
 }
 
-void FileBuffer::load(SerializeInStream &in)
+void FileBuffer::readState(SerializeInStream &in)
 {
     size_t size;
     in >> size;
@@ -35,6 +28,43 @@ FileBufferReader::FileBufferReader(FileBuffer &buffer) :
     mBuffer(buffer)
 {
     setg(mBuffer.data(), mBuffer.data(), mBuffer.data() + mBuffer.size());
+}
+
+pos_type FileBufferReader::seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode mode)
+{
+	if (mode & std::ios_base::in) {
+		switch (dir) {
+		case std::ios_base::beg:
+			if (0 <= off && eback() + off <= egptr()) {
+				setg(eback(), eback() + off, egptr());
+				return pos_type(off);
+			}
+			break;
+		case std::ios_base::cur:
+			if (eback() <= gptr() + off && gptr() + off <= egptr()) {
+				setg(eback(), gptr() + off, egptr());
+				return pos_type(gptr() - eback());
+			}
+			break;
+		case std::ios_base::end:
+			if (eback() <= egptr() + off && off <= 0) {
+				setg(eback(), egptr() + off, egptr());
+				return pos_type(gptr() - eback());
+			}
+		}
+	}
+
+	return pos_type(off_type(-1));
+	
+}
+
+pos_type FileBufferReader::seekpos(pos_type pos, std::ios_base::openmode mode)
+{
+	if (0 <= pos && eback() + pos <= egptr()) {
+		setg(eback(), eback() + pos, egptr());
+		return pos;
+	}
+	return pos_type(off_type(-1));
 }
 
 FileBufferWriter::FileBufferWriter(FileBuffer &buffer) :
@@ -89,6 +119,5 @@ size_t FileBufferWriter::bufferByteSize() const
 
 
 } // namespace Serialize
-} // namespace Scripting
 } // namespace Core
 

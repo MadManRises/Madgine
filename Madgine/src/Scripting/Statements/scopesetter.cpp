@@ -1,6 +1,6 @@
 #include "madginelib.h"
 #include "scopesetter.h"
-#include "Scripting\Datatypes\valuetype.h"
+#include "valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -14,7 +14,7 @@ ScopeSetter::ScopeSetter(int line, Ogre::unique_ptr<const Statement> &&child, Og
 
 }
 
-ValueType ScopeSetter::run(Scope *rootScope, Scope *scope, VarSet &stack,
+ValueType ScopeSetter::run(Scope *rootScope, Scope *scope, Stack &stack,
                            bool *) const
 {
     Scope *newScope = mScope->run(rootScope, scope, stack).asScope();

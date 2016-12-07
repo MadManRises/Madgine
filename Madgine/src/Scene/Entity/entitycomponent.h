@@ -12,13 +12,18 @@ class EntityComponent : public BaseEntityComponent, public Scripting::API<T>{
 public:
 	using BaseEntityComponent::BaseEntityComponent;
 
-    virtual std::string name() const override{
+    virtual std::string getName() const override{
         return sComponentName;
     }
 
-	static const char *componentName() {
+	virtual std::string key() const override {
 		return sComponentName;
 	}
+
+	static const char * const componentName() {
+		return sComponentName;
+	}
+	
 
 private:
 	virtual void __reg() {
@@ -29,11 +34,15 @@ private:
 		return hasMethod(name);
     }
 
-    virtual Scripting::ValueType execComponentMethod(const std::string &name, const Scripting::ArgumentList &args) final{
+    virtual ValueType execComponentMethod(const std::string &name, const Scripting::ArgumentList &args) final{
 		return execMethod(name, args);
     }
 
-    static const char * const sComponentName;
+	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
+		out << sComponentName;
+	}
+    
+	static const char * const sComponentName;
     static const Entity::ComponentRegistrator<T> _reg;
 
 };

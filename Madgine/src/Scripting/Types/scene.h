@@ -1,16 +1,16 @@
 #pragma once
 
-#include "scopefactoryimpl.h"
+#include "scopeimpl.h"
 
 namespace Engine {
 namespace Scripting {
 
-class Scene : public ScopeFactoryImpl<Scene>
+class Scene : public Scope
 {
 public:
     Scene();
 
-	virtual void clear() override;
+	virtual std::string getIdentifier() override;
 
 };
 

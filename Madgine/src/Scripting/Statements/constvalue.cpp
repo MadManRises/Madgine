@@ -13,7 +13,7 @@ ConstValue::ConstValue(int line, const ValueType &v) :
 
 }
 
-ValueType ConstValue::run(Scope *, Scope *, VarSet &, bool *) const
+ValueType ConstValue::run(Scope *, Scope *, Stack &, bool *) const
 {
     return mValue;
 }

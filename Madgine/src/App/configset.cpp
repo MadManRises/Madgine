@@ -5,7 +5,8 @@
 #include "Os\os.h"
 #include "Application.h"
 
-#include "Scripting\Datatypes\Serialize\serializestream.h"
+#include "Serialize/Streams/serializestream.h"
+#include "Serialize\serializemanager.h"
 
 namespace Engine {
 namespace App {
@@ -145,19 +146,21 @@ void ConfigSet::updateWindow()
 
 void ConfigSet::save()
 {
+	Serialize::SerializeManager mgr(true);
     std::ofstream ofs(mConfigFileName, std::ios::binary);
-    Scripting::Serialize::SerializeOutStream of(ofs);
-    of << mSettings;
+    Serialize::SerializeOutStream of(ofs, mgr);
+	mSettings.writeState(of);
     ofs.close();
 
 }
 
 void ConfigSet::load()
 {
+	Serialize::SerializeManager mgr;
     std::ifstream f(mConfigFileName, std::ios::binary);
     if (f.good()) {
-        Scripting::Serialize::SerializeInStream ifs(f);
-        ifs >> mSettings;
+        Serialize::SerializeInStream ifs(f, mgr);
+		mSettings.readState(ifs);
     }
     f.close();
 

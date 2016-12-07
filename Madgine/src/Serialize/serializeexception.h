@@ -2,7 +2,6 @@
 
 
 namespace Engine {
-namespace Scripting {
 namespace Serialize {
 
 class SerializeException : public std::exception {
@@ -22,7 +21,6 @@ private:
     std::string m_msg;
 };
 
-}
 }
 }
 

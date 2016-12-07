@@ -12,7 +12,7 @@ public:
     Return(int line);
     Return(int line, Ogre::unique_ptr<const Statement> &&value);
 
-    virtual ValueType run(Scope *rootScope, Scope *, VarSet &stack, bool *bReturn) const;
+    virtual ValueType run(Scope *rootScope, Scope *, Stack &stack, bool *bReturn) const;
 private:
     Ogre::unique_ptr<const Statement> mValue;
 };

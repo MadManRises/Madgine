@@ -162,8 +162,9 @@ private:
     ConfigSet*                        mConfig;
 	Util::Profiler*                   mProfiler;
 	Input::InputHandler*              mInput;
+	Network::NetworkManager*          mNetwork;
 
-    
+	HWND mHwnd;
 
 	std::queue<std::function<void()>> mSafeCallQueue;
 

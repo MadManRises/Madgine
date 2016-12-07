@@ -9,8 +9,6 @@ public:
     SceneListener();
     ~SceneListener();
 
-    virtual void notifyEntityRemoved(Entity::Entity *);
-    virtual void notifyEntityAdded(Entity::Entity *);
     virtual void onSceneLoad();
     virtual void onSceneClear();
     virtual void beforeSceneClear();

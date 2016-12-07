@@ -2,14 +2,18 @@
 
 #include "Scene\scenecomponent.h"
 #include "Resources/Shading/shadercollector.h"
-#include "Scripting/Datatypes/Serialize/serializable.h"
+#include "Serialize/serializableunit.h"
 #include "Entity\masks.h"
 #include "Util\MadgineObject.h"
+
+#include "Entity\entity.h"
+
+#include "Serialize\Container\list.h"
 
 namespace Engine {
 namespace Scene {
 
-class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Scripting::Serialize::Serializable, public Util::MadgineObject<SceneManager> {
+class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Serialize::SerializableUnit, public Util::MadgineObject<SceneManager> {
 public:
     SceneManager(Ogre::Root *root);
     virtual ~SceneManager();
@@ -44,9 +48,11 @@ public:
 	const Ogre::SceneNode *terrain();
 	Ogre::TerrainGroup *terrainGroup() const;
 
+	std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> createEntityData(const std::string &name, const std::string &meshName, const std::string &behaviour);
+	
 	Entity::Entity *createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour);
-	std::list<Entity::Entity *> entities() const;
-	Entity::Entity *findEntity(const std::string &name, bool throwIfNotFound = false) const;
+	std::list<Entity::Entity *> entities();
+	Entity::Entity *findEntity(const std::string &name, bool throwIfNotFound = false);
 	void removeLater(Entity::Entity *e);
 
 
@@ -56,12 +62,12 @@ public:
 
 	Ogre::Vector3 rasterizePoint(const Ogre::Vector3 &v);
 	Ogre::Vector2 rasterizePoint(const Ogre::Vector2 &v);
-	static float rasterSize();
 
 	Ogre::Vector2 relToScenePos(const Ogre::Vector2 &v);
 
 
 	const std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion> &getInfoObject(const std::string &name) const;
+	
 	void GetMeshInformation(const Ogre::MeshPtr mesh, size_t &vertex_count,
 		Ogre::Vector3 *&vertices, size_t &index_count, unsigned long *&indices,
 		const Ogre::Vector3 &position, const Ogre::Quaternion &orient,
@@ -75,23 +81,34 @@ public:
 	bool rayToTerrainPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask = Entity::Masks::TERRAIN_MASK);
 
 
-	void saveComponentData(Scripting::Serialize::SerializeOutStream &out) const;
-	void loadComponentData(Scripting::Serialize::SerializeInStream &in);
+	void saveComponentData(Serialize::SerializeOutStream &out) const;
+	void loadComponentData(Serialize::SerializeInStream &in);
 
-	std::set<BaseSceneComponent*> getComponents();
-	std::set<SceneListener*> getListeners();
+	virtual Serialize::TopLevelMadgineObject topLevelId() override;
+	
 
 	void clear();
 
-protected:
-    virtual void save(Scripting::Serialize::SerializeOutStream &out) const override;
-    virtual void load(Scripting::Serialize::SerializeInStream &in) override;
+	virtual void writeState(Serialize::SerializeOutStream &out) const override;
+	virtual void readState(Serialize::SerializeInStream &in) override;
 
+	void readScene(Serialize::SerializeInStream &in, bool callInit = false);
+	void writeScene(Serialize::SerializeOutStream &out) const;
+
+	static constexpr const float sSceneRasterSize = .2f;
+
+	///FOR LAUNCHER
+	std::set<BaseSceneComponent*> getComponents();
+	std::set<SceneListener*> getListeners();
+
+
+protected:
 
 	virtual void createCamera(void);
 
-	void createScene(Scripting::Serialize::SerializeInStream &in);
-	void createTerrain(Ogre::SceneNode *terrain, Scripting::Serialize::SerializeInStream &in);
+	void writeStaticScene(Serialize::SerializeOutStream &out) const;
+	void readStaticScene(Serialize::SerializeInStream &in);
+	void readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInStream &in);
 
 
 	void removeQueuedEntities();
@@ -127,7 +144,7 @@ private:
 	Ogre::TexturePtr mGameTexture;
 
 
-    std::list<Ogre::unique_ptr<Entity::Entity>> mEntities;
+	Serialize::ObservableList<Entity::Entity, Ogre::SceneNode *, std::string, Ogre::Entity*> mEntities;
     std::list<Entity::Entity *> mEntityRemoveQueue;
 
     std::list<SceneListener *> mSceneListeners;
@@ -141,7 +158,7 @@ private:
 
     
 
-    static const float sceneRasterSize;
+    
 
 };
 

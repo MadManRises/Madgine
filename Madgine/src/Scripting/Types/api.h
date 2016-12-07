@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Scripting\Datatypes\argumentlist.h"
-#include "Scripting\Datatypes\valuetype.h"
+#include "valuetype.h"
 #include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
 #include "Scripting\Types\scope.h"
 #include "Scripting\scriptingexception.h"
+#include "templates.h"
 
 namespace Engine {
 	namespace Scripting {
@@ -18,46 +18,6 @@ namespace Engine {
 			virtual ValueType execMethod(const std::string &name, const ArgumentList &list) = 0;
 		};
 
-
-		template <class _T>
-		struct Caster {
-			static auto cast(const ValueType &v) {
-				return v.as<std::remove_const_t<std::remove_reference_t<_T>>>();
-			}
-		};
-
-		template <>
-		struct Caster<const ValueType &> {
-			static auto cast(const ValueType &v) {
-				return v;
-			}
-		};
-
-		template <>
-		struct Caster<List*> {
-			static auto cast(const ValueType &v) {
-				List *list = scope_cast<List>(v.asScope());
-				if (!list)
-					throw 0;
-				return list;
-			}
-		};
-
-		template <>
-		struct Caster<Engine::Scene::Entity::Entity*> {
-			static auto cast(const ValueType &v) {
-				Engine::Scene::Entity::Entity *e = scope_cast<Engine::Scene::Entity::Entity>(v.asScope());
-				if (!e)
-					throw 0;
-				return e;
-			}
-		};
-
-		template<bool...> struct bool_pack;
-
-		template<bool...values> struct all_of
-			: std::is_same<bool_pack<values..., true>, bool_pack<true, values...>> {};
-
 		template <class T>
 		class API : public BaseAPI {
 		public:
@@ -69,10 +29,10 @@ namespace Engine {
 
 			virtual ValueType execMethod(const std::string &name, const ArgumentList &list) override {
 				TRACE_S(sFile, -1, name);
-				return (this->*sMethods.find(name)->second)(list);
+				return (this->*sMethods.at(name))(list);
 			}
 
-			typedef Engine::Scripting::ValueType(API::*Method)(const Engine::Scripting::ArgumentList&);
+			typedef ValueType(API::*Method)(const ArgumentList&);
 
 		private:			
 

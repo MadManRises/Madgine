@@ -1,17 +1,32 @@
 #pragma once
 
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 namespace Engine {
-namespace Scripting {
 namespace Serialize {
 
-typedef std::ifstream::pos_type pos_type;
+	typedef std::ifstream::pos_type pos_type;
 
-class MADGINE_EXPORT SerializeInStream {
+class Stream {
 public:
-    SerializeInStream(std::istream &ifs);
-	SerializeInStream(std::istream &ifs, UI::Process &process);
+	Stream(SerializeManager &mgr);
+	virtual ~Stream() = default;
+
+	SerializeManager &manager();
+
+	UI::Process &process();
+
+	ParticipantId id();
+	void setId(ParticipantId id);
+
+protected:
+	SerializeManager &mManager;
+	ParticipantId mId;
+};
+
+class MADGINE_EXPORT SerializeInStream : public Stream {
+public:
+    SerializeInStream(std::istream &ifs, SerializeManager &mgr);
 
 	template <class T, typename V = decltype(std::declval<ValueType>().as<T>())>
 	SerializeInStream &operator >> (T &v) {
@@ -45,37 +60,41 @@ public:
 		return true;
 	}
 
+	bool loopRead() {
+		return ValueType().peek(*this);
+	}
+
     explicit operator bool();
 
-	UI::Process *process();
 
 private:
     std::istream &mIfs;
-	UI::Process *mProcess;
 };
 
-class MADGINE_EXPORT SerializeOutStream {
+class MADGINE_EXPORT SerializeOutStream : public Stream{
 public:
-    SerializeOutStream(std::ostream &ofs);
+    SerializeOutStream(std::ostream &ofs, SerializeManager &mgr);
 
-    SerializeOutStream &operator << (const ValueType &v);
-
+	SerializeOutStream &operator<<(const ValueType &v);
 	SerializeOutStream &operator << (const Ogre::Quaternion &q);
 
-    template <class T>
-    void write(const T &t){
-        write(&t, sizeof(T));
-    }
-
-    void write(const void *buffer, size_t size);
+    virtual void writeData(const void *buffer, size_t size);
     pos_type tell();
     void seek(pos_type p);
 
+
+	template <class T>
+	void write(const T &t) {
+		writeData(&t, sizeof(T));
+	}
+
 private:
     std::ostream &mOfs;
+
+	
 };
 
-}
+
 }
 } // namespace Scripting
 

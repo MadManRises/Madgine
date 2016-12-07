@@ -2,7 +2,7 @@
 #include "ArithmeticalOperator.h"
 
 #include "Database\exceptionmessages.h"
-#include "Scripting\Datatypes\valuetype.h"
+#include "valuetype.h"
 #include "Scripting\scriptingexception.h"
 
 namespace Engine {
@@ -31,7 +31,7 @@ namespace Engine {
 				}
 			}
 
-			ValueType ArithmeticalOperator::run(Scope * rootScope, Scope *, VarSet & stack, bool *) const
+			ValueType ArithmeticalOperator::run(Scope * rootScope, Scope *, Stack & stack, bool *) const
 			{
 				ValueType first = mFirst->run(rootScope, 0, stack);
 				ValueType second = mSecond->run(rootScope, 0, stack);

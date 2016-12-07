@@ -1,7 +1,6 @@
 #include "madginelib.h"
 #include "accessor.h"
 #include "Scripting/Types/scope.h"
-#include "Scripting/Datatypes/varset.h"
 #include "Scripting/Types/globalscope.h"
 
 namespace Engine {
@@ -16,7 +15,7 @@ Accessor::Accessor(int line, const std::string &attName) :
 
 }
 
-ValueType Accessor::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const
+ValueType Accessor::run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const
 {
     if (mAttName.empty())
         return &GlobalScope::getSingleton();
@@ -25,7 +24,7 @@ ValueType Accessor::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) c
     else if (scope)
         return scope->getVar(mAttName);
     else
-        return stack.get(mAttName);
+        return stack.at(mAttName);
 }
 
 }

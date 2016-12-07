@@ -6,21 +6,42 @@ namespace Ogre {
 }
 
 namespace Engine {
+	class ValueType;
+
+	enum class InvPtr : uintptr_t {};
+
 	namespace App {
 		class ConfigSet;
 		struct AppSettings;
 		enum class ContextMask : unsigned int;
 		class Application;
 	}
+	namespace Serialize {
+
+		class SerializeInStream;
+		class SerializeOutStream;
+		class SerializableUnit;
+		class Observable;
+		class Serializable;
+		class FileBuffer;
+		struct MessageHeader;
+		class SerializeManager;
+
+		template <class T, class... Args>
+		class ObservableMap;
+
+		typedef size_t ParticipantId;
+
+		enum TopLevelMadgineObject;
+	}
 	namespace Scripting {
 
-		enum class ScopeClass;
 		class BaseAPI;
 		class BaseGlobalAPIComponent;
 
 		class Scope;
-		class ValueType;
-		class VarSet;
+		
+		
 		class List;
 		class Array;
 		class Struct;
@@ -28,13 +49,11 @@ namespace Engine {
 		class GlobalScope;
 		class Scene;
 
-		namespace Serialize {
+		typedef std::vector<ValueType> ArgumentList;
+		typedef std::map<std::string, ValueType> Stack;
+		typedef Serialize::ObservableMap<ValueType> VarSet;
 
-			class SerializeInStream;
-			class SerializeOutStream;
-			class Serializable;
 
-		}
 
 		namespace Parsing {
 			class MethodNode;
@@ -120,6 +139,12 @@ namespace Engine {
 
 	namespace Input {
 		class InputHandler;
+	}
+
+	namespace Network {
+		class NetworkManager;
+		class NetworkStream;
+		
 	}
 
 }

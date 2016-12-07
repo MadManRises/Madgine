@@ -6,6 +6,8 @@
 
 #include "Scripting\Parsing\entitynodeptr.h"
 
+#include "Serialize\Container\set.h"
+
 namespace Engine {
 namespace Scene {
 namespace Entity {
@@ -16,7 +18,7 @@ namespace Entity {
 class MADGINE_EXPORT Entity : public Scripting::ScopeImpl<Entity>
 {
 private:
-    typedef BaseEntityComponent *(Entity::*ComponentAdder)();
+    typedef Ogre::unique_ptr<BaseEntityComponent> (Entity::*ComponentBuilder)();
 
 public:
     static Entity *entityFromMovable(Ogre::MovableObject *o);
@@ -27,7 +29,6 @@ public:
     ~Entity();
 
     void init(const Scripting::ArgumentList &args = {});
-	void finalize();
 	void remove();
 
 	void positionChanged(const Ogre::Vector3 &dist);
@@ -46,7 +47,7 @@ public:
 	const Ogre::Vector3 &getScale() const;
 
 	virtual std::string getIdentifier() override;
-	std::string getName();
+	std::string getName() const;
 
 	void setObjectVisible(bool b);
 
@@ -58,7 +59,7 @@ public:
 	template <class T>
 	T *addComponent_t() {
 		if (!hasComponent<T>())
-			addComponentImpl(T::componentName(), OGRE_MAKE_UNIQUE(T)(*this));
+			addComponentImpl(createComponent_t<T>());
 		return getComponent<T>();
 	}
 
@@ -67,7 +68,7 @@ public:
 		auto it = mComponents.find(T::componentName());
 		if (it == mComponents.end())
 			return 0;
-		return static_cast<T*>(it->second.get());
+		return static_cast<T*>(it->get());
 	}
 
 	template <class T>
@@ -84,14 +85,17 @@ public:
 
 	static std::set<std::string> registeredComponentNames();
 
+	virtual void writeState(Serialize::SerializeOutStream &of) const override;
+	virtual void readState(Serialize::SerializeInStream &ifs) override;
+	virtual void writeCreationData(Serialize::SerializeOutStream &of) const override;
 
 protected:
 
-	Scripting::ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
+	ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
 
 	template <class T>
-	BaseEntityComponent *addComponentBaseImpl() {
-		return addComponent_t<T>();
+	std::unique_ptr<BaseEntityComponent> createComponent_t() {
+		return std::make_unique<T>(*this);
 	}
 
 	
@@ -99,31 +103,28 @@ protected:
 
     const Scripting::Parsing::MethodNodePtr &getMethod(const std::string &name) override;
 
-    virtual void save(Scripting::Serialize::SerializeOutStream &of) const override;
-    virtual void load(Scripting::Serialize::SerializeInStream &ifs) override;
-
-	virtual void storeCreationData(Scripting::Serialize::SerializeOutStream &of) override;
-
+    
 	
 
 private:
 
 	template <class T>
 	static void registerComponent() {
-		const char *name = T::componentName();
+		const std::string name = T::componentName();
 		assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-		sRegisteredComponentsByName()[name] = &addComponentBaseImpl<T>;
+		sRegisteredComponentsByName()[name] = &createComponent_t<T>;
 	}
 
 	template <class T>
 	static void unregisterComponent() {
-		const char *name = T::componentName();
+		const std::string name = T::componentName();
 		assert(sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end());
 		sRegisteredComponentsByName().erase(name);
 	}
 
 
-	void addComponentImpl(const std::string &name, Ogre::unique_ptr<BaseEntityComponent> &&component);
+	std::tuple<std::unique_ptr<BaseEntityComponent>> createComponent(const std::string &name);
+	BaseEntityComponent *addComponentImpl(Ogre::unique_ptr<BaseEntityComponent> &&component);
 
 	template <class T>
 	class ComponentRegistrator {
@@ -148,10 +149,11 @@ private:
     
     Ogre::Vector3 mLastPosition;
 
-    std::map<std::string, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
+	Serialize::ObservableSet<Ogre::unique_ptr<BaseEntityComponent>, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
+    //std::set<Ogre::unique_ptr<BaseEntityComponent>> mComponents;
 
-    static std::map<std::string, ComponentAdder> &sRegisteredComponentsByName(){
-        static std::map<std::string, ComponentAdder> dummy;
+    static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
+        static std::map<std::string, ComponentBuilder> dummy;
         return dummy;
     }
 

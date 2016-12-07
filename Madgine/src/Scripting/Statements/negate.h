@@ -10,7 +10,7 @@ class Negate : public Statement {
 public:
     Negate(int line, Ogre::unique_ptr<const Statement> &&child);
 
-    virtual ValueType run(Scope *rootScope, Scope *, VarSet &stack, bool *) const;
+    virtual ValueType run(Scope *rootScope, Scope *, Stack &stack, bool *) const;
 private:
     Ogre::unique_ptr<const Statement> mChild;
 };

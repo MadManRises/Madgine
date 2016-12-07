@@ -3,14 +3,14 @@
 #include "uniquecomponent.h"
 #include "scenelistener.h"
 #include "App/contextmasks.h"
-#include "Scripting/Datatypes/Serialize/serializable.h"
+#include "Serialize/serializableunit.h"
 #include "Util\UtilMethods.h"
 #include "Scripting\Types\globalapi.h"
 
 namespace Engine {
 namespace Scene {
 
-class MADGINE_EXPORT BaseSceneComponent : public SceneListener, public Scripting::Serialize::Serializable{
+class MADGINE_EXPORT BaseSceneComponent : public SceneListener, public Serialize::SerializableUnit{
 public:
     virtual ~BaseSceneComponent() = default;
 
@@ -31,8 +31,7 @@ protected:
 
 	void setUpdateInterval(float interval);
 
-    virtual void load(Scripting::Serialize::SerializeInStream &in);
-    virtual void save(Scripting::Serialize::SerializeOutStream &out) const;
+    
 
 private:
     const App::ContextMask mContext;

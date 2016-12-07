@@ -1,6 +1,6 @@
 #include "madginelib.h"
 #include "for.h"
-#include "Scripting/Datatypes/valuetype.h"
+#include "valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -17,7 +17,7 @@ For::For(int line, Ogre::unique_ptr<const Statement> &&init, Ogre::unique_ptr<co
 
 }
 
-ValueType For::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *bReturn) const
+ValueType For::run(Scope *rootScope, Scope *scope, Stack &stack, bool *bReturn) const
 {
 
     for(mInit->run(rootScope, 0, stack); mCond->run(rootScope, 0, stack).asBool(); mStep->run(rootScope, 0, stack)){

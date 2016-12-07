@@ -1,7 +1,7 @@
 #include "madginelib.h"
 #include "methodcall.h"
-#include <sstream>
 #include "Scripting/Types/scope.h"
+#include "valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -17,7 +17,7 @@ MethodCall::MethodCall(int line, const std::string &methodName,
 
 }
 
-ValueType MethodCall::run(Scope *rootScope, Scope *scope, VarSet &stack, bool *) const
+ValueType MethodCall::run(Scope *rootScope, Scope *scope, Stack &stack, bool *) const
 {
     if (!scope) scope = rootScope;
     ArgumentList args(mArguments.size());
