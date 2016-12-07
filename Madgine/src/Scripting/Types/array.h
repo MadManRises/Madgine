@@ -22,13 +22,9 @@ public:
 	const ValueType *begin() const;
 	const ValueType *end() const;
 
-    //virtual void collectNamedValues(std::map<std::string, ValueType*> &values) override;
-
 	virtual void writeCreationData(Serialize::SerializeOutStream &of) const override;
 
 protected:
-
-    virtual void collectValueRefs(std::list<ValueType *> &values) override;
 
     virtual void readState(Serialize::SerializeInStream &ifs) override;
     virtual void writeState(Serialize::SerializeOutStream &of) const override;

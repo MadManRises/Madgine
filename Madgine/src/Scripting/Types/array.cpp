@@ -97,16 +97,6 @@ const ValueType *Array::end() const
 	return mItems + mSize;
 }
 
-/*void List::collectNamedValues(std::map<std::string, ValueType *> &values)
-{
-    Scope::collectNamedValues(values);
-
-    unsigned int i = 0;
-    for (ValueType &v : *this){
-        values[std::to_string(i++)] = &v;
-    }
-}*/
-
 
 void Array::writeCreationData(Serialize::SerializeOutStream & of) const
 {
@@ -114,16 +104,6 @@ void Array::writeCreationData(Serialize::SerializeOutStream & of) const
 	of << mSize;
 }
 
-
-
-void Array::collectValueRefs(std::list<ValueType *> &values)
-{
-    Scope::collectValueRefs(values);
-
-	for (size_t i = 0; i < mSize; ++i) {
-        values.push_back(mItems + i);
-    }
-}
 
 } // namespace Scripting
 

@@ -25,11 +25,8 @@ public:
 	std::list<ValueType>::const_iterator begin() const;
 	std::list<ValueType>::const_iterator end() const;
 
-    //virtual void collectNamedValues(std::map<std::string, ValueType*> &values) override;
 
 protected:
-
-    virtual void collectValueRefs(std::list<ValueType *> &values) override;
 
     virtual void readState(Serialize::SerializeInStream &ifs) override;
     virtual void writeState(Serialize::SerializeOutStream &of) const override;

@@ -124,58 +124,14 @@ void Scope::readState(Serialize::SerializeInStream &in)
 		mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(mPrototypeName);
 }
 
-void Scope::applyScopeMap(const std::map<InvPtr, Scope *> &map)
-{
-    std::list<ValueType *> values;
-    collectValueRefs(values);
-    for (ValueType *v : values){
-        if (v->isInvScope()){
-            auto it = map.find(v->asInvScope());
-            if (it == map.end()) throw 0;
-            *v = it->second;
-        }
-    }
-}
-
 bool Scope::checkFlag(const std::string &name, bool defaultValue)
 {
     return hasVar(name) ? mVariables[name].asBool() : defaultValue;
 }
 
-void Scope::collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &ignoreMap)
-{
-    if (ignoreMap.find(this) != ignoreMap.end()) return;
-    if (scopeMap.find(this) != scopeMap.end()) return;
-
-    scopeMap.insert(this);
-    std::list<ValueType *> values;
-    collectValueRefs(values);
-    for (ValueType *v : values){
-        if (v->isScope()){
-            v->asScope()->collectScopes(scopeMap);
-        }
-    }
-    return;
-}
-
-/*void Scope::collectNamedValues(std::map<std::string, ValueType *> &values)
-{
-    for (std::pair<const std::string, ValueType> &p : mVariables){
-        values[p.first] = &p.second;
-    }
-
-}*/
-
 void Scope::clear()
 {
     mVariables.clear();
-}
-
-void Scope::collectValueRefs(std::list<ValueType *> &values)
-{
-    /*for (const std::pair<const std::string, ValueType> &p : mVariables){
-        values.push_back(&p.second);
-    }*/
 }
 
 const std::list<std::string> &Scope::getArguments(const std::string &name)

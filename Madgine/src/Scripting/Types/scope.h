@@ -26,11 +26,6 @@ public:
 	void clearPrototype();
 
 	virtual bool hasScriptMethod(const std::string &name);
-	
-	void applyScopeMap(const std::map<InvPtr, Scope *> &map);
-	void collectScopes(std::set<Scope *> &scopeMap, const std::set<Scope *> &ignoreMap = {});
-	//virtual void collectNamedValues(std::map<std::string, ValueType*> &values);
-
  
 	virtual std::string getIdentifier() = 0;	
 
@@ -42,16 +37,8 @@ public:
 
 	virtual void clear();
 
-
 	virtual void readState(Serialize::SerializeInStream &in) override;
-
-protected:	
-
-    virtual void collectValueRefs(std::list<ValueType *> &values);
-
-    
-
-
+  
 private:
 
 	ValueType execScriptMethod(const std::string &name, const ArgumentList &args);

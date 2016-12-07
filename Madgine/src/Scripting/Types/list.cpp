@@ -114,25 +114,6 @@ std::list<ValueType>::const_iterator List::end() const
 	return mItems.end();
 }
 
-/*void List::collectNamedValues(std::map<std::string, ValueType *> &values)
-{
-    Scope::collectNamedValues(values);
-
-    unsigned int i = 0;
-    for (ValueType &v : mItems){
-        values[std::to_string(i++)] = &v;
-    }
-}*/
-
-
-void List::collectValueRefs(std::list<ValueType *> &values)
-{
-    Scope::collectValueRefs(values);
-
-    for (ValueType &v : mItems){
-        values.push_back(&v);
-    }
-}
 
 } // namespace Scripting
 
