@@ -78,7 +78,7 @@ public:
 
 	bool hasComponent(const std::string &name);
 
-	BaseEntityComponent *addComponent(const std::string &name);
+	void addComponent(const std::string &name);
 	void removeComponent(const std::string &name);
 
 	static bool existsComponent(const std::string &name);

@@ -9,8 +9,9 @@ namespace Engine {
 			template <class T>
 			class Serialized : public Serializable {
 			public:
-				Serialized(SerializableUnit *parent, const T &data = T()) :
-					mData(data),
+				template <class... _Ty>
+				Serialized(SerializableUnit *parent, _Ty&&... args) :
+					mData(std::forward<_Ty>(args)...),
 					Serializable(parent) {
 
 				}
@@ -20,12 +21,20 @@ namespace Engine {
 					mData = std::forward<T>(v);
 				}
 
-				virtual void read(SerializeInStream &in) override {
-					in >> mData;
+				T *operator->() {
+					return &mData;
 				}
 
-				virtual void write(SerializeOutStream &out) const override {
-					out << mData;
+				T *ptr() {
+					return &mData;
+				}
+
+				virtual void readState(SerializeInStream &in) override {
+					mData.readState(in);
+				}
+
+				virtual void writeState(SerializeOutStream &out) const override {
+					mData.writeState(out);
 				}
 
 			protected:

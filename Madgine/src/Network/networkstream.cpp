@@ -28,6 +28,21 @@ namespace Engine {
 			return mBuffer.isMessageAvailable();
 		}
 
+		bool NetworkStream::isValid()
+		{
+			return bool(*this) && !mBuffer.isClosed();
+		}
+
+		void NetworkStream::beginMessage()
+		{
+			mBuffer.beginMessage();
+		}
+
+		void NetworkStream::endMessage()
+		{
+			mBuffer.sendMessage();
+		}
+
 
 		
 	}

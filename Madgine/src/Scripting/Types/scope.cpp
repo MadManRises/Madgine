@@ -9,6 +9,8 @@
 
 #include "Util\UtilMethods.h"
 
+#include "scriptingmanager.h"
+
 namespace Engine {
 namespace Scripting {
 
@@ -19,16 +21,18 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
     {"check", &checkFlag},
 	{"findPrototype", &findPrototype},
 	{"getPrototype", &getPrototype},
-	{"setPrototype", &setPrototype}
+	{"setPrototype", &setPrototype},
+	{"call", &call},
+	{"isGlobal", &isGlobal}
 };
 
-Scope::Scope(const std::string &prototypeName) :
+Scope::Scope(Serialize::TopLevelSerializableUnit *topLevel) :
 	mPrototype(0),
 	mPrototypeName(this),
-	mVariables(this)
+	mVariables(this),
+	SerializableUnit(topLevel)
 {
-	if (!prototypeName.empty())
-		findPrototype(prototypeName);
+
 }
 
 Scope::~Scope()
@@ -186,6 +190,20 @@ ValueType Scope::setPrototype(const ArgumentList & stack)
 {
 	setPrototype(stack.at(0).asScope());
 	return ValueType();
+}
+
+ValueType Scope::call(const ArgumentList & stack)
+{
+	if (stack.size() < 1)
+		throw ScriptingException("Too few Arguments to call!");
+	auto it = stack.begin();
+	++it;
+	return methodCall(stack.at(0).asString(), { it, stack.end() });
+}
+
+ValueType Scope::isGlobal(const ArgumentList & stack)
+{
+	return topLevel() == &ScriptingManager::getSingleton();
 }
 
 ValueType Scope::execScriptMethod(const std::string &name,

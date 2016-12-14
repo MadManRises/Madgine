@@ -40,7 +40,8 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
     mNode(node),
     mObject(obj),
     mLastPosition(node->getPosition()),
-	mComponents(this, &Entity::createComponent)
+	mComponents(this, &Entity::createComponent),
+	ScopeImpl(&SceneManager::getSingleton())
 {
 
     mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
@@ -186,8 +187,8 @@ bool Entity::hasComponent(const std::string & name)
 	return mComponents.contains(name);
 }
 
-BaseEntityComponent *Entity::addComponent(const std::string &name){
-	return addComponentImpl(std::get<0>(createComponent(name)));
+void Entity::addComponent(const std::string &name){
+	addComponentImpl(std::get<0>(createComponent(name)));
 }
 
 void Entity::removeComponent(const std::string & name)

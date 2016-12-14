@@ -55,18 +55,18 @@ namespace Maditor {
 			void ApplicationWatcher::notifyApplicationShutdown()
 			{
 
-				mPerformanceWatcher.clear();
-				mResourceWatcher->clear();
-
-				emit applicationShutdown();
-			}
-
-			void ApplicationWatcher::afterApplicationShutdown()
-			{
 				//emit logRemoved(mOgreLog);
 				//mOgreLog->stopListening(false);
 				//delete mOgreLog;
+
+				mPerformanceWatcher.clear();
+				mResourceWatcher->clear();
+
+
+				emit applicationShutdown();
+		
 			}
+
 
 			void ApplicationWatcher::notifyApplicationStarted()
 			{

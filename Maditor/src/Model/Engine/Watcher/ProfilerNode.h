@@ -2,13 +2,13 @@
 
 #include "Model\TreeItem.h"
 
-#include "Common\StatsInfo.h"
+#include "StatsInfo.h"
 
 namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 
-			class ProfilerNode : public TreeItem {
+			/*class ProfilerNode : public TreeItem {
 
 			public:
 				ProfilerNode(const std::string &name, const ProcessStats &stats, ProfilerNode *parent);
@@ -59,7 +59,7 @@ namespace Maditor {
 			private:
 				SharedStats &mShared;
 
-			};
+			};*/
 
 		}
 	}

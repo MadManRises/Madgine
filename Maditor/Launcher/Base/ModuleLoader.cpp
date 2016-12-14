@@ -5,7 +5,6 @@
 
 
 		ModuleLoader::ModuleLoader() :
-			ProcessTalker("Maditor_Module_Loader", "Loader"),
 			mInit(false)
 		{
 			
@@ -27,11 +26,11 @@
 
 			mReceivingModules = true;
 
-			sendMsg({ Init }, "Maditor_Loader");
+			//sendMsg({ Init }, "Maditor_Loader");
 	
-			while (mReceivingModules) {
+			/*while (mReceivingModules) {
 				update();
-			}
+			}*/
 		}
 
 		void ModuleLoader::cleanup()
@@ -103,7 +102,7 @@
 				h->finalize();
 			}
 
-			bool result = FreeLibrary(module.mHandle);
+			bool result = (FreeLibrary(module.mHandle) != 0);
 			if (result)
 				module.mLoaded = false;
 			else
@@ -113,20 +112,6 @@
 		}
 
 
-		void ModuleLoader::receiveMessage(const ModuleLoaderMsg & msg)
-		{
-			switch (msg.mCmd) {
-			case Init:
-				mReceivingModules = false;
-				break;
-			case Load:
-				loadModule(addModule(msg.mArg), msg.mCallInit);
-				break;
-			case Unload:
-				unloadModule(addModule(msg.mArg));
-				break;
-			}
-		}
 
 		bool ModuleLoader::loadModule(ModuleInstance & module, bool callInit)
 		{

@@ -10,99 +10,64 @@ namespace Engine {
 
 
 
-API_IMPL(Array, &contains, &at, &setAt, &size, &index);
+API_IMPL(Vector, &contains, &at, &setAt, &size, &index);
 
-
-Array::Array(size_t size) :
-	mSize(size),
-	mItems(new ValueType[size]())
+Vector::Vector(RefScopeTopLevelSerializableUnit * topLevel) :
+	mItems(this),
+	ScopeImpl(topLevel)
 {
+}
 
+bool Vector::contains(const ValueType &v)
+{
+    return std::find(mItems.begin(), mItems.end(), v) != mItems.end();
+}
+
+ValueType Vector::at(int i)
+{
+	return mItems.at(i);
+}
+
+void Vector::setAt(int i, const ValueType & v)
+{
+	mItems.at(i) = v;
+}
+
+void Vector::resize(size_t size)
+{
+	//mItems.resize(size);
+}
+
+size_t Vector::size() const
+{
+	return mItems.size();
+}
+
+int Vector::index(const ValueType & v)
+{
+	auto it = std::find(mItems.begin(), mItems.end(), v);
+	if (it == mItems.end()) return -1;
+	else return std::distance(mItems.begin(), it);
 }
 
 
-bool Array::contains(const ValueType &v)
+
+/*const ValueType *Vector::data() const
 {
-    return std::find(begin(), end(), v) != end();
+    return mItems.data();
+}*/
+
+Serialize::SerializableList<ValueType>::const_iterator Vector::begin() const
+{
+	return mItems.begin();
 }
 
-ValueType Array::at(int i)
+Serialize::SerializableList<ValueType>::const_iterator Vector::end() const
 {
-	if (i >= mSize)
-		MADGINE_THROW_NO_TRACE(ScriptingException("index out of bounds!"));
-	return mItems[i];
-}
-
-void Array::setAt(int i, const ValueType & v)
-{
-	if (i >= mSize)
-		MADGINE_THROW_NO_TRACE(ScriptingException("index out of bounds!"));
-	mItems[i] = v;
-}
-
-size_t Array::size() const
-{
-	return mSize;
-}
-
-int Array::index(const ValueType & v)
-{
-	auto it = std::find(begin(), end(), v);
-	if (it == end()) return -1;
-	else return std::distance(begin(), it);
+	return mItems.end();
 }
 
 
-
-void Array::readState(Serialize::SerializeInStream &ifs)
-{
-
-    Scope::readState(ifs);
-
-    size_t count;
-    ifs >> count;
-	if (count != mSize)
-		MADGINE_THROW_NO_TRACE(ScriptingException("serialized data array size mismatch!"));
-
-	for (auto v : *this) {
-        ifs >> v;
-    }
-
-}
-
-void Array::writeState(Serialize::SerializeOutStream &of) const
-{
-    Scope::writeState(of);
-
-    of << mSize;
-
-    for (const ValueType &v : *this){
-        of << v;
-    }
-
-}
-
-const ValueType *Array::data() const
-{
-    return mItems;
-}
-
-const ValueType *Array::begin() const
-{
-	return mItems;
-}
-
-const ValueType *Array::end() const
-{
-	return mItems + mSize;
-}
-
-
-void Array::writeCreationData(Serialize::SerializeOutStream & of) const
-{
-	Scope::writeCreationData(of);
-	of << mSize;
-}
 
 
 } // namespace Scripting

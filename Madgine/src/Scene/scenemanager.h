@@ -2,7 +2,7 @@
 
 #include "Scene\scenecomponent.h"
 #include "Resources/Shading/shadercollector.h"
-#include "Serialize/serializableunit.h"
+#include "Scripting\Types\refscopetoplevelserializableunit.h"
 #include "Entity\masks.h"
 #include "Util\MadgineObject.h"
 
@@ -10,10 +10,17 @@
 
 #include "Serialize\Container\list.h"
 
+#include "Scripting\Types\array.h"
+
 namespace Engine {
 namespace Scene {
 
-class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>, public Ogre::GeneralAllocatedObject, public Serialize::SerializableUnit, public Util::MadgineObject<SceneManager> {
+class MADGINE_EXPORT SceneManager : public Ogre::Singleton<SceneManager>,
+	public Ogre::GeneralAllocatedObject, 
+	public Scripting::RefScopeTopLevelSerializableUnit, 
+	public Util::MadgineObject<SceneManager>, 
+	public Scripting::GlobalAPI<SceneManager>
+{
 public:
     SceneManager(Ogre::Root *root);
     virtual ~SceneManager();
@@ -83,8 +90,6 @@ public:
 
 	void saveComponentData(Serialize::SerializeOutStream &out) const;
 	void loadComponentData(Serialize::SerializeInStream &in);
-
-	virtual Serialize::TopLevelMadgineObject topLevelId() override;
 	
 
 	void clear();
@@ -96,6 +101,10 @@ public:
 	void writeScene(Serialize::SerializeOutStream &out) const;
 
 	static constexpr const float sSceneRasterSize = .2f;
+
+	Scripting::Scope *createSceneArray(size_t size);
+	Scripting::Scope *createSceneStruct();
+	Scripting::Scope *createSceneList();
 
 	///FOR LAUNCHER
 	std::set<BaseSceneComponent*> getComponents();
@@ -114,8 +123,6 @@ protected:
 	void removeQueuedEntities();
 		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
-
-
 
 private:
 
@@ -153,12 +160,7 @@ private:
     Resources::Shading::ShaderCollector mShaderCollector;
 
     
-    std::string mHeightmap;
-
-
-    
-
-    
+    std::string mHeightmap;   
 
 };
 

@@ -12,22 +12,14 @@
 #include "Network\networkmanager.h"
 
 		ApplicationLauncher::ApplicationLauncher() :
-			ProcessTalker("Maditor_Launcher", "Launcher"),
 			mRunning(true),
-			mApplication(0),
-			mAppInfo(SharedMemory::getSingleton().mAppInfo),
-			mWatcher()
+			mAppInfo(SharedMemory::getSingleton().mAppInfo)
 		{
 			load();
 		}
 		ApplicationLauncher::~ApplicationLauncher()
 		{
-			sendMsg(APP_SHUTDOWN);
-			delete mApplication;
-			mApplication = 0;
-			mWatcher.clear();
-			sendMsg(APP_AFTER_SHUTDOWN);
-			delete mOgreLog;
+
 		}
 
 		void ApplicationLauncher::load()
@@ -40,7 +32,6 @@
 			mSettings.mWindowHeight = mAppInfo.mWindowHeight;
 			mSettings.mRootDir = mAppInfo.mMediaDir.c_str();
 			mSettings.mPluginsFile = mSettings.mRootDir + "plugins.cfg";
-			mSettings.mUseNetwork = true;
 
 			Ogre::NameValuePairList &parameters = mSettings.mWindowParameters;
 
@@ -68,22 +59,28 @@
 			parameters["macAPICocoaUseNSView"] = "true";
 #endif
 
-
-			mApplication = new Engine::App::Application;
 				
-			mApplication->setup(mSettings);
+			mApplication.setup(mSettings);
 
 			mInput.setSystem(&Engine::GUI::GUISystem::getSingleton());
 			std::string project = mAppInfo.mProjectDir.c_str();
-			sendMsg(APP_CREATED);
-
-			mOgreLog = new LogWatcher("Madgine.log", project);
+			//sendMsg(APP_CREATED);
 			
-			mLoader.setup(project + "debug/bin/", project + "debug/runtime/");
-			mApplication->init();
-			sendMsg(APP_INITIALIZED);
+			mNetwork.addTopLevelItem(this);
+			mNetwork.startServer(1000);
+			while (mNetwork.clientCount() == 0) {
+				mNetwork.receiveMessages();
+				mNetwork.acceptConnections();
+			}
 
-			Engine::Network::NetworkManager::getSingleton().startServer(1000);
+			mLoader.setup(project + "debug/bin/", project + "debug/runtime/");
+			mApplication.init();
+			//sendMsg(APP_INITIALIZED);
+
+			mNetwork.addTopLevelItem(&Engine::Scene::SceneManager::getSingleton());
+			
+
+			
 
 			Ogre::Root::getSingleton().addFrameListener(this);
 
@@ -92,36 +89,16 @@
 
 		void ApplicationLauncher::start()
 		{
-			sendMsg(APP_STARTED);
-			mApplication->go();
-			sendMsg(APP_STOPPED);
+			//sendMsg(APP_STARTED);
+			mApplication.go();
+			//sendMsg(APP_STOPPED);
 		}
 
 		void ApplicationLauncher::stop()
 		{			
-			mApplication->shutdown();
+			mApplication.shutdown();
 		}
 
-		
-
-		void ApplicationLauncher::receiveMessage(const ApplicationMsg & msg)
-		{
-			switch (msg.mCmd) {
-			case START_APP:
-				start();
-				break;
-			case STOP_APP:
-				stop();
-				break;
-			case SHUTDOWN:
-				stop();
-				mRunning = false;
-				break;
-			case RESIZE_WINDOW:
-				resizeWindow();
-				break;
-			}
-		}
 
 		void ApplicationLauncher::resizeWindow()
 		{
@@ -132,9 +109,10 @@
 		bool ApplicationLauncher::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		{
 			PROFILE("Launcher", "Frame");
-			mWatcher.update();
-			update();
-			mLoader.update();
+			mNetwork.receiveMessages();
+			if (mNetwork.clientCount() < 1) {
+				stop();
+			}
 			return true;
 		}
 
@@ -146,19 +124,15 @@
 		int ApplicationLauncher::exec()
 		{
 			
-			while (mRunning) {
-				mWatcher.update();
-				update();
+			while (mRunning) {								
+				mNetwork.receiveMessages();
+				if (mNetwork.clientCount() < 1) {
+					mRunning = false;
+				}
 				//mLoader->update();		
 			}
 			return 0;
 		}
 
-		bool ApplicationLauncher::sendMsg(ApplicationCmd cmd)
-		{
-			ApplicationMsg msg;
-			msg.mCmd = cmd;
-			return ProcessTalker::sendMsg(msg, "Maditor");
-		}
 
 	

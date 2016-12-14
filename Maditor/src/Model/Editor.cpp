@@ -2,7 +2,6 @@
 
 #include "Editor.h"
 #include "Logsmodel.h"
-#include "Engine/Watcher/ApplicationWatcher.h"
 #include "Engine/ApplicationWrapper.h"
 #include "Editors\EditorManager.h"
 #include "Project\Generators\ClassGeneratorFactory.h"
@@ -27,26 +26,24 @@ namespace Maditor {
 			mLogs(0)
 		{
 
-			mLog = new Watcher::OgreLogWatcher(Watcher::OgreLogWatcher::GuiLog, "Madgine.log");
+			//mLog = new Watcher::OgreLogWatcher(Watcher::OgreLogWatcher::GuiLog, "Madgine.log");
 
 			mSettings.beginGroup("Editor");
 			mRecentProjects = mSettings.value("recentProjects").toStringList();
 			mReloadProject = mSettings.value("reloadProject").toBool();
 			mSettings.endGroup();
 
-			mLoader = new ModuleLoader;
-			mApplicationWatcher = new Watcher::ApplicationWatcher(mLog);
-			mApplicationWrapper = new ApplicationWrapper(mApplicationWatcher, mLoader);
+			mApplicationWrapper = new ApplicationWrapper();
 
 			mEditorManager = new Editors::EditorManager(collector);
 			mClassGeneratorFactory = new Generators::ClassGeneratorFactory;
 			mLogs = new LogsModel;
 
-			mApplicationWatcher->init();
+			/*mApplicationWatcher->init();
 
 			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logCreated, mLogs, &LogsModel::addLog);
 			connect(mApplicationWatcher, &Watcher::ApplicationWatcher::logRemoved, mLogs, &LogsModel::removeLog);
-			connect(mEditorManager->scriptEditor(), &Editors::ScriptEditorModel::documentSaved, mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::reloadScriptFile);
+			connect(mEditorManager->scriptEditor(), &Editors::ScriptEditorModel::documentSaved, mApplicationWatcher->resourceWatcher(), &Watcher::ResourceWatcher::reloadScriptFile);*/
 
 			mLogs->addLog(mLog);
 			Generators::CommandLine::setLog(mLog);

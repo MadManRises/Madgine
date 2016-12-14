@@ -5,7 +5,6 @@
 
 #include "Addons\Addon.h"
 
-#include "Common\Shared.h"
 
 
 //#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")

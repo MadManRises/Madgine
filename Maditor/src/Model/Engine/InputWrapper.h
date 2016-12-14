@@ -4,7 +4,7 @@
 #include <boost\interprocess\ipc\message_queue.hpp>
 
 
-#include "Common\InputInfo.h"
+#include "InputInfo.h"
 
 namespace Maditor {
 	namespace Model {

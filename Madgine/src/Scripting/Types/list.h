@@ -9,7 +9,7 @@ namespace Scripting {
 class MADGINE_EXPORT List : public ScopeImpl<List, RefScope>
 {
 public:
-    List();
+	using ScopeImpl::ScopeImpl;
 
     bool contains(const ValueType &v);
     const ValueType &add(const ValueType &v);
@@ -24,9 +24,6 @@ public:
 
 	std::list<ValueType>::const_iterator begin() const;
 	std::list<ValueType>::const_iterator end() const;
-
-
-protected:
 
     virtual void readState(Serialize::SerializeInStream &ifs) override;
     virtual void writeState(Serialize::SerializeOutStream &of) const override;

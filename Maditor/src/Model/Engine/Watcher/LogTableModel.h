@@ -2,7 +2,8 @@
 
 #include "OgreLog.h"
 #include "Util\Traceback.h"
-#include "Common\LogInfo.h"
+
+#include "LogInfo.h"
 
 namespace Maditor {
 	namespace Model {

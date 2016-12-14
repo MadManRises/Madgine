@@ -1,7 +1,6 @@
 #pragma once
 
 #include "refscope.h"
-#include "scopeimpl.h"
 
 namespace Engine {
 namespace Scripting {

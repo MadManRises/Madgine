@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "valuetype.h"
 
 
 namespace Engine {
@@ -28,22 +28,38 @@ namespace Engine {
 	};
 
 	
-	struct TupleLoader {
+	struct TupleSerializer {
 
 		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<Args>::value...>::value>>
-		static void loadTuple(std::tuple<Args...> &tuple, Serialize::SerializeInStream &in) {
-			loadTuple(tuple, in, std::make_index_sequence<sizeof...(Args)>());
+		static void readTuple(std::tuple<Args...> &tuple, Serialize::SerializeInStream &in) {
+			readTuple(tuple, in, std::make_index_sequence<sizeof...(Args)>());
 		}
 
 		template <class Arg, class... Args, size_t... S>
-		static void loadTuple(std::tuple<Arg, Args...> &tuple, Serialize::SerializeInStream &in, std::index_sequence<S...>) {
+		static void readTuple(std::tuple<Arg, Args...> &tuple, Serialize::SerializeInStream &in, std::index_sequence<S...>) {
 			using expander = int[];
 			(void)expander {
 				(void(in >> std::get<S>(tuple)), 0)...
 			};
 		}
 
-		static void loadTuple(std::tuple<> &tuple, Serialize::SerializeInStream &in, std::index_sequence<>) {
+		static void readTuple(std::tuple<> &tuple, Serialize::SerializeInStream &in, std::index_sequence<>) {
+		}
+
+		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<Args>::value...>::value>>
+		static void writeTuple(const std::tuple<Args...> &tuple, Serialize::SerializeOutStream &out) {
+			writeTuple(tuple, out, std::make_index_sequence<sizeof...(Args)>());
+		}
+
+		template <class Arg, class... Args, size_t... S>
+		static void writeTuple(const std::tuple<Arg, Args...> &tuple, Serialize::SerializeOutStream &out, std::index_sequence<S...>) {
+			using expander = int[];
+			(void)expander {
+				(void(out << std::get<S>(tuple)), 0)...
+			};
+		}
+
+		static void writeTuple(const std::tuple<> &tuple, Serialize::SerializeOutStream &out, std::index_sequence<>) {
 		}
 
 	};

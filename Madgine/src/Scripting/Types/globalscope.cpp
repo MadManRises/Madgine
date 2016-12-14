@@ -10,19 +10,17 @@
 namespace Engine {
 namespace Scripting {
 
-//Story::Factory Story::sFactory;
-
-	API_IMPL(GlobalScope, &log, &createStruct, &createStruct_, &createList, &createArray, &debug, &level, &getData, &call);
+	API_IMPL(GlobalScope);
 
 
-	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
-	mScriptParser(scriptParser)
-{    
-	Ogre::LogManager::getSingleton().createLog("Scripting.log");
-}
+	GlobalScope::GlobalScope(Serialize::TopLevelSerializableUnit *parent, Parsing::ScriptParser *scriptParser) :
+		mScriptParser(scriptParser),
+		ScopeImpl(parent)
+	{
+		Ogre::LogManager::getSingleton().createLog("Scripting.log");
+	}
 
 void GlobalScope::init() {
-	MadgineObject::init();
 
 	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
 		api->init();
@@ -34,12 +32,6 @@ void GlobalScope::finalize()
 	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
 		api->finalize();
 	}
-	MadgineObject::finalize();
-}
-
-Scene *GlobalScope::level()
-{
-    return &mLevel;
 }
 
 void GlobalScope::addAPI(BaseAPI * api)
@@ -58,44 +50,9 @@ bool GlobalScope::hasScriptMethod(const std::string &name)
 	return mScriptParser->hasGlobalMethod(name);
 }
 
-Struct *GlobalScope::getData(const std::string &name)
-{
-	return &mScriptParser->getPrototype(name);
-}
-
 const Parsing::MethodNodePtr &GlobalScope::getMethod(const std::string &name)
 {
 	return mScriptParser->getGlobalMethod(name);
-}
-
-void GlobalScope::log(const ValueType &v)
-{
-	Util::UtilMethods::log(v.toString(), Ogre::LML_TRIVIAL);
-}
-
-Struct *GlobalScope::createStruct()
-{
-    return OGRE_NEW Struct();
-}
-
-Struct * GlobalScope::createStruct_(const std::string &prototype)
-{
-	return OGRE_NEW Struct(prototype);
-}
-
-List *GlobalScope::createList()
-{
-    return OGRE_NEW List();
-}
-
-Array * GlobalScope::createArray(size_t size)
-{
-	return OGRE_NEW Array(size);
-}
-
-const ValueType &GlobalScope::debug(const ValueType &v)
-{
-    return v;
 }
 
 
@@ -104,7 +61,6 @@ void GlobalScope::clear()
 	for (const Ogre::unique_ptr<BaseGlobalAPIComponent> &p : mGlobalAPIs) {
 		p->clear();
 	}
-	mLevel.clear();
     Scope::clear();    
 }
 
@@ -128,11 +84,6 @@ std::set<BaseGlobalAPIComponent*> GlobalScope::getGlobalAPIComponents()
 		result.insert(api.get());
 	}
 	return result;
-}
-
-ValueType GlobalScope::call(const ArgumentList & args, const std::string & name)
-{
-	return methodCall(name, args);
 }
 
 

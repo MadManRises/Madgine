@@ -76,8 +76,9 @@ namespace Engine {
 
 				void notify() {
 
-					for (SerializeOutStream *out : getMessageTargets(true)) {
+					for (SerializeOutStream *out : getMasterMessageTargets(true)) {
 						*out << mData;
+						out->endMessage();
 					}
 					
 				}

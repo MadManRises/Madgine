@@ -13,7 +13,7 @@ T *scope_cast(Scope *s) {
 	T *t = dynamic_cast<T*>(s);
 	if (!t)
 		MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::unexpectedScopeType(s->getIdentifier(), typeid(T).name())));
-	return (T*)s;
+	return t;
 }
 
 

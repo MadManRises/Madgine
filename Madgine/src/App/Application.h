@@ -158,11 +158,10 @@ private:
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;
-    Scripting::GlobalScope*                 mGlobalScope;
+    Scripting::ScriptingManager*      mScriptingMgr;
     ConfigSet*                        mConfig;
 	Util::Profiler*                   mProfiler;
 	Input::InputHandler*              mInput;
-	Network::NetworkManager*          mNetwork;
 
 	HWND mHwnd;
 

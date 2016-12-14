@@ -12,13 +12,6 @@ public:
 
 
 
-	void clear();
-
-
-				
-
-	void update();
-
 private:				
 		
 	PerformanceWatcher mPerformanceWatcher;

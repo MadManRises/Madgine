@@ -21,10 +21,10 @@ namespace Engine {
 
 		};
 
-		class MADGINE_EXPORT LevelFieldAccessor : public ScopeFieldAccessor
+		class MADGINE_EXPORT SceneFieldAccessor : public ScopeFieldAccessor
 		{
 		public:
-			LevelFieldAccessor(const std::string &fieldName);
+			SceneFieldAccessor(const std::string &fieldName);
 
 		};
 
@@ -79,14 +79,14 @@ namespace Engine {
 		template <class T>
 		using DefaultGlobalAccessor = DefaultFieldAccessor<T, GlobalFieldAccessor>;
 		template <class T>
-		using DefaultLevelAccessor = DefaultFieldAccessor<T, LevelFieldAccessor>;
+		using DefaultSceneAccessor = DefaultFieldAccessor<T, SceneFieldAccessor>;
 		template <class T>
 		using DefaultScopeAccessor = DefaultFieldAccessor<T, ScopeFieldAccessor>;
 
 		template <class T>
 		using GlobalAccessor = FieldAccessor<T, GlobalFieldAccessor>;
 		template <class T>
-		using LevelAccessor = FieldAccessor<T, LevelFieldAccessor>;
+		using SceneAccessor = FieldAccessor<T, SceneFieldAccessor>;
 		template <class T>
 		using ScopeAccessor = FieldAccessor<T, ScopeFieldAccessor>;
 

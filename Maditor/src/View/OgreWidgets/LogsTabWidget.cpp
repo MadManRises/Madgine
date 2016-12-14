@@ -30,7 +30,7 @@ namespace Maditor {
 		}
 
 		void LogsTabWidget::addLog(Model::Log *log) {
-			Model::Watcher::OgreLogWatcher *ogreLog = dynamic_cast<Model::Watcher::OgreLogWatcher*>(log);
+			/*Model::Watcher::OgreLogWatcher *ogreLog = dynamic_cast<Model::Watcher::OgreLogWatcher*>(log);
 			if (!ogreLog || ogreLog->type() == Model::Watcher::OgreLogWatcher::TextLog) {
 				QPlainTextEdit *edit = new QPlainTextEdit;
 				mTabs[log] = edit;
@@ -43,7 +43,7 @@ namespace Maditor {
 				addTab(view, QString::fromStdString(log->getName()));
 
 
-			}
+			}*/
 			
 		}
 

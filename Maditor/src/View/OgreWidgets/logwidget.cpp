@@ -27,9 +27,9 @@ namespace Maditor {
 
 		void LogWidget::setModel(Model::Watcher::LogTableModel * log)
 		{
-			connect(ui->tableView, &QTableView::doubleClicked, log, &Model::Watcher::LogTableModel::doubleClicked);
+			//connect(ui->tableView, &QTableView::doubleClicked, log, &Model::Watcher::LogTableModel::doubleClicked);
 			ui->tableView->setModel(log);
-			connect(ui->clearButton, &QPushButton::clicked, log, &Model::Watcher::LogTableModel::clear);
+			//connect(ui->clearButton, &QPushButton::clicked, log, &Model::Watcher::LogTableModel::clear);
 		}
 
 	}

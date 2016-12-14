@@ -55,7 +55,7 @@ public:
 	bool loopRead(T &val) {
 		ValueType v;
 		(*this) >> v;
-		if (v.isNull()) return false;
+		if (v.isEOL()) return false;
 		val = v.as<T>();
 		return true;
 	}
@@ -77,6 +77,9 @@ public:
 
 	SerializeOutStream &operator<<(const ValueType &v);
 	SerializeOutStream &operator << (const Ogre::Quaternion &q);
+
+	virtual void beginMessage();
+	virtual void endMessage();
 
     virtual void writeData(const void *buffer, size_t size);
     pos_type tell();

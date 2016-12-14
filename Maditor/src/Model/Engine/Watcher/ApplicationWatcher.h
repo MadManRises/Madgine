@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common\ApplicationInfo.h"
+#include "ApplicationInfo.h"
 
-#include "Common\StatsInfo.h"
+#include "StatsInfo.h"
 
 #include "PerformanceWatcher.h"
 #include "ObjectsWatcher.h"
@@ -22,8 +22,7 @@ namespace Maditor {
 				~ApplicationWatcher();
 
 				void notifyApplicationCreated();
-				void notifyApplicationShutdown();
-				void afterApplicationShutdown();
+				void notifyApplicationShutdown();				
 				void notifyApplicationStarted();
 				void notifyApplicationStopped();
 				void notifyApplicationInitialized();

@@ -76,6 +76,8 @@ def runCustom(report, export, context):
     def getMesh(ob):
         if (ob.data):
             return ob.data.name + ".mesh"
+        elif "Mesh" in ob:
+            return ob["Mesh"] + ".mesh"
         else:
             return ""
 
@@ -95,8 +97,8 @@ def runCustom(report, export, context):
                 levelOut.write(bytes([i & 0xFF]))
                 i >>= 8
 
-        def writeNull():
-            writeChar(9)
+        def writeEOL():
+            writeChar(10)
 
         def writeType(t):
             writeChar(3)
@@ -152,7 +154,7 @@ def runCustom(report, export, context):
             v = mathutils.Quaternion(s.rotation_euler)
             writeFloat(v[0])
             writeVector([v[1], v[3], v[2]])
-        writeNull() #close statics list
+        writeEOL() #close statics list
 
         for l in lights:
             v = l.matrix_world.translation
@@ -173,9 +175,13 @@ def runCustom(report, export, context):
                 writeVector([v[0], v[2], -v[1]])
 
 
-        writeNull() #close lights list
+        writeEOL() #close lights list
 
-        writeNull() #close sceneComponentList
+        writeEOL() #close sceneComponentList
+
+        writeEOL() #close ArraysList
+        writeEOL() #close StructsList
+        writeEOL() #close ListsList
 
         for key, ob in entities.items():
 
@@ -198,18 +204,18 @@ def runCustom(report, export, context):
             writeString("")
             #varset
             for k in ob.keys():
-                if k not in ["Behaviour", "_RNA_UI", "cycles"]:
+                if k not in ["Behaviour", "_RNA_UI", "cycles", "Mesh"]:
                     writeString(k)
                     writeValue(ob[k])
-            writeNull()
+            writeEOL()
 
             #Components
-            writeNull()
+            writeEOL()
 
             writeId(key)
 
 
-        writeNull() #close Entity-List
+        writeEOL() #close Entity-List
 
 
 

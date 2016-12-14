@@ -10,15 +10,14 @@
 
 			LogWatcher::LogWatcher(const std::string &name, const std::string & root) :
 				mName(name),
-				mSourcesRoot(root + "src/"),
-				mShared(SharedMemory::getSingleton().mLog)
+				mSourcesRoot(root + "src/")
 			{
 				Ogre::LogManager::getSingleton().getLog(name)->addListener(this);
 			}
 			
 			void LogWatcher::logMessage(const std::string & msg, Ogre::LogMessageLevel level, const Engine::Util::TraceBack *traceback, const std::string &fullTraceback)
 			{
-				LogMessage &message = mShared.mMadgineLog.create();
+				/*LogMessage &message = mShared.mMadgineLog.create();
 				message.mFullTraceback = fullTraceback.c_str();
 				switch (level) {
 				case Ogre::LML_TRIVIAL:
@@ -42,7 +41,7 @@
 					message.mTraceback.mFunction[0] = '\0';
 					message.mTraceback.mLineNr = -1;
 				}
-				mShared.mMadgineLog.send();
+				mShared.mMadgineLog.send();*/
 			}
 
 			void LogWatcher::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)

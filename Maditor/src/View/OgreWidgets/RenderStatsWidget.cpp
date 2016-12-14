@@ -27,7 +27,7 @@ namespace Maditor {
 		{
 			mName = name;
 			ui->groupBox->setTitle(name);
-			connect(&watcher, &Model::Watcher::ApplicationWatcher::renderStatsSetup, this, &RenderStatsWidget::setStats);
+			//connect(&watcher, &Model::Watcher::ApplicationWatcher::renderStatsSetup, this, &RenderStatsWidget::setStats);
 		}
 
 		void RenderStatsWidget::update()

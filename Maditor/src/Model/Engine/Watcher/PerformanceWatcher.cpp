@@ -6,7 +6,7 @@ namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 			PerformanceWatcher::PerformanceWatcher() :
-				TreeModel(&mRootItem, 4)
+				TreeModel(0 /*&mRootItem*/, 4)
 			{
 				startTimer(3000);
 			}
@@ -14,14 +14,14 @@ namespace Maditor {
 			void PerformanceWatcher::clear()
 			{
 				beginResetModel();
-				mRootItem.clear();
+				//mRootItem.clear();
 				endResetModel();
 			}
 
 			void PerformanceWatcher::timerEvent(QTimerEvent * event)
 			{
 
-				mRootItem.update(this);
+				//mRootItem.update(this);
 				emit dataChanged(index(0, 1), index(rowCount() - 1, 3));
 			}
 
@@ -31,8 +31,8 @@ namespace Maditor {
 					return QVariant();
 
 				if (orientation == Qt::Horizontal)
-					return RootProfilerNode::header(section);
-				else
+					//return RootProfilerNode::header(section);
+//				else
 					return QVariant();
 			}
 

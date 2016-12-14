@@ -10,7 +10,7 @@ namespace Maditor {
 	namespace Model {
 		namespace Watcher {
 			
-			ProfilerNode::ProfilerNode(const std::string & name, const ProcessStats &stats, ProfilerNode *parent) :
+			/*ProfilerNode::ProfilerNode(const std::string & name, const ProcessStats &stats, ProfilerNode *parent) :
 				mName(name),
 				mStats(stats),
 				mParent(parent)
@@ -118,7 +118,7 @@ namespace Maditor {
 			{
 				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mShared.mMutex);
 				ProfilerNode::update(watcher, QModelIndex(), std::max((long long)1, mStats.mAverageDuration));
-			}
+			}*/
 
 		}
 	}

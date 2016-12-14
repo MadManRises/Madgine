@@ -24,6 +24,7 @@ namespace Maditor {
 			public slots:
 				void connectToHost();
 				void read();
+				void connected();
 
 			signals:
 				void error();

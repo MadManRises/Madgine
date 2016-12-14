@@ -11,7 +11,8 @@ namespace Engine {
 		NetworkBuffer::NetworkBuffer(UINT_PTR socket) :
 			mSocket(socket),
 			mMsgInBuffer(false),
-			mBytesToRead(sizeof(NetworkMessageHeader))
+			mBytesToRead(sizeof(NetworkMessageHeader)),
+			mClosed(false)
 		{
 			extend();
 		}
@@ -25,28 +26,43 @@ namespace Engine {
 			if (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback())
 				return true;
 			underflow();
-			return (mMsgInBuffer && mBytesToRead == 0);
+			return (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback());
 		}
 
 		void NetworkBuffer::beginMessage()
 		{
-			if (mSendBuffer.size() != 1 || pptr() != pbase())
+			if (!mClosed && (mSendBuffer.size() != 1 || pptr() != pbase()))
 				throw 0;
 		}
 
 		void NetworkBuffer::sendMessage()
 		{
-			int sendBufferIndex = pptr() - pbase();
+			intptr_t sendBufferIndex = pptr() - pbase();
 			mSendMessageHeader.mMsgSize = (mSendBuffer.size() - 1) * BUFFER_SIZE + sendBufferIndex;
 			if (send(mSocket, reinterpret_cast<char*>(&mSendMessageHeader), sizeof(mSendMessageHeader), 0) != sizeof(mSendMessageHeader)) {
-				throw 0;
+				mClosed = true;
+				return;
 			}			
 			auto it = mSendBuffer.begin();
 			while (mSendMessageHeader.mMsgSize > 0) {
 				if (it == mSendBuffer.end())
 					throw 0;
 				size_t count = std::min(mSendMessageHeader.mMsgSize, BUFFER_SIZE);
-				if (send(mSocket, it->data(), count, 0) != count) {
+				int num = send(mSocket, it->data(), count, 0);
+				if (num == 0) {
+					mClosed = true;
+					return;
+				}
+				if (num == -1) {
+					int error = WSAGetLastError();
+					switch (error) {
+					default:
+						//throw NetworkException(error);
+						mClosed = true;
+						return;
+					}
+				}
+				if (num != count) {
 					throw 0;
 				}
 				mSendMessageHeader.mMsgSize -= count;
@@ -59,6 +75,11 @@ namespace Engine {
 				if (sendBufferIndex != 0 || mSendBuffer.size() != 1)
 					throw 0;
 			}
+		}
+
+		bool NetworkBuffer::isClosed()
+		{
+			return mClosed;
 		}
 
 		void NetworkBuffer::extend()
@@ -90,6 +111,7 @@ namespace Engine {
 				assert(mBytesToRead > 0);
 				int num = recv(mSocket, reinterpret_cast<char*>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead, 0);
 				if (num == 0){
+					mClosed = true;
 					return traits_type::eof();
 				}
 				if (num == SOCKET_ERROR) {
@@ -98,7 +120,9 @@ namespace Engine {
 					case WSAEWOULDBLOCK:
 						return traits_type::eof();
 					default:
-						throw NetworkException(error);
+						//throw NetworkException(error);
+						mClosed = true;
+						return traits_type::eof();
 					}
 				}
 				mBytesToRead -= num;
@@ -117,10 +141,17 @@ namespace Engine {
 			if (mMsgInBuffer && mBytesToRead > 0) {
 				int num = recv(mSocket, (mMsgBuffer + mReceiveMessageHeader.mMsgSize - mBytesToRead), mBytesToRead, 0);
 				if (num == 0){
+					mClosed = true;
 					return traits_type::eof();
 				}
 				if (num == SOCKET_ERROR) {
-					throw NetworkException(WSAGetLastError());
+					int error = WSAGetLastError();
+					switch (error) {
+					case WSAEWOULDBLOCK:
+						return traits_type::eof();
+					default:
+						throw NetworkException(error);
+					}
 				}
 				mBytesToRead -= num;
 				if (mBytesToRead == 0) {

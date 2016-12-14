@@ -5,9 +5,11 @@ namespace Engine {
 
 
 
-			enum TopLevelMadgineObject {
-				NO_TOPLEVEL_ITEM,
-				SCENE_MANAGER
+			enum TopLevelMadgineObject {	
+				NO_TOP_LEVEL,
+				SCENE_MANAGER,
+				SCRIPTING_MANAGER,
+				MADITOR
 			};
 
 enum MessageType {

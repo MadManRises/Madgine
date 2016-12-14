@@ -21,6 +21,8 @@ namespace Engine {
 			void beginMessage();
 			void sendMessage();
 
+			bool isClosed();
+
 		protected:
 			virtual int_type underflow() override;
 			void extend();
@@ -38,6 +40,8 @@ namespace Engine {
 			size_t mBytesToRead;
 
 			UINT_PTR mSocket; // = SOCKET
+
+			bool mClosed;
 			
 		};
 

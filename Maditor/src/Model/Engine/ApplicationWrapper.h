@@ -2,21 +2,21 @@
 
 #include "InputWrapper.h"
 
-#include "Common\ProcessTalker.h"
+#include "ModuleLoader.h"
 
-#include "Common\ApplicationInfo.h"
+class ApplicationInfo;
 
 
 namespace Maditor {
 	namespace Model {
 
 
-		class MADITOR_EXPORT ApplicationWrapper : public QObject, public ProcessTalker<ApplicationMsg> {
+		class MADITOR_EXPORT ApplicationWrapper : public QObject {
 			Q_OBJECT
 
 		public:
 
-			ApplicationWrapper(Watcher::ApplicationWatcher *watcher, ModuleLoader *loader);
+			ApplicationWrapper();
 			~ApplicationWrapper();
 
 			void load(Project *project, QWindow *target);
@@ -28,12 +28,6 @@ namespace Maditor {
 
 			Watcher::InputWrapper *input();
 
-			// Geerbt über ProcessTalker
-			virtual void receiveMessage(const ApplicationMsg & msg) override;
-
-			bool sendMsg(ApplicationCmd cmd);
-
-			
 			virtual void timerEvent(QTimerEvent *te) override;
 
 			DWORD pid();
@@ -45,19 +39,16 @@ namespace Maditor {
 
 		private:
 
-			ModuleLoader *mLoader;
+			ModuleLoader mLoader;
 
 			DWORD mPID;
 			HANDLE mHandle;
 
 			Watcher::InputWrapper mInput;
 
-			Watcher::ApplicationWatcher *mWatcher;
-
 			ApplicationInfo &mAppInfo;
 
 			std::list<std::function<void(DWORD)>> mProcessListener;
-
 		};
 	}
 }

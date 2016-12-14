@@ -25,6 +25,9 @@
 #include "Serialize\serializemanager.h"
 
 namespace Engine {
+
+	API_IMPL(Scene::SceneManager, &createSceneArray, &createSceneStruct, &createSceneList);
+
 namespace Scene {
 
 
@@ -37,7 +40,8 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mRenderTexture(0),
     mIsSceneLoaded(false),
 	mTerrainRayQuery(0),
-	mEntities(this, &SceneManager::createEntityData)
+	mEntities(this, &SceneManager::createEntityData),
+	RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER)
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
@@ -341,7 +345,7 @@ void SceneManager::saveComponentData(Serialize::SerializeOutStream &out) const
         out << component->componentName();
 		component->writeState(out);
     }
-    out << ValueType();
+    out << ValueType::EOL();
 }
 
 void SceneManager::loadComponentData(Serialize::SerializeInStream &in)
@@ -357,10 +361,6 @@ void SceneManager::loadComponentData(Serialize::SerializeInStream &in)
     }
 }
 
-Serialize::TopLevelMadgineObject SceneManager::topLevelId()
-{
-	return Serialize::SCENE_MANAGER;
-}
 
 const std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>& SceneManager::getInfoObject(const std::string & name) const
 {
@@ -378,7 +378,7 @@ void SceneManager::writeStaticScene(Serialize::SerializeOutStream & out) const
 	for (const std::pair<const std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> &t : mInfoObjects) {
 		out << t.first << std::get<0>(t.second) << std::get<1>(t.second) << std::get<2>(t.second);
 	}
-	out << ValueType();
+	out << ValueType::EOL();
 
 	for (Ogre::Light * light : mStaticLights) {
 
@@ -389,7 +389,7 @@ void SceneManager::writeStaticScene(Serialize::SerializeOutStream & out) const
 		}
 
 	}
-	out << ValueType();
+	out << ValueType::EOL();
 }
 
 void SceneManager::writeState(Serialize::SerializeOutStream &out) const
@@ -418,9 +418,8 @@ void SceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
 	in.process().startSubProcess(1, "Loading Level...");
 
 	readState(in);
-
-	const std::map<InvPtr, Serialize::SerializableUnit *> &scopeMap = in.manager().map();
-	//apply map
+	
+	applySerializableMap(in.manager().map());
 
 	if (callInit) {
 		for (Entity::Entity &e : mEntities) {
@@ -436,6 +435,23 @@ void SceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
 void SceneManager::writeScene(Serialize::SerializeOutStream & out) const
 {
 	writeState(out);
+}
+
+Scripting::Scope * SceneManager::createSceneArray(size_t size)
+{
+	Scripting::Vector *v = createArray();
+	v->resize(size);
+	return v;
+}
+
+Scripting::Scope * SceneManager::createSceneStruct()
+{
+	return createStruct();
+}
+
+Scripting::Scope * SceneManager::createSceneList()
+{
+	return createList();
 }
 
 Ogre::TerrainGroup *SceneManager::terrainGroup() const
@@ -615,8 +631,7 @@ void SceneManager::removeQueuedEntities()
 
     while (it != mEntityRemoveQueue.end()) {
 
-		std::list<Entity::Entity>::iterator ent = std::find_if(mEntities.begin(),
-                                                                                mEntities.end(), find);
+		auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
         if (ent == mEntities.end()) throw 0;
 
 		mEntities.erase(ent);
@@ -649,6 +664,7 @@ void SceneManager::clear()
 	mIsSceneLoaded = false;
 
 }
+
 
 
 std::set<BaseSceneComponent*> SceneManager::getComponents()

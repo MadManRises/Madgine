@@ -12,19 +12,6 @@
 			}
 
 
-			void ApplicationWatcher::clear()
-			{
-				mObjectsWatcher.update();
-				mPerformanceWatcher.clear();
-			}
-
-			void ApplicationWatcher::update()
-			{
-
-				mPerformanceWatcher.update();
-				mObjectsWatcher.update();
-
-			}
 
 
 			

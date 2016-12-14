@@ -5,23 +5,22 @@
 #include "Model\Editor.h"
 
 
-#include "Watcher\ApplicationWatcher.h"
 
 #include "ModuleLoader.h"
 
 #include "Scripting\Parsing\parseexception.h"
 
-#include "Common/Shared.h"
+#include "Shared.h"
 
 #include <Windows.h>
+
+#include <chrono>
+#include <thread>
 
 
 namespace Maditor {
 	namespace Model {
-		ApplicationWrapper::ApplicationWrapper(Watcher::ApplicationWatcher *watcher, ModuleLoader *loader) :
-			ProcessTalker("Maditor_Launcher", "Maditor"),
-			mWatcher(watcher),
-			mLoader(loader),
+		ApplicationWrapper::ApplicationWrapper() :
 			mAppInfo(SharedMemory::getSingleton().mAppInfo),
 			mPID(0)
 		{
@@ -71,67 +70,38 @@ namespace Maditor {
 				f(mPID);
 			}
 
-			mLoader->setup(project->path() + "debug/bin/", project->moduleList());
+			/*mWatcher->client()->connectToHost();
 
+			mLoader->setup(project->path() + "debug/bin/", project->moduleList());			*/
+
+			
 		}
 
-		bool ApplicationWrapper::sendMsg(ApplicationCmd cmd)
-		{
-			ApplicationMsg msg;
-			msg.mCmd = cmd;
-			return ProcessTalker::sendMsg(msg, "Launcher");
-		}
 
 
 		void ApplicationWrapper::start()
 		{
-			sendMsg(START_APP);
+			//sendMsg(START_APP);
 		}
 
 		void ApplicationWrapper::shutdown()
 		{
-			sendMsg(SHUTDOWN);
+			//sendMsg(SHUTDOWN);
 		}
 
 		void ApplicationWrapper::stop()
 		{			
-			sendMsg(STOP_APP);
+			//sendMsg(STOP_APP);
 		}
 
 		void ApplicationWrapper::resizeWindow()
 		{
-			sendMsg(RESIZE_WINDOW);
+			//sendMsg(RESIZE_WINDOW);
 		}
 
 		Watcher::InputWrapper * ApplicationWrapper::input()
 		{
 			return &mInput;
-		}
-
-		void ApplicationWrapper::receiveMessage(const ApplicationMsg & msg)
-		{
-			switch (msg.mCmd) {
-			case APP_CREATED:
-				mWatcher->notifyApplicationCreated();
-				break;
-			case APP_INITIALIZED:
-				mWatcher->notifyApplicationInitialized();
-				break;
-			case APP_STARTED:
-				mWatcher->notifyApplicationStarted();
-				mInput.setEnabled(true);
-				break;
-			case APP_STOPPED:
-				mInput.setEnabled(false);
-				mWatcher->notifyApplicationStopped();
-				break;
-			case APP_SHUTDOWN:
-				mWatcher->notifyApplicationShutdown();
-				break;
-			case APP_AFTER_SHUTDOWN:
-				cleanup();
-				break;
-			}
 		}
 
 		void ApplicationWrapper::timerEvent(QTimerEvent * te)
@@ -144,9 +114,6 @@ namespace Maditor {
 					cleanup();
 					return;
 				}
-				update();
-				mWatcher->update();
-				mLoader->update();
 			}
 		}
 
@@ -162,8 +129,8 @@ namespace Maditor {
 
 		void ApplicationWrapper::cleanup()
 		{
-			mWatcher->afterApplicationShutdown();
-			mLoader->clear();
+
+			//mWatcher->notifyApplicationShutdown();
 			if (mPID) {
 				mPID = 0;
 				CloseHandle(mHandle);

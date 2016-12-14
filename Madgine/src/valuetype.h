@@ -77,6 +77,7 @@ public:
     float asFloat() const;
     float asFloat(float f);
     bool isNull() const;
+	bool isEOL() const;
 	const ValueType &asDefault(const ValueType &default);
 
     std::string toString() const;
@@ -87,7 +88,11 @@ public:
 	void writeState(Serialize::SerializeOutStream &out) const;
 	void writeCreationData(Serialize::SerializeOutStream &out) const;
 
+	void applySerializableMap(const std::map<InvPtr, Serialize::SerializableUnit *> &map);
+
 	bool peek(Serialize::SerializeInStream &in);
+
+	static ValueType EOL();
 
 public:
 	template <class T>
@@ -172,7 +177,8 @@ private:
         StringValue,
         Vector3Value,
 		Vector2Value,
-        NullValue
+        NullValue,
+		EndOfListValue
     } mType;
 
     union {

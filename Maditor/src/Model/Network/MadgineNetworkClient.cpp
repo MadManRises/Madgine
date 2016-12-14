@@ -16,6 +16,7 @@ namespace Maditor {
 			{
 
 				connect(mSocket, &QTcpSocket::readyRead, this, &MadgineNetworkClient::read);
+				connect(mSocket, &QTcpSocket::connected, this, &MadgineNetworkClient::connected);
 			}
 
 			void MadgineNetworkClient::connectToHost() {
@@ -40,6 +41,11 @@ namespace Maditor {
 						loop = false;
 					}
 				}
+			}
+
+			void MadgineNetworkClient::connected()
+			{
+				emit receivedValue("Connection established!");
 			}
 
 			void MadgineNetworkClient::handleMessage(char * data, size_t size)

@@ -69,8 +69,10 @@ namespace Engine {
 
 			void MyGUILauncher::finalize()
 			{
-				mRootWindow->finalize();
-				delete mRootWindow;
+				if (mRootWindow) {
+					mRootWindow->finalize();
+					delete mRootWindow;
+				}
 				if (mGUI) {
 					mGUI->shutdown();
 					delete mGUI;

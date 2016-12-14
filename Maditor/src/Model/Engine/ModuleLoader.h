@@ -1,15 +1,11 @@
 #pragma once
 
-#include "Common\ProcessTalker.h"
-
-#include "Common\ModuleLoaderInfo.h"
-
 
 namespace Maditor {
 	namespace Model {
 
 
-		class ModuleLoader : public QObject, public ProcessTalker<ModuleLoaderMsg> {
+		class ModuleLoader : public QObject {
 			Q_OBJECT
 
 		public:
@@ -18,9 +14,6 @@ namespace Maditor {
 
 			void setup(const QString &binaryDir, ModuleList *moduleList);
 			void clear();
-
-			// Geerbt über ProcessTalker
-			virtual void receiveMessage(const ModuleLoaderMsg & msg) override;
 
 		protected:
 			void addModule(Module *module);		

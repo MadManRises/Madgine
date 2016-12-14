@@ -9,22 +9,17 @@ namespace Engine {
 
 			Serializable::Serializable(SerializableUnit * parent)
 			{
-				parent->addSerializableValue(this);
 			}
 
 			Serializable::Serializable()
 			{
 			}
 
-			InvPtr Serializable::masterId()
+			void Serializable::applySerializableMap(const std::map<InvPtr, SerializableUnit*>& map)
 			{
-				return mMasterId;
 			}
 
-			void Serializable::setMasterId(InvPtr id)
-			{
-				mMasterId = id;
-			}
+
 
 		}
 }

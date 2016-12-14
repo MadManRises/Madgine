@@ -12,11 +12,7 @@ namespace Engine {
 				virtual void readState(SerializeInStream&) = 0;
 				virtual void writeState(SerializeOutStream&) const = 0;
 
-				InvPtr masterId();
-				void setMasterId(InvPtr id);
-
-			private:
-				InvPtr mMasterId;
+				virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit *> &map);
 
 			};
 

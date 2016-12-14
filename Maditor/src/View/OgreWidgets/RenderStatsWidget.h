@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Common\StatsInfo.h"
+#include "StatsInfo.h"
 
 namespace Ui {
 	class RenderStatsWidget;
 }
+
 
 namespace Maditor {
 

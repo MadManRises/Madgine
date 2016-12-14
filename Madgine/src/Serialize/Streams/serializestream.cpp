@@ -78,6 +78,14 @@ SerializeOutStream & SerializeOutStream::operator<<(const Ogre::Quaternion & q)
 	return *this << *q.ptr() << Ogre::Vector3(q.ptr() + 1);
 }
 
+void SerializeOutStream::beginMessage()
+{
+}
+
+void SerializeOutStream::endMessage()
+{
+}
+
 void SerializeOutStream::writeData(const void *buffer, size_t size)
 {
     mOfs.write((char *)buffer, size);

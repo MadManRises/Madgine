@@ -19,6 +19,10 @@ namespace Engine {
 
 			bool isMessageAvailable();
 
+			bool isValid();
+
+			virtual void beginMessage() override;
+			virtual void endMessage() override;
 
 
 		private:

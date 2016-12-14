@@ -11,7 +11,7 @@ namespace Scripting {
 class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::SerializableUnit {
 
 public:
-	Scope(const std::string &prototypeName = "");
+	Scope(Serialize::TopLevelSerializableUnit *topLevel = 0);
     virtual ~Scope();
 
     void setVar(const std::string &name, const ValueType &v);
@@ -57,6 +57,8 @@ private:
 	ValueType findPrototype(const ArgumentList &stack);
 	ValueType getPrototype(const ArgumentList &stack);
 	ValueType setPrototype(const ArgumentList &stack);
+	ValueType call(const ArgumentList &stack);
+	ValueType isGlobal(const ArgumentList &stack);
 
 private:
     typedef ValueType(Scope::*NativeMethod)(const ArgumentList &);

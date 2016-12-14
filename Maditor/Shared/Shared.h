@@ -12,17 +12,11 @@
 struct Shared {
 	Shared(boost::interprocess::managed_shared_memory::segment_manager *mgr) :
 		mAppInfo(mgr),
-		mInput(mgr),
-		mLog(mgr),
-		mObjects(mgr),
-		mStats(mgr)
+		mInput(mgr)
 	{}
 
 	ApplicationInfo mAppInfo;
 	InputShared mInput;
-	SharedLog mLog;
-	ObjectsShared mObjects;
-	SharedStats mStats;
 };
 
 

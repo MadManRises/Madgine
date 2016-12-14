@@ -570,6 +570,11 @@ bool ValueType::isNull() const
     return mType == Type::NullValue;
 }
 
+bool ValueType::isEOL() const
+{
+	return mType == Type::EndOfListValue;
+}
+
 const ValueType & ValueType::asDefault(const ValueType & default)
 {
 	if (mType != default.mType) {
@@ -592,6 +597,8 @@ std::string ValueType::toString() const
         return std::to_string(mUnion.mInt);
     case Type::NullValue:
         return "NULL";
+	case Type::EndOfListValue:
+		return "EOL";
     case Type::ScopeValue:
         return mUnion.mScope->getIdentifier();
     case Type::FloatValue:
@@ -608,6 +615,8 @@ std::string ValueType::getTypeString() const
 	switch (mType) {
 	case Type::BoolValue:
 		return "Bool";
+	case Type::EndOfListValue:
+		return "EOL-Type";
 	case Type::FloatValue:
 		return "Float";
 	case Type::IntValue:
@@ -655,6 +664,8 @@ void ValueType::readState(Serialize::SerializeInStream & in)
 		break;
 	case Type::NullValue:
 		break;
+	case Type::EndOfListValue:
+		break;
 	case Type::Vector3Value:
 		float buffer[3];
 		in.read(buffer);
@@ -692,6 +703,8 @@ void ValueType::writeState(Serialize::SerializeOutStream & out) const
 		break;
 	case Type::NullValue:
 		break;
+	case Type::EndOfListValue:
+		break;
 	case Type::ScopeValue:
 		out.write(mUnion.mScope);
 		break;
@@ -713,14 +726,40 @@ void ValueType::writeCreationData(Serialize::SerializeOutStream & out) const
 {
 }
 
+void ValueType::applySerializableMap(const std::map<InvPtr, Serialize::SerializableUnit*>& map)
+{
+	if (mType == Type::InvPtrValue) {
+		auto it = map.find(mUnion.mInvPtr);
+		if (it != map.end()) {
+			Scripting::Scope *scope = dynamic_cast<Scripting::Scope*>(it->second);
+			if (scope) {
+				*this = scope;
+			}
+			else {
+				LOG_WARNING("Non-Scope InvPtr in ValueType!");
+			}
+		}
+		else {
+			LOG_WARNING("Unmapped InvPtr!");
+		}
+	}
+}
+
 bool ValueType::peek(Serialize::SerializeInStream & in)
 {
 	Serialize::pos_type pos = in.tell();
 	readState(in);
-	if (isNull())
+	if (isEOL())
 		return false;
 	in.seek(pos);
 	return true;
+}
+
+ValueType ValueType::EOL()
+{
+	ValueType v;
+	v.mType = Type::EndOfListValue;
+	return v;
 }
 
 bool ValueType::setType(ValueType::Type t)

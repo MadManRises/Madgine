@@ -8,7 +8,7 @@ namespace Scripting {
 class MADGINE_EXPORT RefScope : public Scope
 {
 public:
-    RefScope(const std::string &prototype = "");
+    RefScope(RefScopeTopLevelSerializableUnit *topLevel);
     virtual ~RefScope();
 
     void ref();
@@ -17,32 +17,10 @@ public:
 private:
     size_t mRefCount;
 
+	RefScopeTopLevelSerializableUnit *mTopLevel;
 };
 
 
-template <class T>
-class ScopeRef {
-public:
-	ScopeRef(){
-		mPtr = new T();
-		mPtr->ref();
-	}
-
-	~ScopeRef() {
-		mPtr->unref();
-	}
-
-	T *ptr() {
-		return mPtr;
-	}
-
-	operator T &() {
-		return *mPtr;
-	}
-
-private:
-	T *mPtr;
-};
 
 } // namespace Scripting
 } // namespace Core

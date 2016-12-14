@@ -1,9 +1,5 @@
 #pragma once
 
-#include "ProcessTalker.h"
-
-
-struct SharedLog;
 
 			class LogWatcher : public Ogre::LogListener {
 			public:
@@ -17,6 +13,5 @@ struct SharedLog;
 				std::string mSourcesRoot;
 				std::string mName;
 
-				SharedLog &mShared;
 
 			};

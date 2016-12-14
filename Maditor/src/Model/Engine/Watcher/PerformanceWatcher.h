@@ -24,7 +24,7 @@ namespace Maditor {
 
 			private:
 
-				RootProfilerNode mRootItem;
+				//RootProfilerNode mRootItem;
 			};
 
 		}

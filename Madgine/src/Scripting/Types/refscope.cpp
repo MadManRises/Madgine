@@ -1,15 +1,19 @@
 #include "madginelib.h"
 #include "refscope.h"
+#include "Scene\scenemanager.h"
+#include "refscopetoplevelserializableunit.h"
 
 namespace Engine {
 namespace Scripting {
 
-RefScope::RefScope(const std::string &prototype) :
-	Scope(prototype),
-    mRefCount(0)
+RefScope::RefScope(RefScopeTopLevelSerializableUnit *topLevel) :
+	Scope(topLevel),
+    mRefCount(0),	
+	mTopLevel(topLevel)
 {
 
 }
+
 
 RefScope::~RefScope()
 {
@@ -25,8 +29,9 @@ void RefScope::unref()
 {
     assert(mRefCount > 0);
     --mRefCount;
-    if (mRefCount == 0)
-        delete this;
+	if (mRefCount == 0) {
+		mTopLevel->removeRefScope(this);
+	}
 }
 
 

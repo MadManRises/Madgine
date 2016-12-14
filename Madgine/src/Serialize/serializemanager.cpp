@@ -22,6 +22,13 @@ namespace Engine {
 			{
 			}
 
+			SerializeManager::~SerializeManager()
+			{
+				for (TopLevelSerializableUnit *unit : mTopLevelUnits) {
+					unit->removeManager(this);
+				}
+			}
+
 			void SerializeManager::setMaster(bool b)
 			{
 				mIsMaster = true;
@@ -51,6 +58,7 @@ namespace Engine {
 					break;
 				case STATE:
 					object->readState(stream);
+					object->applySerializableMap(mSerializableItems);
 					break;
 				default:
 					throw 0;
@@ -76,6 +84,17 @@ namespace Engine {
 						result.push_back(stream);
 				}
 				return result;
+			}
+
+			void SerializeManager::addTopLevelItem(TopLevelSerializableUnit * unit)
+			{
+				mTopLevelUnits.push_back(unit);
+				unit->addManager(this);
+			}
+
+			SerializeOutStream * SerializeManager::getStream()
+			{
+				return mStreams.front();
 			}
 
 			bool SerializeManager::isMaster()

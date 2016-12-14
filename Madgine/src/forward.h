@@ -20,7 +20,8 @@ namespace Engine {
 
 		class SerializeInStream;
 		class SerializeOutStream;
-		class SerializableUnit;
+		class SerializableUnit; 
+		class TopLevelSerializableUnit;
 		class Observable;
 		class Serializable;
 		class FileBuffer;
@@ -36,14 +37,19 @@ namespace Engine {
 	}
 	namespace Scripting {
 
+		class ScriptingManager;
+
 		class BaseAPI;
 		class BaseGlobalAPIComponent;
 
 		class Scope;
+
+		class RefScopeTopLevelSerializableUnit;
+		class RefScope;
 		
-		
+		class Prototype;
 		class List;
-		class Array;
+		class Vector;
 		class Struct;
 
 		class GlobalScope;

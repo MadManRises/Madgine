@@ -1,6 +1,7 @@
 #include "madginelib.h"
 #include "fieldaccessor.h"
 #include "Scripting/Types/globalscope.h"
+#include "Scripting\Types\scriptingmanager.h"
 
 namespace Engine{
 namespace Scripting{
@@ -20,8 +21,8 @@ GlobalFieldAccessor::GlobalFieldAccessor(const std::string &fieldName) :
 
 }
 
-LevelFieldAccessor::LevelFieldAccessor(const std::string &fieldName) :
-	ScopeFieldAccessor(*GlobalScope::getSingleton().level(), fieldName) {
+SceneFieldAccessor::SceneFieldAccessor(const std::string &fieldName) :
+	ScopeFieldAccessor(*ScriptingManager::getSingleton().scene(), fieldName) {
 
 }
 

@@ -3,10 +3,10 @@
 #include "LogTableModel.h"
 #include "Model\log.h"
 
+#include "LogInfo.h"
+
 Q_DECLARE_METATYPE(MessageType);
 Q_DECLARE_METATYPE(Traceback);
-
-struct SharedLog;
 
 namespace Maditor {
 	namespace Model {
@@ -32,8 +32,6 @@ namespace Maditor {
 
 				void logMessage(const QString &msg, MessageType level = LOG_TYPE, const Traceback &traceback = {}, const QString &fullTraceback = "");
 
-				void update();
-
 			signals:
 				void ogreMessageReceived(const QString &msg, MessageType level = LOG_TYPE, const Traceback &traceback = {}, const QString &fullTraceback = "");
 
@@ -42,7 +40,6 @@ namespace Maditor {
 				LogType mType;
 				std::string mName;
 
-				SharedLog &mShared;
 
 			};
 

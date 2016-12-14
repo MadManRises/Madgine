@@ -2,36 +2,29 @@
 
 #include "refscope.h"
 #include "scopeimpl.h"
+#include "Serialize\Container\list.h"
 
 namespace Engine {
 namespace Scripting {
 
-class MADGINE_EXPORT Array : public ScopeImpl<Array, RefScope>
+class MADGINE_EXPORT Vector : public ScopeImpl<Vector, RefScope>
 {
 public:
-    Array(size_t size);
+	Vector(RefScopeTopLevelSerializableUnit *topLevel);
 
     bool contains(const ValueType &v);
     ValueType at(int i);
     void setAt(int i, const ValueType &v);
+	void resize(size_t size);
     size_t size() const;
     int index(const ValueType &v);
 
-    const ValueType *data() const;
 
-	const ValueType *begin() const;
-	const ValueType *end() const;
-
-	virtual void writeCreationData(Serialize::SerializeOutStream &of) const override;
-
-protected:
-
-    virtual void readState(Serialize::SerializeInStream &ifs) override;
-    virtual void writeState(Serialize::SerializeOutStream &of) const override;
+	Serialize::SerializableList<ValueType>::const_iterator begin() const;
+	Serialize::SerializableList<ValueType>::const_iterator end() const;
 
 private:
-    ValueType *mItems;
-	size_t mSize;
+    Serialize::SerializableList<ValueType> mItems;
 
 };
 

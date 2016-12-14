@@ -10,7 +10,6 @@ namespace Maditor {
 
 
 		ModuleLoader::ModuleLoader() :
-			ProcessTalker("Maditor_Module_Loader", "Maditor_Loader"),
 			mModules(0),
 			mInit(false)
 		{
@@ -72,7 +71,7 @@ namespace Maditor {
 		void ModuleLoader::setup(const QString & binaryDir, ModuleList *moduleList)
 		{
 			
-			assert(!mInit);
+			//assert(!mInit);
 			mInit = true;
 
 			mBinaryDir = binaryDir;
@@ -129,13 +128,13 @@ namespace Maditor {
 			for (const Module *m : reloadOrder) {
 				ModuleInstance &instance = mInstances.at(m);
 
-				loadModule(instance, false);
+				//loadModule(instance, false);
 			}
 
-			ModuleLoaderMsg msg;
+			/*ModuleLoaderMsg msg;
 			msg.mCmd = Init;
 
-			sendMsg(msg, "Loader");
+			sendMsg(msg, "Loader");*/
 		}
 
 		void ModuleLoader::reload(Module *module) {
@@ -145,7 +144,7 @@ namespace Maditor {
 			for (const Module *m : reloadOrder) {
 				ModuleInstance &instance = mInstances.at(m);
 
-				unloadModule(instance);
+				//unloadModule(instance);
 			}
 			
 			reloadOrder.reverse();
@@ -153,41 +152,12 @@ namespace Maditor {
 			for (const Module *m : reloadOrder) {
 				ModuleInstance &instance = mInstances.at(m);
 
-				loadModule(instance, true);
+				//loadModule(instance, true);
 			}
 		}
 
-		void ModuleLoader::receiveMessage(const ModuleLoaderMsg & msg)
-		{
-			switch (msg.mCmd) {
-			case Init:
-				sendAll();
-				break;
-			}
-			
-		}
 
-
-		void ModuleLoader::unloadModule(ModuleInstance & module)
-		{
-			ModuleLoaderMsg msg;
-			msg.mCmd = Unload;
-			strcpy_s(msg.mArg, module.mName.toStdString().c_str());
-
-			sendMsg(msg, "Loader");
-
-		}
-
-
-		void ModuleLoader::loadModule(ModuleInstance & module, bool callInit)
-		{
-			ModuleLoaderMsg msg;
-			msg.mCmd = Load;
-			strcpy_s(msg.mArg, module.mName.toStdString().c_str());
-			msg.mCallInit = callInit;
-
-			sendMsg(msg, "Loader");
-		}
+		
 
 	}
 }

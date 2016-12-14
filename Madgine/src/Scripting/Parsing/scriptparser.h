@@ -2,6 +2,7 @@
 
 #include "Scripting\Types\struct.h"
 #include "entitynodeptr.h"
+#include "prototype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -22,7 +23,7 @@ public:
 
     const EntityNodePtr &getEntityDescription(const std::string &name);
 
-	Struct &getPrototype(const std::string &name);
+	Prototype &getPrototype(const std::string &name);
 
     bool hasGlobalMethod(const std::string &name);
 
@@ -104,7 +105,7 @@ private:
 
     std::map<std::string, EntityNodePtr> mGlobalTypes;
     std::map<std::string, MethodNodePtr> mGlobalMethods;
-	std::map<std::string, ScopeRef<Struct>> mPrototypes;
+	std::map<std::string, Prototype> mPrototypes;
 
     Ogre::ResourceGroupManager *mRsgm;
 

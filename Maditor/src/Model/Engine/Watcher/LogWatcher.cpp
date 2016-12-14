@@ -2,9 +2,9 @@
 
 #include "LogWatcher.h"
 
-#include "Common\LogInfo.h"
+#include "LogInfo.h"
 
-#include "Common\Shared.h"
+#include "Shared.h"
 
 namespace Maditor {
 	namespace Model {
@@ -13,8 +13,7 @@ namespace Maditor {
 
 			OgreLogWatcher::OgreLogWatcher(LogType type, const std::string &name) :
 				mType(type),
-				mName(name),
-				mShared(SharedMemory::getSingleton().mLog)
+				mName(name)
 			{
 				if (mType == GuiLog) {
 					mModel = std::unique_ptr<LogTableModel>(new LogTableModel);
@@ -50,14 +49,6 @@ namespace Maditor {
 				emit messageReceived(msg);
 			}
 
-			void OgreLogWatcher::update()
-			{
-				while (!mShared.mMadgineLog.empty()) {
-					const LogMessage &msg = mShared.mMadgineLog.front();
-					logMessage(msg.mMsg.c_str(), msg.mType, msg.mTraceback, msg.mFullTraceback.c_str());
-					mShared.mMadgineLog.pop();
-				}
-			}
 
 		}
 	}

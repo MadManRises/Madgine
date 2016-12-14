@@ -10,7 +10,6 @@
 
 #include "Model\Engine\ApplicationWrapper.h"
 
-#include "Model\Engine\Watcher\ApplicationWatcher.h"
 #include "Model\Engine\Watcher\ResourceWatcher.h"
 #include "Model\Engine\Watcher\PerformanceWatcher.h"
 #include "Model\Engine\Watcher\OgreSceneWatcher.h"
@@ -49,12 +48,12 @@ namespace Maditor {
 			ui->LogsWidget->setModel(editor->logsModel());
 			//ui->guiRenderStats->connectWatchers("Gui", watcher);
 			//ui->sceneRenderStats->connectWatchers("Scene", watcher);
-			ui->ResourcesWidget->setModel(watcher->resourceWatcher());
+			/*ui->ResourcesWidget->setModel(watcher->resourceWatcher());
 			ui->scriptEditorTabWidget->setModel(editor->editorManager()->scriptEditor());
 			ui->PerformanceWidget->setModel(watcher->performanceWatcher());
 			ui->OgreSceneWidget->setModel(watcher->ogreSceneWatcher());
 			ui->ObjectsWidget->setModel(watcher->objectsWatcher());
-			ui->NetworkWidget->setModel(watcher->client());
+			ui->NetworkWidget->setModel(watcher->client());*/
 
 			setupConnections();
 
@@ -113,13 +112,13 @@ namespace Maditor {
 
 
 			//Watcher-related
-			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::onAppCreated, Qt::QueuedConnection);
+			/*connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationCreated, this, &MainWindow::onAppCreated, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, this, &MainWindow::onAppInitialized, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStarted, this, &MainWindow::onAppStarted, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationStopped, this, &MainWindow::onAppStopped, Qt::QueuedConnection);
 			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationShutdown, this, &MainWindow::onAppShutdown, Qt::QueuedConnection);
 
-			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, mTarget, &OgreWindow::setInput);
+			connect(mEditor->watcher(), &Model::Watcher::ApplicationWatcher::applicationInitialized, mTarget, &OgreWindow::setInput);*/
 
 			//Dialogs-related
 			connect(ui->actionNewProject, &QAction::triggered, &mDialogManager, &Dialogs::DialogManager::showNewProjectDialog);

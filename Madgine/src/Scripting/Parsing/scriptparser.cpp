@@ -127,7 +127,7 @@ const EntityNodePtr &ScriptParser::getEntityDescription(const std::string &name)
     return it->second;
 }
 
-Struct & ScriptParser::getPrototype(const std::string & name)
+Prototype & ScriptParser::getPrototype(const std::string & name)
 {
 	auto it = mPrototypes.find(name);
 	if (it == mPrototypes.end()) {
@@ -267,7 +267,7 @@ void ScriptParser::parsePrototype()
 		if (it != mPrototypes.end() && !mReload) {
 			throw ParseException(Database::Exceptions::doubleTypeDefinition(name));
 		}
-		Struct *node = mPrototypes[name].ptr();
+		Prototype *node = &mPrototypes[name];
 		node->clear();
 		node->clearPrototype();
 

@@ -1,11 +1,16 @@
 #include "madginelib.h"
 #include "scenecomponent.h"
+#include "scenemanager.h"
 
 namespace Engine{
 namespace Scene{
 
-BaseSceneComponent::BaseSceneComponent(float updateInterval, App::ContextMask context) :
-    mContext(context), mUpdateInterval(updateInterval), mTimeBank(0.f), mEnabled(true)
+	BaseSceneComponent::BaseSceneComponent(float updateInterval, App::ContextMask context) :
+		mContext(context),
+		mUpdateInterval(updateInterval),
+		mTimeBank(0.f),
+		mEnabled(true),
+		SerializableUnit(&SceneManager::getSingleton())
 {
 
 }

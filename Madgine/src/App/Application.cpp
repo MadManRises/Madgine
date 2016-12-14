@@ -11,7 +11,7 @@
 
 #include "UI\UIManager.h"
 #include "configset.h"
-#include "Scripting\Types\globalscope.h"
+#include "Scripting\Types\scriptingmanager.h"
 #include "Resources\ResourceLoader.h"
 #include "Util\Profiler.h"
 
@@ -37,19 +37,16 @@ Application::Application() :
 	mGUI(0),
 	mUI(0),
 	mLoader(0),
-	mGlobalScope(0),
+	mScriptingMgr(0),
 	mConfig(0),
 	mProfiler(0),
-	mInput(0),
-	mNetwork(0)
+	mInput(0)
 {
 
 }
 
 Application::~Application()
 {
-	if (mNetwork)
-		delete mNetwork;
 	if (mInput && !mSettings->mInput)
 		delete mInput;
 	if (mProfiler)
@@ -67,9 +64,9 @@ Application::~Application()
 		mSceneMgr->finalize();
 		delete mSceneMgr;
 	}
-	if (mGlobalScope) {
-		mGlobalScope->finalize();
-		delete mGlobalScope;
+	if (mScriptingMgr) {
+		mScriptingMgr->finalize();
+		delete mScriptingMgr;
 	}
 	if (mLoader)
 		delete mLoader;
@@ -106,7 +103,7 @@ void Application::init()
 {
 	mGUI->init();
 
-	mGlobalScope->callMethodCatch("openMainLoadingScreen");
+	mScriptingMgr->globalScope()->callMethodCatch("openMainLoadingScreen");
 
 	mLoader->load();
 
@@ -114,12 +111,9 @@ void Application::init()
 	
 	mUI->init(); // Initialise all Handler
 	
-	mGlobalScope->init();
+	mScriptingMgr->init();
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows
-
-	if (mNetwork)
-		mNetwork->init();
 
 	mRoot->addFrameListener(this);
 }
@@ -129,7 +123,7 @@ int Application::go()
 	mShutDown = false;
 	mPaused = false;
 
-	if (!mGlobalScope->callMethodCatch("init"))
+	if (!mScriptingMgr->globalScope()->callMethodCatch("init"))
 		return -1;
 
 	mRoot->startRendering();
@@ -224,17 +218,6 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 				mSafeCallQueue.pop();
 			}
 		}
-		
-		if (mNetwork) {
-			try {
-				PROFILE("Network", "Rendering");
-				mNetwork->update();
-			}
-			catch (const std::exception &e) {
-				LOG_ERROR("Unhandled Exception during Network-Update!");
-				LOG_EXCEPTION(e);
-			}
-		}
 
 	}
 
@@ -268,7 +251,7 @@ Ogre::RenderWindow * Application::renderWindow()
 void Application::_clear()
 {
 	mSceneMgr->clear();
-	mGlobalScope->clear();
+	mScriptingMgr->clear();
 	mUI->clear();
 }
 
@@ -288,9 +271,9 @@ void Application::_setup()
 	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
 
 	// Instantiate the GlobalScope class
-	mGlobalScope = OGRE_NEW Scripting::GlobalScope(mLoader->scriptParser());
+	mScriptingMgr = OGRE_NEW Scripting::ScriptingManager(mLoader->scriptParser());
 
-	mGlobalScope->addAPI(this);
+	mScriptingMgr->globalScope()->addAPI(this);
 
 	// Create SceneManager
 	mSceneMgr = OGRE_NEW Scene::SceneManager(mRoot);
@@ -310,8 +293,6 @@ void Application::_setup()
 
 	mProfiler = OGRE_NEW Util::Profiler();
 
-	if (mSettings->mUseNetwork)
-		mNetwork = OGRE_NEW Network::NetworkManager();	
 }
 
 void Application::resizeWindow()

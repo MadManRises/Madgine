@@ -1,10 +1,9 @@
 #pragma once
 
-#include "ProcessTalker.h"
 
 #include "ModuleLoaderInfo.h"
 
-class ModuleLoader : public ProcessTalker<ModuleLoaderMsg> {
+class ModuleLoader {
 
 public:
 	ModuleLoader();
@@ -12,9 +11,6 @@ public:
 
 	void setup(const std::string &binaryDir, const std::string &runtimeDir);
 	void cleanup();
-			
-	// Geerbt über ProcessTalker
-	virtual void receiveMessage(const ModuleLoaderMsg & msg) override;
 			
 
 private:

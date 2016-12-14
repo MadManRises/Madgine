@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Project\Project.h"
-#include "../Common\Shared.h"
+#include "Shared.h"
 
 namespace Maditor {
 	namespace Model {

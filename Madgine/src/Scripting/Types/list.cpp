@@ -12,11 +12,6 @@ namespace Scripting {
 API_IMPL(List, &contains, &add, &at, &setAt, &size, &remove, &index);
 
 
-List::List()
-{
-
-}
-
 
 bool List::contains(const ValueType &v)
 {

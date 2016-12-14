@@ -15,8 +15,7 @@ struct AppSettings {
 	AppSettings() :
 		mPluginsFile("plugins.cfg"),
 		mUseExternalSettings(false),
-		mInput(0),
-		mUseNetwork(false)
+		mInput(0)
 	{
 
 	}
@@ -61,11 +60,6 @@ struct AppSettings {
 	 * (optional) might be set to specify an InputHandler. Otherwise the default one will be created.
 	 */
 	Input::InputHandler *mInput;
-
-	/**
-	 * Specifies if the Application uses Networking. (default: false)
-	 */
-	bool mUseNetwork;
 
 
 };

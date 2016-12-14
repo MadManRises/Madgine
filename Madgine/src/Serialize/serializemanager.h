@@ -8,6 +8,7 @@ namespace Engine {
 			class MADGINE_EXPORT SerializeManager {
 			public:				
 				SerializeManager(bool isMaster = false);
+				virtual ~SerializeManager();
 
 				void setMaster(bool b);
 
@@ -27,7 +28,11 @@ namespace Engine {
 				bool filter(const SerializableUnit *unit, ParticipantId id);
 				void addFilter(std::function<bool(const SerializableUnit*, ParticipantId)>);
 
-				std::list<SerializeOutStream*> getMessageTargets(SerializableUnit *unit);
+				virtual std::list<SerializeOutStream*> getMessageTargets(SerializableUnit *unit);
+
+				void addTopLevelItem(TopLevelSerializableUnit *unit);
+
+				SerializeOutStream *getStream();
 
 			private:
 				std::map<InvPtr, SerializableUnit*> mSerializableItems;
@@ -41,6 +46,8 @@ namespace Engine {
 				std::list<std::function<bool(const SerializableUnit *unit, ParticipantId id)>> mFilters;
 
 				ParticipantId mRunningId;
+
+				std::list<TopLevelSerializableUnit*> mTopLevelUnits;
 
 			};
 

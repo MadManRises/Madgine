@@ -17,7 +17,7 @@ find_package(Qt5Xml REQUIRED)
 find_package(QScintilla REQUIRED)
 find_package(Qt5Network REQUIRED)
 
-
+add_subdirectory(Shared)
 
 PROJECT(Maditor)
 
@@ -34,13 +34,12 @@ set (CMAKE_AUTORCC ON)
 
 set (sources "")
 FolderSources(sources "" "" maditorlib.cpp)
-	FolderSources(sources "" Common ApplicationInfo.h InputInfo.h ModuleLoaderInfo.h ObjectsInfo.h ProcessTalker.h Shared.h SharedBase.h StatsInfo.h)
 	FolderSources(sources "" src maditorlib.h madgineinclude.h)
 		FolderSources(sources src Addons Addon.cpp Addon.h)
 		FolderSources(sources src Model editor.cpp editor.h editorforward.h log.h LogsModel.cpp LogsModel.h TreeItem.cpp TreeItem.h TreeModel.cpp TreeModel.h TreeSorter.cpp TreeSorter.h)
 			FolderSources(sources Model Editors EditorManager.cpp EditorManager.h ScriptAPI.cpp ScriptAPI.h ScriptEditor.cpp ScriptEditor.h ScriptEditorModel.cpp ScriptEditorModel.h)
 			FolderSources(sources Model Engine ApplicationWrapper.cpp ApplicationWrapper.h InputWrapper.cpp InputWrapper.h ModuleLoader.cpp ModuleLoader.h )
-				FolderSources(sources Engine Watcher ApplicationWatcher.cpp ApplicationWatcher.h LogTableModel.cpp LogTableModel.h LogWatcher.cpp LogWatcher.h ObjectsWatcher.cpp ObjectsWatcher.h OgreNodeItem.cpp OgreNodeItem.h OgreSceneWatcher.cpp OgreSceneWatcher.h PerformanceWatcher.cpp PerformanceWatcher.h ProfilerNode.cpp ProfilerNode.h ResourceGroupItem.cpp ResourceGroupItem.h ResourceItem.cpp ResourceItem.h ResourceWatcher.cpp ResourceWatcher.h)
+				#FolderSources(sources Engine Watcher ApplicationWatcher.cpp ApplicationWatcher.h LogTableModel.cpp LogTableModel.h LogWatcher.cpp LogWatcher.h ObjectsWatcher.cpp ObjectsWatcher.h OgreNodeItem.cpp OgreNodeItem.h OgreSceneWatcher.cpp OgreSceneWatcher.h PerformanceWatcher.cpp PerformanceWatcher.h ProfilerNode.cpp ProfilerNode.h ResourceGroupItem.cpp ResourceGroupItem.h ResourceItem.cpp ResourceItem.h ResourceWatcher.cpp ResourceWatcher.h)
 			FolderSources(sources Model Network madginenetworkclient.cpp madginenetworkclient.h)
 			FolderSources(sources Model Project Module.cpp Module.h ModuleList.cpp ModuleList.h Project.cpp Project.h ProjectElement.cpp ProjectElement.h)
 				FolderSources(sources Project Generators ClassGenerator.cpp ClassGenerator.h ClassGeneratorFactory.cpp ClassGeneratorFactory.h CmakeGenerator.cpp CmakeGenerator.h CmakeProject.cpp CmakeProject.h CmakeSubProject.cpp CmakeSubProject.h CommandLine.cpp CommandLine.h DotGenerator.cpp DotGenerator.h EntityComponentGenerator.cpp EntityComponentGenerator.h GameHandlerGenerator.cpp GameHandlerGenerator.h GlobalAPIGenerator.cpp GlobalAPIGenerator.h GuiHandlerGenerator.cpp GuiHandlerGenerator.h HeaderGuardGenerator.cpp HeaderGuardGenerator.h OtherClassGenerator.cpp OtherClassGenerator.h SceneComponentGenerator.cpp SceneComponentGenerator.h Generator.cpp Generator.h)
@@ -57,8 +56,8 @@ set(CMAKE_AUTOMOC ON)
 
 
 include_directories(${MADGINE_SOURCE_DIR}/src)
+include_directories(${Maditor_Shared_SOURCE_DIR})
 include_directories(${Maditor_SOURCE_DIR}/src)
-include_directories(${Maditor_SOURCE_DIR})
 
 if (OGRE_FOUND)
   include_directories(${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
@@ -71,7 +70,7 @@ add_precompiled_header(Maditor src/maditorlib.h FORCEINCLUDE SOURCE_CXX maditorl
 target_link_libraries(Maditor Madgine)
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(Maditor Qt5::Widgets Qt5::Xml Qt5::Network ${QSCINTILLA2_LIBRARY})
+target_link_libraries(Maditor Maditor_Shared Qt5::Widgets Qt5::Xml Qt5::Network ${QSCINTILLA2_LIBRARY})
 
 
 add_subdirectory(Tools)

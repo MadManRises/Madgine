@@ -1,8 +1,6 @@
 #include "madginelib.h"
 #include "struct.h"
-#include "Scripting/scriptingexception.h"
 
-#include "Database/exceptionmessages.h"
 
 namespace Engine {
 	

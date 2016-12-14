@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serializable.h"
+#include "serializablebase.h"
 
 namespace Engine {
 namespace Serialize {
@@ -8,12 +9,11 @@ namespace Serialize {
 class MADGINE_EXPORT SerializableUnit : public Serializable
 {
 public:
-	SerializableUnit();
-	virtual ~SerializableUnit();
+	SerializableUnit(TopLevelSerializableUnit *topLevel = 0, TopLevelMadgineObject type = NO_TOP_LEVEL);
+	virtual ~SerializableUnit();	
 
-	void setMasterManager(SerializeManager *mgr);
-
-	std::list<SerializeOutStream *> getMessageTargets(bool isAction);
+	std::list<SerializeOutStream *> getMasterMessageTargets(bool isAction);
+	SerializeOutStream *getSlaveMessageTarget();
 
 	virtual void writeCreationData(SerializeOutStream &out) const;
 	virtual void writeState(SerializeOutStream &out) const;
@@ -23,17 +23,30 @@ public:
 	void readRequest(SerializeInStream &in);
 
 	int addObservable(Observable* val);
-	void addSerializableValue(Serializable *val);	
+	void addSerializableValue(Serializable *val);
+
+	TopLevelSerializableUnit *topLevel();
+
+
+	InvPtr masterId();
+	void setMasterId(InvPtr id);
+
+	virtual void applySerializableMap(const std::map <InvPtr, SerializableUnit*> &map) override;
 
 protected:
-	void writeHeader(SerializeOutStream &out, bool isAction);	
-	virtual TopLevelMadgineObject topLevelId();
+	virtual void writeHeader(SerializeOutStream &out, bool isAction);	
+
+	
 
 private:
 	std::vector<Observable*> mObservedValues;
 	std::vector<Serializable*> mStateValues;
 
-	SerializeManager *mMasterManager;
+	TopLevelSerializableUnit *mTopLevel;
+
+	TopLevelMadgineObject mObject;
+
+	InvPtr mMasterId;
 };
 
 } // namespace Serialize
