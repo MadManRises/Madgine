@@ -2,7 +2,7 @@
 
 #include "observable.h"
 #include "serializableunit.h"
-#include "Streams\serializestream.h"
+#include "Streams\bufferedstream.h"
 #include "toplevelserializableunit.h"
 
 namespace Engine {
@@ -12,16 +12,23 @@ namespace Engine {
 				mParent(parent),
 				mIndex(parent->addObservable(this)) {}
 
-			std::list<SerializeOutStream*> Observable::getMasterMessageTargets(bool isAction)
+			std::list<BufferedOutStream*> Observable::getMasterActionMessageTargets() const
 			{
-				std::list<SerializeOutStream*> result = mParent->getMasterMessageTargets(isAction);
-				for (SerializeOutStream *out : result) {
+				std::list<BufferedOutStream*> result = mParent->getMasterMessageTargets(true);
+				for (BufferedOutStream *out : result) {
 					*out << mIndex;
 				}
 				return result;
 			}
 
-			bool Observable::isMaster()
+			BufferedOutStream * Observable::getSlaveActionMessageTarget() const
+			{
+				BufferedOutStream *out = mParent->getSlaveMessageTarget();
+				*out << mIndex;
+				return out;
+			}
+
+			bool Observable::isMaster() const
 			{
 				return mParent->topLevel()->isMaster();
 			}

@@ -2,7 +2,7 @@
 
 #include "../observable.h"
 #include "../serializable.h"
-#include "container.h"
+#include "sortedcontainer.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -26,6 +26,11 @@ namespace Engine {
 				return mData.try_emplace(mData.end(), std::forward<_Ty>(args)...);
 			}
 
+			template <class... _Ty>
+			native_iterator insert_where_impl(const native_iterator &where, _Ty&&... args) {
+				return mData.try_emplace(where, std::forward<_Ty>(args)...);
+			}
+
 			static T &access(const native_iterator &it) {
 				return it->second;
 			}
@@ -34,14 +39,15 @@ namespace Engine {
 				return it->second;
 			}
 
+
 			NativeContainer mData;
 		};
 
 
 		template <class T, class... Args>
-		class SerializableMap : public Container<T, std::map<std::string, T>, Creator<std::string, Args...>> {
+		class SerializableMap : public SortedContainer<T, std::map<std::string, T>, Creator<std::string, Args...>> {
 		public:
-			using Container::Container;
+			using SortedContainer::SortedContainer;
 
 			virtual T &operator[](const std::string &key) {
 				return mData[key];

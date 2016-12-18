@@ -494,7 +494,7 @@ std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> SceneManager::createEn
 
 Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour)
 {
-	return &mEntities.emplaceTuple(createEntityData(name, meshName, behaviour));
+	return &mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
 }
 
 Ogre::Camera *SceneManager::camera()

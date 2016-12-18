@@ -2,7 +2,7 @@
 
 #include "../observable.h"
 #include "../serializable.h"
-#include "container.h"
+#include "unsortedcontainer.h"
 
 namespace Engine {
 namespace Serialize {
@@ -25,8 +25,8 @@ namespace Serialize {
 		}
 
 		template <class... _Ty>
-		native_iterator insert_impl(_Ty&&... args) {
-			return mData.emplace(mData.end(), std::forward<_Ty>(args)...);
+		native_iterator insert_where_impl(const native_iterator &where, _Ty&&... args) {
+			return mData.emplace(where, std::forward<_Ty>(args)...);
 		}
 
 		void erase_impl(const native_iterator &it) {
@@ -43,9 +43,9 @@ namespace Serialize {
 	};
 	
 	template <class T, class... Args>
-	class SerializableList : public Container<T, std::list<T>, Creator<Args...>> {
+	class SerializableList : public UnsortedContainer<T, std::list<T>, Creator<Args...>> {
 	public:
-		using Container::Container;
+		using UnsortedContainer::UnsortedContainer;
 	};
 		
 

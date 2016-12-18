@@ -14,6 +14,13 @@ namespace Engine {
 
 				virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit *> &map);
 
+				std::list<BufferedOutStream*> getMasterStateMessageTargets();
+
+				void sendState();
+
+			private:
+				SerializableUnit *mParent;
+
 			};
 
 

@@ -2,7 +2,7 @@
 
 #include "../observable.h"
 #include "../serializable.h"
-#include "container.h"
+#include "sortedcontainer.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -148,9 +148,9 @@ namespace Engine {
 		};
 
 		template <class T, class... Args>
-		class SerializableSet : public Container<T, std::set<T>, Creator<Args...>> {
+		class SerializableSet : public SortedContainer<T, std::set<T>, Creator<Args...>> {
 		public:
-			using Container::Container;
+			using SortedContainer::SortedContainer;
 
 			typedef typename KeyHolder<T>::KeyType KeyType;
 
@@ -200,6 +200,11 @@ namespace Engine {
 				return mData.emplace(std::forward<_Ty>(args)...).first;
 			}
 
+			template <class... _Ty>
+			native_iterator insert_where_impl(const native_iterator &where, _Ty&&... args) {
+				return mData.emplace_hint(where.mIterator, std::forward<_Ty>(args)...);
+			}
+
 			void erase_impl(const native_iterator &it) {
 				mData.erase(it.mIterator);
 			}
@@ -207,7 +212,6 @@ namespace Engine {
 			static void write(SerializeOutStream &out, const native_const_iterator &it) {
 				UnitHelper::write(out, *it);
 			}
-
 
 
 		protected:

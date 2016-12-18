@@ -10,7 +10,8 @@
 namespace Engine {
 namespace Serialize {
 	TopLevelSerializableUnit::TopLevelSerializableUnit(Serialize::TopLevelMadgineObject type) :
-		SerializableUnit(this, type),
+		SerializableUnit(this),
+		mType(type),
 		mSlaveManager(0)
 	{
 	}
@@ -21,36 +22,42 @@ namespace Serialize {
 
 	bool TopLevelSerializableUnit::isMaster()
 	{
-		return false;
+		return mSlaveManager == 0;
 	}
 
-	std::list<SerializeOutStream*> TopLevelSerializableUnit::getMasterMessageTargets(SerializableUnit * unit)
+	TopLevelMadgineObject TopLevelSerializableUnit::type()
+	{
+		return mType;
+	}
+
+	std::list<BufferedOutStream*> TopLevelSerializableUnit::getMasterMessageTargets(SerializableUnit * unit)
 {
-	std::list<SerializeOutStream*> result;
+	std::list<BufferedOutStream*> result;
 	for (SerializeManager *mgr : mMasterManagers) {
-		result.splice(result.end(), mgr->getMessageTargets(unit));
+		result.splice(result.end(), mgr->getMasterMessageTargets(unit));
 	}
 	return result;
 }
 
-	SerializeOutStream * TopLevelSerializableUnit::getSlaveMessageTarget()
+	BufferedOutStream * TopLevelSerializableUnit::getSlaveMessageTarget()
 	{
 		if (mSlaveManager) {
-			return mSlaveManager->getStream();
+			return mSlaveManager->getSlaveMessageTarget();
 		}
 		return nullptr;
 	}
 
-void TopLevelSerializableUnit::addManager(SerializeManager * mgr)
+bool TopLevelSerializableUnit::addManager(SerializeManager * mgr)
 {
 	if (mgr->isMaster()) {
 		mMasterManagers.push_back(mgr);
 	}
 	else {
 		if (mSlaveManager)
-			throw 0;
+			return false;
 		mSlaveManager = mgr;
 	}
+	return true;
 }
 
 void TopLevelSerializableUnit::removeManager(SerializeManager * mgr)
@@ -59,10 +66,25 @@ void TopLevelSerializableUnit::removeManager(SerializeManager * mgr)
 		mMasterManagers.remove(mgr);
 	}
 	else {
-		if (mSlaveManager != mgr)
-			throw 0;
+		assert(mSlaveManager == mgr);
 		mSlaveManager = 0;
+
 	}
+}
+
+bool TopLevelSerializableUnit::updateManagerType(SerializeManager *mgr, bool isMaster)
+{
+	if (isMaster) {
+		removeManager(mgr);
+		mMasterManagers.push_back(mgr);
+	}
+	else {
+		if (mSlaveManager)
+			return false;
+		removeManager(mgr);
+		mSlaveManager = mgr;
+	}
+	return true;
 }
 
 

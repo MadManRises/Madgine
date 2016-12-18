@@ -2,7 +2,7 @@
 
 #include "../observable.h"
 #include "templates.h"
-#include "Serialize\Streams\serializestream.h"
+#include "Serialize\Streams\bufferedstream.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -21,19 +21,21 @@ namespace Engine {
 			void operator()(_Ty&&... args) {
 				if (isMaster()) {
 					mImpl(std::forward<_Ty>(args)...);
-					for (SerializeOutStream *out : getMasterMessageTargets(true)) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 						TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
 						out->endMessage();
 					}
 				}
 				else {
-
+					BufferedOutStream *out = getSlaveActionMessageTarget();
+					TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
+					out->endMessage();
 				}
 			}
 
 
 			// Inherited via Observable
-			virtual void readChanges(SerializeInStream & in) override
+			virtual void readRequest(BufferedInOutStream & in) override
 			{
 				std::tuple<_Ty...> args;
 				TupleSerializer::readTuple(args, in);

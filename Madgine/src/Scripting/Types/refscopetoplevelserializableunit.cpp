@@ -18,17 +18,17 @@ namespace Engine {
 
 		Scripting::Vector *RefScopeTopLevelSerializableUnit::createArray()
 		{
-			return &mArrays.emplaceTuple(createRefScopeImpl());
+			return &mArrays.emplace_tuple_back(createRefScopeImpl());
 		}
 
 		Scripting::Struct * RefScopeTopLevelSerializableUnit::createStruct()
 		{
-			return &mStructs.emplaceTuple(createRefScopeImpl());
+			return &mStructs.emplace_tuple_back(createRefScopeImpl());
 		}
 
 		Scripting::List * RefScopeTopLevelSerializableUnit::createList()
 		{
-			return &mLists.emplaceTuple(createRefScopeImpl());
+			return &mLists.emplace_tuple_back(createRefScopeImpl());
 		}
 
 		void RefScopeTopLevelSerializableUnit::removeRefScope(Scripting::RefScope * scope)

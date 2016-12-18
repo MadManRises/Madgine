@@ -10,9 +10,8 @@ namespace Engine {
 		NetworkStream::NetworkStream(UINT_PTR socket, Serialize::SerializeManager &mgr) :
 			mSocket(socket),
 			mBuffer(socket),
-			mStream(&mBuffer),
-			SerializeOutStream(mStream, mgr),
-			SerializeInStream(mStream, mgr)
+			BufferedInOutStream(mBuffer, mgr),
+			Stream(mgr)
 		{
 			u_long iMode = 1;
 			ioctlsocket(mSocket, FIONBIO, &iMode);
@@ -23,25 +22,6 @@ namespace Engine {
 			closesocket(mSocket);
 		}
 
-		bool NetworkStream::isMessageAvailable()
-		{
-			return mBuffer.isMessageAvailable();
-		}
-
-		bool NetworkStream::isValid()
-		{
-			return bool(*this) && !mBuffer.isClosed();
-		}
-
-		void NetworkStream::beginMessage()
-		{
-			mBuffer.beginMessage();
-		}
-
-		void NetworkStream::endMessage()
-		{
-			mBuffer.sendMessage();
-		}
 
 
 		

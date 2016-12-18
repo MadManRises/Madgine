@@ -21,6 +21,9 @@ namespace Engine {
 		class SerializeInStream;
 		class SerializeOutStream;
 		class SerializableUnit; 
+		class BufferedInOutStream;
+		class BufferedInStream;
+		class BufferedOutStream;
 		class TopLevelSerializableUnit;
 		class Observable;
 		class Serializable;
@@ -34,6 +37,8 @@ namespace Engine {
 		typedef size_t ParticipantId;
 
 		enum TopLevelMadgineObject;
+
+		class buffered_streambuf;
 	}
 	namespace Scripting {
 

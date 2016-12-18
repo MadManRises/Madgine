@@ -7,7 +7,7 @@ namespace Serialize {
 
 	typedef std::ifstream::pos_type pos_type;
 
-class Stream {
+class MADGINE_EXPORT Stream {
 public:
 	Stream(SerializeManager &mgr);
 	virtual ~Stream() = default;
@@ -24,7 +24,7 @@ protected:
 	ParticipantId mId;
 };
 
-class MADGINE_EXPORT SerializeInStream : public Stream {
+class MADGINE_EXPORT SerializeInStream : public virtual Stream {
 public:
     SerializeInStream(std::istream &ifs, SerializeManager &mgr);
 
@@ -71,15 +71,12 @@ private:
     std::istream &mIfs;
 };
 
-class MADGINE_EXPORT SerializeOutStream : public Stream{
+class MADGINE_EXPORT SerializeOutStream : public virtual Stream{
 public:
     SerializeOutStream(std::ostream &ofs, SerializeManager &mgr);
 
 	SerializeOutStream &operator<<(const ValueType &v);
 	SerializeOutStream &operator << (const Ogre::Quaternion &q);
-
-	virtual void beginMessage();
-	virtual void endMessage();
 
     virtual void writeData(const void *buffer, size_t size);
     pos_type tell();

@@ -2,6 +2,7 @@
 
 #include "../observable.h"
 #include "serialized.h"
+#include "../Streams/bufferedstream.h"
 
 
 namespace Engine {
@@ -25,7 +26,7 @@ namespace Engine {
 					}
 				}
 
-				virtual void readChanges(SerializeInStream &in) override {
+				virtual void readRequest(SerializeInStream &in) override {
 					in >> mData;
 				}
 
@@ -70,13 +71,14 @@ namespace Engine {
 					}
 				}
 
-				virtual void readChanges(SerializeInStream &in) override {
+				virtual void readRequest(BufferedInOutStream &in) override {
 					in >> mData;
+					notify();
 				}
 
 				void notify() {
 
-					for (SerializeOutStream *out : getMasterMessageTargets(true)) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 						*out << mData;
 						out->endMessage();
 					}

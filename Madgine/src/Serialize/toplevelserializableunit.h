@@ -11,17 +11,22 @@ public:
 	TopLevelSerializableUnit(Serialize::TopLevelMadgineObject type);
 	virtual ~TopLevelSerializableUnit();	
 
-	std::list<SerializeOutStream *> getMasterMessageTargets(SerializableUnit *unit);
-	SerializeOutStream *getSlaveMessageTarget();
+	std::list<BufferedOutStream *> getMasterMessageTargets(SerializableUnit *unit);
+	BufferedOutStream *getSlaveMessageTarget();
 
-	void addManager(SerializeManager *mgr);
+	bool addManager(SerializeManager *mgr);
 	void removeManager(SerializeManager *mgr);
 
+	bool updateManagerType(SerializeManager *mgr, bool isMaster);
+
 	bool isMaster();
+
+	virtual TopLevelMadgineObject type() override;
 
 private:
 	std::list<SerializeManager*> mMasterManagers;
 	SerializeManager *mSlaveManager;
+	TopLevelMadgineObject mType;
 
 };
 

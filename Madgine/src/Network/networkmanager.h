@@ -24,12 +24,15 @@ namespace Engine {
 
 			void close();
 
-			void receiveMessages();
+
+			bool acceptConnection(int timeout);
 			void acceptConnections();
 
 			int clientCount();
 
-			virtual std::list<Serialize::SerializeOutStream*> getMessageTargets(Serialize::SerializableUnit *unit) override;
+		protected:
+			virtual void onSlaveStreamRemoved(Serialize::BufferedInOutStream *stream) override;
+			virtual void onMasterStreamRemoved(Serialize::BufferedInOutStream *stream) override;
 
 		private:
 			UINT_PTR mSocket; // = SOCKET
@@ -39,6 +42,7 @@ namespace Engine {
 			int mPort;
 
 			std::list<NetworkStream> mStreams;
+			NetworkStream *mSlaveStream;
 
 			//static constexpr UINT sMessageSignature = 1048;
 

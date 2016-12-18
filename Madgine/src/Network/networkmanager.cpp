@@ -12,7 +12,8 @@ namespace Engine {
 		int NetworkManager::sManagerCount = 0;
 
 		NetworkManager::NetworkManager() :			
-			mSocket(0)
+			mSocket(0),
+			mIsServer(false)
 		{
 
 			if (sManagerCount == 0) {
@@ -47,6 +48,8 @@ namespace Engine {
 		bool NetworkManager::startServer(int port)
 		{
 			
+			if (!setMaster(true))
+				return false;
 
 			SOCKADDR_IN addr;
 			memset(&addr, 0, sizeof(addr));
@@ -74,7 +77,7 @@ namespace Engine {
 			}
 
 			mIsServer = true;
-			setMaster(true);
+
 			
 			return true;
 		}
@@ -111,7 +114,12 @@ namespace Engine {
 			mIsServer = false;
 			setMaster(false);
 
-			mStreams.emplace_back(mSocket, *this);
+			mSlaveStream = new NetworkStream(mSocket, *this);
+			if (!setSlaveStream(mSlaveStream)) {
+				delete mSlaveStream;
+				return false;
+			}
+
 
 			return true;
 		}
@@ -119,32 +127,15 @@ namespace Engine {
 		void NetworkManager::close()
 		{
 			if (mSocket) {
-
+				clearAllStreams();
 				if (mIsServer) {
 					closesocket(mSocket);
 				}
-				mStreams.clear();
-				
+				assert(mStreams.empty() && mSlaveStream == 0);
 				mSocket = 0;
 			}
 		}
 
-		void NetworkManager::receiveMessages()
-		{
-			for (auto it = mStreams.begin(); it != mStreams.end();) {
-				if (it->isValid()) {
-
-					if (it->isMessageAvailable()) {
-						readMessage(*it);
-					}
-					++it;
-				}
-				else {
-					removeBroadcastStream(&*it);
-					it = mStreams.erase(it);
-				}
-			}
-		}
 
 		void NetworkManager::acceptConnections()
 		{
@@ -158,10 +149,29 @@ namespace Engine {
 					timeout.tv_usec = 0;
 					while (select(mSocket, &readSet, NULL, NULL, &timeout) > 0) {
 						mStreams.emplace_back(accept(mSocket, NULL, NULL), *this);
-						addBroadcastStream(&mStreams.back());
+						addMasterStream(&mStreams.back());
 					}
 				}
 			}
+		}
+
+		bool NetworkManager::acceptConnection(int timeout) {
+			if (mSocket) {
+				if (mIsServer) {
+					fd_set readSet;
+					FD_ZERO(&readSet);
+					FD_SET(mSocket, &readSet);
+					timeval timeout_s;
+					timeout_s.tv_sec = timeout / 1000;
+					timeout_s.tv_usec = (timeout % 1000) * 1000;
+					if (select(mSocket, &readSet, NULL, NULL, &timeout_s) > 0) {
+						mStreams.emplace_back(accept(mSocket, NULL, NULL), *this);
+						addMasterStream(&mStreams.back());
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		int NetworkManager::clientCount()
@@ -169,13 +179,19 @@ namespace Engine {
 			return mStreams.size();
 		}
 
-		std::list<Serialize::SerializeOutStream*> NetworkManager::getMessageTargets(Serialize::SerializableUnit *unit)
+		void NetworkManager::onSlaveStreamRemoved(Serialize::BufferedInOutStream * stream)
 		{
-			std::list<Serialize::SerializeOutStream*> result = SerializeManager::getMessageTargets(unit);
-			for (Serialize::SerializeOutStream *out : result) {
-				out->beginMessage();
-			}
-			return result;
+			SerializeManager::onSlaveStreamRemoved(stream);
+			if (stream != mSlaveStream)
+				throw 0;
+			delete mSlaveStream;
+			mSlaveStream = 0;
+		}
+
+		void NetworkManager::onMasterStreamRemoved(Serialize::BufferedInOutStream * stream)
+		{
+			SerializeManager::onMasterStreamRemoved(stream);
+			mStreams.remove_if([=](NetworkStream &s) {return &s == stream; });
 		}
 
 	}

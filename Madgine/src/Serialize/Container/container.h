@@ -5,12 +5,16 @@
 #include "../serializemanager.h"
 #include "../serializable.h"
 #include "../observable.h"
+#include "../Streams/bufferedstream.h"
 
 namespace Engine {
 	namespace Serialize {
 		enum Operations {
-			ADD_ITEM,
-			CLEAR
+			ADD_ITEM = 0x1,
+			CLEAR = 0x2,
+
+			ACCEPT = 0x10,
+			REJECT = 0x20
 		};
 
 		template <class T, bool b = std::is_base_of<SerializableUnit, T>::value>
@@ -58,17 +62,12 @@ namespace Engine {
 		struct UnitHelper<T, true> {
 
 			static void read(SerializeInStream &in, T &item) {
-				item.readState(in);
-				InvPtr id;
-				in >> id;
-				in.manager().addMapping(id, &item);
-				item.setMasterId(id);				
+				item.readState(in);			
 			}
 
 			static void write(SerializeOutStream &out, const T &item) {
 				item.writeCreationData(out);
 				item.writeState(out);
-				out << static_cast<InvPtr>(reinterpret_cast<uintptr_t>(static_cast<const SerializableUnit*>(&item)));
 			}
 
 			static bool filter(SerializeOutStream &out, const T &item) {
@@ -180,6 +179,21 @@ namespace Engine {
 					mSkipList(skipList)
 				{
 					validate();
+				}
+
+				iterator(native_iterator&& it, const typename ChangesList::const_iterator& skipIt, const ChangesList *skipList) :
+					mIntern(std::forward<native_iterator>(it)),
+					mSkipIt(skipIt),
+					mSkipList(skipList)
+				{
+					validate();
+				}
+
+				iterator(const native_iterator& it, Container &c) : iterator(c, begin) {
+					while (mIntern != it) {
+						++mIntern;
+						validate();
+					}
 				}
 
 				iterator(native_iterator&& it, const ChangesList *skipList, begin_t) : iterator(std::forward<native_iterator>(it), skipList ? skipList->begin() : ChangesList::const_iterator(), skipList)
@@ -396,7 +410,7 @@ namespace Engine {
 				return mData.size();
 			}
 
-			void clear() {
+			virtual void clear() {
 				mData.clear();
 			}
 
@@ -411,71 +425,69 @@ namespace Engine {
 				return it;
 			}
 
-			T &at(size_t i) {
-				iterator it = begin();
-				std::advance(it, i);
-				return *it;
-			}
 
-			const T &at(size_t i) const {
-				const_iterator it = begin();
-				std::advance(it, i);
-				return *it;
-			}
 
-			virtual void writeState(SerializeOutStream &out) const override {
-				for (auto it = begin(); it != end(); ++it) {
-					const T &t = access(it.mIntern);
-					if (filter(out, t)) {
-						write(out, it.mIntern);
-					}
-				}
-				out << ValueType::EOL();
-			}
+virtual void writeState(SerializeOutStream &out) const override {
+	for (auto it = begin(); it != end(); ++it) {
+		const T &t = access(it.mIntern);
+		if (filter(out, t)) {
+			write(out, it.mIntern);
+		}
+	}
+	out << ValueType::EOL();
+}
 
-			virtual void readState(SerializeInStream &in) override {
-				while (in.loopRead()) {
-					iterator it = insertTuple(readCreationData(in));
-					read(in, access(it.mIntern));
-				}
-			}
+virtual void readState(SerializeInStream &in) override {
+	clear();
+	iterator it = begin();
+	while (in.loopRead()) {
+		iterator it = insert_tuple_where(it, readCreationData(in));
+		read(in, access(it.mIntern));
+		++it;
+	}
+}
 
-			virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map) override {
-				for (auto it = begin(); it != end(); ++it) {
-					T &t = access(it.mIntern);
-					applyMap(map, t);
-				}
-			}
 
-			template <class... _Ty>
-			T &emplace(_Ty&&... args) {
-				return access(insert(std::forward<_Ty>(args)...).mIntern);
-			}
 
-			template <class... _Ty>
-			T &emplaceTuple(std::tuple<_Ty...>&& tuple) {
-				return access(insertTuple(std::forward<std::tuple<_Ty...>>(tuple)).mIntern);
-			}
+virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map) override {
+	for (auto it = begin(); it != end(); ++it) {
+		T &t = access(it.mIntern);
+		applyMap(map, t);
+	}
+}
+
 
 		protected:
+
+			template <class... _Ty>
+			iterator insert_tuple_where_requested(const iterator &where, std::tuple<_Ty...>&& tuple, BufferedInOutStream &in) {
+				return TupleUnpacker<const iterator &, BufferedInOutStream &>::call(this, &Container::insert_where_requested<_Ty...>, where, in, std::forward<std::tuple<_Ty...>>(tuple));
+			}
+
+			template <class... _Ty>
+			iterator insert_tuple_where(const iterator &where, std::tuple<_Ty...>&& tuple) {
+				return TupleUnpacker<const iterator &>::call(this, &Container::insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
+			}
+
+			template <class... _Ty>
+			iterator insert_where_requested(const iterator &where, BufferedInOutStream &in, _Ty&&... args) {
+				iterator it(insert_where_impl(where.mIntern, std::forward<_Ty>(args)...), where.mSkipIt, where.mSkipList);
+				onInsert(it, &in);
+				return it;
+			}
+
+			template <class... _Ty>
+			iterator insert_where(const iterator &where, _Ty&&... args) {
+				iterator it(insert_where_impl(where.mIntern, std::forward<_Ty>(args)...), where.mSkipIt, where.mSkipList);
+				onInsert(it);
+				return it;
+			}
 
 			virtual const ChangesList *pendingAdds() const { return 0; }
 			virtual const ChangesList *pendingRemoves() const { return 0; }
 
-			virtual void onInsert(const iterator &) const {}
+			virtual void onInsert(const iterator &, BufferedInOutStream *reqBy = 0) const {}
 			virtual void onRemove(const iterator &) const {}
-
-			template <class... _Ty>
-			iterator insertTuple(std::tuple<_Ty...>&& tuple) {
-				return TupleUnpacker<>::call(this, &Container::insert<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
-			}
-
-			template <class... _Ty>
-			iterator insert(_Ty&&... args) {
-				iterator it(insert_impl(std::forward<_Ty>(args)...), pendingRemoves(), iterator::end);
-				onInsert(it);
-				return it;
-			}
 
 
 			ArgsTuple readCreationData(SerializeInStream &in) {
@@ -487,25 +499,26 @@ namespace Engine {
 				}
 			}
 
-			const native_iterator &intern(const iterator &it) {
+			const native_iterator &intern(const iterator &it) const {
 				return it.mIntern;
 			}
 
+			virtual void readItem(BufferedInOutStream &in) = 0;
 
 		private:
 			Factory mCreationDataFactory;
-			
+
 
 		};
 
 		template <class C>
 		class ObservableContainer : public C, public Observable {
 		public:
-			typedef typename Container::ArgsTuple ArgsTuple;
+			typedef typename C::ArgsTuple ArgsTuple;
 
 			ObservableContainer(SerializableUnit *parent) :
 				Observable(parent),
-				C(parent){
+				C(parent) {
 
 			}
 
@@ -516,10 +529,85 @@ namespace Engine {
 			{
 			}
 
-			// Inherited via Observable
-			virtual void readChanges(SerializeInStream & in) override
-			{
+			virtual void clear() override {
+				C::clear();
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					*out << CLEAR;
+					out->endMessage();
+				}
 			}
+
+			// Inherited via Observable
+			virtual void readRequest(BufferedInOutStream & inout) override
+			{
+				bool accepted = true; //Check TODO
+
+				Operations op;
+				inout >> (int&)op;
+
+				inout.beginMessage();
+
+				if (accepted) {
+					
+
+
+					switch (op) {
+					case ADD_ITEM:
+						readItem(inout);
+						break;
+					case CLEAR:
+						clear();
+						break;
+					default:
+						throw 0;
+					}
+					
+					inout << (op | ACCEPT);
+
+				}
+				else {
+					inout << (op | REJECT);
+
+				}
+
+				inout.endMessage();
+
+			}
+
+			virtual void onInsert(const typename C::iterator &it, BufferedInOutStream *reqBy = 0) const override {
+				if (!isMaster()) {
+					//add pending add
+					BufferedOutStream *out = getSlaveActionMessageTarget();
+					*out << ADD_ITEM;
+					write_iterator(*out, it);
+					write(*out, intern(it));
+					out->endMessage();
+				}
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					if (out == reqBy)
+						continue;
+					*out << ADD_ITEM;
+					write_iterator(*out, it);
+					write(*out, intern(it));
+					out->endMessage();
+				}
+				
+			}
+
+		protected:
+			
+
+			
+			virtual const typename C::ChangesList *pendingAdds() const override {
+				return &mPendingAdds;
+			}
+
+			virtual const typename C::ChangesList *pendingRemoves() const override {
+				return &mPendingRemoves;
+			}
+
+		private:
+			typename C::ChangesList mPendingAdds, mPendingRemoves;
 
 		};
 		

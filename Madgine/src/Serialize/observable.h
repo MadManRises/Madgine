@@ -6,14 +6,16 @@ namespace Engine {
 		namespace Serialize {
 
 			class MADGINE_EXPORT Observable {
+			public:
+				virtual void readRequest(BufferedInOutStream &in) = 0;
+
 			protected:
 				Observable(SerializableUnit *parent);		
 
-				virtual void readChanges(SerializeInStream &in) = 0;
+				std::list<BufferedOutStream*> getMasterActionMessageTargets() const;
+				BufferedOutStream *getSlaveActionMessageTarget() const;
 
-				std::list<SerializeOutStream*> getMasterMessageTargets(bool isAction);
-
-				bool isMaster();
+				bool isMaster() const;
 
 			private:
 				SerializableUnit *mParent;

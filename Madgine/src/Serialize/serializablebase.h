@@ -7,6 +7,7 @@ namespace Engine {
 
 			enum TopLevelMadgineObject {	
 				NO_TOP_LEVEL,
+				SERIALIZE_MANAGER,
 				SCENE_MANAGER,
 				SCRIPTING_MANAGER,
 				MADITOR
