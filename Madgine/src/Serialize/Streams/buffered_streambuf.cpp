@@ -159,7 +159,7 @@ bool buffered_streambuf::receive()
 {
 	if (mMsgInBuffer && mBytesToRead == 0) {
 		if (gptr() != egptr()) {
-			LOG_WARNING("Message not fully read!");
+			std::cout << "Message not fully read!" << std::endl;
 		}
 		delete[] mRecBuffer;
 		mMsgInBuffer = false;
@@ -179,7 +179,6 @@ bool buffered_streambuf::receive()
 			mMsgInBuffer = true;
 			mBytesToRead = mReceiveMessageHeader.mMsgSize;
 			mRecBuffer = new char[mBytesToRead];
-			std::cout << "Header received!" << std::endl;
 		}
 		else {
 			return true;

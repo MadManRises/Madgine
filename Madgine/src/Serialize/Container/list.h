@@ -11,7 +11,7 @@ namespace Serialize {
 	template <class T>
 	class ContainerWrapper<std::list<T>> : protected UnitHelper<T> {
 	protected:
-		typedef std::list<T> NativeContainer;
+		typedef std::list<Type> NativeContainer;
 		typedef typename NativeContainer::iterator native_iterator;
 		typedef typename NativeContainer::const_iterator native_const_iterator;
 
@@ -29,12 +29,12 @@ namespace Serialize {
 			return mData.emplace(where, std::forward<_Ty>(args)...);
 		}
 
-		void erase_impl(const native_iterator &it) {
-			mData.erase(it);
+		native_iterator erase_impl(const native_iterator &it) {
+			return mData.erase(it);
 		}
 
-		static void write(SerializeOutStream &out, const native_const_iterator &it) {
-			UnitHelper::write(out, *it);
+		static void write_creation(SerializeOutStream &out, const native_const_iterator &it) {
+			UnitHelper::write_creation(out, *it);
 		}
 
 	protected:
@@ -46,6 +46,18 @@ namespace Serialize {
 	class SerializableList : public UnsortedContainer<T, std::list<T>, Creator<Args...>> {
 	public:
 		using UnsortedContainer::UnsortedContainer;
+
+		void remove(const T &item) {
+			for (iterator it = begin(); it != end();) {
+				if (*it == item) {
+					it = erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+			
+		}
 	};
 		
 

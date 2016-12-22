@@ -10,20 +10,14 @@ namespace Engine {
 		template <class T>
 		class ContainerWrapper<std::map<std::string, T>> : protected UnitHelper<T> {
 		protected:
-			typedef std::map<std::string, T> NativeContainer;
+			typedef std::map<std::string, Type> NativeContainer;
 			typedef typename NativeContainer::iterator native_iterator;
 			typedef typename NativeContainer::const_iterator native_const_iterator;
 
 
-			static void write(SerializeOutStream &out, const native_const_iterator &it) {
+			static void write_creation(SerializeOutStream &out, const native_const_iterator &it) {
 				out << it->first;
-				UnitHelper::write(out, it->second);
-			}
-
-
-			template <class... _Ty>
-			native_iterator insert_impl(_Ty&&... args) {
-				return mData.try_emplace(mData.end(), std::forward<_Ty>(args)...);
+				UnitHelper::write_creation(out, it->second);
 			}
 
 			template <class... _Ty>

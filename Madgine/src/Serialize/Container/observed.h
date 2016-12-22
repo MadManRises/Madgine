@@ -76,6 +76,11 @@ namespace Engine {
 					notify();
 				}
 
+				virtual void readAction(BufferedInOutStream &in) override {
+					in >> mData;
+					notify();
+				}
+
 				void notify() {
 
 					for (BufferedOutStream *out : getMasterActionMessageTargets()) {

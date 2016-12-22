@@ -18,6 +18,8 @@ namespace Engine {
 
 				void sendState();
 
+				TopLevelSerializableUnit *topLevel();
+
 			private:
 				SerializableUnit *mParent;
 

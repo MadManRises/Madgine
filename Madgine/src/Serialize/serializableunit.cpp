@@ -14,8 +14,8 @@
 namespace Engine {
 namespace Serialize {
 
-	SerializableUnit::SerializableUnit(TopLevelSerializableUnit *topLevel) :
-	mTopLevel(topLevel),
+	SerializableUnit::SerializableUnit() :
+	mTopLevel(0),
 	mMasterId((InvPtr)0)
 {
 }
@@ -27,13 +27,17 @@ SerializableUnit::~SerializableUnit()
 
 void SerializableUnit::writeState(SerializeOutStream & out) const
 {
-	out << static_cast<InvPtr>(reinterpret_cast<uintptr_t>(this));
 	for (Serializable *val : mStateValues) {
 		val->writeState(out);
 	}
 }
 
-void SerializableUnit::readState(SerializeInStream & in)
+void SerializableUnit::writeId(SerializeOutStream & out) const
+{
+	out << static_cast<InvPtr>(reinterpret_cast<uintptr_t>(this));
+}
+
+void SerializableUnit::readId(SerializeInStream & in)
 {
 	InvPtr id;
 	in >> id;
@@ -42,15 +46,21 @@ void SerializableUnit::readState(SerializeInStream & in)
 		in.manager().addMapping(id, this);
 		mMasterId = id;
 	}
+}
+
+void SerializableUnit::readState(SerializeInStream & in)
+{
 	for (Serializable *val : mStateValues) {
 		val->readState(in);
 	}
 	
 }
 
-void SerializableUnit::readAction(SerializeInStream & in)
+void SerializableUnit::readAction(BufferedInOutStream & in)
 {
-	
+	int index;
+	in >> index;
+	mObservedValues.at(index)->readAction(in);
 }
 
 void SerializableUnit::readRequest(BufferedInOutStream & in)
@@ -75,33 +85,22 @@ std::list<BufferedOutStream*> SerializableUnit::getMasterMessageTargets(bool isA
 {
 	std::list<BufferedOutStream*> result;
 	if (mTopLevel) {
-		if (!isAction && !mTopLevel->isMaster())
-			throw 0;
 		result = mTopLevel->getMasterMessageTargets(this);
+
 		for (BufferedOutStream *out : result) {
-			writeHeader(*out, isAction);
+			writeMasterMessageHeader(*out, isAction);
 		}
 	}
 	return result;
 	
 }
 
-BufferedOutStream * SerializableUnit::getSlaveMessageTarget()
-{
-	BufferedOutStream* result = nullptr;
-	if (mTopLevel) {
-		result = mTopLevel->getSlaveMessageTarget();
-		writeHeader(*result, true);
-	}
-	return result;
-}
-
-void SerializableUnit::writeHeader(SerializeOutStream & out, bool isAction)
+void SerializableUnit::writeMasterMessageHeader(BufferedOutStream & out, bool isAction)
 {
 	MessageHeader header;
-	header.mType = isAction ? (out.manager().isMaster() ? ACTION : REQUEST) : STATE;
+	header.mType = isAction ? ACTION : STATE;
 	if (type() == NO_TOP_LEVEL) {
-		header.mObject = out.manager().isMaster() ? static_cast<InvPtr>(reinterpret_cast<uintptr_t>(this)) : mMasterId;
+		header.mObject = out.manager().convertPtr(out, this);
 		header.mIsMadgineComponent = false;
 	}
 	else {
@@ -111,6 +110,27 @@ void SerializableUnit::writeHeader(SerializeOutStream & out, bool isAction)
 	out.write(header);
 }
 
+BufferedOutStream * SerializableUnit::getSlaveMessageTarget()
+{
+	BufferedOutStream* result = nullptr;
+	if (mTopLevel) {
+		result = mTopLevel->getSlaveMessageTarget();
+		MessageHeader header;
+		header.mType = REQUEST;
+		if (type() == NO_TOP_LEVEL) {
+			header.mObject = result->manager().convertPtr(*result, this);
+			header.mIsMadgineComponent = false;
+		}
+		else {
+			header.mMadgineComponent = type();
+			header.mIsMadgineComponent = true;
+		}
+		result->write(header);
+	}
+	return result;
+}
+
+
 TopLevelMadgineObject SerializableUnit::type() {
 	return NO_TOP_LEVEL;
 }
@@ -118,6 +138,11 @@ TopLevelMadgineObject SerializableUnit::type() {
 
 void SerializableUnit::writeCreationData(SerializeOutStream & out) const
 {
+}
+
+void SerializableUnit::setTopLevel(TopLevelSerializableUnit * topLevel)
+{
+	mTopLevel = topLevel;
 }
 
 TopLevelSerializableUnit * SerializableUnit::topLevel()
@@ -130,12 +155,12 @@ void SerializableUnit::clearMasterId()
 	mMasterId = (InvPtr)0;
 }
 
-/*InvPtr SerializableUnit::masterId()
+InvPtr SerializableUnit::masterId()
 {
 	return mMasterId;
 }
 
-void SerializableUnit::setMasterId(InvPtr id)
+/*void SerializableUnit::setMasterId(InvPtr id)
 {
 	mMasterId = id;
 }*/

@@ -47,9 +47,10 @@ namespace Engine {
 
 		bool NetworkManager::startServer(int port)
 		{
-			
-			if (!setMaster(true))
+			if (mSocket)
 				return false;
+
+			mIsServer = true;
 
 			SOCKADDR_IN addr;
 			memset(&addr, 0, sizeof(addr));
@@ -61,6 +62,7 @@ namespace Engine {
 			mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 			if (mSocket == INVALID_SOCKET) {
+				mSocket = 0;
 				return false;
 			}
 
@@ -75,15 +77,15 @@ namespace Engine {
 				close();
 				return false;
 			}
-
-			mIsServer = true;
-
-			
+						
 			return true;
 		}
 
 		bool NetworkManager::connect(const std::string & url, int portNr, int timeout)
 		{
+
+			if (mSocket)
+				return false;
 
 			//Fill out the information needed to initialize a socket…
 			SOCKADDR_IN target; //Socket address information
@@ -111,8 +113,6 @@ namespace Engine {
 				return false; //Couldn't connect
 			}
 
-			mIsServer = false;
-			setMaster(false);
 
 			mSlaveStream = new NetworkStream(mSocket, *this);
 			if (!setSlaveStream(mSlaveStream)) {
@@ -130,6 +130,7 @@ namespace Engine {
 				clearAllStreams();
 				if (mIsServer) {
 					closesocket(mSocket);
+					mIsServer = false;
 				}
 				assert(mStreams.empty() && mSlaveStream == 0);
 				mSocket = 0;

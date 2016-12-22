@@ -86,7 +86,6 @@ public:
 
 	void readState(Serialize::SerializeInStream &in);
 	void writeState(Serialize::SerializeOutStream &out) const;
-	void writeCreationData(Serialize::SerializeOutStream &out) const;
 
 	void applySerializableMap(const std::map<InvPtr, Serialize::SerializableUnit *> &map);
 

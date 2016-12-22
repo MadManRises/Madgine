@@ -146,7 +146,7 @@ void ConfigSet::updateWindow()
 
 void ConfigSet::save()
 {
-	Serialize::SerializeManager mgr(true);
+	Serialize::SerializeManager mgr;
     std::ofstream ofs(mConfigFileName, std::ios::binary);
     Serialize::SerializeOutStream of(ofs, mgr);
 	mSettings.writeState(of);

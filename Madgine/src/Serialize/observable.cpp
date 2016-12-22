@@ -21,6 +21,12 @@ namespace Engine {
 				return result;
 			}
 
+			void Observable::writeMasterActionMessageHeader(BufferedOutStream & out) const
+			{
+				mParent->writeMasterMessageHeader(out, true);
+				out << mIndex;
+			}
+
 			BufferedOutStream * Observable::getSlaveActionMessageTarget() const
 			{
 				BufferedOutStream *out = mParent->getSlaveMessageTarget();

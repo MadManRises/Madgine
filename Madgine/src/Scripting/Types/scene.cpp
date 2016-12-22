@@ -7,8 +7,7 @@ namespace Scripting {
 
 
 
-Scene::Scene(Serialize::TopLevelSerializableUnit *topLevel) :
-	Scope(topLevel)
+Scene::Scene()
 {
 
 }

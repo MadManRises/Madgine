@@ -13,9 +13,8 @@ namespace Scripting {
 	API_IMPL(GlobalScope);
 
 
-	GlobalScope::GlobalScope(Serialize::TopLevelSerializableUnit *parent, Parsing::ScriptParser *scriptParser) :
-		mScriptParser(scriptParser),
-		ScopeImpl(parent)
+	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
+		mScriptParser(scriptParser)
 	{
 		Ogre::LogManager::getSingleton().createLog("Scripting.log");
 	}

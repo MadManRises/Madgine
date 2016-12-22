@@ -8,7 +8,7 @@ namespace Scripting {
 class Scene : public Scope
 {
 public:
-    Scene(Serialize::TopLevelSerializableUnit *topLevel);
+    Scene();
 
 	virtual std::string getIdentifier() override;
 

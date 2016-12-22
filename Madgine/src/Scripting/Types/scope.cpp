@@ -26,11 +26,10 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
 	{"isGlobal", &isGlobal}
 };
 
-Scope::Scope(Serialize::TopLevelSerializableUnit *topLevel) :
+Scope::Scope() :
 	mPrototype(0),
 	mPrototypeName(this),
-	mVariables(this),
-	SerializableUnit(topLevel)
+	mVariables(this)
 {
 
 }

@@ -13,35 +13,46 @@ namespace Engine {
 
 			template <class... _Ty>
 			T &emplace(_Ty&&... args) {
-				return access(intern(insert(std::forward<_Ty>(args)...)));
+				return access(insert(std::forward<_Ty>(args)...));
 			}
 
 			template <class... _Ty>
 			T &emplace_tuple(std::tuple<_Ty...>&& tuple) {
-				return access(intern(insert_tuple(std::forward<std::tuple<_Ty...>>(tuple))));
+				return access(insert_tuple(std::forward<std::tuple<_Ty...>>(tuple)));
 			}
 
 		protected:
 			template <class... _Ty>
-			iterator insert_tuple(std::tuple<_Ty...>&& tuple) {
-				return TupleUnpacker<>::call(this, &SortedContainer::insert<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
+			iterator insert_tuple(bool authorized, std::tuple<_Ty...>&& tuple) {
+				return insert_tuple_where(std::forward<bool>(authorized), begin(), std::forward<std::tuple<_Ty...>>(tuple));
+			}
+
+			template <class... _Ty>
+			void insert_tuple_safe(std::function<void(const iterator &)>callback, std::tuple<_Ty...>&& tuple) {
+				return insert_tuple_where_safe(callback, begin(), std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			template <class... _Ty>
 			iterator insert(_Ty&&... args) {
-				iterator it(insert_impl(std::forward<_Ty>(args)...), *this);
-				onInsert(it);
+				return insert_where(false, begin(), std::forward<_Ty>(args)...);				
+			}
+
+			iterator read_item(BufferedInOutStream &in) {
+				iterator it = insert_tuple(true, readCreationData(in));		
+				read_id(in, access(it));
 				return it;
 			}
 
-			virtual void readItem(BufferedInOutStream &in) override {
-				insert_tuple(readCreationData(in));
+			void read_item_save(std::function<void(const iterator &)>callback, BufferedInOutStream &in) {
+				insert_tuple_safe(callback, readCreationData(in));
 			}
 
-			/*typename Container::iterator read_iterator(SerializeInStream &) {
-				return end();
-			}*/
-			void write_iterator(SerializeOutStream &, const typename Container::const_iterator &) const {
+			void write_item(BufferedOutStream &out, const iterator &it) const {
+				write_creation(out, it);
+				write_id(out, access(it));
+			}
+
+			void write_iterator(SerializeOutStream &out, const const_iterator &it) const {
 			}
 
 		};

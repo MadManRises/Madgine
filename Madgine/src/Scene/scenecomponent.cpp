@@ -9,8 +9,7 @@ namespace Scene{
 		mContext(context),
 		mUpdateInterval(updateInterval),
 		mTimeBank(0.f),
-		mEnabled(true),
-		SerializableUnit(&SceneManager::getSingleton())
+		mEnabled(true)
 {
 
 }

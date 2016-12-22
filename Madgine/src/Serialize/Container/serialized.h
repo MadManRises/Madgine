@@ -2,18 +2,19 @@
 
 #include "../serializable.h"
 #include "../Streams/serializestream.h"
+#include "container.h"
 
 namespace Engine {
 		namespace Serialize {
 
 			template <class T>
-			class Serialized : public Serializable {
+			class Serialized : public Serializable, protected UnitHelper<T> {
 			public:
 				template <class... _Ty>
 				Serialized(SerializableUnit *parent, _Ty&&... args) :
 					mData(std::forward<_Ty>(args)...),
 					Serializable(parent) {
-
+					setTopLevel(mData, parent->topLevel());
 				}
 
 				template <class T>
@@ -29,55 +30,22 @@ namespace Engine {
 					return &mData;
 				}
 
+				operator T &() {
+					return mData;
+				}
+
 				virtual void readState(SerializeInStream &in) override {
-					mData.readState(in);
+					read_id(in, mData);
+					read_state(in, mData);
 				}
 
 				virtual void writeState(SerializeOutStream &out) const override {
-					mData.writeState(out);
+					write_id(out, mData);
+					write_state(out, mData);
 				}
 
 			protected:
 				T mData;
-			};
-
-			template <>
-			class Serialized<std::string> : public Serializable {
-			public:
-				Serialized(SerializableUnit *parent, const std::string &data = "") :
-					mData(data),
-					Serializable(parent) {
-
-				}
-
-				template <class T>
-				void operator =(T&& v) {
-					mData = std::forward<T>(v);
-				}
-
-				operator const std::string &() const {
-					return mData;
-				}
-
-				bool empty() const {
-					return mData.empty();
-				}
-
-				void clear() {
-					mData.clear();
-				}
-
-				virtual void readState(SerializeInStream &in) override {
-					in >> mData;
-				}
-
-				virtual void writeState(SerializeOutStream &out) const override {
-					out << mData;
-				}
-
-			protected:
-
-				std::string mData;
 			};
 
 		}

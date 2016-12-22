@@ -38,8 +38,13 @@ public:
 
 	bool isValid();
 
+	bool isBlocked();
+	void setBlocked(bool blocked);
+
 private:
 	buffered_streambuf &mBuffer;
+
+	bool mBlocked;
 };
 
 

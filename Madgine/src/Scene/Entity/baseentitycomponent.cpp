@@ -7,8 +7,7 @@ namespace Scene {
 namespace Entity {
 
 BaseEntityComponent::BaseEntityComponent(Entity &entity) :
-    mEntity(entity),
-	SerializableUnit(entity.topLevel())
+    mEntity(entity)
 {
 }
 

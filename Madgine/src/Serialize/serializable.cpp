@@ -36,6 +36,11 @@ namespace Engine {
 				}
 			}
 
+			TopLevelSerializableUnit * Serializable::topLevel()
+			{
+				return mParent->topLevel();
+			}
+
 
 
 		}

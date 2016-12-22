@@ -11,7 +11,7 @@ namespace Scripting {
 class MADGINE_EXPORT Scope : public Ogre::ScriptingAllocatedObject, public Serialize::SerializableUnit {
 
 public:
-	Scope(Serialize::TopLevelSerializableUnit *topLevel = 0);
+	Scope();
     virtual ~Scope();
 
     void setVar(const std::string &name, const ValueType &v);

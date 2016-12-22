@@ -9,10 +9,9 @@ namespace Engine {
 
 			class MADGINE_EXPORT SerializeManager {
 			public:				
-				SerializeManager(bool isMaster = false);
+				SerializeManager();
 				virtual ~SerializeManager();
 
-				bool setMaster(bool b);
 
 				void readMessage(BufferedInOutStream &);
 
@@ -26,7 +25,7 @@ namespace Engine {
 
 				void clearAllStreams();
 				bool setSlaveStream(BufferedInOutStream *stream);
-				void clearSlaveStream(BufferedInOutStream *stream);
+				void clearSlaveStream();
 				void addMasterStream(BufferedInOutStream *stream);
 				void removeMasterStream(BufferedInOutStream *stream);
 
@@ -40,6 +39,11 @@ namespace Engine {
 				BufferedOutStream *getSlaveMessageTarget();
 
 				void receiveMessages();
+
+				SerializableUnit *readPtr(SerializeInStream &in);
+				InvPtr convertPtr(SerializeOutStream &out, SerializableUnit *unit);
+				SerializableUnit *convertPtr(SerializeInStream &in, InvPtr unit);
+				void writePtr(SerializeOutStream &out, SerializableUnit *unit);
 
 			protected:
 
@@ -57,7 +61,6 @@ namespace Engine {
 			private:
 				std::map<InvPtr, SerializableUnit*> mSerializableItems;
 
-				bool mIsMaster;
 				bool mReceivingMasterState;
 
 				UI::Process mProcess;

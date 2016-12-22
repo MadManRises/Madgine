@@ -722,10 +722,6 @@ void ValueType::writeState(Serialize::SerializeOutStream & out) const
 	}
 }
 
-void ValueType::writeCreationData(Serialize::SerializeOutStream & out) const
-{
-}
-
 void ValueType::applySerializableMap(const std::map<InvPtr, Serialize::SerializableUnit*>& map)
 {
 	if (mType == Type::InvPtrValue) {

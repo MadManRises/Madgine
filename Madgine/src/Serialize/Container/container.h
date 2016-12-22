@@ -6,6 +6,7 @@
 #include "../serializable.h"
 #include "../observable.h"
 #include "../Streams/bufferedstream.h"
+#include "../toplevelserializableunit.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -13,6 +14,8 @@ namespace Engine {
 			ADD_ITEM = 0x1,
 			CLEAR = 0x2,
 
+
+			MASK = 0x0F,
 			ACCEPT = 0x10,
 			REJECT = 0x20
 		};
@@ -20,13 +23,25 @@ namespace Engine {
 		template <class T, bool b = std::is_base_of<SerializableUnit, T>::value>
 		struct UnitHelper {
 
-			static void read(SerializeInStream &in, T &item) {
-				item.readState(in);
+			typedef T Type;
+
+
+
+			static void read_id(SerializeInStream &in, T &item) {
 			}
 
-			static void write(SerializeOutStream &out, const T &item) {
-				item.writeCreationData(out);
-				item.writeState(out);
+			static void write_id(SerializeOutStream &out, const T &item) {
+			}
+
+			static void write_creation(SerializeOutStream &out, const T &item) {
+			}
+
+			static void read_state(SerializeInStream &in, T &item) {
+				in >> item;
+			}
+
+			static void write_state(SerializeOutStream &out, const T &item) {
+				out << item;
 			}
 
 			static bool filter(SerializeOutStream &out, const T &item) {
@@ -34,19 +49,110 @@ namespace Engine {
 			}
 
 			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, T &item) {
+			}
+
+			static void setTopLevel(T &item, TopLevelSerializableUnit *topLevel) {
+			}
+			
+
+		};
+
+		template <class T, bool b>
+		struct UnitHelper<T*, b> {
+
+			typedef T* Type;
+
+			static void read_state(SerializeInStream &in, T *&item) {
+				SerializableUnit *unit = in.manager().readPtr(in);
+				T *temp = dynamic_cast<T*>(unit);
+				if (!temp)
+					throw 0;
+				item = temp;
+			}
+
+			static void read_id(SerializeInStream &in, T *item) {
+			}
+
+			static void write_id(SerializeOutStream &out, T *item) {
+			}
+
+			static void write_creation(SerializeOutStream &out, T *item) {
+			}
+
+			static void write_state(SerializeOutStream &out, T *item) {
+				out.manager().writePtr(out, item);
+			}
+
+			static bool filter(SerializeOutStream &out, T *item) {
+				return true;
+			}
+
+			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, T *&item) {
+			}
+
+			static void setTopLevel(T* &item, TopLevelSerializableUnit *topLevel) {
+			}
+
+		};
+
+		template <bool b>
+		struct UnitHelper<ValueType, b> {
+
+			typedef ValueType Type;
+
+			static void read_state(SerializeInStream &in, ValueType &item) {
+				in >> item;
+			}
+
+			static void read_id(SerializeInStream &in, ValueType &item) {
+			}
+
+			static void write_id(SerializeOutStream &out, const ValueType &item) {
+			}
+
+			static void write_creation(SerializeOutStream &out, const ValueType &item) {
+			}
+
+			static void write_state(SerializeOutStream &out, const ValueType &item) {
+				out << item;
+			}
+
+			static bool filter(SerializeOutStream &out, const ValueType &item) {
+				return true;
+			}
+
+			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, ValueType &item) {
 				item.applySerializableMap(map);
 			}
+
+			static void setTopLevel(ValueType &item, TopLevelSerializableUnit *topLevel) {
+			}
+
 		};
 
 		template <class T, bool b>
 		struct UnitHelper<Ogre::unique_ptr<T>, b> {
 
-			static void read(SerializeInStream &in, Ogre::unique_ptr<T> &item) {
-				UnitHelper<T>::read(in, *item);
+			typedef Ogre::unique_ptr<typename UnitHelper<T>::Type> Type;
+
+			static void read_state(SerializeInStream &in, Ogre::unique_ptr<T> &item) {
+				UnitHelper<T>::read_state(in, *item);
 			}
 
-			static void write(SerializeOutStream &out, const Ogre::unique_ptr<T> &item) {
-				UnitHelper<T>::write(out, *item);
+			static void read_id(SerializeInStream &in, Ogre::unique_ptr<T> &item) {
+				UnitHelper<T>::read_id(in, *item);
+			}
+
+			static void write_id(SerializeOutStream &out, const Ogre::unique_ptr<T> &item) {
+				UnitHelper<T>::write_id(out, *item);
+			}
+
+			static void write_creation(SerializeOutStream &out, const Ogre::unique_ptr<T> &item) {
+				UnitHelper<T>::write_creation(out, *item);
+			}
+
+			static void write_state(SerializeOutStream &out, const Ogre::unique_ptr<T> &item) {
+				UnitHelper<T>::write_state(out, *item);
 			}
 
 			static bool filter(SerializeOutStream &out, const Ogre::unique_ptr<T> &item) {
@@ -56,17 +162,36 @@ namespace Engine {
 			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, const Ogre::unique_ptr<T> &item) {
 				UnitHelper<T>::applyMap(map, *item);
 			}
+
+			static void setTopLevel(Ogre::unique_ptr<T> &item, TopLevelSerializableUnit *topLevel) {
+				UnitHelper<T>::setTopLevel(*item, topLevel);
+			}
+
+
 		};
 
 		template <class T>
 		struct UnitHelper<T, true> {
 
-			static void read(SerializeInStream &in, T &item) {
+			typedef T Type;
+
+			static void read_state(SerializeInStream &in, T &item) {
 				item.readState(in);			
 			}
 
-			static void write(SerializeOutStream &out, const T &item) {
+			static void read_id(SerializeInStream &in, T &item) {
+				item.readId(in);
+			}
+
+			static void write_id(SerializeOutStream &out, const T &item) {
+				item.writeId(out);
+			}
+
+			static void write_creation(SerializeOutStream &out, const T &item) {
 				item.writeCreationData(out);
+			}
+
+			static void write_state(SerializeOutStream &out, const T &item) {
 				item.writeState(out);
 			}
 
@@ -77,6 +202,12 @@ namespace Engine {
 			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, T &item) {
 				item.applySerializableMap(map);
 			}
+
+			static void setTopLevel(T &item, TopLevelSerializableUnit *topLevel) {
+				item.setTopLevel(topLevel);
+			}
+
+
 		};
 
 		
@@ -118,8 +249,9 @@ namespace Engine {
 		template <class T>
 		class ContainerWrapper<std::vector<T>> : protected UnitHelper<T> {
 		protected:
-			typedef typename std::vector<T>::iterator native_iterator;
-			typedef typename std::vector<T>::const_iterator native_const_iterator;
+			typedef std::vector<Type> NativeContainer;
+			typedef typename NativeContainer::iterator native_iterator;
+			typedef typename NativeContainer::const_iterator native_const_iterator;
 
 
 			static T &access(const native_iterator &it) {
@@ -135,12 +267,8 @@ namespace Engine {
 				return mData.emplace(mData.end(), std::forward<_Ty>(args)...);
 			}
 
-			static void write(SerializeOutStream &out, const native_iterator &it) {
-				write(out, *it);
-			}
-
 		protected:
-			std::vector<T> mData;
+			NativeContainer mData;
 
 		};
 		
@@ -148,25 +276,17 @@ namespace Engine {
 		template <class T, class NativeContainer, class Creator>
 		class Container : protected Creator, public Serializable, protected ContainerWrapper<NativeContainer> {
 		public:
+			typedef T T;
+
 			typedef typename Creator::ArgsTuple ArgsTuple;
 			typedef std::function<ArgsTuple(SerializeInStream&)> Factory;
 			
 			/*typedef NativeContainer NativeContainer;*/
-			typedef typename ContainerWrapper<NativeContainer>::native_iterator native_iterator;
-			typedef typename ContainerWrapper<NativeContainer>::native_const_iterator native_const_iterator;
-			typedef std::iterator_traits<native_iterator> native_traits;
-			typedef typename native_traits::value_type value_type;
+			typedef typename ContainerWrapper<NativeContainer>::native_iterator iterator;
+			typedef typename ContainerWrapper<NativeContainer>::native_const_iterator const_iterator;
 
-			typedef size_t TransactionId;
-
-			struct Change {
-				native_const_iterator mWhere;
-				TransactionId mId;
-			};
-			typedef std::list<Change> ChangesList;
-
-
-			class iterator : public std::iterator<typename native_traits::iterator_category, value_type> {
+			
+			/*class iterator : public std::iterator<typename native_traits::iterator_category, value_type> {
 			public:
 				struct begin_t {};
 				struct end_t {};
@@ -367,7 +487,7 @@ namespace Engine {
 				typename ChangesList::const_iterator mSkipIt;
 
 				typename native_const_iterator mIntern;
-			};
+			};*/
 
 		public:			
 
@@ -391,26 +511,31 @@ namespace Engine {
 			}
 
 			const_iterator begin() const {
-				return{ *this, const_iterator::begin };
+				return mData.begin();
+				//return{ *this, const_iterator::begin };
 			}
 
 			const_iterator end() const {
-				return{ *this, const_iterator::end };
+				return mData.end();
+				//return{ *this, const_iterator::end };
 			}
 
 			iterator begin() {
-				return{ *this, iterator::begin };
+				return mData.begin();
+				//return{ *this, iterator::begin };
 			}
 
 			iterator end() {
-				return{ *this, iterator::end };
+				return mData.end();
+				//return{ *this, iterator::end };
 			}
 
 			size_t size() const {
 				return mData.size();
 			}
 
-			virtual void clear() {
+			void clear() {
+				onClear();
 				mData.clear();
 			}
 
@@ -419,19 +544,19 @@ namespace Engine {
 			}
 
 			iterator erase(const iterator &where) {
-				iterator it = where;
-				++it;
-				erase_impl(where.mIntern);
-				return it;
+				onRemove(where);
+				return erase_impl(where);
 			}
 
 
 
 virtual void writeState(SerializeOutStream &out) const override {
 	for (auto it = begin(); it != end(); ++it) {
-		const T &t = access(it.mIntern);
+		const T &t = access(it);
 		if (filter(out, t)) {
-			write(out, it.mIntern);
+			write_creation(out, it);
+			write_id(out, t);
+			write_state(out, t);
 		}
 	}
 	out << ValueType::EOL();
@@ -439,11 +564,10 @@ virtual void writeState(SerializeOutStream &out) const override {
 
 virtual void readState(SerializeInStream &in) override {
 	clear();
-	iterator it = begin();
 	while (in.loopRead()) {
-		iterator it = insert_tuple_where(it, readCreationData(in));
-		read(in, access(it.mIntern));
-		++it;
+		iterator it = insert_tuple_where(true, end(), readCreationData(in));
+		read_id(in, access(it));
+		read_state(in, access(it));		
 	}
 }
 
@@ -451,43 +575,66 @@ virtual void readState(SerializeInStream &in) override {
 
 virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map) override {
 	for (auto it = begin(); it != end(); ++it) {
-		T &t = access(it.mIntern);
+		T &t = access(it);
 		applyMap(map, t);
 	}
 }
 
+void setCallback(std::function<void(const iterator &, Operations)> callback) {
+	mCallback = callback;
+}
 
 		protected:
 
 			template <class... _Ty>
-			iterator insert_tuple_where_requested(const iterator &where, std::tuple<_Ty...>&& tuple, BufferedInOutStream &in) {
-				return TupleUnpacker<const iterator &, BufferedInOutStream &>::call(this, &Container::insert_where_requested<_Ty...>, where, in, std::forward<std::tuple<_Ty...>>(tuple));
+			iterator insert_tuple_where(bool &&authorized, const iterator &where, std::tuple<_Ty...>&& tuple) {
+				return TupleUnpacker<bool, const iterator &>::call(this, &Container::insert_where<_Ty...>, std::forward<bool>(authorized), where, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			template <class... _Ty>
-			iterator insert_tuple_where(const iterator &where, std::tuple<_Ty...>&& tuple) {
-				return TupleUnpacker<const iterator &>::call(this, &Container::insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
+			void insert_tuple_where_safe(std::function<void(const iterator &)> callback, const iterator &where, std::tuple<_Ty...>&& tuple) {
+				return TupleUnpacker<std::function<void(const iterator &)>, const iterator &>::call(this, &Container::insert_where_safe<_Ty...>, std::forward<std::function<void(const iterator &)>>(callback), where, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			template <class... _Ty>
-			iterator insert_where_requested(const iterator &where, BufferedInOutStream &in, _Ty&&... args) {
-				iterator it(insert_where_impl(where.mIntern, std::forward<_Ty>(args)...), where.mSkipIt, where.mSkipList);
-				onInsert(it, &in);
-				return it;
+			iterator insert_where(bool authorized, const iterator &where, _Ty&&... args) {
+				if (!authorized && observed() && !topLevel()->isMaster()) {
+					T temp(std::forward<_Ty>(args)...);
+					requestInsert(where, temp);
+					return end();
+				}
+				else {
+					iterator it = insert_where_impl(where, std::forward<_Ty>(args)...);
+					setTopLevel(access(it), topLevel());
+					onInsert(it);
+					return it;
+				}
 			}
 
 			template <class... _Ty>
-			iterator insert_where(const iterator &where, _Ty&&... args) {
-				iterator it(insert_where_impl(where.mIntern, std::forward<_Ty>(args)...), where.mSkipIt, where.mSkipList);
-				onInsert(it);
-				return it;
+			void insert_where_safe(std::function<void(const iterator &)> callback, const iterator &where, _Ty&&... args) {
+				if (observed() && !topLevel()->isMaster()) {
+					T temp(std::forward<_Ty>(args)...);
+					requestInsert(where, temp, callback);
+				}
+				else {
+					iterator it = insert_where_impl(where, std::forward<_Ty>(args)...);
+					setTopLevel(access(it), topLevel());
+					onInsert(it);
+					callback(it);
+				}
 			}
 
-			virtual const ChangesList *pendingAdds() const { return 0; }
-			virtual const ChangesList *pendingRemoves() const { return 0; }
-
-			virtual void onInsert(const iterator &, BufferedInOutStream *reqBy = 0) const {}
+			virtual void requestInsert(const iterator &, const T &) const {}
+			virtual void requestInsert(const iterator &, const T &, std::function<void(const iterator &)>) {}
+			virtual void onClear() const {}
+			virtual void onInsert(const iterator &it) const {
+				if (mCallback)
+					mCallback(it, ADD_ITEM);
+			}
 			virtual void onRemove(const iterator &) const {}
+
+			virtual bool observed() const { return false; }
 
 
 			ArgsTuple readCreationData(SerializeInStream &in) {
@@ -499,15 +646,9 @@ virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map
 				}
 			}
 
-			const native_iterator &intern(const iterator &it) const {
-				return it.mIntern;
-			}
-
-			virtual void readItem(BufferedInOutStream &in) = 0;
-
 		private:
 			Factory mCreationDataFactory;
-
+			std::function<void(const iterator &, Operations)> mCallback;
 
 		};
 
@@ -516,9 +657,22 @@ virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map
 		public:
 			typedef typename C::ArgsTuple ArgsTuple;
 
+			typedef size_t TransactionId;
+
+			struct Transaction {
+				Transaction(TransactionId id, std::function<void(const typename C::iterator &it)> callback) :
+					mId(id), mCallback(callback) 
+				{}
+
+				TransactionId mId;
+				std::function<void(const typename C::iterator &it)> mCallback;
+			};
+
+
 			ObservableContainer(SerializableUnit *parent) :
 				Observable(parent),
-				C(parent) {
+				C(parent),
+				mTransactionCounter(0){
 
 			}
 
@@ -529,12 +683,36 @@ virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map
 			{
 			}
 
-			virtual void clear() override {
-				C::clear();
+			virtual void onClear() const override {
+				C::onClear();
 				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 					*out << CLEAR;
 					out->endMessage();
 				}
+			}
+
+			virtual void requestInsert(const typename C::iterator &where, const typename C::T &item) const override {
+				BufferedOutStream *out = getSlaveActionMessageTarget();
+				*out << ADD_ITEM;
+				*out << (size_t)0;
+				write_iterator(*out, where);
+				UnitHelper::write_creation(*out, item);
+				write_state(*out, item);
+				out->endMessage();
+			}
+
+			virtual void requestInsert(const typename C::iterator &where, const typename C::T &item, std::function<void(const typename C::iterator &)> callback) override {
+				TransactionId id = ++mTransactionCounter;
+
+				mTransactions.emplace_back(id, callback);
+
+				BufferedOutStream *out = getSlaveActionMessageTarget();
+				*out << ADD_ITEM;
+				*out << id;
+				write_iterator(*out, where);
+				UnitHelper::write_creation(*out, item);
+				write_state(*out, item);
+				out->endMessage();
 			}
 
 			// Inherited via Observable
@@ -545,15 +723,35 @@ virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map
 				Operations op;
 				inout >> (int&)op;
 
-				inout.beginMessage();
+				TransactionId id;
+				inout >> id;
 
-				if (accepted) {
-					
 
+				if (!accepted) {
+					inout.beginMessage();
+					inout << (op | REJECT);
+					inout << id;
+					inout.endMessage();
+				}
+				else {					
+
+					auto callback = [&, op, id](const typename C::iterator &it) {
+						bool accepted = (it != end());
+						inout.beginMessage();
+						writeMasterActionMessageHeader(inout);
+						inout << (op | (accepted ? ACCEPT : REJECT));
+						inout << id;
+						if (accepted) {
+							read_state(inout, access(it));
+							write_item(inout, it);
+							write_state(inout, access(it));
+						}
+						inout.endMessage();
+					};
 
 					switch (op) {
 					case ADD_ITEM:
-						readItem(inout);
+						read_item_save(callback, inout);
 						break;
 					case CLEAR:
 						clear();
@@ -561,54 +759,67 @@ virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map
 					default:
 						throw 0;
 					}
-					
-					inout << (op | ACCEPT);
+
 
 				}
-				else {
-					inout << (op | REJECT);
-
-				}
-
-				inout.endMessage();
+				
 
 			}
 
-			virtual void onInsert(const typename C::iterator &it, BufferedInOutStream *reqBy = 0) const override {
-				if (!isMaster()) {
-					//add pending add
-					BufferedOutStream *out = getSlaveActionMessageTarget();
-					*out << ADD_ITEM;
-					write_iterator(*out, it);
-					write(*out, intern(it));
-					out->endMessage();
+			virtual void readAction(BufferedInOutStream &inout) override {
+				Operations op;
+				inout >> (int&)op;
+
+				TransactionId id;
+				inout >> id;
+
+				bool accepted = (op & (~MASK)) == ACCEPT;
+
+				if (id) {
+					if (mTransactions.empty() || mTransactions.front().mId != id)
+						throw 0;
+
+					iterator it = end();
+					switch (op & MASK) {
+					case ADD_ITEM:
+						it = read_item(inout);
+						read_state(inout, access(it));
+						break;
+					default:
+						throw 0;
+					}
+
+					mTransactions.front().mCallback(it);
+					mTransactions.pop_front();
 				}
+				else {
+					if (!accepted)
+						throw 0;
+				}
+			}
+
+			virtual void onInsert(const typename C::iterator &it) const override {
+				C::onInsert(it);
 				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (out == reqBy)
-						continue;
 					*out << ADD_ITEM;
-					write_iterator(*out, it);
-					write(*out, intern(it));
+					*out << (TransactionId)0;
+					write_item(*out, it);
+					write_state(*out, access(it));
 					out->endMessage();
 				}
 				
 			}
 
 		protected:
-			
-
-			
-			virtual const typename C::ChangesList *pendingAdds() const override {
-				return &mPendingAdds;
-			}
-
-			virtual const typename C::ChangesList *pendingRemoves() const override {
-				return &mPendingRemoves;
+			virtual bool observed() const override {
+				return true;
 			}
 
 		private:
-			typename C::ChangesList mPendingAdds, mPendingRemoves;
 
+			TransactionId mTransactionCounter;
+
+			std::list<Transaction> mTransactions;
 		};
 		
 	}

@@ -30,12 +30,17 @@ namespace Engine {
 
 			template <class... _Ty>
 			T &emplace_back(_Ty&&... args) {
-				return access(intern(insert_where(end(), std::forward<_Ty>(args)...)));
+				return access(insert_where(end(), std::forward<_Ty>(args)...));
+			}
+
+			template <class... _Ty>
+			void emplace_back_safe(std::function<void(const typename Container::iterator &)> callback, _Ty&&... args) {
+				insert_where_safe(callback, end(), std::forward<_Ty>(args)...);
 			}
 
 			template <class... _Ty>
 			T &emplace_tuple(const iterator &where, std::tuple<_Ty...>&& tuple) {
-				return access(intern(insert_tuple_where(where, std::forward<std::tuple<_Ty...>>(tuple))));
+				return access(insert_tuple_where(false, where, std::forward<std::tuple<_Ty...>>(tuple)));
 			}
 
 			template <class... _Ty>
@@ -43,23 +48,44 @@ namespace Engine {
 				return emplace_tuple(end(), std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
-			typename Container::iterator read_iterator(SerializeInStream &in) {
+			void push_back(const T &other) {
+				insert_where(false, end(), other);
+			}
+
+			
+
+		protected:
+
+			iterator read_iterator(SerializeInStream &in) {
 				int i;
 				in >> i;
-				typename Container::iterator it = begin();
+				iterator it = begin();
 				std::advance(it, i);
 				return it;
 			}
 
-			void write_iterator(SerializeOutStream &out, const typename Container::const_iterator &it) const {
+			void write_iterator(SerializeOutStream &out, const const_iterator &it) const {
 				out << (int)std::distance(begin(), it);
 			}
 
-			virtual void readItem(BufferedInOutStream &in) override {
+			iterator read_item(BufferedInOutStream &in) {
 				iterator it = read_iterator(in);
-				insert_tuple_where_requested(it, readCreationData(in), in);
+				it = insert_tuple_where(true, it, readCreationData(in));
+				read_id(in, access(it));
+				return it;
 			}
 
+			void write_item(BufferedOutStream &out, const iterator &it) const {
+				write_iterator(out, it);
+				write_creation(out, it);
+				write_id(out, access(it));
+			}
+
+
+			void read_item_save(std::function<void(const iterator &)>callback, BufferedInOutStream &in) {
+				iterator it = read_iterator(in);
+				insert_tuple_where_safe(callback, it, readCreationData(in));
+			}
 		};
 
 	}

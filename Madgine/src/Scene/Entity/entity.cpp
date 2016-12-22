@@ -40,8 +40,7 @@ Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity
     mNode(node),
     mObject(obj),
     mLastPosition(node->getPosition()),
-	mComponents(this, &Entity::createComponent),
-	ScopeImpl(&SceneManager::getSingleton())
+	mComponents(this, &Entity::createComponent)
 {
 
     mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));

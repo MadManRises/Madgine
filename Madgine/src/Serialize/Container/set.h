@@ -168,7 +168,7 @@ namespace Engine {
 
 			iterator find(const KeyType &key) {				
 				for (iterator it = begin(); it != end(); ++it) {
-					if (intern(it).key() == key)
+					if (it.key() == key)
 						return it;
 				}
 				return end();
@@ -183,8 +183,8 @@ namespace Engine {
 		template <class T>
 		class ContainerWrapper<std::set<T>> : protected UnitHelper<T> {
 		protected:
-			typedef typename SetIterator<T> native_iterator;
-			typedef typename SetConstIterator<T> native_const_iterator;
+			typedef typename SetIterator<Type> native_iterator;
+			typedef typename SetConstIterator<Type> native_const_iterator;
 
 
 			static T &access(const native_iterator &it) {
@@ -196,26 +196,21 @@ namespace Engine {
 			}
 
 			template <class... _Ty>
-			native_iterator insert_impl(_Ty&&... args) {
-				return mData.emplace(std::forward<_Ty>(args)...).first;
-			}
-
-			template <class... _Ty>
 			native_iterator insert_where_impl(const native_iterator &where, _Ty&&... args) {
 				return mData.emplace_hint(where.mIterator, std::forward<_Ty>(args)...);
 			}
 
-			void erase_impl(const native_iterator &it) {
-				mData.erase(it.mIterator);
+			native_iterator erase_impl(const native_iterator &it) {
+				return mData.erase(it.mIterator);
 			}
 
-			static void write(SerializeOutStream &out, const native_const_iterator &it) {
-				UnitHelper::write(out, *it);
+			static void write_creation(SerializeOutStream &out, const native_const_iterator &it) {
+				UnitHelper::write_creation(out, *it);
 			}
 
 
 		protected:
-			std::set<KeyHolder<T>> mData;
+			std::set<KeyHolder<Type>> mData;
 
 		};
 

@@ -16,8 +16,7 @@ namespace Engine {
 
 
 
-		SerializeManager::SerializeManager(bool isMaster) :
-			mIsMaster(isMaster),
+		SerializeManager::SerializeManager() :
 			mRunningId(0),
 			mSlaveStream(0),
 			mReceivingMasterState(false)
@@ -31,26 +30,6 @@ namespace Engine {
 			}
 		}
 
-		bool SerializeManager::setMaster(bool b)
-		{
-			if (mIsMaster == b) return true;
-			auto it = mTopLevelUnits.begin();
-			bool success = true;
-			for (; it != mTopLevelUnits.end(); ++it) {
-				if (!it->second->updateManagerType(this, b)) {
-					success = false;
-					break;
-				}
-			}
-			mIsMaster = b;
-			if (!success) {
-				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
-					assert(it->second->updateManagerType(this, !b));
-				}
-				mIsMaster = !b;
-			}
-			return success;
-		}
 
 		void SerializeManager::readMessage(BufferedInOutStream &stream)
 		{
@@ -74,17 +53,16 @@ namespace Engine {
 				object = mTopLevelUnits.find(msg.mMadgineComponent)->second;
 			}
 			else {
-				if (mIsMaster)
-					object = reinterpret_cast<SerializableUnit*>(msg.mObject);
-				else
-					object = mSerializableItems.at(msg.mObject);
+				object = convertPtr(stream, msg.mObject);
 			}
 			switch (msg.mType) {
 			case ACTION:
 				object->readAction(stream);
 				break;
 			case REQUEST:
+				stream.setBlocked(true);
 				object->readRequest(stream);
+				stream.setBlocked(false);
 				break;
 			case STATE:
 				object->readState(stream);
@@ -109,8 +87,8 @@ namespace Engine {
 		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnit * unit)
 		{
 			std::list<BufferedOutStream*> result;
-			for (BufferedOutStream* stream : mMasterStreams) {
-				if (filter(unit, stream->id())) {
+			for (BufferedInOutStream* stream : mMasterStreams) {
+				if (!stream->isBlocked() && filter(unit, stream->id())) {
 					result.push_back(stream);
 					stream->beginMessage();
 				}
@@ -134,7 +112,7 @@ namespace Engine {
 
 		bool SerializeManager::isMaster()
 		{
-			return mIsMaster;
+			return mSlaveStream == 0;
 		}
 
 		UI::Process & SerializeManager::process()
@@ -144,29 +122,45 @@ namespace Engine {
 
 		void SerializeManager::clearAllStreams()
 		{
-			if (mSlaveStream)
-				clearSlaveStream(mSlaveStream);
+			clearSlaveStream();
 			while (!mMasterStreams.empty())
 				removeMasterStream(mMasterStreams.front());
 		}
 
 		bool SerializeManager::setSlaveStream(BufferedInOutStream * stream)
 		{
+			if (mSlaveStream)
+				return false;
 
-			mReceivingMasterState = true;
-			while (mReceivingMasterState) {
-				if (!receiveMessages(stream))
-					return false;
+			auto it = mTopLevelUnits.begin();
+			bool success = true;
+			for (; it != mTopLevelUnits.end(); ++it) {
+				if (!it->second->updateManagerType(this, false)) {
+					success = false;
+					break;
+				}
 			}
-			mSlaveStream = stream;
-			return true;
+
+			if (!success) {
+				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
+					assert(it->second->updateManagerType(this, true));
+				}
+			}
+			else {
+				mReceivingMasterState = true;
+				while (mReceivingMasterState) {
+					if (!receiveMessages(stream))
+						return false;
+				}
+				mSlaveStream = stream;
+			}
+			return success;
 		}
 
-		void SerializeManager::clearSlaveStream(BufferedInOutStream * stream)
+		void SerializeManager::clearSlaveStream()
 		{
-			assert(mSlaveStream == stream);
-			onSlaveStreamRemoved(stream);
-			mSlaveStream = 0;
+			if (mSlaveStream)
+				onSlaveStreamRemoved(mSlaveStream);
 		}
 
 		void SerializeManager::addMasterStream(BufferedInOutStream * stream)
@@ -174,10 +168,18 @@ namespace Engine {
 			if (stream->id() != 0)
 				throw 0;
 			stream->setId(++mRunningId);
+
+			MessageHeader header;
+			header.mType = STATE;
+			header.mIsMadgineComponent = true;
+
 			mMasterStreams.push_back(stream);
 			for (const std::pair<const TopLevelMadgineObject, SerializableUnit *> &unit : mTopLevelUnits) {
 				stream->beginMessage();
-				unit.second->writeHeader(*stream, false);
+				
+				header.mMadgineComponent = unit.second->type();				
+				stream->write(header);
+
 				unit.second->writeState(*stream);
 				stream->endMessage();
 			}
@@ -192,10 +194,9 @@ namespace Engine {
 
 		bool SerializeManager::filter(const SerializableUnit * unit, ParticipantId id)
 		{
-			if (mIsMaster) {
-				for (auto f : mFilters) {
-					if (!f(unit, id))
-						return false;
+			for (auto f : mFilters) {
+				if (!f(unit, id)){
+					return false;
 				}
 			}
 			return true;
@@ -211,8 +212,7 @@ namespace Engine {
 		{
 			if (mSlaveStream) {
 				if (!receiveMessages(mSlaveStream)) {
-					onSlaveStreamRemoved(mSlaveStream);
-					mSlaveStream = 0;
+					clearSlaveStream();
 				}
 			}
 			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
@@ -226,13 +226,35 @@ namespace Engine {
 			}
 		}
 
+		SerializableUnit * SerializeManager::readPtr(SerializeInStream & in)
+		{
+			InvPtr ptr;
+			in >> ptr;
+			return convertPtr(in, ptr);
+		}
+
+		InvPtr SerializeManager::convertPtr(SerializeOutStream & out, SerializableUnit * unit)
+		{
+			return &out != mSlaveStream ? static_cast<InvPtr>(reinterpret_cast<uintptr_t>(unit)) : unit->masterId();
+		}
+
+		SerializableUnit * SerializeManager::convertPtr(SerializeInStream & in, InvPtr unit)
+		{
+			return &in != mSlaveStream ? reinterpret_cast<SerializableUnit*>(unit) : mSerializableItems.at(unit);
+		}
+
+		void SerializeManager::writePtr(SerializeOutStream & out, SerializableUnit * unit)
+		{
+			out << convertPtr(out, unit);
+		}
+
 
 		bool SerializeManager::receiveMessages(BufferedInOutStream * stream)
 		{
 			if (!stream->isValid()) return false;
 
 
-			if (stream->isMessageAvailable()) {
+ 			while (stream->isMessageAvailable()) {
 				readMessage(*stream);
 			}
 
@@ -257,11 +279,16 @@ namespace Engine {
 
 		void SerializeManager::onSlaveStreamRemoved(BufferedInOutStream * stream)
 		{
+			assert(mSlaveStream == stream);
 			auto it = mSerializableItems.begin();
 			while (it != mSerializableItems.end()) {
 				it->second->clearMasterId();
 				it = mSerializableItems.erase(it);
 			}
+			for (const std::pair<const TopLevelMadgineObject, TopLevelSerializableUnit *> &topLevel : mTopLevelUnits) {
+				topLevel.second->updateManagerType(this, true);
+			}
+			mSlaveStream = 0;
 		}
 
 

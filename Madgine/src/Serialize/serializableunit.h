@@ -9,32 +9,35 @@ namespace Serialize {
 class MADGINE_EXPORT SerializableUnit
 {
 public:
-	SerializableUnit(TopLevelSerializableUnit *topLevel = 0);
+	SerializableUnit();
 	virtual ~SerializableUnit();	
 
 	std::list<BufferedOutStream *> getMasterMessageTargets(bool isAction);
+	void writeMasterMessageHeader(BufferedOutStream &out, bool isAction);
 	BufferedOutStream *getSlaveMessageTarget();
 
 	virtual void writeCreationData(SerializeOutStream &out) const;
-	void writeState(SerializeOutStream &out) const;
+	virtual void writeState(SerializeOutStream &out) const;
+	void writeId(SerializeOutStream &out) const;
 
-	void readState(SerializeInStream &in);
-	void readAction(SerializeInStream &in);
+	void readId(SerializeInStream &in);
+	virtual void readState(SerializeInStream &in);
+	void readAction(BufferedInOutStream &in);
 	void readRequest(BufferedInOutStream &in);
 
 	int addObservable(Observable* val);
 	void addSerializableValue(Serializable *val);
 
+	void setTopLevel(TopLevelSerializableUnit *topLevel);
 	TopLevelSerializableUnit *topLevel();
 
 	void clearMasterId();
-
-	/*InvPtr masterId();
-	void setMasterId(InvPtr id);*/
+	InvPtr masterId();
+	/*void setMasterId(InvPtr id);*/
 
 	void applySerializableMap(const std::map <InvPtr, SerializableUnit*> &map);
 
-	void writeHeader(SerializeOutStream &out, bool isAction);	
+	//void writeHeader(SerializeOutStream &out, bool isAction);	
 
 	virtual TopLevelMadgineObject type();
 	

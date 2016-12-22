@@ -45,13 +45,24 @@ namespace Serialize {
 		BufferedOutStream(buffer, mgr),
 		BufferedInStream(buffer, mgr),
 		Stream(mgr),
-		mBuffer(buffer)
+		mBuffer(buffer),
+		mBlocked(false)
 	{
 	}
 
 	bool BufferedInOutStream::isValid()
 	{
 		return bool(*this) && !mBuffer.isClosed();
+	}
+
+	bool BufferedInOutStream::isBlocked()
+	{
+		return mBlocked;
+	}
+
+	void BufferedInOutStream::setBlocked(bool blocked)
+	{
+		mBlocked = blocked;
 	}
 
 }

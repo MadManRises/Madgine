@@ -16,7 +16,7 @@ namespace Scripting {
 
 class MADGINE_EXPORT GlobalScope : public ScopeImpl<GlobalScope>, public Ogre::Singleton<GlobalScope> {
 public:
-    GlobalScope(Serialize::TopLevelSerializableUnit *parent, Parsing::ScriptParser *scriptParser);
+    GlobalScope(Parsing::ScriptParser *scriptParser);
 
 	void init();
 	void finalize();

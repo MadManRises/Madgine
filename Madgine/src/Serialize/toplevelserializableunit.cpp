@@ -10,10 +10,10 @@
 namespace Engine {
 namespace Serialize {
 	TopLevelSerializableUnit::TopLevelSerializableUnit(Serialize::TopLevelMadgineObject type) :
-		SerializableUnit(this),
 		mType(type),
 		mSlaveManager(0)
 	{
+		setTopLevel(this);
 	}
 
 	TopLevelSerializableUnit::~TopLevelSerializableUnit()

@@ -7,7 +7,6 @@ namespace Engine {
 namespace Scripting {
 
 RefScope::RefScope(RefScopeTopLevelSerializableUnit *topLevel) :
-	Scope(topLevel),
     mRefCount(0),	
 	mTopLevel(topLevel)
 {
