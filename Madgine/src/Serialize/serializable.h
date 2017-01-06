@@ -18,7 +18,7 @@ namespace Engine {
 
 				void sendState();
 
-				TopLevelSerializableUnit *topLevel();
+				TopLevelSerializableUnit *topLevel() const;
 
 			private:
 				SerializableUnit *mParent;

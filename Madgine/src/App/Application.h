@@ -154,13 +154,13 @@ private:
 	Ogre::RenderWindow								   *mWindow;
 
     Ogre::Root*                       mRoot;
-    Scene::SceneManager*               mSceneMgr;
+    Scene::SceneManager*              mSceneMgr;
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;
     Scripting::ScriptingManager*      mScriptingMgr;
     ConfigSet*                        mConfig;
-	Util::Profiler*                   mProfiler;
+	Util::Util*                       mUtil;
 	Input::InputHandler*              mInput;
 
 	HWND mHwnd;

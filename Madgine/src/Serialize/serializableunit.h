@@ -10,6 +10,7 @@ class MADGINE_EXPORT SerializableUnit
 {
 public:
 	SerializableUnit();
+	SerializableUnit(const SerializableUnit &) = delete;
 	virtual ~SerializableUnit();	
 
 	std::list<BufferedOutStream *> getMasterMessageTargets(bool isAction);

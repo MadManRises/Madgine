@@ -5,7 +5,7 @@
 #include "Application.h"
 #include "appsettings.h"
 #include "GUI\MyGUI\MyGUILauncher.h"
-#include "Util\UtilMethods.h"
+#include "Util\Util.h"
 
 #include "Scene\scenemanager.h"
 
@@ -39,7 +39,7 @@ Application::Application() :
 	mLoader(0),
 	mScriptingMgr(0),
 	mConfig(0),
-	mProfiler(0),
+	mUtil(0),
 	mInput(0)
 {
 
@@ -49,8 +49,6 @@ Application::~Application()
 {
 	if (mInput && !mSettings->mInput)
 		delete mInput;
-	if (mProfiler)
-		delete mProfiler;
 	if (mUI) {
 		mUI->finalize();
 		delete mUI;
@@ -70,6 +68,8 @@ Application::~Application()
 	}
 	if (mLoader)
 		delete mLoader;
+	if (mUtil)
+		delete mUtil;
 	if (mConfig)
 		delete mConfig;
 	if (mRoot)
@@ -131,7 +131,6 @@ int Application::go()
 	_clear();
 
 	return 0;
-
 }
 
 void Application::shutdown()
@@ -150,27 +149,28 @@ bool Application::frameStarted(const Ogre::FrameEvent & fe)
 	if (mWindow->isClosed() || mShutDown)
 		return false;
 
-	mProfiler->startProfiling("Frame");
-	mProfiler->startProfiling("PreRender", "Frame");
+	mUtil->profiler()->update();
+	mUtil->profiler()->startProfiling("Frame");
+	mUtil->profiler()->startProfiling("PreRender");
 
 	return true;
 }
 
 bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 {
-	mProfiler->stopProfiling("PreRender");
+	mUtil->profiler()->stopProfiling(); // PreRender
 
 	if (mWindow->isClosed() || mShutDown) {
-		mProfiler->stopProfiling("Frame");
+		mUtil->profiler()->stopProfiling(); // Frame
 		return false;
 	}
 
-	mProfiler->startProfiling("Rendering", "Frame");
+	mUtil->profiler()->startProfiling("Rendering");
 
 	if (!mPaused) {
 
 		try{
-			PROFILE("Input", "Rendering");
+			PROFILE("Input");
 			mInput->update();
 		}
 		catch (const std::exception &e) {
@@ -179,7 +179,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		}
 
 		try{
-			PROFILE("GUI", "Rendering");
+			PROFILE("GUI");
 			mGUI->update(fe.timeSinceLastFrame);
 		}
 		catch (const std::exception &e) {
@@ -188,7 +188,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		}
 
 		try{
-			PROFILE("UIManager", "Rendering");
+			PROFILE("UIManager");
 			mUI->update(fe.timeSinceLastFrame);
 		}
 		catch (const std::exception &e) {
@@ -197,7 +197,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		}
 
 		try{
-			PROFILE("SceneManager", "Rendering");
+			PROFILE("SceneManager");
 			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
 		}
 		catch (const std::exception &e) {
@@ -206,7 +206,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 		}
 
 		{
-			PROFILE("SafeCall", "Rendering");
+			PROFILE("SafeCall");
 			while (!mSafeCallQueue.empty()) {
 				try {
 					mSafeCallQueue.front()();
@@ -226,8 +226,8 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 
 bool Application::frameEnded(const Ogre::FrameEvent & fe)
 {
-	mProfiler->stopProfiling("Rendering");
-	mProfiler->stopProfiling("Frame");
+	mUtil->profiler()->stopProfiling(); // Rendering
+	mUtil->profiler()->stopProfiling(); // Frame
 
 	if (mWindow->isClosed() || mShutDown)
 		return false;
@@ -262,7 +262,7 @@ void Application::_setupOgre()
 
 	mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
 
-	Util::UtilMethods::setup();
+	mUtil = OGRE_NEW Util::Util;
 
 }
 
@@ -290,8 +290,6 @@ void Application::_setup()
 		mInput = mSettings->mInput;
 	else
 		mInput = new Input::OISInputHandler(mGUI, mWindow);
-
-	mProfiler = OGRE_NEW Util::Profiler();
 
 }
 

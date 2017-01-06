@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api.h"
+#include "scope.h"
 #include "Serialize/serializableunit.h"
 
 namespace Engine {

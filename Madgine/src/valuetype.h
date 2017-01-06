@@ -57,7 +57,7 @@ public:
     const Ogre::Vector3 &asVector3(const Ogre::Vector3 &v);
     bool isScope() const;
 	Scripting::Scope *asScope() const;
-	Scripting::Scope *asScope(const Scripting::Scope *s);
+	Scripting::Scope *asScope(Scripting::Scope *s);
     bool isInvScope() const;
     InvPtr asInvScope() const;
 	InvPtr asInvScope(InvPtr s);
@@ -95,63 +95,68 @@ public:
 
 public:
 	template <class T>
-	struct isValueType {
-		constexpr static bool value = false;
+	struct _isValueType {
+		const constexpr static bool value = false;
 	};
 
 	template <>
-	struct isValueType<int> {
-		constexpr static bool value = true;
+	struct _isValueType<int> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<std::string> {
-		constexpr static bool value = true;
+	struct _isValueType<std::string> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<Ogre::Vector3> {
-		constexpr static bool value = true;
+	struct _isValueType<Ogre::Vector3> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<Ogre::Vector2> {
-		constexpr static bool value = true;
+	struct _isValueType<Ogre::Vector2> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<float> {
-		constexpr static bool value = true;
+	struct _isValueType<float> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<bool> {
-		constexpr static bool value = true;
+	struct _isValueType<bool> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<size_t> {
-		constexpr static bool value = true;
+	struct _isValueType<size_t> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<InvPtr> {
-		constexpr static bool value = true;
+	struct _isValueType<InvPtr> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<Scripting::Scope *> {
-		constexpr static bool value = true;
+	struct _isValueType<Scripting::Scope *> {
+		const constexpr static bool value = true;
 	};
 
 	template <>
-	struct isValueType<ValueType> {
-		constexpr static bool value = true;
+	struct _isValueType<ValueType> {
+		const constexpr static bool value = true;
 	};
-
 
 	template <class T>
-	using enableValueType = std::enable_if_t<isValueType<std::remove_const_t<std::remove_reference_t<T>>>::value, T>;
+	using isValueType = _isValueType<std::remove_const_t<T>>;
+
+	template <class T>
+	const constexpr static bool isValueType_v = isValueType<T>::value;
+
+	template <class T>
+	using enableValueType = std::enable_if_t<isValueType_v<std::remove_const_t<std::remove_reference_t<T>>>, T>;
 
     template <class T>
     std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> as() const;

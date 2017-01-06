@@ -1,9 +1,6 @@
 #include "madginelib.h"
 #include "scriptingmanager.h"
 #include "Scripting/Parsing/scriptparser.h"
-#include "struct.h"
-#include "list.h"
-#include "array.h"
 #include "globalapi.h"
 #include "Database\exceptionmessages.h"
 
@@ -63,7 +60,7 @@ List *ScriptingManager::createGlobalList()
 
 Vector * ScriptingManager::createGlobalArray(size_t size)
 {
-	Scripting::Vector *v = createArray();
+	Scripting::Vector *v = createVector();
 	v->resize(size);
 	return v;
 }

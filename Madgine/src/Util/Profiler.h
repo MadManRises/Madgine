@@ -1,73 +1,84 @@
 #pragma once
 
-#include <chrono>
+#include "Serialize\serializableunit.h"
+#include "Serialize\Container\map.h"
+#include "Serialize\Container\observed.h"
 
 namespace Engine {
 	namespace Util {
 
-		class MADGINE_EXPORT ProcessStats {
+		class MADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit {
 		public:
-			ProcessStats(ProcessStats *parent = 0) :
+			ProcessStats(std::function<bool()> condition, ProcessStats *parent = 0) :
 				mStarted(false),
-				mAccumulatedDuration(0),
+				mAccumulatedDuration(this, 0),
 				mRecordIndex(0),
 				mBuffer(),
-				mParent(parent) {}
+				mParent(parent),
+				mChildren(this)
+			{
+				mAccumulatedDuration.setCondition(condition);
+			}
 
-			long long averageDuration() const;
+			ProcessStats(const ProcessStats &other) :
+				ProcessStats(other.mAccumulatedDuration.getCondition(), other.mParent)
+			{}
+
+			size_t averageDuration() const;
 			void start();
 			void stop();
 
-			const std::list<std::string> &children() const;
-			void addChild(const std::string &child);
+			ProcessStats &addChild(const std::string &child);
 
 			bool hasParent() const;
 			const ProcessStats *parent() const;
+			ProcessStats *parent();
 
 		private:
 			std::chrono::time_point<std::chrono::high_resolution_clock> mStart;
 
 			bool mStarted;
 
-			long long mAccumulatedDuration;
+			Serialize::Observed<size_t> mAccumulatedDuration;
 			size_t mRecordIndex;
-			long long mBuffer[20];
+			std::array<size_t, 20> mBuffer;
 
-			std::list<std::string> mChildren;
+			Serialize::ObservableMap<ProcessStats, std::function<bool()>, ProcessStats*> mChildren;
 
 			ProcessStats *mParent;
 
 		};
 
 
-		class MADGINE_EXPORT Profiler : public Ogre::Singleton<Profiler>, public Ogre::GeneralAllocatedObject {
+		class MADGINE_EXPORT Profiler : public Serialize::SerializableUnit {
 		public:
-			void startProfiling(const std::string &name, const std::string &parent = "");
-			void stopProfiling(const std::string &name);
+			Profiler();
 
-			const std::list<std::string> &topLevelProcesses();
-			
-			bool hasStats(const std::string &name);
-			const ProcessStats *getStats(const std::string &name);
+			void startProfiling(const std::string &name);
+			void stopProfiling();
+
+			void update();
+
 
 		private:
-			ProcessStats *getProcess(const std::string &name, const std::string &parent = "");
+			ProcessStats &getProcess(const std::string &name);
 
-			std::map<std::string, ProcessStats> mProcesses;
-			std::list<std::string> mTopLevelProcesses;
+			Serialize::ObservableMap<ProcessStats, std::function<bool()>> mProcesses;
 			
+			ProcessStats *mCurrent;
+
+			std::chrono::time_point<std::chrono::high_resolution_clock> mLast;
+			float mInterval;
+			bool mCurrentInterval;
 		};
 
 		class MADGINE_EXPORT ProfileWrapper {
 		public:
-			ProfileWrapper(const std::string &name, const std::string &parent = "");
+			ProfileWrapper(const std::string &name);
 			~ProfileWrapper();
-
-		private:
-			std::string mName;
 		};
 
-#define PROFILE(TARGET, PARENT) Engine::Util::ProfileWrapper __p(TARGET, PARENT)
+#define PROFILE(TARGET) Engine::Util::ProfileWrapper __p(TARGET)
 
 	}
 }

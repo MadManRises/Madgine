@@ -142,6 +142,8 @@ void SerializableUnit::writeCreationData(SerializeOutStream & out) const
 
 void SerializableUnit::setTopLevel(TopLevelSerializableUnit * topLevel)
 {
+	if (!topLevel)
+		throw 0;
 	mTopLevel = topLevel;
 }
 

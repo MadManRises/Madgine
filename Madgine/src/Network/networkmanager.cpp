@@ -2,7 +2,8 @@
 
 #include "networkmanager.h"
 
-#include <WinSock2.h>
+//#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 #include "Serialize\serializemanager.h"
 
@@ -92,8 +93,8 @@ namespace Engine {
 
 			target.sin_family = AF_INET; // address family Internet
 			target.sin_port = htons(portNr); //Port to connect on
-			target.sin_addr.s_addr = inet_addr(url.c_str()); //Target IP
-
+			inet_pton(AF_INET, url.c_str(), &target.sin_addr);
+			
 			mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 			if (mSocket == INVALID_SOCKET)
 			{
@@ -117,6 +118,7 @@ namespace Engine {
 			mSlaveStream = new NetworkStream(mSocket, *this);
 			if (!setSlaveStream(mSlaveStream)) {
 				delete mSlaveStream;
+				mSlaveStream = 0;
 				return false;
 			}
 

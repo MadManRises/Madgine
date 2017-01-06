@@ -1,9 +1,6 @@
 #include "madginelib.h"
 #include "globalscope.h"
 #include "Scripting/Parsing/scriptparser.h"
-#include "struct.h"
-#include "list.h"
-#include "array.h"
 #include "globalapi.h"
 #include "Database\exceptionmessages.h"
 
@@ -16,7 +13,6 @@ namespace Scripting {
 	GlobalScope::GlobalScope(Parsing::ScriptParser *scriptParser) :
 		mScriptParser(scriptParser)
 	{
-		Ogre::LogManager::getSingleton().createLog("Scripting.log");
 	}
 
 void GlobalScope::init() {

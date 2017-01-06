@@ -3,7 +3,6 @@
 #include "valuetype.h"
 #include "Database\exceptionmessages.h"
 #include "Util\UtilMethods.h"
-#include "Scripting\Types\scope.h"
 #include "Scripting\scriptingexception.h"
 #include "templates.h"
 

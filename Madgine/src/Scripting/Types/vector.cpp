@@ -1,5 +1,5 @@
 #include "madginelib.h"
-#include "array.h"
+#include "vector.h"
 #include "Scripting/scriptingexception.h"
 #include "Serialize/Streams/serializestream.h"
 
@@ -35,7 +35,7 @@ void Vector::setAt(int i, const ValueType & v)
 
 void Vector::resize(size_t size)
 {
-	//mItems.resize(size);
+	mItems.resize(size);
 }
 
 size_t Vector::size() const
@@ -57,12 +57,12 @@ int Vector::index(const ValueType & v)
     return mItems.data();
 }*/
 
-Serialize::SerializableList<ValueType>::const_iterator Vector::begin() const
+Serialize::SerializableVector<ValueType>::const_iterator Vector::begin() const
 {
 	return mItems.begin();
 }
 
-Serialize::SerializableList<ValueType>::const_iterator Vector::end() const
+Serialize::SerializableVector<ValueType>::const_iterator Vector::end() const
 {
 	return mItems.end();
 }

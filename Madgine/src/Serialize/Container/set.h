@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../observable.h"
-#include "../serializable.h"
-#include "sortedcontainer.h"
+#include "serializablecontainer.h"
+#include "creationhelper.h"
+#include "observablecontainer.h"
+#include "unithelper.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -71,6 +72,7 @@ namespace Engine {
 			typedef typename std::set<KeyHolder<T>>::iterator It;
 			typedef typename KeyHolder<T>::KeyType KeyType;
 
+			SetIterator() {}
 			SetIterator(It&& it) :
 				mIterator(std::forward<It>(it)) {}
 			SetIterator(const It &it) :
@@ -101,7 +103,7 @@ namespace Engine {
 
 		private:
 			friend class SetConstIterator<T>;
-			friend class ContainerWrapper<std::set<T>>;
+			friend class BaseContainer<std::set<T>>;
 
 			It mIterator;
 		};
@@ -144,13 +146,42 @@ namespace Engine {
 			}
 
 		private:
+			friend class BaseContainer<std::set<T>>;
+
 			It mIterator;
 		};
 
-		template <class T, class... Args>
-		class SerializableSet : public SortedContainer<T, std::set<T>, Creator<Args...>> {
+		template <class T>
+		class BaseContainer<std::set<T>> : protected UnitHelper<T> {
 		public:
-			using SortedContainer::SortedContainer;
+			static constexpr const bool sorted = true;
+		protected:
+			typedef typename SetIterator<Type> iterator;
+			typedef typename SetConstIterator<Type> const_iterator;
+
+
+			
+
+			template <class... _Ty>
+			iterator insert_where(const iterator &where, _Ty&&... args) {
+				return mData.emplace_hint(where.mIterator, std::forward<_Ty>(args)...);
+			}
+
+			const_iterator erase(const const_iterator &it) {
+				return mData.erase(it.mIterator);
+			}
+
+
+		protected:
+			std::set<KeyHolder<Type>> mData;
+
+		};
+
+
+		template <class T, class... Args>
+		class SerializableSet : public SerializableContainer<std::set<T>, Creator<Args...>> {
+		public:
+			using SerializableContainer::SerializableContainer;
 
 			typedef typename KeyHolder<T>::KeyType KeyType;
 
@@ -169,7 +200,7 @@ namespace Engine {
 			iterator find(const KeyType &key) {				
 				for (iterator it = begin(); it != end(); ++it) {
 					if (it.key() == key)
-						return it;
+						return it; ////TODO  O(log(n))
 				}
 				return end();
 			}
@@ -178,39 +209,10 @@ namespace Engine {
 				return find(key) != end();
 			}
 
-		};
-
-		template <class T>
-		class ContainerWrapper<std::set<T>> : protected UnitHelper<T> {
-		protected:
-			typedef typename SetIterator<Type> native_iterator;
-			typedef typename SetConstIterator<Type> native_const_iterator;
-
-
-			static T &access(const native_iterator &it) {
-				return *it;
-			}
-
-			static const T &access(const native_const_iterator &it) {
-				return *it;
-			}
-
 			template <class... _Ty>
-			native_iterator insert_where_impl(const native_iterator &where, _Ty&&... args) {
-				return mData.emplace_hint(where.mIterator, std::forward<_Ty>(args)...);
+			iterator emplace(_Ty&&... args) {
+				return insert_where(end(), std::forward<_Ty>(args)...);
 			}
-
-			native_iterator erase_impl(const native_iterator &it) {
-				return mData.erase(it.mIterator);
-			}
-
-			static void write_creation(SerializeOutStream &out, const native_const_iterator &it) {
-				UnitHelper::write_creation(out, *it);
-			}
-
-
-		protected:
-			std::set<KeyHolder<Type>> mData;
 
 		};
 

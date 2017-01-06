@@ -9,7 +9,7 @@
 
 #include "Util\UtilMethods.h"
 
-#include "scriptingmanager.h"
+#include "Serialize\toplevelserializableunit.h"
 
 namespace Engine {
 namespace Scripting {
@@ -47,7 +47,7 @@ void Scope::setVar(const std::string &name, const ValueType &v)
 const ValueType &Scope::getVar(const std::string &name) const
 {
 	if (mPrototype == nullptr || hasVar(name))
-		return mVariables.at(name);
+		return mVariables.find(name)->second;
 	return mPrototype->getVar(name);
 }
 
@@ -69,7 +69,7 @@ void Scope::findPrototype(const std::string & data)
 
 void Scope::setPrototype(Scope * prototype)
 {
-	mPrototypeName.clear();
+	mPrototypeName->clear();
 	mPrototype = prototype;
 }
 
@@ -81,7 +81,7 @@ const std::string &Scope::getPrototype() {
 void Scope::clearPrototype()
 {
 	mPrototype = 0;
-	mPrototypeName.clear();
+	mPrototypeName->clear();
 }
 
 ValueType Scope::methodCall(const std::string &name, const ArgumentList &args)
@@ -121,7 +121,7 @@ void Scope::readState(Serialize::SerializeInStream &in)
 {
 	SerializableUnit::readState(in);
 
-	if (mPrototypeName.empty())
+	if (mPrototypeName->empty())
 		mPrototype = 0;
 	else
 		mPrototype = &Parsing::ScriptParser::getSingleton().getPrototype(mPrototypeName);
@@ -166,7 +166,7 @@ ValueType Scope::set(const ArgumentList &stack)
 
 ValueType Scope::get(const ArgumentList &stack)
 {
-    return mVariables.at(stack.at(0).asString());
+    return mVariables.find(stack.at(0).asString())->second;
 }
 
 ValueType Scope::checkFlag(const ArgumentList &stack)
@@ -202,7 +202,7 @@ ValueType Scope::call(const ArgumentList & stack)
 
 ValueType Scope::isGlobal(const ArgumentList & stack)
 {
-	return topLevel() == &ScriptingManager::getSingleton();
+	return topLevel()->type() == Serialize::SCRIPTING_MANAGER;
 }
 
 ValueType Scope::execScriptMethod(const std::string &name,

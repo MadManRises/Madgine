@@ -17,6 +17,7 @@
 #include <sstream>
 #include <vector>
 #include <typeindex>
+#include <chrono>
 
 #include "forward.h"
 

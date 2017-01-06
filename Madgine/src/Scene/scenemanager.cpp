@@ -26,7 +26,7 @@
 
 namespace Engine {
 
-	API_IMPL(Scene::SceneManager, &createSceneArray, &createSceneStruct, &createSceneList);
+	API_IMPL(Scene::SceneManager, &createSceneArray, &createSceneStruct, &createSceneList, &findEntity);
 
 namespace Scene {
 
@@ -439,7 +439,7 @@ void SceneManager::writeScene(Serialize::SerializeOutStream & out) const
 
 Scripting::Scope * SceneManager::createSceneArray(size_t size)
 {
-	Scripting::Vector *v = createArray();
+	Scripting::Vector *v = createVector();
 	v->resize(size);
 	return v;
 }
@@ -494,7 +494,7 @@ std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> SceneManager::createEn
 
 Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour)
 {
-	return &mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
+	return &*mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
 }
 
 Ogre::Camera *SceneManager::camera()
@@ -586,7 +586,7 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 {
 
 	{
-		PROFILE("Entities", "SceneManager");
+		PROFILE("Entities");
 		if (mask & App::ContextMask::SceneContext && mIsSceneLoaded) {
 			for (Entity::Entity &e : mEntities) {
 				e.update(timeSinceLastFrame);
@@ -595,10 +595,10 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 	}
 
 	{
-		PROFILE("SceneComponents", "SceneManager");
+		PROFILE("SceneComponents");
 		if (mIsSceneLoaded) {
 			for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
-				PROFILE(component->componentName(), "SceneComponents");
+				PROFILE(component->componentName());
 				component->update(timeSinceLastFrame, mask);
 			}
 		}
@@ -648,6 +648,9 @@ void SceneManager::clear()
         listener->beforeSceneClear();
     }
 
+	for (Entity::Entity &e : mEntities) {
+		e.clear();
+	}
     mEntities.clear();
     mEntityRemoveQueue.clear();
 
@@ -1055,15 +1058,13 @@ Ogre::RenderTarget * SceneManager::getRenderTarget()
 	return mRenderTexture;
 }
 
-Entity::Entity * SceneManager::findEntity(const std::string & name, bool throwIfNotFound)
+Entity::Entity * SceneManager::findEntity(const std::string & name)
 {
 	auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
 		return e.getName() == name;
 	});
 	if (it == mEntities.end()) {
-		if (throwIfNotFound)
-			throw 0;
-		return 0;
+		throw 0;
 	}
 	else
 		return &*it;

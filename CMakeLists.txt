@@ -31,5 +31,3 @@ if (BUILD_TESTS)
 endif (BUILD_TESTS)
 
 add_subdirectory(Madgine)
-
-add_subdirectory(Maditor)

@@ -21,6 +21,11 @@ namespace Serialize {
 		return mBuffer.isMessageAvailable();
 	}
 
+	buffered_streambuf * BufferedInStream::rdbuf()
+	{
+		return &mBuffer;
+	}
+
 	BufferedOutStream::BufferedOutStream(buffered_streambuf & buffer, SerializeManager & mgr) :
 		SerializeOutStream(mOfs, mgr),
 		mBuffer(buffer),
@@ -39,14 +44,19 @@ namespace Serialize {
 		mBuffer.sendMessage();
 	}
 
+	BufferedOutStream & BufferedOutStream::operator<<(BufferedInStream & in)
+	{
+		mOfs << in.rdbuf();
+		return *this;
+	}
+
 
 
 	BufferedInOutStream::BufferedInOutStream(buffered_streambuf & buffer, SerializeManager & mgr) :
 		BufferedOutStream(buffer, mgr),
 		BufferedInStream(buffer, mgr),
 		Stream(mgr),
-		mBuffer(buffer),
-		mBlocked(false)
+		mBuffer(buffer)
 	{
 	}
 
@@ -54,17 +64,6 @@ namespace Serialize {
 	{
 		return bool(*this) && !mBuffer.isClosed();
 	}
-
-	bool BufferedInOutStream::isBlocked()
-	{
-		return mBlocked;
-	}
-
-	void BufferedInOutStream::setBlocked(bool blocked)
-	{
-		mBlocked = blocked;
-	}
-
 }
 } // namespace Scripting
 

@@ -237,7 +237,7 @@ BaseEntityComponent *Entity::addComponentImpl(Ogre::unique_ptr<BaseEntityCompone
         throw ComponentException(Database::Exceptions::doubleComponent(component->getName()));
     if (&component->getEntity() != this)
         throw ComponentException(Database::Exceptions::corruptData);
-    return mComponents.emplace(std::forward<Ogre::unique_ptr<BaseEntityComponent>>(component)).get();
+    return mComponents.emplace(std::forward<Ogre::unique_ptr<BaseEntityComponent>>(component))->get();
 }
 
 

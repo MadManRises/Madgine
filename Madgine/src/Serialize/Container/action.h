@@ -21,10 +21,6 @@ namespace Engine {
 			void operator()(_Ty&&... args) {
 				if (isMaster()) {
 					call(std::forward<_Ty>(args)...);
-					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-						TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
-						out->endMessage();
-					}
 				}
 				else {
 					BufferedOutStream *out = getSlaveActionMessageTarget();
@@ -40,7 +36,6 @@ namespace Engine {
 				TupleUnpacker<>::call(this, &Action::call, std::move(args));
 			}
 
-			// Inherited via Observable
 			virtual void readRequest(BufferedInOutStream & in) override
 			{
 				std::tuple<_Ty...> args;
@@ -51,6 +46,10 @@ namespace Engine {
 		private:
 			void call(_Ty&&... args) {
 				mImpl(std::forward<_Ty>(args)...);
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
+					out->endMessage();
+				}
 			}
 
 		private:

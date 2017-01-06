@@ -3,6 +3,7 @@
 #include "Serialize\Container\observed.h"
 #include "Serialize\serializableunit.h"
 #include "Serialize\Container\map.h"
+#include "api.h"
 
 namespace Engine {
 namespace Scripting {
@@ -68,7 +69,7 @@ private:
 	Serialize::Observed<std::string> mPrototypeName;
 	Scope *mPrototype;
 	
-	VarSet mVariables;
+	Serialize::ObservableMap<ValueType> mVariables;
 };
 
 }

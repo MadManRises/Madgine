@@ -2,7 +2,7 @@
 
 #include "refscope.h"
 #include "scopeimpl.h"
-#include "Serialize\Container\list.h"
+#include "Serialize\Container\vector.h"
 
 namespace Engine {
 namespace Scripting {
@@ -20,11 +20,11 @@ public:
     int index(const ValueType &v);
 
 
-	Serialize::SerializableList<ValueType>::const_iterator begin() const;
-	Serialize::SerializableList<ValueType>::const_iterator end() const;
+	Serialize::SerializableVector<ValueType>::const_iterator begin() const;
+	Serialize::SerializableVector<ValueType>::const_iterator end() const;
 
 private:
-    Serialize::SerializableList<ValueType> mItems;
+    Serialize::SerializableVector<ValueType> mItems;
 
 };
 

@@ -36,9 +36,9 @@ namespace Engine {
 				}
 			}
 
-			TopLevelSerializableUnit * Serializable::topLevel()
+			TopLevelSerializableUnit * Serializable::topLevel() const
 			{
-				return mParent->topLevel();
+				return mParent ? mParent->topLevel() : 0;
 			}
 
 

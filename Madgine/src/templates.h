@@ -5,10 +5,15 @@
 
 namespace Engine {
 
-	template<bool...> struct bool_pack;
+	template<bool...>
+	struct bool_pack;
 
-	template<bool...values> struct all_of
+	template<bool... values>
+	struct all_of
 		: std::is_same<bool_pack<values..., true>, bool_pack<true, values...>> {};
+
+	template<bool... values>
+	const constexpr bool all_of_v = all_of<values...>::value;
 
 	template <class _T>
 	struct Caster {

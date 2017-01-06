@@ -1,67 +1,65 @@
+#include "madginelib.h"
 
 #include "Profiler.h"
-
+#include "Util.h"
 
 namespace Engine {
 	namespace Util {
-		
-		void Profiler::startProfiling(const std::string &name, const std::string &parent)
+
+		Profiler::Profiler() :
+			mProcesses(this),
+			mCurrent(0),
+			mInterval(2.0f),
+			mCurrentInterval(false)
 		{
-			getProcess(name, parent)->start();			
 		}
 
-		void Profiler::stopProfiling(const std::string &name)
+		void Profiler::startProfiling(const std::string &name)
 		{
-			getProcess(name)->stop();
+			mCurrent = &getProcess(name);
+			mCurrent->start();
 		}
 
-		const std::list<std::string>& Profiler::topLevelProcesses()
+		void Profiler::stopProfiling()
 		{
-			return mTopLevelProcesses;
+			assert(mCurrent);
+			mCurrent->stop();
+			mCurrent = mCurrent->parent();
 		}
 
-		bool Profiler::hasStats(const std::string & name)
+		void Profiler::update()
 		{
-			return mProcesses.find(name) != mProcesses.end();
+			mCurrentInterval = false;
+
+			auto now = std::chrono::high_resolution_clock::now();
+			size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - mLast).count();
+			if (duration >= 1000.f * mInterval) {
+				mLast = now;
+				mCurrentInterval = true;
+			}
 		}
 
-		const ProcessStats * Profiler::getStats(const std::string & name)
+		ProcessStats & Profiler::getProcess(const std::string & name)
 		{
-			return &mProcesses.find(name)->second;
-		}
-
-		ProcessStats * Profiler::getProcess(const std::string & name, const std::string &parent)
-		{
-			auto it = mProcesses.find(name);
-			if (it == mProcesses.end()) {
-				
-				if (!parent.empty()) {
-					mProcesses.at(parent).addChild(name);
-					return &mProcesses.emplace(name, &mProcesses[parent]).first->second;
-				}
-				else {
-					mTopLevelProcesses.push_back(name);
-					return &mProcesses[name];
-				}				
+			if (mCurrent) {
+				return mCurrent->addChild(name);
 			}
 			else {
-				return &it->second;
-			}
-			
+				return mProcesses.try_emplace(name, [this]() {return mCurrentInterval; }).first->second;
+			}			
 		}
 		
-		ProfileWrapper::ProfileWrapper(const std::string &name, const std::string &parent) :
-			mName(name)
+		ProfileWrapper::ProfileWrapper(const std::string &name)
 		{
-			Profiler::getSingleton().startProfiling(name, parent);
+			Util::getSingleton().profiler()->startProfiling(name);
 		}
 
 		ProfileWrapper::~ProfileWrapper()
 		{
-			Profiler::getSingleton().stopProfiling(mName);
+			Util::getSingleton().profiler()->stopProfiling();
 		}
 		
-		long long ProcessStats::averageDuration() const
+		size_t ProcessStats::averageDuration() const
 		{
 			return mAccumulatedDuration / 20;
 		}
@@ -78,23 +76,19 @@ namespace Engine {
 			assert(mStarted);
 			mStarted = false;
 			auto end = std::chrono::high_resolution_clock::now();
-			long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - mStart).count();
+			size_t duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - mStart).count();
 
-			mAccumulatedDuration -= mBuffer[mRecordIndex];
-			mAccumulatedDuration += duration;
+			mAccumulatedDuration += duration - mBuffer[mRecordIndex];
 			mBuffer[mRecordIndex] = duration;
 			++mRecordIndex;
 			mRecordIndex %= 20;
+
+			
 		}
 
-		const std::list<std::string>& ProcessStats::children() const
+		ProcessStats &ProcessStats::addChild(const std::string & child)
 		{
-			return mChildren;
-		}
-
-		void ProcessStats::addChild(const std::string & child)
-		{
-			mChildren.push_back(child);
+			return mChildren.try_emplace(child, mAccumulatedDuration.getCondition(), this).first->second;
 		}
 
 		bool ProcessStats::hasParent() const
@@ -103,6 +97,11 @@ namespace Engine {
 		}
 
 		const ProcessStats * ProcessStats::parent() const
+		{
+			return mParent;
+		}
+
+		ProcessStats * ProcessStats::parent()
 		{
 			return mParent;
 		}

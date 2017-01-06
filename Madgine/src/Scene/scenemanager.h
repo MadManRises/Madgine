@@ -10,7 +10,6 @@
 
 #include "Serialize\Container\list.h"
 
-#include "Scripting\Types\array.h"
 
 namespace Engine {
 namespace Scene {
@@ -59,7 +58,7 @@ public:
 	
 	Entity::Entity *createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour);
 	std::list<Entity::Entity *> entities();
-	Entity::Entity *findEntity(const std::string &name, bool throwIfNotFound = false);
+	Entity::Entity *findEntity(const std::string &name);
 	void removeLater(Entity::Entity *e);
 
 

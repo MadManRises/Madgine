@@ -35,6 +35,7 @@ namespace Engine {
 				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnit *unit);
 
 				void addTopLevelItem(TopLevelSerializableUnit *unit);
+				void removeTopLevelItem(TopLevelSerializableUnit *unit);
 
 				BufferedOutStream *getSlaveMessageTarget();
 

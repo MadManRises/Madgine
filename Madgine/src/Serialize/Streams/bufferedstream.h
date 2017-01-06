@@ -12,6 +12,8 @@ public:
 
 	bool isMessageAvailable();
 
+	buffered_streambuf *rdbuf();
+
 private:
     std::istream mIfs;
 	buffered_streambuf &mBuffer;
@@ -23,6 +25,9 @@ public:
 
 	void beginMessage();
 	void endMessage();
+
+	BufferedOutStream &operator<< (BufferedInStream &in);
+	using SerializeOutStream::operator<<;
 
 private:
     std::ostream mOfs;
@@ -38,13 +43,9 @@ public:
 
 	bool isValid();
 
-	bool isBlocked();
-	void setBlocked(bool blocked);
-
 private:
 	buffered_streambuf &mBuffer;
 
-	bool mBlocked;
 };
 
 

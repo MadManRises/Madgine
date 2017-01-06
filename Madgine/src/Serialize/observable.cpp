@@ -7,10 +7,11 @@
 
 namespace Engine {
 		namespace Serialize {
-			
+
 			Observable::Observable(SerializableUnit * parent) :
 				mParent(parent),
-				mIndex(parent->addObservable(this)) {}
+				mIndex(parent->addObservable(this))
+			{}
 
 			std::list<BufferedOutStream*> Observable::getMasterActionMessageTargets() const
 			{

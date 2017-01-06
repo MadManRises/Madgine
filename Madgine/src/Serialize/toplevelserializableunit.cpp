@@ -62,6 +62,7 @@ bool TopLevelSerializableUnit::addManager(SerializeManager * mgr)
 
 void TopLevelSerializableUnit::removeManager(SerializeManager * mgr)
 {
+
 	if (mgr->isMaster()) {
 		mMasterManagers.remove(mgr);
 	}

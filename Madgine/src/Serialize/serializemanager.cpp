@@ -50,7 +50,10 @@ namespace Engine {
 					}
 					return;
 				}
-				object = mTopLevelUnits.find(msg.mMadgineComponent)->second;
+				auto it = mTopLevelUnits.find(msg.mMadgineComponent);
+				if (it == mTopLevelUnits.end())
+					throw 0;
+				object = it->second;
 			}
 			else {
 				object = convertPtr(stream, msg.mObject);
@@ -60,9 +63,7 @@ namespace Engine {
 				object->readAction(stream);
 				break;
 			case REQUEST:
-				stream.setBlocked(true);
 				object->readRequest(stream);
-				stream.setBlocked(false);
 				break;
 			case STATE:
 				object->readState(stream);
@@ -88,7 +89,7 @@ namespace Engine {
 		{
 			std::list<BufferedOutStream*> result;
 			for (BufferedInOutStream* stream : mMasterStreams) {
-				if (!stream->isBlocked() && filter(unit, stream->id())) {
+				if (filter(unit, stream->id())) {
 					result.push_back(stream);
 					stream->beginMessage();
 				}
@@ -102,6 +103,28 @@ namespace Engine {
 				throw 0;
 			mTopLevelUnits[unit->type()] = unit;
 			unit->addManager(this);
+
+			MessageHeader header;
+			header.mType = STATE;
+			header.mIsMadgineComponent = true;
+			header.mMadgineComponent = unit->type();
+
+			for (BufferedInOutStream *stream : mMasterStreams) {
+				stream->beginMessage();
+
+				stream->write(header);
+				unit->writeState(*stream);
+				stream->endMessage();
+			}
+		}
+
+		void SerializeManager::removeTopLevelItem(TopLevelSerializableUnit * unit)
+		{
+			unit->removeManager(this);
+			auto it = std::find_if(mTopLevelUnits.begin(), mTopLevelUnits.end(), [=](const std::pair<const TopLevelMadgineObject, TopLevelSerializableUnit*> &p) {return p.second == unit; });
+			if (it == mTopLevelUnits.end())
+				throw 0;
+			mTopLevelUnits.erase(it);
 		}
 
 		BufferedOutStream * SerializeManager::getSlaveMessageTarget()
@@ -141,17 +164,22 @@ namespace Engine {
 				}
 			}
 
+			if (success) {
+				mReceivingMasterState = true;
+				while (mReceivingMasterState) {
+					if (!receiveMessages(stream)) {
+						success = false;
+						mReceivingMasterState = false;
+					}
+				}
+			}
+
 			if (!success) {
 				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
 					assert(it->second->updateManagerType(this, true));
 				}
 			}
 			else {
-				mReceivingMasterState = true;
-				while (mReceivingMasterState) {
-					if (!receiveMessages(stream))
-						return false;
-				}
 				mSlaveStream = stream;
 			}
 			return success;
@@ -233,6 +261,12 @@ namespace Engine {
 			return convertPtr(in, ptr);
 		}
 
+		void SerializeManager::writePtr(SerializeOutStream & out, SerializableUnit * unit)
+		{
+			out << convertPtr(out, unit);
+		}
+
+
 		InvPtr SerializeManager::convertPtr(SerializeOutStream & out, SerializableUnit * unit)
 		{
 			return &out != mSlaveStream ? static_cast<InvPtr>(reinterpret_cast<uintptr_t>(unit)) : unit->masterId();
@@ -241,11 +275,6 @@ namespace Engine {
 		SerializableUnit * SerializeManager::convertPtr(SerializeInStream & in, InvPtr unit)
 		{
 			return &in != mSlaveStream ? reinterpret_cast<SerializableUnit*>(unit) : mSerializableItems.at(unit);
-		}
-
-		void SerializeManager::writePtr(SerializeOutStream & out, SerializableUnit * unit)
-		{
-			out << convertPtr(out, unit);
 		}
 
 

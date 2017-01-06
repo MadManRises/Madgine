@@ -415,7 +415,7 @@ Scripting::Scope *ValueType::asScope() const
     return mUnion.mScope;
 }
 
-Scripting::Scope * ValueType::asScope(const Scripting::Scope * s)
+Scripting::Scope * ValueType::asScope(Scripting::Scope * s)
 {
 	if (mType != Type::ScopeValue) {
 		if (mType == Type::NullValue) {

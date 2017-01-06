@@ -8,7 +8,7 @@ namespace Engine {
 		class AbortException {};
 
 		
-		class MADGINE_EXPORT UtilMethods {
+		class MADGINE_EXPORT UtilMethods : public Ogre::Singleton<UtilMethods>{
 		public:
 			static void setup();
 			

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../serializable.h"
-#include "../Streams/serializestream.h"
-#include "container.h"
+#include "unithelper.h"
 
 namespace Engine {
 		namespace Serialize {
@@ -17,9 +16,12 @@ namespace Engine {
 					setTopLevel(mData, parent->topLevel());
 				}
 
-				template <class T>
-				void operator =(T&& v) {
-					mData = std::forward<T>(v);
+				template <class Ty>
+				void operator =(Ty&& v) {
+					if (mData != v) {
+						mData = std::forward<Ty>(v);
+						notify();
+					}
 				}
 
 				T *operator->() {
@@ -30,13 +32,14 @@ namespace Engine {
 					return &mData;
 				}
 
-				operator T &() {
+				operator const T &() const {
 					return mData;
 				}
 
 				virtual void readState(SerializeInStream &in) override {
 					read_id(in, mData);
 					read_state(in, mData);
+					notify();
 				}
 
 				virtual void writeState(SerializeOutStream &out) const override {
@@ -44,8 +47,22 @@ namespace Engine {
 					write_state(out, mData);
 				}
 
+
+				void setCallback(std::function<void(const T &)> callback) {
+					mCallback = callback;
+				}
+
+			protected:
+				void notify() {
+					if (mCallback)
+						mCallback(mData);
+				}
+
 			protected:
 				T mData;
+
+			private:
+				std::function<void(const T &)> mCallback;
 			};
 
 		}

@@ -13,17 +13,19 @@ namespace Engine {
 			protected:
 				Observable(SerializableUnit *parent);		
 
+				BufferedOutStream *getSlaveActionMessageTarget() const;
 				std::list<BufferedOutStream*> getMasterActionMessageTargets() const;
 				void writeMasterActionMessageHeader(BufferedOutStream &out) const;
-				BufferedOutStream *getSlaveActionMessageTarget() const;
+
 
 				bool isMaster() const;
 
+				
 			private:
 				SerializableUnit *mParent;
 				int mIndex;
 
-
+				
 			};
 
 		}

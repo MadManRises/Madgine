@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace Ogre {
 	template <class T>
 	class Singleton;
@@ -31,14 +32,13 @@ namespace Engine {
 		struct MessageHeader;
 		class SerializeManager;
 
-		template <class T, class... Args>
-		class ObservableMap;
-
+		
 		typedef size_t ParticipantId;
 
 		enum TopLevelMadgineObject;
 
 		class buffered_streambuf;
+
 	}
 	namespace Scripting {
 
@@ -62,7 +62,7 @@ namespace Engine {
 
 		typedef std::vector<ValueType> ArgumentList;
 		typedef std::map<std::string, ValueType> Stack;
-		typedef Serialize::ObservableMap<ValueType> VarSet;
+		//typedef Serialize::ObservableMap<ValueType> VarSet;
 
 
 
@@ -146,6 +146,7 @@ namespace Engine {
 		class ProcessStats;
 		struct TraceBack;
 		class BaseMadgineObject;
+		class Util;
 	}
 
 	namespace Input {

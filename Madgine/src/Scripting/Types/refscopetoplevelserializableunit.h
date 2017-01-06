@@ -2,7 +2,7 @@
 
 #include "Serialize\toplevelserializableunit.h"
 #include "Serialize\Container\list.h"
-#include "array.h"
+#include "vector.h"
 #include "struct.h"
 #include "list.h"
 
@@ -14,7 +14,7 @@ namespace Engine {
 		public:
 			RefScopeTopLevelSerializableUnit(Serialize::TopLevelMadgineObject type);
 
-			Scripting::Vector *createArray();
+			Scripting::Vector *createVector();
 			Scripting::Struct *createStruct();
 			Scripting::List *createList();
 
@@ -25,7 +25,7 @@ namespace Engine {
 			
 
 		private:
-			Serialize::SerializableList<Scripting::Vector, RefScopeTopLevelSerializableUnit*> mArrays;
+			Serialize::SerializableList<Scripting::Vector, RefScopeTopLevelSerializableUnit*> mVectors;
 			Serialize::SerializableList<Scripting::Struct, RefScopeTopLevelSerializableUnit*> mStructs;
 			Serialize::SerializableList<Scripting::List, RefScopeTopLevelSerializableUnit*> mLists;
 		};
