@@ -51,7 +51,7 @@ namespace Engine {
 		static void readTuple(std::tuple<> &tuple, Serialize::SerializeInStream &in, std::index_sequence<>) {
 		}
 
-		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<Args>::value...>::value>>
+		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<std::remove_reference_t<Args>>::value...>::value>>
 		static void writeTuple(const std::tuple<Args...> &tuple, Serialize::SerializeOutStream &out) {
 			writeTuple(tuple, out, std::make_index_sequence<sizeof...(Args)>());
 		}

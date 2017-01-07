@@ -1,4 +1,4 @@
-
+#include "madginelib.h"
 
 #include "WindowContainer.h"
 
@@ -7,7 +7,8 @@
 namespace Engine {
 	namespace GUI {
 		Window::Window(WindowContainer * w) :
-			mContainer(w)
+			mContainer(w),
+			mIsValid(true)
 		{
 		}
 
@@ -125,6 +126,11 @@ namespace Engine {
 			if (!child)
 				return 0;
 			return child->as(_class);
+		}
+
+		void Window::invalidate()
+		{
+			mIsValid = false;
 		}
 
 	}

@@ -172,8 +172,12 @@ namespace Engine {
 
 		void WindowContainer::finalize()
 		{
-			while(!mChildren.empty())
-				mChildren.front()->destroy();			
+			if (mDefaultImpl)
+				mDefaultImpl->invalidate();
+			if (mImpl)
+				mImpl->invalidate();
+			while (!mChildren.empty())
+				destroyChild(mChildren.front());
 		}
 
 	}

@@ -18,6 +18,12 @@ namespace Serialize {
 
 	TopLevelSerializableUnit::~TopLevelSerializableUnit()
 	{
+		if (mSlaveManager) {
+			mSlaveManager->removeTopLevelItem(this);
+		}
+		while (!mMasterManagers.empty()) {
+			mMasterManagers.front()->removeTopLevelItem(this);
+		}
 	}
 
 	bool TopLevelSerializableUnit::isMaster()

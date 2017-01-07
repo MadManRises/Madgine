@@ -72,9 +72,11 @@ namespace Engine {
 			}
 			Window *getChildRecursive(const std::string &name, Class _class);
 			
+			void invalidate();
 
 		protected:
 
+			bool mIsValid;
 			WindowContainer *mContainer;
 
 		};

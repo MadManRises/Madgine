@@ -247,4 +247,5 @@ packages/
 
 *.pyc
 Maditor/Tools/blender/.idea/workspace.xml
-*.pyc
+
+.couscous/

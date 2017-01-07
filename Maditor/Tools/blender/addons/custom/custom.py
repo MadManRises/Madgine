@@ -194,7 +194,7 @@ def runCustom(report, export, context):
             writeVector([v[0], v[2], -v[1]])
             v = mathutils.Quaternion(ob.rotation_euler)
             writeFloat(v[0])
-            writeVector([v[1], v[3], v[2]])
+            writeVector([v[2], v[3], v[1]])
 
             v = ob.scale
             writeVector([v[0], v[2], -v[1]])
