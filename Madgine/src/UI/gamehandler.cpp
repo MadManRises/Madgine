@@ -146,24 +146,6 @@ void GameHandlerBase::update(float timeSinceLastFrame)
 
 }
 
-void GameHandlerBase::onSceneLoad()
-{
-	Handler::onSceneLoad();
-	SceneListener::onSceneLoad();	
-}
-
-void GameHandlerBase::beforeSceneClear()
-{
-	Handler::beforeSceneClear();
-	SceneListener::beforeSceneClear();
-}
-
-void GameHandlerBase::onSceneClear()
-{
-	SceneListener::onSceneClear();
-	Handler::onSceneClear();
-}
-
 
 }
 } // namespace UI

@@ -99,15 +99,15 @@ namespace Engine {
 
 		void SerializeManager::addTopLevelItem(TopLevelSerializableUnit * unit)
 		{
-			if (unit->type() == Serialize::NO_TOP_LEVEL || mTopLevelUnits.find(unit->type()) != mTopLevelUnits.end())
+			if (unit->topLevelType() == Serialize::NO_TOP_LEVEL || mTopLevelUnits.find(unit->topLevelType()) != mTopLevelUnits.end())
 				throw 0;
-			mTopLevelUnits[unit->type()] = unit;
+			mTopLevelUnits[unit->topLevelType()] = unit;
 			unit->addManager(this);
 
 			MessageHeader header;
 			header.mType = STATE;
 			header.mIsMadgineComponent = true;
-			header.mMadgineComponent = unit->type();
+			header.mMadgineComponent = unit->topLevelType();
 
 			for (BufferedInOutStream *stream : mMasterStreams) {
 				stream->beginMessage();
@@ -205,7 +205,7 @@ namespace Engine {
 			for (const std::pair<const TopLevelMadgineObject, SerializableUnit *> &unit : mTopLevelUnits) {
 				stream->beginMessage();
 				
-				header.mMadgineComponent = unit.second->type();				
+				header.mMadgineComponent = unit.second->topLevelType();				
 				stream->write(header);
 
 				unit.second->writeState(*stream);

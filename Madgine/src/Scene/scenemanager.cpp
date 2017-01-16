@@ -38,7 +38,6 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mTerrainGroup(0),
     mVp(0),
     mRenderTexture(0),
-    mIsSceneLoaded(false),
 	mTerrainRayQuery(0),
 	mEntities(this, &SceneManager::createEntityData),
 	RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER)
@@ -47,6 +46,8 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
 
 	createCamera();
+
+	clear();
 
 }
 
@@ -115,16 +116,10 @@ void SceneManager::readStaticScene(Serialize::SerializeInStream &in)
 	clear();
 
 	in.process().startSubProcess(1 + mSceneListeners.size(), "Creating Terrain...");
-	
-	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
 
-    readTerrain(mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain"), in);
+    readTerrain(in);
 
 	in.process().step();
-
-	mIsSceneLoaded = true;
-
-    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 
     for (SceneListener *listener : mSceneListeners){
         listener->onSceneLoad();
@@ -149,10 +144,8 @@ void SceneManager::createCamera(void)
 
 }
 
-void SceneManager::readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInStream &in)
-{
-    mTerrain = terrain;
-	
+void SceneManager::readTerrain(Serialize::SerializeInStream &in)
+{	
 	in >> mHeightmap;
 
     if (isUsingHeightmap()) {
@@ -215,7 +208,6 @@ void SceneManager::readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInS
 		Ogre::Vector3 v;
 		in >> v;
 		
-
 		Ogre::Quaternion q;
 		in >> q;
 		
@@ -226,7 +218,7 @@ void SceneManager::readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInS
 			Ogre::Entity *ent = mSceneMgr->createEntity(obName, mesh);
 			ent->addQueryFlags(Entity::Masks::TERRAIN_MASK);
 
-			Ogre::SceneNode *node = terrain->createChildSceneNode(obName, v, q);
+			Ogre::SceneNode *node = mTerrain->createChildSceneNode(obName, v, q);
 			node->attachObject(ent);
 
 			mTerrainEntities.push_back(node);
@@ -285,9 +277,6 @@ std::list<Entity::Entity *> SceneManager::entities()
 
 Math::Bounds SceneManager::getSceneBounds()
 {
-	if (!mIsSceneLoaded) {
-		MADGINE_THROW(SceneException("No Scene Loaded!"));
-	}
     mTerrain->_update(true, false);
     Ogre::AxisAlignedBox box = mTerrain->_getWorldAABB();
     return {box.getMinimum(), box.getMaximum()};
@@ -466,11 +455,6 @@ bool SceneManager::isUsingHeightmap() const
     return !mHeightmap.empty();
 }
 
-bool SceneManager::isSceneLoaded() const
-{
-	return mIsSceneLoaded;
-}
-
 const std::vector<Ogre::SceneNode*> &SceneManager::terrainEntities()
 {
 	return mTerrainEntities;
@@ -492,9 +476,11 @@ std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> SceneManager::createEn
 	
 }
 
-Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour)
+Entity::Entity *SceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour, const Scripting::ArgumentList &args)
 {
-	return &*mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
+	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
+	e.init(args);
+	return &e;
 }
 
 Ogre::Camera *SceneManager::camera()
@@ -587,7 +573,7 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 
 	{
 		PROFILE("Entities");
-		if (mask & App::ContextMask::SceneContext && mIsSceneLoaded) {
+		if (mask & App::ContextMask::SceneContext) {
 			for (Entity::Entity &e : mEntities) {
 				e.update(timeSinceLastFrame);
 			}
@@ -596,11 +582,9 @@ void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
 
 	{
 		PROFILE("SceneComponents");
-		if (mIsSceneLoaded) {
-			for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
-				PROFILE(component->componentName());
-				component->update(timeSinceLastFrame, mask);
-			}
+		for (const Ogre::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
+			PROFILE(component->componentName());
+			component->update(timeSinceLastFrame, mask);
 		}
 	}
 
@@ -642,8 +626,6 @@ void SceneManager::removeQueuedEntities()
 
 void SceneManager::clear()
 {
-	if (!mIsSceneLoaded) return;
-
     for (SceneListener *listener : mSceneListeners){
         listener->beforeSceneClear();
     }
@@ -664,8 +646,10 @@ void SceneManager::clear()
 
     mSceneMgr->clearScene();
 
-	mIsSceneLoaded = false;
+	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
+	mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
 
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 }
 
 

@@ -6,7 +6,23 @@
 namespace Engine {
 	namespace Serialize {
 
-		template <class C>
+	
+		struct _ContainerPolicy {
+			enum RequestMode {
+				ALL_REQUESTS,
+				NO_REQUESTS
+			} mRequestMode;
+
+		};
+
+		struct ContainerPolicy{
+
+			static const constexpr _ContainerPolicy allowAll{_ContainerPolicy::ALL_REQUESTS};
+			static const constexpr _ContainerPolicy masterOnly{ _ContainerPolicy::NO_REQUESTS };
+
+		};
+
+		template <class C, const _ContainerPolicy &Config>
 		class ObservableContainer : public C, public Observable {
 		public:
 			typedef size_t TransactionId;
@@ -16,6 +32,8 @@ namespace Engine {
 			typedef typename C::iterator iterator;
 			typedef typename C::const_iterator const_iterator;
 			typedef typename C::Type Type;
+
+			
 
 			struct Transaction {
 				Transaction(TransactionId id, std::function<void(bool, const iterator &it)> callback) :
@@ -58,44 +76,56 @@ namespace Engine {
 			template <class... _Ty>
 			iterator insert_where(const iterator &where, _Ty&&... args) {
 				iterator it = end();
+				
 				if (isMaster()) {
 					it = C::insert_where(where, std::forward<_Ty>(args)...);
 					onInsert(it);
 				}
 				else {
-					const Type &temp = UnitCreator<Type>::createTemp(std::forward<_Ty>(args)...);
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+						const Type &temp = UnitCreator<Type>::createTemp(std::forward<_Ty>(args)...);
 
-					BufferedOutStream* out = getSlaveActionMessageTarget();
-					*out << (TransactionId)0;
-					*out << INSERT_ITEM;
-					write_item(*out, where, temp);
-					out->endMessage();
-
+						BufferedOutStream* out = getSlaveActionMessageTarget();
+						*out << (TransactionId)0;
+						*out << INSERT_ITEM;
+						write_item(*out, where, temp);
+						out->endMessage();
+					}
+					else {
+						throw 0;
+					}
 				}
 				return it;
 			}
 
 			template <class... _Ty>
 			void insert_where_safe(std::function<void(const iterator &)> callback, const iterator &where, _Ty&&... args) {
+
 				if (isMaster()) {
 					iterator it = C::insert_where(where, std::forward<_Ty>(args)...);
 					onInsert(it);
 					callback(it);
 				}
 				else {
-					Type temp(std::forward<_Ty>(args)...);
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+						Type temp(std::forward<_Ty>(args)...);
 
-					TransactionId id = ++mTransactionCounter;
+						TransactionId id = ++mTransactionCounter;
 
-					BufferedOutStream *out = getSlaveActionMessageTarget();
-					*out << id;
-					*out << INSERT_ITEM;
-					write_item(*out, where, temp);
-					out->endMessage();
+						BufferedOutStream *out = getSlaveActionMessageTarget();
+						*out << id;
+						*out << INSERT_ITEM;
+						write_item(*out, where, temp);
+						out->endMessage();
 
-					mTransactions.emplace_back(id, [=](bool, const iterator &it) {callback(it); });
-
+						mTransactions.emplace_back(id, [=](bool, const iterator &it) {callback(it); });
+					}
+					else {
+						callback(end());
+						throw 0;
+					}
 				}
+
 			}
 
 			void onInsert(const const_iterator &it, BufferedInOutStream *answerTarget = 0, TransactionId answerId = 0) const {
@@ -117,7 +147,7 @@ namespace Engine {
 			// Inherited via Observable
 			virtual void readRequest(BufferedInOutStream & inout) override
 			{
-				bool accepted = true; //Check TODO
+				bool accepted = Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS; //Check TODO
 
 				TransactionId id;
 				inout >> id;
@@ -205,14 +235,13 @@ namespace Engine {
 
 			}
 
-
-
 		private:
 
 			std::list<Transaction> mTransactions;
 			std::list<std::pair<TransactionId, std::pair<BufferedInOutStream*, TransactionId>>> mPassTransactions;
 
 			TransactionId mTransactionCounter;
+
 		};
 		
 	}

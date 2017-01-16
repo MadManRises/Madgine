@@ -41,8 +41,8 @@ namespace Engine {
 			using SerializableContainer::SerializableContainer;
 		};
 
-		template <class T, class Creator>
-		class ObservableListImpl : public ObservableContainer<SerializableListImpl<T, Creator>> {
+		template <class T, class Creator, const _ContainerPolicy &Config>
+		class ObservableListImpl : public ObservableContainer<SerializableListImpl<T, Creator>, Config> {
 		public:
 			using ObservableContainer::ObservableContainer;
 
@@ -106,8 +106,8 @@ namespace Engine {
 		template <class T, class... Args>
 		using SerializableList = ListImpl<SerializableListImpl<T, Creator<Args...>>>;
 
-		template <class T, class... Args>
-		using ObservableList = ListImpl<ObservableListImpl<T, Creator<Args...>>>;
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		using ObservableList = ListImpl<ObservableListImpl<T, Creator<Args...>, Config>>;
 
 
 	}

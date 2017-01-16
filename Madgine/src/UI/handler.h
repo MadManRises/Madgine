@@ -62,6 +62,26 @@ namespace Engine {
 
 
 			template <class T, class... _Ty>
+			void registerButton(const std::string &name,
+				void (T::*f)(_Ty...), _Ty... args)
+			{
+				registerWindow({ name,{
+					{ GUI::EventType::ButtonClick, event(f, args...) }
+				}
+				});
+			}
+
+			template <class T, class... _Ty>
+			void registerButton(const std::string &name, Engine::GUI::Button **var,
+				void (T::*f)(_Ty...), std::remove_const_t<_Ty>... args)
+			{
+				registerWindow({ name, var,{
+					{ GUI::EventType::ButtonClick, event(f, args...) }
+				}
+				});
+			}
+
+			template <class T, class... _Ty>
 			void registerKeyBinding(GUI::Key key,
 				void (T::*f)(_Ty...))
 			{

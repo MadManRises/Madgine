@@ -32,6 +32,9 @@ namespace Engine {
 		{
 			unregisterCustomEvents(id);
 			mResizeListeners.erase(id);
+			for (WindowContainer *child : mChildren) {
+				child->unregisterAllEvents(id);
+			}
 		}
 
 		void WindowContainer::registerEvent(void * id, EventType type, std::function<void()> event)

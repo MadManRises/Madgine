@@ -40,6 +40,7 @@ namespace Engine {
 				virtual void hideModal() override;
 				virtual void show() override;
 				virtual void hide() override;
+				virtual void setVisible(bool b) override;
 				virtual void activate() override;
 				virtual void moveToFront() override;
 				virtual void setEnabled(bool b) override;

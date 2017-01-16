@@ -216,8 +216,8 @@ namespace Engine {
 
 		};
 
-		template <class T, class... Args>
-		class ObservableSet : public ObservableContainer<SerializableSet<T, Args...>> {
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		class ObservableSet : public ObservableContainer<SerializableSet<T, Args...>, Config> {
 		public:
 			using ObservableContainer::ObservableContainer;
 

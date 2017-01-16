@@ -153,7 +153,7 @@ public:
 	using isValueType = _isValueType<std::remove_const_t<T>>;
 
 	template <class T>
-	const constexpr static bool isValueType_v = isValueType<T>::value;
+	const constexpr static bool isValueType_v = isValueType<T>::value || std::is_enum<T>::value;
 
 	template <class T>
 	using enableValueType = std::enable_if_t<isValueType_v<std::remove_const_t<std::remove_reference_t<T>>>, T>;

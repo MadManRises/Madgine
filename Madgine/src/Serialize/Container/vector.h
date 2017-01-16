@@ -44,8 +44,8 @@ namespace Engine {
 
 		};
 
-		template <class T, class Creator>
-		class ObservableVectorImpl : public ObservableContainer<SerializableVectorImpl<T, Creator>> {
+		template <class T, class Creator, _ContainerPolicy &Config>
+		class ObservableVectorImpl : public ObservableContainer<SerializableVectorImpl<T, Creator>, Config> {
 		public:
 			using ObservableContainer::ObservableContainer;
 
@@ -115,8 +115,8 @@ namespace Engine {
 		template <class T, class... Args>
 		using SerializableVector = VectorImpl<SerializableVectorImpl<T, Creator<Args...>>>;
 
-		template <class T, class... Args>
-		using ObservableVector = VectorImpl<ObservableVectorImpl<T, Creator<Args...>>>;
+		template <class T, _ContainerPolicy &Config, class... Args>
+		using ObservableVector = VectorImpl<ObservableVectorImpl<T, Creator<Args...>, Config>>;
 
 
 	}

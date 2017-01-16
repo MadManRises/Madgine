@@ -30,7 +30,7 @@ namespace Engine {
 		void BaseMadgineObject::init()
 		{
 			if (mState != ObjectState::CONSTRUCTED) {
-				LOG_WARNING(std::string("Double initializeingObject: ") + getName());
+				LOG_WARNING(std::string("Double initializeing Object: ") + getName());
 				return;
 			}
 			mState = ObjectState::INITIALIZED;
@@ -42,54 +42,10 @@ namespace Engine {
 				LOG_WARNING(std::string("Finalizing unitialized Object: ") + getName());
 				return;
 			}
-			if (mState == ObjectState::IN_SCENE || mState == ObjectState::IN_SCENE_ABOUT_TO_CLEAR) {
-				LOG_WARNING(std::string("Finalizing in-scene Object: ") + getName() + "\n Calling onSceneClear.");
-				onSceneClear();
-				if (mState != ObjectState::INITIALIZED) {
-					LOG_WARNING(std::string("onSceneClear does not call Baseclass-Implementation: ") + getName());
-				}
-			}
 			mState = ObjectState::CONSTRUCTED;
 		}
 
-		void BaseMadgineObject::onSceneLoad()
-		{
-			if (mState == ObjectState::IN_SCENE || mState == ObjectState::IN_SCENE_ABOUT_TO_CLEAR) {
-				LOG_WARNING(std::string("OnSceneLoad called on in-scene Object: ") + getName());
-				return;
-			}
-			if (mState == ObjectState::CONSTRUCTED) {
-				LOG_WARNING(std::string("OnSceneLoad called on uninitialized Object: ") + getName() + "\n Calling init.");
-				init();
-				if (mState != ObjectState::INITIALIZED) {
-					LOG_WARNING(std::string("Init does not call Baseclass-Implementation: ") + getName());
-				}
-			}
-			mState = ObjectState::IN_SCENE;
-		}
-
-		void BaseMadgineObject::onSceneClear()
-		{
-			if (mState != ObjectState::IN_SCENE_ABOUT_TO_CLEAR && mState != ObjectState::IN_SCENE) {
-				LOG_WARNING(std::string("OnSceneClear called on not in-scene Object: ") + getName() + "\nAborting");
-				return;
-			}
-			if (mState == ObjectState::IN_SCENE) {
-				LOG_WARNING(std::string("OnSceneClear called without BeforeSceneClear on Object: ") + getName() + "\n Calling beforeSceneClear.");
-				beforeSceneClear();
-			}
-			mState = ObjectState::INITIALIZED;
-		}
-
-		void BaseMadgineObject::beforeSceneClear()
-		{
-			if (mState != ObjectState::IN_SCENE) {
-				LOG_WARNING(std::string("OnSceneClear called on not in-scene Object: ") + getName() + "\nAborting");
-				return;
-			}
-			mState = ObjectState::IN_SCENE_ABOUT_TO_CLEAR;
-		}
-
+		
 		ObjectState BaseMadgineObject::getState() {
 			return mState;
 		}

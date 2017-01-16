@@ -31,7 +31,7 @@ namespace Serialize {
 		return mSlaveManager == 0;
 	}
 
-	TopLevelMadgineObject TopLevelSerializableUnit::type()
+	TopLevelMadgineObject TopLevelSerializableUnit::topLevelType()
 	{
 		return mType;
 	}

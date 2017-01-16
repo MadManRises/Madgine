@@ -99,12 +99,12 @@ void SerializableUnit::writeMasterMessageHeader(BufferedOutStream & out, bool is
 {
 	MessageHeader header;
 	header.mType = isAction ? ACTION : STATE;
-	if (type() == NO_TOP_LEVEL) {
+	if (topLevelType() == NO_TOP_LEVEL) {
 		header.mObject = out.manager().convertPtr(out, this);
 		header.mIsMadgineComponent = false;
 	}
 	else {
-		header.mMadgineComponent = type();
+		header.mMadgineComponent = topLevelType();
 		header.mIsMadgineComponent = true;
 	}
 	out.write(header);
@@ -117,12 +117,12 @@ BufferedOutStream * SerializableUnit::getSlaveMessageTarget()
 		result = mTopLevel->getSlaveMessageTarget();
 		MessageHeader header;
 		header.mType = REQUEST;
-		if (type() == NO_TOP_LEVEL) {
+		if (topLevelType() == NO_TOP_LEVEL) {
 			header.mObject = result->manager().convertPtr(*result, this);
 			header.mIsMadgineComponent = false;
 		}
 		else {
-			header.mMadgineComponent = type();
+			header.mMadgineComponent = topLevelType();
 			header.mIsMadgineComponent = true;
 		}
 		result->write(header);
@@ -131,7 +131,7 @@ BufferedOutStream * SerializableUnit::getSlaveMessageTarget()
 }
 
 
-TopLevelMadgineObject SerializableUnit::type() {
+TopLevelMadgineObject SerializableUnit::topLevelType() {
 	return NO_TOP_LEVEL;
 }
 

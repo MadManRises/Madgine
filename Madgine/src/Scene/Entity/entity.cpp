@@ -127,6 +127,11 @@ void Entity::setPosition(const Ogre::Vector3 &v)
     mNode->setPosition(v);
 }
 
+void Entity::translate(const Ogre::Vector3 & v)
+{
+	mNode->translate(v);
+}
+
 void Entity::rotate(const Ogre::Quaternion &q)
 {
     mNode->rotate(q);

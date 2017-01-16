@@ -7,25 +7,43 @@
 namespace Engine {
 	namespace Serialize {
 
-		template <class... _Ty>
+		struct _ActionPolicy {
+			bool mExecuteOnMasterOnly;
+			bool mCallByMasterOnly;
+		};
+
+		struct ActionPolicy{
+			static const constexpr _ActionPolicy masterOnly{ true, true };
+			static const constexpr _ActionPolicy standard{ true, false };
+			static const constexpr _ActionPolicy allowAll{ false, false };
+		};
+
+		template <const _ActionPolicy &Config, class... _Ty>
 		class Action : public Observable{
 		public:
 			template <class T>
 			Action(T *parent, void (T::*callback)(_Ty...)) :
 				Observable(parent),
-				mImpl([=](_Ty... args) {(parent->*callback)(std::forward<_Ty>(args)...); })
+				mImpl([=](_Ty... args) {(parent->*callback)(args...); })
 			{
 
 			}
 
 			void operator()(_Ty... args) {
+				if (!verify(args...))
+					return;
 				if (isMaster()) {
-					call(std::forward<_Ty>(args)...);
+					call(args...);
 				}
 				else {
-					BufferedOutStream *out = getSlaveActionMessageTarget();
-					TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
-					out->endMessage();
+					if (!Config.mCallByMasterOnly) {
+						BufferedOutStream *out = getSlaveActionMessageTarget();
+						TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
+						out->endMessage();
+					}
+					else {
+						throw 0;
+					}
 				}
 			}
 
@@ -38,25 +56,38 @@ namespace Engine {
 
 			virtual void readRequest(BufferedInOutStream & in) override
 			{
-				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
-				TupleSerializer::readTuple(args, in);
-				TupleUnpacker<>::call(this, &Action::operator(), std::move(args));
+				if (!Config.mCallByMasterOnly) {
+					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
+					TupleSerializer::readTuple(args, in);
+					if (!TupleUnpacker<>::call(this, &Action::verify, args))
+						return;
+					TupleUnpacker<>::call(this, &Action::operator(), args);
+				}
+			}
+
+			void setVerify(std::function<bool(_Ty...)> verify) {
+				mVerify = verify;
+			}
+
+		protected:
+			bool verify(_Ty... args) {
+				return !mVerify || mVerify(args...);
 			}
 
 		private:
 			void call(_Ty... args) {
 				mImpl(std::forward<_Ty>(args)...);
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					TupleSerializer::writeTuple(std::forward_as_tuple(std::forward<_Ty>(args)...), *out);
-					out->endMessage();
+				if (!Config.mExecuteOnMasterOnly) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+						TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
+						out->endMessage();
+					}
 				}
 			}
 
 		private:
 			std::function<void(_Ty...)> mImpl;
-
-
-
+			std::function<bool(_Ty...)> mVerify;
 		};
 
 	}

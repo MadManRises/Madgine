@@ -39,8 +39,8 @@ namespace Engine {
 			}
 		};
 
-		template <class T, class Creator>
-		class ObservableMapImpl : public ObservableContainer<SerializableMapImpl<T, Creator>> {
+		template <class T, class Creator, const _ContainerPolicy &Config>
+		class ObservableMapImpl : public ObservableContainer<SerializableMapImpl<T, Creator>, Config> {
 		public:
 			using ObservableContainer::ObservableContainer;
 
@@ -96,8 +96,8 @@ namespace Engine {
 		template <class T, class... Args>
 		using SerializableMap = MapImpl<SerializableMapImpl<T, Creator<std::string, Args...>>>;
 
-		template <class T, class... Args>
-		using ObservableMap = MapImpl<ObservableMapImpl<T, Creator<std::string, Args...>>>;
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		using ObservableMap = MapImpl<ObservableMapImpl<T, Creator<std::string, Args...>, Config>>;
 
 
 	}
