@@ -2,6 +2,7 @@
 
 #include "../observable.h"
 #include "../Streams/bufferedstream.h"
+#include "serializablecontainer.h"
 
 namespace Engine {
 	namespace Serialize {

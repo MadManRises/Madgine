@@ -3,6 +3,67 @@
 namespace Engine {
 
 
+	template <class T>
+	struct _isValueType {
+		const constexpr static bool value = false;
+	};
+
+	template <>
+	struct _isValueType<int> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<std::string> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<Ogre::Vector3> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<Ogre::Vector2> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<float> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<bool> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<size_t> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<InvPtr> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<Scripting::Scope *> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
+	struct _isValueType<ValueType> {
+		const constexpr static bool value = true;
+	};
+
+	template <class T>
+	using isValueType = _isValueType<std::remove_const_t<T>>;
+
+	template <class T>
+	using enableValueType = std::enable_if_t<isValueType<std::remove_const_t<std::remove_reference_t<T>>>::value, T>;
+
 class MADGINE_EXPORT ValueType {
 public:
     ValueType();
@@ -78,7 +139,7 @@ public:
     float asFloat(float f);
     bool isNull() const;
 	bool isEOL() const;
-	const ValueType &asDefault(const ValueType &default);
+	const ValueType &asDefault(const ValueType &defaultValue);
 
     std::string toString() const;
 
@@ -94,69 +155,7 @@ public:
 	static ValueType EOL();
 
 public:
-	template <class T>
-	struct _isValueType {
-		const constexpr static bool value = false;
-	};
 
-	template <>
-	struct _isValueType<int> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<std::string> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<Ogre::Vector3> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<Ogre::Vector2> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<float> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<bool> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<size_t> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<InvPtr> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<Scripting::Scope *> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<ValueType> {
-		const constexpr static bool value = true;
-	};
-
-	template <class T>
-	using isValueType = _isValueType<std::remove_const_t<T>>;
-
-	template <class T>
-	const constexpr static bool isValueType_v = isValueType<T>::value;
-
-	template <class T>
-	using enableValueType = std::enable_if_t<isValueType_v<std::remove_const_t<std::remove_reference_t<T>>>, T>;
 
     template <class T>
     std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> as() const;

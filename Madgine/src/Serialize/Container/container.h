@@ -1,6 +1,7 @@
 #pragma once
 
 #include "basecontainer.h"
+#include "templates.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -18,19 +19,19 @@ namespace Engine {
 			typedef typename BaseContainer<NativeContainer>::const_iterator const_iterator;
 
 			const_iterator begin() const {
-				return mData.begin();
+				return this->mData.begin();
 			}
 
 			const_iterator end() const {
-				return mData.end();
+				return this->mData.end();
 			}
 
 			iterator begin() {
-				return mData.begin();
+				return this->mData.begin();
 			}
 
 			iterator end() {
-				return mData.end();
+				return this->mData.end();
 			}
 
 		protected:
@@ -50,7 +51,7 @@ namespace Engine {
 
 			template <class... _Ty>
 			iterator insert_tuple_where(const iterator &where, std::tuple<_Ty...>&& tuple) {
-				return TupleUnpacker<const iterator &>::call(static_cast<BaseContainer*>(this), &Container::insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker<const iterator &>::call(static_cast<BaseContainer<NativeContainer>*>(this), &BaseContainer<NativeContainer>::insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			ArgsTuple readCreationData(SerializeInStream &in) {

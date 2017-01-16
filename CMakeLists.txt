@@ -2,6 +2,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 
 cmake_minimum_required (VERSION 3.3)
 
+project(Madgine)
+
 set(OGRE_SDK "" CACHE PATH "Path to Ogre install directory")
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")

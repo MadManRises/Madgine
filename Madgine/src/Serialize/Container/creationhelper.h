@@ -9,7 +9,7 @@ namespace Engine {
 		class CreationHelper;
 
 		template <class... Args>
-		using Creator = CreationHelper<all_of_v<ValueType::_isValueType<Args>::value...>, Args...>;
+		using Creator = CreationHelper<all_of<_isValueType<Args>::value...>::value, Args...>;
 
 
 		template <class... Args>

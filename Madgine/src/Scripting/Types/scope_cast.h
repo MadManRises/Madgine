@@ -2,8 +2,8 @@
 
 #include "Util\UtilMethods.h"
 #include "Database\exceptionmessages.h"
-#include "Serialize\serializablebase.h"
 #include "Scripting\scriptingexception.h"
+#include "scope.h"
 
 namespace Engine {
 namespace Scripting {

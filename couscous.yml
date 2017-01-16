@@ -1,0 +1,29 @@
+template:
+  
+baseUrl: https://madmanrises.github.io/Madgine
+
+title: Madgine
+
+subTitle: One Engine Framework. Flexibility at low cost. Built with CMake, C++ and Ogre3D.
+
+menu:
+    items:
+        home:
+            text: Home
+            relativeUrl: .
+        gettingStarted:
+            text: Getting Started
+            relativeUrl: docs/gettingStarted.html
+        examples:
+            text: Examples
+            relativeUrl: docs/examples.html
+        installation:
+            text: Installation
+            relativeUrl: /docs/install.html
+        license:
+            text: License
+            relativeUrl: license.html
+        validators:
+            text: What is a DSL?
+            relativeUrl: /docs/dsl.html
+            

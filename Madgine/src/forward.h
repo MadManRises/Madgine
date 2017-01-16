@@ -35,8 +35,6 @@ namespace Engine {
 		
 		typedef size_t ParticipantId;
 
-		enum TopLevelMadgineObject;
-
 		class buffered_streambuf;
 
 	}

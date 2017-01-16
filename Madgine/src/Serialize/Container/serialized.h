@@ -2,6 +2,7 @@
 
 #include "../serializable.h"
 #include "unithelper.h"
+#include "../serializableunit.h"
 
 namespace Engine {
 		namespace Serialize {

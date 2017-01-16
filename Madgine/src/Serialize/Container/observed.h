@@ -13,32 +13,32 @@ namespace Engine {
 			public:
 				Observed(SerializableUnit *parent, const T &data = T()) :
 					Observable(parent),
-					Serialized(parent, data)
+					Serialized<T>(parent, data)
 				{
 
 				}
 
-				template <class T>
-				void operator =(T&& v) {
-					if (mData != v) {
-						mData = std::forward<T>(v);
+				template <class Ty>
+				void operator =(Ty&& v) {
+					if (this->mData != v) {
+						this->mData = std::forward<Ty>(v);
 						notify();
 					}
 				}
 
-				template <class T>
-				void operator += (T&& v) {
-					mData += std::forward<T>(v);
+				template <class Ty>
+				void operator += (Ty&& v) {
+					this->mData += std::forward<Ty>(v);
 					notify();
 				}
 
 				virtual void readRequest(BufferedInOutStream &in) override {
-					read_state(in, mData);
+					read_state(in, this->mData);
 					notify();
 				}
 
 				virtual void readAction(BufferedInOutStream &in) override {
-					read_state(in, mData);
+					read_state(in, this->mData);
 					notify();
 				}
 
@@ -52,10 +52,10 @@ namespace Engine {
 
 			protected:
 				void notify() {
-					Serialized::notify();
+					Serialized<T>::notify();
 					if (!mCondition || mCondition()) {
 						for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-							write_state(*out, mData);
+							write_state(*out, this->mData);
 							out->endMessage();
 						}
 					}

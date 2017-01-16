@@ -12,8 +12,6 @@ namespace Engine {
 	struct all_of
 		: std::is_same<bool_pack<values..., true>, bool_pack<true, values...>> {};
 
-	template<bool... values>
-	const constexpr bool all_of_v = all_of<values...>::value;
 
 	template <class _T>
 	struct Caster {
@@ -35,7 +33,7 @@ namespace Engine {
 	
 	struct TupleSerializer {
 
-		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<Args>::value...>::value>>
+		template <class... Args, class _ = std::enable_if_t<all_of<isValueType<Args>::value...>::value>>
 		static void readTuple(std::tuple<Args...> &tuple, Serialize::SerializeInStream &in) {
 			readTuple(tuple, in, std::make_index_sequence<sizeof...(Args)>());
 		}
@@ -51,7 +49,7 @@ namespace Engine {
 		static void readTuple(std::tuple<> &tuple, Serialize::SerializeInStream &in, std::index_sequence<>) {
 		}
 
-		template <class... Args, class _ = std::enable_if_t<all_of<ValueType::isValueType<std::remove_reference_t<Args>>::value...>::value>>
+		template <class... Args, class _ = std::enable_if_t<all_of<isValueType<std::remove_reference_t<Args>>::value...>::value>>
 		static void writeTuple(const std::tuple<Args...> &tuple, Serialize::SerializeOutStream &out) {
 			writeTuple(tuple, out, std::make_index_sequence<sizeof...(Args)>());
 		}

@@ -26,7 +26,7 @@ namespace Engine {
 		};
 
 
-		template <class T, bool b = ValueType::isValueType_v<T>>
+		template <class T, bool b = isValueType<T>::value>
 		struct UnitHelper{
 
 			typedef T Type;
