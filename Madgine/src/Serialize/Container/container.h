@@ -51,7 +51,7 @@ namespace Engine {
 
 			template <class... _Ty>
 			iterator insert_tuple_where(const iterator &where, std::tuple<_Ty...>&& tuple) {
-				return TupleUnpacker<const iterator &>::call(static_cast<BaseContainer<NativeContainer>*>(this), &BaseContainer<NativeContainer>::insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker<const iterator &>::call(static_cast<BaseContainer<NativeContainer>*>(this), &BaseContainer<NativeContainer>::template insert_where<_Ty...>, where, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			ArgsTuple readCreationData(SerializeInStream &in) {
@@ -59,7 +59,7 @@ namespace Engine {
 					return mCreationDataFactory(in);
 				}
 				else {
-					return defaultCreationData(in);
+					return this->defaultCreationData(in);
 				}
 			}
 

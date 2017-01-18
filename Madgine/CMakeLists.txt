@@ -54,7 +54,15 @@ add_library(Madgine SHARED ${sources} madginelib.cpp)
 
 add_precompiled_header(Madgine src/madginelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-target_link_libraries (Madgine wsock32 ws2_32)
+target_link_libraries (Madgine ws2_32)
+
+
+find_package(MYGUI REQUIRED)
+if (MYGUI_FOUND)
+  include_directories(${MYGUI_INCLUDE_DIRS})
+  MESSAGE(STATUS ${MYGUI_LIBRARIES})
+  target_link_libraries (Madgine ${MYGUI_LIBRARIES})
+endif (MYGUI_FOUND)
 
 if (OGRE_FOUND)
   include_directories(${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
@@ -67,12 +75,6 @@ if (OIS_FOUND)
   target_link_libraries (Madgine ${OIS_LIBRARIES})
 endif (OIS_FOUND)
 
-find_package(MYGUI REQUIRED)
-if (MYGUI_FOUND)
-  include_directories(${MYGUI_INCLUDE_DIRS})
-  MESSAGE(STATUS ${MYGUI_LIBRARIES})
-  target_link_libraries (Madgine ${MYGUI_LIBRARIES})
-endif (MYGUI_FOUND)
 
 
 # Export Configuration

@@ -69,7 +69,7 @@ private:
 	Serialize::Observed<std::string> mPrototypeName;
 	Scope *mPrototype;
 	
-	Serialize::ObservableMap<ValueType> mVariables;
+	Serialize::ObservableMap<ValueType, Serialize::ContainerPolicy::allowAll> mVariables;
 };
 
 }

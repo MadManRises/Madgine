@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "container.h"
+#include "../Streams/serializestream.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -9,12 +10,12 @@ namespace Engine {
 		class UnsortedContainer : public Container<NativeContainer, Creator> {
 
 		public:
-			using Container::Container;
+			using Container<NativeContainer, Creator>::Container;
 
-			typedef typename Container::iterator iterator;
-			typedef typename Container::const_iterator const_iterator;
+			typedef typename Container<NativeContainer, Creator>::iterator iterator;
+			typedef typename Container<NativeContainer, Creator>::const_iterator const_iterator;
 
-			typedef typename Container::Type Type;
+			typedef typename Container<NativeContainer, Creator>::Type Type;
 
 		protected:
 
@@ -22,13 +23,13 @@ namespace Engine {
 			iterator read_iterator(SerializeInStream &in) {
 				int i;
 				in >> i;
-				iterator it = begin();
+				iterator it = this->begin();
 				std::advance(it, i);
 				return it;
 			}
 
 			void write_iterator(SerializeOutStream &out, const const_iterator &it) const {
-				out << (int)std::distance(begin(), it);
+				out << (int)std::distance(this->begin(), it);
 			}
 
 			iterator read_item(BufferedInOutStream &in) {
@@ -36,9 +37,9 @@ namespace Engine {
 			}
 
 			iterator read_item_where(const iterator &where, SerializeInStream &in) {
-				iterator it = insert_tuple_where(where, readCreationData(in));
-				read_id(in, *it);
-				read_state(in, *it);
+				iterator it = this->insert_tuple_where(where, this->readCreationData(in));
+				this->read_id(in, *it);
+				this->read_state(in, *it);
 				return it;
 			}
 
@@ -52,9 +53,9 @@ namespace Engine {
 			}
 
 			void write_item(SerializeOutStream &out, const Type &t) const {
-				write_creation(out, t);
-				write_id(out, t);
-				write_state(out, t);
+				this->write_creation(out, t);
+				this->write_id(out, t);
+				this->write_state(out, t);
 			}
 
 

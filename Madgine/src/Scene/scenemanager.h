@@ -49,14 +49,13 @@ public:
 	Ogre::RenderTarget *getRenderTarget();
 
 	bool isUsingHeightmap() const;
-	bool isSceneLoaded() const;
 	const std::vector<Ogre::SceneNode*> &terrainEntities();
 	const Ogre::SceneNode *terrain();
 	Ogre::TerrainGroup *terrainGroup() const;
 
 	std::tuple<Ogre::SceneNode *, std::string, Ogre::Entity*> createEntityData(const std::string &name, const std::string &meshName, const std::string &behaviour);
 	
-	Entity::Entity *createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour);
+	Entity::Entity *createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour, const Scripting::ArgumentList &args = {});
 	std::list<Entity::Entity *> entities();
 	Entity::Entity *findEntity(const std::string &name);
 	void removeLater(Entity::Entity *e);
@@ -116,7 +115,7 @@ protected:
 
 	void writeStaticScene(Serialize::SerializeOutStream &out) const;
 	void readStaticScene(Serialize::SerializeInStream &in);
-	void readTerrain(Ogre::SceneNode *terrain, Serialize::SerializeInStream &in);
+	void readTerrain(Serialize::SerializeInStream &in);
 
 
 	void removeQueuedEntities();
@@ -134,8 +133,6 @@ private:
 	
 	Ogre::RenderTexture *mRenderTexture;
 
-	bool mIsSceneLoaded;
-
 	Ogre::RaySceneQuery *mTerrainRayQuery;	
 
 	Ogre::Camera *mCamera;
@@ -150,7 +147,7 @@ private:
 	Ogre::TexturePtr mGameTexture;
 
 
-	Serialize::ObservableList<Entity::Entity, Ogre::SceneNode *, std::string, Ogre::Entity*> mEntities;
+	Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicy::masterOnly, Ogre::SceneNode *, std::string, Ogre::Entity*> mEntities;
     std::list<Entity::Entity *> mEntityRemoveQueue;
 
     std::list<SceneListener *> mSceneListeners;

@@ -21,7 +21,7 @@ public:
 
 	bool isMaster();
 
-	virtual TopLevelMadgineObject type() override;
+	virtual TopLevelMadgineObject topLevelType() override;
 
 private:
 	std::list<SerializeManager*> mMasterManagers;

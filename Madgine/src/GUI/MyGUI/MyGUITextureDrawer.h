@@ -11,7 +11,7 @@ namespace Engine {
 				MyGUITextureDrawer(MyGUIWindow *w);
 				
 				// Inherited via TextureDrawer
-				virtual void setTexture(Ogre::TexturePtr &tex) override;
+				virtual void setTexture(const Ogre::TexturePtr &tex) override;
 
 			private:
 				MyGUI::ImageBox *mTextureDrawer;

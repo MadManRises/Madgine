@@ -62,7 +62,7 @@ namespace Engine {
 	using isValueType = _isValueType<std::remove_const_t<T>>;
 
 	template <class T>
-	using enableValueType = std::enable_if_t<isValueType<std::remove_const_t<std::remove_reference_t<T>>>::value, T>;
+	using enableValueType = std::enable_if_t<isValueType<std::remove_reference_t<T>>::value, T>;
 
 class MADGINE_EXPORT ValueType {
 public:

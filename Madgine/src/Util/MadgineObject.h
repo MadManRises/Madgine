@@ -18,9 +18,6 @@ namespace Engine {
 
 			virtual void init();
 			virtual void finalize();
-			virtual void onSceneLoad();
-			virtual void beforeSceneClear();
-			virtual void onSceneClear();
 
 			ObjectState getState();
 

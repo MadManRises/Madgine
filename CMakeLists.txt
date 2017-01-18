@@ -1,4 +1,4 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 
 cmake_minimum_required (VERSION 3.3)
 
@@ -11,6 +11,12 @@ set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 if (MINGW)
 	add_compile_options(-Wall -std=c++14 -fpermissive)
 endif (MINGW)
+
+if (NOT APPLE)
+  # Create debug libraries with _d postfix
+  set(CMAKE_DEBUG_POSTFIX "_d")
+endif ()
+
 
 Project(Madgine)
 

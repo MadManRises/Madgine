@@ -12,9 +12,10 @@ namespace Engine {
 			public:
 				template <class... _Ty>
 				Serialized(SerializableUnit *parent, _Ty&&... args) :
-					mData(std::forward<_Ty>(args)...),
-					Serializable(parent) {
-					setTopLevel(mData, parent->topLevel());
+					Serializable(parent),
+					mData(std::forward<_Ty>(args)...)
+				{
+					this->setTopLevel(mData, parent->topLevel());
 				}
 
 				template <class Ty>
@@ -38,14 +39,14 @@ namespace Engine {
 				}
 
 				virtual void readState(SerializeInStream &in) override {
-					read_id(in, mData);
-					read_state(in, mData);
+					this->read_id(in, mData);
+					this->read_state(in, mData);
 					notify();
 				}
 
 				virtual void writeState(SerializeOutStream &out) const override {
-					write_id(out, mData);
-					write_state(out, mData);
+					this->write_id(out, mData);
+					this->write_state(out, mData);
 				}
 
 

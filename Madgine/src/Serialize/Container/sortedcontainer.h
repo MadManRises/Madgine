@@ -9,24 +9,24 @@ namespace Engine {
 		class SortedContainer : public Container<NativeContainer, Creator>  {
 		public:
 
-			using Container::Container;
+			using Container<NativeContainer, Creator>::Container;
 
-			typedef typename Container::iterator iterator;
-			typedef typename Container::const_iterator const_iterator;
+			typedef typename Container<NativeContainer, Creator>::iterator iterator;
+			typedef typename Container<NativeContainer, Creator>::const_iterator const_iterator;
 
-			typedef typename Container::Type Type;
+			typedef typename Container<NativeContainer, Creator>::Type Type;
 
 		protected:
 			
 
 			iterator read_item(SerializeInStream &in) {
-				return read_item_where(end(), in);
+				return read_item_where(this->end(), in);
 			}
 
 			iterator read_item_where(const iterator &where, SerializeInStream &in) {
-				iterator it = insert_tuple_where(where, readCreationData(in));
-				read_id(in, *it);
-				read_state(in, *it);
+				iterator it = this->insert_tuple_where(where, this->readCreationData(in));
+				this->read_id(in, *it);
+				this->read_state(in, *it);
 				return it;
 			}
 
@@ -39,9 +39,9 @@ namespace Engine {
 			}
 
 			void write_item(SerializeOutStream &out, const Type &t) const {
-				write_creation(out, t);
-				write_id(out, t);
-				write_state(out, t);
+				this->write_creation(out, t);
+				this->write_id(out, t);
+				this->write_state(out, t);
 			}
 
 		};

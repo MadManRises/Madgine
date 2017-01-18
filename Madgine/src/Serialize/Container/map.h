@@ -19,9 +19,9 @@ namespace Engine {
 			typedef typename NativeContainer::const_iterator const_iterator;
 
 
-			template <class... _Ty>
-			iterator insert_where(const iterator &where, _Ty&&... args) {
-				return mData.try_emplace(where, std::forward<_Ty>(args)...);
+			template <class K, class... _Ty>
+			iterator insert_where(const iterator &where, K &&key, _Ty&&... args) {
+				return mData.emplace_hint(where, std::piecewise_construct, std::forward_as_tuple(std::forward<K>(key)), std::forward_as_tuple(std::forward<_Ty>(args)...));
 			}
 
 			NativeContainer mData;
@@ -31,18 +31,18 @@ namespace Engine {
 		template <class T, class Creator>
 		class SerializableMapImpl : public SerializableContainer<std::map<std::string, T>, Creator> {
 		public:
-			using SerializableContainer::SerializableContainer;
+			using SerializableContainer<std::map<std::string, T>, Creator>::SerializableContainer;
 
 
 			T &operator[](const std::string &key) {
-				return mData[key];
+				return this->mData[key];
 			}
 		};
 
-		template <class T, class Creator>
-		class ObservableMapImpl : public ObservableContainer<SerializableMapImpl<T, Creator>> {
+		template <class T, class Creator, const _ContainerPolicy &Config>
+		class ObservableMapImpl : public ObservableContainer<SerializableMapImpl<T, Creator>, Config> {
 		public:
-			using ObservableContainer::ObservableContainer;
+			using ObservableContainer<SerializableMapImpl<T, Creator>, Config>::ObservableContainer;
 
 		};
 
@@ -61,7 +61,7 @@ namespace Engine {
 			}*/
 
 			bool contains(const std::string &key) const {
-				return mData.find(key) != mData.end();
+				return this->mData.find(key) != this->mData.end();
 			}
 
 			/*typename const C::Type::second_type &at(const std::string &key) const {
@@ -69,26 +69,26 @@ namespace Engine {
 			}*/
 
 			typename C::iterator find(const std::string &key) {
-				return mData.find(key);
+				return this->mData.find(key);
 			}
 
 			typename C::const_iterator find(const std::string &key) const {
-				return mData.find(key);
+				return this->mData.find(key);
 			}
 
 			template <class... _Ty>
 			std::pair<typename C::iterator, bool> try_emplace(const std::string &key, _Ty&&... args) {
-				auto it = mData.lower_bound(key);
-				if (it != end() && it->first == key) {
+				auto it = this->mData.lower_bound(key);
+				if (it != this->end() && it->first == key) {
 					return{ it, false };
 				}
 				else {
-					return{ insert_where(it, key, std::forward<_Ty>(args)...), true };
+					return{ this->insert_where(it, key, std::forward<_Ty>(args)...), true };
 				}
 			}
 
 			size_t size() const {
-				return mData.size();
+				return this->mData.size();
 			}
 
 		};
@@ -96,8 +96,8 @@ namespace Engine {
 		template <class T, class... Args>
 		using SerializableMap = MapImpl<SerializableMapImpl<T, Creator<std::string, Args...>>>;
 
-		template <class T, class... Args>
-		using ObservableMap = MapImpl<ObservableMapImpl<T, Creator<std::string, Args...>>>;
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		using ObservableMap = MapImpl<ObservableMapImpl<T, Creator<std::string, Args...>, Config>>;
 
 
 	}

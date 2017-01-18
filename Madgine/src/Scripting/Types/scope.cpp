@@ -202,7 +202,7 @@ ValueType Scope::call(const ArgumentList & stack)
 
 ValueType Scope::isGlobal(const ArgumentList & stack)
 {
-	return topLevel()->type() == Serialize::SCRIPTING_MANAGER;
+	return topLevel()->topLevelType() == Serialize::SCRIPTING_MANAGER;
 }
 
 ValueType Scope::execScriptMethod(const std::string &name,

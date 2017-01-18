@@ -52,11 +52,11 @@ namespace Engine {
 			{
 			}
 
-	
+			SerializableContainer(const SerializableContainer &) = delete;
 
 			void clear() {
 				beforeClear();
-				mData.clear();
+				this->mData.clear();
 				afterClear();
 			}
 
@@ -68,10 +68,10 @@ namespace Engine {
 			}
 			
 			virtual void writeState(SerializeOutStream &out) const override {
-				for (auto it = begin(); it != end(); ++it) {
+				for (auto it = this->begin(); it != this->end(); ++it) {
 					const auto &t = *it;
-					if (filter(out, t)) {
-						write_item(out, t);
+					if (this->filter(out, t)) {
+						this->write_item(out, t);
 					}
 				}
 				out << ValueType::EOL();
@@ -80,7 +80,7 @@ namespace Engine {
 			virtual void readState(SerializeInStream &in) override {
 				clear();
 				while (in.loopRead()) {
-					iterator it = read_item_where(end(), in);
+					iterator it = this->read_item_where(this->end(), in);
 					onInsert(it);
 				}	
 			}
@@ -88,8 +88,8 @@ namespace Engine {
 
 
 			virtual void applySerializableMap(const std::map<InvPtr, SerializableUnit*> &map) override {
-				for (auto it = begin(); it != end(); ++it) {
-					applyMap(map, *it);
+				for (auto it = this->begin(); it != this->end(); ++it) {
+					this->applyMap(map, *it);
 				}
 			}
 
@@ -102,16 +102,16 @@ namespace Engine {
 
 			void beforeClear() const {
 				if (mCallback)
-					mCallback(end(), BEFORE | CLEAR);
+					mCallback(this->end(), BEFORE | CLEAR);
 			}
 
 			void afterClear() const {
 				if (mCallback)
-					mCallback(end(), AFTER | CLEAR);
+					mCallback(this->end(), AFTER | CLEAR);
 			}
 			
 			void onInsert(const iterator &it) const {
-				setTopLevel(*it, topLevel());
+				this->setTopLevel(*it, topLevel());
 				if (mCallback)
 					mCallback(it, INSERT_ITEM);
 			}
@@ -123,7 +123,7 @@ namespace Engine {
 
 			void afterRemove() const {
 				if (mCallback)
-					mCallback(end(), AFTER | REMOVE_ITEM);
+					mCallback(this->end(), AFTER | REMOVE_ITEM);
 			}
 
 			template <class... _Ty>

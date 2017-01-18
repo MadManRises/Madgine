@@ -575,11 +575,11 @@ bool ValueType::isEOL() const
 	return mType == Type::EndOfListValue;
 }
 
-const ValueType & ValueType::asDefault(const ValueType & default)
+const ValueType & ValueType::asDefault(const ValueType & def)
 {
-	if (mType != default.mType) {
+	if (mType != def.mType) {
 		if (mType == Type::NullValue)
-			*this = default;
+			*this = def;
 		else
 			MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
 	}

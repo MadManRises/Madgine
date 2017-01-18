@@ -91,8 +91,6 @@ void Application::setup(const AppSettings &settings)
 		mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
 	}
 
-	std::ostringstream windowHndStr;
-
 	mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
 	_setup();

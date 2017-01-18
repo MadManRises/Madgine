@@ -25,22 +25,22 @@ IF (WIN32) #Windows
     MESSAGE(STATUS "Looking for MyGUI")
 
     #IF(MINGW)
-    #
+    
     #    FIND_PATH ( MYGUI_INCLUDE_DIRS MyGUI.h PATH_SUFFIXES MYGUI)
     #    FIND_LIBRARY ( MYGUI_LIBRARIES_REL NAMES
     #        libMyGUIEngine${CMAKE_SHARED_LIBRARY_SUFFIX}
     #        HINTS
-    #        ${MYGUI_LIB_DIR}
+    #        ${MYGUISDK}
     #        PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-    #
+    
     #    FIND_LIBRARY ( MYGUI_LIBRARIES_DBG NAMES
     #        libMyGUIEngine_d${CMAKE_SHARED_LIBRARY_SUFFIX}
     #        HINTS
-    #        ${MYGUI_LIB_DIR}
+    #        ${MYGUISDK}
     #        PATH_SUFFIXES "" debug )
-    #
+    
     #    make_library_set ( MYGUI_LIBRARIES )
-    #
+    
     #    MESSAGE ("${MYGUI_LIBRARIES}")
     #ENDIF(MINGW)
 
@@ -62,25 +62,27 @@ IF (WIN32) #Windows
         
         if ( MINGW )
             set(LIB_PREFIX "lib")
-            set(LIB_EXT ${CMAKE_SHARED_LIBRARY_SUFFIX})
+            set(LIB_EXT ".a")
+            set(LIB_EXT2 ".dll")
         else ( MINGW )
             set(LIB_PREFIX "")
             set(LIB_EXT ".lib")
+            set(LIB_EXT "")
         endif ( MINGW )
 
         
 
-        find_library ( MYGUI_LIBRARIES_REL NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_DBG NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        find_library ( MYGUI_LIBRARIES_REL NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}${LIB_EXT2}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_DBG NAMES ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${LIB_EXT2}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
         find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
         find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}_d${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
 
-        MESSAGE(STATUS ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX})
+        MESSAGE(STATUS ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${LIB_EXT})
 
         make_library_set ( MYGUI_LIBRARIES )
         make_library_set ( MYGUI_LIBRARIES_OGRE )
 
-        set (MYGUI_LIBRARIES ${MYGUI_LIBRARIES} ${MYGUI_LIBRARIES_OGRE})        
+        set (MYGUI_LIBRARIES ${MYGUI_LIBRARIES_OGRE} ${MYGUI_LIBRARIES})        
 
         MESSAGE ("${MYGUI_LIBRARIES} ${MYGUI_LIBRARIES_OGRE}")
 

@@ -37,7 +37,7 @@ namespace Engine {
 
 			bool Observable::isMaster() const
 			{
-				return mParent->topLevel()->isMaster();
+				return !mParent->topLevel() || mParent->topLevel()->isMaster();
 			}
 
 		

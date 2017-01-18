@@ -11,7 +11,7 @@ namespace Engine {
 			using Window::Window;
 			virtual ~TextureDrawer() = default;
 			
-			virtual void setTexture(Ogre::TexturePtr &tex) = 0;
+			virtual void setTexture(const Ogre::TexturePtr &tex) = 0;
 			inline void clearTexture() {
 				setTexture(Ogre::TexturePtr());
 			}

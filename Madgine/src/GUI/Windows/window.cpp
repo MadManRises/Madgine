@@ -85,6 +85,11 @@ namespace Engine {
 			mContainer->hide();
 		}
 
+		void Window::setVisible(bool b)
+		{
+			mContainer->setVisible(b);
+		}
+
 		void Window::setEnabled(bool b)
 		{
 			mContainer->setEnabled(b);

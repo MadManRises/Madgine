@@ -22,11 +22,6 @@ public:
 
     virtual void update(float timeSinceLastFrame);
 
-	virtual void onSceneLoad() override;
-	virtual void beforeSceneClear() override;
-	virtual void onSceneClear() override;
-
-
 protected:
     virtual void onMouseMove(GUI::MouseEventArgs &me);
 

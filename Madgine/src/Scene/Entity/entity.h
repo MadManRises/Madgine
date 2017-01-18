@@ -52,6 +52,7 @@ public:
 	void setObjectVisible(bool b);
 
 	void setPosition(const Ogre::Vector3 &v);
+	void translate(const Ogre::Vector3 &v);
 	void rotate(const Ogre::Quaternion &q);
 
     void onLoad();
@@ -146,7 +147,7 @@ private:
     
     Ogre::Vector3 mLastPosition;
 
-	Serialize::ObservableSet<Ogre::unique_ptr<BaseEntityComponent>, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
+	Serialize::ObservableSet<Ogre::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
     //std::set<Ogre::unique_ptr<BaseEntityComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){

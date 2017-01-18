@@ -34,6 +34,7 @@ namespace Engine {
 			void hideModal();
 			void show();
 			void hide();
+			void setVisible(bool b);
 
 			void setEnabled(bool b);
 

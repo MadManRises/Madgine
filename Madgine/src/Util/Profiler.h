@@ -14,8 +14,8 @@ namespace Engine {
 				mAccumulatedDuration(this, 0),
 				mRecordIndex(0),
 				mBuffer(),
-				mParent(parent),
-				mChildren(this)
+				mChildren(this),
+				mParent(parent)
 			{
 				mAccumulatedDuration.setCondition(condition);
 			}
@@ -43,7 +43,7 @@ namespace Engine {
 			size_t mRecordIndex;
 			std::array<size_t, 20> mBuffer;
 
-			Serialize::ObservableMap<ProcessStats, std::function<bool()>, ProcessStats*> mChildren;
+			Serialize::ObservableMap<ProcessStats, Serialize::ContainerPolicy::masterOnly, std::function<bool()>, ProcessStats*> mChildren;
 
 			ProcessStats *mParent;
 
@@ -63,7 +63,7 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			Serialize::ObservableMap<ProcessStats, std::function<bool()>> mProcesses;
+			Serialize::ObservableMap<ProcessStats, Serialize::ContainerPolicy::masterOnly, std::function<bool()>> mProcesses;
 			
 			ProcessStats *mCurrent;
 

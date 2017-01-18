@@ -165,6 +165,11 @@ namespace Engine {
 				mWindow->setVisible(false);
 			}
 
+			void MyGUIWindow::setVisible(bool b)
+			{
+				mWindow->setVisible(b);
+			}
+
 			void MyGUIWindow::activate()
 			{
 				MyGUI::InputManager::getInstance().setKeyFocusWidget(mWindow);

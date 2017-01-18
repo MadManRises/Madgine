@@ -27,6 +27,7 @@ public:
 	virtual void hideModal() = 0;
 	virtual void show() = 0;
 	virtual void hide() = 0;
+	virtual void setVisible(bool b) = 0;
 
 	virtual void setEnabled(bool b) = 0;
 

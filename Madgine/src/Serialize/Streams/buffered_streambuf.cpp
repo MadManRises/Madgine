@@ -6,6 +6,8 @@
 namespace Engine {
 namespace Serialize {
 
+	constexpr size_t buffered_streambuf::BUFFER_SIZE;
+
 /*pos_type FileBufferReader::seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode mode)
 {
 	if (mode & std::ios_base::in) {

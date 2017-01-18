@@ -15,7 +15,7 @@ namespace Engine {
 
 			static constexpr const bool sorted = false;
 		protected:
-			typedef std::list<Type> NativeContainer;
+			typedef std::list<typename UnitHelper<T>::Type> NativeContainer;
 			typedef typename NativeContainer::iterator iterator;
 			typedef typename NativeContainer::const_iterator const_iterator;
 
@@ -38,17 +38,23 @@ namespace Engine {
 		template <class T, class Creator>
 		class SerializableListImpl : public SerializableContainer<std::list<T>, Creator> {
 		public:
-			using SerializableContainer::SerializableContainer;
+			using SerializableContainer<std::list<T>, Creator>::SerializableContainer;
+
+			typedef typename SerializableContainer<std::list<T>, Creator>::iterator iterator;
+			typedef typename SerializableContainer<std::list<T>, Creator>::const_iterator const_iterator;
 		};
 
-		template <class T, class Creator>
-		class ObservableListImpl : public ObservableContainer<SerializableListImpl<T, Creator>> {
+		template <class T, class Creator, const _ContainerPolicy &Config>
+		class ObservableListImpl : public ObservableContainer<SerializableListImpl<T, Creator>, Config> {
 		public:
-			using ObservableContainer::ObservableContainer;
+			using ObservableContainer<SerializableListImpl<T, Creator>, Config>::ObservableContainer;
+
+			typedef typename ObservableContainer<SerializableListImpl<T, Creator>, Config>::iterator iterator;
+			typedef typename ObservableContainer<SerializableListImpl<T, Creator>, Config>::const_iterator const_iterator;
 
 			template <class... _Ty>
 			void emplace_back_safe(std::function<void(const iterator &)> callback, _Ty&&... args) {
-				insert_where_safe(callback, end(), std::forward<_Ty>(args)...);
+				insert_where_safe(callback, this->end(), std::forward<_Ty>(args)...);
 			}
 
 		protected:
@@ -68,7 +74,7 @@ namespace Engine {
 			using C::C;
 
 			void remove(const Type &item) {
-				for (const_iterator it = begin(); it != end();) {
+				for (const_iterator it = this->begin(); it != this->end();) {
 					if (*it == item) {
 						it = erase(it);
 					}
@@ -80,12 +86,12 @@ namespace Engine {
 			}
 
 			void push_back(const Type &item) {
-				insert_where(end(), item);
+				insert_where(this->end(), item);
 			}
 
 			template <class... _Ty>
 			iterator emplace_back(_Ty&&... args) {
-				return insert_where(end(), std::forward<_Ty>(args)...);
+				return this->insert_where(this->end(), std::forward<_Ty>(args)...);
 			}
 
 			
@@ -96,7 +102,7 @@ namespace Engine {
 			}
 
 			size_t size() const {
-				return mData.size();
+				return this->mData.size();
 			}
 
 		
@@ -106,8 +112,8 @@ namespace Engine {
 		template <class T, class... Args>
 		using SerializableList = ListImpl<SerializableListImpl<T, Creator<Args...>>>;
 
-		template <class T, class... Args>
-		using ObservableList = ListImpl<ObservableListImpl<T, Creator<Args...>>>;
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		using ObservableList = ListImpl<ObservableListImpl<T, Creator<Args...>, Config>>;
 
 
 	}

@@ -63,7 +63,7 @@ namespace Engine {
 
 		std::tuple<RefScopeTopLevelSerializableUnit*> RefScopeTopLevelSerializableUnit::createRefScopeImpl()
 		{
-			return{ this };
+			return std::make_tuple(this);
 		}
 
 	}

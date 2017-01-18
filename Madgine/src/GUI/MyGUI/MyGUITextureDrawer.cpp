@@ -29,7 +29,7 @@ namespace Engine {
 			}
 
 
-			void MyGUITextureDrawer::setTexture(Ogre::TexturePtr &tex)
+			void MyGUITextureDrawer::setTexture(const Ogre::TexturePtr &tex)
 			{
 				mTextureDrawer->setImageTexture(tex.isNull() ? "" : tex->getName());
 			}

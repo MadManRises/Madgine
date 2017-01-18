@@ -127,6 +127,11 @@ void Entity::setPosition(const Ogre::Vector3 &v)
     mNode->setPosition(v);
 }
 
+void Entity::translate(const Ogre::Vector3 & v)
+{
+	mNode->translate(v);
+}
+
 void Entity::rotate(const Ogre::Quaternion &q)
 {
     mNode->rotate(q);
@@ -228,7 +233,7 @@ std::tuple<std::unique_ptr<BaseEntityComponent>> Entity::createComponent(const s
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
 		throw ComponentException(Database::Exceptions::unknownComponent(name));
-	return (this->*(it->second))();
+	return std::make_tuple((this->*(it->second))());
 }
 
 BaseEntityComponent *Entity::addComponentImpl(Ogre::unique_ptr<BaseEntityComponent> &&component)

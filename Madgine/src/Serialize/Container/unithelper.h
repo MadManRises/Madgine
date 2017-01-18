@@ -25,6 +25,15 @@ namespace Engine {
 			}
 		};
 
+		template <class T, class To, class _ = std::enable_if_t<std::is_enum<T>::value>>
+		To &enum_cast(T &t) {
+			return (To&)t;
+		}
+
+		template <class T, class To, class _ = std::enable_if_t<!std::is_enum<T>::value>>
+		T &enum_cast(T &t) {
+			return t;
+		}
 
 		template <class T, bool b = isValueType<T>::value>
 		struct UnitHelper{
@@ -43,11 +52,11 @@ namespace Engine {
 			}
 
 			static void read_state(SerializeInStream &in, T &item) {
-				in >> item;
+				in >> enum_cast<T, int>(item);
 			}
 
 			static void write_state(SerializeOutStream &out, const T &item) {
-				out << item;
+				out << enum_cast<const T, const int>(item);
 			}
 
 			static bool filter(SerializeOutStream &out, const T &item) {
@@ -282,7 +291,7 @@ namespace Engine {
 
 			static bool filter(SerializeOutStream &out, const Type &item) {
 				return UnitHelper<U>::filter(out, item.first) &&
-						UnitHelper<V>::filter(out, item.second);
+					   UnitHelper<V>::filter(out, item.second);
 			}
 
 			static void applyMap(const std::map<InvPtr, SerializableUnit*> &map, Type &item) {

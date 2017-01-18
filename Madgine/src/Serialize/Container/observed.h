@@ -33,12 +33,12 @@ namespace Engine {
 				}
 
 				virtual void readRequest(BufferedInOutStream &in) override {
-					read_state(in, this->mData);
+					this->read_state(in, this->mData);
 					notify();
 				}
 
 				virtual void readAction(BufferedInOutStream &in) override {
-					read_state(in, this->mData);
+					this->read_state(in, this->mData);
 					notify();
 				}
 
@@ -55,7 +55,7 @@ namespace Engine {
 					Serialized<T>::notify();
 					if (!mCondition || mCondition()) {
 						for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-							write_state(*out, this->mData);
+							this->write_state(*out, this->mData);
 							out->endMessage();
 						}
 					}

@@ -40,7 +40,7 @@ public:
 
 	//void writeHeader(SerializeOutStream &out, bool isAction);	
 
-	virtual TopLevelMadgineObject type();
+	virtual TopLevelMadgineObject topLevelType();
 	
 
 private:

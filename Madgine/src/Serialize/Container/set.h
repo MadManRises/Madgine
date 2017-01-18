@@ -156,8 +156,8 @@ namespace Engine {
 		public:
 			static constexpr const bool sorted = true;
 		protected:
-			typedef typename SetIterator<Type> iterator;
-			typedef typename SetConstIterator<Type> const_iterator;
+			typedef SetIterator<typename UnitHelper<T>::Type> iterator;
+			typedef SetConstIterator<typename UnitHelper<T>::Type> const_iterator;
 
 
 			
@@ -173,7 +173,7 @@ namespace Engine {
 
 
 		protected:
-			std::set<KeyHolder<Type>> mData;
+			std::set<KeyHolder<typename UnitHelper<T>::Type>> mData;
 
 		};
 
@@ -181,45 +181,48 @@ namespace Engine {
 		template <class T, class... Args>
 		class SerializableSet : public SerializableContainer<std::set<T>, Creator<Args...>> {
 		public:
-			using SerializableContainer::SerializableContainer;
+			using SerializableContainer<std::set<T>, Creator<Args...>>::SerializableContainer;
 
 			typedef typename KeyHolder<T>::KeyType KeyType;
 
+			typedef typename SerializableContainer<std::set<T>, Creator<Args...>>::iterator iterator;
+			typedef typename SerializableContainer<std::set<T>, Creator<Args...>>::const_iterator const_iterator;
+
 			iterator find(const T &item) {
-				return std::find(begin(), end(), item);
+				return std::find(this->begin(), this->end(), item);
 			}
 
 			const_iterator find(const T &item) const {
-				return std::find(begin(), end(), item);
+				return std::find(this->begin(), this->end(), item);
 			}
 
 			bool contains(const T &item) const {
-				return find(item) != end();
+				return find(item) != this->end();
 			}
 
 			iterator find(const KeyType &key) {				
-				for (iterator it = begin(); it != end(); ++it) {
+				for (iterator it = this->begin(); it != this->end(); ++it) {
 					if (it.key() == key)
 						return it; ////TODO  O(log(n))
 				}
-				return end();
+				return this->end();
 			}
 
 			bool contains(const KeyType &key) {
-				return find(key) != end();
+				return find(key) != this->end();
 			}
 
 			template <class... _Ty>
 			iterator emplace(_Ty&&... args) {
-				return insert_where(end(), std::forward<_Ty>(args)...);
+				return this->insert_where(this->end(), std::forward<_Ty>(args)...);
 			}
 
 		};
 
-		template <class T, class... Args>
-		class ObservableSet : public ObservableContainer<SerializableSet<T, Args...>> {
+		template <class T, const _ContainerPolicy &Config, class... Args>
+		class ObservableSet : public ObservableContainer<SerializableSet<T, Args...>, Config> {
 		public:
-			using ObservableContainer::ObservableContainer;
+			using ObservableContainer<SerializableSet<T, Args...>, Config>::ObservableContainer;
 
 		};
 

@@ -2,7 +2,7 @@
 
 #include "networkmanager.h"
 
-//#include <WinSock2.h>
+#include <WinSock2.h>
 #include <WS2tcpip.h>
 
 #include "Serialize\serializemanager.h"
@@ -20,13 +20,13 @@ namespace Engine {
 			if (sManagerCount == 0) {
 				WSADATA w;
 
-				int error = WSAStartup(WINSOCK_VERSION, &w);
+				int error = WSAStartup(MAKEWORD(2, 2), &w);
 
 				if (error) {
 					throw 0;
 				}
 
-				if (w.wVersion != WINSOCK_VERSION)
+				if (w.wVersion != MAKEWORD(2, 2))
 				{
 					WSACleanup();
 					throw 0;
@@ -93,7 +93,7 @@ namespace Engine {
 
 			target.sin_family = AF_INET; // address family Internet
 			target.sin_port = htons(portNr); //Port to connect on
-			inet_pton(AF_INET, url.c_str(), &target.sin_addr);
+			target.sin_addr.s_addr = inet_addr(url.c_str());
 			
 			mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 			if (mSocket == INVALID_SOCKET)
