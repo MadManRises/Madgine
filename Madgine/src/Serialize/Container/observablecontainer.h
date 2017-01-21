@@ -57,8 +57,8 @@ namespace Engine {
 
 			template <class P, class... _Ty>
 			ObservableContainer(P *parent, ArgsTuple(P::*factory)(_Ty...)) :
-				Observable(parent),
 				C(parent, factory),
+				Observable(parent),
 				mTransactionCounter(0)
 			{
 			}

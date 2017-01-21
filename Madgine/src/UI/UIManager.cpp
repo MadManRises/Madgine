@@ -17,9 +17,9 @@ namespace Engine {
 
 
 		UIManager::UIManager(GUI::GUISystem *gui) :
-			mKeepingCursorPos(false),
+			mCurrentRoot(0),
 			mGUI(gui),
-			mCurrentRoot(0)
+			mKeepingCursorPos(false)			
 		{
 
 			//Register as a Window listener

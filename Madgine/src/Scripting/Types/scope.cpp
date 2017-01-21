@@ -27,8 +27,8 @@ const std::map<std::string, Scope::NativeMethod> Scope::mBoundNativeMethods = {
 };
 
 Scope::Scope() :
-	mPrototype(0),
 	mPrototypeName(this),
+	mPrototype(0),	
 	mVariables(this)
 {
 

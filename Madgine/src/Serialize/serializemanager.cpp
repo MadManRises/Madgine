@@ -17,9 +17,9 @@ namespace Engine {
 
 
 		SerializeManager::SerializeManager() :
-			mRunningId(0),
+			mReceivingMasterState(false),			
 			mSlaveStream(0),
-			mReceivingMasterState(false)
+			mRunningId(0)			
 		{
 		}
 

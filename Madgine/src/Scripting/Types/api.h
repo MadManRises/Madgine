@@ -153,6 +153,7 @@ namespace Engine {
 			};
 
 
+
 			template <class... _F>
 			static auto _type(_F... f) {
 				using Type = TypeCatcher<_F...>;

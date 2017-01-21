@@ -11,9 +11,9 @@ namespace Scripting {
 
 
 	ScriptingManager::ScriptingManager(Parsing::ScriptParser *scriptParser) :
-		mScriptParser(scriptParser),
-		mGlobalScope(scriptParser),
-		RefScopeTopLevelSerializableUnit(Serialize::SCRIPTING_MANAGER)
+		RefScopeTopLevelSerializableUnit(Serialize::SCRIPTING_MANAGER),
+		mGlobalScope(scriptParser),	
+		mScriptParser(scriptParser)
 	{
 		Ogre::LogManager::getSingleton().createLog("Scripting.log");
 		mGlobalScope.addAPI(this);

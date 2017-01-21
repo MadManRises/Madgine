@@ -11,10 +11,10 @@ namespace Statements {
 
 
 Assignment::Assignment(int line, const std::string &varName, const std::string &op,
-                       Ogre::unique_ptr<const Statement> &&value):
+                       Ogre::unique_ptr<const Statement> &&value) :
+	Statement(line),
     mVarName(varName),
-    mValue(std::forward<Ogre::unique_ptr<const Statement>>(value)),
-	Statement(line)
+    mValue(std::forward<Ogre::unique_ptr<const Statement>>(value))	
 {
     if (varName == "my") throw ScriptingException(
             Database::Exceptions::reservedKeyword("my"));

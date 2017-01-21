@@ -9,10 +9,10 @@ namespace Engine {
 
 
 		RefScopeTopLevelSerializableUnit::RefScopeTopLevelSerializableUnit(Serialize::TopLevelMadgineObject type) :
+			TopLevelSerializableUnit(type),
 			mVectors(this, &RefScopeTopLevelSerializableUnit::createRefScopeImpl),
 			mStructs(this, &RefScopeTopLevelSerializableUnit::createRefScopeImpl),
-			mLists(this, &RefScopeTopLevelSerializableUnit::createRefScopeImpl),
-			TopLevelSerializableUnit(type)
+			mLists(this, &RefScopeTopLevelSerializableUnit::createRefScopeImpl)			
 		{
 		}
 

@@ -10,9 +10,9 @@ namespace Statements {
 
 MethodCall::MethodCall(int line, const std::string &methodName,
                        std::list<Ogre::unique_ptr<const Statement>> &&arguments) :
-    mMethodName(methodName),
-    mArguments(std::forward<std::list<Ogre::unique_ptr<const Statement>>>(arguments)),
-	Statement(line)
+	Statement(line),
+	mMethodName(methodName),
+    mArguments(std::forward<std::list<Ogre::unique_ptr<const Statement>>>(arguments))	
 {
 
 }

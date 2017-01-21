@@ -32,6 +32,7 @@ namespace Scene {
 
 
 SceneManager::SceneManager(Ogre::Root *root) :
+	RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER),
     mRoot(root),
     mSceneMgr(0),
     mTerrainGlobals(0),
@@ -39,8 +40,7 @@ SceneManager::SceneManager(Ogre::Root *root) :
     mVp(0),
     mRenderTexture(0),
 	mTerrainRayQuery(0),
-	mEntities(this, &SceneManager::createEntityData),
-	RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER)
+	mEntities(this, &SceneManager::createEntityData)	
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);

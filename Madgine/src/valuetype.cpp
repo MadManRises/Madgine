@@ -33,8 +33,8 @@ ValueType::ValueType(const ValueType &other) :
 }
 
 ValueType::ValueType(ValueType &&other) :
-    mUnion(other.mUnion),
-    mType(other.mType)
+    mType(other.mType),
+	mUnion(other.mUnion)
 {
     other.mType = Type::NullValue;
 }

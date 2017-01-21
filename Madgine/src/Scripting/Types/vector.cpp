@@ -12,9 +12,9 @@ namespace Engine {
 
 API_IMPL(Vector, &contains, &at, &setAt, &size, &index);
 
-Vector::Vector(RefScopeTopLevelSerializableUnit * topLevel) :
-	mItems(this),
-	ScopeImpl(topLevel)
+Vector::Vector(RefScopeTopLevelSerializableUnit * topLevel) :	
+	ScopeImpl(topLevel),
+	mItems(this)
 {
 }
 
