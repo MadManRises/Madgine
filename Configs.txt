@@ -1,3 +1,0 @@
-Visual Studio 2015 (64-bit) | -G"Visual Studio 14 2015 Win64"
-MinGW | -G"MinGW Makefiles"
-Android | -DCMAKE_SYSTEM_NAME=Android   -DCMAKE_SYSTEM_VERSION=19   -DCMAKE_ANDROID_ARCH_ABI=x86  -DCMAKE_ANDROID_NDK=C:/android-ndk-r13b   -DCMAKE_ANDROID_STL_TYPE=gnustl_static -G"MinGW Makefiles" 
