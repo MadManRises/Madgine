@@ -167,9 +167,9 @@ namespace Engine {
 		void WindowContainer::buildHierarchy()
 		{
 			assert(mChildren.empty());
-			for (WindowContainer *w : buildChildren()) {
+			buildChildren();
+			for (WindowContainer *w : mChildren) {
 				w->buildHierarchy();
-				mChildren.push_back(w);
 			}
 		}
 
@@ -181,6 +181,11 @@ namespace Engine {
 				mImpl->invalidate();
 			while (!mChildren.empty())
 				destroyChild(mChildren.front());
+		}
+
+		void WindowContainer::addChild(WindowContainer * child)
+		{
+			mChildren.push_back(child);
 		}
 
 	}

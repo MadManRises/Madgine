@@ -35,7 +35,7 @@ namespace Engine {
 				mViewport = window->addViewport(mCamera);
 
 				mPlatform = new MyGUI::OgrePlatform;
-				mPlatform->initialise(window, sceneMgr);
+				mPlatform->initialise(window, sceneMgr, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 			}
 
 			MyGUILauncher::~MyGUILauncher()

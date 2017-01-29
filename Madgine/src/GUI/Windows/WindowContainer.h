@@ -89,7 +89,8 @@ protected:
 	virtual WindowContainer *createChildWindow(const std::string &name, Class _class, const std::string &customSkin = "") = 0;
 	virtual WindowContainer *loadLayoutWindow(const std::string &name) = 0;
 
-	virtual std::list<WindowContainer*> buildChildren() = 0;
+	virtual void buildChildren() = 0;
+	void addChild(WindowContainer *child);
 
 private:
 	

@@ -67,7 +67,7 @@ namespace Engine {
 				// Inherited via WindowContainer
 				virtual WindowContainer * createChildWindow(const std::string & name, Class _class, const std::string &customSkin = "") override;
 
-				virtual std::list<WindowContainer*> buildChildren() override;
+				virtual void buildChildren() override;
 
 				void needMouse();
 			

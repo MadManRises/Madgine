@@ -285,21 +285,17 @@ namespace Engine {
 					LOG_ERROR(Database::Exceptions::loadLayoutFailure(name));
 					return 0;
 				}
-				MyGUI::Widget *w = widgets.front();
-				w->setVisible(false);
-				WindowContainer *result = new MyGUIWindow(w, mGui, this);
+				WindowContainer *result = new MyGUIWindow(widgets.front(), mGui, this);
 				result->buildHierarchy();
 				return result;
 			}
 
-			std::list<WindowContainer*> MyGUIWindow::buildChildren()
-			{
-				std::list<WindowContainer*> result;
+			void MyGUIWindow::buildChildren()
+			{				
 				MyGUI::Widget *w = mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow;
 				for (size_t i = 0; i < w->getChildCount(); ++i) {
-					result.push_back(new MyGUIWindow(w->getChildAt(i), mGui, this));
-				}
-				return result;
+					addChild(new MyGUIWindow(w->getChildAt(i), mGui, this));
+				}				
 			}
 
 			void MyGUIWindow::needMouse()
