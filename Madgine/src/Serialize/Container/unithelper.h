@@ -25,16 +25,6 @@ namespace Engine {
 			}
 		};
 
-		template <class T, class To, class _ = std::enable_if_t<std::is_enum<T>::value>>
-		To &enum_cast(T &t) {
-			return (To&)t;
-		}
-
-		template <class T, class To, class _ = std::enable_if_t<!std::is_enum<T>::value>>
-		T &enum_cast(T &t) {
-			return t;
-		}
-
 		template <class T, bool b = isValueType<T>::value>
 		struct UnitHelper{
 
@@ -52,11 +42,11 @@ namespace Engine {
 			}
 
 			static void read_state(SerializeInStream &in, T &item) {
-				in >> enum_cast<T, int>(item);
+				in >> item;
 			}
 
 			static void write_state(SerializeOutStream &out, const T &item) {
-				out << enum_cast<const T, const int>(item);
+				out << item;
 			}
 
 			static bool filter(SerializeOutStream &out, const T &item) {

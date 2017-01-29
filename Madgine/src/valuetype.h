@@ -59,10 +59,10 @@ namespace Engine {
 	};
 
 	template <class T>
-	using isValueType = _isValueType<std::remove_const_t<T>>;
+	struct isValueType {
+		const constexpr static bool value = _isValueType<std::remove_const_t<T>>::value || std::is_enum<T>::value;
+	};
 
-	template <class T>
-	using enableValueType = std::enable_if_t<isValueType<std::remove_reference_t<T>>::value, T>;
 
 class MADGINE_EXPORT ValueType {
 public:
@@ -158,16 +158,21 @@ public:
 
 
     template <class T>
-    std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> as() const;
+    std::enable_if_t<!std::is_class<T>::value && _isValueType<T>::value, T> as() const;
 
     template <class T>
-    std::enable_if_t<std::is_class<T>::value, enableValueType<const T&>> as() const;
+    std::enable_if_t<std::is_class<T>::value && _isValueType<T>::value, const T&> as() const;
+
+	template <class T>
+	std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, T> as() const {
+		return static_cast<T>(as<int>());
+	}
 
     template <class T>
-	std::enable_if_t<!std::is_class<T>::value, enableValueType<T>> asDefault(T defaultValue);
+	std::enable_if_t<!std::is_class<T>::value && _isValueType<T>::value, T> asDefault(T defaultValue);
 
     template <class T>
-	std::enable_if_t<std::is_class<T>::value, enableValueType<const T &>> asDefault(const T &defaultValue);
+	std::enable_if_t<std::is_class<T>::value && _isValueType<T>::value, const T &> asDefault(const T &defaultValue);
 
 private:
 	enum class Type : unsigned char {
