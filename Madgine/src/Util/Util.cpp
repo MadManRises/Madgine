@@ -6,9 +6,10 @@
 namespace Engine {
 	namespace Util {
 
-		Util::Util() :
+		Util::Util(Ogre::RenderWindow *window) :
 			TopLevelSerializableUnit(Serialize::UTIL),
-			mProfiler(this)
+			mProfiler(this),
+			mStats(this, window)
 		{
 			UtilMethods::setup();
 		}
@@ -16,6 +17,12 @@ namespace Engine {
 		Profiler * Util::profiler()
 		{
 			return mProfiler.ptr();
+		}
+
+		void Util::update()
+		{
+			mProfiler->update();
+			mStats->update();
 		}
 
 	}

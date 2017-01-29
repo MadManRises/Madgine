@@ -10,7 +10,7 @@ namespace Engine {
 		
 		class MADGINE_EXPORT UtilMethods : public Ogre::Singleton<UtilMethods>{
 		public:
-			static void setup();
+			static void setup(Ogre::Log *log = 0);
 			
 			static void log(const std::string &msg, Ogre::LogMessageLevel lvl, const std::list<TraceBack> &traceBack = {});
 			

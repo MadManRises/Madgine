@@ -93,6 +93,8 @@ void Application::setup(const AppSettings &settings)
 
 	mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
+	mUtil = OGRE_NEW Util::Util(mWindow);
+
 	_setup();
 
 }
@@ -147,7 +149,7 @@ bool Application::frameStarted(const Ogre::FrameEvent & fe)
 	if (mWindow->isClosed() || mShutDown)
 		return false;
 
-	mUtil->profiler()->update();
+	mUtil->update();
 	mUtil->profiler()->startProfiling("Frame");
 	mUtil->profiler()->startProfiling("PreRender");
 
@@ -259,8 +261,6 @@ void Application::_setupOgre()
 	mRoot = OGRE_NEW Ogre::Root(mSettings->mPluginsFile); // Creating Root
 
 	mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
-
-	mUtil = OGRE_NEW Util::Util;
 
 }
 

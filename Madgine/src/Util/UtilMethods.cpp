@@ -11,8 +11,13 @@ namespace Engine {
 		const std::string UtilMethods::sLogFileName = "Madgine.log";
 		Ogre::Log *UtilMethods::sLog = 0;
 
-		void UtilMethods::setup() {
-			sLog = Ogre::LogManager::getSingleton().createLog(sLogFileName);
+		void UtilMethods::setup(Ogre::Log *log) {
+			if (log) {
+				sLog = log;
+			}
+			else {
+				sLog = Ogre::LogManager::getSingleton().createLog(sLogFileName);
+			}
 			sLog->setLogDetail(Ogre::LL_BOREME);
 		}
 

@@ -46,7 +46,7 @@ FolderSources(sources "" src forward.h madginelib.h Ogrememory.h singletonimpl.h
 		FolderSources(sources Serialize Container action.h basecontainer.h container.h creationhelper.h list.h map.h observed.h observablecontainer.h serializablecontainer.h serialized.h set.h sortedcontainer.h unithelper.h unsortedcontainer.h vector.h)
 		FolderSources(sources Serialize Streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h OgreStreamReader.cpp OgreStreamReader.h serializestream.cpp serializestream.h)
 	FolderSources(sources src UI gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h Process.cpp Process.h ProcessListener.h UIManager.cpp UIManager.h windownames.h)
-	FolderSources(sources src Util MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h Profiler.cpp Profiler.h Traceback.h Util.cpp Util.h UtilMethods.cpp UtilMethods.h)
+	FolderSources(sources src Util AppStats.cpp AppStats.h MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h Profiler.cpp Profiler.h Traceback.h Util.cpp Util.h UtilMethods.cpp UtilMethods.h)
 
 include_directories(${MADGINE_SOURCE_DIR}/src)
 
