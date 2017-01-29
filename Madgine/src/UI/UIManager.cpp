@@ -21,10 +21,6 @@ namespace Engine {
 			mGUI(gui),
 			mKeepingCursorPos(false)			
 		{
-
-			//Register as a Window listener
-			
-
 		}
 
 		UIManager::~UIManager()
