@@ -9,7 +9,15 @@ namespace Engine {
 		class CreationHelper;
 
 		template <class... Args>
-		using Creator =	CreationHelper<all_of<_isValueType<Args>::value...>::value, Args...>;		
+		struct _CreationHelper {
+			typedef CreationHelper<all_of<_isValueType<Args>::value...>::value, Args...> type;
+		};
+
+
+		template <class... Args>
+		using Creator = typename _CreationHelper<Args...>::type;
+		
+
 
 
 		template <class... Args>
