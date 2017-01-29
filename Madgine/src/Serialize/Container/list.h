@@ -14,10 +14,10 @@ namespace Engine {
 		public:
 
 			static constexpr const bool sorted = false;
-		protected:
-			typedef std::list<typename UnitHelper<T>::Type> NativeContainer;
-			typedef typename NativeContainer::iterator iterator;
-			typedef typename NativeContainer::const_iterator const_iterator;
+		//protected:
+			typedef std::list<typename UnitHelper<T>::Type> NativeContainerType;
+			typedef typename NativeContainerType::iterator iterator;
+			typedef typename NativeContainerType::const_iterator const_iterator;
 
 
 			
@@ -31,7 +31,7 @@ namespace Engine {
 			}
 
 		protected:
-			NativeContainer mData;
+			NativeContainerType mData;
 
 		};
 

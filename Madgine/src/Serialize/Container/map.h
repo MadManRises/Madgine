@@ -13,10 +13,10 @@ namespace Engine {
 		class BaseContainer<std::map<std::string, T>> : protected UnitHelper<std::pair<const std::string, T>> {
 		public:
 			static constexpr const bool sorted = true;
-		protected:
-			typedef std::map<std::string, typename UnitHelper<T>::Type> NativeContainer;
-			typedef typename NativeContainer::iterator iterator;
-			typedef typename NativeContainer::const_iterator const_iterator;
+		//protected:
+			typedef std::map<std::string, typename UnitHelper<T>::Type> NativeContainerType;
+			typedef typename NativeContainerType::iterator iterator;
+			typedef typename NativeContainerType::const_iterator const_iterator;
 
 
 			template <class K, class... _Ty>
@@ -24,7 +24,7 @@ namespace Engine {
 				return mData.emplace_hint(where, std::piecewise_construct, std::forward_as_tuple(std::forward<K>(key)), std::forward_as_tuple(std::forward<_Ty>(args)...));
 			}
 
-			NativeContainer mData;
+			NativeContainerType mData;
 		};
 
 

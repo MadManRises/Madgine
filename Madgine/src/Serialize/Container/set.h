@@ -155,7 +155,7 @@ namespace Engine {
 		class BaseContainer<std::set<T>> : protected UnitHelper<T> {
 		public:
 			static constexpr const bool sorted = true;
-		protected:
+		//protected:
 			typedef SetIterator<typename UnitHelper<T>::Type> iterator;
 			typedef SetConstIterator<typename UnitHelper<T>::Type> const_iterator;
 
