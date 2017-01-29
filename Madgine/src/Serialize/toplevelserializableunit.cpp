@@ -53,6 +53,11 @@ namespace Serialize {
 		return nullptr;
 	}
 
+	SerializeManager * TopLevelSerializableUnit::getSlaveManager()
+	{
+		return mSlaveManager;
+	}
+
 bool TopLevelSerializableUnit::addManager(SerializeManager * mgr)
 {
 	if (mgr->isMaster()) {

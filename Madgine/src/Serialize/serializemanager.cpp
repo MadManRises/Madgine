@@ -10,6 +10,7 @@
 
 #include "Streams/bufferedstream.h"
 
+#include "serializeexception.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -25,6 +26,11 @@ namespace Engine {
 
 		SerializeManager::~SerializeManager()
 		{
+			auto it = mSerializableItems.begin();
+			while (it != mSerializableItems.end()) {
+				it->second->clearMasterId();
+				it = mSerializableItems.erase(it);
+			}
 			for (std::pair<const TopLevelMadgineObject, TopLevelSerializableUnit*> &unit : mTopLevelUnits) {
 				unit.second->removeManager(this);
 			}
@@ -46,13 +52,13 @@ namespace Engine {
 						mReceivingMasterState = false;
 						break;
 					default:
-						throw 0;
+						throw SerializeException("Unknown Builtin Command-Code for SerializeManager: " + std::to_string(cmd));
 					}
 					return;
 				}
 				auto it = mTopLevelUnits.find(msg.mMadgineComponent);
 				if (it == mTopLevelUnits.end())
-					throw 0;
+					throw SerializeException("Unknown TopLevelUnit-Code: " + std::to_string(msg.mMadgineComponent));
 				object = it->second;
 			}
 			else {
@@ -70,7 +76,7 @@ namespace Engine {
 				object->applySerializableMap(mSerializableItems);
 				break;
 			default:
-				throw 0;
+				throw SerializeException("Invalid Message-Type: " + std::to_string(msg.mType));
 			}
 		}
 
@@ -82,6 +88,11 @@ namespace Engine {
 		void SerializeManager::addMapping(InvPtr id, SerializableUnit * item)
 		{
 			mSerializableItems[id] = item;
+		}
+
+		void SerializeManager::removeMapping(InvPtr id)
+		{
+			assert(mSerializableItems.erase(id) == 1);
 		}
 
 
@@ -121,6 +132,15 @@ namespace Engine {
 		void SerializeManager::removeTopLevelItem(TopLevelSerializableUnit * unit)
 		{
 			unit->removeManager(this);
+			auto it2 = mSerializableItems.begin();
+			while (it2 != mSerializableItems.end()) {
+				if (it2->second->topLevel() == unit) {
+					(it2++)->second->clearMasterId();
+				}
+				else {
+					++it2;
+				}
+			}
 			auto it = std::find_if(mTopLevelUnits.begin(), mTopLevelUnits.end(), [=](const std::pair<const TopLevelMadgineObject, TopLevelSerializableUnit*> &p) {return p.second == unit; });
 			if (it == mTopLevelUnits.end())
 				throw 0;
@@ -274,7 +294,12 @@ namespace Engine {
 
 		SerializableUnit * SerializeManager::convertPtr(SerializeInStream & in, InvPtr unit)
 		{
-			return &in != mSlaveStream ? reinterpret_cast<SerializableUnit*>(unit) : mSerializableItems.at(unit);
+			try {
+				return &in != mSlaveStream ? reinterpret_cast<SerializableUnit*>(unit) : mSerializableItems.at(unit);
+			}
+			catch (const std::out_of_range &) {
+				throw SerializeException("Unknown Unit-Id used! Possible binary mismatch!");
+			}
 		}
 
 
@@ -284,7 +309,12 @@ namespace Engine {
 
 
  			while (stream->isMessageAvailable()) {
-				readMessage(*stream);
+				try {
+					readMessage(*stream);
+				}
+				catch (const SerializeException &e) {
+					LOG_EXCEPTION(e);
+				}
 			}
 
 			return true;
@@ -309,10 +339,10 @@ namespace Engine {
 		void SerializeManager::onSlaveStreamRemoved(BufferedInOutStream * stream)
 		{
 			assert(mSlaveStream == stream);
-			auto it = mSerializableItems.begin();
-			while (it != mSerializableItems.end()) {
-				it->second->clearMasterId();
-				it = mSerializableItems.erase(it);
+			while (!mSerializableItems.empty()) {
+				size_t s = mSerializableItems.size();
+				mSerializableItems.begin()->second->clearMasterId();
+				assert(s > mSerializableItems.size());				
 			}
 			for (const std::pair<const TopLevelMadgineObject, TopLevelSerializableUnit *> &topLevel : mTopLevelUnits) {
 				topLevel.second->updateManagerType(this, true);

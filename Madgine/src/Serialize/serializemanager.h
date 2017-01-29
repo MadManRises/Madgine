@@ -18,6 +18,7 @@ namespace Engine {
 				const std::map<InvPtr, SerializableUnit*> &map();
 
 				void addMapping(InvPtr id, SerializableUnit *item);
+				void removeMapping(InvPtr id);
 
 				bool isMaster();
 

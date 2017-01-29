@@ -161,7 +161,7 @@ bool buffered_streambuf::receive()
 {
 	if (mMsgInBuffer && mBytesToRead == 0) {
 		if (gptr() != egptr()) {
-			std::cout << "Message not fully read!" << std::endl;
+			LOG_WARNING("Message not fully read!");
 		}
 		delete[] mRecBuffer;
 		mMsgInBuffer = false;

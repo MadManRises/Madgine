@@ -14,6 +14,8 @@ public:
 	std::list<BufferedOutStream *> getMasterMessageTargets(SerializableUnit *unit);
 	BufferedOutStream *getSlaveMessageTarget();
 
+	SerializeManager *getSlaveManager();
+
 	bool addManager(SerializeManager *mgr);
 	void removeManager(SerializeManager *mgr);
 

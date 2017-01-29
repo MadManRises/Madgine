@@ -11,6 +11,8 @@
 
 #include "observable.h"
 
+#include "serializeexception.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -22,7 +24,7 @@ namespace Serialize {
 
 SerializableUnit::~SerializableUnit()
 {
-
+	clearMasterId();
 }
 
 void SerializableUnit::writeState(SerializeOutStream & out) const
@@ -60,14 +62,24 @@ void SerializableUnit::readAction(BufferedInOutStream & in)
 {
 	int index;
 	in >> index;
-	mObservedValues.at(index)->readAction(in);
+	try {
+		mObservedValues.at(index)->readAction(in);
+	}
+	catch (const std::out_of_range &e) {
+		throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
+	}
 }
 
 void SerializableUnit::readRequest(BufferedInOutStream & in)
 {
 	int index;
 	in >> index;
-	mObservedValues.at(index)->readRequest(in);
+	try {
+		mObservedValues.at(index)->readRequest(in);
+	}
+	catch (const std::out_of_range &e) {
+		throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
+	}
 }
 
 int SerializableUnit::addObservable(Observable * val)
@@ -154,7 +166,10 @@ TopLevelSerializableUnit * SerializableUnit::topLevel()
 
 void SerializableUnit::clearMasterId()
 {
-	mMasterId = (InvPtr)0;
+	if (mMasterId != (InvPtr)0) {
+		mTopLevel->getSlaveManager()->removeMapping(mMasterId);
+		mMasterId = (InvPtr)0;
+	}
 }
 
 InvPtr SerializableUnit::masterId()
