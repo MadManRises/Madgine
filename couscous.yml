@@ -14,6 +14,9 @@ menu:
         gettingStarted:
             text: Getting Started
             relativeUrl: docs/gettingStarted.html
+        overview:
+            text: Overview
+            relativeUrl: docs/overview.html
         examples:
             text: Examples
             relativeUrl: docs/examples.html

@@ -15,7 +15,9 @@ Also atleast one of the following Libraries needs to be available:
 
 * [MyGUI](http://mygui.info/) Built with Ogre-support. Tested with version 3.2.2
 
-If you want to use the Maditor-IDE, the following libraries will also be neccessary (*Recommended*):
+
+*Recommended:*        
+If you want to use the Maditor-IDE, the following libraries will also be neccessary:
 
 * [Boost](.) vx.x or higher
 * [Qt5](.)
