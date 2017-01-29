@@ -40,6 +40,11 @@ void GuiHandlerBase::init()
 			LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
 			return;
 		}
+		else {
+			if (mType == WindowType::ROOT_WINDOW) {
+				window->hide();
+			}
+		}
     }
 	if (window)
 		Handler::init(window);
