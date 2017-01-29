@@ -32,6 +32,11 @@ Ogre::Vector2 BaseEntityComponent::getPosition2D()
     return mEntity.getPosition2D();
 }
 
+void BaseEntityComponent::setPosition(const Ogre::Vector3 & pos)
+{
+	mEntity.setPosition(pos);
+}
+
 const Ogre::Vector3 &BaseEntityComponent::getPosition()
 {
     return mEntity.getPosition();

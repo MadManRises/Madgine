@@ -22,6 +22,7 @@ public:
     virtual ValueType execComponentMethod(const std::string &name, const Scripting::ArgumentList &args) = 0;
 
     Ogre::Vector2 getPosition2D();
+	void setPosition(const Ogre::Vector3 &pos);
     const Ogre::Vector3 &getPosition();
 	Ogre::Vector2 getCenter2D();
 	Ogre::Vector3 getCenter();
