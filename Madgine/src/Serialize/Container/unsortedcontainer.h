@@ -38,7 +38,8 @@ namespace Engine {
 
 			iterator read_item_where(const iterator &where, SerializeInStream &in) {
 				iterator it = this->insert_tuple_where(where, this->readCreationData(in));
-				this->read_id(in, *it);
+				if (!in.manager().isMaster())
+					this->read_id(in, *it);
 				this->read_state(in, *it);
 				return it;
 			}
@@ -54,7 +55,8 @@ namespace Engine {
 
 			void write_item(SerializeOutStream &out, const Type &t) const {
 				this->write_creation(out, t);
-				this->write_id(out, t);
+				if (out.manager().isMaster())
+					this->write_id(out, t);
 				this->write_state(out, t);
 			}
 
