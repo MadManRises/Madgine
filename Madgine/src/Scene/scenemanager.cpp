@@ -513,6 +513,7 @@ void SceneManager::setGameTextureSize(const Ogre::Vector2 & size)
     
     
 	mRenderTexture = mGameTexture->getBuffer()->getRenderTarget();
+	mRoot->getRenderSystem()->_cleanupDepthBuffers(false);
 
 	mVp = mRenderTexture->addViewport(mCamera);
 	mVp->setOverlaysEnabled(false);
