@@ -14,7 +14,8 @@ namespace Engine {
 
 		NetworkManager::NetworkManager() :			
 			mSocket(0),
-			mIsServer(false)
+			mIsServer(false),
+			mSlaveStream(0)
 		{
 
 			if (sManagerCount == 0) {
