@@ -66,7 +66,7 @@ endif (MYGUI_FOUND)
 
 if (OGRE_FOUND)
   include_directories(${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
-  target_link_libraries (Madgine ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_RTShaderSystem_LIBRARIES})
+  target_link_libraries (Madgine ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_RTShaderSystem_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
 endif (OGRE_FOUND)
 
 find_package(OIS REQUIRED)

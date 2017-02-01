@@ -77,14 +77,10 @@ IF (WIN32) #Windows
         find_library ( MYGUI_LIBRARIES_OGRE_REL NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
         find_library ( MYGUI_LIBRARIES_OGRE_DBG NAMES ${LIB_PREFIX}MyGUI.OgrePlatform${LIB_SUFFIX}_d${LIB_EXT} HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
 
-        MESSAGE(STATUS ${LIB_PREFIX}MyGUIEngine${LIB_SUFFIX}_d${LIB_EXT})
-
         make_library_set ( MYGUI_LIBRARIES )
         make_library_set ( MYGUI_LIBRARIES_OGRE )
 
         set (MYGUI_LIBRARIES ${MYGUI_LIBRARIES_OGRE} ${MYGUI_LIBRARIES})        
-
-        MESSAGE ("${MYGUI_LIBRARIES} ${MYGUI_LIBRARIES_OGRE}")
 
         #findpkg_finish ( "MYGUI" )
     ENDIF (MYGUISDK)
