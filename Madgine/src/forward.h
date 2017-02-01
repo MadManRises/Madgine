@@ -4,6 +4,9 @@
 namespace Ogre {
 	template <class T>
 	class Singleton;
+
+	template <class T>
+	class SharedPtr;
 }
 
 namespace Engine {
@@ -66,9 +69,9 @@ namespace Engine {
 
 		namespace Parsing {
 			class MethodNode;
-			class MethodNodePtr;
+			typedef Ogre::SharedPtr<MethodNode> MethodNodePtr;
 			class EntityNode;
-			class EntityNodePtr;
+			typedef Ogre::SharedPtr<EntityNode> EntityNodePtr;
 			class ScriptParser;
 		}
 

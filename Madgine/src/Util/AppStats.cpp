@@ -2,6 +2,7 @@
 
 #include "AppStats.h"
 
+#include <iostream>
 
 
 namespace Engine {
@@ -9,18 +10,23 @@ namespace Engine {
 
 		AppStats::AppStats(Ogre::RenderWindow *window) :
 			mAverageFPS(this),
+#if OGRE_MEMORY_TRACKER
 			mOgreMemory(this),
 			startTrack(this, &AppStats::startTrackImpl),
 			stopTrack(this, &AppStats::stopTrackImpl),
-			mWindow(window),
-			mTracker(Ogre::MemoryTracker::get())
+			mTracker(static_cast<TrackerAccessor&>(Ogre::MemoryTracker::get())),
+#endif
+			mWindow(window)
+			
 		{
 		}
 
 		void AppStats::update()
 		{
 			mAverageFPS = mWindow->getAverageFPS();
+#if OGRE_MEMORY_TRACKER
 			mOgreMemory = mTracker.getTotalMemoryAllocated();
+#endif
 		}
 
 		void AppStats::startTrackImpl()
@@ -30,16 +36,16 @@ namespace Engine {
 
 		void AppStats::stopTrackImpl()
 		{
-			std::list<Ogre::MemoryTracker::Alloc> newAllocations;
+			std::list<TrackerAccessor::Alloc> newAllocations;
 
-			for (const std::pair<void * const, Ogre::MemoryTracker::Alloc> &p : mTracker.mAllocations) {
+			for (const std::pair<void * const, TrackerAccessor::Alloc> &p : mTracker.mAllocations) {
 				if (mMemoryImage.count(p.first) == 0) {
 					newAllocations.push_back(p.second);
 				}
 			}
 
 
-			for (const Ogre::MemoryTracker::Alloc &alloc : newAllocations) {
+			for (const TrackerAccessor::Alloc &alloc : newAllocations) {
 				if (!alloc.filename.empty())
 					std::cout << alloc.filename;
 				else

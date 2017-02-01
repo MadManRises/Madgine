@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scripting\Types\struct.h"
-#include "entitynodeptr.h"
 #include "prototype.h"
 
 namespace Engine {

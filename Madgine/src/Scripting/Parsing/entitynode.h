@@ -1,6 +1,6 @@
 #pragma once
 
-#include "methodnodeptr.h"
+#include "methodnode.h"
 #include "textResource.h"
 
 namespace Engine {
@@ -31,7 +31,7 @@ private:
 	std::string mPrototype;
 };
 
-
+typedef Ogre::SharedPtr<EntityNode> EntityNodePtr;
 
 }
 }

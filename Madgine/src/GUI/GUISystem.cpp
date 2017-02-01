@@ -4,6 +4,7 @@
 #include "Windows\WindowContainer.h"
 #include "Windows\window.h"
 
+#include <iostream>
 
 namespace Engine {
 	namespace GUI {

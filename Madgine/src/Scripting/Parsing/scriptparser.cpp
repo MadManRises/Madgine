@@ -219,7 +219,7 @@ void ScriptParser::parseEntity()
 		Ogre::NameValuePairList param;
 		param["Type"] = "Entity";
 
-		node = mGlobalTypes[name] = create(name, mGroup, false, 0, &param);		
+		node = mGlobalTypes[name] = createResource(name, mGroup, false, 0, &param).staticCast<EntityNode>();		
 		created = true;
 	}
 
@@ -324,7 +324,7 @@ void ScriptParser::parseMethod(const EntityNodePtr &entity)
 
 		std::string resName = (entity.isNull() ? name : entity->getName() + "::" + name);
 
-		node = create(resName, mGroup, false, 0, &param);
+		node = createResource(resName, mGroup, false, 0, &param).staticCast<MethodNode>();
 		created = true;
 		if (!entity.isNull()) {
 			entity->addMethod(node, name);

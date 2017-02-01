@@ -4,8 +4,6 @@
 
 #include "baseentitycomponent.h"
 
-#include "Scripting\Parsing\entitynodeptr.h"
-
 #include "Serialize\Container\set.h"
 
 namespace Engine {

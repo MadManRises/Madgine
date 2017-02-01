@@ -21,6 +21,8 @@ private:
 	int mLineNr;
 };
 
+typedef Ogre::SharedPtr<TextResource> TextResourcePtr;
+
 }
 }
 }

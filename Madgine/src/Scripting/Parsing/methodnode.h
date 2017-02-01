@@ -30,6 +30,7 @@ private:
     std::list<std::string> mArguments;
 };
 
+typedef Ogre::SharedPtr<MethodNode> MethodNodePtr;
 
 }
 }

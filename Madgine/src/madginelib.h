@@ -23,8 +23,8 @@
 
 #include <Ogre.h>
 
-#include <OgreFont.h>
-#include <OgreFontManager.h>
+#include <Overlay/OgreFont.h>
+#include <Overlay/OgreFontManager.h>
 
 #include <OgreRTShaderSystem.h>
 

@@ -51,7 +51,7 @@ void ShaderCollector::finalize()
 	if (mInitialized) {
 		Ogre::RTShader::ShaderGenerator::getSingleton().removeAllShaderBasedTechniques();
 		mCollector.reset();
-		Ogre::RTShader::ShaderGenerator::finalize();
+		//Ogre::RTShader::ShaderGenerator::finalize();
 		mInitialized = false;
 	}
 }
