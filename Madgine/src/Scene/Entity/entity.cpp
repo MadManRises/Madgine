@@ -4,18 +4,17 @@
 
 #include "masks.h"
 
-#include "Database\exceptionmessages.h"
+#include "exceptionmessages.h"
 
 #include "componentexception.h"
 
-#include "Scene\scenemanager.h"
+#include "Scene/ogrescenemanager.h"
 
 #include "Serialize\Streams/serializestream.h"
 
 
 #include "Scripting\Parsing\scriptparser.h"
 #include "Scripting\Parsing\entitynode.h"
-
 
 
 namespace Engine {
@@ -36,7 +35,7 @@ Entity *Entity::entityFromMovable(Ogre::MovableObject *o)
 
 
 Entity::Entity(Ogre::SceneNode *node, const std::string &behaviour, Ogre::Entity *obj) :
-	mDescription(Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour)),
+	mDescription(&Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour)),
     mNode(node),
     mObject(obj),
     mLastPosition(node->getPosition()),
@@ -68,7 +67,7 @@ Entity::~Entity()
 	mComponents.clear();
 
 	if (mNode->getAttachedObjectIterator().hasMoreElements())
-		LOG_ERROR(Database::Exceptions::nodeNotCleared);
+		LOG_ERROR(Exceptions::nodeNotCleared);
 
 	mNode->getParentSceneNode()->removeChild(mNode);
 	mNode->getCreator()->destroySceneNode(mNode);
@@ -232,16 +231,16 @@ std::tuple<std::unique_ptr<BaseEntityComponent>> Entity::createComponent(const s
 {
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
-		throw ComponentException(Database::Exceptions::unknownComponent(name));
+		throw ComponentException(Exceptions::unknownComponent(name));
 	return std::make_tuple((this->*(it->second))());
 }
 
 BaseEntityComponent *Entity::addComponentImpl(Ogre::unique_ptr<BaseEntityComponent> &&component)
 {
     if (mComponents.find(component) != mComponents.end())
-        throw ComponentException(Database::Exceptions::doubleComponent(component->getName()));
+        throw ComponentException(Exceptions::doubleComponent(component->getName()));
     if (&component->getEntity() != this)
-        throw ComponentException(Database::Exceptions::corruptData);
+        throw ComponentException(Exceptions::corruptData);
     return mComponents.emplace(std::forward<Ogre::unique_ptr<BaseEntityComponent>>(component))->get();
 }
 
@@ -252,20 +251,20 @@ bool Entity::hasScriptMethod(const std::string &name)
     return mDescription->hasMethod(name);
 }
 
-const Scripting::Parsing::MethodNodePtr &Entity::getMethod(const std::string &name)
+const Scripting::Parsing::MethodNode &Entity::getMethod(const std::string &name)
 {
     return mDescription->getMethod(name);
 }
 
 void Entity::remove()
 {
-	Engine::Scene::SceneManager::getSingleton().removeLater(this);
+	Engine::Scene::OgreSceneManager::getSingleton().removeLater(this);
 }
 
 
 void Entity::writeState(Serialize::SerializeOutStream &of) const
 {
-	of << getPosition();
+	of << ValueType(getPosition());
 
 	of << mNode->getOrientation();
 
@@ -314,7 +313,7 @@ void Entity::destroyDecoratorNode(Ogre::SceneNode * node)
 {
 	if (node->getAttachedObjectIterator().begin() !=
 		node->getAttachedObjectIterator().end())
-		LOG_ERROR(Database::Exceptions::nodeNotCleared);
+		LOG_ERROR(Exceptions::nodeNotCleared);
 	node->getParentSceneNode()->removeChild(node);
 	node->getCreator()->destroySceneNode(node);
 }

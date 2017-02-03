@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
 #include "Util.h"
-#include "UtilMethods.h"
+#include "Util/UtilMethods.h"
 
 namespace Engine {
 	namespace Util {
@@ -9,9 +9,10 @@ namespace Engine {
 		Util::Util(Ogre::RenderWindow *window) :
 			TopLevelSerializableUnit(Serialize::UTIL),
 			mProfiler(this),
-			mStats(this, window)
+			mStats(this, window),
+			mLog("Madgine.log")
 		{
-			UtilMethods::setup();
+			UtilMethods::setup(&mLog);
 		}
 
 		Profiler * Util::profiler()

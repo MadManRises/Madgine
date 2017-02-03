@@ -2,7 +2,7 @@
 #include "guihandler.h"
 #include "windownames.h"
 #include "Database/translationunit.h"
-#include "Database/exceptionmessages.h"
+#include "exceptionmessages.h"
 #include "GUI\GUISystem.h"
 #include "UI\UIManager.h"
 #include "GUI\Windows\Window.h"
@@ -37,7 +37,7 @@ void GuiHandlerBase::init()
     if (!mLayoutFile.empty()){
 		window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
 		if (!window){
-			LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
+			LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
 			return;
 		}
 		else {

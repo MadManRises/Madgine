@@ -10,6 +10,8 @@
 #define MADGINE_EXPORT __declspec(dllimport)
 #endif
 
+#include "baselib.h"
+
 #include <stack>
 #include <memory>
 #include <map>
@@ -34,7 +36,10 @@
 
 #include "Ogrememory.h"
 
-#include "singletonimpl.h"
+namespace Ogre {
+	template <class T>
+	T *Singleton<T>::msSingleton = 0;
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

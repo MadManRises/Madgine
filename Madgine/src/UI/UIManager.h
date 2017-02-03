@@ -1,14 +1,14 @@
 #pragma once
 
-#include "uniquecomponentcollector.h"
+#include "ogreuniquecomponentcollector.h"
 #include "guihandler.h"
 #include "gamehandler.h"
 
 namespace Engine {
 
 #ifdef _MSC_VER
-	template MADGINE_EXPORT class UniqueComponentCollector<UI::GuiHandlerBase>;
-	template MADGINE_EXPORT class UniqueComponentCollector<UI::GameHandlerBase>;
+	template MADGINE_EXPORT class OgreUniqueComponentCollector<UI::GuiHandlerBase>;
+	template MADGINE_EXPORT class OgreUniqueComponentCollector<UI::GameHandlerBase>;
 #endif
 
 	namespace UI {
@@ -56,8 +56,8 @@ namespace Engine {
 			static const constexpr int sMaxInitOrder = 4;
 
 		private:
-			UniqueComponentCollector<GuiHandlerBase> mGuiHandlers;
-			UniqueComponentCollector<GameHandlerBase> mGameHandlers;
+			OgreUniqueComponentCollector<GuiHandlerBase> mGuiHandlers;
+			OgreUniqueComponentCollector<GameHandlerBase> mGameHandlers;
 
 			GuiHandlerBase *mCurrentRoot;			
 

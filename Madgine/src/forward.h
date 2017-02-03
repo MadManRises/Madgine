@@ -10,75 +10,12 @@ namespace Ogre {
 }
 
 namespace Engine {
-	class ValueType;
-
-	enum class InvPtr : uintptr_t {};
 
 	namespace App {
 		class ConfigSet;
 		struct AppSettings;
 		enum class ContextMask : unsigned int;
 		class Application;
-	}
-	namespace Serialize {
-
-		class SerializeInStream;
-		class SerializeOutStream;
-		class SerializableUnit; 
-		class BufferedInOutStream;
-		class BufferedInStream;
-		class BufferedOutStream;
-		class TopLevelSerializableUnit;
-		class Observable;
-		class Serializable;
-		class FileBuffer;
-		struct MessageHeader;
-		class SerializeManager;
-
-		
-		typedef size_t ParticipantId;
-
-		class buffered_streambuf;
-
-	}
-	namespace Scripting {
-
-		class ScriptingManager;
-
-		class BaseAPI;
-		class BaseGlobalAPIComponent;
-
-		class Scope;
-
-		class RefScopeTopLevelSerializableUnit;
-		class RefScope;
-		
-		class Prototype;
-		class List;
-		class Vector;
-		class Struct;
-
-		class GlobalScope;
-		class Scene;
-
-		typedef std::vector<ValueType> ArgumentList;
-		typedef std::map<std::string, ValueType> Stack;
-		//typedef Serialize::ObservableMap<ValueType> VarSet;
-
-
-
-		namespace Parsing {
-			class MethodNode;
-			typedef Ogre::SharedPtr<MethodNode> MethodNodePtr;
-			class EntityNode;
-			typedef Ogre::SharedPtr<EntityNode> EntityNodePtr;
-			class ScriptParser;
-		}
-
-		namespace Statements {
-			class Statement;
-		}
-
 	}
 
 	namespace UI {
@@ -88,8 +25,6 @@ namespace Engine {
 		class GuiHandlerBase;
 		class UIManager;
 
-		class Process;
-		class ProcessListener;
 
 	}
 
@@ -116,9 +51,8 @@ namespace Engine {
 
 	namespace Scene {
 
-		class SceneManager;
+		class OgreSceneManager;
 		class BaseSceneComponent;
-		class SceneListener;
 
 		namespace Entity {
 			class Entity;
@@ -146,7 +80,6 @@ namespace Engine {
 		class Profiler;
 		class ProcessStats;
 		struct TraceBack;
-		class BaseMadgineObject;
 		class Util;
 	}
 
@@ -154,11 +87,6 @@ namespace Engine {
 		class InputHandler;
 	}
 
-	namespace Network {
-		class NetworkManager;
-		class NetworkStream;
-		
-	}
 
 }
 

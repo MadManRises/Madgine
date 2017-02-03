@@ -8,7 +8,7 @@
 
 #include "UI\windownames.h"
 
-#include "Database\exceptionmessages.h"
+#include "exceptionmessages.h"
 
 #include "MyGUIWindow.h"
 

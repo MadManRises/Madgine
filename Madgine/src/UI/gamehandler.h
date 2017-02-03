@@ -2,8 +2,7 @@
 
 #include "handler.h"
 
-#include "uniquecomponent.h"
-#include "Scene/scenelistener.h"
+#include "ogreuniquecomponent.h"
 
 #include "App/contextmasks.h"
 
@@ -12,7 +11,7 @@
 namespace Engine {
 namespace UI {
 
-class MADGINE_EXPORT GameHandlerBase : public Handler, public Scene::SceneListener {
+class MADGINE_EXPORT GameHandlerBase : public Handler {
 public:
     GameHandlerBase(const std::string &windowName, App::ContextMask context = App::ContextMask::SceneContext);
 
@@ -21,6 +20,8 @@ public:
     void update(float timeSinceLastFrame, App::ContextMask mask);
 
     virtual void update(float timeSinceLastFrame);
+
+	Scene::OgreSceneManager *sceneMgr();
 
 protected:
     virtual void onMouseMove(GUI::MouseEventArgs &me);
@@ -68,11 +69,13 @@ private:
     Ogre::Vector2 mDragStart;    
 
     App::ContextMask mContext;
+
+	Scene::OgreSceneManager *mSceneMgr;
 };
 
 template <class T>
-class GameHandler : public UniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
-	using UniqueComponent<T, GameHandlerBase>::UniqueComponent;
+class GameHandler : public OgreUniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
+	using OgreUniqueComponent<T, GameHandlerBase>::OgreUniqueComponent;
 
 	virtual const char *getName() override {
 		return typeid(T).name();

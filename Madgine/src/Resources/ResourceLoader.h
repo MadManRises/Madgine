@@ -1,13 +1,13 @@
 #pragma once
 
-#include "UI\Process.h"
+#include "Util\Process.h"
 #include "ImageSets\imagesetmanager.h"
-#include "Scripting\Parsing\scriptparser.h"
+#include "Scripting\Parsing\ogrescriptparser.h"
 
 namespace Engine {
 	namespace Resources {
 
-		class MADGINE_EXPORT ResourceLoader : public UI::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
+		class MADGINE_EXPORT ResourceLoader : public Util::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
 		public:
 			ResourceLoader(const std::string &mediaPath);
 			~ResourceLoader();
@@ -36,7 +36,7 @@ namespace Engine {
 
 			std::string mMediaPath;
 
-			Ogre::unique_ptr<Scripting::Parsing::ScriptParser> mParser;
+			Ogre::unique_ptr<Scripting::Parsing::OgreScriptParser> mParser;
 			Ogre::unique_ptr<ImageSets::ImageSetManager> mImageSetManager;
 		};
 

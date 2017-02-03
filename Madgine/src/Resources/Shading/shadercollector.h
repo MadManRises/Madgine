@@ -28,7 +28,7 @@ private:
 	bool mVerbose;
 	bool mInitialized;
 
-	Ogre::unique_ptr<UniqueComponentCollector<ShaderFactoryBase>> mCollector;
+	//Ogre::unique_ptr<UniqueComponentCollector<ShaderFactoryBase>> mCollector;
 
 };
 

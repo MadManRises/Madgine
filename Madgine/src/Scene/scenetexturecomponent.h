@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scenecomponent.h"
+#include "Scene/scenecomponent.h"
 
 namespace Engine {
 	namespace Scene {
@@ -20,7 +20,7 @@ namespace Engine {
 
 		protected:			
 
-			void updateTexture(SceneManager *sceneMgr);
+			void updateTexture(OgreSceneManager *sceneMgr);
 
 			float aspectRatio() const;
 

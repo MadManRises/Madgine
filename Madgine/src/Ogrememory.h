@@ -6,9 +6,9 @@ template <class T>
 using unique_ptr = std::unique_ptr<T>;
 
 template <class T, class Base>
-constexpr std::function<unique_ptr<Base>()> make_unique(const char *file, int line, const char *func){
+constexpr std::function<unique_ptr<Base>()> make_unique(){
     return [=](){
-        return unique_ptr<Base>(new (file, line, func) T);
+        return unique_ptr<Base>(new T);
     };
 }
 
@@ -30,7 +30,7 @@ private:
 
 }
 
-#define OGRE_MAKE_UNIQUE_FUNC(T, Base) Ogre::make_unique<T, Base>(__FILE__, __LINE__, __FUNCTION__)
+#define OGRE_MAKE_UNIQUE_FUNC(T, Base) Ogre::make_unique<T, Base>()
 #define OGRE_MAKE_UNIQUE(T) Ogre::MakeUniqueHelper<T>(__FILE__, __LINE__, __FUNCTION__)
 #define OGRE_MAKE_UNIQUE_BASE(T, Base) Ogre::MakeUniqueHelper<T, Base>(__FILE__, __LINE__, __FUNCTION__)
 

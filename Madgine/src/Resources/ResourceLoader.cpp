@@ -30,7 +30,7 @@ namespace Engine {
 				}
 			}
 
-			mParser = OGRE_MAKE_UNIQUE(Scripting::Parsing::ScriptParser)(); // Initialise the Script Parser
+			mParser = OGRE_MAKE_UNIQUE(Scripting::Parsing::OgreScriptParser)(); // Initialise the Script Parser
 
 			mImageSetManager = OGRE_MAKE_UNIQUE(Resources::ImageSets::ImageSetManager)();
 		}

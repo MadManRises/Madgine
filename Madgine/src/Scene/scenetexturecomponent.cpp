@@ -2,7 +2,7 @@
 
 #include "scenetexturecomponent.h"
 
-#include "scenemanager.h"
+#include "ogrescenemanager.h"
 
 #include "Math\bounds.h"
 
@@ -49,7 +49,7 @@ namespace Scene {
 		return mTexture;
 	}
 
-	void BaseSceneTextureComponent::updateTexture(SceneManager * sceneMgr) {
+	void BaseSceneTextureComponent::updateTexture(OgreSceneManager * sceneMgr) {
 		const Engine::Math::Bounds &rasterizedBounds = sceneMgr->getRasterizedSceneBounds();
 
 		mTexture->freeInternalResources();

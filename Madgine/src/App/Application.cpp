@@ -7,7 +7,7 @@
 #include "GUI\MyGUI\MyGUILauncher.h"
 #include "Util\Util.h"
 
-#include "Scene\scenemanager.h"
+#include "Scene\ogrescenemanager.h"
 
 #include "UI\UIManager.h"
 #include "configset.h"
@@ -269,12 +269,12 @@ void Application::_setup()
 	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
 
 	// Instantiate the GlobalScope class
-	mScriptingMgr = OGRE_NEW Scripting::ScriptingManager(mLoader->scriptParser());
+	mScriptingMgr = new Scripting::ScriptingManager(mLoader->scriptParser());
 
 	mScriptingMgr->globalScope()->addAPI(this);
 
 	// Create SceneManager
-	mSceneMgr = OGRE_NEW Scene::SceneManager(mRoot);
+	mSceneMgr = OGRE_NEW Scene::OgreSceneManager(mRoot);
 
 	// Initialise GUISystem 
 	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());

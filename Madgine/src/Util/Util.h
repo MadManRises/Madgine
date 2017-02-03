@@ -7,6 +7,8 @@
 
 #include "Serialize\Container\serialized.h"
 
+#include "OgreUtilLog.h"
+
 namespace Engine {
 	namespace Util {
 
@@ -19,6 +21,8 @@ namespace Engine {
 			void update();
 
 		private:
+			OgreUtilLog mLog;
+
 			Serialize::Serialized<Profiler> mProfiler;
 			Serialize::Serialized<AppStats> mStats;
 

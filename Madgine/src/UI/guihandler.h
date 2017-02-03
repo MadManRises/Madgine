@@ -2,7 +2,7 @@
 
 #include "UI/handler.h"
 #include "UI/windownames.h"
-#include "uniquecomponent.h"
+#include "ogreuniquecomponent.h"
 
 #include "Scripting\Types\globalapi.h"
 
@@ -56,8 +56,8 @@ private:
 };
 
 template <class T>
-class GuiHandler : public UniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
-	using UniqueComponent<T, GuiHandlerBase>::UniqueComponent;
+class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
+	using OgreUniqueComponent<T, GuiHandlerBase>::OgreUniqueComponent;
 
 	virtual const char *getName() override {
 		return typeid(T).name();

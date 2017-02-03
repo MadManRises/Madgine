@@ -3,7 +3,7 @@
 #include "UI/UIManager.h"
 #include "Gui\GUISystem.h"
 #include "GUI\Windows\Window.h"
-#include "Database\exceptionmessages.h"
+#include "exceptionmessages.h"
 #include "windownames.h"
 
 namespace Engine {
@@ -34,7 +34,7 @@ bool Handler::installToWindow(GUI::Window * w)
 		GUI::Window * window = w->getChildRecursive(des.mWindowName, des.mClass);
 		
 		if (!window) {
-			LOG_ERROR(Database::Exceptions::windowNotFound(des.mWindowName));
+			LOG_ERROR(Exceptions::windowNotFound(des.mWindowName));
 			return false;
 		}
 		

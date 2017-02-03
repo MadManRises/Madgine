@@ -154,7 +154,7 @@ private:
 	Ogre::RenderWindow								   *mWindow;
 
     Ogre::Root*                       mRoot;
-    Scene::SceneManager*              mSceneMgr;
+    Scene::OgreSceneManager*              mSceneMgr;
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;

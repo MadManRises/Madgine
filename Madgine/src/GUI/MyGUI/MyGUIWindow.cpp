@@ -15,7 +15,7 @@
 #include "MyGUICombobox.h"
 
 #include "Util\UtilMethods.h"
-#include "Database\exceptionmessages.h"
+#include "exceptionmessages.h"
 
 namespace Engine {
 	namespace GUI {
@@ -282,7 +282,7 @@ namespace Engine {
 				}
 
 				if (failed) {
-					LOG_ERROR(Database::Exceptions::loadLayoutFailure(name));
+					LOG_ERROR(Exceptions::loadLayoutFailure(name));
 					return 0;
 				}
 				WindowContainer *result = new MyGUIWindow(widgets.front(), mGui, this);

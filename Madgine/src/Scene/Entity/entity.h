@@ -1,10 +1,14 @@
 #pragma once
 
+#include "Serialize\ogreSerialize.h"
+
 #include "Scripting/Types/scopeimpl.h"
 
 #include "baseentitycomponent.h"
 
 #include "Serialize\Container\set.h"
+
+
 
 namespace Engine {
 namespace Scene {
@@ -100,7 +104,7 @@ protected:
 	
 	bool hasScriptMethod(const std::string &name) override;
 
-    const Scripting::Parsing::MethodNodePtr &getMethod(const std::string &name) override;
+    const Scripting::Parsing::MethodNode &getMethod(const std::string &name) override;
 	
 private:
 
@@ -137,7 +141,7 @@ private:
 	friend class EntityComponent;
 
 
-    const Scripting::Parsing::EntityNodePtr mDescription;
+    const Scripting::Parsing::EntityNode *mDescription;
     
 	Ogre::SceneNode *mNode;
     Ogre::SceneNode *mDecoratorNode;

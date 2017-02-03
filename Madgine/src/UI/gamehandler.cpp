@@ -3,6 +3,7 @@
 #include "ui\UIManager.h"
 #include "gui\GUISystem.h"
 #include "gui\Windows\Window.h"
+#include "Scene\ogrescenemanager.h"
 
 namespace Engine {
 namespace UI {
@@ -16,7 +17,8 @@ GameHandlerBase::GameHandlerBase(const std::string &windowName, App::ContextMask
     mCurrentMouseButton(GUI::MouseButton::NO_BUTTON),
     mDragging(false),
     mSingleClick(false),
-    mContext(context)
+    mContext(context),
+	mSceneMgr(&Scene::OgreSceneManager::getSingleton())
 {
 
 }
@@ -32,6 +34,10 @@ void GameHandlerBase::update(float timeSinceLastFrame, App::ContextMask mask)
 {
     if (mContext & mask)
         update(timeSinceLastFrame);
+}
+
+Scene::OgreSceneManager *GameHandlerBase::sceneMgr() {
+	return mSceneMgr;
 }
 
 void GameHandlerBase::onMouseMove(GUI::MouseEventArgs &me)

@@ -39,18 +39,18 @@ void ShaderCollector::init(Ogre::SceneManager *sceneMgr)
 	// Set the scene manager.
 	mShaderGenerator->addSceneManager(sceneMgr);
 
-	mCollector = OGRE_MAKE_UNIQUE(UniqueComponentCollector<ShaderFactoryBase>)();
+	//mCollector = std::make_unique<UniqueComponentCollector<ShaderFactoryBase>>();
 
-	for (const Ogre::unique_ptr<ShaderFactoryBase> &fac : *mCollector) {
+	/*for (const Ogre::unique_ptr<ShaderFactoryBase> &fac : *mCollector) {
 		fac->init();
-	}
+	}*/
 }
 
 void ShaderCollector::finalize()
 {
 	if (mInitialized) {
 		Ogre::RTShader::ShaderGenerator::getSingleton().removeAllShaderBasedTechniques();
-		mCollector.reset();
+		//mCollector.reset();
 		//Ogre::RTShader::ShaderGenerator::finalize();
 		mInitialized = false;
 	}
