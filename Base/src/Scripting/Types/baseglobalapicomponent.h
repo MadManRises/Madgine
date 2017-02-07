@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Util\MadgineObject.h"
+#include "MadgineObject.h"
 
 namespace Engine {
 	namespace Scripting {
 
-		class MADGINE_BASE_EXPORT BaseGlobalAPIComponent : public Util::BaseMadgineObject {
+		class MADGINE_BASE_EXPORT BaseGlobalAPIComponent : public BaseMadgineObject {
 
 		public:
 			virtual ~BaseGlobalAPIComponent() = default;

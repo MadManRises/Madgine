@@ -13,20 +13,20 @@ menu:
             relativeUrl: .
         gettingStarted:
             text: Getting Started
-            relativeUrl: docs/gettingStarted.html
+            relativeUrl: doc/gettingStarted.html
         overview:
             text: Overview
-            relativeUrl: docs/overview.html
+            relativeUrl: doc/overview.html
         examples:
             text: Examples
-            relativeUrl: docs/examples.html
+            relativeUrl: doc/examples.html
         installation:
             text: Installation
-            relativeUrl: /docs/install.html
+            relativeUrl: /doc/install.html
         license:
             text: License
             relativeUrl: license.html
         validators:
             text: What is a DSL?
-            relativeUrl: /docs/dsl.html
+            relativeUrl: /doc/dsl.html
             

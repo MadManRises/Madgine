@@ -9,7 +9,8 @@ namespace Engine {
 	namespace Scene {
 		
 		SceneManager::SceneManager() :
-			RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER)
+			RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER),
+			mItemCount(0)
 		{
 		}
 
@@ -98,6 +99,11 @@ namespace Engine {
 				result.insert(e.get());
 			}
 			return result;
+		}
+
+		std::string SceneManager::generateUniqueName()
+		{
+			return std::string("Madgine_AutoGen_Name_") + std::to_string(++mItemCount);
 		}
 
 	}

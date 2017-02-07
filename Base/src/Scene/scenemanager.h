@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util\MadgineObject.h"
+#include "MadgineObject.h"
 #include "Scripting\Types\refscopetoplevelserializableunit.h"
 #include "Scripting\Types\globalapi.h"
 
@@ -12,7 +12,7 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT SceneManager : public Singleton<SceneManager>,
 			public Scripting::RefScopeTopLevelSerializableUnit,
-			public Util::MadgineObject<SceneManager>,
+			public MadgineObject<SceneManager>,
 			public Scripting::GlobalAPI<SceneManager>
 		{
 		public:
@@ -23,7 +23,7 @@ namespace Engine {
 			Scripting::Scope *createSceneStruct();
 			Scripting::Scope *createSceneList();
 
-			virtual Entity::Entity *createEntity(const std::string &name, const std::string &mesh, const std::string &behaviour, const Scripting::ArgumentList &args = {}) = 0;
+			virtual Entity::Entity *createEntity(const std::string &name = "", const std::string &mesh = "", const std::string &behaviour = "", const Scripting::ArgumentList &args = {}) = 0;
 			virtual Entity::Entity *findEntity(const std::string &name) = 0;
 
 			virtual void init() override;
@@ -42,7 +42,11 @@ namespace Engine {
 			////FOR LAUNCHER
 			std::set<BaseSceneComponent*> getComponents();
 
+		protected:
+			std::string generateUniqueName();
+
 		private:
+			size_t mItemCount;
 
 			UniqueComponentCollector<BaseSceneComponent> mSceneComponents;
 

@@ -1,9 +1,8 @@
 #pragma once
 
 namespace Engine {
-	namespace Util {
-		class BaseMadgineObject;
-	}
+
+	class BaseMadgineObject;
 
 	namespace Scene {
 		class SceneManager;

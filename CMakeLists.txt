@@ -1,15 +1,15 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/../bin)
 
 cmake_minimum_required (VERSION 3.3)
 
-project(Madgine)
+cmake_policy(SET CMP0048 NEW)
 
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
 set(MADGINE_PATCH_VERSION 0)
-set(MADGINE_VERSION
-  ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
 
+project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
+                            
 
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
@@ -33,22 +33,22 @@ include(PrecompiledHeader)
 include(Project)
 
 
-include_directories(Common)
+find_package(Interfaces REQUIRED)
 
 if (BUILD_TESTS)
 	add_subdirectory(gtest1.8.0)
 endif (BUILD_TESTS)
 
-add_subdirectory(Interfaces)
+
 add_subdirectory(Base)
-add_subdirectory(Madgine)
+add_subdirectory(Ogre)
 
 
 # Export Configuration
 # ===============================
  
 # Add all targets to the build-tree export set
-export(TARGETS Madgine Interfaces Base
+export(TARGETS OgreMadgine Base
   FILE "${PROJECT_BINARY_DIR}/MadgineTargets.cmake")
  
 # Export the package for use from the build-tree
