@@ -92,6 +92,10 @@ public:
 
 	static constexpr const float sSceneRasterSize = .2f;
 	
+	void makeLocalCopy(Entity::Entity &e);
+	void makeLocalCopy(Entity::Entity &&e);
+
+	void setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::Entity, Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*>::iterator &, int)> f);
 
 protected:
 
@@ -132,6 +136,8 @@ private:
 
 
 	Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicy::masterOnly, Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*> mEntities;
+	std::list<Entity::Entity> mLocalEntities;
+
     std::list<Entity::Entity *> mEntityRemoveQueue;
 
     

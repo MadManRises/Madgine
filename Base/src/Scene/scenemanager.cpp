@@ -2,6 +2,8 @@
 
 #include "scenemanager.h"
 
+#include "TopLevelIds.h"
+
 namespace Engine {
 
 	API_IMPL(Scene::SceneManager, &createSceneArray, &createSceneStruct, &createSceneList, &findEntity);
@@ -9,7 +11,7 @@ namespace Engine {
 	namespace Scene {
 		
 		SceneManager::SceneManager() :
-			RefScopeTopLevelSerializableUnit(Serialize::SCENE_MANAGER),
+			RefScopeTopLevelSerializableUnit(SCENE_MANAGER),
 			mItemCount(0)
 		{
 		}

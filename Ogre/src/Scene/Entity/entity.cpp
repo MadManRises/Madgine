@@ -34,6 +34,40 @@ Entity *Entity::entityFromMovable(Ogre::MovableObject *o)
 }
 
 
+Entity::Entity(const Entity &other) :
+	mDescription(other.mDescription),
+	mLastPosition(other.mLastPosition),
+	mComponents(this, &Entity::createComponent),
+	ScopeImpl(other)
+{
+
+	mNode = other.mNode->getParentSceneNode()->createChildSceneNode(other.getPosition(), other.getOrientation());
+	mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
+
+	if (other.mObject) {
+		//TODO
+	}
+
+	//TODO copy Components
+
+	mDecoratorNode = mNode->createChildSceneNode(getName() + "_Decorator");
+
+}
+
+Entity::Entity(Entity &&other) :
+	mDescription(other.mDescription),
+	mLastPosition(other.mLastPosition),
+	mComponents(this, std::forward<decltype(mComponents)>(other.mComponents)),
+	mNode(other.mNode),
+	mObject(other.mObject),
+	mDecoratorNode(other.mDecoratorNode),
+	ScopeImpl(std::forward<Entity>(other))
+{
+	other.mNode = 0;
+	other.mObject = 0;
+	other.mDecoratorNode = 0;
+}
+
 Entity::Entity(Ogre::SceneNode *node, const Scripting::Parsing::EntityNode *behaviour, Ogre::Entity *obj) :
 	mDescription(behaviour),
     mNode(node),
@@ -66,11 +100,13 @@ Entity::~Entity()
 
 	mComponents.clear();
 
-	if (mNode->getAttachedObjectIterator().hasMoreElements())
-		LOG_ERROR(Exceptions::nodeNotCleared);
+	if (mNode) {
+		if (mNode->getAttachedObjectIterator().hasMoreElements())
+			LOG_ERROR(Exceptions::nodeNotCleared);
 
-	mNode->getParentSceneNode()->removeChild(mNode);
-	mNode->getCreator()->destroySceneNode(mNode);
+		mNode->getParentSceneNode()->removeChild(mNode);
+		mNode->getCreator()->destroySceneNode(mNode);
+	}
 }
 
 void Entity::init(const Scripting::ArgumentList &args)

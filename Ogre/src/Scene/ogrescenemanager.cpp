@@ -368,7 +368,7 @@ void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callIni
 
 	readState(in);
 	
-	applySerializableMap(in.manager().map());
+	applySerializableMap(in.manager().slavesMap());
 
 	if (callInit) {
 		for (Entity::Entity &e : mEntities) {
@@ -384,6 +384,21 @@ void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callIni
 void OgreSceneManager::writeScene(Serialize::SerializeOutStream & out) const
 {
 	writeState(out);
+}
+
+void OgreSceneManager::makeLocalCopy(Entity::Entity & e)
+{
+	mLocalEntities.emplace_back(e);
+}
+
+void OgreSceneManager::makeLocalCopy(Entity::Entity && e)
+{
+	mLocalEntities.emplace_back(std::forward<Entity::Entity>(e));
+}
+
+void OgreSceneManager::setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::Entity, Ogre::SceneNode*, const Scripting::Parsing::EntityNode*, Ogre::Entity*>::iterator&, int)> f)
+{
+	mEntities.setCallback(f);
 }
 
 

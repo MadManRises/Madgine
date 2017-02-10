@@ -25,7 +25,9 @@ private:
 public:
     static Entity *entityFromMovable(Ogre::MovableObject *o);
 
-	Entity(const Entity&) = delete;
+	Entity(const Entity&);
+	Entity(Entity &&);
+
     Entity(Ogre::SceneNode *node,
            const Scripting::Parsing::EntityNode *behaviour, Ogre::Entity *obj);
     ~Entity();

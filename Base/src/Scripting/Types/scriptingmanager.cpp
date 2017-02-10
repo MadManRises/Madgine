@@ -4,6 +4,8 @@
 #include "globalapi.h"
 #include "exceptionmessages.h"
 
+#include "TopLevelIds.h"
+
 namespace Engine {
 namespace Scripting {
 
@@ -11,7 +13,7 @@ namespace Scripting {
 
 
 	ScriptingManager::ScriptingManager(Parsing::ScriptParser *scriptParser) :
-		RefScopeTopLevelSerializableUnit(Serialize::SCRIPTING_MANAGER),
+		RefScopeTopLevelSerializableUnit(SCRIPTING_MANAGER),
 		mGlobalScope(scriptParser),	
 		mScriptParser(scriptParser)
 	{

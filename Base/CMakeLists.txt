@@ -13,7 +13,7 @@ set(CMAKE_MODULE_PATH
 
 set(sources "")
 FolderSources(sources "" "")
-FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h uniquecomponent.h uniquecomponentcollector.h)
+FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h TopLevelIds.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources src App contextmasks.h)
 	FolderSources(sources src Scene scenemanager.cpp scenemanager.h scenecomponent.cpp scenecomponent.h)
 	FolderSources(sources src Scripting)
