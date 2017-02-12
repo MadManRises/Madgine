@@ -42,13 +42,14 @@ endif (BUILD_TESTS)
 
 add_subdirectory(Base)
 add_subdirectory(Ogre)
+add_subdirectory(Server)
 
 
 # Export Configuration
 # ===============================
  
 # Add all targets to the build-tree export set
-export(TARGETS OgreMadgine Base
+export(TARGETS OgreMadgine Base MadgineServer
   FILE "${PROJECT_BINARY_DIR}/MadgineTargets.cmake")
  
 # Export the package for use from the build-tree
@@ -59,8 +60,10 @@ export(PACKAGE Madgine)
 #file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
 #   "${INSTALL_INCLUDE_DIR}")
 # ... for the build tree
-get_property(dirs DIRECTORY ${MADGINE_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+get_property(dirs DIRECTORY ${OGREMADGINE_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 set(CONF_INCLUDE_DIRS "${dirs}")
+get_property(dirs DIRECTORY ${SERVER_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+set(CONF_INCLUDE_DIRS ${CONF_INCLUDE_DIRS} "${dirs}")
 configure_file(CMake/MadgineConfig.cmake.in
   "${PROJECT_BINARY_DIR}/MadgineConfig.cmake" @ONLY)
 # ... for the install tree

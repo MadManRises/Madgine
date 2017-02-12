@@ -14,5 +14,5 @@ if(NOT TARGET Madgine AND NOT Madgine_BINARY_DIR)
 endif()
  
 # These are IMPORTED targets created by MadgineTargets.cmake
-set(MADGINE_LIBRARIES OgreMadgine)
+set(MADGINE_LIBRARIES OgreMadgine MadgineServer)
 set(MADGINE_EXECUTABLE )

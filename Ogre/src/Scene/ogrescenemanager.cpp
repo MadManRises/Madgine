@@ -2,7 +2,7 @@
 
 #include "OgreSceneManager.h"
 
-#include "Entity/entity.h"
+#include "Entity/ogreentity.h"
 
 #include "exceptionmessages.h"
 
@@ -25,6 +25,8 @@
 #include "Serialize\ogreSerialize.h"
 
 #include "Scripting\Parsing\scriptparser.h"
+
+
 
 namespace Engine {
 
@@ -386,17 +388,17 @@ void OgreSceneManager::writeScene(Serialize::SerializeOutStream & out) const
 	writeState(out);
 }
 
-void OgreSceneManager::makeLocalCopy(Entity::Entity & e)
+void OgreSceneManager::makeLocalCopy(Entity::OgreEntity & e)
 {
 	mLocalEntities.emplace_back(e);
 }
 
-void OgreSceneManager::makeLocalCopy(Entity::Entity && e)
+void OgreSceneManager::makeLocalCopy(Entity::OgreEntity && e)
 {
-	mLocalEntities.emplace_back(std::forward<Entity::Entity>(e));
+	mLocalEntities.emplace_back(std::forward<Entity::OgreEntity>(e));
 }
 
-void OgreSceneManager::setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::Entity, Ogre::SceneNode*, const Scripting::Parsing::EntityNode*, Ogre::Entity*>::iterator&, int)> f)
+void OgreSceneManager::setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::OgreEntity, const Scripting::Parsing::EntityNode*, Ogre::SceneNode*, Ogre::Entity*>::iterator&, int)> f)
 {
 	mEntities.setCallback(f);
 }
@@ -419,7 +421,7 @@ const std::vector<Ogre::SceneNode*> &OgreSceneManager::terrainEntities()
 	return mTerrainEntities;
 }
 
-std::tuple<Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & name, const std::string & meshName, const std::string & behaviour)
+std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
 
 	std::string actualName = name.empty() ? generateUniqueName() : name;
@@ -438,13 +440,13 @@ std::tuple<Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Enti
 		behaviourNode = &Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour);
 	}
 
-	return std::make_tuple(node, behaviourNode, mesh);
+	return std::make_tuple(behaviourNode, node, mesh);
 	
 }
 
-Entity::Entity *OgreSceneManager::createEntity(const std::string &name, const std::string &meshName, const std::string &behaviour, const Scripting::ArgumentList &args)
+Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args)
 {
-	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(name, meshName, behaviour));
+	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(behaviour, name, meshName));
 	e.init(args);
 	return &e;
 }
@@ -533,29 +535,6 @@ bool OgreSceneManager::rayToTerrainPoint(const Ogre::Ray &ray,
     
 	return RaycastFromPoint(ray, result, mask);
     
-}
-
-void OgreSceneManager::update(float timeSinceLastFrame, App::ContextMask mask)
-{
-
-	{
-		PROFILE("Entities");
-		if (mask & App::ContextMask::SceneContext) {
-			for (Entity::Entity &e : mEntities) {
-				e.update(timeSinceLastFrame);
-			}
-		}
-	}
-
-	SceneManager::update(timeSinceLastFrame, mask);
-
-    removeQueuedEntities();
-}
-
-
-void OgreSceneManager::removeLater(Entity::Entity *e)
-{
-    mEntityRemoveQueue.push_back(e);
 }
 
 

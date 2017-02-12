@@ -31,6 +31,13 @@ public:
 		return mComponents;
 	}
 
+	static std::list<void*> registeredComponentsHashes() {
+		std::list<void*> result;
+		for (std::function<std::unique_ptr<Base>()> &f : sComponents()) {
+			result.push_back(&f);
+		}
+		return result;
+	}
 
 private:
     template <class T, class _Base>

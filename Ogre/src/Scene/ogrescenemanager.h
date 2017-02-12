@@ -2,15 +2,13 @@
 
 #include "Resources/Shading/shadercollector.h"
 
-#include "Entity\masks.h"
-
-
-#include "Entity\entity.h"
+#include "Entity\ogreentity.h"
 
 #include "Serialize\Container\list.h"
 
 #include "Scene\scenemanager.h"
 
+#include "Scene\Entity\masks.h"
 
 namespace Engine {
 namespace Scene {
@@ -28,7 +26,6 @@ public:
     virtual void init() override;
 	virtual void finalize() override;
 
-	void update(float timeSinceLastFrame, App::ContextMask mask);
 	
     void onLoad();
 
@@ -46,12 +43,12 @@ public:
 	const Ogre::SceneNode *terrain();
 	Ogre::TerrainGroup *terrainGroup() const;
 
-	std::tuple<Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*> createEntityData(const std::string &name, const std::string &meshName, const std::string &behaviour);
+	std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
 	
-	Entity::Entity *createEntity(const std::string &name = "", const std::string &meshName = "", const std::string &behaviour = "", const Scripting::ArgumentList &args = {});
+	Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {});
 	std::list<Entity::Entity *> entities();
 	Entity::Entity *findEntity(const std::string &name);
-	void removeLater(Entity::Entity *e);
+	
 
 
 
@@ -92,10 +89,10 @@ public:
 
 	static constexpr const float sSceneRasterSize = .2f;
 	
-	void makeLocalCopy(Entity::Entity &e);
-	void makeLocalCopy(Entity::Entity &&e);
+	void makeLocalCopy(Entity::OgreEntity &e);
+	void makeLocalCopy(Entity::OgreEntity &&e);
 
-	void setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::Entity, Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*>::iterator &, int)> f);
+	void setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::OgreEntity, const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*>::iterator &, int)> f);
 
 protected:
 
@@ -135,10 +132,10 @@ private:
 	Ogre::TexturePtr mGameTexture;
 
 
-	Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicy::masterOnly, Ogre::SceneNode *, const Scripting::Parsing::EntityNode *, Ogre::Entity*> mEntities;
-	std::list<Entity::Entity> mLocalEntities;
+	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> mEntities;
+	std::list<Entity::OgreEntity> mLocalEntities;
 
-    std::list<Entity::Entity *> mEntityRemoveQueue;
+
 
     
 

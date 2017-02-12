@@ -26,7 +26,7 @@ FolderSources(sources "" src forward.h madginelib.h Ogrememory.h ogreuniquecompo
 	FolderSources(sources src Input InputHandler.h OISInputHandler.cpp OISInputHandler.h)
 	FolderSources(sources src Math bounds.cpp bounds.h)
 	FolderSources(sources src Scene ingameoverlay.cpp ingameoverlay.h ogrescenemanager.cpp ogrescenemanager.h scenetexturecomponent.cpp scenetexturecomponent.h)
-	    FolderSources(sources Scene Entity baseentitycomponent.cpp baseentitycomponent.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
+	    FolderSources(sources Scene Entity ogreentity.cpp ogreentity.h)
 	FolderSources(sources src Os os.h windows.cpp)
 	FolderSources(sources src Resources ResourceLoader.cpp ResourceLoader.h)
 	    FolderSources(sources Resources Shading shadercollector.cpp shadercollector.h shaderimplementation.h)

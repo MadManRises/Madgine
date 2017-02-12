@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Serialize\ogreSerialize.h"
-
 #include "Scripting/Types/scopeimpl.h"
 
 #include "baseentitycomponent.h"
@@ -17,48 +15,40 @@ namespace Entity {
 
 
 
-class OGREMADGINE_EXPORT Entity : public Scripting::ScopeImpl<Entity>
+class MADGINE_BASE_EXPORT Entity : public Scripting::ScopeImpl<Entity>
 {
 private:
-    typedef Ogre::unique_ptr<BaseEntityComponent> (Entity::*ComponentBuilder)();
+    typedef std::unique_ptr<BaseEntityComponent> (Entity::*ComponentBuilder)();
 
 public:
-    static Entity *entityFromMovable(Ogre::MovableObject *o);
 
 	Entity(const Entity&);
 	Entity(Entity &&);
 
-    Entity(Ogre::SceneNode *node,
-           const Scripting::Parsing::EntityNode *behaviour, Ogre::Entity *obj);
+    Entity(const Scripting::Parsing::EntityNode *behaviour);
     ~Entity();
 
     void init(const Scripting::ArgumentList &args = {});
 	void remove();
 
-	void positionChanged(const Ogre::Vector3 &dist);
-	void update(float timeSinceLastFrame);
-
-	Ogre::SceneNode *createDecoratorNode(bool centered, float height = 0.0f);
-	void destroyDecoratorNode(Ogre::SceneNode* node);
-
-	Ogre::SceneNode *getNode();
-	Ogre::Entity *getObject();
-	const Ogre::Vector3 &getPosition() const;
-	Ogre::Vector3 getCenter() const;
-	Ogre::Vector2 getPosition2D() const;
-	Ogre::Vector2 getCenter2D() const;
-	const Ogre::Quaternion &getOrientation() const;
-	const Ogre::Vector3 &getScale() const;
+	virtual std::array<float, 3> getPosition() const = 0;
+	virtual std::array<float, 3> getCenter() const = 0;
+	std::array<float, 2> getPosition2D() const;
+	std::array<float, 2> getCenter2D() const;
+	virtual std::array<float, 4> getOrientation() const = 0;
+	virtual std::array<float, 3> getScale() const = 0;
 
 	virtual std::string getIdentifier() override;
-	std::string getName() const;
+	virtual std::string getName() const = 0;
+	virtual std::string getObjectName() const = 0;
 
-	void setObjectVisible(bool b);
+	virtual void setObjectVisible(bool b) = 0;
 
-	void setPosition(const Ogre::Vector3 &v);
-	void setScale(const Ogre::Vector3 &scale);
-	void translate(const Ogre::Vector3 &v);
-	void rotate(const Ogre::Quaternion &q);
+	virtual void setPosition(const std::array<float, 3> &v) = 0;
+	virtual void setScale(const std::array<float, 3> &scale) = 0;
+	virtual void setOrientation(const std::array<float, 4> &orientation) = 0;
+	virtual void translate(const std::array<float, 3> &v) = 0;
+	virtual void rotate(const std::array<float, 4> &q) = 0;
 
     void onLoad();
 
@@ -127,7 +117,7 @@ private:
 
 
 	std::tuple<std::unique_ptr<BaseEntityComponent>> createComponent(const std::string &name);
-	BaseEntityComponent *addComponentImpl(Ogre::unique_ptr<BaseEntityComponent> &&component);
+	BaseEntityComponent *addComponentImpl(std::unique_ptr<BaseEntityComponent> &&component);
 
 	template <class T>
 	class ComponentRegistrator {
@@ -144,15 +134,9 @@ private:
 	friend class EntityComponent;
 
 
-    const Scripting::Parsing::EntityNode *mDescription;
-    
-	Ogre::SceneNode *mNode;
-    Ogre::SceneNode *mDecoratorNode;
-	Ogre::Entity *mObject;
-    
-    Ogre::Vector3 mLastPosition;
+    const Scripting::Parsing::EntityNode *mDescription;    
 
-	Serialize::ObservableSet<Ogre::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, Ogre::unique_ptr<BaseEntityComponent>> mComponents;
+	Serialize::ObservableSet<std::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, std::unique_ptr<BaseEntityComponent>> mComponents;
     //std::set<Ogre::unique_ptr<BaseEntityComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){

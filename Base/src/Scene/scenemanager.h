@@ -23,7 +23,7 @@ namespace Engine {
 			Scripting::Scope *createSceneStruct();
 			Scripting::Scope *createSceneList();
 
-			virtual Entity::Entity *createEntity(const std::string &name = "", const std::string &mesh = "", const std::string &behaviour = "", const Scripting::ArgumentList &args = {}) = 0;
+			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
 			virtual Entity::Entity *findEntity(const std::string &name) = 0;
 
 			virtual void init() override;
@@ -40,10 +40,16 @@ namespace Engine {
 
 
 			////FOR LAUNCHER
-			std::set<BaseSceneComponent*> getComponents();
+			virtual std::list<Entity::Entity*> entities() = 0;
+
+			void removeLater(Entity::Entity *e);
 
 		protected:
 			std::string generateUniqueName();
+
+			virtual void removeQueuedEntities() = 0;
+
+			std::list<Entity::Entity *> mEntityRemoveQueue;
 
 		private:
 			size_t mItemCount;

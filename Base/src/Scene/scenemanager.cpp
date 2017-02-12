@@ -91,22 +91,22 @@ namespace Engine {
 					component->update(timeSinceLastFrame, mask);
 				}
 			}
+
+			removeQueuedEntities();
 		}
 
-
-		std::set<BaseSceneComponent*> SceneManager::getComponents()
-		{
-			std::set<BaseSceneComponent*> result;
-			for (const std::unique_ptr<BaseSceneComponent> &e : mSceneComponents) {
-				result.insert(e.get());
-			}
-			return result;
-		}
 
 		std::string SceneManager::generateUniqueName()
 		{
 			return std::string("Madgine_AutoGen_Name_") + std::to_string(++mItemCount);
 		}
+
+
+		void SceneManager::removeLater(Entity::Entity *e)
+		{
+			mEntityRemoveQueue.push_back(e);
+		}
+
 
 	}
 }

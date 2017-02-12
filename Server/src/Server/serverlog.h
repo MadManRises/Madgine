@@ -1,23 +1,20 @@
 #pragma once
 
-#include "Util/UtilMethods.h"
+#include "Util\UtilMethods.h"
 
 namespace Engine {
-	namespace Util {
+	namespace Server {
 
-
-		class OGREMADGINE_EXPORT OgreUtilLog : public ::Util::Log {
+		class MADGINE_SERVER_EXPORT ServerLog : public ::Util::Log {
 		public:
-			OgreUtilLog(const std::string &name);
-			virtual ~OgreUtilLog();
+			ServerLog(const std::string &name);
 
 			// Inherited via Log
 			virtual void log(const std::string & msg, ::Util::MessageType lvl, const std::list<::Util::TraceBack>& traceBack = {}) override;
 			virtual std::string getName() override;
 
 		private:
-			Ogre::Log *mLog;
-			
+			std::string mName;
 		};
 
 	}

@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "baselib.h"
 #include "baseentitycomponent.h"
 #include "entity.h"
 
@@ -25,44 +25,42 @@ Entity &BaseEntityComponent::getEntity() const
 }
 
 
-void BaseEntityComponent::positionChanged(const Ogre::Vector3 &){}
-
-Ogre::Vector2 BaseEntityComponent::getPosition2D()
+std::array<float, 2> BaseEntityComponent::getPosition2D()
 {
     return mEntity.getPosition2D();
 }
 
-void BaseEntityComponent::setPosition(const Ogre::Vector3 & pos)
+void BaseEntityComponent::setPosition(const std::array<float, 3> & pos)
 {
 	mEntity.setPosition(pos);
 }
 
-const Ogre::Vector3 &BaseEntityComponent::getPosition()
+std::array<float, 3> BaseEntityComponent::getPosition()
 {
     return mEntity.getPosition();
 }
 
-Ogre::Vector2 BaseEntityComponent::getCenter2D()
+std::array<float, 2> BaseEntityComponent::getCenter2D()
 {
 	return mEntity.getCenter2D();
 }
 
-Ogre::Vector3 BaseEntityComponent::getCenter()
+std::array<float, 3> BaseEntityComponent::getCenter()
 {
 	return mEntity.getCenter();
 }
 
-const Ogre::Quaternion & BaseEntityComponent::getOrientation()
+std::array<float, 4> BaseEntityComponent::getOrientation()
 {
 	return mEntity.getOrientation();
 }
 
-void BaseEntityComponent::setScale(const Ogre::Vector3 & scale)
+void BaseEntityComponent::setScale(const std::array<float, 3> & scale)
 {
 	mEntity.setScale(scale);
 }
 
-const Ogre::Vector3 & BaseEntityComponent::getScale()
+std::array<float, 3> BaseEntityComponent::getScale()
 {
 	return mEntity.getScale();
 }

@@ -38,5 +38,10 @@ namespace Engine {
 			mLog->logMessage(msg.c_str(), level);
 		}
 
+		std::string OgreUtilLog::getName()
+		{
+			return mLog->getName();
+		}
+
 	}
 }
