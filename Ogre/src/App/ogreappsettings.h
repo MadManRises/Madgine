@@ -1,5 +1,6 @@
 #pragma once
 
+#include "App\appsettings.h"
 
 namespace Engine{
 namespace App{
@@ -7,12 +8,12 @@ namespace App{
 /**
  * Contains the information needed to start the Application.
  */
-struct AppSettings {
+struct OgreAppSettings : public AppSettings {
 
 	/**
 	 * Sets up default values for the settings.
 	 */
-	AppSettings() :
+	OgreAppSettings() :
 		mPluginsFile("plugins.cfg"),
 		mUseExternalSettings(false),
 		mInput(0)
@@ -25,10 +26,10 @@ struct AppSettings {
 	 */
 	std::string mPluginsFile;
 
-    /**
-     * The root-directory to look for resources.
-     */
-    std::string mRootDir;
+	/**
+	* The root-directory to look for resources.
+	*/
+	std::string mRootDir;
 
 	/**
 	 * The name of the Application-window.

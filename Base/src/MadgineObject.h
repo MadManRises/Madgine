@@ -14,7 +14,7 @@ namespace Engine {
 		public:
 			virtual const char *getName() = 0;
 
-			virtual void init();
+			virtual bool init();
 			virtual void finalize();
 
 			ObjectState getState();

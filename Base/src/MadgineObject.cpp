@@ -26,13 +26,14 @@ namespace Engine {
 			MadgineObjectCollector::getSingleton().remove(this);
 		}
 
-		void BaseMadgineObject::init()
+		bool BaseMadgineObject::init()
 		{
 			if (mState != ObjectState::CONSTRUCTED) {
 				LOG_WARNING(std::string("Double initializeing Object: ") + getName());
-				return;
+				return false;
 			}
 			mState = ObjectState::INITIALIZED;
+			return true;
 		}
 
 		void BaseMadgineObject::finalize()

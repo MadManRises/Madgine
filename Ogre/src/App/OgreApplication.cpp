@@ -2,8 +2,8 @@
 
 #include "madginelib.h"
 
-#include "Application.h"
-#include "appsettings.h"
+#include "OgreApplication.h"
+#include "ogreappsettings.h"
 #include "GUI\MyGUI\MyGUILauncher.h"
 #include "Util\Util.h"
 
@@ -21,50 +21,50 @@
 
 #include "Serialize\serializemanager.h"
 
-namespace Engine {
+#include "OgreWindowEventUtilities.h"
 
-	API_IMPL(App::Application, &shutdown);
+namespace Engine {
 
 namespace App {
 
-Application::Application() :
+	OgreApplication::OgreApplication() :
 	mSettings(0),
-	mShutDown(true),
-	mPaused(false),
 	mWindow(0),
 	mRoot(0),
 	mSceneMgr(0),
 	mGUI(0),
 	mUI(0),
 	mLoader(0),
-	mScriptingMgr(0),
 	mConfig(0),
 	mUtil(0),
-	mInput(0)
+	mInput(0),
+		mPaused(false),
+		mSceneMgrInitialized(false),
+		mGUIInitialized(false),
+		mUIInitialized(false)
 {
 
 }
 
-Application::~Application()
+	OgreApplication::~OgreApplication()
 {
 	if (mInput && !mSettings->mInput)
 		delete mInput;
 	if (mUI) {
-		mUI->finalize();
+		if (mUIInitialized)
+			mUI->finalize();
 		delete mUI;
 	}
 	if (mGUI) {
 		Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
-		mGUI->finalize();
+		if (mGUIInitialized)
+			mGUI->finalize();
 		delete mGUI;
 	}
 	if (mSceneMgr) {
-		mSceneMgr->finalize();
+		if (mSceneMgrInitialized)
+			mSceneMgr->finalize();
 		delete mSceneMgr;
-	}
-	if (mScriptingMgr) {
-		mScriptingMgr->finalize();
-		delete mScriptingMgr;
 	}
 	if (mLoader)
 		delete mLoader;
@@ -76,7 +76,7 @@ Application::~Application()
 		delete mRoot;
 }
 
-void Application::setup(const AppSettings &settings)
+void OgreApplication::setup(const OgreAppSettings &settings)
 {
 	mSettings = &settings;
 
@@ -95,35 +95,44 @@ void Application::setup(const AppSettings &settings)
 
 	mUtil = OGRE_NEW Util::Util(mWindow);
 
-	_setup();
-
+	Application::setup(settings);
 }
 
-void Application::init()
+bool OgreApplication::init()
 {
-	mGUI->init();
+	mGUIInitialized = mGUI->init();
+	if (!mGUIInitialized)
+		return false;
 
-	mScriptingMgr->globalScope()->callMethodCatch("openMainLoadingScreen");
+	mRoot->addFrameListener(this);
+
+	std::pair<bool, ValueType> res = Scripting::GlobalScope::getSingleton().callMethodCatch("afterViewInit");
+	if (res.first && !res.second.isNull() && (!res.second.isBool() || !res.second.asBool()))
+		return false;
 
 	mLoader->load();
 
-	mSceneMgr->init(); // Initialise all Scene-Components
+	mSceneMgrInitialized = mSceneMgr->init();
+	if (!mSceneMgrInitialized)
+		return false; // Initialise all Scene-Components
 	
-	mUI->init(); // Initialise all Handler
+	mUIInitialized = mUI->init();
+	if (!mUIInitialized)
+		return false; // Initialise all Handler
 	
-	mScriptingMgr->init();
+	if (!Application::init())
+		return false;
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows
 
-	mRoot->addFrameListener(this);
+	return true;
 }
 
-int Application::go()
+int OgreApplication::go()
 {
-	mShutDown = false;
 	mPaused = false;
 
-	if (!mScriptingMgr->globalScope()->callMethodCatch("init"))
+	if (!Scripting::GlobalScope::getSingleton().callMethodCatch("init").first)
 		return -1;
 
 	mRoot->startRendering();
@@ -133,20 +142,15 @@ int Application::go()
 	return 0;
 }
 
-void Application::shutdown()
+void OgreApplication::shutdown()
 {
 	mConfig->save();
-	mShutDown = true;
+	Application::shutdown();
 }
 
-void Application::callSafe(std::function<void()> f)
+bool OgreApplication::frameStarted(const Ogre::FrameEvent & fe)
 {
-	mSafeCallQueue.emplace(f);
-}
-
-bool Application::frameStarted(const Ogre::FrameEvent & fe)
-{
-	if (mWindow->isClosed() || mShutDown)
+	if (mWindow->isClosed())
 		return false;
 
 	mUtil->update();
@@ -156,18 +160,33 @@ bool Application::frameStarted(const Ogre::FrameEvent & fe)
 	return true;
 }
 
-bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
+
+bool OgreApplication::update(float timeSinceLastFrame) {
+	Ogre::WindowEventUtilities::messagePump();
+	return mRoot->renderOneFrame();
+}
+
+bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
 {
 	mUtil->profiler()->stopProfiling(); // PreRender
 
-	if (mWindow->isClosed() || mShutDown) {
+	mUtil->profiler()->startProfiling("Rendering");
+
+	if (mWindow->isClosed() || !Application::update(fe.timeSinceLastFrame)) {		
 		mUtil->profiler()->stopProfiling(); // Frame
 		return false;
 	}
 
-	mUtil->profiler()->startProfiling("Rendering");
+	if (!mPaused){
 
-	if (!mPaused) {
+		try {
+			PROFILE("GUI");
+			mGUI->update(fe.timeSinceLastFrame);
+		}
+		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during GUI-Update!");
+			LOG_EXCEPTION(e);
+		}
 
 		try{
 			PROFILE("Input");
@@ -178,45 +197,42 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 			LOG_EXCEPTION(e);
 		}
 
-		try{
-			PROFILE("GUI");
-			mGUI->update(fe.timeSinceLastFrame);
-		}
-		catch (const std::exception &e) {
-			LOG_ERROR("Unhandled Exception during GUI-Update!");
-			LOG_EXCEPTION(e);
-		}
+	}
 
-		try{
-			PROFILE("UIManager");
-			mUI->update(fe.timeSinceLastFrame);
-		}
-		catch (const std::exception &e) {
-			LOG_ERROR("Unhandled Exception during UI-Update!");
-			LOG_EXCEPTION(e);
-		}
+	return true;
+}
 
-		try{
+bool OgreApplication::frameEnded(const Ogre::FrameEvent & fe)
+{
+	mUtil->profiler()->stopProfiling(); // Rendering
+	mUtil->profiler()->stopProfiling(); // Frame
+
+	if (mWindow->isClosed())
+		return false;
+
+	return true;
+}
+
+bool OgreApplication::fixedUpdate(float timeStep)
+{
+	if (!mPaused) {
+
+		try {
 			PROFILE("SceneManager");
-			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
+			mSceneMgr->update(timeStep, mUI->currentContext());
 		}
 		catch (const std::exception &e) {
 			LOG_ERROR("Unhandled Exception during Scene-Update!");
 			LOG_EXCEPTION(e);
 		}
 
-		{
-			PROFILE("SafeCall");
-			while (!mSafeCallQueue.empty()) {
-				try {
-					mSafeCallQueue.front()();
-				}
-				catch (const std::exception &e) {
-					LOG_ERROR("Unhandled Exception during SafeCall!");
-					LOG_EXCEPTION(e);
-				}
-				mSafeCallQueue.pop();
-			}
+		try {
+			PROFILE("UIManager");
+			mUI->update(timeStep);
+		}
+		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during UI-Update!");
+			LOG_EXCEPTION(e);
 		}
 
 	}
@@ -224,38 +240,27 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent & fe)
 	return true;
 }
 
-bool Application::frameEnded(const Ogre::FrameEvent & fe)
-{
-	mUtil->profiler()->stopProfiling(); // Rendering
-	mUtil->profiler()->stopProfiling(); // Frame
 
-	if (mWindow->isClosed() || mShutDown)
-		return false;
-
-	return true;
-}
-
-
-void Application::setWindowProperties(bool fullscreen, unsigned int width, unsigned int height)
+void OgreApplication::setWindowProperties(bool fullscreen, unsigned int width, unsigned int height)
 {
 	mWindow->setFullscreen(fullscreen, width, height);
 	resizeWindow();
 }
 
-Ogre::RenderWindow * Application::renderWindow()
+Ogre::RenderWindow * OgreApplication::renderWindow()
 {
 	return mWindow;
 }
 
 
-void Application::_clear()
+void OgreApplication::_clear()
 {
 	mSceneMgr->clear();
-	mScriptingMgr->clear();
+	Application::_clear();
 	mUI->clear();
 }
 
-void Application::_setupOgre()
+void OgreApplication::_setupOgre()
 {
 
 	mRoot = OGRE_NEW Ogre::Root(mSettings->mPluginsFile); // Creating Root
@@ -264,14 +269,11 @@ void Application::_setupOgre()
 
 }
 
-void Application::_setup()
+void OgreApplication::_setup()
 {
 	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
 
-	// Instantiate the GlobalScope class
-	mScriptingMgr = new Scripting::ScriptingManager(mLoader->scriptParser());
-
-	mScriptingMgr->globalScope()->addAPI(this);
+	Application::_setup();
 
 	// Create SceneManager
 	mSceneMgr = OGRE_NEW Scene::OgreSceneManager(mRoot);
@@ -291,7 +293,7 @@ void Application::_setup()
 
 }
 
-void Application::resizeWindow()
+void OgreApplication::resizeWindow()
 {
 	if (mWindow) {
 		mWindow->windowMovedOrResized();
@@ -303,7 +305,7 @@ void Application::resizeWindow()
 	}
 }
 
-void Application::renderFrame()
+void OgreApplication::renderFrame()
 {
 	mGUI->renderSingleFrame();
 	mWindow->update();

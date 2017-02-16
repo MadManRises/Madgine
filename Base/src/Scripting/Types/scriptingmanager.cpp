@@ -12,18 +12,16 @@ namespace Scripting {
 	API_IMPL(ScriptingManager, &log, &createGlobalStruct, &createGlobalList, &createGlobalArray, &debug, &scene, &getPrototype);
 
 
-	ScriptingManager::ScriptingManager(Parsing::ScriptParser *scriptParser) :
+	ScriptingManager::ScriptingManager() :
 		RefScopeTopLevelSerializableUnit(SCRIPTING_MANAGER),
-		mGlobalScope(scriptParser),	
-		mScriptParser(scriptParser)
+		mScriptParser(&Parsing::ScriptParser::getSingleton())
 	{
 		//Ogre::LogManager::getSingleton().createLog("Scripting.log");
 		mGlobalScope.addAPI(this);
 	}
 
-void ScriptingManager::init() {
-	MadgineObject::init();
-	mGlobalScope.init();
+bool ScriptingManager::init() {
+	return mGlobalScope.init() && MadgineObject::init();
 }
 
 void ScriptingManager::finalize()

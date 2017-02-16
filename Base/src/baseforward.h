@@ -14,6 +14,8 @@ namespace Engine {
 
 	namespace App {
 		enum class ContextMask : unsigned int;
+		struct AppSettings;
+		class Application;
 	}
 
 	namespace UI {

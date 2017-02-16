@@ -1,12 +1,12 @@
 
 
-#include "madginelib.h"
+#include "baselib.h"
 #include "os.h"
 #include "windows.h"
 
 namespace Engine {
 
-/*std::list<std::string> Os::filesMatchingPattern(const std::string &pattern)
+std::list<std::string> Os::filesMatchingPattern(const std::string &path, const std::string &pattern)
 {
 
     std::list<std::string> result;
@@ -14,11 +14,8 @@ namespace Engine {
     WIN32_FIND_DATAA FindFileData;
     HANDLE hFind;
 
-    std::string fullPath = localPath(pattern);
 
-    std::string path = fullPath.substr(0, fullPath.rfind('\\') + 1);
-
-    hFind = FindFirstFileA(fullPath.c_str(), &FindFileData);
+    hFind = FindFirstFileA((path + pattern).c_str(), &FindFileData);
     while (hFind != INVALID_HANDLE_VALUE) {
         result.emplace_back(path + FindFileData.cFileName);
 
@@ -30,7 +27,7 @@ namespace Engine {
 
     return result;
 
-}*/
+}
 
 void Os::createDir(const std::string &dirName){
     CreateDirectoryA(dirName.c_str(), NULL);

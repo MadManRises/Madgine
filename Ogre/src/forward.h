@@ -13,7 +13,7 @@ namespace Engine {
 
 	namespace App {
 		class ConfigSet;
-		struct AppSettings;
+		struct OgreAppSettings;
 		enum class ContextMask : unsigned int;
 		class Application;
 	}

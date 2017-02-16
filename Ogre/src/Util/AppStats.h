@@ -35,7 +35,8 @@ namespace Engine {
 			TrackerAccessor::AllocationMap mMemoryImage;
 			TrackerAccessor &mTracker;
 			Engine::Serialize::Observed<size_t> mOgreMemory;
-			Engine::Serialize::Action<Engine::Serialize::ActionPolicy::standard> startTrack, stopTrack;
+			Engine::Serialize::Action<decltype(&AppStats::startTrackImpl), &AppStats::startTrackImpl, Engine::Serialize::ActionPolicy::standard> startTrack;
+			Engine::Serialize::Action<decltype(&AppStats::stopTrackImpl), &AppStats::stopTrackImpl, Engine::Serialize::ActionPolicy::standard> stopTrack;
 #endif		
 
 			Ogre::RenderWindow *mWindow;

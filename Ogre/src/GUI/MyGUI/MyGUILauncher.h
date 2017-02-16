@@ -22,7 +22,7 @@ namespace Engine {
 				MyGUILauncher(Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr);
 				~MyGUILauncher();
 
-				virtual void init() override;
+				virtual bool init() override;
 				virtual void finalize() override;
 
 				// Inherited via GUISystem

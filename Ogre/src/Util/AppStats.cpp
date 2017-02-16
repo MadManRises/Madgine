@@ -12,8 +12,8 @@ namespace Engine {
 			mAverageFPS(this),
 #if OGRE_MEMORY_TRACKER
 			mOgreMemory(this),
-			startTrack(this, &AppStats::startTrackImpl),
-			stopTrack(this, &AppStats::stopTrackImpl),
+			startTrack(this),
+			stopTrack(this),
 			mTracker(static_cast<TrackerAccessor&>(Ogre::MemoryTracker::get())),
 #endif
 			mWindow(window)

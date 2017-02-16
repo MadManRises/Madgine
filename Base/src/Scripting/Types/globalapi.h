@@ -18,11 +18,11 @@ public:
 		mGlobalScope->removeAPI(this);
 	}
 
-	bool callGlobalMethod(const std::string &name, const ArgumentList &args = {}) {
+	std::pair<bool, ValueType> callGlobalMethod(const std::string &name, const ArgumentList &args = {}) {
 		return mGlobalScope->callMethodCatch(name, args);
 	}
 
-	bool callGlobalMethodIfAvailable(const std::string &name, const ArgumentList &args = {}) {
+	std::pair<bool, ValueType> callGlobalMethodIfAvailable(const std::string &name, const ArgumentList &args = {}) {
 		return mGlobalScope->callMethodIfAvailable(name, args);
 	}
 

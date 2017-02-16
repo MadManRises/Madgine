@@ -16,16 +16,14 @@ namespace Scripting {
 
 class MADGINE_BASE_EXPORT GlobalScopeImpl : public ScopeImpl<GlobalScopeImpl, GlobalScope>, public Singleton<GlobalScopeImpl> {
 public:
-    GlobalScopeImpl(Parsing::ScriptParser *scriptParser);
+    GlobalScopeImpl();
 
-	void init();
+	bool init();
 	void finalize();
 
 	void addAPI(BaseAPI *api);
 	void removeAPI(BaseAPI *api);
 
-    
-	bool hasScriptMethod(const std::string &name) override;
 	virtual void clear() override;
 
 	virtual ValueType methodCall(const std::string &name, const ArgumentList &args = {}) override;
@@ -34,16 +32,11 @@ public:
 
 	using Singleton<GlobalScopeImpl>::getSingleton;
 
-protected:    
-
-	virtual const Parsing::MethodNode &getMethod(const std::string &name) override;
 
 private:
 
     std::list<BaseAPI*> mAPIs;
 	UniqueComponentCollector<BaseGlobalAPIComponent> mGlobalAPIs;
-
-	Parsing::ScriptParser *mScriptParser;
 
 };
 

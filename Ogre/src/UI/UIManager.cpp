@@ -27,17 +27,20 @@ namespace Engine {
 		{			
 		}
 
-		void UIManager::init()
+		bool UIManager::init()
 		{
-			MadgineObject::init();
 
 			for (int i = 0; i < sMaxInitOrder; ++i)
 				for (const Ogre::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
-					handler->init(i);
+					if (!handler->init(i))
+						return false;
 
 			for (const Ogre::unique_ptr<UI::GameHandlerBase> &handler : mGameHandlers) {
-				handler->init();
+				if (!handler->init())
+					return false;
 			}
+
+			return MadgineObject::init();
 
 		}
 

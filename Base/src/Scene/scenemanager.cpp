@@ -14,6 +14,9 @@ namespace Engine {
 			RefScopeTopLevelSerializableUnit(SCENE_MANAGER),
 			mItemCount(0)
 		{
+			for (const std::unique_ptr<BaseSceneComponent> &comp : mSceneComponents) {
+				Serialize::UnitHelper<BaseSceneComponent>::setItemTopLevel(*comp, this);
+			}
 		}
 
 
@@ -34,13 +37,16 @@ namespace Engine {
 			return createList();
 		}
 
-		void SceneManager::init() {
+		bool SceneManager::init() {
 
-			MadgineObject::init();
+			if (!MadgineObject::init())
+				return false;
 
 			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
-				component->init();
+				if (!component->init())
+					return false;
 			}
+			return true;
 		}
 
 		void SceneManager::finalize() {
@@ -64,7 +70,7 @@ namespace Engine {
 		void SceneManager::saveComponentData(Serialize::SerializeOutStream &out) const
 		{
 			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
-				out << component->componentName();
+				out << component->getName();
 				component->writeState(out);
 			}
 			out << ValueType::EOL();
@@ -74,12 +80,10 @@ namespace Engine {
 		{
 			std::string componentName;
 			while (in.loopRead(componentName)) {
-				for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
-					if (component->componentName() == componentName) {
-						component->readState(in);
-						break;
-					}
-				}
+				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<BaseSceneComponent> &comp) {return comp->getName() == componentName; });
+				if (it == mSceneComponents.end())
+					throw 0;
+				(*it)->readState(in);
 			}
 		}
 

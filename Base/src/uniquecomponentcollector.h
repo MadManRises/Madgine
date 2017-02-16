@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Serialize\serializable.h"
+#include "Serialize\Container\unithelper.h"
 
 namespace Engine{
 
@@ -11,8 +13,9 @@ public:
 	void operator=(const UniqueComponentCollector &) = delete;
 
     UniqueComponentCollector(){
-        for (auto f : sComponents())
-            mComponents.emplace_back(f());
+		for (auto f : sComponents()) {
+			mComponents.emplace_back(f());
+		}
     }
 
     typename std::list<std::unique_ptr<Base>>::const_iterator begin() const {
@@ -39,7 +42,7 @@ public:
 		return result;
 	}
 
-private:
+protected:
     template <class T, class _Base>
     friend class UniqueComponent;
 
@@ -89,5 +92,6 @@ private:
 
     std::list<std::unique_ptr<Base>> mComponents;
 };
+
 
 }

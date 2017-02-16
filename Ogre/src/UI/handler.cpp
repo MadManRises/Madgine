@@ -57,11 +57,14 @@ void Handler::sizeChanged()
 {
 }
 
-void Handler::init()
+bool Handler::init()
 {
 	if (installToWindow(mUI->gui()->getWindowByName(mWindowName))) {
 		mWindows.clear();
-		BaseMadgineObject::init();
+		return BaseMadgineObject::init();
+	}
+	else {
+		return false;
 	}
 	
 }
@@ -73,12 +76,15 @@ void Handler::finalize()
 	BaseMadgineObject::finalize();
 }
 
-void Handler::init(GUI::Window *window)
+bool Handler::init(GUI::Window *window)
 {
 	if (installToWindow(window)) {
 		mWindows.clear();
-		BaseMadgineObject::init();
-	}	
+		return BaseMadgineObject::init();
+	}
+	else {
+		return false;
+	}
 }
 
 void Handler::injectMouseMove(GUI::MouseEventArgs &evt)

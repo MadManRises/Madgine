@@ -46,9 +46,10 @@ namespace Engine {
 				mCamera->getSceneManager()->destroyCamera(mCamera);
 			}
 
-			void MyGUILauncher::init()
+			bool MyGUILauncher::init()
 			{
-				GUISystem::init();
+				if (!GUISystem::init())
+					return false;
 				mGUI = new MyGUI::Gui;
 				mGUI->initialise("runTheme.xml");
 
@@ -65,6 +66,8 @@ namespace Engine {
 				mRootWindow = new MyGUIWindow(mInternRootWindow, this, 0);
 
 				setCursorVisibility(false);
+
+				return true;
 			}
 
 			void MyGUILauncher::finalize()

@@ -31,12 +31,14 @@ void BaseSceneComponent::update(float timeSinceLastFrame, App::ContextMask mask)
     }
 }
 
-void BaseSceneComponent::init()
+bool BaseSceneComponent::init()
 {
+	return BaseMadgineObject::init();
 }
 
 void BaseSceneComponent::finalize()
 {
+	BaseMadgineObject::finalize();
 }
 
 void BaseSceneComponent::setEnabled(bool b)

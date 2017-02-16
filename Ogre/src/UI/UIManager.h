@@ -22,7 +22,7 @@ namespace Engine {
 			UIManager(GUI::GUISystem *gui);
 			~UIManager();
 
-			virtual void init() override;
+			virtual bool init() override;
 			virtual void finalize() override;
 
 			void clear();

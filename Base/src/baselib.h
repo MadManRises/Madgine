@@ -10,5 +10,6 @@
 #include "baseforward.h"
 
 #include <set>
+#include <queue>
 
 #include "interfaceslib.h"

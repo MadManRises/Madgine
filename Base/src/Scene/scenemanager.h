@@ -26,7 +26,7 @@ namespace Engine {
 			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
 			virtual Entity::Entity *findEntity(const std::string &name) = 0;
 
-			virtual void init() override;
+			virtual bool init() override;
 			virtual void finalize() override;
 			
 			virtual void update(float timeSinceLastFrame, App::ContextMask context);

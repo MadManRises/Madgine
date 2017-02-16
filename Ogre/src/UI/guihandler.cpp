@@ -24,13 +24,15 @@ GuiHandlerBase::GuiHandlerBase(const std::string &windowName, WindowType type, c
 
 
 
-void GuiHandlerBase::init(int order)
+bool GuiHandlerBase::init(int order)
 {
-    if (mOrder == order)
-        init();
+	if (mOrder == order)
+		return init();
+	else
+		return true;
 }
 
-void GuiHandlerBase::init()
+bool GuiHandlerBase::init()
 {
 	GUI::Window *window = nullptr;
 
@@ -38,7 +40,7 @@ void GuiHandlerBase::init()
 		window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
 		if (!window){
 			LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
-			return;
+			return false;
 		}
 		else {
 			if (mType == WindowType::ROOT_WINDOW) {
@@ -47,9 +49,9 @@ void GuiHandlerBase::init()
 		}
     }
 	if (window)
-		Handler::init(window);
+		return Handler::init(window);
 	else
-		Handler::init();
+		return Handler::init();
 
 }
 

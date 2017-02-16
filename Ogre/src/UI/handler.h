@@ -34,7 +34,7 @@ namespace Engine {
 			Handler(const std::string &windowName);
 			virtual ~Handler() = default;
 
-			virtual void init();
+			virtual bool init();
 			virtual void finalize();
 
 			virtual void onMouseVisibilityChanged(bool b);
@@ -48,7 +48,7 @@ namespace Engine {
 			bool installToWindow(GUI::Window * w);
 
 		protected:
-			void init(GUI::Window *w);
+			bool init(GUI::Window *w);
 
 			void registerWindow(const WindowDescriber &des);
 

@@ -21,8 +21,8 @@ public:
     GuiHandlerBase(const std::string &windowName, WindowType type, const std::string &layoutFile = "", const std::string &parentName = WindowNames::rootWindow);
 
 
-    void init(int order);
-    virtual void init() override;
+    bool init(int order);
+    virtual bool init() override;
 	void finalize(int order);
 	virtual void finalize() override;
 

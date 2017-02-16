@@ -3,6 +3,7 @@
 
 
 #include "Scripting\Types\api.h"
+#include "App\application.h"
 
 namespace Engine {
 namespace App {
@@ -15,19 +16,19 @@ namespace App {
  * It implements Singleton, so there can only be one Application at a time per process.
  *
  */
-class OGREMADGINE_EXPORT Application : public Ogre::Singleton<Application>,
-	public Ogre::FrameListener, public Scripting::API<Application> {
+class OGREMADGINE_EXPORT OgreApplication : public Application, public Singleton<OgreApplication>,
+	public Ogre::FrameListener{
 public:
 	/**
 	 * Creates the Application.
 	 * 
 	 */
-    Application();
+	OgreApplication();
 	/**
 	 * Deletes all objects created by the Application.
 	 *
 	 */
-	virtual ~Application();
+	virtual ~OgreApplication();
 
 	/**
 	 * Loads all plugins listed in <code>settings.mPluginsFile</code>.
@@ -38,13 +39,13 @@ public:
 	 *
 	 * @param settings all necessary information to setup the Application
 	 */
-	virtual void setup(const AppSettings &settings);
+	void setup(const OgreAppSettings &settings);
 
 	/**
 	 * May only be called after a call to setup().
 	 * Initializes all Madgine-Components.
 	 */
-	virtual void init();
+	virtual bool init() override;
 	
 	/**
 	 * Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop. 
@@ -55,35 +56,7 @@ public:
 	 *
 	 * @return <code>0</code>, if the Application is started and shutdown properly; <code>-1</code> otherwise
 	 */
-	virtual int go();
-	/**
-	 * Marks the Application as shutdown. This causes the Renderloop to return within the next frame.
-	 */
-	virtual void shutdown();
-
-	/**
-	 * Convenience method, that creates the Application of type T (which defaults to Application), calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
-	 *
-	 * @return result of the call to go()
-	 * @param settings the settings for the Application
-	 */
-	template <class T = Application>
-	static int run(const AppSettings &settings)
-	{
-		T app;
-		app.setup(settings);
-		app.init();
-		return app.go();
-	}
-
-	/**
-	 * Enqueues a task to be performed within the end of the current frame. This can be used for two purposes:
-	 * - To modify a container while iterating over it (e.g. remove an entity inside of Entity::update(), which is called by iterating over all entities)
-	 * - To insert calls, that are not thread-safe, from another thread
-	 *
-	 * @param f a functional with the task to be executed
-	 */
-	virtual void callSafe(std::function<void()> f);
+	virtual int go() override;
 
 	/**
 	 * Sets the properties of the Renderwindow. Might have unexpected effects, when used as embedded window.
@@ -110,6 +83,14 @@ public:
 	 * Renders a single frame of the Application. Useful for rolling custom renderloops or updating screen during long calculations.(e.g. Loading Screen)
 	 */
 	virtual void renderFrame();
+	
+	virtual void shutdown() override;
+
+	using Singleton<OgreApplication>::getSingleton;
+
+
+	virtual bool update(float timeSinceLastFrame) override;
+
 
 protected:
 	/**
@@ -138,6 +119,8 @@ protected:
 	*/
 	virtual bool frameEnded(const Ogre::FrameEvent & fe) override;
 
+	virtual bool fixedUpdate(float timeStep) override;
+
 private:
 	virtual void _clear();
 	virtual void _setupOgre();
@@ -146,28 +129,30 @@ private:
 
 private:
 
-	const AppSettings *mSettings;
-	
-	bool mShutDown;
+	const OgreAppSettings *mSettings;
+
 	bool mPaused;
+
+	bool mSceneMgrInitialized;
+	bool mGUIInitialized;
+	bool mUIInitialized;
 
 	Ogre::RenderWindow								   *mWindow;
 
     Ogre::Root*                       mRoot;
-    Scene::OgreSceneManager*              mSceneMgr;
+    Scene::OgreSceneManager*          mSceneMgr;
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;
-    Scripting::ScriptingManager*      mScriptingMgr;
     ConfigSet*                        mConfig;
 	Util::Util*                       mUtil;
 	Input::InputHandler*              mInput;
 
 	HWND mHwnd;
 
-	std::queue<std::function<void()>> mSafeCallQueue;
-
 	
+	
+
 };
 
 

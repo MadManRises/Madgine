@@ -301,7 +301,7 @@ namespace Engine {
 			void MyGUIWindow::needMouse()
 			{
 				MyGUI::Widget *w = mWindow;
-				while (w && !w->getNeedMouseFocus()) {
+				while (w/* && !w->getNeedMouseFocus()*/) {
 					w->setNeedMouseFocus(true);
 					w = w->getParent();
 				}

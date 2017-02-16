@@ -22,13 +22,10 @@ public:
     virtual ~OgreSceneManager();
 
 	using Ogre::Singleton<OgreSceneManager>::getSingleton;
+	using Ogre::Singleton<OgreSceneManager>::getSingletonPtr;
 
-    virtual void init() override;
+    virtual bool init() override;
 	virtual void finalize() override;
-
-	
-    void onLoad();
-
 
 	void setGameTextureSize(const Ogre::Vector2 &size);
 	Ogre::TexturePtr getGameTexture();

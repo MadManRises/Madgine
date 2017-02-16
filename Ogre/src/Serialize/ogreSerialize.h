@@ -16,10 +16,9 @@ namespace Engine {
 		const constexpr static bool value = true;
 	};
 	
-	namespace Serialize {
+	template <>
+	struct externValueType<Ogre::Quaternion> {
+		const constexpr static bool value = true;
+	};
 
-		SerializeOutStream &operator << (SerializeOutStream &out, const Ogre::Quaternion &q);
-		SerializeInStream &operator >> (SerializeInStream &in, Ogre::Quaternion &q);
-
-	}
 }

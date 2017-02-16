@@ -3,7 +3,7 @@
 #include "configset.h"
 
 #include "Os\os.h"
-#include "Application.h"
+#include "OgreApplication.h"
 
 #include "Serialize/Streams/serializestream.h"
 #include "Serialize\serializemanager.h"
@@ -12,7 +12,7 @@ namespace Engine {
 namespace App {
 
 const bool ConfigSet::defaultFullScreen = false;
-const bool ConfigSet::defaultVSync = false;
+const bool ConfigSet::defaultVSync = true;
 const int ConfigSet::defaultResolutionWidth = 1024;
 const int ConfigSet::defaultResolutionHeight = 768;
 const int ConfigSet::defaultColorDepth = 32;
@@ -58,7 +58,7 @@ bool ConfigSet::getFullscreen()
 
 bool ConfigSet::getVSync()
 {
-    return mSettings[vSyncProperty].asBool(defaultFullScreen);
+    return mSettings[vSyncProperty].asBool(defaultVSync);
 }
 
 int ConfigSet::getResolutionWidth()
@@ -140,7 +140,7 @@ void ConfigSet::applyLanguage()
 
 void ConfigSet::updateWindow()
 {
-    Application::getSingleton().setWindowProperties(getFullscreen(), getResolutionWidth(),
+    OgreApplication::getSingleton().setWindowProperties(getFullscreen(), getResolutionWidth(),
                           getResolutionHeight());
 }
 

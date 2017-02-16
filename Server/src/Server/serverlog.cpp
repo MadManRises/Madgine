@@ -13,7 +13,7 @@ namespace Engine {
 
 		void ServerLog::log(const std::string & msg, Util::MessageType lvl, const std::list<Util::TraceBack>& traceBack)
 		{
-			std::cout << msg;
+			std::cout << msg << std::endl;
 		}
 
 		std::string ServerLog::getName()

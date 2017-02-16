@@ -56,7 +56,7 @@ OgreSceneManager::~OgreSceneManager()
 {
 }
 
-void OgreSceneManager::init()
+bool OgreSceneManager::init()
 {
 
 
@@ -87,7 +87,7 @@ void OgreSceneManager::init()
 
 	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
-	SceneManager::init();
+	return SceneManager::init();
 
 }
 
@@ -244,7 +244,7 @@ void OgreSceneManager::readTerrain(Serialize::SerializeInStream &in)
 		
 	}
 
-	if (mTerrainEntities.empty() && mHeightmap.empty()) throw std::invalid_argument("Empty Scene-Config");
+	//if (mTerrainEntities.empty() && mHeightmap.empty()) throw std::invalid_argument("Empty Scene-Config");
 
 
 }
@@ -301,14 +301,6 @@ Ogre::Vector2 OgreSceneManager::relToScenePos(const Ogre::Vector2 &v)
     return getSceneBounds() * v;
 }
 
-
-void OgreSceneManager::onLoad()
-{
-
-    for (Entity::Entity &e : mEntities){
-        e.onLoad();
-    }
-}
 
 
 
@@ -377,8 +369,6 @@ void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callIni
 			e.init();
 		}
 	}
-
-	onLoad();
 
 	in.process().endSubProcess();
 }

@@ -9,9 +9,9 @@ namespace Scripting {
 
 class MADGINE_BASE_EXPORT ScriptingManager : public RefScopeTopLevelSerializableUnit, public Singleton<ScriptingManager>, public MadgineObject<ScriptingManager>, public API<ScriptingManager> {
 public:
-    ScriptingManager(Parsing::ScriptParser *scriptParser);
+    ScriptingManager();
 
-	virtual void init() override;
+	virtual bool init() override;
 	virtual void finalize() override;
 
 	void log(const ValueType &v);

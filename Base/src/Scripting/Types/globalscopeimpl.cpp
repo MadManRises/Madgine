@@ -11,16 +11,17 @@ namespace Scripting {
 	API_IMPL(GlobalScopeImpl);
 
 
-	GlobalScopeImpl::GlobalScopeImpl(Parsing::ScriptParser *scriptParser) :
-		mScriptParser(scriptParser)
+	GlobalScopeImpl::GlobalScopeImpl() 
 	{
 	}
 
-void GlobalScopeImpl::init() {
+bool GlobalScopeImpl::init() {
 
 	for (const std::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
-		api->init();
+		if (!api->init())
+			return false;
 	}
+	return true;
 }
 
 void GlobalScopeImpl::finalize()
@@ -39,18 +40,6 @@ void GlobalScopeImpl::removeAPI(BaseAPI * api)
 {
 	mAPIs.remove(api);
 }
-
-
-bool GlobalScopeImpl::hasScriptMethod(const std::string &name)
-{
-	return mScriptParser->hasGlobalMethod(name);
-}
-
-const Parsing::MethodNode &GlobalScopeImpl::getMethod(const std::string &name)
-{
-	return mScriptParser->getGlobalMethod(name);
-}
-
 
 void GlobalScopeImpl::clear()
 {

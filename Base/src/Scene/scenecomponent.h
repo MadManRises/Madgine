@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-class MADGINE_BASE_EXPORT BaseSceneComponent : public Serialize::SerializableUnit{
+class MADGINE_BASE_EXPORT BaseSceneComponent : public Serialize::SerializableUnit, public BaseMadgineObject{
 public:
     virtual ~BaseSceneComponent() = default;
 
@@ -17,10 +17,10 @@ public:
 
     void update(float timeSinceLastFrame, App::ContextMask mask);
 
-    virtual void init();
+    virtual bool init();
 	virtual void finalize();
 
-    virtual const char *componentName() = 0;
+    virtual const char *getName() = 0;
 
 	void setEnabled(bool b);
 	bool isEnabled();
@@ -56,7 +56,7 @@ class SceneComponent : public UniqueComponent<T, BaseSceneComponent>, public Scr
 public:
 	using UniqueComponent<T, BaseSceneComponent>::UniqueComponent;
 
-    virtual const char *componentName() override {
+    virtual const char *getName() override {
         return strrchr(typeid(T).name(), ':') + 1;
     }
 
