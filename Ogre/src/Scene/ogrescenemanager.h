@@ -10,10 +10,14 @@
 
 #include "Scene\Entity\masks.h"
 
+#include "Resources\ogretextureptr.h"
+
+#include "ogrelight.h"
+
 namespace Engine {
 namespace Scene {
 
-class OGREMADGINE_EXPORT OgreSceneManager : public Ogre::Singleton<OgreSceneManager>,
+class OGREMADGINE_EXPORT OgreSceneManager : public Singleton<OgreSceneManager>,
 	public Ogre::GeneralAllocatedObject,
 	public SceneManager
 {
@@ -21,14 +25,14 @@ public:
     OgreSceneManager(Ogre::Root *root);
     virtual ~OgreSceneManager();
 
-	using Ogre::Singleton<OgreSceneManager>::getSingleton;
-	using Ogre::Singleton<OgreSceneManager>::getSingletonPtr;
+	using Singleton<OgreSceneManager>::getSingleton;
+	using Singleton<OgreSceneManager>::getSingletonPtr;
 
     virtual bool init() override;
 	virtual void finalize() override;
 
 	void setGameTextureSize(const Ogre::Vector2 &size);
-	Ogre::TexturePtr getGameTexture();
+	Resources::OgreTexturePtr &getGameTexture();
 	Ogre::Camera *camera();
 	Ogre::SceneManager *getSceneManager();
 	Ogre::Image getScreenshot();
@@ -40,12 +44,14 @@ public:
 	const Ogre::SceneNode *terrain();
 	Ogre::TerrainGroup *terrainGroup() const;
 
-	std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
 	
-	Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {});
+	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) override;
+	virtual Entity::Entity * createLocalEntity(const std::string & behaviour = "", const std::string & name = "", const std::string & meshName = "", const Scripting::ArgumentList & args = {}) override;
 	std::list<Entity::Entity *> entities();
 	Entity::Entity *findEntity(const std::string &name);
 	
+	virtual Light * createLight() override;
+	virtual std::list<Light*> lights() override;
 
 
 
@@ -104,6 +110,9 @@ protected:
 		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
+	std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
+	std::tuple<Ogre::Light *> createLightData();
+
 private:
 
     Ogre::Root *mRoot;
@@ -126,22 +135,22 @@ private:
 	std::vector<Ogre::SceneNode *> mTerrainEntities;
 	std::map<std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> mInfoObjects;
 
-	Ogre::TexturePtr mGameTexture;
+	Resources::OgreTexturePtr mGameTexture;
 
 
 	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> mEntities;
 	std::list<Entity::OgreEntity> mLocalEntities;
 
 
-
+	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Ogre::Light*> mLights;
     
-
-    
-    Resources::Shading::ShaderCollector mShaderCollector;
+//    Resources::Shading::ShaderCollector mShaderCollector;
 
     
     std::string mHeightmap;   
 
+
+	
 };
 
 }

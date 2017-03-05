@@ -18,11 +18,23 @@ namespace Engine {
 			}
 		}
 
+		void ServerApplication::setup(const ServerAppSettings & settings)
+		{
+			mSettings = &settings;
+
+			Application::setup(settings);
+		}
+
 		int ServerApplication::go()
 		{
+			Application::go();
+
 			bool run = true;
+			mTimer.reset();
 			while (run) {
-				run = update(0);
+				float timeSinceLastFrame = mTimer.elapsed_us() / 1000000.0f;
+				mTimer.start();
+				run = update(timeSinceLastFrame);
 			}
 			return 0;
 		}

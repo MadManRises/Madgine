@@ -2,6 +2,9 @@
 
 #include "serverlog.h"
 #include "Scripting/Parsing/serverscriptparser.h"
+#include "ServerTimer.h"
+
+#include "serverappinstance.h"
 
 namespace Engine {
 	namespace Server {
@@ -23,14 +26,22 @@ namespace Engine {
 			virtual void start() = 0;
 			virtual void stop() = 0;
 
+			template <class T>
+			void spawnInstance(T &&init) {
+				mInstances.emplace_back(std::forward<T>(init));
+			}
+
 		private:
 			ServerLog mLog;
 			std::string mName;
 			Scripting::Parsing::ServerScriptParser mScriptParser;
+			ServerTimer mTimer;
 
 			bool mRunning;
 
 			std::list<std::function<bool(float)>> mFrameCallbacks;
+
+			std::list<ServerAppInstance> mInstances;
 		};
 
 	}

@@ -7,10 +7,10 @@ namespace Engine{
 namespace Scene {
 namespace Entity {
 
-template <class T>
-class EntityComponent : public BaseEntityComponent, public Scripting::API<T>{
+template <class T, class Base = BaseEntityComponent>
+class EntityComponent : public Base, public Scripting::API<T>{
 public:
-	using BaseEntityComponent::BaseEntityComponent;
+	using Base::Base;
 
     virtual std::string getName() const override{
         return sComponentName;
@@ -47,8 +47,8 @@ private:
 
 };
 
-template <class T>
-const Entity::ComponentRegistrator<T> EntityComponent<T>::_reg;
+template <class T, class Base>
+const Entity::ComponentRegistrator<T> EntityComponent<T, Base>::_reg;
 
 }
 }

@@ -14,7 +14,8 @@ namespace Scene {
 
 
 ServerSceneManager::ServerSceneManager() :
-	mEntities(this, &ServerSceneManager::createEntityData)
+	mEntities(this, &ServerSceneManager::createEntityData),
+	mLights(this)
 {
 	clear();
 }
@@ -115,9 +116,22 @@ std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> Ser
 	
 }
 
-Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args)
+Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args, std::function<void(Entity::Entity&)> init)
 {
-	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(behaviour, name, meshName));
+	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
+		it->init(args);
+		if (init)
+			init(*it);
+	}, createEntityData(behaviour, name, meshName));
+	return &mEntities.back();
+}
+
+Entity::Entity * ServerSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
+{
+	throw 0;
+	const std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> &data = createEntityData(behaviour, name, meshName);
+	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
+	Entity::Entity &e = mLocalEntities.back();
 	e.init(args);
 	return &e;
 }
@@ -139,6 +153,20 @@ void ServerSceneManager::removeQueuedEntities()
     }
 }
 
+Light * ServerSceneManager::createLight()
+{
+	return &*mLights.emplace_back();
+}
+
+std::list<Light*> ServerSceneManager::lights()
+{
+	std::list<Light*> result;
+	for (Light &light : mLights) {
+		result.push_back(&light);
+	}
+	return result;
+}
+
 void ServerSceneManager::clear()
 {
 
@@ -147,6 +175,7 @@ void ServerSceneManager::clear()
 	}
     mEntities.clear();
     mEntityRemoveQueue.clear();
+	mLights.clear();
 
 }
 

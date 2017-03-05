@@ -130,14 +130,13 @@ private:
 		}
 	};
 
-	template <class T>
+	template <class T, class Base>
 	friend class EntityComponent;
 
 
     const Scripting::Parsing::EntityNode *mDescription;    
 
 	Serialize::ObservableSet<std::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, std::unique_ptr<BaseEntityComponent>> mComponents;
-    //std::set<Ogre::unique_ptr<BaseEntityComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
         static std::map<std::string, ComponentBuilder> dummy;

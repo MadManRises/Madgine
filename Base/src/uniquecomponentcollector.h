@@ -48,10 +48,10 @@ protected:
 
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator registerComponent(){
-		auto f = OGRE_MAKE_UNIQUE_FUNC(T, Base);
+		auto f = []() {return std::unique_ptr<Base>(new T); };
 		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
 		if (self) {
-			Ogre::unique_ptr<Base> component = f();
+			std::unique_ptr<Base> component = f();
 			self->mComponents.emplace_back(std::move(component));
 		}
         sComponents().emplace_back(f);

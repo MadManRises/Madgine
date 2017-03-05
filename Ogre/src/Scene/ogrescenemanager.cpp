@@ -27,7 +27,6 @@
 #include "Scripting\Parsing\scriptparser.h"
 
 
-
 namespace Engine {
 
 namespace Scene {
@@ -41,7 +40,8 @@ OgreSceneManager::OgreSceneManager(Ogre::Root *root) :
     mVp(0),
     mRenderTexture(0),
 	mTerrainRayQuery(0),
-	mEntities(this, &OgreSceneManager::createEntityData)	
+	mEntities(this, &OgreSceneManager::createEntityData),
+	mLights(this, &OgreSceneManager::createLightData)
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
@@ -85,7 +85,7 @@ bool OgreSceneManager::init()
 	mVp->setBackgroundColour(Ogre::ColourValue::Black);
 
 
-	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+//	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
 	return SceneManager::init();
 
@@ -434,9 +434,40 @@ std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Enti
 	
 }
 
-Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args)
+std::tuple<Ogre::Light*> OgreSceneManager::createLightData()
 {
-	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(behaviour, name, meshName));
+	return std::make_tuple(mSceneMgr->createLight());
+}
+
+Light * OgreSceneManager::createLight()
+{
+	return &*mLights.emplace_back(mSceneMgr->createLight());
+}
+
+std::list<Light*> OgreSceneManager::lights()
+{
+	std::list<Light*> result;
+	for (OgreLight &light : mLights) {
+		result.push_back(&light);
+	}
+	return result;
+}
+
+Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args, std::function<void(Entity::Entity&)> init)
+{
+	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
+		it->init(args);
+		if (init)
+			init(*it);
+	}, createEntityData(behaviour, name, meshName));
+	return &mEntities.back();
+}
+
+Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
+{
+	const std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(behaviour, name, meshName);
+	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
+	Entity::Entity &e = mLocalEntities.back();
 	e.init(args);
 	return &e;
 }
@@ -462,14 +493,25 @@ void OgreSceneManager::setGameTextureSize(const Ogre::Vector2 & size)
     unsigned int width = (unsigned int)size.x;
     unsigned int height = (unsigned int)size.y;
 
-	mRenderTexture->removeAllViewports();
+	{
+		Ogre::TexturePtr tmp = mGameTexture;
 
-	mGameTexture->freeInternalResources();
-	mGameTexture->setWidth(width);
-	mGameTexture->setHeight(height);
-	mGameTexture->createInternalResources();
+		mGameTexture = Ogre::TexturePtr();
+
+		mRoot->getTextureManager()->remove(tmp);
+	}	
+
+	mGameTexture = mRoot->getTextureManager()->createManual(
+		"RTT",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		Ogre::TEX_TYPE_2D,
+		width,
+		height,
+		0,
+		Ogre::PF_R8G8B8,
+		Ogre::TU_RENDERTARGET);	
     	
-	mRoot->getRenderSystem()->_cleanupDepthBuffers(false);
+	//mRoot->getRenderSystem()->_cleanupDepthBuffers(false);
 
 	mRenderTexture = mGameTexture->getBuffer()->getRenderTarget();	
 
@@ -479,7 +521,7 @@ void OgreSceneManager::setGameTextureSize(const Ogre::Vector2 & size)
 	mVp->setBackgroundColour(Ogre::ColourValue::Black);
 
 
-	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+//	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
     
 }
 
@@ -537,9 +579,18 @@ void OgreSceneManager::removeQueuedEntities()
     while (it != mEntityRemoveQueue.end()) {
 
 		auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
-        if (ent == mEntities.end()) throw 0;
-
-		mEntities.erase(ent);
+		if (ent != mEntities.end()) {
+			mEntities.erase(ent);
+		}
+		else {
+			auto ent = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), find);
+			if (ent != mLocalEntities.end()) {
+				mLocalEntities.erase(ent);
+			}
+			else {
+				throw 0;
+			}
+		}
 
         it = mEntityRemoveQueue.erase(it);
     }
@@ -553,6 +604,8 @@ void OgreSceneManager::clear()
 	}
     mEntities.clear();
     mEntityRemoveQueue.clear();
+
+	mLights.clear();
 
 	mStaticLights.clear();
     mTerrainEntities.clear();
@@ -924,7 +977,7 @@ void OgreSceneManager::getTerrainMeshInformation(size_t &vertex_count, Ogre::Vec
 	}
 }
 
-Ogre::TexturePtr OgreSceneManager::getGameTexture()
+Resources::OgreTexturePtr &OgreSceneManager::getGameTexture()
 {
 	return mGameTexture;
 }

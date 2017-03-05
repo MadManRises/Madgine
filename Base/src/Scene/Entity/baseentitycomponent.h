@@ -13,8 +13,6 @@ public:
     BaseEntityComponent(Entity &entity);
     virtual ~BaseEntityComponent() = 0;
 
-	virtual void preDelete();
-
     virtual std::string getName() const = 0;
 
     virtual bool hasComponentMethod(const std::string &name) const = 0;

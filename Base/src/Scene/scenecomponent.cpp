@@ -22,10 +22,9 @@ void BaseSceneComponent::update(float timeSinceLastFrame, App::ContextMask mask)
             update(timeSinceLastFrame);
         else {
             mTimeBank += timeSinceLastFrame;
-            if (mTimeBank >= mUpdateInterval){
-                float oldTimeBank = mTimeBank;
-                mTimeBank = fmodf(mTimeBank, mUpdateInterval);
-                update(oldTimeBank - mTimeBank);
+            while (mTimeBank >= mUpdateInterval){                
+                mTimeBank -= mUpdateInterval;
+                update(mUpdateInterval);
             }
         }
     }

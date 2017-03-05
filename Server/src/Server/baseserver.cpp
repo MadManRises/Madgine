@@ -19,9 +19,11 @@ namespace Engine {
 
 			start();
 
-			float timeSinceLastFrame = 0.0f;
+			mTimer.reset();
 
 			while (mRunning) {
+				float timeSinceLastFrame = mTimer.elapsed_ns() / 1000000000.0f;
+				mTimer.start();
 				mRunning = update(timeSinceLastFrame);
 				for (auto it = mFrameCallbacks.begin(); it != mFrameCallbacks.end() && mRunning; ++it) {
 					mRunning = (*it)(timeSinceLastFrame);

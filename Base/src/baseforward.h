@@ -10,6 +10,9 @@ namespace Engine {
 		namespace Entity {
 			class Entity;
 		}
+
+		class Light;
+
 	}
 
 	namespace App {
@@ -22,5 +25,4 @@ namespace Engine {
 		class GuiHandlerBase;
 		class GameHandlerBase;
 	}
-
 }

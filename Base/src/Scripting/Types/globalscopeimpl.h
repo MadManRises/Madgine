@@ -28,8 +28,6 @@ public:
 
 	virtual ValueType methodCall(const std::string &name, const ArgumentList &args = {}) override;
 
-	std::set<BaseGlobalAPIComponent*> getGlobalAPIComponents();
-
 	using Singleton<GlobalScopeImpl>::getSingleton;
 
 

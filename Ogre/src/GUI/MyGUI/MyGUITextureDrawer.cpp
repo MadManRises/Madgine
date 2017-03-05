@@ -31,12 +31,29 @@ namespace Engine {
 
 			void MyGUITextureDrawer::setTexture(const Ogre::TexturePtr &tex)
 			{
-				mTextureDrawer->setImageTexture(tex.isNull() ? "" : tex->getName());
+				if (tex.isNull()) {
+					mTextureDrawer->setImageTexture("");
+				}
+				else {
+					MyGUI::OgreRenderManager *mgr = &MyGUI::OgreRenderManager::getInstance();
+					MyGUI::OgreTexture *myguitex = static_cast<MyGUI::OgreTexture*>(mgr->getTexture(tex->getName()));
+					if (myguitex) {
+						if (myguitex->getOgreTexture() != tex)
+							myguitex->setOgreTexture(tex);
+					}
+					mTextureDrawer->setImageTexture(tex->getName());
+				}
+				
 			}
 			void MyGUITextureDrawer::setTexture(const std::string & name)
 			{
-				mTextureDrawer->setImageTexture(name);
+				Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(name);
+				if (tex.isNull())
+					mTextureDrawer->setImageTexture(name);
+				else
+					setTexture(tex);
 			}
+
 		}
 	}
 }

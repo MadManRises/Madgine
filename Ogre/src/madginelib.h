@@ -28,18 +28,8 @@
 #include <Overlay/OgreFont.h>
 #include <Overlay/OgreFontManager.h>
 
-#include <OgreRTShaderSystem.h>
-
 #include <OgreTerrainGroup.h>
 
-
-
-#include "Ogrememory.h"
-
-namespace Ogre {
-	template <class T>
-	T *Singleton<T>::msSingleton = 0;
-}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

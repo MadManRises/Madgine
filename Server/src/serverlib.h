@@ -7,6 +7,8 @@
 #define MADGINE_SERVER_EXPORT __declspec(dllimport)
 #endif
 
-#include "baseforward.h"
+#include "serverforward.h"
 
 #include "baselib.h"
+
+#include <thread>

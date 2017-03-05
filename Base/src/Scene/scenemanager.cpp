@@ -71,6 +71,7 @@ namespace Engine {
 		{
 			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
 				out << component->getName();
+				component->writeId(out);
 				component->writeState(out);
 			}
 			out << ValueType::EOL();
@@ -81,8 +82,7 @@ namespace Engine {
 			std::string componentName;
 			while (in.loopRead(componentName)) {
 				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<BaseSceneComponent> &comp) {return comp->getName() == componentName; });
-				if (it == mSceneComponents.end())
-					throw 0;
+				(*it)->readId(in);
 				(*it)->readState(in);
 			}
 		}

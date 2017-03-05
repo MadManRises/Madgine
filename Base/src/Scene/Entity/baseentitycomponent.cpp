@@ -15,10 +15,6 @@ BaseEntityComponent::~BaseEntityComponent() {
 
 }
 
-void BaseEntityComponent::preDelete() {
-
-}
-
 Entity &BaseEntityComponent::getEntity() const
 {
     return mEntity;

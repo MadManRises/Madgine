@@ -8,6 +8,8 @@
 
 #include "Entity\serverentity.h"
 
+#include "Scene\light.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -16,18 +18,20 @@ class MADGINE_SERVER_EXPORT ServerSceneManager :
 {
 public:
     ServerSceneManager();
-    virtual ~ServerSceneManager();
-
-	//using Ogre::Singleton<OgreSceneManager>::getSingleton;
+    virtual ~ServerSceneManager();	
 
     virtual bool init() override;
 	virtual void finalize() override;
 
 	std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
 	
-	Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {});
-	std::list<Entity::Entity *> entities();
-	Entity::Entity *findEntity(const std::string &name);
+	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) override;
+	virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {}) override;
+	virtual std::list<Entity::Entity *> entities() override;
+	virtual Entity::Entity *findEntity(const std::string &name) override;
+	
+	virtual Light * createLight() override;
+	virtual std::list<Light*> lights() override;
 
 	void clear();
 
@@ -46,7 +50,7 @@ public:
 
 protected:
 
-	void removeQueuedEntities();
+	virtual void removeQueuedEntities() override;
 		
     
 private:
@@ -56,7 +60,9 @@ private:
 
 	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, const Scripting::Parsing::EntityNode *, const std::string &, const std::string &> mEntities;
 	std::list<Entity::ServerEntity> mLocalEntities;
-    
+
+	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;
+
 };
 
 }

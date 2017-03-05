@@ -15,9 +15,9 @@ namespace Engine {
 
 		Application::Application() :
 			mShutDown(false),
+			mScriptingMgrInitialized(false),
 			mScriptingMgr(0),
-			mTimeBank(0.0f),
-			mScriptingMgrInitialized(false)
+			mTimeBank(0.0f)
 		{
 
 		}
@@ -37,8 +37,7 @@ namespace Engine {
 		}
 
 		bool Application::init()
-		{
-			mShutDown = false;
+		{			
 			mScriptingMgrInitialized = mScriptingMgr->init();
 			return mScriptingMgrInitialized;
 		}
@@ -51,6 +50,11 @@ namespace Engine {
 		void Application::callSafe(std::function<void()> f)
 		{
 			mSafeCallQueue.emplace(f);
+		}
+
+		int Application::go() {
+			mShutDown = false;
+			return 0;
 		}
 
 		bool Application::update(float timeSinceLastFrame)

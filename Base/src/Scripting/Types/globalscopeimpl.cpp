@@ -62,15 +62,6 @@ ValueType GlobalScopeImpl::methodCall(const std::string &name, const Scripting::
     return ScopeImpl::methodCall(name, args);
 }
 
-std::set<BaseGlobalAPIComponent*> GlobalScopeImpl::getGlobalAPIComponents()
-{
-	std::set<BaseGlobalAPIComponent*> result;
-	for (const std::unique_ptr<BaseGlobalAPIComponent> &api : mGlobalAPIs) {
-		result.insert(api.get());
-	}
-	return result;
-}
-
 
 }
 

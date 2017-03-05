@@ -2,6 +2,8 @@
 
 #include "App\application.h"
 #include "Scene\serverscenemanager.h"
+#include "Server\ServerTimer.h"
+#include "serverappsettings.h"
 
 namespace Engine {
 	namespace App {
@@ -10,6 +12,8 @@ namespace Engine {
 		public:
 			ServerApplication();
 			virtual ~ServerApplication();
+
+			void setup(const ServerAppSettings &settings);
 
 			// Inherited via Application
 			virtual int go() override;
@@ -23,6 +27,8 @@ namespace Engine {
 
 		private:
 			Scene::ServerSceneManager *mSceneManager;
+			Server::ServerTimer mTimer;
+			const ServerAppSettings *mSettings;
 		};
 
 	}

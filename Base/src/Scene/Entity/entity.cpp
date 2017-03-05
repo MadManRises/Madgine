@@ -28,20 +28,19 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
+	ScopeImpl(other),
 	mDescription(other.mDescription),
-	mComponents(this, &Entity::createComponent),
-	ScopeImpl(other)
+	mComponents(this, &Entity::createComponent)	
 {
-
 
 	//TODO copy Components
 
 }
 
 Entity::Entity(Entity &&other) :
+	ScopeImpl(std::forward<Entity>(other)),
 	mDescription(other.mDescription),
-	mComponents(this, std::forward<decltype(mComponents)>(other.mComponents)),
-	ScopeImpl(std::forward<Entity>(other))
+	mComponents(this, std::forward<decltype(mComponents)>(other.mComponents))	
 {
 }
 
@@ -52,11 +51,7 @@ Entity::Entity(const Scripting::Parsing::EntityNode *behaviour) :
 }
 
 Entity::~Entity()
-{
-
-	for (const std::unique_ptr<BaseEntityComponent> &c : mComponents) {
-		c->preDelete();
-	}
+{	
 
 	clear();
 
@@ -103,8 +98,7 @@ void Entity::addComponent(const std::string &name){
 void Entity::removeComponent(const std::string & name)
 {
 	auto it = mComponents.find(name);
-	assert(it != mComponents.end());
-	(*it)->preDelete();
+	assert(it != mComponents.end());	
 	mComponents.erase(it);
 }
 

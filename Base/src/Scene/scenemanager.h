@@ -23,8 +23,13 @@ namespace Engine {
 			Scripting::Scope *createSceneStruct();
 			Scripting::Scope *createSceneList();
 
-			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
+			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) = 0;
+			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
 			virtual Entity::Entity *findEntity(const std::string &name) = 0;
+			virtual std::list<Entity::Entity*> entities() = 0;
+
+			virtual Light *createLight() = 0;
+			virtual std::list<Light*> lights() = 0;
 
 			virtual bool init() override;
 			virtual void finalize() override;
@@ -40,7 +45,7 @@ namespace Engine {
 
 
 			////FOR LAUNCHER
-			virtual std::list<Entity::Entity*> entities() = 0;
+			
 
 			void removeLater(Entity::Entity *e);
 
