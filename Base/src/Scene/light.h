@@ -2,6 +2,7 @@
 
 #include "Serialize\serializableunit.h"
 #include "Serialize\Container\observed.h"
+#include "SignalSlot\slot.h"
 
 namespace Engine {
 	namespace Scene {

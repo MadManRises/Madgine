@@ -11,6 +11,7 @@ namespace Engine {
 			virtual ~BaseGlobalAPIComponent() = default;
 
 			virtual void clear();
+			virtual void update(float timeSinceLastFrame);
 		};
 
 	}

@@ -12,5 +12,9 @@ namespace Engine {
 
 		}
 
+		void BaseGlobalAPIComponent::update(float timeSinceLastFrame)
+		{
+		}
+
 	}
 }

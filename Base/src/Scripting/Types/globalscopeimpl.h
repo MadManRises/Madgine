@@ -30,6 +30,7 @@ public:
 
 	using Singleton<GlobalScopeImpl>::getSingleton;
 
+	void update(float timeSinceLastFrame);
 
 private:
 

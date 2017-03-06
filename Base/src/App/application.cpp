@@ -88,6 +88,16 @@ namespace Engine {
 				}
 			}
 
+			{
+				//PROFILE("ScriptingManager")
+				try {
+					mScriptingMgr->globalScope()->update(timeSinceLastFrame);
+				}
+				catch (const std::exception &e) {
+					LOG_ERROR("Unhandled Exception during GlobalScope-update!");
+					LOG_EXCEPTION(e);
+				}
+			}
 
 			return true;
 		}

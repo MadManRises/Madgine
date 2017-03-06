@@ -19,7 +19,7 @@ namespace Engine {
 			}
 
 		private:
-			SignalSlot::Signal<OgreTexturePtr &> mSignal;
+			SignalSlot::Signal<Ogre::TexturePtr &> mSignal;
 		};
 
 	}

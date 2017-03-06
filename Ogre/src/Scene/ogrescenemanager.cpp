@@ -603,6 +603,10 @@ void OgreSceneManager::clear()
 		e.clear();
 	}
     mEntities.clear();
+	for (Entity::Entity &e : mLocalEntities) {
+		e.clear();
+	}
+	mLocalEntities.clear();
     mEntityRemoveQueue.clear();
 
 	mLights.clear();

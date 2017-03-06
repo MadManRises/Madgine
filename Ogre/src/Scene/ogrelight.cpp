@@ -9,7 +9,7 @@ Engine::Scene::OgreLight::OgreLight(Ogre::Light * light) :
 
 Engine::Scene::OgreLight::~OgreLight()
 {
-	mLight->_getCreator()->destroyInstance(mLight);
+	mLight->_getManager()->destroyLight(mLight);
 }
 
 void Engine::Scene::OgreLight::onPositionChanged(const std::array<float, 3>& position)

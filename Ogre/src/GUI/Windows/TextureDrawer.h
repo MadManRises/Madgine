@@ -31,7 +31,7 @@ namespace Engine {
 			}
 
 		protected:
-			void updateTexture(Resources::OgreTexturePtr &tex) {
+			void updateTexture(const Ogre::TexturePtr &tex) {
 				setTexture(tex);
 			}
 

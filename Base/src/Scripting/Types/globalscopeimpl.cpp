@@ -62,6 +62,13 @@ ValueType GlobalScopeImpl::methodCall(const std::string &name, const Scripting::
     return ScopeImpl::methodCall(name, args);
 }
 
+void GlobalScopeImpl::update(float timeSinceLastFrame)
+{
+	for (const std::unique_ptr<BaseGlobalAPIComponent> &p : mGlobalAPIs) {
+		p->update(timeSinceLastFrame);
+	}
+}
+
 
 }
 
