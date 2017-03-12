@@ -6,8 +6,8 @@ namespace Engine {
 	namespace Scene {
 
 		Light::Light() :
-			mPower(this),
-			mPosition(this),
+			mPower(),
+			mPosition(),
 			mPowerChangedSlot(this),
 			mPositionChangedSlot(this)
 		{

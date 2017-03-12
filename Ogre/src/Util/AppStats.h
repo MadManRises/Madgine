@@ -18,7 +18,7 @@ namespace Engine {
 		};
 #endif
 
-		class OGREMADGINE_EXPORT AppStats : public Serialize::SerializableUnit {
+		class OGREMADGINE_EXPORT AppStats : public Serialize::SerializableUnitBase {
 		public:
 			AppStats(Ogre::RenderWindow *window);
 

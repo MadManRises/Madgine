@@ -46,7 +46,10 @@ public:
 	void makeLocalCopy(Entity::ServerEntity &e);
 	void makeLocalCopy(Entity::ServerEntity &&e);
 
-	void setEntitiesCallback(std::function<void(const Serialize::SerializableList < Entity::ServerEntity, const Scripting::Parsing::EntityNode *, const std::string &, const std::string & > ::iterator &, int) > f);
+	template <class T>
+	void connectEntitiesCallback(T &slot) {
+		mEntities.connectCallback(slot);
+	}
 
 protected:
 
@@ -58,7 +61,7 @@ private:
 	std::string mStaticSceneName;
 	
 
-	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, const Scripting::Parsing::EntityNode *, const std::string &, const std::string &> mEntities;
+	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&ServerSceneManager::createEntityData), &ServerSceneManager::createEntityData>> mEntities;
 	std::list<Entity::ServerEntity> mLocalEntities;
 
 	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;

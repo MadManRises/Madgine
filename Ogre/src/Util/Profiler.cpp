@@ -7,7 +7,7 @@ namespace Engine {
 	namespace Util {
 
 		Profiler::Profiler() :
-			mProcesses(this),
+			mProcesses(),
 			mCurrent(0),
 			mInterval(2.0f),
 			mCurrentInterval(false)
@@ -45,7 +45,7 @@ namespace Engine {
 				return mCurrent->addChild(name);
 			}
 			else {
-				return mProcesses.try_emplace(name, [this]() {return mCurrentInterval; }).first->second;
+				return mProcesses.try_emplace(name).first->second;
 			}			
 		}
 		
@@ -88,7 +88,7 @@ namespace Engine {
 
 		ProcessStats &ProcessStats::addChild(const std::string & child)
 		{
-			return mChildren.try_emplace(child, mAccumulatedDuration.getCondition(), this).first->second;
+			return mChildren.try_emplace(child, this).first->second;
 		}
 
 		bool ProcessStats::hasParent() const

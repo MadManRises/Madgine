@@ -11,7 +11,7 @@ namespace Engine {
 	namespace Scene {
 
 		class MADGINE_BASE_EXPORT SceneManager : public Singleton<SceneManager>,
-			public Scripting::RefScopeTopLevelSerializableUnit,
+			public Scripting::RefScopeTopLevelSerializableUnitBase,
 			public MadgineObject<SceneManager>,
 			public Scripting::GlobalAPI<SceneManager>
 		{
@@ -44,10 +44,16 @@ namespace Engine {
 			void loadComponentData(Serialize::SerializeInStream &in);
 
 
-			////FOR LAUNCHER
+			virtual void readState(Serialize::SerializeInStream &in);
+			virtual void writeState(Serialize::SerializeOutStream &out) const;
 			
 
 			void removeLater(Entity::Entity *e);
+
+			template <class T>
+			void connectStateLoaded(T &slot) {
+				mStateLoadedSignal.connect(slot);
+			}
 
 		protected:
 			std::string generateUniqueName();
@@ -60,6 +66,8 @@ namespace Engine {
 			size_t mItemCount;
 
 			UniqueComponentCollector<BaseSceneComponent> mSceneComponents;
+
+			Engine::SignalSlot::Signal<> mStateLoadedSignal;
 
 		};
 

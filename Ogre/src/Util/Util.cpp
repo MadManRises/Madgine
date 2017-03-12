@@ -10,8 +10,8 @@ namespace Engine {
 
 		Util::Util(Ogre::RenderWindow *window) :
 			TopLevelSerializableUnit(UTIL),
-			mProfiler(this),
-			mStats(this, window),
+			mProfiler(),
+			mStats(window),
 			mLog("Madgine.log")
 		{
 			::Util::UtilMethods::setup(&mLog);

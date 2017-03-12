@@ -30,7 +30,7 @@ namespace Entity {
 Entity::Entity(const Entity &other) :
 	ScopeImpl(other),
 	mDescription(other.mDescription),
-	mComponents(this, &Entity::createComponent)	
+	mComponents()	
 {
 
 	//TODO copy Components
@@ -40,13 +40,13 @@ Entity::Entity(const Entity &other) :
 Entity::Entity(Entity &&other) :
 	ScopeImpl(std::forward<Entity>(other)),
 	mDescription(other.mDescription),
-	mComponents(this, std::forward<decltype(mComponents)>(other.mComponents))	
+	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
 {
 }
 
 Entity::Entity(const Scripting::Parsing::EntityNode *behaviour) :
 	mDescription(behaviour),
-	mComponents(this, &Entity::createComponent)
+	mComponents()
 {
 }
 

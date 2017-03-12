@@ -40,15 +40,18 @@ OgreSceneManager::OgreSceneManager(Ogre::Root *root) :
     mVp(0),
     mRenderTexture(0),
 	mTerrainRayQuery(0),
-	mEntities(this, &OgreSceneManager::createEntityData),
-	mLights(this, &OgreSceneManager::createLightData)
+	mEntities(),
+	mLights()
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
 
 	createCamera();
 
-	clear();
+	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
+	mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
+
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 
 }
 
@@ -339,21 +342,14 @@ void OgreSceneManager::writeState(Serialize::SerializeOutStream &out) const
 {
 	writeStaticScene(out);
 
-	saveComponentData(out);
-
-	SerializableUnit::writeState(out);
-
-    
+	SceneManager::writeState(out);    
 }
 
 void OgreSceneManager::readState(Serialize::SerializeInStream &in)
 {
 	readStaticScene(in);
-
-	loadComponentData(in);
 	
-	SerializableUnit::readState(in);
-		
+	SceneManager::readState(in);		
 }
 
 void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
@@ -387,12 +383,6 @@ void OgreSceneManager::makeLocalCopy(Entity::OgreEntity && e)
 {
 	mLocalEntities.emplace_back(std::forward<Entity::OgreEntity>(e));
 }
-
-void OgreSceneManager::setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::OgreEntity, const Scripting::Parsing::EntityNode*, Ogre::SceneNode*, Ogre::Entity*>::iterator&, int)> f)
-{
-	mEntities.setCallback(f);
-}
-
 
 Ogre::TerrainGroup *OgreSceneManager::terrainGroup() const
 {
@@ -598,32 +588,22 @@ void OgreSceneManager::removeQueuedEntities()
 
 void OgreSceneManager::clear()
 {
-
 	for (Entity::Entity &e : mEntities) {
 		e.clear();
 	}
-    mEntities.clear();
+	mEntities.clear();
 	for (Entity::Entity &e : mLocalEntities) {
 		e.clear();
 	}
 	mLocalEntities.clear();
-    mEntityRemoveQueue.clear();
+	mEntityRemoveQueue.clear();
 
 	mLights.clear();
 
 	mStaticLights.clear();
-    mTerrainEntities.clear();
+	mTerrainEntities.clear();
 	mInfoObjects.clear();
-
-    mSceneMgr->clearScene();
-
-	mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
-	mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
-
-	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 }
-
-
 
 
 // raycast from a point in to the scene.

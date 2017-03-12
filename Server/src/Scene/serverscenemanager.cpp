@@ -14,8 +14,8 @@ namespace Scene {
 
 
 ServerSceneManager::ServerSceneManager() :
-	mEntities(this, &ServerSceneManager::createEntityData),
-	mLights(this)
+	mEntities(),
+	mLights()
 {
 	clear();
 }
@@ -49,20 +49,14 @@ void ServerSceneManager::writeState(Serialize::SerializeOutStream &out) const
 {
 	out << mStaticSceneName << ValueType::EOL() << ValueType::EOL();
 
-	saveComponentData(out);
-
-	SerializableUnit::writeState(out);
-    
+	SceneManager::writeState(out);    
 }
 
 void ServerSceneManager::readState(Serialize::SerializeInStream &in)
 {
 	in >> mStaticSceneName >> ValueType() >> ValueType();
-
-	loadComponentData(in);
 	
-	SerializableUnit::readState(in);
-		
+	SceneManager::readState(in);		
 }
 
 void ServerSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
@@ -97,10 +91,6 @@ void ServerSceneManager::makeLocalCopy(Entity::ServerEntity && e)
 	mLocalEntities.emplace_back(std::forward<Entity::ServerEntity>(e));
 }
 
-void ServerSceneManager::setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::ServerEntity, const Scripting::Parsing::EntityNode*, const std::string &, const std::string &>::iterator&, int)> f)
-{
-	mEntities.setCallback(f);
-}
 
 std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> ServerSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {

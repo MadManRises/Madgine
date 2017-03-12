@@ -93,7 +93,7 @@ void OgreApplication::setup(const OgreAppSettings &settings)
 
 	mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
-	mUtil = OGRE_NEW Util::Util(mWindow);
+	mUtil = new Util::Util(mWindow);
 
 	Application::setup(settings);
 }

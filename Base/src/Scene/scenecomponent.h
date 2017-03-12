@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-class MADGINE_BASE_EXPORT BaseSceneComponent : public Serialize::SerializableUnit, public BaseMadgineObject{
+class MADGINE_BASE_EXPORT BaseSceneComponent : public Serialize::SerializableUnitBase, public BaseMadgineObject{
 public:
     virtual ~BaseSceneComponent() = default;
 

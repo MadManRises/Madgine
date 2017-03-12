@@ -136,7 +136,7 @@ private:
 
     const Scripting::Parsing::EntityNode *mDescription;    
 
-	Serialize::ObservableSet<std::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, std::unique_ptr<BaseEntityComponent>> mComponents;
+	Serialize::ObservableSet<std::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
         static std::map<std::string, ComponentBuilder> dummy;

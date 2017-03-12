@@ -7,21 +7,20 @@
 namespace Engine {
 	namespace Util {
 
-		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit {
+		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnitBase {
 		public:
-			ProcessStats(std::function<bool()> condition, ProcessStats *parent = 0) :
+			ProcessStats(ProcessStats *parent = 0) :
 				mStarted(false),
-				mAccumulatedDuration(this, 0),
+				mAccumulatedDuration(0),
 				mRecordIndex(0),
 				mBuffer(),
-				mChildren(this),
+				mChildren(),
 				mParent(parent)
 			{
-				mAccumulatedDuration.setCondition(condition);
 			}
 
 			ProcessStats(const ProcessStats &other) :
-				ProcessStats(other.mAccumulatedDuration.getCondition(), other.mParent)
+				ProcessStats(other.mParent)
 			{}
 
 			size_t averageDuration() const;
@@ -43,14 +42,14 @@ namespace Engine {
 			size_t mRecordIndex;
 			std::array<size_t, 20> mBuffer;
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, std::function<bool()>, ProcessStats*> mChildren;
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::DefaultCreator<std::string, ProcessStats*>> mChildren;
 
 			ProcessStats *mParent;
 
 		};
 
 
-		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit {
+		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler> {
 		public:
 			Profiler();
 
@@ -63,7 +62,7 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, std::function<bool()>> mProcesses;
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly> mProcesses;
 			
 			ProcessStats *mCurrent;
 

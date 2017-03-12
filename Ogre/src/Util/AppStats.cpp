@@ -9,9 +9,9 @@ namespace Engine {
 	namespace Util {
 
 		AppStats::AppStats(Ogre::RenderWindow *window) :
-			mAverageFPS(this),
+			mAverageFPS(),
 #if OGRE_MEMORY_TRACKER
-			mOgreMemory(this),
+			mOgreMemory(),
 			startTrack(this),
 			stopTrack(this),
 			mTracker(static_cast<TrackerAccessor&>(Ogre::MemoryTracker::get())),

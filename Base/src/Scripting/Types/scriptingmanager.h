@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Scripting {
 
-class MADGINE_BASE_EXPORT ScriptingManager : public RefScopeTopLevelSerializableUnit, public Singleton<ScriptingManager>, public MadgineObject<ScriptingManager>, public API<ScriptingManager> {
+class MADGINE_BASE_EXPORT ScriptingManager : public RefScopeTopLevelSerializableUnitBase, public Singleton<ScriptingManager>, public MadgineObject<ScriptingManager>, public API<ScriptingManager> {
 public:
     ScriptingManager();
 

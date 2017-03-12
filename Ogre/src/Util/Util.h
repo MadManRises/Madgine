@@ -12,7 +12,7 @@
 namespace Engine {
 	namespace Util {
 
-		class OGREMADGINE_EXPORT Util : public Singleton<Util>, public Ogre::GeneralAllocatedObject, public Serialize::TopLevelSerializableUnit {
+		class OGREMADGINE_EXPORT Util : public Singleton<Util>, public Serialize::TopLevelSerializableUnit<Util> {
 		public:
 			Util(Ogre::RenderWindow *window);
 

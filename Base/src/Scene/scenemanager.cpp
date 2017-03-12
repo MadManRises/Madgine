@@ -11,7 +11,7 @@ namespace Engine {
 	namespace Scene {
 		
 		SceneManager::SceneManager() :
-			RefScopeTopLevelSerializableUnit(SCENE_MANAGER),
+			RefScopeTopLevelSerializableUnitBase(SCENE_MANAGER),
 			mItemCount(0)
 		{
 			for (const std::unique_ptr<BaseSceneComponent> &comp : mSceneComponents) {
@@ -85,6 +85,22 @@ namespace Engine {
 				(*it)->readId(in);
 				(*it)->readState(in);
 			}
+		}
+
+		void SceneManager::writeState(Serialize::SerializeOutStream &out) const
+		{
+			saveComponentData(out);
+
+			SerializableUnitBase::writeState(out);
+		}
+
+		void SceneManager::readState(Serialize::SerializeInStream &in)
+		{
+			loadComponentData(in);
+
+			SerializableUnitBase::readState(in);
+
+			mStateLoadedSignal.emit();
 		}
 
 		void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask) {

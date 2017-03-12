@@ -8,7 +8,7 @@ namespace Engine {
 namespace Scene {
 namespace Entity {
 
-class MADGINE_BASE_EXPORT BaseEntityComponent : public Serialize::SerializableUnit, public Serialize::Keyed<std::string> {
+class MADGINE_BASE_EXPORT BaseEntityComponent : public Serialize::SerializableUnitBase, public Serialize::Keyed<std::string> {
 public:
     BaseEntityComponent(Entity &entity);
     virtual ~BaseEntityComponent() = 0;

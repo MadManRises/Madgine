@@ -82,7 +82,7 @@ public:
 
 	
 
-	void clear();
+	virtual void clear() override;
 
 	virtual void writeState(Serialize::SerializeOutStream &out) const override;
 	virtual void readState(Serialize::SerializeInStream &in) override;
@@ -95,7 +95,10 @@ public:
 	void makeLocalCopy(Entity::OgreEntity &e);
 	void makeLocalCopy(Entity::OgreEntity &&e);
 
-	void setEntitiesCallback(std::function<void(const Serialize::SerializableList<Entity::OgreEntity, const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*>::iterator &, int)> f);
+	template <class T>
+	void connectEntitiesCallback(T &slot) {
+		mEntities.connectCallback(slot);
+	}
 
 protected:
 
@@ -138,11 +141,11 @@ private:
 	Resources::OgreTexturePtr mGameTexture;
 
 
-	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> mEntities;
+	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createEntityData), &OgreSceneManager::createEntityData>> mEntities;
 	std::list<Entity::OgreEntity> mLocalEntities;
 
 
-	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Ogre::Light*> mLights;
+	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createLightData), &OgreSceneManager::createLightData>> mLights;
     
 //    Resources::Shading::ShaderCollector mShaderCollector;
 
