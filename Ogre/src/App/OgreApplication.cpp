@@ -28,20 +28,20 @@ namespace Engine {
 namespace App {
 
 	OgreApplication::OgreApplication() :
-	mSettings(0),
-	mWindow(0),
-	mRoot(0),
-	mSceneMgr(0),
-	mGUI(0),
-	mUI(0),
-	mLoader(0),
-	mConfig(0),
-	mUtil(0),
-	mInput(0),
+	mSettings(nullptr),
 		mPaused(false),
 		mSceneMgrInitialized(false),
 		mGUIInitialized(false),
-		mUIInitialized(false)
+		mUIInitialized(false),
+	mWindow(nullptr),
+	mRoot(nullptr),
+	mSceneMgr(nullptr),
+	mGUI(nullptr),
+	mUI(nullptr),
+	mLoader(nullptr),
+	mConfig(nullptr),
+	mUtil(nullptr),
+	mInput(nullptr)
 {
 
 }
@@ -277,7 +277,7 @@ void OgreApplication::_setup()
 	Application::_setup();
 
 	// Create SceneManager
-	mSceneMgr = OGRE_NEW Scene::OgreSceneManager(mRoot);
+	mSceneMgr = new Scene::OgreSceneManager(mRoot);
 
 	mWindow->update();
 

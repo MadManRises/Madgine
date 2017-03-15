@@ -6,7 +6,7 @@ namespace Engine{
 
 namespace Scene{
 
-	BaseSceneComponent::BaseSceneComponent(float updateInterval, App::ContextMask context) :
+	SceneComponentBase::SceneComponentBase(float updateInterval, App::ContextMask context) :
 		mContext(context),
 		mUpdateInterval(updateInterval),
 		mTimeBank(0.f),
@@ -16,7 +16,7 @@ namespace Scene{
 
 }
 
-void BaseSceneComponent::update(float timeSinceLastFrame, App::ContextMask mask){
+void SceneComponentBase::update(float timeSinceLastFrame, App::ContextMask mask){
     if (mEnabled && (mContext & (mask | App::ContextMask::AnyContext))){
         if (mUpdateInterval == 0.f)
             update(timeSinceLastFrame);
@@ -30,34 +30,34 @@ void BaseSceneComponent::update(float timeSinceLastFrame, App::ContextMask mask)
     }
 }
 
-bool BaseSceneComponent::init()
+bool SceneComponentBase::init()
 {
-	return BaseMadgineObject::init();
+	return MadgineObjectBase::init();
 }
 
-void BaseSceneComponent::finalize()
+void SceneComponentBase::finalize()
 {
-	BaseMadgineObject::finalize();
+	MadgineObjectBase::finalize();
 }
 
-void BaseSceneComponent::setEnabled(bool b)
+void SceneComponentBase::setEnabled(bool b)
 {
 	mEnabled = b;
 }
 
-bool BaseSceneComponent::isEnabled()
+bool SceneComponentBase::isEnabled()
 {
 	return mEnabled;
 }
 
-SceneManager * BaseSceneComponent::sceneMgr()
+SceneManager * SceneComponentBase::sceneMgr()
 {
 	return mSceneMgr;
 }
 
-void BaseSceneComponent::update(float){}
+void SceneComponentBase::update(float){}
 
-void BaseSceneComponent::setUpdateInterval(float interval)
+void SceneComponentBase::setUpdateInterval(float interval)
 {
 	mUpdateInterval = interval;
 }

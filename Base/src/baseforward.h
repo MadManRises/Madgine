@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-	class BaseMadgineObject;
+	class MadgineObjectBase;
 
 	namespace Scene {
 		class SceneManager;

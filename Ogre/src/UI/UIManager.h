@@ -52,7 +52,7 @@ namespace Engine {
 
 			GUI::GUISystem *mGUI;
 
-			std::stack<UI::GuiHandlerBase *> mModalWindowList;
+			std::stack<GuiHandlerBase *> mModalWindowList;
 
 		private:
 			Ogre::Vector2 mKeptCursorPosition;

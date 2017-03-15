@@ -6,7 +6,7 @@ namespace Engine {
 	namespace App {
 
 		ServerApplication::ServerApplication() :
-			mSceneManager(0)
+			mSceneManager(nullptr)
 		{
 		}
 

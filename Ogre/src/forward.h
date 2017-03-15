@@ -52,11 +52,11 @@ namespace Engine {
 	namespace Scene {
 
 		class OgreSceneManager;
-		class BaseSceneComponent;
+		class SceneComponentBase;
 
 		namespace Entity {
 			class Entity;
-			class BaseEntityComponent;
+			class EntityComponentBase;
 		}
 
 

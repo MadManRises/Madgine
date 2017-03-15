@@ -57,7 +57,7 @@ private:
 };
 
 template <class T>
-class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
+class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T>, public Hierarchy::HierarchyObject<T> {
 	using OgreUniqueComponent<T, GuiHandlerBase>::OgreUniqueComponent;
 
 	virtual const char *getName() override {

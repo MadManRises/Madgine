@@ -34,14 +34,12 @@ namespace Scene {
 
 OgreSceneManager::OgreSceneManager(Ogre::Root *root) :
     mRoot(root),
-    mSceneMgr(0),
-    mTerrainGlobals(0),
-    mTerrainGroup(0),
-    mVp(0),
-    mRenderTexture(0),
-	mTerrainRayQuery(0),
-	mEntities(),
-	mLights()
+    mSceneMgr(nullptr),
+    mTerrainGlobals(nullptr),
+    mTerrainGroup(nullptr),
+    mVp(nullptr),
+    mRenderTexture(nullptr),
+	mTerrainRayQuery(nullptr)
 {
 
     mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
@@ -807,7 +805,7 @@ void OgreSceneManager::GetMeshInformation(const Ogre::MeshPtr mesh,
         Ogre::IndexData *index_data = submesh->indexData;
         size_t numTris = index_data->indexCount / 3;
         Ogre::HardwareIndexBufferSharedPtr ibuf = index_data->indexBuffer;
-        if (ibuf.isNull())
+        if (!ibuf)
             continue;  // need to check if index buffer is valid (which will be not if the mesh doesn't have triangles like a pointcloud)
 
         bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
@@ -854,7 +852,7 @@ void OgreSceneManager::getTerrainMeshInformation(size_t &vertex_count, Ogre::Vec
 		bool added_shared = false;
 
 		// Calculate how many vertices and indices we're going to need
-		for (int i = 0; i < mesh->getNumSubMeshes(); i++)
+		for (size_t i = 0; i < mesh->getNumSubMeshes(); i++)
 		{
 			Ogre::SubMesh* submesh = mesh->getSubMesh(i);
 
@@ -894,7 +892,7 @@ void OgreSceneManager::getTerrainMeshInformation(size_t &vertex_count, Ogre::Vec
 		bool added_shared = false;
 
 		// Run through the submeshes again, adding the data into the arrays
-		for (int i = 0; i < mesh->getNumSubMeshes(); i++)
+		for (size_t i = 0; i < mesh->getNumSubMeshes(); i++)
 		{
 			Ogre::SubMesh* submesh = mesh->getSubMesh(i);
 

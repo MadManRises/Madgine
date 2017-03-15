@@ -1,17 +1,17 @@
 #include "serverlib.h"
 
-#include "baseserver.h"
+#include "ServerBase.h"
 
 namespace Engine {
 	namespace Server {
-		BaseServer::BaseServer(const std::string & name, const std::string &scriptsFolder) :
+		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
 			mLog(name + "-Log"),
 			mName(name),
 			mScriptParser(scriptsFolder),
 			mRunning(false)
 		{
 		}
-		int BaseServer::run()
+		int ServerBase::run()
 		{
 			Util::UtilMethods::setup(&mLog);
 
@@ -35,17 +35,17 @@ namespace Engine {
 			return 0;
 		}
 
-		ServerLog & Engine::Server::BaseServer::getLog()
+		ServerLog & Engine::Server::ServerBase::getLog()
 		{
 			return mLog;
 		}
 
-		const std::string & BaseServer::scriptsFolder()
+		const std::string & ServerBase::scriptsFolder()
 		{
 			return mScriptParser.rootFolder();
 		}
 
-		void BaseServer::addFrameCallback(std::function<bool(float)> callback)
+		void ServerBase::addFrameCallback(std::function<bool(float)> callback)
 		{
 			mFrameCallbacks.push_back(callback);
 		}

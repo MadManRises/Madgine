@@ -10,7 +10,7 @@ namespace Engine {
 namespace UI {
 
 Handler::Handler(const std::string &windowName) :
-    mWindow(0),
+    mWindow(nullptr),
     mUI(&UI::UIManager::getSingleton()),
     mWindowName(windowName)
 {
@@ -61,7 +61,7 @@ bool Handler::init()
 {
 	if (installToWindow(mUI->gui()->getWindowByName(mWindowName))) {
 		mWindows.clear();
-		return BaseMadgineObject::init();
+		return MadgineObjectBase::init();
 	}
 	else {
 		return false;
@@ -73,14 +73,14 @@ void Handler::finalize()
 {
 	if (mWindow)
 		mWindow->unregisterAllEvents(this);
-	BaseMadgineObject::finalize();
+	MadgineObjectBase::finalize();
 }
 
 bool Handler::init(GUI::Window *window)
 {
 	if (installToWindow(window)) {
 		mWindows.clear();
-		return BaseMadgineObject::init();
+		return MadgineObjectBase::init();
 	}
 	else {
 		return false;

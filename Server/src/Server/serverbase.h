@@ -9,9 +9,9 @@
 namespace Engine {
 	namespace Server {
 
-		class MADGINE_SERVER_EXPORT BaseServer {
+		class MADGINE_SERVER_EXPORT ServerBase {
 		public:
-			BaseServer(const std::string &name, const std::string &scriptsFolder);
+			ServerBase(const std::string &name, const std::string &scriptsFolder);
 
 			int run();
 

@@ -7,8 +7,8 @@
 namespace Engine {
 	namespace GUI {
 		Window::Window(WindowContainer * w) :
-			mContainer(w),
-			mIsValid(true)
+			mIsValid(true),
+			mContainer(w)
 		{
 		}
 

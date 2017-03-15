@@ -5,11 +5,7 @@
 namespace Engine {
 	namespace Scene {
 
-		Light::Light() :
-			mPower(),
-			mPosition(),
-			mPowerChangedSlot(this),
-			mPositionChangedSlot(this)
+		Light::Light()
 		{
 			mPower.setCallback(mPowerChangedSlot);
 			mPosition.setCallback(mPositionChangedSlot);

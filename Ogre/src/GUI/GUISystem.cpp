@@ -10,7 +10,7 @@ namespace Engine {
 	namespace GUI {
 
 		GUISystem::GUISystem() :
-			mRootWindow(0),
+			mRootWindow(nullptr),
 			mWindowSizesDirty(false)
 		{
 			

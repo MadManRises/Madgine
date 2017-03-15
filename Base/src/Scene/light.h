@@ -7,7 +7,7 @@
 namespace Engine {
 	namespace Scene {
 
-		class MADGINE_BASE_EXPORT Light : public Engine::Serialize::SerializableUnitBase {
+		class MADGINE_BASE_EXPORT Light : public Engine::Serialize::SerializableUnit<Light> {
 		public:
 			Light();
 			virtual ~Light() = default;

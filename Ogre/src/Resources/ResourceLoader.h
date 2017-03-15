@@ -7,7 +7,7 @@
 namespace Engine {
 	namespace Resources {
 
-		class OGREMADGINE_EXPORT ResourceLoader : public ::Util::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
+		class OGREMADGINE_EXPORT ResourceLoader : public Engine::Util::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
 		public:
 			ResourceLoader(const std::string &mediaPath);
 			~ResourceLoader();

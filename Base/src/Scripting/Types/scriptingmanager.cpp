@@ -78,7 +78,7 @@ void ScriptingManager::clear()
     
 }
 
-GlobalScopeImpl * ScriptingManager::globalScope()
+GlobalScope * ScriptingManager::globalScope()
 {
 	return &mGlobalScope;
 }

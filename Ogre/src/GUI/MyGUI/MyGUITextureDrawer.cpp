@@ -31,7 +31,7 @@ namespace Engine {
 
 			void MyGUITextureDrawer::setTexture(const Ogre::TexturePtr &tex)
 			{
-				if (tex.isNull()) {
+				if (!tex) {
 					mTextureDrawer->setImageTexture("");
 				}
 				else {
@@ -48,7 +48,7 @@ namespace Engine {
 			void MyGUITextureDrawer::setTexture(const std::string & name)
 			{
 				Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(name);
-				if (tex.isNull())
+				if (!tex)
 					mTextureDrawer->setImageTexture(name);
 				else
 					setTexture(tex);

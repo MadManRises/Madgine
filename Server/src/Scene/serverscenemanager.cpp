@@ -13,11 +13,8 @@ namespace Engine {
 namespace Scene {
 
 
-ServerSceneManager::ServerSceneManager() :
-	mEntities(),
-	mLights()
+ServerSceneManager::ServerSceneManager()
 {
-	clear();
 }
 
 ServerSceneManager::~ServerSceneManager()

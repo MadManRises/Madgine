@@ -55,7 +55,7 @@ ConfigSet::ConfigSet(Ogre::Root *root, const std::string &configFileName) :
 		if (!root->restoreConfig())
 		{
 			// if no existing config, or could not restore it, show the config dialog 
-			if (!root->showConfigDialog())
+			if (!root->showConfigDialog(nullptr))
 			{
 				throw 0;
 			}

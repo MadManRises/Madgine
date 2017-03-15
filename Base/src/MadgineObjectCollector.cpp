@@ -3,19 +3,19 @@
 #include "MadgineObjectCollector.h"
 
 namespace Engine {
-		void MadgineObjectCollector::add(BaseMadgineObject * object)
+		void MadgineObjectCollector::add(MadgineObjectBase * object)
 		{
 			mObjects.push_back(object);
 		}
-		void MadgineObjectCollector::remove(BaseMadgineObject * object)
+		void MadgineObjectCollector::remove(MadgineObjectBase * object)
 		{
 			mObjects.remove(object);
 		}
-		std::list<BaseMadgineObject*>::const_iterator MadgineObjectCollector::begin()
+		std::list<MadgineObjectBase*>::const_iterator MadgineObjectCollector::begin()
 		{
 			return mObjects.begin();
 		}
-		std::list<BaseMadgineObject*>::const_iterator MadgineObjectCollector::end()
+		std::list<MadgineObjectBase*>::const_iterator MadgineObjectCollector::end()
 		{
 			return mObjects.end();
 		}

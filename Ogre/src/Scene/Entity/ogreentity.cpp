@@ -51,8 +51,8 @@ OgreEntity::OgreEntity(const OgreEntity &other) :
 OgreEntity::OgreEntity(OgreEntity &&other) :
 	Entity(std::forward<Entity>(other)),
 	mNode(other.mNode),
-	mObject(other.mObject),
-	mDecoratorNode(other.mDecoratorNode)
+	mDecoratorNode(other.mDecoratorNode),
+	mObject(other.mObject)
 {
 	other.mNode = 0;
 	other.mObject = 0;

@@ -19,7 +19,7 @@ FolderSources(sources "" src serverforward.h serverlib.h)
 		FolderSources(sources Scene Entity serverentity.cpp serverentity.h)
 	FolderSources(sources src Scripting)
 		FolderSources(sources Scripting Parsing serverscriptparser.cpp serverscriptparser.h)
-	FolderSources(sources src Server baseserver.cpp baseserver.h serverappinstance.cpp serverappinstance.h serverlog.cpp serverlog.h ServerTimer.cpp ServerTimer.h)
+	FolderSources(sources src Server ServerBase.cpp ServerBase.h serverappinstance.cpp serverappinstance.h serverlog.cpp serverlog.h ServerTimer.cpp ServerTimer.h)
 
 
 include_directories(${SERVER_SOURCE_DIR}/src ${BASE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS})

@@ -17,9 +17,9 @@ FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineOb
 	FolderSources(sources src App application.cpp application.h appsettings.h contextmasks.h)
 	FolderSources(sources src Os os.h windows.cpp)
 	FolderSources(sources src Scene light.cpp light.h scenemanager.cpp scenemanager.h scenecomponent.cpp scenecomponent.h)
-		FolderSources(sources Scene Entity baseentitycomponent.cpp baseentitycomponent.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
+		FolderSources(sources Scene Entity EntityComponentBase.cpp EntityComponentBase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 	FolderSources(sources src Scripting)
-		FolderSources(sources Scripting Types baseglobalapicomponent.cpp baseglobalapicomponent.h globalapi.h globalapicomponent.h globalscopeimpl.cpp globalscopeimpl.h scene.cpp scene.h scriptingmanager.cpp scriptingmanager.h)
+		FolderSources(sources Scripting Types globalapicomponentbase.cpp globalapicomponentbase.h globalapi.h globalapicomponent.h GlobalScope.cpp GlobalScope.h scene.cpp scene.h scriptingmanager.cpp scriptingmanager.h)
 
 include_directories(${BASE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS})
 

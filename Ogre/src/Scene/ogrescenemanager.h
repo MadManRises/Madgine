@@ -17,8 +17,9 @@
 namespace Engine {
 namespace Scene {
 
-class OGREMADGINE_EXPORT OgreSceneManager : public Singleton<OgreSceneManager>,
-	public Ogre::GeneralAllocatedObject,
+class OGREMADGINE_EXPORT OgreSceneManager : 
+	public Hierarchy::HierarchyObject<OgreSceneManager>,
+	public Singleton<OgreSceneManager>,
 	public SceneManager
 {
 public:

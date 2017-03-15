@@ -9,11 +9,11 @@
 namespace Engine {
 namespace Scene {
 
-class MADGINE_BASE_EXPORT BaseSceneComponent : public Serialize::SerializableUnitBase, public BaseMadgineObject{
+class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public MadgineObjectBase{
 public:
-    virtual ~BaseSceneComponent() = default;
+    virtual ~SceneComponentBase() = default;
 
-    BaseSceneComponent(float updateInterval = 0.f, App::ContextMask context = App::ContextMask::SceneContext);
+    SceneComponentBase(float updateInterval = 0.f, App::ContextMask context = App::ContextMask::SceneContext);
 
     void update(float timeSinceLastFrame, App::ContextMask mask);
 
@@ -47,14 +47,14 @@ private:
 };
 
 #ifdef _MSC_VER
-template MADGINE_BASE_EXPORT class UniqueComponentCollector<BaseSceneComponent>;
+template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase>;
 #endif
 
 template <class T>
-class SceneComponent : public UniqueComponent<T, BaseSceneComponent>, public Scripting::GlobalAPI<T>{
+class SceneComponent : public Hierarchy::HierarchyObject<T>, public UniqueComponent<T, SceneComponentBase>, public Scripting::GlobalAPI<T>{
 
 public:
-	using UniqueComponent<T, BaseSceneComponent>::UniqueComponent;
+	using UniqueComponent<T, SceneComponentBase>::UniqueComponent;
 
     virtual const char *getName() override {
         return strrchr(typeid(T).name(), ':') + 1;

@@ -5,10 +5,10 @@
 namespace Engine {
 	namespace Scripting {
 
-		class MADGINE_BASE_EXPORT BaseGlobalAPIComponent : public BaseMadgineObject {
+		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObjectBase {
 
 		public:
-			virtual ~BaseGlobalAPIComponent() = default;
+			virtual ~GlobalAPIComponentBase() = default;
 
 			virtual void clear();
 			virtual void update(float timeSinceLastFrame);

@@ -24,7 +24,7 @@ namespace Engine {
 
 
 		UIManager::UIManager(GUI::GUISystem *gui) :
-			mCurrentRoot(0),
+			mCurrentRoot(nullptr),
 			mGUI(gui),
 			mKeepingCursorPos(false)			
 		{

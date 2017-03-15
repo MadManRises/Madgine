@@ -9,11 +9,7 @@ namespace Engine {
 	namespace Util {
 
 		AppStats::AppStats(Ogre::RenderWindow *window) :
-			mAverageFPS(),
 #if OGRE_MEMORY_TRACKER
-			mOgreMemory(),
-			startTrack(this),
-			stopTrack(this),
 			mTracker(static_cast<TrackerAccessor&>(Ogre::MemoryTracker::get())),
 #endif
 			mWindow(window)
@@ -23,7 +19,7 @@ namespace Engine {
 
 		void AppStats::update()
 		{
-			mAverageFPS = mWindow->getAverageFPS();
+			mAverageFPS = mWindow->getStatistics().avgFPS;
 #if OGRE_MEMORY_TRACKER
 			mOgreMemory = mTracker.getTotalMemoryAllocated();
 #endif

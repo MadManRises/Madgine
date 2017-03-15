@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Scripting/Types/scopeimpl.h"
+#include "Scripting/Types/scope.h"
 
-#include "baseentitycomponent.h"
+#include "EntityComponentBase.h"
 
 #include "Serialize\Container\set.h"
 
@@ -15,10 +15,10 @@ namespace Entity {
 
 
 
-class MADGINE_BASE_EXPORT Entity : public Scripting::ScopeImpl<Entity>
+class MADGINE_BASE_EXPORT Entity : public Scripting::Scope<Entity>
 {
 private:
-    typedef std::unique_ptr<BaseEntityComponent> (Entity::*ComponentBuilder)();
+    typedef std::unique_ptr<EntityComponentBase> (Entity::*ComponentBuilder)();
 
 public:
 
@@ -90,7 +90,7 @@ protected:
 	ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
 
 	template <class T>
-	std::unique_ptr<BaseEntityComponent> createComponent_t() {
+	std::unique_ptr<EntityComponentBase> createComponent_t() {
 		return std::make_unique<T>(*this);
 	}
 
@@ -116,8 +116,8 @@ private:
 	}
 
 
-	std::tuple<std::unique_ptr<BaseEntityComponent>> createComponent(const std::string &name);
-	BaseEntityComponent *addComponentImpl(std::unique_ptr<BaseEntityComponent> &&component);
+	std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string &name);
+	EntityComponentBase *addComponentImpl(std::unique_ptr<EntityComponentBase> &&component);
 
 	template <class T>
 	class ComponentRegistrator {
@@ -136,7 +136,7 @@ private:
 
     const Scripting::Parsing::EntityNode *mDescription;    
 
-	Serialize::ObservableSet<std::unique_ptr<BaseEntityComponent>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
+	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
         static std::map<std::string, ComponentBuilder> dummy;

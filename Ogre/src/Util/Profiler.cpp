@@ -7,8 +7,7 @@ namespace Engine {
 	namespace Util {
 
 		Profiler::Profiler() :
-			mProcesses(),
-			mCurrent(0),
+			mCurrent(nullptr),
 			mInterval(2.0f),
 			mCurrentInterval(false)
 		{

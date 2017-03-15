@@ -6,10 +6,10 @@
 namespace Engine {
 
 
-		class MADGINE_BASE_EXPORT BaseMadgineObject {
+		class MADGINE_BASE_EXPORT MadgineObjectBase {
 		protected:
-			BaseMadgineObject();
-			virtual ~BaseMadgineObject();
+			MadgineObjectBase();
+			virtual ~MadgineObjectBase();
 
 		public:
 			virtual const char *getName() = 0;
@@ -25,7 +25,7 @@ namespace Engine {
 		};
 
 		template <class T>
-		class MadgineObject : public BaseMadgineObject {
+		class MadgineObject : public MadgineObjectBase {
 			virtual const char *getName() override {
 				return typeid(T).name();
 			}		

@@ -1,6 +1,6 @@
 #include "baselib.h"
 #include "scene.h"
-#include "globalscopeimpl.h"
+#include "GlobalScope.h"
 
 namespace Engine {
 namespace Scripting {

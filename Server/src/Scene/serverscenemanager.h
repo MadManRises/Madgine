@@ -14,6 +14,7 @@ namespace Engine {
 namespace Scene {
 
 class MADGINE_SERVER_EXPORT ServerSceneManager :
+	public Hierarchy::HierarchyObject<ServerSceneManager>,
 	public SceneManager
 {
 public:

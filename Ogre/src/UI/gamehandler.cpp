@@ -46,7 +46,7 @@ void GameHandlerBase::onMouseMove(GUI::MouseEventArgs &me)
     if (mCurrentMouseButton != GUI::MouseButton::NO_BUTTON){
         me.button = mCurrentMouseButton;
         if (!mDragging && mSingleClick &&
-                abs(me.position[0] - mDragStart[0]) + abs(me.position[1] - mDragStart[1]) > mDragStartThreshold){
+                fabs(me.position[0] - mDragStart[0]) + fabs(me.position[1] - mDragStart[1]) > mDragStartThreshold){
             mSingleClick = false;
 			if (mMouseDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED) {
 				mDragging = true;

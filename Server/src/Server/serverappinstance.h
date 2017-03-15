@@ -9,7 +9,7 @@ namespace Engine {
 		public:
 			template <class T>
 			ServerAppInstance(T &&initCallback) :
-				mApplication(0),
+				mApplication(nullptr),
 				mResult(0),
 				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))
 			{

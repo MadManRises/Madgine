@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scripting/Types/api.h"
-#include "globalscopeimpl.h"
+#include "GlobalScope.h"
 
 namespace Engine {
 namespace Scripting {
@@ -11,7 +11,7 @@ template <class T>
 class GlobalAPI : public API<T> {
 public:
 	GlobalAPI() :
-		mGlobalScope(&GlobalScopeImpl::getSingleton()) {
+		mGlobalScope(&GlobalScope::getSingleton()) {
 		mGlobalScope->addAPI(this);
 	}
 	virtual ~GlobalAPI() {
@@ -27,12 +27,12 @@ public:
 	}
 
 protected:
-	GlobalScopeImpl *globalScope() {
+	GlobalScope *globalScope() {
 		return mGlobalScope;
 	}
 
 private:
-	GlobalScopeImpl *mGlobalScope;
+	GlobalScope *mGlobalScope;
 };
 
 

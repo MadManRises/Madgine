@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Scripting {
 
-class Scene : public Scope
+class Scene : public ScopeBase
 {
 public:
 

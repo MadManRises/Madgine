@@ -1,13 +1,13 @@
 #pragma once
 
-#include "baseentitycomponent.h"
+#include "EntityComponentBase.h"
 #include "entity.h"
 
 namespace Engine{
 namespace Scene {
 namespace Entity {
 
-template <class T, class Base = BaseEntityComponent>
+template <class T, class Base = EntityComponentBase>
 class EntityComponent : public Base, public Scripting::API<T>{
 public:
 	using Base::Base;

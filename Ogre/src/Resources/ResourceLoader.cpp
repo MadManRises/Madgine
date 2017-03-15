@@ -17,13 +17,11 @@ namespace Engine {
 			Ogre::ConfigFile cf;
 			cf.load(mediaPath + "resources.cfg");
 
-			// Go through all sections & settings in the file
-			Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
 
 			Ogre::String secName, typeName, archName;
-			while (seci.hasMoreElements()) {
-				secName = seci.peekNextKey();
-				for (const std::pair<Ogre::String, Ogre::String> &p : *seci.getNext()) {
+			for (const std::pair<const Ogre::String, Ogre::ConfigFile::SettingsMultiMap> &p : cf.getSettingsBySection()) {
+				secName = p.first;
+				for (const std::pair<const Ogre::String, Ogre::String> &p : p.second) {
 					typeName = p.first;
 					archName = mediaPath + p.second;
 

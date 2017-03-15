@@ -7,16 +7,16 @@ namespace Engine {
 		class MADGINE_BASE_EXPORT MadgineObjectCollector {
 
 		public:
-			void add(BaseMadgineObject *object);
-			void remove(BaseMadgineObject *object);
+			void add(MadgineObjectBase *object);
+			void remove(MadgineObjectBase *object);
 
-			std::list<BaseMadgineObject*>::const_iterator begin();
-			std::list<BaseMadgineObject*>::const_iterator end();
+			std::list<MadgineObjectBase*>::const_iterator begin();
+			std::list<MadgineObjectBase*>::const_iterator end();
 
 			static MadgineObjectCollector &getSingleton();
 
 		private:
-			std::list<BaseMadgineObject*> mObjects;
+			std::list<MadgineObjectBase*> mObjects;
 		};
 
 }

@@ -19,7 +19,7 @@ std::string tr(const std::string &key)
 
 TranslationUnit::TranslationUnit() :
     mRsgm(&Ogre::ResourceGroupManager::getSingleton()),
-    mCurrentLanguage(0)
+    mCurrentLanguage(nullptr)
 {
 
     mLoadOrder = 100.0f;

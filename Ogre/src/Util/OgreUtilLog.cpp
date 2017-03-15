@@ -19,17 +19,17 @@ namespace Engine {
 			Ogre::LogManager::getSingleton().destroyLog(mLog);
 		}
 
-		void OgreUtilLog::log(const std::string & msg, ::Util::MessageType lvl, const std::list<::Util::TraceBack>& traceBack)
+		void OgreUtilLog::log(const std::string & msg, Engine::Util::MessageType lvl, const std::list<Engine::Util::TraceBack>& traceBack)
 		{
 			Ogre::LogMessageLevel level;
 			switch (lvl) {
-			case ::Util::ERROR_TYPE:
+			case Engine::Util::ERROR_TYPE:
 				level = Ogre::LML_CRITICAL;
 				break;
-			case ::Util::WARNING_TYPE:
+			case Engine::Util::WARNING_TYPE:
 				level = Ogre::LML_NORMAL;
 				break;
-			case ::Util::LOG_TYPE:
+			case Engine::Util::LOG_TYPE:
 				level = Ogre::LML_TRIVIAL;
 				break;
 			default:

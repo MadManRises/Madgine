@@ -16,7 +16,7 @@ namespace Engine {
 		Application::Application() :
 			mShutDown(false),
 			mScriptingMgrInitialized(false),
-			mScriptingMgr(0),
+			mScriptingMgr(nullptr),
 			mTimeBank(0.0f)
 		{
 

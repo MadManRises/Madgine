@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scripting/Types/scopeimpl.h"
+#include "Scripting/Types/scope.h"
 
 #include "Serialize\Container\set.h"
 
@@ -51,7 +51,7 @@ private:
 
 
 
-    //std::set<Ogre::unique_ptr<BaseEntityComponent>> mComponents;
+    //std::set<Ogre::unique_ptr<EntityComponentBase>> mComponents;
 
 };
 

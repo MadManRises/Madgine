@@ -7,7 +7,7 @@ namespace Engine {
 	}
 
 	namespace Server {
-		class BaseServer;
+		class ServerBase;
 		
 	}
 

@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.3)
 
 cmake_policy(SET CMP0048 NEW)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
@@ -17,7 +17,7 @@ project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADG
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 
 if (MINGW)
-	add_compile_options(-Wall -fpermissive)
+	add_compile_options(-Wall -fpermissive -Wno-attributes)
 endif (MINGW)
 
 if (NOT APPLE)

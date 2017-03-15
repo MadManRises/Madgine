@@ -14,25 +14,25 @@ namespace Engine {
 			RefScopeTopLevelSerializableUnitBase(SCENE_MANAGER),
 			mItemCount(0)
 		{
-			for (const std::unique_ptr<BaseSceneComponent> &comp : mSceneComponents) {
-				Serialize::UnitHelper<BaseSceneComponent>::setItemTopLevel(*comp, this);
+			for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
+				Serialize::UnitHelper<SceneComponentBase>::setItemTopLevel(*comp, this);
 			}
 		}
 
 
-		Scripting::Scope * SceneManager::createSceneArray(size_t size)
+		Scripting::ScopeBase * SceneManager::createSceneArray(size_t size)
 		{
 			Scripting::Vector *v = createVector();
 			v->resize(size);
 			return v;
 		}
 
-		Scripting::Scope * SceneManager::createSceneStruct()
+		Scripting::ScopeBase * SceneManager::createSceneStruct()
 		{
 			return createStruct();
 		}
 
-		Scripting::Scope * SceneManager::createSceneList()
+		Scripting::ScopeBase * SceneManager::createSceneList()
 		{
 			return createList();
 		}
@@ -42,7 +42,7 @@ namespace Engine {
 			if (!MadgineObject::init())
 				return false;
 
-			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
+			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				if (!component->init())
 					return false;
 			}
@@ -55,7 +55,7 @@ namespace Engine {
 
 			clear();
 
-			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
+			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				component->finalize();
 			}
 		}
@@ -69,7 +69,7 @@ namespace Engine {
 
 		void SceneManager::saveComponentData(Serialize::SerializeOutStream &out) const
 		{
-			for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
+			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				out << component->getName();
 				component->writeId(out);
 				component->writeState(out);
@@ -81,7 +81,7 @@ namespace Engine {
 		{
 			std::string componentName;
 			while (in.loopRead(componentName)) {
-				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<BaseSceneComponent> &comp) {return comp->getName() == componentName; });
+				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase> &comp) {return comp->getName() == componentName; });
 				(*it)->readId(in);
 				(*it)->readState(in);
 			}
@@ -106,7 +106,7 @@ namespace Engine {
 		void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask) {
 			{
 				//PROFILE("SceneComponents");
-				for (const std::unique_ptr<BaseSceneComponent> &component : mSceneComponents) {
+				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 					//PROFILE(component->componentName());
 					component->update(timeSinceLastFrame, mask);
 				}

@@ -28,7 +28,7 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	ScopeImpl(other),
+	Scope(other),
 	mDescription(other.mDescription),
 	mComponents()	
 {
@@ -38,7 +38,7 @@ Entity::Entity(const Entity &other) :
 }
 
 Entity::Entity(Entity &&other) :
-	ScopeImpl(std::forward<Entity>(other)),
+	Scope(std::forward<Entity>(other)),
 	mDescription(other.mDescription),
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
 {
@@ -120,14 +120,14 @@ std::set<std::string> Entity::registeredComponentNames()
 
 ValueType Entity::methodCall(const std::string &name, const Scripting::ArgumentList &args)
 {
-    for (const std::unique_ptr<BaseEntityComponent> &c : mComponents){
+    for (const std::unique_ptr<EntityComponentBase> &c : mComponents){
         if(c->hasComponentMethod(name))
             return c->execComponentMethod(name, args);
     }
-    return ScopeImpl::methodCall(name, args);
+    return Scope::methodCall(name, args);
 }
 
-std::tuple<std::unique_ptr<BaseEntityComponent>> Entity::createComponent(const std::string & name)
+std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name)
 {
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
@@ -135,13 +135,13 @@ std::tuple<std::unique_ptr<BaseEntityComponent>> Entity::createComponent(const s
 	return std::make_tuple((this->*(it->second))());
 }
 
-BaseEntityComponent *Entity::addComponentImpl(std::unique_ptr<BaseEntityComponent> &&component)
+EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)
 {
     if (mComponents.find(component) != mComponents.end())
         throw ComponentException(Exceptions::doubleComponent(component->getName()));
     if (&component->getEntity() != this)
         throw ComponentException(Exceptions::corruptData);
-    return mComponents.emplace(std::forward<std::unique_ptr<BaseEntityComponent>>(component))->get();
+    return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component))->get();
 }
 
 

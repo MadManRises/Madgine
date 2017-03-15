@@ -7,14 +7,12 @@
 namespace Engine {
 	namespace Util {
 
-		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnitBase {
+		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
 		public:
 			ProcessStats(ProcessStats *parent = 0) :
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
-				mBuffer(),
-				mChildren(),
 				mParent(parent)
 			{
 			}

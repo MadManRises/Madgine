@@ -19,9 +19,9 @@ namespace Engine {
 			SceneManager();
 			virtual ~SceneManager() = default;
 
-			Scripting::Scope *createSceneArray(size_t size);
-			Scripting::Scope *createSceneStruct();
-			Scripting::Scope *createSceneList();
+			Scripting::ScopeBase *createSceneArray(size_t size);
+			Scripting::ScopeBase *createSceneStruct();
+			Scripting::ScopeBase *createSceneList();
 
 			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) = 0;
 			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
@@ -65,7 +65,7 @@ namespace Engine {
 		private:
 			size_t mItemCount;
 
-			UniqueComponentCollector<BaseSceneComponent> mSceneComponents;
+			UniqueComponentCollector<SceneComponentBase> mSceneComponents;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;
 
