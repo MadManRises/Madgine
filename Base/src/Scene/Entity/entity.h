@@ -18,10 +18,9 @@ namespace Entity {
 class MADGINE_BASE_EXPORT Entity : public Scripting::Scope<Entity>
 {
 private:
-    typedef std::unique_ptr<EntityComponentBase> (Entity::*ComponentBuilder)();
+    typedef std::unique_ptr<EntityComponentBase> (Entity::*ComponentBuilder)(const Scripting::ArgumentList &);
 
 public:
-
 	Entity(const Entity&);
 	Entity(Entity &&);
 
@@ -74,7 +73,7 @@ public:
 
 	bool hasComponent(const std::string &name);
 
-	void addComponent(const std::string &name);
+	void addComponent(const Scripting::ArgumentList &args, const std::string &name);
 	void removeComponent(const std::string &name);
 
 	static bool existsComponent(const std::string &name);
@@ -96,12 +95,11 @@ protected:
 private:
 
 	template <class T>
-	std::unique_ptr<EntityComponentBase> createComponent_t() {
-		return std::make_unique<T>(*this);
-	}
+	std::unique_ptr<EntityComponentBase> createComponent_t(const Scripting::ArgumentList &args) {
+		return std::make_unique<T>(*this, args);
+	}	
 
-
-	std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string &name);
+	std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string &name, const Engine::Scripting::ArgumentList &args);
 	EntityComponentBase *addComponentImpl(std::unique_ptr<EntityComponentBase> &&component);
 
 	template <class T>

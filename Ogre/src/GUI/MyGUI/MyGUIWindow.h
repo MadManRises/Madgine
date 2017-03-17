@@ -117,9 +117,9 @@ namespace Engine {
 				};
 
 
-				template <class T, class... _Ty>
+				template <class... _Ty>
 				struct EventHandler : public EventHandlerClass {
-					using F = std::function<T(_Ty...)>;
+					using F = std::function<void(_Ty...)>;
 					using Delegate = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::delegate;
 					using Event = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type;
 
@@ -137,7 +137,6 @@ namespace Engine {
 					Event &mEvent;
 					F mFunc;
 					Delegate *mDelegate;
-					SignalSlot::
 				};
 
 				template <class... _Ty>

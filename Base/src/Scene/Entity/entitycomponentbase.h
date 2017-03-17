@@ -28,8 +28,9 @@ public:
 	std::array<float, 3> getScale();
 
     Entity &getEntity() const;
-
 protected:
+
+	virtual Scripting::ArgumentList creationArguments() const;
 
     Entity &mEntity;
 };

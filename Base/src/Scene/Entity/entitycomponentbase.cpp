@@ -20,6 +20,11 @@ Entity &EntityComponentBase::getEntity() const
     return mEntity;
 }
 
+Scripting::ArgumentList EntityComponentBase::creationArguments() const
+{
+	return{};
+}
+
 
 std::array<float, 2> EntityComponentBase::getPosition2D()
 {

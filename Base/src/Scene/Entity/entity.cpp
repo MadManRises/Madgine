@@ -91,8 +91,8 @@ bool Entity::hasComponent(const std::string & name)
 	return mComponents.contains(name);
 }
 
-void Entity::addComponent(const std::string &name){
-	addComponentImpl(std::get<0>(createComponent(name)));
+void Entity::addComponent(const Scripting::ArgumentList &args, const std::string &name){
+	addComponentImpl(std::get<0>(createComponent(name, args)));
 }
 
 void Entity::removeComponent(const std::string & name)
@@ -127,12 +127,12 @@ ValueType Entity::methodCall(const std::string &name, const Scripting::ArgumentL
     return Scope::methodCall(name, args);
 }
 
-std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name)
+std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name, const Engine::Scripting::ArgumentList &args)
 {
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
 		throw ComponentException(Exceptions::unknownComponent(name));
-	return std::make_tuple((this->*(it->second))());
+	return std::make_tuple((this->*(it->second))(args));
 }
 
 EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)

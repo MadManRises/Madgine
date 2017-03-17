@@ -39,7 +39,7 @@ private:
     }
 
 	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
-		out << sComponentName;
+		out << sComponentName << creationArguments();
 	}
     
 	static const char * const sComponentName;
