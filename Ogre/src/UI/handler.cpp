@@ -49,7 +49,6 @@ bool Handler::installToWindow(GUI::Window * w)
 	}
 
 	return true;
-
 }
 
 
@@ -59,28 +58,28 @@ void Handler::sizeChanged()
 
 bool Handler::init()
 {
-	if (installToWindow(mUI->gui()->getWindowByName(mWindowName))) {
-		mWindows.clear();
-		return MadgineObjectBase::init();
-	}
-	else {
+	if (!MadgineObject::init())
+		return false;
+	if (!installToWindow(mUI->gui()->getWindowByName(mWindowName))) {
 		return false;
 	}
-	
+	return true;
 }
 
 void Handler::finalize()
 {
-	if (mWindow)
+	if (mWindow) {
 		mWindow->unregisterAllEvents(this);
-	MadgineObjectBase::finalize();
+		mWindow = 0;
+	}
+	MadgineObject::finalize();
 }
 
 bool Handler::init(GUI::Window *window)
 {
 	if (installToWindow(window)) {
 		mWindows.clear();
-		return MadgineObjectBase::init();
+		return MadgineObject::init();
 	}
 	else {
 		return false;
@@ -132,13 +131,6 @@ bool Handler::onKeyPress(const GUI::KeyEventArgs &evt)
 
 	return false;
 }
-
-
-void Handler::registerWindow(const WindowDescriber &des)
-{
-	mWindows.push_back(des);
-}
-
 
 void Handler::onMouseVisibilityChanged(bool b)
 {

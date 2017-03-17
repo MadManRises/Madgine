@@ -88,12 +88,6 @@ public:
 protected:
 
 	ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
-
-	template <class T>
-	std::unique_ptr<EntityComponentBase> createComponent_t() {
-		return std::make_unique<T>(*this);
-	}
-
 	
 	bool hasScriptMethod(const std::string &name) override;
 
@@ -102,17 +96,8 @@ protected:
 private:
 
 	template <class T>
-	static void registerComponent() {
-		const std::string name = T::componentName();
-		assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-		sRegisteredComponentsByName()[name] = &createComponent_t<T>;
-	}
-
-	template <class T>
-	static void unregisterComponent() {
-		const std::string name = T::componentName();
-		assert(sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end());
-		sRegisteredComponentsByName().erase(name);
+	std::unique_ptr<EntityComponentBase> createComponent_t() {
+		return std::make_unique<T>(*this);
 	}
 
 
@@ -123,10 +108,14 @@ private:
 	class ComponentRegistrator {
 	public:
 		ComponentRegistrator() {
-			registerComponent<T>();
+			const std::string name = T::componentName();
+			assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
+			sRegisteredComponentsByName()[name] = &createComponent_t<T>;
 		}
 		~ComponentRegistrator() {
-			unregisterComponent<T>();
+			const std::string name = T::componentName();
+			assert(sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end());
+			sRegisteredComponentsByName().erase(name);
 		}
 	};
 

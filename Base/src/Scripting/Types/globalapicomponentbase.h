@@ -5,7 +5,7 @@
 namespace Engine {
 	namespace Scripting {
 
-		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObjectBase {
+		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject {
 
 		public:
 			virtual ~GlobalAPIComponentBase() = default;

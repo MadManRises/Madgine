@@ -9,7 +9,11 @@ namespace Engine {
 
 		
 
-		class OGREMADGINE_EXPORT GUISystem : public Singleton<GUISystem>, public MadgineObject<GUISystem>, public Ogre::GeneralAllocatedObject, public Ogre::WindowEventListener
+		class OGREMADGINE_EXPORT GUISystem : 
+			public Singleton<GUISystem>, 
+			public MadgineObject,
+			public Ogre::GeneralAllocatedObject,
+			public Ogre::WindowEventListener
 		{
 		public:
 			GUISystem();

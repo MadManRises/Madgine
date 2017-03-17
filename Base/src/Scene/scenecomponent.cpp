@@ -30,12 +30,12 @@ void SceneComponentBase::fixedUpdate(float timeStep, App::ContextMask mask)
 
 bool SceneComponentBase::init()
 {
-	return MadgineObjectBase::init();
+	return MadgineObject::init();
 }
 
 void SceneComponentBase::finalize()
 {
-	MadgineObjectBase::finalize();
+	MadgineObject::finalize();
 }
 
 void SceneComponentBase::setEnabled(bool b)

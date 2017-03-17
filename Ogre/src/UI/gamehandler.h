@@ -78,10 +78,6 @@ private:
 template <class T>
 class GameHandler : public OgreUniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T>, public Hierarchy::HierarchyObject<T> {
 	using OgreUniqueComponent<T, GameHandlerBase>::OgreUniqueComponent;
-
-	virtual const char *getName() override {
-		return typeid(T).name();
-	}
 };
 
 

@@ -60,9 +60,6 @@ template <class T>
 class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T>, public Hierarchy::HierarchyObject<T> {
 	using OgreUniqueComponent<T, GuiHandlerBase>::OgreUniqueComponent;
 
-	virtual const char *getName() override {
-		return typeid(T).name();
-	}
 };
 
 } // namespace GuiHandler

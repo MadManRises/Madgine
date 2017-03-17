@@ -10,7 +10,7 @@ namespace Engine {
 	namespace UI {
 
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-			public MadgineObject<UIManager>,
+			public MadgineObject,
 			public Scripting::GlobalAPI<UIManager>,
 			public Ogre::GeneralAllocatedObject
 		{

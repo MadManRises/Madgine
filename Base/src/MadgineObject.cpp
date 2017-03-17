@@ -6,13 +6,13 @@
 
 namespace Engine {	
 
-		MadgineObjectBase::MadgineObjectBase() :
+		MadgineObject::MadgineObject() :
 			mState(ObjectState::CONSTRUCTED)
 		{
 			MadgineObjectCollector::getSingleton().add(this);
 		}
 
-		MadgineObjectBase::~MadgineObjectBase()
+		MadgineObject::~MadgineObject()
 		{
 			if (mState != ObjectState::CONSTRUCTED) {
 				std::stringstream ss;
@@ -26,7 +26,12 @@ namespace Engine {
 			MadgineObjectCollector::getSingleton().remove(this);
 		}
 
-		bool MadgineObjectBase::init()
+		const char * MadgineObject::getName()
+		{
+			return typeid(*this).name();
+		}
+
+		bool MadgineObject::init()
 		{
 			if (mState != ObjectState::CONSTRUCTED) {
 				LOG_WARNING(std::string("Double initializeing Object: ") + getName());
@@ -36,7 +41,7 @@ namespace Engine {
 			return true;
 		}
 
-		void MadgineObjectBase::finalize()
+		void MadgineObject::finalize()
 		{
 			if (mState == ObjectState::CONSTRUCTED) {
 				LOG_WARNING(std::string("Finalizing unitialized Object: ") + getName());
@@ -46,7 +51,7 @@ namespace Engine {
 		}
 
 		
-		ObjectState MadgineObjectBase::getState() {
+		ObjectState MadgineObject::getState() {
 			return mState;
 		}
 

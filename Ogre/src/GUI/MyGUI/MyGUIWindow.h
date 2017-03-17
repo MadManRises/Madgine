@@ -117,15 +117,14 @@ namespace Engine {
 				};
 
 
-				template <class... _Ty>
+				template <class T, class... _Ty>
 				struct EventHandler : public EventHandlerClass {
-					using F = std::function<void(_Ty...)>;
+					using F = std::function<T(_Ty...)>;
 					using Delegate = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::delegate;
 					using Event = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type;
 
-					EventHandler(F f, Event &event) :
-						mEvent(event),
-						mFunc(f) {
+					EventHandler(const F &f, Event &event) :
+						mEvent(event) {
 						mDelegate = MyGUI::newDelegate(this, &EventHandler::fire);
 						event += mDelegate;
 					}
@@ -137,7 +136,8 @@ namespace Engine {
 					}
 					Event &mEvent;
 					F mFunc;
-					Delegate *mDelegate;					
+					Delegate *mDelegate;
+					SignalSlot::
 				};
 
 				template <class... _Ty>
