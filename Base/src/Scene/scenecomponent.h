@@ -13,9 +13,10 @@ class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUni
 public:
     virtual ~SceneComponentBase() = default;
 
-    SceneComponentBase(float updateInterval = 0.f, App::ContextMask context = App::ContextMask::SceneContext);
+    SceneComponentBase(App::ContextMask context = App::ContextMask::SceneContext);
 
     void update(float timeSinceLastFrame, App::ContextMask mask);
+	void fixedUpdate(float timeStep, App::ContextMask mask);
 
     virtual bool init();
 	virtual void finalize();
@@ -29,16 +30,10 @@ public:
 
 protected:
     virtual void update(float);
-
-	void setUpdateInterval(float interval);
-
-    
+	virtual void fixedUpdate(float);    
 
 private:
     const App::ContextMask mContext;
-
-    float mUpdateInterval;
-    float mTimeBank;
 
 	bool mEnabled;
 

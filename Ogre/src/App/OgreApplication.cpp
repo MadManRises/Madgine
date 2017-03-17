@@ -179,6 +179,24 @@ bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
 	}
 
 	if (!mPaused){
+		
+		try {
+			PROFILE("UIManager");
+			mUI->update(fe.timeSinceLastFrame);
+		}
+		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during UI-Update!");
+			LOG_EXCEPTION(e);
+		}
+
+		try {
+			PROFILE("SceneManager");
+			mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
+		}
+		catch (const std::exception &e) {
+			LOG_ERROR("Unhandled Exception during Scene-Update!");
+			LOG_EXCEPTION(e);
+		}
 
 		try {
 			PROFILE("GUI");
@@ -220,7 +238,7 @@ bool OgreApplication::fixedUpdate(float timeStep)
 
 		try {
 			PROFILE("SceneManager");
-			mSceneMgr->update(timeStep, mUI->currentContext());
+			mSceneMgr->fixedUpdate(timeStep, mUI->currentContext());
 		}
 		catch (const std::exception &e) {
 			LOG_ERROR("Unhandled Exception during Scene-Update!");
@@ -229,7 +247,7 @@ bool OgreApplication::fixedUpdate(float timeStep)
 
 		try {
 			PROFILE("UIManager");
-			mUI->update(timeStep);
+			mUI->fixedUpdate(timeStep);
 		}
 		catch (const std::exception &e) {
 			LOG_ERROR("Unhandled Exception during UI-Update!");

@@ -34,6 +34,7 @@ namespace Engine {
 			void closeWindow(GuiHandlerBase *handler);
 
 			void update(float timeSinceLastFrame);
+			void fixedUpdate(float timeStep);
 
 			App::ContextMask currentContext();
 

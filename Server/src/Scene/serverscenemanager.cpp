@@ -51,7 +51,8 @@ void ServerSceneManager::writeState(Serialize::SerializeOutStream &out) const
 
 void ServerSceneManager::readState(Serialize::SerializeInStream &in)
 {
-	in >> mStaticSceneName >> ValueType() >> ValueType();
+	ValueType dummy;
+	in >> mStaticSceneName >> dummy >> dummy;
 	
 	SceneManager::readState(in);		
 }

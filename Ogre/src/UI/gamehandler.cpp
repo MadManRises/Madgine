@@ -36,6 +36,12 @@ void GameHandlerBase::update(float timeSinceLastFrame, App::ContextMask mask)
         update(timeSinceLastFrame);
 }
 
+void GameHandlerBase::fixedUpdate(float timeStep, App::ContextMask mask)
+{
+	if (mContext & mask)
+		fixedUpdate(timeStep);
+}
+
 Scene::OgreSceneManager *GameHandlerBase::sceneMgr() {
 	return mSceneMgr;
 }
@@ -150,6 +156,10 @@ const std::array<float, 2> &GameHandlerBase::dragStart()
 void GameHandlerBase::update(float timeSinceLastFrame)
 {
 
+}
+
+void GameHandlerBase::fixedUpdate(float timeStep)
+{
 }
 
 

@@ -6,28 +6,26 @@ namespace Engine{
 
 namespace Scene{
 
-	SceneComponentBase::SceneComponentBase(float updateInterval, App::ContextMask context) :
+	SceneComponentBase::SceneComponentBase(App::ContextMask context) :
 		mContext(context),
-		mUpdateInterval(updateInterval),
-		mTimeBank(0.f),
 		mEnabled(true),
 		mSceneMgr(&SceneManager::getSingleton())
 {
 
 }
 
-void SceneComponentBase::update(float timeSinceLastFrame, App::ContextMask mask){
+void SceneComponentBase::update(float timeSinceLastFrame, App::ContextMask mask)
+{
     if (mEnabled && (mContext & (mask | App::ContextMask::AnyContext))){
-        if (mUpdateInterval == 0.f)
-            update(timeSinceLastFrame);
-        else {
-            mTimeBank += timeSinceLastFrame;
-            while (mTimeBank >= mUpdateInterval){                
-                mTimeBank -= mUpdateInterval;
-                update(mUpdateInterval);
-            }
-        }
+		update(timeSinceLastFrame);
     }
+}
+
+void SceneComponentBase::fixedUpdate(float timeStep, App::ContextMask mask)
+{
+	if (mEnabled && (mContext & (mask | App::ContextMask::AnyContext))) {
+		fixedUpdate(timeStep);
+	}
 }
 
 bool SceneComponentBase::init()
@@ -57,14 +55,7 @@ SceneManager * SceneComponentBase::sceneMgr()
 
 void SceneComponentBase::update(float){}
 
-void SceneComponentBase::setUpdateInterval(float interval)
-{
-	mUpdateInterval = interval;
-}
-
-
-
-
+void SceneComponentBase::fixedUpdate(float){}
 
 }
 }

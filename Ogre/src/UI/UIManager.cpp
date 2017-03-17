@@ -135,13 +135,21 @@ namespace Engine {
 			return result;
 		}
 
-		
 		void UIManager::update(float timeSinceLastFrame)
 		{
 			App::ContextMask context = currentContext();
 
 			for (const std::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->update(timeSinceLastFrame, context);
+			}
+		}
+		
+		void UIManager::fixedUpdate(float timeStep)
+		{
+			App::ContextMask context = currentContext();
+
+			for (const std::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
+				h->fixedUpdate(timeStep, context);
 			}
 		}
 

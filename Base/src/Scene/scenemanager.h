@@ -35,6 +35,7 @@ namespace Engine {
 			virtual void finalize() override;
 			
 			virtual void update(float timeSinceLastFrame, App::ContextMask context);
+			virtual void fixedUpdate(float timeStep, App::ContextMask context);
 
 			virtual void clear() = 0;
 

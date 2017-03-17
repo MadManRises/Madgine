@@ -17,9 +17,8 @@ public:
 
     void abortDrag();
 
-    void update(float timeSinceLastFrame, App::ContextMask mask);
-
-    virtual void update(float timeSinceLastFrame);
+	void update(float timeSinceLastFrame, App::ContextMask mask);
+    void fixedUpdate(float timeStep, App::ContextMask mask);
 
 	Scene::OgreSceneManager *sceneMgr();
 
@@ -41,6 +40,9 @@ protected:
     virtual void onMouseDragEnd(const GUI::MouseEventArgs &evt);
 
     virtual void onMouseDragAbort();
+
+	virtual void update(float timeSinceLastFrame);
+	virtual void fixedUpdate(float timeStep);
 
 
 

@@ -115,6 +115,16 @@ namespace Engine {
 			removeQueuedEntities();
 		}
 
+		void SceneManager::fixedUpdate(float timeStep, App::ContextMask mask) {
+			{
+				//PROFILE("SceneComponents");
+				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+					//PROFILE(component->componentName());
+					component->fixedUpdate(timeStep, mask);
+				}
+			}
+		}
+
 
 		std::string SceneManager::generateUniqueName()
 		{

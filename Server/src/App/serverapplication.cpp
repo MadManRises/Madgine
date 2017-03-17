@@ -59,7 +59,7 @@ namespace Engine {
 
 		bool ServerApplication::fixedUpdate(float timeStep)
 		{
-			mSceneManager->update(timeStep, Engine::App::ContextMask::SceneContext);
+			mSceneManager->fixedUpdate(timeStep, Engine::App::ContextMask::SceneContext);
 
 			return true;
 		}
