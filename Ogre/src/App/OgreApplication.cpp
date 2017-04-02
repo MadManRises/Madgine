@@ -294,7 +294,7 @@ void OgreApplication::_setup()
 
 	Application::_setup();
 
-	// Create SceneManager
+	// Create SceneManagerBase
 	mSceneMgr = new Scene::OgreSceneManager(mRoot);
 
 	mWindow->update();

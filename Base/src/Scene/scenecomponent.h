@@ -19,14 +19,12 @@ public:
 	void fixedUpdate(float timeStep, App::ContextMask mask);
 
     virtual bool init();
-	virtual void finalize();
-
-    virtual const char *getName() = 0;
+	virtual void finalize();    
 
 	void setEnabled(bool b);
 	bool isEnabled();
 
-	SceneManager *sceneMgr();
+	SceneManagerBase *sceneMgr();
 
 protected:
     virtual void update(float);
@@ -37,23 +35,24 @@ private:
 
 	bool mEnabled;
 
-	SceneManager *mSceneMgr;
+	SceneManagerBase *mSceneMgr;
 
 };
 
 #ifdef _MSC_VER
-template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase>;
+template MADGINE_BASE_EXPORT class BaseUniqueComponentCollector<SceneComponentBase>;
 #endif
 
 template <class T>
-class SceneComponent : public Hierarchy::HierarchyObject<T>, public UniqueComponent<T, SceneComponentBase>, public Scripting::GlobalAPI<T>{
+class SceneComponent : public UniqueComponent<T, SceneComponentBase>, public Scripting::GlobalAPI<T>{
 
 public:
-	using UniqueComponent<T, SceneComponentBase>::UniqueComponent;
+	using UniqueComponent::UniqueComponent;
 
-    virtual const char *getName() override {
-        return strrchr(typeid(T).name(), ':') + 1;
-    }
+private:
+	virtual size_t getSize() const override final {
+		return sizeof(T);
+	}
 
 };
 

@@ -7,7 +7,7 @@ namespace Engine{
 namespace Scene {
 namespace Entity {
 
-template <class T, class Base = EntityComponentBase>
+template <class T, class Base = EntityComponentBase, class... _Ty>
 class EntityComponent : public Base, public Scripting::API<T>{
 public:
 	using Base::Base;
@@ -41,14 +41,18 @@ private:
 	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
 		out << sComponentName << creationArguments();
 	}
+
+	virtual size_t getSize() const override final {
+		return sizeof(T);
+	}
     
 	static const char * const sComponentName;
-    static const Entity::ComponentRegistrator<T> _reg;
+    static const Entity::ComponentRegistrator<T, _Ty...> _reg;
 
 };
 
-template <class T, class Base>
-const Entity::ComponentRegistrator<T> EntityComponent<T, Base>::_reg;
+template <class T, class Base, class... _Ty>
+const Entity::ComponentRegistrator<T, _Ty...> EntityComponent<T, Base, _Ty...>::_reg;
 
 }
 }

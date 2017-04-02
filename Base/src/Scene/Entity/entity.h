@@ -18,7 +18,7 @@ namespace Entity {
 class MADGINE_BASE_EXPORT Entity : public Scripting::Scope<Entity>
 {
 private:
-    typedef std::unique_ptr<EntityComponentBase> (Entity::*ComponentBuilder)(const Scripting::ArgumentList &);
+    typedef std::function<std::unique_ptr<EntityComponentBase>(Entity &, const Scripting::ArgumentList &)> ComponentBuilder;
 
 public:
 	Entity(const Entity&);
@@ -51,20 +51,19 @@ public:
 
     void onLoad();
 
-	template <class T>
-	T *addComponent_t() {
+	template <class T, class... _Ty>
+	T *addComponent_t(_Ty&&... args) {
 		if (!hasComponent<T>())
-			addComponentImpl(createComponent_t<T>());
+			addComponentImpl(createComponent_t<T>(std::forward<_Ty>(args)...));
 		return getComponent<T>();
 	}
 
 	template <class T>
 	T *getComponent() {
-		auto it = mComponents.find(T::componentName());
-		if (it == mComponents.end())
-			return 0;
-		return static_cast<T*>(it->get());
+		return static_cast<T*>(getComponent(T::componentName()));
 	}
+
+	EntityComponentBase *getComponent(const std::string &name);
 
 	template <class T>
 	bool hasComponent() {
@@ -94,21 +93,26 @@ protected:
 	
 private:
 
-	template <class T>
-	std::unique_ptr<EntityComponentBase> createComponent_t(const Scripting::ArgumentList &args) {
-		return std::make_unique<T>(*this, args);
+	template <class T, class... _Ty>
+	std::unique_ptr<EntityComponentBase> createComponent_t(_Ty&&... args) {
+		return std::make_unique<T>(*this, std::forward<_Ty>(args)...);
 	}	
 
 	std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string &name, const Engine::Scripting::ArgumentList &args);
 	EntityComponentBase *addComponentImpl(std::unique_ptr<EntityComponentBase> &&component);
 
-	template <class T>
+	template <class T, class... _Ty>
 	class ComponentRegistrator {
 	public:
 		ComponentRegistrator() {
 			const std::string name = T::componentName();
 			assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-			sRegisteredComponentsByName()[name] = &createComponent_t<T>;
+			sRegisteredComponentsByName()[name] = [](Entity &e, const Scripting::ArgumentList &args) {
+				std::tuple<_Ty...> argsTuple;				
+				if (!TupleUnpacker<>::call(&args, &Scripting::ArgumentList::parse<_Ty...>, argsTuple))
+					throw 0;
+				return TupleUnpacker<Entity &>::call(std::make_unique<T, Entity&, _Ty...>, e, std::move(argsTuple));
+			};
 		}
 		~ComponentRegistrator() {
 			const std::string name = T::componentName();
@@ -117,13 +121,13 @@ private:
 		}
 	};
 
-	template <class T, class Base>
+	template <class T, class Base, class... _Ty>
 	friend class EntityComponent;
 
 
     const Scripting::Parsing::EntityNode *mDescription;    
 
-	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
+	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent)>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
         static std::map<std::string, ComponentBuilder> dummy;

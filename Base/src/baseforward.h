@@ -5,7 +5,7 @@ namespace Engine {
 	class MadgineObject;
 
 	namespace Scene {
-		class SceneManager;
+		class SceneManagerBase;
 
 		namespace Entity {
 			class Entity;

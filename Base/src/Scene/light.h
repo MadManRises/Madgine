@@ -28,7 +28,8 @@ namespace Engine {
 				onPositionChanged(position);
 			}
 
-		private:
+		private:			
+
 			Engine::Serialize::Observed<std::array<float, 3>> mPosition;
 			Engine::Serialize::Observed<float> mPower;
 			Engine::SignalSlot::Slot<decltype(&Light::onPowerChangedImpl), &Light::onPowerChangedImpl> mPowerChangedSlot;

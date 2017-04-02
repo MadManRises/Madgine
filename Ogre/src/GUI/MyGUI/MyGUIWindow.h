@@ -124,7 +124,8 @@ namespace Engine {
 					using Event = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type;
 
 					EventHandler(const F &f, Event &event) :
-						mEvent(event) {
+						mEvent(event),
+						mFunc(f) {
 						mDelegate = MyGUI::newDelegate(this, &EventHandler::fire);
 						event += mDelegate;
 					}

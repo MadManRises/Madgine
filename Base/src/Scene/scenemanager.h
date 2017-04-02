@@ -10,14 +10,14 @@
 namespace Engine {
 	namespace Scene {
 
-		class MADGINE_BASE_EXPORT SceneManager : public Singleton<SceneManager>,
+		class MADGINE_BASE_EXPORT SceneManagerBase : public Singleton<SceneManagerBase>,
 			public Scripting::RefScopeTopLevelSerializableUnitBase,
 			public MadgineObject,
-			public Scripting::GlobalAPI<SceneManager>
+			public Scripting::GlobalAPI<SceneManagerBase>
 		{
 		public:
-			SceneManager();
-			virtual ~SceneManager() = default;
+			SceneManagerBase();
+			virtual ~SceneManagerBase() = default;
 
 			Scripting::ScopeBase *createSceneArray(size_t size);
 			Scripting::ScopeBase *createSceneStruct();
@@ -66,13 +66,22 @@ namespace Engine {
 		private:
 			size_t mItemCount;
 
-			UniqueComponentCollector<SceneComponentBase> mSceneComponents;
+			BaseUniqueComponentCollector<SceneComponentBase> mSceneComponents;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;
 
 		};
 
+		template <class T>
+		class SceneManager : public Singleton<T>, public SceneManagerBase {
+		public:
+			using SceneManagerBase::SceneManagerBase;
 
+		private:
+			virtual size_t getSize() const override final {
+				return sizeof(T);
+			}
+		};
 		
 
 	}

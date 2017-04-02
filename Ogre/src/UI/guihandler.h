@@ -57,7 +57,7 @@ private:
 };
 
 template <class T>
-class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T>, public Hierarchy::HierarchyObject<T> {
+class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
 	using OgreUniqueComponent<T, GuiHandlerBase>::OgreUniqueComponent;
 
 };

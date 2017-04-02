@@ -6,7 +6,7 @@ namespace App{
   /**
    * Describes the current context of the game. This is used to decide which components should be updated each frame.
    * The current root-UI::GuiHandler determines the current Context. That is matched against the ContextMask of the UI::GameHandlers and
-   * the Scene::SceneManager to decide wether it gets updated or not.
+   * the Scene::SceneManagerBase to decide wether it gets updated or not.
    */
 	enum class ContextMask : unsigned int{
 		NoContext = 0x0, /*! No specific context */

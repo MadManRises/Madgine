@@ -11,9 +11,10 @@ namespace Engine {
 		AppStats::AppStats(Ogre::RenderWindow *window) :
 #if OGRE_MEMORY_TRACKER
 			mTracker(static_cast<TrackerAccessor&>(Ogre::MemoryTracker::get())),
+			/*startTrack(this),
+			stopTrack(this),*/
 #endif
-			mWindow(window)
-			
+			mWindow(window)			
 		{
 		}
 

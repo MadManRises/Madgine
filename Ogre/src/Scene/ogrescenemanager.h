@@ -18,9 +18,7 @@ namespace Engine {
 namespace Scene {
 
 class OGREMADGINE_EXPORT OgreSceneManager : 
-	public Hierarchy::HierarchyObject<OgreSceneManager>,
-	public Singleton<OgreSceneManager>,
-	public SceneManager
+	public SceneManager<OgreSceneManager>
 {
 public:
     OgreSceneManager(Ogre::Root *root);
@@ -142,11 +140,11 @@ private:
 	Resources::OgreTexturePtr mGameTexture;
 
 
-	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createEntityData), &OgreSceneManager::createEntityData>> mEntities;
+	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createEntityData)>> mEntities;
 	std::list<Entity::OgreEntity> mLocalEntities;
 
 
-	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createLightData), &OgreSceneManager::createLightData>> mLights;
+	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createLightData)>> mLights;
     
 //    Resources::Shading::ShaderCollector mShaderCollector;
 

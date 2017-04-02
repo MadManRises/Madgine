@@ -88,13 +88,13 @@ bool OgreSceneManager::init()
 
 //	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
-	return SceneManager::init();
+	return SceneManagerBase::init();
 
 }
 
 void OgreSceneManager::finalize()
 {
-	SceneManager::finalize();
+	SceneManagerBase::finalize();
 
 	if (mTerrainGlobals) OGRE_DELETE mTerrainGlobals;
 	if (mTerrainGroup) OGRE_DELETE mTerrainGroup;
@@ -340,14 +340,14 @@ void OgreSceneManager::writeState(Serialize::SerializeOutStream &out) const
 {
 	writeStaticScene(out);
 
-	SceneManager::writeState(out);    
+	SceneManagerBase::writeState(out);    
 }
 
 void OgreSceneManager::readState(Serialize::SerializeInStream &in)
 {
 	readStaticScene(in);
 	
-	SceneManager::readState(in);		
+	SceneManagerBase::readState(in);		
 }
 
 void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)

@@ -14,7 +14,7 @@ public:
     ShaderCollector();
     ~ShaderCollector();
 
-	void init(Ogre::SceneManager *sceneMgr);
+	void init(Ogre::SceneManagerBase *sceneMgr);
 	void finalize();
 
     Ogre::Technique *handleSchemeNotFound(unsigned short schemeIndex, const Ogre::String &schemeName, Ogre::Material *originalMaterial, unsigned short lodIndex, const Ogre::Renderable *rend);

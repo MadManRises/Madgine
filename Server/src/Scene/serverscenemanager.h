@@ -14,8 +14,7 @@ namespace Engine {
 namespace Scene {
 
 class MADGINE_SERVER_EXPORT ServerSceneManager :
-	public Hierarchy::HierarchyObject<ServerSceneManager>,
-	public SceneManager
+	public SceneManager<ServerSceneManager>
 {
 public:
     ServerSceneManager();
@@ -62,7 +61,7 @@ private:
 	std::string mStaticSceneName;
 	
 
-	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&ServerSceneManager::createEntityData), &ServerSceneManager::createEntityData>> mEntities;
+	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&ServerSceneManager::createEntityData)>> mEntities;
 	std::list<Entity::ServerEntity> mLocalEntities;
 
 	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;

@@ -5,10 +5,6 @@
 namespace Engine {
 namespace Scripting {
 
-std::string Scene::getIdentifier()
-{
-	return typeid(Scene).name();
-}
 
 } // namespace Scripting
 

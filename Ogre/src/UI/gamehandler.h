@@ -76,7 +76,7 @@ private:
 };
 
 template <class T>
-class GameHandler : public OgreUniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T>, public Hierarchy::HierarchyObject<T> {
+class GameHandler : public OgreUniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
 	using OgreUniqueComponent<T, GameHandlerBase>::OgreUniqueComponent;
 };
 

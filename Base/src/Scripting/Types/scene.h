@@ -9,8 +9,6 @@ class Scene : public ScopeBase
 {
 public:
 
-	virtual std::string getIdentifier() override;
-
 };
 
 } // namespace Scripting

@@ -86,6 +86,15 @@ void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
     of << mDescription->getName() << getName() << getObjectName();
 }
 
+EntityComponentBase * Entity::getComponent(const std::string & name)
+{
+	auto it = mComponents.find(name);
+	if (it == mComponents.end())
+		return nullptr;
+	else
+		return it->get();
+}
+
 bool Entity::hasComponent(const std::string & name)
 {
 	return mComponents.contains(name);
@@ -132,7 +141,7 @@ std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const s
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
 		throw ComponentException(Exceptions::unknownComponent(name));
-	return std::make_tuple((this->*(it->second))(args));
+	return std::make_tuple(it->second(*this, args));
 }
 
 EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)
@@ -160,7 +169,7 @@ const Scripting::Parsing::MethodNode &Entity::getMethod(const std::string &name)
 
 void Entity::remove()
 {
-	Engine::Scene::SceneManager::getSingleton().removeLater(this);
+	Engine::Scene::SceneManagerBase::getSingleton().removeLater(this);
 }
 
 

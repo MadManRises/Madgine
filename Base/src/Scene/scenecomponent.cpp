@@ -9,7 +9,7 @@ namespace Scene{
 	SceneComponentBase::SceneComponentBase(App::ContextMask context) :
 		mContext(context),
 		mEnabled(true),
-		mSceneMgr(&SceneManager::getSingleton())
+		mSceneMgr(&SceneManagerBase::getSingleton())
 {
 
 }
@@ -48,7 +48,7 @@ bool SceneComponentBase::isEnabled()
 	return mEnabled;
 }
 
-SceneManager * SceneComponentBase::sceneMgr()
+SceneManagerBase * SceneComponentBase::sceneMgr()
 {
 	return mSceneMgr;
 }

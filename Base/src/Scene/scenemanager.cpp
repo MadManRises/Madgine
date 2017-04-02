@@ -6,11 +6,11 @@
 
 namespace Engine {
 
-	API_IMPL(Scene::SceneManager, &createSceneArray, &createSceneStruct, &createSceneList, &findEntity);
+	API_IMPL(Scene::SceneManagerBase, &createSceneArray, &createSceneStruct, &createSceneList, &findEntity);
 
 	namespace Scene {
 		
-		SceneManager::SceneManager() :
+		SceneManagerBase::SceneManagerBase() :
 			RefScopeTopLevelSerializableUnitBase(SCENE_MANAGER),
 			mItemCount(0)
 		{
@@ -20,24 +20,24 @@ namespace Engine {
 		}
 
 
-		Scripting::ScopeBase * SceneManager::createSceneArray(size_t size)
+		Scripting::ScopeBase * SceneManagerBase::createSceneArray(size_t size)
 		{
 			Scripting::Vector *v = createVector();
 			v->resize(size);
 			return v;
 		}
 
-		Scripting::ScopeBase * SceneManager::createSceneStruct()
+		Scripting::ScopeBase * SceneManagerBase::createSceneStruct()
 		{
 			return createStruct();
 		}
 
-		Scripting::ScopeBase * SceneManager::createSceneList()
+		Scripting::ScopeBase * SceneManagerBase::createSceneList()
 		{
 			return createList();
 		}
 
-		bool SceneManager::init() {
+		bool SceneManagerBase::init() {
 
 			if (!MadgineObject::init())
 				return false;
@@ -49,7 +49,7 @@ namespace Engine {
 			return true;
 		}
 
-		void SceneManager::finalize() {
+		void SceneManagerBase::finalize() {
 
 			MadgineObject::finalize();
 
@@ -61,13 +61,13 @@ namespace Engine {
 		}
 
 
-		size_t SceneManager::getComponentCount()
+		size_t SceneManagerBase::getComponentCount()
 		{
 			return mSceneComponents.size();
 		}
 
 
-		void SceneManager::saveComponentData(Serialize::SerializeOutStream &out) const
+		void SceneManagerBase::saveComponentData(Serialize::SerializeOutStream &out) const
 		{
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				out << component->getName();
@@ -77,7 +77,7 @@ namespace Engine {
 			out << ValueType::EOL();
 		}
 
-		void SceneManager::loadComponentData(Serialize::SerializeInStream &in)
+		void SceneManagerBase::loadComponentData(Serialize::SerializeInStream &in)
 		{
 			std::string componentName;
 			while (in.loopRead(componentName)) {
@@ -87,23 +87,23 @@ namespace Engine {
 			}
 		}
 
-		void SceneManager::writeState(Serialize::SerializeOutStream &out) const
+		void SceneManagerBase::writeState(Serialize::SerializeOutStream &out) const
 		{
 			saveComponentData(out);
 
-			SerializableUnitBase::writeState(out);
+			Serialize::SerializableUnitBase::writeState(out);
 		}
 
-		void SceneManager::readState(Serialize::SerializeInStream &in)
+		void SceneManagerBase::readState(Serialize::SerializeInStream &in)
 		{
 			loadComponentData(in);
 
-			SerializableUnitBase::readState(in);
+			Serialize::SerializableUnitBase::readState(in);
 
 			mStateLoadedSignal.emit();
 		}
 
-		void SceneManager::update(float timeSinceLastFrame, App::ContextMask mask) {
+		void SceneManagerBase::update(float timeSinceLastFrame, App::ContextMask mask) {
 			{
 				//PROFILE("SceneComponents");
 				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -115,7 +115,7 @@ namespace Engine {
 			removeQueuedEntities();
 		}
 
-		void SceneManager::fixedUpdate(float timeStep, App::ContextMask mask) {
+		void SceneManagerBase::fixedUpdate(float timeStep, App::ContextMask mask) {
 			{
 				//PROFILE("SceneComponents");
 				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -126,13 +126,13 @@ namespace Engine {
 		}
 
 
-		std::string SceneManager::generateUniqueName()
+		std::string SceneManagerBase::generateUniqueName()
 		{
 			return std::string("Madgine_AutoGen_Name_") + std::to_string(++mItemCount);
 		}
 
 
-		void SceneManager::removeLater(Entity::Entity *e)
+		void SceneManagerBase::removeLater(Entity::Entity *e)
 		{
 			mEntityRemoveQueue.push_back(e);
 		}

@@ -13,7 +13,8 @@ namespace Engine {
 		{
 		public:
 			TextureDrawer(WindowContainer *w) :
-				Window(w) {}
+				Window(w),
+				mTextureSlot(this) {}
 
 			virtual ~TextureDrawer() = default;
 			

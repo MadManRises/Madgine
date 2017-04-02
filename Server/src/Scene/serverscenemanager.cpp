@@ -23,12 +23,12 @@ ServerSceneManager::~ServerSceneManager()
 
 bool ServerSceneManager::init()
 {
-	return SceneManager::init();
+	return SceneManagerBase::init();
 }
 
 void ServerSceneManager::finalize()
 {
-	SceneManager::finalize();
+	SceneManagerBase::finalize();
 }
 
 std::list<Entity::Entity *> ServerSceneManager::entities()
@@ -46,7 +46,7 @@ void ServerSceneManager::writeState(Serialize::SerializeOutStream &out) const
 {
 	out << mStaticSceneName << ValueType::EOL() << ValueType::EOL();
 
-	SceneManager::writeState(out);    
+	SceneManagerBase::writeState(out);    
 }
 
 void ServerSceneManager::readState(Serialize::SerializeInStream &in)
@@ -54,7 +54,7 @@ void ServerSceneManager::readState(Serialize::SerializeInStream &in)
 	ValueType dummy;
 	in >> mStaticSceneName >> dummy >> dummy;
 	
-	SceneManager::readState(in);		
+	SceneManagerBase::readState(in);		
 }
 
 void ServerSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)

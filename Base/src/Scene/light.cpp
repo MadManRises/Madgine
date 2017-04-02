@@ -5,7 +5,9 @@
 namespace Engine {
 	namespace Scene {
 
-		Light::Light()
+		Light::Light() :
+			mPositionChangedSlot(this),
+			mPowerChangedSlot(this)
 		{
 			mPower.setCallback(mPowerChangedSlot);
 			mPosition.setCallback(mPositionChangedSlot);
@@ -38,6 +40,7 @@ namespace Engine {
 		void Light::onPositionChanged(const std::array<float, 3>& position)
 		{
 		}
+
 
 	}
 }

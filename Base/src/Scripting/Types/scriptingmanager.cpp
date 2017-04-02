@@ -13,7 +13,7 @@ namespace Scripting {
 
 
 	ScriptingManager::ScriptingManager() :
-		RefScopeTopLevelSerializableUnitBase(SCRIPTING_MANAGER),
+		RefScopeTopLevelSerializableUnit(SCRIPTING_MANAGER),
 		mScriptParser(&Parsing::ScriptParser::getSingleton())
 	{
 		//Ogre::LogManager::getSingleton().createLog("Scripting.log");

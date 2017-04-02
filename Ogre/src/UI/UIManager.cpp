@@ -16,8 +16,8 @@ namespace Engine {
 
 	
 #ifdef _MSC_VER
-	template OGREMADGINE_EXPORT class OgreUniqueComponentCollector<UI::GuiHandlerBase>;
-	template OGREMADGINE_EXPORT class OgreUniqueComponentCollector<UI::GameHandlerBase>;
+	template OGREMADGINE_EXPORT class UniqueComponentCollector<UI::GuiHandlerBase, OgreCreatorStore<UI::GuiHandlerBase>>;
+	template OGREMADGINE_EXPORT class UniqueComponentCollector<UI::GameHandlerBase, OgreCreatorStore<UI::GameHandlerBase>>;
 #endif
 
 	namespace UI {

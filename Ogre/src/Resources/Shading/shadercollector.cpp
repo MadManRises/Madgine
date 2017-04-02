@@ -18,7 +18,7 @@ ShaderCollector::~ShaderCollector()
 {	
 }
 
-void ShaderCollector::init(Ogre::SceneManager *sceneMgr)
+void ShaderCollector::init(Ogre::SceneManagerBase *sceneMgr)
 {
 	if (!Ogre::RTShader::ShaderGenerator::initialize())
 		throw 0;

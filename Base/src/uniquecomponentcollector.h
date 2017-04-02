@@ -5,8 +5,9 @@
 
 namespace Engine{
 
-template <class Base>
-class MADGINE_BASE_EXPORT UniqueComponentCollector : public Singleton<UniqueComponentCollector<Base>>{
+
+template <class Base, class Store>
+class UniqueComponentCollector : Store {
 
 public:
 	UniqueComponentCollector(const UniqueComponentCollector &) = delete;
@@ -43,18 +44,12 @@ public:
 	}
 
 protected:
-    template <class T, class _Base>
+    template <class T, class _Base, template <class> class Collector>
     friend class UniqueComponent;
 
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator registerComponent(){
-		auto f = []() {return std::unique_ptr<Base>(new T); };
-		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
-		if (self) {
-			std::unique_ptr<Base> component = f();
-			self->mComponents.emplace_back(std::move(component));
-		}
-        sComponents().emplace_back(f);
+        sComponents().emplace_back([]() {return std::unique_ptr<Base>(new T); });
 		auto it = sComponents().end();
 		--it;
 		return it;
@@ -62,16 +57,10 @@ protected:
 
 	static void unregisterComponent(const typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator &it) {
 		typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator begin = sComponents().begin();
-		size_t i = std::distance(begin, it);
-		UniqueComponentCollector *self = UniqueComponentCollector<Base>::getSingletonPtr();
-		if (self) {
-			auto it2 = self->mComponents.begin();
-			std::advance(it2, i);
-			self->mComponents.erase(it2);
-		}
 		sComponents().erase(it);
 	}
 
+public:
 	template <class T>
 	class ComponentRegistrator {
 	public:
@@ -85,12 +74,24 @@ protected:
 		typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator mIterator;
 	};
 
-    static std::list<std::function<std::unique_ptr<Base>()>> &sComponents(){
-        static std::list<std::function<std::unique_ptr<Base>()>> dummy;
-        return dummy;
-    }
-
+private:
     std::list<std::unique_ptr<Base>> mComponents;
+};
+
+
+template <class Base>
+class MADGINE_BASE_EXPORT BaseCreatorStore {
+protected:
+	static std::list<std::function<std::unique_ptr<Base>()>> &sComponents() {
+		static std::list<std::function<std::unique_ptr<Base>()>> dummy;
+		return dummy;
+	}
+
+};
+
+template <class Base>
+class MADGINE_BASE_EXPORT BaseUniqueComponentCollector : public UniqueComponentCollector<Base, BaseCreatorStore<Base>>, public Singleton<BaseUniqueComponentCollector<Base>> {
+
 };
 
 
