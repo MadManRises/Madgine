@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
 #include "Profiler.h"
-#include "Util.h"
+
 
 namespace Engine {
 	namespace Util {
@@ -44,18 +44,27 @@ namespace Engine {
 				return mCurrent->addChild(name);
 			}
 			else {
-				return mProcesses.try_emplace(name).first->second;
+				return mProcesses.try_emplace(name, [this]() {return mCurrentInterval; }).first->second;
 			}			
+		}
+
+		std::tuple<std::string, std::function<bool()>> Profiler::createProcessData(const std::string & name)
+		{
+			return std::make_tuple(name, [this]() {return mCurrentInterval; });
 		}
 		
 		ProfileWrapper::ProfileWrapper(const std::string &name)
 		{
-			Util::getSingleton().profiler()->startProfiling(name);
+			Profiler *p = Profiler::getSingletonPtr();
+			if (p)
+				p->startProfiling(name);
 		}
 
 		ProfileWrapper::~ProfileWrapper()
 		{
-			Util::getSingleton().profiler()->stopProfiling();
+			Profiler *p = Profiler::getSingletonPtr();
+			if (p)
+				p->stopProfiling();
 		}
 		
 		size_t ProcessStats::averageDuration() const

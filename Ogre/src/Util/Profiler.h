@@ -9,12 +9,24 @@ namespace Engine {
 
 		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
 		public:
-			ProcessStats(ProcessStats *parent = 0) :
+			ProcessStats(const std::function<bool()> &condition) :
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
-				mParent(parent)
+				mParent(nullptr),
+				mBuffer({})
 			{
+				mAccumulatedDuration.setCondition(condition);
+			}
+
+			ProcessStats(ProcessStats *parent) :
+				mStarted(false),
+				mAccumulatedDuration(0),
+				mRecordIndex(0),
+				mParent(parent),
+				mBuffer({})
+			{
+				mAccumulatedDuration.setCondition(parent->mAccumulatedDuration.getCondition());
 			}
 
 			ProcessStats(const ProcessStats &other) :
@@ -47,7 +59,7 @@ namespace Engine {
 		};
 
 
-		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler> {
+		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
 		public:
 			Profiler();
 
@@ -60,7 +72,9 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly> mProcesses;
+			std::tuple<std::string, std::function<bool()>> createProcessData(const std::string &name);
+
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Profiler::createProcessData), &Profiler::createProcessData>> mProcesses;
 			
 			ProcessStats *mCurrent;
 

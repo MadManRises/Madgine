@@ -34,7 +34,7 @@ FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreun
 		FolderSources(sources Scripting Parsing ogrescriptparser.cpp ogrescriptparser.h)
 	FolderSources(sources src Serialize ogreSerialize.cpp ogreSerialize.h OgreStreamReader.cpp OgreStreamReader.h)
 	FolderSources(sources src UI gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h UIManager.cpp UIManager.h windownames.h)
-	FolderSources(sources src Util AppStats.cpp AppStats.h OgreUtilLog.cpp OgreUtilLog.h Profiler.cpp Profiler.h Util.cpp Util.h )
+	FolderSources(sources src Util Profiler.cpp Profiler.h)
 
 include_directories(${OGREMADGINE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS} ${BASE_SOURCE_DIR}/src)
 

@@ -4,6 +4,8 @@
 
 #include "Scripting\Types\api.h"
 
+#include "SignalSlot\ConnectionStore.h"
+
 namespace Engine {
 	namespace App {
 
@@ -61,7 +63,7 @@ namespace Engine {
 			*
 			* @param f a functional with the task to be executed
 			*/
-			void callSafe(std::function<void()> f);
+			//void callSafe(std::function<void()> f);
 
 
 			/**
@@ -94,6 +96,8 @@ namespace Engine {
 
 			bool isShutdown();
 
+			float getFPS();
+
 		protected:
 			
 			virtual bool fixedUpdate(float timeStep);
@@ -110,7 +114,7 @@ namespace Engine {
 
 			Scripting::ScriptingManager*      mScriptingMgr;
 
-			std::queue<std::function<void()>> mSafeCallQueue;	
+			SignalSlot::ConnectionManager mConnectionManager;	
 
 			float mTimeBank;
 

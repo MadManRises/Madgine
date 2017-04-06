@@ -43,6 +43,11 @@ public:
 		return result;
 	}
 
+	typename std::list<std::unique_ptr<Base>>::const_iterator postCreate(void *hash) {
+		auto fIt = std::find_if(sComponents().begin(), sComponents().end(), [=](const std::function<std::unique_ptr<Base>()> &f) {return &f == hash; });
+		return mComponents.insert(mComponents.end(), (*fIt)());
+	}
+
 protected:
     template <class T, class _Base, template <class> class Collector>
     friend class UniqueComponent;
@@ -91,7 +96,7 @@ protected:
 
 template <class Base>
 class MADGINE_BASE_EXPORT BaseUniqueComponentCollector : public UniqueComponentCollector<Base, BaseCreatorStore<Base>>, public Singleton<BaseUniqueComponentCollector<Base>> {
-
+public:
 };
 
 

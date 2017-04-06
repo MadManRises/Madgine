@@ -16,8 +16,8 @@ namespace Engine{
 	};
 
 	template <class Base>
-	class OGREMADGINE_EXPORT OgreUniqueComponentCollector : public UniqueComponentCollector<Base, OgreCreatorStore<Base>>, Singleton<OgreUniqueComponentCollector<Base>> {
-
+	class OGREMADGINE_EXPORT OgreUniqueComponentCollector : public UniqueComponentCollector<Base, OgreCreatorStore<Base>>, public Singleton<OgreUniqueComponentCollector<Base>> {
+		
 	};
 
 }

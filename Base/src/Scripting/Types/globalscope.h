@@ -11,7 +11,7 @@ namespace Engine {
 namespace Scripting {
 
 #ifdef _MSC_VER
-	template MADGINE_BASE_EXPORT class UniqueComponentCollector<GlobalAPIComponentBase, BaseCreatorStore<GlobalAPIComponentBase>>;
+	template MADGINE_BASE_EXPORT class BaseUniqueComponentCollector<GlobalAPIComponentBase>;
 #endif
 
 class MADGINE_BASE_EXPORT GlobalScope : public Scope<GlobalScope, GlobalScopeBase>, public Singleton<GlobalScope> {

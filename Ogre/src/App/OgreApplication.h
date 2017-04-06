@@ -144,8 +144,7 @@ private:
     GUI::GUISystem*                   mGUI;
 	UI::UIManager*                    mUI;
 	Resources::ResourceLoader*        mLoader;
-    ConfigSet*                        mConfig;
-	Util::Util*                       mUtil;
+	ConfigSet*                        mConfig;
 	Input::InputHandler*              mInput;
 
 	HWND mHwnd;

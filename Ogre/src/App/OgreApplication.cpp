@@ -5,7 +5,6 @@
 #include "OgreApplication.h"
 #include "ogreappsettings.h"
 #include "GUI\MyGUI\MyGUILauncher.h"
-#include "Util\Util.h"
 
 #include "Scene\ogrescenemanager.h"
 
@@ -40,7 +39,6 @@ namespace App {
 	mUI(nullptr),
 	mLoader(nullptr),
 	mConfig(nullptr),
-	mUtil(nullptr),
 	mInput(nullptr)
 {
 
@@ -68,8 +66,6 @@ namespace App {
 	}
 	if (mLoader)
 		delete mLoader;
-	if (mUtil)
-		delete mUtil;
 	if (mConfig)
 		delete mConfig;
 	if (mRoot)
@@ -91,9 +87,7 @@ void OgreApplication::setup(const OgreAppSettings &settings)
 		mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
 	}
 
-	mWindow->getCustomAttribute("WINDOW", &mHwnd);
-
-	mUtil = new Util::Util(mWindow);
+	mWindow->getCustomAttribute("WINDOW", &mHwnd);	
 
 	Application::setup(settings);
 }
@@ -154,10 +148,6 @@ bool OgreApplication::frameStarted(const Ogre::FrameEvent & fe)
 	if (mWindow->isClosed())
 		return false;
 
-	mUtil->update();
-	mUtil->profiler()->startProfiling("Frame");
-	mUtil->profiler()->startProfiling("PreRender");
-
 	return true;
 }
 
@@ -169,12 +159,8 @@ bool OgreApplication::update(float timeSinceLastFrame) {
 
 bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
 {
-	mUtil->profiler()->stopProfiling(); // PreRender
-
-	mUtil->profiler()->startProfiling("Rendering");
-
+	
 	if (mWindow->isClosed() || !Application::update(fe.timeSinceLastFrame)) {		
-		mUtil->profiler()->stopProfiling(); // Frame
 		return false;
 	}
 
@@ -223,8 +209,6 @@ bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
 
 bool OgreApplication::frameEnded(const Ogre::FrameEvent & fe)
 {
-	mUtil->profiler()->stopProfiling(); // Rendering
-	mUtil->profiler()->stopProfiling(); // Frame
 
 	if (mWindow->isClosed())
 		return false;

@@ -47,10 +47,10 @@ namespace Engine {
 			mShutDown = true;
 		}
 
-		void Application::callSafe(std::function<void()> f)
+		/*void Application::callSafe(std::function<void()> f)
 		{
 			mSafeCallQueue.emplace(f);
-		}
+		}*/
 
 		int Application::go() {
 			mShutDown = false;
@@ -75,17 +75,8 @@ namespace Engine {
 			}
 
 			{
-				//PROFILE("SafeCall");
-				while (!mSafeCallQueue.empty()) {
-					try {
-						mSafeCallQueue.front()();
-					}
-					catch (const std::exception &e) {
-						LOG_ERROR("Unhandled Exception during SafeCall!");
-						LOG_EXCEPTION(e);
-					}
-					mSafeCallQueue.pop();
-				}
+				//PROFILE("ConnectionDispatch");
+				mConnectionManager.update();
 			}
 
 			{
@@ -110,6 +101,11 @@ namespace Engine {
 		bool Application::isShutdown()
 		{
 			return mShutDown;
+		}
+
+		float Application::getFPS()
+		{
+			return 1.0f;
 		}
 
 		bool Application::fixedUpdate(float timeStep) {
