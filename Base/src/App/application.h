@@ -98,13 +98,20 @@ namespace Engine {
 
 			float getFPS();
 
+			void addFrameListener(FrameListener *listener);
+			void removeFrameListener(FrameListener *listener);
+
 		protected:
 			
 			virtual bool fixedUpdate(float timeStep);
 
 			virtual void _clear();
 			
-			virtual void _setup();		
+			virtual void _setup();	
+
+			bool sendFrameStarted(float timeSinceLastFrame);
+			bool sendFrameRenderingQueued(float timeSinceLastFrame);
+			bool sendFrameEnded(float timeSinceLastFrame);
 
 		private:
 
@@ -116,7 +123,11 @@ namespace Engine {
 
 			SignalSlot::ConnectionManager mConnectionManager;	
 
+			std::unique_ptr<Util::StandardLog> mLog;
+
 			float mTimeBank;
+
+			std::list<FrameListener*> mListeners;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
 

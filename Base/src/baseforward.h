@@ -19,6 +19,7 @@ namespace Engine {
 		enum class ContextMask : unsigned int;
 		struct AppSettings;
 		class Application;
+		class FrameListener;
 	}
 
 	namespace UI {

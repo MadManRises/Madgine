@@ -34,7 +34,9 @@ namespace Engine {
 			while (run) {
 				float timeSinceLastFrame = mTimer.elapsed_us() / 1000000.0f;
 				mTimer.start();
-				run = update(timeSinceLastFrame);
+				run = sendFrameStarted(timeSinceLastFrame) &&
+					update(timeSinceLastFrame) &&
+					sendFrameEnded(timeSinceLastFrame);
 			}
 			return 0;
 		}

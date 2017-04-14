@@ -7,6 +7,10 @@
 
 #include "Scripting\Types\scriptingmanager.h"
 
+#include "Util\standardlog.h"
+
+#include "framelistener.h"
+
 namespace Engine {
 
 	API_IMPL(App::Application, &shutdown);
@@ -33,6 +37,8 @@ namespace Engine {
 
 		void Application::setup(const AppSettings &settings)
 		{
+			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
+			Util::UtilMethods::setup(mLog.get());
 			_setup();
 		}
 
@@ -62,6 +68,9 @@ namespace Engine {
 			if (mShutDown) {
 				return false;
 			}
+
+			if (!sendFrameRenderingQueued(timeSinceLastFrame))
+				return false;
 
 			mTimeBank += timeSinceLastFrame;
 
@@ -108,6 +117,16 @@ namespace Engine {
 			return 1.0f;
 		}
 
+		void Application::addFrameListener(FrameListener * listener)
+		{
+			mListeners.push_back(listener);
+		}
+
+		void Application::removeFrameListener(FrameListener * listener)
+		{
+			mListeners.remove(listener);
+		}
+
 		bool Application::fixedUpdate(float timeStep) {
 			return true;
 		}
@@ -124,6 +143,30 @@ namespace Engine {
 			mScriptingMgr = new Scripting::ScriptingManager;
 
 			mScriptingMgr->globalScope()->addAPI(this);
+		}
+
+		bool Application::sendFrameStarted(float timeSinceLastFrame)
+		{
+			bool result = true;
+			for (FrameListener *listener : mListeners)
+				result &= listener->frameStarted(timeSinceLastFrame);
+			return result;
+		}
+
+		bool Application::sendFrameRenderingQueued(float timeSinceLastFrame)
+		{
+			bool result = true;
+			for (FrameListener *listener : mListeners)
+				result &= listener->frameRenderingQueued(timeSinceLastFrame);
+			return result;
+		}
+
+		bool Application::sendFrameEnded(float timeSinceLastFrame)
+		{
+			bool result = true;
+			for (FrameListener *listener : mListeners)
+				result &= listener->frameEnded(timeSinceLastFrame);
+			return result;
 		}
 
 

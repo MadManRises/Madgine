@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serverlog.h"
+#include "Util\standardlog.h"
 #include "Scripting/Parsing/serverscriptparser.h"
 #include "ServerTimer.h"
 
@@ -15,14 +15,14 @@ namespace Engine {
 
 			int run();
 
-			ServerLog &getLog();
+			Util::StandardLog &getLog();
 
-			const std::string &scriptsFolder();
+			const std::string &scriptsFolder();		
 
-			void addFrameCallback(std::function<bool(float)> callback);
+			void shutdown();
 
 		protected:
-			virtual bool update(float timeSinceLastFrame) = 0;
+			virtual bool update() = 0;
 			virtual void start() = 0;
 			virtual void stop() = 0;
 
@@ -32,14 +32,12 @@ namespace Engine {
 			}
 
 		private:
-			ServerLog mLog;
+			Util::StandardLog mLog;
 			std::string mName;
 			Scripting::Parsing::ServerScriptParser mScriptParser;
 			ServerTimer mTimer;
 
 			bool mRunning;
-
-			std::list<std::function<bool(float)>> mFrameCallbacks;
 
 			std::list<ServerAppInstance> mInstances;
 		};

@@ -145,9 +145,12 @@ void OgreApplication::shutdown()
 
 bool OgreApplication::frameStarted(const Ogre::FrameEvent & fe)
 {
-	if (mWindow->isClosed())
+	if (!sendFrameStarted(fe.timeSinceLastFrame))
 		return false;
 
+	if (mWindow->isClosed())
+		return false;
+	
 	return true;
 }
 
@@ -209,6 +212,9 @@ bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
 
 bool OgreApplication::frameEnded(const Ogre::FrameEvent & fe)
 {
+
+	if (!sendFrameEnded(fe.timeSinceLastFrame))
+		return false;
 
 	if (mWindow->isClosed())
 		return false;
