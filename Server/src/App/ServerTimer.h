@@ -4,7 +4,7 @@
 #include <thread>
 
 namespace Engine {
-	namespace Server {
+	namespace App {
 
 		class ServerTimer
 		{

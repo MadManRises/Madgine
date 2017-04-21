@@ -33,5 +33,5 @@ namespace Engine {
 		const std::array<float, 4> &a = as<std::array<float, 4>>();
 		return{ a[0], a[1], a[2], a[3] };
 	}
-
+	
 }

@@ -2,7 +2,7 @@
 
 #include "App\application.h"
 #include "Scene\serverscenemanager.h"
-#include "Server\ServerTimer.h"
+#include "ServerTimer.h"
 #include "serverappsettings.h"
 
 namespace Engine {
@@ -27,7 +27,7 @@ namespace Engine {
 
 		private:
 			Scene::ServerSceneManager *mSceneManager;
-			Server::ServerTimer mTimer;
+			ServerTimer mTimer;
 			const ServerAppSettings *mSettings;
 		};
 

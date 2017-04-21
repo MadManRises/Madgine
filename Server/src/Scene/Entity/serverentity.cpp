@@ -3,8 +3,6 @@
 #include "serverentity.h"
 
 
-#include "exceptionmessages.h"
-
 #include "Scene/serverscenemanager.h"
 
 #include "Serialize\Streams/serializestream.h"

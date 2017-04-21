@@ -1,11 +1,17 @@
 #pragma once
 
 #include "GUI/Windows/TextureDrawer.h"
-#include "MyGUIWindow.h"
+
+namespace MyGUI {
+	class ImageBox;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
+
 			class MyGUITextureDrawer : public TextureDrawer {
 			public:
 				MyGUITextureDrawer(MyGUIWindow *w);

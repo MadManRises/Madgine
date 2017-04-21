@@ -137,7 +137,7 @@ namespace Engine {
 
 		void UIManager::update(float timeSinceLastFrame)
 		{
-			App::ContextMask context = currentContext();
+			Scene::ContextMask context = currentContext();
 
 			for (const std::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->update(timeSinceLastFrame, context);
@@ -146,16 +146,16 @@ namespace Engine {
 		
 		void UIManager::fixedUpdate(float timeStep)
 		{
-			App::ContextMask context = currentContext();
+			Scene::ContextMask context = currentContext();
 
 			for (const std::unique_ptr<UI::GameHandlerBase> &h : mGameHandlers) {
 				h->fixedUpdate(timeStep, context);
 			}
 		}
 
-		App::ContextMask UIManager::currentContext()
+		Scene::ContextMask UIManager::currentContext()
 		{
-			return (mModalWindowList.empty() ? (mCurrentRoot ? mCurrentRoot->context() : App::ContextMask::NoContext) : mModalWindowList.top()->context());
+			return (mModalWindowList.empty() ? (mCurrentRoot ? mCurrentRoot->context() : Scene::ContextMask::NoContext) : mModalWindowList.top()->context());
 		}
 
 

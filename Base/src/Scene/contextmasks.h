@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Engine{
-namespace App{
+namespace Scene{
 
   /**
    * Describes the current context of the game. This is used to decide which components should be updated each frame.

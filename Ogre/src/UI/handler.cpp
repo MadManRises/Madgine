@@ -3,8 +3,7 @@
 #include "UI/UIManager.h"
 #include "Gui\GUISystem.h"
 #include "GUI\Windows\Window.h"
-#include "exceptionmessages.h"
-#include "windownames.h"
+
 
 namespace Engine {
 namespace UI {

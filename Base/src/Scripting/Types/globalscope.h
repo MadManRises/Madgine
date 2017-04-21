@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Scripting/Types/scope.h"
-#include "scene.h"
 #include "uniquecomponentcollector.h"
 #include "GlobalAPIComponentBase.h"
-#include "Scripting/Types/refscopetoplevelserializableunit.h"
 #include "Scripting\Types\globalscopebase.h"
 
 namespace Engine {

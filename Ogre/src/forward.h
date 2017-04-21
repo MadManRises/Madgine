@@ -14,7 +14,6 @@ namespace Engine {
 	namespace App {
 		class ConfigSet;
 		struct OgreAppSettings;
-		enum class ContextMask : unsigned int;
 		class Application;
 	}
 

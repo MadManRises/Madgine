@@ -4,7 +4,6 @@
 
 #include "Entity/ogreentity.h"
 
-#include "exceptionmessages.h"
 
 #include "Math\bounds.h"
 
@@ -18,14 +17,13 @@
 
 #include "Scene/sceneexception.h"
 
-#include "Serialize\serializablebase.h"
-
 #include "Serialize\serializemanager.h"
 
 #include "Serialize\ogreSerialize.h"
 
 #include "Scripting\Parsing\scriptparser.h"
 
+#include "Scripting\Types\list.h"
 
 namespace Engine {
 

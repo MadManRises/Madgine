@@ -6,9 +6,8 @@
 
 #include "GUI\Windows\WindowContainer.h"
 
-#include "UI\windownames.h"
+#include "..\windownames.h"
 
-#include "exceptionmessages.h"
 
 #include "MyGUIWindow.h"
 

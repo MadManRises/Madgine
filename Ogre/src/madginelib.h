@@ -1,5 +1,7 @@
 #pragma once
 
+/// @cond
+
 #ifdef _MSC_VER
 #pragma warning(push, 0)
 #endif
@@ -35,4 +37,4 @@
 #pragma warning(pop)
 #endif
 
-
+/// @endcond

@@ -17,6 +17,7 @@ struct AppSettings {
 
 	}
 
+	std::string mAppName;
 
 };
 

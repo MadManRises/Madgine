@@ -6,6 +6,7 @@ namespace Engine {
 
 	namespace Scene {
 		class SceneManagerBase;
+		enum class ContextMask : unsigned int;
 
 		namespace Entity {
 			class Entity;
@@ -16,9 +17,10 @@ namespace Engine {
 	}
 
 	namespace App {
-		enum class ContextMask : unsigned int;
+		
 		struct AppSettings;
 		class Application;
+		class FrameListener;
 	}
 
 	namespace UI {

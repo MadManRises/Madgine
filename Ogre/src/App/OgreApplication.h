@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-#include "Scripting\Types\api.h"
 #include "App\application.h"
 
 namespace Engine {

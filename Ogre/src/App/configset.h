@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Serialize\Container\map.h"
-#include "Database\translationunit.h"
+//#include "Database\translationunit.h"
 
 namespace Engine {
 namespace App {
@@ -151,7 +151,7 @@ private:
     Ogre::RenderSystem *mRenderSystem;
 
 
-    Database::TranslationUnit mTranslation;
+   // Database::TranslationUnit mTranslation;
 
     std::string mConfigFileName;
 

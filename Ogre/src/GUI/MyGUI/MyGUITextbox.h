@@ -1,11 +1,17 @@
 #pragma once
 
 #include "GUI/Windows/Textbox.h"
-#include "MyGUIWindow.h"
+
+namespace MyGUI {
+	class EditBox;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
+
 			class MyGUITextbox : public Textbox
 			{
 			public:

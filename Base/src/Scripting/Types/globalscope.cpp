@@ -2,7 +2,6 @@
 #include "GlobalScope.h"
 #include "Scripting/Parsing/scriptparser.h"
 #include "globalapi.h"
-#include "exceptionmessages.h"
 
 namespace Engine {
 namespace Scripting {

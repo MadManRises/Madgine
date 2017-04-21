@@ -2,6 +2,8 @@
 
 #include "ServerBase.h"
 
+#include "App\framelistener.h"
+
 namespace Engine {
 	namespace Server {
 		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
@@ -19,23 +21,14 @@ namespace Engine {
 
 			start();
 
-			mTimer.reset();
-
-			while (mRunning) {
-				float timeSinceLastFrame = mTimer.elapsed_ns() / 1000000000.0f;
-				mTimer.start();
-				mRunning = update(timeSinceLastFrame);
-				for (auto it = mFrameCallbacks.begin(); it != mFrameCallbacks.end() && mRunning; ++it) {
-					mRunning = (*it)(timeSinceLastFrame);
-				}
-			}
+			while (update());
 
 			stop();
 
 			return 0;
 		}
 
-		ServerLog & Engine::Server::ServerBase::getLog()
+		Util::StandardLog & Engine::Server::ServerBase::getLog()
 		{
 			return mLog;
 		}
@@ -45,9 +38,14 @@ namespace Engine {
 			return mScriptParser.rootFolder();
 		}
 
-		void ServerBase::addFrameCallback(std::function<bool(float)> callback)
+		void ServerBase::shutdown()
 		{
-			mFrameCallbacks.push_back(callback);
+			mRunning = false;
+		}
+
+		bool ServerBase::update()
+		{
+			return mRunning;
 		}
 
 	}

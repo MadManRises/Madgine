@@ -2,8 +2,8 @@
 
 The Madgine-Design can be split semantically into two parts:
 
-- The generic template-based layer
-- The logic layer
+- The Interfaces layer
+- The Game-Logic layer
 
 ## The Generic Layer
 

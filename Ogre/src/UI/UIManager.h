@@ -36,7 +36,7 @@ namespace Engine {
 			void update(float timeSinceLastFrame);
 			void fixedUpdate(float timeStep);
 
-			App::ContextMask currentContext();
+			Scene::ContextMask currentContext();
 
 			GUI::GUISystem *gui();
 
