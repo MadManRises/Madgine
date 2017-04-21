@@ -2,8 +2,6 @@
 
 #include "Serialize\ogreSerialize.h"
 
-#include "Serialize\Container\set.h"
-
 #include "Scene\Entity\entity.h"
 
 
@@ -53,7 +51,6 @@ private:
     Ogre::SceneNode *mDecoratorNode;
 	Ogre::Entity *mObject;
     
-    //std::set<Ogre::unique_ptr<EntityComponentBase>> mComponents;
 
 };
 

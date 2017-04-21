@@ -14,8 +14,6 @@
 #include "MyGUICheckbox.h"
 #include "MyGUICombobox.h"
 
-#include "Util\UtilMethods.h"
-#include "exceptionmessages.h"
 
 namespace Engine {
 	namespace GUI {

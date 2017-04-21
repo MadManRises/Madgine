@@ -21,8 +21,6 @@ namespace Engine {
 
 			start();
 
-			mTimer.reset();
-
 			while (update());
 
 			stop();

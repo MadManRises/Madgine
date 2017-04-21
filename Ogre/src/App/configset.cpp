@@ -140,7 +140,7 @@ void ConfigSet::setColorDepth(int i)
 void ConfigSet::setLanguage(const std::string &language)
 {
     mSettings[languageProperty] = language;
-    mTranslation.setCurrentLanguage(language);
+    //mTranslation.setCurrentLanguage(language);
     //UI::UIManager::getSingleton().retranslate();
 }
 

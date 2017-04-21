@@ -6,7 +6,7 @@ namespace Engine{
 
 namespace Scene{
 
-	SceneComponentBase::SceneComponentBase(App::ContextMask context) :
+	SceneComponentBase::SceneComponentBase(ContextMask context) :
 		mContext(context),
 		mEnabled(true),
 		mSceneMgr(&SceneManagerBase::getSingleton())
@@ -14,16 +14,16 @@ namespace Scene{
 
 }
 
-void SceneComponentBase::update(float timeSinceLastFrame, App::ContextMask mask)
+void SceneComponentBase::update(float timeSinceLastFrame, ContextMask mask)
 {
-    if (mEnabled && (mContext & (mask | App::ContextMask::AnyContext))){
+    if (mEnabled && (mContext & (mask | ContextMask::AnyContext))){
 		update(timeSinceLastFrame);
     }
 }
 
-void SceneComponentBase::fixedUpdate(float timeStep, App::ContextMask mask)
+void SceneComponentBase::fixedUpdate(float timeStep, ContextMask mask)
 {
-	if (mEnabled && (mContext & (mask | App::ContextMask::AnyContext))) {
+	if (mEnabled && (mContext & (mask | ContextMask::AnyContext))) {
 		fixedUpdate(timeStep);
 	}
 }

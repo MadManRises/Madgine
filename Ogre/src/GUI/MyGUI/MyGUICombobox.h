@@ -1,12 +1,16 @@
 #pragma once
 
 #include "GUI\Windows\Combobox.h"
-#include "MyGUIWindow.h"
 
+namespace MyGUI {
+	class ComboBox;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
 
 			class MyGUICombobox :
 				public Combobox

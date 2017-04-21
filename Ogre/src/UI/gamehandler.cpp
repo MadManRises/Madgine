@@ -12,7 +12,7 @@ namespace UI {
 const float GameHandlerBase::mDragStartThreshold = 0.01f;
 
 
-GameHandlerBase::GameHandlerBase(const std::string &windowName, App::ContextMask context) :
+GameHandlerBase::GameHandlerBase(const std::string &windowName, Scene::ContextMask context) :
     Handler(windowName),
     mCurrentMouseButton(GUI::MouseButton::NO_BUTTON),
     mDragging(false),
@@ -30,13 +30,13 @@ void GameHandlerBase::abortDrag()
     onMouseDragAbort();
 }
 
-void GameHandlerBase::update(float timeSinceLastFrame, App::ContextMask mask)
+void GameHandlerBase::update(float timeSinceLastFrame, Scene::ContextMask mask)
 {
     if (mContext & mask)
         update(timeSinceLastFrame);
 }
 
-void GameHandlerBase::fixedUpdate(float timeStep, App::ContextMask mask)
+void GameHandlerBase::fixedUpdate(float timeStep, Scene::ContextMask mask)
 {
 	if (mContext & mask)
 		fixedUpdate(timeStep);

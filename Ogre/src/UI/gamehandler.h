@@ -2,7 +2,7 @@
 
 #include "handler.h"
 
-#include "App/contextmasks.h"
+#include "Scene/contextmasks.h"
 
 #include "Scripting\Types\globalapi.h"
 
@@ -13,12 +13,12 @@ namespace UI {
 
 class OGREMADGINE_EXPORT GameHandlerBase : public Handler {
 public:
-    GameHandlerBase(const std::string &windowName, App::ContextMask context = App::ContextMask::SceneContext);
+    GameHandlerBase(const std::string &windowName, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 
     void abortDrag();
 
-	void update(float timeSinceLastFrame, App::ContextMask mask);
-    void fixedUpdate(float timeStep, App::ContextMask mask);
+	void update(float timeSinceLastFrame, Scene::ContextMask mask);
+    void fixedUpdate(float timeStep, Scene::ContextMask mask);
 
 	Scene::OgreSceneManager *sceneMgr();
 
@@ -70,7 +70,7 @@ private:
 
     std::array<float, 2> mDragStart;    
 
-    App::ContextMask mContext;
+    Scene::ContextMask mContext;
 
 	Scene::OgreSceneManager *mSceneMgr;
 };

@@ -34,8 +34,8 @@ namespace Engine {
 			virtual bool init() override;
 			virtual void finalize() override;
 			
-			virtual void update(float timeSinceLastFrame, App::ContextMask context);
-			virtual void fixedUpdate(float timeStep, App::ContextMask context);
+			virtual void update(float timeSinceLastFrame, ContextMask context);
+			virtual void fixedUpdate(float timeStep, ContextMask context);
 
 			virtual void clear() = 0;
 

@@ -3,8 +3,6 @@
 
 #include "appsettings.h"
 
-#include "Scene\scenemanager.h"
-
 #include "Scripting\Types\scriptingmanager.h"
 
 #include "Util\standardlog.h"

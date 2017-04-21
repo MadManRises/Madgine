@@ -1,15 +1,18 @@
 #pragma once
 
 #include "GUI\Windows\Checkbox.h"
-#include "MyGUIWindow.h"
 
 namespace MyGUI {
 	class Widget;
+	class Button;
 }
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
+
 			class MyGUICheckbox : public Checkbox
 			{
 			public:

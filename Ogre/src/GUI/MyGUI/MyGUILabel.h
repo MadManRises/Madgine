@@ -1,10 +1,16 @@
 #pragma once
 #include "GUI\Windows\Label.h"
-#include "MyGUIWindow.h"
+
+namespace MyGUI {
+	class TextBox;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
+
 			class MyGUILabel :
 				public Label
 			{

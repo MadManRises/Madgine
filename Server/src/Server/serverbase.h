@@ -2,7 +2,6 @@
 
 #include "Util\standardlog.h"
 #include "Scripting/Parsing/serverscriptparser.h"
-#include "ServerTimer.h"
 
 #include "serverappinstance.h"
 
@@ -35,7 +34,6 @@ namespace Engine {
 			Util::StandardLog mLog;
 			std::string mName;
 			Scripting::Parsing::ServerScriptParser mScriptParser;
-			ServerTimer mTimer;
 
 			bool mRunning;
 

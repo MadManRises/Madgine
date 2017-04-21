@@ -1,10 +1,18 @@
 #pragma once
 #include "GUI\Windows\Bar.h"
-#include "MyGUIWindow.h"
+
+
+namespace MyGUI {
+	class ProgressBar;
+}
 
 namespace Engine {
 	namespace GUI {
 		namespace MyGui {
+
+			class MyGUIWindow;
+
+
 			class MyGUIBar :
 				public Bar
 			{

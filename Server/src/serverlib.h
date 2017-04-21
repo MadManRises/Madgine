@@ -1,5 +1,6 @@
 #pragma once
 
+/// @cond
 
 #if defined(MadgineServer_EXPORTS)
 #define MADGINE_SERVER_EXPORT __declspec(dllexport)
@@ -12,3 +13,5 @@
 #include "baselib.h"
 
 #include <thread>
+
+/// @endcond

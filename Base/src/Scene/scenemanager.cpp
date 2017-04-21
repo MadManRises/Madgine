@@ -103,7 +103,7 @@ namespace Engine {
 			mStateLoadedSignal.emit();
 		}
 
-		void SceneManagerBase::update(float timeSinceLastFrame, App::ContextMask mask) {
+		void SceneManagerBase::update(float timeSinceLastFrame, ContextMask mask) {
 			{
 				//PROFILE("SceneComponents");
 				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -115,7 +115,7 @@ namespace Engine {
 			removeQueuedEntities();
 		}
 
-		void SceneManagerBase::fixedUpdate(float timeStep, App::ContextMask mask) {
+		void SceneManagerBase::fixedUpdate(float timeStep, ContextMask mask) {
 			{
 				//PROFILE("SceneComponents");
 				for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {

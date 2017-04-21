@@ -1,9 +1,8 @@
 #pragma once
 
 #include "uniquecomponent.h"
-#include "App/contextmasks.h"
+#include "contextmasks.h"
 #include "Serialize/serializableunit.h"
-#include "Util\UtilMethods.h"
 #include "Scripting\Types\globalapi.h"
 
 namespace Engine {
@@ -13,10 +12,10 @@ class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUni
 public:
     virtual ~SceneComponentBase() = default;
 
-    SceneComponentBase(App::ContextMask context = App::ContextMask::SceneContext);
+    SceneComponentBase(ContextMask context = ContextMask::SceneContext);
 
-    void update(float timeSinceLastFrame, App::ContextMask mask);
-	void fixedUpdate(float timeStep, App::ContextMask mask);
+    void update(float timeSinceLastFrame, ContextMask mask);
+	void fixedUpdate(float timeStep, ContextMask mask);
 
     virtual bool init();
 	virtual void finalize();    
@@ -31,7 +30,7 @@ protected:
 	virtual void fixedUpdate(float);    
 
 private:
-    const App::ContextMask mContext;
+    const ContextMask mContext;
 
 	bool mEnabled;
 

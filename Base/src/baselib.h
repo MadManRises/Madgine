@@ -1,5 +1,6 @@
 #pragma once
 
+/// @cond
 
 #if defined(Base_EXPORTS)
 #define MADGINE_BASE_EXPORT __declspec(dllexport)
@@ -13,3 +14,5 @@
 #include <queue>
 
 #include "interfaceslib.h"
+
+/// @endcond

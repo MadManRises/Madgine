@@ -5,7 +5,6 @@
 
 namespace Engine {
 
-
 	template <>
 	struct externValueType<Ogre::Vector3> {
 		const constexpr static bool value = true;
@@ -20,5 +19,5 @@ namespace Engine {
 	struct externValueType<Ogre::Quaternion> {
 		const constexpr static bool value = true;
 	};
-
+	
 }

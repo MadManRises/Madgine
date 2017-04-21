@@ -1,7 +1,7 @@
 #include "ServerTimer.h"
 
 namespace Engine {
-	namespace Server {
+	namespace App {
 
 		ServerTimer::ServerTimer() :
 			default_unit(unit::MS),

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "UI/handler.h"
-#include "UI/windownames.h"
+#include "handler.h"
+#include "GUI\windownames.h"
 
 #include "Scripting\Types\globalapi.h"
 
@@ -33,11 +33,11 @@ public:
 
     bool isRootWindow();
 
-	App::ContextMask context();
+	Scene::ContextMask context();
 
 protected:
 	void setInitialisationOrder(int order);
-	void setContext(App::ContextMask context);
+	void setContext(Scene::ContextMask context);
 
 
 
@@ -52,7 +52,7 @@ private:
 
 
 	int mOrder;
-	App::ContextMask mContext;
+	Scene::ContextMask mContext;
 
 };
 

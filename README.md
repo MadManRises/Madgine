@@ -12,11 +12,10 @@ The Madgine is an Engine Framework, that uses [Ogre3D][]. It tries to provide a 
 * Easy to use due to multiple smart Component systems
 * Support for a simple extensible Scripting language
 * Unified Toolchain by using [CMake][]
-* Large set of C++-Libraries availabe
 
 ## Getting Started
 
-See [Getting Started](docs/gettingStarted.html)
+See [Getting Started](doc/gettingStarted.html)
 
 [Ogre3D]: http://www.ogre3d.org/
 [CMake]: .

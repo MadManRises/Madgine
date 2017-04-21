@@ -3,8 +3,6 @@
 #include "ogreentity.h"
 
 
-#include "exceptionmessages.h"
-
 #include "Scene/ogrescenemanager.h"
 
 #include "Serialize\Streams/serializestream.h"

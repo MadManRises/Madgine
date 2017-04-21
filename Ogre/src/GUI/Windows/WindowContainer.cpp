@@ -6,7 +6,7 @@
 
 #include "GUI\Windows\window.h"
 
-#include "UI\windownames.h"
+#include "..\windownames.h"
 
 namespace Engine {
 	namespace GUI {

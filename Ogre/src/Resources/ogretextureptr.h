@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Util\Process.h"
-#include "ImageSets\imagesetmanager.h"
-#include "Scripting\Parsing\ogrescriptparser.h"
 #include "SignalSlot\signal.h"
 
 namespace Engine {

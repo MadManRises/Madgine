@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scripting/Types/scope.h"
+#include "Scripting/Types/scopebase.h"
 
 namespace Engine {
 namespace Scripting {

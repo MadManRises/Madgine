@@ -1,8 +1,7 @@
 #include "madginelib.h"
 #include "guihandler.h"
-#include "windownames.h"
-#include "Database/translationunit.h"
-#include "exceptionmessages.h"
+//#include "Database/translationunit.h"
+
 #include "GUI\GUISystem.h"
 #include "UI\UIManager.h"
 #include "GUI\Windows\Window.h"
@@ -17,7 +16,7 @@ GuiHandlerBase::GuiHandlerBase(const std::string &windowName, WindowType type, c
 	mParentName(parentName),
 	mType(type),
 	mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
-	mContext(App::ContextMask::NoContext)	
+	mContext(Scene::ContextMask::NoContext)	
 {
 }
 
@@ -118,7 +117,7 @@ bool GuiHandlerBase::isRootWindow()
     return mType == WindowType::ROOT_WINDOW;
 }
 
-App::ContextMask GuiHandlerBase::context()
+Scene::ContextMask GuiHandlerBase::context()
 {
 	return mContext;
 }
@@ -128,7 +127,7 @@ void GuiHandlerBase::setInitialisationOrder(int order)
 	mOrder = order;
 }
 
-void GuiHandlerBase::setContext(App::ContextMask context)
+void GuiHandlerBase::setContext(Scene::ContextMask context)
 {
 	mContext = context;
 }
