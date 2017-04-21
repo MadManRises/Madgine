@@ -1,0 +1,4 @@
+VS 2015 64 | Visual Studio 14 2015 Win64 | 
+VS 2017 64 | Visual Studio 15 2017 Win64 | 
+MinGW | MinGW Makefiles | -DCMAKE_CXX_FLAGS=-m64
+Android | MinGW Makefiles | -DCMAKE_SYSTEM_NAME=Android   -DCMAKE_SYSTEM_VERSION=19   -DCMAKE_ANDROID_ARCH_ABI=x86  -DCMAKE_ANDROID_NDK=C:/android-ndk-r13b   -DCMAKE_ANDROID_STL_TYPE=gnustl_static 
