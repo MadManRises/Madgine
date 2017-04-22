@@ -68,3 +68,6 @@ endif (OIS_FOUND)
 if (BUILD_TESTS)
 	add_subdirectory(test)
 endif(BUILD_TESTS)
+
+
+installToWorkspace(OgreMadgine Madgine)

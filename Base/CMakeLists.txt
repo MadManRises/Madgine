@@ -33,3 +33,5 @@ add_precompiled_header(Base src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 if (BUILD_TESTS)
 	add_subdirectory(test)
 endif(BUILD_TESTS)
+
+installToWorkspace(Base Madgine)

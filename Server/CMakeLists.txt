@@ -34,3 +34,6 @@ add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX ser
 if (BUILD_TESTS)
 	add_subdirectory(test)
 endif(BUILD_TESTS)
+
+
+installToWorkspace(MadgineServer Madgine)
