@@ -3,7 +3,7 @@
 #include "Scripting/Parsing/scriptparser.h"
 #include "globalapi.h"
 
-#include "TopLevelIds.h"
+#include "Serialize/TopLevelIds.h"
 
 namespace Engine {
 namespace Scripting {
@@ -12,7 +12,7 @@ namespace Scripting {
 
 
 	ScriptingManager::ScriptingManager() :
-		RefScopeTopLevelSerializableUnit(SCRIPTING_MANAGER),
+		RefScopeTopLevelSerializableUnit(Serialize::SCRIPTING_MANAGER),
 		mScriptParser(&Parsing::ScriptParser::getSingleton())
 	{
 		//Ogre::LogManager::getSingleton().createLog("Scripting.log");

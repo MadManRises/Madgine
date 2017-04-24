@@ -13,13 +13,14 @@ set(CMAKE_MODULE_PATH
 
 set(sources "")
 FolderSources(sources "" "")
-FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h TopLevelIds.h uniquecomponent.h uniquecomponentcollector.h)
+FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineObject.h MadgineObjectCollector.cpp MadgineObjectCollector.h ObjectState.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources src App application.cpp application.h appsettings.h framelistener.h)
 	FolderSources(sources src Os os.h windows.cpp)
 	FolderSources(sources src Scene contextmasks.h light.cpp light.h scenemanager.cpp scenemanager.h scenecomponent.cpp scenecomponent.h)
 		FolderSources(sources Scene Entity EntityComponentBase.cpp EntityComponentBase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 	FolderSources(sources src Scripting)
 		FolderSources(sources Scripting Types globalapicomponentbase.cpp globalapicomponentbase.h globalapi.h globalapicomponent.h GlobalScope.cpp GlobalScope.h scene.cpp scene.h scriptingmanager.cpp scriptingmanager.h)
+	FolderSources(sources src Serialize TopLevelIds.h)
 
 include_directories(${BASE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS})
 

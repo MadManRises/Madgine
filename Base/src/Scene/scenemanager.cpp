@@ -2,7 +2,7 @@
 
 #include "scenemanager.h"
 
-#include "TopLevelIds.h"
+#include "Serialize/TopLevelIds.h"
 
 namespace Engine {
 
@@ -11,7 +11,7 @@ namespace Engine {
 	namespace Scene {
 		
 		SceneManagerBase::SceneManagerBase() :
-			RefScopeTopLevelSerializableUnitBase(SCENE_MANAGER),
+			RefScopeTopLevelSerializableUnitBase(Serialize::SCENE_MANAGER),
 			mItemCount(0)
 		{
 			for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
