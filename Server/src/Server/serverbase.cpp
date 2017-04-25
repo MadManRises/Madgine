@@ -4,6 +4,8 @@
 
 #include "App\framelistener.h"
 
+#include <iostream>
+
 namespace Engine {
 	namespace Server {
 		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
@@ -21,9 +23,13 @@ namespace Engine {
 
 			start();
 
+			mLog.startConsole(mRunning, [this](const std::string &cmd) {return performCommand(cmd); });
+			
 			while (update());
 
 			stop();
+
+			mRunning = false;
 
 			return 0;
 		}
@@ -45,7 +51,17 @@ namespace Engine {
 
 		bool ServerBase::update()
 		{
+			mConnectionManager.update();
 			return mRunning;
+		}
+
+		bool ServerBase::performCommand(const std::string & cmd)
+		{
+			if (cmd == "shutdown") {
+				shutdown();
+				return true;
+			}
+			return false;
 		}
 
 	}

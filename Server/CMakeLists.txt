@@ -20,6 +20,7 @@ FolderSources(sources "" src serverforward.h serverlib.h)
 	FolderSources(sources src Scripting)
 		FolderSources(sources Scripting Parsing serverscriptparser.cpp serverscriptparser.h)
 	FolderSources(sources src Server ServerBase.cpp ServerBase.h serverappinstance.cpp serverappinstance.h)
+	FolderSources(sources src Util serverlog.cpp serverlog.h)
 
 
 include_directories(${SERVER_SOURCE_DIR}/src ${BASE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS})
