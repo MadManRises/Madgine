@@ -2,17 +2,15 @@ cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0011 OLD)
 cmake_policy(SET CMP0049 OLD)
 cmake_policy(SET CMP0048 NEW)
-
+cmake_policy(SET CMP0022 NEW)
 
 
 Project(OGREMADGINE)
 
-set(OGRE_SDK "" CACHE PATH "Path to Ogre install directory")
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
   "${OGREMADGINE_SOURCE_DIR}/CMake"
-  "${OGRE_SDK}/CMake"
 )                                                           
 
 set(sources "")
@@ -36,32 +34,51 @@ FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreun
 	FolderSources(sources src UI gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h UIManager.cpp UIManager.h)
 	FolderSources(sources src Util Profiler.cpp Profiler.h)
 
-include_directories(${OGREMADGINE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS} ${BASE_SOURCE_DIR}/src)
+include_directories(${OGREMADGINE_SOURCE_DIR}/src)
 
 add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
 
-add_precompiled_header(OgreMadgine src/madginelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
+add_precompiled_header(OgreMadgine ${CMAKE_CURRENT_SOURCE_DIR}/src/madginelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-target_link_libraries (OgreMadgine Interfaces Base)
-
+include_targets(OgreMadgine Base)
+include_library(OgreMadgine Interfaces Interfaces)
 
 find_package(MYGUI REQUIRED)
 if (MYGUI_FOUND)
-  include_directories(${MYGUI_INCLUDE_DIRS})
+  target_include_directories(OgreMadgine PUBLIC ${MYGUI_INCLUDE_DIRS})
   MESSAGE(STATUS ${MYGUI_LIBRARIES})
-  target_link_libraries (OgreMadgine ${MYGUI_LIBRARIES})
+  foreach(lib ${MYGUI_LIBRARIES})
+	  target_link_libraries (OgreMadgine PRIVATE ${lib})
+  endforeach()
 endif (MYGUI_FOUND)
 
+set(OGRE_HOME ${Workspace})
 find_package(OGRE REQUIRED)
 if (OGRE_FOUND)
-  include_directories(${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
-  target_link_libraries (OgreMadgine ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_RTShaderSystem_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
+  target_include_directories(OgreMadgine PUBLIC ${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
+  MESSAGE(STATUS ${OGRE_LIBRARIES})
+  set(buffered "")
+  foreach(lib ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_RTShaderSystem_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
+	  if (lib STREQUAL "optimized" OR lib STREQUAL "debug" OR lib STREQUAL "general")
+		set(buffered ${lib})
+	  else()
+		target_link_libraries (OgreMadgine PUBLIC ${buffered} ${lib})
+		set(buffered "")
+	  endif()
+  endforeach()
 endif (OGRE_FOUND)
 
 find_package(OIS REQUIRED)
 if (OIS_FOUND)
-  include_directories(${OIS_INCLUDE_DIRS})
-  target_link_libraries (OgreMadgine ${OIS_LIBRARIES})
+  target_include_directories(OgreMadgine PUBLIC ${OIS_INCLUDE_DIRS})
+  foreach(lib ${OIS_LIBRARIES})
+	  if (lib STREQUAL "optimized" OR lib STREQUAL "debug" OR lib STREQUAL "general")
+		set(buffered ${lib})
+	  else()
+		target_link_libraries (OgreMadgine PRIVATE ${buffered} ${lib})
+		set(buffered "")
+	  endif()
+  endforeach()
 endif (OIS_FOUND)
 
 

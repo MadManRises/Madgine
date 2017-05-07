@@ -14,7 +14,7 @@ public:
 	void operator=(const UniqueComponentCollector &) = delete;
 
     UniqueComponentCollector(){
-		for (auto f : sComponents()) {
+		for (auto f : this->sComponents()) {
 			mComponents.emplace_back(f());
 		}
     }
@@ -37,14 +37,14 @@ public:
 
 	static std::list<void*> registeredComponentsHashes() {
 		std::list<void*> result;
-		for (std::function<std::unique_ptr<Base>()> &f : sComponents()) {
+		for (std::function<std::unique_ptr<Base>()> &f : Store::sComponents()) {
 			result.push_back(&f);
 		}
 		return result;
 	}
 
 	typename std::list<std::unique_ptr<Base>>::const_iterator postCreate(void *hash) {
-		auto fIt = std::find_if(sComponents().begin(), sComponents().end(), [=](const std::function<std::unique_ptr<Base>()> &f) {return &f == hash; });
+		auto fIt = std::find_if(this->sComponents().begin(), this->sComponents().end(), [=](const std::function<std::unique_ptr<Base>()> &f) {return &f == hash; });
 		return mComponents.insert(mComponents.end(), (*fIt)());
 	}
 
@@ -54,15 +54,14 @@ protected:
 
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator registerComponent(){
-        sComponents().emplace_back([]() {return std::unique_ptr<Base>(new T); });
-		auto it = sComponents().end();
+		Store::sComponents().emplace_back([]() {return std::unique_ptr<Base>(new T); });
+		auto it = Store::sComponents().end();
 		--it;
 		return it;
     }
 
 	static void unregisterComponent(const typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator &it) {
-		typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator begin = sComponents().begin();
-		sComponents().erase(it);
+		Store::sComponents().erase(it);
 	}
 
 public:

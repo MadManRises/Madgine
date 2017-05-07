@@ -6,11 +6,12 @@
 #include "Scripting\Types\globalscopebase.h"
 
 namespace Engine {
-namespace Scripting {
 
 #ifdef _MSC_VER
-	template MADGINE_BASE_EXPORT class BaseUniqueComponentCollector<GlobalAPIComponentBase>;
+	template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scripting::GlobalAPIComponentBase>;
 #endif
+
+	namespace Scripting {
 
 class MADGINE_BASE_EXPORT GlobalScope : public Scope<GlobalScope, GlobalScopeBase>, public Singleton<GlobalScope> {
 public:

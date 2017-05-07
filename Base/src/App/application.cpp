@@ -9,11 +9,13 @@
 
 #include "framelistener.h"
 
-namespace Engine {
+namespace Engine {	
 
-	API_IMPL(App::Application, &shutdown);
+	API_IMPL(App::Application, MAP(shutdown));
 
 	namespace App {
+
+		
 
 		Application::Application() :
 			mShutDown(false),

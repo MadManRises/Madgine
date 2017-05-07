@@ -5,7 +5,7 @@
 using namespace Ogre;
 void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRectangle, Font* font, const ColourValue &color, char justify = 'l', bool wordwrap = true);
 
-Engine::Resources::ImageSets::ImageSetManager *Engine::Resources::ImageSets::ImageSetManager::msSingleton = 0;
+template<> Engine::Resources::ImageSets::ImageSetManager *Ogre::Singleton<Engine::Resources::ImageSets::ImageSetManager>::msSingleton = 0;
 
 namespace Engine {
 	namespace Resources {
@@ -29,7 +29,7 @@ namespace Engine {
 
 					Ogre::FontPtr font = Ogre::FontManager::getSingleton().getByName("BlueHighway");
 
-					WriteToTexture(setName + "\n" + imageName, tex, Ogre::Image::Box(8, 8, 121, 121), font.getPointer(), Ogre::ColourValue::White);
+					WriteToTexture(setName + "\n" + imageName, tex, Ogre::Image::Box(8, 8, 121, 121), font.get(), Ogre::ColourValue::White);
 
 					set[imageName] = tex;
 					return tex;

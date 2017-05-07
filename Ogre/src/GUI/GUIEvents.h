@@ -185,8 +185,6 @@ namespace Engine {
 		};
 
 		struct MouseEventArgs {
-			
-			MouseEventArgs() {}
 
 			MouseEventArgs(const std::array<float, 2> &pos, GUI::MouseButton::MouseButton button) :
 				position(pos),

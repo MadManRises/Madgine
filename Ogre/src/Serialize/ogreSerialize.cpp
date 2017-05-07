@@ -10,11 +10,11 @@ namespace Engine {
 
 	template <>
 	ValueType::ValueType(const Ogre::Vector3 &v) :
-		ValueType(std::array<float, 3>{v.x, v.y, v.z}) {}
+		ValueType(std::array<float, 3>{ {v.x, v.y, v.z}}) {}
 
 	template <>
 	ValueType::ValueType(const Ogre::Quaternion &q) :
-		ValueType(std::array<float, 4>{q.w, q.x, q.y, q.z}) {}
+		ValueType(std::array<float, 4>{ {q.w, q.x, q.y, q.z}}) {}
 
 	template <>
 	OGREMADGINE_EXPORT Ogre::Vector3 ValueType::as<Ogre::Vector3>() const {

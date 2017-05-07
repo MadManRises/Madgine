@@ -134,7 +134,7 @@ namespace Engine {
 
 			std::array<float, 2> MyGUILauncher::relativeMoveDelta(MyGUI::Widget * w)
 			{
-				return{ mMoveDelta.x / w->getWidth(), mMoveDelta.y / w->getHeight() };
+				return{ {mMoveDelta.x / w->getWidth(), mMoveDelta.y / w->getHeight() } };
 			}
 
 			void MyGUILauncher::destroy(MyGUI::Widget * w)
@@ -181,7 +181,7 @@ namespace Engine {
 					top = mMousePosition.y;
 				float x = (float)left - w->getPosition().left;
 				float y = (float)top - w->getPosition().top;
-				return{ x / w->getWidth(), y / w->getHeight() };
+				return{ { x / w->getWidth(), y / w->getHeight() } };
 			}
 
 		}

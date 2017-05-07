@@ -13,8 +13,8 @@ namespace Engine {
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
-				mParent(nullptr),
-				mBuffer({})
+				mBuffer({}),
+				mParent(nullptr)				
 			{
 				mAccumulatedDuration.setCondition(condition);
 			}
@@ -23,8 +23,8 @@ namespace Engine {
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
-				mParent(parent),
-				mBuffer({})
+				mBuffer({}),
+				mParent(parent)				
 			{
 				mAccumulatedDuration.setCondition(parent->mAccumulatedDuration.getCondition());
 			}

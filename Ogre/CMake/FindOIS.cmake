@@ -8,7 +8,7 @@
 include(FindPkgMacros)
 findpkg_begin(OIS)
 
-set (OIS_HOME "" CACHE PATH "Path to OIS-SDK")
+set (OIS_HOME "${Workspace}" CACHE PATH "Path to OIS-SDK")
 
 # Get path, convert backslashes as ${ENV_${var}}
 getenv_path(OIS_HOME)

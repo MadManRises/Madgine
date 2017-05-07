@@ -145,24 +145,24 @@ void OgreEntity::rotate(const std::array<float, 4> &q)
 
 std::array<float, 3> OgreEntity::getPosition() const
 {
-	return{ mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z};
+	return{ {mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z} };
 }
 
 std::array<float, 3> OgreEntity::getCenter() const
 {
 	Ogre::Vector3 v = (mObject ? mObject->getWorldBoundingBox().getCenter() : mNode->getPosition());
-	return{ v.x, v.y, v.z };
+	return{ {v.x, v.y, v.z } };
 }
 
 
 std::array<float, 4> OgreEntity::getOrientation() const
 {
-	return{ mNode->getOrientation().w, mNode->getOrientation().x, mNode->getOrientation().y, mNode->getOrientation().z };
+	return{ {mNode->getOrientation().w, mNode->getOrientation().x, mNode->getOrientation().y, mNode->getOrientation().z} };
 }
 
 std::array<float, 3> OgreEntity::getScale() const
 {
-	return{ mNode->getScale().x, mNode->getScale().y, mNode->getScale().z };
+	return{ {mNode->getScale().x, mNode->getScale().y, mNode->getScale().z} };
 }
 
 

@@ -45,8 +45,8 @@ namespace Engine {
 			void loadComponentData(Serialize::SerializeInStream &in);
 
 
-			virtual void readState(Serialize::SerializeInStream &in);
-			virtual void writeState(Serialize::SerializeOutStream &out) const;
+			virtual void readState(Serialize::SerializeInStream &in) override;
+			virtual void writeState(Serialize::SerializeOutStream &out) const override;
 			
 
 			void removeLater(Entity::Entity *e);

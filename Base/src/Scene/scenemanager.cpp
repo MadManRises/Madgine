@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-	API_IMPL(Scene::SceneManagerBase, &createSceneArray, &createSceneStruct, &createSceneList, &findEntity);
+	API_IMPL(Engine::Scene::SceneManagerBase, MAP(createSceneArray), MAP(createSceneStruct), MAP(createSceneList), MAP(findEntity));
 
 	namespace Scene {
 		

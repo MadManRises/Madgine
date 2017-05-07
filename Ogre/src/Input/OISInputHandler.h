@@ -24,9 +24,9 @@ namespace Engine {
 
 			virtual void update() override;
 
-			void windowResized(Ogre::RenderWindow * rw);
+			virtual void windowResized(Ogre::RenderWindow * rw) override;
 
-			void windowClosed(Ogre::RenderWindow * rw);
+			virtual void windowClosed(Ogre::RenderWindow * rw) override;
 
 			float mMouseScale;
 

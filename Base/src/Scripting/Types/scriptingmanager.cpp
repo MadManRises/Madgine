@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Scripting {
 
-	API_IMPL(ScriptingManager, &log, &createGlobalStruct, &createGlobalList, &createGlobalArray, &debug, &scene, &getPrototype);
+	API_IMPL(ScriptingManager, MAP(log), MAP(createGlobalStruct), MAP(createGlobalList), MAP(createGlobalArray), MAP(debug), MAP(scene), MAP(getPrototype));
 
 
 	ScriptingManager::ScriptingManager() :

@@ -91,6 +91,8 @@ protected:
 
     const Scripting::Parsing::MethodNode &getMethod(const std::string &name) override;
 	
+	virtual size_t getSize() const override;
+
 private:
 
 	template <class T, class... _Ty>
@@ -127,7 +129,7 @@ private:
 
     const Scripting::Parsing::EntityNode *mDescription;    
 
-	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&Entity::createComponent)>> mComponents;
+	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
 
     static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
         static std::map<std::string, ComponentBuilder> dummy;
