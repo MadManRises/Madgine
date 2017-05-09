@@ -23,7 +23,7 @@ include_directories(${SERVER_SOURCE_DIR}/src)
 
 add_library(MadgineServer SHARED ${sources} serverlib.cpp)
 
-add_precompiled_header(MadgineServer ${CMAKE_CURRENT_SOURCE_DIR}/src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
+add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
 include_targets(MadgineServer Base)
 include_library(MadgineServer Interfaces Interfaces)

@@ -20,7 +20,7 @@ FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineOb
 
 include_directories(${BASE_SOURCE_DIR}/src)
 add_library(Base SHARED ${sources} baselib.cpp)
-add_precompiled_header(Base ${CMAKE_CURRENT_SOURCE_DIR}/src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
+add_precompiled_header(Base src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
 include_library(Base Interfaces Interfaces)
 
