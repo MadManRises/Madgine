@@ -8,7 +8,7 @@
 #include "Serialize/Streams/serializestream.h"
 #include "Serialize\serializemanager.h"
 
-Engine::App::ConfigSet *Engine::App::ConfigSet::msSingleton = 0;
+template<> Engine::App::ConfigSet *Ogre::Singleton<Engine::App::ConfigSet>::msSingleton = 0;
 
 namespace Engine {
 namespace App {

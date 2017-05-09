@@ -46,8 +46,8 @@ public:
 	
 	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) override;
 	virtual Entity::Entity * createLocalEntity(const std::string & behaviour = "", const std::string & name = "", const std::string & meshName = "", const Scripting::ArgumentList & args = {}) override;
-	std::list<Entity::Entity *> entities();
-	Entity::Entity *findEntity(const std::string &name);
+	virtual std::list<Entity::Entity *> entities() override;
+	virtual Entity::Entity *findEntity(const std::string &name) override;
 	
 	virtual Light * createLight() override;
 	virtual std::list<Light*> lights() override;
@@ -108,7 +108,7 @@ protected:
 	void readTerrain(Serialize::SerializeInStream &in);
 
 
-	void removeQueuedEntities();
+	virtual void removeQueuedEntities() override;
 		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
@@ -140,11 +140,11 @@ private:
 	Resources::OgreTexturePtr mGameTexture;
 
 
-	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createEntityData)>> mEntities;
+	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&OgreSceneManager::createEntityData), &OgreSceneManager::createEntityData>> mEntities;
 	std::list<Entity::OgreEntity> mLocalEntities;
 
 
-	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&OgreSceneManager::createLightData)>> mLights;
+	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&OgreSceneManager::createLightData), &OgreSceneManager::createLightData>> mLights;
     
 //    Resources::Shading::ShaderCollector mShaderCollector;
 

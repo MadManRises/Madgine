@@ -25,7 +25,7 @@ namespace Engine {
 
 			mLog.startConsole(mRunning, [this](const std::string &cmd) {return performCommand(cmd); });
 			
-			while (update());
+			while (sendFrameStarted() && update() && sendFrameEnded());
 
 			stop();
 
@@ -63,6 +63,37 @@ namespace Engine {
 			}
 			return false;
 		}
+
+		void ServerBase::addFrameListener(App::FrameListener * listener)
+		{
+			mListeners.push_back(listener);
+		}
+
+		void ServerBase::removeFrameListener(App::FrameListener * listener)
+		{
+			mListeners.remove(listener);
+		}
+
+		bool ServerBase::sendFrameStarted()
+		{
+			bool result = true;
+			for (App::FrameListener *listener : mListeners)
+				result &= listener->frameStarted(0);
+			if (!result)
+				return false;
+			for (App::FrameListener *listener : mListeners)
+				result &= listener->frameRenderingQueued(0);
+			return result;
+		}
+
+		bool ServerBase::sendFrameEnded()
+		{
+			bool result = true;
+			for (App::FrameListener *listener : mListeners)
+				result &= listener->frameEnded(0);
+			return result;
+		}
+
 
 	}
 }

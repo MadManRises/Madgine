@@ -119,9 +119,9 @@ protected:
 	virtual bool fixedUpdate(float timeStep) override;
 
 private:
-	virtual void _clear();
+	virtual void _clear() override;
 	virtual void _setupOgre();
-	virtual void _setup();
+	virtual void _setup() override;
 	
 
 private:

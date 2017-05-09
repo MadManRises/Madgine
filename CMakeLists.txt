@@ -18,19 +18,16 @@ set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 
 
 set(CMAKE_MODULE_PATH
+	"${CMAKE_MODULE_PATH}"
 	"${CMAKE_SOURCE_DIR}/CMake"
 )
 
-include(installToWorkspace)
+include(Workspace)
 include(PrecompiledHeader)
 include(Project)
 include(multiConfig)
-
-
-find_package(Interfaces REQUIRED)
-
   
-multiConfig(Interfaces)  
+multiConfig(Madgine)  
 
 
 if (BUILD_TESTS)

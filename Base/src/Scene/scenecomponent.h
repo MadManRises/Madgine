@@ -38,15 +38,12 @@ private:
 
 };
 
-#ifdef _MSC_VER
-template MADGINE_BASE_EXPORT class BaseUniqueComponentCollector<SceneComponentBase>;
-#endif
 
 template <class T>
 class SceneComponent : public UniqueComponent<T, SceneComponentBase>, public Scripting::GlobalAPI<T>{
 
 public:
-	using UniqueComponent::UniqueComponent;
+	using UniqueComponent<T, SceneComponentBase>::UniqueComponent;
 
 private:
 	virtual size_t getSize() const override final {
@@ -56,9 +53,12 @@ private:
 };
 
 
-
-
 }
+
+#ifdef _MSC_VER
+template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase>;
+#endif
+
 }
 
 

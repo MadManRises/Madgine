@@ -17,7 +17,7 @@
 
 namespace Engine {
 
-	API_IMPL(Scene::Entity::Entity, &addComponent, &remove, /*&enqueueMethod,*/ &getPosition, &getCenter, &setObjectVisible);
+	API_IMPL(Engine::Scene::Entity::Entity, MAP(addComponent), MAP(remove), /*&enqueueMethod,*/ MAP(getPosition), MAP(getCenter), MAP(setObjectVisible));
 
 
 namespace Scene {
@@ -27,8 +27,7 @@ namespace Entity {
 
 Entity::Entity(const Entity &other) :
 	Scope(other),
-	mDescription(other.mDescription),
-	mComponents()	
+	mDescription(other.mDescription)
 {
 
 	//TODO copy Components
@@ -40,11 +39,11 @@ Entity::Entity(Entity &&other) :
 	mDescription(other.mDescription),
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
 {
+
 }
 
 Entity::Entity(const Scripting::Parsing::EntityNode *behaviour) :
-	mDescription(behaviour),
-	mComponents()
+	mDescription(behaviour)
 {
 }
 
@@ -165,6 +164,11 @@ const Scripting::Parsing::MethodNode &Entity::getMethod(const std::string &name)
     return mDescription->getMethod(name);
 }
 
+size_t Entity::getSize() const
+{
+	return sizeof(Entity);
+}
+
 void Entity::remove()
 {
 	Engine::Scene::SceneManagerBase::getSingleton().removeLater(this);
@@ -201,12 +205,12 @@ void Entity::readState(Serialize::SerializeInStream &ifs)
 
 std::array<float, 2> Entity::getCenter2D() const {
 	std::array<float, 3> c = getCenter();
-	return{ c[0], c[2] };
+	return{ { c[0], c[2] } };
 }
 
 std::array<float, 2> Entity::getPosition2D() const {
 	std::array<float, 3> p = getPosition();
-	return{ p[0], p[2] };
+	return{ { p[0], p[2] } };
 }
 
 }

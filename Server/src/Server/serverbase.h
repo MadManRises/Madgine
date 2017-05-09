@@ -21,6 +21,8 @@ namespace Engine {
 			void shutdown();
 
 
+			void addFrameListener(App::FrameListener *listener);
+			void removeFrameListener(App::FrameListener *listener);
 
 		protected:
 			virtual bool update() = 0;
@@ -34,6 +36,8 @@ namespace Engine {
 				mInstances.emplace_back(std::forward<T>(init));
 			}
 
+			bool sendFrameStarted();
+			bool sendFrameEnded();
 
 		private:
 			SignalSlot::ConnectionManager mConnectionManager;
@@ -46,7 +50,8 @@ namespace Engine {
 
 			std::list<ServerAppInstance> mInstances;
 
-			
+			std::list<App::FrameListener*> mListeners;
+
 		};
 
 	}

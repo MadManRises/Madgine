@@ -15,8 +15,8 @@ public:
 
 	void operator=(const OgreScriptParser &) = delete;
 
-    const Ogre::StringVector &getScriptPatterns() const;
-    float getLoadingOrder() const;
+    virtual const Ogre::StringVector &getScriptPatterns() const override;
+    virtual float getLoadingOrder() const override;
 
     virtual void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &group) override;
 

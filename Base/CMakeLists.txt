@@ -3,13 +3,9 @@ cmake_minimum_required (VERSION 2.6)
 cmake_policy(SET CMP0011 OLD)
 cmake_policy(SET CMP0049 OLD)
 cmake_policy(SET CMP0048 NEW)
+cmake_policy(SET CMP0022 NEW)
 
 Project(BASE)
-
-set(CMAKE_MODULE_PATH
-  "${CMAKE_MODULE_PATH}"
-)
-
 
 set(sources "")
 FolderSources(sources "" "")
@@ -22,13 +18,11 @@ FolderSources(sources "" src baseforward.h baselib.h MadgineObject.cpp MadgineOb
 		FolderSources(sources Scripting Types globalapicomponentbase.cpp globalapicomponentbase.h globalapi.h globalapicomponent.h GlobalScope.cpp GlobalScope.h scene.cpp scene.h scriptingmanager.cpp scriptingmanager.h)
 	FolderSources(sources src Serialize TopLevelIds.h)
 
-include_directories(${BASE_SOURCE_DIR}/src ${INTERFACES_INCLUDE_DIRS})
-
+include_directories(${BASE_SOURCE_DIR}/src)
 add_library(Base SHARED ${sources} baselib.cpp)
+add_precompiled_header(Base ${CMAKE_CURRENT_SOURCE_DIR}/src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
-target_link_libraries(Base Interfaces)
-
-add_precompiled_header(Base src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
+include_library(Base Interfaces Interfaces)
 
  
 if (BUILD_TESTS)

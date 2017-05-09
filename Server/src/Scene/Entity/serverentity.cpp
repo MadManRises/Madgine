@@ -24,10 +24,10 @@ namespace Entity {
 
 	ServerEntity::ServerEntity(const Scripting::Parsing::EntityNode *behaviour, const std::string &name, const std::string &object) :
 	Entity(behaviour),
-    mName(name),
-    mObject(object),
-		mOrientation{1, 0, 0, 0},
-		mScale{1, 1, 1}
+		mScale{ { 1, 1, 1 } },
+		mOrientation{ {1, 0, 0, 0} },
+		mName(name),
+		mObject(object)
 {
 
 }

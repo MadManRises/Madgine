@@ -14,8 +14,6 @@ namespace Engine {
 			mFlag(nullptr),
 			mEcho(false)
 		{
-			mCharTyped.connect(mCharTypedSlot, Engine::SignalSlot::queuedConnection);
-			mCmdSent.connect(mHandleSlot, Engine::SignalSlot::queuedConnection);
 		}
 
 		ServerLog::~ServerLog()
@@ -83,9 +81,9 @@ namespace Engine {
 							cmd += c;
 							break;
 						}
-						mCharTyped.emit(c, cmd);
+						mCharTypedSlot.queue(c, cmd);
 						if (send && !cmd.empty()) {
-							mCmdSent.emit(cmd);
+							mHandleSlot.queue(cmd);
 							cmd.clear();
 						}
 					}

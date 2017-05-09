@@ -33,7 +33,7 @@ public:
 	virtual Light * createLight() override;
 	virtual std::list<Light*> lights() override;
 
-	void clear();
+	virtual void clear() override;
 
 	virtual void writeState(Serialize::SerializeOutStream &out) const override;
 	virtual void readState(Serialize::SerializeInStream &in) override;
@@ -61,7 +61,7 @@ private:
 	std::string mStaticSceneName;
 	
 
-	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, Serialize::CustomCreator<decltype(&ServerSceneManager::createEntityData)>> mEntities;
+	Serialize::ObservableList<Entity::ServerEntity, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&ServerSceneManager::createEntityData), &ServerSceneManager::createEntityData>> mEntities;
 	std::list<Entity::ServerEntity> mLocalEntities;
 
 	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;

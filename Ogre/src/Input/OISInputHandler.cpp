@@ -75,20 +75,20 @@ namespace Engine {
 		bool OISInputHandler::mousePressed(const OIS::MouseEvent &arg,
 			OIS::MouseButtonID id)
 		{
-			mGUI->injectMousePress({ std::array<float, 2>{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}, convertMouseButton(id) });
+			mGUI->injectMousePress({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, convertMouseButton(id) });
 			return true;
 		}
 
 		bool OISInputHandler::mouseMoved(const OIS::MouseEvent &arg)
 		{
-			mGUI->injectMouseMove({ std::array<float, 2>{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}, std::array<float, 2>{static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)}, arg.state.Z.rel / 120.0f });
+			mGUI->injectMouseMove({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, std::array<float, 2>{ {static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)}}, arg.state.Z.rel / 120.0f });
 			return true;
 		}
 
 		bool OISInputHandler::mouseReleased(const OIS::MouseEvent &arg,
 			OIS::MouseButtonID id)
 		{
-			mGUI->injectMouseRelease({ std::array<float, 2>{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}, convertMouseButton(id) });
+			mGUI->injectMouseRelease({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, convertMouseButton(id) });
 			return true;
 		}
 

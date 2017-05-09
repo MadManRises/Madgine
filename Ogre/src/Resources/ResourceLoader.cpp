@@ -4,7 +4,7 @@
 #include "Database\messages.h"
 
 
-Engine::Resources::ResourceLoader *Engine::Resources::ResourceLoader::msSingleton = 0;
+template<> Engine::Resources::ResourceLoader *Ogre::Singleton<Engine::Resources::ResourceLoader>::msSingleton = 0;
 
 namespace Engine {
 	namespace Resources {

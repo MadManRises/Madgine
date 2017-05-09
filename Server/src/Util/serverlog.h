@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Util\standardlog.h"
-#include "SignalSlot\signal.h"
 #include "SignalSlot\slot.h"
 
 namespace Engine {
@@ -25,8 +24,6 @@ namespace Engine {
 			void charTyped(char, const std::string &);
 
 		private:
-			Engine::SignalSlot::Signal<char, const std::string &> mCharTyped;
-			Engine::SignalSlot::Signal<const std::string&> mCmdSent;
 			Engine::SignalSlot::Slot<decltype(&ServerLog::charTyped), &ServerLog::charTyped> mCharTypedSlot;
 			Engine::SignalSlot::Slot<decltype(&ServerLog::handle), &ServerLog::handle> mHandleSlot;
 

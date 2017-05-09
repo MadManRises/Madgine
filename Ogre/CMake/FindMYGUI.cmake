@@ -14,7 +14,7 @@ CMAKE_POLICY(PUSH)
 include(FindPkgMacros)
 include(PreprocessorUtils)
 
-set (MYGUISDK "" CACHE PATH "Path to MyGUI-SDK")
+set (MYGUISDK "${Workspace}" CACHE PATH "Path to MyGUI-SDK")
 
 # IF (MYGUI_LIBRARIES AND MYGUI_INCLUDE_DIRS)
     # SET(MYGUI_FIND_QUIETLY TRUE)
@@ -48,12 +48,12 @@ IF (WIN32) #Windows
     IF (MYGUISDK)
         findpkg_begin ( "MYGUI" )
         MESSAGE(STATUS "Using MyGUI in MyGUI SDK")
-        STRING(REGEX REPLACE "[\\]" "/" MYGUISDK "${MYGUISDK}" )
+        STRING(REGEX REPLACE "[\\]" "/" _MYGUISDK "${MYGUISDK}" )
 
-        SET ( MYGUI_INCLUDE_DIRS "${MYGUISDK}/include" )
+        SET ( MYGUI_INCLUDE_DIRS "${_MYGUISDK}/include" )
       
 
-        SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib)
+        SET ( MYGUI_LIB_DIR ${_MYGUISDK}/lib)
 
         if ( MYGUI_STATIC )
            set(LIB_SUFFIX "Static")
