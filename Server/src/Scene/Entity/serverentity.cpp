@@ -9,7 +9,6 @@
 
 
 #include "Scripting\Parsing\scriptparser.h"
-#include "Scripting\Parsing\entitynode.h"
 
 #include "Scene\Entity\masks.h"
 
@@ -22,11 +21,10 @@ namespace Entity {
 
 
 
-	ServerEntity::ServerEntity(const Scripting::Parsing::EntityNode *behaviour, const std::string &name, const std::string &object) :
-	Entity(behaviour),
+	ServerEntity::ServerEntity(const std::string &behaviour, const std::string &name, const std::string &object) :
+	Entity(behaviour, name),
 		mScale{ { 1, 1, 1 } },
 		mOrientation{ {1, 0, 0, 0} },
-		mName(name),
 		mObject(object)
 {
 
@@ -34,13 +32,6 @@ namespace Entity {
 
 	ServerEntity::~ServerEntity()
 {
-}
-
-
-
-std::string ServerEntity::getName() const
-{
-	return mName;
 }
 
 std::string ServerEntity::getObjectName() const

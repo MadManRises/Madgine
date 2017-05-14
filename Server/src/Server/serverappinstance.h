@@ -9,10 +9,10 @@ namespace Engine {
 		class MADGINE_SERVER_EXPORT ServerAppInstance {
 		public:
 			template <class T>
-			ServerAppInstance(T &&initCallback) :
+			ServerAppInstance(T &&initCallback, lua_State *state) :
 				mApplication(nullptr),
 				mResult(0),
-				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))
+				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback), state)
 			{
 
 			}
@@ -20,11 +20,11 @@ namespace Engine {
 
 		protected:
 			template <class T>
-			void run(T initCallback) 
+			void run(T initCallback, lua_State *state) 
 			{
 				App::ServerApplication app;
 				mApplication = &app;
-				App::ServerAppSettings settings;
+				App::ServerAppSettings settings(state);
 				app.setup(settings);
 				if (app.init()) {
 					initCallback();

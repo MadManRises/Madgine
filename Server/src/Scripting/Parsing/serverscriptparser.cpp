@@ -14,7 +14,7 @@ namespace Engine {
 				mRootFolder(rootFolder)
 			{
 
-				for (std::string path : Engine::Os::filesMatchingPattern(rootFolder, "*.script")) {
+				for (std::string path : Engine::Os::filesMatchingPattern(rootFolder, std::string("*.") + fileExtension())) {
 					std::ifstream in(path);
 					parseScript(in, path, false);
 				}

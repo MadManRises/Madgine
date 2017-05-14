@@ -47,6 +47,8 @@ bool Handler::installToWindow(GUI::Window * w)
 		}		
 	}
 
+	mWindows.clear();
+
 	return true;
 }
 
@@ -69,7 +71,6 @@ void Handler::finalize()
 {
 	if (mWindow) {
 		mWindow->unregisterAllEvents(this);
-		mWindow = 0;
 	}
 	MadgineObject::finalize();
 }
@@ -77,7 +78,6 @@ void Handler::finalize()
 bool Handler::init(GUI::Window *window)
 {
 	if (installToWindow(window)) {
-		mWindows.clear();
 		return MadgineObject::init();
 	}
 	else {

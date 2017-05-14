@@ -26,7 +26,7 @@ namespace Engine {
 			std::cout << "\r";
 			StandardLog::log(msg, lvl, traceBack);
 			if (mFlag && *mFlag) {
-				std::cout << "prompt>" << mCurrentCmd;
+				std::cout << "prompt> " << mCurrentCmd;
 				std::cout.flush();
 			}
 		}
@@ -101,7 +101,7 @@ namespace Engine {
 				std::cout << "Unknown Command: " << cmd << std::endl;
 			}
 			if (*mFlag) {
-				std::cout << "prompt>";
+				std::cout << "prompt> ";
 				std::cout.flush();
 			}
 		}
@@ -118,7 +118,7 @@ namespace Engine {
 
 		void ServerLog::startConsole(bool &flag, const std::function<bool(const std::string&)>& evaluator) {
 			assert(!mConsoleThread.joinable());
-			std::cout << "prompt>";
+			std::cout << "prompt> ";
 			std::cout.flush();
 			mFlag = &flag;
 			mEvaluator = evaluator;

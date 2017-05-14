@@ -13,7 +13,6 @@ namespace Engine {
 		ServerApplication::~ServerApplication()
 		{
 			if (mSceneManager) {
-				mSceneManager->finalize();
 				delete mSceneManager;
 			}
 		}
@@ -23,6 +22,8 @@ namespace Engine {
 			mSettings = &settings;
 
 			Application::setup(settings);
+
+			mSceneManager = new Scene::ServerSceneManager;
 		}
 
 		int ServerApplication::go()
@@ -43,27 +44,24 @@ namespace Engine {
 
 		bool ServerApplication::init()
 		{
-			if (!Application::init())
-				return false;
-
-			mSceneManager->init();
-
-			return true;
+			return Application::init() && mSceneManager->init();
 		}
 
-
-		void ServerApplication::_setup()
-		{
-			Application::_setup();
-
-			mSceneManager = new Scene::ServerSceneManager;
+		void ServerApplication::finalize() {
+			mSceneManager->finalize();
+			Application::finalize();
 		}
+
 
 		bool ServerApplication::fixedUpdate(float timeStep)
 		{
 			mSceneManager->fixedUpdate(timeStep, Scene::ContextMask::SceneContext);
 
 			return true;
+		}
+
+		lua_State *ServerApplication::lua_state() {
+			return mSettings->mState;
 		}
 
 	}

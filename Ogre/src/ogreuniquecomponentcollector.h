@@ -2,6 +2,7 @@
 
 #include "Serialize\serializable.h"
 #include "Serialize\Container\unithelper.h"
+#include "uniquecomponentcollector.h"
 
 namespace Engine{
 

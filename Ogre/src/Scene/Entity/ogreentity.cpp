@@ -9,7 +9,6 @@
 
 
 #include "Scripting\Parsing\scriptparser.h"
-#include "Scripting\Parsing\entitynode.h"
 
 #include "Scene\Entity\masks.h"
 
@@ -59,8 +58,8 @@ OgreEntity::OgreEntity(OgreEntity &&other) :
 	//Change components-Owner
 }
 
-OgreEntity::OgreEntity(const Scripting::Parsing::EntityNode *behaviour, Ogre::SceneNode *node, Ogre::Entity *obj) :
-	Entity(behaviour),
+OgreEntity::OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre::Entity *obj) :
+	Entity(behaviour, node->getName().c_str()),
     mNode(node),
     mObject(obj)
 {
@@ -88,13 +87,6 @@ OgreEntity::~OgreEntity()
 		mNode->getParentSceneNode()->removeChild(mNode);
 		mNode->getCreator()->destroySceneNode(mNode);
 	}
-}
-
-
-
-std::string OgreEntity::getName() const
-{
-	return mNode->getName();
 }
 
 std::string OgreEntity::getObjectName() const

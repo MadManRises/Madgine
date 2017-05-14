@@ -58,6 +58,7 @@ void GuiHandlerBase::finalize(int order)
 {
 	if (mOrder == order)
 		finalize();
+	
 }
 
 void GuiHandlerBase::finalize()
@@ -66,7 +67,7 @@ void GuiHandlerBase::finalize()
 	if (mWindow && !mLayoutFile.empty()) {
 		mWindow->destroy();
 		mWindow = 0;
-	}	
+	}
 }
 
 void GuiHandlerBase::open()

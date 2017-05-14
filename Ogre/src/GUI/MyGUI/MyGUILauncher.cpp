@@ -79,7 +79,7 @@ namespace Engine {
 					mGUI->shutdown();
 					delete mGUI;
 				}
-				GUISystem::finalize();
+				return GUISystem::finalize();
 			}
 
 			void MyGUILauncher::injectKeyPress(const KeyEventArgs & arg)

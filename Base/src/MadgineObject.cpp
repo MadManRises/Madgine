@@ -13,42 +13,42 @@ namespace Engine {
 
 		MadgineObject::~MadgineObject()
 		{
-			if (mState != ObjectState::CONSTRUCTED) {
-				std::stringstream ss;
-				ss << std::hex << (uint64_t)this;
-				LOG_WARNING(std::string("Deleting non-finalized Object: ") + ss.str() + "\n Calling finalize.");
+			if (mState != ObjectState::CONSTRUCTED) {				
+				LOG_WARNING(std::string("Deleting non-finalized Object: ") + mName + "\n Calling finalize.");
 				finalize();
 				if (mState != ObjectState::CONSTRUCTED) {
-					LOG_WARNING(std::string("Finalize does not call Baseclass-Implementation: ") + std::to_string((uint64_t)this));
+					LOG_WARNING(std::string("Finalize does not call Baseclass-Implementation: ") + mName);
 				}
 			}
 			MadgineObjectCollector::getSingleton().remove(this);
 		}
 
-		const char * MadgineObject::getName()
-		{
-			return typeid(*this).name();
-		}
-
 		bool MadgineObject::init()
 		{
+			
 			if (mState != ObjectState::CONSTRUCTED) {
-				LOG_WARNING(std::string("Double initializeing Object: ") + getName());
+				LOG_WARNING(std::string("Double initializeing Object: ") + mName);
 				return false;
 			}
-			mState = ObjectState::INITIALIZED;
-			return true;
+			if (ScopeBase::init()) {
+				mState = ObjectState::INITIALIZED;
+				mName = getIdentifier();
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 
 		void MadgineObject::finalize()
 		{
+			ScopeBase::finalize();
 			if (mState == ObjectState::CONSTRUCTED) {
-				LOG_WARNING(std::string("Finalizing unitialized Object: ") + getName());
-				return;
-			}
-			mState = ObjectState::CONSTRUCTED;
+				LOG_WARNING(std::string("Finalizing unitialized Object: ") + getIdentifier());
+			}else{
+				mState = ObjectState::CONSTRUCTED;
+			}			
 		}
-
 		
 		ObjectState MadgineObject::getState() {
 			return mState;

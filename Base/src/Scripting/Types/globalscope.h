@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Scripting/Types/scope.h"
+
 #include "uniquecomponentcollector.h"
 #include "GlobalAPIComponentBase.h"
 #include "Scripting\Types\globalscopebase.h"
+
 
 namespace Engine {
 
@@ -13,27 +14,25 @@ namespace Engine {
 
 	namespace Scripting {
 
-class MADGINE_BASE_EXPORT GlobalScope : public Scope<GlobalScope, GlobalScopeBase>, public Singleton<GlobalScope> {
+class MADGINE_BASE_EXPORT GlobalScope : public GlobalScopeBase, public Singleton<GlobalScope> {
 public:
-    GlobalScope();
+    GlobalScope(lua_State *state);
 
-	bool init();
-	void finalize();
+	virtual bool init() override;
+	virtual void finalize() override;
 
-	void addAPI(APIBase *api);
-	void removeAPI(APIBase *api);
 
-	virtual void clear() override;
 
-	virtual ValueType methodCall(const std::string &name, const ArgumentList &args = {}) override;
+	void clear();
+
+	void update();
 
 	using Singleton<GlobalScope>::getSingleton;
 
-	void update(float timeSinceLastFrame);
 
 private:
 
-    std::list<APIBase*> mAPIs;
+
 	BaseUniqueComponentCollector<GlobalAPIComponentBase> mGlobalAPIs;
 
 };

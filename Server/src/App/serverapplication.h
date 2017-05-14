@@ -20,10 +20,13 @@ namespace Engine {
 
 			virtual bool init() override;
 
+			virtual void finalize() override;
+
 		protected:
-			virtual void _setup() override;
 
 			virtual bool fixedUpdate(float timeStep) override;
+
+			virtual lua_State *lua_state() override;
 
 		private:
 			Scene::ServerSceneManager *mSceneManager;

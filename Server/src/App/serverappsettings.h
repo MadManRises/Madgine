@@ -13,11 +13,13 @@ struct ServerAppSettings : AppSettings {
 	/**
 	 * Sets up default values for the settings.
 	 */
-	ServerAppSettings()
+	ServerAppSettings(lua_State *state) :
+		mState(state)
 	{
 
 	}
 
+	lua_State *mState;
 
 
 };

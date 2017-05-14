@@ -2,20 +2,19 @@
 
 #include "Serialize/serializableunit.h"
 #include "Serialize\Container\set.h"
+#include "Scripting/Types/scopebase.h"
 
 namespace Engine {
 namespace Scene {
 namespace Entity {
 
-class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Serialize::Keyed<std::string> {
+class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::ScopeBase, public Serialize::Keyed<std::string> {
 public:
     EntityComponentBase(Entity &entity);
     virtual ~EntityComponentBase() = 0;
 
     virtual std::string getName() const = 0;
 
-    virtual bool hasComponentMethod(const std::string &name) const = 0;
-    virtual ValueType execComponentMethod(const std::string &name, const Scripting::ArgumentList &args) = 0;
 
     std::array<float, 2> getPosition2D();
 	void setPosition(const std::array<float, 3> &pos);

@@ -21,7 +21,7 @@ public:
 	ServerEntity(const ServerEntity&) = default;
 	ServerEntity(ServerEntity &&) = default;
 
-	ServerEntity(const Scripting::Parsing::EntityNode *behaviour, const std::string &name, const std::string &object);
+	ServerEntity(const std::string &behaviour, const std::string &name, const std::string &object);
     ~ServerEntity();
 
 	virtual std::array<float, 3> getPosition() const override;
@@ -29,7 +29,6 @@ public:
 	virtual std::array<float, 4> getOrientation() const override;
 	virtual std::array<float, 3> getScale() const override;
 
-	virtual std::string getName() const override;
 	virtual std::string getObjectName() const override;
 
 	virtual void setObjectVisible(bool b) override;
@@ -46,7 +45,6 @@ private:
 	std::array<float, 3> mScale;
 	std::array<float, 4> mOrientation;
 
-	std::string mName;
 	std::string mObject;
 
 

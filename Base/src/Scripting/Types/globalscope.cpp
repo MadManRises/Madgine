@@ -1,21 +1,21 @@
 #include "baselib.h"
 #include "GlobalScope.h"
 #include "Scripting/Parsing/scriptparser.h"
-#include "globalapi.h"
+
 
 namespace Engine {
 namespace Scripting {
 
 
-	API_IMPL(GlobalScope);
 
-
-	GlobalScope::GlobalScope() 
+	GlobalScope::GlobalScope(lua_State *state) :
+		GlobalScopeBase(state)
 	{
 	}
 
 bool GlobalScope::init() {
-
+	if (!GlobalScopeBase::init())
+		return false;
 	for (const std::unique_ptr<GlobalAPIComponentBase> &api : mGlobalAPIs) {
 		if (!api->init())
 			return false;
@@ -28,43 +28,28 @@ void GlobalScope::finalize()
 	for (const std::unique_ptr<GlobalAPIComponentBase> &api : mGlobalAPIs) {
 		api->finalize();
 	}
+	GlobalScopeBase::finalize();
 }
 
-void GlobalScope::addAPI(APIBase * api)
-{
-	mAPIs.push_back(api);
-}
-
-void GlobalScope::removeAPI(APIBase * api)
-{
-	mAPIs.remove(api);
-}
 
 void GlobalScope::clear()
 {
 	for (const std::unique_ptr<GlobalAPIComponentBase> &p : mGlobalAPIs) {
 		p->clear();
-	}
-    Scope::clear();    
+	}   
 }
 
 
-ValueType GlobalScope::methodCall(const std::string &name, const Scripting::ArgumentList &args)
+/*void GlobalScope::log(const ValueType &v)
 {
-	for (APIBase *api : mAPIs) {
-		if (api->hasMethod(name)) {
-			TRACE_S("<unknown>", -1, name);
-			return api->execMethod(name, args);
-		}
-	}
- 
-    return Scope::methodCall(name, args);
-}
+	Util::UtilMethods::log(v.toString(), Util::LOG_TYPE);
+}*/
 
-void GlobalScope::update(float timeSinceLastFrame)
+
+void GlobalScope::update()
 {
 	for (const std::unique_ptr<GlobalAPIComponentBase> &p : mGlobalAPIs) {
-		p->update(timeSinceLastFrame);
+		p->update();
 	}
 }
 

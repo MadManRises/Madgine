@@ -13,6 +13,7 @@ namespace Engine {
 			~ResourceLoader();
 
 			void load();
+			void loadScripts();
 
 			std::string getMediaPath(const std::string &filename, const std::string &folder = "");
 

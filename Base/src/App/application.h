@@ -1,16 +1,15 @@
 #pragma once
 
 
-
-#include "Scripting\Types\api.h"
-
 #include "SignalSlot\ConnectionStore.h"
+
+#include "Scripting\Types\globalapicomponentbase.h"
+#include "Scripting\Types\scope.h"
 
 namespace Engine {
 	namespace App {
 
-		class MADGINE_BASE_EXPORT Application : public Singleton<Application>,
-			public Scripting::API<Application> {
+		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, Scripting::GlobalAPIComponentBase> {
 		public:
 			/**
 			* Creates the Application.
@@ -38,7 +37,9 @@ namespace Engine {
 			* May only be called after a call to setup().
 			* Initializes all Madgine-Components.
 			*/
-			virtual bool init();
+			virtual bool init() override;
+
+			virtual void finalize() override;
 
 			/**
 			* Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop.
@@ -56,15 +57,6 @@ namespace Engine {
 			*/
 			virtual void shutdown();
 
-			/**
-			* Enqueues a task to be performed within the end of the current frame. This can be used for two purposes:
-			* - To modify a container while iterating over it (e.g. remove an entity inside of Entity::update(), which is called by iterating over all entities)
-			* - To insert calls, that are not thread-safe, from another thread
-			*
-			* @param f a functional with the task to be executed
-			*/
-			//void callSafe(std::function<void()> f);
-
 
 			/**
 			* Convenience method, that creates the Application of type T (which defaults to Application), calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
@@ -78,7 +70,9 @@ namespace Engine {
 				App app;
 				app.setup(settings);
 				if (!app.init()) return -1;
-				return app.go();
+				int result = app.go();
+				app.finalize();
+				return result;
 			}
 
 
@@ -102,24 +96,22 @@ namespace Engine {
 			void removeFrameListener(FrameListener *listener);
 
 		protected:
-			
-			virtual bool fixedUpdate(float timeStep);
-
 			virtual void _clear();
 			
-			virtual void _setup();	
+			virtual bool fixedUpdate(float timeStep);			
 
 			bool sendFrameStarted(float timeSinceLastFrame);
 			bool sendFrameRenderingQueued(float timeSinceLastFrame);
 			bool sendFrameEnded(float timeSinceLastFrame);
 
+			Scripting::GlobalScope *globalScope();
+
+			virtual lua_State *lua_state() = 0;
 		private:
 
 			bool mShutDown;
 
-			bool mScriptingMgrInitialized;
-
-			Scripting::ScriptingManager*      mScriptingMgr;
+			Scripting::GlobalScope*      mGlobalScope;
 
 			SignalSlot::ConnectionManager mConnectionManager;	
 

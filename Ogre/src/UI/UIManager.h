@@ -2,6 +2,8 @@
 
 #include "guihandler.h"
 #include "gamehandler.h"
+#include "Scripting\Types\scope.h"
+#include "Scripting\Types\globalapicomponentbase.h"
 
 namespace Engine {
 
@@ -10,14 +12,13 @@ namespace Engine {
 	namespace UI {
 
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-			public MadgineObject,
-			public Scripting::GlobalAPI<UIManager>,
-			public Ogre::GeneralAllocatedObject
+			public Scripting::Scope<UIManager, Scripting::GlobalAPIComponentBase>			
 		{
 		public:
 			UIManager(GUI::GUISystem *gui);
 			~UIManager();
 
+			bool preInit();
 			virtual bool init() override;
 			virtual void finalize() override;
 
@@ -44,6 +45,10 @@ namespace Engine {
 			std::set<GuiHandlerBase*> getGuiHandlers();
 
 			static const constexpr int sMaxInitOrder = 4;
+
+		protected:
+			virtual int resolve(lua_State *state, const std::string &key) override;
+			virtual std::pair<bool, std::string> next(const std::string &key) override;
 
 		private:
 			OgreUniqueComponentCollector<GuiHandlerBase> mGuiHandlers;

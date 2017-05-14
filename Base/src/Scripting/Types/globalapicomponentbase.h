@@ -2,16 +2,18 @@
 
 #include "MadgineObject.h"
 
+
 namespace Engine {
 	namespace Scripting {
 
-		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject {
+		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject{
 
 		public:
-			virtual ~GlobalAPIComponentBase() = default;
+			virtual bool init() override;
+			virtual void finalize() override;
 
 			virtual void clear();
-			virtual void update(float timeSinceLastFrame);
+			virtual void update();
 		};
 
 	}

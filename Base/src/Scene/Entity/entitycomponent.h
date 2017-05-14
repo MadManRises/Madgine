@@ -2,15 +2,16 @@
 
 #include "EntityComponentBase.h"
 #include "entity.h"
+#include "Scripting\Types\scope.h"
 
 namespace Engine{
 namespace Scene {
 namespace Entity {
 
 template <class T, class Base = EntityComponentBase, class... _Ty>
-class EntityComponent : public Base, public Scripting::API<T>{
+class EntityComponent : public Scripting::Scope<T, Base>{
 public:
-	using Base::Base;
+	using Scripting::Scope<T, Base>::Scope;
 
     virtual std::string getName() const override{
         return sComponentName;
@@ -29,14 +30,6 @@ private:
 	virtual void __reg() {
 		(void)_reg;
 	}
-
-    virtual bool hasComponentMethod(const std::string &name) const final{
-		return hasMethod(name);
-    }
-
-    virtual ValueType execComponentMethod(const std::string &name, const Scripting::ArgumentList &args) final{
-		return execMethod(name, args);
-    }
 
 	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
 		out << sComponentName << creationArguments();

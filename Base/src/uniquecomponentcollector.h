@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Serialize\serializable.h"
-#include "Serialize\Container\unithelper.h"
 
 namespace Engine{
 
@@ -49,7 +47,7 @@ public:
 	}
 
 protected:
-    template <class T, class _Base, template <class> class Collector>
+    template <class T, template <class> class Collector, class Collection, class Base>
     friend class UniqueComponent;
 
     template <class T>

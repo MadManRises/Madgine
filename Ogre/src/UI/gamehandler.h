@@ -4,9 +4,9 @@
 
 #include "Scene/contextmasks.h"
 
-#include "Scripting\Types\globalapi.h"
-
 #include "ogreuniquecomponent.h"
+
+#include "Scripting\Types\scope.h"
 
 namespace Engine {
 namespace UI {
@@ -76,9 +76,7 @@ private:
 };
 
 template <class T>
-class GameHandler : public OgreUniqueComponent<T, GameHandlerBase>, public Scripting::GlobalAPI<T> {
-	using OgreUniqueComponent<T, GameHandlerBase>::OgreUniqueComponent;
-};
+using GameHandler = Scripting::Scope<T, OgreUniqueComponent<T, GameHandlerBase>>;
 
 
 } // namespace UI

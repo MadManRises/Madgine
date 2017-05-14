@@ -56,6 +56,11 @@ namespace Engine {
 			endSubProcess();
 		}
 
+		void Engine::Resources::ResourceLoader::loadScripts()
+		{
+			mRgm->initialiseResourceGroup("Scripting");
+		}
+
 		std::string ResourceLoader::getMediaPath(const std::string & filename, const std::string & folder)
 		{
 			return mMediaPath + "Media\\" + (folder.empty() ? "" : folder + "\\") + filename;

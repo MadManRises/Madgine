@@ -23,7 +23,6 @@
 
 #include "Scripting\Parsing\scriptparser.h"
 
-#include "Scripting\Types\list.h"
 
 namespace Engine {
 
@@ -397,7 +396,7 @@ const std::vector<Ogre::SceneNode*> &OgreSceneManager::terrainEntities()
 	return mTerrainEntities;
 }
 
-std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
+std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
 
 	std::string actualName = name.empty() ? generateUniqueName() : name;
@@ -411,12 +410,8 @@ std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Enti
 		node->attachObject(mesh);
 	}
 
-	const Scripting::Parsing::EntityNode *behaviourNode = 0;
-	if (!behaviour.empty()) {
-		behaviourNode = &Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour);
-	}
-
-	return std::make_tuple(behaviourNode, node, mesh);
+	return std::make_tuple(behaviour, node, mesh);
+	
 	
 }
 
@@ -451,7 +446,7 @@ Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, con
 
 Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
 {
-	const std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(behaviour, name, meshName);
+	const std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(behaviour, name, meshName);
 	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
 	Entity::Entity &e = mLocalEntities.back();
 	e.init(args);
@@ -584,13 +579,7 @@ void OgreSceneManager::removeQueuedEntities()
 
 void OgreSceneManager::clear()
 {
-	for (Entity::Entity &e : mEntities) {
-		e.clear();
-	}
 	mEntities.clear();
-	for (Entity::Entity &e : mLocalEntities) {
-		e.clear();
-	}
 	mLocalEntities.clear();
 	mEntityRemoveQueue.clear();
 

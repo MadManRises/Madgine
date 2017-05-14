@@ -6,12 +6,11 @@
 
 namespace Engine {
 
-	API_IMPL(Engine::Scene::SceneManagerBase, MAP(createSceneArray), MAP(createSceneStruct), MAP(createSceneList), MAP(findEntity));
+	API_IMPL(Engine::Scene::SceneManagerBase, MAP(findEntity));
 
 	namespace Scene {
 		
 		SceneManagerBase::SceneManagerBase() :
-			RefScopeTopLevelSerializableUnitBase(Serialize::SCENE_MANAGER),
 			mItemCount(0)
 		{
 			for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
@@ -19,27 +18,9 @@ namespace Engine {
 			}
 		}
 
-
-		Scripting::ScopeBase * SceneManagerBase::createSceneArray(size_t size)
-		{
-			Scripting::Vector *v = createVector();
-			v->resize(size);
-			return v;
-		}
-
-		Scripting::ScopeBase * SceneManagerBase::createSceneStruct()
-		{
-			return createStruct();
-		}
-
-		Scripting::ScopeBase * SceneManagerBase::createSceneList()
-		{
-			return createList();
-		}
-
 		bool SceneManagerBase::init() {
 
-			if (!MadgineObject::init())
+			if (!GlobalAPIComponentBase::init())
 				return false;
 
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -51,13 +32,13 @@ namespace Engine {
 
 		void SceneManagerBase::finalize() {
 
-			MadgineObject::finalize();
-
 			clear();
 
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				component->finalize();
 			}
+
+			GlobalAPIComponentBase::finalize();
 		}
 
 
@@ -125,6 +106,33 @@ namespace Engine {
 			}
 		}
 
+		int Engine::Scene::SceneManagerBase::resolve(lua_State * state, const std::string & key)
+		{
+			auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase>&comp) {return comp->getName() == key; });
+			if (it != mSceneComponents.end()) {
+				(*it)->push();
+				return 1;
+			}
+			else
+				return Scope::resolve(state, key);
+		}
+
+		std::pair<bool, std::string> Engine::Scene::SceneManagerBase::next(const std::string & key)
+		{
+			std::pair<bool, std::string> p = Scope::next(key);
+			if (!p.second.empty())
+				return p;
+			auto it = mSceneComponents.begin();
+			if (!p.first && !key.empty()) {
+				it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase>&comp) {return comp->getName() == key; });
+				if (it == mSceneComponents.end())
+					return std::make_pair(false, "");
+				++it;
+			}
+			if (it == mSceneComponents.end())
+				return std::make_pair(true, "");
+			return std::make_pair(true, (*it)->getName());
+		}
 
 		std::string SceneManagerBase::generateUniqueName()
 		{

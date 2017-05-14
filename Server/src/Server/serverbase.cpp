@@ -6,18 +6,26 @@
 
 #include <iostream>
 
+API_IMPL(Engine::Server::ServerBase, MAP(shutdown));
+
 namespace Engine {
 	namespace Server {
+
 		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
 			mLog(name + "-Log"),
 			mName(name),
 			mScriptParser(scriptsFolder),
-			mRunning(false)
+			mRunning(false),
+			mGlobalScope(mScriptParser.lua_state())
 		{
 		}
 		int ServerBase::run()
 		{
 			Util::UtilMethods::setup(&mLog);
+
+			mGlobalScope.init();
+
+			init();
 
 			mRunning = true;
 
@@ -25,11 +33,15 @@ namespace Engine {
 
 			mLog.startConsole(mRunning, [this](const std::string &cmd) {return performCommand(cmd); });
 			
-			while (sendFrameStarted() && update() && sendFrameEnded());
+			while (sendFrameStarted() && frame() && sendFrameEnded());
 
 			stop();
 
 			mRunning = false;
+
+			finalize();
+
+			mGlobalScope.finalize();
 
 			return 0;
 		}
@@ -49,7 +61,7 @@ namespace Engine {
 			mRunning = false;
 		}
 
-		bool ServerBase::update()
+		bool ServerBase::frame()
 		{
 			mConnectionManager.update();
 			return mRunning;

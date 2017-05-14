@@ -12,7 +12,6 @@
 
 
 #include "Scripting\Parsing\scriptparser.h"
-#include "Scripting\Parsing\entitynode.h"
 
 
 namespace Engine {
@@ -26,8 +25,7 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	Scope(other),
-	mDescription(other.mDescription)
+	mName(other.mName)
 {
 
 	//TODO copy Components
@@ -35,22 +33,19 @@ Entity::Entity(const Entity &other) :
 }
 
 Entity::Entity(Entity &&other) :
-	Scope(std::forward<Entity>(other)),
-	mDescription(other.mDescription),
+	mName(other.mName),
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
 {
 
 }
 
-Entity::Entity(const Scripting::Parsing::EntityNode *behaviour) :
-	mDescription(behaviour)
+Entity::Entity(const std::string &behaviour, const std::string &name) : 
+	mName(name)
 {
 }
 
 Entity::~Entity()
 {	
-
-	clear();
 
 	mComponents.clear();
 
@@ -58,9 +53,6 @@ Entity::~Entity()
 
 void Entity::init(const Scripting::ArgumentList &args)
 {
-	if (mDescription && !mDescription->getPrototype().empty())
-		findPrototype(mDescription->getPrototype());
-
     callMethodIfAvailable("init", args);
 }
 
@@ -70,17 +62,20 @@ void Entity::onLoad()
     callMethodIfAvailable("onLoad");
 }
 
-
+std::string Entity::getName() const
+{
+	return mName;
+}
 
 std::string Entity::getIdentifier()
 {
-    return mDescription->getName() + "[" + getName() + "]";
+    return mName + "[" + getName() + "]";
 }
 
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
-    Scope::writeCreationData(of);
-    of << mDescription->getName() << getName() << getObjectName();
+	SerializableUnitBase::writeCreationData(of);
+    of << mName << getName() << getObjectName();
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)
@@ -124,15 +119,6 @@ std::set<std::string> Entity::registeredComponentNames()
 	return result;
 }
 
-ValueType Entity::methodCall(const std::string &name, const Scripting::ArgumentList &args)
-{
-    for (const std::unique_ptr<EntityComponentBase> &c : mComponents){
-        if(c->hasComponentMethod(name))
-            return c->execComponentMethod(name, args);
-    }
-    return Scope::methodCall(name, args);
-}
-
 std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name, const Engine::Scripting::ArgumentList &args)
 {
 	auto it = sRegisteredComponentsByName().find(name);
@@ -150,19 +136,6 @@ EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBas
     return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component))->get();
 }
 
-
-
-bool Entity::hasScriptMethod(const std::string &name)
-{
-	if (!mDescription) return false;
-    return mDescription->hasMethod(name);
-}
-
-const Scripting::Parsing::MethodNode &Entity::getMethod(const std::string &name)
-{
-	if (!mDescription) throw 0;
-    return mDescription->getMethod(name);
-}
 
 size_t Entity::getSize() const
 {
@@ -183,7 +156,7 @@ void Entity::writeState(Serialize::SerializeOutStream &of) const
 
 	of << getScale();
 	
-	Scope::writeState(of);
+	SerializableUnitBase::writeState(of);
 
 }
 
@@ -200,7 +173,7 @@ void Entity::readState(Serialize::SerializeInStream &ifs)
 	ifs >> v;
 	setScale(v);
 
-    Scope::readState(ifs);
+	SerializableUnitBase::readState(ifs);
 }
 
 std::array<float, 2> Entity::getCenter2D() const {

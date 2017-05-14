@@ -44,6 +44,8 @@ public:
 	 */
 	virtual bool init() override;
 	
+	virtual void finalize() override;
+
 	/**
 	 * Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop. 
 	 * If "init" is not found, <code>-1</code> is returned.
@@ -121,18 +123,14 @@ protected:
 private:
 	virtual void _clear() override;
 	virtual void _setupOgre();
-	virtual void _setup() override;
 	
+	virtual lua_State *lua_state() override;
 
 private:
 
 	const OgreAppSettings *mSettings;
 
 	bool mPaused;
-
-	bool mSceneMgrInitialized;
-	bool mGUIInitialized;
-	bool mUIInitialized;
 
 	Ogre::RenderWindow								   *mWindow;
 

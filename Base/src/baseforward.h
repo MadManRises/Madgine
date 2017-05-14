@@ -27,4 +27,8 @@ namespace Engine {
 		class GuiHandlerBase;
 		class GameHandlerBase;
 	}
+
+	namespace Scripting {
+		class GlobalScope;
+	}
 }

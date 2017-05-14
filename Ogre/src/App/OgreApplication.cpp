@@ -10,7 +10,6 @@
 
 #include "UI\UIManager.h"
 #include "configset.h"
-#include "Scripting\Types\scriptingmanager.h"
 #include "Resources\ResourceLoader.h"
 #include "Util\Profiler.h"
 
@@ -22,6 +21,9 @@
 
 #include "OgreWindowEventUtilities.h"
 
+#include "Scripting\Types\GlobalScope.h"
+
+
 namespace Engine {
 
 namespace App {
@@ -29,9 +31,6 @@ namespace App {
 	OgreApplication::OgreApplication() :
 	mSettings(nullptr),
 		mPaused(false),
-		mSceneMgrInitialized(false),
-		mGUIInitialized(false),
-		mUIInitialized(false),
 	mWindow(nullptr),
 	mRoot(nullptr),
 	mSceneMgr(nullptr),
@@ -48,22 +47,12 @@ namespace App {
 {
 	if (mInput && !mSettings->mInput)
 		delete mInput;
-	if (mUI) {
-		if (mUIInitialized)
-			mUI->finalize();
+	if (mUI)
 		delete mUI;
-	}
-	if (mGUI) {
-		Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
-		if (mGUIInitialized)
-			mGUI->finalize();
+	if (mGUI)
 		delete mGUI;
-	}
-	if (mSceneMgr) {
-		if (mSceneMgrInitialized)
-			mSceneMgr->finalize();
+	if (mSceneMgr)
 		delete mSceneMgr;
-	}
 	if (mLoader)
 		delete mLoader;
 	if (mConfig)
@@ -89,37 +78,76 @@ void OgreApplication::setup(const OgreAppSettings &settings)
 
 	mWindow->getCustomAttribute("WINDOW", &mHwnd);	
 
-	Application::setup(settings);
+	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
+
+	Application::setup(settings);	
+
+	// Create SceneManagerBase
+	mSceneMgr = new Scene::OgreSceneManager(mRoot);
+
+	mWindow->update();
+
+	// Initialise GUISystem 
+	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());
+	//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
+	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI);
+
+	// Create UIManager
+	mUI = new UI::UIManager(mGUI);
+
+	if (mSettings->mInput)
+		mInput = mSettings->mInput;
+	else
+		mInput = new Input::OISInputHandler(mGUI, mWindow);
 }
 
 bool OgreApplication::init()
 {
-	mGUIInitialized = mGUI->init();
-	if (!mGUIInitialized)
+	
+	if (!mGUI->init())
 		return false;
 
 	mRoot->addFrameListener(this);
 
-	std::pair<bool, ValueType> res = Scripting::GlobalScope::getSingleton().callMethodCatch("afterViewInit");
-	if (res.first && !res.second.isNull() && (!res.second.isBool() || !res.second.asBool()))
+	if (!Application::init())
+		return false;
+
+	if (!mUI->preInit())
+		return false;
+
+	mLoader->loadScripts();
+
+	std::pair<bool, Scripting::ArgumentList> res = globalScope()->callMethodIfAvailable("afterViewInit");
+	if (res.first && !res.second.empty() && (!res.second.front().isBool() || !res.second.front().asBool()))
 		return false;
 
 	mLoader->load();
 
-	mSceneMgrInitialized = mSceneMgr->init();
-	if (!mSceneMgrInitialized)
+	
+	if (!mSceneMgr->init())
 		return false; // Initialise all Scene-Components
 	
-	mUIInitialized = mUI->init();
-	if (!mUIInitialized)
+
+	if (!mUI->init())
 		return false; // Initialise all Handler
 	
-	if (!Application::init())
-		return false;
+
 
 	mConfig->applyLanguage();  // Set the Language in the Config to all Windows
 
 	return true;
+}
+
+void OgreApplication::finalize() {
+	
+	mUI->finalize();
+	
+	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
+	mGUI->finalize();
+	
+	mSceneMgr->finalize();
+	
+	Application::finalize();
 }
 
 int OgreApplication::go()
@@ -127,8 +155,9 @@ int OgreApplication::go()
 	Application::go();
 	mPaused = false;
 
-	if (!Scripting::GlobalScope::getSingleton().callMethodCatch("main").first)
+	if (!globalScope()->callMethodCatch("main").first) {
 		return -1;
+	}
 
 	mRoot->startRendering();
 
@@ -278,32 +307,6 @@ void OgreApplication::_setupOgre()
 
 }
 
-void OgreApplication::_setup()
-{
-	mLoader = OGRE_NEW Resources::ResourceLoader(mSettings->mRootDir);
-
-	Application::_setup();
-
-	// Create SceneManagerBase
-	mSceneMgr = new Scene::OgreSceneManager(mRoot);
-
-	mWindow->update();
-
-	// Initialise GUISystem 
-	mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());
-	//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
-	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI);
-
-	// Create UIManager
-	mUI = OGRE_NEW UI::UIManager(mGUI);
-
-	if (mSettings->mInput)
-		mInput = mSettings->mInput;
-	else
-		mInput = new Input::OISInputHandler(mGUI, mWindow);
-
-}
-
 void OgreApplication::resizeWindow()
 {
 	if (mWindow) {
@@ -322,6 +325,9 @@ void OgreApplication::renderFrame()
 	mWindow->update();
 }
 
+lua_State *OgreApplication::lua_state() {
+	return mLoader->scriptParser()->lua_state();
+}
 
 }
 }

@@ -21,7 +21,7 @@ public:
 	OgreEntity(const OgreEntity&);
 	OgreEntity(OgreEntity &&);
 
-    OgreEntity(const Scripting::Parsing::EntityNode *behaviour, Ogre::SceneNode *node, Ogre::Entity *obj);
+    OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre::Entity *obj);
     ~OgreEntity();
 
 	Ogre::SceneNode *createDecoratorNode(bool centered, float height = 0.0f);
@@ -34,7 +34,6 @@ public:
 	virtual std::array<float, 4> getOrientation() const override;
 	virtual std::array<float, 3> getScale() const override;
 
-	virtual std::string getName() const override;
 	virtual std::string getObjectName() const override;
 
 	virtual void setObjectVisible(bool b) override;

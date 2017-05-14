@@ -3,11 +3,13 @@
 
 #include "appsettings.h"
 
-#include "Scripting\Types\scriptingmanager.h"
-
 #include "Util\standardlog.h"
 
 #include "framelistener.h"
+
+#include "Scripting\Types\GlobalScope.h"
+
+#include "Scripting/Types/api.h"
 
 namespace Engine {	
 
@@ -19,8 +21,7 @@ namespace Engine {
 
 		Application::Application() :
 			mShutDown(false),
-			mScriptingMgrInitialized(false),
-			mScriptingMgr(nullptr),
+			mGlobalScope(nullptr),
 			mTimeBank(0.0f)
 		{
 
@@ -28,35 +29,31 @@ namespace Engine {
 
 		Application::~Application()
 		{
-			if (mScriptingMgr) {
-				if (mScriptingMgrInitialized)
-					mScriptingMgr->finalize();
-				delete mScriptingMgr;
-			}
+			if (mGlobalScope)
+				delete mGlobalScope;
 		}
 
 		void Application::setup(const AppSettings &settings)
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-			_setup();
+			mGlobalScope = new Scripting::GlobalScope(lua_state());
 		}
 
 		bool Application::init()
 		{			
-			mScriptingMgrInitialized = mScriptingMgr->init();
-			return mScriptingMgrInitialized;
+			return mGlobalScope->init() && GlobalAPIComponentBase::init();
+		}
+
+		void Application::finalize() {
+			GlobalAPIComponentBase::finalize();
+			mGlobalScope->finalize();
 		}
 
 		void Application::shutdown()
 		{
 			mShutDown = true;
 		}
-
-		/*void Application::callSafe(std::function<void()> f)
-		{
-			mSafeCallQueue.emplace(f);
-		}*/
 
 		int Application::go() {
 			mShutDown = false;
@@ -91,7 +88,7 @@ namespace Engine {
 			{
 				//PROFILE("ScriptingManager")
 				try {
-					mScriptingMgr->globalScope()->update(timeSinceLastFrame);
+					mGlobalScope->update();
 				}
 				catch (const std::exception &e) {
 					LOG_ERROR("Unhandled Exception during GlobalScope-update!");
@@ -131,20 +128,6 @@ namespace Engine {
 			return true;
 		}
 
-		void Application::_clear()
-		{
-			mScriptingMgr->clear();
-		}
-
-		void Application::_setup()
-		{
-
-			// Instantiate the GlobalScope class
-			mScriptingMgr = new Scripting::ScriptingManager;
-
-			mScriptingMgr->globalScope()->addAPI(this);
-		}
-
 		bool Application::sendFrameStarted(float timeSinceLastFrame)
 		{
 			bool result = true;
@@ -169,6 +152,14 @@ namespace Engine {
 			return result;
 		}
 
+		Scripting::GlobalScope *Application::globalScope() {
+			return mGlobalScope;
+		}
+
+		void Application::_clear()
+		{
+			mGlobalScope->clear();
+		}
 
 	}
 }

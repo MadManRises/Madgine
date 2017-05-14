@@ -3,7 +3,8 @@
 #include "uniquecomponent.h"
 #include "contextmasks.h"
 #include "Serialize/serializableunit.h"
-#include "Scripting\Types\globalapi.h"
+#include "Scripting\Types\scope.h"
+#include "MadgineObject.h"
 
 namespace Engine {
 namespace Scene {
@@ -17,8 +18,8 @@ public:
     void update(float timeSinceLastFrame, ContextMask mask);
 	void fixedUpdate(float timeStep, ContextMask mask);
 
-    virtual bool init();
-	virtual void finalize();    
+    virtual bool init() override;
+	virtual void finalize() override;    
 
 	void setEnabled(bool b);
 	bool isEnabled();
@@ -40,10 +41,10 @@ private:
 
 
 template <class T>
-class SceneComponent : public UniqueComponent<T, SceneComponentBase>, public Scripting::GlobalAPI<T>{
+class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase>>{
 
 public:
-	using UniqueComponent<T, SceneComponentBase>::UniqueComponent;
+	using Scope<T, BaseUniqueComponent<T, SceneComponentBase>>::Scope;
 
 private:
 	virtual size_t getSize() const override final {

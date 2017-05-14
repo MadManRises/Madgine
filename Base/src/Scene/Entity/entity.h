@@ -15,7 +15,7 @@ namespace Entity {
 
 
 
-class MADGINE_BASE_EXPORT Entity : public Scripting::Scope<Entity>
+class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnitBase, public Scripting::Scope<Entity>
 {
 private:
     typedef std::function<std::unique_ptr<EntityComponentBase>(Entity &, const Scripting::ArgumentList &)> ComponentBuilder;
@@ -24,7 +24,7 @@ public:
 	Entity(const Entity&);
 	Entity(Entity &&);
 
-    Entity(const Scripting::Parsing::EntityNode *behaviour);
+    Entity(const std::string &behaviour, const std::string &name);
     ~Entity();
 
     void init(const Scripting::ArgumentList &args = {});
@@ -38,7 +38,7 @@ public:
 	virtual std::array<float, 3> getScale() const = 0;
 
 	virtual std::string getIdentifier() override;
-	virtual std::string getName() const = 0;
+	std::string getName() const;
 	virtual std::string getObjectName() const = 0;
 
 	virtual void setObjectVisible(bool b) = 0;
@@ -84,12 +84,6 @@ public:
 	virtual void writeCreationData(Serialize::SerializeOutStream &of) const override;
 
 protected:
-
-	ValueType methodCall(const std::string &name, const Scripting::ArgumentList &args = {}) override;
-	
-	bool hasScriptMethod(const std::string &name) override;
-
-    const Scripting::Parsing::MethodNode &getMethod(const std::string &name) override;
 	
 	virtual size_t getSize() const override;
 
@@ -127,7 +121,7 @@ private:
 	friend class EntityComponent;
 
 
-    const Scripting::Parsing::EntityNode *mDescription;    
+	const std::string mName;
 
 	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Entity::createComponent), &Entity::createComponent>> mComponents;
 

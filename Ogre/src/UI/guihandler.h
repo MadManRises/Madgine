@@ -3,9 +3,9 @@
 #include "handler.h"
 #include "GUI\windownames.h"
 
-#include "Scripting\Types\globalapi.h"
-
 #include "ogreuniquecomponent.h"
+
+#include "Scripting\Types\scope.h"
 
 namespace Engine {
 namespace UI {
@@ -57,10 +57,7 @@ private:
 };
 
 template <class T>
-class GuiHandler : public OgreUniqueComponent<T, GuiHandlerBase>, public Scripting::GlobalAPI<T> {
-	using OgreUniqueComponent<T, GuiHandlerBase>::OgreUniqueComponent;
-
-};
+using GuiHandler = Scripting::Scope<T, OgreUniqueComponent<T, GuiHandlerBase>>;
 
 } // namespace GuiHandler
 } // namespace Cegui

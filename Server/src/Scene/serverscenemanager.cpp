@@ -89,17 +89,12 @@ void ServerSceneManager::makeLocalCopy(Entity::ServerEntity && e)
 }
 
 
-std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> ServerSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
+std::tuple<std::string, std::string, std::string> ServerSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
 
 	std::string actualName = name.empty() ? generateUniqueName() : name;
 
-	const Scripting::Parsing::EntityNode *behaviourNode = 0;
-	if (!behaviour.empty()) {
-		behaviourNode = &Scripting::Parsing::ScriptParser::getSingleton().getEntityDescription(behaviour);
-	}
-
-	return std::make_tuple(behaviourNode, actualName, meshName);
+	return std::make_tuple(behaviour, actualName, meshName);
 	
 }
 
@@ -116,7 +111,7 @@ Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, c
 Entity::Entity * ServerSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
 {
 	throw 0;
-	const std::tuple<const Scripting::Parsing::EntityNode *, std::string, std::string> &data = createEntityData(behaviour, name, meshName);
+	const std::tuple<std::string, std::string, std::string> &data = createEntityData(behaviour, name, meshName);
 	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
 	Entity::Entity &e = mLocalEntities.back();
 	e.init(args);
@@ -157,9 +152,6 @@ std::list<Light*> ServerSceneManager::lights()
 void ServerSceneManager::clear()
 {
 
-	for (Entity::Entity &e : mEntities) {
-		e.clear();
-	}
     mEntities.clear();
     mEntityRemoveQueue.clear();
 	mLights.clear();

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "MadgineObject.h"
-#include "Scripting\Types\refscopetoplevelserializableunit.h"
-#include "Scripting\Types\globalapi.h"
+#include "Scripting\Types\globalapicomponentbase.h"
 
+#include "Serialize\toplevelserializableunit.h"
 
 #include "Scene\scenecomponent.h"
 
@@ -11,17 +10,12 @@ namespace Engine {
 	namespace Scene {
 
 		class MADGINE_BASE_EXPORT SceneManagerBase : public Singleton<SceneManagerBase>,
-			public Scripting::RefScopeTopLevelSerializableUnitBase,
-			public MadgineObject,
-			public Scripting::GlobalAPI<SceneManagerBase>
+			public Serialize::TopLevelSerializableUnit<SceneManagerBase>,
+			public Scripting::Scope<SceneManagerBase, Scripting::GlobalAPIComponentBase>
 		{
 		public:
 			SceneManagerBase();
 			virtual ~SceneManagerBase() = default;
-
-			Scripting::ScopeBase *createSceneArray(size_t size);
-			Scripting::ScopeBase *createSceneStruct();
-			Scripting::ScopeBase *createSceneList();
 
 			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) = 0;
 			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
@@ -62,6 +56,9 @@ namespace Engine {
 			virtual void removeQueuedEntities() = 0;
 
 			std::list<Entity::Entity *> mEntityRemoveQueue;
+
+			virtual int resolve(lua_State *state, const std::string &key) override;
+			virtual std::pair<bool, std::string> next(const std::string &key) override;
 
 		private:
 			size_t mItemCount;
