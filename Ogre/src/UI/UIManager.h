@@ -47,8 +47,7 @@ namespace Engine {
 			static const constexpr int sMaxInitOrder = 4;
 
 		protected:
-			virtual int resolve(lua_State *state, const std::string &key) override;
-			virtual std::pair<bool, std::string> next(const std::string &key) override;
+			virtual Scripting::KeyValueMapList maps() override;
 
 		private:
 			OgreUniqueComponentCollector<GuiHandlerBase> mGuiHandlers;

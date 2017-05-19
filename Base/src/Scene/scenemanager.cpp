@@ -106,32 +106,9 @@ namespace Engine {
 			}
 		}
 
-		int Engine::Scene::SceneManagerBase::resolve(lua_State * state, const std::string & key)
+		Scripting::KeyValueMapList SceneManagerBase::maps()
 		{
-			auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase>&comp) {return comp->getName() == key; });
-			if (it != mSceneComponents.end()) {
-				(*it)->push();
-				return 1;
-			}
-			else
-				return Scope::resolve(state, key);
-		}
-
-		std::pair<bool, std::string> Engine::Scene::SceneManagerBase::next(const std::string & key)
-		{
-			std::pair<bool, std::string> p = Scope::next(key);
-			if (!p.second.empty())
-				return p;
-			auto it = mSceneComponents.begin();
-			if (!p.first && !key.empty()) {
-				it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase>&comp) {return comp->getName() == key; });
-				if (it == mSceneComponents.end())
-					return std::make_pair(false, "");
-				++it;
-			}
-			if (it == mSceneComponents.end())
-				return std::make_pair(true, "");
-			return std::make_pair(true, (*it)->getName());
+			return Scope::maps().merge(mSceneComponents);
 		}
 
 		std::string SceneManagerBase::generateUniqueName()

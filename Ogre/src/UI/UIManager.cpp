@@ -207,50 +207,9 @@ namespace Engine {
 			return mGUI;
 		}
 
-		int UIManager::resolve(lua_State * state, const std::string & key)
+		Scripting::KeyValueMapList UIManager::maps()
 		{
-			auto itGui = std::find_if(mGuiHandlers.begin(), mGuiHandlers.end(), [&](const std::unique_ptr<GuiHandlerBase>&comp) {return comp->getName() == key; });
-			if (itGui != mGuiHandlers.end()) {
-				(*itGui)->push();
-				return 1;
-			}
-			auto itGame = std::find_if(mGameHandlers.begin(), mGameHandlers.end(), [&](const std::unique_ptr<GameHandlerBase>&comp) {return comp->getName() == key; });
-			if (itGame != mGameHandlers.end()) {
-				(*itGame)->push();
-				return 1;
-			}
-			return Scope::resolve(state, key);
-		}
-
-		std::pair<bool, std::string> UIManager::next(const std::string & key)
-		{
-			std::pair<bool, std::string> p = Scope::next(key);
-			if (!p.second.empty())
-				return p;
-			auto itGui = mGuiHandlers.begin();
-			if (!p.first && !key.empty()) {
-				itGui = std::find_if(mGuiHandlers.begin(), mGuiHandlers.end(), [&](const std::unique_ptr<GuiHandlerBase>&comp) {return comp->getName() == key; });
-				if (itGui == mGuiHandlers.end())
-					p = std::make_pair(false, "");
-				else {
-					++itGui;
-					p = std::make_pair(true, "");
-				}
-			}
-			if (itGui != mGuiHandlers.end())
-				return std::make_pair(true, (*itGui)->getName());
-
-			auto itGame = mGameHandlers.begin();
-			if (!p.first && !key.empty()) {
-				itGame = std::find_if(mGameHandlers.begin(), mGameHandlers.end(), [&](const std::unique_ptr<GameHandlerBase>&comp) {return comp->getName() == key; });
-				if (itGame == mGameHandlers.end())
-					return std::make_pair(false, "");
-				else
-					++itGame;
-			}
-			if (itGame == mGameHandlers.end())
-				return std::make_pair(true, "");
-			return std::make_pair(true, (*itGame)->getName());
+			return Scope::maps().merge(mGuiHandlers, mGameHandlers);
 		}
 
 	}

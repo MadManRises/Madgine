@@ -57,8 +57,7 @@ namespace Engine {
 
 			std::list<Entity::Entity *> mEntityRemoveQueue;
 
-			virtual int resolve(lua_State *state, const std::string &key) override;
-			virtual std::pair<bool, std::string> next(const std::string &key) override;
+			virtual Scripting::KeyValueMapList maps() override;
 
 		private:
 			size_t mItemCount;
