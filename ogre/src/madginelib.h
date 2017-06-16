@@ -48,6 +48,8 @@ namespace std {
 
 
 #ifdef _MSC_VER
+#undef NO_ERROR
+
 #pragma warning(pop)
 #endif
 

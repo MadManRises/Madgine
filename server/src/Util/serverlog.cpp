@@ -4,6 +4,10 @@
 #include <iostream>
 #include <conio.h>
 
+#include <Windows.h>
+#undef min
+#undef NO_ERROR
+
 namespace Engine {
 	namespace Util {
 

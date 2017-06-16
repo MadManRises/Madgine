@@ -2,7 +2,8 @@
 
 #include "baselib.h"
 #include "os.h"
-#include "windows.h"
+#include <windows.h>
+#undef NO_ERROR
 
 namespace Engine {
 
