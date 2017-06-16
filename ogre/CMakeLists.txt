@@ -10,7 +10,7 @@ Project(OGREMADGINE)
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
-  "${OGREMADGINE_SOURCE_DIR}/CMake"
+  "${OGREMADGINE_SOURCE_DIR}/cmake"
 )                                                           
 
 set(sources "")
