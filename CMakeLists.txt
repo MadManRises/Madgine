@@ -35,10 +35,10 @@ if (BUILD_TESTS)
 endif (BUILD_TESTS)
 
 
-add_subdirectory(Base)
-add_subdirectory(Ogre)
-#add_subdirectory(Unity)
-add_subdirectory(Server)
+add_subdirectory(base)
+add_subdirectory(ogre)
+#add_subdirectory(unity)
+add_subdirectory(server)
 
 
 exportToWorkspace(Madgine)
