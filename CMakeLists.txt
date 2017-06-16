@@ -19,7 +19,7 @@ set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 
 set(CMAKE_MODULE_PATH
 	"${CMAKE_MODULE_PATH}"
-	"${CMAKE_SOURCE_DIR}/CMake"
+	"${CMAKE_SOURCE_DIR}/cmake"
 )
 
 include(Workspace)
