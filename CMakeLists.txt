@@ -47,7 +47,7 @@ if (BUILD_TESTS)
 
 	include_directories(${GTEST_DIR}/include)
 
-	add_dependencies(Madgine googletest)
+	#add_dependencies(Madgine googletest)
 		
 	set (GTEST_LIBS ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
 
