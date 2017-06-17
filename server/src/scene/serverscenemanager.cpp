@@ -1,11 +1,11 @@
 #include "serverlib.h"
 
-#include "serverSceneManager.h"
+#include "serverscenemanager.h"
 
 
-#include "Serialize\Streams\serializestream.h"
+#include "serialize/streams/serializestream.h"
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
 namespace Engine {
 

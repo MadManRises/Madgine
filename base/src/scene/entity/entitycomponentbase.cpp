@@ -1,5 +1,5 @@
 #include "baselib.h"
-#include "EntityComponentBase.h"
+#include "entitycomponentbase.h"
 #include "entity.h"
 
 namespace Engine {

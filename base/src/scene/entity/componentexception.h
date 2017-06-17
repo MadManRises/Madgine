@@ -1,8 +1,5 @@
 #pragma once
 
-#include <exception>
-#include <string>
-
 namespace Engine{
 namespace Scene{
 namespace Entity{

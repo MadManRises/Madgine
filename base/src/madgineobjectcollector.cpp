@@ -1,6 +1,6 @@
 #include "baselib.h"
 
-#include "MadgineObjectCollector.h"
+#include "madgineobjectcollector.h"
 
 namespace Engine {
 		void MadgineObjectCollector::add(MadgineObject * object)

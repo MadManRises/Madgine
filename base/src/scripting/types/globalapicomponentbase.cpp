@@ -1,7 +1,7 @@
 #include "baselib.h"
 
-#include "GlobalAPIComponentBase.h"
-#include "Scripting\Types\globalscopebase.h"
+#include "globalapicomponentbase.h"
+#include "scripting/types/globalscopebase.h"
 
 
 

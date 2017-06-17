@@ -2,11 +2,11 @@
 
 #include "configset.h"
 
-#include "Os\os.h"
-#include "OgreApplication.h"
+#include "os/os.h"
+#include "ogreapplication.h"
 
-#include "Serialize/Streams/serializestream.h"
-#include "Serialize\serializemanager.h"
+#include "serialize/streams/serializestream.h"
+#include "serialize/serializemanager.h"
 
 template<> Engine::App::ConfigSet *Ogre::Singleton<Engine::App::ConfigSet>::msSingleton = 0;
 

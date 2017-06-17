@@ -6,12 +6,12 @@
 
 #include "componentexception.h"
 
-#include "Scene/scenemanager.h"
+#include "scene/scenemanager.h"
 
-#include "Serialize\Streams/serializestream.h"
+#include "serialize/streams/serializestream.h"
 
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
 
 namespace Engine {

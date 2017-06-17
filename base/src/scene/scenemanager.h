@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Scripting\Types\globalapicomponentbase.h"
+#include "scripting/types/globalapicomponentbase.h"
 
-#include "Serialize\toplevelserializableunit.h"
+#include "serialize/toplevelserializableunit.h"
 
-#include "Scene\scenecomponent.h"
+#include "scene/scenecomponent.h"
 
 namespace Engine {
 	namespace Scene {

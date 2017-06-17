@@ -1,6 +1,6 @@
 #include "baselib.h"
-#include "GlobalScope.h"
-#include "Scripting/Parsing/scriptparser.h"
+#include "globalscope.h"
+#include "scripting/parsing/scriptparser.h"
 
 
 namespace Engine {

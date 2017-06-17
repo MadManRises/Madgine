@@ -2,9 +2,9 @@
 
 #include "uniquecomponent.h"
 #include "contextmasks.h"
-#include "Serialize/serializableunit.h"
-#include "Scripting\Types\scope.h"
-#include "MadgineObject.h"
+#include "serialize/serializableunit.h"
+#include "scripting/types/scope.h"
+#include "madgineobject.h"
 
 namespace Engine {
 namespace Scene {

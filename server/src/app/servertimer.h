@@ -1,7 +1,5 @@
 #pragma once
 
-#include <chrono>
-#include <thread>
 
 namespace Engine {
 	namespace App {

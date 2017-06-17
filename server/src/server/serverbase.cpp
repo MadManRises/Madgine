@@ -1,10 +1,8 @@
 #include "serverlib.h"
 
-#include "ServerBase.h"
+#include "serverbase.h"
 
-#include "App\framelistener.h"
-
-#include <iostream>
+#include "app/framelistener.h"
 
 API_IMPL(Engine::Server::ServerBase, MAP(shutdown));
 

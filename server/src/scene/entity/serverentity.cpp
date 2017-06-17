@@ -3,14 +3,14 @@
 #include "serverentity.h"
 
 
-#include "Scene/serverscenemanager.h"
+#include "scene/serverscenemanager.h"
 
-#include "Serialize\Streams/serializestream.h"
+#include "serialize/streams/serializestream.h"
 
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
-#include "Scene\Entity\masks.h"
+#include "scene/entity/masks.h"
 
 namespace Engine {
 

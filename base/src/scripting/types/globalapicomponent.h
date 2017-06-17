@@ -1,8 +1,8 @@
 #pragma once
 
 #include "uniquecomponent.h"
-#include "GlobalAPIComponentBase.h"
-#include "Scripting\Types\scope.h"
+#include "globalapicomponentbase.h"
+#include "scripting/types/scope.h"
 
 namespace Engine {
 	namespace Scripting {

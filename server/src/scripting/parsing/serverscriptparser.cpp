@@ -2,9 +2,7 @@
 
 #include "serverscriptparser.h"
 
-#include "Os\os.h"
-
-#include <fstream>
+#include "os/os.h"
 
 namespace Engine {
 	namespace Scripting {

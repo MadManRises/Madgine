@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Scripting\Types\scopebase.h"
+#include "scripting/types/scopebase.h"
 
-#include "ObjectState.h"
+#include "objectstate.h"
 
 namespace Engine {
 

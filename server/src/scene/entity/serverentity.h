@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Scripting/Types/scope.h"
+#include "scripting/types/scope.h"
 
-#include "Serialize\Container\set.h"
+#include "serialize/container/set.h"
 
-#include "Scene\Entity\entity.h"
+#include "scene/entity/entity.h"
 
 
 namespace Engine {

@@ -13,5 +13,6 @@
 #include "baselib.h"
 
 #include <thread>
+#include <fstream>
 
 /// @endcond

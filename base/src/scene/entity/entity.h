@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Scripting/Types/scope.h"
+#include "scripting/types/scope.h"
 
-#include "EntityComponentBase.h"
+#include "entitycomponentbase.h"
 
-#include "Serialize\Container\set.h"
+#include "serialize/container/set.h"
 
 
 

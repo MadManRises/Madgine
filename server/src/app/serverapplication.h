@@ -1,8 +1,8 @@
 #pragma once
 
-#include "App\application.h"
-#include "Scene\serverscenemanager.h"
-#include "ServerTimer.h"
+#include "app/application.h"
+#include "scene/serverscenemanager.h"
+#include "servertimer.h"
 #include "serverappsettings.h"
 
 namespace Engine {

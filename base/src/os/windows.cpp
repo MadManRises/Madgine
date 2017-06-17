@@ -1,6 +1,7 @@
-
-
 #include "baselib.h"
+
+#ifdef _WIN32
+
 #include "os.h"
 #include <windows.h>
 #undef NO_ERROR
@@ -42,3 +43,4 @@ void Os::remove(const std::string &fileName){
 
 }
 
+#endif

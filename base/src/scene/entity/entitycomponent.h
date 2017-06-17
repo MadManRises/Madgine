@@ -1,8 +1,8 @@
 #pragma once
 
-#include "EntityComponentBase.h"
+#include "entitycomponentbase.h"
 #include "entity.h"
-#include "Scripting\Types\scope.h"
+#include "scripting/types/scope.h"
 
 namespace Engine{
 namespace Scene {

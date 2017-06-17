@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include "SignalSlot\ConnectionStore.h"
+#include "signalslot/connectionstore.h"
 
-#include "Scripting\Types\globalapicomponentbase.h"
-#include "Scripting\Types\scope.h"
+#include "scripting/types/globalapicomponentbase.h"
+#include "scripting/types/scope.h"
 
 namespace Engine {
 	namespace App {

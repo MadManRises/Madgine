@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Util\standardlog.h"
-#include "SignalSlot\slot.h"
+#include "util/standardlog.h"
+#include "signalslot/slot.h"
 
 namespace Engine {
 	namespace Util {

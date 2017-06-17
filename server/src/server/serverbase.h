@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Util\serverlog.h"
-#include "Scripting/Parsing/serverscriptparser.h"
-#include "Scripting\Types\GlobalScopeBase.h"
+#include "util/serverlog.h"
+#include "scripting/parsing/serverscriptparser.h"
+#include "scripting/types/globalscopebase.h"
 
 #include "serverappinstance.h"
 

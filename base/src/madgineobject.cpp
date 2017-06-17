@@ -1,7 +1,7 @@
 
 #include "baselib.h"
-#include "MadgineObject.h"
-#include "MadgineObjectCollector.h"
+#include "madgineobject.h"
+#include "madgineobjectcollector.h"
 
 namespace Engine {	
 

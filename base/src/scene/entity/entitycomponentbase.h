@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Serialize/serializableunit.h"
-#include "Serialize\Container\set.h"
-#include "Scripting/Types/scopebase.h"
+#include "serialize/serializableunit.h"
+#include "serialize/container/set.h"
+#include "scripting/types/scopebase.h"
 
 namespace Engine {
 namespace Scene {

@@ -2,8 +2,8 @@
 
 
 #include "uniquecomponentcollector.h"
-#include "GlobalAPIComponentBase.h"
-#include "Scripting\Types\globalscopebase.h"
+#include "globalapicomponentbase.h"
+#include "scripting/types/globalscopebase.h"
 
 
 namespace Engine {

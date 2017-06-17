@@ -2,26 +2,26 @@
 
 #include "madginelib.h"
 
-#include "OgreApplication.h"
+#include "ogreapplication.h"
 #include "ogreappsettings.h"
-#include "GUI\MyGUI\MyGUILauncher.h"
+#include "gui/mygui/myguilauncher.h"
 
-#include "Scene\ogrescenemanager.h"
+#include "scene/ogrescenemanager.h"
 
-#include "UI\UIManager.h"
+#include "ui/UIManager.h"
 #include "configset.h"
-#include "Resources\ResourceLoader.h"
-#include "Util\Profiler.h"
+#include "resources/resourceloader.h"
+#include "util/profiler.h"
 
-#include "Input\OISInputHandler.h"
+#include "input/oisinputhandler.h"
 
-#include "Network\networkmanager.h"
+#include "network/networkmanager.h"
 
-#include "Serialize\serializemanager.h"
+#include "serialize/serializemanager.h"
 
 #include "OgreWindowEventUtilities.h"
 
-#include "Scripting\Types\GlobalScope.h"
+#include "scripting/types/globalscope.h"
 
 
 namespace Engine {

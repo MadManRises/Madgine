@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Serialize\Container\list.h"
+#include "serialize/container/list.h"
 
-#include "Scene\scenemanager.h"
+#include "scene/scenemanager.h"
 
-#include "Scene\Entity\masks.h"
+#include "scene/entity/masks.h"
 
-#include "Entity\serverentity.h"
+#include "entity/serverentity.h"
 
-#include "Scene\light.h"
+#include "scene/light.h"
 
 namespace Engine {
 namespace Scene {

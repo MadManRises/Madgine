@@ -3,13 +3,13 @@
 
 #include "appsettings.h"
 
-#include "Util\standardlog.h"
+#include "util/standardlog.h"
 
 #include "framelistener.h"
 
-#include "Scripting\Types\GlobalScope.h"
+#include "scripting/types/globalScope.h"
 
-#include "Scripting/Types/api.h"
+#include "scripting/types/api.h"
 
 namespace Engine {	
 
