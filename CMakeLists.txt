@@ -15,6 +15,7 @@ project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADG
 
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
+set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
 
 
 set(CMAKE_MODULE_PATH
@@ -31,12 +32,34 @@ multiConfig(Madgine)
 
 
 if (BUILD_TESTS)
-	add_subdirectory(gtest1.8.0)
+	include (CTest)
+	
+	set (GTEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/googletest)
+
+	include(ExternalProject)
+	ExternalProject_Add(googletest
+		GIT_REPOSITORY    https://github.com/google/googletest.git
+		GIT_TAG           master
+		INSTALL_DIR       ${GTEST_DIR}
+		CMAKE_ARGS
+			-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+	)
+
+	include_directories(${GTEST_DIR}/include)
+
+	add_dependencies(Madgine googletest)
+		
+	set (GTEST_LIBS ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
+
+
+	add_test(NAME Interfaces_Test COMMAND Interfaces_Test --gtest_output=xml:Interfaces.xml)
 endif (BUILD_TESTS)
 
 
 add_subdirectory(base)
-add_subdirectory(ogre)
+if (BUILD_OGRE)
+	add_subdirectory(ogre)
+endif (BUILD_OGRE)
 #add_subdirectory(unity)
 add_subdirectory(server)
 
