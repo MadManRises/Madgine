@@ -7,7 +7,7 @@
 
 #include "framelistener.h"
 
-#include "scripting/types/globalScope.h"
+#include "scripting/types/globalscope.h"
 
 #include "scripting/types/api.h"
 
