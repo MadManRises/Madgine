@@ -47,7 +47,7 @@ public:
 	}
 
 protected:
-    template <class T, template <class> class Collector, class Collection, class Base>
+    template <class T, template <class> class Collector, class Collection, class B>
     friend class UniqueComponent;
 
     template <class T>
