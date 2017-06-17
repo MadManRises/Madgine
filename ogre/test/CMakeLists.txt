@@ -12,4 +12,4 @@ FolderSources(sources "" mocks)
 
 add_executable(Madgine_Test ${sources})
 
-target_link_libraries(Madgine_Test Madgine gmock_main)
+target_link_libraries(Madgine_Test OgreMadgine ${GTEST_LIBS})
