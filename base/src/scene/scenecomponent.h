@@ -44,7 +44,7 @@ template <class T>
 class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase>>{
 
 public:
-	using Scope<T, BaseUniqueComponent<T, SceneComponentBase>>::Scope;
+	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase>>::Scope;
 
 private:
 	virtual size_t getSize() const override final {
