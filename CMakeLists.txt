@@ -11,11 +11,7 @@ set(MADGINE_MINOR_VERSION 1)
 set(MADGINE_PATCH_VERSION 0)
 
 project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
-                            
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options(-Wall)
-	set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined)
-endif ()
+
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
