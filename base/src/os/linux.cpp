@@ -16,7 +16,7 @@ std::list<std::string> Os::filesMatchingPattern(const std::string &path, const s
 	glob_t g;
 
 	if (glob((path + pattern).c_str(), 0, NULL, &g) == 0) {
-		for (int i = 0; i < g.gl_pathc; ++i) {
+		for (size_t i = 0; i < g.gl_pathc; ++i) {
 			result.emplace_back(g.gl_pathv[i]);
 		}
 	}
@@ -31,7 +31,7 @@ void Os::createDir(const std::string &dirName){
 }
 
 void Os::remove(const std::string &fileName){
-	::remove(fileName);
+	::remove(fileName.c_str());
 }
 
 
