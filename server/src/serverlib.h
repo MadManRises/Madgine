@@ -22,5 +22,6 @@
 
 #include <thread>
 #include <fstream>
+#include <chrono>
 
 /// @endcond
