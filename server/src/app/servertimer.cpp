@@ -7,7 +7,7 @@ namespace Engine {
 		ServerTimer::ServerTimer() :
 			default_unit(unit::MS),
 			m_running(true),
-			m_start(std::chrono::high_resolution_clock::now())
+			m_start(std::chrono::steady_clock::now())
 		{
 			m_endex = m_start;
 		}
@@ -15,7 +15,7 @@ namespace Engine {
 		ServerTimer::ServerTimer(unit UN) :
 			default_unit(UN),
 			m_running(true),
-			m_start(std::chrono::high_resolution_clock::now())
+			m_start(std::chrono::steady_clock::now())
 		{
 			m_endex = m_start;
 		}
@@ -23,7 +23,7 @@ namespace Engine {
 		void ServerTimer::start(void)
 		{
 			m_running = true;
-			m_start = std::chrono::high_resolution_clock::now();
+			m_start = std::chrono::steady_clock::now();
 		}
 
 		void ServerTimer::reset(void)
@@ -34,7 +34,7 @@ namespace Engine {
 		void ServerTimer::endex(void)
 		{
 			m_running = false;
-			m_endex = std::chrono::high_resolution_clock::now();
+			m_endex = std::chrono::steady_clock::now();
 		}
 
 		//------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ namespace Engine {
 
 		std::size_t ServerTimer::current_time(void)
 		{
-			return std::chrono::high_resolution_clock::now()
+			return std::chrono::steady_clock::now()
 				.time_since_epoch().count();
 		}
 
@@ -81,7 +81,7 @@ namespace Engine {
 		{
 			if (m_running)
 			{
-				m_endex = std::chrono::high_resolution_clock::now();
+				m_endex = std::chrono::steady_clock::now();
 			}
 			switch (type)
 			{
@@ -105,7 +105,7 @@ namespace Engine {
 		{
 			if (m_running)
 			{
-				m_endex = std::chrono::high_resolution_clock::now();
+				m_endex = std::chrono::steady_clock::now();
 			}
 			return std::chrono::duration_cast<std::chrono::milliseconds>
 				(m_endex - m_start).count();
@@ -115,7 +115,7 @@ namespace Engine {
 		{
 			if (m_running)
 			{
-				m_endex = std::chrono::high_resolution_clock::now();
+				m_endex = std::chrono::steady_clock::now();
 			}
 			return std::chrono::duration_cast<std::chrono::microseconds>
 				(m_endex - m_start).count();
@@ -125,7 +125,7 @@ namespace Engine {
 		{
 			if (m_running)
 			{
-				m_endex = std::chrono::high_resolution_clock::now();
+				m_endex = std::chrono::steady_clock::now();
 			}
 			return std::chrono::duration_cast<std::chrono::nanoseconds>
 				(m_endex - m_start).count();
