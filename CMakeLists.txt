@@ -17,6 +17,7 @@ project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADG
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
 
+
 FIND_PACKAGE ( Threads REQUIRED )
 
 set(CMAKE_MODULE_PATH
@@ -47,16 +48,12 @@ if (BUILD_TESTS)
 	)
 
 	include_directories(${GTEST_DIR}/include)
-
-	#add_dependencies(Madgine googletest)
 		
 	set (GTEST_LIBS ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
 
-
-	add_test(NAME Interfaces_Test COMMAND Interfaces_Test --gtest_output=xml:Interfaces.xml)
 endif (BUILD_TESTS)
 
-
+add_subdirectory(interfaces)
 add_subdirectory(base)
 if (BUILD_OGRE)
 	add_subdirectory(ogre)

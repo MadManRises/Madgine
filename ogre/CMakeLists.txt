@@ -40,8 +40,7 @@ add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
 
 add_precompiled_header(OgreMadgine src/madginelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-include_targets(OgreMadgine Base)
-include_library(OgreMadgine Interfaces Interfaces)
+include_targets(OgreMadgine Base Interfaces)
 
 find_package(MYGUI REQUIRED)
 if (MYGUI_FOUND)

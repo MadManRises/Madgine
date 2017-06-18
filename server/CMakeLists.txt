@@ -25,8 +25,8 @@ add_library(MadgineServer SHARED ${sources} serverlib.cpp)
 
 add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
-include_targets(MadgineServer Base)
-include_library(MadgineServer Interfaces Interfaces)
+include_targets(MadgineServer Base Interfaces)
+
 target_link_libraries(MadgineServer ${CMAKE_THREAD_LIBS_INIT})
  
 if (BUILD_TESTS)
