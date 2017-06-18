@@ -2,11 +2,14 @@
 #include "serverlog.h"
 
 #include <iostream>
+
+#ifdef WIN32
 #include <conio.h>
 
 #include <Windows.h>
 #undef min
 #undef NO_ERROR
+#endif
 
 namespace Engine {
 	namespace Util {
@@ -37,6 +40,7 @@ namespace Engine {
 
 		void ServerLog::runConsole()
 		{
+#ifdef WIN32
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			std::string cmd;
 
@@ -95,7 +99,7 @@ namespace Engine {
 
 			}
 			SetConsoleMode(input, fdwOldMode);
-
+#endif
 		}
 
 		void ServerLog::handle(const std::string &cmd)
