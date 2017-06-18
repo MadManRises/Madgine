@@ -37,6 +37,7 @@ if (BUILD_TESTS)
 	include (CTest)
 	
 	set (GTEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/googletest)
+	set (GTEST_WORK_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 	include(ExternalProject)
 	ExternalProject_Add(googletest

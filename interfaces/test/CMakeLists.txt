@@ -14,4 +14,7 @@ add_executable(Interfaces_Test ${sources})
 
 target_link_libraries(Interfaces_Test Interfaces ${GTEST_LIBS})
 
-add_test(NAME Interfaces_Test COMMAND Interfaces_Test --gtest_output=xml:Interfaces.xml)
+add_test(
+	NAME Interfaces_Test
+	COMMAND Interfaces_Test --gtest_output=xml:Interfaces.xml
+	WORKING_DIRECTORY ${GTEST_WORK_DIR})
