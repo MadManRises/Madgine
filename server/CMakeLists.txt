@@ -27,6 +27,7 @@ add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX ser
 
 include_targets(MadgineServer Base)
 include_library(MadgineServer Interfaces Interfaces)
+target_link_libraries(MadgineServer ${CMAKE_THREAD_LIBS_INIT})
  
 if (BUILD_TESTS)
 	add_subdirectory(test)
