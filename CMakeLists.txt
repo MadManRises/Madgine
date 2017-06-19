@@ -63,3 +63,5 @@ add_subdirectory(server)
 
 
 exportToWorkspace(Madgine)
+
+configure_file(doc/Doxyfile.in Doxyfile)
