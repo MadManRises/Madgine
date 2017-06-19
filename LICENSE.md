@@ -1,6 +1,3 @@
----
-currentMenu: license
----
 
 # MIT License
 
