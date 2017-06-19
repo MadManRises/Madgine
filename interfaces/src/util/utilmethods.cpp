@@ -5,7 +5,6 @@
 namespace Engine {
 	namespace Util {
 		std::list<LogListener*> UtilMethods::sListeners;
-		std::map<const std::exception*, std::list<TraceBack>> UtilMethods::sExceptions;
 		std::list<TraceBack> UtilMethods::sCurrentTraceBack;
 		std::list<TraceBack> UtilMethods::sExceptionTraceBack;
 		std::list<TraceBack> UtilMethods::sTraceBack;
