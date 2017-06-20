@@ -61,7 +61,6 @@ namespace Engine {
 			static std::list<TraceBack> sCurrentTraceBack;
 			static std::list<TraceBack> sTraceBack;
 			static std::list<TraceBack> sExceptionTraceBack;
-			static std::map<const std::exception *, std::list<TraceBack>> sExceptions;
 			static std::list<LogListener*> sListeners;
 
 			static Log *sLog;
