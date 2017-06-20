@@ -14,9 +14,17 @@ FolderSources(sources "" network networkmanagertest.cpp)
 
 add_executable(Interfaces_Test ${sources})
 
+add_dependencies(Interfaces_Test googletest)
+
 target_link_libraries(Interfaces_Test Interfaces ${GTEST_LIBS})
+
+MESSAGE(STATUS ${Interfaces_BINARY_DIR})
+set_target_properties(Interfaces_Test PROPERTIES 
+
+RUNTIME_OUTPUT_DIRECTORY_DEBUG "$<TARGET_FILE_DIR:Interfaces>")
 
 add_test(
 	NAME Interfaces_Test
 	COMMAND Interfaces_Test --gtest_output=xml:Interfaces.xml
-	WORKING_DIRECTORY ${GTEST_WORK_DIR})
+	WORKING_DIRECTORY ${GTEST_WORK_DIR}
+)

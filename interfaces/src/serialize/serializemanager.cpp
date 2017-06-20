@@ -242,12 +242,12 @@ namespace Engine {
 				removeMasterStream(mMasterStreams.front());
 		}
 
-		bool SerializeManager::setSlaveStream(BufferedInOutStream * stream, bool receiveState, int timeout)
+		StreamError SerializeManager::setSlaveStream(BufferedInOutStream * stream, bool receiveState, int timeout)
 		{
 			if (mSlaveStream)
-				return false;
+				return UNKNOWN_ERROR;
 
-			bool success = true;
+			StreamError state = NO_ERROR;
 
 			if (receiveState) {
 
@@ -255,32 +255,38 @@ namespace Engine {
 
 				for (; it != mTopLevelUnits.end(); ++it) {
 					if (!(*it)->updateManagerType(this, false)) {
-						success = false;
+						state = UNKNOWN_ERROR;
 						break;
 					}
 				}
 
 				mSlaveStream = stream;
 
-				if (success) {					
+				if (state == NO_ERROR) {					
 					for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
 						unit->initSlaveId();
 					}
 					std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 					mReceivingMasterState = true;
 					while (mReceivingMasterState) {
-						if (!receiveMessages(stream) || (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
-							(std::chrono::steady_clock::now() - start).count() > timeout)) {
-							success = false;
+						if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
+							(std::chrono::steady_clock::now() - start).count() > timeout) {
+							state = TIMEOUT;
 							mReceivingMasterState = false;
-							while (!mSlaveMappings.empty()) {
-								mSlaveMappings.begin()->second->clearSlaveId();
-							}
+						}
+						if (!receiveMessages(stream)) {
+							state = stream->error();
+							mReceivingMasterState = false;
+						}						
+					}
+					if (state != NO_ERROR) {
+						while (!mSlaveMappings.empty()) {
+							mSlaveMappings.begin()->second->clearSlaveId();
 						}
 					}
 				}
 
-				if (!success) {
+				if (state != NO_ERROR) {
 					for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
 						assert((*it2)->updateManagerType(this, true));
 					}
@@ -288,7 +294,7 @@ namespace Engine {
 				}
 			}
 
-			return success;
+			return state;
 		}
 
 		void SerializeManager::removeSlaveStream()

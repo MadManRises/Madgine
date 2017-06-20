@@ -73,7 +73,7 @@ private:
     static constexpr size_t BUFFER_SIZE = 100;
 
 	std::list<std::array<char, BUFFER_SIZE>> mSendBuffer;
-	std::list<std::array<char, BUFFER_SIZE>>::iterator mCurrentSendBufferBegin;
+	std::list<std::array<char, BUFFER_SIZE>> mStagedSendBuffer;
 
 	struct BufferedSendMessage {
 		bool mHeaderSent;

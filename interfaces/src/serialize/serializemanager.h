@@ -99,7 +99,7 @@ namespace Engine {
 				BufferedInOutStream *getSlaveStream();
 
 				void removeAllStreams();
-				bool setSlaveStream(BufferedInOutStream *stream, bool receiveState = true, int timeout = 0);
+				StreamError setSlaveStream(BufferedInOutStream *stream, bool receiveState = true, int timeout = 0);
 				virtual void removeSlaveStream();
 				bool addMasterStream(BufferedInOutStream *stream, bool sendState = true);
 				virtual void removeMasterStream(BufferedInOutStream *stream);

@@ -14,7 +14,6 @@ namespace Serialize {
 		mMsgInBuffer(false)
 	{
 		extend();
-		mCurrentSendBufferBegin = mSendBuffer.begin();
 	}
 
 	buffered_streambuf::buffered_streambuf(buffered_streambuf &&other) :
@@ -25,8 +24,8 @@ namespace Serialize {
 		mRecBuffer(other.mRecBuffer),
 		mMsgInBuffer(other.mMsgInBuffer),
 		mSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mSendBuffer)),
-		mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
-		//mCurrentSendBufferBegin(mSendBuffer.begin() + std::distance() TODO!!
+		mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs)),
+		mStagedSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mStagedSendBuffer))
 	{
 		setg(other.eback(), other.gptr(), other.egptr());
 		setp(other.pbase(), other.epptr());
@@ -131,7 +130,7 @@ void buffered_streambuf::beginMessage()
 {
 	if (mIsClosed)
 		return;
-	if (mSendBuffer.begin() != mCurrentSendBufferBegin || pptr() != pbase())
+	if (mSendBuffer.size() != 1 || pptr() != pbase())
 		throw 0;
 }
 
@@ -142,11 +141,12 @@ void buffered_streambuf::endMessage()
 
 	BufferedSendMessage msg;
 	msg.mHeaderSent = false;
-	msg.mHeader.mMsgSize = std::distance(mCurrentSendBufferBegin, mSendBuffer.end()) * BUFFER_SIZE + (pptr() - pbase());
+	msg.mHeader.mMsgSize = (mSendBuffer.size() - 1) * BUFFER_SIZE + (pptr() - pbase());
 	mBufferedSendMsgs.emplace_back(msg);
 
+	mStagedSendBuffer.splice(mStagedSendBuffer.end(), mSendBuffer);
+
 	extend();
-	mCurrentSendBufferBegin = mSendBuffer.begin();
 }
 
 void buffered_streambuf::sendMessages()
@@ -165,9 +165,9 @@ void buffered_streambuf::sendMessages()
 			}
 			it->mHeaderSent = true;
 		}
-		auto it2 = mSendBuffer.begin();
+		auto it2 = mStagedSendBuffer.begin();
 		while (it->mHeader.mMsgSize > 0) {
-			if (it2 == mSendBuffer.end())
+			if (it2 == mStagedSendBuffer.end())
 				throw 0;
 			size_t count = std::min(it->mHeader.mMsgSize, BUFFER_SIZE);
 			int num = send(it2->data(), count);
@@ -183,7 +183,7 @@ void buffered_streambuf::sendMessages()
 				throw 0;
 			}
 			it->mHeader.mMsgSize -= count;
-			it2 = mSendBuffer.erase(it2);
+			it2 = mStagedSendBuffer.erase(it2);
 		}
 	}
 }
