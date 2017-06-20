@@ -41,7 +41,12 @@ namespace Serialize {
 
 	void BufferedOutStream::endMessage()
 	{
-		mBuffer.sendMessage();
+		mBuffer.endMessage();
+	}
+
+	void BufferedOutStream::sendMessages()
+	{
+		mBuffer.sendMessages();
 	}
 
 	BufferedOutStream & BufferedOutStream::operator<<(BufferedInStream & in)

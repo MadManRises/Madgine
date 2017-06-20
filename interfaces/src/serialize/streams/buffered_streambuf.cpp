@@ -14,6 +14,7 @@ namespace Serialize {
 		mMsgInBuffer(false)
 	{
 		extend();
+		mCurrentSendBufferBegin = mSendBuffer.begin();
 	}
 
 	buffered_streambuf::buffered_streambuf(buffered_streambuf &&other) :
@@ -24,7 +25,8 @@ namespace Serialize {
 		mRecBuffer(other.mRecBuffer),
 		mMsgInBuffer(other.mMsgInBuffer),
 		mSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mSendBuffer)),
-		mSendMessageHeader(other.mSendMessageHeader)
+		mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
+		//mCurrentSendBufferBegin(mSendBuffer.begin() + std::distance() TODO!!
 	{
 		setg(other.eback(), other.gptr(), other.egptr());
 		setp(other.pbase(), other.epptr());
@@ -121,67 +123,68 @@ buffered_streambuf::int_type buffered_streambuf::overflow(int c)
 
 int buffered_streambuf::sync()
 {
-	if (mIsClosed)
-		return -1;
-    auto end = mSendBuffer.end();
-    --end;
-    for (auto it = mSendBuffer.begin(); it != end; ++it){
-		send(it->data(), BUFFER_SIZE);
-	}
-	if (pptr() - pbase() > 0){
-		send(pbase(), pptr() - pbase());
-	}
-    mSendBuffer.clear();
-    extend();
+	sendMessages(); // TODO return value
     return 0;
 }
 
 void buffered_streambuf::beginMessage()
 {
-	if (!mIsClosed && (mSendBuffer.size() != 1 || pptr() != pbase()))
+	if (mIsClosed)
+		return;
+	if (mSendBuffer.begin() != mCurrentSendBufferBegin || pptr() != pbase())
 		throw 0;
 }
 
-void buffered_streambuf::sendMessage()
+void buffered_streambuf::endMessage() 
 {
 	if (mIsClosed)
 		return;
-	intptr_t sendBufferIndex = pptr() - pbase();
-	mSendMessageHeader.mMsgSize = (mSendBuffer.size() - 1) * BUFFER_SIZE + sendBufferIndex;
-	int num = send(reinterpret_cast<char*>(&mSendMessageHeader), sizeof(mSendMessageHeader));
-	if (num == -1){
-		handleError();
+
+	BufferedSendMessage msg;
+	msg.mHeaderSent = false;
+	msg.mHeader.mMsgSize = std::distance(mCurrentSendBufferBegin, mSendBuffer.end()) * BUFFER_SIZE + (pptr() - pbase());
+	mBufferedSendMsgs.emplace_back(msg);
+
+	extend();
+	mCurrentSendBufferBegin = mSendBuffer.begin();
+}
+
+void buffered_streambuf::sendMessages()
+{
+	if (mIsClosed)
 		return;
-	}
-	if (num != sizeof(mSendMessageHeader)) {
-		throw 0;
-	}
-	auto it = mSendBuffer.begin();
-	while (mSendMessageHeader.mMsgSize > 0) {
-		if (it == mSendBuffer.end())
-			throw 0;
-		size_t count = std::min(mSendMessageHeader.mMsgSize, BUFFER_SIZE);
-		int num = send(it->data(), count);
-		if (num == 0) {
-			close();
-			return;
+	for (auto it = mBufferedSendMsgs.begin(); it != mBufferedSendMsgs.end(); it = mBufferedSendMsgs.erase(it)) {
+		if (!it->mHeaderSent) {
+			int num = send(reinterpret_cast<char*>(&it->mHeader), sizeof(it->mHeader));
+			if (num == -1) {
+				handleError();
+				return;
+			}
+			if (num != sizeof(it->mHeader)) {
+				throw 0;
+			}
+			it->mHeaderSent = true;
 		}
-		if (num == -1) {
-			handleError();
-			return;
+		auto it2 = mSendBuffer.begin();
+		while (it->mHeader.mMsgSize > 0) {
+			if (it2 == mSendBuffer.end())
+				throw 0;
+			size_t count = std::min(it->mHeader.mMsgSize, BUFFER_SIZE);
+			int num = send(it2->data(), count);
+			if (num == 0) {
+				close();
+				return;
+			}
+			if (num == -1) {
+				handleError();
+				return;
+			}
+			if (static_cast<size_t>(num) != count) {
+				throw 0;
+			}
+			it->mHeader.mMsgSize -= count;
+			it2 = mSendBuffer.erase(it2);
 		}
-		if (static_cast<size_t>(num) != count) {
-			throw 0;
-		}
-		mSendMessageHeader.mMsgSize -= count;
-		it = mSendBuffer.erase(it);
-	}
-	if (mSendBuffer.empty()) {
-		extend();
-	}
-	else {
-		if (sendBufferIndex != 0 || mSendBuffer.size() != 1)
-			throw 0;
 	}
 }
 

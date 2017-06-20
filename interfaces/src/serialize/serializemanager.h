@@ -77,6 +77,8 @@ namespace Engine {
 				ParticipantId getSlaveParticipantId();
 
 				void receiveMessages();
+				void sendMessages();
+				void sendAndReceiveMessages();
 
 				size_t convertPtr(SerializeOutStream &out, SerializableUnitBase *unit);
 				SerializableUnitBase *convertPtr(SerializeInStream &in, size_t unit);
@@ -92,7 +94,7 @@ namespace Engine {
 
 
 				bool receiveMessages(BufferedInOutStream *stream);
-
+				bool sendMessages(BufferedInOutStream *stream);
 				
 				BufferedInOutStream *getSlaveStream();
 

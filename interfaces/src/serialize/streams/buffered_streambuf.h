@@ -30,7 +30,9 @@ public:
 
 	//write
 	void beginMessage();
-	void sendMessage();
+	void endMessage();
+
+	void sendMessages();
 
 	StreamError closeCause();
 
@@ -71,8 +73,13 @@ private:
     static constexpr size_t BUFFER_SIZE = 100;
 
 	std::list<std::array<char, BUFFER_SIZE>> mSendBuffer;
-	BufferedMessageHeader mSendMessageHeader;
+	std::list<std::array<char, BUFFER_SIZE>>::iterator mCurrentSendBufferBegin;
 
+	struct BufferedSendMessage {
+		bool mHeaderSent;
+		BufferedMessageHeader mHeader;
+	};
+	std::list<BufferedSendMessage> mBufferedSendMsgs;
 };
 
 

@@ -371,6 +371,31 @@ namespace Engine {
 			}
 		}
 
+		void SerializeManager::sendMessages()
+		{
+			if (mSlaveStream) {
+				if (!sendMessages(mSlaveStream)) {
+					removeSlaveStream();
+				}
+			}
+			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
+				if (!sendMessages(*it)) {
+					BufferedInOutStream *tmp = *it;
+					++it;
+					removeMasterStream(tmp);
+				}
+				else {
+					++it;
+				}
+			}
+		}
+
+		void SerializeManager::sendAndReceiveMessages()
+		{
+			receiveMessages();
+			sendMessages();
+		}
+
 		size_t SerializeManager::convertPtr(SerializeOutStream & out, SerializableUnitBase * unit)
 		{
 			return &out != mSlaveStream ? unit->masterId() : unit->slaveId();
@@ -421,6 +446,16 @@ namespace Engine {
 				if (stream->isClosed())
 					return false;
 			}
+
+			return !stream->isClosed();
+		}
+
+		bool SerializeManager::sendMessages(BufferedInOutStream * stream)
+		{
+			if (stream->isClosed())
+				return false;
+
+			stream->sendMessages();
 
 			return !stream->isClosed();
 		}

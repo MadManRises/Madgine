@@ -27,6 +27,8 @@ public:
 	void beginMessage();
 	void endMessage();
 
+	void sendMessages();
+
 	BufferedOutStream &operator<< (BufferedInStream &in);
 	using SerializeOutStream::operator<<;
 
