@@ -142,7 +142,7 @@ namespace Engine {
 		}
 
 
-		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnitBase * unit, std::function<bool(SerializableUnitBase*, ParticipantId)> customFilter)
+		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnitBase * unit, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter)
 		{
 			std::list<BufferedOutStream*> result;
 			for (BufferedInOutStream* stream : mMasterStreams) {
@@ -322,6 +322,7 @@ namespace Engine {
 					sendState(*stream, unit);
 				}
 				stream->writeCommand(INITIAL_STATE_DONE, stream->id());
+
 			}
 
 			if (*stream) {
@@ -344,11 +345,6 @@ namespace Engine {
 					return false;
 				}
 			}
-			return true;
-		}
-
-		bool SerializeManager::filter(const Serializable * s, ParticipantId id)
-		{
 			return true;
 		}
 
@@ -380,12 +376,12 @@ namespace Engine {
 		void SerializeManager::sendMessages()
 		{
 			if (mSlaveStream) {
-				if (!sendMessages(mSlaveStream)) {
+				if (mSlaveStream->sendMessages() == -1) {
 					removeSlaveStream();
 				}
 			}
 			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-				if (!sendMessages(*it)) {
+				if ((*it)->sendMessages() == -1) {
 					BufferedInOutStream *tmp = *it;
 					++it;
 					removeMasterStream(tmp);
@@ -456,14 +452,18 @@ namespace Engine {
 			return !stream->isClosed();
 		}
 
-		bool SerializeManager::sendMessages(BufferedInOutStream * stream)
-		{
-			if (stream->isClosed())
-				return false;
-
-			stream->sendMessages();
-
-			return !stream->isClosed();
+		bool SerializeManager::sendAllMessages(BufferedInOutStream *stream, int timeout) {
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			while (int result = stream->sendMessages()) {
+				if (result == -1) {
+					return false;
+				}
+				if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
+					(std::chrono::steady_clock::now() - start).count() > timeout) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 

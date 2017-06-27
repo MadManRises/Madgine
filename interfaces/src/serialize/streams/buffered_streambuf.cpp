@@ -149,16 +149,16 @@ void buffered_streambuf::endMessage()
 	extend();
 }
 
-void buffered_streambuf::sendMessages()
+int buffered_streambuf::sendMessages()
 {
 	if (mIsClosed)
-		return;
+		return -1;
 	for (auto it = mBufferedSendMsgs.begin(); it != mBufferedSendMsgs.end(); it = mBufferedSendMsgs.erase(it)) {
 		if (!it->mHeaderSent) {
 			int num = send(reinterpret_cast<char*>(&it->mHeader), sizeof(it->mHeader));
 			if (num == -1) {
 				handleError();
-				return;
+				return mIsClosed ? -1 : mBufferedSendMsgs.size();
 			}
 			if (num != sizeof(it->mHeader)) {
 				throw 0;
@@ -173,11 +173,11 @@ void buffered_streambuf::sendMessages()
 			int num = send(it2->data(), count);
 			if (num == 0) {
 				close();
-				return;
+				return -1;
 			}
 			if (num == -1) {
 				handleError();
-				return;
+				return mIsClosed ? -1 : mBufferedSendMsgs.size();
 			}
 			if (static_cast<size_t>(num) != count) {
 				throw 0;
@@ -186,6 +186,7 @@ void buffered_streambuf::sendMessages()
 			it2 = mStagedSendBuffer.erase(it2);
 		}
 	}
+	return 0;
 }
 
 StreamError buffered_streambuf::closeCause()

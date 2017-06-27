@@ -32,7 +32,7 @@ public:
 	void beginMessage();
 	void endMessage();
 
-	void sendMessages();
+	int sendMessages();
 
 	StreamError closeCause();
 

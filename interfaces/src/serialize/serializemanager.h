@@ -62,10 +62,9 @@ namespace Engine {
 
 
 				bool filter(const SerializableUnitBase *unit, ParticipantId id);
-				bool filter(const Serializable *s, ParticipantId id);
 				void addFilter(std::function<bool(const SerializableUnitBase*, ParticipantId)>);
 
-				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnitBase *unit, std::function<bool(SerializableUnitBase*, ParticipantId)> customFilter = {});
+				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnitBase *unit, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter = {});
 
 				void clearTopLevelItems();
 				bool addTopLevelItem(TopLevelSerializableUnitBase *unit, bool sendStateFlag = true);
@@ -94,7 +93,7 @@ namespace Engine {
 
 
 				bool receiveMessages(BufferedInOutStream *stream);
-				bool sendMessages(BufferedInOutStream *stream);
+				bool sendAllMessages(BufferedInOutStream *stream, int timeout = 0);
 				
 				BufferedInOutStream *getSlaveStream();
 
