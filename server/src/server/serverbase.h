@@ -25,6 +25,8 @@ namespace Engine {
 			void addFrameListener(App::FrameListener *listener);
 			void removeFrameListener(App::FrameListener *listener);
 
+			Scripting::GlobalScopeBase *globalScope();
+
 		protected:
 			virtual bool frame() = 0;
 			virtual void start() = 0;
@@ -34,11 +36,13 @@ namespace Engine {
 
 			template <class T>
 			void spawnInstance(T &&init) {
-				mInstances.emplace_back(std::forward<T>(init), mScriptParser.createThread());
+				mInstances.emplace_back(std::forward<T>(init), mScriptParser);
 			}
 
 			bool sendFrameStarted();
 			bool sendFrameEnded();
+
+			virtual Scripting::KeyValueMapList maps() override;
 
 		private:
 			SignalSlot::ConnectionManager mConnectionManager;

@@ -29,7 +29,6 @@ add_precompiled_header(Interfaces src/interfaceslib.h FORCEINCLUDE SOURCE_CXX in
 
 target_include_directories(Interfaces PRIVATE ${lua_include})
 
-MESSAGE(STATUS ${lua_lib})
 target_link_libraries (Interfaces PRIVATE ${lua_lib} ${CMAKE_THREAD_LIBS_INIT})
 
 if (WIN32)

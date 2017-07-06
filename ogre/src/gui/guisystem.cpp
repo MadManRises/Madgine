@@ -4,8 +4,6 @@
 #include "Windows\WindowContainer.h"
 #include "Windows\window.h"
 
-#include <iostream>
-
 namespace Engine {
 	namespace GUI {
 
@@ -50,7 +48,7 @@ namespace Engine {
 			
 		}
 
-		void GUISystem::printHierarchy() {
+		/*void GUISystem::printHierarchy() {
 			std::list<std::pair<WindowContainer*, size_t>> windows{ {mRootWindow, 0} };
 			
 			while (!windows.empty()) {
@@ -62,7 +60,7 @@ namespace Engine {
 				}				
 				std::cout << std::string(4 * p.second, ' ') << "'" << w->getName() << "', " << w->getPixelSize() << std::endl;
 			}
-		}
+		}*/
 
 		void GUISystem::addWindow(const std::string & name, WindowContainer * w)
 		{

@@ -60,9 +60,5 @@ namespace Engine {
 			return true;
 		}
 
-		lua_State *ServerApplication::lua_state() {
-			return mSettings->mState;
-		}
-
 	}
 }

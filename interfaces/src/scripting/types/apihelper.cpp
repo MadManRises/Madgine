@@ -4,8 +4,6 @@
 
 #include "globalscopebase.h"
 
-#include <iostream>
-
 #include "api.h"
 
 extern "C" {

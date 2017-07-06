@@ -10,16 +10,7 @@ namespace App{
  */
 struct ServerAppSettings : AppSettings {
 
-	/**
-	 * Sets up default values for the settings.
-	 */
-	ServerAppSettings(lua_State *state) :
-		mState(state)
-	{
-
-	}
-
-	lua_State *mState;
+	
 
 
 };

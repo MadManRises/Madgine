@@ -17,8 +17,10 @@ namespace Engine {
 
 		class KeyValueMapRef {
 		public:
-			virtual KeyValueIterator *iterator() = 0;
+			virtual std::unique_ptr<KeyValueIterator> iterator() = 0;
 			virtual int resolve(lua_State *state, const std::string &key) = 0;
+			virtual bool contains(const std::string &key) = 0;
+			virtual std::pair<bool, ValueType> at(const std::string &key) = 0;
 		};
 
 		template <class T>
@@ -78,12 +80,15 @@ namespace Engine {
 			return KeyValue<T>::key(v);
 		}
 
-		template <class T, class _ = void_t<decltype(ValueType(std::declval<T>()))>>
+		template <class T, class _ = decltype(ValueType{ std::declval<T>() })>
 		std::pair<bool, ValueType> toValueType(const T &v) {
-			return { true, ValueType(v) };
+			return { true, ValueType{v} };
 		}
 
-		std::pair<bool, ValueType> INTERFACES_EXPORT toValueType(...);
+		template <class T>
+		std::pair<bool, ValueType> toValueType(T &v) {
+			return { false, ValueType{} };
+		}
 
 		template <class T>
 		class KeyValueRef : public KeyValueMapRef {
@@ -94,8 +99,8 @@ namespace Engine {
 
 			}
 
-			virtual KeyValueIterator *iterator() override {
-				return new Iterator(mMap);
+			virtual std::unique_ptr<KeyValueIterator> iterator() override {
+				return std::unique_ptr<KeyValueIterator>(new Iterator(mMap));
 			}
 
 			virtual int resolve(lua_State *state, const std::string &key) override {
@@ -104,6 +109,18 @@ namespace Engine {
 					return APIHelper::push(state, kvValue(*it));
 				}
 				return 0;
+			}
+
+			virtual bool contains(const std::string &key) override {
+				auto it = Finder<T>::find(mMap, key);
+				return it != mMap.end();
+			}
+
+			virtual std::pair<bool, ValueType> at(const std::string &key) override {
+				auto it = Finder<T>::find(mMap, key);
+				if (it == mMap.end())
+					throw 0;
+				return toValueType(kvValue(*it));
 			}
 
 		private:
@@ -158,8 +175,10 @@ namespace Engine {
 			KeyValueMapList(const KeyValueMapList &) = delete;
 			KeyValueMapList(KeyValueMapList &&) = default;
 
+			KeyValueMapList &operator=(const KeyValueMapList &) = delete;
+
 			int resolve(lua_State *state, const std::string &key);
-			KeyValueIterator *iterator();
+			std::unique_ptr<KeyValueIterator> iterator();
 
 			KeyValueMapList &&merge(KeyValueMapList &&other) &&;
 
@@ -172,6 +191,9 @@ namespace Engine {
 			std::vector<std::unique_ptr<KeyValueMapRef>>::const_iterator end() const;
 
 			size_t size() const;
+
+			bool contains(const std::string &key);
+			std::pair<bool, Engine::ValueType> at(const std::string &key);
 
 		private:
 			std::vector<std::unique_ptr<KeyValueMapRef>> mMaps;

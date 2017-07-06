@@ -12,19 +12,20 @@ namespace Scripting {
 class INTERFACES_EXPORT GlobalScopeBase : public Singleton<GlobalScopeBase>, public ScopeBase {
 
 public:
-	GlobalScopeBase(lua_State *state);
+	GlobalScopeBase(const std::pair<lua_State *, int> &state);
 	
 	virtual bool init() override;
 	virtual void finalize() override;
 
 	void pushScope(int table);
 
-	int registerScope(ScopeBase *scope);
-	void unregisterScope(int table);
+	int registerScope(ScopeBase *scope, int tableId);
+	void unregisterScope(ScopeBase *scope);
 
 	bool hasMethod(ScopeBase *scope, const std::string &name);
 	ArgumentList callMethod(ScopeBase *scope, const std::string &name, const ArgumentList &args = {});
 
+	void executeString(const std::string &cmd);
 
 	void addGlobal(ScopeBase *api);
 	void removeGlobal(ScopeBase *api);
@@ -33,11 +34,13 @@ public:
 	
 	static const int sNoRef;
 
+	lua_State *lua_state();
 
 private:
 
 
 	lua_State *mState;
+	int mTable;
 	std::map<std::string, ScopeBase*> mGlobals;
 };
 

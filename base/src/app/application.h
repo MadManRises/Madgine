@@ -95,6 +95,10 @@ namespace Engine {
 			void addFrameListener(FrameListener *listener);
 			void removeFrameListener(FrameListener *listener);
 
+			lua_State *lua_state();
+
+			Scripting::GlobalScope *globalScope();
+
 		protected:
 			virtual void _clear();
 			
@@ -104,14 +108,11 @@ namespace Engine {
 			bool sendFrameRenderingQueued(float timeSinceLastFrame);
 			bool sendFrameEnded(float timeSinceLastFrame);
 
-			Scripting::GlobalScope *globalScope();
-
-			virtual lua_State *lua_state() = 0;
 		private:
 
 			bool mShutDown;
 
-			Scripting::GlobalScope*      mGlobalScope;
+			std::unique_ptr<Scripting::GlobalScope>      mGlobalScope;
 
 			SignalSlot::ConnectionManager mConnectionManager;	
 

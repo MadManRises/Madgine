@@ -15,20 +15,19 @@ public:
 
 	void operator=(const ScriptParser &) = delete;
 
-	void executeString(const std::string &cmd);
-
 	void parseScript(std::istream &stream, const std::string &name, bool reload);
 
-	void reparseFile(const std::string &name);
+	void executeString(lua_State *state, const std::string &cmd);
 
 	static ScriptParser &getSingleton();
 
 
 	std::string fileExtension();
 
-	lua_State *lua_state();
+	std::pair<lua_State*, int> createThread();
+	int pushThread(lua_State *state, lua_State *thread);
 
-	lua_State* createThread();
+	void makeFinalized();
 
 private:
 	static const constexpr size_t READ_BUFFER = 256;
@@ -43,6 +42,8 @@ private:
 
 private:
 	lua_State *mState;
+	int mEnv;
+	bool mFinalized;
 
 	std::istream *mStream;
 	char *mBuffer;
@@ -52,12 +53,17 @@ private:
 
 	std::map<lua_State *, int> mThreads;
 
-	static const luaL_Reg sMetafunctions[];
+	static const luaL_Reg sEnvMetafunctions[];
+	static const luaL_Reg sScopeMetafunctions[];
+	static const luaL_Reg sGlobalMetafunctions[];
 
-	static int lua_index(lua_State *state);
-	static int lua_newindex(lua_State *state);
-	static int lua_pairs(lua_State *state);
-	static int lua_nextImpl(lua_State *state);
+	static int lua_indexScope(lua_State *state);
+	static int lua_pairsScope(lua_State *state);
+	static int lua_nextScope(lua_State *state);
+	static int lua_newindexGlobal(lua_State *state);
+	static int lua_indexEnv(lua_State *state);
+	static int lua_newindexEnv(lua_State *state);
+	static void pushGlobalScope(lua_State *state);
 };
 
 }

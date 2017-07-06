@@ -123,8 +123,6 @@ protected:
 private:
 	virtual void _clear() override;
 	virtual void _setupOgre();
-	
-	virtual lua_State *lua_state() override;
 
 private:
 

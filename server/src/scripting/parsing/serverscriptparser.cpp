@@ -17,6 +17,8 @@ namespace Engine {
 					parseScript(in, path, false);
 				}
 
+				makeFinalized();
+
 			}
 
 			const std::string & ServerScriptParser::rootFolder()

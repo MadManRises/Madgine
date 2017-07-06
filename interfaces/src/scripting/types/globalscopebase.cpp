@@ -17,33 +17,35 @@ namespace Scripting {
 
 	const int GlobalScopeBase::sNoRef = LUA_NOREF;
 
-	GlobalScopeBase::GlobalScopeBase(lua_State *state) :
-	mState(state)
+	GlobalScopeBase::GlobalScopeBase(const std::pair<lua_State *, int> &state) :
+	mState(state.first),
+	mTable(state.second)
 	{
 		
 
 	}
 
-	bool Engine::Scripting::GlobalScopeBase::init()
+	bool GlobalScopeBase::init()
 	{
-		lua_pushlightuserdata(mState, static_cast<ScopeBase*>(this));
-		lua_setglobal(mState, "___scope___");
+		if (!mState) {
+			std::tie(mState, mTable) = Engine::Scripting::Parsing::ScriptParser::getSingleton().createThread();
+		}
 
-		lua_rawgeti(mState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-		luaL_getmetatable(mState, "Interfaces.Metatable");
-
-		lua_setmetatable(mState, -2);
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		
+		lua_newtable(mState);
+		lua_setfield(mState, -2, "__scopes__");
+	
 		lua_pop(mState, 1);
 
-		return ScopeBase::initGlobal(LUA_RIDX_GLOBALS);
+		return ScopeBase::init(mTable);
 	}
 
-	void Engine::Scripting::GlobalScopeBase::finalize()
+	void GlobalScopeBase::finalize()
 	{
 		ScopeBase::finalize();
 	}
 
-	
 
 	void GlobalScopeBase::addGlobal(ScopeBase * api)
 	{
@@ -56,38 +58,67 @@ namespace Scripting {
 		mGlobals.erase(api->getName());
 	}
 
-	void GlobalScopeBase::pushScope(int table) {
-		lua_rawgeti(mState, LUA_REGISTRYINDEX, table);
+	void GlobalScopeBase::executeString(const std::string &cmd) {
+		Parsing::ScriptParser::getSingleton().executeString(mState, cmd);
 	}
 
-	int GlobalScopeBase::registerScope(ScopeBase *scope) {
+	void GlobalScopeBase::pushScope(int table) {
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		lua_pushliteral(mState, "__scopes__");
+		lua_rawget(mState, -2);
+		lua_replace(mState, -2);
+		lua_rawgeti(mState, -1, table);
+		lua_replace(mState, -2);
+	}
 
-		lua_newtable(mState);
+	int GlobalScopeBase::registerScope(ScopeBase *scope, int tableId) {
 
-		lua_pushliteral(mState, "___scope___");
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		lua_pushliteral(mState, "__scopes__");
+		lua_rawget(mState, -2);
+		lua_replace(mState, -2);
+
+		if (tableId == -1) {		
+			lua_newtable(mState);
+		}
+		else {
+			lua_rawgeti(mState, LUA_REGISTRYINDEX, tableId);
+		}
+
 		lua_pushlightuserdata(mState, scope);
 
-		lua_rawset(mState, -3);
+		lua_setfield(mState, -2, "___scope___");		
 
-		luaL_getmetatable(mState, "Interfaces.Metatable");
+		luaL_setmetatable(mState, "Interfaces.Scope");
 
-		lua_setmetatable(mState, -2);
+		int i = luaL_ref(mState, -2);
 
-		return luaL_ref(mState, LUA_REGISTRYINDEX);
+		lua_pop(mState, 1);
+
+		return i;
 	}
 
-	void GlobalScopeBase::unregisterScope(int table) {
-		luaL_unref(mState, LUA_REGISTRYINDEX, table);
+	void GlobalScopeBase::unregisterScope(ScopeBase *scope) {
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		lua_pushliteral(mState, "__scopes__");
+		lua_rawget(mState, -2);
+		lua_replace(mState, -2);
+		luaL_unref(mState, -1, scope->mTable);
+		lua_pop(mState, 1);
 	}
 
 	bool GlobalScopeBase::hasMethod(ScopeBase *scope, const std::string &name) {
-		lua_rawgeti(mState, LUA_REGISTRYINDEX, scope->table());
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		lua_pushliteral(mState, "__scopes__");
+		lua_rawget(mState, -2);
+		lua_replace(mState, -2);
+		lua_rawgeti(mState, -1, scope->mTable);
 
 		lua_getfield(mState, -1, name.c_str());
 
 		bool result = lua_isfunction(mState, -1);
 
-		lua_pop(mState, 2);
+		lua_pop(mState, 3);
 
 		return result;
 	}
@@ -95,7 +126,12 @@ namespace Scripting {
 	ArgumentList GlobalScopeBase::callMethod(ScopeBase *scope, const std::string &name, const ArgumentList &args) {
 		int level = lua_gettop(mState);
 
-		lua_rawgeti(mState, LUA_REGISTRYINDEX, scope->table());
+		lua_rawgeti(mState, LUA_REGISTRYINDEX, mTable);
+		lua_pushliteral(mState, "__scopes__");
+		lua_rawget(mState, -2);
+		lua_replace(mState, -2);
+		lua_rawgeti(mState, -1, scope->mTable);
+		lua_replace(mState, -2);
 
 		lua_getfield(mState, -1, name.c_str());
 
@@ -133,9 +169,14 @@ namespace Scripting {
 	}
 
 
-	KeyValueMapList Engine::Scripting::GlobalScopeBase::maps()
+	KeyValueMapList GlobalScopeBase::maps()
 	{
 		return ScopeBase::maps().merge(mGlobals);
+	}
+
+	lua_State * GlobalScopeBase::lua_state()
+	{
+		return mState;
 	}
 
 }

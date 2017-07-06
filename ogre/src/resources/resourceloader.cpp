@@ -59,6 +59,7 @@ namespace Engine {
 		void Engine::Resources::ResourceLoader::loadScripts()
 		{
 			mRgm->initialiseResourceGroup("Scripting");
+			mParser->makeFinalized();
 		}
 
 		std::string ResourceLoader::getMediaPath(const std::string & filename, const std::string & folder)

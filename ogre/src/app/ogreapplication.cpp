@@ -104,18 +104,18 @@ void OgreApplication::setup(const OgreAppSettings &settings)
 bool OgreApplication::init()
 {
 	
-	if (!mGUI->init())
-		return false;
-
-	mRoot->addFrameListener(this);
+	mLoader->loadScripts();
 
 	if (!Application::init())
 		return false;
 
-	if (!mUI->preInit())
+	if (!mGUI->init())
 		return false;
 
-	mLoader->loadScripts();
+	mRoot->addFrameListener(this);
+	
+	if (!mUI->preInit())
+		return false;
 
 	std::pair<bool, Scripting::ArgumentList> res = globalScope()->callMethodIfAvailable("afterViewInit");
 	if (res.first && !res.second.empty() && (!res.second.front().isBool() || !res.second.front().asBool()))
@@ -323,10 +323,6 @@ void OgreApplication::renderFrame()
 {
 	mGUI->renderSingleFrame();
 	mWindow->update();
-}
-
-lua_State *OgreApplication::lua_state() {
-	return mLoader->scriptParser()->lua_state();
 }
 
 }

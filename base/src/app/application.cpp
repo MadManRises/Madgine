@@ -11,6 +11,8 @@
 
 #include "scripting/types/api.h"
 
+#include "scripting/parsing/scriptparser.h"
+
 namespace Engine {	
 
 	API_IMPL(App::Application, MAP(shutdown));
@@ -29,15 +31,13 @@ namespace Engine {
 
 		Application::~Application()
 		{
-			if (mGlobalScope)
-				delete mGlobalScope;
 		}
 
 		void Application::setup(const AppSettings &settings)
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-			mGlobalScope = new Scripting::GlobalScope(lua_state());
+			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mState);
 		}
 
 		bool Application::init()
@@ -153,12 +153,17 @@ namespace Engine {
 		}
 
 		Scripting::GlobalScope *Application::globalScope() {
-			return mGlobalScope;
+			return mGlobalScope.get();
 		}
 
 		void Application::_clear()
 		{
 			mGlobalScope->clear();
+		}
+
+		lua_State * Application::lua_state()
+		{
+			return mGlobalScope->lua_state();
 		}
 
 	}

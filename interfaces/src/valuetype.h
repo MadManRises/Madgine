@@ -13,6 +13,7 @@ namespace Engine {
 		Scripting::ScopeBase *validate() const { return mPtr; }
 		operator bool() { return mPtr != nullptr; }
 		bool operator<(const InvScopePtr &other) const { return mPtr < other.mPtr; }
+		bool operator==(const InvScopePtr &other) const { return mPtr == other.mPtr; }
 	private:
 		Scripting::ScopeBase *mPtr;
 	};

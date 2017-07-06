@@ -14,7 +14,7 @@ namespace Engine {
 			mName(name),
 			mScriptParser(scriptsFolder),
 			mRunning(false),
-			mGlobalScope(mScriptParser.lua_state())
+			mGlobalScope(mScriptParser.createThread())
 		{
 		}
 		int ServerBase::run()
@@ -104,6 +104,15 @@ namespace Engine {
 			return result;
 		}
 
+		Scripting::KeyValueMapList ServerBase::maps()
+		{
+			return Scope::maps().merge(mInstances);
+		}
+
+		Scripting::GlobalScopeBase * Engine::Server::ServerBase::globalScope()
+		{
+			return &mGlobalScope;
+		}
 
 	}
 }

@@ -5,10 +5,6 @@
 
 namespace Engine {
 	namespace Scripting {
-		
-		std::pair<bool, ValueType> toValueType(...) {
-			return { false,{} };
-		}
 
 		int KeyValueMapList::resolve(lua_State * state, const std::string & key)
 		{
@@ -19,9 +15,27 @@ namespace Engine {
 			return 0;
 		}
 
-		KeyValueIterator * KeyValueMapList::iterator()
+		bool KeyValueMapList::contains(const std::string & key)
 		{
-			return new KeyValueMapListIterator(*this);
+			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
+				if (p->contains(key))
+					return true;
+			}
+			return false;
+		}
+
+		std::pair<bool, Engine::ValueType> KeyValueMapList::at(const std::string & key)
+		{
+			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
+				if (p->contains(key))
+					return p->at(key);
+			}
+			throw 0;
+		}
+
+		std::unique_ptr<KeyValueIterator> KeyValueMapList::iterator()
+		{
+			return std::make_unique<KeyValueMapListIterator>(*this);
 		}
 
 		KeyValueMapListIterator::KeyValueMapListIterator(const KeyValueMapList & list) :
@@ -29,7 +43,9 @@ namespace Engine {
 		{
 			mIterators.reserve(list.size());
 			std::transform(list.begin(), list.end(), std::back_inserter(mIterators),
-				[](const std::unique_ptr<KeyValueMapRef> &m) {return std::unique_ptr<KeyValueIterator>(m->iterator()); });
+				[](const std::unique_ptr<KeyValueMapRef> &m) {
+				return m->iterator(); 
+			});
 			validate();
 		}
 

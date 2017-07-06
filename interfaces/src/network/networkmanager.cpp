@@ -143,7 +143,7 @@ namespace Engine {
 		void NetworkManager::moveConnection(Serialize::ParticipantId id, NetworkManager * to)
 		{
 			auto it = mStreams.find(id);
-			if (!to->addMasterStream(std::forward<NetworkStream>(it->second), false))
+			if (to->addMasterStream(std::forward<NetworkStream>(it->second), false) != Serialize::NO_ERROR)
 				throw 0;
 			NetworkStream &stream = to->mStreams.at(id);
 			std::list<Serialize::TopLevelSerializableUnitBase*> newTopLevels;

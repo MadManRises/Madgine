@@ -26,7 +26,6 @@ namespace Engine {
 
 			virtual bool fixedUpdate(float timeStep) override;
 
-			virtual lua_State *lua_state() override;
 
 		private:
 			Scene::ServerSceneManager *mSceneManager;

@@ -53,6 +53,7 @@ Entity::~Entity()
 
 void Entity::init(const Scripting::ArgumentList &args)
 {
+	Scope::init();
     callMethodIfAvailable("init", args);
 }
 

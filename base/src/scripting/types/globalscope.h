@@ -16,7 +16,7 @@ namespace Engine {
 
 class MADGINE_BASE_EXPORT GlobalScope : public GlobalScopeBase, public Singleton<GlobalScope> {
 public:
-    GlobalScope(lua_State *state);
+    GlobalScope(const std::pair<lua_State *, int> &);
 
 	virtual bool init() override;
 	virtual void finalize() override;

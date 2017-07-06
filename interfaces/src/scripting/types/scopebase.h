@@ -29,7 +29,7 @@ public:
 	void push();
 
 	int resolve(lua_State *state, const std::string &key);
-	KeyValueIterator *iterator();
+	std::unique_ptr<KeyValueIterator> iterator();
 
 	virtual KeyValueMapList maps();
 
@@ -40,15 +40,12 @@ public:
 	virtual void finalize();
 
 protected:
-	bool initGlobal(int tableId);
+	bool init(int tableId);
 
 	friend class GlobalScopeBase;
 	GlobalScopeBase *globalScope();
 
 private:
-
-	
-	int table();
 
 	GlobalScopeBase *mGlobal;
 	int mTable;

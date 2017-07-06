@@ -23,27 +23,19 @@ ScopeBase::~ScopeBase()
 {
 }
 
-bool Engine::Scripting::ScopeBase::init()
+bool ScopeBase::init()
 {
-	if (!mGlobal) {
-		mGlobal = GlobalScopeBase::getSingletonPtr();
-		if (!mGlobal)
-			return false;
-	}
-	if (mTable != GlobalScopeBase::sNoRef)
-		return false;
-	mTable = mGlobal->registerScope(this);
-	return true;
+	return init(-1);
 }
 
 void ScopeBase::finalize() {
 	if (mTable != GlobalScopeBase::sNoRef) {
-		mGlobal->unregisterScope(mTable);
+		mGlobal->unregisterScope(this);
 		mTable = GlobalScopeBase::sNoRef;
 	}
 }
 
-bool ScopeBase::initGlobal(int tableId)
+bool ScopeBase::init(int tableId)
 {
 	if (!mGlobal) {
 		mGlobal = GlobalScopeBase::getSingletonPtr();
@@ -52,7 +44,7 @@ bool ScopeBase::initGlobal(int tableId)
 	}
 	if (mTable != GlobalScopeBase::sNoRef)
 		return false;
-	mTable = tableId;
+	mTable = mGlobal->registerScope(this, tableId);
 	return true;
 }
 
@@ -100,15 +92,12 @@ std::string ScopeBase::getName() {
 	throw 0;
 }
 
-int ScopeBase::table() {
-	return mTable;
-}
 
 int ScopeBase::resolve(lua_State *state, const std::string &key) {
 	return maps().resolve(state, key);
 }
 
-KeyValueIterator *Engine::Scripting::ScopeBase::iterator()
+std::unique_ptr<KeyValueIterator> Engine::Scripting::ScopeBase::iterator()
 {
 	return maps().iterator();
 }

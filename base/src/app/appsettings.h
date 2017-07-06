@@ -12,12 +12,21 @@ struct AppSettings {
 	/**
 	 * Sets up default values for the settings.
 	 */
-	AppSettings()
+	AppSettings(const std::pair<lua_State *, int> &state) :
+		mState(state)
+	{
+
+	}
+
+	AppSettings() :
+		mState(std::make_pair(nullptr, 0))
 	{
 
 	}
 
 	std::string mAppName;
+
+	std::pair<lua_State *, int> mState;
 
 };
 

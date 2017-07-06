@@ -8,7 +8,7 @@ namespace Scripting {
 
 
 
-	GlobalScope::GlobalScope(lua_State *state) :
+	GlobalScope::GlobalScope(const std::pair<lua_State *, int> &state) :
 		GlobalScopeBase(state)
 	{
 	}

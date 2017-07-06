@@ -6,11 +6,15 @@
 
 #include "scripting/types/api.h"
 
+#include "scripting/types/globalscopebase.h"
+
 extern "C" {
 #include <lua.h>                                /* Always include this when calling Lua */
 #include <lauxlib.h>                            /* Always include this when calling Lua */
 #include <lualib.h>                             /* Always include this when calling Lua */
 }
+
+//#include <iostream>
 
 namespace Engine {
 namespace Scripting {
@@ -18,15 +22,31 @@ namespace Parsing {
 
 	ScriptParser *ScriptParser::sSingleton = nullptr;
 
-	const luaL_Reg ScriptParser::sMetafunctions[] = 
+	const luaL_Reg ScriptParser::sScopeMetafunctions[] = 
 	{
-		{"__index", &lua_index},
-		{"__pairs", &lua_pairs},
-		//{"__newindex", &lua_newindex}
+		{"__index", &lua_indexScope},
+		{"__pairs", &lua_pairsScope},
 		{NULL, NULL}
 	};
 
-ScriptParser::ScriptParser()
+	const luaL_Reg ScriptParser::sGlobalMetafunctions[] =
+	{
+		{ "__newindex", &lua_newindexGlobal },
+		{ NULL, NULL }
+	};
+
+	const luaL_Reg ScriptParser::sEnvMetafunctions[] =
+	{
+		{ "__index", &lua_indexEnv },
+		{ "__newindex", &lua_newindexEnv },		
+		{ NULL, NULL }
+	};
+
+ScriptParser::ScriptParser() :
+	mFinalized(false),
+	mStream(nullptr),
+	mBuffer(nullptr),
+	mChunk(false)
 {
 	assert(!sSingleton);
 	sSingleton = this;
@@ -35,13 +55,34 @@ ScriptParser::ScriptParser()
 
 	luaL_openlibs(mState);
 
-	luaL_newmetatable(mState, "Interfaces.Metatable");
+	luaL_newmetatable(mState, "Interfaces.Scope");
+	luaL_setfuncs(mState, sScopeMetafunctions, 0);
+	lua_pop(mState, 1);
 
-	luaL_setfuncs(mState, sMetafunctions, 0);
+	luaL_newmetatable(mState, "Interfaces.Global");
+	luaL_setfuncs(mState, sGlobalMetafunctions, 0);
+	lua_pop(mState, 1);
 
+	luaL_newmetatable(mState, "Interfaces.Env");
+	luaL_setfuncs(mState, sEnvMetafunctions, 0);
 	lua_pop(mState, 1);
 
 	APIHelper::createMetatables(mState);
+
+	lua_newtable(mState); //Env	
+
+	lua_newtable(mState); //Temp Metatable
+
+	lua_rawgeti(mState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+	lua_pushvalue(mState, -1);
+
+	lua_setfield(mState, -3, "__index");
+	lua_setfield(mState, -2, "__newindex");	
+
+	lua_setmetatable(mState, -2);
+
+	mEnv = luaL_ref(mState, LUA_REGISTRYINDEX);
+
 }
 
 ScriptParser::~ScriptParser()
@@ -50,16 +91,22 @@ ScriptParser::~ScriptParser()
 	sSingleton = nullptr;
 }
 
-void ScriptParser::executeString(const std::string & cmd)
+void ScriptParser::makeFinalized()
 {
-	if (luaL_dostring(mState, cmd.c_str()) != 0) {
-		LOG_ERROR(lua_tostring(mState, -1));
-	}
+	lua_rawgeti(mState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+	luaL_setmetatable(mState, "Interfaces.Global");
+	lua_rawgeti(mState, LUA_REGISTRYINDEX, mEnv);
+	luaL_setmetatable(mState, "Interfaces.Env");
+	lua_pop(mState, 1);
+
+	mFinalized = true;
 }
 
 void ScriptParser::parseScript(std::istream &stream, const std::string &name,
 								bool reload)
 {
+	assert(!mFinalized);
+
 	mStream = &stream;
 	mChunk = true;
 
@@ -78,33 +125,44 @@ void ScriptParser::parseScript(std::istream &stream, const std::string &name,
 			throw 0;
 		}		
 	}
+	
+	lua_rawgeti(mState, LUA_REGISTRYINDEX, mEnv);
+	lua_setupvalue(mState, -2, 1);
 	switch (lua_pcall(mState, 0, 0, 0)) {
 	case 0:
 		break;
 	case LUA_ERRRUN: {
 		int iType = lua_type(mState, -1);
 		const char *msg = "unknown Error";
-		if (iType == LUA_TSTRING){
+		if (iType == LUA_TSTRING) {
 			msg = lua_tostring(mState, -1);
 		}
 		lua_pop(mState, 1);
-		throw ParseException(std::string("Runtime Error: ")+msg);
+		throw ParseException(std::string("Runtime Error: ") + msg);
 	}
 	case LUA_ERRMEM:
 		throw ParseException("Lua Out-Of-Memory!");
 	default:
 		throw 0;
 	}
+	
 }
 
-
-void ScriptParser::reparseFile(const std::string & name)
+void ScriptParser::executeString(lua_State *state, const std::string & cmd)
 {
-	/*Ogre::DataStreamPtr stream =
-		Ogre::ResourceGroupManager::getSingleton().openResource(
-			name, "General", true);
-	parseScript(stream, group, true);*/
+	if (luaL_loadstring(state, cmd.c_str())) {
+		LOG_ERROR(lua_tostring(state, -1));
+		return;
+	}
+	lua_rawgeti(state, LUA_REGISTRYINDEX, mEnv);
+	lua_setupvalue(state, -2, 1);
+
+	if (lua_pcall(state, 0, LUA_MULTRET, 0)) {
+		LOG_ERROR(lua_tostring(state, -1));
+	}
 }
+
+
 
 ScriptParser & ScriptParser::getSingleton()
 {
@@ -137,40 +195,26 @@ std::string ScriptParser::fileExtension() {
 }
 
 
-lua_State *ScriptParser::lua_state() {
-	return mState;
-}
+std::pair<lua_State*, int> ScriptParser::createThread() {
+	assert(mFinalized);
 
-lua_State* ScriptParser::createThread() {
 	lua_State *thread = lua_newthread(mState);
 
 	mThreads[thread] = luaL_ref(mState, LUA_REGISTRYINDEX);
 
-	lua_newtable(thread);
-	
-	lua_rawgeti(thread, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+	lua_newtable(mState);
 
-	lua_newtable(thread);
-
-	lua_pushnil(thread);
-	while (lua_next(thread, -3) != 0) {
-		lua_pushvalue(thread, -2);
-		lua_insert(thread, -2);
-		lua_settable(thread, -4);
-	}
-
-	lua_rawseti(thread, -3, LUA_RIDX_GLOBALS);
-
-	lua_pop(thread, 1);
-
-	lua_replace(thread, LUA_REGISTRYINDEX);
-
-
-
-	return thread;
+	return std::make_pair(thread, luaL_ref(mState, LUA_REGISTRYINDEX));
 }
 
-int ScriptParser::lua_index(lua_State *state) {
+int ScriptParser::pushThread(lua_State * state, lua_State * thread)
+{
+	lua_rawgeti(state, LUA_REGISTRYINDEX, mThreads.at(thread));
+
+	return 1;
+}
+
+int ScriptParser::lua_indexScope(lua_State *state) {
 
 	ScopeBase *scope = APIHelper::to<ScopeBase*>(state, -2);
 
@@ -181,23 +225,23 @@ int ScriptParser::lua_index(lua_State *state) {
 	return scope->resolve(state, key);
 }
 
-int ScriptParser::lua_newindex(lua_State *state) {
-	return 0;
+int ScriptParser::lua_newindexGlobal(lua_State *state) {
+	return luaL_error(state, "Trying to modify read-only Global");
 }
 
-int ScriptParser::lua_pairs(lua_State * state)
+int ScriptParser::lua_pairsScope(lua_State * state)
 {
 	if (lua_gettop(state) != 1 || !lua_istable(state, -1))
 		luaL_error(state, "illegal Call to __pairs!");
 
-	lua_pushcfunction(state, &lua_nextImpl);
+	lua_pushcfunction(state, &lua_nextScope);
 
 	lua_insert(state, -2);
 
 	return 2;
 }
 
-int ScriptParser::lua_nextImpl(lua_State * state)
+int ScriptParser::lua_nextScope(lua_State * state)
 {
 	lua_settop(state, 2);
 
@@ -208,8 +252,8 @@ int ScriptParser::lua_nextImpl(lua_State * state)
 	KeyValueIterator *it = nullptr;
 
 	if (lua_isnil(state, -1)) {
-		it = scope->iterator();
 		lua_pop(state, 1);
+		it = scope->iterator().release();
 		APIHelper::push(state, it);
 	}
 	else if (lua_isuserdata(state, -1)) {
@@ -229,6 +273,65 @@ int ScriptParser::lua_nextImpl(lua_State * state)
 	lua_insert(state, -3);
 	lua_call(state, 2, 2);
 	return 2;
+}
+
+int ScriptParser::lua_newindexEnv(lua_State * state)
+{
+	pushGlobalScope(state);
+	lua_replace(state, -3);
+	lua_settable(state, -3);
+	return 1;
+}
+
+/*void stackdump_g(lua_State* l)
+{
+	int i;
+	int top = lua_gettop(l);
+
+	std::cout << "total in stack " << top << std::endl;
+
+	for (i = 1; i <= top; i++)
+	{  // repeat for each level 
+		int t = lua_type(l, i);
+		switch (t) {
+		case LUA_TSTRING:  // strings 
+			std::cout << "string: '" << lua_tostring(l, i) << "'" << std::endl;
+			break;
+		case LUA_TBOOLEAN:  // booleans 
+			std::cout << "boolean " << (lua_toboolean(l, i) ? "true" : "false") << std::endl;
+			break;
+		case LUA_TNUMBER:  // numbers 
+			std::cout << "number: " << lua_tonumber(l, i) << std::endl;
+			break;
+		default:  // other values 
+			std::cout << lua_typename(l, t) << std::endl;;
+			break;
+		}
+	}
+}*/
+
+int ScriptParser::lua_indexEnv(lua_State * state)
+{
+	pushGlobalScope(state);
+	lua_replace(state, -3);
+	lua_pushvalue(state, -1);
+	if (lua_gettable(state, -3) == LUA_TNIL) {
+		lua_pop(state, 1);
+		lua_rawgeti(state, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+		lua_replace(state, -3);
+		lua_gettable(state, -2);
+		lua_replace(state, -2);
+	}
+	else {
+		lua_replace(state, -3);
+		lua_pop(state, 1);
+	}
+	return 1;
+}
+
+void ScriptParser::pushGlobalScope(lua_State * state)
+{
+	GlobalScopeBase::getSingleton().push(); //TODO maybe assert state
 }
 
 }
