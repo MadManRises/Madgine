@@ -43,6 +43,11 @@ SerializeInStream &SerializeInStream::operator >>(ValueType &result)
 		read(i);
 		result = i;
 		break;
+	case ValueType::Type::UIntValue:
+		size_t s;
+		read(s);
+		result = s;
+		break;
 	case ValueType::Type::NullValue:
 		result.clear();
 		break;
@@ -152,6 +157,9 @@ SerializeOutStream & SerializeOutStream::operator<<(const ValueType & v)
 	}
 	case ValueType::Type::IntValue:
 		write(v.asInt());
+		break;
+	case ValueType::Type::UIntValue:
+		write(v.asUInt());
 		break;
 	case ValueType::Type::NullValue:
 		break;

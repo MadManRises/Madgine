@@ -22,7 +22,7 @@ namespace Engine {
 
 		int ServerAppInstance::push(lua_State * state) const
 		{
-			return mParser.pushThread(state, mState.first);
+			return mParser.pushThread(state, mTable.state());
 		}
 
 	}

@@ -27,7 +27,7 @@ namespace Entity {
 		mOrientation{ {1, 0, 0, 0} },
 		mObject(object)
 {
-
+		init();
 }
 
 	ServerEntity::~ServerEntity()

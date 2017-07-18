@@ -44,8 +44,8 @@ public:
 	Ogre::TerrainGroup *terrainGroup() const;
 
 	
-	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) override;
-	virtual Entity::Entity * createLocalEntity(const std::string & behaviour = "", const std::string & name = "", const std::string & meshName = "", const Scripting::ArgumentList & args = {}) override;
+	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", std::function<void(Entity::Entity&)> init = {}) override;
+	virtual Entity::Entity * createLocalEntity(const std::string & behaviour = "", const std::string & name = "", const std::string & meshName = "") override;
 	virtual std::list<Entity::Entity *> entities() override;
 	virtual Entity::Entity *findEntity(const std::string &name) override;
 	
@@ -86,7 +86,7 @@ public:
 	virtual void writeState(Serialize::SerializeOutStream &out) const override;
 	virtual void readState(Serialize::SerializeInStream &in) override;
 
-	void readScene(Serialize::SerializeInStream &in, bool callInit = false);
+	void readScene(Serialize::SerializeInStream &in);
 	void writeScene(Serialize::SerializeOutStream &out) const;
 
 	static constexpr const float sSceneRasterSize = .2f;
@@ -98,6 +98,8 @@ public:
 	void connectEntitiesCallback(T &slot) {
 		mEntities.connectCallback(slot);
 	}
+
+	Scripting::KeyValueMapList maps() override;
 
 protected:
 

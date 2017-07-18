@@ -196,7 +196,8 @@ namespace Engine {
 			}
 
 			mSlaveStream = new NetworkStream(mSocket, *this);
-			if (error = setSlaveStream(mSlaveStream, true, timeout)) {
+			error = setSlaveStream(mSlaveStream, true, timeout);
+			if (error != Serialize::NO_ERROR) {
 				delete mSlaveStream;
 				mSlaveStream = 0;
 				mSocket = Invalid_Socket;

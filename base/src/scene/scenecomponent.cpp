@@ -4,6 +4,8 @@
 
 namespace Engine{
 
+	API_IMPL(Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
+
 namespace Scene{
 
 	SceneComponentBase::SceneComponentBase(ContextMask context) :
@@ -56,6 +58,16 @@ SceneManagerBase * SceneComponentBase::sceneMgr()
 void SceneComponentBase::update(float){}
 
 void SceneComponentBase::fixedUpdate(float){}
+
+Scripting::KeyValueMapList SceneComponentBase::maps()
+{
+	return MadgineObject::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
+}
+
+int SceneComponentBase::test()
+{
+	return 1234;
+}
 
 }
 }

@@ -14,7 +14,7 @@ FolderSources(sources "" src interfacesforward.h interfaceslib.h message.h singl
 	FolderSources(sources src math vector3.cpp vector3.h vector2.cpp vector2.h)
 	FolderSources(sources src network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.h winapi.cpp)
 	FolderSources(sources src scripting scriptingexception.h)
-		FolderSources(sources scripting datatypes argumentlist.cpp argumentlist.h)
+		FolderSources(sources scripting datatypes argumentlist.cpp argumentlist.h luatable.cpp luatable.h)
 		FolderSources(sources scripting parsing parseexception.h scriptparser.cpp scriptparser.h)
 		FolderSources(sources scripting types api.h apihelper.cpp apihelper.h globalscopebase.cpp globalscopebase.h keyvalue.cpp keyvalue.h scopebase.cpp scopebase.h scope_cast.h scope.h)
 	FolderSources(sources src serialize fileexception.h observable.cpp observable.h serializable.cpp serializable.h serializableunit.cpp serializableunit.h serializeexception.h serializemanager.cpp serializemanager.h toplevelserializableunit.cpp toplevelserializableunit.h)

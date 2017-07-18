@@ -38,6 +38,7 @@ namespace Engine {
 				run = sendFrameStarted(timeSinceLastFrame) &&
 					update(timeSinceLastFrame) &&
 					sendFrameEnded(timeSinceLastFrame);
+				std::this_thread::yield();
 			}
 			return 0;
 		}

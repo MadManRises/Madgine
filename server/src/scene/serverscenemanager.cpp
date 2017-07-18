@@ -56,19 +56,13 @@ void ServerSceneManager::readState(Serialize::SerializeInStream &in)
 	SceneManagerBase::readState(in);		
 }
 
-void ServerSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
+void ServerSceneManager::readScene(Serialize::SerializeInStream & in)
 {
 	in.process().startSubProcess(1, "Loading Level...");
 
 	readState(in);
 	
 	applySerializableMap(in.manager().slavesMap());
-
-	if (callInit) {
-		for (Entity::Entity &e : mEntities) {
-			e.init();
-		}
-	}
 
 	in.process().endSubProcess();
 }
@@ -98,24 +92,22 @@ std::tuple<std::string, std::string, std::string> ServerSceneManager::createEnti
 	
 }
 
-Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args, std::function<void(Entity::Entity&)> init)
+Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, std::function<void(Entity::Entity&)> init)
 {
 	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
-		it->init(args);
+		//it->init(args);
 		if (init)
 			init(*it);
 	}, createEntityData(behaviour, name, meshName));
 	return &mEntities.back();
 }
 
-Entity::Entity * ServerSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
+Entity::Entity * ServerSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
 	throw 0;
 	const std::tuple<std::string, std::string, std::string> &data = createEntityData(behaviour, name, meshName);
-	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
-	Entity::Entity &e = mLocalEntities.back();
-	e.init(args);
-	return &e;
+	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));	
+	return &mLocalEntities.back();
 }
 
 void ServerSceneManager::removeQueuedEntities()
@@ -169,6 +161,11 @@ Entity::Entity * ServerSceneManager::findEntity(const std::string & name)
 	}
 	else
 		return &*it;
+}
+
+Scripting::KeyValueMapList ServerSceneManager::maps()
+{
+	return SceneManager::maps().merge(mEntities);
 }
 
 }

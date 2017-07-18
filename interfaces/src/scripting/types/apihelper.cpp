@@ -47,11 +47,6 @@ namespace Engine {
 			lua_pop(state, 1);
 		}
 
-		int LuaHelper<ScopeBase*>::push(lua_State *state, ScopeBase *scope) {
-			scope->push();
-			return 1;
-		}
-
 		int LuaHelper<KeyValueIterator*>::push(lua_State * state, KeyValueIterator * it)
 		{
 			KeyValueIterator **itP = static_cast<KeyValueIterator**>(lua_newuserdata(state, sizeof(KeyValueIterator*)));
@@ -88,6 +83,9 @@ namespace Engine {
 			case ValueType::Type::IntValue:
 				lua_pushinteger(state, v.asInt());
 				break;
+			case ValueType::Type::UIntValue:
+				lua_pushinteger(state, v.asUInt());
+				break;
 			case ValueType::Type::NullValue:
 				lua_pushnil(state);
 				break;
@@ -117,8 +115,20 @@ namespace Engine {
 				return ValueType(static_cast<float>(lua_tonumber(state, index)));
 			case LUA_TNIL:
 				return ValueType();
-			case LUA_TTABLE:
-				return ValueType(APIHelper::to<ScopeBase*>(state, index));
+			case LUA_TTABLE: {
+				lua_pushliteral(state, "___scope___");
+
+				if (index > -100 && index < 0)
+					--index;
+
+				lua_rawget(state, index);
+
+				ScopeBase *scope = static_cast<ScopeBase*>(lua_touserdata(state, -1));
+
+				lua_pop(state, 1);
+
+				return ValueType(scope);
+			}
 			case LUA_TSTRING:
 				return ValueType(lua_tostring(state, index));
 			default:
@@ -132,30 +142,14 @@ namespace Engine {
 			return lua_gettop(state);
 		}
 
-		ScopeBase *LuaHelper<ScopeBase*>::convert(lua_State * state, int index) {
-			lua_pushliteral(state, "___scope___");
-
-			if (index > -100 && index < 0)
-				--index;
-
-			lua_rawget(state, index);
-
-			ScopeBase *scope = static_cast<ScopeBase*>(lua_touserdata(state, -1));
-
-			lua_pop(state, 1);
-
-			return scope;
-		}
-
 		int APIHelper::error(lua_State * state, const std::string & msg)
 		{
 			return luaL_error(state, msg.c_str());
 		}
-
-		int LuaHelper<Mapper>::push(lua_State * state, const Mapper & mapper)
+		
+		int LuaRefHelper<Mapper>::push(lua_State * state, ScopeBase * ref, const Mapper & mapper)
 		{
-			return (*mapper.mPush)(state);
+			return (*mapper.mPush)(state, ref);
 		}
-
 	}
 }

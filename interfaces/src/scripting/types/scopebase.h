@@ -5,6 +5,8 @@
 #include "scripting/datatypes/argumentlist.h"
 #include "keyvalue.h"
 
+#include "scripting/datatypes/luatable.h"
+
 namespace Engine {
 namespace Scripting {
 
@@ -33,14 +35,14 @@ public:
 
 	virtual KeyValueMapList maps();
 
-	virtual std::string getIdentifier();
-	virtual std::string getName();
+	virtual std::string getIdentifier() const;
+	virtual std::string getName() const;
 
 	virtual bool init();
 	virtual void finalize();
 
 protected:
-	bool init(int tableId);
+	bool init(const LuaTable &table);
 
 	friend class GlobalScopeBase;
 	GlobalScopeBase *globalScope();
@@ -48,7 +50,7 @@ protected:
 private:
 
 	GlobalScopeBase *mGlobal;
-	int mTable;
+	LuaTable mTable;
 		 
 };
 

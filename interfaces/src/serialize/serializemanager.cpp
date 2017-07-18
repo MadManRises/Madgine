@@ -418,7 +418,9 @@ namespace Engine {
 				}
 			}
 			catch (const std::out_of_range &) {
-				throw SerializeException("Unknown Unit-Id used! Possible binary mismatch!");
+				std::stringstream ss;	
+				ss << "Unknown Unit-Id (" << unit << ") used! Possible binary mismatch!";
+				throw SerializeException(ss.str());
 			}
 		}
 

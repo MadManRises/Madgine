@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scripting/datatypes/argumentlist.h"
-
+#include "scripting/datatypes/luatable.h"
 
 namespace Engine {
 namespace Scripting {
@@ -24,7 +24,7 @@ public:
 
 	std::string fileExtension();
 
-	std::pair<lua_State*, int> createThread();
+	LuaTable createThread();
 	int pushThread(lua_State *state, lua_State *thread);
 
 	void makeFinalized();
@@ -42,7 +42,9 @@ private:
 
 private:
 	lua_State *mState;
-	int mEnv;
+	LuaTable mRegistry;
+	LuaTable mEnv;
+	LuaTable mGlobal;
 	bool mFinalized;
 
 	std::istream *mStream;
@@ -56,13 +58,17 @@ private:
 	static const luaL_Reg sEnvMetafunctions[];
 	static const luaL_Reg sScopeMetafunctions[];
 	static const luaL_Reg sGlobalMetafunctions[];
+	static const luaL_Reg sGlobalScopeMetafunctions[];
 
 	static int lua_indexScope(lua_State *state);
 	static int lua_pairsScope(lua_State *state);
 	static int lua_nextScope(lua_State *state);
 	static int lua_newindexGlobal(lua_State *state);
+	static int lua_indexGlobalScope(lua_State *state);
 	static int lua_indexEnv(lua_State *state);
+	static int lua_pairsEnv(lua_State *state);
 	static int lua_newindexEnv(lua_State *state);
+	static int lua_tostringEnv(lua_State *state);
 	static void pushGlobalScope(lua_State *state);
 };
 

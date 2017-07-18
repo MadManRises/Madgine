@@ -16,7 +16,7 @@
 
 namespace Engine {
 
-	API_IMPL(Engine::Scene::Entity::Entity, MAP(addComponent), MAP(remove), /*&enqueueMethod,*/ MAP(getPosition), MAP(getCenter), MAP(setObjectVisible));
+	API_IMPL(Engine::Scene::Entity::Entity, MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
 
 
 namespace Scene {
@@ -40,7 +40,8 @@ Entity::Entity(Entity &&other) :
 }
 
 Entity::Entity(const std::string &behaviour, const std::string &name) : 
-	mName(name)
+	mName(name),
+	mBehaviour(behaviour)
 {
 }
 
@@ -51,10 +52,14 @@ Entity::~Entity()
 
 }
 
-void Entity::init(const Scripting::ArgumentList &args)
+bool Entity::init()
 {
-	Scope::init();
-    callMethodIfAvailable("init", args);
+	if (!Scope::init())
+		return false;
+
+
+
+	return true;
 }
 
 
@@ -63,12 +68,17 @@ void Entity::onLoad()
     callMethodIfAvailable("onLoad");
 }
 
-std::string Entity::getName() const
+/*std::string Entity::getName() const
+{
+	return mName;
+}*/
+
+const std::string & Entity::key() const
 {
 	return mName;
 }
 
-std::string Entity::getIdentifier()
+std::string Entity::getIdentifier() const
 {
     return mName + "[" + getName() + "]";
 }
@@ -76,7 +86,7 @@ std::string Entity::getIdentifier()
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
 	SerializableUnitBase::writeCreationData(of);
-    of << mName << getName() << getObjectName();
+    of << mName << mName << getObjectName();
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)
@@ -93,8 +103,8 @@ bool Entity::hasComponent(const std::string & name)
 	return mComponents.contains(name);
 }
 
-void Entity::addComponent(const Scripting::ArgumentList &args, const std::string &name){
-	addComponentImpl(std::get<0>(createComponent(name, args)));
+void Entity::addComponent(const std::string &name, const Scripting::LuaTable &table){
+	addComponentImpl(std::get<0>(createComponent(name, table)));
 }
 
 void Entity::removeComponent(const std::string & name)
@@ -120,12 +130,12 @@ std::set<std::string> Entity::registeredComponentNames()
 	return result;
 }
 
-std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name, const Engine::Scripting::ArgumentList &args)
+std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name, const Scripting::LuaTable &table)
 {
 	auto it = sRegisteredComponentsByName().find(name);
 	if (it == sRegisteredComponentsByName().end())
 		throw ComponentException(Exceptions::unknownComponent(name));
-	return std::make_tuple(it->second(*this, args));
+	return std::make_tuple(it->second(*this, table));
 }
 
 EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)

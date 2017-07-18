@@ -15,7 +15,7 @@
 
 namespace Engine {	
 
-	API_IMPL(App::Application, MAP(shutdown));
+	API_IMPL(App::Application, MAP_F(shutdown));
 
 	namespace App {
 
@@ -37,7 +37,7 @@ namespace Engine {
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mState);
+			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mTable);
 		}
 
 		bool Application::init()

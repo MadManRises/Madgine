@@ -48,6 +48,8 @@ namespace Engine {
 
 		class KeyValueIterator;
 
+		class LuaTable;
+
 		class ArgumentList;
 		typedef std::map<std::string, ValueType> Stack;
 

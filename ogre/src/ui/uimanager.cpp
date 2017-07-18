@@ -12,7 +12,7 @@
 
 namespace Engine {
 
-	API_IMPL(UI::UIManager, MAP(showCursor));
+	API_IMPL(UI::UIManager, MAP_F(showCursor));
 
 	
 #ifdef _MSC_VER

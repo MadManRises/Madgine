@@ -2,14 +2,19 @@
 
 #include "interfaceslib.h"
 #include "keyvalue.h"
+#include "api.h"
 
 namespace Engine {
 	namespace Scripting {
 
+		std::pair<bool, Engine::ValueType> toValueType(ScopeBase *ref, const Mapper &mapper) {
+			return mapper.mToValueType ? mapper.mToValueType(ref) : std::pair<bool, Engine::ValueType>{false, ValueType{}};
+		}
+
 		int KeyValueMapList::resolve(lua_State * state, const std::string & key)
 		{
 			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
-				if (int i = p->resolve(state, key))
+				if (int i = p->resolve(state, mRef, key))
 					return i;
 			}
 			return 0;
@@ -81,7 +86,7 @@ namespace Engine {
 				++mIndex;
 		}
 
-		KeyValueMapList &&KeyValueMapList::merge(KeyValueMapList && other) &&
+		KeyValueMapList KeyValueMapList::merge(KeyValueMapList && other) &&
 		{
 			mMaps.reserve(size() + other.size());
 			std::move(other.mMaps.begin(), other.mMaps.end(), std::back_inserter(mMaps));

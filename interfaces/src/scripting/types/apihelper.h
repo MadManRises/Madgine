@@ -13,6 +13,9 @@ namespace Engine {
 		template <class T>
 		struct LuaHelper;
 
+		template <class T>
+		struct LuaRefHelper;
+
 		class INTERFACES_EXPORT APIHelper {
 		public:
 			static void createMetatables(lua_State *state);
@@ -23,6 +26,10 @@ namespace Engine {
 			template <class T>
 			static int push(lua_State *state, const T &t) {
 				return LuaHelper<T>::push(state, t);
+			}
+			template <class T>
+			static int push(lua_State *state, ScopeBase *ref, const T &t) {
+				return LuaRefHelper<T>::push(state, ref, t);
 			}
 			template <class T>
 			static T to(lua_State *state, int index) {
@@ -45,14 +52,8 @@ namespace Engine {
 		template <>
 		struct INTERFACES_EXPORT LuaHelper<int(*)(lua_State*)> {
 			typedef int(*F)(lua_State*);
-			static int push(lua_State *state, int(*f)(lua_State*));
+			static int push(lua_State *state, F f);
 			static F convert(lua_State *state, int index);
-		};
-
-		template <>
-		struct INTERFACES_EXPORT LuaHelper<ScopeBase*> {
-			static int push(lua_State *state, ScopeBase *scope);
-			static ScopeBase *convert(lua_State *state, int index);
 		};
 
 		template <>
@@ -61,9 +62,29 @@ namespace Engine {
 			static KeyValueIterator *convert(lua_State *state, int index);
 		};
 
-		template <>
-		struct INTERFACES_EXPORT LuaHelper<Mapper> {
-			static int push(lua_State *state, const Mapper &mapper);
+		template <class T>
+		struct Unmapper {
+			static int push(lua_State *state, ScopeBase *ref, const T &t) {
+				return LuaHelper<T>::push(state, t);
+			}
+		};
+
+
+		template <class T>
+		struct LuaRefHelper {
+			static int push(lua_State *state, ScopeBase *ref, const T &t) {
+				return Unmapper<T>::push(state, ref, t);
+			}
+		};
+
+		template <class T>
+		struct LuaHelper {
+			static int push(lua_State *state, const T &v) {
+				return LuaHelper<ValueType>::push(state, ValueType(v));
+			}
+			static T convert(lua_State *state, int index) {
+				return LuaHelper<ValueType>::convert(state, index).as<T>();
+			}
 		};
 
 	} // namespace Scripting

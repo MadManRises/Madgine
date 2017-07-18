@@ -14,7 +14,7 @@ extern "C" {
 #include <lualib.h>                             /* Always include this when calling Lua */
 }
 
-//#include <iostream>
+#include <iostream>
 
 namespace Engine {
 namespace Scripting {
@@ -39,7 +39,16 @@ namespace Parsing {
 	{
 		{ "__index", &lua_indexEnv },
 		{ "__newindex", &lua_newindexEnv },		
+		{ "__pairs", &lua_pairsEnv},
+		{"__tostring", &lua_tostringEnv},
 		{ NULL, NULL }
+	};
+
+	const luaL_Reg ScriptParser::sGlobalScopeMetafunctions[] = 
+	{
+		{"__index", &lua_indexGlobalScope },
+		{"__pairs", &lua_pairsScope},
+		{NULL, NULL}
 	};
 
 ScriptParser::ScriptParser() :
@@ -52,6 +61,8 @@ ScriptParser::ScriptParser() :
 	sSingleton = this;
 
 	mState = luaL_newstate();
+
+	mRegistry = LuaTable::registry(mState);
 
 	luaL_openlibs(mState);
 
@@ -67,22 +78,22 @@ ScriptParser::ScriptParser() :
 	luaL_setfuncs(mState, sEnvMetafunctions, 0);
 	lua_pop(mState, 1);
 
+	luaL_newmetatable(mState, "Interfaces.GlobalScope");
+	luaL_setfuncs(mState, sGlobalScopeMetafunctions, 0);
+	lua_pop(mState, 1);
+
 	APIHelper::createMetatables(mState);
 
-	lua_newtable(mState); //Env	
+	mEnv = mRegistry.createTable();
 
-	lua_newtable(mState); //Temp Metatable
+	LuaTable tempMetatable = mRegistry.createTable();
 
-	lua_rawgeti(mState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-	lua_pushvalue(mState, -1);
+	mGlobal = LuaTable::global(mState);
 
-	lua_setfield(mState, -3, "__index");
-	lua_setfield(mState, -2, "__newindex");	
+	tempMetatable.setValue("__index", mGlobal);
+	tempMetatable.setValue("__newindex", mGlobal);
 
-	lua_setmetatable(mState, -2);
-
-	mEnv = luaL_ref(mState, LUA_REGISTRYINDEX);
-
+	mEnv.setMetatable(tempMetatable);
 }
 
 ScriptParser::~ScriptParser()
@@ -93,11 +104,8 @@ ScriptParser::~ScriptParser()
 
 void ScriptParser::makeFinalized()
 {
-	lua_rawgeti(mState, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-	luaL_setmetatable(mState, "Interfaces.Global");
-	lua_rawgeti(mState, LUA_REGISTRYINDEX, mEnv);
-	luaL_setmetatable(mState, "Interfaces.Env");
-	lua_pop(mState, 1);
+	mGlobal.setMetatable("Interfaces.Global");
+	mEnv.setMetatable("Interfaces.Env");
 
 	mFinalized = true;
 }
@@ -126,7 +134,7 @@ void ScriptParser::parseScript(std::istream &stream, const std::string &name,
 		}		
 	}
 	
-	lua_rawgeti(mState, LUA_REGISTRYINDEX, mEnv);
+	mEnv.push();
 	lua_setupvalue(mState, -2, 1);
 	switch (lua_pcall(mState, 0, 0, 0)) {
 	case 0:
@@ -154,7 +162,7 @@ void ScriptParser::executeString(lua_State *state, const std::string & cmd)
 		LOG_ERROR(lua_tostring(state, -1));
 		return;
 	}
-	lua_rawgeti(state, LUA_REGISTRYINDEX, mEnv);
+	mEnv.push(state);
 	lua_setupvalue(state, -2, 1);
 
 	if (lua_pcall(state, 0, LUA_MULTRET, 0)) {
@@ -195,16 +203,14 @@ std::string ScriptParser::fileExtension() {
 }
 
 
-std::pair<lua_State*, int> ScriptParser::createThread() {
+LuaTable ScriptParser::createThread() {
 	assert(mFinalized);
 
 	lua_State *thread = lua_newthread(mState);
 
 	mThreads[thread] = luaL_ref(mState, LUA_REGISTRYINDEX);
 
-	lua_newtable(mState);
-
-	return std::make_pair(thread, luaL_ref(mState, LUA_REGISTRYINDEX));
+	return mRegistry.createTable(thread);
 }
 
 int ScriptParser::pushThread(lua_State * state, lua_State * thread)
@@ -227,6 +233,18 @@ int ScriptParser::lua_indexScope(lua_State *state) {
 
 int ScriptParser::lua_newindexGlobal(lua_State *state) {
 	return luaL_error(state, "Trying to modify read-only Global");
+}
+
+int ScriptParser::lua_indexGlobalScope(lua_State *state) {
+	ScopeBase *scope = APIHelper::to<ScopeBase*>(state, -2);
+
+	std::string key = lua_tostring(state, -1);
+
+	if (int i = scope->resolve(state, key))
+		return i;
+
+	lua_getglobal(state, key.c_str());
+	return 1;
 }
 
 int ScriptParser::lua_pairsScope(lua_State * state)
@@ -278,12 +296,14 @@ int ScriptParser::lua_nextScope(lua_State * state)
 int ScriptParser::lua_newindexEnv(lua_State * state)
 {
 	pushGlobalScope(state);
-	lua_replace(state, -3);
+	lua_replace(state, -4);
 	lua_settable(state, -3);
 	return 1;
 }
 
-/*void stackdump_g(lua_State* l)
+
+
+void stackdump_g(lua_State* l)
 {
 	int i;
 	int top = lua_gettop(l);
@@ -308,24 +328,30 @@ int ScriptParser::lua_newindexEnv(lua_State * state)
 			break;
 		}
 	}
-}*/
+}
 
 int ScriptParser::lua_indexEnv(lua_State * state)
 {
 	pushGlobalScope(state);
-	lua_replace(state, -3);
-	lua_pushvalue(state, -1);
-	if (lua_gettable(state, -3) == LUA_TNIL) {
-		lua_pop(state, 1);
-		lua_rawgeti(state, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
-		lua_replace(state, -3);
-		lua_gettable(state, -2);
-		lua_replace(state, -2);
-	}
-	else {
-		lua_replace(state, -3);
-		lua_pop(state, 1);
-	}
+	lua_replace(state, -3);	
+	lua_gettable(state, -2);
+	lua_replace(state, -2);		
+	return 1;
+}
+
+int ScriptParser::lua_pairsEnv(lua_State * state)
+{
+	lua_pop(state, 1);
+	lua_pushcfunction(state, &lua_nextScope);
+	pushGlobalScope(state);
+	return 2;
+}
+
+int ScriptParser::lua_tostringEnv(lua_State * state)
+{
+	pushGlobalScope(state);
+	lua_replace(state, -2);
+	luaL_tolstring(state, -1, NULL);
 	return 1;
 }
 

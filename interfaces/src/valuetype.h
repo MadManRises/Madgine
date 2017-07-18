@@ -34,6 +34,11 @@ namespace Engine {
 	};
 
 	template <>
+	struct _isValueType<size_t> {
+		const constexpr static bool value = true;
+	};
+
+	template <>
 	struct _isValueType<std::string> {
 		const constexpr static bool value = true;
 	};
@@ -60,11 +65,6 @@ namespace Engine {
 
 	template <>
 	struct _isValueType<bool> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<size_t> {
 		const constexpr static bool value = true;
 	};
 
@@ -137,6 +137,11 @@ public:
 		mType(Type::IntValue)
 	{
 		mUnion.mInt = i;
+	}
+	explicit ValueType(size_t s) :
+		mType(Type::UIntValue)
+	{
+		mUnion.mUInt = s;
 	}
 	explicit ValueType(float f) :
 		mType(Type::FloatValue)
@@ -219,6 +224,11 @@ public:
 	{
 		setType(Type::IntValue);
 		mUnion.mInt = i;
+	}
+	void operator=(size_t i)
+	{
+		setType(Type::UIntValue);
+		mUnion.mUInt = i;
 	}
     void operator=(float f)
 	{
@@ -611,6 +621,26 @@ public:
 		}
 		return mUnion.mInt;
 	}
+	bool isUInt() const
+	{
+		return mType == Type::UIntValue;
+	}
+	size_t asUInt() const
+	{
+		if (mType != Type::UIntValue)
+			MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("UInt")));
+		return mUnion.mUInt;
+	}
+	size_t asUInt(size_t i)
+	{
+		if (mType != Type::UIntValue) {
+			if (mType == Type::NullValue)
+				*this = i;
+			else
+				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
+		}
+		return mUnion.mUInt;
+	}
 	bool isFloat() const
 	{
 		return mType == Type::FloatValue;
@@ -728,6 +758,7 @@ public:
 		ScopeValue,
 		InvScopePtrValue,
 		IntValue,
+		UIntValue,
         FloatValue,
         StringValue,
 		Vector4Value,
@@ -748,6 +779,7 @@ private:
 		Scripting::ScopeBase *mScope;
         InvScopePtr mInvPtr;
         int mInt;
+		size_t mUInt;
         float mFloat;
         std::string *mString;
 		std::array<float, 4> mVector4;

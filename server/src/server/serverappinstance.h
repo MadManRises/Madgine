@@ -12,11 +12,11 @@ namespace Engine {
 			template <class T>
 			ServerAppInstance(T &&initCallback, Scripting::Parsing::ScriptParser &parser) :
 				mParser(parser),
-				mState(parser.createThread()),
+				mTable(parser.createThread()),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
-				mResult(0)/*,
-				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))				*/
+				mResult(0),
+				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))				
 			{
 
 			}
@@ -31,7 +31,7 @@ namespace Engine {
 			{
 				App::ServerApplication app;
 				mApplication = &app;
-				App::ServerAppSettings settings(mState);
+				App::ServerAppSettings settings(mTable);
 				app.setup(settings);
 				if (app.init()) {
 					initCallback();
@@ -45,7 +45,7 @@ namespace Engine {
 
 		private:
 			Scripting::Parsing::ScriptParser &mParser;
-			std::pair<lua_State *, int> mState;			
+			Scripting::LuaTable mTable;			
 			App::ServerApplication *mApplication;
 
 			std::string mName;

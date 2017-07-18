@@ -17,8 +17,8 @@ namespace Engine {
 			SceneManagerBase();
 			virtual ~SceneManagerBase() = default;
 
-			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}, std::function<void(Entity::Entity&)> init = {}) = 0;
-			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", const Scripting::ArgumentList &args = {}) = 0;
+			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", std::function<void(Entity::Entity&)> init = {}) = 0;
+			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "") = 0;
 			virtual Entity::Entity *findEntity(const std::string &name) = 0;
 			virtual std::list<Entity::Entity*> entities() = 0;
 

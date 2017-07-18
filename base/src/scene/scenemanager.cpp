@@ -4,13 +4,16 @@
 
 #include "serialize/toplevelids.h"
 
+#include "entity/entity.h"
+
 namespace Engine {
 
-	API_IMPL(Engine::Scene::SceneManagerBase, MAP(findEntity));
+	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
 
 	namespace Scene {
 		
 		SceneManagerBase::SceneManagerBase() :
+			TopLevelSerializableUnit(Serialize::SCENE_MANAGER),
 			mItemCount(0)
 		{
 			for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
@@ -121,7 +124,6 @@ namespace Engine {
 		{
 			mEntityRemoveQueue.push_back(e);
 		}
-
 
 	}
 }

@@ -70,7 +70,9 @@ OgreEntity::OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre
 		mObject->addQueryFlags(Masks::ENTITY_MASK);
 	}
 	
-    mDecoratorNode = mNode->createChildSceneNode(getName() + "_Decorator");
+    mDecoratorNode = mNode->createChildSceneNode(node->getName() + "_Decorator");
+
+	init();
 
 }
 

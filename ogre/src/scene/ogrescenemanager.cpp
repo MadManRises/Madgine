@@ -347,19 +347,13 @@ void OgreSceneManager::readState(Serialize::SerializeInStream &in)
 	SceneManagerBase::readState(in);		
 }
 
-void OgreSceneManager::readScene(Serialize::SerializeInStream & in, bool callInit)
+void OgreSceneManager::readScene(Serialize::SerializeInStream & in)
 {
 	in.process().startSubProcess(1, "Loading Level...");
 
 	readState(in);
 	
 	applySerializableMap(in.manager().slavesMap());
-
-	if (callInit) {
-		for (Entity::Entity &e : mEntities) {
-			e.init();
-		}
-	}
 
 	in.process().endSubProcess();
 }
@@ -434,23 +428,20 @@ std::list<Light*> OgreSceneManager::lights()
 	return result;
 }
 
-Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args, std::function<void(Entity::Entity&)> init)
+Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, std::function<void(Entity::Entity&)> init)
 {
 	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
-		it->init(args);
 		if (init)
 			init(*it);
 	}, createEntityData(behaviour, name, meshName));
 	return &mEntities.back();
 }
 
-Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName, const Scripting::ArgumentList & args)
+Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
 	const std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(behaviour, name, meshName);
 	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
-	Entity::Entity &e = mLocalEntities.back();
-	e.init(args);
-	return &e;
+	return &mLocalEntities.back();
 }
 
 Ogre::Camera *OgreSceneManager::camera()
@@ -971,6 +962,11 @@ Entity::Entity * OgreSceneManager::findEntity(const std::string & name)
 	}
 	else
 		return &*it;
+}
+
+Scripting::KeyValueMapList OgreSceneManager::maps()
+{
+	return SceneManager::maps().merge(mEntities);
 }
 
 }

@@ -436,7 +436,6 @@ std::tuple<const Scripting::Parsing::EntityNode *, Ogre::SceneNode *, Ogre::Enti
 Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, const Scripting::ArgumentList &args)
 {
 	Entity::Entity &e = *mEntities.emplace_tuple_back(createEntityData(behaviour, name, meshName));
-	e.init(args);
 	return &e;
 }
 

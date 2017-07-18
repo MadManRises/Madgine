@@ -183,6 +183,8 @@ std::string ValueType::toString() const
 		return std::string("\"") + *mUnion.mString + "\"";
 	case Type::IntValue:
 		return std::to_string(mUnion.mInt);
+	case Type::UIntValue:
+		return std::to_string(mUnion.mUInt);
 	case Type::NullValue:
 		return "NULL";
 	case Type::EndOfListValue:
@@ -191,6 +193,8 @@ std::string ValueType::toString() const
 		return mUnion.mScope->getIdentifier();
 	case Type::FloatValue:
 		return std::to_string(mUnion.mFloat);
+	case Type::Vector3Value:
+		return std::string("[") + std::to_string(mUnion.mVector3[0]) + ", " + std::to_string(mUnion.mVector3[1]) + ", " + std::to_string(mUnion.mVector3[2]) + "]";
 	default:
 		MADGINE_THROW(Scripting::ScriptingException("Unknown Type!"));
 	}

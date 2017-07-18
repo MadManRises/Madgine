@@ -8,13 +8,19 @@
 #include "api.h"
 
 
+extern "C" {
+#include <lua.h>                                /* Always include this when calling Lua */
+#include <lauxlib.h>                            /* Always include this when calling Lua */
+#include <lualib.h>                             /* Always include this when calling Lua */
+}
+
+
 namespace Engine {
 namespace Scripting {
 
 
 ScopeBase::ScopeBase() :
-	mGlobal(nullptr),
-	mTable(GlobalScopeBase::sNoRef)
+	mGlobal(nullptr)
 {
 	
 }
@@ -25,37 +31,37 @@ ScopeBase::~ScopeBase()
 
 bool ScopeBase::init()
 {
-	return init(-1);
+	return init({});
 }
 
 void ScopeBase::finalize() {
-	if (mTable != GlobalScopeBase::sNoRef) {
-		mGlobal->unregisterScope(this);
-		mTable = GlobalScopeBase::sNoRef;
-	}
+	mTable.clear();
 }
 
-bool ScopeBase::init(int tableId)
+bool ScopeBase::init(const LuaTable &table)
 {
 	if (!mGlobal) {
 		mGlobal = GlobalScopeBase::getSingletonPtr();
 		if (!mGlobal)
 			return false;
 	}
-	if (mTable != GlobalScopeBase::sNoRef)
+	if (mTable)
 		return false;
-	mTable = mGlobal->registerScope(this, tableId);
+	mTable = table ? table : mGlobal->createTable();
+	mTable.setLightUserdata("___scope___", this);
+	mTable.setMetatable("Interfaces.Scope");
+
 	return true;
 }
 
-void Engine::Scripting::ScopeBase::push()
+void ScopeBase::push()
 {
-	mGlobal->pushScope(mTable);
+	mTable.push();
 }
 
 ArgumentList ScopeBase::methodCall(const std::string &name, const ArgumentList &args)
 {
-	return mGlobal->callMethod(this, name, args);
+	return mTable.callMethod(name, args);
 }
 
 std::pair<bool, ArgumentList> ScopeBase::callMethodIfAvailable(const std::string & name, const ArgumentList & args)
@@ -80,15 +86,15 @@ std::pair<bool, ArgumentList> ScopeBase::callMethodCatch(const std::string & nam
 
 bool ScopeBase::hasMethod(const std::string &name)
 {
-	return mGlobal->hasMethod(this, name);
+	return mTable.hasFunction(name);
 }
 
-std::string ScopeBase::getIdentifier()
+std::string ScopeBase::getIdentifier() const
 {
 	return typeid(*this).name();
 }
 
-std::string ScopeBase::getName() {
+std::string ScopeBase::getName() const {
 	throw 0;
 }
 
@@ -102,9 +108,9 @@ std::unique_ptr<KeyValueIterator> Engine::Scripting::ScopeBase::iterator()
 	return maps().iterator();
 }
 
-KeyValueMapList Engine::Scripting::ScopeBase::maps()
+KeyValueMapList ScopeBase::maps()
 {
-	return KeyValueMapList();
+	return KeyValueMapList(this);
 }
 
 GlobalScopeBase * ScopeBase::globalScope()

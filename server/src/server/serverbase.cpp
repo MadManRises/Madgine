@@ -4,7 +4,7 @@
 
 #include "app/framelistener.h"
 
-API_IMPL(Engine::Server::ServerBase, MAP(shutdown));
+API_IMPL(Engine::Server::ServerBase, MAP_F(shutdown));
 
 namespace Engine {
 	namespace Server {
@@ -31,7 +31,7 @@ namespace Engine {
 
 			mLog.startConsole(mRunning, [this](const std::string &cmd) {return performCommand(cmd); });
 			
-			while (sendFrameStarted() && frame() && sendFrameEnded());
+			while (sendFrameStarted() && frame() && sendFrameEnded()) std::this_thread::yield();
 
 			stop();
 

@@ -96,7 +96,7 @@ namespace Engine {
 						}
 					}
 				}
-
+				std::this_thread::yield();
 			}
 			SetConsoleMode(input, fdwOldMode);
 #endif

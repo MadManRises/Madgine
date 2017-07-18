@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include "serialize/serializableunit.h"
 #include "serialize/container/set.h"
