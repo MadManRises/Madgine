@@ -155,7 +155,7 @@ int ValueType::apiMethodCaller(lua_State *state)
 {
 	int n = lua_gettop(state);
 	Engine::Scripting::ArgumentList args(state, n-1);
-	Scripting::ApiMethod method = static_cast<Scripting::ApiMethod>(lua_touserdata(state, lua_upvalueindex(1)));
+	Scripting::ApiMethod method = reinterpret_cast<Scripting::ApiMethod>(lua_touserdata(state, lua_upvalueindex(1)));
 	Engine::Scripting::ScopeBase *scope = fromStack(state, -1).as<Scripting::ScopeBase*>();
 	lua_pop(state, 1);
 	return (*method)(scope, args).push(state);
