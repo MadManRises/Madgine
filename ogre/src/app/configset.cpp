@@ -64,37 +64,37 @@ ConfigSet::ConfigSet(Ogre::Root *root, const std::string &configFileName) :
 
 bool ConfigSet::getFullscreen()
 {
-    return mSettings[fullScreenProperty].asBool(defaultFullScreen);
+    return mSettings[fullScreenProperty].asDefault<bool>(defaultFullScreen);
 }
 
 bool ConfigSet::getVSync()
 {
-    return mSettings[vSyncProperty].asBool(defaultVSync);
+    return mSettings[vSyncProperty].asDefault<bool>(defaultVSync);
 }
 
 int ConfigSet::getResolutionWidth()
 {
-    return mSettings[widthProperty].asInt(defaultResolutionWidth);
+    return mSettings[widthProperty].asDefault<int>(defaultResolutionWidth);
 }
 
 int ConfigSet::getResolutionHeight()
 {
-    return mSettings[heightProperty].asInt(defaultResolutionHeight);
+    return mSettings[heightProperty].asDefault<int>(defaultResolutionHeight);
 }
 
 int ConfigSet::getColorDepth()
 {
-    return mSettings[colorDepthProperty].asInt(defaultColorDepth);
+    return mSettings[colorDepthProperty].asDefault<int>(defaultColorDepth);
 }
 
 std::string ConfigSet::getLanguage()
 {
-    return mSettings[languageProperty].asString(defaultLanguage);
+    return mSettings[languageProperty].asDefault<std::string>(defaultLanguage);
 }
 
 std::string ConfigSet::getRenderSystem()
 {
-    return mSettings[renderSystemProperty].asString(defaultRenderSystem);
+    return mSettings[renderSystemProperty].asDefault<std::string>(defaultRenderSystem);
 }
 
 std::string ConfigSet::getResolutionAndColorDepthString()

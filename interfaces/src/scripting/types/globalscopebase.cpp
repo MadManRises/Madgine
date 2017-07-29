@@ -6,16 +6,8 @@
 #include "scopebase.h"
 
 
-extern "C" {
-#include <lua.h>                                /* Always include this when calling Lua */
-#include <lauxlib.h>                            /* Always include this when calling Lua */
-#include <lualib.h>                             /* Always include this when calling Lua */
-}
-
 namespace Engine {
 namespace Scripting {
-
-	const int GlobalScopeBase::sNoRef = LUA_NOREF;
 
 	GlobalScopeBase::GlobalScopeBase(const LuaTable &table) :
 	mTable(table)
@@ -37,23 +29,14 @@ namespace Scripting {
 
 		mTable.setMetatable("Interfaces.GlobalScope");
 
+		return true;
 	}
 
 	void GlobalScopeBase::finalize()
 	{
 		ScopeBase::finalize();
-	}
-
-
-	void GlobalScopeBase::addGlobal(ScopeBase * api)
-	{
-		assert(!api->getName().empty());
-		mGlobals[api->getName()] = api;
-	}
-
-	void GlobalScopeBase::removeGlobal(ScopeBase * api)
-	{
-		mGlobals.erase(api->getName());
+		mTable.clear();
+		mScopes.clear();
 	}
 
 	void GlobalScopeBase::executeString(const std::string &cmd) {
@@ -66,12 +49,9 @@ namespace Scripting {
 	}
 
 
-	
-
-
-	KeyValueMapList GlobalScopeBase::maps()
+	LuaTable GlobalScopeBase::table()
 	{
-		return ScopeBase::maps().merge(mGlobals);
+		return mTable;
 	}
 
 	lua_State * GlobalScopeBase::lua_state()

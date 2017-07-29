@@ -56,7 +56,7 @@ namespace Engine {
 			endSubProcess();
 		}
 
-		void Engine::Resources::ResourceLoader::loadScripts()
+		void ResourceLoader::loadScripts()
 		{
 			mRgm->initialiseResourceGroup("Scripting");
 			mParser->makeFinalized();

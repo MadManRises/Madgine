@@ -18,7 +18,7 @@ namespace Engine {
 			mPower = power;
 		}
 
-		void Light::setPosition(const std::array<float, 3>& position)
+		void Light::setPosition(const Vector3& position)
 		{
 			mPosition = position;
 		}
@@ -28,7 +28,7 @@ namespace Engine {
 			return mPower;
 		}
 
-		const std::array<float, 3>& Light::position()
+		const Vector3& Light::position()
 		{
 			return mPosition;
 		}
@@ -37,7 +37,7 @@ namespace Engine {
 		{
 		}
 
-		void Light::onPositionChanged(const std::array<float, 3>& position)
+		void Light::onPositionChanged(const Vector3& position)
 		{
 		}
 

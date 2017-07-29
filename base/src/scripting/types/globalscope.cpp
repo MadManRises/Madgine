@@ -2,14 +2,16 @@
 #include "globalscope.h"
 #include "scripting/parsing/scriptparser.h"
 
+#include "app/application.h"
 
 namespace Engine {
 namespace Scripting {
 
 
 
-	GlobalScope::GlobalScope(const LuaTable &table) :
-		GlobalScopeBase(table)
+	GlobalScope::GlobalScope(const LuaTable &table, App::Application *app) :
+		GlobalScopeBase(table),
+		mApp(app)
 	{
 	}
 
@@ -51,6 +53,11 @@ void GlobalScope::update()
 	for (const std::unique_ptr<GlobalAPIComponentBase> &p : mGlobalAPIs) {
 		p->update();
 	}
+}
+
+KeyValueMapList GlobalScope::maps()
+{
+	return GlobalScopeBase::maps().merge(mGlobalAPIs).merge(mApp->maps());
 }
 
 

@@ -165,7 +165,8 @@ Entity::Entity * ServerSceneManager::findEntity(const std::string & name)
 
 Scripting::KeyValueMapList ServerSceneManager::maps()
 {
-	return SceneManager::maps().merge(mEntities);
+
+	return SceneManager::maps().merge(Scripting::transformIt<Scripting::ToPointerConverter>(mEntities));
 }
 
 }

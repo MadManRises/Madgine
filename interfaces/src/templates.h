@@ -42,6 +42,18 @@ namespace Engine {
 
 
 
+	template <class V, class T>
+	struct variant_contains;
+
+	template <class T>
+	struct variant_contains<std::variant<>, T> {
+		const constexpr static bool value = false;
+	};
+
+	template <class U, class... V, class T>
+	struct variant_contains<std::variant<U, V...>, T> {
+		const constexpr static bool value = std::is_same<U, T>::value || variant_contains<std::variant<V...>, T>::value;
+	};
 
 	struct TupleSerializer {
 
@@ -231,7 +243,15 @@ namespace Engine {
 	using CopyTraits = std::conditional_t<custom_is_copy_constructible<T>::value, CopyType, NonCopyType>;
 
 
+	template <class T>
+	class is_iterable {
+	private:
+		template<typename C> static std::true_type Test(void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>*);
+		template<typename> static std::false_type Test(...);
 
+	public:
+		static bool const constexpr value = decltype(Test<T>(0))::value;
+	};
 
 }
 

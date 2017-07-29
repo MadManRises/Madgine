@@ -7,35 +7,27 @@
 namespace Engine {
 	namespace Scripting {
 
-		std::pair<bool, Engine::ValueType> toValueType(ScopeBase *ref, const Mapper &mapper) {
-			return mapper.mToValueType ? mapper.mToValueType(ref) : std::pair<bool, Engine::ValueType>{false, ValueType{}};
+		Engine::ValueType toValueType(ScopeBase *ref, const Mapper &mapper) {
+			return mapper.mToValueType ? mapper.mToValueType(ref) : ValueType{};
 		}
 
-		int KeyValueMapList::resolve(lua_State * state, const std::string & key)
+		std::pair<bool, ValueType> KeyValueMapList::get(const std::string & key)
 		{
-			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
-				if (int i = p->resolve(state, mRef, key))
-					return i;
+			for (const std::unique_ptr<KeyValueRef> &p : *this) {
+				std::pair<bool, ValueType> v = p->get(key);
+				if (v.first)
+					return v;
 			}
-			return 0;
+			return { false, ValueType{} };
 		}
 
 		bool KeyValueMapList::contains(const std::string & key)
 		{
-			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
+			for (const std::unique_ptr<KeyValueRef> &p : *this) {
 				if (p->contains(key))
 					return true;
 			}
 			return false;
-		}
-
-		std::pair<bool, Engine::ValueType> KeyValueMapList::at(const std::string & key)
-		{
-			for (const std::unique_ptr<KeyValueMapRef> &p : *this) {
-				if (p->contains(key))
-					return p->at(key);
-			}
-			throw 0;
 		}
 
 		std::unique_ptr<KeyValueIterator> KeyValueMapList::iterator()
@@ -48,7 +40,7 @@ namespace Engine {
 		{
 			mIterators.reserve(list.size());
 			std::transform(list.begin(), list.end(), std::back_inserter(mIterators),
-				[](const std::unique_ptr<KeyValueMapRef> &m) {
+				[](const std::unique_ptr<KeyValueRef> &m) {
 				return m->iterator(); 
 			});
 			validate();
@@ -59,7 +51,7 @@ namespace Engine {
 			return mIterators.at(mIndex)->key();
 		}
 
-		std::pair<bool, ValueType> Engine::Scripting::KeyValueMapListIterator::value()
+		ValueType Engine::Scripting::KeyValueMapListIterator::value()
 		{
 			return mIterators.at(mIndex)->value();
 		}
@@ -68,11 +60,6 @@ namespace Engine {
 		{
 			++(*mIterators.at(mIndex));
 			validate();
-		}
-
-		int KeyValueMapListIterator::push(lua_State * state)
-		{
-			return mIterators.at(mIndex)->push(state);
 		}
 
 		bool KeyValueMapListIterator::ended()
@@ -88,23 +75,23 @@ namespace Engine {
 
 		KeyValueMapList KeyValueMapList::merge(KeyValueMapList && other) &&
 		{
-			mMaps.reserve(size() + other.size());
-			std::move(other.mMaps.begin(), other.mMaps.end(), std::back_inserter(mMaps));
+			mRefs.reserve(size() + other.size());
+			std::move(other.mRefs.begin(), other.mRefs.end(), std::back_inserter(mRefs));
 			return std::forward<KeyValueMapList>(*this);
 		}
 
-		std::vector<std::unique_ptr<KeyValueMapRef>>::const_iterator KeyValueMapList::begin() const
+		std::vector<std::unique_ptr<KeyValueRef>>::const_iterator KeyValueMapList::begin() const
 		{
-			return mMaps.begin();
+			return mRefs.begin();
 		}
 
-		std::vector<std::unique_ptr<KeyValueMapRef>>::const_iterator KeyValueMapList::end() const
+		std::vector<std::unique_ptr<KeyValueRef>>::const_iterator KeyValueMapList::end() const
 		{
-			return mMaps.end();
+			return mRefs.end();
 		}
 
 		size_t KeyValueMapList::size() const {
-			return mMaps.size();
+			return mRefs.size();
 		}
 
 	}

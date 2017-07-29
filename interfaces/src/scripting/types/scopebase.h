@@ -30,7 +30,7 @@ public:
 
 	void push();
 
-	int resolve(lua_State *state, const std::string &key);
+	std::pair<bool, ValueType> get(const std::string &key);
 	std::unique_ptr<KeyValueIterator> iterator();
 
 	virtual KeyValueMapList maps();

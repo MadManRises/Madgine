@@ -12,9 +12,9 @@ Engine::Scene::OgreLight::~OgreLight()
 	mLight->_getManager()->destroyLight(mLight);
 }
 
-void Engine::Scene::OgreLight::onPositionChanged(const std::array<float, 3>& position)
+void Engine::Scene::OgreLight::onPositionChanged(const Vector3& position)
 {
-	mLight->setPosition(Ogre::Vector3(position.data()));
+	mLight->setPosition(Ogre::Vector3(position.ptr()));
 }
 
 void Engine::Scene::OgreLight::onPowerChanged(float power)

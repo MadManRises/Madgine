@@ -22,6 +22,8 @@ namespace Engine {
 
 	namespace UI {
 
+		const std::string UIManager::sName = "UI";
+
 
 		UIManager::UIManager(GUI::GUISystem *gui) :
 			mCurrentRoot(nullptr),
@@ -34,12 +36,12 @@ namespace Engine {
 		{			
 		}
 
-		bool Engine::UI::UIManager::preInit()
+		bool UIManager::preInit()
 		{
 			for (const std::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
 				if (!handler->init(-1))
 					return false;
-			return GlobalAPIComponentBase::init();
+			return MadgineObject::init();
 		}
 
 		bool UIManager::init()
@@ -70,7 +72,7 @@ namespace Engine {
 				for (const std::unique_ptr<UI::GuiHandlerBase> &handler : mGuiHandlers)
 					handler->finalize(i);
 
-			GlobalAPIComponentBase::finalize();
+			MadgineObject::finalize();
 		}
 
 		void UIManager::clear()
@@ -210,6 +212,11 @@ namespace Engine {
 		Scripting::KeyValueMapList UIManager::maps()
 		{
 			return Scope::maps().merge(mGuiHandlers, mGameHandlers);
+		}
+
+		const std::string & UIManager::key() const
+		{
+			return sName;
 		}
 
 	}

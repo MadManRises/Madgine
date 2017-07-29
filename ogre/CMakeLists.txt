@@ -30,7 +30,7 @@ FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreun
 		FolderSources(sources resources imagesets imagesetmanager.cpp imagesetmanager.h)
 	FolderSources(sources src scripting)
 		FolderSources(sources scripting parsing ogrescriptparser.cpp ogrescriptparser.h)
-	FolderSources(sources src serialize ogreserialize.cpp ogreserialize.h ogrestreamreader.cpp ogrestreamreader.h)
+	FolderSources(sources src serialize ogrestreamreader.cpp ogrestreamreader.h)
 	FolderSources(sources src ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
 	FolderSources(sources src util profiler.cpp profiler.h)
 

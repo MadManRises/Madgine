@@ -118,7 +118,7 @@ bool OgreApplication::init()
 		return false;
 
 	std::pair<bool, Scripting::ArgumentList> res = globalScope()->callMethodIfAvailable("afterViewInit");
-	if (res.first && !res.second.empty() && (!res.second.front().isBool() || !res.second.front().asBool()))
+	if (res.first && !res.second.empty() && (!res.second.front().is<bool>() || !res.second.front().as<bool>()))
 		return false;
 
 	mLoader->load();
@@ -323,6 +323,11 @@ void OgreApplication::renderFrame()
 {
 	mGUI->renderSingleFrame();
 	mWindow->update();
+}
+
+Scripting::KeyValueMapList OgreApplication::maps()
+{
+	return Application::maps().merge(mUI);
 }
 
 }

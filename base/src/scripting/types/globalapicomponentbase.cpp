@@ -9,18 +9,10 @@ namespace Engine {
 	namespace Scripting {
 
 		bool GlobalAPIComponentBase::init() {
-			if (MadgineObject::init()) {
-				globalScope()->addGlobal(this);
-				return true;
-			}
-			else
-				return false;
+			return MadgineObject::init();
 		}
 		void GlobalAPIComponentBase::finalize() {
 			MadgineObject::finalize();
-			if (globalScope()) {
-				globalScope()->removeGlobal(this);
-			}
 		}
 
 		void GlobalAPIComponentBase::clear() {

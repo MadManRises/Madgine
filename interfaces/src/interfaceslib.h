@@ -32,6 +32,7 @@
 #include <thread>
 #include <queue>
 #include <mutex>
+#include <variant>
 
 #include <assert.h>
 

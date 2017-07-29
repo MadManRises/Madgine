@@ -1,8 +1,10 @@
 #pragma once
 
+#include "templates.h"
+#include "scripting/datatypes/luatable.h"
 
-
-
+#include "math/vector2.h"
+#include "math/vector3.h"
 
 namespace Engine {
 
@@ -18,274 +20,128 @@ namespace Engine {
 		Scripting::ScopeBase *mPtr;
 	};
 
-	template <class T>
-	struct externValueType {
-		const constexpr static bool value = false;
+	class ValueTypeException : public std::exception {
+
 	};
+
+class INTERFACES_EXPORT ValueType {
+private:
+	class EOLType {
+	public:
+		constexpr bool operator==(const EOLType &) const { return true; }
+	};
+
+	using Union = std::variant<
+		std::monostate,
+		std::string,
+		bool,
+		int,
+		size_t,
+		float,
+		Scripting::ScopeBase *,
+		InvScopePtr,
+		std::array<float, 4>,
+		Vector3,
+		Vector2,
+		EOLType,
+		std::shared_ptr<Scripting::KeyValueIterator>,
+		Scripting::ApiMethod,
+		Scripting::LuaTable,
+		Scripting::LuaThread
+	>;	
 
 	template <class T>
 	struct _isValueType {
-		const constexpr static bool value = false;
+		const constexpr static bool value = variant_contains<Union, T>::value;
 	};
 
-	template <>
-	struct _isValueType<int> {
-		const constexpr static bool value = true;
+public:
+
+	enum class Type : unsigned char {
+		NullValue,
+		StringValue,
+		BoolValue,
+		IntValue,
+		UIntValue,
+		FloatValue,
+		ScopeValue,
+		InvScopePtrValue,		
+		Vector4Value,
+		Vector3Value,
+		Vector2Value,		
+		EndOfListValue,
+		KeyValueIteratorValue,
+		ApiMethodValue,
+		LuaTableValue,
+		LuaStateValue,
+
+		MAX_TYPE_VALUE
 	};
 
-	template <>
-	struct _isValueType<size_t> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<std::string> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<std::array<float, 4>> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<std::array<float, 3>> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<std::array<float, 2>> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<float> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<bool> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<InvScopePtr> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<Scripting::ScopeBase *> {
-		const constexpr static bool value = true;
-	};
-
-	template <>
-	struct _isValueType<ValueType> {
-		const constexpr static bool value = true;
-	};
 
 	template <class T>
 	struct isValueType {
 		const constexpr static bool value = _isValueType<std::remove_const_t<T>>::value || std::is_enum<T>::value;
 	};
 
-
-class INTERFACES_EXPORT ValueType {
-public:
-	ValueType() :
-		mType(Type::NullValue)
+	ValueType()
 	{
 
 	}
 	ValueType(const ValueType &other) :
-		mType(other.mType)
-	{
-		if (mType == Type::StringValue) {
-			mUnion.mString = new std::string(*other.mUnion.mString);
-		}
-		else {
-			mUnion = other.mUnion;
-		}
-	}
-	ValueType(ValueType &&other) :
-		mType(other.mType),
 		mUnion(other.mUnion)
 	{
-		other.mType = Type::NullValue;
+	}
+	ValueType(ValueType &&other) :
+		mUnion(std::forward<decltype(other.mUnion)>(other.mUnion))
+	{
 	}
 
-	explicit ValueType(Scripting::ScopeBase *e) :
-		mType(Type::ScopeValue)
-	{
-		mUnion.mScope = e;
-	}
-	explicit ValueType(const std::string &s) :
-		mType(Type::StringValue)
-	{
-		mUnion.mString = new std::string(s);
-	}
-	explicit ValueType(const char *s) :
-		mType(Type::StringValue)
-	{
-		mUnion.mString = new std::string(s);
-	}
-	explicit ValueType(bool b) :
-		mType(Type::BoolValue)
-	{
-		mUnion.mBool = b;
-	}
-	explicit ValueType(int i) :
-		mType(Type::IntValue)
-	{
-		mUnion.mInt = i;
-	}
-	explicit ValueType(size_t s) :
-		mType(Type::UIntValue)
-	{
-		mUnion.mUInt = s;
-	}
-	explicit ValueType(float f) :
-		mType(Type::FloatValue)
-	{
-		mUnion.mFloat = f;
-	}
-	explicit ValueType(const std::array<float, 4> &v) :
-		mType(Type::Vector4Value)
-	{
-		mUnion.mVector4 = v;
-	}
-	explicit ValueType(const std::array<float, 3> &v) :
-		mType(Type::Vector3Value)
-	{
-		mUnion.mVector3 = v;
-	}
-	explicit ValueType(const std::array<float, 2> &v) :
-		mType(Type::Vector2Value)
-	{
-		mUnion.mVector2 = v;
-	}
-	explicit ValueType(InvScopePtr s) :
-		mType(Type::InvScopePtrValue)
-	{
-		mUnion.mInvPtr = s;
-	}
 
-	template <class T, class _ = std::enable_if_t<externValueType<T>::value>>
-	explicit ValueType(const T &);
+	template <class T, class _ = std::enable_if_t<_isValueType<T>::value>>
+	explicit ValueType(const T &v);
 
 	template <class T, class _ = std::enable_if_t<std::is_enum<T>::value>>
 	explicit ValueType(T val) :
 		ValueType(static_cast<int>(val)) {}
+
+	explicit ValueType(const char *s) :
+		ValueType(std::string(s)) {}
+
+	template <class T, class _ = std::enable_if_t<std::is_base_of<Scripting::ScopeBase, T>::value && !std::is_same<Scripting::ScopeBase, T>::value>>
+		explicit ValueType(T *val) :
+			ValueType(static_cast<Scripting::ScopeBase*>(val)) {}
 
 	~ValueType()
 	{
 		clear();
 	}
 
+	static ValueType fromStack(lua_State *state, int index);
+	int push(lua_State *state) const;
+
 	void clear()
 	{
-		setType(Type::NullValue);
+		mUnion = std::monostate();
 	}
 
     void operator=(const ValueType &other)
 	{
-		if (setType(other.mType)) {
-			if (mType == Type::StringValue)
-				mUnion.mString = new std::string(*other.mUnion.mString);
-			else
-				mUnion = other.mUnion;
-		}
-		else {
-			if (mType == Type::StringValue)
-				*mUnion.mString = *other.mUnion.mString;
-			else
-				mUnion = other.mUnion;
-		}
+		mUnion = other.mUnion;
 	}
-    void operator=(Scripting::ScopeBase *s)
+	template <class T, class _ = std::enable_if_t<isValueType<T>::value>>
+    void operator=(const T &t)
 	{
-		setType(Type::ScopeValue);
-		mUnion.mScope = s;
-	}
-    void operator=(const std::string &s)
-	{
-		if (setType(Type::StringValue)) {
-			mUnion.mString = new std::string(s);
-		}
-		else {
-			*mUnion.mString = s;
-		}
-	}
-    void operator=(bool b)
-	{
-		setType(Type::BoolValue);
-		mUnion.mBool = b;
-	}
-    void operator=(int i)
-	{
-		setType(Type::IntValue);
-		mUnion.mInt = i;
-	}
-	void operator=(size_t i)
-	{
-		setType(Type::UIntValue);
-		mUnion.mUInt = i;
-	}
-    void operator=(float f)
-	{
-		setType(Type::FloatValue);
-		mUnion.mFloat = f;
-	}
-	void operator=(const std::array<float, 2> &v)
-	{
-		setType(Type::Vector2Value);
-		mUnion.mVector2 = v;
-	}
-	void operator=(const std::array<float, 3> &v)
-	{
-		setType(Type::Vector3Value);
-		mUnion.mVector3 = v;
-	}
-	void operator=(const std::array<float, 4> &v)
-	{
-		setType(Type::Vector4Value);
-		mUnion.mVector4 = v;
+		mUnion = t;
 	}
 	void operator=(const char *s)
 	{
 		*this = std::string(s);
 	}
-	void operator=(InvScopePtr p)
-	{
-		setType(Type::InvScopePtrValue);
-		mUnion.mInvPtr = p;
-	}
 
     bool operator==(const ValueType &other) const
 	{
-		if (other.mType != mType)
-			return false;
-		switch (mType) {
-		case Type::StringValue:
-			return *mUnion.mString == *other.mUnion.mString;
-		case Type::BoolValue:
-			return mUnion.mBool == other.mUnion.mBool;
-		case Type::ScopeValue:
-			return mUnion.mScope == other.mUnion.mScope;
-		case Type::IntValue:
-			return mUnion.mInt == other.mUnion.mInt;
-		case Type::FloatValue:
-			return mUnion.mFloat == other.mUnion.mFloat;
-		case Type::Vector4Value:
-			return mUnion.mVector4 == other.mUnion.mVector4;
-		case Type::Vector3Value:
-			return mUnion.mVector3 == other.mUnion.mVector3;
-		case Type::Vector2Value:
-			return mUnion.mVector2 == other.mUnion.mVector2;
-		case Type::NullValue:
-			return true;
-		default:
-			MADGINE_THROW(Scripting::ScriptingException(Exceptions::invalidValueType));
-		}
+		return mUnion == other.mUnion;
 	}
 	bool operator!=(const ValueType &other) const
 	{
@@ -293,20 +149,20 @@ public:
 	}
     bool operator <(const ValueType &other) const
 	{
-		switch (mType) {
+		switch (type()) {
 		case Type::StringValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::StringValue:
-				return *mUnion.mString < *other.mUnion.mString;
+				return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
 			default:
 				throw Scripting::ScriptingException(Exceptions::invalidValueType);
 			}
 		case Type::IntValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				return mUnion.mInt < other.mUnion.mInt;
+				return std::get<int>(mUnion) < std::get<int>(other.mUnion);
 			case Type::FloatValue:
-				return mUnion.mInt < other.mUnion.mFloat;
+				return std::get<int>(mUnion) < std::get<float>(other.mUnion);
 			default:
 				throw Scripting::ScriptingException(Exceptions::invalidValueType);
 			}
@@ -321,26 +177,26 @@ public:
 
     void operator+=(const ValueType &other)
 	{
-		switch (mType) {
+		switch (type()) {
 		case Type::StringValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::StringValue:
-				*mUnion.mString += *other.mUnion.mString;
+				std::get<std::string>(mUnion) += std::get<std::string>(other.mUnion);
 				return;
 			case Type::IntValue:
-				*mUnion.mString += std::to_string(other.mUnion.mInt);
+				std::get<std::string>(mUnion) += std::to_string(std::get<int>(other.mUnion));
 				return;
 			default:
 				break;
 			}
 			break;
 		case Type::IntValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mInt += other.mUnion.mInt;
+				std::get<int>(mUnion) += std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				(*this) = mUnion.mInt + other.mUnion.mFloat;
+				(*this) = std::get<int>(mUnion) + std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
@@ -359,14 +215,14 @@ public:
 	}
 
 	void operator-=(const ValueType &other) {
-		switch (mType) {
+		switch (type()) {
 		case Type::IntValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mInt -= other.mUnion.mInt;
+				std::get<int>(mUnion) -= std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				(*this) = mUnion.mInt - other.mUnion.mFloat;
+				(*this) = std::get<int>(mUnion) - std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
@@ -385,26 +241,26 @@ public:
 
 	void operator/=(const ValueType &other)
 	{
-		switch (mType) {
+		switch (type()) {
 		case Type::IntValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mInt /= other.mUnion.mInt;
+				std::get<int>(mUnion) /= std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				(*this) = mUnion.mInt / other.mUnion.mFloat;
+				(*this) = std::get<int>(mUnion) / std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
 			}
 			break;
 		case Type::FloatValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mFloat /= other.mUnion.mInt;
+				std::get<float>(mUnion) /= std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				mUnion.mFloat /= other.mUnion.mFloat;
+				std::get<float>(mUnion) /= std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
@@ -424,26 +280,26 @@ public:
 
 	void operator*=(const ValueType &other)
 	{
-		switch (mType) {
+		switch (type()) {
 		case Type::IntValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mInt *= other.mUnion.mInt;
+				std::get<int>(mUnion) *= std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				(*this) = mUnion.mInt * other.mUnion.mFloat;
+				(*this) = std::get<int>(mUnion) * std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
 			}
 			break;
 		case Type::FloatValue:
-			switch (other.mType) {
+			switch (other.type()) {
 			case Type::IntValue:
-				mUnion.mFloat *= other.mUnion.mInt;
+				std::get<float>(mUnion) *= std::get<int>(other.mUnion);
 				return;
 			case Type::FloatValue:
-				mUnion.mFloat *= other.mUnion.mFloat;
+				std::get<float>(mUnion) *= std::get<float>(other.mUnion);
 				return;
 			default:
 				break;
@@ -461,232 +317,12 @@ public:
 		return result;
 	}
 
-	bool isVector2() const
-	{
-		return mType == Type::Vector2Value;
-	}
-
-	const std::array<float, 2> &asVector2() const
-	{
-		if (mType != Type::Vector2Value) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Vector2")));
-		return mUnion.mVector2;
-	}
-	const std::array<float, 2> &asVector2(const std::array<float, 2> &v)
-	{
-		if (mType != Type::Vector2Value) {
-			if (mType == Type::NullValue)
-				*this = v;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mVector2;
-	}
-
-
-	bool isVector3() const
-	{
-		return mType == Type::Vector3Value;
-	}
-	const std::array<float, 3> &asVector3() const
-	{
-		if (mType != Type::Vector3Value) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Vector3")));
-		return mUnion.mVector3;
-	}
-	const std::array<float, 3> &asVector3(const std::array<float, 3> &v)
-	{
-		if (mType != Type::Vector3Value) {
-			if (mType == Type::NullValue)
-				*this = v;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mVector3;
-	}
-
-
-	bool isVector4() const
-	{
-		return mType == Type::Vector4Value;
-	}
-	const std::array<float, 4> &asVector4() const
-	{
-		if (mType != Type::Vector4Value) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Vector4")));
-		return mUnion.mVector4;
-	}
-	const std::array<float, 4> &asVector4(const std::array<float, 4> &v)
-	{
-		if (mType != Type::Vector4Value) {
-			if (mType == Type::NullValue)
-				*this = v;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mVector4;
-	}
-	bool isScope() const
-	{
-		return mType == Type::ScopeValue;
-	}
-	Scripting::ScopeBase *asScope() const
-	{
-		if (mType != Type::ScopeValue) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Scope")));
-		return mUnion.mScope;
-	}
-	Scripting::ScopeBase *asScope(Scripting::ScopeBase *s)
-	{
-		if (mType != Type::ScopeValue) {
-			if (mType == Type::NullValue) {
-				*this = s;
-			}
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mScope;
-	}
-	bool isInvPtr() const
-	{
-		return mType == Type::InvScopePtrValue;
-	}
-	const InvScopePtr &asInvPtr() const
-	{
-		if (mType != Type::InvScopePtrValue) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("InvScope")));
-		return mUnion.mInvPtr;
-	}
-	const InvScopePtr &asInvPtr(InvScopePtr s)
-	{
-		if (mType != Type::InvScopePtrValue) {
-			if (mType == Type::NullValue)
-				*this = s;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mInvPtr;
-	}
-	bool isString() const
-	{
-		return mType == Type::StringValue;
-	}
-	const std::string &asString() const
-	{
-		if (mType != Type::StringValue)
-			MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Exceptions::notValueType("String")));
-		return *mUnion.mString;
-	}
-	const std::string &asString(const std::string &s)
-	{
-		if (mType != Type::StringValue) {
-			if (mType == Type::NullValue)
-				*this = s;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return *mUnion.mString;
-	}
-	bool isBool() const
-	{
-		return mType == Type::BoolValue;
-	}
-	bool asBool() const
-	{
-		if (mType != Type::BoolValue) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Bool")));
-		return mUnion.mBool;
-	}
-	bool asBool(bool b)
-	{
-		if (mType != Type::BoolValue) {
-			if (mType == Type::NullValue)
-				*this = b;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mBool;
-	}
-	bool isInt() const
-	{
-		return mType == Type::IntValue;
-	}
-	int asInt() const
-	{
-		if (mType != Type::IntValue)
-			MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Int")));
-		return mUnion.mInt;
-	}
-	int asInt(int i)
-	{
-		if (mType != Type::IntValue) {
-			if (mType == Type::NullValue)
-				*this = i;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mInt;
-	}
-	bool isUInt() const
-	{
-		return mType == Type::UIntValue;
-	}
-	size_t asUInt() const
-	{
-		if (mType != Type::UIntValue)
-			MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("UInt")));
-		return mUnion.mUInt;
-	}
-	size_t asUInt(size_t i)
-	{
-		if (mType != Type::UIntValue) {
-			if (mType == Type::NullValue)
-				*this = i;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return mUnion.mUInt;
-	}
-	bool isFloat() const
-	{
-		return mType == Type::FloatValue;
-	}
-	float asFloat() const
-	{
-		if (mType != Type::FloatValue
-			&& mType != Type::IntValue) MADGINE_THROW(Scripting::ScriptingException(Exceptions::notValueType("Float")));
-		if (mType == Type::IntValue) return static_cast<float>(mUnion.mInt);
-		return mUnion.mFloat;
-	}
-	float asFloat(float f)
-	{
-		if (mType != Type::FloatValue && mType != Type::IntValue) {
-			if (mType == Type::NullValue)
-				*this = f;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		if (mType == Type::IntValue) return static_cast<float>(mUnion.mInt);
-		return mUnion.mFloat;
-	}
-	bool isNull() const
-	{
-		return mType == Type::NullValue;
-	}
-	bool isEOL() const
-	{
-		return mType == Type::EndOfListValue;
-	}
-	const ValueType &asDefault(const ValueType &defaultValue)
-	{
-		if (mType != defaultValue.mType) {
-			if (mType == Type::NullValue)
-				*this = defaultValue;
-			else
-				MADGINE_THROW(Scripting::ScriptingException("Can't assign default value to non-Null variable!"));
-		}
-		return *this;
-	}
-
+	
 	std::string toString() const;
 
 	std::string getTypeString() const
 	{
-		switch (mType) {
+		switch (type()) {
 		case Type::BoolValue:
 			return "Bool";
 		case Type::EndOfListValue:
@@ -716,27 +352,40 @@ public:
 
 	static ValueType EOL()
 	{
-		ValueType v;
-		v.mType = Type::EndOfListValue;
+		ValueType v(EOLType{});
 		return v;
+	}
+
+	bool isEOL() {
+		return type() == Type::EndOfListValue;
 	}
 
 public:
 
 	template <class T>
-	std::enable_if_t<_isValueType<T>::value, bool> is() const;
+	std::enable_if_t<_isValueType<T>::value, bool> is() const {
+		return std::holds_alternative<T>(mUnion);
+	}
 
 	template <class T>
 	std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, bool> is() const {
-		return isInt();
+		return is<int>();
 	}
 	
-
     template <class T>
-    std::enable_if_t<(!std::is_class<T>::value && _isValueType<T>::value) || externValueType<T>::value, T> as() const;
+	std::enable_if_t<_isValueType<T>::value, const T&> as() const {
+		try {
+			return std::get<T>(mUnion);
+		}
+		catch (const std::bad_variant_access &) {
+			throw ValueTypeException();
+		}
+	}
 
-    template <class T>
-    std::enable_if_t<std::is_class<T>::value && _isValueType<T>::value, const T&> as() const;
+	template <class T>
+	std::enable_if_t<std::is_same<T, ValueType>::value, const ValueType&> as() const {
+		return *this;
+	}
 
 	template <class T>
 	std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, T> as() const {
@@ -744,61 +393,35 @@ public:
 	}
 
     template <class T>
-	std::enable_if_t<!std::is_class<T>::value && _isValueType<T>::value, T> asDefault(T defaultValue);
+	std::enable_if_t<isValueType<T>::value, const T&> asDefault(const T &defaultValue) {
+		if (!is<T>()) {
+			mUnion = defaultValue;
+		}
+		return as<T>();
+	}
 
-    template <class T>
-	std::enable_if_t<std::is_class<T>::value && _isValueType<T>::value, const T &> asDefault(const T &defaultValue);
-
-	template <class T>
-	std::enable_if_t<externValueType<T>::value, T> asDefault(const T &defaultValue);
 
 
-	enum class Type : unsigned char {
-		BoolValue,
-		ScopeValue,
-		InvScopePtrValue,
-		IntValue,
-		UIntValue,
-        FloatValue,
-        StringValue,
-		Vector4Value,
-        Vector3Value,
-		Vector2Value,
-        NullValue,
-		EndOfListValue,
-		MAX_TYPE_VALUE
-    } mType;
+	
 
 	Type type() const {
-		return mType;
+		return static_cast<Type>(mUnion.index());
 	}
 
 private:
-    union {
-        bool mBool;
-		Scripting::ScopeBase *mScope;
-        InvScopePtr mInvPtr;
-        int mInt;
-		size_t mUInt;
-        float mFloat;
-        std::string *mString;
-		std::array<float, 4> mVector4;
-		std::array<float, 3> mVector3;
-		std::array<float, 2> mVector2;
-    } mUnion;
 
-	bool setType(Type t)
-	{
-		if (mType == t) return false;
-		if (mType == Type::StringValue)
-			delete mUnion.mString;
-		mType = t;
-		return true;
-	}
+	static int apiMethodCaller(lua_State *);
+
+	Union mUnion;
 
 };
 
 
+template <class T, class _>
+ValueType::ValueType(const T &v) :
+mUnion(v)
+{
+}
 
 }
 

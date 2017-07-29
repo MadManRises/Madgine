@@ -10,9 +10,8 @@ namespace Engine {
 		class MADGINE_SERVER_EXPORT ServerAppInstance {
 		public:
 			template <class T>
-			ServerAppInstance(T &&initCallback, Scripting::Parsing::ScriptParser &parser) :
-				mParser(parser),
-				mTable(parser.createThread()),
+			ServerAppInstance(T &&initCallback, const Scripting::LuaTable &table) :				
+				mTable(table),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
@@ -23,7 +22,8 @@ namespace Engine {
 			virtual ~ServerAppInstance();
 
 			const std::string &key() const;
-			int push(lua_State *state) const;
+
+			ValueType toValueType() const;
 
 		protected:
 			template <class T>
@@ -43,8 +43,7 @@ namespace Engine {
 				}
 			}
 
-		private:
-			Scripting::Parsing::ScriptParser &mParser;
+		private:			
 			Scripting::LuaTable mTable;			
 			App::ServerApplication *mApplication;
 
@@ -55,13 +54,6 @@ namespace Engine {
 			std::thread mThread;
 		};
 
-	}
-
-	namespace Scripting {
-		template <>
-		struct MADGINE_SERVER_EXPORT LuaHelper<Server::ServerAppInstance> {
-			static int push(lua_State *state, const Server::ServerAppInstance &it);
-		};
 	}
 
 }

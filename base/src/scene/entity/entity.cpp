@@ -13,6 +13,7 @@
 
 #include "scripting/parsing/scriptparser.h"
 
+#include "scripting/types/globalscope.h"
 
 namespace Engine {
 
@@ -43,6 +44,7 @@ Entity::Entity(const std::string &behaviour, const std::string &name) :
 	mName(name),
 	mBehaviour(behaviour)
 {
+	
 }
 
 Entity::~Entity()
@@ -57,7 +59,19 @@ bool Entity::init()
 	if (!Scope::init())
 		return false;
 
-
+	if (!mBehaviour.empty()) {
+		ValueType table = Scripting::GlobalScope::getSingleton().table().getValue(mBehaviour);
+		if (!table.is<Scripting::LuaTable>())
+			throw 0;
+		for (const std::pair<std::string, ValueType> &p : table.as<Scripting::LuaTable>()) {
+			if (p.second.is<Scripting::LuaTable>()) {
+				addComponent(p.first, p.second.as<Scripting::LuaTable>());
+			}
+			else {
+				LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
+			}
+		}
+	}
 
 	return true;
 }
@@ -86,7 +100,7 @@ std::string Entity::getIdentifier() const
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
 	SerializableUnitBase::writeCreationData(of);
-    of << mName << mName << getObjectName();
+    of << mBehaviour << mName << getObjectName();
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)
@@ -173,7 +187,7 @@ void Entity::writeState(Serialize::SerializeOutStream &of) const
 
 void Entity::readState(Serialize::SerializeInStream &ifs)
 {
-	std::array<float, 3> v;
+	Vector3 v;
 	ifs >> v;
 	setPosition(v);
 
@@ -188,13 +202,18 @@ void Entity::readState(Serialize::SerializeInStream &ifs)
 }
 
 std::array<float, 2> Entity::getCenter2D() const {
-	std::array<float, 3> c = getCenter();
-	return{ { c[0], c[2] } };
+	Vector3 c = getCenter();
+	return{ { c.x, c.z } };
 }
 
 std::array<float, 2> Entity::getPosition2D() const {
-	std::array<float, 3> p = getPosition();
-	return{ { p[0], p[2] } };
+	Vector3 p = getPosition();
+	return{ { p.x, p.z } };
+}
+
+Scripting::KeyValueMapList Entity::maps()
+{
+	return Scope::maps().merge(mComponents);
 }
 
 }

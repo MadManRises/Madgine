@@ -12,21 +12,24 @@ namespace Engine {
 
 		struct Mapper {
 			Mapper() = delete;
-			Mapper(int(*push)(lua_State *, ScopeBase *), std::pair<bool, ValueType>(*toValueType)(ScopeBase *)) : mPush(push), mToValueType(toValueType) {}
+			Mapper(ValueType(*toValueType)(ScopeBase *)) : mToValueType(toValueType) {}
 
-			int (*mPush)(lua_State *, ScopeBase *);
-			std::pair<bool, ValueType>(*mToValueType)(ScopeBase *);
+			ValueType(*mToValueType)(ScopeBase *);
 
-		};
 
-		template <>
-		struct Unmapper<Mapper> {
-			static int push(lua_State *state, ScopeBase *ref, const Mapper &m) {
-				return m.mPush(state, ref);
+		private:
+			template <class T, ValueType (*F)(T *, const ArgumentList&)>
+			static ValueType map_f2(ScopeBase *s, const ArgumentList &args) {
+				return F(dynamic_cast<T*>(s), args);
+			}
+
+		public:
+
+			template <class T, ValueType(*F)(T *, const ArgumentList&)>
+			static ValueType map_f(ScopeBase *) {				
+				return ValueType(&map_f2<T, F>);
 			}
 		};
-
-		
 
 		template <class T>
 		struct Caster {
@@ -38,7 +41,7 @@ namespace Engine {
 		template <class T>
 		struct Caster<T*> {
 			static auto cast(const ValueType &v) {
-				T *t = scope_cast<T>(v.asScope());
+				T *t = scope_cast<T>(v.as<Scripting::ScopeBase*>());
 				if (!t)
 					throw 0;
 				return t;
@@ -50,13 +53,9 @@ namespace Engine {
 		class FunctionMapperImpl {
 		public:
 
-			typedef T T;
+			typedef T type;
 
-			static int push(lua_State *state, ScopeBase *ref) {
-				return APIHelper::push(state, &FunctionMapperImpl<F, _f, T, R, Ty...>::impl);
-			}
-
-			static auto call(T *t, const ArgumentList &args) {
+			static ValueType call(T *t, const ArgumentList &args) {
 				return FixReturn<R>::call(t, args);
 			}
 
@@ -64,8 +63,8 @@ namespace Engine {
 		private:
 			template <class _R>
 			struct FixReturn {
-				static _R call(T *t, const ArgumentList &args) {
-					return callImpl(_f, t, args);
+				static ValueType call(T *t, const ArgumentList &args) {
+					return ValueType(callImpl(_f, t, args));
 				}
 			};
 
@@ -138,7 +137,7 @@ namespace Engine {
 					APIHelper::error(state, Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
-			static int impl(lua_State *state) {
+			/*static int impl(lua_State *state) {
 				int i = APIHelper::stackSize(state);
 				checkStackSize(state, _f, i - 1);
 
@@ -148,34 +147,28 @@ namespace Engine {
 				if (!t)
 					return APIHelper::error(state, "self has invalid type");
 				return APIHelper::push(state, call(t, std::move(args)));
-			}
+			}*/
 
 		};
 
 		template <typename F, F f>
 		using FunctionMapper = typename MemberFunctionCapture<FunctionMapperImpl, F, f>::type;
 
-
 		template <class F, F f>
 		Mapper make_function_mapper() {
-			return { &FunctionMapper<F, f>::push, nullptr };
+			return Mapper(&Mapper::map_f<typename FunctionMapper<F, f>::type, &FunctionMapper<F, f>::call>);
 		}
 
 		template <class G, G g, class S = void*, S s = nullptr>
 		Mapper make_mapper() {
 			struct GetterWrapper {
-				static int push(lua_State *state, ScopeBase *ref) {
-					using T = typename FunctionMapper<G, g>::T;
+				static ValueType valueType(ScopeBase *ref) {
+					using T = typename FunctionMapper<G, g>::type;
 					T *t = dynamic_cast<T*>(ref);
-					return APIHelper::push(state, FunctionMapper<G, g>::call(t, {}));
-				}
-				static std::pair<bool, ValueType> valueType(ScopeBase *ref) {
-					using T = typename FunctionMapper<G, g>::T;
-					T *t = dynamic_cast<T*>(ref);
-					return toValueType(ref, FunctionMapper<G, g>::call(t, {}));
+					return FunctionMapper<G, g>::call(t, {});
 				}
 			};
-			return { &GetterWrapper::push, &GetterWrapper::valueType };
+			return { &GetterWrapper::valueType };
 		}
 
 

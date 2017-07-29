@@ -6,13 +6,19 @@ namespace Engine {
 namespace Scene {
 namespace Entity {
 
-EntityComponentBase::EntityComponentBase(Entity &entity) :
-    mEntity(entity)
+EntityComponentBase::EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable) :
+    mEntity(entity),
+	mInitTable(initTable)
 {
 }
 
 EntityComponentBase::~EntityComponentBase() {
 
+}
+
+bool EntityComponentBase::init()
+{
+	return ScopeBase::init();
 }
 
 Entity &EntityComponentBase::getEntity() const
@@ -31,12 +37,12 @@ std::array<float, 2> EntityComponentBase::getPosition2D()
     return mEntity.getPosition2D();
 }
 
-void EntityComponentBase::setPosition(const std::array<float, 3> & pos)
+void EntityComponentBase::setPosition(const Vector3 & pos)
 {
 	mEntity.setPosition(pos);
 }
 
-std::array<float, 3> EntityComponentBase::getPosition()
+Vector3 EntityComponentBase::getPosition()
 {
     return mEntity.getPosition();
 }
@@ -46,7 +52,7 @@ std::array<float, 2> EntityComponentBase::getCenter2D()
 	return mEntity.getCenter2D();
 }
 
-std::array<float, 3> EntityComponentBase::getCenter()
+Vector3 EntityComponentBase::getCenter()
 {
 	return mEntity.getCenter();
 }
@@ -56,12 +62,12 @@ std::array<float, 4> EntityComponentBase::getOrientation()
 	return mEntity.getOrientation();
 }
 
-void EntityComponentBase::setScale(const std::array<float, 3> & scale)
+void EntityComponentBase::setScale(const Vector3 & scale)
 {
 	mEntity.setScale(scale);
 }
 
-std::array<float, 3> EntityComponentBase::getScale()
+Vector3 EntityComponentBase::getScale()
 {
 	return mEntity.getScale();
 }

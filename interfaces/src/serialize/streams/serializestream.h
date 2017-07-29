@@ -8,8 +8,7 @@ namespace Engine {
 namespace Serialize {
 
 	enum class ExtendedValueType : unsigned char {
-		UIntValue = static_cast<unsigned char>(ValueType::Type::MAX_TYPE_VALUE),
-		SerializableUnitValue
+		SerializableUnitValue = static_cast<unsigned char>(ValueType::Type::MAX_TYPE_VALUE)
 	};
 
 	typedef std::istream::pos_type pos_type;
@@ -61,7 +60,6 @@ public:
 	}
 
 	SerializeInStream &operator >> (Serializable &s);
-	SerializeInStream &operator >> (size_t &s);
 
     template <class T>
     void read(T &t){
@@ -104,7 +102,6 @@ public:
 	SerializeOutStream &operator<<(SerializableUnitBase *p);
 
 	SerializeOutStream &operator<<(const Serializable &s);
-	SerializeOutStream &operator<<(size_t s);
 
     void writeData(const void *buffer, size_t size);
     pos_type tell();

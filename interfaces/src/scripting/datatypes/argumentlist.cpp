@@ -12,7 +12,7 @@ namespace Scripting{
 	{
 		resize(count);
 		for (int i = 0; i < count; ++i) {
-			at(i) = APIHelper::to<ValueType>(state, i - count);
+			at(i) = ValueType::fromStack(state, i - count);
 		}
 		APIHelper::pop(state, count);
 	}
@@ -36,7 +36,7 @@ namespace Scripting{
 
 	void ArgumentList::pushToStack(lua_State *state) const {
 		for (const ValueType &v : *this) {
-			APIHelper::push(state, v);
+			v.push(state);
 		}
 	}
 

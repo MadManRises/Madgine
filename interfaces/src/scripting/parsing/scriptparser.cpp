@@ -90,14 +90,17 @@ ScriptParser::ScriptParser() :
 
 	mGlobal = LuaTable::global(mState);
 
-	tempMetatable.setValue("__index", mGlobal);
-	tempMetatable.setValue("__newindex", mGlobal);
+	tempMetatable.setValue("__index", ValueType(mGlobal));
+	tempMetatable.setValue("__newindex", ValueType(mGlobal));
 
 	mEnv.setMetatable(tempMetatable);
 }
 
 ScriptParser::~ScriptParser()
 {
+	mGlobal.clear();
+	mRegistry.clear();
+	mEnv.clear();
 	lua_close(mState);
 	sSingleton = nullptr;
 }
@@ -126,7 +129,8 @@ void ScriptParser::parseScript(std::istream &stream, const std::string &name,
 		case 0:
 			break;
 		case LUA_ERRSYNTAX:
-			throw ParseException("Lua Syntax-Error!");
+			LOG_ERROR(lua_tostring(mState, -1));
+			return;
 		case LUA_ERRMEM:
 			throw ParseException("Lua Out-Of-Memory!");
 		default:
@@ -222,13 +226,19 @@ int ScriptParser::pushThread(lua_State * state, lua_State * thread)
 
 int ScriptParser::lua_indexScope(lua_State *state) {
 
-	ScopeBase *scope = APIHelper::to<ScopeBase*>(state, -2);
+	ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 	std::string key = lua_tostring(state, -1);
 
 	lua_pop(state, 2);
 
-	return scope->resolve(state, key);
+	std::pair<bool, ValueType> p = scope->get(key);
+	if (!p.first)
+		return 0;
+	else {
+		p.second.push(state);
+		return 1;
+	}
 }
 
 int ScriptParser::lua_newindexGlobal(lua_State *state) {
@@ -236,12 +246,17 @@ int ScriptParser::lua_newindexGlobal(lua_State *state) {
 }
 
 int ScriptParser::lua_indexGlobalScope(lua_State *state) {
-	ScopeBase *scope = APIHelper::to<ScopeBase*>(state, -2);
+	ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 	std::string key = lua_tostring(state, -1);
 
-	if (int i = scope->resolve(state, key))
-		return i;
+	lua_pop(state, 2);
+
+	std::pair<bool, ValueType> p = scope->get(key);
+	if (p.first) {
+		p.second.push(state);
+		return 1;
+	}
 
 	lua_getglobal(state, key.c_str());
 	return 1;
@@ -263,25 +278,25 @@ int ScriptParser::lua_nextScope(lua_State * state)
 {
 	lua_settop(state, 2);
 
-	ScopeBase *scope = APIHelper::to<ScopeBase*>(state, -2);
+	ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 	assert(scope);
 
-	KeyValueIterator *it = nullptr;
+	std::shared_ptr<KeyValueIterator> it;
 
 	if (lua_isnil(state, -1)) {
 		lua_pop(state, 1);
-		it = scope->iterator().release();
-		APIHelper::push(state, it);
+		it = scope->iterator();
+		ValueType(it).push(state);
 	}
 	else if (lua_isuserdata(state, -1)) {
-		it = APIHelper::to<KeyValueIterator*>(state, -1);
+		it = ValueType::fromStack(state, -1).as<std::shared_ptr<KeyValueIterator>>();
 		++(*it);
 	}
 
 	if (it) {
 		if (!it->ended()) {
-			return 1 + it->push(state);
+			return 1 + it->value().push(state);
 		}
 		lua_pop(state, 1);
 		lua_pushnil(state);

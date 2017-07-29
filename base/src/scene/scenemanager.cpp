@@ -23,7 +23,7 @@ namespace Engine {
 
 		bool SceneManagerBase::init() {
 
-			if (!GlobalAPIComponentBase::init())
+			if (!MadgineObject::init())
 				return false;
 
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -41,7 +41,7 @@ namespace Engine {
 				component->finalize();
 			}
 
-			GlobalAPIComponentBase::finalize();
+			MadgineObject::finalize();
 		}
 
 

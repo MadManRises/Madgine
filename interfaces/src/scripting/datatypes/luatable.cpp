@@ -17,13 +17,13 @@ namespace Engine {
 
 		LuaTableInstance::LuaTableInstance(lua_State *state, const std::shared_ptr<LuaTableInstance> &parent) :
 			mState(state),
-			mParent(parent){
+			mParent(parent) {
 
 		}
 
 		IntLuaTableInstance::~IntLuaTableInstance()
 		{
-			if (mIndex != LUA_REGISTRYINDEX){
+			if (mIndex != LUA_REGISTRYINDEX) {
 				if (mParent) {
 					mParent->push(mState);
 					luaL_unref(mState, -1, mIndex);
@@ -37,27 +37,27 @@ namespace Engine {
 
 		StringLuaTableInstance::~StringLuaTableInstance()
 		{
-				if (mParent) {
-					mParent->push(mState);
-					lua_pushnil(mState);
-					lua_setfield(mState, -2, mIndex.c_str());
-					lua_pop(mState, 1);
-				}
-				else {
-					lua_pushnil(mState);
-					lua_setfield(mState, LUA_REGISTRYINDEX, mIndex.c_str());
-				}
+			if (mParent) {
+				mParent->push(mState);
+				lua_pushnil(mState);
+				lua_setfield(mState, -2, mIndex.c_str());
+				lua_pop(mState, 1);
+			}
+			else {
+				lua_pushnil(mState);
+				lua_setfield(mState, LUA_REGISTRYINDEX, mIndex.c_str());
+			}
 		}
 
 
 		LuaTable LuaTable::global(lua_State * state)
 		{
-			return std::make_shared<IntLuaTableInstance>(state, LUA_RIDX_GLOBALS);
+			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(state, LUA_RIDX_GLOBALS));
 		}
 
 		LuaTable LuaTable::registry(lua_State * state)
 		{
-			return std::make_shared<IntLuaTableInstance>(state, LUA_REGISTRYINDEX);
+			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(state, LUA_REGISTRYINDEX));
 		}
 
 		void LuaTableInstance::setMetatable(const std::string &metatable) {
@@ -76,7 +76,7 @@ namespace Engine {
 				lua_rawgeti(state ? state : mState, -1, mIndex);
 				lua_replace(state ? state : mState, -2);
 			}
-			else{
+			else {
 				lua_rawgeti(state ? state : mState, LUA_REGISTRYINDEX, mIndex);
 			}
 		}
@@ -93,12 +93,21 @@ namespace Engine {
 			}
 		}
 
-		void LuaTableInstance::setValue(const std::string & name, const LuaTable & value)
+		void LuaTableInstance::setValue(const std::string & name, const ValueType& value)
 		{
 			push();
-			value.push();
+			value.push(mState);
 			lua_setfield(mState, -2, name.c_str());
 			lua_pop(mState, 1);
+		}
+
+		ValueType LuaTableInstance::getValue(const std::string & name)
+		{
+			push();
+			lua_getfield(mState, -1, name.c_str());
+			ValueType result = ValueType::fromStack(mState, -1);
+			lua_pop(mState, 2);
+			return result;
 		}
 
 		void LuaTableInstance::setMetatable(const LuaTable & metatable)
@@ -125,6 +134,17 @@ namespace Engine {
 			lua_setfield(mState, -2, name.c_str());
 			lua_pop(mState, 1);
 			return std::make_shared<StringLuaTableInstance>(mState, name, ptr);
+		}
+
+		std::shared_ptr<LuaTableInstance> LuaTableInstance::registerTable(lua_State * state, int index, const std::shared_ptr<LuaTableInstance>& ptr)
+		{			
+			push(state);
+			if (index < 0 && index > -100)
+				--index;
+			lua_pushvalue(state ? state : mState, index);
+			int regIndex = luaL_ref(state ? state : mState, -2);			
+			lua_pop(state ? state : mState, 1);
+			return std::make_shared<IntLuaTableInstance>(state ? state : mState, regIndex, ptr);
 		}
 
 		void LuaTable::clear()
@@ -194,9 +214,14 @@ namespace Engine {
 			return ArgumentList(mState, nresults);
 		}
 
-		void LuaTable::setValue(const std::string & name, const LuaTable & value)
+		void LuaTable::setValue(const std::string & name, const ValueType & value)
 		{
 			mInstance->setValue(name, value);
+		}
+
+		ValueType LuaTable::getValue(const std::string & name) const
+		{
+			return mInstance->getValue(name);
 		}
 
 		void LuaTable::setLightUserdata(const std::string & name, void * userdata)
@@ -239,6 +264,11 @@ namespace Engine {
 			return mInstance->createTable(name, mInstance);
 		}
 
+		LuaTable LuaTable::registerTable(lua_State * state, int index)
+		{
+			return mInstance->registerTable(state, index, mInstance);
+		}
+
 		IntLuaTableInstance::IntLuaTableInstance(lua_State * state, int index, const std::shared_ptr<LuaTableInstance>& parent) :
 			LuaTableInstance(state, parent),
 			mIndex(index)
@@ -262,6 +292,68 @@ namespace Engine {
 		lua_State * LuaTableInstance::state()
 		{
 			return mState;
+		}
+
+		LuaTable::iterator::iterator(const std::shared_ptr<LuaTableInstance> &instance) :
+			mInstance(instance),
+			mCurrent(std::make_unique<std::pair<std::string, ValueType>>())
+		{
+			lua_State *state = mInstance->state();
+			mInstance->push();
+			lua_pushnil(state);
+			if (lua_next(state, -2) != 0) {
+				mCurrent->first = lua_tostring(state, -2);
+				mCurrent->second = ValueType::fromStack(state, -1);
+				lua_pop(state, 2);
+			}
+			lua_pop(state, 1);
+		}
+
+		LuaTable::iterator::iterator() :
+			mCurrent(std::make_unique<std::pair<std::string, ValueType>>())
+		{
+		}
+
+		void LuaTable::iterator::operator++()
+		{
+			lua_State *state = mInstance->state();
+			mInstance->push();
+			lua_pushstring(state, mCurrent->first.c_str());
+			if (lua_next(state, -2) != 0) {
+				mCurrent->first = lua_tostring(state, -2);
+				mCurrent->second = ValueType::fromStack(state, -1);
+				lua_pop(state, 2);
+			}
+			else {
+				mCurrent->first.clear();
+				mCurrent->second.clear();
+			}
+			lua_pop(state, 1);
+		}
+
+		const std::pair<std::string, ValueType>& LuaTable::iterator::operator*() const
+		{
+			return *mCurrent;
+		}
+
+		LuaTable::iterator LuaTable::begin() const
+		{
+			return iterator(mInstance);
+		}
+
+		LuaTable::iterator LuaTable::end() const
+		{
+			return iterator();
+		}
+
+		bool LuaTable::iterator::operator!=(const iterator & other) const
+		{
+			return !(*this == other);
+		}
+
+		bool LuaTable::iterator::operator==(const iterator & other) const
+		{
+			return mCurrent->first == other.mCurrent->first;
 		}
 
 	}

@@ -9,7 +9,7 @@
 namespace Engine {
 	namespace Server {
 
-		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalAPIComponentBase> {
+		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::Scope<ServerBase, MadgineObject> {
 		public:
 			ServerBase(const std::string &name, const std::string &scriptsFolder);
 
@@ -36,7 +36,7 @@ namespace Engine {
 
 			template <class T>
 			void spawnInstance(T &&init) {
-				mInstances.emplace_back(std::forward<T>(init), mScriptParser);
+				mInstances.emplace_back(std::forward<T>(init), mScriptParser.createThread());
 			}
 
 			bool sendFrameStarted();

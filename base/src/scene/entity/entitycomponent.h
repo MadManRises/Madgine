@@ -8,10 +8,14 @@ namespace Engine{
 namespace Scene {
 namespace Entity {
 
-template <class T, class Base = EntityComponentBase, class... _Ty>
-class EntityComponent : public Scripting::Scope<T, Base>{
-public:
-	using Scripting::Scope<T, Base>::Scope;
+	template <class T, class Base = EntityComponentBase>
+	class EntityComponent : public Scripting::Scope<T, Base> {
+	public:
+		EntityComponent(Entity &entity, const Scripting::LuaTable &table) :
+			Scope(entity, table) {
+
+		}
+
 
     virtual std::string getName() const override{
         return sComponentName;
@@ -40,12 +44,12 @@ private:
 	}
     
 	static const char * const sComponentName;
-    static const Entity::ComponentRegistrator<T, _Ty...> _reg;
+    static const Entity::ComponentRegistrator<T> _reg;
 
 };
 
-template <class T, class Base, class... _Ty>
-const Entity::ComponentRegistrator<T, _Ty...> EntityComponent<T, Base, _Ty...>::_reg;
+template <class T, class Base>
+const Entity::ComponentRegistrator<T> EntityComponent<T, Base>::_reg;
 
 }
 }

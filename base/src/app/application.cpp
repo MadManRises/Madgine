@@ -19,7 +19,7 @@ namespace Engine {
 
 	namespace App {
 
-		
+		const std::string Application::sName = "Application";
 
 		Application::Application() :
 			mShutDown(false),
@@ -37,16 +37,16 @@ namespace Engine {
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mTable);
+			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mTable, this);
 		}
 
 		bool Application::init()
 		{			
-			return mGlobalScope->init() && GlobalAPIComponentBase::init();
+			return mGlobalScope->init() && MadgineObject::init();
 		}
 
 		void Application::finalize() {
-			GlobalAPIComponentBase::finalize();
+			MadgineObject::finalize();
 			mGlobalScope->finalize();
 		}
 
@@ -164,6 +164,11 @@ namespace Engine {
 		lua_State * Application::lua_state()
 		{
 			return mGlobalScope->lua_state();
+		}
+
+		const std::string & Application::key() const
+		{
+			return sName;
 		}
 
 	}

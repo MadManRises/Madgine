@@ -3,6 +3,21 @@
 namespace Engine {
 	namespace Scripting {
 
+		class INTERFACES_EXPORT LuaThread {
+		public:
+			LuaThread(lua_State* state) :
+				mState(state) {}
+
+			bool operator==(const LuaThread &other) const {
+				return other.mState == mState;
+			}
+
+			operator lua_State *() const {
+				return mState;
+			}
+		private:
+			lua_State *mState;
+		};
 
 		class LuaTableInstance {
 		public:
@@ -10,7 +25,8 @@ namespace Engine {
 			LuaTableInstance(const LuaTableInstance &other) = delete;
 			virtual ~LuaTableInstance() = default;
 
-			void setValue(const std::string &name, const LuaTable &value);
+			void setValue(const std::string &name, const ValueType &value);
+			ValueType getValue(const std::string &name);
 			void setLightUserdata(const std::string &name, void *userdata);
 			void setMetatable(const LuaTable &metatable);
 			void setMetatable(const std::string &metatable);
@@ -20,6 +36,7 @@ namespace Engine {
 
 			std::shared_ptr<LuaTableInstance> createTable(lua_State *state, const std::shared_ptr<LuaTableInstance> &ptr);
 			std::shared_ptr<LuaTableInstance> createTable(const std::string &name, const std::shared_ptr<LuaTableInstance> &ptr);
+			std::shared_ptr<LuaTableInstance> registerTable(lua_State *state, int index, const std::shared_ptr<LuaTableInstance> &ptr);
 
 			virtual void push(lua_State *state = nullptr) const = 0;
 
@@ -58,7 +75,8 @@ namespace Engine {
 			static LuaTable global(lua_State *state);
 			static LuaTable registry(lua_State *state);		
 
-			void setValue(const std::string &name, const LuaTable &value);
+			void setValue(const std::string &name, const ValueType &value);
+			ValueType getValue(const std::string &name) const;
 			void setLightUserdata(const std::string &name, void *userdata);
 			void setMetatable(const LuaTable &metatable);
 			void setMetatable(const std::string &metatable);
@@ -73,8 +91,27 @@ namespace Engine {
 
 			LuaTable createTable(lua_State *state = nullptr);
 			LuaTable createTable(const std::string &name);
+			LuaTable registerTable(lua_State *state, int index);
 
 			lua_State *state() const;
+
+			class INTERFACES_EXPORT iterator {
+			public:
+				iterator(const std::shared_ptr<LuaTableInstance> &instance);
+				iterator();
+
+				bool operator !=(const iterator &other) const;
+				bool operator ==(const iterator &other) const;
+				void operator++();
+				const std::pair<std::string, ValueType> &operator *() const;
+
+			private:
+				std::unique_ptr<std::pair<std::string, ValueType>> mCurrent;
+				std::shared_ptr<LuaTableInstance> mInstance;
+			};
+
+			iterator begin() const;
+			iterator end() const;
 
 		private:
 			LuaTable(const std::shared_ptr<LuaTableInstance> &instance);

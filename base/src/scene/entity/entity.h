@@ -30,12 +30,12 @@ public:
     
 	void remove();
 
-	virtual std::array<float, 3> getPosition() const = 0;
-	virtual std::array<float, 3> getCenter() const = 0;
+	virtual Vector3 getPosition() const = 0;
+	virtual Vector3 getCenter() const = 0;
 	std::array<float, 2> getPosition2D() const;
 	std::array<float, 2> getCenter2D() const;
 	virtual std::array<float, 4> getOrientation() const = 0;
-	virtual std::array<float, 3> getScale() const = 0;
+	virtual Vector3 getScale() const = 0;
 
 	virtual std::string getIdentifier() const override;
 	//virtual std::string getName() const override;
@@ -44,18 +44,18 @@ public:
 
 	virtual void setObjectVisible(bool b) = 0;
 
-	virtual void setPosition(const std::array<float, 3> &v) = 0;
-	virtual void setScale(const std::array<float, 3> &scale) = 0;
+	virtual void setPosition(const Vector3 &v) = 0;
+	virtual void setScale(const Vector3 &scale) = 0;
 	virtual void setOrientation(const std::array<float, 4> &orientation) = 0;
-	virtual void translate(const std::array<float, 3> &v) = 0;
+	virtual void translate(const Vector3 &v) = 0;
 	virtual void rotate(const std::array<float, 4> &q) = 0;
 
     void onLoad();
 
-	template <class T, class... _Ty>
-	T *addComponent_t(_Ty&&... args) {
+	template <class T>
+	T *addComponent_t(Entity &e, const Scripting::LuaTable &table) {
 		if (!hasComponent<T>())
-			addComponentImpl(createComponent_t<T>(std::forward<_Ty>(args)...));
+			addComponentImpl(createComponent_t<T>(*this, e, table));
 		return getComponent<T>();
 	}
 
@@ -73,7 +73,7 @@ public:
 
 	bool hasComponent(const std::string &name);
 
-	void addComponent(const std::string &name, const Scripting::LuaTable &table);
+	void addComponent(const std::string &name, const Scripting::LuaTable &table = {});
 	void removeComponent(const std::string &name);
 
 	static bool existsComponent(const std::string &name);
@@ -89,29 +89,28 @@ protected:
 	virtual size_t getSize() const override;
 	virtual bool init() override;
 
+	virtual Scripting::KeyValueMapList maps() override;
+
 private:
 
-	template <class T, class... _Ty>
-	std::unique_ptr<EntityComponentBase> createComponent_t(_Ty&&... args) {
-		return std::make_unique<T>(*this, std::forward<_Ty>(args)...);
+	template <class T>
+	static std::unique_ptr<EntityComponentBase> createComponent_t(Entity &e, const Scripting::LuaTable &table) {
+		std::unique_ptr<EntityComponentBase> c = std::make_unique<T>(e, table);
+		c->init();
+		return c;
 	}	
 
 	std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string &name, const Scripting::LuaTable &table = {});
 	std::tuple<std::unique_ptr<EntityComponentBase>> createComponentSimple(const std::string &name) { return createComponent(name); }
 	EntityComponentBase *addComponentImpl(std::unique_ptr<EntityComponentBase> &&component);
 
-	template <class T, class... _Ty>
+	template <class T>
 	class ComponentRegistrator {
 	public:
 		ComponentRegistrator() {
 			const std::string name = T::componentName();
 			assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-			sRegisteredComponentsByName()[name] = [](Entity &e, const Scripting::ArgumentList &args) {
-				std::tuple<_Ty...> argsTuple;				
-				if (!TupleUnpacker<>::call(&args, &Scripting::ArgumentList::parse<_Ty...>, argsTuple))
-					throw 0;
-				return TupleUnpacker<Entity &>::call(std::make_unique<T, Entity&, _Ty...>, e, std::move(argsTuple));
-			};
+			sRegisteredComponentsByName()[name] = &createComponent_t<T>;			
 		}
 		~ComponentRegistrator() {
 			const std::string name = T::componentName();
@@ -120,7 +119,7 @@ private:
 		}
 	};
 
-	template <class T, class Base, class... _Ty>
+	template <class T, class Base>
 	friend class EntityComponent;
 
 

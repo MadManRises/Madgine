@@ -11,7 +11,7 @@ namespace Engine {
 			virtual ~OgreLight();
 
 		protected:
-			virtual void onPositionChanged(const std::array<float, 3> &position) override;
+			virtual void onPositionChanged(const Vector3 &position) override;
 			virtual void onPowerChanged(float power) override;
 
 		private:

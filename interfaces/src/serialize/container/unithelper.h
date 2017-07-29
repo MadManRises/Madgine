@@ -69,7 +69,7 @@ namespace Engine {
 		};
 
 
-		template <class T, bool b = isValueType<T>::value>
+		template <class T, bool b = ValueType::isValueType<T>::value>
 		struct UnitHelper : public UnitHelperBase<T> {
 
 			typedef T Type;
@@ -96,7 +96,7 @@ namespace Engine {
 		};
 
 		template <>
-		struct INTERFACES_EXPORT UnitHelper<ValueType, true> : public UnitHelperBase<ValueType> {
+		struct INTERFACES_EXPORT UnitHelper<ValueType, false> : public UnitHelperBase<ValueType> {
 
 			typedef ValueType Type;
 

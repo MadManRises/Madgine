@@ -7,14 +7,6 @@
 
 #include "api.h"
 
-
-extern "C" {
-#include <lua.h>                                /* Always include this when calling Lua */
-#include <lauxlib.h>                            /* Always include this when calling Lua */
-#include <lualib.h>                             /* Always include this when calling Lua */
-}
-
-
 namespace Engine {
 namespace Scripting {
 
@@ -99,11 +91,11 @@ std::string ScopeBase::getName() const {
 }
 
 
-int ScopeBase::resolve(lua_State *state, const std::string &key) {
-	return maps().resolve(state, key);
+std::pair<bool, ValueType> ScopeBase::get(const std::string &key) {
+	return maps().get(key);
 }
 
-std::unique_ptr<KeyValueIterator> Engine::Scripting::ScopeBase::iterator()
+std::unique_ptr<KeyValueIterator> ScopeBase::iterator()
 {
 	return maps().iterator();
 }

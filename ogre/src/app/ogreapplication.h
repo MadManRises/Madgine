@@ -120,6 +120,8 @@ protected:
 
 	virtual bool fixedUpdate(float timeStep) override;
 
+	virtual Scripting::KeyValueMapList maps() override;
+
 private:
 	virtual void _clear() override;
 	virtual void _setupOgre();

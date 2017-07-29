@@ -16,11 +16,12 @@ namespace Engine {
 
 class MADGINE_BASE_EXPORT GlobalScope : public GlobalScopeBase, public Singleton<GlobalScope> {
 public:
-    GlobalScope(const LuaTable &);
+    GlobalScope(const LuaTable &, App::Application *app);
 
 	virtual bool init() override;
 	virtual void finalize() override;
 
+	virtual KeyValueMapList maps() override;
 
 
 	void clear();
@@ -34,6 +35,7 @@ private:
 
 
 	BaseUniqueComponentCollector<GlobalAPIComponentBase> mGlobalAPIs;
+	App::Application *mApp;
 
 };
 

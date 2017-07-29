@@ -12,7 +12,7 @@ namespace Engine {
 	namespace UI {
 
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-			public Scripting::Scope<UIManager, Scripting::GlobalAPIComponentBase>			
+			public Scripting::Scope<UIManager, MadgineObject>			
 		{
 		public:
 			UIManager(GUI::GUISystem *gui);
@@ -45,6 +45,9 @@ namespace Engine {
 			std::set<GuiHandlerBase*> getGuiHandlers();
 
 			static const constexpr int sMaxInitOrder = 4;
+			static const std::string sName;
+
+			const std::string &key() const;
 
 		protected:
 			virtual Scripting::KeyValueMapList maps() override;

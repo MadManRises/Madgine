@@ -2,6 +2,7 @@
 #include "serverappinstance.h"
 #include "scripting/parsing/scriptparser.h"
 
+
 namespace Engine {
 	namespace Server {
 
@@ -15,23 +16,16 @@ namespace Engine {
 				mThread.join();
 		}
 		
-		const std::string &Engine::Server::ServerAppInstance::key() const
+		const std::string &ServerAppInstance::key() const
 		{
 			return mName;
 		}
 
-		int ServerAppInstance::push(lua_State * state) const
+		ValueType ServerAppInstance::toValueType() const
 		{
-			return mParser.pushThread(state, mTable.state());
+			return ValueType(Scripting::LuaThread(mTable.state()));
 		}
 
-	}
-
-	namespace Scripting {
-		int LuaHelper<Server::ServerAppInstance>::push(lua_State * state, const Server::ServerAppInstance & it)
-		{
-			return it.push(state);
-		}
 	}
 
 }

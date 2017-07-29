@@ -53,7 +53,10 @@ namespace Engine {
 		class ArgumentList;
 		typedef std::map<std::string, ValueType> Stack;
 
-		namespace Parsing {
+		typedef ValueType(*ApiMethod)(ScopeBase *, const ArgumentList &);
+
+		namespace Parsing
+		{
 			class ScriptParser;
 		}
 

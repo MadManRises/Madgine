@@ -32,7 +32,7 @@ OgreEntity::OgreEntity(const OgreEntity &other) :
 	Entity(other)	
 {
 
-	mNode = other.mNode->getParentSceneNode()->createChildSceneNode(Ogre::Vector3(other.getPosition().data()), Ogre::Quaternion(const_cast<float*>(other.getOrientation().data())));
+	mNode = other.mNode->getParentSceneNode()->createChildSceneNode(Ogre::Vector3(other.getPosition().ptr()), Ogre::Quaternion(const_cast<float*>(other.getOrientation().data())));
 	mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(this));
 
 	if (other.mObject) {
@@ -112,14 +112,14 @@ Ogre::Entity *OgreEntity::getObject()
     return mObject;
 }
 
-void OgreEntity::setPosition(const std::array<float, 3> &v)
+void OgreEntity::setPosition(const Vector3 &v)
 {
-    mNode->setPosition(Ogre::Vector3(v.data()));
+    mNode->setPosition(Ogre::Vector3(v.ptr()));
 }
 
-void OgreEntity::setScale(const std::array<float, 3> & scale)
+void OgreEntity::setScale(const Vector3 & scale)
 {
-	mNode->setScale(Ogre::Vector3(scale.data()));
+	mNode->setScale(Ogre::Vector3(scale.ptr()));
 }
 
 void OgreEntity::setOrientation(const std::array<float, 4>& orientation)
@@ -127,9 +127,9 @@ void OgreEntity::setOrientation(const std::array<float, 4>& orientation)
 	mNode->setOrientation(Ogre::Quaternion(const_cast<float*>(orientation.data())));
 }
 
-void OgreEntity::translate(const std::array<float, 3> & v)
+void OgreEntity::translate(const Vector3 & v)
 {
-	mNode->translate(Ogre::Vector3(v.data()));
+	mNode->translate(Ogre::Vector3(v.ptr()));
 }
 
 void OgreEntity::rotate(const std::array<float, 4> &q)
@@ -137,15 +137,15 @@ void OgreEntity::rotate(const std::array<float, 4> &q)
     mNode->rotate(Ogre::Quaternion(const_cast<float*>(q.data())));
 }
 
-std::array<float, 3> OgreEntity::getPosition() const
+Vector3 OgreEntity::getPosition() const
 {
-	return{ {mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z} };
+	return{ mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z };
 }
 
-std::array<float, 3> OgreEntity::getCenter() const
+Vector3 OgreEntity::getCenter() const
 {
 	Ogre::Vector3 v = (mObject ? mObject->getWorldBoundingBox().getCenter() : mNode->getPosition());
-	return{ {v.x, v.y, v.z } };
+	return{ v.x, v.y, v.z };
 }
 
 
@@ -154,9 +154,9 @@ std::array<float, 4> OgreEntity::getOrientation() const
 	return{ {mNode->getOrientation().w, mNode->getOrientation().x, mNode->getOrientation().y, mNode->getOrientation().z} };
 }
 
-std::array<float, 3> OgreEntity::getScale() const
+Vector3 OgreEntity::getScale() const
 {
-	return{ {mNode->getScale().x, mNode->getScale().y, mNode->getScale().z} };
+	return{ mNode->getScale().x, mNode->getScale().y, mNode->getScale().z };
 }
 
 

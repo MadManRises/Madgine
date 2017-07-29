@@ -55,10 +55,12 @@ SerializeInStream &SerializeInStream::operator >>(ValueType &result)
 		result = ValueType::EOL();
 		break;
 	case ValueType::Type::Vector3Value:
-		std::array<float, 3> a3;
+	{
+		Vector3 a3;
 		read(a3);
 		result = a3;
 		break;
+	}
 	case ValueType::Type::Vector4Value:
 		std::array<float, 4> a4;
 		read(a4);
@@ -86,18 +88,6 @@ SerializeInStream &SerializeInStream::operator >>(ValueType &result)
 SerializeInStream & SerializeInStream::operator >> (Serializable & s)
 {
 	s.readState(*this);
-	return *this;
-}
-
-SerializeInStream & SerializeInStream::operator >> (size_t & s)
-{
-	ExtendedValueType type;
-	read(type);
-
-	if (type != ExtendedValueType::UIntValue)
-		throw Serialize::SerializeException(Exceptions::notValueType("UInt"));
-
-	read(s);
 	return *this;
 }
 
@@ -146,20 +136,20 @@ SerializeOutStream & SerializeOutStream::operator<<(const ValueType & v)
 	write(v.type() == ValueType::Type::ScopeValue ? ValueType::Type::InvScopePtrValue : v.type());
 	switch (v.type()) {
 	case ValueType::Type::BoolValue:
-		write(v.asBool());
+		write(v.as<bool>());
 		break;
 	case ValueType::Type::StringValue: {
-		const std::string &s = v.asString();
+		const std::string &s = v.as<std::string>();
 		auto size = s.size();
 		write(size);
 		writeData(s.c_str(), size);
 		break;
 	}
 	case ValueType::Type::IntValue:
-		write(v.asInt());
+		write(v.as<int>());
 		break;
 	case ValueType::Type::UIntValue:
-		write(v.asUInt());
+		write(v.as<size_t>());
 		break;
 	case ValueType::Type::NullValue:
 		break;
@@ -169,16 +159,16 @@ SerializeOutStream & SerializeOutStream::operator<<(const ValueType & v)
 		throw Serialize::SerializeException("Cannot Serialize a Scope-Pointer!");
 		break;
 	case ValueType::Type::Vector3Value:
-		writeData(v.asVector3().data(), sizeof(float) * 3);
+		writeData(v.as<Vector3>().ptr(), sizeof(float) * 3);
 		break;
 	case ValueType::Type::Vector4Value:
-		writeData(v.asVector4().data(), sizeof(float) * 4);
+		writeData(v.as<std::array<float, 4>>().data(), sizeof(float) * 4);
 		break;
 	case ValueType::Type::FloatValue:
-		write(v.asFloat());
+		write(v.as<float>());
 		break;
 	case ValueType::Type::InvScopePtrValue:
-		write(v.asInvPtr());
+		write(v.as<InvScopePtr>());
 		break;
 	default:
 		throw Serialize::SerializeException(Exceptions::unknownSerializationType);
@@ -196,13 +186,6 @@ SerializeOutStream & SerializeOutStream::operator<<(SerializableUnitBase * p)
 SerializeOutStream & SerializeOutStream::operator<<(const Serializable & s)
 {
 	s.writeState(*this);
-	return *this;
-}
-
-SerializeOutStream & SerializeOutStream::operator<<(size_t s)
-{
-	write(ExtendedValueType::UIntValue);
-	write(s);
 	return *this;
 }
 

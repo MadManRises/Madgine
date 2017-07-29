@@ -19,8 +19,6 @@
 
 #include "Serialize\serializemanager.h"
 
-#include "Serialize\ogreSerialize.h"
-
 #include "Scripting\Parsing\scriptparser.h"
 
 
@@ -189,27 +187,29 @@ void OgreSceneManager::readTerrain(Serialize::SerializeInStream &in)
 		std::string mesh;
 		in >> mesh;
 
-		Ogre::Vector3 v;
+		Vector3 v;
 		in >> v;
 		
 		Ogre::Quaternion q;
-		in >> q;
+		std::array<float, 4> _q;
+		in >> _q;
+		q = _q.data();
 		
 		if (obName[0] == '_') {
-			mInfoObjects[obName] = std::make_tuple(mesh, v, q);
+			mInfoObjects[obName] = std::make_tuple(mesh, Ogre::Vector3(v.ptr()), q);
 		}
 		else {
 			Ogre::Entity *ent = mSceneMgr->createEntity(obName, mesh);
 			ent->addQueryFlags(Entity::Masks::TERRAIN_MASK);
 
-			Ogre::SceneNode *node = mTerrain->createChildSceneNode(obName, v, q);
+			Ogre::SceneNode *node = mTerrain->createChildSceneNode(obName, Ogre::Vector3(v.ptr()), q);
 			node->attachObject(ent);
 
 			mTerrainEntities.push_back(node);
 		}
 	}
 
-	Ogre::Vector3 lightPosition;
+	Vector3 lightPosition;
 	while (in.loopRead(lightPosition)) {
 		Ogre::Light* light = mSceneMgr->createLight();
 
@@ -230,12 +230,12 @@ void OgreSceneManager::readTerrain(Serialize::SerializeInStream &in)
 		light->setPowerScale(scale);
 		
 		if (light->getType() != Ogre::Light::LT_POINT) {
-			Ogre::Vector3 dir;
+			Vector3 dir;
 			in >> dir;
-			light->setDirection(dir);
+			light->setDirection(Ogre::Vector3(dir.ptr()));
 		}
 
-		light->setPosition(lightPosition);
+		light->setPosition(Ogre::Vector3(lightPosition.ptr()));
 		light->setAttenuation(5000, 1.0, linear, 0.0);
 
 		mStaticLights.push_back(light);
@@ -314,19 +314,19 @@ void OgreSceneManager::writeStaticScene(Serialize::SerializeOutStream & out) con
 	out << mHeightmap;
 	for (Ogre::SceneNode *n : mTerrainEntities) {
 		Ogre::Entity * ent = (Ogre::Entity*)n->getAttachedObjectIterator().getNext();
-		out << ent->getName() << ent->getMesh()->getName() << n->getPosition() << n->getOrientation();
+		out << ent->getName() << ent->getMesh()->getName() << Vector3(n->getPosition().ptr())/* << reinterpret_cast<float[4]>(n->getOrientation().ptr())) TODO*/;
 	}
 	for (const std::pair<const std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> &t : mInfoObjects) {
-		out << t.first << std::get<0>(t.second) << std::get<1>(t.second) << std::get<2>(t.second);
+		out << t.first << std::get<0>(t.second) << Vector3(std::get<1>(t.second).ptr())/* << std::get<2>(t.second) TODO*/;
 	}
 	out << ValueType::EOL();
 
 	for (Ogre::Light * light : mStaticLights) {
 
-		out << light->getPosition() << light->getAttenuationLinear() << light->getType() << light->getPowerScale();
+		out << Vector3(light->getPosition().ptr()) << light->getAttenuationLinear() << light->getType() << light->getPowerScale();
 
 		if (light->getType() != Ogre::Light::LT_POINT) {
-			out << light->getDirection();
+			out << Vector3(light->getDirection().ptr());
 		}
 
 	}
@@ -966,7 +966,7 @@ Entity::Entity * OgreSceneManager::findEntity(const std::string & name)
 
 Scripting::KeyValueMapList OgreSceneManager::maps()
 {
-	return SceneManager::maps().merge(mEntities);
+	return SceneManager::maps().merge(Scripting::transformIt<Scripting::ToPointerConverter>(mEntities));
 }
 
 }

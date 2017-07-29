@@ -9,7 +9,7 @@
 namespace Engine {
 	namespace App {
 
-		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, Scripting::GlobalAPIComponentBase> {
+		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, MadgineObject> {
 		public:
 			/**
 			* Creates the Application.
@@ -99,6 +99,8 @@ namespace Engine {
 
 			Scripting::GlobalScope *globalScope();
 
+			const std::string &key() const;
+
 		protected:
 			virtual void _clear();
 			
@@ -123,6 +125,8 @@ namespace Engine {
 			std::list<FrameListener*> mListeners;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
+
+			static const std::string sName;
 
 		};
 

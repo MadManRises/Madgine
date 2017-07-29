@@ -19,21 +19,14 @@ public:
 
 	void executeString(const std::string &cmd);
 
-	void addGlobal(ScopeBase *api);
-	void removeGlobal(ScopeBase *api);
-
-	virtual KeyValueMapList maps() override;
-	
-	static const int sNoRef;
-
 	lua_State *lua_state();
 
 	LuaTable createTable();
+	LuaTable table();
 
 private:
 	LuaTable mTable;
 	LuaTable mScopes;
-	std::map<std::string, ScopeBase*> mGlobals;
 };
 
 }
