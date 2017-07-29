@@ -20,6 +20,7 @@ FolderSources(sources "" src interfacesforward.h interfaceslib.h message.h singl
 	FolderSources(sources src serialize fileexception.h observable.cpp observable.h serializable.cpp serializable.h serializableunit.cpp serializableunit.h serializeexception.h serializemanager.cpp serializemanager.h toplevelserializableunit.cpp toplevelserializableunit.h)
 		FolderSources(sources serialize container action.h basecontainer.h container.h creationhelper.h list.h map.h observed.h observablecontainer.h serializablecontainer.h serialized.h set.h sortedcontainer.h unithelper.h unsortedcontainer.h vector.h)
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
+			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources src signalslot connection.cpp connection.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
 	FolderSources(sources src util process.cpp process.h processlistener.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
 

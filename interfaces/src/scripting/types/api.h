@@ -48,34 +48,9 @@ namespace Engine {
 			}
 		};
 
-
-		template <class F, F _f, class T, class R, class... Ty>
-		class FunctionMapperImpl {
-		public:
-
-			typedef T type;
-
-			static ValueType call(T *t, const ArgumentList &args) {
-				return FixReturn<R>::call(t, args);
-			}
-
-
-		private:
-			template <class _R>
-			struct FixReturn {
-				static ValueType call(T *t, const ArgumentList &args) {
-					return ValueType(callImpl(_f, t, args));
-				}
-			};
-
-			template <>
-			struct FixReturn<void> {
-				static ValueType call(T *t, const ArgumentList &args) {
-					callImpl(_f, t, args);
-					return ValueType();
-				}
-			};
-
+		template <class T, class R>
+		class FunctionMapperBase {
+		protected:
 			template <class... _Ty>
 			static std::enable_if_t<all_of<!std::is_same<std::remove_const_t<std::remove_reference_t<_Ty>>, ArgumentList>::value...>::value, R> callImpl(R(T::*f)(_Ty...), T *t, const ArgumentList &list) {
 				return callImpl(f, t, list, std::make_index_sequence<sizeof...(_Ty)>());
@@ -138,17 +113,40 @@ namespace Engine {
 			}
 
 			/*static int impl(lua_State *state) {
-				int i = APIHelper::stackSize(state);
-				checkStackSize(state, _f, i - 1);
+			int i = APIHelper::stackSize(state);
+			checkStackSize(state, _f, i - 1);
 
-				ArgumentList args(state, i - 1);
-				T *t = dynamic_cast<T*>(APIHelper::to<ScopeBase*>(state, -1));
-				APIHelper::pop(state, 1);
-				if (!t)
-					return APIHelper::error(state, "self has invalid type");
-				return APIHelper::push(state, call(t, std::move(args)));
+			ArgumentList args(state, i - 1);
+			T *t = dynamic_cast<T*>(APIHelper::to<ScopeBase*>(state, -1));
+			APIHelper::pop(state, 1);
+			if (!t)
+			return APIHelper::error(state, "self has invalid type");
+			return APIHelper::push(state, call(t, std::move(args)));
 			}*/
+		};
 
+		template <class F, F _f, class T, class R, class... Ty>
+		class FunctionMapperImpl : private FunctionMapperBase<T, R>{
+		public:
+
+			typedef T type;
+
+			static ValueType call(T *t, const ArgumentList &args) {
+				return ValueType(callImpl(_f, t, args));
+			}
+
+		};
+
+		template <class F, F _f, class T, class... Ty>
+		class FunctionMapperImpl<F, _f, T, void, Ty...> : private FunctionMapperBase<T, void> {
+		public:
+
+			typedef T type;
+
+			static ValueType call(T *t, const ArgumentList &args) {
+				callImpl(_f, t, args);
+				return ValueType();
+			}
 		};
 
 		template <typename F, F f>
