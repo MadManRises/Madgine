@@ -4,7 +4,9 @@ cmake_policy(SET CMP0048 NEW)
 
 set (CMAKE_CXX_STANDARD 17)
 
-add_compile_options(/std:c++latest)
+if (MSVC)
+	add_compile_options(/std:c++latest)
+endif(MSVC)
 
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
