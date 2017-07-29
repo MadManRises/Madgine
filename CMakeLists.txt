@@ -4,16 +4,15 @@ cmake_policy(SET CMP0048 NEW)
 
 set (CMAKE_CXX_STANDARD 17)
 
-#if (MSVC)
-	add_compile_options(/std:c++latest)
-#endif(MSVC)
-
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
 set(MADGINE_PATCH_VERSION 0)
 
 project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
 
+if (MSVC)
+	add_compile_options(/std:c++latest)
+endif(MSVC)
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
