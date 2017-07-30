@@ -4,12 +4,28 @@ namespace Engine {
 	namespace Serialize {
 		namespace Debugging {
 
-			class INTERFACES_EXPORT StreamDebugging {
+			class StreamLog {
 			public:
-				StreamDebugging() = delete;
+				StreamLog(Stream *stream);
+
+				void logRead(const ValueType &v);
+				void logWrite(const ValueType &v);
+			private:
+				std::ofstream mReads;
+				std::ofstream mWrites;
+			};
+
+			class INTERFACES_EXPORT StreamDebugging {
+			private:
+				StreamDebugging();
+
+			public:
+				static void setLoggingEnabled(bool b);
+				static bool isLoggingEnabled();
 
 			private:
-				
+				static StreamDebugging sInstance;			
+				bool mLoggingEnabled;
 			};
 
 		}

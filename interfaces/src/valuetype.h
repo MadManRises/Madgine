@@ -320,35 +320,8 @@ public:
 	
 	std::string toString() const;
 
-	std::string getTypeString() const
-	{
-		switch (type()) {
-		case Type::BoolValue:
-			return "Bool";
-		case Type::EndOfListValue:
-			return "EOL-Type";
-		case Type::FloatValue:
-			return "Float";
-		case Type::IntValue:
-			return "Integer";
-		case Type::InvScopePtrValue:
-			return "Invalid Scope";
-		case Type::NullValue:
-			return "Null-Type";
-		case Type::ScopeValue:
-			return "Scope";
-		case Type::StringValue:
-			return "String";
-		case Type::Vector2Value:
-			return "Vector2";
-		case Type::Vector3Value:
-			return "Vector3";
-		case Type::Vector4Value:
-			return "Vector4";
-		default:
-			throw 0;
-		}
-	}
+	std::string getTypeString() const;
+	
 
 	static ValueType EOL()
 	{

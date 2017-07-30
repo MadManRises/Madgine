@@ -54,7 +54,7 @@ std::string ValueType::toString() const
 	case Type::ScopeValue:
 		return std::get<Scripting::ScopeBase*>(mUnion)->getIdentifier();
 	case Type::FloatValue:
-		return std::to_string(std::get<bool>(mUnion));
+		return std::to_string(std::get<float>(mUnion));
 	case Type::Vector3Value:
 		return std::string("[") + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
 	default:
@@ -62,6 +62,38 @@ std::string ValueType::toString() const
 	}
 
 
+}
+
+std::string ValueType::getTypeString() const
+{
+	switch (type()) {
+	case Type::BoolValue:
+		return "Bool";
+	case Type::EndOfListValue:
+		return "EOL-Type";
+	case Type::FloatValue:
+		return "Float";
+	case Type::IntValue:
+		return "Integer";
+	case Type::UIntValue:
+		return "Unsigned Integer";
+	case Type::InvScopePtrValue:
+		return "Invalid Scope";
+	case Type::NullValue:
+		return "Null-Type";
+	case Type::ScopeValue:
+		return "Scope";
+	case Type::StringValue:
+		return "String";
+	case Type::Vector2Value:
+		return "Vector2";
+	case Type::Vector3Value:
+		return "Vector3";
+	case Type::Vector4Value:
+		return "Vector4";
+	default:
+		throw 0;
+	}
 }
 
 

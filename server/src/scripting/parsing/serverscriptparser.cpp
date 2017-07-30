@@ -2,8 +2,6 @@
 
 #include "serverscriptparser.h"
 
-#include "os/os.h"
-
 namespace Engine {
 	namespace Scripting {
 		namespace Parsing {
@@ -12,9 +10,12 @@ namespace Engine {
 				mRootFolder(rootFolder)
 			{
 
-				for (std::string path : Engine::Os::filesMatchingPattern(rootFolder, std::string("*.") + fileExtension())) {
-					std::ifstream in(path);
-					parseScript(in, path, false);
+				for (auto &file : std::experimental::filesystem::recursive_directory_iterator(rootFolder)){
+					/*, std::string("*.") + fileExtension())) {*/
+					if (file.path().extension() == fileExtension()) {
+						std::ifstream in(file.path());
+						parseScript(in, file.path().generic_string(), false);
+					}
 				}
 
 				makeFinalized();

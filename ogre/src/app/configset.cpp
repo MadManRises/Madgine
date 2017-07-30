@@ -2,7 +2,6 @@
 
 #include "configset.h"
 
-#include "os/os.h"
 #include "ogreapplication.h"
 
 #include "serialize/streams/serializestream.h"

@@ -14,7 +14,7 @@ namespace Serialize {
 
 SerializeInStream::SerializeInStream(std::istream &ifs, Serialize::SerializeManager &mgr, ParticipantId id) :
 	Stream(mgr, id),
-	mIfs(ifs)	
+	mIfs(ifs)
 {
 }
 
@@ -81,6 +81,7 @@ SerializeInStream &SerializeInStream::operator >>(ValueType &result)
 	default:
 		throw Serialize::SerializeException(Exceptions::unknownDeserializationType);
 	}
+	mLog.logRead(result);
     return *this;
 }
 
@@ -133,7 +134,7 @@ SerializeOutStream::SerializeOutStream(std::ostream &ofs, Serialize::SerializeMa
 
 SerializeOutStream & SerializeOutStream::operator<<(const ValueType & v)
 {
-	write(v.type() == ValueType::Type::ScopeValue ? ValueType::Type::InvScopePtrValue : v.type());
+	write(v.type());
 	switch (v.type()) {
 	case ValueType::Type::BoolValue:
 		write(v.as<bool>());
@@ -173,6 +174,7 @@ SerializeOutStream & SerializeOutStream::operator<<(const ValueType & v)
 	default:
 		throw Serialize::SerializeException(Exceptions::unknownSerializationType);
 	}
+	mLog.logWrite(v);
 	return *this;
 }
 
@@ -206,7 +208,8 @@ void SerializeOutStream::seek(pos_type p)
 
 Stream::Stream(SerializeManager &mgr, ParticipantId id) :
 	mManager(mgr),
-	mId(id)
+	mId(id),
+	mLog(this)
 {
 }
 

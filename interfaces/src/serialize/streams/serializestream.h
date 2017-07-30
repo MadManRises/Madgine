@@ -3,6 +3,7 @@
 #include "valuetype.h"
 #include "../serializemanager.h"
 #include "../serializeexception.h"
+#include "debugging/streamdebugging.h"
 
 namespace Engine {
 namespace Serialize {
@@ -29,6 +30,7 @@ public:
 protected:
 	SerializeManager &mManager;
 	ParticipantId mId;
+	Debugging::StreamLog mLog;
 };
 
 class INTERFACES_EXPORT SerializeInStream : public virtual Stream {
