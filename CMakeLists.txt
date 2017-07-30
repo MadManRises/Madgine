@@ -13,9 +13,9 @@ project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADG
 if (MSVC)
 	add_compile_options(/std:c++latest)
 endif(MSVC)
-if (UNIX)
+if (CMAKE_COMPILER_IS_GNUCXX)
 	set (CMAKE_STANDARD_LIBRARIES ${CMAKE_STANDARD_LIBRARIES} stdc++fs)
-endif (UNIX)
+endif (CMAKE_COMPILER_IS_GNUCXX)
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
