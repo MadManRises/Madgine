@@ -35,6 +35,10 @@ target_link_libraries (Interfaces PRIVATE ${lua_lib} ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32)	
 endif()
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+	target_link_libraries (Interfaces stdc++fs)
+endif (CMAKE_COMPILER_IS_GNUCXX)
  
 if (BUILD_TESTS)	
 	add_subdirectory(test)	
