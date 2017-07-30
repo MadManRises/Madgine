@@ -20,22 +20,29 @@ namespace Engine {
 
 			void StreamLog::logRead(const ValueType & v)
 			{
-				mReads << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
+				if (StreamDebugging::isLoggingEnabled())
+					mReads << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
 			}
 
 			void StreamLog::logWrite(const ValueType & v)
 			{
-				mWrites << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
+				if (StreamDebugging::isLoggingEnabled())
+					mWrites << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
 			}
 
 			StreamDebugging::StreamDebugging() {
-				std::experimental::filesystem::remove_all("stream-logging");
-				std::experimental::filesystem::create_directory("stream-logging");
 			}
 
 			void StreamDebugging::setLoggingEnabled(bool b)
 			{
-				sInstance.mLoggingEnabled = b;
+				if (sInstance.mLoggingEnabled != b) {
+					sInstance.mLoggingEnabled = b;
+					if (b) {
+						if (std::experimental::filesystem::exists("stream-logging"))
+							std::experimental::filesystem::remove_all("stream-logging");
+						std::experimental::filesystem::create_directory("stream-logging");
+					}
+				}
 			}
 
 			bool StreamDebugging::isLoggingEnabled()
