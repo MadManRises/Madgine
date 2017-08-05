@@ -49,12 +49,6 @@ namespace Engine {
 			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, T &item) {
 			}
 
-			static void setItemTopLevel(T &item, TopLevelSerializableUnitBase *topLevel) {
-			}
-
-			static void clearItemTopLevel(T &item) {
-			}
-
 			static void postConstruct(T &item) {
 			}
 
@@ -160,14 +154,6 @@ namespace Engine {
 				UnitHelper<T>::applyMap(map, *item);
 			}
 
-			static void setItemTopLevel(Type &item, TopLevelSerializableUnitBase *topLevel) {
-				UnitHelper<T>::setItemTopLevel(*item, topLevel);
-			}
-
-			static void clearItemTopLevel(Type &item) {
-				UnitHelper<T>::clearItemTopLevel(*item);
-			}
-
 			static void postConstruct(Type &item) {
 				UnitHelper<T>::postConstruct(*item);
 			}
@@ -219,31 +205,6 @@ namespace Engine {
 				item.applySerializableMap(map);
 			}
 
-			static void setItemTopLevel(TopLevelSerializableUnitBase &item, TopLevelSerializableUnitBase *topLevel) {
-				for (SerializeManager *mgr : topLevel->getMasterManagers()) {
-					mgr->addTopLevelItem(&item, false);
-				}
-				SerializeManager *slaveMgr = topLevel->getSlaveManager();
-				if (slaveMgr) {
-					slaveMgr->addTopLevelItem(&item, false);
-				}
-			}
-
-			static void setItemTopLevel(SerializableUnitBase &item, TopLevelSerializableUnitBase *topLevel) {
-				item.setTopLevel(topLevel);
-			}
-
-			static void setItemTopLevel(Serializable &item, TopLevelSerializableUnitBase *topLevel) {
-
-			}
-
-			static void clearItemTopLevel(SerializableUnitBase &item) {
-				item.clearTopLevel();
-			}
-
-			static void clearItemTopLevel(Serializable &item) {
-
-			}
 
 			static void postConstruct(SerializableUnitBase &item) {
 				item.postConstruct();
@@ -309,16 +270,6 @@ namespace Engine {
 			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, Type &item) {
 				UnitHelper<U>::applyMap(map, item.first);
 				UnitHelper<V>::applyMap(map, item.second);
-			}
-
-			static void setItemTopLevel(Type &item, TopLevelSerializableUnitBase *topLevel) {
-				UnitHelper<U>::setItemTopLevel(item.first, topLevel);
-				UnitHelper<V>::setItemTopLevel(item.second, topLevel);
-			}
-
-			static void clearItemTopLevel(Type &item) {
-				UnitHelper<U>::clearItemTopLevel(item.first);
-				UnitHelper<V>::clearItemTopLevel(item.second);
 			}
 
 			static void postConstruct(Type &item) {

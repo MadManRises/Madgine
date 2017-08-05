@@ -53,10 +53,18 @@ std::string ValueType::toString() const
 		return "EOL";
 	case Type::ScopeValue:
 		return std::get<Scripting::ScopeBase*>(mUnion)->getIdentifier();
+	case Type::InvScopePtrValue:
+		return std::to_string(reinterpret_cast<uintptr_t>(std::get<InvScopePtr>(mUnion).validate()));
 	case Type::FloatValue:
 		return std::to_string(std::get<float>(mUnion));
 	case Type::Vector3Value:
 		return std::string("[") + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
+	case Type::Vector4Value:
+		return std::string("[") + 
+			std::to_string(std::get<std::array<float, 4>>(mUnion)[0]) + ", " + 
+			std::to_string(std::get<std::array<float, 4>>(mUnion)[1]) + ", " + 
+			std::to_string(std::get<std::array<float, 4>>(mUnion)[2]) + ", " +
+			std::to_string(std::get<std::array<float, 4>>(mUnion)[3]) + "]";
 	default:
 		MADGINE_THROW(Scripting::ScriptingException("Unknown Type!"));
 	}
@@ -66,7 +74,12 @@ std::string ValueType::toString() const
 
 std::string ValueType::getTypeString() const
 {
-	switch (type()) {
+	return getTypeString(type());
+}
+
+std::string ValueType::getTypeString(Type type)
+{
+	switch (type) {
 	case Type::BoolValue:
 		return "Bool";
 	case Type::EndOfListValue:

@@ -18,32 +18,34 @@ namespace Serialize {
 
 	thread_local std::list<SerializableUnitBase*> SerializableUnitBase::intern::stack;
 
-	SerializableUnitBase::SerializableUnitBase(size_t masterId) :
-	mTopLevel(0),
+	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId) :
+	mTopLevel(topLevel),
 	mSlaveId(0)
-{
+	{
+		assert(mTopLevel);
 		if (masterId == 0) {
 			mMasterId = SerializeManager::addMasterMapping(this);
 		}
 		else {
 			mMasterId = SerializeManager::addStaticMasterMapping(this, masterId);
-			
 		}
 		insertInstance();
-}
+	}
 
-	SerializableUnitBase::SerializableUnitBase(const SerializableUnitBase & other) :
-		mTopLevel(0),
+	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase & other) :
+		mTopLevel(topLevel),
 		mSlaveId(0)
 	{
+		assert(mTopLevel);
 		mMasterId = SerializeManager::addMasterMapping(this);
 		insertInstance();
 	}
 
-	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase && other) :
-		mTopLevel(0),
+	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase && other) :
+		mTopLevel(topLevel),
 		mSlaveId(0)
 	{
+		assert(mTopLevel);
 		std::tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
 		insertInstance();
 	}
@@ -67,11 +69,14 @@ void SerializableUnitBase::writeId(SerializeOutStream & out) const
 	out << mMasterId.first;
 }
 
-void SerializableUnitBase::readId(SerializeInStream & in)
+size_t SerializableUnitBase::readId(SerializeInStream & in)
 {
 	size_t id;
 	in >> id;
-	setSlaveId(id);
+	if (&in.manager() == topLevel()->getSlaveManager()) {
+		setSlaveId(id);
+	}
+	return id;
 }
 
 void SerializableUnitBase::readState(SerializeInStream & in)
@@ -121,11 +126,7 @@ std::list<BufferedOutStream*> SerializableUnitBase::getMasterMessageTargets(bool
 {
 	std::list<BufferedOutStream*> result;
 	if (mTopLevel && !isInitialising()) {
-		result = mTopLevel->getMasterMessageTargets(this, targets);
-
-		for (BufferedOutStream *out : result) {
-			writeMasterMessageHeader(*out, isAction);
-		}
+		result = mTopLevel->getMasterMessageTargets(this, isAction ? ACTION : STATE, targets);
 	}
 	else {
 		assert(targets.empty());
@@ -134,23 +135,11 @@ std::list<BufferedOutStream*> SerializableUnitBase::getMasterMessageTargets(bool
 	
 }
 
-void SerializableUnitBase::writeMasterMessageHeader(BufferedOutStream & out, bool isAction)
-{
-	MessageHeader header;
-	header.mType = isAction ? ACTION : STATE;
-	header.mObject = out.manager().convertPtr(out, this);
-	out.write(header);
-}
-
 BufferedOutStream * SerializableUnitBase::getSlaveMessageTarget()
 {
 	BufferedOutStream* result = nullptr;
 	if (mTopLevel) {
-		result = mTopLevel->getSlaveMessageTarget();
-		MessageHeader header;
-		header.mType = REQUEST;
-		header.mObject = result->manager().convertPtr(*result, this);
-		result->write(header);
+		result = mTopLevel->getSlaveMessageTarget(this);
 	}
 	return result;
 }
@@ -160,19 +149,7 @@ void SerializableUnitBase::writeCreationData(SerializeOutStream & out) const
 {
 }
 
-void SerializableUnitBase::setTopLevel(TopLevelSerializableUnitBase * topLevel)
-{
-	assert(!mTopLevel && topLevel);
-	mTopLevel = topLevel;
-}
-
-void SerializableUnitBase::clearTopLevel()
-{
-	clearSlaveId();
-	mTopLevel = nullptr;
-}
-
-TopLevelSerializableUnitBase * SerializableUnitBase::topLevel()
+TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 {
 	return mTopLevel;
 }

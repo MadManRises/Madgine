@@ -50,9 +50,27 @@ namespace Engine {
 		const constexpr static bool value = false;
 	};
 
+	template <class... V, class T>
+	struct variant_contains<std::variant<T, V...>, T> {
+		const constexpr static bool value = true;
+	};
+
 	template <class U, class... V, class T>
 	struct variant_contains<std::variant<U, V...>, T> {
-		const constexpr static bool value = std::is_same<U, T>::value || variant_contains<std::variant<V...>, T>::value;
+		const constexpr static bool value = variant_contains<std::variant<V...>, T>::value;
+	};
+
+	template <class V, class T>
+	struct variant_index;
+
+	template <class... V, class T>
+	struct variant_index<std::variant<T, V...>, T> {
+		const constexpr static size_t value = 0;
+	};
+
+	template <class U, class... V, class T>
+	struct variant_index<std::variant<U, V...>, T> {
+		const constexpr static size_t value = 1 + variant_index<std::variant<V...>, T>::value;
 	};
 
 	struct TupleSerializer {

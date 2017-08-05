@@ -9,7 +9,7 @@ namespace Engine {
 		class INTERFACES_EXPORT NetworkManager : public Serialize::SerializeManager{
 
 		public:
-			NetworkManager();
+			NetworkManager(const std::string &name);
 			NetworkManager(const NetworkManager &) = delete;
 			NetworkManager(NetworkManager &&);
 			virtual ~NetworkManager();

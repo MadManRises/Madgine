@@ -61,5 +61,10 @@ namespace Engine {
 			return true;
 		}
 
+		Scripting::KeyValueMapList ServerApplication::maps()
+		{
+			return Application::maps().merge(mSceneManager);
+		}
+
 	}
 }

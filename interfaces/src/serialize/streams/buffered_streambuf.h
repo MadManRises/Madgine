@@ -26,7 +26,7 @@ public:
 	virtual void close(StreamError cause = NO_ERROR);
 
 	//read
-	bool isMessageAvailable();
+	bool isMessageAvailable(const std::string &context);
 
 	//write
 	void beginMessage();
@@ -56,7 +56,7 @@ protected:
 	
 	virtual int sync() override;
 	void extend();	
-	void receive();
+	void receive(const std::string &context);
 
 private:
 

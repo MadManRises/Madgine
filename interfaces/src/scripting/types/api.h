@@ -33,14 +33,14 @@ namespace Engine {
 
 		template <class T>
 		struct Caster {
-			static auto cast(const ValueType &v) {
+			static decltype(auto) cast(const ValueType &v) {
 				return v.as<std::remove_const_t<std::remove_reference_t<T>>>();
 			}
 		};
 
 		template <class T>
 		struct Caster<T*> {
-			static auto cast(const ValueType &v) {
+			static decltype(auto) cast(const ValueType &v) {
 				T *t = scope_cast<T>(v.as<Scripting::ScopeBase*>());
 				if (!t)
 					throw 0;

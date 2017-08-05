@@ -390,7 +390,7 @@ const std::vector<Ogre::SceneNode*> &OgreSceneManager::terrainEntities()
 	return mTerrainEntities;
 }
 
-std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & behaviour, const std::string & name, const std::string & meshName)
+std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & name, const std::string & meshName)
 {
 
 	std::string actualName = name.empty() ? generateUniqueName() : name;
@@ -404,19 +404,19 @@ std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::crea
 		node->attachObject(mesh);
 	}
 
-	return std::make_tuple(behaviour, node, mesh);
+	return std::make_tuple(this, node, mesh);
 	
 	
 }
 
-std::tuple<Ogre::Light*> OgreSceneManager::createLightData()
+std::tuple<OgreSceneManager *, Ogre::Light*> OgreSceneManager::createLightData()
 {
-	return std::make_tuple(mSceneMgr->createLight());
+	return std::make_tuple(this, mSceneMgr->createLight());
 }
 
 Light * OgreSceneManager::createLight()
 {
-	return &*mLights.emplace_back(mSceneMgr->createLight());
+	return &*mLights.emplace_back(this, mSceneMgr->createLight());
 }
 
 std::list<Light*> OgreSceneManager::lights()
@@ -433,14 +433,14 @@ Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, con
 	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
 		if (init)
 			init(*it);
-	}, createEntityData(behaviour, name, meshName));
+	}, std::tuple_cat(createEntityData(name, meshName), std::make_tuple(behaviour)));
 	return &mEntities.back();
 }
 
 Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName)
 {
-	const std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(behaviour, name, meshName);
-	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data));
+	const std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(name, meshName);
+	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
 	return &mLocalEntities.back();
 }
 

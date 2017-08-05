@@ -11,4 +11,8 @@ namespace Engine {
 		
 	}
 
+	namespace Scene {
+		class ServerSceneManager;
+	}
+
 }

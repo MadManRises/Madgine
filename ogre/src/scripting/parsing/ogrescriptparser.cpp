@@ -11,7 +11,7 @@ OgreScriptParser::OgreScriptParser() : mRsgm(
         &Ogre::ResourceGroupManager::getSingleton())
 {
     mLoadOrder = 100.0f;
-    mScriptPatterns.push_back(std::string("*.") + fileExtension());
+    mScriptPatterns.push_back(std::string("*") + fileExtension());
     mRsgm->_registerScriptLoader(this);
 }
 

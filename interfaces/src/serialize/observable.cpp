@@ -22,17 +22,17 @@ namespace Engine {
 				return result;
 			}
 
-			void Observable::writeMasterActionMessageHeader(BufferedOutStream & out) const
-			{
-				mUnit->writeMasterMessageHeader(out, true);
-				out << mIndex;
-			}
-
 			BufferedOutStream * Observable::getSlaveActionMessageTarget() const
 			{
 				BufferedOutStream *out = mUnit->getSlaveMessageTarget();
 				*out << mIndex;
 				return out;
+			}
+
+			void Observable::beginActionResponseMessage(BufferedOutStream * stream)
+			{
+				stream->beginMessage(mUnit, ACTION);
+				*stream << mIndex;
 			}
 
 			ParticipantId Observable::id()

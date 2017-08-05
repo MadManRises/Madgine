@@ -21,7 +21,7 @@ public:
 	ServerEntity(const ServerEntity&) = default;
 	ServerEntity(ServerEntity &&) = default;
 
-	ServerEntity(const std::string &behaviour, const std::string &name, const std::string &object);
+	ServerEntity(ServerSceneManager *sceneMgr, const std::string &name, const std::string &object, const std::string &behaviour = "");
     ~ServerEntity();
 
 	virtual Vector3 getPosition() const override;

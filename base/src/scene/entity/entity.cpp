@@ -17,7 +17,7 @@
 
 namespace Engine {
 
-	API_IMPL(Engine::Scene::Entity::Entity, MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
+	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
 
 
 namespace Scene {
@@ -26,6 +26,7 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
+	SerializableUnitBase(other.topLevel()),
 	mName(other.mName)
 {
 
@@ -34,15 +35,16 @@ Entity::Entity(const Entity &other) :
 }
 
 Entity::Entity(Entity &&other) :
-	mName(other.mName),
+	SerializableUnitBase(other.topLevel()),
+	mName(other.mName),	
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
 {
 
 }
 
-Entity::Entity(const std::string &behaviour, const std::string &name) : 
-	mName(name),
-	mBehaviour(behaviour)
+Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name) :
+	SerializableUnitBase(sceneMgr),
+	mName(name)
 {
 	
 }
@@ -54,13 +56,13 @@ Entity::~Entity()
 
 }
 
-bool Entity::init()
+bool Entity::init(const std::string &behaviour)
 {
 	if (!Scope::init())
 		return false;
 
-	if (!mBehaviour.empty()) {
-		ValueType table = Scripting::GlobalScope::getSingleton().table().getValue(mBehaviour);
+	if (!behaviour.empty()) {
+		ValueType table = Scripting::GlobalScope::getSingleton().table().getValue(behaviour);
 		if (!table.is<Scripting::LuaTable>())
 			throw 0;
 		for (const std::pair<std::string, ValueType> &p : table.as<Scripting::LuaTable>()) {
@@ -100,7 +102,7 @@ std::string Entity::getIdentifier() const
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
 	SerializableUnitBase::writeCreationData(of);
-    of << mBehaviour << mName << getObjectName();
+    of << mName << getObjectName();
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)

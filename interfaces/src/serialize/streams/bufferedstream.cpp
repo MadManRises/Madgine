@@ -18,12 +18,20 @@ namespace Serialize {
 
 	bool BufferedInStream::isMessageAvailable()
 	{
-		return mBuffer.isMessageAvailable();
+		return mBuffer.isMessageAvailable(mManager.name());
 	}
 
 	buffered_streambuf * BufferedInStream::rdbuf()
 	{
 		return &mBuffer;
+	}
+
+	void BufferedInStream::readHeader(MessageHeader & header)
+	{
+		if (!isMessageAvailable())
+			throw 0;
+		read(header);
+		mLog.logBeginMessage(header);
 	}
 
 	BufferedOutStream::BufferedOutStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :
@@ -34,9 +42,24 @@ namespace Serialize {
 	{
 	}
 
-	void BufferedOutStream::beginMessage()
+	void BufferedOutStream::beginMessage(SerializableUnitBase *unit, MessageType type)
 	{
+		MessageHeader header;
+		header.mType = type;
+		header.mObject = mManager.convertPtr(*this, unit);
+		mLog.logBeginMessage(header, unit);
 		mBuffer.beginMessage();
+		write(header);
+	}
+
+	void BufferedOutStream::beginMessage(Command cmd)
+	{
+		MessageHeader header;
+		header.mCmd = cmd;
+		header.mObject = SERIALIZE_MANAGER;
+		mLog.logBeginMessage(header);
+		mBuffer.beginMessage();
+		write(header);
 	}
 
 	void BufferedOutStream::endMessage()

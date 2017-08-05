@@ -5,7 +5,8 @@
 namespace Engine {
 	namespace Scene {
 
-		Light::Light() :
+		Light::Light(Serialize::TopLevelSerializableUnitBase* topLevel) :
+			SerializableUnit(topLevel),
 			mPowerChangedSlot(this),
 			mPositionChangedSlot(this)			
 		{

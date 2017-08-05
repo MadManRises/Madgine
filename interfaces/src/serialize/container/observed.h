@@ -13,23 +13,7 @@ namespace Engine {
 				template <class... _Ty>
 				Observed(_Ty&&... args) :
 					mData(std::forward<_Ty>(args)...)
-				{
-					if (topLevel())
-						this->setItemTopLevel(mData, topLevel());				
-				}
-
-				Observed(const Observed<T> &other) :
-					mData(other.mData)
-				{
-					if (topLevel())
-						this->setItemTopLevel(mData, topLevel());
-				}
-
-				Observed(Observed<T> &&other) :
-					mData(std::forward<Observed<T>>(other))
-				{
-					if (topLevel())
-						this->setItemTopLevel(mData, topLevel());
+				{			
 				}
 
 				template <class Ty>

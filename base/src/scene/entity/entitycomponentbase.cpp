@@ -7,6 +7,7 @@ namespace Scene {
 namespace Entity {
 
 EntityComponentBase::EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable) :
+	SerializableUnitBase(entity.topLevel()),
     mEntity(entity),
 	mInitTable(initTable)
 {

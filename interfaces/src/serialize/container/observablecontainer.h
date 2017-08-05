@@ -221,7 +221,7 @@ namespace Engine {
 				iterator it = this->end();
 				switch (op) {
 				case INSERT_ITEM:
-					it = this->read_item(in, this->topLevel());
+					it = this->read_item(in, topLevel());
 					C::onInsert(it);
 					onInsert(it, partId, id);
 					break;
@@ -258,7 +258,7 @@ namespace Engine {
 
 
 				if (!accepted) {
-					inout.beginMessage();
+					beginActionResponseMessage(&inout);
 					inout << id;
 					inout << (op | REJECT);
 					inout.endMessage();

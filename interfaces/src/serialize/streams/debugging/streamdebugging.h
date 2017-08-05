@@ -10,6 +10,7 @@ namespace Engine {
 
 				void logRead(const ValueType &v);
 				void logWrite(const ValueType &v);
+				void logBeginMessage(const MessageHeader &header, SerializableUnitBase *unit = nullptr);
 			private:
 				std::ofstream mReads;
 				std::ofstream mWrites;

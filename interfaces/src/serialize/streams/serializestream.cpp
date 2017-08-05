@@ -92,6 +92,11 @@ SerializeInStream & SerializeInStream::operator >> (Serializable & s)
 	return *this;
 }
 
+void SerializeInStream::readRaw(void * buffer, size_t size)
+{
+	read(buffer, size);
+}
+
 void SerializeInStream::read(void *buffer, size_t size)
 {
     mIfs.read((char*)buffer, size);
@@ -189,6 +194,11 @@ SerializeOutStream & SerializeOutStream::operator<<(const Serializable & s)
 {
 	s.writeState(*this);
 	return *this;
+}
+
+void SerializeOutStream::writeRaw(const void * buffer, size_t size)
+{
+	writeData(buffer, size);
 }
 
 void SerializeOutStream::writeData(const void *buffer, size_t size)

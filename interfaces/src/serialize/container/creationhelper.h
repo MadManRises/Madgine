@@ -6,16 +6,35 @@
 namespace Engine {
 	namespace Serialize {
 
+		template <class Tuple>
+		class SerializableUnitExtendedTuple : public decltype(std::tuple_cat(std::make_tuple(std::declval<TopLevelSerializableUnitBase*>()), std::declval<Tuple>())) {
+		public:
+			SerializableUnitExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
+				tuple(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
+		};
+
+		template <class Tuple>
+		class NotExtendedTuple : public Tuple {
+		public:
+			NotExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
+				tuple(std::forward<Tuple>(tuple)) {}
+		};
+
+		template <class T, class Tuple>
+		using ExtendedTuple = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value && !std::is_base_of<TopLevelSerializableUnitBase, T>::value, SerializableUnitExtendedTuple<Tuple>, NotExtendedTuple<Tuple>>::type;
+
+		
 		template <class... Args>
 		class DefaultCreator {
 		protected:
 
 			typedef std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...> ArgsTuple;
 
-			ArgsTuple readCreationData(SerializeInStream &in) {
+			template <class T>
+			ExtendedTuple<T, ArgsTuple> readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				ArgsTuple tuple;
 				TupleSerializer::readTuple(tuple, in);
-				return tuple;
+				return { topLevel, std::move(tuple) };
 			}
 		};
 
@@ -29,11 +48,11 @@ namespace Engine {
 		protected:
 			typedef R ArgsTuple;
 
-
-			R readCreationData(SerializeInStream &in) {
+			template <class T>
+			R readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
-				return TupleUnpacker<>::call(mCallback, std::move(tuple));				
+				return TupleUnpacker<>::call(mCallback, std::move(tuple));
 			}
 
 		private:
@@ -55,7 +74,8 @@ namespace Engine {
 		protected:
 			typedef R ArgsTuple;
 
-			R readCreationData(SerializeInStream &in) {
+			template <class T>
+			R readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
 				return TupleUnpacker<>::call(mParent, f, std::move(tuple));

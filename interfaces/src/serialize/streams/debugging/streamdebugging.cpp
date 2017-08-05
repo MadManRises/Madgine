@@ -6,6 +6,8 @@
 
 #include "valuetype.h"
 
+#include "serialize/serializableunit.h"
+
 namespace Engine {
 	namespace Serialize {
 		namespace Debugging {
@@ -13,9 +15,11 @@ namespace Engine {
 			StreamDebugging StreamDebugging::sInstance;
 
 			StreamLog::StreamLog(Stream * stream) :
-				mWrites(std::string("stream-logging/") + std::to_string(reinterpret_cast<uintptr_t>(&stream->manager())) + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log"),
-				mReads(std::string("stream-logging/") + std::to_string(reinterpret_cast<uintptr_t>(&stream->manager())) + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log")
-			{				
+				mWrites(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log"),
+				mReads(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log")
+			{		
+				if (stream->manager().name().empty())
+					throw 0;
 			}
 
 			void StreamLog::logRead(const ValueType & v)
@@ -30,6 +34,28 @@ namespace Engine {
 					mWrites << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
 			}
 
+			void StreamLog::logBeginMessage(const MessageHeader &header, SerializableUnitBase *unit) {
+				if (StreamDebugging::isLoggingEnabled()) {
+					mWrites << "// Begin Message of Type ";
+					switch (header.mType) {
+					case ACTION:
+						mWrites << "ACTION";
+						break;
+					case REQUEST:
+						mWrites << "REQUEST";
+						break;
+					case STATE:
+						mWrites << "STATE";
+						break;
+					}
+					mWrites << " to ";
+					if (unit) {
+						mWrites << typeid(*unit).name();
+					}
+					mWrites << "(" << header.mObject << ")"<< std::endl;
+				}
+			}
+
 			StreamDebugging::StreamDebugging() {
 			}
 
@@ -38,9 +64,14 @@ namespace Engine {
 				if (sInstance.mLoggingEnabled != b) {
 					sInstance.mLoggingEnabled = b;
 					if (b) {
-						if (std::experimental::filesystem::exists("stream-logging"))
-							std::experimental::filesystem::remove_all("stream-logging");
-						std::experimental::filesystem::create_directory("stream-logging");
+						if (std::experimental::filesystem::exists("stream-logging")) {
+							for (std::experimental::filesystem::directory_iterator end, it("stream-logging"); it != end; ++it) {
+								std::experimental::filesystem::remove_all(it->path());
+							}
+						}
+						else {
+							std::experimental::filesystem::create_directory("stream-logging");
+						}
 					}
 				}
 			}

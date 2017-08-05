@@ -19,7 +19,7 @@ public:
 	OgreEntity(const OgreEntity&);
 	OgreEntity(OgreEntity &&);
 
-    OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre::Entity *obj);
+    OgreEntity(OgreSceneManager *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour = "");
     ~OgreEntity();
 
 	Ogre::SceneNode *createDecoratorNode(bool centered, float height = 0.0f);

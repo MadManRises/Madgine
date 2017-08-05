@@ -23,7 +23,7 @@ public:
     virtual bool init() override;
 	virtual void finalize() override;
 
-	std::tuple<std::string, std::string, std::string> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
+	std::tuple<ServerSceneManager*, std::string, std::string> createEntityData(const std::string &name, const std::string &meshName);
 	
 	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", std::function<void(Entity::Entity&)> init = {}) override;
 	virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "") override;

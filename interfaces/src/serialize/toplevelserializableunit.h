@@ -15,8 +15,8 @@ public:
 
 	void copyStaticSlaveId(const TopLevelSerializableUnitBase &other);
 
-	std::list<BufferedOutStream *> getMasterMessageTargets(SerializableUnitBase *unit, const std::list<ParticipantId> &targets);
-	BufferedOutStream *getSlaveMessageTarget();
+	std::list<BufferedOutStream *> getMasterMessageTargets(SerializableUnitBase *unit, MessageType type, const std::list<ParticipantId> &targets);
+	BufferedOutStream *getSlaveMessageTarget(SerializableUnitBase *unit);
 
 	const std::list<SerializeManager*> &getMasterManagers();
 	SerializeManager *getSlaveManager();
@@ -34,7 +34,7 @@ public:
 	void setStaticSlaveId(size_t staticId);
 	void initSlaveId();
 
-	virtual void readId(SerializeInStream &in) override;
+	virtual size_t readId(SerializeInStream &in) override;
 
 private:
 	std::list<SerializeManager*> mMasterManagers;

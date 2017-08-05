@@ -14,7 +14,7 @@ namespace Engine {
 			mName(name),
 			mScriptParser(scriptsFolder),
 			mRunning(false),
-			mGlobalScope(mScriptParser.createThread())
+			mGlobalScope(mScriptParser.createThread(), this)
 		{
 		}
 		int ServerBase::run()
@@ -109,7 +109,7 @@ namespace Engine {
 			return Scope::maps().merge(mInstances);
 		}
 
-		Scripting::GlobalScopeBase * Engine::Server::ServerBase::globalScope()
+		Scripting::GlobalScopeBase * ServerBase::globalScope()
 		{
 			return &mGlobalScope;
 		}

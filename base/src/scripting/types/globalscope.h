@@ -32,10 +32,7 @@ public:
 
 
 private:
-
-
 	BaseUniqueComponentCollector<GlobalAPIComponentBase> mGlobalAPIs;
-	App::Application *mApp;
 
 };
 

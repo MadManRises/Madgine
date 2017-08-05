@@ -63,15 +63,6 @@ public:
 
 	SerializeInStream &operator >> (Serializable &s);
 
-    template <class T>
-    void read(T &t){
-        read(&t, sizeof(T));
-    }
-
-    void read(void *buffer, size_t size);
-
-    pos_type tell();
-    void seek(pos_type p);
 
 	template <class T>
 	bool loopRead(T &val) {
@@ -86,6 +77,19 @@ public:
 
     explicit operator bool();
 
+	void readRaw(void *buffer, size_t size);
+
+protected:
+
+	pos_type tell();
+	void seek(pos_type p);
+
+	template <class T>
+	void read(T &t) {
+		read(&t, sizeof(T));
+	}
+
+	void read(void *buffer, size_t size);
 
 private:
     std::istream &mIfs;
@@ -105,17 +109,20 @@ public:
 
 	SerializeOutStream &operator<<(const Serializable &s);
 
-    void writeData(const void *buffer, size_t size);
-    pos_type tell();
-    void seek(pos_type p);
+	explicit operator bool();
 
+	void writeRaw(const void *buffer, size_t size);
+
+protected:
+	pos_type tell();
+	void seek(pos_type p);
 
 	template <class T>
 	void write(const T &t) {
 		writeData(&t, sizeof(T));
 	}
 
-	explicit operator bool();
+	void writeData(const void *buffer, size_t size);
 
 private:
     std::ostream &mOfs;

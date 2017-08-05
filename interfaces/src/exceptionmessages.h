@@ -20,6 +20,7 @@ namespace Exceptions {
 	const auto invalidValueType = message("Invalid ValueType!");
 	const auto invalidTypesForOperator = message("Invalid Types for Operator '", "': ", ", ", "");
 	const auto loadLayoutFailure = message("Failed to load Layout: '", "'!");
+	const auto messageNotFullyRead = message("Message not fully read! (", ")");
 	//const auto missingEvent = message("Reference to non-existing Event: '", "'");
 	//const auto moreThanOneAttachedObject = message("Entity with more than one attached Object!");
 	//const auto noAttachedObject = message("Entity without attached Object!");
@@ -32,6 +33,7 @@ namespace Exceptions {
 	const auto reservedKeyword = message("Use of reserved Keyword '", "'!");
 	const auto unexpectedParseType = message("Unexpected Type ", " during Parsing in File ", ":(", ",", ")!");
 	const auto unexpectedScopeType = message("Unexpected Scope Type: got ", ", expected ", "!");
+	const auto unexpectedValueType = message("Unexpected Value-Type: got ", ", expected ", "!");
 	const auto unknownArithmeticalOperator = message("Unknown Arithmetical-Operator: ", "");
 	const auto unknownCompareOperator = message("Unknown Compare-Operator: ", "");
 	const auto unknownComponent = message("Unknown Component-Name: '", "'");

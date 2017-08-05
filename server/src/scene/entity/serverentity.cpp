@@ -21,13 +21,13 @@ namespace Entity {
 
 
 
-	ServerEntity::ServerEntity(const std::string &behaviour, const std::string &name, const std::string &object) :
-	Entity(behaviour, name),
+	ServerEntity::ServerEntity(ServerSceneManager *sceneMgr, const std::string &name, const std::string &object, const std::string &behaviour) :
+	Entity(sceneMgr, name),
 		mScale{ 1, 1, 1 },
 		mOrientation{ {1, 0, 0, 0} },
 		mObject(object)
 {
-		init();
+		init(behaviour);
 }
 
 	ServerEntity::~ServerEntity()

@@ -58,8 +58,8 @@ OgreEntity::OgreEntity(OgreEntity &&other) :
 	//Change components-Owner
 }
 
-OgreEntity::OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre::Entity *obj) :
-	Entity(behaviour, node->getName().c_str()),
+OgreEntity::OgreEntity(OgreSceneManager *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour) :
+	Entity(sceneMgr, node->getName().c_str()),
     mNode(node),
     mObject(obj)
 {
@@ -72,7 +72,7 @@ OgreEntity::OgreEntity(const std::string &behaviour, Ogre::SceneNode *node, Ogre
 	
     mDecoratorNode = mNode->createChildSceneNode(node->getName() + "_Decorator");
 
-	init();
+	init(behaviour);
 
 }
 

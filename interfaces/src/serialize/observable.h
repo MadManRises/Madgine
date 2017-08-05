@@ -13,13 +13,14 @@ namespace Engine {
 
 				BufferedOutStream *getSlaveActionMessageTarget() const;
 				std::list<BufferedOutStream*> getMasterActionMessageTargets(const std::list<ParticipantId> &targets = {}) const;
-				void writeMasterActionMessageHeader(BufferedOutStream &out) const;
+
+				void beginActionResponseMessage(BufferedOutStream *stream);
 
 				ParticipantId id();
 				bool isMaster() const;
 
 				SerializableUnitBase *parent();
-				
+
 			private:		
 				SerializableUnitBase *mUnit;
 				size_t mIndex;

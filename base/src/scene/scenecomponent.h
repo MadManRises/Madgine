@@ -28,8 +28,6 @@ public:
 
 	virtual Scripting::KeyValueMapList maps() override;
 
-	int test();
-
 protected:
     virtual void update(float);
 	virtual void fixedUpdate(float);    

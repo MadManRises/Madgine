@@ -15,6 +15,8 @@ public:
 
 	buffered_streambuf *rdbuf();
 
+	void readHeader(MessageHeader &header);
+
 private:
 	buffered_streambuf &mBuffer;
 	std::istream mIfs;
@@ -24,7 +26,8 @@ class INTERFACES_EXPORT BufferedOutStream : public SerializeOutStream{
 public:
     BufferedOutStream(buffered_streambuf &buffer, SerializeManager &mgr, ParticipantId id);
 
-	void beginMessage();
+	void beginMessage(SerializableUnitBase *unit, MessageType type);
+	void beginMessage(Command cmd);
 	void endMessage();
 
 	int sendMessages();
@@ -35,11 +38,7 @@ public:
 	template <class... _Ty>
 	void writeCommand(Command cmd, const _Ty&... args)
 	{
-		MessageHeader header;
-		header.mObject = SERIALIZE_MANAGER;
-		header.mCmd = cmd;
-		beginMessage();
-		write(header);
+		beginMessage(cmd);		
 
 		using expander = bool[];
 		(void)expander {

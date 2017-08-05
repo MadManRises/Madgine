@@ -114,8 +114,8 @@ protected:
 		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
-	std::tuple<std::string, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &behaviour, const std::string &name, const std::string &meshName);
-	std::tuple<Ogre::Light *> createLightData();
+	std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &name, const std::string &meshName);
+	std::tuple<OgreSceneManager *, Ogre::Light *> createLightData();
 
 private:
 

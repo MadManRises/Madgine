@@ -2,22 +2,30 @@
 
 #include "ogrelight.h"
 
-Engine::Scene::OgreLight::OgreLight(Ogre::Light * light) :
+namespace Engine {
+	namespace Scene {
+
+
+OgreLight::OgreLight(Serialize::TopLevelSerializableUnitBase *topLevel, Ogre::Light * light) :
+	Light(topLevel),
 	mLight(light)
 {
 }
 
-Engine::Scene::OgreLight::~OgreLight()
+OgreLight::~OgreLight()
 {
 	mLight->_getManager()->destroyLight(mLight);
 }
 
-void Engine::Scene::OgreLight::onPositionChanged(const Vector3& position)
+void OgreLight::onPositionChanged(const Vector3& position)
 {
 	mLight->setPosition(Ogre::Vector3(position.ptr()));
 }
 
-void Engine::Scene::OgreLight::onPowerChanged(float power)
+void OgreLight::onPowerChanged(float power)
 {
 	mLight->setPowerScale(power);
+}
+
+	}
 }

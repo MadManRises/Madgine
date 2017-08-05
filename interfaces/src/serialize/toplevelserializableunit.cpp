@@ -10,27 +10,24 @@ namespace Engine {
 namespace Serialize {
 
 	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId) :
-		SerializableUnitBase(staticId),
+		SerializableUnitBase(this, staticId),
 		mSlaveManager(0),
 		mStaticSlaveId(staticId)
 	{
-		setTopLevel(this);
 	}
 
 	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other) :
-		SerializableUnitBase(other),
+		SerializableUnitBase(this, other),
 		mSlaveManager(0),
 		mStaticSlaveId(other.mStaticSlaveId)
-	{
-		setTopLevel(this);
+	{		
 	}
 
 	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other) :
-		SerializableUnitBase(std::forward<TopLevelSerializableUnitBase>(other)),
+		SerializableUnitBase(this, std::forward<TopLevelSerializableUnitBase>(other)),
 		mSlaveManager(0),
 		mStaticSlaveId(other.mStaticSlaveId)
-	{
-		setTopLevel(this);
+	{		
 		while (!other.mMasterManagers.empty()) {
 			other.mMasterManagers.front()->moveTopLevelItem(&other, this);
 		}
@@ -81,18 +78,18 @@ namespace Serialize {
 		return setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
 	}
 
-	void TopLevelSerializableUnitBase::readId(SerializeInStream & in)
+	size_t TopLevelSerializableUnitBase::readId(SerializeInStream & in)
 	{
-		SerializableUnitBase::readId(in);
-		mStaticSlaveId = slaveId();
+		mStaticSlaveId = SerializableUnitBase::readId(in);		
+		return mStaticSlaveId;
 	}
 
-	std::list<BufferedOutStream*> TopLevelSerializableUnitBase::getMasterMessageTargets(SerializableUnitBase * unit, const std::list<ParticipantId> &targets)
+	std::list<BufferedOutStream*> TopLevelSerializableUnitBase::getMasterMessageTargets(SerializableUnitBase * unit, MessageType type, const std::list<ParticipantId> &targets)
 {
 	std::list<BufferedOutStream*> result;
 	if (targets.empty()) {
 		for (SerializeManager *mgr : mMasterManagers) {
-			result.splice(result.end(), mgr->getMasterMessageTargets(unit));
+			result.splice(result.end(), mgr->getMasterMessageTargets(unit, type));
 		}
 	}
 	else {
@@ -106,7 +103,7 @@ namespace Serialize {
 			return false;
 		};
 		for (SerializeManager *mgr : mMasterManagers) {
-			result.splice(result.end(), mgr->getMasterMessageTargets(unit, f));
+			result.splice(result.end(), mgr->getMasterMessageTargets(unit, type, f));
 		}
 		if (!filterCopy.empty())
 			LOG_WARNING("Passed invalid Particpant-Id as Message Target!");
@@ -114,10 +111,10 @@ namespace Serialize {
 	return result;
 }
 
-	BufferedOutStream * TopLevelSerializableUnitBase::getSlaveMessageTarget()
+	BufferedOutStream * TopLevelSerializableUnitBase::getSlaveMessageTarget(SerializableUnitBase *unit)
 	{
 		if (mSlaveManager) {
-			return mSlaveManager->getSlaveMessageTarget();
+			return mSlaveManager->getSlaveMessageTarget(unit);
 		}
 		return nullptr;
 	}

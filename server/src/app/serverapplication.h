@@ -22,6 +22,8 @@ namespace Engine {
 
 			virtual void finalize() override;
 
+			virtual Scripting::KeyValueMapList maps() override;
+
 		protected:
 
 			virtual bool fixedUpdate(float timeStep) override;

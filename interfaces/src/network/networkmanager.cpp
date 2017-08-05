@@ -11,7 +11,8 @@ namespace Engine {
 
 		int NetworkManager::sManagerCount = 0;
 
-		NetworkManager::NetworkManager() :			
+		NetworkManager::NetworkManager(const std::string &name) :			
+			SerializeManager(name),
 			mSocket(Invalid_Socket),
 			mIsServer(false),
 			mSlaveStream(0)

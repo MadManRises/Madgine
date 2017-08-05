@@ -10,8 +10,7 @@ namespace Scripting {
 
 
 	GlobalScope::GlobalScope(const LuaTable &table, App::Application *app) :
-		GlobalScopeBase(table),
-		mApp(app)
+		GlobalScopeBase(table, app)
 	{
 	}
 
@@ -57,7 +56,7 @@ void GlobalScope::update()
 
 KeyValueMapList GlobalScope::maps()
 {
-	return GlobalScopeBase::maps().merge(mGlobalAPIs).merge(mApp->maps());
+	return GlobalScopeBase::maps().merge(mGlobalAPIs);
 }
 
 

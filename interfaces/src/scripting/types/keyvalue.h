@@ -102,22 +102,22 @@ namespace Engine {
 		};
 
 		template <class T>
-		auto kvValue(T &v) -> decltype(KeyValue<T>::value(v)) {
+		decltype(auto) kvValue(T &v) {
 			return KeyValue<T>::value(v);
 		}
 
 		template <class T>
-		auto kvValue(const T &v) -> decltype(KeyValue<const T>::value(v)) {
+		decltype(auto) kvValue(const T &v) {
 			return KeyValue<const T>::value(v);
 		}
 
 		template <class T>
-		auto kvKey(T &v) -> decltype(KeyValue<T>::key(v)) {
+		decltype(auto) kvKey(T &v) {
 			return KeyValue<T>::key(v);
 		}
 
 		template <class T>
-		auto kvKey(const T &v) -> decltype(KeyValue<const T>::key(v)) {
+		decltype(auto) kvKey(const T &v) {
 			return KeyValue<const T>::key(v);
 		}
 
@@ -171,7 +171,7 @@ namespace Engine {
 					++mIt;
 				}
 
-				auto operator*() const -> decltype(Converter{}(*std::declval<It>())) {
+				decltype(auto) operator*() const {
 					return Converter{}(*mIt);
 				}
 

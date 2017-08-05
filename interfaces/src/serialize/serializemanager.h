@@ -37,7 +37,7 @@ namespace Engine {
 
 			class INTERFACES_EXPORT SerializeManager {
 			public:				
-				SerializeManager();
+				SerializeManager(const std::string &name);
 				SerializeManager(const SerializeManager &) = delete;
 				SerializeManager(SerializeManager &&);
 				virtual ~SerializeManager();
@@ -64,14 +64,14 @@ namespace Engine {
 				bool filter(const SerializableUnitBase *unit, ParticipantId id);
 				void addFilter(std::function<bool(const SerializableUnitBase*, ParticipantId)>);
 
-				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnitBase *unit, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter = {});
+				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnitBase *unit, MessageType type, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter = {});
 
 				void clearTopLevelItems();
 				bool addTopLevelItem(TopLevelSerializableUnitBase *unit, bool sendStateFlag = true);
 				void removeTopLevelItem(TopLevelSerializableUnitBase *unit);
 				void moveTopLevelItem(TopLevelSerializableUnitBase *oldUnit, TopLevelSerializableUnitBase *newUnit);
 
-				BufferedOutStream *getSlaveMessageTarget();
+				BufferedOutStream *getSlaveMessageTarget(SerializableUnitBase *unit);
 				static ParticipantId getLocalMasterParticipantId();
 				ParticipantId getSlaveParticipantId();
 
@@ -88,6 +88,8 @@ namespace Engine {
 				}
 
 				std::vector<ParticipantId> getMasterParticipantIds();
+
+				const std::string &name() const;
 
 			protected:
 
@@ -132,6 +134,8 @@ namespace Engine {
 				std::set<TopLevelSerializableUnitBase*> mTopLevelUnits;
 
 				SignalSlot::Signal<> mSlaveStreamDisconnected;
+
+				std::string mName;
 
 			};
 

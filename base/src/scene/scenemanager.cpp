@@ -11,14 +11,13 @@ namespace Engine {
 	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
 
 	namespace Scene {
+
+		const std::string SceneManagerBase::sKey = "Scene";
 		
 		SceneManagerBase::SceneManagerBase() :
 			TopLevelSerializableUnit(Serialize::SCENE_MANAGER),
 			mItemCount(0)
 		{
-			for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
-				Serialize::UnitHelper<SceneComponentBase>::setItemTopLevel(*comp, this);
-			}
 		}
 
 		bool SceneManagerBase::init() {
@@ -123,6 +122,11 @@ namespace Engine {
 		void SceneManagerBase::removeLater(Entity::Entity *e)
 		{
 			mEntityRemoveQueue.push_back(e);
+		}
+
+		const std::string &SceneManagerBase::key() const
+		{
+			return sKey;
 		}
 
 	}

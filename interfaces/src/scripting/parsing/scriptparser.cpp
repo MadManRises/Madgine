@@ -203,7 +203,7 @@ const char *ScriptParser::read(size_t *size) {
 
 
 std::string ScriptParser::fileExtension() {
-	return "lua";
+	return ".lua";
 }
 
 

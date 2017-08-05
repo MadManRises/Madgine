@@ -98,13 +98,13 @@ void buffered_streambuf::extend()
     setp(mSendBuffer.back().data(), mSendBuffer.back().data() + BUFFER_SIZE);
 }
 
-bool buffered_streambuf::isMessageAvailable()
+bool buffered_streambuf::isMessageAvailable(const std::string &context)
 {
 	if (mIsClosed)
 		return false;
 	if (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback())
 		return true;
-	receive();
+	receive(context);
 	return (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback());
 }
 
@@ -199,11 +199,11 @@ buffered_streambuf::int_type buffered_streambuf::underflow()
 	return traits_type::eof();
 }
 
-void buffered_streambuf::receive()
+void buffered_streambuf::receive(const std::string &context)
 {
 	if (mMsgInBuffer && mBytesToRead == 0) {
 		if (gptr() != egptr()) {
-			LOG_WARNING("Message not fully read!");
+			LOG_WARNING(Exceptions::messageNotFullyRead(context));
 		}
 		delete[] mRecBuffer;
 		mMsgInBuffer = false;
@@ -218,7 +218,7 @@ void buffered_streambuf::receive()
 		}
 		if (num == -1) {
 			handleError();
-			return ;
+			return;
 		}
 		mBytesToRead -= num;
 		if (mBytesToRead == 0) {

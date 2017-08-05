@@ -9,8 +9,9 @@
 namespace Engine {
 namespace Scripting {
 
-	GlobalScopeBase::GlobalScopeBase(const LuaTable &table) :
-	mTable(table)
+	GlobalScopeBase::GlobalScopeBase(const LuaTable &table, ScopeBase *topLevelApi) :
+	mTable(table),
+		mTopLevelApi(topLevelApi)
 	{
 		
 
@@ -57,6 +58,11 @@ namespace Scripting {
 	lua_State * GlobalScopeBase::lua_state()
 	{
 		return mTable.state();
+	}
+
+	KeyValueMapList GlobalScopeBase::maps()
+	{
+		return mTopLevelApi ? ScopeBase::maps().merge(mTopLevelApi->maps()) : ScopeBase::maps();
 	}
 
 }

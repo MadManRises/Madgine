@@ -34,7 +34,7 @@ namespace Engine {
 			}
 
 			iterator read_item(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
-				return this->read_item_where(read_iterator(in), in, topLevel);
+				return this->read_item_where(read_iterator(in), topLevel, in);
 			}
 
 			void write_item(SerializeOutStream &out, const const_iterator &it) const {

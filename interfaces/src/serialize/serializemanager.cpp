@@ -17,9 +17,10 @@ namespace Engine {
 		size_t SerializeManager::sNextUnitId = RESERVED_ID_COUNT;
 		ParticipantId SerializeManager::sRunningStreamId = sLocalMasterId;
 
-		SerializeManager::SerializeManager() :
+		SerializeManager::SerializeManager(const std::string &name) :
 			mReceivingMasterState(false),			
-			mSlaveStream(0)		
+			mSlaveStream(0),
+			mName(name)
 		{
 		}
 
@@ -29,7 +30,8 @@ namespace Engine {
 			mProcess(std::forward<Engine::Util::Process>(other.mProcess)),
 			mSlaveStream(0),
 			mFilters(std::forward<std::list<std::function<bool(const SerializableUnitBase *,ParticipantId)>>>(other.mFilters)),
-			mTopLevelUnits(std::forward<std::set<TopLevelSerializableUnitBase*>>(other.mTopLevelUnits))
+			mTopLevelUnits(std::forward<std::set<TopLevelSerializableUnitBase*>>(other.mTopLevelUnits)),
+			mName(std::forward<std::string>(other.mName))
 		{
 			other.mSlaveMappings.clear();
 			for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
@@ -48,7 +50,7 @@ namespace Engine {
 		void SerializeManager::readMessage(BufferedInOutStream &stream)
 		{
 			MessageHeader msg;
-			stream.read(msg);
+			stream.readHeader(msg);
 
 			SerializableUnitBase *object;
 			if (msg.mObject == SERIALIZE_MANAGER) {
@@ -142,13 +144,13 @@ namespace Engine {
 		}
 
 
-		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnitBase * unit, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter)
+		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnitBase * unit, MessageType type, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter)
 		{
 			std::list<BufferedOutStream*> result;
 			for (BufferedInOutStream* stream : mMasterStreams) {
 				if (!stream->isClosed() && (!customFilter || customFilter(unit, stream->id())) && filter(unit, stream->id())) {
 					result.push_back(stream);
-					stream->beginMessage();
+					stream->beginMessage(unit, type);
 				}
 			}
 			return result;
@@ -204,9 +206,9 @@ namespace Engine {
 			addTopLevelItem(newUnit, false);
 		}
 
-		BufferedOutStream * SerializeManager::getSlaveMessageTarget()
+		BufferedOutStream * SerializeManager::getSlaveMessageTarget(SerializableUnitBase *unit)
 		{
-			mSlaveStream->beginMessage();
+			mSlaveStream->beginMessage(unit, REQUEST);
 			return mSlaveStream;
 		}
 
@@ -487,17 +489,15 @@ namespace Engine {
 
 		void SerializeManager::sendState(BufferedInOutStream & stream, TopLevelSerializableUnitBase * unit)
 		{
-			MessageHeader header;
-			header.mType = STATE;
-			header.mObject = unit->masterId();
-			
-			stream.beginMessage();			
-			stream.write(header);
+			stream.beginMessage(unit, STATE);			
 			unit->writeState(stream);
 			stream.endMessage();
 		}
 
-
+		const std::string & SerializeManager::name() const
+		{
+			return mName;
+		}
 
 	}
 }

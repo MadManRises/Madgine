@@ -24,7 +24,7 @@ public:
 	Entity(const Entity&);
 	Entity(Entity &&);
 
-    Entity(const std::string &behaviour, const std::string &name);
+    Entity(SceneManagerBase *sceneMgr, const std::string &name);
     ~Entity();
 
     
@@ -87,7 +87,7 @@ public:
 protected:
 	
 	virtual size_t getSize() const override;
-	virtual bool init() override;
+	virtual bool init(const std::string &behaviour);
 
 	virtual Scripting::KeyValueMapList maps() override;
 
@@ -124,7 +124,6 @@ private:
 
 
 	const std::string mName;
-	std::string mBehaviour;
 
 	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Entity::createComponentSimple), &Entity::createComponentSimple>> mComponents;
 

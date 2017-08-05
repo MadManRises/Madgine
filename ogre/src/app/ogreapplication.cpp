@@ -327,7 +327,7 @@ void OgreApplication::renderFrame()
 
 Scripting::KeyValueMapList OgreApplication::maps()
 {
-	return Application::maps().merge(mUI);
+	return Application::maps().merge(mSceneMgr, mUI);
 }
 
 }

@@ -38,6 +38,8 @@ namespace Engine {
 			UNKNOWN_ERROR
 		};
 
+		enum MessageType;
+
 	}
 	namespace Scripting {
 

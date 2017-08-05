@@ -9,7 +9,7 @@ namespace Serialize {
 void FileBuffer::writeState(SerializeOutStream &out) const
 {
     out << size();
-    out.writeData(data(), size());
+    out.writeRaw(data(), size());
 }
 
 void FileBuffer::readState(SerializeInStream &in)
@@ -19,7 +19,7 @@ void FileBuffer::readState(SerializeInStream &in)
     clear();
     resize(size);
     if (size > 0)
-        in.read(data(), size);
+        in.readRaw(data(), size);
 }
 
 

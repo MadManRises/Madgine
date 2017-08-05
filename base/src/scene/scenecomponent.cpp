@@ -9,6 +9,7 @@ namespace Engine{
 namespace Scene{
 
 	SceneComponentBase::SceneComponentBase(ContextMask context) :
+		SerializableUnitBase(&SceneManagerBase::getSingleton()),
 		mContext(context),
 		mEnabled(true),
 		mSceneMgr(&SceneManagerBase::getSingleton())
@@ -62,11 +63,6 @@ void SceneComponentBase::fixedUpdate(float){}
 Scripting::KeyValueMapList SceneComponentBase::maps()
 {
 	return MadgineObject::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
-}
-
-int SceneComponentBase::test()
-{
-	return 1234;
 }
 
 }

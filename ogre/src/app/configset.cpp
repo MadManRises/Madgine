@@ -156,7 +156,7 @@ void ConfigSet::updateWindow()
 
 void ConfigSet::save()
 {
-	Serialize::SerializeManager mgr;
+	Serialize::SerializeManager mgr("ConfigSet");
     std::ofstream ofs(mConfigFileName, std::ios::binary);
     Serialize::SerializeOutStream of(ofs, mgr);
 	mSettings.writeState(of);
@@ -166,7 +166,7 @@ void ConfigSet::save()
 
 void ConfigSet::load()
 {
-	Serialize::SerializeManager mgr;
+	Serialize::SerializeManager mgr("ConfigSet");
     std::ifstream f(mConfigFileName, std::ios::binary);
     if (f.good()) {
         Serialize::SerializeInStream ifs(f, mgr);

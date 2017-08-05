@@ -21,7 +21,18 @@ namespace Engine {
 	};
 
 	class ValueTypeException : public std::exception {
+	public:
+		ValueTypeException(const std::string &msg) :
+			mMsg(msg)
+		{
+		}
 
+		const char *what() const noexcept override {
+			return mMsg.c_str();
+		}
+
+	private:
+		std::string mMsg;
 	};
 
 class INTERFACES_EXPORT ValueType {
@@ -267,7 +278,7 @@ public:
 			}
 			break;
 		default:
-			MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Exceptions::invalidTypesForOperator("/", getTypeString(), other.getTypeString())));
+			MADGINE_THROW_NO_TRACE(ValueTypeException(Exceptions::invalidTypesForOperator("/", getTypeString(), other.getTypeString())));
 		}		
 	}
 
@@ -306,7 +317,7 @@ public:
 			}
 			break;
 		default:
-			MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Exceptions::invalidTypesForOperator("*", getTypeString(), other.getTypeString())));
+			MADGINE_THROW_NO_TRACE(ValueTypeException(Exceptions::invalidTypesForOperator("*", getTypeString(), other.getTypeString())));
 		}		
 	}
 
@@ -321,6 +332,7 @@ public:
 	std::string toString() const;
 
 	std::string getTypeString() const;
+	static std::string getTypeString(Type type);
 	
 
 	static ValueType EOL()
@@ -351,7 +363,7 @@ public:
 			return std::get<T>(mUnion);
 		}
 		catch (const std::bad_variant_access &) {
-			throw ValueTypeException();
+			throw ValueTypeException(Exceptions::unexpectedValueType(getTypeString(), getTypeString(static_cast<Type>(variant_index<Union, T>::value))));
 		}
 	}
 

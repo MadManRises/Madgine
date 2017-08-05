@@ -74,7 +74,7 @@ namespace Engine {
 				beforeReset();
 				this->mData.clear();
 				while (in.loopRead()) {
-					this->read_item_where(this->end(), in, topLevel());
+					this->read_item_where(this->end(), topLevel(), in);
 				}
 				afterReset();
 			}
@@ -117,8 +117,9 @@ namespace Engine {
 			}
 			
 			void beforeRemove(const iterator &it) {
-				this->clearItemTopLevel(*it);
+				size_t old = this->setItemInitialising(*it);
 				mSignal.emit(it, BEFORE | REMOVE_ITEM);
+				this->resetItemInitialising(*it, old);
 			}
 
 			void afterRemove() {
@@ -129,9 +130,7 @@ namespace Engine {
 			iterator insert(T &callback, const const_iterator &where, _Ty&&... args) {
 				iterator it = Base::insert(where, std::forward<_Ty>(args)...);
 				TupleUnpacker<>::call(callback, std::make_tuple(it, true));					
-				onInsert(it);
-				if (topLevel())
-					this->setItemTopLevel(*it, topLevel());				
+				onInsert(it);		
 				return it;
 			}
 
@@ -139,8 +138,6 @@ namespace Engine {
 			iterator insert(const const_iterator &where, _Ty&&... args) {				
 				iterator it = Base::insert(where, std::forward<_Ty>(args)...);					
 				onInsert(it);
-				if (topLevel())
-					this->setItemTopLevel(*it, topLevel());
 				return it;
 			}
 

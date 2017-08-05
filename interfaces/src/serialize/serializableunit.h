@@ -6,13 +6,14 @@ namespace Serialize {
 class INTERFACES_EXPORT SerializableUnitBase
 {
 protected:
-	SerializableUnitBase(size_t masterId = 0);
-	SerializableUnitBase(const SerializableUnitBase &other);
-	SerializableUnitBase(SerializableUnitBase &&other);
+
+	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId = 0);
+	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase &other);
+	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase &&other);
 	virtual ~SerializableUnitBase();
 
 public:
-	TopLevelSerializableUnitBase *topLevel();
+	TopLevelSerializableUnitBase *topLevel() const;
 
 	virtual void writeState(SerializeOutStream &out) const;
 	virtual void readState(SerializeInStream &in);
@@ -21,7 +22,7 @@ public:
 	void readRequest(BufferedInOutStream &in);
 
 	void writeId(SerializeOutStream &out) const;
-	virtual void readId(SerializeInStream &in);
+	virtual size_t readId(SerializeInStream &in);
 
 	void applySerializableMap(const std::map <size_t, SerializableUnitBase*> &map);
 
@@ -35,15 +36,11 @@ private:
 	void resetInitialising(size_t id);
 	bool isInitialising();
 	std::list<BufferedOutStream *> getMasterMessageTargets(bool isActionconst, const std::list<ParticipantId> &targets = {});
-	void writeMasterMessageHeader(BufferedOutStream &out, bool isAction);
 	BufferedOutStream *getSlaveMessageTarget();	
 
 
 	size_t addObservable(Observable* val);
 	void addSerializable(Serializable *val);
-
-	void setTopLevel(TopLevelSerializableUnitBase *topLevel);
-	void clearTopLevel();
 
 	void setSlaveId(size_t id);
 	void clearSlaveId();
