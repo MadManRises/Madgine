@@ -63,7 +63,7 @@ public:
 	}
 
 protected:
-    template <class T, template <class, class> class Collector, class Base, class Creator>
+    template <class T, template <class, class> class Collector, class _Base, class _Creator>
     friend class UniqueComponent;
 
     template <class T>
