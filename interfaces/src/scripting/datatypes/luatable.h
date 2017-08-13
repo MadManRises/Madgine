@@ -106,7 +106,7 @@ namespace Engine {
 				const std::pair<std::string, ValueType> &operator *() const;
 
 			private:
-				std::unique_ptr<std::pair<std::string, ValueType>> mCurrent;
+				std::unique_ptr<std::pair<std::string, ValueType>> mCurrent; // TODO -> iterator extern -> stack
 				std::shared_ptr<LuaTableInstance> mInstance;
 			};
 

@@ -16,8 +16,9 @@ namespace Engine {
 		}
 
 		LuaTableInstance::LuaTableInstance(lua_State *state, const std::shared_ptr<LuaTableInstance> &parent) :
-			mState(state),
-			mParent(parent) {
+			mParent(parent),
+			mState(state)
+		{
 
 		}
 
@@ -295,8 +296,8 @@ namespace Engine {
 		}
 
 		LuaTable::iterator::iterator(const std::shared_ptr<LuaTableInstance> &instance) :
-			mInstance(instance),
-			mCurrent(std::make_unique<std::pair<std::string, ValueType>>())
+			mCurrent(std::make_unique<std::pair<std::string, ValueType>>()),
+			mInstance(instance)
 		{
 			lua_State *state = mInstance->state();
 			mInstance->push();

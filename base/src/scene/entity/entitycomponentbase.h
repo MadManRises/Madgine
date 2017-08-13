@@ -15,7 +15,7 @@ public:
 
 	virtual bool init() override;
 
-    virtual std::string getName() const = 0;
+    virtual std::string getName() const override = 0;
 
 
     std::array<float, 2> getPosition2D();

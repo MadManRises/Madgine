@@ -1,5 +1,6 @@
 #pragma once
 
+#include "serialize/container/unithelper.h"
 
 namespace Engine{
 
@@ -20,7 +21,7 @@ namespace Engine{
 	};
 
 template <class Base, class Store, class Creator = StandardHeapCreator>
-class UniqueComponentCollector : Store, Creator {
+class UniqueComponentCollector : Store {
 
 public:
 	UniqueComponentCollector(const UniqueComponentCollector &) = delete;
@@ -67,7 +68,7 @@ protected:
 
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator registerComponent(){
-		Store::sComponents().emplace_back([]() {return std::unique_ptr<Base>(create<T>()); });
+		Store::sComponents().emplace_back([]() {return std::unique_ptr<Base>(Creator::template create<T>()); });
 		auto it = Store::sComponents().end();
 		--it;
 		return it;

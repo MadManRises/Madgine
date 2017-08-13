@@ -6,11 +6,14 @@
 namespace Engine {
 	namespace Serialize {
 
+		template <class Tuple, class... _Ty>
+		using ExtendedTupleType = decltype(std::tuple_cat(std::make_tuple(std::declval<_Ty>()...), std::declval<Tuple>()));
+
 		template <class Tuple>
-		class SerializableUnitExtendedTuple : public decltype(std::tuple_cat(std::make_tuple(std::declval<TopLevelSerializableUnitBase*>()), std::declval<Tuple>())) {
+		class SerializableUnitExtendedTuple : public ExtendedTupleType<Tuple, TopLevelSerializableUnitBase*> {
 		public:
 			SerializableUnitExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
-				std::tuple(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
+				ExtendedTupleType<Tuple, TopLevelSerializableUnitBase*>(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
 		};
 
 		template <class Tuple>

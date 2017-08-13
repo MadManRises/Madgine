@@ -46,31 +46,26 @@ namespace Engine {
 	struct variant_contains;
 
 	template <class T>
-	struct variant_contains<std::variant<>, T> {
-		const constexpr static bool value = false;
+	struct variant_contains<std::variant<>, T> : std::false_type {
 	};
 
 	template <class... V, class T>
-	struct variant_contains<std::variant<T, V...>, T> {
-		const constexpr static bool value = true;
+	struct variant_contains<std::variant<T, V...>, T> : std::true_type {
 	};
 
 	template <class U, class... V, class T>
-	struct variant_contains<std::variant<U, V...>, T> {
-		const constexpr static bool value = variant_contains<std::variant<V...>, T>::value;
+	struct variant_contains<std::variant<U, V...>, T> : variant_contains<std::variant<V...>, T> {
 	};
 
 	template <class V, class T>
 	struct variant_index;
 
 	template <class... V, class T>
-	struct variant_index<std::variant<T, V...>, T> {
-		const constexpr static size_t value = 0;
+	struct variant_index<std::variant<T, V...>, T> : std::integral_constant<size_t, 0> {
 	};
 
 	template <class U, class... V, class T>
-	struct variant_index<std::variant<U, V...>, T> {
-		const constexpr static size_t value = 1 + variant_index<std::variant<V...>, T>::value;
+	struct variant_index<std::variant<U, V...>, T> : std::integral_constant<size_t, 1 + variant_index<std::variant<V...>, T>::value> {
 	};
 
 	struct TupleSerializer {
@@ -264,7 +259,7 @@ namespace Engine {
 	template <class T>
 	class is_iterable {
 	private:
-		template<typename C> static std::true_type Test(void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>*);
+		template<typename C> static std::true_type Test(void_t<decltype(std::declval<C>().begin()), decltype(std::declval<C>().end())>*);
 		template<typename> static std::false_type Test(...);
 
 	public:

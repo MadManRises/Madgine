@@ -261,9 +261,9 @@ namespace Engine {
 			class Iterator : public KeyValueIterator {
 			public:
 				Iterator(T &map, ScopeBase *ref) :
-					mRef(ref),
 					mMap(map),
-					mIt(map.begin())
+					mIt(map.begin()),
+					mRef(ref)
 				{
 				}
 

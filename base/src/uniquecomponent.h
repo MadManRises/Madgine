@@ -19,7 +19,7 @@ private:
 	static typename Collector<Base, Creator>::template ComponentRegistrator<T> _reg;
 };
 
-template <class T, template <class, class> class Collector, class Base, class Creator = StandardHeapCreator>
+template <class T, template <class, class> class Collector, class Base, class Creator>
 typename Collector<Base, Creator>::template ComponentRegistrator<T> UniqueComponent<T, Collector, Base, Creator>::_reg;
 
 template <class T, class Base, class Creator = StandardHeapCreator>

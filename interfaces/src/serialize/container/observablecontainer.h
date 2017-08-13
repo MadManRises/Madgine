@@ -222,7 +222,7 @@ namespace Engine {
 				iterator it = this->end();
 				switch (op) {
 				case INSERT_ITEM:
-					it = this->read_item(in, topLevel());
+					it = this->read_item(in, this->topLevel());
 					C::onInsert(it);
 					onInsert(it, partId, id);
 					break;

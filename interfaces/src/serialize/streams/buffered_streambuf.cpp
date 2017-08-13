@@ -24,8 +24,8 @@ namespace Serialize {
 		mRecBuffer(other.mRecBuffer),
 		mMsgInBuffer(other.mMsgInBuffer),
 		mSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mSendBuffer)),
-		mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs)),
-		mStagedSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mStagedSendBuffer))
+		mStagedSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mStagedSendBuffer)),
+		mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
 	{
 		setg(other.eback(), other.gptr(), other.egptr());
 		setp(other.pbase(), other.epptr());

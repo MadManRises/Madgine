@@ -49,8 +49,7 @@ namespace Engine {
 		};
 
 		template <class T, class R>
-		class FunctionMapperBase {
-		protected:
+		struct FunctionMapperBase {
 			template <class... _Ty>
 			static std::enable_if_t<all_of<!std::is_same<std::remove_const_t<std::remove_reference_t<_Ty>>, ArgumentList>::value...>::value, R> callImpl(R(T::*f)(_Ty...), T *t, const ArgumentList &list) {
 				return callImpl(f, t, list, std::make_index_sequence<sizeof...(_Ty)>());
@@ -126,25 +125,25 @@ namespace Engine {
 		};
 
 		template <class F, F _f, class T, class R, class... Ty>
-		class FunctionMapperImpl : private FunctionMapperBase<T, R>{
+		class FunctionMapperImpl{
 		public:
 
 			typedef T type;
 
 			static ValueType call(T *t, const ArgumentList &args) {
-				return ValueType(callImpl(_f, t, args));
+				return ValueType(FunctionMapperBase<T, R>::callImpl(_f, t, args));
 			}
 
 		};
 
 		template <class F, F _f, class T, class... Ty>
-		class FunctionMapperImpl<F, _f, T, void, Ty...> : private FunctionMapperBase<T, void> {
+		class FunctionMapperImpl<F, _f, T, void, Ty...> {
 		public:
 
 			typedef T type;
 
 			static ValueType call(T *t, const ArgumentList &args) {
-				callImpl(_f, t, args);
+				FunctionMapperBase<T, void>::callImpl(_f, t, args);
 				return ValueType();
 			}
 		};

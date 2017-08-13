@@ -15,8 +15,8 @@ namespace Engine {
 			StreamDebugging StreamDebugging::sInstance;
 
 			StreamLog::StreamLog(Stream * stream) :
-				mWrites(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log"),
-				mReads(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log")
+				mReads(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log"),
+				mWrites(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log")
 			{		
 				if (stream->manager().name().empty())
 					throw 0;
