@@ -38,7 +38,11 @@ namespace Engine {
 			UNKNOWN_ERROR
 		};
 
-		enum MessageType;
+		enum MessageType {
+			STATE,
+			ACTION,
+			REQUEST
+		};
 
 	}
 	namespace Scripting {

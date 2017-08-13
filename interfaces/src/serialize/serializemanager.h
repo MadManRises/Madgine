@@ -7,11 +7,7 @@
 namespace Engine {
 		namespace Serialize {
 
-			enum MessageType {
-				STATE,
-				ACTION,
-				REQUEST
-			};
+
 
 
 			enum Command {
