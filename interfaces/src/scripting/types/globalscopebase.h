@@ -1,8 +1,5 @@
 #pragma once
 
-#include "serialize/container/observed.h"
-#include "serialize/container/map.h"
-#include "scripting/datatypes/argumentlist.h"
 #include "scopebase.h"
 
 namespace Engine {

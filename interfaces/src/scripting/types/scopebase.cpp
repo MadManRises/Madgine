@@ -7,6 +7,8 @@
 
 #include "api.h"
 
+#include "keyvalue.h"
+
 namespace Engine {
 namespace Scripting {
 

@@ -53,6 +53,7 @@ namespace Engine {
 		class GlobalScopeBase;
 
 		class KeyValueIterator;
+		class KeyValueMapList;
 
 		class LuaTable;
 

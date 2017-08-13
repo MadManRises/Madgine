@@ -2,16 +2,9 @@
 
 #include "entity.h"
 
-#include "masks.h"
-
 #include "componentexception.h"
 
 #include "scene/scenemanager.h"
-
-#include "serialize/streams/serializestream.h"
-
-
-#include "scripting/parsing/scriptparser.h"
 
 #include "scripting/types/globalscope.h"
 
@@ -27,7 +20,8 @@ namespace Entity {
 
 Entity::Entity(const Entity &other) :
 	SerializableUnitBase(other.topLevel()),
-	mName(other.mName)
+	mName(other.mName),
+	mSceneManager(other.mSceneManager)
 {
 
 	//TODO copy Components
@@ -37,14 +31,16 @@ Entity::Entity(const Entity &other) :
 Entity::Entity(Entity &&other) :
 	SerializableUnitBase(other.topLevel()),
 	mName(other.mName),	
-	mComponents(std::forward<decltype(mComponents)>(other.mComponents))	
+	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
+	mSceneManager(other.mSceneManager)
 {
 
 }
 
 Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name) :
 	SerializableUnitBase(sceneMgr),
-	mName(name)
+	mName(name),
+	mSceneManager(sceneMgr)
 {
 	
 }
@@ -171,7 +167,7 @@ size_t Entity::getSize() const
 
 void Entity::remove()
 {
-	Engine::Scene::SceneManagerBase::getSingleton().removeLater(this);
+	mSceneManager->removeLater(this);
 }
 
 

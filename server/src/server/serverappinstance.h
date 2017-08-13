@@ -1,7 +1,7 @@
 #pragma once
 
 #include "app/serverapplication.h"
-#include "scripting/parsing/scriptparser.h"
+#include "app/serverappsettings.h"
 
 namespace Engine {
 

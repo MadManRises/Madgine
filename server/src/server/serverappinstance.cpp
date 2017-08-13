@@ -1,6 +1,5 @@
 #include "serverlib.h"
 #include "serverappinstance.h"
-#include "scripting/parsing/scriptparser.h"
 
 
 namespace Engine {

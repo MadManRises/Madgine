@@ -13,8 +13,8 @@ namespace Engine {
 			mLog(name + "-Log"),
 			mName(name),
 			mScriptParser(scriptsFolder),
-			mRunning(false),
-			mGlobalScope(mScriptParser.createThread(), this)
+			mGlobalScope(mScriptParser.createThread(), this),
+			mRunning(false)
 		{
 		}
 		int ServerBase::run()

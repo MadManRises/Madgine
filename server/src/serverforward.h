@@ -4,6 +4,7 @@ namespace Engine {
 
 	namespace App {
 		class ServerApplication;
+		struct ServerAppSettings;
 	}
 
 	namespace Server {

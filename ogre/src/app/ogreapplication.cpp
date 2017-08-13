@@ -15,10 +15,6 @@
 
 #include "input/oisinputhandler.h"
 
-#include "network/networkmanager.h"
-
-#include "serialize/serializemanager.h"
-
 #include "OgreWindowEventUtilities.h"
 
 #include "scripting/types/globalscope.h"

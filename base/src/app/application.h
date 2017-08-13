@@ -3,8 +3,8 @@
 
 #include "signalslot/connectionstore.h"
 
-#include "scripting/types/globalapicomponentbase.h"
 #include "scripting/types/scope.h"
+#include "madgineobject.h"
 
 namespace Engine {
 	namespace App {

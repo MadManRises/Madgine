@@ -4,7 +4,7 @@
 
 namespace Engine{
 
-template <class T, template <class, class> class Collector, class Base, class Creator = StandardHeapCreator>
+template <class T, template <class, class, class...> class Collector, class Base, class Creator = StandardHeapCreator, class... _Ty>
 class UniqueComponent : public Base , public Singleton<T>
 {
 public:
@@ -16,14 +16,14 @@ private:
     }
 
 private:
-	static typename Collector<Base, Creator>::template ComponentRegistrator<T> _reg;
+	static typename Collector<Base, Creator, _Ty...>::template ComponentRegistrator<T> _reg;
 };
 
-template <class T, template <class, class> class Collector, class Base, class Creator>
-typename Collector<Base, Creator>::template ComponentRegistrator<T> UniqueComponent<T, Collector, Base, Creator>::_reg;
+template <class T, template <class, class, class...> class Collector, class Base, class Creator, class... _Ty>
+typename Collector<Base, Creator, _Ty...>::template ComponentRegistrator<T> UniqueComponent<T, Collector, Base, Creator, _Ty...>::_reg;
 
-template <class T, class Base, class Creator = StandardHeapCreator>
-using BaseUniqueComponent = UniqueComponent<T, BaseUniqueComponentCollector, Base, Creator>;
+template <class T, class Base, class Creator = StandardHeapCreator, class... _Ty>
+using BaseUniqueComponent = UniqueComponent<T, BaseUniqueComponentCollector, Base, Creator, _Ty...>;
 
 
 }

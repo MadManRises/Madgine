@@ -1,6 +1,8 @@
 #pragma once
 
-#include "scripting/types/globalapicomponentbase.h"
+#include "madgineobject.h"
+
+#include "scripting/types/scope.h"
 
 #include "serialize/toplevelserializableunit.h"
 
@@ -66,7 +68,7 @@ namespace Engine {
 		private:
 			size_t mItemCount;
 
-			BaseUniqueComponentCollector<SceneComponentBase, SerializableUnitHeapCreator> mSceneComponents;
+			BaseUniqueComponentCollector<SceneComponentBase, Serialize::SerializableUnitHeapCreator, SceneManagerBase*> mSceneComponents;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;
 

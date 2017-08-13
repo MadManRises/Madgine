@@ -1,10 +1,7 @@
 #include "interfaceslib.h"
 
 #include "apihelper.h"
-
-#include "globalscopebase.h"
-
-#include "api.h"
+#include "keyvalue.h"
 
 extern "C" {
 #include <lua.h>                                /* Always include this when calling Lua */

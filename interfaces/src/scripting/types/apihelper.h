@@ -1,10 +1,5 @@
 #pragma once
 
-#include "templates.h"
-#include "scripting/datatypes/argumentlist.h"
-
-
-
 namespace Engine {
 	namespace Scripting {
 

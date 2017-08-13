@@ -1,6 +1,8 @@
 #include "serverlib.h"
 
 #include "serverapplication.h"
+#include "serverappsettings.h"
+#include "scene/serverscenemanager.h"
 
 namespace Engine {
 	namespace App {

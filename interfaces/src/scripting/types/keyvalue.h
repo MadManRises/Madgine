@@ -1,6 +1,7 @@
 #pragma once
 
-#include "apihelper.h"
+//#include "apihelper.h"
+#include "valuetype.h"
 
 namespace Engine {
 	namespace Scripting {
@@ -323,9 +324,9 @@ namespace Engine {
 			class Iterator : public KeyValueIterator {
 			public:
 				Iterator(T &item, ScopeBase *ref) :
-					mRef(ref),
 					mItem(item),
-					mEnded(false)
+					mEnded(false),
+					mRef(ref)
 				{
 				}
 

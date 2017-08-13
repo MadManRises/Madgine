@@ -1,6 +1,6 @@
 #include "interfaceslib.h"
 #include "luatable.h"
-#include "scripting/datatypes/argumentlist.h"
+#include "argumentlist.h"
 
 extern "C" {
 #include <lua.h>                                /* Always include this when calling Lua */

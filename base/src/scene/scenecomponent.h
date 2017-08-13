@@ -5,6 +5,7 @@
 #include "serialize/serializableunit.h"
 #include "scripting/types/scope.h"
 #include "madgineobject.h"
+#include "serialize/serializableunitheapcreator.h"
 
 namespace Engine {
 namespace Scene {
@@ -13,7 +14,7 @@ class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUni
 public:
     virtual ~SceneComponentBase() = default;
 
-    SceneComponentBase(ContextMask context = ContextMask::SceneContext);
+	SceneComponentBase(SceneManagerBase *sceneMgr, ContextMask context = ContextMask::SceneContext);
 
     void update(float timeSinceLastFrame, ContextMask mask);
 	void fixedUpdate(float timeStep, ContextMask mask);
@@ -43,10 +44,10 @@ private:
 
 
 template <class T>
-class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, SerializableUnitHeapCreator>>{
+class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, Serialize::SerializableUnitHeapCreator, Scene::SceneManagerBase*>>{
 
 public:
-	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, SerializableUnitHeapCreator>>::Scope;
+	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, Serialize::SerializableUnitHeapCreator, SceneManagerBase*>>::Scope;
 
 private:
 	virtual size_t getSize() const override final {
@@ -59,7 +60,7 @@ private:
 }
 
 #ifdef _MSC_VER
-template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase, SerializableUnitHeapCreator>;
+template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase, Serialize::SerializableUnitHeapCreator, Scene::SceneManagerBase*>;
 #endif
 
 }

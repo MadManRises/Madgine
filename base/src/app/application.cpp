@@ -9,10 +9,6 @@
 
 #include "scripting/types/globalscope.h"
 
-#include "scripting/types/api.h"
-
-#include "scripting/parsing/scriptparser.h"
-
 namespace Engine {	
 
 	API_IMPL(App::Application, MAP_F(shutdown));

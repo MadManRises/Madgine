@@ -1,9 +1,5 @@
 #pragma once
 
-#include "scripting/types/scope.h"
-
-#include "serialize/container/set.h"
-
 #include "scene/entity/entity.h"
 
 
@@ -46,10 +42,6 @@ private:
 	std::array<float, 4> mOrientation;
 
 	std::string mObject;
-
-
-
-    //std::set<Ogre::unique_ptr<EntityComponentBase>> mComponents;
 
 };
 

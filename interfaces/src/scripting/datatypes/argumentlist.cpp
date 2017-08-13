@@ -1,9 +1,8 @@
 #include "interfaceslib.h"
 #include "argumentlist.h"
 #include "serialize/streams/serializestream.h"
-#include "scripting/types/globalscopebase.h"
+#include "scripting/types/apihelper.h"
 
-#include "scripting/types/api.h"
 
 namespace Engine{
 namespace Scripting{

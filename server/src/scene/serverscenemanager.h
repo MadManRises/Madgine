@@ -4,8 +4,6 @@
 
 #include "scene/scenemanager.h"
 
-#include "scene/entity/masks.h"
-
 #include "entity/serverentity.h"
 
 #include "scene/light.h"

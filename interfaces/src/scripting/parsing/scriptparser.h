@@ -1,6 +1,5 @@
 #pragma once
 
-#include "scripting/datatypes/argumentlist.h"
 #include "scripting/datatypes/luatable.h"
 
 namespace Engine {

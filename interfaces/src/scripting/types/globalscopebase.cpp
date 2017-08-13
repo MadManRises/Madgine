@@ -3,7 +3,7 @@
 
 #include "scripting/parsing/scriptparser.h"
 
-#include "scopebase.h"
+#include "keyvalue.h"
 
 
 namespace Engine {

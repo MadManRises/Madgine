@@ -8,11 +8,11 @@ namespace Engine{
 
 namespace Scene{
 
-	SceneComponentBase::SceneComponentBase(ContextMask context) :
-		SerializableUnitBase(&SceneManagerBase::getSingleton()),
+	SceneComponentBase::SceneComponentBase(SceneManagerBase *sceneMgr, ContextMask context) :
+		SerializableUnitBase(sceneMgr),
 		mContext(context),
 		mEnabled(true),
-		mSceneMgr(&SceneManagerBase::getSingleton())
+		mSceneMgr(sceneMgr)
 {
 
 }

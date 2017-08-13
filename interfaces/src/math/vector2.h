@@ -27,7 +27,6 @@ THE SOFTWARE.
 */
 #pragma once
 
-#include <math.h>
 
 namespace Engine
 {

@@ -2,11 +2,11 @@
 #include "scriptparser.h"
 #include "parseexception.h"
 
-#include "scripting/types/scopebase.h"
-
-#include "scripting/types/api.h"
-
 #include "scripting/types/globalscopebase.h"
+
+#include "scripting/types/apihelper.h"
+
+#include "scripting/types/keyvalue.h"
 
 extern "C" {
 #include <lua.h>                                /* Always include this when calling Lua */

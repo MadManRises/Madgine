@@ -5,8 +5,6 @@
 
 #include "serialize/streams/serializestream.h"
 
-#include "scripting/parsing/scriptparser.h"
-
 namespace Engine {
 
 namespace Scene {

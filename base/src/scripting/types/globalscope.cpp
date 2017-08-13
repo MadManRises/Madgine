@@ -1,6 +1,5 @@
 #include "baselib.h"
 #include "globalscope.h"
-#include "scripting/parsing/scriptparser.h"
 
 #include "app/application.h"
 

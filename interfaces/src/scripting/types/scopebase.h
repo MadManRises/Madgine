@@ -1,11 +1,8 @@
 #pragma once
 
-#include "serialize/container/observed.h"
-#include "serialize/container/map.h"
-#include "scripting/datatypes/argumentlist.h"
-#include "keyvalue.h"
 
 #include "scripting/datatypes/luatable.h"
+#include "scripting/datatypes/argumentlist.h"
 
 namespace Engine {
 namespace Scripting {

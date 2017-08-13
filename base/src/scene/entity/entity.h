@@ -119,6 +119,11 @@ private:
 		}
 	};
 
+	static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName() {
+		static std::map<std::string, ComponentBuilder> dummy;
+		return dummy;
+	}
+
 	template <class T, class Base>
 	friend class EntityComponent;
 
@@ -127,10 +132,8 @@ private:
 
 	Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Entity::createComponentSimple), &Entity::createComponentSimple>> mComponents;
 
-    static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName(){
-        static std::map<std::string, ComponentBuilder> dummy;
-        return dummy;
-    }
+	SceneManagerBase *mSceneManager;
+
 
 };
 

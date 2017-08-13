@@ -16,7 +16,8 @@ namespace Engine {
 		
 		SceneManagerBase::SceneManagerBase() :
 			TopLevelSerializableUnit(Serialize::SCENE_MANAGER),
-			mItemCount(0)
+			mItemCount(0),
+			mSceneComponents(this)
 		{
 		}
 

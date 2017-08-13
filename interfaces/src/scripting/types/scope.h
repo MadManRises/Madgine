@@ -2,6 +2,7 @@
 
 #include "api.h"
 #include "scopebase.h"
+#include "keyvalue.h"
 
 
 namespace Engine {
