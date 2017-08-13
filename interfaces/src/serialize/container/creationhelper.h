@@ -10,14 +10,14 @@ namespace Engine {
 		class SerializableUnitExtendedTuple : public decltype(std::tuple_cat(std::make_tuple(std::declval<TopLevelSerializableUnitBase*>()), std::declval<Tuple>())) {
 		public:
 			SerializableUnitExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
-				tuple(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
+				std::tuple(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
 		};
 
 		template <class Tuple>
 		class NotExtendedTuple : public Tuple {
 		public:
 			NotExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
-				tuple(std::forward<Tuple>(tuple)) {}
+				Tuple(std::forward<Tuple>(tuple)) {}
 		};
 
 		template <class T, class Tuple>
@@ -74,7 +74,7 @@ namespace Engine {
 		protected:
 			typedef R ArgsTuple;
 
-			template <class T>
+			template <class _>
 			R readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
