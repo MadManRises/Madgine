@@ -3,6 +3,8 @@
 #include "bufferedstream.h"
 #include "buffered_streambuf.h"
 
+#include "serialize/serializableunit.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -31,7 +33,6 @@ namespace Serialize {
 		if (!isMessageAvailable())
 			throw 0;
 		read(header);
-		mLog.logBeginMessage(header);
 	}
 
 	BufferedOutStream::BufferedOutStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :
@@ -47,7 +48,7 @@ namespace Serialize {
 		MessageHeader header;
 		header.mType = type;
 		header.mObject = mManager.convertPtr(*this, unit);
-		mLog.logBeginMessage(header, unit);
+		mLog.logBeginSendMessage(header, typeid(*unit).name());
 		mBuffer.beginMessage();
 		write(header);
 	}
@@ -57,7 +58,7 @@ namespace Serialize {
 		MessageHeader header;
 		header.mCmd = cmd;
 		header.mObject = SERIALIZE_MANAGER;
-		mLog.logBeginMessage(header);
+		mLog.logBeginSendMessage(header, mManager.name());
 		mBuffer.beginMessage();
 		write(header);
 	}

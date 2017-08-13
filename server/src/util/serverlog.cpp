@@ -76,7 +76,7 @@ namespace Engine {
 				}
 				if (dwRead > 0) {
 
-					for (int i = 0; i < dwRead; ++i) {
+					for (DWORD i = 0; i < dwRead; ++i) {
 						char c = buffer[i];
 
 						bool send = false;

@@ -79,6 +79,8 @@ public:
 
 	void readRaw(void *buffer, size_t size);
 
+	void logReadHeader(const MessageHeader &header, const std::string &object);
+
 protected:
 
 	pos_type tell();

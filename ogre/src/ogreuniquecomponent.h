@@ -5,8 +5,8 @@
 
 namespace Engine{
 
-	template <class T, class Collection, class Base = Collection>
-	using OgreUniqueComponent = UniqueComponent<T, OgreUniqueComponentCollector, Collection, Base>;
+	template <class T, class Base>
+	using OgreUniqueComponent = UniqueComponent<T, OgreUniqueComponentCollector, Base>;
 
 }
 

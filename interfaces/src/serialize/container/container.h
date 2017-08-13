@@ -57,12 +57,12 @@ namespace Engine {
 			iterator read_item_where(const const_iterator &where, TopLevelSerializableUnitBase *topLevel, SerializeInStream &in) {				
 				iterator it = this->insert_tuple(where, this->readCreationData<Type>(in, topLevel));				
 				if (in.isMaster()) {
-					size_t old = this->setItemInitialising(*it);
 					this->read_state(in, *it);
-					this->resetItemInitialising(*it, old);
+					this->postConstruct(*it);
 				}
 				else {
 					this->read_state(in, *it);
+					this->postConstruct(*it);
 					this->read_id(in, *it);
 				}					
 				return it;

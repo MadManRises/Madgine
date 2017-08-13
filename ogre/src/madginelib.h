@@ -25,7 +25,7 @@
 
 #include "forward.h"
 
-//#if !defined(_HAS_TR1_NAMESPACE)
+/*#if !defined(_HAS_TR1_NAMESPACE)
 #include <unordered_map>
 namespace std {
 	namespace tr1 {
@@ -36,7 +36,7 @@ namespace std {
 		using unordered_map = std::unordered_map<Key, T>;
 	}
 }
-//#endif
+#endif*/
 
 
 #include <Ogre.h>

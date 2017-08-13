@@ -114,6 +114,7 @@ namespace Engine {
 			
 			void onInsert(const iterator &it) {
 				mSignal.emit(it, INSERT_ITEM);
+				this->postConstruct(*it);
 			}
 			
 			void beforeRemove(const iterator &it) {

@@ -21,7 +21,6 @@ namespace Engine {
 			template <class K, class... _Ty>
 			iterator insert(const const_iterator &where, K &&key, _Ty&&... args) {
 				iterator it = mData.emplace_hint(where, std::piecewise_construct, std::forward_as_tuple(std::forward<K>(key)), std::forward_as_tuple(std::forward<_Ty>(args)...));
-				this->postConstruct(*it);
 				return it;
 			}
 

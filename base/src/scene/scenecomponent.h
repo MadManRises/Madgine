@@ -43,10 +43,10 @@ private:
 
 
 template <class T>
-class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase>>{
+class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, SerializableUnitHeapCreator>>{
 
 public:
-	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase>>::Scope;
+	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, SerializableUnitHeapCreator>>::Scope;
 
 private:
 	virtual size_t getSize() const override final {
@@ -59,7 +59,7 @@ private:
 }
 
 #ifdef _MSC_VER
-template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase>;
+template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase, SerializableUnitHeapCreator>;
 #endif
 
 }

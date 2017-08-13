@@ -16,8 +16,11 @@ namespace Engine{
 
 	};
 
-	template <class Base>
-	class OGREMADGINE_EXPORT OgreUniqueComponentCollector : public UniqueComponentCollector<Base, OgreCreatorStore<Base>>, public Singleton<OgreUniqueComponentCollector<Base>> {
+	template <class Base, class Creator = StandardHeapCreator>
+	class OGREMADGINE_EXPORT OgreUniqueComponentCollector : 
+		public UniqueComponentCollector<Base, OgreCreatorStore<Base>, Creator>, 
+		public Singleton<OgreUniqueComponentCollector<Base>>
+	{
 		
 	};
 

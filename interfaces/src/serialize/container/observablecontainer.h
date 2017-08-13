@@ -147,6 +147,7 @@ namespace Engine {
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
 						Type temp(std::forward<_Ty>(args)...);
+						this->postConstruct(temp);
 
 						TransactionId id = ++mTransactionCounter;
 

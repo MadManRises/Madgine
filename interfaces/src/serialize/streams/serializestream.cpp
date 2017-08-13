@@ -119,8 +119,10 @@ bool SerializeInStream::loopRead() {
 	pos_type pos = tell();
 	ValueType::Type type;
 	read(type);
-	if (type == ValueType::Type::EndOfListValue)
+	if (type == ValueType::Type::EndOfListValue) {
+		mLog.logRead(ValueType::EOL());
 		return false;
+	}
 	seek(pos);
 	return true;
 }
@@ -128,6 +130,10 @@ bool SerializeInStream::loopRead() {
 SerializeInStream::operator bool()
 {
     return (bool) mIfs;
+}
+
+void SerializeInStream::logReadHeader(const MessageHeader &header, const std::string &object) {
+	mLog.logBeginReadMessage(header, object);
 }
 
 SerializeOutStream::SerializeOutStream(std::ostream &ofs, Serialize::SerializeManager &mgr, ParticipantId id) :

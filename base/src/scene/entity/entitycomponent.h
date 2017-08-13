@@ -36,7 +36,7 @@ private:
 	}
 
 	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
-		out << sComponentName << creationArguments();
+		out << sComponentName;
 	}
 
 	virtual size_t getSize() const override final {

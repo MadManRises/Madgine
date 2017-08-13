@@ -96,6 +96,8 @@ namespace Engine {
 			case unit::NS:
 				return std::chrono::duration_cast<std::chrono::nanoseconds>
 					(m_endex - m_start).count();
+			default:
+				throw 0;
 			}
 		}
 

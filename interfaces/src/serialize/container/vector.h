@@ -29,7 +29,6 @@ namespace Engine {
 			template <class... _Ty>
 			iterator insert(const const_iterator &where, _Ty&&... args) {
 				iterator it = mData.emplace(where, std::forward<_Ty>(args)...);
-				this->postConstruct(*it);
 				return it;
 			}
 

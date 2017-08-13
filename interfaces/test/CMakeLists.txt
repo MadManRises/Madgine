@@ -11,6 +11,9 @@ project(Interfaces_Test)
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)
 FolderSources(sources "" network networkmanagertest.cpp)
+FolderSources(sources "" serialize)
+FolderSources(sources serialize streams)
+FolderSources(sources streams debugging streamdebuggingtest.cpp)
 
 add_executable(Interfaces_Test ${sources})
 
@@ -18,9 +21,7 @@ add_dependencies(Interfaces_Test googletest)
 
 target_link_libraries(Interfaces_Test Interfaces ${GTEST_LIBS})
 
-MESSAGE(STATUS ${Interfaces_BINARY_DIR})
 set_target_properties(Interfaces_Test PROPERTIES 
-
 RUNTIME_OUTPUT_DIRECTORY_DEBUG "$<TARGET_FILE_DIR:Interfaces>")
 
 add_test(

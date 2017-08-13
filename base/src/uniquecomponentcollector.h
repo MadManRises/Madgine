@@ -3,9 +3,24 @@
 
 namespace Engine{
 
+	struct StandardHeapCreator {
+		template <class T>
+		static T *create() {
+			return new T;
+		}
+	};
 
-template <class Base, class Store>
-class UniqueComponentCollector : Store {
+	struct SerializableUnitHeapCreator {
+		template <class T>
+		static T *create() {
+			T *t = new T;
+			Serialize::UnitHelper<T>::postConstruct(*t);
+			return t;
+		}
+	};
+
+template <class Base, class Store, class Creator = StandardHeapCreator>
+class UniqueComponentCollector : Store, Creator {
 
 public:
 	UniqueComponentCollector(const UniqueComponentCollector &) = delete;
@@ -47,12 +62,12 @@ public:
 	}
 
 protected:
-    template <class T, template <class> class Collector, class Collection, class B>
+    template <class T, template <class, class> class Collector, class Base, class Creator>
     friend class UniqueComponent;
 
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>()>>::const_iterator registerComponent(){
-		Store::sComponents().emplace_back([]() {return std::unique_ptr<Base>(new T); });
+		Store::sComponents().emplace_back([]() {return std::unique_ptr<Base>(create<T>()); });
 		auto it = Store::sComponents().end();
 		--it;
 		return it;
@@ -91,9 +106,11 @@ protected:
 
 };
 
-template <class Base>
-class MADGINE_BASE_EXPORT BaseUniqueComponentCollector : public UniqueComponentCollector<Base, BaseCreatorStore<Base>>, public Singleton<BaseUniqueComponentCollector<Base>> {
-public:
+template <class Base, class Creator = StandardHeapCreator>
+class MADGINE_BASE_EXPORT BaseUniqueComponentCollector : 
+	public UniqueComponentCollector<Base, BaseCreatorStore<Base>, Creator>, 
+	public Singleton<BaseUniqueComponentCollector<Base, Creator>>
+{
 };
 
 

@@ -20,7 +20,7 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId) :
 	mTopLevel(topLevel),
-	mSlaveId(0)
+	mSlaveId(UNINITIALIZED)
 	{
 		assert(mTopLevel);
 		if (masterId == 0) {
@@ -34,7 +34,7 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase & other) :
 		mTopLevel(topLevel),
-		mSlaveId(0)
+		mSlaveId(UNINITIALIZED)
 	{
 		assert(mTopLevel);
 		mMasterId = SerializeManager::addMasterMapping(this);
@@ -43,7 +43,7 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase && other) :
 		mTopLevel(topLevel),
-		mSlaveId(0)
+		mSlaveId(UNINITIALIZED)
 	{
 		assert(mTopLevel);
 		std::tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
@@ -156,6 +156,7 @@ TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 
 void SerializableUnitBase::clearSlaveId()
 {
+	assert(mSlaveId != UNINITIALIZED);
 	if (mSlaveId != 0) {
 		mTopLevel->getSlaveManager()->removeSlaveMapping(this);
 		mSlaveId = 0;
@@ -165,6 +166,8 @@ void SerializableUnitBase::clearSlaveId()
 void SerializableUnitBase::postConstruct()
 {
 	removeInstance();
+	if (isInitialising())
+		resetInitialising(0);
 }
 
 void SerializableUnitBase::insertInstance() {

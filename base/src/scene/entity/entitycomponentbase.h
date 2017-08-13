@@ -29,8 +29,6 @@ public:
 
     Entity &getEntity() const;
 
-	virtual Scripting::ArgumentList creationArguments() const;
-
 protected:
 
     Entity &mEntity;

@@ -32,7 +32,7 @@ public:
 
 	void setGameTextureSize(const Ogre::Vector2 &size);
 	Resources::OgreTexturePtr &getGameTexture();
-	Ogre::Camera *camera();
+	Ogre::SceneNode *camera();
 	Ogre::SceneManager *getSceneManager();
 	Ogre::Image getScreenshot();
 	Ogre::Viewport *getViewport();
@@ -130,6 +130,7 @@ private:
 
 	Ogre::RaySceneQuery *mTerrainRayQuery;	
 
+	Ogre::SceneNode *mCameraNode;
 	Ogre::Camera *mCamera;
 	Ogre::SceneNode *mTerrain, *mEntitiesNode;
 

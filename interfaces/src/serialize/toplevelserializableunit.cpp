@@ -75,7 +75,7 @@ namespace Serialize {
 
 	void TopLevelSerializableUnitBase::initSlaveId()
 	{
-		return setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
+		setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
 	}
 
 	size_t TopLevelSerializableUnitBase::readId(SerializeInStream & in)
@@ -172,6 +172,11 @@ bool TopLevelSerializableUnitBase::updateManagerType(SerializeManager *mgr, bool
 	return true;
 }
 
+bool TopLevelSerializableUnitBase::init()
+{
+	postConstruct();
+	return true;
+}
 
 } // namespace Serialize
 } // namespace Core

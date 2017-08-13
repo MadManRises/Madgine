@@ -116,9 +116,11 @@ void OgreSceneManager::createCamera(void)
 {
     // Create the camera
 
+	mCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3{ 1,80,0 });
     mCamera = mSceneMgr->createCamera("MadgineSceneCamera");
-    mCamera->setPosition(1,80,0);
-    mCamera->lookAt(0,0,0);
+	mCameraNode->attachObject(mCamera);
+    mCameraNode->setPosition(1,80,0);
+	mCameraNode->lookAt({ 0,0,0 }, Ogre::Node::TS_WORLD);
 
 
     mCamera->setFarClipDistance(5000);
@@ -444,9 +446,9 @@ Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behavio
 	return &mLocalEntities.back();
 }
 
-Ogre::Camera *OgreSceneManager::camera()
+Ogre::SceneNode *OgreSceneManager::camera()
 {
-    return mCamera;
+    return mCameraNode;
 }
 
 Ogre::SceneManager *OgreSceneManager::getSceneManager()

@@ -36,6 +36,8 @@ public:
 
 	virtual size_t readId(SerializeInStream &in) override;
 
+	virtual bool init();
+
 private:
 	std::list<SerializeManager*> mMasterManagers;
 	SerializeManager *mSlaveManager;

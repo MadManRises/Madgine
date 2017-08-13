@@ -66,7 +66,7 @@ namespace Engine {
 		private:
 			size_t mItemCount;
 
-			BaseUniqueComponentCollector<SceneComponentBase> mSceneComponents;
+			BaseUniqueComponentCollector<SceneComponentBase, SerializableUnitHeapCreator> mSceneComponents;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;
 

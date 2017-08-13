@@ -34,7 +34,7 @@ namespace Engine {
 					mWrites << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
 			}
 
-			void StreamLog::logBeginMessage(const MessageHeader &header, SerializableUnitBase *unit) {
+			void StreamLog::logBeginSendMessage(const MessageHeader &header, const std::string &object) {
 				if (StreamDebugging::isLoggingEnabled()) {
 					mWrites << "// Begin Message of Type ";
 					switch (header.mType) {
@@ -48,11 +48,25 @@ namespace Engine {
 						mWrites << "STATE";
 						break;
 					}
-					mWrites << " to ";
-					if (unit) {
-						mWrites << typeid(*unit).name();
+					mWrites << " to " << object << "(" << header.mObject << ")" << std::endl;
+				}
+			}
+
+			void StreamLog::logBeginReadMessage(const MessageHeader &header, const std::string &object) {
+				if (StreamDebugging::isLoggingEnabled()) {
+					mReads << "// Begin Message of Type ";
+					switch (header.mType) {
+					case ACTION:
+						mReads << "ACTION";
+						break;
+					case REQUEST:
+						mReads << "REQUEST";
+						break;
+					case STATE:
+						mReads << "STATE";
+						break;
 					}
-					mWrites << "(" << header.mObject << ")"<< std::endl;
+					mReads << " to " << object << "(" << header.mObject << ")" << std::endl;
 				}
 			}
 

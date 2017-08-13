@@ -49,13 +49,13 @@ namespace Engine {
 
 		void SerializeManager::readMessage(BufferedInOutStream &stream)
 		{
-			MessageHeader msg;
-			stream.readHeader(msg);
+			MessageHeader header;
+			stream.readHeader(header);
 
-			SerializableUnitBase *object;
-			if (msg.mObject == SERIALIZE_MANAGER) {
+			if (header.mObject == SERIALIZE_MANAGER) {
+				stream.logReadHeader(header, mName);
 				ParticipantId id;
-				switch (msg.mCmd) {
+				switch (header.mCmd) {
 				case INITIAL_STATE_DONE:
 					mReceivingMasterState = false;
 					stream >> id;
@@ -65,12 +65,13 @@ namespace Engine {
 					stream.close();
 					break;
 				default:
-					throw SerializeException("Unknown Builtin Command-Code for SerializeManager: " + std::to_string(msg.mCmd));
+					throw SerializeException("Unknown Builtin Command-Code for SerializeManager: " + std::to_string(header.mCmd));
 				}
 			}
 			else {
-				object = convertPtr(stream, msg.mObject);
-				switch (msg.mType) {
+				SerializableUnitBase *object = convertPtr(stream, header.mObject);
+				stream.logReadHeader(header, typeid(*object).name());
+				switch (header.mType) {
 				case ACTION:
 					object->readAction(stream);
 					break;
@@ -82,7 +83,7 @@ namespace Engine {
 					object->applySerializableMap(mSlaveMappings);
 					break;
 				default:
-					throw SerializeException("Invalid Message-Type: " + std::to_string(msg.mType));
+					throw SerializeException("Invalid Message-Type: " + std::to_string(header.mType));
 				}			
 			}
 		}

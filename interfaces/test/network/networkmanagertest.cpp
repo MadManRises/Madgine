@@ -7,7 +7,7 @@
 #include <future>
 
 TEST(NetworkManager, Connect) {
-	Engine::Network::NetworkManager server;
+	Engine::Network::NetworkManager server("testNetworkServer");
 
 	bool done = false;
 
@@ -19,7 +19,7 @@ TEST(NetworkManager, Connect) {
 		}
 		return result;
 	});
-	Engine::Network::NetworkManager client;
+	Engine::Network::NetworkManager client("testNetworkServer");
 
 	EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000), Engine::Serialize::NO_ERROR);
 
