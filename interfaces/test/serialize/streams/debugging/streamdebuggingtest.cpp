@@ -6,7 +6,6 @@
 #include "serialize/streams/debugging/streamdebugging.h"
 #include "serialize/streams/bufferedstream.h"
 
-#include <filesystem>
 #include <fstream>
 
 TEST(StreamDebugging, Logging) {
