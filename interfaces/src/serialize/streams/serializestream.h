@@ -1,7 +1,6 @@
 #pragma once
 
 #include "valuetype.h"
-#include "../serializemanager.h"
 #include "../serializeexception.h"
 #include "debugging/streamdebugging.h"
 
@@ -55,7 +54,7 @@ public:
 			throw SerializeException(Exceptions::notValueType("SerializableUnit"));
 		size_t ptr;
 		read(ptr);
-		p = dynamic_cast<T*>(mManager.convertPtr(*this, ptr));
+		p = dynamic_cast<T*>(convertPtr(ptr));
 		if (!p)
 			throw 0;
 		return *this;
@@ -92,6 +91,8 @@ protected:
 	}
 
 	void read(void *buffer, size_t size);
+
+	SerializableUnitBase *convertPtr(size_t ptr);
 
 private:
     std::istream &mIfs;

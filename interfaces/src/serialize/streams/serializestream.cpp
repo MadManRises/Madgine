@@ -136,6 +136,11 @@ void SerializeInStream::logReadHeader(const MessageHeader &header, const std::st
 	mLog.logBeginReadMessage(header, object);
 }
 
+SerializableUnitBase * SerializeInStream::convertPtr(size_t ptr)
+{
+	return mManager.convertPtr(*this, ptr);
+}
+
 SerializeOutStream::SerializeOutStream(std::ostream &ofs, Serialize::SerializeManager &mgr, ParticipantId id) :
 	Stream(mgr, id),
     mOfs(ofs)

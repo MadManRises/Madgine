@@ -8,6 +8,8 @@
 
 #include "serialize/serializableunit.h"
 
+#include "serialize/serializemanager.h"
+
 namespace Engine {
 	namespace Serialize {
 		namespace Debugging {
