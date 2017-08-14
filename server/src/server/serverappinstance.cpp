@@ -15,9 +15,9 @@ namespace Engine {
 				mThread.join();
 		}
 		
-		const std::string &ServerAppInstance::key() const
+		const char *ServerAppInstance::key() const
 		{
-			return mName;
+			return mName.c_str();
 		}
 
 		ValueType ServerAppInstance::toValueType() const

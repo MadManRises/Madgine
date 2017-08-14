@@ -45,10 +45,10 @@
 
 #include "interfacesforward.h"
 
-#include "singleton.h"
+#include "generic/singleton.h"
 
 #include "scripting/scriptingexception.h"
 #include "util/utilmethods.h"
-#include "exceptionmessages.h"
+#include "generic/exceptionmessages.h"
 
 /// @endcond

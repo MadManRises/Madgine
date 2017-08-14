@@ -2,14 +2,8 @@
 
 #include "interfaceslib.h"
 #include "keyvalue.h"
-#include "mapper.h"
 
 namespace Engine {
-	namespace Scripting {
-
-		Engine::ValueType toValueType(ScopeBase *ref, const Mapper &mapper) {
-			return mapper.mToValueType ? mapper.mToValueType(ref) : ValueType{};
-		}
 
 		std::pair<bool, ValueType> KeyValueMapList::get(const std::string & key)
 		{
@@ -51,7 +45,7 @@ namespace Engine {
 			return mIterators.at(mIndex)->key();
 		}
 
-		ValueType Engine::Scripting::KeyValueMapListIterator::value()
+		ValueType KeyValueMapListIterator::value()
 		{
 			return mIterators.at(mIndex)->value();
 		}
@@ -93,6 +87,4 @@ namespace Engine {
 		size_t KeyValueMapList::size() const {
 			return mRefs.size();
 		}
-
-	}
 }

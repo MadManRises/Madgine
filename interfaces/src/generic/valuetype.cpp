@@ -140,7 +140,7 @@ ValueType ValueType::fromStack(lua_State * state, int index)
 	case LUA_TSTRING:
 		return ValueType(lua_tostring(state, index));
 	case LUA_TUSERDATA:
-		return ValueType(*static_cast<std::shared_ptr<Scripting::KeyValueIterator>*>(lua_touserdata(state, -1)));
+		return ValueType(*static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1)));
 	default:
 		throw 0;
 	}
@@ -176,8 +176,8 @@ int ValueType::push(lua_State * state) const
 		return 1;
 	case Type::KeyValueIteratorValue:
 	{
-		std::shared_ptr<Scripting::KeyValueIterator> *itP = static_cast<std::shared_ptr<Scripting::KeyValueIterator>*>(lua_newuserdata(state, sizeof(std::shared_ptr<Scripting::KeyValueIterator>)));
-		new (itP) std::shared_ptr<Scripting::KeyValueIterator>(as<std::shared_ptr<Scripting::KeyValueIterator>>());
+		std::shared_ptr<KeyValueIterator> *itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_newuserdata(state, sizeof(std::shared_ptr<KeyValueIterator>)));
+		new (itP) std::shared_ptr<KeyValueIterator>(as<std::shared_ptr<KeyValueIterator>>());
 
 		luaL_getmetatable(state, "Interfaces.kvIteratorMetatable");
 

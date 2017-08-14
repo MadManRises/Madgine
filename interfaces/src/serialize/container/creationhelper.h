@@ -1,6 +1,6 @@
 #pragma once
 
-#include "templates.h"
+#include "generic/templates.h"
 #include "serialize/serializableunit.h"
 
 namespace Engine {

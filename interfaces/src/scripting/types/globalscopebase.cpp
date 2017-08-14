@@ -3,7 +3,7 @@
 
 #include "scripting/parsing/scriptparser.h"
 
-#include "keyvalue.h"
+#include "generic/keyvalue.h"
 
 
 namespace Engine {
@@ -63,6 +63,11 @@ namespace Scripting {
 	KeyValueMapList GlobalScopeBase::maps()
 	{
 		return mTopLevelApi ? ScopeBase::maps().merge(mTopLevelApi->maps()) : ScopeBase::maps();
+	}
+
+	const char *GlobalScopeBase::key() const
+	{
+		return "Global";
 	}
 
 }

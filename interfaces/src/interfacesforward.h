@@ -5,6 +5,9 @@ namespace Engine {
 
 	class InvScopePtr;
 
+	class KeyValueIterator;
+	class KeyValueMapList;
+
 	namespace Serialize {
 
 		class Stream;
@@ -57,10 +60,10 @@ namespace Engine {
 		class ScopeBase;
 		class GlobalScopeBase;
 
-		class KeyValueIterator;
-		class KeyValueMapList;
 
 		class LuaTable;
+
+		struct Mapper;
 
 		class ArgumentList;
 		typedef std::map<std::string, ValueType> Stack;

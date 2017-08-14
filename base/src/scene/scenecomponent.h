@@ -27,7 +27,7 @@ public:
 
 	SceneManagerBase *sceneMgr();
 
-	virtual Scripting::KeyValueMapList maps() override;
+	virtual KeyValueMapList maps() override;
 
 protected:
     virtual void update(float);

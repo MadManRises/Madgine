@@ -22,9 +22,6 @@ namespace Engine {
 
 	namespace UI {
 
-		const std::string UIManager::sName = "UI";
-
-
 		UIManager::UIManager(GUI::GUISystem *gui) :
 			mCurrentRoot(nullptr),
 			mGUI(gui),
@@ -209,14 +206,14 @@ namespace Engine {
 			return mGUI;
 		}
 
-		Scripting::KeyValueMapList UIManager::maps()
+		KeyValueMapList UIManager::maps()
 		{
 			return Scope::maps().merge(mGuiHandlers, mGameHandlers);
 		}
 
-		const std::string & UIManager::key() const
+		const char *UIManager::key() const
 		{
-			return sName;
+			return "UI";
 		}
 
 	}

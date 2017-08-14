@@ -1,6 +1,6 @@
 #pragma once
 
-#include "message.h"
+#include "generic/message.h"
 #include "translationkey.h"
 
 namespace Engine {

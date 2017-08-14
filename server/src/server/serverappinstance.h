@@ -21,7 +21,7 @@ namespace Engine {
 			}
 			virtual ~ServerAppInstance();
 
-			const std::string &key() const;
+			const char *key() const;
 
 			ValueType toValueType() const;
 

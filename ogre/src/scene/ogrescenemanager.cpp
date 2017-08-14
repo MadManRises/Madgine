@@ -957,7 +957,7 @@ Ogre::RenderTarget * OgreSceneManager::getRenderTarget()
 Entity::Entity * OgreSceneManager::findEntity(const std::string & name)
 {
 	auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
-		return e.getName() == name;
+		return e.key() == name;
 	});
 	if (it == mEntities.end()) {
 		throw 0;
@@ -966,9 +966,9 @@ Entity::Entity * OgreSceneManager::findEntity(const std::string & name)
 		return &*it;
 }
 
-Scripting::KeyValueMapList OgreSceneManager::maps()
+KeyValueMapList OgreSceneManager::maps()
 {
-	return SceneManager::maps().merge(Scripting::transformIt<Scripting::ToPointerConverter>(mEntities));
+	return SceneManager::maps().merge(transformIt<ToPointerConverter>(mEntities));
 }
 
 }

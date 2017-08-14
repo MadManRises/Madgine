@@ -59,6 +59,11 @@ KeyValueMapList GlobalScope::maps()
 }
 
 
+const char *GlobalScope::key() const
+{
+	throw 0;
+}
+
 }
 
 

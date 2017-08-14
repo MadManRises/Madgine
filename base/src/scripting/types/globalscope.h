@@ -22,7 +22,7 @@ public:
 	virtual void finalize() override;
 
 	virtual KeyValueMapList maps() override;
-
+	virtual const char *key() const override;
 
 	void clear();
 

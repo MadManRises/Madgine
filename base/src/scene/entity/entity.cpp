@@ -80,19 +80,9 @@ void Entity::onLoad()
     callMethodIfAvailable("onLoad");
 }
 
-/*std::string Entity::getName() const
+const char *Entity::key() const
 {
-	return mName;
-}*/
-
-const std::string & Entity::key() const
-{
-	return mName;
-}
-
-std::string Entity::getIdentifier() const
-{
-    return mName + "[" + getName() + "]";
+	return mName.c_str();
 }
 
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
@@ -153,7 +143,7 @@ std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const s
 EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)
 {
     if (mComponents.find(component) != mComponents.end())
-        throw ComponentException(Exceptions::doubleComponent(component->getName()));
+        throw ComponentException(Exceptions::doubleComponent(component->key()));
     if (&component->getEntity() != this)
         throw ComponentException(Exceptions::corruptData);
     return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component))->get();
@@ -209,7 +199,7 @@ std::array<float, 2> Entity::getPosition2D() const {
 	return{ { p.x, p.z } };
 }
 
-Scripting::KeyValueMapList Entity::maps()
+KeyValueMapList Entity::maps()
 {
 	return Scope::maps().merge(mComponents);
 }

@@ -156,9 +156,11 @@ TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 
 void SerializableUnitBase::clearSlaveId()
 {
-	assert(mSlaveId != UNINITIALIZED);
+	//assert(mSlaveId != UNINITIALIZED);
 	if (mSlaveId != 0) {
-		mTopLevel->getSlaveManager()->removeSlaveMapping(this);
+		if (mSlaveId != UNINITIALIZED) {
+			mTopLevel->getSlaveManager()->removeSlaveMapping(this);
+		}
 		mSlaveId = 0;
 	}
 }

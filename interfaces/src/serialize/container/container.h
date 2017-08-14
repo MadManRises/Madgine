@@ -2,7 +2,7 @@
 
 #include "../streams/serializestream.h"
 #include "basecontainer.h"
-#include "templates.h"
+#include "generic/templates.h"
 
 namespace Engine {
 	namespace Serialize {

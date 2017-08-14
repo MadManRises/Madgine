@@ -37,10 +37,8 @@ public:
 	virtual std::array<float, 4> getOrientation() const = 0;
 	virtual Vector3 getScale() const = 0;
 
-	virtual std::string getIdentifier() const override;
-	//virtual std::string getName() const override;
 	virtual std::string getObjectName() const = 0;
-	const std::string &key() const;
+	virtual const char *key() const override;
 
 	virtual void setObjectVisible(bool b) = 0;
 
@@ -89,7 +87,7 @@ protected:
 	virtual size_t getSize() const override;
 	virtual bool init(const std::string &behaviour);
 
-	virtual Scripting::KeyValueMapList maps() override;
+	virtual KeyValueMapList maps() override;
 
 private:
 

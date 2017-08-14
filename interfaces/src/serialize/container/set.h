@@ -3,78 +3,31 @@
 #include "creationhelper.h"
 #include "observablecontainer.h"
 #include "unithelper.h"
+#include "generic/keyvalue.h"
 
 namespace Engine {
 	namespace Serialize {
 
-		template <class T>
-		class Keyed {
-		public:
-			typedef T KeyType;
+		template<class _Ty = void>
+		struct KeyCompare
+		{	// functor for operator<
+			typedef _Ty first_argument_type;
+			typedef _Ty second_argument_type;
+			typedef bool result_type;
 
-			virtual KeyType key() const = 0;
-		};
-
-		template <class T>
-		struct KeyHelper {
-			typedef typename T::KeyType KeyType;
-
-			static KeyType key(const T &t) {
-				return t.key();
+			constexpr bool operator()(const _Ty& _Left, const _Ty& _Right) const
+			{	// apply operator< to operands
+				return (kvKey(_Left) < kvKey(_Right));
 			}
-		};
-
-		template <class T>
-		struct KeyHelper<std::unique_ptr<T>> {
-			typedef typename KeyHelper<T>::KeyType KeyType;
-
-			static KeyType key(const std::unique_ptr<T> &t) {
-				return KeyHelper<T>::key(*t);
-			}
-		};
-			
-
-		template <class T>
-		class KeyHolder {
-		public:
-			typedef typename KeyHelper<T>::KeyType KeyType;
-
-			template <class... _Ty>
-			KeyHolder(_Ty&&... args) :
-				mItem(std::forward<_Ty>(args)...),
-				mKey(KeyHelper<T>::key(mItem))
-			{
-			}
-
-			const KeyType &key() const {
-				return mKey;
-			}
-
-			operator T &() const {
-				return mItem;
-			}
-
-			bool operator < (const KeyHolder<T> &other) const {
-				return mKey < other.mKey;
-			}
-
-			bool operator == (const T &other) const {
-				return mKey == KeyHelper<T>::key(other);
-			}
-
-			mutable T mItem;
-		private:
-			KeyType mKey;			
 		};
 
 		template <class T>
 		class SetConstIterator;
 
 		template <class T>
-		class SetIterator : public std::iterator<typename std::iterator_traits<typename std::set<T>::iterator>::iterator_category, T>{
+		class SetIterator : public std::iterator<typename std::iterator_traits<typename std::set<T>::iterator>::iterator_category, T> {
 		public:
-			typedef typename std::set<KeyHolder<T>>::iterator It;
-			typedef typename KeyHolder<T>::KeyType KeyType;
+			typedef typename std::set<T>::iterator It;
 
 			SetIterator() {}
 			SetIterator(It&& it) :
@@ -83,15 +36,11 @@ namespace Engine {
 				mIterator(it) {}
 
 			T &operator *() const {
-				return mIterator->mItem;
+				return const_cast<T&>(*mIterator);
 			}
 
 			T *operator ->() const {
-				return &mIterator->mItem;
-			}
-
-			const KeyType &key() const {
-				return mIterator->key();
+				return &const_cast<T&>(*mIterator);
 			}
 
 			bool operator !=(const SetIterator<T> &other) const {
@@ -115,8 +64,7 @@ namespace Engine {
 		template <class T>
 		class SetConstIterator : public std::iterator<typename std::iterator_traits<typename std::set<T>::iterator>::iterator_category, T> {
 		public:
-			typedef typename std::set<KeyHolder<T>>::const_iterator It;
-			typedef typename KeyHolder<T>::KeyType KeyType;
+			typedef typename std::set<T>::const_iterator It;
 
 			SetConstIterator(It &&it) :
 				mIterator(std::forward<It>(it)) {}
@@ -126,15 +74,11 @@ namespace Engine {
 				mIterator(it.mIterator) {}
 
 			const T &operator *() const {
-				return mIterator->mItem;
+				return *mIterator;
 			}
 
 			const T *operator ->() const {
-				return &mIterator->mItem;
-			}
-
-			const KeyType &key() const {
-				return mIterator->key();
+				return &*mIterator;
 			}
 
 			bool operator !=(const SetConstIterator<T> &other) const {
@@ -143,7 +87,7 @@ namespace Engine {
 			bool operator ==(const SetConstIterator<T> &other) const {
 				return mIterator == other.mIterator;
 			}
-			
+
 
 			void operator++() {
 				++mIterator;
@@ -159,13 +103,23 @@ namespace Engine {
 		class BaseContainer<std::set<T>> : protected UnitHelper<T> {
 		public:
 
+			template <class T>
+			struct FixString {
+				typedef T type;
+			};
+
+			template <>
+			struct FixString<const char*> {
+				typedef std::string type;
+			};
+
 			static constexpr const bool sorted = true;
-		//protected:
+			//protected:
 			typedef typename UnitHelper<T>::Type Type;
-			typedef std::set<KeyHolder<Type>> NativeContainerType;
+			typedef std::set<Type, KeyCompare<Type>> NativeContainerType;
 			typedef SetIterator<Type> iterator;
 			typedef SetConstIterator<Type> const_iterator;
-			typedef typename KeyHolder<T>::KeyType KeyType;
+			typedef typename FixString<typename std::remove_const<typename std::remove_reference<decltype(kvKey(std::declval<T>()))>::type>::type>::type KeyType;
 
 
 			BaseContainer()
@@ -187,8 +141,8 @@ namespace Engine {
 				return mData.erase(it.mIterator);
 			}
 
-			const KeyType &key(const const_iterator &where) const {
-				return where.key();
+			decltype(auto) key(const const_iterator &where) const {
+				return kvKey(*where);
 			}
 
 
@@ -206,7 +160,7 @@ namespace Engine {
 
 			iterator find(const KeyType &key) {
 				for (iterator it = mData.begin(); it != mData.end(); ++it) {
-					if (it.key() == key)
+					if (kvKey(*it) == key)
 						return it; ////TODO  O(log(n))
 				}
 				return mData.end();
@@ -227,8 +181,6 @@ namespace Engine {
 		class SerializableSetImpl : public SerializableContainer<std::set<T>, Creator> {
 		public:
 			using SerializableContainer<std::set<T>, Creator>::SerializableContainer;
-
-			typedef typename KeyHolder<T>::KeyType KeyType;
 
 			typedef typename SerializableContainer<std::set<T>, Creator>::iterator iterator;
 			typedef typename SerializableContainer<std::set<T>, Creator>::const_iterator const_iterator;
@@ -264,7 +216,7 @@ namespace Engine {
 
 		};
 
-		
+
 		template <class T, class Creator = DefaultCreator<>>
 		using SerializableSet = SetImpl<SerializableSetImpl<T, Creator>>;
 

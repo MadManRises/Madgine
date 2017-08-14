@@ -23,11 +23,14 @@ public:
 
 	virtual KeyValueMapList maps() override;
 
+	const char *key() const override;
+
 private:
 	LuaTable mTable;
 	LuaTable mScopes;
 
 	ScopeBase *mTopLevelApi;
+
 };
 
 }

@@ -2,7 +2,7 @@
 
 #include "api.h"
 #include "scopebase.h"
-#include "keyvalue.h"
+#include "generic/keyvalue.h"
 
 
 namespace Engine {
@@ -16,7 +16,7 @@ class Scope : public Base {
 public:
 	using Base::Base;
 	
-	virtual std::string getName() const override {
+	virtual const char *key() const override {
 		return API<T>::sName;
 	}
 

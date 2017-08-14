@@ -15,8 +15,6 @@ namespace Engine {
 
 	namespace App {
 
-		const std::string Application::sName = "Application";
-
 		Application::Application() :
 			mShutDown(false),
 			mGlobalScope(nullptr),
@@ -162,9 +160,9 @@ namespace Engine {
 			return mGlobalScope->lua_state();
 		}
 
-		const std::string & Application::key() const
+		const char *Application::key() const
 		{
-			return sName;
+			return "Application";
 		}
 
 	}

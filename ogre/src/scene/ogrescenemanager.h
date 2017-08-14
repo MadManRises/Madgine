@@ -99,7 +99,7 @@ public:
 		mEntities.connectCallback(slot);
 	}
 
-	Scripting::KeyValueMapList maps() override;
+	KeyValueMapList maps() override;
 
 protected:
 

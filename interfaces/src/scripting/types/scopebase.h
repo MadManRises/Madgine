@@ -33,7 +33,7 @@ public:
 	virtual KeyValueMapList maps();
 
 	virtual std::string getIdentifier() const;
-	virtual std::string getName() const;
+	virtual const char *key() const = 0;
 
 	virtual bool init();
 	virtual void finalize();

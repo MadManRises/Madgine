@@ -41,7 +41,7 @@ OgreEntity::OgreEntity(const OgreEntity &other) :
 
 	//TODO copy Components
 
-	mDecoratorNode = mNode->createChildSceneNode(getName() + "_Decorator");
+	mDecoratorNode = mNode->createChildSceneNode(std::string(key()) + "_Decorator");
 
 }
 

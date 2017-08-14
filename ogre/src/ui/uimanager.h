@@ -45,12 +45,11 @@ namespace Engine {
 			std::set<GuiHandlerBase*> getGuiHandlers();
 
 			static const constexpr int sMaxInitOrder = 4;
-			static const std::string sName;
 
-			const std::string &key() const;
+			virtual const char *key() const override;
 
 		protected:
-			virtual Scripting::KeyValueMapList maps() override;
+			virtual KeyValueMapList maps() override;
 
 		private:
 			OgreUniqueComponentCollector<GuiHandlerBase> mGuiHandlers;

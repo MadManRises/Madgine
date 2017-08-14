@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../observable.h"
-#include "templates.h"
+#include "generic/templates.h"
 #include "Serialize\Streams\bufferedstream.h"
 
 namespace Engine {

@@ -11,8 +11,6 @@ namespace Engine {
 	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
 
 	namespace Scene {
-
-		const std::string SceneManagerBase::sKey = "Scene";
 		
 		SceneManagerBase::SceneManagerBase() :
 			TopLevelSerializableUnit(Serialize::SCENE_MANAGER),
@@ -57,7 +55,7 @@ namespace Engine {
 		void SceneManagerBase::saveComponentData(Serialize::SerializeOutStream &out) const
 		{
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-				out << component->getName();
+				out << component->key();
 				component->writeId(out);
 				component->writeState(out);
 			}
@@ -68,7 +66,7 @@ namespace Engine {
 		{
 			std::string componentName;
 			while (in.loopRead(componentName)) {
-				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase> &comp) {return comp->getName() == componentName; });
+				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase> &comp) {return comp->key() == componentName; });
 				(*it)->readId(in);
 				(*it)->readState(in);
 			}
@@ -112,7 +110,7 @@ namespace Engine {
 			}
 		}
 
-		Scripting::KeyValueMapList SceneManagerBase::maps()
+		KeyValueMapList SceneManagerBase::maps()
 		{
 			return Scope::maps().merge(mSceneComponents);
 		}
@@ -128,9 +126,9 @@ namespace Engine {
 			mEntityRemoveQueue.push_back(e);
 		}
 
-		const std::string &SceneManagerBase::key() const
+		const char *SceneManagerBase::key() const
 		{
-			return sKey;
+			return "Scene";
 		}
 
 	}

@@ -8,14 +8,12 @@ namespace Engine {
 namespace Scene {
 namespace Entity {
 
-class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::ScopeBase, public Serialize::Keyed<std::string> {
+class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::ScopeBase {
 public:
     EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable);
     virtual ~EntityComponentBase() = 0;
 
 	virtual bool init() override;
-
-    virtual std::string getName() const override = 0;
 
 
     std::array<float, 2> getPosition2D();

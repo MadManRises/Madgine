@@ -42,7 +42,7 @@ namespace Engine {
 			bool sendFrameStarted();
 			bool sendFrameEnded();
 
-			virtual Scripting::KeyValueMapList maps() override;
+			virtual KeyValueMapList maps() override;
 
 		private:
 			SignalSlot::ConnectionManager mConnectionManager;

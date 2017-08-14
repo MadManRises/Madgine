@@ -52,7 +52,7 @@ namespace Engine {
 				mStateLoadedSignal.connect(slot);
 			}
 
-			const std::string &key() const;
+			virtual const char *key() const override;
 
 		protected:
 			std::string generateUniqueName();
@@ -61,9 +61,7 @@ namespace Engine {
 
 			std::list<Entity::Entity *> mEntityRemoveQueue;
 
-			virtual Scripting::KeyValueMapList maps() override;
-
-			static const std::string sKey;
+			virtual KeyValueMapList maps() override;
 
 		private:
 			size_t mItemCount;

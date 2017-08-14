@@ -55,7 +55,7 @@ private:
 		Vector3,
 		Vector2,
 		EOLType,
-		std::shared_ptr<Scripting::KeyValueIterator>,
+		std::shared_ptr<KeyValueIterator>,
 		Scripting::ApiMethod,
 		Scripting::LuaTable,
 		Scripting::LuaThread

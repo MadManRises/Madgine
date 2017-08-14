@@ -104,7 +104,7 @@ namespace Engine {
 			return result;
 		}
 
-		Scripting::KeyValueMapList ServerBase::maps()
+		KeyValueMapList ServerBase::maps()
 		{
 			return Scope::maps().merge(mInstances);
 		}

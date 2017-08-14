@@ -7,7 +7,7 @@
 
 #include "api.h"
 
-#include "keyvalue.h"
+#include "generic/keyvalue.h"
 
 namespace Engine {
 namespace Scripting {
@@ -87,11 +87,6 @@ std::string ScopeBase::getIdentifier() const
 {
 	return typeid(*this).name();
 }
-
-std::string ScopeBase::getName() const {
-	throw 0;
-}
-
 
 std::pair<bool, ValueType> ScopeBase::get(const std::string &key) {
 	return maps().get(key);

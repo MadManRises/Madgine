@@ -16,16 +16,11 @@ namespace Entity {
 
 		}
 
-
-    virtual std::string getName() const override{
-        return sComponentName;
-    }
-
-	virtual std::string key() const override {
+	const char *key() const override {
 		return sComponentName;
 	}
 
-	static const char * const componentName() {
+	static const char *componentName() {
 		return sComponentName;
 	}
 	

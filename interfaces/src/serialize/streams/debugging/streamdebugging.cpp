@@ -4,7 +4,7 @@
 
 #include "serialize/streams/serializestream.h"
 
-#include "valuetype.h"
+#include "generic/valuetype.h"
 
 #include "serialize/serializemanager.h"
 

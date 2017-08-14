@@ -1,6 +1,6 @@
 #pragma once
 
-#include "valuetype.h"
+#include "generic/valuetype.h"
 #include "../serializeexception.h"
 #include "debugging/streamdebugging.h"
 

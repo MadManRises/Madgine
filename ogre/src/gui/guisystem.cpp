@@ -114,5 +114,10 @@ namespace Engine {
 			notifyDisplaySizeChanged(Ogre::Vector2(width, height));
 		}
 
+		const char *GUISystem::key() const
+		{
+			return "Gui";
+		}
+
 }
 }

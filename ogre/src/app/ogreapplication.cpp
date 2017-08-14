@@ -321,7 +321,7 @@ void OgreApplication::renderFrame()
 	mWindow->update();
 }
 
-Scripting::KeyValueMapList OgreApplication::maps()
+KeyValueMapList OgreApplication::maps()
 {
 	return Application::maps().merge(mSceneMgr, mUI);
 }

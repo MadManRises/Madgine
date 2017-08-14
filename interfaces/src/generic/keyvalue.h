@@ -3,9 +3,6 @@
 #include "valuetype.h"
 
 namespace Engine {
-	namespace Scripting {
-
-		struct Mapper;
 
 		class KeyValueIterator {
 		public:
@@ -30,7 +27,7 @@ namespace Engine {
 				return v;
 			}
 
-			static const std::string &key(const T &v) {
+			static decltype(auto) key(const T &v) {
 				return v.key();
 			}
 		};
@@ -41,7 +38,7 @@ namespace Engine {
 				return v;
 			}
 
-			static const std::string &key(const T *v) {
+			static decltype(auto) key(const T *v) {
 				return v->key();
 			}
 		};
@@ -52,52 +49,52 @@ namespace Engine {
 				return v;
 			}
 
-			static const std::string &key(const T *v) {
+			static decltype(auto) key(const T *v) {
 				return v->key();
 			}
 		};
 
-		template <class T>
-		struct KeyValue<std::pair<const std::string, T>> {
-			static T& value(std::pair<const std::string, T> &p) {
+		template <class K, class T>
+		struct KeyValue<std::pair<const K, T>> {
+			static T& value(std::pair<const K, T> &p) {
 				return p.second;
 			}
 
-			static const std::string &key(const std::pair<const std::string, T> &p) {
+			static const K &key(const std::pair<const K, T> &p) {
 				return p.first;
 			}
 		};
 
-		template <class T>
-		struct KeyValue<const std::pair<const std::string, T>> {
-			static const T& value(const std::pair<const std::string, T> &p) {
+		template <class K, class T>
+		struct KeyValue<const std::pair<const K, T>> {
+			static const T& value(const std::pair<const K, T> &p) {
 				return p.second;
 			}
 
-			static const std::string &key(const std::pair<const std::string, T> &p) {
+			static const K &key(const std::pair<const K, T> &p) {
 				return p.first;
 			}
 		};
 
 		template <class T>
 		struct KeyValue<std::unique_ptr<T>> {
-			static ScopeBase *value(const std::unique_ptr<T> &p) {
+			static Scripting::ScopeBase *value(const std::unique_ptr<T> &p) {
 				return p.get();
 			}
 
-			static std::string key(const std::unique_ptr<T> &p) {
-				return p->getName();
+			static decltype(auto) key(const std::unique_ptr<T> &p) {
+				return p->key();
 			}
 		};
 
 		template <class T>
 		struct KeyValue<const std::unique_ptr<T>> {
-			static ScopeBase *value(const std::unique_ptr<T> &p) {
+			static Scripting::ScopeBase *value(const std::unique_ptr<T> &p) {
 				return p.get();
 			}
 
-			static std::string key(const std::unique_ptr<T> &p) {
-				return p->getName();
+			static decltype(auto) key(const std::unique_ptr<T> &p) {
+				return p->key();
 			}
 		};
 
@@ -136,14 +133,12 @@ namespace Engine {
 		};
 
 		template <class T, class _ = decltype(ValueType{ std::declval<T>() })>
-		ValueType toValueType(ScopeBase *ref, const T &v) {
+		ValueType toValueType(Scripting::ScopeBase *ref, const T &v) {
 			return ValueType{v};
 		}
 
-		ValueType INTERFACES_EXPORT toValueType(ScopeBase *ref, const Mapper &mapper);
-
 		template <class T, class _ = decltype(ValueType{ std::declval<T>().toValueType() })>
-		ValueType toValueType(ScopeBase *ref, T &v) {
+		ValueType toValueType(Scripting::ScopeBase *ref, T &v) {
 			return v.toValueType();
 		}
 
@@ -155,14 +150,15 @@ namespace Engine {
 		};
 
 		template <class T, typename Converter>
-		class TransformItContainer {
+		class TransformItContainer{
 		private:
 			TransformItContainer() = delete;
 			TransformItContainer(const TransformItContainer<T, Converter> &) = delete;
 			TransformItContainer(TransformItContainer<T, Converter> &&) = delete;
 		
 			template <class It>
-			class TransformIterator {
+			class TransformIterator : public std::iterator<typename std::iterator_traits<It>::iterator_category, 
+				typename std::remove_reference<decltype(std::declval<Converter>()(*std::declval<It>()))>::type> {
 			public:
 				TransformIterator(It &&it) :
 					mIt(std::forward<It>(it)) {}
@@ -183,17 +179,8 @@ namespace Engine {
 					return mIt == other.mIt;
 				}
 
-
 			private:
 				It mIt;
-
-			public:
-
-				typedef typename It::difference_type difference_type;
-				typedef typename std::remove_reference<decltype(*std::declval<TransformIterator<It>>())>::type value_type;
-				typedef value_type* pointer;
-				typedef decltype(*std::declval<TransformIterator<It>>()) reference;
-				typedef typename It::iterator_category iterator_category;
 			};
 
 		public:			
@@ -233,7 +220,7 @@ namespace Engine {
 		template <class T>
 		class KeyValueMapRef : public KeyValueRef {
 		public:
-			KeyValueMapRef(T &map, ScopeBase *ref) :
+			KeyValueMapRef(T &map, Scripting::ScopeBase *ref) :
 				mMap(map),
 				mRef(ref)
 			{
@@ -260,7 +247,7 @@ namespace Engine {
 		private:
 			class Iterator : public KeyValueIterator {
 			public:
-				Iterator(T &map, ScopeBase *ref) :
+				Iterator(T &map, Scripting::ScopeBase *ref) :
 					mMap(map),
 					mIt(map.begin()),
 					mRef(ref)
@@ -286,18 +273,18 @@ namespace Engine {
 			private:
 				T &mMap;
 				decltype(std::declval<T>().begin()) mIt;
-				ScopeBase *mRef;
+				Scripting::ScopeBase *mRef;
 			};
 
 		private:
 			T &mMap;
-			ScopeBase *mRef;
+			Scripting::ScopeBase *mRef;
 		};
 
 		template <class T>
 		class KeyValueItemRef : public KeyValueRef {
 		public:
-			KeyValueItemRef(T &item, ScopeBase *ref) :
+			KeyValueItemRef(T &item, Scripting::ScopeBase *ref) :
 				mItem(item),
 				mRef(ref)
 			{
@@ -322,7 +309,7 @@ namespace Engine {
 		private:
 			class Iterator : public KeyValueIterator {
 			public:
-				Iterator(T &item, ScopeBase *ref) :
+				Iterator(T &item, Scripting::ScopeBase *ref) :
 					mItem(item),
 					mEnded(false),
 					mRef(ref)
@@ -348,33 +335,33 @@ namespace Engine {
 			private:
 				T &mItem;
 				bool mEnded;
-				ScopeBase *mRef;
+				Scripting::ScopeBase *mRef;
 			};
 
 		private:
 			T &mItem;
-			ScopeBase *mRef;
+			Scripting::ScopeBase *mRef;
 		};
 
 		template <class T>
-		typename std::enable_if<is_iterable<T>::value, KeyValueMapRef<T>*>::type make_ref(ScopeBase *ref, T &t) {
+		typename std::enable_if<is_iterable<T>::value, KeyValueMapRef<T>*>::type make_ref(Scripting::ScopeBase *ref, T &t) {
 			return new KeyValueMapRef<T>(t, ref);
 		}
 
 		template <class T>
-		typename std::enable_if<!is_iterable<T>::value, KeyValueItemRef<T>*>::type make_ref(ScopeBase *ref, T &t) {
+		typename std::enable_if<!is_iterable<T>::value, KeyValueItemRef<T>*>::type make_ref(Scripting::ScopeBase *ref, T &t) {
 			return new KeyValueItemRef<T>(t, ref);
 		}
 
 		class INTERFACES_EXPORT KeyValueMapList {
 		public:
 			//using vector::vector;
-			KeyValueMapList(ScopeBase *ref) :
+			KeyValueMapList(Scripting::ScopeBase *ref) :
 				mRef(ref){
 			}
 
 			template <class... Ty>
-			KeyValueMapList(ScopeBase *ref, Ty&... maps) :
+			KeyValueMapList(Scripting::ScopeBase *ref, Ty&... maps) :
 				mRef(ref)
 			{
 				mRefs.reserve(sizeof...(Ty));
@@ -406,7 +393,7 @@ namespace Engine {
 
 		private:
 			std::vector<std::unique_ptr<KeyValueRef>> mRefs;
-			ScopeBase *mRef;
+			Scripting::ScopeBase *mRef;
 		};
 
 		class KeyValueMapListIterator : public KeyValueIterator {
@@ -425,5 +412,4 @@ namespace Engine {
 			std::vector<std::shared_ptr<KeyValueIterator>> mIterators;
 		};
 
-	}
 }

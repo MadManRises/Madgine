@@ -20,7 +20,7 @@ namespace Engine {
 
 			virtual void finalize() override;
 
-			virtual Scripting::KeyValueMapList maps() override;
+			virtual KeyValueMapList maps() override;
 
 		protected:
 

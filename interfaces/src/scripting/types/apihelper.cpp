@@ -1,7 +1,7 @@
 #include "interfaceslib.h"
 
 #include "apihelper.h"
-#include "keyvalue.h"
+#include "generic/keyvalue.h"
 
 extern "C" {
 #include <lua.h>                                /* Always include this when calling Lua */

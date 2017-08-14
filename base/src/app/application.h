@@ -99,7 +99,7 @@ namespace Engine {
 
 			Scripting::GlobalScope *globalScope();
 
-			const std::string &key() const;
+			virtual const char *key() const override;
 
 		protected:
 			virtual void _clear();
@@ -125,8 +125,6 @@ namespace Engine {
 			std::list<FrameListener*> mListeners;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
-
-			static const std::string sName;
 
 		};
 

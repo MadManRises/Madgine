@@ -1,12 +1,15 @@
 #pragma once
 
-#include "templates.h"
+#include "generic/templates.h"
 #include "scripting/datatypes/argumentlist.h"
 #include "scope_cast.h"
 #include "mapper.h"
 #include "apihelper.h"
 
 namespace Engine {
+
+	ValueType INTERFACES_EXPORT toValueType(Scripting::ScopeBase *ref, const Scripting::Mapper &mapper);
+
 	namespace Scripting {
 
 

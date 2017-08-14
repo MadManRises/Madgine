@@ -60,7 +60,7 @@ void SceneComponentBase::update(float){}
 
 void SceneComponentBase::fixedUpdate(float){}
 
-Scripting::KeyValueMapList SceneComponentBase::maps()
+KeyValueMapList SceneComponentBase::maps()
 {
 	return MadgineObject::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
 }
