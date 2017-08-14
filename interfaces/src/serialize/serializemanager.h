@@ -7,14 +7,6 @@
 namespace Engine {
 		namespace Serialize {
 
-
-
-
-			enum Command {
-				INITIAL_STATE_DONE,
-				STREAM_EOF
-			};
-
 			struct MessageHeader {
 				union {
 					MessageType mType;

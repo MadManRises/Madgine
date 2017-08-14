@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "apihelper.h"
 #include "valuetype.h"
 
 namespace Engine {

@@ -44,6 +44,11 @@ namespace Engine {
 			REQUEST
 		};
 
+		enum Command {
+			INITIAL_STATE_DONE,
+			STREAM_EOF
+		};
+
 	}
 	namespace Scripting {
 

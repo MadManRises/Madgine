@@ -4,6 +4,7 @@
 #include "buffered_streambuf.h"
 
 #include "serialize/serializableunit.h"
+#include "serialize/serializemanager.h"
 
 namespace Engine {
 namespace Serialize {
