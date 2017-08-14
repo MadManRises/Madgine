@@ -99,19 +99,21 @@ namespace Engine {
 			It mIterator;
 		};
 
+
+		template <class T>
+		struct FixString {
+			typedef T type;
+		};
+
+		template <>
+		struct FixString<const char*> {
+			typedef std::string type;
+		};
+
 		template <class T>
 		class BaseContainer<std::set<T>> : protected UnitHelper<T> {
 		public:
 
-			template <class T>
-			struct FixString {
-				typedef T type;
-			};
-
-			template <>
-			struct FixString<const char*> {
-				typedef std::string type;
-			};
 
 			static constexpr const bool sorted = true;
 			//protected:
