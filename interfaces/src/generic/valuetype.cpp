@@ -1,8 +1,6 @@
 #include "interfaceslib.h"
 #include "valuetype.h"
 
-#include "serialize/container/unithelper.h"
-
 #include "scripting/datatypes/argumentlist.h"
 
 #include "scripting/types/globalscopebase.h"
@@ -14,25 +12,6 @@ extern "C" {
 }
 
 namespace Engine {
-
-	void Serialize::UnitHelper<ValueType, false>::applyMap(const std::map<size_t, SerializableUnitBase*> &map, ValueType &item)
-	{
-		/*if (item.isInvPtr()) {
-			auto it = map.find(static_cast<size_t>(item.asInvPtr()));
-			if (it != map.end()) {
-				Scripting::ScopeBase *scope = dynamic_cast<Scripting::ScopeBase*>(it->second);
-				if (scope) {
-					item = scope;
-				}
-				else {
-					LOG_WARNING("Non-Scope InvScopePtr in ValueType!");
-				}
-			}
-			else {
-				LOG_WARNING("Unmapped InvScopePtr!");
-			}
-		}*/
-	}
 
 std::string ValueType::toString() const
 {

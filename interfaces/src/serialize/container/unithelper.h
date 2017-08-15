@@ -102,7 +102,9 @@ namespace Engine {
 				out << item;
 			}
 
-			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, ValueType &item);
+			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, ValueType &item) {
+
+			}
 
 		};
 
