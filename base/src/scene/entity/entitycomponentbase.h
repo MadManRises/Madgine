@@ -1,7 +1,6 @@
  #pragma once
 
 #include "serialize/serializableunit.h"
-#include "serialize/container/set.h"
 #include "scripting/types/scopebase.h"
 
 namespace Engine {
