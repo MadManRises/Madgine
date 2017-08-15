@@ -2,9 +2,6 @@
 
 #include "ogrescenemanager.h"
 
-#include "entity/ogreentity.h"
-
-
 #include "math/bounds.h"
 
 #include "serialize/streams/serializestream.h"
@@ -16,8 +13,6 @@
 #include "util/profiler.h"
 
 #include "scene/sceneexception.h"
-
-#include "serialize/serializemanager.h"
 
 #include "scripting/parsing/scriptparser.h"
 
