@@ -1,15 +1,12 @@
 #include "madginelib.h"
 
-#include "MyGUILauncher.h"
+#include "myguilauncher.h"
 
-#include "MyGUIWindow.h"
+#include "myguiwindow.h"
 
-#include "GUI\Windows\WindowContainer.h"
+#include "gui/windows/windowcontainer.h"
 
-#include "..\windownames.h"
-
-
-#include "MyGUIWindow.h"
+#include "../windownames.h"
 
 #ifdef _MSC_VER
 #pragma warning (push, 0)

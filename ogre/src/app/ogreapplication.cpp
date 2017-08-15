@@ -8,7 +8,7 @@
 
 #include "scene/ogrescenemanager.h"
 
-#include "ui/UIManager.h"
+#include "ui/uimanager.h"
 #include "configset.h"
 #include "resources/resourceloader.h"
 #include "util/profiler.h"

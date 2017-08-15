@@ -1,6 +1,6 @@
 #include "interfaceslib.h"
 
-#include "OgreStreamReader.h"
+#include "ogrestreamreader.h"
 
 namespace Engine {
 		namespace Serialize {

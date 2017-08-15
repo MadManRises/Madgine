@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GUIEvents.h"
-#include "Windows\windowclass.h"
-#include "MadgineObject.h"
+#include "guievents.h"
+#include "windows/windowclass.h"
+#include "madgineobject.h"
 
 namespace Engine {
 	namespace GUI {

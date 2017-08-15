@@ -1,7 +1,7 @@
 #include "madginelib.h"
 #include "ogrescriptparser.h"
 
-#include "Serialize\OgreStreamReader.h"
+#include "serialize/ogrestreamreader.h"
 
 namespace Engine {
 namespace Scripting {

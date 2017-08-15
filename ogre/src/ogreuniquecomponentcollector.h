@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Serialize\serializable.h"
-#include "Serialize\Container\unithelper.h"
+#include "serialize/serializable.h"
+#include "serialize/container/unithelper.h"
 #include "uniquecomponentcollector.h"
 
 namespace Engine{

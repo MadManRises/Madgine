@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene\light.h"
+#include "scene/light.h"
 
 namespace Engine {
 	namespace Scene {

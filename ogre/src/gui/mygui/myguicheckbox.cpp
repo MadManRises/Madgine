@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
-#include "MyGUICheckbox.h"
-#include "MyGUIWindow.h"
+#include "myguicheckbox.h"
+#include "myguiwindow.h"
 
 
 #ifdef _MSC_VER

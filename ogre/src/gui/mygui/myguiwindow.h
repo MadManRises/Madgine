@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GUI\Windows\WindowContainer.h"
-#include "GUI\GUIEvents.h"
+#include "gui/windows/windowcontainer.h"
+#include "gui/guievents.h"
 
 #ifdef _MSC_VER
 #pragma warning (push, 0)

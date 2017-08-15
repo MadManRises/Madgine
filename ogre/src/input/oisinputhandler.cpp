@@ -1,7 +1,7 @@
 #include "madginelib.h"
-#include "OISInputHandler.h"
-#include "GUI\GUISystem.h"
-#include "GUI\GUIEvents.h"
+#include "oisinputhandler.h"
+#include "gui/guisystem.h"
+#include "gui/guievents.h"
 
 namespace Engine {
 	namespace Input {

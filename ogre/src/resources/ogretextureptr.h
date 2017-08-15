@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SignalSlot\signal.h"
+#include "signalslot/signal.h"
 
 namespace Engine {
 	namespace Resources {

@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
-#include "MyGUIBar.h"
-#include "MyGUIWindow.h"
+#include "myguibar.h"
+#include "myguiwindow.h"
 
 
 namespace Engine {

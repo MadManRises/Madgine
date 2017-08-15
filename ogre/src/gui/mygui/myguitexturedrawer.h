@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI/Windows/TextureDrawer.h"
+#include "gui/windows/texturedrawer.h"
 
 namespace MyGUI {
 	class ImageBox;

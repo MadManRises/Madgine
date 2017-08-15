@@ -1,8 +1,8 @@
 #include "madginelib.h"
 
-#include "MyGUILabel.h"
+#include "myguilabel.h"
 
-#include "MyGUIWindow.h"
+#include "myguiwindow.h"
 
 
 #ifdef _MSC_VER

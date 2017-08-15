@@ -3,13 +3,6 @@
 #include "serverentity.h"
 
 
-#include "scene/serverscenemanager.h"
-
-#include "serialize/streams/serializestream.h"
-
-
-#include "scripting/parsing/scriptparser.h"
-
 #include "scene/entity/masks.h"
 
 namespace Engine {
@@ -21,7 +14,7 @@ namespace Entity {
 
 
 
-	ServerEntity::ServerEntity(ServerSceneManager *sceneMgr, const std::string &name, const std::string &object, const std::string &behaviour) :
+	ServerEntity::ServerEntity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &object, const std::string &behaviour) :
 	Entity(sceneMgr, name),
 		mScale{ 1, 1, 1 },
 		mOrientation{ {1, 0, 0, 0} },

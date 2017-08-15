@@ -1,9 +1,9 @@
 #include "madginelib.h"
 #include "gamehandler.h"
-#include "ui\UIManager.h"
-#include "gui\GUISystem.h"
-#include "gui\Windows\Window.h"
-#include "Scene\ogrescenemanager.h"
+#include "ui/uimanager.h"
+#include "gui/guisystem.h"
+#include "gui/windows/window.h"
+#include "scene/ogrescenemanager.h"
 
 namespace Engine {
 namespace UI {

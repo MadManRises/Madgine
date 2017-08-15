@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI\GUISystem.h"
+#include "gui/guisystem.h"
 
 namespace MyGUI {
 	struct MouseButton;

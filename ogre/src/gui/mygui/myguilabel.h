@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI\Windows\Label.h"
+#include "gui/windows/label.h"
 
 namespace MyGUI {
 	class TextBox;

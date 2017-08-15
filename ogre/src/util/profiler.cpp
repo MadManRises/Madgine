@@ -1,6 +1,6 @@
 #include "madginelib.h"
 
-#include "Profiler.h"
+#include "profiler.h"
 
 
 namespace Engine {

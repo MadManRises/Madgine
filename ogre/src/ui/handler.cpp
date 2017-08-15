@@ -1,8 +1,8 @@
 #include "madginelib.h"
 #include "handler.h"
-#include "UI/UIManager.h"
-#include "Gui\GUISystem.h"
-#include "GUI\Windows\Window.h"
+#include "ui/uimanager.h"
+#include "gui/guisystem.h"
+#include "gui/windows/window.h"
 
 
 namespace Engine {

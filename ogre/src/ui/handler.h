@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GUI\GUIEvents.h"
-#include "GUI\Windows\classid.h"
-#include "Scripting\Types\globalapicomponentbase.h"
+#include "gui/guievents.h"
+#include "gui/windows/classid.h"
+#include "scripting/types/globalapicomponentbase.h"
 
 namespace Engine {
 	namespace UI {

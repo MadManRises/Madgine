@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI\Windows\Combobox.h"
+#include "gui/windows/combobox.h"
 
 namespace MyGUI {
 	class ComboBox;

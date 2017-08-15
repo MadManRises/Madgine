@@ -1,8 +1,8 @@
 #include "madginelib.h"
 
-#include "IngameOverlay.h"
+#include "ingameoverlay.h"
 
-#include "App\OgreApplication.h"
+#include "app/ogreapplication.h"
 
 namespace Engine {
 	namespace Scene {

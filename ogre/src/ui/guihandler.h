@@ -1,11 +1,11 @@
 #pragma once
 
 #include "handler.h"
-#include "GUI\windownames.h"
+#include "gui/windownames.h"
 
 #include "ogreuniquecomponent.h"
 
-#include "Scripting\Types\scope.h"
+#include "scripting/types/scope.h"
 
 namespace Engine {
 namespace UI {

@@ -1,12 +1,12 @@
 #include "madginelib.h"
 
-#include "WindowContainer.h"
+#include "windowcontainer.h"
 
-#include "GUI\GUISystem.h"
+#include "gui/guisystem.h"
 
-#include "GUI\Windows\window.h"
+#include "window.h"
 
-#include "..\windownames.h"
+#include "../windownames.h"
 
 namespace Engine {
 	namespace GUI {

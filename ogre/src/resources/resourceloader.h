@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Util\Process.h"
-#include "ImageSets\imagesetmanager.h"
-#include "Scripting\Parsing\ogrescriptparser.h"
+#include "util/process.h"
+#include "imagesets/imagesetmanager.h"
+#include "scripting/parsing/ogrescriptparser.h"
 
 namespace Engine {
 	namespace Resources {

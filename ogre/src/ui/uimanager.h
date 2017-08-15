@@ -2,8 +2,8 @@
 
 #include "guihandler.h"
 #include "gamehandler.h"
-#include "Scripting\Types\scope.h"
-#include "Scripting\Types\globalapicomponentbase.h"
+#include "scripting/types/scope.h"
+#include "scripting/types/globalapicomponentbase.h"
 
 namespace Engine {
 

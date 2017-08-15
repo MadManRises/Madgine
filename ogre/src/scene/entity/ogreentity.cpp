@@ -2,15 +2,12 @@
 
 #include "ogreentity.h"
 
-
-#include "Scene/ogrescenemanager.h"
-
-#include "Serialize\Streams/serializestream.h"
+#include "serialize/streams/serializestream.h"
 
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
-#include "Scene\Entity\masks.h"
+#include "scene/entity/masks.h"
 
 namespace Engine {
 
@@ -58,7 +55,7 @@ OgreEntity::OgreEntity(OgreEntity &&other) :
 	//Change components-Owner
 }
 
-OgreEntity::OgreEntity(OgreSceneManager *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour) :
+OgreEntity::OgreEntity(SceneManagerBase *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour) :
 	Entity(sceneMgr, node->getName().c_str()),
     mNode(node),
     mObject(obj)

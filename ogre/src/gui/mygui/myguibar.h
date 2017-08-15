@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI\Windows\Bar.h"
+#include "gui/windows/bar.h"
 
 
 namespace MyGUI {

@@ -1,5 +1,5 @@
 #pragma once
-#include "GUI\Windows\Button.h"
+#include "gui/windows/button.h"
 
 namespace MyGUI {
 	class Button;

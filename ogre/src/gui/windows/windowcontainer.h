@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI/GUIEvents.h"
+#include "gui/guievents.h"
 #include "windowclass.h"
 #include "windowid.h"
 #include "windowsizerelvector.h"

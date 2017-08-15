@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
-#include "MyGUITextureDrawer.h"
-#include "MyGUIWindow.h"
+#include "myguitexturedrawer.h"
+#include "myguiwindow.h"
 
 
 

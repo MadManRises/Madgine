@@ -1,18 +1,18 @@
 #include "madginelib.h"
 
-#include "GUI\Windows\window.h"
+#include "gui/windows/window.h"
 
 
-#include "MyGUIWindow.h"
-#include "MyGUILauncher.h"
+#include "myguiwindow.h"
+#include "myguilauncher.h"
 
-#include "MyGUILabel.h"
-#include "MyGUIBar.h"
-#include "MyGUITextureDrawer.h"
-#include "MyGUITextbox.h"
-#include "MyGUIButton.h"
-#include "MyGUICheckbox.h"
-#include "MyGUICombobox.h"
+#include "myguilabel.h"
+#include "myguibar.h"
+#include "myguitexturedrawer.h"
+#include "myguitextbox.h"
+#include "myguibutton.h"
+#include "myguicheckbox.h"
+#include "myguicombobox.h"
 
 
 namespace Engine {

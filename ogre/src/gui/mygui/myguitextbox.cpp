@@ -1,8 +1,8 @@
 #include "madginelib.h"
 
-#include "MyGUITextbox.h"
+#include "myguitextbox.h"
 
-#include "MyGUIWindow.h"
+#include "myguiwindow.h"
 
 
 #ifdef _MSC_VER

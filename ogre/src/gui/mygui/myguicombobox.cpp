@@ -1,7 +1,7 @@
 #include "madginelib.h"
 
-#include "MyGUICombobox.h"
-#include "MyGUIWindow.h"
+#include "myguicombobox.h"
+#include "myguiwindow.h"
 
 
 #ifdef _MSC_VER

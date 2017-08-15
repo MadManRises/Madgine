@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI\Windows\Checkbox.h"
+#include "gui/windows/checkbox.h"
 
 namespace MyGUI {
 	class Widget;

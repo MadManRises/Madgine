@@ -1,7 +1,7 @@
 #pragma once
 
-#include <OIS\OIS.h>
-#include "InputHandler.h"
+#include <OIS/OIS.h>
+#include "inputhandler.h"
 
 namespace Engine {
 	namespace Input {

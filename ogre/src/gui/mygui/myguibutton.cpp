@@ -1,8 +1,8 @@
 #include "madginelib.h"
 
-#include "MyGUIButton.h"
+#include "myguibutton.h"
 
-#include "MyGUIWindow.h"
+#include "myguiwindow.h"
 
 namespace Engine {
 	namespace GUI {

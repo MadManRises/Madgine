@@ -2,9 +2,9 @@
 #include "guihandler.h"
 //#include "Database/translationunit.h"
 
-#include "GUI\GUISystem.h"
-#include "UI\UIManager.h"
-#include "GUI\Windows\Window.h"
+#include "gui/guisystem.h"
+#include "ui/uimanager.h"
+#include "gui/windows/window.h"
 
 
 namespace Engine {

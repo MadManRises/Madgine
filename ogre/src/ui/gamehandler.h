@@ -2,11 +2,11 @@
 
 #include "handler.h"
 
-#include "Scene/contextmasks.h"
+#include "scene/contextmasks.h"
 
 #include "ogreuniquecomponent.h"
 
-#include "Scripting\Types\scope.h"
+#include "scripting/types/scope.h"
 
 namespace Engine {
 namespace UI {

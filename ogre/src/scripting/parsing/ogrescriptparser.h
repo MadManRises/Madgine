@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
 namespace Engine {
 namespace Scripting {

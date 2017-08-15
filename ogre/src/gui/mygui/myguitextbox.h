@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI/Windows/Textbox.h"
+#include "gui/windows/textbox.h"
 
 namespace MyGUI {
 	class EditBox;

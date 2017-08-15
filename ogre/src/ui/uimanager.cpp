@@ -1,10 +1,10 @@
 #include "madginelib.h"
 
-#include "UIManager.h"
+#include "uimanager.h"
 
-#include "GUI/GUISystem.h"
+#include "gui/guisystem.h"
 
-#include "GUI/Windows/Window.h"
+#include "gui/windows/window.h"
 
 #include "gamehandler.h"
 

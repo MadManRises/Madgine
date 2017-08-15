@@ -1,7 +1,7 @@
 #include "madginelib.h"
-#include "ResourceLoader.h"
+#include "resourceloader.h"
 
-#include "Database\messages.h"
+#include "database/messages.h"
 
 
 template<> Engine::Resources::ResourceLoader *Ogre::Singleton<Engine::Resources::ResourceLoader>::msSingleton = 0;

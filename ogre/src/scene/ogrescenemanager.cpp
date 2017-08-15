@@ -1,25 +1,25 @@
 #include "madginelib.h"
 
-#include "OgreSceneManager.h"
+#include "ogrescenemanager.h"
 
-#include "Entity/ogreentity.h"
+#include "entity/ogreentity.h"
 
 
-#include "Math\bounds.h"
+#include "math/bounds.h"
 
-#include "Serialize\Streams\serializestream.h"
+#include "serialize/streams/serializestream.h"
 
-#include "Scene/scenecomponent.h"
+#include "scene/scenecomponent.h"
 
-#include "Util\Process.h"
+#include "util/process.h"
 
-#include "Util\Profiler.h"
+#include "util/profiler.h"
 
-#include "Scene/sceneexception.h"
+#include "scene/sceneexception.h"
 
-#include "Serialize\serializemanager.h"
+#include "serialize/serializemanager.h"
 
-#include "Scripting\Parsing\scriptparser.h"
+#include "scripting/parsing/scriptparser.h"
 
 
 namespace Engine {

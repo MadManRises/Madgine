@@ -2,9 +2,9 @@
 
 #include "window.h"
 
-#include "SignalSlot\slot.h"
+#include "signalslot/slot.h"
 
-#include "Resources\ogretextureptr.h"
+#include "resources/ogretextureptr.h"
 
 namespace Engine {
 	namespace GUI {
