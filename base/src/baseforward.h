@@ -30,5 +30,6 @@ namespace Engine {
 
 	namespace Scripting {
 		class GlobalScope;
+		class GlobalAPIComponentBase;
 	}
 }

@@ -2,7 +2,7 @@
 
 #include "gui/guievents.h"
 #include "gui/windows/classid.h"
-#include "scripting/types/globalapicomponentbase.h"
+#include "madgineobject.h"
 
 namespace Engine {
 	namespace UI {
