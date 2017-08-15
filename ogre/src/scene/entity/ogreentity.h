@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Scene\Entity\entity.h"
+#include "scene/entity/entity.h"
 
 
 namespace Engine {
 namespace Scene {
 namespace Entity {
-
-
-
 
 class OGREMADGINE_EXPORT OgreEntity : public Entity
 {
@@ -19,7 +16,7 @@ public:
 	OgreEntity(const OgreEntity&);
 	OgreEntity(OgreEntity &&);
 
-    OgreEntity(OgreSceneManager *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour = "");
+    OgreEntity(SceneManagerBase *sceneMgr, Ogre::SceneNode *node, Ogre::Entity *obj, const std::string &behaviour = "");
     ~OgreEntity();
 
 	Ogre::SceneNode *createDecoratorNode(bool centered, float height = 0.0f);
