@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Resources/Shading/shadercollector.h"
+#include "resources/shading/shadercollector.h"
 
-#include "Entity\ogreentity.h"
+#include "entity/ogreentity.h"
 
-#include "Serialize\Container\list.h"
+#include "serialize/container/list.h"
 
-#include "Scene\scenemanager.h"
+#include "scene/scenemanager.h"
 
-#include "Scene\Entity\masks.h"
+#include "scene/entity/masks.h"
 
-#include "Resources\ogretextureptr.h"
+#include "resources/ogretextureptr.h"
 
 #include "ogrelight.h"
 
