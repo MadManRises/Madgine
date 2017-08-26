@@ -176,6 +176,8 @@ int ValueType::push(lua_State * state) const
 int ValueType::apiMethodCaller(lua_State *state)
 {
 	int n = lua_gettop(state);
+	if (n < 1)
+		luaL_error(state, "Memberfunctions need at least 1 argument!");
 	Engine::Scripting::ArgumentList args(state, n-1);
 	Scripting::ApiMethod method = reinterpret_cast<Scripting::ApiMethod>(lua_touserdata(state, lua_upvalueindex(1)));
 	Engine::Scripting::ScopeBase *scope = fromStack(state, -1).as<Scripting::ScopeBase*>();

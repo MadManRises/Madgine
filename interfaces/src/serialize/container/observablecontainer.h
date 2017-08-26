@@ -24,31 +24,32 @@ namespace Engine {
 
 		};
 
-		template <class C, const _ContainerPolicy &Config>
-		class ObservableContainer : public C, public Observable {
+		template <class traits, class Creator, const _ContainerPolicy &Config>
+		class ObservableContainer : public SerializableContainer<traits, Creator>, public Observable {
 		public:
 			typedef size_t TransactionId;
 
-			typedef typename C::ArgsTuple ArgsTuple;
+			typedef SerializableContainer<traits, Creator> Base;
 
-			typedef typename C::iterator iterator;
-			typedef typename C::const_iterator const_iterator;
-			typedef typename C::Type Type;
+			typedef typename traits::iterator iterator;
+			typedef typename traits::const_iterator const_iterator;
+			typedef typename traits::type type;
+			typedef typename traits::value_type value_type;
 
 			
 
 			struct Transaction {
 				template <class T>
 				Transaction(TransactionId id, const T &callback) :
-					mId(id), mCallback(callback) 
+					mId(id), mCallback(callback)
 				{}
 
 				TransactionId mId;
-				SignalSlot::Connection<const iterator &, bool> mCallback;				
+				SignalSlot::Connection<const iterator &, bool> mCallback;
 			};
 
 
-			ObservableContainer() :				
+			ObservableContainer() :
 				mTransactionCounter(0)
 			{
 
@@ -62,15 +63,16 @@ namespace Engine {
 			template <class T>
 			void operator=(T&& arg) {
 				if (isMaster()) {
-					C::operator=(std::forward<T>(arg));
-					onReset();
+					beforeReset();
+					Base::operator=(std::forward<T>(arg));
+					afterReset();
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
-						C temp(std::forward<T>(arg));
+						Base temp(std::forward<T>(arg));
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0;
+						*out << (TransactionId)0; 
 						*out << RESET;
 						temp.writeState(*out);
 						out->endMessage();
@@ -81,49 +83,26 @@ namespace Engine {
 				}
 			}
 
-			void onReset(ParticipantId answerTarget = 0, TransactionId answerId = 0) const {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
-					}
-					else {
-						*out << (TransactionId)0;						
-					}
-					*out << (ACCEPT | RESET);
-					this->writeState(*out);
-					out->endMessage();
-				}
-			}
 
 			void clear() {
-				C::clear();
-				onClear();
+				beforeReset();
+				Base::clear();
+				afterReset();
 			}
 
-			void onClear(ParticipantId answerTarget = 0, TransactionId answerId = 0) const {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
-					}
-					else {
-						*out << (TransactionId)0;						
-					}
-					*out << (ACCEPT | CLEAR);
-					out->endMessage();
-				}
-			}
 
 			template <class... _Ty>
 			iterator insert(const iterator &where, _Ty&&... args) {
 				iterator it = this->end();
 				
 				if (isMaster()) {
-					it = C::insert(where, std::forward<_Ty>(args)...);
+					it = Base::insert(where, std::forward<_Ty>(args)...);
 					onInsert(it);
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
-						const Type &temp = UnitCreator<Type>::createTemp(std::forward<_Ty>(args)...);
+						type temp(std::forward<_Ty>(args)...);
+						this->postConstruct(temp);
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << (TransactionId)0;
@@ -139,28 +118,25 @@ namespace Engine {
 			}
 
 			template <class T, class... _Ty>
-			void insert(T &callback, const iterator &where, _Ty&&... args) {
+			void insert(T &&init, const iterator &where, _Ty&&... args) {
 				if (isMaster()) {
-					iterator it = C::insert(callback, where, std::forward<_Ty>(args)...);
+					iterator it = Base::insert(std::forward<T>(init), where, std::forward<_Ty>(args)...);
 					onInsert(it);					
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
-						Type temp(std::forward<_Ty>(args)...);
+						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
 
-						TransactionId id = ++mTransactionCounter;
+						init(temp);
 
 						BufferedOutStream *out = getSlaveActionMessageTarget();
-						*out << id;
+						*out << (TransactionId)0;
 						*out << INSERT_ITEM;
 						this->write_item(*out, where, temp);
 						out->endMessage();
-
-						mTransactions.emplace_back(id, callback);
 					}
 					else {
-						//callback(this->end());
 						throw 0;
 					}
 				}
@@ -171,12 +147,12 @@ namespace Engine {
 				iterator it = this->end();
 
 				if (isMaster()) {
-					onRemove(where);
-					it = C::erase(where);					
+					beforeRemove(where);
+					it = Base::erase(where);
+					afterRemove();
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
-
 						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << (TransactionId)0;
 						*out << REMOVE_ITEM;
@@ -190,54 +166,25 @@ namespace Engine {
 				return it;
 			}
 
-			void onInsert(const const_iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) const {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;	
-					}
-					else {
-						*out << (TransactionId)0;					
-					}
-					*out << (ACCEPT | INSERT_ITEM);
-					this->write_item(*out, it);
-					out->endMessage();
-				}
-			}
-
-			void onRemove(const const_iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0) const {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
-					}
-					else {
-						*out << (TransactionId)0;						
-					}
-					*out << (ACCEPT | REMOVE_ITEM);
-					this->write_iterator(*out, where);
-					out->endMessage();
-				}
-			}
+			
 
 			iterator performOperation(Operations op, SerializeInStream &in, ParticipantId partId, TransactionId id) {
 				iterator it = this->end();
 				switch (op) {
 				case INSERT_ITEM:
-					it = this->read_item(in, this->topLevel());
-					C::onInsert(it);
+					it = this->read_item(in);
 					onInsert(it, partId, id);
 					break;
 				case REMOVE_ITEM:
 					it = this->read_iterator(in);
-					onRemove(it);
-					it = C::erase(it);
-					break;
-				case CLEAR:
-					C::clear();
-					onClear(partId, id);
+					beforeRemove(it, partId, id);
+					it = Base::erase(it);
+					afterRemove();
 					break;
 				case RESET:
-					this->readState(in);
-					onReset(partId, id);
+					beforeReset();
+					Base::readState(in);
+					afterReset(partId, id);
 					break;
 				default:
 					throw 0;
@@ -245,12 +192,18 @@ namespace Engine {
 				return it;
 			}
 
+			virtual void readState(SerializeInStream &in) override {
+				beforeReset();
+				Base::readState(in);
+				afterReset();
+			}
+
 			
 			// Inherited via Observable
 			virtual void readRequest(BufferedInOutStream & inout) override
 			{
 				bool accepted = Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS; //Check TODO
-
+				
 				TransactionId id;
 				inout >> id;
 
@@ -259,10 +212,12 @@ namespace Engine {
 
 
 				if (!accepted) {
-					beginActionResponseMessage(&inout);
-					inout << id;
-					inout << (op | REJECT);
-					inout.endMessage();
+					if (id) {
+						beginActionResponseMessage(&inout);
+						inout << id;
+						inout << (op | REJECT);
+						inout.endMessage();
+					}
 				}
 				else {
 
@@ -270,15 +225,19 @@ namespace Engine {
 						performOperation(op, inout, inout.id(), id);
 					}
 					else {
-						TransactionId newId = ++mTransactionCounter;
-
+						TransactionId newId = 0;
+						if (id) {
+							newId = ++mTransactionCounter;
+						}
 						BufferedOutStream *out = getSlaveActionMessageTarget();
 						*out << newId;
 						*out << op;
 						*out << inout;
 						out->endMessage();
 
-						mPassTransactions.emplace_back(newId, std::make_pair(inout.id(), id));
+						if (id) {
+							mPassTransactions.emplace_back(newId, std::make_pair(inout.id(), id));
+						}
 					}
 				}
 			}
@@ -289,7 +248,7 @@ namespace Engine {
 				inout >> id;
 
 				Operations op;
-				inout >> (int&)op;
+				inout >> op;
 
 				bool accepted = (id == 0) || ((op & (~MASK)) == ACCEPT);
 
@@ -300,10 +259,11 @@ namespace Engine {
 					if (!mPassTransactions.empty() && mPassTransactions.front().first == id) {
 						sender = mPassTransactions.front().second;
 						mPassTransactions.pop_front();
+
 					}
 				}
 
-				if (accepted) {	
+				if (accepted) {
 					it = performOperation((Operations)(op & MASK), inout, sender.first, sender.second);
 				}
 
@@ -316,7 +276,69 @@ namespace Engine {
 
 			}
 
+			template <class Ty>
+			void connectCallback(Ty &&slot) {
+				mSignal.connect(std::forward<Ty>(slot));
+			}
+
+
 		private:
+			void onInsert(const const_iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					if (answerTarget == out->id()) {
+						*out << answerId;
+					}
+					else {
+						*out << (TransactionId)0;
+					}
+					*out << INSERT_ITEM;
+					this->write_item(*out, it);
+					out->endMessage();
+				}
+				mSignal.emit(it, INSERT_ITEM);
+			}
+
+			void beforeRemove(const const_iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					if (answerTarget == out->id()) {
+						*out << answerId;
+					}
+					else {
+						*out << (TransactionId)0;
+					}
+					*out << REMOVE_ITEM;
+					this->write_iterator(*out, it);
+					out->endMessage();
+				}
+				mSignal.emit(it, BEFORE | REMOVE_ITEM);
+			}
+
+			void afterRemove() {
+				mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
+			}
+
+			void beforeReset() {
+				mSignal.emit(this->end(), BEFORE | RESET);
+			}
+
+			void afterReset(ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+					if (answerTarget == out->id()) {
+						*out << answerId;
+					}
+					else {
+						*out << (TransactionId)0;
+					}
+					*out << RESET;
+					this->writeState(*out);
+					out->endMessage();
+				}
+				mSignal.emit(this->end(), AFTER | RESET);
+			}
+
+		private:
+
+			SignalSlot::Signal<const const_iterator &, int> mSignal;
 
 			std::list<Transaction> mTransactions;
 			std::list<std::pair<TransactionId, std::pair<ParticipantId, TransactionId>>> mPassTransactions;

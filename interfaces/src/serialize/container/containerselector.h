@@ -8,12 +8,12 @@ namespace Engine {
 	namespace Serialize {
 
 
-		template <class NativeContainer, class Creator>
+		template <class traits, class Creator>
 		using ContainerSelector = 
 			std::conditional_t<
-				BaseContainer<NativeContainer>::sorted, 
-				SortedContainer<NativeContainer, Creator>, 
-				UnsortedContainer<NativeContainer, Creator>
+				traits::sorted, 
+				SortedContainer<traits, Creator>, 
+				UnsortedContainer<traits, Creator>
 			>;
 
 	}

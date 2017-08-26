@@ -9,7 +9,7 @@ namespace Engine {
 
 		class OGREMADGINE_EXPORT ResourceLoader : public Engine::Util::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
 		public:
-			ResourceLoader(const std::string &mediaPath);
+			ResourceLoader(Scripting::LuaState *state, const std::string &mediaPath);
 			~ResourceLoader();
 
 			void load();

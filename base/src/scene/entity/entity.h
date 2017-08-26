@@ -94,7 +94,6 @@ private:
 	template <class T>
 	static std::unique_ptr<EntityComponentBase> createComponent_t(Entity &e, const Scripting::LuaTable &table) {
 		std::unique_ptr<EntityComponentBase> c = std::make_unique<T>(e, table);
-		c->init();
 		return c;
 	}	
 

@@ -26,7 +26,7 @@ namespace Engine {
 		};
 
 
-		class OGREMADGINE_EXPORT Handler : public MadgineObject {
+		class OGREMADGINE_EXPORT Handler : public MadgineObject, public Scripting::ScopeBase {
 		public:
 			Handler(const std::string &windowName);
 			virtual ~Handler() = default;

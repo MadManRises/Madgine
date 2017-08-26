@@ -15,6 +15,7 @@ public:
    *
    */
     ConfigSet(Ogre::Root *root, const std::string &configFileName);
+	ConfigSet(const ConfigSet&) = delete;
 
     /**
      * [getFullscreen description]

@@ -17,9 +17,14 @@ EntityComponentBase::~EntityComponentBase() {
 
 }
 
-bool EntityComponentBase::init()
+void EntityComponentBase::onActivate()
 {
-	return ScopeBase::init();
+	init();
+}
+
+void EntityComponentBase::init()
+{
+	
 }
 
 Entity &EntityComponentBase::getEntity() const

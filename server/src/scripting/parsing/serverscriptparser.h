@@ -8,7 +8,7 @@ namespace Engine {
 
 			class MADGINE_SERVER_EXPORT ServerScriptParser : public Scripting::Parsing::ScriptParser {
 			public:
-				ServerScriptParser(const std::string &rootFolder);
+				ServerScriptParser(LuaState *state, const std::string &rootFolder);
 
 				const std::string &rootFolder();
 

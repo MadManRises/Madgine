@@ -4,7 +4,7 @@
 
 namespace Engine{
 
-	API_IMPL(Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
+	API_IMPL(Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 
 namespace Scene{
 
@@ -33,6 +33,7 @@ void SceneComponentBase::fixedUpdate(float timeStep, ContextMask mask)
 
 bool SceneComponentBase::init()
 {
+	activate();
 	return MadgineObject::init();
 }
 
@@ -62,7 +63,7 @@ void SceneComponentBase::fixedUpdate(float){}
 
 KeyValueMapList SceneComponentBase::maps()
 {
-	return MadgineObject::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
+	return ScopeBase::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
 }
 
 }

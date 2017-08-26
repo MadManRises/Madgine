@@ -38,6 +38,10 @@ namespace Engine {
 		{
 		}
 
+		void Serializable::activate()
+		{
+		}
+
 		std::list<BufferedOutStream*> Serializable::getMasterStateMessageTargets()
 		{
 			return mUnit ? mUnit->getMasterMessageTargets(false) : std::list<BufferedOutStream*>();
@@ -54,6 +58,11 @@ namespace Engine {
 		TopLevelSerializableUnitBase * Serializable::topLevel() const
 		{
 			return mUnit ? mUnit->topLevel() : nullptr;
+		}
+
+		SerializableUnitBase * Serializable::unit() const
+		{
+			return mUnit;
 		}
 
 	}

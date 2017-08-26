@@ -1,7 +1,7 @@
 #include "interfaceslib.h"
 #include "globalscopebase.h"
 
-#include "scripting/parsing/scriptparser.h"
+#include "scripting/types/luastate.h"
 
 #include "generic/keyvalue.h"
 
@@ -9,39 +9,20 @@
 namespace Engine {
 namespace Scripting {
 
-	GlobalScopeBase::GlobalScopeBase(const LuaTable &table, ScopeBase *topLevelApi) :
-	mTable(table),
-		mTopLevelApi(topLevelApi)
+	GlobalScopeBase::GlobalScopeBase(const LuaTable &table) :
+		ScopeBase(table),
+		mTable(table)
 	{
-		
-
-	}
-
-	bool GlobalScopeBase::init()
-	{
-		if (!mTable) {
-			mTable = Engine::Scripting::Parsing::ScriptParser::getSingleton().createThread();
-		}
 
 		mScopes = mTable.createTable();
 
-		if (!ScopeBase::init(mTable))
-			return false;
-
 		mTable.setMetatable("Interfaces.GlobalScope");
 
-		return true;
-	}
-
-	void GlobalScopeBase::finalize()
-	{
-		ScopeBase::finalize();
-		mTable.clear();
-		mScopes.clear();
+		assert(mTable);
 	}
 
 	void GlobalScopeBase::executeString(const std::string &cmd) {
-		Parsing::ScriptParser::getSingleton().executeString(mTable.state(), cmd);
+		LuaState::getSingleton().executeString(mTable.state(), cmd);
 	}
 
 	LuaTable GlobalScopeBase::createTable()
@@ -49,26 +30,16 @@ namespace Scripting {
 		return mScopes.createTable();
 	}
 
+	lua_State * GlobalScopeBase::lua_state()
+	{
+		return mTable.state();
+	}
 
 	LuaTable GlobalScopeBase::table()
 	{
 		return mTable;
 	}
 
-	lua_State * GlobalScopeBase::lua_state()
-	{
-		return mTable.state();
-	}
-
-	KeyValueMapList GlobalScopeBase::maps()
-	{
-		return mTopLevelApi ? ScopeBase::maps().merge(mTopLevelApi->maps()) : ScopeBase::maps();
-	}
-
-	const char *GlobalScopeBase::key() const
-	{
-		return "Global";
-	}
 
 }
 }

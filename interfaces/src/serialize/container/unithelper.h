@@ -8,24 +8,6 @@ namespace Engine {
 	namespace Serialize {
 
 		template <class T>
-		class UnitCreator {
-		public:
-			template <class... _Ty>
-			static T createTemp(_Ty&&... args) {
-				return{ std::forward<_Ty>(args)... };
-			}
-		};
-
-		template <class U, class V>
-		class UnitCreator<std::pair<U, V>> {
-		public:
-			template <class... _Ty>
-			static std::pair<U, V> createTemp(const U &first, _Ty&&... args) {
-				return{ std::piecewise_construct, std::forward_as_tuple(first), std::forward_as_tuple(std::forward<_Ty>(args)...) };
-			}
-		};
-
-		template <class T>
 		struct UnitHelperBase : public CopyTraits<T> {
 			static void read_id(SerializeInStream &in, T &item) {
 			}
@@ -52,12 +34,7 @@ namespace Engine {
 			static void postConstruct(T &item) {
 			}
 
-			static size_t setItemInitialising(T &item) {
-				return -1;
-			}
-
-			static void resetItemInitialising(T &item, size_t id) {
-
+			static void activateItem(T &item) {
 			}
 
 		};
@@ -160,6 +137,10 @@ namespace Engine {
 				UnitHelper<T>::postConstruct(*item);
 			}
 
+			static void activateItem(Type &item) {
+				UnitHelper<T>::activateItem(*item);
+			}
+
 		};
 
 		template <class T>
@@ -216,19 +197,12 @@ namespace Engine {
 
 			}
 
-			static size_t setItemInitialising(SerializableUnitBase &item) {
-				return item.setInitialising();
+			static void activateItem(SerializableUnitBase &item) {
+				item.activate();
 			}
 
-			static size_t setItemInitialising(Serializable &item) {
-				return -1;
-			}
+			static void activateItem(Serializable &item) {
 
-			static void resetItemInitialising(SerializableUnitBase &item, size_t id) {
-				item.resetInitialising(id);
-			}
-
-			static void resetItemInitialising(Serializable &item, size_t id) {
 			}
 
 		};
@@ -277,6 +251,11 @@ namespace Engine {
 			static void postConstruct(Type &item) {
 				UnitHelper<U>::postConstruct(item.first);
 				UnitHelper<V>::postConstruct(item.second);
+			}
+
+			static void activateItem(Type &item) {
+				UnitHelper<U>::activateItem(item.first);
+				UnitHelper<V>::activateItem(item.second);
 			}
 
 		};

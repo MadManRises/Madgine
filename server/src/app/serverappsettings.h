@@ -10,8 +10,6 @@ namespace App{
  */
 struct ServerAppSettings : AppSettings {
 
-	using AppSettings::AppSettings;
-
 
 };
 

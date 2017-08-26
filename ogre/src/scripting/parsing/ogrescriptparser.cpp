@@ -3,12 +3,15 @@
 
 #include "serialize/ogrestreamreader.h"
 
+#include "scripting/types/luastate.h"
+
 namespace Engine {
 namespace Scripting {
 namespace Parsing {
 
-OgreScriptParser::OgreScriptParser() : mRsgm(
-        &Ogre::ResourceGroupManager::getSingleton())
+OgreScriptParser::OgreScriptParser(LuaState *state) : 
+	ScriptParser(state),
+	mRsgm(&Ogre::ResourceGroupManager::getSingleton())
 {
     mLoadOrder = 100.0f;
     mScriptPatterns.push_back(std::string("*") + fileExtension());
@@ -42,6 +45,10 @@ void OgreScriptParser::parseScript(Ogre::DataStreamPtr &stream,
 	ScriptParser::parseScript(is, group, false);
 }
 
+void OgreScriptParser::setFinalized()
+{
+	state()->setFinalized();
+}
 
 }
 }

@@ -9,7 +9,7 @@ template<> Engine::Resources::ResourceLoader *Ogre::Singleton<Engine::Resources:
 namespace Engine {
 	namespace Resources {
 
-		ResourceLoader::ResourceLoader(const std::string &mediaPath) :
+		ResourceLoader::ResourceLoader(Scripting::LuaState *state, const std::string &mediaPath) :
 			mRgm(&Ogre::ResourceGroupManager::getSingleton()),
 			mMediaPath(mediaPath)
 		{
@@ -30,7 +30,7 @@ namespace Engine {
 				}
 			}
 
-			mParser = std::make_unique<Scripting::Parsing::OgreScriptParser>(); // Initialise the Script Parser
+			mParser = std::make_unique<Scripting::Parsing::OgreScriptParser>(state); // Initialise the Script Parser
 
 			mImageSetManager = std::make_unique<Resources::ImageSets::ImageSetManager>();
 		}
@@ -59,7 +59,7 @@ namespace Engine {
 		void ResourceLoader::loadScripts()
 		{
 			mRgm->initialiseResourceGroup("Scripting");
-			mParser->makeFinalized();
+			mParser->setFinalized();
 		}
 
 		std::string ResourceLoader::getMediaPath(const std::string & filename, const std::string & folder)

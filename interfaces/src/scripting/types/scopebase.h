@@ -12,7 +12,7 @@ namespace Scripting {
 class INTERFACES_EXPORT ScopeBase {
 
 public:
-	ScopeBase();
+	ScopeBase(const LuaTable &table = {});
 	ScopeBase(const ScopeBase &) = delete;
 	ScopeBase(ScopeBase &&) = delete;
     virtual ~ScopeBase();
@@ -35,18 +35,7 @@ public:
 	virtual std::string getIdentifier() const;
 	virtual const char *key() const = 0;
 
-	virtual bool init();
-	virtual void finalize();
-
-protected:
-	bool init(const LuaTable &table);
-
-	friend class GlobalScopeBase;
-	GlobalScopeBase *globalScope();
-
 private:
-
-	GlobalScopeBase *mGlobal;
 	LuaTable mTable;
 		 
 };

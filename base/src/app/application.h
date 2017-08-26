@@ -6,16 +6,20 @@
 #include "scripting/types/scope.h"
 #include "madgineobject.h"
 
+#include "scripting/types/globalscopebase.h"
+
+#include "uniquecomponentcollector.h"
+
 namespace Engine {
 	namespace App {
 
-		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, MadgineObject> {
+		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, Scripting::GlobalScopeBase>, public MadgineObject {
 		public:
 			/**
 			* Creates the Application.
 			*
 			*/
-			Application();
+			Application(const Scripting::LuaTable &table = {});
 			/**
 			* Deletes all objects created by the Application.
 			*
@@ -32,7 +36,7 @@ namespace Engine {
 			* @param settings all necessary information to setup the Application
 			*/
 			void setup(const AppSettings &settings);
-
+			
 			/**
 			* May only be called after a call to setup().
 			* Initializes all Madgine-Components.
@@ -40,7 +44,7 @@ namespace Engine {
 			virtual bool init() override;
 
 			virtual void finalize() override;
-
+			
 			/**
 			* Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop.
 			* If "init" is not found, <code>-1</code> is returned.
@@ -95,11 +99,10 @@ namespace Engine {
 			void addFrameListener(FrameListener *listener);
 			void removeFrameListener(FrameListener *listener);
 
-			lua_State *lua_state();
+			virtual KeyValueMapList maps() override;
 
-			Scripting::GlobalScope *globalScope();
-
-			virtual const char *key() const override;
+			using Singleton<Application>::getSingleton;
+			using Singleton<Application>::getSingletonPtr;
 
 		protected:
 			virtual void _clear();
@@ -114,9 +117,9 @@ namespace Engine {
 
 			bool mShutDown;
 
-			std::unique_ptr<Scripting::GlobalScope>      mGlobalScope;
-
 			SignalSlot::ConnectionManager mConnectionManager;	
+
+			BaseUniqueComponentCollector<Scripting::GlobalAPIComponentBase> mGlobalAPIs;
 
 			std::unique_ptr<Util::StandardLog> mLog;
 
@@ -128,7 +131,12 @@ namespace Engine {
 
 		};
 
-
 	}
+
+
+#ifdef _MSC_VER
+	template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scripting::GlobalAPIComponentBase>;
+#endif
+
 }
 

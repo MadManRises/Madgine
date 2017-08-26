@@ -92,10 +92,9 @@ std::tuple<ServerSceneManager*, std::string, std::string> ServerSceneManager::cr
 
 Entity::Entity *ServerSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, std::function<void(Entity::Entity&)> init)
 {
-	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
-		//it->init(args);
+	mEntities.emplace_tuple_back_init([&](Entity::ServerEntity &e) {
 		if (init)
-			init(*it);
+			init(e);
 	}, std::tuple_cat(createEntityData(name, meshName), std::make_tuple(behaviour)));
 	return &mEntities.back();
 }

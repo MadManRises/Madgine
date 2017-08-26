@@ -25,26 +25,19 @@ namespace Engine {
 
 		bool MadgineObject::init()
 		{
-			
 			if (mState != ObjectState::CONSTRUCTED) {
 				LOG_WARNING(std::string("Double initializeing Object: ") + mName);
 				return false;
 			}
-			if (ScopeBase::init()) {
-				mState = ObjectState::INITIALIZED;
-				mName = getIdentifier();
-				return true;
-			}
-			else {
-				return false;
-			}
+			mState = ObjectState::INITIALIZED;
+			mName = typeid(*this).name();
+			return true;
 		}
 
 		void MadgineObject::finalize()
 		{
-			ScopeBase::finalize();
 			if (mState == ObjectState::CONSTRUCTED) {
-				LOG_WARNING(std::string("Finalizing unitialized Object: ") + getIdentifier());
+				LOG_WARNING(std::string("Finalizing unitialized Object: ") + typeid(*this).name());
 			}else{
 				mState = ObjectState::CONSTRUCTED;
 			}			

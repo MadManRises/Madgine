@@ -2,6 +2,8 @@
 
 #include "app/application.h"
 
+#include "scripting/types/luastate.h"
+
 namespace Engine {
 namespace App {
 
@@ -13,7 +15,7 @@ namespace App {
  * It implements Singleton, so there can only be one Application at a time per process.
  *
  */
-class OGREMADGINE_EXPORT OgreApplication : public Application, public Singleton<OgreApplication>,
+class OGREMADGINE_EXPORT OgreApplication : public Scripting::LuaState, public Application, public Singleton<OgreApplication>,
 	public Ogre::FrameListener{
 public:
 	/**

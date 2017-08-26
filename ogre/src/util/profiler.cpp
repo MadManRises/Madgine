@@ -49,9 +49,9 @@ namespace Engine {
 			}			
 		}
 
-		std::tuple<std::string, Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> Profiler::createProcessData(const std::string & name)
+		std::tuple<Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> Profiler::createProcessData()
 		{
-			return std::make_tuple(name, topLevel(), [this]() {return mCurrentInterval; });
+			return std::make_tuple(topLevel(), [this]() {return mCurrentInterval; });
 		}
 		
 		ProfileWrapper::ProfileWrapper(const std::string &name)
@@ -97,7 +97,7 @@ namespace Engine {
 
 		ProcessStats &ProcessStats::addChild(const std::string & child)
 		{
-			return mChildren.try_emplace(child, this).first->second;
+			return mChildren.try_emplace(child, topLevel(), this).first->second;
 		}
 
 		bool ProcessStats::hasParent() const

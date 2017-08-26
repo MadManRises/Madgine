@@ -5,11 +5,11 @@
 namespace Engine {
 	namespace Serialize {
 
-		template <class NativeContainer, class Creator>
-		class UnsortedContainer : public Container<NativeContainer, Creator> {
+		template <class traits, class Creator>
+		class UnsortedContainer : public Container<traits, Creator> {
 
 		public:
-			typedef Container<NativeContainer, Creator> Base;
+			typedef Container<traits, Creator> Base;
 			using Base::Base;
 			using Base::operator=;
 
@@ -33,8 +33,8 @@ namespace Engine {
 				out << (int)std::distance(this->begin(), it);
 			}
 
-			iterator read_item(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
-				return this->read_item_where(read_iterator(in), topLevel, in);
+			iterator read_item(SerializeInStream &in) {
+				return this->read_item_where(read_iterator(in), in);
 			}
 
 			void write_item(SerializeOutStream &out, const const_iterator &it) const {

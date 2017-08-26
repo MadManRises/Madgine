@@ -40,7 +40,6 @@ OgreSceneManager::OgreSceneManager(Ogre::Root *root) :
 	mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
 
 	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
-
 }
 
 OgreSceneManager::~OgreSceneManager()
@@ -427,9 +426,9 @@ std::list<Light*> OgreSceneManager::lights()
 
 Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, std::function<void(Entity::Entity&)> init)
 {
-	mEntities.emplace_tuple_back_safe([&](const decltype(mEntities)::iterator &it) {
+	mEntities.emplace_tuple_back_init([&](Entity::OgreEntity &e) {
 		if (init)
-			init(*it);
+			init(e);
 	}, std::tuple_cat(createEntityData(name, meshName), std::make_tuple(behaviour)));
 	return &mEntities.back();
 }

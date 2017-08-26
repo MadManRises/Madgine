@@ -13,7 +13,8 @@ namespace Engine {
 			public Singleton<GUISystem>, 
 			public MadgineObject,
 			public Ogre::GeneralAllocatedObject,
-			public Ogre::WindowEventListener
+			public Ogre::WindowEventListener,
+			public Scripting::ScopeBase
 		{
 		public:
 			GUISystem();

@@ -12,8 +12,8 @@ public:
     EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable);
     virtual ~EntityComponentBase() = 0;
 
-	virtual bool init() override;
-
+	virtual void init();
+	virtual void onActivate() override;
 
     std::array<float, 2> getPosition2D();
 	void setPosition(const Vector3 &pos);

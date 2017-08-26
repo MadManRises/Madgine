@@ -7,10 +7,9 @@
 #include "apihelper.h"
 
 namespace Engine {
-
-	ValueType INTERFACES_EXPORT toValueType(Scripting::ScopeBase *ref, const Scripting::Mapper &mapper);
-
 	namespace Scripting {
+
+		ValueType INTERFACES_EXPORT toValueType(ScopeBase *ref, const Scripting::Mapper &mapper);
 
 
 		template <class T>

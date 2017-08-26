@@ -6,41 +6,56 @@
 namespace Engine {
 	namespace Serialize {
 
-		template <class Tuple, typename... _Ty>
-		struct ExtendedTupleType {
-			typedef decltype(std::tuple_cat(std::make_tuple(std::declval<_Ty>()...), std::declval<Tuple>())) type;
+		struct SerializableUnitTupleExtender {
+			template <class Tuple>
+			static auto extend(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) {
+				return std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple));
+			}
 		};
 
-		template <class Tuple>
-		class SerializableUnitExtendedTuple : 
-			public ExtendedTupleType<Tuple, TopLevelSerializableUnitBase*>::type{
-		public:
-			SerializableUnitExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
-				ExtendedTupleType<Tuple, TopLevelSerializableUnitBase*>::type(std::tuple_cat(std::make_tuple(topLevel), std::forward<Tuple>(tuple))) {}
+		struct NoTupleExtender {
+			template <class Tuple>
+			static auto extend(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) {
+				return std::forward<Tuple>(tuple);
+			}
 		};
 
-		template <class Tuple>
-		class NotExtendedTuple : public Tuple {
-		public:
-			NotExtendedTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) :
-				Tuple(std::forward<Tuple>(tuple)) {}
-		};
+		template <class T>
+		using TupleExtender = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value && !std::is_base_of<TopLevelSerializableUnitBase, T>::value, SerializableUnitTupleExtender, NoTupleExtender>::type;
 
 		template <class T, class Tuple>
-		using ExtendedTuple = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value && !std::is_base_of<TopLevelSerializableUnitBase, T>::value, SerializableUnitExtendedTuple<Tuple>, NotExtendedTuple<Tuple>>::type;
+		auto extendTuple(TopLevelSerializableUnitBase *topLevel, Tuple &&tuple) {
+			return TupleExtender<T>::extend(topLevel, std::forward<Tuple>(tuple));
+		}
 
-		
+		template <class T, class Tuple>
+		using ExtendedTuple = decltype(extendTuple<T>(std::declval<TopLevelSerializableUnitBase*>(), std::declval<Tuple>()));
+
+		template <class FirstCreator, class SecondCreator>
+		class PairCreator : private FirstCreator, private SecondCreator {
+		public:
+			template <class T>
+			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::template ArgsTuple<T>, typename SecondCreator::template ArgsTuple<T>>;
+		protected:
+			template <class P>
+			auto readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
+				auto &&first = FirstCreator::template readCreationData<typename P::first_type>(in, topLevel);
+				return std::make_tuple(std::piecewise_construct, first, SecondCreator::template readCreationData<typename P::second_type>(in, topLevel));
+			}
+
+		};
+
 		template <class... Args>
 		class DefaultCreator {
-		protected:
-
-			typedef std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...> ArgsTuple;
-
+		public:
 			template <class T>
-			ExtendedTuple<T, ArgsTuple> readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
-				ArgsTuple tuple;
+			using ArgsTuple = ExtendedTuple<T, std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>>;
+		protected:
+			template <class T>
+			ArgsTuple<T> readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
+				std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
-				return { topLevel, std::move(tuple) };
+				return extendTuple<T>(topLevel, std::move(tuple));
 			}
 		};
 
@@ -51,9 +66,10 @@ namespace Engine {
 				mCallback = f;
 			}
 
-		protected:
-			typedef R ArgsTuple;
+			template <class T>
+			using ArgsTuple = R;
 
+		protected:
 			template <class T>
 			R readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
@@ -77,9 +93,10 @@ namespace Engine {
 				assert(mParent);
 			}
 
-		protected:
-			typedef R ArgsTuple;
+			template <class T>
+			using ArgsTuple = R;
 
+		protected:
 			template <class _>
 			R readCreationData(SerializeInStream &in, TopLevelSerializableUnitBase *topLevel) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;

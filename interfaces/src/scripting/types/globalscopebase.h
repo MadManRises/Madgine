@@ -9,10 +9,7 @@ namespace Scripting {
 class INTERFACES_EXPORT GlobalScopeBase : public Singleton<GlobalScopeBase>, public ScopeBase {
 
 public:
-	GlobalScopeBase(const LuaTable &table, ScopeBase *topLevelApi = nullptr);
-	
-	virtual bool init() override;
-	virtual void finalize() override;
+	GlobalScopeBase(const LuaTable &table);
 
 	void executeString(const std::string &cmd);
 
@@ -21,15 +18,9 @@ public:
 	LuaTable createTable();
 	LuaTable table();
 
-	virtual KeyValueMapList maps() override;
-
-	const char *key() const override;
-
 private:
 	LuaTable mTable;
 	LuaTable mScopes;
-
-	ScopeBase *mTopLevelApi;
 
 };
 

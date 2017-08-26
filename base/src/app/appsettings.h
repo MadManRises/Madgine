@@ -12,20 +12,12 @@ struct AppSettings {
 	/**
 	 * Sets up default values for the settings.
 	 */
-	AppSettings(const Scripting::LuaTable &table) :
-		mTable(table)
-	{
-
-	}
-
-	AppSettings()		
+	AppSettings()
 	{
 
 	}
 
 	std::string mAppName;
-
-	Scripting::LuaTable mTable;
 
 };
 

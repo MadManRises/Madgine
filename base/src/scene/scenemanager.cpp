@@ -24,13 +24,14 @@ namespace Engine {
 			if (!MadgineObject::init())
 				return false;
 
-			if (!TopLevelSerializableUnitBase::init())
-				return false;
-
 			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
 				if (!component->init())
 					return false;
 			}
+
+			if (!TopLevelSerializableUnitBase::init())
+				return false;
+
 			return true;
 		}
 

@@ -7,71 +7,38 @@
 namespace Engine {
 	namespace Serialize {
 
-		template <class Key, class T>
-		class BaseContainer<std::map<Key, T>> : protected UnitHelper<std::pair<const Key, T>> {
-		public:
+		template <class K, class T>
+		struct container_traits<std::map, std::pair<const K, T>> {
 			static constexpr const bool sorted = true;
-		//protected:
-			typedef std::map<Key, typename UnitHelper<T>::Type> NativeContainerType;
-			typedef typename NativeContainerType::iterator iterator;
-			typedef typename NativeContainerType::const_iterator const_iterator;
-			typedef Key KeyType;
 
+			typedef std::map<K, T> container;
+			typedef typename container::iterator iterator;
+			typedef typename container::const_iterator const_iterator;
+			typedef K key_type;
+			typedef T value_type;
+			typedef std::pair<const K, T> type;
 
-			template <class K, class... _Ty>
-			iterator insert(const const_iterator &where, K &&key, _Ty&&... args) {
-				iterator it = mData.emplace_hint(where, std::piecewise_construct, std::forward_as_tuple(std::forward<K>(key)), std::forward_as_tuple(std::forward<_Ty>(args)...));
-				return it;
+			template <class... _Ty>
+			static iterator insert(container &c, const const_iterator &where, _Ty&&... args) {
+				return c.emplace_hint(where, std::forward<_Ty>(args)...);
 			}
 
-			iterator erase(const const_iterator &where) {
-				return mData.erase(where);
+			static void write_iterator(SerializeOutStream &out, const const_iterator &it) {
+				out << kvKey(*it);
 			}
 
-			const KeyType &key(const const_iterator &where) const {
-				return where->first;
-			}
-
-			bool contains(const Key &key) const {
-				return mData.find(key) != mData.end();
-			}
-
-
-			iterator find(const Key &key) {
-				return mData.find(key);
-			}
-
-			const_iterator find(const Key &key) const {
-				return mData.find(key);
-			}
-
-			NativeContainerType mData;
 		};
 
-
-		template <class Key, class T, class Creator>
-		class SerializableMapImpl : public SerializableContainer<std::map<Key, T>, Creator> {
-		public:
-			using SerializableContainer<std::map<Key, T>, Creator>::SerializableContainer;
-
-
-			T &operator[](const Key &key) {
-				return this->mData[key];
-			}
-		};
-
-		template <class Key, class T, class Creator, const _ContainerPolicy &Config>
-		class ObservableMapImpl : public ObservableContainer<SerializableMapImpl<Key, T, Creator>, Config> {
-		public:
-			using ObservableContainer<SerializableMapImpl<Key, T, Creator>, Config>::ObservableContainer;
-
-		};
 
 		template <class Key, class C>
 		class MapImpl : public C {
 		public:
 
 			using C::C;
+
+			decltype(auto) operator[](const Key &key) {
+				return this->mData[key];
+			}
 
 			/*T &operator[](const std::string &key) {
 				iterator it = mData.lower_bound(key);
@@ -95,21 +62,27 @@ namespace Engine {
 					return{ it, false };
 				}
 				else {
-					return{ this->insert(it, key, std::forward<_Ty>(args)...), true };
+					return{ this->insert(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...)), true };
 				}
-			}
-
-			size_t size() const {
-				return this->mData.size();
 			}
 
 		};
 
-		template <class Key, class T, class Creator = DefaultCreator<Key>>
-		using SerializableMap = MapImpl<Key, SerializableMapImpl<Key, T, Creator>>;
 
-		template <class Key, class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<Key>>
-		using ObservableMap = MapImpl<Key, ObservableMapImpl<Key, T, Creator, Config>>;
+		template <class Key, class C>
+		class ObservableMapImpl : public MapImpl<Key, C> {
+		public:
+			using MapImpl<Key, C>::MapImpl;
+
+		};
+
+		template <class Key, class T, class Creator = DefaultCreator<>, class KeyCreator = DefaultCreator<Key>>
+		using SerializableMap = MapImpl<Key, SerializableContainer<container_traits<std::map, typename UnitHelper<std::pair<const Key, T>>::Type>, PairCreator<KeyCreator, Creator>>>;
+
+		template <class Key, class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<>, class KeyCreator = DefaultCreator<Key>>
+		using ObservableMap = ObservableMapImpl<Key, ObservableContainer<container_traits<std::map, typename UnitHelper<std::pair<const Key, T>>::Type>, PairCreator<KeyCreator, Creator>, Config>>;
+
+
 
 
 	}

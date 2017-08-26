@@ -20,8 +20,8 @@ namespace Engine {
 				mAccumulatedDuration.setCondition(condition);
 			}
 
-			ProcessStats(ProcessStats *parent) :
-				SerializableUnit(parent->topLevel()),
+			ProcessStats(Serialize::TopLevelSerializableUnitBase *topLevel, ProcessStats *parent) :
+				SerializableUnit(topLevel),
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
@@ -32,7 +32,7 @@ namespace Engine {
 			}
 
 			ProcessStats(const ProcessStats &other) :
-				ProcessStats(other.mParent)
+				ProcessStats(other.topLevel(), other.mParent)
 			{}
 
 			size_t averageDuration() const;
@@ -54,7 +54,7 @@ namespace Engine {
 			size_t mRecordIndex;
 			std::array<size_t, 20> mBuffer;
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::DefaultCreator<std::string, ProcessStats*>> mChildren;
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::DefaultCreator<ProcessStats*>> mChildren;
 
 			ProcessStats *mParent;
 
@@ -64,6 +64,7 @@ namespace Engine {
 		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
 		public:
 			Profiler(Serialize::TopLevelSerializableUnitBase *topLevel);
+			Profiler(const Profiler &) = delete;
 
 			void startProfiling(const std::string &name);
 			void stopProfiling();
@@ -74,7 +75,7 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			std::tuple<std::string, Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> createProcessData(const std::string &name);
+			std::tuple<Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> createProcessData();
 
 			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Profiler::createProcessData), &Profiler::createProcessData>> mProcesses;
 			

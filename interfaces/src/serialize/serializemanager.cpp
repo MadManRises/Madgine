@@ -20,6 +20,7 @@ namespace Engine {
 		SerializeManager::SerializeManager(const std::string &name) :
 			mReceivingMasterState(false),			
 			mSlaveStream(0),
+			mSlaveStreamInvalid(false),
 			mName(name)
 		{
 		}
@@ -29,6 +30,7 @@ namespace Engine {
 			mReceivingMasterState(other.mReceivingMasterState),
 			mProcess(std::forward<Engine::Util::Process>(other.mProcess)),
 			mSlaveStream(0),
+			mSlaveStreamInvalid(false),
 			mFilters(std::forward<std::list<std::function<bool(const SerializableUnitBase *,ParticipantId)>>>(other.mFilters)),
 			mTopLevelUnits(std::forward<std::set<TopLevelSerializableUnitBase*>>(other.mTopLevelUnits)),
 			mName(std::forward<std::string>(other.mName))
@@ -178,7 +180,7 @@ namespace Engine {
 				unit->initSlaveId();
 			}
 
-			if (sendStateFlag){				
+			if (sendStateFlag && unit->isActive()) {
 				for (BufferedInOutStream *stream : mMasterStreams) {
 					this->sendState(*stream, unit);
 				}
@@ -252,20 +254,21 @@ namespace Engine {
 
 			StreamError state = NO_ERROR;
 
-			if (receiveState) {
+			auto it = mTopLevelUnits.begin();
 
-				auto it = mTopLevelUnits.begin();
-
-				for (; it != mTopLevelUnits.end(); ++it) {
-					if (!(*it)->updateManagerType(this, false)) {
-						state = UNKNOWN_ERROR;
-						break;
-					}
+			for (; it != mTopLevelUnits.end(); ++it) {
+				if (!(*it)->updateManagerType(this, false)) {
+					state = UNKNOWN_ERROR;
+					break;
 				}
+			}
 
-				mSlaveStream = stream;
+			mSlaveStreamInvalid = true;
+			mSlaveStream = stream;
 
-				if (state == NO_ERROR) {					
+
+			if (receiveState) {
+				if (state == NO_ERROR) {
 					for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
 						unit->initSlaveId();
 					}
@@ -280,7 +283,7 @@ namespace Engine {
 						if (!receiveMessages(stream)) {
 							state = stream->error();
 							mReceivingMasterState = false;
-						}						
+						}
 					}
 					if (state != NO_ERROR) {
 						while (!mSlaveMappings.empty()) {
@@ -288,14 +291,16 @@ namespace Engine {
 						}
 					}
 				}
-
-				if (state != NO_ERROR) {
-					for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
-						assert((*it2)->updateManagerType(this, true));
-					}
-					mSlaveStream = nullptr;
-				}
 			}
+
+			if (state != NO_ERROR) {
+				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
+					assert((*it2)->updateManagerType(this, true));
+				}
+				mSlaveStream = nullptr;
+			}
+
+			mSlaveStreamInvalid = false;
 
 			return state;
 		}
@@ -343,7 +348,7 @@ namespace Engine {
 
 		bool SerializeManager::filter(const SerializableUnitBase * unit, ParticipantId id)
 		{
-			for (auto f : mFilters) {
+			for (auto &f : mFilters) {
 				if (!f(unit, id)){
 					return false;
 				}
@@ -359,7 +364,7 @@ namespace Engine {
 
 		void SerializeManager::receiveMessages()
 		{
-			if (mSlaveStream) {
+			if (mSlaveStream && !mSlaveStreamInvalid) {
 				if (!receiveMessages(mSlaveStream)) {
 					removeSlaveStream();
 				}
@@ -378,7 +383,7 @@ namespace Engine {
 
 		void SerializeManager::sendMessages()
 		{
-			if (mSlaveStream) {
+			if (mSlaveStream && !mSlaveStreamInvalid) {
 				if (mSlaveStream->sendMessages() == -1) {
 					removeSlaveStream();
 				}

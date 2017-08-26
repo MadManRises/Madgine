@@ -62,7 +62,6 @@ add_subdirectory(base)
 if (BUILD_OGRE)
 	add_subdirectory(ogre)
 endif (BUILD_OGRE)
-#add_subdirectory(unity)
 add_subdirectory(server)
 
 

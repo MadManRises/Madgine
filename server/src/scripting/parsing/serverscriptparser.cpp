@@ -2,11 +2,14 @@
 
 #include "serverscriptparser.h"
 
+#include "scripting/types/luastate.h"
+
 namespace Engine {
 	namespace Scripting {
 		namespace Parsing {
 
-			ServerScriptParser::ServerScriptParser(const std::string & rootFolder) :
+			ServerScriptParser::ServerScriptParser(LuaState *state, const std::string & rootFolder) :
+				ScriptParser(state),
 				mRootFolder(rootFolder)
 			{
 
@@ -18,7 +21,7 @@ namespace Engine {
 					}
 				}
 
-				makeFinalized();
+				state->setFinalized();
 
 			}
 

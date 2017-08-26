@@ -3,13 +3,14 @@
 #include "util/serverlog.h"
 #include "scripting/parsing/serverscriptparser.h"
 #include "scripting/types/globalscopebase.h"
+#include "scripting/types/luastate.h"
 
 #include "serverappinstance.h"
 
 namespace Engine {
 	namespace Server {
 
-		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::Scope<ServerBase, MadgineObject> {
+		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::LuaState, public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public MadgineObject {
 		public:
 			ServerBase(const std::string &name, const std::string &scriptsFolder);
 
@@ -25,8 +26,6 @@ namespace Engine {
 			void addFrameListener(App::FrameListener *listener);
 			void removeFrameListener(App::FrameListener *listener);
 
-			Scripting::GlobalScopeBase *globalScope();
-
 		protected:
 			virtual bool frame() = 0;
 			virtual void start() = 0;
@@ -36,7 +35,7 @@ namespace Engine {
 
 			template <class T>
 			void spawnInstance(T &&init) {
-				mInstances.emplace_back(std::forward<T>(init), mScriptParser.createThread());
+				mInstances.emplace_back(std::forward<T>(init), createThread());
 			}
 
 			bool sendFrameStarted();
@@ -50,7 +49,6 @@ namespace Engine {
 			Util::ServerLog mLog;
 			std::string mName;
 			Scripting::Parsing::ServerScriptParser mScriptParser;
-			Scripting::GlobalScopeBase mGlobalScope;
 
 			bool mRunning;
 

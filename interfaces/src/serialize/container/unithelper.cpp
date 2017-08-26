@@ -5,7 +5,7 @@
 namespace Engine {
 	namespace Serialize {
 
-		template class UnitHelper<ValueType, false>;
+		template struct UnitHelper<ValueType, false>;
 
 	}
 }

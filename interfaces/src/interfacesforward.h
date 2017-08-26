@@ -60,7 +60,7 @@ namespace Engine {
 		class ScopeBase;
 		class GlobalScopeBase;
 
-
+		class LuaState;
 		class LuaTable;
 
 		struct Mapper;

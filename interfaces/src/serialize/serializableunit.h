@@ -30,11 +30,19 @@ public:
 
 	size_t slaveId();
 	size_t masterId();	
+
+
+	virtual void onActivate();
+
+	bool isActive() const;
+
+protected:
+	void activate();
+	void deactivate();
+
 	
 private:
-	size_t setInitialising();
-	void resetInitialising(size_t id);
-	bool isInitialising();
+
 	std::list<BufferedOutStream *> getMasterMessageTargets(bool isActionconst, const std::list<ParticipantId> &targets = {});
 	BufferedOutStream *getSlaveMessageTarget();	
 
@@ -54,7 +62,11 @@ private:
 	friend class TopLevelSerializableUnitBase;
 	template <class T, bool b>
 	friend struct UnitHelper;
-
+	template <class T>
+	friend class SerializedUnit;
+	/*template <template <class...> class C, class Creator, class T>
+	friend class SerializableContainer;
+	*/
 
 private:
 	std::vector<Observable*> mObservedValues;
@@ -65,6 +77,7 @@ private:
 	size_t mSlaveId;
 	std::pair<size_t, SerializableUnitMap*> mMasterId;
 
+	bool mActive;
 
 	////Stack
 
@@ -91,11 +104,11 @@ private:
 	};
 };
 
-template <class T>
-class SerializableUnit : public SerializableUnitBase {
-	using SerializableUnitBase::SerializableUnitBase;
+template <class T, class Base = SerializableUnitBase>
+class SerializableUnit : public Base {
+	using Base::Base;
 
-	virtual size_t getSize() const override final {
+	virtual size_t getSize() const override {
 		return sizeof(T);
 	}
 };

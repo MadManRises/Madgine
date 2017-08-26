@@ -15,8 +15,8 @@ namespace Engine {
 			StreamDebugging StreamDebugging::sInstance;
 
 			StreamLog::StreamLog(Stream * stream) :
-				mReads(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log"),
-				mWrites(std::string("stream-logging/") + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log")
+				mReads(StreamDebugging::getLoggingPath() + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "r.log"),
+				mWrites(StreamDebugging::getLoggingPath() + stream->manager().name() + "_" + (stream->isMaster() ? "m" : "s") + "_" + std::to_string(stream->id()) + "w.log")
 			{		
 				if (stream->manager().name().empty())
 					throw 0;
@@ -35,42 +35,40 @@ namespace Engine {
 			}
 
 			void StreamLog::logBeginSendMessage(const MessageHeader &header, const std::string &object) {
-				if (StreamDebugging::isLoggingEnabled()) {
-					mWrites << "// Begin Message of Type ";
-					switch (header.mType) {
-					case ACTION:
-						mWrites << "ACTION";
-						break;
-					case REQUEST:
-						mWrites << "REQUEST";
-						break;
-					case STATE:
-						mWrites << "STATE";
-						break;
-					}
-					mWrites << " to " << object << "(" << header.mObject << ")" << std::endl;
-				}
+				logBeginMessage(header, object, mWrites);
 			}
 
 			void StreamLog::logBeginReadMessage(const MessageHeader &header, const std::string &object) {
+				logBeginMessage(header, object, mReads);
+			}
+
+			void StreamLog::logBeginMessage(const MessageHeader & header, const std::string & object, std::ofstream & stream)
+			{
 				if (StreamDebugging::isLoggingEnabled()) {
-					mReads << "// Begin Message of Type ";
-					switch (header.mType) {
-					case ACTION:
-						mReads << "ACTION";
-						break;
-					case REQUEST:
-						mReads << "REQUEST";
-						break;
-					case STATE:
-						mReads << "STATE";
-						break;
+					if (header.mObject != SERIALIZE_MANAGER) {
+						stream << "// Begin Message of Type ";
+						switch (header.mType) {
+						case ACTION:
+							stream << "ACTION";
+							break;
+						case REQUEST:
+							stream << "REQUEST";
+							break;
+						case STATE:
+							stream << "STATE";
+							break;
+						}
+						stream << " to " << object << "(" << header.mObject << ")" << std::endl;
 					}
-					mReads << " to " << object << "(" << header.mObject << ")" << std::endl;
+					else {
+						stream << "// Begin Command of Type " << header.mCmd << " to Manager (" << object << ")" << std::endl;
+					}
 				}
 			}
 
-			StreamDebugging::StreamDebugging() {
+			StreamDebugging::StreamDebugging() :
+				mPath("stream-logging/")
+			{
 			}
 
 			void StreamDebugging::setLoggingEnabled(bool b)
@@ -78,13 +76,13 @@ namespace Engine {
 				if (sInstance.mLoggingEnabled != b) {
 					sInstance.mLoggingEnabled = b;
 					if (b) {
-						if (std::experimental::filesystem::exists("stream-logging")) {
-							for (std::experimental::filesystem::directory_iterator end, it("stream-logging"); it != end; ++it) {
+						if (std::experimental::filesystem::exists(sInstance.mPath)) {
+							for (std::experimental::filesystem::directory_iterator end, it(sInstance.mPath); it != end; ++it) {
 								std::experimental::filesystem::remove_all(it->path());
 							}
 						}
 						else {
-							std::experimental::filesystem::create_directory("stream-logging");
+							std::experimental::filesystem::create_directory(sInstance.mPath);
 						}
 					}
 				}
@@ -94,6 +92,18 @@ namespace Engine {
 			{
 				return sInstance.mLoggingEnabled;
 			}
+
+			void StreamDebugging::setLoggingPath(const std::string & path)
+			{
+				assert(!sInstance.mLoggingEnabled);
+				sInstance.mPath = path;
+			}
+
+			const std::string &StreamDebugging::getLoggingPath() 
+			{
+				return sInstance.mPath;
+			}
+
 		}
 	}
 }

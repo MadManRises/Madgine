@@ -20,7 +20,8 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId) :
 	mTopLevel(topLevel),
-	mSlaveId(UNINITIALIZED)
+	mSlaveId(0),
+		mActive(false)
 	{
 		assert(mTopLevel);
 		if (masterId == 0) {
@@ -34,7 +35,8 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase & other) :
 		mTopLevel(topLevel),
-		mSlaveId(UNINITIALIZED)
+		mSlaveId(0),
+		mActive(false)
 	{
 		assert(mTopLevel);
 		mMasterId = SerializeManager::addMasterMapping(this);
@@ -43,7 +45,8 @@ namespace Serialize {
 
 	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase && other) :
 		mTopLevel(topLevel),
-		mSlaveId(UNINITIALIZED)
+		mSlaveId(0),
+		mActive(false)
 	{
 		assert(mTopLevel);
 		std::tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
@@ -125,7 +128,7 @@ void SerializableUnitBase::addSerializable(Serializable * val)
 std::list<BufferedOutStream*> SerializableUnitBase::getMasterMessageTargets(bool isAction, const std::list<ParticipantId> &targets)
 {
 	std::list<BufferedOutStream*> result;
-	if (mTopLevel && !isInitialising()) {
+	if (mTopLevel && mActive) {
 		result = mTopLevel->getMasterMessageTargets(this, isAction ? ACTION : STATE, targets);
 	}
 	else {
@@ -138,7 +141,7 @@ std::list<BufferedOutStream*> SerializableUnitBase::getMasterMessageTargets(bool
 BufferedOutStream * SerializableUnitBase::getSlaveMessageTarget()
 {
 	BufferedOutStream* result = nullptr;
-	if (mTopLevel) {
+	if (mTopLevel && mActive) {
 		result = mTopLevel->getSlaveMessageTarget(this);
 	}
 	return result;
@@ -156,11 +159,8 @@ TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 
 void SerializableUnitBase::clearSlaveId()
 {
-	//assert(mSlaveId != UNINITIALIZED);
 	if (mSlaveId != 0) {
-		if (mSlaveId != UNINITIALIZED) {
-			mTopLevel->getSlaveManager()->removeSlaveMapping(this);
-		}
+		mTopLevel->getSlaveManager()->removeSlaveMapping(this);
 		mSlaveId = 0;
 	}
 }
@@ -168,8 +168,6 @@ void SerializableUnitBase::clearSlaveId()
 void SerializableUnitBase::postConstruct()
 {
 	removeInstance();
-	if (isInitialising())
-		resetInitialising(0);
 }
 
 void SerializableUnitBase::insertInstance() {
@@ -222,26 +220,6 @@ size_t SerializableUnitBase::masterId()
 	return mMasterId.first;
 }
 
-
-size_t SerializableUnitBase::setInitialising()
-{
-	assert(mSlaveId != UNINITIALIZED);
-	size_t oldId = mSlaveId;
-	mSlaveId = UNINITIALIZED;
-	return oldId;
-}
-
-void SerializableUnitBase::resetInitialising(size_t id)
-{
-	assert(mSlaveId == UNINITIALIZED);
-	mSlaveId = id;
-}
-
-bool SerializableUnitBase::isInitialising()
-{
-	return mSlaveId == UNINITIALIZED;
-}
-
 void SerializableUnitBase::setSlaveId(size_t id)
 {
 	if (mSlaveId != id) {
@@ -258,6 +236,25 @@ void SerializableUnitBase::applySerializableMap(const std::map<size_t, Serializa
 	for (Serializable *ser : mStateValues) {
 		ser->applySerializableMap(map);
 	}
+}
+
+void SerializableUnitBase::onActivate() {
+
+}
+
+void SerializableUnitBase::activate()
+{
+	assert(!mActive);
+	for (Serializable *ser : mStateValues) {
+		ser->activate();
+	}
+	onActivate();
+	mActive = true;
+}
+
+bool SerializableUnitBase::isActive() const
+{
+	return mActive;
 }
 
 } // namespace Serialize

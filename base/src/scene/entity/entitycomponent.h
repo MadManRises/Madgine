@@ -9,7 +9,7 @@ namespace Scene {
 namespace Entity {
 
 	template <class T, class Base = EntityComponentBase>
-	class EntityComponent : public Scripting::Scope<T, Base> {
+	class EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>> {
 	public:
 		EntityComponent(Entity &entity, const Scripting::LuaTable &table) :
 			Scope(entity, table) {
@@ -32,10 +32,6 @@ private:
 
 	virtual void writeCreationData(Serialize::SerializeOutStream &out) const override {
 		out << sComponentName;
-	}
-
-	virtual size_t getSize() const override final {
-		return sizeof(T);
 	}
     
 	static const char * const sComponentName;

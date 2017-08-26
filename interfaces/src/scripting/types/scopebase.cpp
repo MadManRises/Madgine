@@ -13,39 +13,15 @@ namespace Engine {
 namespace Scripting {
 
 
-ScopeBase::ScopeBase() :
-	mGlobal(nullptr)
+ScopeBase::ScopeBase(const LuaTable &table) :
+	mTable(table ? table : GlobalScopeBase::getSingleton().createTable())
 {
-	
+	mTable.setLightUserdata("___scope___", this);
+	mTable.setMetatable("Interfaces.Scope");
 }
 
 ScopeBase::~ScopeBase()
 {
-}
-
-bool ScopeBase::init()
-{
-	return init({});
-}
-
-void ScopeBase::finalize() {
-	mTable.clear();
-}
-
-bool ScopeBase::init(const LuaTable &table)
-{
-	if (!mGlobal) {
-		mGlobal = GlobalScopeBase::getSingletonPtr();
-		if (!mGlobal)
-			return false;
-	}
-	if (mTable)
-		return false;
-	mTable = table ? table : mGlobal->createTable();
-	mTable.setLightUserdata("___scope___", this);
-	mTable.setMetatable("Interfaces.Scope");
-
-	return true;
 }
 
 void ScopeBase::push()
@@ -100,11 +76,6 @@ std::unique_ptr<KeyValueIterator> ScopeBase::iterator()
 KeyValueMapList ScopeBase::maps()
 {
 	return KeyValueMapList(this);
-}
-
-GlobalScopeBase * ScopeBase::globalScope()
-{
-	return mGlobal;
 }
 
 }

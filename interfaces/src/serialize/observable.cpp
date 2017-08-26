@@ -42,7 +42,7 @@ namespace Engine {
 
 			bool Observable::isMaster() const
 			{
-				return !mUnit->topLevel() || mUnit->topLevel()->isMaster();
+				return !mUnit->isActive() || mUnit->topLevel()->isMaster();
 			}
 
 			SerializableUnitBase *Observable::parent() {

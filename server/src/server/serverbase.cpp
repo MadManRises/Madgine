@@ -10,18 +10,17 @@ namespace Engine {
 	namespace Server {
 
 		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
+			Scope(env().createTable()),
 			mLog(name + "-Log"),
 			mName(name),
-			mScriptParser(scriptsFolder),
-			mGlobalScope(mScriptParser.createThread(), this),
+			mScriptParser(this, scriptsFolder),
 			mRunning(false)
 		{
 		}
+
 		int ServerBase::run()
 		{
 			Util::UtilMethods::setup(&mLog);
-
-			mGlobalScope.init();
 
 			init();
 
@@ -38,8 +37,6 @@ namespace Engine {
 			mRunning = false;
 
 			finalize();
-
-			mGlobalScope.finalize();
 
 			return 0;
 		}
@@ -107,11 +104,6 @@ namespace Engine {
 		KeyValueMapList ServerBase::maps()
 		{
 			return Scope::maps().merge(mInstances);
-		}
-
-		Scripting::GlobalScopeBase * ServerBase::globalScope()
-		{
-			return &mGlobalScope;
 		}
 
 	}

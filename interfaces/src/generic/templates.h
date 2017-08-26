@@ -4,6 +4,17 @@
 namespace Engine {
 
 	template <class...>
+	struct last;
+
+	template <class U, class V, class... T>
+	struct last<U, V, T...> : public last<V, T...> {};
+
+	template <class V>
+	struct last<V> {
+		typedef V type;
+	};
+
+	template <class...>
 	using void_t = void;
 
 	template<class...>
@@ -264,6 +275,21 @@ namespace Engine {
 
 	public:
 		static bool const constexpr value = decltype(Test<T>(0))::value;
+	};
+
+
+	template <class T>
+	class TupleConstructed : public T {
+	public:
+		template <class... Ty>
+		TupleConstructed(const std::tuple<Ty...> &tuple) :
+			TupleConstructed(std::make_index_sequence<sizeof...(Ty)>(), tuple) {}
+
+	private:
+		template <class Tuple, size_t... Is>
+		TupleConstructed(std::index_sequence<Is...>, const Tuple &tuple) :
+			T(std::get<Is>(tuple)...) {}
+
 	};
 
 }

@@ -81,6 +81,11 @@ namespace Engine {
 					return mCondition;
 				}
 
+				virtual void activate() override {
+					this->activateItem(mData);
+					//mData.activate();
+				}
+
 			protected:
 				void notify(const T &old) {
 					mNotifySignal.emit(mData, old);

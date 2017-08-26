@@ -7,15 +7,15 @@
 namespace Engine {
 
 
-		class MADGINE_BASE_EXPORT MadgineObject : public Scripting::ScopeBase {
+		class MADGINE_BASE_EXPORT MadgineObject {
 		protected:
 			MadgineObject();
 			virtual ~MadgineObject();
 
 		public:
 
-			virtual bool init() override;
-			virtual void finalize() override;
+			virtual bool init();
+			virtual void finalize();
 
 			ObjectState getState();
 

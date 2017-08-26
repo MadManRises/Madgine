@@ -17,12 +17,16 @@ namespace Engine {
 
 			virtual void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map);
 			virtual void writeCreationData(SerializeOutStream &out) const;
+			virtual void activate();
 
 			std::list<BufferedOutStream*> getMasterStateMessageTargets();
 
 			void sendState();
 
 			TopLevelSerializableUnitBase *topLevel() const;
+
+		protected:
+			SerializableUnitBase *unit() const;
 
 		private:
 			SerializableUnitBase *mUnit;

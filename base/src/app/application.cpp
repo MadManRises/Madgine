@@ -7,7 +7,7 @@
 
 #include "framelistener.h"
 
-#include "scripting/types/globalscope.h"
+#include "scripting/types/globalapicomponent.h"
 
 namespace Engine {	
 
@@ -15,9 +15,9 @@ namespace Engine {
 
 	namespace App {
 
-		Application::Application() :
+		Application::Application(const Scripting::LuaTable &table) :
+			Scope(table),
 			mShutDown(false),
-			mGlobalScope(nullptr),
 			mTimeBank(0.0f)
 		{
 
@@ -31,17 +31,26 @@ namespace Engine {
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-			mGlobalScope = std::make_unique<Scripting::GlobalScope>(settings.mTable, this);
 		}
 
 		bool Application::init()
-		{			
-			return mGlobalScope->init() && MadgineObject::init();
+		{
+			if(!MadgineObject::init())
+				return false;
+
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &api : mGlobalAPIs) {
+				if (!api->init())
+					return false;
+			}
+
+			return true;
 		}
 
 		void Application::finalize() {
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &api : mGlobalAPIs) {
+				api->finalize();
+			}
 			MadgineObject::finalize();
-			mGlobalScope->finalize();
 		}
 
 		void Application::shutdown()
@@ -82,7 +91,9 @@ namespace Engine {
 			{
 				//PROFILE("ScriptingManager")
 				try {
-					mGlobalScope->update();
+					for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &p : mGlobalAPIs) {
+						p->update();
+					}
 				}
 				catch (const std::exception &e) {
 					LOG_ERROR("Unhandled Exception during GlobalScope-update!");
@@ -146,23 +157,16 @@ namespace Engine {
 			return result;
 		}
 
-		Scripting::GlobalScope *Application::globalScope() {
-			return mGlobalScope.get();
+		KeyValueMapList Application::maps()
+		{
+			return Scope::maps().merge(mGlobalAPIs);
 		}
 
 		void Application::_clear()
 		{
-			mGlobalScope->clear();
-		}
-
-		lua_State * Application::lua_state()
-		{
-			return mGlobalScope->lua_state();
-		}
-
-		const char *Application::key() const
-		{
-			return "Application";
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &p : mGlobalAPIs) {
+				p->clear();
+			}
 		}
 
 	}

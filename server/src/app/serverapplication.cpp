@@ -7,7 +7,8 @@
 namespace Engine {
 	namespace App {
 
-		ServerApplication::ServerApplication() :
+		ServerApplication::ServerApplication(const Scripting::LuaTable &table) :
+			Application(table),
 			mSceneManager(nullptr)
 		{
 		}

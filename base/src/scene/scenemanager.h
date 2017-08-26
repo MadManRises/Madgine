@@ -13,7 +13,8 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT SceneManagerBase : public Singleton<SceneManagerBase>,
 			public Serialize::TopLevelSerializableUnit<SceneManagerBase>,
-			public Scripting::Scope<SceneManagerBase, MadgineObject>
+			public Scripting::Scope<SceneManagerBase>,
+			public MadgineObject
 		{
 		public:
 			SceneManagerBase();

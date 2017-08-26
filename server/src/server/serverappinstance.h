@@ -29,9 +29,9 @@ namespace Engine {
 			template <class T>
 			void run(T initCallback) 
 			{
-				App::ServerApplication app;
+				App::ServerApplication app(mTable);
 				mApplication = &app;
-				App::ServerAppSettings settings(mTable);
+				App::ServerAppSettings settings;
 				app.setup(settings);
 				if (app.init()) {
 					initCallback();

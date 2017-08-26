@@ -175,6 +175,7 @@ bool TopLevelSerializableUnitBase::updateManagerType(SerializeManager *mgr, bool
 bool TopLevelSerializableUnitBase::init()
 {
 	postConstruct();
+	activate();
 	return true;
 }
 

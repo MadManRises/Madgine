@@ -12,7 +12,8 @@ namespace Engine {
 	namespace UI {
 
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-			public Scripting::Scope<UIManager, MadgineObject>			
+			public Scripting::Scope<UIManager>,
+			public MadgineObject
 		{
 		public:
 			UIManager(GUI::GUISystem *gui);

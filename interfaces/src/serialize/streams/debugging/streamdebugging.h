@@ -12,6 +12,10 @@ namespace Engine {
 				void logWrite(const ValueType &v);
 				void logBeginSendMessage(const MessageHeader &header, const std::string &object);
 				void logBeginReadMessage(const MessageHeader &header, const std::string &object);
+
+			private:
+				void logBeginMessage(const MessageHeader &header, const std::string &object, std::ofstream &stream);
+
 			private:
 				std::ofstream mReads;
 				std::ofstream mWrites;
@@ -25,9 +29,13 @@ namespace Engine {
 				static void setLoggingEnabled(bool b);
 				static bool isLoggingEnabled();
 
+				static void setLoggingPath(const std::string &path);
+				static const std::string &getLoggingPath();
+
 			private:
 				static StreamDebugging sInstance;			
 				bool mLoggingEnabled;
+				std::string mPath;
 			};
 
 		}

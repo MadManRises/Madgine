@@ -17,7 +17,6 @@ namespace Engine {
 
 			enum ReservedIds {
 				NO_ID = 0,
-				UNINITIALIZED = 1,
 				SERIALIZE_MANAGER = 1,
 				BEGIN_USER_ID_SPACE,
 				RESERVED_ID_COUNT = 256
@@ -124,6 +123,8 @@ namespace Engine {
 				SignalSlot::Signal<> mSlaveStreamDisconnected;
 
 				std::string mName;
+
+				bool mSlaveStreamInvalid;
 
 			};
 

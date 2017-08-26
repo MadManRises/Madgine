@@ -54,9 +54,16 @@ namespace Engine {
 				++mIterator;
 			}
 
+			void operator--() {
+				--mIterator;
+			}
+
+			operator const It &() const {
+				return mIterator;
+			}
+
 		private:
 			friend class SetConstIterator<T>;
-			friend class BaseContainer<std::set<T>>;
 
 			It mIterator;
 		};
@@ -88,113 +95,43 @@ namespace Engine {
 				return mIterator == other.mIterator;
 			}
 
-
 			void operator++() {
 				++mIterator;
 			}
 
+			void operator--() {
+				--mIterator;
+			}
+
+			operator const It &() const {
+				return mIterator;
+			}
+
 		private:
-			friend class BaseContainer<std::set<T>>;
 
 			It mIterator;
 		};
 
 
 		template <class T>
-		struct FixString {
-			typedef T type;
-		};
-
-		template <>
-		struct FixString<const char*> {
-			typedef std::string type;
-		};
-
-		template <class T>
-		class BaseContainer<std::set<T>> : protected UnitHelper<T> {
-		public:
-
-
+		struct container_traits<std::set, T> {
 			static constexpr const bool sorted = true;
-			//protected:
-			typedef typename UnitHelper<T>::Type Type;
-			typedef std::set<Type, KeyCompare<Type>> NativeContainerType;
-			typedef SetIterator<Type> iterator;
-			typedef SetConstIterator<Type> const_iterator;
-			typedef typename FixString<typename std::remove_const<typename std::remove_reference<decltype(kvKey(std::declval<T>()))>::type>::type>::type KeyType;
 
-
-			BaseContainer()
-			{
-			}
-
-			BaseContainer(const NativeContainerType &c) :
-				mData(c)
-			{
-			}
+			typedef std::set<T, KeyCompare<T>> container;
+			typedef SetIterator<T> iterator;
+			typedef SetConstIterator<T> const_iterator;
+			typedef typename KeyType<T>::type key_type;
+			typedef typename container::value_type value_type;
+			typedef T type;
 
 			template <class... _Ty>
-			iterator insert(const const_iterator &where, _Ty&&... args) {
-				iterator it = mData.emplace_hint(where.mIterator, std::forward<_Ty>(args)...);
-				return it;
+			static iterator insert(container &c, const const_iterator &where, _Ty&&... args) {
+				return c.emplace(std::forward<_Ty>(args)...).first;
 			}
 
-			iterator erase(const const_iterator &it) {
-				return mData.erase(it.mIterator);
+			static void write_iterator(SerializeOutStream &out, const const_iterator &it) {
+
 			}
-
-			decltype(auto) key(const const_iterator &where) const {
-				return kvKey(*where);
-			}
-
-
-			iterator find(const Type &item) {
-				return std::find(mData.begin(), mData.end(), item);
-			}
-
-			const_iterator find(const Type &item) const {
-				return std::find(mData.begin(), mData.end(), item);
-			}
-
-			bool contains(const Type &item) const {
-				return find(item) != mData.end();
-			}
-
-			iterator find(const KeyType &key) {
-				for (iterator it = mData.begin(); it != mData.end(); ++it) {
-					if (kvKey(*it) == key)
-						return it; ////TODO  O(log(n))
-				}
-				return mData.end();
-			}
-
-			bool contains(const KeyType &key) {
-				return find(key) != mData.end();
-			}
-
-
-		protected:
-			NativeContainerType mData;
-
-		};
-
-
-		template <class T, class Creator>
-		class SerializableSetImpl : public SerializableContainer<std::set<T>, Creator> {
-		public:
-			using SerializableContainer<std::set<T>, Creator>::SerializableContainer;
-
-			typedef typename SerializableContainer<std::set<T>, Creator>::iterator iterator;
-			typedef typename SerializableContainer<std::set<T>, Creator>::const_iterator const_iterator;
-		};
-
-		template <class T, class Creator, const _ContainerPolicy &Config>
-		class ObservableSetImpl : public ObservableContainer<SerializableSetImpl<T, Creator>, Config> {
-		public:
-			using ObservableContainer<SerializableSetImpl<T, Creator>, Config>::ObservableContainer;
-
-			typedef typename ObservableContainer<SerializableSetImpl<T, Creator>, Config>::iterator iterator;
-			typedef typename ObservableContainer<SerializableSetImpl<T, Creator>, Config>::const_iterator const_iterator;
 
 		};
 
@@ -203,7 +140,6 @@ namespace Engine {
 		public:
 
 			typedef typename C::Type Type;
-			typedef typename C::KeyType KeyType;
 
 			typedef typename C::iterator iterator;
 			typedef typename C::const_iterator const_iterator;
@@ -218,12 +154,14 @@ namespace Engine {
 
 		};
 
+		template <class C>
+		using ObservableSetImpl = SetImpl<C>;
 
 		template <class T, class Creator = DefaultCreator<>>
-		using SerializableSet = SetImpl<SerializableSetImpl<T, Creator>>;
+		using SerializableSet = SetImpl<SerializableContainer<container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
 
 		template <class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<>>
-		using ObservableSet = SetImpl<ObservableSetImpl<T, Creator, Config>>;
+		using ObservableSet = ObservableSetImpl<ObservableContainer<container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
 
 
 

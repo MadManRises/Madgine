@@ -27,7 +27,7 @@ namespace Engine {
 				return v;
 			}
 
-			static decltype(auto) key(const T &v) {
+			static auto key(const T &v) -> decltype(v.key()) {
 				return v.key();
 			}
 		};
@@ -118,18 +118,45 @@ namespace Engine {
 			return KeyValue<const T>::key(v);
 		}
 
-		template <class T>
+		template <class T, class K>
 		struct Finder {
-			static auto find(T &c, const std::string &key) {
+			static auto find(T &c, const K &key) {
 				return std::find_if(c.begin(), c.end(), [&](decltype(*c.begin()) v) {return kvKey(v) == key; });
 			}
 		};
 
-		template <class V>
-		struct Finder<std::map<std::string, V>> {
-			static auto find(const std::map<std::string, V> &c, const std::string &key) {
+		template <class V, class K, class _K>
+		struct Finder<std::map<K, V>, _K> {
+			static auto find(std::map<K, V> &c, const _K &key) {
 				return c.find(key);
 			}
+		};
+
+		template <class V, class K, class _K>
+		struct Finder<const std::map<K, V>, _K> {
+			static auto find(const std::map<K, V> &c, const _K &key) {
+				return c.find(key);
+			}
+		};
+
+		template <class T, class K>
+		decltype(auto) kvFind(T &c, const K &key) {
+			return Finder<T, K>::find(c, key);
+		}
+
+		template <class T>
+		struct FixString {
+			typedef T type;
+		};
+
+		template <>
+		struct FixString<const char*> {
+			typedef std::string type;
+		};
+
+		template <class T>
+		struct KeyType {
+			typedef typename FixString<typename std::remove_const<typename std::remove_reference<decltype(kvKey(std::declval<T>()))>::type>::type>::type type;
 		};
 
 		template <class T, class _ = decltype(ValueType{ std::declval<T>() })>
@@ -232,7 +259,7 @@ namespace Engine {
 			}
 
 			virtual std::pair<bool, ValueType> get(const std::string &key) override {
-				auto it = Finder<T>::find(mMap, key);
+				auto it = Finder<T, std::string>::find(mMap, key);
 				if (it != mMap.end()) {
 					return { true, toValueType(mRef, kvValue(*it)) };
 				}
@@ -240,7 +267,7 @@ namespace Engine {
 			}
 
 			virtual bool contains(const std::string &key) override {
-				auto it = Finder<T>::find(mMap, key);
+				auto it = Finder<T, std::string>::find(mMap, key);
 				return it != mMap.end();
 			}
 

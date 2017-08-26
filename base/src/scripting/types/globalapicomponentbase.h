@@ -6,7 +6,7 @@
 namespace Engine {
 	namespace Scripting {
 
-		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject{
+		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject, public Scripting::ScopeBase{
 
 		public:
 			virtual bool init() override;

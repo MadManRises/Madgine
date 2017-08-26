@@ -9,7 +9,7 @@ namespace Parsing {
 class OgreScriptParser : public Ogre::ScriptLoader, public Ogre::GeneralAllocatedObject,
     public ScriptParser {
 public:
-    OgreScriptParser();
+    OgreScriptParser(LuaState *state);
 	OgreScriptParser(const OgreScriptParser &) = delete;
     virtual ~OgreScriptParser();
 
@@ -19,6 +19,8 @@ public:
     virtual float getLoadingOrder() const override;
 
     virtual void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &group) override;
+
+	void setFinalized();
 
 protected:
 	

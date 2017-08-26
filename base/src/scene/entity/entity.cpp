@@ -6,11 +6,11 @@
 
 #include "scene/scenemanager.h"
 
-#include "scripting/types/globalscope.h"
+#include "scripting/types/globalscopebase.h"
 
 namespace Engine {
 
-	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
+	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
 
 
 namespace Scene {
@@ -19,22 +19,18 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	SerializableUnitBase(other.topLevel()),
+	SerializableUnitBase(other.topLevel(), other),
 	mName(other.mName),
 	mSceneManager(other.mSceneManager)
 {
-
-	//TODO copy Components
-
 }
 
 Entity::Entity(Entity &&other) :
-	SerializableUnitBase(other.topLevel()),
+	SerializableUnitBase(other.topLevel(), std::forward<Entity>(other)),
 	mName(other.mName),	
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
 	mSceneManager(other.mSceneManager)
 {
-
 }
 
 Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name) :
@@ -42,32 +38,30 @@ Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name) :
 	mName(name),
 	mSceneManager(sceneMgr)
 {
-	
 }
 
 Entity::~Entity()
 {	
-
 	mComponents.clear();
-
 }
 
 bool Entity::init(const std::string &behaviour)
 {
-	if (!Scope::init())
-		return false;
 
 	if (!behaviour.empty()) {
-		ValueType table = Scripting::GlobalScope::getSingleton().table().getValue(behaviour);
-		if (!table.is<Scripting::LuaTable>())
-			throw 0;
-		for (const std::pair<std::string, ValueType> &p : table.as<Scripting::LuaTable>()) {
-			if (p.second.is<Scripting::LuaTable>()) {
-				addComponent(p.first, p.second.as<Scripting::LuaTable>());
+		ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
+		if (table.is<Scripting::LuaTable>()) {
+			for (const std::pair<std::string, ValueType> &p : table.as<Scripting::LuaTable>()) {
+				if (p.second.is<Scripting::LuaTable>()) {
+					addComponent(p.first, p.second.as<Scripting::LuaTable>());
+				}
+				else {
+					LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
+				}
 			}
-			else {
-				LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
-			}
+		}
+		else {
+			LOG_ERROR(message("Behaviour \"", "\" not found!")(behaviour));
 		}
 	}
 

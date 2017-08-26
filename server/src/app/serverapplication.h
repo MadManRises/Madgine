@@ -8,7 +8,7 @@ namespace Engine {
 
 		class MADGINE_SERVER_EXPORT ServerApplication : public Application {
 		public:
-			ServerApplication();
+			ServerApplication(const Scripting::LuaTable &table = {});
 			virtual ~ServerApplication();
 
 			void setup(const ServerAppSettings &settings);

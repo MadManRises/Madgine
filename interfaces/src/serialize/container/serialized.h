@@ -2,6 +2,7 @@
 
 #include "../serializable.h"
 #include "unithelper.h"
+#include "creationhelper.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -21,6 +22,10 @@ namespace Engine {
 					mData = std::forward<Ty>(v);
 					notify();
 				}
+			}
+
+			T &operator*() {
+				return mData;
 			}
 
 			T *operator->() {
@@ -59,14 +64,17 @@ namespace Engine {
 			SignalSlot::Signal<const T &> mNotifySignal;
 		};
 
+
 		template <class T>
 		class SerializedUnit : UnitHelper<T>, public Serializable {
 		public:
 			template <class... _Ty>
 			SerializedUnit(_Ty&&... args) :
-				mData(topLevel(), std::forward<_Ty>(args)...)
+				mData(extendTuple<T>(topLevel(), std::forward_as_tuple(args...)))
 			{
-				this->postConstruct(mData);
+				mData.postConstruct();
+				if (!unit() || unit()->isActive())
+					mData.activate();
 			}
 
 			/*template <class Ty>
@@ -99,19 +107,13 @@ namespace Engine {
 				this->write_state(out, mData);
 			}
 
-			/*template <class Ty>
-			void setCallback(Ty &slot) {
-			mNotifySignal.connect(slot);
-			}*/
-
-		protected:
-			/*void notify() {
-			mNotifySignal.emit(mData);
-			}*/
+			virtual void activate() override {
+				mData.activate();
+			}
 
 		private:
-			T mData;
-			//SignalSlot::Signal<const T &> mNotifySignal;
+			TupleConstructed<T> mData;
+
 		};
 
 		template <class T>
