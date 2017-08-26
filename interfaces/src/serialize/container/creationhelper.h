@@ -93,7 +93,7 @@ namespace Engine {
 				assert(mParent);
 			}
 
-			template <class T>
+			template <class _>
 			using ArgsTuple = R;
 
 		protected:
