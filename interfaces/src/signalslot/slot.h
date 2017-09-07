@@ -19,11 +19,11 @@ namespace Engine {
 
 			void operator()(_Ty... args) const {
 				assert(std::this_thread::get_id() == mThread);
-				(mItem->*f)(args...);
+				(mItem->*f)(std::forward<_Ty>(args)...);
 			}
 
 			void queue(_Ty... args) const {
-				mManager->queue(std::bind(f, mItem, args...));
+				mManager->queue(std::bind(f, mItem, std::forward<_Ty>(args)...));
 			}
 
 			void disconnectAll() {

@@ -50,6 +50,11 @@ namespace Engine {
 			return mIterators.at(mIndex)->value();
 		}
 
+		KeyValueValueFlags Engine::KeyValueMapListIterator::flags()
+		{
+			return mIterators.at(mIndex)->flags();
+		}
+
 		void KeyValueMapListIterator::operator++()
 		{
 			++(*mIterators.at(mIndex));

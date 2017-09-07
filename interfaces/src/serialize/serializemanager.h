@@ -78,6 +78,8 @@ namespace Engine {
 
 				const std::string &name() const;
 
+				static constexpr ParticipantId sLocalMasterId = 1;
+
 			protected:
 
 
@@ -115,7 +117,6 @@ namespace Engine {
 
 				std::list<std::function<bool(const SerializableUnitBase *, ParticipantId)>> mFilters;
 
-				static constexpr ParticipantId sLocalMasterId = 1;
 				static ParticipantId sRunningStreamId;
 
 				std::set<TopLevelSerializableUnitBase*> mTopLevelUnits;

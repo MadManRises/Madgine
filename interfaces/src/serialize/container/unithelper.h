@@ -44,7 +44,7 @@ namespace Engine {
 		struct UnitHelper : public UnitHelperBase<T> {
 
 			typedef T Type;
-			
+
 			static void read_state(SerializeInStream &in, T &item) {
 				in >> item;
 			}
@@ -260,7 +260,80 @@ namespace Engine {
 
 		};
 
+		template <class Type, size_t... Is>
+		struct TupleUnitHelper : public UnitHelperBase<Type> {
 
+			typedef Type Type;
+			using unpacker = bool[];
+
+			static void read_state(SerializeInStream &in, Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::read_state(in, std::get<Is>(item)), true)...
+			};
+				/*UnitHelper<U>::read_state(in, item.first);
+				UnitHelper<V>::read_state(in, item.second);*/
+			}
+
+			static void read_id(SerializeInStream &in, Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::read_id(in, std::get<Is>(item)), true)...
+			};
+			}
+
+			static void write_id(SerializeOutStream &out, const Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::write_id(out, std::get<Is>(item)), true)...
+			};
+			}
+
+			static void write_creation(SerializeOutStream &out, const Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::write_creation(out, std::get<Is>(item)), true)...
+			};
+			}
+
+			static void write_state(SerializeOutStream &out, const Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::write_state(out, std::get<Is>(item)), true)...
+			};
+			}
+
+			static bool filter(SerializeOutStream &out, const Type &item) {
+				unpacker pack = {
+					UnitHelper<typename std::tuple_element<Is, Type>::type>::filter(out, std::get<Is>(item))...
+				};
+				for (int i = 0; i < sizeof...(Is); ++i) {
+					if (!pack[i])
+						return false;
+				}
+				return true;
+			}
+
+			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::applyMap(map, std::get<Is>(item)), true)...
+			};
+			}
+
+			static void postConstruct(Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::postConstruct(std::get<Is>(item)), true)...
+			};
+			}
+
+			static void activateItem(Type &item) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::activateItem(std::get<Is>(item)), true)...
+			};
+			}
+
+		};
+
+		template <class... Ty, size_t... Is>
+		TupleUnitHelper<std::tuple<typename UnitHelper<Ty>::Type...>, Is...> tupleUnitHelperDeducer(std::index_sequence<Is...>);
+
+		template <class... Ty>
+		struct UnitHelper<std::tuple<Ty...>, false> : public decltype(tupleUnitHelperDeducer<Ty...>(std::make_index_sequence<sizeof...(Ty)>())) {};
 
 	}
 }

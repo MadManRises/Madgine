@@ -4,10 +4,13 @@ namespace Engine {
 	namespace Scripting {
 		struct Mapper {
 			Mapper() = delete;
-			Mapper(ValueType(*toValueType)(ScopeBase *)) : mToValueType(toValueType) {}
+			Mapper(ValueType(*getter)(ScopeBase *)) : mGetter(getter) {}
 
-			ValueType(*mToValueType)(ScopeBase *);
+			ValueType(*mGetter)(ScopeBase *);
 
+			bool isWritable() const {
+				return false;
+			}
 
 		private:
 			template <class T, ValueType(*F)(T *, const ArgumentList&)>

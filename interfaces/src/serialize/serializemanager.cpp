@@ -222,7 +222,7 @@ namespace Engine {
 
 		ParticipantId SerializeManager::getSlaveParticipantId()
 		{
-			return mSlaveStream->id();
+			return mSlaveStream ? mSlaveStream->id() : 0;
 		}
 
 		bool SerializeManager::isMaster(Stream * stream)
