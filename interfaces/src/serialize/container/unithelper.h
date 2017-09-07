@@ -260,10 +260,10 @@ namespace Engine {
 
 		};
 
-		template <class Type, size_t... Is>
-		struct TupleUnitHelper : public UnitHelperBase<Type> {
+		template <class Tuple, size_t... Is>
+		struct TupleUnitHelper : public UnitHelperBase<Tuple> {
 
-			typedef Type Type;
+			typedef Tuple Type;
 			using unpacker = bool[];
 
 			static void read_state(SerializeInStream &in, Type &item) {
