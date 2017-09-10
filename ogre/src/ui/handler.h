@@ -40,6 +40,8 @@ namespace Engine {
 
 			virtual void sizeChanged();
 
+			virtual const char *key() const = 0;
+
 		private:
 			bool installToWindow(GUI::Window * w);
 
@@ -63,7 +65,7 @@ namespace Engine {
 				mWindows.emplace_back(
 					name,
 					(GUI::Window**)var,
-					GUI::ClassId<WindowClass>::id,
+					typeid(WindowClass),
 					events
 				);
 			}
@@ -106,7 +108,7 @@ namespace Engine {
 			template <class T, class... _Ty>
 			std::function<void()> event(void (T::*f)(_Ty...), std::remove_const_t<_Ty>... args) {
 				return std::bind(f, static_cast<T*>(this), args...);
-			}
+			}			
 
 		private:
 

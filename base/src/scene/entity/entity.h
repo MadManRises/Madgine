@@ -38,7 +38,7 @@ public:
 	virtual Vector3 getScale() const = 0;
 
 	virtual std::string getObjectName() const = 0;
-	virtual const char *key() const override;
+	const char *key() const;
 
 	virtual void setObjectVisible(bool b) = 0;
 

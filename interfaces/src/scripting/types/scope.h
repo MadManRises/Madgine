@@ -16,7 +16,7 @@ class Scope : public Base {
 public:
 	using Base::Base;
 	
-	virtual const char *key() const override {
+	const char *key() const {
 		return API<T>::sName;
 	}
 

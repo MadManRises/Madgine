@@ -61,23 +61,23 @@ namespace Engine {
 	};
 
 	template <class K, class T>
-	struct KeyValue<std::pair<const K, T>> {
-		static T& value(std::pair<const K, T> &p) {
+	struct KeyValue<std::pair<K, T>> {
+		static T& value(std::pair<K, T> &p) {
 			return p.second;
 		}
 
-		static const K &key(const std::pair<const K, T> &p) {
+		static const K &key(const std::pair<K, T> &p) {
 			return p.first;
 		}
 	};
 
 	template <class K, class T>
-	struct KeyValue<const std::pair<const K, T>> {
-		static const T& value(const std::pair<const K, T> &p) {
+	struct KeyValue<const std::pair<K, T>> {
+		static const T& value(const std::pair<K, T> &p) {
 			return p.second;
 		}
 
-		static const K &key(const std::pair<const K, T> &p) {
+		static const K &key(const std::pair<K, T> &p) {
 			return p.first;
 		}
 	};
@@ -338,8 +338,8 @@ namespace Engine {
 	template <class T>
 	class KeyValueItemRef : public KeyValueRef {
 	public:
-		KeyValueItemRef(T &item, Scripting::ScopeBase *ref) :
-			mItem(item),
+		KeyValueItemRef(T&& item, Scripting::ScopeBase *ref) :
+			mItem(std::forward<T>(item)),
 			mRef(ref)
 		{
 
@@ -363,7 +363,7 @@ namespace Engine {
 	private:
 		class Iterator : public KeyValueIterator {
 		public:
-			Iterator(T &item, Scripting::ScopeBase *ref) :
+			Iterator(const T &item, Scripting::ScopeBase *ref) :
 				mItem(item),
 				mEnded(false),
 				mRef(ref)
@@ -391,13 +391,13 @@ namespace Engine {
 			}
 
 		private:
-			T &mItem;
+			T mItem;
 			bool mEnded;
 			Scripting::ScopeBase *mRef;
 		};
 
 	private:
-		T &mItem;
+		T mItem;
 		Scripting::ScopeBase *mRef;
 	};
 
@@ -407,25 +407,25 @@ namespace Engine {
 	}
 
 	template <class T>
-	typename std::enable_if<!is_iterable<T>::value, KeyValueItemRef<T>*>::type make_ref(Scripting::ScopeBase *ref, T &t) {
-		return new KeyValueItemRef<T>(t, ref);
+	typename std::enable_if<!is_iterable<T>::value, KeyValueItemRef<T>*>::type make_ref(Scripting::ScopeBase *ref, T &&t) {
+		return new KeyValueItemRef<T>(std::forward<T>(t), ref);
 	}
 
 	class INTERFACES_EXPORT KeyValueMapList {
 	public:
 		//using vector::vector;
-		KeyValueMapList(Scripting::ScopeBase *ref) :
+		explicit KeyValueMapList(Scripting::ScopeBase *ref) :
 			mRef(ref) {
 		}
 
 		template <class... Ty>
-		KeyValueMapList(Scripting::ScopeBase *ref, Ty&... maps) :
+		explicit KeyValueMapList(Scripting::ScopeBase *ref, Ty&&... maps) :
 			mRef(ref)
 		{
 			mRefs.reserve(sizeof...(Ty));
 			using unpacker = bool[];
 			(void)unpacker {
-				(mRefs.emplace_back(make_ref(ref, maps)), true)...
+				(mRefs.emplace_back(make_ref(ref, std::forward<Ty>(maps))), true)...
 			};
 		}
 		KeyValueMapList() = delete;
@@ -440,8 +440,8 @@ namespace Engine {
 		KeyValueMapList merge(KeyValueMapList &&other) && ;
 
 		template <class... Ty>
-		KeyValueMapList merge(Ty&... maps) && {
-			return std::forward<KeyValueMapList>(*this).merge({ mRef, maps... });
+		KeyValueMapList merge(Ty&&... maps) && {
+			return std::forward<KeyValueMapList>(*this).merge(KeyValueMapList{ mRef, std::forward<Ty>(maps)... });
 		}
 
 		std::vector<std::unique_ptr<KeyValueRef>>::const_iterator begin() const;

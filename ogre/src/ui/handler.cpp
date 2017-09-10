@@ -32,19 +32,21 @@ bool Handler::installToWindow(GUI::Window * w)
 	for (const WindowDescriber &des : mWindows) {
 		GUI::Window * window = w->getChildRecursive(des.mWindowName, des.mClass);
 		
-		if (!window) {
+		if (window) {
+			if (des.mVar) {
+				*des.mVar = window;
+			}
+
+			for (auto &event : des.mEvents) {
+				//TODO
+				window->registerEvent(this, event.first, event.second);
+			}
+		}else {
 			LOG_ERROR(Exceptions::windowNotFound(des.mWindowName));
-			return false;
-		}
-		
-		if (des.mVar) {			
-			*des.mVar = window;
-		}
-		
-		for (auto &event : des.mEvents) {
-			//TODO
-			window->registerEvent(this, event.first, event.second);
+			if (des.mVar)
+				return false;
 		}		
+		
 	}
 
 	mWindows.clear();

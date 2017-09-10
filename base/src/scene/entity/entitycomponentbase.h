@@ -26,6 +26,8 @@ public:
 
     Entity &getEntity() const;
 
+	virtual const char *key() const = 0;
+
 protected:
 
     Entity &mEntity;

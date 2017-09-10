@@ -53,7 +53,7 @@ namespace Engine {
 				mStateLoadedSignal.connect(slot);
 			}
 
-			virtual const char *key() const override;
+			virtual const char *key() const;
 
 		protected:
 			std::string generateUniqueName();

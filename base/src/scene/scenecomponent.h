@@ -29,6 +29,8 @@ public:
 
 	virtual KeyValueMapList maps() override;
 
+	virtual const char *key() const = 0;
+
 protected:
     virtual void update(float);
 	virtual void fixedUpdate(float);    

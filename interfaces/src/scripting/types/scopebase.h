@@ -33,7 +33,7 @@ public:
 	virtual KeyValueMapList maps();
 
 	virtual std::string getIdentifier() const;
-	virtual const char *key() const = 0;
+	//virtual const char *key() const = 0;
 
 private:
 	LuaTable mTable;

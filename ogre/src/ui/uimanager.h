@@ -47,7 +47,7 @@ namespace Engine {
 
 			static const constexpr int sMaxInitOrder = 4;
 
-			virtual const char *key() const override;
+			const char *key() const;
 
 		protected:
 			virtual KeyValueMapList maps() override;

@@ -14,6 +14,8 @@ namespace Engine {
 
 			virtual void clear();
 			virtual void update();
+
+			virtual const char *key() const = 0;
 		};
 
 	}
