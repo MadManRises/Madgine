@@ -46,13 +46,7 @@ private:
 };
 
 template <class T>
-class TopLevelSerializableUnit : public TopLevelSerializableUnitBase {
-	using TopLevelSerializableUnitBase::TopLevelSerializableUnitBase;
-
-	virtual size_t getSize() const override {
-		return sizeof(T);
-	}
-};
+using TopLevelSerializableUnit = SerializableUnit<T, TopLevelSerializableUnitBase>;
 
 
 } // namespace Serialize

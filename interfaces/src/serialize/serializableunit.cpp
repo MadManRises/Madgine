@@ -248,8 +248,8 @@ void SerializableUnitBase::activate()
 	for (Serializable *ser : mStateValues) {
 		ser->activate();
 	}
-	onActivate();
 	mActive = true;
+	onActivate();
 }
 
 bool SerializableUnitBase::isActive() const

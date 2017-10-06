@@ -292,6 +292,51 @@ namespace Engine {
 
 	};
 
+
+	template <class T, class... Ty>
+	struct OneTimeFunctor {
+		OneTimeFunctor(void(T::*f)(Ty...), T *t, Ty&&... args) :
+			mF(f),
+			mT(t),
+			mData(std::forward<Ty>(args)...),
+			mCalled(false) {}
+
+		OneTimeFunctor(OneTimeFunctor<T, Ty...> &&other) :
+			mF(other.mF),
+			mT(other.mT),
+			mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData)),
+			mCalled(other.mCalled) {
+			other.mCalled = true;
+		}
+
+		OneTimeFunctor(const OneTimeFunctor<T, Ty...> &other) :
+			mF(other.mF),
+			mT(other.mT),
+			mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData)),
+			mCalled(other.mCalled) {
+			other.mCalled = true;
+		}
+
+		~OneTimeFunctor() {
+		}
+
+		void operator()() {
+			assert(!mCalled);
+			mCalled = true;
+			TupleUnpacker<>::call(mT, mF, std::move(mData));			
+		}
+
+	private:
+		T *mT;
+		mutable std::tuple<std::remove_reference_t<Ty>...> mData;
+		void(T::*mF)(Ty...);
+		mutable bool mCalled;
+	};
+
+	template <class T, class... Ty>
+	auto oneTimeFunctor(void(T::*f)(Ty...), T* t, Ty&&... args) {
+		return OneTimeFunctor<T, Ty...>{f, t, std::forward<Ty>(args)...};
+	}
 }
 
 

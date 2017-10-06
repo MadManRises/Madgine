@@ -7,7 +7,7 @@
 namespace Engine {
 	namespace Util {
 
-		class OGREMADGINE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
+		class MADGINE_BASE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
 		public:
 			ProcessStats(Serialize::TopLevelSerializableUnitBase* topLevel, const std::function<bool()> &condition) :
 				SerializableUnit(topLevel),
@@ -61,7 +61,7 @@ namespace Engine {
 		};
 
 
-		class OGREMADGINE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
+		class MADGINE_BASE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
 		public:
 			Profiler(Serialize::TopLevelSerializableUnitBase *topLevel);
 			Profiler(const Profiler &) = delete;
@@ -86,7 +86,7 @@ namespace Engine {
 			bool mCurrentInterval;
 		};
 
-		class OGREMADGINE_EXPORT ProfileWrapper {
+		class MADGINE_BASE_EXPORT ProfileWrapper {
 		public:
 			ProfileWrapper(const std::string &name);
 			~ProfileWrapper();

@@ -129,10 +129,6 @@ namespace Engine {
 				return c.emplace(std::forward<_Ty>(args)...).first;
 			}
 
-			static void write_iterator(SerializeOutStream &out, const const_iterator &it) {
-
-			}
-
 		};
 
 		template <class C>

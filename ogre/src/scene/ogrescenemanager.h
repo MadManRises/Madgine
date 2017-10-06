@@ -2,7 +2,6 @@
 
 #include "resources/shading/shadercollector.h"
 
-#include "entity/ogreentity.h"
 
 #include "serialize/container/list.h"
 
@@ -43,11 +42,7 @@ public:
 	const Ogre::SceneNode *terrain();
 	Ogre::TerrainGroup *terrainGroup() const;
 
-	
-	virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &meshName = "", std::function<void(Entity::Entity&)> init = {}) override;
-	virtual Entity::Entity * createLocalEntity(const std::string & behaviour = "", const std::string & name = "", const std::string & meshName = "") override;
-	virtual std::list<Entity::Entity *> entities() override;
-	virtual Entity::Entity *findEntity(const std::string &name) override;
+	Ogre::SceneNode *createEntityNode();
 	
 	virtual Light * createLight() override;
 	virtual std::list<Light*> lights() override;
@@ -90,16 +85,6 @@ public:
 	void writeScene(Serialize::SerializeOutStream &out) const;
 
 	static constexpr const float sSceneRasterSize = .2f;
-	
-	void makeLocalCopy(Entity::OgreEntity &e);
-	void makeLocalCopy(Entity::OgreEntity &&e);
-
-	template <class T>
-	void connectEntitiesCallback(T &slot) {
-		mEntities.connectCallback(slot);
-	}
-
-	KeyValueMapList maps() override;
 
 protected:
 
@@ -109,12 +94,10 @@ protected:
 	void readStaticScene(Serialize::SerializeInStream &in);
 	void readTerrain(Serialize::SerializeInStream &in);
 
-
-	virtual void removeQueuedEntities() override;
 		
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
-	std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> createEntityData(const std::string &name, const std::string &meshName);
+	
 	std::tuple<OgreSceneManager *, Ogre::Light *> createLightData();
 
 private:
@@ -141,11 +124,6 @@ private:
 	std::map<std::string, std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>> mInfoObjects;
 
 	Resources::OgreTexturePtr mGameTexture;
-
-
-	Serialize::ObservableList<Entity::OgreEntity, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&OgreSceneManager::createEntityData), &OgreSceneManager::createEntityData>> mEntities;
-	std::list<Entity::OgreEntity> mLocalEntities;
-
 
 	Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&OgreSceneManager::createLightData), &OgreSceneManager::createLightData>> mLights;
     

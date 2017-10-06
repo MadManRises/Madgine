@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 
 #include "myguicombobox.h"
 #include "myguiwindow.h"

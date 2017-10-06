@@ -18,10 +18,7 @@ namespace Engine {
 
 			template <class Ty>
 			void operator =(Ty&& v) {
-				if (mData != v) {
-					mData = std::forward<Ty>(v);
-					notify();
-				}
+				mData = std::forward<Ty>(v);
 			}
 
 			T &operator*() {
@@ -42,26 +39,14 @@ namespace Engine {
 
 			virtual void readState(SerializeInStream &in) override {
 				this->read_state(in, mData);
-				notify();
 			}
 
 			virtual void writeState(SerializeOutStream &out) const override {
 				this->write_state(out, mData);
 			}
 
-			template <class Ty>
-			void setCallback(Ty &slot) {
-				mNotifySignal.connect(slot);
-			}
-
-		protected:
-			void notify() {
-				mNotifySignal.emit(mData);
-			}
-
 		private:
 			T mData;
-			SignalSlot::Signal<const T &> mNotifySignal;
 		};
 
 

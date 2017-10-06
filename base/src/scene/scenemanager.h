@@ -8,6 +8,10 @@
 
 #include "scene/scenecomponent.h"
 
+#include "serialize/container/list.h"
+
+#include "entity/entity.h"
+
 namespace Engine {
 	namespace Scene {
 
@@ -20,11 +24,15 @@ namespace Engine {
 			SceneManagerBase();
 			virtual ~SceneManagerBase() = default;
 
-			virtual Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "", std::function<void(Entity::Entity&)> init = {}) = 0;
-			virtual Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "", const std::string &mesh = "") = 0;
-			virtual Entity::Entity *findEntity(const std::string &name) = 0;
-			virtual std::list<Entity::Entity*> entities() = 0;
+			Entity::Entity *createEntity(const std::string &behaviour = "", const std::string &name = "", std::function<void(Entity::Entity&)> init = {});
+			Entity::Entity *createLocalEntity(const std::string &behaviour = "", const std::string &name = "");
+			Entity::Entity *findEntity(const std::string &name);
+			std::list<Entity::Entity*> entities();
 
+
+			void makeLocalCopy(Entity::Entity &e);
+			void makeLocalCopy(Entity::Entity &&e);
+			
 			virtual Light *createLight() = 0;
 			virtual std::list<Light*> lights() = 0;
 
@@ -34,7 +42,7 @@ namespace Engine {
 			virtual void update(float timeSinceLastFrame, ContextMask context);
 			virtual void fixedUpdate(float timeStep, ContextMask context);
 
-			virtual void clear() = 0;
+			virtual void clear();
 
 			size_t getComponentCount();
 
@@ -53,35 +61,50 @@ namespace Engine {
 				mStateLoadedSignal.connect(slot);
 			}
 
+			template <class T>
+			void connectCleared(T &slot) {
+				mClearedSignal.connect(slot);
+			}
+
+
+			template <class T>
+			void connectEntitiesCallback(T &slot) {
+				mEntities.connectCallback(slot);
+			}
+
 			virtual const char *key() const;
 
-		protected:
-			std::string generateUniqueName();
-
-			virtual void removeQueuedEntities() = 0;
-
-			std::list<Entity::Entity *> mEntityRemoveQueue;
+		protected:		
 
 			virtual KeyValueMapList maps() override;
+
+		private:		
+
+			void removeQueuedEntities();
+
+			std::string generateUniqueName();
+
+			std::tuple<SceneManagerBase *, std::string> createEntityData(const std::string &name);
 
 		private:
 			size_t mItemCount;
 
 			BaseUniqueComponentCollector<SceneComponentBase, Serialize::SerializableUnitHeapCreator, SceneManagerBase*> mSceneComponents;
+			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&SceneManagerBase::createEntityData), &SceneManagerBase::createEntityData>> mEntities;
+			std::list<Entity::Entity> mLocalEntities;
+			std::list<Entity::Entity *> mEntityRemoveQueue;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;
+			Engine::SignalSlot::Signal<> mClearedSignal;
+
 
 		};
 
 		template <class T>
-		class SceneManager : public Singleton<T>, public SceneManagerBase {
+		class SceneManager : public Singleton<T>, public Serialize::SerializableUnit<T, SceneManagerBase> {
 		public:
-			using SceneManagerBase::SceneManagerBase;
+			using Serialize::SerializableUnit<T, SceneManagerBase>::SerializableUnit;
 
-		private:
-			virtual size_t getSize() const override final {
-				return sizeof(T);
-			}
 		};
 		
 

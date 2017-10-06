@@ -106,8 +106,9 @@ private:
 
 template <class T, class Base = SerializableUnitBase>
 class SerializableUnit : public Base {
+protected:
 	using Base::Base;
-
+	
 	virtual size_t getSize() const override {
 		return sizeof(T);
 	}

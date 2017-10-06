@@ -11,10 +11,7 @@ namespace Entity {
 	template <class T, class Base = EntityComponentBase>
 	class EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>> {
 	public:
-		EntityComponent(Entity &entity, const Scripting::LuaTable &table) :
-			Scope(entity, table) {
-
-		}
+		using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
 
 	const char *key() const override {
 		return sComponentName;

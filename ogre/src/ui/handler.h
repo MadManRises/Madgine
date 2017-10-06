@@ -65,7 +65,7 @@ namespace Engine {
 				mWindows.emplace_back(
 					name,
 					(GUI::Window**)var,
-					typeid(WindowClass),
+					GUI::ClassId<WindowClass>::id,
 					events
 				);
 			}

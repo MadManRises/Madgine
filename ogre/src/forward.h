@@ -56,6 +56,7 @@ namespace Engine {
 		namespace Entity {
 			class Entity;
 			class EntityComponentBase;
+
 		}
 
 

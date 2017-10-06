@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 #include "resourceloader.h"
 
 #include "database/messages.h"

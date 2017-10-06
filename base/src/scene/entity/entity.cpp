@@ -10,7 +10,7 @@
 
 namespace Engine {
 
-	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible));
+	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
 
 
 namespace Scene {
@@ -19,35 +19,25 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	SerializableUnitBase(other.topLevel(), other),
+	SerializableUnit(other.topLevel(), other),
 	mName(other.mName),
 	mSceneManager(other.mSceneManager)
 {
 }
 
 Entity::Entity(Entity &&other) :
-	SerializableUnitBase(other.topLevel(), std::forward<Entity>(other)),
+	SerializableUnit(other.topLevel(), std::forward<Entity>(other)),
 	mName(other.mName),	
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
 	mSceneManager(other.mSceneManager)
 {
 }
 
-Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name) :
-	SerializableUnitBase(sceneMgr),
+Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &behaviour) :
+	SerializableUnit(sceneMgr),
 	mName(name),
 	mSceneManager(sceneMgr)
 {
-}
-
-Entity::~Entity()
-{	
-	mComponents.clear();
-}
-
-bool Entity::init(const std::string &behaviour)
-{
-
 	if (!behaviour.empty()) {
 		ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
 		if (table.is<Scripting::LuaTable>()) {
@@ -64,14 +54,19 @@ bool Entity::init(const std::string &behaviour)
 			LOG_ERROR(message("Behaviour \"", "\" not found!")(behaviour));
 		}
 	}
-
-	return true;
 }
 
+Entity::~Entity()
+{	
+	finalize();
+}
 
-void Entity::onLoad()
+void Entity::finalize()
 {
-    callMethodIfAvailable("onLoad");
+	for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
+		comp->finalize();
+	}
+	mComponents.clear();
 }
 
 const char *Entity::key() const
@@ -82,7 +77,7 @@ const char *Entity::key() const
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
 	SerializableUnitBase::writeCreationData(of);
-    of << mName << getObjectName();
+    of << mName/* << getObjectName()*/;
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)
@@ -144,11 +139,6 @@ EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBas
 }
 
 
-size_t Entity::getSize() const
-{
-	return sizeof(Entity);
-}
-
 void Entity::remove()
 {
 	mSceneManager->removeLater(this);
@@ -157,45 +147,22 @@ void Entity::remove()
 
 void Entity::writeState(Serialize::SerializeOutStream &of) const
 {
-	of << ValueType(getPosition());
-
-	of << getOrientation();
-
-	of << getScale();
-	
 	SerializableUnitBase::writeState(of);
-
 }
 
 void Entity::readState(Serialize::SerializeInStream &ifs)
 {
-	Vector3 v;
-	ifs >> v;
-	setPosition(v);
-
-	std::array<float, 4> q;
-	ifs >> q;
-	setOrientation(q);
-
-	ifs >> v;
-	setScale(v);
-
 	SerializableUnitBase::readState(ifs);
-}
-
-std::array<float, 2> Entity::getCenter2D() const {
-	Vector3 c = getCenter();
-	return{ { c.x, c.z } };
-}
-
-std::array<float, 2> Entity::getPosition2D() const {
-	Vector3 p = getPosition();
-	return{ { p.x, p.z } };
 }
 
 KeyValueMapList Entity::maps()
 {
 	return Scope::maps().merge(mComponents);
+}
+
+SceneManagerBase & Entity::sceneMgr() const
+{
+	return *mSceneManager;
 }
 
 }

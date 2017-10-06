@@ -32,6 +32,13 @@ namespace Engine {
 					notify(old);
 				}
 
+				template <class Ty>
+				void operator -= (Ty&& v) {
+					T old = mData;
+					this->mData -= std::forward<Ty>(v);
+					notify(old);
+				}
+
 				T *operator->() {
 					return &mData;
 				}
@@ -83,16 +90,18 @@ namespace Engine {
 
 				virtual void activate() override {
 					this->activateItem(mData);
-					//mData.activate();
+					mNotifySignal.emit(mData, T());
 				}
 
 			protected:
 				void notify(const T &old) {
-					mNotifySignal.emit(mData, old);
 					if (!mCondition || mCondition()) {
-						for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-							this->write_state(*out, this->mData);
-							out->endMessage();
+						if (unit()->isActive()) {
+							mNotifySignal.emit(mData, old);
+							for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+								this->write_state(*out, this->mData);
+								out->endMessage();
+							}
 						}
 					}
 				}

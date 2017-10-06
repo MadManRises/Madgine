@@ -14,11 +14,12 @@ namespace Scripting {
 		mTable(table)
 	{
 
+		assert(mTable);
+
 		mScopes = mTable.createTable();
 
 		mTable.setMetatable("Interfaces.GlobalScope");
-
-		assert(mTable);
+		
 	}
 
 	void GlobalScopeBase::executeString(const std::string &cmd) {

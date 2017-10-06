@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 #include "oisinputhandler.h"
 #include "gui/guisystem.h"
 #include "gui/guievents.h"

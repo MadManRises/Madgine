@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serialize/serializemanager.h"
+#include "signalslot/slot.h"
 #include "networkstream.h"
 
 namespace Engine {
@@ -44,7 +45,7 @@ namespace Engine {
 
 			Serialize::StreamError addMasterStream(NetworkStream &&stream, bool sendState = true);
 
-			Serialize::StreamError connectImpl(const std::string &url, int portNr, int timeout);
+			void onConnectionEstablished(int timeout);
 
 		private:
 			SocketId mSocket;
@@ -59,6 +60,7 @@ namespace Engine {
 			static int sManagerCount;
 
 			SignalSlot::Signal<Serialize::StreamError> mConnectionResult;
+			SignalSlot::Slot<decltype(&NetworkManager::onConnectionEstablished), &NetworkManager::onConnectionEstablished> mConnectionEstablished;
 
 		};
 

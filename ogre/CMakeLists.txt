@@ -16,7 +16,7 @@ set(CMAKE_MODULE_PATH
 
 set(sources "")
 FolderSources(sources "" "")
-FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreuniquecomponentcollector.h)
+FolderSources(sources "" src forward.h ogrelib.h ogreuniquecomponent.h ogreuniquecomponentcollector.h)
 	FolderSources(sources src app ogreapplication.cpp ogreapplication.h ogreappsettings.h configset.cpp configset.h)
 	FolderSources(sources src database messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources src gui guievents.h guisystem.cpp guisystem.h windownames.h)
@@ -25,7 +25,8 @@ FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreun
 	FolderSources(sources src input inputHandler.h oisinputhandler.cpp oisinputhandler.h)
 	FolderSources(sources src math bounds.cpp bounds.h)
 	FolderSources(sources src scene ingameoverlay.cpp ingameoverlay.h ogrelight.cpp ogrelight.h ogrescenemanager.cpp ogrescenemanager.h)
-	    FolderSources(sources scene entity ogreentity.cpp ogreentity.h)
+	    FolderSources(sources scene entity)
+			FolderSources(sources entity components ogremesh.cpp ogremesh.h ogretransform.cpp ogretransform.h)
 	FolderSources(sources src resources resourceLoader.cpp ResourceLoader.h ogretextureptr.cpp ogretextureptr.h)
 	    FolderSources(sources resources shading shadercollector.cpp shadercollector.h shaderimplementation.h)
 		FolderSources(sources resources imagesets imagesetmanager.cpp imagesetmanager.h)
@@ -33,15 +34,17 @@ FolderSources(sources "" src forward.h madginelib.h ogreuniquecomponent.h ogreun
 		FolderSources(sources scripting parsing ogrescriptparser.cpp ogrescriptparser.h)
 	FolderSources(sources src serialize ogrestreamreader.cpp ogrestreamreader.h)
 	FolderSources(sources src ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
-	FolderSources(sources src util profiler.cpp profiler.h)
+
 
 include_directories(${OGREMADGINE_SOURCE_DIR}/src)
 
 add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
 
-add_precompiled_header(OgreMadgine src/madginelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
+add_precompiled_header(OgreMadgine src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
 include_targets(OgreMadgine Base Interfaces)
+
+target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 
 find_package(OGRE REQUIRED)
 if (OGRE_FOUND)
@@ -83,7 +86,7 @@ else()
     #foreach(lib ${${GuiSystem}_LIBRARIES})
 	#  target_link_libraries (OgreMadgine PRIVATE ${lib})
     #endforeach()
-	target_link_libraries(OgreMadgine PRIVATE ${${GuiSystem}_LIBRARIES})
+	target_link_libraries(OgreMadgine PUBLIC ${${GuiSystem}_LIBRARIES})
   endif()
 
 endif()

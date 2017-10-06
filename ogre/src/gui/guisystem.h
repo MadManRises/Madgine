@@ -55,7 +55,7 @@ namespace Engine {
 
 			virtual void windowResized(Ogre::RenderWindow * rw) override;
 
-			const char *key() const override;
+			const char *key() const;
 
 		protected:
 			WindowContainer *mRootWindow;

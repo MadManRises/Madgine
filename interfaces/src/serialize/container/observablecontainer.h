@@ -4,11 +4,28 @@
 #include "../streams/bufferedstream.h"
 #include "serializablecontainer.h"
 #include "unithelper.h"
+#include "sortedcontainer.h"
+#include "unsortedcontainer.h"
 
 namespace Engine {
 	namespace Serialize {
 
 	
+
+		enum Operations {
+			INSERT_ITEM = 0x1,
+			REMOVE_ITEM = 0x2,
+			RESET = 0x3,
+
+
+			MASK = 0x0F,
+			ACCEPT = 0x10,
+			REJECT = 0x20,
+
+			BEFORE = 0x0,
+			AFTER = 0x10
+		};
+
 		struct _ContainerPolicy {
 			enum RequestMode {
 				ALL_REQUESTS,
@@ -24,12 +41,20 @@ namespace Engine {
 
 		};
 
+		template <class traits, class Creator>
+		using ContainerSelector = std::conditional_t<
+			traits::sorted,
+			SortedContainer<traits, Creator>,
+			UnsortedContainer<traits, Creator>
+		>;
+
 		template <class traits, class Creator, const _ContainerPolicy &Config>
-		class ObservableContainer : public SerializableContainer<traits, Creator>, public Observable {
+		class ObservableContainer : 
+			public ContainerSelector<traits, Creator>, public Observable {
 		public:
 			typedef size_t TransactionId;
 
-			typedef SerializableContainer<traits, Creator> Base;
+			typedef ContainerSelector<traits, Creator> Base;
 
 			typedef typename traits::iterator iterator;
 			typedef typename traits::const_iterator const_iterator;

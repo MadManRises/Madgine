@@ -12,7 +12,8 @@ FolderSources(sources "" "" serverlib.cpp)
 FolderSources(sources "" src serverforward.h serverlib.h)
 	FolderSources(sources src app serverapplication.cpp serverapplication.h serverappsettings.h servertimer.cpp servertimer.h)
 	FolderSources(sources src scene serverscenemanager.cpp serverscenemanager.h)
-		FolderSources(sources scene entity serverentity.cpp serverentity.h)
+		FolderSources(sources scene entity)
+			FolderSources(sources entity components servermesh.cpp servermesh.h servertransform.cpp servertransform.h)
 	FolderSources(sources src scripting)
 		FolderSources(sources scripting parsing serverscriptparser.cpp serverscriptparser.h)
 	FolderSources(sources src server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h)
@@ -26,6 +27,8 @@ add_library(MadgineServer SHARED ${sources} serverlib.cpp)
 add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
 include_targets(MadgineServer Base Interfaces)
+
+target_compile_definitions(MadgineServer INTERFACE MADGINE_SERVER_BUILD)
 
 target_link_libraries(MadgineServer PRIVATE ${CMAKE_THREAD_LIBS_INIT})
  

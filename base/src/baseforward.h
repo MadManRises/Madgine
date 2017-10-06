@@ -10,6 +10,7 @@ namespace Engine {
 
 		namespace Entity {
 			class Entity;
+			class Transform;
 		}
 
 		class Light;

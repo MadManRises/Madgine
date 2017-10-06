@@ -1,6 +1,7 @@
 #pragma once
 
 #include "uniquecomponentcollector.h"
+#include "generic/singleton.h"
 
 namespace Engine{
 

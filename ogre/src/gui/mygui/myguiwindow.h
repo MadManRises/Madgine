@@ -16,7 +16,7 @@ namespace Engine {
 		namespace MyGui {
 			class MyGUILauncher;
 
-			class MyGUIWindow :
+			class OGREMADGINE_EXPORT MyGUIWindow :
 				public WindowContainer
 			{
 			public:

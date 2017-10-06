@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 #include "ogrescriptparser.h"
 
 #include "serialize/ogrestreamreader.h"

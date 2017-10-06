@@ -12,7 +12,8 @@ namespace Engine {
 			SerializeManager(name),
 			mSocket(Invalid_Socket),
 			mIsServer(false),
-			mSlaveStream(0)
+			mSlaveStream(0),
+			mConnectionEstablished(this)
 		{
 
 			if (sManagerCount == 0) {
@@ -27,7 +28,8 @@ namespace Engine {
 			SerializeManager(std::forward<NetworkManager>(other)),
 			mSocket(other.mSocket),
 			mIsServer(other.mIsServer),
-			mSlaveStream(0)
+			mSlaveStream(0),
+			mConnectionEstablished(this)
 		{
 			for (std::pair<const Serialize::ParticipantId, NetworkStream> &stream : other.mStreams)
 				if (!stream.second.isClosed())
@@ -70,9 +72,23 @@ namespace Engine {
 
 		Serialize::StreamError NetworkManager::connect(const std::string & url, int portNr, int timeout)
 		{
-			Serialize::StreamError result = connectImpl(url, portNr, timeout);
-			mConnectionResult.emit(result);
-			return result;
+			if (isConnected()) {
+				mConnectionResult.emit(Serialize::ALREADY_CONNECTED);
+				return Serialize::ALREADY_CONNECTED;
+			}
+
+			Serialize::StreamError error;
+
+			std::tie(mSocket, error) = SocketAPI::connect(url, portNr);
+
+			if (!isConnected()) {
+				mConnectionResult.emit(error);
+				return error;
+			}
+
+			mConnectionEstablished.queue_direct(timeout);
+
+			return Serialize::NO_ERROR;
 		}
 
 		void NetworkManager::connect_async(const std::string & url, int portNr, int timeout)
@@ -180,18 +196,9 @@ namespace Engine {
 			return error;
 		}
 
-		Serialize::StreamError NetworkManager::connectImpl(const std::string & url, int portNr, int timeout)
+		void NetworkManager::onConnectionEstablished(int timeout)
 		{
-			if (isConnected())
-				return Serialize::ALREADY_CONNECTED;
-
 			Serialize::StreamError error;
-
-			std::tie(mSocket, error) = SocketAPI::connect(url, portNr);
-
-			if (!isConnected()) {
-				return error;
-			}
 
 			mSlaveStream = new NetworkStream(mSocket, *this);
 			error = setSlaveStream(mSlaveStream, true, timeout);
@@ -199,11 +206,10 @@ namespace Engine {
 				delete mSlaveStream;
 				mSlaveStream = 0;
 				mSocket = Invalid_Socket;
-				return error;
 			}
 
+			mConnectionResult.emit(error);
 
-			return Serialize::NO_ERROR;
 		}
 
 	}

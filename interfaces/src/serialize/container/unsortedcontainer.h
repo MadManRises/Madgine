@@ -6,10 +6,10 @@ namespace Engine {
 	namespace Serialize {
 
 		template <class traits, class Creator>
-		class UnsortedContainer : public Container<traits, Creator> {
+		class UnsortedContainer : public SerializableContainer<traits, Creator> {
 
 		public:
-			typedef Container<traits, Creator> Base;
+			typedef SerializableContainer<traits, Creator> Base;
 			using Base::Base;
 			using Base::operator=;
 

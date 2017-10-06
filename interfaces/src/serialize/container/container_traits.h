@@ -20,10 +20,6 @@ namespace Engine {
 				return c.emplace(where, std::forward<_Ty>(args)...);
 			}
 
-			static void write_iterator(SerializeOutStream &out, const const_iterator &it) {
-
-			}
-
 		};
 
 	}

@@ -222,7 +222,7 @@ namespace Engine {
 
 		ValueType LuaTable::getValue(const std::string & name) const
 		{
-			return mInstance->getValue(name);
+			return mInstance ? mInstance->getValue(name) : ValueType();
 		}
 
 		void LuaTable::setLightUserdata(const std::string & name, void * userdata)
@@ -242,7 +242,7 @@ namespace Engine {
 
 		bool LuaTable::hasFunction(const std::string & name)
 		{
-			return mInstance->hasFunction(name);
+			return mInstance ? mInstance->hasFunction(name) : false;
 		}
 
 		ArgumentList LuaTable::callMethod(const std::string & name, const ArgumentList & args)

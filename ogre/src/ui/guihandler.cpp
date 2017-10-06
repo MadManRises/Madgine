@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 #include "guihandler.h"
 //#include "Database/translationunit.h"
 

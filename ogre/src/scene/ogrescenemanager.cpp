@@ -1,4 +1,4 @@
-#include "madginelib.h"
+#include "ogrelib.h"
 
 #include "ogrescenemanager.h"
 
@@ -243,15 +243,6 @@ void OgreSceneManager::readTerrain(Serialize::SerializeInStream &in)
 
 }
 
-std::list<Entity::Entity *> OgreSceneManager::entities()
-{
-    std::list<Entity::Entity*> result;
-    for (Entity::Entity &e : mEntities){
-        if (std::find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), &e) == mEntityRemoveQueue.end())
-            result.push_back(&e);
-    }
-    return result;
-}
 
 
 
@@ -359,16 +350,6 @@ void OgreSceneManager::writeScene(Serialize::SerializeOutStream & out) const
 	writeState(out);
 }
 
-void OgreSceneManager::makeLocalCopy(Entity::OgreEntity & e)
-{
-	mLocalEntities.emplace_back(e);
-}
-
-void OgreSceneManager::makeLocalCopy(Entity::OgreEntity && e)
-{
-	mLocalEntities.emplace_back(std::forward<Entity::OgreEntity>(e));
-}
-
 Ogre::TerrainGroup *OgreSceneManager::terrainGroup() const
 {
     return mTerrainGroup;
@@ -386,24 +367,12 @@ const std::vector<Ogre::SceneNode*> &OgreSceneManager::terrainEntities()
 	return mTerrainEntities;
 }
 
-std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> OgreSceneManager::createEntityData(const std::string & name, const std::string & meshName)
+Ogre::SceneNode * OgreSceneManager::createEntityNode()
 {
-
-	std::string actualName = name.empty() ? generateUniqueName() : name;
-
-	Ogre::SceneNode *node = mEntitiesNode->createChildSceneNode(actualName);
-
-	Ogre::Entity *mesh = 0;
-	if (!meshName.empty()) {
-		mesh = mSceneMgr->createEntity(actualName, meshName);
-
-		node->attachObject(mesh);
-	}
-
-	return std::make_tuple(this, node, mesh);
-	
-	
+	return mEntitiesNode->createChildSceneNode();
 }
+
+
 
 std::tuple<OgreSceneManager *, Ogre::Light*> OgreSceneManager::createLightData()
 {
@@ -424,21 +393,7 @@ std::list<Light*> OgreSceneManager::lights()
 	return result;
 }
 
-Entity::Entity *OgreSceneManager::createEntity(const std::string &behaviour, const std::string &name, const std::string &meshName, std::function<void(Entity::Entity&)> init)
-{
-	mEntities.emplace_tuple_back_init([&](Entity::OgreEntity &e) {
-		if (init)
-			init(e);
-	}, std::tuple_cat(createEntityData(name, meshName), std::make_tuple(behaviour)));
-	return &mEntities.back();
-}
 
-Entity::Entity * OgreSceneManager::createLocalEntity(const std::string & behaviour, const std::string & name, const std::string & meshName)
-{
-	const std::tuple<OgreSceneManager *, Ogre::SceneNode *, Ogre::Entity*> &data = createEntityData(name, meshName);
-	mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
-	return &mLocalEntities.back();
-}
 
 Ogre::SceneNode *OgreSceneManager::camera()
 {
@@ -538,43 +493,19 @@ bool OgreSceneManager::rayToTerrainPoint(const Ogre::Ray &ray,
 }
 
 
-void OgreSceneManager::removeQueuedEntities()
-{
-    std::list<Entity::Entity *>::iterator it = mEntityRemoveQueue.begin();
 
-	auto find = [&](const Entity::Entity &ent) {return &ent == *it; };
-
-    while (it != mEntityRemoveQueue.end()) {
-
-		auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
-		if (ent != mEntities.end()) {
-			mEntities.erase(ent);
-		}
-		else {
-			auto ent = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), find);
-			if (ent != mLocalEntities.end()) {
-				mLocalEntities.erase(ent);
-			}
-			else {
-				throw 0;
-			}
-		}
-
-        it = mEntityRemoveQueue.erase(it);
-    }
-}
 
 void OgreSceneManager::clear()
 {
-	mEntities.clear();
-	mLocalEntities.clear();
-	mEntityRemoveQueue.clear();
+
 
 	mLights.clear();
 
 	mStaticLights.clear();
 	mTerrainEntities.clear();
 	mInfoObjects.clear();
+
+	SceneManagerBase::clear();
 }
 
 
@@ -948,22 +879,7 @@ Ogre::RenderTarget * OgreSceneManager::getRenderTarget()
 	return mRenderTexture;
 }
 
-Entity::Entity * OgreSceneManager::findEntity(const std::string & name)
-{
-	auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
-		return e.key() == name;
-	});
-	if (it == mEntities.end()) {
-		throw 0;
-	}
-	else
-		return &*it;
-}
 
-KeyValueMapList OgreSceneManager::maps()
-{
-	return SceneManager::maps().merge(transformIt<ToPointerConverter>(mEntities));
-}
 
 }
 }

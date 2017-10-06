@@ -31,10 +31,10 @@ namespace Engine {
 		{
 		}
 
-		void ConnectionManager::queue(const std::function<void()>& f)
+		void ConnectionManager::queue(std::function<void()>&& f)
 		{
 			mMutex.lock();
-			mQueue.emplace(f);
+			mQueue.emplace(std::forward<std::function<void()>>(f));
 			mMutex.unlock();
 		}
 

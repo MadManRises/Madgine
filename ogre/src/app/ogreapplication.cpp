@@ -1,6 +1,6 @@
 
 
-#include "madginelib.h"
+#include "ogrelib.h"
 
 #include "ogreapplication.h"
 #include "ogreappsettings.h"

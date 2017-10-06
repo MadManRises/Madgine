@@ -23,10 +23,6 @@ namespace Engine {
 				return c.emplace_hint(where, std::forward<_Ty>(args)...);
 			}
 
-			static void write_iterator(SerializeOutStream &out, const const_iterator &it) {
-				out << kvKey(*it);
-			}
-
 		};
 
 

@@ -7,11 +7,11 @@ namespace Engine {
 	namespace SignalSlot {
 
 		template <typename F, F f, class T, class R, class... _Ty>
-		class SlotImpl{
+		class SlotImpl {
 		public:
 			SlotImpl(T *item) :
 				mManager(ConnectionManager::getSingletonPtr()),
-				mThread(std::this_thread::get_id()),				
+				mThread(std::this_thread::get_id()),
 				mItem(item)
 			{}
 
@@ -23,7 +23,16 @@ namespace Engine {
 			}
 
 			void queue(_Ty... args) const {
-				mManager->queue(std::bind(f, mItem, std::forward<_Ty>(args)...));
+				mManager->queue(oneTimeFunctor<T, _Ty...>(f, mItem, std::forward<_Ty>(args)...));
+			}
+
+			void queue_direct(_Ty... args) const {
+				if (std::this_thread::get_id() == mThread){
+					(mItem->*f)(std::forward<_Ty>(args)...);
+				}
+				else {
+					queue(std::forward<_Ty>(args)...);
+				}
 			}
 
 			void disconnectAll() {

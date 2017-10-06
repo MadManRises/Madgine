@@ -60,7 +60,7 @@ namespace Engine {
 		public:
 			ConnectionManager();
 
-			void queue(const std::function<void()> &f);
+			void queue(std::function<void()> &&f);
 
 			void update();
 
