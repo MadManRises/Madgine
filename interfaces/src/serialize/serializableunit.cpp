@@ -178,6 +178,7 @@ void SerializableUnitBase::insertInstance() {
 
 void SerializableUnitBase::removeInstance() {
 	auto it = std::find(intern::stack.begin(), intern::stack.end(), this);
+	assert(it != intern::stack.end());
 	if (it != intern::stack.end()) {
 		intern::stack.erase(intern::stack.begin(), ++it);
 		//std::cout << "Stack size: " << sStack.size() << std::endl;
@@ -199,6 +200,7 @@ std::list<SerializableUnitBase*>::iterator SerializableUnitBase::findParentIt(vo
 {
 	auto it = std::find_if(intern::stack.begin(), intern::stack.end(), [&](SerializableUnitBase * const p) {return p <= from && to <= reinterpret_cast<char*>(p) + p->getSize(); });
 	if (it != intern::stack.end()) {
+		assert(it == intern::stack.begin());
 		intern::stack.erase(intern::stack.begin(), it);
 	}
 	return it;
