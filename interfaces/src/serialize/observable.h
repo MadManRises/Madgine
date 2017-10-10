@@ -1,5 +1,7 @@
 #pragma once
 
+#include "streams/serializestream.h"
+
 namespace Engine {
 		namespace Serialize {
 
@@ -12,7 +14,7 @@ namespace Engine {
 				Observable();		
 
 				BufferedOutStream *getSlaveActionMessageTarget() const;
-				std::list<BufferedOutStream*> getMasterActionMessageTargets(const std::list<ParticipantId> &targets = {}) const;
+				std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(const std::list<ParticipantId> &targets = {}) const;
 
 				void beginActionResponseMessage(BufferedOutStream *stream);
 

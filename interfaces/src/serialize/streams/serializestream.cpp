@@ -12,6 +12,10 @@
 namespace Engine {
 namespace Serialize {
 
+	bool CompareStreamId::operator()(Stream *first, Stream *second) {
+		return first->id() < second->id();
+	}
+
 SerializeInStream::SerializeInStream(std::istream &ifs, Serialize::SerializeManager &mgr, ParticipantId id) :
 	Stream(mgr, id),
 	mIfs(ifs)

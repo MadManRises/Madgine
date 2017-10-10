@@ -88,9 +88,12 @@ namespace Engine {
 					return mCondition;
 				}
 
-				virtual void activate() override {
-					this->activateItem(mData);
-					mNotifySignal.emit(mData, T());
+				virtual void setActive(bool b) override {
+					if (b)
+						mNotifySignal.emit(mData, T());
+					else
+						mNotifySignal.emit(T(), mData);
+					this->setItemActive(mData, b);
 				}
 
 			protected:

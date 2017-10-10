@@ -13,10 +13,11 @@ namespace Engine {
 			{
 			}
 
-			std::list<BufferedOutStream*> Observable::getMasterActionMessageTargets(const std::list<ParticipantId> &targets) const
+			std::set<BufferedOutStream*, CompareStreamId> Observable::getMasterActionMessageTargets(const std::list<ParticipantId> &targets) const
 			{
-				std::list<BufferedOutStream*> result = mUnit->getMasterMessageTargets(true, targets);
+				std::set<BufferedOutStream*, CompareStreamId> result = mUnit->getMasterMessageTargets();
 				for (BufferedOutStream *out : result) {
+					out->beginMessage(mUnit, ACTION);
 					*out << mIndex;
 				}
 				return result;
@@ -25,6 +26,7 @@ namespace Engine {
 			BufferedOutStream * Observable::getSlaveActionMessageTarget() const
 			{
 				BufferedOutStream *out = mUnit->getSlaveMessageTarget();
+				out->beginMessage(mUnit, REQUEST);
 				*out << mIndex;
 				return out;
 			}

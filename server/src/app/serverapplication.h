@@ -25,6 +25,7 @@ namespace Engine {
 		protected:
 
 			virtual bool fixedUpdate(float timeStep) override;
+			virtual bool update(float timeSinceLastFrame) override;
 
 
 		private:

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "streams/serializestream.h"
+
 namespace Engine {
 	namespace Serialize {
 
@@ -17,13 +19,13 @@ namespace Engine {
 
 			virtual void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map);
 			virtual void writeCreationData(SerializeOutStream &out) const;
-			virtual void activate();
+			virtual void setActive(bool b);
 
-			std::list<BufferedOutStream*> getMasterStateMessageTargets();
+			std::set<BufferedOutStream*, CompareStreamId> getMasterStateMessageTargets();
 
 			void sendState();
 
-			TopLevelSerializableUnitBase *topLevel() const;
+			const TopLevelSerializableUnitBase *topLevel() const;
 
 		protected:
 			SerializableUnitBase *unit() const;

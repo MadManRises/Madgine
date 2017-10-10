@@ -6,8 +6,8 @@ namespace Engine {
 	namespace Scene {
 
 
-OgreLight::OgreLight(Serialize::TopLevelSerializableUnitBase *topLevel, Ogre::Light * light) :
-	Light(topLevel),
+OgreLight::OgreLight(SceneManagerBase *sceneMgr, Ogre::Light * light) :
+	Light(sceneMgr),
 	mLight(light)
 {
 }

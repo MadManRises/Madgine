@@ -19,18 +19,20 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	SerializableUnit(other.topLevel(), other),
+	SerializableUnit(other.mSceneManager, other),
 	mName(other.mName),
 	mSceneManager(other.mSceneManager)
 {
+	setup();
 }
 
 Entity::Entity(Entity &&other) :
-	SerializableUnit(other.topLevel(), std::forward<Entity>(other)),
+	SerializableUnit(other.mSceneManager, std::forward<Entity>(other)),
 	mName(other.mName),	
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
 	mSceneManager(other.mSceneManager)
 {
+	setup();
 }
 
 Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &behaviour) :
@@ -38,6 +40,7 @@ Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::s
 	mName(name),
 	mSceneManager(sceneMgr)
 {
+	setup();
 	if (!behaviour.empty()) {
 		ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
 		if (table.is<Scripting::LuaTable>()) {
@@ -61,11 +64,32 @@ Entity::~Entity()
 	finalize();
 }
 
+void Entity::setup() {
+	mComponents.connectCallback([this](const decltype(mComponents)::const_iterator &it, int op) {
+		using namespace Engine::Serialize;
+		switch (op) {
+		case BEFORE | RESET:
+			for (auto it2 = mComponents.begin(); it != it2; ++it2) {
+				(*it2)->finalize();
+			}
+			break;
+		case AFTER | RESET:
+			for (auto it2 = mComponents.begin(); it != it2; ++it2) {
+				(*it2)->init();
+			}
+			break;
+		case INSERT_ITEM:
+			(*it)->init();
+			break;
+		case BEFORE | REMOVE_ITEM:
+			(*it)->finalize();
+			break;
+		}
+	});
+}
+
 void Entity::finalize()
 {
-	for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
-		comp->finalize();
-	}
 	mComponents.clear();
 }
 
@@ -77,7 +101,7 @@ const char *Entity::key() const
 void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
 {
 	SerializableUnitBase::writeCreationData(of);
-    of << mName/* << getObjectName()*/;
+    of << mName;
 }
 
 EntityComponentBase * Entity::getComponent(const std::string & name)

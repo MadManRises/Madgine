@@ -15,8 +15,6 @@ public:
 	virtual void init();
 	virtual void finalize();
 
-	virtual void onActivate() override;
-
     Entity &getEntity() const;
 
 	virtual const char *key() const = 0;

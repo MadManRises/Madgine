@@ -93,9 +93,9 @@ namespace Engine {
 				}
 			}
 
-			virtual void activate() override {
+			virtual void setActive(bool b) override {
 				for (auto it = begin(); it != end(); ++it) {
-					this->activateItem(*it);
+					this->setItemActive(*it, b);
 				}
 			}
 
@@ -104,7 +104,7 @@ namespace Engine {
 			iterator insert(const const_iterator &where, _Ty&&... args) {
 				iterator it = insert_intern(where, std::forward<_Ty>(args)...);
 				if (unit() && unit()->isActive()) {
-					this->activateItem(*it);
+					this->setItemActive(*it, true);
 				}
 				return it;
 			}
@@ -114,7 +114,7 @@ namespace Engine {
 				iterator it = insert_intern(where, std::forward<_Ty>(args)...);
 				init(*it);
 				if (unit() && unit()->isActive()) {
-					this->activateItem(*it);
+					this->setItemActive(*it, true);
 				}
 				return it;
 			}
@@ -126,13 +126,13 @@ namespace Engine {
 
 
 			iterator read_item_where(const const_iterator &where, SerializeInStream &in) {
-				iterator it = insert_tuple_intern(where, this->template readCreationData<Type>(in, topLevel()));
+				iterator it = insert_tuple_intern(where, this->template readCreationData<Type>(in, unit()));
 				this->read_state(in, *it);
 				if (!in.isMaster()) {
 					this->read_id(in, *it);
 				}
 				if (unit() && unit()->isActive()) {
-					this->activateItem(*it);
+					this->setItemActive(*it, true);
 				}
 				return it;
 			}

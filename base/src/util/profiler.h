@@ -9,8 +9,8 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
 		public:
-			ProcessStats(Serialize::TopLevelSerializableUnitBase* topLevel, const std::function<bool()> &condition) :
-				SerializableUnit(topLevel),
+			ProcessStats(Serialize::SerializableUnitBase* parent, const std::function<bool()> &condition) :
+				SerializableUnit(parent),
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
@@ -20,8 +20,8 @@ namespace Engine {
 				mAccumulatedDuration.setCondition(condition);
 			}
 
-			ProcessStats(Serialize::TopLevelSerializableUnitBase *topLevel, ProcessStats *parent) :
-				SerializableUnit(topLevel),
+			ProcessStats(ProcessStats *parent) :
+				SerializableUnit(parent),
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
@@ -32,7 +32,7 @@ namespace Engine {
 			}
 
 			ProcessStats(const ProcessStats &other) :
-				ProcessStats(other.topLevel(), other.mParent)
+				ProcessStats(other.mParent)
 			{}
 
 			size_t averageDuration() const;
@@ -46,6 +46,7 @@ namespace Engine {
 			ProcessStats *parent();
 
 		private:
+
 			std::chrono::time_point<std::chrono::high_resolution_clock> mStart;
 
 			bool mStarted;
@@ -54,7 +55,7 @@ namespace Engine {
 			size_t mRecordIndex;
 			std::array<size_t, 20> mBuffer;
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::DefaultCreator<ProcessStats*>> mChildren;
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::NoExtendCreator<ProcessStats*>> mChildren;
 
 			ProcessStats *mParent;
 
@@ -63,7 +64,7 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
 		public:
-			Profiler(Serialize::TopLevelSerializableUnitBase *topLevel);
+			Profiler(Serialize::SerializableUnitBase *parent);
 			Profiler(const Profiler &) = delete;
 
 			void startProfiling(const std::string &name);
@@ -75,7 +76,7 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			std::tuple<Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> createProcessData();
+			std::tuple<Serialize::SerializableUnitBase*, std::function<bool()>> createProcessData();
 
 			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Profiler::createProcessData), &Profiler::createProcessData>> mProcesses;
 			

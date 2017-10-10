@@ -1,12 +1,13 @@
 #include "baselib.h"
 
 #include "light.h"
+#include "scenemanager.h"
 
 namespace Engine {
 	namespace Scene {
 
-		Light::Light(Serialize::TopLevelSerializableUnitBase* topLevel) :
-			SerializableUnit(topLevel),
+		Light::Light(SceneManagerBase* sceneMgr) :
+			SerializableUnit(sceneMgr),
 			mPowerChangedSlot(this),
 			mPositionChangedSlot(this)			
 		{

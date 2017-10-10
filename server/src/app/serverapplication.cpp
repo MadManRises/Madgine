@@ -56,11 +56,14 @@ namespace Engine {
 			Application::finalize();
 		}
 
+		bool ServerApplication::update(float timeSinceLastFrame) {
+			mSceneManager->update(timeSinceLastFrame, Scene::ContextMask::SceneContext);
+			return Application::update(timeSinceLastFrame);
+		}
 
 		bool ServerApplication::fixedUpdate(float timeStep)
 		{
 			mSceneManager->fixedUpdate(timeStep, Scene::ContextMask::SceneContext);
-
 			return true;
 		}
 
