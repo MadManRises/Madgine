@@ -1,5 +1,7 @@
 #pragma once
 
+#include "streams/serializestream.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -7,13 +9,13 @@ class INTERFACES_EXPORT SerializableUnitBase
 {
 protected:
 
-	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId = 0);
-	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase &other);
-	SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase &&other);
+	SerializableUnitBase(SerializableUnitBase *parent, size_t masterId = 0);
+	SerializableUnitBase(SerializableUnitBase *parent, const SerializableUnitBase &other);
+	SerializableUnitBase(SerializableUnitBase *parent, SerializableUnitBase &&other);
 	virtual ~SerializableUnitBase();
 
 public:
-	TopLevelSerializableUnitBase *topLevel() const;
+	virtual const TopLevelSerializableUnitBase *topLevel() const;
 
 	virtual void writeState(SerializeOutStream &out) const;
 	virtual void readState(SerializeInStream &in);
@@ -31,19 +33,17 @@ public:
 	size_t slaveId();
 	size_t masterId();	
 
-
-	virtual void onActivate();
-
 	bool isActive() const;
 
 protected:
 	void activate();
 	void deactivate();
 
+	void setActive(bool b);
 	
 private:
 
-	std::list<BufferedOutStream *> getMasterMessageTargets(bool isActionconst, const std::list<ParticipantId> &targets = {});
+	virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
 	BufferedOutStream *getSlaveMessageTarget();	
 
 
@@ -62,7 +62,7 @@ private:
 	friend class TopLevelSerializableUnitBase;
 	template <class T, bool b>
 	friend struct UnitHelper;
-	template <class T>
+	template <class T, bool extend>
 	friend class SerializedUnit;
 	/*template <template <class...> class C, class Creator, class T>
 	friend class SerializableContainer;
@@ -72,7 +72,7 @@ private:
 	std::vector<Observable*> mObservedValues;
 	std::vector<Serializable*> mStateValues;
 
-	TopLevelSerializableUnitBase *mTopLevel;
+	SerializableUnitBase *mParent;
 
 	size_t mSlaveId;
 	std::pair<size_t, SerializableUnitMap*> mMasterId;

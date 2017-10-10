@@ -147,17 +147,15 @@ namespace Engine {
 		}
 
 
-		std::list<BufferedOutStream*> SerializeManager::getMasterMessageTargets(SerializableUnitBase * unit, MessageType type, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter)
+		std::set<BufferedOutStream*, CompareStreamId> SerializeManager::getMasterMessageTargets()
 		{
-			std::list<BufferedOutStream*> result;
-			for (BufferedInOutStream* stream : mMasterStreams) {
-				if (!stream->isClosed() && (!customFilter || customFilter(unit, stream->id())) && filter(unit, stream->id())) {
-					result.push_back(stream);
-					stream->beginMessage(unit, type);
-				}
-			}
+			std::set<BufferedOutStream*, CompareStreamId> result;
+			std::copy_if(mMasterStreams.begin(), mMasterStreams.end(), std::inserter(result, result.begin()), [](BufferedInOutStream* stream) {
+				return !stream->isClosed();
+			});
 			return result;
 		}
+
 
 		void SerializeManager::clearTopLevelItems()
 		{
@@ -209,9 +207,8 @@ namespace Engine {
 			addTopLevelItem(newUnit, false);
 		}
 
-		BufferedOutStream * SerializeManager::getSlaveMessageTarget(SerializableUnitBase *unit)
+		BufferedOutStream * SerializeManager::getSlaveMessageTarget()
 		{
-			mSlaveStream->beginMessage(unit, REQUEST);
 			return mSlaveStream;
 		}
 

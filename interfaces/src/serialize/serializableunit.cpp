@@ -18,12 +18,11 @@ namespace Serialize {
 
 	thread_local std::list<SerializableUnitBase*> SerializableUnitBase::intern::stack;
 
-	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, size_t masterId) :
-	mTopLevel(topLevel),
+	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, size_t masterId) :
 	mSlaveId(0),
-		mActive(false)
+		mActive(false),
+		mParent(parent)
 	{
-		assert(mTopLevel);
 		if (masterId == 0) {
 			mMasterId = SerializeManager::addMasterMapping(this);
 		}
@@ -33,22 +32,20 @@ namespace Serialize {
 		insertInstance();
 	}
 
-	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, const SerializableUnitBase & other) :
-		mTopLevel(topLevel),
+	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, const SerializableUnitBase & other) :
 		mSlaveId(0),
-		mActive(false)
+		mActive(false),
+		mParent(parent)
 	{
-		assert(mTopLevel);
 		mMasterId = SerializeManager::addMasterMapping(this);
 		insertInstance();
 	}
 
-	SerializableUnitBase::SerializableUnitBase(TopLevelSerializableUnitBase *topLevel, SerializableUnitBase && other) :
-		mTopLevel(topLevel),
+	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, SerializableUnitBase && other) :
 		mSlaveId(0),
-		mActive(false)
+		mActive(false),
+		mParent(parent)
 	{
-		assert(mTopLevel);
 		std::tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
 		insertInstance();
 	}
@@ -125,24 +122,20 @@ void SerializableUnitBase::addSerializable(Serializable * val)
 	mStateValues.push_back(val);
 }
 
-std::list<BufferedOutStream*> SerializableUnitBase::getMasterMessageTargets(bool isAction, const std::list<ParticipantId> &targets)
+std::set<BufferedOutStream*, CompareStreamId> SerializableUnitBase::getMasterMessageTargets()
 {
-	std::list<BufferedOutStream*> result;
-	if (mTopLevel && mActive) {
-		result = mTopLevel->getMasterMessageTargets(this, isAction ? ACTION : STATE, targets);
-	}
-	else {
-		assert(targets.empty());
+	std::set<BufferedOutStream *, CompareStreamId> result;
+	if (mActive) {
+		result = mParent->getMasterMessageTargets();
 	}
 	return result;
-	
 }
 
 BufferedOutStream * SerializableUnitBase::getSlaveMessageTarget()
 {
 	BufferedOutStream* result = nullptr;
-	if (mTopLevel && mActive) {
-		result = mTopLevel->getSlaveMessageTarget(this);
+	if (mActive) {
+		result = topLevel()->getSlaveMessageTarget();
 	}
 	return result;
 }
@@ -152,15 +145,15 @@ void SerializableUnitBase::writeCreationData(SerializeOutStream & out) const
 {
 }
 
-TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
+const TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 {
-	return mTopLevel;
+	return mParent->topLevel();
 }
 
 void SerializableUnitBase::clearSlaveId()
 {
 	if (mSlaveId != 0) {
-		mTopLevel->getSlaveManager()->removeSlaveMapping(this);
+		topLevel()->getSlaveManager()->removeSlaveMapping(this);
 		mSlaveId = 0;
 	}
 }
@@ -229,7 +222,7 @@ void SerializableUnitBase::setSlaveId(size_t id)
 			clearSlaveId();
 		}
 		mSlaveId = id;
-		mTopLevel->getSlaveManager()->addSlaveMapping(this);		
+		topLevel()->getSlaveManager()->addSlaveMapping(this);		
 	}
 }
 
@@ -240,18 +233,25 @@ void SerializableUnitBase::applySerializableMap(const std::map<size_t, Serializa
 	}
 }
 
-void SerializableUnitBase::onActivate() {
-
+void SerializableUnitBase::setActive(bool b) {
+	assert(mActive != b);
+	if (b)
+		mActive = true;
+	for (Serializable *ser : mStateValues) {
+		ser->setActive(b);
+	}
+	if (!b)
+		mActive = false;
 }
 
 void SerializableUnitBase::activate()
 {
-	assert(!mActive);
-	for (Serializable *ser : mStateValues) {
-		ser->activate();
-	}
-	mActive = true;
-	onActivate();
+	setActive(true);
+}
+
+void SerializableUnitBase::deactivate()
+{
+	setActive(false);
 }
 
 bool SerializableUnitBase::isActive() const

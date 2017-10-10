@@ -6,8 +6,8 @@
 namespace Engine {
 	namespace Util {
 
-		Profiler::Profiler(Serialize::TopLevelSerializableUnitBase *topLevel) :
-			SerializableUnit(topLevel),
+		Profiler::Profiler(Serialize::SerializableUnitBase *parent) :
+			SerializableUnit(parent),
 			mCurrent(nullptr),
 			mInterval(2.0f),
 			mCurrentInterval(false)
@@ -45,13 +45,13 @@ namespace Engine {
 				return mCurrent->addChild(name);
 			}
 			else {
-				return mProcesses.try_emplace(name, topLevel(), [this]() {return mCurrentInterval; }).first->second;
+				return mProcesses.try_emplace(name, this, [this]() {return mCurrentInterval; }).first->second;
 			}			
 		}
 
-		std::tuple<Serialize::TopLevelSerializableUnitBase*, std::function<bool()>> Profiler::createProcessData()
+		std::tuple<Serialize::SerializableUnitBase*, std::function<bool()>> Profiler::createProcessData()
 		{
-			return std::make_tuple(topLevel(), [this]() {return mCurrentInterval; });
+			return std::make_tuple(this, [this]() {return mCurrentInterval; });
 		}
 		
 		ProfileWrapper::ProfileWrapper(const std::string &name)
@@ -97,7 +97,7 @@ namespace Engine {
 
 		ProcessStats &ProcessStats::addChild(const std::string & child)
 		{
-			return mChildren.try_emplace(child, topLevel(), this).first->second;
+			return mChildren.try_emplace(child, this).first->second;
 		}
 
 		bool ProcessStats::hasParent() const

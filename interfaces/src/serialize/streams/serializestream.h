@@ -32,6 +32,11 @@ protected:
 	Debugging::StreamLog mLog;
 };
 
+struct CompareStreamId {
+	bool operator()(Stream* first, Stream *second);
+	bool operator()(BufferedOutStream *first, BufferedOutStream *second);
+};
+
 class INTERFACES_EXPORT SerializeInStream : public virtual Stream {
 public:
     SerializeInStream(std::istream &ifs, SerializeManager &mgr, ParticipantId id = 0);

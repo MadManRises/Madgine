@@ -7,7 +7,7 @@ namespace Scene {
 namespace Entity {
 
 EntityComponentBase::EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable) :
-	SerializableUnitBase(entity.topLevel()),
+	SerializableUnitBase(&entity),
     mEntity(entity),
 	mInitTable(initTable)
 {
@@ -15,11 +15,6 @@ EntityComponentBase::EntityComponentBase(Entity &entity, const Scripting::LuaTab
 
 EntityComponentBase::~EntityComponentBase() {
 
-}
-
-void EntityComponentBase::onActivate()
-{
-	init();
 }
 
 void EntityComponentBase::init()

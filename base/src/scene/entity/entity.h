@@ -25,6 +25,7 @@ public:
     Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &behaviour = "");
     ~Entity();
 
+	void setup();
 	//void init();
 	void finalize();
     

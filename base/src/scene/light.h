@@ -9,7 +9,7 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT Light : public Engine::Serialize::SerializableUnit<Light> {
 		public:
-			Light(Serialize::TopLevelSerializableUnitBase* topLevel);
+			Light(SceneManagerBase* sceneMgr);
 			virtual ~Light() = default;
 
 			void setPower(float power);

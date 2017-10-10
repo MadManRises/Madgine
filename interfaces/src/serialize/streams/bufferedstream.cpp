@@ -9,6 +9,9 @@
 namespace Engine {
 namespace Serialize {
 
+	bool CompareStreamId::operator()(BufferedOutStream *first, BufferedOutStream *second) {
+		return first->id() < second->id();
+	}
 
 
 	BufferedInStream::BufferedInStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :

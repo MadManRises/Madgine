@@ -10,7 +10,7 @@
 namespace Engine {
 	namespace Serialize {
 
-	
+
 
 		enum Operations {
 			INSERT_ITEM = 0x1,
@@ -34,9 +34,9 @@ namespace Engine {
 
 		};
 
-		struct ContainerPolicy{
+		struct ContainerPolicy {
 
-			static const constexpr _ContainerPolicy allowAll{_ContainerPolicy::ALL_REQUESTS};
+			static const constexpr _ContainerPolicy allowAll{ _ContainerPolicy::ALL_REQUESTS };
 			static const constexpr _ContainerPolicy masterOnly{ _ContainerPolicy::NO_REQUESTS };
 
 		};
@@ -49,7 +49,7 @@ namespace Engine {
 		>;
 
 		template <class traits, class Creator, const _ContainerPolicy &Config>
-		class ObservableContainer : 
+		class ObservableContainer :
 			public ContainerSelector<traits, Creator>, public Observable {
 		public:
 			typedef size_t TransactionId;
@@ -61,7 +61,7 @@ namespace Engine {
 			typedef typename traits::type type;
 			typedef typename traits::value_type value_type;
 
-			
+
 
 			struct Transaction {
 				template <class T>
@@ -80,10 +80,21 @@ namespace Engine {
 
 			}
 
-			ObservableContainer(const ObservableContainer &other) = default;
+			ObservableContainer(const ObservableContainer &other) :
+				Base(other),
+				mTransactionCounter(0)
+			{
+			}
 
 			ObservableContainer(ObservableContainer &&other) = default;
 
+			virtual ~ObservableContainer() {
+				if (unit()->isActive()) {
+					mSignal.emit(this->end(), BEFORE | RESET);
+					Base::clear();
+					mSignal.emit(this->end(), AFTER | RESET);
+				}
+			}
 
 			template <class T>
 			void operator=(T&& arg) {
@@ -97,7 +108,7 @@ namespace Engine {
 						Base temp(std::forward<T>(arg));
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0; 
+						*out << (TransactionId)0;
 						*out << RESET;
 						temp.writeState(*out);
 						out->endMessage();
@@ -119,7 +130,7 @@ namespace Engine {
 			template <class... _Ty>
 			iterator insert(const iterator &where, _Ty&&... args) {
 				iterator it = this->end();
-				
+
 				if (isMaster()) {
 					it = Base::insert(where, std::forward<_Ty>(args)...);
 					onInsert(it);
@@ -146,7 +157,7 @@ namespace Engine {
 			void insert(T &&init, const iterator &where, _Ty&&... args) {
 				if (isMaster()) {
 					iterator it = Base::insert(std::forward<T>(init), where, std::forward<_Ty>(args)...);
-					onInsert(it);					
+					onInsert(it);
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
@@ -191,7 +202,7 @@ namespace Engine {
 				return it;
 			}
 
-			
+
 
 			iterator performOperation(Operations op, SerializeInStream &in, ParticipantId partId, TransactionId id) {
 				iterator it = this->end();
@@ -223,12 +234,12 @@ namespace Engine {
 				afterReset();
 			}
 
-			
+
 			// Inherited via Observable
 			virtual void readRequest(BufferedInOutStream & inout) override
 			{
 				bool accepted = Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS; //Check TODO
-				
+
 				TransactionId id;
 				inout >> id;
 
@@ -292,13 +303,25 @@ namespace Engine {
 					it = performOperation((Operations)(op & MASK), inout, sender.first, sender.second);
 				}
 
-				if (id){
+				if (id) {
 					if (!mTransactions.empty() && mTransactions.front().mId == id) {
 						mTransactions.front().mCallback(it, accepted);
 						mTransactions.pop_front();
 					}
 				}
 
+			}
+
+			virtual void setActive(bool b) override {
+				if (b) {
+					mSignal.emit(this->begin(), BEFORE | RESET);
+					mSignal.emit(this->end(), AFTER | RESET);
+				}
+				Base::setActive(b);
+				if (!b) {
+					mSignal.emit(this->end(), BEFORE | RESET);
+					mSignal.emit(this->begin(), AFTER | RESET);
+				}
 			}
 
 			template <class Ty>
@@ -308,62 +331,72 @@ namespace Engine {
 
 
 		private:
-			void onInsert(const const_iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
+			void onInsert(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				if (unit()->isActive()) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+						if (answerTarget == out->id()) {
+							*out << answerId;
+						}
+						else {
+							*out << (TransactionId)0;
+						}
+						*out << INSERT_ITEM;
+						this->write_item(*out, it);
+						out->endMessage();
 					}
-					else {
-						*out << (TransactionId)0;
-					}
-					*out << INSERT_ITEM;
-					this->write_item(*out, it);
-					out->endMessage();
+					mSignal.emit(it, INSERT_ITEM);
 				}
-				mSignal.emit(it, INSERT_ITEM);
 			}
 
-			void beforeRemove(const const_iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
+			void beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				if (unit()->isActive()) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+						if (answerTarget == out->id()) {
+							*out << answerId;
+						}
+						else {
+							*out << (TransactionId)0;
+						}
+						*out << REMOVE_ITEM;
+						this->write_iterator(*out, it);
+						out->endMessage();
 					}
-					else {
-						*out << (TransactionId)0;
-					}
-					*out << REMOVE_ITEM;
-					this->write_iterator(*out, it);
-					out->endMessage();
+					mSignal.emit(it, BEFORE | REMOVE_ITEM);
 				}
-				mSignal.emit(it, BEFORE | REMOVE_ITEM);
 			}
 
 			void afterRemove() {
-				mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
+				if (unit()->isActive()) {
+					mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
+				}
 			}
 
 			void beforeReset() {
-				mSignal.emit(this->end(), BEFORE | RESET);
+				if (unit()->isActive()) {
+					mSignal.emit(this->end(), BEFORE | RESET);
+				}
 			}
 
 			void afterReset(ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-					if (answerTarget == out->id()) {
-						*out << answerId;
+				if (unit()->isActive()) {
+					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
+						if (answerTarget == out->id()) {
+							*out << answerId;
+						}
+						else {
+							*out << (TransactionId)0;
+						}
+						*out << RESET;
+						this->writeState(*out);
+						out->endMessage();
 					}
-					else {
-						*out << (TransactionId)0;
-					}
-					*out << RESET;
-					this->writeState(*out);
-					out->endMessage();
+					mSignal.emit(this->end(), AFTER | RESET);
 				}
-				mSignal.emit(this->end(), AFTER | RESET);
 			}
 
 		private:
 
-			SignalSlot::Signal<const const_iterator &, int> mSignal;
+			SignalSlot::Signal<const iterator &, int> mSignal;
 
 			std::list<Transaction> mTransactions;
 			std::list<std::pair<TransactionId, std::pair<ParticipantId, TransactionId>>> mPassTransactions;
@@ -371,6 +404,6 @@ namespace Engine {
 			TransactionId mTransactionCounter;
 
 		};
-		
+
 	}
 }

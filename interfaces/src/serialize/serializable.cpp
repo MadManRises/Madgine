@@ -38,13 +38,22 @@ namespace Engine {
 		{
 		}
 
-		void Serializable::activate()
+		void Serializable::setActive(bool b)
 		{
 		}
 
-		std::list<BufferedOutStream*> Serializable::getMasterStateMessageTargets()
+		std::set<BufferedOutStream*, CompareStreamId> Serializable::getMasterStateMessageTargets()
 		{
-			return mUnit ? mUnit->getMasterMessageTargets(false) : std::list<BufferedOutStream*>();
+			std::set<BufferedOutStream*, CompareStreamId> result;
+			if (mUnit) {
+				result = mUnit->getMasterMessageTargets();
+
+				for (BufferedOutStream *out : result) {
+					out->beginMessage(mUnit, STATE);
+				}
+			}
+
+			return result;
 		}
 
 		void Serializable::sendState()
@@ -55,7 +64,7 @@ namespace Engine {
 			}
 		}
 
-		TopLevelSerializableUnitBase * Serializable::topLevel() const
+		const TopLevelSerializableUnitBase * Serializable::topLevel() const
 		{
 			return mUnit ? mUnit->topLevel() : nullptr;
 		}

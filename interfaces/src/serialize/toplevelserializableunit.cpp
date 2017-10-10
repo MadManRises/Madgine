@@ -7,124 +7,109 @@
 #include "serializemanager.h"
 
 namespace Engine {
-namespace Serialize {
+	namespace Serialize {
 
-	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId) :
-		SerializableUnitBase(this, staticId),
-		mSlaveManager(0),
-		mStaticSlaveId(staticId)
-	{
-	}
-
-	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other) :
-		SerializableUnitBase(this, other),
-		mSlaveManager(0),
-		mStaticSlaveId(other.mStaticSlaveId)
-	{		
-	}
-
-	TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other) :
-		SerializableUnitBase(this, std::forward<TopLevelSerializableUnitBase>(other)),
-		mSlaveManager(0),
-		mStaticSlaveId(other.mStaticSlaveId)
-	{		
-		while (!other.mMasterManagers.empty()) {
-			other.mMasterManagers.front()->moveTopLevelItem(&other, this);
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId, SerializableUnitBase *parent) :
+			SerializableUnitBase(parent, staticId),
+			mSlaveManager(0),
+			mStaticSlaveId(staticId)
+		{
 		}
-		if (other.mSlaveManager) {
-			other.mSlaveManager->moveTopLevelItem(&other, this);
+
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other, SerializableUnitBase *parent) :
+			SerializableUnitBase(parent, other),
+			mSlaveManager(0),
+			mStaticSlaveId(other.mStaticSlaveId)
+		{
 		}
-	}
 
-	
-
-	TopLevelSerializableUnitBase::~TopLevelSerializableUnitBase()
-	{
-		if (mSlaveManager) {
-			mSlaveManager->removeTopLevelItem(this);
-		}
-		while (!mMasterManagers.empty()) {
-			mMasterManagers.front()->removeTopLevelItem(this);
-		}
-	}
-
-	void TopLevelSerializableUnitBase::copyStaticSlaveId(const TopLevelSerializableUnitBase & other)
-	{
-		mStaticSlaveId = other.mStaticSlaveId;
-	}
-
-	bool TopLevelSerializableUnitBase::isMaster()
-	{
-		return mSlaveManager == 0;
-	}
-
-	ParticipantId TopLevelSerializableUnitBase::getLocalMasterParticipantId()
-	{
-		return SerializeManager::getLocalMasterParticipantId();
-	}
-
-	ParticipantId TopLevelSerializableUnitBase::getSlaveParticipantId()
-	{
-		return mSlaveManager->getSlaveParticipantId();
-	}
-
-	void TopLevelSerializableUnitBase::setStaticSlaveId(size_t staticId)
-	{
-		mStaticSlaveId = staticId;
-	}
-
-	void TopLevelSerializableUnitBase::initSlaveId()
-	{
-		setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
-	}
-
-	size_t TopLevelSerializableUnitBase::readId(SerializeInStream & in)
-	{
-		mStaticSlaveId = SerializableUnitBase::readId(in);		
-		return mStaticSlaveId;
-	}
-
-	std::list<BufferedOutStream*> TopLevelSerializableUnitBase::getMasterMessageTargets(SerializableUnitBase * unit, MessageType type, const std::list<ParticipantId> &targets)
-{
-	std::list<BufferedOutStream*> result;
-	if (targets.empty()) {
-		for (SerializeManager *mgr : mMasterManagers) {
-			result.splice(result.end(), mgr->getMasterMessageTargets(unit, type));
-		}
-	}
-	else {
-		std::list<ParticipantId> filterCopy = targets;
-		auto f = [&](SerializableUnitBase *unit, ParticipantId id) {
-			auto it = std::find(filterCopy.begin(), filterCopy.end(), id);
-			if (it != filterCopy.end()) {
-				filterCopy.erase(it);
-				return true;
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other, SerializableUnitBase *parent) :
+			SerializableUnitBase(parent, std::forward<TopLevelSerializableUnitBase>(other)),
+			mSlaveManager(0),
+			mStaticSlaveId(other.mStaticSlaveId)
+		{
+			while (!other.mMasterManagers.empty()) {
+				other.mMasterManagers.front()->moveTopLevelItem(&other, this);
 			}
-			return false;
-		};
-		for (SerializeManager *mgr : mMasterManagers) {
-			result.splice(result.end(), mgr->getMasterMessageTargets(unit, type, f));
+			if (other.mSlaveManager) {
+				other.mSlaveManager->moveTopLevelItem(&other, this);
+			}
 		}
-		if (!filterCopy.empty())
-			LOG_WARNING("Passed invalid Particpant-Id as Message Target!");
-	}
-	return result;
-}
 
-	BufferedOutStream * TopLevelSerializableUnitBase::getSlaveMessageTarget(SerializableUnitBase *unit)
+
+
+		TopLevelSerializableUnitBase::~TopLevelSerializableUnitBase()
+		{
+			if (mSlaveManager) {
+				mSlaveManager->removeTopLevelItem(this);
+			}
+			while (!mMasterManagers.empty()) {
+				mMasterManagers.front()->removeTopLevelItem(this);
+			}
+		}
+
+		void TopLevelSerializableUnitBase::copyStaticSlaveId(const TopLevelSerializableUnitBase & other)
+		{
+			mStaticSlaveId = other.mStaticSlaveId;
+		}
+
+		bool TopLevelSerializableUnitBase::isMaster() const
+		{
+			return mSlaveManager == 0;
+		}
+
+		ParticipantId TopLevelSerializableUnitBase::getLocalMasterParticipantId()
+		{
+			return SerializeManager::getLocalMasterParticipantId();
+		}
+
+		ParticipantId TopLevelSerializableUnitBase::getSlaveParticipantId() const
+		{
+			return mSlaveManager->getSlaveParticipantId();
+		}
+
+		void TopLevelSerializableUnitBase::setStaticSlaveId(size_t staticId)
+		{
+			mStaticSlaveId = staticId;
+		}
+
+		void TopLevelSerializableUnitBase::initSlaveId()
+		{
+			setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
+		}
+
+		size_t TopLevelSerializableUnitBase::readId(SerializeInStream & in)
+		{
+			mStaticSlaveId = SerializableUnitBase::readId(in);
+			return mStaticSlaveId;
+		}
+
+		std::set<BufferedOutStream*, CompareStreamId> TopLevelSerializableUnitBase::getMasterMessageTargets()
+		{
+			std::set<BufferedOutStream*, CompareStreamId> result;
+			for (SerializeManager *mgr : mMasterManagers) {
+				const std::set<BufferedOutStream*, CompareStreamId> &targets = mgr->getMasterMessageTargets();
+				std::set<BufferedOutStream*, CompareStreamId> temp;
+				std::set_union(result.begin(), result.end(), targets.begin(), targets.end(), std::inserter(temp, temp.begin()));
+				temp.swap(result);
+			}
+			return result;
+		}
+
+	BufferedOutStream * TopLevelSerializableUnitBase::getSlaveMessageTarget() const
 	{
 		if (mSlaveManager) {
-			return mSlaveManager->getSlaveMessageTarget(unit);
+			return mSlaveManager->getSlaveMessageTarget();
 		}
 		return nullptr;
 	}
 
-	const std::list<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers()
+	const std::list<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers() const
 	{
 		return mMasterManagers;
 	}
 
-	SerializeManager * TopLevelSerializableUnitBase::getSlaveManager()
+	SerializeManager * TopLevelSerializableUnitBase::getSlaveManager() const
 	{
 		return mSlaveManager;
 	}
@@ -177,6 +162,11 @@ bool TopLevelSerializableUnitBase::init()
 	postConstruct();
 	activate();
 	return true;
+}
+
+const TopLevelSerializableUnitBase * TopLevelSerializableUnitBase::topLevel() const
+{
+	return this;
 }
 
 } // namespace Serialize

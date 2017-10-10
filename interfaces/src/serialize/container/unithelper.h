@@ -34,7 +34,7 @@ namespace Engine {
 			static void postConstruct(T &item) {
 			}
 
-			static void activateItem(T &item) {
+			static void setItemActive(T &item, bool b) {
 			}
 
 		};
@@ -137,8 +137,8 @@ namespace Engine {
 				UnitHelper<T>::postConstruct(*item);
 			}
 
-			static void activateItem(Type &item) {
-				UnitHelper<T>::activateItem(*item);
+			static void setItemActive(Type &item, bool b) {
+				UnitHelper<T>::setItemActive(*item, b);
 			}
 
 		};
@@ -197,11 +197,11 @@ namespace Engine {
 
 			}
 
-			static void activateItem(SerializableUnitBase &item) {
-				item.activate();
+			static void setItemActive(SerializableUnitBase &item, bool b) {
+				item.setActive(b);
 			}
 
-			static void activateItem(Serializable &item) {
+			static void setItemActive(Serializable &item, bool b) {
 
 			}
 
@@ -253,9 +253,9 @@ namespace Engine {
 				UnitHelper<V>::postConstruct(item.second);
 			}
 
-			static void activateItem(Type &item) {
-				UnitHelper<U>::activateItem(item.first);
-				UnitHelper<V>::activateItem(item.second);
+			static void setItemActive(Type &item, bool b) {
+				UnitHelper<U>::setItemActive(item.first, b);
+				UnitHelper<V>::setItemActive(item.second, b);
 			}
 
 		};
@@ -321,9 +321,9 @@ namespace Engine {
 			};
 			}
 
-			static void activateItem(Type &item) {
+			static void setItemActive(Type &item, bool b) {
 				(void)unpacker {
-				(UnitHelper<typename std::tuple_element<Is, Type>::type>::activateItem(std::get<Is>(item)), true)...
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::setItemActive(std::get<Is>(item), b), true)...
 			};
 			}
 

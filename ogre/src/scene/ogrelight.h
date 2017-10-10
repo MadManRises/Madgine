@@ -7,7 +7,7 @@ namespace Engine {
 
 		class OgreLight : public Light {
 		public:
-			OgreLight(Serialize::TopLevelSerializableUnitBase *topLevel, Ogre::Light *light);
+			OgreLight(SceneManagerBase *sceneMgr, Ogre::Light *light);
 			virtual ~OgreLight();
 
 		protected:

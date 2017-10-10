@@ -50,12 +50,12 @@ namespace Engine {
 		};
 
 
-		template <class T>
+		template <class T, bool extend = true>
 		class SerializedUnit : UnitHelper<T>, public Serializable {
 		public:
 			template <class... _Ty>
 			SerializedUnit(_Ty&&... args) :
-				mData(extendTuple<T>(topLevel(), std::forward_as_tuple(args...)))
+				mData(extendTuple<extend, T>(unit(), std::forward_as_tuple(args...)))
 			{
 				mData.postConstruct();
 				if (!unit() || unit()->isActive())
@@ -92,17 +92,19 @@ namespace Engine {
 				this->write_state(out, mData);
 			}
 
-			virtual void activate() override {
-				mData.activate();
+
+			virtual void setActive(bool b) override {
+				mData.setActive(b);
 			}
+
 
 		private:
 			TupleConstructed<T> mData;
 
 		};
 
-		template <class T>
-		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T>, SerializedData<T>>::type;
+		template <class T, bool extend = true>
+		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T, extend>, SerializedData<T>>::type;
 
 	}
 }

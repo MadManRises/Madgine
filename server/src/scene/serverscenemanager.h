@@ -31,6 +31,8 @@ public:
 	void readScene(Serialize::SerializeInStream &in);
 	void writeScene(Serialize::SerializeOutStream &out) const;
 
+	std::tuple<ServerSceneManager*> createLightData();
+
 	static constexpr const float sSceneRasterSize = .2f;
 
 protected:
@@ -40,7 +42,7 @@ private:
 
 	std::string mStaticSceneName;
 
-	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;
+	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&ServerSceneManager::createLightData), &ServerSceneManager::createLightData>> mLights;
 
 };
 

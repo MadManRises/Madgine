@@ -66,6 +66,11 @@ Light * ServerSceneManager::createLight()
 	return &*mLights.emplace_back(this);
 }
 
+std::tuple<ServerSceneManager*> Engine::Scene::ServerSceneManager::createLightData()
+{
+	return { this };
+}
+
 std::list<Light*> ServerSceneManager::lights()
 {
 	std::list<Light*> result;

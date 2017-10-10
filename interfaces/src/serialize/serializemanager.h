@@ -4,6 +4,8 @@
 
 #include "signalslot/signal.h"
 
+#include "streams/serializestream.h"
+
 namespace Engine {
 		namespace Serialize {
 
@@ -51,14 +53,14 @@ namespace Engine {
 				bool filter(const SerializableUnitBase *unit, ParticipantId id);
 				void addFilter(std::function<bool(const SerializableUnitBase*, ParticipantId)>);
 
-				virtual std::list<BufferedOutStream*> getMasterMessageTargets(SerializableUnitBase *unit, MessageType type, const std::function<bool(SerializableUnitBase*, ParticipantId)> &customFilter = {});
+				std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
 
 				void clearTopLevelItems();
 				bool addTopLevelItem(TopLevelSerializableUnitBase *unit, bool sendStateFlag = true);
 				void removeTopLevelItem(TopLevelSerializableUnitBase *unit);
 				void moveTopLevelItem(TopLevelSerializableUnitBase *oldUnit, TopLevelSerializableUnitBase *newUnit);
 
-				BufferedOutStream *getSlaveMessageTarget(SerializableUnitBase *unit);
+				BufferedOutStream *getSlaveMessageTarget();
 				static ParticipantId getLocalMasterParticipantId();
 				ParticipantId getSlaveParticipantId();
 
