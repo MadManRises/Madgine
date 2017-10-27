@@ -24,6 +24,7 @@ FolderSources(sources "" src interfacesforward.h interfaceslib.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources src signalslot connection.cpp connection.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
 	FolderSources(sources src util process.cpp process.h processlistener.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
+FolderSources(sources "" vstools Madgine.natvis)
 
 include_directories(${Interfaces_SOURCE_DIR}/src)
 add_library(Interfaces SHARED ${sources})

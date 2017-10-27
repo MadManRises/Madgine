@@ -80,39 +80,52 @@ namespace Engine {
 					mNotifySignal.connect(std::forward<Ty>(slot));
 				}
 
-				void setCondition(std::function<bool()> condition) {
+				/*void setCondition(std::function<bool()> condition) {
 					mCondition = condition;
 				}
 
 				std::function<bool()> getCondition() const {
 					return mCondition;
+				}*/
+
+				virtual void setActiveFlag(bool b) override {
+					this->setItemActiveFlag(mData, b);
 				}
 
-				virtual void setActive(bool b) override {
-					if (b)
-						mNotifySignal.emit(mData, T());
-					else
-						mNotifySignal.emit(T(), mData);
-					this->setItemActive(mData, b);
+				virtual void notifySetActive(bool active) override {
+					
+					if (!active) {
+						Serializable::notifySetActive(active);
+						if (mData != T())
+							mNotifySignal.emit(T(), mData);
+					}
+					this->notifySetItemActive(mData, active);
+					if (active) {
+						Serializable::notifySetActive(active);
+						if(mData != T())
+							mNotifySignal.emit(mData, T());
+					}
 				}
 
 			protected:
 				void notify(const T &old) {
-					if (!mCondition || mCondition()) {
-						if (unit()->isActive()) {
-							mNotifySignal.emit(mData, old);
+					//if (!mCondition || mCondition()) {
+						if (isActive()) {
 							for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 								this->write_state(*out, this->mData);
 								out->endMessage();
 							}
 						}
-					}
+						if (isLocallyActive()) {
+							mNotifySignal.emit(mData, old);
+						}
+					//}
 				}
 
 			private:
 				T mData;
 				SignalSlot::Signal<const T &, const T &> mNotifySignal;
-				std::function<bool()> mCondition;
+				//std::function<bool()> mCondition;
 
 			};
 

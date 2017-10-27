@@ -92,7 +92,7 @@ public:
 
 	template <class T>
 	struct isValueType {
-		const constexpr static bool value = _isValueType<std::remove_const_t<T>>::value || std::is_enum<T>::value;
+		const constexpr static bool value = _isValueType<std::decay_t<T>>::value || std::is_enum<T>::value;
 	};
 
 	ValueType()
@@ -141,13 +141,13 @@ public:
 		mUnion = other.mUnion;
 	}
 	template <class T, class _ = std::enable_if_t<isValueType<T>::value>>
-    void operator=(const T &t)
+    void operator=(T &&t)
 	{
-		mUnion = t;
+		mUnion = std::forward<T>(t);
 	}
-	void operator=(const char *s)
+	void operator=(const char * const s)
 	{
-		*this = std::string(s);
+		mUnion = std::string(s);
 	}
 
     bool operator==(const ValueType &other) const

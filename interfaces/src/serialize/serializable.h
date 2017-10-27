@@ -11,15 +11,18 @@ namespace Engine {
 			Serializable();
 			Serializable(const Serializable &);
 			Serializable(Serializable &&);
+			virtual ~Serializable();
 
-			Serializable &operator=(const Serializable &) = default;
+			Serializable &operator=(const Serializable &);
 
 			virtual void readState(SerializeInStream&) = 0;
 			virtual void writeState(SerializeOutStream&) const = 0;
 
 			virtual void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map);
 			virtual void writeCreationData(SerializeOutStream &out) const;
-			virtual void setActive(bool b);
+			virtual void setActiveFlag(bool b);
+			virtual void notifySetActive(bool active);
+
 
 			std::set<BufferedOutStream*, CompareStreamId> getMasterStateMessageTargets();
 
@@ -27,11 +30,15 @@ namespace Engine {
 
 			const TopLevelSerializableUnitBase *topLevel() const;
 
-		protected:
 			SerializableUnitBase *unit() const;
+
+		protected:
+			bool isLocallyActive();
+			bool isActive();
 
 		private:
 			SerializableUnitBase *mUnit;
+			bool mLocallyActive;
 
 		};
 

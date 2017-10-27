@@ -3,6 +3,7 @@
 #include "observablecontainer.h"
 #include "creationhelper.h"
 #include "unithelper.h"
+#include "generic/container_traits.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -35,18 +36,18 @@ namespace Engine {
 			}
 
 			void push_back(const Type &item) {
-				this->insert(this->end(), item);
+				this->emplace(this->end(), item);
 			}
 
 			template <class... _Ty>
-			iterator emplace_back(_Ty&&... args) {
-				return this->insert(this->end(), std::forward<_Ty>(args)...);
+			std::pair<iterator, bool> emplace_back(_Ty&&... args) {
+				return this->emplace(this->end(), std::forward<_Ty>(args)...);
 			}
 
 			
 
 			template <class... _Ty>
-			iterator emplace_tuple_back(std::tuple<_Ty...>&& tuple) {
+			std::pair<iterator, bool> emplace_tuple_back(std::tuple<_Ty...>&& tuple) {
 				return TupleUnpacker<>::call(this, &ListImpl::emplace_back<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
@@ -70,7 +71,7 @@ namespace Engine {
 
 			template <class T, class... _Ty>
 			void emplace_back_init(T &&init, _Ty&&... args) {
-				this->insert(std::forward<T>(init), this->end(), std::forward<_Ty>(args)...);
+				this->emplace_init(std::forward<T>(init), this->end(), std::forward<_Ty>(args)...);
 			}
 
 			template <class T, class... _Ty>

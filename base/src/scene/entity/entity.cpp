@@ -19,7 +19,7 @@ namespace Entity {
 
 
 Entity::Entity(const Entity &other) :
-	SerializableUnit(other.mSceneManager, other),
+	SerializableUnit(other),
 	mName(other.mName),
 	mSceneManager(other.mSceneManager)
 {
@@ -27,7 +27,7 @@ Entity::Entity(const Entity &other) :
 }
 
 Entity::Entity(Entity &&other) :
-	SerializableUnit(other.mSceneManager, std::forward<Entity>(other)),
+	SerializableUnit(std::forward<Entity>(other)),
 	mName(other.mName),	
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
 	mSceneManager(other.mSceneManager)
@@ -36,7 +36,6 @@ Entity::Entity(Entity &&other) :
 }
 
 Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &behaviour) :
-	SerializableUnit(sceneMgr),
 	mName(name),
 	mSceneManager(sceneMgr)
 {
@@ -61,22 +60,15 @@ Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::s
 
 Entity::~Entity()
 {	
-	finalize();
 }
 
 void Entity::setup() {
-	mComponents.connectCallback([this](const decltype(mComponents)::const_iterator &it, int op) {
+	mComponents.connectCallback([](const decltype(mComponents)::const_iterator &it, int op) {
 		using namespace Engine::Serialize;
 		switch (op) {
 		case BEFORE | RESET:
-			for (auto it2 = mComponents.begin(); it != it2; ++it2) {
-				(*it2)->finalize();
-			}
 			break;
 		case AFTER | RESET:
-			for (auto it2 = mComponents.begin(); it != it2; ++it2) {
-				(*it2)->init();
-			}
 			break;
 		case INSERT_ITEM:
 			(*it)->init();
@@ -86,11 +78,6 @@ void Entity::setup() {
 			break;
 		}
 	});
-}
-
-void Entity::finalize()
-{
-	mComponents.clear();
 }
 
 const char *Entity::key() const
@@ -159,7 +146,7 @@ EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBas
         throw ComponentException(Exceptions::doubleComponent(component->key()));
     if (&component->getEntity() != this)
         throw ComponentException(Exceptions::corruptData);
-    return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component))->get();
+    return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
 }
 
 

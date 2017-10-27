@@ -33,8 +33,8 @@ namespace Engine {
 				out << (int)std::distance(this->begin(), it);
 			}
 
-			iterator read_item(SerializeInStream &in) {
-				return this->read_item_where(read_iterator(in), in);
+			std::pair<iterator, bool> read_item(SerializeInStream &in) {
+				return this->read_item_where_intern(read_iterator(in), in);
 			}
 
 			void write_item(SerializeOutStream &out, const const_iterator &it) const {

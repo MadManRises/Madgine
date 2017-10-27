@@ -6,7 +6,7 @@
 namespace Engine {
 	namespace Serialize {
 
-		struct SerializableUnitTupleExtender {
+		/*struct SerializableUnitTupleExtender {
 			template <class Tuple>
 			static auto extend(SerializableUnitBase *unit, Tuple &&tuple) {
 				return std::tuple_cat(std::make_tuple(unit), std::forward<Tuple>(tuple));
@@ -30,40 +30,31 @@ namespace Engine {
 
 		template <bool extend, class T, class Tuple>
 		using ExtendedTuple = decltype(extendTuple<extend, T>(std::declval<SerializableUnitBase*>(), std::declval<Tuple>()));
+		*/
 
 		template <class FirstCreator, class SecondCreator>
 		class PairCreator : private FirstCreator, private SecondCreator {
 		public:
-			template <class T>
-			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::template ArgsTuple<T>, typename SecondCreator::template ArgsTuple<T>>;
+			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::template ArgsTuple, typename SecondCreator::template ArgsTuple>;
 		protected:
-			template <class P>
-			auto readCreationData(SerializeInStream &in, SerializableUnitBase *parent) {
-				auto &&first = FirstCreator::template readCreationData<typename P::first_type>(in, parent);
-				return std::make_tuple(std::piecewise_construct, first, SecondCreator::template readCreationData<typename P::second_type>(in, parent));
+			auto readCreationData(SerializeInStream &in) {
+				auto &&first = FirstCreator::readCreationData(in);
+				return std::make_tuple(std::piecewise_construct, first, SecondCreator::readCreationData(in));
 			}
 
 		};
 
-		template <bool extend, class... Args>
-		class _DefaultCreator {
+		template <class... Args>
+		class DefaultCreator {
 		public:
-			template <class T>
-			using ArgsTuple = ExtendedTuple<extend, T, std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>>;
+			using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>;
 		protected:
-			template <class T>
-			ArgsTuple<T> readCreationData(SerializeInStream &in, SerializableUnitBase *parent) {
-				std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...> tuple;
+			ArgsTuple readCreationData(SerializeInStream &in) {
+				ArgsTuple tuple;
 				TupleSerializer::readTuple(tuple, in);
-				return extendTuple<extend, T>(parent, std::move(tuple));
+				return std::move(tuple);
 			}
 		};
-
-		template <class... Args>
-		using DefaultCreator = _DefaultCreator<true, Args...>;
-
-		template <class... Args>
-		using NoExtendCreator = _DefaultCreator<false, Args...>;
 
 		template <typename F, class R, class... _Ty>
 		class _CustomCreator {
@@ -72,12 +63,10 @@ namespace Engine {
 				mCallback = f;
 			}
 
-			template <class T>
 			using ArgsTuple = R;
 
 		protected:
-			template <class T>
-			R readCreationData(SerializeInStream &in, SerializableUnitBase *parent) {
+			R readCreationData(SerializeInStream &in) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
 				return TupleUnpacker<>::call(mCallback, std::move(tuple));
@@ -99,12 +88,10 @@ namespace Engine {
 				assert(mParent);
 			}
 
-			template <class _>
 			using ArgsTuple = R;
 
 		protected:
-			template <class _>
-			R readCreationData(SerializeInStream &in, SerializableUnitBase *parent) {
+			R readCreationData(SerializeInStream &in) {
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 				TupleSerializer::readTuple(tuple, in);
 				return TupleUnpacker<>::call(mParent, f, std::move(tuple));

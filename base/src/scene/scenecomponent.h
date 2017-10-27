@@ -5,7 +5,8 @@
 #include "serialize/serializableunit.h"
 #include "scripting/types/scope.h"
 #include "madgineobject.h"
-#include "serialize/serializableunitheapcreator.h"
+
+#include "serialize/container/set.h"
 
 namespace Engine {
 namespace Scene {
@@ -44,26 +45,42 @@ private:
 
 };
 
-
 template <class T>
-class SceneComponent : public Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, Serialize::SerializableUnitHeapCreator, Scene::SceneManagerBase*>>{
-
-public:
-	using Scripting::Scope<T, BaseUniqueComponent<T, SceneComponentBase, Serialize::SerializableUnitHeapCreator, SceneManagerBase*>>::Scope;
-
-private:
-	virtual size_t getSize() const override final {
-		return sizeof(T);
+class SceneComponentSet : public Serialize::SerializableSet<T> {
+protected:
+	virtual void writeState(Serialize::SerializeOutStream &out) const override
+	{
+		for (const std::unique_ptr<SceneComponentBase> &component : *this) {
+			out << component->key();
+			component->writeId(out);
+			component->writeState(out);
+		}
+		out << ValueType::EOL();
 	}
 
+	virtual void readState(Serialize::SerializeInStream &in) override {
+		std::string componentName;
+		while (in.loopRead(componentName)) {
+			auto it = std::find_if(begin(), end(), [&](const std::unique_ptr<SceneComponentBase> &comp) {return comp->key() == componentName; });
+			(*it)->readId(in);
+			(*it)->readState(in);
+		}
+	}
 };
+
+template <class T>
+struct container_traits<SceneComponentSet, T> : public container_traits<Serialize::SerializableSet, T>{
+};
+
+using SceneComponentCollector = BaseUniqueComponentCollector<Scene::SceneComponentBase, SceneComponentSet, Scene::SceneManagerBase*>;
+
+template <class T>
+using SceneComponent = Serialize::SerializableUnit<T, Scripting::Scope<T, UniqueComponent<T, SceneComponentCollector>>>;
 
 
 }
 
-#ifdef _MSC_VER
-template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scene::SceneComponentBase, Serialize::SerializableUnitHeapCreator, Scene::SceneManagerBase*>;
-#endif
+
 
 }
 

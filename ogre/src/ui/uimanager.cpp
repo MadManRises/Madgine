@@ -14,10 +14,10 @@ namespace Engine {
 
 	API_IMPL(UI::UIManager, MAP_F(showCursor));
 
-	
+
 #ifdef _MSC_VER
-	template class OGREMADGINE_EXPORT OgreUniqueComponentCollector<UI::GuiHandlerBase>;
-	template class OGREMADGINE_EXPORT OgreUniqueComponentCollector<UI::GameHandlerBase>;
+	template class OGREMADGINE_EXPORT UI::GuiHandlerCollector;
+	template class OGREMADGINE_EXPORT UI::GameHandlerCollector;
 #endif
 
 	namespace UI {

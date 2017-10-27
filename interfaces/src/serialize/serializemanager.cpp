@@ -229,7 +229,7 @@ namespace Engine {
 
 		bool SerializeManager::isMaster()
 		{
-			return mSlaveStream == 0;
+			return mSlaveStream == nullptr || mSlaveStreamInvalid;
 		}
 
 		Util::Process & SerializeManager::process()
@@ -405,11 +405,13 @@ namespace Engine {
 
 		size_t SerializeManager::convertPtr(SerializeOutStream & out, SerializableUnitBase * unit)
 		{
-			return &out != mSlaveStream ? unit->masterId() : unit->slaveId();
+			return unit == nullptr ? NULL_UNIT_ID : (&out != mSlaveStream ? unit->masterId() : unit->slaveId());
 		}
 
 		SerializableUnitBase * SerializeManager::convertPtr(SerializeInStream & in, size_t unit)
 		{
+			if (unit == NULL_UNIT_ID)
+				return nullptr;
 			try {
 				if (&in == mSlaveStream) {
 					return mSlaveMappings.at(unit);

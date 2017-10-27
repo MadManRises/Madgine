@@ -12,8 +12,12 @@
 
 #include "entity/entity.h"
 
+#include "serialize/container/noparentunit.h"
+
 namespace Engine {
 	namespace Scene {
+
+
 
 		class MADGINE_BASE_EXPORT SceneManagerBase : public Singleton<SceneManagerBase>,
 			public Serialize::TopLevelSerializableUnit<SceneManagerBase>,
@@ -45,9 +49,6 @@ namespace Engine {
 			virtual void clear();
 
 			size_t getComponentCount();
-
-			void saveComponentData(Serialize::SerializeOutStream &out) const;
-			void loadComponentData(Serialize::SerializeInStream &in);
 
 
 			virtual void readState(Serialize::SerializeInStream &in) override;
@@ -89,9 +90,9 @@ namespace Engine {
 		private:
 			size_t mItemCount;
 
-			BaseUniqueComponentCollector<SceneComponentBase, Serialize::SerializableUnitHeapCreator, SceneManagerBase*> mSceneComponents;
+			SceneComponentCollector mSceneComponents;
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&SceneManagerBase::createEntityData), &SceneManagerBase::createEntityData>> mEntities;
-			std::list<Entity::Entity> mLocalEntities;
+			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
 			std::list<Entity::Entity *> mEntityRemoveQueue;
 
 			Engine::SignalSlot::Signal<> mStateLoadedSignal;

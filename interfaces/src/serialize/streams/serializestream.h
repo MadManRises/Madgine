@@ -52,18 +52,16 @@ public:
     SerializeInStream &operator >> (ValueType &result);
 
 	template <class T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
-	SerializeInStream &operator >> (T *&p) {
-		ExtendedValueType type;
-		read(type);
-		if (type != ExtendedValueType::SerializableUnitValue)
-			throw SerializeException(Exceptions::notValueType("SerializableUnit"));
-		size_t ptr;
-		read(ptr);
-		p = dynamic_cast<T*>(convertPtr(ptr));
-		if (!p)
-			throw 0;
+	SerializeInStream &operator >> (T *&p) {		
+		SerializableUnitBase *unit;
+		(*this) >> unit;
+		p = dynamic_cast<T*>(unit);
+		if (unit && !p)
+			throw 0;	
 		return *this;
 	}
+
+	SerializeInStream &operator >> (SerializableUnitBase *&p);
 
 	SerializeInStream &operator >> (Serializable &s);
 

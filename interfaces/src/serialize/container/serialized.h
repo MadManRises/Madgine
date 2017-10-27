@@ -2,7 +2,6 @@
 
 #include "../serializable.h"
 #include "unithelper.h"
-#include "creationhelper.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -45,21 +44,28 @@ namespace Engine {
 				this->write_state(out, mData);
 			}
 
+			virtual void setActiveFlag(bool b) override {
+				this->setItemActiveFlag(mData, b);
+			}
+
+			virtual void notifySetActive(bool active) override {
+				Serializable::notifySetActive(active);
+				this->notifySetItemActive(mData, active);
+			}
+
 		private:
 			T mData;
 		};
 
 
-		template <class T, bool extend = true>
+		template <class T>
 		class SerializedUnit : UnitHelper<T>, public Serializable {
 		public:
 			template <class... _Ty>
 			SerializedUnit(_Ty&&... args) :
-				mData(extendTuple<extend, T>(unit(), std::forward_as_tuple(args...)))
+				mData(std::forward<_Ty>(args)...)
 			{
-				mData.postConstruct();
-				if (!unit() || unit()->isActive())
-					mData.activate();
+				mData.postConstruct(this);
 			}
 
 			/*template <class Ty>
@@ -92,19 +98,22 @@ namespace Engine {
 				this->write_state(out, mData);
 			}
 
-
-			virtual void setActive(bool b) override {
-				mData.setActive(b);
+			virtual void setActiveFlag(bool b) override {
+				this->setItemActiveFlag(mData, b);
 			}
 
+			virtual void notifySetActive(bool active) override {
+				Serializable::notifySetActive(active);
+				this->notifySetItemActive(mData, active);
+			}
 
 		private:
-			TupleConstructed<T> mData;
+			T mData;
 
 		};
 
-		template <class T, bool extend = true>
-		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T, extend>, SerializedData<T>>::type;
+		template <class T>
+		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T>, SerializedData<T>>::type;
 
 	}
 }

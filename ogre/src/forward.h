@@ -15,6 +15,7 @@ namespace Engine {
 		class ConfigSet;
 		struct OgreAppSettings;
 		class Application;
+		class OgreApplication;
 	}
 
 	namespace UI {

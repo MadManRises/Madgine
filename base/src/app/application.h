@@ -10,6 +10,8 @@
 
 #include "uniquecomponentcollector.h"
 
+#include "scripting/types/globalapicomponent.h"
+
 namespace Engine {
 	namespace App {
 
@@ -101,6 +103,8 @@ namespace Engine {
 
 			virtual KeyValueMapList maps() override;
 
+			bool singleFrame(float timeSinceLastFrame);
+
 			using Singleton<Application>::getSingleton;
 			using Singleton<Application>::getSingletonPtr;
 
@@ -119,7 +123,7 @@ namespace Engine {
 
 			SignalSlot::ConnectionManager mConnectionManager;	
 
-			BaseUniqueComponentCollector<Scripting::GlobalAPIComponentBase> mGlobalAPIs;
+			Scripting::GlobalAPICollector mGlobalAPIs;
 
 			std::unique_ptr<Util::StandardLog> mLog;
 
@@ -134,9 +138,7 @@ namespace Engine {
 	}
 
 
-#ifdef _MSC_VER
-	template class MADGINE_BASE_EXPORT BaseUniqueComponentCollector<Scripting::GlobalAPIComponentBase>;
-#endif
+
 
 }
 

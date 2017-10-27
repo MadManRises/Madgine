@@ -8,9 +8,9 @@ namespace Serialize {
 class INTERFACES_EXPORT TopLevelSerializableUnitBase : public SerializableUnitBase
 {
 public:
-	TopLevelSerializableUnitBase(size_t staticId = 0, SerializableUnitBase *parent = nullptr);
-	TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other, SerializableUnitBase *parent = nullptr);
-	TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other, SerializableUnitBase *parent = nullptr);
+	TopLevelSerializableUnitBase(size_t staticId = 0);
+	TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
+	TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other);
 	virtual ~TopLevelSerializableUnitBase();
 
 	void copyStaticSlaveId(const TopLevelSerializableUnitBase &other);
@@ -34,8 +34,6 @@ public:
 	void initSlaveId();
 
 	virtual size_t readId(SerializeInStream &in) override;
-
-	virtual bool init();
 
 	virtual const TopLevelSerializableUnitBase *topLevel() const override;
 

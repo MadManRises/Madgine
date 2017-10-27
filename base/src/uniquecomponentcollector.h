@@ -1,35 +1,31 @@
 #pragma once
 
+#include "generic/container_traits.h"
 
 namespace Engine{
 
-	struct StandardHeapCreator {
-		template <class T, class... _Ty>
-		static T *create(_Ty&&... args) {
-			return new T(std::forward<_Ty>(args)...);
-		}
-	};
 
 
-
-template <class Base, class Store, class Creator = StandardHeapCreator, class... _Ty>
+template <class Base, class Store, template <class...> class Container = std::list, class... _Ty>
 class UniqueComponentCollector : Store {
 
 public:
+	typedef Base Base;
+
 	UniqueComponentCollector(const UniqueComponentCollector &) = delete;
 	void operator=(const UniqueComponentCollector &) = delete;
 
     UniqueComponentCollector(_Ty... args){
 		for (auto f : this->sComponents()) {
-			mComponents.emplace_back(f(std::forward<_Ty>(args)...));
+			container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), f(std::forward<_Ty>(args)...));
 		}
     }
 
-    typename std::list<std::unique_ptr<Base>>::const_iterator begin() const {
+    typename Container<std::unique_ptr<Base>>::const_iterator begin() const {
         return mComponents.begin();
     }
 
-    typename std::list<std::unique_ptr<Base>>::const_iterator end() const {
+    typename Container<std::unique_ptr<Base>>::const_iterator end() const {
         return mComponents.end();
     }
 
@@ -37,7 +33,7 @@ public:
 		return mComponents.size();
 	}
 
-	const std::list<std::unique_ptr<Base>> &data() const {
+	const Container<std::unique_ptr<Base>> &data() const {
 		return mComponents;
 	}
 
@@ -49,18 +45,15 @@ public:
 		return result;
 	}
 
-	typename std::list<std::unique_ptr<Base>>::const_iterator postCreate(void *hash, _Ty... args) {
+	typename Container<std::unique_ptr<Base>>::const_iterator postCreate(void *hash, _Ty... args) {
 		auto fIt = std::find_if(this->sComponents().begin(), this->sComponents().end(), [=](const std::function<std::unique_ptr<Base>(_Ty...)> &f) {return &f == hash; });
-		return mComponents.insert(mComponents.end(), (*fIt)(std::forward<_Ty>(args)...));
+		return container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), (*fIt)(std::forward<_Ty>(args)...)).first;
 	}
 
 protected:
-    template <class T, template <class, class, class...> class Collector, class _Base, class _Creator, class...>
-    friend class UniqueComponent;
-
     template <class T>
     static typename std::list<std::function<std::unique_ptr<Base>(_Ty...)>>::const_iterator registerComponent(){
-		Store::sComponents().emplace_back([](_Ty... args) {return std::unique_ptr<Base>(Creator::template create<T>(std::forward<_Ty>(args)...)); });
+		Store::sComponents().emplace_back([](_Ty... args) {return std::unique_ptr<Base>(new T(std::forward<_Ty>(args)...)); });
 		auto it = Store::sComponents().end();
 		--it;
 		return it;
@@ -85,7 +78,7 @@ public:
 	};
 
 private:
-    std::list<std::unique_ptr<Base>> mComponents;
+    Container<std::unique_ptr<Base>> mComponents;
 };
 
 
@@ -99,12 +92,12 @@ protected:
 
 };
 
-template <class Base, class Creator = StandardHeapCreator, class... _Ty>
+template <class Base, template <class...> class Container = std::list, class... _Ty>
 class MADGINE_BASE_EXPORT BaseUniqueComponentCollector : 
-	public UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Creator, _Ty...>, 
-	public Singleton<BaseUniqueComponentCollector<Base, Creator, _Ty...>>
+	public UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>, 
+	public Singleton<BaseUniqueComponentCollector<Base, Container, _Ty...>>
 {
-	using UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Creator, _Ty...>::UniqueComponentCollector;
+	using UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>::UniqueComponentCollector;
 };
 
 

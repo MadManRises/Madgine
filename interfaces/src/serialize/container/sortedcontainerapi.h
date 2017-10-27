@@ -18,7 +18,7 @@ namespace Engine {
 			typedef typename traits::const_iterator const_iterator;
 
 			typedef typename traits::key_type key_type;
-			typedef typename traits::type type;
+			typedef typename traits::value_type value_type;
 
 			iterator find(const key_type &key) {
 				return kvFind(this->mData, key);

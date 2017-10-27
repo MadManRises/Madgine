@@ -2,8 +2,8 @@
 
 #include "handler.h"
 #include "gui/windownames.h"
-
-#include "ogreuniquecomponent.h"
+#include "ogreuniquecomponentcollector.h"
+#include "uniquecomponent.h"
 
 #include "scripting/types/scope.h"
 
@@ -56,8 +56,9 @@ private:
 
 };
 
+using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase>;
 template <class T>
-using GuiHandler = Scripting::Scope<T, OgreUniqueComponent<T, GuiHandlerBase>>;
+using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 
 } // namespace GuiHandler
 } // namespace Cegui

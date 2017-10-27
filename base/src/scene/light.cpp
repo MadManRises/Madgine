@@ -6,8 +6,7 @@
 namespace Engine {
 	namespace Scene {
 
-		Light::Light(SceneManagerBase* sceneMgr) :
-			SerializableUnit(sceneMgr),
+		Light::Light() :
 			mPowerChangedSlot(this),
 			mPositionChangedSlot(this)			
 		{

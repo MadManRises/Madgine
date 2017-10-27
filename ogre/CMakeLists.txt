@@ -16,7 +16,7 @@ set(CMAKE_MODULE_PATH
 
 set(sources "")
 FolderSources(sources "" "")
-FolderSources(sources "" src forward.h ogrelib.h ogreuniquecomponent.h ogreuniquecomponentcollector.h)
+FolderSources(sources "" src forward.h ogrelib.h ogreuniquecomponentcollector.h)
 	FolderSources(sources src app ogreapplication.cpp ogreapplication.h ogreappsettings.h configset.cpp configset.h)
 	FolderSources(sources src database messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources src gui guievents.h guisystem.cpp guisystem.h windownames.h)

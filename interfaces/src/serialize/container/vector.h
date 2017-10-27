@@ -38,12 +38,12 @@ namespace Engine {
 			}
 
 			void push_back(const Type &item) {
-				insert(this->end(), item);
+				emplace(this->end(), item);
 			}
 
 			template <class... _Ty>
 			iterator emplace_back(_Ty&&... args) {
-				return insert(this->end(), std::forward<_Ty>(args)...);
+				return emplace(this->end(), std::forward<_Ty>(args)...);
 			}
 
 			

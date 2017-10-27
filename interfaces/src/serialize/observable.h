@@ -14,7 +14,7 @@ namespace Engine {
 				Observable();		
 
 				BufferedOutStream *getSlaveActionMessageTarget() const;
-				std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(const std::list<ParticipantId> &targets = {}) const;
+				std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(const std::set<ParticipantId> &targets = {}) const;
 
 				void beginActionResponseMessage(BufferedOutStream *stream);
 

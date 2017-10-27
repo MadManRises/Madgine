@@ -22,6 +22,7 @@
 #include <vector>
 #include <typeindex>
 #include <chrono>
+#include <future>
 
 #include "forward.h"
 

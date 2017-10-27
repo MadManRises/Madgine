@@ -9,7 +9,6 @@ namespace Engine{
 namespace Scene{
 
 	SceneComponentBase::SceneComponentBase(SceneManagerBase *sceneMgr, ContextMask context) :
-		SerializableUnitBase(sceneMgr),
 		mContext(context),
 		mEnabled(true),
 		mSceneMgr(sceneMgr)
@@ -33,7 +32,6 @@ void SceneComponentBase::fixedUpdate(float timeStep, ContextMask mask)
 
 bool SceneComponentBase::init()
 {
-	activate();
 	return MadgineObject::init();
 }
 

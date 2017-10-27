@@ -5,11 +5,15 @@
 #include "scripting/types/scope.h"
 #include "scripting/types/globalapicomponentbase.h"
 
+
 namespace Engine {
 
 
 
 	namespace UI {
+
+
+
 
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
 			public Scripting::Scope<UIManager>,
@@ -53,8 +57,8 @@ namespace Engine {
 			virtual KeyValueMapList maps() override;
 
 		private:
-			OgreUniqueComponentCollector<GuiHandlerBase> mGuiHandlers;
-			OgreUniqueComponentCollector<GameHandlerBase> mGameHandlers;
+			GuiHandlerCollector mGuiHandlers;
+			GameHandlerCollector mGameHandlers;
 
 			GuiHandlerBase *mCurrentRoot;			
 

@@ -96,7 +96,6 @@ namespace Engine {
 		class LogListener;
 
 		class Process;
-		class ProcessListener;
 		class StandardLog;
 	}
 

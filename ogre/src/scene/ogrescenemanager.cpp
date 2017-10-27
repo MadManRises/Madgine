@@ -286,10 +286,6 @@ Ogre::Vector2 OgreSceneManager::relToScenePos(const Ogre::Vector2 &v)
     return getSceneBounds() * v;
 }
 
-
-
-
-
 const std::tuple<std::string, Ogre::Vector3, Ogre::Quaternion>& OgreSceneManager::getInfoObject(const std::string & name) const
 {
 	return mInfoObjects.at(name);
@@ -374,14 +370,14 @@ Ogre::SceneNode * OgreSceneManager::createEntityNode()
 
 
 
-std::tuple<OgreSceneManager *, Ogre::Light*> OgreSceneManager::createLightData()
+std::tuple<Ogre::Light*> OgreSceneManager::createLightData()
 {
-	return std::make_tuple(this, mSceneMgr->createLight());
+	return std::make_tuple(mSceneMgr->createLight());
 }
 
 Light * OgreSceneManager::createLight()
 {
-	return &*mLights.emplace_back(this, mSceneMgr->createLight());
+	return &*mLights.emplace_back(mSceneMgr->createLight()).first;
 }
 
 std::list<Light*> OgreSceneManager::lights()

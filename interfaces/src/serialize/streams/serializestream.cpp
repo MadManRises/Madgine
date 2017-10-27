@@ -96,6 +96,18 @@ SerializeInStream & SerializeInStream::operator >> (Serializable & s)
 	return *this;
 }
 
+SerializeInStream & SerializeInStream::operator>>(SerializableUnitBase *& p)
+{
+	ExtendedValueType type;
+	read(type);
+	if (type != ExtendedValueType::SerializableUnitValue)
+		throw SerializeException(Exceptions::notValueType("SerializableUnit"));
+	size_t ptr;
+	read(ptr);
+	p = convertPtr(ptr);
+	return *this;
+}
+
 void SerializeInStream::readRaw(void * buffer, size_t size)
 {
 	read(buffer, size);

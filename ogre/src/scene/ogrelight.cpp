@@ -6,8 +6,7 @@ namespace Engine {
 	namespace Scene {
 
 
-OgreLight::OgreLight(SceneManagerBase *sceneMgr, Ogre::Light * light) :
-	Light(sceneMgr),
+OgreLight::OgreLight(Ogre::Light * light) :
 	mLight(light)
 {
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "signalslot/signal.h"
+
 namespace Engine {
 	namespace Util {
 
@@ -13,8 +15,15 @@ namespace Engine {
 			void startSubProcess(size_t size, const std::string &name = "");
 			void endSubProcess();
 
-			void addListener(ProcessListener *listener);
-			void removeListener(ProcessListener *listener);
+			template <class T>
+			void connectSubProcessStarted(T &&slot) {
+				mSubProcessStarted.connect(std::forward<T>(slot), SignalSlot::QueuedConnectionType{});
+			}
+
+			template <class T>
+			void connectRatioChanged(T &&slot) {
+				mRatioChanged.connect(std::forward<T>(slot), SignalSlot::QueuedConnectionType{});
+			}
 
 		private:
 			float mRatio;
@@ -23,7 +32,8 @@ namespace Engine {
 			std::list<size_t> mSubProcessCounts;
 			std::list<size_t> mSubProcessIndices;
 
-			std::list<ProcessListener *> mListeners;
+			SignalSlot::Signal<const std::string &> mSubProcessStarted;
+			SignalSlot::Signal<float> mRatioChanged;
 		};
 
 	}

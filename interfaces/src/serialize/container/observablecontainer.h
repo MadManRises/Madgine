@@ -89,19 +89,15 @@ namespace Engine {
 			ObservableContainer(ObservableContainer &&other) = default;
 
 			virtual ~ObservableContainer() {
-				if (unit()->isActive()) {
-					mSignal.emit(this->end(), BEFORE | RESET);
-					Base::clear();
-					mSignal.emit(this->end(), AFTER | RESET);
-				}
+				
 			}
 
 			template <class T>
 			void operator=(T&& arg) {
 				if (isMaster()) {
-					beforeReset();
+					bool wasActive = beforeReset(this->end());
 					Base::operator=(std::forward<T>(arg));
-					afterReset();
+					afterReset(wasActive, this->end());
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
@@ -121,24 +117,26 @@ namespace Engine {
 
 
 			void clear() {
-				beforeReset();
-				Base::clear();
-				afterReset();
+				bool wasActive = beforeReset(this->end());
+				mData.clear();
+				mLocallyActiveIterator = mData.begin();
+				afterReset(wasActive, this->end());
 			}
 
 
 			template <class... _Ty>
-			iterator insert(const iterator &where, _Ty&&... args) {
-				iterator it = this->end();
+			std::pair<iterator, bool> emplace(const iterator &where, _Ty&&... args) {
+				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
 
 				if (isMaster()) {
-					it = Base::insert(where, std::forward<_Ty>(args)...);
-					onInsert(it);
+					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
+					if (it.second)
+						onInsert(it.first);
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
 						type temp(std::forward<_Ty>(args)...);
-						this->postConstruct(temp);
+						this->postConstruct(temp, nullptr);
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << (TransactionId)0;
@@ -154,15 +152,19 @@ namespace Engine {
 			}
 
 			template <class T, class... _Ty>
-			void insert(T &&init, const iterator &where, _Ty&&... args) {
+			std::pair<iterator, bool> emplace_init(T &&init, const iterator &where, _Ty&&... args) {
+				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
 				if (isMaster()) {
-					iterator it = Base::insert(std::forward<T>(init), where, std::forward<_Ty>(args)...);
-					onInsert(it);
+					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
+					if (it.second) {
+						init(*it.first);
+						onInsert(it.first);
+					}
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
 						type temp(std::forward<_Ty>(args)...);
-						this->postConstruct(temp);
+						this->postConstruct(temp, nullptr);
 
 						init(temp);
 
@@ -176,16 +178,16 @@ namespace Engine {
 						throw 0;
 					}
 				}
-
+				return it;
 			}
 
 			iterator erase(const iterator &where) {
 				iterator it = this->end();
 
 				if (isMaster()) {
-					beforeRemove(where);
-					it = Base::erase(where);
-					afterRemove();
+					bool b = beforeRemove(where);
+					it = Base::erase_intern(where);
+					afterRemove(b);
 				}
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
@@ -204,23 +206,25 @@ namespace Engine {
 
 
 
-			iterator performOperation(Operations op, SerializeInStream &in, ParticipantId partId, TransactionId id) {
-				iterator it = this->end();
+			std::pair<iterator, bool> performOperation(Operations op, SerializeInStream &in, ParticipantId partId, TransactionId id) {
+				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
+				bool b;
 				switch (op) {
 				case INSERT_ITEM:
 					it = this->read_item(in);
-					onInsert(it, partId, id);
+					if (it.second)
+						onInsert(it.first, partId, id);
 					break;
 				case REMOVE_ITEM:
-					it = this->read_iterator(in);
-					beforeRemove(it, partId, id);
-					it = Base::erase(it);
-					afterRemove();
+					it.first = this->read_iterator(in);
+					b = beforeRemove(it.first, partId, id);
+					it.first = Base::erase_intern(it.first);
+					afterRemove(b);
+					it.second = true;
 					break;
 				case RESET:
-					beforeReset();
-					Base::readState(in);
-					afterReset(partId, id);
+					readStateImpl(in, partId, id);
+					it.second = true;
 					break;
 				default:
 					throw 0;
@@ -229,11 +233,18 @@ namespace Engine {
 			}
 
 			virtual void readState(SerializeInStream &in) override {
-				beforeReset();
-				Base::readState(in);
-				afterReset();
+				readStateImpl(in);
 			}
 
+			void readStateImpl(SerializeInStream &in, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				bool wasActive = beforeReset(this->end());
+				mData.clear();
+				mLocallyActiveIterator = mData.begin();
+				while (in.loopRead()) {
+					this->read_item_where_intern(end(), in);
+				}
+				afterReset(wasActive, this->end());
+			}
 
 			// Inherited via Observable
 			virtual void readRequest(BufferedInOutStream & inout) override
@@ -300,7 +311,7 @@ namespace Engine {
 				}
 
 				if (accepted) {
-					it = performOperation((Operations)(op & MASK), inout, sender.first, sender.second);
+					it = performOperation((Operations)(op & MASK), inout, sender.first, sender.second).first;
 				}
 
 				if (id) {
@@ -312,27 +323,35 @@ namespace Engine {
 
 			}
 
-			virtual void setActive(bool b) override {
-				if (b) {
-					mSignal.emit(this->begin(), BEFORE | RESET);
-					mSignal.emit(this->end(), AFTER | RESET);
-				}
-				Base::setActive(b);
-				if (!b) {
-					mSignal.emit(this->end(), BEFORE | RESET);
-					mSignal.emit(this->begin(), AFTER | RESET);
-				}
-			}
-
 			template <class Ty>
 			void connectCallback(Ty &&slot) {
 				mSignal.connect(std::forward<Ty>(slot));
 			}
 
+		protected:
+			virtual void notifySetActive(bool active) {
+				if (!active) {
+					while (mLocallyActiveIterator != begin()) {
+						--mLocallyActiveIterator;
+						mSignal.emit(mLocallyActiveIterator, BEFORE | REMOVE_ITEM);
+						mSignal.emit(end(), AFTER | REMOVE_ITEM);
+						this->notifySetItemActive(*mLocallyActiveIterator, active);						
+					}
+				}
+				Serializable::notifySetActive(active);
+				if (active) {
+					for (mLocallyActiveIterator = begin(); mLocallyActiveIterator != end();) {
+						auto it = mLocallyActiveIterator;
+						++mLocallyActiveIterator;						
+						this->notifySetItemActive(*it, active);
+						mSignal.emit(it, INSERT_ITEM);
+					}
+				}
+			}
 
 		private:
 			void onInsert(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (unit()->isActive()) {
+				if (isActive()) {
 					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 						if (answerTarget == out->id()) {
 							*out << answerId;
@@ -344,12 +363,16 @@ namespace Engine {
 						this->write_item(*out, it);
 						out->endMessage();
 					}
+					this->setItemActiveFlag(*it, true);	
+				}	
+				if (isItemLocallyActive(it)) {
+					this->notifySetItemActive(*it, true);
 					mSignal.emit(it, INSERT_ITEM);
 				}
 			}
 
-			void beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (unit()->isActive()) {
+			bool beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				if (isActive()) {
 					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 						if (answerTarget == out->id()) {
 							*out << answerId;
@@ -361,24 +384,40 @@ namespace Engine {
 						this->write_iterator(*out, it);
 						out->endMessage();
 					}
-					mSignal.emit(it, BEFORE | REMOVE_ITEM);
+					this->setItemActiveFlag(*it, false);	
 				}
+				if (isItemLocallyActive(it)) {
+					this->notifySetItemActive(*it, false);
+					mSignal.emit(it, BEFORE | REMOVE_ITEM);
+					return true;
+				}else
+					return false;
 			}
 
-			void afterRemove() {
-				if (unit()->isActive()) {
+			void afterRemove(bool b) {
+				if (b) {
 					mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
 				}
 			}
 
-			void beforeReset() {
-				if (unit()->isActive()) {
-					mSignal.emit(this->end(), BEFORE | RESET);
+			bool beforeReset(const iterator &it) {
+				if (isLocallyActive()) {
+					mSignal.emit(it, BEFORE | RESET);
+				}				
+				if (isActive()) {
+					setActiveFlag(false);
+				}
+				if (isLocallyActive()) {
+					notifySetActive(false);
+					return true;
+				}
+				else {
+					return false;
 				}
 			}
 
-			void afterReset(ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (unit()->isActive()) {
+			void afterReset(bool wasActive, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+				if (isActive()) {
 					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
 						if (answerTarget == out->id()) {
 							*out << answerId;
@@ -390,7 +429,13 @@ namespace Engine {
 						this->writeState(*out);
 						out->endMessage();
 					}
-					mSignal.emit(this->end(), AFTER | RESET);
+				}
+				if (isActive()) {
+					setActiveFlag(true);
+				}
+				if (wasActive){
+					notifySetActive(true);
+					mSignal.emit(it, AFTER | RESET);
 				}
 			}
 

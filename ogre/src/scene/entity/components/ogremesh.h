@@ -14,6 +14,7 @@ namespace Engine {
 				Mesh(Entity &entity, const std::string &meshName = "");
 				virtual ~Mesh();
 
+				virtual void init() override;
 				virtual void finalize() override;
 
 

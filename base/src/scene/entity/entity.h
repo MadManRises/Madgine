@@ -26,8 +26,6 @@ public:
     ~Entity();
 
 	void setup();
-	//void init();
-	void finalize();
     
 	void remove();
 

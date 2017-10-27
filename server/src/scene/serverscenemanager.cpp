@@ -63,12 +63,7 @@ void ServerSceneManager::writeScene(Serialize::SerializeOutStream & out) const
 
 Light * ServerSceneManager::createLight()
 {
-	return &*mLights.emplace_back(this);
-}
-
-std::tuple<ServerSceneManager*> Engine::Scene::ServerSceneManager::createLightData()
-{
-	return { this };
+	return &*mLights.emplace_back().first;
 }
 
 std::list<Light*> ServerSceneManager::lights()

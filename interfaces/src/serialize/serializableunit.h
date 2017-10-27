@@ -9,9 +9,9 @@ class INTERFACES_EXPORT SerializableUnitBase
 {
 protected:
 
-	SerializableUnitBase(SerializableUnitBase *parent, size_t masterId = 0);
-	SerializableUnitBase(SerializableUnitBase *parent, const SerializableUnitBase &other);
-	SerializableUnitBase(SerializableUnitBase *parent, SerializableUnitBase &&other);
+	SerializableUnitBase(size_t masterId = 0);
+	SerializableUnitBase(const SerializableUnitBase &other);
+	SerializableUnitBase(SerializableUnitBase &&other);
 	virtual ~SerializableUnitBase();
 
 public:
@@ -40,6 +40,8 @@ protected:
 	void deactivate();
 
 	void setActive(bool b);
+
+	virtual bool filter(Stream *stream);
 	
 private:
 
@@ -52,6 +54,9 @@ private:
 
 	void setSlaveId(size_t id);
 	void clearSlaveId();
+
+	void setActiveFlag(bool b);
+	void notifySetActive(bool active);
 	
 	
 	//void writeHeader(SerializeOutStream &out, bool isAction);		
@@ -62,7 +67,7 @@ private:
 	friend class TopLevelSerializableUnitBase;
 	template <class T, bool b>
 	friend struct UnitHelper;
-	template <class T, bool extend>
+	template <class T>
 	friend class SerializedUnit;
 	/*template <template <class...> class C, class Creator, class T>
 	friend class SerializableContainer;
@@ -72,7 +77,7 @@ private:
 	std::vector<Observable*> mObservedValues;
 	std::vector<Serializable*> mStateValues;
 
-	SerializableUnitBase *mParent;
+	Serializable *mParent;
 
 	size_t mSlaveId;
 	std::pair<size_t, SerializableUnitMap*> mMasterId;
@@ -88,7 +93,7 @@ public:
 	}
 
 protected:
-	void postConstruct();
+	void postConstruct(Serializable *parent);
 
 private:
 	void insertInstance();

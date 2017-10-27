@@ -31,10 +31,13 @@ namespace Engine {
 			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, T &item) {
 			}
 
-			static void postConstruct(T &item) {
+			static void postConstruct(T &item, Serializable *parent) {
 			}
 
-			static void setItemActive(T &item, bool b) {
+			static void setItemActiveFlag(T &item, bool b) {
+			}
+
+			static void notifySetItemActive(T &item, bool active) {
 			}
 
 		};
@@ -133,13 +136,18 @@ namespace Engine {
 				UnitHelper<T>::applyMap(map, *item);
 			}
 
-			static void postConstruct(Type &item) {
-				UnitHelper<T>::postConstruct(*item);
+			static void postConstruct(Type &item, Serializable *parent) {
+				UnitHelper<T>::postConstruct(*item, parent);
 			}
 
-			static void setItemActive(Type &item, bool b) {
-				UnitHelper<T>::setItemActive(*item, b);
+			static void setItemActiveFlag(Type &item, bool b) {
+				UnitHelper<T>::setItemActiveFlag(*item, b);
 			}
+
+			static void notifySetItemActive(Type &item, bool active) {
+				UnitHelper<T>::notifySetItemActive(*item, active);
+			}
+
 
 		};
 
@@ -189,19 +197,27 @@ namespace Engine {
 			}
 
 
-			static void postConstruct(SerializableUnitBase &item) {
-				item.postConstruct();
+			static void postConstruct(SerializableUnitBase &item, Serializable *parent) {
+				item.postConstruct(parent);
 			}
 
-			static void postConstruct(Serializable &item) {
+			static void postConstruct(Serializable &item, Serializable *parent) {
 
 			}
 
-			static void setItemActive(SerializableUnitBase &item, bool b) {
-				item.setActive(b);
+			static void setItemActiveFlag(SerializableUnitBase &item, bool b) {
+				item.setActiveFlag(b);
 			}
 
-			static void setItemActive(Serializable &item, bool b) {
+			static void setItemActiveFlag(Serializable &item, bool b) {
+
+			}
+
+			static void notifySetItemActive(SerializableUnitBase &item, bool active) {
+				item.notifySetActive(active);
+			}
+
+			static void notifySetItemActive(Serializable &item, bool active) {
 
 			}
 
@@ -248,14 +264,19 @@ namespace Engine {
 				UnitHelper<V>::applyMap(map, item.second);
 			}
 
-			static void postConstruct(Type &item) {
-				UnitHelper<U>::postConstruct(item.first);
-				UnitHelper<V>::postConstruct(item.second);
+			static void postConstruct(Type &item, Serializable *parent) {
+				UnitHelper<U>::postConstruct(item.first, parent);
+				UnitHelper<V>::postConstruct(item.second, parent);
 			}
 
-			static void setItemActive(Type &item, bool b) {
-				UnitHelper<U>::setItemActive(item.first, b);
-				UnitHelper<V>::setItemActive(item.second, b);
+			static void setItemActiveFlag(Type &item, bool b) {
+				UnitHelper<U>::setItemActiveFlag(item.first, b);
+				UnitHelper<V>::setItemActiveFlag(item.second, b);
+			}
+
+			static void notifySetItemActive(Type &item, bool active) {
+				UnitHelper<U>::notifySetItemActive(item.first, active);
+				UnitHelper<V>::notifySetItemActive(item.second, active);
 			}
 
 		};
@@ -315,15 +336,21 @@ namespace Engine {
 			};
 			}
 
-			static void postConstruct(Type &item) {
+			static void postConstruct(Type &item, Serializable *parent) {
 				(void)unpacker {
-				(UnitHelper<typename std::tuple_element<Is, Type>::type>::postConstruct(std::get<Is>(item)), true)...
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::postConstruct(std::get<Is>(item), parent), true)...
 			};
 			}
 
-			static void setItemActive(Type &item, bool b) {
+			static void setItemActiveFlag(Type &item, bool b) {
 				(void)unpacker {
-				(UnitHelper<typename std::tuple_element<Is, Type>::type>::setItemActive(std::get<Is>(item), b), true)...
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::setItemActiveFlag(std::get<Is>(item), b), true)...
+			};
+			}
+
+			static void notifySetItemActive(Type &item, bool active) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::notifySetItemActive(std::get<Is>(item), active), true)...
 			};
 			}
 

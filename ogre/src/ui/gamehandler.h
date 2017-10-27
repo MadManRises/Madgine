@@ -1,10 +1,9 @@
 #pragma once
 
 #include "handler.h"
-
+#include "ogreuniquecomponentcollector.h"
 #include "scene/contextmasks.h"
-
-#include "ogreuniquecomponent.h"
+#include "uniquecomponent.h"
 
 #include "scripting/types/scope.h"
 
@@ -75,8 +74,11 @@ private:
 	Scene::OgreSceneManager *mSceneMgr;
 };
 
+
+using GameHandlerCollector = OgreUniqueComponentCollector<GameHandlerBase>;
+
 template <class T>
-using GameHandler = Scripting::Scope<T, OgreUniqueComponent<T, GameHandlerBase>>;
+using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
 
 
 } // namespace UI

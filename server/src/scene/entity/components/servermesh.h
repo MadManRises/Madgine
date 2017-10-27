@@ -14,6 +14,9 @@ namespace Engine {
 				Mesh(Entity &entity, const std::string &meshName);
 				virtual ~Mesh();
 
+				virtual void init() override;
+
+
 				Vector3 getCenter() const;
 
 				std::string getName() const;

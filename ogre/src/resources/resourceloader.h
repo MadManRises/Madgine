@@ -9,10 +9,11 @@ namespace Engine {
 
 		class OGREMADGINE_EXPORT ResourceLoader : public Engine::Util::Process, public Ogre::ResourceGroupListener, public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject {
 		public:
-			ResourceLoader(Scripting::LuaState *state, const std::string &mediaPath);
+			ResourceLoader(App::OgreApplication *app, const std::string &mediaPath);
 			~ResourceLoader();
 
-			void load();
+			bool load_async();
+			bool load();
 			void loadScripts();
 
 			std::string getMediaPath(const std::string &filename, const std::string &folder = "");
@@ -34,6 +35,8 @@ namespace Engine {
 
 		private:
 			Ogre::ResourceGroupManager *mRgm;
+
+			App::Application *mApp;
 
 			std::string mMediaPath;
 

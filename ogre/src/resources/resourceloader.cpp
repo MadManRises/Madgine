@@ -3,15 +3,18 @@
 
 #include "database/messages.h"
 
+#include "app/ogreapplication.h"
+
 
 template<> Engine::Resources::ResourceLoader *Ogre::Singleton<Engine::Resources::ResourceLoader>::msSingleton = 0;
 
 namespace Engine {
 	namespace Resources {
 
-		ResourceLoader::ResourceLoader(Scripting::LuaState *state, const std::string &mediaPath) :
+		ResourceLoader::ResourceLoader(App::OgreApplication *app, const std::string &mediaPath) :
 			mRgm(&Ogre::ResourceGroupManager::getSingleton()),
-			mMediaPath(mediaPath)
+			mMediaPath(mediaPath),
+			mApp(app)
 		{
 			// Load resource paths from config file
 			Ogre::ConfigFile cf;
@@ -30,7 +33,7 @@ namespace Engine {
 				}
 			}
 
-			mParser = std::make_unique<Scripting::Parsing::OgreScriptParser>(state); // Initialise the Script Parser
+			mParser = std::make_unique<Scripting::Parsing::OgreScriptParser>(app); // Initialise the Script Parser
 
 			mImageSetManager = std::make_unique<Resources::ImageSets::ImageSetManager>();
 		}
@@ -41,11 +44,24 @@ namespace Engine {
 			mRgm->shutdownAll();
 		}
 
+		bool ResourceLoader::load_async() {
+			bool success = true;
+			auto future = std::async([this]() {
+				return load();
+			});
+			using namespace std::chrono_literals;
+			while (future.wait_for(0s) == std::future_status::timeout && success) {
+				if (!mApp->singleFrame(0))
+					success = false;
+			}
+			return success && future.get();
+		}
 
-		void ResourceLoader::load()
+		bool ResourceLoader::load()
 		{
+			int mod = mRgm->isResourceGroupInitialised("Scripting") ? -1 : 0;				
 
-			startSubProcess(mRgm->getResourceGroups().size(), Database::Messages::loadingMessage("Resources"));
+			startSubProcess(mRgm->getResourceGroups().size() + mod, Database::Messages::loadingMessage("Resources"));
 
 			mRgm->addResourceGroupListener(this);
 
@@ -54,6 +70,8 @@ namespace Engine {
 			mRgm->removeResourceGroupListener(this);
 
 			endSubProcess();
+
+			return true;
 		}
 
 		void ResourceLoader::loadScripts()

@@ -18,10 +18,10 @@ namespace Serialize {
 
 	thread_local std::list<SerializableUnitBase*> SerializableUnitBase::intern::stack;
 
-	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, size_t masterId) :
+	SerializableUnitBase::SerializableUnitBase(size_t masterId) :
 	mSlaveId(0),
 		mActive(false),
-		mParent(parent)
+		mParent(nullptr)
 	{
 		if (masterId == 0) {
 			mMasterId = SerializeManager::addMasterMapping(this);
@@ -32,19 +32,19 @@ namespace Serialize {
 		insertInstance();
 	}
 
-	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, const SerializableUnitBase & other) :
+	SerializableUnitBase::SerializableUnitBase(const SerializableUnitBase & other) :
 		mSlaveId(0),
 		mActive(false),
-		mParent(parent)
+		mParent(nullptr)
 	{
 		mMasterId = SerializeManager::addMasterMapping(this);
 		insertInstance();
 	}
 
-	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase *parent, SerializableUnitBase && other) :
+	SerializableUnitBase::SerializableUnitBase(SerializableUnitBase && other) :
 		mSlaveId(0),
 		mActive(false),
-		mParent(parent)
+		mParent(nullptr)
 	{
 		std::tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
 		insertInstance();
@@ -52,7 +52,12 @@ namespace Serialize {
 
 SerializableUnitBase::~SerializableUnitBase()
 {
-	removeInstance();
+	if (std::find(intern::stack.begin(), intern::stack.end(), this) != intern::stack.end()) {
+		removeInstance();
+	}
+
+	assert(!mActive);
+	
 	clearSlaveId();
 	SerializeManager::removeMasterMapping(mMasterId, this);
 }
@@ -125,8 +130,8 @@ void SerializableUnitBase::addSerializable(Serializable * val)
 std::set<BufferedOutStream*, CompareStreamId> SerializableUnitBase::getMasterMessageTargets()
 {
 	std::set<BufferedOutStream *, CompareStreamId> result;
-	if (mActive) {
-		result = mParent->getMasterMessageTargets();
+	if (mActive && mParent && mParent->unit()) {
+		result = mParent->unit()->getMasterMessageTargets();
 	}
 	return result;
 }
@@ -147,7 +152,7 @@ void SerializableUnitBase::writeCreationData(SerializeOutStream & out) const
 
 const TopLevelSerializableUnitBase * SerializableUnitBase::topLevel() const
 {
-	return mParent->topLevel();
+	return mParent ? mParent->topLevel() : nullptr;
 }
 
 void SerializableUnitBase::clearSlaveId()
@@ -158,9 +163,10 @@ void SerializableUnitBase::clearSlaveId()
 	}
 }
 
-void SerializableUnitBase::postConstruct()
+void SerializableUnitBase::postConstruct(Serializable *parent)
 {
 	removeInstance();
+	mParent = parent;
 }
 
 void SerializableUnitBase::insertInstance() {
@@ -170,12 +176,11 @@ void SerializableUnitBase::insertInstance() {
 }
 
 void SerializableUnitBase::removeInstance() {
-	auto it = std::find(intern::stack.begin(), intern::stack.end(), this);
-	assert(it != intern::stack.end());
-	if (it != intern::stack.end()) {
-		intern::stack.erase(intern::stack.begin(), ++it);
+	assert(*intern::stack.begin() == this);
+	//if (it != intern::stack.end()) {
+		intern::stack.erase(intern::stack.begin());
 		//std::cout << "Stack size: " << sStack.size() << std::endl;
-	}
+	//}
 }
 
 SerializableUnitBase * SerializableUnitBase::findParent(void * from, void * to) {
@@ -234,14 +239,26 @@ void SerializableUnitBase::applySerializableMap(const std::map<size_t, Serializa
 }
 
 void SerializableUnitBase::setActive(bool b) {
+
+	setActiveFlag(b);
+	notifySetActive(b);
+
+}
+
+void SerializableUnitBase::setActiveFlag(bool b) {
 	assert(mActive != b);
-	if (b)
-		mActive = true;
+	mActive = b;
 	for (Serializable *ser : mStateValues) {
-		ser->setActive(b);
+		ser->setActiveFlag(b);
 	}
-	if (!b)
-		mActive = false;
+}
+
+void SerializableUnitBase::notifySetActive(bool active)
+{
+	assert(mActive == active);
+	for (Serializable *ser : mStateValues) {
+		ser->notifySetActive(active);
+	}
 }
 
 void SerializableUnitBase::activate()
@@ -257,6 +274,11 @@ void SerializableUnitBase::deactivate()
 bool SerializableUnitBase::isActive() const
 {
 	return mActive;
+}
+
+bool SerializableUnitBase::filter(Stream * stream)
+{
+	return true;
 }
 
 } // namespace Serialize

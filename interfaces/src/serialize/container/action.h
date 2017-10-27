@@ -31,7 +31,7 @@ namespace Engine {
 					throw 0;
 			}
 
-			void operator()(_Ty... args, const std::list<ParticipantId> &targets = {}) {
+			void operator()(_Ty... args, const std::set<ParticipantId> &targets = {}) {
 				tryCall(id(), targets, args...);
 			}
 
@@ -39,7 +39,7 @@ namespace Engine {
 			{
 				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 				TupleSerializer::readTuple(args, in);
-				TupleUnpacker<const std::list<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
+				TupleUnpacker<const std::set<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
 			}
 
 			virtual void readRequest(BufferedInOutStream & in) override
@@ -47,7 +47,7 @@ namespace Engine {
 				if (!Config::sCallByMasterOnly) {
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 					TupleSerializer::readTuple(args, in);
-					TupleUnpacker<ParticipantId, const std::list<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
+					TupleUnpacker<ParticipantId, const std::set<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
 				}
 			}
 
@@ -62,7 +62,7 @@ namespace Engine {
 			}
 
 		private:
-			void call(const std::list<ParticipantId> &targets, _Ty... args) {
+			void call(const std::set<ParticipantId> &targets, _Ty... args) {
 				if (!Config::sExecuteOnMasterOnly) {
 					for (BufferedOutStream *out : getMasterActionMessageTargets(targets)) {
 						TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
@@ -75,7 +75,7 @@ namespace Engine {
 				(mParent->*f)(args...);
 			}
 
-			void tryCall(ParticipantId id, const std::list<ParticipantId> &targets, _Ty... args) {
+			void tryCall(ParticipantId id, const std::set<ParticipantId> &targets, _Ty... args) {
 				if (verify(id, args...)) {
 					if (isMaster()) {
 						call(targets, args...);

@@ -10,10 +10,12 @@ project(Interfaces_Test)
 
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)
-FolderSources(sources "" network networkmanagertest.cpp)
-FolderSources(sources "" serialize)
-FolderSources(sources serialize streams)
-FolderSources(sources streams debugging streamdebuggingtest.cpp)
+	FolderSources(sources "" generic valuetypetest.cpp)
+	FolderSources(sources "" network networkmanagertest.cpp)
+	FolderSources(sources "" serialize)
+		FolderSources(sources serialize container containertest.cpp)
+		FolderSources(sources serialize streams)
+			FolderSources(sources streams debugging streamdebuggingtest.cpp)
 
 add_executable(Interfaces_Test ${sources})
 

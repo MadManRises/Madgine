@@ -33,8 +33,8 @@ namespace Engine {
 			}
 			
 
-			iterator read_item(SerializeInStream &in) {
-				return this->read_item_where(this->end(), in);
+			std::pair<iterator, bool> read_item(SerializeInStream &in) {
+				return this->read_item_where_intern(this->end(), in);
 			}
 
 

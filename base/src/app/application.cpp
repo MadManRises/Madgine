@@ -169,6 +169,17 @@ namespace Engine {
 			}
 		}
 
+		bool Application::singleFrame(float timeSinceLastFrame) {
+			return sendFrameStarted(timeSinceLastFrame) &&
+				update(timeSinceLastFrame) &&
+				sendFrameEnded(timeSinceLastFrame);
+		}
+
 	}
+
+#ifdef _MSC_VER
+	template class MADGINE_BASE_EXPORT Scripting::GlobalAPICollector;
+#endif
+
 }
 

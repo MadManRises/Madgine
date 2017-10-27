@@ -13,13 +13,37 @@ namespace Engine {
 			{
 			}
 
-			std::set<BufferedOutStream*, CompareStreamId> Observable::getMasterActionMessageTargets(const std::list<ParticipantId> &targets) const
+			std::set<BufferedOutStream*, CompareStreamId> Observable::getMasterActionMessageTargets(const std::set<ParticipantId> &targets) const
 			{
 				std::set<BufferedOutStream*, CompareStreamId> result = mUnit->getMasterMessageTargets();
-				for (BufferedOutStream *out : result) {
-					out->beginMessage(mUnit, ACTION);
-					*out << mIndex;
+				if (targets.empty()) {
+					for (BufferedOutStream *out : result) {
+						out->beginMessage(mUnit, ACTION);
+						*out << mIndex;
+					}
 				}
+				else {
+					auto it1 = result.begin();
+					auto it2 = targets.begin();
+					while (it1 != result.end() && it2 != targets.end()) {
+						BufferedOutStream *out = *it1;
+						while (*it2 < out->id()) {
+							LOG_WARNING("Specific Target not in MessageTargetList!");
+							++it2;
+						}
+						if (*it2 == out->id()) {
+							out->beginMessage(mUnit, ACTION);
+							*out << mIndex;
+							++it2;
+							++it1;
+						}
+						else {
+							it1 = result.erase(it1);
+						}
+					}
+					result.erase(it1, result.end());
+				}
+				
 				return result;
 			}
 
@@ -44,7 +68,7 @@ namespace Engine {
 
 			bool Observable::isMaster() const
 			{
-				return !mUnit->isActive() || mUnit->topLevel()->isMaster();
+				return !mUnit->isActive() || !mUnit->topLevel() || mUnit->topLevel()->isMaster();
 			}
 
 			SerializableUnitBase *Observable::parent() {

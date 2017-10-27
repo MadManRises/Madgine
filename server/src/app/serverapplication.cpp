@@ -3,6 +3,7 @@
 #include "serverapplication.h"
 #include "serverappsettings.h"
 #include "scene/serverscenemanager.h"
+#include "serialize/container/noparentunit.h"
 
 namespace Engine {
 	namespace App {
@@ -26,7 +27,7 @@ namespace Engine {
 
 			Application::setup(settings);
 
-			mSceneManager = new Scene::ServerSceneManager;
+			mSceneManager = new Serialize::NoParentUnit<Scene::ServerSceneManager>;
 		}
 
 		int ServerApplication::go()
@@ -38,9 +39,7 @@ namespace Engine {
 			while (run) {
 				float timeSinceLastFrame = mTimer.elapsed_us() / 1000000.0f;
 				mTimer.start();
-				run = sendFrameStarted(timeSinceLastFrame) &&
-					update(timeSinceLastFrame) &&
-					sendFrameEnded(timeSinceLastFrame);
+				run = singleFrame(timeSinceLastFrame);
 				std::this_thread::yield();
 			}
 			return 0;

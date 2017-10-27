@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Engine::Serialize::Container&lt;*, *&gt;">
+    <DisplayString>{mData}</DisplayString>
+    <Expand>
+      <ExpandedItem>mData</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="Engine::Serialize::Serialized&lt;*&gt;"> 
+    <DisplayString>{mData}</DisplayString> 
+    <Expand> 
+	    <ExpandedItem>mData</ExpandedItem> 
+    </Expand> 
+  </Type>
+  <Type Name="Engine::Serialize::Observed&lt;*&gt;"> 
+    <DisplayString>{mData}</DisplayString> 
+    <Expand> 
+	    <ExpandedItem>mData</ExpandedItem> 
+    </Expand>
+  </Type>
+  <Type Name="Engine::ValueType">    
+    <DisplayString Condition="mUnion._Which == NullValue">NULL</DisplayString>
+    <DisplayString Condition="mUnion._Which == StringValue">{mUnion._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == BoolValue">{mUnion._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == IntValue">{mUnion._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == UIntValue">{mUnion._Tail._Tail._Tail._Tail._Head}u</DisplayString>
+    <DisplayString Condition="mUnion._Which == FloatValue">{mUnion._Tail._Tail._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == ScopeValue">{mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == InvScopePtrValue">{mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Head,h}</DisplayString>
+    <DisplayString Condition="mUnion._Which == Vector4Value">{mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == Vector3Value">{mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == Vector2Value">{mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Tail._Head}</DisplayString>
+    <DisplayString Condition="mUnion._Which == EndOfListValue">EOL</DisplayString> 
+    <Expand>
+      <ExpandedItem Condition="mUnion._Which == ScopeValue">mUnion._Tail._Tail._Tail._Tail._Tail._Tail._Head</ExpandedItem>
+    </Expand>   
+  </Type>  
+</AutoVisualizer>

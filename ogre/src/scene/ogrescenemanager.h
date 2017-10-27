@@ -98,7 +98,7 @@ protected:
     bool RaycastFromPoint(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::uint32 mask);
 
 	
-	std::tuple<OgreSceneManager *, Ogre::Light *> createLightData();
+	std::tuple<Ogre::Light *> createLightData();
 
 private:
 

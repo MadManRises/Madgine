@@ -9,22 +9,22 @@
 namespace Engine {
 	namespace Serialize {
 
-		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId, SerializableUnitBase *parent) :
-			SerializableUnitBase(parent, staticId),
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId) :
+			SerializableUnitBase(staticId),
 			mSlaveManager(0),
 			mStaticSlaveId(staticId)
 		{
 		}
 
-		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other, SerializableUnitBase *parent) :
-			SerializableUnitBase(parent, other),
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other) :
+			SerializableUnitBase(other),
 			mSlaveManager(0),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
 		}
 
-		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other, SerializableUnitBase *parent) :
-			SerializableUnitBase(parent, std::forward<TopLevelSerializableUnitBase>(other)),
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other) :
+			SerializableUnitBase(std::forward<TopLevelSerializableUnitBase>(other)),
 			mSlaveManager(0),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
@@ -90,7 +90,7 @@ namespace Engine {
 			for (SerializeManager *mgr : mMasterManagers) {
 				const std::set<BufferedOutStream*, CompareStreamId> &targets = mgr->getMasterMessageTargets();
 				std::set<BufferedOutStream*, CompareStreamId> temp;
-				std::set_union(result.begin(), result.end(), targets.begin(), targets.end(), std::inserter(temp, temp.begin()));
+				std::set_union(result.begin(), result.end(), targets.begin(), targets.end(), std::inserter(temp, temp.begin()), CompareStreamId{});
 				temp.swap(result);
 			}
 			return result;
@@ -154,13 +154,6 @@ bool TopLevelSerializableUnitBase::updateManagerType(SerializeManager *mgr, bool
 		removeManager(mgr);
 		mSlaveManager = mgr;
 	}
-	return true;
-}
-
-bool TopLevelSerializableUnitBase::init()
-{
-	postConstruct();
-	activate();
 	return true;
 }
 

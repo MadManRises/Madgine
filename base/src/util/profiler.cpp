@@ -6,8 +6,7 @@
 namespace Engine {
 	namespace Util {
 
-		Profiler::Profiler(Serialize::SerializableUnitBase *parent) :
-			SerializableUnit(parent),
+		Profiler::Profiler() :
 			mCurrent(nullptr),
 			mInterval(2.0f),
 			mCurrentInterval(false)
@@ -45,13 +44,13 @@ namespace Engine {
 				return mCurrent->addChild(name);
 			}
 			else {
-				return mProcesses.try_emplace(name, this, [this]() {return mCurrentInterval; }).first->second;
+				return mProcesses.try_emplace(name, [this]() {return mCurrentInterval; }).first->second;
 			}			
 		}
 
-		std::tuple<Serialize::SerializableUnitBase*, std::function<bool()>> Profiler::createProcessData()
+		std::tuple<std::function<bool()>> Profiler::createProcessData()
 		{
-			return std::make_tuple(this, [this]() {return mCurrentInterval; });
+			return std::make_tuple([this]() {return mCurrentInterval; });
 		}
 		
 		ProfileWrapper::ProfileWrapper(const std::string &name)
@@ -87,7 +86,7 @@ namespace Engine {
 			auto end = std::chrono::high_resolution_clock::now();
 			size_t duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - mStart).count();
 
-			mAccumulatedDuration += duration - mBuffer[mRecordIndex];
+			//mAccumulatedDuration += duration - mBuffer[mRecordIndex];
 			mBuffer[mRecordIndex] = duration;
 			++mRecordIndex;
 			mRecordIndex %= 20;

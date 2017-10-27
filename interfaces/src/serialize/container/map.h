@@ -3,27 +3,10 @@
 #include "observablecontainer.h"
 #include "creationhelper.h"
 #include "unithelper.h"
+#include "generic/container_traits.h"
 
 namespace Engine {
 	namespace Serialize {
-
-		template <class K, class T>
-		struct container_traits<std::map, std::pair<const K, T>> {
-			static constexpr const bool sorted = true;
-
-			typedef std::map<K, T> container;
-			typedef typename container::iterator iterator;
-			typedef typename container::const_iterator const_iterator;
-			typedef K key_type;
-			typedef T value_type;
-			typedef std::pair<const K, T> type;
-
-			template <class... _Ty>
-			static iterator insert(container &c, const const_iterator &where, _Ty&&... args) {
-				return c.emplace_hint(where, std::forward<_Ty>(args)...);
-			}
-
-		};
 
 
 		template <class Key, class C>
@@ -58,7 +41,7 @@ namespace Engine {
 					return{ it, false };
 				}
 				else {
-					return{ this->insert(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...)), true };
+					return this->emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
 				}
 			}
 

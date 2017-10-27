@@ -22,9 +22,9 @@ namespace Engine {
 
 			Mesh::Mesh(Entity & entity, const std::string & meshName) :
 				EntityComponent(entity),
-				mTransform(entity.addComponent_t<Transform>()),
 				mObject(nullptr),
-				mSerializedObject(this)
+				mSerializedObject(this),
+				mTransform(nullptr)
 			{
 				setName(meshName);
 			}
@@ -32,6 +32,13 @@ namespace Engine {
 
 			Mesh::~Mesh() {
 				assert(!mObject);
+			}
+
+			void Mesh::init()
+			{
+				mTransform = getEntity().addComponent_t<Transform>();
+				if (mObject)
+					mTransform->getNode()->attachObject(mObject);
 			}
 
 			void Mesh::finalize()
@@ -51,7 +58,8 @@ namespace Engine {
 				if (!mesh.empty()) {
 					mObject = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->createEntity(mesh);
 					mObject->addQueryFlags(Masks::ENTITY_MASK);
-					mTransform->getNode()->attachObject(mObject);
+					if (mTransform)
+						mTransform->getNode()->attachObject(mObject);
 				}
 			}
 
@@ -73,7 +81,8 @@ namespace Engine {
 
 			void Mesh::destroyObject() {
 				if (mObject) {
-					mTransform->getNode()->detachObject(mObject);
+					if (mTransform)
+						mTransform->getNode()->detachObject(mObject);
 					static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->destroyEntity(mObject);
 					mObject = nullptr;
 				}

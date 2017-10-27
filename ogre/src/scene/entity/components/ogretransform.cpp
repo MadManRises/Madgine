@@ -31,6 +31,11 @@ namespace Engine {
 			}
 
 			Transform::~Transform() {
+				if (mNode->getAttachedObjectIterator().hasMoreElements())
+					LOG_ERROR(Exceptions::nodeNotCleared);
+
+				mNode->getParentSceneNode()->removeChild(mNode);
+				mNode->getCreator()->destroySceneNode(mNode);
 			}
 
 			void Transform::init()
@@ -40,14 +45,7 @@ namespace Engine {
 
 			void Transform::finalize()
 			{
-				if (mNode) {
-					if (mNode->getAttachedObjectIterator().hasMoreElements())
-						LOG_ERROR(Exceptions::nodeNotCleared);
-
-					mNode->getParentSceneNode()->removeChild(mNode);
-					mNode->getCreator()->destroySceneNode(mNode);
-					mNode = nullptr;
-				}
+				
 			}
 
 			

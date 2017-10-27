@@ -1,6 +1,5 @@
 #include "interfaceslib.h"
 #include "process.h"
-#include "processlistener.h"
 
 namespace Engine {
 	namespace Util {
@@ -21,9 +20,7 @@ namespace Engine {
 			if (mSubProcessIndices.back() > mSubProcessCounts.back())
 				LOG("Warning: Too many steps!");
 			mRatio += mStepSizes.back();
-			for (ProcessListener *listener : mListeners) {
-				listener->onProgressUpdate(mRatio);
-			}
+			mRatioChanged.emit(mRatio);
 		}
 
 		void Process::startSubProcess(size_t size, const std::string & name)
@@ -38,9 +35,7 @@ namespace Engine {
 			}
 			mSubProcessCounts.push_back(size);
 			mSubProcessIndices.push_back(0);
-			for (ProcessListener *listener : mListeners) {
-				listener->onSubProcessStarted(name);
-			}
+			mSubProcessStarted.emit(name);
 		}
 
 		void Process::endSubProcess() {
@@ -49,26 +44,13 @@ namespace Engine {
 			mStepSizes.pop_back();
 			if (mSubProcessCounts.back() == 0) {
 				mRatio += mStepSizes.back();
-				for (ProcessListener *listener : mListeners) {
-					listener->onProgressUpdate(mRatio);
-				}
+				mRatioChanged.emit(mRatio);
 			}
 			mSubProcessCounts.pop_back();
 			mSubProcessIndices.pop_back();
 
 			if (mSubProcessIndices.size() > 0)
 				++mSubProcessIndices.back();
-		}
-
-		void Process::addListener(ProcessListener * listener)
-		{
-			mListeners.push_back(listener);
-			listener->onProgressUpdate(mRatio);
-		}
-
-		void Process::removeListener(ProcessListener * listener)
-		{
-			mListeners.remove(listener);
 		}
 
 	}

@@ -16,7 +16,7 @@ namespace Engine {
 
 			Mesh::Mesh(Entity &entity, const Scripting::LuaTable &table) :
 				EntityComponent(entity, table),
-				mTransform(entity.addComponent_t<Transform>()),
+				mTransform(nullptr),
 				mMeshName(table.getValue("mesh").as<std::string>())
 			{
 				
@@ -24,12 +24,17 @@ namespace Engine {
 
 			Mesh::Mesh(Entity &entity, const std::string &meshName) :
 				EntityComponent(entity),
-				mTransform(entity.addComponent_t<Transform>()),
+				mTransform(nullptr),
 				mMeshName(meshName)
 			{
 			}
 
 			Mesh::~Mesh() {				
+			}
+
+			void Mesh::init()
+			{
+				mTransform = getEntity().addComponent_t<Transform>();
 			}
 
 			std::string Mesh::getName() const

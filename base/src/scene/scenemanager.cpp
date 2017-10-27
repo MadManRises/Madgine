@@ -8,7 +8,12 @@
 
 namespace Engine {
 
-	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
+	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
+
+#ifdef _MSC_VER
+	template class MADGINE_BASE_EXPORT Scene::SceneComponentCollector;
+#endif
+
 
 	namespace Scene {
 		
@@ -28,9 +33,6 @@ namespace Engine {
 				if (!component->init())
 					return false;
 			}
-
-			if (!TopLevelSerializableUnitBase::init())
-				return false;
 
 			return true;
 		}
@@ -63,38 +65,16 @@ namespace Engine {
 		}
 
 
-		void SceneManagerBase::saveComponentData(Serialize::SerializeOutStream &out) const
-		{
-			for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-				out << component->key();
-				component->writeId(out);
-				component->writeState(out);
-			}
-			out << ValueType::EOL();
-		}
-
-		void SceneManagerBase::loadComponentData(Serialize::SerializeInStream &in)
-		{
-			std::string componentName;
-			while (in.loopRead(componentName)) {
-				auto it = std::find_if(mSceneComponents.begin(), mSceneComponents.end(), [&](const std::unique_ptr<SceneComponentBase> &comp) {return comp->key() == componentName; });
-				(*it)->readId(in);
-				(*it)->readState(in);
-			}
-		}
+		
 
 		void SceneManagerBase::writeState(Serialize::SerializeOutStream &out) const
 		{
-			saveComponentData(out);
-
 			Serialize::SerializableUnitBase::writeState(out);
 		}
 
 		void SceneManagerBase::readState(Serialize::SerializeInStream &in)
 		{
 			clear();
-
-			loadComponentData(in);
 
 			Serialize::SerializableUnitBase::readState(in);
 
@@ -159,12 +139,6 @@ namespace Engine {
 		void SceneManagerBase::clear() {
 			mClearedSignal.emit();
 
-			for (Entity::Entity &e : mEntities) {
-				e.finalize();
-			}
-			for (Entity::Entity &e : mLocalEntities) {
-				e.finalize();
-			}
 			mEntities.clear();
 			mLocalEntities.clear();		
 			mEntityRemoveQueue.clear();
@@ -208,7 +182,6 @@ namespace Engine {
 			auto find = [&](const Entity::Entity &ent) {return &ent == *it; };
 
 			while (it != mEntityRemoveQueue.end()) {
-				(*it)->finalize();
 
 				auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
 				if (ent != mEntities.end()) {

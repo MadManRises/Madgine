@@ -10,24 +10,35 @@ namespace Engine {
 	namespace Serialize {
 
 		Serializable::Serializable() :
-			mUnit(SerializableUnitBase::findParent(this))
+			mUnit(SerializableUnitBase::findParent(this)),
+			mLocallyActive(false)
 		{
-			if (mUnit)
+			if (mUnit) {
 				mUnit->addSerializable(this);
+				assert(!mUnit->isActive());
+			}
+			else {
+				mLocallyActive = true;
+			}
 		}
 
 		Serializable::Serializable(const Serializable &) :
-			mUnit(SerializableUnitBase::findParent(this))
+			Serializable()
 		{
-			if (mUnit)
-				mUnit->addSerializable(this);
 		}
 
 		Serializable::Serializable(Serializable &&) :
-			mUnit(SerializableUnitBase::findParent(this))
+			Serializable()
 		{
+		}
+
+		Serializable::~Serializable() {
 			if (mUnit)
-				mUnit->addSerializable(this);
+				assert(!mUnit->isActive());
+		}
+
+		Serializable &Serializable::operator=(const Serializable &other) {
+			return *this;
 		}
 
 		void Serializable::applySerializableMap(const std::map<size_t, SerializableUnitBase*>& map)
@@ -38,8 +49,22 @@ namespace Engine {
 		{
 		}
 
-		void Serializable::setActive(bool b)
+		void Serializable::setActiveFlag(bool b)
 		{
+		}
+
+		void Serializable::notifySetActive(bool active)
+		{
+			assert(mLocallyActive != active);
+			mLocallyActive = active;
+		}
+
+		bool Serializable::isLocallyActive() {
+			return mLocallyActive;
+		}
+
+		bool Serializable::isActive() {
+			return mUnit ? mUnit->isActive() : true;
 		}
 
 		std::set<BufferedOutStream*, CompareStreamId> Serializable::getMasterStateMessageTargets()

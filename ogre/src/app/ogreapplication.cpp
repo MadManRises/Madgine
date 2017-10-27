@@ -17,6 +17,7 @@
 
 #include "OgreWindowEventUtilities.h"
 
+#include "serialize/container/noparentunit.h"
 
 namespace Engine {
 
@@ -78,7 +79,7 @@ namespace Engine {
 			Application::setup(settings);
 
 			// Create SceneManagerBase
-			mSceneMgr = new Scene::OgreSceneManager(mRoot);
+			mSceneMgr = new Serialize::NoParentUnit<Scene::OgreSceneManager>(mRoot);
 
 			mWindow->update();
 
@@ -116,7 +117,8 @@ namespace Engine {
 			if (res.first && !res.second.empty() && (!res.second.front().is<bool>() || !res.second.front().as<bool>()))
 				return false;
 
-			mLoader->load();
+			if (!mLoader->load())
+				return false;
 
 
 			if (!mSceneMgr->init())

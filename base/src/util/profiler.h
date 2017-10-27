@@ -9,26 +9,24 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT ProcessStats : public Engine::Serialize::SerializableUnit<ProcessStats> {
 		public:
-			ProcessStats(Serialize::SerializableUnitBase* parent, const std::function<bool()> &condition) :
-				SerializableUnit(parent),
+			ProcessStats(const std::function<bool()> &condition) :
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
 				mBuffer({}),
 				mParent(nullptr)				
 			{
-				mAccumulatedDuration.setCondition(condition);
+				//mAccumulatedDuration.setCondition(condition);
 			}
 
 			ProcessStats(ProcessStats *parent) :
-				SerializableUnit(parent),
 				mStarted(false),
 				mAccumulatedDuration(0),
 				mRecordIndex(0),
 				mBuffer({}),
 				mParent(parent)				
 			{
-				mAccumulatedDuration.setCondition(parent->mAccumulatedDuration.getCondition());
+				//mAccumulatedDuration.setCondition(parent->mAccumulatedDuration.getCondition());
 			}
 
 			ProcessStats(const ProcessStats &other) :
@@ -55,7 +53,7 @@ namespace Engine {
 			size_t mRecordIndex;
 			std::array<size_t, 20> mBuffer;
 
-			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::NoExtendCreator<ProcessStats*>> mChildren;
+			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::DefaultCreator<ProcessStats*>> mChildren;
 
 			ProcessStats *mParent;
 
@@ -64,7 +62,7 @@ namespace Engine {
 
 		class MADGINE_BASE_EXPORT Profiler : public Serialize::SerializableUnit<Profiler>, public Singleton<Profiler> {
 		public:
-			Profiler(Serialize::SerializableUnitBase *parent);
+			Profiler();
 			Profiler(const Profiler &) = delete;
 
 			void startProfiling(const std::string &name);
@@ -76,7 +74,7 @@ namespace Engine {
 		private:
 			ProcessStats &getProcess(const std::string &name);
 
-			std::tuple<Serialize::SerializableUnitBase*, std::function<bool()>> createProcessData();
+			std::tuple<std::function<bool()>> createProcessData();
 
 			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<decltype(&Profiler::createProcessData), &Profiler::createProcessData>> mProcesses;
 			

@@ -19,7 +19,8 @@ namespace Engine {
 
 			enum ReservedIds {
 				NO_ID = 0,
-				SERIALIZE_MANAGER = 1,
+				NULL_UNIT_ID = 1,
+				SERIALIZE_MANAGER = 2,
 				BEGIN_USER_ID_SPACE,
 				RESERVED_ID_COUNT = 256
 			};
