@@ -34,7 +34,7 @@ namespace Engine {
 
 			void Mesh::init()
 			{
-				mTransform = getEntity().addComponent_t<Transform>();
+				mTransform = getEntity().getComponent<Transform>();
 			}
 
 			std::string Mesh::getName() const

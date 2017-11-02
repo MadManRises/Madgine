@@ -2,6 +2,8 @@
 
 #include "Scene/Entity/entitycomponent.h"
 
+#include "serialize/container/serializedmapper.h"
+
 namespace Engine {
 	namespace Scene {
 		namespace Entity {
@@ -32,8 +34,11 @@ namespace Engine {
 				void translate(const Vector3 &v);
 				void rotate(const std::array<float, 4> &q);
 
+				void lookAt(const Vector3 &v);
+
 			private:
 				Ogre::SceneNode *mNode;
+				Engine::Serialize::SerializedMapper<decltype(&Transform::getPosition), &Transform::getPosition, decltype(&Transform::setPosition), &Transform::setPosition> mSerializedPosition;
 			};
 
 		}

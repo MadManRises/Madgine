@@ -24,7 +24,7 @@
 #include <chrono>
 #include <future>
 
-#include "forward.h"
+#include "ogreforward.h"
 
 /*#if !defined(_HAS_TR1_NAMESPACE)
 #include <unordered_map>

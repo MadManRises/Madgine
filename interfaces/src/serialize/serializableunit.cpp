@@ -130,8 +130,8 @@ void SerializableUnitBase::addSerializable(Serializable * val)
 std::set<BufferedOutStream*, CompareStreamId> SerializableUnitBase::getMasterMessageTargets()
 {
 	std::set<BufferedOutStream *, CompareStreamId> result;
-	if (mActive && mParent && mParent->unit()) {
-		result = mParent->unit()->getMasterMessageTargets();
+	if (mActive && mParent) {
+		result = mParent->getMasterMessageTargets();
 	}
 	return result;
 }
@@ -163,9 +163,13 @@ void SerializableUnitBase::clearSlaveId()
 	}
 }
 
-void SerializableUnitBase::postConstruct(Serializable *parent)
+void SerializableUnitBase::postConstruct()
 {
 	removeInstance();
+}
+
+void SerializableUnitBase::setParent(SerializableUnitBase *parent)
+{
 	mParent = parent;
 }
 
@@ -274,6 +278,11 @@ void SerializableUnitBase::deactivate()
 bool SerializableUnitBase::isActive() const
 {
 	return mActive;
+}
+
+bool SerializableUnitBase::isMaster() const
+{
+	return mSlaveId == 0;
 }
 
 bool SerializableUnitBase::filter(Stream * stream)

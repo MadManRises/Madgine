@@ -136,7 +136,7 @@ namespace Engine {
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
 						type temp(std::forward<_Ty>(args)...);
-						this->postConstruct(temp, nullptr);
+						this->postConstruct(temp);
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << (TransactionId)0;
@@ -164,7 +164,7 @@ namespace Engine {
 				else {
 					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
 						type temp(std::forward<_Ty>(args)...);
-						this->postConstruct(temp, nullptr);
+						this->postConstruct(temp);
 
 						init(temp);
 
@@ -340,7 +340,7 @@ namespace Engine {
 				}
 				Serializable::notifySetActive(active);
 				if (active) {
-					for (mLocallyActiveIterator = begin(); mLocallyActiveIterator != end();) {
+					while (mLocallyActiveIterator != end()) {
 						auto it = mLocallyActiveIterator;
 						++mLocallyActiveIterator;						
 						this->notifySetItemActive(*it, active);
@@ -387,8 +387,8 @@ namespace Engine {
 					this->setItemActiveFlag(*it, false);	
 				}
 				if (isItemLocallyActive(it)) {
-					this->notifySetItemActive(*it, false);
 					mSignal.emit(it, BEFORE | REMOVE_ITEM);
+					this->notifySetItemActive(*it, false);
 					return true;
 				}else
 					return false;

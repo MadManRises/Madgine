@@ -34,9 +34,17 @@ namespace Engine {
 				mLocallyActiveIterator(mData.begin()) {
 			}
 
-			Container(Container &&other) :
-				mData(std::forward<decltype(mData)>(other.mData)),
-				mLocallyActiveIterator(mData.begin()) {
+			Container(Container &&other) {
+				if (other.isActive()) {
+					other.setActiveFlag(false);
+				}
+				mData = std::forward<NativeContainerType>(other.mData);
+				mLocallyActiveIterator = other.mLocallyActiveIterator;
+				other.mData.clear();
+				other.mLocallyActiveIterator = other.mData.begin();
+				if (other.isActive()) {
+					other.setActiveFlag(true);
+				}				
 			}
 
 			const_iterator begin() const {
@@ -60,41 +68,18 @@ namespace Engine {
 			}
 
 			Container<traits, Creator> &operator=(const NativeContainerType &other) {
-				bool wasActive = false;
-				if (isActive()) {
-					setActiveFlag(false);	
-				}
-				if (isLocallyActive()) {
-					notifySetActive(false);
-					wasActive = true;
-				}
+				bool wasActive = deactivate();
 				mData = other;
 				mLocallyActiveIterator = mData.begin();
-				if (isActive()) {
-					setActiveFlag(true);
-				}
-				if (wasActive)
-					notifySetActive(true);
+				activate(wasActive);
 				return *this;
 			}
 
 			void clear() {
-				bool wasActive = false;
-				if (isActive()) {
-					setActiveFlag(false);
-				}
-				if (isLocallyActive()) {
-					notifySetActive(false);
-					wasActive = true;
-				}
+				bool wasActive = deactivate();
 				mData.clear();
 				mLocallyActiveIterator = mData.begin();
-				if (isActive()) {
-					setActiveFlag(true);
-				}
-				if (wasActive)
-					notifySetActive(true);
-
+				activate(wasActive);
 			}
 
 			iterator erase(const iterator &it) {
@@ -125,24 +110,13 @@ namespace Engine {
 			}
 
 			virtual void readState(SerializeInStream &in) override {
-				bool wasActive = false;
-				if (isActive()) {
-					setActiveFlag(false);
-				}
-				if (isLocallyActive()) {
-					notifySetActive(false);
-					wasActive = true;
-				}
+				bool wasActive = deactivate();				
 				mData.clear();
 				mLocallyActiveIterator = mData.begin();
 				while (in.loopRead()) {
 					this->read_item_where_intern(end(), in);
 				}
-				if (isActive()) {
-					setActiveFlag(true);
-				}
-				if (wasActive)
-					notifySetActive(true);
+				activate(wasActive);
 			}
 
 			virtual void applySerializableMap(const std::map<size_t, SerializableUnitBase*> &map) override {
@@ -208,6 +182,27 @@ namespace Engine {
 			}
 
 		protected:
+			bool deactivate() {
+				if (isActive()) {
+					setActiveFlag(false);
+				}
+				if (isLocallyActive()) {
+					notifySetActive(false);
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+
+			void activate(bool wasActive) {
+				if (isActive()) {
+					setActiveFlag(true);
+				}
+				if (wasActive)
+					notifySetActive(true);
+			}
+
 			/*std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in) {
 				std::pair<iterator, bool> it = read_item_where_intern(where, in);
 				if (isActive()) {
@@ -239,8 +234,6 @@ namespace Engine {
 			iterator mLocallyActiveIterator;
 
 			bool isItemLocallyActive(const iterator &it) {
-				if (!isLocallyActive())
-					return false;
 				if (mLocallyActiveIterator == end())
 					return true;
 				for (auto it2 = begin(); it2 != mLocallyActiveIterator; ++it2) {
@@ -255,8 +248,15 @@ namespace Engine {
 				auto keep = traits::keepIterator(begin(), mLocallyActiveIterator);
 				std::pair<iterator, bool> it = traits::emplace(mData, where, std::forward<_Ty>(args)...);
 				if (it.second) {
-					mLocallyActiveIterator = traits::revalidateIteratorInsert(begin(), keep, it.first);
-					this->postConstruct(*it.first, this);
+					iterator oldActiveIt = traits::revalidateIteratorInsert(begin(), keep, it.first);
+					iterator nextItemIt = it.first;
+					++nextItemIt;
+					if (nextItemIt == oldActiveIt && !isLocallyActive())
+						mLocallyActiveIterator = it.first;
+					else
+						mLocallyActiveIterator = oldActiveIt;
+					this->postConstruct(*it.first);
+					this->setParent(*it.first, unit());
 				}
 				return it;
 			}
@@ -267,9 +267,13 @@ namespace Engine {
 			}
 
 			iterator erase_intern(const iterator &it) {
+				bool test = mLocallyActiveIterator == it;
 				auto keep = traits::keepIterator(begin(), mLocallyActiveIterator);
 				iterator newIt = mData.erase(it);
-				mLocallyActiveIterator = traits::revalidateIteratorRemove(begin(), keep, newIt);
+				if (test)
+					mLocallyActiveIterator = newIt;
+				else
+					mLocallyActiveIterator = traits::revalidateIteratorRemove(begin(), keep, newIt);
 				return newIt; 
 			}
 

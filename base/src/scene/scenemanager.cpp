@@ -145,14 +145,16 @@ namespace Engine {
 		}
 
 
-		void SceneManagerBase::makeLocalCopy(Entity::Entity & e)
+		Entity::Entity *SceneManagerBase::makeLocalCopy(Entity::Entity & e)
 		{
 			mLocalEntities.emplace_back(e);
+			return &mLocalEntities.back();
 		}
 
-		void SceneManagerBase::makeLocalCopy(Entity::Entity && e)
+		Entity::Entity *SceneManagerBase::makeLocalCopy(Entity::Entity && e)
 		{
 			mLocalEntities.emplace_back(std::forward<Entity::Entity>(e));
+			return &mLocalEntities.back();
 		}
 
 		std::tuple<SceneManagerBase *, std::string> SceneManagerBase::createEntityData(const std::string & name)

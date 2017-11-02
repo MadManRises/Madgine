@@ -34,6 +34,7 @@ public:
 	size_t masterId();	
 
 	bool isActive() const;
+	bool isMaster() const;
 
 protected:
 	void activate();
@@ -77,7 +78,7 @@ private:
 	std::vector<Observable*> mObservedValues;
 	std::vector<Serializable*> mStateValues;
 
-	Serializable *mParent;
+	SerializableUnitBase *mParent;
 
 	size_t mSlaveId;
 	std::pair<size_t, SerializableUnitMap*> mMasterId;
@@ -93,7 +94,8 @@ public:
 	}
 
 protected:
-	void postConstruct(Serializable *parent);
+	void postConstruct();
+	void setParent(SerializableUnitBase *parent);
 
 private:
 	void insertInstance();

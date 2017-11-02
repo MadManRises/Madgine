@@ -2,6 +2,8 @@
 
 #include "Scene/Entity/entitycomponent.h"
 
+#include "serialize/container/serialized.h"
+
 namespace Engine {
 	namespace Scene {
 		namespace Entity {
@@ -26,7 +28,7 @@ namespace Engine {
 				void rotate(const std::array<float, 4> &q);
 
 			private:
-				Vector3 mPosition;
+				Serialize::Serialized<Vector3> mPosition;
 				Vector3 mScale;
 				std::array<float, 4> mOrientation;
 			};

@@ -15,13 +15,14 @@ public:
 	virtual void init();
 	virtual void finalize();
 
+	void moveToEntity(Entity *ent);
     Entity &getEntity() const;
 
 	virtual const char *key() const = 0;
 
 private:
 
-    Entity &mEntity;
+    Entity *mEntity;
 	Scripting::LuaTable mInitTable;
 };
 

@@ -31,7 +31,10 @@ namespace Engine {
 			static void applyMap(const std::map<size_t, SerializableUnitBase*> &map, T &item) {
 			}
 
-			static void postConstruct(T &item, Serializable *parent) {
+			static void postConstruct(T &item) {
+			}
+
+			static void setParent(T &item, SerializableUnitBase *parent) {
 			}
 
 			static void setItemActiveFlag(T &item, bool b) {
@@ -136,8 +139,12 @@ namespace Engine {
 				UnitHelper<T>::applyMap(map, *item);
 			}
 
-			static void postConstruct(Type &item, Serializable *parent) {
-				UnitHelper<T>::postConstruct(*item, parent);
+			static void postConstruct(Type &item) {
+				UnitHelper<T>::postConstruct(*item);
+			}
+
+			static void setParent(Type &item, SerializableUnitBase *parent) {
+				UnitHelper<T>::setParent(*item, parent);
 			}
 
 			static void setItemActiveFlag(Type &item, bool b) {
@@ -197,12 +204,19 @@ namespace Engine {
 			}
 
 
-			static void postConstruct(SerializableUnitBase &item, Serializable *parent) {
-				item.postConstruct(parent);
+			static void postConstruct(SerializableUnitBase &item) {
+				item.postConstruct();
 			}
 
-			static void postConstruct(Serializable &item, Serializable *parent) {
+			static void postConstruct(Serializable &item) {
 
+			}
+
+			static void setParent(SerializableUnitBase &item, SerializableUnitBase *parent) {
+				item.setParent(parent);
+			}
+
+			static void setParent(Serializable &item, SerializableUnitBase *parent) {
 			}
 
 			static void setItemActiveFlag(SerializableUnitBase &item, bool b) {
@@ -264,9 +278,14 @@ namespace Engine {
 				UnitHelper<V>::applyMap(map, item.second);
 			}
 
-			static void postConstruct(Type &item, Serializable *parent) {
-				UnitHelper<U>::postConstruct(item.first, parent);
-				UnitHelper<V>::postConstruct(item.second, parent);
+			static void postConstruct(Type &item) {
+				UnitHelper<U>::postConstruct(item.first);
+				UnitHelper<V>::postConstruct(item.second);
+			}
+
+			static void setParent(Type &item, SerializableUnitBase *parent) {
+				UnitHelper<U>::setParent(item.first, parent);
+				UnitHelper<V>::setParent(item.second, parent);
 			}
 
 			static void setItemActiveFlag(Type &item, bool b) {
@@ -336,9 +355,15 @@ namespace Engine {
 			};
 			}
 
-			static void postConstruct(Type &item, Serializable *parent) {
+			static void postConstruct(Type &item) {
 				(void)unpacker {
-				(UnitHelper<typename std::tuple_element<Is, Type>::type>::postConstruct(std::get<Is>(item), parent), true)...
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::postConstruct(std::get<Is>(item)), true)...
+			};
+			}
+
+			static void setParent(Type &item, SerializableUnitBase *parent) {
+				(void)unpacker {
+				(UnitHelper<typename std::tuple_element<Is, Type>::type>::setParent(std::get<Is>(item), parent), true)...
 			};
 			}
 

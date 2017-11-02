@@ -12,20 +12,20 @@ namespace Engine {
 			NoParentUnit(_Ty&&... args) :
 				T(std::forward<_Ty>(args)...)
 			{
-				postConstruct(nullptr);
+				postConstruct();
 				activate();
 			}
 
 			NoParentUnit(const NoParentUnit<T> &t) :
 				T(t)
 			{
-				postConstruct(nullptr);
+				postConstruct();
 				activate();
 			}
 			NoParentUnit(NoParentUnit<T> &&t) :
 				T(std::forward<NoParentUnit<T>>(t))
 			{
-				postConstruct(nullptr);
+				postConstruct();
 				activate();
 			}
 

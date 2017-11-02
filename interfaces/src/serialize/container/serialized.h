@@ -65,7 +65,8 @@ namespace Engine {
 			SerializedUnit(_Ty&&... args) :
 				mData(std::forward<_Ty>(args)...)
 			{
-				mData.postConstruct(this);
+				mData.postConstruct();
+				mData.SerializableUnitBase::setParent(unit());
 			}
 
 			/*template <class Ty>

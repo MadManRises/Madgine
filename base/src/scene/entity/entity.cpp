@@ -8,6 +8,8 @@
 
 #include "scripting/types/globalscopebase.h"
 
+#include "entitycomponentbase.h"
+
 namespace Engine {
 
 	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
@@ -32,6 +34,9 @@ Entity::Entity(Entity &&other) :
 	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
 	mSceneManager(other.mSceneManager)
 {
+	for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
+		comp->moveToEntity(this);
+	}
 	setup();
 }
 
@@ -95,7 +100,7 @@ EntityComponentBase * Entity::getComponent(const std::string & name)
 {
 	auto it = mComponents.find(name);
 	if (it == mComponents.end())
-		return nullptr;
+		throw 0;
 	else
 		return it->get();
 }

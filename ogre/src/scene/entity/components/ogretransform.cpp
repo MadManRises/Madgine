@@ -81,6 +81,10 @@ namespace Engine {
 				mNode->rotate(Ogre::Quaternion(const_cast<float*>(q.data())));
 			}
 
+			void Transform::lookAt(const Vector3 & v) {
+				mNode->lookAt(Ogre::Vector3(v.ptr()), Ogre::Node::TS_WORLD);
+			}
+
 			Vector3 Transform::getPosition() const
 			{
 				return{ mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z };

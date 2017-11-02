@@ -34,8 +34,8 @@ namespace Engine {
 			std::list<Entity::Entity*> entities();
 
 
-			void makeLocalCopy(Entity::Entity &e);
-			void makeLocalCopy(Entity::Entity &&e);
+			Entity::Entity *makeLocalCopy(Entity::Entity &e);
+			Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 			
 			virtual Light *createLight() = 0;
 			virtual std::list<Light*> lights() = 0;

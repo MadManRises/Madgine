@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../serializable.h"
+#include "../serializableunit.h"
 
 namespace Engine {
 	namespace Serialize {
@@ -13,8 +14,10 @@ namespace Engine {
 		template <class T, class Return, class Argument, Return(T::*g)() const, void (T::*s)(Argument)>
 		class SerializedMapperImpl : public Serializable {
 		public:
-			SerializedMapperImpl(T *parent) :
-				mParent(parent) {}
+			SerializedMapperImpl() :
+				mParent(dynamic_cast<T*>(unit())) {
+				assert(mParent);
+			}
 
 			virtual void readState(SerializeInStream &in) override {
 				std::decay_t<Argument> arg;

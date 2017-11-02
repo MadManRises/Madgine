@@ -11,6 +11,8 @@ namespace Engine {
 		namespace Entity {
 			class Entity;
 			class Transform;
+			class Animation;
+			class Mesh;
 		}
 
 		class Light;

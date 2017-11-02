@@ -23,7 +23,6 @@ namespace Engine {
 			Mesh::Mesh(Entity & entity, const std::string & meshName) :
 				EntityComponent(entity),
 				mObject(nullptr),
-				mSerializedObject(this),
 				mTransform(nullptr)
 			{
 				setName(meshName);

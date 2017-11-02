@@ -23,7 +23,7 @@ FolderSources(sources "" src interfacesforward.h interfaceslib.h)
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources src signalslot connection.cpp connection.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
-	FolderSources(sources src util process.cpp process.h processlistener.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources src util process.cpp process.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
 FolderSources(sources "" vstools Madgine.natvis)
 
 include_directories(${Interfaces_SOURCE_DIR}/src)

@@ -39,6 +39,12 @@ public:
 	}
 
 	template <class T>
+	void removeComponent_t() {
+		if (hasComponent<T>())
+			removeComponent(T::componentName());
+	}
+
+	template <class T>
 	T *getComponent() {
 		return static_cast<T*>(getComponent(T::componentName()));
 	}

@@ -14,7 +14,8 @@ namespace Engine {
 			Signal(const Signal<_Ty...> &other) {
 			}
 
-			Signal(Signal<_Ty...> &&) = default;
+			Signal(Signal<_Ty...> &&) {
+			}
 
 			~Signal() {
 				disconnectAll();
