@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Scene/Entity/systemcomponent.h"
+#include "scene/entity/systemcomponent.h"
 
 #include "serialize/container/serialized.h"
 
