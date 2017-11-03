@@ -118,8 +118,8 @@ namespace Engine {
 
 			void clear() {
 				bool wasActive = beforeReset(this->end());
-				mData.clear();
-				mLocallyActiveIterator = mData.begin();
+				this->mData.clear();
+				this->mLocallyActiveIterator = this->mData.begin();
 				afterReset(wasActive, this->end());
 			}
 
@@ -238,8 +238,8 @@ namespace Engine {
 
 			void readStateImpl(SerializeInStream &in, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
 				bool wasActive = beforeReset(this->end());
-				mData.clear();
-				mLocallyActiveIterator = mData.begin();
+				this->mData.clear();
+				this->mLocallyActiveIterator = this->mData.begin();
 				while (in.loopRead()) {
 					this->read_item_where_intern(end(), in);
 				}
@@ -404,16 +404,7 @@ namespace Engine {
 				if (isLocallyActive()) {
 					mSignal.emit(it, BEFORE | RESET);
 				}				
-				if (isActive()) {
-					setActiveFlag(false);
-				}
-				if (isLocallyActive()) {
-					notifySetActive(false);
-					return true;
-				}
-				else {
-					return false;
-				}
+				return deactivate();
 			}
 
 			void afterReset(bool wasActive, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
@@ -430,11 +421,8 @@ namespace Engine {
 						out->endMessage();
 					}
 				}
-				if (isActive()) {
-					setActiveFlag(true);
-				}
+				activate(wasActive);
 				if (wasActive){
-					notifySetActive(true);
 					mSignal.emit(it, AFTER | RESET);
 				}
 			}
