@@ -331,18 +331,18 @@ namespace Engine {
 		protected:
 			virtual void notifySetActive(bool active) {
 				if (!active) {
-					while (mLocallyActiveIterator != begin()) {
-						--mLocallyActiveIterator;
+					while (this->mLocallyActiveIterator != begin()) {
+						--this->mLocallyActiveIterator;
 						mSignal.emit(mLocallyActiveIterator, BEFORE | REMOVE_ITEM);
 						mSignal.emit(end(), AFTER | REMOVE_ITEM);
-						this->notifySetItemActive(*mLocallyActiveIterator, active);						
+						this->notifySetItemActive(*this->mLocallyActiveIterator, active);						
 					}
 				}
 				Serializable::notifySetActive(active);
 				if (active) {
-					while (mLocallyActiveIterator != end()) {
-						auto it = mLocallyActiveIterator;
-						++mLocallyActiveIterator;						
+					while (this->mLocallyActiveIterator != end()) {
+						auto it = this->mLocallyActiveIterator;
+						++this->mLocallyActiveIterator;						
 						this->notifySetItemActive(*it, active);
 						mSignal.emit(it, INSERT_ITEM);
 					}

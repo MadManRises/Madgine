@@ -35,7 +35,7 @@ namespace Engine {
 		template <class FirstCreator, class SecondCreator>
 		class PairCreator : private FirstCreator, private SecondCreator {
 		public:
-			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::template ArgsTuple, typename SecondCreator::template ArgsTuple>;
+			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::ArgsTuple, typename SecondCreator::ArgsTuple>;
 		protected:
 			auto readCreationData(SerializeInStream &in) {
 				auto &&first = FirstCreator::readCreationData(in);
