@@ -6,11 +6,11 @@ namespace Engine{
 
 
 
-template <class Base, class Store, template <class...> class Container = std::list, class... _Ty>
+template <class _Base, class Store, template <class...> class Container = std::list, class... _Ty>
 class UniqueComponentCollector : Store {
 
 public:
-	typedef Base Base;
+	typedef _Base Base;
 
 	UniqueComponentCollector(const UniqueComponentCollector &) = delete;
 	void operator=(const UniqueComponentCollector &) = delete;
