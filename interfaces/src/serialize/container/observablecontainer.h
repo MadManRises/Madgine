@@ -333,7 +333,7 @@ namespace Engine {
 				if (!active) {
 					while (this->mLocallyActiveIterator != begin()) {
 						--this->mLocallyActiveIterator;
-						mSignal.emit(mLocallyActiveIterator, BEFORE | REMOVE_ITEM);
+						mSignal.emit(this->mLocallyActiveIterator, BEFORE | REMOVE_ITEM);
 						mSignal.emit(end(), AFTER | REMOVE_ITEM);
 						this->notifySetItemActive(*this->mLocallyActiveIterator, active);						
 					}
