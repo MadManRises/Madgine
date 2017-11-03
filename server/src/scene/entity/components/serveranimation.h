@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Scene/Entity/entitycomponent.h"
+#include "scene/entity/entitycomponent.h"
 #include "serialize/container/serialized.h"
 
 namespace Engine {
