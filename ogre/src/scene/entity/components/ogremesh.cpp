@@ -4,7 +4,7 @@
 
 #include "ogretransform.h"
 
-#include "Scene/ogrescenemanager.h"
+#include "scene/ogrescenemanager.h"
 
 namespace Engine {
 
