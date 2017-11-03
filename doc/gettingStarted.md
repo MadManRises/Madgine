@@ -8,7 +8,7 @@ The Madgine is built using CMake. It can be downloaded [here](https://cmake.org/
 
 The following Libraries need to be available:
 
-* [Ogre 1.8](http://www.ogre3d.org/download/sdk)
+* [Ogre 1.10](http://www.ogre3d.org/download/sdk)
 * Ogre Dependencies (e.g. [here](https://bitbucket.org/cabalistic/ogredeps), SDL2 not needed)
 
 Also atleast one of the following Libraries needs to be available:
