@@ -52,8 +52,20 @@ if (BUILD_TESTS)
 	)
 
 	include_directories(${GTEST_DIR}/include)
-		
-	set (GTEST_LIBS ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtestd${CMAKE_STATIC_LIBRARY_SUFFIX} ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_maind${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_THREAD_LIBS_INIT})
+
+	if (WIN32)
+		set (debug_suffix "d")
+	else()
+		set (debug_suffix "")
+	endif ()
+
+	set (GTEST_LIBS 
+		debug ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${debug_suffix}${CMAKE_STATIC_LIBRARY_SUFFIX} 
+		debug ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${debug_suffix}${CMAKE_STATIC_LIBRARY_SUFFIX} 
+		optimized ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX} 
+		optimized ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX} 
+		${CMAKE_THREAD_LIBS_INIT}
+	)
 
 endif (BUILD_TESTS)
 
