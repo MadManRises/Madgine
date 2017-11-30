@@ -4,20 +4,20 @@
 #include "windows/windowcontainer.h"
 #include "windows/window.h"
 
-namespace Engine {
-	namespace GUI {
-
+namespace Engine
+{
+	namespace GUI
+	{
 		GUISystem::GUISystem() :
 			mRootWindow(nullptr),
 			mWindowSizesDirty(false)
 		{
-			
 		}
 
 
 		GUISystem::~GUISystem()
 		{
-			assert(mWindows.empty());			
+			assert(mWindows.empty());
 		}
 
 		void GUISystem::showCursor()
@@ -32,20 +32,20 @@ namespace Engine {
 
 		void GUISystem::update(float time)
 		{
-			if (mWindowSizesDirty) {
+			if (mWindowSizesDirty)
+			{
 				mWindowSizesDirty = false;
 				updateWindowSizes();
 			}
 		}
 
-		void GUISystem::notifyDisplaySizeChanged(const Ogre::Vector2 & size)
+		void GUISystem::notifyDisplaySizeChanged(const Ogre::Vector2& size)
 		{
 			updateWindowSizes();
 		}
 
 		void GUISystem::renderSingleFrame()
 		{
-			
 		}
 
 		/*void GUISystem::printHierarchy() {
@@ -62,13 +62,13 @@ namespace Engine {
 			}
 		}*/
 
-		void GUISystem::addWindow(const std::string & name, WindowContainer * w)
+		void GUISystem::addWindow(const std::string& name, WindowContainer* w)
 		{
 			//assert(mWindows.find(name) == mWindows.end());
 			mWindows[name] = w;
 		}
 
-		void GUISystem::removeWindow(const std::string & name)
+		void GUISystem::removeWindow(const std::string& name)
 		{
 			mWindows.erase(name);
 		}
@@ -84,28 +84,28 @@ namespace Engine {
 			mWindowSizesDirty = true;
 		}
 
-		Window * GUISystem::getWindowByName(const std::string & name, Class _class)
+		Window* GUISystem::getWindowByName(const std::string& name, Class _class)
 		{
 			return mWindows.at(name)->as(_class);
 		}
 
-		Window * GUISystem::loadLayout(const std::string & name, const std::string & parent)
+		Window* GUISystem::loadLayout(const std::string& name, const std::string& parent)
 		{
 			auto it = mWindows.find(parent);
 			if (it == mWindows.end())
-				return 0;
-			WindowContainer *w = it->second->loadLayout(name);
+				return nullptr;
+			WindowContainer* w = it->second->loadLayout(name);
 			if (!w)
-				return 0;
+				return nullptr;
 			return w->as();
 		}
 
-		Window * GUISystem::getRootWindow()
+		Window* GUISystem::getRootWindow() const
 		{
 			return mRootWindow->as();
 		}
 
-		void GUISystem::windowResized(Ogre::RenderWindow * rw)
+		void GUISystem::windowResized(Ogre::RenderWindow* rw)
 		{
 			unsigned int width, height, depth;
 			int left, top;
@@ -114,10 +114,9 @@ namespace Engine {
 			notifyDisplaySizeChanged(Ogre::Vector2(width, height));
 		}
 
-		const char *GUISystem::key() const
+		const char* GUISystem::key() const
 		{
 			return "Gui";
 		}
-
-}
+	}
 }

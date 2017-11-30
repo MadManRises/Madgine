@@ -3,16 +3,15 @@
 #include "../observable.h"
 #include "../streams/bufferedstream.h"
 #include "serializablecontainer.h"
-#include "unithelper.h"
 #include "sortedcontainer.h"
 #include "unsortedcontainer.h"
 
-namespace Engine {
-	namespace Serialize {
-
-
-
-		enum Operations {
+namespace Engine
+{
+	namespace Serialize
+	{
+		enum Operations
+		{
 			INSERT_ITEM = 0x1,
 			REMOVE_ITEM = 0x2,
 			RESET = 0x3,
@@ -26,19 +25,19 @@ namespace Engine {
 			AFTER = 0x10
 		};
 
-		struct _ContainerPolicy {
-			enum RequestMode {
+		struct _ContainerPolicy
+		{
+			enum RequestMode
+			{
 				ALL_REQUESTS,
 				NO_REQUESTS
 			} mRequestMode;
-
 		};
 
-		struct ContainerPolicy {
-
-			static const constexpr _ContainerPolicy allowAll{ _ContainerPolicy::ALL_REQUESTS };
-			static const constexpr _ContainerPolicy masterOnly{ _ContainerPolicy::NO_REQUESTS };
-
+		struct ContainerPolicy
+		{
+			static const constexpr _ContainerPolicy allowAll{_ContainerPolicy::ALL_REQUESTS};
+			static const constexpr _ContainerPolicy masterOnly{_ContainerPolicy::NO_REQUESTS};
 		};
 
 		template <class traits, class Creator>
@@ -50,7 +49,8 @@ namespace Engine {
 
 		template <class traits, class Creator, const _ContainerPolicy &Config>
 		class ObservableContainer :
-			public ContainerSelector<traits, Creator>, public Observable {
+			public ContainerSelector<traits, Creator>, public Observable
+		{
 		public:
 			typedef size_t TransactionId;
 
@@ -62,12 +62,13 @@ namespace Engine {
 			typedef typename traits::value_type value_type;
 
 
-
-			struct Transaction {
+			struct Transaction
+			{
 				template <class T>
-				Transaction(TransactionId id, const T &callback) :
+				Transaction(TransactionId id, const T& callback) :
 					mId(id), mCallback(callback)
-				{}
+				{
+				}
 
 				TransactionId mId;
 				SignalSlot::Connection<const iterator &, bool> mCallback;
@@ -77,46 +78,51 @@ namespace Engine {
 			ObservableContainer() :
 				mTransactionCounter(0)
 			{
-
 			}
 
-			ObservableContainer(const ObservableContainer &other) :
+			ObservableContainer(const ObservableContainer& other) :
 				Base(other),
 				mTransactionCounter(0)
 			{
 			}
 
-			ObservableContainer(ObservableContainer &&other) = default;
+			ObservableContainer(ObservableContainer&& other) = default;
 
-			virtual ~ObservableContainer() {
-				
+			virtual ~ObservableContainer()
+			{
 			}
 
 			template <class T>
-			void operator=(T&& arg) {
-				if (isMaster()) {
+			void operator=(T&& arg)
+			{
+				if (isMaster())
+				{
 					bool wasActive = beforeReset(this->end());
 					Base::operator=(std::forward<T>(arg));
 					afterReset(wasActive, this->end());
 				}
-				else {
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+				else
+				{
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					{
 						Base temp(std::forward<T>(arg));
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0;
+						*out << TransactionId(0);
 						*out << RESET;
 						temp.writeState(*out);
 						out->endMessage();
 					}
-					else {
+					else
+					{
 						throw 0;
 					}
 				}
 			}
 
 
-			void clear() {
+			void clear()
+			{
 				bool wasActive = beforeReset(this->end());
 				this->mData.clear();
 				this->mLocallyActiveIterator = this->mData.begin();
@@ -125,26 +131,31 @@ namespace Engine {
 
 
 			template <class... _Ty>
-			std::pair<iterator, bool> emplace(const iterator &where, _Ty&&... args) {
+			std::pair<iterator, bool> emplace(const iterator& where, _Ty&&... args)
+			{
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
 
-				if (isMaster()) {
+				if (isMaster())
+				{
 					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
 					if (it.second)
 						onInsert(it.first);
 				}
-				else {
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+				else
+				{
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
 
 						BufferedOutStream* out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0;
+						*out << TransactionId(0);
 						*out << INSERT_ITEM;
 						this->write_item(*out, where, temp);
 						out->endMessage();
 					}
-					else {
+					else
+					{
 						throw 0;
 					}
 				}
@@ -152,52 +163,63 @@ namespace Engine {
 			}
 
 			template <class T, class... _Ty>
-			std::pair<iterator, bool> emplace_init(T &&init, const iterator &where, _Ty&&... args) {
+			std::pair<iterator, bool> emplace_init(T&& init, const iterator& where, _Ty&&... args)
+			{
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
-				if (isMaster()) {
+				if (isMaster())
+				{
 					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
-					if (it.second) {
+					if (it.second)
+					{
 						init(*it.first);
 						onInsert(it.first);
 					}
 				}
-				else {
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+				else
+				{
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
 
 						init(temp);
 
-						BufferedOutStream *out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0;
+						BufferedOutStream* out = getSlaveActionMessageTarget();
+						*out << TransactionId(0);
 						*out << INSERT_ITEM;
 						this->write_item(*out, where, temp);
 						out->endMessage();
 					}
-					else {
+					else
+					{
 						throw 0;
 					}
 				}
 				return it;
 			}
 
-			iterator erase(const iterator &where) {
+			iterator erase(const iterator& where)
+			{
 				iterator it = this->end();
 
-				if (isMaster()) {
+				if (isMaster())
+				{
 					bool b = beforeRemove(where);
 					it = Base::erase_intern(where);
 					afterRemove(b);
 				}
-				else {
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS) {
+				else
+				{
+					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					{
 						BufferedOutStream* out = getSlaveActionMessageTarget();
-						*out << (TransactionId)0;
+						*out << TransactionId(0);
 						*out << REMOVE_ITEM;
 						this->write_iterator(*out, where);
 						out->endMessage();
 					}
-					else {
+					else
+					{
 						throw 0;
 					}
 				}
@@ -205,11 +227,13 @@ namespace Engine {
 			}
 
 
-
-			std::pair<iterator, bool> performOperation(Operations op, SerializeInStream &in, ParticipantId partId, TransactionId id) {
+			std::pair<iterator, bool> performOperation(Operations op, SerializeInStream& in, ParticipantId partId,
+			                                           TransactionId id)
+			{
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
 				bool b;
-				switch (op) {
+				switch (op)
+				{
 				case INSERT_ITEM:
 					it = this->read_item(in);
 					if (it.second)
@@ -232,22 +256,25 @@ namespace Engine {
 				return it;
 			}
 
-			virtual void readState(SerializeInStream &in) override {
+			virtual void readState(SerializeInStream& in) override
+			{
 				readStateImpl(in);
 			}
 
-			void readStateImpl(SerializeInStream &in, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
+			void readStateImpl(SerializeInStream& in, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+			{
 				bool wasActive = beforeReset(this->end());
 				this->mData.clear();
 				this->mLocallyActiveIterator = this->mData.begin();
-				while (in.loopRead()) {
-					this->read_item_where_intern(end(), in);
+				while (in.loopRead())
+				{
+					this->read_item_where_intern(this->end(), in);
 				}
 				afterReset(wasActive, this->end());
 			}
 
 			// Inherited via Observable
-			virtual void readRequest(BufferedInOutStream & inout) override
+			void readRequest(BufferedInOutStream& inout) override
 			{
 				bool accepted = Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS; //Check TODO
 
@@ -255,42 +282,48 @@ namespace Engine {
 				inout >> id;
 
 				Operations op;
-				inout >> (int&)op;
+				inout >> reinterpret_cast<int&>(op);
 
 
-				if (!accepted) {
-					if (id) {
+				if (!accepted)
+				{
+					if (id)
+					{
 						beginActionResponseMessage(&inout);
 						inout << id;
 						inout << (op | REJECT);
 						inout.endMessage();
 					}
 				}
-				else {
-
-					if (isMaster()) {
+				else
+				{
+					if (isMaster())
+					{
 						performOperation(op, inout, inout.id(), id);
 					}
-					else {
+					else
+					{
 						TransactionId newId = 0;
-						if (id) {
+						if (id)
+						{
 							newId = ++mTransactionCounter;
 						}
-						BufferedOutStream *out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << newId;
 						*out << op;
 						*out << inout;
 						out->endMessage();
 
-						if (id) {
+						if (id)
+						{
 							mPassTransactions.emplace_back(newId, std::make_pair(inout.id(), id));
 						}
 					}
 				}
 			}
 
-			virtual void readAction(SerializeInStream &inout) override {
-
+			void readAction(SerializeInStream& inout) override
+			{
 				TransactionId id;
 				inout >> id;
 
@@ -301,48 +334,57 @@ namespace Engine {
 
 				iterator it = this->end();
 
-				std::pair<ParticipantId, TransactionId> sender = { 0, 0 };
-				if (id) {
-					if (!mPassTransactions.empty() && mPassTransactions.front().first == id) {
+				std::pair<ParticipantId, TransactionId> sender = {0, 0};
+				if (id)
+				{
+					if (!mPassTransactions.empty() && mPassTransactions.front().first == id)
+					{
 						sender = mPassTransactions.front().second;
 						mPassTransactions.pop_front();
-
 					}
 				}
 
-				if (accepted) {
-					it = performOperation((Operations)(op & MASK), inout, sender.first, sender.second).first;
+				if (accepted)
+				{
+					it = performOperation(Operations(op & MASK), inout, sender.first, sender.second).first;
 				}
 
-				if (id) {
-					if (!mTransactions.empty() && mTransactions.front().mId == id) {
+				if (id)
+				{
+					if (!mTransactions.empty() && mTransactions.front().mId == id)
+					{
 						mTransactions.front().mCallback(it, accepted);
 						mTransactions.pop_front();
 					}
 				}
-
 			}
 
 			template <class Ty>
-			void connectCallback(Ty &&slot) {
+			void connectCallback(Ty&& slot)
+			{
 				mSignal.connect(std::forward<Ty>(slot));
 			}
 
 		protected:
-			virtual void notifySetActive(bool active) {
-				if (!active) {
-					while (this->mLocallyActiveIterator != begin()) {
+			virtual void notifySetActive(bool active)
+			{
+				if (!active)
+				{
+					while (this->mLocallyActiveIterator != this->begin())
+					{
 						--this->mLocallyActiveIterator;
 						mSignal.emit(this->mLocallyActiveIterator, BEFORE | REMOVE_ITEM);
-						mSignal.emit(end(), AFTER | REMOVE_ITEM);
-						this->notifySetItemActive(*this->mLocallyActiveIterator, active);						
+						mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
+						this->notifySetItemActive(*this->mLocallyActiveIterator, active);
 					}
 				}
 				Serializable::notifySetActive(active);
-				if (active) {
-					while (this->mLocallyActiveIterator != end()) {
+				if (active)
+				{
+					while (this->mLocallyActiveIterator != this->end())
+					{
 						auto it = this->mLocallyActiveIterator;
-						++this->mLocallyActiveIterator;						
+						++this->mLocallyActiveIterator;
 						this->notifySetItemActive(*it, active);
 						mSignal.emit(it, INSERT_ITEM);
 					}
@@ -350,79 +392,101 @@ namespace Engine {
 			}
 
 		private:
-			void onInsert(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (isActive()) {
-					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-						if (answerTarget == out->id()) {
+			void onInsert(const iterator& it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+			{
+				if (this->isActive())
+				{
+					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					{
+						if (answerTarget == out->id())
+						{
 							*out << answerId;
 						}
-						else {
-							*out << (TransactionId)0;
+						else
+						{
+							*out << TransactionId(0);
 						}
 						*out << INSERT_ITEM;
 						this->write_item(*out, it);
 						out->endMessage();
 					}
-					this->setItemActiveFlag(*it, true);	
-				}	
-				if (isItemLocallyActive(it)) {
+					this->setItemActiveFlag(*it, true);
+				}
+				if (isItemLocallyActive(it))
+				{
 					this->notifySetItemActive(*it, true);
 					mSignal.emit(it, INSERT_ITEM);
 				}
 			}
 
-			bool beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (isActive()) {
-					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-						if (answerTarget == out->id()) {
+			bool beforeRemove(const iterator& it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+			{
+				if (this->isActive())
+				{
+					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					{
+						if (answerTarget == out->id())
+						{
 							*out << answerId;
 						}
-						else {
-							*out << (TransactionId)0;
+						else
+						{
+							*out << TransactionId(0);
 						}
 						*out << REMOVE_ITEM;
 						this->write_iterator(*out, it);
 						out->endMessage();
 					}
-					this->setItemActiveFlag(*it, false);	
+					this->setItemActiveFlag(*it, false);
 				}
-				if (isItemLocallyActive(it)) {
+				if (isItemLocallyActive(it))
+				{
 					mSignal.emit(it, BEFORE | REMOVE_ITEM);
 					this->notifySetItemActive(*it, false);
 					return true;
-				}else
-					return false;
+				}
+				return false;
 			}
 
-			void afterRemove(bool b) {
-				if (b) {
+			void afterRemove(bool b)
+			{
+				if (b)
+				{
 					mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
 				}
 			}
 
-			bool beforeReset(const iterator &it) {
-				if (isLocallyActive()) {
+			bool beforeReset(const iterator& it)
+			{
+				if (this->isLocallyActive())
+				{
 					mSignal.emit(it, BEFORE | RESET);
-				}				
-				return deactivate();
+				}
+				return this->deactivate();
 			}
 
-			void afterReset(bool wasActive, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0) {
-				if (isActive()) {
-					for (BufferedOutStream *out : getMasterActionMessageTargets()) {
-						if (answerTarget == out->id()) {
+			void afterReset(bool wasActive, const iterator& it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+			{
+				if (this->isActive())
+				{
+					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					{
+						if (answerTarget == out->id())
+						{
 							*out << answerId;
 						}
-						else {
-							*out << (TransactionId)0;
+						else
+						{
+							*out << TransactionId(0);
 						}
 						*out << RESET;
 						this->writeState(*out);
 						out->endMessage();
 					}
 				}
-				activate(wasActive);
-				if (wasActive){
+				this->activate(wasActive);
+				if (wasActive)
+				{
 					mSignal.emit(it, AFTER | RESET);
 				}
 			}
@@ -435,8 +499,6 @@ namespace Engine {
 			std::list<std::pair<TransactionId, std::pair<ParticipantId, TransactionId>>> mPassTransactions;
 
 			TransactionId mTransactionCounter;
-
 		};
-
 	}
 }

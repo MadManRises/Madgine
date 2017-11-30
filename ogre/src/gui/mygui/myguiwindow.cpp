@@ -15,39 +15,44 @@
 #include "myguicombobox.h"
 
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
-			MyGUIWindow::MyGUIWindow(MyGUI::Widget *window, MyGUILauncher *gui, WindowContainer *parent) :
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			MyGUIWindow::MyGUIWindow(MyGUI::Widget* window, MyGUILauncher* gui, WindowContainer* parent) :
 				WindowContainer(gui, parent, window->getName()),
 				mWindow(window),
 				mGui(gui)
 			{
-
-				if (window->isUserString("Size")) {
+				if (window->isUserString("Size"))
+				{
 					std::stringstream ss;
 					ss.str(window->getUserString("Size"));
 					float xw, xh, xa, yw, yh, ya;
 					ss >> xw >> xh >> xa >> yw >> yh >> ya;
-					setSize({ { xw, xh, xa },{ yw, yh, ya } });
+					setSize({{xw, xh, xa},{yw, yh, ya}});
 				}
-				else {
-					setSize({ { 1, 0, 0 } ,{ 0, 1, 0 } });
+				else
+				{
+					setSize({{1, 0, 0} ,{0, 1, 0}});
 				}
 
-				if (window->isUserString("Pos")) {
+				if (window->isUserString("Pos"))
+				{
 					std::stringstream ss;
 					ss.str(window->getUserString("Pos"));
 					float xw, xh, xa, yw, yh, ya;
 					ss >> xw >> xh >> xa >> yw >> yh >> ya;
-					setPos({ { xw, xh, xa },{ yw, yh, ya } });
+					setPos({{xw, xh, xa},{yw, yh, ya}});
 				}
-				else {
-					setPos({ { 0, 0, 0 } ,{ 0, 0, 0 } });
+				else
+				{
+					setPos({{0, 0, 0} ,{0, 0, 0}});
 				}
 
-				mWindow->eventKeyButtonReleased += MyGUI::newDelegate(this, &MyGUIWindow::handleKeyEvent);
+				mWindow->eventKeyButtonReleased += newDelegate(this, &MyGUIWindow::handleKeyEvent);
 
 				mWindow->setNeedMouseFocus(false);
 				mWindow->setNeedKeyFocus(false);
@@ -58,7 +63,11 @@ namespace Engine {
 				mGui->destroy(mWindow);
 			}
 
-			void MyGUIWindow::registerHandlerEvents(void * id, std::function<void(GUI::MouseEventArgs&)> mouseMove, std::function<void(GUI::MouseEventArgs&)> mouseDown, std::function<void(GUI::MouseEventArgs&)> mouseUp, std::function<void(GUI::MouseEventArgs&)> mouseScroll, std::function<bool(GUI::KeyEventArgs&)> keyPress)
+			void MyGUIWindow::registerHandlerEvents(void* id, std::function<void(MouseEventArgs&)> mouseMove,
+			                                        std::function<void(MouseEventArgs&)> mouseDown,
+			                                        std::function<void(MouseEventArgs&)> mouseUp,
+			                                        std::function<void(MouseEventArgs&)> mouseScroll,
+			                                        std::function<bool(KeyEventArgs&)> keyPress)
 			{
 				mWindow->setNeedKeyFocus(true);
 				needMouse();
@@ -70,17 +79,19 @@ namespace Engine {
 				registerEvent(id, mouseMove, mWindow->eventMouseWheel);
 			}
 
-			void MyGUIWindow::unregisterCustomEvents(void * id)
+			void MyGUIWindow::unregisterCustomEvents(void* id)
 			{
 				mEventHandlers.erase(id);
 				mKeyHandlers.erase(id);
 			}
 
-			void MyGUIWindow::handleKeyEvent(MyGUI::Widget * w, MyGUI::KeyCode c)
+			void MyGUIWindow::handleKeyEvent(MyGUI::Widget* w, MyGUI::KeyCode c)
 			{
-				KeyEventArgs args((Key)c.getValue());
-				for (const std::pair<void *const, std::list<std::function<bool(GUI::KeyEventArgs&)>>> &p : mKeyHandlers) {
-					for (const std::function<bool(GUI::KeyEventArgs&)> &f : p.second) {
+				KeyEventArgs args(static_cast<Key>(c.getValue()));
+				for (const std::pair<void *const, std::list<std::function<bool(KeyEventArgs&)>>>& p : mKeyHandlers)
+				{
+					for (const std::function<bool(KeyEventArgs&)>& f : p.second)
+					{
 						if (f(args))
 							return;
 					}
@@ -90,10 +101,11 @@ namespace Engine {
 					mWindow->getParent()->eventKeyButtonReleased(w, c);
 			}
 
-			Window *MyGUIWindow::createImpl(Class _class)
+			Window* MyGUIWindow::createImpl(Class _class)
 			{
-				Window *impl;
-				switch (_class) {
+				Window* impl;
+				switch (_class)
+				{
 				case Class::WINDOW_CLASS:
 					impl = new Window(this);
 					break;
@@ -186,9 +198,10 @@ namespace Engine {
 			}
 
 
-			void MyGUIWindow::registerEvent(void *id, EventType type, std::function<void()> event)
+			void MyGUIWindow::registerEvent(void* id, EventType type, std::function<void()> event)
 			{
-				switch (type) {
+				switch (type)
+				{
 				case EventType::ButtonClick:
 					needMouse();
 					registerEvent(id, event, mWindow->castType<MyGUI::Button>()->eventMouseButtonClick);
@@ -197,7 +210,8 @@ namespace Engine {
 					registerEvent(id, event, mWindow->castType<MyGUI::EditBox>()->eventEditTextChange.m_eventObsolete);
 					break;
 				case EventType::CloseClicked:
-					registerEvent(id, [=](const std::string &name) {
+					registerEvent(id, [=](const std::string& name)
+					{
 						if (name == "close")
 							event();
 					}, mWindow->castType<MyGUI::Window>()->eventWindowButtonPressed.m_eventObsolete);
@@ -219,96 +233,117 @@ namespace Engine {
 				default:
 					WindowContainer::registerEvent(id, type, event);
 				}
-
 			}
 
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void(const std::string&)> f, MyGUI::EventHandle_WidgetString &event)
+			void MyGUIWindow::registerEvent(void* id, std::function<void(const std::string&)> f,
+			                                MyGUI::EventHandle_WidgetString& event)
 			{
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, const std::string&>([=](MyGUI::Widget*, const std::string &name) {
-					f(name);
-				}, event));
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, const std::string&>(
+					[=](MyGUI::Widget*, const std::string& name)
+					{
+						f(name);
+					}, event));
 			}
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetVoid &event)
+			void MyGUIWindow::registerEvent(void* id, std::function<void()> f, MyGUI::EventHandle_WidgetVoid& event)
 			{
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*>([=](MyGUI::Widget*) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*>([=](MyGUI::Widget*)
+				{
 					f();
 				}, event));
 			}
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntInt &event) {
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int>([=](MyGUI::Widget* w, int left, int top) {
+			void MyGUIWindow::registerEvent(void* id, std::function<void(MouseEventArgs&)> f,
+			                                MyGUI::EventHandle_WidgetIntInt& event)
+			{
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int>([=](MyGUI::Widget* w, int left, int top)
+				{
 					MouseEventArgs args(mGui->widgetRelative(w, left, top), mGui->relativeMoveDelta(w), 0);
 					f(args);
 				}, event));
 			}
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetInt &event) {
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int>([=](MyGUI::Widget* w, int wheel) {
-					MouseEventArgs args(mGui->widgetRelative(w), mGui->relativeMoveDelta(w), (float)wheel);
+			void MyGUIWindow::registerEvent(void* id, std::function<void(MouseEventArgs&)> f,
+			                                MyGUI::EventHandle_WidgetInt& event)
+			{
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int>([=](MyGUI::Widget* w, int wheel)
+				{
+					MouseEventArgs args(mGui->widgetRelative(w), mGui->relativeMoveDelta(w), static_cast<float>(wheel));
 					f(args);
 				}, event));
 			}
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetWidget &event)
+			void MyGUIWindow::registerEvent(void* id, std::function<void()> f, MyGUI::EventHandle_WidgetWidget& event)
 			{
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, MyGUI::Widget*>([=](MyGUI::Widget*, MyGUI::Widget*) {
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, MyGUI::Widget*>([=](MyGUI::Widget*, MyGUI::Widget*)
+				{
 					f();
 				}, event));
 			}
 
-			void MyGUIWindow::registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntIntButton &event) {
-				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int, MyGUI::MouseButton>([=](MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button) {
-					MouseEventArgs args(mGui->widgetRelative(w, left, top), mGui->relativeMoveDelta(w), 0, MyGUILauncher::convertButton(button));
-					f(args);
-				}, event));
+			void MyGUIWindow::registerEvent(void* id, std::function<void(MouseEventArgs&)> f,
+			                                MyGUI::EventHandle_WidgetIntIntButton& event)
+			{
+				mEventHandlers[id].emplace_back(new EventHandler<MyGUI::Widget*, int, int, MyGUI::MouseButton>(
+					[=](MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button)
+					{
+						MouseEventArgs args(mGui->widgetRelative(w, left, top), mGui->relativeMoveDelta(w), 0,
+						                    MyGUILauncher::convertButton(button));
+						f(args);
+					}, event));
 			}
 
 
-			WindowContainer * MyGUIWindow::loadLayoutWindow(const std::string & name)
+			WindowContainer* MyGUIWindow::loadLayoutWindow(const std::string& name)
 			{
 				bool failed = false;
 				MyGUI::VectorWidgetPtr widgets;
-				try {
+				try
+				{
 					widgets = MyGUI::LayoutManager::getInstance().loadLayout(name, "", mWindow);
 					if (widgets.size() != 1)
 						failed = true;
 				}
-				catch (Ogre::FileNotFoundException &) {
+				catch (Ogre::FileNotFoundException&)
+				{
 					failed = true;
 				}
 
-				if (failed) {
+				if (failed)
+				{
 					LOG_ERROR(Exceptions::loadLayoutFailure(name));
-					return 0;
+					return nullptr;
 				}
-				WindowContainer *result = new MyGUIWindow(widgets.front(), mGui, this);
+				WindowContainer* result = new MyGUIWindow(widgets.front(), mGui, this);
 				result->buildHierarchy();
 				return result;
 			}
 
 			void MyGUIWindow::buildChildren()
-			{				
-				MyGUI::Widget *w = mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow;
-				for (size_t i = 0; i < w->getChildCount(); ++i) {
+			{
+				MyGUI::Widget* w = mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow;
+				for (size_t i = 0; i < w->getChildCount(); ++i)
+				{
 					addChild(new MyGUIWindow(w->getChildAt(i), mGui, this));
-				}				
+				}
 			}
 
-			void MyGUIWindow::needMouse()
+			void MyGUIWindow::needMouse() const
 			{
-				MyGUI::Widget *w = mWindow;
-				while (w/* && !w->getNeedMouseFocus()*/) {
+				MyGUI::Widget* w = mWindow;
+				while (w/* && !w->getNeedMouseFocus()*/)
+				{
 					w->setNeedMouseFocus(true);
 					w = w->getParent();
 				}
 			}
 
-			WindowContainer * MyGUIWindow::createChildWindow(const std::string & name, Class _class, const std::string &customSkin)
+			WindowContainer* MyGUIWindow::createChildWindow(const std::string& name, Class _class, const std::string& customSkin)
 			{
 				std::string type, skin;
-				switch (_class) {
+				switch (_class)
+				{
 				case Class::WINDOW_CLASS:
 					type = "Widget";
 					skin = "PanelEmpty";
@@ -331,40 +366,39 @@ namespace Engine {
 				if (!customSkin.empty())
 					skin = customSkin;
 
-				MyGUI::Widget *w = mWindow->createWidgetRealT(type, skin, { 0, 0, 1, 1 }, MyGUI::Align::Default, name);
+				MyGUI::Widget* w = mWindow->createWidgetRealT(type, skin, {0, 0, 1, 1}, MyGUI::Align::Default, name);
 
 				return new MyGUIWindow(w, mGui, this);
 			}
 
 
-			void MyGUIWindow::setPixelSize(const Ogre::Vector2 & size)
+			void MyGUIWindow::setPixelSize(const Ogre::Vector2& size)
 			{
-				mWindow->setSize((int)size.x, (int)size.y);
+				mWindow->setSize(static_cast<int>(size.x), static_cast<int>(size.y));
 			}
 
-			void MyGUIWindow::setPixelPosition(const Ogre::Vector2 & pos)
+			void MyGUIWindow::setPixelPosition(const Ogre::Vector2& pos)
 			{
-				mWindow->setPosition((int)pos.x, (int)pos.y);
+				mWindow->setPosition(static_cast<int>(pos.x), static_cast<int>(pos.y));
 			}
 
 			Ogre::Vector2 MyGUIWindow::getPixelPosition()
 			{
-				const MyGUI::IntPoint &pos = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getPosition();
-				return{ (float)pos.left, (float)pos.top };
+				const MyGUI::IntPoint& pos = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getPosition();
+				return {static_cast<float>(pos.left), static_cast<float>(pos.top)};
 			}
 
 			Ogre::Vector2 MyGUIWindow::getPixelSize()
 			{
-				const MyGUI::IntSize &size = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getSize();
-				return{ (float)size.width, (float)size.height };
+				const MyGUI::IntSize& size = (mWindow->getClientWidget() ? mWindow->getClientWidget() : mWindow)->getSize();
+				return {static_cast<float>(size.width), static_cast<float>(size.height)};
 			}
 
 
-
-			MyGUI::Widget *MyGUIWindow::window() {
+			MyGUI::Widget* MyGUIWindow::window() const
+			{
 				return mWindow;
 			}
-
 		}
 	}
 }

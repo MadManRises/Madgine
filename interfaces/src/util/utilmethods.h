@@ -2,59 +2,71 @@
 
 #include "traceback.h"
 
-namespace Engine {
-	namespace Util {
+namespace Engine
+{
+	namespace Util
+	{
+		class AbortException
+		{
+		};
 
-		class AbortException {};
-
-		enum MessageType {
+		enum MessageType
+		{
 			ERROR_TYPE,
 			WARNING_TYPE,
 			LOG_TYPE
 		};
 
-		class Log {
+		class Log
+		{
 		public:
 			virtual ~Log() = default;
-			virtual void log(const std::string &msg, MessageType lvl, const std::list<TraceBack> &traceBack = {}) = 0;
+			virtual void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {}) = 0;
 			virtual std::string getName() = 0;
 		};
 
-		class LogListener {
+		class LogListener
+		{
 		public:
 			virtual ~LogListener() = default;
-			virtual void messageLogged(const std::string & message, MessageType lml, const std::list<TraceBack> &traceback, const std::string & logName) = 0;
+			virtual void messageLogged(const std::string& message, MessageType lml, const std::list<TraceBack>& traceback,
+			                           const std::string& logName) = 0;
 		};
 
-		class INTERFACES_EXPORT UtilMethods {
+		class INTERFACES_EXPORT UtilMethods
+		{
 		public:
-			static void setup(Log *log = 0, bool logToStdCout = true);
+			static void setup(Log* log = nullptr, bool logToStdCout = true);
 
-			static void log(const std::string &msg, MessageType lvl, const std::list<TraceBack> &traceBack = {});
+			static void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {});
 
 			static void popTraceBack();
-			static void pushTraceBack(const TraceBack &t);
+			static void pushTraceBack(const TraceBack& t);
 
-			static void logException(const std::exception &e);
+			static void logException(const std::exception& e);
 
-			struct Tracer {
-				Tracer(const TraceBack &t) {
+			struct Tracer
+			{
+				Tracer(const TraceBack& t)
+				{
 					pushTraceBack(t);
 				}
-				~Tracer() {
+
+				~Tracer()
+				{
 					popTraceBack();
 				}
 			};
 
-			static void registerException(const TraceBack &t);
+			static void registerException(const TraceBack& t);
 			static void registerException();
 
 			static void abort();
 
 			static const std::list<TraceBack>& traceBack();
 
-			static void addListener(LogListener *listener);
-			static void removeListener(LogListener *listener);
+			static void addListener(LogListener* listener);
+			static void removeListener(LogListener* listener);
 
 
 		private:
@@ -63,7 +75,7 @@ namespace Engine {
 			static std::list<TraceBack> sExceptionTraceBack;
 			static std::list<LogListener*> sListeners;
 
-			static Log *sLog;
+			static Log* sLog;
 			static bool sLogToStdCout;
 		};
 
@@ -80,6 +92,5 @@ namespace Engine {
 #define MADGINE_THROW_NO_TRACE(e) throw (Engine::Util::UtilMethods::registerException(), e)
 
 #define MADGINE_ABORT Engine::Util::UtilMethods::abort()
-
 	}
 }

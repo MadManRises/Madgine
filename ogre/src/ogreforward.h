@@ -1,7 +1,8 @@
 #pragma once
 
 
-namespace Ogre {
+namespace Ogre
+{
 	template <class T>
 	class Singleton;
 
@@ -9,27 +10,26 @@ namespace Ogre {
 	class SharedPtr;
 }
 
-namespace Engine {
-
-	namespace App {
+namespace Engine
+{
+	namespace App
+	{
 		class ConfigSet;
 		struct OgreAppSettings;
 		class Application;
 		class OgreApplication;
 	}
 
-	namespace UI {
-
+	namespace UI
+	{
 		class Handler;
 		class GameHandlerBase;
 		class GuiHandlerBase;
 		class UIManager;
-
-
 	}
 
-	namespace GUI {
-
+	namespace GUI
+	{
 		class GUISystem;
 		struct WindowSizeRelVector;
 		class WindowContainer;
@@ -43,51 +43,50 @@ namespace Engine {
 		class Textbox;
 		class Label;
 
-		namespace MouseButton {
+		namespace MouseButton
+		{
 			enum MouseButton : unsigned char;
 		}
-
 	}
 
-	namespace Scene {
-
+	namespace Scene
+	{
 		class OgreSceneManager;
 		class SceneComponentBase;
 
-		namespace Entity {
+		namespace Entity
+		{
 			class Entity;
 			class EntityComponentBase;
-
 		}
-
-
 	}
 
-	namespace Math {
+	namespace Math
+	{
 		class Bounds;
 	}
 
-	namespace Resources {
+	namespace Resources
+	{
 		class OgreTexturePtr;
 
 		class ResourceLoader;
-		namespace Shading {
+
+		namespace Shading
+		{
 			class ShaderFactoryBase;
 		}
 	}
 
-	namespace Util {
+	namespace Util
+	{
 		class Profiler;
 		class ProcessStats;
 		class Util;
 	}
 
-	namespace Input {
+	namespace Input
+	{
 		class InputHandler;
 	}
-
-
 }
-
-
-

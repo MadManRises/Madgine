@@ -5,33 +5,38 @@
 
 #include "serialize/container/serialized.h"
 
-namespace Engine {
-	namespace Scene {
-		namespace Entity {
-
-			class OGREMADGINE_EXPORT Animation : public SystemComponent<Animation> {
+namespace Engine
+{
+	namespace Scene
+	{
+		namespace Entity
+		{
+			class OGREMADGINE_EXPORT Animation : public SystemComponent<Animation>
+			{
 			public:
-				enum LoopSetting {
+				enum LoopSetting
+				{
 					DEFAULT,
 					LOOP,
 					NO_LOOP
 				};
 
-				Animation(Entity &entity, const Scripting::LuaTable &table);
+				Animation(Entity& entity, const Scripting::LuaTable& table);
 				virtual ~Animation();
 
-				virtual void init() override;
-				virtual void finalize() override;
+				void init() override;
+				void finalize() override;
 
 				void update(float timestep);
 
-				void setAnimation(const std::string &name, LoopSetting loop = DEFAULT);
+				void setAnimation(const std::string& name, LoopSetting loop = DEFAULT);
 				void resetAnimation();
-				void setDefaultAnimation(const std::string &name);
+				void setDefaultAnimation(const std::string& name);
 				void resetDefaultAnimation();
+				float getAnimationLength(const std::string& name) const;
 
 			private:
-				Mesh *mMesh;
+				Mesh* mMesh;
 				Ogre::AnimationState *mState, *mDefaultState;
 				Serialize::Serialized<std::string> mDefaultAnimation;
 			};

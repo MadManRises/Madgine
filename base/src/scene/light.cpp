@@ -3,12 +3,13 @@
 #include "light.h"
 #include "scenemanager.h"
 
-namespace Engine {
-	namespace Scene {
-
+namespace Engine
+{
+	namespace Scene
+	{
 		Light::Light() :
 			mPowerChangedSlot(this),
-			mPositionChangedSlot(this)			
+			mPositionChangedSlot(this)
 		{
 			mPower.setCallback(mPowerChangedSlot);
 			mPosition.setCallback(mPositionChangedSlot);
@@ -24,12 +25,12 @@ namespace Engine {
 			mPosition = position;
 		}
 
-		float Light::power()
+		float Light::power() const
 		{
 			return mPower;
 		}
 
-		const Vector3& Light::position()
+		const Vector3& Light::position() const
 		{
 			return mPosition;
 		}
@@ -41,7 +42,5 @@ namespace Engine {
 		void Light::onPositionChanged(const Vector3& position)
 		{
 		}
-
-
 	}
 }

@@ -2,32 +2,34 @@
 
 #include "servertransform.h"
 
-namespace Engine {
+namespace Engine
+{
+	API_IMPL(Scene::Entity::Transform, MAP_RO(Position, getPosition), MAP_RO(Orientation, getOrientation), MAP_RO(Scale,
+		getScale));
 
-	API_IMPL(Scene::Entity::Transform, MAP_RO(Position, getPosition), MAP_RO(Orientation, getOrientation), MAP_RO(Scale, getScale));
-
-	namespace Scene {
-		namespace Entity {
-
-
+	namespace Scene
+	{
+		namespace Entity
+		{
 			template <>
-			const char * const EntityComponent<Transform>::sComponentName = "Transform";
+			const char* const EntityComponent<Transform>::sComponentName = "Transform";
 
-			Transform::Transform(Entity &entity, const Scripting::LuaTable &table) :
+			Transform::Transform(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table)
 			{
 			}
 
-			Transform::~Transform() {
+			Transform::~Transform()
+			{
 			}
 
 
-			void Transform::setPosition(const Vector3 &v)
+			void Transform::setPosition(const Vector3& v)
 			{
 				mPosition = v;
 			}
 
-			void Transform::setScale(const Vector3 & scale)
+			void Transform::setScale(const Vector3& scale)
 			{
 				mScale = scale;
 			}
@@ -37,12 +39,12 @@ namespace Engine {
 				mOrientation = orientation;
 			}
 
-			void Transform::translate(const Vector3 & v)
+			void Transform::translate(const Vector3& v)
 			{
 				//mNode->translate(Ogre::Vector3(v.ptr()));
 			}
 
-			void Transform::rotate(const std::array<float, 4> &q)
+			void Transform::rotate(const std::array<float, 4>& q)
 			{
 				//mNode->rotate(Ogre::Quaternion(const_cast<float*>(q.data())));
 			}
@@ -61,10 +63,6 @@ namespace Engine {
 			{
 				return mScale;
 			}
-
-
 		}
 	}
-
-
 }

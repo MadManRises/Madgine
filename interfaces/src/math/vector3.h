@@ -31,7 +31,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-
 	/** \addtogroup Core
 	*  @{
 	*/
@@ -55,77 +54,79 @@ namespace Engine
 		@note
 		It does <b>NOT</b> initialize the vector for efficiency.
 		*/
-		inline Vector3()
+		Vector3()
 		{
 		}
 
-		inline Vector3(const float fX, const float fY, const float fZ)
+		Vector3(const float fX, const float fY, const float fZ)
 			: x(fX), y(fY), z(fZ)
 		{
 		}
 
-		inline explicit Vector3(const float afCoordinate[3])
+		explicit Vector3(const float afCoordinate[3])
 			: x(afCoordinate[0]),
-			y(afCoordinate[1]),
-			z(afCoordinate[2])
+			  y(afCoordinate[1]),
+			  z(afCoordinate[2])
 		{
 		}
 
-		inline explicit Vector3(const int afCoordinate[3])
+		explicit Vector3(const int afCoordinate[3])
 		{
-			x = (float)afCoordinate[0];
-			y = (float)afCoordinate[1];
-			z = (float)afCoordinate[2];
+			x = static_cast<float>(afCoordinate[0]);
+			y = static_cast<float>(afCoordinate[1]);
+			z = static_cast<float>(afCoordinate[2]);
 		}
 
-		inline explicit Vector3(float* const r)
+		explicit Vector3(float* const r)
 			: x(r[0]), y(r[1]), z(r[2])
 		{
 		}
 
-		inline explicit Vector3(const float scaler)
+		explicit Vector3(const float scaler)
 			: x(scaler)
-			, y(scaler)
-			, z(scaler)
+			  , y(scaler)
+			  , z(scaler)
 		{
 		}
 
 		/** Swizzle-like narrowing operations
 		*/
-		inline Vector2 xy() const
+		Vector2 xy() const
 		{
 			return Vector2(x, y);
 		}
 
 		/** Exchange the contents of this vector with another.
 		*/
-		inline void swap(Vector3& other)
+		void swap(Vector3& other) noexcept
 		{
 			std::swap(x, other.x);
 			std::swap(y, other.y);
 			std::swap(z, other.z);
 		}
 
-		inline float operator [] (const size_t i) const
+		float operator [](const size_t i) const
 		{
 			assert(i < 3);
 
 			return *(&x + i);
 		}
 
-		inline float& operator [] (const size_t i)
+		float& operator [](const size_t i)
 		{
 			assert(i < 3);
 
 			return *(&x + i);
 		}
+
 		/// Pointer accessor for direct copying
-		inline float* ptr()
+		float* ptr()
 		{
 			return &x;
 		}
+
 		/// Pointer accessor for direct copying
-		inline const float* ptr() const
+		const float* ptr() const
 		{
 			return &x;
 		}
@@ -134,7 +135,7 @@ namespace Engine
 		@param
 		rkVector The other vector
 		*/
-		inline Vector3& operator = (const Vector3& rkVector)
+		Vector3& operator =(const Vector3& rkVector)
 		{
 			x = rkVector.x;
 			y = rkVector.y;
@@ -143,7 +144,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator = (const float fScaler)
+		Vector3& operator =(const float fScaler)
 		{
 			x = fScaler;
 			y = fScaler;
@@ -152,18 +153,18 @@ namespace Engine
 			return *this;
 		}
 
-		inline bool operator == (const Vector3& rkVector) const
+		bool operator ==(const Vector3& rkVector) const
 		{
 			return (x == rkVector.x && y == rkVector.y && z == rkVector.z);
 		}
 
-		inline bool operator != (const Vector3& rkVector) const
+		bool operator !=(const Vector3& rkVector) const
 		{
 			return (x != rkVector.x || y != rkVector.y || z != rkVector.z);
 		}
 
 		// arithmetic operations
-		inline Vector3 operator + (const Vector3& rkVector) const
+		Vector3 operator +(const Vector3& rkVector) const
 		{
 			return Vector3(
 				x + rkVector.x,
@@ -171,7 +172,7 @@ namespace Engine
 				z + rkVector.z);
 		}
 
-		inline Vector3 operator - (const Vector3& rkVector) const
+		Vector3 operator -(const Vector3& rkVector) const
 		{
 			return Vector3(
 				x - rkVector.x,
@@ -179,7 +180,7 @@ namespace Engine
 				z - rkVector.z);
 		}
 
-		inline Vector3 operator * (const float fScalar) const
+		Vector3 operator *(const float fScalar) const
 		{
 			return Vector3(
 				x * fScalar,
@@ -187,7 +188,7 @@ namespace Engine
 				z * fScalar);
 		}
 
-		inline Vector3 operator * (const Vector3& rhs) const
+		Vector3 operator *(const Vector3& rhs) const
 		{
 			return Vector3(
 				x * rhs.x,
@@ -195,7 +196,7 @@ namespace Engine
 				z * rhs.z);
 		}
 
-		inline Vector3 operator / (const float fScalar) const
+		Vector3 operator /(const float fScalar) const
 		{
 			assert(fScalar != 0.0);
 
@@ -207,7 +208,7 @@ namespace Engine
 				z * fInv);
 		}
 
-		inline Vector3 operator / (const Vector3& rhs) const
+		Vector3 operator /(const Vector3& rhs) const
 		{
 			return Vector3(
 				x / rhs.x,
@@ -215,18 +216,18 @@ namespace Engine
 				z / rhs.z);
 		}
 
-		inline const Vector3& operator + () const
+		const Vector3& operator +() const
 		{
 			return *this;
 		}
 
-		inline Vector3 operator - () const
+		Vector3 operator -() const
 		{
 			return Vector3(-x, -y, -z);
 		}
 
 		// overloaded operators to help Vector3
-		inline friend Vector3 operator * (const float fScalar, const Vector3& rkVector)
+		friend Vector3 operator *(const float fScalar, const Vector3& rkVector)
 		{
 			return Vector3(
 				fScalar * rkVector.x,
@@ -234,7 +235,7 @@ namespace Engine
 				fScalar * rkVector.z);
 		}
 
-		inline friend Vector3 operator / (const float fScalar, const Vector3& rkVector)
+		friend Vector3 operator /(const float fScalar, const Vector3& rkVector)
 		{
 			return Vector3(
 				fScalar / rkVector.x,
@@ -242,7 +243,7 @@ namespace Engine
 				fScalar / rkVector.z);
 		}
 
-		inline friend Vector3 operator + (const Vector3& lhs, const float rhs)
+		friend Vector3 operator +(const Vector3& lhs, const float rhs)
 		{
 			return Vector3(
 				lhs.x + rhs,
@@ -250,7 +251,7 @@ namespace Engine
 				lhs.z + rhs);
 		}
 
-		inline friend Vector3 operator + (const float lhs, const Vector3& rhs)
+		friend Vector3 operator +(const float lhs, const Vector3& rhs)
 		{
 			return Vector3(
 				lhs + rhs.x,
@@ -258,7 +259,7 @@ namespace Engine
 				lhs + rhs.z);
 		}
 
-		inline friend Vector3 operator - (const Vector3& lhs, const float rhs)
+		friend Vector3 operator -(const Vector3& lhs, const float rhs)
 		{
 			return Vector3(
 				lhs.x - rhs,
@@ -266,7 +267,7 @@ namespace Engine
 				lhs.z - rhs);
 		}
 
-		inline friend Vector3 operator - (const float lhs, const Vector3& rhs)
+		friend Vector3 operator -(const float lhs, const Vector3& rhs)
 		{
 			return Vector3(
 				lhs - rhs.x,
@@ -275,7 +276,7 @@ namespace Engine
 		}
 
 		// arithmetic updates
-		inline Vector3& operator += (const Vector3& rkVector)
+		Vector3& operator +=(const Vector3& rkVector)
 		{
 			x += rkVector.x;
 			y += rkVector.y;
@@ -284,7 +285,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator += (const float fScalar)
+		Vector3& operator +=(const float fScalar)
 		{
 			x += fScalar;
 			y += fScalar;
@@ -292,7 +293,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator -= (const Vector3& rkVector)
+		Vector3& operator -=(const Vector3& rkVector)
 		{
 			x -= rkVector.x;
 			y -= rkVector.y;
@@ -301,7 +302,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator -= (const float fScalar)
+		Vector3& operator -=(const float fScalar)
 		{
 			x -= fScalar;
 			y -= fScalar;
@@ -309,7 +310,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator *= (const float fScalar)
+		Vector3& operator *=(const float fScalar)
 		{
 			x *= fScalar;
 			y *= fScalar;
@@ -317,7 +318,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator *= (const Vector3& rkVector)
+		Vector3& operator *=(const Vector3& rkVector)
 		{
 			x *= rkVector.x;
 			y *= rkVector.y;
@@ -326,7 +327,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator /= (const float fScalar)
+		Vector3& operator /=(const float fScalar)
 		{
 			assert(fScalar != 0.0);
 
@@ -339,7 +340,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector3& operator /= (const Vector3& rkVector)
+		Vector3& operator /=(const Vector3& rkVector)
 		{
 			x /= rkVector.x;
 			y /= rkVector.y;
@@ -356,7 +357,7 @@ namespace Engine
 		length (e.g. for just comparing lengths) use squaredLength()
 		instead.
 		*/
-		inline float length() const
+		float length() const
 		{
 			return sqrtf(x * x + y * y + z * z);
 		}
@@ -371,7 +372,7 @@ namespace Engine
 		want to find the longest / shortest vector without incurring
 		the square root.
 		*/
-		inline float squaredLength() const
+		float squaredLength() const
 		{
 			return x * x + y * y + z * z;
 		}
@@ -383,7 +384,7 @@ namespace Engine
 		distance (e.g. for just comparing distances) use squaredDistance()
 		instead.
 		*/
-		inline float distance(const Vector3& rhs) const
+		float distance(const Vector3& rhs) const
 		{
 			return (*this - rhs).length();
 		}
@@ -398,7 +399,7 @@ namespace Engine
 		Use this if you want to find the longest / shortest distance
 		without incurring the square root.
 		*/
-		inline float squaredDistance(const Vector3& rhs) const
+		float squaredDistance(const Vector3& rhs) const
 		{
 			return (*this - rhs).squaredLength();
 		}
@@ -417,7 +418,7 @@ namespace Engine
 		@return
 		A float representing the dot product value.
 		*/
-		inline float dotProduct(const Vector3& vec) const
+		float dotProduct(const Vector3& vec) const
 		{
 			return x * vec.x + y * vec.y + z * vec.z;
 		}
@@ -432,7 +433,7 @@ namespace Engine
 		@return
 		A float representing the absolute dot product value.
 		*/
-		inline float absDotProduct(const Vector3& vec) const
+		float absDotProduct(const Vector3& vec) const
 		{
 			return fabs(x * vec.x) + fabs(y * vec.y) + fabs(z * vec.z);
 		}
@@ -446,7 +447,7 @@ namespace Engine
 		will be no changes made to their components.
 		@return The previous length of the vector.
 		*/
-		inline float normalise()
+		float normalise()
 		{
 			float fLength = sqrtf(x * x + y * y + z * z);
 
@@ -492,7 +493,7 @@ namespace Engine
 		and will go <i>inside</i> the screen, towards the cathode tube
 		(assuming you're using a CRT monitor, of course).
 		*/
-		inline Vector3 crossProduct(const Vector3& rkVector) const
+		Vector3 crossProduct(const Vector3& rkVector) const
 		{
 			return Vector3(
 				y * rkVector.z - z * rkVector.y,
@@ -503,7 +504,7 @@ namespace Engine
 		/** Returns a vector at a point half way between this and the passed
 		in vector.
 		*/
-		inline Vector3 midPoint(const Vector3& vec) const
+		Vector3 midPoint(const Vector3& vec) const
 		{
 			return Vector3(
 				(x + vec.x) * 0.5f,
@@ -514,7 +515,7 @@ namespace Engine
 		/** Returns true if the vector's scalar components are all greater
 		that the ones of the vector it is compared against.
 		*/
-		inline bool operator < (const Vector3& rhs) const
+		bool operator <(const Vector3& rhs) const
 		{
 			if (x < rhs.x && y < rhs.y && z < rhs.z)
 				return true;
@@ -524,7 +525,7 @@ namespace Engine
 		/** Returns true if the vector's scalar components are all smaller
 		that the ones of the vector it is compared against.
 		*/
-		inline bool operator > (const Vector3& rhs) const
+		bool operator >(const Vector3& rhs) const
 		{
 			if (x > rhs.x && y > rhs.y && z > rhs.z)
 				return true;
@@ -538,7 +539,7 @@ namespace Engine
 		value of x, y and z from both vectors. Lowest is taken just
 		numerically, not magnitude, so -1 < 0.
 		*/
-		inline void makeFloor(const Vector3& cmp)
+		void makeFloor(const Vector3& cmp)
 		{
 			if (cmp.x < x) x = cmp.x;
 			if (cmp.y < y) y = cmp.y;
@@ -552,7 +553,7 @@ namespace Engine
 		value of x, y and z from both vectors. Highest is taken just
 		numerically, not magnitude, so 1 > -3.
 		*/
-		inline void makeCeil(const Vector3& cmp)
+		void makeCeil(const Vector3& cmp)
 		{
 			if (cmp.x > x) x = cmp.x;
 			if (cmp.y > y) y = cmp.y;
@@ -566,14 +567,16 @@ namespace Engine
 		method will guarantee to generate one of them. If you need more
 		control you should use the Quaternion class.
 		*/
-		inline Vector3 perpendicular(void) const
+		Vector3 perpendicular() const
 		{
 			// From Sam Hocevar's article "On picking an orthogonal
 			// vector (and combing coconuts)"
 			Vector3 perp = fabs(x) > fabs(z)
-				? Vector3(-y, x, 0.0) : Vector3(0.0, -z, y);
+				               ? Vector3(-y, x, 0.0)
+				               : Vector3(0.0, -z, y);
 			return perp.normalisedCopy();
 		}
+
 		/** Generates a new random vector which deviates from this vector by a
 		given angle in a random direction.
 		@remarks
@@ -672,16 +675,15 @@ namespace Engine
 		}*/
 
 		/** Returns true if this vector is zero length. */
-		inline bool isZeroLength(void) const
+		bool isZeroLength() const
 		{
 			float sqlen = (x * x) + (y * y) + (z * z);
 			return (sqlen < (1e-06 * 1e-06));
-
 		}
 
 		/** As normalise, except that this vector is unaffected and the
 		normalised vector is returned as a copy. */
-		inline Vector3 normalisedCopy(void) const
+		Vector3 normalisedCopy() const
 		{
 			Vector3 ret = *this;
 			ret.normalise();
@@ -691,7 +693,7 @@ namespace Engine
 		/** Calculates a reflection vector to the plane with the given normal .
 		@remarks NB assumes 'this' is pointing AWAY FROM the plane, invert if it is not.
 		*/
-		inline Vector3 reflect(const Vector3& normal) const
+		Vector3 reflect(const Vector3& normal) const
 		{
 			return Vector3(*this - (2 * this->dotProduct(normal) * normal));
 		}
@@ -716,7 +718,7 @@ namespace Engine
 		@param tolerance The amount (related to the scale of vectors) that distance
 		of the vector may vary by and still be considered close
 		*/
-		inline bool positionCloses(const Vector3& rhs, float tolerance = 1e-03f) const
+		bool positionCloses(const Vector3& rhs, float tolerance = 1e-03f) const
 		{
 			return squaredDistance(rhs) <=
 				(squaredLength() + rhs.squaredLength()) * tolerance;
@@ -724,23 +726,21 @@ namespace Engine
 
 
 		/// Extract the primary (dominant) axis from this direction vector
-		inline Vector3 primaryAxis() const
+		Vector3 primaryAxis() const
 		{
 			float absx = fabs(x);
 			float absy = fabs(y);
 			float absz = fabs(z);
 			if (absx > absy)
+			{
 				if (absx > absz)
-					return x > 0 ? Vector3::UNIT_X : Vector3::NEGATIVE_UNIT_X;
-				else
-					return z > 0 ? Vector3::UNIT_Z : Vector3::NEGATIVE_UNIT_Z;
-			else // absx <= absy
-				if (absy > absz)
-					return y > 0 ? Vector3::UNIT_Y : Vector3::NEGATIVE_UNIT_Y;
-				else
-					return z > 0 ? Vector3::UNIT_Z : Vector3::NEGATIVE_UNIT_Z;
-
-
+					return x > 0 ? UNIT_X : NEGATIVE_UNIT_X;
+				return z > 0 ? UNIT_Z : NEGATIVE_UNIT_Z;
+			}
+			// absx <= absy
+			if (absy > absz)
+				return y > 0 ? UNIT_Y : NEGATIVE_UNIT_Y;
+			return z > 0 ? UNIT_Z : NEGATIVE_UNIT_Z;
 		}
 
 		// special points
@@ -755,15 +755,14 @@ namespace Engine
 
 		/** Function for writing to a stream.
 		*/
-		inline INTERFACES_EXPORT friend std::ostream& operator <<
-			(std::ostream& o, const Vector3& v)
+		INTERFACES_EXPORT friend std::ostream& operator <<
+		(std::ostream& o, const Vector3& v)
 		{
 			o << "Vector3(" << v.x << ", " << v.y << ", " << v.z << ")";
 			return o;
 		}
 	};
-	/** @} */
-	/** @} */
 
+	/** @} */
+	/** @} */
 }
-

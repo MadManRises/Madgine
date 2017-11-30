@@ -1,5 +1,3 @@
-
-
 #include "ogrelib.h"
 
 #include "ogreapplication.h"
@@ -19,10 +17,10 @@
 
 #include "serialize/container/noparentunit.h"
 
-namespace Engine {
-
-	namespace App {
-
+namespace Engine
+{
+	namespace App
+	{
 		OgreApplication::OgreApplication() :
 			Application(env().createTable()),
 			mSettings(nullptr),
@@ -34,9 +32,8 @@ namespace Engine {
 			mUI(nullptr),
 			mLoader(nullptr),
 			mConfig(nullptr),
-			mInput(nullptr)
+			mInput(nullptr), mHwnd(nullptr)
 		{
-
 		}
 
 		OgreApplication::~OgreApplication()
@@ -57,18 +54,21 @@ namespace Engine {
 				delete mRoot;
 		}
 
-		void OgreApplication::setup(const OgreAppSettings &settings)
+		void OgreApplication::setup(const OgreAppSettings& settings)
 		{
 			mSettings = &settings;
 
 			_setupOgre();
 
-			if (mSettings->mUseExternalSettings) {
+			if (mSettings->mUseExternalSettings)
+			{
 				mRoot->initialise(false);
 
-				mWindow = mRoot->createRenderWindow(mSettings->mWindowName, mSettings->mWindowWidth, mSettings->mWindowHeight, false, &mSettings->mWindowParameters);
+				mWindow = mRoot->createRenderWindow(mSettings->mWindowName, mSettings->mWindowWidth, mSettings->mWindowHeight,
+				                                    false, &mSettings->mWindowParameters);
 			}
-			else {
+			else
+			{
 				mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
 			}
 
@@ -99,7 +99,6 @@ namespace Engine {
 
 		bool OgreApplication::init()
 		{
-
 			mLoader->loadScripts();
 
 			if (!Application::init())
@@ -129,14 +128,13 @@ namespace Engine {
 				return false; // Initialise all Handler
 
 
-
-			mConfig->applyLanguage();  // Set the Language in the Config to all Windows
+			mConfig->applyLanguage(); // Set the Language in the Config to all Windows
 
 			return true;
 		}
 
-		void OgreApplication::finalize() {
-
+		void OgreApplication::finalize()
+		{
 			mUI->finalize();
 
 			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
@@ -152,7 +150,8 @@ namespace Engine {
 			Application::go();
 			mPaused = false;
 
-			if (!callMethodCatch("main").first) {
+			if (!callMethodCatch("main").first)
+			{
 				return -1;
 			}
 
@@ -169,7 +168,7 @@ namespace Engine {
 			Application::shutdown();
 		}
 
-		bool OgreApplication::frameStarted(const Ogre::FrameEvent & fe)
+		bool OgreApplication::frameStarted(const Ogre::FrameEvent& fe)
 		{
 			if (!sendFrameStarted(fe.timeSinceLastFrame))
 				return false;
@@ -181,64 +180,71 @@ namespace Engine {
 		}
 
 
-		bool OgreApplication::update(float timeSinceLastFrame) {
+		bool OgreApplication::update(float timeSinceLastFrame)
+		{
 			Ogre::WindowEventUtilities::messagePump();
 			return mRoot->renderOneFrame();
 		}
 
-		bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent & fe)
+		bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent& fe)
 		{
-
-			if (mWindow->isClosed() || !Application::update(fe.timeSinceLastFrame)) {
+			if (mWindow->isClosed() || !Application::update(fe.timeSinceLastFrame))
+			{
 				return false;
 			}
 
-			if (!mPaused) {
-
-				try {
+			if (!mPaused)
+			{
+				try
+				{
 					PROFILE("UIManager");
 					mUI->update(fe.timeSinceLastFrame);
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during UI-Update!");
 					LOG_EXCEPTION(e);
 				}
 
-				try {
+				try
+				{
 					PROFILE("SceneManager");
 					mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during Scene-Update!");
 					LOG_EXCEPTION(e);
 				}
 
-				try {
+				try
+				{
 					PROFILE("GUI");
 					mGUI->update(fe.timeSinceLastFrame);
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during GUI-Update!");
 					LOG_EXCEPTION(e);
 				}
 
-				try {
+				try
+				{
 					PROFILE("Input");
 					mInput->update();
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during Input!");
 					LOG_EXCEPTION(e);
 				}
-
 			}
 
 			return true;
 		}
 
-		bool OgreApplication::frameEnded(const Ogre::FrameEvent & fe)
+		bool OgreApplication::frameEnded(const Ogre::FrameEvent& fe)
 		{
-
 			if (!sendFrameEnded(fe.timeSinceLastFrame))
 				return false;
 
@@ -250,26 +256,29 @@ namespace Engine {
 
 		bool OgreApplication::fixedUpdate(float timeStep)
 		{
-			if (!mPaused) {
-
-				try {
+			if (!mPaused)
+			{
+				try
+				{
 					PROFILE("SceneManager");
 					mSceneMgr->fixedUpdate(timeStep, mUI->currentContext());
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during Scene-Update!");
 					LOG_EXCEPTION(e);
 				}
 
-				try {
+				try
+				{
 					PROFILE("UIManager");
 					mUI->fixedUpdate(timeStep);
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during UI-Update!");
 					LOG_EXCEPTION(e);
 				}
-
 			}
 
 			return true;
@@ -282,7 +291,7 @@ namespace Engine {
 			resizeWindow();
 		}
 
-		Ogre::RenderWindow * OgreApplication::renderWindow()
+		Ogre::RenderWindow* OgreApplication::renderWindow()
 		{
 			return mWindow;
 		}
@@ -297,21 +306,20 @@ namespace Engine {
 
 		void OgreApplication::_setupOgre()
 		{
-
 			mRoot = OGRE_NEW Ogre::Root(mSettings->mPluginsFile); // Creating Root
 
 			mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
-
 		}
 
 		void OgreApplication::resizeWindow()
 		{
-			if (mWindow) {
+			if (mWindow)
+			{
 				mWindow->windowMovedOrResized();
-				Ogre::WindowEventUtilities::WindowEventListeners::iterator index,
+				Ogre::WindowEventUtilities::WindowEventListeners::iterator
 					start = Ogre::WindowEventUtilities::_msListeners.lower_bound(mWindow),
 					end = Ogre::WindowEventUtilities::_msListeners.upper_bound(mWindow);
-				for (index = start; index != end; ++index)
+				for (Ogre::WindowEventUtilities::WindowEventListeners::iterator index = start; index != end; ++index)
 					(index->second)->windowResized(mWindow);
 			}
 		}
@@ -326,7 +334,5 @@ namespace Engine {
 		{
 			return Application::maps().merge(mSceneMgr, mUI);
 		}
-
 	}
 }
-

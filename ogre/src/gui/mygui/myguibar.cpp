@@ -4,10 +4,13 @@
 #include "myguiwindow.h"
 
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-			MyGUIBar::MyGUIBar(MyGUIWindow *w) :
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			MyGUIBar::MyGUIBar(MyGUIWindow* w) :
 				Bar(w),
 				mBar(w->window()->castType<MyGUI::ProgressBar>())
 			{

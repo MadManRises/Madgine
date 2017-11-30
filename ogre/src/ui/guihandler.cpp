@@ -7,134 +7,130 @@
 #include "gui/windows/window.h"
 
 
-namespace Engine {
-namespace UI {
-
-GuiHandlerBase::GuiHandlerBase(const std::string &windowName, WindowType type, const std::string &layoutFile, const std::string &parentName) :
-    Handler(windowName),
-    mLayoutFile(layoutFile),
-	mParentName(parentName),
-	mType(type),
-	mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
-	mContext(Scene::ContextMask::NoContext)	
+namespace Engine
 {
-}
-
-
-
-
-bool GuiHandlerBase::init(int order)
-{
-	if (mOrder == order)
-		return init();
-	else
-		return true;
-}
-
-bool GuiHandlerBase::init()
-{
-	GUI::Window *window = nullptr;
-
-    if (!mLayoutFile.empty()){
-		window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
-		if (!window){
-			LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
-			return false;
+	namespace UI
+	{
+		GuiHandlerBase::GuiHandlerBase(const std::string& windowName, WindowType type, const std::string& layoutFile,
+		                               const std::string& parentName) :
+			Handler(windowName),
+			mLayoutFile(layoutFile),
+			mParentName(parentName),
+			mType(type),
+			mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
+			mContext(Scene::ContextMask::NoContext)
+		{
 		}
-		else {
-			if (mType == WindowType::ROOT_WINDOW) {
-				window->hide();
+
+
+		bool GuiHandlerBase::init(int order)
+		{
+			if (mOrder == order)
+				return init();
+			return true;
+		}
+
+		bool GuiHandlerBase::init()
+		{
+			GUI::Window* window = nullptr;
+
+			if (!mLayoutFile.empty())
+			{
+				window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
+				if (!window)
+				{
+					LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
+					return false;
+				}
+				if (mType == WindowType::ROOT_WINDOW)
+				{
+					window->hide();
+				}
+			}
+			if (window)
+				return Handler::init(window);
+			return Handler::init();
+		}
+
+		void GuiHandlerBase::finalize(int order)
+		{
+			if (mOrder == order)
+				finalize();
+		}
+
+		void GuiHandlerBase::finalize()
+		{
+			Handler::finalize();
+			if (mWindow && !mLayoutFile.empty())
+			{
+				mWindow->destroy();
+				mWindow = nullptr;
 			}
 		}
-    }
-	if (window)
-		return Handler::init(window);
-	else
-		return Handler::init();
 
-}
+		void GuiHandlerBase::open()
+		{
+			if (getState() == ObjectState::CONSTRUCTED)
+			{
+				LOG_ERROR("Failed to open unitialized GuiHandler!");
+				return;
+			}
 
-void GuiHandlerBase::finalize(int order)
-{
-	if (mOrder == order)
-		finalize();
-	
-}
+			if (isOpen()) return;
 
-void GuiHandlerBase::finalize()
-{
-	Handler::finalize();
-	if (mWindow && !mLayoutFile.empty()) {
-		mWindow->destroy();
-		mWindow = 0;
-	}
-}
+			switch (mType)
+			{
+			case WindowType::MODAL_OVERLAY:
+				mUI->openModalWindow(this);
+				break;
+			case WindowType::NONMODAL_OVERLAY:
+				mUI->openWindow(this);
+				break;
+			case WindowType::ROOT_WINDOW:
+				mUI->swapCurrentRoot(this);
+				break;
+			}
+		}
 
-void GuiHandlerBase::open()
-{
-	if (getState() == ObjectState::CONSTRUCTED) {
-		LOG_ERROR("Failed to open unitialized GuiHandler!");
-		return;
-	}
+		void GuiHandlerBase::close()
+		{
+			switch (mType)
+			{
+			case WindowType::MODAL_OVERLAY:
+				mUI->closeModalWindow(this);
+				break;
+			case WindowType::NONMODAL_OVERLAY:
+				mUI->closeWindow(this);
+				break;
+			case WindowType::ROOT_WINDOW:
+				throw 0;
+			}
+		}
 
-	if (isOpen()) return;
-
-    switch(mType){
-    case WindowType::MODAL_OVERLAY:
-        mUI->openModalWindow(this);
-        break;
-    case WindowType::NONMODAL_OVERLAY:
-		mUI->openWindow(this);
-        break;
-    case WindowType::ROOT_WINDOW:
-		mUI->swapCurrentRoot(this);
-        break;
-    }
-}
-
-void GuiHandlerBase::close()
-{
-	switch (mType) {
-	case WindowType::MODAL_OVERLAY:
-		mUI->closeModalWindow(this);
-		break;
-	case WindowType::NONMODAL_OVERLAY:
-		mUI->closeWindow(this);
-		break;
-	case WindowType::ROOT_WINDOW:
-		throw 0;
-		break;
-	}
-}
-
-bool GuiHandlerBase::isOpen()
-{
-	return mWindow->isVisible();
-}
+		bool GuiHandlerBase::isOpen() const
+		{
+			return mWindow->isVisible();
+		}
 
 
-bool GuiHandlerBase::isRootWindow()
-{
-    return mType == WindowType::ROOT_WINDOW;
-}
+		bool GuiHandlerBase::isRootWindow() const
+		{
+			return mType == WindowType::ROOT_WINDOW;
+		}
 
-Scene::ContextMask GuiHandlerBase::context()
-{
-	return mContext;
-}
+		Scene::ContextMask GuiHandlerBase::context() const
+		{
+			return mContext;
+		}
 
-void GuiHandlerBase::setInitialisationOrder(int order)
-{
-	mOrder = order;
-}
+		void GuiHandlerBase::setInitialisationOrder(int order)
+		{
+			mOrder = order;
+		}
 
-void GuiHandlerBase::setContext(Scene::ContextMask context)
-{
-	mContext = context;
-}
-
-
-
-} // namespace GuiHandler
+		void GuiHandlerBase::setContext(Scene::ContextMask context)
+		{
+			mContext = context;
+		}
+	} // namespace GuiHandler
 } // namespace Cegui
-

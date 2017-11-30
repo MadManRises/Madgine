@@ -9,25 +9,24 @@
 
 #include "scripting/types/globalapicomponent.h"
 
-namespace Engine {	
-
+namespace Engine
+{
 	API_IMPL(App::Application, MAP_F(shutdown));
 
-	namespace App {
-
-		Application::Application(const Scripting::LuaTable &table) :
+	namespace App
+	{
+		Application::Application(const Scripting::LuaTable& table) :
 			Scope(table),
 			mShutDown(false),
 			mTimeBank(0.0f)
 		{
-
 		}
 
 		Application::~Application()
 		{
 		}
 
-		void Application::setup(const AppSettings &settings)
+		void Application::setup(const AppSettings& settings)
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
@@ -35,10 +34,11 @@ namespace Engine {
 
 		bool Application::init()
 		{
-			if(!MadgineObject::init())
+			if (!MadgineObject::init())
 				return false;
 
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &api : mGlobalAPIs) {
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+			{
 				if (!api->init())
 					return false;
 			}
@@ -46,8 +46,10 @@ namespace Engine {
 			return true;
 		}
 
-		void Application::finalize() {
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &api : mGlobalAPIs) {
+		void Application::finalize()
+		{
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+			{
 				api->finalize();
 			}
 			MadgineObject::finalize();
@@ -58,14 +60,16 @@ namespace Engine {
 			mShutDown = true;
 		}
 
-		int Application::go() {
+		int Application::go()
+		{
 			mShutDown = false;
 			return 0;
 		}
 
 		bool Application::update(float timeSinceLastFrame)
-		{			
-			if (mShutDown) {
+		{
+			if (mShutDown)
+			{
 				return false;
 			}
 
@@ -74,13 +78,12 @@ namespace Engine {
 
 			mTimeBank += timeSinceLastFrame;
 
-			while (mTimeBank >= FIXED_TIMESTEP) {
-
+			while (mTimeBank >= FIXED_TIMESTEP)
+			{
 				if (!fixedUpdate(FIXED_TIMESTEP))
 					return false;
 
 				mTimeBank -= FIXED_TIMESTEP;
-
 			}
 
 			{
@@ -90,12 +93,15 @@ namespace Engine {
 
 			{
 				//PROFILE("ScriptingManager")
-				try {
-					for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &p : mGlobalAPIs) {
+				try
+				{
+					for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
+					{
 						p->update();
 					}
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during GlobalScope-update!");
 					LOG_EXCEPTION(e);
 				}
@@ -104,12 +110,12 @@ namespace Engine {
 			return true;
 		}
 
-		float Application::fixedRemainder()
+		float Application::fixedRemainder() const
 		{
 			return FIXED_TIMESTEP - mTimeBank;
 		}
 
-		bool Application::isShutdown()
+		bool Application::isShutdown() const
 		{
 			return mShutDown;
 		}
@@ -119,24 +125,25 @@ namespace Engine {
 			return 1.0f;
 		}
 
-		void Application::addFrameListener(FrameListener * listener)
+		void Application::addFrameListener(FrameListener* listener)
 		{
 			mListeners.push_back(listener);
 		}
 
-		void Application::removeFrameListener(FrameListener * listener)
+		void Application::removeFrameListener(FrameListener* listener)
 		{
 			mListeners.remove(listener);
 		}
 
-		bool Application::fixedUpdate(float timeStep) {
+		bool Application::fixedUpdate(float timeStep)
+		{
 			return true;
 		}
 
 		bool Application::sendFrameStarted(float timeSinceLastFrame)
 		{
 			bool result = true;
-			for (FrameListener *listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameStarted(timeSinceLastFrame);
 			return result;
 		}
@@ -144,7 +151,7 @@ namespace Engine {
 		bool Application::sendFrameRenderingQueued(float timeSinceLastFrame)
 		{
 			bool result = true;
-			for (FrameListener *listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameRenderingQueued(timeSinceLastFrame);
 			return result;
 		}
@@ -152,7 +159,7 @@ namespace Engine {
 		bool Application::sendFrameEnded(float timeSinceLastFrame)
 		{
 			bool result = true;
-			for (FrameListener *listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameEnded(timeSinceLastFrame);
 			return result;
 		}
@@ -164,22 +171,21 @@ namespace Engine {
 
 		void Application::_clear()
 		{
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase> &p : mGlobalAPIs) {
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
+			{
 				p->clear();
 			}
 		}
 
-		bool Application::singleFrame(float timeSinceLastFrame) {
+		bool Application::singleFrame(float timeSinceLastFrame)
+		{
 			return sendFrameStarted(timeSinceLastFrame) &&
 				update(timeSinceLastFrame) &&
 				sendFrameEnded(timeSinceLastFrame);
 		}
-
 	}
 
 #ifdef _MSC_VER
 	template class MADGINE_BASE_EXPORT Scripting::GlobalAPICollector;
 #endif
-
 }
-

@@ -1,27 +1,30 @@
 #pragma once
 #include "gui/windows/label.h"
 
-namespace MyGUI {
+namespace MyGUI
+{
 	class TextBox;
 }
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
 			class MyGUIWindow;
 
 			class MyGUILabel :
 				public Label
 			{
 			public:
-				MyGUILabel(MyGUIWindow *w);
+				MyGUILabel(MyGUIWindow* w);
 
 				// Inherited via Label
-				virtual void setText(const std::string & text) override;
+				void setText(const std::string& text) override;
 
 			private:
-				MyGUI::TextBox *mLabel;
+				MyGUI::TextBox* mLabel;
 			};
 		}
 	}

@@ -4,17 +4,18 @@
 
 #include "ogreanimation.h"
 
-namespace Engine {
-
+namespace Engine
+{
 	API_IMPL(Scene::Entity::Animation);
 
-	namespace Scene {
-		namespace Entity {
-
+	namespace Scene
+	{
+		namespace Entity
+		{
 			template <>
-			const char * const EntityComponent<Animation>::sComponentName = "Animation";
+			const char* const EntityComponent<Animation>::sComponentName = "Animation";
 
-			Animation::Animation(Entity &entity, const Scripting::LuaTable &table) :
+			Animation::Animation(Entity& entity, const Scripting::LuaTable& table) :
 				SystemComponent(entity, table),
 				mMesh(nullptr),
 				mState(nullptr),
@@ -24,13 +25,15 @@ namespace Engine {
 			}
 
 
-			Animation::~Animation() {
+			Animation::~Animation()
+			{
 			}
 
 			void Animation::init()
 			{
 				mMesh = getEntity().getComponent<Mesh>();
-				if (!mDefaultAnimation->empty()) {
+				if (!mDefaultAnimation->empty())
+				{
 					setDefaultAnimation(mDefaultAnimation);
 				}
 				SystemComponent::init();
@@ -41,33 +44,43 @@ namespace Engine {
 				SystemComponent::finalize();
 			}
 
-			void Animation::update(float timestep) {
-				if (mState) {
+			void Animation::update(float timestep)
+			{
+				if (mState)
+				{
 					mState->addTime(timestep);
-					if (mState->hasEnded()) {
+					if (mState->hasEnded())
+					{
 						resetAnimation();
 					}
 				}
 			}
 
-			void Animation::resetAnimation() {
-				if (mState) {
+			void Animation::resetAnimation()
+			{
+				if (mState)
+				{
 					mState->setEnabled(false);
 				}
 				mState = mDefaultState;
-				if (mState) {
+				if (mState)
+				{
 					mState->setEnabled(true);
 					mState->setTimePosition(0.0f);
 				}
 			}
 
-			void Animation::setAnimation(const std::string &name, LoopSetting loop) {
-				if (mState) {
+			void Animation::setAnimation(const std::string& name, LoopSetting loop)
+			{
+				if (mState)
+				{
 					mState->setEnabled(false);
 				}
 				mState = mMesh->getMesh()->getAnimationState(name);
-				if (mState) {
-					switch (loop) {
+				if (mState)
+				{
+					switch (loop)
+					{
 					case DEFAULT:
 						break;
 					case LOOP:
@@ -82,26 +95,44 @@ namespace Engine {
 				}
 			}
 
-			void Animation::setDefaultAnimation(const std::string &name) {
+			void Animation::setDefaultAnimation(const std::string& name)
+			{
 				mDefaultAnimation = name;
-				if (mMesh) {
+				if (mMesh)
+				{
 					mDefaultState = mMesh->getMesh()->getAnimationState(name);
-					if (mDefaultState) {
+					if (mDefaultState)
+					{
 						mDefaultState->setLoop(true);
-						if (!mState) {
+						if (!mState)
+						{
 							resetAnimation();
 						}
 					}
 				}
 			}
 
-			void Animation::resetDefaultAnimation() {
+			void Animation::resetDefaultAnimation()
+			{
 				mDefaultAnimation->clear();
-				if (mDefaultState) {
+				if (mDefaultState)
+				{
 					mDefaultState = nullptr;
 				}
 			}
 
+			float Animation::getAnimationLength(const std::string& name) const
+			{
+				if (mMesh)
+				{
+					Ogre::AnimationState* state = mMesh->getMesh()->getAnimationState(name);
+					if (state)
+					{
+						return state->getLength();
+					}
+				}
+				return 0.0f;
+			}
 		}
 	}
 }

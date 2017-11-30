@@ -2,14 +2,13 @@
 
 #include "interfaceslib.h"
 
-#include "network/networkmanager.h"
-
 #include <future>
 
 #include "scripting/types/scopebase.h"
 
 
-TEST(ValueType, Construct) {
+TEST(ValueType, Construct)
+{
 	using namespace Engine;
 
 	ValueType test;

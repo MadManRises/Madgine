@@ -10,33 +10,35 @@
 
 //#include <iostream>
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		thread_local std::map<size_t, SerializableUnitBase*> SerializeManager::intern::sMasterMappings;
 		size_t SerializeManager::sNextUnitId = RESERVED_ID_COUNT;
 		ParticipantId SerializeManager::sRunningStreamId = sLocalMasterId;
 
-		SerializeManager::SerializeManager(const std::string &name) :
-			mReceivingMasterState(false),			
-			mSlaveStream(0),
-			mSlaveStreamInvalid(false),
-			mName(name)
+		SerializeManager::SerializeManager(const std::string& name) :
+			mReceivingMasterState(false),
+			mSlaveStream(nullptr),
+			mName(name),
+			mSlaveStreamInvalid(false)
 		{
 		}
 
-		SerializeManager::SerializeManager(SerializeManager &&other) :
+		SerializeManager::SerializeManager(SerializeManager&& other) noexcept :
 			mSlaveMappings(std::forward<std::map<size_t, SerializableUnitBase*>>(other.mSlaveMappings)),
 			mReceivingMasterState(other.mReceivingMasterState),
-			mProcess(std::forward<Engine::Util::Process>(other.mProcess)),
-			mSlaveStream(0),
-			mSlaveStreamInvalid(false),
-			mFilters(std::forward<std::list<std::function<bool(const SerializableUnitBase *,ParticipantId)>>>(other.mFilters)),
+			mProcess(std::forward<Util::Process>(other.mProcess)),
+			mSlaveStream(nullptr),
+			mFilters(std::forward<std::list<std::function<bool(const SerializableUnitBase*, ParticipantId)>>>(other.mFilters)),
 			mTopLevelUnits(std::forward<std::set<TopLevelSerializableUnitBase*>>(other.mTopLevelUnits)),
-			mName(std::forward<std::string>(other.mName))
+			mName(std::forward<std::string>(other.mName)),
+			mSlaveStreamInvalid(false)
 		{
 			other.mSlaveMappings.clear();
-			for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+			for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
+			{
 				unit->removeManager(&other);
 				assert(unit->addManager(this));
 			}
@@ -49,15 +51,17 @@ namespace Engine {
 		}
 
 
-		void SerializeManager::readMessage(BufferedInOutStream &stream)
+		void SerializeManager::readMessage(BufferedInOutStream& stream)
 		{
 			MessageHeader header;
 			stream.readHeader(header);
 
-			if (header.mObject == SERIALIZE_MANAGER) {
+			if (header.mObject == SERIALIZE_MANAGER)
+			{
 				stream.logReadHeader(header, mName);
 				ParticipantId id;
-				switch (header.mCmd) {
+				switch (header.mCmd)
+				{
 				case INITIAL_STATE_DONE:
 					mReceivingMasterState = false;
 					stream >> id;
@@ -70,10 +74,12 @@ namespace Engine {
 					throw SerializeException("Unknown Builtin Command-Code for SerializeManager: " + std::to_string(header.mCmd));
 				}
 			}
-			else {
-				SerializableUnitBase *object = convertPtr(stream, header.mObject);
+			else
+			{
+				SerializableUnitBase* object = convertPtr(stream, header.mObject);
 				stream.logReadHeader(header, typeid(*object).name());
-				switch (header.mType) {
+				switch (header.mType)
+				{
 				case ACTION:
 					object->readAction(stream);
 					break;
@@ -86,114 +92,125 @@ namespace Engine {
 					break;
 				default:
 					throw SerializeException("Invalid Message-Type: " + std::to_string(header.mType));
-				}			
+				}
 			}
 		}
 
-		const std::map<size_t, SerializableUnitBase*>& SerializeManager::slavesMap()
+		const std::map<size_t, SerializableUnitBase*>& SerializeManager::slavesMap() const
 		{
 			return mSlaveMappings;
 		}
 
-		void SerializeManager::addSlaveMapping(SerializableUnitBase * item)
+		void SerializeManager::addSlaveMapping(SerializableUnitBase* item)
 		{
 			assert(mSlaveMappings.find(item->slaveId()) == mSlaveMappings.end());
 			mSlaveMappings[item->slaveId()] = item;
 			//std::cout << "Slave: " << item->slaveId() << " -> add " << typeid(*item).name() << std::endl;
 		}
 
-		void SerializeManager::removeSlaveMapping(SerializableUnitBase * item)
+		void SerializeManager::removeSlaveMapping(SerializableUnitBase* item)
 		{
 			assert(mSlaveMappings.erase(item->slaveId()) == 1);
 		}
 
-		std::pair<size_t, SerializableUnitMap*> SerializeManager::addStaticMasterMapping(SerializableUnitBase * item, size_t id)
+		std::pair<size_t, SerializableUnitMap*> SerializeManager::addStaticMasterMapping(
+			SerializableUnitBase* item, size_t id)
 		{
 			assert(id < RESERVED_ID_COUNT && id >= BEGIN_USER_ID_SPACE &&
 				intern::sMasterMappings.find(id) == intern::sMasterMappings.end());
 			intern::sMasterMappings[id] = item;
 			//std::cout << "Master: " << id << " -> add static " << typeid(*item).name() << std::endl;
-			return{ id, &intern::sMasterMappings };			
+			return {id, &intern::sMasterMappings};
 		}
 
-		std::pair<size_t, SerializableUnitMap*> SerializeManager::addMasterMapping(SerializableUnitBase * item)
+		std::pair<size_t, SerializableUnitMap*> SerializeManager::addMasterMapping(SerializableUnitBase* item)
 		{
 			intern::sMasterMappings[sNextUnitId] = item;
 			//std::cout << "Master: " << sNextUnitId << " -> add " << typeid(*item).name() << std::endl;
-			return{ sNextUnitId++, &intern::sMasterMappings };			
+			return {sNextUnitId++, &intern::sMasterMappings};
 		}
 
-		void SerializeManager::removeMasterMapping(const std::pair<size_t, SerializableUnitMap*> &id, SerializableUnitBase * item)
+		void SerializeManager::removeMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id,
+		                                           SerializableUnitBase* item)
 		{
 			auto it = id.second->find(id.first);
 			assert(it->second == item);
 			id.second->erase(it);
 		}
 
-		std::pair<std::pair<size_t, SerializableUnitMap*>, std::pair<size_t, SerializableUnitMap*>> SerializeManager::updateMasterMapping(const std::pair<size_t, SerializableUnitMap*> &id, SerializableUnitBase * item)
+		std::pair<std::pair<size_t, SerializableUnitMap*>, std::pair<size_t, SerializableUnitMap*>> SerializeManager::
+		updateMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id, SerializableUnitBase* item)
 		{
 			assert(id.first >= RESERVED_ID_COUNT);
-			if (&intern::sMasterMappings == id.second) {
+			if (&intern::sMasterMappings == id.second)
+			{
 				auto it = id.second->find(id.first);
-				SerializableUnitBase *old = it->second;
+				SerializableUnitBase* old = it->second;
 				it->second = item;
-				return{ id, addMasterMapping(old) };
+				return {id, addMasterMapping(old)};
 			}
-			else {
-				intern::sMasterMappings[id.first] = item;
-				return{ {id.first, &intern::sMasterMappings}, id };
-			}
-			
+			intern::sMasterMappings[id.first] = item;
+			return {{id.first, &intern::sMasterMappings}, id};
 		}
 
 
 		std::set<BufferedOutStream*, CompareStreamId> SerializeManager::getMasterMessageTargets()
 		{
 			std::set<BufferedOutStream*, CompareStreamId> result;
-			std::copy_if(mMasterStreams.begin(), mMasterStreams.end(), std::inserter(result, result.begin()), [](BufferedInOutStream* stream) {
-				return !stream->isClosed();
-			});
+			std::copy_if(mMasterStreams.begin(), mMasterStreams.end(), inserter(result, result.begin()),
+			             [](BufferedInOutStream* stream)
+			             {
+				             return !stream->isClosed();
+			             });
 			return result;
 		}
 
 
 		void SerializeManager::clearTopLevelItems()
 		{
-			while (!mSlaveMappings.empty()) {
+			while (!mSlaveMappings.empty())
+			{
 				mSlaveMappings.begin()->second->clearSlaveId();
 			}
-			for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+			for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
+			{
 				unit->removeManager(this);
 			}
 			mTopLevelUnits.clear();
 		}
 
-		bool SerializeManager::addTopLevelItem(TopLevelSerializableUnitBase * unit, bool sendStateFlag)
+		bool SerializeManager::addTopLevelItem(TopLevelSerializableUnitBase* unit, bool sendStateFlag)
 		{
 			if (!unit->addManager(this))
 				return false;
-			mTopLevelUnits.insert(unit);			
+			mTopLevelUnits.insert(unit);
 
-			if (mSlaveStream) {				
+			if (mSlaveStream)
+			{
 				unit->initSlaveId();
 			}
 
-			if (sendStateFlag && unit->isActive()) {
-				for (BufferedInOutStream *stream : mMasterStreams) {
+			if (sendStateFlag && unit->isActive())
+			{
+				for (BufferedInOutStream* stream : mMasterStreams)
+				{
 					this->sendState(*stream, unit);
 				}
 			}
 			return true;
 		}
 
-		void SerializeManager::removeTopLevelItem(TopLevelSerializableUnitBase * unit)
+		void SerializeManager::removeTopLevelItem(TopLevelSerializableUnitBase* unit)
 		{
 			auto it2 = mSlaveMappings.begin();
-			while (it2 != mSlaveMappings.end()) {
-				if (it2->second->topLevel() == unit) {
+			while (it2 != mSlaveMappings.end())
+			{
+				if (it2->second->topLevel() == unit)
+				{
 					(it2++)->second->clearSlaveId();
 				}
-				else {
+				else
+				{
 					++it2;
 				}
 			}
@@ -201,13 +218,13 @@ namespace Engine {
 			mTopLevelUnits.erase(unit);
 		}
 
-		void SerializeManager::moveTopLevelItem(TopLevelSerializableUnitBase * oldUnit, TopLevelSerializableUnitBase * newUnit)
+		void SerializeManager::moveTopLevelItem(TopLevelSerializableUnitBase* oldUnit, TopLevelSerializableUnitBase* newUnit)
 		{
 			removeTopLevelItem(oldUnit);
 			addTopLevelItem(newUnit, false);
 		}
 
-		BufferedOutStream * SerializeManager::getSlaveMessageTarget()
+		BufferedOutStream* SerializeManager::getSlaveMessageTarget() const
 		{
 			return mSlaveStream;
 		}
@@ -217,22 +234,22 @@ namespace Engine {
 			return sLocalMasterId;
 		}
 
-		ParticipantId SerializeManager::getSlaveParticipantId()
+		ParticipantId SerializeManager::getSlaveParticipantId() const
 		{
 			return mSlaveStream ? mSlaveStream->id() : 0;
 		}
 
-		bool SerializeManager::isMaster(Stream * stream)
+		bool SerializeManager::isMaster(Stream* stream) const
 		{
 			return mSlaveStream != stream;
 		}
 
-		bool SerializeManager::isMaster()
+		bool SerializeManager::isMaster() const
 		{
 			return mSlaveStream == nullptr || mSlaveStreamInvalid;
 		}
 
-		Util::Process & SerializeManager::process()
+		Util::Process& SerializeManager::process()
 		{
 			return mProcess;
 		}
@@ -244,7 +261,7 @@ namespace Engine {
 				removeMasterStream(mMasterStreams.front());
 		}
 
-		StreamError SerializeManager::setSlaveStream(BufferedInOutStream * stream, bool receiveState, int timeout)
+		StreamError SerializeManager::setSlaveStream(BufferedInOutStream* stream, bool receiveState, int timeout)
 		{
 			if (mSlaveStream)
 				return UNKNOWN_ERROR;
@@ -253,8 +270,10 @@ namespace Engine {
 
 			auto it = mTopLevelUnits.begin();
 
-			for (; it != mTopLevelUnits.end(); ++it) {
-				if (!(*it)->updateManagerType(this, false)) {
+			for (; it != mTopLevelUnits.end(); ++it)
+			{
+				if (!(*it)->updateManagerType(this, false))
+				{
 					state = UNKNOWN_ERROR;
 					break;
 				}
@@ -264,34 +283,44 @@ namespace Engine {
 			mSlaveStream = stream;
 
 
-			if (receiveState) {
-				if (state == NO_ERROR) {
-					for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+			if (receiveState)
+			{
+				if (state == NO_ERROR)
+				{
+					for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
+					{
 						unit->initSlaveId();
 					}
 					std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 					mReceivingMasterState = true;
-					while (mReceivingMasterState) {
+					while (mReceivingMasterState)
+					{
 						if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
-							(std::chrono::steady_clock::now() - start).count() > timeout) {
+							(std::chrono::steady_clock::now() - start).count() > timeout)
+						{
 							state = TIMEOUT;
 							mReceivingMasterState = false;
 						}
-						if (!receiveMessages(stream)) {
+						if (!receiveMessages(stream))
+						{
 							state = stream->error();
 							mReceivingMasterState = false;
 						}
 					}
-					if (state != NO_ERROR) {
-						while (!mSlaveMappings.empty()) {
+					if (state != NO_ERROR)
+					{
+						while (!mSlaveMappings.empty())
+						{
 							mSlaveMappings.begin()->second->clearSlaveId();
 						}
 					}
 				}
 			}
 
-			if (state != NO_ERROR) {
-				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
+			if (state != NO_ERROR)
+			{
+				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2)
+				{
 					assert((*it2)->updateManagerType(this, true));
 				}
 				mSlaveStream = nullptr;
@@ -304,49 +333,54 @@ namespace Engine {
 
 		void SerializeManager::removeSlaveStream()
 		{
-			if (mSlaveStream) {
-				while (!mSlaveMappings.empty()) {
+			if (mSlaveStream)
+			{
+				while (!mSlaveMappings.empty())
+				{
 					size_t s = mSlaveMappings.size();
 					mSlaveMappings.begin()->second->clearSlaveId();
 					assert(s > mSlaveMappings.size());
 				}
-				for (TopLevelSerializableUnitBase *topLevel : mTopLevelUnits) {
+				for (TopLevelSerializableUnitBase* topLevel : mTopLevelUnits)
+				{
 					topLevel->updateManagerType(this, true);
 				}
 				mSlaveStream->setId(0);
-				mSlaveStream = 0;
+				mSlaveStream = nullptr;
 				mSlaveStreamDisconnected.emit();
-			}				
+			}
 		}
 
-		bool SerializeManager::addMasterStream(BufferedInOutStream * stream, bool sendStateFlag)
-		{			
-
-			if (sendStateFlag && *stream) {
-				for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+		bool SerializeManager::addMasterStream(BufferedInOutStream* stream, bool sendStateFlag)
+		{
+			if (sendStateFlag && *stream)
+			{
+				for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
+				{
 					sendState(*stream, unit);
 				}
 				stream->writeCommand(INITIAL_STATE_DONE, stream->id());
-
 			}
 
-			if (*stream) {
+			if (*stream)
+			{
 				mMasterStreams.push_back(stream);
 				return true;
 			}
 			return false;
-
 		}
 
-		void SerializeManager::removeMasterStream(BufferedInOutStream * stream)
+		void SerializeManager::removeMasterStream(BufferedInOutStream* stream)
 		{
 			mMasterStreams.remove(stream);
 		}
 
-		bool SerializeManager::filter(const SerializableUnitBase * unit, ParticipantId id)
+		bool SerializeManager::filter(const SerializableUnitBase* unit, ParticipantId id)
 		{
-			for (auto &f : mFilters) {
-				if (!f(unit, id)){
+			for (auto& f : mFilters)
+			{
+				if (!f(unit, id))
+				{
 					return false;
 				}
 			}
@@ -361,18 +395,23 @@ namespace Engine {
 
 		void SerializeManager::receiveMessages()
 		{
-			if (mSlaveStream && !mSlaveStreamInvalid) {
-				if (!receiveMessages(mSlaveStream)) {
+			if (mSlaveStream && !mSlaveStreamInvalid)
+			{
+				if (!receiveMessages(mSlaveStream))
+				{
 					removeSlaveStream();
 				}
 			}
-			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-				if (!receiveMessages(*it)) {
-					BufferedInOutStream *tmp = *it;
+			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
+			{
+				if (!receiveMessages(*it))
+				{
+					BufferedInOutStream* tmp = *it;
 					++it;
 					removeMasterStream(tmp);
 				}
-				else {
+				else
+				{
 					++it;
 				}
 			}
@@ -380,18 +419,23 @@ namespace Engine {
 
 		void SerializeManager::sendMessages()
 		{
-			if (mSlaveStream && !mSlaveStreamInvalid) {
-				if (mSlaveStream->sendMessages() == -1) {
+			if (mSlaveStream && !mSlaveStreamInvalid)
+			{
+				if (mSlaveStream->sendMessages() == -1)
+				{
 					removeSlaveStream();
 				}
 			}
-			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-				if ((*it)->sendMessages() == -1) {
-					BufferedInOutStream *tmp = *it;
+			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
+			{
+				if ((*it)->sendMessages() == -1)
+				{
+					BufferedInOutStream* tmp = *it;
 					++it;
 					removeMasterStream(tmp);
 				}
-				else {
+				else
+				{
 					++it;
 				}
 			}
@@ -403,29 +447,31 @@ namespace Engine {
 			sendMessages();
 		}
 
-		size_t SerializeManager::convertPtr(SerializeOutStream & out, SerializableUnitBase * unit)
+		size_t SerializeManager::convertPtr(SerializeOutStream& out, SerializableUnitBase* unit) const
 		{
 			return unit == nullptr ? NULL_UNIT_ID : (&out != mSlaveStream ? unit->masterId() : unit->slaveId());
 		}
 
-		SerializableUnitBase * SerializeManager::convertPtr(SerializeInStream & in, size_t unit)
+		SerializableUnitBase* SerializeManager::convertPtr(SerializeInStream& in, size_t unit)
 		{
 			if (unit == NULL_UNIT_ID)
 				return nullptr;
-			try {
-				if (&in == mSlaveStream) {
+			try
+			{
+				if (&in == mSlaveStream)
+				{
 					return mSlaveMappings.at(unit);
 				}
-				else {
-					SerializableUnitBase *u = intern::sMasterMappings.at(unit);
-					if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end()) {
-						throw SerializeException("Illegal Toplevel-Id used! Possible configuration mismatch!");
-					}
-					return u;
+				SerializableUnitBase* u = intern::sMasterMappings.at(unit);
+				if (find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end())
+				{
+					throw SerializeException("Illegal Toplevel-Id used! Possible configuration mismatch!");
 				}
+				return u;
 			}
-			catch (const std::out_of_range &) {
-				std::stringstream ss;	
+			catch (const std::out_of_range&)
+			{
+				std::stringstream ss;
 				ss << "Unknown Unit-Id (" << unit << ") used! Possible binary mismatch!";
 				throw SerializeException(ss.str());
 			}
@@ -435,23 +481,27 @@ namespace Engine {
 		{
 			std::vector<ParticipantId> result;
 			result.reserve(mMasterStreams.size());
-			for (BufferedInOutStream *stream : mMasterStreams) {
+			for (BufferedInOutStream* stream : mMasterStreams)
+			{
 				result.push_back(stream->id());
 			}
 			return result;
 		}
 
 
-		bool SerializeManager::receiveMessages(BufferedInOutStream * stream)
+		bool SerializeManager::receiveMessages(BufferedInOutStream* stream)
 		{
 			if (stream->isClosed()) return false;
 
 
- 			while (stream->isMessageAvailable()) {
-				try {
+			while (stream->isMessageAvailable())
+			{
+				try
+				{
 					readMessage(*stream);
 				}
-				catch (const SerializeException &e) {
+				catch (const SerializeException& e)
+				{
 					LOG_EXCEPTION(e);
 				}
 				if (stream->isClosed())
@@ -461,14 +511,18 @@ namespace Engine {
 			return !stream->isClosed();
 		}
 
-		bool SerializeManager::sendAllMessages(BufferedInOutStream *stream, int timeout) {
+		bool SerializeManager::sendAllMessages(BufferedInOutStream* stream, int timeout)
+		{
 			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-			while (int result = stream->sendMessages()) {
-				if (result == -1) {
+			while (int result = stream->sendMessages())
+			{
+				if (result == -1)
+				{
 					return false;
 				}
 				if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
-					(std::chrono::steady_clock::now() - start).count() > timeout) {
+					(std::chrono::steady_clock::now() - start).count() > timeout)
+				{
 					return false;
 				}
 			}
@@ -476,7 +530,7 @@ namespace Engine {
 		}
 
 
-		BufferedInOutStream * SerializeManager::getSlaveStream()
+		BufferedInOutStream* SerializeManager::getSlaveStream() const
 		{
 			return mSlaveStream;
 		}
@@ -487,22 +541,21 @@ namespace Engine {
 			return ++sRunningStreamId;
 		}
 
-		const std::set<TopLevelSerializableUnitBase*>& SerializeManager::getTopLevelUnits()
+		const std::set<TopLevelSerializableUnitBase*>& SerializeManager::getTopLevelUnits() const
 		{
 			return mTopLevelUnits;
 		}
 
-		void SerializeManager::sendState(BufferedInOutStream & stream, TopLevelSerializableUnitBase * unit)
+		void SerializeManager::sendState(BufferedInOutStream& stream, TopLevelSerializableUnitBase* unit)
 		{
-			stream.beginMessage(unit, STATE);			
+			stream.beginMessage(unit, STATE);
 			unit->writeState(stream);
 			stream.endMessage();
 		}
 
-		const std::string & SerializeManager::name() const
+		const std::string& SerializeManager::name() const
 		{
 			return mName;
 		}
-
 	}
 }

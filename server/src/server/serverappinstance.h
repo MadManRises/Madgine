@@ -3,57 +3,58 @@
 #include "app/serverapplication.h"
 #include "app/serverappsettings.h"
 
-namespace Engine {
-
-	namespace Server {
-
-		class MADGINE_SERVER_EXPORT ServerAppInstance {
+namespace Engine
+{
+	namespace Server
+	{
+		class MADGINE_SERVER_EXPORT ServerAppInstance
+		{
 		public:
 			template <class T>
-			ServerAppInstance(T &&initCallback, const Scripting::LuaTable &table) :				
+			ServerAppInstance(T&& initCallback, const Scripting::LuaTable& table) :
 				mTable(table),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
-				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))				
+				mThread(&ServerAppInstance::run<T>, this, std::forward<T>(initCallback))
 			{
-
 			}
+
 			virtual ~ServerAppInstance();
 
-			const char *key() const;
+			const char* key() const;
 
 			ValueType toValueType() const;
 
 		protected:
 			template <class T>
-			void run(T initCallback) 
+			void run(T initCallback)
 			{
 				App::ServerApplication app(mTable);
 				mApplication = &app;
 				App::ServerAppSettings settings;
 				app.setup(settings);
-				if (app.init()) {
+				if (app.init())
+				{
 					initCallback();
 					mResult = app.go();
 					app.finalize();
 				}
-				else {
+				else
+				{
 					mResult = -1;
 				}
 			}
 
-		private:			
-			Scripting::LuaTable mTable;			
-			App::ServerApplication *mApplication;
+		private:
+			Scripting::LuaTable mTable;
+			App::ServerApplication* mApplication;
 
 			std::string mName;
 			static size_t sInstanceCounter;
-			
+
 			int mResult;
 			std::thread mThread;
 		};
-
 	}
-
 }

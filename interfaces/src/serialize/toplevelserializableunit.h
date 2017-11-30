@@ -2,54 +2,51 @@
 
 #include "serializableunit.h"
 
-namespace Engine {
-namespace Serialize {
-
-class INTERFACES_EXPORT TopLevelSerializableUnitBase : public SerializableUnitBase
+namespace Engine
 {
-public:
-	TopLevelSerializableUnitBase(size_t staticId = 0);
-	TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
-	TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other);
-	virtual ~TopLevelSerializableUnitBase();
+	namespace Serialize
+	{
+		class INTERFACES_EXPORT TopLevelSerializableUnitBase : public SerializableUnitBase
+		{
+		public:
+			TopLevelSerializableUnitBase(size_t staticId = 0);
+			TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase& other);
+			TopLevelSerializableUnitBase(TopLevelSerializableUnitBase&& other) noexcept;
+			virtual ~TopLevelSerializableUnitBase();
 
-	void copyStaticSlaveId(const TopLevelSerializableUnitBase &other);
+			void copyStaticSlaveId(const TopLevelSerializableUnitBase& other);
 
-	BufferedOutStream *getSlaveMessageTarget() const;
+			BufferedOutStream* getSlaveMessageTarget() const;
 
-	const std::list<SerializeManager*> &getMasterManagers() const;
-	SerializeManager *getSlaveManager() const;
+			const std::list<SerializeManager*>& getMasterManagers() const;
+			SerializeManager* getSlaveManager() const;
 
-	bool addManager(SerializeManager *mgr);
-	void removeManager(SerializeManager *mgr);
+			bool addManager(SerializeManager* mgr);
+			void removeManager(SerializeManager* mgr);
 
-	bool updateManagerType(SerializeManager *mgr, bool isMaster);
+			bool updateManagerType(SerializeManager* mgr, bool isMaster);
 
-	bool isMaster() const;
+			//bool isMaster() const;
 
-	static ParticipantId getLocalMasterParticipantId();
-	ParticipantId getSlaveParticipantId() const;
+			static ParticipantId getLocalMasterParticipantId();
+			ParticipantId getSlaveParticipantId() const;
 
-	void setStaticSlaveId(size_t staticId);
-	void initSlaveId();
+			void setStaticSlaveId(size_t staticId);
+			void initSlaveId();
 
-	virtual size_t readId(SerializeInStream &in) override;
+			size_t readId(SerializeInStream& in) override;
 
-	virtual const TopLevelSerializableUnitBase *topLevel() const override;
+			const TopLevelSerializableUnitBase* topLevel() const override;
 
-	virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() override;
+			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() override;
 
-private:
-	std::list<SerializeManager*> mMasterManagers;
-	SerializeManager *mSlaveManager;
-	size_t mStaticSlaveId;
+		private:
+			std::list<SerializeManager*> mMasterManagers;
+			SerializeManager* mSlaveManager;
+			size_t mStaticSlaveId;
+		};
 
-};
-
-template <class T>
-using TopLevelSerializableUnit = SerializableUnit<T, TopLevelSerializableUnitBase>;
-
-
-} // namespace Serialize
+		template <class T>
+		using TopLevelSerializableUnit = SerializableUnit<T, TopLevelSerializableUnitBase>;
+	} // namespace Serialize
 } // namespace Core
-

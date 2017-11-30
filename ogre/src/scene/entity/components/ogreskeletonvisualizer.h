@@ -3,18 +3,20 @@
 
 #include "scene/entity/entitycomponent.h"
 
-namespace Engine {
-	namespace Scene {
-		namespace Entity {
-
-			class OGREMADGINE_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer> {
-
+namespace Engine
+{
+	namespace Scene
+	{
+		namespace Entity
+		{
+			class OGREMADGINE_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer>
+			{
 			public:
-				OgreSkeletonVisualizer(Entity &entity, const Scripting::LuaTable &table = {});
+				OgreSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table = {});
 				virtual ~OgreSkeletonVisualizer();
 
-				virtual void init() override;
-				virtual void finalize() override;
+				void init() override;
+				void finalize() override;
 
 			protected:
 				void showBones(bool b);
@@ -23,7 +25,7 @@ namespace Engine {
 				void createBoneMesh();
 
 			private:
-				Mesh *mMesh;
+				Mesh* mMesh;
 
 				std::vector<Ogre::Entity*> mBoneEntities;
 

@@ -4,13 +4,14 @@
 
 #include "app/ogreapplication.h"
 
-namespace Engine {
-	namespace Scene {
-
-		IngameOverlay::IngameOverlay(const std::string &name):
-			Ogre::ManualObject(name)
+namespace Engine
+{
+	namespace Scene
+	{
+		IngameOverlay::IngameOverlay(const std::string& name):
+			ManualObject(name)
 		{
-			setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY - 1);
+			MovableObject::setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY - 1);
 			setUseIdentityProjection(true);
 			setUseIdentityView(true);
 			setQueryFlags(0);
@@ -23,16 +24,15 @@ namespace Engine {
 			App::OgreApplication::getSingleton().renderWindow()->removeListener(this);
 		}
 
-		void IngameOverlay::preViewportUpdate(const Ogre::RenderTargetViewportEvent & ev)
+		void IngameOverlay::preViewportUpdate(const Ogre::RenderTargetViewportEvent& ev)
 		{
 			mVisible = isVisible();
 			setVisible(false);
 		}
 
-		void IngameOverlay::postViewportUpdate(const Ogre::RenderTargetViewportEvent & ev)
+		void IngameOverlay::postViewportUpdate(const Ogre::RenderTargetViewportEvent& ev)
 		{
 			setVisible(mVisible);
 		}
-
 	}
 }

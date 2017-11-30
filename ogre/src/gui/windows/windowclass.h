@@ -1,8 +1,11 @@
 #pragma once
 
-namespace Engine {
-	namespace GUI {
-		enum class Class {
+namespace Engine
+{
+	namespace GUI
+	{
+		enum class Class
+		{
 			WINDOW_CLASS,
 			TEXTUREDRAWER_CLASS,
 			COMBOBOX_CLASS,

@@ -2,13 +2,9 @@
 
 #include "interfaceslib.h"
 
-#include "serialize/serializemanager.h"
 #include "serialize/streams/debugging/streamdebugging.h"
-#include "serialize/streams/bufferedstream.h"
 
-#include <fstream>
-
-TEST(StreamDebugging, Logging) {
+TEST(StreamDebugging, Logging)
+{
 	Engine::Serialize::Debugging::StreamDebugging::setLoggingEnabled(true);
-
 }

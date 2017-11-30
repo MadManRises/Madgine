@@ -2,39 +2,39 @@
 #include "entitycomponentbase.h"
 #include "entity.h"
 
-namespace Engine {
-namespace Scene {
-namespace Entity {
-
-EntityComponentBase::EntityComponentBase(Entity &entity, const Scripting::LuaTable &initTable) :
-    mEntity(&entity),
-	mInitTable(initTable)
+namespace Engine
 {
-}
+	namespace Scene
+	{
+		namespace Entity
+		{
+			EntityComponentBase::EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable) :
+				mEntity(&entity),
+				mInitTable(initTable)
+			{
+			}
 
-EntityComponentBase::~EntityComponentBase() {
+			EntityComponentBase::~EntityComponentBase()
+			{
+			}
 
-}
+			void EntityComponentBase::init()
+			{
+			}
 
-void EntityComponentBase::init()
-{
-	
-}
+			void EntityComponentBase::finalize()
+			{
+			}
 
-void EntityComponentBase::finalize()
-{
-}
+			Entity& EntityComponentBase::getEntity() const
+			{
+				return *mEntity;
+			}
 
-Entity &EntityComponentBase::getEntity() const
-{
-    return *mEntity;
-}
-
-void EntityComponentBase::moveToEntity(Entity *entity) {
-	mEntity = entity;
-}
-
-
-}
-}
+			void EntityComponentBase::moveToEntity(Entity* entity)
+			{
+				mEntity = entity;
+			}
+		}
+	}
 }

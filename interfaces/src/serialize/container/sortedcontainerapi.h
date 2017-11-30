@@ -1,13 +1,15 @@
-#pragma once 
+#pragma once
 
 #include "container.h"
 #include "generic/keyvalue.h"
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template <class traits, class Creator>
-		class SortedContainerApi : public Container<traits, Creator> {
+		class SortedContainerApi : public Container<traits, Creator>
+		{
 		public:
 
 			typedef Container<traits, Creator> Base;
@@ -20,20 +22,21 @@ namespace Engine {
 			typedef typename traits::key_type key_type;
 			typedef typename traits::value_type value_type;
 
-			iterator find(const key_type &key) {
+			iterator find(const key_type& key)
+			{
 				return kvFind(this->mData, key);
 			}
 
-			bool contains(const key_type &key) {
+			bool contains(const key_type& key)
+			{
 				return find(key) != this->end();
 			}
 
 			template <class Ty, class _ = decltype(std::declval<typename Base::NativeContainerType>().find(std::declval<Ty>()))>
-			iterator find(const Ty &v) {
+			iterator find(const Ty& v)
+			{
 				return this->mData.find(v);
 			}
-
 		};
-
 	}
 }

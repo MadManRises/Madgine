@@ -6,152 +6,171 @@
 #ifdef _MSC_VER
 #pragma warning (push, 0)
 #endif
-#include <MYGUI\MyGUI.h>
+#include <MYGUI/MyGUI.h>
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
 			class MyGUILauncher;
 
 			class OGREMADGINE_EXPORT MyGUIWindow :
 				public WindowContainer
 			{
 			public:
-				MyGUIWindow(MyGUI::Widget *widget, MyGUILauncher *gui, WindowContainer *parent);
+				MyGUIWindow(MyGUI::Widget* widget, MyGUILauncher* gui, WindowContainer* parent);
 				virtual ~MyGUIWindow();
 
 				// Inherited via Window
-				virtual void showModal() override;
+				void showModal() override;
 
 				// Inherited via Window
-				virtual void registerHandlerEvents(void *id, std::function<void(GUI::MouseEventArgs&)> mouseMove, std::function<void(GUI::MouseEventArgs&)> mouseDown, std::function<void(GUI::MouseEventArgs&)> mouseUp, std::function<void(GUI::MouseEventArgs&)> mouseScroll, std::function<bool(GUI::KeyEventArgs&)> keyPress) override;
-				virtual void unregisterCustomEvents(void *id) override;
+				void registerHandlerEvents(void* id, std::function<void(MouseEventArgs&)> mouseMove,
+				                           std::function<void(MouseEventArgs&)> mouseDown,
+				                           std::function<void(MouseEventArgs&)> mouseUp,
+				                           std::function<void(MouseEventArgs&)> mouseScroll,
+				                           std::function<bool(KeyEventArgs&)> keyPress) override;
+				void unregisterCustomEvents(void* id) override;
 
-				virtual void registerEvent(void *id, EventType type, std::function<void()> event) override;
+				void registerEvent(void* id, EventType type, std::function<void()> event) override;
 
 
 				// Inherited via Window
-				virtual bool isVisible() override;
-				virtual void releaseInput() override;
-				virtual void captureInput() override;
-				virtual void hideModal() override;
-				virtual void show() override;
-				virtual void hide() override;
-				virtual void setVisible(bool b) override;
-				virtual void activate() override;
-				virtual void moveToFront() override;
-				virtual void setEnabled(bool b) override;
+				bool isVisible() override;
+				void releaseInput() override;
+				void captureInput() override;
+				void hideModal() override;
+				void show() override;
+				void hide() override;
+				void setVisible(bool b) override;
+				void activate() override;
+				void moveToFront() override;
+				void setEnabled(bool b) override;
 
-				virtual void setPixelSize(const Ogre::Vector2 & size) override;
-				virtual Ogre::Vector2 getPixelSize() override;
-				virtual void setPixelPosition(const Ogre::Vector2 & pos) override;
-				virtual Ogre::Vector2 getPixelPosition() override;
-
+				void setPixelSize(const Ogre::Vector2& size) override;
+				Ogre::Vector2 getPixelSize() override;
+				void setPixelPosition(const Ogre::Vector2& pos) override;
+				Ogre::Vector2 getPixelPosition() override;
 
 
 				// Inherited via WindowContainer
-				virtual WindowContainer * loadLayoutWindow(const std::string & name) override;
+				WindowContainer* loadLayoutWindow(const std::string& name) override;
 
-				MyGUI::Widget *window();
-				
+				MyGUI::Widget* window() const;
+
 
 			protected:
 				// Inherited via Window
-				virtual Window *createImpl(Class _class) override;
+				Window* createImpl(Class _class) override;
 
-				void handleKeyEvent(MyGUI::Widget *w, MyGUI::KeyCode c);
+				void handleKeyEvent(MyGUI::Widget* w, MyGUI::KeyCode c);
 
 				// Inherited via WindowContainer
-				virtual WindowContainer * createChildWindow(const std::string & name, Class _class, const std::string &customSkin = "") override;
+				WindowContainer* createChildWindow(const std::string& name, Class _class, const std::string& customSkin = "")
+				override;
 
-				virtual void buildChildren() override;
+				void buildChildren() override;
 
-				void needMouse();
-			
-			private:
-
-				void registerEvent(void *id, std::function<void(const std::string&)> f, MyGUI::EventHandle_WidgetString &event);
-				void registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetVoid &event);
-				void registerEvent(void *id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntIntButton &event);
-				void registerEvent(void *id, std::function<void(GUI::MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntInt &event);
-				void registerEvent(void *id, std::function<void(GUI::MouseEventArgs&)> f, MyGUI::EventHandle_WidgetInt &event);
-				void registerEvent(void *id, std::function<void()> f, MyGUI::EventHandle_WidgetWidget &event);
-
+				void needMouse() const;
 
 			private:
-				MyGUI::Widget *mWindow;
-				MyGUILauncher *mGui;
 
-				struct EventHandlerClass {
+				void registerEvent(void* id, std::function<void(const std::string&)> f, MyGUI::EventHandle_WidgetString& event);
+				void registerEvent(void* id, std::function<void()> f, MyGUI::EventHandle_WidgetVoid& event);
+				void registerEvent(void* id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntIntButton& event);
+				void registerEvent(void* id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetIntInt& event);
+				void registerEvent(void* id, std::function<void(MouseEventArgs&)> f, MyGUI::EventHandle_WidgetInt& event);
+				void registerEvent(void* id, std::function<void()> f, MyGUI::EventHandle_WidgetWidget& event);
+
+
+			private:
+				MyGUI::Widget* mWindow;
+				MyGUILauncher* mGui;
+
+				struct EventHandlerClass
+				{
 					virtual ~EventHandlerClass() = default;
 				};
 
 				template <int, class...>
-				struct EventTypeWrapper {};
+				struct EventTypeWrapper
+				{
+				};
 
 				template <class... _Ty>
-				struct EventTypeWrapper<1, _Ty...> {
+				struct EventTypeWrapper<1, _Ty...>
+				{
 					using type = MyGUI::delegates::CMultiDelegate1<_Ty...>;
 					using delegate = MyGUI::delegates::IDelegate1<_Ty...>;
 				};
 
 				template <class... _Ty>
-				struct EventTypeWrapper<2, _Ty...> {
+				struct EventTypeWrapper<2, _Ty...>
+				{
 					using type = MyGUI::delegates::CMultiDelegate2<_Ty...>;
 					using delegate = MyGUI::delegates::IDelegate2<_Ty...>;
 				};
 
 				template <class... _Ty>
-				struct EventTypeWrapper<3, _Ty...> {
+				struct EventTypeWrapper<3, _Ty...>
+				{
 					using type = MyGUI::delegates::CMultiDelegate3<_Ty...>;
 					using delegate = MyGUI::delegates::IDelegate3<_Ty...>;
 				};
 
 				template <class... _Ty>
-				struct EventTypeWrapper<4, _Ty...> {
+				struct EventTypeWrapper<4, _Ty...>
+				{
 					using type = MyGUI::delegates::CMultiDelegate4<_Ty...>;
 					using delegate = MyGUI::delegates::IDelegate4<_Ty...>;
 				};
 
 
 				template <class... _Ty>
-				struct EventHandler : public EventHandlerClass {
-					using F = std::function<void(_Ty...)>;
+				struct EventHandler : public EventHandlerClass
+				{
+					using F = std::function<void(_Ty ...)>;
 					using Delegate = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::delegate;
 					using Event = typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type;
 
-					EventHandler(const F &f, Event &event) :
+					EventHandler(const F& f, Event& event) :
 						mEvent(event),
-						mFunc(f) {
+						mFunc(f)
+					{
 						mDelegate = MyGUI::newDelegate(this, &EventHandler::fire);
 						event += mDelegate;
 					}
-					void fire(_Ty... args) {
+
+					void fire(_Ty ... args)
+					{
 						mFunc(args...);
 					}
-					virtual ~EventHandler() {
+
+					virtual ~EventHandler()
+					{
 						mEvent -= mDelegate;
 					}
-					Event &mEvent;
+
+					Event& mEvent;
 					F mFunc;
-					Delegate *mDelegate;
+					Delegate* mDelegate;
 				};
 
 				template <class... _Ty>
-				EventHandler<_Ty...> *wrapEvent(const std::function<void(_Ty...)> &f, typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type &event) {
+				static EventHandler<_Ty...>* wrapEvent(const std::function<void(_Ty ...)>& f,
+				                                       typename EventTypeWrapper<sizeof...(_Ty), _Ty...>::type& event)
+				{
 					return new EventHandler<_Ty...>(f, event);
 				}
 
 				std::map<void*, std::list<std::unique_ptr<EventHandlerClass>>> mEventHandlers;
-				std::map<void*, std::list<std::function<bool(GUI::KeyEventArgs&)>>> mKeyHandlers;
-
-
-};
-
+				std::map<void*, std::list<std::function<bool(KeyEventArgs&)>>> mKeyHandlers;
+			};
 		}
 	}
 }
-

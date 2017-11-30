@@ -4,25 +4,26 @@
 
 #include "serverskeletonvisualizer.h"
 
-namespace Engine {
-
+namespace Engine
+{
 	API_IMPL(Scene::Entity::ServerSkeletonVisualizer);
 
-	namespace Scene {
-		namespace Entity {
-
+	namespace Scene
+	{
+		namespace Entity
+		{
 			template <>
-			const char * const EntityComponent<ServerSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
+			const char* const EntityComponent<ServerSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
 
-			ServerSkeletonVisualizer::ServerSkeletonVisualizer(Entity &entity, const Scripting::LuaTable &table) :
+			ServerSkeletonVisualizer::ServerSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table)
-			{}
-
-
-			ServerSkeletonVisualizer::~ServerSkeletonVisualizer() {
+			{
 			}
 
 
+			ServerSkeletonVisualizer::~ServerSkeletonVisualizer()
+			{
+			}
 		}
 	}
 }

@@ -10,179 +10,198 @@
 
 #include "entitycomponentbase.h"
 
-namespace Engine {
+#include "scripting/datatypes/luatableiterator.h"
 
-	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
-
-
-namespace Scene {
-namespace Entity {
-
-
-
-Entity::Entity(const Entity &other) :
-	SerializableUnit(other),
-	mName(other.mName),
-	mSceneManager(other.mSceneManager)
+namespace Engine
 {
-	setup();
-}
+	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove
+	), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
 
-Entity::Entity(Entity &&other) :
-	SerializableUnit(std::forward<Entity>(other)),
-	mName(other.mName),	
-	mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
-	mSceneManager(other.mSceneManager)
-{
-	for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
-		comp->moveToEntity(this);
-	}
-	setup();
-}
 
-Entity::Entity(SceneManagerBase *sceneMgr, const std::string &name, const std::string &behaviour) :
-	mName(name),
-	mSceneManager(sceneMgr)
-{
-	setup();
-	if (!behaviour.empty()) {
-		ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
-		if (table.is<Scripting::LuaTable>()) {
-			for (const std::pair<std::string, ValueType> &p : table.as<Scripting::LuaTable>()) {
-				if (p.second.is<Scripting::LuaTable>()) {
-					addComponent(p.first, p.second.as<Scripting::LuaTable>());
+	namespace Scene
+	{
+		namespace Entity
+		{
+			Entity::Entity(const Entity& other, bool local) :
+				SerializableUnit(other),
+				mName(other.mName),
+				mLocal(local),
+				mSceneManager(other.mSceneManager)
+			{
+				setup();
+			}
+
+			Entity::Entity(Entity&& other, bool local) :
+				SerializableUnit(std::forward<Entity>(other)),
+				mName(other.mName),
+				mLocal(local),
+				mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
+				mSceneManager(other.mSceneManager)
+			{
+				for (const std::unique_ptr<EntityComponentBase>& comp : mComponents)
+				{
+					comp->moveToEntity(this);
 				}
-				else {
-					LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
+				setup();
+			}
+
+			Entity::Entity(SceneManagerBase* sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
+				mName(name),
+				mLocal(local),
+				mSceneManager(sceneMgr)
+			{
+				setup();
+				if (!behaviour.empty())
+				{
+					ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
+					if (table.is<Scripting::LuaTable>())
+					{
+						for (const std::pair<std::string, ValueType>& p : table.as<Scripting::LuaTable>())
+						{
+							if (p.second.is<Scripting::LuaTable>())
+							{
+								addComponent(p.first, p.second.as<Scripting::LuaTable>());
+							}
+							else
+							{
+								LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
+							}
+						}
+					}
+					else
+					{
+						LOG_ERROR(message("Behaviour \"", "\" not found!")(behaviour));
+					}
 				}
 			}
-		}
-		else {
-			LOG_ERROR(message("Behaviour \"", "\" not found!")(behaviour));
+
+			Entity::~Entity()
+			{
+			}
+
+			void Entity::setup()
+			{
+				mComponents.connectCallback([](const decltype(mComponents)::const_iterator& it, int op)
+				{
+					using namespace Serialize;
+					switch (op)
+					{
+					case BEFORE | RESET:
+						break;
+					case AFTER | RESET:
+						break;
+					case INSERT_ITEM:
+						(*it)->init();
+						break;
+					case BEFORE | REMOVE_ITEM:
+						(*it)->finalize();
+						break;
+					}
+				});
+			}
+
+			const char* Entity::key() const
+			{
+				return mName.c_str();
+			}
+
+			void Entity::writeCreationData(Serialize::SerializeOutStream& of) const
+			{
+				SerializableUnitBase::writeCreationData(of);
+				of << mName;
+			}
+
+			EntityComponentBase* Entity::getComponent(const std::string& name)
+			{
+				auto it = mComponents.find(name);
+				if (it == mComponents.end())
+					throw 0;
+				return it->get();
+			}
+
+			bool Entity::hasComponent(const std::string& name)
+			{
+				return mComponents.contains(name);
+			}
+
+			void Entity::addComponent(const std::string& name, const Scripting::LuaTable& table)
+			{
+				addComponentImpl(std::get<0>(createComponent(name, table)));
+			}
+
+			void Entity::removeComponent(const std::string& name)
+			{
+				auto it = mComponents.find(name);
+				assert(it != mComponents.end());
+				mComponents.erase(it);
+			}
+
+			bool Entity::existsComponent(const std::string& name)
+			{
+				return sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end();
+			}
+
+			std::set<std::string> Entity::registeredComponentNames()
+			{
+				std::set<std::string> result;
+
+				for (const std::pair<const std::string, ComponentBuilder>& p : sRegisteredComponentsByName())
+				{
+					result.insert(p.first);
+				}
+
+				return result;
+			}
+
+			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(
+				const std::string& name, const Scripting::LuaTable& table)
+			{
+				auto it = sRegisteredComponentsByName().find(name);
+				if (it == sRegisteredComponentsByName().end())
+					throw ComponentException(Exceptions::unknownComponent(name));
+				return make_tuple(it->second(*this, table));
+			}
+
+			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
+			{
+				if (mComponents.find(component) != mComponents.end())
+					throw ComponentException(Exceptions::doubleComponent(component->key()));
+				if (&component->getEntity() != this)
+					throw ComponentException(Exceptions::corruptData);
+				return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
+			}
+
+
+			void Entity::remove()
+			{
+				mSceneManager->removeLater(this);
+			}
+
+
+			void Entity::writeState(Serialize::SerializeOutStream& of) const
+			{
+				SerializableUnitBase::writeState(of);
+			}
+
+			void Entity::readState(Serialize::SerializeInStream& ifs)
+			{
+				SerializableUnitBase::readState(ifs);
+			}
+
+			KeyValueMapList Entity::maps()
+			{
+				return Scope::maps().merge(mComponents);
+			}
+
+			SceneManagerBase& Entity::sceneMgr() const
+			{
+				return *mSceneManager;
+			}
+
+			bool Entity::isLocal() const
+			{
+				return mLocal;
+			}
 		}
 	}
-}
-
-Entity::~Entity()
-{	
-}
-
-void Entity::setup() {
-	mComponents.connectCallback([](const decltype(mComponents)::const_iterator &it, int op) {
-		using namespace Engine::Serialize;
-		switch (op) {
-		case BEFORE | RESET:
-			break;
-		case AFTER | RESET:
-			break;
-		case INSERT_ITEM:
-			(*it)->init();
-			break;
-		case BEFORE | REMOVE_ITEM:
-			(*it)->finalize();
-			break;
-		}
-	});
-}
-
-const char *Entity::key() const
-{
-	return mName.c_str();
-}
-
-void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
-{
-	SerializableUnitBase::writeCreationData(of);
-    of << mName;
-}
-
-EntityComponentBase * Entity::getComponent(const std::string & name)
-{
-	auto it = mComponents.find(name);
-	if (it == mComponents.end())
-		throw 0;
-	else
-		return it->get();
-}
-
-bool Entity::hasComponent(const std::string & name)
-{
-	return mComponents.contains(name);
-}
-
-void Entity::addComponent(const std::string &name, const Scripting::LuaTable &table){
-	addComponentImpl(std::get<0>(createComponent(name, table)));
-}
-
-void Entity::removeComponent(const std::string & name)
-{
-	auto it = mComponents.find(name);
-	assert(it != mComponents.end());	
-	mComponents.erase(it);
-}
-
-bool Entity::existsComponent(const std::string &name)
-{
-    return sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end();
-}
-
-std::set<std::string> Entity::registeredComponentNames()
-{
-	std::set<std::string> result;
-
-	for (const std::pair<const std::string, ComponentBuilder> &p : sRegisteredComponentsByName()) {
-		result.insert(p.first);
-	}
-
-	return result;
-}
-
-std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(const std::string & name, const Scripting::LuaTable &table)
-{
-	auto it = sRegisteredComponentsByName().find(name);
-	if (it == sRegisteredComponentsByName().end())
-		throw ComponentException(Exceptions::unknownComponent(name));
-	return std::make_tuple(it->second(*this, table));
-}
-
-EntityComponentBase *Entity::addComponentImpl(std::unique_ptr<EntityComponentBase> &&component)
-{
-    if (mComponents.find(component) != mComponents.end())
-        throw ComponentException(Exceptions::doubleComponent(component->key()));
-    if (&component->getEntity() != this)
-        throw ComponentException(Exceptions::corruptData);
-    return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
-}
-
-
-void Entity::remove()
-{
-	mSceneManager->removeLater(this);
-}
-
-
-void Entity::writeState(Serialize::SerializeOutStream &of) const
-{
-	SerializableUnitBase::writeState(of);
-}
-
-void Entity::readState(Serialize::SerializeInStream &ifs)
-{
-	SerializableUnitBase::readState(ifs);
-}
-
-KeyValueMapList Entity::maps()
-{
-	return Scope::maps().merge(mComponents);
-}
-
-SceneManagerBase & Entity::sceneMgr() const
-{
-	return *mSceneManager;
-}
-
-}
-}
-
-
 }

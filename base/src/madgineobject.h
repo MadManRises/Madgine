@@ -1,28 +1,24 @@
 #pragma once
 
-#include "scripting/types/scopebase.h"
-
 #include "objectstate.h"
 
-namespace Engine {
+namespace Engine
+{
+	class MADGINE_BASE_EXPORT MadgineObject
+	{
+	protected:
+		MadgineObject();
+		virtual ~MadgineObject();
 
+	public:
 
-		class MADGINE_BASE_EXPORT MadgineObject {
-		protected:
-			MadgineObject();
-			virtual ~MadgineObject();
+		virtual bool init();
+		virtual void finalize();
 
-		public:
+		ObjectState getState() const;
 
-			virtual bool init();
-			virtual void finalize();
-
-			ObjectState getState();
-
-		private:
-			ObjectState mState;
-			std::string mName;
-
-		};
-
+	private:
+		ObjectState mState;
+		std::string mName;
+	};
 }

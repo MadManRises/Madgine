@@ -3,61 +3,73 @@
 #include "generic/templates.h"
 #include "connectionstore.h"
 
-namespace Engine {
-	namespace SignalSlot {
-
+namespace Engine
+{
+	namespace SignalSlot
+	{
 		template <typename F, F f, class T, class R, class... _Ty>
-		class SlotImpl {
+		class SlotImpl
+		{
 		public:
-			SlotImpl(T *item) :
+			SlotImpl(T* item) :
 				mManager(ConnectionManager::getSingletonPtr()),
 				mThread(std::this_thread::get_id()),
 				mItem(item)
-			{}
-
-			SlotImpl(const SlotImpl<F, f, T, R, _Ty...> &) = delete;
-
-			void operator()(_Ty... args) const {
-				assert(std::this_thread::get_id() == mThread);
-				(mItem->*f)(std::forward<_Ty>(args)...);
+			{
 			}
 
-			void queue(_Ty... args) const {
+			SlotImpl(const SlotImpl<F, f, T, R, _Ty...>&) = delete;
+
+			void operator()(_Ty ... args) const
+			{
+				assert(std::this_thread::get_id() == mThread);
+				(mItem ->* f)(std::forward<_Ty>(args)...);
+			}
+
+			void queue(_Ty ... args) const
+			{
 				mManager->queue(oneTimeFunctor<T, _Ty...>(f, mItem, std::forward<_Ty>(args)...));
 			}
 
-			void queue_direct(_Ty... args) const {
-				if (std::this_thread::get_id() == mThread){
-					(mItem->*f)(std::forward<_Ty>(args)...);
+			void queue_direct(_Ty ... args) const
+			{
+				if (std::this_thread::get_id() == mThread)
+				{
+					(mItem ->* f)(std::forward<_Ty>(args)...);
 				}
-				else {
+				else
+				{
 					queue(std::forward<_Ty>(args)...);
 				}
 			}
 
-			void disconnectAll() {
+			void disconnectAll()
+			{
 				mConnections.clear();
 			}
 
-			ConnectionStore &connectionStore() {
+			ConnectionStore& connectionStore()
+			{
 				return mConnections;
 			}
 
-			std::thread::id thread() {
+			std::thread::id thread() const
+			{
 				return mThread;
 			}
 
-			ConnectionManager &manager() {
+			ConnectionManager& manager() const
+			{
 				assert(mManager);
 				return *mManager;
 			}
 
 		private:
 			ConnectionStore mConnections;
-			ConnectionManager *mManager;
+			ConnectionManager* mManager;
 			std::thread::id mThread;
 
-			T *mItem;
+			T* mItem;
 		};
 
 		/*template <auto f>

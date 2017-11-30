@@ -12,16 +12,20 @@
 
 #include "scripting/types/globalapicomponent.h"
 
-namespace Engine {
-	namespace App {
-
-		class MADGINE_BASE_EXPORT Application : public Singleton<Application>, public Scripting::Scope<Application, Scripting::GlobalScopeBase>, public MadgineObject {
+namespace Engine
+{
+	namespace App
+	{
+		class MADGINE_BASE_EXPORT Application : public Singleton<Application>,
+		                                        public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
+		                                        public MadgineObject
+		{
 		public:
 			/**
 			* Creates the Application.
 			*
 			*/
-			Application(const Scripting::LuaTable &table = {});
+			Application(const Scripting::LuaTable& table = {});
 			/**
 			* Deletes all objects created by the Application.
 			*
@@ -37,16 +41,16 @@ namespace Engine {
 			*
 			* @param settings all necessary information to setup the Application
 			*/
-			void setup(const AppSettings &settings);
-			
+			void setup(const AppSettings& settings);
+
 			/**
 			* May only be called after a call to setup().
 			* Initializes all Madgine-Components.
 			*/
-			virtual bool init() override;
+			bool init() override;
 
-			virtual void finalize() override;
-			
+			void finalize() override;
+
 			/**
 			* Tries to call the script-method "init", which must be implemented in a script-file or in a Scripting::GlobalAPI, and to start the Ogre-Renderloop.
 			* If "init" is not found, <code>-1</code> is returned.
@@ -71,7 +75,7 @@ namespace Engine {
 			* @param settings the settings for the Application
 			*/
 			template <class App, class Settings>
-			static int run(const Settings &settings)
+			static int run(const Settings& settings)
 			{
 				App app;
 				app.setup(settings);
@@ -88,30 +92,30 @@ namespace Engine {
 			* This is the toplevel method of the Madgine, that should recursively update all elements that need update per frame.
 			*
 			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
-			* @param fe holds the time since the last frame
+			* @param timeSinceLastFrame holds the time since the last frame
 			*/
 			virtual bool update(float timeSinceLastFrame);
 
-			float fixedRemainder();
+			float fixedRemainder() const;
 
-			bool isShutdown();
+			bool isShutdown() const;
 
 			float getFPS();
 
-			void addFrameListener(FrameListener *listener);
-			void removeFrameListener(FrameListener *listener);
+			void addFrameListener(FrameListener* listener);
+			void removeFrameListener(FrameListener* listener);
 
-			virtual KeyValueMapList maps() override;
+			KeyValueMapList maps() override;
 
 			bool singleFrame(float timeSinceLastFrame);
 
-			using Singleton<Application>::getSingleton;
-			using Singleton<Application>::getSingletonPtr;
+			using Engine::Singleton<Application>::getSingleton;
+			using Engine::Singleton<Application>::getSingletonPtr;
 
 		protected:
 			virtual void _clear();
-			
-			virtual bool fixedUpdate(float timeStep);			
+
+			virtual bool fixedUpdate(float timeStep);
 
 			bool sendFrameStarted(float timeSinceLastFrame);
 			bool sendFrameRenderingQueued(float timeSinceLastFrame);
@@ -121,7 +125,7 @@ namespace Engine {
 
 			bool mShutDown;
 
-			SignalSlot::ConnectionManager mConnectionManager;	
+			SignalSlot::ConnectionManager mConnectionManager;
 
 			Scripting::GlobalAPICollector mGlobalAPIs;
 
@@ -132,13 +136,6 @@ namespace Engine {
 			std::list<FrameListener*> mListeners;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
-
 		};
-
 	}
-
-
-
-
 }
-

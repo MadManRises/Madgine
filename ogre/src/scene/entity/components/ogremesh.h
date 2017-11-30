@@ -3,27 +3,29 @@
 #include "scene/entity/entitycomponent.h"
 #include "serialize/container/serializedmapper.h"
 
-namespace Engine {
-	namespace Scene {
-		namespace Entity {
-
-			class OGREMADGINE_EXPORT Mesh : public EntityComponent<Mesh> {
-
+namespace Engine
+{
+	namespace Scene
+	{
+		namespace Entity
+		{
+			class OGREMADGINE_EXPORT Mesh : public EntityComponent<Mesh>
+			{
 			public:
-				Mesh(Entity &entity, const Scripting::LuaTable &table);
-				Mesh(Entity &entity, const std::string &meshName = "");
+				Mesh(Entity& entity, const Scripting::LuaTable& table);
+				Mesh(Entity& entity, const std::string& meshName = "");
 				virtual ~Mesh();
 
-				virtual void init() override;
-				virtual void finalize() override;
+				void init() override;
+				void finalize() override;
 
 
-				Ogre::Entity *getMesh();
+				Ogre::Entity* getMesh() const;
 
 				Vector3 getCenter() const;
 
 				std::string getName() const;
-				void setName(const std::string &mesh);
+				void setName(const std::string& mesh);
 
 				bool isVisible() const;
 				void setVisible(bool b);
@@ -31,9 +33,10 @@ namespace Engine {
 				void destroyObject();
 
 			private:
-				Transform *mTransform;
-				Ogre::Entity *mObject;
-				Engine::Serialize::SerializedMapper<decltype(&Mesh::getName), &Mesh::getName, decltype(&Mesh::setName), &Mesh::setName> mSerializedObject;
+				Transform* mTransform;
+				Ogre::Entity* mObject;
+				Serialize::SerializedMapper<decltype(&Mesh::getName), &Mesh::getName, decltype(&Mesh::setName), &Mesh::setName>
+				mSerializedObject;
 			};
 		}
 	}

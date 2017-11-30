@@ -1,16 +1,17 @@
-
 #include "interfaceslib.h"
 #include "connectionstore.h"
 #include "connection.h"
 
-namespace Engine {
-	namespace SignalSlot {
-
-		std::shared_ptr<ConnectionBase> ConnectionStore::make_shared_connection(ConnectionBase * conn) {
+namespace Engine
+{
+	namespace SignalSlot
+	{
+		std::shared_ptr<ConnectionBase> ConnectionStore::make_shared_connection(ConnectionBase* conn)
+		{
 			return std::shared_ptr<ConnectionBase>(conn);
 		}
 
-		void ConnectionStore::disconnect(const const_iterator & where)
+		void ConnectionStore::disconnect(const const_iterator& where)
 		{
 			mConnections.erase(where);
 		}
@@ -20,7 +21,7 @@ namespace Engine {
 			mConnections.clear();
 		}
 
-		ConnectionStore & ConnectionStore::globalStore()
+		ConnectionStore& ConnectionStore::globalStore()
 		{
 			static ConnectionStore store;
 			return store;
@@ -40,24 +41,26 @@ namespace Engine {
 
 		void ConnectionManager::update()
 		{
-			while (!mQueue.empty() && mMutex.try_lock()) {
-				std::function<void()> f = std::move(mQueue.front());
+			while (!mQueue.empty() && mMutex.try_lock())
+			{
+				std::function<void()> f = move(mQueue.front());
 				mQueue.pop();
 				mMutex.unlock();
-				try {
+				try
+				{
 					f();
 				}
-				catch (const std::exception &e) {
+				catch (const std::exception& e)
+				{
 					LOG_ERROR("Unhandled Exception during Connection-Dispatching!");
 					LOG_EXCEPTION(e);
 				}
 			}
 		}
 
-		std::thread::id ConnectionManager::thread()
+		std::thread::id ConnectionManager::thread() const
 		{
 			return mThread;
 		}
-
 	}
 }

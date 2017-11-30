@@ -2,58 +2,67 @@
 
 #include "windowclass.h"
 
-namespace Engine {
-	namespace GUI {
-
+namespace Engine
+{
+	namespace GUI
+	{
 		template <class T>
-		struct ClassId {
-
+		struct ClassId
+		{
 		};
 
 		template <>
-		struct ClassId<Window> {
+		struct ClassId<Window>
+		{
 			static constexpr Class id = Class::WINDOW_CLASS;
 		};
 
 		template <>
-		struct ClassId<TextureDrawer> {
+		struct ClassId<TextureDrawer>
+		{
 			static constexpr Class id = Class::TEXTUREDRAWER_CLASS;
 		};
 
 		template <>
-		struct ClassId<Combobox> {
+		struct ClassId<Combobox>
+		{
 			static constexpr Class id = Class::COMBOBOX_CLASS;
 		};
 
 		template <>
-		struct ClassId<TabWindow> {
+		struct ClassId<TabWindow>
+		{
 			static constexpr Class id = Class::TABWINDOW_CLASS;
 		};
 
 		template <>
-		struct ClassId<Checkbox> {
+		struct ClassId<Checkbox>
+		{
 			static constexpr Class id = Class::CHECKBOX_CLASS;
 		};
 
 		template <>
-		struct ClassId<Textbox> {
+		struct ClassId<Textbox>
+		{
 			static constexpr Class id = Class::TEXTBOX_CLASS;
 		};
 
 		template <>
-		struct ClassId<Button> {
+		struct ClassId<Button>
+		{
 			static constexpr Class id = Class::BUTTON_CLASS;
 		};
 
 		template <>
-		struct ClassId<Label> {
+		struct ClassId<Label>
+		{
 			static constexpr Class id = Class::LABEL_CLASS;
 		};
 
 		template <>
-		struct ClassId<Bar> {
+		struct ClassId<Bar>
+		{
 			static constexpr Class id = Class::BAR_CLASS;
 		};
-
 	}
 }

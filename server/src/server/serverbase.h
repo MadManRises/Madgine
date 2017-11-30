@@ -7,41 +7,46 @@
 
 #include "serverappinstance.h"
 
-namespace Engine {
-	namespace Server {
-
-		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::LuaState, public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public MadgineObject {
+namespace Engine
+{
+	namespace Server
+	{
+		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::LuaState,
+		                                         public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>,
+		                                         public MadgineObject
+		{
 		public:
-			ServerBase(const std::string &name, const std::string &scriptsFolder);
+			ServerBase(const std::string& name, const std::string& scriptsFolder);
 
 			int run();
 
-			Util::StandardLog &getLog();
+			Util::StandardLog& getLog();
 
-			const std::string &scriptsFolder();		
+			const std::string& scriptsFolder();
 
 			void shutdown();
 
 
-			void addFrameListener(App::FrameListener *listener);
-			void removeFrameListener(App::FrameListener *listener);
+			void addFrameListener(App::FrameListener* listener);
+			void removeFrameListener(App::FrameListener* listener);
 
 		protected:
 			virtual bool frame() = 0;
 			virtual void start() = 0;
 			virtual void stop() = 0;
 
-			virtual bool performCommand(const std::string &cmd);
+			virtual bool performCommand(const std::string& cmd);
 
 			template <class T>
-			void spawnInstance(T &&init) {
+			void spawnInstance(T&& init)
+			{
 				mInstances.emplace_back(std::forward<T>(init), createThread());
 			}
 
 			bool sendFrameStarted();
 			bool sendFrameEnded();
 
-			virtual KeyValueMapList maps() override;
+			KeyValueMapList maps() override;
 
 		private:
 			SignalSlot::ConnectionManager mConnectionManager;
@@ -55,8 +60,6 @@ namespace Engine {
 			std::list<ServerAppInstance> mInstances;
 
 			std::list<App::FrameListener*> mListeners;
-
 		};
-
 	}
 }

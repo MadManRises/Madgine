@@ -2,9 +2,10 @@
 
 #include "window.h"
 
-namespace Engine {
-	namespace GUI {
-
+namespace Engine
+{
+	namespace GUI
+	{
 		class Checkbox : public Window
 		{
 		public:
@@ -14,6 +15,5 @@ namespace Engine {
 			virtual bool isChecked() = 0;
 			virtual void setChecked(bool b) = 0;
 		};
-
 	}
 }

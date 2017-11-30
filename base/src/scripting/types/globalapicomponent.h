@@ -4,14 +4,13 @@
 #include "globalapicomponentbase.h"
 #include "scripting/types/scope.h"
 
-namespace Engine {
-	namespace Scripting {
-
+namespace Engine
+{
+	namespace Scripting
+	{
 		using GlobalAPICollector = BaseUniqueComponentCollector<GlobalAPIComponentBase>;
-	
+
 		template <class T>
 		using GlobalAPIComponent = Scope<T, UniqueComponent<T, GlobalAPICollector>>;
-
-
 	}
 }

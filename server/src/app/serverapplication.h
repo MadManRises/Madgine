@@ -3,36 +3,37 @@
 #include "app/application.h"
 #include "servertimer.h"
 
-namespace Engine {
-	namespace App {
-
-		class MADGINE_SERVER_EXPORT ServerApplication : public Application {
+namespace Engine
+{
+	namespace App
+	{
+		class MADGINE_SERVER_EXPORT ServerApplication : public Application
+		{
 		public:
-			ServerApplication(const Scripting::LuaTable &table = {});
+			ServerApplication(const Scripting::LuaTable& table = {});
 			virtual ~ServerApplication();
 
-			void setup(const ServerAppSettings &settings);
+			void setup(const ServerAppSettings& settings);
 
 			// Inherited via Application
-			virtual int go() override;
+			int go() override;
 
-			virtual bool init() override;
+			bool init() override;
 
-			virtual void finalize() override;
+			void finalize() override;
 
-			virtual KeyValueMapList maps() override;
+			KeyValueMapList maps() override;
 
 		protected:
 
-			virtual bool fixedUpdate(float timeStep) override;
-			virtual bool update(float timeSinceLastFrame) override;
+			bool fixedUpdate(float timeStep) override;
+			bool update(float timeSinceLastFrame) override;
 
 
 		private:
-			Scene::ServerSceneManager *mSceneManager;
+			Scene::ServerSceneManager* mSceneManager;
 			ServerTimer mTimer;
-			const ServerAppSettings *mSettings;
+			const ServerAppSettings* mSettings;
 		};
-
 	}
 }

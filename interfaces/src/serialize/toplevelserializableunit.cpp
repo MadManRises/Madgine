@@ -6,57 +6,61 @@
 
 #include "serializemanager.h"
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId) :
 			SerializableUnitBase(staticId),
-			mSlaveManager(0),
+			mSlaveManager(nullptr),
 			mStaticSlaveId(staticId)
 		{
 		}
 
-		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase & other) :
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase& other) :
 			SerializableUnitBase(other),
-			mSlaveManager(0),
+			mSlaveManager(nullptr),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
 		}
 
-		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase && other) :
+		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase&& other) noexcept :
 			SerializableUnitBase(std::forward<TopLevelSerializableUnitBase>(other)),
-			mSlaveManager(0),
+			mSlaveManager(nullptr),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
-			while (!other.mMasterManagers.empty()) {
+			while (!other.mMasterManagers.empty())
+			{
 				other.mMasterManagers.front()->moveTopLevelItem(&other, this);
 			}
-			if (other.mSlaveManager) {
+			if (other.mSlaveManager)
+			{
 				other.mSlaveManager->moveTopLevelItem(&other, this);
 			}
 		}
 
 
-
 		TopLevelSerializableUnitBase::~TopLevelSerializableUnitBase()
 		{
-			if (mSlaveManager) {
+			if (mSlaveManager)
+			{
 				mSlaveManager->removeTopLevelItem(this);
 			}
-			while (!mMasterManagers.empty()) {
+			while (!mMasterManagers.empty())
+			{
 				mMasterManagers.front()->removeTopLevelItem(this);
 			}
 		}
 
-		void TopLevelSerializableUnitBase::copyStaticSlaveId(const TopLevelSerializableUnitBase & other)
+		void TopLevelSerializableUnitBase::copyStaticSlaveId(const TopLevelSerializableUnitBase& other)
 		{
 			mStaticSlaveId = other.mStaticSlaveId;
 		}
 
-		bool TopLevelSerializableUnitBase::isMaster() const
+		/*bool TopLevelSerializableUnitBase::isMaster() const
 		{
-			return mSlaveManager == 0;
-		}
+			return mSlaveManager == nullptr;
+		}*/
 
 		ParticipantId TopLevelSerializableUnitBase::getLocalMasterParticipantId()
 		{
@@ -78,7 +82,7 @@ namespace Engine {
 			setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
 		}
 
-		size_t TopLevelSerializableUnitBase::readId(SerializeInStream & in)
+		size_t TopLevelSerializableUnitBase::readId(SerializeInStream& in)
 		{
 			mStaticSlaveId = SerializableUnitBase::readId(in);
 			return mStaticSlaveId;
@@ -87,81 +91,86 @@ namespace Engine {
 		std::set<BufferedOutStream*, CompareStreamId> TopLevelSerializableUnitBase::getMasterMessageTargets()
 		{
 			std::set<BufferedOutStream*, CompareStreamId> result;
-			for (SerializeManager *mgr : mMasterManagers) {
-				const std::set<BufferedOutStream*, CompareStreamId> &targets = mgr->getMasterMessageTargets();
+			for (SerializeManager* mgr : mMasterManagers)
+			{
+				const std::set<BufferedOutStream*, CompareStreamId>& targets = mgr->getMasterMessageTargets();
 				std::set<BufferedOutStream*, CompareStreamId> temp;
-				std::set_union(result.begin(), result.end(), targets.begin(), targets.end(), std::inserter(temp, temp.begin()), CompareStreamId{});
+				set_union(result.begin(), result.end(), targets.begin(), targets.end(), inserter(temp, temp.begin()),
+				          CompareStreamId{});
 				temp.swap(result);
 			}
 			return result;
 		}
 
-	BufferedOutStream * TopLevelSerializableUnitBase::getSlaveMessageTarget() const
-	{
-		if (mSlaveManager) {
-			return mSlaveManager->getSlaveMessageTarget();
+		BufferedOutStream* TopLevelSerializableUnitBase::getSlaveMessageTarget() const
+		{
+			if (mSlaveManager)
+			{
+				return mSlaveManager->getSlaveMessageTarget();
+			}
+			return nullptr;
 		}
-		return nullptr;
-	}
 
-	const std::list<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers() const
-	{
-		return mMasterManagers;
-	}
+		const std::list<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers() const
+		{
+			return mMasterManagers;
+		}
 
-	SerializeManager * TopLevelSerializableUnitBase::getSlaveManager() const
-	{
-		return mSlaveManager;
-	}
+		SerializeManager* TopLevelSerializableUnitBase::getSlaveManager() const
+		{
+			return mSlaveManager;
+		}
 
-bool TopLevelSerializableUnitBase::addManager(SerializeManager * mgr)
-{
-	if (mgr->isMaster()) {
-		mMasterManagers.push_back(mgr);
-	}
-	else {
-		if (mSlaveManager)
-			return false;
-		mSlaveManager = mgr;
-	}
-	return true;
-}
+		bool TopLevelSerializableUnitBase::addManager(SerializeManager* mgr)
+		{
+			if (mgr->isMaster())
+			{
+				mMasterManagers.push_back(mgr);
+			}
+			else
+			{
+				if (mSlaveManager)
+					return false;
+				mSlaveManager = mgr;
+			}
+			return true;
+		}
 
-void TopLevelSerializableUnitBase::removeManager(SerializeManager * mgr)
-{
+		void TopLevelSerializableUnitBase::removeManager(SerializeManager* mgr)
+		{
+			if (mgr->isMaster())
+			{
+				size_t check = mMasterManagers.size();
+				mMasterManagers.remove(mgr);
+				assert(mMasterManagers.size() == check - 1);
+			}
+			else
+			{
+				assert(mSlaveManager == mgr);
+				mSlaveManager = nullptr;
+			}
+		}
 
-	if (mgr->isMaster()) {
-		size_t check = mMasterManagers.size();
-		mMasterManagers.remove(mgr);
-		assert(mMasterManagers.size() == check - 1);
-	}
-	else {
-		assert(mSlaveManager == mgr);
-		mSlaveManager = 0;
+		bool TopLevelSerializableUnitBase::updateManagerType(SerializeManager* mgr, bool isMaster)
+		{
+			if (isMaster)
+			{
+				removeManager(mgr);
+				mMasterManagers.push_back(mgr);
+			}
+			else
+			{
+				if (mSlaveManager)
+					return false;
+				removeManager(mgr);
+				mSlaveManager = mgr;
+			}
+			return true;
+		}
 
-	}
-}
-
-bool TopLevelSerializableUnitBase::updateManagerType(SerializeManager *mgr, bool isMaster)
-{
-	if (isMaster) {
-		removeManager(mgr);
-		mMasterManagers.push_back(mgr);
-	}
-	else {
-		if (mSlaveManager)
-			return false;
-		removeManager(mgr);
-		mSlaveManager = mgr;
-	}
-	return true;
-}
-
-const TopLevelSerializableUnitBase * TopLevelSerializableUnitBase::topLevel() const
-{
-	return this;
-}
-
-} // namespace Serialize
+		const TopLevelSerializableUnitBase* TopLevelSerializableUnitBase::topLevel() const
+		{
+			return this;
+		}
+	} // namespace Serialize
 } // namespace Core
-

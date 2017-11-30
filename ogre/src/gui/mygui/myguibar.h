@@ -2,14 +2,17 @@
 #include "gui/windows/bar.h"
 
 
-namespace MyGUI {
+namespace MyGUI
+{
 	class ProgressBar;
 }
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
 			class MyGUIWindow;
 
 
@@ -17,16 +20,14 @@ namespace Engine {
 				public Bar
 			{
 			public:
-				MyGUIBar(MyGUIWindow *w);
+				MyGUIBar(MyGUIWindow* w);
 
 				// Inherited via Bar
-				virtual void setRatio(float f) override;
+				void setRatio(float f) override;
 
 			private:
-				MyGUI::ProgressBar *mBar;
+				MyGUI::ProgressBar* mBar;
 			};
 		}
 	}
 }
-
-

@@ -7,50 +7,52 @@
 
 #include "scripting/types/globalscopebase.h"
 
-extern "C" {
+extern "C"
+{
 #include <lua.h>                                /* Always include this when calling Lua */
 #include <lauxlib.h>                            /* Always include this when calling Lua */
 #include <lualib.h>                             /* Always include this when calling Lua */
 }
 
-namespace Engine {
-	namespace Scripting {
-
-		LuaState *LuaState::sSingleton = nullptr;
+namespace Engine
+{
+	namespace Scripting
+	{
+		LuaState* LuaState::sSingleton = nullptr;
 
 		const luaL_Reg LuaState::sScopeMetafunctions[] =
 		{
-			{ "__index", &lua_indexScope },
-			{ "__pairs", &lua_pairsScope },
-			{ NULL, NULL }
+			{"__index", &lua_indexScope},
+			{"__pairs", &lua_pairsScope},
+			{nullptr, nullptr}
 		};
 
 		const luaL_Reg LuaState::sGlobalMetafunctions[] =
 		{
-			{ "__newindex", &lua_newindexGlobal },
-			{ NULL, NULL }
+			{"__newindex", &lua_newindexGlobal},
+			{nullptr, nullptr}
 		};
 
 		const luaL_Reg LuaState::sEnvMetafunctions[] =
 		{
-			{ "__index", &lua_indexEnv },
-			{ "__newindex", &lua_newindexEnv },
-			{ "__pairs", &lua_pairsEnv },
-			{ "__tostring", &lua_tostringEnv },
-			{ NULL, NULL }
+			{"__index", &lua_indexEnv},
+			{"__newindex", &lua_newindexEnv},
+			{"__pairs", &lua_pairsEnv},
+			{"__tostring", &lua_tostringEnv},
+			{nullptr, nullptr}
 		};
 
 		const luaL_Reg LuaState::sGlobalScopeMetafunctions[] =
 		{
-			{ "__index", &lua_indexGlobalScope },
-			{ "__pairs", &lua_pairsScope },
-			{ NULL, NULL }
+			{"__index", &lua_indexGlobalScope},
+			{"__pairs", &lua_pairsScope},
+			{nullptr, nullptr}
 		};
 
 
 		LuaState::LuaState() :
 			mFinalized(false)
-			{
+		{
 			assert(!sSingleton);
 			sSingleton = this;
 
@@ -90,7 +92,8 @@ namespace Engine {
 			mEnv.setMetatable(tempMetatable);
 		}
 
-		LuaState::~LuaState() {
+		LuaState::~LuaState()
+		{
 			mGlobal.clear();
 			mRegistry.clear();
 			mEnv.clear();
@@ -107,64 +110,67 @@ namespace Engine {
 			mFinalized = true;
 		}
 
-		bool LuaState::isFinalized()
+		bool LuaState::isFinalized() const
 		{
 			return mFinalized;
 		}
 
 
-		void LuaState::executeString(lua_State *state, const std::string & cmd)
+		void LuaState::executeString(lua_State* state, const std::string& cmd)
 		{
-			if (luaL_loadstring(state, cmd.c_str())) {
+			if (luaL_loadstring(state, cmd.c_str()))
+			{
 				LOG_ERROR(lua_tostring(state, -1));
 				return;
 			}
 			mEnv.push(state);
 			lua_setupvalue(state, -2, 1);
 
-			if (lua_pcall(state, 0, LUA_MULTRET, 0)) {
+			if (lua_pcall(state, 0, LUA_MULTRET, 0))
+			{
 				LOG_ERROR(lua_tostring(state, -1));
 			}
 		}
 
 
-		LuaTable LuaState::createThread() {
+		LuaTable LuaState::createThread()
+		{
 			assert(mFinalized);
 
 
-			lua_State *thread = lua_newthread(mState);
+			lua_State* thread = lua_newthread(mState);
 
 			mThreads[thread] = luaL_ref(mState, LUA_REGISTRYINDEX);
 
 			return mRegistry.createTable(thread);
 		}
 
-		int LuaState::pushThread(lua_State * state, lua_State * thread)
+		int LuaState::pushThread(lua_State* state, lua_State* thread)
 		{
 			lua_rawgeti(state, LUA_REGISTRYINDEX, mThreads.at(thread));
 
 			return 1;
 		}
 
-		LuaState & LuaState::getSingleton()
+		LuaState& LuaState::getSingleton()
 		{
 			assert(sSingleton);
 			return *sSingleton;
 		}
 
-		LuaTable LuaState::env()
+		LuaTable LuaState::env() const
 		{
 			return mEnv;
 		}
 
-		lua_State * LuaState::state()
+		lua_State* LuaState::state() const
 		{
 			return mState;
 		}
 
-		int LuaState::lua_indexScope(lua_State *state) {
-
-			ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
+		int LuaState::lua_indexScope(lua_State* state)
+		{
+			ScopeBase* scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 			std::string key = lua_tostring(state, -1);
 
@@ -173,25 +179,26 @@ namespace Engine {
 			std::pair<bool, ValueType> p = scope->get(key);
 			if (!p.first)
 				return 0;
-			else {
-				p.second.push(state);
-				return 1;
-			}
+			p.second.push(state);
+			return 1;
 		}
 
-		int LuaState::lua_newindexGlobal(lua_State *state) {
+		int LuaState::lua_newindexGlobal(lua_State* state)
+		{
 			return luaL_error(state, "Trying to modify read-only Global");
 		}
 
-		int LuaState::lua_indexGlobalScope(lua_State *state) {
-			ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
+		int LuaState::lua_indexGlobalScope(lua_State* state)
+		{
+			ScopeBase* scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 			std::string key = lua_tostring(state, -1);
 
 			lua_pop(state, 2);
 
 			std::pair<bool, ValueType> p = scope->get(key);
-			if (p.first) {
+			if (p.first)
+			{
 				p.second.push(state);
 				return 1;
 			}
@@ -200,7 +207,7 @@ namespace Engine {
 			return 1;
 		}
 
-		int LuaState::lua_pairsScope(lua_State * state)
+		int LuaState::lua_pairsScope(lua_State* state)
 		{
 			if (lua_gettop(state) != 1 || !lua_istable(state, -1))
 				luaL_error(state, "illegal Call to __pairs!");
@@ -212,28 +219,32 @@ namespace Engine {
 			return 2;
 		}
 
-		int LuaState::lua_nextScope(lua_State * state)
+		int LuaState::lua_nextScope(lua_State* state)
 		{
 			lua_settop(state, 2);
 
-			ScopeBase *scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
+			ScopeBase* scope = ValueType::fromStack(state, -2).as<ScopeBase*>();
 
 			assert(scope);
 
 			std::shared_ptr<KeyValueIterator> it;
 
-			if (lua_isnil(state, -1)) {
+			if (lua_isnil(state, -1))
+			{
 				lua_pop(state, 1);
 				it = scope->iterator();
 				ValueType(it).push(state);
 			}
-			else if (lua_isuserdata(state, -1)) {
+			else if (lua_isuserdata(state, -1))
+			{
 				it = ValueType::fromStack(state, -1).as<std::shared_ptr<KeyValueIterator>>();
 				++(*it);
 			}
 
-			if (it) {
-				if (!it->ended()) {
+			if (it)
+			{
+				if (!it->ended())
+				{
 					return 1 + it->value().push(state);
 				}
 				lua_pop(state, 1);
@@ -246,14 +257,13 @@ namespace Engine {
 			return 2;
 		}
 
-		int LuaState::lua_newindexEnv(lua_State * state)
+		int LuaState::lua_newindexEnv(lua_State* state)
 		{
 			pushGlobalScope(state);
 			lua_replace(state, -4);
 			lua_settable(state, -3);
 			return 1;
 		}
-
 
 
 		/*void stackdump_g(lua_State* l)
@@ -283,7 +293,7 @@ namespace Engine {
 			}
 		}*/
 
-		int LuaState::lua_indexEnv(lua_State * state)
+		int LuaState::lua_indexEnv(lua_State* state)
 		{
 			pushGlobalScope(state);
 			lua_replace(state, -3);
@@ -292,7 +302,7 @@ namespace Engine {
 			return 1;
 		}
 
-		int LuaState::lua_pairsEnv(lua_State * state)
+		int LuaState::lua_pairsEnv(lua_State* state)
 		{
 			lua_pop(state, 1);
 			lua_pushcfunction(state, &lua_nextScope);
@@ -300,19 +310,18 @@ namespace Engine {
 			return 2;
 		}
 
-		int LuaState::lua_tostringEnv(lua_State * state)
+		int LuaState::lua_tostringEnv(lua_State* state)
 		{
 			pushGlobalScope(state);
 			lua_replace(state, -2);
-			luaL_tolstring(state, -1, NULL);
+			luaL_tolstring(state, -1, nullptr);
 			return 1;
 		}
 
-		void LuaState::pushGlobalScope(lua_State * state)
+		void LuaState::pushGlobalScope(lua_State* state)
 		{
-			GlobalScopeBase::getSingleton().push(); //TODO maybe assert state
+			assert(GlobalScopeBase::getSingleton().lua_state() == state);
+			GlobalScopeBase::getSingleton().push();
 		}
-
-
 	}
 }

@@ -2,33 +2,35 @@
 
 #include "streams/serializestream.h"
 
-namespace Engine {
-		namespace Serialize {
+namespace Engine
+{
+	namespace Serialize
+	{
+		class INTERFACES_EXPORT Observable
+		{
+		public:
+			virtual ~Observable() = default;
 
-			class INTERFACES_EXPORT Observable {
-			public:
-				virtual void readRequest(BufferedInOutStream &in) = 0;
-				virtual void readAction(SerializeInStream &in) = 0;
+			virtual void readRequest(BufferedInOutStream& in) = 0;
+			virtual void readAction(SerializeInStream& in) = 0;
 
-			protected:
-				Observable();		
+		protected:
+			Observable();
 
-				BufferedOutStream *getSlaveActionMessageTarget() const;
-				std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(const std::set<ParticipantId> &targets = {}) const;
+			BufferedOutStream* getSlaveActionMessageTarget() const;
+			std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
+				const std::set<ParticipantId>& targets = {}) const;
 
-				void beginActionResponseMessage(BufferedOutStream *stream);
+			void beginActionResponseMessage(BufferedOutStream* stream) const;
 
-				ParticipantId id();
-				bool isMaster() const;
+			ParticipantId id() const;
+			bool isMaster() const;
 
-				SerializableUnitBase *parent();
+			SerializableUnitBase* parent() const;
 
-			private:		
-				SerializableUnitBase *mUnit;
-				size_t mIndex;
-
-				
-			};
-
-		}
+		private:
+			SerializableUnitBase* mUnit;
+			size_t mIndex;
+		};
+	}
 }

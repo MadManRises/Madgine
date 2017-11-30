@@ -2,30 +2,25 @@
 
 #include "scopebase.h"
 
-namespace Engine {
-namespace Scripting {
+namespace Engine
+{
+	namespace Scripting
+	{
+		class INTERFACES_EXPORT GlobalScopeBase : public Singleton<GlobalScopeBase>, public ScopeBase
+		{
+		public:
+			GlobalScopeBase(const LuaTable& table);
 
+			void executeString(const std::string& cmd);
 
-class INTERFACES_EXPORT GlobalScopeBase : public Singleton<GlobalScopeBase>, public ScopeBase {
+			lua_State* lua_state() const;
 
-public:
-	GlobalScopeBase(const LuaTable &table);
+			LuaTable createTable();
+			LuaTable table() const;
 
-	void executeString(const std::string &cmd);
-
-	lua_State *lua_state();
-
-	LuaTable createTable();
-	LuaTable table();
-
-private:
-	LuaTable mTable;
-	LuaTable mScopes;
-
-};
-
+		private:
+			LuaTable mTable;
+			LuaTable mScopes;
+		};
+	}
 }
-}
-
-
-

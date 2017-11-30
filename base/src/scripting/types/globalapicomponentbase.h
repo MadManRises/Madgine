@@ -1,22 +1,22 @@
 #pragma once
 
 #include "madgineobject.h"
+#include "scripting/types/scopebase.h"
 
-
-namespace Engine {
-	namespace Scripting {
-
-		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject, public Scripting::ScopeBase{
-
+namespace Engine
+{
+	namespace Scripting
+	{
+		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject, public ScopeBase
+		{
 		public:
-			virtual bool init() override;
-			virtual void finalize() override;
+			bool init() override;
+			void finalize() override;
 
 			virtual void clear();
 			virtual void update();
 
-			virtual const char *key() const = 0;
+			virtual const char* key() const = 0;
 		};
-
 	}
 }

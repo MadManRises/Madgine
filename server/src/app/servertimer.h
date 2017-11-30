@@ -1,9 +1,10 @@
 #pragma once
 
 
-namespace Engine {
-	namespace App {
-
+namespace Engine
+{
+	namespace App
+	{
 		class ServerTimer
 		{
 		public:
@@ -14,25 +15,24 @@ namespace Engine {
 
 			ServerTimer(unit UN);
 
-			void start(void);
-			void reset(void);
-			void endex(void);
+			void start();
+			void reset();
+			void endex();
 			//------------------------------------------------------------------------------
-			void delay(std::size_t duration);
-			static void delay(std::size_t duration, ServerTimer::unit type);
-			static std::size_t current_time(void);
+			void delay(size_t duration);
+			static void delay(size_t duration, unit type);
+			static size_t current_time();
 			//------------------------------------------------------------------------------
-			std::size_t elapsed_xx(ServerTimer::unit type);
+			size_t elapsed_xx(unit type);
 			//------------------------------------------------------------------------------
-			std::size_t elapsed_ms(void);
-			std::size_t elapsed_us(void);
-			std::size_t elapsed_ns(void);
+			size_t elapsed_ms();
+			size_t elapsed_us();
+			size_t elapsed_ns();
 
 		private:
 			bool m_running;
 			std::chrono::time_point<std::chrono::steady_clock> m_start;
 			std::chrono::time_point<std::chrono::steady_clock> m_endex;
 		};
-
 	}
 }

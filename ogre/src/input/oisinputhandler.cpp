@@ -3,9 +3,11 @@
 #include "gui/guisystem.h"
 #include "gui/guievents.h"
 
-namespace Engine {
-	namespace Input {
-		OISInputHandler::OISInputHandler(GUI::GUISystem * gui, Ogre::RenderWindow *window) :
+namespace Engine
+{
+	namespace Input
+	{
+		OISInputHandler::OISInputHandler(GUI::GUISystem* gui, Ogre::RenderWindow* window) :
 			mGUI(gui),
 			mWindow(window)
 		{
@@ -16,7 +18,7 @@ namespace Engine {
 
 			window->getCustomAttribute("WINDOW", &windowHnd);
 			windowHndStr << windowHnd;
-			pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
+			pl.insert(make_pair(std::string("WINDOW"), windowHndStr.str()));
 
 			/*    pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND")));
 			pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));*/
@@ -34,8 +36,7 @@ namespace Engine {
 			Ogre::WindowEventUtilities::addWindowEventListener(window, this);
 
 			//Set initial mouse clipping size
-			windowResized(window);
-
+			OISInputHandler::windowResized(window);
 		}
 
 		OISInputHandler::~OISInputHandler()
@@ -45,85 +46,93 @@ namespace Engine {
 
 		GUI::MouseButton::MouseButton OISInputHandler::convertMouseButton(OIS::MouseButtonID id)
 		{
-			switch (id) {
+			switch (id)
+			{
 			case OIS::MB_Left:
 				return GUI::MouseButton::LEFT_BUTTON;
-				break;
 			case OIS::MB_Right:
 				return GUI::MouseButton::RIGHT_BUTTON;
-				break;
 			case OIS::MB_Middle:
 				return GUI::MouseButton::MIDDLE_BUTTON;
-				break;
 			default:
 				throw 0;
 			}
 		}
 
-		bool OISInputHandler::keyPressed(const OIS::KeyEvent &arg)
+		bool OISInputHandler::keyPressed(const OIS::KeyEvent& arg)
 		{
-			mGUI->injectKeyPress({ (GUI::Key)arg.key, (char)arg.text });
+			mGUI->injectKeyPress({static_cast<GUI::Key>(arg.key), static_cast<char>(arg.text)});
 			return true;
 		}
 
-		bool OISInputHandler::keyReleased(const OIS::KeyEvent &arg)
+		bool OISInputHandler::keyReleased(const OIS::KeyEvent& arg)
 		{
-			mGUI->injectKeyRelease({ (GUI::Key)arg.key });
+			mGUI->injectKeyRelease({static_cast<GUI::Key>(arg.key)});
 			return true;
 		}
 
-		bool OISInputHandler::mousePressed(const OIS::MouseEvent &arg,
-			OIS::MouseButtonID id)
+		bool OISInputHandler::mousePressed(const OIS::MouseEvent& arg,
+		                                   OIS::MouseButtonID id)
 		{
-			mGUI->injectMousePress({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, convertMouseButton(id) });
+			mGUI->injectMousePress({
+				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
+				convertMouseButton(id)
+			});
 			return true;
 		}
 
-		bool OISInputHandler::mouseMoved(const OIS::MouseEvent &arg)
+		bool OISInputHandler::mouseMoved(const OIS::MouseEvent& arg)
 		{
-			mGUI->injectMouseMove({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, std::array<float, 2>{ {static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)}}, arg.state.Z.rel / 120.0f });
+			mGUI->injectMouseMove({
+				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
+				std::array<float, 2>{
+					{static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)}
+				},
+				arg.state.Z.rel / 120.0f
+			});
 			return true;
 		}
 
-		bool OISInputHandler::mouseReleased(const OIS::MouseEvent &arg,
-			OIS::MouseButtonID id)
+		bool OISInputHandler::mouseReleased(const OIS::MouseEvent& arg,
+		                                    OIS::MouseButtonID id)
 		{
-			mGUI->injectMouseRelease({ std::array<float, 2>{ {static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}}, convertMouseButton(id) });
+			mGUI->injectMouseRelease({
+				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
+				convertMouseButton(id)
+			});
 			return true;
 		}
 
 		void OISInputHandler::update()
 		{
-
 			//Need to capture/update each device
 			mKeyboard->capture();
 			mMouse->capture();
-
 		}
 
-		void OISInputHandler::windowResized(Ogre::RenderWindow *rw)
+		void OISInputHandler::windowResized(Ogre::RenderWindow* rw)
 		{
 			unsigned int width, height, depth;
 			int left, top;
 			rw->getMetrics(width, height, depth, left, top);
 
-			const OIS::MouseState &ms = mMouse->getMouseState();
+			const OIS::MouseState& ms = mMouse->getMouseState();
 			ms.width = width;
 			ms.height = height;
 
 			mMouseScale = (width / 640.0f + height / 480.0f) / 2;
 		}
 
-		void OISInputHandler::windowClosed(Ogre::RenderWindow *rw)
+		void OISInputHandler::windowClosed(Ogre::RenderWindow* rw)
 		{
-			if (mInputManager) {
+			if (mInputManager)
+			{
 				mInputManager->destroyInputObject(mMouse);
 				mInputManager->destroyInputObject(mKeyboard);
 
 				OIS::InputManager::destroyInputSystem(mInputManager);
-				mInputManager = 0;
+				mInputManager = nullptr;
 			}
 		}
-
 	}
 }

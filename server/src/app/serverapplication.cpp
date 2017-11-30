@@ -5,23 +5,25 @@
 #include "scene/serverscenemanager.h"
 #include "serialize/container/noparentunit.h"
 
-namespace Engine {
-	namespace App {
-
-		ServerApplication::ServerApplication(const Scripting::LuaTable &table) :
+namespace Engine
+{
+	namespace App
+	{
+		ServerApplication::ServerApplication(const Scripting::LuaTable& table) :
 			Application(table),
-			mSceneManager(nullptr)
+			mSceneManager(nullptr), mSettings(nullptr)
 		{
 		}
 
 		ServerApplication::~ServerApplication()
 		{
-			if (mSceneManager) {
+			if (mSceneManager)
+			{
 				delete mSceneManager;
 			}
 		}
 
-		void ServerApplication::setup(const ServerAppSettings & settings)
+		void ServerApplication::setup(const ServerAppSettings& settings)
 		{
 			mSettings = &settings;
 
@@ -36,7 +38,8 @@ namespace Engine {
 
 			bool run = true;
 			mTimer.reset();
-			while (run) {
+			while (run)
+			{
 				float timeSinceLastFrame = mTimer.elapsed_us() / 1000000.0f;
 				mTimer.start();
 				run = singleFrame(timeSinceLastFrame);
@@ -50,12 +53,14 @@ namespace Engine {
 			return Application::init() && mSceneManager->init();
 		}
 
-		void ServerApplication::finalize() {
+		void ServerApplication::finalize()
+		{
 			mSceneManager->finalize();
 			Application::finalize();
 		}
 
-		bool ServerApplication::update(float timeSinceLastFrame) {
+		bool ServerApplication::update(float timeSinceLastFrame)
+		{
 			mSceneManager->update(timeSinceLastFrame, Scene::ContextMask::SceneContext);
 			return Application::update(timeSinceLastFrame);
 		}
@@ -70,6 +75,5 @@ namespace Engine {
 		{
 			return Application::maps().merge(mSceneManager);
 		}
-
 	}
 }

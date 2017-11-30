@@ -1,40 +1,39 @@
 #pragma once
 
-#include "unithelper.h"
-
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template <class T>
-		class NoParentUnit : public T {
+		class NoParentUnit : public T
+		{
 		public:
 			template <class... _Ty>
 			NoParentUnit(_Ty&&... args) :
 				T(std::forward<_Ty>(args)...)
 			{
-				postConstruct();
-				activate();
+				this->postConstruct();
+				this->activate();
 			}
 
-			NoParentUnit(const NoParentUnit<T> &t) :
+			NoParentUnit(const NoParentUnit<T>& t) :
 				T(t)
 			{
-				postConstruct();
-				activate();
+				this->postConstruct();
+				this->activate();
 			}
-			NoParentUnit(NoParentUnit<T> &&t) :
+
+			NoParentUnit(NoParentUnit<T>&& t) noexcept :
 				T(std::forward<NoParentUnit<T>>(t))
 			{
-				postConstruct();
-				activate();
+				this->postConstruct();
+				this->activate();
 			}
 
-			~NoParentUnit() {
-				deactivate();
+			~NoParentUnit()
+			{
+				this->deactivate();
 			}
-
 		};
-
-
 	}
 }

@@ -6,10 +6,11 @@
 
 API_IMPL(Engine::Server::ServerBase, MAP_F(shutdown));
 
-namespace Engine {
-	namespace Server {
-
-		ServerBase::ServerBase(const std::string & name, const std::string &scriptsFolder) :
+namespace Engine
+{
+	namespace Server
+	{
+		ServerBase::ServerBase(const std::string& name, const std::string& scriptsFolder) :
 			Scope(env().createTable()),
 			mLog(name + "-Log"),
 			mName(name),
@@ -28,8 +29,8 @@ namespace Engine {
 
 			start();
 
-			mLog.startConsole(mRunning, [this](const std::string &cmd) {return performCommand(cmd); });
-			
+			mLog.startConsole(mRunning, [this](const std::string& cmd) { return performCommand(cmd); });
+
 			while (sendFrameStarted() && frame() && sendFrameEnded()) std::this_thread::yield();
 
 			stop();
@@ -41,12 +42,12 @@ namespace Engine {
 			return 0;
 		}
 
-		Util::StandardLog & Engine::Server::ServerBase::getLog()
+		Util::StandardLog& ServerBase::getLog()
 		{
 			return mLog;
 		}
 
-		const std::string & ServerBase::scriptsFolder()
+		const std::string& ServerBase::scriptsFolder()
 		{
 			return mScriptParser.rootFolder();
 		}
@@ -62,21 +63,22 @@ namespace Engine {
 			return mRunning;
 		}
 
-		bool ServerBase::performCommand(const std::string & cmd)
+		bool ServerBase::performCommand(const std::string& cmd)
 		{
-			if (cmd == "shutdown") {
+			if (cmd == "shutdown")
+			{
 				shutdown();
 				return true;
 			}
 			return false;
 		}
 
-		void ServerBase::addFrameListener(App::FrameListener * listener)
+		void ServerBase::addFrameListener(App::FrameListener* listener)
 		{
 			mListeners.push_back(listener);
 		}
 
-		void ServerBase::removeFrameListener(App::FrameListener * listener)
+		void ServerBase::removeFrameListener(App::FrameListener* listener)
 		{
 			mListeners.remove(listener);
 		}
@@ -84,11 +86,11 @@ namespace Engine {
 		bool ServerBase::sendFrameStarted()
 		{
 			bool result = true;
-			for (App::FrameListener *listener : mListeners)
+			for (App::FrameListener* listener : mListeners)
 				result &= listener->frameStarted(0);
 			if (!result)
 				return false;
-			for (App::FrameListener *listener : mListeners)
+			for (App::FrameListener* listener : mListeners)
 				result &= listener->frameRenderingQueued(0);
 			return result;
 		}
@@ -96,7 +98,7 @@ namespace Engine {
 		bool ServerBase::sendFrameEnded()
 		{
 			bool result = true;
-			for (App::FrameListener *listener : mListeners)
+			for (App::FrameListener* listener : mListeners)
 				result &= listener->frameEnded(0);
 			return result;
 		}
@@ -105,6 +107,5 @@ namespace Engine {
 		{
 			return Scope::maps().merge(mInstances);
 		}
-
 	}
 }

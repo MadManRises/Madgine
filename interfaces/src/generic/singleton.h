@@ -1,42 +1,45 @@
 #pragma once
 
-namespace Engine {
-
+namespace Engine
+{
 	template <class T>
-	class Singleton {
+	class Singleton
+	{
+	private:
+		Singleton(const Singleton<T>&) = delete;
 
-	private:		
-		Singleton(const Singleton<T> &) = delete;
-
-		Singleton& operator=(const Singleton<T> &) = delete;
+		Singleton& operator=(const Singleton<T>&) = delete;
 
 	protected:
-		Singleton() {
+		Singleton()
+		{
 			assert(!sSingleton);
 			sSingleton = static_cast<T*>(this);
 		}
 
-		~Singleton() {
+		~Singleton()
+		{
 			assert(sSingleton);
 			sSingleton = 0;
 		}
 
 	public:
 
-		static T &getSingleton() {
+		static T& getSingleton()
+		{
 			assert(sSingleton);
 			return *sSingleton;
 		}
 
-		static T *getSingletonPtr() {
+		static T* getSingletonPtr()
+		{
 			return sSingleton;
 		}
 
 	private:
-		static thread_local T * sSingleton;
+		static thread_local T* sSingleton;
 	};
 
 	template <class T>
-	thread_local T *Singleton<T>::sSingleton = nullptr;
-
+	thread_local T* Singleton<T>::sSingleton = nullptr;
 }

@@ -3,18 +3,20 @@
 #include "scene/entity/entitycomponent.h"
 #include "serialize/container/serialized.h"
 
-namespace Engine {
-	namespace Scene {
-		namespace Entity {
-
-			class MADGINE_SERVER_EXPORT Mesh : public EntityComponent<Mesh> {
-
+namespace Engine
+{
+	namespace Scene
+	{
+		namespace Entity
+		{
+			class MADGINE_SERVER_EXPORT Mesh : public EntityComponent<Mesh>
+			{
 			public:
-				Mesh(Entity &entity, const Scripting::LuaTable &table);
-				Mesh(Entity &entity, const std::string &meshName);
+				Mesh(Entity& entity, const Scripting::LuaTable& table);
+				Mesh(Entity& entity, const std::string& meshName);
 				virtual ~Mesh();
 
-				virtual void init() override;
+				void init() override;
 
 
 				Vector3 getCenter() const;
@@ -25,8 +27,8 @@ namespace Engine {
 
 
 			private:
-				Transform *mTransform;
-				Engine::Serialize::Serialized<std::string> mMeshName;				
+				Transform* mTransform;
+				Serialize::Serialized<std::string> mMeshName;
 			};
 		}
 	}

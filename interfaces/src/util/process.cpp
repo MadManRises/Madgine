@@ -1,15 +1,17 @@
 #include "interfaceslib.h"
 #include "process.h"
 
-namespace Engine {
-	namespace Util {
+namespace Engine
+{
+	namespace Util
+	{
 		Process::Process() :
 			mRatio(0.0f)
 		{
-
 		}
 
-		Process::~Process() {
+		Process::~Process()
+		{
 			if (mStepSizes.size() > 0)
 				LOG("Warning: Unfinished Process!");
 		}
@@ -23,14 +25,16 @@ namespace Engine {
 			mRatioChanged.emit(mRatio);
 		}
 
-		void Process::startSubProcess(size_t size, const std::string & name)
+		void Process::startSubProcess(size_t size, const std::string& name)
 		{
-			if (mSubProcessIndices.size() > 0) {
+			if (mSubProcessIndices.size() > 0)
+			{
 				if (mSubProcessIndices.back() >= mSubProcessCounts.back())
 					LOG("Warning: Too many steps!");
 				mStepSizes.push_back(mStepSizes.back() / size);
 			}
-			else {
+			else
+			{
 				mStepSizes.push_back(1.0f / size);
 			}
 			mSubProcessCounts.push_back(size);
@@ -38,11 +42,13 @@ namespace Engine {
 			mSubProcessStarted.emit(name);
 		}
 
-		void Process::endSubProcess() {
+		void Process::endSubProcess()
+		{
 			if (mSubProcessIndices.back() != mSubProcessCounts.back())
 				LOG("Stepcount not matching!");
 			mStepSizes.pop_back();
-			if (mSubProcessCounts.back() == 0) {
+			if (mSubProcessCounts.back() == 0)
+			{
 				mRatio += mStepSizes.back();
 				mRatioChanged.emit(mRatio);
 			}
@@ -52,7 +58,5 @@ namespace Engine {
 			if (mSubProcessIndices.size() > 0)
 				++mSubProcessIndices.back();
 		}
-
 	}
 }
-

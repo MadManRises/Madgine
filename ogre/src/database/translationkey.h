@@ -1,20 +1,19 @@
 #pragma once
 
 
-namespace Engine {
-namespace Database {
+namespace Engine
+{
+	namespace Database
+	{
+		class OGREMADGINE_EXPORT TranslationKey
+		{
+		public:
+			TranslationKey(const std::string& key);
 
+			operator std::string() const;
 
-class OGREMADGINE_EXPORT TranslationKey {
-public:
-    TranslationKey(const std::string &key);
-
-    operator std::string() const;
-
-private:
-    std::string mKey;
-};
-
-}
+		private:
+			std::string mKey;
+		};
+	}
 } // namespace Database
-

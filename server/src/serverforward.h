@@ -1,19 +1,20 @@
 #pragma once
 
-namespace Engine {
-
-	namespace App {
+namespace Engine
+{
+	namespace App
+	{
 		class ServerApplication;
 		struct ServerAppSettings;
 	}
 
-	namespace Server {
+	namespace Server
+	{
 		class ServerBase;
-		
 	}
 
-	namespace Scene {
+	namespace Scene
+	{
 		class ServerSceneManager;
 	}
-
 }

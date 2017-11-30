@@ -6,38 +6,43 @@
 
 #include "streams/bufferedstream.h"
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		Serializable::Serializable() :
 			mUnit(SerializableUnitBase::findParent(this)),
 			mLocallyActive(false)
 		{
-			if (mUnit) {
+			if (mUnit)
+			{
 				mUnit->addSerializable(this);
 				assert(!mUnit->isActive());
 			}
-			else {
+			else
+			{
 				mLocallyActive = true;
 			}
 		}
 
-		Serializable::Serializable(const Serializable &) :
+		Serializable::Serializable(const Serializable&) :
 			Serializable()
 		{
 		}
 
-		Serializable::Serializable(Serializable &&) :
+		Serializable::Serializable(Serializable&&) noexcept :
 			Serializable()
 		{
 		}
 
-		Serializable::~Serializable() {
+		Serializable::~Serializable()
+		{
 			if (mUnit)
 				assert(!mUnit->isActive());
 		}
 
-		Serializable &Serializable::operator=(const Serializable &other) {
+		Serializable& Serializable::operator=(const Serializable& other)
+		{
 			return *this;
 		}
 
@@ -45,7 +50,7 @@ namespace Engine {
 		{
 		}
 
-		void Serializable::writeCreationData(SerializeOutStream & out) const
+		void Serializable::writeCreationData(SerializeOutStream& out) const
 		{
 		}
 
@@ -59,21 +64,25 @@ namespace Engine {
 			mLocallyActive = active;
 		}
 
-		bool Serializable::isLocallyActive() {
+		bool Serializable::isLocallyActive() const
+		{
 			return mLocallyActive;
 		}
 
-		bool Serializable::isActive() {
+		bool Serializable::isActive() const
+		{
 			return mUnit ? mUnit->isActive() : true;
 		}
 
-		std::set<BufferedOutStream*, CompareStreamId> Serializable::getMasterStateMessageTargets()
+		std::set<BufferedOutStream*, CompareStreamId> Serializable::getMasterStateMessageTargets() const
 		{
 			std::set<BufferedOutStream*, CompareStreamId> result;
-			if (mUnit) {
+			if (mUnit)
+			{
 				result = mUnit->getMasterMessageTargets();
 
-				for (BufferedOutStream *out : result) {
+				for (BufferedOutStream* out : result)
+				{
 					out->beginMessage(mUnit, STATE);
 				}
 			}
@@ -83,21 +92,21 @@ namespace Engine {
 
 		void Serializable::sendState()
 		{
-			for (BufferedOutStream *out : getMasterStateMessageTargets()) {
+			for (BufferedOutStream* out : getMasterStateMessageTargets())
+			{
 				writeState(*out);
 				out->endMessage();
 			}
 		}
 
-		const TopLevelSerializableUnitBase * Serializable::topLevel() const
+		const TopLevelSerializableUnitBase* Serializable::topLevel() const
 		{
 			return mUnit ? mUnit->topLevel() : nullptr;
 		}
 
-		SerializableUnitBase * Serializable::unit() const
+		SerializableUnitBase* Serializable::unit() const
 		{
 			return mUnit;
 		}
-
 	}
 }

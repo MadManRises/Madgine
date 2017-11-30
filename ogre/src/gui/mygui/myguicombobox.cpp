@@ -7,24 +7,26 @@
 #ifdef _MSC_VER
 #pragma warning (push, 0)
 #endif
-#include <MYGUI\MyGUI.h>
+#include <MYGUI/MyGUI.h>
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
-			MyGUICombobox::MyGUICombobox(MyGUIWindow *w) :
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			MyGUICombobox::MyGUICombobox(MyGUIWindow* w) :
 				Combobox(w),
 				mCombobox(w->window()->castType<MyGUI::ComboBox>())
 			{
 				mCombobox->setEditReadOnly(true);
 			}
 
-			void MyGUICombobox::addItem(const std::string & text)
+			void MyGUICombobox::addItem(const std::string& text)
 			{
 				mCombobox->addItem(text);
 			}
@@ -34,7 +36,7 @@ namespace Engine {
 				mCombobox->removeAllItems();
 			}
 
-			void MyGUICombobox::setText(const std::string & s)
+			void MyGUICombobox::setText(const std::string& s)
 			{
 				mCombobox->setCaption(s);
 			}
@@ -43,7 +45,6 @@ namespace Engine {
 			{
 				return mCombobox->getCaption();
 			}
-
 		}
 	}
 }

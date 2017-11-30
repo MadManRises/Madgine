@@ -1,27 +1,26 @@
 #pragma once
 
 
-namespace Engine {
-namespace Serialize {
+namespace Engine
+{
+	namespace Serialize
+	{
+		class SerializeException : public std::exception
+		{
+		public:
+			SerializeException(const std::string& msg) :
+				m_msg(msg)
+			{
+			}
 
-class SerializeException : public std::exception {
-public:
-    SerializeException(const std::string &msg) :
-        m_msg(msg)
-    {
-    }
 
+			const char* what() const throw() override
+			{
+				return m_msg.c_str();
+			}
 
-    virtual const char *what() const throw()
-    {
-        return m_msg.c_str();
-    }
-
-private:
-    std::string m_msg;
-};
-
+		private:
+			std::string m_msg;
+		};
+	}
 }
-}
-
-

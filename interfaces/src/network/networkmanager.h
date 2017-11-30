@@ -4,23 +4,24 @@
 #include "signalslot/slot.h"
 #include "networkstream.h"
 
-namespace Engine {
-	namespace Network {
-
-		class INTERFACES_EXPORT NetworkManager : public Serialize::SerializeManager{
-
+namespace Engine
+{
+	namespace Network
+	{
+		class INTERFACES_EXPORT NetworkManager : public Serialize::SerializeManager
+		{
 		public:
-			NetworkManager(const std::string &name);
-			NetworkManager(const NetworkManager &) = delete;
-			NetworkManager(NetworkManager &&);
+			NetworkManager(const std::string& name);
+			NetworkManager(const NetworkManager&) = delete;
+			NetworkManager(NetworkManager&&) noexcept;
 			virtual ~NetworkManager();
 
 
-			void operator=(const NetworkManager &) = delete;
+			void operator=(const NetworkManager&) = delete;
 
 			bool startServer(int port);
-			Serialize::StreamError connect(const std::string &url, int portNr, int timeout = 0);
-			void connect_async(const std::string &url, int portNr, int timeout = 0);
+			Serialize::StreamError connect(const std::string& url, int portNr, int timeout = 0);
+			void connect_async(const std::string& url, int portNr, int timeout = 0);
 
 			void close();
 
@@ -28,42 +29,41 @@ namespace Engine {
 			Serialize::StreamError acceptConnection(int timeout);
 			void acceptConnections();
 
-			int clientCount();
+			int clientCount() const;
 
-			bool isConnected();
+			bool isConnected() const;
 
-			void moveConnection(Serialize::ParticipantId id, NetworkManager *to);
+			void moveConnection(Serialize::ParticipantId id, NetworkManager* to);
 
 			template <class T>
-			void connectConnectionSlot(T &slot) {
+			void connectConnectionSlot(T& slot)
+			{
 				mConnectionResult.connect(slot, SignalSlot::queuedConnection);
 			}
 
 		protected:
-			virtual void removeSlaveStream() override;
-			virtual void removeMasterStream(Serialize::BufferedInOutStream *stream) override;
+			void removeSlaveStream() override;
+			void removeMasterStream(Serialize::BufferedInOutStream* stream) override;
 
-			Serialize::StreamError addMasterStream(NetworkStream &&stream, bool sendState = true);
+			Serialize::StreamError addMasterStream(NetworkStream&& stream, bool sendState = true);
 
 			void onConnectionEstablished(int timeout);
 
 		private:
 			SocketId mSocket;
 
-			bool mIsServer;			
+			bool mIsServer;
 
 			std::map<Serialize::ParticipantId, NetworkStream> mStreams;
-			NetworkStream *mSlaveStream;
+			NetworkStream* mSlaveStream;
 
 			//static constexpr UINT sMessageSignature = 1048;
 
 			static int sManagerCount;
 
 			SignalSlot::Signal<Serialize::StreamError> mConnectionResult;
-			SignalSlot::Slot<decltype(&NetworkManager::onConnectionEstablished), &NetworkManager::onConnectionEstablished> mConnectionEstablished;
-
+			SignalSlot::Slot<decltype(&NetworkManager::onConnectionEstablished), &NetworkManager::onConnectionEstablished>
+			mConnectionEstablished;
 		};
-
 	}
 }
-

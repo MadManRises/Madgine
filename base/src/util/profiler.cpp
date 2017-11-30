@@ -3,9 +3,10 @@
 #include "profiler.h"
 
 
-namespace Engine {
-	namespace Util {
-
+namespace Engine
+{
+	namespace Util
+	{
 		Profiler::Profiler() :
 			mCurrent(nullptr),
 			mInterval(2.0f),
@@ -13,7 +14,7 @@ namespace Engine {
 		{
 		}
 
-		void Profiler::startProfiling(const std::string &name)
+		void Profiler::startProfiling(const std::string& name)
 		{
 			mCurrent = &getProcess(name);
 			mCurrent->start();
@@ -32,41 +33,41 @@ namespace Engine {
 
 			auto now = std::chrono::high_resolution_clock::now();
 			size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - mLast).count();
-			if (duration >= 1000.f * mInterval) {
+			if (duration >= 1000.f * mInterval)
+			{
 				mLast = now;
 				mCurrentInterval = true;
 			}
 		}
 
-		ProcessStats & Profiler::getProcess(const std::string & name)
+		ProcessStats& Profiler::getProcess(const std::string& name)
 		{
-			if (mCurrent) {
+			if (mCurrent)
+			{
 				return mCurrent->addChild(name);
 			}
-			else {
-				return mProcesses.try_emplace(name, [this]() {return mCurrentInterval; }).first->second;
-			}			
+			return mProcesses.try_emplace(name, [this]() { return mCurrentInterval; }).first->second;
 		}
 
 		std::tuple<std::function<bool()>> Profiler::createProcessData()
 		{
-			return std::make_tuple([this]() {return mCurrentInterval; });
+			return std::make_tuple([this]() { return mCurrentInterval; });
 		}
-		
-		ProfileWrapper::ProfileWrapper(const std::string &name)
+
+		ProfileWrapper::ProfileWrapper(const std::string& name)
 		{
-			Profiler *p = Profiler::getSingletonPtr();
+			Profiler* p = Profiler::getSingletonPtr();
 			if (p)
 				p->startProfiling(name);
 		}
 
 		ProfileWrapper::~ProfileWrapper()
 		{
-			Profiler *p = Profiler::getSingletonPtr();
+			Profiler* p = Profiler::getSingletonPtr();
 			if (p)
 				p->stopProfiling();
 		}
-		
+
 		size_t ProcessStats::averageDuration() const
 		{
 			return mAccumulatedDuration / 20;
@@ -90,29 +91,26 @@ namespace Engine {
 			mBuffer[mRecordIndex] = duration;
 			++mRecordIndex;
 			mRecordIndex %= 20;
-
-			
 		}
 
-		ProcessStats &ProcessStats::addChild(const std::string & child)
+		ProcessStats& ProcessStats::addChild(const std::string& child)
 		{
 			return mChildren.try_emplace(child, this).first->second;
 		}
 
 		bool ProcessStats::hasParent() const
 		{
-			return mParent != 0;
+			return mParent != nullptr;
 		}
 
-		const ProcessStats * ProcessStats::parent() const
+		const ProcessStats* ProcessStats::parent() const
 		{
 			return mParent;
 		}
 
-		ProcessStats * ProcessStats::parent()
+		ProcessStats* ProcessStats::parent()
 		{
 			return mParent;
 		}
-
 	}
 }

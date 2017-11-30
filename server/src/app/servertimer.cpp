@@ -1,11 +1,12 @@
 #include "serverlib.h"
 #include "servertimer.h"
 
-namespace Engine {
-	namespace App {
-
+namespace Engine
+{
+	namespace App
+	{
 		ServerTimer::ServerTimer() :
-			default_unit(unit::MS),
+			default_unit(MS),
 			m_running(true),
 			m_start(std::chrono::steady_clock::now())
 		{
@@ -20,18 +21,18 @@ namespace Engine {
 			m_endex = m_start;
 		}
 
-		void ServerTimer::start(void)
+		void ServerTimer::start()
 		{
 			m_running = true;
 			m_start = std::chrono::steady_clock::now();
 		}
 
-		void ServerTimer::reset(void)
+		void ServerTimer::reset()
 		{
 			this->start();
 		}
 
-		void ServerTimer::endex(void)
+		void ServerTimer::endex()
 		{
 			m_running = false;
 			m_endex = std::chrono::steady_clock::now();
@@ -39,37 +40,37 @@ namespace Engine {
 
 		//------------------------------------------------------------------------------
 
-		void ServerTimer::delay(std::size_t duration)
+		void ServerTimer::delay(size_t duration)
 		{
 			switch (default_unit)
 			{
-			case unit::MS:
+			case MS:
 				std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 				break;
-			case unit::US:
+			case US:
 				std::this_thread::sleep_for(std::chrono::microseconds(duration));
 				break;
-			case unit::NS:
+			case NS:
 				std::this_thread::sleep_for(std::chrono::nanoseconds(duration));
 			}
 		}
 
-		void ServerTimer::delay(std::size_t duration, ServerTimer::unit type)
+		void ServerTimer::delay(size_t duration, unit type)
 		{
 			switch (type)
 			{
-			case unit::MS:
+			case MS:
 				std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 				break;
-			case unit::US:
+			case US:
 				std::this_thread::sleep_for(std::chrono::microseconds(duration));
 				break;
-			case unit::NS:
+			case NS:
 				std::this_thread::sleep_for(std::chrono::nanoseconds(duration));
 			}
 		}
 
-		std::size_t ServerTimer::current_time(void)
+		size_t ServerTimer::current_time()
 		{
 			return std::chrono::steady_clock::now()
 				.time_since_epoch().count();
@@ -77,7 +78,7 @@ namespace Engine {
 
 		//------------------------------------------------------------------------------
 
-		std::size_t ServerTimer::elapsed_xx(ServerTimer::unit type)
+		size_t ServerTimer::elapsed_xx(unit type)
 		{
 			if (m_running)
 			{
@@ -85,15 +86,13 @@ namespace Engine {
 			}
 			switch (type)
 			{
-			case unit::MS:
+			case MS:
 				return std::chrono::duration_cast<std::chrono::milliseconds>
 					(m_endex - m_start).count();
-				break;
-			case unit::US:
+			case US:
 				return std::chrono::duration_cast<std::chrono::microseconds>
 					(m_endex - m_start).count();
-				break;
-			case unit::NS:
+			case NS:
 				return std::chrono::duration_cast<std::chrono::nanoseconds>
 					(m_endex - m_start).count();
 			default:
@@ -103,7 +102,7 @@ namespace Engine {
 
 		//------------------------------------------------------------------------------
 
-		std::size_t ServerTimer::elapsed_ms(void)
+		size_t ServerTimer::elapsed_ms()
 		{
 			if (m_running)
 			{
@@ -113,7 +112,7 @@ namespace Engine {
 				(m_endex - m_start).count();
 		}
 
-		std::size_t ServerTimer::elapsed_us(void)
+		size_t ServerTimer::elapsed_us()
 		{
 			if (m_running)
 			{
@@ -123,7 +122,7 @@ namespace Engine {
 				(m_endex - m_start).count();
 		}
 
-		std::size_t ServerTimer::elapsed_ns(void)
+		size_t ServerTimer::elapsed_ns()
 		{
 			if (m_running)
 			{
@@ -132,6 +131,5 @@ namespace Engine {
 			return std::chrono::duration_cast<std::chrono::nanoseconds>
 				(m_endex - m_start).count();
 		}
-
 	}
 }

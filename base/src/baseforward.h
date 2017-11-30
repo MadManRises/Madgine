@@ -1,14 +1,16 @@
 #pragma once
 
-namespace Engine {
-
+namespace Engine
+{
 	class MadgineObject;
 
-	namespace Scene {
+	namespace Scene
+	{
 		class SceneManagerBase;
 		enum class ContextMask : unsigned int;
 
-		namespace Entity {
+		namespace Entity
+		{
 			class Entity;
 			class Transform;
 			class Animation;
@@ -16,22 +18,23 @@ namespace Engine {
 		}
 
 		class Light;
-
 	}
 
-	namespace App {
-		
+	namespace App
+	{
 		struct AppSettings;
 		class Application;
 		class FrameListener;
 	}
 
-	namespace UI {
+	namespace UI
+	{
 		class GuiHandlerBase;
 		class GameHandlerBase;
 	}
 
-	namespace Scripting {
+	namespace Scripting
+	{
 		class GlobalScope;
 		class GlobalAPIComponentBase;
 	}

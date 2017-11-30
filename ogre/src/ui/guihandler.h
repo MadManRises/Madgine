@@ -7,59 +7,58 @@
 
 #include "scripting/types/scope.h"
 
-namespace Engine {
-namespace UI {
+namespace Engine
+{
+	namespace UI
+	{
+		class OGREMADGINE_EXPORT GuiHandlerBase : public Handler
+		{
+		public:
+			enum class WindowType
+			{
+				MODAL_OVERLAY,
+				NONMODAL_OVERLAY,
+				ROOT_WINDOW
+			};
+
+			GuiHandlerBase(const std::string& windowName, WindowType type, const std::string& layoutFile = "",
+			               const std::string& parentName = WindowNames::rootWindow);
 
 
-class OGREMADGINE_EXPORT GuiHandlerBase : public Handler {
-public:
-    enum class WindowType{
-        MODAL_OVERLAY,
-        NONMODAL_OVERLAY,
-        ROOT_WINDOW
-    };
+			bool init(int order);
+			bool init() override;
+			void finalize(int order);
+			void finalize() override;
 
-    GuiHandlerBase(const std::string &windowName, WindowType type, const std::string &layoutFile = "", const std::string &parentName = WindowNames::rootWindow);
+			virtual void open();
+			virtual void close();
+			bool isOpen() const;
 
+			bool isRootWindow() const;
 
-    bool init(int order);
-    virtual bool init() override;
-	void finalize(int order);
-	virtual void finalize() override;
+			Scene::ContextMask context() const;
 
-    virtual void open();
-    virtual void close();
-    bool isOpen();
-
-    bool isRootWindow();
-
-	Scene::ContextMask context();
-
-protected:
-	void setInitialisationOrder(int order);
-	void setContext(Scene::ContextMask context);
+		protected:
+			void setInitialisationOrder(int order);
+			void setContext(Scene::ContextMask context);
 
 
-
-private:
-
-
-    //std::map<CEGUI::Window *, std::string> mTranslationKeys;
-
-    const std::string mLayoutFile;
-	const std::string mParentName;
-    const WindowType mType;
+		private:
 
 
-	int mOrder;
-	Scene::ContextMask mContext;
+			//std::map<CEGUI::Window *, std::string> mTranslationKeys;
 
-};
+			const std::string mLayoutFile;
+			const std::string mParentName;
+			const WindowType mType;
 
-using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase>;
-template <class T>
-using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 
-} // namespace GuiHandler
+			int mOrder;
+			Scene::ContextMask mContext;
+		};
+
+		using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase>;
+		template <class T>
+		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
+	} // namespace GuiHandler
 } // namespace Cegui
-

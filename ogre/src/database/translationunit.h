@@ -1,47 +1,47 @@
 #pragma once
 
-namespace Engine {
-namespace Database {
+namespace Engine
+{
+	namespace Database
+	{
+		std::string OGREMADGINE_EXPORT tr(const std::string& key);
 
-std::string OGREMADGINE_EXPORT tr(const std::string &key);
+		class TranslationUnit : public Ogre::ScriptLoader,
+		                        public Singleton<TranslationUnit>
+		{
+		public:
+			TranslationUnit();
+			~TranslationUnit();
 
-class TranslationUnit : public Ogre::ScriptLoader,
-    public Singleton<TranslationUnit> {
-public:
-    TranslationUnit();
-    ~TranslationUnit();
+			std::string getMessage(const std::string& key) const;
 
-    std::string getMessage(const std::string &key) const;
+			std::list<std::string> availableLanguages();
 
-    std::list<std::string> availableLanguages();
+			std::string currentLanguageName() const;
 
-    std::string currentLanguageName();
+			const std::string& resolveLanguageName(const std::string& name) const;
 
-    const std::string &resolveLanguageName(const std::string &name);
+			void setCurrentLanguage(const std::string& name);
 
-    void setCurrentLanguage(const std::string &name);
+			const Ogre::StringVector& getScriptPatterns() const override;
+			float getLoadingOrder() const override;
 
-    const Ogre::StringVector &getScriptPatterns() const;
-    float getLoadingOrder() const;
-
-    void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &);
+			void parseScript(Ogre::DataStreamPtr& stream, const Ogre::String&) override;
 
 
-private:
+		private:
 
-    float mLoadOrder;
-    Ogre::StringVector mScriptPatterns;
+			float mLoadOrder;
+			Ogre::StringVector mScriptPatterns;
 
-    Ogre::ResourceGroupManager *mRsgm;
+			Ogre::ResourceGroupManager* mRsgm;
 
-    std::map<std::string, std::map<std::string, std::string>> mLanguages;
+			std::map<std::string, std::map<std::string, std::string>> mLanguages;
 
-    std::map<std::string, std::string> *mCurrentLanguage;
-    std::string mCurrentLanguageName;
+			std::map<std::string, std::string>* mCurrentLanguage;
+			std::string mCurrentLanguageName;
 
-    static const std::string sExtension;
-};
-
-} // namespace Database
+			static const std::string sExtension;
+		};
+	} // namespace Database
 }
-

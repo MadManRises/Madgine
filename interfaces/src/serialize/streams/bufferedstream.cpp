@@ -6,109 +6,112 @@
 #include "serialize/serializableunit.h"
 #include "serialize/serializemanager.h"
 
-namespace Engine {
-namespace Serialize {
-
-	bool CompareStreamId::operator()(BufferedOutStream *first, BufferedOutStream *second) {
-		return first->id() < second->id();
-	}
-
-
-	BufferedInStream::BufferedInStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :
-		Stream(mgr, id),
-		SerializeInStream(mIfs, mgr, id),
-		mBuffer(buffer),
-		mIfs(&buffer)
+namespace Engine
+{
+	namespace Serialize
 	{
-	}
+		bool CompareStreamId::operator()(BufferedOutStream* first, BufferedOutStream* second) const
+		{
+			return first->id() < second->id();
+		}
 
-	bool BufferedInStream::isMessageAvailable()
-	{
-		return mBuffer.isMessageAvailable(mManager.name());
-	}
 
-	buffered_streambuf * BufferedInStream::rdbuf()
-	{
-		return &mBuffer;
-	}
+		BufferedInStream::BufferedInStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
+			Stream(mgr, id),
+			SerializeInStream(mIfs, mgr, id),
+			mBuffer(buffer),
+			mIfs(&buffer)
+		{
+		}
 
-	void BufferedInStream::readHeader(MessageHeader & header)
-	{
-		if (!isMessageAvailable())
-			throw 0;
-		read(header);
-	}
+		bool BufferedInStream::isMessageAvailable()
+		{
+			return mBuffer.isMessageAvailable(mManager.name());
+		}
 
-	BufferedOutStream::BufferedOutStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :
-		Stream(mgr, id),
-		SerializeOutStream(mOfs, mgr, id),		
-		mBuffer(buffer),
-		mOfs(&buffer)		
-	{
-	}
+		buffered_streambuf* BufferedInStream::rdbuf()
+		{
+			return &mBuffer;
+		}
 
-	void BufferedOutStream::beginMessage(SerializableUnitBase *unit, MessageType type)
-	{
-		MessageHeader header;
-		header.mType = type;
-		header.mObject = mManager.convertPtr(*this, unit);
-		mLog.logBeginSendMessage(header, typeid(*unit).name());
-		mBuffer.beginMessage();
-		write(header);
-	}
+		void BufferedInStream::readHeader(MessageHeader& header)
+		{
+			if (!isMessageAvailable())
+				throw 0;
+			read(header);
+		}
 
-	void BufferedOutStream::beginMessage(Command cmd)
-	{
-		MessageHeader header;
-		header.mCmd = cmd;
-		header.mObject = SERIALIZE_MANAGER;
-		mLog.logBeginSendMessage(header, mManager.name());
-		mBuffer.beginMessage();
-		write(header);
-	}
+		BufferedOutStream::BufferedOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
+			Stream(mgr, id),
+			SerializeOutStream(mOfs, mgr, id),
+			mBuffer(buffer),
+			mOfs(&buffer)
+		{
+		}
 
-	void BufferedOutStream::endMessage()
-	{
-		mBuffer.endMessage();
-	}
+		void BufferedOutStream::beginMessage(SerializableUnitBase* unit, MessageType type)
+		{
+			MessageHeader header;
+			header.mType = type;
+			header.mObject = mManager.convertPtr(*this, unit);
+			mLog.logBeginSendMessage(header, typeid(*unit).name());
+			mBuffer.beginMessage();
+			write(header);
+		}
 
-	int BufferedOutStream::sendMessages()
-	{
-		return mBuffer.sendMessages();
-	}
+		void BufferedOutStream::beginMessage(Command cmd)
+		{
+			MessageHeader header;
+			header.mCmd = cmd;
+			header.mObject = SERIALIZE_MANAGER;
+			mLog.logBeginSendMessage(header, mManager.name());
+			mBuffer.beginMessage();
+			write(header);
+		}
 
-	BufferedOutStream & BufferedOutStream::operator<<(BufferedInStream & in)
-	{
-		mOfs << in.rdbuf();
-		return *this;
-	}
+		void BufferedOutStream::endMessage()
+		{
+			mBuffer.endMessage();
+		}
 
-	BufferedInOutStream::BufferedInOutStream(buffered_streambuf & buffer, SerializeManager & mgr, ParticipantId id) :
-		Stream(mgr, id),
-		BufferedOutStream(buffer, mgr, id),
-		BufferedInStream(buffer, mgr, id),
-		mBuffer(buffer)
-	{
-	}
+		int BufferedOutStream::sendMessages()
+		{
+			return mBuffer.sendMessages();
+		}
 
-	StreamError Engine::Serialize::BufferedInOutStream::error()
-	{
-		return mBuffer.closeCause();
-	}
+		BufferedOutStream& BufferedOutStream::operator<<(BufferedInStream& in)
+		{
+			mOfs << in.rdbuf();
+			return *this;
+		}
 
-	bool BufferedInOutStream::isClosed()
-	{
-		return !bool(*this) || mBuffer.isClosed();
+		BufferedInOutStream::BufferedInOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
+			Stream(mgr, id),
+			BufferedOutStream(buffer, mgr, id),
+			BufferedInStream(buffer, mgr, id),
+			mBuffer(buffer)
+		{
+		}
+
+		StreamError BufferedInOutStream::error() const
+		{
+			return mBuffer.closeCause();
+		}
+
+		bool BufferedInOutStream::isClosed()
+		{
+			return !bool(*this) || mBuffer.isClosed();
+		}
+
+		void BufferedInOutStream::close()
+		{
+			writeCommand(STREAM_EOF);
+			mBuffer.close();
+		}
+
+		BufferedInOutStream::operator bool()
+		{
+			return this->SerializeInStream::operator bool() && this->SerializeOutStream::operator bool();
+		}
 	}
-	void BufferedInOutStream::close()
-	{
-		writeCommand(STREAM_EOF);
-		mBuffer.close();
-	}
-	BufferedInOutStream::operator bool()
-	{
-		return this->SerializeInStream::operator bool() && this->SerializeOutStream::operator bool();
-	}
-}
 } // namespace Scripting
-

@@ -6,63 +6,58 @@
 #include "scripting/types/globalapicomponentbase.h"
 
 
-namespace Engine {
-
-
-
-	namespace UI {
-
-
-
-
+namespace Engine
+{
+	namespace UI
+	{
 		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-			public Scripting::Scope<UIManager>,
-			public MadgineObject
+		                                     public Scripting::Scope<UIManager>,
+		                                     public MadgineObject
 		{
 		public:
-			UIManager(GUI::GUISystem *gui);
+			UIManager(GUI::GUISystem* gui);
 			~UIManager();
 
 			bool preInit();
-			virtual bool init() override;
-			virtual void finalize() override;
+			bool init() override;
+			void finalize() override;
 
 			void clear();
 
 			void hideCursor(bool keep = true);
 			void showCursor();
-			bool isCursorVisible();
+			bool isCursorVisible() const;
 
-			void swapCurrentRoot(GuiHandlerBase * newRoot);
-			void openModalWindow(GuiHandlerBase *handler);
-			void closeModalWindow(GuiHandlerBase *handler);
-			void openWindow(GuiHandlerBase *handler);
-			void closeWindow(GuiHandlerBase *handler);
+			void swapCurrentRoot(GuiHandlerBase* newRoot);
+			void openModalWindow(GuiHandlerBase* handler);
+			void closeModalWindow(GuiHandlerBase* handler);
+			void openWindow(GuiHandlerBase* handler);
+			void closeWindow(GuiHandlerBase* handler);
 
 			void update(float timeSinceLastFrame);
 			void fixedUpdate(float timeStep);
 
 			Scene::ContextMask currentContext();
 
-			GUI::GUISystem *gui();
+			GUI::GUISystem* gui() const;
 
 			std::set<GameHandlerBase*> getGameHandlers();
 			std::set<GuiHandlerBase*> getGuiHandlers();
 
 			static const constexpr int sMaxInitOrder = 4;
 
-			const char *key() const;
+			const char* key() const override;
 
 		protected:
-			virtual KeyValueMapList maps() override;
+			KeyValueMapList maps() override;
 
 		private:
 			GuiHandlerCollector mGuiHandlers;
 			GameHandlerCollector mGameHandlers;
 
-			GuiHandlerBase *mCurrentRoot;			
+			GuiHandlerBase* mCurrentRoot;
 
-			GUI::GUISystem *mGUI;
+			GUI::GUISystem* mGUI;
 
 			std::stack<GuiHandlerBase *> mModalWindowList;
 
@@ -70,6 +65,5 @@ namespace Engine {
 			Ogre::Vector2 mKeptCursorPosition;
 			bool mKeepingCursorPos;
 		};
-
 	}
 }

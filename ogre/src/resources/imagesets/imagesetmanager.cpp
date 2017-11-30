@@ -3,52 +3,53 @@
 
 
 using namespace Ogre;
-void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRectangle, Font* font, const ColourValue &color, char justify = 'l', bool wordwrap = true);
+void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle, Font* font, const ColourValue& color,
+                    char justify = 'l', bool wordwrap = true);
 
-template<> Engine::Resources::ImageSets::ImageSetManager *Ogre::Singleton<Engine::Resources::ImageSets::ImageSetManager>::msSingleton = 0;
+template <>
+Engine::Resources::ImageSets::ImageSetManager* Singleton<Engine::Resources::ImageSets::ImageSetManager>::msSingleton =
+	nullptr;
 
-namespace Engine {
-	namespace Resources {
-		namespace ImageSets {			
-
-			Ogre::TexturePtr ImageSetManager::getImageTexture(const std::string & setName, const std::string & imageName)
+namespace Engine
+{
+	namespace Resources
+	{
+		namespace ImageSets
+		{
+			TexturePtr ImageSetManager::getImageTexture(const std::string& setName, const std::string& imageName)
 			{
-				std::map<std::string, Ogre::TexturePtr> &set = mTextures[setName];
+				std::map<std::string, TexturePtr>& set = mTextures[setName];
 
 				auto it = set.find(imageName);
-				if (it == set.end()) {
-					Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual(
+				if (it == set.end())
+				{
+					TexturePtr tex = TextureManager::getSingleton().createManual(
 						std::string("ImageSet_") + setName + "_" + imageName, // name
-						Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-						Ogre::TEX_TYPE_2D,      // type
-						128, 128,         // width & height
-						0,                // number of mipmaps
-						Ogre::PF_BYTE_LA,     // pixel format
-						Ogre::TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
-										  // textures updated very often (e.g. each frame)
+						ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						TEX_TYPE_2D, // type
+						128, 128, // width & height
+						0, // number of mipmaps
+						PF_BYTE_LA, // pixel format
+						TU_DEFAULT); // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
+					// textures updated very often (e.g. each frame)
 
-					Ogre::FontPtr font = Ogre::FontManager::getSingleton().getByName("BlueHighway");
+					FontPtr font = FontManager::getSingleton().getByName("BlueHighway");
 
-					WriteToTexture(setName + "\n" + imageName, tex, Ogre::Image::Box(8, 8, 121, 121), font.get(), Ogre::ColourValue::White);
+					WriteToTexture(setName + "\n" + imageName, tex, Box(8, 8, 121, 121), font.get(), ColourValue::White);
 
 					set[imageName] = tex;
 					return tex;
 				}
-				else {
-					return it->second;
-				}
-				
+				return it->second;
 			}
 		}
 	}
 }
 
 
-
-void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRectangle, Font* font, const ColourValue &color, char justify, bool wordwrap)
+void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle, Font* font, const ColourValue& color,
+                    char justify, bool wordwrap)
 {
-	
-
 	if (destTexture->getHeight() < destRectangle.bottom)
 		destRectangle.bottom = destTexture->getHeight();
 	if (destTexture->getWidth() < destRectangle.right)
@@ -57,7 +58,8 @@ void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRe
 	if (!font->isLoaded())
 		font->load();
 
-	TexturePtr fontTexture = (TexturePtr)TextureManager::getSingleton().getByName(font->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName());
+	TexturePtr fontTexture = static_cast<TexturePtr>(TextureManager::getSingleton().getByName(
+		font->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName()));
 
 	HardwarePixelBufferSharedPtr fontBuffer = fontTexture->getBuffer();
 	HardwarePixelBufferSharedPtr destBuffer = destTexture->getBuffer();
@@ -68,10 +70,11 @@ void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRe
 
 	// create a buffer
 	size_t nBuffSize = fontBuffer->getSizeInBytes();
-	uint8* buffer = (uint8*)calloc(nBuffSize, sizeof(uint8));
+	uint8* buffer = static_cast<uint8*>(calloc(nBuffSize, sizeof(uint8)));
 
 	// create pixel box using the copy of the buffer
-	PixelBox fontPb(fontBuffer->getWidth(), fontBuffer->getHeight(), fontBuffer->getDepth(), fontBuffer->getFormat(), buffer);
+	PixelBox fontPb(fontBuffer->getWidth(), fontBuffer->getHeight(), fontBuffer->getDepth(), fontBuffer->getFormat(),
+	                buffer);
 	fontBuffer->blitToMemory(fontPb);
 
 	uint8* fontData = static_cast<uint8*>(fontPb.data);
@@ -83,8 +86,7 @@ void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRe
 	const size_t fontRowPitchBytes = fontPb.rowPitch * fontPixelSize;
 	const size_t destRowPitchBytes = destPb.rowPitch * destPixelSize;
 
-	Box *GlyphTexCoords;
-	GlyphTexCoords = new Box[str.size()];
+	Box* GlyphTexCoords = new Box[str.size()];
 
 	Font::UVRect glypheTexRect;
 	size_t charheight = 0;
@@ -105,7 +107,6 @@ void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRe
 			if (GlyphTexCoords[i].getWidth() > charwidth)
 				charwidth = GlyphTexCoords[i].getWidth();
 		}
-
 	}
 
 	size_t cursorX = 0;
@@ -116,94 +117,105 @@ void WriteToTexture(const String &str, TexturePtr destTexture, Image::Box destRe
 	{
 		switch (str[strindex])
 		{
-		case ' ': cursorX += charwidth;  break;
-		case '\t':cursorX += charwidth * 3; break;
-		case '\n':cursorY += charheight; carriagreturn = true; break;
+		case ' ': cursorX += charwidth;
+			break;
+		case '\t': cursorX += charwidth * 3;
+			break;
+		case '\n': cursorY += charheight;
+			carriagreturn = true;
+			break;
 		default:
-		{
-			//wrapping
-			if ((cursorX + GlyphTexCoords[strindex].getWidth()> lineend) && !carriagreturn)
 			{
-				cursorY += charheight;
-				carriagreturn = true;
-			}
-
-			//justify
-			if (carriagreturn)
-			{
-				size_t l = strindex;
-				size_t textwidth = 0;
-				size_t wordwidth = 0;
-
-				while ((l < str.size()) && (str[l] != '\n'))
+				//wrapping
+				if ((cursorX + GlyphTexCoords[strindex].getWidth() > lineend) && !carriagreturn)
 				{
-					wordwidth = 0;
+					cursorY += charheight;
+					carriagreturn = true;
+				}
 
-					switch (str[l])
+				//justify
+				if (carriagreturn)
+				{
+					size_t l = strindex;
+					size_t textwidth = 0;
+					size_t wordwidth = 0;
+
+					while ((l < str.size()) && (str[l] != '\n'))
 					{
-					case ' ': wordwidth = charwidth; ++l; break;
-					case '\t': wordwidth = charwidth * 3; ++l; break;
-					case '\n': l = str.size();
-					}
+						wordwidth = 0;
 
-					if (wordwrap)
-						while ((l < str.size()) && (str[l] != ' ') && (str[l] != '\t') && (str[l] != '\n'))
+						switch (str[l])
+						{
+						case ' ': wordwidth = charwidth;
+							++l;
+							break;
+						case '\t': wordwidth = charwidth * 3;
+							++l;
+							break;
+						case '\n': l = str.size();
+							break;
+						default: break;
+						}
+
+						if (wordwrap)
+							while ((l < str.size()) && (str[l] != ' ') && (str[l] != '\t') && (str[l] != '\n'))
+							{
+								wordwidth += GlyphTexCoords[l].getWidth();
+								++l;
+							}
+						else
 						{
 							wordwidth += GlyphTexCoords[l].getWidth();
-							++l;
+							l++;
 						}
-					else
-					{
-						wordwidth += GlyphTexCoords[l].getWidth();
-						l++;
+
+						if ((textwidth + wordwidth) <= destRectangle.getWidth())
+							textwidth += (wordwidth);
+						else
+							break;
 					}
 
-					if ((textwidth + wordwidth) <= destRectangle.getWidth())
-						textwidth += (wordwidth);
-					else
+					if ((textwidth == 0) && (wordwidth > destRectangle.getWidth()))
+						textwidth = destRectangle.getWidth();
+
+					switch (justify)
+					{
+					case 'c': cursorX = (destRectangle.getWidth() - textwidth) / 2;
+						lineend = destRectangle.getWidth() - cursorX;
 						break;
+
+					case 'r': cursorX = (destRectangle.getWidth() - textwidth);
+						lineend = destRectangle.getWidth();
+						break;
+
+					default: cursorX = 0;
+						lineend = textwidth;
+						break;
+					}
+
+					carriagreturn = false;
 				}
 
-				if ((textwidth == 0) && (wordwidth > destRectangle.getWidth()))
-					textwidth = destRectangle.getWidth();
+				//abort - net enough space to draw
+				if ((cursorY + charheight) > destRectangle.getHeight())
+					goto stop;
 
-				switch (justify)
-				{
-				case 'c':    cursorX = (destRectangle.getWidth() - textwidth) / 2;
-					lineend = destRectangle.getWidth() - cursorX;
-					break;
+				//draw pixel by pixel
+				for (size_t i = 0; i < GlyphTexCoords[strindex].getHeight(); i++)
+					for (size_t j = 0; j < GlyphTexCoords[strindex].getWidth(); j++)
+					{
+						float alpha = color.a * (fontData[(i + GlyphTexCoords[strindex].top) * fontRowPitchBytes + (j + GlyphTexCoords[
+							strindex].left) * fontPixelSize + 1] / 255.0);
+						float invalpha = 1.0 - alpha;
+						size_t offset = (i + cursorY) * destRowPitchBytes + (j + cursorX) * destPixelSize;
+						ColourValue pix;
+						PixelUtil::unpackColour(&pix, destPb.format, &destData[offset]);
+						pix = (pix * invalpha) + (color * alpha);
+						PixelUtil::packColour(pix, destPb.format, &destData[offset]);
+					}
 
-				case 'r':    cursorX = (destRectangle.getWidth() - textwidth);
-					lineend = destRectangle.getWidth();
-					break;
-
-				default:    cursorX = 0;
-					lineend = textwidth;
-					break;
-				}
-
-				carriagreturn = false;
-			}
-
-			//abort - net enough space to draw
-			if ((cursorY + charheight) > destRectangle.getHeight())
-				goto stop;
-
-			//draw pixel by pixel
-			for (size_t i = 0; i < GlyphTexCoords[strindex].getHeight(); i++)
-				for (size_t j = 0; j < GlyphTexCoords[strindex].getWidth(); j++)
-				{
-					float alpha = color.a * (fontData[(i + GlyphTexCoords[strindex].top) * fontRowPitchBytes + (j + GlyphTexCoords[strindex].left) * fontPixelSize + 1] / 255.0);
-					float invalpha = 1.0 - alpha;
-					size_t offset = (i + cursorY) * destRowPitchBytes + (j + cursorX) * destPixelSize;
-					ColourValue pix;
-					PixelUtil::unpackColour(&pix, destPb.format, &destData[offset]);
-					pix = (pix * invalpha) + (color * alpha);
-					PixelUtil::packColour(pix, destPb.format, &destData[offset]);
-				}
-
-			cursorX += GlyphTexCoords[strindex].getWidth();
-		}//default
+				cursorX += GlyphTexCoords[strindex].getWidth();
+			}//default
 		}//switch
 	}//for
 
@@ -213,5 +225,6 @@ stop:
 	destBuffer->unlock();
 
 	// Free the memory allocated for the buffer
-	free(buffer); buffer = 0;
+	free(buffer);
+	buffer = nullptr;
 }

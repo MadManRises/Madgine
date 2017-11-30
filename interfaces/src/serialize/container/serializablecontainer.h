@@ -6,13 +6,12 @@
 
 #include "signalslot/signal.h"
 
-namespace Engine {
-	namespace Serialize {
-
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template <class traits, class Creator>
-		using SerializableContainer = std::conditional_t<traits::sorted, SortedContainerApi<traits, Creator>, Container<traits, Creator>>;
-
-
+		using SerializableContainer = std::conditional_t<
+			traits::sorted, SortedContainerApi<traits, Creator>, Container<traits, Creator>>;
 	}
 }

@@ -3,11 +3,13 @@
 #include "../serializable.h"
 #include "unithelper.h"
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template <class T>
-		class SerializedData : UnitHelper<T>, public Serializable {
+		class SerializedData : UnitHelper<T>, public Serializable
+		{
 		public:
 			template <class... _Ty>
 			SerializedData(_Ty&&... args) :
@@ -16,39 +18,48 @@ namespace Engine {
 			}
 
 			template <class Ty>
-			void operator =(Ty&& v) {
+			void operator =(Ty&& v)
+			{
 				mData = std::forward<Ty>(v);
 			}
 
-			T &operator*() {
+			T& operator*()
+			{
 				return mData;
 			}
 
-			T *operator->() {
+			T* operator->()
+			{
 				return &mData;
 			}
 
-			T *ptr() {
+			T* ptr()
+			{
 				return &mData;
 			}
 
-			operator const T &() const {
+			operator const T &() const
+			{
 				return mData;
 			}
 
-			virtual void readState(SerializeInStream &in) override {
+			void readState(SerializeInStream& in) override
+			{
 				this->read_state(in, mData);
 			}
 
-			virtual void writeState(SerializeOutStream &out) const override {
+			void writeState(SerializeOutStream& out) const override
+			{
 				this->write_state(out, mData);
 			}
 
-			virtual void setActiveFlag(bool b) override {
+			void setActiveFlag(bool b) override
+			{
 				this->setItemActiveFlag(mData, b);
 			}
 
-			virtual void notifySetActive(bool active) override {
+			void notifySetActive(bool active) override
+			{
 				Serializable::notifySetActive(active);
 				this->notifySetItemActive(mData, active);
 			}
@@ -59,7 +70,8 @@ namespace Engine {
 
 
 		template <class T>
-		class SerializedUnit : UnitHelper<T>, public Serializable {
+		class SerializedUnit : UnitHelper<T>, public Serializable
+		{
 		public:
 			template <class... _Ty>
 			SerializedUnit(_Ty&&... args) :
@@ -77,44 +89,50 @@ namespace Engine {
 			}
 			}*/
 
-			T *operator->() {
+			T* operator->()
+			{
 				return &mData;
 			}
 
-			T *ptr() {
+			T* ptr()
+			{
 				return &mData;
 			}
 
-			operator const T &() const {
+			operator const T &() const
+			{
 				return mData;
 			}
 
-			virtual void readState(SerializeInStream &in) override {
+			void readState(SerializeInStream& in) override
+			{
 				this->read_id(in, mData);
 				this->read_state(in, mData);
 			}
 
-			virtual void writeState(SerializeOutStream &out) const override {
+			void writeState(SerializeOutStream& out) const override
+			{
 				this->write_id(out, mData);
 				this->write_state(out, mData);
 			}
 
-			virtual void setActiveFlag(bool b) override {
+			void setActiveFlag(bool b) override
+			{
 				this->setItemActiveFlag(mData, b);
 			}
 
-			virtual void notifySetActive(bool active) override {
+			void notifySetActive(bool active) override
+			{
 				Serializable::notifySetActive(active);
 				this->notifySetItemActive(mData, active);
 			}
 
 		private:
 			T mData;
-
 		};
 
 		template <class T>
-		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T>, SerializedData<T>>::type;
-
+		using Serialized = typename std::conditional<std::is_base_of<SerializableUnitBase, T>::value, SerializedUnit<T>,
+		                                             SerializedData<T>>::type;
 	}
 }

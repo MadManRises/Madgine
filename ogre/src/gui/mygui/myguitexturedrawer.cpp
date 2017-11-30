@@ -4,24 +4,24 @@
 #include "myguiwindow.h"
 
 
-
 #ifdef _MSC_VER
 #pragma warning (push, 0)
 #endif
-#include <MYGUI\MyGUI.h>
-#include <MYGUI\MyGUI_OgreRenderManager.h>
-#include <MYGUI\MyGUI_OgreTexture.h>
+#include <MYGUI/MyGUI.h>
+#include <MYGUI/MyGUI_OgreRenderManager.h>
+#include <MYGUI/MyGUI_OgreTexture.h>
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
-
-			MyGUITextureDrawer::MyGUITextureDrawer(MyGUIWindow *w) :
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			MyGUITextureDrawer::MyGUITextureDrawer(MyGUIWindow* w) :
 				TextureDrawer(w),
 				mTextureDrawer(w->window()->castType<MyGUI::ImageBox>())
 			{
@@ -29,23 +29,26 @@ namespace Engine {
 			}
 
 
-			void MyGUITextureDrawer::setTexture(const Ogre::TexturePtr &tex)
+			void MyGUITextureDrawer::setTexture(const Ogre::TexturePtr& tex)
 			{
-				if (!tex) {
+				if (!tex)
+				{
 					mTextureDrawer->setImageTexture("");
 				}
-				else {
-					MyGUI::OgreRenderManager *mgr = &MyGUI::OgreRenderManager::getInstance();
-					MyGUI::OgreTexture *myguitex = static_cast<MyGUI::OgreTexture*>(mgr->getTexture(tex->getName()));
-					if (myguitex) {
+				else
+				{
+					MyGUI::OgreRenderManager* mgr = &MyGUI::OgreRenderManager::getInstance();
+					MyGUI::OgreTexture* myguitex = static_cast<MyGUI::OgreTexture*>(mgr->getTexture(tex->getName()));
+					if (myguitex)
+					{
 						if (myguitex->getOgreTexture() != tex)
 							myguitex->setOgreTexture(tex);
 					}
 					mTextureDrawer->setImageTexture(tex->getName());
 				}
-				
 			}
-			void MyGUITextureDrawer::setTexture(const std::string & name)
+
+			void MyGUITextureDrawer::setTexture(const std::string& name)
 			{
 				Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(name);
 				if (!tex)
@@ -53,7 +56,6 @@ namespace Engine {
 				else
 					setTexture(tex);
 			}
-
 		}
 	}
 }

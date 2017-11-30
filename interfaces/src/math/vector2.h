@@ -30,7 +30,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-
 	/** \addtogroup Core
 	*  @{
 	*/
@@ -54,53 +53,53 @@ namespace Engine
 		@note
 		It does <b>NOT</b> initialize the vector for efficiency.
 		*/
-		inline Vector2()
+		Vector2()
 		{
 		}
 
-		inline Vector2(const float fX, const float fY)
+		Vector2(const float fX, const float fY)
 			: x(fX), y(fY)
 		{
 		}
 
-		inline explicit Vector2(const float scaler)
+		explicit Vector2(const float scaler)
 			: x(scaler), y(scaler)
 		{
 		}
 
-		inline explicit Vector2(const float afCoordinate[2])
+		explicit Vector2(const float afCoordinate[2])
 			: x(afCoordinate[0]),
-			y(afCoordinate[1])
+			  y(afCoordinate[1])
 		{
 		}
 
-		inline explicit Vector2(const int afCoordinate[2])
+		explicit Vector2(const int afCoordinate[2])
 		{
-			x = (float)afCoordinate[0];
-			y = (float)afCoordinate[1];
+			x = static_cast<float>(afCoordinate[0]);
+			y = static_cast<float>(afCoordinate[1]);
 		}
 
-		inline explicit Vector2(float* const r)
+		explicit Vector2(float* const r)
 			: x(r[0]), y(r[1])
 		{
 		}
 
 		/** Exchange the contents of this vector with another.
 		*/
-		inline void swap(Vector2& other)
+		void swap(Vector2& other) noexcept
 		{
 			std::swap(x, other.x);
 			std::swap(y, other.y);
 		}
 
-		inline float operator [] (const size_t i) const
+		float operator [](const size_t i) const
 		{
 			assert(i < 2);
 
 			return *(&x + i);
 		}
 
-		inline float& operator [] (const size_t i)
+		float& operator [](const size_t i)
 		{
 			assert(i < 2);
 
@@ -108,12 +107,13 @@ namespace Engine
 		}
 
 		/// Pointer accessor for direct copying
-		inline float* ptr()
+		float* ptr()
 		{
 			return &x;
 		}
+
 		/// Pointer accessor for direct copying
-		inline const float* ptr() const
+		const float* ptr() const
 		{
 			return &x;
 		}
@@ -122,7 +122,7 @@ namespace Engine
 		@param
 		rkVector The other vector
 		*/
-		inline Vector2& operator = (const Vector2& rkVector)
+		Vector2& operator =(const Vector2& rkVector)
 		{
 			x = rkVector.x;
 			y = rkVector.y;
@@ -130,7 +130,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator = (const float fScalar)
+		Vector2& operator =(const float fScalar)
 		{
 			x = fScalar;
 			y = fScalar;
@@ -138,46 +138,46 @@ namespace Engine
 			return *this;
 		}
 
-		inline bool operator == (const Vector2& rkVector) const
+		bool operator ==(const Vector2& rkVector) const
 		{
 			return (x == rkVector.x && y == rkVector.y);
 		}
 
-		inline bool operator != (const Vector2& rkVector) const
+		bool operator !=(const Vector2& rkVector) const
 		{
 			return (x != rkVector.x || y != rkVector.y);
 		}
 
 		// arithmetic operations
-		inline Vector2 operator + (const Vector2& rkVector) const
+		Vector2 operator +(const Vector2& rkVector) const
 		{
 			return Vector2(
 				x + rkVector.x,
 				y + rkVector.y);
 		}
 
-		inline Vector2 operator - (const Vector2& rkVector) const
+		Vector2 operator -(const Vector2& rkVector) const
 		{
 			return Vector2(
 				x - rkVector.x,
 				y - rkVector.y);
 		}
 
-		inline Vector2 operator * (const float fScalar) const
+		Vector2 operator *(const float fScalar) const
 		{
 			return Vector2(
 				x * fScalar,
 				y * fScalar);
 		}
 
-		inline Vector2 operator * (const Vector2& rhs) const
+		Vector2 operator *(const Vector2& rhs) const
 		{
 			return Vector2(
 				x * rhs.x,
 				y * rhs.y);
 		}
 
-		inline Vector2 operator / (const float fScalar) const
+		Vector2 operator /(const float fScalar) const
 		{
 			assert(fScalar != 0.0);
 
@@ -188,60 +188,60 @@ namespace Engine
 				y * fInv);
 		}
 
-		inline Vector2 operator / (const Vector2& rhs) const
+		Vector2 operator /(const Vector2& rhs) const
 		{
 			return Vector2(
 				x / rhs.x,
 				y / rhs.y);
 		}
 
-		inline const Vector2& operator + () const
+		const Vector2& operator +() const
 		{
 			return *this;
 		}
 
-		inline Vector2 operator - () const
+		Vector2 operator -() const
 		{
 			return Vector2(-x, -y);
 		}
 
 		// overloaded operators to help Vector2
-		inline friend Vector2 operator * (const float fScalar, const Vector2& rkVector)
+		friend Vector2 operator *(const float fScalar, const Vector2& rkVector)
 		{
 			return Vector2(
 				fScalar * rkVector.x,
 				fScalar * rkVector.y);
 		}
 
-		inline friend Vector2 operator / (const float fScalar, const Vector2& rkVector)
+		friend Vector2 operator /(const float fScalar, const Vector2& rkVector)
 		{
 			return Vector2(
 				fScalar / rkVector.x,
 				fScalar / rkVector.y);
 		}
 
-		inline friend Vector2 operator + (const Vector2& lhs, const float rhs)
+		friend Vector2 operator +(const Vector2& lhs, const float rhs)
 		{
 			return Vector2(
 				lhs.x + rhs,
 				lhs.y + rhs);
 		}
 
-		inline friend Vector2 operator + (const float lhs, const Vector2& rhs)
+		friend Vector2 operator +(const float lhs, const Vector2& rhs)
 		{
 			return Vector2(
 				lhs + rhs.x,
 				lhs + rhs.y);
 		}
 
-		inline friend Vector2 operator - (const Vector2& lhs, const float rhs)
+		friend Vector2 operator -(const Vector2& lhs, const float rhs)
 		{
 			return Vector2(
 				lhs.x - rhs,
 				lhs.y - rhs);
 		}
 
-		inline friend Vector2 operator - (const float lhs, const Vector2& rhs)
+		friend Vector2 operator -(const float lhs, const Vector2& rhs)
 		{
 			return Vector2(
 				lhs - rhs.x,
@@ -249,7 +249,7 @@ namespace Engine
 		}
 
 		// arithmetic updates
-		inline Vector2& operator += (const Vector2& rkVector)
+		Vector2& operator +=(const Vector2& rkVector)
 		{
 			x += rkVector.x;
 			y += rkVector.y;
@@ -257,7 +257,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator += (const float fScaler)
+		Vector2& operator +=(const float fScaler)
 		{
 			x += fScaler;
 			y += fScaler;
@@ -265,7 +265,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator -= (const Vector2& rkVector)
+		Vector2& operator -=(const Vector2& rkVector)
 		{
 			x -= rkVector.x;
 			y -= rkVector.y;
@@ -273,7 +273,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator -= (const float fScaler)
+		Vector2& operator -=(const float fScaler)
 		{
 			x -= fScaler;
 			y -= fScaler;
@@ -281,7 +281,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator *= (const float fScalar)
+		Vector2& operator *=(const float fScalar)
 		{
 			x *= fScalar;
 			y *= fScalar;
@@ -289,7 +289,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator *= (const Vector2& rkVector)
+		Vector2& operator *=(const Vector2& rkVector)
 		{
 			x *= rkVector.x;
 			y *= rkVector.y;
@@ -297,7 +297,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator /= (const float fScalar)
+		Vector2& operator /=(const float fScalar)
 		{
 			assert(fScalar != 0.0);
 
@@ -309,7 +309,7 @@ namespace Engine
 			return *this;
 		}
 
-		inline Vector2& operator /= (const Vector2& rkVector)
+		Vector2& operator /=(const Vector2& rkVector)
 		{
 			x /= rkVector.x;
 			y /= rkVector.y;
@@ -318,37 +318,37 @@ namespace Engine
 		}
 
 		/// @copydoc Vector3::length
-		inline float length() const
+		float length() const
 		{
 			return sqrtf(x * x + y * y);
 		}
 
 		/// @copydoc Vector3::squaredLength
-		inline float squaredLength() const
+		float squaredLength() const
 		{
 			return x * x + y * y;
 		}
 
 		/// @copydoc Vector3::distance
-		inline float distance(const Vector2& rhs) const
+		float distance(const Vector2& rhs) const
 		{
 			return (*this - rhs).length();
 		}
 
 		/// @copydoc Vector3::squaredDistance
-		inline float squaredDistance(const Vector2& rhs) const
+		float squaredDistance(const Vector2& rhs) const
 		{
 			return (*this - rhs).squaredLength();
 		}
 
 		/// @copydoc Vector3::dotProduct
-		inline float dotProduct(const Vector2& vec) const
+		float dotProduct(const Vector2& vec) const
 		{
 			return x * vec.x + y * vec.y;
 		}
 
 		/// @copydoc Vector3::normalise
-		inline float normalise()
+		float normalise()
 		{
 			float fLength = sqrtf(x * x + y * y);
 
@@ -368,7 +368,7 @@ namespace Engine
 		/** Returns a vector at a point half way between this and the passed
 		in vector.
 		*/
-		inline Vector2 midPoint(const Vector2& vec) const
+		Vector2 midPoint(const Vector2& vec) const
 		{
 			return Vector2(
 				(x + vec.x) * 0.5f,
@@ -378,7 +378,7 @@ namespace Engine
 		/** Returns true if the vector's scalar components are all greater
 		that the ones of the vector it is compared against.
 		*/
-		inline bool operator < (const Vector2& rhs) const
+		bool operator <(const Vector2& rhs) const
 		{
 			if (x < rhs.x && y < rhs.y)
 				return true;
@@ -388,7 +388,7 @@ namespace Engine
 		/** Returns true if the vector's scalar components are all smaller
 		that the ones of the vector it is compared against.
 		*/
-		inline bool operator > (const Vector2& rhs) const
+		bool operator >(const Vector2& rhs) const
 		{
 			if (x > rhs.x && y > rhs.y)
 				return true;
@@ -402,7 +402,7 @@ namespace Engine
 		value of x, y and z from both vectors. Lowest is taken just
 		numerically, not magnitude, so -1 < 0.
 		*/
-		inline void makeFloor(const Vector2& cmp)
+		void makeFloor(const Vector2& cmp)
 		{
 			if (cmp.x < x) x = cmp.x;
 			if (cmp.y < y) y = cmp.y;
@@ -415,7 +415,7 @@ namespace Engine
 		value of x, y and z from both vectors. Highest is taken just
 		numerically, not magnitude, so 1 > -3.
 		*/
-		inline void makeCeil(const Vector2& cmp)
+		void makeCeil(const Vector2& cmp)
 		{
 			if (cmp.x > x) x = cmp.x;
 			if (cmp.y > y) y = cmp.y;
@@ -428,7 +428,7 @@ namespace Engine
 		method will guarantee to generate one of them. If you need more
 		control you should use the Quaternion class.
 		*/
-		inline Vector2 perpendicular(void) const
+		Vector2 perpendicular() const
 		{
 			return Vector2(-y, x);
 		}
@@ -436,7 +436,7 @@ namespace Engine
 		/** Calculates the 2 dimensional cross-product of 2 vectors, which results
 		in a single floating point value which is 2 times the area of the triangle.
 		*/
-		inline float crossProduct(const Vector2& rkVector) const
+		float crossProduct(const Vector2& rkVector) const
 		{
 			return x * rkVector.y - y * rkVector.x;
 		}
@@ -463,16 +463,15 @@ namespace Engine
 		}*/
 
 		/** Returns true if this vector is zero length. */
-		inline bool isZeroLength(void) const
+		bool isZeroLength() const
 		{
 			float sqlen = (x * x) + (y * y);
 			return (sqlen < (1e-06 * 1e-06));
-
 		}
 
 		/** As normalise, except that this vector is unaffected and the
 		normalised vector is returned as a copy. */
-		inline Vector2 normalisedCopy(void) const
+		Vector2 normalisedCopy() const
 		{
 			Vector2 ret = *this;
 			ret.normalise();
@@ -482,7 +481,7 @@ namespace Engine
 		/** Calculates a reflection vector to the plane with the given normal .
 		@remarks NB assumes 'this' is pointing AWAY FROM the plane, invert if it is not.
 		*/
-		inline Vector2 reflect(const Vector2& normal) const
+		Vector2 reflect(const Vector2& normal) const
 		{
 			return Vector2(*this - (2 * this->dotProduct(normal) * normal));
 		}
@@ -535,15 +534,14 @@ namespace Engine
 
 		/** Function for writing to a stream.
 		*/
-		inline INTERFACES_EXPORT friend std::ostream& operator <<
-			(std::ostream& o, const Vector2& v)
+		INTERFACES_EXPORT friend std::ostream& operator <<
+		(std::ostream& o, const Vector2& v)
 		{
 			o << "Vector2(" << v.x << ", " << v.y << ")";
 			return o;
 		}
 	};
-	/** @} */
-	/** @} */
 
+	/** @} */
+	/** @} */
 }
-

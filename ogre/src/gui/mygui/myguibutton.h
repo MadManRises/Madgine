@@ -1,29 +1,30 @@
 #pragma once
 #include "gui/windows/button.h"
 
-namespace MyGUI {
+namespace MyGUI
+{
 	class Button;
 }
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
 			class MyGUIWindow;
 
 			class MyGUIButton :
 				public Button
 			{
 			public:
-				MyGUIButton(MyGUIWindow *w);
+				MyGUIButton(MyGUIWindow* w);
 
-				virtual void setText(const std::string &text) override;
+				void setText(const std::string& text) override;
 
 			private:
-				MyGUI::Button *mButton;
+				MyGUI::Button* mButton;
 			};
 		}
 	}
 }
-
-

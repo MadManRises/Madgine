@@ -1,29 +1,25 @@
 #pragma once
 
-#include "uniquecomponentcollector.h"
 #include "generic/singleton.h"
 
-namespace Engine{
-
-template <class T, class Collector>
-class UniqueComponent : public Collector::Base , public Singleton<T>
+namespace Engine
 {
-public:
-	using Collector::Base::Base;
+	template <class T, class Collector>
+	class UniqueComponent : public Collector::Base, public Singleton<T>
+	{
+	public:
+		using Collector::Base::Base;
 
-private:
-    virtual void __reg(){
-		(void)_reg;
-    }
+	private:
+		virtual void __reg()
+		{
+			(void)_reg;
+		}
 
-private:
-	static typename Collector::template ComponentRegistrator<T> _reg;
-};
+	private:
+		static typename Collector::template ComponentRegistrator<T> _reg;
+	};
 
-template <class T, class Collector>
-typename Collector::template ComponentRegistrator<T> UniqueComponent<T, Collector>::_reg;
-
-
+	template <class T, class Collector>
+	typename Collector::template ComponentRegistrator<T> UniqueComponent<T, Collector>::_reg;
 }
-
-

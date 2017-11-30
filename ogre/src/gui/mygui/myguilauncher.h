@@ -2,7 +2,8 @@
 
 #include "gui/guisystem.h"
 
-namespace MyGUI {
+namespace MyGUI
+{
 	struct MouseButton;
 	class Widget;
 	class Gui;
@@ -13,63 +14,64 @@ namespace MyGUI {
 	class InputManager;
 }
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
-			class MyGUILauncher : public GUISystem {
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			class MyGUILauncher : public GUISystem
+			{
 			public:
-				MyGUILauncher(Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr);
+				MyGUILauncher(Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr);
 				~MyGUILauncher();
 
-				virtual bool init() override;
-				virtual void finalize() override;
+				bool init() override;
+				void finalize() override;
 
 				// Inherited via GUISystem
-				virtual void injectKeyPress(const KeyEventArgs & arg) override;
-				virtual void injectKeyRelease(const KeyEventArgs & arg) override;
-				virtual void injectMousePress(const MouseEventArgs & arg) override;
-				virtual void injectMouseRelease(const MouseEventArgs & arg) override;
-				virtual void injectMouseMove(const MouseEventArgs & arg) override;
+				void injectKeyPress(const KeyEventArgs& arg) override;
+				void injectKeyRelease(const KeyEventArgs& arg) override;
+				void injectMousePress(const MouseEventArgs& arg) override;
+				void injectMouseRelease(const MouseEventArgs& arg) override;
+				void injectMouseMove(const MouseEventArgs& arg) override;
 
-			
 
-				virtual bool isCursorVisible() override;
-				virtual void setCursorVisibility(bool v) override;
-				virtual void setCursorPosition(const Ogre::Vector2 & pos) override;
-				virtual Ogre::Vector2 getCursorPosition() override;
-				virtual Ogre::Vector2 getScreenSize() override;
+				bool isCursorVisible() override;
+				void setCursorVisibility(bool v) override;
+				void setCursorPosition(const Ogre::Vector2& pos) override;
+				Ogre::Vector2 getCursorPosition() override;
+				Ogre::Vector2 getScreenSize() override;
 
 
 				static MyGUI::MouseButton convertButton(MouseButton::MouseButton buttonID);
 				static MouseButton::MouseButton convertButton(MyGUI::MouseButton buttonID);
 
-				std::array<float, 2> widgetRelative(MyGUI::Widget *w, int left = -1, int top = -1);
-				std::array<float, 2> relativeMoveDelta(MyGUI::Widget *w);
+				std::array<float, 2> widgetRelative(MyGUI::Widget* w, int left = -1, int top = -1) const;
+				std::array<float, 2> relativeMoveDelta(MyGUI::Widget* w) const;
 
-				void destroy(MyGUI::Widget *w);
+				void destroy(MyGUI::Widget* w);
 
 
 			private:
-				
-				MyGUI::Gui *mGUI;
-				MyGUI::OgrePlatform *mPlatform;
-				MyGUI::LayoutManager *mLayoutManager;
-				MyGUI::ResourceManager *mResourceManager;
-				MyGUI::InputManager *mInputManager;
-				MyGUI::OgreRenderManager *mRenderManager;
+
+				MyGUI::Gui* mGUI;
+				MyGUI::OgrePlatform* mPlatform;
+				MyGUI::LayoutManager* mLayoutManager;
+				MyGUI::ResourceManager* mResourceManager;
+				MyGUI::InputManager* mInputManager;
+				MyGUI::OgreRenderManager* mRenderManager;
 
 
-				Ogre::Viewport *mViewport;
-				Ogre::Camera *mCamera;
+				Ogre::Viewport* mViewport;
+				Ogre::Camera* mCamera;
 
-				MyGUI::Widget *mInternRootWindow;
+				MyGUI::Widget* mInternRootWindow;
 
 				float mScrollWheel;
 
 				Ogre::Vector2 mMousePosition;
 				Ogre::Vector2 mMoveDelta;
-
 			};
 		}
 	}

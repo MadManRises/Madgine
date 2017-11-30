@@ -1,3 +1,6 @@
+#pragma once
+
+
 #if defined(MADGINE_SERVER_BUILD) && defined(MADGINE_CLIENT_BUILD)
 #error "Both Server- and Client-config have been selected!"
 #elif defined(MADGINE_SERVER_BUILD)

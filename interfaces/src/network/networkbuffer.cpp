@@ -2,17 +2,17 @@
 
 #include "networkbuffer.h"
 
-namespace Engine {
-	namespace Network {
-
+namespace Engine
+{
+	namespace Network
+	{
 		NetworkBuffer::NetworkBuffer(SocketId socket) :
-			mSocket(socket)			
+			mSocket(socket)
 		{
-			
 		}
 
 
-		NetworkBuffer::NetworkBuffer(NetworkBuffer && other) :
+		NetworkBuffer::NetworkBuffer(NetworkBuffer&& other) noexcept :
 			buffered_streambuf(std::forward<NetworkBuffer>(other)),
 			mSocket(other.mSocket)
 		{
@@ -23,14 +23,14 @@ namespace Engine {
 		{
 			if (mSocket != Invalid_Socket)
 				SocketAPI::closeSocket(mSocket);
-		}		
+		}
 
-		size_t NetworkBuffer::rec(char *buf, size_t len)
+		size_t NetworkBuffer::rec(char* buf, size_t len)
 		{
 			return SocketAPI::recv(mSocket, buf, len);
 		}
 
-		size_t NetworkBuffer::send(char *buf, size_t len)
+		size_t NetworkBuffer::send(char* buf, size_t len)
 		{
 			return SocketAPI::send(mSocket, buf, len);
 		}
@@ -38,7 +38,6 @@ namespace Engine {
 		Serialize::StreamError NetworkBuffer::getError()
 		{
 			return SocketAPI::getError();
-		}	
-
+		}
 	}
 }

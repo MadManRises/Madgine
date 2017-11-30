@@ -6,30 +6,33 @@
 
 #include "scene/ogrescenemanager.h"
 
-namespace Engine {
-
+namespace Engine
+{
 	API_IMPL(Scene::Entity::Mesh, MAP_RO(MeshName, getName), MAP_RO(Visible, isVisible));
 
-	namespace Scene {
-		namespace Entity {
-
+	namespace Scene
+	{
+		namespace Entity
+		{
 			template <>
-			const char * const EntityComponent<Mesh>::sComponentName = "Mesh";
+			const char* const EntityComponent<Mesh>::sComponentName = "Mesh";
 
-			Mesh::Mesh(Entity &entity, const Scripting::LuaTable &table) :
+			Mesh::Mesh(Entity& entity, const Scripting::LuaTable& table) :
 				Mesh(entity, table.getValue("mesh").asDefault<std::string>(""))
-			{}
+			{
+			}
 
-			Mesh::Mesh(Entity & entity, const std::string & meshName) :
+			Mesh::Mesh(Entity& entity, const std::string& meshName) :
 				EntityComponent(entity),
-				mObject(nullptr),
-				mTransform(nullptr)
+				mTransform(nullptr),
+				mObject(nullptr)
 			{
 				setName(meshName);
 			}
 
 
-			Mesh::~Mesh() {
+			Mesh::~Mesh()
+			{
 				assert(!mObject);
 			}
 
@@ -43,7 +46,6 @@ namespace Engine {
 			void Mesh::finalize()
 			{
 				destroyObject();
-				
 			}
 
 			std::string Mesh::getName() const
@@ -51,10 +53,11 @@ namespace Engine {
 				return mObject ? mObject->getMesh()->getName() : "";
 			}
 
-			void Mesh::setName(const std::string & mesh)
+			void Mesh::setName(const std::string& mesh)
 			{
 				destroyObject();
-				if (!mesh.empty()) {
+				if (!mesh.empty())
+				{
 					mObject = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->createEntity(mesh);
 					mObject->addQueryFlags(Masks::ENTITY_MASK);
 					if (mTransform)
@@ -73,13 +76,15 @@ namespace Engine {
 					mObject->setVisible(b);
 			}
 
-			Ogre::Entity *Mesh::getMesh()
+			Ogre::Entity* Mesh::getMesh() const
 			{
 				return mObject;
 			}
 
-			void Mesh::destroyObject() {
-				if (mObject) {
+			void Mesh::destroyObject()
+			{
+				if (mObject)
+				{
 					if (mTransform)
 						mTransform->getNode()->detachObject(mObject);
 					static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->destroyEntity(mObject);
@@ -89,16 +94,13 @@ namespace Engine {
 
 			Vector3 Mesh::getCenter() const
 			{
-				if (mObject) {
+				if (mObject)
+				{
 					Ogre::Vector3 v = mObject->getWorldBoundingBox().getCenter();
-					return{ v.x, v.y, v.z };
+					return {v.x, v.y, v.z};
 				}
-				else {
-					return mTransform->getPosition();
-				}	
+				return mTransform->getPosition();
 			}
-
-
 		}
 	}
 }

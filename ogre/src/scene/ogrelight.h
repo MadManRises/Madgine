@@ -2,21 +2,22 @@
 
 #include "scene/light.h"
 
-namespace Engine {
-	namespace Scene {
-
-		class OgreLight : public Light {
+namespace Engine
+{
+	namespace Scene
+	{
+		class OgreLight : public Light
+		{
 		public:
-			OgreLight(Ogre::Light *light);
+			OgreLight(Ogre::Light* light);
 			virtual ~OgreLight();
 
 		protected:
-			virtual void onPositionChanged(const Vector3 &position) override;
-			virtual void onPowerChanged(float power) override;
+			void onPositionChanged(const Vector3& position) override;
+			void onPowerChanged(float power) override;
 
 		private:
-			Ogre::Light *mLight;
+			Ogre::Light* mLight;
 		};
-
 	}
 }

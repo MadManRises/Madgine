@@ -2,10 +2,10 @@
 
 #include "unithelper.h"
 
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template struct UnitHelper<ValueType, false>;
-
 	}
 }

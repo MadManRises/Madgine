@@ -11,20 +11,24 @@
 #ifdef _MSC_VER
 #pragma warning (push, 0)
 #endif
-#include <MYGUI\MyGUI.h>
-#include <MYGUI\MyGUI_OgrePlatform.h>
+#include <MYGUI/MyGUI.h>
+#include <MYGUI/MyGUI_OgrePlatform.h>
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
 
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
-			MyGUILauncher::MyGUILauncher(Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr) :
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
+			MyGUILauncher::MyGUILauncher(Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr) :
 				mGUI(nullptr),
-				mPlatform(nullptr),
+				mPlatform(nullptr), mLayoutManager(nullptr), mResourceManager(nullptr), mInputManager(nullptr),
+				mRenderManager(nullptr),
+				mInternRootWindow(nullptr),
 				mScrollWheel(0)
 			{
 				mCamera = sceneMgr->createCamera("ContentCamera");
@@ -53,13 +57,14 @@ namespace Engine {
 				mResourceManager = &MyGUI::ResourceManager::getInstance();
 				mInputManager = &MyGUI::InputManager::getInstance();
 				mRenderManager = &MyGUI::OgreRenderManager::getInstance();
-				
+
 
 				//mResourceManager->load("Project.xml");
 
-				mInternRootWindow = mGUI->createWidgetRealT("Widget", "PanelEmpty", { 0, 0, 1, 1 }, MyGUI::Align::Default, "Main", WindowNames::rootWindow);
+				mInternRootWindow = mGUI->createWidgetRealT("Widget", "PanelEmpty", {0, 0, 1, 1}, MyGUI::Align::Default, "Main",
+				                                            WindowNames::rootWindow);
 
-				mRootWindow = new MyGUIWindow(mInternRootWindow, this, 0);
+				mRootWindow = new MyGUIWindow(mInternRootWindow, this, nullptr);
 
 				setCursorVisibility(false);
 
@@ -68,73 +73,82 @@ namespace Engine {
 
 			void MyGUILauncher::finalize()
 			{
-				if (mRootWindow) {
+				if (mRootWindow)
+				{
 					mRootWindow->finalize();
 					delete mRootWindow;
 				}
-				if (mGUI) {
+				if (mGUI)
+				{
 					mGUI->shutdown();
 					delete mGUI;
 				}
 				return GUISystem::finalize();
 			}
 
-			void MyGUILauncher::injectKeyPress(const KeyEventArgs & arg)
+			void MyGUILauncher::injectKeyPress(const KeyEventArgs& arg)
 			{
 				mInputManager->injectKeyPress(MyGUI::KeyCode::Enum(arg.scancode), arg.text);
 			}
-			void MyGUILauncher::injectKeyRelease(const KeyEventArgs & arg)
+
+			void MyGUILauncher::injectKeyRelease(const KeyEventArgs& arg)
 			{
 				mInputManager->injectKeyRelease(MyGUI::KeyCode::Enum(arg.scancode));
 			}
-			void MyGUILauncher::injectMousePress(const MouseEventArgs & arg)
+
+			void MyGUILauncher::injectMousePress(const MouseEventArgs& arg)
 			{
 				mInputManager->injectMousePress(arg.position[0], arg.position[1], convertButton(arg.button));
 			}
-			void MyGUILauncher::injectMouseRelease(const MouseEventArgs & arg)
+
+			void MyGUILauncher::injectMouseRelease(const MouseEventArgs& arg)
 			{
 				mInputManager->injectMouseRelease(arg.position[0], arg.position[1], convertButton(arg.button));
 			}
-			void MyGUILauncher::injectMouseMove(const MouseEventArgs & arg)
+
+			void MyGUILauncher::injectMouseMove(const MouseEventArgs& arg)
 			{
 				mScrollWheel += arg.scrollWheel;
 				mMoveDelta = Ogre::Vector2(arg.moveDelta.data());
 				mMousePosition = Ogre::Vector2(arg.position.data());
 				mInputManager->injectMouseMove(arg.position[0], arg.position[1], mScrollWheel);
 			}
-			
+
 			bool MyGUILauncher::isCursorVisible()
 			{
 				return MyGUI::PointerManager::getInstance().isVisible();
 			}
+
 			void MyGUILauncher::setCursorVisibility(bool v)
 			{
 				MyGUI::PointerManager::getInstance().setVisible(v);
 			}
-			void MyGUILauncher::setCursorPosition(const Ogre::Vector2 & pos)
+
+			void MyGUILauncher::setCursorPosition(const Ogre::Vector2& pos)
 			{
 				MyGUI::InputManager::getInstance().injectMouseMove(pos.x, pos.y, 0);
 			}
+
 			Ogre::Vector2 MyGUILauncher::getCursorPosition()
 			{
-				const MyGUI::IntPoint &p = MyGUI::InputManager::getInstance().getMousePosition();
-				return{ (float)p.left, (float)p.top };
+				const MyGUI::IntPoint& p = MyGUI::InputManager::getInstance().getMousePosition();
+				return {static_cast<float>(p.left), static_cast<float>(p.top)};
 			}
-			
+
 
 			Ogre::Vector2 MyGUILauncher::getScreenSize()
 			{
-				const MyGUI::IntSize &size = MyGUI::RenderManager::getInstance().getViewSize();
-				return{ (float)size.width, (float)size.height };
+				const MyGUI::IntSize& size = MyGUI::RenderManager::getInstance().getViewSize();
+				return {static_cast<float>(size.width), static_cast<float>(size.height)};
 			}
 
 
-			std::array<float, 2> MyGUILauncher::relativeMoveDelta(MyGUI::Widget * w)
+			std::array<float, 2> MyGUILauncher::relativeMoveDelta(MyGUI::Widget* w) const
 			{
-				return{ {mMoveDelta.x / w->getWidth(), mMoveDelta.y / w->getHeight() } };
+				return {{mMoveDelta.x / w->getWidth(), mMoveDelta.y / w->getHeight()}};
 			}
 
-			void MyGUILauncher::destroy(MyGUI::Widget * w)
+			void MyGUILauncher::destroy(MyGUI::Widget* w)
 			{
 				mGUI->destroyWidget(w);
 			}
@@ -142,14 +156,15 @@ namespace Engine {
 
 			MyGUI::MouseButton MyGUILauncher::convertButton(MouseButton::MouseButton buttonID)
 			{
-				switch (buttonID) {
-				case Engine::GUI::MouseButton::LEFT_BUTTON:
+				switch (buttonID)
+				{
+				case MouseButton::LEFT_BUTTON:
 					return MyGUI::MouseButton::Left;
 
-				case Engine::GUI::MouseButton::RIGHT_BUTTON:
+				case MouseButton::RIGHT_BUTTON:
 					return MyGUI::MouseButton::Right;
 
-				case Engine::GUI::MouseButton::MIDDLE_BUTTON:
+				case MouseButton::MIDDLE_BUTTON:
 					return MyGUI::MouseButton::Middle;
 
 				default:
@@ -157,30 +172,31 @@ namespace Engine {
 				}
 			}
 
-			MouseButton::MouseButton MyGUILauncher::convertButton(MyGUI::MouseButton buttonID) {
-				switch (buttonID.getValue()) {
+			MouseButton::MouseButton MyGUILauncher::convertButton(MyGUI::MouseButton buttonID)
+			{
+				switch (buttonID.getValue())
+				{
 				case MyGUI::MouseButton::Left:
-					return Engine::GUI::MouseButton::LEFT_BUTTON;
+					return MouseButton::LEFT_BUTTON;
 				case MyGUI::MouseButton::Right:
-					return Engine::GUI::MouseButton::RIGHT_BUTTON;
+					return MouseButton::RIGHT_BUTTON;
 				case MyGUI::MouseButton::Middle:
-					return Engine::GUI::MouseButton::MIDDLE_BUTTON;
+					return MouseButton::MIDDLE_BUTTON;
 				default:
-					return Engine::GUI::MouseButton::LEFT_BUTTON;
+					return MouseButton::LEFT_BUTTON;
 				}
 			}
 
-			std::array<float, 2> MyGUILauncher::widgetRelative(MyGUI::Widget * w, int left, int top)
+			std::array<float, 2> MyGUILauncher::widgetRelative(MyGUI::Widget* w, int left, int top) const
 			{
-				if (left == -1) 
+				if (left == -1)
 					left = mMousePosition.x;
 				if (top == -1)
 					top = mMousePosition.y;
-				float x = (float)left - w->getPosition().left;
-				float y = (float)top - w->getPosition().top;
-				return{ { x / w->getWidth(), y / w->getHeight() } };
+				float x = static_cast<float>(left) - w->getPosition().left;
+				float y = static_cast<float>(top) - w->getPosition().top;
+				return {{x / w->getWidth(), y / w->getHeight()}};
 			}
-
 		}
 	}
 }

@@ -8,32 +8,34 @@
 
 #include <OgreTagPoint.h>
 
-namespace Engine {
-
+namespace Engine
+{
 	API_IMPL(Scene::Entity::OgreSkeletonVisualizer);
 
-	namespace Scene {
-		namespace Entity {
-
+	namespace Scene
+	{
+		namespace Entity
+		{
 			template <>
-			const char * const EntityComponent<OgreSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
+			const char* const EntityComponent<OgreSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
 
-			OgreSkeletonVisualizer::OgreSkeletonVisualizer(Entity &entity, const Scripting::LuaTable &table) :
+			OgreSkeletonVisualizer::OgreSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table),
-				mMesh(nullptr)
-			{}
+				mMesh(nullptr), mBoneSize(0), mShowBones(false)
+			{
+			}
 
 
-			OgreSkeletonVisualizer::~OgreSkeletonVisualizer() {
+			OgreSkeletonVisualizer::~OgreSkeletonVisualizer()
+			{
 			}
 
 			void OgreSkeletonVisualizer::init()
 			{
-
 				mMesh = getEntity().getComponent<Mesh>();
 
-				Ogre::Entity *entity = mMesh->getMesh();
-				Ogre::SceneManager *sceneMgr = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager();
+				Ogre::Entity* entity = mMesh->getMesh();
+				Ogre::SceneManager* sceneMgr = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager();
 
 				mBoneSize = 0.1f;
 
@@ -55,8 +57,8 @@ namespace Engine {
 
 					pBone->scale(Ogre::Vector3(0.1f, 0.1f, 0.1f));
 
-					Ogre::Entity *ent;
-					Ogre::TagPoint *tp;
+					Ogre::Entity* ent;
+					Ogre::TagPoint* tp;
 
 					// Absolutely HAVE to create bone representations first. Otherwise we would get the wrong child count
 					// because an attached object counts as a child
@@ -67,7 +69,7 @@ namespace Engine {
 						// There are no children, but we should still represent the bone
 						// Creates a bone of length 1 for leaf bones (bones without children)
 						ent = sceneMgr->createEntity("SkeletonDebug/BoneMesh");
-						tp = entity->attachObjectToBone(pBone->getName(), (Ogre::MovableObject*)ent);
+						tp = entity->attachObjectToBone(pBone->getName(), static_cast<Ogre::MovableObject*>(ent));
 						mBoneEntities.push_back(ent);
 					}
 					else
@@ -81,7 +83,7 @@ namespace Engine {
 								continue;
 
 							ent = sceneMgr->createEntity("SkeletonDebug/BoneMesh");
-							tp = entity->attachObjectToBone(pBone->getName(), (Ogre::MovableObject*)ent);
+							tp = entity->attachObjectToBone(pBone->getName(), static_cast<Ogre::MovableObject*>(ent));
 							mBoneEntities.push_back(ent);
 
 							tp->setScale(length, length, length);
@@ -103,7 +105,6 @@ namespace Engine {
 
 			void OgreSkeletonVisualizer::finalize()
 			{
-
 			}
 
 
@@ -115,12 +116,10 @@ namespace Engine {
 
 				mShowBones = show;
 
-				std::vector<Ogre::Entity*>::iterator it;
-				for (it = mBoneEntities.begin(); it < mBoneEntities.end(); ++it)
+				for (std::vector<Ogre::Entity*>::iterator it = mBoneEntities.begin(); it < mBoneEntities.end(); ++it)
 				{
-					((Ogre::Entity*)*it)->setVisible(show);
+					static_cast<Ogre::Entity*>(*it)->setVisible(show);
 				}
-
 			}
 
 
@@ -129,9 +128,10 @@ namespace Engine {
 				Ogre::String matName = "SkeletonDebug/BoneMat";
 
 				mBoneMatPtr = Ogre::MaterialManager::getSingleton().getByName(matName);
-				if (mBoneMatPtr.isNull())
+				if (!mBoneMatPtr)
 				{
-					mBoneMatPtr = Ogre::MaterialManager::getSingleton().create(matName, Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
+					mBoneMatPtr = Ogre::MaterialManager::getSingleton().create(
+						matName, Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
 
 					Ogre::Pass* p = mBoneMatPtr->getTechnique(0)->getPass(0);
 					p->setLightingEnabled(false);
@@ -148,14 +148,14 @@ namespace Engine {
 			{
 				Ogre::String meshName = "SkeletonDebug/BoneMesh";
 				mBoneMeshPtr = Ogre::MeshManager::getSingleton().getByName(meshName);
-				if (mBoneMeshPtr.isNull())
+				if (!mBoneMeshPtr)
 				{
 					Ogre::ManualObject mo("tmp");
 					mo.begin(mBoneMatPtr->getName());
 
 					Ogre::Vector3 basepos[6] =
 					{
-						Ogre::Vector3(0,0,0),
+						Ogre::Vector3(0, 0, 0),
 						Ogre::Vector3(mBoneSize, mBoneSize * 2, mBoneSize),
 						Ogre::Vector3(-mBoneSize, mBoneSize * 2, mBoneSize),
 						Ogre::Vector3(-mBoneSize, mBoneSize * 2, -mBoneSize),
@@ -238,8 +238,6 @@ namespace Engine {
 					mBoneMeshPtr = mo.convertToMesh(meshName, Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
 				}
 			}
-
-
 		}
 	}
 }

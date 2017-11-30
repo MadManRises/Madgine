@@ -7,44 +7,39 @@
 
 #include "scene/light.h"
 
-namespace Engine {
-namespace Scene {
-
-class MADGINE_SERVER_EXPORT ServerSceneManager :
-	public SceneManager<ServerSceneManager>
+namespace Engine
 {
-public:
-    ServerSceneManager();
-    virtual ~ServerSceneManager();	
+	namespace Scene
+	{
+		class MADGINE_SERVER_EXPORT ServerSceneManager :
+			public SceneManager<ServerSceneManager>
+		{
+		public:
+			ServerSceneManager();
+			virtual ~ServerSceneManager();
 
-    virtual bool init() override;
-	virtual void finalize() override;
-	
-	virtual Light * createLight() override;
-	virtual std::list<Light*> lights() override;
+			bool init() override;
+			void finalize() override;
 
-	virtual void clear() override;
+			Light* createLight() override;
+			std::list<Light*> lights() override;
 
-	virtual void writeState(Serialize::SerializeOutStream &out) const override;
-	virtual void readState(Serialize::SerializeInStream &in) override;
+			void clear() override;
 
-	void readScene(Serialize::SerializeInStream &in);
-	void writeScene(Serialize::SerializeOutStream &out) const;
+			void writeState(Serialize::SerializeOutStream& out) const override;
+			void readState(Serialize::SerializeInStream& in) override;
 
-	static constexpr const float sSceneRasterSize = .2f;
+			void readScene(Serialize::SerializeInStream& in);
+			void writeScene(Serialize::SerializeOutStream& out) const;
 
-protected:
-		
-    
-private:
+			static constexpr const float sSceneRasterSize = .2f;
 
-	std::string mStaticSceneName;
 
-	Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;
+		private:
 
-};
+			std::string mStaticSceneName;
 
+			Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;
+		};
+	}
 }
-}
-
-

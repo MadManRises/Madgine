@@ -2,16 +2,17 @@
 
 #include "serialize/serializemanager.h"
 
-namespace Engine {
-	namespace Serialize {
-
-		enum TopLevelIds {
+namespace Engine
+{
+	namespace Serialize
+	{
+		enum TopLevelIds
+		{
 			SCENE_MANAGER = BEGIN_USER_ID_SPACE,
 			UTIL,
 			SCRIPTING_MANAGER,
 			MADITOR,
 			BEGIN_MADGINE_USER_ID_SPACE
 		};
-
 	}
 }

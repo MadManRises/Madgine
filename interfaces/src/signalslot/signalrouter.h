@@ -1,55 +1,66 @@
 #pragma once
 
 #include "connection.h"
-#include "templates.h"
 
-namespace Engine {
-	namespace SignalSlot {
-
+namespace Engine
+{
+	namespace SignalSlot
+	{
 		template <class... _Ty>
-		class SignalRouter {
+		class SignalRouter
+		{
 		public:
 			SignalRouter() = default;
 
-			SignalRouter(const SignalRouter<_Ty...> &other) = delete;
+			SignalRouter(const SignalRouter<_Ty...>& other) = delete;
 
-			SignalRouter(SignalRouter<_Ty...> &&) = default;
+			SignalRouter(SignalRouter<_Ty...>&&) = default;
 
-			~SignalRouter() {
+			~SignalRouter()
+			{
 				disconnectAll();
 			}
 
-			SignalRouter<_Ty...> &operator=(const SignalRouter<_Ty...> &other) {
+			SignalRouter<_Ty...>& operator=(const SignalRouter<_Ty...>& other)
+			{
 				/*disconnectAll();
 				copyConnections(other);*/
 				return *this;
 			}
 
-			void operator()(_Ty... args) {
+			void operator()(_Ty ... args)
+			{
 				emit(args...);
 			}
 
-			void emit(_Ty... args) {
+			void emit(_Ty ... args)
+			{
 				auto end = mConnectedSlots.end();
 				auto it = mConnectedSlots.begin();
-				if (end != it) {
+				if (end != it)
+				{
 					--end;
 					bool keepGoing;
-					do{
+					do
+					{
 						keepGoing = it != end;
-						if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = it->lock()) {
+						if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = it->lock())
+						{
 							(*ptr)(args...);
 							++it;
 						}
-						else {
+						else
+						{
 							it = mConnectedSlots.erase(it);
 						}
-					} while (keepGoing);
+					}
+					while (keepGoing);
 				}
 			}
 
 			template <class T, class _ = std::enable_if_t<has_store<T>::value>>
-			std::weak_ptr<ConnectionBase> connect(T &slot) {
+			std::weak_ptr<ConnectionBase> connect(T& slot)
+			{
 				std::weak_ptr<ConnectionInstance<_Ty...>> conn = slot.connectionStore().template create<_Ty...>(&slot);
 				mConnectedSlots.emplace_back(
 					conn
@@ -58,17 +69,21 @@ namespace Engine {
 			}
 
 			template <class T, class _ = std::enable_if_t<!has_store<T>::value>>
-			std::weak_ptr<ConnectionBase> connect(const T &slot) {
-				std::weak_ptr<ConnectionInstance<_Ty...>> conn = GlobalConnectionManager::globalConnectionStore().template create<_Ty...>(slot);
+			std::weak_ptr<ConnectionBase> connect(const T& slot)
+			{
+				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().create<_Ty...>(slot);
 				mConnectedSlots.emplace_back(
 					conn
 				);
 				return conn;
 			}
 
-			void disconnectAll() {
-				for (const std::weak_ptr<ConnectionInstance<_Ty...>> &conn : mConnectedSlots) {
-					if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = conn.lock()) {
+			void disconnectAll()
+			{
+				for (const std::weak_ptr<ConnectionInstance<_Ty...>>& conn : mConnectedSlots)
+				{
+					if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = conn.lock())
+					{
 						ptr->disconnect();
 					}
 				}
@@ -76,15 +91,19 @@ namespace Engine {
 				mConnections.clear();
 			}
 
-			void copyConnections(const SignalRouter<_Ty...> &other) {
-				for (const std::weak_ptr<ConnectionInstance<_Ty...>> &conn : other.mConnectedSlots) {
-					if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = conn.lock()) {
+			void copyConnections(const SignalRouter<_Ty...>& other)
+			{
+				for (const std::weak_ptr<ConnectionInstance<_Ty...>>& conn : other.mConnectedSlots)
+				{
+					if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = conn.lock())
+					{
 						mConnectedSlots.emplace_back(ptr->clone());
 					}
 				}
 			}
 
-			ConnectionStore &connectionStore() {
+			ConnectionStore& connectionStore()
+			{
 				return mConnections;
 			}
 
@@ -92,6 +111,5 @@ namespace Engine {
 			ConnectionStore mConnections;
 			std::list<std::weak_ptr<ConnectionInstance<_Ty...>>> mConnectedSlots;
 		};
-
 	}
 }

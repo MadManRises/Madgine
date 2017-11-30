@@ -5,29 +5,25 @@
 #include "generic/keyvalue.h"
 
 
-namespace Engine {
-namespace Scripting {
+namespace Engine
+{
+	namespace Scripting
+	{
+		template <class T, class Base = ScopeBase>
+		class Scope : public Base
+		{
+		public:
+			using Base::Base;
 
-	
+			virtual const char* key() const
+			{
+				return API<T>::sName;
+			}
 
-template <class T, class Base = ScopeBase>
-class Scope : public Base {
-
-public:
-	using Base::Base;
-	
-	const char *key() const {
-		return API<T>::sName;
+			virtual KeyValueMapList maps() override
+			{
+				return Base::maps().merge(API<T>::sAPI);
+			}
+		};
 	}
-
-	virtual KeyValueMapList maps() override {
-		return Base::maps().merge(API<T>::sAPI);
-	}
-
-};
-
 }
-}
-
-
-

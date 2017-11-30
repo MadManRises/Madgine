@@ -43,7 +43,6 @@
 #include <assert.h>
 
 
-
 #include "interfacesforward.h"
 
 #include "generic/singleton.h"

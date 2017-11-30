@@ -1,13 +1,12 @@
-#pragma once 
+#pragma once
 
-#include "container.h"
-
-namespace Engine {
-	namespace Serialize {
-
+namespace Engine
+{
+	namespace Serialize
+	{
 		template <class traits, class Creator>
-		class UnsortedContainer : public SerializableContainer<traits, Creator> {
-
+		class UnsortedContainer : public SerializableContainer<traits, Creator>
+		{
 		public:
 			typedef SerializableContainer<traits, Creator> Base;
 			using Base::Base;
@@ -21,7 +20,8 @@ namespace Engine {
 		protected:
 
 
-			iterator read_iterator(SerializeInStream &in) {
+			iterator read_iterator(SerializeInStream& in)
+			{
 				int i;
 				in >> i;
 				iterator it = this->begin();
@@ -29,27 +29,28 @@ namespace Engine {
 				return it;
 			}
 
-			void write_iterator(SerializeOutStream &out, const const_iterator &it) const {
-				out << (int)std::distance(this->begin(), it);
+			void write_iterator(SerializeOutStream& out, const const_iterator& it) const
+			{
+				out << static_cast<int>(std::distance(this->begin(), it));
 			}
 
-			std::pair<iterator, bool> read_item(SerializeInStream &in) {
+			std::pair<iterator, bool> read_item(SerializeInStream& in)
+			{
 				return this->read_item_where_intern(read_iterator(in), in);
 			}
 
-			void write_item(SerializeOutStream &out, const const_iterator &it) const {
-				write_item(out, it, *it);
+			void write_item(SerializeOutStream& out, const const_iterator& it) const
+			{
+				this->write_item(out, it, *it);
 			}
 
-			void write_item(SerializeOutStream &out, const const_iterator &it, const Type &t) const {
+			void write_item(SerializeOutStream& out, const const_iterator& it, const Type& t) const
+			{
 				write_iterator(out, it);
-				write_item(out, t);
+				this->write_item(out, t);
 			}
 
 			using Base::write_item;
-
-
 		};
-
 	}
 }

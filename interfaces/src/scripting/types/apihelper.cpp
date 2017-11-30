@@ -3,41 +3,43 @@
 #include "apihelper.h"
 #include "generic/keyvalue.h"
 
-extern "C" {
+extern "C"
+{
 #include <lua.h>                                /* Always include this when calling Lua */
 #include <lauxlib.h>                            /* Always include this when calling Lua */
-#include <lualib.h>                             /* Always include this when calling Lua */
 }
 
-namespace Engine {
-	namespace Scripting {
-
+namespace Engine
+{
+	namespace Scripting
+	{
 		const luaL_Reg APIHelper::sIteratorMetafunctions[] =
 		{
-			{ "__gc", &lua_gc },
-			{ "__tostring", &lua_toString },
+			{"__gc", &lua_gc},
+			{"__tostring", &lua_toString},
 			//{ "__pairs", &lua_pairs },
 			//{"__newindex", &lua_newindex}
-			{ NULL, NULL }
+			{nullptr, nullptr}
 		};
 
-		int APIHelper::lua_gc(lua_State *state) {
-
-			std::shared_ptr<KeyValueIterator> *itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
+		int APIHelper::lua_gc(lua_State* state)
+		{
+			std::shared_ptr<KeyValueIterator>* itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
 			itP->~shared_ptr();
 			lua_pop(state, 1);
 			return 0;
 		}
 
-		int APIHelper::lua_toString(lua_State * state)
+		int APIHelper::lua_toString(lua_State* state)
 		{
-			std::shared_ptr<KeyValueIterator> *itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
+			std::shared_ptr<KeyValueIterator>* itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
 			lua_pop(state, 1);
 			lua_pushstring(state, (*itP)->key().c_str());
 			return 1;
 		}
 
-		void APIHelper::createMetatables(lua_State *state) {
+		void APIHelper::createMetatables(lua_State* state)
+		{
 			luaL_newmetatable(state, "Interfaces.kvIteratorMetatable");
 
 			luaL_setfuncs(state, sIteratorMetafunctions, 0);
@@ -92,10 +94,11 @@ namespace Engine {
 			return 1;
 		}*/
 
-		void APIHelper::pop(lua_State * state, int n)
+		void APIHelper::pop(lua_State* state, int n)
 		{
 			lua_pop(state, n);
 		}
+
 		/*
 		ValueType LuaHelper<ValueType>::convert(lua_State * state, int index)
 		{
@@ -105,16 +108,16 @@ namespace Engine {
 			
 		}*/
 
-		int APIHelper::stackSize(lua_State * state)
+		int APIHelper::stackSize(lua_State* state)
 		{
 			return lua_gettop(state);
 		}
 
-		int APIHelper::error(lua_State * state, const std::string & msg)
+		int APIHelper::error(lua_State* state, const std::string& msg)
 		{
 			return luaL_error(state, msg.c_str());
 		}
-		
+
 		/*int LuaRefHelper<Mapper>::push(lua_State * state, ScopeBase * ref, const Mapper & mapper)
 		{
 			return (*mapper.mPush)(state, ref);

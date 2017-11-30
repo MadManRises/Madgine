@@ -1,6 +1,7 @@
 #pragma once
 
-namespace Engine {
+namespace Engine
+{
 	class ValueType;
 
 	class InvScopePtr;
@@ -8,8 +9,8 @@ namespace Engine {
 	class KeyValueIterator;
 	class KeyValueMapList;
 
-	namespace Serialize {
-
+	namespace Serialize
+	{
 		class Stream;
 		class SerializeInStream;
 		class SerializeOutStream;
@@ -31,7 +32,8 @@ namespace Engine {
 
 		using SerializableUnitMap = std::map<size_t, SerializableUnitBase*>;
 
-		enum StreamError {
+		enum StreamError
+		{
 			NO_ERROR = 0,
 			WOULD_BLOCK,
 			ALREADY_CONNECTED,
@@ -41,20 +43,22 @@ namespace Engine {
 			UNKNOWN_ERROR
 		};
 
-		enum MessageType {
+		enum MessageType
+		{
 			STATE,
 			ACTION,
 			REQUEST
 		};
 
-		enum Command {
+		enum Command
+		{
 			INITIAL_STATE_DONE,
 			STREAM_EOF
 		};
-
 	}
-	namespace Scripting {
 
+	namespace Scripting
+	{
 		class ScriptingManager;
 
 		class ScopeBase;
@@ -62,35 +66,37 @@ namespace Engine {
 
 		class LuaState;
 		class LuaTable;
+		class LuaTableIterator;
 
 		struct Mapper;
 
 		class ArgumentList;
 		typedef std::map<std::string, ValueType> Stack;
 
-		typedef ValueType(*ApiMethod)(ScopeBase *, const ArgumentList &);
+		typedef ValueType (*ApiMethod)(ScopeBase*, const ArgumentList&);
 
 		namespace Parsing
 		{
 			class ScriptParser;
 		}
-
 	}
 
 
-	namespace Network {
+	namespace Network
+	{
 		class NetworkManager;
 		class NetworkStream;
-
 	}
 
 
-	namespace Hierarchy {
+	namespace Hierarchy
+	{
 		class any_ptr;
 	}
 
 
-	namespace Util {
+	namespace Util
+	{
 		struct TraceBack;
 
 		class LogListener;
@@ -99,17 +105,14 @@ namespace Engine {
 		class StandardLog;
 	}
 
-	namespace SignalSlot {
-
+	namespace SignalSlot
+	{
 		class ConnectionBase;
 		template <class... _Ty>
 		class ConnectionInstance;
 		class ConnectionManager;
 	}
-
-
 }
 
 struct lua_State;
 struct luaL_Reg;
-

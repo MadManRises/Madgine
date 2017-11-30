@@ -2,125 +2,128 @@
 
 #include "streams/serializestream.h"
 
-namespace Engine {
-namespace Serialize {
-
-class INTERFACES_EXPORT SerializableUnitBase
+namespace Engine
 {
-protected:
+	namespace Serialize
+	{
+		class INTERFACES_EXPORT SerializableUnitBase
+		{
+		protected:
 
-	SerializableUnitBase(size_t masterId = 0);
-	SerializableUnitBase(const SerializableUnitBase &other);
-	SerializableUnitBase(SerializableUnitBase &&other);
-	virtual ~SerializableUnitBase();
+			SerializableUnitBase(size_t masterId = 0);
+			SerializableUnitBase(const SerializableUnitBase& other);
+			SerializableUnitBase(SerializableUnitBase&& other) noexcept;
+			virtual ~SerializableUnitBase();
 
-public:
-	virtual const TopLevelSerializableUnitBase *topLevel() const;
+		public:
+			virtual const TopLevelSerializableUnitBase* topLevel() const;
 
-	virtual void writeState(SerializeOutStream &out) const;
-	virtual void readState(SerializeInStream &in);
+			virtual void writeState(SerializeOutStream& out) const;
+			virtual void readState(SerializeInStream& in);
 
-	void readAction(BufferedInOutStream &in);
-	void readRequest(BufferedInOutStream &in);
+			void readAction(BufferedInOutStream& in);
+			void readRequest(BufferedInOutStream& in);
 
-	void writeId(SerializeOutStream &out) const;
-	virtual size_t readId(SerializeInStream &in);
+			void writeId(SerializeOutStream& out) const;
+			virtual size_t readId(SerializeInStream& in);
 
-	void applySerializableMap(const std::map <size_t, SerializableUnitBase*> &map);
+			void applySerializableMap(const std::map<size_t, SerializableUnitBase*>& map);
 
-	virtual void writeCreationData(SerializeOutStream &out) const;
+			virtual void writeCreationData(SerializeOutStream& out) const;
 
-	size_t slaveId();
-	size_t masterId();	
+			size_t slaveId() const;
+			size_t masterId() const;
 
-	bool isActive() const;
-	bool isMaster() const;
+			bool isActive() const;
+			bool isMaster() const;
 
-protected:
-	void activate();
-	void deactivate();
+		protected:
+			void activate();
+			void deactivate();
 
-	void setActive(bool b);
+			void setActive(bool b);
 
-	virtual bool filter(Stream *stream);
-	
-private:
+			virtual bool filter(Stream* stream);
 
-	virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
-	BufferedOutStream *getSlaveMessageTarget();	
+		private:
+
+			virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
+			BufferedOutStream* getSlaveMessageTarget() const;
 
 
-	size_t addObservable(Observable* val);
-	void addSerializable(Serializable *val);
+			size_t addObservable(Observable* val);
+			void addSerializable(Serializable* val);
 
-	void setSlaveId(size_t id);
-	void clearSlaveId();
+			void setSlaveId(size_t id);
+			void clearSlaveId();
 
-	void setActiveFlag(bool b);
-	void notifySetActive(bool active);
-	
-	
-	//void writeHeader(SerializeOutStream &out, bool isAction);		
+			void setActiveFlag(bool b);
+			void notifySetActive(bool active);
 
-	friend class SerializeManager;
-	friend class Serializable;
-	friend class Observable;
-	friend class TopLevelSerializableUnitBase;
-	template <class T, bool b>
-	friend struct UnitHelper;
-	template <class T>
-	friend class SerializedUnit;
-	/*template <template <class...> class C, class Creator, class T>
-	friend class SerializableContainer;
-	*/
 
-private:
-	std::vector<Observable*> mObservedValues;
-	std::vector<Serializable*> mStateValues;
+			//void writeHeader(SerializeOutStream &out, bool isAction);		
 
-	SerializableUnitBase *mParent;
+			friend class SerializeManager;
+			friend class Serializable;
+			friend class Observable;
+			friend class TopLevelSerializableUnitBase;
+			template <class T, bool b>
+			friend struct UnitHelper;
+			template <class T>
+			friend class SerializedUnit;
+			/*template <template <class...> class C, class Creator, class T>
+			friend class SerializableContainer;
+			*/
 
-	size_t mSlaveId;
-	std::pair<size_t, SerializableUnitMap*> mMasterId;
+		private:
+			std::vector<Observable*> mObservedValues;
+			std::vector<Serializable*> mStateValues;
 
-	bool mActive;
+			SerializableUnitBase* mParent;
 
-	////Stack
+			size_t mSlaveId;
+			std::pair<size_t, SerializableUnitMap*> mMasterId;
 
-public:
-	template <class T>
-	static SerializableUnitBase *findParent(T *t) {
-		return findParent(t, t + 1);
-	}
+			bool mActive;
 
-protected:
-	void postConstruct();
-	void setParent(SerializableUnitBase *parent);
+			////Stack
 
-private:
-	void insertInstance();
-	void removeInstance();
+		public:
+			template <class T>
+			static SerializableUnitBase* findParent(T* t)
+			{
+				return findParent(t, t + 1);
+			}
 
-	static SerializableUnitBase * findParent(void *from, void *to);
-	static std::list<SerializableUnitBase*>::iterator findParentIt(void *from, void *to);
+		protected:
+			void postConstruct();
+			void setParent(SerializableUnitBase* parent);
 
-	virtual size_t getSize() const = 0;
+		private:
+			void insertInstance();
+			void removeInstance();
 
-	struct intern {
-		static thread_local std::list<SerializableUnitBase*> stack;
-	};
-};
+			static SerializableUnitBase* findParent(void* from, void* to);
+			static std::list<SerializableUnitBase*>::iterator findParentIt(void* from, void* to);
 
-template <class T, class Base = SerializableUnitBase>
-class SerializableUnit : public Base {
-protected:
-	using Base::Base;
-	
-	virtual size_t getSize() const override {
-		return sizeof(T);
-	}
-};
+			virtual size_t getSize() const = 0;
 
-} // namespace Serialize
+			struct intern
+			{
+				static thread_local std::list<SerializableUnitBase*> stack;
+			};
+		};
+
+		template <class T, class Base = SerializableUnitBase>
+		class SerializableUnit : public Base
+		{
+		protected:
+			using Base::Base;
+
+			virtual size_t getSize() const override
+			{
+				return sizeof(T);
+			}
+		};
+	} // namespace Serialize
 } // namespace Core
-

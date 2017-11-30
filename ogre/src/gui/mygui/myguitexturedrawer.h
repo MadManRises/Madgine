@@ -2,26 +2,30 @@
 
 #include "gui/windows/texturedrawer.h"
 
-namespace MyGUI {
+namespace MyGUI
+{
 	class ImageBox;
 }
 
-namespace Engine {
-	namespace GUI {
-		namespace MyGui {
-
+namespace Engine
+{
+	namespace GUI
+	{
+		namespace MyGui
+		{
 			class MyGUIWindow;
 
-			class MyGUITextureDrawer : public TextureDrawer {
+			class MyGUITextureDrawer : public TextureDrawer
+			{
 			public:
-				MyGUITextureDrawer(MyGUIWindow *w);
-				
+				MyGUITextureDrawer(MyGUIWindow* w);
+
 				// Inherited via TextureDrawer
-				virtual void setTexture(const Ogre::TexturePtr &tex) override;
-				virtual void setTexture(const std::string &name) override;			
+				void setTexture(const Ogre::TexturePtr& tex) override;
+				void setTexture(const std::string& name) override;
 
 			private:
-				MyGUI::ImageBox *mTextureDrawer;
+				MyGUI::ImageBox* mTextureDrawer;
 			};
 		}
 	}
