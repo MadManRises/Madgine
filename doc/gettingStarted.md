@@ -17,7 +17,7 @@ Also atleast one of the following Libraries needs to be available:
 
 
 *Recommended:*        
-If you want to use the Maditor-IDE, the following libraries will also be neccessary:
+If you want to use the [Maditor-IDE](https://github.com/MadManRises/Maditor), the following libraries will also be neccessary:
 
 * [Boost](.) vx.x or higher
 * [Qt5](.)
