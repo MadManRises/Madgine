@@ -440,7 +440,7 @@ namespace Engine
 
 		template <class... Ty, size_t... Is>
 		TupleUnitHelper<std::tuple<typename UnitHelper<Ty>::Type...>, Is...> tupleUnitHelperDeducer(
-			std::index_sequence<Is...>) = delete;
+			std::index_sequence<Is...>);
 
 		template <class... Ty>
 		struct UnitHelper<std::tuple<Ty...>, false> : public decltype(tupleUnitHelperDeducer<Ty...>(

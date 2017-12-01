@@ -439,7 +439,7 @@ namespace Engine
 					}
 					this->setItemActiveFlag(*it, false);
 				}
-				if (isItemLocallyActive(it))
+				if (this->isItemLocallyActive(it))
 				{
 					mSignal.emit(it, BEFORE | REMOVE_ITEM);
 					this->notifySetItemActive(*it, false);

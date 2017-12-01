@@ -3,6 +3,7 @@
 #include "uniquecomponent.h"
 #include "globalapicomponentbase.h"
 #include "scripting/types/scope.h"
+#include "uniquecomponentcollector.h"
 
 namespace Engine
 {

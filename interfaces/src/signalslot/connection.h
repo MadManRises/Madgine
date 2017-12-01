@@ -147,7 +147,7 @@ namespace Engine
 					{
 						if (std::shared_ptr<ConnectionInstance<_Ty...>> innerPtr = ptr.lock())
 						{
-							innerPtr->template Connection<_Ty...>::operator()(args...);
+							innerPtr->Connection<_Ty...>::operator()(args...);
 						}
 					});
 				}
