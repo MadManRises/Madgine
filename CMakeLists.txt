@@ -54,11 +54,7 @@ if (BUILD_TESTS)
 
 	include_directories(${GTEST_DIR}/include)
 
-	if (WIN32 )
-		set (debug_suffix "d")
-	else()
-		set (debug_suffix "")
-	endif ()
+	set (debug_suffix "d")
 
 	set (GTEST_LIBS 
 		debug ${GTEST_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${debug_suffix}${CMAKE_STATIC_LIBRARY_SUFFIX} 
