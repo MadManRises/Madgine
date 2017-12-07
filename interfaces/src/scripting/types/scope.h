@@ -17,12 +17,12 @@ namespace Engine
 
 			virtual const char* key() const
 			{
-				return API<T>::sName;
+				return API<T>::name();
 			}
 
 			virtual KeyValueMapList maps() override
 			{
-				return Base::maps().merge(API<T>::sAPI);
+				return Base::maps().merge(API<T>::api());
 			}
 		};
 	}

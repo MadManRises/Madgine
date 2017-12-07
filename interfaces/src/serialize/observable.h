@@ -6,6 +6,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
+		
 		class INTERFACES_EXPORT Observable
 		{
 		public:

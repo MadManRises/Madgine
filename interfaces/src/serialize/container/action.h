@@ -1,125 +1,125 @@
 #pragma once
 
 #include "../observable.h"
-#include "generic/templates.h"
+#include "serialize/serializehelper.h"
 #include "Serialize/Streams/bufferedstream.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		template <bool executeOnMasterOnly, bool callByMasterOnly>
-		struct _ActionPolicy
-		{
-			static constexpr bool sExecuteOnMasterOnly = executeOnMasterOnly;
-			static constexpr bool sCallByMasterOnly = callByMasterOnly;
-		};
-
-		struct ActionPolicy
-		{
-			//using masterOnly = _ActionPolicy<true, true>;
-			using request = _ActionPolicy<true, false>;
-			using broadcast = _ActionPolicy<false, false>;
-			using notification = _ActionPolicy<false, true>;
-		};
-
-		template <class F, F f, class Config, class T, class R, class... _Ty>
-		class ActionImpl : public Observable
-		{
-		public:
-
-			ActionImpl() :
-				mParent(dynamic_cast<T*>(parent()))
+		namespace __actionpolicy__impl__{
+			template <bool executeOnMasterOnly, bool callByMasterOnly>
+			struct _ActionPolicy
 			{
-				if (!mParent)
-					throw 0;
-			}
+				static constexpr bool sExecuteOnMasterOnly = executeOnMasterOnly;
+				static constexpr bool sCallByMasterOnly = callByMasterOnly;
+			};
 
-			void operator()(_Ty ... args, const std::set<ParticipantId>& targets = {})
-			{
-				tryCall(id(), targets, args...);
-			}
 
-			void readAction(SerializeInStream& in) override
+			template <class F, F f, class Config, class T, class R, class... _Ty>
+			class ActionImpl : public Observable
 			{
-				std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
-				TupleSerializer::readTuple(args, in);
-				TupleUnpacker<const std::set<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
-			}
+			public:
 
-			void readRequest(BufferedInOutStream& in) override
-			{
-				if (!Config::sCallByMasterOnly)
+				ActionImpl() :
+					mParent(dynamic_cast<T*>(parent()))
+				{
+					if (!mParent)
+						throw 0;
+				}
+
+				void operator()(_Ty ... args, const std::set<ParticipantId>& targets = {})
+				{
+					tryCall(id(), targets, args...);
+				}
+
+				void readAction(SerializeInStream& in) override
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 					TupleSerializer::readTuple(args, in);
-					TupleUnpacker<ParticipantId, const std::set<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
+					TupleUnpacker<const std::set<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
 				}
-			}
 
-			void setVerify(std::function<bool(ParticipantId, _Ty ...)> verify)
-			{
-				mVerify = verify;
-			}
-
-
-		protected:
-			bool verify(ParticipantId id, _Ty ... args)
-			{
-				return !mVerify || mVerify(id, args...);
-			}
-
-		private:
-			void call(const std::set<ParticipantId>& targets, _Ty ... args)
-			{
-				if (!Config::sExecuteOnMasterOnly)
+				void readRequest(BufferedInOutStream& in) override
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets(targets))
+					if (!Config::sCallByMasterOnly)
 					{
-						TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
-						out->endMessage();
+						std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
+						TupleSerializer::readTuple(args, in);
+						TupleUnpacker<ParticipantId, const std::set<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
 					}
 				}
-				else
-				{
-					assert(targets.empty());
-				}
-				(mParent ->* f)(args...);
-			}
 
-			void tryCall(ParticipantId id, const std::set<ParticipantId>& targets, _Ty ... args)
-			{
-				if (verify(id, args...))
+				void setVerify(std::function<bool(ParticipantId, _Ty ...)> verify)
 				{
-					if (isMaster())
+					mVerify = verify;
+				}
+
+
+			protected:
+				bool verify(ParticipantId id, _Ty ... args)
+				{
+					return !mVerify || mVerify(id, args...);
+				}
+
+			private:
+				void call(const std::set<ParticipantId>& targets, _Ty ... args)
+				{
+					if (!Config::sExecuteOnMasterOnly)
 					{
-						call(targets, args...);
-					}
-					else
-					{
-						if (!Config::sCallByMasterOnly && targets.empty())
+						for (BufferedOutStream* out : getMasterActionMessageTargets(targets))
 						{
-							BufferedOutStream* out = getSlaveActionMessageTarget();
 							TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
 							out->endMessage();
 						}
+					}
+					else
+					{
+						assert(targets.empty());
+					}
+					(mParent ->* f)(args...);
+				}
+
+				void tryCall(ParticipantId id, const std::set<ParticipantId>& targets, _Ty ... args)
+				{
+					if (verify(id, args...))
+					{
+						if (isMaster())
+						{
+							call(targets, args...);
+						}
 						else
 						{
-							throw 0;
+							if (!Config::sCallByMasterOnly && targets.empty())
+							{
+								BufferedOutStream* out = getSlaveActionMessageTarget();
+								TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
+								out->endMessage();
+							}
+							else
+							{
+								throw 0;
+							}
 						}
 					}
 				}
-			}
 
-		private:
-			std::function<bool(ParticipantId, _Ty ...)> mVerify;
-			T* mParent;
+			private:
+				std::function<bool(ParticipantId, _Ty ...)> mVerify;
+				T* mParent;
+			};
+		}
+		
+		struct ActionPolicy
+		{
+			//using masterOnly = _ActionPolicy<true, true>;
+			using request = __actionpolicy__impl__::_ActionPolicy<true, false>;
+			using broadcast = __actionpolicy__impl__::_ActionPolicy<false, false>;
+			using notification = __actionpolicy__impl__::_ActionPolicy<false, true>;
 		};
 
-		/*template <auto f, class C>
-		using Action = MemberFunctionWrapper<ActionImpl, f, C>;*/
-
 		template <typename F, F f, class C>
-		using Action = typename MemberFunctionCapture<ActionImpl, F, f, C>::type;
+		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;
 	}
 }

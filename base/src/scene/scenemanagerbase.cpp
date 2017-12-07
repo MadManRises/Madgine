@@ -1,20 +1,22 @@
 #include "baselib.h"
 
-#include "scenemanager.h"
+#include "scenemanagerbase.h"
 
 #include "serialize/toplevelids.h"
 
 #include "entity/entity.h"
 
-namespace Engine
-{
+#include "generic/transformIt.h"
+
 	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
 		MAP_RO(Active, isActive));
 
-#ifdef _MSC_VER
-	template class MADGINE_BASE_EXPORT Scene::SceneComponentCollector;
-#endif
+namespace Engine
+{
 
+	BASE_COLLECTOR_IMPL(Scene::SceneComponentCollector);
+
+	SINGLETON_IMPL(Scene::SceneManagerBase);
 
 	namespace Scene
 	{

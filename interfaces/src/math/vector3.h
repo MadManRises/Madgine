@@ -155,12 +155,12 @@ namespace Engine
 
 		bool operator ==(const Vector3& rkVector) const
 		{
-			return (x == rkVector.x && y == rkVector.y && z == rkVector.z);
+			return x == rkVector.x && y == rkVector.y && z == rkVector.z;
 		}
 
 		bool operator !=(const Vector3& rkVector) const
 		{
-			return (x != rkVector.x || y != rkVector.y || z != rkVector.z);
+			return x != rkVector.x || y != rkVector.y || z != rkVector.z;
 		}
 
 		// arithmetic operations
@@ -677,8 +677,8 @@ namespace Engine
 		/** Returns true if this vector is zero length. */
 		bool isZeroLength() const
 		{
-			float sqlen = (x * x) + (y * y) + (z * z);
-			return (sqlen < (1e-06 * 1e-06));
+			float sqlen = x * x + y * y + z * z;
+			return sqlen < 1e-06 * 1e-06;
 		}
 
 		/** As normalise, except that this vector is unaffected and the
@@ -695,7 +695,7 @@ namespace Engine
 		*/
 		Vector3 reflect(const Vector3& normal) const
 		{
-			return Vector3(*this - (2 * this->dotProduct(normal) * normal));
+			return Vector3(*this - 2 * this->dotProduct(normal) * normal);
 		}
 
 		/** Returns whether this vector is within a positional tolerance
@@ -755,7 +755,7 @@ namespace Engine
 
 		/** Function for writing to a stream.
 		*/
-		INTERFACES_EXPORT friend std::ostream& operator <<
+		friend std::ostream& operator <<
 		(std::ostream& o, const Vector3& v)
 		{
 			o << "Vector3(" << v.x << ", " << v.y << ", " << v.z << ")";

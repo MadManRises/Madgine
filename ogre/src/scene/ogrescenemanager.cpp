@@ -13,6 +13,9 @@
 
 namespace Engine
 {
+
+	template <> thread_local Scene::OgreSceneManager *Singleton<Scene::OgreSceneManager>::sSingleton = nullptr;
+
 	namespace Scene
 	{
 		OgreSceneManager::OgreSceneManager(Ogre::Root* root) :
@@ -457,7 +460,7 @@ namespace Engine
 		bool OgreSceneManager::rayToTerrainPoint(const Ogre::Ray& ray,
 		                                         Ogre::Vector3& result, Ogre::uint32 mask)
 		{
-			if (mTerrainGroup && (mask & Entity::Masks::TERRAIN_MASK))
+			if (mTerrainGroup && mask & Entity::Masks::TERRAIN_MASK)
 			{
 				// Perform the scene query
 				Ogre::TerrainGroup::RayResult r = mTerrainGroup->rayIntersects(ray);
@@ -523,15 +526,15 @@ namespace Engine
 			{
 				// stop checking if we have found a raycast hit that is closer
 				// than all remaining entities
-				if ((closest_distance >= 0.0f) &&
-					(closest_distance < query_result[qr_idx].distance))
+				if (closest_distance >= 0.0f &&
+					closest_distance < query_result[qr_idx].distance)
 				{
 					break;
 				}
 
 				// only check this result if its a hit against an entity
-				if ((query_result[qr_idx].movable != nullptr) &&
-					(query_result[qr_idx].movable->getMovableType().compare("Entity") == 0))
+				if (query_result[qr_idx].movable != nullptr &&
+					query_result[qr_idx].movable->getMovableType().compare("Entity") == 0)
 				{
 					// get the entity to check
 					Ogre::Entity* pentity = static_cast<Ogre::Entity *>
@@ -575,8 +578,8 @@ namespace Engine
 						// if it was a hit check if its the closest
 						if (hit.first)
 						{
-							if ((closest_distance < 0.0f) ||
-								(hit.second < closest_distance))
+							if (closest_distance < 0.0f ||
+								hit.second < closest_distance)
 							{
 								// this is the closest so far, save it off
 								closest_distance = hit.second;
@@ -603,10 +606,10 @@ namespace Engine
 			{
 				// raycast success
 				result = closest_result;
-				return (true);
+				return true;
 			}
 			// raycast failed
-			return (false);
+			return false;
 		}
 
 
@@ -666,7 +669,7 @@ namespace Engine
 
 				Ogre::VertexData* vertex_data = submesh->useSharedVertices ? mesh->sharedVertexData : submesh->vertexData;
 
-				if ((!submesh->useSharedVertices) || (submesh->useSharedVertices
+				if (!submesh->useSharedVertices || (submesh->useSharedVertices
 					&& !added_shared))
 				{
 					if (submesh->useSharedVertices)
@@ -697,7 +700,7 @@ namespace Engine
 
 						Ogre::Vector3 pt(pReal[0], pReal[1], pReal[2]);
 
-						vertices[current_offset + j] = (orient * (pt * scale)) + position;
+						vertices[current_offset + j] = orient * (pt * scale) + position;
 					}
 
 					vbuf->unlock();
@@ -712,14 +715,14 @@ namespace Engine
 					continue;
 				// need to check if index buffer is valid (which will be not if the mesh doesn't have triangles like a pointcloud)
 
-				bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
+				bool use32bitindexes = ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT;
 
 				unsigned long* pLong = static_cast<unsigned long *>(ibuf->lock(
 					Ogre::HardwareBuffer::HBL_READ_ONLY));
 				unsigned short* pShort = reinterpret_cast<unsigned short *>(pLong);
 
 
-				size_t offset = (submesh->useSharedVertices) ? shared_offset : current_offset;
+				size_t offset = submesh->useSharedVertices ? shared_offset : current_offset;
 				size_t index_start = index_data->indexStart;
 				size_t last_index = numTris * 3 + index_start;
 
@@ -805,7 +808,7 @@ namespace Engine
 					Ogre::SubMesh* submesh = mesh->getSubMesh(i);
 
 					Ogre::VertexData* vertex_data = submesh->useSharedVertices ? mesh->sharedVertexData : submesh->vertexData;
-					if ((!submesh->useSharedVertices) || (submesh->useSharedVertices && !added_shared))
+					if (!submesh->useSharedVertices || (submesh->useSharedVertices && !added_shared))
 					{
 						if (submesh->useSharedVertices)
 						{
@@ -824,11 +827,11 @@ namespace Engine
 
 							Ogre::Vector3 pt;
 
-							pt.x = (*pReal++);
-							pt.y = (*pReal++);
-							pt.z = (*pReal++);
+							pt.x = *pReal++;
+							pt.y = *pReal++;
+							pt.z = *pReal++;
 
-							pt = (orient * (pt * scale)) + position;
+							pt = orient * (pt * scale) + position;
 
 							vertices[current_offset + j].x = pt.x;
 							vertices[current_offset + j].y = pt.y;
@@ -844,13 +847,13 @@ namespace Engine
 					unsigned short* pShort;
 					unsigned int* pInt;
 					Ogre::HardwareIndexBufferSharedPtr ibuf = index_data->indexBuffer;
-					bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
+					bool use32bitindexes = ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT;
 					if (use32bitindexes) pInt = static_cast<unsigned int*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
 					else pShort = static_cast<unsigned short*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
 
 					for (size_t k = 0; k < numTris; ++k)
 					{
-						size_t offset = (submesh->useSharedVertices) ? shared_offset : current_offset;
+						size_t offset = submesh->useSharedVertices ? shared_offset : current_offset;
 
 						unsigned int vindex = use32bitindexes ? *pInt++ : *pShort++;
 						indices[index_offset + 0] = vindex + offset;

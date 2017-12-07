@@ -5,6 +5,9 @@
 
 namespace Engine
 {
+
+	SINGLETON_IMPL(Util::Profiler);
+
 	namespace Util
 	{
 		Profiler::Profiler() :
@@ -54,63 +57,6 @@ namespace Engine
 			return std::make_tuple([this]() { return mCurrentInterval; });
 		}
 
-		ProfileWrapper::ProfileWrapper(const std::string& name)
-		{
-			Profiler* p = Profiler::getSingletonPtr();
-			if (p)
-				p->startProfiling(name);
-		}
 
-		ProfileWrapper::~ProfileWrapper()
-		{
-			Profiler* p = Profiler::getSingletonPtr();
-			if (p)
-				p->stopProfiling();
-		}
-
-		size_t ProcessStats::averageDuration() const
-		{
-			return mAccumulatedDuration / 20;
-		}
-
-		void ProcessStats::start()
-		{
-			assert(!mStarted);
-			mStarted = true;
-			mStart = std::chrono::high_resolution_clock::now();
-		}
-
-		void ProcessStats::stop()
-		{
-			assert(mStarted);
-			mStarted = false;
-			auto end = std::chrono::high_resolution_clock::now();
-			size_t duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - mStart).count();
-
-			//mAccumulatedDuration += duration - mBuffer[mRecordIndex];
-			mBuffer[mRecordIndex] = duration;
-			++mRecordIndex;
-			mRecordIndex %= 20;
-		}
-
-		ProcessStats& ProcessStats::addChild(const std::string& child)
-		{
-			return mChildren.try_emplace(child, this).first->second;
-		}
-
-		bool ProcessStats::hasParent() const
-		{
-			return mParent != nullptr;
-		}
-
-		const ProcessStats* ProcessStats::parent() const
-		{
-			return mParent;
-		}
-
-		ProcessStats* ProcessStats::parent()
-		{
-			return mParent;
-		}
 	}
 }

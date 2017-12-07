@@ -16,8 +16,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <>
-			const char* const EntityComponent<OgreSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
+			ENTITYCOMPONENT_IMPL(SkeletonVisualizer, OgreSkeletonVisualizer);
 
 			OgreSkeletonVisualizer::OgreSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table),

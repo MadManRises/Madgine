@@ -7,6 +7,8 @@
 
 namespace Engine
 {
+	template <> thread_local Scene::ServerSceneManager *Singleton<Scene::ServerSceneManager>::sSingleton = nullptr;
+
 	namespace Scene
 	{
 		ServerSceneManager::ServerSceneManager()

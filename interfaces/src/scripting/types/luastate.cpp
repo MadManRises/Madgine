@@ -238,7 +238,7 @@ namespace Engine
 			else if (lua_isuserdata(state, -1))
 			{
 				it = ValueType::fromStack(state, -1).as<std::shared_ptr<KeyValueIterator>>();
-				++(*it);
+				++*it;
 			}
 
 			if (it)

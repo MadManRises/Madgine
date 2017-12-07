@@ -25,6 +25,7 @@ namespace Engine
 		struct MessageHeader;
 		class SerializeManager;
 
+		struct CompareStreamId;
 
 		typedef size_t ParticipantId;
 
@@ -97,6 +98,9 @@ namespace Engine
 
 	namespace Util
 	{
+		
+		class Log;
+
 		struct TraceBack;
 
 		class LogListener;

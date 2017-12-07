@@ -12,8 +12,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <>
-			const char* const EntityComponent<Mesh>::sComponentName = "Mesh";
+			ENTITYCOMPONENT_IMPL(Mesh, Mesh);
 
 			Mesh::Mesh(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table),

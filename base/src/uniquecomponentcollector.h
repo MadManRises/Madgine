@@ -4,11 +4,13 @@
 
 namespace Engine
 {
-	template <class _Base, class Store, template <class...> class Container = std::list, class... _Ty>
-	class UniqueComponentCollector : Store
+	template <class _Base, class _Store, template <class...> class Container = std::list, class... _Ty>
+	class UniqueComponentCollector : _Store
 	{
 	public:
 		typedef _Base Base;
+		typedef std::function<std::unique_ptr<Base>(_Ty...)> F;
+		typedef _Store Store;
 
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
@@ -106,12 +108,18 @@ namespace Engine
 	class MADGINE_BASE_EXPORT BaseCreatorStore
 	{
 	protected:
-		static std::list<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents()
-		{
-			static std::list<std::function<std::unique_ptr<Base>(_Ty ...)>> dummy;
-			return dummy;
-		}
+		static std::list<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents();
 	};
+
+	#define BASE_COLLECTOR_IMPL(Collector) template<> \
+	DLL_EXPORT std::list<Collector::F>& Collector::Store::sComponents() \
+		{ \
+			static std::list<Collector::F> dummy; \
+			return dummy; \
+		}\
+		SINGLETON_IMPL(Collector)
+	
+
 
 	template <class Base, template <class...> class Container = std::list, class... _Ty>
 	class MADGINE_BASE_EXPORT BaseUniqueComponentCollector :

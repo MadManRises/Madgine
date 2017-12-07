@@ -3,15 +3,19 @@
 
 #include "appsettings.h"
 
-#include "util/standardlog.h"
+
 
 #include "framelistener.h"
 
 #include "scripting/types/globalapicomponent.h"
 
+
+API_IMPL(Engine::App::Application, MAP_F(shutdown));
+
 namespace Engine
-{
-	API_IMPL(App::Application, MAP_F(shutdown));
+{	
+
+	SINGLETON_IMPL(App::Application);
 
 	namespace App
 	{
@@ -28,8 +32,7 @@ namespace Engine
 
 		void Application::setup(const AppSettings& settings)
 		{
-			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
-			Util::UtilMethods::setup(mLog.get());
+			
 		}
 
 		bool Application::init()
@@ -169,7 +172,7 @@ namespace Engine
 			return Scope::maps().merge(mGlobalAPIs);
 		}
 
-		void Application::_clear()
+		void Application::clear()
 		{
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
 			{

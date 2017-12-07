@@ -11,7 +11,7 @@ namespace Engine
 		                        public Ogre::WindowEventListener, public InputHandler
 		{
 		public:
-			OISInputHandler(GUI::GUISystem* gui, Ogre::RenderWindow* window);
+			OISInputHandler(Ogre::RenderWindow* window);
 			virtual ~OISInputHandler();
 
 		private:
@@ -34,7 +34,7 @@ namespace Engine
 
 			float mMouseScale;
 
-			GUI::GUISystem* mGUI;
+
 
 			//OIS Input devices
 			OIS::InputManager* mInputManager;

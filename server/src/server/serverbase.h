@@ -17,6 +17,7 @@ namespace Engine
 		{
 		public:
 			ServerBase(const std::string& name, const std::string& scriptsFolder);
+			virtual ~ServerBase();
 
 			int run();
 

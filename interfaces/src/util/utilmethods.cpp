@@ -2,6 +2,11 @@
 
 #include <iostream>
 
+#include "abortexception.h"
+
+#include "log.h"
+#include "loglistener.h"
+
 namespace Engine
 {
 	namespace Util

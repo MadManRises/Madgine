@@ -6,8 +6,13 @@
 
 namespace Engine
 {
+
+	SINGLETON_IMPL(Scripting::GlobalScopeBase);
+
 	namespace Scripting
 	{
+
+
 		GlobalScopeBase::GlobalScopeBase(const LuaTable& table) :
 			ScopeBase(table),
 			mTable(table)

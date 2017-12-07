@@ -17,7 +17,15 @@ namespace Engine
 			mScriptParser(this, scriptsFolder),
 			mRunning(false)
 		{
+			Util::UtilMethods::setup(&mLog);
 		}
+
+		ServerBase::~ServerBase()
+		{
+			mInstances.clear();
+			Util::UtilMethods::setup(nullptr);
+		}
+
 
 		int ServerBase::run()
 		{

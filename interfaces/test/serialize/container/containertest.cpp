@@ -17,11 +17,11 @@ TEST(Serialize_Container, Test1)
 	class TestUnit : public SerializableUnit<TestUnit>
 	{
 	public:
-		ObservableList<int, ContainerPolicy::allowAll> list;
+		ObservableList<int, ContainerPolicies::allowAll> list;
 	};
 	TestUnit unit;
 
-	ObservableList<int, ContainerPolicy::allowAll>& list2 = unit.list;
+	ObservableList<int, ContainerPolicies::allowAll>& list2 = unit.list;
 
 	list2.push_back(1);
 	list2.push_back(2);

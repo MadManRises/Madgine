@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <class T, class Base = EntityComponentBase>
+			template <class T, class S, class Base = EntityComponentBase>
 			class SystemComponent : public EntityComponent<T, Base>
 			{
 			public:
@@ -18,12 +18,12 @@ namespace Engine
 				virtual void init() override
 				{
 					EntityComponent<T, Base>::init();
-					System<T>::getSingleton().addComponent(static_cast<T*>(this));
+					S::getSingleton().addComponent(static_cast<T*>(this));
 				}
 
 				virtual void finalize() override
 				{
-					System<T>::getSingleton().removeComponent(static_cast<T*>(this));
+					S::getSingleton().removeComponent(static_cast<T*>(this));
 					EntityComponent<T, Base>::finalize();
 				}
 			};

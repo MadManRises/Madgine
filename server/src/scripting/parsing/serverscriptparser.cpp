@@ -19,8 +19,8 @@ namespace Engine
 					/*, std::string("*.") + fileExtension())) {*/
 					if (file.path().extension() == fileExtension())
 					{
-						std::ifstream in(file.path());
-						parseScript(in, file.path().generic_string(), false);
+						std::ifstream in(file.path().string());
+						parseScript(in, file.path().string(), false);
 					}
 				}
 

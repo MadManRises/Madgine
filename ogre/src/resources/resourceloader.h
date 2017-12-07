@@ -9,7 +9,7 @@ namespace Engine
 	namespace Resources
 	{
 		class OGREMADGINE_EXPORT ResourceLoader : public Util::Process, public Ogre::ResourceGroupListener,
-		                                          public Ogre::Singleton<ResourceLoader>, public Ogre::GeneralAllocatedObject
+		                                          public Ogre::GeneralAllocatedObject
 		{
 		public:
 			ResourceLoader(App::OgreApplication* app, const std::string& mediaPath);
@@ -36,6 +36,9 @@ namespace Engine
 
 			Scripting::Parsing::ScriptParser* scriptParser() const;
 
+			static ResourceLoader &getSingleton();
+			static ResourceLoader *getSingletonPtr();
+
 		private:
 			Ogre::ResourceGroupManager* mRgm;
 
@@ -45,6 +48,8 @@ namespace Engine
 
 			std::unique_ptr<Scripting::Parsing::OgreScriptParser> mParser;
 			std::unique_ptr<ImageSets::ImageSetManager> mImageSetManager;
+
+			static ResourceLoader *sSingleton;
 		};
 	}
 }

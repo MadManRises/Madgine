@@ -34,11 +34,6 @@ namespace Engine
 			Debugging::StreamLog mLog;
 		};
 
-		struct CompareStreamId
-		{
-			bool operator()(Stream* first, Stream* second) const;
-			bool operator()(BufferedOutStream* first, BufferedOutStream* second) const;
-		};
 
 		class INTERFACES_EXPORT SerializeInStream : public virtual Stream
 		{
@@ -50,7 +45,7 @@ namespace Engine
 			SerializeInStream& operator >>(T& v)
 			{
 				ValueType temp;
-				if ((*this) >> temp)
+				if (*this >> temp)
 					v = temp.as<T>();
 				return *this;
 			}
@@ -61,7 +56,7 @@ namespace Engine
 			SerializeInStream& operator >>(T*& p)
 			{
 				SerializableUnitBase* unit;
-				(*this) >> unit;
+				*this >> unit;
 				p = dynamic_cast<T*>(unit);
 				if (unit && !p)
 					throw 0;
@@ -77,7 +72,7 @@ namespace Engine
 			bool loopRead(T& val)
 			{
 				ValueType v;
-				(*this) >> v;
+				*this >> v;
 				if (v.isEOL()) return false;
 				val = v.as<T>();
 				return true;
@@ -122,7 +117,7 @@ namespace Engine
 					          std::declval<T>()))>>
 			SerializeOutStream& operator<<(const T& t)
 			{
-				return (*this) << ValueType(t);
+				return *this << ValueType(t);
 			}
 
 			SerializeOutStream& operator<<(SerializableUnitBase* p);

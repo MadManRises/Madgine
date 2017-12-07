@@ -67,7 +67,7 @@ namespace Engine
 		SocketId SocketAPI::socket(int port)
 		{
 			SOCKADDR_IN addr;
-			memset(&addr, 0, sizeof(addr));
+			memset(&addr, 0, sizeof addr);
 			addr.sin_family = AF_INET;
 			addr.sin_port = htons(port);
 
@@ -80,7 +80,7 @@ namespace Engine
 				return Invalid_Socket;
 			}
 
-			if (bind(s, LPSOCKADDR(&addr), sizeof(addr)) == SOCKET_ERROR)
+			if (bind(s, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR)
 			{
 				closesocket(s);
 				return Invalid_Socket;
@@ -102,7 +102,7 @@ namespace Engine
 			FD_SET(s, &readSet);
 			timeval timeout_s;
 			timeout_s.tv_sec = timeout / 1000;
-			timeout_s.tv_usec = (timeout % 1000) * 1000;
+			timeout_s.tv_usec = timeout % 1000 * 1000;
 			if (select(s, &readSet, nullptr, nullptr, &timeout_s) > 0)
 			{
 				SocketId sock = ::accept(s, nullptr, nullptr);
@@ -135,7 +135,7 @@ namespace Engine
 
 			//Try connecting...
 
-			if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof(target)) == SOCKET_ERROR)
+			if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR)
 			{
 				Serialize::StreamError error = getError();
 				closesocket(s);

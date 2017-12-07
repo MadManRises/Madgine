@@ -1,5 +1,6 @@
 #include "interfaceslib.h"
 #include "luatableiterator.h"
+#include "luatableinstance.h"
 
 extern "C"
 {

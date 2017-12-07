@@ -11,20 +11,17 @@ namespace Engine
 		namespace Entity
 		{
 			template <class T, class Base = EntityComponentBase>
-			class EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
+			class TEMPLATE_EXPORT EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
 			{
 			public:
 				using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
 
 				const char* key() const override
 				{
-					return sComponentName;
+					return componentName();
 				}
 
-				static const char* componentName()
-				{
-					return sComponentName;
-				}
+				static const char* componentName();
 
 
 			private:
@@ -35,15 +32,18 @@ namespace Engine
 
 				virtual void writeCreationData(Serialize::SerializeOutStream& out) const override
 				{
-					out << sComponentName;
+					out << componentName();
 				}
 
-				static const char* const sComponentName;
-				static const Entity::ComponentRegistrator<T> _reg;
+				typedef Entity::ComponentRegistrator<T> _Reg;
+				static const _Reg _reg;
 			};
 
-			template <class T, class Base>
-			const Entity::ComponentRegistrator<T> EntityComponent<T, Base>::_reg;
+			
+
+			#define ENTITYCOMPONENT_IMPL(Name, ...) \
+				template <> TEMPLATE_INSTANCE const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
+				template <> TEMPLATE_EXPORT const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
 		}
 	}
 }

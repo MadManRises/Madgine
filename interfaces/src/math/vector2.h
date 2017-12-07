@@ -140,12 +140,12 @@ namespace Engine
 
 		bool operator ==(const Vector2& rkVector) const
 		{
-			return (x == rkVector.x && y == rkVector.y);
+			return x == rkVector.x && y == rkVector.y;
 		}
 
 		bool operator !=(const Vector2& rkVector) const
 		{
-			return (x != rkVector.x || y != rkVector.y);
+			return x != rkVector.x || y != rkVector.y;
 		}
 
 		// arithmetic operations
@@ -465,8 +465,8 @@ namespace Engine
 		/** Returns true if this vector is zero length. */
 		bool isZeroLength() const
 		{
-			float sqlen = (x * x) + (y * y);
-			return (sqlen < (1e-06 * 1e-06));
+			float sqlen = x * x + y * y;
+			return sqlen < 1e-06 * 1e-06;
 		}
 
 		/** As normalise, except that this vector is unaffected and the
@@ -483,7 +483,7 @@ namespace Engine
 		*/
 		Vector2 reflect(const Vector2& normal) const
 		{
-			return Vector2(*this - (2 * this->dotProduct(normal) * normal));
+			return Vector2(*this - 2 * this->dotProduct(normal) * normal);
 		}
 
 		/// Check whether this vector contains valid values
@@ -534,7 +534,7 @@ namespace Engine
 
 		/** Function for writing to a stream.
 		*/
-		INTERFACES_EXPORT friend std::ostream& operator <<
+		friend std::ostream& operator <<
 		(std::ostream& o, const Vector2& v)
 		{
 			o << "Vector2(" << v.x << ", " << v.y << ")";

@@ -9,7 +9,7 @@
 #include "ui/uimanager.h"
 #include "configset.h"
 #include "resources/resourceloader.h"
-#include "util/profiler.h"
+#include "util/profile.h"
 
 #include "input/oisinputhandler.h"
 
@@ -17,8 +17,13 @@
 
 #include "serialize/container/noparentunit.h"
 
+#include "util/standardlog.h"
+
 namespace Engine
 {
+
+SINGLETON_IMPL(App::OgreApplication);
+
 	namespace App
 	{
 		OgreApplication::OgreApplication() :
@@ -52,10 +57,14 @@ namespace Engine
 				delete mConfig;
 			if (mRoot)
 				delete mRoot;
+			Util::UtilMethods::setup(nullptr);
 		}
 
 		void OgreApplication::setup(const OgreAppSettings& settings)
 		{
+			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
+			Util::UtilMethods::setup(mLog.get());
+
 			mSettings = &settings;
 
 			_setupOgre();
@@ -94,7 +103,9 @@ namespace Engine
 			if (mSettings->mInput)
 				mInput = mSettings->mInput;
 			else
-				mInput = new Input::OISInputHandler(mGUI, mWindow);
+				mInput = new Input::OISInputHandler(mWindow);
+
+			mInput->setSystem(mGUI);
 		}
 
 		bool OgreApplication::init()
@@ -157,7 +168,7 @@ namespace Engine
 
 			mRoot->startRendering();
 
-			_clear();
+			clear();
 
 			return 0;
 		}
@@ -297,10 +308,10 @@ namespace Engine
 		}
 
 
-		void OgreApplication::_clear()
+		void OgreApplication::clear()
 		{
 			mSceneMgr->clear();
-			Application::_clear();
+			Application::clear();
 			mUI->clear();
 		}
 
@@ -320,7 +331,7 @@ namespace Engine
 					start = Ogre::WindowEventUtilities::_msListeners.lower_bound(mWindow),
 					end = Ogre::WindowEventUtilities::_msListeners.upper_bound(mWindow);
 				for (Ogre::WindowEventUtilities::WindowEventListeners::iterator index = start; index != end; ++index)
-					(index->second)->windowResized(mWindow);
+					index->second->windowResized(mWindow);
 			}
 		}
 

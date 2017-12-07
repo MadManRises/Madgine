@@ -1,14 +1,13 @@
 #include "ogrelib.h"
 #include "oisinputhandler.h"
-#include "gui/guisystem.h"
+
 #include "gui/guievents.h"
 
 namespace Engine
 {
 	namespace Input
 	{
-		OISInputHandler::OISInputHandler(GUI::GUISystem* gui, Ogre::RenderWindow* window) :
-			mGUI(gui),
+		OISInputHandler::OISInputHandler(Ogre::RenderWindow* window) :
 			mWindow(window)
 		{
 			LOG("*** Initializing OIS ***");
@@ -61,20 +60,20 @@ namespace Engine
 
 		bool OISInputHandler::keyPressed(const OIS::KeyEvent& arg)
 		{
-			mGUI->injectKeyPress({static_cast<GUI::Key>(arg.key), static_cast<char>(arg.text)});
+			injectKeyPress({static_cast<GUI::Key>(arg.key), static_cast<char>(arg.text)});
 			return true;
 		}
 
 		bool OISInputHandler::keyReleased(const OIS::KeyEvent& arg)
 		{
-			mGUI->injectKeyRelease({static_cast<GUI::Key>(arg.key)});
+			injectKeyRelease({static_cast<GUI::Key>(arg.key)});
 			return true;
 		}
 
 		bool OISInputHandler::mousePressed(const OIS::MouseEvent& arg,
 		                                   OIS::MouseButtonID id)
 		{
-			mGUI->injectMousePress({
+			injectMousePress({
 				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
 				convertMouseButton(id)
 			});
@@ -83,7 +82,7 @@ namespace Engine
 
 		bool OISInputHandler::mouseMoved(const OIS::MouseEvent& arg)
 		{
-			mGUI->injectMouseMove({
+			injectMouseMove({
 				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
 				std::array<float, 2>{
 					{static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)}
@@ -96,7 +95,7 @@ namespace Engine
 		bool OISInputHandler::mouseReleased(const OIS::MouseEvent& arg,
 		                                    OIS::MouseButtonID id)
 		{
-			mGUI->injectMouseRelease({
+			injectMouseRelease({
 				std::array<float, 2>{{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)}},
 				convertMouseButton(id)
 			});

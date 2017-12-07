@@ -1,11 +1,17 @@
 #pragma once
 
-#include "streams/serializestream.h"
+#include "streams/comparestreamid.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
+		namespace __serialized__impl__
+		{
+			template <class T>
+			class SerializedUnit;
+		}
+
 		class INTERFACES_EXPORT SerializableUnitBase
 		{
 		protected:
@@ -70,7 +76,7 @@ namespace Engine
 			template <class T, bool b>
 			friend struct UnitHelper;
 			template <class T>
-			friend class SerializedUnit;
+			friend class __serialized__impl__::SerializedUnit;
 			/*template <template <class...> class C, class Creator, class T>
 			friend class SerializableContainer;
 			*/

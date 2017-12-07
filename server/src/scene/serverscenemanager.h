@@ -39,7 +39,7 @@ namespace Engine
 
 			std::string mStaticSceneName;
 
-			Serialize::ObservableList<Light, Serialize::ContainerPolicy::masterOnly> mLights;
+			Serialize::ObservableList<Light, Serialize::ContainerPolicies::masterOnly> mLights;
 		};
 	}
 }

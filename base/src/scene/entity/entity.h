@@ -90,10 +90,9 @@ namespace Engine
 
 				std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string& name,
 				                                                                 const Scripting::LuaTable& table = {});
-				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentSimple(const std::string& name)
-				{
-					return createComponent(name);
-				}
+
+				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentSimple(const std::string& name);
+
 				EntityComponentBase* addComponentImpl(std::unique_ptr<EntityComponentBase>&& component);
 
 				template <class T>
@@ -115,11 +114,7 @@ namespace Engine
 					}
 				};
 
-				static std::map<std::string, ComponentBuilder>& sRegisteredComponentsByName()
-				{
-					static std::map<std::string, ComponentBuilder> dummy;
-					return dummy;
-				}
+				static std::map<std::string, ComponentBuilder>& sRegisteredComponentsByName();
 
 				template <class T, class Base>
 				friend class EntityComponent;
@@ -128,7 +123,7 @@ namespace Engine
 				std::string mName;
 				bool mLocal;
 
-				Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicy::masterOnly, Serialize::
+				Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::
 				                         ParentCreator<decltype(&Entity::createComponentSimple), &Entity::createComponentSimple>>
 				mComponents;
 

@@ -6,18 +6,21 @@
 #include "app/ogreapplication.h"
 
 
-template <>
-Engine::Resources::ResourceLoader* Ogre::Singleton<Engine::Resources::ResourceLoader>::msSingleton = nullptr;
-
 namespace Engine
 {
 	namespace Resources
 	{
+
+		ResourceLoader *ResourceLoader::sSingleton = nullptr;
+
 		ResourceLoader::ResourceLoader(App::OgreApplication* app, const std::string& mediaPath) :
 			mRgm(&Ogre::ResourceGroupManager::getSingleton()),
 			mApp(app),
 			mMediaPath(mediaPath)
 		{
+			assert(!sSingleton);
+			sSingleton = this;
+
 			// Load resource paths from config file
 			Ogre::ConfigFile cf;
 			cf.load(mediaPath + "resources.cfg");
@@ -146,5 +149,17 @@ namespace Engine
 		{
 			return mParser.get();
 		}
+
+		ResourceLoader* ResourceLoader::getSingletonPtr()
+		{
+			return sSingleton;
+		}
+
+		ResourceLoader &ResourceLoader::getSingleton()
+		{
+			assert(sSingleton);
+			return *sSingleton;
+		}
+
 	}
 }

@@ -153,11 +153,7 @@ namespace Engine
 			return Serialize::NO_SERVER;
 		}
 
-		int NetworkManager::clientCount() const
-		{
-			return mStreams.size();
-		}
-
+		
 		bool NetworkManager::isConnected() const
 		{
 			return mSocket != Invalid_Socket;

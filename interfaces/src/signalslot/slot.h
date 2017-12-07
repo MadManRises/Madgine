@@ -3,6 +3,10 @@
 #include "generic/templates.h"
 #include "connectionstore.h"
 
+#include "generic/onetimefunctor.h"
+
+#include "connectionmanager.h"
+
 namespace Engine
 {
 	namespace SignalSlot

@@ -72,7 +72,7 @@ namespace Engine
 			static ParticipantId getLocalMasterParticipantId();
 			ParticipantId getSlaveParticipantId() const;
 
-			void receiveMessages();
+			void receiveMessages(int msgCount = -1);
 			void sendMessages();
 			void sendAndReceiveMessages();
 
@@ -86,6 +86,7 @@ namespace Engine
 			}
 
 			std::vector<ParticipantId> getMasterParticipantIds();
+			int clientCount() const;
 
 			const std::string& name() const;
 
@@ -94,7 +95,7 @@ namespace Engine
 		protected:
 
 
-			bool receiveMessages(BufferedInOutStream* stream);
+			bool receiveMessages(BufferedInOutStream* stream, int msgCount);
 			bool sendAllMessages(BufferedInOutStream* stream, int timeout = 0);
 
 			BufferedInOutStream* getSlaveStream() const;

@@ -19,6 +19,11 @@ namespace Engine
 	template class OGREMADGINE_EXPORT UI::GameHandlerCollector;
 #endif
 
+	template <> thread_local UI::UIManager *Singleton<UI::UIManager>::sSingleton = nullptr;
+	template <> thread_local UI::GuiHandlerCollector *Singleton<UI::GuiHandlerCollector>::sSingleton = nullptr;
+	template <> thread_local UI::GameHandlerCollector *Singleton<UI::GameHandlerCollector>::sSingleton = nullptr;
+
+
 	namespace UI
 	{
 		UIManager::UIManager(GUI::GUISystem* gui) :
@@ -173,9 +178,9 @@ namespace Engine
 
 		Scene::ContextMask UIManager::currentContext()
 		{
-			return (mModalWindowList.empty()
-				        ? (mCurrentRoot ? mCurrentRoot->context() : Scene::ContextMask::NoContext)
-				        : mModalWindowList.top()->context());
+			return mModalWindowList.empty()
+				       ? (mCurrentRoot ? mCurrentRoot->context() : Scene::ContextMask::NoContext)
+				       : mModalWindowList.top()->context();
 		}
 
 

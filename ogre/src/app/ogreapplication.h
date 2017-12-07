@@ -128,7 +128,7 @@ namespace Engine
 			KeyValueMapList maps() override;
 
 		private:
-			void _clear() override;
+			void clear() override;
 			virtual void _setupOgre();
 
 		private:
@@ -148,6 +148,8 @@ namespace Engine
 			Input::InputHandler* mInput;
 
 			HWND mHwnd;
+
+			std::unique_ptr<Util::StandardLog> mLog;
 		};
 	}
 }

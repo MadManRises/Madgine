@@ -1,4 +1,4 @@
-#include "interfaceslib.h"
+#include "ogrelib.h"
 
 #include "ogrestreamreader.h"
 

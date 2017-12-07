@@ -10,8 +10,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <>
-			const char* const EntityComponent<Animation>::sComponentName = "Animation";
+			ENTITYCOMPONENT_IMPL(Animation, Animation);
 
 			Animation::Animation(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table),

@@ -6,6 +6,10 @@
 
 namespace Engine
 {
+
+	SINGLETON_IMPL(GUI::GUISystem);
+
+
 	namespace GUI
 	{
 		GUISystem::GUISystem() :

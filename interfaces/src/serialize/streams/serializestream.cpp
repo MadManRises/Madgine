@@ -11,10 +11,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		bool CompareStreamId::operator()(Stream* first, Stream* second) const
-		{
-			return first->id() < second->id();
-		}
+		
 
 		SerializeInStream::SerializeInStream(std::istream& ifs, SerializeManager& mgr, ParticipantId id) :
 			Stream(mgr, id),
@@ -40,7 +37,7 @@ namespace Engine
 					decltype(std::declval<std::string>().size()) size;
 					read(size);
 					std::string temp(size, ' ');
-					read(&(temp[0]), size);
+					read(&temp[0], size);
 					result = temp;
 					break;
 				}

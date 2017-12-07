@@ -60,7 +60,7 @@ namespace Engine
 			                                container_traits<std::map, typename UnitHelper<std::pair<const Key, T>>::Type>,
 			                                PairCreator<KeyCreator, Creator>>>;
 
-		template <class Key, class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<>, class KeyCreator =
+		template <class Key, class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>, class KeyCreator =
 		          DefaultCreator<Key>>
 		using ObservableMap = ObservableMapImpl<Key, ObservableContainer<
 			                                        container_traits<

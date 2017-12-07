@@ -2,18 +2,12 @@
 
 /// @cond
 
+#include "interfaceslib.h"
+
 #if defined(Base_EXPORTS)
-#ifdef __GNUC__
-#define MADGINE_BASE_EXPORT //__attribute__((dllexport))
+#define MADGINE_BASE_EXPORT DLL_EXPORT
 #else
-#define MADGINE_BASE_EXPORT __declspec(dllexport)
-#endif
-#else
-#ifdef __GNUC__
-#define MADGINE_BASE_EXPORT //__attribute__((dllimport))
-#else
-#define MADGINE_BASE_EXPORT __declspec(dllimport)
-#endif
+#define MADGINE_BASE_EXPORT DLL_IMPORT
 #endif
 
 #include "baseforward.h"
@@ -21,6 +15,5 @@
 #include <set>
 #include <queue>
 
-#include "interfaceslib.h"
 
 /// @endcond

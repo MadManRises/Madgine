@@ -2,9 +2,13 @@
 
 #include "ogreanimationsystem.h"
 
+#include "scene/entity/components/ogreanimation.h"
+
 namespace Engine
 {
 	API_IMPL(Scene::Entity::OgreAnimationSystem);
+
+	template <> thread_local Scene::Entity::OgreAnimationSystem *Singleton<Scene::Entity::OgreAnimationSystem>::sSingleton = nullptr;
 
 	namespace Scene
 	{

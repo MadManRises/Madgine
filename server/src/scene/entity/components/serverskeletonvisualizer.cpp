@@ -12,8 +12,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <>
-			const char* const EntityComponent<ServerSkeletonVisualizer>::sComponentName = "SkeletonVisualizer";
+			ENTITYCOMPONENT_IMPL(SkeletonVisualizer, ServerSkeletonVisualizer);
 
 			ServerSkeletonVisualizer::ServerSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table)

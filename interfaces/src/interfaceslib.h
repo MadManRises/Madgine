@@ -2,18 +2,31 @@
 
 /// @cond
 
+#ifdef __GNUC__
+#define DLL_EXPORT __attribute__((dllexport))
+#else
+#define DLL_EXPORT __declspec(dllexport)
+#endif
+
+#ifdef __GNUC__
+#define DLL_IMPORT __attribute__((dllimport))
+#else
+#define DLL_IMPORT __declspec(dllimport)
+#endif
+
 #if defined(Interfaces_EXPORTS)
-#ifdef __GNUC__
-#define INTERFACES_EXPORT //__attribute__((dllexport))
+#define INTERFACES_EXPORT DLL_EXPORT
 #else
-#define INTERFACES_EXPORT __declspec(dllexport)
+#define INTERFACES_EXPORT DLL_IMPORT
 #endif
-#else
+
+#define TEMPLATE_INSTANCE DLL_EXPORT
+
+
 #ifdef __GNUC__
-#define INTERFACES_EXPORT //__attribute__((dllimport))
+	#define TEMPLATE_EXPORT DLL_EXPORT
 #else
-#define INTERFACES_EXPORT __declspec(dllimport)
-#endif
+	#define TEMPLATE_EXPORT
 #endif
 
 

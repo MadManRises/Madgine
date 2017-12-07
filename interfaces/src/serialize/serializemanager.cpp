@@ -207,7 +207,7 @@ namespace Engine
 			{
 				if (it2->second->topLevel() == unit)
 				{
-					(it2++)->second->clearSlaveId();
+					it2++->second->clearSlaveId();
 				}
 				else
 				{
@@ -301,7 +301,7 @@ namespace Engine
 							state = TIMEOUT;
 							mReceivingMasterState = false;
 						}
-						if (!receiveMessages(stream))
+						if (!receiveMessages(stream, -1))
 						{
 							state = stream->error();
 							mReceivingMasterState = false;
@@ -393,18 +393,18 @@ namespace Engine
 		}
 
 
-		void SerializeManager::receiveMessages()
+		void SerializeManager::receiveMessages(int msgCount)
 		{
 			if (mSlaveStream && !mSlaveStreamInvalid)
 			{
-				if (!receiveMessages(mSlaveStream))
+				if (!receiveMessages(mSlaveStream, msgCount))
 				{
 					removeSlaveStream();
 				}
 			}
 			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
 			{
-				if (!receiveMessages(*it))
+				if (!receiveMessages(*it, msgCount))
 				{
 					BufferedInOutStream* tmp = *it;
 					++it;
@@ -449,7 +449,7 @@ namespace Engine
 
 		size_t SerializeManager::convertPtr(SerializeOutStream& out, SerializableUnitBase* unit) const
 		{
-			return unit == nullptr ? NULL_UNIT_ID : (&out != mSlaveStream ? unit->masterId() : unit->slaveId());
+			return unit == nullptr ? NULL_UNIT_ID : &out != mSlaveStream ? unit->masterId() : unit->slaveId();
 		}
 
 		SerializableUnitBase* SerializeManager::convertPtr(SerializeInStream& in, size_t unit)
@@ -489,12 +489,12 @@ namespace Engine
 		}
 
 
-		bool SerializeManager::receiveMessages(BufferedInOutStream* stream)
+		bool SerializeManager::receiveMessages(BufferedInOutStream* stream, int msgCount)
 		{
 			if (stream->isClosed()) return false;
 
 
-			while (stream->isMessageAvailable())
+			while (stream->isMessageAvailable() && msgCount != 0)
 			{
 				try
 				{
@@ -506,6 +506,8 @@ namespace Engine
 				}
 				if (stream->isClosed())
 					return false;
+				if (msgCount > 0)
+					--msgCount;
 			}
 
 			return !stream->isClosed();
@@ -545,6 +547,12 @@ namespace Engine
 		{
 			return mTopLevelUnits;
 		}
+
+		int SerializeManager::clientCount() const
+		{
+			return mMasterStreams.size();
+		}
+
 
 		void SerializeManager::sendState(BufferedInOutStream& stream, TopLevelSerializableUnitBase* unit)
 		{

@@ -30,19 +30,33 @@ namespace Engine
 			template <class T>
 			void run(T initCallback)
 			{
-				App::ServerApplication app(mTable);
-				mApplication = &app;
-				App::ServerAppSettings settings;
-				app.setup(settings);
-				if (app.init())
-				{
-					initCallback();
-					mResult = app.go();
-					app.finalize();
-				}
-				else
-				{
+				try{
 					mResult = -1;
+
+					App::ServerApplication app(mTable);
+					mApplication = &app;
+					App::ServerAppSettings settings;
+					app.setup(settings);
+					if (app.init())
+					{
+						try{
+							initCallback();
+							mResult = app.go();
+						}
+						catch(...)
+						{
+							app.finalize();	
+							throw;
+						}
+						app.finalize();
+					}
+				}
+				catch(const std::exception &e)	{
+					LOG_ERROR(message("Uncaught Exception in Thread: ", "")(e.what()));
+				}
+				catch(...)
+				{
+					LOG_ERROR("Uncaught unknown Exception in Thread!");
 				}
 			}
 

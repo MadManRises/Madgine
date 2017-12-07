@@ -4,6 +4,7 @@
 #include "scene/entity/systemcomponent.h"
 
 #include "serialize/container/serialized.h"
+#include "scene/entity/systems/ogreanimationsystem.h"
 
 namespace Engine
 {
@@ -11,7 +12,9 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT Animation : public SystemComponent<Animation>
+			class OgreAnimationSystem;
+
+			class OGREMADGINE_EXPORT Animation : public SystemComponent<Animation, OgreAnimationSystem>
 			{
 			public:
 				enum LoopSetting

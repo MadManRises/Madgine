@@ -120,7 +120,7 @@ namespace Engine
 
 			Resources::OgreTexturePtr mGameTexture;
 
-			Serialize::ObservableList<OgreLight, Serialize::ContainerPolicy::masterOnly, Serialize::ParentCreator<
+			Serialize::ObservableList<OgreLight, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<
 				                          decltype(&OgreSceneManager::createLightData), &OgreSceneManager::createLightData>>
 			mLights;
 

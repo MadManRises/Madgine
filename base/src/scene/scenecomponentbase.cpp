@@ -1,10 +1,12 @@
 #include "baselib.h"
-#include "scenecomponent.h"
-#include "scenemanager.h"
+#include "scenecomponentbase.h"
+#include "scripting/types/api.h"
+
+API_IMPL(Engine::Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 
 namespace Engine
 {
-	API_IMPL(Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
+
 
 	namespace Scene
 	{
@@ -17,7 +19,7 @@ namespace Engine
 
 		void SceneComponentBase::update(float timeSinceLastFrame, ContextMask mask)
 		{
-			if (mEnabled && (mContext & (mask | ContextMask::AnyContext)))
+			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
 			{
 				update(timeSinceLastFrame);
 			}
@@ -25,7 +27,7 @@ namespace Engine
 
 		void SceneComponentBase::fixedUpdate(float timeStep, ContextMask mask)
 		{
-			if (mEnabled && (mContext & (mask | ContextMask::AnyContext)))
+			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
 			{
 				fixedUpdate(timeStep);
 			}
@@ -66,7 +68,7 @@ namespace Engine
 
 		KeyValueMapList SceneComponentBase::maps()
 		{
-			return ScopeBase::maps().merge(Scripting::API<SceneComponentBase>::sAPI);
+			return ScopeBase::maps().merge(Scripting::API<SceneComponentBase>::api());
 		}
 	}
 }

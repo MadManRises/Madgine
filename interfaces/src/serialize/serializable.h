@@ -1,6 +1,5 @@
 #pragma once
 
-#include "streams/serializestream.h"
 
 namespace Engine
 {
@@ -9,7 +8,7 @@ namespace Engine
 		class INTERFACES_EXPORT Serializable
 		{
 		public:
-			Serializable();
+			Serializable(bool local = false);
 			Serializable(const Serializable&);
 			Serializable(Serializable&&) noexcept;
 			virtual ~Serializable();

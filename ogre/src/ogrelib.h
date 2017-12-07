@@ -7,9 +7,9 @@
 #endif
 
 #if defined(OgreMadgine_EXPORTS)
-#define OGREMADGINE_EXPORT __declspec(dllexport)
+#define OGREMADGINE_EXPORT DLL_EXPORT
 #else
-#define OGREMADGINE_EXPORT __declspec(dllimport)
+#define OGREMADGINE_EXPORT DLL_IMPORT
 #endif
 
 #include "baselib.h"

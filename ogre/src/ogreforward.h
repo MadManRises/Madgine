@@ -43,6 +43,9 @@ namespace Engine
 		class Textbox;
 		class Label;
 
+		struct KeyEventArgs;
+		struct MouseEventArgs;
+
 		namespace MouseButton
 		{
 			enum MouseButton : unsigned char;

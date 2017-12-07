@@ -13,8 +13,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <>
-			const char* const EntityComponent<Transform>::sComponentName = "Transform";
+			ENTITYCOMPONENT_IMPL(Transform, Transform);
 
 			Entity* Transform::entityFromNode(Ogre::SceneNode* node)
 			{

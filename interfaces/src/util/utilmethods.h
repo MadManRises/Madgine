@@ -1,37 +1,12 @@
 #pragma once
 
 #include "traceback.h"
+#include "messagetype.h"
 
 namespace Engine
 {
 	namespace Util
 	{
-		class AbortException
-		{
-		};
-
-		enum MessageType
-		{
-			ERROR_TYPE,
-			WARNING_TYPE,
-			LOG_TYPE
-		};
-
-		class Log
-		{
-		public:
-			virtual ~Log() = default;
-			virtual void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {}) = 0;
-			virtual std::string getName() = 0;
-		};
-
-		class LogListener
-		{
-		public:
-			virtual ~LogListener() = default;
-			virtual void messageLogged(const std::string& message, MessageType lml, const std::list<TraceBack>& traceback,
-			                           const std::string& logName) = 0;
-		};
 
 		class INTERFACES_EXPORT UtilMethods
 		{

@@ -231,24 +231,37 @@ namespace Engine
 		};\
 	}
 
-		template <class T>
-		struct API
+		template<class T>
+		struct TEMPLATE_EXPORT API
 		{
-			static const std::map<std::string, Mapper> sAPI;
-			static const char* const sFile;
-			static const char* const sName;
+		public:
+			static const char* const file();
+
+			static const char* const name();
+
+			static const std::map<std::string, Mapper> &api();
+			
+
+		private:
+
 
 			static const char* fix(const char* s)
 			{
 				const char* f = strrchr(s, ':');
 				return f ? f + 1 : s;
 			}
+
 		};
+
+
 
 #define API_IMPL(Class, ...) \
 	MEMBERS_CAPTURE_DEF(Class, __VA_ARGS__) \
-	template<> const char * const Engine::Scripting::API<Class>::sFile = __FILE__; \
-	template<> const char * const Engine::Scripting::API<Class>::sName = fix(#Class); \
-	template<> const std::map<std::string, Engine::Scripting::Mapper> Engine::Scripting::API<Class>::sAPI = __hide__::__struct__<Class>::capture()
+	template<> TEMPLATE_INSTANCE const char * const Engine::Scripting::API<Class>::file() {static const char *s = __FILE__; return s; } \
+	template<> TEMPLATE_INSTANCE const char * const Engine::Scripting::API<Class>::name() {static const char *s = fix(#Class); return s; } \
+	template<> TEMPLATE_INSTANCE const std::map<std::string, Engine::Scripting::Mapper> &Engine::Scripting::API<Class>::api(){ \
+		static std::map<std::string, Engine::Scripting::Mapper> m = __hide__::__struct__<Class>::capture(); return m;}\
+	template struct TEMPLATE_INSTANCE Engine::Scripting::API<Class>
+
 	} // namespace Scripting
 } // namespace Core

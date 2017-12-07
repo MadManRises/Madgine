@@ -4,7 +4,7 @@
 
 #include "componentexception.h"
 
-#include "scene/scenemanager.h"
+#include "scene/scenemanagerbase.h"
 
 #include "scripting/types/globalscopebase.h"
 
@@ -12,11 +12,11 @@
 
 #include "scripting/datatypes/luatableiterator.h"
 
-namespace Engine
-{
-	API_IMPL(Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove
+	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove
 	), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
 
+namespace Engine
+{
 
 	namespace Scene
 	{
@@ -162,6 +162,11 @@ namespace Engine
 				return make_tuple(it->second(*this, table));
 			}
 
+			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentSimple(const std::string& name)
+			{
+				return createComponent(name);
+			}
+
 			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
 			{
 				if (mComponents.find(component) != mComponents.end())
@@ -169,6 +174,12 @@ namespace Engine
 				if (&component->getEntity() != this)
 					throw ComponentException(Exceptions::corruptData);
 				return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
+			}
+
+			std::map<std::string, Entity::ComponentBuilder>& Entity::sRegisteredComponentsByName()
+			{
+				static std::map<std::string, ComponentBuilder> dummy;
+				return dummy;
 			}
 
 

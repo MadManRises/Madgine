@@ -29,7 +29,7 @@ namespace Engine
 			Serialize::StreamError acceptConnection(int timeout);
 			void acceptConnections();
 
-			int clientCount() const;
+
 
 			bool isConnected() const;
 

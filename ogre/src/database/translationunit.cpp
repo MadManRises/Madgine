@@ -7,6 +7,10 @@
 
 namespace Engine
 {
+
+	SINGLETON_IMPL(Database::TranslationUnit);
+
+
 	namespace Database
 	{
 		const std::string TranslationUnit::sExtension = ".l";

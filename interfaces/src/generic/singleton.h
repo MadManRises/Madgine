@@ -1,9 +1,10 @@
 #pragma once
 
+
 namespace Engine
 {
 	template <class T>
-	class Singleton
+	class TEMPLATE_EXPORT Singleton
 	{
 	private:
 		Singleton(const Singleton<T>&) = delete;
@@ -19,8 +20,10 @@ namespace Engine
 
 		~Singleton()
 		{
+#ifndef __MINGW32__
 			assert(sSingleton);
-			sSingleton = 0;
+#endif
+			sSingleton = nullptr;
 		}
 
 	public:
@@ -40,6 +43,6 @@ namespace Engine
 		static thread_local T* sSingleton;
 	};
 
-	template <class T>
-	thread_local T* Singleton<T>::sSingleton = nullptr;
 }
+
+#define SINGLETON_IMPL(Class) template <> thread_local TEMPLATE_EXPORT Class *Engine::Singleton<Class>::sSingleton = nullptr

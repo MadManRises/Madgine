@@ -37,7 +37,7 @@ namespace Engine
 		using SerializableSet = SetImpl<SerializableContainer<
 			container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
 
-		template <class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<>>
+		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
 		using ObservableSet = ObservableSetImpl<ObservableContainer<
 			container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
 	}

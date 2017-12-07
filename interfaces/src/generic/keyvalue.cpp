@@ -58,7 +58,7 @@ namespace Engine
 
 	void KeyValueMapListIterator::operator++()
 	{
-		++(*mIterators.at(mIndex));
+		++*mIterators.at(mIndex);
 		validate();
 	}
 

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "scene/entity/system.h"
-#include "scene/entity/components/ogreanimation.h"
-#include "scene/scenecomponent.h"
+
 
 namespace Engine
 {
@@ -10,10 +9,10 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT OgreAnimationSystem : public System<Animation>, public SceneComponent<OgreAnimationSystem>
+			class OGREMADGINE_EXPORT OgreAnimationSystem : public System<OgreAnimationSystem, Animation>
 			{
 			public:
-				using SerializableUnit::SerializableUnit;
+				using System::System;
 
 				void update(float timeSinceLastFrame) override;
 			};

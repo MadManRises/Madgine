@@ -5,56 +5,49 @@
 #include "serializablecontainer.h"
 #include "sortedcontainer.h"
 #include "unsortedcontainer.h"
+#include "operations.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		enum Operations
-		{
-			INSERT_ITEM = 0x1,
-			REMOVE_ITEM = 0x2,
-			RESET = 0x3,
-
-
-			MASK = 0x0F,
-			ACCEPT = 0x10,
-			REJECT = 0x20,
-
-			BEFORE = 0x0,
-			AFTER = 0x10
-		};
-
-		struct _ContainerPolicy
-		{
+		
+		namespace __observablecontainer__impl__{
 			enum RequestMode
-			{
-				ALL_REQUESTS,
-				NO_REQUESTS
-			} mRequestMode;
-		};
+				{
+					ALL_REQUESTS,
+					NO_REQUESTS
+				};
 
-		struct ContainerPolicy
-		{
-			static const constexpr _ContainerPolicy allowAll{_ContainerPolicy::ALL_REQUESTS};
-			static const constexpr _ContainerPolicy masterOnly{_ContainerPolicy::NO_REQUESTS};
-		};
 
-		template <class traits, class Creator>
+			template <class traits, class Creator>
 		using ContainerSelector = std::conditional_t<
 			traits::sorted,
 			SortedContainer<traits, Creator>,
 			UnsortedContainer<traits, Creator>
 		>;
+		}
 
-		template <class traits, class Creator, const _ContainerPolicy &Config>
+		struct ContainerPolicy
+		{
+			__observablecontainer__impl__::RequestMode mRequestMode;
+		};
+
+		struct ContainerPolicies{
+			static const constexpr ContainerPolicy allowAll{__observablecontainer__impl__::ALL_REQUESTS};
+			static const constexpr ContainerPolicy masterOnly{__observablecontainer__impl__::NO_REQUESTS};
+		};
+
+		
+
+		template <class traits, class Creator, const ContainerPolicy &Config>
 		class ObservableContainer :
-			public ContainerSelector<traits, Creator>, public Observable
+			public __observablecontainer__impl__::ContainerSelector<traits, Creator>, public Observable
 		{
 		public:
 			typedef size_t TransactionId;
 
-			typedef ContainerSelector<traits, Creator> Base;
+			typedef __observablecontainer__impl__::ContainerSelector<traits, Creator> Base;
 
 			typedef typename traits::iterator iterator;
 			typedef typename traits::const_iterator const_iterator;
@@ -103,7 +96,7 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						Base temp(std::forward<T>(arg));
 
@@ -143,7 +136,7 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
@@ -177,7 +170,7 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
@@ -210,7 +203,7 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS)
+					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						BufferedOutStream* out = getSlaveActionMessageTarget();
 						*out << TransactionId(0);
@@ -276,7 +269,7 @@ namespace Engine
 			// Inherited via Observable
 			void readRequest(BufferedInOutStream& inout) override
 			{
-				bool accepted = Config.mRequestMode == _ContainerPolicy::ALL_REQUESTS; //Check TODO
+				bool accepted = Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS; //Check TODO
 
 				TransactionId id;
 				inout >> id;
@@ -330,7 +323,7 @@ namespace Engine
 				Operations op;
 				inout >> op;
 
-				bool accepted = (id == 0) || ((op & (~MASK)) == ACCEPT);
+				bool accepted = id == 0 || (op & ~MASK) == ACCEPT;
 
 				iterator it = this->end();
 
@@ -412,7 +405,7 @@ namespace Engine
 					}
 					this->setItemActiveFlag(*it, true);
 				}
-				if (isItemLocallyActive(it))
+				if (this->isItemLocallyActive(it))
 				{
 					this->notifySetItemActive(*it, true);
 					mSignal.emit(it, INSERT_ITEM);

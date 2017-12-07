@@ -38,7 +38,9 @@ namespace Engine
 		typedef Head type;
 	};
 
-	template <typename T, size_t n, size_t... Is>
+	namespace __generic__impl__
+	{
+		template <typename T, size_t n, size_t... Is>
 	struct type_pack_selector
 		: type_pack_selector<T, n - 1, n - 1, Is...>
 	{
@@ -49,9 +51,12 @@ namespace Engine
 	{
 		using type = type_pack<typename select_type<Is, T>::type...>;
 	};
+	}
+
+	
 
 	template <size_t n, class... _Ty>
-	using type_pack_n = typename type_pack_selector<type_pack<_Ty...>, n>::type;
+	using type_pack_n = typename __generic__impl__::type_pack_selector<type_pack<_Ty...>, n>::type;
 
 	template <bool...>
 	struct bool_pack;
@@ -95,48 +100,6 @@ namespace Engine
 	{
 	};
 
-	struct TupleSerializer
-	{
-		template <class... Args>
-		static void readTuple(std::tuple<Args...>& tuple, Serialize::SerializeInStream& in)
-		{
-			readTuple(tuple, in, std::make_index_sequence<sizeof...(Args)>());
-		}
-
-		template <class Arg, class... Args, size_t... S>
-		static void readTuple(std::tuple<Arg, Args...>& tuple, Serialize::SerializeInStream& in, std::index_sequence<S...>)
-		{
-			using expander = int[];
-			(void)expander{
-				(void(in >> std::get<S>(tuple)), 0)...
-			};
-		}
-
-		static void readTuple(std::tuple<>& tuple, Serialize::SerializeInStream& in, std::index_sequence<>)
-		{
-		}
-
-		template <class... Args>
-		static void writeTuple(const std::tuple<Args...>& tuple, Serialize::SerializeOutStream& out)
-		{
-			writeTuple(tuple, out, std::make_index_sequence<sizeof...(Args)>());
-		}
-
-		template <class Arg, class... Args, size_t... S>
-		static void writeTuple(const std::tuple<Arg, Args...>& tuple, Serialize::SerializeOutStream& out,
-		                       std::index_sequence<S...>)
-		{
-			using expander = int[];
-			(void)expander{
-				(void(out << std::get<S>(tuple)), 0)...
-			};
-		}
-
-		static void writeTuple(const std::tuple<>& tuple, Serialize::SerializeOutStream& out, std::index_sequence<>)
-		{
-		}
-	};
-
 
 	template <class R, class T, class... _Ty>
 	constexpr size_t argumentsCount(R (T::*)(_Ty ...) const)
@@ -159,7 +122,9 @@ namespace Engine
 		using instance = C<F, f, Args..., T, R, _Ty...>;
 	};
 
-	template <class T, class R, class... _Ty>
+	namespace __generic__impl__
+	{
+		template <class T, class R, class... _Ty>
 	MemberFunctionTypeCapture<T, R, _Ty...> memberFunctionTypeDeducer(R (T::*f)(_Ty ...));
 
 	template <class T, class R, class... _Ty>
@@ -167,11 +132,14 @@ namespace Engine
 
 	template <typename F>
 	using MemberFunctionHelper = decltype(memberFunctionTypeDeducer(std::declval<F>()));
+	}
+
+	
 
 	template <template <typename F, F, class, class, class...> class C, class F, F f, class... Args>
 	struct MemberFunctionCapture
 	{
-		typedef typename MemberFunctionHelper<F>::template instance<C, F, f, Args...> type;
+		typedef typename __generic__impl__::MemberFunctionHelper<F>::template instance<C, F, f, Args...> type;
 	};
 
 
@@ -185,6 +153,7 @@ namespace Engine
 		typedef R Return;
 	};
 
+	namespace __generic__impl__{
 	template <class T, class R, class... _Ty>
 	CallableTypeCapture<R, _Ty...> callableTypeDeducer(R (T::*f)(_Ty ...));
 
@@ -196,13 +165,11 @@ namespace Engine
 
 	template <class F, class R = decltype(callableTypeDeducer(&F::operator()))>
 	R callableTypeDeducer(const F&);
-
-	/*template <template <typename F, F, class, class...> class C, auto f, class... Args>
-	using MemberFunctionCapture = typename decltype(memberFunctionTypeDeducer(f))::template instance<C, decltype(f), f, Args...>;
-	*/
+}	
 
 	template <typename F>
-	using CallableHelper = decltype(callableTypeDeducer(std::declval<F>()));
+	using CallableHelper = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
+
 
 	template <template <typename F, class, class...> class C, class F, class... Args>
 	struct CallableDeduce
@@ -280,6 +247,7 @@ namespace Engine
 		NonCopyType& operator=(NonCopyType&&) = default;
 	};
 
+	namespace __generic__impl__{
 	template <class, class T>
 	struct _custom_is_copy_constructible : std::false_type
 	{
@@ -289,11 +257,12 @@ namespace Engine
 	struct _custom_is_copy_constructible<void_t<decltype(T(std::declval<const T &>()))>, T> : std::true_type
 	{
 	};
+		}
 
 	template <class T>
 	struct custom_is_copy_constructible
 	{
-		static const constexpr bool value = _custom_is_copy_constructible<void_t<>, T>::value;
+		static const constexpr bool value = __generic__impl__::_custom_is_copy_constructible<void_t<>, T>::value;
 	};
 
 	template <class U, class V>
@@ -338,57 +307,4 @@ namespace Engine
 		}
 	};
 
-
-	template <class T, class... Ty>
-	struct OneTimeFunctor
-	{
-		OneTimeFunctor(void (T::*f)(Ty ...), T* t, Ty&&... args) :
-			mT(t),
-			mData(std::forward<Ty>(args)...),
-			mF(f),
-			mCalled(false)
-		{
-		}
-
-		OneTimeFunctor(OneTimeFunctor<T, Ty...>&& other) noexcept :
-			mT(other.mT),
-			mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData)),
-			mF(other.mF),
-			mCalled(other.mCalled)
-		{
-			other.mCalled = true;
-		}
-
-		OneTimeFunctor(const OneTimeFunctor<T, Ty...>& other) :
-			mT(other.mT),
-			mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData)),
-			mF(other.mF),
-			mCalled(other.mCalled)
-		{
-			other.mCalled = true;
-		}
-
-		~OneTimeFunctor()
-		{
-		}
-
-		void operator()()
-		{
-			assert(!mCalled);
-			mCalled = true;
-			TupleUnpacker<>::call(mT, mF, std::move(mData));
-		}
-
-	private:
-		T* mT;
-		mutable std::tuple<std::remove_reference_t<Ty>...> mData;
-		void (T::*mF)(Ty ...);
-		mutable bool mCalled;
-	};
-
-	template <class T, class... Ty>
-	auto oneTimeFunctor(void (T::*f)(Ty ...), T* t, Ty&&... args)
-	{
-		return OneTimeFunctor<T, Ty...>{f, t, std::forward<Ty>(args)...};
-	}
 }

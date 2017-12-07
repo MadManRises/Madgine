@@ -6,41 +6,15 @@
 #include "math/vector2.h"
 #include "math/vector3.h"
 
+#include "invscopeptr.h"
+
+#include "valuetypeexception.h"
+
+#include "scripting/datatypes/luathread.h"
+
 namespace Engine
 {
-	class InvScopePtr
-	{
-	public:
-		InvScopePtr() = default;
 
-		InvScopePtr(Scripting::ScopeBase* ptr) : mPtr(ptr)
-		{
-		}
-
-		Scripting::ScopeBase* validate() const { return mPtr; }
-		operator bool() const { return mPtr != nullptr; }
-		bool operator<(const InvScopePtr& other) const { return mPtr < other.mPtr; }
-		bool operator==(const InvScopePtr& other) const { return mPtr == other.mPtr; }
-	private:
-		Scripting::ScopeBase* mPtr;
-	};
-
-	class ValueTypeException : public std::exception
-	{
-	public:
-		ValueTypeException(const std::string& msg) :
-			mMsg(msg)
-		{
-		}
-
-		const char* what() const noexcept override
-		{
-			return mMsg.c_str();
-		}
-
-	private:
-		std::string mMsg;
-	};
 
 	class INTERFACES_EXPORT ValueType
 	{
@@ -237,7 +211,7 @@ namespace Engine
 					std::get<int>(mUnion) += std::get<int>(other.mUnion);
 					return;
 				case Type::FloatValue:
-					(*this) = std::get<int>(mUnion) + std::get<float>(other.mUnion);
+					*this = std::get<int>(mUnion) + std::get<float>(other.mUnion);
 				default:
 					break;
 				}
@@ -266,7 +240,7 @@ namespace Engine
 					std::get<int>(mUnion) -= std::get<int>(other.mUnion);
 					return;
 				case Type::FloatValue:
-					(*this) = std::get<int>(mUnion) - std::get<float>(other.mUnion);
+					*this = std::get<int>(mUnion) - std::get<float>(other.mUnion);
 				default:
 					break;
 				}
@@ -295,7 +269,7 @@ namespace Engine
 					std::get<int>(mUnion) /= std::get<int>(other.mUnion);
 					return;
 				case Type::FloatValue:
-					(*this) = std::get<int>(mUnion) / std::get<float>(other.mUnion);
+					*this = std::get<int>(mUnion) / std::get<float>(other.mUnion);
 				default:
 					break;
 				}
@@ -336,7 +310,7 @@ namespace Engine
 					std::get<int>(mUnion) *= std::get<int>(other.mUnion);
 					return;
 				case Type::FloatValue:
-					(*this) = std::get<int>(mUnion) * std::get<float>(other.mUnion);
+					*this = std::get<int>(mUnion) * std::get<float>(other.mUnion);
 				default:
 					break;
 				}

@@ -94,7 +94,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 
 	for (unsigned int i = 0; i < str.size(); i++)
 	{
-		if ((str[i] != '\t') && (str[i] != '\n') && (str[i] != ' '))
+		if (str[i] != '\t' && str[i] != '\n' && str[i] != ' ')
 		{
 			glypheTexRect = font->getGlyphTexCoords(str[i]);
 			GlyphTexCoords[i].left = glypheTexRect.left * fontTexture->getSrcWidth();
@@ -127,7 +127,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 		default:
 			{
 				//wrapping
-				if ((cursorX + GlyphTexCoords[strindex].getWidth() > lineend) && !carriagreturn)
+				if (cursorX + GlyphTexCoords[strindex].getWidth() > lineend && !carriagreturn)
 				{
 					cursorY += charheight;
 					carriagreturn = true;
@@ -140,7 +140,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 					size_t textwidth = 0;
 					size_t wordwidth = 0;
 
-					while ((l < str.size()) && (str[l] != '\n'))
+					while (l < str.size() && str[l] != '\n')
 					{
 						wordwidth = 0;
 
@@ -158,7 +158,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 						}
 
 						if (wordwrap)
-							while ((l < str.size()) && (str[l] != ' ') && (str[l] != '\t') && (str[l] != '\n'))
+							while (l < str.size() && str[l] != ' ' && str[l] != '\t' && str[l] != '\n')
 							{
 								wordwidth += GlyphTexCoords[l].getWidth();
 								++l;
@@ -169,13 +169,13 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 							l++;
 						}
 
-						if ((textwidth + wordwidth) <= destRectangle.getWidth())
-							textwidth += (wordwidth);
+						if (textwidth + wordwidth <= destRectangle.getWidth())
+							textwidth += wordwidth;
 						else
 							break;
 					}
 
-					if ((textwidth == 0) && (wordwidth > destRectangle.getWidth()))
+					if (textwidth == 0 && wordwidth > destRectangle.getWidth())
 						textwidth = destRectangle.getWidth();
 
 					switch (justify)
@@ -184,7 +184,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 						lineend = destRectangle.getWidth() - cursorX;
 						break;
 
-					case 'r': cursorX = (destRectangle.getWidth() - textwidth);
+					case 'r': cursorX = destRectangle.getWidth() - textwidth;
 						lineend = destRectangle.getWidth();
 						break;
 
@@ -197,7 +197,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 				}
 
 				//abort - net enough space to draw
-				if ((cursorY + charheight) > destRectangle.getHeight())
+				if (cursorY + charheight > destRectangle.getHeight())
 					goto stop;
 
 				//draw pixel by pixel
@@ -210,7 +210,7 @@ void WriteToTexture(const String& str, TexturePtr destTexture, Box destRectangle
 						size_t offset = (i + cursorY) * destRowPitchBytes + (j + cursorX) * destPixelSize;
 						ColourValue pix;
 						PixelUtil::unpackColour(&pix, destPb.format, &destData[offset]);
-						pix = (pix * invalpha) + (color * alpha);
+						pix = pix * invalpha + color * alpha;
 						PixelUtil::packColour(pix, destPb.format, &destData[offset]);
 					}
 

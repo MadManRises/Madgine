@@ -112,7 +112,7 @@ namespace Engine
 			if (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback())
 				return true;
 			receive(context);
-			return (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback());
+			return mMsgInBuffer && mBytesToRead == 0 && gptr() == eback();
 		}
 
 
@@ -164,13 +164,13 @@ namespace Engine
 			{
 				if (!it->mHeaderSent)
 				{
-					int num = send(reinterpret_cast<char*>(&it->mHeader), sizeof(it->mHeader));
+					int num = send(reinterpret_cast<char*>(&it->mHeader), sizeof it->mHeader);
 					if (num == -1)
 					{
 						handleError();
 						return mIsClosed ? -1 : mBufferedSendMsgs.size();
 					}
-					if (num != sizeof(it->mHeader))
+					if (num != sizeof it->mHeader)
 					{
 						throw 0;
 					}
@@ -224,7 +224,7 @@ namespace Engine
 				}
 				delete[] mRecBuffer;
 				mMsgInBuffer = false;
-				mBytesToRead = sizeof(mReceiveMessageHeader);
+				mBytesToRead = sizeof mReceiveMessageHeader;
 			}
 			if (!mMsgInBuffer)
 			{
@@ -251,7 +251,7 @@ namespace Engine
 
 			if (mMsgInBuffer && mBytesToRead > 0)
 			{
-				int num = rec((mRecBuffer + mReceiveMessageHeader.mMsgSize - mBytesToRead), mBytesToRead);
+				int num = rec(mRecBuffer + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
 				if (num == 0)
 				{
 					close();

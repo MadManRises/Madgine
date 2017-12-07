@@ -49,11 +49,12 @@ if (BUILD_TESTS)
 		INSTALL_DIR       ${GTEST_DIR}
 		CMAKE_ARGS
 			-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+			-DCMAKE_BUILD_TYPE=Debug
 	)
 
 	include_directories(${GTEST_DIR}/include)
 
-	if (WIN32)
+	if (WIN32 )
 		set (debug_suffix "d")
 	else()
 		set (debug_suffix "")

@@ -30,6 +30,10 @@ include_targets(MadgineServer Base Interfaces)
 target_compile_definitions(MadgineServer INTERFACE MADGINE_SERVER_BUILD)
 
 target_link_libraries(MadgineServer PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+	target_link_libraries (MadgineServer PRIVATE stdc++fs)
+endif (CMAKE_COMPILER_IS_GNUCXX)
  
 if (BUILD_TESTS)
 	add_subdirectory(test)
