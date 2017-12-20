@@ -14,7 +14,12 @@ namespace Engine
 				ScriptParser(state),
 				mRootFolder(rootFolder)
 			{
-				for (auto& file : std::experimental::filesystem::recursive_directory_iterator(rootFolder))
+				
+			}
+
+			void ServerScriptParser::parse()
+			{
+				for (auto& file : std::experimental::filesystem::recursive_directory_iterator(mRootFolder))
 				{
 					/*, std::string("*.") + fileExtension())) {*/
 					if (file.path().extension() == fileExtension())
@@ -24,7 +29,7 @@ namespace Engine
 					}
 				}
 
-				state->setFinalized();
+				state()->setFinalized();
 			}
 
 			const std::string& ServerScriptParser::rootFolder() const

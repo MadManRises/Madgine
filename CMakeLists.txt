@@ -16,6 +16,9 @@ if (MSVC)
 	add_compile_options(/std:c++latest)
 endif(MSVC)
 
+if (UNIX)
+	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
+endif()
 
 set(BUILD_TESTS FALSE CACHE BOOL "Builds the tests")
 set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
@@ -49,7 +52,8 @@ if (BUILD_TESTS)
 		INSTALL_DIR       ${GTEST_DIR}
 		CMAKE_ARGS
 			-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-			-DCMAKE_BUILD_TYPE=Debug
+			-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+			-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 	)
 
 	include_directories(${GTEST_DIR}/include)
@@ -68,9 +72,9 @@ endif (BUILD_TESTS)
 
 add_subdirectory(interfaces)
 add_subdirectory(base)
-if (BUILD_OGRE)
+if (BUILD_OGRE AND NOT CONFIG_BUILD)
 	add_subdirectory(ogre)
-endif (BUILD_OGRE)
+endif ()
 add_subdirectory(server)
 
 

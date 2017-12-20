@@ -11,7 +11,7 @@ FolderSources(sources "" "")
 FolderSources(sources "" src interfacesforward.h interfaceslib.h)
 	FolderSources(sources src generic exceptionmessages.h keyvalue.cpp keyvalue.h message.h singleton.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources src math vector3.cpp vector3.h vector2.cpp vector2.h)
-	FolderSources(sources src network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.h winapi.cpp)
+	FolderSources(sources src network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.cpp socketapi.h winapi.cpp)
 	FolderSources(sources src scripting scriptingexception.h)
 		FolderSources(sources scripting datatypes argumentlist.cpp argumentlist.h intluatableinstance.cpp intluatableinstance.h luatable.cpp luatable.h luatableinstance.cpp luatableinstance.h luatableiterator.cpp luatableiterator.h luathread.h stringluatableinstance.cpp stringluatableinstance.h)
 		FolderSources(sources scripting parsing parseexception.h scriptparser.cpp scriptparser.h)
@@ -26,7 +26,7 @@ FolderSources(sources "" vstools Madgine.natvis)
 
 include_directories(${Interfaces_SOURCE_DIR}/src)
 add_library(Interfaces SHARED ${sources})
-add_precompiled_header(Interfaces src/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
+#add_precompiled_header(Interfaces src/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
 target_include_directories(Interfaces PRIVATE ${lua_include})
 
@@ -40,6 +40,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries (Interfaces PRIVATE stdc++fs)
 endif (CMAKE_COMPILER_IS_GNUCXX)
  
+message(STATUS ${CMAKE_PREFIX_PATH})
+
 include_library(Interfaces Lua PRIVATE lualib)
 
 if (BUILD_TESTS)	

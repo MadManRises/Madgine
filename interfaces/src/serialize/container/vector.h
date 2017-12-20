@@ -105,7 +105,7 @@ namespace Engine
 		using SerializableVector = VectorImpl<SerializableContainer<
 			container_traits<std::vector, typename UnitHelper<T>::Type>, Creator>>;
 
-		template <class T, const _ContainerPolicy &Config, class Creator = DefaultCreator<>>
+		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
 		using ObservableVector = ObservableVectorImpl<ObservableContainer<
 			container_traits<std::vector, typename UnitHelper<T>::Type>, Creator, Config>>;
 	}

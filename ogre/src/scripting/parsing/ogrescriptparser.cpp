@@ -42,7 +42,7 @@ namespace Engine
 			void OgreScriptParser::parseScript(Ogre::DataStreamPtr& stream,
 			                                   const Ogre::String& group)
 			{
-				Serialize::OgreStreamReader reader(stream);
+				Serialize::OgreStreamReader reader(Ogre::dynamic_pointer_cast<Ogre::MemoryDataStream>(stream));
 				std::istream is(&reader);
 				ScriptParser::parseScript(is, group, false);
 			}

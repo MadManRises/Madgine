@@ -22,6 +22,8 @@ namespace Engine
 			static size_t recv(SocketId id, char* buf, size_t len);
 
 			static Serialize::StreamError getError();
+			static int getAPIError();
+			static std::string getErrorMsg();
 		};
 	}
 }

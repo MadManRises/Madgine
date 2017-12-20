@@ -27,7 +27,7 @@ namespace Engine
 
 
 			Serialize::StreamError acceptConnection(int timeout);
-			void acceptConnections();
+			int acceptConnections(int limit = -1);
 
 
 

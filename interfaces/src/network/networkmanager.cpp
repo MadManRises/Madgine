@@ -115,8 +115,9 @@ namespace Engine
 		}
 
 
-		void NetworkManager::acceptConnections()
+		int NetworkManager::acceptConnections(int limit)
 		{
+			int count = 0;
 			if (isConnected())
 			{
 				if (mIsServer)
@@ -124,14 +125,21 @@ namespace Engine
 					Serialize::StreamError error;
 					SocketId sock;
 					std::tie(sock, error) = SocketAPI::accept(mSocket);
-					while (error != Serialize::TIMEOUT)
+					while (error != Serialize::TIMEOUT && limit != 0)
 					{
 						if (sock != Invalid_Socket)
-							addMasterStream(NetworkStream(sock, *this, createStreamId()));
+						{
+							if (addMasterStream(NetworkStream(sock, *this, createStreamId())) == Serialize::NO_ERROR){
+								++count;
+								if (limit > 0)
+									--limit;
+							}
+						}
 						std::tie(sock, error) = SocketAPI::accept(mSocket);
 					}
 				}
 			}
+			return count;
 		}
 
 		Serialize::StreamError NetworkManager::acceptConnection(int timeout)
@@ -153,7 +161,7 @@ namespace Engine
 			return Serialize::NO_SERVER;
 		}
 
-		
+
 		bool NetworkManager::isConnected() const
 		{
 			return mSocket != Invalid_Socket;

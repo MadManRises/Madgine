@@ -23,6 +23,37 @@ namespace Engine
 				in.readRaw(data(), size);
 		}
 
+		std::vector<char>::const_iterator FileBuffer::begin() const
+		{
+			return std::vector<char>::begin();
+		}
+
+		std::vector<char>::const_iterator FileBuffer::end() const
+		{
+			return std::vector<char>::end();
+		}
+
+		FileBuffer FileBuffer::readFile(const std::experimental::filesystem::path& path)
+		{
+			std::ifstream stream(path, std::ios::binary);
+			FileBuffer fileContents;
+			fileContents.reserve(file_size(path));
+			fileContents.assign(std::istreambuf_iterator<char>(stream),
+                    std::istreambuf_iterator<char>());
+			return fileContents;
+		}
+
+		void FileBuffer::writeFile(const std::experimental::filesystem::path& path, bool createFolders) const
+		{
+			if (createFolders)
+				create_directories(path.parent_path());
+			else
+				if (!exists(path.parent_path()))
+					throw 0;
+			std::ofstream stream(path, std::ios::binary);
+			stream.write(data(), size());
+		}
+
 
 		FileBufferReader::FileBufferReader(FileBuffer& buffer) :
 			mBuffer(buffer)

@@ -13,6 +13,8 @@ namespace Engine
 			public:
 				ServerScriptParser(LuaState* state, const std::string& rootFolder);
 
+				void parse();
+
 				const std::string& rootFolder() const;
 
 			private:

@@ -72,6 +72,7 @@ namespace Engine
 			static ParticipantId getLocalMasterParticipantId();
 			ParticipantId getSlaveParticipantId() const;
 
+			bool isMessageAvailable();
 			void receiveMessages(int msgCount = -1);
 			void sendMessages();
 			void sendAndReceiveMessages();

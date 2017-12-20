@@ -41,6 +41,7 @@ namespace Engine
 			TIMEOUT,
 			NO_SERVER,
 			NO_CONNECTION,
+			CONNECTION_REFUSED,
 			UNKNOWN_ERROR
 		};
 

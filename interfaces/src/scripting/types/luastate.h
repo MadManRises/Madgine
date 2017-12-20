@@ -26,6 +26,8 @@ namespace Engine
 			LuaTable env() const;
 			lua_State* state() const;
 
+			void setGlobalMethod(const std::string &name, int (*f)(lua_State*));
+
 		private:
 			bool mFinalized;
 

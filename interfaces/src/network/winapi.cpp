@@ -57,11 +57,18 @@ namespace Engine
 			int error = WSAGetLastError();
 			switch (error)
 			{
+			case WSAECONNREFUSED:
+				return Serialize::CONNECTION_REFUSED;
 			case WSAEWOULDBLOCK:
 				return Serialize::WOULD_BLOCK;
 			default:
 				return Serialize::UNKNOWN_ERROR;
 			}
+		}
+
+		int SocketAPI::getAPIError()
+		{
+			return WSAGetLastError();
 		}
 
 		SocketId SocketAPI::socket(int port)

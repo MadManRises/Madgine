@@ -120,15 +120,14 @@ namespace Engine
 		{
 			if (luaL_loadstring(state, cmd.c_str()))
 			{
-				LOG_ERROR(lua_tostring(state, -1));
-				return;
+				throw ScriptingException(lua_tostring(state, -1));
 			}
 			mEnv.push(state);
 			lua_setupvalue(state, -2, 1);
 
 			if (lua_pcall(state, 0, LUA_MULTRET, 0))
 			{
-				LOG_ERROR(lua_tostring(state, -1));
+				throw ScriptingException(lua_tostring(state, -1));
 			}
 		}
 
@@ -166,6 +165,15 @@ namespace Engine
 		lua_State* LuaState::state() const
 		{
 			return mState;
+		}
+
+		void LuaState::setGlobalMethod(const std::string& name, int(* f)(lua_State*))
+		{
+			assert(!mFinalized);
+			mGlobal.push();
+			lua_pushcfunction(mState, f);
+			lua_setfield(mState, -2, name.c_str());
+			lua_pop(mState, 1);
 		}
 
 		int LuaState::lua_indexScope(lua_State* state)

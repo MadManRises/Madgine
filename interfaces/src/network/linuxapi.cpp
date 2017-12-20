@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
 
@@ -49,6 +50,34 @@ namespace Engine {
 			}
 		}
 
+		int SocketAPI::getAPIError()
+		{
+			return errno;
+		}
+
+		Serialize::StreamError initSock(SocketId s)
+		{
+			int on = 1;
+			if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on))  < 0)
+			{
+				return Serialize::UNKNOWN_ERROR;
+			}
+			if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+			{
+				return Serialize::UNKNOWN_ERROR;
+			}
+
+			int flags = fcntl(s, F_GETFL, 0);
+			if (flags < 0) {
+				return Serialize::UNKNOWN_ERROR;
+			}
+			flags |= O_NONBLOCK;
+			if (fcntl(s, F_SETFL, flags) != 0) {
+				return Serialize::UNKNOWN_ERROR;
+			}
+			return Serialize::NO_ERROR;
+		}
+
 		SocketId SocketAPI::socket(int port) {
 			struct sockaddr_in addr;
 			memset(&addr, 0, sizeof(addr));
@@ -63,13 +92,7 @@ namespace Engine {
 				return Invalid_Socket;
 			}
 
-			int flags = fcntl(s, F_GETFL, 0);
-			if (flags < 0) {
-				close(s);
-				return Invalid_Socket;
-			}
-			flags |= O_NONBLOCK;
-			if (fcntl(s, F_SETFL, flags) != 0) {
+			if (initSock(s) != Serialize::NO_ERROR){
 				close(s);
 				return Invalid_Socket;
 			}
@@ -131,7 +154,12 @@ namespace Engine {
 				return { Invalid_Socket, getError() };
 			}
 
-			
+			if (initSock(s) != Serialize::NO_ERROR)
+			{
+				Serialize::StreamError error = getError();
+				close(s);
+				return { Invalid_Socket, error };
+			}
 
 			//Try connecting...
 
@@ -142,22 +170,10 @@ namespace Engine {
 				return { Invalid_Socket, error };
 			}
 
-			int flags = fcntl(s, F_GETFL, 0);
-			if (flags < 0) {
-				Serialize::StreamError error = getError();
-				close(s);
-				return { Invalid_Socket, error };
-			}
-			flags |= O_NONBLOCK;
-			if (fcntl(s, F_SETFL, flags) != 0) {
-				Serialize::StreamError error = getError();
-				close(s);
-				return { Invalid_Socket, error };
-			}
-
-
 			return { s, Serialize::NO_ERROR };
 		}
+
+
 
 	}
 }

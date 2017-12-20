@@ -6,11 +6,11 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		OgreStreamReader::OgreStreamReader(Ogre::DataStreamPtr stream) :
-			mPtr(dynamic_cast<Ogre::MemoryDataStream*>(stream.get()))
+		OgreStreamReader::OgreStreamReader(Ogre::MemoryDataStreamPtr stream) :
+			mStream(stream)
 		{
-			setg(reinterpret_cast<char*>(mPtr->getPtr()), reinterpret_cast<char*>(mPtr->getPtr()),
-			     reinterpret_cast<char*>(mPtr->getPtr()) + mPtr->size());
+			setg(reinterpret_cast<char*>(mStream->getPtr()), reinterpret_cast<char*>(mStream->getPtr()),
+			     reinterpret_cast<char*>(mStream->getPtr()) + mStream->size());
 		}
 
 		std::streampos OgreStreamReader::seekoff(std::streamoff off, std::ios_base::seekdir way,
@@ -31,15 +31,15 @@ namespace Engine
 			}
 			char* newPos = base + off;
 			int dist = newPos - eback();
-			setg(reinterpret_cast<char*>(mPtr->getPtr()), reinterpret_cast<char*>(mPtr->getPtr()) + dist,
-			     reinterpret_cast<char*>(mPtr->getPtr()) + mPtr->size());
+			setg(reinterpret_cast<char*>(mStream->getPtr()), reinterpret_cast<char*>(mStream->getPtr()) + dist,
+			     reinterpret_cast<char*>(mStream->getPtr()) + mStream->size());
 			return dist;
 		}
 
 		std::streampos OgreStreamReader::seekpos(std::streampos pos, std::ios_base::openmode which)
 		{
-			setg(reinterpret_cast<char*>(mPtr->getPtr()), reinterpret_cast<char*>(mPtr->getPtr()) + pos,
-			     reinterpret_cast<char*>(mPtr->getPtr()) + mPtr->size());
+			setg(reinterpret_cast<char*>(mStream->getPtr()), reinterpret_cast<char*>(mStream->getPtr()) + pos,
+			     reinterpret_cast<char*>(mStream->getPtr()) + mStream->size());
 			return pos;
 		}
 	}

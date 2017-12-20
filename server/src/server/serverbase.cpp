@@ -29,7 +29,7 @@ namespace Engine
 
 		int ServerBase::run()
 		{
-			Util::UtilMethods::setup(&mLog);
+			mScriptParser.parse();
 
 			init();
 

@@ -239,6 +239,18 @@ namespace Engine
 			return mSlaveStream ? mSlaveStream->id() : 0;
 		}
 
+		bool SerializeManager::isMessageAvailable()
+		{
+			if (mSlaveStream && mSlaveStream->isMessageAvailable())
+				return true;
+			for (BufferedInOutStream *stream : mMasterStreams)
+			{
+				if (stream->isMessageAvailable())
+					return true;
+			}
+			return false;
+		}
+
 		bool SerializeManager::isMaster(Stream* stream) const
 		{
 			return mSlaveStream != stream;

@@ -16,6 +16,12 @@ namespace Engine
 
 			void writeState(SerializeOutStream& out) const override;
 			void readState(SerializeInStream& in) override;
+
+			const_iterator begin() const;
+			const_iterator end() const;
+
+			static FileBuffer readFile(const std::experimental::filesystem::path &path);
+			void writeFile(const std::experimental::filesystem::path &path, bool createFolders = false) const;
 		};
 
 		class INTERFACES_EXPORT FileBufferReader : public std::basic_streambuf<char>
