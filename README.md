@@ -1,6 +1,6 @@
 # Madgine
 
-
+[![Build Status](http://37.221.194.184:8080/buildStatus/icon?job=Madgine)](http://37.221.194.184:8080/job/Madgine)
 
 ## Description
 
