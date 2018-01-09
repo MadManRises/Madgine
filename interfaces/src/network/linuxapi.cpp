@@ -55,7 +55,7 @@ namespace Engine {
 			return errno;
 		}
 
-		Serialize::StreamError initSock(SocketId s)
+		Serialize::StreamError preInitSock(SocketId s)
 		{
 			int on = 1;
 			if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on))  < 0)
@@ -66,7 +66,11 @@ namespace Engine {
 			{
 				return Serialize::UNKNOWN_ERROR;
 			}
-
+			
+			return Serialize::NO_ERROR;
+		}
+		
+		Serialize::StreamError postInitSock(SocketId s){
 			int flags = fcntl(s, F_GETFL, 0);
 			if (flags < 0) {
 				return Serialize::UNKNOWN_ERROR;
@@ -92,7 +96,12 @@ namespace Engine {
 				return Invalid_Socket;
 			}
 
-			if (initSock(s) != Serialize::NO_ERROR){
+			if (preInitSock(s) != Serialize::NO_ERROR){
+				close(s);
+				return Invalid_Socket;
+			}
+			
+			if (postInitSock(s) != Serialize::NO_ERROR){
 				close(s);
 				return Invalid_Socket;
 			}
@@ -154,7 +163,7 @@ namespace Engine {
 				return { Invalid_Socket, getError() };
 			}
 
-			if (initSock(s) != Serialize::NO_ERROR)
+			if (preInitSock(s) != Serialize::NO_ERROR)
 			{
 				Serialize::StreamError error = getError();
 				close(s);
@@ -164,6 +173,13 @@ namespace Engine {
 			//Try connecting...
 
 			if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0)
+			{
+				Serialize::StreamError error = getError();
+				close(s);
+				return { Invalid_Socket, error };
+			}
+			
+			if (postInitSock(s) != Serialize::NO_ERROR)
 			{
 				Serialize::StreamError error = getError();
 				close(s);
