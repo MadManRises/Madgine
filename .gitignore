@@ -246,6 +246,7 @@ html/
 packages/
 
 *.pyc
-Maditor/Tools/blender/.idea/workspace.xml
 
 .couscous/
+
+CMakeSettings.json
