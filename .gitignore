@@ -250,3 +250,5 @@ packages/
 .couscous/
 
 CMakeSettings.json
+
+docs/
