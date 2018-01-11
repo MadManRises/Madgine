@@ -1,6 +1,7 @@
 #pragma once
 
 #include "valuetype.h"
+#include "keyvalue.h"
 
 namespace Engine
 {
