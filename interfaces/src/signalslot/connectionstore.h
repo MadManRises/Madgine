@@ -17,7 +17,7 @@ namespace Engine
 				std::shared_ptr<ConnectionInstance<_Ty...>> conn =
 					std::static_pointer_cast<ConnectionInstance<_Ty...>>(
 						make_shared_connection(
-							new Con<_Ty...>(*this, it, std::forward<Args>(args)...)
+							std::make_unique<Con<_Ty...>>(*this, it, std::forward<Args>(args)...)
 						)
 					);
 				*it = conn;
@@ -29,7 +29,7 @@ namespace Engine
 			{
 				mConnections.emplace_back();
 				auto it = --mConnections.end();
-				std::shared_ptr<T> conn = std::static_pointer_cast<T>(make_shared_connection(new T(connection, *this, it)));
+				std::shared_ptr<T> conn = std::static_pointer_cast<T>(make_shared_connection(std::make_unique<T>(connection, *this, it)));
 				*it = conn;
 				return conn;
 			}
@@ -40,7 +40,7 @@ namespace Engine
 			static ConnectionStore& globalStore();
 
 		private:
-			static std::shared_ptr<ConnectionBase> make_shared_connection(ConnectionBase* conn);
+			static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
 		private:
 			std::list<std::shared_ptr<ConnectionBase>> mConnections;

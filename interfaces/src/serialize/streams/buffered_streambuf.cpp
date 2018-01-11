@@ -10,8 +10,7 @@ namespace Engine
 
 		buffered_streambuf::buffered_streambuf() :
 			mIsClosed(false),
-			mBytesToRead(sizeof(BufferedMessageHeader)),
-			mMsgInBuffer(false)
+			mBytesToRead(sizeof(BufferedMessageHeader))
 		{
 			extend();
 		}
@@ -21,8 +20,7 @@ namespace Engine
 			mIsClosed(other.mIsClosed),
 			mBytesToRead(other.mBytesToRead),
 			mReceiveMessageHeader(other.mReceiveMessageHeader),
-			mRecBuffer(other.mRecBuffer),
-			mMsgInBuffer(other.mMsgInBuffer),
+			mRecBuffer(std::forward<std::unique_ptr<char[]>>(other.mRecBuffer)),
 			mSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mSendBuffer)),
 			mStagedSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mStagedSendBuffer)),
 			mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
@@ -30,15 +28,12 @@ namespace Engine
 			setg(other.eback(), other.gptr(), other.egptr());
 			setp(other.pbase(), other.epptr());
 			other.mIsClosed = true;
-			other.mMsgInBuffer = false;
 
 			//setp(mSendBuffer.back().data(), mSendBuffer.back().data() + (other.pptr() - other.pbase()), mSendBuffer.back().data() + BUFFER_SIZE);
 		}
 
 		buffered_streambuf::~buffered_streambuf()
 		{
-			if (mMsgInBuffer)
-				delete mRecBuffer;
 		}
 
 		buffered_streambuf::pos_type buffered_streambuf::seekoff(off_type off, std::ios_base::seekdir dir,
@@ -109,10 +104,10 @@ namespace Engine
 		{
 			if (mIsClosed)
 				return false;
-			if (mMsgInBuffer && mBytesToRead == 0 && gptr() == eback())
+			if (mRecBuffer && mBytesToRead == 0 && gptr() == eback())
 				return true;
 			receive(context);
-			return mMsgInBuffer && mBytesToRead == 0 && gptr() == eback();
+			return mRecBuffer && mBytesToRead == 0 && gptr() == eback();
 		}
 
 
@@ -216,17 +211,16 @@ namespace Engine
 
 		void buffered_streambuf::receive(const std::string& context)
 		{
-			if (mMsgInBuffer && mBytesToRead == 0)
+			if (mRecBuffer && mBytesToRead == 0)
 			{
 				if (gptr() != egptr())
 				{
 					LOG_WARNING(Exceptions::messageNotFullyRead(context));
 				}
-				delete[] mRecBuffer;
-				mMsgInBuffer = false;
+				mRecBuffer.reset();
 				mBytesToRead = sizeof mReceiveMessageHeader;
 			}
-			if (!mMsgInBuffer)
+			if (!mRecBuffer)
 			{
 				assert(mBytesToRead > 0);
 				int num = rec(reinterpret_cast<char*>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
@@ -243,15 +237,14 @@ namespace Engine
 				mBytesToRead -= num;
 				if (mBytesToRead == 0)
 				{
-					mMsgInBuffer = true;
 					mBytesToRead = mReceiveMessageHeader.mMsgSize;
-					mRecBuffer = new char[mBytesToRead];
+					mRecBuffer = std::make_unique<char[]>(mBytesToRead);
 				}
 			}
 
-			if (mMsgInBuffer && mBytesToRead > 0)
+			if (mRecBuffer && mBytesToRead > 0)
 			{
-				int num = rec(mRecBuffer + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
+				int num = rec(mRecBuffer.get() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
 				if (num == 0)
 				{
 					close();
@@ -265,7 +258,7 @@ namespace Engine
 				mBytesToRead -= num;
 				if (mBytesToRead == 0)
 				{
-					setg(mRecBuffer, mRecBuffer, mRecBuffer + mReceiveMessageHeader.mMsgSize);
+					setg(mRecBuffer.get(), mRecBuffer.get(), mRecBuffer.get() + mReceiveMessageHeader.mMsgSize);
 				}
 			}
 		}

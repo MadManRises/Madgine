@@ -1,6 +1,7 @@
 #include "baselib.h"
 #include "scenecomponentbase.h"
 #include "scripting/types/api.h"
+#include "generic/keyvalueiterate.h"
 
 API_IMPL(Engine::Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 

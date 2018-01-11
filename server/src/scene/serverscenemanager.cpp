@@ -5,6 +5,10 @@
 
 #include "serialize/streams/serializestream.h"
 
+#include "util/process.h"
+
+#include "serialize/serializemanager.h"
+
 namespace Engine
 {
 	template <> thread_local Scene::ServerSceneManager *Singleton<Scene::ServerSceneManager>::sSingleton = nullptr;

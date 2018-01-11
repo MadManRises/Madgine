@@ -6,13 +6,13 @@
 
 #include "serialize/toplevelserializableunit.h"
 
-#include "scene/scenecomponent.h"
+#include "scene/scenecomponentcollector.h"
 
 #include "serialize/container/list.h"
 
 #include "entity/entity.h"
 
-#include "serialize/container/noparentunit.h"
+#include "serialize/container/noparent.h"
 
 namespace Engine
 {

@@ -67,7 +67,7 @@ namespace Engine
 		{
 			Store::sComponents().emplace_back([](_Ty ... args)
 			{
-				return std::unique_ptr<Base>(new T(std::forward<_Ty>(args)...));
+				return std::unique_ptr<Base>(std::make_unique<T>(std::forward<_Ty>(args)...));
 			});
 			auto it = Store::sComponents().end();
 			--it;

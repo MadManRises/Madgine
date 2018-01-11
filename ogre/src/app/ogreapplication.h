@@ -4,6 +4,9 @@
 
 #include "scripting/types/luastate.h"
 
+
+#include "serialize/container/noparent.h"
+
 namespace Engine
 {
 	namespace App
@@ -139,13 +142,13 @@ namespace Engine
 
 			Ogre::RenderWindow* mWindow;
 
-			Ogre::Root* mRoot;
-			Scene::OgreSceneManager* mSceneMgr;
-			GUI::GUISystem* mGUI;
-			UI::UIManager* mUI;
-			Resources::ResourceLoader* mLoader;
-			ConfigSet* mConfig;
-			Input::InputHandler* mInput;
+			std::unique_ptr<Ogre::Root> mRoot;
+			std::unique_ptr<ConfigSet> mConfig;
+			std::unique_ptr<Resources::ResourceLoader> mLoader;
+			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;
+			std::unique_ptr<GUI::GUISystem> mGUI;
+			std::unique_ptr<UI::UIManager> mUI;
+			std::unique_ptr<Input::InputHandler> mInput;
 
 			HWND mHwnd;
 

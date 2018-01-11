@@ -30,12 +30,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-	/** \addtogroup Core
-	*  @{
-	*/
-	/** \addtogroup Math
-	*  @{
-	*/
 	/** Standard 2-dimensional vector.
 	@remarks
 	A direction in 2D space represented as distances along the 2
@@ -441,7 +435,7 @@ namespace Engine
 			return x * rkVector.y - y * rkVector.x;
 		}
 
-		/** Generates a new random vector which deviates from this vector by a
+		/* Generates a new random vector which deviates from this vector by a
 		given angle in a random direction.
 		@remarks
 		This method assumes that the random number generator has already
@@ -492,7 +486,7 @@ namespace Engine
 			return Math::isNaN(x) || Math::isNaN(y);
 		}*/
 
-		/**  Gets the angle between 2 vectors.
+		/*  Gets the angle between 2 vectors.
 		@remarks
 		Vectors do not have to be unit-length but must represent directions.
 		*/
@@ -509,7 +503,7 @@ namespace Engine
 			return Ogre::Math::ACos(f);
 		}*/
 
-		/**  Gets the oriented angle between 2 vectors.
+		/*  Gets the oriented angle between 2 vectors.
 		@remarks
 		Vectors do not have to be unit-length but must represent directions.
 		The angle is comprised between 0 and 2 PI.
@@ -542,6 +536,4 @@ namespace Engine
 		}
 	};
 
-	/** @} */
-	/** @} */
 }

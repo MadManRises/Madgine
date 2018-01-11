@@ -31,12 +31,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-	/** \addtogroup Core
-	*  @{
-	*/
-	/** \addtogroup Math
-	*  @{
-	*/
 	/** Standard 3-dimensional vector.
 	@remarks
 	A direction in 3D space represented as distances along the 3
@@ -577,7 +571,7 @@ namespace Engine
 			return perp.normalisedCopy();
 		}
 
-		/** Generates a new random vector which deviates from this vector by a
+		/* Generates a new random vector which deviates from this vector by a
 		given angle in a random direction.
 		@remarks
 		This method assumes that the random number generator has already
@@ -622,7 +616,7 @@ namespace Engine
 			return q * (*this);
 		}*/
 
-		/** Gets the angle between 2 vectors.
+		/* Gets the angle between 2 vectors.
 		@remarks
 		Vectors do not have to be unit-length but must represent directions.
 		*/
@@ -640,7 +634,7 @@ namespace Engine
 			return Math::ACos(f);
 
 		}*/
-		/** Gets the shortest arc quaternion to rotate this vector to the destination
+		/* Gets the shortest arc quaternion to rotate this vector to the destination
 		vector.
 		@remarks
 		If you call this with a dest vector that is close to the inverse
@@ -698,7 +692,7 @@ namespace Engine
 			return Vector3(*this - 2 * this->dotProduct(normal) * normal);
 		}
 
-		/** Returns whether this vector is within a positional tolerance
+		/* Returns whether this vector is within a positional tolerance
 		of another vector.
 		@param rhs The vector to compare with
 		@param tolerance The amount that each element of the vector may vary by
@@ -763,6 +757,4 @@ namespace Engine
 		}
 	};
 
-	/** @} */
-	/** @} */
 }

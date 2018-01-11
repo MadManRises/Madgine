@@ -8,9 +8,9 @@ namespace Engine
 
 	namespace SignalSlot
 	{
-		std::shared_ptr<ConnectionBase> ConnectionStore::make_shared_connection(ConnectionBase* conn)
+		std::shared_ptr<ConnectionBase> ConnectionStore::make_shared_connection(std::unique_ptr<ConnectionBase> &&conn)
 		{
-			return std::shared_ptr<ConnectionBase>(conn);
+			return std::shared_ptr<ConnectionBase>(std::forward<std::unique_ptr<ConnectionBase>>(conn));
 		}
 
 		void ConnectionStore::disconnect(const const_iterator& where)

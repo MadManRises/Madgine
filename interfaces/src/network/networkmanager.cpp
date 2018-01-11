@@ -13,7 +13,6 @@ namespace Engine
 			SerializeManager(name),
 			mSocket(Invalid_Socket),
 			mIsServer(false),
-			mSlaveStream(nullptr),
 			mConnectionEstablished(this)
 		{
 			if (sManagerCount == 0)
@@ -28,7 +27,6 @@ namespace Engine
 			SerializeManager(std::forward<NetworkManager>(other)),
 			mSocket(other.mSocket),
 			mIsServer(other.mIsServer),
-			mSlaveStream(nullptr),
 			mConnectionEstablished(this)
 		{
 			for (std::pair<const Serialize::ParticipantId, NetworkStream>& stream : other.mStreams)
@@ -38,10 +36,9 @@ namespace Engine
 			other.mIsServer = false;
 			if (other.mSlaveStream)
 			{
-				mSlaveStream = new NetworkStream(std::move(*other.mSlaveStream), *this);
-				setSlaveStream(mSlaveStream, false);
-				delete other.mSlaveStream;
-				other.mSlaveStream = nullptr;
+				mSlaveStream = std::make_unique<NetworkStream>(std::move(*other.mSlaveStream), *this);
+				setSlaveStream(mSlaveStream.get(), false);
+				other.mSlaveStream.reset();
 			}
 			++sManagerCount;
 		}
@@ -187,8 +184,7 @@ namespace Engine
 			if (mSlaveStream)
 			{
 				SerializeManager::removeSlaveStream();
-				delete mSlaveStream;
-				mSlaveStream = nullptr;
+				mSlaveStream.reset();
 				mSocket = Invalid_Socket;
 			}
 		}
@@ -215,12 +211,11 @@ namespace Engine
 
 		void NetworkManager::onConnectionEstablished(int timeout)
 		{
-			mSlaveStream = new NetworkStream(mSocket, *this);
-			Serialize::StreamError error = setSlaveStream(mSlaveStream, true, timeout);
+			mSlaveStream = std::make_unique<NetworkStream>(mSocket, *this);
+			Serialize::StreamError error = setSlaveStream(mSlaveStream.get(), true, timeout);
 			if (error != Serialize::NO_ERROR)
 			{
-				delete mSlaveStream;
-				mSlaveStream = nullptr;
+				mSlaveStream.reset();
 				mSocket = Invalid_Socket;
 			}
 

@@ -3,7 +3,7 @@
 #include "serverapplication.h"
 #include "serverappsettings.h"
 #include "scene/serverscenemanager.h"
-#include "serialize/container/noparentunit.h"
+
 
 namespace Engine
 {
@@ -11,16 +11,12 @@ namespace Engine
 	{
 		ServerApplication::ServerApplication(const Scripting::LuaTable& table) :
 			Application(table),
-			mSceneManager(nullptr), mSettings(nullptr)
+			mSettings(nullptr)
 		{
 		}
 
 		ServerApplication::~ServerApplication()
 		{
-			if (mSceneManager)
-			{
-				delete mSceneManager;
-			}
 		}
 
 		void ServerApplication::setup(const ServerAppSettings& settings)
@@ -29,7 +25,7 @@ namespace Engine
 
 			Application::setup(settings);
 
-			mSceneManager = new Serialize::NoParentUnit<Scene::ServerSceneManager>;
+			mSceneManager = Serialize::make_noparent_unique<Scene::ServerSceneManager>();
 		}
 
 		int ServerApplication::go()

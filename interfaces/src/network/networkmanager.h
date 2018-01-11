@@ -55,7 +55,7 @@ namespace Engine
 			bool mIsServer;
 
 			std::map<Serialize::ParticipantId, NetworkStream> mStreams;
-			NetworkStream* mSlaveStream;
+			std::unique_ptr<NetworkStream> mSlaveStream;
 
 			//static constexpr UINT sMessageSignature = 1048;
 

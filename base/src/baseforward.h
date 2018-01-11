@@ -7,6 +7,7 @@ namespace Engine
 	namespace Scene
 	{
 		class SceneManagerBase;
+		class SceneComponentBase;
 		enum class ContextMask : unsigned int;
 
 		namespace Entity

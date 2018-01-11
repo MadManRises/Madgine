@@ -2,7 +2,7 @@
 
 #include "luastate.h"
 
-#include "generic/keyvalue.h"
+#include "generic/keyvalueiterate.h"
 #include "scripting/types/apihelper.h"
 
 #include "scripting/types/globalscopebase.h"

@@ -62,8 +62,8 @@ namespace Engine
 			//read
 			size_t mBytesToRead;
 			BufferedMessageHeader mReceiveMessageHeader;
-			char* mRecBuffer;
-			bool mMsgInBuffer;
+			std::unique_ptr<char[]> mRecBuffer;
+			
 
 			//write
 			static constexpr size_t BUFFER_SIZE = 100;

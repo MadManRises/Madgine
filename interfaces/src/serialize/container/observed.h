@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../observable.h"
-#include "serialized.h"
+#include "../serializable.h"
 #include "../streams/bufferedstream.h"
+#include "signalslot/signal.h"
+#include "unithelper.h"
 
 namespace Engine
 {

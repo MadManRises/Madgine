@@ -3,6 +3,8 @@
 #include "app/application.h"
 #include "servertimer.h"
 
+#include "serialize/container/noparent.h"
+
 namespace Engine
 {
 	namespace App
@@ -31,7 +33,7 @@ namespace Engine
 
 
 		private:
-			Scene::ServerSceneManager* mSceneManager;
+			Serialize::noparent_unique_ptr<Scene::ServerSceneManager> mSceneManager;
 			ServerTimer mTimer;
 			const ServerAppSettings* mSettings;
 		};

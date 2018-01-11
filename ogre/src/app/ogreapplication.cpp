@@ -15,7 +15,6 @@
 
 #include "OgreWindowEventUtilities.h"
 
-#include "serialize/container/noparentunit.h"
 
 #include "util/standardlog.h"
 
@@ -28,35 +27,14 @@ SINGLETON_IMPL(App::OgreApplication);
 	{
 		OgreApplication::OgreApplication() :
 			Application(env().createTable()),
-			mSettings(nullptr),
 			mPaused(false),
 			mWindow(nullptr),
-			mRoot(nullptr),
-			mSceneMgr(nullptr),
-			mGUI(nullptr),
-			mUI(nullptr),
-			mLoader(nullptr),
-			mConfig(nullptr),
-			mInput(nullptr), mHwnd(nullptr)
+			mHwnd(nullptr)
 		{
 		}
 
 		OgreApplication::~OgreApplication()
 		{
-			if (mInput && !mSettings->mInput)
-				delete mInput;
-			if (mUI)
-				delete mUI;
-			if (mGUI)
-				delete mGUI;
-			if (mSceneMgr)
-				delete mSceneMgr;
-			if (mLoader)
-				delete mLoader;
-			if (mConfig)
-				delete mConfig;
-			if (mRoot)
-				delete mRoot;
 			Util::UtilMethods::setup(nullptr);
 		}
 
@@ -83,29 +61,32 @@ SINGLETON_IMPL(App::OgreApplication);
 
 			mWindow->getCustomAttribute("WINDOW", &mHwnd);
 
-			mLoader = OGRE_NEW Resources::ResourceLoader(this, mSettings->mRootDir);
+			mLoader = std::make_unique<Resources::ResourceLoader>(this, mSettings->mRootDir);
 
 			Application::setup(settings);
 
 			// Create SceneManagerBase
-			mSceneMgr = new Serialize::NoParentUnit<Scene::OgreSceneManager>(mRoot);
+			mSceneMgr = Serialize::make_noparent_unique<Scene::OgreSceneManager>(mRoot.get());
 
 			mWindow->update();
 
 			// Initialise GUISystem 
-			mGUI = OGRE_NEW GUI::MyGui::MyGUILauncher(mWindow, mSceneMgr->getSceneManager());
+			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(mWindow, mSceneMgr->getSceneManager());
 			//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
-			Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI);
+			Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI.get());
 
 			// Create UIManager
-			mUI = new UI::UIManager(mGUI);
+			mUI = std::make_unique<UI::UIManager>(mGUI.get());
 
-			if (mSettings->mInput)
-				mInput = mSettings->mInput;
-			else
-				mInput = new Input::OISInputHandler(mWindow);
+			if (mSettings->mInput) {
+				mSettings->mInput->setSystem(mGUI.get());
+			}
+			else {
+				mInput = std::make_unique<Input::OISInputHandler>(mWindow);
+				mInput->setSystem(mGUI.get());
+			}
 
-			mInput->setSystem(mGUI);
+			
 		}
 
 		bool OgreApplication::init()
@@ -148,7 +129,7 @@ SINGLETON_IMPL(App::OgreApplication);
 		{
 			mUI->finalize();
 
-			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI);
+			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI.get());
 			mGUI->finalize();
 
 			mSceneMgr->finalize();
@@ -317,9 +298,9 @@ SINGLETON_IMPL(App::OgreApplication);
 
 		void OgreApplication::_setupOgre()
 		{
-			mRoot = OGRE_NEW Ogre::Root(mSettings->mPluginsFile); // Creating Root
+			mRoot = std::make_unique<Ogre::Root>(mSettings->mPluginsFile); // Creating Root
 
-			mConfig = OGRE_NEW ConfigSet(mRoot, "config.vs"); // Loading Config and configuring Root
+			mConfig = std::make_unique<ConfigSet>(mRoot.get(), "config.vs"); // Loading Config and configuring Root
 		}
 
 		void OgreApplication::resizeWindow()

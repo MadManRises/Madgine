@@ -49,7 +49,7 @@ namespace Engine
 
 			void setActive(bool b);
 
-			virtual bool filter(Stream* stream);
+			virtual bool filter(Stream* stream) const;
 
 		private:
 
@@ -73,13 +73,16 @@ namespace Engine
 			friend class Serializable;
 			friend class Observable;
 			friend class TopLevelSerializableUnitBase;
-			template <class T, bool b>
-			friend struct UnitHelper;
+			friend struct SerializeUnitHelper;
 			template <class T>
 			friend class __serialized__impl__::SerializedUnit;
 			/*template <template <class...> class C, class Creator, class T>
 			friend class SerializableContainer;
 			*/
+			friend struct noparent_deleter;
+			template <typename T, typename... Args>
+			friend noparent_unique_ptr<T> make_noparent_unique(Args&&... args);
+			
 
 		private:
 			std::vector<Observable*> mObservedValues;

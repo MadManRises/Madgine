@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../serializemanager.h"
 #include "serialize/streams/serializestream.h"
 #include "../toplevelserializableunit.h"
+#include "../serializable.h"
 
 namespace Engine
 {
@@ -182,12 +182,13 @@ namespace Engine
 			}
 		};
 
-		template <class T>
-		struct UnitHelper<T, false> : public UnitHelperBase<T>
-		{
-			typedef T Type;
+		struct SerializeUnitHelper {
+			static void read_state(SerializeInStream& in, Serializable& item)
+			{
+				item.readState(in);
+			}
 
-			static void read_state(SerializeInStream& in, T& item)
+			static void read_state(SerializeInStream& in, SerializableUnitBase& item)
 			{
 				item.readState(in);
 			}
@@ -210,19 +211,29 @@ namespace Engine
 			{
 			}
 
-			static void write_creation(SerializeOutStream& out, const Type& item)
+			static void write_creation(SerializeOutStream& out, const Serializable& item)
 			{
 				item.writeCreationData(out);
 			}
 
-			static void write_state(SerializeOutStream& out, const Type& item)
+			static void write_creation(SerializeOutStream& out, const SerializableUnitBase& item)
+			{
+				item.writeCreationData(out);
+			}
+
+			static void write_state(SerializeOutStream& out, const Serializable& item)
+			{
+				item.writeState(out);
+			}
+
+			static void write_state(SerializeOutStream& out, const SerializableUnitBase& item)
 			{
 				item.writeState(out);
 			}
 
 			static bool filter(SerializeOutStream& out, const SerializableUnitBase& item)
 			{
-				return out.manager().filter(&item, out.id());
+				return item.filter(&out);
 			}
 
 			static bool filter(SerializeOutStream& out, const Serializable& item)
@@ -230,11 +241,15 @@ namespace Engine
 				return true;
 			}
 
-			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, Type& item)
+			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, SerializableUnitBase& item)
 			{
 				item.applySerializableMap(map);
 			}
 
+			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, Serializable& item)
+			{
+				item.applySerializableMap(map);
+			}
 
 			static void postConstruct(SerializableUnitBase& item)
 			{
@@ -273,6 +288,12 @@ namespace Engine
 			}
 		};
 
+
+		template <class T>
+		struct UnitHelper<T, false> : public CopyTraits<T>, public SerializeUnitHelper
+		{
+			typedef T Type;
+		};
 
 		template <class U, class V>
 		struct UnitHelper<std::pair<U, V>, false> : public UnitHelperBase<std::pair<U, V>>

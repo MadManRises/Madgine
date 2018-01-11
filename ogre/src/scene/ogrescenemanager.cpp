@@ -10,6 +10,7 @@
 
 #include "util/profiler.h"
 
+#include "serialize/serializemanager.h"
 
 namespace Engine
 {

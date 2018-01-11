@@ -8,6 +8,8 @@
 
 #include "generic/transformIt.h"
 
+#include "scenecomponentbase.h"
+
 	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
 		MAP_RO(Active, isActive));
 
