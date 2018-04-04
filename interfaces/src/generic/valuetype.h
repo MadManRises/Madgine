@@ -15,15 +15,15 @@
 namespace Engine
 {
 
+	class EOLType
+	{
+	public:
+		constexpr bool operator==(const EOLType&) const { return true; }
+	};
 
 	class INTERFACES_EXPORT ValueType
 	{
 	private:
-		class EOLType
-		{
-		public:
-			constexpr bool operator==(const EOLType&) const { return true; }
-		};
 
 		using Union = std::variant<
 			std::monostate,

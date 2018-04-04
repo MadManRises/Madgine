@@ -35,7 +35,7 @@ namespace Engine
 
 		FileBuffer FileBuffer::readFile(const std::experimental::filesystem::path& path)
 		{
-			std::ifstream stream(path, std::ios::binary);
+			std::ifstream stream(path.string(), std::ios::binary);
 			FileBuffer fileContents;
 			fileContents.reserve(file_size(path));
 			fileContents.assign(std::istreambuf_iterator<char>(stream),
@@ -50,7 +50,7 @@ namespace Engine
 			else
 				if (!exists(path.parent_path()))
 					throw 0;
-			std::ofstream stream(path, std::ios::binary);
+			std::ofstream stream(path.string(), std::ios::binary);
 			stream.write(data(), size());
 		}
 
