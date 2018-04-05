@@ -6,7 +6,7 @@
 
 extern "C"
 {
-#include <lua.h>                                /* Always include this when calling Lua */
+#include <lua/lua.h>                                /* Always include this when calling Lua */
 }
 
 namespace Engine
