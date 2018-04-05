@@ -5,6 +5,7 @@ cmake_policy(SET CMP0048 NEW)
 
 Project(Interfaces)
 
+load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
 set(sources interfaceslib.cpp)
 FolderSources(sources "" "")
@@ -24,13 +25,14 @@ FolderSources(sources "" src interfacesforward.h interfaceslib.h)
 	FolderSources(sources src util process.cpp process.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
 FolderSources(sources "" vstools Madgine.natvis)
 
-include_directories(${Interfaces_SOURCE_DIR}/src)
 add_library(Interfaces SHARED ${sources})
+
+target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${Interfaces_SOURCE_DIR}/src>)
+
 #add_precompiled_header(Interfaces src/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
-target_include_directories(Interfaces PRIVATE ${lua_include})
 
-target_link_libraries (Interfaces PRIVATE ${lua_lib} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (Interfaces PRIVATE lualib ${CMAKE_THREAD_LIBS_INIT})
 
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32)	
@@ -40,12 +42,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries (Interfaces PRIVATE stdc++fs)
 endif (CMAKE_COMPILER_IS_GNUCXX)
  
-message(STATUS ${CMAKE_PREFIX_PATH})
-
-include_library(Interfaces Lua PRIVATE lualib)
-
-if (BUILD_TESTS)	
+if (BUILD_TESTING)
 	add_subdirectory(test)	
-endif(BUILD_TESTS)
+endif()
 
-installToWorkspace(Interfaces Madgine)
+install_to_workspace(Madgine Interfaces)

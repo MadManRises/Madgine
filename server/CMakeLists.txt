@@ -4,7 +4,7 @@ cmake_policy(SET CMP0049 OLD)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
-Project(SERVER)
+Project(Server)
 
 set(sources "")
 FolderSources(sources "" "" serverlib.cpp)
@@ -19,25 +19,24 @@ FolderSources(sources "" src serverforward.h serverlib.h)
 	FolderSources(sources src util serverlog.cpp serverlog.h)
 
 
-include_directories(${SERVER_SOURCE_DIR}/src)
-
 add_library(MadgineServer SHARED ${sources} serverlib.cpp)
+
+target_include_directories(MadgineServer PUBLIC $<BUILD_INTERFACE:${Server_SOURCE_DIR}/src>)
 
 add_precompiled_header(MadgineServer src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
-include_targets(MadgineServer Base Interfaces)
+target_link_libraries(MadgineServer PRIVATE Base Interfaces ${CMAKE_THREAD_LIBS_INIT})
 
 target_compile_definitions(MadgineServer INTERFACE MADGINE_SERVER_BUILD)
 
-target_link_libraries(MadgineServer PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 	target_link_libraries (MadgineServer PRIVATE stdc++fs)
 endif (CMAKE_COMPILER_IS_GNUCXX)
  
-if (BUILD_TESTS)
+if (BUILD_TESTING)
 	add_subdirectory(test)
-endif(BUILD_TESTS)
+endif()
 
 
-installToWorkspace(MadgineServer Madgine)
+install_to_workspace(Madgine MadgineServer)

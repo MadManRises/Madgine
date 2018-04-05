@@ -4,7 +4,7 @@ cmake_policy(SET CMP0049 OLD)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0022 NEW)
 
-Project(BASE)
+Project(Base)
 
 set(sources "")
 FolderSources(sources "" "")
@@ -18,15 +18,16 @@ FolderSources(sources "" src baseforward.h baselib.h madgineobject.cpp madgineob
 	FolderSources(sources src serialize toplevelids.h)
 	FolderSources(sources src util processstats.cpp processstats.h profile.cpp profile.h profiler.cpp profiler.h)
 
-include_directories(${BASE_SOURCE_DIR}/src)
+
 add_library(Base SHARED ${sources} baselib.cpp)
 add_precompiled_header(Base src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
-include_targets(Base Interfaces)
+target_link_libraries(Base PRIVATE Interfaces)
+target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${Base_SOURCE_DIR}/src>)
 
- 
-if (BUILD_TESTS)
+if (BUILD_TESTING)
 	add_subdirectory(test)
-endif(BUILD_TESTS)
+endif()
 
-installToWorkspace(Base Madgine)
+
+install_to_workspace(Madgine Base)

@@ -6,7 +6,7 @@ cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0057 NEW)
 
 
-Project(OGREMADGINE)
+Project(OgreMadgine)
 
 
 set(CMAKE_MODULE_PATH
@@ -37,13 +37,14 @@ FolderSources(sources "" src ogreforward.h ogrelib.h)
 	FolderSources(sources src ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
 
 
-include_directories(${OGREMADGINE_SOURCE_DIR}/src)
 
 add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
 
+target_include_directories(OgreMadgine PUBLIC $<BUILD_INTERFACE:${OgreMadgine_SOURCE_DIR}/src>)
+
 add_precompiled_header(OgreMadgine src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-include_targets(OgreMadgine Base Interfaces)
+target_link_libraries(OgreMadgine PRIVATE Base Interfaces)
 
 target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 
@@ -131,10 +132,9 @@ else()
   endif()
 endif ()
 
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
 
-if (BUILD_TESTS)
-  add_subdirectory(test)
-endif(BUILD_TESTS)
 
-
-installToWorkspace(OgreMadgine Madgine)
+install_to_workspace(Madgine OgreMadgine)
