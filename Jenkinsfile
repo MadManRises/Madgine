@@ -62,7 +62,7 @@ pipeline {
                     }
                     steps {
                         sh 'doxygen build/Doxyfile'
-                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'html', reportFiles: 'index.html', reportName: 'Documentation', reportTitles: ''])
+                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'docs', reportFiles: 'index.html', reportName: 'Documentation', reportTitles: ''])
                     }
                 }
             
