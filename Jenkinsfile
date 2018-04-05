@@ -14,7 +14,7 @@ pipeline {
                 mkdir -p build
                 cd build
                 mkdir -p workspace
-                cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace
+                cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DBUILD_OGRE=FALSE
                 '''
 			}
 		}
