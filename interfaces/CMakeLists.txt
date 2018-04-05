@@ -5,6 +5,8 @@ cmake_policy(SET CMP0048 NEW)
 
 Project(Interfaces)
 
+find_package(Threads REQUIRED)
+
 load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
 set(sources interfaceslib.cpp)
