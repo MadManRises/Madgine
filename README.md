@@ -1,6 +1,6 @@
 # Madgine
 
-[![Build Status](http://37.221.194.184:8080/buildStatus/icon?job=Madgine%20Pipeline/master&style=plastic)](http://37.221.194.184:8080/job/Madgine%20Pipeline)
+[![Build Status](http://37.221.194.184:8080/buildStatus/icon?job=Madgine%20Pipeline/master&style=plastic)](http://37.221.194.184:8080/job/Madgine%20Pipeline/job/master)
 
 ## Description
 
