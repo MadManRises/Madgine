@@ -6,6 +6,8 @@ cmake_policy(SET CMP0022 NEW)
 
 Project(Server)
 
+find_package(Threads REQUIRED)
+
 set(sources "")
 FolderSources(sources "" "" serverlib.cpp)
 FolderSources(sources "" src serverforward.h serverlib.h)
