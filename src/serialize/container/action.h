@@ -2,7 +2,7 @@
 
 #include "../observable.h"
 #include "../serializehelper.h"
-#include "../Streams/bufferedstream.h"
+#include "../streams/bufferedstream.h"
 
 namespace Engine
 {
