@@ -19,7 +19,7 @@ namespace Engine
 			return v;
 		}
 
-		static auto key(const T& v) -> decltype(v.key())
+		static typename std::invoke_result<decltype(&T::key), T*>::type key(const T& v)
 		{
 			return v.key();
 		}
