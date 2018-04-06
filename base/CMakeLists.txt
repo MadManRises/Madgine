@@ -7,8 +7,8 @@ cmake_policy(SET CMP0022 NEW)
 Project(Base)
 
 set(sources "")
-FolderSources(sources "" "")
-FolderSources(sources "" src baseforward.h baselib.h madgineobject.cpp madgineobject.h madgineobjectcollector.cpp madgineobjectcollector.h objectstate.h uniquecomponent.h uniquecomponentcollector.h)
+FolderSources(sources "" "..")
+FolderSources(sources ".." src baseforward.h baselib.h madgineobject.cpp madgineobject.h madgineobjectcollector.cpp madgineobjectcollector.h objectstate.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources src app application.cpp application.h appsettings.h framelistener.h)
 	FolderSources(sources src scene contextmasks.h light.cpp light.h scenemanager.h scenemanagerbase.cpp scenemanagerbase.h scenecomponent.h scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h scenecomponentset.h)
 		FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
@@ -20,10 +20,9 @@ FolderSources(sources "" src baseforward.h baselib.h madgineobject.cpp madgineob
 
 
 add_library(Base SHARED ${sources} baselib.cpp)
-add_precompiled_header(Base src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
+add_precompiled_header(Base ../src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
-target_link_libraries(Base PRIVATE Interfaces)
-target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${Base_SOURCE_DIR}/src>)
+target_link_libraries(Base PUBLIC Interfaces)
 
 if (BUILD_TESTING)
 	add_subdirectory(test)

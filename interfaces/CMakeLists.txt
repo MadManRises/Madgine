@@ -10,8 +10,8 @@ find_package(Threads REQUIRED)
 load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
 set(sources interfaceslib.cpp)
-FolderSources(sources "" "")
-FolderSources(sources "" src interfacesforward.h interfaceslib.h)
+FolderSources(sources "" "..")
+FolderSources(sources ".." src interfacesforward.h interfaceslib.h)
 	FolderSources(sources src generic exceptionmessages.h keyvalue.h keyvalueiterate.cpp keyvalueiterate.h message.h singleton.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources src math vector3.cpp vector3.h vector2.cpp vector2.h)
 	FolderSources(sources src network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.cpp socketapi.h winapi.cpp)
@@ -29,10 +29,7 @@ FolderSources(sources "" vstools Madgine.natvis)
 
 add_library(Interfaces SHARED ${sources})
 
-target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${Interfaces_SOURCE_DIR}/src>)
-
-#add_precompiled_header(Interfaces src/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
-
+add_precompiled_header(Interfaces ../src/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
 target_link_libraries (Interfaces PRIVATE lualib ${CMAKE_THREAD_LIBS_INIT})
 

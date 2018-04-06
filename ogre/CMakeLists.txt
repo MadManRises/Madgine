@@ -15,8 +15,8 @@ set(CMAKE_MODULE_PATH
 )                                                           
 
 set(sources "")
-FolderSources(sources "" "")
-FolderSources(sources "" src ogreforward.h ogrelib.h)
+FolderSources(sources "" "..")
+FolderSources(sources ".." src ogreforward.h ogrelib.h)
 	FolderSources(sources src app ogreapplication.cpp ogreapplication.h ogreappsettings.h configset.cpp configset.h)
 	FolderSources(sources src database messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources src gui guievents.h guisystem.cpp guisystem.h windownames.h)
@@ -40,11 +40,9 @@ FolderSources(sources "" src ogreforward.h ogrelib.h)
 
 add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
 
-target_include_directories(OgreMadgine PUBLIC $<BUILD_INTERFACE:${OgreMadgine_SOURCE_DIR}/src>)
+add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-add_precompiled_header(OgreMadgine src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
-
-target_link_libraries(OgreMadgine PRIVATE Base Interfaces)
+target_link_libraries(OgreMadgine PUBLIC Base)
 
 target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 

@@ -39,6 +39,7 @@ if (BUILD_OGRE AND NOT CONFIG_BUILD)
 endif ()
 add_subdirectory(server)
 
+install_header(Madgine)
 
 export_to_workspace(Madgine)
 
