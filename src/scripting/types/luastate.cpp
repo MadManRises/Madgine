@@ -132,30 +132,28 @@ namespace Engine
 		}
 
 
-		LuaTable LuaState::createThread()
+		LuaTable LuaState::createThread(GlobalScopeBase *global)
 		{
-			assert(mFinalized);
-
 
 			lua_State* thread = lua_newthread(mState);
 
-			mThreads[thread] = luaL_ref(mState, LUA_REGISTRYINDEX);
+			mThreads[thread] = { luaL_ref(mState, LUA_REGISTRYINDEX), global };
 
 			return mRegistry.createTable(thread);
 		}
 
 		int LuaState::pushThread(lua_State* state, lua_State* thread)
 		{
-			lua_rawgeti(state, LUA_REGISTRYINDEX, mThreads.at(thread));
+			lua_rawgeti(state, LUA_REGISTRYINDEX, mThreads.at(thread).mRegIndex);
 
 			return 1;
 		}
 
-		LuaState& LuaState::getSingleton()
+		/*LuaState& LuaState::getSingleton()
 		{
 			assert(sSingleton);
 			return *sSingleton;
-		}
+		}*/
 
 		LuaTable LuaState::env() const
 		{
@@ -174,6 +172,11 @@ namespace Engine
 			lua_pushcfunction(mState, f);
 			lua_setfield(mState, -2, name.c_str());
 			lua_pop(mState, 1);
+		}
+
+		GlobalScopeBase* LuaState::getGlobal(lua_State* state)
+		{
+			return sSingleton->mThreads.at(state).mGlobal;
 		}
 
 		int LuaState::lua_indexScope(lua_State* state)
@@ -328,8 +331,7 @@ namespace Engine
 
 		void LuaState::pushGlobalScope(lua_State* state)
 		{
-			assert(GlobalScopeBase::getSingleton().lua_state() == state);
-			GlobalScopeBase::getSingleton().push();
+			sSingleton->mThreads.at(state).mGlobal->push();
 		}
 	}
 }

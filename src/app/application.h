@@ -43,9 +43,9 @@ namespace Engine
 
 			/**
 			 * \brief Creates the Application
-			 * \param table (optional) a Lua-Table to be used as the global table for that application. If left empty, a new one is created.
+			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(const Scripting::LuaTable& table = {});
+			Application(Scripting::LuaState *state);
 			
 			/**
 			 * \brief Deletes all objects created by the Application.

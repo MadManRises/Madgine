@@ -12,7 +12,7 @@ namespace Engine
 		class MADGINE_SERVER_EXPORT ServerApplication : public Application
 		{
 		public:
-			ServerApplication(const Scripting::LuaTable& table = {});
+			ServerApplication(Scripting::LuaState *state);
 			virtual ~ServerApplication();
 
 			void setup(const ServerAppSettings& settings);

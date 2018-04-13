@@ -26,10 +26,11 @@ SINGLETON_IMPL(App::OgreApplication);
 	namespace App
 	{
 		OgreApplication::OgreApplication() :
-			Application(env().createTable()),
+			Application(this),
 			mPaused(false),
 			mWindow(nullptr),
-			mHwnd(nullptr)
+			mHwnd(nullptr),
+			mInput(nullptr)
 		{
 		}
 
@@ -80,9 +81,11 @@ SINGLETON_IMPL(App::OgreApplication);
 
 			if (mSettings->mInput) {
 				mSettings->mInput->setSystem(mGUI.get());
+				mInput = mSettings->mInput;
 			}
 			else {
-				mInput = std::make_unique<Input::OISInputHandler>(mWindow);
+				mInputHolder = std::make_unique<Input::OISInputHandler>(mWindow);
+				mInput = mInputHolder.get();
 				mInput->setSystem(mGUI.get());
 			}
 

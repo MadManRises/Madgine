@@ -41,7 +41,7 @@ namespace Engine
 			template <class T>
 			void spawnInstance(T&& init)
 			{
-				mInstances.emplace_back(std::forward<T>(init), createThread());
+				mInstances.emplace_back(std::forward<T>(init), this);
 			}
 
 			bool sendFrameStarted();

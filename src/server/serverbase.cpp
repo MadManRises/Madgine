@@ -11,7 +11,7 @@ namespace Engine
 	namespace Server
 	{
 		ServerBase::ServerBase(const std::string& name, const std::string& scriptsFolder) :
-			Scope(env().createTable()),
+			Scope(this),
 			mLog(name + "-Log"),
 			mName(name),
 			mScriptParser(this, scriptsFolder),

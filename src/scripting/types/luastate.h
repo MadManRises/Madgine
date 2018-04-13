@@ -12,14 +12,14 @@ namespace Engine
 			LuaState();
 			virtual ~LuaState();
 
-			static LuaState& getSingleton();
+			//static LuaState& getSingleton();
 
 			void setFinalized();
 			bool isFinalized() const;
 
 			void executeString(lua_State* state, const std::string& cmd);
 
-			LuaTable createThread();
+			LuaTable createThread(GlobalScopeBase *global);
 
 			int pushThread(lua_State* state, lua_State* thread);
 
@@ -27,6 +27,8 @@ namespace Engine
 			lua_State* state() const;
 
 			void setGlobalMethod(const std::string &name, int (*f)(lua_State*));
+
+			static GlobalScopeBase *getGlobal(lua_State *state);
 
 		private:
 			bool mFinalized;
@@ -36,8 +38,13 @@ namespace Engine
 			LuaTable mEnv;
 			LuaTable mGlobal;
 
+			struct ThreadDescriptor
+			{
+				int mRegIndex;
+				GlobalScopeBase *mGlobal;
+			};
 
-			std::map<lua_State *, int> mThreads;
+			std::map<lua_State *, ThreadDescriptor> mThreads;
 
 			static LuaState* sSingleton;
 

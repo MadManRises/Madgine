@@ -9,8 +9,8 @@ namespace Engine
 {
 	namespace App
 	{
-		ServerApplication::ServerApplication(const Scripting::LuaTable& table) :
-			Application(table),
+		ServerApplication::ServerApplication(Scripting::LuaState *state) :
+			Application(state),
 			mSettings(nullptr)
 		{
 		}

@@ -13,20 +13,20 @@ namespace Engine
 	{
 
 
-		GlobalScopeBase::GlobalScopeBase(const LuaTable& table) :
-			ScopeBase(table),
-			mTable(table)
+		GlobalScopeBase::GlobalScopeBase(LuaState *state) :
+			ScopeBase(state->createThread(this)),
+			mState(state)
 		{
-			assert(mTable);
+			assert(table());
 
-			mScopes = mTable.createTable();
+			mScopes = table().createTable();
 
-			mTable.setMetatable("Interfaces.GlobalScope");
+			table().setMetatable("Interfaces.GlobalScope");
 		}
 
 		void GlobalScopeBase::executeString(const std::string& cmd)
 		{
-			LuaState::getSingleton().executeString(mTable.state(), cmd);
+			mState->executeString(table().state(), cmd);
 		}
 
 		LuaTable GlobalScopeBase::createTable()
@@ -36,12 +36,9 @@ namespace Engine
 
 		lua_State* GlobalScopeBase::lua_state() const
 		{
-			return mTable.state();
+			return table().state();
 		}
 
-		LuaTable GlobalScopeBase::table() const
-		{
-			return mTable;
-		}
+		
 	}
 }

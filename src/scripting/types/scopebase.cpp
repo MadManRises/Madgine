@@ -77,5 +77,11 @@ namespace Engine
 		{
 			return KeyValueMapList(this);
 		}
+
+		LuaTable ScopeBase::table() const
+		{
+			return mTable;
+		}
+
 	}
 }

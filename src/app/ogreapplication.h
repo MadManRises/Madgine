@@ -148,7 +148,8 @@ namespace Engine
 			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;
 			std::unique_ptr<GUI::GUISystem> mGUI;
 			std::unique_ptr<UI::UIManager> mUI;
-			std::unique_ptr<Input::InputHandler> mInput;
+			std::unique_ptr<Input::InputHandler> mInputHolder;
+			Input::InputHandler *mInput;
 
 			HWND mHwnd;
 

@@ -34,6 +34,9 @@ namespace Engine
 			virtual std::string getIdentifier() const;
 			//virtual const char *key() const = 0;
 
+		protected:
+			LuaTable table() const;
+
 		private:
 			LuaTable mTable;
 		};

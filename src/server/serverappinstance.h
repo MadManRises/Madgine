@@ -11,8 +11,8 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			ServerAppInstance(T&& initCallback, const Scripting::LuaTable& table) :
-				mTable(table),
+			ServerAppInstance(T&& initCallback, Scripting::LuaState *state) :
+				mState(state),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
@@ -33,7 +33,7 @@ namespace Engine
 				try{
 					mResult = -1;
 
-					App::ServerApplication app(mTable);
+					App::ServerApplication app(mState);
 					mApplication = &app;
 					App::ServerAppSettings settings;
 					app.setup(settings);
@@ -61,7 +61,7 @@ namespace Engine
 			}
 
 		private:
-			Scripting::LuaTable mTable;
+			Scripting::LuaState *mState;
 			App::ServerApplication* mApplication;
 
 			std::string mName;

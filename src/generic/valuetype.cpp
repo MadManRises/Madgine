@@ -5,6 +5,8 @@
 
 #include "../scripting/types/globalscopebase.h"
 
+#include "../scripting/types/luastate.h"
+
 extern "C"
 {
 #include <lua/lua.h>                                /* Always include this when calling Lua */
@@ -114,7 +116,7 @@ namespace Engine
 				}
 				else
 				{
-					result = Scripting::GlobalScopeBase::getSingleton().table().registerTable(state, index);
+					result = Scripting::LuaState::getGlobal(state)->table().registerTable(state, index);
 				}
 				lua_pop(state, 1);
 

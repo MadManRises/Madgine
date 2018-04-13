@@ -9,6 +9,8 @@
 
 #include "../scripting/types/globalapicomponent.h"
 
+#include "../scripting/types/luastate.h"
+
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -19,8 +21,8 @@ namespace Engine
 
 	namespace App
 	{
-		Application::Application(const Scripting::LuaTable& table) :
-			Scope(table),
+		Application::Application(Scripting::LuaState *state) :
+			Scope(state),
 			mShutDown(false),
 			mTimeBank(0.0f)
 		{

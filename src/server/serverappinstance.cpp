@@ -23,7 +23,7 @@ namespace Engine
 
 		ValueType ServerAppInstance::toValueType() const
 		{
-			return ValueType(Scripting::LuaThread(mTable.state()));
+			return ValueType(Scripting::LuaThread(mApplication->lua_state()));
 		}
 	}
 }

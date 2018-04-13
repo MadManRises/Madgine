@@ -9,17 +9,19 @@ namespace Engine
 		class INTERFACES_EXPORT GlobalScopeBase : public Singleton<GlobalScopeBase>, public ScopeBase
 		{
 		public:
-			GlobalScopeBase(const LuaTable& table);
+			GlobalScopeBase(LuaState *state);
 
 			void executeString(const std::string& cmd);
 
 			lua_State* lua_state() const;
 
 			LuaTable createTable();
-			LuaTable table() const;
+
+			using ScopeBase::table;
+			
 
 		private:
-			LuaTable mTable;
+			LuaState * mState;
 			LuaTable mScopes;
 		};
 	}
