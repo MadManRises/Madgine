@@ -119,7 +119,11 @@ namespace Engine
 			using notification = __actionpolicy__impl__::_ActionPolicy<false, true>;
 		};
 
+		/*template <typename F, F f, class C>
+		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
+
 		template <typename F, F f, class C>
-		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;
+		class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type{};
+
 	}
 }

@@ -2,7 +2,7 @@
 
 #include "observablecontainer.h"
 #include "creationhelper.h"
-#include "generic/container_traits.h"
+#include "../../generic/container_traits.h"
 
 namespace Engine
 {
