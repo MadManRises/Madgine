@@ -358,11 +358,6 @@ namespace Engine
 			++mIterator;
 		}
 
-		void operator--()
-		{
-			--mIterator;
-		}
-
 		operator const It &() const
 		{
 			return mIterator;
@@ -419,11 +414,6 @@ namespace Engine
 		void operator++()
 		{
 			++mIterator;
-		}
-
-		void operator--()
-		{
-			--mIterator;
 		}
 
 		operator const It &() const
