@@ -26,7 +26,7 @@ namespace Engine
 			mTable.push();
 		}
 
-		ArgumentList ScopeBase::methodCall(const std::string& name, const ArgumentList& args)
+		ArgumentList ScopeBase::callMethod(const std::string& name, const ArgumentList& args)
 		{
 			return mTable.callMethod(name, args);
 		}
@@ -42,7 +42,7 @@ namespace Engine
 		{
 			try
 			{
-				return methodCall(name, args);
+				return callMethod(name, args);
 			}
 			catch (std::exception& e)
 			{

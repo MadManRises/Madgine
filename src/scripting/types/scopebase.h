@@ -18,7 +18,7 @@ namespace Engine
 
 			bool hasMethod(const std::string& name);
 
-			ArgumentList methodCall(const std::string& name,
+			ArgumentList callMethod(const std::string& name,
 			                        const ArgumentList& args = {});
 
 			std::optional<ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args = {});
