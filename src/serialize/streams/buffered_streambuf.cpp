@@ -96,8 +96,8 @@ namespace Engine
 
 		void buffered_streambuf::extend()
 		{
-			mSendBuffer.emplace_back();
-			setp(mSendBuffer.back().data(), mSendBuffer.back().data() + BUFFER_SIZE);
+			std::array<char, BUFFER_SIZE> &buffer = mSendBuffer.emplace_back();
+			setp(buffer.data(), buffer.data() + BUFFER_SIZE);
 		}
 
 		bool buffered_streambuf::isMessageAvailable(const std::string& context)

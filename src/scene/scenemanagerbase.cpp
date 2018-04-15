@@ -171,14 +171,12 @@ namespace Engine
 
 		Entity::Entity* SceneManagerBase::makeLocalCopy(Entity::Entity& e)
 		{
-			mLocalEntities.emplace_back(e, true);
-			return &mLocalEntities.back();
+			return &mLocalEntities.emplace_back(e, true);
 		}
 
 		Entity::Entity* SceneManagerBase::makeLocalCopy(Entity::Entity&& e)
 		{
-			mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
-			return &mLocalEntities.back();
+			return &mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
 		}
 
 		std::tuple<SceneManagerBase &, bool, std::string> SceneManagerBase::createNonLocalEntityData(const std::string& name)
@@ -204,8 +202,7 @@ namespace Engine
 		Entity::Entity* SceneManagerBase::createLocalEntity(const std::string& behaviour, const std::string& name)
 		{
 			const std::tuple<SceneManagerBase &, bool, std::string>& data = createEntityData(name, true);
-			mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
-			return &mLocalEntities.back();
+			return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
 		}
 
 		void SceneManagerBase::removeQueuedEntities()

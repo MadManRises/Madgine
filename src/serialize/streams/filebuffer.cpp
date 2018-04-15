@@ -116,8 +116,8 @@ namespace Engine
 
 		void FileBufferWriter::extend()
 		{
-			mDataBuffer.emplace_back();
-			setp(mDataBuffer.back().data(), mDataBuffer.back().data() + BUFFER_SIZE);
+			std::array<char, BUFFER_SIZE> &buffer = mDataBuffer.emplace_back();
+			setp(buffer.data(), buffer.data() + BUFFER_SIZE);
 		}
 
 		FileBufferWriter::int_type FileBufferWriter::overflow(int c)
