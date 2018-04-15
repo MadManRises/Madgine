@@ -51,7 +51,7 @@ namespace Engine
 						LOG_ERROR(lua_tostring(state, -1));
 						return;
 					case LUA_ERRMEM:
-						throw ParseException("Lua Out-Of-Memory!");
+						throw std::bad_alloc{};
 					default:
 						throw 0;
 					}
@@ -75,7 +75,7 @@ namespace Engine
 						throw ParseException(std::string("Runtime Error: ") + msg);
 					}
 				case LUA_ERRMEM:
-					throw ParseException("Lua Out-Of-Memory!");
+					throw std::bad_alloc{};
 				default:
 					throw 0;
 				}
