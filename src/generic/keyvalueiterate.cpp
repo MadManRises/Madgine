@@ -3,15 +3,15 @@
 
 namespace Engine
 {
-	std::pair<bool, ValueType> KeyValueMapList::get(const std::string& key)
+	std::optional<ValueType> KeyValueMapList::get(const std::string& key)
 	{
 		for (const std::unique_ptr<KeyValueRef>& p : *this)
 		{
-			std::pair<bool, ValueType> v = p->get(key);
-			if (v.first)
+			std::optional<ValueType> v = p->get(key);
+			if (v)
 				return v;
 		}
-		return {false, ValueType{}};
+		return {};
 	}
 
 	bool KeyValueMapList::contains(const std::string& key)

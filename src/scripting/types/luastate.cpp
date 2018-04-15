@@ -188,10 +188,10 @@ namespace Engine
 
 			lua_pop(state, 2);
 
-			std::pair<bool, ValueType> p = scope->get(key);
-			if (!p.first)
+			std::optional<ValueType> v = scope->get(key);
+			if (!v)
 				return 0;
-			p.second.push(state);
+			v->push(state);
 			return 1;
 		}
 
@@ -208,10 +208,10 @@ namespace Engine
 
 			lua_pop(state, 2);
 
-			std::pair<bool, ValueType> p = scope->get(key);
-			if (p.first)
+			std::optional<ValueType> v = scope->get(key);
+			if (v)
 			{
-				p.second.push(state);
+				v->push(state);
 				return 1;
 			}
 

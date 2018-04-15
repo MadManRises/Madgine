@@ -59,6 +59,7 @@
 #include <iomanip>
 #include <experimental/filesystem>
 #include <type_traits>
+#include <optional>
 
 #include <math.h>
 

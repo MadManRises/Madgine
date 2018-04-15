@@ -105,8 +105,8 @@ namespace Engine
 			if (!mUI->preInit())
 				return false;
 
-			std::pair<bool, Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
-			if (res.first && !res.second.empty() && (!res.second.front().is<bool>() || !res.second.front().as<bool>()))
+			std::optional<Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
+			if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 				return false;
 
 			if (!mLoader->load())
@@ -143,7 +143,7 @@ namespace Engine
 			Application::go();
 			mPaused = false;
 
-			if (!callMethodCatch("main").first)
+			if (!callMethodCatch("main"))
 			{
 				return -1;
 			}

@@ -24,7 +24,7 @@ namespace Engine
 	public:
 		virtual ~KeyValueRef() = default;
 		virtual std::shared_ptr<KeyValueIterator> iterator() = 0;
-		virtual std::pair<bool, ValueType> get(const std::string& key) = 0;
+		virtual std::optional<ValueType> get(const std::string& key) = 0;
 		virtual bool contains(const std::string& key) = 0;
 	};
 
@@ -57,14 +57,14 @@ namespace Engine
 			return std::static_pointer_cast<KeyValueIterator>(std::make_shared<Iterator>(mMap, mRef));
 		}
 
-		std::pair<bool, ValueType> get(const std::string& key) override
+		std::optional<ValueType> get(const std::string& key) override
 		{
 			auto it = Finder<T, std::string>::find(mMap, key);
 			if (it != mMap.end())
 			{
-				return { true, toValueType(mRef, kvValue(*it)) };
+				return toValueType(mRef, kvValue(*it));
 			}
-			return { false, ValueType{} };
+			return {};
 		}
 
 		bool contains(const std::string& key) override
@@ -135,13 +135,13 @@ namespace Engine
 			return std::static_pointer_cast<KeyValueIterator>(std::make_shared<Iterator>(mItem, mRef));
 		}
 
-		std::pair<bool, ValueType> get(const std::string& key) override
+		std::optional<ValueType> get(const std::string& key) override
 		{
 			if (kvKey(mItem) == key)
 			{
-				return { true, toValueType(mRef, kvValue(mItem)) };
+				return toValueType(mRef, kvValue(mItem));
 			}
-			return { false, ValueType{} };
+			return {};
 		}
 
 		bool contains(const std::string& key) override
@@ -234,7 +234,7 @@ namespace Engine
 
 		KeyValueMapList& operator=(const KeyValueMapList&) = delete;
 
-		std::pair<bool, ValueType> get(const std::string& key);
+		std::optional<ValueType> get(const std::string& key);
 		std::unique_ptr<KeyValueIterator> iterator();
 
 		KeyValueMapList merge(KeyValueMapList&& other) && ;

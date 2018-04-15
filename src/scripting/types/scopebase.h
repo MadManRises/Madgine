@@ -21,12 +21,12 @@ namespace Engine
 			ArgumentList methodCall(const std::string& name,
 			                        const ArgumentList& args = {});
 
-			std::pair<bool, ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args = {});
-			std::pair<bool, ArgumentList> callMethodCatch(const std::string& name, const ArgumentList& args = {});
+			std::optional<ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args = {});
+			std::optional<ArgumentList> callMethodCatch(const std::string& name, const ArgumentList& args = {});
 
 			void push() const;
 
-			std::pair<bool, ValueType> get(const std::string& key);
+			std::optional<ValueType> get(const std::string& key);
 			std::unique_ptr<KeyValueIterator> iterator();
 
 			virtual KeyValueMapList maps();

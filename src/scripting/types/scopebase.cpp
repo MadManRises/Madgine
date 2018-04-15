@@ -31,24 +31,24 @@ namespace Engine
 			return mTable.callMethod(name, args);
 		}
 
-		std::pair<bool, ArgumentList> ScopeBase::callMethodIfAvailable(const std::string& name, const ArgumentList& args)
+		std::optional<ArgumentList> ScopeBase::callMethodIfAvailable(const std::string& name, const ArgumentList& args)
 		{
 			if (hasMethod(name))
 				return callMethodCatch(name, args);
-			return make_pair(false, ArgumentList());
+			return {};
 		}
 
-		std::pair<bool, ArgumentList> ScopeBase::callMethodCatch(const std::string& name, const ArgumentList& args)
+		std::optional<ArgumentList> ScopeBase::callMethodCatch(const std::string& name, const ArgumentList& args)
 		{
 			try
 			{
-				return make_pair(true, methodCall(name, args));
+				return methodCall(name, args);
 			}
 			catch (std::exception& e)
 			{
 				LOG_EXCEPTION(e);
 			}
-			return make_pair(false, ArgumentList());
+			return {};
 		}
 
 
@@ -62,7 +62,7 @@ namespace Engine
 			return typeid(*this).name();
 		}
 
-		std::pair<bool, ValueType> ScopeBase::get(const std::string& key)
+		std::optional<ValueType> ScopeBase::get(const std::string& key)
 		{
 			return maps().get(key);
 		}
