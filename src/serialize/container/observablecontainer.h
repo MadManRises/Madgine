@@ -6,6 +6,8 @@
 #include "sortedcontainer.h"
 #include "unsortedcontainer.h"
 #include "operations.h"
+#include "../../signalslot/connection.h"
+#include "../../signalslot/signal.h"
 
 namespace Engine
 {
