@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../serialize/container/unordered_set.h"
+#include "scenecomponentbase.h"
 
 namespace Engine
 {
