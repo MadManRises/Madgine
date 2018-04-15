@@ -70,6 +70,7 @@ namespace Engine
 
 		class ScopeBase;
 		class GlobalScopeBase;
+		class GlobalAPIComponentBase;
 
 		class LuaState;
 		class LuaTable;

@@ -18,12 +18,12 @@ namespace Engine
 				virtual void init() override
 				{
 					EntityComponent<T, Base>::init();
-					S::getSingleton().addComponent(static_cast<T*>(this));
+					getSceneComponent<S>().addComponent(static_cast<T*>(this));
 				}
 
 				virtual void finalize() override
 				{
-					S::getSingleton().removeComponent(static_cast<T*>(this));
+					getSceneComponent<S>().removeComponent(static_cast<T*>(this));
 					EntityComponent<T, Base>::finalize();
 				}
 			};

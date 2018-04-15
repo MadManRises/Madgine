@@ -8,6 +8,8 @@
 
 #include "gamehandler.h"
 
+#include "../app/application.h"
+
 
 namespace Engine
 {
@@ -19,17 +21,15 @@ namespace Engine
 	template class OGREMADGINE_EXPORT UI::GameHandlerCollector;
 #endif
 
-	template <> thread_local UI::UIManager *Singleton<UI::UIManager>::sSingleton = nullptr;
-	template <> thread_local UI::GuiHandlerCollector *Singleton<UI::GuiHandlerCollector>::sSingleton = nullptr;
-	template <> thread_local UI::GameHandlerCollector *Singleton<UI::GameHandlerCollector>::sSingleton = nullptr;
-
-
 	namespace UI
 	{
-		UIManager::UIManager(GUI::GUISystem* gui) :
+		UIManager::UIManager(GUI::GUISystem &gui) :
+			Scope<Engine::UI::UIManager, Engine::Scripting::ScopeBase>(gui.app().createTable()),
 			mCurrentRoot(nullptr),
 			mGUI(gui),
-			mKeepingCursorPos(false)
+			mKeepingCursorPos(false),
+		    mGuiHandlers(*this),
+		    mGameHandlers(*this)
 		{
 		}
 
@@ -93,7 +93,7 @@ namespace Engine
 				/*const OIS::MouseState &mouseState = mMouse->getMouseState();
 				mKeptCursorPosition = { (float)mouseState.X.abs, (float)mouseState.Y.abs };*/
 			}
-			mGUI->hideCursor();
+			mGUI.hideCursor();
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
 				h->onMouseVisibilityChanged(false);
@@ -114,12 +114,12 @@ namespace Engine
 				mutableMouseState.Y.abs = mKeptCursorPosition.y;
 				callSafe([&]() {
 					mouseMoved(OIS::MouseEvent(mMouse, mutableMouseState));*/
-				mGUI->showCursor();
+				mGUI.showCursor();
 				/*});*/
 			}
 			else
 			{
-				mGUI->showCursor();
+				mGUI.showCursor();
 			}
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
@@ -133,7 +133,7 @@ namespace Engine
 
 		bool UIManager::isCursorVisible() const
 		{
-			return mGUI->isCursorVisible();
+			return mGUI.isCursorVisible();
 		}
 
 		std::set<GameHandlerBase*> UIManager::getGameHandlers()
@@ -154,6 +154,11 @@ namespace Engine
 				result.insert(h.get());
 			}
 			return result;
+		}
+
+		App::Application& UIManager::app()
+		{
+			return mGUI.app();
 		}
 
 		void UIManager::update(float timeSinceLastFrame)
@@ -219,7 +224,7 @@ namespace Engine
 		}
 
 
-		GUI::GUISystem* UIManager::gui() const
+		GUI::GUISystem &UIManager::gui() const
 		{
 			return mGUI;
 		}
@@ -232,6 +237,31 @@ namespace Engine
 		const char* UIManager::key() const
 		{
 			return "UI";
+		}
+
+		Scene::SceneComponentBase& UIManager::getSceneComponent(size_t i)
+		{
+			return mGUI.getSceneComponent(i);
+		}
+
+		Scripting::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i)
+		{
+			return mGUI.getGlobalAPIComponent(i);
+		}
+
+		GameHandlerBase& UIManager::getGameHandler(size_t i)
+		{
+			return mGameHandlers.get(i);
+		}
+
+		GuiHandlerBase& UIManager::getGuiHandler(size_t i)
+		{
+			return mGuiHandlers.get(i);
+		}
+
+		Scene::SceneManagerBase& UIManager::sceneMgr()
+		{
+			return mGUI.sceneMgr();
 		}
 	}
 }

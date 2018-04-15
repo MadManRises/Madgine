@@ -1,8 +1,6 @@
 #include "../../interfaceslib.h"
 #include "scopebase.h"
 
-#include "globalscopebase.h"
-
 #include "api.h"
 
 #include "../../generic/keyvalueiterate.h"
@@ -12,8 +10,9 @@ namespace Engine
 	namespace Scripting
 	{
 		ScopeBase::ScopeBase(const LuaTable& table) :
-			mTable(table ? table : GlobalScopeBase::getSingleton().createTable())
+			mTable(table)
 		{
+			assert(table);
 			mTable.setLightUserdata("___scope___", this);
 			mTable.setMetatable("Interfaces.Scope");
 		}

@@ -32,6 +32,7 @@ namespace Engine
 	{
 		class GuiHandlerBase;
 		class GameHandlerBase;
+		class UIManager;
 	}
 
 	namespace Scripting
@@ -39,4 +40,21 @@ namespace Engine
 		class GlobalScope;
 		class GlobalAPIComponentBase;
 	}
+
+	namespace GUI
+	{
+		class GUISystem;
+		struct WindowSizeRelVector;
+		class WindowContainer;
+		class Window;
+		class Bar;
+		class Button;
+		class TextureDrawer;
+		class Checkbox;
+		class Combobox;
+		class TabWindow;
+		class Textbox;
+		class Label;
+	}
+
 }

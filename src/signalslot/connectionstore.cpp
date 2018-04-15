@@ -4,7 +4,6 @@
 
 namespace Engine
 {
-	SINGLETON_IMPL(SignalSlot::ConnectionManager);
 
 	namespace SignalSlot
 	{

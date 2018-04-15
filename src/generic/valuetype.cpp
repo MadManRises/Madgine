@@ -3,9 +3,9 @@
 
 #include "../scripting/datatypes/argumentlist.h"
 
-#include "../scripting/types/globalscopebase.h"
-
 #include "../scripting/types/luastate.h"
+
+#include "../scripting/types/scopebase.h"
 
 extern "C"
 {
@@ -116,7 +116,7 @@ namespace Engine
 				}
 				else
 				{
-					result = Scripting::LuaState::getGlobal(state)->table().registerTable(state, index);
+					result = Scripting::LuaState::getGlobalTable(state).registerTable(state, index);
 				}
 				lua_pop(state, 1);
 

@@ -1,14 +1,18 @@
 #pragma once
 
-#include "generic/singleton.h"
 
 namespace Engine
 {
 	template <class T, class Collector>
-	class UniqueComponent : public Collector::Base, public Singleton<T>
+	class UniqueComponent : public Collector::Base
 	{
 	public:
 		using Collector::Base::Base;
+
+		static size_t component_index()
+		{
+			return _reg.index();
+		}
 
 	private:
 		virtual void __reg()

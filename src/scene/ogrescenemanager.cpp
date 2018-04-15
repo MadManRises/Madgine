@@ -15,11 +15,10 @@
 namespace Engine
 {
 
-	template <> thread_local Scene::OgreSceneManager *Singleton<Scene::OgreSceneManager>::sSingleton = nullptr;
-
 	namespace Scene
 	{
-		OgreSceneManager::OgreSceneManager(Ogre::Root* root) :
+		OgreSceneManager::OgreSceneManager(App::Application &app, Ogre::Root* root) :
+			SceneManager<Engine::Scene::OgreSceneManager>(app),
 			mRoot(root),
 			mSceneMgr(nullptr),
 			mTerrainGlobals(nullptr),

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../generic/singleton.h"
+
 namespace Engine
 {
 	namespace SignalSlot

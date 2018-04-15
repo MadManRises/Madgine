@@ -10,6 +10,8 @@
 
 #include "scenecomponentbase.h"
 
+#include "../app/application.h"
+
 	API_IMPL(Engine::Scene::SceneManagerBase, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
 		MAP_RO(Active, isActive));
 
@@ -18,14 +20,14 @@ namespace Engine
 
 	BASE_COLLECTOR_IMPL(Scene::SceneComponentCollector);
 
-	SINGLETON_IMPL(Scene::SceneManagerBase);
-
 	namespace Scene
 	{
-		SceneManagerBase::SceneManagerBase() :
+		SceneManagerBase::SceneManagerBase(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
+			Scope<Engine::Scene::SceneManagerBase, Engine::Scripting::ScopeBase>(app.createTable()),
 			mItemCount(0),
-			mSceneComponents(this)
+			mSceneComponents(*this),
+			mApp(app)
 		{
 		}
 
@@ -66,6 +68,11 @@ namespace Engine
 			return result;
 		}
 
+
+		SceneComponentBase& SceneManagerBase::getComponent(size_t i)
+		{
+			return mSceneComponents.get(i);
+		}
 
 		size_t SceneManagerBase::getComponentCount()
 		{
@@ -147,6 +154,11 @@ namespace Engine
 			return "Scene";
 		}
 
+		App::Application& SceneManagerBase::app() const
+		{
+			return mApp;
+		}
+
 		void SceneManagerBase::clear()
 		{
 			mClearedSignal.emit();
@@ -169,17 +181,17 @@ namespace Engine
 			return &mLocalEntities.back();
 		}
 
-		std::tuple<SceneManagerBase *, bool, std::string> SceneManagerBase::createNonLocalEntityData(const std::string& name)
+		std::tuple<SceneManagerBase &, bool, std::string> SceneManagerBase::createNonLocalEntityData(const std::string& name)
 		{
 			return createEntityData(name, false);
 		}
 
-		std::tuple<SceneManagerBase *, bool, std::string> SceneManagerBase::createEntityData(
+		std::tuple<SceneManagerBase &, bool, std::string> SceneManagerBase::createEntityData(
 			const std::string& name, bool local)
 		{
 			std::string actualName = name.empty() ? generateUniqueName() : name;
 
-			return make_tuple(this, local, actualName);
+			return make_tuple(std::ref(*this), local, actualName);
 		}
 
 		Entity::Entity* SceneManagerBase::createEntity(const std::string& behaviour, const std::string& name,
@@ -191,7 +203,7 @@ namespace Engine
 
 		Entity::Entity* SceneManagerBase::createLocalEntity(const std::string& behaviour, const std::string& name)
 		{
-			const std::tuple<SceneManagerBase *, bool, std::string>& data = createEntityData(name, true);
+			const std::tuple<SceneManagerBase &, bool, std::string>& data = createEntityData(name, true);
 			mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
 			return &mLocalEntities.back();
 		}

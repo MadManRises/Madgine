@@ -18,7 +18,7 @@ namespace Engine
 		public:
 			virtual ~SceneComponentBase() = default;
 
-			SceneComponentBase(SceneManagerBase* sceneMgr, ContextMask context = ContextMask::SceneContext);
+			SceneComponentBase(SceneManagerBase &sceneMgr, ContextMask context = ContextMask::SceneContext);
 
 			void update(float timeSinceLastFrame, ContextMask mask);
 			void fixedUpdate(float timeStep, ContextMask mask);
@@ -29,11 +29,19 @@ namespace Engine
 			void setEnabled(bool b);
 			bool isEnabled() const;
 
-			SceneManagerBase* sceneMgr() const;
+			SceneManagerBase &sceneMgr() const;
 
 			KeyValueMapList maps() override;
 
 			virtual const char* key() const = 0;
+
+			template <class T>
+			T &getSceneComponent()
+			{
+				return static_cast<T&>(getSceneComponent(T::component_index()));
+			}
+
+			SceneComponentBase &getSceneComponent(size_t i);
 
 		protected:
 			virtual void update(float);
@@ -44,7 +52,7 @@ namespace Engine
 
 			bool mEnabled;
 
-			SceneManagerBase* mSceneMgr;
+			SceneManagerBase &mSceneMgr;
 		};
 
 		

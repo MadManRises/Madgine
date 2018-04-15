@@ -10,12 +10,11 @@ namespace Engine
 {
 	namespace UI
 	{
-		class OGREMADGINE_EXPORT UIManager : public Singleton<UIManager>,
-		                                     public Scripting::Scope<UIManager>,
+		class OGREMADGINE_EXPORT UIManager : public Scripting::Scope<UIManager>,
 		                                     public MadgineObject
 		{
 		public:
-			UIManager(GUI::GUISystem* gui);
+			UIManager(GUI::GUISystem &gui);
 			~UIManager();
 
 			bool preInit();
@@ -39,25 +38,36 @@ namespace Engine
 
 			Scene::ContextMask currentContext();
 
-			GUI::GUISystem* gui() const;
+			GUI::GUISystem &gui() const;
 
 			std::set<GameHandlerBase*> getGameHandlers();
 			std::set<GuiHandlerBase*> getGuiHandlers();
+			App::Application& app();
 
 			static const constexpr int sMaxInitOrder = 4;
 
 			const char* key() const override;
 
+			Scene::SceneComponentBase &getSceneComponent(size_t i);
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
+			GameHandlerBase &getGameHandler(size_t i);
+
+			GuiHandlerBase &getGuiHandler(size_t i);
+
+			Scene::SceneManagerBase &sceneMgr();
+
 		protected:
 			KeyValueMapList maps() override;
 
 		private:
+			GUI::GUISystem &mGUI;
+			
 			GuiHandlerCollector mGuiHandlers;
 			GameHandlerCollector mGameHandlers;
 
-			GuiHandlerBase* mCurrentRoot;
-
-			GUI::GUISystem* mGUI;
+			GuiHandlerBase* mCurrentRoot;			
 
 			std::stack<GuiHandlerBase *> mModalWindowList;
 

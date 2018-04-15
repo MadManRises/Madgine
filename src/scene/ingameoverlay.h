@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 namespace Engine
 {
@@ -17,4 +17,4 @@ namespace Engine
 			bool mVisible;
 		};
 	}
-}
+}*/

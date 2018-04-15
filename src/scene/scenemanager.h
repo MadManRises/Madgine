@@ -11,10 +11,6 @@ namespace Engine
 	{
 
 		template <class T>
-		class SceneManager : public Singleton<T>, public Serialize::SerializableUnit<T, SceneManagerBase>
-		{
-		public:
-			using Serialize::SerializableUnit<T, SceneManagerBase>::SerializableUnit;
-		};
+		using SceneManager = Serialize::SerializableUnit<T, SceneManagerBase>;
 	}
 }

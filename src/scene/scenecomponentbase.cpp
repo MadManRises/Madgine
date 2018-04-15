@@ -2,6 +2,8 @@
 #include "scenecomponentbase.h"
 #include "../scripting/types/api.h"
 #include "../generic/keyvalueiterate.h"
+#include "scenemanagerbase.h"
+#include "../app/application.h"
 
 API_IMPL(Engine::Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 
@@ -11,7 +13,8 @@ namespace Engine
 
 	namespace Scene
 	{
-		SceneComponentBase::SceneComponentBase(SceneManagerBase* sceneMgr, ContextMask context) :
+		SceneComponentBase::SceneComponentBase(SceneManagerBase &sceneMgr, ContextMask context) :
+			ScopeBase(sceneMgr.app().createTable()),
 			mContext(context),
 			mEnabled(true),
 			mSceneMgr(sceneMgr)
@@ -54,9 +57,14 @@ namespace Engine
 			return mEnabled;
 		}
 
-		SceneManagerBase* SceneComponentBase::sceneMgr() const
+		SceneManagerBase &SceneComponentBase::sceneMgr() const
 		{
 			return mSceneMgr;
+		}
+
+		SceneComponentBase& SceneComponentBase::getSceneComponent(size_t i)
+		{
+			return mSceneMgr.getComponent(i);
 		}
 
 		void SceneComponentBase::update(float)

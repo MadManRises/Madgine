@@ -16,11 +16,9 @@ namespace Engine
 		 * This class is responsible for setting up the global parameters of the application and creating and initializing all Components of the Madgine.
 		 * Thats the class, that needs to be created in the user <code>main</code> method.
 		 * The Application can also be paused (e.g. in a multithreaded environment).
-		 * It implements Singleton, so there can only be one Application at a time per process.
 		 *
 		 */
 		class OGREMADGINE_EXPORT OgreApplication : public Scripting::LuaState, public Application,
-		                                           public Singleton<OgreApplication>,
 		                                           public Ogre::FrameListener
 		{
 		public:
@@ -93,11 +91,13 @@ namespace Engine
 
 			void shutdown() override;
 
-			using Singleton<OgreApplication>::getSingleton;
-
 
 			bool update(float timeSinceLastFrame) override;
 
+			virtual Scene::SceneManagerBase& sceneMgr() override;
+			virtual Scene::SceneComponentBase& getSceneComponent(size_t) override;
+			virtual UI::GuiHandlerBase& getGuiHandler(size_t) override;
+			virtual UI::GameHandlerBase& getGameHandler(size_t) override;
 
 		protected:
 			/**

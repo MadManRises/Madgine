@@ -25,7 +25,7 @@ namespace Engine
 
 			Application::setup(settings);
 
-			mSceneManager = Serialize::make_noparent_unique<Scene::ServerSceneManager>();
+			mSceneManager = Serialize::make_noparent_unique<Scene::ServerSceneManager>(*this);
 		}
 
 		int ServerApplication::go()

@@ -3,19 +3,46 @@
 #include "../ui/uimanager.h"
 #include "../gui/guisystem.h"
 #include "../gui/windows/window.h"
+#include "../app/application.h"
 
 
 namespace Engine
 {
 	namespace UI
 	{
-		Handler::Handler(const std::string& windowName) :
+		Handler::Handler(UIManager &ui, const std::string& windowName) :
+			ScopeBase(ui.gui().app().createTable()),
 			mWindow(nullptr),
-			mUI(&UIManager::getSingleton()),
+			mUI(ui),
 			mWindowName(windowName)
 		{
 		}
 
+
+		Scene::SceneComponentBase& Handler::getSceneComponent(size_t i)
+		{
+			return mUI.getSceneComponent(i);
+		}
+
+		Scene::SceneManagerBase& Handler::sceneMgr()
+		{
+			return mUI.sceneMgr();
+		}
+
+		Scripting::GlobalAPIComponentBase& Handler::getGlobalAPIComponent(size_t i)
+		{
+			return mUI.getGlobalAPIComponent(i);
+		}
+
+		UI::GuiHandlerBase& Handler::getGuiHandler(size_t i)
+		{
+			return mUI.getGuiHandler(i);
+		}
+
+		GameHandlerBase& Handler::getGameHandler(size_t i)
+		{
+			return mUI.getGameHandler(i);
+		}
 
 		bool Handler::installToWindow(GUI::Window* w)
 		{
@@ -64,11 +91,16 @@ namespace Engine
 		{
 		}
 
+		App::Application& Handler::app()
+		{
+			return mUI.app();
+		}
+
 		bool Handler::init()
 		{
 			if (!MadgineObject::init())
 				return false;
-			if (!installToWindow(mUI->gui()->getWindowByName(mWindowName)))
+			if (!installToWindow(mUI.gui().getWindowByName(mWindowName)))
 			{
 				return false;
 			}

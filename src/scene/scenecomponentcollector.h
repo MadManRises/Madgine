@@ -12,7 +12,7 @@ namespace Engine
 	namespace Scene
 	{
 
-		using SceneComponentCollector = BaseUniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManagerBase*>;
+		using SceneComponentCollector = BaseUniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManagerBase&>;
 
 	}
 

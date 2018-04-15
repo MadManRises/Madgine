@@ -4,8 +4,10 @@
 
 namespace Engine
 {
+	SINGLETON_IMPL(SignalSlot::ConnectionManager);
+
 	namespace SignalSlot
-	{
+	{		
 		
 		ConnectionManager::ConnectionManager() :
 			mThread(std::this_thread::get_id())

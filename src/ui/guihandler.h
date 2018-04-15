@@ -21,7 +21,7 @@ namespace Engine
 				ROOT_WINDOW
 			};
 
-			GuiHandlerBase(const std::string& windowName, WindowType type, const std::string& layoutFile = "",
+			GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type, const std::string& layoutFile = "",
 			               const std::string& parentName = WindowNames::rootWindow);
 
 
@@ -57,7 +57,7 @@ namespace Engine
 			Scene::ContextMask mContext;
 		};
 
-		using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase>;
+		using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 	} // namespace GuiHandler

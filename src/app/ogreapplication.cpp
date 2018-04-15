@@ -21,8 +21,6 @@
 namespace Engine
 {
 
-SINGLETON_IMPL(App::OgreApplication);
-
 	namespace App
 	{
 		OgreApplication::OgreApplication() :
@@ -67,17 +65,17 @@ SINGLETON_IMPL(App::OgreApplication);
 			Application::setup(settings);
 
 			// Create SceneManagerBase
-			mSceneMgr = Serialize::make_noparent_unique<Scene::OgreSceneManager>(mRoot.get());
+			mSceneMgr = Serialize::make_noparent_unique<Scene::OgreSceneManager>(*this, mRoot.get());
 
 			mWindow->update();
 
 			// Initialise GUISystem 
-			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(mWindow, mSceneMgr->getSceneManager());
+			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(*this, mWindow, mSceneMgr->getSceneManager());
 			//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
 			Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI.get());
 
 			// Create UIManager
-			mUI = std::make_unique<UI::UIManager>(mGUI.get());
+			mUI = std::make_unique<UI::UIManager>(*mGUI.get());
 
 			if (mSettings->mInput) {
 				mSettings->mInput->setSystem(mGUI.get());
@@ -179,6 +177,26 @@ SINGLETON_IMPL(App::OgreApplication);
 		{
 			Ogre::WindowEventUtilities::messagePump();
 			return mRoot->renderOneFrame();
+		}
+
+		Scene::SceneManagerBase& OgreApplication::sceneMgr()
+		{
+			return *mSceneMgr;
+		}
+
+		Scene::SceneComponentBase& OgreApplication::getSceneComponent(size_t i)
+		{
+			return mSceneMgr->getComponent(i);
+		}
+
+		UI::GuiHandlerBase& OgreApplication::getGuiHandler(size_t i)
+		{
+			return mUI->getGuiHandler(i);
+		}
+
+		UI::GameHandlerBase& OgreApplication::getGameHandler(size_t i)
+		{
+			return mUI->getGameHandler(i);
 		}
 
 		bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent& fe)
@@ -303,7 +321,7 @@ SINGLETON_IMPL(App::OgreApplication);
 		{
 			mRoot = std::make_unique<Ogre::Root>(mSettings->mPluginsFile); // Creating Root
 
-			mConfig = std::make_unique<ConfigSet>(mRoot.get(), "config.vs"); // Loading Config and configuring Root
+			mConfig = std::make_unique<ConfigSet>(*this, mRoot.get(), "config.vs"); // Loading Config and configuring Root
 		}
 
 		void OgreApplication::resizeWindow()

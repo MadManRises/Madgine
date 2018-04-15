@@ -19,11 +19,8 @@ namespace Engine
 			public SceneManager<OgreSceneManager>
 		{
 		public:
-			OgreSceneManager(Ogre::Root* root);
+			OgreSceneManager(App::Application &app, Ogre::Root* root);
 			virtual ~OgreSceneManager();
-
-			using Singleton<OgreSceneManager>::getSingleton;
-			using Singleton<OgreSceneManager>::getSingletonPtr;
 
 			bool init() override;
 			void finalize() override;

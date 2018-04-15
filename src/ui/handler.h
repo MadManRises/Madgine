@@ -4,6 +4,7 @@
 #include "../gui/windows/classid.h"
 #include "../madgineobject.h"
 #include "../scripting/types/scopebase.h"
+#include "../scripting/types/globalapicomponentbase.h"
 
 namespace Engine
 {
@@ -32,7 +33,7 @@ namespace Engine
 		class OGREMADGINE_EXPORT Handler : public MadgineObject, public Scripting::ScopeBase
 		{
 		public:
-			Handler(const std::string& windowName);
+			Handler(UIManager &ui, const std::string& windowName);
 			virtual ~Handler() = default;
 
 			bool init() override;
@@ -45,6 +46,42 @@ namespace Engine
 			virtual void sizeChanged();
 
 			virtual const char* key() const = 0;
+			
+			App::Application &app();
+
+			template <class T>
+			T &getSceneComponent()
+			{
+				return static_cast<T&>(getSceneComponent(T::component_index()));
+			}
+
+			Scene::SceneComponentBase &getSceneComponent(size_t i);
+
+			Scene::SceneManagerBase &sceneMgr();
+
+			template <class T>
+			T &getGlobalAPIComponent()
+			{
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+			}
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
+			template <class T>
+			T &getGuiHandler()
+			{
+				return static_cast<T&>(getGuiHandler(T::component_index()));
+			}
+
+			GuiHandlerBase &getGuiHandler(size_t i);
+
+			template <class T>
+			T &getGameHandler()
+			{
+				return static_cast<T&>(getGameHandler(T::component_index()));
+			}
+
+			GameHandlerBase &getGameHandler(size_t i);
 
 		private:
 			bool installToWindow(GUI::Window* w);
@@ -129,7 +166,7 @@ namespace Engine
 		protected:
 			GUI::Window* mWindow;
 
-			UIManager* mUI;
+			UIManager &mUI;
 
 			const std::string mWindowName;
 

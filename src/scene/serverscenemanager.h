@@ -15,7 +15,7 @@ namespace Engine
 			public SceneManager<ServerSceneManager>
 		{
 		public:
-			ServerSceneManager();
+			ServerSceneManager(App::Application &app);
 			virtual ~ServerSceneManager();
 
 			bool init() override;

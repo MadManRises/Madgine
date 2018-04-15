@@ -1,4 +1,4 @@
-#include "../ogrelib.h"
+/*#include "../ogrelib.h"
 
 #include "ingameoverlay.h"
 
@@ -35,4 +35,4 @@ namespace Engine
 			setVisible(mVisible);
 		}
 	}
-}
+}*/

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../serialize/container/set.h"
+#include "../serialize/container/unordered_set.h"
 
 namespace Engine
 {
@@ -8,7 +8,7 @@ namespace Engine
 	{
 
 		template <class T>
-		class SceneComponentSet : public Serialize::SerializableSet<T>
+		class SceneComponentSet : public Serialize::SerializableUnorderedSet<T>
 		{
 		protected:
 			virtual void writeState(Serialize::SerializeOutStream& out) const override
@@ -41,7 +41,7 @@ namespace Engine
 	}
 
 	template <class T>
-	struct container_traits<Scene::SceneComponentSet, T> : public container_traits<Serialize::SerializableSet, T>
+	struct container_traits<Scene::SceneComponentSet, T> : public container_traits<Serialize::SerializableUnorderedSet, T>
 	{
 	};
 }

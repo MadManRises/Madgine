@@ -24,7 +24,8 @@ namespace Engine
 	{
 		namespace MyGui
 		{
-			MyGUILauncher::MyGUILauncher(Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr) :
+			MyGUILauncher::MyGUILauncher(App::Application &app, Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr) :
+				GUISystem(app),
 				mGUI(nullptr),
 				mPlatform(nullptr), mLayoutManager(nullptr), mResourceManager(nullptr), mInputManager(nullptr),
 				mRenderManager(nullptr),

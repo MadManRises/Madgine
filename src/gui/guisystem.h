@@ -4,20 +4,21 @@
 #include "windows/windowclass.h"
 #include "../madgineobject.h"
 #include "../scripting/types/scopebase.h"
+#include "../scene/scenecomponentbase.h"
+#include "../scripting/types/globalapicomponentbase.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 		class OGREMADGINE_EXPORT GUISystem :
-			public Singleton<GUISystem>,
 			public MadgineObject,
 			public Ogre::GeneralAllocatedObject,
 			public Ogre::WindowEventListener,
 			public Scripting::ScopeBase
 		{
 		public:
-			GUISystem();
+			GUISystem(App::Application &app);
 			virtual ~GUISystem();
 
 			//void printHierarchy();
@@ -57,6 +58,14 @@ namespace Engine
 
 			const char* key() const;
 
+			App::Application &app();
+
+			Scene::SceneComponentBase &getSceneComponent(size_t i);
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
+			Scene::SceneManagerBase &sceneMgr();
+
 		protected:
 			WindowContainer* mRootWindow;
 
@@ -64,6 +73,8 @@ namespace Engine
 			bool mWindowSizesDirty;
 
 			std::map<std::string, WindowContainer *> mWindows;
+
+			App::Application &mApp;
 		};
 	}
 }

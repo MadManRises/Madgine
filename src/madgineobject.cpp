@@ -1,13 +1,11 @@
 #include "baselib.h"
 #include "madgineobject.h"
-#include "madgineobjectcollector.h"
 
 namespace Engine
 {
 	MadgineObject::MadgineObject() :
 		mState(ObjectState::CONSTRUCTED)
 	{
-		MadgineObjectCollector::getSingleton().add(this);
 	}
 
 	MadgineObject::~MadgineObject()
@@ -21,7 +19,6 @@ namespace Engine
 				LOG_WARNING(std::string("Finalize does not call Baseclass-Implementation: ") + mName);
 			}
 		}
-		MadgineObjectCollector::getSingleton().remove(this);
 	}
 
 	bool MadgineObject::init()

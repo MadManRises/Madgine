@@ -23,7 +23,7 @@ namespace Engine
 			class MyGUILauncher : public GUISystem
 			{
 			public:
-				MyGUILauncher(Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr);
+				MyGUILauncher(App::Application &app, Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr);
 				~MyGUILauncher();
 
 				bool init() override;

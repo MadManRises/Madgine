@@ -12,6 +12,8 @@
 
 #include "../../scripting/datatypes/luatableiterator.h"
 
+#include "../../app/application.h"
+
 	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove
 	), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
 
@@ -24,6 +26,7 @@ namespace Engine
 		{
 			Entity::Entity(const Entity& other, bool local) :
 				SerializableUnit(other),
+				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(other.mSceneManager.app().createTable()),
 				mName(other.mName),
 				mLocal(local),
 				mSceneManager(other.mSceneManager)
@@ -33,6 +36,7 @@ namespace Engine
 
 			Entity::Entity(Entity&& other, bool local) :
 				SerializableUnit(std::forward<Entity>(other)),
+				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(std::forward<Entity>(other)),
 				mName(other.mName),
 				mLocal(local),
 				mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
@@ -45,7 +49,8 @@ namespace Engine
 				setup();
 			}
 
-			Entity::Entity(SceneManagerBase* sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
+			Entity::Entity(SceneManagerBase &sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
+				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(sceneMgr.app().createTable()),
 				mName(name),
 				mLocal(local),
 				mSceneManager(sceneMgr)
@@ -53,7 +58,7 @@ namespace Engine
 				setup();
 				if (!behaviour.empty())
 				{
-					ValueType table = Scripting::GlobalScopeBase::getSingleton().table().getValue(behaviour);
+					ValueType table = sceneMgr.app().table().getValue(behaviour);
 					if (table.is<Scripting::LuaTable>())
 					{
 						for (const std::pair<std::string, ValueType>& p : table.as<Scripting::LuaTable>())
@@ -185,7 +190,7 @@ namespace Engine
 
 			void Entity::remove()
 			{
-				mSceneManager->removeLater(this);
+				mSceneManager.removeLater(this);
 			}
 
 
@@ -199,6 +204,11 @@ namespace Engine
 				SerializableUnitBase::readState(ifs);
 			}
 
+			SceneComponentBase& Entity::getSceneComponent(size_t i)
+			{
+				return mSceneManager.getComponent(i);
+			}
+
 			KeyValueMapList Entity::maps()
 			{
 				return Scope::maps().merge(mComponents);
@@ -206,7 +216,7 @@ namespace Engine
 
 			SceneManagerBase& Entity::sceneMgr() const
 			{
-				return *mSceneManager;
+				return mSceneManager;
 			}
 
 			bool Entity::isLocal() const

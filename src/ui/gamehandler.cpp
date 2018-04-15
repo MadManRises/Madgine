@@ -12,13 +12,13 @@ namespace Engine
 		const float GameHandlerBase::mDragStartThreshold = 0.01f;
 
 
-		GameHandlerBase::GameHandlerBase(const std::string& windowName, Scene::ContextMask context) :
-			Handler(windowName),
+		GameHandlerBase::GameHandlerBase(UIManager &ui, const std::string& windowName, Scene::ContextMask context) :
+			Handler(ui, windowName),
 			mCurrentMouseButton(GUI::MouseButton::NO_BUTTON),
 			mDragging(false),
 			mSingleClick(false),
 			mContext(context),
-			mSceneMgr(&Scene::OgreSceneManager::getSingleton())
+			mSceneMgr(ui.sceneMgr())
 		{
 		}
 
@@ -41,7 +41,7 @@ namespace Engine
 				fixedUpdate(timeStep);
 		}
 
-		Scene::OgreSceneManager* GameHandlerBase::sceneMgr() const
+		Scene::SceneManagerBase &GameHandlerBase::sceneMgr() const
 		{
 			return mSceneMgr;
 		}
@@ -62,7 +62,7 @@ namespace Engine
 						mWindow->captureInput();
 						if (mMouseDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
 						{
-							mUI->hideCursor();
+							mUI.hideCursor();
 						}
 						onMouseDragBegin(me);
 					}
@@ -72,7 +72,7 @@ namespace Engine
 			{
 				onMouseDrag(me);
 			}
-			else if (mUI->isCursorVisible())
+			else if (mUI.isCursorVisible())
 			{
 				onMouseHover(me);
 			}
@@ -99,7 +99,7 @@ namespace Engine
 					mWindow->releaseInput();
 					if (mMouseDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
 					{
-						mUI->showCursor();
+						mUI.showCursor();
 					}
 					onMouseDragEnd(me);
 				}

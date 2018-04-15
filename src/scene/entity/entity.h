@@ -21,7 +21,7 @@ namespace Engine
 				Entity(const Entity&, bool local);
 				Entity(Entity&&, bool local);
 
-				Entity(SceneManagerBase* sceneMgr, bool local, const std::string& name, const std::string& behaviour = "");
+				Entity(SceneManagerBase &sceneMgr, bool local, const std::string& name, const std::string& behaviour = "");
 				~Entity();
 
 				void setup();
@@ -76,6 +76,14 @@ namespace Engine
 
 				bool isLocal() const;
 
+				template <class T>
+				T &getSceneComponent()
+				{
+					return static_cast<T&>(getSceneComponent(T::component_index()));
+				}
+
+				SceneComponentBase &getSceneComponent(size_t i);
+
 			protected:
 
 				KeyValueMapList maps() override;
@@ -127,7 +135,7 @@ namespace Engine
 				                         ParentCreator<decltype(&Entity::createComponentSimple), &Entity::createComponentSimple>>
 				mComponents;
 
-				SceneManagerBase* mSceneManager;
+				SceneManagerBase &mSceneManager;
 			};
 		}
 	}

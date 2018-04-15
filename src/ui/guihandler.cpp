@@ -11,9 +11,9 @@ namespace Engine
 {
 	namespace UI
 	{
-		GuiHandlerBase::GuiHandlerBase(const std::string& windowName, WindowType type, const std::string& layoutFile,
+		GuiHandlerBase::GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type, const std::string& layoutFile,
 		                               const std::string& parentName) :
-			Handler(windowName),
+			Handler(ui, windowName),
 			mLayoutFile(layoutFile),
 			mParentName(parentName),
 			mType(type),
@@ -36,7 +36,7 @@ namespace Engine
 
 			if (!mLayoutFile.empty())
 			{
-				window = mUI->gui()->loadLayout(mLayoutFile, mParentName);
+				window = mUI.gui().loadLayout(mLayoutFile, mParentName);
 				if (!window)
 				{
 					LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
@@ -81,13 +81,13 @@ namespace Engine
 			switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
-				mUI->openModalWindow(this);
+				mUI.openModalWindow(this);
 				break;
 			case WindowType::NONMODAL_OVERLAY:
-				mUI->openWindow(this);
+				mUI.openWindow(this);
 				break;
 			case WindowType::ROOT_WINDOW:
-				mUI->swapCurrentRoot(this);
+				mUI.swapCurrentRoot(this);
 				break;
 			}
 		}
@@ -97,10 +97,10 @@ namespace Engine
 			switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
-				mUI->closeModalWindow(this);
+				mUI.closeModalWindow(this);
 				break;
 			case WindowType::NONMODAL_OVERLAY:
-				mUI->closeWindow(this);
+				mUI.closeWindow(this);
 				break;
 			case WindowType::ROOT_WINDOW:
 				throw 0;

@@ -14,14 +14,14 @@ namespace Engine
 		class OGREMADGINE_EXPORT GameHandlerBase : public Handler
 		{
 		public:
-			GameHandlerBase(const std::string& windowName, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			GameHandlerBase(UIManager &ui, const std::string& windowName, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 
 			void abortDrag();
 
 			void update(float timeSinceLastFrame, Scene::ContextMask mask);
 			void fixedUpdate(float timeStep, Scene::ContextMask mask);
 
-			Scene::OgreSceneManager* sceneMgr() const;
+			Scene::SceneManagerBase &sceneMgr() const;
 
 		protected:
 			void onMouseMove(GUI::MouseEventArgs& me) override;
@@ -72,11 +72,11 @@ namespace Engine
 
 			Scene::ContextMask mContext;
 
-			Scene::OgreSceneManager* mSceneMgr;
+			Scene::SceneManagerBase &mSceneMgr;
 		};
 
 
-		using GameHandlerCollector = OgreUniqueComponentCollector<GameHandlerBase>;
+		using GameHandlerCollector = OgreUniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
 
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;

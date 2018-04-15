@@ -4,6 +4,8 @@
 #include "windows/windowcontainer.h"
 #include "windows/window.h"
 
+#include "../app/application.h"
+
 namespace Engine
 {
 
@@ -12,9 +14,11 @@ namespace Engine
 
 	namespace GUI
 	{
-		GUISystem::GUISystem() :
+		GUISystem::GUISystem(App::Application &app) :
+			ScopeBase(app.createTable()),
 			mRootWindow(nullptr),
-			mWindowSizesDirty(false)
+			mWindowSizesDirty(false),
+			mApp(app)
 		{
 		}
 
@@ -121,6 +125,26 @@ namespace Engine
 		const char* GUISystem::key() const
 		{
 			return "Gui";
+		}
+
+		App::Application& GUISystem::app()
+		{
+			return mApp;
+		}
+
+		Scene::SceneComponentBase& GUISystem::getSceneComponent(size_t i)
+		{
+			return mApp.getSceneComponent(i);
+		}
+
+		Scripting::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i)
+		{
+			return mApp.getGlobalAPIComponent(i);
+		}
+
+		Scene::SceneManagerBase& GUISystem::sceneMgr()
+		{
+			return mApp.sceneMgr();
 		}
 	}
 }

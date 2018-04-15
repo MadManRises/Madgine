@@ -11,9 +11,9 @@ namespace Engine
 		class INTERFACES_EXPORT ScopeBase
 		{
 		public:
-			ScopeBase(const LuaTable& table = {});
+			ScopeBase(const LuaTable& table);
 			ScopeBase(const ScopeBase&) = delete;
-			ScopeBase(ScopeBase&&) = delete;
+			ScopeBase(ScopeBase&&) = default;
 			virtual ~ScopeBase();
 
 			bool hasMethod(const std::string& name);

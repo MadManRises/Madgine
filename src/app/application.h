@@ -19,8 +19,7 @@ namespace Engine
 		/**
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
-		class MADGINE_BASE_EXPORT Application : public Singleton<Application>,
-		                                        public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
+		class MADGINE_BASE_EXPORT Application : public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
 		                                        public MadgineObject
 		{
 		public:
@@ -134,9 +133,7 @@ namespace Engine
 
 			KeyValueMapList maps() override;
 
-
-			using Engine::Singleton<Application>::getSingleton;
-			using Engine::Singleton<Application>::getSingletonPtr;
+			virtual Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t) override;
 
 		protected:
 			virtual void clear();

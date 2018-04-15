@@ -17,14 +17,13 @@ API_IMPL(Engine::App::Application, MAP_F(shutdown));
 namespace Engine
 {	
 
-	SINGLETON_IMPL(App::Application);
-
 	namespace App
 	{
 		Application::Application(Scripting::LuaState *state) :
 			Scope(state),
 			mShutDown(false),
-			mTimeBank(0.0f)
+			mTimeBank(0.0f),
+			mGlobalAPIs(*this)
 		{
 		}
 
@@ -173,6 +172,12 @@ namespace Engine
 		{
 			return Scope::maps().merge(mGlobalAPIs);
 		}
+
+		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i)
+		{
+			return mGlobalAPIs.get(i);
+		}
+
 
 		void Application::clear()
 		{

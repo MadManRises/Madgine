@@ -49,6 +49,7 @@
 #include <sstream>
 #include <algorithm>
 #include <set>
+#include <unordered_set>
 #include <stack>
 #include <thread>
 #include <queue>
@@ -65,8 +66,6 @@
 
 
 #include "interfacesforward.h"
-
-#include "generic/singleton.h"
 
 #include "scripting/scriptingexception.h"
 #include "util/utilmethods.h"

@@ -3,9 +3,9 @@
 #include "luastate.h"
 
 #include "../../generic/keyvalueiterate.h"
-#include "../types/apihelper.h"
 
-#include "../types/globalscopebase.h"
+#include "scopebase.h"
+#include "apihelper.h"
 
 extern "C"
 {
@@ -132,14 +132,16 @@ namespace Engine
 		}
 
 
-		LuaTable LuaState::createThread(GlobalScopeBase *global)
+		LuaTable LuaState::createThread(ScopeBase *global)
 		{
 
 			lua_State* thread = lua_newthread(mState);
 
-			mThreads[thread] = { luaL_ref(mState, LUA_REGISTRYINDEX), global };
+			LuaTable table = mRegistry.createTable(thread);
 
-			return mRegistry.createTable(thread);
+			mThreads[thread] = { luaL_ref(mState, LUA_REGISTRYINDEX), global, table};
+
+			return table;
 		}
 
 		int LuaState::pushThread(lua_State* state, lua_State* thread)
@@ -148,12 +150,6 @@ namespace Engine
 
 			return 1;
 		}
-
-		/*LuaState& LuaState::getSingleton()
-		{
-			assert(sSingleton);
-			return *sSingleton;
-		}*/
 
 		LuaTable LuaState::env() const
 		{
@@ -174,9 +170,14 @@ namespace Engine
 			lua_pop(mState, 1);
 		}
 
-		GlobalScopeBase* LuaState::getGlobal(lua_State* state)
+		ScopeBase* LuaState::getGlobal(lua_State* state)
 		{
 			return sSingleton->mThreads.at(state).mGlobal;
+		}
+
+		LuaTable LuaState::getGlobalTable(lua_State* state)
+		{
+			return sSingleton->mThreads.at(state).mTable;
 		}
 
 		int LuaState::lua_indexScope(lua_State* state)
@@ -270,7 +271,7 @@ namespace Engine
 
 		int LuaState::lua_newindexEnv(lua_State* state)
 		{
-			pushGlobalScope(state);
+			getGlobal(state)->push();
 			lua_replace(state, -4);
 			lua_settable(state, -3);
 			return 1;
@@ -306,7 +307,7 @@ namespace Engine
 
 		int LuaState::lua_indexEnv(lua_State* state)
 		{
-			pushGlobalScope(state);
+			getGlobal(state)->push();
 			lua_replace(state, -3);
 			lua_gettable(state, -2);
 			lua_replace(state, -2);
@@ -317,21 +318,17 @@ namespace Engine
 		{
 			lua_pop(state, 1);
 			lua_pushcfunction(state, &lua_nextScope);
-			pushGlobalScope(state);
+			getGlobal(state)->push();
 			return 2;
 		}
 
 		int LuaState::lua_tostringEnv(lua_State* state)
 		{
-			pushGlobalScope(state);
+			getGlobal(state)->push();
 			lua_replace(state, -2);
 			luaL_tolstring(state, -1, nullptr);
 			return 1;
 		}
 
-		void LuaState::pushGlobalScope(lua_State* state)
-		{
-			sSingleton->mThreads.at(state).mGlobal->push();
-		}
 	}
 }

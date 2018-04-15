@@ -1,6 +1,8 @@
 #include "../../baselib.h"
 #include "entitycomponentbase.h"
 #include "entity.h"
+#include "../scenemanagerbase.h"
+#include "../../app/application.h"
 
 namespace Engine
 {
@@ -9,6 +11,7 @@ namespace Engine
 		namespace Entity
 		{
 			EntityComponentBase::EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable) :
+				ScopeBase(entity.sceneMgr().app().createTable()),
 				mEntity(&entity),
 				mInitTable(initTable)
 			{
@@ -29,6 +32,11 @@ namespace Engine
 			Entity& EntityComponentBase::getEntity() const
 			{
 				return *mEntity;
+			}
+
+			SceneComponentBase& EntityComponentBase::getSceneComponent(size_t i)
+			{
+				return mEntity->getSceneComponent(i);
 			}
 
 			void EntityComponentBase::moveToEntity(Entity* entity)

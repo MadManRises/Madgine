@@ -23,6 +23,15 @@ namespace Engine
 
 				virtual const char* key() const = 0;
 
+				template <class T>
+				T &getSceneComponent()
+				{
+					return static_cast<T&>(getSceneComponent(T::component_index()));
+				}
+
+				SceneComponentBase &getSceneComponent(size_t i);
+				
+
 			private:
 
 				Entity* mEntity;

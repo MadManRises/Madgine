@@ -18,13 +18,12 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class MADGINE_BASE_EXPORT SceneManagerBase : public Singleton<SceneManagerBase>,
-		                                             public Serialize::TopLevelSerializableUnit<SceneManagerBase>,
+		class MADGINE_BASE_EXPORT SceneManagerBase : public Serialize::TopLevelSerializableUnit<SceneManagerBase>,
 		                                             public Scripting::Scope<SceneManagerBase>,
 		                                             public MadgineObject
 		{
 		public:
-			SceneManagerBase();
+			SceneManagerBase(App::Application &app);
 			virtual ~SceneManagerBase() = default;
 
 			Entity::Entity* createEntity(const std::string& behaviour = "", const std::string& name = "",
@@ -48,8 +47,13 @@ namespace Engine
 
 			virtual void clear();
 
+			template <class T>
+			T &getComponent()
+			{
+				return mSceneComponents.get<T>();
+			}
+			SceneComponentBase &getComponent(size_t i);
 			size_t getComponentCount();
-
 
 			void readState(Serialize::SerializeInStream& in) override;
 			void writeState(Serialize::SerializeOutStream& out) const override;
@@ -78,6 +82,8 @@ namespace Engine
 
 			const char* key() const override;
 
+			App::Application &app() const;
+
 		protected:
 
 			KeyValueMapList maps() override;
@@ -88,10 +94,11 @@ namespace Engine
 
 			std::string generateUniqueName();
 
-			std::tuple<SceneManagerBase *, bool, std::string> createNonLocalEntityData(const std::string& name);
-			std::tuple<SceneManagerBase *, bool, std::string> createEntityData(const std::string& name, bool local);
+			std::tuple<SceneManagerBase &, bool, std::string> createNonLocalEntityData(const std::string& name);
+			std::tuple<SceneManagerBase &, bool, std::string> createEntityData(const std::string& name, bool local);
 
 		private:
+			App::Application &mApp;
 			size_t mItemCount;
 
 			SceneComponentCollector mSceneComponents;
@@ -103,6 +110,8 @@ namespace Engine
 
 			SignalSlot::Signal<> mStateLoadedSignal;
 			SignalSlot::Signal<> mClearedSignal;
+
+			
 		};
 
 	}

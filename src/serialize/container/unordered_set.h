@@ -10,7 +10,7 @@ namespace Engine
 	namespace Serialize
 	{
 		template <class C>
-		class SetImpl : public C
+		class UnorderedSetImpl : public C
 		{
 		public:
 
@@ -37,26 +37,26 @@ namespace Engine
 		};
 
 		template <class C>
-		using ObservableSetImpl = SetImpl<C>;
+		using ObservableUnorderedSetImpl = UnorderedSetImpl<C>;
 
 		template <class T, class Creator = DefaultCreator<>>
-		using SerializableSet = SetImpl<SerializableContainer<
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
+		using SerializableUnorderedSet = UnorderedSetImpl<SerializableContainer<
+			container_traits<std::unordered_set, typename UnitHelper<T>::Type>, Creator>>;
 
 		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
-		using ObservableSet = ObservableSetImpl<ObservableContainer<
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
+		using ObservableUnorderedSet = ObservableUnorderedSetImpl<ObservableContainer<
+			container_traits<std::unordered_set, typename UnitHelper<T>::Type>, Creator, Config>>;
 	}
 
 
 	template <class T>
-	struct container_traits<Serialize::SerializableSet, T>
+	struct container_traits<Serialize::SerializableUnorderedSet, T>
 	{
 		static constexpr const bool sorted = true;
 
-		typedef Serialize::SerializableSet<T> container;
-		typedef SetIterator<T> iterator;
-		typedef SetConstIterator<T> const_iterator;
+		typedef Serialize::SerializableUnorderedSet<T> container;
+		typedef UnorderedSetIterator<T> iterator;
+		typedef UnorderedSetConstIterator<T> const_iterator;
 		typedef typename KeyType<T>::type key_type;
 		typedef typename container::value_type value_type;
 		typedef T type;

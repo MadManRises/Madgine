@@ -35,8 +35,9 @@ namespace Engine
 		const std::string ConfigSet::languageProperty = "Language";
 
 
-		ConfigSet::ConfigSet(Ogre::Root* root, const std::string& configFileName) :
-			mConfigFileName(configFileName)
+		ConfigSet::ConfigSet(OgreApplication &app, Ogre::Root* root, const std::string& configFileName) :
+			mConfigFileName(configFileName),
+			mApp(app)
 		{
 			load();
 
@@ -152,7 +153,7 @@ namespace Engine
 
 		void ConfigSet::updateWindow()
 		{
-			OgreApplication::getSingleton().setWindowProperties(getFullscreen(), getResolutionWidth(),
+			mApp.setWindowProperties(getFullscreen(), getResolutionWidth(),
 			                                                    getResolutionHeight());
 		}
 
