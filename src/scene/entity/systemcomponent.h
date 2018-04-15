@@ -1,7 +1,6 @@
 #pragma once
 
 #include "entitycomponent.h"
-#include "system.h"
 
 namespace Engine
 {
