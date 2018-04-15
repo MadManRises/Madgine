@@ -20,14 +20,18 @@ namespace Engine
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>){
 				mComponents.reserve(this->sComponents().size());
 			}
+			mSortedComponents.reserve(this->sComponents().size());
 			for (auto f : this->sComponents())
 			{
 				if (f) {
-					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), f(std::forward<_Ty>(args)...));
+					std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
+					mSortedComponents.push_back(p.get());
+					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
 				}
 				else
 				{
-					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), nullptr);
+					mSortedComponents.push_back(nullptr);
+					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
 				}
 			}
 		}
@@ -65,25 +69,23 @@ namespace Engine
 			return result;
 		}
 
-		typename Container<std::unique_ptr<Base>>::const_iterator postCreate(void* hash, _Ty ... args)
+		/*typename Container<std::unique_ptr<Base>>::const_iterator postCreate(void* hash, _Ty ... args)
 		{
 			auto fIt = std::find_if(this->sComponents().begin(), this->sComponents().end(),
 			                        [=](const F& f) { return &f == hash; });
 			return container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(),
 			                                                                   (*fIt)(std::forward<_Ty>(args)...)).first;
-		}
+		}*/
 
 		template <class T>
 		T &get()
 		{
-			auto it = mComponents.begin();
-			std::advance(it, T::component_index());
-			return static_cast<T&>(**it);
+			return static_cast<T&>(get(T::component_index()));
 		}
 
 		Base &get(size_t i)
 		{
-			auto it = mComponents.begin();
+			auto it = mSortedComponents.begin();
 			std::advance(it, i);
 			return **it;
 		}
@@ -133,6 +135,7 @@ namespace Engine
 
 	private:
 		Container<std::unique_ptr<Base>> mComponents;
+		std::vector<Base*> mSortedComponents;
 	};
 
 
