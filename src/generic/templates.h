@@ -3,18 +3,15 @@
 
 namespace Engine
 {
-	template <class...>
-	struct last;
+	template <class V, class...>
+	struct last
+	{
+		typedef V type;
+	};
 
 	template <class U, class V, class... T>
 	struct last<U, V, T...> : public last<V, T...>
 	{
-	};
-
-	template <class V>
-	struct last<V>
-	{
-		typedef V type;
 	};
 
 	template <class...>
