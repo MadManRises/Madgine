@@ -142,7 +142,7 @@ namespace Engine
 
 		constexpr size_t operator()(const _Ty& _Arg) const 
 		{
-			return std::hash<KeyType<_Ty>::type>{}(kvKey(_Arg));
+			return std::hash<typename KeyType<_Ty>::type>{}(kvKey(_Arg));
 		}
 	};
 
