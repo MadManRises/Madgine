@@ -108,8 +108,7 @@ namespace Engine
 		static iterator revalidateIteratorRemove(const iterator& begin, size_t dist, const iterator& it)
 		{
 			size_t item = std::distance(begin, it);
-			if (item == dist)
-				throw 0;
+			assert (item != dist);
 			if (item < dist)
 				--dist;
 			iterator newIt = begin;
