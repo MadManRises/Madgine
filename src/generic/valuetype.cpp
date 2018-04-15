@@ -188,8 +188,11 @@ namespace Engine
 			luaL_error(state, "Memberfunctions need at least 1 argument!");
 		Scripting::ArgumentList args(state, n - 1);
 		Scripting::ApiMethod method = reinterpret_cast<Scripting::ApiMethod>(lua_touserdata(state, lua_upvalueindex(1)));
-		Scripting::ScopeBase* scope = fromStack(state, -1).as<Scripting::ScopeBase*>();
+		ValueType v = fromStack(state, -1);
 		lua_pop(state, 1);
+		if (!v.is<Scripting::ScopeBase*>())
+			luaL_error(state, "First arguments has to be a Scope-type!");
+		Scripting::ScopeBase* scope = v.as<Scripting::ScopeBase*>();		
 		return (*method)(scope, args).push(state);
 	}
 }

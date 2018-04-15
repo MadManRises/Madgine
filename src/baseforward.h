@@ -13,6 +13,7 @@ namespace Engine
 		namespace Entity
 		{
 			class Entity;
+			class EntityComponentBase;
 			class Transform;
 			class Animation;
 			class Mesh;
