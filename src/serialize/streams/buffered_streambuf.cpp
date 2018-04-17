@@ -6,7 +6,6 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		constexpr size_t buffered_streambuf::BUFFER_SIZE;
 
 		buffered_streambuf::buffered_streambuf() :
 			mIsClosed(false),
@@ -20,13 +19,13 @@ namespace Engine
 			mIsClosed(other.mIsClosed),
 			mBytesToRead(other.mBytesToRead),
 			mReceiveMessageHeader(other.mReceiveMessageHeader),
-			mRecBuffer(std::forward<std::unique_ptr<char[]>>(other.mRecBuffer)),
-			mSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mSendBuffer)),
-			mStagedSendBuffer(std::forward<std::list<std::array<char, BUFFER_SIZE>>>(other.mStagedSendBuffer)),
+			mRecBuffer(std::forward<std::vector<char>>(other.mRecBuffer)),
+			mSendBuffer(std::forward<std::vector<char>>(other.mSendBuffer)),
 			mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
 		{
-			setg(other.eback(), other.gptr(), other.egptr());
-			setp(other.pbase(), other.epptr());
+			setg(mRecBuffer.data(), mRecBuffer.data() + (other.gptr() - other.eback()), mRecBuffer.data() + mRecBuffer.size());
+			setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
+			pbump(other.pptr() - other.pbase());
 			other.mIsClosed = true;
 
 			//setp(mSendBuffer.back().data(), mSendBuffer.back().data() + (other.pptr() - other.pbase()), mSendBuffer.back().data() + BUFFER_SIZE);
@@ -96,18 +95,29 @@ namespace Engine
 
 		void buffered_streambuf::extend()
 		{
-			std::array<char, BUFFER_SIZE> &buffer = mSendBuffer.emplace_back();
-			setp(buffer.data(), buffer.data() + BUFFER_SIZE);
+			if (mSendBuffer.empty())
+			{
+				mSendBuffer.resize(128);
+				setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
+			}
+			else
+			{
+				size_t index = pptr() - pbase();
+				mSendBuffer.resize(2 * mSendBuffer.capacity());
+				setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
+				pbump(index);
+			}			
+			
 		}
 
 		bool buffered_streambuf::isMessageAvailable(const std::string& context)
 		{
 			if (mIsClosed)
 				return false;
-			if (mRecBuffer && mBytesToRead == 0 && gptr() == eback())
+			if (!mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback())
 				return true;
 			receive(context);
-			return mRecBuffer && mBytesToRead == 0 && gptr() == eback();
+			return !mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback();
 		}
 
 
@@ -132,7 +142,7 @@ namespace Engine
 		{
 			if (mIsClosed)
 				return;
-			if (mSendBuffer.size() != 1 || pptr() != pbase())
+			if (pptr() != pbase())
 				throw 0;
 		}
 
@@ -141,12 +151,13 @@ namespace Engine
 			if (mIsClosed)
 				return;
 
-			BufferedSendMessage msg;
+			BufferedSendMessage &msg = mBufferedSendMsgs.emplace_back();
 			msg.mHeaderSent = false;
-			msg.mHeader.mMsgSize = (mSendBuffer.size() - 1) * BUFFER_SIZE + (pptr() - pbase());
-			mBufferedSendMsgs.emplace_back(msg);
-
-			mStagedSendBuffer.splice(mStagedSendBuffer.end(), mSendBuffer);
+			msg.mBytesSent = 0;
+			msg.mHeader.mMsgSize = pptr() - pbase();
+			mSendBuffer.resize(msg.mHeader.mMsgSize);
+			mSendBuffer.shrink_to_fit();
+			mSendBuffer.swap(msg.mData);
 
 			extend();
 		}
@@ -171,13 +182,11 @@ namespace Engine
 					}
 					it->mHeaderSent = true;
 				}
-				auto it2 = mStagedSendBuffer.begin();
-				while (it->mHeader.mMsgSize > 0)
+				while (it->mBytesSent < it->mHeader.mMsgSize)
 				{
-					if (it2 == mStagedSendBuffer.end())
-						throw 0;
-					size_t count = std::min(it->mHeader.mMsgSize, BUFFER_SIZE);
-					int num = send(it2->data(), count);
+					
+					size_t count = it->mHeader.mMsgSize - it->mBytesSent;
+					int num = send(it->mData.data() + it->mBytesSent, count);
 					if (num == 0)
 					{
 						close();
@@ -188,12 +197,7 @@ namespace Engine
 						handleError();
 						return mIsClosed ? -1 : mBufferedSendMsgs.size();
 					}
-					if (static_cast<size_t>(num) != count)
-					{
-						throw 0;
-					}
-					it->mHeader.mMsgSize -= count;
-					it2 = mStagedSendBuffer.erase(it2);
+					it->mBytesSent += num;
 				}
 			}
 			return 0;
@@ -211,16 +215,16 @@ namespace Engine
 
 		void buffered_streambuf::receive(const std::string& context)
 		{
-			if (mRecBuffer && mBytesToRead == 0)
+			if (!mRecBuffer.empty() && mBytesToRead == 0)
 			{
 				if (gptr() != egptr())
 				{
 					LOG_WARNING(Exceptions::messageNotFullyRead(context));
 				}
-				mRecBuffer.reset();
+				mRecBuffer.clear();
 				mBytesToRead = sizeof mReceiveMessageHeader;
 			}
-			if (!mRecBuffer)
+			if (mRecBuffer.empty())
 			{
 				assert(mBytesToRead > 0);
 				int num = rec(reinterpret_cast<char*>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
@@ -238,13 +242,13 @@ namespace Engine
 				if (mBytesToRead == 0)
 				{
 					mBytesToRead = mReceiveMessageHeader.mMsgSize;
-					mRecBuffer = std::make_unique<char[]>(mBytesToRead);
+					mRecBuffer.resize(mBytesToRead);
 				}
 			}
 
-			if (mRecBuffer && mBytesToRead > 0)
+			if (!mRecBuffer.empty() && mBytesToRead > 0)
 			{
-				int num = rec(mRecBuffer.get() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
+				int num = rec(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
 				if (num == 0)
 				{
 					close();
@@ -258,7 +262,7 @@ namespace Engine
 				mBytesToRead -= num;
 				if (mBytesToRead == 0)
 				{
-					setg(mRecBuffer.get(), mRecBuffer.get(), mRecBuffer.get() + mReceiveMessageHeader.mMsgSize);
+					setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
 				}
 			}
 		}

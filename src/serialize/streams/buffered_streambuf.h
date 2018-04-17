@@ -62,19 +62,18 @@ namespace Engine
 			//read
 			size_t mBytesToRead;
 			BufferedMessageHeader mReceiveMessageHeader;
-			std::unique_ptr<char[]> mRecBuffer;
+			std::vector<char> mRecBuffer;
 			
 
 			//write
-			static constexpr size_t BUFFER_SIZE = 100;
-
-			std::list<std::array<char, BUFFER_SIZE>> mSendBuffer;
-			std::list<std::array<char, BUFFER_SIZE>> mStagedSendBuffer;
+			std::vector<char> mSendBuffer;
 
 			struct BufferedSendMessage
 			{
 				bool mHeaderSent;
 				BufferedMessageHeader mHeader;
+				size_t mBytesSent;
+				std::vector<char> mData;
 			};
 
 			std::list<BufferedSendMessage> mBufferedSendMsgs;
