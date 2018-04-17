@@ -96,10 +96,10 @@ namespace Engine
 					return std::make_unique<T>(e, std::forward<Ty>(args)...);
 				}
 
-				std::tuple<std::unique_ptr<EntityComponentBase>> createComponent(const std::string& name,
+				std::unique_ptr<EntityComponentBase> createComponent(const std::string& name,
 				                                                                 const Scripting::LuaTable& table = {});
 
-				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentSimple(const std::string& name);
+				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string& name);
 
 				EntityComponentBase* addComponentImpl(std::unique_ptr<EntityComponentBase>&& component);
 
@@ -132,7 +132,7 @@ namespace Engine
 				bool mLocal;
 
 				Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::
-				                         ParentCreator<decltype(&Entity::createComponentSimple), &Entity::createComponentSimple>>
+				                         ParentCreator<decltype(&Entity::createComponentTuple), &Entity::createComponentTuple>>
 				mComponents;
 
 				SceneManagerBase &mSceneManager;

@@ -131,7 +131,7 @@ namespace Engine
 
 			void Entity::addComponent(const std::string& name, const Scripting::LuaTable& table)
 			{
-				addComponentImpl(std::get<0>(createComponent(name, table)));
+				addComponentImpl(createComponent(name, table));
 			}
 
 			void Entity::removeComponent(const std::string& name)
@@ -158,18 +158,18 @@ namespace Engine
 				return result;
 			}
 
-			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponent(
+			std::unique_ptr<EntityComponentBase> Entity::createComponent(
 				const std::string& name, const Scripting::LuaTable& table)
 			{
 				auto it = sRegisteredComponentsByName().find(name);
 				if (it == sRegisteredComponentsByName().end())
 					throw ComponentException(Exceptions::unknownComponent(name));
-				return make_tuple(it->second(*this, table));
+				return it->second(*this, table);
 			}
 
-			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentSimple(const std::string& name)
+			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string& name)
 			{
-				return createComponent(name);
+				return make_tuple(createComponent(name));
 			}
 
 			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
