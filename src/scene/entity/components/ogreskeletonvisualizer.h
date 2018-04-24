@@ -25,7 +25,7 @@ namespace Engine
 				void createBoneMesh();
 
 			private:
-				Mesh* mMesh;
+				OgreMesh* mMesh;
 
 				std::vector<Ogre::Entity*> mBoneEntities;
 

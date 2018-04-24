@@ -6,16 +6,13 @@
 
 namespace Engine
 {
-	API_IMPL(Scene::Entity::Transform, MAP_RO(Position, getPosition), MAP_RO(Orientation, getOrientation), MAP_RO(Scale,
-		getScale));
-
 	namespace Scene
 	{
 		namespace Entity
 		{
-			ENTITYCOMPONENT_IMPL(Transform, Transform);
+			ENTITYCOMPONENTVIRTUALIMPL_IMPL(OgreTransform, Transform);
 
-			Entity* Transform::entityFromNode(Ogre::SceneNode* node)
+			Entity* OgreTransform::entityFromNode(Ogre::SceneNode* node)
 			{
 				const Ogre::Any& any =
 					node->getUserObjectBindings().getUserAny("entity");
@@ -23,15 +20,15 @@ namespace Engine
 				return any.isEmpty() ? 0 : Ogre::any_cast<Entity *>(any);
 			}
 
-			Transform::Transform(Entity& entity, const Scripting::LuaTable& table) :
-				EntityComponent(entity, table),
+			OgreTransform::OgreTransform(Entity& entity, const Scripting::LuaTable& table) :
+				EntityComponentVirtualImpl(entity, table),
 				mNode(nullptr)
 			{
 				mNode = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).createEntityNode();
 				mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(&getEntity()));
 			}
 
-			Transform::~Transform()
+			OgreTransform::~OgreTransform()
 			{
 				if (mNode->getAttachedObjectIterator().hasMoreElements())
 				LOG_ERROR(Exceptions::nodeNotCleared);
@@ -40,64 +37,64 @@ namespace Engine
 				mNode->getCreator()->destroySceneNode(mNode);
 			}
 
-			void Transform::init()
+			void OgreTransform::init()
 			{
 			}
 
-			void Transform::finalize()
+			void OgreTransform::finalize()
 			{
 			}
 
 
-			Ogre::SceneNode* Transform::getNode() const
+			Ogre::SceneNode* OgreTransform::getNode() const
 			{
 				return mNode;
 			}
 
 
-			void Transform::setPosition(const Vector3& v)
+			void OgreTransform::setPosition(const Vector3& v)
 			{
 				mNode->setPosition(Ogre::Vector3(v.ptr()));
 			}
 
-			void Transform::setScale(const Vector3& scale)
+			void OgreTransform::setScale(const Vector3& scale)
 			{
 				mNode->setScale(Ogre::Vector3(scale.ptr()));
 			}
 
-			void Transform::setOrientation(const std::array<float, 4>& orientation)
+			void OgreTransform::setOrientation(const std::array<float, 4>& orientation)
 			{
 				mNode->setOrientation(Ogre::Quaternion(const_cast<float*>(orientation.data())));
 			}
 
-			void Transform::translate(const Vector3& v)
+			void OgreTransform::translate(const Vector3& v)
 			{
 				mNode->translate(Ogre::Vector3(v.ptr()));
 			}
 
-			void Transform::rotate(const std::array<float, 4>& q)
+			void OgreTransform::rotate(const std::array<float, 4>& q)
 			{
 				mNode->rotate(Ogre::Quaternion(const_cast<float*>(q.data())));
 			}
 
-			void Transform::lookAt(const Vector3& v)
+			void OgreTransform::lookAt(const Vector3& v)
 			{
 				mNode->lookAt(Ogre::Vector3(v.ptr()), Ogre::Node::TS_WORLD);
 			}
 
-			Vector3 Transform::getPosition() const
+			Vector3 OgreTransform::getPosition() const
 			{
 				return {mNode->getPosition().x, mNode->getPosition().y, mNode->getPosition().z};
 			}
 
-			std::array<float, 4> Transform::getOrientation() const
+			std::array<float, 4> OgreTransform::getOrientation() const
 			{
 				return {
 					{mNode->getOrientation().w, mNode->getOrientation().x, mNode->getOrientation().y, mNode->getOrientation().z}
 				};
 			}
 
-			Vector3 Transform::getScale() const
+			Vector3 OgreTransform::getScale() const
 			{
 				return {mNode->getScale().x, mNode->getScale().y, mNode->getScale().z};
 			}

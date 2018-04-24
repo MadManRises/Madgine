@@ -30,11 +30,11 @@ namespace Engine
 
 				const char* key() const override;
 
-				template <class T, class... Ty>
-				T* addComponent_t(Ty&&... args)
+				template <class T>
+				T* addComponent_t(const Scripting::LuaTable &table = {})
 				{
 					if (!hasComponent<T>())
-						addComponentImpl(createComponent_t<T>(*this, std::forward<Ty>(args)...));
+						addComponent(T::componentName(), table);
 					return getComponent<T>();
 				}
 
@@ -90,10 +90,10 @@ namespace Engine
 
 			private:
 
-				template <class T, class... Ty>
-				static std::unique_ptr<EntityComponentBase> createComponent_t(Entity& e, Ty&&... args)
+				template <class T>
+				static std::unique_ptr<EntityComponentBase> createComponent_t(Entity& e, const Scripting::LuaTable &table = {})
 				{
-					return std::make_unique<T>(e, std::forward<Ty>(args)...);
+					return std::make_unique<T>(e, table);
 				}
 
 				std::unique_ptr<EntityComponentBase> createComponent(const std::string& name,
@@ -111,7 +111,7 @@ namespace Engine
 					{
 						const std::string name = T::componentName();
 						assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-						sRegisteredComponentsByName()[name] = &createComponent_t<T, const Scripting::LuaTable&>;
+						sRegisteredComponentsByName()[name] = &createComponent_t<T>;
 					}
 
 					~ComponentRegistrator()
@@ -127,6 +127,8 @@ namespace Engine
 				template <class T, class Base>
 				friend class EntityComponent;
 
+				template <class T, class Base>
+				friend class EntityComponentVirtualImpl;
 
 				std::string mName;
 				bool mLocal;

@@ -31,7 +31,7 @@ namespace Engine
 
 			void OgreSkeletonVisualizer::init()
 			{
-				mMesh = getEntity().getComponent<Mesh>();
+				mMesh = getEntity().getComponent<OgreMesh>();
 
 				Ogre::Entity* entity = mMesh->getMesh();
 				Ogre::SceneManager* sceneMgr = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager();

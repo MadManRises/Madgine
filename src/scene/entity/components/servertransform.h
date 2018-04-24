@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entitycomponent.h"
+#include "transform.h"
 
 #include "../../../serialize/container/serialized.h"
 
@@ -10,11 +10,11 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_SERVER_EXPORT Transform : public EntityComponent<Transform>
+			class MADGINE_SERVER_EXPORT ServerTransform : public EntityComponentVirtualImpl<ServerTransform, Transform>
 			{
 			public:
-				Transform(Entity& entity, const Scripting::LuaTable& table = {});
-				virtual ~Transform();
+				ServerTransform(Entity& entity, const Scripting::LuaTable& table = {});
+				virtual ~ServerTransform();
 
 				Vector3 getPosition() const;
 				Vector3 getScale() const;

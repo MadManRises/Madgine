@@ -8,51 +8,45 @@
 
 namespace Engine
 {
-	API_IMPL(Scene::Entity::Mesh, MAP_RO(MeshName, getName), MAP_RO(Visible, isVisible));
 
 	namespace Scene
 	{
 		namespace Entity
 		{
-			ENTITYCOMPONENT_IMPL(Mesh, Mesh);
+			ENTITYCOMPONENTVIRTUALIMPL_IMPL(OgreMesh, Mesh);
 
-			Mesh::Mesh(Entity& entity, const Scripting::LuaTable& table) :
-				Mesh(entity, table.getValue("mesh").asDefault<std::string>(""))
+			OgreMesh::OgreMesh(Entity& entity, const Scripting::LuaTable& table) :
+				EntityComponentVirtualImpl<Engine::Scene::Entity::OgreMesh, Engine::Scene::Entity::Mesh>(entity, table),
+			mTransform(nullptr),
+			mObject(nullptr)
 			{
-			}
-
-			Mesh::Mesh(Entity& entity, const std::string& meshName) :
-				EntityComponent(entity),
-				mTransform(nullptr),
-				mObject(nullptr)
-			{
-				setName(meshName);
+				setName(table.getValue("mesh").asDefault<std::string>(""));
 			}
 
 
-			Mesh::~Mesh()
+			OgreMesh::~OgreMesh()
 			{
 				assert(!mObject);
 			}
 
-			void Mesh::init()
+			void OgreMesh::init()
 			{
-				mTransform = getEntity().addComponent_t<Transform>();
+				mTransform = getEntity().addComponent_t<OgreTransform>();
 				if (mObject)
 					mTransform->getNode()->attachObject(mObject);
 			}
 
-			void Mesh::finalize()
+			void OgreMesh::finalize()
 			{
 				destroyObject();
 			}
 
-			std::string Mesh::getName() const
+			std::string OgreMesh::getName() const
 			{
 				return mObject ? mObject->getMesh()->getName() : "";
 			}
 
-			void Mesh::setName(const std::string& mesh)
+			void OgreMesh::setName(const std::string& mesh)
 			{
 				destroyObject();
 				if (!mesh.empty())
@@ -64,23 +58,23 @@ namespace Engine
 				}
 			}
 
-			bool Mesh::isVisible() const
+			bool OgreMesh::isVisible() const
 			{
 				return mObject ? mObject->isVisible() : false;
 			}
 
-			void Mesh::setVisible(bool b)
+			void OgreMesh::setVisible(bool b)
 			{
 				if (mObject)
 					mObject->setVisible(b);
 			}
 
-			Ogre::Entity* Mesh::getMesh() const
+			Ogre::Entity* OgreMesh::getMesh() const
 			{
 				return mObject;
 			}
 
-			void Mesh::destroyObject()
+			void OgreMesh::destroyObject()
 			{
 				if (mObject)
 				{
@@ -91,7 +85,7 @@ namespace Engine
 				}
 			}
 
-			Vector3 Mesh::getCenter() const
+			Vector3 OgreMesh::getCenter() const
 			{
 				if (mObject)
 				{

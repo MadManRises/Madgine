@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT OgreAnimationSystem : public System<OgreAnimationSystem, Animation>
+			class OGREMADGINE_EXPORT OgreAnimationSystem : public System<OgreAnimationSystem, OgreAnimation>
 			{
 			public:
 				using System::System;

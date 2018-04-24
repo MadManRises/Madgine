@@ -12,7 +12,7 @@ FolderSources(sources ".." src baseforward.h baselib.h madgineobject.cpp madgine
 	FolderSources(sources src app application.cpp application.h appsettings.h framelistener.h)
 	FolderSources(sources src scene contextmasks.h light.cpp light.h scenemanager.h scenemanagerbase.cpp scenemanagerbase.h scenecomponent.h scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h scenecomponentset.h)
 		FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
-			FolderSources(sources entity components animation.h mesh.h transform.h)
+			FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h transform.cpp transform.h)
 	FolderSources(sources src scripting)
 		FolderSources(sources scripting types globalapicomponentbase.cpp globalapicomponentbase.h globalapicomponent.cpp globalapicomponent.h globalscopebase.cpp globalscopebase.h)
 	FolderSources(sources src serialize toplevelids.h)

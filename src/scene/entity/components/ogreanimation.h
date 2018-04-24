@@ -3,8 +3,8 @@
 
 #include "../systemcomponent.h"
 
-#include "../../../serialize/container/serialized.h"
 #include "../systems/ogreanimationsystem.h"
+#include "animation.h"
 
 namespace Engine
 {
@@ -14,7 +14,7 @@ namespace Engine
 		{
 			class OgreAnimationSystem;
 
-			class OGREMADGINE_EXPORT Animation : public SystemComponent<Animation, OgreAnimationSystem>
+			class OGREMADGINE_EXPORT OgreAnimation : public SystemComponent<OgreAnimation, OgreAnimationSystem, EntityComponentVirtualImpl<OgreAnimation, Animation>>
 			{
 			public:
 				enum LoopSetting
@@ -24,8 +24,8 @@ namespace Engine
 					NO_LOOP
 				};
 
-				Animation(Entity& entity, const Scripting::LuaTable& table);
-				virtual ~Animation();
+				OgreAnimation(Entity& entity, const Scripting::LuaTable& table);
+				virtual ~OgreAnimation();
 
 				void init() override;
 				void finalize() override;
@@ -34,14 +34,15 @@ namespace Engine
 
 				void setAnimation(const std::string& name, LoopSetting loop = DEFAULT);
 				void resetAnimation();
+				std::string getDefaultAnimation() const override;
 				void setDefaultAnimation(const std::string& name);
 				void resetDefaultAnimation();
 				float getAnimationLength(const std::string& name) const;
 
 			private:
-				Mesh* mMesh;
+				OgreMesh* mMesh;
 				Ogre::AnimationState *mState, *mDefaultState;
-				Serialize::Serialized<std::string> mDefaultAnimation;
+				std::string mDefaultAnimation;
 			};
 		}
 	}

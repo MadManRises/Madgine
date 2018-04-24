@@ -6,49 +6,58 @@
 
 namespace Engine
 {
-	API_IMPL(Scene::Entity::Mesh);
 
 	namespace Scene
 	{
 		namespace Entity
 		{
-			ENTITYCOMPONENT_IMPL(Mesh, Mesh);
+			ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerMesh, Mesh);
 
-			Mesh::Mesh(Entity& entity, const Scripting::LuaTable& table) :
-				EntityComponent(entity, table),
+			ServerMesh::ServerMesh(Entity& entity, const Scripting::LuaTable& table) :
+				EntityComponentVirtualImpl<Engine::Scene::Entity::ServerMesh, Engine::Scene::Entity::Mesh>(entity, table),
 				mTransform(nullptr),
 				mMeshName(table.getValue("mesh").as<std::string>())
 			{
 			}
 
-			Mesh::Mesh(Entity& entity, const std::string& meshName) :
-				EntityComponent(entity),
+			ServerMesh::ServerMesh(Entity& entity, const std::string& meshName) :
+				EntityComponentVirtualImpl<Engine::Scene::Entity::ServerMesh, Engine::Scene::Entity::Mesh>(entity),
 				mTransform(nullptr),
 				mMeshName(meshName)
 			{
 			}
 
-			Mesh::~Mesh()
+			ServerMesh::~ServerMesh()
 			{
 			}
 
-			void Mesh::init()
+			void ServerMesh::init()
 			{
 				mTransform = getEntity().getComponent<Transform>();
 			}
 
-			std::string Mesh::getName() const
+			std::string ServerMesh::getName() const
 			{
 				return mMeshName;
 			}
 
-			void Mesh::setVisible(bool b)
+			void ServerMesh::setVisible(bool b)
 			{
 			}
 
-			Vector3 Mesh::getCenter() const
+			bool ServerMesh::isVisible() const
+			{
+				return true;
+			}
+
+			Vector3 ServerMesh::getCenter() const
 			{
 				return mTransform->getPosition();
+			}
+
+			void ServerMesh::setName(const std::string& name)
+			{
+				mMeshName = name;
 			}
 		}
 	}

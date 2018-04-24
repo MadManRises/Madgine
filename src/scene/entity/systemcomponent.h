@@ -8,22 +8,22 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			template <class T, class S, class Base = EntityComponentBase>
-			class SystemComponent : public EntityComponent<T, Base>
+			template <class T, class S, class Base = EntityComponent<T, EntityComponentBase>>
+			class SystemComponent : public Base
 			{
 			public:
-				using EntityComponent<T, Base>::EntityComponent;
+				using Base::Base;
 
 				virtual void init() override
 				{
-					EntityComponent<T, Base>::init();
+					Base::init();
 					getSceneComponent<S>().addComponent(static_cast<T*>(this));
 				}
 
 				virtual void finalize() override
 				{
 					getSceneComponent<S>().removeComponent(static_cast<T*>(this));
-					EntityComponent<T, Base>::finalize();
+					Base::finalize();
 				}
 			};
 		}

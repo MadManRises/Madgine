@@ -12,9 +12,9 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			ENTITYCOMPONENT_IMPL(Animation, Animation);
+			ENTITYCOMPONENTVIRTUALIMPL_IMPL(OgreAnimation, Animation);
 
-			Animation::Animation(Entity& entity, const Scripting::LuaTable& table) :
+			OgreAnimation::OgreAnimation(Entity& entity, const Scripting::LuaTable& table) :
 				SystemComponent(entity, table),
 				mMesh(nullptr),
 				mState(nullptr),
@@ -24,26 +24,26 @@ namespace Engine
 			}
 
 
-			Animation::~Animation()
+			OgreAnimation::~OgreAnimation()
 			{
 			}
 
-			void Animation::init()
+			void OgreAnimation::init()
 			{
-				mMesh = getEntity().getComponent<Mesh>();
-				if (!mDefaultAnimation->empty())
+				mMesh = getEntity().getComponent<OgreMesh>();
+				if (!mDefaultAnimation.empty())
 				{
 					setDefaultAnimation(mDefaultAnimation);
 				}
 				SystemComponent::init();
 			}
 
-			void Animation::finalize()
+			void OgreAnimation::finalize()
 			{
 				SystemComponent::finalize();
 			}
 
-			void Animation::update(float timestep)
+			void OgreAnimation::update(float timestep)
 			{
 				if (mState)
 				{
@@ -55,7 +55,7 @@ namespace Engine
 				}
 			}
 
-			void Animation::resetAnimation()
+			void OgreAnimation::resetAnimation()
 			{
 				if (mState)
 				{
@@ -69,7 +69,12 @@ namespace Engine
 				}
 			}
 
-			void Animation::setAnimation(const std::string& name, LoopSetting loop)
+			std::string OgreAnimation::getDefaultAnimation() const
+			{
+				return mDefaultAnimation;
+			}
+
+			void OgreAnimation::setAnimation(const std::string& name, LoopSetting loop)
 			{
 				if (mState)
 				{
@@ -94,7 +99,7 @@ namespace Engine
 				}
 			}
 
-			void Animation::setDefaultAnimation(const std::string& name)
+			void OgreAnimation::setDefaultAnimation(const std::string& name)
 			{
 				mDefaultAnimation = name;
 				if (mMesh)
@@ -111,16 +116,16 @@ namespace Engine
 				}
 			}
 
-			void Animation::resetDefaultAnimation()
+			void OgreAnimation::resetDefaultAnimation()
 			{
-				mDefaultAnimation->clear();
+				mDefaultAnimation.clear();
 				if (mDefaultState)
 				{
 					mDefaultState = nullptr;
 				}
 			}
 
-			float Animation::getAnimationLength(const std::string& name) const
+			float OgreAnimation::getAnimationLength(const std::string& name) const
 			{
 				if (mMesh)
 				{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "../../../serialize/container/serialized.h"
+#include "mesh.h"
 
 namespace Engine
 {
@@ -9,26 +9,28 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_SERVER_EXPORT Mesh : public EntityComponent<Mesh>
+			class MADGINE_SERVER_EXPORT ServerMesh : public EntityComponentVirtualImpl<ServerMesh, Mesh>
 			{
 			public:
-				Mesh(Entity& entity, const Scripting::LuaTable& table);
-				Mesh(Entity& entity, const std::string& meshName);
-				virtual ~Mesh();
+				ServerMesh(Entity& entity, const Scripting::LuaTable& table);
+				ServerMesh(Entity& entity, const std::string& meshName);
+				virtual ~ServerMesh();
 
 				void init() override;
 
 
 				Vector3 getCenter() const;
 
-				std::string getName() const;
+				virtual std::string getName() const override;
+				virtual void setName(const std::string &name) override;
 
-				void setVisible(bool b);
+				virtual void setVisible(bool b) override;
+				virtual bool isVisible() const override;
 
 
 			private:
 				Transform* mTransform;
-				Serialize::Serialized<std::string> mMeshName;
+				std::string mMeshName;
 			};
 		}
 	}

@@ -61,6 +61,10 @@ namespace Engine
 		{
 			class Entity;
 			class EntityComponentBase;
+
+			class OgreTransform;
+			class OgreMesh;
+			class OgreAnimation;
 		}
 	}
 

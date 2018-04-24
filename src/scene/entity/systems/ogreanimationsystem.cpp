@@ -14,7 +14,7 @@ namespace Engine
 		{
 			void OgreAnimationSystem::update(float timeSinceLastFrame)
 			{
-				for (Animation* anim : components())
+				for (OgreAnimation* anim : components())
 				{
 					anim->update(timeSinceLastFrame);
 				}

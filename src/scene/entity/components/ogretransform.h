@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entitycomponent.h"
+#include "transform.h"
 
 #include "../../../serialize/container/serializedmapper.h"
 
@@ -10,13 +10,13 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT Transform : public EntityComponent<Transform>
+			class OGREMADGINE_EXPORT OgreTransform : public EntityComponentVirtualImpl<OgreTransform, Transform>
 			{
 			public:
 				static Entity* entityFromNode(Ogre::SceneNode* node);
 
-				Transform(Entity& entity, const Scripting::LuaTable& table = {});
-				virtual ~Transform();
+				OgreTransform(Entity& entity, const Scripting::LuaTable& table = {});
+				virtual ~OgreTransform();
 
 				void init() override;
 				void finalize() override;
