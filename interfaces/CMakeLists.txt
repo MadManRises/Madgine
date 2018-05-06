@@ -39,7 +39,7 @@ if (WIN32)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-	target_link_libraries (Interfaces PRIVATE stdc++fs)
+	target_link_libraries (Interfaces PRIVATE stdc++fs dl)
 endif (CMAKE_COMPILER_IS_GNUCXX)
  
 if (BUILD_TESTING)
