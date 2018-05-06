@@ -19,7 +19,7 @@ namespace Engine
 				mMesh(nullptr),
 				mState(nullptr),
 				mDefaultState(nullptr),
-				mDefaultAnimation(table.getValue("default").asDefault<std::string>(""))
+				mDefaultAnimation(table["default"].asDefault<std::string>(""))
 			{
 			}
 

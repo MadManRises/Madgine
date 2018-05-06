@@ -14,7 +14,7 @@ namespace Engine
 
 			Animation::Animation(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponent(entity, table),
-				mDefaultAnimation(table.getValue("default").asDefault<std::string>(""))
+				mDefaultAnimation(table["default"].asDefault<std::string>(""))
 			{
 			}
 

@@ -1,11 +1,14 @@
 #pragma once
 
+#include "luatablefieldaccessor.h"
+
 namespace Engine
 {
 	namespace Scripting
 	{
 
 		class LuaTableInstance;
+		class LuaTableFieldAccessor;
 
 		class INTERFACES_EXPORT LuaTable
 		{
@@ -28,6 +31,10 @@ namespace Engine
 			void push(lua_State* state = nullptr) const;
 			void clear();
 
+			LuaTableFieldAccessor operator[](const std::string &name);
+			LuaTableFieldAccessor operator[](const char *name);
+			ValueType operator[](const std::string &name) const;
+			ValueType operator[](const char *name) const;
 			operator bool() const;
 
 			LuaTable createTable(lua_State* state = nullptr);

@@ -20,7 +20,7 @@ namespace Engine
 			mTransform(nullptr),
 			mObject(nullptr)
 			{
-				setName(table.getValue("mesh").asDefault<std::string>(""));
+				setName(table["mesh"].asDefault<std::string>(""));
 			}
 
 

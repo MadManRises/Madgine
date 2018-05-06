@@ -86,8 +86,8 @@ namespace Engine
 
 			mGlobal = LuaTable::global(mState);
 
-			tempMetatable.setValue("__index", ValueType(mGlobal));
-			tempMetatable.setValue("__newindex", ValueType(mGlobal));
+			tempMetatable["__index"] = ValueType(mGlobal);
+			tempMetatable["__newindex"] = ValueType(mGlobal);
 
 			mEnv.setMetatable(tempMetatable);
 		}

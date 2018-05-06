@@ -58,7 +58,7 @@ namespace Engine
 				setup();
 				if (!behaviour.empty())
 				{
-					ValueType table = sceneMgr.app().table().getValue(behaviour);
+					ValueType table = sceneMgr.app().table()[behaviour];
 					if (table.is<Scripting::LuaTable>())
 					{
 						for (const std::pair<std::string, ValueType>& p : table.as<Scripting::LuaTable>())

@@ -32,6 +32,22 @@ namespace Engine
 			mInstance.reset();
 		}
 
+		LuaTableFieldAccessor LuaTable::operator[](const std::string &name) {
+			return LuaTableFieldAccessor(mInstance, name);
+		}
+
+		LuaTableFieldAccessor LuaTable::operator[](const char *name) {
+			return LuaTableFieldAccessor(mInstance, name);
+		}
+
+		ValueType LuaTable::operator[](const std::string &name) const {
+			return mInstance->getValue(name);
+		}
+
+		ValueType LuaTable::operator[](const char *name) const {
+			return mInstance->getValue(name);
+		}
+
 		LuaTable::operator bool() const
 		{
 			return mInstance.operator bool();
