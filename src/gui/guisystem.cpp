@@ -1,4 +1,4 @@
-#include "../ogrelib.h"
+#include "../clientlib.h"
 
 #include "guisystem.h"
 #include "windows/windowcontainer.h"

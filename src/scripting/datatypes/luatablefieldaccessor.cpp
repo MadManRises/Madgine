@@ -19,7 +19,7 @@ namespace Engine
 		}
 
 		LuaTableFieldAccessor::operator ValueType(){
-			return mInstance->getValue(mName);
+			return mInstance ? mInstance->getValue(mName) : ValueType{};
 		}
 
 	}

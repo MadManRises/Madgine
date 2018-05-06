@@ -1,4 +1,4 @@
-#include "../ogrelib.h"
+#include "../clientlib.h"
 #include "gamehandler.h"
 #include "uimanager.h"
 #include "../gui/guisystem.h"

@@ -138,23 +138,36 @@ namespace Engine
 		std::vector<Base*> mSortedComponents;
 	};
 
-
 	template <class Base, class... _Ty>
 	class MADGINE_BASE_EXPORT BaseCreatorStore
 	{
 	protected:
-		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents();
+		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
+			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
+			return dummy;
+		}
 	};
 
-	#define BASE_COLLECTOR_IMPL(Collector) template<> \
-	DLL_EXPORT std::vector<Collector::F>& Collector::Store::sComponents() \
-		{ \
-			static std::vector<Collector::F> dummy; \
-			return dummy; \
-		}	
+#ifdef PLUGIN_BUILD
 
+	template <class Base, class... _Ty>
+	class LocalCreatorStore
+	{
+	protected:
+		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
+			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
+			return dummy;
+		}
+	};
+
+	template <class Base, template <class...> class Container = std::vector, class... _Ty>
+	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, LocalCreatorStore<Base, _Ty...>, Container, _Ty...>;
+
+#else
 
 	template <class Base, template <class...> class Container = std::vector, class... _Ty>
 	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>;
+
+#endif
 
 }

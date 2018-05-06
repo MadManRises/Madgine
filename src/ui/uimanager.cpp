@@ -1,4 +1,4 @@
-#include "../ogrelib.h"
+#include "../clientlib.h"
 
 #include "uimanager.h"
 
@@ -17,8 +17,8 @@ namespace Engine
 
 
 #ifdef _MSC_VER
-	template class OGREMADGINE_EXPORT UI::GuiHandlerCollector;
-	template class OGREMADGINE_EXPORT UI::GameHandlerCollector;
+	template class MADGINE_CLIENT_EXPORT UI::GuiHandlerCollector;
+	template class MADGINE_CLIENT_EXPORT UI::GameHandlerCollector;
 #endif
 
 	namespace UI

@@ -10,7 +10,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT OgreTransform : public EntityComponentVirtualImpl<OgreTransform, Transform>
+			class MADGINE_CLIENT_EXPORT OgreTransform : public EntityComponentVirtualImpl<OgreTransform, Transform>
 			{
 			public:
 				static Entity* entityFromNode(Ogre::SceneNode* node);

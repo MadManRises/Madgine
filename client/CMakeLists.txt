@@ -6,17 +6,16 @@ cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0057 NEW)
 
 
-Project(OgreMadgine)
-
+Project(Client)      
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
-  "${OgreMadgine_SOURCE_DIR}/cmake"
-)                                                           
+  "${Client_SOURCE_DIR}/../ogre/cmake"
+)       
 
 set(sources "")
 FolderSources(sources "" "..")
-FolderSources(sources ".." src ogreforward.h ogrelib.h)
+FolderSources(sources ".." src clientforward.h clientlib.h)
 	FolderSources(sources src app ogreapplication.cpp ogreapplication.h ogreappsettings.h configset.cpp configset.h)
 	FolderSources(sources src database messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources src gui guievents.h guisystem.cpp guisystem.h windownames.h)
@@ -38,17 +37,23 @@ FolderSources(sources ".." src ogreforward.h ogrelib.h)
 
 
 
-add_library(OgreMadgine SHARED ${sources} madginelib.cpp)
+add_library(Client SHARED ${sources} clientlib.cpp)
 
-add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
+add_precompiled_header(Client ../src/clientlib.h FORCEINCLUDE SOURCE_CXX clientlib.cpp)
 
-target_link_libraries(OgreMadgine PUBLIC Base)
+target_link_libraries(Client PUBLIC Base)
 
-target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
+target_compile_definitions(Client INTERFACE MADGINE_CLIENT_BUILD)
+
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
+
+
 
 find_package(OGRE REQUIRED)
 if (OGRE_FOUND)
-  target_include_directories(OgreMadgine PUBLIC ${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
+  target_include_directories(Client PUBLIC ${OGRE_INCLUDE_DIRS} ${OGRE_Terrain_INCLUDE_DIRS} ${OGRE_RTShaderSystem_INCLUDE_DIRS})
   
   set(buffered "")
   foreach(lib ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
@@ -56,13 +61,13 @@ if (OGRE_FOUND)
 		set(buffered ${lib})
     else()
 	  if (IS_ABSOLUTE ${lib})
-	    target_link_libraries (OgreMadgine PUBLIC ${buffered} ${lib})
+	    target_link_libraries (Client PUBLIC ${buffered} ${lib})
 	  else ()
         find_library(${lib}_path ${lib} HINTS ${OGRE_LIBRARY_DIRS})
 	    if (NOT ${lib}_path)
-	      target_link_libraries(OgreMadgine PUBLIC ${buffered} ${lib})
+	      target_link_libraries(Client PUBLIC ${buffered} ${lib})
 	    else ()
-	      target_link_libraries (OgreMadgine PUBLIC ${buffered} ${${lib}_path})
+	      target_link_libraries (Client PUBLIC ${buffered} ${${lib}_path})
 	    endif()
 	  endif()
 	  set(buffered "")
@@ -88,11 +93,11 @@ else()
   if (NOT "${GuiSystem}" IN_LIST GuiSystems)
 	  MESSAGE(SEND_ERROR "No valid Gui-System selected!")
   else()
-    target_include_directories(OgreMadgine PUBLIC ${${GuiSystem}_INCLUDE_DIRS})
+    target_include_directories(Client PUBLIC ${${GuiSystem}_INCLUDE_DIRS})
     #foreach(lib ${${GuiSystem}_LIBRARIES})
 	#  target_link_libraries (OgreMadgine PRIVATE ${lib})
     #endforeach()
-	target_link_libraries(OgreMadgine PUBLIC ${${GuiSystem}_LIBRARIES})
+	target_link_libraries(Client PUBLIC ${${GuiSystem}_LIBRARIES})
   endif()
 
 endif()
@@ -116,23 +121,19 @@ else()
   if (NOT "${InputSystem}" IN_LIST InputSystems)
     MESSAGE(SEND_ERROR "No valid Input-System selected!")
   else()
-    target_include_directories(OgreMadgine PUBLIC ${${InputSystem}_INCLUDE_DIRS})
+    target_include_directories(Client PUBLIC ${${InputSystem}_INCLUDE_DIRS})
 	message(STATUS ${${InputSystem}_LIBRARIES})
 	set(buffered "")
     foreach(lib ${${InputSystem}_LIBRARIES})
 	  if (lib STREQUAL "optimized" OR lib STREQUAL "debug" OR lib STREQUAL "general")
 		set(buffered ${lib})
 	  else()
-		target_link_libraries (OgreMadgine PRIVATE ${buffered} ${lib})
+		target_link_libraries (Client PRIVATE ${buffered} ${lib})
 		set(buffered "")
 	  endif()
     endforeach()
   endif()
 endif ()
 
-if (BUILD_TESTING)
-	add_subdirectory(test)
-endif()
 
-
-install_to_workspace(Madgine OgreMadgine)
+install_to_workspace(Madgine Client)

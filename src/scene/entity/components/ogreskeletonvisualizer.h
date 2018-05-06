@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer>
+			class MADGINE_CLIENT_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer>
 			{
 			public:
 				OgreSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table = {});

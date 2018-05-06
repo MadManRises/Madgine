@@ -8,7 +8,7 @@ namespace Engine
 {
 	namespace Resources
 	{
-		class OGREMADGINE_EXPORT ResourceLoader : public Util::Process, public Ogre::ResourceGroupListener,
+		class MADGINE_CLIENT_EXPORT ResourceLoader : public Util::Process, public Ogre::ResourceGroupListener,
 		                                          public Ogre::GeneralAllocatedObject
 		{
 		public:

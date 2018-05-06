@@ -38,6 +38,7 @@ add_subdirectory(interfaces)
 add_subdirectory(base)
 if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 	add_subdirectory(client)
+	add_subdirectory(ogre)
 endif ()
 add_subdirectory(server)
 

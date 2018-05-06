@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace Resources
 	{
-		class OGREMADGINE_EXPORT OgreTexturePtr : public Ogre::TexturePtr
+		class MADGINE_CLIENT_EXPORT OgreTexturePtr : public Ogre::TexturePtr
 		{
 		public:
 

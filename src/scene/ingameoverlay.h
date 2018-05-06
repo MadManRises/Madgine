@@ -4,7 +4,7 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class OGREMADGINE_EXPORT IngameOverlay : public Ogre::ManualObject, public Ogre::RenderTargetListener
+		class MADGINE_CLIENT_EXPORT IngameOverlay : public Ogre::ManualObject, public Ogre::RenderTargetListener
 		{
 		public:
 			IngameOverlay(const std::string& name);

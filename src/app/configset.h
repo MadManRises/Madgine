@@ -11,7 +11,7 @@ namespace Engine
 		/**
 		 *
 		 */
-		class OGREMADGINE_EXPORT ConfigSet : public Ogre::Singleton<ConfigSet>, public Ogre::GeneralAllocatedObject
+		class MADGINE_CLIENT_EXPORT ConfigSet : public Ogre::Singleton<ConfigSet>, public Ogre::GeneralAllocatedObject
 		{
 		public:
 			/**

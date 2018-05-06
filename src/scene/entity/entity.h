@@ -103,6 +103,22 @@ namespace Engine
 
 				EntityComponentBase* addComponentImpl(std::unique_ptr<EntityComponentBase>&& component);
 
+#ifdef PLUGIN_BUILD
+				struct LocalComponentStore {
+					static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName() {
+						static std::map<std::string, ComponentBuilder> dummy;
+						return dummy;
+					}
+				};
+
+#define PLUGABLE_COMPONENT LocalComponentStore::
+
+#else
+
+#define PLUGABLE_COMPONENT 
+
+#endif
+
 				template <class T>
 				class ComponentRegistrator
 				{
@@ -110,15 +126,15 @@ namespace Engine
 					ComponentRegistrator()
 					{
 						const std::string name = T::componentName();
-						assert(sRegisteredComponentsByName().find(name) == sRegisteredComponentsByName().end());
-						sRegisteredComponentsByName()[name] = &createComponent_t<T>;
+						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName().find(name) == PLUGABLE_COMPONENT sRegisteredComponentsByName().end());
+						PLUGABLE_COMPONENT sRegisteredComponentsByName()[name] = &createComponent_t<T>;
 					}
 
 					~ComponentRegistrator()
 					{
 						const std::string name = T::componentName();
-						assert(sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end());
-						sRegisteredComponentsByName().erase(name);
+						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName().find(name) != PLUGABLE_COMPONENT sRegisteredComponentsByName().end());
+						PLUGABLE_COMPONENT sRegisteredComponentsByName().erase(name);
 					}
 				};
 

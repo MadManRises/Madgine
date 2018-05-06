@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class OGREMADGINE_EXPORT Window
+		class MADGINE_CLIENT_EXPORT Window
 		{
 		public:
 			Window(WindowContainer* w);

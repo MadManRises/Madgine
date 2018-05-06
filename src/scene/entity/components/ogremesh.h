@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class OGREMADGINE_EXPORT OgreMesh : public EntityComponentVirtualImpl<OgreMesh, Mesh>
+			class MADGINE_CLIENT_EXPORT OgreMesh : public EntityComponentVirtualImpl<OgreMesh, Mesh>
 			{
 			public:
 				OgreMesh(Entity& entity, const Scripting::LuaTable& table);

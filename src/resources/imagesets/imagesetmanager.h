@@ -7,7 +7,7 @@ namespace Engine
 	{
 		namespace ImageSets
 		{
-			class OGREMADGINE_EXPORT ImageSetManager : public Ogre::Singleton<ImageSetManager>,
+			class MADGINE_CLIENT_EXPORT ImageSetManager : public Ogre::Singleton<ImageSetManager>,
 			                                           public Ogre::GeneralAllocatedObject
 			{
 			public:

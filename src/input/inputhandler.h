@@ -4,7 +4,7 @@ namespace Engine
 {
 	namespace Input
 	{
-		class OGREMADGINE_EXPORT InputHandler
+		class MADGINE_CLIENT_EXPORT InputHandler
 		{
 		public:
 			InputHandler();

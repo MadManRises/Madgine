@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace UI
 	{
-		class OGREMADGINE_EXPORT GameHandlerBase : public Handler
+		class MADGINE_CLIENT_EXPORT GameHandlerBase : public Handler
 		{
 		public:
 			GameHandlerBase(UIManager &ui, const std::string& windowName, Scene::ContextMask context = Scene::ContextMask::SceneContext);

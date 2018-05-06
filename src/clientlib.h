@@ -6,10 +6,10 @@
 #pragma warning(push, 0)
 #endif
 
-#if defined(OgreMadgine_EXPORTS)
-#define OGREMADGINE_EXPORT DLL_EXPORT
+#if defined(Client_EXPORTS)
+#define MADGINE_CLIENT_EXPORT DLL_EXPORT
 #else
-#define OGREMADGINE_EXPORT DLL_IMPORT
+#define MADGINE_CLIENT_EXPORT DLL_IMPORT
 #endif
 
 #include "baselib.h"
@@ -24,7 +24,7 @@
 #include <chrono>
 #include <future>
 
-#include "ogreforward.h"
+#include "clientforward.h"
 
 /*#if !defined(_HAS_TR1_NAMESPACE)
 #include <unordered_map>

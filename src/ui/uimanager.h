@@ -10,7 +10,7 @@ namespace Engine
 {
 	namespace UI
 	{
-		class OGREMADGINE_EXPORT UIManager : public Scripting::Scope<UIManager>,
+		class MADGINE_CLIENT_EXPORT UIManager : public Scripting::Scope<UIManager>,
 		                                     public MadgineObject
 		{
 		public:

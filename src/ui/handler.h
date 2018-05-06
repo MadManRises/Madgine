@@ -10,7 +10,7 @@ namespace Engine
 {
 	namespace UI
 	{
-		struct OGREMADGINE_EXPORT WindowDescriber
+		struct MADGINE_CLIENT_EXPORT WindowDescriber
 		{
 			WindowDescriber(const std::string& windowName,
 			                GUI::Window** var,
@@ -30,7 +30,7 @@ namespace Engine
 		};
 
 
-		class OGREMADGINE_EXPORT Handler : public MadgineObject, public Scripting::ScopeBase
+		class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public Scripting::ScopeBase
 		{
 		public:
 			Handler(UIManager &ui, const std::string& windowName);

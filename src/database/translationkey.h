@@ -5,7 +5,7 @@ namespace Engine
 {
 	namespace Database
 	{
-		class OGREMADGINE_EXPORT TranslationKey
+		class MADGINE_CLIENT_EXPORT TranslationKey
 		{
 		public:
 			TranslationKey(const std::string& key);

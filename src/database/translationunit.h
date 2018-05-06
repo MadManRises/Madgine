@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace Database
 	{
-		std::string OGREMADGINE_EXPORT tr(const std::string& key);
+		std::string MADGINE_CLIENT_EXPORT tr(const std::string& key);
 
 		class TranslationUnit : public Ogre::ScriptLoader,
 		                        public Singleton<TranslationUnit>

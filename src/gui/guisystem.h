@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class OGREMADGINE_EXPORT GUISystem :
+		class MADGINE_CLIENT_EXPORT GUISystem :
 			public MadgineObject,
 			public Ogre::GeneralAllocatedObject,
 			public Ogre::WindowEventListener,

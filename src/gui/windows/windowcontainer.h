@@ -9,7 +9,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class OGREMADGINE_EXPORT WindowContainer
+		class MADGINE_CLIENT_EXPORT WindowContainer
 		{
 		public:
 

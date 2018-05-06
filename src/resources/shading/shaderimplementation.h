@@ -142,6 +142,6 @@ namespace Engine
 	} // namespace Resources
 
 	/*#ifdef _MSC_VER
-	template OGREMADGINE_EXPORT class UniqueComponentCollector<Resources::Shading::ShaderFactoryBase>;
+	template MADGINE_CLIENT_EXPORT class UniqueComponentCollector<Resources::Shading::ShaderFactoryBase>;
 	#endif*/
 } // namespace Core

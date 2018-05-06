@@ -15,7 +15,7 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class OGREMADGINE_EXPORT OgreSceneManager :
+		class MADGINE_CLIENT_EXPORT OgreSceneManager :
 			public SceneManager<OgreSceneManager>
 		{
 		public:

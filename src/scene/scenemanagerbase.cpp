@@ -18,8 +18,6 @@
 namespace Engine
 {
 
-	BASE_COLLECTOR_IMPL(Scene::SceneComponentCollector);
-
 	namespace Scene
 	{
 		SceneManagerBase::SceneManagerBase(App::Application &app) :

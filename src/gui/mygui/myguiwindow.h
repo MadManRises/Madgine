@@ -19,7 +19,7 @@ namespace Engine
 		{
 			class MyGUILauncher;
 
-			class OGREMADGINE_EXPORT MyGUIWindow :
+			class MADGINE_CLIENT_EXPORT MyGUIWindow :
 				public WindowContainer
 			{
 			public:

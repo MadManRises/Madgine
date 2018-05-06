@@ -14,7 +14,7 @@ FolderSources(sources ".." src baseforward.h baselib.h madgineobject.cpp madgine
 		FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 			FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h transform.cpp transform.h)
 	FolderSources(sources src scripting)
-		FolderSources(sources scripting types globalapicomponentbase.cpp globalapicomponentbase.h globalapicomponent.cpp globalapicomponent.h globalscopebase.cpp globalscopebase.h)
+		FolderSources(sources scripting types globalapicomponentbase.cpp globalapicomponentbase.h globalapicomponent.h globalscopebase.cpp globalscopebase.h)
 	FolderSources(sources src serialize toplevelids.h)
 	FolderSources(sources src util processstats.cpp processstats.h profile.cpp profile.h profiler.cpp profiler.h)
 

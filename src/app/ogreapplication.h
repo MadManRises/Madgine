@@ -18,7 +18,7 @@ namespace Engine
 		 * The Application can also be paused (e.g. in a multithreaded environment).
 		 *
 		 */
-		class OGREMADGINE_EXPORT OgreApplication : public Scripting::LuaState, public Application,
+		class MADGINE_CLIENT_EXPORT OgreApplication : public Scripting::LuaState, public Application,
 		                                           public Ogre::FrameListener
 		{
 		public:

@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class OGREMADGINE_EXPORT Button : public Window
+		class MADGINE_CLIENT_EXPORT Button : public Window
 		{
 		public:
 			using Window::Window;

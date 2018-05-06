@@ -4,7 +4,7 @@ namespace Engine
 {
 	namespace Math
 	{
-		class OGREMADGINE_EXPORT Bounds
+		class MADGINE_CLIENT_EXPORT Bounds
 		{
 		public:
 			Bounds(float left = 0.f, float bottom = 0.f, float right = 0.f, float top = 0.f);

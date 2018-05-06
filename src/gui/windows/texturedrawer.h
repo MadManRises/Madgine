@@ -10,7 +10,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class OGREMADGINE_EXPORT TextureDrawer : public Window
+		class MADGINE_CLIENT_EXPORT TextureDrawer : public Window
 		{
 		public:
 			TextureDrawer(WindowContainer* w) :

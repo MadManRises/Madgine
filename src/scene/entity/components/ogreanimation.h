@@ -14,7 +14,7 @@ namespace Engine
 		{
 			class OgreAnimationSystem;
 
-			class OGREMADGINE_EXPORT OgreAnimation : public SystemComponent<OgreAnimation, OgreAnimationSystem, EntityComponentVirtualImpl<OgreAnimation, Animation>>
+			class MADGINE_CLIENT_EXPORT OgreAnimation : public SystemComponent<OgreAnimation, OgreAnimationSystem, EntityComponentVirtualImpl<OgreAnimation, Animation>>
 			{
 			public:
 				enum LoopSetting

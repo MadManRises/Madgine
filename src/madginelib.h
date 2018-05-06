@@ -6,7 +6,7 @@
 #elif defined(MADGINE_SERVER_BUILD)
 #include "serverlib.h"
 #elif defined(MADGINE_CLIENT_BUILD)
-#include "ogrelib.h"
+#include "clientlib.h"
 #else
 #error "No config has been selected!"
 #endif

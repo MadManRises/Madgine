@@ -1,4 +1,4 @@
-#include "../../ogrelib.h"
+#include "../../clientlib.h"
 
 #include "myguicheckbox.h"
 #include "myguiwindow.h"

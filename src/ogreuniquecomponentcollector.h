@@ -5,7 +5,7 @@
 namespace Engine
 {
 	template <class Base, class... _Ty>
-	class OGREMADGINE_EXPORT OgreCreatorStore
+	class MADGINE_CLIENT_EXPORT OgreCreatorStore
 	{
 	protected:
 		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents()
@@ -15,7 +15,17 @@ namespace Engine
 		}
 	};
 
+
+#ifdef PLUGIN_BUILD
+
+	template <class Base, template <class...> class Container = std::vector, class... _Ty>
+	using OgreUniqueComponentCollector = UniqueComponentCollector<Base, LocalCreatorStore<Base, _Ty...>, Container, _Ty...>;
+
+#else
+
 	template <class Base, template <class...> class Container = std::vector, class... _Ty>
 	using OgreUniqueComponentCollector = UniqueComponentCollector<Base, OgreCreatorStore<Base, _Ty...>, Container, _Ty...>;
+
+#endif
 
 }

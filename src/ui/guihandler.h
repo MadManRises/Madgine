@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace UI
 	{
-		class OGREMADGINE_EXPORT GuiHandlerBase : public Handler
+		class MADGINE_CLIENT_EXPORT GuiHandlerBase : public Handler
 		{
 		public:
 			enum class WindowType

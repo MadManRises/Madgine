@@ -41,11 +41,11 @@ namespace Engine
 		}
 
 		ValueType LuaTable::operator[](const std::string &name) const {
-			return mInstance->getValue(name);
+			return getValue(name);
 		}
 
 		ValueType LuaTable::operator[](const char *name) const {
-			return mInstance->getValue(name);
+			return getValue(name);
 		}
 
 		LuaTable::operator bool() const
