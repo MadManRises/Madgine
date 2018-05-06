@@ -18,7 +18,7 @@ if (UNIX)
 	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
 endif()
 
-set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
+set(BUILD_CLIENT TRUE CACHE BOOL "Build Client Code")
 
 set(CMAKE_MODULE_PATH
 	"${CMAKE_MODULE_PATH}"
@@ -36,8 +36,8 @@ include(Testing)
 
 add_subdirectory(interfaces)
 add_subdirectory(base)
-if (BUILD_OGRE AND NOT CONFIG_BUILD)
-	add_subdirectory(ogre)
+if (BUILD_CLIENT AND NOT CONFIG_BUILD)
+	add_subdirectory(client)
 endif ()
 add_subdirectory(server)
 
