@@ -12,6 +12,9 @@ namespace Engine
 
 			bool isLoaded();
 			bool load();
+			bool unload();
+
+			void *getSymbol(const std::string &name);
 
 		private:
 			void *mModule;

@@ -6,13 +6,8 @@ namespace Engine
 {
 	namespace Plugins
 	{
-		PluginManager::PluginManager(const std::string& selfDllName)
+		PluginManager::PluginManager()
 		{
-			if (!selfDllName.empty())
-			{
-				assert(mPlugins.try_emplace(selfDllName, selfDllName).first->second.load());
-			}
-			assert(mPlugins.try_emplace("Self", "").first->second.load());
 		}
 	}
 }

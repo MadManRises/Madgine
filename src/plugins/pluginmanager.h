@@ -9,7 +9,7 @@ namespace Engine
 		class INTERFACES_EXPORT PluginManager
 		{
 		public:
-			PluginManager(const std::string &selfDllName = "");
+			PluginManager();
 
 		private:
 			std::map<std::string, Plugin> mPlugins;
