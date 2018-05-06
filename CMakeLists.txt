@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.3)
 cmake_policy(SET CMP0048 NEW)
 
 set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_definitions(-D_HAS_TR1_NAMESPACE)
 
