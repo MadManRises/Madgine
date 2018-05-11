@@ -36,6 +36,7 @@ namespace Engine
 			char s[30];
 			strftime(s, 28, "%d/%m/%Y - %H:%M : ", p);
 			std::cout << s << msg << std::endl;
+			Log::log(msg, lvl, traceBack);
 		}
 
 		std::string StandardLog::getName()

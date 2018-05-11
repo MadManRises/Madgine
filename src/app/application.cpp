@@ -11,6 +11,7 @@
 
 #include "../scripting/types/luastate.h"
 
+#include "../util/standardlog.h"
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -33,7 +34,9 @@ namespace Engine
 
 		void Application::setup(const AppSettings& settings)
 		{
-			
+			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
+			Util::UtilMethods::setup(mLog.get());
+
 		}
 
 		bool Application::init()
@@ -193,6 +196,11 @@ namespace Engine
 				update(timeSinceLastFrame) &&
 				sendFrameEnded(timeSinceLastFrame);
 		}
+
+		Util::Log &Application::log() {
+			return *mLog;
+		}
+
 	}
 
 #ifdef _MSC_VER

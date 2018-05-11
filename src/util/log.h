@@ -5,12 +5,19 @@ namespace Engine
 	namespace Util
 	{
 
-		class Log
+		class INTERFACES_EXPORT Log
 		{
 		public:
 			virtual ~Log() = default;
-			virtual void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {}) = 0;
+			virtual void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {});
 			virtual std::string getName() = 0;
+
+			void addListener(LogListener* listener);
+			void removeListener(LogListener* listener);
+
+		private:
+			std::list<LogListener*> mListeners;
+
 		};
 		
 	}

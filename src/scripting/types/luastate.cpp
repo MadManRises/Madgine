@@ -97,6 +97,7 @@ namespace Engine
 			mGlobal.clear();
 			mRegistry.clear();
 			mEnv.clear();
+			mThreads.clear();
 			lua_close(mState);
 
 			sSingleton = nullptr;

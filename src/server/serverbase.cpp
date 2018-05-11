@@ -50,7 +50,7 @@ namespace Engine
 			return 0;
 		}
 
-		Util::StandardLog& ServerBase::getLog()
+		Util::ServerLog& ServerBase::log()
 		{
 			return mLog;
 		}

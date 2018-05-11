@@ -44,7 +44,7 @@ namespace Engine
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(Scripting::LuaState *state);
+			Application(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr);
 			
 			/**
 			 * \brief Deletes all objects created by the Application.
@@ -135,6 +135,8 @@ namespace Engine
 
 			virtual Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t) override;
 
+			Util::Log &log();
+
 		protected:
 			virtual void clear();
 
@@ -151,6 +153,8 @@ namespace Engine
 			SignalSlot::ConnectionManager mConnectionManager;
 
 			Scripting::GlobalAPICollector mGlobalAPIs;
+
+			std::unique_ptr<Util::StandardLog> mLog;
 
 			float mTimeBank;
 

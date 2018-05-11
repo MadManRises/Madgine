@@ -21,7 +21,7 @@ namespace Engine
 
 			int run();
 
-			Util::StandardLog& getLog();
+			Util::ServerLog& log();
 
 			const std::string& scriptsFolder();
 

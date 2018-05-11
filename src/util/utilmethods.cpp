@@ -11,63 +11,65 @@ namespace Engine
 {
 	namespace Util
 	{
-		std::list<LogListener*> UtilMethods::sListeners;
-		std::list<TraceBack> UtilMethods::sCurrentTraceBack;
-		std::list<TraceBack> UtilMethods::sExceptionTraceBack;
-		std::list<TraceBack> UtilMethods::sTraceBack;
-		Log* UtilMethods::sLog = nullptr;
-		bool UtilMethods::sLogToStdCout = true;
+
+		thread_local std::list<TraceBack> UtilMethods::__currentLogHolder::sCurrentTraceBack;
+		thread_local std::list<TraceBack> UtilMethods::__currentLogHolder::sExceptionTraceBack;
+		thread_local std::list<TraceBack> UtilMethods::__currentLogHolder::sTraceBack;
+		thread_local Log* UtilMethods::__currentLogHolder::sLog = nullptr;
+		thread_local bool UtilMethods::__currentLogHolder::sLogToStdCout = true;
+
+		void UtilMethods::setup(Log* log)
+		{
+			__currentLogHolder::sLog = log;
+		}
+
 
 		void UtilMethods::setup(Log* log, bool logToStdCout)
 		{
-			sLog = log;
-			sLogToStdCout = logToStdCout;
+			__currentLogHolder::sLog = log;
+			__currentLogHolder::sLogToStdCout = logToStdCout;
 		}
 
 		void UtilMethods::log(const std::string& msg, MessageType level, const std::list<TraceBack>& traceBack)
 		{
-			sCurrentTraceBack = traceBack.empty() ? sTraceBack : traceBack;
-			if (sLog)
-				sLog->log(msg.c_str(), level, sCurrentTraceBack);
-			else if (sLogToStdCout)
+			__currentLogHolder::sCurrentTraceBack = traceBack.empty() ? __currentLogHolder::sTraceBack : traceBack;
+			if (__currentLogHolder::sLog)
+				__currentLogHolder::sLog->log(msg.c_str(), level, __currentLogHolder::sCurrentTraceBack);
+			else if (__currentLogHolder::sLogToStdCout)
 				std::cout << msg << std::endl;
-			for (LogListener* listener : sListeners)
-			{
-				listener->messageLogged(msg, level, traceBack, sLog ? sLog->getName() : "Stdout");
-			}
 		}
 
 		void UtilMethods::pushTraceBack(const TraceBack& t)
 		{
-			sTraceBack.push_back(t);
+			__currentLogHolder::sTraceBack.push_back(t);
 		}
 
 		void UtilMethods::logException(const std::exception& e)
 		{
-			log(e.what(), ERROR_TYPE, sExceptionTraceBack);
-			sExceptionTraceBack.clear();
+			log(e.what(), ERROR_TYPE, __currentLogHolder::sExceptionTraceBack);
+			__currentLogHolder::sExceptionTraceBack.clear();
 		}
 
 		void UtilMethods::popTraceBack()
 		{
-			sTraceBack.pop_back();
+			__currentLogHolder::sTraceBack.pop_back();
 		}
 
 		void UtilMethods::registerException(const TraceBack& t)
 		{
 			registerException();
-			if (sExceptionTraceBack.empty()
-				|| sExceptionTraceBack.back().mFile != t.mFile
-				|| sExceptionTraceBack.back().mFunction != t.mFunction
-				|| sExceptionTraceBack.back().mLineNr != -1)
-				sExceptionTraceBack.push_back(t);
+			if (__currentLogHolder::sExceptionTraceBack.empty()
+				|| __currentLogHolder::sExceptionTraceBack.back().mFile != t.mFile
+				|| __currentLogHolder::sExceptionTraceBack.back().mFunction != t.mFunction
+				|| __currentLogHolder::sExceptionTraceBack.back().mLineNr != -1)
+				__currentLogHolder::sExceptionTraceBack.push_back(t);
 			else
-				sExceptionTraceBack.back().mLineNr = t.mLineNr;
+				__currentLogHolder::sExceptionTraceBack.back().mLineNr = t.mLineNr;
 		}
 
 		void UtilMethods::registerException()
 		{
-			sExceptionTraceBack = sTraceBack;
+			__currentLogHolder::sExceptionTraceBack = __currentLogHolder::sTraceBack;
 		}
 
 		void UtilMethods::abort()
@@ -77,17 +79,8 @@ namespace Engine
 
 		const std::list<TraceBack>& UtilMethods::traceBack()
 		{
-			return sCurrentTraceBack;
+			return __currentLogHolder::sCurrentTraceBack;
 		}
 
-		void UtilMethods::addListener(LogListener* listener)
-		{
-			sListeners.push_back(listener);
-		}
-
-		void UtilMethods::removeListener(LogListener* listener)
-		{
-			sListeners.remove(listener);
-		}
 	}
 }

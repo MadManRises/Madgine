@@ -11,7 +11,8 @@ namespace Engine
 		class INTERFACES_EXPORT UtilMethods
 		{
 		public:
-			static void setup(Log* log = nullptr, bool logToStdCout = true);
+			static void setup(Log* log = nullptr);
+			static void setup(Log* log, bool logToStdOut);
 
 			static void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {});
 
@@ -40,18 +41,15 @@ namespace Engine
 
 			static const std::list<TraceBack>& traceBack();
 
-			static void addListener(LogListener* listener);
-			static void removeListener(LogListener* listener);
-
 
 		private:
-			static std::list<TraceBack> sCurrentTraceBack;
-			static std::list<TraceBack> sTraceBack;
-			static std::list<TraceBack> sExceptionTraceBack;
-			static std::list<LogListener*> sListeners;
-
-			static Log* sLog;
-			static bool sLogToStdCout;
+			struct __currentLogHolder {
+				static thread_local std::list<TraceBack> sCurrentTraceBack;
+				static thread_local std::list<TraceBack> sTraceBack;
+				static thread_local std::list<TraceBack> sExceptionTraceBack;
+				static thread_local Log* sLog;
+				static thread_local bool sLogToStdCout;
+			};
 		};
 
 #define TRACEBACK Engine::Util::TraceBack(__FILE__, __LINE__, __FUNCTION__)
