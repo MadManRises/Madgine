@@ -20,14 +20,18 @@ namespace Engine
 	{
 		namespace MyGui
 		{
-			class MyGUILauncher : public GUISystem
+			class MyGUILauncher : public GUISystem, public Ogre::FrameListener
 			{
 			public:
-				MyGUILauncher(App::Application &app, Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr);
+				MyGUILauncher(App::Application &app, const App::OgreAppSettings& settings);
 				~MyGUILauncher();
 
 				bool init() override;
 				void finalize() override;
+
+				virtual int go() override;
+
+				virtual void renderSingleFrame() override;
 
 				// Inherited via GUISystem
 				void injectKeyPress(const KeyEventArgs& arg) override;
@@ -52,8 +56,45 @@ namespace Engine
 
 				void destroy(MyGUI::Widget* w);
 
+				virtual void setWindowProperties(bool fullscreen, unsigned int width, unsigned int height) override;
+				virtual void resizeWindow() override;
+
+			protected:
+				/**
+				* This will be called by Ogre whenever a new frame is started. It returns <code>false</code>, if the Application was shutdown().
+				* Otherwise it will start all Profilers for frame-profiling.
+				*
+				* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
+				* @param fe holds the time since the last frame
+				*/
+				bool frameStarted(const Ogre::FrameEvent& fe) override;
+				/**
+				* This will be called by Ogre whenever a new frame was sent to and gets rendered by the GPU. It returns <code>false</code>, if the Application was shutdown().
+				* Otherwise it will update all Profilers for frame-profiling, capture input from the Input::InputHandler, update the UI::UIManager and perform all tasks given by callSafe().
+				* This is the toplevel method of the Madgine, that should recursively update all elements that need update per frame.
+				*
+				* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
+				* @param fe holds the time since the last frame
+				*/
+				bool frameRenderingQueued(const Ogre::FrameEvent& fe) override;
+				/**
+				* This will be called by Ogre whenever a frame is ended. It returns <code>false</code>, if the Application was shutdown().
+				* Otherwise it will start all Profilers for frame-profiling.
+				*
+				* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
+				* @param fe holds the time since the last frame
+				*/
+				bool frameEnded(const Ogre::FrameEvent& fe) override;
+
 
 			private:
+
+				std::unique_ptr<Ogre::Root> mRoot;
+				std::unique_ptr<App::ConfigSet> mConfig;
+				std::unique_ptr<Input::InputHandler> mInputHolder;
+				Input::InputHandler *mInput;
+
+				HWND mHwnd;
 
 				MyGUI::Gui* mGUI;
 				MyGUI::OgrePlatform* mPlatform;
@@ -65,6 +106,7 @@ namespace Engine
 
 				Ogre::Viewport* mViewport;
 				Ogre::Camera* mCamera;
+				Ogre::RenderWindow *mWindow;
 
 				MyGUI::Widget* mInternRootWindow;
 

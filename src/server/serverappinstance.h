@@ -11,8 +11,9 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			ServerAppInstance(T&& initCallback, Scripting::LuaState *state) :
+			ServerAppInstance(T&& initCallback, Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
 				mState(state),
+				mPluginMgr(pluginMgr),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
@@ -33,14 +34,14 @@ namespace Engine
 				try{
 					mResult = -1;
 
-					App::ServerApplication app(mState);
+					App::ServerApplication app(mState, mPluginMgr);
 					mApplication = &app;
 					App::ServerAppSettings settings;
 					app.setup(settings);
 					if (app.init())
 					{
 						try{
-							initCallback();
+							TupleUnpacker<>::call(initCallback, std::make_tuple(std::ref(app)));
 							mResult = app.go();
 						}
 						catch(...)
@@ -62,6 +63,7 @@ namespace Engine
 
 		private:
 			Scripting::LuaState *mState;
+			Plugins::PluginManager &mPluginMgr;
 			App::ServerApplication* mApplication;
 
 			std::string mName;

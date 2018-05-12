@@ -81,4 +81,6 @@ namespace Engine
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
 	} // namespace UI
+
+	PLUGIN_COLLECTOR_EXPORT(GameHandler, UI::GameHandlerCollector);
 }

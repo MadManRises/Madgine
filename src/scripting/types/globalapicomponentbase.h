@@ -10,7 +10,7 @@ namespace Engine
 		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public MadgineObject, public ScopeBase
 		{
 		public:
-			GlobalAPIComponentBase(GlobalScopeBase & global);
+			GlobalAPIComponentBase(App::Application &app);
 
 			bool init() override;
 			void finalize() override;
@@ -57,7 +57,7 @@ namespace Engine
 			UI::GameHandlerBase &getGameHandler(size_t i);
 
 		private:
-			GlobalScopeBase & mGlobal;
+			App::Application & mApp;
 		};
 	}
 }

@@ -43,8 +43,6 @@ add_precompiled_header(Client ../src/clientlib.h FORCEINCLUDE SOURCE_CXX clientl
 
 target_link_libraries(Client PUBLIC Base)
 
-target_compile_definitions(Client INTERFACE MADGINE_CLIENT_BUILD)
-
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()

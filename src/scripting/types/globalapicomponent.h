@@ -7,11 +7,15 @@
 
 namespace Engine
 {
+
 	namespace Scripting
 	{
-		using GlobalAPICollector = BaseUniqueComponentCollector<GlobalAPIComponentBase, std::vector, GlobalScopeBase &>;
+		using GlobalAPICollector = BaseUniqueComponentCollector<GlobalAPIComponentBase, std::vector, App::Application &>;
 
 		template <class T>
 		using GlobalAPIComponent = Scope<T, UniqueComponent<T, GlobalAPICollector>>;
 	}
+
+	PLUGIN_COLLECTOR_EXPORT(GlobalAPI, Scripting::GlobalAPICollector);
+
 }

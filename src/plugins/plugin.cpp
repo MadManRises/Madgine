@@ -15,7 +15,7 @@ namespace Engine
 	namespace Plugins
 	{
 
-		Plugin::Plugin(const std::string &path) :
+		Plugin::Plugin(const std::experimental::filesystem::path &path) :
 			mModule(nullptr),
 			mPath(path)
 		{
@@ -38,9 +38,9 @@ namespace Engine
 
 			try {
 #ifdef _WIN32
-				mModule = LoadLibrary(mPath.c_str());
+				mModule = LoadLibrary(mPath.string().c_str());
 #elif __linux__
-				mModule = dlopen(mPath.c_str(), RTLD_LAZY);
+				mModule = dlopen(mPath.string().c_str(), RTLD_LAZY);
 #endif
 			}
 			catch (const std::exception &e) {
@@ -71,12 +71,27 @@ namespace Engine
 		}
 
 
-		void *Plugin::getSymbol(const std::string &name) {
+		void *Plugin::getSymbol(const std::string &name) const {
 #ifdef _WIN32
 			return GetProcAddress((HINSTANCE)mModule, name.c_str());
 #elif __linux__
 			return dlsym(mModule, name.c_str());
 #endif
+		}
+
+		std::experimental::filesystem::path Plugin::fullPath()
+		{
+			std::experimental::filesystem::path path;
+
+			if (!isLoaded())
+				return path;
+
+#ifdef _WIN32
+			char buffer[512];
+			assert(GetModuleFileName((HMODULE)mModule, buffer, sizeof(buffer)) != 0);
+			path = buffer;
+#endif
+			return path;
 		}
 
 

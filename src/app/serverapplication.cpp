@@ -9,8 +9,8 @@ namespace Engine
 {
 	namespace App
 	{
-		ServerApplication::ServerApplication(Scripting::LuaState *state) :
-			Application(state),
+		ServerApplication::ServerApplication(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
+			Application(state, pluginMgr),
 			mSettings(nullptr)
 		{
 		}
@@ -44,6 +44,11 @@ namespace Engine
 			return 0;
 		}
 
+		bool ServerApplication::singleFrame(float timeSinceLastFrame)
+		{
+			return update(timeSinceLastFrame);
+		}
+
 		bool ServerApplication::init()
 		{
 			return Application::init() && mSceneManager->init();
@@ -71,5 +76,16 @@ namespace Engine
 		{
 			return Application::maps().merge(mSceneManager);
 		}
+
+		Scene::SceneManagerBase& ServerApplication::sceneMgr()
+		{
+			return *mSceneManager;
+		}
+
+		Scene::SceneComponentBase& ServerApplication::getSceneComponent(size_t i)
+		{
+			return mSceneManager->getComponent(i);
+		}
+
 	}
 }

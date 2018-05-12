@@ -47,7 +47,7 @@ namespace Engine
 
 		ResourceLoader::~ResourceLoader()
 		{
-			mRgm->shutdownAll();
+			//mRgm->shutdownAll();
 		}
 
 		bool ResourceLoader::load_async()

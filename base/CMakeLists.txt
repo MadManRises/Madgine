@@ -10,6 +10,7 @@ set(sources "")
 FolderSources(sources "" "..")
 FolderSources(sources ".." src baseforward.h baselib.h madgineobject.cpp madgineobject.h objectstate.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources src app application.cpp application.h appsettings.h framelistener.h)
+	FolderSources(sources src plugins madginepluginmanager.cpp madginepluginmanager.h)
 	FolderSources(sources src scene contextmasks.h light.cpp light.h scenemanager.h scenemanagerbase.cpp scenemanagerbase.h scenecomponent.h scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h scenecomponentset.h)
 		FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 			FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h transform.cpp transform.h)
@@ -23,6 +24,8 @@ add_library(Base SHARED ${sources} baselib.cpp)
 add_precompiled_header(Base ../src/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
 target_link_libraries(Base PUBLIC Interfaces)
+
+target_compile_definitions(Base PRIVATE MADGINE_BASE_BINARY_NAME="$<TARGET_FILE_NAME:Base>" CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
 
 if (BUILD_TESTING)
 	add_subdirectory(test)

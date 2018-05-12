@@ -61,4 +61,7 @@ namespace Engine
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 	} // namespace GuiHandler
+
+	PLUGIN_COLLECTOR_EXPORT(GuiHandler, UI::GuiHandlerCollector);
+
 } // namespace Cegui

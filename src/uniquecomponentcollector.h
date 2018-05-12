@@ -1,9 +1,14 @@
 #pragma once
 
 #include "generic/container_traits.h"
+#include "plugins/pluginmanager.h"
 
 namespace Engine
 {
+
+	template <class T>
+	struct CollectorName;
+
 	template <class _Base, class _Store, template <class...> class Container = std::vector, class... _Ty>
 	class UniqueComponentCollector : _Store
 	{
@@ -15,12 +20,18 @@ namespace Engine
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
 
-		UniqueComponentCollector(_Ty ... args)
+		UniqueComponentCollector(const Plugins::PluginManager &pluginManager, _Ty ... args)
 		{
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>){
 				mComponents.reserve(this->sComponents().size());
 			}
-			mSortedComponents.reserve(this->sComponents().size());
+			size_t count = this->sComponents().size();
+			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
+				const std::vector<F> *components = loadFromPlugin(&p.second);
+				if (components)
+					count += components->size();
+			}
+			mSortedComponents.reserve(count);
 			for (auto f : this->sComponents())
 			{
 				if (f) {
@@ -34,6 +45,20 @@ namespace Engine
 					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
 				}
 			}
+			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
+				const std::vector<F> *components = loadFromPlugin(&p.second);
+				if (components) {
+					mPluginOffsets[&p.second] = mSortedComponents.size();
+					for (auto f : *components) {
+						if (f) {
+							std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
+							mSortedComponents.push_back(p.get());
+							container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
+						}
+					}
+				}
+			}
+
 		}
 
 		typename Container<std::unique_ptr<Base>>::const_iterator begin() const
@@ -56,7 +81,7 @@ namespace Engine
 			return mComponents;
 		}
 
-		static std::vector<void*> registeredComponentsHashes()
+		/*static std::vector<void*> registeredComponentsHashes()
 		{
 			std::vector<void*> result;
 			result.reserve(Store::sComponents().size());
@@ -67,7 +92,7 @@ namespace Engine
 				}
 			}
 			return result;
-		}
+		}*/
 
 		/*typename Container<std::unique_ptr<Base>>::const_iterator postCreate(void* hash, _Ty ... args)
 		{
@@ -108,6 +133,15 @@ namespace Engine
 			*it = F();
 		}
 
+	private:
+		static const std::vector<F> *loadFromPlugin(const Plugins::Plugin *plugin) {
+			typedef const std::vector<F> *StoreLoader();
+			StoreLoader *loader = (StoreLoader*)plugin->getSymbol(name());
+			return loader ? (*loader)() : nullptr;
+		}
+
+		static const char *name();
+
 	public:
 		template <class T>
 		class ComponentRegistrator
@@ -136,6 +170,7 @@ namespace Engine
 	private:
 		Container<std::unique_ptr<Base>> mComponents;
 		std::vector<Base*> mSortedComponents;
+		std::map<const Plugins::Plugin*, size_t> mPluginOffsets;
 	};
 
 	template <class Base, class... _Ty>
@@ -148,12 +183,18 @@ namespace Engine
 		}
 	};
 
+#define COLLECTOR_NAME(Name, Collector) \
+inline const char *Collector::name(){\
+	return "pluginComponents" #Name;\
+}
+
+
 #ifdef PLUGIN_BUILD
 
 	template <class Base, class... _Ty>
 	class LocalCreatorStore
 	{
-	protected:
+	public:
 		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
 			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
 			return dummy;
@@ -163,10 +204,22 @@ namespace Engine
 	template <class Base, template <class...> class Container = std::vector, class... _Ty>
 	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, LocalCreatorStore<Base, _Ty...>, Container, _Ty...>;
 
+	
+
+
+#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) \
+	extern "C" DLL_EXPORT inline const std::vector<Collector::F> *pluginComponents ## Name(){ \
+		return &Collector::Store::sComponents(); \
+	} \
+\
+	COLLECTOR_NAME(Name, Collector)
+
 #else
 
 	template <class Base, template <class...> class Container = std::vector, class... _Ty>
 	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>;
+
+#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) COLLECTOR_NAME(Name, Collector)
 
 #endif
 

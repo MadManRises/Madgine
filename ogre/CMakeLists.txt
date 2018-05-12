@@ -12,19 +12,23 @@ Project(OgreMadgine)
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
   "${OgreMadgine_SOURCE_DIR}/cmake"
-)                                                           
+)                         
+
+include(Plugins)
 
 set(sources "")
-FolderSources(sources "" src foo.cpp)
+FolderSources(sources "" src ogrescenerenderer.cpp ogrescenerenderer.h)
 
 
-add_library(OgreMadgine SHARED ${sources})
+add_plugin(OgreMadgine Madgine ${sources})
 
 #add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
-#target_link_libraries(OgreMadgine PUBLIC Base)
+target_link_libraries(OgreMadgine PUBLIC Client)
 
+target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 
+target_include_directories(OgreMadgine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 find_package(OGRE REQUIRED)
 if (OGRE_FOUND)
@@ -110,3 +114,5 @@ else()
   endif()
 endif ()
 
+
+install_to_workspace(Madgine OgreMadgine)

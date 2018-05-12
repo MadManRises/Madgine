@@ -52,10 +52,6 @@ namespace Engine
 			updateWindowSizes();
 		}
 
-		void GUISystem::renderSingleFrame()
-		{
-		}
-
 		/*void GUISystem::printHierarchy() {
 			std::list<std::pair<WindowContainer*, size_t>> windows{ {mRootWindow, 0} };
 			
@@ -146,5 +142,8 @@ namespace Engine
 		{
 			return mApp.sceneMgr();
 		}
+
+
+
 	}
 }

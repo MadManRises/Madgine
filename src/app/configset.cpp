@@ -2,7 +2,7 @@
 
 #include "configset.h"
 
-#include "ogreapplication.h"
+#include "../gui/guisystem.h"
 
 #include "../serialize/streams/serializestream.h"
 #include "../serialize/serializemanager.h"
@@ -35,9 +35,9 @@ namespace Engine
 		const std::string ConfigSet::languageProperty = "Language";
 
 
-		ConfigSet::ConfigSet(OgreApplication &app, Ogre::Root* root, const std::string& configFileName) :
+		ConfigSet::ConfigSet(GUI::GUISystem &gui, Ogre::Root* root, const std::string& configFileName) :
 			mConfigFileName(configFileName),
-			mApp(app)
+			mGui(gui)
 		{
 			load();
 
@@ -153,7 +153,7 @@ namespace Engine
 
 		void ConfigSet::updateWindow()
 		{
-			mApp.setWindowProperties(getFullscreen(), getResolutionWidth(),
+			mGui.setWindowProperties(getFullscreen(), getResolutionWidth(),
 			                                                    getResolutionHeight());
 		}
 

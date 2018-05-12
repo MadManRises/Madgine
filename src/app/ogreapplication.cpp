@@ -11,81 +11,41 @@
 #include "../resources/resourceloader.h"
 #include "../util/profile.h"
 
-#include "../input/oisinputhandler.h"
+
 
 #include "OgreWindowEventUtilities.h"
 
 
-#include "../util/standardlog.h"
-
 namespace Engine
 {
-
 	namespace App
 	{
-		OgreApplication::OgreApplication() :
-			Application(this),
-			mPaused(false),
-			mWindow(nullptr),
-			mHwnd(nullptr),
-			mInput(nullptr)
+		OgreApplication::OgreApplication(Plugins::PluginManager &pluginMgr) :
+			Application(this, pluginMgr),
+			mPaused(false)
 		{
 		}
 
 		OgreApplication::~OgreApplication()
 		{
-			Util::UtilMethods::setup(nullptr);
 		}
 
 		void OgreApplication::setup(const OgreAppSettings& settings)
 		{
-			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
-			Util::UtilMethods::setup(mLog.get());
-
 			mSettings = &settings;
 
-			_setupOgre();
-
-			if (mSettings->mUseExternalSettings)
-			{
-				mRoot->initialise(false);
-
-				mWindow = mRoot->createRenderWindow(mSettings->mWindowName, mSettings->mWindowWidth, mSettings->mWindowHeight,
-				                                    false, &mSettings->mWindowParameters);
-			}
-			else
-			{
-				mWindow = mRoot->initialise(true, mSettings->mWindowName); // Create Application-Window
-			}
-
-			mWindow->getCustomAttribute("WINDOW", &mHwnd);
+			// Initialise GUISystem 
+			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(*this, settings);
 
 			mLoader = std::make_unique<Resources::ResourceLoader>(this, mSettings->mRootDir);
 
 			Application::setup(settings);
 
 			// Create SceneManagerBase
-			mSceneMgr = Serialize::make_noparent_unique<Scene::OgreSceneManager>(*this, mRoot.get());
-
-			mWindow->update();
-
-			// Initialise GUISystem 
-			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(*this, mWindow, mSceneMgr->getSceneManager());
-			//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
-			Ogre::WindowEventUtilities::addWindowEventListener(mWindow, mGUI.get());
+			mSceneMgr = Serialize::make_noparent_unique<Scene::OgreSceneManager>(*this, &Ogre::Root::getSingleton());
 
 			// Create UIManager
 			mUI = std::make_unique<UI::UIManager>(*mGUI.get());
-
-			if (mSettings->mInput) {
-				mSettings->mInput->setSystem(mGUI.get());
-				mInput = mSettings->mInput;
-			}
-			else {
-				mInputHolder = std::make_unique<Input::OISInputHandler>(mWindow);
-				mInput = mInputHolder.get();
-				mInput->setSystem(mGUI.get());
-			}
 
 			
 		}
@@ -96,15 +56,13 @@ namespace Engine
 
 			if (!Application::init())
 				return false;
-
+			
 			if (!mGUI->init())
 				return false;
 
-			mRoot->addFrameListener(this);
-
 			if (!mUI->preInit())
 				return false;
-
+			
 			std::optional<Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
 			if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 				return false;
@@ -121,8 +79,6 @@ namespace Engine
 				return false; // Initialise all Handler
 
 
-			mConfig->applyLanguage(); // Set the Language in the Config to all Windows
-
 			return true;
 		}
 
@@ -130,7 +86,6 @@ namespace Engine
 		{
 			mUI->finalize();
 
-			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, mGUI.get());
 			mGUI->finalize();
 
 			mSceneMgr->finalize();
@@ -148,35 +103,59 @@ namespace Engine
 				return -1;
 			}
 
-			mRoot->startRendering();
+			int result = mGUI->go();
 
 			clear();
 
-			return 0;
+			return result;
 		}
 
 		void OgreApplication::shutdown()
 		{
-			mConfig->save();
+			//mConfig->save();
 			Application::shutdown();
-		}
-
-		bool OgreApplication::frameStarted(const Ogre::FrameEvent& fe)
-		{
-			if (!sendFrameStarted(fe.timeSinceLastFrame))
-				return false;
-
-			if (mWindow->isClosed())
-				return false;
-
-			return true;
 		}
 
 
 		bool OgreApplication::update(float timeSinceLastFrame)
 		{
 			Ogre::WindowEventUtilities::messagePump();
-			return mRoot->renderOneFrame();
+			if (!mPaused)
+			{
+				try
+				{
+					PROFILE("UIManager");
+					mUI->update(timeSinceLastFrame);
+				}
+				catch (const std::exception& e)
+				{
+					LOG_ERROR("Unhandled Exception during UI-Update!");
+					LOG_EXCEPTION(e);
+				}
+
+				try
+				{
+					PROFILE("SceneManager");
+					mSceneMgr->update(timeSinceLastFrame, mUI->currentContext());
+				}
+				catch (const std::exception& e)
+				{
+					LOG_ERROR("Unhandled Exception during Scene-Update!");
+					LOG_EXCEPTION(e);
+				}
+
+				try
+				{
+					PROFILE("GUI");
+					mGUI->update(timeSinceLastFrame);
+				}
+				catch (const std::exception& e)
+				{
+					LOG_ERROR("Unhandled Exception during GUI-Update!");
+					LOG_EXCEPTION(e);
+				}
+			}
+			return Application::update(timeSinceLastFrame);
 		}
 
 		Scene::SceneManagerBase& OgreApplication::sceneMgr()
@@ -199,73 +178,12 @@ namespace Engine
 			return mUI->getGameHandler(i);
 		}
 
-		bool OgreApplication::frameRenderingQueued(const Ogre::FrameEvent& fe)
+		bool OgreApplication::singleFrame(float timeSinceLastFrame)
 		{
-			if (mWindow->isClosed() || !Application::update(fe.timeSinceLastFrame))
-			{
-				return false;
-			}
-
-			if (!mPaused)
-			{
-				try
-				{
-					PROFILE("UIManager");
-					mUI->update(fe.timeSinceLastFrame);
-				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during UI-Update!");
-					LOG_EXCEPTION(e);
-				}
-
-				try
-				{
-					PROFILE("SceneManager");
-					mSceneMgr->update(fe.timeSinceLastFrame, mUI->currentContext());
-				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during Scene-Update!");
-					LOG_EXCEPTION(e);
-				}
-
-				try
-				{
-					PROFILE("GUI");
-					mGUI->update(fe.timeSinceLastFrame);
-				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during GUI-Update!");
-					LOG_EXCEPTION(e);
-				}
-
-				try
-				{
-					PROFILE("Input");
-					mInput->update();
-				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during Input!");
-					LOG_EXCEPTION(e);
-				}
-			}
-
+			mGUI->renderSingleFrame();
 			return true;
 		}
 
-		bool OgreApplication::frameEnded(const Ogre::FrameEvent& fe)
-		{
-			if (!sendFrameEnded(fe.timeSinceLastFrame))
-				return false;
-
-			if (mWindow->isClosed())
-				return false;
-
-			return true;
-		}
 
 		bool OgreApplication::fixedUpdate(float timeStep)
 		{
@@ -298,18 +216,6 @@ namespace Engine
 		}
 
 
-		void OgreApplication::setWindowProperties(bool fullscreen, unsigned int width, unsigned int height)
-		{
-			mWindow->setFullscreen(fullscreen, width, height);
-			resizeWindow();
-		}
-
-		Ogre::RenderWindow* OgreApplication::renderWindow()
-		{
-			return mWindow;
-		}
-
-
 		void OgreApplication::clear()
 		{
 			mSceneMgr->clear();
@@ -317,30 +223,9 @@ namespace Engine
 			mUI->clear();
 		}
 
-		void OgreApplication::_setupOgre()
-		{
-			mRoot = std::make_unique<Ogre::Root>(mSettings->mPluginsFile); // Creating Root
-
-			mConfig = std::make_unique<ConfigSet>(*this, mRoot.get(), "config.vs"); // Loading Config and configuring Root
-		}
-
-		void OgreApplication::resizeWindow()
-		{
-			if (mWindow)
-			{
-				mWindow->windowMovedOrResized();
-				Ogre::WindowEventUtilities::WindowEventListeners::iterator
-					start = Ogre::WindowEventUtilities::_msListeners.lower_bound(mWindow),
-					end = Ogre::WindowEventUtilities::_msListeners.upper_bound(mWindow);
-				for (Ogre::WindowEventUtilities::WindowEventListeners::iterator index = start; index != end; ++index)
-					index->second->windowResized(mWindow);
-			}
-		}
-
 		void OgreApplication::renderFrame()
 		{
 			mGUI->renderSingleFrame();
-			mWindow->update();
 		}
 
 		KeyValueMapList OgreApplication::maps()

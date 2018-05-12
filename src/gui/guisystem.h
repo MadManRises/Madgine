@@ -25,10 +25,12 @@ namespace Engine
 
 			virtual void update(float time);
 			virtual void notifyDisplaySizeChanged(const Ogre::Vector2& size);
-			virtual void renderSingleFrame();
+			virtual void renderSingleFrame() = 0;
 
 			void showCursor();
 			void hideCursor();
+
+			virtual int go() = 0;
 
 			virtual void injectKeyPress(const KeyEventArgs& arg) = 0;
 			virtual void injectKeyRelease(const KeyEventArgs& arg) = 0;
@@ -54,7 +56,20 @@ namespace Engine
 
 			Window* getRootWindow() const;
 
+			/**
+			* Sets the properties of the Renderwindow. Might have unexpected effects, when used as embedded window.
+			*
+			* @param fullscreen flag indicating, if the window should be shown in fullscreen
+			* @param width the preferred width for the Renderwindow
+			* @param height the preferred height of the Renderwindow
+			*/
+			virtual void setWindowProperties(bool fullscreen, unsigned int width, unsigned int height) = 0;
 			void windowResized(Ogre::RenderWindow* rw) override;
+
+			/**
+			* For embedded Applications. Resizes the Game-Components to the current size of the Renderwindow. Will be called automatically in a non-embedded environment.
+			*/
+			virtual void resizeWindow() = 0;
 
 			const char* key() const;
 
@@ -66,6 +81,7 @@ namespace Engine
 
 			Scene::SceneManagerBase &sceneMgr();
 
+
 		protected:
 			WindowContainer* mRootWindow;
 
@@ -75,6 +91,8 @@ namespace Engine
 			std::map<std::string, WindowContainer *> mWindows;
 
 			App::Application &mApp;
+
+
 		};
 	}
 }

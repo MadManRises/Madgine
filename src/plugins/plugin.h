@@ -8,18 +8,20 @@ namespace Engine
 		class INTERFACES_EXPORT Plugin
 		{
 		public:
-			Plugin(const std::string &path);
+			Plugin(const std::experimental::filesystem::path &path);
 
 			bool isLoaded();
 			bool load();
 			bool unload();
 
-			void *getSymbol(const std::string &name);
+			void *getSymbol(const std::string &name) const;
+
+			std::experimental::filesystem::path fullPath();
 
 		private:
 			void *mModule;
 
-			std::string mPath;
+			std::experimental::filesystem::path mPath;
 
 		};
 	}

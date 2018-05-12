@@ -5,13 +5,14 @@
 
 
 
-#include "framelistener.h"
 
 #include "../scripting/types/globalapicomponent.h"
 
 #include "../scripting/types/luastate.h"
 
 #include "../util/standardlog.h"
+
+#include "framelistener.h"
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -20,11 +21,12 @@ namespace Engine
 
 	namespace App
 	{
-		Application::Application(Scripting::LuaState *state) :
+		Application::Application(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
 			Scope(state),
 			mShutDown(false),
 			mTimeBank(0.0f),
-			mGlobalAPIs(*this)
+			mGlobalAPIs(pluginMgr, *this),
+			mPluginMgr(pluginMgr)
 		{
 		}
 
@@ -80,9 +82,6 @@ namespace Engine
 				return false;
 			}
 
-			if (!sendFrameRenderingQueued(timeSinceLastFrame))
-				return false;
-
 			mTimeBank += timeSinceLastFrame;
 
 			while (mTimeBank >= FIXED_TIMESTEP)
@@ -132,43 +131,10 @@ namespace Engine
 			return 1.0f;
 		}
 
-		void Application::addFrameListener(FrameListener* listener)
-		{
-			mListeners.push_back(listener);
-		}
-
-		void Application::removeFrameListener(FrameListener* listener)
-		{
-			mListeners.remove(listener);
-		}
 
 		bool Application::fixedUpdate(float timeStep)
 		{
 			return true;
-		}
-
-		bool Application::sendFrameStarted(float timeSinceLastFrame)
-		{
-			bool result = true;
-			for (FrameListener* listener : mListeners)
-				result &= listener->frameStarted(timeSinceLastFrame);
-			return result;
-		}
-
-		bool Application::sendFrameRenderingQueued(float timeSinceLastFrame)
-		{
-			bool result = true;
-			for (FrameListener* listener : mListeners)
-				result &= listener->frameRenderingQueued(timeSinceLastFrame);
-			return result;
-		}
-
-		bool Application::sendFrameEnded(float timeSinceLastFrame)
-		{
-			bool result = true;
-			for (FrameListener* listener : mListeners)
-				result &= listener->frameEnded(timeSinceLastFrame);
-			return result;
 		}
 
 		KeyValueMapList Application::maps()
@@ -181,6 +147,36 @@ namespace Engine
 			return mGlobalAPIs.get(i);
 		}
 
+		Scene::SceneComponentBase& Application::getSceneComponent(size_t i)
+		{
+			throw 0;
+		}
+
+		Scene::SceneManagerBase& Application::sceneMgr()
+		{
+			throw 0;
+		}
+
+		GUI::GUISystem & Application::gui()
+		{
+			throw 0;
+		}
+
+		UI::UIManager& Application::ui()
+		{
+			throw 0;
+		}
+
+		UI::GameHandlerBase& Application::getGameHandler(size_t i)
+		{
+			throw 0;
+		}
+
+		UI::GuiHandlerBase& Application::getGuiHandler(size_t i)
+		{
+			throw 0;
+		}
+
 
 		void Application::clear()
 		{
@@ -190,15 +186,48 @@ namespace Engine
 			}
 		}
 
-		bool Application::singleFrame(float timeSinceLastFrame)
+		void Application::addFrameListener(FrameListener* listener)
 		{
-			return sendFrameStarted(timeSinceLastFrame) &&
-				update(timeSinceLastFrame) &&
-				sendFrameEnded(timeSinceLastFrame);
+			mListeners.push_back(listener);
+		}
+
+		void Application::removeFrameListener(FrameListener* listener)
+		{
+			mListeners.remove(listener);
+		}
+
+		bool Application::sendFrameStarted(float timeSinceLastFrame)
+		{
+			bool result = true;
+			for (App::FrameListener* listener : mListeners)
+				result &= listener->frameStarted(timeSinceLastFrame);
+			return result;
+		}
+
+		bool Application::sendFrameRenderingQueued(float timeSinceLastFrame)
+		{
+			if (!update(timeSinceLastFrame))
+				return false;
+			bool result = true;
+			for (App::FrameListener* listener : mListeners)
+				result &= listener->frameRenderingQueued(timeSinceLastFrame);
+			return result;
+		}
+
+		bool Application::sendFrameEnded(float timeSinceLastFrame)
+		{
+			bool result = true;
+			for (App::FrameListener* listener : mListeners)
+				result &= listener->frameEnded(timeSinceLastFrame);
+			return result;
 		}
 
 		Util::Log &Application::log() {
 			return *mLog;
+		}
+
+		const Plugins::PluginManager &Application::pluginMgr() {
+			return mPluginMgr;
 		}
 
 	}

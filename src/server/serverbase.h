@@ -16,7 +16,7 @@ namespace Engine
 		                                         public MadgineObject
 		{
 		public:
-			ServerBase(const std::string& name, const std::string& scriptsFolder);
+			ServerBase(const std::string& name, const std::string& scriptsFolder, Plugins::PluginManager &pluginMgr);
 			virtual ~ServerBase();
 
 			int run();
@@ -26,7 +26,6 @@ namespace Engine
 			const std::string& scriptsFolder();
 
 			void shutdown();
-
 
 			void addFrameListener(App::FrameListener* listener);
 			void removeFrameListener(App::FrameListener* listener);
@@ -41,7 +40,7 @@ namespace Engine
 			template <class T>
 			void spawnInstance(T&& init)
 			{
-				mInstances.emplace_back(std::forward<T>(init), this);
+				mInstances.emplace_back(std::forward<T>(init), this, mPluginMgr);
 			}
 
 			bool sendFrameStarted();
@@ -55,6 +54,8 @@ namespace Engine
 			Util::ServerLog mLog;
 			std::string mName;
 			Scripting::Parsing::ServerScriptParser mScriptParser;
+
+			Plugins::PluginManager &mPluginMgr;
 
 			bool mRunning;
 

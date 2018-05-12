@@ -33,41 +33,6 @@ namespace Engine
 			return mScopes.createTable();
 		}
 
-		GlobalAPIComponentBase & GlobalScopeBase::getGlobalAPIComponent(size_t)
-		{
-			throw 0;
-		}
-
-		Scene::SceneComponentBase& GlobalScopeBase::getSceneComponent(size_t i)
-		{
-			throw 0;
-		}
-
-		Scene::SceneManagerBase& GlobalScopeBase::sceneMgr()
-		{
-			throw 0;
-		}
-
-		GUI::GUISystem & GlobalScopeBase::gui()
-		{
-			throw 0;
-		}
-
-		UI::UIManager& GlobalScopeBase::ui()
-		{
-			throw 0;
-		}
-
-		UI::GameHandlerBase& GlobalScopeBase::getGameHandler(size_t i)
-		{
-			throw 0;
-		}
-
-		UI::GuiHandlerBase& GlobalScopeBase::getGuiHandler(size_t i)
-		{
-			throw 0;
-		}
-
 		lua_State* GlobalScopeBase::lua_state() const
 		{
 			return table().state();

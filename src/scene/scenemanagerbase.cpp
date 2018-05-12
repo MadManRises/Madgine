@@ -24,7 +24,7 @@ namespace Engine
 			SerializableUnit(Serialize::SCENE_MANAGER),
 			Scope<Engine::Scene::SceneManagerBase, Engine::Scripting::ScopeBase>(app.createTable()),
 			mItemCount(0),
-			mSceneComponents(*this),
+			mSceneComponents(app.pluginMgr(), *this),
 			mApp(app)
 		{
 		}

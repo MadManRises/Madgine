@@ -18,15 +18,14 @@ namespace Engine
 		 * The Application can also be paused (e.g. in a multithreaded environment).
 		 *
 		 */
-		class MADGINE_CLIENT_EXPORT OgreApplication : public Scripting::LuaState, public Application,
-		                                           public Ogre::FrameListener
+		class MADGINE_CLIENT_EXPORT OgreApplication : public Scripting::LuaState, public Application
 		{
 		public:
 			/**
 			 * Creates the Application.
 			 * 
 			 */
-			OgreApplication();
+			OgreApplication(Plugins::PluginManager &pluginMgr);
 			/**
 			 * Deletes all objects created by the Application.
 			 *
@@ -63,26 +62,6 @@ namespace Engine
 			 */
 			int go() override;
 
-			/**
-			 * Sets the properties of the Renderwindow. Might have unexpected effects, when used as embedded window.
-			 *
-			 * @param fullscreen flag indicating, if the window should be shown in fullscreen
-			 * @param width the preferred width for the Renderwindow
-			 * @param height the preferred height of the Renderwindow
-			 */
-			virtual void setWindowProperties(bool fullscreen, unsigned int width, unsigned int height);
-
-			/**
-			 * Returns the Renderwindow of the Application.
-			 *
-			 * @return the Ogre::RenderWindow, in which the application is rendered.
-			 */
-			virtual Ogre::RenderWindow* renderWindow();
-
-			/**
-			 * For embedded Applications. Resizes the Game-Components to the current size of the Renderwindow. Will be called automatically in a non-embedded environment.
-			 */
-			virtual void resizeWindow();
 
 			/**
 			 * Renders a single frame of the Application. Useful for rolling custom renderloops or updating screen during long calculations.(e.g. Loading Screen)
@@ -99,32 +78,9 @@ namespace Engine
 			virtual UI::GuiHandlerBase& getGuiHandler(size_t) override;
 			virtual UI::GameHandlerBase& getGameHandler(size_t) override;
 
+			virtual bool singleFrame(float timeSinceLastFrame) override;
+
 		protected:
-			/**
-			 * This will be called by Ogre whenever a new frame is started. It returns <code>false</code>, if the Application was shutdown().
-			 * Otherwise it will start all Profilers for frame-profiling.
-			 *
-			 * @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
-			 * @param fe holds the time since the last frame
-			 */
-			bool frameStarted(const Ogre::FrameEvent& fe) override;
-			/**
-			* This will be called by Ogre whenever a new frame was sent to and gets rendered by the GPU. It returns <code>false</code>, if the Application was shutdown().
-			* Otherwise it will update all Profilers for frame-profiling, capture input from the Input::InputHandler, update the UI::UIManager and perform all tasks given by callSafe().
-			* This is the toplevel method of the Madgine, that should recursively update all elements that need update per frame.
-			*
-			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
-			* @param fe holds the time since the last frame
-			*/
-			bool frameRenderingQueued(const Ogre::FrameEvent& fe) override;
-			/**
-			* This will be called by Ogre whenever a frame is ended. It returns <code>false</code>, if the Application was shutdown().
-			* Otherwise it will start all Profilers for frame-profiling.
-			*
-			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
-			* @param fe holds the time since the last frame
-			*/
-			bool frameEnded(const Ogre::FrameEvent& fe) override;
 
 			bool fixedUpdate(float timeStep) override;
 
@@ -132,7 +88,6 @@ namespace Engine
 
 		private:
 			void clear() override;
-			virtual void _setupOgre();
 
 		private:
 
@@ -140,20 +95,12 @@ namespace Engine
 
 			bool mPaused;
 
-			Ogre::RenderWindow* mWindow;
-
-			std::unique_ptr<Ogre::Root> mRoot;
-			std::unique_ptr<ConfigSet> mConfig;
+			
 			std::unique_ptr<Resources::ResourceLoader> mLoader;
 			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;
 			std::unique_ptr<GUI::GUISystem> mGUI;
 			std::unique_ptr<UI::UIManager> mUI;
-			std::unique_ptr<Input::InputHandler> mInputHolder;
-			Input::InputHandler *mInput;
-
-			HWND mHwnd;
-
-			std::unique_ptr<Util::StandardLog> mLog;
+			
 		};
 	}
 }

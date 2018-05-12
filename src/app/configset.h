@@ -17,7 +17,7 @@ namespace Engine
 			/**
 			 *
 			 */
-			ConfigSet(OgreApplication &app, Ogre::Root* root, const std::string& configFileName);
+			ConfigSet(GUI::GUISystem &gui, Ogre::Root* root, const std::string& configFileName);
 			ConfigSet(const ConfigSet&) = delete;
 
 			/**
@@ -154,7 +154,7 @@ namespace Engine
 			Serialize::SerializableMap<std::string, ValueType> mSettings;
 			Ogre::RenderSystem* mRenderSystem;
 
-			OgreApplication &mApp;
+			GUI::GUISystem &mGui;
 
 			// Database::TranslationUnit mTranslation;
 

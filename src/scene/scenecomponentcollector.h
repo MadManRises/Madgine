@@ -16,4 +16,6 @@ namespace Engine
 
 	}
 
+	PLUGIN_COLLECTOR_EXPORT(SceneComponent, Scene::SceneComponentCollector);
+
 }

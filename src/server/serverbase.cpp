@@ -10,12 +10,13 @@ namespace Engine
 {
 	namespace Server
 	{
-		ServerBase::ServerBase(const std::string& name, const std::string& scriptsFolder) :
+		ServerBase::ServerBase(const std::string& name, const std::string& scriptsFolder, Plugins::PluginManager &pluginMgr) :
 			Scope(this),
 			mLog(name + "-Log"),
 			mName(name),
 			mScriptParser(this, scriptsFolder),
-			mRunning(false)
+			mRunning(false),
+			mPluginMgr(pluginMgr)
 		{
 			Util::UtilMethods::setup(&mLog);
 		}

@@ -8,6 +8,16 @@
 
 #include "../windownames.h"
 
+#include "../../app/ogreappsettings.h"
+
+#include "../../scene/ogrescenemanager.h"
+
+#include "../../input/oisinputhandler.h"
+
+#include "../../app/application.h"
+
+#include "../../app/configset.h"
+
 #ifdef _MSC_VER
 #pragma warning (push, 0)
 #endif
@@ -24,33 +34,79 @@ namespace Engine
 	{
 		namespace MyGui
 		{
-			MyGUILauncher::MyGUILauncher(App::Application &app, Ogre::RenderWindow* window, Ogre::SceneManager* sceneMgr) :
+			MyGUILauncher::MyGUILauncher(App::Application &app, const App::OgreAppSettings &settings) :
 				GUISystem(app),
 				mGUI(nullptr),
 				mPlatform(nullptr), mLayoutManager(nullptr), mResourceManager(nullptr), mInputManager(nullptr),
 				mRenderManager(nullptr),
 				mInternRootWindow(nullptr),
-				mScrollWheel(0)
+				mScrollWheel(0),
+				mWindow(nullptr),
+				mHwnd(nullptr),
+				mInput(nullptr)
 			{
-				mCamera = sceneMgr->createCamera("ContentCamera");
-				mViewport = window->addViewport(mCamera);
 
-				mPlatform = new MyGUI::OgrePlatform;
-				mPlatform->initialise(window, sceneMgr, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+
+				mRoot = std::make_unique<Ogre::Root>(settings.mPluginsFile); // Creating Root
+
+				mConfig = std::make_unique<App::ConfigSet>(*this, mRoot.get(), "config.vs"); // Loading Config and configuring Root
+
+				if (settings.mUseExternalSettings)
+				{
+					mRoot->initialise(false);
+
+					mWindow = mRoot->createRenderWindow(settings.mWindowName, settings.mWindowWidth, settings.mWindowHeight,
+						false, &settings.mWindowParameters);
+				}
+				else
+				{
+					mWindow = mRoot->initialise(true, settings.mWindowName); // Create Application-Window
+				}
+
+				mWindow->update();
+
+				mRoot->addFrameListener(this);
+
+				mWindow->getCustomAttribute("WINDOW", &mHwnd);
+
+				//mGUI = OGRE_MAKE_UNIQUE_FUNC(GUI::Cegui::CEGUILauncher, GUI::GUISystem)();
+				Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);
+
+
+				
+
+				if (settings.mInput) {
+					mInput = settings.mInput;
+				}
+				else {
+					mInputHolder = std::make_unique<Input::OISInputHandler>(mWindow);
+					mInput = mInputHolder.get();
+				}
+				mInput->setSystem(this);
+
 			}
 
 			MyGUILauncher::~MyGUILauncher()
 			{
-				mPlatform->shutdown();
-				delete mPlatform;
+			
 
-				mCamera->getSceneManager()->destroyCamera(mCamera);
+				Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
+
 			}
 
 			bool MyGUILauncher::init()
 			{
 				if (!GUISystem::init())
 					return false;
+				
+				Ogre::SceneManager *sceneM = mRoot->getSceneManager("SceneTmp");
+				mCamera = sceneM->createCamera("ContentCamera");
+				mViewport = mWindow->addViewport(mCamera);
+
+
+				mPlatform = new MyGUI::OgrePlatform;
+				mPlatform->initialise(mWindow, sceneM, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+
 				mGUI = new MyGUI::Gui;
 				mGUI->initialise("runTheme.xml");
 
@@ -69,6 +125,8 @@ namespace Engine
 
 				setCursorVisibility(false);
 
+				mConfig->applyLanguage(); // Set the Language in the Config to all Windows
+
 				return true;
 			}
 
@@ -84,7 +142,25 @@ namespace Engine
 					mGUI->shutdown();
 					delete mGUI;
 				}
+				if (mPlatform) {
+					mPlatform->shutdown();
+					delete mPlatform;
+				}
+
+				mCamera->getSceneManager()->destroyCamera(mCamera);
+
 				return GUISystem::finalize();
+			}
+
+			int MyGUILauncher::go()
+			{
+				mRoot->startRendering();
+				return 0;
+			}
+
+			void MyGUILauncher::renderSingleFrame()
+			{
+				mWindow->update();
 			}
 
 			void MyGUILauncher::injectKeyPress(const KeyEventArgs& arg)
@@ -198,6 +274,70 @@ namespace Engine
 				float y = static_cast<float>(top) - w->getPosition().top;
 				return {{x / w->getWidth(), y / w->getHeight()}};
 			}
+
+			void MyGUILauncher::setWindowProperties(bool fullscreen, unsigned int width, unsigned int height)
+			{
+				mWindow->setFullscreen(fullscreen, width, height);
+				resizeWindow();
+			}
+
+			void MyGUILauncher::resizeWindow()
+			{
+				if (mWindow)
+				{
+					mWindow->windowMovedOrResized();
+					Ogre::WindowEventUtilities::WindowEventListeners::iterator
+						start = Ogre::WindowEventUtilities::_msListeners.lower_bound(mWindow),
+						end = Ogre::WindowEventUtilities::_msListeners.upper_bound(mWindow);
+					for (Ogre::WindowEventUtilities::WindowEventListeners::iterator index = start; index != end; ++index)
+						index->second->windowResized(mWindow);
+				}
+			}
+
+			bool MyGUILauncher::frameStarted(const Ogre::FrameEvent& fe)
+			{
+				if (!app().sendFrameStarted(fe.timeSinceLastFrame))
+					return false;
+
+				if (mWindow->isClosed())
+					return false;
+
+				return true;
+			}
+
+			bool MyGUILauncher::frameRenderingQueued(const Ogre::FrameEvent& fe)
+			{
+				if (mWindow->isClosed() || !app().sendFrameRenderingQueued(fe.timeSinceLastFrame))
+				{
+					return false;
+				}
+
+				try
+				{
+					//PROFILE("Input");
+					mInput->update();
+				}
+				catch (const std::exception& e)
+				{
+					LOG_ERROR("Unhandled Exception during Input!");
+					LOG_EXCEPTION(e);
+				}				
+
+				return true;
+			}
+
+			bool MyGUILauncher::frameEnded(const Ogre::FrameEvent& fe)
+			{
+				if (!app().sendFrameEnded(fe.timeSinceLastFrame))
+					return false;
+
+				if (mWindow->isClosed())
+					return false;
+
+				return true;
+			}
+
+
 		}
 	}
 }

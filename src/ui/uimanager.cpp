@@ -28,8 +28,8 @@ namespace Engine
 			mCurrentRoot(nullptr),
 			mGUI(gui),
 			mKeepingCursorPos(false),
-		    mGuiHandlers(*this),
-		    mGameHandlers(*this)
+		    mGuiHandlers(gui.app().pluginMgr(), *this),
+		    mGameHandlers(gui.app().pluginMgr(), *this)
 		{
 		}
 

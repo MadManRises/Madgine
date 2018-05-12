@@ -84,7 +84,7 @@ namespace Engine
 			virtual void shutdown();
 
 
-			bool singleFrame(float timeSinceLastFrame);
+			virtual bool singleFrame(float timeSinceLastFrame) = 0;
 
 			/**
 			* This will be called once every frame. It returns <code>false</code>, if the Application was shutdown().
@@ -120,10 +120,54 @@ namespace Engine
 			*/
 			float getFPS();
 
+
+			KeyValueMapList maps() override;
+
+			template <class T>
+			T &getGlobalAPIComponent()
+			{
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+			}
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t);
+
+			template <class T>
+			T &getSceneComponent()
+			{
+				return static_cast<T&>(getSceneComponent(T::component_index()));
+			}
+
+			virtual Scene::SceneComponentBase &getSceneComponent(size_t);
+			virtual Scene::SceneManagerBase &sceneMgr();
+			virtual GUI::GUISystem &gui();
+			virtual UI::UIManager &ui();
+
+			template <class T>
+			T &getGameHandler()
+			{
+				return static_cast<T&>(getGameHandler(T::component_index()));
+			}
+
+			virtual UI::GameHandlerBase &getGameHandler(size_t);
+
+			template <class T>
+			T &getGuiHandler()
+			{
+				return static_cast<T&>(getGuiHandler(T::component_index()));
+			}
+
+			virtual UI::GuiHandlerBase &getGuiHandler(size_t);
+
+
+			Util::Log &log();
+
+			const Plugins::PluginManager &pluginMgr();
+
+
 			/**
-			 * \brief Adds a FrameListener to the application.
-			 * \param listener the FrameListener to be added.
-			 */
+			* \brief Adds a FrameListener to the application.
+			* \param listener the FrameListener to be added.
+			*/
 			void addFrameListener(FrameListener* listener);
 			/**
 			* \brief Removes a FrameListener from the application.
@@ -131,20 +175,16 @@ namespace Engine
 			*/
 			void removeFrameListener(FrameListener* listener);
 
-			KeyValueMapList maps() override;
 
-			virtual Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t) override;
+			bool sendFrameStarted(float timeSinceLastFrame);
+			bool sendFrameRenderingQueued(float timeSinceLastFrame);
+			bool sendFrameEnded(float timeSinceLastFrame);
 
-			Util::Log &log();
 
 		protected:
 			virtual void clear();
 
 			virtual bool fixedUpdate(float timeStep);
-
-			bool sendFrameStarted(float timeSinceLastFrame);
-			bool sendFrameRenderingQueued(float timeSinceLastFrame);
-			bool sendFrameEnded(float timeSinceLastFrame);
 
 		private:
 
@@ -159,6 +199,8 @@ namespace Engine
 			float mTimeBank;
 
 			std::list<FrameListener*> mListeners;
+
+			Plugins::PluginManager &mPluginMgr;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
 		};

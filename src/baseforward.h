@@ -26,6 +26,7 @@ namespace Engine
 	{
 		struct AppSettings;
 		class Application;
+
 		class FrameListener;
 	}
 

@@ -27,14 +27,7 @@ namespace Engine
 			mRenderTexture(nullptr),
 			mTerrainRayQuery(nullptr)
 		{
-			mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC);
-
-			createCamera();
-
-			mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
-			mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
-
-			mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
+			
 		}
 
 		OgreSceneManager::~OgreSceneManager()
@@ -43,10 +36,14 @@ namespace Engine
 
 		bool OgreSceneManager::init()
 		{
-			//mShaderCollector.init(mSceneMgr);
+			mSceneMgr = mRoot->getSceneManager("SceneTmp");
 
-			Ogre::MovableObject::setDefaultQueryFlags(Entity::Masks::DEFAULT_MASK);
+			createCamera();
 
+			mEntitiesNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("Entities");
+			mTerrain = mSceneMgr->getRootSceneNode()->createChildSceneNode("Terrain");
+
+			
 			mTerrainRayQuery = mSceneMgr->createRayQuery(Ogre::Ray(), Entity::Masks::TERRAIN_MASK);
 			mTerrainRayQuery->setSortByDistance(true);
 

@@ -12,7 +12,7 @@ namespace Engine
 		class MADGINE_SERVER_EXPORT ServerApplication : public Application
 		{
 		public:
-			ServerApplication(Scripting::LuaState *state);
+			ServerApplication(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr);
 			virtual ~ServerApplication();
 
 			void setup(const ServerAppSettings& settings);
@@ -20,11 +20,16 @@ namespace Engine
 			// Inherited via Application
 			int go() override;
 
+			bool singleFrame(float timeSinceLastFrame) override;
+
 			bool init() override;
 
 			void finalize() override;
 
 			KeyValueMapList maps() override;
+
+			virtual Scene::SceneManagerBase& sceneMgr() override;
+			virtual Scene::SceneComponentBase& getSceneComponent(size_t) override;
 
 		protected:
 

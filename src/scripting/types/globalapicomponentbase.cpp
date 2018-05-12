@@ -4,14 +4,16 @@
 
 #include "globalscopebase.h"
 
+#include "../../app/application.h"
+
 
 namespace Engine
 {
 	namespace Scripting
 	{
-		GlobalAPIComponentBase::GlobalAPIComponentBase(GlobalScopeBase &global) :
-		ScopeBase(global.createTable()),
-		mGlobal(global)
+		GlobalAPIComponentBase::GlobalAPIComponentBase(App::Application &app) :
+		ScopeBase(app.createTable()),
+		mApp(app)
 		{
 		}
 
@@ -35,32 +37,32 @@ namespace Engine
 
 		GlobalAPIComponentBase& GlobalAPIComponentBase::getGlobalAPIComponent(size_t i)
 		{
-			return mGlobal.getGlobalAPIComponent(i);
+			return mApp.getGlobalAPIComponent(i);
 		}
 
 		Scene::SceneComponentBase& GlobalAPIComponentBase::getSceneComponent(size_t i)
 		{
-			return mGlobal.getSceneComponent(i);
+			return mApp.getSceneComponent(i);
 		}
 
 		Scene::SceneManagerBase& GlobalAPIComponentBase::sceneMgr()
 		{
-			return mGlobal.sceneMgr();
+			return mApp.sceneMgr();
 		}
 
 		GlobalScopeBase& GlobalAPIComponentBase::globalScope()
 		{
-			return mGlobal;
+			return mApp;
 		}
 
 		UI::GuiHandlerBase& GlobalAPIComponentBase::getGuiHandler(size_t i)
 		{
-			return mGlobal.getGuiHandler(i);
+			return mApp.getGuiHandler(i);
 		}
 
 		UI::GameHandlerBase& GlobalAPIComponentBase::getGameHandler(size_t i)
 		{
-			return mGlobal.getGameHandler(i);
+			return mApp.getGameHandler(i);
 		}
 	}
 }
