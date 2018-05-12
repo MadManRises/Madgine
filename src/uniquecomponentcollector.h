@@ -184,7 +184,7 @@ namespace Engine
 	};
 
 #define COLLECTOR_NAME(Name, Collector) \
-inline const char *Collector::name(){\
+template<> inline const char *Collector::name(){\
 	return "pluginComponents" #Name;\
 }
 
