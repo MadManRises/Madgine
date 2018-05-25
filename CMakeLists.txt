@@ -29,6 +29,7 @@ include(Workspace)
 include(PrecompiledHeader)
 include(Project)
 include(multiConfig)
+include(Packaging)
   
 multiConfig(Madgine)  
 
@@ -46,4 +47,8 @@ install_header(Madgine Madgine)
 
 export_to_workspace(Madgine)
 
+enable_packaging()
+
+
 configure_file(doc/Doxyfile.in Doxyfile)
+
