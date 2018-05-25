@@ -32,7 +32,10 @@ add_library(Interfaces SHARED ${sources})
 
 add_precompiled_header(Interfaces ../Madgine/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
+target_compile_definitions(Interfaces PRIVATE CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
+
 target_link_libraries (Interfaces PRIVATE lualib ${CMAKE_THREAD_LIBS_INIT})
+
 
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32)	

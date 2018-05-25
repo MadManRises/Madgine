@@ -20,13 +20,11 @@ set(sources "")
 FolderSources(sources "" OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
 
 
-add_plugin(OgreMadgine Madgine ${sources})
+add_plugin(OgreMadgine Madgine Renderer ${sources})
 
 #add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
 
 target_link_libraries(OgreMadgine PUBLIC Client)
-
-target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 
 target_include_directories(OgreMadgine PRIVATE ${CMAKE_SOURCE_DIR})
 
@@ -115,6 +113,11 @@ else()
 endif ()
 
 
-install_to_workspace(Madgine OgreMadgine)
+install_to_workspace(OgreMadgine OgreMadgine)
 
-install_header(Madgine OgreMadgine)
+install_header(OgreMadgine OgreMadgine)
+
+export_to_workspace(OgreMadgine)
+
+cpack_add_component(OgreMadgine DISPLAY_NAME Ogre GROUP Renderer)
+cpack_add_component(OgreMadgine_dev DISPLAY_NAME Ogre-dev GROUP Renderer)

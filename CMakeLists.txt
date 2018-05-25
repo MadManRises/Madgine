@@ -26,14 +26,24 @@ set(CMAKE_MODULE_PATH
 )
 
 include(Workspace)
+include(Packaging)
 include(PrecompiledHeader)
 include(Project)
 include(multiConfig)
-include(Packaging)
+include(Plugins)
+
+
+set (CPACK_NSIS_MODIFY_PATH ON)
+
+enable_packaging()
+
   
 multiConfig(Madgine)  
 
 include(Testing)
+
+
+
 
 add_subdirectory(interfaces)
 add_subdirectory(base)
@@ -47,8 +57,9 @@ install_header(Madgine Madgine)
 
 export_to_workspace(Madgine)
 
-enable_packaging()
+cpack_add_component(Madgine REQUIRED)
 
+cpack_add_component_group(Renderer EXPANDED)
 
 configure_file(doc/Doxyfile.in Doxyfile)
 

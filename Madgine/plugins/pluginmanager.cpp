@@ -6,13 +6,16 @@ namespace Engine
 {
 	namespace Plugins
 	{
-		PluginManager::PluginManager()
+		PluginManager::PluginManager(const std::string &project, const std::string &type) :
+			mProject(project),
+			mType(type)
 		{
+
 		}
 
-		Plugin & PluginManager::addPlugin(const std::string & name, const std::experimental::filesystem::path & path)
+		Plugin & PluginManager::getPlugin(const std::string & name)
 		{
-			auto pairIB = mPlugins.try_emplace(name, path);
+			auto pairIB = mPlugins.try_emplace(name, "Plugin_" + mProject + "_" + mType + "_" + name + CONFIG_SUFFIX);
 			return pairIB.first->second;
 		}
 
@@ -24,10 +27,6 @@ namespace Engine
 		std::map<std::string, Plugin>::const_iterator PluginManager::end() const
 		{
 			return mPlugins.end();
-		}
-
-		Plugin & PluginManager::getPlugin(const std::string & name) {
-			return mPlugins.at(name);
 		}
 
 	}
