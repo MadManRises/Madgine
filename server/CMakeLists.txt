@@ -10,20 +10,20 @@ find_package(Threads REQUIRED)
 
 set(sources "")
 FolderSources(sources "" "..")
-FolderSources(sources ".." src serverforward.h serverlib.h)
-	FolderSources(sources src app serverapplication.cpp serverapplication.h serverappsettings.h servertimer.cpp servertimer.h)
-	FolderSources(sources src scene serverscenemanager.cpp serverscenemanager.h)
+FolderSources(sources ".." Madgine serverforward.h serverlib.h)
+	FolderSources(sources Madgine app serverapplication.cpp serverapplication.h serverappsettings.h servertimer.cpp servertimer.h)
+	FolderSources(sources Madgine scene serverscenemanager.cpp serverscenemanager.h)
 		FolderSources(sources scene entity)
 			FolderSources(sources entity components serveranimation.cpp serveranimation.h servermesh.cpp servermesh.h serverskeletonvisualizer.cpp serverskeletonvisualizer.h servertransform.cpp servertransform.h)
-	FolderSources(sources src scripting)
+	FolderSources(sources Madgine scripting)
 		FolderSources(sources scripting parsing serverscriptparser.cpp serverscriptparser.h)
-	FolderSources(sources src server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h)
-	FolderSources(sources src util serverlog.cpp serverlog.h)
+	FolderSources(sources Madgine server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h)
+	FolderSources(sources Madgine util serverlog.cpp serverlog.h)
 
 
 add_library(MadgineServer SHARED ${sources} serverlib.cpp)
 
-add_precompiled_header(MadgineServer ../src/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
+add_precompiled_header(MadgineServer ../Madgine/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
 target_link_libraries(MadgineServer PUBLIC Base)
 

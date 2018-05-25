@@ -13,19 +13,11 @@ namespace Engine
 			static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>> dummy;
 			return dummy;
 		}
+
+		static constexpr size_t baseIndex() { return 0; }
 	};
-
-
-#ifdef PLUGIN_BUILD
-
-	template <class Base, template <class...> class Container = std::vector, class... _Ty>
-	using OgreUniqueComponentCollector = UniqueComponentCollector<Base, LocalCreatorStore<Base, _Ty...>, Container, _Ty...>;
-
-#else
 
 	template <class Base, template <class...> class Container = std::vector, class... _Ty>
 	using OgreUniqueComponentCollector = UniqueComponentCollector<Base, OgreCreatorStore<Base, _Ty...>, Container, _Ty...>;
-
-#endif
 
 }

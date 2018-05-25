@@ -39,6 +39,11 @@ namespace Engine
 				return mEntity->getSceneComponent(i);
 			}
 
+			Scripting::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i)
+			{
+				return mEntity->getGlobalAPIComponent(i);
+			}
+
 			void EntityComponentBase::moveToEntity(Entity* entity)
 			{
 				mEntity = entity;

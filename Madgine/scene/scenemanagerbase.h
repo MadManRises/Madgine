@@ -55,6 +55,14 @@ namespace Engine
 			SceneComponentBase &getComponent(size_t i);
 			size_t getComponentCount();
 
+			template <class T>
+			T &getGlobalAPIComponent()
+			{
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+			}
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
 			void readState(Serialize::SerializeInStream& in) override;
 			void writeState(Serialize::SerializeOutStream& out) const override;
 

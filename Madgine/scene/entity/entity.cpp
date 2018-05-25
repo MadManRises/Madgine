@@ -162,8 +162,19 @@ namespace Engine
 				const std::string& name, const Scripting::LuaTable& table)
 			{
 				auto it = sRegisteredComponentsByName().find(name);
-				if (it == sRegisteredComponentsByName().end())
+				if (it == sRegisteredComponentsByName().end()) {
+					typedef std::map<std::string, ComponentBuilder> & (*ComponentGetter)();
+					for (const std::pair<const std::string, Plugins::Plugin> &p : sceneMgr().app().pluginMgr()) {
+						ComponentGetter getter = (ComponentGetter)p.second.getSymbol("pluginEntityComponents");
+						if (getter) {
+							it = (*getter)().find(name);
+							if (it != (*getter)().end()) {
+								return it->second(*this, table);
+							}
+						}
+					}
 					throw ComponentException(Exceptions::unknownComponent(name));
+				}
 				return it->second(*this, table);
 			}
 
@@ -207,6 +218,11 @@ namespace Engine
 			SceneComponentBase& Entity::getSceneComponent(size_t i)
 			{
 				return mSceneManager.getComponent(i);
+			}
+
+			Scripting::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i)
+			{
+				return mSceneManager.getGlobalAPIComponent(i);
 			}
 
 			KeyValueMapList Entity::maps()

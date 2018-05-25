@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../entitycomponent.h"
-#include "mesh.h"
+#include "Madgine/scene/entity/entitycomponent.h"
+#include "Madgine/scene/entity/components/mesh.h"
 
 namespace Engine
 {
@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_CLIENT_EXPORT OgreMesh : public EntityComponentVirtualImpl<OgreMesh, Mesh>
+			class OGREMADGINE_EXPORT OgreMesh : public EntityComponentVirtualImpl<OgreMesh, Mesh>
 			{
 			public:
 				OgreMesh(Entity& entity, const Scripting::LuaTable& table);

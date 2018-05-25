@@ -3,7 +3,7 @@ cmake_policy(SET CMP0048 NEW)
 
 project(Interfaces_Test)
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR})
 
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)

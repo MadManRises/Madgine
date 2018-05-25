@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../system.h"
+#include "Madgine/scene/entity/system.h"
 
 
 namespace Engine
@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_CLIENT_EXPORT OgreAnimationSystem : public System<OgreAnimationSystem, OgreAnimation>
+			class OGREMADGINE_EXPORT OgreAnimationSystem : public System<OgreAnimationSystem, OgreAnimation>
 			{
 			public:
 				using System::System;

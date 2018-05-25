@@ -43,6 +43,14 @@ namespace Engine
 
 			SceneComponentBase &getSceneComponent(size_t i);
 
+			template <class T>
+			T &getGlobalAPIComponent()
+			{
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+			}
+
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
 		protected:
 			virtual void update(float);
 			virtual void fixedUpdate(float);

@@ -6,12 +6,19 @@
 
 #include "../../serialize/container/set.h"
 
+
+
 namespace Engine
 {
 	namespace Scene
 	{
 		namespace Entity
 		{
+
+#ifdef PLUGIN_BUILD
+			extern "C" DLL_EXPORT std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity&, const Scripting::LuaTable&)>> &pluginEntityComponents();
+#endif
+
 			class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public Scripting::Scope<Entity>
 			{
 			private:
@@ -84,6 +91,14 @@ namespace Engine
 
 				SceneComponentBase &getSceneComponent(size_t i);
 
+				template <class T>
+				T &getGlobalAPIComponent()
+				{
+					return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+				}
+
+				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+
 			protected:
 
 				KeyValueMapList maps() override;
@@ -110,6 +125,10 @@ namespace Engine
 						return dummy;
 					}
 				};
+
+				friend std::map<std::string, ComponentBuilder> &pluginEntityComponents() {
+					return LocalComponentStore::sRegisteredComponentsByName();
+				}
 
 #define PLUGABLE_COMPONENT LocalComponentStore::
 
@@ -155,6 +174,9 @@ namespace Engine
 
 				SceneManagerBase &mSceneManager;
 			};
+
+
+
 		}
 	}
 }

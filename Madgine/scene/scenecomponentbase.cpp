@@ -67,6 +67,11 @@ namespace Engine
 			return mSceneMgr.getComponent(i);
 		}
 
+		Scripting::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i)
+		{
+			return mSceneMgr.getGlobalAPIComponent(i);
+		}
+
 		void SceneComponentBase::update(float)
 		{
 		}

@@ -12,7 +12,7 @@
 #define OGREMADGINE_EXPORT DLL_IMPORT
 #endif
 
-#include "clientlib.h"
+#include "Madgine/clientlib.h"
 
 #include "ogreforward.h"
 

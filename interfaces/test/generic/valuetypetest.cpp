@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "interfaceslib.h"
+#include "Madgine/interfaceslib.h"
 
 #include <future>
 
-#include "scripting/types/scopebase.h"
+#include "Madgine/scripting/types/scopebase.h"
 
 
 TEST(ValueType, Construct)

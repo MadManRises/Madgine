@@ -1,10 +1,10 @@
-#include "../../../clientlib.h"
+#include "ogrelib.h"
 
 #include "ogremesh.h"
 
 #include "ogreskeletonvisualizer.h"
 
-#include "../../ogreSceneManager.h"
+#include "ogrescenerenderer.h"
 
 #include <OgreTagPoint.h>
 
@@ -34,7 +34,7 @@ namespace Engine
 				mMesh = getEntity().getComponent<OgreMesh>();
 
 				Ogre::Entity* entity = mMesh->getMesh();
-				Ogre::SceneManager* sceneMgr = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager();
+				Ogre::SceneManager* sceneMgr = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager();
 
 				mBoneSize = 0.1f;
 

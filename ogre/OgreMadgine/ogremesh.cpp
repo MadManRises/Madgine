@@ -1,10 +1,12 @@
-#include "../../../clientlib.h"
+#include "ogrelib.h"
 
 #include "ogremesh.h"
 
 #include "ogretransform.h"
 
-#include "../../ogrescenemanager.h"
+#include "ogrescenerenderer.h"
+
+#include "Madgine/scene/entity/masks.h"
 
 namespace Engine
 {
@@ -51,7 +53,8 @@ namespace Engine
 				destroyObject();
 				if (!mesh.empty())
 				{
-					mObject = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->createEntity(mesh);
+					
+					mObject = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->createEntity(mesh);
 					mObject->addQueryFlags(Masks::ENTITY_MASK);
 					if (mTransform)
 						mTransform->getNode()->attachObject(mObject);
@@ -80,7 +83,7 @@ namespace Engine
 				{
 					if (mTransform)
 						mTransform->getNode()->detachObject(mObject);
-					static_cast<OgreSceneManager&>(getEntity().sceneMgr()).getSceneManager()->destroyEntity(mObject);
+					getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->destroyEntity(mObject);
 					mObject = nullptr;
 				}
 			}

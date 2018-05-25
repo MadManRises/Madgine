@@ -6,28 +6,83 @@
 namespace Engine
 {
 
+
+#define COLLECTOR_NAME(Name, Collector) \
+template<> inline const char *Collector::name(){\
+	return "pluginComponents" #Name;\
+}
+	
+#ifdef PLUGIN_BUILD
+
+	template <class Base, class... _Ty>
+	class LocalCreatorStore
+	{
+	public:
+		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
+			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
+			return dummy;
+		}
+
+		static size_t baseIndex() { return mBaseIndex; }
+
+		static void setBaseIndex(size_t index) {
+			mBaseIndex = index;
+		}
+
+	private:
+		static inline size_t mBaseIndex = 0;
+	};
+
+
+#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) \
+	extern "C" DLL_EXPORT inline const std::vector<Collector::F> *pluginComponents ## Name(size_t baseIndex){ \
+		Collector::Store::setBaseIndex(baseIndex); \
+		return &Collector::Store::sComponents(); \
+	} \
+\
+	COLLECTOR_NAME(Name, Collector)
+
+#else
+
+#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) COLLECTOR_NAME(Name, Collector)
+
+#endif
+
+
+
 	template <class T>
 	struct CollectorName;
 
 	template <class _Base, class _Store, template <class...> class Container = std::vector, class... _Ty>
-	class UniqueComponentCollector : _Store
+	class UniqueComponentCollector : 
+#ifdef PLUGIN_BUILD
+		LocalCreatorStore<_Base, _Ty...>
+#else
+		_Store
+#endif
 	{
 	public:
 		typedef _Base Base;
 		typedef std::function<std::unique_ptr<Base>(_Ty...)> F;
+#ifdef PLUGIN_BUILD
+		typedef LocalCreatorStore<_Base, _Ty...> Store;
+#else
 		typedef _Store Store;
+#endif
 
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
 
 		UniqueComponentCollector(const Plugins::PluginManager &pluginManager, _Ty ... args)
 		{
+			//Necessary for dllexport
+			(void)baseIndex();
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>){
 				mComponents.reserve(this->sComponents().size());
 			}
 			size_t count = this->sComponents().size();
 			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
-				const std::vector<F> *components = loadFromPlugin(&p.second);
+				const std::vector<F> *components = loadFromPlugin(&p.second, count);
 				if (components)
 					count += components->size();
 			}
@@ -46,14 +101,18 @@ namespace Engine
 				}
 			}
 			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
-				const std::vector<F> *components = loadFromPlugin(&p.second);
+				const std::vector<F> *components = loadFromPlugin(&p.second, mSortedComponents.size());
 				if (components) {
-					mPluginOffsets[&p.second] = mSortedComponents.size();
 					for (auto f : *components) {
 						if (f) {
 							std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
 							mSortedComponents.push_back(p.get());
 							container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
+						}
+						else
+						{
+							mSortedComponents.push_back(nullptr);
+							container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
 						}
 					}
 				}
@@ -134,10 +193,10 @@ namespace Engine
 		}
 
 	private:
-		static const std::vector<F> *loadFromPlugin(const Plugins::Plugin *plugin) {
-			typedef const std::vector<F> *StoreLoader();
+		static const std::vector<F> *loadFromPlugin(const Plugins::Plugin *plugin, size_t baseIndex) {
+			typedef const std::vector<F> *StoreLoader(size_t);
 			StoreLoader *loader = (StoreLoader*)plugin->getSymbol(name());
-			return loader ? (*loader)() : nullptr;
+			return loader ? (*loader)(baseIndex) : nullptr;
 		}
 
 		static const char *name();
@@ -160,7 +219,7 @@ namespace Engine
 
 			size_t index()
 			{
-				return mIterator;
+				return mIterator + baseIndex();
 			}
 
 		private:
@@ -170,7 +229,6 @@ namespace Engine
 	private:
 		Container<std::unique_ptr<Base>> mComponents;
 		std::vector<Base*> mSortedComponents;
-		std::map<const Plugins::Plugin*, size_t> mPluginOffsets;
 	};
 
 	template <class Base, class... _Ty>
@@ -181,46 +239,13 @@ namespace Engine
 			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
 			return dummy;
 		}
+
+		static constexpr size_t baseIndex() { return 0; }
 	};
 
-#define COLLECTOR_NAME(Name, Collector) \
-template<> inline const char *Collector::name(){\
-	return "pluginComponents" #Name;\
-}
 
 
-#ifdef PLUGIN_BUILD
-
-	template <class Base, class... _Ty>
-	class LocalCreatorStore
-	{
-	public:
-		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
-			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
-			return dummy;
-		}
-	};
-
-	template <class Base, template <class...> class Container = std::vector, class... _Ty>
-	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, LocalCreatorStore<Base, _Ty...>, Container, _Ty...>;
-
-	
-
-
-#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) \
-	extern "C" DLL_EXPORT inline const std::vector<Collector::F> *pluginComponents ## Name(){ \
-		return &Collector::Store::sComponents(); \
-	} \
-\
-	COLLECTOR_NAME(Name, Collector)
-
-#else
-
-	template <class Base, template <class...> class Container = std::vector, class... _Ty>
-	using BaseUniqueComponentCollector = UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>;
-
-#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) COLLECTOR_NAME(Name, Collector)
-
-#endif
+template <class Base, template <class...> class Container = std::vector, class... _Ty>
+using BaseUniqueComponentCollector = UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>;
 
 }

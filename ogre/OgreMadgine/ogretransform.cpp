@@ -1,8 +1,8 @@
-#include "../../../clientlib.h"
+#include "ogrelib.h"
 
 #include "ogretransform.h"
 
-#include "../../ogrescenemanager.h"
+#include "ogrescenerenderer.h"
 
 namespace Engine
 {
@@ -24,7 +24,7 @@ namespace Engine
 				EntityComponentVirtualImpl(entity, table),
 				mNode(nullptr)
 			{
-				mNode = static_cast<OgreSceneManager&>(getEntity().sceneMgr()).createEntityNode();
+				mNode = getGlobalAPIComponent<OgreSceneRenderer>().createEntityNode();
 				mNode->getUserObjectBindings().setUserAny("entity", Ogre::Any(&getEntity()));
 			}
 

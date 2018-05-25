@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "interfaceslib.h"
+#include "Madgine/interfaceslib.h"
 
-#include "serialize/container/list.h"
-#include "serialize/serializableunit.h"
+#include "Madgine/serialize/container/list.h"
+#include "Madgine/serialize/serializableunit.h"
 
 TEST(Serialize_Container, Test1)
 {

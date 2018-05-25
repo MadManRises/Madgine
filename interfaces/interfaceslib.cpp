@@ -1,1 +1,1 @@
-#include "../src/interfaceslib.h"
+#include "../Madgine/interfaceslib.h"

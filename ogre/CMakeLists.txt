@@ -17,7 +17,7 @@ set(CMAKE_MODULE_PATH
 include(Plugins)
 
 set(sources "")
-FolderSources(sources "" src ogrescenerenderer.cpp ogrescenerenderer.h)
+FolderSources(sources "" OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
 
 
 add_plugin(OgreMadgine Madgine ${sources})
@@ -28,7 +28,7 @@ target_link_libraries(OgreMadgine PUBLIC Client)
 
 target_compile_definitions(OgreMadgine INTERFACE MADGINE_CLIENT_BUILD)
 
-target_include_directories(OgreMadgine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+target_include_directories(OgreMadgine PRIVATE ${CMAKE_SOURCE_DIR})
 
 find_package(OGRE REQUIRED)
 if (OGRE_FOUND)
@@ -116,3 +116,5 @@ endif ()
 
 
 install_to_workspace(Madgine OgreMadgine)
+
+install_header(Madgine OgreMadgine)

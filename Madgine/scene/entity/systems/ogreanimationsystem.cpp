@@ -2,7 +2,7 @@
 
 #include "ogreanimationsystem.h"
 
-#include "../components/ogreanimation.h"
+#include "ogreanimation.h"
 
 namespace Engine
 {

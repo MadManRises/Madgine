@@ -83,6 +83,11 @@ namespace Engine
 			SerializableUnitBase::writeState(out);
 		}
 
+		Scripting::GlobalAPIComponentBase & SceneManagerBase::getGlobalAPIComponent(size_t i)
+		{
+			return mApp.getGlobalAPIComponent(i);
+		}
+
 		void SceneManagerBase::readState(Serialize::SerializeInStream& in)
 		{
 			clear();

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../entitycomponent.h"
+#include "Madgine/scene/entity/entitycomponent.h"
 
 namespace Engine
 {
@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_CLIENT_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer>
+			class OGREMADGINE_EXPORT OgreSkeletonVisualizer : public EntityComponent<OgreSkeletonVisualizer>
 			{
 			public:
 				OgreSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table = {});

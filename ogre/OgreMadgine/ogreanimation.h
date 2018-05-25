@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include "../systemcomponent.h"
+#include "Madgine/scene/entity/systemcomponent.h"
 
-#include "../systems/ogreanimationsystem.h"
-#include "animation.h"
+#include "ogreanimationsystem.h"
+#include "Madgine/scene/entity/components/animation.h"
 
 namespace Engine
 {
@@ -14,7 +14,7 @@ namespace Engine
 		{
 			class OgreAnimationSystem;
 
-			class MADGINE_CLIENT_EXPORT OgreAnimation : public SystemComponent<OgreAnimation, OgreAnimationSystem, EntityComponentVirtualImpl<OgreAnimation, Animation>>
+			class OGREMADGINE_EXPORT OgreAnimation : public SystemComponent<OgreAnimation, OgreAnimationSystem, EntityComponentVirtualImpl<OgreAnimation, Animation>>
 			{
 			public:
 				enum LoopSetting

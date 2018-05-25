@@ -1,8 +1,8 @@
 #pragma once
 
-#include "transform.h"
+#include "Madgine/scene/entity/components/transform.h"
 
-#include "../../../serialize/container/serializedmapper.h"
+#include "Madgine/serialize/container/serializedmapper.h"
 
 namespace Engine
 {
@@ -10,7 +10,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_CLIENT_EXPORT OgreTransform : public EntityComponentVirtualImpl<OgreTransform, Transform>
+			class OGREMADGINE_EXPORT OgreTransform : public EntityComponentVirtualImpl<OgreTransform, Transform>
 			{
 			public:
 				static Entity* entityFromNode(Ogre::SceneNode* node);

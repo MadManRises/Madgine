@@ -1,4 +1,4 @@
-#include "../../../clientlib.h"
+#include "ogrelib.h"
 
 #include "ogremesh.h"
 

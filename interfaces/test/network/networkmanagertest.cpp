@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "interfaceslib.h"
+#include "Madgine/interfaceslib.h"
 
-#include "network/networkmanager.h"
+#include "Madgine/network/networkmanager.h"
 
 #include <future>
 
