@@ -9,8 +9,8 @@ Project(Server)
 find_package(Threads REQUIRED)
 
 set(sources "")
-FolderSources(sources "" "..")
-FolderSources(sources ".." Madgine serverforward.h serverlib.h)
+FolderSources(sources "" "../../src")
+FolderSources(sources "../../src" Madgine serverforward.h serverlib.h)
 	FolderSources(sources Madgine app serverapplication.cpp serverapplication.h serverappsettings.h servertimer.cpp servertimer.h)
 	FolderSources(sources Madgine scene serverscenemanager.cpp serverscenemanager.h)
 		FolderSources(sources scene entity)
@@ -23,7 +23,7 @@ FolderSources(sources ".." Madgine serverforward.h serverlib.h)
 
 add_library(MadgineServer SHARED ${sources} serverlib.cpp)
 
-add_precompiled_header(MadgineServer ../Madgine/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
+add_precompiled_header(MadgineServer ../../src/Madgine/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
 
 target_link_libraries(MadgineServer PUBLIC Base)
 
@@ -41,4 +41,4 @@ if (BUILD_TESTING)
 endif()
 
 
-install_to_workspace(Madgine MadgineServer)
+install_to_workspace(Madgine TARGETS MadgineServer EXPORT_LIB)

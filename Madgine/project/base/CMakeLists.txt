@@ -7,8 +7,8 @@ cmake_policy(SET CMP0022 NEW)
 Project(Base)
 
 set(sources "")
-FolderSources(sources "" "..")
-FolderSources(sources ".." Madgine baseforward.h baselib.h madgineobject.cpp madgineobject.h objectstate.h uniquecomponent.h uniquecomponentcollector.h)
+FolderSources(sources "" "../../src")
+FolderSources(sources "../../src" Madgine baseforward.h baselib.h madgineobject.cpp madgineobject.h objectstate.h uniquecomponent.h uniquecomponentcollector.h)
 	FolderSources(sources Madgine app application.cpp application.h appsettings.h framelistener.h)
 	FolderSources(sources Madgine scene contextmasks.h light.cpp light.h scenemanager.h scenemanagerbase.cpp scenemanagerbase.h scenecomponent.h scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h scenecomponentset.h)
 		FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
@@ -20,7 +20,7 @@ FolderSources(sources ".." Madgine baseforward.h baselib.h madgineobject.cpp mad
 
 
 add_library(Base SHARED ${sources} baselib.cpp)
-add_precompiled_header(Base ../Madgine/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
+add_precompiled_header(Base ../../src/Madgine/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
 
 target_link_libraries(Base PUBLIC Interfaces)
 
@@ -29,4 +29,4 @@ if (BUILD_TESTING)
 endif()
 
 
-install_to_workspace(Madgine Base)
+install_to_workspace(Madgine TARGETS Base EXPORT_LIB)

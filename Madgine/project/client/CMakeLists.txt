@@ -10,12 +10,12 @@ Project(Client)
 
 set(CMAKE_MODULE_PATH
   "${CMAKE_MODULE_PATH}"
-  "${Client_SOURCE_DIR}/../ogre/cmake"
+  "${Client_SOURCE_DIR}/../../plugins/ogre/cmake"
 )       
 
 set(sources "")
-FolderSources(sources "" "..")
-FolderSources(sources ".." Madgine clientforward.h clientlib.h)
+FolderSources(sources "" "../../src")
+FolderSources(sources "../../src" Madgine clientforward.h clientlib.h)
 	FolderSources(sources Madgine app ogreapplication.cpp ogreapplication.h ogreappsettings.h configset.cpp configset.h)
 	FolderSources(sources Madgine database messages.h translationkey.cpp translationkey.h translationunit.cpp translationunit.h)
 	FolderSources(sources Madgine gui guievents.h guisystem.cpp guisystem.h windownames.h)
@@ -39,7 +39,7 @@ FolderSources(sources ".." Madgine clientforward.h clientlib.h)
 
 add_library(Client SHARED ${sources} clientlib.cpp)
 
-add_precompiled_header(Client ../Madgine/clientlib.h FORCEINCLUDE SOURCE_CXX clientlib.cpp)
+add_precompiled_header(Client ../../src/Madgine/clientlib.h FORCEINCLUDE SOURCE_CXX clientlib.cpp)
 
 target_link_libraries(Client PUBLIC Base)
 
@@ -136,4 +136,4 @@ else()
 endif ()
 
 
-install_to_workspace(Madgine Client)
+install_to_workspace(Madgine TARGETS Client EXPORT_LIB)

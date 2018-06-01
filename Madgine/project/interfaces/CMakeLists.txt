@@ -10,8 +10,8 @@ find_package(Threads REQUIRED)
 load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
 set(sources interfaceslib.cpp)
-FolderSources(sources "" "..")
-FolderSources(sources ".." Madgine interfacesforward.h interfaceslib.h)
+FolderSources(sources "" "../../src")
+FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
 	FolderSources(sources Madgine generic exceptionmessages.h keyvalue.h keyvalueiterate.cpp keyvalueiterate.h message.h singleton.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources Madgine math vector3.cpp vector3.h vector2.cpp vector2.h)
 	FolderSources(sources Madgine network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.cpp socketapi.h winapi.cpp)
@@ -30,7 +30,7 @@ FolderSources(sources "" vstools Madgine.natvis)
 
 add_library(Interfaces SHARED ${sources})
 
-add_precompiled_header(Interfaces ../Madgine/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
+add_precompiled_header(Interfaces ../../src/Madgine/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
 target_compile_definitions(Interfaces PRIVATE CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
 
@@ -49,4 +49,4 @@ if (BUILD_TESTING)
 	add_subdirectory(test)	
 endif()
 
-install_to_workspace(Madgine Interfaces)
+install_to_workspace(Madgine TARGETS Interfaces EXPORT_LIB)
