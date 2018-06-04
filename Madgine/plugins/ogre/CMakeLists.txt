@@ -24,7 +24,8 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 
 
 		set(sources "")
-		FolderSources(sources "" OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
+		FolderSources(sources "" src)
+			FolderSources(sources src OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
 
 
 		add_plugin(OgreMadgine Madgine Renderer ${sources})
@@ -118,7 +119,8 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 		endif ()
 
 
-		install_to_workspace(OgreMadgine TARGETS OgreMadgine)
+		install_to_workspace(OgreMadgine TARGETS OgreMadgine EXPORT_LIB)
+		export_to_workspace(OgreMadgine)
 
 		cpack_add_component(OgreMadgine DISPLAY_NAME Ogre GROUP Renderer)
 	endif()

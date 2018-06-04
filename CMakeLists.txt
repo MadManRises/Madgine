@@ -2,10 +2,16 @@
 cmake_minimum_required (VERSION 3.8)
 
 cmake_policy(SET CMP0048 NEW)
+cmake_policy(SET CMP0011 OLD)
+cmake_policy(SET CMP0049 OLD)
 
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_definitions(-D_HAS_TR1_NAMESPACE)
 
 
 set(MADGINE_MAJOR_VERSION 0)
@@ -40,4 +46,9 @@ enable_packaging()
 
 multiConfig(Madgine) 
 
+load_workspace_package(lua https://github.com/MadManRises/lua.git)
+
+
+
 add_subdirectory(Madgine)
+add_subdirectory(Maditor)

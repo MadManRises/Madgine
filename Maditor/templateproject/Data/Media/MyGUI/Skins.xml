@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource" version="1.1">
+	<Resource type="ResourceSkin" name="LoadingScreenBarBackground" size="206 125" texture="img\LoadingScreen\loadingScreenBar.png">
+		<BasisSkin type="SubSkin" offset="143 0 63 125" align="Right VStretch">
+			<State name="normal" offset="143 0 63 125"/>
+		</BasisSkin>
+		<BasisSkin type="SubSkin" offset="0 0 64 125" align="Left VStretch">
+			<State name="normal" offset="0 0 64 125"/>
+		</BasisSkin>
+		<BasisSkin type="SubSkin" offset="64 0 79 125" align="Stretch">
+			<State name="normal" offset="64 0 79 125"/>
+		</BasisSkin>
+	</Resource>
+	<Resource type="ResourceSkin" name="LoadingScreenBar" size="20 40" texture="img\LoadingScreen\Bar.png">
+		<BasisSkin type="SubSkin" offset="0 0 20 40" align="Stretch">
+			<State name="normal" offset="0 0 20 40"/>
+		</BasisSkin>
+	</Resource>
+</MyGUI>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource">
+    <Resource type="ResourceLayout" name="loading" version="3.2.0">
+        <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" layer="Main" name="Loading">
+            <Widget type="ProgressBar" skin="LoadingScreenProgressBar" position_real="0.0791016 0.864258 0.839844 0.0820313" name="ProgressBar">
+                <Property key="RangePosition" value="31"/>
+                <Property key="AutoTrack" value="#{ColourDefault}[DEFAULT]"/>
+                <Property key="Range" value="55"/>
+            </Widget>
+            <Widget type="TextBox" skin="TextBox" position="55 795 890 65" name="LoadingMsg">
+                <Property key="Caption" value="hallo"/>
+                <Property key="FontHeight" value="40"/>
+                <Property key="FontName" value="DejaVuSansFont_28"/>
+                <Property key="TextAlign" value="Left VCenter"/>
+            </Widget>
+        </Widget>
+        <CodeGeneratorSettings/>
+    </Resource>
+</MyGUI>

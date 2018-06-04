@@ -1,0 +1,1 @@
+#include "maditorlauncherlib.h"

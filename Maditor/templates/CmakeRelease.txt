@@ -1,0 +1,111 @@
+cmake_minimum_required (VERSION 2.6)
+
+cmake_policy(SET CMP0011 OLD)
+cmake_policy(SET CMP0049 OLD)
+
+set (CMAKE_CXX_STANDARD 17)
+
+PROJECT(%1)
+
+if (MSVC)
+	add_compile_options(/std:c++latest)
+endif()
+
+add_definitions(-D_HAS_TR1_NAMESPACE)
+
+
+
+set(PROJECT_ROOT ${CMAKE_SOURCE_DIR}/../../..)
+
+include(${PROJECT_ROOT}/src/Dependencies.cmake)
+
+set(CMAKE_MODULE_PATH
+  ${CMAKE_MODULE_PATH}
+	"${Cmake_Utils}"
+	
+)
+
+include(Workspace)
+include(multiConfig)
+
+multiConfig(TW) 
+
+
+set(Server %5)
+
+if (Server)
+    set(SPEC_LIB MadgineServer)
+else()
+    set(SPEC_LIB OgreMadgine)
+endif()
+
+
+set(LIBRARY_TARGETS)
+
+foreach(lib %2)
+
+    string(TOUPPER ${lib} lib_uc)
+    find_package(${lib} REQUIRED)
+    include_directories(${${lib_uc}_INCLUDE_DIRS})
+    foreach (target ${${lib_uc}_LIBRARIES})
+        get_target_property(lib_file ${target} LOCATION)
+        set(LIBRARY_FILES ${LIBRARY_FILES} ${lib_file})
+    endforeach(target)
+    set(LIBRARY_TARGETS ${LIBRARY_TARGETS} ${${lib_uc}_LIBRARIES})
+
+endforeach(lib)
+
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/../bin)
+
+add_definitions(-DGAME_RELEASE)
+
+include_directories(%4)
+
+set (sources %3)
+
+if (NOT sources STREQUAL "")  
+    add_executable(%1 main.cpp ${sources})
+
+    include_library(%1 Madgine PRIVATE Interfaces ${SPEC_LIB})
+
+	target_link_libraries(%1 PRIVATE ${LIBRARY_TARGETS})
+
+    set_target_properties(%1 PROPERTIES LINKER_LANGUAGE CXX)
+
+endif()
+
+#install(
+#  FILES ${LIBRARY_FILES} 
+#  DESTINATION ${CMAKE_SOURCE_DIR}/../install
+#)
+
+if (NOT CONFIG_BUILD)
+	set(INSTALL_PATH ${CMAKE_SOURCE_DIR}/../install)
+else()
+	set(INSTALL_PATH ${CMAKE_SOURCE_DIR}/../install_${CONFIG})
+endif()
+
+install(
+  TARGETS %1 
+  RUNTIME 
+  DESTINATION ${INSTALL_PATH}
+)
+
+if(NOT Server)
+  install(
+    FILES ${PROJECT_ROOT}/Data/plugins.cfg
+    DESTINATION ${INSTALL_PATH}
+  )
+  install(
+    DIRECTORY ${PROJECT_ROOT}/Data/Media
+    DESTINATION ${INSTALL_PATH}
+  )
+  
+else()
+  install(
+    DIRECTORY ${PROJECT_ROOT}/Data/Media/Scripts
+    DESTINATION ${INSTALL_PATH}
+  )
+  
+endif()

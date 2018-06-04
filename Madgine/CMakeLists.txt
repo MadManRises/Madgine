@@ -1,11 +1,6 @@
 
 
 
-add_definitions(-D_HAS_TR1_NAMESPACE)
-
-project(Madgine)
-
-
 add_subdirectory(project)
 
 add_subdirectory(plugins)

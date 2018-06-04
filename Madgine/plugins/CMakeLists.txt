@@ -1,5 +1,5 @@
 
-include_directories(${Madgine_SOURCE_DIR}/src)
+include_directories(${Madgine_SOURCE_DIR}/Madgine/src)
 
 include(Plugins)
 

@@ -7,8 +7,6 @@ Project(Interfaces)
 
 find_package(Threads REQUIRED)
 
-load_workspace_package(lua https://github.com/MadManRises/lua.git)
-
 set(sources interfaceslib.cpp)
 FolderSources(sources "" "../../src")
 FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)

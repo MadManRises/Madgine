@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MyGUI type="Resource" version="1.1">
+  
+  <Resource type="ResourceLayout" version="3.2.0" name="LoadingScreenProgressBar">
+    <Widget type="Widget" name="Root" position="25 50 125 15" skin="LoadingScreenBarBackground">
+
+      <Property value="true" key="MoveToClick"/>
+
+      <UserString value="ProgressBar" key="LE_TargetWidgetType"/>
+
+      <UserString value="7" key="TrackWidth"/>
+
+      <UserString value="true" key="TrackFill"/>
+
+      <UserString value="LoadingScreenBar" key="TrackSkin"/>
+
+
+      <Widget type="Widget" name="TrackPlace" position="62 0 0 13" skin="PanelEmpty" align="Stretch">
+
+        <Property value="false" key="NeedKey"/>
+
+        <Property value="true" key="InheritsPick"/>
+
+      </Widget>
+
+    </Widget>
+
+  </Resource>
+  
+
+
+
+</MyGUI>

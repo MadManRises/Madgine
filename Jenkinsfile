@@ -14,7 +14,7 @@ pipeline {
                 mkdir -p build
                 cd build
                 mkdir -p workspace
-                cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DBUILD_CLIENT=FALSE -DINSTALL_EXTERN=TRUE
+                cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DBUILD_CLIENT=FALSE -DINSTALL_EXTERN=TRUE -DBOOST_PATH=~/boost_1_66_0
                 '''
 			}
 		}
