@@ -26,8 +26,11 @@ if (BUILD_CLIENT)
 	if (CMAKE_COMPILER_IS_GNUCXX)
 		target_link_libraries(Embedded_Client_Launcher PRIVATE dl)
 	endif (CMAKE_COMPILER_IS_GNUCXX)
+
+	install_to_workspace(Maditor TARGETS Embedded_Client_Launcher)
+
 endif (BUILD_CLIENT)
 
 add_subdirectory(standalone)
 
-install_to_workspace(Maditor TARGETS Embedded_Server_Launcher Embedded_Client_Launcher)
+install_to_workspace(Maditor TARGETS Embedded_Server_Launcher)
