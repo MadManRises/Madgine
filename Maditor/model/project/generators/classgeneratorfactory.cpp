@@ -10,7 +10,7 @@
 #include "entitycomponentgenerator.h"
 #include "serverclassgenerator.h"
 
-#include "model/project/module.h"
+#include "project/module.h"
 
 #include "dialogmanager.h"
 

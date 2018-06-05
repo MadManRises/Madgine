@@ -2,7 +2,7 @@
 
 #include "componentview.h"
 
-#include "model/logs/logtablemodel.h"
+#include "../../model/logs/logtablemodel.h"
 
 namespace Maditor {
 namespace View {

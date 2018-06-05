@@ -2,8 +2,8 @@
 
 #include "applicationwrapper.h"
 
-#include "shared/sharedmemory.h"
-#include "shared/ipcmanager/boostipcmanager.h"
+#include "../shared/sharedmemory.h"
+#include "../shared/ipcmanager/boostipcmanager.h"
 
 namespace Maditor
 {

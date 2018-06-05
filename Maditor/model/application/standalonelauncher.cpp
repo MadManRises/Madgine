@@ -4,7 +4,7 @@
 
 #include "project/applicationconfig.h"
 #include <iostream>
-#include "shared/projectfile.h"
+#include "../shared/projectfile.h"
 #include "project/project.h"
 
 namespace Maditor

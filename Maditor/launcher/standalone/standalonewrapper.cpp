@@ -2,7 +2,7 @@
 
 #include "standalonewrapper.h"
 
-#include "shared/errorcodes.h"
+#include "../../shared/errorcodes.h"
 #include <iostream>
 
 #ifdef MADGINE_CLIENT_BUILD

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/treemodel.h"
-#include "model/treeitem.h"
+#include "../treemodel.h"
+#include "../treeitem.h"
 
 #include "Madgine/serialize/serializableunit.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/appcontrol.h"
+#include "../shared/appcontrol.h"
 
 #ifdef MADGINE_CLIENT_BUILD
 #include "Madgine/app/ogreappsettings.h"
@@ -20,7 +20,7 @@
 
 #include "inspector.h"
 
-#include "shared/applicationinfo.h"
+#include "../shared/applicationinfo.h"
 
 namespace Maditor {
 

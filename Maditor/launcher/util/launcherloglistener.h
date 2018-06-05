@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/moduleinstance.h"
+#include "../../shared/moduleinstance.h"
 #include "Madgine/serialize/container/action.h"
 #include "Madgine/util/loglistener.h"
 #include "Madgine/signalslot/slot.h"

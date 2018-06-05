@@ -2,7 +2,7 @@
 
 #include "componentview.h"
 
-#include "model/project/project.h"
+#include "../../model/project/project.h"
 
 #include "documents/independentwindowspawner.h"
 #include "documents/windowspawner.h"

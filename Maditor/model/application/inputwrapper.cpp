@@ -2,7 +2,7 @@
 
 #include "inputwrapper.h"
 
-#include "shared/inputinfo.h"
+#include "../shared/inputinfo.h"
 
 namespace Maditor {
 	namespace Model {

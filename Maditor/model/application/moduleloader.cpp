@@ -2,11 +2,11 @@
 
 #include "moduleloader.h"
 
-#include "model/project/project.h"
+#include "project/project.h"
 
-#include "model/project/module.h"
+#include "project/module.h"
 
-#include "model/project/modulelist.h"
+#include "project/modulelist.h"
 
 #include "applicationlauncher.h"
 

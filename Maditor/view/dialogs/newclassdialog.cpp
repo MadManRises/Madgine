@@ -3,7 +3,7 @@
 #include "newclassdialog.h"
 #include "ui_newclassdialog.h"
 
-#include "model/project/module.h"
+#include "../../model/project/module.h"
 
 namespace Maditor {
 namespace View {

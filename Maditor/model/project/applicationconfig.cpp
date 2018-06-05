@@ -9,7 +9,7 @@
 
 #include "project.h"
 
-#include "shared/applicationinfo.h"
+#include "../shared/applicationinfo.h"
 
 #include "modulelist.h"
 

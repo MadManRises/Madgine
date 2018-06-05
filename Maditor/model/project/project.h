@@ -3,7 +3,7 @@
 
 #include "projectelement.h"
 
-#include "model/treemodel.h"
+#include "../treemodel.h"
 
 
 namespace Maditor {

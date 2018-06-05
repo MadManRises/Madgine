@@ -4,7 +4,7 @@
 
 
 #include "maditormodelforward.h"
-#include "shared/maditorsharedlib.h"
+#include "../shared/maditorsharedlib.h"
 
 #if defined(Maditor_Model_EXPORTS)
 #define MADITOR_MODEL_EXPORT DLL_EXPORT

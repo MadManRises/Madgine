@@ -1,7 +1,7 @@
 #include "maditorviewlib.h"
 
 #include "documentview.h"
-#include "model/documents/document.h"
+#include "../../model/documents/document.h"
 
 namespace Maditor {
 	namespace View {

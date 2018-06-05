@@ -3,7 +3,7 @@
 /// @cond
 
 #include "maditorlauncherforward.h"
-#include "shared/maditorsharedlib.h"
+#include "../shared/maditorsharedlib.h"
 
 #include "Madgine/madginelib.h"
 

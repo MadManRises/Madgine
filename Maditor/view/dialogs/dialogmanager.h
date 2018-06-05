@@ -3,7 +3,7 @@
 
 //#include "Model\Project\Generators\ClassGeneratorFactory.h"
 
-#include "model/dialogmanager.h"
+#include "../../model/dialogmanager.h"
 
 namespace Maditor {
 

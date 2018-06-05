@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/application/treeunit.h"
+#include "../treeunit.h"
 
 namespace Maditor {
 	namespace Model {

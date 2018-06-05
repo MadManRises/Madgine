@@ -2,7 +2,7 @@
 
 #include "applicationlauncher.h"
 
-#include "shared/ipcmanager/boostipcmanager.h"
+#include "../shared/ipcmanager/boostipcmanager.h"
 
 #ifdef _WIN32
 #define pid_t DWORD

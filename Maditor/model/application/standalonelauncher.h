@@ -3,7 +3,7 @@
 #include "applicationlauncher.h"
 
 #include "Madgine/network/networkmanager.h"
-#include "shared/projectfile.h"
+#include "../shared/projectfile.h"
 
 #include "Madgine/serialize/streams/filebuffer.h"
 

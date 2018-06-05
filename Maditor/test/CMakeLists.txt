@@ -1,6 +1,7 @@
 
 project(Maditor_Test)
 
+include_directories(${Madgine_SOURCE_DIR}/Maditor)
 
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)

@@ -4,8 +4,8 @@
 
 #include "componentview.h"
 
-#include "model/application/embeddedlauncher.h"
-#include "model/application/standalonelauncher.h"
+#include "../../model/application/embeddedlauncher.h"
+#include "../../model/application/standalonelauncher.h"
 
 namespace Maditor {
 namespace View {

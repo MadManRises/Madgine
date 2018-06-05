@@ -10,9 +10,9 @@
 #include "editorsettingswidget.h"
 
 
-#include "model/addons/addon.h"
+#include "../model/addons/addon.h"
 
-#include "model/maditor.h"
+#include "../model/maditor.h"
 
 namespace Maditor {
 namespace View {

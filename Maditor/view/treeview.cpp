@@ -2,7 +2,7 @@
 
 #include "treeview.h"
 
-#include "model/treemodel.h"
+#include "../model/treemodel.h"
 
 namespace Maditor {
 	namespace View {

@@ -3,12 +3,12 @@
 #include "configwidget.h"
 #include "ui_configwidget.h"
 
-#include "model/project/applicationconfig.h"
+#include "../../model/project/applicationconfig.h"
 
-#include "model/project/project.h"
-#include "model/project/modulelist.h"
+#include "../../model/project/project.h"
+#include "../../model/project/modulelist.h"
 
-#include "model/project/generators/serverclassgenerator.h"
+#include "../../model/project/generators/serverclassgenerator.h"
 
 namespace Maditor {
 namespace View {

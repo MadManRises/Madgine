@@ -3,7 +3,7 @@
 #include "appstatswidget.h"
 #include "ui_appstatswidget.h"
 
-#include "model/application/statsmodel.h"
+#include "../../model/application/statsmodel.h"
 
 namespace Maditor {
 namespace View {

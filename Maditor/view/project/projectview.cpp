@@ -6,7 +6,7 @@
 #include "projectview.h"
 
 
-#include "model/project/configlist.h"
+#include "../../model/project/configlist.h"
 
 
 namespace Maditor {

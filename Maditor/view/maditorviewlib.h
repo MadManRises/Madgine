@@ -2,7 +2,7 @@
 
 /// @cond
 
-#include "model/maditormodellib.h"
+#include "../model/maditormodellib.h"
 
 #if defined(Maditor_View_EXPORTS)
 #define MADITOR_VIEW_EXPORT DLL_EXPORT

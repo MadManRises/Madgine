@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/tablemodel.h"
+#include "../model/tablemodel.h"
 
 #include "Madgine/serialize/serializableunit.h"
 

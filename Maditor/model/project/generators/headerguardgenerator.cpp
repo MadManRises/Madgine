@@ -1,6 +1,6 @@
 #include "maditormodellib.h"
 
-#include "model/project/module.h"
+#include "project/module.h"
 #include "headerguardgenerator.h"
 
 namespace Maditor {

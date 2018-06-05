@@ -2,7 +2,7 @@
 
 #include "embeddedwrapper.h"
 
-#include "shared/errorcodes.h"
+#include "../shared/errorcodes.h"
 
 #ifdef MADGINE_CLIENT_BUILD
 #include "inputwrapper.h"

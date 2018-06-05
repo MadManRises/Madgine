@@ -10,7 +10,7 @@
 
 #include "ogrewindow.h"
 
-#include "shared/ipcmanager/boostipcserver.h"
+#include "../shared/ipcmanager/boostipcserver.h"
 
 namespace Maditor
 {

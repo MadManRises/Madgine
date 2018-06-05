@@ -3,7 +3,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "model/maditor.h"
+#include "../model/maditor.h"
 
 #include "maditorview.h"
 
@@ -12,7 +12,7 @@
 
 #include "application/applicationview.h"
 
-#include "model/addons/addon.h"
+#include "../model/addons/addon.h"
 
 
 #include "logs/logsview.h"

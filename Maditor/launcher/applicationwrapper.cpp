@@ -2,7 +2,7 @@
 
 #include "applicationwrapper.h"
 
-#include "shared/sharedmemory.h"
+#include "../shared/sharedmemory.h"
 
 #include "Madgine/serialize/serializemanager.h"
 
@@ -14,7 +14,7 @@
 #include "Madgine/gui/guisystem.h"
 #endif
 
-#include "shared/errorcodes.h"
+#include "../shared/errorcodes.h"
 
 
 #include <iostream>

@@ -2,9 +2,9 @@
 
 #include "propertieswidget.h"
 #include "ui_propertieswidget.h"
-#include "model/project/module.h"
-#include "model/project/project.h"
-#include "model/project/modulelist.h"
+#include "../../model/project/module.h"
+#include "../../model/project/project.h"
+#include "../../model/project/modulelist.h"
 #include "project/modulepropertieswidget.h"
 
 namespace Maditor {

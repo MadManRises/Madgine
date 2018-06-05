@@ -2,7 +2,7 @@
 
 #include "embeddedwrapper.h"
 
-#include "shared/errorcodes.h"
+#include "../shared/errorcodes.h"
 
 #include "Madgine/serialize/container/noparent.h"
 

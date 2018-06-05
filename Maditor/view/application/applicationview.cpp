@@ -5,7 +5,7 @@
 
 #include "applicationview.h"
 
-#include "model/project/configlist.h"
+#include "../../model/project/configlist.h"
 
 #include "applicationwindow.h"
 

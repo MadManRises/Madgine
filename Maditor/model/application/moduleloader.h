@@ -2,7 +2,7 @@
 
 #include "Madgine/serialize/container/list.h"
 
-#include "shared/moduleinstance.h"
+#include "../shared/moduleinstance.h"
 
 #include "Madgine/serialize/container/action.h"
 

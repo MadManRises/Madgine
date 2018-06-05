@@ -3,7 +3,7 @@
 #include "editorsettingswidget.h"
 #include "ui_editorsettingswidget.h"
 
-#include "model/maditor.h"
+#include "../model/maditor.h"
 
 namespace Maditor {
 namespace View {

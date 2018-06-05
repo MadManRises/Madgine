@@ -2,7 +2,7 @@
 #include "modulepropertieswidget.h"
 #include "ui_modulepropertieswidget.h"
 
-#include "model/project/modulelist.h"
+#include "../../model/project/modulelist.h"
 
 namespace Maditor {
 namespace View {

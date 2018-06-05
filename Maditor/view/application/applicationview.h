@@ -3,7 +3,7 @@
 
 #include "documents/windowspawner.h"
 
-#include "model/application/applicationlauncher.h"
+#include "../model/application/applicationlauncher.h"
 
 #include "applicationwindow.h"
 #include "applicationlog.h"

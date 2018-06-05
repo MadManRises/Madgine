@@ -3,7 +3,7 @@
 #include "applicationlauncher.h"
 
 
-#include "shared/sharedmemory.h"
+#include "../shared/sharedmemory.h"
 
 
 

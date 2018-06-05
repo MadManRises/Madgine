@@ -1,14 +1,14 @@
 #pragma once
 
-#include "shared/appcontrol.h"
+#include "../shared/appcontrol.h"
 #include "moduleloader.h"
 #include "Madgine/serialize/container/serialized.h"
 #include "utilmodel.h"
 #include "logreceiver.h"
-#include "model/documents/document.h"
-#include "shared/errorcodes.h"
+#include "../documents/document.h"
+#include "../shared/errorcodes.h"
 #include "inspector/inspector.h"
-#include "shared/sharedmemory.h"
+#include "../shared/sharedmemory.h"
 
 
 namespace Maditor {

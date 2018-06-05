@@ -2,7 +2,7 @@
 
 #include "componentview.h"
 
-#include "model/maditor.h"
+#include "../model/maditor.h"
 
 
 namespace Maditor {

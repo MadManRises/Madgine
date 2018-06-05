@@ -1,7 +1,7 @@
 #pragma once
 
 #include "generator.h"
-#include "model/project/projectelement.h"
+#include "../projectelement.h"
 
 namespace Maditor {
 	namespace Model {

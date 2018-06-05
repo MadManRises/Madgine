@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/treeitem.h"
-#include "model/documents/document.h"
+#include "../treeitem.h"
+#include "../documents/document.h"
 
 namespace Maditor {
 	namespace Model {

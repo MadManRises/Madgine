@@ -1,7 +1,7 @@
 #ifndef MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 #define MADITOR_VIEW_DIALOGS_NEWCLASSDIALOG_H
 
-#include "model/project/generators/classgeneratorfactory.h"
+#include "../../model/project/generators/classgeneratorfactory.h"
 
 namespace Maditor {
 namespace View {

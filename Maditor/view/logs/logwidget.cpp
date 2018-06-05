@@ -2,7 +2,7 @@
 
 #include "logwidget.h"
 #include "ui_logwidget.h"
-#include "model/logs/logtablemodel.h"
+#include "../../model/logs/logtablemodel.h"
 
 namespace Maditor {
 	namespace View {
