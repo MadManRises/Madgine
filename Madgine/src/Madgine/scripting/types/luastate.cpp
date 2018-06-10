@@ -7,6 +7,8 @@
 #include "scopebase.h"
 #include "apihelper.h"
 
+#include "../datatypes/luatablefieldaccessor.h"
+
 extern "C"
 {
 #include <lua/lua.h>                                /* Always include this when calling Lua */

@@ -3,6 +3,7 @@
 #include "argumentlist.h"
 #include "luatableiterator.h"
 #include "intluatableinstance.h"
+#include "luatablefieldaccessor.h"
 
 extern "C"
 {

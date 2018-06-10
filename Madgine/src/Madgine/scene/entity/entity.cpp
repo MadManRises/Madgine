@@ -11,6 +11,7 @@
 #include "entitycomponentbase.h"
 
 #include "../../scripting/datatypes/luatableiterator.h"
+#include "../../scripting/datatypes/luatablefieldaccessor.h"
 
 #include "../../app/application.h"
 

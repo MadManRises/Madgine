@@ -6,6 +6,7 @@
 #include "../scripting/types/luastate.h"
 
 #include "../scripting/types/scopebase.h"
+#include "../scripting/types/apihelper.h"
 
 extern "C"
 {
@@ -125,7 +126,17 @@ namespace Engine
 		case LUA_TSTRING:
 			return ValueType(lua_tostring(state, index));
 		case LUA_TUSERDATA:
-			return ValueType(*static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1)));
+			{
+				Scripting::APIHelper::Userdata *userdata = static_cast<Scripting::APIHelper::Userdata*>(lua_touserdata(state, -1));
+				if (std::holds_alternative<std::shared_ptr<KeyValueIterator>>(*userdata))
+				{
+					return ValueType(std::get<std::shared_ptr<KeyValueIterator>>(*userdata));
+				}
+				else if(std::holds_alternative<Scripting::ApiMethod>(*userdata))
+				{
+					return ValueType(std::get<Scripting::ApiMethod>(*userdata));
+				}
+			}			
 		default:
 			throw 0;
 		}
@@ -157,16 +168,26 @@ namespace Engine
 			lua_pushstring(state, as<std::string>().c_str());
 			return 1;
 		case Type::ApiMethodValue:
-			lua_pushlightuserdata(state, as<Scripting::ApiMethod>());
-			lua_pushcclosure(state, apiMethodCaller, 1);
-			return 1;
+			{
+				Scripting::APIHelper::Userdata *userdata = static_cast<Scripting::APIHelper::Userdata*>(lua_newuserdata(
+					state, sizeof(Scripting::APIHelper::Userdata)));
+				new(userdata) Scripting::APIHelper::Userdata(as<Scripting::ApiMethod>());
+
+				luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
+
+				lua_setmetatable(state, -2);
+
+				lua_pushcclosure(state, apiMethodCaller, 1);
+
+				return 1;
+			}
 		case Type::KeyValueIteratorValue:
 			{
-				std::shared_ptr<KeyValueIterator>* itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_newuserdata(
-					state, sizeof(std::shared_ptr<KeyValueIterator>)));
-				new(itP) std::shared_ptr<KeyValueIterator>(as<std::shared_ptr<KeyValueIterator>>());
+				Scripting::APIHelper::Userdata *userdata = static_cast<Scripting::APIHelper::Userdata*>(lua_newuserdata(
+					state, sizeof(Scripting::APIHelper::Userdata)));
+				new(userdata) Scripting::APIHelper::Userdata(as<std::shared_ptr<KeyValueIterator>>());
 
-				luaL_getmetatable(state, "Interfaces.kvIteratorMetatable");
+				luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
 
 				lua_setmetatable(state, -2);
 
@@ -187,7 +208,7 @@ namespace Engine
 		if (n < 1)
 			luaL_error(state, "Memberfunctions need at least 1 argument!");
 		Scripting::ArgumentList args(state, n - 1);
-		Scripting::ApiMethod method = reinterpret_cast<Scripting::ApiMethod>(lua_touserdata(state, lua_upvalueindex(1)));
+		Scripting::ApiMethod method = std::get<Scripting::ApiMethod>(*static_cast<Scripting::APIHelper::Userdata*>(lua_touserdata(state, lua_upvalueindex(1))));
 		ValueType v = fromStack(state, -1);
 		lua_pop(state, 1);
 		if (!v.is<Scripting::ScopeBase*>())

@@ -13,7 +13,7 @@ namespace Engine
 {
 	namespace Scripting
 	{
-		const luaL_Reg APIHelper::sIteratorMetafunctions[] =
+		const luaL_Reg APIHelper::sUserdataMetafunctions[] =
 		{
 			{"__gc", &lua_gc},
 			{"__tostring", &lua_toString},
@@ -24,25 +24,32 @@ namespace Engine
 
 		int APIHelper::lua_gc(lua_State* state)
 		{
-			std::shared_ptr<KeyValueIterator>* itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
-			itP->~shared_ptr();
+			Userdata *userdata = static_cast<Userdata*>(lua_touserdata(state, -1));
+			userdata->~Userdata();
 			lua_pop(state, 1);
 			return 0;
 		}
 
 		int APIHelper::lua_toString(lua_State* state)
 		{
-			std::shared_ptr<KeyValueIterator>* itP = static_cast<std::shared_ptr<KeyValueIterator>*>(lua_touserdata(state, -1));
+			Userdata* userdata = static_cast<Userdata*>(lua_touserdata(state, -1));
 			lua_pop(state, 1);
-			lua_pushstring(state, (*itP)->key().c_str());
+			if (std::holds_alternative<std::shared_ptr<KeyValueIterator>>(*userdata))
+			{
+				lua_pushstring(state, std::get<std::shared_ptr<KeyValueIterator>>(*userdata)->key().c_str());
+			}
+			else if(std::holds_alternative<ApiMethod>(*userdata))
+			{
+				lua_pushstring(state, "<user-defined method>");
+			}			
 			return 1;
 		}
 
 		void APIHelper::createMetatables(lua_State* state)
 		{
-			luaL_newmetatable(state, "Interfaces.kvIteratorMetatable");
+			luaL_newmetatable(state, "Interfaces.kvUserdataMetatable");
 
-			luaL_setfuncs(state, sIteratorMetafunctions, 0);
+			luaL_setfuncs(state, sUserdataMetafunctions, 0);
 
 			lua_pop(state, 1);
 		}
