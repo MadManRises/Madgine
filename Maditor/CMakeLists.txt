@@ -19,7 +19,7 @@ set(CMAKE_PREFIX_PATH
 #Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
-find_package(QScintilla REQUIRED)
+#find_package(QScintilla REQUIRED)
 find_package(Qt5Network REQUIRED)
 
 
