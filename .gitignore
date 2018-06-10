@@ -252,3 +252,4 @@ packages/
 CMakeSettings.json
 
 docs/
+.vscode/tasks.json

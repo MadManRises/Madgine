@@ -1,5 +1,8 @@
 #pragma once
 
+#include "luatableinstance.h"
+#include "../../generic/valuetype.h"
+
 namespace Engine
 {
 	namespace Scripting

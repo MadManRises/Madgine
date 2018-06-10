@@ -1,6 +1,6 @@
 #pragma once
 
-#include "luatablefieldaccessor.h"
+//#include "luatablefieldaccessor.h"
 
 namespace Engine
 {
