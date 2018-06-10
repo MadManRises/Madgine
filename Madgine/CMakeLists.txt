@@ -4,7 +4,10 @@
 		  "${CMAKE_CURRENT_SOURCE_DIR}/plugins/ogre/cmake"
 		)     
 
-find_package(OGRE REQUIRED)
+#tmp
+if (BUILD_CLIENT AND NOT CONFIG_BUILD)
+	find_package(OGRE REQUIRED)
+endif()
 
 add_subdirectory(project)
 
