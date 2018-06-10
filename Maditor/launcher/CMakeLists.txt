@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 
 
-
-PROJECT(Maditor_Launcher)
-
 set (BUILD_CLIENT TRUE CACHE BOOL "")
 
 

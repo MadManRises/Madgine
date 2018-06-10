@@ -1,0 +1,6 @@
+include(GetPrerequisites)
+
+file(GLOB CONFIG_FILES "${CMAKE_CURRENT_LIST_DIR}/gatherDependencies-@target@-*.cmake")
+foreach(f ${CONFIG_FILES})
+  include(${f})
+endforeach()

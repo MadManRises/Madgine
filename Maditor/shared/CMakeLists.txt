@@ -9,7 +9,6 @@ if (BOOST_PATH STREQUAL "")
     message (FATAL_ERROR "Assertion failed: Boost is required!")
 endif () 
 
-PROJECT(Maditor_Shared)
 
 find_package(Threads REQUIRED)
 

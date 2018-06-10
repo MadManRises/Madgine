@@ -39,10 +39,9 @@ endif (%1_FOUND)
 					for (CmakeGenerator *sub : mSubProjects)
 						subProjects += "add_subdirectory(" + sub->name() + ")\n";
 
-					stream << templateFile("CmakeMain.txt").arg(mName, libraries, subProjects);
-				}
-				else {
-					stream << templateFile("Dependencies.cmake");
+					QDir dir(QApplication::applicationDirPath());
+					dir.cdUp();
+					stream << templateFile("CmakeMain.txt").arg(mName, libraries, subProjects, dir.path());
 				}
 			}
 
@@ -63,8 +62,7 @@ endif (%1_FOUND)
 			QStringList CmakeProject::filePaths()
 			{
 				return{ 
-					mRoot + "CmakeLists.txt",
-					mRoot + "Dependencies.cmake"
+					mRoot + "CmakeLists.txt"
 				};
 			}
 

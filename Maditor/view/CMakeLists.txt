@@ -1,4 +1,3 @@
-PROJECT(Maditor_View)
 
 set (CMAKE_AUTOUIC ON)
 set (CMAKE_AUTORCC ON)

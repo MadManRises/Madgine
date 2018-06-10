@@ -11,8 +11,6 @@
 
 int main(int argc, char **argv) {
 
-	qDebug() << QDir::currentPath();
-
 	QApplication app(argc, argv);
 
 	qRegisterMetaType<Engine::ValueType>();

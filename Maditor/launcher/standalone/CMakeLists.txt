@@ -1,7 +1,5 @@
 
 
-PROJECT(Maditor_Standalone_Launcher)
-
 set (sources "")
 FolderSources(sources "" "" standalonewrapper.cpp standalonewrapper.h main_standalone.cpp)
 FolderSources(sources "" ".." applicationwrapper.cpp applicationwrapper.h embeddedwrapper.cpp embeddedwrapper.h inputwrapper.cpp inputwrapper.h inspector.cpp inspector.h maditorlauncherlib.cpp maditorlauncherlib.h maditorlauncherforward.h moduleloader.cpp moduleloader.h)

@@ -1,0 +1,26 @@
+MESSAGE(STATUS "Removing old dependencies for @target@...")
+file(REMOVE_RECURSE @CMAKE_BINARY_DIR@/dependencies_bin/@target@)
+
+GET_PREREQUISITES($<TARGET_FILE:@target@> Dependencies 1 1 "" "")
+
+
+
+foreach(dep ${Dependencies})
+	GP_RESOLVE_ITEM($<TARGET_FILE:@target@> ${dep} "$<TARGET_FILE_DIR:@target@>" "" path)
+	GP_FILE_TYPE($<TARGET_FILE:@target@> ${path} type)
+	if (NOT ${type} STREQUAL "local")
+		file(COPY ${path} DESTINATION @CMAKE_BINARY_DIR@/dependencies_bin/@target@)
+		#MESSAGE(STATUS ${dep} ${type} ${path})
+	endif()
+endforeach()
+
+
+foreach(plugin_pattern @plugin_pattern@)
+
+	file(GLOB plugins
+		${plugin_pattern}
+	)
+	foreach(f ${plugins})
+		file(COPY ${f} DESTINATION @CMAKE_BINARY_DIR@/dependencies_bin/@target@)
+	endforeach()
+endforeach()

@@ -40,6 +40,7 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
   
 		  set(buffered "")
 		  foreach(lib ${OGRE_LIBRARIES} ${OGRE_Terrain_LIBRARIES} ${OGRE_Overlay_LIBRARIES})
+		  MESSAGE(STATUS ${lib})
 			if (lib STREQUAL "optimized" OR lib STREQUAL "debug" OR lib STREQUAL "general")
 				set(buffered ${lib})
 			else()
@@ -123,5 +124,16 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 		export_to_workspace(OgreMadgine)
 
 		cpack_add_component(OgreMadgine DISPLAY_NAME Ogre GROUP Renderer)
+
+		get_target_property(bin_loc OgreMadgine LOCATION)
+
+		get_filename_component(bin_name ${bin_loc} NAME)
+
+		collect_dependencies(OgreMadgine "$<$<CONFIG:Debug>:${OGRE_PLUGIN_DIR_DBG}>$<$<NOT:$<CONFIG:Debug>>:${OGRE_PLUGIN_DIR_REL}>/RenderSystem_*$<$<CONFIG:Debug>:_d>${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
+
+
+		install()
+
 	endif()
 endif()

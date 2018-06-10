@@ -12,11 +12,13 @@ PROJECT(%1)
 
 add_definitions(-D_HAS_TR1_NAMESPACE)
 
-include(Dependencies.cmake)
+set(Workspace "%4")
+
+MESSAGE(STATUS ${Workspace})
 
 set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
-	"${Cmake_Utils}"
+	"${Workspace}/Maditor/cmake"
 	
 )
 

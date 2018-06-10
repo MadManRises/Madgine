@@ -4,9 +4,6 @@ option(BLENDER_TOOL "Enables and installs blender tools")
 option(VS_TOOL "Enables Visual Studio tools")
 
 
-Project(Tools)
-
-
 set (TOOLS_LIBS "")
 
 set (TOOLS_BINS "")

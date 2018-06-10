@@ -1,4 +1,4 @@
-PROJECT(Maditor_Model)
+
 
 find_package(Threads REQUIRED)
 
