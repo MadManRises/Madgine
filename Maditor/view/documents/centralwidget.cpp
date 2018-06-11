@@ -1,4 +1,4 @@
-#include "maditorview.h"
+#include "maditorviewlib.h"
 
 #include "centralwidget.h"
 

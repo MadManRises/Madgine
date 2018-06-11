@@ -27,9 +27,9 @@ target_link_libraries(Maditor_Shared PUBLIC Interfaces)
 
 target_link_libraries(Maditor_Shared PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (UNIX)
 	target_link_libraries(Maditor_Shared PRIVATE rt)
-endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (UNIX)
 
 install_to_workspace(Maditor TARGETS Maditor_Shared)
 

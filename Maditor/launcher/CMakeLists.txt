@@ -12,17 +12,17 @@ FolderSources(sources "" "" applicationwrapper.cpp applicationwrapper.h embedded
 add_executable(Embedded_Server_Launcher ${sources})
 target_link_libraries(Embedded_Server_Launcher PRIVATE Maditor_Shared MadgineServer lualib)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (UNIX)
 	target_link_libraries(Embedded_Server_Launcher PRIVATE dl)
-endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (UNIX)
 
 if (BUILD_CLIENT)
 	add_executable(Embedded_Client_Launcher ${sources})
 	target_link_libraries(Embedded_Client_Launcher PRIVATE Maditor_Shared OgreMadgine lualib)
 
-	if (CMAKE_COMPILER_IS_GNUCXX)
+	if (UNIX)
 		target_link_libraries(Embedded_Client_Launcher PRIVATE dl)
-	endif (CMAKE_COMPILER_IS_GNUCXX)
+	endif (UNIX)
 
 	install_to_workspace(Maditor TARGETS Embedded_Client_Launcher)
 

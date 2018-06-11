@@ -1,3 +1,5 @@
+#include "maditorviewlib.h"
+
 #include "modulepropertieswidget.h"
 #include "modulepropertieswidget.h"
 #include "ui_modulepropertieswidget.h"

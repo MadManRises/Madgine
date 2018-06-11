@@ -2,6 +2,7 @@
 
 #include "../generic/templates.h"
 #include "connectionstore.h"
+#include "connectionmanager.h"
 
 namespace Engine
 {

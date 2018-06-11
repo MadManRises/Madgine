@@ -39,9 +39,9 @@ if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32)	
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (UNIX)
 	target_link_libraries (Interfaces PRIVATE stdc++fs dl)
-endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (UNIX)
  
 if (BUILD_TESTING)
 	add_subdirectory(test)	

@@ -76,7 +76,7 @@ template<> inline const char *Collector::name(){\
 		UniqueComponentCollector(const Plugins::PluginManager &pluginManager, _Ty ... args)
 		{
 			//Necessary for dllexport
-			(void)baseIndex();
+			(void)this->baseIndex();
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>){
 				mComponents.reserve(this->sComponents().size());
 			}
@@ -219,7 +219,7 @@ template<> inline const char *Collector::name(){\
 
 			size_t index()
 			{
-				return mIterator + baseIndex();
+				return mIterator + this->baseIndex();
 			}
 
 		private:

@@ -1,4 +1,4 @@
-#include "maditorview.h"
+#include "maditorviewlib.h"
 
 #include "documenttabbar.h"
 #include "documenttabwidget.h"

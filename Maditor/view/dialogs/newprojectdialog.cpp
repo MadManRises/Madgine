@@ -1,3 +1,4 @@
+#include "maditorviewlib.h"
 #include "newprojectdialog.h"
 #include "ui_newprojectdialog.h"
 
