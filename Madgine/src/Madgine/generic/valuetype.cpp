@@ -168,31 +168,12 @@ namespace Engine
 			lua_pushstring(state, as<std::string>().c_str());
 			return 1;
 		case Type::ApiMethodValue:
-			{
-				Scripting::APIHelper::Userdata *userdata = static_cast<Scripting::APIHelper::Userdata*>(lua_newuserdata(
-					state, sizeof(Scripting::APIHelper::Userdata)));
-				new(userdata) Scripting::APIHelper::Userdata(as<Scripting::ApiMethod>());
-
-				luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
-
-				lua_setmetatable(state, -2);
-
-				lua_pushcclosure(state, apiMethodCaller, 1);
-
-				return 1;
-			}
+			pushUserdata(state, as<Scripting::ApiMethod>());
+			lua_pushcclosure(state, apiMethodCaller, 1);
+			return 1;
 		case Type::KeyValueIteratorValue:
-			{
-				Scripting::APIHelper::Userdata *userdata = static_cast<Scripting::APIHelper::Userdata*>(lua_newuserdata(
-					state, sizeof(Scripting::APIHelper::Userdata)));
-				new(userdata) Scripting::APIHelper::Userdata(as<std::shared_ptr<KeyValueIterator>>());
-
-				luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
-
-				lua_setmetatable(state, -2);
-
-				return 1;
-			}
+			pushUserdata(state, as<std::shared_ptr<KeyValueIterator>>());
+			return 1;
 		case Type::LuaTableValue:
 			as<Scripting::LuaTable>().push(state);
 			return 1;
@@ -201,6 +182,17 @@ namespace Engine
 		}
 	}
 
+
+	Scripting::APIHelper::Userdata* ValueType::pushUserdata(lua_State* state, const Scripting::APIHelper::Userdata& data) const
+	{
+		Scripting::APIHelper::Userdata *userdata = new (lua_newuserdata(state, sizeof(Scripting::APIHelper::Userdata))) Scripting::APIHelper::Userdata();
+
+		luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
+
+		lua_setmetatable(state, -2);
+
+		return userdata;
+	}
 
 	int ValueType::apiMethodCaller(lua_State* state)
 	{

@@ -219,7 +219,7 @@ template<> inline const char *Collector::name(){\
 
 			size_t index()
 			{
-				return mIterator + this->baseIndex();
+				return mIterator + Store::baseIndex();
 			}
 
 		private:

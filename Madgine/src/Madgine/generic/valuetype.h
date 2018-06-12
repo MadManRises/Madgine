@@ -11,6 +11,7 @@
 #include "valuetypeexception.h"
 
 #include "../scripting/datatypes/luathread.h"
+#include "../scripting/types/apihelper.h"
 
 namespace Engine
 {
@@ -97,7 +98,10 @@ namespace Engine
 
 
 		template <class T, class _ = std::enable_if_t<_isValueType<T>::value>>
-		explicit ValueType(const T& v);
+		explicit ValueType(const T& v) :
+			mUnion(v)
+		{
+		}
 
 		template <class T, class _ = std::enable_if_t<std::is_enum<T>::value>>
 		explicit ValueType(T val) :
@@ -417,17 +421,14 @@ namespace Engine
 
 	private:
 
+		Scripting::APIHelper::Userdata *pushUserdata(lua_State* state, const Scripting::APIHelper::Userdata &data) const;
+
 		static int apiMethodCaller(lua_State*);
 
 		Union mUnion;
 	};
 
 
-	template <class T, class _>
-	ValueType::ValueType(const T& v) :
-		mUnion(v)
-	{
-	}
 }
 
 std::ostream& operator <<(std::ostream& stream,
