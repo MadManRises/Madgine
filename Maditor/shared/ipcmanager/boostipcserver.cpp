@@ -1,4 +1,4 @@
-#include "maditorsharedlib.h"
+#include "../maditorsharedlib.h"
 
 #include "boostipcserver.h"
 

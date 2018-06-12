@@ -1,10 +1,10 @@
-#include "maditorsharedlib.h"
+#include "../maditorsharedlib.h"
 
 #include "boostipcmanager.h"
 
 #include "Madgine/serialize/toplevelserializableunit.h"
 
-#include "sharedmemory.h"
+#include "../sharedmemory.h"
 
 #include "boostipcstream.h"
 

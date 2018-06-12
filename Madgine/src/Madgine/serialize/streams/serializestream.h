@@ -113,8 +113,7 @@ namespace Engine
 			SerializeOutStream& operator<<(const ValueType& v);
 
 			template <class T, class _ = std::enable_if_t<
-				          !std::is_pointer<T>::value || std::is_convertible<T, const char *>::value, decltype(ValueType(
-					          std::declval<T>()))>>
+				          (!std::is_pointer<T>::value || std::is_convertible<T, const char *>::value) && std::is_constructible_v<ValueType, const T&>>>
 			SerializeOutStream& operator<<(const T& t)
 			{
 				return *this << ValueType(t);

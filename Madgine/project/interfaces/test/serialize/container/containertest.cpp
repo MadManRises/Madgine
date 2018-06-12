@@ -5,6 +5,7 @@
 #include "Madgine/serialize/container/list.h"
 #include "Madgine/serialize/serializableunit.h"
 
+
 TEST(Serialize_Container, Test1)
 {
 	using namespace Engine::Serialize;

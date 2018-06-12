@@ -66,7 +66,7 @@ namespace Engine
 			bool isClosed();
 			void close();
 
-			explicit operator bool();
+			explicit operator bool() const;
 
 		private:
 			buffered_streambuf& mBuffer;

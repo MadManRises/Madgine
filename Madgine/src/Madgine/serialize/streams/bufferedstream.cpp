@@ -109,7 +109,7 @@ namespace Engine
 			mBuffer.close();
 		}
 
-		BufferedInOutStream::operator bool()
+		BufferedInOutStream::operator bool() const
 		{
 			return this->SerializeInStream::operator bool() && this->SerializeOutStream::operator bool();
 		}
