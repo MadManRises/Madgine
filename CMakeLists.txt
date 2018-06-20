@@ -41,6 +41,7 @@ include(Plugins)
 include(Testing)
 
 set (CPACK_NSIS_MODIFY_PATH ON)
+set (CPACK_PACKAGE_VENDOR "Martin Schütz")
 
 enable_packaging()
 
