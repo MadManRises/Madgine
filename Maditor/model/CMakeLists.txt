@@ -34,7 +34,13 @@ if (UNIX)
 	target_link_libraries(Maditor_Model PRIVATE dl)
 endif (UNIX)
 
-target_compile_definitions(Maditor_Model PRIVATE EMBEDDED_CLIENT_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Client_Launcher>" EMBEDDED_SERVER_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Server_Launcher>" CMAKE_GENERATOR="${CMAKE_GENERATOR}")
+target_compile_definitions(Maditor_Model PRIVATE EMBEDDED_SERVER_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Server_Launcher>" CMAKE_GENERATOR="${CMAKE_GENERATOR}")
+
+if (BUILD_CLIENT)
+	target_compile_definitions(Maditor_Model PRIVATE EMBEDDED_CLIENT_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Client_Launcher>")
+else()
+	target_compile_definitions(Maditor_Model PRIVATE EMBEDDED_CLIENT_LAUNCHER_BINARY="")
+endif (BUILD_CLIENT)
 
 install_to_workspace(Maditor TARGETS Maditor_Model)
 
