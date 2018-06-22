@@ -12,7 +12,7 @@ namespace Maditor {
 
 			void addTabWidget(DocumentTabWidget *w);
 			void focus(DocumentTabWidget *w);
-			const std::list<DocumentTabWidget*> &tabWidgets() const;
+			const std::vector<DocumentTabWidget*> &tabWidgets() const;
 
 			void addTab(QWidget *w);
 
@@ -32,7 +32,7 @@ namespace Maditor {
 
 		private:
 			DocumentTabWidget *mCurrentTabWidget;
-			std::list<DocumentTabWidget*> mTabWidgets;
+			std::vector<DocumentTabWidget*> mTabWidgets;
 
 		};
 

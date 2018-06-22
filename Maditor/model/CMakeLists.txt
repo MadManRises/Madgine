@@ -10,10 +10,6 @@ set(CMAKE_AUTOMOC ON)
 set (CMAKE_AUTOMOC_MOC_OPTIONS "-bmaditormodellib.h")
 
 
-add_definitions(-DCMAKE_PATH="${CMAKE_COMMAND}")
-add_definitions(-DCMAKE_GENERATOR="${CMAKE_GENERATOR}")
-add_definitions(-DQSCINTILLA_DLL)
-
 
 set (sources "")
 FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodellib.cpp maditormodellib.h maditor.cpp maditor.h maditorlog.cpp maditorlog.h tablemodel.cpp tablemodel.h treeitem.cpp treeitem.h treemodel.cpp treemodel.h treesorter.cpp treesorter.h)
@@ -22,7 +18,7 @@ FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodelli
 		FolderSources(sources application inspector inspector.cpp inspector.h scopewrapper.cpp scopewrapper.h)
 	FolderSources(sources "" documents document.cpp document.h documentstore.h)
 	FolderSources(sources "" logs logsorterfilter.cpp logsorterfilter.h logtablemodel.cpp logtablemodel.h)
-	FolderSources(sources "" project applicationconfig.cpp applicationconfig.h configlist.cpp configlist.h module.cpp module.h modulelist.cpp modulelist.h moduleselection.cpp moduleselection.h project.cpp project.h projectelement.cpp projectelement.h)
+	FolderSources(sources "" project applicationconfig.cpp applicationconfig.h configlist.cpp configlist.h module.cpp module.h modulelist.cpp modulelist.h moduleselection.cpp moduleselection.h project.cpp project.h projectelement.cpp projectelement.h xmlexception.h)
 		FolderSources(sources project generators classgenerator.cpp classgenerator.h classgeneratorfactory.cpp classgeneratorfactory.h cmakegenerator.cpp cmakegenerator.h cmakeproject.cpp cmakeproject.h commandline.cpp commandline.h dotgenerator.cpp dotgenerator.h entitycomponentgenerator.cpp entitycomponentgenerator.h gamehandlergenerator.cpp gamehandlergenerator.h generator.cpp generator.h globalapigenerator.cpp globalapigenerator.h guihandlergenerator.cpp guihandlergenerator.h headerguardgenerator.cpp headerguardgenerator.h otherclassgenerator.cpp otherclassgenerator.h scenecomponentgenerator.cpp scenecomponentgenerator.h serverclassgenerator.cpp serverclassgenerator.h)
 
 
@@ -37,6 +33,8 @@ target_link_libraries(Maditor_Model PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
 	target_link_libraries(Maditor_Model PRIVATE dl)
 endif (UNIX)
+
+target_compile_definitions(Maditor_Model PRIVATE EMBEDDED_CLIENT_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Client_Launcher>" EMBEDDED_SERVER_LAUNCHER_BINARY="$<TARGET_FILE_NAME:Embedded_Server_Launcher>" CMAKE_GENERATOR="${CMAKE_GENERATOR}")
 
 install_to_workspace(Maditor TARGETS Maditor_Model)
 

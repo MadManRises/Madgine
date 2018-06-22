@@ -198,7 +198,7 @@ namespace Engine
 
 			float mTimeBank;
 
-			std::list<FrameListener*> mListeners;
+			std::vector<FrameListener*> mListeners;
 
 			Plugins::PluginManager &mPluginMgr;
 

@@ -28,7 +28,7 @@ namespace Maditor {
 			{
 				QStringList result;
 				for (QString s : fileNames()) {
-					result << (path() + s);
+					result << (path().filePath(s));
 				}
 				return result;
 			}
@@ -101,7 +101,7 @@ namespace Maditor {
 					if (getContextMenuItems().empty() && !menu.isEmpty())
 						menu.addSeparator();
 					QMenu *subMenu = menu.addMenu("Open");
-					QObject::connect(subMenu, &QMenu::triggered, [this](QAction *action) {
+					connect(subMenu, &QMenu::triggered, [this](QAction *action) {
 						//Editors::EditorManager::getSingleton().openByExtension((path() + action->text()).toStdString());
 					});
 					for (const QString &file : fileNames()) {

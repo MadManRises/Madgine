@@ -14,7 +14,7 @@ namespace Maditor {
 
 			QStringList HeaderGuardGenerator::filePaths()
 			{
-				return{ mModule->path() + fileName() };
+				return{ mModule->path().filePath(fileName()) };
 			}
 
 			void HeaderGuardGenerator::write(QTextStream & stream, int index)

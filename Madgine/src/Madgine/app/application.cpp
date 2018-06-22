@@ -193,7 +193,7 @@ namespace Engine
 
 		void Application::removeFrameListener(FrameListener* listener)
 		{
-			mListeners.remove(listener);
+			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
 		}
 
 		bool Application::sendFrameStarted(float timeSinceLastFrame)

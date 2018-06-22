@@ -37,7 +37,8 @@ namespace View {
 
 		setConnections({
 			{ ui->actionNewProject, &Model::Maditor::newProject },
-			{ ui->actionLoadProject, &Model::Maditor::loadProject }
+			{ ui->actionLoadProject, &Model::Maditor::loadProject },
+			{ ui->actionCloseProject, &Model::Maditor::closeProject }
 		});
 
 		addItemsToWindow(this);
@@ -100,6 +101,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::setModel(Model::Maditor* model)
 {
 	connect(model, &Model::Maditor::projectOpened, this, &MainWindow::onProjectOpened);
+	connect(model, &Model::Maditor::projectClosed, this, &MainWindow::onProjectClosed);
 
 	if (model->project()) {
 		onProjectOpened(model->project());
@@ -115,8 +117,14 @@ void MainWindow::setModel(Model::Maditor* model)
 void MainWindow::onProjectOpened(Model::Project *project) {
 	mApplication->setConfigModel(project->configList());
 	mProject->setModel(project);
+	ui->actionCloseProject->setEnabled(true);
 }
 
-
+	void MainWindow::onProjectClosed(Model::Project* project)
+	{
+		mApplication->clearConfigModel();
+		mProject->clearModel();
+		ui->actionCloseProject->setEnabled(false);
+	}
 } // namespace View
 } // namespace Maditor

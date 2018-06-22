@@ -2,6 +2,8 @@
 
 #include "treeitem.h"
 
+#include "treemodel.h"
+
 namespace Maditor {
 	namespace Model {
 
@@ -14,7 +16,7 @@ namespace Maditor {
 			if (!mContextMenuItems.empty()) {
 				if (!menu.actions().isEmpty())
 					menu.addSeparator();
-				for (const std::pair<QString, std::function<void()>> &p : mContextMenuItems) {
+				for (const std::pair<const QString, std::function<void()>> &p : mContextMenuItems) {
 					menu.addAction(p.first, p.second);
 				}
 			}
@@ -24,15 +26,27 @@ namespace Maditor {
 		{
 		}		
 
-		void TreeItem::setContextMenuItems(std::list<std::pair<QString, std::function<void()>>>&& contextMenuItems)
+		void TreeItem::setContextMenuItems(std::map<QString, std::function<void()>>&& contextMenuItems)
 		{
-			mContextMenuItems = std::forward<std::list<std::pair<QString, std::function<void()>>>>(contextMenuItems);
+			mContextMenuItems = std::forward<std::map<QString, std::function<void()>>>(contextMenuItems);
 		}
 
-		const std::list<std::pair<QString, std::function<void()>>>& TreeItem::getContextMenuItems()
+		void TreeItem::addContextMenuItem(const QString& name, std::function<void()> f)
+		{
+			mContextMenuItems[name] = f;
+		}
+
+		void TreeItem::removeContextMenuItem(const QString& name)
+		{
+			mContextMenuItems.erase(name);
+		}
+
+		const std::map<QString, std::function<void()>>& TreeItem::getContextMenuItems()
 		{
 			return mContextMenuItems;
 		}
+
+		
 
 		int TreeItem::childCount() const
 		{
@@ -48,7 +62,7 @@ namespace Maditor {
 				if (parent->child(i) == this)
 					return i;
 			}
-			throw 0;
+			return -1;
 		}
 
 		QVariant TreeItem::icon() const

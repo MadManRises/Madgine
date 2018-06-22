@@ -30,7 +30,7 @@ private:
 
     Ui::SettingsDialog *ui;
 
-	std::list<SettingsTab*> mTabs;
+	std::vector<SettingsTab*> mTabs;
 };
 
 

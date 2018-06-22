@@ -12,11 +12,11 @@ namespace Maditor {
 			Q_OBJECT
 
 		public:
-			Project(LogTableModel *logs, const QString &path, const QString &name, QDomDocument doc = QDomDocument());
-			Project(LogTableModel *logs, QDomDocument doc, const QString &path);
+			Project(LogTableModel *logs, const QDir &path, const QString &name, QDomDocument doc = QDomDocument());
+			Project(LogTableModel *logs, QDomDocument doc, const QDir &path);
 			~Project();
 
-			static Project *load(LogTableModel *logs, const QString &path);
+			static std::unique_ptr<Project> load(LogTableModel *logs, const QDir &path);
 
 			bool isValid();
 
@@ -35,7 +35,7 @@ namespace Maditor {
 			virtual Project *project() override;
 			virtual int childCount() const override;
 			virtual ProjectElement* child(int i) override;
-			virtual QString path() const override;
+			virtual QDir path() const override;
 		
 
 		signals:
@@ -58,7 +58,7 @@ namespace Maditor {
 		private:
 			QDomDocument mDocument;
 			
-			QString mPath;
+			QDir mPath;
 
 			bool mValid;
 

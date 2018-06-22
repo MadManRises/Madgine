@@ -26,7 +26,7 @@ public:
 	}
 
 protected:
-	void setConnections(const std::list<std::pair<QAction*, void(T::*)()>> &connections) {
+	void setConnections(const std::vector<std::pair<QAction*, void(T::*)()>> &connections) {
 		mConnections = connections;
 		if (mModel)
 			setupConnections();
@@ -86,11 +86,11 @@ protected:
 	}
 
 private:
-	std::list<QMetaObject::Connection> mCurrentConnections;
-	std::list<std::pair<QAction *, void (T::*)()>> mConnections;
+	std::vector<QMetaObject::Connection> mCurrentConnections;
+	std::vector<std::pair<QAction *, void (T::*)()>> mConnections;
 
-	std::list<QToolBar*> mToolBars;
-	std::list<QMenu*> mMenus;
+	std::vector<QToolBar*> mToolBars;
+	std::vector<QMenu*> mMenus;
 
 	T *mModel;
 };

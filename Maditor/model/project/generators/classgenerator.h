@@ -35,9 +35,6 @@ namespace Maditor {
 				QString fullName() const;
 				QString header() const;
 
-			signals:
-				void deleteClassRequest();
-
 			protected:
 				virtual QString templateFileName(int index) = 0;
 				QString templateFileByIndex(int index);

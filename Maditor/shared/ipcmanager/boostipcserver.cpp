@@ -16,7 +16,7 @@ namespace Maditor {
 
 		void BoostIPCServer::enqueue(const SharedConnectionPtr &conn, int timeout)
 		{
-			mQueue.emplace_back(std::move(conn));
+			mQueue.emplace_back(conn);
 		}
 
 		SharedConnectionPtr BoostIPCServer::poll(int timeout)

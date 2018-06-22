@@ -32,7 +32,7 @@ public:
 	virtual QString resourceGroupName() override;
 
 	virtual void onProjectOpened(Maditor::Model::Project *project) override;
-	void onInstanceAdded(Maditor::Model::Document *app);
+	void onInstanceAdded(const std::shared_ptr<Maditor::Model::ApplicationLauncher> &app);
 
 	bool autoAttachDebugger();
 	void setAutoAttachDebugger(bool b);

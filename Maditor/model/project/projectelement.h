@@ -3,6 +3,7 @@
 #include "../treeitem.h"
 #include "../documents/document.h"
 
+
 namespace Maditor {
 	namespace Model {
 		class MADITOR_MODEL_EXPORT ProjectElement : public TreeItem{
@@ -16,9 +17,8 @@ namespace Maditor {
 			virtual ~ProjectElement();
 
 			const QString &name() const;
-			QModelIndex ownIndex();
 
-			virtual QString path() const;
+			virtual QDir path() const;
 			virtual Project *project();
 			virtual ProjectElement * parentItem() const override;
 			virtual QVariant cellData(int col) const override;
@@ -29,6 +29,7 @@ namespace Maditor {
 		protected:
 			QDomElement &element();
 			QDomElement createElement(const QString &name);
+			QDomElement uniqueChildElement(const QString &name);
 
 			virtual ProjectElement *child(int i) override;
 
@@ -44,6 +45,12 @@ namespace Maditor {
 			QString stringAttribute(const QString &name);
 
 			void dirty();
+
+			std::optional<QModelIndex> modelIndex();
+			bool beginInsertRows(size_t first, size_t last);
+			void endInsertRows(bool begun);
+			bool beginRemoveRows(size_t first, size_t last);
+			void endRemoveRows(bool begun);
 
 		protected:
 			const QString mName;

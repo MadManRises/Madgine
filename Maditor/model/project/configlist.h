@@ -21,7 +21,7 @@ namespace Maditor {
 			ConfigList(const ConfigList &) = delete;
 			~ConfigList();			
 
-			virtual QString path() const override;
+			virtual QDir path() const override;
 
 			bool hasConfig(const QString &name) const;
 
@@ -29,8 +29,8 @@ namespace Maditor {
 			const ApplicationConfig *getConfig(const QString &name) const;
 
 
-			std::list<std::unique_ptr<ApplicationConfig>>::const_iterator begin() const;
-			std::list<std::unique_ptr<ApplicationConfig>>::const_iterator end() const;
+			std::vector<std::unique_ptr<ApplicationConfig>>::const_iterator begin() const;
+			std::vector<std::unique_ptr<ApplicationConfig>>::const_iterator end() const;
 
 			virtual QVariant icon() const override;
 
@@ -43,17 +43,20 @@ namespace Maditor {
 
 		public slots:
 			void createConfig(const QString &name);
+			void deleteConfig(ApplicationConfig *config);
 
 		private:
 			void init();
 
-			void addConfig(ApplicationConfig *module);
+			void addConfig(std::unique_ptr<ApplicationConfig> &&onfig);
+			void removeConfig(ApplicationConfig *module);
 			void newConfig();
 
 		signals:
 			void configAdded(ApplicationConfig *);		
-			void instanceAdded(ApplicationLauncher *);
-			void instanceDestroyed(ApplicationLauncher *);
+			void configRemoved(ApplicationConfig *);
+			void instanceAdded(const std::shared_ptr<ApplicationLauncher>&);
+			void instanceDestroyed(const std::shared_ptr<ApplicationLauncher>&);
 
 			void openConfig(ApplicationConfig *);
 
@@ -68,7 +71,7 @@ namespace Maditor {
 		private:
 			Project *mParent;
 
-			std::list<std::unique_ptr<ApplicationConfig>> mConfigs;
+			std::vector<std::unique_ptr<ApplicationConfig>> mConfigs;
 
 
 		};

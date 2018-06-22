@@ -22,6 +22,8 @@ find_package(Qt5Xml REQUIRED)
 #find_package(QScintilla REQUIRED)
 find_package(Qt5Network REQUIRED)
 
+add_definitions(-DQSCINTILLA_DLL)
+
 
 include_directories(${Maditor_SOURCE_DIR} ${Madgine_SOURCE_DIR}/Madgine/src)
 
@@ -68,7 +70,7 @@ add_custom_command(TARGET Maditor POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BIN_PATH}/../doc ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../doc
 )
 
-
+collect_custom_dependencies(Maditor cmake ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${CMAKE_BIN})
 
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${CMAKE_BIN} DESTINATION bin COMPONENT Maditor)
@@ -85,12 +87,17 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake DESTINATION Maditor COMPONEN
 
 # Windows specific build steps
 if(WIN32)
-    # Run winddeployqt if it can be found
+    # Run windeployqt if it can be found
     find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${QT_PATH} ENV QTDIR PATH_SUFFIXES bin)
     add_custom_command(TARGET Maditor POST_BUILD
-    COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/qt_dep/bin)
+    COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin -xml)
 
-	install(DIRECTORY ${CMAKE_BINARY_DIR}/qt_dep/bin DESTINATION . COMPONENT Maditor)
+	install(DIRECTORY ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin DESTINATION . COMPONENT Maditor)
+
+	if (MSVC)
+		cpack_add_component(vs15 DISPLAY_NAME "Visual Studio 2017")
+	endif(MSVC)
+
 endif()
 
 install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/addons.txt DESTINATION bin COMPONENT Maditor)

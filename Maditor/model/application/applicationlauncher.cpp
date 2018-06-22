@@ -23,7 +23,7 @@ namespace Maditor
 			Document(uniqueName),
 			mLoader(config),
 
-			mLog(config->project()->logs(), std::list<std::string>{"Ogre.log"}),
+			mLog(config->project()->logs(), std::vector<std::string>{"Ogre.log"}),
 			mWaitingForLoader(false),
 
 			mConfig(config),

@@ -25,13 +25,29 @@ namespace Maditor {
 				}
 
 				virtual View::Dialogs::SettingsDialog *settingsDialog() = 0;
+
+				virtual void showError(const QString &title, const QString &msg) = 0;
+				static void showErrorStatic(const QString &title, const QString &msg)
+				{
+					sSingleton->showError(title, msg);
+				}
 					
 
 				virtual bool showNewProjectDialog(QString &path, QString &name) = 0;
+				static bool showNewProjectDialogStatic(QString &path, QString &name) {
+					return sSingleton->showNewProjectDialog(path, name);
+				}
 				virtual bool showLoadProjectDialog(QString &path) = 0;
+				static bool showLoadProjectDialogStatic(QString &path) {
+					return sSingleton->showLoadProjectDialog(path);
+				}
 				virtual bool showNewConfigDialog(Model::ConfigList *list, QString &name) = 0;
 				static bool showNewConfigDialogStatic(Model::ConfigList *list, QString &name) {
 					return sSingleton->showNewConfigDialog(list, name);
+				}
+				virtual bool showDeleteConfigDialog(Model::ApplicationConfig *config) = 0;
+				static bool showDeleteConfigDialogStatic(Model::ApplicationConfig *config) {
+					return sSingleton->showDeleteConfigDialog(config);
 				}
 				virtual bool showNewModuleDialog(Model::ModuleList *list, QString &name) = 0;
 				static bool showNewModuleDialogStatic(Model::ModuleList *list, QString &name) {
@@ -49,6 +65,7 @@ namespace Maditor {
 				virtual bool showNewGameHandlerDialog(Model::Module *module, const QString &name) = 0;
 				virtual bool showNewOtherClassDialog(Model::Module *module, const QString &name, bool &headerOnly) = 0;
 				virtual bool showNewServerClassDialog(Model::Module *module, const QString &name) = 0;
+				virtual bool showDeleteClassDialog(Generators::ClassGenerator *generator, bool &deleteFiles) = 0;
 				static bool showNewGuiHandlerDialogStatic(Model::Module *module, const QString &name, QString &window, int &type, bool &hasLayout) {
 					return sSingleton->showNewGuiHandlerDialog(module, name, window, type, hasLayout);
 				}
@@ -70,13 +87,11 @@ namespace Maditor {
 				static bool showNewServerClassDialogStatic(Model::Module *module, const QString &name) {
 					return sSingleton->showNewServerClassDialog(module, name);
 				}
-
-				virtual void showSettingsDialog() = 0;
-
-				virtual bool showDeleteClassDialog(Generators::ClassGenerator *generator, bool &deleteFiles) = 0;
 				static bool showDeleteClassDialogStatic(Generators::ClassGenerator *generator, bool &deleteFiles) {
 					return sSingleton->showDeleteClassDialog(generator, deleteFiles);
 				}
+
+				virtual void showSettingsDialog() = 0;
 
 			private:
 				static DialogManager *sSingleton;

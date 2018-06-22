@@ -45,7 +45,7 @@ namespace Maditor {
 
 			QStringList CmakeGenerator::filePaths()
 			{
-				return{ mParent->root() + mName + "/" + "CmakeLists.txt" };
+				return{ mParent->root().filePath(mName + "/" + "CmakeLists.txt") };
 			}
 
 

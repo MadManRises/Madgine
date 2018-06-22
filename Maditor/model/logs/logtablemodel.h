@@ -34,7 +34,7 @@ namespace Maditor {
 
 
 			private:
-				std::list<std::tuple<Engine::Util::MessageType, QString, QString, QString, std::string, int>> mItems;
+				std::vector<std::tuple<Engine::Util::MessageType, QString, QString, QString, std::string, int>> mItems;
 				
 				LogSorterFilter mSorted;
 			};

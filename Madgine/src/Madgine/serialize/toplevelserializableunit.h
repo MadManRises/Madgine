@@ -18,7 +18,7 @@ namespace Engine
 
 			BufferedOutStream* getSlaveMessageTarget() const;
 
-			const std::list<SerializeManager*>& getMasterManagers() const;
+			const std::vector<SerializeManager*>& getMasterManagers() const;
 			SerializeManager* getSlaveManager() const;
 
 			bool addManager(SerializeManager* mgr);
@@ -41,7 +41,7 @@ namespace Engine
 			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() override;
 
 		private:
-			std::list<SerializeManager*> mMasterManagers;
+			std::vector<SerializeManager*> mMasterManagers;
 			SerializeManager* mSlaveManager;
 			size_t mStaticSlaveId;
 		};

@@ -18,8 +18,7 @@ namespace Maditor {
 namespace View {
 
 	MaditorView::MaditorView() :
-		mDialogManager(new Dialogs::DialogManager),
-
+		mDialogManager(std::make_unique<Dialogs::DialogManager>()),
 		mSettings(nullptr),
 		mMainWindow(nullptr){
 
@@ -44,9 +43,6 @@ namespace View {
 		mSettings->setValue("state", mMainWindow->saveState(0));
 		mSettings->endGroup();
 
-		delete mDialogManager;
-
-
 	}
 
 	void MaditorView::setupUi(MainWindow * window)
@@ -60,7 +56,7 @@ namespace View {
 
 		addItemsToWindow(window);
 
-		connect(window->ui->actionSettings, &QAction::triggered, mDialogManager, &Dialogs::DialogManager::showSettingsDialog);
+		connect(window->ui->actionSettings, &QAction::triggered, mDialogManager.get(), &Dialogs::DialogManager::showSettingsDialog);
 
 	}
 
@@ -70,10 +66,7 @@ namespace View {
 
 		mSettings = &model->settings();
 
-		
-
-		model->setDialogManager(mDialogManager);
-		createSettingsTab(mDialogManager, new EditorSettingsWidget(model), "Projects");
+		createSettingsTab(mDialogManager.get(), new EditorSettingsWidget(model), "Projects");
 
 		updateRecentProjects(model->recentProjects());
 
@@ -88,7 +81,7 @@ namespace View {
 
 	Dialogs::DialogManager * MaditorView::dialogs()
 	{
-		return mDialogManager;
+		return mDialogManager.get();
 	}
 
 	bool MaditorView::closeEvent()

@@ -15,7 +15,7 @@ namespace Maditor {
 			Module(ModuleList *parent, const QString &name);
 			Module(QDomElement data, ModuleList *parent);
 
-			virtual QString path() const override;
+			virtual QDir path() const override;
 
 			QString moduleInclude();
 
@@ -51,10 +51,10 @@ namespace Maditor {
 					return nullptr;
 				return dynamic_cast<T*>(it->get());
 			}
-			const std::list<std::unique_ptr<Generators::ClassGenerator>> &getClasses();
+			const std::vector<std::unique_ptr<Generators::ClassGenerator>> &getClasses();
 			template <class T>
-			std::list<T*> getClasses() {
-				std::list<T*> result;
+			std::vector<T*> getClasses() {
+				std::vector<T*> result;
 				for (const std::unique_ptr<Generators::ClassGenerator> &classGen : mClasses) {
 					if (T *t = dynamic_cast<T*>(classGen.get()))
 						result.push_back(t);
@@ -88,7 +88,7 @@ namespace Maditor {
 
 			Generators::CmakeGenerator mCmake;
 
-			std::list<std::unique_ptr<Generators::ClassGenerator>> mClasses;
+			std::vector<std::unique_ptr<Generators::ClassGenerator>> mClasses;
 			
 			std::set<Module *> mDependencies, mDependedBy;
 

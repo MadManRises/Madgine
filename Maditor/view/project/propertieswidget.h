@@ -21,7 +21,7 @@ public:
 
 private:
 	Model::Project *mProject;
-	std::list<ModulePropertiesWidget*> mModuleWidgets;
+	std::vector<ModulePropertiesWidget*> mModuleWidgets;
 
     Ui::PropertiesWidget *ui;
 };

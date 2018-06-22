@@ -185,7 +185,7 @@ namespace Engine
 
 	Scripting::APIHelper::Userdata* ValueType::pushUserdata(lua_State* state, const Scripting::APIHelper::Userdata& data) const
 	{
-		Scripting::APIHelper::Userdata *userdata = new (lua_newuserdata(state, sizeof(Scripting::APIHelper::Userdata))) Scripting::APIHelper::Userdata();
+		Scripting::APIHelper::Userdata *userdata = new (lua_newuserdata(state, sizeof(Scripting::APIHelper::Userdata))) Scripting::APIHelper::Userdata(data);
 
 		luaL_getmetatable(state, "Interfaces.kvUserdataMetatable");
 

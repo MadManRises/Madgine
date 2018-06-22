@@ -29,20 +29,21 @@ namespace Maditor {
 
 			bool hasModuleEnabled(Module *module);
 
-			ApplicationLauncher *createInstace(bool remote);
+			std::shared_ptr<ApplicationLauncher> createInstace(bool remote);
 
 			Launcher launcher() const;
 			const QString &customExecutableCmd() const;
 			Shared::LauncherType launcherType() const;
 			Generators::ServerClassGenerator *server() const;
 
-			QString path() const override;
+			QDir path() const override;
 			void save() override;
 			void discardChanges() override;
 
 			ModuleSelection *modules();
 
 			void release();
+			void delete_();
 
 		public slots:
 			void setLauncher(Launcher launcher);
@@ -64,8 +65,8 @@ namespace Maditor {
 			void init();
 
 		signals:
-			void documentCreated(ApplicationLauncher *);
-			void documentDestroyed(ApplicationLauncher *);
+			void documentCreated(const std::shared_ptr<ApplicationLauncher> &);
+			void documentDestroyed(const std::shared_ptr<ApplicationLauncher> &);
 
 			void launcherChanged(Launcher newValue, Launcher old);
 			void launcherTypeChanged(Shared::LauncherType newValue, Shared::LauncherType old);
@@ -73,8 +74,8 @@ namespace Maditor {
 			void serverChanged(Generators::ServerClassGenerator*);
 
 		private slots:
-			void onDocumentCreated(Document *doc);
-			void onDocumentDestroyed(Document *doc);
+			void onDocumentCreated(const std::shared_ptr<Document> &doc);
+			void onDocumentDestroyed(const std::shared_ptr<Document> &doc);
 
 
 		private:

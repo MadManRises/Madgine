@@ -7,7 +7,7 @@ namespace Maditor {
 		namespace Generators {
 			class DotGenerator : public Generator {
 			public:
-				DotGenerator(const QString &folder, const QString &name);
+				DotGenerator(const QDir &folder, const QString &name);
 
 				void addEdge(const QString &from, const QString &to);
 				void addNode(const QString &node);
@@ -23,7 +23,8 @@ namespace Maditor {
 				std::list<std::pair<QString, QString>> mEdges;
 				QStringList mNodes;
 
-				QString mFolder, mName;
+				QDir mFolder;
+				QString mName;
 				
 			};
 		}

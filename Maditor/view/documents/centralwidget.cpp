@@ -39,7 +39,7 @@ namespace Maditor {
 			parentTabWidget(w)->setCurrentWidget(w);
 		}
 
-		const std::list<DocumentTabWidget*>& Maditor::View::CentralWidget::tabWidgets() const
+		const std::vector<DocumentTabWidget*>& Maditor::View::CentralWidget::tabWidgets() const
 		{
 			return mTabWidgets;
 		}
@@ -58,7 +58,7 @@ namespace Maditor {
 		}
 
 		void CentralWidget::removeTabWidget(QObject *obj) {
-			mTabWidgets.remove(static_cast<DocumentTabWidget*>(obj));
+			mTabWidgets.erase(std::remove(mTabWidgets.begin(), mTabWidgets.end(), static_cast<DocumentTabWidget*>(obj)), mTabWidgets.end());
 		}
 
 		void CentralWidget::onCurrentTabChanged(int index) {

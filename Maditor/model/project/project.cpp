@@ -11,30 +11,34 @@
 #include "generators/serverclassgenerator.h"
 
 #include "configlist.h"
+#include "Madgine/plugins/plugin.h"
+#include "xmlexception.h"
 
 namespace Maditor {
 	namespace Model {
 
 		const QString Project::sProjectFileName = "project.mad";
 
-		Project::Project(LogTableModel *logs, const QString & path, const QString & name, QDomDocument doc) :
+		Project::Project(LogTableModel *logs, const QDir & path, const QString & name, QDomDocument doc) :
 			ProjectElement(name, "MadProject", doc),
 			Document(name),
 			mModel(this, 1),
 			mDocument(doc),
-			mPath(QDir(path + name).absolutePath() + "/"),
-			mModules(new ModuleList(this)),
-			mConfigs(new ConfigList(this)),
+			mPath(path),
+			mModules(std::make_unique<ModuleList>(this)),
+			mConfigs(std::make_unique<ConfigList>(this)),
 			mValid(false),
 			mLogs(logs)
 		{
+			assert(mPath.cd(name));
+
 			init();
 
 			QMessageBox::StandardButton answer = QMessageBox::StandardButton::Default;
 
-			QFile file(mPath + sProjectFileName);
+			QFile file(mPath.filePath(sProjectFileName));
 			if (file.exists()) {
-				if (!DialogManager::confirmFileOverwriteStatic(mPath + sProjectFileName, &answer)) {
+				if (!DialogManager::confirmFileOverwriteStatic(mPath.filePath(sProjectFileName), &answer)) {
 					return;
 				}
 			}
@@ -50,14 +54,14 @@ namespace Maditor {
 		}
 
 
-		Project::Project(LogTableModel *logs, QDomDocument doc, const QString &path) :
+		Project::Project(LogTableModel *logs, QDomDocument doc, const QDir &path) :
 			ProjectElement(doc.documentElement()),
 			Document(doc.documentElement().attribute("name")),
 			mModel(this, 1),
 			mDocument(doc),
-			mPath(QDir(path).absolutePath() + "/"),
-			mModules(new ModuleList(element().firstChildElement("Modules"), this)),
-			mConfigs(new ConfigList(element().firstChildElement("Configs"), this)),
+			mPath(path),
+			mModules(std::make_unique<ModuleList>(uniqueChildElement("Modules"), this)),
+			mConfigs(std::make_unique<ConfigList>(uniqueChildElement("Configs"), this)),
 			mValid(true),
 			mLogs(logs)
 		{
@@ -78,9 +82,9 @@ namespace Maditor {
 
 		void Project::init()
 		{
-			mMediaFolder.setRootPath(mPath + "data/media");
+			mMediaFolder.setRootPath(mPath.filePath("data/media"));
 
-			Engine::Serialize::Debugging::StreamDebugging::setLoggingPath(mPath.toStdString() + "debug/runtime/maditor/");
+			Engine::Serialize::Debugging::StreamDebugging::setLoggingPath(mPath.path().toStdString() + "debug/runtime/maditor/");
 			Engine::Serialize::Debugging::StreamDebugging::setLoggingEnabled(true);
 
 			connect(mModules.get(), &ModuleList::classAdded, this, &Project::onClassAdded);
@@ -104,13 +108,13 @@ namespace Maditor {
 		void Project::copyTemplate(QMessageBox::StandardButton *answer)
 		{
 			QStringList templateFiles;
-			QString templatePath("templateproject/");
+			QString templatePath = QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string() + "/templateproject/");
 			QDir dir(templatePath);
 
 			QDirIterator it(templatePath, QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs, QDirIterator::Subdirectories);
 			while (it.hasNext()) {
 				QString filePath = it.next();
-				QString target = mPath + dir.relativeFilePath(filePath);
+				QString target = mPath.filePath(dir.relativeFilePath(filePath));
 				QFileInfo info(filePath);
 				if (info.isFile()) {
 					QDir().mkpath(info.path());
@@ -139,19 +143,20 @@ namespace Maditor {
 			return &mModel;
 		}
 
-		QString Project::path() const
+		QDir Project::path() const
 		{
 			return mPath;
 		}
 
-		Project * Project::load(LogTableModel *logs, const QString & path)
+		std::unique_ptr<Project> Project::load(LogTableModel *logs, const QDir & path)
 		{
-			QFile file(path + sProjectFileName);
-			file.open(QIODevice::ReadOnly);
+			QFile file(path.filePath(sProjectFileName));
+			if (!file.open(QIODevice::ReadOnly))
+				throw XmlException(Engine::message("Could not find Project-File '", "'!")(path.filePath(sProjectFileName).toStdString()));
 			QDomDocument doc;
 			doc.setContent(&file);
 			file.close();
-			return new Project(logs, doc, path);
+			return std::make_unique<Project>(logs, doc, path);
 		}
 		
 		bool Project::isValid()
@@ -193,7 +198,7 @@ namespace Maditor {
 
 		bool Project::writeToDisk()
 		{
-			QFile file(mPath + sProjectFileName);
+			QFile file(mPath.filePath(sProjectFileName));
 			if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 				return false;
 			QTextStream stream(&file);

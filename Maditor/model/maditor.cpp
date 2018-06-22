@@ -7,6 +7,7 @@
 #include "addons/addon.h"
 
 #include "Madgine/util/utilmethods.h"
+#include "project/xmlexception.h"
 
 namespace Maditor {
 	namespace Model {
@@ -14,8 +15,8 @@ namespace Maditor {
 		DialogManager *DialogManager::sSingleton = 0;
 
 		Maditor::Maditor() :
-			mSettings("MadMan Studios", "Maditor"),
-			mAddons(new Addons::AddonCollector(this)),
+			mSettings(QSettings::IniFormat, QSettings::UserScope, "MadMan Studios", "Maditor"),
+			mAddons(std::make_unique<Addons::AddonCollector>(this)),
 			mLog(&mLogs)
 		{
 
@@ -24,22 +25,16 @@ namespace Maditor {
 			mReloadProject = mSettings.value("reloadProject").toBool();
 			mSettings.endGroup();
 
-			connect(this, &Maditor::projectOpened, mAddons, &Addons::AddonCollector::onProjectOpened);
+			connect(this, &Maditor::projectOpened, mAddons.get(), &Addons::AddonCollector::onProjectOpened);
 
 			Engine::Util::UtilMethods::setup(&mLog);
 
-			if (mReloadProject && !mRecentProjects.isEmpty()) {
-				loadProject(mRecentProjects.front());
-			}
-
-			startTimer(100);
 		}
 
 
 
 		Maditor::~Maditor()
 		{
-			delete mAddons;
 			mSettings.beginGroup("Editor");
 			mSettings.setValue("recentProjects", mRecentProjects);
 			mSettings.setValue("reloadProject", mReloadProject);
@@ -47,9 +42,19 @@ namespace Maditor {
 
 		}
 
+		void Maditor::init()
+		{
+			if (mReloadProject && !mRecentProjects.isEmpty()) {
+				loadProject(mRecentProjects.front());
+			}
+
+			startTimer(100);
+		}
+
 		void Maditor::newProject(const QString &path, const QString &name)
 		{
 
+			closeProject();
 			openProject(std::make_unique<Project>(&mLogs, path, name));
 
 		}
@@ -57,7 +62,13 @@ namespace Maditor {
 		void Maditor::loadProject(const QString & path)
 		{
 
-			openProject(std::unique_ptr<Project>(Project::load(&mLogs, path)));
+			closeProject();
+			try {
+				openProject(std::unique_ptr<Project>(Project::load(&mLogs, path)));
+			} catch(const XmlException &e)
+			{
+				DialogManager::showErrorStatic("Xml Error", e.what());
+			}
 
 		}
 
@@ -67,7 +78,7 @@ namespace Maditor {
 
 			mProject = std::forward<std::unique_ptr<Project>>(project);
 
-			QString path = mProject->path();
+			QString path = mProject->path().path();
 			mRecentProjects.removeAll(path);
 			mRecentProjects.push_front(path);
 
@@ -118,25 +129,30 @@ namespace Maditor {
 
 		Addons::AddonCollector * Maditor::addons()
 		{
-			return mAddons;
-		}
-
-		void Maditor::setDialogManager(DialogManager *manager) {
-			mDialogManager = manager;
+			return mAddons.get();
 		}
 
 		void Maditor::newProject()
 		{
 			QString path, name;
-			if (mDialogManager->showNewProjectDialog(path, name)) {
+			if (DialogManager::showNewProjectDialogStatic(path, name)) {
 				newProject(path, name);
 			}
+		}
+
+		void Maditor::closeProject()
+		{
+			if (mProject) {
+				emit projectClosed(mProject.get());
+				mProject.reset();
+			}
+
 		}
 
 		void Maditor::loadProject()
 		{
 			QString path;
-			if (mDialogManager->showLoadProjectDialog(path)) {
+			if (DialogManager::showLoadProjectDialogStatic(path)) {
 				loadProject(path);
 			}
 		}

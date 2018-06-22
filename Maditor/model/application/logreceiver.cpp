@@ -7,7 +7,7 @@
 namespace Maditor {
 	namespace Model {
 
-		LogReceiver::LogReceiver(LogTableModel * model, const std::list<std::string> &textLogs) :
+		LogReceiver::LogReceiver(LogTableModel * model, const std::vector<std::string> &textLogs) :
 			mModel(model)
 		{
 

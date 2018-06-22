@@ -111,7 +111,7 @@ namespace Engine
 			return nullptr;
 		}
 
-		const std::list<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers() const
+		const std::vector<SerializeManager*>& TopLevelSerializableUnitBase::getMasterManagers() const
 		{
 			return mMasterManagers;
 		}
@@ -141,7 +141,7 @@ namespace Engine
 			if (mgr->isMaster())
 			{
 				size_t check = mMasterManagers.size();
-				mMasterManagers.remove(mgr);
+				mMasterManagers.erase(std::remove(mMasterManagers.begin(), mMasterManagers.end(), mgr), mMasterManagers.end());
 				assert(mMasterManagers.size() == check - 1);
 			}
 			else

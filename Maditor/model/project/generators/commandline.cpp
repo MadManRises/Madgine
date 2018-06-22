@@ -15,23 +15,23 @@ namespace Maditor {
 
 			//Watcher::OgreLogWatcher *CommandLine::sLog = 0;
 
-			int CommandLine::exec(const char* cmd) {
+			std::pair<int, std::string> CommandLine::exec(std::string cmd) {
 				LOG(std::string("Executing Command: ") + cmd);
 
-				char buffer[128];
-				std::string result = "result: ";
-				FILE* pipe = _popen(cmd, "r");
+#ifdef _WIN32
+				cmd += " 2>&1";
+#endif
+				
+				FILE* pipe = _popen(cmd.c_str(), "r");
 				if (!pipe) throw std::runtime_error("popen() failed!");
+
+				char buffer[128];
+				std::string result;
 				while (!feof(pipe)) {
 					if (fgets(buffer, 128, pipe) != NULL)
 						result += buffer;
 				}
-				int rVal = _pclose(pipe);
-				if (rVal == 0)
-					LOG(result);
-				else
-					LOG_ERROR(result);
-				return rVal;
+				return std::make_pair(_pclose(pipe), std::move(result));
 				
 			}
 

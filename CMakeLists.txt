@@ -41,7 +41,11 @@ include(Plugins)
 include(Testing)
 
 set (CPACK_NSIS_MODIFY_PATH ON)
-set (CPACK_PACKAGE_VENDOR "Martin Schütz")
+set (CPACK_PACKAGE_VENDOR "MadMan Studios")
+
+set (CPACK_PACKAGE_EXECUTABLES "Maditor;Maditor")
+
+include(Maditor/Maditor_packaging.cmake)
 
 enable_packaging()
 

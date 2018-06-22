@@ -29,7 +29,7 @@ namespace Maditor
 		protected:
 			Engine::Input::InputHandler* input() override;
 		private:
-			InputWrapper *mInput;
+			std::unique_ptr<InputWrapper> mInput;
 #endif
 		};
 

@@ -12,9 +12,9 @@ namespace Maditor {
 			mId(++sRunningId),
 			mMemory(
 				(
-					boost::interprocess::shared_memory_object::remove((std::string("Maditor_Memory_")+std::to_string(mId)).c_str()),
+					boost::interprocess::shared_memory_object::remove(serverName().c_str()),
 					boost::interprocess::create_only
-				), (std::string("Maditor_Memory_") + std::to_string(mId)).c_str(), 1000000),
+				), serverName().c_str(), 1000000),
 			mCreate(true)
 		{
 			mData = mMemory.construct<Shared>("SharedData")(mMemory.get_segment_manager());
@@ -22,14 +22,14 @@ namespace Maditor {
 
 		SharedMemory::SharedMemory(size_t id) :
 			mId(id),
-			mMemory(boost::interprocess::open_only, (std::string("Maditor_Memory_") + std::to_string(mId)).c_str()),
+			mMemory(boost::interprocess::open_only, serverName().c_str()),
 			mCreate(false)
 		{
 			mData = mMemory.find<Shared>("SharedData").first;
 		}
 		SharedMemory::~SharedMemory() {
 			if (mCreate)
-				boost::interprocess::shared_memory_object::remove((std::string("Maditor_Memory_") + std::to_string(mId)).c_str());
+				boost::interprocess::shared_memory_object::remove(serverName().c_str());
 		}
 		boost::interprocess::managed_shared_memory::segment_manager * SharedMemory::mgr() {
 			return mMemory.get_segment_manager();
@@ -45,9 +45,13 @@ namespace Maditor {
 		{
 			return mId;
 		}
-		std::string SharedMemory::uniqueName()
+		std::string SharedMemory::prefix()
 		{
 			return "Mem_" + std::to_string(mId) + "_";
+		}
+		std::string SharedMemory::serverName()
+		{
+			return "Maditor_Memory_" + std::to_string(mId);
 		}
 		Shared::Shared(boost::interprocess::managed_shared_memory::segment_manager * mgr) :
 			mInput(mgr)

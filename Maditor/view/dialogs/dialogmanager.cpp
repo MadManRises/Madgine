@@ -52,7 +52,12 @@ namespace Maditor {
 			{
 				return mSettingsDialog;
 			}
-			
+
+			void DialogManager::showError(const QString& title, const QString& msg)
+			{
+				QMessageBox::critical(0, title, msg);
+			}
+
 			bool DialogManager::showNewProjectDialog(QString &path, QString &name)
 			{
 				NewProjectDialog dialog;
@@ -86,6 +91,15 @@ namespace Maditor {
 				if (ok)
 					name = s;
 				return ok;
+			}
+
+			bool DialogManager::showDeleteConfigDialog(Model::ApplicationConfig* config)
+			{
+				QMessageBox::StandardButton val = QMessageBox::question(0, "Delete Config?", QString("Do you want to delete the configuration <i>%1</i>?").arg(config->getName()), QMessageBox::Yes | QMessageBox::No);
+				if (val == QMessageBox::No)
+					return false;
+				else
+					return true;
 			}
 
 			bool DialogManager::showNewModuleDialog(Model::ModuleList *list, QString &name)

@@ -48,7 +48,7 @@ private:
 	TreeSorter mSorter;
 	int mColumnCount;
 
-	std::list<std::pair<QString, std::function<void()>>> mContextMenuItems;
+	std::vector<std::pair<QString, std::function<void()>>> mContextMenuItems;
 
 };
 

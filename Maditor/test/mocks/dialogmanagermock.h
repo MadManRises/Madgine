@@ -10,12 +10,16 @@ class MockDialogManager : public DialogManager {
       bool(const QString &filePath, QMessageBox::StandardButton *result));
   MOCK_METHOD0(settingsDialog,
       View::Dialogs::SettingsDialog*());
+  MOCK_METHOD2(showError,
+	  void(const QString &title, const QString &msg));
   MOCK_METHOD2(showNewProjectDialog,
       bool(QString &path, QString &name));
   MOCK_METHOD1(showLoadProjectDialog,
       bool(QString &path));
   MOCK_METHOD2(showNewConfigDialog,
       bool(Model::ConfigList *list, QString &name));
+  MOCK_METHOD1(showDeleteConfigDialog,
+	  bool(Model::ApplicationConfig *config));
   MOCK_METHOD2(showNewModuleDialog,
       bool(Model::ModuleList *list, QString &name));
   MOCK_METHOD3(showNewClassDialog,

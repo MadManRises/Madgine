@@ -118,12 +118,12 @@ void AddonCollector::timerEvent(QTimerEvent * e)
 	}
 }
 
-std::list<Addon*>::const_iterator AddonCollector::begin()
+std::vector<Addon*>::const_iterator AddonCollector::begin()
 {
 	return mAddons.begin();
 }
 
-std::list<Addon*>::const_iterator AddonCollector::end()
+std::vector<Addon*>::const_iterator AddonCollector::end()
 {
 	return mAddons.end();
 }

@@ -43,21 +43,25 @@ namespace Maditor
 			Document(data.attribute("name")),
 			Generator(false),
 			mParent(parent),
+			mLauncher(MADITOR_LAUNCHER),
+			mLauncherType(Shared::CLIENT_LAUNCHER),
 			mInstanceCounter(0),
 			mModules(data.firstChildElement("ModuleSelection"), this)
-		{
+		{			
 			restoreData();
 			init();
+			
 		}
 
 		ApplicationConfig::~ApplicationConfig()
 		{
+			destroy();
 		}
 
 		void ApplicationConfig::generateInfo(Shared::ApplicationInfo& appInfo, QWindow* w) const
 		{
-			appInfo.mDataDir = (mParent->path() + "Data/").toStdString().c_str();
-			appInfo.mProjectDir = mParent->path().toStdString().c_str();
+			appInfo.mDataDir = mParent->path().filePath("Data").toStdString().c_str();
+			appInfo.mProjectDir = mParent->path().path().toStdString().c_str();
 			appInfo.mType = mLauncherType;
 
 			if (mLauncherType == Shared::CLIENT_LAUNCHER)
@@ -81,7 +85,7 @@ namespace Maditor
 			return mModules.isEnabled(module->name());
 		}
 
-		ApplicationLauncher* ApplicationConfig::createInstace(bool remote)
+		std::shared_ptr<ApplicationLauncher> ApplicationConfig::createInstace(bool remote)
 		{
 			if (!remote)
 			{
@@ -115,9 +119,9 @@ namespace Maditor
 			return mServer;
 		}
 
-		QString ApplicationConfig::path() const
+		QDir ApplicationConfig::path() const
 		{
-			return mParent->path() + "release/" + name() + "/";
+			return mParent->path().filePath(QString("release/") + name() + "/");
 		}
 
 		void ApplicationConfig::save()
@@ -141,8 +145,13 @@ namespace Maditor
 		{
 			generate();
 			std::string cmd = QString("\"cmake -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\"").arg(
-				path() + "build/", path() + "src/").toStdString();
+				path().filePath("build"), path().filePath("src")).toStdString();
 			Generators::CommandLine::exec(cmd.c_str());
+		}
+
+		void ApplicationConfig::delete_()
+		{
+			mParent->deleteConfig(this);
 		}
 
 		void ApplicationConfig::setLauncherType(Shared::LauncherType type)
@@ -165,7 +174,8 @@ namespace Maditor
 		void ApplicationConfig::setServer(Generators::ServerClassGenerator* server)
 		{
 			mServer = server;
-			setDirtyFlag(true);
+			if (mLauncher == MADITOR_LAUNCHER && mLauncherType == Shared::SERVER_LAUNCHER)
+				setDirtyFlag(true);
 			emit serverChanged(server);
 		}
 
@@ -183,13 +193,11 @@ namespace Maditor
 				setDirtyFlag(true);
 				if (launcher == MADITOR_LAUNCHER)
 				{
-					setContextMenuItems({
-						{"Release", [this]() { release(); }}
-					});
+					addContextMenuItem("Release", [this]() { release(); });					
 				}
 				else
 				{
-					setContextMenuItems({});
+					removeContextMenuItem("Release");
 				}
 			}
 		}
@@ -223,23 +231,33 @@ namespace Maditor
 		{
 			connect(&mDocuments, &DocumentStore::documentCreated, this, &ApplicationConfig::onDocumentCreated);
 			connect(&mDocuments, &DocumentStore::documentDestroyed, this, &ApplicationConfig::onDocumentDestroyed);
+
+			std::map<QString, std::function<void()>> menuItems{
+				{"Delete", [this]() {delete_(); }}
+			};
+
+			if (mLauncher == MADITOR_LAUNCHER) {
+				menuItems["Release"] = [this]() { release(); };
+			}
+			setContextMenuItems(std::move(menuItems));
+			
 		}
 
-		void ApplicationConfig::onDocumentCreated(Document* doc)
+		void ApplicationConfig::onDocumentCreated(const std::shared_ptr<Document> &doc)
 		{
-			emit documentCreated(static_cast<ApplicationLauncher*>(doc));
+			emit documentCreated(std::static_pointer_cast<ApplicationLauncher>(doc));
 		}
 
-		void ApplicationConfig::onDocumentDestroyed(Document* doc)
+		void ApplicationConfig::onDocumentDestroyed(const std::shared_ptr<Document> &doc)
 		{
-			emit documentDestroyed(static_cast<ApplicationLauncher*>(doc));
+			emit documentDestroyed(std::static_pointer_cast<ApplicationLauncher>(doc));
 		}
 
 		QStringList ApplicationConfig::filePaths()
 		{
 			return {
-				path() + "src/CmakeLists.txt",
-				path() + "src/main.cpp"
+				path().filePath("src/CmakeLists.txt"),
+				path().filePath("src/main.cpp")
 			};
 		}
 
@@ -257,7 +275,7 @@ namespace Maditor
 
 				QString type = (mLauncherType == Shared::SERVER_LAUNCHER ? "TRUE" : "FALSE");
 
-				content = templateFile("CmakeRelease.txt").arg(name(), libraries, files, project()->moduleList()->path(), type);
+				content = templateFile("CmakeRelease.txt").arg(name(), libraries, files, project()->moduleList()->path().path(), type);
 			}
 			else if (index == 1)
 			{

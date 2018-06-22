@@ -31,8 +31,8 @@ namespace Maditor {
 
 			virtual void timerEvent(QTimerEvent *e) override;
 
-			std::list<Addon*>::const_iterator begin();
-			std::list<Addon*>::const_iterator end();
+			std::vector<Addon*>::const_iterator begin();
+			std::vector<Addon*>::const_iterator end();
 
 			void setup(View::MaditorView *view);
 			void setupUi(View::MainWindow *window);
@@ -41,7 +41,7 @@ namespace Maditor {
 			void onProjectOpened(Model::Project *project);
 
 		private:
-			std::list<Addon*> mAddons;
+			std::vector<Addon*> mAddons;
 
 		};
 

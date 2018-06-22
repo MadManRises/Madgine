@@ -17,7 +17,7 @@ namespace Maditor {
 
 
 		ModuleLoader::ModuleLoader(ApplicationConfig *config) :			
-			mBinaryDir(config->project()->path() + "debug/bin/"),
+			mBinaryDir(config->project()->path().filePath("debug/bin")),
 			mModules(*config->project()->moduleList()),
 			TableUnit(2),
 			mModulesCount(-1),
@@ -27,27 +27,23 @@ namespace Maditor {
 						
 			mInstances.setCreator(std::bind(&ModuleLoader::createModule, this, std::placeholders::_1));
 
-			QDir dir(mBinaryDir);
-			mFiles = QSet<QString>::fromList(dir.entryList({ "*.dll" }, QDir::NoDotAndDotDot | QDir::Files));
+			mFiles = QSet<QString>::fromList(mBinaryDir.entryList({ "*.dll" }, QDir::NoDotAndDotDot | QDir::Files));
 
 
 			connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ModuleLoader::onFileChanged);
 			connect(&mWatcher, &QFileSystemWatcher::directoryChanged, this, &ModuleLoader::onFolderChanged);
 
-			mWatcher.addPath(mBinaryDir);
+			mWatcher.addPath(mBinaryDir.path());
 			qDebug() << mBinaryDir;
 		}
 
 
 		ModuleLoader::~ModuleLoader()
 		{
-			if (!mBinaryDir.isEmpty())
-				mWatcher.removePath(mBinaryDir);
-
-			std::list<const Module*> reloadOrder;
+			mWatcher.removePath(mBinaryDir.path());
 
 			for (const Shared::ModuleInstance &mod : mInstances) {
-				mWatcher.removePath(mBinaryDir + QString::fromStdString(mod.name()) + ".dll");
+				mWatcher.removePath(mBinaryDir.filePath(QString::fromStdString(mod.name()) + ".dll"));
 			}
 
 			mInstances.clear();

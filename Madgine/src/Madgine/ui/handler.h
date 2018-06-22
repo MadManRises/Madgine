@@ -15,7 +15,7 @@ namespace Engine
 			WindowDescriber(const std::string& windowName,
 			                GUI::Window** var,
 			                GUI::Class _class,
-			                const std::list<std::pair<GUI::EventType, std::function<void()>>>& events) :
+			                const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events) :
 				mWindowName(windowName),
 				mVar(var),
 				mClass(_class),
@@ -26,7 +26,7 @@ namespace Engine
 			std::string mWindowName;
 			GUI::Window** mVar;
 			GUI::Class mClass;
-			std::list<std::pair<GUI::EventType, std::function<void()>>> mEvents;
+			std::vector<std::pair<GUI::EventType, std::function<void()>>> mEvents;
 		};
 
 
@@ -101,7 +101,7 @@ namespace Engine
 
 			template <class WindowClass>
 			void registerWindow(const std::string& name, WindowClass** var = nullptr,
-			                    const std::list<std::pair<GUI::EventType, std::function<void()>>>& events = {})
+			                    const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events = {})
 			{
 				mWindows.emplace_back(
 					name,
@@ -113,7 +113,7 @@ namespace Engine
 
 
 			void registerWindow(const std::string& name,
-			                    const std::list<std::pair<GUI::EventType, std::function<void()>>>& events = {})
+			                    const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events = {})
 			{
 				registerWindow<GUI::Window>(name, nullptr, events);
 			}

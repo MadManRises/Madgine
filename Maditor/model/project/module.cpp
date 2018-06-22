@@ -20,7 +20,7 @@ namespace Maditor {
 			
 			init();
 
-			QDir().mkdir(path());
+			QDir().mkdir(path().path());
 
 			Generators::HeaderGuardGenerator header(this, name);
 			header.generate();
@@ -39,7 +39,7 @@ namespace Maditor {
 
 			
 			for (QDomElement generator = element().firstChildElement("Class"); !generator.isNull(); generator = generator.nextSiblingElement("Class")) {
-				addClassImpl(Generators::ClassGeneratorFactory::load(this, generator), false);				
+				addClassImpl(Generators::ClassGeneratorFactory::load(this, generator));				
 			}
 
 			for (QDomElement dependency = element().firstChildElement("Dependency"); !dependency.isNull(); dependency = dependency.nextSiblingElement("Dependency")) {
@@ -66,9 +66,9 @@ namespace Maditor {
 			return mClasses.empty();
 		}
 
-		QString Module::path() const
+		QDir Module::path() const
 		{
-			return mParent->path() + mName + "/";
+			return mParent->path().filePath(mName);
 		}
 		void Module::newClass()
 		{
@@ -88,14 +88,13 @@ namespace Maditor {
 
 		void Module::addClassImpl(Generators::ClassGenerator * generator, bool callInsert)
 		{
-			if (callInsert)
-				project()->model()->beginInsertRows(ownIndex(), mClasses.size(), mClasses.size());
+			
+			bool b = beginInsertRows(mClasses.size(), mClasses.size());
 			mClasses.emplace_back(generator);
+			endInsertRows(b);
 
 			mCmake.addFiles(generator->fileNames());
-
-			if (callInsert)
-				project()->model()->endInsertRows();
+				
 
 			emit classAdded(generator);
 		}
@@ -214,9 +213,7 @@ namespace Maditor {
 		}
 
 		Generators::ClassGenerator *Module::child(int i) {
-			auto it = mClasses.begin();
-			std::advance(it, i);
-			return it->get();
+			return mClasses[i].get();
 		}
 
 		Generators::ClassGenerator * Module::getClass(const QString & name)
@@ -227,7 +224,7 @@ namespace Maditor {
 			return it->get();
 		}
 
-		const std::list<std::unique_ptr<Generators::ClassGenerator>> &Module::getClasses()
+		const std::vector<std::unique_ptr<Generators::ClassGenerator>> &Module::getClasses()
 		{
 			return mClasses;
 		}
@@ -253,12 +250,12 @@ namespace Maditor {
 				throw 0;
 			size_t i = std::distance(mClasses.begin(), it);
 
-			project()->model()->beginRemoveRows(ownIndex(), i, i);
+			bool b = beginRemoveRows(i, i);
 			mCmake.removeFiles(generator->fileNames());
-			
-			mClasses.erase(it);			
+			endRemoveRows(b);
 
-			project()->model()->endRemoveRows();
+			mClasses.erase(it);			
+			
 
 			mParent->generate();
 

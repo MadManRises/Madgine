@@ -19,7 +19,7 @@ namespace Maditor
 		EmbeddedLauncher::EmbeddedLauncher(ApplicationConfig* config, const QString& uniqueName) :
 			ApplicationLauncher(config, uniqueName),
 			mNetwork(&mMemory, uniqueName.toStdString()),
-			mInput(new InputWrapper(mMemory.data().mInput)),
+			mInput(std::make_unique<InputWrapper>(mMemory.data().mInput)),
 			mWindow(config->launcher() == ApplicationConfig::MADITOR_LAUNCHER ? new OgreWindow(mInput.get()) : nullptr),
 			mPID(0),
 			mChildInRead(NULL),
@@ -112,7 +112,7 @@ namespace Maditor
 			{
 				mConfig->generateInfo(mAppInfo, mWindow);
 
-				cmd = isClient() ? "Embedded_Client_Launcher.exe " : "Embedded_Server_Launcher.exe ";
+				cmd = isClient() ? EMBEDDED_CLIENT_LAUNCHER_BINARY : EMBEDDED_SERVER_LAUNCHER_BINARY;
 
 				cmd += std::to_string(mMemory.id());
 			}
@@ -182,7 +182,7 @@ namespace Maditor
 
 		std::string EmbeddedLauncher::runtimeDir()
 		{
-			return (mConfig->project()->path() + "debug/runtime/" + getName() + "/").toStdString();
+			return mConfig->project()->path().filePath(QString("debug/runtime/") + getName() + "/").toStdString();
 		}
 
 		

@@ -14,23 +14,23 @@ namespace Maditor {
 		
 		ModuleList::ModuleList(Project *parent) :
 			ProjectElement("C++", "Modules", parent),
-			mPath(parent->path() + "src/"),
+			mPath(parent->path().filePath("src")),
 			mCmake(mPath, parent->path(), parent->name()),
 			mParent(parent)
 		{
-
+			init();
 		}
 
 		ModuleList::ModuleList(QDomElement element, Project *parent) :
 			ProjectElement(element, parent),
-			mPath(parent->path() + "src/"),
+			mPath(parent->path().filePath("src")),
 			mCmake(mPath, parent->path(), parent->name()),
 			mParent(parent)
 		{
 			init();
 
 			for (QDomElement module = element.firstChildElement("Module"); !module.isNull(); module = module.nextSiblingElement("Module")) {
-				addModule(new Module(module, this));
+				addModule(std::make_unique<Module>(module, this));
 			}
 
 			for (const std::unique_ptr<Module> &module : mModules)
@@ -54,15 +54,15 @@ namespace Maditor {
 			});
 		}
 
-		void ModuleList::addModule(Module * module)
+		void ModuleList::addModule(std::unique_ptr<Module> &&module)
 		{
-			//beginInsertRows(index(0, 0), mModules.size(), mModules.size());
-			mModules.emplace_back(module);
-			//endInsertRows();
+			bool b = beginInsertRows(mModules.size(), mModules.size());
+			Module *m = mModules.emplace_back(std::forward<std::unique_ptr<Module>>(module)).get();
+			endInsertRows(b);
 
-			connect(module, &Module::classAdded, this, &ModuleList::classAdded);
+			connect(m, &Module::classAdded, this, &ModuleList::classAdded);
 
-			emit moduleAdded(module);
+			emit moduleAdded(m);
 		}
 
 		void ModuleList::newModule()
@@ -75,7 +75,7 @@ namespace Maditor {
 
 		void ModuleList::drawDependenciesGraph()
 		{
-			Generators::DotGenerator dot(mParent->path() + "tmp/", "Dependencies");
+			Generators::DotGenerator dot(mParent->path().filePath("tmp"), "Dependencies");
 
 			for (const std::unique_ptr<Module> &module : mModules) {
 				dot.addNode(module->name());
@@ -88,7 +88,7 @@ namespace Maditor {
 		}
 
 
-		QString ModuleList::path() const
+		QDir ModuleList::path() const
 		{
 			return mPath;
 		}
@@ -101,7 +101,7 @@ namespace Maditor {
 
 		void ModuleList::createModule(const QString & name)
 		{
-			addModule(new Module(this, name));
+			addModule(std::make_unique<Module>(this, name));
 
 			writeData();
 			mParent->writeToDisk();
@@ -143,12 +143,12 @@ namespace Maditor {
 			return it->get();
 		}
 
-		std::list<std::unique_ptr<Module>>::const_iterator ModuleList::begin() const
+		std::vector<std::unique_ptr<Module>>::const_iterator ModuleList::begin() const
 		{
 			return mModules.begin();
 		}
 
-		std::list<std::unique_ptr<Module>>::const_iterator ModuleList::end() const
+		std::vector<std::unique_ptr<Module>>::const_iterator ModuleList::end() const
 		{
 			return mModules.end();
 		}
@@ -158,9 +158,7 @@ namespace Maditor {
 		}
 
 		Module * ModuleList::child(int i) {
-			auto it = mModules.begin();
-			std::advance(it, i);
-			return it->get();
+			return mModules[i].get();
 		}
 
 		void ModuleList::writeData()

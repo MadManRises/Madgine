@@ -91,7 +91,7 @@ namespace Maditor {
 			}
 
 			SharedConnectionPtr conn = boost::interprocess::make_managed_shared_ptr(
-				mMemory->mgr()->construct<BoostIPCConnection>(boost::interprocess::anonymous_instance)(mMemory->uniqueName(), mMemory->mgr()), mMemory->memory());
+				mMemory->mgr()->construct<BoostIPCConnection>(boost::interprocess::anonymous_instance)(mMemory->prefix(), mMemory->mgr()), mMemory->memory());
 			mServer->enqueue(conn, timeout);
 
 			mConnectionEstablished.queue_direct(std::move(conn), timeout);
@@ -169,7 +169,7 @@ namespace Maditor {
 		{
 			auto it = mStreams.find(id);
 			BoostIPCStream &stream = to->addMasterStream(std::forward<BoostIPCStream>(it->second), false);
-			std::list<Engine::Serialize::TopLevelSerializableUnitBase*> newTopLevels;
+			std::vector<Engine::Serialize::TopLevelSerializableUnitBase*> newTopLevels;
 			std::set_difference(to->getTopLevelUnits().begin(), to->getTopLevelUnits().end(), getTopLevelUnits().begin(), getTopLevelUnits().end(), std::back_inserter(newTopLevels));
 			for (Engine::Serialize::TopLevelSerializableUnitBase *newTopLevel : newTopLevels) {
 				sendState(stream, newTopLevel);

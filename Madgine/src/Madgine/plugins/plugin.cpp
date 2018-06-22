@@ -94,6 +94,13 @@ namespace Engine
 			return path;
 		}
 
-
+		std::experimental::filesystem::path Plugin::runtimePath()
+		{
+#ifdef _WIN32
+			char buffer[512];
+			assert(GetModuleFileName(nullptr, buffer, sizeof(buffer)) != 0);
+			return std::experimental::filesystem::path(buffer).parent_path();
+#endif
+		}
 	}
 }

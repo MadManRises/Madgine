@@ -48,7 +48,7 @@ namespace Maditor {
 
 		void FilesView::clearModel()
 		{
-			setModel(nullptr);
+			QTreeView::setModel(nullptr);
 		}		 
 
 	}

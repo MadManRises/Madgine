@@ -26,7 +26,7 @@ public:
 private:
     Ui::AppStatsWidget *ui;
 
-	std::list<QMetaObject::Connection> mCurrentConnections;
+	std::vector<QMetaObject::Connection> mCurrentConnections;
 };
 
 

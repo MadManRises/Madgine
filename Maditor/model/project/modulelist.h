@@ -20,7 +20,7 @@ namespace Maditor {
 			ModuleList(const ModuleList &) = delete;
 			~ModuleList();
 
-			virtual QString path() const override;
+			virtual QDir path() const override;
 
 			void generate();
 
@@ -33,8 +33,8 @@ namespace Maditor {
 			Module *getModule(const QString &name);
 			const Module *getModule(const QString &name) const;
 
-			std::list<std::unique_ptr<Module>>::const_iterator begin() const;
-			std::list<std::unique_ptr<Module>>::const_iterator end() const;
+			std::vector<std::unique_ptr<Module>>::const_iterator begin() const;
+			std::vector<std::unique_ptr<Module>>::const_iterator end() const;
 
 			virtual QVariant icon() const override;
 
@@ -52,10 +52,11 @@ namespace Maditor {
 			}
 
 			template <class T>
-			std::list<T*> getClasses() {
-				std::list<T*> result;
+			std::vector<T*> getClasses() {
+				std::vector<T*> result;
 				for (const std::unique_ptr<Module> &module : mModules) {
-					result.splice(result.end(), module->getClasses<T>());
+					std::vector<T*> v = module->getClasses<T>();
+					std::copy(v.begin(), v.end(), std::back_inserter(result));					
 				}
 				return result;
 			}
@@ -74,7 +75,7 @@ namespace Maditor {
 		private:
 			void init();
 
-			void addModule(Module *module);
+			void addModule(std::unique_ptr<Module> &&module);
 			void newModule();
 
 		signals:
@@ -85,11 +86,11 @@ namespace Maditor {
 		private:
 			Project *mParent;
 
-			QString mPath;
+			QDir mPath;
 
 			Generators::CmakeProject mCmake;
 
-			std::list<std::unique_ptr<Module>> mModules;
+			std::vector<std::unique_ptr<Module>> mModules;
 
 
 

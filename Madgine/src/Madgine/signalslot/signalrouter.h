@@ -109,7 +109,7 @@ namespace Engine
 
 		private:
 			ConnectionStore mConnections;
-			std::list<std::weak_ptr<ConnectionInstance<_Ty...>>> mConnectedSlots;
+			std::vector<std::weak_ptr<ConnectionInstance<_Ty...>>> mConnectedSlots;
 		};
 	}
 }

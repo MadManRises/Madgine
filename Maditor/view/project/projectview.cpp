@@ -45,12 +45,27 @@ namespace View {
 		mUi->mediaWidget->setModel(model()->getMedia());
 
 		connect(project, &Model::Project::showProperties, std::bind(&IndependentWindowSpawner<Model::Project, PropertiesWidget>::spawn<>, this, project));
+		connect(project->configList(), &Model::ConfigList::configAdded, this, &ProjectView::openConfig);
 		connect(project->configList(), &Model::ConfigList::openConfig, this, &ProjectView::openConfig);
+		connect(project->configList(), &Model::ConfigList::configRemoved, this, &ProjectView::closeConfig);
+	}
+
+	void ProjectView::clearModel()
+	{
+		mUi->projectWidget->clearModel();
+		mUi->mediaWidget->clearModel();
+
+		ComponentView::clearModel();
 	}
 
 	void ProjectView::openConfig(Model::ApplicationConfig * config)
 	{
 		IndependentWindowSpawner<Model::ApplicationConfig, ConfigWidget>::spawn(config);
+	}
+
+	void ProjectView::closeConfig(Model::ApplicationConfig * config)
+	{
+		IndependentWindowSpawner<Model::ApplicationConfig, ConfigWidget>::remove(config);
 	}
 
 } // namespace View

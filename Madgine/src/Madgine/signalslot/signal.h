@@ -122,7 +122,7 @@ namespace Engine
 			}
 
 		private:
-			std::list<std::weak_ptr<ConnectionInstance<_Ty...>>> mConnectedSlots;
+			std::vector<std::weak_ptr<ConnectionInstance<_Ty...>>> mConnectedSlots;
 		};
 	}
 }

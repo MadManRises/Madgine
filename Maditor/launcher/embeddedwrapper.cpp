@@ -17,9 +17,6 @@ namespace Maditor
 		ApplicationWrapper(),
 		mMemory(id),
 		mNetwork(&mMemory, "Maditor-Link")
-		#ifdef MADGINE_CLIENT_BUILD
-			, mInput(nullptr)
-#endif
 		{
 			mNetwork.addTopLevelItem(this);
 		}
@@ -33,10 +30,6 @@ namespace Maditor
 			}
 			using namespace std::chrono;
 			std::this_thread::sleep_for(2000ms);
-#ifdef MADGINE_CLIENT_BUILD
-			if (mInput)
-				delete mInput;
-#endif
 		}
 
 		int EmbeddedWrapper::acceptConnection()
@@ -63,8 +56,8 @@ namespace Maditor
 		Engine::Input::InputHandler* EmbeddedWrapper::input()
 		{
 			if (!mInput)
-				mInput = new InputWrapper(mMemory.data().mInput);
-			return mInput;
+				mInput = std::make_unique<InputWrapper>(mMemory.data().mInput);
+			return mInput.get();
 		}
 #endif
 	}

@@ -7,7 +7,7 @@ namespace Maditor {
 
 			class CommandLine {
 			public:
-				static int exec(const char *cmd);
+				static std::pair<int, std::string> exec(std::string cmd);
 
 				//static void setLog(Watcher::OgreLogWatcher *log);
 

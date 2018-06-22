@@ -14,28 +14,28 @@ namespace Maditor {
 			DocumentStore(DocumentStore &&) = delete;
 
 			template <class Doc, class... _Ty>
-			Doc *createDocument( _Ty&&... args) {
-				Doc *document = new Doc(std::forward<_Ty>(args)...);
+			std::shared_ptr<Doc> createDocument( _Ty&&... args) {
+				std::shared_ptr<Doc> document = std::make_shared<Doc>(std::forward<_Ty>(args)...);
 				mDocuments.emplace_back(document);
-				connect(document, &Doc::destroySignal, this, &DocumentStore::destroyDocument);
+				connect(document.get(), &Doc::destroySignal, this, &DocumentStore::destroyDocument);
 				emit documentCreated(document);
 				return document;
 			}
 
 		signals:
-			void documentCreated(Document *doc);
-			void documentDestroyed(Document *doc);
+			void documentCreated(const std::shared_ptr<Document> &doc);
+			void documentDestroyed(const std::shared_ptr<Document> &doc);
 
 		private slots:
 			void destroyDocument(Document *document) {
-				auto it = std::find_if(mDocuments.begin(), mDocuments.end(), [=](const std::unique_ptr<Document> &doc) {return doc.get() == document; });
+				auto it = std::find_if(mDocuments.begin(), mDocuments.end(), [=](const std::shared_ptr<Document> &doc) {return doc.get() == document; });
 				assert(it != mDocuments.end());
-				emit documentDestroyed(it->get());
+				emit documentDestroyed(*it);
 				mDocuments.erase(it);
 			}
 
 		private:
-			std::list<std::unique_ptr<Document>> mDocuments;
+			std::vector<std::shared_ptr<Document>> mDocuments;
 
 		};
 

@@ -62,7 +62,7 @@ namespace Maditor {
 
 		private:
 			QFileSystemWatcher mWatcher;
-			QString mBinaryDir;
+			QDir mBinaryDir;
 			QSet<QString> mFiles;
 
 			const ModuleList &mModules;

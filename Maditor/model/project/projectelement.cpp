@@ -3,9 +3,12 @@
 #include "projectelement.h"
 
 #include "project.h"
+#include "xmlexception.h"
 
 namespace Maditor {
 	namespace Model {
+
+
 
 		ProjectElement::ProjectElement(const QString & name, const QString &type, ProjectElement *parent) :
 			mRootElement(parent->mRootElement.ownerDocument().createElement(type)),
@@ -47,12 +50,7 @@ namespace Maditor {
 			return mName;
 		}
 
-		QModelIndex ProjectElement::ownIndex()
-		{
-			return parentItem() == nullptr ? QModelIndex() : project()->model()->index(parentIndex(), 0, parentItem()->ownIndex());
-		}
-
-		QString ProjectElement::path() const
+		QDir ProjectElement::path() const
 		{
 			return parentItem()->path();
 		}
@@ -73,6 +71,16 @@ namespace Maditor {
 			QDomElement el = mRootElement.ownerDocument().createElement(name);
 			mRootElement.appendChild(el);
 			return el;
+		}
+
+		QDomElement ProjectElement::uniqueChildElement(const QString& name)
+		{
+			QDomElement e = mRootElement.firstChildElement(name);
+			if (e.isNull())
+				throw XmlException(Engine::message("Missing Child \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
+			if (!e.nextSiblingElement(name).isNull())
+				throw XmlException(Engine::message("Multiple Children with tag \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
+			return e;
 		}
 
 		ProjectElement * ProjectElement::child(int i)
@@ -150,6 +158,74 @@ namespace Maditor {
 		QVariant ProjectElement::cellData(int col) const
 		{
 			return mName;
+		}
+
+		std::optional<QModelIndex> ProjectElement::modelIndex()
+		{
+			if (parentItem())
+			{
+				if (parentIndex() == -1)
+				{
+					return {};
+				}
+				else {
+					std::optional<QModelIndex> parentI = parentItem()->modelIndex();
+					if (parentI) {
+						return project()->model()->index(parentIndex(), 0, parentI.value());
+					}
+					else
+					{
+						return {};
+					}
+				}
+			}
+			else
+			{
+				return QModelIndex();
+			}
+
+		}
+
+		bool ProjectElement::beginInsertRows(size_t first, size_t last)
+		{
+			std::optional<QModelIndex> parentI = modelIndex();
+			if (parentI) {
+				project()->model()->beginInsertRows(parentI.value(), first, last);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		void ProjectElement::endInsertRows(bool begun)
+		{
+			if (begun)
+			{
+				project()->model()->endInsertRows();
+			}
+		}
+
+		bool ProjectElement::beginRemoveRows(size_t first, size_t last)
+		{
+			std::optional<QModelIndex> parentI = modelIndex();
+			if (parentI) {
+				project()->model()->beginRemoveRows(parentI.value(), first, last);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		void ProjectElement::endRemoveRows(bool begun)
+		{
+			if (begun)
+			{
+				project()->model()->endRemoveRows();
+			}
 		}
 
 

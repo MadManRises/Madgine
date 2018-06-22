@@ -29,9 +29,11 @@ public:
 	
 	void setupUi(MainWindow *window);
 	virtual void setModel(Model::Project *project) override;
+	virtual void clearModel() override;
 
 private slots:
 	void openConfig(Model::ApplicationConfig *config);
+	void closeConfig(Model::ApplicationConfig *config);
 
 private:
 	const Ui::MainWindow *mUi;

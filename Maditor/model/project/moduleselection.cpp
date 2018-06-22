@@ -64,7 +64,7 @@ namespace Maditor {
 
 		bool ModuleSelection::storeData()
 		{
-			for (QDomElement el = element().firstChildElement("exclude"); !el.isNull(); el = element().firstChildElement("exclude")) {
+			for (QDomElement el = element().firstChildElement("exclude"); !el.isNull(); el = el.nextSiblingElement("exclude")) {
 				element().removeChild(el);
 			}
 			for (const QString &name : mExcludedModules) {
@@ -100,7 +100,7 @@ namespace Maditor {
 			for (const std::unique_ptr<Module> &mod : *mModules) {
 				if (!mExcludedModules.contains(mod->name())) {
 					for (const QString &f : mod->files()) {
-						files << (mModules->path() + mod->name() + "/" + f);
+						files << (mModules->path().filePath(mod->name() + "/" + f));
 					}
 				}
 			}

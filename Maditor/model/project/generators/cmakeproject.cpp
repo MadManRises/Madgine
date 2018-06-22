@@ -6,10 +6,12 @@
 
 #include "cmakegenerator.h"
 
+#include "Madgine/plugins/plugin.h"
+
 namespace Maditor {
 	namespace Model {
 		namespace Generators {
-			CmakeProject::CmakeProject(const QString & root, const QString &buildDir, const QString &name) :
+			CmakeProject::CmakeProject(const QDir & root, const QDir &buildDir, const QString &name) :
 				Generator(false),
 				mBuildDir(buildDir),
 				mRoot(root),
@@ -18,8 +20,22 @@ namespace Maditor {
 			}
 			void CmakeProject::build()
 			{
-				std::string cmd = QString("\"cmake -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\"").arg(buildDir(), mRoot).toStdString();
-				CommandLine::exec(cmd.c_str());
+				
+				std::string cmd = QString("\"\"%3/cmake\" -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\"").arg(
+					buildDir().path(),
+					mRoot.path(),
+					QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string())
+				).toStdString();
+				std::pair<int, std::string> result = CommandLine::exec(cmd.c_str());
+				if (result.first != 0)
+				{
+					LOG_ERROR(result.second);
+				}
+				else
+				{
+					//LOG(result.second);
+					LOG("CMake Success!");
+				}
 			}
 
 			void CmakeProject::write(QTextStream & stream, int index)
@@ -62,7 +78,7 @@ endif (%1_FOUND)
 			QStringList CmakeProject::filePaths()
 			{
 				return{ 
-					mRoot + "CmakeLists.txt"
+					mRoot.filePath("CMakeLists.txt")
 				};
 			}
 
@@ -72,7 +88,7 @@ endif (%1_FOUND)
 			}
 
 
-			QString CmakeProject::root()
+			QDir CmakeProject::root()
 			{
 				return mRoot;
 			}
@@ -84,12 +100,12 @@ endif (%1_FOUND)
 
 			QString CmakeProject::solutionPath()
 			{
-				return buildDir() + mName + ".sln";
+				return buildDir().filePath(mName + ".sln");
 			}
 
-			QString CmakeProject::buildDir()
+			QDir CmakeProject::buildDir()
 			{
-				return mBuildDir +  "debug/build/";
+				return mBuildDir.filePath("debug/build");
 			}
 
 		}

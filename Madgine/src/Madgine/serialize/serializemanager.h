@@ -126,7 +126,7 @@ namespace Engine
 
 			Util::Process mProcess;
 
-			std::list<BufferedInOutStream *> mMasterStreams;
+			std::vector<BufferedInOutStream *> mMasterStreams;
 			BufferedInOutStream* mSlaveStream;
 
 			std::list<std::function<bool(const SerializableUnitBase*, ParticipantId)>> mFilters;

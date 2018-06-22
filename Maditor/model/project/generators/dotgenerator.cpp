@@ -7,7 +7,7 @@ namespace Maditor {
 	namespace Model {
 		namespace Generators {
 
-DotGenerator::DotGenerator(const QString & folder, const QString & name) :
+DotGenerator::DotGenerator(const QDir & folder, const QString & name) :
 	Generator(false),
 	mFolder(folder),
 	mName(name)
@@ -27,13 +27,13 @@ void DotGenerator::addNode(const QString & node)
 void DotGenerator::generate()
 {
 	Generator::generate();
-	QString cmd = QString("dot -Tpng -o \"%1.png\" \"%1.dot\"").arg(mFolder + mName);
+	QString cmd = QString("dot -Tpng -o \"%1.png\" \"%1.dot\"").arg(mFolder.filePath(mName));
 	CommandLine::exec(cmd.toStdString().c_str());
 }
 
 QStringList DotGenerator::filePaths()
 {
-	return{mFolder + mName + ".dot"};
+	return{mFolder.filePath(mName + ".dot")};
 }
 
 void DotGenerator::write(QTextStream & stream, int index)

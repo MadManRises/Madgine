@@ -31,9 +31,9 @@ namespace Engine
 		private:
 			float mRatio;
 
-			std::list<float> mStepSizes;
-			std::list<size_t> mSubProcessCounts;
-			std::list<size_t> mSubProcessIndices;
+			std::vector<float> mStepSizes;
+			std::vector<size_t> mSubProcessCounts;
+			std::vector<size_t> mSubProcessIndices;
 
 			SignalSlot::Signal<const std::string &> mSubProcessStarted;
 			SignalSlot::Signal<float> mRatioChanged;

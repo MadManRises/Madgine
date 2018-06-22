@@ -31,6 +31,7 @@ public:
 
 private slots:
 	void onProjectOpened(Model::Project *project);
+	void onProjectClosed(Model::Project *project);
 
 private:    
 	ApplicationView *mApplication;

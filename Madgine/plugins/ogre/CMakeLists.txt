@@ -129,7 +129,7 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 
 		get_filename_component(bin_name ${bin_loc} NAME)
 
-		collect_dependencies(OgreMadgine "$<$<CONFIG:Debug>:${OGRE_PLUGIN_DIR_DBG}>$<$<NOT:$<CONFIG:Debug>>:${OGRE_PLUGIN_DIR_REL}>/RenderSystem_*$<$<CONFIG:Debug>:_d>${CMAKE_SHARED_LIBRARY_SUFFIX}")
+		collect_target_dependencies(OgreMadgine "$<$<CONFIG:Debug>:${OGRE_PLUGIN_DIR_DBG}>$<$<NOT:$<CONFIG:Debug>>:${OGRE_PLUGIN_DIR_REL}>/RenderSystem_*$<$<CONFIG:Debug>:_d>${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 
 

@@ -22,16 +22,16 @@ namespace Engine
 
 				virtual void removeComponent(C* c)
 				{
-					mComponents.remove(c);
+					mComponents.erase(std::remove(mComponents.begin(), mComponents.end(), c), mComponents.end());
 				}
 
-				const std::list<C*>& components()
+				const std::vector<C*>& components()
 				{
 					return mComponents;
 				}
 
 			private:
-				std::list<C*> mComponents;
+				std::vector<C*> mComponents;
 			};
 		}
 	}

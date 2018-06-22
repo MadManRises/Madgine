@@ -12,7 +12,7 @@ PROJECT(%1)
 
 add_definitions(-D_HAS_TR1_NAMESPACE)
 
-set(Workspace "%4")
+set(Workspace "%4" CACHE PATH "" FORCE)
 
 MESSAGE(STATUS ${Workspace})
 

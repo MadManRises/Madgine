@@ -28,6 +28,7 @@ public:
 	void setupUi(MainWindow *window);
 
 	void setConfigModel(Model::ConfigList *list);
+	void clearConfigModel();
 
 protected:
 	virtual void setModel(Model::ApplicationLauncher *app) override;
@@ -44,8 +45,8 @@ protected:
 
 private slots:
 	void onConfigAdded(Model::ApplicationConfig *config);
-	void onInstanceAdded(Model::ApplicationLauncher *instance);
-	void onInstanceDestroyed(Model::ApplicationLauncher *instance);
+	void onInstanceAdded(const std::shared_ptr<Model::ApplicationLauncher> &instance);
+	void onInstanceDestroyed(const std::shared_ptr<Model::ApplicationLauncher> &instance);
 	void createCurrentConfig();
 
 	
@@ -61,7 +62,7 @@ private:
 
 	int mApplicationInitialActionCount;
 
-	std::list<QMetaObject::Connection> mAppConnections;
+	std::vector<QMetaObject::Connection> mAppConnections;
 
 	QAction *mCurrentConfigSeparator;
 

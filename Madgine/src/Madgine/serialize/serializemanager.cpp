@@ -384,7 +384,7 @@ namespace Engine
 
 		void SerializeManager::removeMasterStream(BufferedInOutStream* stream)
 		{
-			mMasterStreams.remove(stream);
+			mMasterStreams.erase(std::remove(mMasterStreams.begin(), mMasterStreams.end(), stream), mMasterStreams.end());
 		}
 
 		bool SerializeManager::filter(const SerializableUnitBase* unit, ParticipantId id)

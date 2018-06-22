@@ -16,8 +16,8 @@ namespace Maditor {
 			}
 
 			void LogTableModel::addMessage(const QString &msg, Engine::Util::MessageType level, const QString &logName, const QString &traceback, const std::string &fileName, int lineNr) {
-				beginInsertRows(QModelIndex(), mItems.size(), mItems.size());
-				mItems.emplace_front(level, msg, logName, traceback, fileName, lineNr);
+				beginInsertRows(QModelIndex(), 0, 0);
+				mItems.emplace_back(level, msg, logName, traceback, fileName, lineNr);
 				endInsertRows();
 			}
 
@@ -89,15 +89,13 @@ namespace Maditor {
 					return QVariant();
 
 
-
-				auto it = mItems.begin();
-				std::advance(it, index.row());
+				const std::tuple<Engine::Util::MessageType, QString, QString, QString, std::string, int> &t = mItems[mItems.size() - index.row() - 1];
 
 				if (index.column() == 0) {
 					if (role != Qt::DecorationRole)
 						return QVariant();
 					QIcon icon;
-					switch (std::get<0>(*it)) {
+					switch (std::get<0>(t)) {
 					case Engine::Util::LOG_TYPE:
 						icon.addPixmap(QApplication::style()->standardPixmap(QStyle::SP_MessageBoxInformation));
 						break;
@@ -113,17 +111,17 @@ namespace Maditor {
 				else if (index.column() == 1) {
 					if (role != Qt::DisplayRole)
 						return QVariant();
-					return QVariant(std::get<1>(*it));
+					return QVariant(std::get<1>(t));
 				}
 				else if (index.column() == 3) {
 					if (role != Qt::DisplayRole)
 						return QVariant();
-					return QVariant(std::get<3>(*it));
+					return QVariant(std::get<3>(t));
 				}
 				else if (index.column() == 2) {
 					if (role != Qt::DisplayRole)
 						return QVariant();
-					return QVariant(std::get<2>(*it));
+					return QVariant(std::get<2>(t));
 				}
 
 				return QVariant();

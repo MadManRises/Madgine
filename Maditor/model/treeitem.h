@@ -24,11 +24,14 @@ public:
 	virtual void doubleClicked();
 
 protected:
-	void setContextMenuItems(std::list<std::pair<QString, std::function<void()>>> &&contextMenuItems);
-	const std::list<std::pair<QString, std::function<void()>>> &getContextMenuItems();
+	void setContextMenuItems(std::map<QString, std::function<void()>> &&contextMenuItems);
+	void addContextMenuItem(const QString &name, std::function<void()> f);
+	void removeContextMenuItem(const QString &name);
+
+	const std::map<QString, std::function<void()>> &getContextMenuItems();
 
 private:
-	std::list<std::pair<QString, std::function<void()>>> mContextMenuItems;
+	std::map<QString, std::function<void()>> mContextMenuItems;
 
 	
 };

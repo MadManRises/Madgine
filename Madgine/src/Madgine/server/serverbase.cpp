@@ -89,7 +89,7 @@ namespace Engine
 
 		void ServerBase::removeFrameListener(App::FrameListener* listener)
 		{
-			mListeners.remove(listener);
+			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
 		}
 
 		bool ServerBase::sendFrameStarted()

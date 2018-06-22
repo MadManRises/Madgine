@@ -37,7 +37,7 @@ private slots:
 
 private:
 
-	Dialogs::DialogManager *mDialogManager;
+	std::unique_ptr<Dialogs::DialogManager> mDialogManager;
 
 	
 

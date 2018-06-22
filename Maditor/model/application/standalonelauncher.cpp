@@ -7,6 +7,8 @@
 #include "../shared/projectfile.h"
 #include "project/project.h"
 
+#include "../shared/maditor_constants.h"
+
 namespace Maditor
 {
 	namespace Model
@@ -39,7 +41,7 @@ namespace Maditor
 		void StandaloneLauncher::connect()
 		{
 			emit connecting();
-			mNetwork.connect_async("127.0.0.1", 1234, 10000);
+			mNetwork.connect_async("127.0.0.1", Shared::Constants::sDefaultLauncherPort, 10000);
 		}
 
 		void StandaloneLauncher::shutdownImpl()
@@ -67,7 +69,7 @@ namespace Maditor
 				mediaRoot /= "scripts";
 			}
 
-			std::experimental::filesystem::path root = mConfig->parentItem()->path().toStdString();
+			std::experimental::filesystem::path root = mConfig->parentItem()->path().path().toStdString();
 
 			std::list<Shared::ProjectFile> files;
 
@@ -124,7 +126,7 @@ namespace Maditor
 
 		void StandaloneLauncher::fileRequestImpl(const std::string& path)
 		{
-			std::experimental::filesystem::path root = mConfig->parentItem()->path().toStdString();
+			std::experimental::filesystem::path root = mConfig->parentItem()->path().path().toStdString();
 			sendFile(path, Engine::Serialize::FileBuffer::readFile(root / path), {});
 		}
 

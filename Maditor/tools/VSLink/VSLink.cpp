@@ -130,9 +130,9 @@ void VSLink::onProjectOpened(Maditor::Model::Project * project)
 	connect(project->configList(), &Maditor::Model::ConfigList::instanceAdded, this, &VSLink::onInstanceAdded);
 }
 
-void VSLink::onInstanceAdded(Maditor::Model::Document * app)
+void VSLink::onInstanceAdded(const std::shared_ptr<Maditor::Model::ApplicationLauncher> &app)
 {
-	if (Maditor::Model::EmbeddedLauncher *launcher = dynamic_cast<Maditor::Model::EmbeddedLauncher*>(app))
+	if (Maditor::Model::EmbeddedLauncher *launcher = dynamic_cast<Maditor::Model::EmbeddedLauncher*>(app.get()))
 		connect(launcher, &Maditor::Model::EmbeddedLauncher::processStarted, this, &VSLink::onProcessStarted);
 }
 

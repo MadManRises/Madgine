@@ -18,11 +18,6 @@ namespace Maditor {
 class MADITOR_SHARED_EXPORT SharedMemory {
 public:
 
-	struct create_t {};
-	static constexpr create_t create = create_t();
-	struct open_t {};
-	static constexpr open_t open = open_t();
-
 	SharedMemory();//create
 	SharedMemory(size_t id);//open
 
@@ -35,9 +30,12 @@ public:
 
 	size_t id();
 
-	std::string uniqueName();
+	std::string prefix();
 
 private:
+	std::string serverName();
+
+
 	static size_t sRunningId;
 
 	size_t mId;

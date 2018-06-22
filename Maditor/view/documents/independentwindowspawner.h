@@ -39,6 +39,15 @@ namespace Maditor {
 
 		protected:
 
+			void remove(Model *model) {
+				auto it = mViews.find(model);
+				if (it != mViews.end()) {
+					it->second->deleteLater();
+					mViews.erase(it);
+				}
+			}
+
+
 			void onTabCloseRequest(int index) {
 				if (View *w = dynamic_cast<View*>(mTabWidget->widget(index))) {
 					auto it = std::find_if(mViews.begin(), mViews.end(), [=](const std::pair<Model * const, View *> &p) {return p.second == w; });

@@ -61,7 +61,7 @@ namespace Engine
 
 			std::list<ServerAppInstance> mInstances;
 
-			std::list<App::FrameListener*> mListeners;
+			std::vector<App::FrameListener*> mListeners;
 		};
 	}
 }

@@ -15,6 +15,8 @@ namespace Maditor {
 			Maditor();
 			virtual ~Maditor();
 
+			void init();
+
 			void newProject(const QString &path, const QString &name);
 			void loadProject(const QString &path);
 			
@@ -33,18 +35,18 @@ namespace Maditor {
 
 			Addons::AddonCollector *addons();
 
-			void setDialogManager(DialogManager *manager);
-
 		protected:
 			virtual void timerEvent(QTimerEvent *e) override;
 
 		public slots:
 			void loadProject();
 			void newProject();
+			void closeProject();
 
 
 		signals:
 			void projectOpened(Project *project);
+			void projectClosed(Project *project);
 			void recentProjectsChanged(const QStringList &list);
 
 
@@ -57,15 +59,13 @@ namespace Maditor {
 
 			QSettings mSettings;
 
-			Addons::AddonCollector *mAddons;
+			std::unique_ptr<Addons::AddonCollector> mAddons;
 
 			
 			MaditorLog mLog;
 			LogTableModel mLogs;
 			
 			std::unique_ptr<Project> mProject;
-
-			DialogManager *mDialogManager;
 
 			Engine::SignalSlot::ConnectionManager mConnMgr;
 

@@ -16,7 +16,7 @@ namespace Maditor {
 			ProjectElement("Configs", "Configs", parent),
 			mParent(parent)
 		{
-
+			init();
 		}
 
 		ConfigList::ConfigList(QDomElement element, Project *parent) :
@@ -26,7 +26,7 @@ namespace Maditor {
 			init();
 
 			for (QDomElement config = element.firstChildElement("Config"); !config.isNull(); config = config.nextSiblingElement("Config")) {
-				addConfig(new ApplicationConfig(config, this));
+				addConfig(std::make_unique<ApplicationConfig>(config, this));
 			}
 
 		}
@@ -35,7 +35,7 @@ namespace Maditor {
 		{
 		}
 
-		QString ConfigList::path() const
+		QDir ConfigList::path() const
 		{
 			return mParent->path();
 		}
@@ -47,19 +47,31 @@ namespace Maditor {
 			});
 		}
 
-		void ConfigList::addConfig(ApplicationConfig *config)
+		void ConfigList::addConfig(std::unique_ptr<ApplicationConfig> &&config)
 		{
-			//beginInsertRows(index(0, 0), mModules.size(), mModules.size());
-			mConfigs.emplace_back(config);
-			//endInsertRows();
 
-			connect(config, &ApplicationConfig::documentCreated, this, &ConfigList::instanceAdded);
-			connect(config, &ApplicationConfig::documentDestroyed, this, &ConfigList::instanceDestroyed);
+			bool b = beginInsertRows(mConfigs.size(), mConfigs.size());
+			ApplicationConfig *c = mConfigs.emplace_back(std::forward<std::unique_ptr<ApplicationConfig>>(config)).get();
+			endInsertRows(b);
+
+			connect(c, &ApplicationConfig::documentCreated, this, &ConfigList::instanceAdded);
+			connect(c, &ApplicationConfig::documentDestroyed, this, &ConfigList::instanceDestroyed);
 			
-			connect(config, &ApplicationConfig::launcherChanged, this, &ConfigList::launcherChanged);
-			connect(config, &ApplicationConfig::launcherTypeChanged, this, &ConfigList::launcherTypeChanged);
+			connect(c, &ApplicationConfig::launcherChanged, this, &ConfigList::launcherChanged);
+			connect(c, &ApplicationConfig::launcherTypeChanged, this, &ConfigList::launcherTypeChanged);
 
-			//emit moduleAdded(module);
+			emit configAdded(c);
+		}
+
+		void ConfigList::removeConfig(ApplicationConfig* config)
+		{
+			emit configRemoved(config);
+
+			auto it = std::find_if(mConfigs.begin(), mConfigs.end(), [=](const std::unique_ptr<ApplicationConfig> &conf) {return conf.get() == config; });
+			size_t i = std::distance(mConfigs.begin(), it);
+			bool b = beginRemoveRows(i, i);
+			mConfigs.erase(it);
+			endRemoveRows(b);
 		}
 
 		void ConfigList::launcherTypeChanged(Shared::LauncherType type, Shared::LauncherType oldLauncherType)
@@ -84,9 +96,17 @@ namespace Maditor {
 
 		void ConfigList::createConfig(const QString & name)
 		{
-			addConfig(new ApplicationConfig(this, name));
+			addConfig(std::make_unique<ApplicationConfig>(this, name));
 
 			mParent->writeToDisk();
+		}
+
+		void ConfigList::deleteConfig(ApplicationConfig* config)
+		{		
+			if (DialogManager::showDeleteConfigDialogStatic(config)) {
+				removeConfig(config);
+				mParent->writeToDisk();
+			}
 		}
 
 		bool ConfigList::hasConfig(const QString & name) const
@@ -110,12 +130,12 @@ namespace Maditor {
 			return it->get();
 		}
 
-		std::list<std::unique_ptr<ApplicationConfig>>::const_iterator ConfigList::begin() const
+		std::vector<std::unique_ptr<ApplicationConfig>>::const_iterator ConfigList::begin() const
 		{
 			return mConfigs.begin();
 		}
 
-		std::list<std::unique_ptr<ApplicationConfig>>::const_iterator ConfigList::end() const
+		std::vector<std::unique_ptr<ApplicationConfig>>::const_iterator ConfigList::end() const
 		{
 			return mConfigs.end();
 		}
@@ -125,9 +145,7 @@ namespace Maditor {
 		}
 
 		ApplicationConfig * ConfigList::child(int i) {
-			auto it = mConfigs.begin();
-			std::advance(it, i);
-			return it->get();
+			return mConfigs[i].get();
 		}
 
 		QStringList ConfigList::getConfigs()

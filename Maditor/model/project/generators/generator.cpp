@@ -2,6 +2,7 @@
 
 #include "generator.h"
 #include "dialogmanager.h"
+#include "Madgine/plugins/plugin.h"
 
 namespace Maditor {
 	namespace Model {
@@ -43,7 +44,7 @@ namespace Maditor {
 						file.close();
 					}
 					catch (const std::exception &e) {
-						QMessageBox::critical(0, "Error", e.what());
+						DialogManager::showErrorStatic("Error", e.what());
 					}
 					++i;
 				}
@@ -52,7 +53,7 @@ namespace Maditor {
 
 			QString Generator::templateFile(const QString & name)
 			{
-				QString path = QString("../Maditor/templates/") + name;
+				QString path = QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string() + "/../Maditor/templates/") + name;
 				QFile file(path);
 				if (!file.open(QFile::ReadOnly | QFile::Text)) {
 					throw std::invalid_argument((std::string("Could not open File: ") + path.toStdString()).c_str());

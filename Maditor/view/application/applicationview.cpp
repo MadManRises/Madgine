@@ -33,6 +33,7 @@ namespace View {
 		mApplicationInitialActionCount = mUi->menuDocument->actions().count();
 
 		mCurrentConfigSelector = new QMenu(window);
+		mCurrentConfigSelector->setEnabled(false);
 
 		connect(mCurrentConfigSelector, &QMenu::triggered, this, &ApplicationView::selectConfig);
 		connect(mCurrentConfigSelector->menuAction(), &QAction::triggered, this, &ApplicationView::createCurrentConfig);
@@ -68,6 +69,14 @@ namespace View {
 
 		connect(list, &Model::ConfigList::instanceAdded, this, &ApplicationView::onInstanceAdded);
 		connect(list, &Model::ConfigList::instanceDestroyed, this, &ApplicationView::onInstanceDestroyed);
+	}
+
+	void ApplicationView::clearConfigModel()
+	{
+		mList = nullptr;
+
+		mCurrentConfigSelector->clear();
+
 	}
 
 	void ApplicationView::setModel(Model::ApplicationLauncher * app)
@@ -140,7 +149,7 @@ namespace View {
 	{
 		Model::ApplicationConfig *config = mList->getConfig(name);
 		assert(config);
-		Model::ApplicationLauncher *launcher = config->createInstace(remote);
+		std::shared_ptr<Model::ApplicationLauncher> launcher = config->createInstace(remote);
 		//setModel(launcher);
 	}
 
@@ -152,21 +161,21 @@ namespace View {
 		}
 	}
 
-	void ApplicationView::onInstanceAdded(Model::ApplicationLauncher * instance)
+	void ApplicationView::onInstanceAdded(const std::shared_ptr<Model::ApplicationLauncher> &instance)
 	{
 		if (instance->isRemote()){
-			WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::spawn(dynamic_cast<Model::StandaloneLauncher*>(instance));
+			WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::spawn(dynamic_cast<Model::StandaloneLauncher*>(instance.get()));
 		}else{
-			WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::spawn(dynamic_cast<Model::EmbeddedLauncher*>(instance));
+			WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::spawn(dynamic_cast<Model::EmbeddedLauncher*>(instance.get()));
 		}
 	}
 
-	void ApplicationView::onInstanceDestroyed(Model::ApplicationLauncher * instance)
+	void ApplicationView::onInstanceDestroyed(const std::shared_ptr<Model::ApplicationLauncher> &instance)
 	{
 		if (instance->isRemote()){
-			WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::remove(dynamic_cast<Model::StandaloneLauncher*>(instance));
+			WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::remove(dynamic_cast<Model::StandaloneLauncher*>(instance.get()));
 		}else{
-			WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::remove(dynamic_cast<Model::EmbeddedLauncher*>(instance));
+			WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::remove(dynamic_cast<Model::EmbeddedLauncher*>(instance.get()));
 		}
 	}
 

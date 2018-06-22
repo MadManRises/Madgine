@@ -21,9 +21,12 @@ namespace Maditor {
 
 				virtual SettingsDialog *settingsDialog() override;
 
+				virtual void showError(const QString& title, const QString& msg) override;
+
 				virtual bool showNewProjectDialog(QString &path, QString &name) override;
 				virtual bool showLoadProjectDialog(QString &path) override;
 				virtual bool showNewConfigDialog(Model::ConfigList *list, QString &name) override;
+				virtual bool showDeleteConfigDialog(Model::ApplicationConfig *config) override;
 				virtual bool showNewModuleDialog(Model::ModuleList *list, QString &name) override;
 				virtual bool showNewClassDialog(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type) override;
 

@@ -22,5 +22,7 @@ int main(int argc, char **argv) {
 
 	view.createMainWindow();
 
+	model.init();
+
 	return app.exec();
 }

@@ -32,7 +32,7 @@ ConfigWidget::ConfigWidget(Model::ApplicationConfig *config) :
 	setLauncherType(config->launcherType());
 	setCustomExecutableCmd(config->customExecutableCmd());
 
-	std::list<Model::Generators::ServerClassGenerator*> serverClasses = config->project()->moduleList()->getClasses<Model::Generators::ServerClassGenerator>();
+	std::vector<Model::Generators::ServerClassGenerator*> serverClasses = config->project()->moduleList()->getClasses<Model::Generators::ServerClassGenerator>();
 	if (!serverClasses.empty()) {
 		for (Model::Generators::ServerClassGenerator *server : serverClasses) {
 			ui->serverName->addItem(server->fullName());
