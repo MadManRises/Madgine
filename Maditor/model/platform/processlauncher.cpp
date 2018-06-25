@@ -2,6 +2,13 @@
 
 #include "processlauncher.h"
 
+#ifdef __linux__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#endif
 
 namespace Maditor
 {
@@ -15,7 +22,7 @@ namespace Maditor
 				mChildOut{0,0},
 				mLastExitCode(-1)
 			{
-				//TODO linuc
+				//TODO linux
 #ifdef _WIN32
 
 				SECURITY_ATTRIBUTES sa;
@@ -259,7 +266,7 @@ namespace Maditor
 				}
 			}
 
-			HANDLE ProcessLauncher::handle()
+			ProcessLauncher::ProcessHandle ProcessLauncher::handle()
 			{
 				return mHandle;
 			}

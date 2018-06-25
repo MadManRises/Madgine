@@ -40,7 +40,7 @@ namespace Maditor
 				~ProcessLauncher();
 
 				ProcessId pid();
-				HANDLE handle();
+				ProcessHandle handle();
 				bool isLaunched();
 
 			public slots:
