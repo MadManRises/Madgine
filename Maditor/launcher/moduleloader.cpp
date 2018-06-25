@@ -1,3 +1,5 @@
+//TODO Use Plugins System
+
 
 #include "maditorlauncherlib.h"
 

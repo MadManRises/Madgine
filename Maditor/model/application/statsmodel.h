@@ -4,14 +4,8 @@
 #include "Madgine/serialize/container/observed.h"
 #include "Madgine/serialize/container/action.h"
 
-#ifdef _WIN32
-#include <Windows.h>
-#undef min
-#undef max
-#undef NO_ERROR
-#elif __linux__
-using HANDLE=void*;
-#endif
+#include "../platform/processlauncher.h"
+
 
 namespace Maditor {
 	namespace Model {
@@ -25,7 +19,7 @@ namespace Maditor {
 
 			virtual void timerEvent(QTimerEvent *evt) override;
 
-			void setProcess(HANDLE handle);
+			void setProcess(Platform::ProcessLauncher::ProcessHandle handle);
 
 			/*void trackAllocations();
 			void logTrackedAllocations();
@@ -47,7 +41,7 @@ namespace Maditor {
 			
 
 			int mTimerId;
-			HANDLE mHandle;
+			Platform::ProcessLauncher::ProcessHandle mHandle;
 			size_t mCurrentUsage;
 
 		};

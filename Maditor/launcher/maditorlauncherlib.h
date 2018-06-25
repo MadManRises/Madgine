@@ -9,8 +9,8 @@
 
 #include "Madgine/scene/scenemanager.h"
 
-#ifdef _WIN32
+/*#ifdef _WIN32
 #include <Windows.h>
-#endif
+#endif*/
 
 /// @endcond

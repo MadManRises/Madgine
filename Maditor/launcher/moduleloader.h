@@ -4,6 +4,10 @@
 #include "Madgine/serialize/container/action.h"
 #include "Madgine/plugins/pluginmanager.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #ifdef __linux__
 using HINSTANCE = void*;
 #endif

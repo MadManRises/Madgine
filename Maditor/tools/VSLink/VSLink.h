@@ -8,9 +8,6 @@
 
 #include "VSMsg.h"
 
-#include <Windows.h>
-#undef NO_ERROR
-
 class VSLinkView;
 
 class VSLink : public QObject, public ProcessTalker<VSMsg>, public Maditor::Addons::Addon {

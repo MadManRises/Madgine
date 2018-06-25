@@ -2,6 +2,7 @@
 
 #include "statsmodel.h"
 
+
 #ifdef _WIN32
 #include <Psapi.h>
 #endif
@@ -48,7 +49,7 @@ namespace Maditor {
 #endif
 		}
 
-		void StatsModel::setProcess(HANDLE handle)
+		void StatsModel::setProcess(Platform::ProcessLauncher::ProcessHandle handle)
 		{
 			mHandle = handle;
 			if (!mTimerId) {

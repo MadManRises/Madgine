@@ -2,6 +2,8 @@
 
 #include "addon.h"
 
+//TODO Use Plugins System
+
 #ifdef _WIN32
 #include <Windows.h>
 #undef NO_ERROR

@@ -2,9 +2,8 @@
 
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <Windows.h>
-#undef min
-#undef max
 #endif
 
 namespace Maditor
