@@ -3,7 +3,6 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#define pid_t DWORD
 #undef min
 #undef max
 #endif
@@ -20,10 +19,27 @@ namespace Maditor
 				Q_OBJECT
 
 			public:
+
+				static const constexpr size_t PIPE_READ = 0;
+				static const constexpr size_t PIPE_WRITE = 0;
+
+#ifdef _WIN32
+				using ProcessId = DWORD;
+				using ProcessHandle = HANDLE;
+				using PipeHandle = HANDLE;
+				
+#elif __linux__
+				using ProcessId = pid_t;
+				using ProcessHandle = pid_t;
+				using PipeHandle = int;
+
+#endif
+
+			public:
 				ProcessLauncher();
 				~ProcessLauncher();
 
-				pid_t pid();
+				ProcessId pid();
 				HANDLE handle();
 				bool isLaunched();
 
@@ -34,7 +50,7 @@ namespace Maditor
 
 
 			signals:
-				void processStarted(pid_t);
+				void processStarted(ProcessId);
 				void processError(int);
 				void processKilled();
 				void processTerminated();
@@ -46,10 +62,14 @@ namespace Maditor
 				void cleanup();
 				virtual void timerEvent(QTimerEvent* event) override;
 
+				void closeAllPipes();
+
 			private:
-				pid_t mPID;
-				HANDLE mHandle;
-				HANDLE mChildOutRead, mChildOutWrite, mChildInRead, mChildInWrite;
+
+				ProcessId mPID;
+				ProcessHandle mHandle;
+				PipeHandle mChildOut[2];
+				PipeHandle mChildIn[2];
 
 				int mLastExitCode;
 

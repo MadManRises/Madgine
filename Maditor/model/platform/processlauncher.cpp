@@ -11,11 +11,9 @@ namespace Maditor
 		{
 			ProcessLauncher::ProcessLauncher() :
 				mPID(0),
-				mChildInRead(NULL),
-				mChildInWrite(NULL),
-				mChildOutRead(NULL),
-				mChildOutWrite(NULL),
-			mLastExitCode(-1)
+				mChildIn{0,0},
+				mChildOut{0,0},
+				mLastExitCode(-1)
 			{
 				//TODO linuc
 #ifdef _WIN32
@@ -26,17 +24,39 @@ namespace Maditor
 				sa.bInheritHandle = true;
 				sa.lpSecurityDescriptor = NULL;
 
-				if (!CreatePipe(&mChildOutRead, &mChildOutWrite, &sa, 0))
-					return;
+				if (!CreatePipe(mChildOut + PIPE_READ, mChildOut + PIPE_WRITE, &sa, 0))
+				{
+					closeAllPipes();
+					throw 0;
+				}
 
-				if (!SetHandleInformation(mChildOutRead, HANDLE_FLAG_INHERIT, 0))
-					return;
+				if (!SetHandleInformation(mChildOut[PIPE_READ], HANDLE_FLAG_INHERIT, 0)) {
+					closeAllPipes();
+					throw 0;
+				}
 
-				if (!CreatePipe(&mChildInRead, &mChildInWrite, &sa, 0))
-					return;
+				if (!CreatePipe(mChildIn + PIPE_READ, mChildIn + PIPE_WRITE, &sa, 0)) {
+					closeAllPipes();
+					throw 0;
+				}
 
-				if (!SetHandleInformation(mChildInWrite, HANDLE_FLAG_INHERIT, 0))
-					return;
+				if (!SetHandleInformation(mChildIn[PIPE_WRITE], HANDLE_FLAG_INHERIT, 0)) {
+					closeAllPipes();
+					throw 0;
+				}
+
+#elif __linux__
+
+				if (pipe(mChildOut) < 0) {
+					closeAllPipes();
+					throw 0;
+				}
+
+				if (pipe(mChildIn) < 0) {
+					closeAllPipes();
+					throw 0;
+				}
+
 #endif
 
 				startTimer(10);
@@ -46,34 +66,7 @@ namespace Maditor
 			{
 				kill(-1);
 
-				if (mChildInRead)
-				{
-#ifdef _WIN32
-					CloseHandle(mChildInRead);
-#endif
-					mChildInRead = NULL;
-				}
-				if (mChildInWrite)
-				{
-#ifdef _WIN32
-					CloseHandle(mChildInWrite);
-#endif
-					mChildInWrite = NULL;
-				}
-				if (mChildOutRead)
-				{
-#ifdef _WIN32
-					CloseHandle(mChildOutRead);
-#endif
-					mChildOutRead = NULL;
-				}
-				if (mChildOutWrite)
-				{
-#ifdef _WIN32
-					CloseHandle(mChildOutWrite);
-#endif
-					mChildOutWrite = NULL;
-				}
+
 			}
 
 			bool ProcessLauncher::launch(const std::string& cmd, const std::string &cwd)
@@ -88,9 +81,9 @@ namespace Maditor
 				// set the size of the structures
 				ZeroMemory(&si, sizeof(si));
 				si.cb = sizeof(si);
-				si.hStdError = mChildOutWrite;
-				si.hStdOutput = mChildOutWrite;
-				si.hStdInput = mChildInRead;
+				si.hStdError = mChildOut[PIPE_WRITE];
+				si.hStdOutput = mChildOut[PIPE_WRITE];
+				si.hStdInput = mChildIn[PIPE_READ];
 				si.dwFlags |= STARTF_USESTDHANDLES;
 
 				ZeroMemory(&pi, sizeof(pi));
@@ -116,6 +109,42 @@ namespace Maditor
 				mPID = pi.dwProcessId;
 				mHandle = pi.hProcess;
 				CloseHandle(pi.hThread);
+
+#elif __linux__
+
+				mHandle = fork();
+				if (mHandle == 0)
+				{
+					if (dup2(mChildIn[PIPE_READ], STDIN_FILENO) == -1) {
+						exit(errno);
+					}
+
+					// redirect stdout
+					if (dup2(mChildOut[PIPE_WRITE], STDOUT_FILENO) == -1) {
+						exit(errno);
+					}
+
+					// redirect stderr
+					if (dup2(mChildOut[PIPE_WRITE], STDERR_FILENO) == -1) {
+						exit(errno);
+					}
+
+					closeAllPipes();
+
+					char *argv[] = { NULL };
+					char *envp[] = { NULL };
+
+					exit(execve(cmd.c_str(), argv, envp));
+
+				} else if (mHandle > 0)
+				{
+					mPID = mHandle;
+				} else
+				{
+					emit processError(errno);
+					return false;
+				}
+
 #endif
 
 				emit processStarted(mPID);
@@ -129,7 +158,7 @@ namespace Maditor
 #ifdef _WIN32
 				DWORD dwWritten;
 				std::string stdCmd = cmd + '\n';
-				bool result = WriteFile(mChildInWrite, stdCmd.c_str(), stdCmd.size(), &dwWritten, NULL);
+				bool result = WriteFile(mChildIn[PIPE_WRITE], stdCmd.c_str(), stdCmd.size(), &dwWritten, NULL);
 				assert(result && dwWritten == stdCmd.size());
 #endif
 			}
@@ -174,7 +203,7 @@ namespace Maditor
 					DWORD dwRead;
 					CHAR buffer[256];
 
-					bool result = PeekNamedPipe(mChildOutRead, NULL, 0, NULL, &dwRead, NULL);
+					bool result = PeekNamedPipe(mChildOut[PIPE_READ], NULL, 0, NULL, &dwRead, NULL);
 
 					if (result)
 					{
@@ -182,7 +211,7 @@ namespace Maditor
 						while (dwRead > 0)
 						{
 							DWORD bytesRead;
-							result = ReadFile(mChildOutRead, buffer, std::min(sizeof(buffer) - 1, size_t(dwRead)), &bytesRead, NULL);
+							result = ReadFile(mChildOut[PIPE_READ], buffer, std::min(sizeof(buffer) - 1, size_t(dwRead)), &bytesRead, NULL);
 							assert(result && bytesRead > 0);
 							buffer[bytesRead] = '\0';
 							msg += buffer;
@@ -198,12 +227,44 @@ namespace Maditor
 				}
 			}
 
+			void ProcessLauncher::closeAllPipes()
+			{
+				if (mChildIn[PIPE_READ])
+				{
+#ifdef _WIN32
+					CloseHandle(mChildIn[PIPE_READ]);
+#endif
+					mChildIn[PIPE_READ] = NULL;
+				}
+				if (mChildIn[PIPE_WRITE])
+				{
+#ifdef _WIN32
+					CloseHandle(mChildIn[PIPE_WRITE]);
+#endif
+					mChildIn[PIPE_WRITE] = NULL;
+				}
+				if (mChildOut[PIPE_READ])
+				{
+#ifdef _WIN32
+					CloseHandle(mChildOut[PIPE_READ]);
+#endif
+					mChildOut[PIPE_READ] = NULL;
+				}
+				if (mChildOut[PIPE_WRITE])
+				{
+#ifdef _WIN32
+					CloseHandle(mChildOut[PIPE_WRITE]);
+#endif
+					mChildOut[PIPE_WRITE] = NULL;
+				}
+			}
+
 			HANDLE ProcessLauncher::handle()
 			{
 				return mHandle;
 			}
 
-			pid_t ProcessLauncher::pid()
+			ProcessLauncher::ProcessId ProcessLauncher::pid()
 			{
 				return mPID;
 			}
