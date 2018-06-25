@@ -3,7 +3,7 @@
 #include "cmakewidget.h"
 #include "ui_cmakewidget.h"
 
-#include "model/project/cmakeserver.h"
+#include "../../model/project/cmakeserver.h"
 
 namespace Maditor {
 	namespace View {

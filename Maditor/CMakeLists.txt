@@ -25,7 +25,7 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQSCINTILLA_DLL)
 
 
-include_directories(${Maditor_SOURCE_DIR} ${Madgine_SOURCE_DIR}/Madgine/src)
+include_directories(${Madgine_SOURCE_DIR}/Madgine/src)
 
 add_subdirectory(shared)
 

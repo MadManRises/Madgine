@@ -4,7 +4,7 @@
 
 #include "InputWrapper.h"
 
-#include "Shared\InputInfo.h"
+#include "../shared/inputinfo.h"
 
 #include "Madgine/GUI\GUISystem.h"
 

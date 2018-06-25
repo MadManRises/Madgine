@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 option(BLENDER_TOOL "Enables and installs blender tools")
 option(VS_TOOL "Enables Visual Studio tools")
 
+include_directories(${Madgine_SOURCE_DIR}/Maditor)
 
 set (TOOLS_LIBS "")
 

@@ -10,11 +10,7 @@ set (CMAKE_AUTOMOC_MOC_OPTIONS "-bmaditorviewlib.h")
 
 add_definitions(-DCMAKE_VS_DEVENV_COMMAND="${CMAKE_VS_DEVENV_COMMAND}")
 
-include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${BOOST_PATH})
-include_directories(${Maditor_Model_SOURCE_DIR})
-include_directories(${Maditor_View_SOURCE_DIR})
-include_directories(${MADGINE_INCLUDE_DIRS})
 
 add_library(VSLink SHARED VSCommands.cs VSLink.cpp VSLink.h VSLinkView.cpp VSLinkView.h VSMsg.h VSSettingsWidget.cpp VSSettingsWidget.h VSSettingsWidget.ui)
 
