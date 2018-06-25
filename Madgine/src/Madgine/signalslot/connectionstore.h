@@ -9,32 +9,27 @@ namespace Engine
 		public:
 			typedef std::list<std::shared_ptr<ConnectionBase>>::const_iterator const_iterator;
 
-			template <template <class...> class Con, class... _Ty, class... Args>
-			std::weak_ptr<ConnectionInstance<_Ty...>> create(Args&&... args)
+			template <class Con, class... Args>
+			static std::shared_ptr<Con> create(std::shared_ptr<ConnectionBase> *prev, Args&&... args)
 			{
-				mConnections.emplace_back();
-				auto it = --mConnections.end();
-				std::shared_ptr<ConnectionInstance<_Ty...>> conn =
-					std::static_pointer_cast<ConnectionInstance<_Ty...>>(
+				
+				return std::static_pointer_cast<Con>(
 						make_shared_connection(
-							std::make_unique<Con<_Ty...>>(*this, it, std::forward<Args>(args)...)
+							std::make_unique<Con>(prev, std::forward<Args>(args)...)
 						)
 					);
-				*it = conn;
-				return conn;
 			}
 
-			template <class T>
-			std::weak_ptr<T> clone(const T& connection)
+			template <class Con, class... Args>
+			std::weak_ptr<Con> emplace_front(Args&&... args)
 			{
-				mConnections.emplace_back();
-				auto it = --mConnections.end();
-				std::shared_ptr<T> conn = std::static_pointer_cast<T>(make_shared_connection(std::make_unique<T>(connection, *this, it)));
-				*it = conn;
-				return conn;
+				std::shared_ptr<Con> ptr = create<Con>(&mBegin, std::forward<Args>(args)...);
+				mBegin = ptr;
+				return ptr;
 			}
 
-			void disconnect(const const_iterator& where);
+			ConnectionStore();
+
 			void clear();
 
 			static ConnectionStore& globalStore();
@@ -43,7 +38,7 @@ namespace Engine
 			static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
 		private:
-			std::list<std::shared_ptr<ConnectionBase>> mConnections;
+			std::shared_ptr<ConnectionBase> mBegin;
 		};
 
 

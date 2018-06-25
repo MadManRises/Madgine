@@ -12,14 +12,13 @@ namespace Engine
 			return std::shared_ptr<ConnectionBase>(std::forward<std::unique_ptr<ConnectionBase>>(conn));
 		}
 
-		void ConnectionStore::disconnect(const const_iterator& where)
+		ConnectionStore::ConnectionStore()
 		{
-			mConnections.erase(where);
 		}
 
 		void ConnectionStore::clear()
 		{
-			mConnections.clear();
+			mBegin.reset();
 		}
 
 		ConnectionStore& ConnectionStore::globalStore()

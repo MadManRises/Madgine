@@ -5,26 +5,23 @@ namespace Engine
 {
 	namespace SignalSlot
 	{
-		ConnectionBase::ConnectionBase(ConnectionStore& store, const ConnectionStore::const_iterator& where) :
-			mWhere(where),
-			mStore(store)
+		ConnectionBase::ConnectionBase(std::shared_ptr<ConnectionBase> *prev) :
+			mNext(*prev),
+			mPrev(prev)
 		{
+			if (mNext)
+				mNext->mPrev = &mNext;
 		}
 
 
 		void ConnectionBase::disconnect()
 		{
-			mStore.disconnect(mWhere);
+			if (mNext)
+				mNext->mPrev = mPrev;
+			mPrev->swap(mNext);
+			mNext.reset();
 		}
 
-		const std::shared_ptr<ConnectionBase>& ConnectionBase::ptr() const
-		{
-			return *mWhere;
-		}
 
-		ConnectionStore& ConnectionBase::store() const
-		{
-			return mStore;
-		}
 	}
 }

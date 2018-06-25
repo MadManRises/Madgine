@@ -57,8 +57,8 @@ namespace Engine
 			template <class T, class _ = std::enable_if_t<has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T& slot, DirectConnectionType = {})
 			{
-				std::weak_ptr<ConnectionInstance<_Ty...>> conn = slot.connectionStore().template create<
-					DirectConnection, _Ty...>(&slot);
+				std::weak_ptr<ConnectionInstance<_Ty...>> conn = slot.connectionStore().template emplace_front<
+					DirectConnection<_Ty...>>(&slot);
 				mConnectedSlots.emplace_back(
 					conn
 				);
@@ -68,7 +68,7 @@ namespace Engine
 			template <class T, class _ = std::enable_if_t<has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T& slot, QueuedConnectionType)
 			{
-				std::weak_ptr<ConnectionInstance<_Ty...>> conn = slot.connectionStore().template create<QueuedConnection, _Ty...>(
+				std::weak_ptr<ConnectionInstance<_Ty...>> conn = slot.connectionStore().template emplace_front<QueuedConnection<_Ty...>>(
 					&slot, slot.manager());
 				mConnectedSlots.emplace_back(
 					conn
@@ -79,7 +79,7 @@ namespace Engine
 			template <class T, class _ = std::enable_if_t<!has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T&& slot, DirectConnectionType = {})
 			{
-				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().create<DirectConnection, _Ty...>(
+				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<DirectConnection<_Ty...>>(
 					std::forward<T>(slot));
 				mConnectedSlots.emplace_back(
 					conn
@@ -90,7 +90,7 @@ namespace Engine
 			template <class T, class _ = std::enable_if_t<!has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T&& slot, QueuedConnectionType)
 			{
-				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().create<QueuedConnection, _Ty...>(
+				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<QueuedConnection, _Ty...>(
 					std::forward<T>(slot), ConnectionManager::getSingleton());
 				mConnectedSlots.emplace_back(
 					conn

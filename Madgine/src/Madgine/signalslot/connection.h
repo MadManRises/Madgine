@@ -23,17 +23,22 @@ namespace Engine
 		{
 		public:
 			virtual ~ConnectionBase() = default;
-			ConnectionBase(ConnectionStore& store, const ConnectionStore::const_iterator& where);
-			ConnectionBase(const ConnectionBase& other) = default;
+			ConnectionBase(std::shared_ptr<ConnectionBase> *prev);
+			ConnectionBase(const ConnectionBase& other) = delete;
 			void disconnect();
 
 		protected:
-			const std::shared_ptr<ConnectionBase>& ptr() const;
-			ConnectionStore& store() const;
+			template <class Con, class... Args>
+			std::weak_ptr<Con> cloneImpl(Args&&... args)
+			{
+				std::shared_ptr<Con> ptr = ConnectionStore::create<Con>(&mNext, std::forward<Args>(args)...);
+				mNext = ptr;
+				return ptr;
+			}
 
 		private:
-			ConnectionStore::const_iterator mWhere;
-			ConnectionStore& mStore;
+			std::shared_ptr<ConnectionBase> mNext;
+			std::shared_ptr<ConnectionBase> *mPrev;
 		};
 
 
@@ -75,8 +80,8 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			ConnectionInstance(T&& impl, ConnectionStore& store, const ConnectionStore::const_iterator& where) :
-				ConnectionBase(store, where),
+			ConnectionInstance(std::shared_ptr<ConnectionBase> *prev, T&& impl) :
+				ConnectionBase(prev),
 				Connection<_Ty...>(std::forward<T>(impl))
 			{
 			}
@@ -90,26 +95,27 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			DirectConnection(ConnectionStore& store, const ConnectionStore::const_iterator& where, T&& impl) :
-				ConnectionInstance<_Ty...>(std::forward<T>(impl), store, where)
+			DirectConnection(std::shared_ptr<ConnectionBase> *prev, T&& impl) :
+				ConnectionInstance<_Ty...>(prev, std::forward<T>(impl))
 			{
 			}
 
-			DirectConnection(const DirectConnection<_Ty...>& other, ConnectionStore& store,
-			                 const ConnectionStore::const_iterator& where) :
-				ConnectionInstance<_Ty...>(other, store, where)
+			DirectConnection(std::shared_ptr<ConnectionBase> *prev, const DirectConnection<_Ty...>& other) :
+				ConnectionInstance<_Ty...>(prev, other)
 			{
 			}
 
 			std::weak_ptr<ConnectionInstance<_Ty...>> clone() override
 			{
-				return this->store().clone(*this);
+				return cloneImpl<DirectConnection>(*this);
 			}
 
 			void operator()(const std::weak_ptr<ConnectionInstance<_Ty...>>& ptr, _Ty ... args) override
 			{
 				Connection<_Ty...>::operator()(args...);
 			}
+
+		
 		};
 
 		template <class... _Ty>
@@ -117,23 +123,22 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			QueuedConnection(ConnectionStore& store, const ConnectionStore::const_iterator& where, T&& impl,
+			QueuedConnection(std::shared_ptr<ConnectionBase> *prev, T&& impl,
 			                 ConnectionManager& mgr) :
-				ConnectionInstance<_Ty...>(std::forward<T>(impl), store, where),
+				ConnectionInstance<_Ty...>(prev, std::forward<T>(impl)),
 				mManager(mgr)
 			{
 			}
 
-			QueuedConnection(const QueuedConnection<_Ty...>& other, ConnectionStore& store,
-			                 const ConnectionStore::const_iterator& where) :
-				ConnectionInstance<_Ty...>(other, store, where),
+			QueuedConnection(std::shared_ptr<ConnectionBase> *prev, const QueuedConnection<_Ty...>& other) :
+				ConnectionInstance<_Ty...>(prev, other),
 				mManager(other.mManager)
 			{
 			}
 
 			std::weak_ptr<ConnectionInstance<_Ty...>> clone() override
 			{
-				return this->store().clone(*this);
+				return cloneImpl<QueuedConnection>(*this);
 			}
 
 			void operator()(const std::weak_ptr<ConnectionInstance<_Ty...>>& ptr, _Ty ... args) override
