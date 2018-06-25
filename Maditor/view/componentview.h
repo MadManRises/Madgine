@@ -2,6 +2,7 @@
 
 #include "dialogs/dialogmanager.h"
 #include "dialogs/settingsdialog.h"
+#include "mainwindow.h"
 
 namespace Maditor {
 namespace View {
@@ -11,8 +12,14 @@ class ComponentView
 {
 public:
 	ComponentView(T *model = nullptr) :
-	mModel(model){
+	mModel(model),
+	mWindow(nullptr){
 
+	}
+
+	virtual void setupUi(MainWindow *w)
+	{
+		mWindow = w;
 	}
 
 	virtual void setModel(T *model) {
@@ -30,6 +37,16 @@ protected:
 		mConnections = connections;
 		if (mModel)
 			setupConnections();
+	}
+
+	const Ui::MainWindow *ui()
+	{
+		return mWindow->ui;
+	}
+
+	MainWindow *window()
+	{
+		return mWindow;
 	}
 
 private:
@@ -93,6 +110,7 @@ private:
 	std::vector<QMenu*> mMenus;
 
 	T *mModel;
+	MainWindow *mWindow;
 };
 
 

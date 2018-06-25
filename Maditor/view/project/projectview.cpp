@@ -12,17 +12,16 @@
 namespace Maditor {
 namespace View {
 
-	ProjectView::ProjectView() :
-		mUi(nullptr){
+	ProjectView::ProjectView(){
 
 	}
 
 	void ProjectView::setupUi(MainWindow * window)
 	{
-		mUi = window->ui;
+		ComponentView::setupUi(window);
 
-		IndependentWindowSpawner<Model::ApplicationConfig, ConfigWidget>::setupUi(mUi);
-		IndependentWindowSpawner<Model::Project, PropertiesWidget>::setupUi(mUi);
+		IndependentWindowSpawner<Model::ApplicationConfig, ConfigWidget>::setupUi(ui());
+		IndependentWindowSpawner<Model::Project, PropertiesWidget>::setupUi(ui());
 
 
 		/*createToolbar(window, "ApplicationToolbar", {
@@ -41,8 +40,8 @@ namespace View {
 		ComponentView::setModel(project);
 
 
-		mUi->projectWidget->setModel(model()->model());
-		mUi->mediaWidget->setModel(model()->getMedia());
+		ui()->projectWidget->setModel(model()->model());
+		ui()->mediaWidget->setModel(model()->getMedia());
 
 		connect(project, &Model::Project::showProperties, std::bind(&IndependentWindowSpawner<Model::Project, PropertiesWidget>::spawn<>, this, project));
 		connect(project->configList(), &Model::ConfigList::configAdded, this, &ProjectView::openConfig);
@@ -52,8 +51,8 @@ namespace View {
 
 	void ProjectView::clearModel()
 	{
-		mUi->projectWidget->clearModel();
-		mUi->mediaWidget->clearModel();
+		ui()->projectWidget->clearModel();
+		ui()->mediaWidget->clearModel();
 
 		ComponentView::clearModel();
 	}

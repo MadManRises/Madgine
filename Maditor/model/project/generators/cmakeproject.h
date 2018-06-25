@@ -10,19 +10,19 @@ namespace Maditor {
 			public:
 				CmakeProject(const QDir &root, const QDir &buildDir, const QString &name);
 
-				void build();
-
 				// Geerbt über CmakeGenerator
-				QDir root();
-				void addSubProject(CmakeGenerator * sub);
+				
 				virtual void generate() override;
 				virtual QStringList filePaths() override;
-				const QStringList &libraries();
+
+
+				void addSubProject(CmakeGenerator * sub);
+				void removeSubProject(CmakeGenerator * sub);
 
 				void addLibrary(const QString &lib);
+				const QStringList &libraries();
 
-				QString solutionPath();
-
+				QDir root();
 				QDir buildDir();
 
 			protected:

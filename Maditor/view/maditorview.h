@@ -5,6 +5,7 @@
 #include "../model/maditor.h"
 
 
+
 namespace Maditor {
 namespace View {
 
@@ -21,7 +22,7 @@ public:
 	MaditorView();
 	virtual ~MaditorView();
 	
-	void setupUi(MainWindow *window);
+	virtual void setupUi(MainWindow *window) override;
 	virtual void setModel(Model::Maditor *model) override;
 
 	Dialogs::DialogManager *dialogs();
@@ -35,6 +36,9 @@ private slots:
 	void updateRecentProjects(const QStringList &list);
 	void recentProjectClicked(QAction *action);
 
+	void onProjectOpened(Model::Project *project);
+	void onProjectClosed(Model::Project *project);
+
 private:
 
 	std::unique_ptr<Dialogs::DialogManager> mDialogManager;
@@ -42,13 +46,21 @@ private:
 	
 
 
-	QSettings *mSettings;
+	QSettings mSettings;
 
 	QMenu *mRecentProjectsMenu;
 	int mRecentProjectInitialActionCount;
 	QAction *mClearRecentProjectsAction;
 
 	MainWindow *mMainWindow;
+
+	ApplicationView *mApplication;
+
+	LogsView *mLogs;
+
+	ProjectView *mProject;
+
+	CmakeView *mCmake;
 
 };
 

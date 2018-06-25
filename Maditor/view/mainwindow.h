@@ -13,7 +13,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MADITOR_VIEW_EXPORT MainWindow : public QMainWindow, public ComponentView<Model::Maditor>
+class MADITOR_VIEW_EXPORT MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -27,19 +27,8 @@ public:
 
 	const Ui::MainWindow *const ui;
 
-	virtual void setModel(Model::Maditor *model) override;
-
-private slots:
-	void onProjectOpened(Model::Project *project);
-	void onProjectClosed(Model::Project *project);
 
 private:    
-	ApplicationView *mApplication;
-
-
-	LogsView *mLogs;
-
-	ProjectView *mProject;
 
 };
 

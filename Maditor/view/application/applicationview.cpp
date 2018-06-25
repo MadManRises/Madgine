@@ -16,7 +16,6 @@ namespace View {
 	const QString ApplicationView::sRemoteSuffix = " (remote)";
 
 	ApplicationView::ApplicationView() :
-		mUi(nullptr),
 		mList(nullptr), mCurrentConfigSelector(nullptr),
 		mCurrentWidget(nullptr), mApplicationInitialActionCount(0), mCurrentConfigSeparator(nullptr)
 	{
@@ -24,13 +23,13 @@ namespace View {
 
 	void ApplicationView::setupUi(MainWindow * window)
 	{
-		mUi = window->ui;
+		ComponentView::setupUi(window);
 
-		WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::setupUi(mUi);
-		WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::setupUi(mUi);
+		WindowSpawner<Model::StandaloneLauncher, StandaloneApplicationContainerWindow>::setupUi(ui());
+		WindowSpawner<Model::EmbeddedLauncher, EmbeddedApplicationContainerWindow>::setupUi(ui());
 
 
-		mApplicationInitialActionCount = mUi->menuDocument->actions().count();
+		mApplicationInitialActionCount = ui()->menuDocument->actions().count();
 
 		mCurrentConfigSelector = new QMenu(window);
 		mCurrentConfigSelector->setEnabled(false);
@@ -59,7 +58,7 @@ namespace View {
 			mCurrentConfigSelector->addAction(action + sRemoteSuffix);
 		}		
 
-		if (mCurrentConfigSelector->actions().size() > 0) {
+		if (mCurrentConfigSelector->actions().size() > 1) {
 			mCurrentConfigSelector->setEnabled(true);
 			mCurrentConfigSelector->setTitle(QString("New %1").arg(mCurrentConfigSelector->actions().front()->text()));
 		}
@@ -82,16 +81,16 @@ namespace View {
 	void ApplicationView::setModel(Model::ApplicationLauncher * app)
 	{
 		
-		mUi->modulesWidget->setModel(app->moduleLoader());
-		mUi->performanceWidget->setModel(app->util()->profiler());
-		mUi->appStatsWidget->setModel(app->util()->stats());
-		mUi->inspectorWidget->setModel(app->inspector());		
+		ui()->modulesWidget->setModel(app->moduleLoader());
+		ui()->performanceWidget->setModel(app->util()->profiler());
+		ui()->appStatsWidget->setModel(app->util()->stats());
+		ui()->inspectorWidget->setModel(app->inspector());
 	}
 
 	void ApplicationView::clearModel()
 	{	
-		mUi->modulesWidget->setModel(nullptr);
-		mUi->appStatsWidget->clearModel();
+		ui()->modulesWidget->setModel(nullptr);
+		ui()->appStatsWidget->clearModel();
 	}
 
 	void ApplicationView::currentTabSet(StandaloneApplicationContainerWindow * win)
@@ -110,7 +109,7 @@ namespace View {
 	{
 		if (mCurrentWidget != w) {
 			clearModel();
-			mUi->menuDocument->menuAction()->setVisible(false);
+			ui()->menuDocument->menuAction()->setVisible(false);
 		}
 	}
 
@@ -118,7 +117,7 @@ namespace View {
 	{
 		mCurrentWidget = tab;
 
-		QMenu *menu = mUi->menuDocument;
+		QMenu *menu = ui()->menuDocument;
 		menu->setTitle("Application");
 		for (QAction *action : menu->actions().mid(mApplicationInitialActionCount)) {
 			menu->removeAction(action);

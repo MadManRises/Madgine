@@ -51,15 +51,16 @@ namespace Maditor {
 			startTimer(100);
 		}
 
-		void Maditor::newProject(const QString &path, const QString &name)
+		void Maditor::newProject(const QDir &path, const QString &name)
 		{
 
 			closeProject();
-			openProject(std::make_unique<Project>(&mLogs, path, name));
+			path.mkdir(name);
+			openProject(std::make_unique<Project>(&mLogs, path.filePath(name), name));
 
 		}
 
-		void Maditor::loadProject(const QString & path)
+		void Maditor::loadProject(const QDir & path)
 		{
 
 			closeProject();

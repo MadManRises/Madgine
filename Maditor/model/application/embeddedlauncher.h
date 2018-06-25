@@ -4,6 +4,8 @@
 
 #include "../shared/ipcmanager/boostipcmanager.h"
 
+#include "../platform/processlauncher.h"
+
 #ifdef _WIN32
 #define pid_t DWORD
 #endif
@@ -42,8 +44,6 @@ namespace Maditor
 			// Inherited via AppControl
 			void shutdownImpl() override;
 
-			void timerEvent(QTimerEvent *te) override;
-
 			bool setupImpl() override;
 			bool setupImpl(bool debug);
 
@@ -60,9 +60,7 @@ namespace Maditor
 
 		
 		private:
-			pid_t mPID;
-			HANDLE mHandle;
-			HANDLE mChildOutRead, mChildOutWrite, mChildInRead, mChildInWrite;
+			Platform::ProcessLauncher mProcess;
 
 
 			Shared::SharedMemory mMemory;

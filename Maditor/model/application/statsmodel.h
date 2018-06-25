@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #undef min
+#undef max
 #undef NO_ERROR
 #elif __linux__
 using HANDLE=void*;

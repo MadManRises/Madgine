@@ -4,6 +4,7 @@
 #include "argumentlist.h"
 #include "intluatableinstance.h"
 #include "stringluatableinstance.h"
+#include "../types/scopebase.h"
 
 extern "C"
 {
@@ -114,8 +115,13 @@ namespace Engine
 
 			if (!lua_isfunction(mState, -1))
 			{
+				ValueType v = ValueType::fromStack(mState, -2);
+
+				std::string object = v.is<ScopeBase*>() ? v.as<ScopeBase*>()->getIdentifier() : "<anonymous Table>";
+
 				lua_pop(mState, 2);
-				throw ScriptingException(Exceptions::unknownMethod(name, "TODO"/*scope->getIdentifier()*/));
+
+				throw ScriptingException(Exceptions::unknownMethod(name, object));
 			}
 
 			lua_insert(mState, -2);

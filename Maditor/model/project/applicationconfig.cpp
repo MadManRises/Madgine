@@ -60,8 +60,8 @@ namespace Maditor
 
 		void ApplicationConfig::generateInfo(Shared::ApplicationInfo& appInfo, QWindow* w) const
 		{
-			appInfo.mDataDir = mParent->path().filePath("Data").toStdString().c_str();
-			appInfo.mProjectDir = mParent->path().path().toStdString().c_str();
+			appInfo.mDataDir = (mParent->path().filePath("Data").toStdString() + "/").c_str();
+			appInfo.mProjectDir = (mParent->path().path().toStdString() + "/").c_str();
 			appInfo.mType = mLauncherType;
 
 			if (mLauncherType == Shared::CLIENT_LAUNCHER)

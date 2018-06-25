@@ -46,8 +46,13 @@ namespace Engine
 				mInput(nullptr)
 			{
 
+				Plugins::Plugin p("OgreMain" CONFIG_SUFFIX SHARED_LIBRARY_SUFFIX);
 
-				mRoot = std::make_unique<Ogre::Root>(settings.mPluginsFile); // Creating Root
+				p.load();
+
+				std::cout << p.fullPath().parent_path().generic_string() << std::endl;
+
+				mRoot = std::make_unique<Ogre::Root>((p.fullPath().parent_path() / "plugins" CONFIG_SUFFIX ".cfg").generic_string()); // Creating Root
 
 				mConfig = std::make_unique<App::ConfigSet>(*this, mRoot.get(), "config.vs"); // Loading Config and configuring Root
 

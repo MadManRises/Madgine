@@ -16,6 +16,11 @@ namespace Maditor {
 				mParent->addSubProject(this);
 			}
 
+			CmakeGenerator::~CmakeGenerator()
+			{
+				mParent->removeSubProject(this);
+			}
+
 			void CmakeGenerator::addFile(const QString & file)
 			{
 				mFileList << file;

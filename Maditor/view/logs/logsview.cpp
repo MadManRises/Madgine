@@ -15,6 +15,8 @@ namespace View {
 
 	void LogsView::setupUi(MainWindow * window)
 	{
+		ComponentView::setupUi(window);
+
 		mLogsWidget = window->ui->logsWidget;
 	}
 

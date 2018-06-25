@@ -125,15 +125,83 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 
 		cpack_add_component(OgreMadgine DISPLAY_NAME Ogre GROUP Renderer)
 
-		get_target_property(bin_loc OgreMadgine LOCATION)
+		
+		function(read_files var_name filename path)
+			
+			file(STRINGS ${filename} lines)
 
-		get_filename_component(bin_name ${bin_loc} NAME)
+			set(plugins "")
 
-		collect_target_dependencies(OgreMadgine "$<$<CONFIG:Debug>:${OGRE_PLUGIN_DIR_DBG}>$<$<NOT:$<CONFIG:Debug>>:${OGRE_PLUGIN_DIR_REL}>/RenderSystem_*$<$<CONFIG:Debug>:_d>${CMAKE_SHARED_LIBRARY_SUFFIX}")
+			set(plugin_folder "")
 
+			foreach(line ${lines})
 
+				string(REPLACE " " "" line "${line}")
+				
+				string(FIND "${line}" "#" out)
+				if(NOT "${out}" EQUAL -1)
+					string(SUBSTRING "${line}" 0 ${out} line)
+				endif()
 
-		install()
+				if (NOT "${line}" STREQUAL "")
+
+					if ("${line}" MATCHES "^([0-9a-zA-Z._]*)=([0-9a-zA-Z._]*)$")
+				
+						if ("${CMAKE_MATCH_1}" STREQUAL "PluginFolder")
+							set(plugin_folder "${CMAKE_MATCH_2}")
+						elseif ("${CMAKE_MATCH_1}" STREQUAL "Plugin")
+							list(APPEND plugins "${path}/${plugin_folder}/${CMAKE_MATCH_2}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+						else()
+							MESSAGE(SEND_ERROR "Unknown key in config-file:" "${CMAKE_MATCH_1}")
+						endif ()
+				
+					else()
+					
+						MESSAGE(SEND_ERROR "Invalid config-file syntax:" "${line}")
+
+					endif()			
+
+				endif()
+
+			endforeach()
+
+			set(${var_name} ${plugins} PARENT_SCOPE)
+
+		endfunction(read_files)
+
+		
+		find_file(plugins_d plugins_d.cfg PATHS ${OGRE_BINARY_DBG})
+		
+		if (plugins_d)
+			read_files(debug_plugins ${plugins_d} ${OGRE_PLUGIN_DIR_DBG})
+		else()
+			MESSAGE(SEND_ERROR "File plugins_d.cfg could not be found!")
+		endif()
+
+		find_file(plugins plugins.cfg PATHS ${OGRE_BINARY_DBG})
+		
+		if (plugins)
+			read_files(release_plugins ${plugins} ${OGRE_PLUGIN_DIR_REL})
+		else()
+			MESSAGE(SEND_ERROR "File plugins.cfg could not be found!")
+		endif()
+		
+
+		collect_target_dependencies(OgreMadgine)
+
+		install(FILES $<$<CONFIG:Debug>:${plugins_d}> $<$<CONFIG:Release>:${plugins}> DESTINATION bin COMPONENT OgreMadgine)
+
+		foreach(debug_file ${debug_plugins})
+
+			install(FILES $<$<CONFIG:Debug>:${debug_file}> DESTINATION bin COMPONENT OgreMadgine)
+
+		endforeach()
+
+		foreach(release_file ${release_plugins})
+
+			install(FILES $<$<CONFIG:Release>:${release_file}> DESTINATION bin COMPONENT OgreMadgine)
+
+		endforeach()
 
 	endif()
 endif()

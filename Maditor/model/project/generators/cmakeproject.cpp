@@ -18,25 +18,6 @@ namespace Maditor {
 				mName(name)
 			{
 			}
-			void CmakeProject::build()
-			{
-				
-				std::string cmd = QString("\"\"%3/cmake\" -G \"" CMAKE_GENERATOR "\" -B\"%1\" -H\"%2\"\"").arg(
-					buildDir().path(),
-					mRoot.path(),
-					QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string())
-				).toStdString();
-				std::pair<int, std::string> result = CommandLine::exec(cmd.c_str());
-				if (result.first != 0)
-				{
-					LOG_ERROR(result.second);
-				}
-				else
-				{
-					//LOG(result.second);
-					LOG("CMake Success!");
-				}
-			}
 
 			void CmakeProject::write(QTextStream & stream, int index)
 			{
@@ -65,6 +46,11 @@ endif (%1_FOUND)
 			void CmakeProject::addSubProject(CmakeGenerator * sub)
 			{
 				mSubProjects.push_back(sub);
+			}
+
+			void CmakeProject::removeSubProject(CmakeGenerator* sub)
+			{
+				mSubProjects.erase(std::remove(mSubProjects.begin(), mSubProjects.end(), sub), mSubProjects.end());
 			}
 
 			void CmakeProject::generate()
@@ -96,11 +82,6 @@ endif (%1_FOUND)
 			void CmakeProject::addLibrary(const QString & lib)
 			{
 				mLibraries << lib;
-			}
-
-			QString CmakeProject::solutionPath()
-			{
-				return buildDir().filePath(mName + ".sln");
 			}
 
 			QDir CmakeProject::buildDir()

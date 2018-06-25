@@ -15,18 +15,6 @@ namespace Maditor {
 			Module(ModuleList *parent, const QString &name);
 			Module(QDomElement data, ModuleList *parent);
 
-			virtual QDir path() const override;
-
-			QString moduleInclude();
-
-			bool hasClass(const QString &name);
-
-			virtual QVariant icon() const override;
-			
-			const QStringList &files() const;
-
-			bool empty() const;
-
 			bool addDependency(const QString &dep);
 			void removeDependency(const QString &dep);
 			const QStringList &dependencies() const;
@@ -40,9 +28,18 @@ namespace Maditor {
 
 			// Inherited via ProjectElement
 			virtual int childCount() const override;
-
 			virtual Generators::ClassGenerator * child(int i) override;
+
+			virtual QVariant icon() const override;
+			virtual QDir path() const override;
+
+			QString moduleInclude();
+
+			const QStringList &files() const;
+
+			bool empty() const;
 			Generators::ClassGenerator *getClass(const QString &name);
+			bool hasClass(const QString &name);
 
 			template <class T>
 			T *getClass(const QString &name) {
@@ -73,6 +70,8 @@ namespace Maditor {
 				Shared::LauncherType newLauncherType, Shared::LauncherType oldLauncherType);
 			void removeConfigs(ApplicationConfig::Launcher oldLauncher,
 				Shared::LauncherType oldLauncherType);
+
+			void delete_();
 
 		private:
 			void addClassImpl(Generators::ClassGenerator *generator, bool callInsert = true);

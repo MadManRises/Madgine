@@ -40,6 +40,7 @@
 #include <QMimeData>
 #include <QSplitter>
 #include <QMenuBar>
+#include <QProgressBar>
 
 
 /// @endcond

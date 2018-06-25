@@ -255,6 +255,21 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="cmakeDockWidget">
+   <property name="windowTitle">
+    <string>CMake</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="cmakeDockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="Maditor::View::CmakeWidget" name="cmakeWidget" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionNewProject">
    <property name="text">
     <string>New Project</string>
@@ -283,7 +298,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/icons/icons/start.jpg</normaloff>:/icons/icons/start.jpg</iconset>
    </property>
    <property name="text">
@@ -295,7 +310,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset>
      <normaloff>:/icons/icons/pause.png</normaloff>:/icons/icons/pause.png</iconset>
    </property>
    <property name="text">
@@ -391,6 +406,12 @@
    <class>Maditor::View::CentralWidget</class>
    <extends>QWidget</extends>
    <header>documents/centralwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Maditor::View::CmakeWidget</class>
+   <extends>QWidget</extends>
+   <header>project/cmakewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

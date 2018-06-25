@@ -13,7 +13,7 @@ namespace Maditor {
 		Module::Module(ModuleList *parent, const QString & name) :
 			ProjectElement(name, "Module", parent),
 			mParent(parent),
-			mCmake(parent->cmake(), name),
+			mCmake(parent->cmake()->project(), name),
 			mServerConfigCount(0),
 			mClientConfigCount(0)
 		{
@@ -30,7 +30,7 @@ namespace Maditor {
 		Module::Module(QDomElement data, ModuleList *parent) :
 			ProjectElement(data, parent),
 			mParent(parent),
-			mCmake(parent->cmake(), mName),
+			mCmake(parent->cmake()->project(), mName),
 			mServerConfigCount(0),
 			mClientConfigCount(0)
 		{
@@ -55,7 +55,8 @@ namespace Maditor {
 		void Module::init()
 		{
 			setContextMenuItems({ 
-				{ "New Class", [this]() {newClass(); } }
+				{ "New Class", [this]() {newClass(); } },
+				{ "Delete", [this]() {delete_(); } }
 			});
 
 			mCmake.addFile(Generators::HeaderGuardGenerator::fileName(mName));
@@ -81,7 +82,7 @@ namespace Maditor {
 		{
 			addClassImpl(generator);
 
-			mParent->generate();
+			mCmake.generate();
 
 			project()->writeToDisk();
 		}
@@ -313,5 +314,9 @@ namespace Maditor {
 			}
 		}
 
+		void Module::delete_()
+		{
+			mParent->deleteModule(this);
+		}
 	}
 }

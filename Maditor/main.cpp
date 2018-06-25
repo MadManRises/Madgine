@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
 	Maditor::Model::Maditor model;
 
 	Maditor::View::MaditorView view;
-	view.setModel(&model);
-
 	view.createMainWindow();
+	
+	view.setModel(&model);	
 
 	model.init();
 

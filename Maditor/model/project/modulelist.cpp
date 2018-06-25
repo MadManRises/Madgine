@@ -37,7 +37,7 @@ namespace Maditor {
 				module->initDependencies();
 
 			for (QDomElement library = element.firstChildElement("Library"); !library.isNull(); library = library.nextSiblingElement("Library")) {
-				mCmake.addLibrary(library.attribute("name"));
+				mCmake.project()->addLibrary(library.attribute("name"));
 			}
 		}
 
@@ -63,6 +63,18 @@ namespace Maditor {
 			connect(m, &Module::classAdded, this, &ModuleList::classAdded);
 
 			emit moduleAdded(m);
+		}
+
+		void ModuleList::removeModule(Module* module)
+		{
+			emit moduleRemoved(module);
+
+			auto it = std::find_if(mModules.begin(), mModules.end(), [=](const std::unique_ptr<Module> &mod) {return mod.get() == module; });
+			size_t i = std::distance(mModules.begin(), it);
+			bool b = beginRemoveRows(i, i);
+			mModules.erase(it);
+			endRemoveRows(b);
+
 		}
 
 		void ModuleList::newModule()
@@ -96,20 +108,32 @@ namespace Maditor {
 		void ModuleList::generate()
 		{
 			mCmake.generate();
-			mCmake.build();
 		}
 
 		void ModuleList::createModule(const QString & name)
 		{
 			addModule(std::make_unique<Module>(this, name));
-
+			generate();
 			writeData();
 			mParent->writeToDisk();
 
 		}
 
+		void ModuleList::deleteModule(Module* module)
+		{
+			bool deleteFiles;
+			if (DialogManager::showDeleteModuleDialogStatic(module, deleteFiles)) {
+				QDir path = module->path();
+				path.removeRecursively();
+				removeModule(module);
+				generate();
+				writeData();
+				mParent->writeToDisk();
+			}
+		}
 
-		Generators::CmakeProject * ModuleList::cmake()
+
+		CmakeServer * ModuleList::cmake()
 		{
 			return &mCmake;
 		}

@@ -25,7 +25,7 @@ public:
 
 	ApplicationView();
 	
-	void setupUi(MainWindow *window);
+	virtual void setupUi(MainWindow *window) override;
 
 	void setConfigModel(Model::ConfigList *list);
 	void clearConfigModel();
@@ -52,7 +52,6 @@ private slots:
 	
 
 private:
-	const Ui::MainWindow *mUi;
 
 	Model::ConfigList *mList;
 

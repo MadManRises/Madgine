@@ -8,6 +8,7 @@
 
 #include <Windows.h>
 #undef min
+#undef max
 #undef NO_ERROR
 #endif
 

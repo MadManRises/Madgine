@@ -30,9 +30,6 @@ namespace Maditor {
 			mValid(false),
 			mLogs(logs)
 		{
-			assert(mPath.cd(name));
-
-			init();
 
 			QMessageBox::StandardButton answer = QMessageBox::StandardButton::Default;
 
@@ -46,6 +43,8 @@ namespace Maditor {
 			copyTemplate(&answer);
 
 			if (answer != QMessageBox::Abort) {
+				init();
+
 				mModules->generate();
 				writeToDisk();
 				mValid = true;
@@ -84,7 +83,7 @@ namespace Maditor {
 		{
 			mMediaFolder.setRootPath(mPath.filePath("data/media"));
 
-			Engine::Serialize::Debugging::StreamDebugging::setLoggingPath(mPath.path().toStdString() + "debug/runtime/maditor/");
+			Engine::Serialize::Debugging::StreamDebugging::setLoggingPath(mPath.filePath("debug/runtime/maditor").toStdString());
 			Engine::Serialize::Debugging::StreamDebugging::setLoggingEnabled(true);
 
 			connect(mModules.get(), &ModuleList::classAdded, this, &Project::onClassAdded);
@@ -108,10 +107,10 @@ namespace Maditor {
 		void Project::copyTemplate(QMessageBox::StandardButton *answer)
 		{
 			QStringList templateFiles;
-			QString templatePath = QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string() + "/templateproject/");
-			QDir dir(templatePath);
+			QString templatePath = QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string());
+			QDir dir = QDir(templatePath).filePath("../Maditor/templateproject");
 
-			QDirIterator it(templatePath, QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs, QDirIterator::Subdirectories);
+			QDirIterator it(dir.path(), QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs, QDirIterator::Subdirectories);
 			while (it.hasNext()) {
 				QString filePath = it.next();
 				QString target = mPath.filePath(dir.relativeFilePath(filePath));

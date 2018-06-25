@@ -21,7 +21,7 @@ namespace Maditor {
 			void setModel(Model::LogTableModel *log);
 
 		private slots:
-			void resize();
+			void resize(const QModelIndex &p, int first, int last);
 			void sortIndicatorChanged(int index, Qt::SortOrder order);
 
 		private:

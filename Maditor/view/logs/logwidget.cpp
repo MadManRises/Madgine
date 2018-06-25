@@ -55,10 +55,14 @@ namespace Maditor {
 			}
 		}
 
-		void LogWidget::resize() {
+		void LogWidget::resize(const QModelIndex &p, int first, int last) {
 			/*ui->tableView->resizeColumnToContents(3);
-			ui->tableView->resizeColumnToContents(2);
-			ui->tableView->resizeRowsToContents();*/ //TODO
+			ui->tableView->resizeColumnToContents(2);*/
+			//ui->tableView->resizeRowsToContents(); //TODO
+			for (int i = first; i <= last; ++i)
+			{
+				ui->tableView->resizeRowToContents(i);
+			}
 		}
 
 	}

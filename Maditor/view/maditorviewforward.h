@@ -6,6 +6,7 @@ namespace Maditor {
 		class ApplicationView;
 		class ApplicationWindow;
 		class LogsView;
+		class CmakeView;
 		class ProjectView;
 		class ModulePropertiesWidget;
 		class MaditorView;

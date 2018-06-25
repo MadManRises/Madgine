@@ -15,16 +15,10 @@ namespace Engine
 			 * Sets up default values for the settings.
 			 */
 			OgreAppSettings() :
-				mPluginsFile("plugins.cfg"),
 				mUseExternalSettings(false), mWindowWidth(0), mWindowHeight(0),
 				mInput(nullptr)
 			{
 			}
-
-			/**
-			 * The name of the file, that lists all needed plugins.
-			 */
-			std::string mPluginsFile;
 
 			/**
 			* The root-directory to look for resources.

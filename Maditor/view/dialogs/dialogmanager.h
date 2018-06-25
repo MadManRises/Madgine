@@ -28,6 +28,7 @@ namespace Maditor {
 				virtual bool showNewConfigDialog(Model::ConfigList *list, QString &name) override;
 				virtual bool showDeleteConfigDialog(Model::ApplicationConfig *config) override;
 				virtual bool showNewModuleDialog(Model::ModuleList *list, QString &name) override;
+				virtual bool showDeleteModuleDialog(Model::Module *module, bool &deleteFiles) override;
 				virtual bool showNewClassDialog(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type) override;
 
 				virtual bool showNewGuiHandlerDialog(Model::Module *module, const QString &name, QString &window, int &type, bool &hasLayout) override;

@@ -9,6 +9,7 @@ namespace Engine
 		{
 		public:
 			Plugin(const std::experimental::filesystem::path &path);
+			~Plugin();
 
 			bool isLoaded();
 			bool load();

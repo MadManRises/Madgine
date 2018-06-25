@@ -45,6 +45,8 @@ target_link_libraries(Client PUBLIC Base)
 
 target_compile_definitions(Client INTERFACE MADGINE_CLIENT_BUILD)
 
+target_compile_definitions(Client PRIVATE SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()

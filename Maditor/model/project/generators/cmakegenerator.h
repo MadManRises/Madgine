@@ -9,6 +9,7 @@ namespace Maditor {
 			class CmakeGenerator : public Generator {
 			public:
 				CmakeGenerator(CmakeProject *parent, const QString &name);
+				~CmakeGenerator();
 
 				void addFile(const QString &file);
 				void addFiles(const QStringList &files);

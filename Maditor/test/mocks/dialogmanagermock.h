@@ -22,6 +22,8 @@ class MockDialogManager : public DialogManager {
 	  bool(Model::ApplicationConfig *config));
   MOCK_METHOD2(showNewModuleDialog,
       bool(Model::ModuleList *list, QString &name));
+  MOCK_METHOD2(showDeleteModuleDialog,
+	  bool(Model::Module *module, bool &deleteFiles));
   MOCK_METHOD3(showNewClassDialog,
       bool(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type));
   MOCK_METHOD5(showNewGuiHandlerDialog,

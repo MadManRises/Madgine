@@ -7,7 +7,7 @@ namespace Engine
 		class INTERFACES_EXPORT ConnectionStore
 		{
 		public:
-			typedef std::vector<std::shared_ptr<ConnectionBase>>::const_iterator const_iterator;
+			typedef std::list<std::shared_ptr<ConnectionBase>>::const_iterator const_iterator;
 
 			template <template <class...> class Con, class... _Ty, class... Args>
 			std::weak_ptr<ConnectionInstance<_Ty...>> create(Args&&... args)
@@ -43,7 +43,7 @@ namespace Engine
 			static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
 		private:
-			std::vector<std::shared_ptr<ConnectionBase>> mConnections;
+			std::list<std::shared_ptr<ConnectionBase>> mConnections;
 		};
 
 

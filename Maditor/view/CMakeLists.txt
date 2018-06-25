@@ -18,7 +18,7 @@ FolderSources(sources "" "" componentview.h editorsettingswidget.cpp editorsetti
 	FolderSources(sources "" dialogs dialogmanager.cpp dialogmanager.h newclassdialog.cpp newclassdialog.h newclassdialog.ui newguihandlerdialog.cpp newguihandlerdialog.h newguihandlerdialog.ui newmoduledialog.cpp newmoduledialog.h newmoduledialog.ui newotherclassdialog.cpp newotherclassdialog.h newotherclassdialog.ui newprojectdialog.cpp newprojectdialog.h newprojectdialog.ui settingsdialog.cpp settingsdialog.h settingsdialog.ui settingstab.h)
 	FolderSources(sources "" documents centralwidget.cpp centralwidget.h documenttabbar.cpp documenttabbar.h documenttabwidget.cpp documenttabwidget.h documentview.cpp documentview.h independentwindowspawner.h windowspawner.h)
 	FolderSources(sources "" logs logsview.cpp logsview.h logwidget.cpp logwidget.h)
-	FolderSources(sources "" project filesview.cpp filesview.h modulepropertieswidget.cpp modulepropertieswidget.h modulepropertieswidget.ui projectview.cpp projectview.h propertieswidget.cpp propertieswidget.h propertieswidget.ui)
+	FolderSources(sources "" project cmakeview.cpp cmakeview.h cmakewidget.cpp cmakewidget.h cmakewidget.ui filesview.cpp filesview.h modulepropertieswidget.cpp modulepropertieswidget.h modulepropertieswidget.ui projectview.cpp projectview.h propertieswidget.cpp propertieswidget.h propertieswidget.ui)
 
 add_library(Maditor_View SHARED ${sources})
 

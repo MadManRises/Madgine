@@ -97,8 +97,8 @@ namespace Engine
 
 			
 			std::unique_ptr<Resources::ResourceLoader> mLoader;
-			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;
 			std::unique_ptr<GUI::GUISystem> mGUI;
+			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;			
 			std::unique_ptr<UI::UIManager> mUI;
 			
 		};

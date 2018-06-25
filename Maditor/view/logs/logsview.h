@@ -17,7 +17,7 @@ public:
 
 	LogsView();
 	
-	void setupUi(MainWindow *window);
+	virtual void setupUi(MainWindow *window) override;
 	virtual void setModel(Model::LogTableModel *logs) override;
 
 private:

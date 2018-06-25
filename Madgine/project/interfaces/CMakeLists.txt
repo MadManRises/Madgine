@@ -30,7 +30,7 @@ add_library(Interfaces SHARED ${sources})
 
 add_precompiled_header(Interfaces ../../src/Madgine/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
 
-target_compile_definitions(Interfaces PRIVATE CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
+target_compile_definitions(Interfaces PUBLIC CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
 
 target_link_libraries (Interfaces PRIVATE lualib ${CMAKE_THREAD_LIBS_INIT})
 

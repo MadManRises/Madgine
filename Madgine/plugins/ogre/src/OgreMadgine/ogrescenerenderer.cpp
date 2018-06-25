@@ -74,6 +74,10 @@ namespace Engine {
 
 	void OgreSceneRenderer::finalize()
 	{
+		mRoot->getTextureManager()->remove(mGameTexture);
+		mGameTexture.reset();
+
+
 		if (mTerrainGlobals) OGRE_DELETE mTerrainGlobals;
 		if (mTerrainGroup) OGRE_DELETE mTerrainGroup;
 

@@ -21,6 +21,11 @@ namespace Engine
 		{
 		}
 
+		Plugin::~Plugin()
+		{
+			unload();
+		}
+
 		bool Plugin::isLoaded()
 		{
 			return mModule != nullptr;

@@ -31,26 +31,26 @@ namespace Engine
 			void emit(_Ty ... args)
 			{
 				auto end = mConnectedSlots.end();
-				auto it = mConnectedSlots.begin();
-				if (end != it)
-				{
-					--end;
-					bool keepGoing;
-					do
-					{
-						keepGoing = it != end;
-						if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = it->lock())
-						{
-							(*ptr)(*it, args...);
-							++it;
+
+				mConnectedSlots.erase(
+					std::remove_if(
+						mConnectedSlots.begin(), 
+						end,
+						[&](const std::weak_ptr<ConnectionInstance<_Ty...>> &p) {
+							if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = p.lock())
+							{
+								(*ptr)(p, args...);
+								return false;
+							}
+							else
+							{
+								return true;
+							}
 						}
-						else
-						{
-							it = mConnectedSlots.erase(it);
-						}
-					}
-					while (keepGoing);
-				}
+					),
+					end
+				);
+
 			}
 
 

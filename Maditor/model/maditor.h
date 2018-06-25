@@ -17,8 +17,8 @@ namespace Maditor {
 
 			void init();
 
-			void newProject(const QString &path, const QString &name);
-			void loadProject(const QString &path);
+			void newProject(const QDir &path, const QString &name);
+			void loadProject(const QDir &path);
 			
 
 			void clearRecentProjects();

@@ -19,6 +19,8 @@ namespace Maditor {
 		class Module;
 		class ModuleList;
 
+		class CmakeServer;
+
 		class ConfigList;
 
 		class ModuleLoader;

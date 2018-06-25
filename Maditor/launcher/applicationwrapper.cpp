@@ -106,8 +106,7 @@ namespace Maditor
 			case Shared::CLIENT_LAUNCHER:
 			{
 
-				mSettings.mRootDir = mAppInfo.mDataDir + "Media/";
-				mSettings.mPluginsFile = mAppInfo.mDataDir + "plugins.cfg";
+				mSettings.mRootDir = mAppInfo.mDataDir;
 
 				mSettings.mInput = input();
 				mSettings.mUseExternalSettings = true;

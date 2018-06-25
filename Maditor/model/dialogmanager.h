@@ -53,6 +53,10 @@ namespace Maditor {
 				static bool showNewModuleDialogStatic(Model::ModuleList *list, QString &name) {
 					return sSingleton->showNewModuleDialog(list, name);
 				}
+				virtual bool showDeleteModuleDialog(Model::Module *module, bool &deleteFiles) = 0;
+				static bool showDeleteModuleDialogStatic(Model::Module *module, bool &deleteFiles) {
+					return sSingleton->showDeleteModuleDialog(module, deleteFiles);
+				}
 				virtual bool showNewClassDialog(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type) = 0;
 				static bool showNewClassDialogStatic(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type) {
 					return sSingleton->showNewClassDialog(module, name, type);

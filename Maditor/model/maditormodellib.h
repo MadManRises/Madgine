@@ -45,6 +45,9 @@
 #include <QKeyEvent>
 #include <QTime>
 #include <QTimer>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 Q_DECLARE_METATYPE(Engine::ValueType);
 

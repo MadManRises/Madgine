@@ -27,7 +27,7 @@ public:
 
 	ProjectView();
 	
-	void setupUi(MainWindow *window);
+	virtual void setupUi(MainWindow *window) override;
 	virtual void setModel(Model::Project *project) override;
 	virtual void clearModel() override;
 
@@ -36,7 +36,6 @@ private slots:
 	void closeConfig(Model::ApplicationConfig *config);
 
 private:
-	const Ui::MainWindow *mUi;
 };
 
 

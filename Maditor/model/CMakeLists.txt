@@ -18,7 +18,8 @@ FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodelli
 		FolderSources(sources application inspector inspector.cpp inspector.h scopewrapper.cpp scopewrapper.h)
 	FolderSources(sources "" documents document.cpp document.h documentstore.h)
 	FolderSources(sources "" logs logsorterfilter.cpp logsorterfilter.h logtablemodel.cpp logtablemodel.h)
-	FolderSources(sources "" project applicationconfig.cpp applicationconfig.h configlist.cpp configlist.h module.cpp module.h modulelist.cpp modulelist.h moduleselection.cpp moduleselection.h project.cpp project.h projectelement.cpp projectelement.h xmlexception.h)
+	FolderSources(sources "" platform processlauncher.cpp processlauncher.h)
+	FolderSources(sources "" project applicationconfig.cpp applicationconfig.h cmakeserver.cpp cmakeserver.h configlist.cpp configlist.h module.cpp module.h modulelist.cpp modulelist.h moduleselection.cpp moduleselection.h project.cpp project.h projectelement.cpp projectelement.h xmlexception.h)
 		FolderSources(sources project generators classgenerator.cpp classgenerator.h classgeneratorfactory.cpp classgeneratorfactory.h cmakegenerator.cpp cmakegenerator.h cmakeproject.cpp cmakeproject.h commandline.cpp commandline.h dotgenerator.cpp dotgenerator.h entitycomponentgenerator.cpp entitycomponentgenerator.h gamehandlergenerator.cpp gamehandlergenerator.h generator.cpp generator.h globalapigenerator.cpp globalapigenerator.h guihandlergenerator.cpp guihandlergenerator.h headerguardgenerator.cpp headerguardgenerator.h otherclassgenerator.cpp otherclassgenerator.h scenecomponentgenerator.cpp scenecomponentgenerator.h serverclassgenerator.cpp serverclassgenerator.h)
 
 

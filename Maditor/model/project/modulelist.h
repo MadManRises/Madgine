@@ -3,7 +3,7 @@
 
 #include "projectelement.h"
 
-#include "generators/cmakeproject.h"
+#include "cmakeserver.h"
 
 #include "module.h"
 
@@ -20,11 +20,10 @@ namespace Maditor {
 			ModuleList(const ModuleList &) = delete;
 			~ModuleList();
 
-			virtual QDir path() const override;
 
 			void generate();
 
-			Generators::CmakeProject *cmake();
+			CmakeServer *cmake();
 
 			Generators::ClassGenerator *getClass(const QString &fullName);
 
@@ -36,12 +35,13 @@ namespace Maditor {
 			std::vector<std::unique_ptr<Module>>::const_iterator begin() const;
 			std::vector<std::unique_ptr<Module>>::const_iterator end() const;
 
-			virtual QVariant icon() const override;
-
-			// Inherited via ProjectElement
 			virtual int childCount() const override;
-
 			virtual Module * child(int i) override;
+
+			virtual QVariant icon() const override;
+			virtual QDir path() const override;
+
+
 
 			template <class T>
 			T *getClass(const QString &fullName) {
@@ -66,6 +66,9 @@ namespace Maditor {
 
 		public slots:
 			void createModule(const QString &name);
+			void deleteModule(Module *module);
+			void newModule();
+			
 			void drawDependenciesGraph();
 
 			void updateConfigs(ApplicationConfig *config,
@@ -76,10 +79,12 @@ namespace Maditor {
 			void init();
 
 			void addModule(std::unique_ptr<Module> &&module);
-			void newModule();
+			void removeModule(Module *module);
+			
 
 		signals:
 			void moduleAdded(Module *);
+			void moduleRemoved(Module *);
 			void classAdded(Generators::ClassGenerator*);
 			
 
@@ -88,7 +93,7 @@ namespace Maditor {
 
 			QDir mPath;
 
-			Generators::CmakeProject mCmake;
+			CmakeServer mCmake;
 
 			std::vector<std::unique_ptr<Module>> mModules;
 

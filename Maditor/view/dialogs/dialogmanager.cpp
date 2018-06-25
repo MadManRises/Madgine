@@ -95,7 +95,7 @@ namespace Maditor {
 
 			bool DialogManager::showDeleteConfigDialog(Model::ApplicationConfig* config)
 			{
-				QMessageBox::StandardButton val = QMessageBox::question(0, "Delete Config?", QString("Do you want to delete the configuration <i>%1</i>?").arg(config->getName()), QMessageBox::Yes | QMessageBox::No);
+				QMessageBox::StandardButton val = QMessageBox::question(0, "Delete Config?", QString("Do you want to delete the configuration <i>%1</i>?").arg(config->name()), QMessageBox::Yes | QMessageBox::No);
 				if (val == QMessageBox::No)
 					return false;
 				else
@@ -112,6 +112,26 @@ namespace Maditor {
 					return true;
 				}
 				return false;
+			}
+
+			bool DialogManager::showDeleteModuleDialog(Model::Module* module, bool &deleteFiles)
+			{
+				QMessageBox msgBox(QMessageBox::Icon::Question, "Delete Module?", QString("Do you want to delete the Module <i>%1</i>? All its classes will be destroyed.").arg(module->name()), QMessageBox::No | QMessageBox::Yes);
+
+				QCheckBox cb("Delete Files");
+				cb.setChecked(true);
+				msgBox.setCheckBox(&cb);
+
+				msgBox.exec();
+
+
+				if (msgBox.result() == QMessageBox::Yes) {
+					deleteFiles = cb.isChecked();
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 
 			bool DialogManager::showNewClassDialog(Model::Module *module, QString &name, Model::Generators::ClassGeneratorFactory::ClassType &type)

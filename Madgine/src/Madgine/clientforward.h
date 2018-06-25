@@ -6,8 +6,6 @@ namespace Ogre
 	template <class T>
 	class Singleton;
 
-	template <class T>
-	class SharedPtr;
 }
 
 namespace Engine
