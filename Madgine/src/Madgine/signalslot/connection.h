@@ -107,7 +107,7 @@ namespace Engine
 
 			std::weak_ptr<ConnectionInstance<_Ty...>> clone() override
 			{
-				return this->cloneImpl<DirectConnection>(*this);
+				return this->template cloneImpl<DirectConnection>(*this);
 			}
 
 			void operator()(const std::weak_ptr<ConnectionInstance<_Ty...>>& ptr, _Ty ... args) override
@@ -138,7 +138,7 @@ namespace Engine
 
 			std::weak_ptr<ConnectionInstance<_Ty...>> clone() override
 			{
-				return this->cloneImpl<QueuedConnection>(*this);
+				return this->template cloneImpl<QueuedConnection>(*this);
 			}
 
 			void operator()(const std::weak_ptr<ConnectionInstance<_Ty...>>& ptr, _Ty ... args) override
