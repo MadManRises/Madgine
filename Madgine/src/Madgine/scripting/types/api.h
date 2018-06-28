@@ -94,7 +94,7 @@ namespace Engine
 				...>::value> checkStackSize(lua_State* state, R (T::*f)(_Ty ...), int actual)
 			{
 				if (actual != sizeof...(_Ty))
-					APIHelper::error(state, Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
+					APIHelper::error(state, Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
 			template <class... _Ty>
@@ -102,21 +102,21 @@ namespace Engine
 				...>::value> checkStackSize(lua_State* state, R (T::*f)(_Ty ...) const, int actual)
 			{
 				if (actual != sizeof...(_Ty))
-					APIHelper::error(state, Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
+					APIHelper::error(state, Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
 			template <class... _Ty>
 			static void checkStackSize(lua_State* state, R (T::*f)(const ArgumentList& list, _Ty ...), int actual)
 			{
 				if (actual < sizeof...(_Ty))
-					APIHelper::error(state, Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
+					APIHelper::error(state, Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
 			template <class... _Ty>
 			static void checkStackSize(lua_State* state, R (T::*f)(const ArgumentList& list, _Ty ...) const, int actual)
 			{
 				if (actual < sizeof...(_Ty))
-					APIHelper::error(state, Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
+					APIHelper::error(state, Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
 			/*static int impl(lua_State *state) {
