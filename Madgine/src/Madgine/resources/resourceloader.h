@@ -36,7 +36,7 @@ namespace Engine
 				{
 					auto extIndex = [this](const std::string &ext)
 					{
-						const std::vector<std::string> &extensions = fileExtensions();
+						const std::vector<std::string> &extensions = this->fileExtensions();
 						return std::find(extensions.begin(), extensions.end(), ext) - extensions.begin();
 					};
 
