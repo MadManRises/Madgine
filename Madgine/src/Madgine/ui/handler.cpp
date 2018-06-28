@@ -75,7 +75,7 @@ namespace Engine
 				}
 				else
 				{
-					LOG_ERROR(Exceptions::windowNotFound(des.mWindowName));
+					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWindowName));
 					if (des.mVar)
 						return false;
 				}

@@ -312,7 +312,7 @@ namespace Engine
 
 				if (failed)
 				{
-					LOG_ERROR(Exceptions::loadLayoutFailure(name));
+					LOG_ERROR(Database::Exceptions::loadLayoutFailure(name));
 					return nullptr;
 				}
 				WindowContainer* result = new MyGUIWindow(widgets.front(), mGui, this);

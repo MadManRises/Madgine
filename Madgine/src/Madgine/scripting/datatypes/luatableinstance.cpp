@@ -121,7 +121,7 @@ namespace Engine
 
 				lua_pop(mState, 2);
 
-				throw ScriptingException(Exceptions::unknownMethod(name, object));
+				throw ScriptingException(Database::Exceptions::unknownMethod(name, object));
 			}
 
 			lua_insert(mState, -2);

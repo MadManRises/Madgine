@@ -82,7 +82,7 @@ namespace Engine
 					break;
 				}
 			default:
-				throw SerializeException(Exceptions::unknownDeserializationType);
+				throw SerializeException(Database::Exceptions::unknownDeserializationType);
 			}
 			mLog.logRead(result);
 			return *this;
@@ -100,7 +100,7 @@ namespace Engine
 			ExtendedValueType type;
 			read(type);
 			if (type != ExtendedValueType::SerializableUnitValue)
-				throw SerializeException(Exceptions::notValueType("SerializableUnit"));
+				throw SerializeException(Database::Exceptions::notValueType("SerializableUnit"));
 			size_t ptr;
 			read(ptr);
 			p = convertPtr(ptr);
@@ -117,7 +117,7 @@ namespace Engine
 			mIfs.read(static_cast<char*>(buffer), size);
 			if (!mIfs.good())
 				throw SerializeException(
-					Exceptions::deserializationFailure);
+					Database::Exceptions::deserializationFailure);
 		}
 
 
@@ -207,7 +207,7 @@ namespace Engine
 				write(v.as<InvScopePtr>());
 				break;
 			default:
-				throw SerializeException(Exceptions::unknownSerializationType);
+				throw SerializeException(Database::Exceptions::unknownSerializationType);
 			}
 			mLog.logWrite(v);
 			return *this;

@@ -219,7 +219,7 @@ namespace Engine
 			{
 				if (gptr() != egptr())
 				{
-					LOG_WARNING(Exceptions::messageNotFullyRead(context));
+					LOG_WARNING(Database::Exceptions::messageNotFullyRead(context));
 				}
 				mRecBuffer.clear();
 				mBytesToRead = sizeof mReceiveMessageHeader;

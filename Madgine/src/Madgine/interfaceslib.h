@@ -70,6 +70,6 @@
 
 #include "scripting/scriptingexception.h"
 #include "util/utilmethods.h"
-#include "generic/exceptionmessages.h"
+#include "database/exceptionmessages.h"
 
 /// @endcond

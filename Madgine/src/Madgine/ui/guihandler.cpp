@@ -39,7 +39,7 @@ namespace Engine
 				window = mUI.gui().loadLayout(mLayoutFile, mParentName);
 				if (!window)
 				{
-					LOG_ERROR(Exceptions::guiHandlerInitializationFailed(mWindowName));
+					LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
 					return false;
 				}
 				if (mType == WindowType::ROOT_WINDOW)

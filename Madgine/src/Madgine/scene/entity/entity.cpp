@@ -70,13 +70,13 @@ namespace Engine
 							}
 							else
 							{
-								LOG_WARNING(message("Non-Table value at key \"", "\"!")(p.first));
+								LOG_WARNING(Database::message("Non-Table value at key \"", "\"!")(p.first));
 							}
 						}
 					}
 					else
 					{
-						LOG_ERROR(message("Behaviour \"", "\" not found!")(behaviour));
+						LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behaviour));
 					}
 				}
 			}
@@ -174,7 +174,7 @@ namespace Engine
 							}
 						}
 					}
-					throw ComponentException(Exceptions::unknownComponent(name));
+					throw ComponentException(Database::Exceptions::unknownComponent(name));
 				}
 				return it->second(*this, table);
 			}
@@ -187,9 +187,9 @@ namespace Engine
 			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
 			{
 				if (mComponents.find(component) != mComponents.end())
-					throw ComponentException(Exceptions::doubleComponent(component->key()));
+					throw ComponentException(Database::Exceptions::doubleComponent(component->key()));
 				if (&component->getEntity() != this)
-					throw ComponentException(Exceptions::corruptData);
+					throw ComponentException(Database::Exceptions::corruptData);
 				return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
 			}
 

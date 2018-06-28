@@ -151,7 +151,7 @@ namespace Maditor {
 		{
 			QFile file(path.filePath(sProjectFileName));
 			if (!file.open(QIODevice::ReadOnly))
-				throw XmlException(Engine::message("Could not find Project-File '", "'!")(path.filePath(sProjectFileName).toStdString()));
+				throw XmlException(Engine::Database::message("Could not find Project-File '", "'!")(path.filePath(sProjectFileName).toStdString()));
 			QDomDocument doc;
 			doc.setContent(&file);
 			file.close();

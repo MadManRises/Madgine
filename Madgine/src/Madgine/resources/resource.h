@@ -18,7 +18,7 @@ namespace Engine
 			virtual ~Resource()
 			{
 				if (!unload())
-					LOG_WARNING(message("Deleted Resource \"", "\" still used. Memory not freed!")(name()));
+					LOG_WARNING(Database::message("Deleted Resource \"", "\" still used. Memory not freed!")(name()));
 			}
 
 			std::shared_ptr<typename Loader::Data> data()

@@ -77,9 +77,9 @@ namespace Maditor {
 		{
 			QDomElement e = mRootElement.firstChildElement(name);
 			if (e.isNull())
-				throw XmlException(Engine::message("Missing Child \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
+				throw XmlException(Engine::Database::message("Missing Child \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
 			if (!e.nextSiblingElement(name).isNull())
-				throw XmlException(Engine::message("Multiple Children with tag \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
+				throw XmlException(Engine::Database::message("Multiple Children with tag \"", "\" in Node \"", "\"!")(name.toStdString(), mName.toStdString()));
 			return e;
 		}
 

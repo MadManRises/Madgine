@@ -31,7 +31,7 @@ namespace Engine
 			OgreTransform::~OgreTransform()
 			{
 				if (mNode->getAttachedObjectIterator().hasMoreElements())
-				LOG_ERROR(Exceptions::nodeNotCleared);
+				LOG_ERROR(Database::Exceptions::nodeNotCleared);
 
 				mNode->getParentSceneNode()->removeChild(mNode);
 				mNode->getCreator()->destroySceneNode(mNode);

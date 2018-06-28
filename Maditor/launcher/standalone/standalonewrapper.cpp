@@ -102,7 +102,7 @@ namespace Maditor
 		void StandaloneWrapper::receiveFileImpl(const std::string& path, const Engine::Serialize::FileBuffer& data)
 		{
 			auto it = mMissingFiles.find(path);
-			LOG(Engine::message("Received '", "'.")(it->second));
+			LOG(Engine::Database::message("Received '", "'.")(it->second));
 			data.writeFile(mRootPath / it->second, true);
 			mMissingFiles.erase(it);
 			if (mMissingFiles.empty())

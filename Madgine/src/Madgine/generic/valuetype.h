@@ -170,7 +170,7 @@ namespace Engine
 				case Type::StringValue:
 					return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
 				default:
-					throw Scripting::ScriptingException(Exceptions::invalidValueType);
+					throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
 				}
 			case Type::IntValue:
 				switch (other.type())
@@ -180,10 +180,10 @@ namespace Engine
 				case Type::FloatValue:
 					return std::get<int>(mUnion) < std::get<float>(other.mUnion);
 				default:
-					throw Scripting::ScriptingException(Exceptions::invalidValueType);
+					throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
 				}
 			default:
-				throw Scripting::ScriptingException(Exceptions::invalidValueType);
+				throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
 			}
 		}
 
@@ -221,7 +221,7 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Exceptions::invalidTypesForOperator("+", getTypeString(), other
+				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other
 					.getTypeString())));
 			}
 		}
@@ -250,7 +250,7 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Exceptions::invalidTypesForOperator("-", getTypeString(), other
+				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other
 					.getTypeString())));
 			}
 		}
@@ -291,7 +291,7 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(ValueTypeException(Exceptions::invalidTypesForOperator("/", getTypeString(), other.
+				MADGINE_THROW_NO_TRACE(ValueTypeException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.
 					getTypeString())));
 			}
 		}
@@ -332,7 +332,7 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(ValueTypeException(Exceptions::invalidTypesForOperator("*", getTypeString(), other.
+				MADGINE_THROW_NO_TRACE(ValueTypeException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.
 					getTypeString())));
 			}
 		}
@@ -385,7 +385,7 @@ namespace Engine
 			}
 			catch (const std::bad_variant_access&)
 			{
-				throw ValueTypeException(Exceptions::unexpectedValueType(getTypeString(),
+				throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
 				                                                         getTypeString(
 					                                                         static_cast<Type>(variant_index<Union, T>::value))));
 			}
