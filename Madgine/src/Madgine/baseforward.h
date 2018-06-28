@@ -24,6 +24,8 @@ namespace Engine
 
 	namespace App
 	{
+		class Root;
+
 		struct AppSettings;
 		class Application;
 
@@ -57,6 +59,16 @@ namespace Engine
 		class TabWindow;
 		class Textbox;
 		class Label;
+	}
+
+	namespace Resources
+	{
+		class ResourceManager;
+		template <class Loader>
+		class Resource;
+		template <class T, class Data>
+		class ResourceLoader;
+		class ResourceBase;
 	}
 
 }

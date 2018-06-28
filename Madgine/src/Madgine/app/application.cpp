@@ -13,6 +13,7 @@
 #include "../util/standardlog.h"
 
 #include "framelistener.h"
+#include "root.h"
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -21,24 +22,24 @@ namespace Engine
 
 	namespace App
 	{
-		Application::Application(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
-			Scope(state),
+		Application::Application(Root &root) :
+			Scope(root.luaState()),
 			mShutDown(false),
 			mTimeBank(0.0f),
-			mGlobalAPIs(pluginMgr, *this),
-			mPluginMgr(pluginMgr)
+			mGlobalAPIs(root.pluginMgr(), *this),
+			mRoot(root)
 		{
 		}
 
 		Application::~Application()
 		{
+			mLog.reset();
 		}
 
 		void Application::setup(const AppSettings& settings)
 		{
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
-
 		}
 
 		bool Application::init()
@@ -94,7 +95,7 @@ namespace Engine
 
 			{
 				//PROFILE("ConnectionDispatch");
-				mConnectionManager.update();
+				SignalSlot::ConnectionManager::getSingleton().update();
 			}
 
 			{
@@ -226,10 +227,20 @@ namespace Engine
 			return *mLog;
 		}
 
-		const Plugins::PluginManager &Application::pluginMgr() {
-			return mPluginMgr;
+		Root& Application::root()
+		{
+			return mRoot;
 		}
 
+		const Plugins::PluginManager& Application::pluginMgr()
+		{
+			return mRoot.pluginMgr();
+		}
+
+		Resources::ResourceManager& Application::resources()
+		{
+			return mRoot.resources();
+		}
 	}
 
 #ifdef _MSC_VER

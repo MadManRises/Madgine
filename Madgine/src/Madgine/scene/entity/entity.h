@@ -99,6 +99,8 @@ namespace Engine
 
 				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
 
+				App::Application &app();
+
 			protected:
 
 				KeyValueMapList maps() override;

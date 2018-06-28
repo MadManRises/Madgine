@@ -28,10 +28,16 @@ namespace Maditor {
 		void LauncherLogListener::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
 		{
 			if (lml != Ogre::LML_CRITICAL) return;
+			Ogre::String msg = message;
 			Engine::Util::MessageType level;
 			switch (lml) {
 			case Ogre::LML_CRITICAL:
-				level = Engine::Util::ERROR_TYPE;
+				if (Ogre::StringUtil::startsWith(message, "WARNING:")) {
+					level = Engine::Util::WARNING_TYPE;
+					msg = message.substr(strlen("WARNING: "));
+				}
+				else
+					level = Engine::Util::ERROR_TYPE;
 				break;
 			case Ogre::LML_NORMAL:
 				level = Engine::Util::LOG_TYPE;
@@ -42,7 +48,7 @@ namespace Maditor {
 			default:
 				throw 0;
 			}
-			mSlot->queue(message.c_str(), level, logName.c_str(), "", "", -1, {});
+			mSlot->queue(msg.c_str(), level, logName.c_str(), "", "", -1, {});
 		}
 #endif
 

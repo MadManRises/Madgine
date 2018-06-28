@@ -18,14 +18,14 @@ namespace Engine
 		 * The Application can also be paused (e.g. in a multithreaded environment).
 		 *
 		 */
-		class MADGINE_CLIENT_EXPORT OgreApplication : public Scripting::LuaState, public Application
+		class MADGINE_CLIENT_EXPORT OgreApplication : public Application
 		{
 		public:
 			/**
 			 * Creates the Application.
 			 * 
 			 */
-			OgreApplication(Plugins::PluginManager &pluginMgr);
+			OgreApplication(Root &root);
 			/**
 			 * Deletes all objects created by the Application.
 			 *
@@ -96,7 +96,6 @@ namespace Engine
 			bool mPaused;
 
 			
-			std::unique_ptr<Resources::ResourceLoader> mLoader;
 			std::unique_ptr<GUI::GUISystem> mGUI;
 			Serialize::noparent_unique_ptr<Scene::OgreSceneManager> mSceneMgr;			
 			std::unique_ptr<UI::UIManager> mUI;

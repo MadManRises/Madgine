@@ -1,29 +1,26 @@
 #pragma once
 
 #include "../util/serverlog.h"
-#include "../scripting/parsing/serverscriptparser.h"
 #include "../scripting/types/globalscopebase.h"
 #include "../scripting/types/luastate.h"
 
 #include "serverappinstance.h"
 
+
 namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::LuaState,
-		                                         public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>,
+		class MADGINE_SERVER_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>,
 		                                         public MadgineObject
 		{
 		public:
-			ServerBase(const std::string& name, const std::string& scriptsFolder, Plugins::PluginManager &pluginMgr);
+			ServerBase(const std::string& name, App::Root &root);
 			virtual ~ServerBase();
 
 			int run();
 
 			Util::ServerLog& log();
-
-			const std::string& scriptsFolder();
 
 			void shutdown();
 
@@ -40,7 +37,7 @@ namespace Engine
 			template <class T>
 			void spawnInstance(T&& init)
 			{
-				mInstances.emplace_back(std::forward<T>(init), this, mPluginMgr);
+				mInstances.emplace_back(std::forward<T>(init), mRoot);
 			}
 
 			bool sendFrameStarted();
@@ -49,13 +46,11 @@ namespace Engine
 			KeyValueMapList maps() override;
 
 		private:
-			SignalSlot::ConnectionManager mConnectionManager;
 
 			Util::ServerLog mLog;
 			std::string mName;
-			Scripting::Parsing::ServerScriptParser mScriptParser;
 
-			Plugins::PluginManager &mPluginMgr;
+			App::Root &mRoot;
 
 			bool mRunning;
 
@@ -63,5 +58,11 @@ namespace Engine
 
 			std::vector<App::FrameListener*> mListeners;
 		};
+
+#define SERVER_INSTANCE(Class) \
+		extern "C" DLL_EXPORT Engine::Server::ServerBase *createServer(const std::string &name, Engine::App::Root &root) {\
+			return new TW::Server::Server(name, root);\
+		}
+
 	}
 }

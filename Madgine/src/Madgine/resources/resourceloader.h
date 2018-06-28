@@ -1,55 +1,69 @@
 #pragma once
 
-#include "../util/process.h"
-#include "imagesets/imagesetmanager.h"
-#include "../scripting/parsing/ogrescriptparser.h"
+#include "resourceloaderbase.h"
+#include "resource.h"
+#include "../uniquecomponent.h"
+#include "resourceloadercollector.h"
 
 namespace Engine
 {
 	namespace Resources
 	{
-		class MADGINE_CLIENT_EXPORT ResourceLoader : public Util::Process, public Ogre::ResourceGroupListener,
-		                                          public Ogre::GeneralAllocatedObject
+		
+		template <class T, class _Data>
+		class ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector>
 		{
 		public:
-			ResourceLoader(App::OgreApplication* app, const std::string& mediaPath);
-			virtual ~ResourceLoader();
 
-			bool load_async();
-			bool load();
-			void loadScripts();
+			using Data = _Data;
+			using Resource = Resource<ResourceLoader<T, Data>>;
 
-			std::string getMediaPath(const std::string& filename, const std::string& folder = "") const;
+			using UniqueComponent<T, ResourceLoaderCollector>::UniqueComponent;
 
-			void resourceGroupScriptingStarted(const Ogre::String& groupName,
-			                                   size_t scriptCount) override;
-			void scriptParseStarted(const Ogre::String& scriptName, bool& skipThisScript) override;
-			void scriptParseEnded(const Ogre::String& scriptName, bool skipped) override;
-			void resourceGroupScriptingEnded(const Ogre::String& groupName) override;
-			void resourceGroupLoadStarted(const Ogre::String& groupName,
-			                              size_t resourceCount) override;
-			void resourceLoadStarted(const Ogre::ResourcePtr& resource) override;
-			void resourceLoadEnded() override;
-			void worldGeometryStageStarted(const Ogre::String& description) override;
-			void worldGeometryStageEnded() override;
-			void resourceGroupLoadEnded(const Ogre::String& groupName) override;
 
-			Scripting::Parsing::ScriptParser* scriptParser() const;
+			Resource *get(const std::string &name)
+			{
+				return &mResources.at(name);
+			}
 
-			static ResourceLoader &getSingleton();
-			static ResourceLoader *getSingletonPtr();
+			virtual std::shared_ptr<Data> load(Resource* res) = 0;
+			virtual void addResource(const std::experimental::filesystem::path &path) override
+			{
+				std::string name = path.stem().generic_string();
+				auto pib = mResources.try_emplace(name, this, path);
+				
+				if (!pib.second)
+				{
+					auto extIndex = [this](const std::string &ext)
+					{
+						const std::vector<std::string> &extensions = fileExtensions();
+						return std::find(extensions.begin(), extensions.end(), ext) - extensions.begin();
+					};
+
+					if (extIndex(path.extension().generic_string()) < extIndex(pib.first->second.extension()))
+					{
+						auto it = mResources.emplace_hint(mResources.erase(pib.first), std::piecewise_construct, std::make_tuple(name), std::make_tuple(this, path));
+						resourceAdded(&it->second);
+					}
+				}else
+				{
+					resourceAdded(&pib.first->second);
+				}
+			}
+
+			typename std::map<std::string, Resource>::iterator begin()
+			{
+				return mResources.begin();
+			}
+
+			typename std::map<std::string, Resource>::iterator end()
+			{
+				return mResources.end();
+			}
 
 		private:
-			Ogre::ResourceGroupManager* mRgm;
-
-			App::Application* mApp;
-
-			std::string mMediaPath;
-
-			std::unique_ptr<Scripting::Parsing::OgreScriptParser> mParser;
-			std::unique_ptr<ImageSets::ImageSetManager> mImageSetManager;
-
-			static ResourceLoader *sSingleton;
+			std::map<std::string, Resource> mResources;
 		};
+
 	}
 }

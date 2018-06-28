@@ -31,8 +31,7 @@ namespace Maditor {
 
 		ModuleLoader::ModuleLoader() :
 			mInit(false),
-		mGlobal(nullptr),
-		mPluginMgr("Madgine", "Renderer")
+		mGlobal(nullptr)
 		{
 			mInstances.setCreator(std::bind(&ModuleLoader::createModule, this, std::placeholders::_1));
 		}
@@ -70,11 +69,6 @@ namespace Maditor {
 		const std::string & ModuleLoader::binaryDir()
 		{
 			return mBinaryDir;
-		}
-
-		Engine::Plugins::PluginManager & ModuleLoader::pluginMgr()
-		{
-			return mPluginMgr;
 		}
 
 		void ModuleLoader::setupDoneImpl()
@@ -126,7 +120,7 @@ namespace Maditor {
 		}
 
 #ifdef MADGINE_SERVER_BUILD
-		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName, const std::string &mediaDir)
+		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName, Engine::App::Root &root)
 		{
 			size_t delimPos = fullName.find("::");
 			std::string moduleName(fullName.c_str(), delimPos);
@@ -136,8 +130,8 @@ namespace Maditor {
 			if (it != mInstances.end() && it->isLoaded()) {
 				void *symbol = it->getSymbol(std::string("create") + className);
 				if (symbol) {
-					typedef Engine::Server::ServerBase *(*Factory)(const std::string &, const std::string &, Engine::Plugins::PluginManager &);
-					return (*reinterpret_cast<Factory>(symbol))(instanceName, mediaDir + "scripts/", mPluginMgr);
+					typedef Engine::Server::ServerBase *(*Factory)(const std::string &, Engine::App::Root &);
+					return (*reinterpret_cast<Factory>(symbol))(instanceName, root);
 				}
 			}
 

@@ -21,11 +21,6 @@ namespace Engine
 			}
 
 			/**
-			* The root-directory to look for resources.
-			*/
-			std::string mRootDir;
-
-			/**
 			 * The name of the Application-window.
 			 */
 			std::string mWindowName;

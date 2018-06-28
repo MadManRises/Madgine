@@ -39,6 +39,8 @@ namespace Engine
 
 				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
 
+				App::Application &app();
+
 			private:
 
 				Entity* mEntity;

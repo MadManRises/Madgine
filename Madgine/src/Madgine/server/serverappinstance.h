@@ -11,9 +11,8 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			ServerAppInstance(T&& initCallback, Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
-				mState(state),
-				mPluginMgr(pluginMgr),
+			ServerAppInstance(T&& initCallback, Engine::App::Root &root) :
+				mRoot(root),
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
@@ -34,7 +33,9 @@ namespace Engine
 				try{
 					mResult = -1;
 
-					App::ServerApplication app(mState, mPluginMgr);
+					SignalSlot::ConnectionManager conMgr;
+
+					App::ServerApplication app(mRoot);
 					mApplication = &app;
 					App::ServerAppSettings settings;
 					app.setup(settings);
@@ -62,8 +63,7 @@ namespace Engine
 			}
 
 		private:
-			Scripting::LuaState *mState;
-			Plugins::PluginManager &mPluginMgr;
+			Engine::App::Root &mRoot;
 			App::ServerApplication* mApplication;
 
 			std::string mName;

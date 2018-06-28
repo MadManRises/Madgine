@@ -21,18 +21,21 @@ if (BUILD_CLIENT AND NOT CONFIG_BUILD)
 		  "${OgreMadgine_SOURCE_DIR}/cmake"
 		)                         
 
+		load_workspace_package(assimp https://github.com/assimp/assimp.git GIT_TAG 80799bd)
 
+		link_directories(${ASSIMP_LIBRARY_DIRS})
 
 		set(sources "")
 		FolderSources(sources "" src)
-			FolderSources(sources src OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
+			FolderSources(sources src OgreMadgine ogrescenerenderer.cpp ogrescenerenderer.h ogreanimation.cpp ogreanimation.h ogremesh.cpp ogremesh.h ogremeshloader.cpp ogremeshloader.h ogreskeletonvisualizer.cpp ogreskeletonvisualizer.h ogretransform.cpp ogretransform.h ogreanimationsystem.cpp ogreanimationsystem.h)
 
 
 		add_plugin(OgreMadgine Madgine Renderer ${sources})
 
 		#add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
+				
 
-		target_link_libraries(OgreMadgine PUBLIC Client)
+		target_link_libraries(OgreMadgine PUBLIC Client PRIVATE ${ASSIMP_LIBRARIES})
 
 		find_package(OGRE REQUIRED)
 		if (OGRE_FOUND)

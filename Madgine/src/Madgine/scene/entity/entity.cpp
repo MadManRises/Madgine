@@ -226,6 +226,11 @@ namespace Engine
 				return mSceneManager.getGlobalAPIComponent(i);
 			}
 
+			App::Application& Entity::app()
+			{
+				return mSceneManager.app();
+			}
+
 			KeyValueMapList Entity::maps()
 			{
 				return Scope::maps().merge(mComponents);

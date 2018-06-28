@@ -22,6 +22,8 @@
 
 #include "Madgine/util/log.h"
 
+#include "Madgine/app/root.h"
+
 namespace Maditor
 {
 	namespace Launcher
@@ -100,13 +102,27 @@ namespace Maditor
 				return Shared::MODULE_LOAD_FAILED;
 			}
 
+			mRootSettings.mMediaDir = mAppInfo.mDataDir + "Media/";
+
+			mRoot = std::make_unique<Engine::App::Root>(mRootSettings);
+
+			mRoot->luaState().setGlobalMethod("print", &ApplicationWrapper::lua_log);
+
+			mLog->init();
+
+#ifdef MADGINE_CLIENT_BUILD
+			mRoot->pluginMgr().getPlugin("OgreMadgine").load();
+#endif
+
+			if (!mRoot->init()) {
+				return Shared::APP_INIT_FAILED;
+			}
+
 			switch (mAppInfo.mType)
 			{
 #ifdef MADGINE_CLIENT_BUILD
 			case Shared::CLIENT_LAUNCHER:
 			{
-
-				mSettings.mRootDir = mAppInfo.mDataDir;
 
 				mSettings.mInput = input();
 				mSettings.mUseExternalSettings = true;
@@ -141,20 +157,14 @@ namespace Maditor
 				parameters["macAPICocoaUseNSView"] = "true";
 #endif
 
-				mLoader->pluginMgr().getPlugin("OgreMadgine").load();
+				
 
-				mApplication = std::make_unique<Engine::App::OgreApplication>(mLoader->pluginMgr());
-
-				mApplication->setGlobalMethod("print", &ApplicationWrapper::lua_log);
+				mApplication = std::make_unique<Engine::App::OgreApplication>(*mRoot);
 
 				mApplication->setup(mSettings);
-				mUtil->setApp(mApplication.get());
-
-				mLog->init();
+				mUtil->setApp(mApplication.get());				
 
 				mApplication->log().addListener(mLog.ptr());
-
-
 
 
 				Ogre::LogManager::getSingleton().getLog("Ogre.log")->addListener(mLog.ptr());
@@ -187,14 +197,13 @@ namespace Maditor
 #ifdef MADGINE_SERVER_BUILD
 			case Shared::SERVER_LAUNCHER:
 				{
+					
+
 					mServer = std::unique_ptr<Engine::Server::ServerBase>(
-						mLoader->createServer(mAppInfo.mServerClass, mAppInfo.mAppName, mAppInfo.mDataDir + "Media/"));
+						mLoader->createServer(mAppInfo.mServerClass, mAppInfo.mAppName, *mRoot));
 					if (!mServer)
 						return Shared::FAILED_CREATE_SERVER_CLASS;
-
-					mServer->setGlobalMethod("print", &ApplicationWrapper::lua_log);
-
-					mLog->init();
+											
 
 					mServer->log().addListener(mLog.ptr());
 

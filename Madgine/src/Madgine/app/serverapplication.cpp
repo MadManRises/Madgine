@@ -9,8 +9,8 @@ namespace Engine
 {
 	namespace App
 	{
-		ServerApplication::ServerApplication(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr) :
-			Application(state, pluginMgr),
+		ServerApplication::ServerApplication(Root &root) :
+			Application(root),
 			mSettings(nullptr)
 		{
 		}

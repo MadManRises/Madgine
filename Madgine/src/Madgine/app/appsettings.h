@@ -18,6 +18,7 @@ namespace Engine
 			}
 
 			std::string mAppName;
+
 		};
 	}
 }

@@ -27,6 +27,8 @@
 #pragma warning (pop)
 #endif
 
+#include "../../app/root.h"
+
 
 namespace Engine
 {
@@ -103,6 +105,14 @@ namespace Engine
 			{
 				if (!GUISystem::init())
 					return false;
+
+
+				for (const std::experimental::filesystem::path &p : app().root().resources().folders()) {
+					Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+						p.generic_string(), "FileSystem", "General");
+				}
+
+				Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 				
 				Ogre::SceneManager *sceneM = mRoot->getSceneManager("SceneTmp");
 				mCamera = sceneM->createCamera("ContentCamera");

@@ -9,7 +9,7 @@ namespace Engine
 		class MADGINE_BASE_EXPORT GlobalScopeBase : public ScopeBase
 		{
 		public:
-			GlobalScopeBase(LuaState *state);
+			GlobalScopeBase(LuaState &state);
 
 			void executeString(const std::string& cmd);
 
@@ -22,7 +22,7 @@ namespace Engine
 			
 
 		private:
-			LuaState * mState;
+			LuaState &mState;
 			LuaTable mScopes;
 		};
 	}

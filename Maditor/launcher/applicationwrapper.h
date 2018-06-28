@@ -21,6 +21,7 @@
 #include "inspector.h"
 
 #include "../shared/applicationinfo.h"
+#include "Madgine/app/root.h"
 
 namespace Maditor {
 
@@ -74,6 +75,8 @@ namespace Maditor {
 
 			static ApplicationWrapper *sInstance;
 
+			std::unique_ptr<Engine::App::Root> mRoot;
+
 			Engine::Serialize::Serialized<Util> mUtil;
 			Engine::Serialize::Serialized<LauncherLogListener> mLog;
 			Engine::Serialize::Serialized<ModuleLoader> mLoader;
@@ -81,6 +84,8 @@ namespace Maditor {
 
 			Shared::ApplicationInfo mAppInfo;
 			bool mHaveAppInfo;
+
+			Engine::App::RootSettings mRootSettings;
 
 #ifdef MADGINE_CLIENT_BUILD
 			Engine::App::OgreAppSettings mSettings;

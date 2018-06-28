@@ -8,7 +8,7 @@
 
 #include "../ui/uimanager.h"
 #include "configset.h"
-#include "../resources/resourceloader.h"
+
 #include "../util/profile.h"
 
 
@@ -20,8 +20,8 @@ namespace Engine
 {
 	namespace App
 	{
-		OgreApplication::OgreApplication(Plugins::PluginManager &pluginMgr) :
-			Application(this, pluginMgr),
+		OgreApplication::OgreApplication(Root &root) :
+			Application(root),
 			mPaused(false)
 		{
 		}
@@ -37,8 +37,6 @@ namespace Engine
 			// Initialise GUISystem 
 			mGUI = std::make_unique<GUI::MyGui::MyGUILauncher>(*this, settings);
 
-			mLoader = std::make_unique<Resources::ResourceLoader>(this, mSettings->mRootDir);
-
 			Application::setup(settings);
 
 			// Create SceneManagerBase
@@ -52,7 +50,7 @@ namespace Engine
 
 		bool OgreApplication::init()
 		{
-			mLoader->loadScripts();
+			//mLoader->loadScripts();
 
 			if (!Application::init())
 				return false;
@@ -65,9 +63,6 @@ namespace Engine
 			
 			std::optional<Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
 			if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
-				return false;
-
-			if (!mLoader->load())
 				return false;
 
 

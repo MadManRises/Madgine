@@ -105,6 +105,7 @@ namespace Engine
 			sSingleton = nullptr;
 		}
 
+
 		void LuaState::setFinalized()
 		{
 			mGlobal.setMetatable("Interfaces.Global");

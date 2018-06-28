@@ -8,8 +8,8 @@
 namespace Maditor {
 	namespace Launcher {
 
-class LauncherLogListener : public Engine::Serialize::SerializableUnit<LauncherLogListener>
-	, public Engine::Util::LogListener
+class LauncherLogListener : public Engine::Serialize::SerializableUnit<LauncherLogListener>,
+	public Engine::Util::LogListener
 #ifdef MADGINE_CLIENT_BUILD
 	, public Ogre::LogListener 
 #endif

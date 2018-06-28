@@ -31,10 +31,8 @@ public:
 
 	const std::string &binaryDir();
 
-	Engine::Plugins::PluginManager &pluginMgr();
-
 #ifdef MADGINE_SERVER_BUILD
-	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName, const std::string &mediaDir);
+	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName, Engine::App::Root &root);
 #endif
 
 private:
@@ -89,8 +87,6 @@ private:
 
 	Engine::Scripting::GlobalScopeBase *mGlobal;
 
-
-	Engine::Plugins::PluginManager mPluginMgr;
 };
 
 	}

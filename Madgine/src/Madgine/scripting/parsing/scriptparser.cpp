@@ -1,4 +1,4 @@
-#include "../../interfaceslib.h"
+#include "../../baselib.h"
 #include "scriptparser.h"
 #include "parseexception.h"
 
@@ -7,6 +7,7 @@
 extern "C"
 {
 #include <lua/lua.h>                                /* Always include this when calling Lua */
+#include <lua/lauxlib.h>                            /* Always include this when calling Lua */
 }
 
 namespace Engine
@@ -15,50 +16,33 @@ namespace Engine
 	{
 		namespace Parsing
 		{
-			ScriptParser::ScriptParser(LuaState* state) :
-				mStream(nullptr),
-				mBuffer(nullptr),
-				mChunk(false),
-				mState(state)
+			MethodHolder::MethodHolder() :
+			mState(nullptr)
 			{
 			}
 
-			ScriptParser::~ScriptParser()
+			MethodHolder::MethodHolder(lua_State* state) :
+			mState(state)
 			{
+				mIndex = luaL_ref(state, LUA_REGISTRYINDEX);
 			}
 
-
-			void ScriptParser::parseScript(std::istream& stream, const std::string& name,
-			                               bool reload)
+			MethodHolder::MethodHolder(MethodHolder&& other) :
+				mState(other.mState),
+				mIndex(other.mIndex)
 			{
-				assert(!mState->isFinalized());
+				other.mState = nullptr;
+			}
 
-				mStream = &stream;
-				mChunk = true;
+			MethodHolder::~MethodHolder()
+			{
+				if (mState)
+					luaL_unref(mState, LUA_REGISTRYINDEX, mIndex);
+			}
 
-				char buffer[READ_BUFFER];
-				mBuffer = buffer;
-
-				lua_State* state = mState->state();
-
-				while (mChunk)
-				{
-					switch (lua_load(state, &ScriptParser::reader, this, name.c_str(), nullptr))
-					{
-					case 0:
-						break;
-					case LUA_ERRSYNTAX:
-						LOG_ERROR(lua_tostring(state, -1));
-						return;
-					case LUA_ERRMEM:
-						throw std::bad_alloc{};
-					default:
-						throw 0;
-					}
-				}
-
-				mState->env().push();
-				lua_setupvalue(state, -2, 1);
+			void MethodHolder::call(lua_State *state)
+			{
+				lua_rawgeti(state, LUA_REGISTRYINDEX, mIndex);
 				switch (lua_pcall(state, 0, 0, 0))
 				{
 				case 0:
@@ -79,6 +63,57 @@ namespace Engine
 				default:
 					throw 0;
 				}
+			}
+
+			MethodHolder::operator bool()
+			{
+				return mState;
+			}
+
+			ScriptParser::ScriptParser(LuaState &state) :
+				mStream(nullptr),
+				mBuffer(nullptr),
+				mChunk(false),
+			mState(state)
+			{
+			}
+
+			ScriptParser::~ScriptParser()
+			{
+			}
+
+
+			MethodHolder ScriptParser::parseScript(std::istream& stream, const std::string& name)
+			{
+
+				mStream = &stream;
+				mChunk = true;
+
+				char buffer[READ_BUFFER];
+				mBuffer = buffer;
+
+				lua_State *state = mState.state();
+
+				while (mChunk)
+				{
+					switch (lua_load(state, &ScriptParser::reader, this, name.c_str(), nullptr))
+					{
+					case 0:
+						break;
+					case LUA_ERRSYNTAX:
+						LOG_ERROR(lua_tostring(state, -1));
+						return {};
+					case LUA_ERRMEM:
+						throw std::bad_alloc{};
+					default:
+						throw 0;
+					}
+				}
+
+				mState.env().push();
+				lua_setupvalue(state, -2, 1);
+				return state;
+				
 			}
 
 
@@ -103,16 +138,6 @@ namespace Engine
 				return mBuffer;
 			}
 
-
-			std::string ScriptParser::fileExtension()
-			{
-				return ".lua";
-			}
-
-			LuaState* ScriptParser::state() const
-			{
-				return mState;
-			}
 		}
 	}
 }

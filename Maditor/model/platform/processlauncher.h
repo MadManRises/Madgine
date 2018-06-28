@@ -20,7 +20,7 @@ namespace Maditor
 			public:
 
 				static const constexpr size_t PIPE_READ = 0;
-				static const constexpr size_t PIPE_WRITE = 0;
+				static const constexpr size_t PIPE_WRITE = 1;
 
 #ifdef _WIN32
 				using ProcessId = DWORD;

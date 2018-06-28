@@ -12,6 +12,8 @@
 
 #include "../signalslot/connectionmanager.h"
 
+#include "../resources/resourcemanager.h"
+
 namespace Engine
 {
 	namespace App
@@ -44,7 +46,7 @@ namespace Engine
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(Scripting::LuaState *state, Plugins::PluginManager &pluginMgr);
+			Application(Root &root);
 			
 			/**
 			 * \brief Deletes all objects created by the Application.
@@ -161,7 +163,9 @@ namespace Engine
 
 			Util::Log &log();
 
+			Root &root();
 			const Plugins::PluginManager &pluginMgr();
+			Resources::ResourceManager &resources();
 
 
 			/**
@@ -190,8 +194,6 @@ namespace Engine
 
 			bool mShutDown;
 
-			SignalSlot::ConnectionManager mConnectionManager;
-
 			Scripting::GlobalAPICollector mGlobalAPIs;
 
 			std::unique_ptr<Util::StandardLog> mLog;
@@ -200,7 +202,7 @@ namespace Engine
 
 			std::vector<FrameListener*> mListeners;
 
-			Plugins::PluginManager &mPluginMgr;
+			Root &mRoot;
 
 			static constexpr float FIXED_TIMESTEP = 0.015f;
 		};

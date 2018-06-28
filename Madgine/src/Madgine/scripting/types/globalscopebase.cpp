@@ -11,8 +11,8 @@ namespace Engine
 	{
 
 
-		GlobalScopeBase::GlobalScopeBase(LuaState *state) :
-			ScopeBase(state->createThread(this)),
+		GlobalScopeBase::GlobalScopeBase(LuaState &state) :
+			ScopeBase(state.createThread(this)),
 			mState(state)
 		{
 			assert(table());
@@ -25,7 +25,7 @@ namespace Engine
 
 		void GlobalScopeBase::executeString(const std::string& cmd)
 		{
-			mState->executeString(table().state(), cmd);
+			mState.executeString(table().state(), cmd);
 		}
 
 		LuaTable GlobalScopeBase::createTable()

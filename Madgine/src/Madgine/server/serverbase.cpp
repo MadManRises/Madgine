@@ -4,19 +4,20 @@
 
 #include "../app/framelistener.h"
 
+#include "../app/root.h"
+
 API_IMPL(Engine::Server::ServerBase, MAP_F(shutdown));
 
 namespace Engine
 {
 	namespace Server
 	{
-		ServerBase::ServerBase(const std::string& name, const std::string& scriptsFolder, Plugins::PluginManager &pluginMgr) :
-			Scope(this),
+		ServerBase::ServerBase(const std::string& name, App::Root &root) :
+			Scope(root.luaState()),
 			mLog(name + "-Log"),
 			mName(name),
-			mScriptParser(this, scriptsFolder),
 			mRunning(false),
-			mPluginMgr(pluginMgr)
+			mRoot(root)
 		{
 			Util::UtilMethods::setup(&mLog);
 		}
@@ -29,8 +30,7 @@ namespace Engine
 
 
 		int ServerBase::run()
-		{
-			mScriptParser.parse();
+		{		
 
 			init();
 
@@ -56,11 +56,6 @@ namespace Engine
 			return mLog;
 		}
 
-		const std::string& ServerBase::scriptsFolder()
-		{
-			return mScriptParser.rootFolder();
-		}
-
 		void ServerBase::shutdown()
 		{
 			mRunning = false;
@@ -68,7 +63,7 @@ namespace Engine
 
 		bool ServerBase::frame()
 		{
-			mConnectionManager.update();
+			SignalSlot::ConnectionManager::getSingleton().update();
 			return mRunning;
 		}
 

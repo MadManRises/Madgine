@@ -16,7 +16,6 @@ FolderSources(sources "../../src" Madgine serverforward.h serverlib.h)
 		FolderSources(sources scene entity)
 			FolderSources(sources entity components serveranimation.cpp serveranimation.h servermesh.cpp servermesh.h serverskeletonvisualizer.cpp serverskeletonvisualizer.h servertransform.cpp servertransform.h)
 	FolderSources(sources Madgine scripting)
-		FolderSources(sources scripting parsing serverscriptparser.cpp serverscriptparser.h)
 	FolderSources(sources Madgine server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h)
 	FolderSources(sources Madgine util serverlog.cpp serverlog.h)
 

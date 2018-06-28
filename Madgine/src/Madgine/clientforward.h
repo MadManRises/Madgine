@@ -75,8 +75,6 @@ namespace Engine
 	{
 		class OgreTexturePtr;
 
-		class ResourceLoader;
-
 		namespace Shading
 		{
 			class ShaderFactoryBase;

@@ -44,6 +44,11 @@ namespace Engine
 				return mEntity->getGlobalAPIComponent(i);
 			}
 
+			App::Application& EntityComponentBase::app()
+			{
+				return mEntity->app();
+			}
+
 			void EntityComponentBase::moveToEntity(Entity* entity)
 			{
 				mEntity = entity;

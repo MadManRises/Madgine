@@ -8,6 +8,9 @@
 
 #include "Madgine/scene/entity/masks.h"
 
+#include "Madgine/app/application.h"
+#include "ogremeshloader.h"
+
 namespace Engine
 {
 
@@ -53,7 +56,7 @@ namespace Engine
 				destroyObject();
 				if (!mesh.empty())
 				{
-					
+					auto p = app().resources().load<OgreMeshLoader>(mesh);
 					mObject = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->createEntity(mesh);
 					mObject->addQueryFlags(Masks::ENTITY_MASK);
 					if (mTransform)
