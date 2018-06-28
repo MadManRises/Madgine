@@ -14,7 +14,7 @@ namespace Engine
 			ResourceManager(App::Root &root, const std::experimental::filesystem::path &rootDir);
 
 			template <class Loader>
-			typename Loader::Resource *get(const std::string &name)
+			typename Loader::ResourceType *get(const std::string &name)
 			{
 				return mCollector.get<Loader>().get(name);
 			}

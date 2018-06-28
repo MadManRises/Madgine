@@ -16,17 +16,17 @@ namespace Engine
 		public:
 
 			using Data = _Data;
-			using Resource = Resource<ResourceLoader<T, Data>>;
+			using ResourceType = Resource<ResourceLoader<T, Data>>;
 
 			using UniqueComponent<T, ResourceLoaderCollector>::UniqueComponent;
 
 
-			Resource *get(const std::string &name)
+			ResourceType *get(const std::string &name)
 			{
 				return &mResources.at(name);
 			}
 
-			virtual std::shared_ptr<Data> load(Resource* res) = 0;
+			virtual std::shared_ptr<Data> load(ResourceType* res) = 0;
 			virtual void addResource(const std::experimental::filesystem::path &path) override
 			{
 				std::string name = path.stem().generic_string();
@@ -51,18 +51,18 @@ namespace Engine
 				}
 			}
 
-			typename std::map<std::string, Resource>::iterator begin()
+			typename std::map<std::string, ResourceType>::iterator begin()
 			{
 				return mResources.begin();
 			}
 
-			typename std::map<std::string, Resource>::iterator end()
+			typename std::map<std::string, ResourceType>::iterator end()
 			{
 				return mResources.end();
 			}
 
 		private:
-			std::map<std::string, Resource> mResources;
+			std::map<std::string, ResourceType> mResources;
 		};
 
 	}

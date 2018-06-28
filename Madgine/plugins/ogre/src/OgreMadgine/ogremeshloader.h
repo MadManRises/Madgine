@@ -10,7 +10,7 @@ namespace Engine
 	public:
 		OgreMeshLoader(Resources::ResourceManager &mgr);
 
-		virtual std::shared_ptr<Data> load(Resource* res) override;
+		virtual std::shared_ptr<Data> load(ResourceType* res) override;
 
 	};
 

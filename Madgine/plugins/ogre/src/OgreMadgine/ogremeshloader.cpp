@@ -11,7 +11,7 @@ namespace Engine
 	{
 	}
 
-	std::shared_ptr<Ogre::MeshPtr> OgreMeshLoader::load(Resource* res)
+	std::shared_ptr<Ogre::MeshPtr> OgreMeshLoader::load(ResourceType* res)
 	{
 
 		res->setPersistent(true);
