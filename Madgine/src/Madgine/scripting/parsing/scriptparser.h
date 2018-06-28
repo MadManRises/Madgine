@@ -36,7 +36,7 @@ namespace Engine
 				virtual ~ScriptParser();
 			
 
-				MethodHolder ScriptParser::parseScript(std::istream& stream, const std::string& name);
+				MethodHolder parseScript(std::istream& stream, const std::string& name);
 
 			private:
 				static const constexpr size_t READ_BUFFER = 256;
