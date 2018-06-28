@@ -54,7 +54,7 @@ namespace Engine
 					}
 				}
 				catch(const std::exception &e)	{
-					LOG_ERROR(message("Uncaught Exception in Thread: ", "")(e.what()));
+					LOG_ERROR(Database::message("Uncaught Exception in Thread: ", "")(e.what()));
 				}
 				catch(...)
 				{
