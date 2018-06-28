@@ -13,7 +13,7 @@ namespace Engine
 		{
 			T* t = dynamic_cast<T*>(s);
 			if (!t)
-				MADGINE_THROW_NO_TRACE(ScriptingException(Exceptions::unexpectedScopeType(s->getIdentifier(), typeid(T).name())));
+				MADGINE_THROW_NO_TRACE(ScriptingException(Database::Exceptions::unexpectedScopeType(s->getIdentifier(), typeid(T).name())));
 			return t;
 		}
 	}
