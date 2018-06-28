@@ -43,11 +43,11 @@ namespace Engine
 					if (extIndex(path.extension().generic_string()) < extIndex(pib.first->second.extension()))
 					{
 						auto it = mResources.emplace_hint(mResources.erase(pib.first), std::piecewise_construct, std::make_tuple(name), std::make_tuple(this, path));
-						resourceAdded(&it->second);
+						this->resourceAdded(&it->second);
 					}
 				}else
 				{
-					resourceAdded(&pib.first->second);
+					this->resourceAdded(&pib.first->second);
 				}
 			}
 
