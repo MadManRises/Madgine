@@ -44,8 +44,8 @@ namespace Engine
 					other.setActiveFlag(false);
 				}
 				mData = std::forward<NativeContainerType>(other.mData);
-				for (auto it = begin(); it != end(); ++it)
-					this->setParent(*it, unit());
+				for (auto &t : *this)
+					this->setParent(t, unit());
 				mLocallyActiveIterator = other.mLocallyActiveIterator;
 				other.mData.clear();
 				other.mLocallyActiveIterator = other.mData.begin();
@@ -120,9 +120,8 @@ namespace Engine
 
 			void writeState(SerializeOutStream& out) const override
 			{
-				for (auto it = begin(); it != end(); ++it)
-				{
-					const auto& t = *it;
+				for (const auto &t : *this)
+				{					
 					if (this->filter(out, t))
 					{
 						write_item(out, t);
@@ -145,17 +144,17 @@ namespace Engine
 
 			void applySerializableMap(const std::map<size_t, SerializableUnitBase*>& map) override
 			{
-				for (auto it = begin(); it != end(); ++it)
+				for (auto &t : *this)
 				{
-					this->applyMap(map, *it);
+					this->applyMap(map, t);
 				}
 			}
 
 			void setActiveFlag(bool b) override
 			{
-				for (auto it = begin(); it != end(); ++it)
+				for (auto &t : *this)
 				{
-					this->setItemActiveFlag(*it, b);
+					this->setItemActiveFlag(t, b);
 				}
 			}
 
@@ -223,6 +222,18 @@ namespace Engine
 				                                                   std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
+			std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in) {
+				std::pair<iterator, bool> it = read_item_where_intern(where, in);
+				if (it.second) {
+					if (isActive()) {
+						this->setItemActiveFlag(*it.first, true);
+					}
+					if (isItemLocallyActive(it.first))
+						this->notifySetItemActive(*it.first, true);
+				}
+				return it;
+			}
+
 		protected:
 			bool deactivate()
 			{
@@ -247,16 +258,6 @@ namespace Engine
 				if (wasActive)
 					notifySetActive(true);
 			}
-
-			/*std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in) {
-				std::pair<iterator, bool> it = read_item_where_intern(where, in);
-				if (isActive()) {
-					this->setItemActiveFlag(*it.first, true);
-				}
-				if (isItemLocallyActive(it.first))
-					this->notifySetItemActive(*it.first, true);
-				return it;
-			}*/
 
 			std::pair<iterator, bool> read_item_where_intern(const const_iterator& where, SerializeInStream& in)
 			{
@@ -301,9 +302,7 @@ namespace Engine
 				if (it.second)
 				{
 					iterator oldActiveIt = traits::revalidateIteratorInsert(begin(), keep, it.first);
-					iterator nextItemIt = it.first;
-					++nextItemIt;
-					if (nextItemIt == oldActiveIt && !isLocallyActive())
+					if (std::next(it.first) == oldActiveIt && !isLocallyActive())
 						mLocallyActiveIterator = it.first;
 					else
 						mLocallyActiveIterator = oldActiveIt;

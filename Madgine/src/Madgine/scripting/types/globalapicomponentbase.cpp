@@ -45,7 +45,7 @@ namespace Engine
 			return mApp.getSceneComponent(i);
 		}
 
-		Scene::SceneManagerBase& GlobalAPIComponentBase::sceneMgr()
+		Scene::SceneManager& GlobalAPIComponentBase::sceneMgr()
 		{
 			return mApp.sceneMgr();
 		}
@@ -55,7 +55,7 @@ namespace Engine
 			return mApp;
 		}
 
-		UI::GuiHandlerBase& GlobalAPIComponentBase::getGuiHandler(size_t i)
+		/*UI::GuiHandlerBase& GlobalAPIComponentBase::getGuiHandler(size_t i)
 		{
 			return mApp.getGuiHandler(i);
 		}
@@ -63,6 +63,6 @@ namespace Engine
 		UI::GameHandlerBase& GlobalAPIComponentBase::getGameHandler(size_t i)
 		{
 			return mApp.getGameHandler(i);
-		}
+		}*/
 	}
 }

@@ -414,17 +414,15 @@ namespace Engine
 					removeSlaveStream();
 				}
 			}
-			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
+			for (size_t i = 0; i < mMasterStreams.size();)
 			{
-				if (!receiveMessages(*it, msgCount))
-				{
-					BufferedInOutStream* tmp = *it;
-					++it;
-					removeMasterStream(tmp);
+				if (!receiveMessages(mMasterStreams[i], msgCount))
+				{					
+					removeMasterStream(mMasterStreams[i]);
 				}
 				else
 				{
-					++it;
+					++i;
 				}
 			}
 		}
@@ -438,17 +436,15 @@ namespace Engine
 					removeSlaveStream();
 				}
 			}
-			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
+			for (size_t i = 0; i < mMasterStreams.size();)
 			{
-				if ((*it)->sendMessages() == -1)
+				if (mMasterStreams[i]->sendMessages() == -1)
 				{
-					BufferedInOutStream* tmp = *it;
-					++it;
-					removeMasterStream(tmp);
+					removeMasterStream(mMasterStreams[i]);
 				}
 				else
 				{
-					++it;
+					++i;
 				}
 			}
 		}

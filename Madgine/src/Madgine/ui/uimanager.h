@@ -4,6 +4,7 @@
 #include "gamehandler.h"
 #include "../scripting/types/scope.h"
 #include "../scripting/types/globalapicomponentbase.h"
+#include "../core/framelistener.h"
 
 
 namespace Engine
@@ -11,7 +12,7 @@ namespace Engine
 	namespace UI
 	{
 		class MADGINE_CLIENT_EXPORT UIManager : public Scripting::Scope<UIManager>,
-		                                     public MadgineObject
+			public MadgineObject, public Core::FrameListener
 		{
 		public:
 			UIManager(GUI::GUISystem &gui);
@@ -33,8 +34,8 @@ namespace Engine
 			void openWindow(GuiHandlerBase* handler);
 			void closeWindow(GuiHandlerBase* handler);
 
-			void update(float timeSinceLastFrame);
-			void fixedUpdate(float timeStep);
+			virtual bool frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context);
+			virtual bool frameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context);
 
 			Scene::ContextMask currentContext();
 
@@ -56,7 +57,7 @@ namespace Engine
 
 			GuiHandlerBase &getGuiHandler(size_t i);
 
-			Scene::SceneManagerBase &sceneMgr();
+			Scene::SceneManager &sceneMgr();
 
 		protected:
 			KeyValueMapList maps() override;
@@ -72,7 +73,7 @@ namespace Engine
 			std::stack<GuiHandlerBase *> mModalWindowList;
 
 		private:
-			Ogre::Vector2 mKeptCursorPosition;
+			Vector2 mKeptCursorPosition;
 			bool mKeepingCursorPos;
 		};
 	}

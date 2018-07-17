@@ -3,11 +3,13 @@
 namespace Engine
 {
 	class MadgineObject;
+	class IndexHolder;
 
 	namespace Scene
 	{
-		class SceneManagerBase;
+		class SceneManager;
 		class SceneComponentBase;
+		class Camera;
 		enum class ContextMask : unsigned int;
 
 		namespace Entity
@@ -19,24 +21,22 @@ namespace Engine
 			class Mesh;
 		}
 
+		class LightManager;
 		class Light;
 	}
 
 	namespace App
 	{
-		class Root;
-
 		struct AppSettings;
-		class Application;
-
-		class FrameListener;
+		class Application;		
 	}
 
-	namespace UI
+	namespace Core
 	{
-		class GuiHandlerBase;
-		class GameHandlerBase;
-		class UIManager;
+		class Root;
+
+		class FrameListener;
+		class FrameLoop;
 	}
 
 	namespace Scripting
@@ -45,21 +45,6 @@ namespace Engine
 		class GlobalAPIComponentBase;
 	}
 
-	namespace GUI
-	{
-		class GUISystem;
-		struct WindowSizeRelVector;
-		class WindowContainer;
-		class Window;
-		class Bar;
-		class Button;
-		class TextureDrawer;
-		class Checkbox;
-		class Combobox;
-		class TabWindow;
-		class Textbox;
-		class Label;
-	}
 
 	namespace Resources
 	{
@@ -69,6 +54,11 @@ namespace Engine
 		template <class T, class Data>
 		class ResourceLoader;
 		class ResourceBase;
+	}
+
+	namespace Server
+	{
+		class ServerBase;
 	}
 
 }

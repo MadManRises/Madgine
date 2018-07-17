@@ -3,6 +3,58 @@
 
 namespace Engine
 {
+
+	template <class T, class Base>
+	class VirtualUniqueComponentImpl : public Base
+	{
+	public:
+		using Base::Base;
+
+	private:
+		virtual void __reg()
+		{
+			(void)_reg;
+		}
+
+		using Base::_preg;
+
+		static class Inner
+		{
+		public:
+			Inner()
+			{
+				_preg() = &reg;
+			}
+
+		private:
+			typename Base::Collector::template ComponentRegistrator<T> reg;
+		} _reg;
+	};
+
+	template <class T, class Base>
+	typename VirtualUniqueComponentImpl<T, Base>::Inner VirtualUniqueComponentImpl<T, Base>::_reg;
+
+	template <class T, class _Collector>
+	class TEMPLATE_EXPORT VirtualUniqueComponentBase : public _Collector::Base
+	{
+	public:
+		using Collector = _Collector;
+
+		using Collector::Base::Base;
+
+		static size_t component_index()
+		{
+			return _preg()->index();
+		}
+
+	protected:
+
+		static IndexHolder *& _preg(){ static IndexHolder *p = nullptr; return p; };
+	};
+
+
+
+
 	template <class T, class Collector>
 	class UniqueComponent : public Collector::Base
 	{
@@ -21,6 +73,7 @@ namespace Engine
 		}
 
 	private:
+
 		static typename Collector::template ComponentRegistrator<T> _reg;
 	};
 

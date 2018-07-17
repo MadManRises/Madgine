@@ -31,26 +31,27 @@ namespace Engine
 		    mGuiHandlers(gui.app().pluginMgr(), *this),
 		    mGameHandlers(gui.app().pluginMgr(), *this)
 		{
+			gui.addFrameListener(this);
 		}
 
 		UIManager::~UIManager()
 		{
+			mGUI.app().removeFrameListener(this);
 		}
 
 		bool UIManager::preInit()
 		{
 			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-				if (!handler->init(-1))
+				if (!handler->preInit())
 					return false;
 			return MadgineObject::init();
 		}
 
 		bool UIManager::init()
-		{
-			for (int i = 0; i < sMaxInitOrder; ++i)
-				for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-					if (!handler->init(i))
-						return false;
+		{			
+			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
+				if (!handler->init())
+					return false;
 
 			for (const std::unique_ptr<GameHandlerBase>& handler : mGameHandlers)
 			{
@@ -69,9 +70,8 @@ namespace Engine
 			}
 
 
-			for (int i = sMaxInitOrder - 1; i >= -1; --i)
-				for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-					handler->finalize(i);
+			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
+				handler->finalize();
 
 			MadgineObject::finalize();
 		}
@@ -161,24 +161,22 @@ namespace Engine
 			return mGUI.app();
 		}
 
-		void UIManager::update(float timeSinceLastFrame)
+		bool UIManager::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
 		{
-			Scene::ContextMask context = currentContext();
-
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
 				h->update(timeSinceLastFrame, context);
 			}
+			return true;
 		}
 
-		void UIManager::fixedUpdate(float timeStep)
+		bool UIManager::frameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context)
 		{
-			Scene::ContextMask context = currentContext();
-
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
-				h->fixedUpdate(timeStep, context);
+				h->fixedUpdate(timeSinceLastFrame, context);
 			}
+			return true;
 		}
 
 		Scene::ContextMask UIManager::currentContext()
@@ -259,7 +257,7 @@ namespace Engine
 			return mGuiHandlers.get(i);
 		}
 
-		Scene::SceneManagerBase& UIManager::sceneMgr()
+		Scene::SceneManager& UIManager::sceneMgr()
 		{
 			return mGUI.sceneMgr();
 		}

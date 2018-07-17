@@ -24,7 +24,7 @@ namespace Engine
 			return mUI.getSceneComponent(i);
 		}
 
-		Scene::SceneManagerBase& Handler::sceneMgr()
+		Scene::SceneManager& Handler::sceneMgr()
 		{
 			return mUI.sceneMgr();
 		}
@@ -48,37 +48,21 @@ namespace Engine
 		{
 			mWindow = w;
 
-			w->registerHandlerEvents(this,
-			                         bind(&Handler::injectMouseMove, this, std::placeholders::_1),
-			                         bind(&Handler::injectMouseDown, this, std::placeholders::_1),
-			                         bind(&Handler::injectMouseUp, this, std::placeholders::_1),
-			                         bind(&Handler::injectMouseMove, this, std::placeholders::_1),
-			                         bind(&Handler::injectKeyPress, this, std::placeholders::_1));
-			w->registerEvent(this, GUI::EventType::WindowResized, std::bind(&Handler::sizeChanged, this));
+			//TODO connect
 
 			for (const WindowDescriber& des : mWindows)
 			{
-				GUI::Window* window = w->getChildRecursive(des.mWindowName, des.mClass);
+				GUI::Window* window = w->getChildRecursive(des.mWindowName);
 
-				if (window)
-				{
-					if (des.mVar)
-					{
-						*des.mVar = window;
-					}
-
-					for (auto& event : des.mEvents)
-					{
-						//TODO
-						window->registerEvent(this, event.first, event.second);
-					}
-				}
-				else
+				if (!window)
 				{
 					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWindowName));
-					if (des.mVar)
-						return false;
+					return false;
 				}
+
+				if (!des.mInit(window))
+					return false;
+
 			}
 
 			mWindows.clear();
@@ -96,33 +80,37 @@ namespace Engine
 			return mUI.app();
 		}
 
+		UIManager& Handler::ui()
+		{
+			return mUI;
+		}
+
 		bool Handler::init()
 		{
 			if (!MadgineObject::init())
 				return false;
-			if (!installToWindow(mUI.gui().getWindowByName(mWindowName)))
-			{
+			if (!installToWindow(mUI.gui().getWindowByName(mWindowName)))			
 				return false;
-			}
 			return true;
 		}
 
 		void Handler::finalize()
 		{
-			if (mWindow)
-			{
-				mWindow->unregisterAllEvents(this);
-			}
 			MadgineObject::finalize();
+		}
+
+		bool Handler::preInit()
+		{
+			return true;
 		}
 
 		bool Handler::init(GUI::Window* window)
 		{
-			if (installToWindow(window))
-			{
-				return MadgineObject::init();
-			}
-			return false;
+			if (!MadgineObject::init())
+				return false;
+			if (!installToWindow(window))
+				return false;
+			return true;
 		}
 
 		void Handler::injectMouseMove(GUI::MouseEventArgs& evt)
@@ -159,14 +147,13 @@ namespace Engine
 
 		bool Handler::onKeyPress(const GUI::KeyEventArgs& evt)
 		{
-			auto it = mKeyBindings.find(evt.scancode);
-			if (it != mKeyBindings.end())
-			{
-				it->second();
-				return true;
-			}
-
 			return false;
+		}
+
+		void Handler::registerWindow(const std::string& name, std::function<bool(GUI::Window*)> init)
+		{
+			assert(!mWindow);
+			mWindows.emplace_back(name, init);
 		}
 
 		void Handler::onMouseVisibilityChanged(bool b)
@@ -179,11 +166,5 @@ namespace Engine
 		}
 
 
-		void Handler::registerKeyBinding(GUI::Key key,
-		                                 std::function<void()> f)
-		{
-			assert(mKeyBindings.find(key) == mKeyBindings.end());
-			mKeyBindings[key] = f;
-		}
 	}
 }

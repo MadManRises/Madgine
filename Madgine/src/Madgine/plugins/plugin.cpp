@@ -4,7 +4,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#elif __linux__
+#elif defined(__linux__) || defined(__EMSCRIPTEN__)
 #include <dlfcn.h>
 #else
 #error "Unsupported Platform"
@@ -65,7 +65,7 @@ namespace Engine
 
 #ifdef _WIN32
 			bool result = (FreeLibrary((HINSTANCE)mModule) != 0);
-#elif __linux__
+#elif defined(__linux__) || defined(__EMSCRIPTEN__)
 			bool result = (dlclose(mModule) == 0);
 #endif
 			assert(result);

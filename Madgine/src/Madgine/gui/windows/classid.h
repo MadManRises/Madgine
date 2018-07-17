@@ -18,9 +18,9 @@ namespace Engine
 		};
 
 		template <>
-		struct ClassId<TextureDrawer>
+		struct ClassId<SceneWindow>
 		{
-			static constexpr Class id = Class::TEXTUREDRAWER_CLASS;
+			static constexpr Class id = Class::SCENEWINDOW_CLASS;
 		};
 
 		template <>
@@ -63,6 +63,12 @@ namespace Engine
 		struct ClassId<Bar>
 		{
 			static constexpr Class id = Class::BAR_CLASS;
+		};
+
+		template <>
+		struct ClassId<Image>
+		{
+			static constexpr Class id = Class::IMAGE_CLASS;
 		};
 	}
 }

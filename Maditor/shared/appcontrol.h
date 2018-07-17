@@ -66,16 +66,16 @@ namespace Maditor {
 				luaResponseImpl(cmd, response, failure);
 			}
 
-			Engine::Serialize::Action<decltype(&AppControl::shutdownImpl2), &AppControl::shutdownImpl2, Engine::Serialize::ActionPolicy::broadcast> shutdown;
-			Engine::Serialize::Action<decltype(&AppControl::onApplicationConnected2), &AppControl::onApplicationConnected2, Engine::Serialize::ActionPolicy::broadcast> applicationConnected;
-			Engine::Serialize::Action<decltype(&AppControl::startImpl2), &AppControl::startImpl2, Engine::Serialize::ActionPolicy::broadcast> start;
-			Engine::Serialize::Action<decltype(&AppControl::stopImpl2), &AppControl::stopImpl2, Engine::Serialize::ActionPolicy::broadcast> stop;
-			Engine::Serialize::Action<decltype(&AppControl::pauseImpl2), &AppControl::pauseImpl2, Engine::Serialize::ActionPolicy::broadcast> pause;
-			Engine::Serialize::Action<decltype(&AppControl::resizeWindowImpl2), &AppControl::resizeWindowImpl2, Engine::Serialize::ActionPolicy::broadcast> resizeWindow;
-			Engine::Serialize::Action<decltype(&AppControl::pingImpl2), &AppControl::pingImpl2, Engine::Serialize::ActionPolicy::broadcast> ping;
-			Engine::Serialize::Action<decltype(&AppControl::execLuaImpl2), &AppControl::execLuaImpl2, Engine::Serialize::ActionPolicy::request> execLua;
-			Engine::Serialize::Action<decltype(&AppControl::configImpl2), &AppControl::configImpl2, Engine::Serialize::ActionPolicy::request> configure;
-			Engine::Serialize::Action<decltype(&AppControl::luaResponseImpl2), &AppControl::luaResponseImpl2, Engine::Serialize::ActionPolicy::notification> luaResponse;
+			Engine::Serialize::Action<&AppControl::shutdownImpl2, Engine::Serialize::ActionPolicy::broadcast> shutdown;
+			Engine::Serialize::Action<&AppControl::onApplicationConnected2, Engine::Serialize::ActionPolicy::broadcast> applicationConnected;
+			Engine::Serialize::Action<&AppControl::startImpl2, Engine::Serialize::ActionPolicy::broadcast> start;
+			Engine::Serialize::Action<&AppControl::stopImpl2, Engine::Serialize::ActionPolicy::broadcast> stop;
+			Engine::Serialize::Action<&AppControl::pauseImpl2, Engine::Serialize::ActionPolicy::broadcast> pause;
+			Engine::Serialize::Action<&AppControl::resizeWindowImpl2, Engine::Serialize::ActionPolicy::broadcast> resizeWindow;
+			Engine::Serialize::Action<&AppControl::pingImpl2, Engine::Serialize::ActionPolicy::broadcast> ping;
+			Engine::Serialize::Action<&AppControl::execLuaImpl2, Engine::Serialize::ActionPolicy::request> execLua;
+			Engine::Serialize::Action<&AppControl::configImpl2, Engine::Serialize::ActionPolicy::request> configure;
+			Engine::Serialize::Action<&AppControl::luaResponseImpl2, Engine::Serialize::ActionPolicy::notification> luaResponse;
 			
 		};
 

@@ -1,7 +1,7 @@
 #include "../../baselib.h"
 #include "entitycomponentbase.h"
 #include "entity.h"
-#include "../scenemanagerbase.h"
+#include "../scenemanager.h"
 #include "../../app/application.h"
 
 namespace Engine

@@ -56,4 +56,9 @@ load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
 
 add_subdirectory(Madgine)
-add_subdirectory(Maditor)
+
+set(BUILD_MADITOR TRUE CACHE BOOL "Build Maditor Code")
+
+if(BUILD_MADITOR)
+	add_subdirectory(Maditor)
+endif()

@@ -43,7 +43,7 @@ if (BUILD_TESTING)
 endif(BUILD_TESTING)
 
 add_executable(Maditor main.cpp)
-add_dependencies(Maditor Embedded_Client_Launcher Embedded_Server_Launcher ${TOOLS_LIBS})
+add_dependencies(Maditor Embedded_Launcher ${TOOLS_LIBS} OgreMadgine MadgineServer)
 target_link_libraries(Maditor Maditor_Model Maditor_View)
 
 

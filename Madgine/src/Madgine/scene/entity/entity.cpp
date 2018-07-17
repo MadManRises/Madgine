@@ -4,7 +4,7 @@
 
 #include "componentexception.h"
 
-#include "../scenemanagerbase.h"
+#include "../scenemanager.h"
 
 #include "../../scripting/types/globalscopebase.h"
 
@@ -50,7 +50,7 @@ namespace Engine
 				setup();
 			}
 
-			Entity::Entity(SceneManagerBase &sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
+			Entity::Entity(SceneManager &sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
 				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(sceneMgr.app().createTable()),
 				mName(name),
 				mLocal(local),
@@ -236,7 +236,7 @@ namespace Engine
 				return Scope::maps().merge(mComponents);
 			}
 
-			SceneManagerBase& Entity::sceneMgr() const
+			SceneManager& Entity::sceneMgr() const
 			{
 				return mSceneManager;
 			}

@@ -23,17 +23,20 @@ namespace Maditor{
 
 			const std::string &key() const;
 
-		protected:
+		
 			std::tuple<ProfilerItem*, std::string> createNode(const std::string &name);
 
 			void update(size_t fullDuration);
+
+		protected:
+			
 			void notify();
 
 		private:
 			Engine::Serialize::Observed<size_t> mDuration;
-			Engine::Serialize::ObservableSet<ProfilerItem, Engine::Serialize::ContainerPolicies::masterOnly, Engine::Serialize::ParentCreator<decltype(&ProfilerItem::createNode), &ProfilerItem::createNode>> mChildren;
+			Engine::Serialize::ObservableSet<ProfilerItem, Engine::Serialize::ContainerPolicies::masterOnly, Engine::Serialize::ParentCreator<&ProfilerItem::createNode>> mChildren;
 
-			Engine::SignalSlot::Slot<decltype(&ProfilerItem::update), &ProfilerItem::update> mUpdateSlot;
+			Engine::SignalSlot::Slot<&ProfilerItem::update> mUpdateSlot;
 
 			ProfilerItem *mParent;
 			std::string mName;
@@ -54,14 +57,15 @@ namespace Maditor{
 
 			void reset();
 
+			std::tuple<ProfilerModel*, std::string> createNode(const std::string &name);
+
 		protected:
 			virtual QVariant header(int col) const override;
 
 		private:
-			std::tuple<ProfilerModel*, std::string> createNode(const std::string &name);
+			
 
-		private:
-			Engine::Serialize::ObservableSet<ProfilerItem, Engine::Serialize::ContainerPolicies::masterOnly, Engine::Serialize::ParentCreator<decltype(&ProfilerModel::createNode), &ProfilerModel::createNode>> mTopLevelItems;
+			Engine::Serialize::ObservableSet<ProfilerItem, Engine::Serialize::ContainerPolicies::masterOnly, Engine::Serialize::ParentCreator<&ProfilerModel::createNode>> mTopLevelItems;
 
 			
 

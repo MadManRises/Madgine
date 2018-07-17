@@ -37,8 +37,8 @@ namespace Engine
 
 			Serialize::Observed<Vector3> mPosition;
 			Serialize::Observed<float> mPower;
-			SignalSlot::Slot<decltype(&Light::onPowerChangedImpl), &Light::onPowerChangedImpl> mPowerChangedSlot;
-			SignalSlot::Slot<decltype(&Light::onPositionChangedImpl), &Light::onPositionChangedImpl> mPositionChangedSlot;
+			SignalSlot::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;
+			SignalSlot::Slot<&Light::onPositionChangedImpl> mPositionChangedSlot;
 		};
 	}
 }

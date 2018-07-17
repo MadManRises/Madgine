@@ -23,7 +23,7 @@ namespace Maditor {
 			
 			LogTableModel *mModel;
 
-			Engine::Serialize::Action<decltype(&LogReceiver::receiveImpl), &LogReceiver::receiveImpl, Engine::Serialize::ActionPolicy::notification> receiveMessage;
+			Engine::Serialize::Action<&LogReceiver::receiveImpl, Engine::Serialize::ActionPolicy::notification> receiveMessage;
 
 			
 		};

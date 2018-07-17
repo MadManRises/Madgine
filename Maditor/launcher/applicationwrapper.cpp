@@ -7,12 +7,13 @@
 #include "Madgine/serialize/serializemanager.h"
 
 
-#ifdef MADGINE_SERVER_BUILD
+
 #include "Madgine/server/serverbase.h"
-#else
+
+
 #include "Madgine/input/inputhandler.h"
 #include "Madgine/gui/guisystem.h"
-#endif
+
 
 #include "../shared/errorcodes.h"
 
@@ -22,7 +23,7 @@
 
 #include "Madgine/util/log.h"
 
-#include "Madgine/app/root.h"
+#include "Madgine/core/root.h"
 
 namespace Maditor
 {
@@ -104,15 +105,17 @@ namespace Maditor
 
 			mRootSettings.mMediaDir = mAppInfo.mDataDir + "Media/";
 
-			mRoot = std::make_unique<Engine::App::Root>(mRootSettings);
+			mRoot = std::make_unique<Engine::Core::Root>(mRootSettings);
 
 			mRoot->luaState().setGlobalMethod("print", &ApplicationWrapper::lua_log);
 
 			mLog->init();
 
-#ifdef MADGINE_CLIENT_BUILD
-			mRoot->pluginMgr().getPlugin("OgreMadgine").load();
-#endif
+			if (mAppInfo.mType == Shared::CLIENT_LAUNCHER)
+				mRoot->pluginMgr().getPlugin("OgreMadgine").load();
+			else
+				mRoot->pluginMgr().getPlugin("MadgineServer").load();
+
 
 			if (!mRoot->init()) {
 				return Shared::APP_INIT_FAILED;
@@ -120,7 +123,6 @@ namespace Maditor
 
 			switch (mAppInfo.mType)
 			{
-#ifdef MADGINE_CLIENT_BUILD
 			case Shared::CLIENT_LAUNCHER:
 			{
 
@@ -131,12 +133,12 @@ namespace Maditor
 				mSettings.mWindowHeight = mAppInfo.mWindowHeight;
 				mSettings.mAppName = mAppInfo.mAppName;
 
-				Ogre::NameValuePairList &parameters = mSettings.mWindowParameters;
+				std::map<std::string, std::string> &parameters = mSettings.mWindowParameters;
 
 				/*
 				Flag within the parameters set so that Ogre3D initializes an OpenGL context on it's own.
 				*/
-				parameters["currentGLContext"] = Ogre::String("false");
+				parameters["currentGLContext"] = "false";
 
 				/*
 				We need to supply the low level OS window handle to this QWindow so that Ogre3D knows where to draw
@@ -148,8 +150,8 @@ namespace Maditor
 				parameters["externalWindowHandle"] = Ogre::StringConverter::toString();
 				parameters["parentWindowHandle"] = Ogre::StringConverter::toString((size_t)(target->winId()));
 #else
-				parameters["externalWindowHandle"] = Ogre::StringConverter::toString(mAppInfo.mWindowHandle);
-				parameters["parentWindowHandle"] = Ogre::StringConverter::toString(mAppInfo.mWindowHandle);
+				parameters["externalWindowHandle"] = std::to_string(mAppInfo.mWindowHandle);
+				parameters["parentWindowHandle"] = std::to_string(mAppInfo.mWindowHandle);
 #endif
 
 #if defined(Q_OS_MAC)
@@ -157,17 +159,17 @@ namespace Maditor
 				parameters["macAPICocoaUseNSView"] = "true";
 #endif
 
-				
 
-				mApplication = std::make_unique<Engine::App::OgreApplication>(*mRoot);
+
+				mApplication = std::make_unique<Engine::App::ClientApplication>(*mRoot);
 
 				mApplication->setup(mSettings);
-				mUtil->setApp(mApplication.get());				
+				mUtil->setApp(mApplication.get());
 
 				mApplication->log().addListener(mLog.ptr());
 
 
-				Ogre::LogManager::getSingleton().getLog("Ogre.log")->addListener(mLog.ptr());
+				//Ogre::LogManager::getSingleton().getLog("Ogre.log")->addListener(mLog.ptr());
 				mApplication->addFrameListener(this);
 
 				if (!mApplication->init()) {
@@ -191,10 +193,7 @@ namespace Maditor
 				}
 				mApplication->finalize();
 			}
-			break;
-#endif
-
-#ifdef MADGINE_SERVER_BUILD
+				break;
 			case Shared::SERVER_LAUNCHER:
 				{
 					
@@ -209,12 +208,10 @@ namespace Maditor
 
 					mServer->addFrameListener(this);
 					applicationConnected({});
-					result = mServer->run();
+					result = mServer->go();
 					mRunning = false;
 				}
 				break;
-
-#endif
 			default:
 				return Shared::UNSUPPORTED_LAUNCHER_TYPE;
 			}
@@ -229,14 +226,13 @@ namespace Maditor
 
 		void ApplicationWrapper::onApplicationConnected()
 		{
-#ifdef MADGINE_SERVER_BUILD
-			mInspector->init(*mServer.get());
-#elif MADGINE_CLIENT_BUILD
-			mInspector->init(*mApplication.get());
-#endif
+			if (mAppInfo.mType == Shared::CLIENT_LAUNCHER)
+				mInspector->init(*mApplication.get());
+			else
+				mInspector->init(*mServer.get());
 		}
 
-		bool ApplicationWrapper::frameRenderingQueued(float timeSinceLastFrame)
+		bool ApplicationWrapper::frameRenderingQueued(float timeSinceLastFrame, Engine::Scene::ContextMask context)
 		{
 			mUtil->profiler()->stopProfiling(); // PreRender
 
@@ -276,11 +272,10 @@ namespace Maditor
 
 		void ApplicationWrapper::stopImpl()
 		{
-#ifdef MADGINE_CLIENT_BUILD
+			if (mAppInfo.mType == Shared::CLIENT_LAUNCHER)
 				mApplication->shutdown();
-#else
-			mServer->shutdown();
-#endif
+			else
+				mServer->shutdown();
 		}
 
 		void ApplicationWrapper::pauseImpl()
@@ -289,10 +284,8 @@ namespace Maditor
 
 		void ApplicationWrapper::resizeWindowImpl()
 		{
-#ifdef MADGINE_CLIENT_BUILD
-			if (mApplication)
-				mApplication->gui().resizeWindow();
-#endif
+			/*if (mApplication)
+				mApplication->gui().resizeWindow();*/
 		}
 
 		void ApplicationWrapper::execLuaImpl(const std::string& cmd)
@@ -302,13 +295,8 @@ namespace Maditor
 			Engine::Scripting::GlobalScopeBase* scope;
 			switch (mAppInfo.mType)
 			{
-#ifdef MADGINE_CLIENT_BUILD
 			case Shared::CLIENT_LAUNCHER: scope = mApplication.get(); break;
-#endif
-#ifdef MADGINE_SERVER_BUILD
-			case Shared::SERVER_LAUNCHER: scope = mServer.get();
-				break;
-#endif
+			case Shared::SERVER_LAUNCHER: scope = mServer.get(); break;
 			default:
 				throw 0;
 			}

@@ -120,12 +120,11 @@ namespace Maditor
 			mRunRequested = true;
 		}
 
-#ifdef MADGINE_CLIENT_BUILD
 		Engine::Input::InputHandler* StandaloneWrapper::input()
 		{
 			return nullptr;
 		}
-#endif
+
 	}
 }
 

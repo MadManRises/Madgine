@@ -37,8 +37,6 @@ namespace Engine
 			static void registerException(const TraceBack& t);
 			static void registerException();
 
-			static void abort();
-
 			static const std::list<TraceBack>& traceBack();
 
 

@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "abortexception.h"
-
 #include "log.h"
 #include "loglistener.h"
 
@@ -70,11 +68,6 @@ namespace Engine
 		void UtilMethods::registerException()
 		{
 			__currentLogHolder::sExceptionTraceBack = __currentLogHolder::sTraceBack;
-		}
-
-		void UtilMethods::abort()
-		{
-			throw AbortException();
 		}
 
 		const std::list<TraceBack>& UtilMethods::traceBack()

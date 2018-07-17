@@ -123,6 +123,11 @@ namespace Engine
 		class ConnectionInstance;
 		class ConnectionManager;
 	}
+
+	class Vector2;
+	class Vector3;
+
+
 }
 
 struct lua_State;

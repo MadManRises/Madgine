@@ -7,4 +7,4 @@ FolderSources(sources "" mocks)
 
 add_gtest(Madgine_Test ${sources})
 
-target_link_libraries(Madgine_Test PRIVATE OgreMadgine)
+target_link_libraries(Madgine_Test PRIVATE Client)

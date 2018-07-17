@@ -40,14 +40,6 @@ namespace std {
 #endif*/
 
 
-#include <Ogre.h>
-
-#include <Overlay/OgreFont.h>
-#include <Overlay/OgreFontManager.h>
-
-#include <OgreTerrainGroup.h>
-
-
 #ifdef _MSC_VER
 #undef NO_ERROR
 

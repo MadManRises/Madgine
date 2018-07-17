@@ -13,11 +13,14 @@ namespace Engine
 			/**
 			 * Sets up default values for the settings.
 			 */
-			AppSettings()
+			AppSettings() :
+			mRunMain(true)
 			{
 			}
 
 			std::string mAppName;
+
+			bool mRunMain;
 
 		};
 	}

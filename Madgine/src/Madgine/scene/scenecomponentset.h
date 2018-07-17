@@ -28,10 +28,7 @@ namespace Engine
 				std::string componentName;
 				while (in.loopRead(componentName))
 				{
-					auto it = std::find_if(this->begin(), this->end(), [&](const std::unique_ptr<SceneComponentBase>& comp)
-					{
-						return comp->key() == componentName;
-					});
+					auto it = kvFind(*this, componentName);
 					(*it)->readId(in);
 					(*it)->readState(in);
 				}

@@ -23,8 +23,7 @@ namespace Maditor {
 
 			void LogTableModel::doubleClicked(const QModelIndex & index)
 			{
-				auto it = mItems.begin();
-				std::advance(it, index.row());
+				auto it = std::next(mItems.begin(), index.row());
 
 				const std::string &fileName = std::get<4>(*it);
 			

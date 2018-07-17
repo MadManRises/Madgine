@@ -4,6 +4,7 @@
 
 #include "Madgine/plugins/plugin.h"
 #include "dialogmanager.h"
+#include "../../../Madgine/src/Madgine/util/utilmethods.h"
 
 
 namespace Maditor
@@ -142,7 +143,11 @@ namespace Maditor
 			{
 				QString message = o["message"].toString();
 				QString title = o["title"].toString();
-				if (title == "Warning")
+				if (title == "Error")
+				{
+					LOG_ERROR(message.toStdString());
+				}
+				else if (title == "Warning")
 				{
 					LOG_WARNING(message.toStdString());
 				}
@@ -154,6 +159,39 @@ namespace Maditor
 				{
 					LOG(QString(msg.toJson()).toStdString());
 				}
+			}
+			else if (type == "error")
+			{
+				QString inReplyTo = o["inReplyTo"].toString();
+				QString errorMessage = o["errorMessage"].toString();
+				if (inReplyTo == "handshake") {
+					assert(mState == WAITING_FOR_HELLO);
+					throw 0;
+				}
+				else if (inReplyTo == "configure") {
+					assert(mState == CONFIGURING);
+
+					emit processingEnded();
+					mDirty = false;
+					mState = IDLE;
+
+					emit statusUpdate(errorMessage);					
+				}
+				else if (inReplyTo == "compute")
+				{
+					assert(mState == GENERATING);
+
+					emit processingEnded();
+					mDirty = false;
+					mState = IDLE;
+
+					emit statusUpdate(errorMessage);
+				}
+				else
+				{
+					LOG(QString(msg.toJson()).toStdString());
+				}
+
 			}
 			else
 			{

@@ -4,11 +4,11 @@ namespace Engine
 {
 	namespace Math
 	{
-		class MADGINE_CLIENT_EXPORT Bounds
+		class INTERFACES_EXPORT Bounds
 		{
 		public:
 			Bounds(float left = 0.f, float bottom = 0.f, float right = 0.f, float top = 0.f);
-			Bounds(const Ogre::Vector3& min, const Ogre::Vector3& max);
+			Bounds(const Vector3& min, const Vector3& max);
 
 			float left() const;
 
@@ -22,13 +22,13 @@ namespace Engine
 
 			float height() const;
 
-			Ogre::Vector2 size() const;
+			Vector2 size() const;
 
-			Ogre::Vector2 bottomLeft() const;
+			Vector2 bottomLeft() const;
 
-			std::array<Ogre::Vector2, 4> corners() const;
+			std::array<Vector2, 4> corners() const;
 
-			Ogre::Vector2 operator *(const Ogre::Vector2& v) const;
+			Vector2 operator *(const Vector2& v) const;
 
 			bool isNull() const;
 

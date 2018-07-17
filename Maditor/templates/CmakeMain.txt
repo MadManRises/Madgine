@@ -30,7 +30,7 @@ multiConfig(%1)
 load_workspace_package(Madgine)
 load_workspace_package(OgreMadgine)
 
-set(SERVER_LIBRARIES MadgineServer Interfaces)
+set(SERVER_LIBRARIES Base Interfaces)
 set(CLIENT_LIBRARIES OgreMadgine Interfaces)
 
 function(setup_target_config target config)

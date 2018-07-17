@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace SignalSlot
 	{
-		template <typename F, F f, class T, class R, class... _Ty>
+		template <auto f, class T, class R, class... _Ty>
 		class SlotImpl
 		{
 		public:
@@ -22,7 +22,7 @@ namespace Engine
 			{
 			}
 
-			SlotImpl(const SlotImpl<F, f, T, R, _Ty...>&) = delete;
+			SlotImpl(const SlotImpl<f, T, R, _Ty...>&) = delete;
 
 			void operator()(_Ty ... args) const
 			{
@@ -76,10 +76,11 @@ namespace Engine
 			T* mItem;
 		};
 
-		/*template <auto f>
-		using Slot = MemberFunctionWrapper<SlotImpl, f>;*/
+		template <auto f>
+		using Slot = typename MemberFunctionCapture<SlotImpl, f>::type;
 
-		template <typename F, F f>
-		using Slot = typename MemberFunctionCapture<SlotImpl, F, f>::type;
+		/*template <typename F, F f>
+		using Slot = typename MemberFunctionCapture<SlotImpl, F, f>::type;*/
+
 	}
 }

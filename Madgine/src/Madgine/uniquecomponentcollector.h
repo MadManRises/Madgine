@@ -23,14 +23,14 @@ template<> inline const char *Collector::name(){\
 			return dummy;
 		}
 
-		static size_t baseIndex() { return mBaseIndex; }
+		static size_t baseIndex() { return sBaseIndex; }
 
 		static void setBaseIndex(size_t index) {
-			mBaseIndex = index;
+			sBaseIndex = index;
 		}
 
 	private:
-		static inline size_t mBaseIndex = 0;
+		static inline size_t sBaseIndex = 0;
 	};
 
 
@@ -52,6 +52,12 @@ template<> inline const char *Collector::name(){\
 
 	template <class T>
 	struct CollectorName;
+
+	class IndexHolder
+	{
+	public:
+		virtual size_t index() = 0;
+	};
 
 	template <class _Base, class _Store, template <class...> class Container = std::vector, class... _Ty>
 	class UniqueComponentCollector : 
@@ -169,9 +175,7 @@ template<> inline const char *Collector::name(){\
 
 		Base &get(size_t i)
 		{
-			auto it = mSortedComponents.begin();
-			std::advance(it, i);
-			return **it;
+			return **std::next(mSortedComponents.begin(), i);
 		}
 
 	protected:
@@ -187,9 +191,7 @@ template<> inline const char *Collector::name(){\
 
 		static void unregisterComponent(size_t i)
 		{
-			auto it = Store::sComponents().begin();
-			std::advance(it, i);
-			*it = F();
+			*std::next(Store::sComponents().begin(), i) = F();
 		}
 
 	private:
@@ -203,27 +205,28 @@ template<> inline const char *Collector::name(){\
 
 	public:
 		template <class T>
-		class ComponentRegistrator
+		class ComponentRegistrator : public IndexHolder
 		{
 		public:
 			ComponentRegistrator()
 			{
-				mIterator = registerComponent<T>();
+				mIndex = registerComponent<T>();
 			}
 
 			~ComponentRegistrator()
 			{
-				unregisterComponent(mIterator);
-				mIterator = -1;
+				unregisterComponent(mIndex);
+				mIndex = -1;
 			}
 
-			size_t index()
+			virtual size_t index() override
 			{
-				return mIterator + Store::baseIndex();
+				return mIndex + Store::baseIndex();
 			}
 
 		private:
-			size_t mIterator;
+			size_t mIndex = -1;
+
 		};
 
 	private:

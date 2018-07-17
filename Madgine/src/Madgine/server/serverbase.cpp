@@ -1,10 +1,10 @@
-#include "../serverlib.h"
+#include "../baselib.h"
 
 #include "serverbase.h"
 
-#include "../app/framelistener.h"
+#include "../core/framelistener.h"
 
-#include "../app/root.h"
+#include "../core/root.h"
 
 API_IMPL(Engine::Server::ServerBase, MAP_F(shutdown));
 
@@ -12,7 +12,7 @@ namespace Engine
 {
 	namespace Server
 	{
-		ServerBase::ServerBase(const std::string& name, App::Root &root) :
+		ServerBase::ServerBase(const std::string& name, Core::Root &root) :
 			Scope(root.luaState()),
 			mLog(name + "-Log"),
 			mName(name),
@@ -20,19 +20,22 @@ namespace Engine
 			mRoot(root)
 		{
 			Util::UtilMethods::setup(&mLog);
+			addFrameListener(this);
 		}
 
 		ServerBase::~ServerBase()
 		{
+			removeFrameListener(this);
 			mInstances.clear();
 			Util::UtilMethods::setup(nullptr);
 		}
 
 
-		int ServerBase::run()
+		int ServerBase::go()
 		{		
 
-			init();
+			MadgineObject::init();
+			FrameLoop::init();
 
 			mRunning = true;
 
@@ -40,15 +43,16 @@ namespace Engine
 
 			mLog.startConsole(mRunning, [this](const std::string& cmd) { return performCommand(cmd); });
 
-			while (sendFrameStarted() && frame() && sendFrameEnded()) std::this_thread::yield();
+			int result = FrameLoop::go();
 
 			stop();
 
 			mRunning = false;
 
-			finalize();
+			FrameLoop::finalize();
+			MadgineObject::finalize();
 
-			return 0;
+			return result;
 		}
 
 		Util::ServerLog& ServerBase::log()
@@ -61,7 +65,7 @@ namespace Engine
 			mRunning = false;
 		}
 
-		bool ServerBase::frame()
+		bool ServerBase::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
 		{
 			SignalSlot::ConnectionManager::getSingleton().update();
 			return mRunning;
@@ -75,36 +79,6 @@ namespace Engine
 				return true;
 			}
 			return false;
-		}
-
-		void ServerBase::addFrameListener(App::FrameListener* listener)
-		{
-			mListeners.push_back(listener);
-		}
-
-		void ServerBase::removeFrameListener(App::FrameListener* listener)
-		{
-			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
-		}
-
-		bool ServerBase::sendFrameStarted()
-		{
-			bool result = true;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameStarted(0);
-			if (!result)
-				return false;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameRenderingQueued(0);
-			return result;
-		}
-
-		bool ServerBase::sendFrameEnded()
-		{
-			bool result = true;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameEnded(0);
-			return result;
 		}
 
 		KeyValueMapList ServerBase::maps()

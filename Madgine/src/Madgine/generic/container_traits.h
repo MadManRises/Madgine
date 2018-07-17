@@ -100,9 +100,7 @@ namespace Engine
 			size_t item = std::distance(begin, it);
 			if (item <= dist)
 				++dist;
-			iterator newIt = begin;
-			std::advance(newIt, dist);
-			return newIt;
+			return std::next(begin, dist);
 		}
 
 		static iterator revalidateIteratorRemove(const iterator& begin, size_t dist, const iterator& it)
@@ -111,9 +109,7 @@ namespace Engine
 			assert (item != dist);
 			if (item < dist)
 				--dist;
-			iterator newIt = begin;
-			std::advance(newIt, dist);
-			return newIt;
+			return std::next(begin, dist);
 		}
 	};
 

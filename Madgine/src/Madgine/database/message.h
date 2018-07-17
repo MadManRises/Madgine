@@ -19,7 +19,7 @@ namespace Engine
 				std::stringstream ss;
 				ss << mData[0];
 				using expander = int[];
-				unsigned int i = 0;
+				unsigned int i = 0;				
 
 				(void)expander {
 					(void(ss << std::forward<Ty>(arg) << mData[++i]), 0)...

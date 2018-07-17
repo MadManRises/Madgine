@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Combobox : public Window
+		class Combobox : public virtual Window
 		{
 		public:
 			using Window::Window;

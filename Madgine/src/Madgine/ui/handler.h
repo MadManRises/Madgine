@@ -13,20 +13,15 @@ namespace Engine
 		struct MADGINE_CLIENT_EXPORT WindowDescriber
 		{
 			WindowDescriber(const std::string& windowName,
-			                GUI::Window** var,
-			                GUI::Class _class,
-			                const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events) :
+			                std::function<bool(GUI::Window*)> init) :
 				mWindowName(windowName),
-				mVar(var),
-				mClass(_class),
-				mEvents(events)
+				mInit(init)
 			{
 			}
 
 			std::string mWindowName;
-			GUI::Window** mVar;
-			GUI::Class mClass;
-			std::vector<std::pair<GUI::EventType, std::function<void()>>> mEvents;
+			std::function<bool(GUI::Window*)> mInit;
+			;
 		};
 
 
@@ -38,6 +33,7 @@ namespace Engine
 
 			bool init() override;
 			void finalize() override;
+			virtual bool preInit();
 
 			virtual void onMouseVisibilityChanged(bool b);
 
@@ -48,6 +44,7 @@ namespace Engine
 			virtual const char* key() const = 0;
 			
 			App::Application &app();
+			UIManager &ui();
 
 			template <class T>
 			T &getSceneComponent()
@@ -57,7 +54,7 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i);
 
-			Scene::SceneManagerBase &sceneMgr();
+			Scene::SceneManager &sceneMgr();
 
 			template <class T>
 			T &getGlobalAPIComponent()
@@ -83,6 +80,8 @@ namespace Engine
 
 			GameHandlerBase &getGameHandler(size_t i);
 
+			void registerWindow(const std::string& name, std::function<bool(GUI::Window*)> init);
+
 		private:
 			bool installToWindow(GUI::Window* w);
 
@@ -98,70 +97,14 @@ namespace Engine
 
 			virtual bool onKeyPress(const GUI::KeyEventArgs& evt);
 
-
-			template <class WindowClass>
-			void registerWindow(const std::string& name, WindowClass** var = nullptr,
-			                    const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events = {})
-			{
-				mWindows.emplace_back(
-					name,
-					reinterpret_cast<GUI::Window**>(var),
-					GUI::ClassId<WindowClass>::id,
-					events
-				);
-			}
-
-
-			void registerWindow(const std::string& name,
-			                    const std::vector<std::pair<GUI::EventType, std::function<void()>>>& events = {})
-			{
-				registerWindow<GUI::Window>(name, nullptr, events);
-			}
-
-			template <class T, class... _Ty>
-			void registerButton(const std::string& name,
-			                    void (T::*f)(_Ty ...), _Ty ... args)
-			{
-				registerWindow(name, {
-					               {GUI::EventType::ButtonClick, event(f, args...)}
-				               }
-				);
-			}
-
-			template <class T, class... _Ty>
-			void registerButton(const std::string& name, GUI::Button** var,
-			                    void (T::*f)(_Ty ...), std::remove_const_t<_Ty> ... args)
-			{
-				registerWindow(name, var, {
-					               {GUI::EventType::ButtonClick, event(f, args...)}
-				               }
-				);
-			}
-
-			template <class T, class... _Ty>
-			void registerKeyBinding(GUI::Key key,
-			                        void (T::*f)(_Ty ...))
-			{
-				registerKeyBinding(key, event(f));
-			}
-
-
-			template <class T, class... _Ty>
-			std::function<void()> event(void (T::*f)(_Ty ...), std::remove_const_t<_Ty> ... args)
-			{
-				return std::bind(f, static_cast<T*>(this), args...);
-			}
+			
 
 		private:
-
-
+			
 			void injectMouseMove(GUI::MouseEventArgs& evt);
 			void injectMouseDown(GUI::MouseEventArgs& evt);
 			void injectMouseUp(GUI::MouseEventArgs& evt);
 			bool injectKeyPress(const GUI::KeyEventArgs& evt);
-
-			void registerKeyBinding(GUI::Key key,
-			                        std::function<void()> f);
 
 		protected:
 			GUI::Window* mWindow;
@@ -173,8 +116,6 @@ namespace Engine
 		private:
 			std::list<WindowDescriber> mWindows;
 
-			std::map<GUI::Key, std::function<void()>>
-			mKeyBindings;
 		};
 	}
 }

@@ -1,7 +1,5 @@
 #include "maditorlauncherlib.h"
 
-#ifdef MADGINE_CLIENT_BUILD
-
 #include "InputWrapper.h"
 
 #include "../shared/inputinfo.h"
@@ -64,4 +62,3 @@ namespace Maditor {
 	}
 }
 
-#endif

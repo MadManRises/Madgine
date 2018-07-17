@@ -132,7 +132,7 @@ namespace Engine
 			}*/
 		};
 
-		template <class F, F _f, class T, class R, class... Ty>
+		template <auto _f, class T, class R, class... Ty>
 		class FunctionMapperImpl
 		{
 		public:
@@ -145,8 +145,8 @@ namespace Engine
 			}
 		};
 
-		template <class F, F _f, class T, class... Ty>
-		class FunctionMapperImpl<F, _f, T, void, Ty...>
+		template <auto _f, class T, class... Ty>
+		class FunctionMapperImpl<_f, T, void, Ty...>
 		{
 		public:
 
@@ -159,49 +159,49 @@ namespace Engine
 			}
 		};
 
-		template <typename F, F f>
-		using FunctionMapper = typename MemberFunctionCapture<FunctionMapperImpl, F, f>::type;
+		template <auto f>
+		using FunctionMapper = typename MemberFunctionCapture<FunctionMapperImpl, f>::type;
 
-		template <class F, F f>
+		template <auto f>
 		Mapper make_function_mapper()
 		{
-			return Mapper(&Mapper::map_f<typename FunctionMapper<F, f>::type, &FunctionMapper<F, f>::call>);
+			return Mapper(&Mapper::map_f<typename FunctionMapper<f>::type, &FunctionMapper<f>::call>);
 		}
 
-		template <class G, G g>
+		template <auto g>
 		Mapper make_mapper_readonly()
 		{
 			struct GetterWrapper
 			{
 				static ValueType get(ScopeBase* ref)
 				{
-					using T = typename FunctionMapper<G, g>::type;
+					using T = typename FunctionMapper<g>::type;
 					T* t = dynamic_cast<T*>(ref);
-					return FunctionMapper<G, g>::call(t, {});
+					return FunctionMapper<g>::call(t, {});
 				}
 			};
 			return {&GetterWrapper::get};
 		}
 
-		template <class G, G g, class S, S s>
+		template <auto g, auto s>
 		Mapper make_mapper()
 		{
 			struct GetterWrapper
 			{
 				static ValueType get(ScopeBase* ref)
 				{
-					using T = typename FunctionMapper<G, g>::type;
+					using T = typename FunctionMapper<g>::type;
 					T* t = dynamic_cast<T*>(ref);
-					return FunctionMapper<G, g>::call(t, {});
+					return FunctionMapper<g>::call(t, {});
 				}
 			};
 			struct SetterWrapper
 			{
 				static void set(ScopeBase* ref, const ValueType& v)
 				{
-					using T = typename FunctionMapper<S, s>::type;
+					using T = typename FunctionMapper<s>::type;
 					T* t = dynamic_cast<T*>(ref);
-					FunctionMapper<S, s>::call(t, {v});
+					FunctionMapper<s>::call(t, {v});
 				}
 			};
 			return {&GetterWrapper::get, &SetterWrapper::set};
@@ -209,13 +209,13 @@ namespace Engine
 
 
 #define MAP_F(name) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_function_mapper<decltype(&C::name), &C::name>()}
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_function_mapper<&C::name>()}
 
 #define MAP_RO(name, getter) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper_readonly<decltype(&C::getter), &C::getter>()}
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper_readonly<&C::getter>()}
 
 #define MAP(name, getter, setter) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper<decltype(&C::getter), &C::getter, decltype(&C::setter), &C::setter>()}
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper<&C::getter, &C::setter>()}
 
 #define MEMBERS_CAPTURE_DEF(Class, ...) \
 	namespace __hide__{ \

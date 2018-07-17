@@ -34,9 +34,7 @@ namespace Maditor {
 
 		TreeItem * Inspector::child(int i)
 		{
-			auto it = mWrappers.begin();
-			std::advance(it, i);
-			return &it->second;
+			return &std::next(mWrappers.begin(), i)->second;
 		}
 
 		int Inspector::childCount() const

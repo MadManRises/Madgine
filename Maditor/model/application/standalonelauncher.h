@@ -48,13 +48,13 @@ namespace Maditor
 
 		private:
 			Engine::Network::NetworkManager mNetwork;
-			Engine::SignalSlot::Slot<decltype(&StandaloneLauncher::onConnectionResult), &StandaloneLauncher::onConnectionResult> mConnectionSlot;
-			Engine::SignalSlot::Slot<decltype(&StandaloneLauncher::disconnected), &StandaloneLauncher::disconnected> mDisconnectedSlot;
+			Engine::SignalSlot::Slot<&StandaloneLauncher::onConnectionResult> mConnectionSlot;
+			Engine::SignalSlot::Slot<&StandaloneLauncher::disconnected> mDisconnectedSlot;
 
-			Engine::Serialize::Action<decltype(&StandaloneLauncher::sendFilelistImpl), &StandaloneLauncher::sendFilelistImpl, Engine::Serialize::ActionPolicy::request> sendFileList;
-			Engine::Serialize::Action<decltype(&StandaloneLauncher::sendFileImpl), &StandaloneLauncher::sendFileImpl, Engine::Serialize::ActionPolicy::request> sendFile;
-			Engine::Serialize::Action<decltype(&StandaloneLauncher::fileRequestImpl), &StandaloneLauncher::fileRequestImpl, Engine::Serialize::ActionPolicy::notification> fileRequest;
-			Engine::Serialize::Action<decltype(&StandaloneLauncher::startAppImpl), &StandaloneLauncher::startAppImpl, Engine::Serialize::ActionPolicy::notification> startApp;
+			Engine::Serialize::Action<&StandaloneLauncher::sendFilelistImpl, Engine::Serialize::ActionPolicy::request> sendFileList;
+			Engine::Serialize::Action<&StandaloneLauncher::sendFileImpl, Engine::Serialize::ActionPolicy::request> sendFile;
+			Engine::Serialize::Action<&StandaloneLauncher::fileRequestImpl, Engine::Serialize::ActionPolicy::notification> fileRequest;
+			Engine::Serialize::Action<&StandaloneLauncher::startAppImpl, Engine::Serialize::ActionPolicy::notification> startApp;
 
 			Engine::Serialize::Serialized<std::string> mClientConfigString;
 

@@ -16,6 +16,8 @@ namespace Engine
 			std::map<std::string, Plugin>::const_iterator begin() const;
 			std::map<std::string, Plugin>::const_iterator end() const;
 
+			void *getUniqueSymbol(const std::string &name) const;
+
 		private:
 			std::map<std::string, Plugin> mPlugins;
 

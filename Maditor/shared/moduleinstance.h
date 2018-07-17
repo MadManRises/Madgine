@@ -33,7 +33,7 @@ namespace Maditor {
 
 			virtual void writeCreationData(Engine::Serialize::SerializeOutStream &out) const override;
 
-			Engine::Serialize::Action<decltype(&ModuleInstance::reloadImpl2), &ModuleInstance::reloadImpl2, Engine::Serialize::ActionPolicy::request> reload;
+			Engine::Serialize::Action<&ModuleInstance::reloadImpl2, Engine::Serialize::ActionPolicy::request> reload;
 
 			const Engine::Serialize::ObservableList<ModuleInstance*, Engine::Serialize::ContainerPolicies::allowAll> &dependencies();
 

@@ -3,7 +3,6 @@
 #include "uimanager.h"
 #include "../gui/guisystem.h"
 #include "../gui/windows/window.h"
-#include "../scene/ogrescenemanager.h"
 
 namespace Engine
 {
@@ -41,7 +40,7 @@ namespace Engine
 				fixedUpdate(timeStep);
 		}
 
-		Scene::SceneManagerBase &GameHandlerBase::sceneMgr() const
+		Scene::SceneManager &GameHandlerBase::sceneMgr() const
 		{
 			return mSceneMgr;
 		}
@@ -149,7 +148,7 @@ namespace Engine
 			mMouseDragModes[button] = mode;
 		}
 
-		const std::array<float, 2>& GameHandlerBase::dragStart() const
+		const Vector2& GameHandlerBase::dragStart() const
 		{
 			return mDragStart;
 		}

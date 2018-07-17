@@ -135,8 +135,7 @@ namespace Engine
 		int FileBufferWriter::sync()
 		{
 			mBuffer.resize(bufferByteSize());
-			auto end = mDataBuffer.end();
-			--end;
+			auto end = std::prev(mDataBuffer.end());
 			char* buffer = mBuffer.data();
 			for (auto it = mDataBuffer.begin(); it != end; ++it)
 			{

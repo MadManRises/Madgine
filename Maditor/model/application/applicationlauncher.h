@@ -72,7 +72,7 @@ namespace Maditor {
 
 			void luaResponseImpl(const std::string&, const std::string&, bool) override;
 
-			Engine::SignalSlot::Slot<decltype(&ApplicationLauncher::onSetupResult), &ApplicationLauncher::onSetupResult> mOnSetupResult;
+			Engine::SignalSlot::Slot<&ApplicationLauncher::onSetupResult> mOnSetupResult;
 
 			virtual Engine::Serialize::SerializeManager *network() = 0;
 

@@ -6,9 +6,9 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Textbox : public Window
+		class Textbox : public virtual Window
 		{
-		public:
+		public:		
 			using Window::Window;
 			virtual ~Textbox() = default;
 

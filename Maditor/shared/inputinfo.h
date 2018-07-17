@@ -2,6 +2,7 @@
 
 #include "sharedbase.h"
 
+
 namespace Maditor {
 	namespace Shared {
 
@@ -20,13 +21,13 @@ namespace Maditor {
 		struct MouseEventArgs {
 			MouseEventArgs() {}
 
-			MouseEventArgs(const std::array<float, 2> &pos, MouseButton button) :
+			MouseEventArgs(const Engine::Vector2 &pos, MouseButton button) :
 				position(pos),
 				button(button),
 				scrollWheel(0.0f)
 			{}
 
-			MouseEventArgs(const std::array<float, 2> &pos, const std::array<float, 2> &move, float scroll, MouseButton button = MouseButton::NO_BUTTON) :
+			MouseEventArgs(const Engine::Vector2 &pos, const Engine::Vector2 &move, float scroll, MouseButton button = MouseButton::NO_BUTTON) :
 				position(pos),
 				moveDelta(move),
 				button(button),
@@ -35,7 +36,7 @@ namespace Maditor {
 
 			}
 
-			std::array<float, 2> position, moveDelta;
+			Engine::Vector2 position, moveDelta;
 			MouseButton button;
 			float scrollWheel;
 		};

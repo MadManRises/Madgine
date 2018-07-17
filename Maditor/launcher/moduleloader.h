@@ -31,9 +31,7 @@ public:
 
 	const std::string &binaryDir();
 
-#ifdef MADGINE_SERVER_BUILD
-	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName, Engine::App::Root &root);
-#endif
+	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName, Engine::Core::Root &root);
 
 private:
 
@@ -44,7 +42,7 @@ private:
 		~ModuleLauncherInstance();
 
 		void createDependencies();
-		bool load(bool callInit);
+		bool load(bool callInit, bool isClient);
 		bool unload();
 
 		virtual void reloadImpl() override;
@@ -68,9 +66,11 @@ private:
 		std::map<std::string, std::list<Engine::Scene::Entity::Entity*>> mStoredComponentEntities;
 
 		ModuleLoader *mParent;
+
+		bool mIsClient;
 	};
 
-	void setupDoneImpl();
+	void setupDoneImpl(bool isClient);
 	
 private:
 	std::tuple<ModuleLoader *, std::string> createModule(const std::string &name);
@@ -82,8 +82,8 @@ private:
 
 	bool mReceivingModules;
 
-	Engine::Serialize::ObservableList<ModuleLauncherInstance, Engine::Serialize::ContainerPolicies::allowAll, Engine::Serialize::CustomCreator<decltype(&ModuleLoader::createModule)>> mInstances;
-	Engine::Serialize::Action<decltype(&ModuleLoader::setupDoneImpl), &ModuleLoader::setupDoneImpl, Engine::Serialize::ActionPolicy::request> setupDone;
+	Engine::Serialize::ObservableList<ModuleLauncherInstance, Engine::Serialize::ContainerPolicies::allowAll, Engine::Serialize::ParentCreator<&ModuleLoader::createModule>> mInstances;
+	Engine::Serialize::Action<&ModuleLoader::setupDoneImpl, Engine::Serialize::ActionPolicy::request> setupDone;
 
 	Engine::Scripting::GlobalScopeBase *mGlobal;
 

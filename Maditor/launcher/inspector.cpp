@@ -178,10 +178,8 @@ namespace Maditor
 
 			lua_pop(state, 1);
 
-			mItemRemoved = std::make_unique<Engine::SignalSlot::Slot<decltype(&Inspector::itemRemoved), &Inspector::itemRemoved>
-			>(this);
-			mItemUpdate = std::make_unique<Engine::SignalSlot::Slot<decltype(&Inspector::itemUpdate), &Inspector::itemUpdate>
-			>(this);
+			mItemRemoved = std::make_unique<Engine::SignalSlot::Slot<&Inspector::itemRemoved>>(this);
+			mItemUpdate = std::make_unique<Engine::SignalSlot::Slot<&Inspector::itemUpdate>>(this);
 		}
 
 		void Inspector::itemRemoved(Engine::InvScopePtr ptr)

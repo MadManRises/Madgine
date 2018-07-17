@@ -17,7 +17,7 @@ namespace Engine
 			};
 
 
-			template <class F, F f, class Config, class T, class R, class... _Ty>
+			template <auto f, class Config, class T, class R, class... _Ty>
 			class ActionImpl : public Observable
 			{
 			public:
@@ -122,8 +122,8 @@ namespace Engine
 		/*template <typename F, F f, class C>
 		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
 
-		template <typename F, F f, class C>
-		class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type{};
+		template <auto f, class C>
+		class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C>::type{};
 
 	}
 }

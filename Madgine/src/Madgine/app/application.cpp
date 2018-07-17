@@ -12,8 +12,12 @@
 
 #include "../util/standardlog.h"
 
-#include "framelistener.h"
-#include "root.h"
+#include "../core/framelistener.h"
+#include "../core/root.h"
+#include "../core/frameloop.h"
+#include "../serialize/container/noparent.h"
+
+#include "../scene/scenemanager.h"
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -22,10 +26,10 @@ namespace Engine
 
 	namespace App
 	{
-		Application::Application(Root &root) :
+		Application::Application(Core::Root &root) :
 			Scope(root.luaState()),
 			mShutDown(false),
-			mTimeBank(0.0f),
+			mSettings(nullptr),
 			mGlobalAPIs(root.pluginMgr(), *this),
 			mRoot(root)
 		{
@@ -33,13 +37,30 @@ namespace Engine
 
 		Application::~Application()
 		{
+			mLoop->removeFrameListener(this);
 			mLog.reset();
 		}
 
-		void Application::setup(const AppSettings& settings)
+		void Application::setup(const AppSettings& settings, std::unique_ptr<Core::FrameLoop> &&loop)
 		{
+			mSettings = &settings;
+
+			if (!loop) {
+				auto f = static_cast<Core::FrameLoop*(*)()>(pluginMgr().getUniqueSymbol("frameloop"));
+				if (!f)
+					throw 0;
+				loop = std::unique_ptr<Core::FrameLoop>(f());
+				if (!loop)
+					throw 0;
+			}
+
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
+			mSceneMgr = Serialize::make_noparent_unique<Scene::SceneManager>(*this);
+
+			mLoop = std::forward<std::unique_ptr<Core::FrameLoop>>(loop);
+			mLoop->addFrameListener(this);
+			mLoop->addFrameListener(mSceneMgr.get());
 		}
 
 		bool Application::init()
@@ -53,11 +74,31 @@ namespace Engine
 					return false;
 			}
 
+			if (!mLoop->preInit())
+				return false;
+
+			if (mSettings->mRunMain) {
+				std::optional<Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
+				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
+					return false;
+			}
+
+			if (!mSceneMgr->init())
+				return false;
+
+			if (!mLoop->init())
+				return false;
+
 			return true;
 		}
 
 		void Application::finalize()
 		{
+
+			mLoop->finalize();
+
+			mSceneMgr->finalize();
+
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
 			{
 				api->finalize();
@@ -73,26 +114,27 @@ namespace Engine
 		int Application::go()
 		{
 			mShutDown = false;
-			return 0;
+
+			if (mSettings->mRunMain) {
+				if (!callMethodCatch("main"))
+				{
+					return -1;
+				}
+			}
+
+			int result = mLoop->go();
+			clear();
+			return result;
 		}
 
-		bool Application::update(float timeSinceLastFrame)
+		bool Application::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
 		{
 			if (mShutDown)
 			{
 				return false;
 			}
 
-			mTimeBank += timeSinceLastFrame;
-
-			while (mTimeBank >= FIXED_TIMESTEP)
-			{
-				if (!fixedUpdate(FIXED_TIMESTEP))
-					return false;
-
-				mTimeBank -= FIXED_TIMESTEP;
-			}
-
+			
 			{
 				//PROFILE("ConnectionDispatch");
 				SignalSlot::ConnectionManager::getSingleton().update();
@@ -117,10 +159,7 @@ namespace Engine
 			return true;
 		}
 
-		float Application::fixedRemainder() const
-		{
-			return FIXED_TIMESTEP - mTimeBank;
-		}
+		
 
 		bool Application::isShutdown() const
 		{
@@ -133,14 +172,9 @@ namespace Engine
 		}
 
 
-		bool Application::fixedUpdate(float timeStep)
-		{
-			return true;
-		}
-
 		KeyValueMapList Application::maps()
 		{
-			return Scope::maps().merge(mGlobalAPIs);
+			return Scope::maps().merge(mGlobalAPIs, mSceneMgr);
 		}
 
 		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i)
@@ -150,15 +184,15 @@ namespace Engine
 
 		Scene::SceneComponentBase& Application::getSceneComponent(size_t i)
 		{
-			throw 0;
+			return mSceneMgr->getComponent(i);
 		}
 
-		Scene::SceneManagerBase& Application::sceneMgr()
+		Scene::SceneManager& Application::sceneMgr()
 		{
-			throw 0;
+			return *mSceneMgr;
 		}
 
-		GUI::GUISystem & Application::gui()
+		/*GUI::GUISystem & Application::gui()
 		{
 			throw 0;
 		}
@@ -176,7 +210,7 @@ namespace Engine
 		UI::GuiHandlerBase& Application::getGuiHandler(size_t i)
 		{
 			throw 0;
-		}
+		}*/
 
 
 		void Application::clear()
@@ -185,49 +219,29 @@ namespace Engine
 			{
 				p->clear();
 			}
+			mSceneMgr->clear();
 		}
 
-		void Application::addFrameListener(FrameListener* listener)
+		void Application::addFrameListener(Core::FrameListener* listener)
 		{
-			mListeners.push_back(listener);
+			mLoop->addFrameListener(listener);
 		}
 
-		void Application::removeFrameListener(FrameListener* listener)
+		void Application::removeFrameListener(Core::FrameListener* listener)
 		{
-			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+			mLoop->removeFrameListener(listener);
 		}
 
-		bool Application::sendFrameStarted(float timeSinceLastFrame)
+		void Application::singleFrame()
 		{
-			bool result = true;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameStarted(timeSinceLastFrame);
-			return result;
-		}
-
-		bool Application::sendFrameRenderingQueued(float timeSinceLastFrame)
-		{
-			if (!update(timeSinceLastFrame))
-				return false;
-			bool result = true;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameRenderingQueued(timeSinceLastFrame);
-			return result;
-		}
-
-		bool Application::sendFrameEnded(float timeSinceLastFrame)
-		{
-			bool result = true;
-			for (App::FrameListener* listener : mListeners)
-				result &= listener->frameEnded(timeSinceLastFrame);
-			return result;
+			mLoop->singleFrame();
 		}
 
 		Util::Log &Application::log() {
 			return *mLog;
 		}
 
-		Root& Application::root()
+		Core::Root& Application::root()
 		{
 			return mRoot;
 		}

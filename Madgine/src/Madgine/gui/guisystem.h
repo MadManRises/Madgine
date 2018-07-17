@@ -3,9 +3,9 @@
 #include "guievents.h"
 #include "windows/windowclass.h"
 #include "../madgineobject.h"
-#include "../scripting/types/scopebase.h"
+#include "../scripting/types/scope.h"
 #include "../scene/scenecomponentbase.h"
-#include "../scripting/types/globalapicomponentbase.h"
+#include "../core/frameloop.h"
 
 namespace Engine
 {
@@ -13,24 +13,23 @@ namespace Engine
 	{
 		class MADGINE_CLIENT_EXPORT GUISystem :
 			public MadgineObject,
-			public Ogre::GeneralAllocatedObject,
-			public Ogre::WindowEventListener,
-			public Scripting::ScopeBase
+			public Scripting::Scope<GUISystem>,
+			public Serialize::SerializableUnit<GUISystem>,
+			public Core::FrameLoop
 		{
 		public:
 			GUISystem(App::Application &app);
+			GUISystem(const GUISystem &) = delete;
 			virtual ~GUISystem();
 
-			//void printHierarchy();
-
-			virtual void update(float time);
-			virtual void notifyDisplaySizeChanged(const Ogre::Vector2& size);
-			virtual void renderSingleFrame() = 0;
+			virtual bool preInit() override;
+			virtual bool init() override;
+			virtual void finalize() override;
 
 			void showCursor();
 			void hideCursor();
 
-			virtual int go() = 0;
+			virtual int go() override = 0;
 
 			virtual void injectKeyPress(const KeyEventArgs& arg) = 0;
 			virtual void injectKeyRelease(const KeyEventArgs& arg) = 0;
@@ -40,38 +39,12 @@ namespace Engine
 
 			virtual bool isCursorVisible() = 0;
 			virtual void setCursorVisibility(bool v) = 0;
-			virtual void setCursorPosition(const Ogre::Vector2& pos) = 0;
-			virtual Ogre::Vector2 getCursorPosition() = 0;
-			virtual Ogre::Vector2 getScreenSize() = 0;
+			virtual void setCursorPosition(const Vector2& pos) = 0;
+			virtual Vector2 getCursorPosition() = 0;
+			virtual Vector2 getScreenSize() = 0;
+			
 
-
-			void addWindow(const std::string& name, WindowContainer* w);
-			void removeWindow(const std::string& name);
-
-			void updateWindowSizes();
-			void setDirtyWindowSizes();
-
-			Window* getWindowByName(const std::string& name, Class _class = Class::WINDOW_CLASS);
-			Window* loadLayout(const std::string& name, const std::string& parent);
-
-			Window* getRootWindow() const;
-
-			/**
-			* Sets the properties of the Renderwindow. Might have unexpected effects, when used as embedded window.
-			*
-			* @param fullscreen flag indicating, if the window should be shown in fullscreen
-			* @param width the preferred width for the Renderwindow
-			* @param height the preferred height of the Renderwindow
-			*/
-			virtual void setWindowProperties(bool fullscreen, unsigned int width, unsigned int height) = 0;
-			void windowResized(Ogre::RenderWindow* rw) override;
-
-			/**
-			* For embedded Applications. Resizes the Game-Components to the current size of the Renderwindow. Will be called automatically in a non-embedded environment.
-			*/
-			virtual void resizeWindow() = 0;
-
-			const char* key() const;
+			Window* getWindowByName(const std::string& name);
 
 			App::Application &app();
 
@@ -79,19 +52,54 @@ namespace Engine
 
 			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
 
-			Scene::SceneManagerBase &sceneMgr();
+			Scene::SceneManager &sceneMgr();
+			UI::UIManager &ui();
 
+			Window *createTopLevelWindow(const std::string &name);
+			Bar *createTopLevelBar(const std::string &name);
+			Button *createTopLevelButton(const std::string &name);
+			Checkbox *createTopLevelCheckbox(const std::string &name);
+			Combobox *createTopLevelCombobox(const std::string &name);
+			Image *createTopLevelImage(const std::string &name);
+			Label *createTopLevelLabel(const std::string &name);
+			SceneWindow *createTopLevelSceneWindow(const std::string &name);
+			TabWindow *createTopLevelTabWindow(const std::string &name);
+			Textbox *createTopLevelTextbox(const std::string &name);
+			
+
+			void registerWindow(Window* w);
+
+			void unregisterWindow(Window *w);
+
+			void destroyTopLevel(Window* w);
 
 		protected:
-			WindowContainer* mRootWindow;
+
+			bool sendFrameRenderingQueued(float timeSinceLastFrame);
+
+			std::unique_ptr<Window> createWindowClass(const std::string& name, Class _class);
+
+			virtual std::unique_ptr<Window> createWindow(const std::string &name) = 0;
+			virtual std::unique_ptr<Bar> createBar(const std::string& name) = 0;
+			virtual std::unique_ptr<Button> createButton(const std::string& name) = 0;
+			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name) = 0;
+			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name) = 0;
+			virtual std::unique_ptr<Image> createImage(const std::string& name) = 0;
+			virtual std::unique_ptr<Label> createLabel(const std::string& name) = 0;
+			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name) = 0;
+			virtual std::unique_ptr<TabWindow> createTabWindow(const std::string& name) = 0;
+			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name) = 0;
+			
+			void calculateWindowGeometries();
 
 		private:
-			bool mWindowSizesDirty;
 
-			std::map<std::string, WindowContainer *> mWindows;
+			std::map<std::string, Window *> mWindows;
+			std::vector<std::unique_ptr<Window>> mTopLevelWindows;
 
 			App::Application &mApp;
 
+			std::unique_ptr<UI::UIManager> mUI;
 
 		};
 	}

@@ -39,17 +39,16 @@ namespace Maditor
 
 			std::map<std::experimental::filesystem::path, std::experimental::filesystem::path> mMissingFiles;
 
-			Engine::Serialize::Action<decltype(&StandaloneWrapper::receiveFilelistImpl), &StandaloneWrapper::receiveFilelistImpl, Engine::Serialize::ActionPolicy::request> receiveFileList;
-			Engine::Serialize::Action<decltype(&StandaloneWrapper::receiveFileImpl), &StandaloneWrapper::receiveFileImpl, Engine::Serialize::ActionPolicy::request> receiveFile;
-			Engine::Serialize::Action<decltype(&StandaloneWrapper::requestFileImpl), &StandaloneWrapper::requestFileImpl, Engine::Serialize::ActionPolicy::notification> requestFile;
-			Engine::Serialize::Action<decltype(&StandaloneWrapper::sendReadyImpl), &StandaloneWrapper::sendReadyImpl, Engine::Serialize::ActionPolicy::notification> sendReady;
+			Engine::Serialize::Action<&StandaloneWrapper::receiveFilelistImpl, Engine::Serialize::ActionPolicy::request> receiveFileList;
+			Engine::Serialize::Action<&StandaloneWrapper::receiveFileImpl, Engine::Serialize::ActionPolicy::request> receiveFile;
+			Engine::Serialize::Action<&StandaloneWrapper::requestFileImpl, Engine::Serialize::ActionPolicy::notification> requestFile;
+			Engine::Serialize::Action<&StandaloneWrapper::sendReadyImpl, Engine::Serialize::ActionPolicy::notification> sendReady;
 
 			Engine::Serialize::Serialized<std::string> mConfig;
 
-#ifdef MADGINE_CLIENT_BUILD
 		protected:
 			Engine::Input::InputHandler* input() override;
-#endif
+
 		};
 
 		

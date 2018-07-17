@@ -4,9 +4,8 @@
 
 #include "../shared/errorcodes.h"
 
-#ifdef MADGINE_CLIENT_BUILD
 #include "inputwrapper.h"
-#endif
+
 
 namespace Maditor
 {
@@ -52,14 +51,13 @@ namespace Maditor
 			return &mNetwork;
 		}
 
-#ifdef MADGINE_CLIENT_BUILD
 		Engine::Input::InputHandler* EmbeddedWrapper::input()
 		{
 			if (!mInput)
 				mInput = std::make_unique<InputWrapper>(mMemory.data().mInput);
 			return mInput.get();
 		}
-#endif
+
 	}
 }
 

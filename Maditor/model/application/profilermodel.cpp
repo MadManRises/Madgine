@@ -42,9 +42,7 @@ namespace Maditor {
 
 		ProfilerItem * ProfilerItem::child(int i)
 		{
-			auto it = mChildren.begin();
-			std::advance(it, i);
-			return &*it;
+			return &*std::next(mChildren.begin(), i);
 		}
 
 		const std::string & ProfilerItem::key() const
@@ -95,9 +93,7 @@ namespace Maditor {
 
 		ProfilerItem * ProfilerModel::child(int i)
 		{
-			auto it = mTopLevelItems.begin();
-			std::advance(it, i);
-			return &*it;
+			return &*std::next(mTopLevelItems.begin(), i);
 		}
 
 		void ProfilerModel::reset()

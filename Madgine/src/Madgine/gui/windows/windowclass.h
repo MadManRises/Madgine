@@ -7,7 +7,7 @@ namespace Engine
 		enum class Class
 		{
 			WINDOW_CLASS,
-			TEXTUREDRAWER_CLASS,
+			SCENEWINDOW_CLASS,
 			COMBOBOX_CLASS,
 			TABWINDOW_CLASS,
 			CHECKBOX_CLASS,
@@ -15,7 +15,8 @@ namespace Engine
 			BUTTON_CLASS,
 			LAYOUT_CLASS,
 			LABEL_CLASS,
-			BAR_CLASS
+			BAR_CLASS,
+			IMAGE_CLASS
 		};
 	}
 }

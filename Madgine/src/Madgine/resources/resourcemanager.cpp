@@ -2,14 +2,14 @@
 
 #include "resourcemanager.h"
 
-#include "../app/root.h"
+#include "../core/root.h"
 
 namespace Engine
 {
 	namespace Resources
 	{
 		
-		ResourceManager::ResourceManager(App::Root &root, const std::experimental::filesystem::path &rootDir) :
+		ResourceManager::ResourceManager(Core::Root &root, const std::experimental::filesystem::path &rootDir) :
 		mCollector(root.pluginMgr(), *this),
 		mRoot(root),
 		mRootDir(rootDir)
@@ -51,7 +51,7 @@ namespace Engine
 			return true;
 		}
 
-		App::Root& ResourceManager::root()
+		Core::Root& ResourceManager::root()
 		{
 			return mRoot;
 		}

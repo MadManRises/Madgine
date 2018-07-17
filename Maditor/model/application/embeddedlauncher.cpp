@@ -61,7 +61,7 @@ namespace Maditor
 			{
 				mConfig->generateInfo(mAppInfo, mWindow);
 
-				cmd = isClient() ? EMBEDDED_CLIENT_LAUNCHER_BINARY : EMBEDDED_SERVER_LAUNCHER_BINARY;
+				cmd = EMBEDDED_LAUNCHER_BINARY;
 
 				cmd += " " + std::to_string(mMemory.id());
 			}

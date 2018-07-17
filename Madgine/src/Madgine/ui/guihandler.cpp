@@ -11,61 +11,32 @@ namespace Engine
 {
 	namespace UI
 	{
-		GuiHandlerBase::GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type, const std::string& layoutFile,
-		                               const std::string& parentName) :
+		GuiHandlerBase::GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type) :
 			Handler(ui, windowName),
-			mLayoutFile(layoutFile),
-			mParentName(parentName),
 			mType(type),
-			mOrder(layoutFile.empty() ? 2 : (parentName != WindowNames::rootWindow ? 1 : 0)),
 			mContext(Scene::ContextMask::NoContext)
 		{
 		}
 
 
-		bool GuiHandlerBase::init(int order)
-		{
-			if (mOrder == order)
-				return init();
-			return true;
-		}
-
 		bool GuiHandlerBase::init()
 		{
-			GUI::Window* window = nullptr;
+			GUI::Window* window = mUI.gui().getWindowByName(mWindowName);
 
-			if (!mLayoutFile.empty())
+			if (!window)
 			{
-				window = mUI.gui().loadLayout(mLayoutFile, mParentName);
-				if (!window)
-				{
-					LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
-					return false;
-				}
-				if (mType == WindowType::ROOT_WINDOW)
-				{
-					window->hide();
-				}
+				LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
+				return false;
 			}
 			if (window)
 				return Handler::init(window);
 			return Handler::init();
 		}
 
-		void GuiHandlerBase::finalize(int order)
-		{
-			if (mOrder == order)
-				finalize();
-		}
-
 		void GuiHandlerBase::finalize()
 		{
 			Handler::finalize();
-			if (mWindow && !mLayoutFile.empty())
-			{
-				mWindow->destroy();
-				mWindow = nullptr;
-			}
+			mWindow = nullptr;
 		}
 
 		void GuiHandlerBase::open()
@@ -121,11 +92,6 @@ namespace Engine
 		Scene::ContextMask GuiHandlerBase::context() const
 		{
 			return mContext;
-		}
-
-		void GuiHandlerBase::setInitialisationOrder(int order)
-		{
-			mOrder = order;
 		}
 
 		void GuiHandlerBase::setContext(Scene::ContextMask context)

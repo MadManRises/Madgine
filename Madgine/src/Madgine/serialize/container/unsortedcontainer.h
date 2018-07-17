@@ -24,9 +24,7 @@ namespace Engine
 			{
 				int i;
 				in >> i;
-				iterator it = this->begin();
-				std::advance(it, i);
-				return it;
+				return std::next(this->begin(), i);
 			}
 
 			void write_iterator(SerializeOutStream& out, const const_iterator& it) const

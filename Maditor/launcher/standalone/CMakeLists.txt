@@ -8,19 +8,9 @@ FolderSources(sources "" ".." applicationwrapper.cpp applicationwrapper.h embedd
 
 add_definitions(-DCONFIG="${CONFIG}")
 
-add_executable(Standalone_Server_Launcher ${sources})
-target_link_libraries(Standalone_Server_Launcher PRIVATE Maditor_Shared MadgineServer lualib)
+add_executable(Standalone_Launcher ${sources})
+target_link_libraries(Standalone_Launcher PRIVATE Maditor_Shared Client lualib)
 
 if (UNIX)
-	target_link_libraries(Standalone_Server_Launcher PRIVATE dl)
+	target_link_libraries(Standalone_Launcher PRIVATE dl)
 endif (UNIX)
-
-if (BUILD_CLIENT)
-	add_executable(Standalone_Client_Launcher ${sources})
-	target_link_libraries(Standalone_Client_Launcher PRIVATE Maditor_Shared OgreMadgine lualib)
-
-	if (UNIX)
-		target_link_libraries(Standalone_Client_Launcher PRIVATE dl)
-	endif (UNIX)
-
-endif (BUILD_CLIENT)

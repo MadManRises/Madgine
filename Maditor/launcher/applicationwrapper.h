@@ -2,26 +2,23 @@
 
 #include "../shared/appcontrol.h"
 
-#ifdef MADGINE_CLIENT_BUILD
-#include "Madgine/app/ogreappsettings.h"
-#include "Madgine/app/ogreapplication.h"
-#endif
-#ifdef MADGINE_SERVER_BUILD
-#include "Madgine/app/serverappsettings.h"
-#endif
-
 #include "moduleloader.h"
 #include "util/launcherloglistener.h"
 #include "Madgine/serialize/container/serialized.h"
 
 #include "util/util.h"
 
-#include "Madgine/app/framelistener.h"
+#include "Madgine/core/framelistener.h"
 
 #include "inspector.h"
 
 #include "../shared/applicationinfo.h"
-#include "Madgine/app/root.h"
+#include "Madgine/core/root.h"
+
+
+#include "Madgine/app/clientappsettings.h"
+#include "Madgine/app/clientapplication.h"
+
 
 namespace Maditor {
 
@@ -29,7 +26,7 @@ namespace Maditor {
 
 	namespace Launcher {
 
-		class ApplicationWrapper : public Engine::Serialize::SerializableUnit<ApplicationWrapper,Shared::AppControl>, public Engine::App::FrameListener {
+		class ApplicationWrapper : public Engine::Serialize::SerializableUnit<ApplicationWrapper,Shared::AppControl>, public Engine::Core::FrameListener {
 
 		public:
 			ApplicationWrapper();
@@ -40,9 +37,8 @@ namespace Maditor {
 		protected:
 			virtual int acceptConnection() = 0;
 			virtual Engine::Serialize::SerializeManager *mgr() = 0;
-#ifdef MADGINE_CLIENT_BUILD
 			virtual Engine::Input::InputHandler *input() = 0;
-#endif
+
 
 			// Inherited via AppControl
 			virtual void shutdownImpl() override;
@@ -51,7 +47,7 @@ namespace Maditor {
 			virtual void onApplicationConnected() override;
 
 			virtual bool frameStarted(float timeSinceLastFrame) override;
-			virtual bool frameRenderingQueued(float timeSinceLastFrame) override;
+			virtual bool frameRenderingQueued(float timeSinceLastFrame, Engine::Scene::ContextMask context) override;
 			virtual bool frameEnded(float timeSinceLastFrame) override;
 
 			void startImpl();
@@ -75,7 +71,7 @@ namespace Maditor {
 
 			static ApplicationWrapper *sInstance;
 
-			std::unique_ptr<Engine::App::Root> mRoot;
+			std::unique_ptr<Engine::Core::Root> mRoot;
 
 			Engine::Serialize::Serialized<Util> mUtil;
 			Engine::Serialize::Serialized<LauncherLogListener> mLog;
@@ -85,16 +81,13 @@ namespace Maditor {
 			Shared::ApplicationInfo mAppInfo;
 			bool mHaveAppInfo;
 
-			Engine::App::RootSettings mRootSettings;
+			Engine::Core::RootSettings mRootSettings;
 
-#ifdef MADGINE_CLIENT_BUILD
-			Engine::App::OgreAppSettings mSettings;
-			std::unique_ptr<Engine::App::OgreApplication> mApplication;
-#endif
-#ifdef MADGINE_SERVER_BUILD
-			Engine::App::ServerAppSettings mSettings;
+			Engine::App::ClientAppSettings mSettings;
+			std::unique_ptr<Engine::App::ClientApplication> mApplication;
+
 			std::unique_ptr<Engine::Server::ServerBase> mServer;
-#endif			
+
 
 			bool mRunning;			
 			bool mStartRequested;

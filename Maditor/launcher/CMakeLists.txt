@@ -9,25 +9,12 @@ FolderSources(sources "" "" applicationwrapper.cpp applicationwrapper.h embedded
 	FolderSources(sources "" util appstats.cpp appstats.h launcherloglistener.cpp launcherloglistener.h util.cpp util.h)	
 
 
-add_executable(Embedded_Server_Launcher ${sources})
-target_link_libraries(Embedded_Server_Launcher PRIVATE Maditor_Shared MadgineServer lualib)
+add_executable(Embedded_Launcher ${sources})
+target_link_libraries(Embedded_Launcher PRIVATE Maditor_Shared Client lualib)
 
 if (UNIX)
-	target_link_libraries(Embedded_Server_Launcher PRIVATE dl)
+	target_link_libraries(Embedded_Launcher PRIVATE dl)
 endif (UNIX)
-
-if (BUILD_CLIENT)
-	add_executable(Embedded_Client_Launcher ${sources})
-	target_link_libraries(Embedded_Client_Launcher PRIVATE Maditor_Shared OgreMadgine lualib)
-
-	if (UNIX)
-		target_link_libraries(Embedded_Client_Launcher PRIVATE dl)
-	endif (UNIX)
-
-	install_to_workspace(Maditor TARGETS Embedded_Client_Launcher)
-
-endif (BUILD_CLIENT)
 
 add_subdirectory(standalone)
 
-install_to_workspace(Maditor TARGETS Embedded_Server_Launcher)

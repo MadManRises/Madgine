@@ -115,8 +115,8 @@ namespace Engine
 	struct MemberFunctionTypeCapture
 	{
 	public:
-		template <template <typename F, F, class, class, class...> class C, typename F, F f, class... Args>
-		using instance = C<F, f, Args..., T, R, _Ty...>;
+		template <template <auto, class, class, class...> class C, auto f, class... Args>
+		using instance = C<f, Args..., T, R, _Ty...>;
 	};
 
 	namespace __generic__impl__
@@ -127,16 +127,16 @@ namespace Engine
 	template <class T, class R, class... _Ty>
 	MemberFunctionTypeCapture<const T, R, _Ty...> memberFunctionTypeDeducer(R (T::*f)(_Ty ...) const);
 
-	template <typename F>
-	using MemberFunctionHelper = decltype(memberFunctionTypeDeducer(std::declval<F>()));
+	template <auto f>
+	using MemberFunctionHelper = decltype(memberFunctionTypeDeducer(f));
 	}
 
 	
 
-	template <template <typename F, F, class, class, class...> class C, class F, F f, class... Args>
+	template <template <auto, class, class, class...> class C, auto f, class... Args>
 	struct MemberFunctionCapture
 	{
-		typedef typename __generic__impl__::MemberFunctionHelper<F>::template instance<C, F, f, Args...> type;
+		typedef typename __generic__impl__::MemberFunctionHelper<f>::template instance<C, f, Args...> type;
 	};
 
 

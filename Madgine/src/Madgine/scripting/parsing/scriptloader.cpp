@@ -2,7 +2,7 @@
 #include "scriptloader.h"
 #include "../../resources/resourcemanager.h"
 
-#include "../../app/root.h"
+#include "../../core/root.h"
 
 
 namespace Engine

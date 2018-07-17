@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../math/vector2.h"
+
 namespace Engine
 {
 	namespace GUI
@@ -259,14 +261,14 @@ namespace Engine
 
 		struct MouseEventArgs
 		{
-			MouseEventArgs(const std::array<float, 2>& pos, MouseButton::MouseButton button) :
+			MouseEventArgs(const Vector2& pos, MouseButton::MouseButton button) :
 				position(pos),
 				button(button),
 				scrollWheel(0.0f)
 			{
 			}
 
-			MouseEventArgs(const std::array<float, 2>& pos, const std::array<float, 2>& move, float scroll,
+			MouseEventArgs(const Vector2& pos, const Vector2& move, float scroll,
 			               MouseButton::MouseButton button = MouseButton::NO_BUTTON) :
 				position(pos),
 				moveDelta(move),
@@ -275,7 +277,7 @@ namespace Engine
 			{
 			}
 
-			std::array<float, 2> position, moveDelta;
+			Vector2 position, moveDelta;
 			MouseButton::MouseButton button;
 			float scrollWheel;
 		};

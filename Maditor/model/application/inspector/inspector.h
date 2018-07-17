@@ -40,8 +40,8 @@ namespace Maditor {
 			std::map<QObject *, Engine::InvScopePtr> mIndices;
 			std::map<QObject *, Engine::InvScopePtr>::iterator mIt;
 
-			Engine::Serialize::Action<decltype(&Inspector::requestUpdateImpl), &Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
-			Engine::Serialize::Action<decltype(&Inspector::sendUpdateImpl), &Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
+			Engine::Serialize::Action<&Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
+			Engine::Serialize::Action<&Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
 
 			bool mPending;
 			int mTimer;

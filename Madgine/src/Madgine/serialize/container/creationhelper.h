@@ -66,7 +66,7 @@ namespace Engine
 		using CustomCreator = typename CallableDeduce<__creationhelper__impl__::_CustomCreator, F>::type;
 
 		namespace __creationhelper__impl__{
-			template <typename F, F f, class T, class R, class... _Ty>
+			template <auto f, class T, class R, class... _Ty>
 			class _ParentCreator
 			{
 			public:
@@ -91,7 +91,7 @@ namespace Engine
 			};
 		}
 
-		template <typename F, F f>
-		using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, F, f>::type;
+		template <auto f>
+		using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, f>::type;
 	}
 }

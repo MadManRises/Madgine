@@ -62,7 +62,7 @@ namespace Engine
 			static int sManagerCount;
 
 			SignalSlot::Signal<Serialize::StreamError> mConnectionResult;
-			SignalSlot::Slot<decltype(&NetworkManager::onConnectionEstablished), &NetworkManager::onConnectionEstablished>
+			SignalSlot::Slot<&NetworkManager::onConnectionEstablished>
 			mConnectionEstablished;
 		};
 	}

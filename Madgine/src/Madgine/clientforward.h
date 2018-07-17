@@ -1,21 +1,12 @@
 #pragma once
 
 
-namespace Ogre
-{
-	template <class T>
-	class Singleton;
-
-}
-
 namespace Engine
 {
 	namespace App
 	{
-		class ConfigSet;
-		struct OgreAppSettings;
-		class Application;
-		class OgreApplication;
+		struct ClientAppSettings;
+		class ClientApplication;
 	}
 
 	namespace UI
@@ -34,12 +25,13 @@ namespace Engine
 		class Window;
 		class Bar;
 		class Button;
-		class TextureDrawer;
+		class SceneWindow;
 		class Checkbox;
 		class Combobox;
 		class TabWindow;
 		class Textbox;
 		class Label;
+		class Image;
 
 		struct KeyEventArgs;
 		struct MouseEventArgs;

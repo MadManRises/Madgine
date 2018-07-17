@@ -7,7 +7,7 @@ namespace Engine
 {
 	namespace Input
 	{
-		class OISInputHandler : public Ogre::GeneralAllocatedObject, public OIS::KeyListener, public OIS::MouseListener,
+		class OISInputHandler : public OIS::KeyListener, public OIS::MouseListener,
 		                        public Ogre::WindowEventListener, public InputHandler
 		{
 		public:

@@ -145,7 +145,7 @@ namespace Maditor {
 					module.addDependency(&*std::find_if(mInstances.begin(), mInstances.end(), [&](const Shared::ModuleInstance &m) {return m.name() == dependency; }));
 				}
 			}
-			setupDone({});
+			setupDone(mConfig->launcherType() == Shared::CLIENT_LAUNCHER, {});
 		}
 
 		bool ModuleLoader::done()
@@ -165,7 +165,7 @@ namespace Maditor {
 			mMap.at(module)->reload({});
 		}
 
-		void ModuleLoader::setupDoneImpl()
+		void ModuleLoader::setupDoneImpl(bool isClient)
 		{
 		}
 
@@ -176,8 +176,7 @@ namespace Maditor {
 
 		QVariant ModuleLoader::data(int row, int column, int role) const
 		{
-			auto it = mInstances.begin();
-			std::advance(it, row);
+			auto it = std::next(mInstances.begin(), row);			
 			switch (role) {
 			case Qt::DisplayRole:
 				switch (column) {

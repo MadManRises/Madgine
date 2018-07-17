@@ -5,4 +5,5 @@ include(Plugins)
 
 
 add_subdirectory(ogre)
+add_subdirectory(server)
 

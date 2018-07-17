@@ -14,12 +14,12 @@
 
 #include "Madgine/scripting/types/globalscopebase.h"
 
-#ifdef MADGINE_CLIENT_BUILD
+
 #include "Madgine/ogreuniquecomponentcollector.h"
 #include "Madgine/ui/guihandler.h"
 #include "Madgine/ui/gamehandler.h"
 #include "Madgine/ui/uimanager.h"
-#endif
+
 
 #ifdef __linux__
 #include <dlfcn.h>
@@ -32,8 +32,7 @@ namespace Maditor {
 		ModuleLoader::ModuleLoader() :
 			mInit(false),
 		mGlobal(nullptr)
-		{
-			mInstances.setCreator(std::bind(&ModuleLoader::createModule, this, std::placeholders::_1));
+		{			
 		}
 
 		ModuleLoader::~ModuleLoader()
@@ -71,11 +70,11 @@ namespace Maditor {
 			return mBinaryDir;
 		}
 
-		void ModuleLoader::setupDoneImpl()
+		void ModuleLoader::setupDoneImpl(bool isClient)
 		{
 			for (ModuleLauncherInstance &instance : mInstances) {
 				instance.createDependencies();
-				instance.load(false);
+				instance.load(false, isClient);
 			}
 			mReceivingModules = false;
 		}
@@ -119,8 +118,7 @@ namespace Maditor {
 			}
 		}
 
-#ifdef MADGINE_SERVER_BUILD
-		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName, Engine::App::Root &root)
+		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName, Engine::Core::Root &root)
 		{
 			size_t delimPos = fullName.find("::");
 			std::string moduleName(fullName.c_str(), delimPos);
@@ -130,31 +128,31 @@ namespace Maditor {
 			if (it != mInstances.end() && it->isLoaded()) {
 				void *symbol = it->getSymbol(std::string("create") + className);
 				if (symbol) {
-					typedef Engine::Server::ServerBase *(*Factory)(const std::string &, Engine::App::Root &);
+					typedef Engine::Server::ServerBase *(*Factory)(const std::string &, Engine::Core::Root &);
 					return (*reinterpret_cast<Factory>(symbol))(instanceName, root);
 				}
 			}
 
 			return nullptr;
 		}
-#endif
 
-		bool ModuleLoader::ModuleLauncherInstance::load(bool callInit)
+		bool ModuleLoader::ModuleLauncherInstance::load(bool callInit, bool isClient)
 		{
 			if (isLoaded())
 				return true;
 
-#ifdef MADGINE_CLIENT_BUILD
-			const std::string prefix = "CLIENT_";
-#else
-			const std::string prefix = "SERVER_";
-#endif
+			mIsClient = isClient;
+
+			const std::string prefix = isClient ? "CLIENT_" : "SERVER_";
+
+			
+
 
 			for (ModuleInstance *dep : dependencies()) {
 				ModuleLauncherInstance *d = dynamic_cast<ModuleLauncherInstance*>(dep);
 				if (!d)
 					throw 0;
-				if (!d->load(callInit))
+				if (!d->load(callInit, isClient))
 					return false;
 			}
 
@@ -380,7 +378,7 @@ namespace Maditor {
 		void ModuleLoader::ModuleLauncherInstance::reloadImpl()
 		{
 			if (isLoaded() && unload()) {
-				load(true);
+				load(true, mIsClient);
 			}
 		}
 

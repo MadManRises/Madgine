@@ -70,9 +70,7 @@ namespace Maditor {
 
 		TreeItem * ScopeWrapperItem::child(int i)
 		{
-			auto it = mValues.begin();
-			std::advance(it, i);
-			return &it->second;
+			return &std::next(mValues.begin(), i)->second;
 		}
 
 		QVariant ScopeWrapperItem::cellData(int col) const

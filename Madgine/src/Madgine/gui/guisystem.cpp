@@ -1,23 +1,30 @@
 #include "../clientlib.h"
 
 #include "guisystem.h"
-#include "windows/windowcontainer.h"
-#include "windows/window.h"
-
 #include "../app/application.h"
+
+#include "../ui/uimanager.h"
+
+#include "windows/bar.h"
+#include "windows/button.h"
+#include "windows/checkbox.h"
+#include "windows/combobox.h"
+#include "windows/label.h"
+#include "windows/scenewindow.h"
+#include "windows/tabwindow.h"
+#include "windows/textbox.h"
+#include "windows/image.h"
 
 namespace Engine
 {
 
-	SINGLETON_IMPL(GUI::GUISystem);
-
+	API_IMPL(GUI::GUISystem);
 
 	namespace GUI
 	{
+		
 		GUISystem::GUISystem(App::Application &app) :
-			ScopeBase(app.createTable()),
-			mRootWindow(nullptr),
-			mWindowSizesDirty(false),
+			Scripting::Scope<GUISystem>(app.createTable()),			
 			mApp(app)
 		{
 		}
@@ -25,6 +32,9 @@ namespace Engine
 
 		GUISystem::~GUISystem()
 		{
+			mUI.reset();
+
+			mTopLevelWindows.clear();
 			assert(mWindows.empty());
 		}
 
@@ -38,92 +48,184 @@ namespace Engine
 			setCursorVisibility(false);
 		}
 
-		void GUISystem::update(float time)
+		bool GUISystem::preInit()
 		{
-			if (mWindowSizesDirty)
+			mUI = std::make_unique<UI::UIManager>(*this);
+			return mUI->preInit();
+		}
+
+		bool GUISystem::init()
+		{
+			return MadgineObject::init() && mUI->init();
+		}
+
+		void GUISystem::finalize()
+		{
+			mUI->finalize();
+			MadgineObject::finalize();
+		}
+
+		Window* GUISystem::getWindowByName(const std::string& name)
+		{
+			return mWindows.at(name);
+		}
+
+		Window* GUISystem::createTopLevelWindow(const std::string& name)
+		{
+			Window *w = mTopLevelWindows.emplace_back(createWindow(name)).get();
+			w->hide();
+			return w;
+		}
+
+		Bar* GUISystem::createTopLevelBar(const std::string& name)
+		{
+			std::unique_ptr<Bar> p = createBar(name);
+			Bar *b = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			return b;
+		}
+
+		Button* GUISystem::createTopLevelButton(const std::string& name)
+		{
+			std::unique_ptr<Button> p = createButton(name);
+			Button *b = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			b->hide();
+			return b;
+		}
+
+		Checkbox* GUISystem::createTopLevelCheckbox(const std::string& name)
+		{
+			std::unique_ptr<Checkbox> p = createCheckbox(name);
+			Checkbox *c = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			c->hide();
+			return c;
+		}
+
+		Combobox* GUISystem::createTopLevelCombobox(const std::string& name)
+		{
+			std::unique_ptr<Combobox> p = createCombobox(name);
+			Combobox *c = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			c->hide();
+			return c;
+		}
+
+		Image* GUISystem::createTopLevelImage(const std::string& name)
+		{
+			std::unique_ptr<Image> p = createImage(name);
+			Image *i = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			i->hide();
+			return i;
+		}
+
+		Label* GUISystem::createTopLevelLabel(const std::string& name)
+		{
+			std::unique_ptr<Label> p = createLabel(name);
+			Label *l = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			l->hide();
+			return l;
+		}
+
+		SceneWindow* GUISystem::createTopLevelSceneWindow(const std::string& name)
+		{
+			std::unique_ptr<SceneWindow> p = createSceneWindow(name);
+			SceneWindow *s = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			s->hide();
+			return s;
+		}
+
+		TabWindow* GUISystem::createTopLevelTabWindow(const std::string& name)
+		{
+			std::unique_ptr<TabWindow> p = createTabWindow(name);
+			TabWindow *t = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			t->hide();
+			return t;
+		}
+
+		Textbox* GUISystem::createTopLevelTextbox(const std::string& name)
+		{
+			std::unique_ptr<Textbox> p = createTextbox(name);
+			Textbox *t = p.get();
+			mTopLevelWindows.emplace_back(std::move(p));
+			t->hide();
+			return t;
+		}
+
+		std::unique_ptr<Window> GUISystem::createWindowClass(const std::string& name, Class _class)
+		{
+			switch(_class)
 			{
-				mWindowSizesDirty = false;
-				updateWindowSizes();
+			case Class::BAR_CLASS:
+				return createBar(name);
+			case Class::CHECKBOX_CLASS:
+				return createCheckbox(name);
+			case Class::LABEL_CLASS:
+				return createLabel(name);
+			case Class::TABWINDOW_CLASS:
+				return createTabWindow(name);
+			case Class::BUTTON_CLASS:
+				return createButton(name);
+			case Class::COMBOBOX_CLASS:
+				return createCombobox(name);
+			case Class::TEXTBOX_CLASS:
+				return createTextbox(name);
+			case Class::SCENEWINDOW_CLASS:
+				return createSceneWindow(name);
+			case Class::IMAGE_CLASS:
+				return createImage(name);
+			default:
+				throw 0;
 			}
 		}
 
-		void GUISystem::notifyDisplaySizeChanged(const Ogre::Vector2& size)
+		void GUISystem::calculateWindowGeometries()
 		{
-			updateWindowSizes();
-		}
-
-		/*void GUISystem::printHierarchy() {
-			std::list<std::pair<WindowContainer*, size_t>> windows{ {mRootWindow, 0} };
-			
-			while (!windows.empty()) {
-				std::pair<WindowContainer*, size_t> p = windows.front();
-				windows.pop_front();
-				WindowContainer *w = p.first;
-				for (WindowContainer *win : w->getChildren()) {
-					windows.push_front({ win, p.second + 1 });
-				}				
-				std::cout << std::string(4 * p.second, ' ') << "'" << w->getName() << "', " << w->getPixelSize() << std::endl;
+			Vector2 size = getScreenSize();
+			for (const std::unique_ptr<Window> &topLevel : mTopLevelWindows)
+			{				
+				topLevel->updateGeometry({ size.x, size.y, 1.0f }, { 0.0f, 0.0f });
 			}
-		}*/
-
-		void GUISystem::addWindow(const std::string& name, WindowContainer* w)
-		{
-			//assert(mWindows.find(name) == mWindows.end());
-			mWindows[name] = w;
 		}
 
-		void GUISystem::removeWindow(const std::string& name)
+		void GUISystem::registerWindow(Window* w)
 		{
-			mWindows.erase(name);
+			assert(mWindows.try_emplace(w->getName(), w).second);
 		}
 
-		void GUISystem::updateWindowSizes()
+		void GUISystem::unregisterWindow(Window* w)
 		{
-			if (mRootWindow)
-				mRootWindow->updateSize(getScreenSize());
+			assert(mWindows.erase(w->getName()) == 1);
 		}
 
-		void GUISystem::setDirtyWindowSizes()
+		void GUISystem::destroyTopLevel(Window* w)
 		{
-			mWindowSizesDirty = true;
+			auto it = std::find_if(mTopLevelWindows.begin(), mTopLevelWindows.end(), [=](const std::unique_ptr<Window> &ptr) {return ptr.get() == w; });
+			assert(it != mTopLevelWindows.end());
+			mTopLevelWindows.erase(it);
 		}
 
-		Window* GUISystem::getWindowByName(const std::string& name, Class _class)
+		bool GUISystem::sendFrameRenderingQueued(float timeSinceLastFrame)
 		{
-			return mWindows.at(name)->as(_class);
+			return FrameLoop::sendFrameRenderingQueued(timeSinceLastFrame, mUI->currentContext());
 		}
 
-		Window* GUISystem::loadLayout(const std::string& name, const std::string& parent)
+		Scene::SceneManager& GUISystem::sceneMgr()
 		{
-			auto it = mWindows.find(parent);
-			if (it == mWindows.end())
-				return nullptr;
-			WindowContainer* w = it->second->loadLayout(name);
-			if (!w)
-				return nullptr;
-			return w->as();
+			return mApp.sceneMgr();
 		}
 
-		Window* GUISystem::getRootWindow() const
+		UI::UIManager& GUISystem::ui()
 		{
-			return mRootWindow->as();
+			return *mUI;
 		}
 
-		void GUISystem::windowResized(Ogre::RenderWindow* rw)
-		{
-			unsigned int width, height, depth;
-			int left, top;
-			rw->getMetrics(width, height, depth, left, top);
-
-			notifyDisplaySizeChanged(Ogre::Vector2(width, height));
-		}
-
-		const char* GUISystem::key() const
-		{
-			return "Gui";
-		}
-
-		App::Application& GUISystem::app()
+		App::Application &GUISystem::app()
 		{
 			return mApp;
 		}
@@ -137,13 +239,6 @@ namespace Engine
 		{
 			return mApp.getGlobalAPIComponent(i);
 		}
-
-		Scene::SceneManagerBase& GUISystem::sceneMgr()
-		{
-			return mApp.sceneMgr();
-		}
-
-
 
 	}
 }

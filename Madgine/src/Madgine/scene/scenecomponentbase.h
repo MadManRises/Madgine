@@ -18,18 +18,18 @@ namespace Engine
 		public:
 			virtual ~SceneComponentBase() = default;
 
-			SceneComponentBase(SceneManagerBase &sceneMgr, ContextMask context = ContextMask::SceneContext);
+			SceneComponentBase(SceneManager &sceneMgr, ContextMask context = ContextMask::SceneContext);
 
 			void update(float timeSinceLastFrame, ContextMask mask);
 			void fixedUpdate(float timeStep, ContextMask mask);
 
-			bool init() override;
-			void finalize() override;
+			virtual bool init() override;
+			virtual void finalize() override;
 
 			void setEnabled(bool b);
 			bool isEnabled() const;
 
-			SceneManagerBase &sceneMgr() const;
+			SceneManager &sceneMgr() const;
 
 			KeyValueMapList maps() override;
 
@@ -60,7 +60,7 @@ namespace Engine
 
 			bool mEnabled;
 
-			SceneManagerBase &mSceneMgr;
+			SceneManager &mSceneMgr;
 		};
 
 		

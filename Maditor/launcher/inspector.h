@@ -23,11 +23,11 @@ namespace Maditor {
 
 			static InspectorThreadInstance *getInstance(lua_State *thread);			
 
-		protected:
+		//protected:
 			void update(Engine::InvScopePtr ptr, Inspector *inspector);
 
 		private:
-			Engine::SignalSlot::Slot<decltype(&InspectorThreadInstance::update), &InspectorThreadInstance::update> mUpdate;
+			Engine::SignalSlot::Slot<&InspectorThreadInstance::update> mUpdate;
 
 			static std::mutex sMappingsMutex;
 			static std::map<lua_State *, InspectorThreadInstance*> sMappings;
@@ -58,10 +58,10 @@ namespace Maditor {
 			std::mutex mItemsMutex;
 			std::map<Engine::InvScopePtr, std::tuple<InspectorThreadInstance*, bool>> mItems;
 
-			Engine::Serialize::Action<decltype(&Inspector::requestUpdateImpl), &Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
-			Engine::Serialize::Action<decltype(&Inspector::sendUpdateImpl), &Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
-			std::unique_ptr<Engine::SignalSlot::Slot<decltype(&Inspector::itemRemoved), &Inspector::itemRemoved>> mItemRemoved;
-			std::unique_ptr<Engine::SignalSlot::Slot<decltype(&Inspector::itemUpdate), &Inspector::itemUpdate>> mItemUpdate;
+			Engine::Serialize::Action<&Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
+			Engine::Serialize::Action<&Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
+			std::unique_ptr<Engine::SignalSlot::Slot<&Inspector::itemRemoved>> mItemRemoved;
+			std::unique_ptr<Engine::SignalSlot::Slot<&Inspector::itemUpdate>> mItemUpdate;
 
 			static const luaL_Reg sMarkMetafunctions[];
 			static int lua_scopeGc(lua_State *);

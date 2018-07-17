@@ -21,7 +21,7 @@ namespace Engine
 			void update(float timeSinceLastFrame, Scene::ContextMask mask);
 			void fixedUpdate(float timeStep, Scene::ContextMask mask);
 
-			Scene::SceneManagerBase &sceneMgr() const;
+			Scene::SceneManager &sceneMgr() const;
 
 		protected:
 			void onMouseMove(GUI::MouseEventArgs& me) override;
@@ -57,7 +57,7 @@ namespace Engine
 
 			void setMouseDragMode(GUI::MouseButton::MouseButton button, MouseDragMode mode);
 
-			const std::array<float, 2>& dragStart() const;
+			const Vector2& dragStart() const;
 
 		private:
 			static const float mDragStartThreshold;
@@ -68,11 +68,11 @@ namespace Engine
 
 			bool mDragging, mSingleClick;
 
-			std::array<float, 2> mDragStart;
+			Vector2 mDragStart;
 
 			Scene::ContextMask mContext;
 
-			Scene::SceneManagerBase &mSceneMgr;
+			Scene::SceneManager &mSceneMgr;
 		};
 
 

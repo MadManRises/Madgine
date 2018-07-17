@@ -29,5 +29,20 @@ namespace Engine
 			return mPlugins.end();
 		}
 
+		void* PluginManager::getUniqueSymbol(const std::string& name) const
+		{
+			void *symbol = nullptr;
+			for (const std::pair<const std::string, Plugin> &p : mPlugins)
+			{
+				void *s = p.second.getSymbol(name);
+				if (s)
+				{
+					if (symbol)
+						throw 0;
+					symbol = s;
+				}			
+			}
+			return symbol;
+		}
 	}
 }

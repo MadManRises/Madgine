@@ -28,7 +28,7 @@ namespace Engine
 			std::tuple<std::function<bool()>> createProcessData();
 
 			Serialize::ObservableMap<std::string, ProcessStats, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<
-				                         decltype(&Profiler::createProcessData), &Profiler::createProcessData>> mProcesses;
+				                         &Profiler::createProcessData>> mProcesses;
 
 			ProcessStats* mCurrent;
 

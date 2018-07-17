@@ -7,7 +7,7 @@ namespace Engine
 {
 	namespace Util
 	{
-		class MADGINE_SERVER_EXPORT ServerLog : public StandardLog
+		class MADGINE_BASE_EXPORT ServerLog : public StandardLog
 		{
 		public:
 			ServerLog(const std::string& name);
@@ -26,8 +26,8 @@ namespace Engine
 			void charTyped(char, const std::string&);
 
 		private:
-			SignalSlot::Slot<decltype(&ServerLog::charTyped), &ServerLog::charTyped> mCharTypedSlot;
-			SignalSlot::Slot<decltype(&ServerLog::handle), &ServerLog::handle> mHandleSlot;
+			SignalSlot::Slot<&ServerLog::charTyped> mCharTypedSlot;
+			SignalSlot::Slot<&ServerLog::handle> mHandleSlot;
 
 			bool* mFlag;
 

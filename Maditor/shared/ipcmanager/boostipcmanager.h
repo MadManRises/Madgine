@@ -66,7 +66,7 @@ namespace Maditor {
 			//static int sManagerCount;
 
 			Engine::SignalSlot::Signal<bool> mConnectionResult;
-			Engine::SignalSlot::Slot<decltype(&BoostIPCManager::onConnectionEstablished), &BoostIPCManager::onConnectionEstablished> mConnectionEstablished;
+			Engine::SignalSlot::Slot<&BoostIPCManager::onConnectionEstablished> mConnectionEstablished;
 
 		};
 

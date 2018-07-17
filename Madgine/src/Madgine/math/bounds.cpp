@@ -1,5 +1,8 @@
-#include "../clientlib.h"
+#include "../interfaceslib.h"
 #include "bounds.h"
+
+#include "vector2.h"
+#include "vector3.h"
 
 namespace Engine
 {
@@ -14,7 +17,7 @@ namespace Engine
 		{
 		}
 
-		Bounds::Bounds(const Ogre::Vector3& min, const Ogre::Vector3& max) :
+		Bounds::Bounds(const Vector3& min, const Vector3& max) :
 			mLeft(min.x),
 			mBottom(min.z),
 			mRight(max.x),
@@ -52,22 +55,22 @@ namespace Engine
 			return mTop - mBottom;
 		}
 
-		Ogre::Vector2 Bounds::size() const
+		Vector2 Bounds::size() const
 		{
 			return {width(), height()};
 		}
 
-		Ogre::Vector2 Bounds::bottomLeft() const
+		Vector2 Bounds::bottomLeft() const
 		{
 			return {mLeft, mBottom};
 		}
 
-		std::array<Ogre::Vector2, 4> Bounds::corners() const
+		std::array<Vector2, 4> Bounds::corners() const
 		{
 			return {{{mLeft, mBottom}, {mLeft, mTop}, {mRight, mTop}, {mRight, mBottom}}};
 		}
 
-		Ogre::Vector2 Bounds::operator *(const Ogre::Vector2& v) const
+		Vector2 Bounds::operator *(const Vector2& v) const
 		{
 			return {mLeft + width() * v.x, mBottom + height() * v.y};
 		}

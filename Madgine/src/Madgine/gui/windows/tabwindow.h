@@ -6,9 +6,9 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class TabWindow : public Window
+		class TabWindow : public virtual Window
 		{
-		public:
+		public:			
 			using Window::Window;
 			virtual ~TabWindow() = default;
 

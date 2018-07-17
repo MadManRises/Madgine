@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Label : public Window
+		class Label : public virtual Window
 		{
 		public:
 			using Window::Window;

@@ -28,7 +28,7 @@ namespace Engine
 				Entity(const Entity&, bool local);
 				Entity(Entity&&, bool local);
 
-				Entity(SceneManagerBase &sceneMgr, bool local, const std::string& name, const std::string& behaviour = "");
+				Entity(SceneManager &sceneMgr, bool local, const std::string& name, const std::string& behaviour = "");
 				~Entity();
 
 				void setup();
@@ -79,7 +79,7 @@ namespace Engine
 				void readState(Serialize::SerializeInStream& ifs) override;
 				void writeCreationData(Serialize::SerializeOutStream& of) const override;
 
-				SceneManagerBase& sceneMgr() const;
+				SceneManager& sceneMgr() const;
 
 				bool isLocal() const;
 
@@ -171,10 +171,10 @@ namespace Engine
 				bool mLocal;
 
 				Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::
-				                         ParentCreator<decltype(&Entity::createComponentTuple), &Entity::createComponentTuple>>
+				                         ParentCreator<&Entity::createComponentTuple>>
 				mComponents;
 
-				SceneManagerBase &mSceneManager;
+				SceneManager &mSceneManager;
 			};
 
 

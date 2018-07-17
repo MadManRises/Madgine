@@ -25,12 +25,12 @@ namespace Maditor
 			Shared::SharedMemory mMemory;
 			Shared::BoostIPCManager mNetwork;
 
-#ifdef MADGINE_CLIENT_BUILD
+
 		protected:
 			Engine::Input::InputHandler* input() override;
 		private:
 			std::unique_ptr<InputWrapper> mInput;
-#endif
+
 		};
 
 		

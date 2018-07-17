@@ -24,7 +24,7 @@ namespace Maditor {
 		{
 		}
 
-#ifdef MADGINE_CLIENT_BUILD
+/*#ifdef MADGINE_CLIENT_BUILD
 		void LauncherLogListener::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
 		{
 			if (lml != Ogre::LML_CRITICAL) return;
@@ -50,7 +50,7 @@ namespace Maditor {
 			}
 			mSlot->queue(msg.c_str(), level, logName.c_str(), "", "", -1, {});
 		}
-#endif
+#endif*/
 
 		void LauncherLogListener::messageLogged(const std::string & message, Engine::Util::MessageType lml, const std::list<Engine::Util::TraceBack> &traceback, const std::string & logName)
 		{

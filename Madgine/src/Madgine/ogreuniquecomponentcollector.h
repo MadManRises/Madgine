@@ -13,7 +13,7 @@ namespace Engine
 			static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>> dummy;
 			return dummy;
 		}
-
+	public:
 		static constexpr size_t baseIndex() { return 0; }
 	};
 

@@ -36,11 +36,11 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i);
 
-			Scene::SceneManagerBase &sceneMgr();
+			Scene::SceneManager &sceneMgr();
 
 			GlobalScopeBase &globalScope();
 
-			template <class T>
+			/*template <class T>
 			T &getGuiHandler()
 			{
 				return static_cast<T&>(getGuiHandler(T::component_index()));
@@ -54,7 +54,7 @@ namespace Engine
 				return static_cast<T&>(getGameHandler(T::component_index()));
 			}
 
-			UI::GameHandlerBase &getGameHandler(size_t i);
+			UI::GameHandlerBase &getGameHandler(size_t i);*/
 
 		private:
 			App::Application & mApp;

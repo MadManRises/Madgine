@@ -193,6 +193,18 @@ namespace Engine
 				return it;
 			}
 
+			std::pair<iterator, bool> read_item_where(const const_iterator &where, BufferedInStream &in) {
+				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
+				if (isMaster()) {
+					it = Base::read_item_where_intern(where, in);
+					if (it.second)
+						onInsert(it.first);
+				}else{
+					throw 0;
+				}
+				return it;
+			}
+
 			iterator erase(const iterator& where)
 			{
 				iterator it = this->end();

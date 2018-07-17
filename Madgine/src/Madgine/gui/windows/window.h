@@ -1,11 +1,10 @@
 #pragma once
 
-#include "windowsizerelvector.h"
+#include "../../math/matrix3.h"
 
 #include "../guievents.h"
 
 #include "windowclass.h"
-#include "WindowContainer.h"
 
 namespace Engine
 {
@@ -14,78 +13,93 @@ namespace Engine
 		class MADGINE_CLIENT_EXPORT Window
 		{
 		public:
-			Window(WindowContainer* w);
-			virtual ~Window() = default;
+			Window(const std::string& name, Window* parent);
 
-			void setSize(const WindowSizeRelVector& size);
-			const WindowSizeRelVector& getSize();
-			void setPos(const WindowSizeRelVector& pos);
-			const WindowSizeRelVector& getPos() const;
-			Ogre::Vector2 getPixelSize() const;
+			Window(const std::string& name, GUISystem& gui);
+
+			Window(const Window &) = delete;
+
+			virtual ~Window();
+
+			void setSize(const Matrix3& size);
+			const Matrix3& getSize();
+			void setPos(const Matrix3& pos);
+			const Matrix3& getPos() const;
+
+			virtual Vector3 getAbsoluteSize() const = 0;
+			virtual Vector2 getAbsolutePosition() const = 0;
+
+			void updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos);
+
+			virtual Class getClass() = 0;
 
 			void destroy();
 
-			void releaseInput();
-			void captureInput();
-			void activate();
-			void moveToFront();
+			virtual void releaseInput() = 0;
+			virtual void captureInput() = 0;
+			virtual void activate() = 0;
+			virtual void moveToFront() = 0;
 
 
-			bool isVisible() const;
-			void showModal();
-			void hideModal();
+			virtual bool isVisible() const = 0;
+			virtual void showModal() = 0;
+			virtual void hideModal() = 0;
 			void show();
 			void hide();
-			void setVisible(bool b);
+			virtual void setVisible(bool b) = 0;
 
-			void setEnabled(bool b);
+			virtual void setEnabled(bool b) = 0;
 
-			void registerHandlerEvents(void* id,
-			                           std::function<void(MouseEventArgs&)> mouseMove,
-			                           std::function<void(MouseEventArgs&)> mouseDown,
-			                           std::function<void(MouseEventArgs&)> mouseUp,
-			                           std::function<void(MouseEventArgs&)> mouseScroll,
-			                           std::function<bool(KeyEventArgs&)> keyPress);
-			void unregisterAllEvents(void* id);
+			const std::string &getName() const;
 
-			void registerEvent(void* id,
-			                   EventType type, std::function<void()> event);
-
-
-			std::string getName() const;
-
-			WindowContainer* container() const;
-
-			template <class T>
-			T* loadLayout(const std::string& name)
-			{
-				WindowContainer* c = mContainer->loadLayout(name);
-				return c->as<T>();
-			}
-
-			template <class T>
-			T* createChild(const std::string& name, const std::string& customSkin = "")
-			{
-				WindowContainer* c = mContainer->createChild(name, ClassId<T>::id, customSkin);
-				return c->as<T>();
-			}
-
-			Window* createChild(const std::string& name, Class _class = Class::WINDOW_CLASS);
-
-			template <class T, class _ = std::enable_if<std::is_base_of<Window, T>::value>>
-			T* getChildRecursive(const std::string& name)
-			{
-				return mContainer->getChildRecursive(name)->as<T>();
-			}
-
-			Window* getChildRecursive(const std::string& name, Class _class) const;
-
-			void invalidate();
+			Window* createChild(const std::string& name, Class _class);
+			Window *createChildWindow(const std::string &name);
+			Bar *createChildBar(const std::string& name);
+			Button *createChildButton(const std::string& name);
+			Checkbox *createChildCheckbox(const std::string& name);
+			Combobox *createChildCombobox(const std::string& name);
+			Label *createChildLabel(const std::string& name);
+			SceneWindow *createChildSceneWindow(const std::string& name);
+			TabWindow *createChildTabWindow(const std::string& name);
+			Textbox *createChildTextbox(const std::string& name);
+			Image *createChildImage(const std::string& name);
+			
+			Window* getChildRecursive(const std::string& name);
 
 		protected:
 
-			bool mIsValid;
-			WindowContainer* mContainer;
+			std::unique_ptr<Window> createWindowClass(const std::string& name, Class _class);
+
+			virtual std::unique_ptr<Window> createWindow(const std::string &name) = 0;
+			virtual std::unique_ptr<Bar> createBar(const std::string& name) = 0;
+			virtual std::unique_ptr<Button> createButton(const std::string& name) = 0;
+			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name) = 0;
+			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name) = 0;
+			virtual std::unique_ptr<Image> createImage(const std::string& name) = 0;
+			virtual std::unique_ptr<Label> createLabel(const std::string& name) = 0;
+			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name) = 0;
+			virtual std::unique_ptr<TabWindow> createTabWindow(const std::string& name) = 0;
+			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name) = 0;
+
+		protected:
+			virtual void setAbsoluteSize(const Vector3 &size) = 0;
+			virtual void setAbsolutePosition(const Vector2 &pos) = 0;
+
+			GUISystem &gui();
+
+			void destroyChild(Window *w);
+
+		private:
+			std::string mName;
+			Window *mParent;
+
+			GUISystem &mGUI;
+
+			std::vector<std::unique_ptr<Window>> mChildren;
+
+			
+			Matrix3 mPos, mSize;
+
 		};
 	}
 }

@@ -21,13 +21,10 @@ namespace Engine
 				ROOT_WINDOW
 			};
 
-			GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type, const std::string& layoutFile = "",
-			               const std::string& parentName = WindowNames::rootWindow);
+			GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type);
 
 
-			bool init(int order);
 			bool init() override;
-			void finalize(int order);
 			void finalize() override;
 
 			virtual void open();
@@ -38,22 +35,15 @@ namespace Engine
 
 			Scene::ContextMask context() const;
 
-		protected:
-			void setInitialisationOrder(int order);
+		protected:			
 			void setContext(Scene::ContextMask context);
 
 
 		private:
 
-
-			//std::map<CEGUI::Window *, std::string> mTranslationKeys;
-
-			const std::string mLayoutFile;
-			const std::string mParentName;
 			const WindowType mType;
 
 
-			int mOrder;
 			Scene::ContextMask mContext;
 		};
 
