@@ -15,7 +15,6 @@ namespace Engine
 
 			virtual int go();
 
-			virtual bool preInit();
 			virtual bool init();
 			virtual void finalize();
 

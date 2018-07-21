@@ -25,7 +25,8 @@ namespace Engine
 		
 		GUISystem::GUISystem(App::Application &app) :
 			Scripting::Scope<GUISystem>(app.createTable()),			
-			mApp(app)
+			mApp(app),
+            mUI(std::make_unique<UI::UIManager>(*this))
 		{
 		}
 
@@ -48,21 +49,14 @@ namespace Engine
 			setCursorVisibility(false);
 		}
 
-		bool GUISystem::preInit()
-		{
-			mUI = std::make_unique<UI::UIManager>(*this);
-			return mUI->preInit();
-		}
-
 		bool GUISystem::init()
 		{
-			return MadgineObject::init() && mUI->init();
+			return mUI->callInit();
 		}
 
 		void GUISystem::finalize()
 		{
-			mUI->finalize();
-			MadgineObject::finalize();
+			mUI->callFinalize();
 		}
 
 		Window* GUISystem::getWindowByName(const std::string& name)

@@ -22,7 +22,6 @@ namespace Engine
 			GUISystem(const GUISystem &) = delete;
 			virtual ~GUISystem();
 
-			virtual bool preInit() override;
 			virtual bool init() override;
 			virtual void finalize() override;
 

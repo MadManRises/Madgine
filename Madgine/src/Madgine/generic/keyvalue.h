@@ -84,7 +84,7 @@ namespace Engine
 	template <typename T, typename D>
 	struct KeyValue<std::unique_ptr<T, D>>
 	{
-		static Scripting::ScopeBase* value(const std::unique_ptr<T, D>& p)
+		static Scripting::ScopeBase* value(const std::unique_ptr<T, D>& p) // TODO
 		{
 			return p.get();
 		}
@@ -98,7 +98,7 @@ namespace Engine
 	template <typename T, typename D>
 	struct KeyValue<const std::unique_ptr<T, D>>
 	{
-		static Scripting::ScopeBase* value(const std::unique_ptr<T, D>& p)
+		static Scripting::ScopeBase* value(const std::unique_ptr<T, D>& p) // TODO
 		{
 			return p.get();
 		}

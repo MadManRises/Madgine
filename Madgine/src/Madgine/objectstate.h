@@ -5,7 +5,9 @@ namespace Engine
 {
 	enum class ObjectState
 	{
-		CONSTRUCTED,
+		UNINITIALIZED,
+        INITIALIZING,
+        MARKED_INITIALIZED,
 		INITIALIZED
 	};
 }

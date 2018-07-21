@@ -39,16 +39,14 @@ namespace Engine
 			mGUI.app().removeFrameListener(this);
 		}
 
-		bool UIManager::preInit()
-		{
-			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-				if (!handler->preInit())
-					return false;
-			return MadgineObject::init();
-		}
-
 		bool UIManager::init()
 		{			
+        	if (mSettings->mRunMain) {
+				std::optional<Scripting::ArgumentList> res = app().callMethodIfAvailable("afterViewInit");
+				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
+					return false;
+			}
+        
 			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
 				if (!handler->init())
 					return false;

@@ -65,28 +65,17 @@ namespace Engine
 
 		bool Application::init()
 		{
-			if (!MadgineObject::init())
-				return false;
-
+			
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
 			{
-				if (!api->init())
+				if (!api->callInit())
 					return false;
 			}
 
-			if (!mLoop->preInit())
+			if (!mLoop->callInit())
 				return false;
 
-			if (mSettings->mRunMain) {
-				std::optional<Scripting::ArgumentList> res = callMethodIfAvailable("afterViewInit");
-				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
-					return false;
-			}
-
-			if (!mSceneMgr->init())
-				return false;
-
-			if (!mLoop->init())
+			if (!mSceneMgr->callInit())
 				return false;
 
 			return true;
@@ -177,40 +166,40 @@ namespace Engine
 			return Scope::maps().merge(mGlobalAPIs, mSceneMgr);
 		}
 
-		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)
 		{
-			return mGlobalAPIs.get(i);
+            Scripting::GlobalAPIComponentBase &api = mGlobalAPIs.get(i); 
+            if (init){
+                checkInitState();
+                api.callInit();
+            }
+			return api.getGlobalAPIComponent(init);
 		}
 
-		Scene::SceneComponentBase& Application::getSceneComponent(size_t i)
+		Scene::SceneComponentBase& Application::getSceneComponent(size_t i, bool init)
 		{
-			return mSceneMgr->getComponent(i);
+            if (init){
+                checkInitState();
+                mSceneMgr->callInit();
+            }
+			return mSceneMgr->getComponent(i, init);
 		}
 
-		Scene::SceneManager& Application::sceneMgr()
+		Scene::SceneManager& Application::sceneMgr(bool init)
 		{
-			return *mSceneMgr;
+            if (init){
+                checkInitState();
+                mSceneMgr->callInit();
+            }
+			return mSceneMgr->sceneMgr(init);
 		}
-
-		/*GUI::GUISystem & Application::gui()
-		{
-			throw 0;
-		}
-
-		UI::UIManager& Application::ui()
-		{
-			throw 0;
-		}
-
-		UI::GameHandlerBase& Application::getGameHandler(size_t i)
-		{
-			throw 0;
-		}
-
-		UI::GuiHandlerBase& Application::getGuiHandler(size_t i)
-		{
-			throw 0;
-		}*/
+        
+        Application &Application::app(bool init){
+            if (init){
+                checkDependency();
+            }
+            return *this;
+        }
 
 
 		void Application::clear()

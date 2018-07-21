@@ -6,16 +6,25 @@ namespace Engine
 {
 	class MADGINE_BASE_EXPORT MadgineObject
 	{
+    
+    
+    public:
+    
+        bool callInit();
+        void callFinalize();
+    
 	protected:
 		MadgineObject();
 		virtual ~MadgineObject();
-
-	public:
 
 		virtual bool init();
 		virtual void finalize();
 
 		ObjectState getState() const;
+        
+        void checkInitState();
+        void checkDependency();
+        void markInitialized();
 
 	private:
 		ObjectState mState;

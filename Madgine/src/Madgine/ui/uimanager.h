@@ -18,7 +18,6 @@ namespace Engine
 			UIManager(GUI::GUISystem &gui);
 			~UIManager();
 
-			bool preInit();
 			bool init() override;
 			void finalize() override;
 

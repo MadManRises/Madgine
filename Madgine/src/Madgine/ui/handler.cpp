@@ -99,11 +99,6 @@ namespace Engine
 			MadgineObject::finalize();
 		}
 
-		bool Handler::preInit()
-		{
-			return true;
-		}
-
 		bool Handler::init(GUI::Window* window)
 		{
 			if (!MadgineObject::init())

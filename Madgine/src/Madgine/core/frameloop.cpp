@@ -18,11 +18,6 @@ namespace Engine
 			return 0;
 		}
 
-		bool FrameLoop::preInit()
-		{
-			return true;
-		}
-
 		bool FrameLoop::init()
 		{
 			return true;

@@ -33,7 +33,6 @@ namespace Engine
 
 			bool init() override;
 			void finalize() override;
-			virtual bool preInit();
 
 			virtual void onMouseVisibilityChanged(bool b);
 
