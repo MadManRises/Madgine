@@ -21,7 +21,9 @@ namespace Engine
 			void update(float timeSinceLastFrame, Scene::ContextMask mask);
 			void fixedUpdate(float timeStep, Scene::ContextMask mask);
 
-			Scene::SceneManager &sceneMgr() const;
+			Scene::SceneManager &sceneMgr(bool = true) const;
+
+			GameHandlerBase &getSelf(bool = true);
 
 		protected:
 			void onMouseMove(GUI::MouseEventArgs& me) override;
@@ -70,9 +72,7 @@ namespace Engine
 
 			Vector2 mDragStart;
 
-			Scene::ContextMask mContext;
-
-			Scene::SceneManager &mSceneMgr;
+			Scene::ContextMask mContext;			
 		};
 
 

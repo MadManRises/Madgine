@@ -32,12 +32,10 @@ namespace Engine
 
 		bool SceneManager::init()
 		{
-			if (!MadgineObject::init())
-				return false;
-
+			markInitialized();
 			for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
 			{
-				if (!component->init())
+				if (!component->callInit())
 					return false;
 			}
 
@@ -50,10 +48,8 @@ namespace Engine
 
 			for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
 			{
-				component->finalize();
-			}
-
-			MadgineObject::finalize();
+				component->callFinalize();
+			}			
 		}
 
 		std::list<Entity::Entity *> SceneManager::entities()
@@ -68,9 +64,15 @@ namespace Engine
 		}
 
 
-		SceneComponentBase& SceneManager::getComponent(size_t i)
+		SceneComponentBase& SceneManager::getComponent(size_t i, bool init)
 		{
-			return mSceneComponents.get(i);
+			SceneComponentBase &comp = mSceneComponents.get(i);
+			if (init)
+			{
+				checkInitState();
+				comp.callInit();
+			}
+			return comp.getSelf(init);
 		}
 
 		size_t SceneManager::getComponentCount()
@@ -84,9 +86,22 @@ namespace Engine
 			SerializableUnitBase::writeState(out);
 		}
 
-		Scripting::GlobalAPIComponentBase & SceneManager::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase & SceneManager::getGlobalAPIComponent(size_t i, bool init)
+		{			
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.getGlobalAPIComponent(i, init);
+		}
+
+		SceneManager& SceneManager::getSelf(bool init)
 		{
-			return mApp.getGlobalAPIComponent(i);
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
 		void SceneManager::readState(Serialize::SerializeInStream& in)
@@ -157,9 +172,13 @@ namespace Engine
 			mEntityRemoveQueue.push_back(e);
 		}
 
-		App::Application& SceneManager::app() const
+		App::Application& SceneManager::app(bool init) const
 		{
-			return mApp;
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.getSelf(init);
 		}
 
 		void SceneManager::clear()
@@ -193,6 +212,11 @@ namespace Engine
 			std::string actualName = name.empty() ? generateUniqueName() : name;
 
 			return make_tuple(std::ref(*this), local, actualName);
+		}
+
+		SignalSlot::SignalStub<const decltype(SceneManager::mEntities)::iterator&, int>& SceneManager::entitiesSignal()
+		{
+			return mEntities.signal();
 		}
 
 		Entity::Entity* SceneManager::createEntity(const std::string& behaviour, const std::string& name,

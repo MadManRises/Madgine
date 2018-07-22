@@ -28,8 +28,6 @@ namespace Engine
 			SceneManager(App::Application &app);
 			virtual ~SceneManager() = default;
 
-			virtual bool init() final;
-			virtual void finalize() final;
 
 			void readState(Serialize::SerializeInStream& in) override;
 			void writeState(Serialize::SerializeOutStream& out) const override;
@@ -52,45 +50,31 @@ namespace Engine
 			void clear();
 
 			template <class T>
-			T &getComponent()
+			T &getComponent(bool init = true)
 			{
-				return mSceneComponents.get<T>();
+				return static_cast<T&>(getComponent(T::component_index(), init));
 			}
-			SceneComponentBase &getComponent(size_t i);
+			SceneComponentBase &getComponent(size_t i, bool = true);
 			size_t getComponentCount();
 
 			template <class T>
-			T &getGlobalAPIComponent()
+			T &getGlobalAPIComponent(bool init = true)
 			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
+
+			App::Application &app(bool = true) const;
+			SceneManager &getSelf(bool = true);
+			
 			
 
-			template <class T>
-			void connectStateLoaded(T& slot)
-			{
-				mStateLoadedSignal.connect(slot);
-			}
-
-			template <class T>
-			void connectCleared(T& slot)
-			{
-				mClearedSignal.connect(slot);
-			}
-
-
-			template <class T>
-			void connectEntitiesCallback(T& slot)
-			{
-				mEntities.connectCallback(slot);
-			}
-
-			App::Application &app() const;
-
 		protected:
+
+			virtual bool init() final;
+			virtual void finalize() final;
 
 			KeyValueMapList maps() override;
 
@@ -115,6 +99,9 @@ namespace Engine
 
 			SignalSlot::Signal<> mStateLoadedSignal;
 			SignalSlot::Signal<> mClearedSignal;
+
+		public:
+			SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
 
 			
 		};

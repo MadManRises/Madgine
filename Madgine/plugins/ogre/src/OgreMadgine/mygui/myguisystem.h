@@ -7,7 +7,7 @@ namespace Engine
 	namespace GUI
 	{
 		
-		class MyGUISystem : public GUISystem, public Ogre::WindowEventListener, public Ogre::FrameListener
+		class MyGUISystem : public GUISystem, public Ogre::WindowEventListener, public Ogre::FrameListener, public Ogre::LogListener
 		{
 		public:
 			MyGUISystem(App::ClientApplication &app);
@@ -19,6 +19,9 @@ namespace Engine
 			void injectMouseRelease(const MouseEventArgs& arg) override;
 			void injectMouseMove(const MouseEventArgs& arg) override;
 
+			Vector2 relativeMoveDelta(MyGUI::Widget* w) const;
+			Vector2 widgetRelative(MyGUI::Widget* w, int left = -1, int top = -1) const;
+
 			static MyGUI::MouseButton convertButton(MouseButton::MouseButton buttonID);
 			static MouseButton::MouseButton convertButton(MyGUI::MouseButton buttonID);
 
@@ -26,11 +29,9 @@ namespace Engine
 			void setCursorVisibility(bool v) override;
 			void setCursorPosition(const Vector2& pos) override;
 			Vector2 getCursorPosition() override;
-			Vector2 getScreenSize() override;
-
-			bool preInit() override;
+			Vector3 getScreenSize() override;
+			
 			int go() override;
-			bool singleFrame() override;
 
 			std::unique_ptr<Window> createWindow(const std::string &name) override;
 			std::unique_ptr<Bar> createBar(const std::string &name) override;
@@ -72,7 +73,11 @@ namespace Engine
 			*/
 			bool frameEnded(const Ogre::FrameEvent& fe) override;
 
+			virtual void messageLogged(const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug,
+				const Ogre::String& logName, bool& skipThisMessage) override;
 
+			virtual bool init() override;
+			virtual bool singleFrame() override;
 			
 		private:
 			std::unique_ptr<Ogre::Root> mRoot;

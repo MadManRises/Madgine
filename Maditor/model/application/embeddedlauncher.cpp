@@ -22,7 +22,7 @@ namespace Maditor
 			mInput(std::make_unique<InputWrapper>(mMemory.data().mInput)),
 			mWindow(config->launcher() == ApplicationConfig::MADITOR_LAUNCHER ? new OgreWindow(mInput.get()) : nullptr)
 		{
-			mNetwork.connectConnectionSlot(mOnSetupResult);
+			mNetwork.connectionResult().connect(mOnSetupResult);
 
 			mNetwork.addTopLevelItem(this);
 

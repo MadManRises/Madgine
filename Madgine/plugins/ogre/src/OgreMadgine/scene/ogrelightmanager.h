@@ -18,10 +18,10 @@ namespace Engine
 		public:
 			OgreLightManager(SceneManager &sceneMgr);
 			virtual ~OgreLightManager();		
-			
-			virtual bool init() override;
 
 		protected:
+
+			virtual bool init() override;
 
 			std::unique_ptr<Light> createLightImpl() override;
 

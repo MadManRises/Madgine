@@ -57,6 +57,13 @@ namespace Engine
 			case ValueType::Type::EndOfListValue:
 				result = ValueType::EOL();
 				break;
+			case ValueType::Type::Vector2Value:
+				{
+					Vector2 a2;
+					read(a2);
+					result = a2;
+					break;
+				}
 			case ValueType::Type::Vector3Value:
 				{
 					Vector3 a3;
@@ -194,6 +201,9 @@ namespace Engine
 				break;
 			case ValueType::Type::ScopeValue:
 				throw SerializeException("Cannot Serialize a Scope-Pointer!");
+			case ValueType::Type::Vector2Value:
+				writeData(v.as<Vector2>().ptr(), sizeof(float) * 2);
+				break;
 			case ValueType::Type::Vector3Value:
 				writeData(v.as<Vector3>().ptr(), sizeof(float) * 3);
 				break;

@@ -14,15 +14,10 @@ namespace Engine {
 	public:
 		OgreSceneRenderer(App::Application & app);
 
-		virtual bool init() override;
-		virtual void finalize() override;
 
 		Ogre::SceneManager *getSceneManager();
 
 		Ogre::SceneNode *createEntityNode();
-
-
-		//Ogre::Ray mousePointToRay(const Ogre::Vector2& mousePos) const;
 
 		/*bool mousePointToTerrainPoint(const Ogre::Vector2& mousePos,
 			Ogre::Vector3& result, Ogre::uint32 mask = Scene::Entity::Masks::TERRAIN_MASK);*/
@@ -51,6 +46,9 @@ namespace Engine {
 		const Ogre::SceneNode* terrain() const;
 
 	protected:
+		virtual bool init() override;
+		virtual void finalize() override;
+
 		void createCamera();
 
 

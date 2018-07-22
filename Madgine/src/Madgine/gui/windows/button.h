@@ -15,11 +15,7 @@ namespace Engine
 			virtual ~Button() = default;
 			virtual void setText(const std::string& text) = 0;
 
-			template <class T>
-			void connectOnClick(T &&slot)
-			{
-				mClicked.connect(std::forward<T>(slot));
-			}
+			SignalSlot::SignalStub<> &clickEvent();
 
 		protected:
 			void emitClicked();

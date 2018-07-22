@@ -35,12 +35,9 @@ namespace Maditor {
 
 			void moveConnection(Engine::Serialize::ParticipantId id, BoostIPCManager *to);
 
-			template <class T>
-			void connectConnectionSlot(T &slot) {
-				mConnectionResult.connect(slot, Engine::SignalSlot::queuedConnection);
-			}
-
 			using SerializeManager::getSlaveStream;
+
+			Engine::SignalSlot::SignalStub<bool> &connectionResult();
 
 		protected:
 			virtual void removeSlaveStream() override;

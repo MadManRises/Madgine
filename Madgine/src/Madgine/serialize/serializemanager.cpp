@@ -497,6 +497,11 @@ namespace Engine
 		}
 
 
+		SignalSlot::SignalStub<>& SerializeManager::slaveStreamDisconnected()
+		{
+			return mSlaveStreamDisconnected;
+		}
+
 		bool SerializeManager::receiveMessages(BufferedInOutStream* stream, int msgCount)
 		{
 			if (stream->isClosed()) return false;

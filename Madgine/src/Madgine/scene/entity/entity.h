@@ -79,27 +79,27 @@ namespace Engine
 				void readState(Serialize::SerializeInStream& ifs) override;
 				void writeCreationData(Serialize::SerializeOutStream& of) const override;
 
-				SceneManager& sceneMgr() const;
+				SceneManager& sceneMgr(bool = true) const;
 
 				bool isLocal() const;
 
 				template <class T>
-				T &getSceneComponent()
+				T &getSceneComponent(bool init = true)
 				{
-					return static_cast<T&>(getSceneComponent(T::component_index()));
+					return static_cast<T&>(getSceneComponent(T::component_index(), init));
 				}
 
-				SceneComponentBase &getSceneComponent(size_t i);
+				SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
 				template <class T>
-				T &getGlobalAPIComponent()
+				T &getGlobalAPIComponent(bool init = true)
 				{
-					return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 				}
 
-				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
-				App::Application &app();
+				App::Application &app(bool = true);
 
 			protected:
 

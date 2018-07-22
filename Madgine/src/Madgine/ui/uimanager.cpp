@@ -8,7 +8,8 @@
 
 #include "gamehandler.h"
 
-#include "../app/application.h"
+#include "../app/clientapplication.h"
+#include "../app/clientappsettings.h"
 
 
 namespace Engine
@@ -24,36 +25,47 @@ namespace Engine
 	namespace UI
 	{
 		UIManager::UIManager(GUI::GUISystem &gui) :
-			Scope<Engine::UI::UIManager, Engine::Scripting::ScopeBase>(gui.app().createTable()),
+			Scope<Engine::UI::UIManager, Engine::Scripting::ScopeBase>(gui.app(false).createTable()),
 			mCurrentRoot(nullptr),
 			mGUI(gui),
 			mKeepingCursorPos(false),
-		    mGuiHandlers(gui.app().pluginMgr(), *this),
-		    mGameHandlers(gui.app().pluginMgr(), *this)
+		    mGuiHandlers(gui.app(false).pluginMgr(), *this),
+		    mGameHandlers(gui.app(false).pluginMgr(), *this)
 		{
 			gui.addFrameListener(this);
 		}
 
 		UIManager::~UIManager()
 		{
-			mGUI.app().removeFrameListener(this);
+			mGUI.app(false).removeFrameListener(this);
+		}
+
+		UIManager& UIManager::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
 		bool UIManager::init()
 		{			
-        	if (mSettings->mRunMain) {
+			markInitialized();
+
+        	if (mGUI.app().settings().mRunMain) {
 				std::optional<Scripting::ArgumentList> res = app().callMethodIfAvailable("afterViewInit");
 				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 					return false;
 			}
         
 			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-				if (!handler->init())
+				if (!handler->callInit())
 					return false;
 
 			for (const std::unique_ptr<GameHandlerBase>& handler : mGameHandlers)
 			{
-				if (!handler->init())
+				if (!handler->callInit())
 					return false;
 			}
 
@@ -64,14 +76,13 @@ namespace Engine
 		{
 			for (const std::unique_ptr<GameHandlerBase>& handler : mGameHandlers)
 			{
-				handler->finalize();
+				handler->callFinalize();
 			}
 
 
 			for (const std::unique_ptr<GuiHandlerBase>& handler : mGuiHandlers)
-				handler->finalize();
+				handler->callFinalize();
 
-			MadgineObject::finalize();
 		}
 
 		void UIManager::clear()
@@ -154,9 +165,13 @@ namespace Engine
 			return result;
 		}
 
-		App::Application& UIManager::app()
+		App::Application& UIManager::app(bool init)
 		{
-			return mGUI.app();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGUI.app(init);
 		}
 
 		bool UIManager::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
@@ -220,9 +235,13 @@ namespace Engine
 		}
 
 
-		GUI::GUISystem &UIManager::gui() const
+		GUI::GUISystem &UIManager::gui(bool init) const
 		{
-			return mGUI;
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGUI.getSelf(init);
 		}
 
 		KeyValueMapList UIManager::maps()
@@ -235,29 +254,53 @@ namespace Engine
 			return "UI";
 		}
 
-		Scene::SceneComponentBase& UIManager::getSceneComponent(size_t i)
+		Scene::SceneComponentBase& UIManager::getSceneComponent(size_t i, bool init)
 		{
-			return mGUI.getSceneComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGUI.getSceneComponent(i, init);
 		}
 
-		Scripting::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
 		{
-			return mGUI.getGlobalAPIComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGUI.getGlobalAPIComponent(i, init);
 		}
 
-		GameHandlerBase& UIManager::getGameHandler(size_t i)
+		GameHandlerBase& UIManager::getGameHandler(size_t i, bool init)
 		{
-			return mGameHandlers.get(i);
+			GameHandlerBase &handler = mGameHandlers.get(i);
+			if (init)
+			{
+				checkInitState();
+				handler.callInit();
+			}
+			return handler.getSelf(init);
 		}
 
-		GuiHandlerBase& UIManager::getGuiHandler(size_t i)
+		GuiHandlerBase& UIManager::getGuiHandler(size_t i, bool init)
 		{
-			return mGuiHandlers.get(i);
+			GuiHandlerBase &handler = mGuiHandlers.get(i);
+			if (init)
+			{
+				checkInitState();
+				handler.callInit();
+			}
+			return handler.getSelf(init);
 		}
 
-		Scene::SceneManager& UIManager::sceneMgr()
+		Scene::SceneManager& UIManager::sceneMgr(bool init)
 		{
-			return mGUI.sceneMgr();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGUI.sceneMgr(init);
 		}
 	}
 }

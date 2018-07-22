@@ -14,7 +14,7 @@ namespace Engine
 	namespace Server
 	{
 		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>,
-			public MadgineObject, public Core::FrameListener, public Core::FrameLoop
+			public Core::FrameListener, public Core::FrameLoop
 		{
 		public:
 			ServerBase(const std::string& name, Core::Root &root);

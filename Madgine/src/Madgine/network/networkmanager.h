@@ -35,11 +35,7 @@ namespace Engine
 
 			void moveConnection(Serialize::ParticipantId id, NetworkManager* to);
 
-			template <class T>
-			void connectConnectionSlot(T& slot)
-			{
-				mConnectionResult.connect(slot, SignalSlot::queuedConnection);
-			}
+			SignalSlot::SignalStub<Serialize::StreamError> &connectionResult();
 
 		protected:
 			void removeSlaveStream() override;

@@ -5,6 +5,7 @@
 #include "../madgineobject.h"
 #include "../scripting/types/scopebase.h"
 #include "../scripting/types/globalapicomponentbase.h"
+#include "../signalslot/slot.h"
 
 namespace Engine
 {
@@ -31,9 +32,6 @@ namespace Engine
 			Handler(UIManager &ui, const std::string& windowName);
 			virtual ~Handler() = default;
 
-			bool init() override;
-			void finalize() override;
-
 			virtual void onMouseVisibilityChanged(bool b);
 
 			GUI::Window* window() const;
@@ -42,42 +40,42 @@ namespace Engine
 
 			virtual const char* key() const = 0;
 			
-			App::Application &app();
-			UIManager &ui();
+			App::Application &app(bool = true);
+			UIManager &ui(bool = true);
 
 			template <class T>
-			T &getSceneComponent()
+			T &getSceneComponent(bool init = true)
 			{
-				return static_cast<T&>(getSceneComponent(T::component_index()));
+				return static_cast<T&>(getSceneComponent(T::component_index(), init));
 			}
 
-			Scene::SceneComponentBase &getSceneComponent(size_t i);
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scene::SceneManager &sceneMgr();
+			Scene::SceneManager &sceneMgr(bool = true);
 
 			template <class T>
-			T &getGlobalAPIComponent()
+			T &getGlobalAPIComponent(bool init = true)
 			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			template <class T>
-			T &getGuiHandler()
+			T &getGuiHandler(bool init = true)
 			{
-				return static_cast<T&>(getGuiHandler(T::component_index()));
+				return static_cast<T&>(getGuiHandler(T::component_index(), init));
 			}
 
-			GuiHandlerBase &getGuiHandler(size_t i);
+			GuiHandlerBase &getGuiHandler(size_t i, bool = true);
 
 			template <class T>
-			T &getGameHandler()
+			T &getGameHandler(bool init = true)
 			{
-				return static_cast<T&>(getGameHandler(T::component_index()));
+				return static_cast<T&>(getGameHandler(T::component_index(), init));
 			}
 
-			GameHandlerBase &getGameHandler(size_t i);
+			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
 			void registerWindow(const std::string& name, std::function<bool(GUI::Window*)> init);
 
@@ -85,6 +83,10 @@ namespace Engine
 			bool installToWindow(GUI::Window* w);
 
 		protected:
+
+			bool init() override;
+			void finalize() override;
+
 			bool init(GUI::Window* w);
 
 
@@ -98,7 +100,7 @@ namespace Engine
 
 			
 
-		private:
+		public:
 			
 			void injectMouseMove(GUI::MouseEventArgs& evt);
 			void injectMouseDown(GUI::MouseEventArgs& evt);
@@ -114,6 +116,11 @@ namespace Engine
 
 		private:
 			std::list<WindowDescriber> mWindows;
+
+			SignalSlot::Slot<&injectMouseMove> mMouseMoveSlot;
+			SignalSlot::Slot<&injectMouseDown> mMouseDownSlot;
+			SignalSlot::Slot<&injectMouseUp> mMouseUpSlot;
+
 
 		};
 	}

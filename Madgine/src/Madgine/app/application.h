@@ -39,7 +39,7 @@ namespace Engine
 			{
 				App app;
 				app.setup(settings);
-				if (!app.init()) return -1;
+				if (!app.callInit()) return -1;
 				int result = app.go();
 				app.finalize();
 				return result;
@@ -62,18 +62,6 @@ namespace Engine
 			* @param settings all necessary information to setup the Application
 			*/
 			void setup(const AppSettings& settings, std::unique_ptr<Core::FrameLoop> &&loop = {});
-
-			/**
-			* \brief Initializes all Madgine-Components.
-			* May only be called after a call to setup().			
-			*/
-			bool init() override;
-
-			/**
-			* \brief Finalizes all Madgine-Components.
-			* May only be called after a call to init().
-			*/
-			void finalize() override;
 
 			/**
 			 * \brief starts the event loop of the madgine.
@@ -123,7 +111,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t);
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t, bool = true);
 
 			template <class T>
 			T &getSceneComponent()
@@ -131,8 +119,10 @@ namespace Engine
 				return static_cast<T&>(getSceneComponent(T::component_index()));
 			}
 
-			Scene::SceneComponentBase &getSceneComponent(size_t);
-			Scene::SceneManager &sceneMgr();
+			Scene::SceneComponentBase &getSceneComponent(size_t, bool = true);
+			Scene::SceneManager &sceneMgr(bool = true);
+			Application &getSelf(bool = true);
+
 			//virtual GUI::GUISystem &gui();
 			//virtual UI::UIManager &ui();
 
@@ -175,6 +165,11 @@ namespace Engine
 
 		protected:
 			virtual void clear();
+
+			bool init() override;
+
+			void finalize() override;
+
 
 		private:
 

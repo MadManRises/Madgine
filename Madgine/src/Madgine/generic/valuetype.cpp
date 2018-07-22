@@ -38,6 +38,8 @@ namespace Engine
 			return std::to_string(reinterpret_cast<uintptr_t>(std::get<InvScopePtr>(mUnion).validate()));
 		case Type::FloatValue:
 			return std::to_string(std::get<float>(mUnion));
+		case Type::Vector2Value:
+			return std::string("[") + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y);
 		case Type::Vector3Value:
 			return std::string("[") + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::
 				to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";

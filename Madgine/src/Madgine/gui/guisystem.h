@@ -11,19 +11,15 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT GUISystem :
-			public MadgineObject,
+		class MADGINE_CLIENT_EXPORT GUISystem :			
 			public Scripting::Scope<GUISystem>,
 			public Serialize::SerializableUnit<GUISystem>,
 			public Core::FrameLoop
 		{
 		public:
-			GUISystem(App::Application &app);
+			GUISystem(App::ClientApplication &app);
 			GUISystem(const GUISystem &) = delete;
 			virtual ~GUISystem();
-
-			virtual bool init() override;
-			virtual void finalize() override;
 
 			void showCursor();
 			void hideCursor();
@@ -40,19 +36,21 @@ namespace Engine
 			virtual void setCursorVisibility(bool v) = 0;
 			virtual void setCursorPosition(const Vector2& pos) = 0;
 			virtual Vector2 getCursorPosition() = 0;
-			virtual Vector2 getScreenSize() = 0;
+			virtual Vector3 getScreenSize() = 0;
 			
 
 			Window* getWindowByName(const std::string& name);
 
-			App::Application &app();
+			App::ClientApplication &app(bool = true);
 
-			Scene::SceneComponentBase &getSceneComponent(size_t i);
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			Scene::SceneManager &sceneMgr();
-			UI::UIManager &ui();
+			Scene::SceneManager &sceneMgr(bool = true);
+			UI::UIManager &ui(bool = true);
+
+			GUISystem &getSelf(bool = true);
 
 			Window *createTopLevelWindow(const std::string &name);
 			Bar *createTopLevelBar(const std::string &name);
@@ -71,8 +69,14 @@ namespace Engine
 			void unregisterWindow(Window *w);
 
 			void destroyTopLevel(Window* w);
+			void clear();
+
+			KeyValueMapList maps() override;
 
 		protected:
+
+			virtual bool init() override;
+			virtual void finalize() override;
 
 			bool sendFrameRenderingQueued(float timeSinceLastFrame);
 
@@ -96,7 +100,7 @@ namespace Engine
 			std::map<std::string, Window *> mWindows;
 			std::vector<std::unique_ptr<Window>> mTopLevelWindows;
 
-			App::Application &mApp;
+			App::ClientApplication &mApp;
 
 			std::unique_ptr<UI::UIManager> mUI;
 

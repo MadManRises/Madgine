@@ -172,8 +172,8 @@ namespace Maditor
 				//Ogre::LogManager::getSingleton().getLog("Ogre.log")->addListener(mLog.ptr());
 				mApplication->addFrameListener(this);
 
-				if (!mApplication->init()) {
-					mApplication->finalize();
+				if (!mApplication->callInit()) {
+					mApplication->callFinalize();
 					return Shared::APP_INIT_FAILED;
 				}
 				applicationConnected({});
@@ -191,7 +191,7 @@ namespace Maditor
 						stop({});
 					}
 				}
-				mApplication->finalize();
+				mApplication->callFinalize();
 			}
 				break;
 			case Shared::SERVER_LAUNCHER:

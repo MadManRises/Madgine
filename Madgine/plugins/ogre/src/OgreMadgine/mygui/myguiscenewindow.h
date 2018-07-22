@@ -8,7 +8,7 @@ namespace Engine
 	namespace GUI
 	{
 
-		class MyGUISceneWindow : public SceneWindow, public MyGUIWindow
+		class OGREMADGINE_EXPORT MyGUISceneWindow : public SceneWindow, public MyGUIWindow
 		{
 		public:
 			MyGUISceneWindow(const std::string &name, MyGUIWindow *parent);
@@ -19,9 +19,11 @@ namespace Engine
 
 			virtual void setCamera(Scene::Camera *camera) override;
 
+			Ogre::Ray mousePointToRay(const Vector2& mousePos) const;
+
 		protected:
 			void setup();
-			void setGameTextureSize(const Vector2 &);
+			void setGameTextureSize();
 
 			MyGUI::Widget* widget() const override;
 

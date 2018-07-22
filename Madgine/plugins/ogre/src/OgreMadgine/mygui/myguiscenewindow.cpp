@@ -14,8 +14,8 @@ namespace Engine
 			Window(name, parent),
 			SceneWindow(name, parent)
 		{
-			mImageBox = parent->widget()->createWidget<MyGUI::ImageBox>("Imagebox", 0, 0, 0, 0, MyGUI::Align::Default, name);
-			setup();
+			mImageBox = parent->widget()->createWidget<MyGUI::ImageBox>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			MyGUIWindow::setup();
 		}
 
 		MyGUISceneWindow::MyGUISceneWindow(const std::string& name, MyGUISystem& system) :
@@ -23,8 +23,8 @@ namespace Engine
 		Window(name, system),
 		SceneWindow(name, system)
 		{
-			mImageBox = system.rootWidget()->createWidget<MyGUI::ImageBox>("Imagebox", 0, 0, 0, 0, MyGUI::Align::Default, name);
-			setup();
+			mImageBox = system.rootWidget()->createWidget<MyGUI::ImageBox>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			MyGUIWindow::setup();
 		}
 
 		MyGUISceneWindow::~MyGUISceneWindow()
@@ -42,25 +42,42 @@ namespace Engine
 		{
 			mCamera = dynamic_cast<Scene::OgreCamera *>(camera)->getCamera();
 
-			mVp = mRenderTexture->addViewport(mCamera);
-			mVp->setOverlaysEnabled(false);
-			mVp->setClearEveryFrame(true);
-			mVp->setBackgroundColour(Ogre::ColourValue::Black);
+			setup();
+
 		}
 
 		void MyGUISceneWindow::setup()
 		{
-			mTexture = Ogre::TextureManager::getSingleton().createManual(
-				"RTT",
-				Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-				Ogre::TEX_TYPE_2D,
-				256,
-				256,
-				0,
-				Ogre::PF_R8G8B8,
-				Ogre::TU_RENDERTARGET);
+			if (mCamera) {
+				if (!mTexture) {
+					mTexture = Ogre::TextureManager::getSingleton().createManual(
+						"RTT",
+						Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						Ogre::TEX_TYPE_2D,
+						getAbsoluteSize().x,
+						getAbsoluteSize().y,
+						0,
+						Ogre::PF_R8G8B8,
+						Ogre::TU_RENDERTARGET);
 
-			mRenderTexture = mTexture->getBuffer()->getRenderTarget();
+					MyGUI::OgreRenderManager* mgr = &MyGUI::OgreRenderManager::getInstance();
+					MyGUI::OgreTexture* myguitex = static_cast<MyGUI::OgreTexture*>(mgr->getTexture(mTexture->getName()));
+					if (myguitex)
+					{
+						if (myguitex->getOgreTexture() != mTexture)
+							myguitex->setOgreTexture(mTexture);
+					}
+
+					mRenderTexture = mTexture->getBuffer()->getRenderTarget();
+
+					mImageBox->setImageTexture("RTT");
+
+					mVp = mRenderTexture->addViewport(mCamera);
+					mVp->setOverlaysEnabled(false);
+					mVp->setClearEveryFrame(true);
+					mVp->setBackgroundColour(Ogre::ColourValue::Black);
+				}
+			}
 		}
 
 		MyGUI::Widget* MyGUISceneWindow::widget() const
@@ -68,41 +85,22 @@ namespace Engine
 			return mImageBox;
 		}
 
-		void MyGUISceneWindow::setGameTextureSize(const Vector2& size)
+		void MyGUISceneWindow::setGameTextureSize()
 		{
-			if (size.x <= 0 || size.y <= 0)
-				return;
-			if (mTexture->getWidth() == size.x && mTexture->getHeight() == size.y)
-				return;
-			if (mCamera)
-				mCamera->setAspectRatio(size.x / size.y);
-
-			unsigned int width = static_cast<unsigned int>(size.x);
-			unsigned int height = static_cast<unsigned int>(size.y);			
-
-			Ogre::TextureManager::getSingleton().remove(mTexture);			
-
-			mTexture = Ogre::TextureManager::getSingleton().createManual(
-				"RTT",
-				Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-				Ogre::TEX_TYPE_2D,
-				width,
-				height,
-				0,
-				Ogre::PF_R8G8B8,
-				Ogre::TU_RENDERTARGET);
-
-			//mRoot->getRenderSystem()->_cleanupDepthBuffers(false);
-
-			mRenderTexture = mTexture->getBuffer()->getRenderTarget();
-
-			if (mCamera) {
-				mVp = mRenderTexture->addViewport(mCamera);
-				mVp->setOverlaysEnabled(false);
-				mVp->setClearEveryFrame(true);
-				mVp->setBackgroundColour(Ogre::ColourValue::Black);
+			Vector2 size = getAbsoluteSize().xy();
+			if (mTexture && (mTexture->getWidth() != size.x || mTexture->getHeight() != size.y)) {
+				Ogre::TextureManager::getSingleton().remove(mTexture);
+				mTexture.reset();
 			}
-			
+			if (size.x > 0 && size.y > 0) {	
+				setup();				
+			}
+		}
+
+
+		Ogre::Ray MyGUISceneWindow::mousePointToRay(const Vector2& mousePos) const
+		{
+			return mCamera->getCameraToViewportRay(mousePos.x, mousePos.y);
 		}
 
 		/*

@@ -20,7 +20,7 @@ namespace Engine
 			public Core::FrameLoop
 		{
 		public:
-			GUISystem(App::Application &app);
+			GUISystem(App::ClientApplication &app);
 			virtual ~GUISystem();
 
 			//void printHierarchy();
@@ -78,7 +78,7 @@ namespace Engine
 
 			const char* key() const;
 
-			App::Application &app();
+			App::ClientApplication &app();
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i);
 
@@ -96,7 +96,7 @@ namespace Engine
 
 			std::map<std::string, WindowContainer *> mWindows;
 
-			App::Application &mApp;
+			App::ClientApplication &mApp;
 
 			std::unique_ptr<UI::UIManager> mUI;
 

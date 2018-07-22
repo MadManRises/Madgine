@@ -20,8 +20,8 @@ namespace Maditor
 			mDisconnectedSlot(this)
 		{
 			mNetwork.addTopLevelItem(this);
-			mNetwork.connectConnectionSlot(mConnectionSlot);
-			mNetwork.connectSlaveStreamDisconnected(mDisconnectedSlot);
+			mNetwork.connectionResult().connect(mConnectionSlot);
+			mNetwork.slaveStreamDisconnected().connect(mDisconnectedSlot);
 		}
 
 		bool StandaloneLauncher::isRemote()

@@ -40,7 +40,7 @@ namespace Engine
 					App::AppSettings settings;
 					settings.mRunMain = false;
 					app.setup(settings);
-					if (app.init())
+					if (app.callInit())
 					{
 						try{
 							TupleUnpacker<>::call(initCallback, std::make_tuple(std::ref(app)));
@@ -48,10 +48,10 @@ namespace Engine
 						}
 						catch(...)
 						{
-							app.finalize();	
+							app.callFinalize();	
 							throw;
 						}
-						app.finalize();
+						app.callFinalize();
 					}
 				}
 				catch(const std::exception &e)	{

@@ -14,7 +14,7 @@ namespace Engine
 	namespace Scene
 	{
 		SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr, ContextMask context) :
-			ScopeBase(sceneMgr.app().createTable()),
+			ScopeBase(sceneMgr.app(false).createTable()),
 			mContext(context),
 			mEnabled(true),
 			mSceneMgr(sceneMgr)
@@ -39,12 +39,11 @@ namespace Engine
 
 		bool SceneComponentBase::init()
 		{
-			return MadgineObject::init();
+			return true;
 		}
 
 		void SceneComponentBase::finalize()
-		{
-			MadgineObject::finalize();
+		{			
 		}
 
 		void SceneComponentBase::setEnabled(bool b)
@@ -57,19 +56,40 @@ namespace Engine
 			return mEnabled;
 		}
 
-		SceneManager &SceneComponentBase::sceneMgr() const
+		SceneManager &SceneComponentBase::sceneMgr(bool init) const
 		{
-			return mSceneMgr;
+			if (init)
+			{
+				checkInitState();
+			}
+			return mSceneMgr.getSelf(init);
 		}
 
-		SceneComponentBase& SceneComponentBase::getSceneComponent(size_t i)
+		SceneComponentBase& SceneComponentBase::getSceneComponent(size_t i, bool init)
 		{
-			return mSceneMgr.getComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mSceneMgr.getComponent(i, init);
 		}
 
-		Scripting::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
 		{
-			return mSceneMgr.getGlobalAPIComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mSceneMgr.getGlobalAPIComponent(i, init);
+		}
+
+		SceneComponentBase& SceneComponentBase::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
 		void SceneComponentBase::update(float)

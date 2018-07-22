@@ -4,7 +4,7 @@
 #include "windows/windowcontainer.h"
 #include "windows/window.h"
 
-#include "../app/application.h"
+#include "../app/clientapplication.h"
 #include "../ui/uimanager.h"
 
 #include "../util/profile.h"
@@ -64,13 +64,12 @@ namespace Engine
 
 		bool GUISystem::init()
 		{
-			return MadgineObject::init() && mUI->init();
+			return mUI->callInit();
 		}
 
 		void GUISystem::finalize()
 		{
-			mUI->finalize();
-			MadgineObject::finalize();
+			mUI->finalize();			
 		}
 
 		/*void GUISystem::printHierarchy() {
@@ -144,7 +143,7 @@ namespace Engine
 			return "Gui";
 		}
 
-		App::Application& GUISystem::app()
+		App::ClientApplication& GUISystem::app()
 		{
 			return mApp;
 		}

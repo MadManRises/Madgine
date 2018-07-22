@@ -17,13 +17,13 @@ namespace Engine
 		MadgineObject();
 		virtual ~MadgineObject();
 
-		virtual bool init();
-		virtual void finalize();
+		virtual bool init() = 0;
+		virtual void finalize() = 0;
 
 		ObjectState getState() const;
         
-        void checkInitState();
-        void checkDependency();
+        void checkInitState() const;
+        void checkDependency() const;
         void markInitialized();
 
 	private:

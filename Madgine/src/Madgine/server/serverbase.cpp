@@ -32,9 +32,7 @@ namespace Engine
 
 
 		int ServerBase::go()
-		{		
-
-			MadgineObject::init();
+		{					
 			FrameLoop::init();
 
 			mRunning = true;
@@ -50,7 +48,6 @@ namespace Engine
 			mRunning = false;
 
 			FrameLoop::finalize();
-			MadgineObject::finalize();
 
 			return result;
 		}

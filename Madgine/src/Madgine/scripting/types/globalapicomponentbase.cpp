@@ -17,14 +17,22 @@ namespace Engine
 		{
 		}
 
+		GlobalAPIComponentBase& GlobalAPIComponentBase::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
+		}
+
 		bool GlobalAPIComponentBase::init()
 		{
-			return MadgineObject::init();
+			return true;
 		}
 
 		void GlobalAPIComponentBase::finalize()
 		{
-			MadgineObject::finalize();
 		}
 
 		void GlobalAPIComponentBase::clear()
@@ -35,19 +43,31 @@ namespace Engine
 		{
 		}
 
-		GlobalAPIComponentBase& GlobalAPIComponentBase::getGlobalAPIComponent(size_t i)
+		GlobalAPIComponentBase& GlobalAPIComponentBase::getGlobalAPIComponent(size_t i, bool init)
 		{
-			return mApp.getGlobalAPIComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.getGlobalAPIComponent(i, init);
 		}
 
-		Scene::SceneComponentBase& GlobalAPIComponentBase::getSceneComponent(size_t i)
+		Scene::SceneComponentBase& GlobalAPIComponentBase::getSceneComponent(size_t i, bool init)
 		{
-			return mApp.getSceneComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.getSceneComponent(i, init);
 		}
 
-		Scene::SceneManager& GlobalAPIComponentBase::sceneMgr()
+		Scene::SceneManager& GlobalAPIComponentBase::sceneMgr(bool init)
 		{
-			return mApp.sceneMgr();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.sceneMgr(init);
 		}
 
 		GlobalScopeBase& GlobalAPIComponentBase::globalScope()

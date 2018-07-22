@@ -16,17 +16,8 @@ namespace Engine
 			void startSubProcess(size_t size, const std::string& name = "");
 			void endSubProcess();
 
-			template <class T>
-			void connectSubProcessStarted(T&& slot)
-			{
-				mSubProcessStarted.connect(std::forward<T>(slot), SignalSlot::QueuedConnectionType{});
-			}
-
-			template <class T>
-			void connectRatioChanged(T&& slot)
-			{
-				mRatioChanged.connect(std::forward<T>(slot), SignalSlot::QueuedConnectionType{});
-			}
+			SignalSlot::SignalStub<const std::string &>& subprocessSignal();
+			SignalSlot::SignalStub<float> &ratioSignal();
 
 		private:
 			float mRatio;

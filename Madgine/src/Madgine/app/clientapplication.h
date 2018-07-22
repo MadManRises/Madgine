@@ -19,7 +19,9 @@ namespace Engine
 
 			virtual KeyValueMapList maps() override;
 
-			GUI::GUISystem &gui();
+			GUI::GUISystem &gui(bool = true);
+
+			ClientApplication &getSelf(bool = true);
 
 		private:
 			GUI::GUISystem * mGUI;

@@ -75,10 +75,6 @@ namespace Engine {
 		return mEntitiesNode->createChildSceneNode();
 	}
 
-	/*Ogre::Ray OgreSceneRenderer::mousePointToRay(const Ogre::Vector2& mousePos) const
-	{
-		return mCamera->getCameraToViewportRay(mousePos.x, mousePos.y);
-	}*/
 
 	/*bool OgreSceneRenderer::mousePointToTerrainPoint(const Ogre::Vector2& mousePos,
 		Ogre::Vector3& result, Ogre::uint32 mask)

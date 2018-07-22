@@ -366,10 +366,9 @@ namespace Engine
 				}
 			}
 
-			template <class Ty>
-			void connectCallback(Ty&& slot)
+			SignalSlot::SignalStub<const iterator &, int> &signal()
 			{
-				mSignal.connect(std::forward<Ty>(slot));
+				return mSignal;
 			}
 
 		protected:

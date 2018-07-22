@@ -51,6 +51,8 @@ namespace Engine
 
 			mRoot = std::make_unique<Ogre::Root>((p.fullPath().parent_path() / "plugins" CONFIG_SUFFIX ".cfg").generic_string()); // Creating Root
 
+			Ogre::LogManager::getSingleton().getDefaultLog()->addListener(this);
+
 			if (!mRoot->restoreConfig())
 			{
 				// if no existing config, or could not restore it, show the config dialog 
@@ -121,6 +123,23 @@ namespace Engine
 			mInputManager->injectMouseMove(arg.position[0], arg.position[1], mScrollWheel);
 		}
 
+		Vector2 MyGUISystem::relativeMoveDelta(MyGUI::Widget* w) const
+		{
+			return { mMoveDelta.x / w->getWidth(), mMoveDelta.y / w->getHeight() };
+		}
+
+		Vector2 MyGUISystem::widgetRelative(MyGUI::Widget* w, int left, int top) const
+		{
+			if (left == -1)
+				left = mMousePosition.x;
+			if (top == -1)
+				top = mMousePosition.y;
+			float x = static_cast<float>(left) - w->getPosition().left;
+			float y = static_cast<float>(top) - w->getPosition().top;
+			return { x / w->getWidth(), y / w->getHeight() };
+		}
+
+
 		MyGUI::MouseButton MyGUISystem::convertButton(MouseButton::MouseButton buttonID)
 		{
 			switch (buttonID)
@@ -176,13 +195,13 @@ namespace Engine
 		}
 
 
-		Vector2 MyGUISystem::getScreenSize()
+		Vector3 MyGUISystem::getScreenSize()
 		{
 			const MyGUI::IntSize& size = mRenderManager->getViewSize();
-			return { static_cast<float>(size.width), static_cast<float>(size.height) };
+			return { static_cast<float>(size.width), static_cast<float>(size.height), 1 };
 		}
 
-		bool MyGUISystem::preInit()
+		bool MyGUISystem::init()
 		{
 
 			for (const std::experimental::filesystem::path &p : app().root().resources().folders()) {
@@ -235,22 +254,57 @@ namespace Engine
 					unitUI->setPos({ 0.8f,0,0,0,0,0,0,0,0 });
 					unitUI->setSize({ 0.2f,0,0,0,1,0,0,0,1 });
 					Window *fieldImage = unitUI->createChildImage("FieldImage");
+						fieldImage->setPos({ 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+						fieldImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
 					Window *defenderImage = unitUI->createChildImage("DefenderImage");
+						defenderImage->setPos({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
+						defenderImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
 						Window *defenderHealth = defenderImage->createChildBar("DefenderHealth");
+							defenderHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
+							defenderHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 						Window *defenderExp = defenderImage->createChildBar("DefenderExp");
+							defenderExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+							defenderExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *attackerImage = unitUI->createChildImage("AttackerImage");
+						attackerImage->setPos({ 0, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
+						attackerImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
 						Window *attackerHealth = attackerImage->createChildBar("AttackerHealth");
+							attackerHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
+							attackerHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 						Window *attackerExp = attackerImage->createChildBar("AttackerExp");
+							attackerExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+							attackerExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *modifierImage = unitUI->createChildImage("ModifierImage");
-					Window *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
+						modifierImage->setPos({ 1.15f, 0, 0, 0.15f, 0, 0, 0, 0, 0 });
+						modifierImage->setSize({ 0.2f, 0, 0, 0.2f, 0, 0, 0, 0, 1 });
+					Image *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
+						attackerStrengthIcon->setPos({ 0.025f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
+						attackerStrengthIcon->setSize({ 0.15f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
+						attackerStrengthIcon->setImage("Sword-01.png");
 					Window *attackerStrength = unitUI->createChildLabel("AttackerStrength");
+						attackerStrength->setPos({ 0.2f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
+						attackerStrength->setSize({ 0.2f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
 					Window *strengthArrow = unitUI->createChildImage("StrengthArrow");
+						strengthArrow->setPos({ 0.4f, 0, 0, 1.075f, 0, 0, 0, 0, 0 });
+						strengthArrow->setSize({ 0.2f, 0, 0, 0.05f, 0, 0, 0, 0, 1 });
 					Window *defenderStrength = unitUI->createChildLabel("DefenderStrength");
+						defenderStrength->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+						defenderStrength->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
+						defenderStrengthIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+						defenderStrengthIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *contentWindow = unitUI->createChildWindow("ContentWindow");
+						contentWindow->setPos({ 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+						contentWindow->setSize({ 1, 0, 0, -1, 1, 0, 0, 0, 1 });
 					Window *movementIcon = unitUI->createChildImage("MovementIcon");
+						movementIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+						movementIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *movement = unitUI->createChildLabel("Movement");
+						movement->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+						movement->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 					Window *health = unitUI->createChildLabel("Health");
+						health->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+						health->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
 			Window *mainMenu = createTopLevelWindow("MainMenu");
 				Window *optionsButton = mainMenu->createChildButton("OptionsButton");
 					optionsButton->setSize({ 0.4f,0,0,0,0.15f,0,0,0,1 });
@@ -279,10 +333,8 @@ namespace Engine
 				Window *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
 				Window *backButton = lobbyListMenu->createChildButton("BackButton");
 				Window *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-			
-			calculateWindowGeometries();
 
-			return GUISystem::preInit();
+			return GUISystem::init();
 		}
 
 		int MyGUISystem::go()
@@ -395,6 +447,26 @@ namespace Engine
 
 			return true;
 		}
+
+		
+		void MyGUISystem::messageLogged(const Ogre::String & message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String & logName, bool & skipThisMessage)
+		{
+			if (lml != Ogre::LML_CRITICAL) return;
+			Ogre::String msg = message;
+			Engine::Util::MessageType level;
+			switch (lml) {
+			case Ogre::LML_CRITICAL:
+				if (Ogre::StringUtil::startsWith(message, "WARNING:")) {
+					LOG_WARNING(message.substr(strlen("WARNING: ")));
+				}
+				else
+					LOG_ERROR(message);
+				break;
+			default:
+				throw 0;
+			}			
+		}
+	
 
 	}
 }

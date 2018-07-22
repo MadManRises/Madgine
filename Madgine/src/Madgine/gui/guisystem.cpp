@@ -1,7 +1,7 @@
 #include "../clientlib.h"
 
 #include "guisystem.h"
-#include "../app/application.h"
+#include "../app/clientapplication.h"
 
 #include "../ui/uimanager.h"
 
@@ -23,7 +23,7 @@ namespace Engine
 	namespace GUI
 	{
 		
-		GUISystem::GUISystem(App::Application &app) :
+		GUISystem::GUISystem(App::ClientApplication &app) :
 			Scripting::Scope<GUISystem>(app.createTable()),			
 			mApp(app),
             mUI(std::make_unique<UI::UIManager>(*this))
@@ -51,12 +51,14 @@ namespace Engine
 
 		bool GUISystem::init()
 		{
+			markInitialized();
 			return mUI->callInit();
 		}
 
 		void GUISystem::finalize()
 		{
 			mUI->callFinalize();
+			clear();
 		}
 
 		Window* GUISystem::getWindowByName(const std::string& name)
@@ -68,6 +70,7 @@ namespace Engine
 		{
 			Window *w = mTopLevelWindows.emplace_back(createWindow(name)).get();
 			w->hide();
+			w->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return w;
 		}
 
@@ -76,6 +79,8 @@ namespace Engine
 			std::unique_ptr<Bar> p = createBar(name);
 			Bar *b = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
+			b->hide();
+			b->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return b;
 		}
 
@@ -84,7 +89,8 @@ namespace Engine
 			std::unique_ptr<Button> p = createButton(name);
 			Button *b = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
-			b->hide();
+			b->hide();			
+			b->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return b;
 		}
 
@@ -94,6 +100,7 @@ namespace Engine
 			Checkbox *c = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
 			c->hide();
+			c->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return c;
 		}
 
@@ -103,6 +110,7 @@ namespace Engine
 			Combobox *c = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
 			c->hide();
+			c->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return c;
 		}
 
@@ -112,6 +120,7 @@ namespace Engine
 			Image *i = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
 			i->hide();
+			i->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return i;
 		}
 
@@ -121,6 +130,7 @@ namespace Engine
 			Label *l = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
 			l->hide();
+			l->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return l;
 		}
 
@@ -130,6 +140,7 @@ namespace Engine
 			SceneWindow *s = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
 			s->hide();
+			s->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return s;
 		}
 
@@ -138,7 +149,8 @@ namespace Engine
 			std::unique_ptr<TabWindow> p = createTabWindow(name);
 			TabWindow *t = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
-			t->hide();
+			t->hide();			
+			t->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return t;
 		}
 
@@ -147,7 +159,8 @@ namespace Engine
 			std::unique_ptr<Textbox> p = createTextbox(name);
 			Textbox *t = p.get();
 			mTopLevelWindows.emplace_back(std::move(p));
-			t->hide();
+			t->hide();			
+			t->updateGeometry(getScreenSize(), { 0.0f, 0.0f });
 			return t;
 		}
 
@@ -180,21 +193,23 @@ namespace Engine
 
 		void GUISystem::calculateWindowGeometries()
 		{
-			Vector2 size = getScreenSize();
+			Vector3 size = getScreenSize();
 			for (const std::unique_ptr<Window> &topLevel : mTopLevelWindows)
 			{				
-				topLevel->updateGeometry({ size.x, size.y, 1.0f }, { 0.0f, 0.0f });
+				topLevel->updateGeometry(size, { 0.0f, 0.0f });
 			}
 		}
 
 		void GUISystem::registerWindow(Window* w)
 		{
-			assert(mWindows.try_emplace(w->getName(), w).second);
+			if (!w->getName().empty())
+				assert(mWindows.try_emplace(w->getName(), w).second);
 		}
 
 		void GUISystem::unregisterWindow(Window* w)
 		{
-			assert(mWindows.erase(w->getName()) == 1);
+			if (!w->getName().empty())
+				assert(mWindows.erase(w->getName()) == 1);
 		}
 
 		void GUISystem::destroyTopLevel(Window* w)
@@ -204,33 +219,73 @@ namespace Engine
 			mTopLevelWindows.erase(it);
 		}
 
+		void GUISystem::clear()
+		{
+			mTopLevelWindows.clear();
+		}
+
+		KeyValueMapList GUISystem::maps()
+		{
+			return Scope::maps().merge(mTopLevelWindows);
+		}
+
 		bool GUISystem::sendFrameRenderingQueued(float timeSinceLastFrame)
 		{
 			return FrameLoop::sendFrameRenderingQueued(timeSinceLastFrame, mUI->currentContext());
 		}
 
-		Scene::SceneManager& GUISystem::sceneMgr()
+		Scene::SceneManager& GUISystem::sceneMgr(bool init)
 		{
-			return mApp.sceneMgr();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.sceneMgr(init);
 		}
 
-		UI::UIManager& GUISystem::ui()
+		UI::UIManager& GUISystem::ui(bool init)
 		{
-			return *mUI;
+			if (init)
+			{
+				checkInitState();
+				mUI->callInit();
+			}
+			return mUI->getSelf(init);
 		}
 
-		App::Application &GUISystem::app()
+		GUISystem& GUISystem::getSelf(bool init)
 		{
-			return mApp;
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
-		Scene::SceneComponentBase& GUISystem::getSceneComponent(size_t i)
+		App::ClientApplication &GUISystem::app(bool init)
 		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mApp.getSelf(init);
+		}
+
+		Scene::SceneComponentBase& GUISystem::getSceneComponent(size_t i, bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
 			return mApp.getSceneComponent(i);
 		}
 
-		Scripting::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
 		{
+			if (init)
+			{
+				checkInitState();
+			}
 			return mApp.getGlobalAPIComponent(i);
 		}
 

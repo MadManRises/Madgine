@@ -66,6 +66,8 @@ namespace Engine
 		bool Application::init()
 		{
 			
+			markInitialized();
+
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
 			{
 				if (!api->callInit())
@@ -83,16 +85,14 @@ namespace Engine
 
 		void Application::finalize()
 		{
+			mSceneMgr->callFinalize();
 
-			mLoop->finalize();
-
-			mSceneMgr->finalize();
+			mLoop->callFinalize();
 
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
 			{
-				api->finalize();
+				api->callFinalize();
 			}
-			MadgineObject::finalize();
 		}
 
 		void Application::shutdown()
@@ -173,7 +173,7 @@ namespace Engine
                 checkInitState();
                 api.callInit();
             }
-			return api.getGlobalAPIComponent(init);
+			return api.getSelf(init);
 		}
 
 		Scene::SceneComponentBase& Application::getSceneComponent(size_t i, bool init)
@@ -191,10 +191,10 @@ namespace Engine
                 checkInitState();
                 mSceneMgr->callInit();
             }
-			return mSceneMgr->sceneMgr(init);
+			return mSceneMgr->getSelf(init);
 		}
         
-        Application &Application::app(bool init){
+        Application &Application::getSelf(bool init){
             if (init){
                 checkDependency();
             }

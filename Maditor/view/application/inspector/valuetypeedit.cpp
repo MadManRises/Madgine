@@ -35,6 +35,15 @@ void VectorWidget::setValue(const Engine::Vector3 & v)
 	}
 }
 
+void VectorWidget::setValue(const Engine::Vector2 & v)
+{
+	assert(mBoxes.size() == 2);
+	for (int i = 0; i < 2; ++i)
+	{
+		mBoxes[i]->setValue(v[i]);
+	}
+}
+
 void VectorWidget::setReadOnly(bool b)
 {
 	for (QDoubleSpinBox *box : mBoxes)
@@ -71,6 +80,7 @@ ValueTypeEdit::ValueTypeEdit(QWidget *parent) :
 	for (Engine::ValueType::Type type : {
 		Engine::ValueType::Type::NullValue,
 			Engine::ValueType::Type::IntValue,
+			Engine::ValueType::Type::Vector2Value,
 			Engine::ValueType::Type::Vector3Value,
 			Engine::ValueType::Type::Vector4Value,
 			Engine::ValueType::Type::StringValue,
@@ -97,6 +107,9 @@ void ValueTypeEdit::setType(Engine::ValueType::Type type) {
 			break;
 		case Engine::ValueType::Type::IntValue:
 			mValue = static_cast<int>(0);
+			break;
+		case Engine::ValueType::Type::Vector2Value:
+			mValue = Engine::Vector2{};
 			break;
 		case Engine::ValueType::Type::Vector3Value:
 			mValue = Engine::Vector3{};
@@ -138,6 +151,7 @@ void ValueTypeEdit::setReadOnly(bool b)
 	case Engine::ValueType::Type::IntValue:
 		mIntBox->setReadOnly(b);		
 		break;
+	case Engine::ValueType::Type::Vector2Value:
 	case Engine::ValueType::Type::Vector3Value:
 	case Engine::ValueType::Type::Vector4Value:
 		mVectorBox->setReadOnly(b);
@@ -172,6 +186,10 @@ void ValueTypeEdit::onTypeChanged() {
 		mIntBox->setMinimum(std::numeric_limits<int>::min());
 		mIntBox->setMaximum(std::numeric_limits<int>::max());
 		mInputWidget = mIntBox;
+		break;
+	case Engine::ValueType::Type::Vector2Value:
+		mVectorBox = new VectorWidget(2);
+		mInputWidget = mVectorBox;
 		break;
 	case Engine::ValueType::Type::Vector3Value:
 		mVectorBox = new VectorWidget(3);
@@ -217,6 +235,9 @@ void ValueTypeEdit::onValueChanged() {
 		break;
 	case Engine::ValueType::Type::IntValue:
 		mIntBox->setValue(mValue.as<int>());
+		break;
+	case Engine::ValueType::Type::Vector2Value:
+		mVectorBox->setValue(mValue.as<Engine::Vector2>());
 		break;
 	case Engine::ValueType::Type::Vector3Value:
 		mVectorBox->setValue(mValue.as<Engine::Vector3>());

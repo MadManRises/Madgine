@@ -150,5 +150,40 @@ namespace Engine
 		{
 			widget()->setPosition(pos.x, pos.y);
 		}
+
+		void MyGUIWindow::setup()
+		{
+			widget()->setNeedMouseFocus(true);
+			widget()->eventMouseMove += MyGUI::newDelegate(this, &MyGUIWindow::emitMouseMove);
+			widget()->eventMouseWheel += MyGUI::newDelegate(this, &MyGUIWindow::emitMouseWheel);
+			widget()->eventMouseDrag += MyGUI::newDelegate(this, &MyGUIWindow::emitMouseMove);
+			widget()->eventMouseButtonPressed += MyGUI::newDelegate(this, &MyGUIWindow::emitMouseDown);
+			widget()->eventMouseButtonReleased += MyGUI::newDelegate(this, &MyGUIWindow::emitMouseUp);
+			
+		}
+
+		void MyGUIWindow::emitMouseMove(MyGUI::Widget* w, int left, int top)
+		{
+			MouseEventArgs args{ static_cast<MyGUISystem&>(gui()).widgetRelative(w, left, top), static_cast<MyGUISystem&>(gui()).relativeMoveDelta(w), 0 };
+			mMouseMoveSignal.emit(args);
+		}
+
+		void MyGUIWindow::emitMouseWheel(MyGUI::Widget* w, int wheel)
+		{
+			MouseEventArgs args{ static_cast<MyGUISystem&>(gui()).widgetRelative(w), static_cast<MyGUISystem&>(gui()).relativeMoveDelta(w), static_cast<float>(wheel) };
+			mMouseMoveSignal.emit(args);
+		}
+
+		void MyGUIWindow::emitMouseDown(MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button)
+		{
+			MouseEventArgs args{ static_cast<MyGUISystem&>(gui()).widgetRelative(w, left, top), static_cast<MyGUISystem&>(gui()).relativeMoveDelta(w), 0, MyGUISystem::convertButton(button) };
+			mMouseDownSignal.emit(args);
+		}
+
+		void MyGUIWindow::emitMouseUp(MyGUI::Widget* w, int left, int top, MyGUI::MouseButton button)
+		{
+			MouseEventArgs args{ static_cast<MyGUISystem&>(gui()).widgetRelative(w, left, top), static_cast<MyGUISystem&>(gui()).relativeMoveDelta(w), 0, MyGUISystem::convertButton(button) };
+			mMouseUpSignal.emit(args);
+		}
 	}
 }

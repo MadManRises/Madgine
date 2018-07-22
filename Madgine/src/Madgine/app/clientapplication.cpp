@@ -39,9 +39,20 @@ namespace Engine
 			return *mSettings;
 		}
 
-		GUI::GUISystem& ClientApplication::gui()
+		GUI::GUISystem& ClientApplication::gui(bool init)
 		{
-			return *mGUI;
+			if (init)
+			{
+				checkInitState();
+				mGUI->callInit();
+			}
+			return mGUI->getSelf(init);
+		}
+
+		ClientApplication& ClientApplication::getSelf(bool init)
+		{
+			Application::getSelf(init);
+			return *this;
 		}
 
 		KeyValueMapList ClientApplication::maps()

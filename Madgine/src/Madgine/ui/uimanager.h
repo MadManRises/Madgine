@@ -18,9 +18,7 @@ namespace Engine
 			UIManager(GUI::GUISystem &gui);
 			~UIManager();
 
-			bool init() override;
-			void finalize() override;
-
+			
 			void clear();
 
 			void hideCursor(bool keep = true);
@@ -38,27 +36,33 @@ namespace Engine
 
 			Scene::ContextMask currentContext();
 
-			GUI::GUISystem &gui() const;
+			GUI::GUISystem &gui(bool = true) const;
 
 			std::set<GameHandlerBase*> getGameHandlers();
 			std::set<GuiHandlerBase*> getGuiHandlers();
-			App::Application& app();
+			App::Application& app(bool = true);
 
 			static const constexpr int sMaxInitOrder = 4;
 
 			const char* key() const override;
 
-			Scene::SceneComponentBase &getSceneComponent(size_t i);
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			GameHandlerBase &getGameHandler(size_t i);
+			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-			GuiHandlerBase &getGuiHandler(size_t i);
+			GuiHandlerBase &getGuiHandler(size_t i, bool = true);
 
-			Scene::SceneManager &sceneMgr();
+			Scene::SceneManager &sceneMgr(bool = true);
+
+			UIManager &getSelf(bool = true);
 
 		protected:
+
+			bool init() override;
+			void finalize() override;
+
 			KeyValueMapList maps() override;
 
 		private:

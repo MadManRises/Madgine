@@ -3,7 +3,7 @@
 #include "../ui/uimanager.h"
 #include "../gui/guisystem.h"
 #include "../gui/windows/window.h"
-#include "../app/application.h"
+#include "../app/clientapplication.h"
 
 
 namespace Engine
@@ -11,44 +11,69 @@ namespace Engine
 	namespace UI
 	{
 		Handler::Handler(UIManager &ui, const std::string& windowName) :
-			ScopeBase(ui.gui().app().createTable()),
+			ScopeBase(ui.app(false).createTable()),
 			mWindow(nullptr),
 			mUI(ui),
-			mWindowName(windowName)
+			mWindowName(windowName),
+		mMouseMoveSlot(this),
+		mMouseDownSlot(this),
+		mMouseUpSlot(this)
 		{
 		}
 
 
-		Scene::SceneComponentBase& Handler::getSceneComponent(size_t i)
+		Scene::SceneComponentBase& Handler::getSceneComponent(size_t i, bool init)
 		{
-			return mUI.getSceneComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.getSceneComponent(i, init);
 		}
 
-		Scene::SceneManager& Handler::sceneMgr()
+		Scene::SceneManager& Handler::sceneMgr(bool init)
 		{
-			return mUI.sceneMgr();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.sceneMgr(init);
 		}
 
-		Scripting::GlobalAPIComponentBase& Handler::getGlobalAPIComponent(size_t i)
+		Scripting::GlobalAPIComponentBase& Handler::getGlobalAPIComponent(size_t i, bool init)
 		{
-			return mUI.getGlobalAPIComponent(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.getGlobalAPIComponent(i, init);
 		}
 
-		UI::GuiHandlerBase& Handler::getGuiHandler(size_t i)
+		UI::GuiHandlerBase& Handler::getGuiHandler(size_t i, bool init)
 		{
-			return mUI.getGuiHandler(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.getGuiHandler(i, init);
 		}
 
-		GameHandlerBase& Handler::getGameHandler(size_t i)
+		GameHandlerBase& Handler::getGameHandler(size_t i, bool init)
 		{
-			return mUI.getGameHandler(i);
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.getGameHandler(i, init);
 		}
 
 		bool Handler::installToWindow(GUI::Window* w)
 		{
 			mWindow = w;
 
-			//TODO connect
+			mWindow->mouseMoveEvent().connect(mMouseMoveSlot);
+			mWindow->mouseDownEvent().connect(mMouseDownSlot);
+			mWindow->mouseUpEvent().connect(mMouseUpSlot);
 
 			for (const WindowDescriber& des : mWindows)
 			{
@@ -75,37 +100,36 @@ namespace Engine
 		{
 		}
 
-		App::Application& Handler::app()
+		App::Application& Handler::app(bool init)
 		{
-			return mUI.app();
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.app(init);
 		}
 
-		UIManager& Handler::ui()
+		UIManager& Handler::ui(bool init)
 		{
-			return mUI;
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.getSelf(init);
 		}
 
 		bool Handler::init()
 		{
-			if (!MadgineObject::init())
-				return false;
-			if (!installToWindow(mUI.gui().getWindowByName(mWindowName)))			
-				return false;
-			return true;
+			return installToWindow(mUI.gui().getWindowByName(mWindowName));
 		}
 
 		void Handler::finalize()
-		{
-			MadgineObject::finalize();
+		{			
 		}
 
 		bool Handler::init(GUI::Window* window)
 		{
-			if (!MadgineObject::init())
-				return false;
-			if (!installToWindow(window))
-				return false;
-			return true;
+			return installToWindow(window);				
 		}
 
 		void Handler::injectMouseMove(GUI::MouseEventArgs& evt)

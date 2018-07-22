@@ -41,7 +41,7 @@ namespace Engine
 
 		void GuiHandlerBase::open()
 		{
-			if (getState() == ObjectState::CONSTRUCTED)
+			if (getState() != ObjectState::INITIALIZED)
 			{
 				LOG_ERROR("Failed to open unitialized GuiHandler!");
 				return;
@@ -92,6 +92,15 @@ namespace Engine
 		Scene::ContextMask GuiHandlerBase::context() const
 		{
 			return mContext;
+		}
+
+		GuiHandlerBase& GuiHandlerBase::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
 		void GuiHandlerBase::setContext(Scene::ContextMask context)

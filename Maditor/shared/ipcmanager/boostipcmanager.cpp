@@ -176,6 +176,11 @@ namespace Maditor {
 			}
 		}
 
+		Engine::SignalSlot::SignalStub<bool>& BoostIPCManager::connectionResult()
+		{
+			return mConnectionResult;
+		}
+
 		void BoostIPCManager::removeSlaveStream()
 		{
 			if (mSlaveStream) {

@@ -47,6 +47,13 @@ namespace Engine
 			void setAbsolutePosition(const Vector2& pos) override;
 			
 
+			void setup();
+
+			void emitMouseMove(MyGUI::Widget *w, int left, int top);
+			void emitMouseWheel(MyGUI::Widget *w, int wheel);
+			void emitMouseDown(MyGUI::Widget *w, int left, int top, MyGUI::MouseButton button);
+			void emitMouseUp(MyGUI::Widget *w, int left, int top, MyGUI::MouseButton button);
+
 		private:
 			float mScale;
 

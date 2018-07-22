@@ -3,6 +3,8 @@
 
 namespace Engine
 {
+	class DependencyInitException{};
+
 	MadgineObject::MadgineObject() :
 		mState(ObjectState::UNINITIALIZED)
 	{
@@ -23,8 +25,8 @@ namespace Engine
 	}
     
     bool MadgineObject::callInit(){
-        if (mState == UNINITIALIZED){
-            mState = INITIALIZING;
+        if (mState == ObjectState::UNINITIALIZED){
+            mState = ObjectState::INITIALIZING;
             mName = typeid(*this).name();
             bool result;
             try{
@@ -33,52 +35,45 @@ namespace Engine
                 result = false;
             }
             if (result)
-                mState = INITIALIZED;
-            else if (mState == INITIALIZING)
-                mState = UNINITIALIZED;
-            else if (mState == MARKED_INITIALIZED){
-                mState = INITIALIZED;
+                mState = ObjectState::INITIALIZED;
+            else if (mState == ObjectState::INITIALIZING)
+                mState = ObjectState::UNINITIALIZED;
+            else if (mState == ObjectState::MARKED_INITIALIZED){
+                mState = ObjectState::INITIALIZED;
                 callFinalize();
             }else throw 0;
         }
-        return mState == INITIALIZED || mState == MARKED_INITIALIZED;
+        return mState == ObjectState::INITIALIZED || mState == ObjectState::MARKED_INITIALIZED;
     }
     
     void MadgineObject::callFinalize(){
-        if (mState == INITIALIZED){
+        if (mState == ObjectState::INITIALIZED){
             finalize();
-            mState = UNINITIALIZED;
+            mState = ObjectState::UNINITIALIZED;
         }
-        assert(mState == UNINITIALIZING);
+        assert(mState == ObjectState::UNINITIALIZED);
     }
 
-    bool MadgineObject::init(){
-        return true;
-    }
-
-    void MadgineObject::finalize(){
-    
-    }
-
-    void MadgineObject::checkInitState(){
-        if (mState == UNINITIALIZED)
-            throw DependencyInitException;
+    void MadgineObject::checkInitState() const{
+        if (mState == ObjectState::UNINITIALIZED)
+            throw DependencyInitException{};
     }
     
-    void MadgineObject::checkDependency(){
+    void MadgineObject::checkDependency() const{
         switch (mState){
-        case UNINITIALIZED:
-            throw DependencyInitException;
-        case INITIALIZING:
+        case ObjectState::UNINITIALIZED:
+            throw DependencyInitException{};
+        case ObjectState::INITIALIZING:
             LOG_WARNING("Possible circular dependency! Consider using markInitialized!");
             break;
         default:
+			break;
         }
     }
     
     void MadgineObject::markInitialized(){
-        assert(mState == INITIALIZING);
-        mState = MARKED_INITIALIZED;
+        assert(mState == ObjectState::INITIALIZING);
+        mState = ObjectState::MARKED_INITIALIZED;
     }
     
 }

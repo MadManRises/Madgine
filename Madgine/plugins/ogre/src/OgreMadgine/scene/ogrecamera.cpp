@@ -17,6 +17,7 @@ namespace Engine
 
 			mCamera->setFarClipDistance(5000);
 			mCamera->setNearClipDistance(1);
+			mCamera->setAutoAspectRatio(true);
 		}
 
 		OgreCamera::~OgreCamera()
@@ -28,6 +29,11 @@ namespace Engine
 		Ogre::Camera* OgreCamera::getCamera()
 		{
 			return mCamera;
+		}
+
+		Ogre::SceneNode* OgreCamera::getNode()
+		{
+			return mNode;
 		}
 
 		void OgreCamera::setPosition(const Vector3& pos)

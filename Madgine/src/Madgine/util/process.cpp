@@ -58,5 +58,15 @@ namespace Engine
 			if (mSubProcessIndices.size() > 0)
 				++mSubProcessIndices.back();
 		}
+
+		SignalSlot::SignalStub<const std::string&>& Process::subprocessSignal()
+		{
+			return mSubProcessStarted;
+		}
+
+		SignalSlot::SignalStub<float>& Process::ratioSignal()
+		{
+			return mRatioChanged;
+		}
 	}
 }

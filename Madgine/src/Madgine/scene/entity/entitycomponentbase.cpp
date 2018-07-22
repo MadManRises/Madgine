@@ -34,19 +34,19 @@ namespace Engine
 				return *mEntity;
 			}
 
-			SceneComponentBase& EntityComponentBase::getSceneComponent(size_t i)
+			SceneComponentBase& EntityComponentBase::getSceneComponent(size_t i, bool init)
 			{
-				return mEntity->getSceneComponent(i);
+				return mEntity->getSceneComponent(i, init);
 			}
 
-			Scripting::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i)
+			Scripting::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
 			{
-				return mEntity->getGlobalAPIComponent(i);
+				return mEntity->getGlobalAPIComponent(i, init);
 			}
 
-			App::Application& EntityComponentBase::app()
+			App::Application& EntityComponentBase::app(bool init)
 			{
-				return mEntity->app();
+				return mEntity->app(init);
 			}
 
 			void EntityComponentBase::moveToEntity(Entity* entity)

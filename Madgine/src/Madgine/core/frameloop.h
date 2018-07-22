@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../scene/contextmasks.h"
+#include "../madgineobject.h"
 
 namespace Engine
 {
 	namespace Core
 	{
-		class MADGINE_BASE_EXPORT FrameLoop
+		class MADGINE_BASE_EXPORT FrameLoop : public MadgineObject
 		{
 		public:
 			
@@ -14,9 +15,6 @@ namespace Engine
 			virtual ~FrameLoop() = default;
 
 			virtual int go();
-
-			virtual bool init();
-			virtual void finalize();
 
 			virtual bool singleFrame();
 
@@ -26,6 +24,9 @@ namespace Engine
 			void removeFrameListener(FrameListener* listener);
 
 		protected:
+			virtual bool init();
+			virtual void finalize();
+
 			bool sendFrameStarted(float timeSinceLastFrame);
 			bool sendFrameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 			bool sendFrameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);

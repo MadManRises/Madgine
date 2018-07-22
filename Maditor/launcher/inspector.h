@@ -18,13 +18,14 @@ namespace Maditor {
 
 			lua_State *state();
 
-			virtual bool init() override;
-			virtual void finalize() override;
-
 			static InspectorThreadInstance *getInstance(lua_State *thread);			
 
 		//protected:
 			void update(Engine::InvScopePtr ptr, Inspector *inspector);
+
+		protected:
+			virtual bool init() override;
+			virtual void finalize() override;
 
 		private:
 			Engine::SignalSlot::Slot<&InspectorThreadInstance::update> mUpdate;

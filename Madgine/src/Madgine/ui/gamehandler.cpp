@@ -16,8 +16,7 @@ namespace Engine
 			mCurrentMouseButton(GUI::MouseButton::NO_BUTTON),
 			mDragging(false),
 			mSingleClick(false),
-			mContext(context),
-			mSceneMgr(ui.sceneMgr())
+			mContext(context)
 		{
 		}
 
@@ -40,9 +39,22 @@ namespace Engine
 				fixedUpdate(timeStep);
 		}
 
-		Scene::SceneManager &GameHandlerBase::sceneMgr() const
+		Scene::SceneManager &GameHandlerBase::sceneMgr(bool init) const
 		{
-			return mSceneMgr;
+			if (init)
+			{
+				checkInitState();
+			}
+			return mUI.sceneMgr(init);
+		}
+
+		GameHandlerBase& GameHandlerBase::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
 		}
 
 		void GameHandlerBase::onMouseMove(GUI::MouseEventArgs& me)

@@ -179,6 +179,11 @@ namespace Engine
 			}
 		}
 
+		SignalSlot::SignalStub<Serialize::StreamError>& NetworkManager::connectionResult()
+		{
+			return mConnectionResult;
+		}
+
 		void NetworkManager::removeSlaveStream()
 		{
 			if (mSlaveStream)

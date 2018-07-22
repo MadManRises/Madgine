@@ -24,8 +24,6 @@ namespace Engine
 			GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type);
 
 
-			bool init() override;
-			void finalize() override;
 
 			virtual void open();
 			virtual void close();
@@ -35,7 +33,13 @@ namespace Engine
 
 			Scene::ContextMask context() const;
 
-		protected:			
+			GuiHandlerBase &getSelf(bool = true);
+
+		protected:	
+
+			bool init() override;
+			void finalize() override;
+
 			void setContext(Scene::ContextMask context);
 
 

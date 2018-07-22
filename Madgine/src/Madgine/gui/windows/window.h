@@ -5,12 +5,14 @@
 #include "../guievents.h"
 
 #include "windowclass.h"
+#include "../../scripting/types/scope.h"
+#include "../../signalslot/signal.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT Window
+		class MADGINE_CLIENT_EXPORT Window : public Scripting::Scope<Window>
 		{
 		public:
 			Window(const std::string& name, Window* parent);
@@ -52,6 +54,8 @@ namespace Engine
 
 			const std::string &getName() const;
 
+			const char * key() const override;
+
 			Window* createChild(const std::string& name, Class _class);
 			Window *createChildWindow(const std::string &name);
 			Bar *createChildBar(const std::string& name);
@@ -65,6 +69,10 @@ namespace Engine
 			Image *createChildImage(const std::string& name);
 			
 			Window* getChildRecursive(const std::string& name);
+
+			SignalSlot::SignalStub<MouseEventArgs&> &mouseMoveEvent();
+			SignalSlot::SignalStub<MouseEventArgs&> &mouseDownEvent();
+			SignalSlot::SignalStub<MouseEventArgs&> &mouseUpEvent();
 
 		protected:
 
@@ -89,6 +97,10 @@ namespace Engine
 
 			void destroyChild(Window *w);
 
+			KeyValueMapList maps() override;
+
+			SignalSlot::Signal<MouseEventArgs&> mMouseMoveSignal, mMouseDownSignal, mMouseUpSignal;
+
 		private:
 			std::string mName;
 			Window *mParent;
@@ -99,6 +111,8 @@ namespace Engine
 
 			
 			Matrix3 mPos, mSize;
+
+			
 
 		};
 	}

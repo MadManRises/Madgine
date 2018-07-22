@@ -12,8 +12,6 @@ namespace Engine
 		public:
 			GlobalAPIComponentBase(App::Application &app);
 
-			bool init() override;
-			void finalize() override;
 
 			virtual void clear();
 			virtual void update();
@@ -21,24 +19,26 @@ namespace Engine
 			virtual const char* key() const = 0;
 
 			template <class T>
-			T &getGlobalAPIComponent()
+			T &getGlobalAPIComponent(bool init = true)
 			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			GlobalAPIComponentBase &getGlobalAPIComponent(size_t i);
+			GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			template <class T>
-			T &getSceneComponent()
+			T &getSceneComponent(bool init = true)
 			{
-				return static_cast<T&>(getSceneComponent(T::component_index()));
+				return static_cast<T&>(getSceneComponent(T::component_index(), init));
 			}
 
-			Scene::SceneComponentBase &getSceneComponent(size_t i);
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scene::SceneManager &sceneMgr();
+			Scene::SceneManager &sceneMgr(bool = true);
 
 			GlobalScopeBase &globalScope();
+
+			GlobalAPIComponentBase &getSelf(bool = true);
 
 			/*template <class T>
 			T &getGuiHandler()
@@ -55,6 +55,10 @@ namespace Engine
 			}
 
 			UI::GameHandlerBase &getGameHandler(size_t i);*/
+
+		protected:
+			bool init() override;
+			void finalize() override;
 
 		private:
 			App::Application & mApp;

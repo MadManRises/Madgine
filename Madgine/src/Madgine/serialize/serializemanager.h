@@ -78,18 +78,14 @@ namespace Engine
 			size_t convertPtr(SerializeOutStream& out, SerializableUnitBase* unit) const;
 			SerializableUnitBase* convertPtr(SerializeInStream& in, size_t unit);
 
-			template <class T>
-			void connectSlaveStreamDisconnected(T& slot)
-			{
-				mSlaveStreamDisconnected.connect(slot);
-			}
-
 			std::vector<ParticipantId> getMasterParticipantIds();
 			int clientCount() const;
 
 			const std::string& name() const;
 
 			static constexpr ParticipantId sLocalMasterId = 1;
+
+			SignalSlot::SignalStub<> &slaveStreamDisconnected();
 
 		protected:
 

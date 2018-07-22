@@ -16,12 +16,19 @@
 #include "tabwindow.h"
 #include "textbox.h"
 
+#include "../../app/clientapplication.h"
+
+
 namespace Engine
 {
+
+	API_IMPL(GUI::Window, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP_RO(Visible, isVisible));
+
 	namespace GUI
 	{
 		
 		Window::Window(const std::string& name, Window* parent) :
+			Scope(parent->gui().app().createTable()),
 			mName(name),
 			mParent(parent),
 			mGUI(parent->gui()),
@@ -32,6 +39,7 @@ namespace Engine
 		}
 
 		Window::Window(const std::string &name, GUISystem &gui) :
+			Scope(gui.app().createTable()),
 			mName(name),
 			mParent(nullptr),
 			mGUI(gui),
@@ -49,6 +57,11 @@ namespace Engine
 		void Window::setSize(const Matrix3& size)
 		{
 			mSize = size;
+			if (mParent)
+				updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+			else {
+				updateGeometry(mGUI.getScreenSize(), { 0.0f,0.0f });
+			}
 		}
 
 		const Matrix3& Window::getSize()
@@ -59,6 +72,7 @@ namespace Engine
 		void Window::setPos(const Matrix3& pos)
 		{
 			mPos = pos;
+			updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
 		}
 
 		const Matrix3& Window::getPos() const
@@ -90,9 +104,16 @@ namespace Engine
 			return mName;
 		}
 
+		const char *Window::key() const
+		{
+			return mName.c_str();
+		}
+
 		Window* Window::createChildWindow(const std::string& name)
 		{
-			return mChildren.emplace_back(createWindow(name)).get();
+			Window *w = mChildren.emplace_back(createWindow(name)).get();
+			w->updateGeometry(getAbsoluteSize(), { 0.0f,0.0f });
+			return w;
 		}
 		
 		Bar* Window::createChildBar(const std::string& name)
@@ -100,6 +121,7 @@ namespace Engine
 			std::unique_ptr<Bar> p = createBar(name);
 			Bar *b = p.get();
 			mChildren.emplace_back(std::move(p));
+			b->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return b;
 		}
 
@@ -108,6 +130,7 @@ namespace Engine
 			std::unique_ptr<Button> p = createButton(name);
 			Button *b = p.get();
 			mChildren.emplace_back(std::move(p));
+			b->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return b;
 		}
 
@@ -116,6 +139,7 @@ namespace Engine
 			std::unique_ptr<Checkbox> p = createCheckbox(name);
 			Checkbox *c = p.get();
 			mChildren.emplace_back(std::move(p));
+			c->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return c;
 		}
 
@@ -124,6 +148,7 @@ namespace Engine
 			std::unique_ptr<Combobox> p = createCombobox(name);
 			Combobox *c = p.get();
 			mChildren.emplace_back(std::move(p));
+			c->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return c;
 		}
 
@@ -132,6 +157,7 @@ namespace Engine
 			std::unique_ptr<Label> p = createLabel(name);
 			Label *l = p.get();
 			mChildren.emplace_back(std::move(p));
+			l->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return l;
 		}
 
@@ -140,6 +166,7 @@ namespace Engine
 			std::unique_ptr<SceneWindow> p = createSceneWindow(name);
 			SceneWindow *s = p.get();
 			mChildren.emplace_back(std::move(p));
+			s->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return s;
 		}
 
@@ -148,6 +175,7 @@ namespace Engine
 			std::unique_ptr<TabWindow> p = createTabWindow(name);
 			TabWindow *t = p.get();
 			mChildren.emplace_back(std::move(p));
+			t->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return t;
 		}
 
@@ -156,6 +184,7 @@ namespace Engine
 			std::unique_ptr<Textbox> p = createTextbox(name);
 			Textbox *t = p.get();
 			mChildren.emplace_back(std::move(p));
+			t->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return t;
 		}
 
@@ -164,6 +193,7 @@ namespace Engine
 			std::unique_ptr<Image> p = createImage(name);
 			Image *i = p.get();
 			mChildren.emplace_back(std::move(p));
+			i->updateGeometry(getAbsoluteSize(), { 0.0f, 0.0f });
 			return i;
 		}
 
@@ -177,6 +207,11 @@ namespace Engine
 			auto it = std::find_if(mChildren.begin(), mChildren.end(), [=](const std::unique_ptr<Window> &ptr) {return ptr.get() == w; });
 			assert(it != mChildren.end());
 			mChildren.erase(it);
+		}
+
+		KeyValueMapList Window::maps()
+		{
+			return Scope::maps().merge(mChildren);
 		}
 
 		void Window::show()
@@ -196,6 +231,21 @@ namespace Engine
 				if (Window* f = w->getChildRecursive(name))
 					return f;
 			return nullptr;
+		}
+
+		SignalSlot::SignalStub<MouseEventArgs&>& Window::mouseMoveEvent()
+		{
+			return mMouseMoveSignal;
+		}
+
+		SignalSlot::SignalStub<MouseEventArgs&>& Window::mouseDownEvent()
+		{
+			return mMouseDownSignal;
+		}
+
+		SignalSlot::SignalStub<MouseEventArgs&>& Window::mouseUpEvent()
+		{
+			return mMouseUpSignal;
 		}
 
 		std::unique_ptr<Window> Window::createWindowClass(const std::string& name, Class _class)

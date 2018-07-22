@@ -87,7 +87,7 @@ namespace Engine
 
 			void Entity::setup()
 			{
-				mComponents.connectCallback([](const decltype(mComponents)::const_iterator& it, int op)
+				mComponents.signal().connect([](const decltype(mComponents)::const_iterator& it, int op)
 				{
 					using namespace Serialize;
 					switch (op)
@@ -216,19 +216,19 @@ namespace Engine
 				SerializableUnitBase::readState(ifs);
 			}
 
-			SceneComponentBase& Entity::getSceneComponent(size_t i)
+			SceneComponentBase& Entity::getSceneComponent(size_t i, bool init)
 			{
-				return mSceneManager.getComponent(i);
+				return mSceneManager.getComponent(i, init);
 			}
 
-			Scripting::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i)
+			Scripting::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i, bool init)
 			{
-				return mSceneManager.getGlobalAPIComponent(i);
+				return mSceneManager.getGlobalAPIComponent(i, init);
 			}
 
-			App::Application& Entity::app()
+			App::Application& Entity::app(bool init)
 			{
-				return mSceneManager.app();
+				return mSceneManager.app(init);
 			}
 
 			KeyValueMapList Entity::maps()
@@ -236,9 +236,9 @@ namespace Engine
 				return Scope::maps().merge(mComponents);
 			}
 
-			SceneManager& Entity::sceneMgr() const
+			SceneManager& Entity::sceneMgr(bool init) const
 			{
-				return mSceneManager;
+				return mSceneManager.getSelf(init);
 			}
 
 			bool Entity::isLocal() const

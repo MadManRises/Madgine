@@ -15,10 +15,10 @@ namespace Engine
 		public:
 			OgreCameraManager(SceneManager &sceneMgr);
 			virtual ~OgreCameraManager();
-			
-			virtual bool init() override;
 
 		protected:
+
+			virtual bool init() override;
 
 			std::unique_ptr<Camera> createCameraImpl() override;
 
