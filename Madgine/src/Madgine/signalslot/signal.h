@@ -20,16 +20,16 @@ namespace Engine
 
 			~Signal()
 			{
-				disconnectAll();
+				this->disconnectAll();
 			}
 			
 			void emit(_Ty ... args)
 			{
-				auto end = mConnectedSlots.end();
+				auto end = this->mConnectedSlots.end();
 
-				mConnectedSlots.erase(
+				this->mConnectedSlots.erase(
 					std::remove_if(
-						mConnectedSlots.begin(), 
+						this->mConnectedSlots.begin(),
 						end,
 						[&](const std::weak_ptr<ConnectionInstance<_Ty...>> &p) {
 							if (std::shared_ptr<ConnectionInstance<_Ty...>> ptr = p.lock())
