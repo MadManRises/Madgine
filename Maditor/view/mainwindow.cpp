@@ -14,6 +14,8 @@
 #include "../model/addons/addon.h"
 
 
+#include "application/inspector/inspectorwidget.h"
+
 
 
 namespace Maditor {
@@ -23,6 +25,8 @@ namespace View {
 		ui(new Ui::MainWindow)		
 	{
 		const_cast<Ui::MainWindow*>(ui)->setupUi(this);
+
+		ui->dockWidgetContents->layout()->addWidget(QWidget::createWindowContainer(new InspectorWidget));
 
 		QMenu *menu = createPopupMenu();
 		menu->setTitle("Views");

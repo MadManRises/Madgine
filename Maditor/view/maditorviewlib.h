@@ -41,6 +41,8 @@
 #include <QSplitter>
 #include <QMenuBar>
 #include <QProgressBar>
+#include <QOpenGLWidget>
+#include <QOpenGLWindow>
 
 
 /// @endcond

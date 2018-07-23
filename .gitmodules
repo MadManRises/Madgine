@@ -1,3 +1,6 @@
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/MadManRises/Mad-CMake-Tools.git
+[submodule "Maditor/view/qtimgui"]
+	path = Maditor/view/qtimgui
+	url = https://github.com/seanchas116/qtimgui.git
