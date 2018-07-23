@@ -18,7 +18,7 @@ FolderSources(sources "../../src" Madgine clientforward.h clientlib.h)
 	#	FolderSources(sources gui windows bar.h button.h checkbox.h combobox.h label.h tabwindow.h textbox.h texturedrawer.h window.cpp window.h windowcontainer.cpp windowcontainer.h )
 	FolderSources(sources Madgine gui guisystem.cpp guisystem.h)
 		FolderSources(sources gui windows bar.h button.cpp button.h checkbox.h classid.h combobox.h image.h label.h scenewindow.h tabwindow.h textbox.h window.cpp window.h windowclass.h)
-	FolderSources(sources Madgine input inputhandler.cpp inputHandler.h)
+	FolderSources(sources Madgine input inputhandler.cpp inputhandler.h)
 	FolderSources(sources Madgine scene camera.h cameramanager.h cameramanager.cpp)
 	FolderSources(sources Madgine ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
 
