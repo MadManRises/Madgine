@@ -29,8 +29,6 @@ if (UNIX)
 	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
 endif()
 
-set(BUILD_CLIENT TRUE CACHE BOOL "Build Client Code")
-
 
 include(Workspace)
 include(Packaging)

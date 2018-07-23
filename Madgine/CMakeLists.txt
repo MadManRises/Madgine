@@ -1,14 +1,4 @@
 
-		set(CMAKE_MODULE_PATH
-		  "${CMAKE_MODULE_PATH}"
-		  "${CMAKE_CURRENT_SOURCE_DIR}/plugins/ogre/cmake"
-		)     
-
-#tmp
-if (BUILD_CLIENT AND NOT CONFIG_BUILD)
-	find_package(OGRE REQUIRED)
-endif()
-
 add_subdirectory(project)
 
 add_subdirectory(plugins)

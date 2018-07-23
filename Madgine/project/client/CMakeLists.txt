@@ -7,11 +7,7 @@ cmake_policy(SET CMP0057 NEW)
 
 
 Project(Client)      
-
-set(CMAKE_MODULE_PATH
-  "${CMAKE_MODULE_PATH}"
-  "${Client_SOURCE_DIR}/../../plugins/ogre/cmake"
-)       
+  
 
 set(sources "")
 FolderSources(sources "" "../../src")
