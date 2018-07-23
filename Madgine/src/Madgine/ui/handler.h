@@ -117,9 +117,9 @@ namespace Engine
 		private:
 			std::list<WindowDescriber> mWindows;
 
-			SignalSlot::Slot<&injectMouseMove> mMouseMoveSlot;
-			SignalSlot::Slot<&injectMouseDown> mMouseDownSlot;
-			SignalSlot::Slot<&injectMouseUp> mMouseUpSlot;
+			SignalSlot::Slot<&Handler::injectMouseMove> mMouseMoveSlot;
+			SignalSlot::Slot<&Handler::injectMouseDown> mMouseDownSlot;
+			SignalSlot::Slot<&Handler::injectMouseUp> mMouseUpSlot;
 
 
 		};
