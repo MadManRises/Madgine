@@ -18,12 +18,12 @@ namespace Engine
 
 		static float Sqrt(float a)
 		{
-			return std::sqrtf(a);
+			return sqrtf(a);
 		}
 
 		static float InvSqrt(float a)
 		{
-			return 1.0f / std::sqrtf(a);
+			return 1.0f / sqrtf(a);
 		}
 
 	}
