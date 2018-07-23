@@ -28,6 +28,8 @@ add_precompiled_header(Base ../../src/Madgine/baselib.h FORCEINCLUDE SOURCE_CXX 
 
 target_link_libraries(Base PUBLIC Interfaces)
 
+target_link_libraries(Base PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()
