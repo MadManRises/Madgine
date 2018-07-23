@@ -1,10 +1,10 @@
 #include "maditorlauncherlib.h"
 
-#include "InputWrapper.h"
+#include "inputwrapper.h"
 
 #include "../shared/inputinfo.h"
 
-#include "Madgine/GUI\GUISystem.h"
+#include "madgine/gui/guisystem.h"
 
 namespace Maditor {
 

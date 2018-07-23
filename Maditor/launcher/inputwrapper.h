@@ -2,7 +2,7 @@
 
 
 
-#include "Madgine/Input\InputHandler.h"
+#include "Madgine/input/inputhandler.h"
 
 
 namespace Maditor {
