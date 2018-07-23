@@ -46,7 +46,7 @@ namespace Engine
 			mSettings = &settings;
 
 			if (!loop) {
-				auto f = static_cast<Core::FrameLoop*(*)()>(pluginMgr().getUniqueSymbol("frameloop"));
+				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(pluginMgr().getUniqueSymbol("frameloop"));
 				if (!f)
 					throw 0;
 				loop = std::unique_ptr<Core::FrameLoop>(f());

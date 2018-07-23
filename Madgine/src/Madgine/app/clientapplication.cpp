@@ -24,7 +24,7 @@ namespace Engine
 
 			
 		
-			auto f = static_cast<GUI::GUISystem*(*)(ClientApplication &)>(pluginMgr().getUniqueSymbol("guisystem"));
+			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(pluginMgr().getUniqueSymbol("guisystem"));
 			if (!f)
 				throw 0;
 			mGUI = f(*this);
