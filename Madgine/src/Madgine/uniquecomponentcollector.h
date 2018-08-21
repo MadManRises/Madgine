@@ -6,6 +6,8 @@
 namespace Engine
 {
 
+	template <class Base, class... _Ty>
+	using Collector_F = std::unique_ptr<Base>(*)(_Ty...);
 
 #define COLLECTOR_NAME(Name, Collector) \
 template<> inline const char *Collector::name(){\
@@ -18,8 +20,8 @@ template<> inline const char *Collector::name(){\
 	class LocalCreatorStore
 	{
 	public:
-		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
-			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
+		static std::vector<Collector_F<Base, _Ty...>>& sComponents() {
+			static std::vector<Collector_F<Base, _Ty...>> dummy;
 			return dummy;
 		}
 
@@ -60,16 +62,11 @@ template<> inline const char *Collector::name(){\
 	};
 
 	template <class _Base, class _Store, template <class...> class Container = std::vector, class... _Ty>
-	class UniqueComponentCollector : 
-#ifdef PLUGIN_BUILD
-		LocalCreatorStore<_Base, _Ty...>
-#else
-		_Store
-#endif
+	class UniqueComponentCollector
 	{
 	public:
 		typedef _Base Base;
-		typedef std::function<std::unique_ptr<Base>(_Ty...)> F;
+		typedef Collector_F<Base, _Ty...> F;
 #ifdef PLUGIN_BUILD
 		typedef LocalCreatorStore<_Base, _Ty...> Store;
 #else
@@ -82,18 +79,20 @@ template<> inline const char *Collector::name(){\
 		UniqueComponentCollector(const Plugins::PluginManager &pluginManager, _Ty ... args)
 		{
 			//Necessary for dllexport
-			(void)this->baseIndex();
-			if constexpr (std::is_same_v<Container<F>, std::vector<F>>){
-				mComponents.reserve(this->sComponents().size());
-			}
-			size_t count = this->sComponents().size();
-			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
-				const std::vector<F> *components = loadFromPlugin(&p.second, count);
-				if (components)
-					count += components->size();
+			(void)Store::baseIndex();
+			size_t count = Store::sComponents().size();
+			for (const std::pair<const std::string, Plugins::PluginSection> &sec : pluginManager) {
+				for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
+					const std::vector<F> *components = loadFromPlugin(&p.second, count);
+					if (components)
+						count += components->size();
+				}
 			}
 			mSortedComponents.reserve(count);
-			for (auto f : this->sComponents())
+			if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
+				mComponents.reserve(count);
+			}
+			for (auto f : Store::sComponents())
 			{
 				if (f) {
 					std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
@@ -106,19 +105,21 @@ template<> inline const char *Collector::name(){\
 					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
 				}
 			}
-			for (const std::pair<const std::string, Plugins::Plugin> &p : pluginManager) {
-				const std::vector<F> *components = loadFromPlugin(&p.second, mSortedComponents.size());
-				if (components) {
-					for (auto f : *components) {
-						if (f) {
-							std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
-							mSortedComponents.push_back(p.get());
-							container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
-						}
-						else
-						{
-							mSortedComponents.push_back(nullptr);
-							container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
+			for (const std::pair<const std::string, Plugins::PluginSection> &sec : pluginManager) {
+				for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
+					const std::vector<F> *components = loadFromPlugin(&p.second, mSortedComponents.size());
+					if (components) {
+						for (auto f : *components) {
+							if (f) {
+								std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
+								mSortedComponents.push_back(p.get());
+								container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
+							}
+							else
+							{
+								mSortedComponents.push_back(nullptr);
+								container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
+							}
 						}
 					}
 				}
@@ -145,27 +146,6 @@ template<> inline const char *Collector::name(){\
 		{
 			return mComponents;
 		}
-
-		/*static std::vector<void*> registeredComponentsHashes()
-		{
-			std::vector<void*> result;
-			result.reserve(Store::sComponents().size());
-			for (auto& f : Store::sComponents())
-			{
-				if (f) {
-					result.push_back(&f);
-				}
-			}
-			return result;
-		}*/
-
-		/*typename Container<std::unique_ptr<Base>>::const_iterator postCreate(void* hash, _Ty ... args)
-		{
-			auto fIt = std::find_if(this->sComponents().begin(), this->sComponents().end(),
-			                        [=](const F& f) { return &f == hash; });
-			return container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(),
-			                                                                   (*fIt)(std::forward<_Ty>(args)...)).first;
-		}*/
 
 		template <class T>
 		T &get()
@@ -237,12 +217,12 @@ template<> inline const char *Collector::name(){\
 	template <class Base, class... _Ty>
 	class MADGINE_BASE_EXPORT BaseCreatorStore
 	{
-	protected:
-		static std::vector<std::function<std::unique_ptr<Base>(_Ty ...)>>& sComponents() {
-			static std::vector<std::function<std::unique_ptr<Base>(_Ty...)>> dummy;
+	public:
+		static std::vector<Collector_F<Base, _Ty...>>& sComponents() {
+			static std::vector<Collector_F<Base, _Ty...>> dummy;
 			return dummy;
 		}
-
+	
 		static constexpr size_t baseIndex() { return 0; }
 	};
 

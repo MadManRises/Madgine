@@ -3,18 +3,22 @@
 #include "frameloop.h"
 #include "framelistener.h"
 
+#include "../signalslot/connectionmanager.h"
+
 namespace Engine
 {
 	namespace Core
 	{
 		FrameLoop::FrameLoop() :
-			mTimeBank(0.0f)
+			mTimeBank(0),
+		mShutdown(true)
 		{
 		}
 
 		int FrameLoop::go()
-		{
-			while (singleFrame()) std::this_thread::yield();
+		{			
+			startLoop();
+			while (!mShutdown && singleFrame()) std::this_thread::yield();
 			return 0;
 		}
 
@@ -29,7 +33,7 @@ namespace Engine
 
 		bool FrameLoop::singleFrame()
 		{
-			return sendFrameStarted(0) && sendFrameRenderingQueued(0) && sendFrameEnded(0);
+			return sendFrameStarted(std::chrono::microseconds{0}) && sendFrameRenderingQueued(std::chrono::microseconds{0}) && sendFrameEnded(std::chrono::microseconds{0});
 		}
 
 		void FrameLoop::addFrameListener(FrameListener* listener)
@@ -42,18 +46,35 @@ namespace Engine
 			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
 		}
 
-		bool FrameLoop::sendFrameStarted(float timeSinceLastFrame)
+		void FrameLoop::shutdown()
+		{
+			mShutdown = true;
+		}
+
+		bool FrameLoop::isShutdown()
+		{
+			return mShutdown;
+		}
+
+		void FrameLoop::startLoop()
+		{
+			mShutdown = false;
+		}
+
+		bool FrameLoop::sendFrameStarted(std::chrono::microseconds timeSinceLastFrame)
 		{
 			bool result = true;
-			for (Core::FrameListener* listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameStarted(timeSinceLastFrame);
 			return result;
 		}
 
-		bool FrameLoop::sendFrameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
+		bool FrameLoop::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
+			SignalSlot::ConnectionManager::getSingleton().update();
+
 			bool result = true;
-			for (Core::FrameListener* listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
 			
 			mTimeBank += timeSinceLastFrame;
@@ -67,23 +88,23 @@ namespace Engine
 			return result;
 		}
 
-		bool FrameLoop::sendFrameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context)
+		bool FrameLoop::sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
 			bool result = true;
-			for (Core::FrameListener* listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameFixedUpdate(timeSinceLastFrame, context);
 			return result;
 		}
 
-		float FrameLoop::fixedRemainder() const
+		std::chrono::nanoseconds FrameLoop::fixedRemainder() const
 		{
 			return FIXED_TIMESTEP - mTimeBank;
 		}
 
-		bool FrameLoop::sendFrameEnded(float timeSinceLastFrame)
+		bool FrameLoop::sendFrameEnded(std::chrono::microseconds timeSinceLastFrame)
 		{
 			bool result = true;
-			for (Core::FrameListener* listener : mListeners)
+			for (FrameListener* listener : mListeners)
 				result &= listener->frameEnded(timeSinceLastFrame);
 			return result;
 		}

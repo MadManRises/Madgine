@@ -19,42 +19,31 @@ namespace Engine
 
 	namespace GUI
 	{
-		class GUISystem;
-		struct WindowSizeRelVector;
-		class WindowContainer;
-		class Window;
+		class GUISystem;		
+		class Widget;
 		class Bar;
 		class Button;
 		class SceneWindow;
 		class Checkbox;
 		class Combobox;
-		class TabWindow;
+		class TabWidget;
 		class Textbox;
 		class Label;
 		class Image;
+		class TopLevelWindow;
 
-		struct KeyEventArgs;
-		struct MouseEventArgs;
+		enum class Class;
 
-		namespace MouseButton
-		{
-			enum MouseButton : unsigned char;
-		}
 	}
 
 	namespace Scene
 	{
-		class OgreSceneManager;
 		class SceneComponentBase;
 
 		namespace Entity
 		{
 			class Entity;
 			class EntityComponentBase;
-
-			class OgreTransform;
-			class OgreMesh;
-			class OgreAnimation;
 		}
 	}
 
@@ -63,15 +52,6 @@ namespace Engine
 		class Bounds;
 	}
 
-	namespace Resources
-	{
-		class OgreTexturePtr;
-
-		namespace Shading
-		{
-			class ShaderFactoryBase;
-		}
-	}
 
 	namespace Util
 	{
@@ -83,5 +63,14 @@ namespace Engine
 	namespace Input
 	{
 		class InputHandler;
+		class InputListener;
+
+		struct KeyEventArgs;
+		struct MouseEventArgs;
+
+		namespace MouseButton
+		{
+			enum MouseButton : unsigned char;
+		}
 	}
 }

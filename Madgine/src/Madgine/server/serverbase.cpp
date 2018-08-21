@@ -15,17 +15,14 @@ namespace Engine
 		ServerBase::ServerBase(const std::string& name, Core::Root &root) :
 			Scope(root.luaState()),
 			mLog(name + "-Log"),
-			mName(name),
-			mRunning(false),
+			mName(name),			
 			mRoot(root)
 		{
-			Util::UtilMethods::setup(&mLog);
-			addFrameListener(this);
+			Util::UtilMethods::setup(&mLog);			
 		}
 
 		ServerBase::~ServerBase()
-		{
-			removeFrameListener(this);
+		{			
 			mInstances.clear();
 			Util::UtilMethods::setup(nullptr);
 		}
@@ -35,17 +32,15 @@ namespace Engine
 		{					
 			FrameLoop::init();
 
-			mRunning = true;
+			start();			
 
-			start();
-
-			mLog.startConsole(mRunning, [this](const std::string& cmd) { return performCommand(cmd); });
+			mLog.startConsole([this](const std::string& cmd) { return performCommand(cmd); });
 
 			int result = FrameLoop::go();
 
-			stop();
+			mLog.stopConsole();
 
-			mRunning = false;
+			stop();
 
 			FrameLoop::finalize();
 
@@ -57,16 +52,6 @@ namespace Engine
 			return mLog;
 		}
 
-		void ServerBase::shutdown()
-		{
-			mRunning = false;
-		}
-
-		bool ServerBase::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
-		{
-			SignalSlot::ConnectionManager::getSingleton().update();
-			return mRunning;
-		}
 
 		bool ServerBase::performCommand(const std::string& cmd)
 		{
@@ -80,7 +65,7 @@ namespace Engine
 
 		KeyValueMapList ServerBase::maps()
 		{
-			return Scope::maps().merge(mInstances);
+			return Scope::maps().merge(mInstances, this);
 		}
 	}
 }

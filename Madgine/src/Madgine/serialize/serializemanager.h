@@ -4,6 +4,8 @@
 
 #include "../signalslot/signal.h"
 
+#include "serializableids.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -19,14 +21,7 @@ namespace Engine
 			size_t mObject;
 		};
 
-		enum ReservedIds
-		{
-			NO_ID = 0,
-			NULL_UNIT_ID = 1,
-			SERIALIZE_MANAGER = 2,
-			BEGIN_USER_ID_SPACE,
-			RESERVED_ID_COUNT = 256
-		};
+		
 
 		class INTERFACES_EXPORT SerializeManager
 		{
@@ -79,7 +74,7 @@ namespace Engine
 			SerializableUnitBase* convertPtr(SerializeInStream& in, size_t unit);
 
 			std::vector<ParticipantId> getMasterParticipantIds();
-			int clientCount() const;
+			size_t clientCount() const;
 
 			const std::string& name() const;
 
@@ -91,12 +86,12 @@ namespace Engine
 
 
 			bool receiveMessages(BufferedInOutStream* stream, int msgCount);
-			bool sendAllMessages(BufferedInOutStream* stream, int timeout = 0);
+			bool sendAllMessages(BufferedInOutStream* stream, std::chrono::milliseconds timeout = {});
 
 			BufferedInOutStream* getSlaveStream() const;
 
 			void removeAllStreams();
-			StreamError setSlaveStream(BufferedInOutStream* stream, bool receiveState = true, int timeout = 0);
+			StreamError setSlaveStream(BufferedInOutStream* stream, bool receiveState = true, std::chrono::milliseconds timeout = {});
 			virtual void removeSlaveStream();
 			bool addMasterStream(BufferedInOutStream* stream, bool sendState = true);
 			virtual void removeMasterStream(BufferedInOutStream* stream);

@@ -113,43 +113,20 @@ namespace Engine
 		}
 	};
 
-
-	template <class _Ty = void>
-	struct KeyCompare
-	{
-		// functor for operator<
-		typedef _Ty first_argument_type;
-		typedef _Ty second_argument_type;
-		typedef bool result_type;
-
-		constexpr bool operator()(const _Ty& _Left, const _Ty& _Right) const
-		{
-			// apply operator< to operands
-			return (kvKey(_Left) < kvKey(_Right));
-		}
-	};
-
-	template <class _Ty = void>
-	struct KeyHash
-	{	
-		typedef _Ty argument_type;
-		typedef size_t result_type;
-
-		constexpr size_t operator()(const _Ty& _Arg) const 
-		{
-			return std::hash<typename KeyType<_Ty>::type>{}(kvKey(_Arg));
-		}
-	};
-
 	template <class T>
 	class SetConstIterator;
 
 	template <class T>
-	class SetIterator : public std::iterator<typename std::iterator_traits<typename std::set<T>::iterator>::
-	                                         iterator_category, T>
+	class SetIterator
 	{
 	public:
 		typedef typename std::set<T>::iterator It;
+
+		using iterator_category = typename It::iterator_category;
+		using value_type = typename It::value_type;
+		using difference_type = typename It::difference_type;
+		using pointer = std::remove_const_t<typename It::value_type>*;
+		using reference = std::remove_const_t<typename It::value_type>&;
 
 		SetIterator()
 		{
@@ -207,11 +184,16 @@ namespace Engine
 	};
 
 	template <class T>
-	class SetConstIterator : public std::iterator<typename std::iterator_traits<typename std::set<T>::iterator>::
-	                                              iterator_category, T>
+	class SetConstIterator
 	{
 	public:
 		typedef typename std::set<T>::const_iterator It;
+
+		using iterator_category = typename It::iterator_category;
+		using value_type = typename It::value_type;
+		using difference_type = typename It::difference_type;
+		using pointer = typename It::pointer;
+		using reference = typename It::reference;
 
 		SetConstIterator(It&& it) :
 			mIterator(std::forward<It>(it))

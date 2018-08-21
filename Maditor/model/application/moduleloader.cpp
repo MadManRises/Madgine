@@ -171,7 +171,7 @@ namespace Maditor {
 
 		Q_INVOKABLE int ModuleLoader::rowCount(const QModelIndex & parent) const
 		{
-			return Q_INVOKABLE mInstances.size();
+			return Q_INVOKABLE static_cast<int>(mInstances.size());
 		}
 
 		QVariant ModuleLoader::data(int row, int column, int role) const

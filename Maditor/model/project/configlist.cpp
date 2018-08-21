@@ -50,7 +50,7 @@ namespace Maditor {
 		void ConfigList::addConfig(std::unique_ptr<ApplicationConfig> &&config)
 		{
 
-			bool b = beginInsertRows(mConfigs.size(), mConfigs.size());
+			bool b = beginInsertRows(static_cast<int>(mConfigs.size()), static_cast<int>(mConfigs.size()));
 			ApplicationConfig *c = mConfigs.emplace_back(std::forward<std::unique_ptr<ApplicationConfig>>(config)).get();
 			endInsertRows(b);
 
@@ -68,7 +68,7 @@ namespace Maditor {
 			emit configRemoved(config);
 
 			auto it = std::find_if(mConfigs.begin(), mConfigs.end(), [=](const std::unique_ptr<ApplicationConfig> &conf) {return conf.get() == config; });
-			size_t i = std::distance(mConfigs.begin(), it);
+			int i = static_cast<int>(std::distance(mConfigs.begin(), it));
 			bool b = beginRemoveRows(i, i);
 			mConfigs.erase(it);
 			endRemoveRows(b);
@@ -141,7 +141,7 @@ namespace Maditor {
 		}
 
 		int ConfigList::childCount() const {
-			return mConfigs.size();
+			return static_cast<int>(mConfigs.size());
 		}
 
 		ApplicationConfig * ConfigList::child(int i) {

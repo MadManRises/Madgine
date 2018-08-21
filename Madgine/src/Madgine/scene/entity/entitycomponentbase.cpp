@@ -1,17 +1,18 @@
 #include "../../baselib.h"
 #include "entitycomponentbase.h"
 #include "entity.h"
-#include "../scenemanager.h"
-#include "../../app/application.h"
 
 namespace Engine
 {
+	API_IMPL(Scene::Entity::EntityComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
+		MAP_RO(Active, isActive));
+	
 	namespace Scene
 	{
 		namespace Entity
 		{
 			EntityComponentBase::EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable) :
-				ScopeBase(entity.sceneMgr().app().createTable()),
+				Scope(&entity),
 				mEntity(&entity),
 				mInitTable(initTable)
 			{

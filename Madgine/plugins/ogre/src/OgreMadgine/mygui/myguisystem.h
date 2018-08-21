@@ -7,45 +7,22 @@ namespace Engine
 	namespace GUI
 	{
 		
-		class MyGUISystem : public GUISystem, public Ogre::WindowEventListener, public Ogre::FrameListener, public Ogre::LogListener
+		class MyGUISystem : public GUISystem, public Ogre::FrameListener, public Ogre::LogListener
 		{
 		public:
 			MyGUISystem(App::ClientApplication &app);
 			~MyGUISystem();
 
-			void injectKeyPress(const KeyEventArgs& arg) override;
-			void injectKeyRelease(const KeyEventArgs& arg) override;
-			void injectMousePress(const MouseEventArgs& arg) override;
-			void injectMouseRelease(const MouseEventArgs& arg) override;
-			void injectMouseMove(const MouseEventArgs& arg) override;
-
-			Vector2 relativeMoveDelta(MyGUI::Widget* w) const;
-			Vector2 widgetRelative(MyGUI::Widget* w, int left = -1, int top = -1) const;
-
-			static MyGUI::MouseButton convertButton(MouseButton::MouseButton buttonID);
-			static MouseButton::MouseButton convertButton(MyGUI::MouseButton buttonID);
-
-			bool isCursorVisible() override;
-			void setCursorVisibility(bool v) override;
-			void setCursorPosition(const Vector2& pos) override;
-			Vector2 getCursorPosition() override;
-			Vector3 getScreenSize() override;
 			
-			int go() override;
 
-			std::unique_ptr<Window> createWindow(const std::string &name) override;
-			std::unique_ptr<Bar> createBar(const std::string &name) override;
-			std::unique_ptr<Button> createButton(const std::string &name) override;
-			std::unique_ptr<Checkbox> createCheckbox(const std::string &name) override;
-			std::unique_ptr<Combobox> createCombobox(const std::string &name) override;
-			std::unique_ptr<Label> createLabel(const std::string &name) override;
-			std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name) override;
-			std::unique_ptr<TabWindow> createTabWindow(const std::string &name) override;
-			std::unique_ptr<Textbox> createTextbox(const std::string &name) override;
-			std::unique_ptr<Image> createImage(const std::string &name) override;
+			
 
-			MyGUI::Widget *rootWidget();
+			static MyGUI::MouseButton convertButton(Input::MouseButton::MouseButton buttonID);
+			static Input::MouseButton::MouseButton convertButton(MyGUI::MouseButton buttonID);
 
+			
+			int go() override;			
+			
 		protected:
 			/**
 			* This will be called by Ogre whenever a new frame is started. It returns <code>false</code>, if the Application was shutdown().
@@ -77,31 +54,13 @@ namespace Engine
 				const Ogre::String& logName, bool& skipThisMessage) override;
 
 			virtual bool init() override;
-			virtual bool singleFrame() override;
+			
 			
 		private:
 			std::unique_ptr<Ogre::Root> mRoot;
-			Ogre::Camera *mCamera;
-			Ogre::Viewport *mViewport;
-			Ogre::RenderWindow *mWindow;			
-			void *mHwnd;
 
-			std::unique_ptr<Input::InputHandler> mInputHolder;
-			Input::InputHandler *mInput;
 
-			MyGUI::OgrePlatform *mPlatform;
-			MyGUI::Gui *mGUI;
-			MyGUI::InputManager* mInputManager;
-			MyGUI::PointerManager *mPointerManager;
-			MyGUI::OgreRenderManager *mRenderManager;
-			MyGUI::LayoutManager* mLayoutManager;
-			MyGUI::ResourceManager* mResourceManager;
-			MyGUI::Widget *mRootWindow;
-
-			float mScrollWheel;
-
-			Vector2 mMousePosition;
-			Vector2 mMoveDelta;
+			
 
 		};
 

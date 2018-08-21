@@ -41,7 +41,7 @@ namespace Maditor
 		void StandaloneLauncher::connect()
 		{
 			emit connecting();
-			mNetwork.connect_async("127.0.0.1", Shared::Constants::sDefaultLauncherPort, 10000);
+			mNetwork.connect_async("127.0.0.1", Shared::Constants::sDefaultLauncherPort, std::chrono::milliseconds{ 10000 });
 		}
 
 		void StandaloneLauncher::shutdownImpl()

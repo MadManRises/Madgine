@@ -24,7 +24,9 @@ namespace Engine
 	public:
 		virtual ~KeyValueRef() = default;
 		virtual std::shared_ptr<KeyValueIterator> iterator() = 0;
+		virtual std::shared_ptr<KeyValueIterator> find(const std::string &key) = 0;
 		virtual std::optional<ValueType> get(const std::string& key) = 0;
+		virtual bool set(const std::string &key, const ValueType &value) = 0;
 		virtual bool contains(const std::string& key) = 0;
 	};
 
@@ -41,6 +43,24 @@ namespace Engine
 		return v.toValueType();
 	}
 
+	template <class T, class _ = decltype(std::declval<ValueType>.as<T>())>
+	void fromValueType(Scripting::ScopeBase *ref, T& v, const ValueType &value)
+	{
+		v = value.as<T>();
+	}
+
+	template <class T>
+	void fromValueType(Scripting::ScopeBase *ref, const T &v, const ValueType &value)
+	{
+		throw 0; //read-only
+	}
+
+	/*template <class T, class _ = decltype(std::declval<T>().fromValueType(std::declval<ValueType>()))>
+	void fromValueType(Scripting::ScopeBase * ref, T &v, const ValueType &value)
+	{
+		v.fromValueType(value);
+	}*/
+
 
 	template <class T>
 	class KeyValueMapRef : public KeyValueRef
@@ -54,12 +74,17 @@ namespace Engine
 
 		std::shared_ptr<KeyValueIterator> iterator() override
 		{
-			return std::static_pointer_cast<KeyValueIterator>(std::make_shared<Iterator>(mMap, mRef));
+			return std::make_shared<Iterator>(mMap, mRef);
+		}
+
+		std::shared_ptr<KeyValueIterator> find(const std::string &key) override
+		{			
+			return std::make_shared<Iterator>(mMap, mRef, kvFind(mMap, key));
 		}
 
 		std::optional<ValueType> get(const std::string& key) override
 		{
-			auto it = Finder<T, std::string>::find(mMap, key);
+			auto it = kvFind(mMap, key);
 			if (it != mMap.end())
 			{
 				return toValueType(mRef, kvValue(*it));
@@ -67,22 +92,42 @@ namespace Engine
 			return {};
 		}
 
+		bool set(const std::string &key, const ValueType &value) override
+		{
+			auto it = kvFind(mMap, key);
+			if (it != mMap.end())
+			{
+				fromValueType(mRef, kvValue(*it), value);
+				return true;
+			}
+			return false;
+		}
+
 		bool contains(const std::string& key) override
 		{
-			auto it = Finder<T, std::string>::find(mMap, key);
-			return it != mMap.end();
+			return kvFind(mMap, key) != mMap.end();
 		}
 
 	private:
 		class Iterator : public KeyValueIterator
 		{
 		public:
+			using InternIt = decltype(std::declval<T>().begin());
+
 			Iterator(T& map, Scripting::ScopeBase* ref) :
 				mMap(map),
 				mIt(map.begin()),
 				mRef(ref)
 			{
 			}
+
+			Iterator(T& map, Scripting::ScopeBase* ref, const InternIt &it) :
+				mMap(map),
+				mIt(it),
+				mRef(ref)
+			{
+			}
+
 
 			std::string key() override
 			{
@@ -111,7 +156,7 @@ namespace Engine
 
 		private:
 			T & mMap;
-			decltype(std::declval<T>().begin()) mIt;
+			InternIt mIt;
 			Scripting::ScopeBase* mRef;
 		};
 
@@ -132,7 +177,15 @@ namespace Engine
 
 		std::shared_ptr<KeyValueIterator> iterator() override
 		{
-			return std::static_pointer_cast<KeyValueIterator>(std::make_shared<Iterator>(mItem, mRef));
+			return std::make_shared<Iterator>(mItem, mRef);
+		}
+
+		std::shared_ptr<KeyValueIterator> find(const std::string &key) override
+		{
+			if (kvKey(mItem) == key)
+				return std::make_shared<Iterator>(mItem, mRef);
+			else
+				return std::make_shared<Iterator>(mItem);
 		}
 
 		std::optional<ValueType> get(const std::string& key) override
@@ -142,6 +195,16 @@ namespace Engine
 				return toValueType(mRef, kvValue(mItem));
 			}
 			return {};
+		}
+
+		bool set(const std::string &key, const ValueType &value) override
+		{
+			if (kvKey(mItem) == key)
+			{
+				fromValueType(mRef, kvValue(mItem), value);
+				return true;
+			}
+			return false;
 		}
 
 		bool contains(const std::string& key) override
@@ -158,6 +221,14 @@ namespace Engine
 				mEnded(false),
 				mRef(ref)
 			{
+			}
+
+			Iterator(const T& item) :
+			mItem(item),
+			mEnded(true),
+			mRef(nullptr)
+			{
+				
 			}
 
 			std::string key() override
@@ -222,10 +293,7 @@ namespace Engine
 			mRef(ref)
 		{
 			mRefs.reserve(sizeof...(Ty));
-			using unpacker = bool[];
-			(void)unpacker {
-				(mRefs.emplace_back(make_ref(ref, std::forward<Ty>(maps))), true)...
-			};
+			(mRefs.emplace_back(make_ref(ref, std::forward<Ty>(maps))) , ...);
 		}
 
 		KeyValueMapList() = delete;
@@ -234,7 +302,9 @@ namespace Engine
 
 		KeyValueMapList& operator=(const KeyValueMapList&) = delete;
 
+		std::unique_ptr<KeyValueIterator> find(const std::string &key);
 		std::optional<ValueType> get(const std::string& key);
+		bool set(const std::string &key, const ValueType &value);
 		std::unique_ptr<KeyValueIterator> iterator();
 
 		KeyValueMapList merge(KeyValueMapList&& other) && ;
@@ -261,6 +331,7 @@ namespace Engine
 	{
 	public:
 		KeyValueMapListIterator(const KeyValueMapList& list);
+		KeyValueMapListIterator(std::vector<std::shared_ptr<KeyValueIterator>> &&elements = {});
 		std::string key() override;
 		ValueType value() override;
 		void operator++() override;

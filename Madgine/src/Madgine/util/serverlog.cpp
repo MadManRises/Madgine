@@ -20,21 +20,21 @@ namespace Engine
 			StandardLog(name),
 			mCharTypedSlot(this),
 			mHandleSlot(this),
-			mFlag(nullptr),
+			mRunning(false),
 			mEcho(false)
 		{
 		}
 
 		ServerLog::~ServerLog()
 		{
-			mConsoleThread.join();
+			stopConsole();
 		}
 
 		void ServerLog::log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack)
 		{
 			std::cout << "\r";
 			StandardLog::log(msg, lvl, traceBack);
-			if (mFlag && *mFlag)
+			if (mRunning)
 			{
 				std::cout << "prompt> " << mCurrentCmd;
 				std::cout.flush();
@@ -51,12 +51,12 @@ namespace Engine
 			bool console = GetConsoleMode(input, &fdwOldMode);
 			// disable mouse and window input
 			DWORD fdwMode = fdwOldMode ^ ENABLE_MOUSE_INPUT ^ ENABLE_WINDOW_INPUT;
-			console &= SetConsoleMode(input, fdwMode);
+			console &= static_cast<bool>(SetConsoleMode(input, fdwMode));
 
 			mEcho = console;
 
 			CHAR buffer[256];
-			while (*mFlag)
+			while (mRunning)
 			{
 				DWORD dwRead = 0;
 
@@ -117,7 +117,7 @@ namespace Engine
 			{
 				std::cout << "Unknown Command: " << cmd << std::endl;
 			}
-			if (*mFlag)
+			if (mRunning)
 			{
 				std::cout << "prompt> ";
 				std::cout.flush();
@@ -135,14 +135,20 @@ namespace Engine
 		}
 
 
-		void ServerLog::startConsole(bool& flag, const std::function<bool(const std::string&)>& evaluator)
+		void ServerLog::startConsole(const std::function<bool(const std::string&)>& evaluator)
 		{
 			assert(!mConsoleThread.joinable());
 			std::cout << "prompt> ";
 			std::cout.flush();
-			mFlag = &flag;
+			mRunning = true;
 			mEvaluator = evaluator;
 			mConsoleThread = std::thread(&ServerLog::runConsole, this);
+		}
+
+		void ServerLog::stopConsole()
+		{
+			mRunning = false;
+			mConsoleThread.join();
 		}
 	}
 }

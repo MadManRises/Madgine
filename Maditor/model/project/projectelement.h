@@ -47,9 +47,9 @@ namespace Maditor {
 			void dirty();
 
 			std::optional<QModelIndex> modelIndex();
-			bool beginInsertRows(size_t first, size_t last);
+			bool beginInsertRows(int first, int last);
 			void endInsertRows(bool begun);
-			bool beginRemoveRows(size_t first, size_t last);
+			bool beginRemoveRows(int first, int last);
 			void endRemoveRows(bool begun);
 
 		protected:

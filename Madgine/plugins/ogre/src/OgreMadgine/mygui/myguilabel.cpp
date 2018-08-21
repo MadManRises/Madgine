@@ -2,26 +2,26 @@
 
 #include "myguilabel.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUILabel::MyGUILabel(const std::string& name, MyGUIWindow* parent) :
-		MyGUIWindow(name, parent),
-		Window(name, parent),
+		MyGUILabel::MyGUILabel(const std::string& name, MyGUIWidget* parent) :
+		MyGUIWidget(name, parent),
+			Widget(name, parent),
 		Label(name, parent)
 		{
 			mTextBox = parent->widget()->createWidget<MyGUI::TextBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
-		MyGUILabel::MyGUILabel(const std::string& name, MyGUISystem& system) :
-		Window(name, system),
-		MyGUIWindow(name, system),
-		Label(name, system)
+		MyGUILabel::MyGUILabel(const std::string& name, MyGUITopLevelWindow& window) :
+			Widget(name, window),
+		MyGUIWidget(name, window),
+		Label(name, window)
 		{
-			mTextBox = system.rootWidget()->createWidget<MyGUI::TextBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mTextBox = window.rootWidget()->createWidget<MyGUI::TextBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
 		void MyGUILabel::setText(const std::string& text)

@@ -26,7 +26,7 @@ namespace Engine {
 
 		mRoot = &Ogre::Root::getSingleton();
 
-		mSceneMgr = mRoot->createSceneManager(Ogre::ST_GENERIC, "SceneTmp");
+		mSceneMgr = mRoot->getSceneManager("GUISystemManager");
 
 		mSceneMgr->setAmbientLight(Ogre::ColourValue(0.8f, 0.8f, 0.8f));
 
@@ -42,14 +42,6 @@ namespace Engine {
 
 		mTerrainRayQuery = mSceneMgr->createRayQuery(Ogre::Ray(), Scene::Entity::Masks::TERRAIN_MASK);
 		mTerrainRayQuery->setSortByDistance(true);
-
-		
-
-		
-
-		
-
-
 		//	mVp->setMaterialScheme(Ogre::RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
 
 

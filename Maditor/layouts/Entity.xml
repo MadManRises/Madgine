@@ -1,0 +1,9 @@
+<Layout name="Entity" depth="1">  
+
+  <Inherit name="SerializableUnit"></Inherit>
+
+  <MemberList>
+    <Rule layout="EntityComponent"></Rule>
+  </MemberList>
+
+</Layout>

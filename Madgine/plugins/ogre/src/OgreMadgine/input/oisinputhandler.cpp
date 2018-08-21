@@ -1,7 +1,7 @@
 #include "../ogrelib.h"
 #include "oisinputhandler.h"
 
-#include "Madgine/gui/guievents.h"
+#include "Madgine/input/inputevents.h"
 
 namespace Engine
 {
@@ -43,16 +43,16 @@ namespace Engine
 			Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
 		}
 
-		GUI::MouseButton::MouseButton OISInputHandler::convertMouseButton(OIS::MouseButtonID id)
+		MouseButton::MouseButton OISInputHandler::convertMouseButton(OIS::MouseButtonID id)
 		{
 			switch (id)
 			{
 			case OIS::MB_Left:
-				return GUI::MouseButton::LEFT_BUTTON;
+				return MouseButton::LEFT_BUTTON;
 			case OIS::MB_Right:
-				return GUI::MouseButton::RIGHT_BUTTON;
+				return MouseButton::RIGHT_BUTTON;
 			case OIS::MB_Middle:
-				return GUI::MouseButton::MIDDLE_BUTTON;
+				return MouseButton::MIDDLE_BUTTON;
 			default:
 				throw 0;
 			}
@@ -60,13 +60,13 @@ namespace Engine
 
 		bool OISInputHandler::keyPressed(const OIS::KeyEvent& arg)
 		{
-			injectKeyPress({static_cast<GUI::Key>(arg.key), static_cast<char>(arg.text)});
+			injectKeyPress({static_cast<Key>(arg.key), static_cast<char>(arg.text)});
 			return true;
 		}
 
 		bool OISInputHandler::keyReleased(const OIS::KeyEvent& arg)
 		{
-			injectKeyRelease({static_cast<GUI::Key>(arg.key)});
+			injectKeyRelease({static_cast<Key>(arg.key)});
 			return true;
 		}
 

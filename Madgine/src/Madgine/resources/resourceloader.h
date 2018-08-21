@@ -23,7 +23,11 @@ namespace Engine
 
 			ResourceType *get(const std::string &name)
 			{
-				return &mResources.at(name);
+				auto it = mResources.find(name);
+				if (it != mResources.end())
+					return &it->second;
+				else
+					return nullptr;
 			}
 
 			virtual std::shared_ptr<Data> load(ResourceType* res) = 0;

@@ -5,41 +5,50 @@
 namespace Maditor {
 	namespace Model {
 
-		class ValueItem : public TreeItem {
+		class MADITOR_MODEL_EXPORT ValueItem {
 		public:
-			ValueItem(ScopeWrapperItem *parent, const std::string &name, const Engine::ValueType &value);
-
-			virtual TreeItem *child(int) override { throw 0; };
-			virtual QVariant cellData(int col) const override;
-			virtual TreeItem *parentItem() const override;
+			ValueItem(ScopeWrapperItem *parent, const std::string &name, const Engine::ValueType &value, const std::string &type, Engine::KeyValueValueFlags flags);
 
 			void setValue(const Engine::ValueType &val);
-			bool isEditable();
-			void setEditable(bool b);
+			void requestSetValue(const Engine::ValueType &val);
+			Engine::KeyValueValueFlags flags();
+
+			const std::string &name() const;
+			const Engine::ValueType &value() const;
+
+			QString type();
 
 		private:
 			std::string mName;
 			Engine::ValueType mValue;
+			std::string mType;
 			ScopeWrapperItem *mParent;
-			bool mEditable;
+			Engine::KeyValueValueFlags mFlags;
 		};
 
 
-		class ScopeWrapperItem : public TreeItem {
+		class MADITOR_MODEL_EXPORT ScopeWrapperItem {
 		public:
 			ScopeWrapperItem(Inspector *parent, Engine::InvScopePtr ptr);
 			virtual ~ScopeWrapperItem();
 
 			void clear();
 
-			virtual int childCount() const override;
-			virtual TreeItem *child(int i) override;
-			virtual QVariant cellData(int col) const override;		
-			virtual TreeItem *parentItem() const override;
+			void update(const std::string &key, const std::map<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &data);
 
-			void update(const std::map<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &data);
+			std::map<std::string, ValueItem> &values();
 
-			QModelIndex getIndex();
+			void setType(const QString &tag);
+			const QString &type() const;
+
+			const QString &key() const;
+
+			Engine::InvScopePtr ptr();
+
+			ScopeWrapperItem *resolve(Engine::InvScopePtr ptr);
+
+			void setField(const std::string& name, const Engine::ValueType& value);
+			
 
 		private:
 
@@ -48,6 +57,10 @@ namespace Maditor {
 			Engine::InvScopePtr mPtr;
 			
 			Inspector *mInspector;
+
+			QString mType;
+
+			QString mKey;
 
 		};
 	}

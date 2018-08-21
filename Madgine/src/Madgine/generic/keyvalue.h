@@ -19,7 +19,7 @@ namespace Engine
 			return v;
 		}
 
-		static typename std::invoke_result<decltype(&T::key), T*>::type key(const T& v)
+		static typename std::template invoke_result<decltype(&T::key), T*>::type key(const T& v)
 		{
 			return v.key();
 		}
@@ -200,10 +200,40 @@ namespace Engine
 	};
 
 	template <class T>
+	using FixString_t = typename FixString<T>::type;
+
+	template <class T>
 	struct KeyType
 	{
-		typedef typename FixString<typename std::remove_const<typename std::remove_reference<decltype(kvKey(std::declval<T>())
-		)>::type>::type>::type type;
+		typedef FixString_t<std::remove_const_t<std::remove_reference_t<decltype(kvKey(std::declval<T>()))>>> type;
+	};
+
+
+	template <class _Ty = void>
+	struct KeyCompare
+	{
+		// functor for operator<
+		typedef _Ty first_argument_type;
+		typedef _Ty second_argument_type;
+		typedef bool result_type;
+
+		constexpr bool operator()(const _Ty& _Left, const _Ty& _Right) const
+		{
+			// apply operator< to operands
+			return (kvKey(_Left) < kvKey(_Right));
+		}
+	};
+
+	template <class _Ty = void>
+	struct KeyHash
+	{
+		typedef _Ty argument_type;
+		typedef size_t result_type;
+
+		constexpr size_t operator()(const _Ty& _Arg) const
+		{
+			return std::hash<typename KeyType<_Ty>::type>{}(kvKey(_Arg));
+		}
 	};
 
 }

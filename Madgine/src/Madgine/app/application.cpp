@@ -6,18 +6,17 @@
 
 
 
-#include "../scripting/types/globalapicomponent.h"
-
-#include "../scripting/types/luastate.h"
+#include "../scripting/types/globalapicomponentbase.h"
 
 #include "../util/standardlog.h"
 
-#include "../core/framelistener.h"
 #include "../core/root.h"
 #include "../core/frameloop.h"
 #include "../serialize/container/noparent.h"
 
 #include "../scene/scenemanager.h"
+
+#include <Windows.h>
 
 API_IMPL(Engine::App::Application, MAP_F(shutdown));
 
@@ -28,10 +27,10 @@ namespace Engine
 	{
 		Application::Application(Core::Root &root) :
 			Scope(root.luaState()),
-			mShutDown(false),
 			mSettings(nullptr),
-			mGlobalAPIs(root.pluginMgr(), *this),
-			mRoot(root)
+			mGlobalAPIs((LoadLibrary("Tools_d.dll"), root.pluginMgr()), *this),
+			mRoot(root),
+		mGlobalAPIInitCounter(0)
 		{
 		}
 
@@ -45,8 +44,11 @@ namespace Engine
 		{
 			mSettings = &settings;
 
+			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
+			Util::UtilMethods::setup(mLog.get());
+
 			if (!loop) {
-				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(pluginMgr().getUniqueSymbol("frameloop"));
+				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(pluginMgr().at("Renderer").getUniqueSymbol("frameloop"));
 				if (!f)
 					throw 0;
 				loop = std::unique_ptr<Core::FrameLoop>(f());
@@ -54,13 +56,8 @@ namespace Engine
 					throw 0;
 			}
 
-			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
-			Util::UtilMethods::setup(mLog.get());
-			mSceneMgr = Serialize::make_noparent_unique<Scene::SceneManager>(*this);
-
 			mLoop = std::forward<std::unique_ptr<Core::FrameLoop>>(loop);
 			mLoop->addFrameListener(this);
-			mLoop->addFrameListener(mSceneMgr.get());
 		}
 
 		bool Application::init()
@@ -68,41 +65,38 @@ namespace Engine
 			
 			markInitialized();
 
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
-			{
-				if (!api->callInit())
-					return false;
-			}
 
 			if (!mLoop->callInit())
 				return false;
 
-			if (!mSceneMgr->callInit())
-				return false;
+			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+			{
+				if (!api->callInit(mGlobalAPIInitCounter))
+					return false;
+			}
 
 			return true;
 		}
 
 		void Application::finalize()
 		{
-			mSceneMgr->callFinalize();
+			for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
+				for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+				{
+					api->callFinalize(mGlobalAPIInitCounter);
+				}
+			}
 
 			mLoop->callFinalize();
-
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
-			{
-				api->callFinalize();
-			}
 		}
 
 		void Application::shutdown()
 		{
-			mShutDown = true;
+			mLoop->shutdown();
 		}
 
 		int Application::go()
 		{
-			mShutDown = false;
 
 			if (mSettings->mRunMain) {
 				if (!callMethodCatch("main"))
@@ -116,18 +110,8 @@ namespace Engine
 			return result;
 		}
 
-		bool Application::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
+		bool Application::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
-			if (mShutDown)
-			{
-				return false;
-			}
-
-			
-			{
-				//PROFILE("ConnectionDispatch");
-				SignalSlot::ConnectionManager::getSingleton().update();
-			}
 
 			{
 				//PROFILE("ScriptingManager")
@@ -152,7 +136,7 @@ namespace Engine
 
 		bool Application::isShutdown() const
 		{
-			return mShutDown;
+			return mLoop->isShutdown();
 		}
 
 		float Application::getFPS()
@@ -163,7 +147,7 @@ namespace Engine
 
 		KeyValueMapList Application::maps()
 		{
-			return Scope::maps().merge(mGlobalAPIs, mSceneMgr);
+			return Scope::maps().merge(mGlobalAPIs, this);
 		}
 
 		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)
@@ -171,27 +155,29 @@ namespace Engine
             Scripting::GlobalAPIComponentBase &api = mGlobalAPIs.get(i); 
             if (init){
                 checkInitState();
-                api.callInit();
+                api.callInit(mGlobalAPIInitCounter);
             }
 			return api.getSelf(init);
 		}
 
 		Scene::SceneComponentBase& Application::getSceneComponent(size_t i, bool init)
 		{
+			Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
             if (init){
                 checkInitState();
-                mSceneMgr->callInit();
+                sceneMgr.callInit(mGlobalAPIInitCounter);
             }
-			return mSceneMgr->getComponent(i, init);
+			return sceneMgr.getComponent(i, init);
 		}
 
 		Scene::SceneManager& Application::sceneMgr(bool init)
 		{
+			Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
             if (init){
                 checkInitState();
-                mSceneMgr->callInit();
+				sceneMgr.callInit(mGlobalAPIInitCounter);
             }
-			return mSceneMgr->getSelf(init);
+			return sceneMgr.getSelf(init);
 		}
         
         Application &Application::getSelf(bool init){
@@ -206,9 +192,9 @@ namespace Engine
 		{
 			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
 			{
-				p->clear();
+				//p->clear();
 			}
-			mSceneMgr->clear();
+			mGlobalAPIs.get<Scene::SceneManager>().clear();
 		}
 
 		void Application::addFrameListener(Core::FrameListener* listener)

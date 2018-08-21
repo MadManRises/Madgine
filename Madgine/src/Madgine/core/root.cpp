@@ -11,7 +11,7 @@ namespace Engine
 	{
 		Root::Root(const RootSettings &settings) :
 			mSettings(settings),
-		mPluginManager("Madgine", "Renderer")
+		mPluginManager("Madgine")
 		{
 		}
 

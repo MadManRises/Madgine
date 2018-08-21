@@ -4,7 +4,7 @@
 
 #include "../gui/guisystem.h"
 #include "../ui/uimanager.h"
-#include "../gui/windows/window.h"
+#include "../gui/widgets/widget.h"
 
 
 namespace Engine
@@ -21,11 +21,11 @@ namespace Engine
 
 		bool GuiHandlerBase::init()
 		{
-			GUI::Window* window = mUI.gui().getWindowByName(mWindowName);
+			GUI::Widget* window = mUI.gui().getWidgetByName(mWidgetName);
 
 			if (!window)
 			{
-				LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWindowName));
+				LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWidgetName));
 				return false;
 			}
 			if (window)
@@ -36,7 +36,7 @@ namespace Engine
 		void GuiHandlerBase::finalize()
 		{
 			Handler::finalize();
-			mWindow = nullptr;
+			mWidget = nullptr;
 		}
 
 		void GuiHandlerBase::open()
@@ -80,7 +80,7 @@ namespace Engine
 
 		bool GuiHandlerBase::isOpen() const
 		{
-			return mWindow->isVisible();
+			return mWidget->isVisible();
 		}
 
 

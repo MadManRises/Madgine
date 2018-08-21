@@ -3,6 +3,17 @@
 
 namespace Engine
 {
+	std::unique_ptr<KeyValueIterator> KeyValueMapList::find(const std::string& key)
+	{
+		for (const std::unique_ptr<KeyValueRef>& p : *this)
+		{
+			std::shared_ptr<KeyValueIterator> v = p->find(key);
+			if (!v->ended())
+				return std::make_unique<KeyValueMapListIterator>(std::vector<std::shared_ptr<KeyValueIterator>>{std::move(v)});
+		}
+		return std::make_unique<KeyValueMapListIterator>();
+	}
+
 	std::optional<ValueType> KeyValueMapList::get(const std::string& key)
 	{
 		for (const std::unique_ptr<KeyValueRef>& p : *this)
@@ -13,6 +24,18 @@ namespace Engine
 		}
 		return {};
 	}
+
+	bool KeyValueMapList::set(const std::string& key, const ValueType& value)
+	{
+		for (const std::unique_ptr<KeyValueRef>& p : *this)
+		{
+			bool b = p->set(key, value);
+			if (b)
+				return b;
+		}
+		return false;
+	}
+
 
 	bool KeyValueMapList::contains(const std::string& key)
 	{
@@ -38,6 +61,13 @@ namespace Engine
 		               {
 			               return m->iterator();
 		               });
+		validate();
+	}
+
+	KeyValueMapListIterator::KeyValueMapListIterator(std::vector<std::shared_ptr<KeyValueIterator>>&& elements) :
+	mIndex(0),
+	mIterators{std::forward<std::vector<std::shared_ptr<KeyValueIterator>>>(elements)}
+	{
 		validate();
 	}
 
@@ -76,7 +106,7 @@ namespace Engine
 	KeyValueMapList KeyValueMapList::merge(KeyValueMapList&& other) &&
 	{
 		mRefs.reserve(size() + other.size());
-		move(other.mRefs.begin(), other.mRefs.end(), back_inserter(mRefs));
+		std::move(other.mRefs.begin(), other.mRefs.end(), std::back_inserter(mRefs));
 		return std::forward<KeyValueMapList>(*this);
 	}
 

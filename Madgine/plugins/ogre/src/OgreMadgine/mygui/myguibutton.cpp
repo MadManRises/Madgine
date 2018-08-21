@@ -2,27 +2,27 @@
 
 #include "myguibutton.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUIButton::MyGUIButton(const std::string& name, MyGUIWindow* parent) :
-			MyGUIWindow(name, parent),
-			Window(name, parent),
-			Button(name, parent)
+		MyGUIButton::MyGUIButton(const std::string& name, MyGUIWidget* parent) :
+			Widget(name, parent),
+			Button(name, parent),
+			MyGUIWidget(name, parent)
 		{
 			mButton = parent->widget()->createWidget<MyGUI::Button>("Button", 0, 0, 0, 0, MyGUI::Align::Default, name);
 			mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MyGUIButton::clicked);
 		}
 
-		MyGUIButton::MyGUIButton(const std::string& name, MyGUISystem& system) :
-			Window(name, system),
-			MyGUIWindow(name, system),
-			Button(name, system)
+		MyGUIButton::MyGUIButton(const std::string& name, MyGUITopLevelWindow& window) :
+			Widget(name, window),
+			Button(name, window),
+			MyGUIWidget(name, window)
 		{
-			mButton = system.rootWidget()->createWidget<MyGUI::Button>("Button", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mButton = window.rootWidget()->createWidget<MyGUI::Button>("Button", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
 		void MyGUIButton::setText(const std::string& text)

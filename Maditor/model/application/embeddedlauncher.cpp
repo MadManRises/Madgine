@@ -77,7 +77,7 @@ namespace Maditor
 
 			if (isLauncher())
 			{
-				mNetwork.connect_async(10000);
+				mNetwork.connect_async(std::chrono::milliseconds{ 10000 });
 			}
 			else
 			{

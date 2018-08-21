@@ -4,7 +4,7 @@ namespace Engine
 {
 	namespace Scripting
 	{
-		class INTERFACES_EXPORT LuaThread
+		class LuaThread
 		{
 		public:
 			LuaThread(lua_State* state) :

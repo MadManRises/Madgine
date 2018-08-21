@@ -2,19 +2,17 @@
 #include "handler.h"
 #include "../ui/uimanager.h"
 #include "../gui/guisystem.h"
-#include "../gui/windows/window.h"
-#include "../app/clientapplication.h"
-
+#include "../gui/widgets/widget.h"
 
 namespace Engine
 {
 	namespace UI
 	{
 		Handler::Handler(UIManager &ui, const std::string& windowName) :
-			ScopeBase(ui.app(false).createTable()),
-			mWindow(nullptr),
+			ScopeBase(&ui),
+			mWidget(nullptr),
 			mUI(ui),
-			mWindowName(windowName),
+			mWidgetName(windowName),
 		mMouseMoveSlot(this),
 		mMouseDownSlot(this),
 		mMouseUpSlot(this)
@@ -67,21 +65,21 @@ namespace Engine
 			return mUI.getGameHandler(i, init);
 		}
 
-		bool Handler::installToWindow(GUI::Window* w)
+		bool Handler::installToWidget(GUI::Widget* w)
 		{
-			mWindow = w;
+			mWidget = w;
 
-			mWindow->mouseMoveEvent().connect(mMouseMoveSlot);
-			mWindow->mouseDownEvent().connect(mMouseDownSlot);
-			mWindow->mouseUpEvent().connect(mMouseUpSlot);
+			mWidget->mouseMoveEvent().connect(mMouseMoveSlot);
+			mWidget->mouseDownEvent().connect(mMouseDownSlot);
+			mWidget->mouseUpEvent().connect(mMouseUpSlot);
 
-			for (const WindowDescriber& des : mWindows)
+			for (const WindowDescriber& des : mWidgets)
 			{
-				GUI::Window* window = w->getChildRecursive(des.mWindowName);
+				GUI::Widget* window = w->getChildRecursive(des.mWidgetName);
 
 				if (!window)
 				{
-					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWindowName));
+					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
 					return false;
 				}
 
@@ -90,7 +88,7 @@ namespace Engine
 
 			}
 
-			mWindows.clear();
+			mWidgets.clear();
 
 			return true;
 		}
@@ -120,68 +118,68 @@ namespace Engine
 
 		bool Handler::init()
 		{
-			return installToWindow(mUI.gui().getWindowByName(mWindowName));
+			return installToWidget(mUI.gui().getWidgetByName(mWidgetName));
 		}
 
 		void Handler::finalize()
 		{			
 		}
 
-		bool Handler::init(GUI::Window* window)
+		bool Handler::init(GUI::Widget* window)
 		{
-			return installToWindow(window);				
+			return installToWidget(window);				
 		}
 
-		void Handler::injectMouseMove(GUI::MouseEventArgs& evt)
+		void Handler::injectMouseMove(Input::MouseEventArgs& evt)
 		{
 			onMouseMove(evt);
 		}
 
-		void Handler::injectMouseDown(GUI::MouseEventArgs& evt)
+		void Handler::injectMouseDown(Input::MouseEventArgs& evt)
 		{
 			onMouseDown(evt);
 		}
 
-		void Handler::injectMouseUp(GUI::MouseEventArgs& evt)
+		void Handler::injectMouseUp(Input::MouseEventArgs& evt)
 		{
 			onMouseUp(evt);
 		}
 
-		bool Handler::injectKeyPress(const GUI::KeyEventArgs& evt)
+		bool Handler::injectKeyPress(const Input::KeyEventArgs& evt)
 		{
 			return onKeyPress(evt);
 		}
 
-		void Handler::onMouseMove(GUI::MouseEventArgs& me)
+		void Handler::onMouseMove(Input::MouseEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseDown(GUI::MouseEventArgs& me)
+		void Handler::onMouseDown(Input::MouseEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseUp(GUI::MouseEventArgs& me)
+		void Handler::onMouseUp(Input::MouseEventArgs& me)
 		{
 		}
 
-		bool Handler::onKeyPress(const GUI::KeyEventArgs& evt)
+		bool Handler::onKeyPress(const Input::KeyEventArgs& evt)
 		{
 			return false;
 		}
 
-		void Handler::registerWindow(const std::string& name, std::function<bool(GUI::Window*)> init)
+		void Handler::registerWidget(const std::string& name, std::function<bool(GUI::Widget*)> init)
 		{
-			assert(!mWindow);
-			mWindows.emplace_back(name, init);
+			assert(!mWidget);
+			mWidgets.emplace_back(name, init);
 		}
 
 		void Handler::onMouseVisibilityChanged(bool b)
 		{
 		}
 
-		GUI::Window* Handler::window() const
+		GUI::Widget* Handler::widget() const
 		{
-			return mWindow;
+			return mWidget;
 		}
 
 

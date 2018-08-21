@@ -17,7 +17,7 @@ namespace View {
 	{
 		ComponentView::setupUi(window);
 
-		mLogsWidget = window->ui->logsWidget;
+		mLogsWidget = window->ui()->logsWidget;
 	}
 
 	void LogsView::setModel(Model::LogTableModel * logs)

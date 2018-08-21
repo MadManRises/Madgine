@@ -24,9 +24,9 @@ namespace Maditor {
 			// Geerbt über buffered_streambuf
 			virtual Engine::Serialize::StreamError getError() override;
 
-			virtual size_t rec(char *, size_t) override;
+			virtual int rec(char *, size_t) override;
 
-			virtual size_t send(char *, size_t) override;
+			virtual int send(char *, size_t) override;
 
 			virtual void close(Engine::Serialize::StreamError error = Engine::Serialize::NO_ERROR) override;
 

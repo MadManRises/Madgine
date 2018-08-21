@@ -3,6 +3,7 @@
 
 #include "../datatypes/luatable.h"
 #include "../datatypes/argumentlist.h"
+#include "../../generic/valuetype.h"
 
 namespace Engine
 {
@@ -12,6 +13,7 @@ namespace Engine
 		{
 		public:
 			ScopeBase(const LuaTable& table);
+			ScopeBase(ScopeBase *parent);
 			ScopeBase(const ScopeBase&) = delete;
 			ScopeBase(ScopeBase&&) = default;
 			virtual ~ScopeBase();
@@ -26,7 +28,9 @@ namespace Engine
 
 			void push() const;
 
+			std::unique_ptr<KeyValueIterator> find(const std::string &key);
 			std::optional<ValueType> get(const std::string& key);
+			bool set(const std::string &key, const ValueType &value);
 			std::unique_ptr<KeyValueIterator> iterator();
 
 			virtual KeyValueMapList maps();

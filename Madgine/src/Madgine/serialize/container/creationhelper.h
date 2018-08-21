@@ -32,7 +32,7 @@ namespace Engine
 			ArgsTuple readCreationData(SerializeInStream& in)
 			{
 				ArgsTuple tuple;
-				TupleSerializer::readTuple(tuple, in);
+				in >> tuple;
 				return std::move(tuple);
 			}
 		};
@@ -53,7 +53,7 @@ namespace Engine
 				R readCreationData(SerializeInStream& in)
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
-					TupleSerializer::readTuple(tuple, in);
+					in >> tuple;
 					return TupleUnpacker<>::call(mCallback, std::move(tuple));
 				}
 
@@ -82,7 +82,7 @@ namespace Engine
 				R readCreationData(SerializeInStream& in)
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
-					TupleSerializer::readTuple(tuple, in);
+					in >> tuple;
 					return TupleUnpacker<>::call(mParent, f, std::move(tuple));
 				}
 

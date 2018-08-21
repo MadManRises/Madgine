@@ -22,8 +22,9 @@ namespace Engine
 
 		OgreCamera::~OgreCamera()
 		{
-			mCamera->_getManager()->destroyCamera(mCamera);
-			mCamera->_getManager()->destroySceneNode(mNode);
+			Ogre::SceneManager *sceneMgr = mCamera->getSceneManager();
+			sceneMgr->destroySceneNode(mNode);
+			sceneMgr->destroyCamera(mCamera);
 		}
 
 		Ogre::Camera* OgreCamera::getCamera()

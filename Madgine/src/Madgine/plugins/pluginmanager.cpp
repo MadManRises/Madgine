@@ -6,30 +6,60 @@ namespace Engine
 {
 	namespace Plugins
 	{
-		PluginManager::PluginManager(const std::string &project, const std::string &type) :
-			mProject(project),
-			mType(type)
+		PluginManager::PluginManager(const std::string &project) :
+			mProject(project)			
 		{
 
 		}
 
-		Plugin & PluginManager::getPlugin(const std::string & name)
+		const std::string& PluginManager::project() const
 		{
-			auto pairIB = mPlugins.try_emplace(name, "Plugin_" + mProject + "_" + mType + "_" + name + CONFIG_SUFFIX);
+			return mProject;
+		}
+
+		PluginSection& PluginManager::operator[](const std::string& name)
+		{
+			return mSections.try_emplace(name, *this, name).first->second;
+		}
+
+		const PluginSection& PluginManager::at(const std::string& name) const
+		{
+			return mSections.at(name);
+		}
+
+		std::map<std::string, PluginSection>::const_iterator PluginManager::begin() const
+		{
+			return mSections.begin();
+		}
+
+		std::map<std::string, PluginSection>::const_iterator PluginManager::end() const
+		{
+			return mSections.end();
+		}
+
+		PluginSection::PluginSection(PluginManager& mgr, const std::string& name) :
+		mMgr(mgr),
+		mName(name)
+		{
+		}
+
+		Plugin & PluginSection::getPlugin(const std::string & name)
+		{
+			auto pairIB = mPlugins.try_emplace(name, "Plugin_" + mMgr.project() + "_" + mName + "_" + name + CONFIG_SUFFIX);
 			return pairIB.first->second;
 		}
 
-		std::map<std::string, Plugin>::const_iterator PluginManager::begin() const
+		std::map<std::string, Plugin>::const_iterator PluginSection::begin() const
 		{
 			return mPlugins.begin();
 		}
 
-		std::map<std::string, Plugin>::const_iterator PluginManager::end() const
+		std::map<std::string, Plugin>::const_iterator PluginSection::end() const
 		{
 			return mPlugins.end();
 		}
 
-		void* PluginManager::getUniqueSymbol(const std::string& name) const
+		void* PluginSection::getUniqueSymbol(const std::string& name) const
 		{
 			void *symbol = nullptr;
 			for (const std::pair<const std::string, Plugin> &p : mPlugins)

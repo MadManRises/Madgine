@@ -3,7 +3,6 @@
 #include "guihandler.h"
 #include "gamehandler.h"
 #include "../scripting/types/scope.h"
-#include "../scripting/types/globalapicomponentbase.h"
 #include "../core/framelistener.h"
 
 

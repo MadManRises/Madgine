@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../streams/serializestream.h"
-#include "../toplevelserializableunit.h"
-#include "../serializable.h"
 
 namespace Engine
 {
@@ -182,110 +180,50 @@ namespace Engine
 			}
 		};
 
-		struct SerializeUnitHelper {
-			static void read_state(SerializeInStream& in, Serializable& item)
-			{
-				item.readState(in);
-			}
+		struct INTERFACES_EXPORT SerializeUnitHelper {
+			static void read_state(SerializeInStream& in, Serializable& item);
 
-			static void read_state(SerializeInStream& in, SerializableUnitBase& item)
-			{
-				item.readState(in);
-			}
+			static void read_state(SerializeInStream& in, SerializableUnitBase& item);
 
-			static void read_id(SerializeInStream& in, SerializableUnitBase& item)
-			{
-				item.readId(in);
-			}
+			static void read_id(SerializeInStream& in, SerializableUnitBase& item);
 
-			static void read_id(SerializeInStream& in, Serializable& item)
-			{
-			}
+			static void read_id(SerializeInStream& in, Serializable& item);
 
-			static void write_id(SerializeOutStream& out, const SerializableUnitBase& item)
-			{
-				item.writeId(out);
-			}
+			static void write_id(SerializeOutStream& out, const SerializableUnitBase& item);
 
-			static void write_id(SerializeOutStream& out, const Serializable& item)
-			{
-			}
+			static void write_id(SerializeOutStream& out, const Serializable& item);
 
-			static void write_creation(SerializeOutStream& out, const Serializable& item)
-			{
-				item.writeCreationData(out);
-			}
+			static void write_creation(SerializeOutStream& out, const Serializable& item);
 
-			static void write_creation(SerializeOutStream& out, const SerializableUnitBase& item)
-			{
-				item.writeCreationData(out);
-			}
+			static void write_creation(SerializeOutStream& out, const SerializableUnitBase& item);
 
-			static void write_state(SerializeOutStream& out, const Serializable& item)
-			{
-				item.writeState(out);
-			}
+			static void write_state(SerializeOutStream& out, const Serializable& item);
 
-			static void write_state(SerializeOutStream& out, const SerializableUnitBase& item)
-			{
-				item.writeState(out);
-			}
+			static void write_state(SerializeOutStream& out, const SerializableUnitBase& item);
 
-			static bool filter(SerializeOutStream& out, const SerializableUnitBase& item)
-			{
-				return item.filter(&out);
-			}
+			static bool filter(SerializeOutStream& out, const SerializableUnitBase& item);
 
-			static bool filter(SerializeOutStream& out, const Serializable& item)
-			{
-				return true;
-			}
+			static bool filter(SerializeOutStream& out, const Serializable& item);
 
-			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, SerializableUnitBase& item)
-			{
-				item.applySerializableMap(map);
-			}
+			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, SerializableUnitBase& item);
 
-			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, Serializable& item)
-			{
-				item.applySerializableMap(map);
-			}
+			static void applyMap(const std::map<size_t, SerializableUnitBase*>& map, Serializable& item);
 
-			static void postConstruct(SerializableUnitBase& item)
-			{
-				item.postConstruct();
-			}
+			static void postConstruct(SerializableUnitBase& item);
 
-			static void postConstruct(Serializable& item)
-			{
-			}
+			static void postConstruct(Serializable& item);
 
-			static void setParent(SerializableUnitBase& item, SerializableUnitBase* parent)
-			{
-				item.setParent(parent);
-			}
+			static void setParent(SerializableUnitBase& item, SerializableUnitBase* parent);
 
-			static void setParent(Serializable& item, SerializableUnitBase* parent)
-			{
-			}
+			static void setParent(Serializable& item, SerializableUnitBase* parent);
 
-			static void setItemActiveFlag(SerializableUnitBase& item, bool b)
-			{
-				item.setActiveFlag(b);
-			}
+			static void setItemActiveFlag(SerializableUnitBase& item, bool b);
 
-			static void setItemActiveFlag(Serializable& item, bool b)
-			{
-			}
+			static void setItemActiveFlag(Serializable& item, bool b);
 
-			static void notifySetItemActive(SerializableUnitBase& item, bool active)
-			{
-				item.notifySetActive(active);
-			}
+			static void notifySetItemActive(SerializableUnitBase& item, bool active);
 
-			static void notifySetItemActive(Serializable& item, bool active)
-			{
-			}
+			static void notifySetItemActive(Serializable& item, bool active);
 		};
 
 

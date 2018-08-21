@@ -25,12 +25,12 @@ namespace Engine
 				SocketAPI::closeSocket(mSocket);
 		}
 
-		size_t NetworkBuffer::rec(char* buf, size_t len)
+		int NetworkBuffer::rec(char* buf, size_t len)
 		{
 			return SocketAPI::recv(mSocket, buf, len);
 		}
 
-		size_t NetworkBuffer::send(char* buf, size_t len)
+		int NetworkBuffer::send(char* buf, size_t len)
 		{
 			return SocketAPI::send(mSocket, buf, len);
 		}

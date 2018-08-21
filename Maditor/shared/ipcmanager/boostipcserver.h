@@ -13,8 +13,8 @@ namespace Maditor {
 		public:
 			BoostIPCServer(boost::interprocess::managed_shared_memory::segment_manager *mgr);
 
-			void enqueue(const SharedConnectionPtr &conn, int timeout);
-			SharedConnectionPtr poll(int timeout = 0);
+			void enqueue(const SharedConnectionPtr &conn, std::chrono::milliseconds timeout);
+			SharedConnectionPtr poll(std::chrono::milliseconds timeout = {});
 
 		private:
 			SharedConnectionQueue mQueue;

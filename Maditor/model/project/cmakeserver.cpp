@@ -36,6 +36,7 @@ namespace Maditor
 		void CmakeServer::generate()
 		{
 			mProject.generate();
+			compute();
 		}
 
 		void CmakeServer::compute()

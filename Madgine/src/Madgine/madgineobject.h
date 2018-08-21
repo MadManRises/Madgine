@@ -11,7 +11,9 @@ namespace Engine
     public:
     
         bool callInit();
+		bool callInit(int &count);
         void callFinalize();
+		void callFinalize(int order);
     
 	protected:
 		MadgineObject();
@@ -29,5 +31,6 @@ namespace Engine
 	private:
 		ObjectState mState;
 		std::string mName;
+		int mOrder;
 	};
 }

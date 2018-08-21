@@ -87,6 +87,8 @@ namespace Engine
 			return "Vector3";
 		case Type::Vector4Value:
 			return "Vector4";
+		case Type::ApiMethodValue:
+			return "Method";
 		default:
 			throw 0;
 		}

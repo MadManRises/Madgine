@@ -18,26 +18,34 @@ namespace Engine
 
 			virtual bool singleFrame();
 
-			float fixedRemainder() const;
+			std::chrono::nanoseconds fixedRemainder() const;
 
 			void addFrameListener(FrameListener* listener);
 			void removeFrameListener(FrameListener* listener);
 
+			void shutdown();
+			bool isShutdown();
+
 		protected:
+			void startLoop();
+			
 			virtual bool init();
 			virtual void finalize();
 
-			bool sendFrameStarted(float timeSinceLastFrame);
-			bool sendFrameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
-			bool sendFrameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
-			bool sendFrameEnded(float timeSinceLastFrame);
+			bool sendFrameStarted(std::chrono::microseconds timeSinceLastFrame);
+			bool sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 			
 		private:
+			bool mShutdown;
+
 			std::vector<FrameListener*> mListeners;
 
-			float mTimeBank;
 
-			static constexpr float FIXED_TIMESTEP = 0.015f;
+			std::chrono::microseconds mTimeBank;
+
+			static constexpr std::chrono::microseconds FIXED_TIMESTEP{ 15000 };
 		};
 
 		

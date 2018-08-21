@@ -5,8 +5,7 @@
 namespace Engine
 {
 
-	API_IMPL(Scene::Entity::Transform, MAP_RO(Position, getPosition), MAP_RO(Orientation, getOrientation), MAP_RO(Scale,
-		getScale));
+	API_IMPL(Scene::Entity::Transform, MAP(Position, getPosition, setPosition), MAP(Orientation, getOrientation, setOrientation), MAP(Scale, getScale, setScale));
 
 
 	namespace Scene

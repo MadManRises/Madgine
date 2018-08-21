@@ -2,27 +2,27 @@
 
 #include "myguicheckbox.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUICheckbox::MyGUICheckbox(const std::string& name, MyGUIWindow* parent) :
-		MyGUIWindow(name, parent),
-		Window(name, parent),
-		Checkbox(name, parent)
+		MyGUICheckbox::MyGUICheckbox(const std::string& name, MyGUIWidget* parent) :
+			Widget(name, parent),
+		Checkbox(name, parent),
+			MyGUIWidget(name, parent)
 		{
 			 mCheckbox = parent->widget()->createWidget<MyGUI::Button>("Checkbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 			 mCheckbox->eventMouseButtonClick += MyGUI::newDelegate(this, &MyGUICheckbox::toggle);
 		}
 
-		MyGUICheckbox::MyGUICheckbox(const std::string& name, MyGUISystem& system) :
-		Window(name, system),
-		MyGUIWindow(name, system),
-		Checkbox(name, system)
+		MyGUICheckbox::MyGUICheckbox(const std::string& name, MyGUITopLevelWindow& window) :
+			Widget(name, window),
+		Checkbox(name, window),
+			MyGUIWidget(name, window)
 		{
-			mCheckbox = system.rootWidget()->createWidget<MyGUI::Button>("Checkbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mCheckbox = window.rootWidget()->createWidget<MyGUI::Button>("Checkbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 			mCheckbox->eventMouseButtonClick += MyGUI::newDelegate(this, &MyGUICheckbox::toggle);
 		}
 

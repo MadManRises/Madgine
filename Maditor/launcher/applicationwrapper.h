@@ -46,9 +46,9 @@ namespace Maditor {
 			// Inherited via AppControl
 			virtual void onApplicationConnected() override;
 
-			virtual bool frameStarted(float timeSinceLastFrame) override;
-			virtual bool frameRenderingQueued(float timeSinceLastFrame, Engine::Scene::ContextMask context) override;
-			virtual bool frameEnded(float timeSinceLastFrame) override;
+			virtual bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
+			virtual bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Engine::Scene::ContextMask context) override;
+			virtual bool frameEnded(std::chrono::microseconds timeSinceLastFrame) override;
 
 			void startImpl();
 

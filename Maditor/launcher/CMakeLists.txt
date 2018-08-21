@@ -9,6 +9,8 @@ FolderSources(sources "" "" applicationwrapper.cpp applicationwrapper.h embedded
 add_executable(Embedded_Launcher ${sources})
 target_link_libraries(Embedded_Launcher PRIVATE Maditor_Shared Client lualib)
 
+add_dependencies(Embedded_Launcher Tools)
+
 if (UNIX)
 	target_link_libraries(Embedded_Launcher PRIVATE dl)
 endif (UNIX)

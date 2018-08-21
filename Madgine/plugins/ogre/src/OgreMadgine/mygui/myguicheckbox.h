@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/checkbox.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/checkbox.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class MyGUICheckbox : public Checkbox, public MyGUIWindow
+		class MyGUICheckbox : public Checkbox, public MyGUIWidget
 		{
 		public:
-			MyGUICheckbox(const std::string &name, MyGUIWindow *parent);
-			MyGUICheckbox(const std::string &name, MyGUISystem &system);
+			MyGUICheckbox(const std::string &name, MyGUIWidget *parent);
+			MyGUICheckbox(const std::string &name, MyGUITopLevelWindow &system);
 
 			bool isChecked() override;
 			void setChecked(bool b) override;

@@ -8,6 +8,8 @@
 
 #include <OgreTagPoint.h>
 
+#include "Madgine/scene/entity/entity.h"
+
 namespace Engine
 {
 	API_IMPL(Scene::Entity::OgreSkeletonVisualizer);

@@ -5,7 +5,6 @@ namespace Maditor {
 	namespace Model {
 
 		Inspector::Inspector() :
-			TreeUnit(2),
 			mPending(false),
 			mTimer(0)
 		{
@@ -15,99 +14,73 @@ namespace Maditor {
 
 		void Inspector::start()
 		{
-			mTimer = startTimer(100);
+			mTimer = startTimer(10);
 		}
 
 		void Inspector::reset()
 		{
-			beginResetModel();
 			mWrappers.clear();
-			mWrappers.try_emplace(nullptr, this, nullptr);
-			mIt = mIndices.end();
+			mWrappers.try_emplace(nullptr, this, nullptr).first->second.setType("Application");
+			mIt = mWrappers.end();
+			emit modelReset();
 			if (mTimer) {
 				killTimer(mTimer);
 				mTimer = 0;
 				mPending = false;
 			}
-			endResetModel();
-		}
-
-		TreeItem * Inspector::child(int i)
-		{
-			return &std::next(mWrappers.begin(), i)->second;
-		}
-
-		int Inspector::childCount() const
-		{
-			return mWrappers.size();
 		}
 
 		void Inspector::timerEvent(QTimerEvent * e)
 		{
 			if (mPending)
 				return;
-			if (!mIndices.empty()) {
-				if (mIt == mIndices.end())
-					mIt = mIndices.begin();
+			if (!mWrappers.empty()) {
+				if (mIt == mWrappers.end())
+					mIt = mWrappers.begin();
 				mPending = true;
-				mRequestUpdate(mIt->second, {});
+				mRequestUpdate(mIt->first, {});
 				++mIt;				
 			}
 		}
 
-		void Inspector::sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &attributes) {
+		void Inspector::sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const std::string &key, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &attributes) {
 			mPending = false;
 			auto it = mWrappers.find(ptr);
-			assert(it != mWrappers.end());
-			if (exists) {
-				it->second.update(attributes.data());
+			if (it != mWrappers.end()) {
+				if (exists) {
+					it->second.update(key, attributes.data());
+				}
+				else {
+					mWrappers.erase(it);
+				}
 			}
-			else {
-				mWrappers.erase(it);
-			}
 		}
 
-		QModelIndex Inspector::updateIndex(QObject *object, Engine::InvScopePtr ptr) {
-			auto it = mIndices.find(object);
-			if (it == mIndices.end())
-				throw 0;
-			it->second = ptr;
-			auto result = mWrappers.try_emplace(ptr, this, ptr);
-			int i = std::distance(mWrappers.begin(), result.first);
-			if (result.second) {
-				beginInsertRows(QModelIndex(), i, i);
-				endInsertRows();
-			}			
-			return index(i, 0);
-		}
-
-		QModelIndex Inspector::registerIndex(QObject * object, Engine::InvScopePtr ptr)
+		void Inspector::setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value)
 		{
-			auto it = mIndices.find(object);
-			if (it != mIndices.end())
-				throw 0;
-			mIndices[object] = ptr;
-			auto it2 = mWrappers.find(ptr);
-			return index(std::distance(mWrappers.begin(), it2), 0);
+			mSetField(ptr, name, value, {});
 		}
 
-		void Inspector::unregisterIndex(QObject * object)
+		ScopeWrapperItem* Inspector::registerScope(Engine::InvScopePtr ptr)
 		{
-			auto it = mIndices.find(object);
-			if (it == mIndices.end())
-				throw 0;
-			mIndices.erase(it);
+			return getScope(ptr);
 		}
 
-		Qt::ItemFlags Inspector::flags(const QModelIndex & index) const
+		void Inspector::unregisterScope(Engine::InvScopePtr ptr)
 		{
-			Qt::ItemFlags flags = TreeUnit::flags(index);
-			ValueItem *value = dynamic_cast<ValueItem*>(item(index));
-			if (value && value->isEditable()) {
-				flags |= Qt::ItemIsEditable;
-			}
-			return flags;
+			auto it = mWrappers.find(ptr);
+			if (it == mIt) ++mIt;
+			mWrappers.erase(it);
 		}
 
+		ScopeWrapperItem* Inspector::getScope(Engine::InvScopePtr ptr)
+		{
+			return &mWrappers.try_emplace(ptr, this, ptr).first->second;
+		}
+
+		ScopeWrapperItem* Inspector::root()
+		{
+			return &mWrappers.at(nullptr);
+		}
 	}
 }

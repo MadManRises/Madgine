@@ -68,7 +68,7 @@ namespace Maditor {
 
 			Q_INVOKABLE int LogTableModel::rowCount(const QModelIndex & parent) const
 			{
-				return mItems.size();
+				return static_cast<int>(mItems.size());
 			}
 
 			Q_INVOKABLE int LogTableModel::columnCount(const QModelIndex & parent) const

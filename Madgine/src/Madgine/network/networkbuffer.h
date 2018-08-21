@@ -21,9 +21,9 @@ namespace Engine
 			// Geerbt über buffered_streambuf
 			Serialize::StreamError getError() override;
 
-			size_t rec(char*, size_t) override;
+			int rec(char*, size_t) override;
 
-			size_t send(char*, size_t) override;
+			int send(char*, size_t) override;
 
 		private:
 			SocketId mSocket; // = SOCKET

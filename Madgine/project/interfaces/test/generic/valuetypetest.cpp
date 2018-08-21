@@ -6,6 +6,8 @@
 
 #include "Madgine/scripting/types/scopebase.h"
 
+#include "Madgine/generic/valuetype.h"
+
 
 TEST(ValueType, Construct)
 {

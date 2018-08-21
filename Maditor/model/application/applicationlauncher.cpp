@@ -5,14 +5,13 @@
 
 #include "../shared/sharedmemory.h"
 
-
-
-
 #include "project/applicationconfig.h"
 
 #include "project/project.h"
 
-#include "Madgine/serialize/toplevelids.h"
+#include "Madgine/serialize/serializableids.h"
+
+#include "Madgine/serialize/serializemanager.h"
 
 
 namespace Maditor

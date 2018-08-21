@@ -45,8 +45,8 @@ namespace Engine
 
 	private:
 		T* mT;
-		mutable std::tuple<std::remove_reference_t<Ty>...> mData;
 		void (T::*mF)(Ty ...);
+		mutable std::tuple<std::remove_reference_t<Ty>...> mData;		
 		mutable bool mCalled;
 	};
 

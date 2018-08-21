@@ -72,7 +72,7 @@ namespace Maditor {
 			return true;
 		}
 
-		bool BoostIPCManager::connect(int timeout)
+		bool BoostIPCManager::connect(std::chrono::milliseconds timeout)
 		{
 			if (mServer) {
 				mConnectionResult.emit(false);
@@ -83,7 +83,7 @@ namespace Maditor {
 			mServer = mMemory->mgr()->find<BoostIPCServer>("Server").first;
 			while (!mServer) {
 				if (std::chrono::duration_cast<std::chrono::milliseconds>
-					(std::chrono::steady_clock::now() - start).count() > timeout || mAborting) {
+					(std::chrono::steady_clock::now() - start) > timeout || mAborting) {
 					mConnectionResult.emit(false);
 					return false;
 				}
@@ -99,7 +99,7 @@ namespace Maditor {
 			return true;
 		}
 
-		void BoostIPCManager::connect_async(int timeout)
+		void BoostIPCManager::connect_async(std::chrono::milliseconds timeout)
 		{
 			if (!mConnectionThread.joinable()) {
 				mAborting = false;
@@ -137,7 +137,7 @@ namespace Maditor {
 			}
 		}
 
-		bool BoostIPCManager::acceptConnection(int timeout) {
+		bool BoostIPCManager::acceptConnection(std::chrono::milliseconds timeout) {
 			if (mServer) {
 				if (mIsServer) {
 					if (SharedConnectionPtr conn = mServer->poll(timeout)) {
@@ -155,7 +155,7 @@ namespace Maditor {
 			return false;
 		}
 
-		int BoostIPCManager::clientCount()
+		size_t BoostIPCManager::clientCount()
 		{
 			return mStreams.size();
 		}
@@ -206,7 +206,7 @@ namespace Maditor {
 			return res.first->second;
 		}
 
-		void BoostIPCManager::onConnectionEstablished(SharedConnectionPtr &&conn, int timeout)
+		void BoostIPCManager::onConnectionEstablished(SharedConnectionPtr &&conn, std::chrono::milliseconds timeout)
 		{
 			bool result = true;
 

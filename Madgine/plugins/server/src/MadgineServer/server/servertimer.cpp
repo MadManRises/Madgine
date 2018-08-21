@@ -112,14 +112,14 @@ namespace Engine
 				(m_endex - m_start).count();
 		}
 
-		size_t ServerTimer::elapsed_us()
+		std::chrono::microseconds ServerTimer::elapsed_us()
 		{
 			if (m_running)
 			{
 				m_endex = std::chrono::steady_clock::now();
 			}
 			return std::chrono::duration_cast<std::chrono::microseconds>
-				(m_endex - m_start).count();
+				(m_endex - m_start);
 		}
 
 		size_t ServerTimer::elapsed_ns()

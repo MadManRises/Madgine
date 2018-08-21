@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/combobox.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/combobox.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class MyGUICombobox : public Combobox, public MyGUIWindow
+		class MyGUICombobox : public Combobox, public MyGUIWidget
 		{
 		public:
-			MyGUICombobox(const std::string &name, MyGUIWindow *parent);
-			MyGUICombobox(const std::string &name, MyGUISystem &system);
+			MyGUICombobox(const std::string &name, MyGUIWidget *parent);
+			MyGUICombobox(const std::string &name, MyGUITopLevelWindow &system);
 
 			void addItem(const std::string& text) override;
 			void clear() override;

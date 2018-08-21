@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../serialize/serializableunit.h"
-#include "../../scripting/types/scopebase.h"
+#include "../../scripting/types/scope.h"
 
 namespace Engine
 {
@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::ScopeBase
+			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::Scope<EntityComponentBase>
 			{
 			public:
 				EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable = {});

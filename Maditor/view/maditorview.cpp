@@ -61,7 +61,7 @@ namespace View {
 	{
 		ComponentView::setupUi(window);
 
-		window->ui->menuFile->insertMenu(window->ui->actionSettings, mRecentProjectsMenu);
+		window->ui()->menuFile->insertMenu(window->ui()->actionSettings, mRecentProjectsMenu);
 
 		if (model())
 			model()->addons()->setupUi(window);
@@ -74,7 +74,7 @@ namespace View {
 		mProject->setupUi(window);
 		mCmake->setupUi(window);
 
-		connect(window->ui->actionSettings, &QAction::triggered, mDialogManager.get(), &Dialogs::DialogManager::showSettingsDialog);
+		connect(window->ui()->actionSettings, &QAction::triggered, mDialogManager.get(), &Dialogs::DialogManager::showSettingsDialog);
 
 	}
 
@@ -118,9 +118,9 @@ namespace View {
 
 		setConnections({
 			{ mClearRecentProjectsAction, &Model::Maditor::clearRecentProjects },
-			{ mMainWindow->ui->actionNewProject, &Model::Maditor::newProject },
-			{ mMainWindow->ui->actionLoadProject, &Model::Maditor::loadProject },
-			{ mMainWindow->ui->actionCloseProject, &Model::Maditor::closeProject }
+			{ mMainWindow->ui()->actionNewProject, &Model::Maditor::newProject },
+			{ mMainWindow->ui()->actionLoadProject, &Model::Maditor::loadProject },
+			{ mMainWindow->ui()->actionCloseProject, &Model::Maditor::closeProject }
 		});
 
 		mMainWindow->show();
@@ -158,7 +158,7 @@ namespace View {
 		mApplication->setConfigModel(project->configList());
 		mProject->setModel(project);
 		mCmake->setModel(project->moduleList()->cmake());
-		mMainWindow->ui->actionCloseProject->setEnabled(true);
+		mMainWindow->ui()->actionCloseProject->setEnabled(true);
 	}
 
 	void MaditorView::onProjectClosed(Model::Project* project)
@@ -166,7 +166,7 @@ namespace View {
 		mApplication->clearConfigModel();
 		mProject->clearModel();
 		mCmake->clearModel();
-		mMainWindow->ui->actionCloseProject->setEnabled(false);
+		mMainWindow->ui()->actionCloseProject->setEnabled(false);
 	}
 
 } // namespace View

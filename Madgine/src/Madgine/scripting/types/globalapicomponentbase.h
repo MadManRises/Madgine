@@ -13,7 +13,6 @@ namespace Engine
 			GlobalAPIComponentBase(App::Application &app);
 
 
-			virtual void clear();
 			virtual void update();
 
 			virtual const char* key() const = 0;
@@ -39,6 +38,8 @@ namespace Engine
 			GlobalScopeBase &globalScope();
 
 			GlobalAPIComponentBase &getSelf(bool = true);
+
+			App::Application &app(bool = true);
 
 			/*template <class T>
 			T &getGuiHandler()

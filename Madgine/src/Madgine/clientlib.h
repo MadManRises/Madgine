@@ -2,10 +2,6 @@
 
 /// @cond
 
-#ifdef _MSC_VER
-#pragma warning(push, 0)
-#endif
-
 #if defined(Client_EXPORTS)
 #define MADGINE_CLIENT_EXPORT DLL_EXPORT
 #else
@@ -42,8 +38,6 @@ namespace std {
 
 #ifdef _MSC_VER
 #undef NO_ERROR
-
-#pragma warning(pop)
 #endif
 
 /// @endcond

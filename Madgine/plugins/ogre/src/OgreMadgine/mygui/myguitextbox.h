@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/textbox.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/textbox.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class MyGUITextbox : public Textbox, public MyGUIWindow
+		class MyGUITextbox : public Textbox, public MyGUIWidget
 		{
 		public:
-			MyGUITextbox(const std::string &name, MyGUIWindow *parent);
-			MyGUITextbox(const std::string &name, MyGUISystem &system);
+			MyGUITextbox(const std::string &name, MyGUIWidget *parent);
+			MyGUITextbox(const std::string &name, MyGUITopLevelWindow &window);
 
 			std::string getText() override;
 			void setText(const std::string& text) override;

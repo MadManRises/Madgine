@@ -56,7 +56,7 @@ namespace Maditor {
 
 		void ModuleList::addModule(std::unique_ptr<Module> &&module)
 		{
-			bool b = beginInsertRows(mModules.size(), mModules.size());
+			bool b = beginInsertRows(static_cast<int>(mModules.size()), static_cast<int>(mModules.size()));
 			Module *m = mModules.emplace_back(std::forward<std::unique_ptr<Module>>(module)).get();
 			endInsertRows(b);
 
@@ -70,7 +70,7 @@ namespace Maditor {
 			emit moduleRemoved(module);
 
 			auto it = std::find_if(mModules.begin(), mModules.end(), [=](const std::unique_ptr<Module> &mod) {return mod.get() == module; });
-			size_t i = std::distance(mModules.begin(), it);
+			int i = std::distance(mModules.begin(), it);
 			bool b = beginRemoveRows(i, i);
 			mModules.erase(it);
 			endRemoveRows(b);
@@ -178,7 +178,7 @@ namespace Maditor {
 		}
 
 		int ModuleList::childCount() const {
-			return mModules.size();
+			return static_cast<int>(mModules.size());
 		}
 
 		Module * ModuleList::child(int i) {

@@ -186,7 +186,7 @@ namespace Maditor {
 
 		}
 
-		bool ProjectElement::beginInsertRows(size_t first, size_t last)
+		bool ProjectElement::beginInsertRows(int first, int last)
 		{
 			std::optional<QModelIndex> parentI = modelIndex();
 			if (parentI) {
@@ -207,7 +207,7 @@ namespace Maditor {
 			}
 		}
 
-		bool ProjectElement::beginRemoveRows(size_t first, size_t last)
+		bool ProjectElement::beginRemoveRows(int first, int last)
 		{
 			std::optional<QModelIndex> parentI = modelIndex();
 			if (parentI) {

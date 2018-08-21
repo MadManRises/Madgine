@@ -2,7 +2,7 @@
 
 #include "scenemanager.h"
 
-#include "../serialize/toplevelids.h"
+#include "../serialize/serializableids.h"
 
 #include "entity/entity.h"
 
@@ -11,6 +11,8 @@
 #include "scenecomponentbase.h"
 
 #include "../app/application.h"
+
+#include "../scripting/datatypes/luatablefieldaccessor.h"
 
 
 	API_IMPL(Engine::Scene::SceneManager, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
@@ -23,7 +25,7 @@ namespace Engine
 	{
 		SceneManager::SceneManager(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
-			Scope<Engine::Scene::SceneManager, Engine::Scripting::ScopeBase>(app.createTable()),
+			Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>(app),
 			mItemCount(0),
 			mSceneComponents(app.pluginMgr(), *this),
 			mApp(app)
@@ -32,6 +34,7 @@ namespace Engine
 
 		bool SceneManager::init()
 		{
+			app().addFrameListener(this);
 			markInitialized();
 			for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
 			{
@@ -57,7 +60,7 @@ namespace Engine
 			std::list<Entity::Entity*> result;
 			for (Entity::Entity& e : mEntities)
 			{
-				if (find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), &e) == mEntityRemoveQueue.end())
+				if (std::find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), &e) == mEntityRemoveQueue.end())
 					result.push_back(&e);
 			}
 			return result;
@@ -219,17 +222,37 @@ namespace Engine
 			return mEntities.signal();
 		}
 
-		Entity::Entity* SceneManager::createEntity(const std::string& behaviour, const std::string& name,
+		Entity::Entity* SceneManager::createEntity(const std::string& behavior, const std::string& name,
 		                                               std::function<void(Entity::Entity&)> init)
 		{
-			mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), make_tuple(behaviour)));
+			ValueType behaviorTable = app().table()[behavior];
+			Scripting::LuaTable table;
+			if (behaviorTable.is<Scripting::LuaTable>())
+			{
+				table = behaviorTable.as<Scripting::LuaTable>();
+			}
+			else
+			{
+				LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behavior));
+			}
+			mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
 			return &mEntities.back();
 		}
 
-		Entity::Entity* SceneManager::createLocalEntity(const std::string& behaviour, const std::string& name)
+		Entity::Entity* SceneManager::createLocalEntity(const std::string& behavior, const std::string& name)
 		{
+			ValueType behaviorTable = app().table()[behavior];
+			Scripting::LuaTable table;
+			if (behaviorTable.is<Scripting::LuaTable>())
+			{
+				table = behaviorTable.as<Scripting::LuaTable>();
+			}
+			else
+			{
+				LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behavior));
+			}
 			const std::tuple<SceneManager &, bool, std::string>& data = createEntityData(name, true);
-			return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), behaviour);
+			return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
 		}
 
 		void SceneManager::removeQueuedEntities()

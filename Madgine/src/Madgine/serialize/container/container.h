@@ -3,6 +3,7 @@
 #include "../streams/serializestream.h"
 #include "../../generic/templates.h"
 #include "unithelper.h"
+#include "../serializable.h"
 
 namespace Engine
 {
@@ -37,7 +38,7 @@ namespace Engine
 			{
 			}
 
-			Container(Container&& other) noexcept
+			Container(Container&& other)
 			{
 				if (other.isActive())
 				{
@@ -49,10 +50,10 @@ namespace Engine
 				mLocallyActiveIterator = other.mLocallyActiveIterator;
 				other.mData.clear();
 				other.mLocallyActiveIterator = other.mData.begin();
-				if (other.isActive())
+				/*if (other.isActive())
 				{
 					other.setActiveFlag(true);
-				}
+				}*/ //TODO
 			}
 
 			const_iterator begin() const

@@ -4,6 +4,8 @@
 #include "../types/luastate.h"
 
 
+
+
 namespace Engine
 {
 
@@ -17,8 +19,6 @@ namespace Engine
 		{
 			assert(table());
 
-			mScopes = table().createTable();
-
 			table().setMetatable("Interfaces.GlobalScope");
 		}
 
@@ -26,11 +26,6 @@ namespace Engine
 		void GlobalScopeBase::executeString(const std::string& cmd)
 		{
 			mState.executeString(table().state(), cmd);
-		}
-
-		LuaTable GlobalScopeBase::createTable()
-		{
-			return mScopes.createTable();
 		}
 
 		lua_State* GlobalScopeBase::lua_state() const

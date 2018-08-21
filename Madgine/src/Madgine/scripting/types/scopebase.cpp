@@ -17,6 +17,11 @@ namespace Engine
 			mTable.setMetatable("Interfaces.Scope");
 		}
 
+		ScopeBase::ScopeBase(ScopeBase* parent) :
+			ScopeBase(parent->table().createTable())
+		{
+		}
+
 		ScopeBase::~ScopeBase()
 		{
 		}
@@ -24,6 +29,11 @@ namespace Engine
 		void ScopeBase::push() const
 		{
 			mTable.push();
+		}
+
+		std::unique_ptr<KeyValueIterator> ScopeBase::find(const std::string& key)
+		{
+			return maps().find(key);
 		}
 
 		ArgumentList ScopeBase::callMethod(const std::string& name, const ArgumentList& args)
@@ -65,6 +75,11 @@ namespace Engine
 		std::optional<ValueType> ScopeBase::get(const std::string& key)
 		{
 			return maps().get(key);
+		}
+
+		bool ScopeBase::set(const std::string &key, const Engine::ValueType &value)
+		{
+			return maps().set(key, value);
 		}
 
 		std::unique_ptr<KeyValueIterator> ScopeBase::iterator()

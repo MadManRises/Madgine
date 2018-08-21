@@ -37,7 +37,7 @@ namespace Engine
 				void readAction(SerializeInStream& in) override
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
-					TupleSerializer::readTuple(args, in);
+					in >> args;
 					TupleUnpacker<const std::set<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
 				}
 
@@ -46,7 +46,7 @@ namespace Engine
 					if (!Config::sCallByMasterOnly)
 					{
 						std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
-						TupleSerializer::readTuple(args, in);
+						in >> args;
 						TupleUnpacker<ParticipantId, const std::set<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
 					}
 				}
@@ -70,7 +70,7 @@ namespace Engine
 					{
 						for (BufferedOutStream* out : getMasterActionMessageTargets(targets))
 						{
-							TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
+							*out << std::forward_as_tuple(args...);
 							out->endMessage();
 						}
 					}
@@ -94,7 +94,7 @@ namespace Engine
 							if (!Config::sCallByMasterOnly && targets.empty())
 							{
 								BufferedOutStream* out = getSlaveActionMessageTarget();
-								TupleSerializer::writeTuple(std::forward_as_tuple(args...), *out);
+								(*out << ... << args);
 								out->endMessage();
 							}
 							else

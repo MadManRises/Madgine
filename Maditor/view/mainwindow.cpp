@@ -22,30 +22,33 @@ namespace Maditor {
 namespace View {
 
 	MainWindow::MainWindow() :
-		ui(new Ui::MainWindow)		
+		mUi(new Ui::MainWindow),
+		mInspector(nullptr)
 	{
-		const_cast<Ui::MainWindow*>(ui)->setupUi(this);
+		mUi->setupUi(this);		
 
-		ui->dockWidgetContents->layout()->addWidget(QWidget::createWindowContainer(new InspectorWidget));
+		mInspector = new InspectorWidget(&mInspectorData);
+
+		mUi->dockWidgetContents->layout()->addWidget(QWidget::createWindowContainer(mInspector));
 
 		QMenu *menu = createPopupMenu();
 		menu->setTitle("Views");
 		menuBar()->addMenu(menu);
 
-		connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
+		connect(mUi->actionQuit, &QAction::triggered, this, &MainWindow::close);
 
 	}
 
 MainWindow::~MainWindow()
 {	
-    delete ui;
+    delete mUi;
 
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	bool yesToAll = false, noToAll = false;
-	for (DocumentTabWidget *tabWidget : ui->centralwidget->tabWidgets()) { 
+	for (DocumentTabWidget *tabWidget : mUi->centralwidget->tabWidgets()) { 
 		for (int i = 0; i < tabWidget->count(); ++i) {
 			if (DocumentView *view = dynamic_cast<DocumentView*>(tabWidget->widget(i))) {
 				if (yesToAll) {
@@ -77,7 +80,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	event->accept();
 }
 
-/*Dialogs::DialogManager * MainWindow::dialogs()
+	const Ui::MainWindow* MainWindow::ui()
+	{
+		return mUi;
+	}
+
+	InspectorWidget* MainWindow::inspector()
+	{
+		return mInspector;
+	}
+
+	/*Dialogs::DialogManager * MainWindow::dialogs()
 {
 	return mMaditor->dialogs();
 }*/

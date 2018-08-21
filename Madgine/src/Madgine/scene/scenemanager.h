@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../madgineobject.h"
-
 #include "../scripting/types/scope.h"
 
 #include "../serialize/toplevelserializableunit.h"
@@ -14,15 +12,15 @@
 
 #include "../serialize/container/noparent.h"
 #include "../core/framelistener.h"
+#include "../scripting/types/globalapicomponent.h"
 
 namespace Engine
 {
 	namespace Scene
 	{
 		class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-		                                             public Scripting::Scope<SceneManager>,
-		                                             public MadgineObject,
-		public Core::FrameListener
+			public Scripting::Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>,
+			public Core::FrameListener
 		{
 		public:
 			SceneManager(App::Application &app);
@@ -36,9 +34,9 @@ namespace Engine
 			virtual bool frameFixedUpdate(float timeStep, ContextMask context) final;
 
 
-			Entity::Entity* createEntity(const std::string& behaviour = "", const std::string& name = "",
+			Entity::Entity* createEntity(const std::string& behavior = "", const std::string& name = "",
 			                             std::function<void(Entity::Entity&)> init = {});
-			Entity::Entity* createLocalEntity(const std::string& behaviour = "", const std::string& name = "");
+			Entity::Entity* createLocalEntity(const std::string& behavior = "", const std::string& name = "");
 			Entity::Entity* findEntity(const std::string& name);
 			std::list<Entity::Entity*> entities();
 			void removeLater(Entity::Entity* e);

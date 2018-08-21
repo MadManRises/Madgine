@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../serializable.h"
-#include "../serializableunit.h"
+#include "../streams/serializestream.h"
 
 namespace Engine
 {
@@ -54,18 +54,18 @@ namespace Engine
 			std::enable_if_t<decay_equiv<Return, Argument>::value, SerializedMapperWrapper<T, Return, Argument>>
 			serializedMapperHelper(Return (T::*)() const, void (T::*)(Argument));
 
-			template <typename G, G g, typename S, S s>
+			template <auto g, auto s>
 			using SerializedMapperDeduce = decltype(serializedMapperHelper(g, s));
 
-			template <typename G, G g, typename S, S s>
+			template <auto g, auto s>
 			struct SerializedMapperType
 			{
-				typedef typename SerializedMapperDeduce<G, g, S, s>::template impl<g, s> type;
+				typedef typename SerializedMapperDeduce<g, s>::template impl<g, s> type;
 			};
 
 		}
 
-		template <typename G, G g, typename S, S s>
-		using SerializedMapper = typename __serializedmapper__impl__::SerializedMapperType<G, g, S, s>::type;
+		template <auto g, auto s>
+		using SerializedMapper = typename __serializedmapper__impl__::SerializedMapperType<g, s>::type;
 	}
 }

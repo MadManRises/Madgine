@@ -21,6 +21,8 @@ namespace Engine
 			Camera* createCamera();
 			const std::vector<std::unique_ptr<Camera>> &cameras() const;
 
+			void finalize() override;
+
 			void clear();
 
 		protected:

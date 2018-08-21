@@ -2,29 +2,29 @@
 
 #include "myguiscenewindow.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 #include "../scene/ogrecamera.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUISceneWindow::MyGUISceneWindow(const std::string& name, MyGUIWindow* parent) :
-			MyGUIWindow(name, parent),
-			Window(name, parent),
+		MyGUISceneWindow::MyGUISceneWindow(const std::string& name, MyGUIWidget* parent) :
+			MyGUIWidget(name, parent),
+			Widget(name, parent),
 			SceneWindow(name, parent)
 		{
 			mImageBox = parent->widget()->createWidget<MyGUI::ImageBox>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
-			MyGUIWindow::setup();
+			MyGUIWidget::setup();
 		}
 
-		MyGUISceneWindow::MyGUISceneWindow(const std::string& name, MyGUISystem& system) :
-		MyGUIWindow(name, system),
-		Window(name, system),
-		SceneWindow(name, system)
+		MyGUISceneWindow::MyGUISceneWindow(const std::string& name, MyGUITopLevelWindow& window) :
+		MyGUIWidget(name, window),
+			Widget(name, window),
+		SceneWindow(name, window)
 		{
-			mImageBox = system.rootWidget()->createWidget<MyGUI::ImageBox>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
-			MyGUIWindow::setup();
+			mImageBox = window.rootWidget()->createWidget<MyGUI::ImageBox>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			MyGUIWidget::setup();
 		}
 
 		MyGUISceneWindow::~MyGUISceneWindow()

@@ -5,7 +5,7 @@
 namespace Engine
 {
 
-	API_IMPL(Scene::Entity::Mesh, MAP_RO(Name, getName), MAP_RO(Visible, isVisible));
+	API_IMPL(Scene::Entity::Mesh, MAP(Name, getName, setName), MAP(Visible, isVisible, setVisible));
 
 
 	namespace Scene

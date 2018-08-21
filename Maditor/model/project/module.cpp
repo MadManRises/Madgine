@@ -90,7 +90,7 @@ namespace Maditor {
 		void Module::addClassImpl(Generators::ClassGenerator * generator, bool callInsert)
 		{
 			
-			bool b = beginInsertRows(mClasses.size(), mClasses.size());
+			bool b = beginInsertRows(static_cast<int>(mClasses.size()), static_cast<int>(mClasses.size()));
 			mClasses.emplace_back(generator);
 			endInsertRows(b);
 
@@ -210,7 +210,7 @@ namespace Maditor {
 		}
 
 		int Module::childCount() const {
-			return mClasses.size();
+			return static_cast<int>(mClasses.size());
 		}
 
 		Generators::ClassGenerator *Module::child(int i) {
@@ -249,7 +249,7 @@ namespace Maditor {
 			auto it = std::find_if(mClasses.begin(), mClasses.end(), [=](const std::unique_ptr<Generators::ClassGenerator> &p) {return p.get() == generator; });
 			if (it == mClasses.end())
 				throw 0;
-			size_t i = std::distance(mClasses.begin(), it);
+			int i = static_cast<int>(std::distance(mClasses.begin(), it));
 
 			bool b = beginRemoveRows(i, i);
 			mCmake.removeFiles(generator->fileNames());

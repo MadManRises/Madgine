@@ -2,8 +2,6 @@
 
 #include "globalapicomponentbase.h"
 
-#include "globalscopebase.h"
-
 #include "../../app/application.h"
 
 
@@ -12,7 +10,7 @@ namespace Engine
 	namespace Scripting
 	{
 		GlobalAPIComponentBase::GlobalAPIComponentBase(App::Application &app) :
-		ScopeBase(app.createTable()),
+		ScopeBase(&app),
 		mApp(app)
 		{
 		}
@@ -26,16 +24,21 @@ namespace Engine
 			return *this;
 		}
 
+		App::Application& GlobalAPIComponentBase::app(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return mApp.getSelf(init);
+		}
+
 		bool GlobalAPIComponentBase::init()
 		{
 			return true;
 		}
 
 		void GlobalAPIComponentBase::finalize()
-		{
-		}
-
-		void GlobalAPIComponentBase::clear()
 		{
 		}
 

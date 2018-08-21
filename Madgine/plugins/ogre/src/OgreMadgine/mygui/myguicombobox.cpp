@@ -2,27 +2,27 @@
 
 #include "myguicombobox.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUICombobox::MyGUICombobox(const std::string& name, MyGUIWindow* parent) :
-			MyGUIWindow(name, parent),
-			Window(name, parent),
-			Combobox(name, parent)
+		MyGUICombobox::MyGUICombobox(const std::string& name, MyGUIWidget* parent) :
+			Widget(name, parent),
+			Combobox(name, parent),
+			MyGUIWidget(name, parent)
 		{
 			mCombobox = parent->widget()->createWidget<MyGUI::ComboBox>("ComboBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 			mCombobox->setEditReadOnly(true);
 		}
 
-		MyGUICombobox::MyGUICombobox(const std::string& name, MyGUISystem& system) :
-		Window(name, system),
-		MyGUIWindow(name, system),
-		Combobox(name, system)
+		MyGUICombobox::MyGUICombobox(const std::string& name, MyGUITopLevelWindow& window) :
+			Widget(name, window),
+		Combobox(name, window),
+			MyGUIWidget(name, window)
 		{
-			mCombobox = system.rootWidget()->createWidget<MyGUI::ComboBox>("ComboBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mCombobox = window.rootWidget()->createWidget<MyGUI::ComboBox>("ComboBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 			mCombobox->setEditReadOnly(true);
 		}
 

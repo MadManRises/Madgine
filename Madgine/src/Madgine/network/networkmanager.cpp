@@ -68,7 +68,7 @@ namespace Engine
 			return false;
 		}
 
-		Serialize::StreamError NetworkManager::connect(const std::string& url, int portNr, int timeout)
+		Serialize::StreamError NetworkManager::connect(const std::string& url, int portNr, std::chrono::milliseconds timeout)
 		{
 			if (isConnected())
 			{
@@ -91,7 +91,7 @@ namespace Engine
 			return Serialize::NO_ERROR;
 		}
 
-		void NetworkManager::connect_async(const std::string& url, int portNr, int timeout)
+		void NetworkManager::connect_async(const std::string& url, int portNr, std::chrono::milliseconds timeout)
 		{
 			std::thread(&NetworkManager::connect, this, url, portNr, timeout).detach();
 		}
@@ -122,14 +122,12 @@ namespace Engine
 					Serialize::StreamError error;
 					SocketId sock;
 					std::tie(sock, error) = SocketAPI::accept(mSocket);
-					while (error != Serialize::TIMEOUT && limit != 0)
+					while (error != Serialize::TIMEOUT && (limit == -1 || count < limit))
 					{
 						if (sock != Invalid_Socket)
 						{
 							if (addMasterStream(NetworkStream(sock, *this, createStreamId())) == Serialize::NO_ERROR){
-								++count;
-								if (limit > 0)
-									--limit;
+								++count;								
 							}
 						}
 						std::tie(sock, error) = SocketAPI::accept(mSocket);
@@ -139,7 +137,7 @@ namespace Engine
 			return count;
 		}
 
-		Serialize::StreamError NetworkManager::acceptConnection(int timeout)
+		Serialize::StreamError NetworkManager::acceptConnection(std::chrono::milliseconds timeout)
 		{
 			if (isConnected())
 			{
@@ -214,7 +212,7 @@ namespace Engine
 			return error;
 		}
 
-		void NetworkManager::onConnectionEstablished(int timeout)
+		void NetworkManager::onConnectionEstablished(std::chrono::milliseconds timeout)
 		{
 			mSlaveStream = std::make_unique<NetworkStream>(mSocket, *this);
 			Serialize::StreamError error = setSlaveStream(mSlaveStream.get(), true, timeout);

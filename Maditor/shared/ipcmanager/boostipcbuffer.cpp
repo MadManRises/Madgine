@@ -48,7 +48,7 @@ namespace Maditor {
 			}
 		}
 
-		size_t BoostIPCBuffer::rec(char *buf, size_t len)
+		int BoostIPCBuffer::rec(char *buf, size_t len)
 		{
 			size_t receivedSize = 0;
 			unsigned int priority;
@@ -59,7 +59,7 @@ namespace Maditor {
 					return -1;
 				}
 				std::memcpy(buf, buffer, receivedSize);
-				return receivedSize;
+				return static_cast<int>(receivedSize);
 			}
 			else {
 				if (mConnection.use_count() == 1) {
@@ -75,11 +75,11 @@ namespace Maditor {
 
 		}
 
-		size_t BoostIPCBuffer::send(char *buf, size_t len)
+		int BoostIPCBuffer::send(char *buf, size_t len)
 		{
 			size_t num = std::min(sMaxMessageSize, len);
 			if (mWriteQueue.try_send(buf, num, 0))
-				return num;
+				return static_cast<int>(num);
 			else {
 				if (mConnection.use_count() == 1)
 					return 0;

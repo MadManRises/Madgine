@@ -15,6 +15,7 @@ namespace Maditor {
 			InspectorThreadInstance(Engine::App::Application &app);
 
 			void getUpdate(Engine::InvScopePtr ptr, Inspector *inspector);
+			void setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value, Inspector *inspector);
 
 			lua_State *state();
 
@@ -22,6 +23,7 @@ namespace Maditor {
 
 		//protected:
 			void update(Engine::InvScopePtr ptr, Inspector *inspector);
+			void setFieldImpl(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value, Inspector *inspector);
 
 		protected:
 			virtual bool init() override;
@@ -29,6 +31,7 @@ namespace Maditor {
 
 		private:
 			Engine::SignalSlot::Slot<&InspectorThreadInstance::update> mUpdate;
+			Engine::SignalSlot::Slot<&InspectorThreadInstance::setFieldImpl> mSetField;
 
 			static std::mutex sMappingsMutex;
 			static std::map<lua_State *, InspectorThreadInstance*> sMappings;
@@ -42,13 +45,15 @@ namespace Maditor {
 
 			void init(Engine::Scripting::GlobalScopeBase &global);
 			void getUpdate(Engine::InvScopePtr ptr, InspectorThreadInstance *thread);
+			void setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value);
 		
 		protected:
 			void requestUpdateImpl(Engine::InvScopePtr ptr);
-			void sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &attributes) {}
+			void setFieldImpl(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value);
+			void sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const std::string &key, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &attributes) {}
 
 			void itemRemoved(Engine::InvScopePtr ptr);
-			void itemUpdate(Engine::InvScopePtr ptr, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &attributes);
+			void itemUpdate(Engine::InvScopePtr ptr, const std::string &key, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &attributes);
 
 		protected:
 			Engine::Scripting::ScopeBase *validate(Engine::InvScopePtr ptr);
@@ -61,6 +66,7 @@ namespace Maditor {
 
 			Engine::Serialize::Action<&Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
 			Engine::Serialize::Action<&Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
+			Engine::Serialize::Action<&Inspector::setFieldImpl, Engine::Serialize::ActionPolicy::request> mSetField;
 			std::unique_ptr<Engine::SignalSlot::Slot<&Inspector::itemRemoved>> mItemRemoved;
 			std::unique_ptr<Engine::SignalSlot::Slot<&Inspector::itemUpdate>> mItemUpdate;
 

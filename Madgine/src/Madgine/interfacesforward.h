@@ -33,9 +33,6 @@ namespace Engine
 
 		struct noparent_deleter;
 
-		template <typename T>
-		using noparent_unique_ptr = std::unique_ptr<T, noparent_deleter>;
-
 		using SerializableUnitMap = std::map<size_t, SerializableUnitBase*>;
 
 		enum StreamError
@@ -100,6 +97,11 @@ namespace Engine
 	namespace Hierarchy
 	{
 		class any_ptr;
+	}
+
+	namespace Plugins
+	{
+		class PluginManager;
 	}
 
 

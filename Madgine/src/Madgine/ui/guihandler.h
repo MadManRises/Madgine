@@ -1,8 +1,8 @@
 #pragma once
 
 #include "handler.h"
-#include "../gui/windownames.h"
-#include "../ogreuniquecomponentcollector.h"
+#include "../gui/widgetnames.h"
+#include "../clientuniquecomponentcollector.h"
 #include "../uniquecomponent.h"
 
 #include "../scripting/types/scope.h"
@@ -51,7 +51,7 @@ namespace Engine
 			Scene::ContextMask mContext;
 		};
 
-		using GuiHandlerCollector = OgreUniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
+		using GuiHandlerCollector = ClientUniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 	} // namespace GuiHandler

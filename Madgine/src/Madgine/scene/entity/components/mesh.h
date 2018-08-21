@@ -33,7 +33,7 @@ namespace Engine
 					setName(name);
 				}
 
-				Serialize::SerializedMapper<decltype(&Mesh::getName2), &Mesh::getName2, decltype(&Mesh::setName2), &Mesh::setName2>
+				Serialize::SerializedMapper<&Mesh::getName2, &Mesh::setName2>
 					mSerializedObject;
 
 			};

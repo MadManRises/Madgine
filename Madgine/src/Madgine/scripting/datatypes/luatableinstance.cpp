@@ -6,6 +6,8 @@
 #include "stringluatableinstance.h"
 #include "../types/scopebase.h"
 
+#include "../../generic/valuetype.h"
+
 extern "C"
 {
 #include <lua/lua.h>                                /* Always include this when calling Lua */
@@ -128,7 +130,7 @@ namespace Engine
 
 			args.pushToStack(mState);
 
-			switch (lua_pcall(mState, args.size() + 1, LUA_MULTRET, 0))
+			switch (lua_pcall(mState, static_cast<int>(args.size()) + 1, LUA_MULTRET, 0))
 			{
 			case 0:
 				break;

@@ -116,7 +116,7 @@ namespace Engine
 		std::pair<size_t, SerializableUnitMap*> SerializeManager::addStaticMasterMapping(
 			SerializableUnitBase* item, size_t id)
 		{
-			assert(id < RESERVED_ID_COUNT && id >= BEGIN_USER_ID_SPACE &&
+			assert(id < RESERVED_ID_COUNT && id >= BEGIN_STATIC_ID_SPACE &&
 				intern::sMasterMappings.find(id) == intern::sMasterMappings.end());
 			intern::sMasterMappings[id] = item;
 			//std::cout << "Master: " << id << " -> add static " << typeid(*item).name() << std::endl;
@@ -273,7 +273,7 @@ namespace Engine
 				removeMasterStream(mMasterStreams.front());
 		}
 
-		StreamError SerializeManager::setSlaveStream(BufferedInOutStream* stream, bool receiveState, int timeout)
+		StreamError SerializeManager::setSlaveStream(BufferedInOutStream* stream, bool receiveState, std::chrono::milliseconds timeout)
 		{
 			if (mSlaveStream)
 				return UNKNOWN_ERROR;
@@ -307,8 +307,8 @@ namespace Engine
 					mReceivingMasterState = true;
 					while (mReceivingMasterState)
 					{
-						if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
-							(std::chrono::steady_clock::now() - start).count() > timeout)
+						if (timeout > std::chrono::milliseconds{} && std::chrono::duration_cast<std::chrono::milliseconds>
+							(std::chrono::steady_clock::now() - start) > timeout)
 						{
 							state = TIMEOUT;
 							mReceivingMasterState = false;
@@ -526,7 +526,7 @@ namespace Engine
 			return !stream->isClosed();
 		}
 
-		bool SerializeManager::sendAllMessages(BufferedInOutStream* stream, int timeout)
+		bool SerializeManager::sendAllMessages(BufferedInOutStream* stream, std::chrono::milliseconds timeout)
 		{
 			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 			while (int result = stream->sendMessages())
@@ -535,8 +535,8 @@ namespace Engine
 				{
 					return false;
 				}
-				if (timeout > 0 && std::chrono::duration_cast<std::chrono::milliseconds>
-					(std::chrono::steady_clock::now() - start).count() > timeout)
+				if (timeout > std::chrono::milliseconds{} && std::chrono::duration_cast<std::chrono::milliseconds>
+					(std::chrono::steady_clock::now() - start) > timeout)
 				{
 					return false;
 				}
@@ -561,7 +561,7 @@ namespace Engine
 			return mTopLevelUnits;
 		}
 
-		int SerializeManager::clientCount() const
+		size_t SerializeManager::clientCount() const
 		{
 			return mMasterStreams.size();
 		}

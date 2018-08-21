@@ -43,8 +43,8 @@ namespace Engine
 			pos_type seekpos(pos_type pos,
 			                 std::ios_base::openmode mode = std::ios_base::in) override;
 
-			virtual size_t rec(char*, size_t) = 0;
-			virtual size_t send(char*, size_t) = 0;
+			virtual int rec(char*, size_t) = 0;
+			virtual int send(char*, size_t) = 0;
 
 
 			int_type overflow(int c = EOF) override;

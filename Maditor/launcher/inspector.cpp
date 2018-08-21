@@ -47,7 +47,8 @@ namespace Maditor
 		InspectorThreadInstance::InspectorThreadInstance(Engine::App::Application &app) :
 			Engine::Scripting::GlobalAPIComponent<InspectorThreadInstance>(app),
 			mUpdate(this),			
-			mState(nullptr)
+			mState(nullptr),
+		mSetField(this)
 		{
 		}
 
@@ -98,9 +99,19 @@ namespace Maditor
 			mUpdate.queue(ptr, inspector);
 		}
 
+		void InspectorThreadInstance::setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value, Inspector *inspector)
+		{
+			mSetField.queue(ptr, name, value, inspector);
+		}
+
 		void InspectorThreadInstance::update(Engine::InvScopePtr ptr, Inspector* inspector)
 		{
 			inspector->getUpdate(ptr, this);
+		}
+
+		void InspectorThreadInstance::setFieldImpl(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value, Inspector *inspector)
+		{
+			inspector->setField(ptr, name, value);
 		}
 
 		Inspector::Inspector() :
@@ -121,7 +132,7 @@ namespace Maditor
 				return;
 			}
 
-			Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>>
+			Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>>
 				attributes;
 			for (std::unique_ptr<Engine::KeyValueIterator> it = scope->iterator(); !it->ended(); ++(*it))
 			{
@@ -129,7 +140,7 @@ namespace Maditor
 				if (value.is<Engine::Scripting::ScopeBase*>())
 				{
 					attributes.try_emplace(
-						it->key(), Engine::ValueType(Engine::InvScopePtr(value.as<Engine::Scripting::ScopeBase*>())), it->flags());
+						it->key(), Engine::ValueType(Engine::InvScopePtr(value.as<Engine::Scripting::ScopeBase*>())), value.as<Engine::Scripting::ScopeBase*>()->getIdentifier(), it->flags());
 					mItemsMutex.lock();
 					auto it2 = mItems.find(value.as<Engine::Scripting::ScopeBase*>());
 					if (it2 == mItems.end())
@@ -145,7 +156,7 @@ namespace Maditor
 					if (otherThread)
 					{
 						Engine::Scripting::ScopeBase* global = &otherThread->globalScope();
-						attributes.try_emplace(it->key(), Engine::ValueType(Engine::InvScopePtr(global)), it->flags());
+						attributes.try_emplace(it->key(), Engine::ValueType(Engine::InvScopePtr(global)), "", it->flags());
 						mItemsMutex.lock();
 						auto it = mItems.find(global);
 						if (it == mItems.end())
@@ -160,10 +171,25 @@ namespace Maditor
 				}
 				else
 				{
-					attributes.try_emplace(it->key(), value, it->flags());
+					attributes.try_emplace(it->key(), value, "", it->flags());
 				}
 			}
-			mItemUpdate->queue(ptr, attributes);
+			mItemUpdate->queue(ptr, scope->getIdentifier(), attributes);
+		}
+
+		void Inspector::setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value)
+		{
+			Engine::Scripting::ScopeBase* scope;
+			if (isValid(ptr))
+			{
+				scope = validate(ptr);
+			}
+			else
+			{
+				mItemRemoved->queue(ptr);
+				return;
+			}
+			scope->set(name, value);
 		}
 
 		void Inspector::init(Engine::Scripting::GlobalScopeBase &global)
@@ -187,14 +213,14 @@ namespace Maditor
 			mItemsMutex.lock();
 			mItems.erase(ptr);
 			mItemsMutex.unlock();
-			mSendUpdate(ptr, false, {}, {});
+			mSendUpdate(ptr, false, "", {}, {});
 		}
 
-		void Inspector::itemUpdate(Engine::InvScopePtr ptr,
+		void Inspector::itemUpdate(Engine::InvScopePtr ptr, const std::string &key,
 		                           const Engine::Serialize::SerializableMap<
-			                           std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>>& attributes)
+			                           std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>>& attributes)
 		{
-			mSendUpdate(ptr, true, attributes, {});
+			mSendUpdate(ptr, true, key, attributes, {});
 		}
 
 		void Inspector::requestUpdateImpl(Engine::InvScopePtr ptr)
@@ -217,12 +243,41 @@ namespace Maditor
 				else
 				{
 					mItemsMutex.unlock();
-					mSendUpdate(ptr, false, {}, {});
+					mSendUpdate(ptr, false, "", {}, {});
 				}
 			}
 			else
 			{
 				getUpdate(ptr, nullptr);
+			}
+		}
+
+		void Inspector::setFieldImpl(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value)
+		{
+			if (ptr)
+			{
+				mItemsMutex.lock();
+				auto it = mItems.find(ptr);
+				if (it != mItems.end())
+				{
+					InspectorThreadInstance* thread = std::get<0>(it->second);
+					mItemsMutex.unlock();
+					if (thread) {
+						thread->setField(ptr, name, value, this);
+					}
+					else
+					{
+						setField(ptr, name, value);
+					}
+				}
+				else
+				{
+					
+				}
+			}
+			else
+			{
+				setField(ptr, name, value);
 			}
 		}
 

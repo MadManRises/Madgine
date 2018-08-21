@@ -1,7 +1,7 @@
 #pragma once
 
 #include "entitycomponentbase.h"
-#include "entity.h"
+#include "entitycomponentcollector.h"
 #include "../../scripting/types/scope.h"
 
 namespace Engine
@@ -42,7 +42,7 @@ namespace Engine
 					(void)_reg;
 				}
 
-				typedef Entity::ComponentRegistrator<T> _Reg;
+				typedef EntityComponentCollector::ComponentRegistrator<T> _Reg;
 				static const _Reg _reg;
 			};
 
@@ -70,7 +70,7 @@ namespace Engine
 					(void)_reg;
 				}				
 
-				typedef Entity::ComponentRegistrator<T> _Reg;
+				typedef EntityComponentCollector::ComponentRegistrator<T> _Reg;
 				static const _Reg _reg;
 			};
 

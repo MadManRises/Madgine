@@ -11,6 +11,10 @@
 #include "Madgine/app/application.h"
 #include "../../resources/ogremeshloader.h"
 
+#include "Madgine/resources/resourcemanager.h"
+
+#include "Madgine/scene/entity/entity.h"
+
 namespace Engine
 {
 
@@ -53,14 +57,19 @@ namespace Engine
 
 			void OgreMesh::setName(const std::string& mesh)
 			{
-				destroyObject();
-				if (!mesh.empty())
+				if (mesh.empty()) {
+					destroyObject();
+				}
+				else
 				{
 					auto p = app().resources().load<OgreMeshLoader>(mesh);
-					mObject = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->createEntity(mesh);
-					mObject->addQueryFlags(Masks::ENTITY_MASK);
-					if (mTransform)
-						mTransform->getNode()->attachObject(mObject);
+					if (p) {
+						destroyObject();
+						mObject = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->createEntity(mesh/*, *p*/);
+						mObject->addQueryFlags(Masks::ENTITY_MASK);
+						if (mTransform)
+							mTransform->getNode()->attachObject(mObject);
+					}
 				}
 			}
 

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/button.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/button.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class MyGUIButton : public Button, public MyGUIWindow
+		class MyGUIButton : public Button, public MyGUIWidget
 		{
 		public:
-			MyGUIButton(const std::string &name, MyGUIWindow *parent);
-			MyGUIButton(const std::string &name, MyGUISystem &system);
+			MyGUIButton(const std::string &name, MyGUIWidget *parent);
+			MyGUIButton(const std::string &name, MyGUITopLevelWindow &window);
 
 			void setText(const std::string& text) override;
 			Class getClass() override;

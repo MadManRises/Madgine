@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/bar.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/bar.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 		
-		class MyGUIBar : public Bar, public MyGUIWindow
+		class MyGUIBar : public Bar, public MyGUIWidget
 		{
 		public:
-			MyGUIBar(const std::string &name, MyGUIWindow *parent);
-			MyGUIBar(const std::string &name, MyGUISystem &system);
+			MyGUIBar(const std::string &name, MyGUIWidget *parent);
+			MyGUIBar(const std::string &name, MyGUITopLevelWindow &window);
 
 			void setRatio(float f) override;
 			Class getClass() override;

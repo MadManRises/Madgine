@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../generic/valuetype.h"
 #include "../../serialize/serializable.h"
 
 namespace Engine
@@ -8,58 +7,42 @@ namespace Engine
 	namespace Scripting
 	{
 		class INTERFACES_EXPORT ArgumentList :
-			public std::vector<ValueType>,
 			public Serialize::Serializable
 		{
 		public:
-			using vector<ValueType>::vector;
+			ArgumentList(std::vector<ValueType> &&data);
 			ArgumentList() = default;
 			ArgumentList(lua_State* state, int count);
 
 			template <class... T>
 			ArgumentList(T&&... args) :
-				ArgumentList({ValueType(std::forward<T>(args))...})
+				ArgumentList(std::vector<ValueType>{ValueType(std::forward<T>(args))...})
 			{
 			}
 
 			// Geerbt über Serializable
 			void readState(Serialize::SerializeInStream&) override;
-
 			void writeState(Serialize::SerializeOutStream&) const override;
-
-			template <class... _Ty>
-			bool parse(_Ty&... args) const
-			{
-				if (size() != sizeof...(_Ty))
-					return false;
-				return parseSeq(std::make_index_sequence<sizeof...(_Ty)>(), args...);
-			}
 
 			void pushToStack(lua_State* state) const;
 
+			size_t size() const;
+
+			ValueType &at(size_t i);
+			const ValueType &at(size_t i) const;
+
+			ValueType &front();
+			const ValueType &front() const;
+
+			bool empty() const;
+
+			std::vector<ValueType>::iterator begin();
+			std::vector<ValueType>::const_iterator begin() const;
+			std::vector<ValueType>::iterator end();
+			std::vector<ValueType>::const_iterator end() const;
+
 		private:
-
-			template <class... _Ty, size_t... Is>
-			bool parseSeq(std::index_sequence<Is...>, _Ty&... args) const
-			{
-				using expander = bool[];
-				expander valid{
-					at(Is).template is<_Ty>()...
-				};
-				for (int i = 0; i < sizeof...(_Ty); ++i)
-					if (!valid[i])
-						return false;
-
-				(void)expander{
-					(void(args = at(Is).template as<_Ty>()), false)...
-				};
-				return true;
-			}
-
-			bool parseSeq(std::index_sequence<>) const
-			{
-				return true;
-			}
+			std::vector<ValueType> mData;
 		};
 	}
 }

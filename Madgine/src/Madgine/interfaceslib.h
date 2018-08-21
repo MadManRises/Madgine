@@ -37,6 +37,9 @@
 	#define TEMPLATE_EXPORT
 #endif
 
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4661)
+
 
 #include <cstring>
 #include <string>

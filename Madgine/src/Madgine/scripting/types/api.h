@@ -6,6 +6,7 @@
 #include "mapper.h"
 #include "apihelper.h"
 #include "../../generic/keyvalue.h"
+#include "../../generic/valuetype.h"
 
 namespace Engine
 {
@@ -15,6 +16,7 @@ namespace Engine
 	namespace Scripting
 	{
 		ValueType INTERFACES_EXPORT toValueType(ScopeBase* ref, const Mapper& mapper);
+		void INTERFACES_EXPORT fromValueType(ScopeBase* ref, const Mapper& mapper, const ValueType &value);
 
 
 		template <class T>
@@ -31,10 +33,7 @@ namespace Engine
 		{
 			static decltype(auto) cast(const ValueType& v)
 			{
-				T* t = scope_cast<T>(v.as<ScopeBase*>());
-				if (!t)
-					throw 0;
-				return t;
+				return scope_cast<T>(v.as<ScopeBase*>());
 			}
 		};
 

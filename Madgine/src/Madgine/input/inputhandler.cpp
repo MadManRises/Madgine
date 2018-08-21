@@ -2,7 +2,7 @@
 
 #include "inputhandler.h"
 
-#include "../gui/guisystem.h"
+#include "inputlistener.h"
 
 namespace Engine
 {
@@ -10,45 +10,50 @@ namespace Engine
 	{
 		
 		InputHandler::InputHandler() :
-		mGUI(nullptr)
+		mListener(nullptr)
 		{
 			
 		}
 
-		void InputHandler::setSystem(GUI::GUISystem* gui)
+		void InputHandler::setListener(InputListener *listener)
 		{
-			mGUI = gui;
+			mListener = listener;
+		}
+
+		InputListener* InputHandler::listener()
+		{
+			return mListener;
 		}
 
 
-			void InputHandler::injectKeyPress(const GUI::KeyEventArgs& arg)
+		void InputHandler::injectKeyPress(const KeyEventArgs& arg)
 			{
-				if (mGUI)
-					mGUI->injectKeyPress(arg);
+				if (mListener)
+					mListener->injectKeyPress(arg);
 			}
 
-			void InputHandler::injectKeyRelease(const GUI::KeyEventArgs& arg)
+			void InputHandler::injectKeyRelease(const KeyEventArgs& arg)
 			{
-				if (mGUI)
-					mGUI->injectKeyRelease(arg);
+				if (mListener)
+					mListener->injectKeyRelease(arg);
 			}
 
-			void InputHandler::injectMousePress(const GUI::MouseEventArgs& arg)
+			void InputHandler::injectMousePress(const MouseEventArgs& arg)
 			{
-				if (mGUI)
-					mGUI->injectMousePress(arg);
+				if (mListener)
+					mListener->injectMousePress(arg);
 			}
 
-			void InputHandler::injectMouseRelease(const GUI::MouseEventArgs& arg)
+			void InputHandler::injectMouseRelease(const MouseEventArgs& arg)
 			{
-				if (mGUI)
-					mGUI->injectMouseRelease(arg);
+				if (mListener)
+					mListener->injectMouseRelease(arg);
 			}
 
-			void InputHandler::injectMouseMove(const GUI::MouseEventArgs& arg)
+			void InputHandler::injectMouseMove(const MouseEventArgs& arg)
 			{
-				if (mGUI)
-					mGUI->injectMouseMove(arg);
+				if (mListener)
+					mListener->injectMouseMove(arg);
 			}
 
 	}

@@ -21,6 +21,7 @@ namespace Engine
 			Light* createLight();
 			const std::list<std::unique_ptr<Light>> &lights() const;
 
+			void finalize() override;
 			void clear();
 
 			virtual std::unique_ptr<Light> createLightImpl() = 0;

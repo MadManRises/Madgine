@@ -49,6 +49,7 @@ namespace Engine
 #endif
 			}
 			catch (const std::exception &e) {
+				LOG_ERROR(Database::message("Load of plugin \"", "\" failed with error: ", "")(mPath, e.what()));
 				mModule = nullptr;
 			}
 

@@ -6,17 +6,15 @@
 
 #include "../scenemanager.h"
 
-#include "../../scripting/types/globalscopebase.h"
-
 #include "entitycomponentbase.h"
 
 #include "../../scripting/datatypes/luatableiterator.h"
-#include "../../scripting/datatypes/luatablefieldaccessor.h"
 
-#include "../../app/application.h"
 
-	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove
-	), /*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
+#include "entitycomponentcollector.h"
+
+	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(Active, isActive), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove),
+		/*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
 
 namespace Engine
 {
@@ -27,7 +25,7 @@ namespace Engine
 		{
 			Entity::Entity(const Entity& other, bool local) :
 				SerializableUnit(other),
-				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(other.mSceneManager.app().createTable()),
+				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(&other.mSceneManager),
 				mName(other.mName),
 				mLocal(local),
 				mSceneManager(other.mSceneManager)
@@ -50,33 +48,25 @@ namespace Engine
 				setup();
 			}
 
-			Entity::Entity(SceneManager &sceneMgr, bool local, const std::string& name, const std::string& behaviour) :
-				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(sceneMgr.app().createTable()),
+			Entity::Entity(SceneManager &sceneMgr, bool local, const std::string& name, const Scripting::LuaTable& behaviour) :
+				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(&sceneMgr),
 				mName(name),
 				mLocal(local),
 				mSceneManager(sceneMgr)
 			{
 				setup();
-				if (!behaviour.empty())
+				if (behaviour)
 				{
-					ValueType table = sceneMgr.app().table()[behaviour];
-					if (table.is<Scripting::LuaTable>())
+					for (const std::pair<std::string, ValueType>& p : behaviour)
 					{
-						for (const std::pair<std::string, ValueType>& p : table.as<Scripting::LuaTable>())
+						if (p.second.is<Scripting::LuaTable>())
 						{
-							if (p.second.is<Scripting::LuaTable>())
-							{
-								addComponent(p.first, p.second.as<Scripting::LuaTable>());
-							}
-							else
-							{
-								LOG_WARNING(Database::message("Non-Table value at key \"", "\"!")(p.first));
-							}
+							addComponent(p.first, p.second.as<Scripting::LuaTable>());
 						}
-					}
-					else
-					{
-						LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behaviour));
+						else
+						{
+							LOG_WARNING(Database::message("Non-Table value at key \"", "\"!")(p.first));
+						}
 					}
 				}
 			}
@@ -132,7 +122,7 @@ namespace Engine
 
 			void Entity::addComponent(const std::string& name, const Scripting::LuaTable& table)
 			{
-				addComponentImpl(createComponent(name, table));
+				addComponentImpl(EntityComponentCollector::createComponent(*this, name, table));
 			}
 
 			void Entity::removeComponent(const std::string& name)
@@ -142,46 +132,12 @@ namespace Engine
 				mComponents.erase(it);
 			}
 
-			bool Entity::existsComponent(const std::string& name)
-			{
-				return sRegisteredComponentsByName().find(name) != sRegisteredComponentsByName().end();
-			}
 
-			std::set<std::string> Entity::registeredComponentNames()
-			{
-				std::set<std::string> result;
 
-				for (const std::pair<const std::string, ComponentBuilder>& p : sRegisteredComponentsByName())
-				{
-					result.insert(p.first);
-				}
-
-				return result;
-			}
-
-			std::unique_ptr<EntityComponentBase> Entity::createComponent(
-				const std::string& name, const Scripting::LuaTable& table)
-			{
-				auto it = sRegisteredComponentsByName().find(name);
-				if (it == sRegisteredComponentsByName().end()) {
-					typedef std::map<std::string, ComponentBuilder> & (*ComponentGetter)();
-					for (const std::pair<const std::string, Plugins::Plugin> &p : sceneMgr().app().pluginMgr()) {
-						ComponentGetter getter = (ComponentGetter)p.second.getSymbol("pluginEntityComponents");
-						if (getter) {
-							it = (*getter)().find(name);
-							if (it != (*getter)().end()) {
-								return it->second(*this, table);
-							}
-						}
-					}
-					throw ComponentException(Database::Exceptions::unknownComponent(name));
-				}
-				return it->second(*this, table);
-			}
-
+			
 			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string& name)
 			{
-				return make_tuple(createComponent(name));
+				return make_tuple(EntityComponentCollector::createComponent(*this, name));
 			}
 
 			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
@@ -193,11 +149,7 @@ namespace Engine
 				return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
 			}
 
-			std::map<std::string, Entity::ComponentBuilder>& Entity::sRegisteredComponentsByName()
-			{
-				static std::map<std::string, ComponentBuilder> dummy;
-				return dummy;
-			}
+			
 
 
 			void Entity::remove()

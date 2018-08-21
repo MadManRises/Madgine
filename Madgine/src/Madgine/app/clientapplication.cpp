@@ -21,10 +21,9 @@ namespace Engine
 		void ClientApplication::setup(const ClientAppSettings& settings)
 		{
 			mSettings = &settings;
-
 			
 		
-			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(pluginMgr().getUniqueSymbol("guisystem"));
+			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(pluginMgr().at("Renderer").getUniqueSymbol("guisystem"));
 			if (!f)
 				throw 0;
 			mGUI = f(*this);

@@ -13,8 +13,7 @@ namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>,
-			public Core::FrameListener, public Core::FrameLoop
+		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public Core::FrameLoop
 		{
 		public:
 			ServerBase(const std::string& name, Core::Root &root);
@@ -22,12 +21,9 @@ namespace Engine
 
 			virtual int go() override;
 
-			Util::ServerLog& log();
-
-			void shutdown();			
+			Util::ServerLog& log();		
 
 		protected:
-			virtual bool frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context) override = 0;
 			virtual void start() = 0;
 			virtual void stop() = 0;
 
@@ -47,8 +43,6 @@ namespace Engine
 			std::string mName;
 
 			Core::Root &mRoot;
-
-			bool mRunning;
 
 			std::list<ServerAppInstance> mInstances;
 			

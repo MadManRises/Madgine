@@ -21,11 +21,17 @@ namespace Engine
 		TransformItContainer(TransformItContainer<T, Converter>&&) = delete;
 
 		template <class It>
-		class TransformIterator : public std::iterator<typename std::iterator_traits<It>::iterator_category,
-		                                               typename std::remove_reference<decltype(std::declval<Converter>()(
-			                                               *std::declval<It>()))>::type>
+		class TransformIterator
 		{
 		public:
+
+			using iterator_category = typename It::iterator_category;
+			using value_type = typename std::remove_reference<decltype(std::declval<Converter>()(std::declval<It::value_type>()))>::type;
+			using difference_type = ptrdiff_t;
+			using pointer = value_type;
+			using reference = value_type;
+
+		
 			TransformIterator(It&& it) :
 				mIt(std::forward<It>(it))
 			{

@@ -38,8 +38,8 @@ namespace Engine
 					setPosition(v);
 				}
 
-				Serialize::SerializedMapper<decltype(&Transform::getPosition2), &Transform::getPosition2, decltype(&Transform::
-					setPosition2), &Transform::setPosition2> mSerializedPosition;
+				Serialize::SerializedMapper<&Transform::getPosition2, 
+					&Transform::setPosition2> mSerializedPosition;
 
 			};
 

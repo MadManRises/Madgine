@@ -1,20 +1,21 @@
 #pragma once
 
-#include "Madgine/gui/windows/image.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/image.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class MyGUIImage : public Image, public MyGUIWindow
+		class MyGUIImage : public Image, public MyGUIWidget
 		{
 		public:
-			MyGUIImage(const std::string &name, MyGUIWindow *parent);
-			MyGUIImage(const std::string &name, MyGUISystem &system);
+			MyGUIImage(const std::string &name, MyGUIWidget *parent);
+			MyGUIImage(const std::string &name, MyGUITopLevelWindow &system);
 
 			void setImage(const std::string& name) override;
+			std::string getImage() const override;
 
 			Class getClass() override;
 

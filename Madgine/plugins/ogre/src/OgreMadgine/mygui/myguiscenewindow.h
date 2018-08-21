@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Madgine/gui/windows/scenewindow.h"
-#include "myguiwindow.h"
+#include "Madgine/gui/widgets/scenewindow.h"
+#include "myguiwidget.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 
-		class OGREMADGINE_EXPORT MyGUISceneWindow : public SceneWindow, public MyGUIWindow
+		class OGREMADGINE_EXPORT MyGUISceneWindow : public SceneWindow, public MyGUIWidget
 		{
 		public:
-			MyGUISceneWindow(const std::string &name, MyGUIWindow *parent);
-			MyGUISceneWindow(const std::string &name, MyGUISystem &system);
+			MyGUISceneWindow(const std::string &name, MyGUIWidget *parent);
+			MyGUISceneWindow(const std::string &name, MyGUITopLevelWindow &system);
 			~MyGUISceneWindow();
 
 			Class getClass() override;

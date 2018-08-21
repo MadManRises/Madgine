@@ -84,7 +84,7 @@ namespace View {
 		ui()->modulesWidget->setModel(app->moduleLoader());
 		ui()->performanceWidget->setModel(app->util()->profiler());
 		ui()->appStatsWidget->setModel(app->util()->stats());
-		ui()->inspectorWidget->setModel(app->inspector());
+		inspector()->setModel(app->inspector());
 	}
 
 	void ApplicationView::clearModel()

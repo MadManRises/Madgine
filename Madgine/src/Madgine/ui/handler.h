@@ -1,10 +1,7 @@
 #pragma once
 
-#include "../gui/guievents.h"
-#include "../gui/windows/classid.h"
 #include "../madgineobject.h"
 #include "../scripting/types/scopebase.h"
-#include "../scripting/types/globalapicomponentbase.h"
 #include "../signalslot/slot.h"
 
 namespace Engine
@@ -13,15 +10,15 @@ namespace Engine
 	{
 		struct MADGINE_CLIENT_EXPORT WindowDescriber
 		{
-			WindowDescriber(const std::string& windowName,
-			                std::function<bool(GUI::Window*)> init) :
-				mWindowName(windowName),
+			WindowDescriber(const std::string& widgetName,
+			                std::function<bool(GUI::Widget*)> init) :
+				mWidgetName(widgetName),
 				mInit(init)
 			{
 			}
 
-			std::string mWindowName;
-			std::function<bool(GUI::Window*)> mInit;
+			std::string mWidgetName;
+			std::function<bool(GUI::Widget*)> mInit;
 			;
 		};
 
@@ -34,7 +31,7 @@ namespace Engine
 
 			virtual void onMouseVisibilityChanged(bool b);
 
-			GUI::Window* window() const;
+			GUI::Widget* widget() const;
 
 			virtual void sizeChanged();
 
@@ -77,45 +74,45 @@ namespace Engine
 
 			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-			void registerWindow(const std::string& name, std::function<bool(GUI::Window*)> init);
+			void registerWidget(const std::string& name, std::function<bool(GUI::Widget*)> init);
 
 		private:
-			bool installToWindow(GUI::Window* w);
+			bool installToWidget(GUI::Widget* w);
 
 		protected:
 
 			bool init() override;
 			void finalize() override;
 
-			bool init(GUI::Window* w);
+			bool init(GUI::Widget* w);
 
 
-			virtual void onMouseMove(GUI::MouseEventArgs& me);
+			virtual void onMouseMove(Input::MouseEventArgs& me);
 
-			virtual void onMouseDown(GUI::MouseEventArgs& me);
+			virtual void onMouseDown(Input::MouseEventArgs& me);
 
-			virtual void onMouseUp(GUI::MouseEventArgs& me);
+			virtual void onMouseUp(Input::MouseEventArgs& me);
 
-			virtual bool onKeyPress(const GUI::KeyEventArgs& evt);
+			virtual bool onKeyPress(const Input::KeyEventArgs& evt);
 
 			
 
 		public:
 			
-			void injectMouseMove(GUI::MouseEventArgs& evt);
-			void injectMouseDown(GUI::MouseEventArgs& evt);
-			void injectMouseUp(GUI::MouseEventArgs& evt);
-			bool injectKeyPress(const GUI::KeyEventArgs& evt);
+			void injectMouseMove(Input::MouseEventArgs& evt);
+			void injectMouseDown(Input::MouseEventArgs& evt);
+			void injectMouseUp(Input::MouseEventArgs& evt);
+			bool injectKeyPress(const Input::KeyEventArgs& evt);
 
 		protected:
-			GUI::Window* mWindow;
+			GUI::Widget* mWidget;
 
 			UIManager &mUI;
 
-			const std::string mWindowName;
+			const std::string mWidgetName;
 
 		private:
-			std::list<WindowDescriber> mWindows;
+			std::list<WindowDescriber> mWidgets;
 
 			SignalSlot::Slot<&Handler::injectMouseMove> mMouseMoveSlot;
 			SignalSlot::Slot<&Handler::injectMouseDown> mMouseDownSlot;

@@ -37,7 +37,7 @@ namespace Maditor {
 
 		int ProfilerItem::childCount() const
 		{
-			return mChildren.size();
+			return static_cast<int>(mChildren.size());
 		}
 
 		ProfilerItem * ProfilerItem::child(int i)
@@ -88,7 +88,7 @@ namespace Maditor {
 
 		int ProfilerModel::childCount() const
 		{
-			return mTopLevelItems.size();
+			return static_cast<int>(mTopLevelItems.size());
 		}
 
 		ProfilerItem * ProfilerModel::child(int i)

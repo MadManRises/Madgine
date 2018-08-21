@@ -37,24 +37,14 @@ namespace Engine
 		private:
 			static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
-		private:
 			std::shared_ptr<ConnectionBase> mBegin;
 		};
 
+		template <class T, class = void>
+		struct has_store : std::false_type {};
 
 		template <class T>
-		class has_store
-		{
-		private:
-			template <typename C>
-			static std::is_same<decltype(&C::connectionStore), ConnectionStore &(C::*)()> test(void*);
-			template <typename>
-			static std::false_type test(...);
-
-		public:
-			static bool const constexpr value = decltype(test<T>(nullptr))::value;
-		};
-
+		struct has_store<T, std::void_t<std::enable_if_t<std::is_same_v<decltype(&T::connectionStore), ConnectionStore &(T::*)()>>>> : std::true_type {};
 
 	}
 }

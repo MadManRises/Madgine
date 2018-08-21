@@ -5,6 +5,9 @@
 #include "componentview.h"
 
 #include "../model/maditor.h"
+#include "application/inspector/inspectorwidget.h"
+
+#include "application/inspector/inspectorlayoutdata.h"
 
 namespace Maditor {
 namespace View {
@@ -25,10 +28,17 @@ public:
 
 	//Dialogs::DialogManager *dialogs();
 
-	const Ui::MainWindow *const ui;
+	const Ui::MainWindow * ui();
+
+	InspectorWidget * inspector();
 
 
 private:    
+	Ui::MainWindow *const mUi;
+
+	InspectorWidget * mInspector;
+
+	InspectorLayoutData mInspectorData;
 
 };
 

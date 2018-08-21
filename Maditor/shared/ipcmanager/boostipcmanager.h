@@ -20,16 +20,16 @@ namespace Maditor {
 			void operator=(const BoostIPCManager &) = delete;
 
 			bool startServer();
-			bool connect(int timeout = 0);
-			void connect_async(int timeout = 0);
+			bool connect(std::chrono::milliseconds timeout = {});
+			void connect_async(std::chrono::milliseconds timeout = {});
 
 			void close();
 
 
-			bool acceptConnection(int timeout);
+			bool acceptConnection(std::chrono::milliseconds timeout);
 			void acceptConnections();
 
-			int clientCount();
+			size_t clientCount();
 
 			bool isConnected();
 
@@ -45,7 +45,7 @@ namespace Maditor {
 
 			BoostIPCStream &addMasterStream(BoostIPCStream &&stream, bool sendState = true);
 
-			void onConnectionEstablished(SharedConnectionPtr &&conn, int timeout);
+			void onConnectionEstablished(SharedConnectionPtr &&conn, std::chrono::milliseconds timeout);
 
 		private:
 			BoostIPCServer *mServer;

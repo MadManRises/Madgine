@@ -15,7 +15,7 @@
 #include "Madgine/scripting/types/globalscopebase.h"
 
 
-#include "Madgine/ogreuniquecomponentcollector.h"
+#include "Madgine/clientuniquecomponentcollector.h"
 #include "Madgine/ui/guihandler.h"
 #include "Madgine/ui/gamehandler.h"
 #include "Madgine/ui/uimanager.h"
@@ -98,8 +98,7 @@ namespace Maditor {
 			unload();
 			for (ModuleInstance *dep : dependencies()) {
 				ModuleLauncherInstance *d = dynamic_cast<ModuleLauncherInstance*>(dep);
-				if (!d)
-					throw 0;
+				assert(d);				
 				d->mDependedBy.remove(this);
 			}
 			for (ModuleLauncherInstance *dep : mDependedBy) {

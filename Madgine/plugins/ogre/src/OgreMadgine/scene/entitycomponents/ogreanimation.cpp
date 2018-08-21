@@ -4,6 +4,8 @@
 
 #include "ogreanimation.h"
 
+#include "Madgine/scene/entity/entity.h"
+
 namespace Engine
 {
 	API_IMPL(Scene::Entity::Animation);

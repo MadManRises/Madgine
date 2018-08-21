@@ -6,16 +6,9 @@
 
 #include "../scripting/types/globalscopebase.h"
 
-#include "../uniquecomponentcollector.h"
+#include "../scripting/types/globalapicomponentcollector.h"
 
-#include "../scripting/types/globalapicomponent.h"
-
-#include "../signalslot/connectionmanager.h"
-
-#include "../resources/resourcemanager.h"
 #include "../core/framelistener.h"
-
-#include "../serialize/container/noparent.h"
 
 namespace Engine
 {
@@ -41,7 +34,7 @@ namespace Engine
 				app.setup(settings);
 				if (!app.callInit()) return -1;
 				int result = app.go();
-				app.finalize();
+				app.callFinalize();
 				return result;
 			}
 
@@ -87,7 +80,7 @@ namespace Engine
 			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
 			* @param timeSinceLastFrame holds the time since the last frame
 			*/
-			virtual bool frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context) override;
+			virtual bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 			
 			/**
@@ -123,26 +116,6 @@ namespace Engine
 			Scene::SceneManager &sceneMgr(bool = true);
 			Application &getSelf(bool = true);
 
-			//virtual GUI::GUISystem &gui();
-			//virtual UI::UIManager &ui();
-
-			/*template <class T>
-			T &getGameHandler()
-			{
-				return static_cast<T&>(getGameHandler(T::component_index()));
-			}
-
-			virtual UI::GameHandlerBase &getGameHandler(size_t);
-
-			template <class T>
-			T &getGuiHandler()
-			{
-				return static_cast<T&>(getGuiHandler(T::component_index()));
-			}
-
-			virtual UI::GuiHandlerBase &getGuiHandler(size_t);*/
-
-
 			Util::Log &log();
 
 			Core::Root &root();
@@ -173,17 +146,14 @@ namespace Engine
 
 		private:
 
-			bool mShutDown;
+			Core::Root &mRoot;
 
 			Scripting::GlobalAPICollector mGlobalAPIs;
+			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Util::StandardLog> mLog;
 
-			std::unique_ptr<Core::FrameLoop> mLoop;
-
-			Serialize::noparent_unique_ptr<Scene::SceneManager> mSceneMgr;
-
-			Core::Root &mRoot;
+			std::unique_ptr<Core::FrameLoop> mLoop;			
 
 			const AppSettings *mSettings;
 

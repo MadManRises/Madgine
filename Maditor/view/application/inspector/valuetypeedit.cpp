@@ -248,7 +248,7 @@ void ValueTypeEdit::onValueChanged() {
 	case Engine::ValueType::Type::InvScopePtrValue:
 		break;
 	case Engine::ValueType::Type::UIntValue:
-		mUIntBox->setValue(mValue.as<size_t>());
+		mUIntBox->setValue(static_cast<int>(mValue.as<size_t>()));
 		break;
 	case Engine::ValueType::Type::BoolValue:
 		mBoolBox->setChecked(mValue.as<bool>());

@@ -8,22 +8,25 @@ namespace Engine
 		{
 			Mapper() = delete;
 
-			Mapper(ValueType (*getter)(ScopeBase*)) : mGetter(getter)
+			Mapper(ValueType (*getter)(ScopeBase*), void (*setter)(ScopeBase *, const ValueType &) = nullptr) : 
+			 mGetter(getter),
+			 mSetter(setter)
 			{
 			}
 
 			ValueType (*mGetter)(ScopeBase*);
+			void(*mSetter)(ScopeBase *, const ValueType &);
 
 			bool isWritable() const
 			{
-				return false;
+				return mSetter != nullptr;
 			}
 
 		private:
 			template <class T, ValueType(*F)(T*, const ArgumentList&)>
 			static ValueType map_f2(ScopeBase* s, const ArgumentList& args)
 			{
-				return F(dynamic_cast<T*>(s), args);
+				return F(scope_cast<T>(s), args);
 			}
 
 		public:

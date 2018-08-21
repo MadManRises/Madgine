@@ -1,12 +1,14 @@
 #include "baselib.h"
 #include "madgineobject.h"
+#include "../../../../../Workspace/include/MYGUI/MyGUI_KeyCode.h"
 
 namespace Engine
 {
 	class DependencyInitException{};
 
 	MadgineObject::MadgineObject() :
-		mState(ObjectState::UNINITIALIZED)
+		mState(ObjectState::UNINITIALIZED),
+		mOrder(-1)
 	{
 	}
 
@@ -45,8 +47,17 @@ namespace Engine
         }
         return mState == ObjectState::INITIALIZED || mState == ObjectState::MARKED_INITIALIZED;
     }
-    
-    void MadgineObject::callFinalize(){
+
+	bool MadgineObject::callInit(int& count)
+	{
+		bool notInit = mState == ObjectState::UNINITIALIZED;
+		bool result = callInit();
+		if (notInit && mState == ObjectState::INITIALIZED)
+			mOrder = ++count;
+		return result;
+	}
+
+	void MadgineObject::callFinalize(){
         if (mState == ObjectState::INITIALIZED){
             finalize();
             mState = ObjectState::UNINITIALIZED;
@@ -54,7 +65,13 @@ namespace Engine
         assert(mState == ObjectState::UNINITIALIZED);
     }
 
-    void MadgineObject::checkInitState() const{
+	void MadgineObject::callFinalize(int order)
+	{
+		if (mOrder == order)
+			callFinalize();
+	}
+
+	void MadgineObject::checkInitState() const{
         if (mState == ObjectState::UNINITIALIZED)
             throw DependencyInitException{};
     }

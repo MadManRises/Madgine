@@ -2,31 +2,36 @@
 
 #include "myguiimage.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUIImage::MyGUIImage(const std::string& name, MyGUIWindow* parent) :
-		MyGUIWindow(name, parent),
-		Window(name, parent),
-		Image(name, parent)
+		MyGUIImage::MyGUIImage(const std::string& name, MyGUIWidget* parent) :
+			Widget(name, parent),
+		Image(name, parent),
+			MyGUIWidget(name, parent)
 		{
 			mImage = parent->widget()->createWidget<MyGUI::StaticImage>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
-		MyGUIImage::MyGUIImage(const std::string& name, MyGUISystem& system) :
-		MyGUIWindow(name, system),
-		Window(name, system),
-		Image(name, system)
+		MyGUIImage::MyGUIImage(const std::string& name, MyGUITopLevelWindow& window) :
+			Widget(name, window),
+		Image(name, window),
+			MyGUIWidget(name, window)
 		{
-			mImage = system.rootWidget()->createWidget<MyGUI::StaticImage>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mImage = window.rootWidget()->createWidget<MyGUI::StaticImage>("ImageBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
 		void MyGUIImage::setImage(const std::string& name)
 		{
 			mImage->setImageTexture(name);
+		}
+
+		std::string MyGUIImage::getImage() const
+		{
+			return mImage->_getTextureName();
 		}
 
 		Class MyGUIImage::getClass()

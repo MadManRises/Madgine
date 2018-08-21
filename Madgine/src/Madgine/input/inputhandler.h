@@ -12,17 +12,18 @@ namespace Engine
 
 			virtual void update() = 0;
 			
-			void setSystem(GUI::GUISystem *gui);
+			void setListener(InputListener *listener);
+			InputListener *listener();
 
 		protected:
-			void injectKeyPress(const GUI::KeyEventArgs& arg);
-			void injectKeyRelease(const GUI::KeyEventArgs& arg);
-			void injectMousePress(const GUI::MouseEventArgs& arg);
-			void injectMouseRelease(const GUI::MouseEventArgs& arg);
-			void injectMouseMove(const GUI::MouseEventArgs& arg);
+			void injectKeyPress(const KeyEventArgs& arg);
+			void injectKeyRelease(const KeyEventArgs& arg);
+			void injectMousePress(const MouseEventArgs& arg);
+			void injectMouseRelease(const MouseEventArgs& arg);
+			void injectMouseMove(const MouseEventArgs& arg);
 
 		private:
-			GUI::GUISystem* mGUI;
+			InputListener* mListener;
 		};
 	}
 }

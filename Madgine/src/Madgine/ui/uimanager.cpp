@@ -4,9 +4,7 @@
 
 #include "../gui/guisystem.h"
 
-#include "../gui/windows/window.h"
-
-#include "gamehandler.h"
+#include "../gui/widgets/widget.h"
 
 #include "../app/clientapplication.h"
 #include "../app/clientappsettings.h"
@@ -25,7 +23,7 @@ namespace Engine
 	namespace UI
 	{
 		UIManager::UIManager(GUI::GUISystem &gui) :
-			Scope<Engine::UI::UIManager, Engine::Scripting::ScopeBase>(gui.app(false).createTable()),
+			Scope(&gui),
 			mCurrentRoot(nullptr),
 			mGUI(gui),
 			mKeepingCursorPos(false),
@@ -102,7 +100,7 @@ namespace Engine
 				/*const OIS::MouseState &mouseState = mMouse->getMouseState();
 				mKeptCursorPosition = { (float)mouseState.X.abs, (float)mouseState.Y.abs };*/
 			}
-			mGUI.hideCursor();
+			//mGUI.hideCursor();
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
 				h->onMouseVisibilityChanged(false);
@@ -123,12 +121,12 @@ namespace Engine
 				mutableMouseState.Y.abs = mKeptCursorPosition.y;
 				callSafe([&]() {
 					mouseMoved(OIS::MouseEvent(mMouse, mutableMouseState));*/
-				mGUI.showCursor();
+				//mGUI.showCursor();
 				/*});*/
 			}
 			else
 			{
-				mGUI.showCursor();
+				//mGUI.showCursor();
 			}
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
@@ -142,7 +140,7 @@ namespace Engine
 
 		bool UIManager::isCursorVisible() const
 		{
-			return mGUI.isCursorVisible();
+			return /* mGUI.isCursorVisible()*/true;
 		}
 
 		std::set<GameHandlerBase*> UIManager::getGameHandlers()
@@ -202,36 +200,36 @@ namespace Engine
 
 		void UIManager::swapCurrentRoot(GuiHandlerBase* newRoot)
 		{
-			if (mCurrentRoot) mCurrentRoot->window()->hide();
+			if (mCurrentRoot) mCurrentRoot->widget()->hide();
 			mCurrentRoot = newRoot;
-			newRoot->window()->show();
+			newRoot->widget()->show();
 		}
 
 		void UIManager::openModalWindow(GuiHandlerBase* handler)
 		{
-			handler->window()->showModal();
+			handler->widget()->showModal();
 			mModalWindowList.emplace(handler);
 		}
 
 		void UIManager::openWindow(GuiHandlerBase* handler)
 		{
-			handler->window()->show();
+			handler->widget()->show();
 		}
 
 		void UIManager::closeModalWindow(GuiHandlerBase* handler)
 		{
 			assert(mModalWindowList.size() > 0 && mModalWindowList.top() == handler);
-			handler->window()->hideModal();
+			handler->widget()->hideModal();
 			mModalWindowList.pop();
 			if (mModalWindowList.size() > 0)
-				mModalWindowList.top()->window()->activate();
+				mModalWindowList.top()->widget()->activate();
 			else if (mCurrentRoot)
-				mCurrentRoot->window()->activate();
+				mCurrentRoot->widget()->activate();
 		}
 
 		void UIManager::closeWindow(GuiHandlerBase* handler)
 		{
-			handler->window()->hide();
+			handler->widget()->hide();
 		}
 
 

@@ -6,46 +6,47 @@
 namespace Maditor {
 	namespace Model {
 
-		ValueItem::ValueItem(ScopeWrapperItem * parent, const std::string & name, const Engine::ValueType & value) :
+		ValueItem::ValueItem(ScopeWrapperItem * parent, const std::string & name, const Engine::ValueType & value, const std::string &type, Engine::KeyValueValueFlags flags) :
 			mParent(parent),
 			mName(name),
 			mValue(value),
-			mEditable(true)
+			mFlags(flags),
+			mType(type.empty() ? value.getTypeString() : type)
 		{
 
 		}
 
-		QVariant ValueItem::cellData(int col) const
-		{
-			QVariant result;
-			switch (col) {
-			case 0:
-				result = QString::fromStdString(mName);
-				break;
-			case 1:
-				result.setValue(mValue);
-				break;
-			}
-			return result;
-		}
-
-		TreeItem * ValueItem::parentItem() const
-		{
-			return mParent;
-		}
 
 		void ValueItem::setValue(const Engine::ValueType & val)
 		{
 			mValue = val;
 		}
 
-		bool ValueItem::isEditable()
+		void ValueItem::requestSetValue(const Engine::ValueType &val)
 		{
-			return mEditable;
+			mValue = val;
+			mParent->setField(mName, val);
 		}
 
-		void ValueItem::setEditable(bool b) {
-			mEditable = b;
+		Engine::KeyValueValueFlags ValueItem::flags()
+		{
+			return mFlags;
+		}
+
+		const std::string& ValueItem::name() const
+		{
+			return mName;
+		}
+
+
+		const Engine::ValueType& ValueItem::value() const
+		{
+			return mValue;
+		}
+
+		QString ValueItem::type()
+		{
+			return QString::fromStdString(mType);
 		}
 
 		ScopeWrapperItem::ScopeWrapperItem(Inspector * parent, Engine::InvScopePtr ptr) :	
@@ -58,57 +59,28 @@ namespace Maditor {
 		{
 		}
 
-		int ScopeWrapperItem::childCount() const
-		{
-			return mValues.size();
-		}
 
 		void ScopeWrapperItem::clear()
 		{
 			mValues.clear();
 		}
 
-		TreeItem * ScopeWrapperItem::child(int i)
-		{
-			return &std::next(mValues.begin(), i)->second;
-		}
-
-		QVariant ScopeWrapperItem::cellData(int col) const
-		{
-			QVariant result;
-			switch (col) {
-			case 0:
-				break;
-			case 1:
-				result.setValue(Engine::ValueType(mPtr));
-				break;
-			}
-			return result;
-		}
-
-		void ScopeWrapperItem::update(const std::map<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>>& data)
+		void ScopeWrapperItem::update(const std::string &key, const std::map<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>>& data)
 		{			
+			mKey = QString::fromStdString(key);
 			std::set<std::string> attributes;
-			for (const std::pair<const std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &p : data) {
-				std::pair<std::map<std::string, ValueItem>::iterator, bool> result = mValues.try_emplace(p.first, this, p.first, std::get<0>(p.second));
-				result.first->second.setEditable(std::get<1>(p.second) & Engine::KeyValueValueFlags::IsEditable);
+			for (const std::pair<const std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &p : data) {
+				std::pair<std::map<std::string, ValueItem>::iterator, bool> result = mValues.try_emplace(p.first, this, p.first, std::get<0>(p.second), std::get<1>(p.second), std::get<2>(p.second));
 				int row = std::distance(mValues.begin(), result.first);
 				if (!result.second) {
 					result.first->second.setValue(std::get<0>(p.second));
-					mInspector->dataChanged(mInspector->index(row, 1, getIndex()), mInspector->index(row, 1, getIndex()));
-				}
-				else {
-					mInspector->beginInsertRows(getIndex(), row, row);
-					mInspector->endInsertRows();
 				}
 				attributes.insert(p.first);
 			}
 			int i = 0;
 			for (auto it = mValues.begin(); it != mValues.end(); ) {
-				if (attributes.find(it->first) == attributes.end()) {
-					mInspector->beginRemoveRows(getIndex(), i, i);
-					it = mValues.erase(it);
-					mInspector->endRemoveRows();
+				if (attributes.find(it->first) == attributes.end()) {				
+					it = mValues.erase(it);					
 				}
 				else {
 					++it;
@@ -117,14 +89,40 @@ namespace Maditor {
 			}
 		}
 
-		QModelIndex ScopeWrapperItem::getIndex() {
-			return mInspector->index(parentIndex(), 0);
+		std::map<std::string, ValueItem>& ScopeWrapperItem::values()
+		{
+			return mValues;
 		}
 
-		TreeItem *ScopeWrapperItem::parentItem() const {
-			return mInspector;
+		void ScopeWrapperItem::setType(const QString &type)
+		{
+			mType = type;
 		}
 
+		const QString& ScopeWrapperItem::type() const
+		{
+			return mType;
+		}
+
+		const QString& ScopeWrapperItem::key() const
+		{
+			return mKey;
+		}
+
+		Engine::InvScopePtr ScopeWrapperItem::ptr()
+		{
+			return mPtr;
+		}
+
+		ScopeWrapperItem* ScopeWrapperItem::resolve(Engine::InvScopePtr ptr)
+		{
+			return mInspector->getScope(ptr);
+		}
+
+		void ScopeWrapperItem::setField(const std::string& name, const Engine::ValueType& value)
+		{
+			mInspector->setField(mPtr, name, value);
+		}
 
 	}
 }

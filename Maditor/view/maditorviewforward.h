@@ -8,6 +8,7 @@ namespace Maditor {
 		class LogsView;
 		class CmakeView;
 		class ProjectView;
+		class InspectorLayoutData;
 		class ModulePropertiesWidget;
 		class MaditorView;
 		class DocumentTabWidget;

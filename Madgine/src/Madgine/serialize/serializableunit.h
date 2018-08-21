@@ -79,10 +79,6 @@ namespace Engine
 			/*template <template <class...> class C, class Creator, class T>
 			friend class SerializableContainer;
 			*/
-			friend struct noparent_deleter;
-			template <typename T, typename... Args>
-			friend noparent_unique_ptr<T> make_noparent_unique(Args&&... args);
-			
 
 		private:
 			std::vector<Observable*> mObservedValues;

@@ -2,26 +2,26 @@
 
 #include "myguitextbox.h"
 
-#include "myguisystem.h"
+#include "myguitoplevelwindow.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		MyGUITextbox::MyGUITextbox(const std::string& name, MyGUIWindow* parent) :
-		MyGUIWindow(name, parent),
-		Window(name, parent),
+		MyGUITextbox::MyGUITextbox(const std::string& name, MyGUIWidget* parent) :
+		MyGUIWidget(name, parent),
+			Widget(name, parent),
 		Textbox(name, parent)
 		{
 			mTextbox = parent->widget()->createWidget<MyGUI::EditBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
-		MyGUITextbox::MyGUITextbox(const std::string& name, MyGUISystem& system) :
-		MyGUIWindow(name, system),
-		Window(name, system),
-		Textbox(name, system)
+		MyGUITextbox::MyGUITextbox(const std::string& name, MyGUITopLevelWindow& window) :
+		MyGUIWidget(name, window),
+			Widget(name, window),
+		Textbox(name, window)
 		{
-			mTextbox = system.rootWidget()->createWidget<MyGUI::EditBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mTextbox = window.rootWidget()->createWidget<MyGUI::EditBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
 		std::string MyGUITextbox::getText()

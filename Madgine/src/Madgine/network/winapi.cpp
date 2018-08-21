@@ -42,14 +42,14 @@ namespace Engine
 			closesocket(id);
 		}
 
-		size_t SocketAPI::send(SocketId id, char* buf, size_t len)
+		int SocketAPI::send(SocketId id, char* buf, size_t len)
 		{
-			return ::send(id, buf, len, 0);
+			return ::send(id, buf, static_cast<int>(len), 0);
 		}
 
-		size_t SocketAPI::recv(SocketId id, char* buf, size_t len)
+		int SocketAPI::recv(SocketId id, char* buf, size_t len)
 		{
-			return ::recv(id, buf, len, 0);
+			return ::recv(id, buf, static_cast<int>(len), 0);
 		}
 
 		Serialize::StreamError SocketAPI::getError()
@@ -102,15 +102,15 @@ namespace Engine
 			return s;
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, int timeout)
+		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, std::chrono::milliseconds timeout)
 		{
 			fd_set readSet;
 			FD_ZERO(&readSet);
 			FD_SET(s, &readSet);
 			timeval timeout_s;
-			timeout_s.tv_sec = timeout / 1000;
-			timeout_s.tv_usec = timeout % 1000 * 1000;
-			if (select(s, &readSet, nullptr, nullptr, &timeout_s) > 0)
+			timeout_s.tv_sec = static_cast<long>(timeout.count()) / 1000;
+			timeout_s.tv_usec = static_cast<long>(timeout.count()) % 1000 * 1000;
+			if (select(static_cast<int>(s), &readSet, nullptr, nullptr, &timeout_s) > 0)
 			{
 				SocketId sock = ::accept(s, nullptr, nullptr);
 				u_long iMode = 1;

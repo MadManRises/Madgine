@@ -19,7 +19,7 @@ namespace Engine
 
 		bool ServerFrameLoop::singleFrame()
 		{
-			float timeSinceLastFrame = mTimer.elapsed_us() / 1000000.0f;
+			std::chrono::microseconds timeSinceLastFrame = mTimer.elapsed_us();
 			mTimer.start();
 			return sendFrameStarted(timeSinceLastFrame) && sendFrameRenderingQueued(timeSinceLastFrame) && sendFrameEnded(timeSinceLastFrame);
 		}

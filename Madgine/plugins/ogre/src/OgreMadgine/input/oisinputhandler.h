@@ -1,7 +1,7 @@
 #pragma once
 
 #include <OIS/OIS.h>
-#include "Madgine/input/inputhandler.h"
+#include <Madgine/input/inputhandler.h>
 
 namespace Engine
 {
@@ -15,7 +15,7 @@ namespace Engine
 			virtual ~OISInputHandler();
 
 		private:
-			static GUI::MouseButton::MouseButton convertMouseButton(OIS::MouseButtonID id);
+			static MouseButton::MouseButton convertMouseButton(OIS::MouseButtonID id);
 
 			// Inherited via KeyListener
 			bool keyPressed(const OIS::KeyEvent& arg) override;

@@ -19,5 +19,12 @@ namespace Engine
 		{
 			return mapper.mGetter(ref);
 		}
+
+		void fromValueType(ScopeBase* ref, const Mapper& mapper, const ValueType &value)
+		{
+			if (!mapper.mSetter)
+				throw 0;
+			mapper.mSetter(ref, value);
+		}
 	}
 }

@@ -8,7 +8,7 @@
 
 namespace Maditor {
 	namespace Model {
-		class MADITOR_MODEL_EXPORT Inspector : public TreeUnit<Inspector> {
+		class MADITOR_MODEL_EXPORT Inspector : public QObject, public Engine::Serialize::SerializableUnit<Inspector> {
 			Q_OBJECT
 		public:
 			Inspector();
@@ -16,32 +16,32 @@ namespace Maditor {
 			void start();
 			void reset();
 
-			virtual TreeItem *child(int i) override;
-			virtual int childCount() const override;
+			void sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const std::string &key, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, std::string, Engine::KeyValueValueFlags>> &attributes);
+			void setField(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value);
 
-			void sendUpdateImpl(Engine::InvScopePtr ptr, bool exists, const Engine::Serialize::SerializableMap<std::string, std::tuple<Engine::ValueType, Engine::KeyValueValueFlags>> &attributes);
+			ScopeWrapperItem *registerScope(Engine::InvScopePtr ptr);
+			void unregisterScope(Engine::InvScopePtr ptr);			
 
+			ScopeWrapperItem *getScope(Engine::InvScopePtr ptr);
 
-			QModelIndex registerIndex(QObject *object, Engine::InvScopePtr ptr);
-			void unregisterIndex(QObject *object);
+			ScopeWrapperItem *root();
 
-			QModelIndex updateIndex(QObject *object, Engine::InvScopePtr ptr);
-
-			virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
-
+		signals:
+			void modelReset();
 
 		protected:
 			void requestUpdateImpl(Engine::InvScopePtr ptr) {}
+			void setFieldImpl(Engine::InvScopePtr ptr, const std::string &name, const Engine::ValueType &value) {}
 
 			virtual void timerEvent(QTimerEvent *e) override;
 
 		private:
 			std::map<Engine::InvScopePtr, ScopeWrapperItem> mWrappers;
-			std::map<QObject *, Engine::InvScopePtr> mIndices;
-			std::map<QObject *, Engine::InvScopePtr>::iterator mIt;
+			std::map<Engine::InvScopePtr, ScopeWrapperItem>::iterator mIt;
 
 			Engine::Serialize::Action<&Inspector::requestUpdateImpl, Engine::Serialize::ActionPolicy::request> mRequestUpdate;
 			Engine::Serialize::Action<&Inspector::sendUpdateImpl, Engine::Serialize::ActionPolicy::notification> mSendUpdate;
+			Engine::Serialize::Action<&Inspector::setFieldImpl, Engine::Serialize::ActionPolicy::request> mSetField;
 
 			bool mPending;
 			int mTimer;

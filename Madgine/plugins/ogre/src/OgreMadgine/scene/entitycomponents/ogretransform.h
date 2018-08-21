@@ -38,8 +38,8 @@ namespace Engine
 
 			private:
 				Ogre::SceneNode* mNode;
-				Serialize::SerializedMapper<decltype(&Transform::getPosition), &Transform::getPosition, decltype(&Transform::
-					                            setPosition), &Transform::setPosition> mSerializedPosition;
+				Serialize::SerializedMapper<&Transform::getPosition, 
+					&Transform::setPosition> mSerializedPosition;
 			};
 		}
 	}

@@ -3,7 +3,6 @@
 #include "../scripting/types/api.h"
 #include "../generic/keyvalueiterate.h"
 #include "scenemanager.h"
-#include "../app/application.h"
 
 API_IMPL(Engine::Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 
@@ -14,7 +13,7 @@ namespace Engine
 	namespace Scene
 	{
 		SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr, ContextMask context) :
-			ScopeBase(sceneMgr.app(false).createTable()),
+			ScopeBase(&sceneMgr),
 			mContext(context),
 			mEnabled(true),
 			mSceneMgr(sceneMgr)

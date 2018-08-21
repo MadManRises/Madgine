@@ -5,7 +5,7 @@ namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerTimer
+		class ServerTimer
 		{
 		public:
 
@@ -26,7 +26,7 @@ namespace Engine
 			size_t elapsed_xx(unit type);
 			//------------------------------------------------------------------------------
 			size_t elapsed_ms();
-			size_t elapsed_us();
+			std::chrono::microseconds elapsed_us();
 			size_t elapsed_ns();
 
 		private:

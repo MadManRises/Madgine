@@ -51,8 +51,6 @@ namespace Engine
 		private:
 			LuaTable(const std::shared_ptr<LuaTableInstance>& instance);
 
-
-		private:
 			std::shared_ptr<LuaTableInstance> mInstance;
 		};
 	}

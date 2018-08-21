@@ -5,15 +5,89 @@
 #include "../../qtimgui/QtImGui.h"
 #include "../../qtimgui/imgui/imgui.h"
 
+#include "../../../model/application/inspector/inspector.h"
+#include "Madgine/generic/invscopeptr.h"
+#include "inspectorlayoutdata.h"
+
+
 namespace Maditor
 {
 	namespace View
 	{
-		InspectorWidget::InspectorWidget(QWidget* parent) :
-		QOpenGLWindow()
+		InspectorWidget::InspectorWidget(InspectorLayoutData *data, QWidget* parent) :
+		QOpenGLWindow(),
+		mInspector(nullptr),
+		mCurrentItem(nullptr),
+		mData(data)
 		{
 			startTimer(0);
 		}
+
+		InspectorWidget::~InspectorWidget()
+		{
+			clearModel();
+		}
+
+		void InspectorWidget::setModel(Model::Inspector* inspector)
+		{
+			if (mInspector == inspector)
+				return;
+			clearModel();
+			mInspector = inspector;
+			mData->setModel(inspector);
+			mDestroyConnection = connect(mInspector, &QObject::destroyed, this, &InspectorWidget::resetModel);
+			mResetConnection = connect(mInspector, &Model::Inspector::modelReset, this, &InspectorWidget::reset);
+			reset();
+		}
+
+		void InspectorWidget::setCurrentItem(Engine::InvScopePtr ptr)
+		{
+			mCurrentItem = mData->updateIndex(mCurrentItem->ptr(), ptr);
+		}
+
+
+		void InspectorWidget::clearModel()
+		{
+			if (mInspector) {
+				mData->unregisterIndex(mCurrentItem->ptr());
+				resetModel();
+			}
+		}
+
+		void InspectorWidget::resetModel() {
+			mInspector = nullptr;
+			reset();
+			disconnect(mDestroyConnection);
+			disconnect(mResetConnection);
+		}
+
+		void InspectorWidget::reset()
+		{
+			if (mInspector) {
+				mCurrentItem = mData->registerIndex(nullptr);
+			}
+			mTrace.clear();
+			mTrace.emplace_back("root", nullptr);						
+		}
+
+
+		void InspectorWidget::drawContext()
+		{
+			for (const std::pair<const QString, Engine::InvScopePtr> &t : mTrace)
+			{
+				if (ImGui::Button(t.first.toStdString().c_str()))
+				{
+					setCurrentItem(t.second);
+					return;
+				}
+			}
+			ImGui::Separator();
+			mData->drawScope(mCurrentItem);
+		}
+
+
+
+
 
 		void InspectorWidget::initializeGL()
 		{
@@ -29,10 +103,10 @@ namespace Maditor
 
 			ImGui::SetNextWindowSize(ImVec2(width(), height()), ImGuiSetCond_Always);
 			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Always);
-			ImGui::Begin("Test", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings);
+			ImGui::Begin("Main", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
-			ImGui::Button("hi");
-			ImGui::Text("Hello");
+			if (mCurrentItem)
+				drawContext();
 			
 			ImGui::End();
 

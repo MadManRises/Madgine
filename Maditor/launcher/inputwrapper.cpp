@@ -6,6 +6,8 @@
 
 #include "Madgine/gui/guisystem.h"
 
+#include "Madgine/input/inputevents.h"
+
 namespace Maditor {
 
 	//
@@ -35,10 +37,10 @@ namespace Maditor {
 			while (!mShared.mKeyQueue.empty()) {
 				const std::pair<Shared::InputEventType, Shared::KeyEventArgs> &evt = mShared.mKeyQueue.front();
 				if (evt.first == Shared::PRESS) {
-					injectKeyPress({ (Engine::GUI::Key)evt.second.key, evt.second.text });
+					injectKeyPress({ (Engine::Input::Key)evt.second.key, evt.second.text });
 				}
 				else {
-					injectKeyRelease({ (Engine::GUI::Key)evt.second.key, evt.second.text});
+					injectKeyRelease({ (Engine::Input::Key)evt.second.key, evt.second.text});
 				}
 				mShared.mKeyQueue.pop();
 			}
@@ -54,9 +56,9 @@ namespace Maditor {
 		}
 
 
-		Engine::GUI::MouseButton::MouseButton InputWrapper::convertButton(Shared::MouseButton button)
+		Engine::Input::MouseButton::MouseButton InputWrapper::convertButton(Shared::MouseButton button)
 		{
-			return Engine::GUI::MouseButton::MouseButton(button);
+			return Engine::Input::MouseButton::MouseButton(button);
 		}
 
 	}

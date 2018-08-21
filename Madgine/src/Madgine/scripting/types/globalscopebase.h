@@ -15,15 +15,10 @@ namespace Engine
 
 			lua_State* lua_state() const;
 
-			LuaTable createTable();
-
-			using ScopeBase::table;
-
-			
+			using ScopeBase::table;			
 
 		private:
 			LuaState &mState;
-			LuaTable mScopes;
 		};
 	}
 }

@@ -16,7 +16,8 @@ namespace Engine
 			// Inherited via Log
 			void log(const std::string& msg, MessageType lvl, const std::list<TraceBack>& traceBack = {}) override;
 
-			void startConsole(bool& flag, const std::function<bool(const std::string&)>& evaluator);
+			void startConsole(const std::function<bool(const std::string&)>& evaluator);
+			void stopConsole();
 
 		private:
 			void runConsole();
@@ -29,7 +30,7 @@ namespace Engine
 			SignalSlot::Slot<&ServerLog::charTyped> mCharTypedSlot;
 			SignalSlot::Slot<&ServerLog::handle> mHandleSlot;
 
-			bool* mFlag;
+			bool mRunning;
 
 			bool mEcho;
 			std::string mCurrentCmd;

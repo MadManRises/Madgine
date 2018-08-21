@@ -5,8 +5,6 @@
 
 #include "scenecomponentset.h"
 
-#include "scenecomponentbase.h"
-
 namespace Engine
 {
 	namespace Scene

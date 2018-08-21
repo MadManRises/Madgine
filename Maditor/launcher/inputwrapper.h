@@ -17,7 +17,7 @@ namespace Maditor {
 			virtual void update() override;
 
 		protected:
-			static Engine::GUI::MouseButton::MouseButton convertButton(Shared::MouseButton button);
+			static Engine::Input::MouseButton::MouseButton convertButton(Shared::MouseButton button);
 
 		private:
 

@@ -25,6 +25,11 @@ namespace Engine
 			return mCameras;
 		}
 
+		void CameraManager::finalize()
+		{
+			clear();
+		}
+
 		void CameraManager::clear()
 		{
 			mCameras.clear();

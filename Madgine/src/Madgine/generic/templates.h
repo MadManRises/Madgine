@@ -111,6 +111,9 @@ namespace Engine
 	}
 
 
+	namespace __generic__impl__
+	{
+
 	template <class T, class R, class... _Ty>
 	struct MemberFunctionTypeCapture
 	{
@@ -119,8 +122,6 @@ namespace Engine
 		using instance = C<f, Args..., T, R, _Ty...>;
 	};
 
-	namespace __generic__impl__
-	{
 		template <class T, class R, class... _Ty>
 	MemberFunctionTypeCapture<T, R, _Ty...> memberFunctionTypeDeducer(R (T::*f)(_Ty ...));
 
@@ -150,28 +151,28 @@ namespace Engine
 		typedef R Return;
 	};
 
-	namespace __generic__impl__{
-	template <class T, class R, class... _Ty>
-	CallableTypeCapture<R, _Ty...> callableTypeDeducer(R (T::*f)(_Ty ...));
+	namespace __generic__impl__ {
+		template <class T, class R, class... _Ty>
+		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...));
 
-	template <class T, class R, class... _Ty>
-	CallableTypeCapture<R, _Ty...> callableTypeDeducer(R (T::*f)(_Ty ...) const);
+		template <class T, class R, class... _Ty>
+		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...) const);
 
-	template <class R, class... _Ty>
-	CallableTypeCapture<R, _Ty...> callableTypeDeducer(R (*f)(_Ty ...));
+		template <class R, class... _Ty>
+		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(*f)(_Ty ...));
 
-	template <class F, class R = decltype(callableTypeDeducer(&F::operator()))>
-	R callableTypeDeducer(const F&);
-}	
+		template <class F, class R = decltype(callableTypeDeducer(&F::operator()))>
+		R callableTypeDeducer(const F&);
 
-	template <typename F>
-	using CallableHelper = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
 
+		template <typename F>
+		using CallableHelper = decltype(callableTypeDeducer(std::declval<F>()));
+	}
 
 	template <template <typename F, class, class...> class C, class F, class... Args>
 	struct CallableDeduce
 	{
-		typedef typename CallableHelper<F>::template instance<C, F, Args...> type;
+		typedef typename __generic__impl__::CallableHelper<F>::template instance<C, F, Args...> type;
 	};
 
 
@@ -217,14 +218,14 @@ namespace Engine
 		}
 
 		template <class F, class Tuple>
-		static typename CallableHelper<F>::Return call(F& f, _Ty ... _ty, Tuple&& args)
+		static typename __generic__impl__::template CallableHelper<F>::Return call(F& f, _Ty ... _ty, Tuple&& args)
 		{
 			return unpack(f, std::forward<_Ty>(_ty)..., std::forward<Tuple>(args),
 			              std::make_index_sequence<argumentsCount(&F::operator())>());
 		}
 
 		template <class F, size_t... S, class Tuple>
-		static typename CallableHelper<F>::Return unpack(F& f, _Ty ... _ty, Tuple&& args, std::index_sequence<S...>)
+		static typename __generic__impl__::template CallableHelper<F>::Return unpack(F& f, _Ty ... _ty, Tuple&& args, std::index_sequence<S...>)
 		{
 			return f(std::forward<_Ty>(_ty)..., std::get<S>(std::forward<Tuple>(args))...);
 		}
@@ -272,18 +273,11 @@ namespace Engine
 	using CopyTraits = std::conditional_t<custom_is_copy_constructible<T>::value, CopyType, NonCopyType>;
 
 
-	template <class T>
-	class is_iterable
-	{
-	private:
-		template <typename C>
-		static std::true_type test(void_t<decltype(std::declval<C>().begin()), decltype(std::declval<C>().end())>*);
-		template <typename>
-		static std::false_type test(...);
+	template <class T, typename = void>
+	struct is_iterable : std::false_type{};
 
-	public:
-		static bool const constexpr value = decltype(test<T>(nullptr))::value;
-	};
+	template <class T>
+	struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {};
 
 
 	template <class T>

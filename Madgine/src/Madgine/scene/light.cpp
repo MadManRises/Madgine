@@ -1,7 +1,6 @@
 #include "../baselib.h"
 
 #include "light.h"
-#include "scenemanager.h"
 
 namespace Engine
 {

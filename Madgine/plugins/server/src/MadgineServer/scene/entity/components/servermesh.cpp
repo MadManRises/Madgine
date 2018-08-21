@@ -4,6 +4,8 @@
 
 #include "servertransform.h"
 
+#include "Madgine/scene/entity/entity.h"
+
 namespace Engine
 {
 

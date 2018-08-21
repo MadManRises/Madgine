@@ -37,7 +37,7 @@ namespace Engine
 
 			void ServerTransform::translate(const Vector3& v)
 			{
-				//mNode->translate(Ogre::Vector3(v.ptr()));
+				*mPosition += v;
 			}
 
 			void ServerTransform::rotate(const std::array<float, 4>& q)

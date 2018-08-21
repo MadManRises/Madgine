@@ -1,11 +1,13 @@
 #pragma once
 
 #include "handler.h"
-#include "../ogreuniquecomponentcollector.h"
+#include "../clientuniquecomponentcollector.h"
 #include "../scene/contextmasks.h"
 #include "../uniquecomponent.h"
 
 #include "../scripting/types/scope.h"
+
+#include "../input/inputevents.h"
 
 namespace Engine
 {
@@ -26,21 +28,21 @@ namespace Engine
 			GameHandlerBase &getSelf(bool = true);
 
 		protected:
-			void onMouseMove(GUI::MouseEventArgs& me) override;
+			void onMouseMove(Input::MouseEventArgs& me) override;
 
-			void onMouseDown(GUI::MouseEventArgs& me) override;
+			void onMouseDown(Input::MouseEventArgs& me) override;
 
-			void onMouseUp(GUI::MouseEventArgs& me) override;
+			void onMouseUp(Input::MouseEventArgs& me) override;
 
-			virtual void onMouseHover(const GUI::MouseEventArgs& evt);
+			virtual void onMouseHover(const Input::MouseEventArgs& evt);
 
-			virtual void onMouseClick(const GUI::MouseEventArgs& evt);
+			virtual void onMouseClick(const Input::MouseEventArgs& evt);
 
-			virtual void onMouseDragBegin(const GUI::MouseEventArgs& evt);
+			virtual void onMouseDragBegin(const Input::MouseEventArgs& evt);
 
-			virtual void onMouseDrag(const GUI::MouseEventArgs& evt);
+			virtual void onMouseDrag(const Input::MouseEventArgs& evt);
 
-			virtual void onMouseDragEnd(const GUI::MouseEventArgs& evt);
+			virtual void onMouseDragEnd(const Input::MouseEventArgs& evt);
 
 			virtual void onMouseDragAbort();
 
@@ -48,7 +50,7 @@ namespace Engine
 			virtual void fixedUpdate(float timeStep);
 
 
-			static void clampToWindow(GUI::MouseEventArgs& me);
+			static void clampToWindow(Input::MouseEventArgs& me);
 
 			enum class MouseDragMode
 			{
@@ -57,26 +59,26 @@ namespace Engine
 				ENABLED_HIDECURSOR
 			};
 
-			void setMouseDragMode(GUI::MouseButton::MouseButton button, MouseDragMode mode);
+			void setMouseDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode);
 
 			const Vector2& dragStart() const;
 
 		private:
 			static const float mDragStartThreshold;
 
-			std::array<MouseDragMode, GUI::MouseButton::BUTTON_COUNT> mMouseDragModes;
+			std::array<MouseDragMode, Input::MouseButton::BUTTON_COUNT> mMouseDragModes;
 
-			GUI::MouseButton::MouseButton mCurrentMouseButton;
+			Input::MouseButton::MouseButton mCurrentMouseButton;
 
 			bool mDragging, mSingleClick;
 
 			Vector2 mDragStart;
 
-			Scene::ContextMask mContext;			
+			Scene::ContextMask mContext;
 		};
 
 
-		using GameHandlerCollector = OgreUniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
+		using GameHandlerCollector = ClientUniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
 
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;

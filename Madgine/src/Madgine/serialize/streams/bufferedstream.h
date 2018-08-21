@@ -41,11 +41,7 @@ namespace Engine
 			{
 				beginMessage(cmd);
 
-				using expander = bool[];
-				(void)expander{
-					false,
-					(*this << args, false)...
-				};
+				(*this << ... << args);
 
 				endMessage();
 			}

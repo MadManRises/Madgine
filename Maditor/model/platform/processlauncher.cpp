@@ -166,7 +166,7 @@ namespace Maditor
 #ifdef _WIN32
 				DWORD dwWritten;
 				std::string stdCmd = cmd + '\n';
-				bool result = WriteFile(mChildIn[PIPE_WRITE], stdCmd.c_str(), stdCmd.size(), &dwWritten, NULL);
+				bool result = WriteFile(mChildIn[PIPE_WRITE], stdCmd.c_str(), static_cast<DWORD>(stdCmd.size()), &dwWritten, NULL);
 				assert(result && dwWritten == stdCmd.size());
 #endif
 			}

@@ -28,6 +28,11 @@ namespace Engine
 			return mLights.data();
 		}
 
+		void LightManager::finalize()
+		{
+			clear();
+		}
+
 		void LightManager::clear()
 		{
 			mLights.clear();

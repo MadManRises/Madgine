@@ -31,8 +31,8 @@ namespace Engine
 					setDefaultAnimation(name);
 				}
 
-				Serialize::SerializedMapper<decltype(&Animation::getDefaultAnimation2), &Animation::getDefaultAnimation2, 
-				decltype(&Animation::setDefaultAnimation2), &Animation::setDefaultAnimation2>
+				Serialize::SerializedMapper<&Animation::getDefaultAnimation2, 
+				&Animation::setDefaultAnimation2>
 					mSerializedObject;
 
 			};

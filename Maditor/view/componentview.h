@@ -3,6 +3,7 @@
 #include "dialogs/dialogmanager.h"
 #include "dialogs/settingsdialog.h"
 #include "mainwindow.h"
+#include "application/inspector/inspectorwidget.h"
 
 namespace Maditor {
 namespace View {
@@ -41,7 +42,12 @@ protected:
 
 	const Ui::MainWindow *ui()
 	{
-		return mWindow->ui;
+		return mWindow->ui();
+	}
+
+	InspectorWidget *inspector()
+	{
+		return mWindow->inspector();
 	}
 
 	MainWindow *window()

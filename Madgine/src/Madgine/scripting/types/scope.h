@@ -24,6 +24,12 @@ namespace Engine
 			{
 				return Base::maps().merge(API<T>::api());
 			}
+
+			virtual std::string getIdentifier() const override
+			{
+				return API<T>::name();
+			}
+
 		};
 	}
 }

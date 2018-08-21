@@ -112,9 +112,9 @@ namespace Maditor
 			mLog->init();
 
 			if (mAppInfo.mType == Shared::CLIENT_LAUNCHER)
-				mRoot->pluginMgr().getPlugin("OgreMadgine").load();
+				mRoot->pluginMgr()["Renderer"].getPlugin("OgreMadgine").load();
 			else
-				mRoot->pluginMgr().getPlugin("MadgineServer").load();
+				mRoot->pluginMgr()["Renderer"].getPlugin("MadgineServer").load();
 
 
 			if (!mRoot->init()) {
@@ -232,7 +232,7 @@ namespace Maditor
 				mInspector->init(*mServer.get());
 		}
 
-		bool ApplicationWrapper::frameRenderingQueued(float timeSinceLastFrame, Engine::Scene::ContextMask context)
+		bool ApplicationWrapper::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Engine::Scene::ContextMask context)
 		{
 			mUtil->profiler()->stopProfiling(); // PreRender
 
@@ -247,7 +247,7 @@ namespace Maditor
 		}
 
 
-		bool ApplicationWrapper::frameStarted(float timeSinceLastFrame)
+		bool ApplicationWrapper::frameStarted(std::chrono::microseconds timeSinceLastFrame)
 		{
 			mUtil->update();
 			mUtil->profiler()->startProfiling("Frame");
@@ -256,7 +256,7 @@ namespace Maditor
 			return true;
 		}
 
-		bool ApplicationWrapper::frameEnded(float timeSinceLastFrame)
+		bool ApplicationWrapper::frameEnded(std::chrono::microseconds timeSinceLastFrame)
 		{
 			mUtil->profiler()->stopProfiling(); // Rendering
 			mUtil->profiler()->stopProfiling(); // Frame
