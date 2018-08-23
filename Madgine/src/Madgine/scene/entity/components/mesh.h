@@ -22,6 +22,8 @@ namespace Engine
 				virtual void setVisible(bool vis) = 0;
 				virtual bool isVisible() const = 0;
 
+				KeyValueMapList maps() override;
+
 			private:
 				std::string getName2() const
 				{

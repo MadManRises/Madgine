@@ -8,6 +8,8 @@
 
 #include "../gui/guisystem.h"
 
+#include "../generic/keyvalueiterate.h"
+
 namespace Engine
 {
 	namespace App

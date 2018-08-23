@@ -3,7 +3,6 @@
 
 #include "../datatypes/luatable.h"
 #include "../datatypes/argumentlist.h"
-#include "../../generic/valuetype.h"
 
 namespace Engine
 {
@@ -21,10 +20,10 @@ namespace Engine
 			bool hasMethod(const std::string& name);
 
 			ArgumentList callMethod(const std::string& name,
-			                        const ArgumentList& args = {});
+			                        const ArgumentList& args);
 
-			std::optional<ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args = {});
-			std::optional<ArgumentList> callMethodCatch(const std::string& name, const ArgumentList& args = {});
+			std::optional<ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args);
+			std::optional<ArgumentList> callMethodCatch(const std::string& name, const ArgumentList& args);
 
 			void push() const;
 

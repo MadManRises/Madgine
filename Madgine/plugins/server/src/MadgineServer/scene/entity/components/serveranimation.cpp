@@ -2,9 +2,13 @@
 
 #include "serveranimation.h"
 
+#include "Madgine/generic/valuetype.h"
+
+RegisterClass(Engine::Scene::Entity::Animation);
+
 namespace Engine
 {
-	API_IMPL(Scene::Entity::Animation);
+	
 
 	namespace Scene
 	{

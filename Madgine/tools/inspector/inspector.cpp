@@ -9,6 +9,8 @@
 
 #include <experimental/filesystem>
 
+#include "Madgine/generic/keyvalueiterate.h"
+
 namespace Engine
 {
 	namespace Tools
@@ -255,6 +257,17 @@ namespace Engine
 				size_t tmp = value.as<size_t>();
 				if (ImGui::DragScalar(id.c_str(), ImGuiDataType_U32, &tmp, 1.0f))
 					value = tmp;
+				break;
+			}
+			case Engine::ValueType::Type::Matrix3Value:
+			{
+				Matrix3 tmp = value.as<Matrix3>();
+					
+				ImGui::DragFloat3((id + "_1").c_str(), tmp[0], 0.15f);
+				ImGui::DragFloat3((id + "_2").c_str(), tmp[1], 0.15f);
+				ImGui::DragFloat3((id + "_3").c_str(), tmp[2], 0.15f);
+
+				value = tmp;
 				break;
 			}
 			case Engine::ValueType::Type::Vector2Value:

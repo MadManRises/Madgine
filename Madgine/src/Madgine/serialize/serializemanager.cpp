@@ -331,6 +331,7 @@ namespace Engine
 
 			if (state != NO_ERROR)
 			{
+				mSlaveStreamInvalid = false;
 				for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2)
 				{
 					assert((*it2)->updateManagerType(this, true));

@@ -13,7 +13,7 @@ namespace Engine
 			Widget(name, parent),
 		Label(name, parent)
 		{
-			mTextBox = parent->widget()->createWidget<MyGUI::TextBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mTextBox = parent->widget()->createWidget<MyGUI::TextBox>("TextBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
 		}
 
 		MyGUILabel::MyGUILabel(const std::string& name, MyGUITopLevelWindow& window) :
@@ -21,7 +21,12 @@ namespace Engine
 		MyGUIWidget(name, window),
 		Label(name, window)
 		{
-			mTextBox = window.rootWidget()->createWidget<MyGUI::TextBox>("Textbox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+			mTextBox = window.rootWidget()->createWidget<MyGUI::TextBox>("TextBox", 0, 0, 0, 0, MyGUI::Align::Default, name);
+		}
+
+		std::string MyGUILabel::getText()
+		{
+			return mTextBox->getCaption();
 		}
 
 		void MyGUILabel::setText(const std::string& text)

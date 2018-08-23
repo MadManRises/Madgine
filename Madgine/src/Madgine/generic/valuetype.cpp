@@ -30,8 +30,6 @@ namespace Engine
 			return std::to_string(std::get<size_t>(mUnion));
 		case Type::NullValue:
 			return "NULL";
-		case Type::EndOfListValue:
-			return "EOL";
 		case Type::ScopeValue:
 			return std::get<Scripting::ScopeBase*>(mUnion)->getIdentifier();
 		case Type::InvScopePtrValue:
@@ -65,8 +63,6 @@ namespace Engine
 		{
 		case Type::BoolValue:
 			return "Bool";
-		case Type::EndOfListValue:
-			return "EOL-Type";
 		case Type::FloatValue:
 			return "Float";
 		case Type::IntValue:
@@ -81,6 +77,8 @@ namespace Engine
 			return "Scope";
 		case Type::StringValue:
 			return "String";
+		case Type::Matrix3Value:
+			return "Matrix3x3";
 		case Type::Vector2Value:
 			return "Vector2";
 		case Type::Vector3Value:

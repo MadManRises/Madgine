@@ -1,16 +1,41 @@
 #pragma once
 
-#include "../../generic/valuetype.h"
 #include "debugging/streamdebugging.h"
+#include "../../generic/templates.h"
+#include "../serializeexception.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		enum class ExtendedValueType : unsigned char
+
+		class EOLType
 		{
-			SerializableUnitValue = static_cast<unsigned char>(ValueType::Type::MAX_TYPE_VALUE)
+		public:
+			constexpr bool operator==(const EOLType&) const { return true; }
 		};
+
+		constexpr const int SERIALIZE_MAGIC_NUMBER = 0x12345678;
+
+		using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase*, EOLType, std::string, Vector2, Vector3, InvScopePtr>;
+
+		template <class T, class = void>
+		struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, T> {};
+
+		template <class T>
+		struct PrimitiveTypeIndex<T, std::enable_if_t<std::is_enum_v<T>>> : PrimitiveTypeIndex<int>{};
+
+		template <class T>
+		const constexpr size_t PrimitiveTypeIndex_v = PrimitiveTypeIndex<T>::value;
+
+		template <class T, class = void>
+		struct PrimitiveTypesContain : type_pack_contains<SerializePrimitives, T>{};
+
+		template <class T>
+		struct PrimitiveTypesContain<T, std::enable_if_t<std::is_enum_v<T>>> : PrimitiveTypesContain<int> {};
+
+		template <class T>
+		const constexpr size_t PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
 		typedef std::istream::pos_type pos_type;
 
@@ -40,13 +65,15 @@ namespace Engine
 		public:
 			SerializeInStream(std::istream& ifs, SerializeManager& mgr, ParticipantId id = 0);
 
-			template <class T, typename _ = std::enable_if_t<
-				          !std::is_same<T, Scripting::ScopeBase*>::value, decltype(std::declval<ValueType>().as<T>())>>
-			SerializeInStream& operator >>(T& v)
+			template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T>>>
+			SerializeInStream& operator >>(T& t)
 			{
-				ValueType temp;
-				if (*this >> temp)
-					v = temp.as<T>();
+				int type;
+				read(type);
+				if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>)
+					throw SerializeException(Database::Exceptions::unknownSerializationType);
+				read(t);
+				mLog.logRead(t);
 				return *this;
 			}
 
@@ -67,15 +94,15 @@ namespace Engine
 
 			SerializeInStream& operator >>(Serializable& s);
 
+			SerializeInStream& operator >>(std::string &s);
 
 			template <class T>
 			bool loopRead(T& val)
 			{
-				ValueType v;
-				*this >> v;
-				if (v.isEOL()) return false;
-				val = v.as<T>();
-				return true;
+				bool result = loopRead();
+				if (result)
+					*this >> val;
+				return result;
 			}
 
 			bool loopRead();
@@ -112,16 +139,20 @@ namespace Engine
 
 			SerializeOutStream& operator<<(const ValueType& v);
 
-			template <class T, class _ = std::enable_if_t<
-				          (!std::is_pointer<T>::value || std::is_convertible<T, const char *>::value) && std::is_constructible_v<ValueType, const T&>>>
+			template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T>>>
 			SerializeOutStream& operator<<(const T& t)
 			{
-				return *this << ValueType(t);
+				write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
+				write(t);
+				mLog.logWrite(t);
+				return *this;
 			}
 
 			SerializeOutStream& operator<<(SerializableUnitBase* p);
 
 			SerializeOutStream& operator<<(const Serializable& s);
+
+			SerializeOutStream& operator<<(const std::string &s);
 
 			explicit operator bool() const;
 

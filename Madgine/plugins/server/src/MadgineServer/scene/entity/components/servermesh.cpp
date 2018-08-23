@@ -6,6 +6,8 @@
 
 #include "Madgine/scene/entity/entity.h"
 
+#include "Madgine/generic/valuetype.h"
+
 namespace Engine
 {
 

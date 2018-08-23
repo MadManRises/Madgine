@@ -6,10 +6,10 @@
 
 #include "ogrecamera.h"
 
+RegisterClass(Engine::Scene::OgreCameraManager);
+
 namespace Engine
 {
-
-	API_IMPL(Scene::OgreCameraManager);
 
 	namespace Scene
 	{

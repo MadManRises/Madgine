@@ -2,7 +2,7 @@
 #include "argumentlist.h"
 #include "../../serialize/streams/serializestream.h"
 #include "../types/apihelper.h"
-
+#include "../../generic/valuetype.h"
 
 namespace Engine
 {
@@ -39,7 +39,7 @@ namespace Engine
 			{
 				out << v;
 			}
-			out << ValueType::EOL();
+			out << Serialize::EOLType();
 		}
 
 		void ArgumentList::pushToStack(lua_State* state) const

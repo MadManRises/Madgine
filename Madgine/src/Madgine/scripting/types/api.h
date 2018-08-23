@@ -118,17 +118,6 @@ namespace Engine
 					APIHelper::error(state, Database::Exceptions::argumentCountMismatch(sizeof...(_Ty), actual));
 			}
 
-			/*static int impl(lua_State *state) {
-			int i = APIHelper::stackSize(state);
-			checkStackSize(state, _f, i - 1);
-
-			ArgumentList args(state, i - 1);
-			T *t = dynamic_cast<T*>(APIHelper::to<ScopeBase*>(state, -1));
-			APIHelper::pop(state, 1);
-			if (!t)
-			return APIHelper::error(state, "self has invalid type");
-			return APIHelper::push(state, call(t, std::move(args)));
-			}*/
 		};
 
 		template <auto _f, class T, class R, class... Ty>
@@ -208,59 +197,13 @@ namespace Engine
 
 
 #define MAP_F(name) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_function_mapper<&C::name>()}
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_function_mapper<&std::decay_t<decltype(*this)>::name>()}
 
 #define MAP_RO(name, getter) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper_readonly<&C::getter>()}
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper_readonly<&std::decay_t<decltype(*this)>::getter>()}
 
 #define MAP(name, getter, setter) \
-		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper<&C::getter, &C::setter>()}
-
-#define MEMBERS_CAPTURE_DEF(Class, ...) \
-	namespace __hide__{ \
-		template <class C> \
-		struct __struct__; \
-		\
-		template <> \
-		struct __struct__<Class>{ \
-			static std::map<std::string, Engine::Scripting::Mapper> capture() { \
-				using C = Class; \
-				return {{__VA_ARGS__}};	\
-			} \
-		};\
-	}
-
-		template<class T>
-		struct TEMPLATE_EXPORT API
-		{
-		public:
-			static const char* const file();
-
-			static const char* const name();
-
-			static const std::map<std::string, Mapper> &api();
-			
-
-		private:
-
-
-			static const char* fix(const char* s)
-			{
-				const char* f = strrchr(s, ':');
-				return f ? f + 1 : s;
-			}
-
-		};
-
-
-
-#define API_IMPL(Class, ...) \
-	MEMBERS_CAPTURE_DEF(Class, __VA_ARGS__) \
-	template<> TEMPLATE_INSTANCE const char * const Engine::Scripting::API<Class>::file() {static const char *s = __FILE__; return s; } \
-	template<> TEMPLATE_INSTANCE const char * const Engine::Scripting::API<Class>::name() {static const char *s = fix(#Class); return s; } \
-	template<> TEMPLATE_INSTANCE const std::map<std::string, Engine::Scripting::Mapper> &Engine::Scripting::API<Class>::api(){ \
-		static std::map<std::string, Engine::Scripting::Mapper> m = __hide__::__struct__<Class>::capture(); return m;}\
-	template struct TEMPLATE_INSTANCE Engine::Scripting::API<Class>
+		std::pair<const std::string, Engine::Scripting::Mapper>{#name, Engine::Scripting::make_mapper<&std::decay_t<decltype(*this)>::getter, &std::decay_t<decltype(*this)>::setter>()}
 
 	} // namespace Scripting
 } // namespace Core

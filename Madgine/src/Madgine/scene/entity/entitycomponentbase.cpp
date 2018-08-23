@@ -2,10 +2,15 @@
 #include "entitycomponentbase.h"
 #include "entity.h"
 
+#include "../../scripting/types/api.h"
+#include "../../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::Scene::Entity::EntityComponentBase);
+
 namespace Engine
 {
-	API_IMPL(Scene::Entity::EntityComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
-		MAP_RO(Active, isActive));
+	
+
 	
 	namespace Scene
 	{
@@ -48,6 +53,12 @@ namespace Engine
 			App::Application& EntityComponentBase::app(bool init)
 			{
 				return mEntity->app(init);
+			}
+
+			KeyValueMapList EntityComponentBase::maps()
+			{
+				return Scope::maps().merge(MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
+					MAP_RO(Active, isActive));
 			}
 
 			void EntityComponentBase::moveToEntity(Entity* entity)

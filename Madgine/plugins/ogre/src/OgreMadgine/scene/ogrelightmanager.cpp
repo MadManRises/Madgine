@@ -4,10 +4,10 @@
 
 #include "ogrescenerenderer.h"
 
+RegisterClass(Engine::Scene::OgreLightManager);
+
 namespace Engine
 {
-
-	API_IMPL(Scene::OgreLightManager);
 
 	namespace Scene
 	{

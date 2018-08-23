@@ -19,11 +19,15 @@
 #include "../../app/clientapplication.h"
 #include "../guisystem.h"
 
+#include "../../generic/keyvalueiterate.h"
+
+#include "../../scripting/types/api.h"
+
+
+RegisterClass(Engine::GUI::Widget);
 
 namespace Engine
 {
-
-	API_IMPL(GUI::Widget, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible));
 
 	namespace GUI
 	{
@@ -60,9 +64,8 @@ namespace Engine
 			mSize = size;
 			if (mParent)
 				updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
-			else {
+			else
 				updateGeometry(mWindow.getScreenSize(), { 0.0f,0.0f });
-			}
 		}
 
 		const Matrix3& Widget::getSize()
@@ -73,7 +76,10 @@ namespace Engine
 		void Widget::setPos(const Matrix3& pos)
 		{
 			mPos = pos;
-			updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+			if (mParent)
+				updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+			else
+				updateGeometry(mWindow.getScreenSize(), { 0.0f,0.0f });
 		}
 
 		const Matrix3& Widget::getPos() const
@@ -217,7 +223,7 @@ namespace Engine
 
 		KeyValueMapList Widget::maps()
 		{
-			return Scope::maps().merge(mChildren);
+			return Scope::maps().merge(mChildren, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible), MAP(Size, getSize, setSize), MAP(Position, getPos, setPos));
 		}
 
 		void Widget::show()

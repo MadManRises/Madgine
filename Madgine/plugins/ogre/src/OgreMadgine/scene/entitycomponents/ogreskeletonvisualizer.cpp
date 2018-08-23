@@ -10,9 +10,10 @@
 
 #include "Madgine/scene/entity/entity.h"
 
+RegisterClass(Engine::Scene::Entity::OgreSkeletonVisualizer);
+
 namespace Engine
 {
-	API_IMPL(Scene::Entity::OgreSkeletonVisualizer);
 
 	namespace Scene
 	{

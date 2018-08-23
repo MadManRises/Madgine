@@ -9,10 +9,14 @@
 
 #include "widgets/widget.h"
 
+#include "../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::GUI::GUISystem);
+
 namespace Engine
 {
 
-	API_IMPL(GUI::GUISystem);
+
 
 	namespace GUI
 	{

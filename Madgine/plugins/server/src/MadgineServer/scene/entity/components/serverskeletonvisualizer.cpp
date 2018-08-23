@@ -4,9 +4,11 @@
 
 #include "serverskeletonvisualizer.h"
 
+RegisterClass(Engine::Scene::Entity::ServerSkeletonVisualizer);
+
 namespace Engine
 {
-	API_IMPL(Scene::Entity::ServerSkeletonVisualizer);
+	
 
 	namespace Scene
 	{

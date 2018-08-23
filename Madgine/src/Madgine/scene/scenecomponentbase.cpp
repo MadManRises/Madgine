@@ -4,7 +4,7 @@
 #include "../generic/keyvalueiterate.h"
 #include "scenemanager.h"
 
-API_IMPL(Engine::Scene::SceneComponentBase, MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
+//API_IMPL(Engine::Scene::SceneComponentBase);
 
 namespace Engine
 {
@@ -101,7 +101,7 @@ namespace Engine
 
 		KeyValueMapList SceneComponentBase::maps()
 		{
-			return ScopeBase::maps().merge(Scripting::API<SceneComponentBase>::api());
+			return ScopeBase::maps().merge(MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Active, isActive));
 		}
 	}
 }

@@ -25,6 +25,8 @@
 
 #include "Madgine/core/root.h"
 
+#include "Madgine/generic/valuetype.h"
+
 namespace Maditor
 {
 	namespace Launcher

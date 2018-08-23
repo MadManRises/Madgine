@@ -14,9 +14,12 @@
 
 #include "../scripting/datatypes/luatablefieldaccessor.h"
 
+#include "../scripting/types/api.h"
 
-	API_IMPL(Engine::Scene::SceneManager, MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
-		MAP_RO(Active, isActive));
+#include "../generic/keyvalueiterate.h"
+
+
+RegisterClass(Engine::Scene::SceneManager);
 
 namespace Engine
 {
@@ -161,7 +164,8 @@ namespace Engine
 
 		KeyValueMapList SceneManager::maps()
 		{
-			return Scope::maps().merge(mSceneComponents, transformIt<ToPointerConverter>(mEntities));
+			return Scope::maps().merge(mSceneComponents, transformIt<ToPointerConverter>(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
+				MAP_RO(Active, isActive));
 		}
 
 		std::string SceneManager::generateUniqueName()

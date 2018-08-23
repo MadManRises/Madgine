@@ -2,10 +2,15 @@
 
 #include "transform.h"
 
+#include "../../../scripting/types/api.h"
+#include "../../../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::Scene::Entity::Transform);
+
 namespace Engine
 {
 
-	API_IMPL(Scene::Entity::Transform, MAP(Position, getPosition, setPosition), MAP(Orientation, getOrientation, setOrientation), MAP(Scale, getScale, setScale));
+
 
 
 	namespace Scene
@@ -15,6 +20,10 @@ namespace Engine
 			
 			ENTITYCOMPONENTVIRTUALBASE_IMPL(Transform, Transform);
 
+			KeyValueMapList Transform::maps()
+			{
+				return Scope::maps().merge(MAP(Position, getPosition, setPosition), MAP(Orientation, getOrientation, setOrientation), MAP(Scale, getScale, setScale));
+			}
 		}
 	}
 }

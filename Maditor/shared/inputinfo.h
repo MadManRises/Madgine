@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sharedbase.h"
+#include "Madgine/math/vector2.h"
 
 
 namespace Maditor {

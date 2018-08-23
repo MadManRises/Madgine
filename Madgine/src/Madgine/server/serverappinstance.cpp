@@ -1,6 +1,6 @@
 #include "../baselib.h"
 #include "serverappinstance.h"
-
+#include "../generic/valuetype.h"
 
 namespace Engine
 {

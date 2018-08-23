@@ -8,7 +8,7 @@ namespace Engine
 		class INTERFACES_EXPORT Serializable
 		{
 		public:
-			Serializable(bool local = false);
+			explicit Serializable(bool local = false);
 			Serializable(const Serializable&);
 			Serializable(Serializable&&) noexcept;
 			virtual ~Serializable();

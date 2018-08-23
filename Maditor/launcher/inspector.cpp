@@ -9,6 +9,8 @@
 
 #include "Madgine/scripting/types/luastate.h"
 
+#include "Madgine/generic/keyvalueiterate.h"
+
 extern "C"
 {
 #include <lua/lua.h>                                /* Always include this when calling Lua */
@@ -16,7 +18,7 @@ extern "C"
 #include <lua/lualib.h>                             /* Always include this when calling Lua */
 }
 
-API_IMPL(Maditor::Launcher::InspectorThreadInstance);
+RegisterClass(Maditor::Launcher::InspectorThreadInstance);
 
 
 namespace Maditor

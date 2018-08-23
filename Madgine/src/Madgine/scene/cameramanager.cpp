@@ -4,10 +4,10 @@
 
 #include "camera.h"
 
+RegisterClass(Engine::Scene::CameraManager);
+
 namespace Engine
 {
-
-	API_IMPL(Scene::CameraManager);
 
 	namespace Scene
 	{

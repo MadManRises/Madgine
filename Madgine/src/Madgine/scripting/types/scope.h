@@ -1,8 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "../../reflection/classname.h"
 #include "scopebase.h"
-#include "../../generic/keyvalueiterate.h"
 
 
 namespace Engine
@@ -17,17 +16,12 @@ namespace Engine
 
 			virtual const char* key() const
 			{
-				return API<T>::name();
-			}
-
-			virtual KeyValueMapList maps() override
-			{
-				return Base::maps().merge(API<T>::api());
+				return ClassName<T>();
 			}
 
 			virtual std::string getIdentifier() const override
 			{
-				return API<T>::name();
+				return ClassName<T>();
 			}
 
 		};

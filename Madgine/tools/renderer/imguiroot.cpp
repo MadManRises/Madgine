@@ -12,13 +12,14 @@
 
 #include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/math/vector3.h"
 
 #include "Madgine/input/inputhandler.h"
 #include "../toolbase.h"
 
-namespace Engine {
+RegisterClass(Engine::Tools::ImGuiRoot);
 
-	API_IMPL(Tools::ImGuiRoot);
+namespace Engine {
 
 	namespace Tools {
 

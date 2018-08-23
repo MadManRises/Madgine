@@ -7,6 +7,8 @@
 #include "Madgine/signalslot/slot.h"
 #include "Madgine/scripting/datatypes/luatable.h"
 
+#include "Madgine/generic/valuetype.h"
+
 namespace Maditor {
 	namespace Launcher {
 

@@ -49,6 +49,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "Madgine/generic/valuetype.h"
+
 Q_DECLARE_METATYPE(Engine::ValueType);
 
 /// @endcond

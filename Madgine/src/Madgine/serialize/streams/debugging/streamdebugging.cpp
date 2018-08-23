@@ -28,17 +28,7 @@ namespace Engine
 					throw 0;
 			}
 
-			void StreamLog::logRead(const ValueType& v)
-			{
-				if (StreamDebugging::isLoggingEnabled())
-					mReads << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
-			}
-
-			void StreamLog::logWrite(const ValueType& v)
-			{
-				if (StreamDebugging::isLoggingEnabled())
-					mWrites << std::setw(20) << v.getTypeString() << " " << v.toString() << std::endl;
-			}
+			
 
 			void StreamLog::logBeginSendMessage(const MessageHeader& header, const std::string& object)
 			{

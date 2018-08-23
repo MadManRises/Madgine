@@ -2,11 +2,14 @@
 
 #include "lightmanager.h"
 
+
+RegisterClass(Engine::Scene::LightManager);
+
+
 namespace Engine
 {
-	//VIRTUALSCENECOMPONENTBASE(Scene::LightManager);
 
-	API_IMPL(Scene::LightManager);
+
 
 	namespace Scene
 	{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/math/vector2.h"
 
 namespace Engine
 {

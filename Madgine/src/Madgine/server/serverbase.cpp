@@ -6,7 +6,10 @@
 
 #include "../core/root.h"
 
-API_IMPL(Engine::Server::ServerBase, MAP_F(shutdown));
+#include "../generic/keyvalueiterate.h"
+#include "../scripting/types/api.h"
+
+RegisterClass(Engine::Server::ServerBase);
 
 namespace Engine
 {
@@ -65,7 +68,7 @@ namespace Engine
 
 		KeyValueMapList ServerBase::maps()
 		{
-			return Scope::maps().merge(mInstances, this);
+			return Scope::maps().merge(mInstances, this, MAP_F(shutdown));
 		}
 	}
 }

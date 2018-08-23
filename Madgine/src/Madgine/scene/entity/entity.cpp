@@ -10,11 +10,12 @@
 
 #include "../../scripting/datatypes/luatableiterator.h"
 
-
 #include "entitycomponentcollector.h"
 
-	API_IMPL(Engine::Scene::Entity::Entity, MAP_RO(Active, isActive), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_F(addComponent), MAP_F(remove),
-		/*&enqueueMethod,*/ /*MAP_RO(position, getPosition), MAP_F(getCenter), MAP_F(setObjectVisible)*/);
+#include "../../scripting/types/api.h"
+#include "../../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::Scene::Entity::Entity);
 
 namespace Engine
 {
@@ -185,7 +186,7 @@ namespace Engine
 
 			KeyValueMapList Entity::maps()
 			{
-				return Scope::maps().merge(mComponents);
+				return Scope::maps().merge(mComponents, MAP_F(addComponent), MAP_F(remove), MAP_RO(Active, isActive), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
 			}
 
 			SceneManager& Entity::sceneMgr(bool init) const

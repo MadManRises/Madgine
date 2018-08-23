@@ -128,7 +128,7 @@ namespace Engine
 						write_item(out, t);
 					}
 				}
-				out << ValueType::EOL();
+				out << EOLType();
 			}
 
 			void readState(SerializeInStream& in) override

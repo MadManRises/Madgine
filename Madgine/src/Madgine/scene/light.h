@@ -3,6 +3,7 @@
 #include "../serialize/serializableunit.h"
 #include "../serialize/container/observed.h"
 #include "../signalslot/slot.h"
+#include "../math/vector3.h"
 
 namespace Engine
 {

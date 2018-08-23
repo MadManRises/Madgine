@@ -4,9 +4,10 @@
 
 #include "entitycomponents/ogreanimation.h"
 
+RegisterClass(Engine::Scene::Entity::OgreAnimationSystem);
+
 namespace Engine
 {
-	API_IMPL(Scene::Entity::OgreAnimationSystem);
 
 	namespace Scene
 	{

@@ -4,6 +4,7 @@
 
 #include "../scripting/parsing/scriptloader.h"
 
+#include <windows.h>
 
 namespace Engine
 {
@@ -13,6 +14,7 @@ namespace Engine
 			mSettings(settings),
 		mPluginManager("Madgine")
 		{
+			LoadLibrary("Tools_d.dll");
 		}
 
 		bool Root::init()

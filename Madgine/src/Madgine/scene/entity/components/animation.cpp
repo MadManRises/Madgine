@@ -2,10 +2,12 @@
 
 #include "animation.h"
 
+RegisterClass(Engine::Scene::Entity::Animation);
+
 namespace Engine
 {
 
-	API_IMPL(Scene::Entity::Animation);
+
 
 
 	namespace Scene

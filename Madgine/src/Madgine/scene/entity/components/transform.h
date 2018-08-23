@@ -2,6 +2,7 @@
 
 #include "../entitycomponent.h"
 #include "../../../serialize/container/serializedmapper.h"
+#include "../../../math/vector3.h"
 
 namespace Engine
 {
@@ -26,6 +27,8 @@ namespace Engine
 
 				virtual void translate(const Vector3 &v) = 0;
 				virtual void rotate(const std::array<float, 4> &q) = 0;
+
+				KeyValueMapList maps() override;
 
 			private:
 				Vector3 getPosition2() const

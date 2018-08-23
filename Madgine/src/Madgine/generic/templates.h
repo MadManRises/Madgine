@@ -50,10 +50,36 @@ namespace Engine
 	};
 	}
 
-	
-
 	template <size_t n, class... _Ty>
 	using type_pack_n = typename __generic__impl__::type_pack_selector<type_pack<_Ty...>, n>::type;
+
+	template <class Pack, class T>
+	struct type_pack_contains : std::false_type{};
+
+	template <class... V, class T>
+	struct type_pack_contains<type_pack<T, V...>, T> : std::true_type
+	{
+	};
+
+	template <class U, class... V, class T>
+	struct type_pack_contains<type_pack<U, V...>, T> : type_pack_contains<type_pack<V...>, T>
+	{
+	};
+
+	template <class Pack, class T>
+	constexpr bool type_pack_contains_v = type_pack_contains<Pack, T>::value;
+
+	template <class Pack, class T>
+	struct type_pack_index{};
+
+	template <class T, class U, class... _Ty>
+	struct type_pack_index<type_pack<U, _Ty...>, T> : std::integral_constant<size_t, type_pack_index<type_pack<_Ty...>, T>::value + 1> {};
+
+	template <class T, class... _Ty>
+	struct type_pack_index<type_pack<T, _Ty...>, T> : std::integral_constant<size_t,0> {};
+
+	template <class Pack, class T>
+	constexpr size_t type_pack_index_v = type_pack_index<Pack, T>::value;
 
 	template <bool...>
 	struct bool_pack;
@@ -68,34 +94,14 @@ namespace Engine
 	template <class V, class T>
 	struct variant_contains;
 
-	template <class T>
-	struct variant_contains<std::variant<>, T> : std::false_type
-	{
-	};
-
-	template <class... V, class T>
-	struct variant_contains<std::variant<T, V...>, T> : std::true_type
-	{
-	};
-
-	template <class U, class... V, class T>
-	struct variant_contains<std::variant<U, V...>, T> : variant_contains<std::variant<V...>, T>
-	{
-	};
+	template <class T, class... _Ty>
+	struct variant_contains<std::variant<_Ty...>, T> : type_pack_contains<type_pack<_Ty...>, T> {};
 
 	template <class V, class T>
 	struct variant_index;
 
-	template <class... V, class T>
-	struct variant_index<std::variant<T, V...>, T> : std::integral_constant<size_t, 0>
-	{
-	};
-
-	template <class U, class... V, class T>
-	struct variant_index<std::variant<U, V...>, T
-		> : std::integral_constant<size_t, 1 + variant_index<std::variant<V...>, T>::value>
-	{
-	};
+	template <class T, class... _Ty>
+	struct variant_index<std::variant<_Ty...>, T> : type_pack_index<type_pack<_Ty...>, T> {};
 
 
 	template <class R, class T, class... _Ty>

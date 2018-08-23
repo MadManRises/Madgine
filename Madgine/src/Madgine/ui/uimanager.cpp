@@ -9,10 +9,14 @@
 #include "../app/clientapplication.h"
 #include "../app/clientappsettings.h"
 
+#include "../generic/keyvalueiterate.h"
+
+#include "../scripting/types/api.h"
+
+RegisterClass(Engine::UI::UIManager);
 
 namespace Engine
-{
-	API_IMPL(UI::UIManager, MAP_F(showCursor));
+{	
 
 
 #ifdef _MSC_VER
@@ -52,7 +56,7 @@ namespace Engine
 			markInitialized();
 
         	if (mGUI.app().settings().mRunMain) {
-				std::optional<Scripting::ArgumentList> res = app().callMethodIfAvailable("afterViewInit");
+				std::optional<Scripting::ArgumentList> res = app().callMethodIfAvailable("afterViewInit", {});
 				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 					return false;
 			}
@@ -244,7 +248,7 @@ namespace Engine
 
 		KeyValueMapList UIManager::maps()
 		{
-			return Scope::maps().merge(mGuiHandlers, mGameHandlers);
+			return Scope::maps().merge(mGuiHandlers, mGameHandlers, MAP_F(showCursor));
 		}
 
 		const char* UIManager::key() const

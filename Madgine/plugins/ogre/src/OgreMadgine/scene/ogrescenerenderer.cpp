@@ -7,9 +7,9 @@
 #include "Madgine/app/clientapplication.h"
 
 
-namespace Engine {
+RegisterClass(Engine::OgreSceneRenderer);
 
-	API_IMPL(OgreSceneRenderer);
+namespace Engine {
 
 	OgreSceneRenderer::OgreSceneRenderer(App::Application & app) :
 		Scripting::GlobalAPIComponent<OgreSceneRenderer>(app),

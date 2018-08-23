@@ -25,6 +25,8 @@ namespace Engine
 		struct MessageHeader;
 		class SerializeManager;
 
+		class EOLType;
+
 		struct CompareStreamId;
 
 		typedef size_t ParticipantId;

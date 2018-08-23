@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "Madgine/generic/valuetype.h"
+
 int main(int argc, char **argv) 
 {
 

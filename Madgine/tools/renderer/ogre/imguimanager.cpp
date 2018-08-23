@@ -71,17 +71,17 @@ void ImguiManager::init(Ogre::SceneManager * mgr)
     io.KeyMap[ImGuiKey_PageDown] = kc2sc(SDLK_PAGEDOWN);
     io.KeyMap[ImGuiKey_Home] = -1;
     io.KeyMap[ImGuiKey_End] = -1;
-    io.KeyMap[ImGuiKey_Delete] = -1;
-    io.KeyMap[ImGuiKey_Backspace] = '\b';
-    io.KeyMap[ImGuiKey_Enter] = '\r';
-    io.KeyMap[ImGuiKey_Escape] = '\033';
-    io.KeyMap[ImGuiKey_Space] = ' ';
+    io.KeyMap[ImGuiKey_Delete] = -1;*/
+    io.KeyMap[ImGuiKey_Backspace] = Engine::Input::KC_BACK;
+	io.KeyMap[ImGuiKey_Enter] = Engine::Input::KC_RETURN;
+	io.KeyMap[ImGuiKey_Escape] = Engine::Input::KC_ESCAPE;
+    io.KeyMap[ImGuiKey_Space] = Engine::Input::KC_SPACE;
     io.KeyMap[ImGuiKey_A] = 'a';
     io.KeyMap[ImGuiKey_C] = 'c';
     io.KeyMap[ImGuiKey_V] = 'v';
     io.KeyMap[ImGuiKey_X] = 'x';
     io.KeyMap[ImGuiKey_Y] = 'y';
-    io.KeyMap[ImGuiKey_Z] = 'z';*/
+    io.KeyMap[ImGuiKey_Z] = 'z';
 
     createFontTexture();
     createMaterial();
@@ -418,13 +418,21 @@ void ImguiManager::createMaterial()
 
 void ImguiManager::injectKeyPress(const Engine::Input::KeyEventArgs& arg)
 {
-	//ImGuiIO &io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 
+	io.KeysDown[arg.scancode] = true;
 
+	io.AddInputCharacter(arg.text);
+
+	if (!io.WantCaptureKeyboard)
+		mListener->injectKeyPress(arg);
 }
 
 void ImguiManager::injectKeyRelease(const Engine::Input::KeyEventArgs& arg)
 {
+	ImGuiIO &io = ImGui::GetIO();
+
+	io.KeysDown[arg.scancode] = false;
 }
 
 void ImguiManager::injectMousePress(const Engine::Input::MouseEventArgs& arg)

@@ -2,6 +2,8 @@
 
 #include "../streams/serializestream.h"
 
+
+
 namespace Engine
 {
 	namespace Serialize
@@ -56,7 +58,7 @@ namespace Engine
 		};
 
 
-		template <class T, bool b = ValueType::isValueType<T>::value>
+		template <class T, bool b = PrimitiveTypesContain_v<std::decay_t<T>>>
 		struct UnitHelper : public UnitHelperBase<T>
 		{
 			typedef T Type;

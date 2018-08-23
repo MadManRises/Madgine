@@ -20,7 +20,7 @@ namespace Engine
 					component->writeId(out);
 					component->writeState(out);
 				}
-				out << ValueType::EOL();
+				out << Serialize::EOLType();
 			}
 
 			virtual void readState(Serialize::SerializeInStream& in) override

@@ -2,10 +2,16 @@
 
 #include "mesh.h"
 
+#include "../../../scripting/types/api.h"
+
+#include "../../../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::Scene::Entity::Mesh);
+
 namespace Engine
 {
 
-	API_IMPL(Scene::Entity::Mesh, MAP(Name, getName, setName), MAP(Visible, isVisible, setVisible));
+
 
 
 	namespace Scene
@@ -15,6 +21,10 @@ namespace Engine
 			
 			ENTITYCOMPONENTVIRTUALBASE_IMPL(Mesh, Mesh);
 
+			KeyValueMapList Mesh::maps()
+			{
+				return Scope::maps().merge(MAP(Name, getName, setName), MAP(Visible, isVisible, setVisible));
+			}
 		}
 	}
 }

@@ -17,9 +17,12 @@
 
 #include "../../input/inputhandler.h"
 
+#include "../../generic/keyvalueiterate.h"
+
+RegisterClass(Engine::GUI::TopLevelWindow);
+
 namespace Engine
-{
-	API_IMPL(GUI::TopLevelWindow);
+{	
 
 	namespace GUI
 	{

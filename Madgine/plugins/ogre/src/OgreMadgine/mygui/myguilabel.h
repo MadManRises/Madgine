@@ -14,6 +14,7 @@ namespace Engine
 			MyGUILabel(const std::string &name, MyGUIWidget *parent);
 			MyGUILabel(const std::string &name, MyGUITopLevelWindow &system);
 
+			std::string getText() override;
 			void setText(const std::string& text) override;
 
 			Class getClass() override;

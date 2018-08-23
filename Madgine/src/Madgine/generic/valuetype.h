@@ -13,14 +13,11 @@
 #include "../scripting/datatypes/luathread.h"
 #include "../scripting/types/apihelper.h"
 
+#include "../math/matrix3.h"
+
 namespace Engine
 {
 
-	class EOLType
-	{
-	public:
-		constexpr bool operator==(const EOLType&) const { return true; }
-	};
 
 	class INTERFACES_EXPORT ValueType
 	{
@@ -35,10 +32,10 @@ namespace Engine
 			float,
 			Scripting::ScopeBase *,
 			InvScopePtr,
+			Matrix3,
 			std::array<float, 4>,
 			Vector3,
 			Vector2,
-			EOLType,
 			std::shared_ptr<KeyValueIterator>,
 			Scripting::ApiMethod,
 			Scripting::LuaTable,
@@ -63,16 +60,16 @@ namespace Engine
 			FloatValue,
 			ScopeValue,
 			InvScopePtrValue,
+			Matrix3Value,
 			Vector4Value,
 			Vector3Value,
 			Vector2Value,
-			EndOfListValue,
 			KeyValueIteratorValue,
 			ApiMethodValue,
 			LuaTableValue,
 			LuaStateValue,
 
-			MAX_TYPE_VALUE
+			MAX_VALUETYPE_TYPE
 		};
 
 
@@ -349,18 +346,6 @@ namespace Engine
 
 		std::string getTypeString() const;
 		static std::string getTypeString(Type type);
-
-
-		static ValueType EOL()
-		{
-			ValueType v(EOLType{});
-			return v;
-		}
-
-		bool isEOL() const
-		{
-			return type() == Type::EndOfListValue;
-		}
 
 	public:
 

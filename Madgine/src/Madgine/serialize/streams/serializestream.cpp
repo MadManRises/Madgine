@@ -7,6 +7,8 @@
 
 #include "../serializable.h"
 
+#include "../../generic/valuetype.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -54,9 +56,6 @@ namespace Engine
 			case ValueType::Type::NullValue:
 				result.clear();
 				break;
-			case ValueType::Type::EndOfListValue:
-				result = ValueType::EOL();
-				break;
 			case ValueType::Type::Vector2Value:
 				{
 					Vector2 a2;
@@ -91,7 +90,7 @@ namespace Engine
 			default:
 				throw SerializeException(Database::Exceptions::unknownDeserializationType);
 			}
-			mLog.logRead(result);
+			//mLog.logRead(result);
 			return *this;
 		}
 
@@ -104,13 +103,26 @@ namespace Engine
 
 		SerializeInStream& SerializeInStream::operator>>(SerializableUnitBase*& p)
 		{
-			ExtendedValueType type;
+			int type;
 			read(type);
-			if (type != ExtendedValueType::SerializableUnitValue)
+			if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase*>)
 				throw SerializeException(Database::Exceptions::notValueType("SerializableUnit"));
 			size_t ptr;
 			read(ptr);
 			p = convertPtr(ptr);
+			return *this;
+		}
+
+		SerializeInStream& SerializeInStream::operator>>(std::string& s)
+		{
+			int type;
+			read(type);
+			if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>)
+				throw SerializeException(Database::Exceptions::notValueType("std::string"));
+			decltype(std::declval<std::string>().size()) size;
+			read(size);
+			s.resize(size);
+			read(&s[0], size);
 			return *this;
 		}
 
@@ -141,11 +153,12 @@ namespace Engine
 		bool SerializeInStream::loopRead()
 		{
 			pos_type pos = tell();
-			ValueType::Type type;
+			int type;
 			read(type);
-			if (type == ValueType::Type::EndOfListValue)
+			if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>)
 			{
-				mLog.logRead(ValueType::EOL());
+				read(EOLType());
+				mLog.logRead(EOLType());
 				return false;
 			}
 			seek(pos);
@@ -197,8 +210,6 @@ namespace Engine
 				break;
 			case ValueType::Type::NullValue:
 				break;
-			case ValueType::Type::EndOfListValue:
-				break;
 			case ValueType::Type::ScopeValue:
 				throw SerializeException("Cannot Serialize a Scope-Pointer!");
 			case ValueType::Type::Vector2Value:
@@ -219,13 +230,13 @@ namespace Engine
 			default:
 				throw SerializeException(Database::Exceptions::unknownSerializationType);
 			}
-			mLog.logWrite(v);
+			//mLog.logWrite(v);
 			return *this;
 		}
 
 		SerializeOutStream& SerializeOutStream::operator<<(SerializableUnitBase* p)
 		{
-			write(ExtendedValueType::SerializableUnitValue);
+			write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase*>);
 			write(mManager.convertPtr(*this, p));
 			return *this;
 		}
@@ -286,6 +297,14 @@ namespace Engine
 		void Stream::setId(ParticipantId id)
 		{
 			mId = id;
+		}
+
+		SerializeOutStream& SerializeOutStream::operator<<(const std::string& s)
+		{
+			write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>);
+			write(s.size());
+			writeData(s.c_str(), s.size());
+			return *this;
 		}
 
 		SerializeOutStream::operator bool() const

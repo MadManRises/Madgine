@@ -4,7 +4,6 @@
 
 #include "../../app/application.h"
 
-
 namespace Engine
 {
 	namespace Scripting

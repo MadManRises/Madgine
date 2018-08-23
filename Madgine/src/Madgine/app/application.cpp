@@ -12,13 +12,18 @@
 
 #include "../core/root.h"
 #include "../core/frameloop.h"
-#include "../serialize/container/noparent.h"
 
 #include "../scene/scenemanager.h"
 
-#include <Windows.h>
+#include "../scripting/types/api.h"
 
-API_IMPL(Engine::App::Application, MAP_F(shutdown));
+#include "../generic/keyvalueiterate.h"
+
+
+RegisterClass(Engine::App::Application);
+
+
+
 
 namespace Engine
 {	
@@ -28,7 +33,7 @@ namespace Engine
 		Application::Application(Core::Root &root) :
 			Scope(root.luaState()),
 			mSettings(nullptr),
-			mGlobalAPIs((LoadLibrary("Tools_d.dll"), root.pluginMgr()), *this),
+			mGlobalAPIs(root.pluginMgr(), *this),
 			mRoot(root),
 		mGlobalAPIInitCounter(0)
 		{
@@ -99,7 +104,7 @@ namespace Engine
 		{
 
 			if (mSettings->mRunMain) {
-				if (!callMethodCatch("main"))
+				if (!callMethodCatch("main", {}))
 				{
 					return -1;
 				}
@@ -147,7 +152,7 @@ namespace Engine
 
 		KeyValueMapList Application::maps()
 		{
-			return Scope::maps().merge(mGlobalAPIs, this);
+			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
 		}
 
 		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)

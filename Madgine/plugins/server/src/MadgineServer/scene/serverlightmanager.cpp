@@ -3,12 +3,12 @@
 #include "serverlightmanager.h"
 
 
-
+RegisterClass(Engine::Scene::ServerLightManager);
 
 namespace Engine
 {
 
-	API_IMPL(Scene::ServerLightManager);
+
 
 	namespace Scene
 	{
