@@ -10,7 +10,11 @@ namespace Engine
 	namespace Scene
 	{
 
-		using SceneComponentCollector = BaseUniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManager&>;
+		using SceneComponentCollector = UniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManager&>;
+
+#ifndef PLUGIN_BUILD
+		extern template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManager&>;
+#endif
 
 	}
 

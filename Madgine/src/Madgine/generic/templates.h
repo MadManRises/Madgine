@@ -117,69 +117,6 @@ namespace Engine
 	}
 
 
-	namespace __generic__impl__
-	{
-
-	template <class T, class R, class... _Ty>
-	struct MemberFunctionTypeCapture
-	{
-	public:
-		template <template <auto, class, class, class...> class C, auto f, class... Args>
-		using instance = C<f, Args..., T, R, _Ty...>;
-	};
-
-		template <class T, class R, class... _Ty>
-	MemberFunctionTypeCapture<T, R, _Ty...> memberFunctionTypeDeducer(R (T::*f)(_Ty ...));
-
-	template <class T, class R, class... _Ty>
-	MemberFunctionTypeCapture<const T, R, _Ty...> memberFunctionTypeDeducer(R (T::*f)(_Ty ...) const);
-
-	template <auto f>
-	using MemberFunctionHelper = decltype(memberFunctionTypeDeducer(f));
-	}
-
-	
-
-	template <template <auto, class, class, class...> class C, auto f, class... Args>
-	struct MemberFunctionCapture
-	{
-		typedef typename __generic__impl__::MemberFunctionHelper<f>::template instance<C, f, Args...> type;
-	};
-
-
-	template <class R, class... _Ty>
-	struct CallableTypeCapture
-	{
-	public:
-		template <template <typename, class, class...> class C, typename F, class... Args>
-		using instance = C<F, Args..., R, _Ty...>;
-
-		typedef R Return;
-	};
-
-	namespace __generic__impl__ {
-		template <class T, class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...));
-
-		template <class T, class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...) const);
-
-		template <class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(*f)(_Ty ...));
-
-		template <class F, class R = decltype(callableTypeDeducer(&F::operator()))>
-		R callableTypeDeducer(const F&);
-
-
-		template <typename F>
-		using CallableHelper = decltype(callableTypeDeducer(std::declval<F>()));
-	}
-
-	template <template <typename F, class, class...> class C, class F, class... Args>
-	struct CallableDeduce
-	{
-		typedef typename __generic__impl__::CallableHelper<F>::template instance<C, F, Args...> type;
-	};
 
 
 	template <class... _Ty>
@@ -237,71 +174,8 @@ namespace Engine
 		}
 	};
 
-	class CopyType
-	{
-	};
-
-	class NonCopyType
-	{
-	protected:
-		NonCopyType() = default;
-		NonCopyType(const NonCopyType&) = delete;
-		void operator=(const NonCopyType&) = delete;
-		NonCopyType(NonCopyType&&) = default;
-		NonCopyType& operator=(NonCopyType&&) = default;
-	};
-
-	namespace __generic__impl__{
-	template <class, class T>
-	struct _custom_is_copy_constructible : std::false_type
-	{
-	};
-
-	template <class T>
-	struct _custom_is_copy_constructible<void_t<decltype(T(std::declval<const T &>()))>, T> : std::true_type
-	{
-	};
-		}
-
-	template <class T>
-	struct custom_is_copy_constructible
-	{
-		static const constexpr bool value = __generic__impl__::_custom_is_copy_constructible<void_t<>, T>::value;
-	};
-
-	template <class U, class V>
-	struct custom_is_copy_constructible<std::pair<U, V>>
-	{
-		static constexpr const bool value = custom_is_copy_constructible<U>::value && custom_is_copy_constructible<V>::value;
-	};
-
-	template <class T>
-	using CopyTraits = std::conditional_t<custom_is_copy_constructible<T>::value, CopyType, NonCopyType>;
 
 
-	template <class T, typename = void>
-	struct is_iterable : std::false_type{};
 
-	template <class T>
-	struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {};
-
-
-	template <class T>
-	class TupleConstructed : public T
-	{
-	public:
-		template <class... Ty>
-		TupleConstructed(const std::tuple<Ty...>& tuple) :
-			TupleConstructed(std::make_index_sequence<sizeof...(Ty)>(), tuple)
-		{
-		}
-
-	private:
-		template <class Tuple, size_t... Is>
-		TupleConstructed(std::index_sequence<Is...>, const Tuple& tuple) :
-			T(std::get<Is>(tuple)...)
-		{
-		}
-	};
 
 }

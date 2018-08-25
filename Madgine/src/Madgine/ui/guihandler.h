@@ -2,8 +2,8 @@
 
 #include "handler.h"
 #include "../gui/widgetnames.h"
-#include "../clientuniquecomponentcollector.h"
 #include "../uniquecomponent.h"
+#include "../uniquecomponentcollector.h"
 
 #include "../scripting/types/scope.h"
 
@@ -51,9 +51,13 @@ namespace Engine
 			Scene::ContextMask mContext;
 		};
 
-		using GuiHandlerCollector = ClientUniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
+		using GuiHandlerCollector = UniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
+
+#ifndef PLUGIN_BUILD
+		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
+#endif
 	} // namespace GuiHandler
 
 	PLUGIN_COLLECTOR_EXPORT(GuiHandler, UI::GuiHandlerCollector);

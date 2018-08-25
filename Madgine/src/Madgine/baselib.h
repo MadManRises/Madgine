@@ -10,6 +10,7 @@
 #define MADGINE_BASE_EXPORT DLL_IMPORT
 #endif
 
+
 #include "baseforward.h"
 
 #include <set>

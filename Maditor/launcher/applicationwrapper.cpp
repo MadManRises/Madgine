@@ -27,6 +27,8 @@
 
 #include "Madgine/generic/valuetype.h"
 
+#include "Madgine/scripting/datatypes/argumentlist.h"
+
 namespace Maditor
 {
 	namespace Launcher

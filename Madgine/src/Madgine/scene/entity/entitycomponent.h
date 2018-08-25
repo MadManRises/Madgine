@@ -11,7 +11,7 @@ namespace Engine
 		namespace Entity
 		{
 			template <class T, class Base = EntityComponentBase>
-			class TEMPLATE_EXPORT EntityComponentVirtualBase : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
+			class EntityComponentVirtualBase : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
 			{
 			public:
 				using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
@@ -47,7 +47,7 @@ namespace Engine
 			};
 
 			template <class T, class Base = EntityComponentBase>
-			class TEMPLATE_EXPORT EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
+			class EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
 			{
 			public:
 				using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
@@ -77,14 +77,14 @@ namespace Engine
 
 
 #define ENTITYCOMPONENT_IMPL(Name, ...) \
-				template <> TEMPLATE_INSTANCE const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
-				template <> TEMPLATE_EXPORT const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
+				template <>  const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
+				template <>  const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
 
 #define	ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, ...) \
-				template <> TEMPLATE_INSTANCE const char * Engine::Scene::Entity::EntityComponentVirtualBase<__VA_ARGS__>::componentName(){return #Name;}
+				template <>  const char * Engine::Scene::Entity::EntityComponentVirtualBase<__VA_ARGS__>::componentName(){return #Name;}
 
 #define ENTITYCOMPONENTVIRTUALIMPL_IMPL(...) \
-				template <> TEMPLATE_EXPORT const Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_reg = {};
+				template <>  const Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_reg = {};
 		}
 	}
 }

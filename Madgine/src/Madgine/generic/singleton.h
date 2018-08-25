@@ -4,7 +4,7 @@
 namespace Engine
 {
 	template <class T>
-	class TEMPLATE_EXPORT Singleton
+	class Singleton
 	{
 	private:
 		Singleton(const Singleton<T>&) = delete;
@@ -45,4 +45,4 @@ namespace Engine
 
 }
 
-#define SINGLETON_IMPL(Class) template <> thread_local TEMPLATE_EXPORT Class *Engine::Singleton<Class>::sSingleton = nullptr
+#define SINGLETON_IMPL(Class) template <> thread_local Class *Engine::Singleton<Class>::sSingleton = nullptr

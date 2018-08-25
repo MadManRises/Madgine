@@ -1,7 +1,7 @@
 #pragma once
 
 #include "handler.h"
-#include "../clientuniquecomponentcollector.h"
+#include "../uniquecomponentcollector.h"
 #include "../scene/contextmasks.h"
 #include "../uniquecomponent.h"
 
@@ -78,10 +78,14 @@ namespace Engine
 		};
 
 
-		using GameHandlerCollector = ClientUniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
+		using GameHandlerCollector = UniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
 
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
+
+#ifndef PLUGIN_BUILD
+		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
+#endif
 	} // namespace UI
 
 	PLUGIN_COLLECTOR_EXPORT(GameHandler, UI::GameHandlerCollector);

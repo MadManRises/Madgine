@@ -14,8 +14,6 @@
 
 #include "Madgine/scripting/types/globalscopebase.h"
 
-
-#include "Madgine/clientuniquecomponentcollector.h"
 #include "Madgine/ui/guihandler.h"
 #include "Madgine/ui/gamehandler.h"
 #include "Madgine/ui/uimanager.h"

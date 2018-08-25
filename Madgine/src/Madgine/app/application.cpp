@@ -28,6 +28,8 @@ RegisterClass(Engine::App::Application);
 namespace Engine
 {	
 
+	template MADGINE_BASE_EXPORT class UniqueComponentCollector<Scripting::GlobalAPIComponentBase, std::vector, App::Application&>;
+
 	namespace App
 	{
 		Application::Application(Core::Root &root) :
@@ -238,6 +240,6 @@ namespace Engine
 	}
 
 #ifdef _MSC_VER
-	template class MADGINE_BASE_EXPORT Scripting::GlobalAPICollector;
+	template class Scripting::GlobalAPICollector;
 #endif
 }

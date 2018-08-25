@@ -2,6 +2,7 @@
 
 /// @cond
 
+
 #ifdef _WIN32
 #ifdef __GNUC__
 #define DLL_EXPORT __attribute__((dllexport))
@@ -26,15 +27,6 @@
 #define INTERFACES_EXPORT DLL_EXPORT
 #else
 #define INTERFACES_EXPORT DLL_IMPORT
-#endif
-
-#define TEMPLATE_INSTANCE DLL_EXPORT
-
-
-#ifdef __GNUC__
-	#define TEMPLATE_EXPORT DLL_EXPORT
-#else
-	#define TEMPLATE_EXPORT
 #endif
 
 #pragma warning(disable : 4251)

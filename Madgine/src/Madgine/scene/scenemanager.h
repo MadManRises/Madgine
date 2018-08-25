@@ -26,7 +26,6 @@ namespace Engine
 			SceneManager(App::Application &app);
 			virtual ~SceneManager() = default;
 
-
 			void readState(Serialize::SerializeInStream& in) override;
 			void writeState(Serialize::SerializeOutStream& out) const override;
 

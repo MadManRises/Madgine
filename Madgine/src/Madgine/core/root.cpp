@@ -6,15 +6,27 @@
 
 #include <windows.h>
 
+#include "../scripting/types/luastate.h"
+#include "../plugins/pluginmanager.h"
+#include "../resources/resourcemanager.h"
+#include "../signalslot/connectionmanager.h"
+
+
 namespace Engine
 {
 	namespace Core
 	{
 		Root::Root(const RootSettings &settings) :
 			mSettings(settings),
-		mPluginManager("Madgine")
+		mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine")),
+		mConnectionManger(std::make_unique<SignalSlot::ConnectionManager>()),
+		mLuaState(std::make_unique<Scripting::LuaState>())
 		{
 			LoadLibrary("Tools_d.dll");
+		}
+
+		Root::~Root()
+		{
 		}
 
 		bool Root::init()
@@ -28,11 +40,11 @@ namespace Engine
 				std::shared_ptr<Scripting::Parsing::MethodHolder> p = res.second.data();
 				if (p)
 				{
-					p->call(mLuaState.state());
+					p->call(mLuaState->state());
 				}
 			}
 
-			mLuaState.setFinalized();
+			mLuaState->setFinalized();
 
 			return true;
 
@@ -40,12 +52,12 @@ namespace Engine
 
 		Plugins::PluginManager& Root::pluginMgr()
 		{
-			return mPluginManager;
+			return *mPluginManager;
 		}
 
 		Scripting::LuaState& Root::luaState()
 		{
-			return mLuaState;
+			return *mLuaState;
 		}
 
 		Resources::ResourceManager& Root::resources()

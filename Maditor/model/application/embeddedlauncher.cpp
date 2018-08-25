@@ -11,6 +11,7 @@
 #include "ogrewindow.h"
 
 #include "../shared/ipcmanager/boostipcserver.h"
+#include "../../../Madgine/src/Madgine/signalslot/connection.h"
 
 namespace Maditor
 {
@@ -22,7 +23,7 @@ namespace Maditor
 			mInput(std::make_unique<InputWrapper>(mMemory.data().mInput)),
 			mWindow(config->launcher() == ApplicationConfig::MADITOR_LAUNCHER ? new OgreWindow(mInput.get()) : nullptr)
 		{
-			mNetwork.connectionResult().connect(mOnSetupResult);
+			mNetwork.connectionResult().connect(mOnSetupResult, Engine::SignalSlot::queuedConnection);
 
 			mNetwork.addTopLevelItem(this);
 
@@ -77,7 +78,7 @@ namespace Maditor
 
 			if (isLauncher())
 			{
-				mNetwork.connect_async(std::chrono::milliseconds{ 10000 });
+				mNetwork.connect_async(std::chrono::milliseconds{ 100000000 });
 			}
 			else
 			{

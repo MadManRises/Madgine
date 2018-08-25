@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../scripting/types/luastate.h"
-#include "../plugins/pluginmanager.h"
-#include "../resources/resourcemanager.h"
-#include "../signalslot/connectionmanager.h"
 
 namespace Engine
 {
@@ -19,6 +15,7 @@ namespace Engine
 		{
 		public:
 			Root(const RootSettings &settings);
+			~Root();
 
 			bool init();
 
@@ -31,9 +28,9 @@ namespace Engine
 		private:
 			const RootSettings &mSettings;
 
-			SignalSlot::ConnectionManager mConnectionManger;
-			Plugins::PluginManager mPluginManager;
-			Scripting::LuaState mLuaState;
+			std::unique_ptr<SignalSlot::ConnectionManager> mConnectionManger;
+			std::unique_ptr<Plugins::PluginManager> mPluginManager;
+			std::unique_ptr<Scripting::LuaState> mLuaState;
 			
 			std::unique_ptr<Resources::ResourceManager> mResources;			
 		};

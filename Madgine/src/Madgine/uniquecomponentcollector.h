@@ -16,30 +16,10 @@ template<> inline const char *Collector::name(){\
 	
 #ifdef PLUGIN_BUILD
 
-	template <class Base, class... _Ty>
-	class LocalCreatorStore
-	{
-	public:
-		static std::vector<Collector_F<Base, _Ty...>>& sComponents() {
-			static std::vector<Collector_F<Base, _Ty...>> dummy;
-			return dummy;
-		}
-
-		static size_t baseIndex() { return sBaseIndex; }
-
-		static void setBaseIndex(size_t index) {
-			sBaseIndex = index;
-		}
-
-	private:
-		static inline size_t sBaseIndex = 0;
-	};
-
-
 #define PLUGIN_COLLECTOR_EXPORT(Name, Collector) \
 	extern "C" DLL_EXPORT inline const std::vector<Collector::F> *pluginComponents ## Name(size_t baseIndex){ \
-		Collector::Store::setBaseIndex(baseIndex); \
-		return &Collector::Store::sComponents(); \
+		Collector::setBaseIndex(baseIndex); \
+		return &Collector::sComponents(); \
 	} \
 \
 	COLLECTOR_NAME(Name, Collector)
@@ -51,36 +31,25 @@ template<> inline const char *Collector::name(){\
 #endif
 
 
-
-	template <class T>
-	struct CollectorName;
-
 	class IndexHolder
 	{
 	public:
 		virtual size_t index() = 0;
 	};
 
-	template <class _Base, class _Store, template <class...> class Container = std::vector, class... _Ty>
+	template <class _Base, template <class...> class Container = std::vector, class... _Ty>
 	class UniqueComponentCollector
 	{
 	public:
 		typedef _Base Base;
 		typedef Collector_F<Base, _Ty...> F;
-#ifdef PLUGIN_BUILD
-		typedef LocalCreatorStore<_Base, _Ty...> Store;
-#else
-		typedef _Store Store;
-#endif
 
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
 
 		UniqueComponentCollector(const Plugins::PluginManager &pluginManager, _Ty ... args)
 		{
-			//Necessary for dllexport
-			(void)Store::baseIndex();
-			size_t count = Store::sComponents().size();
+			size_t count = sComponents().size();
 			for (const std::pair<const std::string, Plugins::PluginSection> &sec : pluginManager) {
 				for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 					const std::vector<F> *components = loadFromPlugin(&p.second, count);
@@ -92,7 +61,7 @@ template<> inline const char *Collector::name(){\
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
 				mComponents.reserve(count);
 			}
-			for (auto f : Store::sComponents())
+			for (auto f : sComponents())
 			{
 				if (f) {
 					std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
@@ -158,21 +127,39 @@ template<> inline const char *Collector::name(){\
 			return **std::next(mSortedComponents.begin(), i);
 		}
 
+#ifndef PLUGIN_BUILD
+		DLL_EXPORT 
+#endif
+		static std::vector<Collector_F<Base, _Ty...>>& sComponents();
+
+		static void setBaseIndex(size_t index)
+		{
+			sBaseIndex = index;
+		}
+
 	protected:
 		template <class T>
 		static size_t registerComponent()
 		{
-			Store::sComponents().emplace_back([](_Ty ... args)
+			sComponents().emplace_back([](_Ty ... args)
 			{
 				return std::unique_ptr<Base>(std::make_unique<T>(std::forward<_Ty>(args)...));
 			});
-			return Store::sComponents().size() - 1;
+			return sComponents().size() - 1;
 		}
 
 		static void unregisterComponent(size_t i)
 		{
-			*std::next(Store::sComponents().begin(), i) = F();
+			*std::next(sComponents().begin(), i) = F();
 		}
+
+		static inline size_t sBaseIndex = 0;
+
+		static size_t baseIndex()
+		{
+			return sBaseIndex;
+		}
+
 
 	private:
 		static const std::vector<F> *loadFromPlugin(const Plugins::Plugin *plugin, size_t baseIndex) {
@@ -199,9 +186,9 @@ template<> inline const char *Collector::name(){\
 				mIndex = -1;
 			}
 
-			virtual size_t index() override
+			size_t index() override
 			{
-				return mIndex + Store::baseIndex();
+				return mIndex + baseIndex();
 			}
 
 		private:
@@ -214,21 +201,15 @@ template<> inline const char *Collector::name(){\
 		std::vector<Base*> mSortedComponents;
 	};
 
-	template <class Base, class... _Ty>
-	class MADGINE_BASE_EXPORT BaseCreatorStore
+
+
+	template <class _Base, template <class ...> class Container, class ... _Ty>
+	std::vector<Collector_F<typename UniqueComponentCollector<_Base, Container, _Ty...>::Base, _Ty...>>& UniqueComponentCollector<_Base, Container, _Ty...>::sComponents()
 	{
-	public:
-		static std::vector<Collector_F<Base, _Ty...>>& sComponents() {
-			static std::vector<Collector_F<Base, _Ty...>> dummy;
-			return dummy;
-		}
-	
-		static constexpr size_t baseIndex() { return 0; }
-	};
+		static std::vector<Collector_F<Base, _Ty...>> dummy;
+		return dummy;
+	}
 
 
-
-template <class Base, template <class...> class Container = std::vector, class... _Ty>
-using BaseUniqueComponentCollector = UniqueComponentCollector<Base, BaseCreatorStore<Base, _Ty...>, Container, _Ty...>;
 
 }

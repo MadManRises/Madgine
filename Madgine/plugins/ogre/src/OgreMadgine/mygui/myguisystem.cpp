@@ -6,7 +6,7 @@
 
 #include "Madgine/app/clientappsettings.h"
 
-
+#include "Madgine/resources/resourcemanager.h"
 
 #include "Madgine/core/root.h"
 

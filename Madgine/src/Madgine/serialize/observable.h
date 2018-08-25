@@ -1,6 +1,6 @@
 #pragma once
 
-#include "streams/serializestream.h"
+#include "streams/comparestreamid.h"
 
 namespace Engine
 {

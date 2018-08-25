@@ -26,6 +26,9 @@ namespace Engine
 
 	namespace Scene
 	{
+
+		template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManager&>;
+
 		SceneManager::SceneManager(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
 			Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>(app),

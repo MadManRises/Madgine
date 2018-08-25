@@ -18,14 +18,12 @@ RegisterClass(Engine::UI::UIManager);
 namespace Engine
 {	
 
-
-#ifdef _MSC_VER
-	template class MADGINE_CLIENT_EXPORT UI::GuiHandlerCollector;
-	template class MADGINE_CLIENT_EXPORT UI::GameHandlerCollector;
-#endif
-
 	namespace UI
 	{
+
+		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, std::vector, UI::UIManager&>;
+		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, std::vector, UI::UIManager&>;
+
 		UIManager::UIManager(GUI::GUISystem &gui) :
 			Scope(&gui),
 			mCurrentRoot(nullptr),

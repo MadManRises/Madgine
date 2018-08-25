@@ -35,7 +35,7 @@ namespace Engine
 	typename VirtualUniqueComponentImpl<T, Base>::Inner VirtualUniqueComponentImpl<T, Base>::_reg;
 
 	template <class T, class _Collector>
-	class TEMPLATE_EXPORT VirtualUniqueComponentBase : public _Collector::Base
+	class VirtualUniqueComponentBase : public _Collector::Base
 	{
 	public:
 		using Collector = _Collector;

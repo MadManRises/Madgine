@@ -4,6 +4,13 @@
 
 namespace Engine
 {
+
+	template <class T, typename = void>
+	struct is_iterable : std::false_type {};
+
+	template <class T>
+	struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {};
+
 	template <template <class...> class C, class T>
 	struct container_traits
 	{
