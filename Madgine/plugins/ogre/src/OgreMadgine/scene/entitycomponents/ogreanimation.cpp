@@ -4,9 +4,9 @@
 
 #include "ogreanimation.h"
 
-#include "Madgine/scene/entity/entity.h"
-
 #include "Madgine/generic/valuetype.h"
+
+#include "../ogreanimationsystem.h"
 
 RegisterClass(Engine::Scene::Entity::Animation);
 
@@ -20,7 +20,7 @@ namespace Engine
 			ENTITYCOMPONENTVIRTUALIMPL_IMPL(OgreAnimation, Animation);
 
 			OgreAnimation::OgreAnimation(Entity& entity, const Scripting::LuaTable& table) :
-				SystemComponent(entity, table),
+				EntityComponentVirtualImpl(entity, table),
 				mMesh(nullptr),
 				mState(nullptr),
 				mDefaultState(nullptr),
@@ -35,17 +35,19 @@ namespace Engine
 
 			void OgreAnimation::init()
 			{
-				mMesh = getEntity().getComponent<OgreMesh>();
+				mMesh = getComponent<OgreMesh>();
 				if (!mDefaultAnimation.empty())
 				{
 					setDefaultAnimation(mDefaultAnimation);
 				}
-				SystemComponent::init();
+				getSceneComponent<OgreAnimationSystem>().addComponent(this);
+				EntityComponentVirtualImpl::init();
 			}
 
 			void OgreAnimation::finalize()
 			{
-				SystemComponent::finalize();
+				getSceneComponent<OgreAnimationSystem>().removeComponent(this);
+				EntityComponentVirtualImpl::finalize();
 			}
 
 			void OgreAnimation::update(float timestep)

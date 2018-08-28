@@ -24,9 +24,9 @@ FolderSources(sources "../../src" Madgine clientforward.h clientlib.h)
 
 
 
-add_library(Client SHARED ${sources} clientlib.cpp)
+add_library(Client SHARED ${sources})
 
-add_precompiled_header(Client ../../src/Madgine/clientlib.h FORCEINCLUDE SOURCE_CXX clientlib.cpp)
+add_precompiled_header(Client ../../src/Madgine/clientlib.h FORCEINCLUDE)
 
 target_link_libraries(Client PUBLIC Base)
 

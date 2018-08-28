@@ -131,7 +131,7 @@ namespace Engine
 
 			target.sin_family = AF_INET; // address family Internet
 			target.sin_port = htons(portNr); //Port to connect on
-			target.sin_addr.s_addr = inet_addr(url.c_str());
+			InetPton(AF_INET, url.c_str(), &target.sin_addr.s_addr);
 
 			SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 

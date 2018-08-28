@@ -9,11 +9,20 @@ namespace Engine
 	namespace Resources
 	{
 		
-		ResourceManager::ResourceManager(Core::Root &root, const std::experimental::filesystem::path &rootDir) :
-		mCollector(root.pluginMgr(), *this),
-		mRoot(root),
+		ResourceManager *ResourceManager::sSingleton = nullptr;
+
+		ResourceManager& ResourceManager::getSingleton()
+		{
+			assert(sSingleton);
+			return *sSingleton;
+		}
+
+		ResourceManager::ResourceManager(Plugins::PluginManager &pluginMgr, const std::experimental::filesystem::path &rootDir) :
+		mCollector(*this),
 		mRootDir(rootDir)
 		{
+			assert(!sSingleton);
+			sSingleton = this;
 		}
 
 		bool ResourceManager::init()
@@ -49,11 +58,6 @@ namespace Engine
 			}
 
 			return true;
-		}
-
-		Core::Root& ResourceManager::root()
-		{
-			return mRoot;
 		}
 
 		const std::vector<std::experimental::filesystem::path>& ResourceManager::folders() const

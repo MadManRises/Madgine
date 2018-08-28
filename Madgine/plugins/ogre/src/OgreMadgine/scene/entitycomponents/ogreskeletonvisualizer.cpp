@@ -8,8 +8,6 @@
 
 #include <OgreTagPoint.h>
 
-#include "Madgine/scene/entity/entity.h"
-
 RegisterClass(Engine::Scene::Entity::OgreSkeletonVisualizer);
 
 namespace Engine
@@ -34,7 +32,7 @@ namespace Engine
 
 			void OgreSkeletonVisualizer::init()
 			{
-				mMesh = getEntity().getComponent<OgreMesh>();
+				mMesh = getComponent<OgreMesh>();
 
 				Ogre::Entity* entity = mMesh->getMesh();
 				Ogre::SceneManager* sceneMgr = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager();

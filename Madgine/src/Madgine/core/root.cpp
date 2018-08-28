@@ -4,8 +4,6 @@
 
 #include "../scripting/parsing/scriptloader.h"
 
-#include <windows.h>
-
 #include "../scripting/types/luastate.h"
 #include "../plugins/pluginmanager.h"
 #include "../resources/resourcemanager.h"
@@ -22,7 +20,7 @@ namespace Engine
 		mConnectionManger(std::make_unique<SignalSlot::ConnectionManager>()),
 		mLuaState(std::make_unique<Scripting::LuaState>())
 		{
-			LoadLibrary("Tools_d.dll");
+			(*mPluginManager)["Utility"].getPlugin("Tools").load();
 		}
 
 		Root::~Root()
@@ -31,7 +29,7 @@ namespace Engine
 
 		bool Root::init()
 		{
-			mResources = std::make_unique<Resources::ResourceManager>(*this, mSettings.mMediaDir);
+			mResources = std::make_unique<Resources::ResourceManager>(*mPluginManager, mSettings.mMediaDir);
 			if (!mResources->init())
 				return false;
 
@@ -48,21 +46,6 @@ namespace Engine
 
 			return true;
 
-		}
-
-		Plugins::PluginManager& Root::pluginMgr()
-		{
-			return *mPluginManager;
-		}
-
-		Scripting::LuaState& Root::luaState()
-		{
-			return *mLuaState;
-		}
-
-		Resources::ResourceManager& Root::resources()
-		{
-			return *mResources;
 		}
 
 		std::experimental::filesystem::path Root::mediaDir()

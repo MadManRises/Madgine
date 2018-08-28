@@ -10,11 +10,13 @@ namespace Engine
 
 	namespace Scripting
 	{
-		using GlobalAPICollector = UniqueComponentCollector<GlobalAPIComponentBase, std::vector, App::Application &>;
+		using GlobalAPICollector = UniqueComponentCollector<GlobalAPIComponentBase, App::Application &>;
 
 #ifndef PLUGIN_BUILD
-		extern template MADGINE_BASE_EXPORT class UniqueComponentCollector<GlobalAPIComponentBase, std::vector, App::Application&>;
+		extern template MADGINE_BASE_EXPORT class UniqueComponentCollector<GlobalAPIComponentBase, App::Application&>;
 #endif
+
+		using GlobalAPICollectorInstance = UniqueComponentCollectorInstance<GlobalAPIComponentBase, std::vector, App::Application&>;
 
 	}
 

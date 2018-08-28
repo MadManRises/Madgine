@@ -1,8 +1,8 @@
 #pragma once
 
 #include "debugging/streamdebugging.h"
-#include "../../generic/templates.h"
 #include "../serializeexception.h"
+#include "../../generic/templates.h"
 
 namespace Engine
 {

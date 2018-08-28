@@ -4,7 +4,7 @@
 #include "gamehandler.h"
 #include "../scripting/types/scope.h"
 #include "../core/framelistener.h"
-
+#include "../uniquecomponentcollectorinstance.h"
 
 namespace Engine
 {
@@ -67,8 +67,8 @@ namespace Engine
 		private:
 			GUI::GUISystem &mGUI;
 			
-			GuiHandlerCollector mGuiHandlers;
-			GameHandlerCollector mGameHandlers;
+			GuiHandlerCollectorInstance mGuiHandlers;
+			GameHandlerCollectorInstance mGameHandlers;
 
 			GuiHandlerBase* mCurrentRoot;			
 

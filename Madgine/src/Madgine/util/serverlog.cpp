@@ -75,7 +75,7 @@ namespace Engine
 
 					if (dwRead > 0)
 					{
-						result = ReadFile(input, buffer, std::min(sizeof buffer, size_t(dwRead)), &dwRead, nullptr);
+						result = ReadFile(input, buffer, std::min(static_cast<DWORD>(sizeof buffer), dwRead), &dwRead, nullptr);
 						assert(result && dwRead > 0);
 					}
 				}

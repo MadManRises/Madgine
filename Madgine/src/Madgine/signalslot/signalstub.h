@@ -52,9 +52,7 @@ namespace Engine
 			{
 				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<DirectConnection<_Ty...>>(
 					std::forward<T>(slot));
-				mConnectedSlots.emplace_back(
-					conn
-				);
+				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}
 
@@ -63,9 +61,7 @@ namespace Engine
 			{
 				std::weak_ptr<ConnectionInstance<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<QueuedConnection, _Ty...>(
 					std::forward<T>(slot), ConnectionManager::getSingleton());
-				mConnectedSlots.emplace_back(
-					conn
-				);
+				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}
 

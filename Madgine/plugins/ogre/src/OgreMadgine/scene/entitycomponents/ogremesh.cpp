@@ -8,12 +8,9 @@
 
 #include "Madgine/scene/entity/masks.h"
 
-#include "Madgine/app/application.h"
 #include "../../resources/ogremeshloader.h"
 
 #include "Madgine/resources/resourcemanager.h"
-
-#include "Madgine/scene/entity/entity.h"
 
 #include "Madgine/generic/valuetype.h"
 
@@ -42,7 +39,7 @@ namespace Engine
 
 			void OgreMesh::init()
 			{
-				mTransform = getEntity().addComponent_t<OgreTransform>();
+				mTransform = addComponent<OgreTransform>();
 				if (mObject)
 					mTransform->getNode()->attachObject(mObject);
 			}
@@ -64,7 +61,7 @@ namespace Engine
 				}
 				else
 				{
-					auto p = app().resources().load<OgreMeshLoader>(mesh);
+					auto p = Resources::ResourceManager::getSingleton().load<OgreMeshLoader>(mesh);
 					if (p) {
 						destroyObject();
 						mObject = getGlobalAPIComponent<OgreSceneRenderer>().getSceneManager()->createEntity(mesh/*, *p*/);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "templates.h"
+
 #include "../scripting/datatypes/luatable.h"
 
 #include "../math/vector2.h"

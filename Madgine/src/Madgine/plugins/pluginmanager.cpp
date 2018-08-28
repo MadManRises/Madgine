@@ -6,10 +6,19 @@ namespace Engine
 {
 	namespace Plugins
 	{
+		PluginManager *PluginManager::sSingleton = nullptr;
+
+		PluginManager& PluginManager::getSingleton()
+		{
+			assert(sSingleton);
+			return *sSingleton;
+		}
+
 		PluginManager::PluginManager(const std::string &project) :
 			mProject(project)			
 		{
-
+			assert(!sSingleton);
+			sSingleton = this;
 		}
 
 		const std::string& PluginManager::project() const

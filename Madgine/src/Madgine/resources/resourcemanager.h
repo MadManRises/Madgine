@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resourceloadercollector.h"
+#include "../uniquecomponentcollectorinstance.h"
 
 namespace Engine
 {
@@ -10,7 +11,9 @@ namespace Engine
 		{
 			
 		public:
-			ResourceManager(Core::Root &root, const std::experimental::filesystem::path &rootDir);
+			static ResourceManager &getSingleton();
+
+			ResourceManager(Plugins::PluginManager &pluginMgr, const std::experimental::filesystem::path &rootDir);
 
 			template <class Loader>
 			typename Loader::ResourceType *get(const std::string &name)
@@ -36,13 +39,12 @@ namespace Engine
 
 			bool init();
 
-			Core::Root &root();
-
 			const std::vector<std::experimental::filesystem::path> &folders() const;
 
 		private:
-			Core::Root &mRoot;
-			ResourceLoaderCollector mCollector;
+			static ResourceManager *sSingleton;
+
+			ResourceLoaderCollectorInstance mCollector;
 
 			std::experimental::filesystem::path mRootDir;
 			std::vector<std::experimental::filesystem::path> mFolders;

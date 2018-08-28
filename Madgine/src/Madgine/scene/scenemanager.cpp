@@ -27,13 +27,13 @@ namespace Engine
 	namespace Scene
 	{
 
-		template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneComponentSet, SceneManager&>;
+		template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneManager&>;
 
 		SceneManager::SceneManager(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
 			Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>(app),
 			mItemCount(0),
-			mSceneComponents(app.pluginMgr(), *this),
+			mSceneComponents(*this),
 			mApp(app)
 		{
 		}

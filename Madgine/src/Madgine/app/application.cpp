@@ -10,7 +10,6 @@
 
 #include "../util/standardlog.h"
 
-#include "../core/root.h"
 #include "../core/frameloop.h"
 
 #include "../scene/scenemanager.h"
@@ -19,6 +18,7 @@
 
 #include "../generic/keyvalueiterate.h"
 
+#include "../scripting/types/luastate.h"
 
 RegisterClass(Engine::App::Application);
 
@@ -28,15 +28,14 @@ RegisterClass(Engine::App::Application);
 namespace Engine
 {	
 
-	template MADGINE_BASE_EXPORT class UniqueComponentCollector<Scripting::GlobalAPIComponentBase, std::vector, App::Application&>;
+	template MADGINE_BASE_EXPORT class UniqueComponentCollector<Scripting::GlobalAPIComponentBase, App::Application&>;
 
 	namespace App
 	{
-		Application::Application(Core::Root &root) :
-			Scope(root.luaState()),
+		Application::Application() :
+			Scope(Scripting::LuaState::getSingleton()),
 			mSettings(nullptr),
-			mGlobalAPIs(root.pluginMgr(), *this),
-			mRoot(root),
+			mGlobalAPIs(*this),
 		mGlobalAPIInitCounter(0)
 		{
 		}
@@ -55,7 +54,7 @@ namespace Engine
 			Util::UtilMethods::setup(mLog.get());
 
 			if (!loop) {
-				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(pluginMgr().at("Renderer").getUniqueSymbol("frameloop"));
+				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("frameloop"));
 				if (!f)
 					throw 0;
 				loop = std::unique_ptr<Core::FrameLoop>(f());
@@ -223,20 +222,6 @@ namespace Engine
 			return *mLog;
 		}
 
-		Core::Root& Application::root()
-		{
-			return mRoot;
-		}
-
-		const Plugins::PluginManager& Application::pluginMgr()
-		{
-			return mRoot.pluginMgr();
-		}
-
-		Resources::ResourceManager& Application::resources()
-		{
-			return mRoot.resources();
-		}
 	}
 
 #ifdef _MSC_VER

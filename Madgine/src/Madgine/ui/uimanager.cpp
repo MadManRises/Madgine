@@ -21,23 +21,23 @@ namespace Engine
 	namespace UI
 	{
 
-		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, std::vector, UI::UIManager&>;
-		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, std::vector, UI::UIManager&>;
+		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, UI::UIManager&>;
+		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, UI::UIManager&>;
 
 		UIManager::UIManager(GUI::GUISystem &gui) :
 			Scope(&gui),
 			mCurrentRoot(nullptr),
 			mGUI(gui),
 			mKeepingCursorPos(false),
-		    mGuiHandlers(gui.app(false).pluginMgr(), *this),
-		    mGameHandlers(gui.app(false).pluginMgr(), *this)
+		    mGuiHandlers(*this),
+		    mGameHandlers(*this)
 		{
 			gui.addFrameListener(this);
 		}
 
 		UIManager::~UIManager()
 		{
-			mGUI.app(false).removeFrameListener(this);
+			mGUI.removeFrameListener(this);
 		}
 
 		UIManager& UIManager::getSelf(bool init)

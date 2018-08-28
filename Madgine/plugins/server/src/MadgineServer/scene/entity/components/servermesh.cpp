@@ -4,8 +4,6 @@
 
 #include "servertransform.h"
 
-#include "Madgine/scene/entity/entity.h"
-
 #include "Madgine/generic/valuetype.h"
 
 namespace Engine
@@ -37,7 +35,7 @@ namespace Engine
 
 			void ServerMesh::init()
 			{
-				mTransform = getEntity().getComponent<Transform>();
+				mTransform = getComponent<Transform>();
 			}
 
 			std::string ServerMesh::getName() const

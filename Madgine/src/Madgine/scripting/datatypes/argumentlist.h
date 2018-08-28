@@ -1,13 +1,11 @@
 #pragma once
 
-#include "../../serialize/serializable.h"
 
 namespace Engine
 {
 	namespace Scripting
 	{
-		class INTERFACES_EXPORT ArgumentList :
-			public Serialize::Serializable
+		class INTERFACES_EXPORT ArgumentList
 		{
 		public:
 			ArgumentList(std::vector<ValueType> &&data);
@@ -19,10 +17,6 @@ namespace Engine
 				ArgumentList(std::vector<ValueType>{ValueType(std::forward<T>(args))...})
 			{
 			}
-
-			// Geerbt über Serializable
-			void readState(Serialize::SerializeInStream&) override;
-			void writeState(Serialize::SerializeOutStream&) const override;
 
 			void pushToStack(lua_State* state) const;
 

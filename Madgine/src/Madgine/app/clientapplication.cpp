@@ -14,8 +14,8 @@ namespace Engine
 {
 	namespace App
 	{
-		ClientApplication::ClientApplication(Core::Root &root) :
-		Application(root),
+		ClientApplication::ClientApplication() :
+		Application(),
 		mGUI(nullptr)
 		{
 		}
@@ -25,7 +25,7 @@ namespace Engine
 			mSettings = &settings;
 			
 		
-			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(pluginMgr().at("Renderer").getUniqueSymbol("guisystem"));
+			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("guisystem"));
 			if (!f)
 				throw 0;
 			mGUI = f(*this);

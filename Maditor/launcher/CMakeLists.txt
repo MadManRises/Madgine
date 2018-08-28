@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 
 set (sources "")
-FolderSources(sources "" "" applicationwrapper.cpp applicationwrapper.h embeddedwrapper.cpp embeddedwrapper.h inputwrapper.cpp inputwrapper.h inspector.cpp inspector.h maditorlauncherlib.cpp maditorlauncherlib.h maditorlauncherforward.h main_embedded.cpp moduleloader.cpp moduleloader.h)
+FolderSources(sources "" "" applicationwrapper.cpp applicationwrapper.h embeddedwrapper.cpp embeddedwrapper.h inputwrapper.cpp inputwrapper.h inspector.cpp inspector.h maditorlauncherlib.h maditorlauncherforward.h main_embedded.cpp moduleloader.cpp moduleloader.h)
 	FolderSources(sources "" util appstats.cpp appstats.h launcherloglistener.cpp launcherloglistener.h util.cpp util.h)	
 
 

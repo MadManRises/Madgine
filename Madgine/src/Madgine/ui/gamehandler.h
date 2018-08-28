@@ -78,14 +78,17 @@ namespace Engine
 		};
 
 
-		using GameHandlerCollector = UniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
+		using GameHandlerCollector = UniqueComponentCollector<GameHandlerBase, UIManager &>;
 
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
 
 #ifndef PLUGIN_BUILD
-		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, std::vector, UIManager &>;
+		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, UIManager &>;
 #endif
+
+		using GameHandlerCollectorInstance = UniqueComponentCollectorInstance<GameHandlerBase, std::vector, UIManager &>;
+
 	} // namespace UI
 
 	PLUGIN_COLLECTOR_EXPORT(GameHandler, UI::GameHandlerCollector);

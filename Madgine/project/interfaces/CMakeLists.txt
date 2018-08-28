@@ -7,7 +7,7 @@ Project(Interfaces)
 
 find_package(Threads REQUIRED)
 
-set(sources interfaceslib.cpp)
+set(sources)
 FolderSources(sources "" "../../src")
 FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
 	FolderSources(sources Madgine database exceptionmessages.h message.h messages.h)
@@ -19,8 +19,8 @@ FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
 		FolderSources(sources scripting datatypes argumentlist.cpp argumentlist.h intluatableinstance.cpp intluatableinstance.h luatable.cpp luatable.h luatablefieldaccessor.cpp luatablefieldaccessor.h luatableinstance.cpp luatableinstance.h luatableiterator.cpp luatableiterator.h luathread.h stringluatableinstance.cpp stringluatableinstance.h)
 		FolderSources(sources scripting parsing parseexception.h scriptparser.cpp scriptparser.h)
 		FolderSources(sources scripting types api.cpp api.h apihelper.cpp apihelper.h luastate.cpp luastate.h mapper.h scopebase.cpp scopebase.h scope_cast.h scope.h)
-	FolderSources(sources Madgine serialize fileexception.h observable.cpp observable.h serializable.cpp serializable.h serializableunit.cpp serializableunit.h serializeexception.h serializehelper.h serializemanager.cpp serializemanager.h toplevelserializableunit.cpp toplevelserializableunit.h)
-		FolderSources(sources serialize container action.h container.h creationhelper.h list.h map.h observed.h observablecontainer.h serializablecontainer.h serialized.h set.h sortedcontainer.h unithelper.cpp unithelper.h unsortedcontainer.h vector.h)
+	FolderSources(sources Madgine serialize fileexception.h observable.cpp observable.h serializable.cpp serializable.h serializableunit.cpp serializableunit.h serializeexception.h serializemanager.cpp serializemanager.h toplevelserializableunit.cpp toplevelserializableunit.h)
+		FolderSources(sources serialize container action.h container.h creationhelper.h list.h map.h observed.h observablecontainer.h serializablecontainer.h serialized.h set.h sortedcontainer.h tupleserialize.h unithelper.cpp unithelper.h unsortedcontainer.h vector.h)
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources Madgine signalslot connection.cpp connection.h connectionmanager.cpp connectionmanager.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
@@ -29,7 +29,7 @@ FolderSources(sources "" vstools Madgine.natvis)
 
 add_library(Interfaces SHARED ${sources})
 
-add_precompiled_header(Interfaces ../../src/Madgine/interfaceslib.h FORCEINCLUDE SOURCE_CXX interfaceslib.cpp)
+add_precompiled_header(Interfaces ../../src/Madgine/interfaceslib.h FORCEINCLUDE)
 
 target_compile_definitions(Interfaces PUBLIC CONFIG_SUFFIX="$<$<CONFIG:Debug>:_d>")
 

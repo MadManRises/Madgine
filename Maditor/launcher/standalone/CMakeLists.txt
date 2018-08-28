@@ -2,7 +2,7 @@
 
 set (sources "")
 FolderSources(sources "" "" standalonewrapper.cpp standalonewrapper.h main_standalone.cpp)
-FolderSources(sources "" ".." applicationwrapper.cpp applicationwrapper.h embeddedwrapper.cpp embeddedwrapper.h inputwrapper.cpp inputwrapper.h inspector.cpp inspector.h maditorlauncherlib.cpp maditorlauncherlib.h maditorlauncherforward.h moduleloader.cpp moduleloader.h)
+FolderSources(sources "" ".." applicationwrapper.cpp applicationwrapper.h embeddedwrapper.cpp embeddedwrapper.h inputwrapper.cpp inputwrapper.h inspector.cpp inspector.h maditorlauncherlib.h maditorlauncherforward.h moduleloader.cpp moduleloader.h)
 	FolderSources(sources ".." util appstats.cpp appstats.h launcherloglistener.cpp launcherloglistener.h util.cpp util.h)	
 
 

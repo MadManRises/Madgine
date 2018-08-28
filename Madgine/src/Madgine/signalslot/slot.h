@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../generic/templates.h"
 #include "connectionstore.h"
 
 #include "../generic/onetimefunctor.h"
+
+#include "../generic/callable_traits.h"
 
 #include "connectionmanager.h"
 
@@ -78,9 +79,6 @@ namespace Engine
 
 		template <auto f>
 		using Slot = typename MemberFunctionCapture<SlotImpl, f>::type;
-
-		/*template <typename F, F f>
-		using Slot = typename MemberFunctionCapture<SlotImpl, F, f>::type;*/
 
 	}
 }

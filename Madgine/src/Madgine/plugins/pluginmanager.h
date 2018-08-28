@@ -35,6 +35,8 @@ namespace Engine
 		class INTERFACES_EXPORT PluginManager
 		{
 		public:
+			static PluginManager &getSingleton();
+
 			PluginManager(const std::string &project);
 
 			const std::string &project() const;
@@ -49,6 +51,8 @@ namespace Engine
 			std::map<std::string, PluginSection> mSections;
 
 			std::string mProject;
+
+			static PluginManager *sSingleton;
 
 		};
 

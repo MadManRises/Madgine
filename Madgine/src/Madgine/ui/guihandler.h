@@ -51,13 +51,15 @@ namespace Engine
 			Scene::ContextMask mContext;
 		};
 
-		using GuiHandlerCollector = UniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
+		using GuiHandlerCollector = UniqueComponentCollector<GuiHandlerBase, UIManager &>;
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 
 #ifndef PLUGIN_BUILD
-		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, std::vector, UIManager &>;
+		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, UIManager &>;
 #endif
+
+		using GuiHandlerCollectorInstance = UniqueComponentCollectorInstance<GuiHandlerBase, std::vector, UIManager &>;
 	} // namespace GuiHandler
 
 	PLUGIN_COLLECTOR_EXPORT(GuiHandler, UI::GuiHandlerCollector);

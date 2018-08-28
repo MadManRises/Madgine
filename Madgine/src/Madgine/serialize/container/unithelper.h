@@ -2,7 +2,7 @@
 
 #include "../streams/serializestream.h"
 
-
+#include "../../generic/copy_traits.h"
 
 namespace Engine
 {

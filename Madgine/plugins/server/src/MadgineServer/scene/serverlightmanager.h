@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Madgine/serialize/container/list.h"
 
 
 #include "Madgine/scene/light.h"
-#include "Madgine/uniquecomponent.h"
 
 #include "Madgine/scene/lightmanager.h"
 

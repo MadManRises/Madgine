@@ -19,7 +19,7 @@ FolderSources(sources src MadgineServer serverforward.h serverlib.h)
 
 add_plugin(MadgineServer Madgine Renderer ${sources})
 
-#add_precompiled_header(MadgineServer src/MadgineServer/serverlib.h FORCEINCLUDE SOURCE_CXX serverlib.cpp)
+add_precompiled_header(MadgineServer src/MadgineServer/serverlib.h FORCEINCLUDE)
 
 target_link_libraries(MadgineServer PUBLIC Base)
 

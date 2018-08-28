@@ -15,11 +15,10 @@ namespace Engine
 {
 	namespace Server
 	{
-		ServerBase::ServerBase(const std::string& name, Core::Root &root) :
-			Scope(root.luaState()),
+		ServerBase::ServerBase(const std::string& name) :
+			Scope(Scripting::LuaState::getSingleton()),
 			mLog(name + "-Log"),
-			mName(name),			
-			mRoot(root)
+			mName(name)
 		{
 			Util::UtilMethods::setup(&mLog);			
 		}

@@ -25,7 +25,7 @@ namespace Engine
 		{
 			setg(mRecBuffer.data(), mRecBuffer.data() + (other.gptr() - other.eback()), mRecBuffer.data() + mRecBuffer.size());
 			setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
-			pbump(other.pptr() - other.pbase());
+			pbump(static_cast<int>(other.pptr() - other.pbase()));
 			other.mIsClosed = true;
 
 			//setp(mSendBuffer.back().data(), mSendBuffer.back().data() + (other.pptr() - other.pbase()), mSendBuffer.back().data() + BUFFER_SIZE);
@@ -105,7 +105,7 @@ namespace Engine
 				size_t index = pptr() - pbase();
 				mSendBuffer.resize(2 * mSendBuffer.capacity());
 				setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
-				pbump(index);
+				pbump(static_cast<int>(index));
 			}			
 			
 		}
@@ -174,7 +174,7 @@ namespace Engine
 					if (num == -1)
 					{
 						handleError();
-						return mIsClosed ? -1 : mBufferedSendMsgs.size();
+						return mIsClosed ? -1 : static_cast<int>(mBufferedSendMsgs.size());
 					}
 					if (num != sizeof it->mHeader)
 					{
@@ -195,7 +195,7 @@ namespace Engine
 					if (num == -1)
 					{
 						handleError();
-						return mIsClosed ? -1 : mBufferedSendMsgs.size();
+						return mIsClosed ? -1 : static_cast<int>(mBufferedSendMsgs.size());
 					}
 					it->mBytesSent += num;
 				}

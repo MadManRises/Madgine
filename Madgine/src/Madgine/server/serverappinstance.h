@@ -11,8 +11,7 @@ namespace Engine
 		{
 		public:
 			template <class T>
-			ServerAppInstance(T&& initCallback, Core::Root &root) :
-				mRoot(root),
+			ServerAppInstance(T&& initCallback) :
 				mApplication(nullptr),
 				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
 				mResult(0),
@@ -35,7 +34,7 @@ namespace Engine
 
 					SignalSlot::ConnectionManager conMgr;
 
-					App::Application app(mRoot);
+					App::Application app;
 					mApplication = &app;
 					App::AppSettings settings;
 					settings.mRunMain = false;
@@ -43,7 +42,7 @@ namespace Engine
 					if (app.callInit())
 					{
 						try{
-							TupleUnpacker<>::call(initCallback, std::make_tuple(std::ref(app)));
+							TupleUnpacker::call(initCallback, std::make_tuple(std::ref(app)));
 							mResult = app.go();
 						}
 						catch(...)
@@ -64,7 +63,6 @@ namespace Engine
 			}
 
 		private:
-			Engine::Core::Root &mRoot;
 			App::Application* mApplication;
 
 			std::string mName;

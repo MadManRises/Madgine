@@ -32,18 +32,15 @@ namespace Engine
 				const char* key() const override;
 
 				template <class T>
-				T* addComponent_t(const Scripting::LuaTable &table = {})
+				T* addComponent(const Scripting::LuaTable &table = {})
 				{
-					if (!hasComponent<T>())
-						addComponent(T::componentName(), table);
-					return getComponent<T>();
+					return static_cast<T*>(addComponent(T::componentName(), table));					
 				}
 
 				template <class T>
-				void removeComponent_t()
+				void removeComponent()
 				{
-					if (hasComponent<T>())
-						removeComponent(T::componentName());
+					removeComponent(T::componentName());
 				}
 
 				template <class T>
@@ -62,7 +59,7 @@ namespace Engine
 
 				bool hasComponent(const std::string& name);
 
-				void addComponent(const std::string& name, const Scripting::LuaTable& table = {});
+				EntityComponentBase *addComponent(const std::string& name, const Scripting::LuaTable& table = {});
 				void removeComponent(const std::string& name);
 
 				
@@ -100,8 +97,6 @@ namespace Engine
 			private:
 
 				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string& name);
-
-				EntityComponentBase* addComponentImpl(std::unique_ptr<EntityComponentBase>&& component);
 
 				std::string mName;
 				bool mLocal;

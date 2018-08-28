@@ -19,9 +19,9 @@ namespace Engine
 
 			bool init();
 
-			Plugins::PluginManager &pluginMgr();
+			/*Plugins::PluginManager &pluginMgr();
 			Scripting::LuaState &luaState();
-			Resources::ResourceManager &resources();
+			Resources::ResourceManager &resources();*/
 
 			std::experimental::filesystem::path mediaDir();
 

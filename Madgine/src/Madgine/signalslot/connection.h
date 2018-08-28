@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../generic/templates.h"
 #include "connectionstore.h"
 #include "connectionmanager.h"
 
@@ -51,7 +50,7 @@ namespace Engine
 			{
 				mImpl = [impl = std::forward<T>(impl)](_Ty ... args)
 				{
-					TupleUnpacker<>::call(impl, std::forward_as_tuple(args...));
+					TupleUnpacker::call(impl, std::forward_as_tuple(args...));
 				};
 			}
 
@@ -60,7 +59,7 @@ namespace Engine
 			{
 				mImpl = [=](_Ty ... args)
 				{
-					TupleUnpacker<>::call(*impl, std::forward_as_tuple(args...));
+					TupleUnpacker::call(*impl, std::forward_as_tuple(args...));
 				};
 			}
 

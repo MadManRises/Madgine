@@ -16,7 +16,7 @@ namespace Engine
 		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public Core::FrameLoop
 		{
 		public:
-			ServerBase(const std::string& name, Core::Root &root);
+			ServerBase(const std::string& name);
 			virtual ~ServerBase();
 
 			virtual int go() override;
@@ -32,7 +32,7 @@ namespace Engine
 			template <class T>
 			void spawnInstance(T&& init)
 			{
-				mInstances.emplace_back(std::forward<T>(init), mRoot);
+				mInstances.emplace_back(std::forward<T>(init));
 			}
 
 			KeyValueMapList maps() override;
@@ -42,15 +42,13 @@ namespace Engine
 			Util::ServerLog mLog;
 			std::string mName;
 
-			Core::Root &mRoot;
-
 			std::list<ServerAppInstance> mInstances;
 			
 		};
 
 #define SERVER_INSTANCE(Class) \
-		extern "C" DLL_EXPORT Engine::Server::ServerBase *createServer(const std::string &name, Engine::Core::Root &root) {\
-			return new TW::Server::Server(name, root);\
+		extern "C" DLL_EXPORT Engine::Server::ServerBase *createServer(const std::string &name) {\
+			return new TW::Server::Server(name);\
 		}
 
 	}

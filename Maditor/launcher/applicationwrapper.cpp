@@ -111,14 +111,14 @@ namespace Maditor
 
 			mRoot = std::make_unique<Engine::Core::Root>(mRootSettings);
 
-			mRoot->luaState().setGlobalMethod("print", &ApplicationWrapper::lua_log);
+			Engine::Scripting::LuaState::getSingleton().setGlobalMethod("print", &ApplicationWrapper::lua_log);
 
 			mLog->init();
 
 			if (mAppInfo.mType == Shared::CLIENT_LAUNCHER)
-				mRoot->pluginMgr()["Renderer"].getPlugin("OgreMadgine").load();
+				Engine::Plugins::PluginManager::getSingleton()["Renderer"].getPlugin("OgreMadgine").load();
 			else
-				mRoot->pluginMgr()["Renderer"].getPlugin("MadgineServer").load();
+				Engine::Plugins::PluginManager::getSingleton()["Renderer"].getPlugin("MadgineServer").load();
 
 
 			if (!mRoot->init()) {
@@ -165,7 +165,7 @@ namespace Maditor
 
 
 
-				mApplication = std::make_unique<Engine::App::ClientApplication>(*mRoot);
+				mApplication = std::make_unique<Engine::App::ClientApplication>();
 
 				mApplication->setup(mSettings);
 				mUtil->setApp(mApplication.get());
@@ -203,7 +203,7 @@ namespace Maditor
 					
 
 					mServer = std::unique_ptr<Engine::Server::ServerBase>(
-						mLoader->createServer(mAppInfo.mServerClass, mAppInfo.mAppName, *mRoot));
+						mLoader->createServer(mAppInfo.mServerClass, mAppInfo.mAppName));
 					if (!mServer)
 						return Shared::FAILED_CREATE_SERVER_CLASS;
 											

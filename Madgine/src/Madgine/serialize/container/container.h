@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../streams/serializestream.h"
-#include "../../generic/templates.h"
 #include "unithelper.h"
 #include "../serializable.h"
 
@@ -218,9 +217,9 @@ namespace Engine
 			template <class... _Ty>
 			std::pair<iterator, bool> emplace_tuple(const const_iterator& where, std::tuple<_Ty...>&& tuple)
 			{
-				return TupleUnpacker<const const_iterator &>::call(static_cast<Container<traits, Creator>*>(this),
-				                                                   &Container<traits, Creator>::emplace<_Ty...>, where,
-				                                                   std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker::call(static_cast<Container<traits, Creator>*>(this),
+				                                                   &Container<traits, Creator>::emplace<_Ty...>, std::tuple_cat(std::make_tuple(where),
+				                                                   std::forward<std::tuple<_Ty...>>(tuple)));
 			}
 
 			std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in) {
@@ -316,9 +315,9 @@ namespace Engine
 			template <class... _Ty>
 			std::pair<iterator, bool> emplace_tuple_intern(const const_iterator& where, std::tuple<_Ty...>&& tuple)
 			{
-				return TupleUnpacker<const const_iterator &>::call(static_cast<Container<traits, Creator>*>(this),
-				                                                   &Container<traits, Creator>::emplace_intern<_Ty...>, where,
-				                                                   std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker::call(static_cast<Container<traits, Creator>*>(this),
+				                                                   &Container<traits, Creator>::emplace_intern<_Ty...>, std::tuple_cat(std::make_tuple(where),
+				                                                   std::forward<std::tuple<_Ty...>>(tuple)));
 			}
 
 			iterator erase_intern(const iterator& it)

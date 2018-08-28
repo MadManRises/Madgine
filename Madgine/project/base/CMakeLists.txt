@@ -23,8 +23,8 @@ FolderSources(sources "../../src" Madgine baseforward.h baselib.h madgineobject.
 	FolderSources(sources Madgine util processstats.cpp processstats.h profile.cpp profile.h profiler.cpp profiler.h serverlog.cpp serverlog.h)
 
 
-add_library(Base SHARED ${sources} baselib.cpp)
-add_precompiled_header(Base ../../src/Madgine/baselib.h FORCEINCLUDE SOURCE_CXX baselib.cpp)
+add_library(Base SHARED ${sources})
+add_precompiled_header(Base ../../src/Madgine/baselib.h FORCEINCLUDE)
 
 target_link_libraries(Base PUBLIC Interfaces)
 

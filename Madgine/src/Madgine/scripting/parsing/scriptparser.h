@@ -32,7 +32,7 @@ namespace Engine
 			class INTERFACES_EXPORT ScriptParser
 			{
 			public:
-				ScriptParser(LuaState &state);
+				ScriptParser();
 				virtual ~ScriptParser();
 			
 

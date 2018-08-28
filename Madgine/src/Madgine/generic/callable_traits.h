@@ -3,6 +3,20 @@
 namespace Engine
 {
 
+	template <class R, class T, class... _Ty>
+	constexpr size_t argumentsCount(R(T::*)(_Ty ...) const)
+	{
+		return sizeof...(_Ty);
+	}
+
+	template <class R, class T, class... _Ty>
+	constexpr size_t argumentsCount(R(T::*)(_Ty ...))
+	{
+		return sizeof...(_Ty);
+	}
+
+
+
 	namespace __generic__impl__
 	{
 

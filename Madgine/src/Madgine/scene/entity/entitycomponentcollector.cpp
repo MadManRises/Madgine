@@ -8,8 +8,6 @@
 
 #include "entity.h"
 
-#include "../../app/application.h"
-
 namespace Engine
 {
 	namespace Scene
@@ -41,7 +39,7 @@ namespace Engine
 				auto it = sRegisteredComponentsByName().find(name);
 				if (it == sRegisteredComponentsByName().end()) {
 					typedef std::map<std::string, ComponentBuilder> & (*ComponentGetter)();
-					for (const std::pair<const std::string, Plugins::PluginSection> &sec : e.app().pluginMgr()) {
+					for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
 						for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 							ComponentGetter getter = (ComponentGetter)p.second.getSymbol("pluginEntityComponents");
 							if (getter) {

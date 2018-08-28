@@ -57,7 +57,7 @@ namespace Engine
 			template <class... _Ty>
 			iterator emplace_tuple_back(std::tuple<_Ty...>&& tuple)
 			{
-				return TupleUnpacker<>::call(this, &VectorImpl::emplace_back<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker::call(this, &VectorImpl::emplace_back<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			Type& at(size_t i)

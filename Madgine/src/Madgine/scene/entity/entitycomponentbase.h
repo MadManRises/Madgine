@@ -24,6 +24,22 @@ namespace Engine
 				virtual const char* key() const = 0;
 
 				template <class T>
+				T *getComponent()
+				{
+					return static_cast<T*>(getComponent(T::componentName()));
+				}
+
+				EntityComponentBase* getComponent(const std::string& name);
+
+				template <class T>
+				T *addComponent(const Scripting::LuaTable &init = {})
+				{
+					return static_cast<T*>(addComponent(T::componentName(), init));
+				}
+
+				EntityComponentBase* addComponent(const std::string &name, const Scripting::LuaTable &init);
+
+				template <class T>
 				T &getSceneComponent(bool init = true)
 				{
 					return static_cast<T&>(getSceneComponent(T::component_index(), init));

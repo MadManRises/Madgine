@@ -4,3 +4,6 @@
 [submodule "Maditor/view/qtimgui"]
 	path = Maditor/view/qtimgui
 	url = https://github.com/seanchas116/qtimgui.git
+[submodule "Madgine/plugins/tools/imgui"]
+	path = Madgine/plugins/tools/imgui
+	url = https://github.com/ocornut/imgui.git

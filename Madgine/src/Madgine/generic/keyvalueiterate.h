@@ -1,5 +1,6 @@
 #pragma once
 
+#include "container_traits.h"
 #include "valuetype.h"
 #include "keyvalue.h"
 

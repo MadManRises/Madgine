@@ -13,11 +13,11 @@ endif ()
 find_package(Threads REQUIRED)
 
 set (sources "")
-FolderSources(sources "" "" appcontrol.cpp appcontrol.h applicationinfo.h errorcodes.cpp errorcodes.h inputinfo.h maditorsharedlib.cpp maditorsharedlib.h maditorsharedforward.h moduleinstance.cpp moduleinstance.h projectfile.cpp projectfile.h sharedbase.h sharedmemory.cpp sharedmemory.h)
+FolderSources(sources "" "" appcontrol.cpp appcontrol.h applicationinfo.h errorcodes.cpp errorcodes.h inputinfo.h maditorsharedlib.h maditorsharedforward.h moduleinstance.cpp moduleinstance.h projectfile.cpp projectfile.h sharedbase.h sharedmemory.cpp sharedmemory.h)
 	FolderSources(sources "" ipcmanager boostipcbuffer.cpp boostipcbuffer.h boostipcconnection.cpp boostipcconnection.h boostipcmanager.cpp boostipcmanager.h boostipcserver.cpp boostipcserver.h boostipcstream.cpp boostipcstream.h)
 
 add_library(Maditor_Shared SHARED ${sources})
-add_precompiled_header(Maditor_Shared maditorsharedlib.h FORCEINCLUDE SOURCE_CXX maditorsharedlib.cpp)
+add_precompiled_header(Maditor_Shared maditorsharedlib.h FORCEINCLUDE)
 
 target_include_directories(Maditor_Shared PUBLIC ${BOOST_PATH})
 

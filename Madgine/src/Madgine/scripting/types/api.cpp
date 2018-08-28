@@ -1,5 +1,6 @@
 #include "../../interfaceslib.h"
 #include "api.h"
+#include "../../generic/keyvalue.h"
 
 namespace Engine
 {

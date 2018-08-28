@@ -11,7 +11,7 @@ namespace Engine
 		class MADGINE_CLIENT_EXPORT ClientApplication : public Application
 		{
 		public:
-			ClientApplication(Core::Root &root);
+			ClientApplication();
 
 			void setup(const ClientAppSettings &settings);
 

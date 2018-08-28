@@ -10,7 +10,9 @@ namespace Engine
 	namespace Resources
 	{
 
-		using ResourceLoaderCollector = UniqueComponentCollector<ResourceLoaderBase, std::vector, ResourceManager&>;
+		using ResourceLoaderCollector = UniqueComponentCollector<ResourceLoaderBase, ResourceManager&>;
+
+		using ResourceLoaderCollectorInstance = UniqueComponentCollectorInstance<ResourceLoaderBase, std::vector, ResourceManager &>;
 
 	}
 

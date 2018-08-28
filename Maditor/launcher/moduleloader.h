@@ -31,7 +31,7 @@ public:
 
 	const std::string &binaryDir();
 
-	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName, Engine::Core::Root &root);
+	Engine::Server::ServerBase * createServer(const std::string & fullName, const std::string &instanceName);
 
 private:
 

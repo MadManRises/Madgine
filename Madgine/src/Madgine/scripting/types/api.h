@@ -1,11 +1,10 @@
 #pragma once
 
-#include "../../generic/templates.h"
+#include "../../generic/callable_traits.h"
 #include "../datatypes/argumentlist.h"
 #include "scope_cast.h"
 #include "mapper.h"
 #include "apihelper.h"
-#include "../../generic/keyvalue.h"
 #include "../../generic/valuetype.h"
 
 namespace Engine

@@ -13,7 +13,7 @@ namespace Engine
 		{
 			ScriptLoader::ScriptLoader(Resources::ResourceManager &mgr) :
 				ResourceLoader(mgr, { ".lua" }, true),
-				mParser(mgr.root().luaState())
+				mParser()
 			{
 			}
 

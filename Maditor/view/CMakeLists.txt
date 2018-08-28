@@ -12,7 +12,7 @@ set (CMAKE_AUTOMOC_MOC_OPTIONS "-bmaditorviewlib.h")
 
 
 set (sources "")
-FolderSources(sources "" "" componentview.h editorsettingswidget.cpp editorsettingswidget.h editorsettingswidget.ui maditorview.cpp maditorview.h maditorviewforward.h maditorviewlib.cpp maditorviewlib.h mainwindow.cpp mainwindow.h mainwindow.ui resources.qrc treeview.cpp treeview.h)
+FolderSources(sources "" "" componentview.h editorsettingswidget.cpp editorsettingswidget.h editorsettingswidget.ui maditorview.cpp maditorview.h maditorviewforward.h maditorviewlib.h mainwindow.cpp mainwindow.h mainwindow.ui resources.qrc treeview.cpp treeview.h)
 	FolderSources(sources "" application applicationlog.cpp applicationlog.h applicationlog.ui applicationview.cpp applicationview.h applicationwindow.cpp applicationwindow.h appstatswidget.cpp appstatswidget.h appstatswidget.ui configwidget.cpp configwidget.h configwidget.ui)
 		FolderSources(sources application inspector inspectorlayoutdata.cpp inspectorlayoutdata.h inspectorwidget.cpp inspectorwidget.h valuetypeedit.cpp valuetypeedit.h)
 	FolderSources(sources "" dialogs dialogmanager.cpp dialogmanager.h newclassdialog.cpp newclassdialog.h newclassdialog.ui newguihandlerdialog.cpp newguihandlerdialog.h newguihandlerdialog.ui newmoduledialog.cpp newmoduledialog.h newmoduledialog.ui newotherclassdialog.cpp newotherclassdialog.h newotherclassdialog.ui newprojectdialog.cpp newprojectdialog.h newprojectdialog.ui settingsdialog.cpp settingsdialog.h settingsdialog.ui settingstab.h)
@@ -26,7 +26,7 @@ add_library(Maditor_View SHARED ${sources})
 
 target_include_directories(Maditor_View PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/qtimgui/imgui)
 
-add_precompiled_header(Maditor_View maditorviewlib.h FORCEINCLUDE SOURCE_CXX maditorviewlib.cpp)
+add_precompiled_header(Maditor_View maditorviewlib.h FORCEINCLUDE)
 
 target_link_libraries(Maditor_View PRIVATE Maditor_Model)
 

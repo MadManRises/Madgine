@@ -35,7 +35,7 @@ if (BUILD_OGRE)
 
 	add_plugin(OgreMadgine Madgine Renderer ${sources})
 
-	#add_precompiled_header(OgreMadgine ../src/ogrelib.h FORCEINCLUDE SOURCE_CXX madginelib.cpp)
+	add_precompiled_header(OgreMadgine src/OgreMadgine/ogrelib.h FORCEINCLUDE)
 				
 
 	target_link_libraries(OgreMadgine PUBLIC Client PRIVATE ${ASSIMP_LIBRARIES})

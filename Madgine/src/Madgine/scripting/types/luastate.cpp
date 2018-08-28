@@ -52,6 +52,12 @@ namespace Engine
 		};
 
 
+		LuaState& LuaState::getSingleton()
+		{
+			assert(sSingleton);
+			return *sSingleton;
+		}
+
 		LuaState::LuaState() :
 			mFinalized(false)
 		{

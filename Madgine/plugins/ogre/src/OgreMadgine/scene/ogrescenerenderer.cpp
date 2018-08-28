@@ -4,7 +4,6 @@
 
 #include "Madgine/scene/entity/masks.h"
 #include "Madgine/gui/guisystem.h"
-#include "Madgine/app/clientapplication.h"
 
 
 RegisterClass(Engine::OgreSceneRenderer);

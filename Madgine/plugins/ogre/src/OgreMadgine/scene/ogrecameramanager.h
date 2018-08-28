@@ -2,7 +2,6 @@
 
 
 #include "Madgine/scene/cameramanager.h"
-#include "Madgine/scene/scenecomponent.h"
 
 
 namespace Engine

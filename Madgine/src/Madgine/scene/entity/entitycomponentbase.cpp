@@ -40,6 +40,16 @@ namespace Engine
 				return *mEntity;
 			}
 
+			EntityComponentBase* EntityComponentBase::getComponent(const std::string& name)
+			{
+				return mEntity->getComponent(name);
+			}
+
+			EntityComponentBase* EntityComponentBase::addComponent(const std::string& name, const Scripting::LuaTable& init)
+			{
+				return mEntity->addComponent(name, init);
+			}
+
 			SceneComponentBase& EntityComponentBase::getSceneComponent(size_t i, bool init)
 			{
 				return mEntity->getSceneComponent(i, init);

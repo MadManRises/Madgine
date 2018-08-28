@@ -50,7 +50,7 @@ namespace Engine
 			template <class... _Ty>
 			std::pair<iterator, bool> emplace_tuple_back(std::tuple<_Ty...>&& tuple)
 			{
-				return TupleUnpacker<>::call(this, &ListImpl::emplace_back<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker::call(this, &ListImpl::emplace_back<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 			const Type& back() const
@@ -82,8 +82,8 @@ namespace Engine
 			template <class T, class... _Ty>
 			void emplace_tuple_back_init(T&& init, std::tuple<_Ty...>&& args)
 			{
-				TupleUnpacker<T&&>::call(this, &ObservableListImpl::emplace_back_init<T, _Ty...>, std::forward<T>(init),
-				                         std::forward<std::tuple<_Ty...>>(args));
+				TupleUnpacker::call(this, &ObservableListImpl::emplace_back_init<T, _Ty...>, std::tuple_cat(std::make_tuple(std::forward<T>(init)),
+				                         std::forward<std::tuple<_Ty...>>(args)));
 			}
 		};
 

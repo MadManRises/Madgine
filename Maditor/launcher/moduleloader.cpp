@@ -115,7 +115,7 @@ namespace Maditor {
 			}
 		}
 
-		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName, Engine::Core::Root &root)
+		Engine::Server::ServerBase * ModuleLoader::createServer(const std::string & fullName, const std::string &instanceName)
 		{
 			size_t delimPos = fullName.find("::");
 			std::string moduleName(fullName.c_str(), delimPos);
@@ -125,8 +125,8 @@ namespace Maditor {
 			if (it != mInstances.end() && it->isLoaded()) {
 				void *symbol = it->getSymbol(std::string("create") + className);
 				if (symbol) {
-					typedef Engine::Server::ServerBase *(*Factory)(const std::string &, Engine::Core::Root &);
-					return (*reinterpret_cast<Factory>(symbol))(instanceName, root);
+					typedef Engine::Server::ServerBase *(*Factory)(const std::string &);
+					return (*reinterpret_cast<Factory>(symbol))(instanceName);
 				}
 			}
 

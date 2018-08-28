@@ -6,6 +6,8 @@ namespace Engine
 
 	class InvScopePtr;
 
+	enum KeyValueValueFlags;
+
 	class KeyValueIterator;
 	class KeyValueMapList;
 

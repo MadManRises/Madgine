@@ -23,7 +23,7 @@ namespace Engine
 			APIHelper::pop(state, count);
 		}
 
-		void ArgumentList::readState(Serialize::SerializeInStream& in)
+/*		void ArgumentList::readState(Serialize::SerializeInStream& in)
 		{
 			mData.clear();
 			ValueType temp;
@@ -40,7 +40,7 @@ namespace Engine
 				out << v;
 			}
 			out << Serialize::EOLType();
-		}
+		}*/
 
 		void ArgumentList::pushToStack(lua_State* state) const
 		{

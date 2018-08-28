@@ -9,6 +9,8 @@ namespace Engine
 		class INTERFACES_EXPORT LuaState
 		{
 		public:
+			static LuaState &getSingleton();
+
 			LuaState();
 			virtual ~LuaState();
 

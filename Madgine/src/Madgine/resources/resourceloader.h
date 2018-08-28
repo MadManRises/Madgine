@@ -1,6 +1,5 @@
 #pragma once
 
-#include "resourceloaderbase.h"
 #include "resource.h"
 #include "../uniquecomponent.h"
 #include "resourceloadercollector.h"

@@ -14,6 +14,10 @@
 #include "../core/framelistener.h"
 #include "../scripting/types/globalapicomponent.h"
 
+#include "../uniquecomponentcollectorinstance.h"
+
+#include "scenecomponentset.h"
+
 namespace Engine
 {
 	namespace Scene
@@ -88,7 +92,7 @@ namespace Engine
 			App::Application &mApp;
 			size_t mItemCount;
 
-			SceneComponentCollector mSceneComponents;
+			SceneComponentCollectorInstance mSceneComponents;
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;

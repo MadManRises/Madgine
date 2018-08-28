@@ -70,11 +70,11 @@ namespace Engine
 				return mState;
 			}
 
-			ScriptParser::ScriptParser(LuaState &state) :
+			ScriptParser::ScriptParser() :
 				mStream(nullptr),
 				mBuffer(nullptr),
 				mChunk(false),
-			mState(state)
+			mState(LuaState::getSingleton())
 			{
 			}
 

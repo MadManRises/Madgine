@@ -12,7 +12,7 @@ set (CMAKE_AUTOMOC_MOC_OPTIONS "-bmaditormodellib.h")
 
 
 set (sources "")
-FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodellib.cpp maditormodellib.h maditor.cpp maditor.h maditorlog.cpp maditorlog.h tablemodel.cpp tablemodel.h treeitem.cpp treeitem.h treemodel.cpp treemodel.h treesorter.cpp treesorter.h)
+FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodellib.h maditor.cpp maditor.h maditorlog.cpp maditorlog.h tablemodel.cpp tablemodel.h treeitem.cpp treeitem.h treemodel.cpp treemodel.h treesorter.cpp treesorter.h)
 	FolderSources(sources "" addons addon.cpp addon.h)
 	FolderSources(sources "" application applicationlauncher.cpp applicationlauncher.h embeddedlauncher.cpp embeddedlauncher.h inputwrapper.cpp inputwrapper.h logreceiver.cpp logreceiver.h moduleloader.cpp moduleloader.h ogrewindow.cpp ogrewindow.h profilermodel.cpp profilermodel.h standalonelauncher.cpp standalonelauncher.h statsmodel.cpp statsmodel.h tableunit.cpp tableunit.h treeunit.cpp treeunit.h utilmodel.cpp utilmodel.h)
 		FolderSources(sources application inspector inspector.cpp inspector.h scopewrapper.cpp scopewrapper.h)
@@ -25,7 +25,7 @@ FolderSources(sources "" "" dialogmanager.h maditormodelforward.h maditormodelli
 
 add_library(Maditor_Model SHARED ${sources})
 
-add_precompiled_header(Maditor_Model maditormodellib.h FORCEINCLUDE SOURCE_CXX maditormodellib.cpp)
+add_precompiled_header(Maditor_Model maditormodellib.h FORCEINCLUDE)
 
 target_link_libraries(Maditor_Model PUBLIC Maditor_Shared Qt5::Xml Qt5::Gui Qt5::Widgets ${QSCINTILLA2_LIBRARY})
 

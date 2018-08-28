@@ -96,7 +96,7 @@ namespace Engine
 		bool MyGUISystem::init()
 		{
 
-			for (const std::experimental::filesystem::path &p : app().root().resources().folders()) {
+			for (const std::experimental::filesystem::path &p : Resources::ResourceManager::getSingleton().folders()) {
 				Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
 					p.generic_string(), "FileSystem", "General");
 			}

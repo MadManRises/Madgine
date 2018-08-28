@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../observable.h"
-#include "../serializehelper.h"
+#include "tupleserialize.h"
 #include "../streams/bufferedstream.h"
+#include "../../generic/tupleunpacker.h"
 
 namespace Engine
 {
@@ -38,7 +39,7 @@ namespace Engine
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 					in >> args;
-					TupleUnpacker<const std::set<ParticipantId> &>::call(this, &ActionImpl::call, {}, std::move(args));
+					TupleUnpacker::call(this, &ActionImpl::call, std::tuple_cat(std::make_tuple(std::set<ParticipantId>{}), std::move(args)));
 				}
 
 				void readRequest(BufferedInOutStream& in) override
@@ -47,7 +48,7 @@ namespace Engine
 					{
 						std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 						in >> args;
-						TupleUnpacker<ParticipantId, const std::set<ParticipantId> &>::call(this, &ActionImpl::tryCall, in.id(), {}, args);
+						TupleUnpacker::call(this, &ActionImpl::tryCall, std::tuple_cat(std::make_tuple(in.id(), std::set<ParticipantId>{}), args));
 					}
 				}
 

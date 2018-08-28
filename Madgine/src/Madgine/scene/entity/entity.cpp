@@ -121,9 +121,16 @@ namespace Engine
 				return mComponents.contains(name);
 			}
 
-			void Entity::addComponent(const std::string& name, const Scripting::LuaTable& table)
+			EntityComponentBase *Entity::addComponent(const std::string& name, const Scripting::LuaTable& table)
 			{
-				addComponentImpl(EntityComponentCollector::createComponent(*this, name, table));
+				auto it = mComponents.find(name);
+				if (it != mComponents.end())
+				{
+					return it->get();
+				}
+				else {
+					return mComponents.emplace(EntityComponentCollector::createComponent(*this, name, table)).first->get();
+				}
 			}
 
 			void Entity::removeComponent(const std::string& name)
@@ -139,18 +146,7 @@ namespace Engine
 			std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string& name)
 			{
 				return make_tuple(EntityComponentCollector::createComponent(*this, name));
-			}
-
-			EntityComponentBase* Entity::addComponentImpl(std::unique_ptr<EntityComponentBase>&& component)
-			{
-				if (mComponents.find(component) != mComponents.end())
-					throw ComponentException(Database::Exceptions::doubleComponent(component->key()));
-				if (&component->getEntity() != this)
-					throw ComponentException(Database::Exceptions::corruptData);
-				return mComponents.emplace(std::forward<std::unique_ptr<EntityComponentBase>>(component)).first->get();
-			}
-
-			
+			}			
 
 
 			void Entity::remove()

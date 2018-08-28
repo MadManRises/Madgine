@@ -10,6 +10,8 @@
 
 #include "../core/framelistener.h"
 
+#include "../uniquecomponentcollectorinstance.h"
+
 namespace Engine
 {
 	namespace App
@@ -42,7 +44,7 @@ namespace Engine
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(Core::Root &root);
+			Application();
 			
 			/**
 			 * \brief Deletes all objects created by the Application.
@@ -118,11 +120,6 @@ namespace Engine
 
 			Util::Log &log();
 
-			Core::Root &root();
-			const Plugins::PluginManager &pluginMgr();
-			Resources::ResourceManager &resources();
-
-
 			/**
 			* \brief Adds a FrameListener to the application.
 			* \param listener the FrameListener to be added.
@@ -146,9 +143,7 @@ namespace Engine
 
 		private:
 
-			Core::Root &mRoot;
-
-			Scripting::GlobalAPICollector mGlobalAPIs;
+			Scripting::GlobalAPICollectorInstance mGlobalAPIs;
 			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Util::StandardLog> mLog;
@@ -156,7 +151,6 @@ namespace Engine
 			std::unique_ptr<Core::FrameLoop> mLoop;			
 
 			const AppSettings *mSettings;
-
 			
 		};
 	}
