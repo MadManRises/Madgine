@@ -12,7 +12,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 CMAKE_POLICY(PUSH)
 include(FindPkgMacros)
-include(PreprocessorUtils)
+#include(PreprocessorUtils)
 
 set (MYGUISDK "${Workspace}" CACHE PATH "Path to MyGUI-SDK")
 
@@ -46,7 +46,7 @@ IF (WIN32) #Windows
 
     #SET(MYGUISDK $ENV{MYGUI_HOME})
     IF (MYGUISDK)
-        findpkg_begin ( "MYGUI" )
+        #findpkg_begin ( "MYGUI" )
         MESSAGE(STATUS "Using MyGUI in MyGUI SDK")
         STRING(REGEX REPLACE "[\\]" "/" _MYGUISDK "${MYGUISDK}" )
 
@@ -67,7 +67,7 @@ IF (WIN32) #Windows
         else ( MINGW )
             set(LIB_PREFIX "")
             set(LIB_EXT ".lib")
-            set(LIB_EXT "")
+            set(LIB_EXT2 "")
         endif ( MINGW )
 
         
@@ -134,12 +134,12 @@ IF (NOT WIN32) # This does not work on Windows for paths with spaces in them
 	SEPARATE_ARGUMENTS(MYGUI_LIBRARIES)
 ENDIF (NOT WIN32)
 
+
 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 SET(MYGUI_INCLUDE_DIRS ${MYGUI_INCLUDE_DIRS} CACHE PATH "")
 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
 SET(MYGUI_LIB_DIR ${MYGUI_LIB_DIR} CACHE PATH "")
-
 
 
 IF (NOT APPLE OR NOT MYGUI_STATIC) # we need explicit freetype libs only on OS X for static build, for other cases just make it TRUE
@@ -159,10 +159,10 @@ IF (MYGUI_FOUND)
 
     find_file(MYGUI_PREQUEST_FILE NAMES MyGUI_Prerequest.h PATHS ${MYGUI_INCLUDE_DIRS}/MYGUI)
     file(READ ${MYGUI_PREQUEST_FILE} MYGUI_TEMP_VERSION_CONTENT)
-    get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MAJOR MYGUI_VERSION_MAJOR)
-    get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MINOR MYGUI_VERSION_MINOR)
-    get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_PATCH MYGUI_VERSION_PATCH)
-    set(MYGUI_VERSION "${MYGUI_VERSION_MAJOR}.${MYGUI_VERSION_MINOR}.${MYGUI_VERSION_PATCH}")
+    #get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MAJOR MYGUI_VERSION_MAJOR)
+    #get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_MINOR MYGUI_VERSION_MINOR)
+    #get_preprocessor_entry(MYGUI_TEMP_VERSION_CONTENT MYGUI_VERSION_PATCH MYGUI_VERSION_PATCH)
+    #set(MYGUI_VERSION "${MYGUI_VERSION_MAJOR}.${MYGUI_VERSION_MINOR}.${MYGUI_VERSION_PATCH}")
 
     IF (NOT MYGUI_FIND_QUIETLY)
         MESSAGE(STATUS "MyGUI version: ${MYGUI_VERSION}")

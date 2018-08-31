@@ -1,6 +1,6 @@
 #pragma once
 
-#include <OIS/OIS.h>
+#include "OIS.h"
 #include <Madgine/input/inputhandler.h>
 
 namespace Engine
