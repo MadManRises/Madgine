@@ -37,7 +37,7 @@ namespace Maditor
 			if (!mNetwork.startServer()) {
 				return Shared::FAILED_START_SERVER;
 			}
-			if (!mNetwork.acceptConnection(std::chrono::milliseconds{ 2000 })) {
+			if (!mNetwork.acceptConnection(2000ms)) {
 				mNetwork.close();
 				return Shared::MADITOR_CONNECTION_TIMEOUT;
 			}

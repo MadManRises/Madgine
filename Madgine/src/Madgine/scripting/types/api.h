@@ -36,7 +36,7 @@ namespace Engine
 			}
 		};
 
-		template <class T, class R>
+		template <class R, class T>
 		struct FunctionMapperBase
 		{
 			template <class... _Ty>
@@ -119,7 +119,7 @@ namespace Engine
 
 		};
 
-		template <auto _f, class T, class R, class... Ty>
+		template <auto _f, class R, class T, class... Ty>
 		class FunctionMapperImpl
 		{
 		public:
@@ -128,12 +128,12 @@ namespace Engine
 
 			static ValueType call(T* t, const ArgumentList& args)
 			{
-				return ValueType(FunctionMapperBase<T, R>::callImpl(_f, t, args));
+				return ValueType(FunctionMapperBase<R, T>::callImpl(_f, t, args));
 			}
 		};
 
 		template <auto _f, class T, class... Ty>
-		class FunctionMapperImpl<_f, T, void, Ty...>
+		class FunctionMapperImpl<_f, void, T, Ty...>
 		{
 		public:
 
@@ -141,7 +141,7 @@ namespace Engine
 
 			static ValueType call(T* t, const ArgumentList& args)
 			{
-				FunctionMapperBase<T, void>::callImpl(_f, t, args);
+				FunctionMapperBase<void, T>::callImpl(_f, t, args);
 				return ValueType();
 			}
 		};

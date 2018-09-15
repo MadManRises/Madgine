@@ -173,7 +173,7 @@ namespace Engine
 
 		std::string SceneManager::generateUniqueName()
 		{
-			return std::string("Madgine_AutoGen_Name_") + std::to_string(++mItemCount);
+			return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
 		}
 
 

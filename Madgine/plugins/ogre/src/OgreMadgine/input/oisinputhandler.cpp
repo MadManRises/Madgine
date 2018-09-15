@@ -17,10 +17,10 @@ namespace Engine
 
 			window->getCustomAttribute("WINDOW", &windowHnd);
 			windowHndStr << windowHnd;
-			pl.insert(make_pair(std::string("WINDOW"), windowHndStr.str()));
+			pl.insert(make_pair("WINDOW"s, windowHndStr.str()));
 
-			/*    pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND")));
-			pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));*/
+			/*    pl.insert(std::make_pair("w32_mouse"s, "DISCL_FOREGROUND"s));
+			pl.insert(std::make_pair("w32_mouse"s, "DISCL_NONEXCLUSIVE"s));*/
 
 			mInputManager = OIS::InputManager::createInputSystem(pl);
 

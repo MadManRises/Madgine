@@ -47,12 +47,12 @@ void AppStatsWidget::setFPS(float fps)
 	ui->FPSValue->setText(fps == 0.0f ? "-" : QLocale().toString(fps));
 }
 
-void AppStatsWidget::setMemUsage(int mem)
+void AppStatsWidget::setMemUsage(size_t mem)
 {
 	ui->MemUsageValue->setText(mem == 0 ? "-" : QLocale().toString(mem / 1024));
 }
 
-void AppStatsWidget::setOgreMem(int mem)
+void AppStatsWidget::setOgreMem(size_t mem)
 {
 	ui->OgreMemoryValue->setText(mem == 0 ? "-" : QLocale().toString(mem / 1024));
 }

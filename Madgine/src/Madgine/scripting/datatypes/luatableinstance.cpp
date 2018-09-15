@@ -146,7 +146,7 @@ namespace Engine
 					{
 						lua_pop(mState, 1);
 					}
-					throw ScriptingException(std::string("Runtime Error: ") + msg);
+					throw ScriptingException("Runtime Error: "s + msg);
 				}
 			case LUA_ERRMEM:
 				throw ScriptingException("Lua Out-Of-Memory!");

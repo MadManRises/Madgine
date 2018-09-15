@@ -36,7 +36,7 @@ namespace Engine
 				return "The connection was refused by the host";
 				break;
 			case Serialize::UNKNOWN_ERROR: 
-				return std::string("Unknown Error (possibly native error code: ") + std::to_string(getAPIError()) + ")";
+				return "Unknown Error (possibly native error code: "s + std::to_string(getAPIError()) + ")";
 				break;
 			default: 
 				throw 0;

@@ -15,6 +15,10 @@ namespace Engine
 
 			Plugin &getPlugin(const std::string &name);
 
+			template <class T>
+			T *getUniqueSymbol(const std::string &name) const {
+				return static_cast<T*>(getUniqueSymbol(name));
+			}
 			void *getUniqueSymbol(const std::string &name) const;
 
 			std::map<std::string, Plugin>::const_iterator begin() const;

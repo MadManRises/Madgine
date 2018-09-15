@@ -53,7 +53,7 @@ namespace Engine
 			}
 			else
 			{
-				ImGui::Text((std::string("Unsupported Tag-Type: ") + element->Name()).c_str());
+				ImGui::Text(("Unsupported Tag-Type: "s + element->Name()).c_str());
 			}
 		}
 
@@ -77,13 +77,13 @@ namespace Engine
 				drawn.insert(name);
 				if (!element->Attribute("hide"))
 				{
-					mInspector.drawValue(element, scope, value);
+					mInspector.drawValue(element, scope, *value);
 				}
 			}else
 			{
 				if (!element->Attribute("optional"))
 				{
-					ImGui::Text((std::string("Required field not found: ") + name).c_str());
+					ImGui::Text(("Required field not found: "s + name).c_str());
 				}
 			}
 		}
@@ -122,7 +122,7 @@ namespace Engine
 								rule = child;
 							}
 						}
-						mInspector.drawValue(rule, scope, it);
+						mInspector.drawValue(rule, scope, *it);
 					}
 					drawn.insert(it->key());
 				}
@@ -141,7 +141,7 @@ namespace Engine
 				layout->draw(scope, drawn);
 			}else
 			{
-				ImGui::Text((std::string("Layout not found: ") + element->Attribute("name")).c_str());
+				ImGui::Text(("Layout not found: "s + element->Attribute("name")).c_str());
 			}
 		}
 
@@ -201,19 +201,19 @@ namespace Engine
 			for (std::unique_ptr<KeyValueIterator> it = scope->iterator(); !it->ended(); ++(*it))
 			{
 				if (drawn.find(it->key()) == drawn.end()) {
-					drawValue(nullptr, scope, it);
+					drawValue(nullptr, scope, *it);
 					drawn.insert(it->key());
 				}
 			}
 		}
 
-		void Inspector::drawValue(tinyxml2::XMLElement* element, Scripting::ScopeBase *parent, const std::unique_ptr<KeyValueIterator> &it)
+		void Inspector::drawValue(tinyxml2::XMLElement* element, Scripting::ScopeBase *parent, const KeyValueIterator &it)
 		{
 			bool showName = !element || !element->Attribute("noname");
-			std::string id = (showName ? std::string() : std::string("##")) + it->key();
-			std::string name = showName ? it->key() : std::string();
-			ValueType value = it->value();
-			bool editable = (it->flags() & Engine::IsEditable) == Engine::IsEditable;
+			std::string id = (showName ? std::string() : "##"s) + it.key();
+			std::string name = showName ? it.key() : std::string();
+			ValueType value = it.value();
+			bool editable = (it.flags() & Engine::IsEditable) == Engine::IsEditable;
 
 			if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -303,14 +303,14 @@ namespace Engine
 				break;
 			default:
 				ImGui::Text(name.c_str()); ImGui::SameLine();
-				ImGui::Text((std::string("Unsupported ValueType: ") + value.getTypeString()).c_str());
+				ImGui::Text(("Unsupported ValueType: "s + value.getTypeString()).c_str());
 			}
 			
 			if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
 				ImGui::PopItemFlag();
 
-			if (value != it->value())
-				parent->set(it->key(), value);
+			if (value != it.value())
+				parent->set(it.key(), value);
 		}
 
 		void Inspector::draw(Scripting::ScopeBase* scope, const char *layoutName)

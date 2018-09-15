@@ -46,7 +46,7 @@ namespace Maditor {
 						(this->*it->second)(el, scope, drawn);
 				}else
 				{
-					ImGui::Text((std::string("Unsupported Tag-Type: ") + el.tagName().toStdString()).c_str());
+					ImGui::Text(("Unsupported Tag-Type: "s + el.tagName().toLatin1().data()).c_str());
 				}
 
 				
@@ -76,7 +76,7 @@ namespace Maditor {
 
 		void InspectorLayout::drawSingleElement(QDomElement element, Model::ScopeWrapperItem* scope, std::set<std::string>& drawn)
 		{
-			std::string name = element.attribute("name").toStdString();
+			std::string name = element.attribute("name").toLatin1().data();
 			auto it = scope->values().find(name);
 			if (it != scope->values().end())
 			{
@@ -87,7 +87,7 @@ namespace Maditor {
 			{
 				if (element.attribute("optional", "<not-found>") == "<not-found>")
 				{
-					ImGui::Text((std::string("Required field not found: ") + name).c_str());
+					ImGui::Text(("Required field not found: "s + name).c_str());
 				}
 			}
 		}
@@ -95,7 +95,7 @@ namespace Maditor {
 		void InspectorLayout::drawElementList(QDomElement element, Model::ScopeWrapperItem* scope,
 			std::set<std::string>& drawn)
 		{
-			std::string name = element.attribute("name").toStdString();
+			std::string name = element.attribute("name").toLatin1().data();
 			bool draw = name.empty() || ImGui::TreeNode(name.c_str());
 			for (std::pair<const std::string, Model::ValueItem> &v : scope->values())
 			{
@@ -121,7 +121,7 @@ namespace Maditor {
 						for (int i = 0; i < children.count(); ++i)
 						{
 							QDomElement el = children.at(i).toElement();
-							std::string name = el.attribute("name").toStdString();
+							std::string name = el.attribute("name").toLatin1().data();
 							if (name.empty() || name == v.first)
 							{
 								rule = el;
@@ -147,14 +147,14 @@ namespace Maditor {
 			}
 			else
 			{
-				ImGui::Text((QString("Layout not found: ") + element.attribute("name")).toStdString().c_str());
+				ImGui::Text((QString("Layout not found: ") + element.attribute("name")).toLatin1().data());
 			}
 		}
 
 		void InspectorLayout::drawConstantString(QDomElement element, Model::ScopeWrapperItem* scope,
 			std::set<std::string>& drawn)
 		{
-			ImGui::Text(element.text().toStdString().c_str());
+			ImGui::Text(element.text().toLatin1().data());
 			if (element.attribute("nobreak", "<not-found>") != "<not-found>")
 				ImGui::SameLine();
 		}
@@ -162,7 +162,7 @@ namespace Maditor {
 		void InspectorLayoutData::drawValue(QDomElement element, Model::ValueItem *item)
 		{
 			bool showName = element.attribute("noname", "<not-found>") == "<not-found>";
-			std::string id = (showName ? std::string() : std::string("##")) + item->name();
+			std::string id = (showName ? std::string() : "##"s) + item->name();
 			std::string name = showName ? item->name() : std::string();
 			Engine::ValueType value = item->value();
 			bool editable = (item->flags() & Engine::IsEditable) == Engine::IsEditable;
@@ -260,7 +260,7 @@ namespace Maditor {
 			}
 			default:
 				ImGui::Text(name.c_str()); ImGui::SameLine(); 
-				ImGui::Text((std::string("Unsupported ValueType: ") + value.getTypeString()).c_str());
+				ImGui::Text(("Unsupported ValueType: "s + value.getTypeString()).c_str());
 			}
 			if (element.attribute("nobreak", "<not-found>") != "<not-found>")
 				ImGui::SameLine();
@@ -323,7 +323,7 @@ namespace Maditor {
 				layout = getLayout(type);
 				if (!layout)			
 				{
-					ImGui::Text((QString("Layout not found: ") + type).toStdString().c_str());
+					ImGui::Text((QString("Layout not found: ") + type).toLatin1().data());
 				}
 			}
 			if (layout)

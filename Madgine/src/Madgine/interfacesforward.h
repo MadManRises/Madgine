@@ -130,6 +130,10 @@ namespace Engine
 		class ConnectionManager;
 	}
 
+	namespace Core {
+		struct MemoryTracker;
+	}
+
 	class Vector2;
 	class Vector3;
 

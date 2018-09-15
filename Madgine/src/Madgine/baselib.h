@@ -16,5 +16,9 @@
 #include <set>
 #include <queue>
 
+#include <chrono>
+
+using namespace std::literals::chrono_literals;
+
 
 /// @endcond

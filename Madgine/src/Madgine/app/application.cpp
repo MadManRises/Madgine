@@ -54,7 +54,7 @@ namespace Engine
 			Util::UtilMethods::setup(mLog.get());
 
 			if (!loop) {
-				auto f = reinterpret_cast<Core::FrameLoop*(*)()>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("frameloop"));
+				auto f = Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol<Core::FrameLoop*()>("frameloop");
 				if (!f)
 					throw 0;
 				loop = std::unique_ptr<Core::FrameLoop>(f());

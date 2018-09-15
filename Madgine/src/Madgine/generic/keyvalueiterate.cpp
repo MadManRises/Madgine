@@ -71,17 +71,17 @@ namespace Engine
 		validate();
 	}
 
-	std::string KeyValueMapListIterator::key()
+	std::string KeyValueMapListIterator::key() const
 	{
 		return mIterators.at(mIndex)->key();
 	}
 
-	ValueType KeyValueMapListIterator::value()
+	ValueType KeyValueMapListIterator::value() const
 	{
 		return mIterators.at(mIndex)->value();
 	}
 
-	KeyValueValueFlags KeyValueMapListIterator::flags()
+	KeyValueValueFlags KeyValueMapListIterator::flags() const
 	{
 		return mIterators.at(mIndex)->flags();
 	}
@@ -92,7 +92,7 @@ namespace Engine
 		validate();
 	}
 
-	bool KeyValueMapListIterator::ended()
+	bool KeyValueMapListIterator::ended() const
 	{
 		return mIndex == mIterators.size();
 	}

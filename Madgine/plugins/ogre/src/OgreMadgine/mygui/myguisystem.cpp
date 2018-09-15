@@ -14,6 +14,8 @@
 
 #include "myguitoplevelwindow.h"
 
+#include <Bites/OgreBitesConfigDialog.h>
+
 
 
 extern "C" DLL_EXPORT Engine::GUI::GUISystem * guisystem(Engine::App::ClientApplication &app) { return new Engine::GUI::MyGUISystem(app); }
@@ -38,7 +40,7 @@ namespace Engine
 			if (!mRoot->restoreConfig())
 			{
 				// if no existing config, or could not restore it, show the config dialog 
-				if (!mRoot->showConfigDialog(nullptr))
+				if (!mRoot->showConfigDialog(OgreBites::getNativeConfigDialog()))
 				{
 					throw 0;
 				}

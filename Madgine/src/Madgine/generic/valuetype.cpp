@@ -23,7 +23,7 @@ namespace Engine
 		case Type::BoolValue:
 			return std::get<bool>(mUnion) ? "true" : "false";
 		case Type::StringValue:
-			return std::string("\"") + std::get<std::string>(mUnion) + "\"";
+			return "\""s + std::get<std::string>(mUnion) + "\"";
 		case Type::IntValue:
 			return std::to_string(std::get<int>(mUnion));
 		case Type::UIntValue:
@@ -37,12 +37,12 @@ namespace Engine
 		case Type::FloatValue:
 			return std::to_string(std::get<float>(mUnion));
 		case Type::Vector2Value:
-			return std::string("[") + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y);
+			return "["s + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y);
 		case Type::Vector3Value:
-			return std::string("[") + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::
+			return "["s + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::
 				to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
 		case Type::Vector4Value:
-			return std::string("[") +
+			return "["s +
 				std::to_string(std::get<std::array<float, 4>>(mUnion)[0]) + ", " +
 				std::to_string(std::get<std::array<float, 4>>(mUnion)[1]) + ", " +
 				std::to_string(std::get<std::array<float, 4>>(mUnion)[2]) + ", " +

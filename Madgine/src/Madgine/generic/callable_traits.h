@@ -3,81 +3,65 @@
 namespace Engine
 {
 
-	template <class R, class T, class... _Ty>
-	constexpr size_t argumentsCount(R(T::*)(_Ty ...) const)
-	{
-		return sizeof...(_Ty);
-	}
 
-	template <class R, class T, class... _Ty>
-	constexpr size_t argumentsCount(R(T::*)(_Ty ...))
-	{
-		return sizeof...(_Ty);
-	}
-
-
-
-	namespace __generic__impl__
+	template <typename F, typename R, typename T, typename... _Ty>
+	struct CallableType
 	{
 
-		template <class T, class R, class... _Ty>
-		struct MemberFunctionTypeCapture
-		{
-		public:
-			template <template <auto, class, class, class...> class C, auto f, class... Args>
-			using instance = C<f, Args..., T, R, _Ty...>;
+		typedef F type;
+		typedef R return_type;
+		typedef T class_type;
+		typedef std::tuple<_Ty...> argument_types;
+		static constexpr size_t argument_count = sizeof...(_Ty);
+
+		template <template <typename, typename, typename...> typename C, typename... Args>
+		struct instance {
+			using type = C<Args..., R, T, _Ty...>;
 		};
-
-		template <class T, class R, class... _Ty>
-		MemberFunctionTypeCapture<T, R, _Ty...> memberFunctionTypeDeducer(R(T::*f)(_Ty ...));
-
-		template <class T, class R, class... _Ty>
-		MemberFunctionTypeCapture<const T, R, _Ty...> memberFunctionTypeDeducer(R(T::*f)(_Ty ...) const);
-
-		template <auto f>
-		using MemberFunctionHelper = decltype(memberFunctionTypeDeducer(f));
-	}
-
-
-
-	template <template <auto, class, class, class...> class C, auto f, class... Args>
-	struct MemberFunctionCapture
-	{
-		typedef typename __generic__impl__::MemberFunctionHelper<f>::template instance<C, f, Args...> type;
-	};
-
-
-	template <class R, class... _Ty>
-	struct CallableTypeCapture
-	{
-	public:
-		template <template <typename, class, class...> class C, typename F, class... Args>
-		using instance = C<F, Args..., R, _Ty...>;
-
-		typedef R Return;
 	};
 
 	namespace __generic__impl__ {
-		template <class T, class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...));
+		template <typename R, typename T, typename... _Ty>
+		CallableType<R(T::*)(_Ty ...), R, T, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...));
 
-		template <class T, class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...) const);
+		template <typename R, typename T, typename... _Ty>
+		CallableType<R(T::*)(_Ty ...) const, R, const T, _Ty...> callableTypeDeducer(R(T::*f)(_Ty ...) const);
 
-		template <class R, class... _Ty>
-		CallableTypeCapture<R, _Ty...> callableTypeDeducer(R(*f)(_Ty ...));
+		template <typename R, typename... _Ty>
+		CallableType<R(*)(_Ty ...), R, void, _Ty...> callableTypeDeducer(R(*f)(_Ty ...));
 
-		template <class F, class R = decltype(callableTypeDeducer(&F::operator()))>
+		template <typename F, typename R = decltype(callableTypeDeducer(&F::operator()))>
 		R callableTypeDeducer(const F&);
-
-
-		template <typename F>
-		using CallableHelper = decltype(callableTypeDeducer(std::declval<F>()));
 	}
 
-	template <template <typename F, class, class...> class C, class F, class... Args>
-	struct CallableDeduce
-	{
-		typedef typename __generic__impl__::CallableHelper<F>::template instance<C, F, Args...> type;
+	template <typename F>
+	using CallableTraits = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
+
+	template <typename T>
+	struct Wrap {
+		using type = T;
 	};
+
+	template <template <auto, typename...> typename C, auto f>
+	struct Partial {
+		template <typename... Args>
+		struct apply {
+			using type = C<f, Args...>;
+		};
+	};	
+
+	template <auto f>
+	struct Callable {
+		using traits = CallableTraits<decltype(f)>;
+		static constexpr typename traits::type value = f;
+
+
+		template <template <auto, typename, typename, typename...> typename C, typename... Args>
+		struct instance {
+			using type = typename traits::template instance<Partial<C, f>::template apply, Args...>::type;
+		};
+	};
+
+	template <template <auto, typename, typename, typename...> typename C, auto f, typename... Args>
+	using MemberFunctionCapture = typename Callable<f>::template instance<C, Args...>::type;
 }

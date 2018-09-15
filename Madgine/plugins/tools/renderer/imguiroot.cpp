@@ -57,7 +57,7 @@ namespace Engine {
 				if (ImGui::BeginMenu("Tools")) {
 					for (const std::unique_ptr<ToolBase> &tool : mCollector)
 					{
-						static bool visible = tool->isVisible();
+						bool visible = tool->isVisible();
 						ImGui::MenuItem(tool->key(), "", &visible);
 						tool->setVisible(visible);
 					}

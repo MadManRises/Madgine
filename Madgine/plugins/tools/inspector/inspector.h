@@ -42,7 +42,7 @@ namespace Engine
 			virtual void render() override;
 
 			void drawRemainingMembers(Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawValue(tinyxml2::XMLElement *element, Scripting::ScopeBase *parent, const std::unique_ptr<KeyValueIterator> &it);
+			void drawValue(tinyxml2::XMLElement *element, Scripting::ScopeBase *parent, const KeyValueIterator &it);
 
 			InspectorLayout * getLayout(const std::string& name);
 

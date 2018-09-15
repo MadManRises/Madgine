@@ -15,7 +15,7 @@ namespace Engine
 	{
 		if (mState != ObjectState::UNINITIALIZED)
 		{
-			LOG_WARNING(std::string("Deleting still initialized Object: ") + mName);
+			LOG_WARNING("Deleting still initialized Object: "s + mName);
 		}
 	}
 

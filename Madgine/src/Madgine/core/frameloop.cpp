@@ -33,7 +33,7 @@ namespace Engine
 
 		bool FrameLoop::singleFrame()
 		{
-			return sendFrameStarted(std::chrono::microseconds{0}) && sendFrameRenderingQueued(std::chrono::microseconds{0}) && sendFrameEnded(std::chrono::microseconds{0});
+			return sendFrameStarted(0us) && sendFrameRenderingQueued(0us) && sendFrameEnded(0us);
 		}
 
 		void FrameLoop::addFrameListener(FrameListener* listener)

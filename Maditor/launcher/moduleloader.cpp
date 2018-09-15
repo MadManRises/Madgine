@@ -123,7 +123,7 @@ namespace Maditor {
 
 			auto it = std::find_if(mInstances.begin(), mInstances.end(), [&](const ModuleLauncherInstance &mod) {return mod.name() == moduleName; });
 			if (it != mInstances.end() && it->isLoaded()) {
-				void *symbol = it->getSymbol(std::string("create") + className);
+				void *symbol = it->getSymbol("create"s + className);
 				if (symbol) {
 					typedef Engine::Server::ServerBase *(*Factory)(const std::string &);
 					return (*reinterpret_cast<Factory>(symbol))(instanceName);

@@ -12,7 +12,7 @@ namespace Engine
 {
 	namespace SignalSlot
 	{
-		template <auto f, class T, class R, class... _Ty>
+		template <auto f, class R, class T, class... _Ty>
 		class SlotImpl
 		{
 		public:

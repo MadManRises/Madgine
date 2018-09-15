@@ -2,8 +2,6 @@
 #include "standardlog.h"
 
 #include <iostream>
-#include <ctime>
-#include <chrono>
 
 namespace Engine
 {

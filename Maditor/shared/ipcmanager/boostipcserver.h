@@ -4,6 +4,8 @@
 
 #include "boostipcconnection.h"
 
+using namespace std::literals::chrono_literals;
+
 namespace Maditor {
 	namespace Shared {
 
@@ -14,7 +16,7 @@ namespace Maditor {
 			BoostIPCServer(boost::interprocess::managed_shared_memory::segment_manager *mgr);
 
 			void enqueue(const SharedConnectionPtr &conn, std::chrono::milliseconds timeout);
-			SharedConnectionPtr poll(std::chrono::milliseconds timeout = {});
+			SharedConnectionPtr poll(std::chrono::milliseconds timeout = 0ms);
 
 		private:
 			SharedConnectionQueue mQueue;

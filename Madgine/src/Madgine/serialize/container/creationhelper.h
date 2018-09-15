@@ -39,7 +39,7 @@ namespace Engine
 		};
 
 		namespace __creationhelper__impl__{
-			template <typename F, class R, class... _Ty>
+			template <class R, class T, class... _Ty>
 			class _CustomCreator
 			{
 			public:
@@ -64,10 +64,10 @@ namespace Engine
 		}
 
 		template <typename F>
-		using CustomCreator = typename CallableDeduce<__creationhelper__impl__::_CustomCreator, F>::type;
+		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;
 
 		namespace __creationhelper__impl__{
-			template <auto f, class T, class R, class... _Ty>
+			template <auto f, class R, class T, class... _Ty>
 			class _ParentCreator
 			{
 			public:

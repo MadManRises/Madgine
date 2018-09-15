@@ -10,6 +10,7 @@ find_package(Threads REQUIRED)
 set(sources)
 FolderSources(sources "" "../../src")
 FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
+	FolderSources(sources Madgine core memory.cpp memory.h)
 	FolderSources(sources Madgine database exceptionmessages.h message.h messages.h)
 	FolderSources(sources Madgine generic keyvalue.h keyvalueiterate.cpp keyvalueiterate.h singleton.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources Madgine math bounds.cpp bounds.h matrix3.cpp matrix3.h vector3.cpp vector3.h vector2.cpp vector2.h)
@@ -28,6 +29,10 @@ FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
 FolderSources(sources "" vstools Madgine.natvis)
 
 add_library(Interfaces SHARED ${sources})
+
+target_sources(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../src>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/Madgine/include>/Madgine/core/memoryinstantiation.cpp)
+
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../src/Madgine/core/memoryinstantiation.cpp DESTINATION Madgine/include/Madgine/core)
 
 add_precompiled_header(Interfaces ../../src/Madgine/interfaceslib.h FORCEINCLUDE)
 

@@ -30,17 +30,20 @@
 #endif
 
 #pragma warning(disable : 4251)
+#pragma warning(disable : 4275)
 #pragma warning(disable : 4661)
-
 
 #include <cstring>
 #include <string>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <array>
 #include <vector>
 #include <functional>
 #include <memory>
+#include <memory_resource>
+#include <stdlib.h>
 #include <sstream>
 #include <algorithm>
 #include <set>
@@ -55,6 +58,9 @@
 #include <experimental/filesystem>
 #include <type_traits>
 #include <optional>
+#include <mutex>
+#include <variant>
+#include <atomic>
 
 #include <math.h>
 
@@ -66,5 +72,7 @@
 #include "scripting/scriptingexception.h"
 #include "util/utilmethods.h"
 #include "database/exceptionmessages.h"
+
+using namespace std::literals::string_literals;
 
 /// @endcond

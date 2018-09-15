@@ -13,22 +13,22 @@ namespace Engine
 	{
 	public:
 		virtual ~KeyValueIterator() = default;
-		virtual std::string key() = 0;
-		virtual ValueType value() = 0;
-		virtual void operator++() = 0;
-		virtual bool ended() = 0;
-		virtual KeyValueValueFlags flags() = 0;
+		virtual std::string key() const = 0;
+		virtual ValueType value() const = 0;
+		virtual KeyValueValueFlags flags() const = 0;
+		virtual bool ended() const = 0;
+		virtual void operator++() = 0;				
 	};
 
 	class KeyValueRef
 	{
 	public:
 		virtual ~KeyValueRef() = default;
-		virtual std::shared_ptr<KeyValueIterator> iterator() = 0;
-		virtual std::shared_ptr<KeyValueIterator> find(const std::string &key) = 0;
-		virtual std::optional<ValueType> get(const std::string& key) = 0;
-		virtual bool set(const std::string &key, const ValueType &value) = 0;
-		virtual bool contains(const std::string& key) = 0;
+		virtual std::shared_ptr<KeyValueIterator> iterator() const = 0;
+		virtual std::shared_ptr<KeyValueIterator> find(const std::string &key) const = 0;
+		virtual std::optional<ValueType> get(const std::string& key) const = 0;
+		virtual bool contains(const std::string& key) const = 0;
+		virtual bool set(const std::string &key, const ValueType &value) = 0;		
 	};
 
 
@@ -73,17 +73,17 @@ namespace Engine
 		{
 		}
 
-		std::shared_ptr<KeyValueIterator> iterator() override
+		std::shared_ptr<KeyValueIterator> iterator() const override
 		{
 			return std::make_shared<Iterator>(mMap, mRef);
 		}
 
-		std::shared_ptr<KeyValueIterator> find(const std::string &key) override
+		std::shared_ptr<KeyValueIterator> find(const std::string &key) const override
 		{			
 			return std::make_shared<Iterator>(mMap, mRef, kvFind(mMap, key));
 		}
 
-		std::optional<ValueType> get(const std::string& key) override
+		std::optional<ValueType> get(const std::string& key) const override
 		{
 			auto it = kvFind(mMap, key);
 			if (it != mMap.end())
@@ -104,7 +104,7 @@ namespace Engine
 			return false;
 		}
 
-		bool contains(const std::string& key) override
+		bool contains(const std::string& key) const override
 		{
 			return kvFind(mMap, key) != mMap.end();
 		}
@@ -130,17 +130,17 @@ namespace Engine
 			}
 
 
-			std::string key() override
+			std::string key() const override
 			{
 				return kvKey(*mIt);
 			}
 
-			ValueType value() override
+			ValueType value() const override
 			{
 				return toValueType(mRef, kvValue(*mIt));
 			}
 
-			KeyValueValueFlags flags() override
+			KeyValueValueFlags flags() const override
 			{
 				return kvFlags(kvValue(*mIt));
 			}
@@ -150,7 +150,7 @@ namespace Engine
 				++mIt;
 			}
 
-			bool ended() override
+			bool ended() const override
 			{
 				return mIt == mMap.end();
 			}
@@ -176,12 +176,12 @@ namespace Engine
 		{
 		}
 
-		std::shared_ptr<KeyValueIterator> iterator() override
+		std::shared_ptr<KeyValueIterator> iterator() const override
 		{
 			return std::make_shared<Iterator>(mItem, mRef);
 		}
 
-		std::shared_ptr<KeyValueIterator> find(const std::string &key) override
+		std::shared_ptr<KeyValueIterator> find(const std::string &key) const override
 		{
 			if (kvKey(mItem) == key)
 				return std::make_shared<Iterator>(mItem, mRef);
@@ -189,7 +189,7 @@ namespace Engine
 				return std::make_shared<Iterator>(mItem);
 		}
 
-		std::optional<ValueType> get(const std::string& key) override
+		std::optional<ValueType> get(const std::string& key) const override
 		{
 			if (kvKey(mItem) == key)
 			{
@@ -208,7 +208,7 @@ namespace Engine
 			return false;
 		}
 
-		bool contains(const std::string& key) override
+		bool contains(const std::string& key) const override
 		{
 			return kvKey(mItem) == key;
 		}
@@ -232,17 +232,17 @@ namespace Engine
 				
 			}
 
-			std::string key() override
+			std::string key() const override
 			{
 				return kvKey(mItem);
 			}
 
-			ValueType value() override
+			ValueType value() const override
 			{
 				return toValueType(mRef, kvValue(mItem));
 			}
 
-			KeyValueValueFlags flags() override
+			KeyValueValueFlags flags() const override
 			{
 				return kvFlags(mItem);
 			}
@@ -252,7 +252,7 @@ namespace Engine
 				mEnded = true;
 			}
 
-			bool ended() override
+			bool ended() const override
 			{
 				return mEnded;
 			}
@@ -333,11 +333,13 @@ namespace Engine
 	public:
 		KeyValueMapListIterator(const KeyValueMapList& list);
 		KeyValueMapListIterator(std::vector<std::shared_ptr<KeyValueIterator>> &&elements = {});
-		std::string key() override;
-		ValueType value() override;
+		std::string key() const override;
+		ValueType value() const override;
+		KeyValueValueFlags flags() const override;
+		bool ended() const override;
 		void operator++() override;
-		bool ended() override;
-		KeyValueValueFlags flags() override;
+		
+		
 
 	private:
 		void validate();

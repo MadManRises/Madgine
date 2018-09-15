@@ -16,7 +16,7 @@ namespace Maditor {
 			//Watcher::OgreLogWatcher *CommandLine::sLog = 0;
 
 			std::pair<int, std::string> CommandLine::exec(std::string cmd) {
-				LOG(std::string("Executing Command: ") + cmd);
+				LOG("Executing Command: "s + cmd);
 
 #ifdef _WIN32
 				cmd += " 2>&1";

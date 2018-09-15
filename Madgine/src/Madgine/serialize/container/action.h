@@ -18,7 +18,7 @@ namespace Engine
 			};
 
 
-			template <auto f, class Config, class T, class R, class... _Ty>
+			template <auto f, class Config, class R, class T, class... _Ty>
 			class ActionImpl : public Observable
 			{
 			public:

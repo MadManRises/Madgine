@@ -94,7 +94,7 @@ InputManager* InputManager::createInputSystem(std::size_t windowhandle)
 	ParamList pl;
 	std::ostringstream wnd;
 	wnd << windowhandle;
-	pl.insert(std::make_pair(std::string("WINDOW"), wnd.str()));
+	pl.insert(std::make_pair("WINDOW"s, wnd.str()));
 
 	return createInputSystem(pl);
 }

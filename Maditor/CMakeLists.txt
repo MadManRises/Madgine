@@ -94,7 +94,9 @@ if(WIN32)
     # Run windeployqt if it can be found
     find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${QT_PATH} ENV QTDIR PATH_SUFFIXES bin)
     add_custom_command(TARGET Maditor POST_BUILD
-    COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin -xml)
+    COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin -xml
+	DEPENDS Maditor
+	)
 
 	install(DIRECTORY ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin DESTINATION . COMPONENT Maditor)
 

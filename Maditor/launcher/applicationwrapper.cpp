@@ -60,8 +60,6 @@ namespace Maditor
 
 			mHaveAppInfo = false;
 
-			using namespace std::literals::chrono_literals;
-
 			std::chrono::time_point<std::chrono::system_clock> end;
 
 			end = std::chrono::system_clock::now() + 20000ms; // this is the end point

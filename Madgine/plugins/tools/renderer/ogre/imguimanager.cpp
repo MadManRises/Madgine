@@ -187,7 +187,7 @@ void ImguiManager::createMaterial()
     mRenderable.mMaterial = MaterialManager::getSingleton().create(
         "imgui/material", ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME);
     Pass* mPass = mRenderable.mMaterial->getTechnique(0)->getPass(0);
-#ifndef OGRE_BUILD_COMPONENT_RTSHADERSYSTEM
+//#ifndef OGRE_BUILD_COMPONENT_RTSHADERSYSTEM
     static const char* vertexShaderSrcD3D11 =
     {
     "cbuffer vertexBuffer : register(b0) \n"
@@ -400,7 +400,7 @@ void ImguiManager::createMaterial()
     mPass->setFragmentProgram("imgui/FP");
     mPass->setVertexProgram("imgui/VP");
     mPass->getVertexProgramParameters()->setNamedAutoConstant("ProjectionMatrix", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-#endif
+//#endif
     mPass->setCullingMode(CULL_NONE);
     mPass->setDepthFunction(Ogre::CMPF_ALWAYS_PASS);
     mPass->setLightingEnabled(false);

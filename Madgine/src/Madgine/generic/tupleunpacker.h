@@ -45,14 +45,14 @@ namespace Engine
 		}
 
 		template <class F, class Tuple>
-		static typename __generic__impl__::template CallableHelper<F>::Return call(F& f, Tuple&& args)
+		static typename CallableTraits<F>::return_type call(F& f, Tuple&& args)
 		{
 			return unpack(f, std::forward<Tuple>(args),
-				std::make_index_sequence<argumentsCount(&F::operator())>());
+				std::make_index_sequence<CallableTraits<F>::argument_count>());
 		}
 
 		template <class F, size_t... S, class Tuple>
-		static typename __generic__impl__::template CallableHelper<F>::Return unpack(F& f, Tuple&& args, std::index_sequence<S...>)
+		static typename CallableTraits<F>::return_type unpack(F& f, Tuple&& args, std::index_sequence<S...>)
 		{
 			return f(std::get<S>(std::forward<Tuple>(args))...);
 		}

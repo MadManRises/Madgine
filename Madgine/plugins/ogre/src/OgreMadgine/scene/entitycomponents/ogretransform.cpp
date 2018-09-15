@@ -17,7 +17,7 @@ namespace Engine
 				const Ogre::Any& any =
 					node->getUserObjectBindings().getUserAny("entity");
 
-				return any.isEmpty() ? 0 : Ogre::any_cast<Entity *>(any);
+				return any.isEmpty() ? nullptr : Ogre::any_cast<Entity *>(any);
 			}
 
 			OgreTransform::OgreTransform(Entity& entity, const Scripting::LuaTable& table) :

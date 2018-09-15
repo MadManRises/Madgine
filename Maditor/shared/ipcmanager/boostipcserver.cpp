@@ -24,7 +24,7 @@ namespace Maditor {
 
 			std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
 
-			boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock = (timeout == std::chrono::milliseconds{} ?
+			boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock = (timeout == 0ms ?
 				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex>(mMutex, boost::posix_time::second_clock::local_time() + boost::posix_time::milliseconds(timeout.count())) :
 				boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex>(mMutex));
 

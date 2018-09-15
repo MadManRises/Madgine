@@ -56,7 +56,7 @@ namespace Maditor {
 				QString path = QString::fromStdString(Engine::Plugins::Plugin::runtimePath().generic_string() + "/../Maditor/templates/") + name;
 				QFile file(path);
 				if (!file.open(QFile::ReadOnly | QFile::Text)) {
-					throw std::invalid_argument((std::string("Could not open File: ") + path.toStdString()).c_str());
+					throw std::invalid_argument(("Could not open File: "s + path.toStdString()).c_str());
 				}
 				QTextStream stream(&file);
 				QString result = stream.readAll();

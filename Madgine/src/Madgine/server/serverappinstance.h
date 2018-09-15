@@ -13,7 +13,7 @@ namespace Engine
 			template <class T>
 			ServerAppInstance(T&& initCallback) :
 				mApplication(nullptr),
-				mName(std::string("thread_") + std::to_string(++sInstanceCounter)),
+				mName("thread_"s + std::to_string(++sInstanceCounter)),
 				mResult(0),
 				mThread(&ServerAppInstance::go<T>, this, std::forward<T>(initCallback))
 			{

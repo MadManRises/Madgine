@@ -116,9 +116,8 @@ namespace Engine
 
 				mShowBones = show;
 
-				for (std::vector<Ogre::Entity*>::iterator it = mBoneEntities.begin(); it < mBoneEntities.end(); ++it)
-				{
-					static_cast<Ogre::Entity*>(*it)->setVisible(show);
+				for (Ogre::Entity *e : mBoneEntities){
+					e->setVisible(show);
 				}
 			}
 

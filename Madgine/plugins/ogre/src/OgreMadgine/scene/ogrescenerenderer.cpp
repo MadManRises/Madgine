@@ -507,7 +507,7 @@ namespace Engine {
 
 				Ogre::Image img;
 				Ogre::LogManager::getSingletonPtr()->logMessage(
-					std::string("Loading Heightmap from file:") + mHeightmap);
+					"Loading Heightmap from file:"s + mHeightmap);
 				img.load(mHeightmap, "Heightmaps");
 
 				mTerrainGroup->defineTerrain(0, 0, &img);

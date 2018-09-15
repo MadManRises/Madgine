@@ -56,7 +56,7 @@ namespace Engine
 							msg = lua_tostring(state, -1);
 						}
 						lua_pop(state, 1);
-						throw ParseException(std::string("Runtime Error: ") + msg);
+						throw ParseException("Runtime Error: "s + msg);
 					}
 				case LUA_ERRMEM:
 					throw std::bad_alloc{};
