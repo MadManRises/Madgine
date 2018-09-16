@@ -1,21 +1,17 @@
 pipeline {
     agent any
 
-    parameters {
-        booleanParam(defaultValue: false, description: 'Run memory checks', name: 'memcheck')
-    }
-
     stages {
 
 		stage('CMake') {
 			steps {
 				sh '''
 				git submodule update --init --recursive
-                mkdir -p build
-                cd build
-                mkdir -p workspace
-                cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DINSTALL_EXTERN=TRUE -DBOOST_PATH=~/boost_1_66_0
-                '''
+				mkdir -p build
+				cd build
+				mkdir -p workspace
+				cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DINSTALL_EXTERN=TRUE -DBOOST_PATH=~/boost_1_66_0
+				'''
 			}
 		}
 
@@ -25,30 +21,15 @@ pipeline {
 				cd build
 				make Update_dependencies
 				'''
-            }
-
+			}
 		}
 
         stage('Build') {
             steps {
                 sh '''
-				cd build
+		cd build
                 make
                 '''
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                sh '''
-                cd build
-                ctest 
-                '''
-            }
-            post {
-                always {
-                    junit '**/build/*.xml'
-                }
             }
         }
         
@@ -56,7 +37,7 @@ pipeline {
            
             parallel {   
                
-                stage('Publish Doxygen') {
+		stage('Publish Doxygen') {
                     when {
                         branch 'master'
                     }
@@ -66,18 +47,21 @@ pipeline {
                     }
                 }
             
-                stage('Memory Check') {
-                    when {
-                        expression{ params.memcheck }
-                    }
-                    steps {
-                        sh '''
-                        cd build
-                        rm -rf memchecks
-                        mkdir -p memchecks
-                        ctest -T memcheck
-                        '''
-                    }
+		    stage('Test') {
+			    steps {
+
+				    sh '''
+				    cd build
+				    rm -rf memchecks
+				    mkdir -p memchecks
+				    ctest -T memcheck
+				    '''
+			    }
+			post {
+				always{
+					junit '**/build/*.xml'
+				}
+			}
                 }
             
             }
