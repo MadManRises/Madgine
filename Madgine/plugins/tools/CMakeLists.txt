@@ -14,13 +14,16 @@ FolderSources(sources "" "" tool.h toolbase.cpp toolbase.h toolscollector.h)
 	FolderSources(sources "" inspector inspector.cpp inspector.h)
 	FolderSources(sources "" memory memoryviewer.cpp memoryviewer.h)
 	FolderSources(sources "" renderer imguiroot.cpp imguiroot.h)
-		FolderSources(sources renderer ogre ImguiManager.cpp ImguiManager.h ImguiRenderable.cpp ImguiRenderable.h)
+		FolderSources(sources renderer ogre imguimanager.cpp imguimanager.h imguirenderable.cpp imguirenderable.h)
 	FolderSources(sources "" tinyxml tinyxml2.cpp tinyxml2.h)
 	
 
 add_plugin(Tools Madgine Utility ${sources})
 add_precompiled_header(Tools toolslib.h FORCEINCLUDE)
 
-target_link_libraries(Tools PUBLIC Client PRIVATE OgreMadgine DbgHelp)
+target_link_libraries(Tools PUBLIC Client PRIVATE OgreMadgine)
+if (WIN32)
+	target_link_libraries(Tools PRIVATE DbgHelp)
+endif()
 
 install_to_workspace(Madgine TARGETS Tools)
