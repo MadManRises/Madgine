@@ -33,6 +33,8 @@
 #pragma warning(disable : 4275)
 #pragma warning(disable : 4661)
 
+#include "core/memoryglobal.h"
+
 #include <cstring>
 #include <string>
 #include <list>
@@ -62,6 +64,8 @@
 #include <variant>
 #include <atomic>
 
+#include <chrono>
+
 #include <math.h>
 
 #include <assert.h>
@@ -73,6 +77,8 @@
 #include "util/utilmethods.h"
 #include "database/exceptionmessages.h"
 
+
+using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
 
 /// @endcond

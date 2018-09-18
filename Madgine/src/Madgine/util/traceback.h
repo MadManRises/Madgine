@@ -6,10 +6,10 @@ namespace Engine
 	{
 		struct TraceBack
 		{
-			TraceBack(const std::string& file = "<unknown>", int line = -1, const std::string& func = "") :
-				mFile(file),
+			TraceBack(std::string func = "????????", std::string file = "", int line = -1) :
+				mFile(std::move(file)),
 				mLineNr(line),
-				mFunction(func)
+				mFunction(std::move(func))
 			{
 			}
 
@@ -17,5 +17,7 @@ namespace Engine
 			int mLineNr;
 			std::string mFunction;
 		};
+
+		std::ostream &operator <<(std::ostream &out, const TraceBack &trace);
 	}
 }

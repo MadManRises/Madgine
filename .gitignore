@@ -253,3 +253,7 @@ CMakeSettings.json
 
 docs/
 .vscode/tasks.json
+
+build/
+
+.vscode/

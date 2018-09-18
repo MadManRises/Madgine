@@ -25,7 +25,7 @@ FolderSources(sources "../../src" Madgine interfacesforward.h interfaceslib.h)
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources Madgine signalslot connection.cpp connection.h connectionmanager.cpp connectionmanager.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
-	FolderSources(sources Madgine util log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h traceback.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources Madgine util exception.cpp exception.h log.cpp log.h process.cpp process.h stacktrace.cpp stacktrace.h standardlog.cpp standardlog.h traceback.cpp traceback.h utilmethods.cpp utilmethods.h)
 FolderSources(sources "" vstools Madgine.natvis)
 
 add_library(Interfaces SHARED ${sources})
@@ -42,7 +42,7 @@ target_link_libraries (Interfaces PRIVATE lualib ${CMAKE_THREAD_LIBS_INIT})
 
 
 if (WIN32)
-	target_link_libraries (Interfaces PRIVATE ws2_32)	
+	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
 endif()
 
 if (UNIX)

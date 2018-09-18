@@ -219,8 +219,8 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other
-					.getTypeString())));
+				throw Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other
+					.getTypeString()));
 			}
 		}
 
@@ -248,8 +248,8 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other
-					.getTypeString())));
+				throw Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other
+					.getTypeString()));
 			}
 		}
 
@@ -289,8 +289,8 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(ValueTypeException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.
-					getTypeString())));
+				throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.
+					getTypeString()));
 			}
 		}
 
@@ -330,8 +330,8 @@ namespace Engine
 				}
 				break;
 			default:
-				MADGINE_THROW_NO_TRACE(ValueTypeException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.
-					getTypeString())));
+				throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.
+					getTypeString()));
 			}
 		}
 

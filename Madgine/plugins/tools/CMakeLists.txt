@@ -22,8 +22,5 @@ add_plugin(Tools Madgine Utility ${sources})
 add_precompiled_header(Tools toolslib.h FORCEINCLUDE)
 
 target_link_libraries(Tools PUBLIC Client PRIVATE OgreMadgine)
-if (WIN32)
-	target_link_libraries(Tools PRIVATE DbgHelp)
-endif()
 
 install_to_workspace(Madgine TARGETS Tools)

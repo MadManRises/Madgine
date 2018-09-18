@@ -5,7 +5,7 @@
 namespace Engine
 {
 
-	enum KeyValueValueFlags
+	enum KeyValueValueFlags : uint8_t
 	{
 		NoFlags = 0x0,
 		IsEditable = 0x1

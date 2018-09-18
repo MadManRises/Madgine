@@ -516,7 +516,7 @@ namespace Engine
 				}
 				catch (const SerializeException& e)
 				{
-					LOG_EXCEPTION(e);
+					LOG_ERROR(e.what());
 				}
 				if (stream->isClosed())
 					return false;

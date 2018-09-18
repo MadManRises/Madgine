@@ -35,16 +35,8 @@ namespace Engine
 				ImGui::Value("Registered Memory", static_cast<unsigned int>(mTracker.registeredMemory()));
 				ImGui::Value("Overhead Memory", static_cast<unsigned int>(mTracker.overhead()));
 
-				constexpr size_t BUFFER = 512;
-				PSYMBOL_INFO info = static_cast<PSYMBOL_INFO>(malloc(sizeof(SYMBOL_INFO) + BUFFER));
-				info->MaxNameLen = BUFFER;
-				info->SizeOfStruct = sizeof(SYMBOL_INFO);
-				for (const auto &trace : mTracker.backtraces()) {
-					DWORD64 disp;
-					if (SymFromAddr(GetCurrentProcess(), reinterpret_cast<DWORD64>(trace.second.mTrace.front()), &disp, info))
-						ImGui::Text(info->Name);
-					else
-						ImGui::Value("error_", static_cast<unsigned int>(GetLastError()));
+				for (const auto &trace : mTracker.stacktraces()) {
+					
 				}
 				free(info);
 

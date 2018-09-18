@@ -48,7 +48,7 @@ namespace Engine
 				std::to_string(std::get<std::array<float, 4>>(mUnion)[2]) + ", " +
 				std::to_string(std::get<std::array<float, 4>>(mUnion)[3]) + "]";
 		default:
-			MADGINE_THROW(Scripting::ScriptingException("Unknown Type!"));
+			throw Scripting::ScriptingException("Unknown Type!");
 		}
 	}
 

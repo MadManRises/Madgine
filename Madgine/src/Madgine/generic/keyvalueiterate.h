@@ -7,8 +7,6 @@
 namespace Engine
 {
 
-	enum KeyValueValueFlags;
-
 	class KeyValueIterator
 	{
 	public:

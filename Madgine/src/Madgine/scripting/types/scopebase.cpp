@@ -56,7 +56,7 @@ namespace Engine
 			}
 			catch (std::exception& e)
 			{
-				LOG_EXCEPTION(e);
+				LOG_ERROR(e.what());
 			}
 			return {};
 		}

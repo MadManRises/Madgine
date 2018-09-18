@@ -35,7 +35,7 @@ namespace Engine
 				catch (const std::exception& e)
 				{
 					LOG_ERROR("Unhandled Exception during Connection-Dispatching!");
-					LOG_EXCEPTION(e);
+					LOG_ERROR(e.what());
 				}
 			}
 		}

@@ -3,7 +3,7 @@
 #include "memory.h"
 
 void *operator new (size_t s) {
-	return Engine::Core::MemoryTracker::sInstance().allocate(s);
+	return Engine::Core::MemoryTracker::allocate(s);
 }
 
 void *operator new [](size_t s) {
@@ -11,7 +11,7 @@ void *operator new [](size_t s) {
 }
 
 void operator delete(void *p) {
-	Engine::Core::MemoryTracker::sInstance().deallocate(p);
+	Engine::Core::MemoryTracker::deallocate(p);
 }
 
 void operator delete [](void *p) {

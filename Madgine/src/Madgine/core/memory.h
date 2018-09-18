@@ -1,30 +1,34 @@
 #pragma once
 
+#include "../util/stacktrace.h"
+
 namespace Engine {
 	namespace Core {
 
-		struct AllocationData {
-			AllocationData(size_t s) : mSize(s) {}
-			size_t mSize;
+		struct TracedAllocationData{
+			size_t mSize = 0;
 		};
 
-		struct INTERFACES_EXPORT MemoryTracker {		
-			static MemoryTracker &sInstance();		
+		struct AllocationData{
+			TracedAllocationData *mTrace;
+		};
 
-			void *allocate(size_t s);
-			void deallocate(void *p);
+
+		struct INTERFACES_EXPORT MemoryTracker {		
+
+			static void *allocate(size_t s);
+			static void deallocate(void *p);
 
 			size_t overhead();
-			size_t rawMemory();
-			size_t registeredMemory();
+			size_t totalMemory();
 
 		private:
 			MemoryTracker();
+			MemoryTracker(const MemoryTracker &) = delete;
 			~MemoryTracker();
 
 			//SAFE ALLOC
-			char* mPageBase;
-			size_t mVirtualMemUsage;
+			size_t mSafeMemUsage;
 
 			void *safe_alloc(size_t s);
 			void safe_dealloc(void *p);
@@ -48,22 +52,20 @@ namespace Engine {
 
 
 			//STATS
-			void onMalloc(size_t s);
-			void onFree(void *p, size_t s);
+			void onMalloc(uintptr_t id, size_t s);
+			void onFree(uintptr_t id, size_t s);
 
-			std::atomic<size_t> mRegisteredMemory;
-			std::atomic<size_t> mRawMemory;
+			size_t mTotalMemory;
+			size_t mUnknownAllocationSize;
 
-			std::mutex mMutex;
-			std::unordered_map<void *, AllocationData, std::hash<void*>, std::equal_to<void*>, UntrackedAllocator<std::pair<void *const, AllocationData>>> mAllocations;
-			struct BackTrace {
-				BackTrace(std::vector<void*, UntrackedAllocator<void*>> &&trace) : mTrace(std::move(trace)) {}
-				std::vector<void*, UntrackedAllocator<void*>> mTrace;
-			};
-			std::unordered_map<unsigned long, BackTrace, std::hash<unsigned long>, std::equal_to<unsigned long>, UntrackedAllocator<std::pair<const unsigned long, BackTrace>>> mBacktraces;
+			using StackTrace = Util::StackTrace<3>;
+
+			std::unordered_map<StackTrace, TracedAllocationData, std::hash<StackTrace>, std::equal_to<StackTrace>, UntrackedAllocator<std::pair<const StackTrace, TracedAllocationData>>> mStacktraces;
+			std::unordered_map<StackTrace, TracedAllocationData, std::hash<StackTrace>, std::equal_to<StackTrace>, UntrackedAllocator<std::pair<const StackTrace, TracedAllocationData>>> mUnknownAllocations;
+			std::unordered_map<uintptr_t, AllocationData, std::hash<uintptr_t>, std::equal_to<uintptr_t>, UntrackedAllocator<std::pair<const uintptr_t, AllocationData>>> mAllocations;
 
 		public:
-			const std::unordered_map<unsigned long, BackTrace, std::hash<unsigned long>, std::equal_to<unsigned long>, UntrackedAllocator<std::pair<const unsigned long, BackTrace>>> &backtraces();
+			const std::unordered_map<StackTrace, TracedAllocationData, std::hash<StackTrace>, std::equal_to<StackTrace>, UntrackedAllocator<std::pair<const StackTrace, TracedAllocationData>>> &stacktraces();
 		private:
 
 			//STATS IMPL
@@ -74,10 +76,6 @@ namespace Engine {
 				blockType, long requestNumber, const unsigned char *filename, int
 				lineNumber);
 
-			struct ThreadLocalStorage {
-				static thread_local bool sRequesting;
-				static thread_local bool sTryLock;
-		};
 #else
 #error "Unsupported Platform!"
 #endif
@@ -87,10 +85,12 @@ namespace Engine {
 			static void original_delete(void *p);
 
 
-			static MemoryTracker &sInitializer;
+			static MemoryTracker sInstance;
+			static MemoryTracker *&getSingleton();
 
-
-
+			struct ThreadLocal{
+				static thread_local size_t sHiddenStackEntries;
+			};
 
 		};
 
