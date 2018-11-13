@@ -12,10 +12,10 @@ namespace Engine
 
 		using ResourceLoaderCollector = UniqueComponentCollector<ResourceLoaderBase, ResourceManager&>;
 
-		using ResourceLoaderCollectorInstance = UniqueComponentCollectorInstance<ResourceLoaderBase, std::vector, ResourceManager &>;
+		using ResourceLoaderCollectorInstance = UniqueComponentCollectorInstance<ResourceLoaderBase, ResourceManager &>;
 
 	}
 
-	PLUGIN_COLLECTOR_EXPORT(ResourceLoader, Resources::ResourceLoaderCollector);
-
 }
+
+RegisterCollector(Engine::Resources::ResourceLoaderCollector);

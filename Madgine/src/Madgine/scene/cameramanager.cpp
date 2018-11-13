@@ -4,7 +4,7 @@
 
 #include "camera.h"
 
-RegisterClass(Engine::Scene::CameraManager);
+
 
 namespace Engine
 {

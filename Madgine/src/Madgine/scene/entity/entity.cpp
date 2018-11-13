@@ -8,14 +8,14 @@
 
 #include "entitycomponentbase.h"
 
-#include "../../scripting/datatypes/luatableiterator.h"
+#include "Interfaces/scripting/datatypes/luatableiterator.h"
 
 #include "entitycomponentcollector.h"
 
-#include "../../scripting/types/api.h"
-#include "../../generic/keyvalueiterate.h"
+#include "Interfaces/scripting/types/api.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-RegisterClass(Engine::Scene::Entity::Entity);
+
 
 namespace Engine
 {
@@ -170,7 +170,7 @@ namespace Engine
 				return mSceneManager.getComponent(i, init);
 			}
 
-			Scripting::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i, bool init)
+			App::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i, bool init)
 			{
 				return mSceneManager.getGlobalAPIComponent(i, init);
 			}

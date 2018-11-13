@@ -166,7 +166,6 @@ namespace Maditor
 				mApplication = std::make_unique<Engine::App::ClientApplication>();
 
 				mApplication->setup(mSettings);
-				mUtil->setApp(mApplication.get());
 
 				mApplication->log().addListener(mLog.ptr());
 
@@ -236,9 +235,6 @@ namespace Maditor
 
 		bool ApplicationWrapper::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Engine::Scene::ContextMask context)
 		{
-			mUtil->profiler()->stopProfiling(); // PreRender
-
-			mUtil->profiler()->startProfiling("Rendering");
 
 			mgr()->sendAndReceiveMessages();
 			if (mgr()->clientCount() != 1)
@@ -251,18 +247,11 @@ namespace Maditor
 
 		bool ApplicationWrapper::frameStarted(std::chrono::microseconds timeSinceLastFrame)
 		{
-			mUtil->update();
-			mUtil->profiler()->startProfiling("Frame");
-			mUtil->profiler()->startProfiling("PreRender");
-
 			return true;
 		}
 
 		bool ApplicationWrapper::frameEnded(std::chrono::microseconds timeSinceLastFrame)
 		{
-			mUtil->profiler()->stopProfiling(); // Rendering
-			mUtil->profiler()->stopProfiling(); // Frame
-
 			return true;
 		}
 

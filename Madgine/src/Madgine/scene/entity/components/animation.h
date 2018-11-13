@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "../../../serialize/container/serializedmapper.h"
+#include "Interfaces/serialize/container/serializedmapper.h"
 
 namespace Engine
 {
@@ -40,3 +40,5 @@ namespace Engine
 		}
 	}
 }
+
+RegisterClass(Engine::Scene::Entity::Animation);

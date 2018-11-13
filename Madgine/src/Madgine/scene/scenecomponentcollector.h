@@ -3,6 +3,8 @@
 
 #include "../uniquecomponentcollector.h"
 
+#include "scenecomponentbase.h"
+
 
 namespace Engine
 {
@@ -15,13 +17,13 @@ namespace Engine
 		using SceneComponentCollector = UniqueComponentCollector<SceneComponentBase, SceneManager&>;
 
 #ifndef PLUGIN_BUILD
-		extern template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneManager&>;
+		extern template MADGINE_BASE_EXPORT struct UniqueComponentCollector<SceneComponentBase, SceneManager&>;
 #endif
 
-		using SceneComponentCollectorInstance = UniqueComponentCollectorInstance<SceneComponentBase, SceneComponentSet, SceneManager&>;
+		using SceneComponentCollectorInstance = UniqueComponentCollectorInstance<SceneComponentBase, SceneManager&, SceneComponentSet>;
 
 	}
 
-	PLUGIN_COLLECTOR_EXPORT(SceneComponent, Scene::SceneComponentCollector);
-
 }
+
+RegisterCollector(Engine::Scene::SceneComponentCollector);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../serialize/serializableunit.h"
-#include "../../scripting/types/scope.h"
+#include "Interfaces/serialize/serializableunit.h"
+#include "Interfaces/scripting/types/scope.h"
 
 namespace Engine
 {
@@ -42,7 +42,7 @@ namespace Engine
 				template <class T>
 				T &getSceneComponent(bool init = true)
 				{
-					return static_cast<T&>(getSceneComponent(T::component_index(), init));
+					return static_cast<T&>(getSceneComponent(component_index<T>(), init));
 				}
 
 				SceneComponentBase &getSceneComponent(size_t i, bool = true);
@@ -50,10 +50,10 @@ namespace Engine
 				template <class T>
 				T &getGlobalAPIComponent(bool init = true)
 				{
-					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
+					return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
 				}
 
-				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+				App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 				App::Application &app(bool = true);
 
@@ -68,3 +68,5 @@ namespace Engine
 		}
 	}
 }
+
+RegisterClass(Engine::Scene::Entity::EntityComponentBase);

@@ -11,6 +11,7 @@ namespace Engine
 			virtual ~InputHandler() = default;
 
 			virtual void update() = 0;
+			virtual void onResize(size_t width, size_t height) = 0;
 			
 			void setListener(InputListener *listener);
 			InputListener *listener();

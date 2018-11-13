@@ -6,8 +6,6 @@
 #include "util/launcherloglistener.h"
 #include "Madgine/serialize/container/serialized.h"
 
-#include "util/util.h"
-
 #include "Madgine/core/framelistener.h"
 
 #include "inspector.h"
@@ -73,7 +71,6 @@ namespace Maditor {
 
 			std::unique_ptr<Engine::Core::Root> mRoot;
 
-			Engine::Serialize::Serialized<Util> mUtil;
 			Engine::Serialize::Serialized<LauncherLogListener> mLog;
 			Engine::Serialize::Serialized<ModuleLoader> mLoader;
 			Engine::Serialize::Serialized<Inspector> mInspector;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../util/serverlog.h"
-#include "../scripting/types/globalscopebase.h"
-#include "../scripting/types/luastate.h"
+#include "serverlog.h"
+#include "Interfaces/scripting/types/globalscopebase.h"
+#include "Interfaces/scripting/types/luastate.h"
 
 #include "serverappinstance.h"
 #include "../core/frameloop.h"
@@ -21,7 +21,7 @@ namespace Engine
 
 			virtual int go() override;
 
-			Util::ServerLog& log();		
+			ServerLog& log();		
 
 		protected:
 			virtual void start() = 0;
@@ -39,7 +39,7 @@ namespace Engine
 
 		private:
 
-			Util::ServerLog mLog;
+			ServerLog mLog;
 			std::string mName;
 
 			std::list<ServerAppInstance> mInstances;
@@ -53,3 +53,5 @@ namespace Engine
 
 	}
 }
+
+RegisterClass(Engine::Server::ServerBase);

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../serialize/serializableunit.h"
-#include "../serialize/container/observed.h"
-#include "../signalslot/slot.h"
-#include "../math/vector3.h"
+#include "Interfaces/serialize/serializableunit.h"
+#include "Interfaces/serialize/container/observed.h"
+#include "Interfaces/signalslot/slot.h"
+#include "Interfaces/math/vector3.h"
 
 namespace Engine
 {

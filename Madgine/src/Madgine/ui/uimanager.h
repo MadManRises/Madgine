@@ -2,7 +2,7 @@
 
 #include "guihandler.h"
 #include "gamehandler.h"
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 #include "../core/framelistener.h"
 #include "../uniquecomponentcollectorinstance.h"
 
@@ -47,7 +47,7 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
@@ -80,3 +80,5 @@ namespace Engine
 		};
 	}
 }
+
+RegisterClass(Engine::UI::UIManager);

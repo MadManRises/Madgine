@@ -1,0 +1,5 @@
+<Layout name="EntityComponent" depth="1">  
+
+  <Inherit name="SerializableUnit"></Inherit>
+
+</Layout>

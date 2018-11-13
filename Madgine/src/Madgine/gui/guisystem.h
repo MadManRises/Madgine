@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 #include "../scene/scenecomponentbase.h"
 #include "../core/frameloop.h"
 
@@ -15,16 +15,9 @@ namespace Engine
 		public:
 			GUISystem(App::ClientApplication &app);
 			GUISystem(const GUISystem &) = delete;
-			virtual ~GUISystem();
+			virtual ~GUISystem();			
 
-			
-
-			virtual int go() override = 0;
-
-			
-
-			Widget* getWidgetByName(const std::string& name);
-			
+			Widget* getWidgetByName(const std::string& name);		
 
 
 
@@ -32,13 +25,14 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			Scene::SceneManager &sceneMgr(bool = true);
 			UI::UIManager &ui(bool = true);
 
 			GUISystem &getSelf(bool = true);
-
+			
+			bool singleFrame(std::chrono::microseconds timeSinceLastFrame = 0us) override;
 			
 			void registerWidget(Widget* w);
 
@@ -48,9 +42,9 @@ namespace Engine
 
 			KeyValueMapList maps() override;
 
-			bool singleFrame() override;
-
 			const std::vector<std::unique_ptr<TopLevelWindow>> &topLevelWindows();
+
+			void closeTopLevelWindow(TopLevelWindow *w);
 
 		protected:
 
@@ -73,3 +67,5 @@ namespace Engine
 		};
 	}
 }
+
+RegisterClass(Engine::GUI::GUISystem);

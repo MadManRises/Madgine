@@ -2,10 +2,10 @@
 
 #include "transform.h"
 
-#include "../../../scripting/types/api.h"
-#include "../../../generic/keyvalueiterate.h"
+#include "Interfaces/scripting/types/api.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-RegisterClass(Engine::Scene::Entity::Transform);
+
 
 namespace Engine
 {

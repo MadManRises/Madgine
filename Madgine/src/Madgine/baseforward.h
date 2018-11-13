@@ -3,7 +3,10 @@
 namespace Engine
 {
 	class MadgineObject;
-	class IndexHolder;
+	struct IndexHolder;
+
+	struct UniqueComponentCollectorManager;
+	struct ComponentRegistryBase;
 
 	namespace Scene
 	{
@@ -28,7 +31,8 @@ namespace Engine
 	namespace App
 	{
 		struct AppSettings;
-		class Application;		
+		class Application;			
+		class GlobalAPIComponentBase;
 	}
 
 	namespace Core
@@ -38,13 +42,6 @@ namespace Engine
 		class FrameListener;
 		class FrameLoop;
 	}
-
-	namespace Scripting
-	{
-		class GlobalScope;
-		class GlobalAPIComponentBase;
-	}
-
 
 	namespace Resources
 	{

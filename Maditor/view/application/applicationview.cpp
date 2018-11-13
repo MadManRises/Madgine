@@ -82,8 +82,6 @@ namespace View {
 	{
 		
 		ui()->modulesWidget->setModel(app->moduleLoader());
-		ui()->performanceWidget->setModel(app->util()->profiler());
-		ui()->appStatsWidget->setModel(app->util()->stats());
 		inspector()->setModel(app->inspector());
 	}
 

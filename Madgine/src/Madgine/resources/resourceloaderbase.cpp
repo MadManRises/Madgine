@@ -4,6 +4,10 @@
 
 #include "resourcebase.h"
 
+#include "Interfaces/reflection/classname.h"
+
+
+
 namespace Engine
 {
 	namespace Resources

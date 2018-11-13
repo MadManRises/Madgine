@@ -8,7 +8,13 @@
 
 #include "../gui/guisystem.h"
 
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
+
+#include "Interfaces/util/exception.h"
+
+#ifdef STATIC_BUILD
+extern "C" Engine::GUI::GUISystem* guisystem(Engine::App::ClientApplication &);
+#endif
 
 namespace Engine
 {
@@ -24,15 +30,7 @@ namespace Engine
 		{
 			mSettings = &settings;
 			
-		
-			auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("guisystem"));
-			if (!f)
-				throw 0;
-			mGUI = f(*this);
-			if (!mGUI)
-				throw 0;
-
-			Application::setup(settings, std::unique_ptr<GUI::GUISystem>(mGUI));
+			Application::setup(settings);
 		}
 
 		const ClientAppSettings& ClientApplication::settings()
@@ -54,6 +52,26 @@ namespace Engine
 		{
 			Application::getSelf(init);
 			return *this;
+		}
+
+		void ClientApplication::loadFrameLoop(std::unique_ptr<Core::FrameLoop>&& loop)
+		{
+
+			if (!loop) {
+#ifndef STATIC_BUILD
+				auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("guisystem"));
+				if (!f)
+					throw exception("A Client-Application requires a Renderer with a guisystem!");
+				mGUI = f(*this);
+#else
+				mGUI = guisystem(*this);
+#endif
+				if (!mGUI)
+					throw 0;
+				loop = std::unique_ptr<GUI::GUISystem>(mGUI);
+			}
+
+			Application::loadFrameLoop(std::forward<std::unique_ptr<Core::FrameLoop>>(loop));
 		}
 
 		KeyValueMapList ClientApplication::maps()

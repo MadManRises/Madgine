@@ -9,9 +9,11 @@
 
 #include "widgets/widget.h"
 
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-RegisterClass(Engine::GUI::GUISystem);
+#include "Interfaces/window/windowapi.h"
+
+#include "Interfaces/debug/profiler/profiler.h"
 
 namespace Engine
 {
@@ -65,14 +67,18 @@ namespace Engine
 
 		void GUISystem::registerWidget(Widget* w)
 		{
-			if (!w->getName().empty())
-				assert(mWidgets.try_emplace(w->getName(), w).second);
+			if (!w->getName().empty()) {
+				auto pib = mWidgets.try_emplace(w->getName(), w);
+				assert(pib.second);
+			}
 		}
 
 		void GUISystem::unregisterWidget(Widget* w)
 		{
-			if (!w->getName().empty())
-				assert(mWidgets.erase(w->getName()) == 1);
+			if (!w->getName().empty()) {
+				size_t result = mWidgets.erase(w->getName());
+				assert(result == 1);
+			}
 		}
 
 
@@ -81,22 +87,21 @@ namespace Engine
 			return Scope::maps().merge(mWindows);
 		}
 
-		bool GUISystem::singleFrame()
-		{
-			bool result = !mWindows.empty();
-			for (const std::unique_ptr<TopLevelWindow> &w : mWindows)
-				result |= w->singleFrame();
-			return result;
-		}
-
 		const std::vector<std::unique_ptr<TopLevelWindow>> &GUISystem::topLevelWindows()
 		{
 			return mWindows;
 		}
 
+		void GUISystem::closeTopLevelWindow(TopLevelWindow * w)
+		{
+			mWindows.erase(std::find_if(mWindows.begin(), mWindows.end(), [w](const std::unique_ptr<TopLevelWindow> &p) {return p.get() == w; }));
+		}
+
 		bool GUISystem::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame)
 		{
-			bool result = !mWindows.empty();
+			PROFILE();
+			Window::sUpdate();
+			bool result = false;
 			for (const std::unique_ptr<TopLevelWindow> &w : mWindows)
 				result |= w->update();
 			return FrameLoop::sendFrameRenderingQueued(timeSinceLastFrame, mUI->currentContext()) && result;
@@ -135,6 +140,11 @@ namespace Engine
 			return *this;
 		}
 
+		bool GUISystem::singleFrame(std::chrono::microseconds timeSinceLastFrame)
+		{
+			return sendFrameStarted(timeSinceLastFrame) && sendFrameRenderingQueued(timeSinceLastFrame) && sendFrameEnded(timeSinceLastFrame);
+		}
+
 		App::ClientApplication &GUISystem::app(bool init)
 		{
 			if (init)
@@ -153,7 +163,7 @@ namespace Engine
 			return mApp.getSceneComponent(i, init);
 		}
 
-		Scripting::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

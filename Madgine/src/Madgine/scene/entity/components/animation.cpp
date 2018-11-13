@@ -2,7 +2,7 @@
 
 #include "animation.h"
 
-RegisterClass(Engine::Scene::Entity::Animation);
+
 
 namespace Engine
 {

@@ -2,24 +2,24 @@
 
 #include "scenemanager.h"
 
-#include "../serialize/serializableids.h"
+#include "Interfaces/serialize/serializableids.h"
 
 #include "entity/entity.h"
 
-#include "../generic/transformIt.h"
+#include "Interfaces/generic/transformIt.h"
 
 #include "scenecomponentbase.h"
 
 #include "../app/application.h"
 
-#include "../scripting/datatypes/luatablefieldaccessor.h"
+#include "Interfaces/scripting/datatypes/luatablefieldaccessor.h"
 
-#include "../scripting/types/api.h"
+#include "Interfaces/scripting/types/api.h"
 
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
 
-RegisterClass(Engine::Scene::SceneManager);
+
 
 namespace Engine
 {
@@ -27,11 +27,11 @@ namespace Engine
 	namespace Scene
 	{
 
-		template MADGINE_BASE_EXPORT class UniqueComponentCollector<SceneComponentBase, SceneManager&>;
+		template MADGINE_BASE_EXPORT struct UniqueComponentCollector<SceneComponentBase, SceneManager&>;
 
 		SceneManager::SceneManager(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
-			Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>(app),
+			Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, App::GlobalAPICollector>>(app),
 			mItemCount(0),
 			mSceneComponents(*this),
 			mApp(app)
@@ -95,7 +95,7 @@ namespace Engine
 			SerializableUnitBase::writeState(out);
 		}
 
-		Scripting::GlobalAPIComponentBase & SceneManager::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIComponentBase & SceneManager::getGlobalAPIComponent(size_t i, bool init)
 		{			
 			if (init)
 			{

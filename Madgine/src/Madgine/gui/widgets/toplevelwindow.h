@@ -1,14 +1,15 @@
 #pragma once
 
-#include "../../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 #include "../../input/inputlistener.h"
+#include "Interfaces/window/windoweventlistener.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 		
-		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener
+		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener, public Window::WindowEventListener
 		{
 
 		public:
@@ -16,6 +17,8 @@ namespace Engine
 			virtual ~TopLevelWindow();
 
 			virtual bool update();
+
+			void close();
 
 			void showCursor();
 			void hideCursor();
@@ -54,7 +57,12 @@ namespace Engine
 			Input::InputHandler *input();
 
 		protected:
-			void setInput(Input::InputHandler *input);
+			Window::Window *window();
+
+			void onClose() override;
+			void onRepaint() override;
+
+			void onResize(size_t width, size_t height) override;
 
 			void calculateWindowGeometries();
 
@@ -77,8 +85,14 @@ namespace Engine
 			std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
 			GUISystem &mGui;
 
-			Input::InputHandler *mInput;
+			Input::InputHandler *mInput = nullptr;
+			std::unique_ptr<Input::InputHandler> mInputHolder;
+
+			Window::Window *mWindow = nullptr;
 		};
 
 	}
 }
+
+
+RegisterClass(Engine::GUI::TopLevelWindow);

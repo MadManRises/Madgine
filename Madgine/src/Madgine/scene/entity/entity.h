@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 
 #include "entitycomponentbase.h"
 
-#include "../../serialize/container/set.h"
+#include "Interfaces/serialize/container/set.h"
 
 
 namespace Engine
@@ -86,7 +86,7 @@ namespace Engine
 					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 				}
 
-				Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+				App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 				App::Application &app(bool = true);
 
@@ -113,3 +113,5 @@ namespace Engine
 		}
 	}
 }
+
+RegisterClass(Engine::Scene::Entity::Entity);

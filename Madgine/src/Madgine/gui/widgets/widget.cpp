@@ -19,12 +19,12 @@
 #include "../../app/clientapplication.h"
 #include "../guisystem.h"
 
-#include "../../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-#include "../../scripting/types/api.h"
+#include "Interfaces/scripting/types/api.h"
 
 
-RegisterClass(Engine::GUI::Widget);
+
 
 namespace Engine
 {

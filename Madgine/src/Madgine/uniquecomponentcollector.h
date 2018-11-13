@@ -1,92 +1,83 @@
 #pragma once
 
+#include "uniquecomponentregistry.h"
+
+#ifndef STATIC_BUILD
+
+#include "Interfaces/reflection/classname.h"
 
 namespace Engine
 {
 
-	template <class Base, class... _Ty>
-	using Collector_F = std::unique_ptr<Base>(*)(_Ty...);
-
-#define COLLECTOR_NAME(Name, Collector) \
-template<> inline const char *Collector::name(){\
-	return "pluginComponents" #Name;\
-}
-	
-#ifdef PLUGIN_BUILD
-
-#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) \
-	extern "C" DLL_EXPORT inline const std::vector<Collector::F> *pluginComponents ## Name(size_t baseIndex){ \
-		Collector::setBaseIndex(baseIndex); \
-		return &Collector::sComponents(); \
-	} \
-\
-	COLLECTOR_NAME(Name, Collector)
-
-#else
-
-#define PLUGIN_COLLECTOR_EXPORT(Name, Collector) COLLECTOR_NAME(Name, Collector)
-
-#endif
-
-
-	class IndexHolder
-	{
-	public:
+	struct IndexHolder
+	{	
 		virtual size_t index() = 0;
 	};
 
-	template <class _Base, template <class...> class Container = std::vector, class... _Ty>
-	class UniqueComponentCollectorInstance;
 
-
-	template <class _Base, class... _Ty>
-	class UniqueComponentCollector
+	template <class _Base, class _Ty>
+	struct UniqueComponentCollector
 	{
 	public:
 		typedef _Base Base;
-		typedef Collector_F<Base, _Ty...> F;
+		typedef _Ty Ty;
+		typedef Collector_F<Base, Ty> F;
+		typedef UniqueComponentRegistry<Base, Ty> Registry;
 
-		UniqueComponentCollector() = default;
+		UniqueComponentCollector() {
+			mInfo.mComponents = reinterpret_cast<std::vector<Collector_F<void, void*>>*>(&mComponents);
+			mInfo.mRegistryInfo = &ClassInfo<Registry>();
+			mInfo.mBaseInfo = &ClassInfo<Base>();
+			collectorRegistry().push_back(&mInfo);
+		}
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
 
+/*#ifndef PLUGIN_BUILD
+		DLL_EXPORT
+#endif*/
+		static UniqueComponentCollector<_Base, _Ty> &sInstance();
 
-#ifndef PLUGIN_BUILD
-		DLL_EXPORT 
-#endif
-		static std::vector<Collector_F<Base, _Ty...>>& sComponents();
-
-
-		static void setBaseIndex(size_t index)
-		{
-			sBaseIndex = index;
+		size_t size() const {
+			return mComponents.size();
 		}
 
-	protected:
+		/*typename std::vector<F>::const_iterator begin() const {
+			return mComponents.begin();
+		}
+
+		typename std::vector<F>::const_iterator end() const {
+			return mComponents.end();
+		}
+
+		static UniqueComponentCollector *loadFromPlugin(const Plugins::Plugin *plugin) {
+			typedef UniqueComponentCollector &StoreLoader();
+			StoreLoader *loader = (StoreLoader*)plugin->getSymbol(name());
+			return loader ? &(*loader)() : nullptr;
+		}*/
+
+	private:
+		std::vector<F> mComponents;
+		CollectorInfo mInfo;
+
 		template <class T>
 		static size_t registerComponent()
 		{
-			sComponents().emplace_back([](_Ty ... args)
-			{
-				return std::unique_ptr<Base>(std::make_unique<T>(std::forward<_Ty>(args)...));
-			});
-			return sComponents().size() - 1;
+			sInstance().mComponents.emplace_back(createComponent<T, _Base, _Ty>);
+			sInstance().mInfo.mElementInfos.push_back(&ClassInfo<T>());
+			return sInstance().mComponents.size() - 1;
 		}
 
 		static void unregisterComponent(size_t i)
 		{
-			*std::next(sComponents().begin(), i) = F();
+			sInstance().mComponents[i] = F();
+			sInstance().mInfo.mElementInfos[i] = nullptr;
 		}
-
-		static inline size_t sBaseIndex = 0;
 
 		static size_t baseIndex()
 		{
-			return sBaseIndex;
+			return sInstance().mInfo.mBaseIndex;
 		}
-
-
-		static const char *name();
 
 	public:
 		template <class T>
@@ -118,14 +109,28 @@ template<> inline const char *Collector::name(){\
 
 
 
-	template <class _Base, class ... _Ty>
-	std::vector<Collector_F<typename UniqueComponentCollector<_Base, _Ty...>::Base, _Ty...>>& UniqueComponentCollector<_Base, _Ty...>::sComponents()
+	template <class _Base, class _Ty>
+	UniqueComponentCollector<_Base, _Ty>& UniqueComponentCollector<_Base, _Ty>::sInstance()
 	{
-		static std::vector<Collector_F<Base, _Ty...>> dummy;
+		static UniqueComponentCollector<_Base, _Ty> dummy;
 		return dummy;
 	}
 
+}
 
+#else
 
+namespace Engine {
+
+	template <class _Base, class _Ty>
+	struct UniqueComponentCollector {
+		typedef _Base Base;
+		typedef _Ty Ty;
+		typedef UniqueComponentRegistry<Base, Ty> Registry;
+	};
 
 }
+
+#endif
+
+#define RegisterCollector(collector) RegisterClass(collector::Registry)

@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "../../signalslot/signal.h"
+#include "Interfaces/signalslot/signal.h"
 
 namespace Engine
 {

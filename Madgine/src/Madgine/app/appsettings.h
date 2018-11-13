@@ -10,17 +10,9 @@ namespace Engine
 		 */
 		struct AppSettings
 		{
-			/**
-			 * Sets up default values for the settings.
-			 */
-			AppSettings() :
-			mRunMain(true)
-			{
-			}
-
 			std::string mAppName;
 
-			bool mRunMain;
+			bool mRunMain = true;
 
 		};
 	}

@@ -79,3 +79,5 @@ namespace Maditor {
 		};
 	}
 }
+
+RegisterClass(Maditor::Launcher::InspectorThreadInstance);

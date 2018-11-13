@@ -2,7 +2,7 @@
 
 #include "entitycomponentbase.h"
 #include "entitycomponentcollector.h"
-#include "../../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 
 namespace Engine
 {

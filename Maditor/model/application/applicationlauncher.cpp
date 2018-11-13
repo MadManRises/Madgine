@@ -131,11 +131,6 @@ namespace Maditor
 			return mLoader.ptr();
 		}
 
-		UtilModel* ApplicationLauncher::util()
-		{
-			return mUtil.ptr();
-		}
-
 		Inspector* ApplicationLauncher::inspector()
 		{
 			return mInspector.ptr();
@@ -195,7 +190,6 @@ namespace Maditor
 			mInspector->reset();
 			mLoader->reset();
 			mWaitingForLoader = false;
-			mUtil->reset();
 
 			mPingTimer.stop();
 

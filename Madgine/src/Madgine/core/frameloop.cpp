@@ -3,7 +3,9 @@
 #include "frameloop.h"
 #include "framelistener.h"
 
-#include "../signalslot/connectionmanager.h"
+#include "Interfaces/signalslot/connectionmanager.h"
+
+#include "Interfaces/debug/profiler/profiler.h"
 
 namespace Engine
 {
@@ -18,7 +20,13 @@ namespace Engine
 		int FrameLoop::go()
 		{			
 			startLoop();
-			while (!mShutdown && singleFrame()) std::this_thread::yield();
+			auto now = std::chrono::high_resolution_clock::now();
+			auto oldNow = now;
+			while (!mShutdown && singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - oldNow))) {
+				std::this_thread::yield();
+				oldNow = now;
+				now = std::chrono::high_resolution_clock::now();
+			}
 			return 0;
 		}
 
@@ -31,9 +39,9 @@ namespace Engine
 		{
 		}
 
-		bool FrameLoop::singleFrame()
+		bool FrameLoop::singleFrame(std::chrono::microseconds timeSinceLastFrame)
 		{
-			return sendFrameStarted(0us) && sendFrameRenderingQueued(0us) && sendFrameEnded(0us);
+			return sendFrameStarted(timeSinceLastFrame) && sendFrameRenderingQueued(timeSinceLastFrame) && sendFrameEnded(timeSinceLastFrame);
 		}
 
 		void FrameLoop::addFrameListener(FrameListener* listener)
@@ -63,6 +71,9 @@ namespace Engine
 
 		bool FrameLoop::sendFrameStarted(std::chrono::microseconds timeSinceLastFrame)
 		{
+			PROFILE();
+			SignalSlot::ConnectionManager::getSingleton().update();
+			
 			bool result = true;
 			for (FrameListener* listener : mListeners)
 				result &= listener->frameStarted(timeSinceLastFrame);
@@ -71,8 +82,7 @@ namespace Engine
 
 		bool FrameLoop::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
-			SignalSlot::ConnectionManager::getSingleton().update();
-
+			PROFILE();
 			bool result = true;
 			for (FrameListener* listener : mListeners)
 				result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
@@ -90,6 +100,7 @@ namespace Engine
 
 		bool FrameLoop::sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
+			PROFILE();
 			bool result = true;
 			for (FrameListener* listener : mListeners)
 				result &= listener->frameFixedUpdate(timeSinceLastFrame, context);
@@ -103,6 +114,7 @@ namespace Engine
 
 		bool FrameLoop::sendFrameEnded(std::chrono::microseconds timeSinceLastFrame)
 		{
+			PROFILE();
 			bool result = true;
 			for (FrameListener* listener : mListeners)
 				result &= listener->frameEnded(timeSinceLastFrame);

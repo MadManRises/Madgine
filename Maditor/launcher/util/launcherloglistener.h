@@ -21,7 +21,7 @@ public:
 
 protected:
 	// Inherited via LogListener
-	virtual void messageLogged(const std::string & message, Engine::Util::MessageType lml, const std::list<Engine::Util::TraceBack> &traceback, const std::string & logName) override;
+	virtual void messageLogged(const std::string & message, Engine::Util::MessageType lml, const Engine::Debug::StackTrace<32> &stackTrace, const std::string & logName) override;
 
 private:
 	void receiveImpl(const std::string &msg, Engine::Util::MessageType level, const std::string &logName, const std::string &fullTraceback, const std::string &fileName, int lineNr);

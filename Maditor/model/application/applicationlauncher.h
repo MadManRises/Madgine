@@ -35,7 +35,6 @@ namespace Maditor {
 			
 			
 			ModuleLoader *moduleLoader();
-			UtilModel *util();
 			Inspector *inspector();
 			
 
@@ -100,8 +99,6 @@ namespace Maditor {
 		protected:
 			Shared::ApplicationInfo mAppInfo;
 			ApplicationConfig *mConfig;
-
-			Engine::Serialize::Serialized<UtilModel> mUtil;
 
 		private:
 

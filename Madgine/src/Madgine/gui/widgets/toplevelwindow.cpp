@@ -17,9 +17,14 @@
 
 #include "../../input/inputhandler.h"
 
-#include "../../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-RegisterClass(Engine::GUI::TopLevelWindow);
+#include "Interfaces/window/windowapi.h"
+
+#include "../../app/clientapplication.h"
+#include "../../app/clientappsettings.h"
+
+#include "../../input/OIS/oisinputhandler.h"
 
 namespace Engine
 {	
@@ -28,13 +33,30 @@ namespace Engine
 	{
 		TopLevelWindow::TopLevelWindow(GUISystem& gui) :
 			Scope(&gui),
-			mGui(gui),
-		mInput(nullptr)
+			mGui(gui)
 		{
+			const App::ClientAppSettings &settings = gui.app().settings();
+
+			mWindow = Window::sCreateWindow(settings.mWindowSettings);
+
+			mWindow->addListener(this);
+
+			if (settings.mInput) {
+				mInput = settings.mInput;
+			}
+			else {
+				mInputHolder = std::make_unique<Input::OISInputHandler>(mWindow);
+				mInput = mInputHolder.get();
+			}
+			mInput->setListener(this);
 		}
 
 		TopLevelWindow::~TopLevelWindow()
 		{
+			mWindow->removeListener(this);
+
+			mWindow->destroy();
+
 			mTopLevelWidgets.clear();
 			
 		}
@@ -54,6 +76,11 @@ namespace Engine
 			}
 
 			return true;
+		}
+
+		void TopLevelWindow::close()
+		{
+			mGui.closeTopLevelWindow(this);
 		}
 
 		void TopLevelWindow::showCursor()
@@ -202,10 +229,24 @@ namespace Engine
 			return mInput;
 		}
 
-		void TopLevelWindow::setInput(Input::InputHandler* input)
+		Window::Window * TopLevelWindow::window()
 		{
-			mInput = input;
-			mInput->setListener(this);
+			return mWindow;
+		}
+
+		void TopLevelWindow::onClose()
+		{
+			close();
+		}
+
+		void TopLevelWindow::onRepaint()
+		{
+			update();
+		}
+
+		void TopLevelWindow::onResize(size_t width, size_t height)
+		{
+			mInput->onResize(width, height);
 		}
 
 		void TopLevelWindow::calculateWindowGeometries()

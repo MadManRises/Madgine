@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 
-#include "../serialize/toplevelserializableunit.h"
+#include "Interfaces/serialize/toplevelserializableunit.h"
 
 #include "scenecomponentcollector.h"
 
-#include "../serialize/container/list.h"
+#include "Interfaces/serialize/container/list.h"
 
 #include "entity/entity.h"
 
-#include "../serialize/container/noparent.h"
+#include "Interfaces/serialize/container/noparent.h"
 #include "../core/framelistener.h"
-#include "../scripting/types/globalapicomponent.h"
+#include "../app/globalapicomponent.h"
 
 #include "../uniquecomponentcollectorinstance.h"
 
@@ -23,7 +23,7 @@ namespace Engine
 	namespace Scene
 	{
 		class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-			public Scripting::Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, Scripting::GlobalAPICollector>>,
+			public Scripting::Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, App::GlobalAPICollector>>,
 			public Core::FrameListener
 		{
 		public:
@@ -64,7 +64,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 
 			App::Application &app(bool = true) const;
@@ -109,3 +109,5 @@ namespace Engine
 
 	}
 }
+
+RegisterClass(Engine::Scene::SceneManager);

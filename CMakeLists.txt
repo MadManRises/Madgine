@@ -5,8 +5,6 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0011 OLD)
 cmake_policy(SET CMP0049 OLD)
 
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -51,11 +49,9 @@ multiConfig(Madgine)
 
 load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
-
-
 add_subdirectory(Madgine)
 
-set(BUILD_MADITOR TRUE CACHE BOOL "Build Maditor Code")
+set(BUILD_MADITOR FALSE CACHE BOOL "Build Maditor Code")
 
 if(BUILD_MADITOR)
 	add_subdirectory(Maditor)

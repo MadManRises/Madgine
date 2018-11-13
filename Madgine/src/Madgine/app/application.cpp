@@ -6,29 +6,28 @@
 
 
 
-#include "../scripting/types/globalapicomponentbase.h"
+#include "globalapicomponentbase.h"
 
-#include "../util/standardlog.h"
+#include "Interfaces/util/standardlog.h"
 
 #include "../core/frameloop.h"
 
 #include "../scene/scenemanager.h"
 
-#include "../scripting/types/api.h"
+#include "Interfaces/scripting/types/api.h"
 
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-#include "../scripting/types/luastate.h"
+#include "Interfaces/scripting/types/luastate.h"
 
-RegisterClass(Engine::App::Application);
-
-
-
+#if defined(STATIC_BUILD) && defined(STATIC_NOGUI)
+extern "C" Engine::Core::FrameLoop* frameloop();
+#endif
 
 namespace Engine
 {	
 
-	template MADGINE_BASE_EXPORT class UniqueComponentCollector<Scripting::GlobalAPIComponentBase, App::Application&>;
+	template MADGINE_BASE_EXPORT struct UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
 
 	namespace App
 	{
@@ -46,24 +45,18 @@ namespace Engine
 			mLog.reset();
 		}
 
-		void Application::setup(const AppSettings& settings, std::unique_ptr<Core::FrameLoop> &&loop)
+		void Application::setup(const AppSettings& settings)
 		{
 			mSettings = &settings;
 
 			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
 			Util::UtilMethods::setup(mLog.get());
 
-			if (!loop) {
-				auto f = Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol<Core::FrameLoop*()>("frameloop");
-				if (!f)
-					throw 0;
-				loop = std::unique_ptr<Core::FrameLoop>(f());
-				if (!loop)
-					throw 0;
-			}
+#ifndef STATIC_BUILD
+			Plugins::PluginManager::getSingleton()["Renderer"].addListener(this);
+#endif
 
-			mLoop = std::forward<std::unique_ptr<Core::FrameLoop>>(loop);
-			mLoop->addFrameListener(this);
+			loadFrameLoop();
 		}
 
 		bool Application::init()
@@ -75,7 +68,7 @@ namespace Engine
 			if (!mLoop->callInit())
 				return false;
 
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+			for (const std::unique_ptr<GlobalAPIComponentBase>& api : mGlobalAPIs)
 			{
 				if (!api->callInit(mGlobalAPIInitCounter))
 					return false;
@@ -87,13 +80,59 @@ namespace Engine
 		void Application::finalize()
 		{
 			for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
-				for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& api : mGlobalAPIs)
+				for (const std::unique_ptr<GlobalAPIComponentBase>& api : mGlobalAPIs)
 				{
 					api->callFinalize(mGlobalAPIInitCounter);
 				}
 			}
 
 			mLoop->callFinalize();
+		}
+
+		void Application::loadFrameLoop(std::unique_ptr<Core::FrameLoop>&& loop)
+		{
+			if (!loop) {
+#ifndef STATIC_BUILD
+				auto f = Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol<Core::FrameLoop*()>("frameloop");
+				if (!f)
+					throw 0;
+				loop = std::unique_ptr<Core::FrameLoop>(f());
+#elif defined(STATIC_NOGUI)
+				loop = std::unique_ptr<Core::FrameLoop>(frameloop());
+#endif
+				if (!loop)
+					throw 0;
+			}
+
+			if (mLoop) {
+				mLoop->removeFrameListener(this);
+			}
+			mLoop = std::move(loop);
+			mLoop->addFrameListener(this);
+		}
+
+		bool Application::aboutToUnloadPlugin(const Plugins::Plugin * plugin)
+		{
+			shutdown();
+			return false;
+		}
+
+		bool Application::aboutToLoadPlugin(const Plugins::Plugin * plugin)
+		{
+			return false;
+		}
+
+		void Application::onPluginUnload(const Plugins::Plugin * plugin)
+		{
+			mLoop->callFinalize();
+			mLoop.reset();
+		}
+
+		void Application::onPluginLoad(const Plugins::Plugin * plugin)
+		{
+			loadFrameLoop();
+			mLoop->callInit();
+			mRestartLoop = true;
 		}
 
 		void Application::shutdown()
@@ -111,7 +150,13 @@ namespace Engine
 				}
 			}
 
-			int result = mLoop->go();
+
+			int result;
+			do {
+				mRestartLoop = false;
+				result = mLoop->go();
+				SignalSlot::ConnectionManager::getSingleton().update();
+			} while (mRestartLoop);
 			clear();
 			return result;
 		}
@@ -123,7 +168,7 @@ namespace Engine
 				//PROFILE("ScriptingManager")
 				try
 				{
-					for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
+					for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
 					{
 						p->update();
 					}
@@ -156,9 +201,9 @@ namespace Engine
 			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
 		}
 
-		Scripting::GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)
+		GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)
 		{
-            Scripting::GlobalAPIComponentBase &api = mGlobalAPIs.get(i); 
+            GlobalAPIComponentBase &api = mGlobalAPIs.get(i); 
             if (init){
                 checkInitState();
                 api.callInit(mGlobalAPIInitCounter);
@@ -196,7 +241,7 @@ namespace Engine
 
 		void Application::clear()
 		{
-			for (const std::unique_ptr<Scripting::GlobalAPIComponentBase>& p : mGlobalAPIs)
+			for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
 			{
 				//p->clear();
 			}
@@ -225,6 +270,7 @@ namespace Engine
 	}
 
 #ifdef _MSC_VER
-	template class Scripting::GlobalAPICollector;
+	template struct App::GlobalAPICollector;
 #endif
+
 }

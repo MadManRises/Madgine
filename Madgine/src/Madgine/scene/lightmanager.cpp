@@ -3,7 +3,7 @@
 #include "lightmanager.h"
 
 
-RegisterClass(Engine::Scene::LightManager);
+
 
 
 namespace Engine

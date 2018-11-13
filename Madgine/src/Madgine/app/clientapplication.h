@@ -23,6 +23,9 @@ namespace Engine
 
 			ClientApplication &getSelf(bool = true);
 
+		protected:
+			virtual void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop) override;
+
 		private:
 			GUI::GUISystem * mGUI;
 

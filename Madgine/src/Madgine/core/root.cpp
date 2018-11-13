@@ -2,12 +2,16 @@
 
 #include "root.h"
 
-#include "../scripting/parsing/scriptloader.h"
+#include "../resources/scripts/scriptloader.h"
 
-#include "../scripting/types/luastate.h"
-#include "../plugins/pluginmanager.h"
+#include "Interfaces/scripting/types/luastate.h"
+#include "Interfaces/plugins/pluginmanager.h"
 #include "../resources/resourcemanager.h"
-#include "../signalslot/connectionmanager.h"
+#include "Interfaces/signalslot/connectionmanager.h"
+#include "Interfaces/debug/memory/memory.h"
+#include "Interfaces/debug/profiler/profiler.h"
+
+#include "../uniquecomponentcollectormanager.h"
 
 
 namespace Engine
@@ -16,11 +20,18 @@ namespace Engine
 	{
 		Root::Root(const RootSettings &settings) :
 			mSettings(settings),
+#ifndef STATIC_BUILD
 		mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine")),
+			mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager)),
+#endif
 		mConnectionManger(std::make_unique<SignalSlot::ConnectionManager>()),
-		mLuaState(std::make_unique<Scripting::LuaState>())
+		mLuaState(std::make_unique<Scripting::LuaState>()),
+			mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>()),
+			mProfiler(std::make_unique<Debug::Profiler::Profiler>())
 		{
-			(*mPluginManager)["Utility"].getPlugin("Tools").load();
+#ifndef STATIC_BUILD
+			(*mPluginManager)["Utility"].loadPlugin("Tools");
+#endif
 		}
 
 		Root::~Root()
@@ -29,7 +40,7 @@ namespace Engine
 
 		bool Root::init()
 		{
-			mResources = std::make_unique<Resources::ResourceManager>(*mPluginManager, mSettings.mMediaDir);
+			mResources = std::make_unique<Resources::ResourceManager>(mSettings.mMediaDir);
 			if (!mResources->init())
 				return false;
 
@@ -44,14 +55,20 @@ namespace Engine
 
 			mLuaState->setFinalized();
 
+#ifndef STATIC_BUILD
+			(*mPluginManager)["Renderer"].loadPlugin("OpenGL");
+			(*mPluginManager)["Renderer"].setExclusive();
+			(*mPluginManager)["Renderer"].setAtleastOne();
+#endif
+
 			return true;
 
 		}
 
-		std::experimental::filesystem::path Root::mediaDir()
+/*		std::experimental::filesystem::path Root::mediaDir()
 		{
 			return mSettings.mMediaDir;
-		}
+		}*/
 
 
 	}

@@ -6,10 +6,10 @@
 
 #include "../core/root.h"
 
-#include "../generic/keyvalueiterate.h"
-#include "../scripting/types/api.h"
+#include "Interfaces/generic/keyvalueiterate.h"
+#include "Interfaces/scripting/types/api.h"
 
-RegisterClass(Engine::Server::ServerBase);
+
 
 namespace Engine
 {
@@ -49,7 +49,7 @@ namespace Engine
 			return result;
 		}
 
-		Util::ServerLog& ServerBase::log()
+		ServerLog& ServerBase::log()
 		{
 			return mLog;
 		}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "widget.h"
-#include "../../generic/virtualbase.h"
+#include "Interfaces/generic/virtualbase.h"
 
 namespace Engine
 {
@@ -20,3 +20,6 @@ namespace Engine
 		};
 	}
 }
+
+
+RegisterClass(Engine::GUI::Label);

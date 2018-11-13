@@ -2,10 +2,10 @@
 #include "entitycomponentbase.h"
 #include "entity.h"
 
-#include "../../scripting/types/api.h"
-#include "../../generic/keyvalueiterate.h"
+#include "Interfaces/scripting/types/api.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-RegisterClass(Engine::Scene::Entity::EntityComponentBase);
+
 
 namespace Engine
 {
@@ -55,7 +55,7 @@ namespace Engine
 				return mEntity->getSceneComponent(i, init);
 			}
 
-			Scripting::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
+			App::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
 			{
 				return mEntity->getGlobalAPIComponent(i, init);
 			}

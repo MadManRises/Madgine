@@ -17,7 +17,7 @@ namespace Engine
 			return *sSingleton;
 		}
 
-		ResourceManager::ResourceManager(Plugins::PluginManager &pluginMgr, const std::experimental::filesystem::path &rootDir) :
+		ResourceManager::ResourceManager(const std::experimental::filesystem::path &rootDir) :
 		mCollector(*this),
 		mRootDir(rootDir)
 		{

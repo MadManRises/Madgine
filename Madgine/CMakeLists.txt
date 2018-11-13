@@ -3,6 +3,8 @@ add_subdirectory(project)
 
 add_subdirectory(plugins)
 
+add_subdirectory(launcher)
+
 export_to_workspace(Madgine)
 
 cpack_add_component(Madgine REQUIRED)

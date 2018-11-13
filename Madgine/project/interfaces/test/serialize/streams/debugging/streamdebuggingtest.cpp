@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "Madgine/interfaceslib.h"
+#include "Interfaces/interfaceslib.h"
 
-#include "Madgine/serialize/streams/debugging/streamdebugging.h"
+#include "Interfaces/serialize/streams/debugging/streamdebugging.h"
 
 TEST(StreamDebugging, Logging)
 {

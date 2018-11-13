@@ -1,11 +1,9 @@
 
-include_directories(${Madgine_SOURCE_DIR}/Madgine/src)
+Project(Plugins)
 
 include(Plugins)
 
+add_subdirectory(renderer)
+add_subdirectory(utility)
 
-add_subdirectory(ogre)
-add_subdirectory(server)
-
-add_subdirectory(tools)
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../madgineobject.h"
-#include "../scripting/types/scopebase.h"
-#include "../signalslot/slot.h"
+#include "Interfaces/scripting/types/scopebase.h"
+#include "Interfaces/signalslot/slot.h"
 
 namespace Engine
 {
@@ -56,7 +56,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			template <class T>
 			T &getGuiHandler(bool init = true)

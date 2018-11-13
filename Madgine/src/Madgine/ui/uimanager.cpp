@@ -9,11 +9,9 @@
 #include "../app/clientapplication.h"
 #include "../app/clientappsettings.h"
 
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 
-#include "../scripting/types/api.h"
-
-RegisterClass(Engine::UI::UIManager);
+#include "Interfaces/scripting/types/api.h"
 
 namespace Engine
 {	
@@ -263,7 +261,7 @@ namespace Engine
 			return mGUI.getSceneComponent(i, init);
 		}
 
-		Scripting::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{
@@ -304,3 +302,4 @@ namespace Engine
 		}
 	}
 }
+

@@ -5,7 +5,7 @@
 #include "../scene/contextmasks.h"
 #include "../uniquecomponent.h"
 
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 
 #include "../input/inputevents.h"
 
@@ -87,9 +87,12 @@ namespace Engine
 		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, UIManager &>;
 #endif
 
-		using GameHandlerCollectorInstance = UniqueComponentCollectorInstance<GameHandlerBase, std::vector, UIManager &>;
+		using GameHandlerCollectorInstance = UniqueComponentCollectorInstance<GameHandlerBase, UIManager &>;
 
 	} // namespace UI
 
-	PLUGIN_COLLECTOR_EXPORT(GameHandler, UI::GameHandlerCollector);
 }
+
+
+RegisterClass(Engine::UI::GameHandlerBase);
+RegisterCollector(Engine::UI::GameHandlerCollector);

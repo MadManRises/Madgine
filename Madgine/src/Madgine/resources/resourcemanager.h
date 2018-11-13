@@ -13,7 +13,7 @@ namespace Engine
 		public:
 			static ResourceManager &getSingleton();
 
-			ResourceManager(Plugins::PluginManager &pluginMgr, const std::experimental::filesystem::path &rootDir);
+			ResourceManager(const std::experimental::filesystem::path &rootDir);
 
 			template <class Loader>
 			typename Loader::ResourceType *get(const std::string &name)

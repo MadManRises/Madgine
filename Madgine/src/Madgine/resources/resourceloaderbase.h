@@ -1,5 +1,7 @@
 #pragma once 
 
+#include "Interfaces/reflection/classname.h"
+
 namespace Engine
 {
 	namespace Resources
@@ -29,3 +31,5 @@ namespace Engine
 
 	}
 }
+
+RegisterClass(Engine::Resources::ResourceLoaderBase);

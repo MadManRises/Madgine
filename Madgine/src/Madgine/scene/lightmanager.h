@@ -2,7 +2,7 @@
 
 #include "scenecomponent.h"
 
-#include "../serialize/container/list.h"
+#include "Interfaces/serialize/container/list.h"
 
 #include "light.h"
 
@@ -39,3 +39,5 @@ namespace Engine
 
 	}
 }
+
+RegisterClass(Engine::Scene::LightManager);

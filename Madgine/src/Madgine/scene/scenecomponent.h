@@ -4,8 +4,8 @@
 
 #include "../uniquecomponent.h"
 #include "scenecomponentbase.h"
-#include "../serialize/serializableunit.h"
-#include "../scripting/types/scope.h"
+#include "Interfaces/serialize/serializableunit.h"
+#include "Interfaces/scripting/types/scope.h"
 
 namespace Engine
 {

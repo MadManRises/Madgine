@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "../../../serialize/container/serializedmapper.h"
-#include "../../../math/vector3.h"
+#include "Interfaces/serialize/container/serializedmapper.h"
+#include "Interfaces/math/vector3.h"
 
 namespace Engine
 {
@@ -49,3 +49,5 @@ namespace Engine
 		}
 	}
 }
+
+RegisterClass(Engine::Scene::Entity::Transform);

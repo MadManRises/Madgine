@@ -5,7 +5,7 @@
 #include "../uniquecomponent.h"
 #include "../uniquecomponentcollector.h"
 
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 
 namespace Engine
 {
@@ -59,9 +59,11 @@ namespace Engine
 		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, UIManager &>;
 #endif
 
-		using GuiHandlerCollectorInstance = UniqueComponentCollectorInstance<GuiHandlerBase, std::vector, UIManager &>;
+		using GuiHandlerCollectorInstance = UniqueComponentCollectorInstance<GuiHandlerBase, UIManager &>;
 	} // namespace GuiHandler
 
-	PLUGIN_COLLECTOR_EXPORT(GuiHandler, UI::GuiHandlerCollector);
-
 } // namespace Cegui
+
+
+RegisterClass(Engine::UI::GuiHandlerBase);
+RegisterCollector(Engine::UI::GuiHandlerCollector);

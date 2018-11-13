@@ -74,7 +74,6 @@ namespace Maditor
 			mProcess.launch(cmd, runtimeDir());
 
 			emit processStarted(mProcess.pid(), mAppInfo);
-			mUtil->stats()->setProcess(mProcess.handle());
 
 			if (isLauncher())
 			{

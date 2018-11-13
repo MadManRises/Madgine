@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../math/matrix3.h"
+#include "Interfaces/math/matrix3.h"
 
 #include "../../input/inputevents.h"
 
 #include "widgetclass.h"
-#include "../../scripting/types/scope.h"
-#include "../../signalslot/signal.h"
+#include "Interfaces/scripting/types/scope.h"
+#include "Interfaces/signalslot/signal.h"
 
 namespace Engine
 {
@@ -118,3 +118,5 @@ namespace Engine
 		};
 	}
 }
+
+RegisterClass(Engine::GUI::Widget);

@@ -1,10 +1,11 @@
 #include "../baselib.h"
 #include "scenecomponentbase.h"
-#include "../scripting/types/api.h"
-#include "../generic/keyvalueiterate.h"
+#include "Interfaces/scripting/types/api.h"
+#include "Interfaces/generic/keyvalueiterate.h"
 #include "scenemanager.h"
 
 //API_IMPL(Engine::Scene::SceneComponentBase);
+
 
 namespace Engine
 {
@@ -73,7 +74,7 @@ namespace Engine
 			return mSceneMgr.getComponent(i, init);
 		}
 
-		Scripting::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

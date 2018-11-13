@@ -32,8 +32,9 @@
 
 #include "maditorsharedforward.h"
 
-
+#define MADGINE_NO_MEMTRACK 1
 #include <Madgine/interfaceslib.h>
+
 
 
 

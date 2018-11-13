@@ -2,7 +2,7 @@
 
 #include "entitycomponentcollector.h"
 
-#include "../../plugins/pluginmanager.h"
+#include "Interfaces/plugins/pluginmanager.h"
 
 #include "componentexception.h"
 

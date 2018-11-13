@@ -18,7 +18,7 @@ extern "C"
 #include <lua/lualib.h>                             /* Always include this when calling Lua */
 }
 
-RegisterClass(Maditor::Launcher::InspectorThreadInstance);
+
 
 
 namespace Maditor

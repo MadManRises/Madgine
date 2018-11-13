@@ -26,28 +26,17 @@ namespace Maditor {
 
 
 
-		void LauncherLogListener::messageLogged(const std::string & message, Engine::Util::MessageType lml, const std::list<Engine::Util::TraceBack> &traceback, const std::string & logName)
+		void LauncherLogListener::messageLogged(const std::string & message, Engine::Util::MessageType lml, const Engine::Debug::StackTrace<32> &stackTrace, const std::string & logName)
 		{
 			std::stringstream fullTraceback;
-			std::string fileName;
-			int lineNr = -2;
-			
-			const Engine::Util::TraceBack *last = 0;
-			for (const Engine::Util::TraceBack &t : Engine::Util::UtilMethods::traceBack()) {
-				if (last)
-					fullTraceback << std::endl;
-				last = &t;
-				fullTraceback << /*relative*/t.mFile << "(" << t.mLineNr << "): " << t.mFunction;
-			}
-			if (last) {
-				fileName = last->mFile;
-				lineNr = last->mLineNr;
-			}
-			else {
-				lineNr = -1;
+			Engine::Debug::FullStackTrace full = stackTrace.calculateReadable();
+			for (const auto &trace : full) {
+				fullTraceback << trace << '\n';
 			}
 
-			mSlot->queue(message, lml, logName, fullTraceback.str(), fileName, lineNr, {});
+			const Engine::Debug::TraceBack &t = full.front();
+
+			mSlot->queue(message, lml, logName, fullTraceback.str(), t.mFile, t.mLineNr, {});
 		}
 
 	}

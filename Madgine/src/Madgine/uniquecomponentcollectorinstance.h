@@ -1,81 +1,56 @@
 #pragma once
 
-#include "uniquecomponentcollector.h"
+#include "uniquecomponentregistry.h"
 
-#include "generic/container_traits.h"
-#include "plugins/pluginmanager.h"
+#include "Interfaces/generic/container_traits.h"
+
+#include "Interfaces/signalslot/slot.h"
 
 namespace Engine
 {
 
-	template <class _Base, template <class...> class Container, class... _Ty>
-	class UniqueComponentCollectorInstance : protected UniqueComponentCollector<_Base, _Ty...>
+	template <class _Base, class _Ty, template <class...> class Container>
+	class UniqueComponentCollectorInstance
 	{
 	public:
-		typedef typename UniqueComponentCollector<_Base, _Ty...>::F F;
-		typedef typename UniqueComponentCollector<_Base, _Ty...>::Base Base;
+		typedef UniqueComponentRegistry<_Base, _Ty> Registry;
+		typedef typename Registry::F F;
+		typedef typename Registry::Base Base;
 
-		UniqueComponentCollectorInstance(_Ty ... args)
-		{
-			Plugins::PluginManager &pluginManager = Plugins::PluginManager::getSingleton();
+		typedef typename Container<std::unique_ptr<Base>>::const_iterator const_iterator;
 
-			size_t count = sComponents().size();
-#ifndef PLUGIN_BUILD
-			for (const std::pair<const std::string, Plugins::PluginSection> &sec : pluginManager) {
-				for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-					const std::vector<F> *components = loadFromPlugin(&p.second, count);
-					if (components)
-						count += components->size();
-				}
-			}
+		UniqueComponentCollectorInstance(_Ty arg)
+#ifndef STATIC_BUILD
+			: mUpdateSlot(this)
+			, mArg(arg)
 #endif
+		{
+			size_t count = UniqueComponentRegistry<_Base, _Ty>::sComponents().size();
 			mSortedComponents.reserve(count);
 			if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
 				mComponents.reserve(count);
 			}
-			for (auto f : sComponents())
+			for (auto f : UniqueComponentRegistry<_Base, _Ty>::sComponents())
 			{
-				if (f) {
-					std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
-					mSortedComponents.push_back(p.get());
-					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
-				}
-				else
-				{
-					mSortedComponents.push_back(nullptr);
-					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
-				}
+				std::unique_ptr<Base> p = f(arg);
+				mSortedComponents.push_back(p.get());
+				container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
 			}
-#ifndef PLUGIN_BUILD
-			for (const std::pair<const std::string, Plugins::PluginSection> &sec : pluginManager) {
-				for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-					const std::vector<F> *components = loadFromPlugin(&p.second, mSortedComponents.size());
-					if (components) {
-						for (auto f : *components) {
-							if (f) {
-								std::unique_ptr<Base> p = f(std::forward<_Ty>(args)...);
-								mSortedComponents.push_back(p.get());
-								container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end(), std::move(p));
-							}
-							else
-							{
-								mSortedComponents.push_back(nullptr);
-								container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, end());
-							}
-						}
-					}
-				}
-			}
+#ifndef STATIC_BUILD
+			Registry::update().connect(mUpdateSlot);
 #endif
 
 		}
 
-		typename Container<std::unique_ptr<Base>>::const_iterator begin() const
+		UniqueComponentCollectorInstance(const UniqueComponentCollectorInstance&) = delete;
+		void operator=(const UniqueComponentCollectorInstance&) = delete;
+
+		const_iterator begin() const
 		{
 			return mComponents.begin();
 		}
 
-		typename Container<std::unique_ptr<Base>>::const_iterator end() const
+		const_iterator end() const
 		{
 			return mComponents.end();
 		}
@@ -93,26 +68,49 @@ namespace Engine
 		template <class T>
 		T &get()
 		{
-			return static_cast<T&>(get(T::component_index()));
+			return static_cast<T&>(get(component_index<T>()));
 		}
 
 		Base &get(size_t i)
 		{
-			return **std::next(mSortedComponents.begin(), i);
+			return *mSortedComponents[i];
 		}
 
-
-	private:
-		static const std::vector<F> *loadFromPlugin(const Plugins::Plugin *plugin, size_t baseIndex) {
-			typedef const std::vector<F> *StoreLoader(size_t);
-			StoreLoader *loader = (StoreLoader*)plugin->getSymbol(name());
-			return loader ? (*loader)(baseIndex) : nullptr;
-		}
 
 
 	private:
 		Container<std::unique_ptr<Base>> mComponents;
 		std::vector<Base*> mSortedComponents;
+
+#ifndef STATIC_BUILD
+
+	protected:	
+		void updateComponents(CollectorInfo *info, bool add, const std::vector<F> &vals) {
+			if (add){
+				assert(mComponents.size() == info->mBaseIndex);
+				mSortedComponents.reserve(info->mBaseIndex + vals.size());
+				if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
+					mComponents.reserve(info->mBaseIndex + vals.size());
+				}
+				size_t i = 0;
+				for (F f : vals) {
+					std::unique_ptr<Base> p = f(mArg);
+					mSortedComponents.push_back(p.get());
+					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
+					++i;
+				}
+			}
+			else {
+				mSortedComponents.erase(mSortedComponents.begin() + info->mBaseIndex, mSortedComponents.begin() + info->mBaseIndex + info->mElementInfos.size());
+				mComponents.erase(std::next(mComponents.begin(), info->mBaseIndex), std::next(mComponents.begin(), info->mBaseIndex + info->mElementInfos.size()));
+			}
+		}
+
+	private:
+		SignalSlot::Slot<&UniqueComponentCollectorInstance<Base, _Ty, Container>::updateComponents> mUpdateSlot;
+		_Ty mArg;
+
+#endif
 	};
 
 }

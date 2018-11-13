@@ -1,16 +1,18 @@
 #pragma once
 
 
-#include "../scripting/types/scope.h"
+#include "Interfaces/scripting/types/scope.h"
 #include "../madgineobject.h"
 
-#include "../scripting/types/globalscopebase.h"
+#include "Interfaces/scripting/types/globalscopebase.h"
 
-#include "../scripting/types/globalapicomponentcollector.h"
+#include "globalapicomponentcollector.h"
 
 #include "../core/framelistener.h"
 
 #include "../uniquecomponentcollectorinstance.h"
+
+#include "Interfaces/plugins/pluginmanager.h"
 
 namespace Engine
 {
@@ -20,7 +22,7 @@ namespace Engine
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
 		class MADGINE_BASE_EXPORT Application : public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
-			public MadgineObject, public Core::FrameListener
+			public MadgineObject, public Core::FrameListener, public Plugins::PluginListener
 		{
 		public:
 			/**
@@ -56,7 +58,7 @@ namespace Engine
 			*
 			* @param settings all necessary information to setup the Application
 			*/
-			void setup(const AppSettings& settings, std::unique_ptr<Core::FrameLoop> &&loop = {});
+			void setup(const AppSettings& settings);
 
 			/**
 			 * \brief starts the event loop of the madgine.
@@ -103,15 +105,15 @@ namespace Engine
 			template <class T>
 			T &getGlobalAPIComponent()
 			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index()));
+				return static_cast<T&>(getGlobalAPIComponent(component_index<T>()));
 			}
 
-			Scripting::GlobalAPIComponentBase &getGlobalAPIComponent(size_t, bool = true);
+			GlobalAPIComponentBase &getGlobalAPIComponent(size_t, bool = true);
 
 			template <class T>
 			T &getSceneComponent()
 			{
-				return static_cast<T&>(getSceneComponent(T::component_index()));
+				return static_cast<T&>(getSceneComponent(component_index<T>()));
 			}
 
 			Scene::SceneComponentBase &getSceneComponent(size_t, bool = true);
@@ -140,18 +142,29 @@ namespace Engine
 
 			void finalize() override;
 
+			virtual void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop = {});
+
+			virtual bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
+			virtual bool aboutToLoadPlugin(const Plugins::Plugin *plugin) override;
+
+			virtual void onPluginUnload(const Plugins::Plugin *plugin) override;
+			virtual void onPluginLoad(const Plugins::Plugin *plugin) override;
 
 		private:
 
-			Scripting::GlobalAPICollectorInstance mGlobalAPIs;
+			GlobalAPICollectorInstance mGlobalAPIs;
 			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Util::StandardLog> mLog;
 
-			std::unique_ptr<Core::FrameLoop> mLoop;			
+			std::unique_ptr<Core::FrameLoop> mLoop;		
+			bool mRestartLoop = false;
 
 			const AppSettings *mSettings;
 			
 		};
 	}
 }
+
+
+RegisterClass(Engine::App::Application);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../scripting/datatypes/luatable.h"
+#include "Interfaces/scripting/datatypes/luatable.h"
 
 namespace Engine
 {

@@ -62,9 +62,14 @@ namespace Engine
 			virtual void setPersistent(bool b) override
 			{
 				ResourceBase::setPersistent(b);
-				if (!mPtr && !mWeakPtr.expired())
-				{
-					mPtr = std::shared_ptr<typename Loader::Data>(mWeakPtr);
+				if (b) {
+					if (!mPtr && !mWeakPtr.expired())
+					{
+						mPtr = std::shared_ptr<typename Loader::Data>(mWeakPtr);
+					}
+				}
+				else {
+					mPtr.reset();
 				}
 			}
 			

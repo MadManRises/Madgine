@@ -16,7 +16,7 @@ namespace Engine
 
 			virtual int go();
 
-			virtual bool singleFrame();
+			virtual bool singleFrame(std::chrono::microseconds timeSinceLastFrame = 0us);
 
 			std::chrono::nanoseconds fixedRemainder() const;
 

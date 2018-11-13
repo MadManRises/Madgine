@@ -25,8 +25,6 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQSCINTILLA_DLL)
 
 
-include_directories(${Madgine_SOURCE_DIR}/Madgine/src)
-
 add_subdirectory(shared)
 
 add_subdirectory(launcher)
@@ -50,7 +48,7 @@ target_link_libraries(Maditor Maditor_Model Maditor_View)
 
 
 
-file(GENERATE OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/addons.txt CONTENT "${TOOLS_BINS}")
+file(GENERATE OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CMAKE_BUILD_TYPE}}/addons.txt CONTENT "${TOOLS_BINS}")
 
 
 get_filename_component(CMAKE_BIN ${CMAKE_COMMAND} NAME)
@@ -66,13 +64,14 @@ add_custom_command(TARGET Maditor POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/layouts ${CMAKE_CURRENT_BINARY_DIR}/layouts
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_CURRENT_BINARY_DIR}/cmake
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_COMMAND} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../share
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../doc
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BIN_PATH}/../share ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../share
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BIN_PATH}/../doc ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../doc
+	#COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../share
+	#COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../doc
+	#COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BIN_PATH}/../share ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../share
+	#COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BIN_PATH}/../doc ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/../doc
 )
 
-collect_custom_dependencies(Maditor cmake ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${CMAKE_BIN})
+MESSAGE(WARNING TODO)
+#collect_custom_dependencies(Maditor cmake ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${CMAKE_BIN})
 
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${CMAKE_BIN} DESTINATION bin COMPONENT Maditor)
@@ -91,18 +90,19 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake DESTINATION Maditor COMPONEN
 
 # Windows specific build steps
 if(WIN32)
+	MESSAGE(WARNING TODO)
     # Run windeployqt if it can be found
-    find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${QT_PATH} ENV QTDIR PATH_SUFFIXES bin)
-    add_custom_command(TARGET Maditor POST_BUILD
-    COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin -xml
-	DEPENDS Maditor
-	)
+    #find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt HINTS ${QT_PATH} ENV QTDIR PATH_SUFFIXES bin)
+    #add_custom_command(TARGET Maditor POST_BUILD
+    #COMMAND ${WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE:Maditor> --dir ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin -xml
+	#DEPENDS Maditor
+	#)
 
-	install(DIRECTORY ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin DESTINATION . COMPONENT Maditor)
+	#install(DIRECTORY ${CMAKE_BINARY_DIR}/dependencies_bin/qt/bin DESTINATION . COMPONENT Maditor)
 
-	if (MSVC)
-		cpack_add_component(vs15 DISPLAY_NAME "Visual Studio 2017")
-	endif(MSVC)
+	#if (MSVC)
+	#	cpack_add_component(vs15 DISPLAY_NAME "Visual Studio 2017")
+	#endif(MSVC)
 
 endif()
 
