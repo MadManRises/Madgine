@@ -197,11 +197,11 @@ function(add_precompiled_header _target _input)
       COMMAND "${CMAKE_CXX_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
       DEPENDS "${_pch_header}" "${_pch_flags_file}"
       COMMENT "Precompiling ${_name} for ${_target} (C++)")
-    add_custom_command(
-      OUTPUT "${_output_c}"
-      COMMAND "${CMAKE_C_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c-header -I "${_orig_dir}" -o "${_output_c}" "${_pch_header}"
-      DEPENDS "${_pch_header}" "${_pch_flags_file}"
-      COMMENT "Precompiling ${_name} for ${_target} (C)")
+    #add_custom_command(
+    #  OUTPUT "${_output_c}"
+    #  COMMAND "${CMAKE_C_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c-header -I "${_orig_dir}" -o "${_output_c}" "${_pch_header}"
+    #  DEPENDS "${_pch_header}" "${_pch_flags_file}"
+    #  COMMENT "Precompiling ${_name} for ${_target} (C)")
 
     get_property(_sources TARGET ${_target} PROPERTY SOURCES)
     foreach(_source ${_sources})
