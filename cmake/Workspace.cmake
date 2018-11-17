@@ -287,7 +287,11 @@ macro(add_workspace_library name)
 	add_library(${name} ${LIB_CONFIG_UNPARSED_ARGUMENTS})
 
 	get_target_property(sourceDir ${name} SOURCE_DIR)
+
+	if (NOT LIB_CONFIG_SOURCE_ROOT)
+		set(LIB_CONFIG_SOURCE_ROOT src)
+	endif()
 	
 
-	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}/src>)
+	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}>)
 endmacro(add_workspace_library)

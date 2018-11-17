@@ -9,17 +9,7 @@ pipeline {
 				git submodule update --init --recursive
 				mkdir -p build
 				cd build
-				mkdir -p workspace
-				cmake .. -DCMAKE_BUILD_TYPE=Debug -DWorkspace=workspace -DINSTALL_EXTERN=TRUE -DBOOST_PATH=~/boost_1_66_0
-				'''
-			}
-		}
-
-		stage('Dependencies'){
-			steps {
-				sh '''
-				cd build
-				make Update_dependencies
+				cmake .. -DCMAKE_BUILD_TYPE=Debug
 				'''
 			}
 		}
@@ -27,7 +17,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-		cd build
+				cd build
                 make
                 '''
             }
@@ -37,7 +27,7 @@ pipeline {
            
             parallel {   
                
-		stage('Publish Doxygen') {
+				stage('Publish Doxygen') {
                     when {
                         branch 'master'
                     }
@@ -47,23 +37,22 @@ pipeline {
                     }
                 }
             
-		    stage('Test') {
-			    steps {
+				stage('Test') {
+					steps {
 
-				    sh '''
-				    cd build
-				    rm -rf memchecks
-				    mkdir -p memchecks
-				    ctest -T memcheck
-				    '''
-			    }
-			post {
-				always{
-					junit '**/build/*.xml'
-				}
-			}
-                }
-            
+						sh '''
+						cd build
+						rm -rf memchecks
+						mkdir -p memchecks
+						ctest -T memcheck
+						'''
+					}
+					post {
+						always{
+							junit '**/build/*.xml'
+						}
+					}
+                }            
             }
         }
         

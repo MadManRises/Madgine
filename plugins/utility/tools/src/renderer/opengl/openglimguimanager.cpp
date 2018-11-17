@@ -19,7 +19,9 @@
 namespace Engine {
 	namespace Tools {
 
-
+		std::unique_ptr<ImGuiManager> createOpenGlManager(App::ClientApplication &app) {
+			return std::make_unique<OpenGLImGuiManager>(app);
+		}
 
 		OpenGLImGuiManager::OpenGLImGuiManager(App::ClientApplication & app) :
 			ImGuiManager(app)

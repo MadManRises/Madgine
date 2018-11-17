@@ -21,7 +21,7 @@ namespace Engine
 
 		PluginManager::PluginManager(const std::string &project) :
 			mProject(project),
-			mSettings("plugins.cfg")
+			mSettings("Madgine_plugins.cfg")
 		{
 			assert(!sSingleton);
 			sSingleton = this;

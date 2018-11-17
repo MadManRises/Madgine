@@ -21,6 +21,7 @@ project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADG
 set(CMAKE_MODULE_PATH
 	"${CMAKE_MODULE_PATH}"
 	"${CMAKE_SOURCE_DIR}/cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/modules"
 )
 
 if (UNIX)
@@ -47,11 +48,17 @@ multiConfig(Madgine)
 
 
 
-add_subdirectory(project)
+add_subdirectory(src)
 
 add_subdirectory(plugins)
 
 add_subdirectory(launcher)
+
+
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
+
 
 export_to_workspace(Madgine)
 

@@ -16,9 +16,6 @@ FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.h)
 	FolderSources(sources src pluginmanager pluginmanager.cpp pluginmanager.h)
 	FolderSources(sources src profiler profiler.cpp profiler.h)
 	FolderSources(sources src renderer imguiaddons.cpp imguiaddons.h imguidemo.cpp imguidemo.h imguimanager.cpp imguimanager.h imguiroot.cpp imguiroot.h)
-	if (NOT STATIC_BUILD OR PLUGINSELECTION_Renderer_Ogre)
-		FolderSources(sources renderer ogre ogreimguimanager.cpp ogreimguimanager.h imguirenderable.cpp imguirenderable.h)
-	endif()
 	if (NOT STATIC_BUILD OR PLUGINSELECTION_Renderer_OpenGL)
 		FolderSources(sources renderer opengl openglimguimanager.cpp openglimguimanager.h)
 	endif()
@@ -29,7 +26,7 @@ add_plugin(Tools Madgine Utility ${sources})
 add_precompiled_header(Tools src/toolslib.h FORCEINCLUDE)
 
 
-target_link_plugins(Tools PUBLIC Ogre OpenGL)
+target_link_plugins(Tools PUBLIC OpenGL)
 
 
 target_link_libraries(Tools PUBLIC Client)

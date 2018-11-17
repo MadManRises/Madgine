@@ -34,7 +34,7 @@ namespace Engine {
 
 	namespace Tools {
 
-		std::unique_ptr<ImGuiManager> createOgreManager(App::ClientApplication &);
+		std::unique_ptr<ImGuiManager> createOpenGlManager(App::ClientApplication &);
 
 		ImGuiRoot::ImGuiRoot(App::Application &app) :
 		Scope(app),
@@ -125,10 +125,8 @@ namespace Engine {
 		void ImGuiRoot::createManager()
 		{
 			
-			IF_PLUGIN(Ogre)
-				mManager = createOgreManager(static_cast<App::ClientApplication&>(app()));
-			else IF_PLUGIN(OpenGL)
-			mManager = std::make_unique<OpenGLImGuiManager>(static_cast<App::ClientApplication&>(app()));
+			IF_PLUGIN(OpenGL)
+			mManager = createOpenGlManager(static_cast<App::ClientApplication&>(app()));
 			else
 			THROW_PLUGIN("No ImGui-Manager available!");
 			mManager->init();
