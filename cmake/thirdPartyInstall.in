@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.8)
+
+set(CMAKE_MODULE_PATH
+	"${CMAKE_MODULE_PATH}"
+	"@workspace_file_dir@"
+)
+
+include(Workspace)
+
+message(STATUS "Begin @lib@ configure...")
+
+add_subdirectory(Update_@lib@)
+
+message(STATUS "@lib@ configure done")
+
+third_party_config(@lib@ @LIB_CONFIG_EXPORT_TARGETS@)
