@@ -39,20 +39,25 @@ include(Testing)
 set (CPACK_NSIS_MODIFY_PATH ON)
 set (CPACK_PACKAGE_VENDOR "MadMan Studios")
 
-set (CPACK_PACKAGE_EXECUTABLES "Maditor;Maditor")
-
-include(Maditor/Maditor_packaging.cmake)
+#set (CPACK_PACKAGE_EXECUTABLES "Maditor;Maditor")
 
 enable_packaging()
 
 multiConfig(Madgine) 
 
-load_workspace_package(lua https://github.com/MadManRises/lua.git)
 
-add_subdirectory(Madgine)
 
-set(BUILD_MADITOR FALSE CACHE BOOL "Build Maditor Code")
+add_subdirectory(project)
 
-if(BUILD_MADITOR)
-	add_subdirectory(Maditor)
-endif()
+add_subdirectory(plugins)
+
+add_subdirectory(launcher)
+
+export_to_workspace(Madgine)
+
+cpack_add_component(Madgine REQUIRED)
+
+cpack_add_component_group(Renderer EXPANDED)
+
+configure_file(doc/Doxyfile.in Doxyfile)
+

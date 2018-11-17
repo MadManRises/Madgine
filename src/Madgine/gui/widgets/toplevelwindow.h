@@ -1,0 +1,118 @@
+#pragma once
+
+#include "Interfaces/scripting/types/scope.h"
+#include "../../input/inputlistener.h"
+#include "Interfaces/window/windoweventlistener.h"
+#include "../../input/inputcollector.h"
+#include "../../uniquecomponent/uniquecomponentselector.h"
+
+namespace Engine
+{
+	namespace GUI
+	{
+		
+		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener, public Window::WindowEventListener
+		{
+
+		public:
+			TopLevelWindow(GUISystem &gui);
+			virtual ~TopLevelWindow();
+
+			virtual bool update();
+
+			void close();
+
+			void showCursor();
+			void hideCursor();
+
+			virtual bool isCursorVisible() = 0;
+			virtual void setCursorVisibility(bool v) = 0;
+			virtual void setCursorPosition(const Vector2& pos) = 0;
+			virtual Vector2 getCursorPosition() = 0;
+			virtual Vector3 getScreenSize() = 0;
+
+
+
+			Widget *createTopLevelWidget(const std::string &name);
+			Bar *createTopLevelBar(const std::string &name);
+			Button *createTopLevelButton(const std::string &name);
+			Checkbox *createTopLevelCheckbox(const std::string &name);
+			Combobox *createTopLevelCombobox(const std::string &name);
+			Image *createTopLevelImage(const std::string &name);
+			Label *createTopLevelLabel(const std::string &name);
+			SceneWindow *createTopLevelSceneWindow(const std::string &name);
+			TabWidget *createTopLevelTabWidget(const std::string &name);
+			Textbox *createTopLevelTextbox(const std::string &name);
+			
+
+			void destroyTopLevel(Widget* w);
+
+			void clear();
+
+			GUISystem &gui();
+
+			virtual bool singleFrame() = 0;
+
+			KeyValueMapList maps() override;
+
+			Input::InputHandler *input();
+
+			void addOverlay(WindowOverlay *overlay);
+
+			bool injectKeyPress(const Input::KeyEventArgs& arg) final;
+			bool injectKeyRelease(const Input::KeyEventArgs& arg) final;
+			bool injectMousePress(const Input::MouseEventArgs& arg) final;
+			bool injectMouseRelease(const Input::MouseEventArgs& arg) final;
+			bool injectMouseMove(const Input::MouseEventArgs& arg) final;
+
+		protected:
+
+			virtual bool handleKeyPress(const Input::KeyEventArgs& arg) = 0;
+			virtual bool handleKeyRelease(const Input::KeyEventArgs& arg) = 0;
+			virtual bool handleMousePress(const Input::MouseEventArgs& arg) = 0;
+			virtual bool handleMouseRelease(const Input::MouseEventArgs& arg) = 0;
+			virtual bool handleMouseMove(const Input::MouseEventArgs& arg) = 0;
+
+			void renderOverlays();
+
+			Window::Window *window();
+
+			void onClose() override;
+			void onRepaint() override;
+
+			void onResize(size_t width, size_t height) override;
+
+			void calculateWindowGeometries();
+
+
+			std::unique_ptr<Widget> createWidgetClass(const std::string& name, Class _class);
+
+			virtual std::unique_ptr<Widget> createWidget(const std::string &name) = 0;
+			virtual std::unique_ptr<Bar> createBar(const std::string& name) = 0;
+			virtual std::unique_ptr<Button> createButton(const std::string& name) = 0;
+			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name) = 0;
+			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name) = 0;
+			virtual std::unique_ptr<Image> createImage(const std::string& name) = 0;
+			virtual std::unique_ptr<Label> createLabel(const std::string& name) = 0;
+			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name) = 0;
+			virtual std::unique_ptr<TabWidget> createTabWidget(const std::string& name) = 0;
+			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name) = 0;
+
+		private:
+
+			std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
+			GUISystem &mGui;
+
+			Input::InputHandler *mExternalInput = nullptr;
+			std::optional<Input::InputSelector> mInputSelector;
+
+			std::vector<WindowOverlay*> mOverlays;
+
+			Window::Window *mWindow = nullptr;
+		};
+
+	}
+}
+
+
+RegisterClass(Engine::GUI::TopLevelWindow);

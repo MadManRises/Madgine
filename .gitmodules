@@ -1,9 +1,10 @@
-[submodule "cmake"]
-	path = cmake
-	url = https://github.com/MadManRises/Mad-CMake-Tools.git
-[submodule "Maditor/view/qtimgui"]
-	path = Maditor/view/qtimgui
-	url = https://github.com/seanchas116/qtimgui.git
 [submodule "Madgine/plugins/tools/imgui"]
 	path = Madgine/plugins/tools/imgui
 	url = https://github.com/ocornut/imgui.git
+
+[submodule "src/Interfaces/lua"]
+	path = src/Interfaces/lua
+	url = https://github.com/lua/lua.git
+[submodule "plugins/input/ois/ois"]
+	path = plugins/input/ois/ois
+	url = https://github.com/wgois/OIS.git
