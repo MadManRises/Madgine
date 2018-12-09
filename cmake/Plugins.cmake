@@ -4,7 +4,7 @@ include_guard()
 
 include(Workspace)
 include(ini)
-include(packaging)
+include(Packaging)
 
 if (STATIC_BUILD)
 

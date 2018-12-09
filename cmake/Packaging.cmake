@@ -3,7 +3,7 @@ include(Util)
 include_guard()
 
 include(Workspace)
-include(binaryInfo)
+include(binaryinfo)
 
 set (CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
 include(InstallRequiredSystemLibraries)
