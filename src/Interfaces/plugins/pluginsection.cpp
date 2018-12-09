@@ -102,10 +102,18 @@ namespace Engine {
 		void PluginSection::addListener(PluginListener * listener)
 		{
 			mListeners.push_back(listener);
+			for (const std::pair<const std::string, Plugins::Plugin> &p : *this) {
+				if (p.second.isLoaded())
+					listener->onPluginLoad(&p.second);
+			}
 		}
 
 		void PluginSection::removeListener(PluginListener * listener)
 		{
+			for (const std::pair<const std::string, Plugins::Plugin> &p : *this) {
+				if (p.second.isLoaded())
+					listener->aboutToUnloadPlugin(&p.second);
+			}
 			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
 		}
 

@@ -18,7 +18,7 @@
 
 #include "Interfaces/generic/keyvalueiterate.h"
 
-
+#include "Interfaces/debug/profiler/profiler.h"
 
 
 namespace Engine
@@ -122,15 +122,14 @@ namespace Engine
 			mStateLoadedSignal.emit();
 		}
 
-		bool SceneManager::frameRenderingQueued(float timeSinceLastFrame, ContextMask mask)
+		bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
 		{
+			PROFILE();
+				
+			for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
 			{
-				//PROFILE("SceneComponents");
-				for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
-				{
-					//PROFILE(component->componentName());
-					component->update(timeSinceLastFrame, mask);
-				}
+				//PROFILE(component->componentName());
+				component->update(timeSinceLastFrame, mask);
 			}
 
 			removeQueuedEntities();
@@ -138,7 +137,7 @@ namespace Engine
 			return true;
 		}
 
-		bool SceneManager::frameFixedUpdate(float timeStep, ContextMask mask)
+		bool SceneManager::frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask mask)
 		{
 			{
 				//PROFILE("SceneComponents");
@@ -167,7 +166,7 @@ namespace Engine
 
 		KeyValueMapList SceneManager::maps()
 		{
-			return Scope::maps().merge(mSceneComponents, transformIt<ToPointerConverter>(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
+			return Scope::maps().merge(mSceneComponents, toPointer(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
 				MAP_RO(Synced, isSynced));
 		}
 

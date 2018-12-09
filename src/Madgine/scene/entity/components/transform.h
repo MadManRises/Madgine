@@ -3,6 +3,7 @@
 #include "../entitycomponent.h"
 #include "Interfaces/serialize/container/serializedmapper.h"
 #include "Interfaces/math/vector3.h"
+#include "Interfaces/math/vector4.h"
 
 namespace Engine
 {
@@ -19,14 +20,14 @@ namespace Engine
 
 				virtual Vector3 getPosition() const = 0;
 				virtual Vector3 getScale() const = 0;
-				virtual std::array<float, 4> getOrientation() const = 0;
+				virtual Vector4 getOrientation() const = 0;
 
 				virtual void setPosition(const Vector3 &v) = 0;
 				virtual void setScale(const Vector3 &scale) = 0;
-				virtual void setOrientation(const std::array<float, 4> &orientation) = 0;
+				virtual void setOrientation(const Vector4 &orientation) = 0;
 
 				virtual void translate(const Vector3 &v) = 0;
-				virtual void rotate(const std::array<float, 4> &q) = 0;
+				virtual void rotate(const Vector4 &q) = 0;
 
 				KeyValueMapList maps() override;
 

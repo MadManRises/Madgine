@@ -23,8 +23,14 @@ namespace Engine {
 			bool injectMouseRelease(const Engine::Input::MouseEventArgs& arg) override;
 			bool injectMouseMove(const Engine::Input::MouseEventArgs& arg) override;
 
+			void calculateAvailableScreenSpace(Vector3 &pos, Vector3 &size) override;
+
+			void setMenuHeight(float h);
+
 		protected:
 			Engine::App::ClientApplication &mApp;
+
+			float mMenuHeight = 0.0f;
 
 		};
 

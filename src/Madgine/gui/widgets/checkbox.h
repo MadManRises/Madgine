@@ -6,14 +6,14 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Checkbox : public virtual Widget
+		class Checkbox : public Widget
 		{
 		public:
 			using Widget::Widget;
 			virtual ~Checkbox() = default;
 
-			virtual bool isChecked() = 0;
-			virtual void setChecked(bool b) = 0;
+			virtual bool isChecked();
+			virtual void setChecked(bool b);
 		};
 	}
 }

@@ -14,3 +14,9 @@ namespace Engine
 		class OpenGLImguiManager;
 	}
 }
+
+namespace tinyxml2
+{
+	class XMLDocument;
+	class XMLElement;
+}

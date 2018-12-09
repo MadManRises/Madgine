@@ -14,9 +14,6 @@ namespace Engine {
 		mMgr(pluginMgr)
 	{
 		mMgr.addListener(this);
-		for (std::pair<const std::string, Plugins::PluginSection> &sec : pluginMgr) {
-			onSectionAdded(&sec.second);
-		}
 		Plugins::Plugin base("Base");
 		base.load();
 		onPluginLoad(&base);
@@ -27,28 +24,7 @@ namespace Engine {
 		Plugins::Plugin base("Base");
 		base.load();
 		aboutToUnloadPlugin(&base);
-		for (std::pair<const std::string, Plugins::PluginSection> &sec : mMgr) {
-			aboutToRemoveSection(&sec.second);
-		}
 		mMgr.removeListener(this);
-	}
-
-	void UniqueComponentCollectorManager::onSectionAdded(Plugins::PluginSection * sec)
-	{
-		sec->addListener(this);
-		for (const std::pair<const std::string, Plugins::Plugin> &p : *sec) {
-			if (p.second.isLoaded())
-				onPluginLoad(&p.second);
-		}
-	}
-
-	void UniqueComponentCollectorManager::aboutToRemoveSection(Plugins::PluginSection * sec)
-	{
-		for (const std::pair<const std::string, Plugins::Plugin> &p : *sec) {
-			if (p.second.isLoaded())
-				aboutToUnloadPlugin(&p.second);
-		}
-		sec->removeListener(this);
 	}
 
 	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)

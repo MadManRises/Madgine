@@ -30,7 +30,7 @@ namespace Engine
 				mScale = scale;
 			}
 
-			void ServerTransform::setOrientation(const std::array<float, 4>& orientation)
+			void ServerTransform::setOrientation(const Vector4& orientation)
 			{
 				mOrientation = orientation;
 			}
@@ -40,7 +40,7 @@ namespace Engine
 				*mPosition += v;
 			}
 
-			void ServerTransform::rotate(const std::array<float, 4>& q)
+			void ServerTransform::rotate(const Vector4& q)
 			{
 				//mNode->rotate(Ogre::Quaternion(const_cast<float*>(q.data())));
 			}
@@ -50,7 +50,7 @@ namespace Engine
 				return mPosition;
 			}
 
-			std::array<float, 4> ServerTransform::getOrientation() const
+			Vector4 ServerTransform::getOrientation() const
 			{
 				return mOrientation;
 			}

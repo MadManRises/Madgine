@@ -6,15 +6,15 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Textbox : public virtual Widget
+		class Textbox : public Widget
 		{
 		public:		
 			using Widget::Widget;
 			virtual ~Textbox() = default;
 
-			virtual std::string getText() = 0;
-			virtual void setText(const std::string& text) = 0;
-			virtual void setEditable(bool b) = 0;
+			virtual std::string getText();
+			virtual void setText(const std::string& text);
+			virtual void setEditable(bool b);
 
 			void clear()
 			{

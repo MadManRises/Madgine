@@ -10,7 +10,7 @@ set(sources "")
 FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.h)
 	FolderSources(sources src imgui imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h)
 		FolderSources(sources imgui examples imgui_impl_opengl3.cpp imgui_impl_opengl3.h)
-	FolderSources(sources src inspector inspector.cpp inspector.h)
+	FolderSources(sources src inspector inspector.cpp inspector.h inspectorlayout.cpp inspectorlayout.h layoutloader.cpp layoutloader.h)
 	FolderSources(sources src memory memoryviewer.cpp memoryviewer.h)
 	FolderSources(sources src metrics metrics.cpp metrics.h)
 	FolderSources(sources src pluginmanager pluginmanager.cpp pluginmanager.h)
@@ -30,12 +30,3 @@ target_link_plugins(Tools PUBLIC OpenGL)
 
 
 target_link_libraries(Tools PUBLIC Client)
-
-target_compile_definitions(Tools PRIVATE -DBINARY_FILENAME="$<TARGET_FILE_NAME:Tools>")
-
-add_custom_command(TARGET Tools POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/Tools/layouts
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/inspector/layouts ${CMAKE_BINARY_DIR}/Tools/layouts
-)
-
-install(DIRECTORY ${CMAKE_BINARY_DIR}/Tools/layouts DESTINATION Tools COMPONENT Tools)

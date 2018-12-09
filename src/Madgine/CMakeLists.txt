@@ -19,8 +19,9 @@ FolderSources(sources "" "" baseforward.h baselib.h)
 	FolderSources(sources "" uniquecomponent uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 
 
-add_workspace_library(Base ${LIBRARY_TYPE} ${sources} SOURCE_ROOT ..)
+add_workspace_library(Base ${sources} SOURCE_ROOT ..)
 add_precompiled_header(Base baselib.h FORCEINCLUDE)
+
 
 target_link_libraries(Base PUBLIC Interfaces)
 
@@ -36,14 +37,14 @@ set(sources "")
 FolderSources(sources "" "" clientforward.h clientlib.h)
 	FolderSources(sources "" app clientapplication.cpp clientapplication.h clientappsettings.h)
 	FolderSources(sources "" gui guisystem.cpp guisystem.h)
-		FolderSources(sources gui widgets bar.h button.cpp button.h checkbox.h classid.h combobox.h image.h label.cpp label.h scenewindow.h tabwidget.h textbox.h toplevelwindow.cpp toplevelwindow.h widget.cpp widget.h widgetclass.h)
+		FolderSources(sources gui widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h image.cpp image.h label.cpp label.h scenewindow.cpp scenewindow.h tabwidget.cpp tabwidget.h textbox.cpp textbox.h toplevelwindow.cpp toplevelwindow.h widget.cpp widget.h widgetclass.h)
 	FolderSources(sources "" input inputhandler.cpp inputhandler.h)
-	FolderSources(sources "" scene camera.h cameramanager.h cameramanager.cpp)
+	FolderSources(sources "" render camera.cpp camera.h renderer.h rendererbase.cpp rendererbase.h renderwindow.cpp renderwindow.h rendertarget.cpp rendertarget.h)	
 	FolderSources(sources "" ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
 
 
 
-add_workspace_library(Client ${LIBRARY_TYPE} ${sources} SOURCE_ROOT ..)
+add_workspace_library(Client ${sources} SOURCE_ROOT ..)
 
 add_precompiled_header(Client clientlib.h FORCEINCLUDE)
 

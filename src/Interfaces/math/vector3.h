@@ -83,6 +83,13 @@ namespace Engine
 		{
 		}
 
+		explicit Vector3(const Vector2 &xy, const float z) :
+			x(xy.x),
+			y(xy.y),
+			z(z)
+		{
+		}
+
 		/** Swizzle-like narrowing operations
 		*/
 		Vector2 xy() const

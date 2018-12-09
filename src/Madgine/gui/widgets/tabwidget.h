@@ -6,13 +6,13 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class TabWidget : public virtual Widget
+		class TabWidget : public Widget
 		{
 		public:			
 			using Widget::Widget;
 			virtual ~TabWidget() = default;
 
-			virtual void addTab(Widget* w) = 0;
+			virtual void addTab(Widget* w);
 		};
 	}
 }

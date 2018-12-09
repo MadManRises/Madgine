@@ -21,8 +21,8 @@ namespace Engine
 
 			SceneComponentBase(SceneManager &sceneMgr, ContextMask context = ContextMask::SceneContext);
 
-			void update(float timeSinceLastFrame, ContextMask mask);
-			void fixedUpdate(float timeStep, ContextMask mask);
+			void update(std::chrono::microseconds timeSinceLastFrame, ContextMask mask);
+			void fixedUpdate(std::chrono::microseconds timeStep, ContextMask mask);
 
 
 			void setEnabled(bool b);
@@ -55,8 +55,8 @@ namespace Engine
 			virtual bool init() override;
 			virtual void finalize() override;
 
-			virtual void update(float);
-			virtual void fixedUpdate(float);
+			virtual void update(std::chrono::microseconds);
+			virtual void fixedUpdate(std::chrono::microseconds);
 
 		private:
 			const ContextMask mContext;

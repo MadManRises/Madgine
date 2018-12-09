@@ -161,6 +161,9 @@ namespace Engine
 	class Vector2;
 	class Vector3;
 
+	class Matrix3;
+	class Matrix4;
+
 	struct TypeInfo;
 
 }

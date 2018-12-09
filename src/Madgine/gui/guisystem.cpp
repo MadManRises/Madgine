@@ -26,13 +26,17 @@ namespace Engine
 		GUISystem::GUISystem(App::ClientApplication &app) :
 			Scripting::Scope<GUISystem>(&app),			
 			mApp(app),
-            mUI(std::make_unique<UI::UIManager>(*this))
+            mUI(std::make_unique<UI::UIManager>(*this)),
+			mRenderer(this)
 		{
+			app.addFrameListener(this);
 		}
 
 
 		GUISystem::~GUISystem()
 		{
+			mApp.removeFrameListener(this);
+
 			mUI.reset();
 
 			mWindows.clear();
@@ -44,12 +48,19 @@ namespace Engine
 		bool GUISystem::init()
 		{
 			markInitialized();
-			return mUI->callInit();
+			
+			if (!mRenderer->callInit() && mUI->callInit())
+				return false;
+			
+			createTopLevelWindow();
+
+			return true;
 		}
 
 		void GUISystem::finalize()
 		{
 			mUI->callFinalize();
+			mRenderer->callFinalize();
 			clear();
 		}
 
@@ -84,7 +95,7 @@ namespace Engine
 
 		KeyValueMapList GUISystem::maps()
 		{
-			return Scope::maps().merge(mWindows);
+			return Scope::maps().merge(mWindows, mRenderer.get());
 		}
 
 		const std::vector<std::unique_ptr<TopLevelWindow>> &GUISystem::topLevelWindows()
@@ -97,19 +108,22 @@ namespace Engine
 			mWindows.erase(std::find_if(mWindows.begin(), mWindows.end(), [w](const std::unique_ptr<TopLevelWindow> &p) {return p.get() == w; }));
 		}
 
-		bool GUISystem::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame)
+		Render::RendererBase & GUISystem::renderer()
+		{
+			return *mRenderer;
+		}
+
+
+		TopLevelWindow *GUISystem::createTopLevelWindow()
+		{
+			return mWindows.emplace_back(std::make_unique<TopLevelWindow>(*this)).get();
+		}
+
+		bool GUISystem::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
 			PROFILE();
 			Window::sUpdate();
-			bool result = false;
-			for (const std::unique_ptr<TopLevelWindow> &w : mWindows)
-				result |= w->update();
-			return FrameLoop::sendFrameRenderingQueued(timeSinceLastFrame, mUI->currentContext()) && result;
-		}
-
-		void GUISystem::addTopLevelWindow(std::unique_ptr<TopLevelWindow>&& window)
-		{
-			mWindows.emplace_back(std::forward<std::unique_ptr<TopLevelWindow>>(window));
+			return !mWindows.empty();
 		}
 
 		Scene::SceneManager& GUISystem::sceneMgr(bool init)
@@ -138,11 +152,6 @@ namespace Engine
 				checkDependency();
 			}
 			return *this;
-		}
-
-		bool GUISystem::singleFrame(std::chrono::microseconds timeSinceLastFrame)
-		{
-			return sendFrameStarted(timeSinceLastFrame) && sendFrameRenderingQueued(timeSinceLastFrame) && sendFrameEnded(timeSinceLastFrame);
 		}
 
 		App::ClientApplication &GUISystem::app(bool init)

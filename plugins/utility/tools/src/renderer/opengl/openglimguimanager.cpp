@@ -8,7 +8,6 @@
 #include "../../imgui/examples/imgui_impl_opengl3.h"
 
 #include "OpenGL/glad.h"
-#include "OpenGL/opengltoplevelwindow.h"
 
 #include "Interfaces/math/vector3.h"
 

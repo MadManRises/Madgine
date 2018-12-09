@@ -3,6 +3,7 @@ include(Util)
 include_guard()
 
 include(Workspace)
+include(binaryInfo)
 
 set (CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
 include(InstallRequiredSystemLibraries)
@@ -89,3 +90,13 @@ function(collect_custom_dependencies target name binary)
 	endforeach()
 
 endfunction(collect_custom_dependencies)
+
+macro(collect_data target)
+
+	generate_binary_info(${target})
+
+	if (STATIC_BUILD)
+		add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_BINARY_DIR}/data)
+	endif()
+
+endmacro()

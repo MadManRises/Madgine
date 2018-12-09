@@ -13,6 +13,8 @@
 
 #include "Madgine/app/clientapplication.h"
 
+#include "Interfaces/math/vector3.h"
+
 namespace Engine {
 	namespace Tools {
 		ImGuiManager::ImGuiManager(Engine::App::ClientApplication &app) :
@@ -77,6 +79,17 @@ namespace Engine {
 			io.MouseWheel = arg.scrollWheel;
 
 			return io.WantCaptureMouse;
+		}
+
+		void ImGuiManager::calculateAvailableScreenSpace(Vector3 & pos, Vector3 & size)
+		{
+			pos.y += mMenuHeight;
+			size.y -= mMenuHeight;
+		}
+
+		void ImGuiManager::setMenuHeight(float h)
+		{
+			mMenuHeight = h;
 		}
 
 	}

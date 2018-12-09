@@ -12,7 +12,7 @@ namespace Engine
 	{
 		class SceneManager;
 		class SceneComponentBase;
-		class Camera;
+
 		enum class ContextMask : unsigned int;
 
 		namespace Entity

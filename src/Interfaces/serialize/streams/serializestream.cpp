@@ -71,10 +71,12 @@ namespace Engine
 					break;
 				}
 			case ValueType::Type::Vector4Value:
-				std::array<float, 4> a4;
-				read(a4);
-				result = a4;
-				break;
+				{
+					Vector4 a4;
+					read(a4);
+					result = a4;
+					break;
+				}
 			case ValueType::Type::FloatValue:
 				float f;
 				read(f);
@@ -219,7 +221,7 @@ namespace Engine
 				writeData(v.as<Vector3>().ptr(), sizeof(float) * 3);
 				break;
 			case ValueType::Type::Vector4Value:
-				writeData(v.as<std::array<float, 4>>().data(), sizeof(float) * 4);
+				writeData(v.as<Vector4>().ptr(), sizeof(float) * 4);
 				break;
 			case ValueType::Type::FloatValue:
 				write(v.as<float>());

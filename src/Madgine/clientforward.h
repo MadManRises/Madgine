@@ -36,6 +36,8 @@ namespace Engine
 
 		struct WindowOverlay;
 
+		struct Vertex;
+
 	}
 
 	namespace Scene
@@ -75,4 +77,12 @@ namespace Engine
 			enum MouseButton : unsigned char;
 		}
 	}
+
+	namespace Render {
+		class RendererBase;
+		class RenderWindow;
+		struct RenderTarget;
+		class Camera;
+	}
+
 }

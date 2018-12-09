@@ -33,5 +33,9 @@ namespace Engine
 		{
 			return mExtensions;
 		}
+		size_t ResourceLoaderBase::extensionIndex(const std::string & ext) const
+		{			
+			return std::find(mExtensions.begin(), mExtensions.end(), ext) - mExtensions.begin();
+		}
 	}
 }

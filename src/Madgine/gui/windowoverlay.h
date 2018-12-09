@@ -7,6 +7,7 @@ namespace Engine {
 
 		struct WindowOverlay : Input::InputListener {
 			virtual void render() {}
+			virtual void calculateAvailableScreenSpace(Vector3 &pos, Vector3 &size) {}
 		};
 
 	}

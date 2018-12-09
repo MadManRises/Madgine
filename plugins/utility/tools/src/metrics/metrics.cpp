@@ -4,6 +4,8 @@
 
 #include "../imgui/imgui.h"
 
+#include "../renderer/imguiaddons.h"
+
 namespace Engine {
 	namespace Tools {
 
@@ -27,10 +29,11 @@ namespace Engine {
 		{
 
 			if (ImGui::Begin("Metrics")) {
-				ImGui::Text("Time/frame: %.5f", ImGui::GetIO().DeltaTime);
+				ImGui::Text("Time/frame: ");
+				ImGui::Duration(std::chrono::microseconds(static_cast<long long>(ImGui::GetIO().DeltaTime * 1000000.0f)));
 				plot(mFramesTrend, "Frames per Second");
-				ImGui::End();
 			}
+			ImGui::End();
 		}
 
 		void Metrics::update()

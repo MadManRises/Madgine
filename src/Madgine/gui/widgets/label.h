@@ -7,14 +7,14 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT Label : public Scripting::Scope<Label, VirtualBase<Widget>>
+		class MADGINE_CLIENT_EXPORT Label : public Scripting::Scope<Label, Widget>
 		{
 		public:
 			using Scope::Scope;
 			virtual ~Label() = default;
 
-			virtual std::string getText() = 0;
-			virtual void setText(const std::string& text) = 0;
+			virtual std::string getText();
+			virtual void setText(const std::string& text);
 
 			KeyValueMapList maps() override;
 		};

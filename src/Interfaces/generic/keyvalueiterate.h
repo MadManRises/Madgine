@@ -242,7 +242,7 @@ namespace Engine
 
 			KeyValueValueFlags flags() const override
 			{
-				return kvFlags(mItem);
+				return kvFlags(kvValue(mItem));
 			}
 
 			void operator++() override

@@ -10,7 +10,7 @@ Project(OpenGL)
 
 set(sources "")
 FolderSources(sources "" src)
-FolderSources(sources src OpenGL glad.cpp glad.h openglforward.h opengllib.h openglsystem.cpp openglsystem.h opengltoplevelwindow.cpp opengltoplevelwindow.h)
+FolderSources(sources src OpenGL glad.cpp glad.h openglforward.h opengllib.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshader.cpp openglshader.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h opengltexture.cpp opengltexture.h)
 
 
 add_plugin(OpenGL Madgine Renderer ${sources})

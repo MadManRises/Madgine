@@ -3,8 +3,10 @@
 namespace Engine
 {
 
-	namespace GUI {
-		class OpenGLSystem;
+	namespace Render {
+		class OpenGLRenderWindow;
+
+		struct OpenGLShader;
 	}
 
 }

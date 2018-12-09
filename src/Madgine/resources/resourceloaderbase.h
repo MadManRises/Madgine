@@ -14,11 +14,13 @@ namespace Engine
 
 			
 
-			virtual void addResource(const std::experimental::filesystem::path &path) = 0;
+			virtual std::pair<ResourceBase *, bool> addResource(const std::experimental::filesystem::path &path) = 0;
 
 			void resourceAdded(ResourceBase* res);
 			
 			const std::vector<std::string> &fileExtensions() const;
+
+			size_t extensionIndex(const std::string &ext) const;
 
 		private:
 			ResourceManager &mMgr;

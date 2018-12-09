@@ -2,6 +2,7 @@
 
 #include "application.h"
 
+
 namespace Engine
 {
 	namespace App
@@ -12,6 +13,7 @@ namespace Engine
 		{
 		public:
 			ClientApplication();
+			~ClientApplication();
 
 			void setup(const ClientAppSettings &settings);
 
@@ -23,11 +25,12 @@ namespace Engine
 
 			ClientApplication &getSelf(bool = true);
 
-		protected:
-			virtual void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop) override;
+			bool init() override;
+			void finalize() override;
 
 		private:
-			GUI::GUISystem * mGUI;
+			std::unique_ptr<GUI::GUISystem> mGUI;
+
 
 			const ClientAppSettings *mSettings;
 		};

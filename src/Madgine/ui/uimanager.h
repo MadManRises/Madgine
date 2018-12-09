@@ -30,8 +30,8 @@ namespace Engine
 			void openWindow(GuiHandlerBase* handler);
 			void closeWindow(GuiHandlerBase* handler);
 
-			virtual bool frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context);
-			virtual bool frameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context);
+			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+			bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 			Scene::ContextMask currentContext();
 

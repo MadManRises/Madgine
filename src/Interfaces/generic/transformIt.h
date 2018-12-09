@@ -3,15 +3,7 @@
 namespace Engine
 {
 	
-	struct ToPointerConverter
-	{
-		template <class T>
-		T* operator()(T& t)
-		{
-			return &t;
-		}
-	};
-
+	
 	template <class T, typename Converter>
 	class TransformItContainer
 	{
@@ -100,4 +92,36 @@ namespace Engine
 	{
 		return reinterpret_cast<TransformItContainer<T, Converter>&>(t);
 	}
+
+	struct ToPointerConverter
+	{
+		template <class T>
+		T* operator()(T& t)
+		{
+			return &t;
+		}
+	};
+
+	template <class T>
+	decltype(auto) toPointer(T &t)
+	{
+		return transformIt<ToPointerConverter>(t);
+	}
+
+	struct UniquePtrToPtrConverter
+	{
+		template <class T>
+		T* operator()(const std::unique_ptr<T> &p)
+		{
+			return p.get();
+		}
+	};
+
+	template <class T>
+	decltype(auto) uniquePtrToPtr(const T &t)
+	{
+		return transformIt<UniquePtrToPtrConverter>(t);
+	}
+
+	
 }

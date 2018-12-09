@@ -18,19 +18,19 @@ namespace Engine
 
 				Vector3 getPosition() const;
 				Vector3 getScale() const;
-				std::array<float, 4> getOrientation() const;
+				Vector4 getOrientation() const;
 
 				void setPosition(const Vector3& v);
 				void setScale(const Vector3& scale);
-				void setOrientation(const std::array<float, 4>& orientation);
+				void setOrientation(const Vector4& orientation);
 
 				void translate(const Vector3& v);
-				void rotate(const std::array<float, 4>& q);
+				void rotate(const Vector4& q);
 
 			private:
 				Serialize::Serialized<Vector3> mPosition;
 				Vector3 mScale;
-				std::array<float, 4> mOrientation;
+				Vector4 mOrientation;
 			};
 		}
 	}

@@ -6,17 +6,17 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Combobox : public virtual Widget
+		class Combobox : public Widget
 		{
 		public:
 			using Widget::Widget;
 			virtual ~Combobox() = default;
 
-			virtual void addItem(const std::string& text) = 0;
-			virtual void clear() = 0;
+			virtual void addItem(const std::string& text);
+			virtual void clear();
 
-			virtual void setText(const std::string& s) = 0;
-			virtual std::string getText() = 0;
+			virtual void setText(const std::string& s);
+			virtual std::string getText();
 		};
 	}
 }

@@ -21,7 +21,7 @@ namespace Engine
 		{
 		}
 
-		void SceneComponentBase::update(float timeSinceLastFrame, ContextMask mask)
+		void SceneComponentBase::update(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
 		{
 			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
 			{
@@ -29,7 +29,7 @@ namespace Engine
 			}
 		}
 
-		void SceneComponentBase::fixedUpdate(float timeStep, ContextMask mask)
+		void SceneComponentBase::fixedUpdate(std::chrono::microseconds timeStep, ContextMask mask)
 		{
 			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
 			{
@@ -92,11 +92,11 @@ namespace Engine
 			return *this;
 		}
 
-		void SceneComponentBase::update(float)
+		void SceneComponentBase::update(std::chrono::microseconds)
 		{
 		}
 
-		void SceneComponentBase::fixedUpdate(float)
+		void SceneComponentBase::fixedUpdate(std::chrono::microseconds)
 		{
 		}
 

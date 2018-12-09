@@ -17,7 +17,7 @@ FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" generic keyvalue.h keyvalueiterate.cpp keyvalueiterate.h singleton.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources "" ini inifile.cpp inifile.h)
 	FolderSources(sources "" lua lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lutf8lib.c lvm.c lzio.c lauxlib.c lbaselib.c lbitlib.c lcorolib.c ldblib.c liolib.c lmathlib.c loslib.c lstrlib.c ltablib.c loadlib.c linit.c)
-	FolderSources(sources "" math bounds.cpp bounds.h matrix3.cpp matrix3.h vector3.cpp vector3.h vector2.cpp vector2.h)
+	FolderSources(sources "" math bounds.cpp bounds.h matrix4.cpp matrix4.h matrix3.cpp matrix3.h vector3.cpp vector3.h vector2.cpp vector2.h)
 	FolderSources(sources "" network linuxapi.cpp networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h networkstream.cpp networkstream.h socketapi.cpp socketapi.h winapi.cpp)
 	FolderSources(sources "" plugins pluginmanager.cpp pluginmanager.h pluginsection.cpp pluginsection.h plugin.cpp plugin.h)
 	FolderSources(sources "" scripting scriptingexception.h)
@@ -32,7 +32,7 @@ FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_windows.cpp windoweventlistener.h)
 
-add_workspace_library(Interfaces  ${LIBRARY_TYPE} ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT ..)
+add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT ..)
 
 add_precompiled_header(Interfaces interfaceslib.h FORCEINCLUDE)
 

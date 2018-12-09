@@ -37,13 +37,17 @@ namespace Engine
 			const std::string &currentSelectionName();
 			void setCurrentSelection(const std::string &key, const std::experimental::filesystem::path &path);
 
-			void addListener(PluginSectionListener *listener);
-			void removeListener(PluginSectionListener *listener);
+			void addListener(PluginListener *listener);
+			void removeListener(PluginListener *listener);
+
+		protected:
+			void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
+			void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
 
 		private:
 			std::map<std::string, PluginSection> mSections;
 
-			std::vector<PluginSectionListener*> mListeners;
+			std::vector<PluginListener*> mListeners;
 
 			std::string mProject;
 
@@ -52,6 +56,8 @@ namespace Engine
 			std::optional<Ini::IniFile> mCurrentSelectionFile;
 
 			static PluginManager *sSingleton;
+
+			bool mLoadingCurrentSelectionFile = false;
 
 		};
 

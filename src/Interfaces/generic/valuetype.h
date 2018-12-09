@@ -6,6 +6,7 @@
 
 #include "../math/vector2.h"
 #include "../math/vector3.h"
+#include "../math/vector4.h"
 
 #include "invscopeptr.h"
 
@@ -34,7 +35,7 @@ namespace Engine
 			Scripting::ScopeBase *,
 			InvScopePtr,
 			Matrix3,
-			std::array<float, 4>,
+			Vector4,
 			Vector3,
 			Vector2,
 			std::shared_ptr<KeyValueIterator>,
@@ -347,6 +348,12 @@ namespace Engine
 
 		std::string getTypeString() const;
 		static std::string getTypeString(Type type);
+
+		template <typename V>
+		void visit(V &&visitor) const
+		{
+			std::visit(std::forward<V>(visitor), mUnion);
+		}
 
 	public:
 

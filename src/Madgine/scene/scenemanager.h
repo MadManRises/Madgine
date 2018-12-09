@@ -33,8 +33,8 @@ namespace Engine
 			void readState(Serialize::SerializeInStream& in) override;
 			void writeState(Serialize::SerializeOutStream& out) const override;
 
-			virtual bool frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context) final;
-			virtual bool frameFixedUpdate(float timeStep, ContextMask context) final;
+			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+			bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
 
 
 			Entity::Entity* createEntity(const std::string& behavior = "", const std::string& name = "",

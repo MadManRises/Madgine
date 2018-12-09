@@ -4,6 +4,7 @@ include_guard()
 
 include(Workspace)
 include(ini)
+include(packaging)
 
 if (STATIC_BUILD)
 
@@ -33,11 +34,13 @@ endif ()
 
 macro(add_plugin name base type)
 
-	add_workspace_library(${name} ${LIBRARY_TYPE} ${ARGN})
+	add_workspace_library(${name} ${ARGN})
 
 	set_target_properties(${name} PROPERTIES OUTPUT_NAME Plugin_${base}_${type}_${name})
 
 	target_compile_definitions(${name} INTERFACE BUILD_PLUGIN_${name})
+
+	collect_data(${name})
 
 	if (NOT STATIC_BUILD)
 
@@ -51,7 +54,7 @@ macro(add_plugin name base type)
 	else()
 
 		if (NOT PLUGINSELECTION_${type}_${name})
-			MESSAGE (STATUS "Exluding Plugin '${name}' from ALL build.")
+			MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
 			set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
 		endif()
 
@@ -66,6 +69,9 @@ function(target_link_plugins target vis)
 		get_target_property(exclude ${plugin} EXCLUDE_FROM_ALL)
 		if (NOT exclude)
 			target_link_libraries(${target} ${vis} ${plugin})
+			#MESSAGE(STATUS "Linking ${plugin} to ${target}")
+		else()
+			#MESSAGE(STATUS "Not linking ${plugin} to ${target}")
 		endif()
 
 	endforeach()

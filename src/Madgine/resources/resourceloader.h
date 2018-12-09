@@ -30,28 +30,15 @@ namespace Engine
 			}
 
 			virtual std::shared_ptr<Data> load(ResourceType* res) = 0;
-			virtual void addResource(const std::experimental::filesystem::path &path) override
+			virtual std::pair<ResourceBase *,bool> addResource(const std::experimental::filesystem::path &path) override
 			{
 				std::string name = path.stem().generic_string();
 				auto pib = mResources.try_emplace(name, this, path);
 				
-				if (!pib.second)
-				{
-					auto extIndex = [this](const std::string &ext)
-					{
-						const std::vector<std::string> &extensions = this->fileExtensions();
-						return std::find(extensions.begin(), extensions.end(), ext) - extensions.begin();
-					};
-
-					if (extIndex(path.extension().generic_string()) < extIndex(pib.first->second.extension()))
-					{
-						auto it = mResources.emplace_hint(mResources.erase(pib.first), std::piecewise_construct, std::make_tuple(name), std::make_tuple(this, path));
-						this->resourceAdded(&it->second);
-					}
-				}else
-				{
+				if (pib.second)				
 					this->resourceAdded(&pib.first->second);
-				}
+				
+				return std::make_pair(&pib.first->second, pib.second);
 			}
 
 			typename std::map<std::string, ResourceType>::iterator begin()

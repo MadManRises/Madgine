@@ -142,7 +142,7 @@ namespace Engine
 
 			void finalize() override;
 
-			virtual void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop = {});
+			void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop = {});
 
 			virtual bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
 			virtual bool aboutToLoadPlugin(const Plugins::Plugin *plugin) override;

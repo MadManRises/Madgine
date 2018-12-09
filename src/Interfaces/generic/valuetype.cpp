@@ -43,10 +43,10 @@ namespace Engine
 				to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
 		case Type::Vector4Value:
 			return "["s +
-				std::to_string(std::get<std::array<float, 4>>(mUnion)[0]) + ", " +
-				std::to_string(std::get<std::array<float, 4>>(mUnion)[1]) + ", " +
-				std::to_string(std::get<std::array<float, 4>>(mUnion)[2]) + ", " +
-				std::to_string(std::get<std::array<float, 4>>(mUnion)[3]) + "]";
+				std::to_string(std::get<Vector4>(mUnion)[0]) + ", " +
+				std::to_string(std::get<Vector4>(mUnion)[1]) + ", " +
+				std::to_string(std::get<Vector4>(mUnion)[2]) + ", " +
+				std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
 		default:
 			throw Scripting::ScriptingException("Unknown Type!");
 		}

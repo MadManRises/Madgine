@@ -3,13 +3,14 @@
 #include "../ois/includes/OIS.h"
 #include <Madgine/input/inputcollector.h>
 #include <Madgine/uniquecomponent/uniquecomponent.h>
+#include <Interfaces/window/windoweventlistener.h>
 
 namespace Engine
 {
 	namespace Input
 	{
 		class MADGINE_OIS_EXPORT OISInputHandler : public OIS::KeyListener, public OIS::MouseListener,
-			public UniqueComponent<OISInputHandler, InputCollector>
+			public UniqueComponent<OISInputHandler, InputCollector>, public Window::WindowEventListener
 		{
 		public:
 			OISInputHandler(Window::Window *window);
@@ -27,7 +28,7 @@ namespace Engine
 			bool mousePressed(const OIS::MouseEvent& arg, OIS::MouseButtonID id) override;
 			bool mouseReleased(const OIS::MouseEvent& arg, OIS::MouseButtonID id) override;
 
-			void update() override;
+			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 			void onResize(size_t width, size_t height);
 

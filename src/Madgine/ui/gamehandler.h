@@ -20,19 +20,19 @@ namespace Engine
 
 			void abortDrag();
 
-			void update(float timeSinceLastFrame, Scene::ContextMask mask);
-			void fixedUpdate(float timeStep, Scene::ContextMask mask);
+			void update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask);
+			void fixedUpdate(std::chrono::microseconds timeStep, Scene::ContextMask mask);
 
 			Scene::SceneManager &sceneMgr(bool = true) const;
 
 			GameHandlerBase &getSelf(bool = true);
 
 		protected:
-			void onMouseMove(Input::MouseEventArgs& me) override;
+			void onMouseMove(const Input::MouseEventArgs& me) override;
 
-			void onMouseDown(Input::MouseEventArgs& me) override;
+			void onMouseDown(const Input::MouseEventArgs& me) override;
 
-			void onMouseUp(Input::MouseEventArgs& me) override;
+			void onMouseUp(const Input::MouseEventArgs& me) override;
 
 			virtual void onMouseHover(const Input::MouseEventArgs& evt);
 
@@ -46,8 +46,8 @@ namespace Engine
 
 			virtual void onMouseDragAbort();
 
-			virtual void update(float timeSinceLastFrame);
-			virtual void fixedUpdate(float timeStep);
+			virtual void update(std::chrono::microseconds timeSinceLastFrame);
+			virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
 
 			static void clampToWindow(Input::MouseEventArgs& me);

@@ -29,13 +29,13 @@ namespace Engine
 			onMouseDragAbort();
 		}
 
-		void GameHandlerBase::update(float timeSinceLastFrame, Scene::ContextMask mask)
+		void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask)
 		{
 			if (mContext & mask)
 				update(timeSinceLastFrame);
 		}
 
-		void GameHandlerBase::fixedUpdate(float timeStep, Scene::ContextMask mask)
+		void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep, Scene::ContextMask mask)
 		{
 			if (mContext & mask)
 				fixedUpdate(timeStep);
@@ -59,12 +59,12 @@ namespace Engine
 			return *this;
 		}
 
-		void GameHandlerBase::onMouseMove(Input::MouseEventArgs& me)
+		void GameHandlerBase::onMouseMove(const Input::MouseEventArgs& me)
 		{
-			clampToWindow(me);
+			//clampToWindow(me);
 			if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON)
 			{
-				me.button = mCurrentMouseButton;
+				//me.button = mCurrentMouseButton;
 				if (!mDragging && mSingleClick &&
 					fabs(me.position[0] - mDragStart[0]) + fabs(me.position[1] - mDragStart[1]) > mDragStartThreshold)
 				{
@@ -91,7 +91,7 @@ namespace Engine
 			}
 		}
 
-		void GameHandlerBase::onMouseDown(Input::MouseEventArgs& me)
+		void GameHandlerBase::onMouseDown(const Input::MouseEventArgs& me)
 		{
 			if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON)
 			{
@@ -101,9 +101,9 @@ namespace Engine
 			}
 		}
 
-		void GameHandlerBase::onMouseUp(Input::MouseEventArgs& me)
+		void GameHandlerBase::onMouseUp(const Input::MouseEventArgs& me)
 		{
-			clampToWindow(me);
+			//clampToWindow(me);
 			if (me.button == mCurrentMouseButton)
 			{
 				if (mDragging)
@@ -167,11 +167,11 @@ namespace Engine
 			return mDragStart;
 		}
 
-		void GameHandlerBase::update(float timeSinceLastFrame)
+		void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame)
 		{
 		}
 
-		void GameHandlerBase::fixedUpdate(float timeStep)
+		void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep)
 		{
 		}
 	}

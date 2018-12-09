@@ -6,8 +6,7 @@
 
 
 int main() {
-	Engine::Core::RootSettings rootSettings;	
-	Engine::Core::Root root(rootSettings);
+	Engine::Core::Root root;
 	root.init();
 	Engine::App::ClientAppSettings settings;
 	settings.mRunMain = false;

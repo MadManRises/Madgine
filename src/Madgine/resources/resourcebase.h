@@ -22,6 +22,8 @@ namespace Engine
 			std::string extension();
 			std::string name();
 
+			void updatePath(const std::experimental::filesystem::path &path) { throw 0; }//TODO
+
 		private:
 			bool mIsPersistent;
 

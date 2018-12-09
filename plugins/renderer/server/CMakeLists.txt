@@ -14,7 +14,7 @@ FolderSources(sources src Server serverforward.h serverlib.h)
 	FolderSources(sources Server scene serverlightmanager.cpp serverlightmanager.h)
 		FolderSources(sources scene entity)
 			FolderSources(sources entity components serveranimation.cpp serveranimation.h servermesh.cpp servermesh.h serverskeletonvisualizer.cpp serverskeletonvisualizer.h servertransform.cpp servertransform.h)
-	FolderSources(sources Server server serverframeloop.cpp serverframeloop.h servertimer.cpp servertimer.h)
+	FolderSources(sources Server server servertimer.cpp servertimer.h)
 
 
 add_plugin(Server Madgine Renderer ${sources})

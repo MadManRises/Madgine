@@ -90,7 +90,7 @@ namespace Engine
 #endif
 		}
 
-		std::experimental::filesystem::path Plugin::fullPath()
+		std::experimental::filesystem::path Plugin::fullPath() const
 		{
 			std::experimental::filesystem::path path;
 

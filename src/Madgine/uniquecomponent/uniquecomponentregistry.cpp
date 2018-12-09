@@ -53,6 +53,8 @@ namespace Engine {
 #include "Madgine/baselib.h"
 
 #include "toolslib.h"
+#include "oislib.h"
+#include "OpenGL/opengllib.h"
 
 )";
 

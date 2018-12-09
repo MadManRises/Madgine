@@ -5,6 +5,8 @@
 
 #include "Interfaces/window/windowapi.h"
 
+#include "Interfaces/debug/profiler/profiler.h"
+
 namespace Engine
 {
 	namespace Input
@@ -34,12 +36,14 @@ namespace Engine
 			mMouse->setEventCallback(this);
 			mKeyboard->setEventCallback(this);			
 
+			window->addListener(this);
 			//Set initial mouse clipping size
 			onResize(mWindow->width(), mWindow->height());			
 		}
 
 		OISInputHandler::~OISInputHandler()
 		{			
+			mWindow->removeListener(this);
 
 			mInputManager->destroyInputObject(mMouse);
 			mInputManager->destroyInputObject(mKeyboard);
@@ -105,11 +109,13 @@ namespace Engine
 			return true;
 		}
 
-		void OISInputHandler::update()
+		bool OISInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
+			PROFILE();
 			//Need to capture/update each device
 			mKeyboard->capture();
 			mMouse->capture();
+			return true;
 		}
 
 		void OISInputHandler::onResize(size_t width, size_t height)

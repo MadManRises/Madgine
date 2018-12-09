@@ -130,17 +130,17 @@ namespace Engine
 			return installToWidget(window);				
 		}
 
-		void Handler::injectMouseMove(Input::MouseEventArgs& evt)
+		void Handler::injectMouseMove(const Input::MouseEventArgs& evt)
 		{
 			onMouseMove(evt);
 		}
 
-		void Handler::injectMouseDown(Input::MouseEventArgs& evt)
+		void Handler::injectMouseDown(const Input::MouseEventArgs& evt)
 		{
 			onMouseDown(evt);
 		}
 
-		void Handler::injectMouseUp(Input::MouseEventArgs& evt)
+		void Handler::injectMouseUp(const Input::MouseEventArgs& evt)
 		{
 			onMouseUp(evt);
 		}
@@ -150,15 +150,15 @@ namespace Engine
 			return onKeyPress(evt);
 		}
 
-		void Handler::onMouseMove(Input::MouseEventArgs& me)
+		void Handler::onMouseMove(const Input::MouseEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseDown(Input::MouseEventArgs& me)
+		void Handler::onMouseDown(const Input::MouseEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseUp(Input::MouseEventArgs& me)
+		void Handler::onMouseUp(const Input::MouseEventArgs& me)
 		{
 		}
 

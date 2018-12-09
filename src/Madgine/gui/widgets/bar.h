@@ -6,13 +6,13 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Bar : public virtual Widget
+		class Bar : public Widget
 		{
 		public:
 			using Widget::Widget;
 			virtual ~Bar() = default;
 
-			virtual void setRatio(float f) = 0;
+			virtual void setRatio(float f);
 		};
 	}
 }

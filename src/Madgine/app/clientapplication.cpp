@@ -28,11 +28,17 @@ namespace Engine
 		{
 		}
 
+		ClientApplication::~ClientApplication()
+		{
+		}
+
 		void ClientApplication::setup(const ClientAppSettings& settings)
 		{
 			mSettings = &settings;
 			
 			Application::setup(settings);
+
+			mGUI = std::make_unique<GUI::GUISystem>(*this);
 		}
 
 		const ClientAppSettings& ClientApplication::settings()
@@ -56,24 +62,17 @@ namespace Engine
 			return *this;
 		}
 
-		void ClientApplication::loadFrameLoop(std::unique_ptr<Core::FrameLoop>&& loop)
+		bool ClientApplication::init()
 		{
+			if (!Application::init())
+				return false;
+			return mGUI->callInit();
+		}
 
-			if (!loop) {
-#ifndef STATIC_BUILD
-				auto f = reinterpret_cast<GUI::GUISystem*(*)(ClientApplication &)>(Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol("guisystem"));
-				if (!f)
-					throw exception("A Client-Application requires a Renderer with a guisystem!");
-				mGUI = f(*this);
-#else
-				mGUI = guisystem(*this);
-#endif
-				if (!mGUI)
-					throw 0;
-				loop = std::unique_ptr<GUI::GUISystem>(mGUI);
-			}
-
-			Application::loadFrameLoop(std::forward<std::unique_ptr<Core::FrameLoop>>(loop));
+		void ClientApplication::finalize()
+		{
+			mGUI->callFinalize();
+			Application::finalize();
 		}
 
 		KeyValueMapList ClientApplication::maps()

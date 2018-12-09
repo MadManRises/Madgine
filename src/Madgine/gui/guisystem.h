@@ -2,15 +2,17 @@
 
 #include "Interfaces/scripting/types/scope.h"
 #include "../scene/scenecomponentbase.h"
-#include "../core/frameloop.h"
+#include "../core/madgineobject.h"
+#include "../uniquecomponent/uniquecomponentselector.h"
+#include "../render/renderer.h"
+#include "../core/framelistener.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT GUISystem :			
-			public Scripting::Scope<GUISystem>,
-			public Core::FrameLoop
+		class MADGINE_CLIENT_EXPORT GUISystem :
+			public Scripting::Scope<GUISystem>, public Core::MadgineObject, public Core::FrameListener
 		{
 		public:
 			GUISystem(App::ClientApplication &app);
@@ -32,8 +34,6 @@ namespace Engine
 
 			GUISystem &getSelf(bool = true);
 			
-			bool singleFrame(std::chrono::microseconds timeSinceLastFrame = 0us) override;
-			
 			void registerWidget(Widget* w);
 
 			void unregisterWidget(Widget *w);
@@ -42,18 +42,20 @@ namespace Engine
 
 			KeyValueMapList maps() override;
 
-			const std::vector<std::unique_ptr<TopLevelWindow>> &topLevelWindows();
+			const std::vector<std::unique_ptr<TopLevelWindow>> &topLevelWindows();			
 
 			void closeTopLevelWindow(TopLevelWindow *w);
+
+			Render::RendererBase &renderer();
 
 		protected:
 
 			virtual bool init() override;
 			virtual void finalize() override;
-
-			bool sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame);
 			
-			void addTopLevelWindow(std::unique_ptr<TopLevelWindow> &&window);
+			TopLevelWindow *createTopLevelWindow();
+
+			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 		private:
 
@@ -63,6 +65,9 @@ namespace Engine
 			App::ClientApplication &mApp;
 
 			std::unique_ptr<UI::UIManager> mUI;
+
+
+			Render::RendererSelector mRenderer;
 
 		};
 	}

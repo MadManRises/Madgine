@@ -87,11 +87,11 @@ namespace Engine
 			bool init(GUI::Widget* w);
 
 
-			virtual void onMouseMove(Input::MouseEventArgs& me);
+			virtual void onMouseMove(const Input::MouseEventArgs& me);
 
-			virtual void onMouseDown(Input::MouseEventArgs& me);
+			virtual void onMouseDown(const Input::MouseEventArgs& me);
 
-			virtual void onMouseUp(Input::MouseEventArgs& me);
+			virtual void onMouseUp(const Input::MouseEventArgs& me);
 
 			virtual bool onKeyPress(const Input::KeyEventArgs& evt);
 
@@ -99,9 +99,9 @@ namespace Engine
 
 		public:
 			
-			void injectMouseMove(Input::MouseEventArgs& evt);
-			void injectMouseDown(Input::MouseEventArgs& evt);
-			void injectMouseUp(Input::MouseEventArgs& evt);
+			void injectMouseMove(const Input::MouseEventArgs& evt);
+			void injectMouseDown(const Input::MouseEventArgs& evt);
+			void injectMouseUp(const Input::MouseEventArgs& evt);
 			bool injectKeyPress(const Input::KeyEventArgs& evt);
 
 		protected:

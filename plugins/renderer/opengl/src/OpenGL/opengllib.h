@@ -16,5 +16,10 @@
 
 #include "Madgine/clientlib.h"
 
+#define NOMINMAX
+#include <Windows.h>
+
+typedef HGLRC(WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
 /// @endcond

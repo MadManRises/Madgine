@@ -104,8 +104,7 @@ namespace Engine
 	struct variant_index<std::variant<_Ty...>, T> : type_pack_index<type_pack<_Ty...>, T> {};
 
 
-
-
-
+	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+	template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
 }

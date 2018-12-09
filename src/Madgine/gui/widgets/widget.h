@@ -8,6 +8,8 @@
 #include "Interfaces/scripting/types/scope.h"
 #include "Interfaces/signalslot/signal.h"
 
+#include "Interfaces/generic/transformIt.h"
+
 namespace Engine
 {
 	namespace GUI
@@ -28,29 +30,30 @@ namespace Engine
 			void setPos(const Matrix3& pos);
 			const Matrix3& getPos() const;
 
-			virtual Vector3 getAbsoluteSize() const = 0;
-			virtual Vector2 getAbsolutePosition() const = 0;
+			Matrix3 getAbsoluteSize() const;
+			Matrix3 getAbsolutePosition() const;
 
-			void updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos);
+			void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos = Matrix3::ZERO);
+			void screenSizeChanged(const Vector3 &screenSize);
 
-			virtual Class getClass() = 0;
+			virtual Class getClass();
 
 			void destroy();
 
-			virtual void releaseInput() = 0;
-			virtual void captureInput() = 0;
-			virtual void activate() = 0;
-			virtual void moveToFront() = 0;
+			virtual void releaseInput();
+			virtual void captureInput();
+			virtual void activate();
+			//virtual void moveToFront();
 
 
-			virtual bool isVisible() const = 0;
-			virtual void showModal() = 0;
-			virtual void hideModal() = 0;
+			virtual bool isVisible() const;
+			virtual void showModal();
+			virtual void hideModal();
 			void show();
 			void hide();
-			virtual void setVisible(bool b) = 0;
+			virtual void setVisible(bool b);
 
-			virtual void setEnabled(bool b) = 0;
+			virtual void setEnabled(bool b);
 
 			const std::string &getName() const;
 
@@ -68,30 +71,48 @@ namespace Engine
 			Textbox *createChildTextbox(const std::string& name);
 			Image *createChildImage(const std::string& name);
 			
-			Widget* getChildRecursive(const std::string& name);
+			Widget *getChildRecursive(const std::string& name);
+			Widget *getParent() const;
 
-			SignalSlot::SignalStub<Input::MouseEventArgs&> &mouseMoveEvent();
-			SignalSlot::SignalStub<Input::MouseEventArgs&> &mouseDownEvent();
-			SignalSlot::SignalStub<Input::MouseEventArgs&> &mouseUpEvent();
+			virtual bool injectMouseMove(const Input::MouseEventArgs& arg);
+			virtual bool injectMouseEnter(const Input::MouseEventArgs& arg);
+			virtual bool injectMouseLeave(const Input::MouseEventArgs& arg);
+
+			SignalSlot::SignalStub<const Input::MouseEventArgs&> &mouseMoveEvent();
+			SignalSlot::SignalStub<const Input::MouseEventArgs&> &mouseDownEvent();
+			SignalSlot::SignalStub<const Input::MouseEventArgs&> &mouseUpEvent();
+			SignalSlot::SignalStub<const Input::MouseEventArgs&> &mouseEnterEvent();
+			SignalSlot::SignalStub<const Input::MouseEventArgs&> &mouseLeaveEvent();
+
+			decltype(auto) children() const 
+			{
+				return uniquePtrToPtr(mChildren);
+			}
+
+			bool containsPoint(const Vector2 &point, const Vector3 &screenSize) const;
+
+			virtual std::vector<Vertex> vertices(const Vector3 &screenSize);
 
 		protected:
 
 			std::unique_ptr<Widget> createWidgetClass(const std::string& name, Class _class);
 
-			virtual std::unique_ptr<Widget> createWidget(const std::string &name) = 0;
-			virtual std::unique_ptr<Bar> createBar(const std::string& name) = 0;
-			virtual std::unique_ptr<Button> createButton(const std::string& name) = 0;
-			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name) = 0;
-			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name) = 0;
-			virtual std::unique_ptr<Image> createImage(const std::string& name) = 0;
-			virtual std::unique_ptr<Label> createLabel(const std::string& name) = 0;
-			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name) = 0;
-			virtual std::unique_ptr<TabWidget> createTabWidget(const std::string& name) = 0;
-			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name) = 0;
+			virtual std::unique_ptr<Widget> createWidget(const std::string &name);
+			virtual std::unique_ptr<Bar> createBar(const std::string& name);
+			virtual std::unique_ptr<Button> createButton(const std::string& name);
+			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name);
+			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name);
+			virtual std::unique_ptr<Image> createImage(const std::string& name);
+			virtual std::unique_ptr<Label> createLabel(const std::string& name);
+			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name);
+			virtual std::unique_ptr<TabWidget> createTabWidget(const std::string& name);
+			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name);
+
+			virtual void sizeChanged(const Vector3 &pixelSize);
 
 		protected:
-			virtual void setAbsoluteSize(const Vector3 &size) = 0;
-			virtual void setAbsolutePosition(const Vector2 &pos) = 0;
+
+			size_t depth();
 
 			GUISystem &gui();
 			TopLevelWindow &window();
@@ -100,7 +121,7 @@ namespace Engine
 
 			KeyValueMapList maps() override;
 
-			SignalSlot::Signal<Input::MouseEventArgs&> mMouseMoveSignal, mMouseDownSignal, mMouseUpSignal;
+			SignalSlot::Signal<const Input::MouseEventArgs&> mMouseMoveSignal, mMouseDownSignal, mMouseUpSignal, mMouseEnterSignal, mMouseLeaveSignal;
 
 		private:
 			std::string mName;
@@ -111,9 +132,12 @@ namespace Engine
 			std::vector<std::unique_ptr<Widget>> mChildren;
 
 			
-			Matrix3 mPos, mSize;
+			Matrix3 mPos = Matrix3::ZERO;
+			Matrix3 mSize = Matrix3::IDENTITY;
 
-			
+			Matrix3 mAbsolutePos, mAbsoluteSize;
+
+			bool mVisible = true;
 
 		};
 	}

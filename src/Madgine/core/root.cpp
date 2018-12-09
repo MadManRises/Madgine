@@ -18,8 +18,7 @@ namespace Engine
 {
 	namespace Core
 	{
-		Root::Root(const RootSettings &settings) :
-			mSettings(settings),
+		Root::Root() :
 #ifndef STATIC_BUILD
 		mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine")),
 			mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager)),
@@ -27,7 +26,8 @@ namespace Engine
 		mConnectionManger(std::make_unique<SignalSlot::ConnectionManager>()),
 		mLuaState(std::make_unique<Scripting::LuaState>()),
 			mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>()),
-			mProfiler(std::make_unique<Debug::Profiler::Profiler>())
+			mProfiler(std::make_unique<Debug::Profiler::Profiler>()),
+			mResources(std::make_unique<Resources::ResourceManager>())
 		{
 #ifndef STATIC_BUILD
 			(*mPluginManager)["Utility"].loadPlugin("Tools");
@@ -40,7 +40,7 @@ namespace Engine
 
 		bool Root::init()
 		{
-			mResources = std::make_unique<Resources::ResourceManager>(mSettings.mMediaDir);
+			
 			if (!mResources->init())
 				return false;
 
@@ -68,10 +68,6 @@ namespace Engine
 
 		}
 
-/*		std::experimental::filesystem::path Root::mediaDir()
-		{
-			return mSettings.mMediaDir;
-		}*/
 
 
 	}

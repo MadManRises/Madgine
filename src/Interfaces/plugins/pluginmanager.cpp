@@ -27,7 +27,9 @@ namespace Engine
 			sSingleton = this;
 
 			if (!mSettings["State"]["CurrentSelectionFile"].empty()) {
-				mCurrentSelectionFile = Ini::IniFile(selectionFiles()[mSettings["State"]["CurrentSelectionFile"]]);
+				std::experimental::filesystem::path p = selectionFiles()[mSettings["State"]["CurrentSelectionFile"]];
+				p /= mSettings["State"]["CurrentSelectionFile"] + ".cfg";
+				mCurrentSelectionFile = Ini::IniFile(p);
 				loadCurrentSelectionFile();
 			}
 		}
@@ -50,8 +52,8 @@ namespace Engine
 		{
 			auto pib = mSections.try_emplace(name, *this, name);
 			if (pib.second) {
-				for (PluginSectionListener *listener : mListeners) {
-					listener->onSectionAdded(&pib.first->second);
+				for (PluginListener *listener : mListeners) {
+					setupListenerOnSectionAdded(listener, &pib.first->second);					
 				}
 			}
 			return pib.first->second;
@@ -84,7 +86,7 @@ namespace Engine
 
 		void PluginManager::saveCurrentSelectionFile()
 		{
-			if (mCurrentSelectionFile) {
+			if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
 				mCurrentSelectionFile->clear();
 				for (const std::pair<const std::string, PluginSection> &sec : mSections) {
 					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first];
@@ -98,11 +100,14 @@ namespace Engine
 
 		void PluginManager::loadCurrentSelectionFile()
 		{
-			if (mCurrentSelectionFile) {
+			assert(!mLoadingCurrentSelectionFile);
+			if (mCurrentSelectionFile) {				
 				mCurrentSelectionFile->loadFromDisk();
+				mLoadingCurrentSelectionFile = true;
 				for (std::pair<const std::string, Ini::IniSection> &sec : *mCurrentSelectionFile) {
 					(*this)[sec.first].loadFromIni(sec.second);					
 				}
+				mLoadingCurrentSelectionFile = false;
 			}
 		}
 
@@ -131,14 +136,27 @@ namespace Engine
 			saveCurrentSelectionFile();
 		}
 
-		void PluginManager::addListener(PluginSectionListener * listener)
+		void PluginManager::addListener(PluginListener * listener)
 		{
 			mListeners.push_back(listener);
+			for (std::pair<const std::string, PluginSection> &sec : mSections)
+				setupListenerOnSectionAdded(listener, &sec.second);
 		}
 
-		void PluginManager::removeListener(PluginSectionListener * listener)
+		void PluginManager::removeListener(PluginListener * listener)
 		{
 			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+		}
+
+
+		void PluginManager::setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section)
+		{
+			section->addListener(listener);
+		}
+
+		void PluginManager::shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section)
+		{
+			section->removeListener(listener);
 		}
 
 

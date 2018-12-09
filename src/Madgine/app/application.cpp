@@ -22,9 +22,7 @@
 
 #include "Interfaces/plugins/pluginmanager.h"
 
-#if defined(STATIC_BUILD) && defined(STATIC_NOGUI)
-extern "C" Engine::Core::FrameLoop* frameloop();
-#endif
+#include "Interfaces/debug/profiler/profiler.h"
 
 namespace Engine
 {	
@@ -89,21 +87,14 @@ namespace Engine
 			}
 
 			mLoop->callFinalize();
+
+			SignalSlot::ConnectionManager::getSingleton().update();
 		}
 
 		void Application::loadFrameLoop(std::unique_ptr<Core::FrameLoop>&& loop)
 		{
 			if (!loop) {
-#ifndef STATIC_BUILD
-				auto f = Plugins::PluginManager::getSingleton().at("Renderer").getUniqueSymbol<Core::FrameLoop*()>("frameloop");
-				if (!f)
-					throw 0;
-				loop = std::unique_ptr<Core::FrameLoop>(f());
-#elif defined(STATIC_NOGUI)
-				loop = std::unique_ptr<Core::FrameLoop>(frameloop());
-#endif
-				if (!loop)
-					throw 0;
+				loop = std::make_unique<Core::FrameLoop>();
 			}
 
 			if (mLoop) {
@@ -165,21 +156,18 @@ namespace Engine
 
 		bool Application::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
-
+			PROFILE();
+			try
 			{
-				//PROFILE("ScriptingManager")
-				try
+				for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
 				{
-					for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
-					{
-						p->update();
-					}
+					p->update();
 				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during GlobalScope-update!");
-					LOG_EXCEPTION(e);
-				}
+			}
+			catch (const std::exception& e)
+			{
+				LOG_ERROR("Unhandled Exception during GlobalScope-update!");
+				LOG_EXCEPTION(e);
 			}
 
 			return true;

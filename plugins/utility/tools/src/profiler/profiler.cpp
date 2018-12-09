@@ -55,9 +55,8 @@ namespace Engine {
 				drawStats(mProfiler.getThreadStats(), mProfiler.getThreadStats()->totalTime(), mProfiler.getThreadStats()->totalTime());
 
 				ImGui::EndColumns();
-
-				ImGui::End();
 			}
+			ImGui::End();
 		}
 
 		const char * Profiler::key()

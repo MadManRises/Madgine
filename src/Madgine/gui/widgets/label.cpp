@@ -11,7 +11,13 @@
 namespace Engine
 {
 	namespace GUI {
-
+		std::string Label::getText()
+		{
+			return std::string();
+		}
+		void Label::setText(const std::string & text)
+		{
+		}
 		KeyValueMapList Label::maps()
 		{
 			return Scope::maps().merge(MAP(Text, getText, setText));

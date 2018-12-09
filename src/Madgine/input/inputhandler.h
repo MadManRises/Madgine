@@ -1,19 +1,17 @@
 #pragma once
 
 #include "Interfaces/reflection/classname.h"
+#include "../core/framelistener.h"
 
 namespace Engine
 {
 	namespace Input
 	{
-		class MADGINE_CLIENT_EXPORT InputHandler
+		class MADGINE_CLIENT_EXPORT InputHandler : public Core::FrameListener
 		{
 		public:
 			InputHandler();
 			virtual ~InputHandler() = default;
-
-			virtual void update() = 0;
-			virtual void onResize(size_t width, size_t height) = 0;
 			
 			void setListener(InputListener *listener);
 			InputListener *listener();

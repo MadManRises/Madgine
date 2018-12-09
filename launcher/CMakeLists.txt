@@ -5,6 +5,6 @@ endif()
 
 add_executable(MadgineLauncher launcher.cpp ${components_source})
 
-target_link_plugins(MadgineLauncher PRIVATE Client Tools)
+target_link_plugins(MadgineLauncher PRIVATE Client Tools OISHandler OpenGL)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

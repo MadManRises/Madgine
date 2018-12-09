@@ -13,6 +13,8 @@
 
 #include "Interfaces/scripting/types/api.h"
 
+#include "Interfaces/debug/profiler/profiler.h"
+
 namespace Engine
 {	
 
@@ -30,12 +32,12 @@ namespace Engine
 		    mGuiHandlers(*this),
 		    mGameHandlers(*this)
 		{
-			gui.addFrameListener(this);
+			app(false).addFrameListener(this);
 		}
 
 		UIManager::~UIManager()
 		{
-			mGUI.removeFrameListener(this);
+			app(false).removeFrameListener(this);
 		}
 
 		UIManager& UIManager::getSelf(bool init)
@@ -172,8 +174,9 @@ namespace Engine
 			return mGUI.app(init);
 		}
 
-		bool UIManager::frameRenderingQueued(float timeSinceLastFrame, Scene::ContextMask context)
+		bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
+			PROFILE();
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{
 				h->update(timeSinceLastFrame, context);
@@ -181,7 +184,7 @@ namespace Engine
 			return true;
 		}
 
-		bool UIManager::frameFixedUpdate(float timeSinceLastFrame, Scene::ContextMask context)
+		bool UIManager::frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
 		{
 			for (const std::unique_ptr<GameHandlerBase>& h : mGameHandlers)
 			{

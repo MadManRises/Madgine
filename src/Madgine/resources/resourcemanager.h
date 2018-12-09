@@ -2,18 +2,25 @@
 
 #include "resourceloadercollector.h"
 #include "../uniquecomponent/uniquecomponentcontainer.h"
+#include "Interfaces/plugins/pluginlistener.h"
 
 namespace Engine
 {
 	namespace Resources
 	{
-		class MADGINE_BASE_EXPORT ResourceManager
+		class MADGINE_BASE_EXPORT ResourceManager 
+#ifndef STATIC_BUILD
+			: Plugins::PluginListener
+#endif
 		{
 			
 		public:
 			static ResourceManager &getSingleton();
 
-			ResourceManager(const std::experimental::filesystem::path &rootDir);
+			ResourceManager();
+			~ResourceManager();
+
+			void registerResourceLocation(const std::experimental::filesystem::path &path, int priority);
 
 			template <class Loader>
 			typename Loader::ResourceType *get(const std::string &name)
@@ -39,15 +46,35 @@ namespace Engine
 
 			bool init();
 
-			const std::vector<std::experimental::filesystem::path> &folders() const;
+#ifndef STATIC_BUILD
+		protected:
+			void onPluginLoad(const Plugins::Plugin *plugin) override;
+			bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
+#endif
+
+		private:
+			void updateResources(const std::experimental::filesystem::path &path, int priority);
+			void updateResources(const std::experimental::filesystem::path &path, int priority, const std::map<std::string, ResourceLoaderBase*> &loaderByExtension);
 
 		private:
 			static ResourceManager *sSingleton;
 
 			ResourceLoaderContainer mCollector;
 
-			std::experimental::filesystem::path mRootDir;
-			std::vector<std::experimental::filesystem::path> mFolders;
+			struct SubDirCompare
+			{
+				bool operator()(const std::experimental::filesystem::path &first, const std::experimental::filesystem::path &second) const
+				{
+					auto[firstEnd, secondEnd] = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
+					if (firstEnd == first.end() || secondEnd == second.end())
+						return false;
+					return first < second;
+				}
+			};
+
+			std::map<std::experimental::filesystem::path, int, SubDirCompare> mResourcePaths;
+
+			bool mInitialized = false;
 
 		};
 

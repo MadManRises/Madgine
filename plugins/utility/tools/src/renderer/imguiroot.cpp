@@ -50,12 +50,11 @@ namespace Engine {
 
 		bool ImGuiRoot::init()
 		{
-			createManager();
-
 #ifndef STATIC_BUILD
 			Plugins::PluginManager::getSingleton()["Renderer"].addListener(this);
+#else
+			createManager();
 #endif
-
 			
 			return true;
 		}
@@ -64,17 +63,26 @@ namespace Engine {
 		{
 #ifndef STATIC_BUILD
 			Plugins::PluginManager::getSingleton()["Renderer"].removeListener(this);
-#endif
+#else
 			destroyManager();
+#endif
 		}
 
 		bool ImGuiRoot::frameStarted(std::chrono::microseconds timeSinceLastFrame)
 		{
+			mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
+			
+			return true;
+		}
+
+		bool ImGuiRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+		{
 			PROFILE_NAMED("ImGui - Rendering");
 
-			mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
 
 			if (ImGui::BeginMainMenuBar()) {
+
+				mManager->setMenuHeight(ImGui::GetWindowSize().y);
 
 				if (ImGui::BeginMenu("File")) {
 					if (ImGui::MenuItem("Quit")) {
@@ -103,12 +111,6 @@ namespace Engine {
 			return true;
 		}
 
-		bool ImGuiRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
-		{
-			
-			return true;
-		}
-
 		bool ImGuiRoot::aboutToUnloadPlugin(const Plugins::Plugin * p)
 		{
 			SignalSlot::ConnectionManager::getSingleton().queue([this]() {
@@ -124,19 +126,20 @@ namespace Engine {
 
 		void ImGuiRoot::createManager()
 		{
-			
+			assert(!mManager);
 			IF_PLUGIN(OpenGL)
 			mManager = createOpenGlManager(static_cast<App::ClientApplication&>(app()));
 			else
 			THROW_PLUGIN("No ImGui-Manager available!");
 			mManager->init();
 			//mManager->newFrame(0.0f);
-			app().addFrameListener(this);
+			app(false).addFrameListener(this);
 		}
 
 		void ImGuiRoot::destroyManager()
 		{
-			app().removeFrameListener(this);
+			assert(mManager);
+			app(false).removeFrameListener(this);
 			ImGui::EndFrame();
 			mManager->finalize();
 			mManager.reset();
