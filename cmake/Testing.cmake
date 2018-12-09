@@ -12,7 +12,7 @@ if (BUILD_TESTING)
 
 	enable_testing()
 
-	load_workspace_package(googletest https://github.com/google/googletest.git EXPORT_TARGETS gtest gtest_main gmock gmock_main DEFINITIONS -Dgtest_force_shared_crt:BOOL=ON)
+	load_workspace_package(googletest https://github.com/abseil/googletest.git EXPORT_TARGETS gtest gtest_main gmock gmock_main DEFINITIONS -Dgtest_force_shared_crt:BOOL=ON)
 
 	find_package( Threads REQUIRED )
 
