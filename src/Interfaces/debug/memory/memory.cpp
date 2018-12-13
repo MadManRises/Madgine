@@ -121,7 +121,7 @@ namespace Engine {
 
 			void *(*sOldMallocHook)(size_t, const void *) = nullptr;
 			void *(*sOldReallocHook)(void *, size_t, const void *) = nullptr;
-			void *(*sOldFreeHook)(void *, const void *) = nullptr;
+			void (*sOldFreeHook)(void *, const void *) = nullptr;
 
 			static void *linuxMallocHook(size_t size, const void *);
 			static void *linuxReallocHook(void *ptr, size_t size, const void *);
