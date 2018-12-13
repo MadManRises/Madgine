@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../generic/valuetype.h"
+
 namespace Engine
 {
 	namespace Scripting
