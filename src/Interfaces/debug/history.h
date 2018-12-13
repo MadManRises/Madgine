@@ -157,7 +157,7 @@ namespace Engine {
 
 		private:
 			std::atomic<HistoryData<T>> mData;
-			std::_Array_iterator<T, S> mBuffer;			
+			std::array<T, S> mBuffer;			
 		};
 
 
