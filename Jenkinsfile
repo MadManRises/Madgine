@@ -22,6 +22,9 @@ def task = {
 	
     def name = "${it.join('-')}--build"    
 
+	if (staticConfig?.trim())
+		staticConfig = "../${staticConfig}"
+
     return {
         // This is where the important work happens for each combination
 	    stage("${name}") {
@@ -35,7 +38,8 @@ def task = {
                 stage("cmake") {
 				    sh """
                     mkdir -p ${name}
-				    cmake ${name} \
+					cd ${name}
+				    cmake .. \
 				    -DCMAKE_BUILD_TYPE=${configuration} \
 				    -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
                     -DSTATIC_BUILD=${staticConfig}
