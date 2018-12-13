@@ -42,7 +42,7 @@ def task = {
 				    cmake .. \
 				    -DCMAKE_BUILD_TYPE=${configuration} \
 				    -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
-                    -DSTATIC_BUILD=${staticConfig}
+                    -DSTATIC_BUILD=${staticConfig} \
 					-DWorkspace=workspace
 				    """
                 }
