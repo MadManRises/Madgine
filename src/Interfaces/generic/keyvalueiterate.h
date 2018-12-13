@@ -42,7 +42,7 @@ namespace Engine
 		return v.toValueType();
 	}
 
-	template <class T, class _ = decltype(std::declval<ValueType>.as<T>())>
+	template <class T, class _ = decltype(std::declval<ValueType>().as<T>())>
 	void fromValueType(Scripting::ScopeBase *ref, T& v, const ValueType &value)
 	{
 		v = value.as<T>();
