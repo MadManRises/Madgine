@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <DbgHelp.h>
 #elif defined(__linux__) || defined(__EMSCRIPTEN__)
+#include <unistd.h>
 #include <dlfcn.h>
 #else
 #error "Unsupported Platform"
