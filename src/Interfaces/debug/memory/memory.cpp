@@ -36,9 +36,11 @@ typedef struct _CrtMemBlockHeader
          */
 } _CrtMemBlockHeader;
 
-#endif
+#else
 
 #include <iostream>
+
+#endif
 
 namespace Engine {
 	namespace Debug {
@@ -119,6 +121,10 @@ namespace Engine {
 #endif
 
 				sSingleton = nullptr;
+
+#ifndef _WIN32
+#	define OutputDebugString(msg) std::cout << msg
+#endif
 
 				OutputDebugString("-------- Madgine Memory Tracker Report --------\n");
 
