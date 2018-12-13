@@ -44,9 +44,9 @@ namespace Engine
 
 	template <template <auto, typename, typename, typename...> typename C, auto f>
 	struct Partial {
-		template <typename... Args>
+		template <typename Arg1, typename Arg2, typename... Args>
 		struct apply {
-			using type = C<f, Args...>;
+			using type = C<f, Arg1, Arg2, Args...>;
 		};
 	};	
 
