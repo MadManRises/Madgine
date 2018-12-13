@@ -17,8 +17,8 @@ namespace Engine
 		void StandardLog::log(const std::string& msg, MessageType lvl)
 		{
 			time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			struct tm p;
-			localtime_s(&p, &time);
+			
+			struct tm *p = localtime(&time);
 
 			const char* type;
 			switch (lvl)
@@ -35,7 +35,7 @@ namespace Engine
 			}
 
 			char s[30];
-			strftime(s, 28, "%d/%m/%Y - %H:%M : ", &p);
+			strftime(s, 28, "%d/%m/%Y - %H:%M : ", p);
 			std::cout << s << msg << std::endl;
 			Log::log(msg, lvl);
 		}
