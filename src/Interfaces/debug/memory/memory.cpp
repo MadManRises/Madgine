@@ -164,7 +164,7 @@ namespace Engine {
 
 			static void *linuxMallocHook(size_t size, const void *)
 			{
-				void *ptr = MemoryTracker::allocUntracked(size, 1);
+				void *ptr = MemoryTracker::allocateUntracked(size, 1);
 				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(ptr), size);
 				return ptr;
 			}
