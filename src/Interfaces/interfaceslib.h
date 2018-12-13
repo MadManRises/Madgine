@@ -72,11 +72,13 @@
 #else
 #include <experimental/memory_resource>
 namespace std {
-	namespace pmr = experimental::pmr;
-	namespace pmr {
-		template <class T>
-		using vector = std::vector<T, polymorphic_allocator<T>>;
+	namespace experimental {
+		namespace pmr {
+			template <class T>
+			using vector = std::vector<T, polymorphic_allocator<T>>;
+		}
 	}
+	namespace pmr = experimental::pmr;	
 }
 #endif
 #include <optional>
