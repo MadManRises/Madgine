@@ -29,12 +29,12 @@ namespace Engine {
 			close(id);
 		}
 
-		size_t SocketAPI::send(SocketId id, char *buf, size_t len)
+		int SocketAPI::send(SocketId id, char *buf, size_t len)
 		{
 			return ::send(id, buf, len, MSG_NOSIGNAL);
 		}
 
-		size_t SocketAPI::recv(SocketId id, char *buf, size_t len)
+		int SocketAPI::recv(SocketId id, char *buf, size_t len)
 		{
 			return ::read(id, buf, len);
 		}

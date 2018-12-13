@@ -43,7 +43,7 @@ namespace Engine
 	{
 		assert(iCol < 4);
 		return Vector4(m[0][iCol], m[1][iCol],
-			m[2][iCol], m[4][iCol]);
+			m[2][iCol], m[3][iCol]);
     }
     //-----------------------------------------------------------------------
     void Matrix4::SetColumn(size_t iCol, const Vector4& vec)
