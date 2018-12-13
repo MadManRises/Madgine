@@ -1,10 +1,7 @@
 #include "../../interfaceslib.h"
 #include "untrackedmemoryresource.h"
+#include "memory.h"
 
-
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 
 namespace Engine {
 	namespace Debug {
@@ -19,28 +16,12 @@ namespace Engine {
 
 			void * UntrackedMemoryResource::do_allocate(size_t _Bytes, size_t _Align)
 			{
-#ifdef _WIN32			
-
-				static HANDLE heap = GetProcessHeap();
-				return HeapAlloc(heap, HEAP_GENERATE_EXCEPTIONS, _Bytes);
-
-#else
-#error "Unsupported Platform!"
-#endif
+				return MemoryTracker::allocateUntracked(_Bytes, _Align);
 			}
 
 			void UntrackedMemoryResource::do_deallocate(void * _Ptr, size_t _Bytes, size_t _Align)
 			{
-
-#ifdef _WIN32
-
-				static HANDLE heap = GetProcessHeap();
-				auto result = HeapFree(heap, 0, _Ptr);
-				assert(result);
-
-#else
-#error "Unsupported Platform!"
-#endif
+				MemoryTracker::deallocateUntracked(_Ptr, _Bytes, _Align);
 			}
 
 			bool UntrackedMemoryResource::do_is_equal(const std::pmr::memory_resource & _That) const noexcept

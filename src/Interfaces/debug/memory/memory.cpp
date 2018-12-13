@@ -46,7 +46,10 @@ namespace Engine {
 	namespace Debug {
 		namespace Memory {
 
-			MemoryTracker *MemoryTracker::sSingleton = nullptr;
+
+
+			static MemoryTracker *sSingleton;
+
 
 			MemoryTracker &MemoryTracker::getSingleton()
 			{
@@ -64,7 +67,6 @@ namespace Engine {
 				return mTotalMemory;
 			}
 
-#ifdef _WIN32
 			const std::pmr::unordered_map<FullStackTrace, TracedAllocationData>& MemoryTracker::stacktraces()
 			{
 				return mFullStacktraces;
@@ -75,7 +77,11 @@ namespace Engine {
 				return mLinkedFront;
 			}
 
-			int MemoryTracker::win32Hook(int allocType, void * userData, size_t size, int blockType, long requestNumber, const unsigned char * filename, int lineNumber)
+#ifdef _WIN32
+
+			int(*sOldHook)(int, void*, size_t, int, long, const unsigned char *, int);
+
+			static int win32Hook(int allocType, void * userData, size_t size, int blockType, long requestNumber, const unsigned char * filename, int lineNumber)
 			{
 				_CrtMemBlockHeader *header;
 				switch (allocType) {
@@ -95,13 +101,89 @@ namespace Engine {
 
 				return true;
 			}
+
+			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
+			{
+				static HANDLE heap = GetProcessHeap();
+				return HeapAlloc(heap, HEAP_GENERATE_EXCEPTIONS, size);
+			}
+
+			void MemoryTracker::deallocateUntracked(void * ptr, size_t size, size_t align)
+			{
+				static HANDLE heap = GetProcessHeap();
+				auto result = HeapFree(heap, 0, ptr);
+				assert(result);
+			}
+
+#elif __linux__
+
+			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
+			{
+				__malloc_hook = sOldMallocHook;
+				__realloc_hook = sOldReallocHook;
+				__free_hook = sOldFreeHook;
+				void *ptr = malloc(size);
+				__malloc_hook = linuxMallocHook;
+				__realloc_hook = linuxReallocHook;
+				__free_hook = linuxFreeHook;
+				return ptr;
+			}
+
+			void MemoryTracker::deallocateUntracked(void * ptr, size_t size, size_t align)
+			{
+				__malloc_hook = sOldMallocHook;
+				__realloc_hook = sOldReallocHook;
+				__free_hook = sOldFreeHook;
+				free(ptr);
+				__malloc_hook = linuxMallocHook;
+				__realloc_hook = linuxReallocHook;
+				__free_hook = linuxFreeHook;
+			}
+
+			void *reallocUntracked(void * ptr, size_t size)
+			{
+				__malloc_hook = sOldMallocHook;
+				__realloc_hook = sOldReallocHook;
+				__free_hook = sOldFreeHook;
+				void *result = realloc(ptr, size);
+				__malloc_hook = linuxMallocHook;
+				__realloc_hook = linuxReallocHook;
+				__free_hook = linuxFreeHook;
+				return result;
+			}
+
+			void *(*sOldMallocHook)(size_t, const void *);
+			void *(*sOldReallocHook)(void *, size_t, const void *);
+			void *(*sOldFreeHook)(void *, const void *)
+
+			static void *linuxMallocHook(size_t size, const void *)
+			{
+				void *ptr = MemoryTracker::allocUntracked(size, 1);
+				sSingleton->onMalloc(ptr, size);
+				return ptr;
+			}
+
+			static void *linuxReallocHook(void *ptr, size_t size, const void *)
+			{
+				sSingleton->onFree(ptr, size);
+				void *result = reallocUntracked(ptr, size);
+				sSingleton->onMalloc(result, size);
+				return result;
+			}
+
+			static void linuxFreeHook(void *ptr, const void *)
+			{
+				//TODO
+				sSingleton->onFree(ptr, 0);
+				MemoryTracker::deallocateUntracked(ptr, 0, 1);
+			}
+
+#else
+#	error "Unsupported Platform!"
 #endif
 
 
 			MemoryTracker::MemoryTracker() :
-#ifdef _WIN32
-				mOldHook(_CrtSetAllocHook(&MemoryTracker::win32Hook)),
-#endif
 				mTotalMemory(0),
 				mUnknownAllocationSize(0),				
 				mStacktraces(UntrackedMemoryResource::sInstance()),
@@ -113,11 +195,26 @@ namespace Engine {
 			{
 				assert(!sSingleton);
 				sSingleton = this;
+
+#ifdef _WIN32
+				sOldHook = _CrtSetAllocHook(&MemoryTracker::win32Hook);
+#elif __linux__				
+				sOldMallocHook = __malloc_hook;
+				sOldReallocHook = __realloc_hook;
+				sOldFreeHook = __free_hook;
+				__malloc_hook = linuxMallocHook;
+				__realloc_hook = linuxReallocHook;
+				__free_hook = linuxFreeHook;
+#endif
 			}
 
 			MemoryTracker::~MemoryTracker() {
-#ifdef _WIN32
+#ifdef _WIN32				
 				_CrtSetAllocHook(mOldHook);
+#elif __linux__
+				__malloc_hook = sOldMallocHook;
+				__realloc_hook = sOldReallocHook;
+				__free_hook = sOldFreeHook;
 #endif
 
 				sSingleton = nullptr;
@@ -205,6 +302,7 @@ namespace Engine {
 					pib.first->second->mSize += s;
 				}
 			}
+
 
 		}
 	}

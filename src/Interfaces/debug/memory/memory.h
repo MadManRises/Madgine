@@ -19,23 +19,27 @@ namespace Engine {
 
 				using StackTrace = StackTrace<64>;				
 
-				size_t overhead();
-				size_t totalMemory();
-				
-				const std::pmr::unordered_map<FullStackTrace, TracedAllocationData> &stacktraces();
-				std::atomic<const std::pair<const FullStackTrace, TracedAllocationData> *>& linkedFront();
-
-				static MemoryTracker &getSingleton();
 
 				MemoryTracker();
 				MemoryTracker(const MemoryTracker &) = delete;
 				~MemoryTracker();
 
-			private:
+				static MemoryTracker &getSingleton();
 
-				//STATS
+
+				size_t overhead();
+				size_t totalMemory();
+				
+				const std::pmr::unordered_map<FullStackTrace, TracedAllocationData> &stacktraces();
+				std::atomic<const std::pair<const FullStackTrace, TracedAllocationData> *>& linkedFront();
+				
 				void onMalloc(uintptr_t id, size_t s);
 				void onFree(uintptr_t id, size_t s);
+
+				static void *allocateUntracked(size_t size, size_t align);
+				static void deallocateUntracked(void *ptr, size_t size, size_t align);
+
+			private:
 
 				size_t mTotalMemory;
 				size_t mUnknownAllocationSize;
@@ -50,21 +54,6 @@ namespace Engine {
 				
 			private:
 
-				//STATS IMPL
-#ifdef _WIN32
-				int(*mOldHook)(int, void*, size_t, int, long, const unsigned char *, int);
-
-				static int win32Hook(int allocType, void *userData, size_t size, int
-					blockType, long requestNumber, const unsigned char *filename, int
-					lineNumber);
-
-#endif
-
-				static MemoryTracker *sSingleton;
-
-
-				struct ThreadLocal {
-				};
 
 			};
 
