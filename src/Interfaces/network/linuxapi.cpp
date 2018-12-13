@@ -120,12 +120,12 @@ namespace Engine {
 			return s;
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, int timeout) {
+		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, std::chrono::milliseconds timeout) {
 			struct timeval tv;
 			fd_set readfds;
 
-			tv.tv_sec = timeout / 1000;
-			tv.tv_usec = (timeout % 1000) * 1000;
+			tv.tv_sec = static_cast<long>(timeout.count()) / 1000;
+			tv.tv_usec = static_cast<long>(timeout.count()) % 1000 * 1000;
 
 			FD_ZERO(&readfds);
 			FD_SET(s, &readfds);
