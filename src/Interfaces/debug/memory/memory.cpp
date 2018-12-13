@@ -123,6 +123,10 @@ namespace Engine {
 			void *(*sOldReallocHook)(void *, size_t, const void *) = nullptr;
 			void *(*sOldFreeHook)(void *, const void *) = nullptr;
 
+			static void *linuxMallocHook(size_t size, const void *);
+			static void *linuxReallocHook(void *ptr, size_t size, const void *);
+			static void linuxFreeHook(void *ptr, const void *);
+
 			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
 			{
 				__malloc_hook = sOldMallocHook;
@@ -161,22 +165,22 @@ namespace Engine {
 			static void *linuxMallocHook(size_t size, const void *)
 			{
 				void *ptr = MemoryTracker::allocUntracked(size, 1);
-				sSingleton->onMalloc(ptr, size);
+				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(ptr), size);
 				return ptr;
 			}
 
 			static void *linuxReallocHook(void *ptr, size_t size, const void *)
 			{
-				sSingleton->onFree(ptr, size);
+				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), size);
 				void *result = reallocUntracked(ptr, size);
-				sSingleton->onMalloc(result, size);
+				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(result), size);
 				return result;
 			}
 
 			static void linuxFreeHook(void *ptr, const void *)
 			{
 				//TODO
-				sSingleton->onFree(ptr, 0);
+				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), 0);
 				MemoryTracker::deallocateUntracked(ptr, 0, 1);
 			}
 
