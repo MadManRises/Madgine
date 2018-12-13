@@ -77,6 +77,12 @@ namespace std {
 			template <class T>
 			using vector = std::vector<T, polymorphic_allocator<T>>;
 			using string = std::basic_string<char, char_traits<char>, polymorphic_allocator<char>>;
+			template <class Key,
+				class T,
+				class Hash = hash<Key>,
+				class Pred = equal_to<Key>>
+			using unordered_map = std::unordered_map<Key, T, Hash, Pred,
+				polymorphic_allocator<pair<const Key, T>>>;
 		}
 	}
 	namespace pmr = experimental::pmr;	
