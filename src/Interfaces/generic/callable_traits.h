@@ -42,7 +42,7 @@ namespace Engine
 		using type = T;
 	};
 
-	template <template <auto, typename...> typename C, auto f>
+	template <template <auto, typename, typename, typename...> typename C, auto f>
 	struct Partial {
 		template <typename... Args>
 		struct apply {

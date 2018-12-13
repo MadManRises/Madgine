@@ -2,6 +2,7 @@
 
 #include "connectionstore.h"
 #include "connectionmanager.h"
+#include "../generic/tupleunpacker.h"
 
 namespace Engine
 {
