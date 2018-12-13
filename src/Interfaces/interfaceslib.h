@@ -71,6 +71,9 @@
 #include <memory_resource>
 #else
 #include <experimental/memory_resource>
+namespace std {
+	namespace pmr = experimental::pmr;
+}
 #endif
 #include <optional>
 
