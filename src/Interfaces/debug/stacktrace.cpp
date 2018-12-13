@@ -38,9 +38,8 @@ namespace Engine {
 			trace = CaptureStackBackTrace((DWORD)skip + 1, (DWORD)size, buffer, NULL);
 #elif __linux__
 			std::unique_ptr<void*[]> tmpBuffer = std::make_unique<void*[]>(size + skip + 1);
-			trace = backtrace(tmpBuffer.get, size + skip + 1);
-			if (!memcpy_s(buffer, tmpBuffer.get() + skip + 1, size))
-				throw 0;
+			trace = backtrace(tmpBuffer.get(), size + skip + 1);
+			memcpy(buffer, tmpBuffer.get() + skip + 1, size * sizeof(void*));				
 #else
 #error "Unsupported Platform!"
 #endif
@@ -117,7 +116,7 @@ namespace Engine {
 				}
 #elif __linux__
 				if (symbols && symbols[i]) {
-					result.emplace_back({ data[i], symbols[i] });
+					result.emplace_back(data[i], symbols[i]);
 				}
 #else
 #error "Unsupported Platform!"
