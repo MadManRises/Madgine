@@ -36,9 +36,10 @@ typedef struct _CrtMemBlockHeader
          */
 } _CrtMemBlockHeader;
 
-#else
+#elif __linux__
 
 #include <iostream>
+#include <malloc.h>
 
 #endif
 
@@ -79,7 +80,7 @@ namespace Engine {
 
 #ifdef _WIN32
 
-			int(*sOldHook)(int, void*, size_t, int, long, const unsigned char *, int);
+			int(*sOldHook)(int, void*, size_t, int, long, const unsigned char *, int) = nullptr;
 
 			static int win32Hook(int allocType, void * userData, size_t size, int blockType, long requestNumber, const unsigned char * filename, int lineNumber)
 			{
@@ -117,6 +118,11 @@ namespace Engine {
 
 #elif __linux__
 
+
+			void *(*sOldMallocHook)(size_t, const void *) = nullptr;
+			void *(*sOldReallocHook)(void *, size_t, const void *) = nullptr;
+			void *(*sOldFreeHook)(void *, const void *) = nullptr;
+
 			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
 			{
 				__malloc_hook = sOldMallocHook;
@@ -151,10 +157,6 @@ namespace Engine {
 				__free_hook = linuxFreeHook;
 				return result;
 			}
-
-			void *(*sOldMallocHook)(size_t, const void *);
-			void *(*sOldReallocHook)(void *, size_t, const void *);
-			void *(*sOldFreeHook)(void *, const void *)
 
 			static void *linuxMallocHook(size_t size, const void *)
 			{
