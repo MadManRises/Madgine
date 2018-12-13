@@ -76,6 +76,8 @@ namespace std {
 		namespace pmr {
 			template <class T>
 			using vector = std::vector<T, polymorphic_allocator<T>>;
+			template <class T>
+			using string = std::basic_string<char, char_traits<char>, polymorphic_allocator<char>>;
 		}
 	}
 	namespace pmr = experimental::pmr;	
