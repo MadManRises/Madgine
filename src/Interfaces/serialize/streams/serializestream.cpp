@@ -159,8 +159,9 @@ namespace Engine
 			read(type);
 			if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>)
 			{
-				read(EOLType());
-				mLog.logRead(EOLType());
+				EOLType eol;
+				read(eol);
+				mLog.logRead(eol);
 				return false;
 			}
 			seek(pos);
