@@ -128,10 +128,10 @@ namespace Engine {
 			void operator << (T value)
 			{
 				HistoryData<T> data = mData.load();
+				HistoryData<T> newData;
 				size_t currentIndex;
 				do {
 					currentIndex = data.mIndex;
-					HistoryData<T> newData;
 					newData.mIndex = (data.mIndex + 1) % S;
 					newData.mMin = min(data.mMin, value);
 					newData.mMax = max(data.mMax, value);
