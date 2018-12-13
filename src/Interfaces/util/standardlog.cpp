@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include <time.h>
+
 namespace Engine
 {
 	namespace Util
