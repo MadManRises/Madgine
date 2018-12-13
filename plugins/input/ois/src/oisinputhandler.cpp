@@ -121,8 +121,8 @@ namespace Engine
 		void OISInputHandler::onResize(size_t width, size_t height)
 		{
 			const OIS::MouseState& ms = mMouse->getMouseState();
-			ms.width = width;
-			ms.height = height;
+			ms.width = static_cast<int>(width);
+			ms.height = static_cast<int>(height);
 
 			mMouseScale = (width / 640.0f + height / 480.0f) / 2;
 		}

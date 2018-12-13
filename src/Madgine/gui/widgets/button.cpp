@@ -31,7 +31,7 @@ namespace Engine
 			Vector4 color = mHovered ? Vector4{ 1.0f, 0.1f, 0.1f, 1.0f } : Vector4{0.4f, 0.4f, 0.4f, 1.0f};
 
 			Vector3 v = pos;
-			v.z = depth();
+			v.z = static_cast<float>(depth());
 			result.push_back({ v, color });
 			v.x += size.x;
 			result.push_back({ v, color });

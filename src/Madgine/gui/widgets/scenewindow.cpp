@@ -43,7 +43,7 @@ namespace Engine
 			uint32_t texId = mTarget ? mTarget->textureId() : 0;
 
 			Vector3 v = pos;
-			v.z = depth();
+			v.z = static_cast<float>(depth());
 			result.push_back({ v, color, {0,0}, texId });
 			v.x += size.x;
 			result.push_back({ v, color, {1,0}, texId });

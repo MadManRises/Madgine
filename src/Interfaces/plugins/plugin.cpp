@@ -90,7 +90,7 @@ namespace Engine
 #endif
 		}
 
-		std::experimental::filesystem::path Plugin::fullPath() const
+		/*std::experimental::filesystem::path Plugin::fullPath() const
 		{
 			std::experimental::filesystem::path path;
 
@@ -104,7 +104,7 @@ namespace Engine
 			path = buffer;
 #endif
 			return path;
-		}
+		}*/
 
 		std::experimental::filesystem::path Plugin::runtimePath()
 		{
@@ -112,6 +112,11 @@ namespace Engine
 			char buffer[512];
 			auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
 			assert(result);
+			return std::experimental::filesystem::path(buffer).parent_path();
+#elif __linux__
+			char buffer[512];
+			auto result = readlink("proc/self/exe", buffer, sizeof(buffer));
+			assert(result > 0);
 			return std::experimental::filesystem::path(buffer).parent_path();
 #endif
 		}

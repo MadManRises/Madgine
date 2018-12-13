@@ -130,7 +130,7 @@ namespace Engine {
 			mTexture.setData(width, height, nullptr);
 
 			glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 
 			RenderTarget::resize(size);
 		}
