@@ -3,6 +3,7 @@
 #include "resourceloadercollector.h"
 #include "../uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/plugins/pluginlistener.h"
+#include "../uniquecomponent/uniquecomponent.h"
 
 namespace Engine
 {

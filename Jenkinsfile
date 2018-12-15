@@ -28,12 +28,6 @@ def task = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-		    stage("checkout") {
-           		checkout scm
-                sh """
-			    git submodule update --init --recursive
-                """
-	    	}
             stage("cmake") {
 			    sh """
                 mkdir -p ${name}
@@ -89,6 +83,12 @@ pipeline {
 	}
 
     stages {
+		stage("checkout") {
+        	checkout scm
+            sh """
+			git submodule update --init --recursive
+            """
+	    }
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
