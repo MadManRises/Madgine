@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <stddef.h>
 
 namespace Engine {
 	namespace Plugins {
