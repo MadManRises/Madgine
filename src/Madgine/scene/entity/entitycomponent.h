@@ -4,6 +4,8 @@
 #include "entitycomponentcollector.h"
 #include "Interfaces/scripting/types/scope.h"
 
+#include "Interfaces/serialize/streams/serializestream.h"
+
 namespace Engine
 {
 	namespace Scene

@@ -35,7 +35,7 @@ namespace Engine
 		struct PrimitiveTypesContain<T, std::enable_if_t<std::is_enum_v<T>>> : PrimitiveTypesContain<int> {};
 
 		template <class T>
-		const constexpr size_t PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
+		const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
 		typedef std::istream::pos_type pos_type;
 
