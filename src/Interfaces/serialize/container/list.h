@@ -82,7 +82,7 @@ namespace Engine
 			template <class T, class... _Ty>
 			void emplace_tuple_back_init(T&& init, std::tuple<_Ty...>&& args)
 			{
-				TupleUnpacker::call(this, &ObservableListImpl::emplace_back_init<T, _Ty...>, std::tuple_cat(std::make_tuple(std::forward<T>(init)),
+				TupleUnpacker::call(this, &ObservableListImpl::emplace_back_init<T, _Ty...>, std::tuple_cat(std::forward_as_tuple(std::forward<T>(init)),
 				                         std::forward<std::tuple<_Ty...>>(args)));
 			}
 		};
