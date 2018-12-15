@@ -16,13 +16,13 @@ namespace Engine
 
 		using SceneComponentCollector = UniqueComponentCollector<SceneComponentBase, SceneManager&>;
 
-#ifndef PLUGIN_BUILD
-		extern template MADGINE_BASE_EXPORT struct UniqueComponentCollector<SceneComponentBase, SceneManager&>;
-#endif
-
 		using SceneComponentContainer = UniqueComponentContainer<SceneComponentBase, SceneManager&, SceneComponentSet>;
 
 	}
+
+#ifndef PLUGIN_BUILD
+	extern template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Scene::SceneComponentBase, Scene::SceneManager&>;
+#endif
 
 }
 
