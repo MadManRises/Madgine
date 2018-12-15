@@ -4,6 +4,9 @@
 #include "Interfaces/scripting/types/scopebase.h"
 #include "Interfaces/reflection/classname.h"
 
+
+#include "../uniquecomponent/uniquecomponent.h"
+
 namespace Engine
 {
 	namespace App
