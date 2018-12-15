@@ -92,6 +92,8 @@ namespace Engine
 
 			protected:
 
+				EntityComponentBase *addComponentSimple(const std::string& name, const Scripting::LuaTable& table = {});
+
 				KeyValueMapList maps() override;
 
 			private:

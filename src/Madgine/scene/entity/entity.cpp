@@ -180,9 +180,14 @@ namespace Engine
 				return mSceneManager.app(init);
 			}
 
+			EntityComponentBase * Entity::addComponentSimple(const std::string & name, const Scripting::LuaTable & table)
+			{
+				return addComponent(name, table);
+			}
+
 			KeyValueMapList Entity::maps()
 			{
-				return Scope::maps().merge(mComponents, MAP_F(addComponent), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId)/*, MAP_RO(SlaveId, slaveId)*/);
+				return Scope::maps().merge(mComponents, MAP_F(addComponentSimple), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
 			}
 
 			SceneManager& Entity::sceneMgr(bool init) const
