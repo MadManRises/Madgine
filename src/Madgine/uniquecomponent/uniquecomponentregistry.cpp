@@ -26,7 +26,7 @@ namespace Engine {
 			collectorData[registry.second->type_info()];
 		}
 
-		for (CollectorInfo *info : collectorRegistry()) {
+		for (CollectorInfo *info : collectorRegistry()->mInfos) {
 			std::vector<const TypeInfo*> &v = collectorData[info->mRegistryInfo];
 			v.insert(v.end(), info->mElementInfos.begin(), info->mElementInfos.end());
 		}
@@ -34,9 +34,9 @@ namespace Engine {
 		for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
 			for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 				if (p.second.isLoaded()) {
-					auto f = (std::vector<CollectorInfo*>&(*)())p.second.getSymbol("collectorRegistry");
+					auto f = (CollectorRegistry*(*)())p.second.getSymbol("collectorRegistry");
 					if (f) {
-						for (CollectorInfo *info : f()) {
+						for (CollectorInfo *info : f()->mInfos) {
 							if (notInSkip(info->mBaseInfo)) {
 								std::vector<const TypeInfo*> &v = collectorData[info->mRegistryInfo];
 								std::copy_if(info->mElementInfos.begin(), info->mElementInfos.end(), std::back_inserter(v), notInSkip);

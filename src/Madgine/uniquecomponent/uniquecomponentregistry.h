@@ -36,6 +36,10 @@ namespace Engine{
 		size_t mBaseIndex = 0;
 	};
 
+	struct CollectorRegistry {
+		std::vector<CollectorInfo*> mInfos;
+	};
+
 	MADGINE_BASE_EXPORT void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip = {});
 
 
@@ -45,10 +49,10 @@ namespace Engine{
 #else
 		MADGINE_BASE_EXPORT
 #endif
-		inline std::vector<CollectorInfo*> &collectorRegistry()
+		inline CollectorRegistry *collectorRegistry()
 	{
 		static std::vector<CollectorInfo*> dummy;
-		return dummy;
+		return &dummy;
 	}
 
 		

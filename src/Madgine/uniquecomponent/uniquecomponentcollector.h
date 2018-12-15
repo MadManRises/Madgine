@@ -28,7 +28,7 @@ namespace Engine
 			mInfo.mComponents = reinterpret_cast<std::vector<Collector_F<void, void*>>*>(&mComponents);
 			mInfo.mRegistryInfo = &ClassInfo<Registry>();
 			mInfo.mBaseInfo = &ClassInfo<Base>();
-			collectorRegistry().push_back(&mInfo);
+			collectorRegistry()->mInfos.push_back(&mInfo);
 		}
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;
