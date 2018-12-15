@@ -63,20 +63,20 @@ namespace Engine
 					ComponentRegistrator()
 					{
 						const std::string name = T::componentName();
-						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName().find(name) == PLUGABLE_COMPONENT sRegisteredComponentsByName().end());
-						PLUGABLE_COMPONENT sRegisteredComponentsByName()[name] = &createComponent_t<T>;
+						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.find(name) == PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.end());
+						PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents[name] = &createComponent_t<T>;
 					}
 
 					~ComponentRegistrator()
 					{
 						const std::string name = T::componentName();
-						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName().find(name) != PLUGABLE_COMPONENT sRegisteredComponentsByName().end());
-						PLUGABLE_COMPONENT sRegisteredComponentsByName().erase(name);
+						assert(PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.find(name) != PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.end());
+						PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.erase(name);
 					}
 				};
 
 			private:
-				static std::map<std::string, ComponentBuilder>& sRegisteredComponentsByName();
+				static PluginEntityComponents *sRegisteredComponentsByName();
 
 			};
 
