@@ -24,10 +24,10 @@
 namespace Engine
 {
 
-	namespace Scene
-	{
+	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Scene::SceneComponentBase, Scene::SceneManager&>;
 
-		template struct MADGINE_BASE_EXPORT UniqueComponentCollector<SceneComponentBase, SceneManager&>;
+	namespace Scene
+	{		
 
 		SceneManager::SceneManager(App::Application &app) :
 			SerializableUnit(Serialize::SCENE_MANAGER),
