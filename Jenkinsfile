@@ -27,14 +27,14 @@ def task = {
 
     return {
         // This is where the important work happens for each combination
-        //node {
-		    stage("checkout ${name}") {
+	    stage ("${name}) {
+		    stage("checkout") {
            		checkout scm
                 sh """
 			    git submodule update --init --recursive
                 """
 	    	}
-            stage("cmake ${name}") {
+            stage("cmake") {
 			    sh """
                 mkdir -p ${name}
 				cd ${name}
@@ -45,13 +45,13 @@ def task = {
 				-DWorkspace=workspace
 			    """
             }
-            stage("build ${name}") {
+            stage("build") {
                 sh """
                 cd ${name}
                 make
                 """
             }
-			stage("Test ${name}") {
+			stage("Test") {
 				sh """
 				cd ${name}
 				rm -rf memchecks
@@ -59,7 +59,7 @@ def task = {
 				ctest -T memcheck
 				"""
             }           
-        //}
+        }
     }
 }
 
