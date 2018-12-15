@@ -27,7 +27,7 @@ def task = {
 
     return {
         // This is where the important work happens for each combination
-	    stage ("${name}) {
+	    stage ("${name}") {
 		    stage("checkout") {
            		checkout scm
                 sh """
