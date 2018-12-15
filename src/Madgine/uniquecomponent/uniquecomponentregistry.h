@@ -42,18 +42,12 @@ namespace Engine{
 
 	MADGINE_BASE_EXPORT void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip = {});
 
-
-	extern "C"
+	   
 #ifdef PLUGIN_BUILD
-		DLL_EXPORT
+	extern "C" DLL_EXPORT inline CollectorRegistry collectorRegistry{};
 #else
-		MADGINE_BASE_EXPORT
+	extern "C" MADGINE_BASE_EXPORT CollectorRegistry collectorRegistry;
 #endif
-		inline CollectorRegistry *collectorRegistry()
-	{
-		static std::vector<CollectorInfo*> dummy;
-		return &dummy;
-	}
 
 		
 	MADGINE_BASE_EXPORT inline std::map<std::string, ComponentRegistryBase *> &registryRegistry()

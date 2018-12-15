@@ -91,7 +91,7 @@ namespace Engine
 #endif
 		}
 
-		/*std::experimental::filesystem::path Plugin::fullPath() const
+		std::experimental::filesystem::path Plugin::fullPath() const
 		{
 			std::experimental::filesystem::path path;
 
@@ -105,7 +105,7 @@ namespace Engine
 			path = buffer;
 #endif
 			return path;
-		}*/
+		}
 
 		std::experimental::filesystem::path Plugin::runtimePath()
 		{
