@@ -6,6 +6,8 @@
 
 #include "Interfaces/signalslot/slot.h"
 
+#include "uniquecomponent.h"
+
 namespace Engine
 {
 
