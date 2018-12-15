@@ -8,6 +8,8 @@
 
 #include "Interfaces/reflection/classname.h"
 
+#include "../uniquecomponent/uniquecomponent.h"
+
 namespace Engine
 {
 	namespace Scene
