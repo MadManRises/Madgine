@@ -20,47 +20,45 @@ def task = {
     def configuration = it[1]
     def staticConfig = it[2]
 	
-    def name = "${it.join('-')}--build"    
+    def name = "${it.join('-')}"    
 
 	if (staticConfig?.trim())
 		staticConfig = "../${staticConfig}"
 
     return {
         // This is where the important work happens for each combination
-	    stage("${name}") {
-            node {
-		        stage("checkout") {
-            		checkout scm
-                    sh """
-				    git submodule update --init --recursive
-                    """
-	    		}
-                stage("cmake") {
-				    sh """
-                    mkdir -p ${name}
-					cd ${name}
-				    cmake .. \
-				    -DCMAKE_BUILD_TYPE=${configuration} \
-				    -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
-                    -DSTATIC_BUILD=${staticConfig} \
-					-DWorkspace=workspace
-				    """
-                }
-                stage("build") {
-                    sh """
-                    cd ${name}
-                    make
-                    """
-                }
-				stage('Test') {
-					sh """
-					cd ${name}
-					rm -rf memchecks
-					mkdir -p memchecks
-					ctest -T memcheck
-					"""
-                }       
+        node {
+		    stage("checkout ${name}") {
+           		checkout scm
+                sh """
+			    git submodule update --init --recursive
+                """
+	    	}
+            stage("cmake ${name}") {
+			    sh """
+                mkdir -p ${name}
+				cd ${name}
+			    cmake .. \
+		        -DCMAKE_BUILD_TYPE=${configuration} \
+		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
+                -DSTATIC_BUILD=${staticConfig} \
+				-DWorkspace=workspace
+			    """
             }
+            stage("build ${name}") {
+                sh """
+                cd ${name}
+                make
+                """
+            }
+			stage("Test ${name}") {
+				sh """
+				cd ${name}
+				rm -rf memchecks
+				mkdir -p memchecks
+				ctest -T memcheck
+				"""
+            }           
         }
     }
 }
