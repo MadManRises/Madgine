@@ -45,13 +45,11 @@ def task = {
 				-DWorkspace=workspace
 			    """
             }
-            stage("build") {
-				wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-					sh """
-					cd ${name}
-					make
-					"""
-				}
+            stage("build") {				
+				sh """
+				cd ${name}
+				make
+				"""				
             }
 			stage("Test") {
 				sh """
@@ -85,6 +83,10 @@ comboBuilder(axisList, 0)
 
 pipeline {
     agent any
+
+	options{
+		ansiColor('xterm')
+	}
 
     stages {
         stage ("Multiconfiguration Parallel Tasks") {
