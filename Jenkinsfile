@@ -27,7 +27,7 @@ def task = {
 
     return {
         // This is where the important work happens for each combination
-        node {
+        //node {
 		    stage("checkout ${name}") {
            		checkout scm
                 sh """
@@ -59,7 +59,7 @@ def task = {
 				ctest -T memcheck
 				"""
             }           
-        }
+        //}
     }
 }
 
