@@ -24,7 +24,7 @@ namespace Engine
 		public:
 			Inner()
 			{
-				_preg() = &reg;
+				Base::_preg() = &reg;
 			}
 
 		private:

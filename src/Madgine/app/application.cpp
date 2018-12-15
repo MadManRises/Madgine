@@ -27,7 +27,7 @@
 namespace Engine
 {	
 
-	template MADGINE_BASE_EXPORT struct UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
+	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
 
 	namespace App
 	{
