@@ -82,30 +82,30 @@ namespace Engine
 
 			Container<traits, Creator>& operator=(const NativeContainerType& other)
 			{
-				bool wasActive = deactivate();
+				bool wasActive = unsync();
 				mData = other;
-				mLocallyActiveIterator = mData.begin();
-				activate(wasActive);
+				mActiveIterator = mData.begin();
+				sync(wasActive);
 				return *this;
 			}
 
 			void clear()
 			{
-				bool wasActive = deactivate();
+				bool wasActive = unsync();
 				mData.clear();
-				mLocallyActiveIterator = mData.begin();
-				activate(wasActive);
+				mActiveIterator = mData.begin();
+				sync(wasActive);
 			}
 
 			iterator erase(const iterator& it)
 			{
-				if (isActive())
+				if (isSynced())
 				{
-					this->setItemActiveFlag(*it, false);
+					this->setItemDataSynced(*it, false);
 				}
-				if (isItemLocallyActive(it)) 
+				if (isItemActive(it)) 
 				{
-					this->notifySetItemActive(*it, false);
+					this->setItemActive(*it, false);
 				}
 				return erase_intern(it);
 			}
@@ -219,12 +219,12 @@ namespace Engine
 				if (it.second)
 				{
 					init(*it.first);
-					if (isActive())
+					if (isSynced())
 					{
-						this->setItemActiveFlag(*it.first, true);
+						this->setItemDataSynced(*it.first, true);
 					}
-					if (isItemLocallyActive(it.first))
-						this->notifySetItemActive(*it.first, true);
+					if (isItemActive(it.first))
+						this->setItemActive(*it.first, true);
 				}
 				return it;
 			}
@@ -241,11 +241,11 @@ namespace Engine
 			std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in) {
 				std::pair<iterator, bool> it = read_item_where_intern(where, in);
 				if (it.second) {
-					if (isActive()) {
-						this->setItemActiveFlag(*it.first, true);
+					if (isSynced()) {
+						this->setItemDataSynced(*it.first, true);
 					}
-					if (isItemLocallyActive(it.first))
-						this->notifySetItemActive(*it.first, true);
+					if (isItemActive(it.first))
+						this->setItemActive(*it.first, true);
 				}
 				return it;
 			}

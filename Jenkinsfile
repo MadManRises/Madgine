@@ -46,7 +46,7 @@ def task = {
 			    """
             }
             stage("build") {
-				ansiColor('xterm') {
+				wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
 					sh """
 					cd ${name}
 					make
