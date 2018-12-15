@@ -55,12 +55,13 @@ namespace Engine
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 
-#ifndef PLUGIN_BUILD
-		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, UIManager &>;
-#endif
 
 		using GuiHandlerContainer = UniqueComponentContainer<GuiHandlerBase, UIManager &>;
 	} // namespace GuiHandler
+
+#ifndef PLUGIN_BUILD
+	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager &>;
+#endif
 
 } // namespace Cegui
 

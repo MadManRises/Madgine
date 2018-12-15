@@ -13,12 +13,10 @@ namespace Engine
 	{
 		using RendererCollector = UniqueComponentCollector<RendererBase, GUI::GUISystem *>;
 
-#ifndef PLUGIN_BUILD
-		extern template MADGINE_CLIENT_EXPORT struct UniqueComponentCollector<RendererBase, App::ClientApplication&>;
-#endif
 
 		using RendererSelector = UniqueComponentSelector<RendererBase, GUI::GUISystem *>;
 
+		//Weird compiler issue
 #ifndef STATIC_BUILD
 		template <class T>
 		using Renderer = UniqueComponent<T, RendererCollector>;
@@ -28,6 +26,10 @@ namespace Engine
 #endif		
 		
 	}
+	
+#ifndef PLUGIN_BUILD
+	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Render::RendererBase, App::ClientApplication&>;
+#endif
 
 }
 

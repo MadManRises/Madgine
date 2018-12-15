@@ -83,13 +83,13 @@ namespace Engine
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
 
-#ifndef PLUGIN_BUILD
-		extern template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, UIManager &>;
-#endif
-
 		using GameHandlerContainer = UniqueComponentContainer<GameHandlerBase, UIManager &>;
 
 	} // namespace UI
+
+#ifndef PLUGIN_BUILD
+	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager &>;
+#endif
 
 }
 
