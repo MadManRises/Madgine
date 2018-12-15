@@ -6,14 +6,10 @@
 
 #include "Interfaces/reflection/classname.h"
 
+#include "indexholder.h"
+
 namespace Engine
 {
-
-	struct IndexHolder
-	{	
-		virtual size_t index() = 0;
-	};
-
 
 	template <class _Base, class _Ty>
 	struct UniqueComponentCollector
@@ -28,7 +24,7 @@ namespace Engine
 			mInfo.mComponents = reinterpret_cast<std::vector<Collector_F<void, void*>>*>(&mComponents);
 			mInfo.mRegistryInfo = &ClassInfo<Registry>();
 			mInfo.mBaseInfo = &ClassInfo<Base>();
-			collectorRegistry.mInfos.push_back(&mInfo);
+			collectorRegistry()->mInfos.push_back(&mInfo);
 		}
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		void operator=(const UniqueComponentCollector&) = delete;

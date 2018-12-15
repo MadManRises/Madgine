@@ -133,7 +133,7 @@ namespace Engine
 				if (ImGui::TreeNode("Base")) {
 					Plugins::Plugin p("Base");
 					p.load();
-					for (CollectorInfo *info : ((CollectorRegistry*)p.getSymbol("collectorRegistry"))->mInfos) {
+					for (CollectorInfo *info : ((CollectorRegistry*(*)())p.getSymbol("collectorRegistry"))()->mInfos) {
 						if (ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
 							for (const TypeInfo *component : info->mElementInfos) {
 								ImGui::Text(component->mTypeName);
@@ -147,9 +147,9 @@ namespace Engine
 				for (const std::pair<const std::string, Plugins::PluginSection> &sec : mManager) {
 					for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 						if (p.second.isLoaded()) {
-							auto reg = (CollectorRegistry*)p.second.getSymbol("collectorRegistry");
-							if (reg && ImGui::TreeNode(p.first.c_str())) {								
-								for (CollectorInfo *info : reg->mInfos) {
+							auto f = (CollectorRegistry*(*)())p.second.getSymbol("collectorRegistry");
+							if (f && ImGui::TreeNode(p.first.c_str())) {								
+								for (CollectorInfo *info : f()->mInfos) {
 									if (ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
 										for (const TypeInfo *component : info->mElementInfos) {
 											ImGui::Text(component->mTypeName);

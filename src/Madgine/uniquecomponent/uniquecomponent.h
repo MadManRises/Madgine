@@ -2,6 +2,8 @@
 
 #ifndef STATIC_BUILD
 
+#include "indexholder.h"
+
 namespace Engine
 {
 
@@ -16,8 +18,6 @@ namespace Engine
 		{
 			(void)_reg;
 		}
-
-		using Base::_preg;
 
 		static class Inner
 		{
@@ -50,7 +50,10 @@ namespace Engine
 
 	protected:
 
-		static IndexHolder *& _preg(){ static IndexHolder *p = nullptr; return p; };
+		static IndexHolder *& _preg() {
+			static IndexHolder *dummy;
+			return dummy;
+		}
 	};
 
 
