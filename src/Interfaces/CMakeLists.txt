@@ -9,7 +9,7 @@ find_package(Threads REQUIRED)
 
 set(sources)
 
-FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
+FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" database exceptionmessages.h message.h messages.h)
 	FolderSources(sources "" debug stacktrace.cpp stacktrace.h traceback.cpp traceback.h)
 		FolderSources(sources debug memory memory.cpp memory.h memoryglobal.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
