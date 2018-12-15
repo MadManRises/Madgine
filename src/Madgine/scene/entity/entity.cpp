@@ -182,7 +182,7 @@ namespace Engine
 
 			KeyValueMapList Entity::maps()
 			{
-				return Scope::maps().merge(mComponents, MAP_F(addComponent), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
+				return Scope::maps().merge(mComponents, MAP_F(addComponent), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId)/*, MAP_RO(SlaveId, slaveId)*/);
 			}
 
 			SceneManager& Entity::sceneMgr(bool init) const
