@@ -18,7 +18,7 @@ namespace Engine
 		public:
 
 			using iterator_category = typename It::iterator_category;
-			using value_type = typename std::remove_reference<decltype(std::declval<Converter>()(std::declval<It::value_type>()))>::type;
+			using value_type = typename std::remove_reference<decltype(std::declval<Converter>()(std::declval<typename It::value_type>()))>::type;
 			using difference_type = ptrdiff_t;
 			using pointer = value_type;
 			using reference = value_type;
