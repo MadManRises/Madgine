@@ -46,10 +46,12 @@ def task = {
 			    """
             }
             stage("build") {
-                sh """
-                cd ${name}
-                make
-                """
+				ansiColor('xterm') {
+					sh """
+					cd ${name}
+					make
+					"""
+				}
             }
 			stage("Test") {
 				sh """

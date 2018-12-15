@@ -14,6 +14,8 @@
 
 #include "Interfaces/plugins/pluginlistener.h"
 
+#include "../uniquecomponent/uniquecomponent.h"
+
 namespace Engine
 {
 	namespace App
