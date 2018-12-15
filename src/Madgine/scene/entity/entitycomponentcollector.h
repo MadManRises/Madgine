@@ -9,9 +9,12 @@ namespace Engine
 		namespace Entity
 		{
 			
+			struct PluginEntityComponents {
+				std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity&, const Scripting::LuaTable&)>> mComponents;
+			};
 
 #ifdef PLUGIN_BUILD
-			extern "C" DLL_EXPORT std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity&, const Scripting::LuaTable&)>> &pluginEntityComponents();
+			extern "C" DLL_EXPORT PluginEntityComponents *pluginEntityComponents();
 #endif
 
 			class MADGINE_BASE_EXPORT EntityComponentCollector
@@ -28,13 +31,13 @@ namespace Engine
 				typedef std::function<std::unique_ptr<EntityComponentBase>(Entity&, const Scripting::LuaTable&)> ComponentBuilder;
 #ifdef PLUGIN_BUILD
 				struct LocalComponentStore {
-					static std::map<std::string, ComponentBuilder> &sRegisteredComponentsByName() {
-						static std::map<std::string, ComponentBuilder> dummy;
-						return dummy;
+					static PluginEntityComponents *sRegisteredComponentsByName() {
+						static PluginEntityComponents dummy;
+						return &dummy;
 					}
 				};
 
-				friend std::map<std::string, ComponentBuilder> &pluginEntityComponents() {
+				friend PluginEntityComponents *pluginEntityComponents() {
 					return LocalComponentStore::sRegisteredComponentsByName();
 				}
 

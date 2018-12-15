@@ -18,11 +18,11 @@
 namespace Engine
 {	
 
-	namespace UI
-	{
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager&>;
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager&>;
 
-		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GuiHandlerBase, UI::UIManager&>;
-		template MADGINE_CLIENT_EXPORT UniqueComponentCollector<GameHandlerBase, UI::UIManager&>;
+	namespace UI
+	{		
 
 		UIManager::UIManager(GUI::GUISystem &gui) :
 			Scope(&gui),

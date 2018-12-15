@@ -119,15 +119,15 @@ namespace Engine
 					this->write_state(out, mData);
 				}
 
-				void setActiveFlag(bool b) override
+				void setDataSynced(bool b) override
 				{
-					this->setItemActiveFlag(mData, b);
+					this->setItemDataSynced(mData, b);
 				}
 
-				void notifySetActive(bool active) override
+				void setActive(bool active) override
 				{
-					Serializable::notifySetActive(active);
-					this->notifySetItemActive(mData, active);
+					Serializable::setActive(active);
+					this->setItemActive(mData, active);
 				}
 
 			private:
