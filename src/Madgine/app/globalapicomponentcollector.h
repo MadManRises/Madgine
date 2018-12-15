@@ -12,13 +12,14 @@ namespace Engine
 	{
 		using GlobalAPICollector = UniqueComponentCollector<GlobalAPIComponentBase, Application &>;
 
-#ifndef PLUGIN_BUILD
-		extern template MADGINE_BASE_EXPORT struct UniqueComponentCollector<GlobalAPIComponentBase, Application&>;
-#endif
 
 		using GlobalAPIContainer = UniqueComponentContainer<GlobalAPIComponentBase, Application&>;
 
 	}
+
+#ifndef PLUGIN_BUILD
+	extern template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
+#endif
 
 }
 

@@ -21,7 +21,7 @@ namespace Engine
 				void moveToEntity(Entity* ent);
 				Entity& getEntity() const;
 
-				virtual const char* key() const = 0;
+				virtual const char* key() const override = 0;
 
 				template <class T>
 				T *getComponent()

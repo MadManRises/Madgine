@@ -410,7 +410,7 @@ namespace Engine
 			}
 
 		protected:
-			virtual void setActive(bool active)
+			virtual void setActive(bool active) override
 			{
 				if (!active)
 				{
