@@ -38,7 +38,7 @@ namespace Engine
 
 
 			Entity::Entity* createEntity(const std::string& behavior = "", const std::string& name = "",
-			                             std::function<void(Entity::Entity&)> init = {});
+			                             const std::function<void(Entity::Entity&)> &init = {});
 			Entity::Entity* createLocalEntity(const std::string& behavior = "", const std::string& name = "");
 			Entity::Entity* findEntity(const std::string& name);
 			std::list<Entity::Entity*> entities();

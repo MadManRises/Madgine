@@ -229,7 +229,7 @@ namespace Engine
 		}
 
 		Entity::Entity* SceneManager::createEntity(const std::string& behavior, const std::string& name,
-		                                               std::function<void(Entity::Entity&)> init)
+		                                               const std::function<void(Entity::Entity&)> &init)
 		{
 			ValueType behaviorTable = app().table()[behavior];
 			Scripting::LuaTable table;
