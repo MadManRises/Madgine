@@ -84,10 +84,12 @@ pipeline {
 
     stages {
 		stage("checkout") {
-        	checkout scm
-            sh """
-			git submodule update --init --recursive
-            """
+			steps{
+        		checkout scm
+				sh """
+				git submodule update --init --recursive
+				"""
+			}
 	    }
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
