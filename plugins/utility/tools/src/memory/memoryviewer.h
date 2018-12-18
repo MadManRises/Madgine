@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef ENABLE_MEMTRACKING
+
 #include "../tool.h"
 #include "Interfaces/debug/stacktrace.h"
 #include "Interfaces/debug/memory/memory.h"
@@ -23,7 +26,7 @@ namespace Engine
 				mSources(source) {}
 			BlockData mData;
 			std::list<BlockData> mLeafs;
-			std::unordered_map<void *, MemoryBlock> mChildren;			
+			std::unordered_map<void *, std::unique_ptr<MemoryBlock>> mChildren;			
 			Item *mSources = nullptr;
 		};
 
@@ -70,3 +73,5 @@ namespace Engine
 }
 
 RegisterClass(Engine::Tools::MemoryViewer);
+
+#endif

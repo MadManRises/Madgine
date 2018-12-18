@@ -24,7 +24,9 @@ namespace Engine
 
 			std::unique_ptr<Scripting::LuaState> mLuaState;
 
+#ifdef ENABLE_MEMTRACKING
 			std::unique_ptr<Debug::Memory::MemoryTracker> mMemTracker;
+#endif
 			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
 			
 			std::unique_ptr<Resources::ResourceManager> mResources;			

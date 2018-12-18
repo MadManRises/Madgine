@@ -21,7 +21,7 @@ namespace Engine
 	}
 
 #ifndef PLUGIN_BUILD
-	extern template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Scene::SceneComponentBase, Scene::SceneManager&>;
+	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Scene::SceneComponentBase, Scene::SceneManager&>;
 #endif
 
 }

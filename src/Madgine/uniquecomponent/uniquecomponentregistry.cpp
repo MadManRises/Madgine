@@ -26,7 +26,7 @@ namespace Engine {
 			collectorData[registry.second->type_info()];
 		}
 
-		for (CollectorInfo *info : collectorRegistry()->mInfos) {
+		for (CollectorInfo *info : collectorRegistry_Base()->mInfos) {
 			std::vector<const TypeInfo*> &v = collectorData[info->mRegistryInfo];
 			v.insert(v.end(), info->mElementInfos.begin(), info->mElementInfos.end());
 		}
@@ -102,6 +102,12 @@ namespace Engine{
 		}
 
 		file << "}";
+	}
+
+	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase*>& registryRegistry()
+	{
+		static std::map<std::string, ComponentRegistryBase *>  dummy;
+		return dummy;
 	}
 
 

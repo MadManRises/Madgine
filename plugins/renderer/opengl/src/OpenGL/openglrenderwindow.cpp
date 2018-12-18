@@ -35,7 +35,7 @@ namespace Engine {
 
 		static unsigned int vao;
 
-		OpenGLRenderWindow::OpenGLRenderWindow(GUI::TopLevelWindow * w, HGLRC context) :
+		OpenGLRenderWindow::OpenGLRenderWindow(GUI::TopLevelWindow * w, ContextHandle context) :
 			RenderWindow(w),
 			mContext(context)
 		{

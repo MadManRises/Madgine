@@ -11,7 +11,7 @@ namespace Engine {
 
 		class OpenGLRenderWindow : public RenderWindow {
 		public:
-			OpenGLRenderWindow(GUI::TopLevelWindow *w, HGLRC context);
+			OpenGLRenderWindow(GUI::TopLevelWindow *w, ContextHandle context);
 			~OpenGLRenderWindow();
 
 			virtual void render() override;
@@ -19,7 +19,7 @@ namespace Engine {
 			virtual std::unique_ptr<RenderTarget> createRenderTarget(Camera * camera, const Vector2& size) override;
 
 		private:
-			HGLRC mContext;
+			ContextHandle mContext;
 
 			uint32_t mTextureCount = 0;
 

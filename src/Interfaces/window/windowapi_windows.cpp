@@ -12,7 +12,7 @@ namespace Engine {
 
 		struct WindowsWindow : Window {
 			WindowsWindow(HWND hwnd) :
-				Window(hwnd)
+				Window((uintptr_t)hwnd)
 			{				
 			}
 
@@ -110,7 +110,7 @@ namespace Engine {
 		}
 
 		Window *sCreateWindow(const WindowSettings &settings) {
-			void *handle = settings.mHandle;
+			HWND handle = (HWND)settings.mHandle;
 			if (!handle) {
 				static const char *windowClass = CreateWindowClass();
 
@@ -126,9 +126,9 @@ namespace Engine {
 					return nullptr;
 			}
 
-			ShowWindow((HWND)handle, SW_SHOW);
+			ShowWindow(handle, SW_SHOW);
 
-			auto pib = sWindows.try_emplace((HWND)handle, (HWND)handle);
+			auto pib = sWindows.try_emplace(handle, handle);
 			assert(pib.second);
 
 			return &pib.first->second;

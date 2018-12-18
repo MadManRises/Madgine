@@ -44,7 +44,7 @@ macro(add_plugin name base type)
 
 	if (NOT STATIC_BUILD)
 
-		target_compile_definitions(${name} PRIVATE PLUGIN_BUILD)
+		target_compile_definitions(${name} PRIVATE PLUGIN_BUILD PLUGIN_NAME=${name})
 
 		install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
 		export_to_workspace(${name})

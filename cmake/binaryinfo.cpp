@@ -2,7 +2,7 @@
 
 #include "Interfaces/plugins/binaryinfo.h"
 
-extern "C" DLL_EXPORT Engine::Plugins::BinaryInfo binaryInfo {
+extern "C" DLL_EXPORT Engine::Plugins::BinaryInfo PLUGIN_LOCAL(binaryInfo) {
 
 	BINARY_MAJOR_VERSION,
 	BINARY_MINOR_VERSION,

@@ -28,7 +28,7 @@ namespace Engine
 	}
 	
 #ifndef PLUGIN_BUILD
-	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Render::RendererBase, App::ClientApplication&>;
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Render::RendererBase, GUI::GUISystem *>;
 #endif
 
 }

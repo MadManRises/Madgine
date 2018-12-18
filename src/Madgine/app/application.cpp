@@ -27,8 +27,6 @@
 namespace Engine
 {	
 
-	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
-
 	namespace App
 	{
 		Application::Application() :
@@ -106,26 +104,26 @@ namespace Engine
 
 		bool Application::aboutToUnloadPlugin(const Plugins::Plugin * plugin)
 		{
-			shutdown();
-			return false;
+			//shutdown();
+			return true;
 		}
 
 		bool Application::aboutToLoadPlugin(const Plugins::Plugin * plugin)
 		{
-			return false;
+			return true;
 		}
 
 		void Application::onPluginUnload(const Plugins::Plugin * plugin)
 		{
-			mLoop->callFinalize();
-			mLoop.reset();
+			/*mLoop->callFinalize();
+			mLoop.reset();*/
 		}
 
 		void Application::onPluginLoad(const Plugins::Plugin * plugin)
 		{
-			loadFrameLoop();
+			/*loadFrameLoop();
 			mLoop->callInit();
-			mRestartLoop = true;
+			mRestartLoop = true;*/
 		}
 
 		void Application::shutdown()

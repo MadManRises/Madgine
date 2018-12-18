@@ -104,7 +104,7 @@ namespace Engine
 					[&](std::string tmp)
 					{
 						char buf[255];
-						strcpy_s(buf, tmp.c_str());
+						strcpy(buf, tmp.c_str());
 
 						if (ImGui::InputText(id.c_str(), buf, sizeof(buf)))
 							value = buf;
@@ -297,7 +297,7 @@ namespace Engine
 		void Inspector::drawSingleLine(tinyxml2::XMLElement* element, Scripting::ScopeBase* scope,
 			std::set<std::string>& drawn)
 		{
-			size_t count = 0;
+			int count = 0;
 			for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
 				++count;
 			ImGui::PushMultiItemsWidths(count);

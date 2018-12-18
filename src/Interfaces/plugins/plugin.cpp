@@ -17,10 +17,19 @@ namespace Engine
 	namespace Plugins
 	{
 
-		Plugin::Plugin(const std::experimental::filesystem::path &path) :
+		Plugin::Plugin(std::string name, std::experimental::filesystem::path path) :
 			mModule(nullptr),
-			mPath(path)
+			mPath(std::move(path)),
+			mName(std::move(name))
 		{
+			if (mPath.empty() && !mName.empty())
+			{
+#if _WIN32
+				mPath = mName;
+#elif __linux__
+				mPath = "lib" + mName + ".so";
+#endif
+			}
 		}
 
 		Plugin::~Plugin()
@@ -38,10 +47,14 @@ namespace Engine
 			if (isLoaded())
 				return true;
 
+			LOG(Database::message("Loading Plugin \"", "\"...")(mName));
+
 #ifdef _WIN32
 			UINT errorMode = GetErrorMode();
 			//SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
+
+			std::string errorMsg;
 
 			try {
 #ifdef _WIN32
@@ -51,17 +64,31 @@ namespace Engine
 					mModule = LoadLibrary(mPath.string().c_str());
 				SymRefreshModuleList(GetCurrentProcess());
 #elif __linux__
-				mModule = dlopen(mPath.string().c_str(), RTLD_LAZY);
+				if (mPath.empty())
+					mModule = dlopen(nullptr, RTLD_LAZY);
+				else
+					mModule = dlopen(mPath.string().c_str(), RTLD_NOW);
+				if (!isLoaded())
+					errorMsg = dlerror();
 #endif
 			}
 			catch (const std::exception &e) {
-				LOG_ERROR(Database::message("Load of plugin \"", "\" failed with error: ", "")(mPath, e.what()));
+				errorMsg = e.what();
 				mModule = nullptr;
 			}
 
 #ifdef _WIN32
 			SetErrorMode(errorMode);
 #endif
+
+			if (!isLoaded())
+			{
+				LOG_ERROR(Database::message("Load of plugin \"", "\" failed with error: ", "")(mName, errorMsg));
+			}
+			else
+			{
+				LOG("Success");
+			}
 
 			return isLoaded();
 		}
@@ -84,10 +111,11 @@ namespace Engine
 
 
 		void *Plugin::getSymbol(const std::string &name) const {
+			std::string fullName = name + "_" + mName;
 #ifdef _WIN32
-			return GetProcAddress((HINSTANCE)mModule, name.c_str());
+			return GetProcAddress((HINSTANCE)mModule, fullName.c_str());
 #elif __linux__
-			return dlsym(mModule, name.c_str());
+			return dlsym(mModule, fullName.c_str());
 #endif
 		}
 
@@ -103,6 +131,10 @@ namespace Engine
 			auto result = GetModuleFileName((HMODULE)mModule, buffer, sizeof(buffer));
 			assert(result);
 			path = buffer;
+#elif __linux__
+			Dl_info info;
+			assert(dladdr(getSymbol("binaryInfo"), &info));
+			path = info.dli_fname;
 #endif
 			return path;
 		}
@@ -116,7 +148,7 @@ namespace Engine
 			return std::experimental::filesystem::path(buffer).parent_path();
 #elif __linux__
 			char buffer[512];
-			auto result = readlink("proc/self/exe", buffer, sizeof(buffer));
+			auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
 			assert(result > 0);
 			return std::experimental::filesystem::path(buffer).parent_path();
 #endif

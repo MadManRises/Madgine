@@ -9,6 +9,7 @@ namespace Engine {
 		{
 
 		public:
+
 			OpenGLRenderer(GUI::GUISystem *gui);
 			~OpenGLRenderer();
 
@@ -17,14 +18,18 @@ namespace Engine {
 
 			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) override;			
 			
-			static void shutdownWindow(Window::Window *window, HGLRC ourOpenGLRenderingContext);
+			static void shutdownWindow(Window::Window *window, ContextHandle ourOpenGLRenderingContext);
 
 		protected:
-			HGLRC setupWindowInternal(Window::Window *window);
+			ContextHandle setupWindowInternal(Window::Window *window);
 
 		private:
+#if _WIN32
 			PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 			PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;		
+#endif
+
+
 
 		};
 

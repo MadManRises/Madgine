@@ -45,4 +45,10 @@ namespace Engine
 
 }
 
-#define SINGLETON_IMPL(Class) template <> thread_local Class *Engine::Singleton<Class>::sSingleton = nullptr
+#if _WIN32
+#define SINGLETON_EXPORT
+#else
+#define SINGLETON_EXPORT DLL_EXPORT
+#endif
+
+#define SINGLETON_IMPL(Class) template <> thread_local SINGLETON_EXPORT Class *Engine::Singleton<Class>::sSingleton = nullptr

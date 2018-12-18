@@ -1,5 +1,7 @@
 #include "../toolslib.h"
 
+#ifdef ENABLE_MEMTRACKING
+
 #include "memoryviewer.h"
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
@@ -89,7 +91,7 @@ namespace Engine
 
 			char buffer[512];
 
-			sprintf_s(buffer, title, GetSortDirectionLabel(sortSelected, mSortDescending));
+			sprintf(buffer, title, GetSortDirectionLabel(sortSelected, mSortDescending));
 
 			if (size > 0)
 				ImGui::SetColumnWidth(-1, size);		
@@ -233,25 +235,25 @@ namespace Engine
 					tmp2->second.mNext = nullptr;
 				}
 				else {
-					auto pib = block.mChildren.try_emplace(block.mSources->first[depth].mAddress, block.mSources);
+					auto pib = block.mChildren.try_emplace(block.mSources->first[depth].mAddress, std::make_unique<MemoryBlock>(block.mSources));
 					Item *tmp = block.mSources;
 					if (pib.second) {
-						pib.first->second.mData.mNext = block.mData.mFirstChild;
-						block.mData.mFirstChild = &pib.first->second.mData;
+						pib.first->second->mData.mNext = block.mData.mFirstChild;
+						block.mData.mFirstChild = &pib.first->second->mData;
 						block.mSources = block.mSources->second.mNext;
 						tmp->second.mNext = nullptr;
 					}
 					else {
 						block.mSources = block.mSources->second.mNext;
-						tmp->second.mNext = pib.first->second.mSources;
-						pib.first->second.mSources = tmp;
+						tmp->second.mNext = pib.first->second->mSources;
+						pib.first->second->mSources = tmp;
 					}
 				}
 			}
 
-			for (std::pair<void *const, MemoryBlock> &p : block.mChildren)
+			for (std::pair<void *const, std::unique_ptr<MemoryBlock>> &p : block.mChildren)
 			{
-				collapseSort(inOrder, descending, depth + 1, p.second);
+				collapseSort(inOrder, descending, depth + 1, *p.second);
 			}
 
 			bool sorting = true;
@@ -310,8 +312,8 @@ namespace Engine
 				leaf.mFront->second.mNext = next;
 				next = leaf.mFront;
 			}
-			for (std::pair<void *const, MemoryBlock> &p : block.mChildren) {
-				next = uncollapse(p.second, next);
+			for (std::pair<void *const, std::unique_ptr<MemoryBlock>> &p : block.mChildren) {
+				next = uncollapse(*p.second, next);
 			}
 			return next;
 		}
@@ -463,3 +465,4 @@ namespace Engine
 	}
 }
 
+#endif

@@ -18,7 +18,7 @@ namespace Engine
 	}
 
 #ifndef PLUGIN_BUILD
-	extern template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
+	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
 #endif
 
 }

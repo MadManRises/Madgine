@@ -60,7 +60,7 @@ namespace Engine
 	} // namespace GuiHandler
 
 #ifndef PLUGIN_BUILD
-	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager &>;
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager &>;
 #endif
 
 } // namespace Cegui

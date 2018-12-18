@@ -18,9 +18,6 @@
 namespace Engine
 {	
 
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager&>;
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager&>;
-
 	namespace UI
 	{		
 

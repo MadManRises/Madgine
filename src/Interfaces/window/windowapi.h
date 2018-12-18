@@ -6,7 +6,7 @@ namespace Engine {
 	namespace Window {
 
 		struct WindowSettings {
-			void *mHandle = nullptr;
+			uintptr_t mHandle = 0;
 
 			size_t mWidth = 800;
 			size_t mHeight = 600;
@@ -16,7 +16,7 @@ namespace Engine {
 
 		struct INTERFACES_EXPORT Window {
 
-			Window(void *handle) : mHandle(handle) {}
+			Window(uintptr_t handle) : mHandle(handle) {}
 
 			void addListener(WindowEventListener *listener) {
 				mListeners.push_back(listener);
@@ -37,7 +37,7 @@ namespace Engine {
 
 			virtual void destroy() = 0;
 
-			const void *const mHandle;
+			const uintptr_t mHandle;
 
 		protected:
 			void onResize(size_t width, size_t height) {

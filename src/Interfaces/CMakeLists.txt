@@ -30,11 +30,17 @@ FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources "" signalslot connection.cpp connection.h connectionmanager.cpp connectionmanager.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
 	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
-	FolderSources(sources "" window windowapi.h windowapi_windows.cpp windoweventlistener.h)
+	FolderSources(sources "" window windowapi.h windowapi_linux.cpp windowapi_windows.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT ..)
 
 add_precompiled_header(Interfaces interfaceslib.h FORCEINCLUDE)
+
+
+if (NOT STATIC_BUILD)
+	target_compile_definitions(Interfaces PRIVATE SHARED_LIB_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}" SHARED_LIB_PREFIX="${CMAKE_SHARED_LIBRARY_PREFIX}")
+endif()
+
 
 target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 

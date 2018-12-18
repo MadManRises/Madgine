@@ -127,61 +127,75 @@ namespace Engine {
 			static void *linuxReallocHook(void *ptr, size_t size, const void *);
 			static void linuxFreeHook(void *ptr, const void *);
 
-			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
+			static bool pushUntracked()
 			{
+				if (__malloc_hook == sOldMallocHook)
+					return false;
 				__malloc_hook = sOldMallocHook;
 				__realloc_hook = sOldReallocHook;
 				__free_hook = sOldFreeHook;
+				return true;
+			}
+
+			static void popUntracked(bool b)
+			{
+				if (b)
+				{
+					__malloc_hook = linuxMallocHook;
+					__realloc_hook = linuxReallocHook;
+					__free_hook = linuxFreeHook;
+				}
+			}
+
+			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
+			{
+				bool b = pushUntracked();
 				void *ptr = malloc(size);
-				__malloc_hook = linuxMallocHook;
-				__realloc_hook = linuxReallocHook;
-				__free_hook = linuxFreeHook;
+				popUntracked(b);
 				return ptr;
 			}
 
 			void MemoryTracker::deallocateUntracked(void * ptr, size_t size, size_t align)
 			{
-				__malloc_hook = sOldMallocHook;
-				__realloc_hook = sOldReallocHook;
-				__free_hook = sOldFreeHook;
+				bool b = pushUntracked();
 				free(ptr);
-				__malloc_hook = linuxMallocHook;
-				__realloc_hook = linuxReallocHook;
-				__free_hook = linuxFreeHook;
+				popUntracked(b);
 			}
 
 			void *reallocUntracked(void * ptr, size_t size)
 			{
-				__malloc_hook = sOldMallocHook;
-				__realloc_hook = sOldReallocHook;
-				__free_hook = sOldFreeHook;
+				bool b = pushUntracked();
 				void *result = realloc(ptr, size);
-				__malloc_hook = linuxMallocHook;
-				__realloc_hook = linuxReallocHook;
-				__free_hook = linuxFreeHook;
+				popUntracked(b);
 				return result;
 			}
 
 			static void *linuxMallocHook(size_t size, const void *)
 			{
-				void *ptr = MemoryTracker::allocateUntracked(size, 1);
+				bool b = pushUntracked();
+				void *ptr = malloc(size);
 				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(ptr), size);
+				popUntracked(b);
 				return ptr;
 			}
 
 			static void *linuxReallocHook(void *ptr, size_t size, const void *)
 			{
+				bool b = pushUntracked();
 				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), size);
-				void *result = reallocUntracked(ptr, size);
+				void *result = realloc(ptr, size);
 				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(result), size);
+				popUntracked(b);
 				return result;
 			}
 
 			static void linuxFreeHook(void *ptr, const void *)
 			{
-				//TODO
+				bool b = pushUntracked();
+				//TODO (0)
 				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), 0);
-				MemoryTracker::deallocateUntracked(ptr, 0, 1);
+				free(ptr);
+				popUntracked(b);
 			}
 
 #else
@@ -203,7 +217,7 @@ namespace Engine {
 				sSingleton = this;
 
 #ifdef _WIN32
-				sOldHook = _CrtSetAllocHook(&MemoryTracker::win32Hook);
+				sOldHook = _CrtSetAllocHook(&win32Hook);
 #elif __linux__				
 				sOldMallocHook = __malloc_hook;
 				sOldReallocHook = __realloc_hook;
@@ -216,7 +230,7 @@ namespace Engine {
 
 			MemoryTracker::~MemoryTracker() {
 #ifdef _WIN32				
-				_CrtSetAllocHook(mOldHook);
+				_CrtSetAllocHook(sOldHook);
 #elif __linux__
 				__malloc_hook = sOldMallocHook;
 				__realloc_hook = sOldReallocHook;

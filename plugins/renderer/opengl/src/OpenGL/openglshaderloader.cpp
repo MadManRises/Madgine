@@ -56,7 +56,7 @@ namespace Engine
 			if (!success)
 			{
 				glGetShaderInfoLog(handle, 512, NULL, infoLog);
-				LOG_ERROR("ERROR::SHADER::COMPILATION_FAILED");
+				LOG_ERROR("Loading of Shader '"s + filename + "' failed:");
 				LOG_ERROR(infoLog);			
 				return {};
 			}

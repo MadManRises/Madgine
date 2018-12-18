@@ -24,8 +24,6 @@
 namespace Engine
 {
 
-	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Scene::SceneComponentBase, Scene::SceneManager&>;
-
 	namespace Scene
 	{		
 

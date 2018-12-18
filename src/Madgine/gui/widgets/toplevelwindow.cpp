@@ -47,11 +47,12 @@ namespace Engine
 
 			mWindow->addListener(this);
 
+
 			if (settings.mInput) {
 				mExternalInput = settings.mInput;
 			}
 			else {
-				mInputSelector.emplace(mWindow);				
+				mInputSelector.emplace(mWindow);
 			}
 			input()->setListener(this);
 			gui.app(false).addFrameListener(input());

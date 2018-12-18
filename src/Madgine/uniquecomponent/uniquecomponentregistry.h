@@ -48,17 +48,13 @@ namespace Engine{
 #else
 		MADGINE_BASE_EXPORT
 #endif
-		inline CollectorRegistry *collectorRegistry()
+		inline CollectorRegistry *PLUGIN_LOCAL(collectorRegistry)()
 	{
 		static CollectorRegistry dummy;
 		return &dummy;
 	}
 		
-	MADGINE_BASE_EXPORT inline std::map<std::string, ComponentRegistryBase *> &registryRegistry()
-	{
-		static std::map<std::string, ComponentRegistryBase *>  dummy;
-		return dummy;
-	}
+	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 
 	struct MADGINE_BASE_EXPORT ComponentRegistryBase {
 		ComponentRegistryBase(const TypeInfo *ti) : mTi(ti){

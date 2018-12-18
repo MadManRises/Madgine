@@ -8,7 +8,7 @@ namespace Engine
 		class INTERFACES_EXPORT Plugin
 		{
 		public:
-			Plugin(const std::experimental::filesystem::path &path = {});
+			Plugin(std::string name = {}, std::experimental::filesystem::path path = {});
 			~Plugin();
 
 			bool isLoaded() const;
@@ -24,6 +24,7 @@ namespace Engine
 		private:
 			void *mModule;
 
+			std::string mName;
 			std::experimental::filesystem::path mPath;
 
 		};

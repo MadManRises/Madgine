@@ -37,9 +37,10 @@ namespace Engine {
 #ifdef _WIN32
 			trace = CaptureStackBackTrace((DWORD)skip + 1, (DWORD)size, buffer, NULL);
 #elif __linux__
-			std::unique_ptr<void*[]> tmpBuffer = std::make_unique<void*[]>(size + skip + 1);
-			trace = backtrace(tmpBuffer.get(), size + skip + 1);
-			memcpy(buffer, tmpBuffer.get() + skip + 1, size * sizeof(void*));				
+			void *tmpBuffer[128];
+			assert(size + skip + 1 < sizeof(tmpBuffer) / sizeof(tmpBuffer[0]));			
+			trace = backtrace(tmpBuffer, size + skip + 1);
+			memcpy(buffer, tmpBuffer + skip + 1, size * sizeof(void*));				
 #else
 #error "Unsupported Platform!"
 #endif

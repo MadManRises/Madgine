@@ -88,7 +88,7 @@ namespace Engine
 	} // namespace UI
 
 #ifndef PLUGIN_BUILD
-	extern template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager &>;
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager &>;
 #endif
 
 }

@@ -25,7 +25,9 @@ namespace Engine
 #endif
 		mConnectionManger(std::make_unique<SignalSlot::ConnectionManager>()),
 		mLuaState(std::make_unique<Scripting::LuaState>()),
+#ifdef ENABLE_MEMTRACKING
 			mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>()),
+#endif
 			mProfiler(std::make_unique<Debug::Profiler::Profiler>()),
 			mResources(std::make_unique<Resources::ResourceManager>())
 		{

@@ -15,14 +15,14 @@ namespace Engine {
 	{
 		mMgr.addListener(this);
 		Plugins::Plugin base("Base");
-		base.load();
+		assert(base.load());
 		onPluginLoad(&base);
 	}
 
 	UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
 	{
 		Plugins::Plugin base("Base");
-		base.load();
+		assert(base.load());
 		aboutToUnloadPlugin(&base);
 		mMgr.removeListener(this);
 	}
@@ -33,6 +33,7 @@ namespace Engine {
 		auto f = (CollectorRegistry*(*)())p->getSymbol("collectorRegistry");
 
 		if (f) {
+			auto &t = registryRegistry();
 			for (CollectorInfo *info : f()->mInfos) {
 				registryRegistry().at(info->mRegistryInfo->mFullName)->addCollector(info);
 			}

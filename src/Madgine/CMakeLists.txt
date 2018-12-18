@@ -28,9 +28,6 @@ target_link_libraries(Base PUBLIC Interfaces)
 target_link_libraries(Base PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 
-
-
-
 Project(Client)     
 
 set(sources "")

@@ -26,11 +26,13 @@ namespace Engine {
 				if (is_regular_file(p)) {
 					std::experimental::filesystem::path path = p.path();
 					std::string extension = path.extension().generic_string();
-					if (extension == ".dll") {
-						std::string name = path.stem().generic_string();
-						const std::string prefix = "Plugin_" + mMgr.project() + "_" + mName + "_";
-						if (StringUtil::startsWith(name, prefix)) {
-							auto pib = mPlugins.try_emplace(name.substr(prefix.size()), name);
+					std::string e = SHARED_LIB_SUFFIX;
+					if (extension == SHARED_LIB_SUFFIX) {
+						std::string filename = path.stem().generic_string();
+						const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + mMgr.project() + "_" + mName + "_";
+						if (StringUtil::startsWith(filename, prefix)) {
+							std::string name = filename.substr(prefix.size());
+							auto pib = mPlugins.try_emplace(name, name, path);
 							assert(pib.second);
 						}
 					}

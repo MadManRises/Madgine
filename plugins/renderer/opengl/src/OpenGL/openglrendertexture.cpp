@@ -82,8 +82,6 @@ namespace Engine {
 			);
 			glEnableVertexAttribArray(2);
 			
-			
-			auto check = []() {int e = glGetError(); if (e) exit(e); };			
 						
 			mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
 			mTexture.setFilter(GL_NEAREST);
@@ -93,17 +91,13 @@ namespace Engine {
 			resize(size);
 			
 			glGenFramebuffers(1, &mFramebuffer);
-			check();			
-			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-			check();
+			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);			
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);			
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
-			check();			
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);			
 
 			GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-			glDrawBuffers(1, DrawBuffers);
-			check();
+			glDrawBuffers(1, DrawBuffers);			
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				throw 0;
