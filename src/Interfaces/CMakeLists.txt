@@ -49,7 +49,8 @@ if (WIN32)
 endif()
 
 if (UNIX)
-	target_link_libraries (Interfaces PRIVATE stdc++fs dl)
+	find_package(X11 REQUIRED)
+	target_link_libraries (Interfaces PRIVATE stdc++fs dl X11)
 endif (UNIX)
 
 install_to_workspace(Madgine TARGETS Interfaces EXPORT_LIB)
