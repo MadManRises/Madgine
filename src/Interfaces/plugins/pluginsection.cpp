@@ -10,6 +10,8 @@
 
 #include "../util/exception.h"
 
+#include "../util/runtime.h"
+
 #include "../signalslot/connectionmanager.h"
 
 #include "pluginlistener.h"
@@ -21,7 +23,7 @@ namespace Engine {
 			mMgr(mgr),
 			mName(name)
 		{
-			for (auto &p : std::experimental::filesystem::directory_iterator(Plugin::runtimePath()))
+			for (auto &p : std::experimental::filesystem::directory_iterator(runtimePath()))
 			{
 				if (is_regular_file(p)) {
 					std::experimental::filesystem::path path = p.path();

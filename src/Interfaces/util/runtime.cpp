@@ -6,7 +6,7 @@
 #	define NOMINMAX 1
 #	include <Windows.h>
 #elif __linux__
-#	include <dlfcn.h>
+#include <unistd.h>
 #else
 #	error "Unsupported Platform!"
 #endif
