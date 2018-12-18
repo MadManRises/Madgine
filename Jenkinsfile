@@ -3,7 +3,7 @@
  def axisList = [
     ["clang-linux",],           //toolchain
     ["Release","Debug"],      //configuration
-    ["",]                   //static configuration file
+    ["", "OpenGL_Default"]                   //static configuration file
 ]   
 
 def tasks = [:]
@@ -23,7 +23,7 @@ def task = {
     def name = "${it.join('-')}"    
 
 	if (staticConfig?.trim())
-		staticConfig = "../${staticConfig}"
+		staticConfig = "../test/${staticConfig}"
 
     return {
         // This is where the important work happens for each combination
@@ -36,7 +36,6 @@ def task = {
 		        -DCMAKE_BUILD_TYPE=${configuration} \
 		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
                 -DSTATIC_BUILD=${staticConfig} \
-				-DWorkspace=workspace
 			    """
             }
             stage("build") {				

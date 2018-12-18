@@ -12,7 +12,7 @@ if (BUILD_TESTING)
 
 	enable_testing()
 
-	load_workspace_package(GTest https://github.com/abseil/googletest.git DEFINITIONS -Dgtest_force_shared_crt:BOOL=ON)
+	add_subdirectory(test/googletest)
 
 	find_package( Threads REQUIRED )
 
