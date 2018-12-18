@@ -3,6 +3,7 @@
 #include "../streams/serializestream.h"
 #include "unithelper.h"
 #include "../serializable.h"
+#include "../../generic/tupleunpacker.h"
 
 namespace Engine
 {
