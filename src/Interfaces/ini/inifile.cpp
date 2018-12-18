@@ -6,6 +6,8 @@
 
 #include "../util/stringutil.h"
 
+#include "../util/runtime.h"
+
 namespace Engine {
 	namespace Ini {
 
@@ -74,7 +76,7 @@ namespace Engine {
 
 		void IniFile::saveToDisk() const
 		{
-			std::ofstream stream(mPath.is_absolute() ? mPath : Plugins::Plugin::runtimePath() / mPath);
+			std::ofstream stream(mPath.is_absolute() ? mPath : runtimePath() / mPath);
 			assert(stream);
 			for (const std::pair<const std::string, IniSection> &p : mSections) {
 				stream << "[" << p.first << "]\n";
@@ -85,7 +87,7 @@ namespace Engine {
 		void IniFile::loadFromDisk()
 		{
 			mSections.clear();
-			std::ifstream stream(mPath.is_absolute() ? mPath : Plugins::Plugin::runtimePath() / mPath);
+			std::ifstream stream(mPath.is_absolute() ? mPath : runtimePath() / mPath);
 			std::string line;
 			while (std::getline(stream, line)) {
 				if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))

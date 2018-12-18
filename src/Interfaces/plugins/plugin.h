@@ -19,8 +19,6 @@ namespace Engine
 
 			std::experimental::filesystem::path fullPath() const;
 
-			static std::experimental::filesystem::path runtimePath();
-
 		private:
 			void *mModule;
 

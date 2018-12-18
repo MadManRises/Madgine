@@ -10,6 +10,8 @@
 #include "Interfaces/plugins/plugin.h"
 #include "Interfaces/plugins/pluginmanager.h"
 
+#include "Interfaces/util/runtime.h"
+
 namespace Engine
 {
 	namespace Resources
@@ -33,7 +35,7 @@ namespace Engine
 			Plugins::PluginManager::getSingleton().addListener(this);
 #endif
 			
-			registerResourceLocation(Plugins::Plugin::runtimePath() / ".." / "data", 50);
+			registerResourceLocation(runtimePath() / ".." / "data", 50);
 		}
 
 		ResourceManager::~ResourceManager()

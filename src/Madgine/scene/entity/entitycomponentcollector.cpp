@@ -38,6 +38,7 @@ namespace Engine
 			{
 				auto it = sRegisteredComponentsByName()->mComponents.find(name);
 				if (it == sRegisteredComponentsByName()->mComponents.end()) {
+#ifndef STATIC_BUILD
 					typedef PluginEntityComponents *(*ComponentGetter)();
 					for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
 						for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
@@ -50,6 +51,7 @@ namespace Engine
 							}
 						}
 					}
+#endif
 					throw ComponentException(Database::Exceptions::unknownComponent(name));
 				}
 				return it->second(e, table);
