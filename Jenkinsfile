@@ -47,9 +47,7 @@ def task = {
 			stage("Test") {
 				sh """
 				cd ${name}
-				rm -rf memchecks
-				mkdir -p memchecks
-				ctest -T memcheck
+				ctest
 				"""
             }           
         }
