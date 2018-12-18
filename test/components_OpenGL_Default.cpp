@@ -29,7 +29,7 @@
 
 namespace Engine{
 
-	template<> std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents() { return {
+	template std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents() { return {
 		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
 		createComponent<Engine::Tools::ImGuiRoot>
 	}; }
