@@ -33,7 +33,6 @@ namespace Engine{
 		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
 		createComponent<Engine::Tools::ImGuiRoot>
 	}; }
-	template std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents();
 
     template<> size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>(){ return 0; }
     template<> size_t component_index<Engine::Scene::SceneManager>(){ return 0; }

@@ -16,7 +16,6 @@ namespace Engine {
 			DisplayGuard() 
 			{
 				sDisplay = XOpenDisplay(NULL);
-				assert(sDisplay);
 			}
 				
 
@@ -102,9 +101,10 @@ namespace Engine {
 
 
 		Window *sCreateWindow(const WindowSettings &settings) {
+			assert(sDisplay);
+
 			uintptr_t handle = settings.mHandle;
-			if (!handle) {
-				assert(sDisplay);
+			if (!handle) {				
 
 				static ::Window root = DefaultRootWindow(sDisplay);
 

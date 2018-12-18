@@ -1,9 +1,5 @@
 
-if (STATIC_BUILD)
-	get_static_config_file(components_source components ".cpp")
-endif()
-
-add_executable(MadgineLauncher launcher.cpp ${components_source})
+add_executable(MadgineLauncher launcher.cpp)
 
 target_link_plugins(MadgineLauncher PRIVATE Client Tools OISHandler OpenGL)
 

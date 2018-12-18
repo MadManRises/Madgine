@@ -30,6 +30,14 @@ if (STATIC_BUILD)
 
 	read_ini_file(${STATIC_BUILD} PLUGINSELECTION)
 
+	function(add_executable name)
+		_add_executable(${name} ${ARGN})
+		
+		get_static_config_file(components_source components ".cpp")
+		target_sources(${name} PRIVATE ${components_source})
+
+	endfunction(add_executable)
+
 endif ()
 
 
