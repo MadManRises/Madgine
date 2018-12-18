@@ -8,6 +8,10 @@ include(Packaging)
 
 if (STATIC_BUILD)
 
+	if (NOT IS_ABSOLUTE ${STATIC_BUILD})
+		set (STATIC_BUILD ${CMAKE_SOURCE_DIR}/${STATIC_BUILD})
+	endif()
+
 	if (NOT EXISTS ${STATIC_BUILD})
 		MESSAGE(FATAL_ERROR "Config file ${STATIC_BUILD} not found!")
 	endif()
@@ -18,10 +22,7 @@ if (STATIC_BUILD)
 	endif()
 
 	get_filename_component(STATIC_BUILD_NAME ${STATIC_BUILD} NAME_WE)
-	get_filename_component(STATIC_BUILD_DIR ${STATIC_BUILD} DIRECTORY)
-	if (NOT STATIC_BUILD_DIR)
-		set (STATIC_BUILD_DIR ".")
-	endif()
+	get_filename_component(STATIC_BUILD_DIR ${STATIC_BUILD} DIRECTORY)	
 
 	function(get_static_config_file var name ext)
 		set(${var} "${STATIC_BUILD_DIR}/${name}_${STATIC_BUILD_NAME}${ext}" PARENT_SCOPE)

@@ -50,7 +50,8 @@ endif()
 
 if (UNIX)
 	find_package(X11 REQUIRED)
-	target_link_libraries (Interfaces PRIVATE stdc++fs dl X11)
+	find_package(OpenGL REQUIRED)
+	target_link_libraries (Interfaces PRIVATE stdc++fs dl X11 glx)
 endif (UNIX)
 
 install_to_workspace(Madgine TARGETS Interfaces EXPORT_LIB)
