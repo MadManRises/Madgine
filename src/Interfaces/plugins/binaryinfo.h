@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stddef.h>
 
 namespace Engine {
@@ -9,13 +11,18 @@ namespace Engine {
 			size_t mMinorVersion;
 			size_t mPathNumber;
 
+			const char *mProjectRoot;
 			const char *mSourceRoot;
 			const char *mBinaryDir;
 			const char *mBinaryName;
 
+			const char *mPrecompiledHeaderPath;
+
 		};
 
-		//extern "C" extern BinaryInfo binaryInfo;
+#ifndef STATIC_BUILD
+		extern "C" extern const BinaryInfo PLUGIN_LOCAL(binaryInfo);
+#endif
 
 	}
 }

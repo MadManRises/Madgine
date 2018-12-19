@@ -292,7 +292,7 @@ endfunction(third_party_config)
 macro(add_workspace_library name)
 
 	set(options)
-	set(oneValueArgs SOURCE_ROOT)
+	set(oneValueArgs SOURCE_ROOT PRECOMPILED_HEADER)
 	set(multiValueArgs)
 	cmake_parse_arguments(LIB_CONFIG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
 	
@@ -304,6 +304,20 @@ macro(add_workspace_library name)
 		set(LIB_CONFIG_SOURCE_ROOT src)
 	endif()
 	
-
 	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}>)
+
+	get_filename_component(abs_source_root ${LIB_CONFIG_SOURCE_ROOT} ABSOLUTE)
+	set_target_properties(${name} PROPERTIES SOURCE_ROOT ${abs_source_root})
+
+	if (LIB_CONFIG_PRECOMPILED_HEADER)
+		
+		get_filename_component(abs_precompile_include ${LIB_CONFIG_PRECOMPILED_HEADER} ABSOLUTE)
+		
+		file(RELATIVE_PATH precompile_include ${abs_source_root} ${abs_precompile_include})
+
+		add_precompiled_header(${name} ${LIB_CONFIG_PRECOMPILED_HEADER} FORCEINCLUDE)
+
+		set_target_properties(${name} PROPERTIES PRECOMPILED_HEADER ${precompile_include})
+	endif()
+
 endmacro(add_workspace_library)

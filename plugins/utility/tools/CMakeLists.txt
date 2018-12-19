@@ -22,8 +22,7 @@ FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.h)
 	FolderSources(sources src tinyxml tinyxml2.cpp tinyxml2.h)
 	
 
-add_plugin(Tools Madgine Utility ${sources})
-add_precompiled_header(Tools src/toolslib.h FORCEINCLUDE)
+add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
 
 target_link_plugins(Tools PUBLIC OpenGL)

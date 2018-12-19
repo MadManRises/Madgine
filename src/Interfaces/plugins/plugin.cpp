@@ -110,7 +110,7 @@ namespace Engine
 		}
 
 
-		void *Plugin::getSymbol(const std::string &name) const {
+		const void *Plugin::getSymbol(const std::string &name) const {
 			std::string fullName = name + "_" + mName;
 #ifdef _WIN32
 			return GetProcAddress((HINSTANCE)mModule, fullName.c_str());

@@ -87,11 +87,11 @@ namespace Engine
 #ifndef STATIC_BUILD
 		void ResourceManager::onPluginLoad(const Plugins::Plugin * plugin)
 		{
-			Plugins::BinaryInfo *info = static_cast<Plugins::BinaryInfo*>(plugin->getSymbol("binaryInfo"));					
+			const Plugins::BinaryInfo *info = static_cast<const Plugins::BinaryInfo*>(plugin->getSymbol("binaryInfo"));					
 			std::experimental::filesystem::path binPath = info->mBinaryDir;
 			bool isLocal = plugin->fullPath().parent_path() == binPath;
 			if (isLocal)
-				registerResourceLocation(std::experimental::filesystem::path(info->mSourceRoot) / "data", 75);
+				registerResourceLocation(std::experimental::filesystem::path(info->mProjectRoot) / "data", 75);
 			//else
 				//registerResourceLocation(binPath.parent_path() / "data" / plugin->());
 		}

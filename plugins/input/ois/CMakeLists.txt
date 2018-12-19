@@ -20,9 +20,7 @@ set(sources "")
 FolderSources(sources "" src oisinputhandler.cpp oisinputhandler.h)
 
 
-add_plugin(OISHandler Madgine Input ${sources})
-
-#add_precompiled_header(OpenGL src/OpenGL/opengllib.h FORCEINCLUDE)
+add_plugin(OISHandler Madgine Input ${sources} PRECOMPILED_HEADER src/oislib.h)
 
 
 

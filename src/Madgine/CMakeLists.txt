@@ -19,14 +19,16 @@ FolderSources(sources "" "" baseforward.h baselib.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 
 
-add_workspace_library(Base ${sources} SOURCE_ROOT ..)
-add_precompiled_header(Base baselib.h FORCEINCLUDE)
+add_workspace_library(Base ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER baselib.h)
+
+
 
 
 target_link_libraries(Base PUBLIC Interfaces)
 
 target_link_libraries(Base PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
+generate_binary_info(Base)
 
 Project(Client)     
 
@@ -41,13 +43,9 @@ FolderSources(sources "" "" clientforward.h clientlib.h)
 
 
 
-add_workspace_library(Client ${sources} SOURCE_ROOT ..)
-
-add_precompiled_header(Client clientlib.h FORCEINCLUDE)
+add_workspace_library(Client ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER clientlib.h)
 
 target_link_libraries(Client PUBLIC Base)
-
-target_compile_definitions(Client INTERFACE MADGINE_CLIENT_BUILD)
 
 
 

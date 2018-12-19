@@ -31,12 +31,10 @@ endif()
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
 			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
 	FolderSources(sources "" signalslot connection.cpp connection.h connectionmanager.cpp connectionmanager.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h)
-	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h runtime.cpp runtime.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h pathutil.cpp pathutil.h process.cpp process.h runtime.cpp runtime.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_linux.cpp windowapi_windows.cpp windoweventlistener.h)
 
-add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT ..)
-
-add_precompiled_header(Interfaces interfaceslib.h FORCEINCLUDE)
+add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
 
 
 if (NOT STATIC_BUILD)

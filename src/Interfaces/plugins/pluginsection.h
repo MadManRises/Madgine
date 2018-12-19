@@ -28,7 +28,7 @@ namespace Engine {
 			T *getUniqueSymbol(const std::string &name) const {
 				return static_cast<T*>(getUniqueSymbol(name));
 			}
-			void *getUniqueSymbol(const std::string &name) const;
+			const void *getUniqueSymbol(const std::string &name) const;
 
 			std::map<std::string, Plugin>::const_iterator begin() const;
 			std::map<std::string, Plugin>::const_iterator end() const;

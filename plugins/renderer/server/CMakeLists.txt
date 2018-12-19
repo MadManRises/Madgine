@@ -17,9 +17,8 @@ FolderSources(sources src Server serverforward.h serverlib.h)
 	FolderSources(sources Server server servertimer.cpp servertimer.h)
 
 
-add_plugin(Server Madgine Renderer ${sources})
+add_plugin(Server Madgine Renderer ${sources} PRECOMPILED_HEADER src/Server/serverlib.h)
 
-add_precompiled_header(Server src/Server/serverlib.h FORCEINCLUDE)
 
 target_link_libraries(Server PUBLIC Base)
 

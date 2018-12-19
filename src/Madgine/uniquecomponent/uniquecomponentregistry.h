@@ -74,7 +74,7 @@ namespace Engine{
 
 	private:
 		const TypeInfo *mTi;
-
+		const Plugins::BinaryInfo *mBi;
 	};
 
 	template <class _Base, class _Ty>

@@ -13,9 +13,7 @@ FolderSources(sources "" src)
 FolderSources(sources src OpenGL glad.cpp glad.h openglforward.h opengllib.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshader.cpp openglshader.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h opengltexture.cpp opengltexture.h)
 
 
-add_plugin(OpenGL Madgine Renderer ${sources})
-
-add_precompiled_header(OpenGL src/OpenGL/opengllib.h FORCEINCLUDE)
+add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
 find_package(OpenGL REQUIRED)
 

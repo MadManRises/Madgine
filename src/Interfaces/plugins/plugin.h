@@ -15,7 +15,7 @@ namespace Engine
 			bool load();
 			bool unload();
 
-			void *getSymbol(const std::string &name) const;
+			const void *getSymbol(const std::string &name) const;
 
 			std::experimental::filesystem::path fullPath() const;
 
