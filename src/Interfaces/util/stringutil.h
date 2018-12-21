@@ -19,5 +19,18 @@ namespace Engine {
 			return s;
 		}
 
+		inline std::string replace(std::string &&s, char old, char replace) {
+			for (char &c : s)
+			{
+				if (c == old) c = replace;
+			}
+			return std::move(s);
+		}
+
+		inline std::string toLower(std::string &&s) {
+			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+			return std::move(s);
+		}
+
 	}
 }
