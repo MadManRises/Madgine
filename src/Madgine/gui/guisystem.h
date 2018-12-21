@@ -73,4 +73,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::GUI::GUISystem);
+RegisterType(Engine::GUI::GUISystem);

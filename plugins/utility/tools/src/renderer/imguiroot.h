@@ -43,4 +43,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::ImGuiRoot);
+RegisterType(Engine::Tools::ImGuiRoot);

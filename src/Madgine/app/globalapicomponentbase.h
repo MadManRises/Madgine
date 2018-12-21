@@ -71,4 +71,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::App::GlobalAPIComponentBase);
+RegisterType(Engine::App::GlobalAPIComponentBase);

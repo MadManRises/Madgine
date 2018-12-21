@@ -120,4 +120,4 @@ namespace Engine
 }
 
 
-RegisterClass(Engine::GUI::TopLevelWindow);
+RegisterType(Engine::GUI::TopLevelWindow);

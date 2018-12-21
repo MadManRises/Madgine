@@ -70,4 +70,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::EntityComponentBase);
+RegisterType(Engine::Scene::Entity::EntityComponentBase);

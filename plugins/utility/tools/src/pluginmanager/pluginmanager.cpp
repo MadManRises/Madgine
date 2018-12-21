@@ -87,7 +87,7 @@ namespace Engine
 					ImGui::PushDisabled();
 				}
 				if (ImGui::Button("Export")) {
-					exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"), {&ClassInfo<PluginManager>()});
+					exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"), {&typeInfo<PluginManager>()});
 				}
 				if (mManager.currentSelectionName().empty()) {
 					ImGui::PopDisabled();

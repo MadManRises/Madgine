@@ -85,7 +85,7 @@ namespace Engine{
 		typedef Collector_F<Base, Ty> F;
 
 		UniqueComponentRegistry() :
-			ComponentRegistryBase(&ClassInfo<UniqueComponentRegistry>()) {}
+			ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>()) {}
 
 		static UniqueComponentRegistry sInstance;
 		static std::vector<F> &sComponents() {

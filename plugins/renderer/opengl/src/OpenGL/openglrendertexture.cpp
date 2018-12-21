@@ -118,8 +118,8 @@ namespace Engine {
 
 		void OpenGLRenderTexture::resize(const Vector2 & size)
 		{
-			size_t width = size_t(size.x);
-			size_t height = size_t(size.y);
+			GLsizei width = static_cast<GLsizei>(size.x);
+			GLsizei height = static_cast<GLsizei>(size.y);
 
 			mTexture.setData(width, height, nullptr);
 
@@ -137,7 +137,7 @@ namespace Engine {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
 			check();
-			glViewport(0, 0, size.x, size.y);			
+			glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));			
 			check();
 
 			mProgram.bind();
@@ -145,7 +145,7 @@ namespace Engine {
 			glClearColor(0.1f, 0.01f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float aspectRatio = float(size.x) / float(size.y);
+			float aspectRatio = size.x / size.y;
 
 			static Quaternion test;
 			

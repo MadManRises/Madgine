@@ -33,7 +33,7 @@ namespace Engine {
 			return result;
 		}
 
-		std::experimental::filesystem::path make_case_sensitive(const char * p)
+		std::experimental::filesystem::path make_normalized(const char * p)
 		{
 #if _WIN32
 
@@ -41,6 +41,9 @@ namespace Engine {
 			auto result = GetLongPathNameA(p, buffer, sizeof(buffer));
 			assert(result > 0 && result < sizeof(buffer));
 			buffer[0] = toupper(buffer[0]);
+			/*for (int i = 0; i < result; ++i)
+				if (buffer[i] == '\\')
+					buffer[i] = '/';*/
 			return { buffer };
 #else
 			return { p };

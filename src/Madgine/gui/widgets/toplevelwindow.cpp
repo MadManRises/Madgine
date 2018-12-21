@@ -526,6 +526,7 @@ namespace Engine
 
 		void TopLevelWindow::onResize(size_t width, size_t height)
 		{
+			input()->onResize(width, height);
 			for (Widget *topLevel : uniquePtrToPtr(mTopLevelWidgets))
 			{
 				topLevel->screenSizeChanged({ static_cast<float>(width), static_cast<float>(height), 1.0f });

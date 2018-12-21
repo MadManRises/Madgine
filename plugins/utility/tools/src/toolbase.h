@@ -11,6 +11,7 @@ namespace Engine
 		{
 		public:
 			ToolBase(ImGuiRoot &root);
+			virtual ~ToolBase() = default;
 
 			virtual void render();
 			virtual void update();
@@ -31,4 +32,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::ToolBase);
+RegisterType(Engine::Tools::ToolBase);

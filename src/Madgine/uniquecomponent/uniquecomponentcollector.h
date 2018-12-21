@@ -20,16 +20,23 @@ namespace Engine
 		typedef Collector_F<Base, Ty> F;
 		typedef UniqueComponentRegistry<Base, Ty> Registry;
 
-		UniqueComponentCollector() {
+		UniqueComponentCollector()
+		{
 			mInfo.mComponents = reinterpret_cast<std::vector<Collector_F<void, void*>>*>(&mComponents);
-			mInfo.mRegistryInfo = &ClassInfo<Registry>();
-			mInfo.mBaseInfo = &ClassInfo<Base>();
+			mInfo.mRegistryInfo = &typeInfo<Registry>();
+			mInfo.mBaseInfo = &typeInfo<Base>();
 			PLUGIN_LOCAL(collectorRegistry)()->mInfos.push_back(&mInfo);
 		}
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
+		~UniqueComponentCollector()
+		{
+			auto &infos = PLUGIN_LOCAL(collectorRegistry)()->mInfos;
+			infos.erase(std::find(infos.begin(), infos.end(), &mInfo));
+		}
+
 		void operator=(const UniqueComponentCollector&) = delete;
 
-		static UniqueComponentCollector<_Base, _Ty> &sInstance();
+		static UniqueComponentCollector<Base, Ty> &sInstance();
 
 		size_t size() const {
 			return mComponents.size();
@@ -42,9 +49,9 @@ namespace Engine
 		template <class T>
 		static size_t registerComponent()
 		{
-			LOG(Database::message("Registering Component: ", "...")(ClassName<T>()));
-			sInstance().mComponents.emplace_back(createComponent<T, _Base, _Ty>);
-			sInstance().mInfo.mElementInfos.push_back(&ClassInfo<T>());
+			LOG(Database::message("Registering Component: ", "...")(typeName<T>()));
+			sInstance().mComponents.emplace_back(createComponent<T, Base, Ty>);
+			sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
 			return sInstance().mComponents.size() - 1;
 		}
 
@@ -113,4 +120,4 @@ namespace Engine {
 
 #endif
 
-#define RegisterCollector(collector) RegisterClass(collector::Registry)
+#define RegisterCollector(collector) RegisterType(collector::Registry)

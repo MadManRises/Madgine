@@ -41,4 +41,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::Animation);
+RegisterType(Engine::Scene::Entity::Animation);

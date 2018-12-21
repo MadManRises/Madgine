@@ -143,4 +143,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::GUI::Widget);
+RegisterType(Engine::GUI::Widget);

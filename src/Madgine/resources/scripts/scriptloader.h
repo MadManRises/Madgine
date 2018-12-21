@@ -27,4 +27,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scripting::Parsing::ScriptLoader);
+RegisterType(Engine::Scripting::Parsing::ScriptLoader);

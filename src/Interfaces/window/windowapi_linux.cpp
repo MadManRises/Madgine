@@ -21,7 +21,8 @@ namespace Engine {
 
 			~DisplayGuard()
 			{
-				XCloseDisplay(sDisplay);
+				if (sDisplay)
+					XCloseDisplay(sDisplay);
 			}			
 		} sDisplayGuard;
 		

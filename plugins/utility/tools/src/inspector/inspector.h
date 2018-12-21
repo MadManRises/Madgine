@@ -14,6 +14,7 @@ namespace Engine
 		public:
 			Inspector(ImGuiRoot &root);
 			Inspector(const Inspector &) = delete;
+			~Inspector();
 
 			virtual void render() override;
 
@@ -46,4 +47,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::Inspector);
+RegisterType(Engine::Tools::Inspector);

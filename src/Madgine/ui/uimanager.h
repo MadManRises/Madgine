@@ -81,4 +81,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::UI::UIManager);
+RegisterType(Engine::UI::UIManager);

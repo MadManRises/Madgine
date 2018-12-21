@@ -9,6 +9,7 @@
 #include "Interfaces/plugins/binaryinfo.h"
 
 #include "Interfaces/util/pathutil.h"
+#include "Interfaces/util/stringutil.h"
 
 
 namespace Engine {
@@ -63,11 +64,11 @@ namespace Engine {
 				file << "#include \"" << bin->mPrecompiledHeaderPath << "\"\n";
 
 		auto fixInclude = [&](const char *pStr) {
-			std::experimental::filesystem::path p = PathUtil::make_case_sensitive(pStr);
+			std::experimental::filesystem::path p = PathUtil::make_normalized(pStr);
 			for (const Plugins::BinaryInfo *binInfo : binaries)
 				if (!PathUtil::relative(p, binInfo->mSourceRoot).empty())
-					return PathUtil::relative(p, binInfo->mSourceRoot);
-			return p;
+					return StringUtil::replace(PathUtil::relative(p, binInfo->mSourceRoot).generic_string(), '\\', '/');
+			return StringUtil::replace(p.generic_string(), '\\', '/');
 		};
 
 		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {

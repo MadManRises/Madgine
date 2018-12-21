@@ -17,10 +17,6 @@ namespace Engine
 
 	}
 
-#ifndef PLUGIN_BUILD
-	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>;
-#endif
-
 }
 
 RegisterCollector(Engine::App::GlobalAPICollector);

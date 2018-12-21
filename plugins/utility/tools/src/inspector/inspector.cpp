@@ -42,15 +42,19 @@ namespace Engine
 			Tool<Inspector>(root)
 		{			
 			
-			for (std::pair<const std::string, LayoutLoader::ResourceType> &resource : Resources::ResourceManager::getSingleton().get<LayoutLoader>())
+			for (auto &[name, resource] : Resources::ResourceManager::getSingleton().get<LayoutLoader>())
 			{
 				
-				InspectorLayout &layout = mLayouts.try_emplace(resource.first, resource.second.loadImpl()).first->second;
+				InspectorLayout &layout = mLayouts.try_emplace(name, resource.loadImpl()).first->second;
 				for (const std::string &assoc : layout.associations())
 				{
 					mAssociations[assoc] = &layout;
 				}
 			}
+		}
+
+		Inspector::~Inspector()
+		{
 		}
 
 		void Inspector::render()

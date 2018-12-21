@@ -31,4 +31,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::Metrics);
+RegisterType(Engine::Tools::Metrics);

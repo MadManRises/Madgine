@@ -24,7 +24,7 @@ namespace Engine {
 			glBindTexture(GL_TEXTURE_2D, mHandle);
 		}
 
-		void OpenGLTexture::setData(size_t width, size_t height, void * data)
+		void OpenGLTexture::setData(GLsizei width, GLsizei height, void * data)
 		{
 			bind();
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_FLOAT, data);

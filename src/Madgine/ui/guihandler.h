@@ -66,5 +66,5 @@ namespace Engine
 } // namespace Cegui
 
 
-RegisterClass(Engine::UI::GuiHandlerBase);
+RegisterType(Engine::UI::GuiHandlerBase);
 RegisterCollector(Engine::UI::GuiHandlerCollector);

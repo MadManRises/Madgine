@@ -36,4 +36,6 @@ typedef GLXContext ContextHandle;
 
 #endif
 
+#include "glad.h"
+
 /// @endcond

@@ -168,4 +168,4 @@ namespace Engine
 }
 
 
-RegisterClass(Engine::App::Application);
+RegisterType(Engine::App::Application);

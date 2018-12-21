@@ -21,10 +21,12 @@ namespace Engine
 			windowHndStr << (size_t)window->mHandle;
 			pl.insert(make_pair("WINDOW"s, windowHndStr.str()));
 
+#if _WIN32
 			pl.insert(std::make_pair("w32_mouse"s, "DISCL_FOREGROUND"s));
 			pl.insert(std::make_pair("w32_mouse"s, "DISCL_NONEXCLUSIVE"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_FOREGROUND"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_NONEXCLUSIVE"s));
+#endif
 
 			mInputManager = OIS::InputManager::createInputSystem(pl);
 
@@ -36,14 +38,14 @@ namespace Engine
 			mMouse->setEventCallback(this);
 			mKeyboard->setEventCallback(this);			
 
-			window->addListener(this);
+			//window->addListener(this);
 			//Set initial mouse clipping size
 			onResize(mWindow->width(), mWindow->height());			
 		}
 
 		OISInputHandler::~OISInputHandler()
 		{			
-			mWindow->removeListener(this);
+			//mWindow->removeListener(this);
 
 			mInputManager->destroyInputObject(mMouse);
 			mInputManager->destroyInputObject(mKeyboard);

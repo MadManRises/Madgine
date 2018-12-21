@@ -54,7 +54,7 @@ namespace Engine
 			bool traceLevel(const Engine::Debug::TraceBack &traceback, size_t size, bool leaf);
 			void drawBlock(const BlockData &block, size_t depth);
 
-			bool drawHeader(const char *title, SortMode mode, size_t size = 0);
+			bool drawHeader(const char *title, SortMode mode, float size = 0);
 
 		private:
 			Debug::Memory::MemoryTracker &mTracker;
@@ -72,6 +72,6 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::MemoryViewer);
+RegisterType(Engine::Tools::MemoryViewer);
 
 #endif

@@ -23,4 +23,4 @@ namespace Engine {
 	}
 }
 
-RegisterClass(Engine::Tools::Profiler);
+RegisterType(Engine::Tools::Profiler);

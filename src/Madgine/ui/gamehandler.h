@@ -94,5 +94,5 @@ namespace Engine
 }
 
 
-RegisterClass(Engine::UI::GameHandlerBase);
+RegisterType(Engine::UI::GameHandlerBase);
 RegisterCollector(Engine::UI::GameHandlerCollector);

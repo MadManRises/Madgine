@@ -110,4 +110,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::SceneManager);
+RegisterType(Engine::Scene::SceneManager);

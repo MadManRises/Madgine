@@ -116,4 +116,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::Entity);
+RegisterType(Engine::Scene::Entity::Entity);

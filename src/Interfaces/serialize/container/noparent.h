@@ -43,9 +43,9 @@ namespace Engine
 	template<class T>
 	struct AccessClassInfo<Serialize::NoParentUnit<T>> {
 		static inline const TypeInfo &get() {
-			const TypeInfo *tType = &ClassInfo<T>();
-			static std::string className = "Engine::Serialize::NoParentUnit<"s + tType->mFullName + ">";
-			static TypeInfo sInfo{ className.c_str(), tType->mHeaderPath, tType }; 
+			static const TypeInfo &tType = typeInfo<T>();
+			static std::string className = "Engine::Serialize::NoParentUnit<"s + tType.mFullName + ">";
+			static TypeInfo sInfo{ className.c_str(), tType.mHeaderPath, &tType }; 
 			return sInfo;
 		}
 	};

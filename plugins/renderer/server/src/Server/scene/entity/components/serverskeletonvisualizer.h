@@ -19,4 +19,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::ServerSkeletonVisualizer);
+RegisterType(Engine::Scene::Entity::ServerSkeletonVisualizer);

@@ -40,6 +40,7 @@ namespace Engine
 		Application::~Application()
 		{
 			mLoop->removeFrameListener(this);
+			Util::UtilMethods::setup();
 			mLog.reset();
 		}
 

@@ -10,7 +10,7 @@ namespace Engine {
 
 			void bind() const;
 
-			void setData(size_t width, size_t height, void *data);
+			void setData(GLsizei width, GLsizei height, void *data);
 
 			unsigned int handle();
 

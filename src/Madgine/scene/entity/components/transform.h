@@ -51,4 +51,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::Transform);
+RegisterType(Engine::Scene::Entity::Transform);

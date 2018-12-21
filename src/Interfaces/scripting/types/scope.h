@@ -16,12 +16,12 @@ namespace Engine
 
 			virtual const char* key() const
 			{
-				return ClassName<T>();
+				return typeName<T>();
 			}
 
 			virtual std::string getIdentifier() const override
 			{
-				return ClassName<T>();
+				return typeName<T>();
 			}
 
 		};

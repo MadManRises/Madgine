@@ -54,4 +54,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Server::ServerBase);
+RegisterType(Engine::Server::ServerBase);
