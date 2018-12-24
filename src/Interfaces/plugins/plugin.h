@@ -19,8 +19,6 @@ namespace Engine
 
 			std::experimental::filesystem::path fullPath() const;
 
-			static std::set<std::string> enumerateLoadedLibraries();
-
 		private:
 			void *mModule;
 

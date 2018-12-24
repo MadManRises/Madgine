@@ -6,6 +6,8 @@
 
 #include "pluginsectionlistener.h"
 
+#include "../util/runtime.h"
+
 namespace Engine
 {
 	namespace Plugins
@@ -168,7 +170,7 @@ namespace Engine
 		void PluginManager::setupCoreSection()
 		{
 			const std::set<std::string> coreLibraries = { "Base", "Client" };
-			const std::set<std::string> loadedLibraries = Plugin::enumerateLoadedLibraries();
+			const std::set<std::string> loadedLibraries = enumerateLoadedLibraries();
 			std::set<std::string> loadedCoreLibraries;
 			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
 				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
