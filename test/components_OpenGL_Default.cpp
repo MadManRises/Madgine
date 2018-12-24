@@ -56,9 +56,6 @@
 #include "inspector/inspector.h"
 #endif
 #ifdef BUILD_PLUGIN_Tools
-#include "memory/memoryviewer.h"
-#endif
-#ifdef BUILD_PLUGIN_Tools
 #include "metrics/metrics.h"
 #endif
 #ifdef BUILD_PLUGIN_Tools
@@ -172,9 +169,6 @@ namespace Engine {
 		createComponent<Engine::Tools::Inspector>,
 #endif
 #ifdef BUILD_PLUGIN_Tools
-		createComponent<Engine::Tools::MemoryViewer>,
-#endif
-#ifdef BUILD_PLUGIN_Tools
 		createComponent<Engine::Tools::Metrics>,
 #endif
 #ifdef BUILD_PLUGIN_Tools
@@ -190,9 +184,6 @@ namespace Engine {
 #endif
 #ifdef BUILD_PLUGIN_Tools
 	template<> size_t component_index<Engine::Tools::Inspector>() { return -1; }
-#endif
-#ifdef BUILD_PLUGIN_Tools
-	template<> size_t component_index<Engine::Tools::MemoryViewer>() { return -1; }
 #endif
 #ifdef BUILD_PLUGIN_Tools
 	template<> size_t component_index<Engine::Tools::Metrics>() { return -1; }
