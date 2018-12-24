@@ -44,6 +44,8 @@ namespace Engine
 			void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
 			void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
 
+			void setupCoreSection();
+
 		private:
 			std::map<std::string, PluginSection> mSections;
 

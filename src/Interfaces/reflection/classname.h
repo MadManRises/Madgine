@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../plugins/binaryinfo.h"
 
 namespace Engine
 {
@@ -15,6 +16,9 @@ namespace Engine
 			mTypeName(fix(mFullName)),
 			mHeaderPath(headerPath),
 			mDecayType(decayType)
+#ifndef STATIC_BUILD
+			,mBinary(&Plugins::PLUGIN_LOCAL(binaryInfo))
+#endif
 		{}
 
 		inline std::string namespaceName() const {
@@ -25,6 +29,9 @@ namespace Engine
 		const char *mTypeName;		
 		const char *mHeaderPath;
 		const TypeInfo *mDecayType;
+#ifndef STATIC_BUILD
+		const Plugins::BinaryInfo *mBinary;
+#endif
 	};
 
 	

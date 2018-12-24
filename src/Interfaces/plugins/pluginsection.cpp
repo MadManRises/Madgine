@@ -19,10 +19,17 @@
 namespace Engine {
 	namespace Plugins {
 
-		PluginSection::PluginSection(PluginManager& mgr, const std::string& name) :
+		PluginSection::PluginSection(PluginManager& mgr, const std::string& name, const std::set<std::string> &fixedPlugins) :
 			mMgr(mgr),
 			mName(name)
 		{
+			for (const std::string &name : fixedPlugins)
+			{
+				auto pib = mPlugins.try_emplace(name, name, name);
+				assert(pib.second);
+				auto result = pib.first->second.load();
+				assert(result);
+			}
 			for (auto &p : std::experimental::filesystem::directory_iterator(runtimePath()))
 			{
 				if (is_regular_file(p)) {

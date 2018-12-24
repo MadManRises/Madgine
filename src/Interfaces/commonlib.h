@@ -1,5 +1,6 @@
 #pragma once
 
+#include "macros.h"
 
 #ifdef _WIN32
 #	ifdef __GNUC__
@@ -22,11 +23,5 @@
 #endif
 
 #ifndef STATIC_BUILD
-#	ifdef PLUGIN_BUILD
-#		define PLUGIN_LOCAL_IMPL(pre, post) pre ## _ ## post
-#		define PLUGIN_LOCAL_EVAL(pre, post) PLUGIN_LOCAL_IMPL(pre, post)
-#		define PLUGIN_LOCAL(name) PLUGIN_LOCAL_EVAL(name, PLUGIN_NAME)
-#	else
-#		define PLUGIN_LOCAL(name) name ## _Base
-#	endif
+#	define PLUGIN_LOCAL(name) CONCAT2(CONCAT(name, _), PROJECT_NAME)
 #endif

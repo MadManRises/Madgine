@@ -11,12 +11,15 @@ namespace Engine {
 			size_t mMinorVersion;
 			size_t mPathNumber;
 
+			const char *mName;
+
 			const char *mProjectRoot;
 			const char *mSourceRoot;
 			const char *mBinaryDir;
-			const char *mBinaryName;
+			const char *mBinaryFileName;
 
 			const char *mPrecompiledHeaderPath;
+
 
 		};
 

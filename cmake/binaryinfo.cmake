@@ -25,9 +25,18 @@ macro(generate_binary_info target)
 			set(patch_number 0)
 		endif()
 
-		set_source_files_properties(${my_dir}/binaryinfo.cpp PROPERTIES
-		  COMPILE_DEFINITIONS "BINARY_PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\";BINARY_BINARY_DIR=\"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\";BINARY_MAJOR_VERSION=${major_version};BINARY_MINOR_VERSION=${minor_version};BINARY_PATCH_NUMBER=${patch_number};BINARY_FILENAME=\"$<TARGET_FILE_NAME:${target}>\";PRECOMPILED_HEADER_PATH=\"$<TARGET_PROPERTY:${target},PRECOMPILED_HEADER>\";BINARY_SOURCE_ROOT=\"$<TARGET_PROPERTY:${target},SOURCE_ROOT>\""
-		)
+		
+		target_compile_definitions(${target} PRIVATE 
+		PROJECT_NAME=${target}
+		BINARY_PROJECT_ROOT=\"${PROJECT_SOURCE_DIR}\"
+		BINARY_BINARY_DIR=\"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\"
+		BINARY_MAJOR_VERSION=${major_version}
+		BINARY_MINOR_VERSION=${minor_version}
+		BINARY_PATCH_NUMBER=${patch_number}
+		BINARY_FILENAME=\"$<TARGET_FILE_NAME:${target}>\"
+		PRECOMPILED_HEADER_PATH=\"$<TARGET_PROPERTY:${target},PRECOMPILED_HEADER>\"
+		BINARY_SOURCE_ROOT=\"$<TARGET_PROPERTY:${target},SOURCE_ROOT>\")
+
 
 	endif()
 

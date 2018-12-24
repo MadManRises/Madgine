@@ -2,9 +2,13 @@
 
 #include "plugin.h"
 
+#include "../generic/templates.h"
+
 #ifdef _WIN32
+#define NOMINMAX
 #include <Windows.h>
 #include <DbgHelp.h>
+#include <Psapi.h>
 #elif defined(__linux__) || defined(__EMSCRIPTEN__)
 #include <unistd.h>
 #include <dlfcn.h>
@@ -138,6 +142,34 @@ namespace Engine
 #endif
 			return path;
 		}
+
+		std::set<std::string> Plugin::enumerateLoadedLibraries()
+		{
+			std::set<std::string> result;
+
+#if _WIN32
+			DWORD count;
+			HMODULE modules[512];
+			auto check = EnumProcessModules(GetCurrentProcess(), modules, array_size(modules), &count);
+			assert(check);
+			count /= sizeof(HMODULE);
+			assert(count < array_size(modules));
+
+			for (DWORD i = 0; i < count; ++i)
+			{
+				char buffer[512];
+				auto check2 = GetModuleFileName(modules[i], buffer, sizeof(buffer));
+				assert(check2);
+				std::experimental::filesystem::path path = buffer;
+				result.insert(path.stem().generic_string());
+			}
+#else
+#	error "Unsupported Platform!"
+#endif
+
+			return result;
+		}
+
 
 	}
 }

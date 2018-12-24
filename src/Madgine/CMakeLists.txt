@@ -21,10 +21,9 @@ FolderSources(sources "" "" baseforward.h baselib.h)
 
 add_workspace_library(Base ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER baselib.h)
 
-
-
-
 target_link_libraries(Base PUBLIC Interfaces)
+
+target_compile_definitions(Base INTERFACE BUILD_Base)
 
 target_link_libraries(Base PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
@@ -47,7 +46,9 @@ add_workspace_library(Client ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER client
 
 target_link_libraries(Client PUBLIC Base)
 
+target_compile_definitions(Client INTERFACE BUILD_Client)
 
+generate_binary_info(Client)
 
 
 install_to_workspace(Madgine TARGETS Base Client EXPORT_LIB)

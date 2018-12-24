@@ -32,5 +32,10 @@ namespace Engine {
 			return std::move(s);
 		}
 
+		inline std::string toUpper(std::string &&s) {
+			std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+			return std::move(s);
+		}
+
 	}
 }

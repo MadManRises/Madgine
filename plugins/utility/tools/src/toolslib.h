@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Madgine/clientlib.h"
-#ifdef BUILD_PLUGIN_Ogre
-#include "OgreMadgine/ogrelib.h"
-#endif
 
 #include "toolsforward.h"
 

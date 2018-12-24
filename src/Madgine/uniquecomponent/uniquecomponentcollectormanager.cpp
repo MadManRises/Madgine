@@ -14,16 +14,10 @@ namespace Engine {
 		mMgr(pluginMgr)
 	{
 		mMgr.addListener(this);
-		Plugins::Plugin base("Base");
-		assert(base.load());
-		onPluginLoad(&base);
 	}
 
 	UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
 	{
-		Plugins::Plugin base("Base");
-		assert(base.load());
-		aboutToUnloadPlugin(&base);
 		mMgr.removeListener(this);
 	}
 
