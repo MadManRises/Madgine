@@ -10,9 +10,6 @@
 namespace Engine
 {
 
-
-
-
 	namespace Scene
 	{
 		namespace Entity
