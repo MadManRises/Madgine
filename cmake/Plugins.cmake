@@ -62,6 +62,19 @@ macro(add_plugin name base type)
 		export_to_workspace(${name})
 
 		cpack_add_component(${name} GROUP ${type})
+
+		if (NOT MSVC)
+			get_target_property(flags ${name} LINK_FLAGS)
+			if(NOT flags)
+				set(flags "")
+			else()
+				set(flags "${flags} ") # A space to cleanly separate from existing content
+			endif()
+			# Append our values
+			set(flags "${flags}-rdynamic" )
+			set_target_properties(${name} PROPERTIES LINK_FLAGS ${flags} )
+		endif()
+
 	else()
 
 		if (NOT PLUGINSELECTION_${type}_${name})
