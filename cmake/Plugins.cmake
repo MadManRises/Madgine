@@ -40,6 +40,7 @@ if (STATIC_BUILD)
 
 	endfunction(add_executable)
 
+
 endif ()
 
 
@@ -90,17 +91,12 @@ function(target_link_plugins target vis)
 
 endfunction(target_link_plugins)
 
+
+	
 function(target_link_all_plugins target vis)
 	
 	set(available_core_libs Base Client)
-	set(additional_core_libs)
 
-	foreach(lib ${available_core_libs})
-		if (PLUGINSELECTION_Core_${lib})
-			set(additional_core_libs ${additional_core_libs} ${lib})
-		endif()
-	endforeach()
-
-	target_link_plugins(${target} ${vis} ${PLUGIN_LIST} ${additional_core_libs})
+	target_link_plugins(${target} ${vis} ${PLUGIN_LIST} ${available_core_libs})
 
 endfunction()
