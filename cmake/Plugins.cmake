@@ -6,6 +6,8 @@ include(Workspace)
 include(ini)
 include(Packaging)
 
+set(PLUGIN_LIST "" CACHE INTERNAL "")
+
 if (STATIC_BUILD)
 
 	if (NOT IS_ABSOLUTE ${STATIC_BUILD})
@@ -59,7 +61,6 @@ macro(add_plugin name base type)
 		export_to_workspace(${name})
 
 		cpack_add_component(${name} GROUP ${type})
-
 	else()
 
 		if (NOT PLUGINSELECTION_${type}_${name})
@@ -68,6 +69,8 @@ macro(add_plugin name base type)
 		endif()
 
 	endif()
+
+	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")
 
 endmacro(add_plugin)
 
@@ -87,3 +90,17 @@ function(target_link_plugins target vis)
 
 endfunction(target_link_plugins)
 
+function(target_link_all_plugins target vis)
+	
+	set(available_core_libs Base Client)
+	set(additional_core_libs)
+
+	foreach(lib ${available_core_libs})
+		if (PLUGINSELECTION_Core_${lib})
+			set(additional_core_libs ${additional_core_libs} ${lib})
+		endif()
+	endforeach()
+
+	target_link_plugins(${target} ${vis} ${PLUGIN_LIST} ${additional_core_libs})
+
+endfunction()

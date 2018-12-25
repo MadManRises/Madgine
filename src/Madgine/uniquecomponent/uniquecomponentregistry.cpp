@@ -42,7 +42,7 @@ namespace Engine {
 
 	void include(std::ostream &out, std::string header, const Plugins::BinaryInfo *bin = nullptr)
 	{
-		GuardGuard g(out, bin);
+		//GuardGuard g(out, bin);
 		out << "#include \"" << header << "\"\n";
 	}
 
@@ -78,6 +78,7 @@ namespace Engine {
 
 		std::ofstream file(outFile);
 		assert(file);
+		GuardGuard g(file, &Plugins::binaryInfo_Base);
 
 		for (const Plugins::BinaryInfo *bin : binaries)
 		{
@@ -106,11 +107,11 @@ namespace Engine{
 
 		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {
 			{
-				GuardGuard g2(file, p.first->mBinary);
+				//GuardGuard g2(file, p.first->mBinary);
 				file << "	template<> std::vector<" << p.first->mFullName << "::F> " << p.first->mFullName << "::sComponents() { return {\n";
 
 				for (const TypeInfo *typeInfo : p.second) {
-					GuardGuard g(file, typeInfo->mBinary);
+					//GuardGuard g(file, typeInfo->mBinary);
 					file << "		createComponent<" << typeInfo->mFullName << ">,\n";
 				}
 
@@ -119,18 +120,19 @@ namespace Engine{
 
 			size_t i = 0;
 			for (const TypeInfo *typeInfo : p.second) {
-				GuardGuard g(file, typeInfo->mBinary);
+				//GuardGuard g(file, typeInfo->mBinary);
 				while (typeInfo) {
-					file << "    template<> size_t component_index<" << typeInfo->mFullName << ">(){ return -1; }\n";
+					file << "    template<> size_t component_index<" << typeInfo->mFullName << ">(){ return " << i << "; }\n";
 					typeInfo = typeInfo->mDecayType;
 				}
+				++i;
 			}
 
 
 			file << "\n";
 		}
 
-		file << "}";
+		file << "}\n";
 	}
 
 	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase*>& registryRegistry()

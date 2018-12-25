@@ -93,8 +93,8 @@ namespace Engine
 			if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
 				mCurrentSelectionFile->clear();
 				for (const std::pair<const std::string, PluginSection> &sec : mSections) {
-					if (sec.first == "Core")
-						continue;
+					/*if (sec.first == "Core")
+						continue;*/
 					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first];
 					for (const std::pair<const std::string, Plugin> &p : sec.second) {
 						iniSec[p.first] = p.second.isLoaded() ? "On" : "";
