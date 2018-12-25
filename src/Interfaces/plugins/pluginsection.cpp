@@ -25,7 +25,7 @@ namespace Engine {
 		{
 			for (const std::string &name : fixedPlugins)
 			{
-				auto pib = mPlugins.try_emplace(name, name, name);
+				auto pib = mPlugins.try_emplace(name, name);
 				assert(pib.second);
 				auto result = pib.first->second.load();
 				assert(result);
