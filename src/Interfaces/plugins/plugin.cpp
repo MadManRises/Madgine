@@ -136,7 +136,8 @@ namespace Engine
 			path = buffer;
 #elif __linux__
 			Dl_info info;
-			assert(dladdr(getSymbol("binaryInfo"), &info));
+			auto result = dladdr(getSymbol("binaryInfo"), &info);
+			assert(result);
 			path = info.dli_fname;
 #endif
 			return path;
