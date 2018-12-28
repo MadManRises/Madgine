@@ -34,6 +34,8 @@ if (STATIC_BUILD)
 
 	function(add_executable name)
 		_add_executable(${name} ${ARGN})
+
+		generate_binary_info(${name})
 		
 		get_static_config_file(components_source components ".cpp")
 		target_sources(${name} PRIVATE ${components_source})
@@ -62,20 +64,6 @@ macro(add_plugin name base type)
 		export_to_workspace(${name})
 
 		cpack_add_component(${name} GROUP ${type})
-
-		if (NOT MSVC)
-			foreach (prop LINK_FLAGS LINK_FLAGS_DEBUG LINK_FLAGS_RELEASE LINK_FLAGS_RELWITHDEBINFO)
-				get_target_property(flags ${name} ${prop})
-				if(NOT flags)
-					set(flags "")
-				else()
-					set(flags "${flags} ") # A space to cleanly separate from existing content
-				endif()
-				# Append our values
-				set(flags "${flags}-rdynamic" )
-				set_target_properties(${name} PROPERTIES ${prop} ${flags} )
-			endforeach()
-		endif()
 
 	else()
 
