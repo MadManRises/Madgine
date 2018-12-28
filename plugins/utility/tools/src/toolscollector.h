@@ -17,7 +17,7 @@ namespace Engine
 
 
 #ifndef STATIC_BUILD
-	template struct MADGINE_TOOLS_EXPORT UniqueComponentCollector<Tools::ToolBase, Tools::ImGuiRoot&>::Registry;
+	template struct MADGINE_TOOLS_EXPORT UniqueComponentRegistry<Tools::ToolBase, Tools::ImGuiRoot&>;
 #endif
 
 

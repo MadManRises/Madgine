@@ -17,7 +17,7 @@ namespace Engine
 	}
 
 #ifndef STATIC_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Input::InputHandler, Window::Window*>;
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentRegistry<Input::InputHandler, Window::Window*>;
 #endif
 
 }

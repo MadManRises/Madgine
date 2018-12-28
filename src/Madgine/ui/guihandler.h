@@ -59,8 +59,8 @@ namespace Engine
 		using GuiHandlerContainer = UniqueComponentContainer<GuiHandlerBase, UIManager &>;
 	} // namespace GuiHandler
 
-#ifndef PLUGIN_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GuiHandlerBase, UI::UIManager &>;
+#ifndef STATIC_BUILD
+	template struct MADGINE_CLIENT_EXPORT UniqueComponentRegistry<UI::GuiHandlerBase, UI::UIManager &>;
 #endif
 
 } // namespace Cegui
