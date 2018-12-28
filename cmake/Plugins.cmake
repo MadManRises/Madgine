@@ -63,17 +63,19 @@ macro(add_plugin name base type)
 
 		cpack_add_component(${name} GROUP ${type})
 
-		#if (NOT MSVC)
-		#	get_target_property(flags ${name} LINK_FLAGS)
-		#	if(NOT flags)
-		#		set(flags "")
-		#	else()
-		#		set(flags "${flags} ") # A space to cleanly separate from existing content
-		#	endif()
-		#	# Append our values
-		#	set(flags "${flags}-rdynamic" )
-		#	set_target_properties(${name} PROPERTIES LINK_FLAGS ${flags} )
-		#endif()
+		if (NOT MSVC)
+			foreach (prop LINK_FLAGS LINK_FLAGS_DEBUG LINK_FLAGS_RELEASE LINK_FLAGS_RELWITHDEBINFO)
+				get_target_property(flags ${name} ${prop})
+				if(NOT flags)
+					set(flags "")
+				else()
+					set(flags "${flags} ") # A space to cleanly separate from existing content
+				endif()
+				# Append our values
+				set(flags "${flags}-rdynamic" )
+				set_target_properties(${name} PROPERTIES ${prop} ${flags} )
+			endforeach()
+		endif()
 
 	else()
 

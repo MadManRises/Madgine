@@ -22,42 +22,40 @@ namespace Engine
 
 		UniqueComponentCollector()
 		{
-			mInfo.mComponents = reinterpret_cast<std::vector<Collector_F<void, void*>>*>(&mComponents);
 			mInfo.mRegistryInfo = &typeInfo<Registry>();
 			mInfo.mBaseInfo = &typeInfo<Base>();
-			PLUGIN_LOCAL(collectorRegistry)()->mInfos.push_back(&mInfo);
+			mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
+			Registry::sInstance().addCollector(&mInfo);
 		}
 		UniqueComponentCollector(const UniqueComponentCollector&) = delete;
 		~UniqueComponentCollector()
 		{
-			auto &infos = PLUGIN_LOCAL(collectorRegistry)()->mInfos;
-			infos.erase(std::find(infos.begin(), infos.end(), &mInfo));
+			Registry::sInstance().removeCollector(&mInfo);
 		}
 
 		void operator=(const UniqueComponentCollector&) = delete;
 
-		static UniqueComponentCollector<Base, Ty> &sInstance();
+		static UniqueComponentCollector &sInstance();
 
 		size_t size() const {
-			return mComponents.size();
+			return sInstance().mInfo.mComponents.size();
 		}
 
 	private:
-		std::vector<F> mComponents;
 		CollectorInfo mInfo;
 
 		template <class T>
 		static size_t registerComponent()
 		{
 			LOG(Database::message("Registering Component: ", "...")(typeName<T>()));
-			sInstance().mComponents.emplace_back(createComponent<T, Base, Ty>);
+			sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<Collector_F<void, void*>>(&createComponent<T, Base, Ty>));
 			sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
-			return sInstance().mComponents.size() - 1;
+			return sInstance().mInfo.mComponents.size() - 1;
 		}
 
 		static void unregisterComponent(size_t i)
 		{
-			sInstance().mComponents[i] = F();
+			sInstance().mInfo.mComponents[i] = nullptr;
 			sInstance().mInfo.mElementInfos[i] = nullptr;
 		}
 
@@ -99,7 +97,7 @@ namespace Engine
 	template <class _Base, class _Ty>
 	UniqueComponentCollector<_Base, _Ty>& UniqueComponentCollector<_Base, _Ty>::sInstance()
 	{
-		static UniqueComponentCollector<_Base, _Ty> dummy;
+		static UniqueComponentCollector dummy;
 		return dummy;
 	}
 

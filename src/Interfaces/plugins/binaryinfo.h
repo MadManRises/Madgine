@@ -24,7 +24,7 @@ namespace Engine {
 		};
 
 #ifndef STATIC_BUILD
-		extern "C" extern const BinaryInfo PLUGIN_LOCAL(binaryInfo);
+		extern "C" const BinaryInfo PLUGIN_LOCAL(binaryInfo);
 #endif
 
 	}

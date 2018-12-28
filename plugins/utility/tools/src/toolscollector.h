@@ -15,6 +15,13 @@ namespace Engine
 
 	}
 
+
+#ifndef STATIC_BUILD
+	template struct MADGINE_TOOLS_EXPORT UniqueComponentCollector<Tools::ToolBase, Tools::ImGuiRoot&>::Registry;
+#endif
+
+
+
 }
 
 RegisterCollector(Engine::Tools::ToolsCollector);

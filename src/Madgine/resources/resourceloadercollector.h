@@ -16,6 +16,12 @@ namespace Engine
 
 	}
 
+
+#ifndef STATIC_BUILD
+	template struct MADGINE_BASE_EXPORT UniqueComponentCollector<Resources::ResourceLoaderBase, Resources::ResourceManager&>::Registry;
+#endif
+
+
 }
 
 RegisterCollector(Engine::Resources::ResourceLoaderCollector);

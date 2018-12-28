@@ -58,15 +58,19 @@ namespace Engine {
 			collectorData[registry.second->type_info()];			
 		}
 
-		for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
-			for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-				if (p.second.isLoaded()) {
+		for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton())
+		{
+			for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) 
+			{
+				if (p.second.isLoaded()) 
+				{
 					const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));
 					binaries.insert(binInfo);
-					auto f = (CollectorRegistry*(*)())p.second.getSymbol("collectorRegistry");
-					if (f) {
-						for (CollectorInfo *info : f()->mInfos) {
-							if (notInSkip(info->mBaseInfo)) {
+					for (auto &[name, reg] : registryRegistry())
+					{
+						for (CollectorInfo *info : *reg)
+						{
+							if (notInSkip(info->mBaseInfo) && info->mBinary == binInfo) {
 								auto &v = collectorData[info->mRegistryInfo];
 								std::copy_if(info->mElementInfos.begin(), info->mElementInfos.end(), std::back_inserter(v), notInSkip);
 							}

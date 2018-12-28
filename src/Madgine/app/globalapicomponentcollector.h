@@ -14,8 +14,11 @@ namespace Engine
 
 
 		using GlobalAPIContainer = UniqueComponentContainer<GlobalAPIComponentBase, Application&>;
-
 	}
+
+#ifndef STATIC_BUILD
+		template struct MADGINE_BASE_EXPORT UniqueComponentCollector<App::GlobalAPIComponentBase, App::Application&>::Registry;
+#endif
 
 }
 

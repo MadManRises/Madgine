@@ -24,13 +24,10 @@ namespace Engine {
 	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)
 	{
 #ifndef STATIC_BUILD
-		auto f = (CollectorRegistry*(*)())p->getSymbol("collectorRegistry");
+		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
 
-		if (f) {
-			auto &t = registryRegistry();
-			for (CollectorInfo *info : f()->mInfos) {
-				registryRegistry().at(info->mRegistryInfo->mFullName)->addCollector(info);
-			}
+		for (auto &[name, reg] : registryRegistry()) {
+			reg->onPluginLoad(info);
 		}
 #endif
 	}
@@ -38,12 +35,10 @@ namespace Engine {
 	bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin * p)
 	{
 #ifndef STATIC_BUILD
-		auto f = (CollectorRegistry*(*)())p->getSymbol("collectorRegistry");
+		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
 
-		if (f) {
-			for (CollectorInfo *info : f()->mInfos) {
-				registryRegistry().at(info->mRegistryInfo->mFullName)->removeCollector(info);
-			}
+		for (auto &[name, reg] : registryRegistry()) {
+			reg->onPluginUnload(info);
 		}
 #endif
 		return true;
