@@ -18,7 +18,7 @@ namespace Engine
 
 
 #ifndef STATIC_BUILD
-	template struct MADGINE_BASE_EXPORT UniqueComponentRegistry<Resources::ResourceLoaderBase, Resources::ResourceManager&>;
+	MADGINE_BASE_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<Resources::ResourceLoaderBase, Resources::ResourceManager&>;
 #endif
 
 

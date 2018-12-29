@@ -17,7 +17,7 @@ namespace Engine
 	}
 
 #ifndef STATIC_BUILD
-		template struct MADGINE_BASE_EXPORT UniqueComponentRegistry<App::GlobalAPIComponentBase, App::Application&>;
+		MADGINE_BASE_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<App::GlobalAPIComponentBase, App::Application&>;
 #endif
 
 }

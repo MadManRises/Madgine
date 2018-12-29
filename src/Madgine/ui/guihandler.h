@@ -60,7 +60,7 @@ namespace Engine
 	} // namespace GuiHandler
 
 #ifndef STATIC_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentRegistry<UI::GuiHandlerBase, UI::UIManager &>;
+	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<UI::GuiHandlerBase, UI::UIManager &>;
 #endif
 
 } // namespace Cegui

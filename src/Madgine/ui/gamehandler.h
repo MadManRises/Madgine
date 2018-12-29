@@ -88,7 +88,7 @@ namespace Engine
 	} // namespace UI
 
 #ifndef STATIC_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentRegistry<UI::GameHandlerBase, UI::UIManager &>;
+	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<UI::GameHandlerBase, UI::UIManager &>;
 #endif
 
 }
