@@ -25,8 +25,12 @@ namespace Engine {
 
 		};
 
-#if !defined(STATIC_BUILD) && defined(PROJECT_NAME)
-#	define PLUGIN_LOCAL(name) CONCAT2(CONCAT(name, _), PROJECT_NAME)
+#if !defined(STATIC_BUILD)
+#	if defined(PROJECT_NAME)
+#		define PLUGIN_LOCAL(name) CONCAT2(CONCAT(name, _), PROJECT_NAME)
+#	else
+#		define PLUGIN_LOCAL(name) __UNDEFINED__ ## name
+#	endif
 		extern "C" const BinaryInfo PLUGIN_LOCAL(binaryInfo);
 #endif
 
