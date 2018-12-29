@@ -42,7 +42,7 @@ namespace Engine{
 	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 
 	struct MADGINE_BASE_EXPORT ComponentRegistryBase {
-		ComponentRegistryBase(const TypeInfo *ti) : mTi(ti){
+		ComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary) : mTi(ti), mBinary(binary){
 			registryRegistry()[ti->mFullName] = this;
 		}
 
@@ -67,6 +67,8 @@ namespace Engine{
 			return mLoadedCollectors.end();
 		}
 
+		const Plugins::BinaryInfo *mBinary;
+
 	protected:
 		std::vector<CollectorInfo*> mLoadedCollectors;
 
@@ -82,7 +84,7 @@ namespace Engine{
 		typedef Collector_F<Base, Ty> F;
 
 		UniqueComponentRegistry() :
-			ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>()) {}
+			ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>(), &Plugins::PLUGIN_LOCAL(binaryInfo)) {}
 
 		static UniqueComponentRegistry &sInstance();
 		static std::vector<F> &sComponents() {

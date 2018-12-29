@@ -2,8 +2,6 @@
 
 #include "Interfaces/plugins/binaryinfo.h"
 
-#include "Interfaces/macros.h"
-
 /*namespace Engine{
 	namespace Plugins {
 	*/

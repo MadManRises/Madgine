@@ -34,14 +34,11 @@ if (STATIC_BUILD)
 
 	function(add_executable name)
 		_add_executable(${name} ${ARGN})
-
-		generate_binary_info(${name})
 		
 		get_static_config_file(components_source components ".cpp")
 		target_sources(${name} PRIVATE ${components_source})
 
 	endfunction(add_executable)
-
 
 endif ()
 

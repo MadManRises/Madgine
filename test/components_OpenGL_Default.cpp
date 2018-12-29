@@ -1,9 +1,8 @@
 #ifdef BUILD_Base
-#include "Madgine/baselib.h"
 #include "toolslib.h"
-#include "Madgine/clientlib.h"
-#include "OpenGL/opengllib.h"
+#include "Madgine/baselib.h"
 #include "oislib.h"
+#include "OpenGL/opengllib.h"
 #include "Madgine/app/globalapicomponentcollector.h"
 #include "Madgine/scene/scenemanager.h"
 #include "renderer/imguiroot.h"

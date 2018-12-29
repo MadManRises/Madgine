@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "../macros.h"
+
 namespace Engine {
 	namespace Plugins {
 
@@ -23,7 +25,8 @@ namespace Engine {
 
 		};
 
-#ifndef STATIC_BUILD
+#if !defined(STATIC_BUILD) && defined(PROJECT_NAME)
+#	define PLUGIN_LOCAL(name) CONCAT2(CONCAT(name, _), PROJECT_NAME)
 		extern "C" const BinaryInfo PLUGIN_LOCAL(binaryInfo);
 #endif
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "macros.h"
+
 
 #ifdef _WIN32
 #	ifdef __GNUC__
@@ -22,6 +22,3 @@
 #	define DLL_IMPORT __attribute__((weak))
 #endif
 
-#ifndef STATIC_BUILD
-#	define PLUGIN_LOCAL(name) CONCAT2(CONCAT(name, _), PROJECT_NAME)
-#endif

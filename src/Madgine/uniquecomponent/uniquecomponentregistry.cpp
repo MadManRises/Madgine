@@ -4,8 +4,6 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "Interfaces/plugins/pluginmanager.h"
-
 #include "Interfaces/plugins/binaryinfo.h"
 
 #include "Interfaces/util/pathutil.h"
@@ -47,36 +45,17 @@ namespace Engine {
 	}
 
 	void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip) {
-		std::map<const TypeInfo *, std::vector<const TypeInfo*>, CompareTypeInfo> collectorData;
 		std::set<const Plugins::BinaryInfo *> binaries;
 
 		auto notInSkip = [&](const TypeInfo *v) {
 			return std::find_if(skip.begin(), skip.end(), [=](const TypeInfo *v2) {return strcmp(v->mFullName, v2->mFullName) == 0; }) == skip.end();
 		};
 
-		for (const std::pair<const std::string, ComponentRegistryBase*> &registry : registryRegistry()) {
-			collectorData[registry.second->type_info()];			
-		}
+		for (auto &[name, reg] : registryRegistry()) {
+			//binaries.insert(reg.mBinary);
 
-		for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton())
-		{
-			for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) 
-			{
-				if (p.second.isLoaded()) 
-				{
-					const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));
-					binaries.insert(binInfo);
-					for (auto &[name, reg] : registryRegistry())
-					{
-						for (CollectorInfo *info : *reg)
-						{
-							if (notInSkip(info->mBaseInfo) && info->mBinary == binInfo) {
-								auto &v = collectorData[info->mRegistryInfo];
-								std::copy_if(info->mElementInfos.begin(), info->mElementInfos.end(), std::back_inserter(v), notInSkip);
-							}
-						}
-					}
-				}
+			for (CollectorInfo *collector : *reg) {
+				binaries.insert(collector->mBinary);
 			}
 		}
 
@@ -91,15 +70,18 @@ namespace Engine {
 				include(file, bin->mPrecompiledHeaderPath, bin);
 			}
 		}
-	
 
-		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {
-			const Plugins::BinaryInfo *bin = p.first->mBinary;
-			std::experimental::filesystem::path path = PathUtil::make_normalized(p.first->mHeaderPath);
-			include(file, fixInclude(p.first->mHeaderPath, bin), bin);
+
+		for (auto &[name, reg] : registryRegistry()) {
+			const Plugins::BinaryInfo *bin = reg->mBinary;
+			include(file, fixInclude(reg->type_info()->mHeaderPath, bin), bin);
 			
-			for (const TypeInfo *typeInfo : p.second) {
-				include(file, fixInclude(typeInfo->mHeaderPath, typeInfo->mBinary), typeInfo->mBinary);
+			for (CollectorInfo *collector : *reg) {
+				for (const TypeInfo *typeInfo : collector->mElementInfos)
+				{
+					if (notInSkip(typeInfo))
+						include(file, fixInclude(typeInfo->mHeaderPath, collector->mBinary), collector->mBinary);
+				}
 			}
 		}
 
@@ -109,27 +91,36 @@ namespace Engine{
 
 )";
 
-		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {
+		for (auto &[name, reg] : registryRegistry()) {
 			{
 				//GuardGuard g2(file, p.first->mBinary);
-				file << "	template<> std::vector<" << p.first->mFullName << "::F> " << p.first->mFullName << "::sComponents() { return {\n";
+				file << "	template<> std::vector<" << name << "::F> " << name << "::sComponents() { return {\n";
 
-				for (const TypeInfo *typeInfo : p.second) {
-					//GuardGuard g(file, typeInfo->mBinary);
-					file << "		createComponent<" << typeInfo->mFullName << ">,\n";
+				for (CollectorInfo *collector : *reg)
+				{
+					for (const TypeInfo *typeInfo : collector->mElementInfos) {
+						//GuardGuard g(file, typeInfo->mBinary);
+						if (notInSkip(typeInfo))
+							file << "		createComponent<" << typeInfo->mFullName << ">,\n";
+					}
 				}
 
 				file << "\n	}; }\n\n";
 			}
 
 			size_t i = 0;
-			for (const TypeInfo *typeInfo : p.second) {
-				//GuardGuard g(file, typeInfo->mBinary);
-				while (typeInfo) {
-					file << "    template<> size_t component_index<" << typeInfo->mFullName << ">(){ return " << i << "; }\n";
-					typeInfo = typeInfo->mDecayType;
+			for (CollectorInfo *collector : *reg)
+			{
+				for (const TypeInfo *typeInfo : collector->mElementInfos) {
+					if (notInSkip(typeInfo)) {
+						//GuardGuard g(file, typeInfo->mBinary);
+						while (typeInfo) {
+							file << "    template<> size_t component_index<" << typeInfo->mFullName << ">(){ return " << i << "; }\n";
+							typeInfo = typeInfo->mDecayType;
+						}
+						++i;
+					}
 				}
-				++i;
 			}
 
 
