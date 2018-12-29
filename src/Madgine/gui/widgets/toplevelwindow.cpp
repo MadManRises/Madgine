@@ -52,7 +52,7 @@ namespace Engine
 				mExternalInput = settings.mInput;
 			}
 			else {
-				mInputSelector.emplace(mWindow);
+				mInputHandlerSelector.emplace(mWindow);
 			}
 			input()->setListener(this);
 			gui.app(false).addFrameListener(input());
@@ -389,7 +389,7 @@ namespace Engine
 
 		Input::InputHandler* TopLevelWindow::input()
 		{
-			return mExternalInput ? mExternalInput : *mInputSelector;
+			return mExternalInput ? mExternalInput : *mInputHandlerSelector;
 		}
 
 		void TopLevelWindow::addOverlay(WindowOverlay * overlay)

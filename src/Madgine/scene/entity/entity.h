@@ -86,7 +86,7 @@ namespace Engine
 					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 				}
 
-				App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+				App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 				App::Application &app(bool = true);
 

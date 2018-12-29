@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scenecomponent.h"
+#include "scenecomponentcollector.h"
 
 #include "Interfaces/serialize/container/list.h"
 

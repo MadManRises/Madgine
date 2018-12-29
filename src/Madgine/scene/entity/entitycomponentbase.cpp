@@ -55,7 +55,7 @@ namespace Engine
 				return mEntity->getSceneComponent(i, init);
 			}
 
-			App::GlobalAPIComponentBase & EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
+			App::GlobalAPIBase & EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
 			{
 				return mEntity->getGlobalAPIComponent(i, init);
 			}

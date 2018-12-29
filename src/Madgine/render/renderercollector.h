@@ -1,11 +1,12 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
-#include "../uniquecomponent/uniquecomponent.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "rendererbase.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Render, RendererBase, GUI::GUISystem*, Renderer, MADGINE_CLIENT);
+/*
 namespace Engine
 {
 
@@ -34,3 +35,4 @@ namespace Engine
 }
 
 RegisterCollector(Engine::Render::RendererCollector);
+*/

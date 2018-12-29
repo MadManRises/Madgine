@@ -6,7 +6,7 @@
 
 #include "Interfaces/scripting/types/globalscopebase.h"
 
-#include "globalapicomponentcollector.h"
+#include "globalapicollector.h"
 
 #include "../core/framelistener.h"
 
@@ -109,7 +109,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(component_index<T>()));
 			}
 
-			GlobalAPIComponentBase &getGlobalAPIComponent(size_t, bool = true);
+			GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
 
 			template <class T>
 			T &getSceneComponent()
@@ -153,7 +153,7 @@ namespace Engine
 
 		private:
 
-			GlobalAPIContainer mGlobalAPIs;
+			GlobalAPIContainer<std::vector> mGlobalAPIs;
 			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Util::StandardLog> mLog;

@@ -11,10 +11,10 @@ namespace Engine
 {
 	namespace App
 	{
-		class MADGINE_BASE_EXPORT GlobalAPIComponentBase : public Core::MadgineObject, public Scripting::ScopeBase
+		class MADGINE_BASE_EXPORT GlobalAPIBase : public Core::MadgineObject, public Scripting::ScopeBase
 		{
 		public:
-			GlobalAPIComponentBase(App::Application &app);
+			GlobalAPIBase(App::Application &app);
 
 
 			virtual void update();
@@ -27,7 +27,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
 			}
 
-			GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			template <class T>
 			T &getSceneComponent(bool init = true)
@@ -41,7 +41,7 @@ namespace Engine
 
 			Scripting::GlobalScopeBase &globalScope();
 
-			GlobalAPIComponentBase &getSelf(bool = true);
+			GlobalAPIBase &getSelf(bool = true);
 
 			App::Application &app(bool = true);
 
@@ -71,4 +71,4 @@ namespace Engine
 	}
 }
 
-RegisterType(Engine::App::GlobalAPIComponentBase);
+RegisterType(Engine::App::GlobalAPIBase);

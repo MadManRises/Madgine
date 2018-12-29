@@ -170,7 +170,7 @@ namespace Engine
 				return mSceneManager.getComponent(i, init);
 			}
 
-			App::GlobalAPIComponentBase & Entity::getGlobalAPIComponent(size_t i, bool init)
+			App::GlobalAPIBase & Entity::getGlobalAPIComponent(size_t i, bool init)
 			{
 				return mSceneManager.getGlobalAPIComponent(i, init);
 			}

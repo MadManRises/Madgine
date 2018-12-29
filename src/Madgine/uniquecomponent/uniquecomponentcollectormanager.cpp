@@ -1,5 +1,7 @@
 #include "../baselib.h"
 
+#ifndef STATIC_BUILD
+
 #include "uniquecomponentcollectormanager.h"
 
 #include "uniquecomponentcollector.h"
@@ -23,25 +25,24 @@ namespace Engine {
 
 	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)
 	{
-#ifndef STATIC_BUILD
+
 		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
 
 		for (auto &[name, reg] : registryRegistry()) {
 			reg->onPluginLoad(info);
 		}
-#endif
 	}
 
 	bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin * p)
 	{
-#ifndef STATIC_BUILD
 		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
 
 		for (auto &[name, reg] : registryRegistry()) {
 			reg->onPluginUnload(info);
 		}
-#endif
 		return true;
 	}
 
 }
+
+#endif

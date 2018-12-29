@@ -32,7 +32,7 @@ namespace Engine
 	{
 		struct AppSettings;
 		class Application;			
-		class GlobalAPIComponentBase;
+		class GlobalAPIBase;
 	}
 
 	namespace Core

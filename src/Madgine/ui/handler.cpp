@@ -38,7 +38,7 @@ namespace Engine
 			return mUI.sceneMgr(init);
 		}
 
-		App::GlobalAPIComponentBase& Handler::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIBase& Handler::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

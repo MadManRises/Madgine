@@ -10,7 +10,7 @@ namespace Engine
 	namespace Input
 	{
 		class MADGINE_OIS_EXPORT OISInputHandler : public OIS::KeyListener, public OIS::MouseListener,
-			public UniqueComponent<OISInputHandler, InputCollector>
+			public InputHandlerComponent<OISInputHandler>
 		{
 		public:
 			OISInputHandler(Window::Window *window);

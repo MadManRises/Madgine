@@ -6,7 +6,7 @@
 
 
 
-#include "globalapicomponentbase.h"
+#include "globalapibase.h"
 
 #include "Interfaces/util/standardlog.h"
 
@@ -67,7 +67,7 @@ namespace Engine
 			if (!mLoop->callInit())
 				return false;
 
-			for (const std::unique_ptr<GlobalAPIComponentBase>& api : mGlobalAPIs)
+			for (const std::unique_ptr<GlobalAPIBase>& api : mGlobalAPIs)
 			{
 				if (!api->callInit(mGlobalAPIInitCounter))
 					return false;
@@ -79,7 +79,7 @@ namespace Engine
 		void Application::finalize()
 		{
 			for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
-				for (const std::unique_ptr<GlobalAPIComponentBase>& api : mGlobalAPIs)
+				for (const std::unique_ptr<GlobalAPIBase>& api : mGlobalAPIs)
 				{
 					api->callFinalize(mGlobalAPIInitCounter);
 				}
@@ -158,7 +158,7 @@ namespace Engine
 			PROFILE();
 			try
 			{
-				for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
+				for (const std::unique_ptr<GlobalAPIBase>& p : mGlobalAPIs)
 				{
 					p->update();
 				}
@@ -190,9 +190,9 @@ namespace Engine
 			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
 		}
 
-		GlobalAPIComponentBase& Application::getGlobalAPIComponent(size_t i, bool init)
+		GlobalAPIBase& Application::getGlobalAPIComponent(size_t i, bool init)
 		{
-            GlobalAPIComponentBase &api = mGlobalAPIs.get(i); 
+			GlobalAPIBase &api = mGlobalAPIs.get(i);
             if (init){
                 checkInitState();
                 api.callInit(mGlobalAPIInitCounter);
@@ -230,7 +230,7 @@ namespace Engine
 
 		void Application::clear()
 		{
-			for (const std::unique_ptr<GlobalAPIComponentBase>& p : mGlobalAPIs)
+			for (const std::unique_ptr<GlobalAPIBase>& p : mGlobalAPIs)
 			{
 				//p->clear();
 			}

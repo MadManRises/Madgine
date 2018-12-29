@@ -261,7 +261,7 @@ namespace Engine
 			return mGUI.getSceneComponent(i, init);
 		}
 
-		App::GlobalAPIComponentBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

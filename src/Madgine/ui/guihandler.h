@@ -2,8 +2,7 @@
 
 #include "handler.h"
 #include "../gui/widgetnames.h"
-#include "../uniquecomponent/uniquecomponent.h"
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "Interfaces/scripting/types/scope.h"
 
@@ -50,21 +49,22 @@ namespace Engine
 
 			Scene::ContextMask mContext;
 		};
-
+		/*
 		using GuiHandlerCollector = UniqueComponentCollector<GuiHandlerBase, UIManager &>;
 		template <class T>
 		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
 
 
-		using GuiHandlerContainer = UniqueComponentContainer<GuiHandlerBase, UIManager &>;
+		using GuiHandlerContainer = UniqueComponentContainer<GuiHandlerBase, UIManager &>;*/
 	} // namespace GuiHandler
-
+/*
 #ifndef STATIC_BUILD
 	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<UI::GuiHandlerBase, UI::UIManager &>;
 #endif
-
+*/
 } // namespace Cegui
 
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
 
 RegisterType(Engine::UI::GuiHandlerBase);
-RegisterCollector(Engine::UI::GuiHandlerCollector);
+//RegisterCollector(Engine::UI::GuiHandlerCollector);

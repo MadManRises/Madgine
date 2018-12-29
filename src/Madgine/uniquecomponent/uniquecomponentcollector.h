@@ -118,4 +118,4 @@ namespace Engine {
 
 #endif
 
-#define RegisterCollector(collector) RegisterType(collector::Registry)
+//#define RegisterCollector(collector) RegisterType(collector::Registry)

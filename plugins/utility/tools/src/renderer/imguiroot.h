@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Madgine/app/globalapicomponent.h"
+#include "Madgine/app/globalapicollector.h"
 #include "Madgine/core/framelistener.h"
 
 #include "../toolscollector.h"
-
-#include "Madgine/uniquecomponent/uniquecomponentcontainer.h"
 
 #include "Interfaces/plugins/pluginlistener.h"
 
@@ -14,7 +12,7 @@ namespace Engine
 	namespace Tools
 	{
 		
-		class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPIComponent<ImGuiRoot>, public Core::FrameListener, public Plugins::PluginListener
+		class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPI<ImGuiRoot>, public Core::FrameListener, public Plugins::PluginListener
 		{
 		public:
 			ImGuiRoot(App::Application &app);
@@ -36,7 +34,7 @@ namespace Engine
 		private:
 			std::unique_ptr<ImGuiManager> mManager;
 
-			ToolsContainer mCollector;
+			ToolsContainer<std::vector> mCollector;
 
 		};
 

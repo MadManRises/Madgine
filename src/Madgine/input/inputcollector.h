@@ -1,10 +1,13 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "inputhandler.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Input, InputHandler, Window::Window*, InputHandler, MADGINE_CLIENT);
+
+/*
 namespace Engine
 {
 
@@ -22,4 +25,4 @@ namespace Engine
 
 }
 
-RegisterCollector(Engine::Input::InputCollector);
+RegisterCollector(Engine::Input::InputCollector);*/

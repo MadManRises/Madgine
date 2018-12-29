@@ -47,7 +47,7 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
@@ -67,8 +67,8 @@ namespace Engine
 		private:
 			GUI::GUISystem &mGUI;
 			
-			GuiHandlerContainer mGuiHandlers;
-			GameHandlerContainer mGameHandlers;
+			GuiHandlerContainer<std::vector> mGuiHandlers;
+			GameHandlerContainer<std::vector> mGameHandlers;
 
 			GuiHandlerBase* mCurrentRoot;			
 

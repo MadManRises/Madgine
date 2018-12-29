@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Madgine/render/renderer.h"
+#include "Madgine/render/renderercollector.h"
 
 namespace Engine {
 	namespace Render {
 
-		class OpenGLRenderer : public Renderer<OpenGLRenderer>
+		class OpenGLRenderer : public RendererComponent<OpenGLRenderer>
 		{
 
 		public:

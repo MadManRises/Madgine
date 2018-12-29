@@ -1,9 +1,12 @@
 #pragma once
 
-#include "Madgine/uniquecomponent/uniquecomponentcollector.h"
+#include "Madgine/uniquecomponent/uniquecomponentdefine.h"
 
 #include "toolbase.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Tools, ToolBase, ImGuiRoot&, Tools, MADGINE_TOOLS);
+
+/*
 namespace Engine
 {
 	namespace Tools
@@ -25,3 +28,4 @@ namespace Engine
 }
 
 RegisterCollector(Engine::Tools::ToolsCollector);
+*/

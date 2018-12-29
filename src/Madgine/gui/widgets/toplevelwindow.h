@@ -106,7 +106,7 @@ namespace Engine
 			GUISystem &mGui;
 
 			Input::InputHandler *mExternalInput = nullptr;
-			std::optional<Input::InputSelector> mInputSelector;
+			std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
 			std::vector<WindowOverlay*> mOverlays;
 

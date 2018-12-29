@@ -1,10 +1,13 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "scenecomponentbase.h"
+#include "Interfaces/serialize/serializableunit.h"
+#include "Interfaces/scripting/types/scope.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Scene, SceneComponentBase, SceneManager&, SceneComponent, MADGINE_BASE);
 
 namespace Engine
 {
@@ -12,18 +15,16 @@ namespace Engine
 	{
 
 		template <class T>
-		class SceneComponentSet;
+		using SceneComponent = Serialize::SerializableUnit <
+			T, Scripting::Scope<T, SceneComponentComponent<T>>>;
 
-		using SceneComponentCollector = UniqueComponentCollector<SceneComponentBase, SceneManager&>;
+		template <class T>
+		using VirtualSceneComponentBase = Serialize::SerializableUnit<T, Scripting::Scope<T, SceneComponentVirtualBase<T>>>;
 
-		using SceneComponentContainer = UniqueComponentContainer<SceneComponentBase, SceneManager&, SceneComponentSet>;
+		template <class T, class Base>
+		using VirtualSceneComponentImpl = Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>;
+
+#define VIRTUALSCENECOMPONENTBASE(T) template <> TEMPLATE_INSTANCE constexpr size_t &Engine::Scene::VirtualSceneComponentBase<T>::sIndex(){static size_t index = -1; return index;};
 
 	}
-
-#ifndef STATIC_BUILD
-	MADGINE_BASE_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<Scene::SceneComponentBase, Scene::SceneManager&>;
-#endif
-
 }
-
-RegisterCollector(Engine::Scene::SceneComponentCollector);

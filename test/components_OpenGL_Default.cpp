@@ -3,12 +3,12 @@
 #include "Madgine/baselib.h"
 #include "oislib.h"
 #include "OpenGL/opengllib.h"
-#include "Madgine/app/globalapicomponentcollector.h"
+#include "Madgine/app/globalapicollector.h"
 #include "Madgine/scene/scenemanager.h"
 #include "renderer/imguiroot.h"
 #include "Madgine/input/inputcollector.h"
 #include "oisinputhandler.h"
-#include "Madgine/render/renderer.h"
+#include "Madgine/render/renderercollector.h"
 #include "OpenGL/openglrenderer.h"
 #include "Madgine/resources/resourceloadercollector.h"
 #include "Madgine/resources/scripts/scriptloader.h"
@@ -38,7 +38,7 @@ createComponent<Engine::Tools::ImGuiRoot>,
 	template<> size_t component_index<Engine::Scene::SceneManager>() { return 0; }
 	template<> size_t component_index<Engine::Tools::ImGuiRoot>() { return 1; }
 
-	template<> std::vector<Engine::Input::InputCollector::Registry::F> Engine::Input::InputCollector::Registry::sComponents() {
+	template<> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() {
 		return {
 createComponent<Engine::Input::OISInputHandler>,
 
