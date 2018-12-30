@@ -2,6 +2,7 @@
 
 #include "runtime.h"
 #include "../generic/templates.h"
+#include "stringutil.h"
 
 #if _WIN32
 #	define NOMINMAX 1
@@ -31,9 +32,16 @@ namespace Engine {
 
 #if __linux__
 	static int VisitModule(struct dl_phdr_info *info, size_t size, void *data) {
-		std::set<std::string> *modules = static_cast<std::set<std::string> *>(data);
-
-		modules->insert(info->dlpi_name);
+		std::experimental::filesystem::path file = std::experimental::filesystem::path(info->dlpi_name).filename();
+		if (file.extension().generic_string() == SHARED_LIB_SUFFIX)
+		{
+			std::string name = file.stem().generic_string();
+			if (StringUtil::startsWith(name, SHARED_LIB_PREFIX)) 
+			{
+				std::set<std::string> *modules = static_cast<std::set<std::string> *>(data);
+				modules->insert(name.substr(strlen(SHARED_LIB_PREFIX)));
+			}
+		}
 		return 0;
 	}
 #endif

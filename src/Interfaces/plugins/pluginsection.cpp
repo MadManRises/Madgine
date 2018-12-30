@@ -35,7 +35,6 @@ namespace Engine {
 				if (is_regular_file(p)) {
 					std::experimental::filesystem::path path = p.path();
 					std::string extension = path.extension().generic_string();
-					std::string e = SHARED_LIB_SUFFIX;
 					if (extension == SHARED_LIB_SUFFIX) {
 						std::string filename = path.stem().generic_string();
 						const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + mMgr.project() + "_" + mName + "_";

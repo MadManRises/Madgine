@@ -12,10 +12,14 @@ namespace Engine {
 
 		DLL_EXPORT Display *sDisplay;
 
+		static Atom WM_DELETE_WINDOW;
+
 		static struct DisplayGuard {
 			DisplayGuard() 
 			{
 				sDisplay = XOpenDisplay(NULL);
+				if (sDisplay)
+					WM_DELETE_WINDOW = XInternAtom(sDisplay, "WM_DELETE_WINDOW", False);
 			}
 				
 
@@ -53,8 +57,16 @@ namespace Engine {
 					}
 					break;
 				}
+				case ClientMessage:
+				{
+					const XClientMessageEvent &xcme = e.xclient;
+					if (xcme.data.l[0] == WM_DELETE_WINDOW)
+					{
+						onClose();
+					}
+					break;
+				}
 				case DestroyNotify:
-					onClose(); //?
 					return false;
 				default:
 					LOG(Database::message("Unknown message type: ", "")(e.type));
@@ -134,6 +146,9 @@ namespace Engine {
 			XSelectInput(sDisplay, handle, StructureNotifyMask);
 
 			XMapWindow(sDisplay, handle);			
+
+			
+			XSetWMProtocols(sDisplay, handle, &WM_DELETE_WINDOW, 1);
 
 			XEvent event;
 			do

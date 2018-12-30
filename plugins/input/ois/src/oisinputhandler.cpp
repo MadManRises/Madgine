@@ -26,6 +26,9 @@ namespace Engine
 			pl.insert(std::make_pair("w32_mouse"s, "DISCL_NONEXCLUSIVE"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_FOREGROUND"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_NONEXCLUSIVE"s));
+#elif __linux__
+			pl.insert(std::make_pair("x11_mouse_grab"s, "false"s));
+			pl.insert(std::make_pair("x11_mouse_hide"s, "false"s));
 #endif
 
 			mInputManager = OIS::InputManager::createInputSystem(pl);
