@@ -29,6 +29,7 @@ namespace Engine {
 		return std::experimental::filesystem::path(buffer).parent_path();
 	}
 
+#ifndef STATIC_BUILD
 
 #if __linux__
 	static int VisitModule(struct dl_phdr_info *info, size_t size, void *data) {
@@ -74,5 +75,7 @@ namespace Engine {
 
 		return result;
 	}
+
+#endif
 
 }
