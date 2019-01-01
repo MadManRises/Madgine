@@ -8,6 +8,10 @@ else()
 	build_apk(MadgineLauncher)
 endif()
 
-target_link_plugins(MadgineLauncher PRIVATE Client Tools OISHandler OpenGL)
+target_link_plugins(MadgineLauncher PRIVATE Client Tools OpenGL)
+
+if (NOT CMAKE_ANDROID_ARCH_ABI)
+	target_link_plugins(MadgineLauncher PRIVATE OISHandler)
+endif()
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)
