@@ -1,7 +1,7 @@
 
 
  def axisList = [
-    ["clang-linux",],           //toolchain
+    ["clang-linux","clang-android"],           //toolchain
     ["Release","Debug","RelWithDebInfo"],      //configuration
     ["", "OpenGL_Default"]                   //static configuration file
 ]   
