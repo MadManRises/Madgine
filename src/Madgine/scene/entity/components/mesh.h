@@ -44,4 +44,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::Entity::Mesh);
+RegisterType(Engine::Scene::Entity::Mesh);

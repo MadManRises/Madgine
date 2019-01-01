@@ -10,7 +10,7 @@ namespace Engine
 	namespace Input
 	{
 		class MADGINE_OIS_EXPORT OISInputHandler : public OIS::KeyListener, public OIS::MouseListener,
-			public UniqueComponent<OISInputHandler, InputCollector>, public Window::WindowEventListener
+			public InputHandlerComponent<OISInputHandler>
 		{
 		public:
 			OISInputHandler(Window::Window *window);
@@ -30,7 +30,7 @@ namespace Engine
 
 			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
-			void onResize(size_t width, size_t height);
+			void onResize(size_t width, size_t height) override;
 
 			float mMouseScale;
 
@@ -46,4 +46,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Input::OISInputHandler);
+RegisterType(Engine::Input::OISInputHandler);

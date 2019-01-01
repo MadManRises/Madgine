@@ -29,35 +29,20 @@ namespace Engine{
 	
 
 	struct CollectorInfo {
-		const std::vector<Collector_F<void, void*>> *mComponents;
+		std::vector<Collector_F<void, void*>> mComponents;
 		const TypeInfo *mRegistryInfo;
 		const TypeInfo *mBaseInfo;
+		const Plugins::BinaryInfo *mBinary;
 		std::vector<const TypeInfo*> mElementInfos;
 		size_t mBaseIndex = 0;
 	};
 
-	struct CollectorRegistry {
-		std::vector<CollectorInfo*> mInfos;
-	};
-
 	MADGINE_BASE_EXPORT void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip = {});
-	   
-	extern "C"
-#ifdef PLUGIN_BUILD
-		DLL_EXPORT
-#else
-		MADGINE_BASE_EXPORT
-#endif
-		inline CollectorRegistry *PLUGIN_LOCAL(collectorRegistry)()
-	{
-		static CollectorRegistry dummy;
-		return &dummy;
-	}
 		
 	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 
 	struct MADGINE_BASE_EXPORT ComponentRegistryBase {
-		ComponentRegistryBase(const TypeInfo *ti) : mTi(ti){
+		ComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary) : mTi(ti), mBinary(binary){
 			registryRegistry()[ti->mFullName] = this;
 		}
 
@@ -65,16 +50,30 @@ namespace Engine{
 			registryRegistry().erase(mTi->mFullName);
 		}
 
-		virtual void addCollector(CollectorInfo *info) = 0;
-		virtual void removeCollector(CollectorInfo *info) = 0;
+		virtual void onPluginLoad(const Plugins::BinaryInfo *) = 0;
+		virtual void onPluginUnload(const Plugins::BinaryInfo *) = 0;
 
 		const TypeInfo *type_info() {
 			return mTi;
 		}
 
+		std::vector<CollectorInfo*>::iterator begin()
+		{
+			return mLoadedCollectors.begin();
+		}
+
+		std::vector<CollectorInfo*>::iterator end()	
+		{
+			return mLoadedCollectors.end();
+		}
+
+		const Plugins::BinaryInfo *mBinary;
+
+	protected:
+		std::vector<CollectorInfo*> mLoadedCollectors;
+
 	private:
 		const TypeInfo *mTi;
-		const Plugins::BinaryInfo *mBi;
 	};
 
 	template <class _Base, class _Ty>
@@ -85,51 +84,87 @@ namespace Engine{
 		typedef Collector_F<Base, Ty> F;
 
 		UniqueComponentRegistry() :
-			ComponentRegistryBase(&ClassInfo<UniqueComponentRegistry>()) {}
+			ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>(), &Plugins::PLUGIN_LOCAL(binaryInfo)) {}
 
-		static UniqueComponentRegistry sInstance;
+		static UniqueComponentRegistry &sInstance();
 		static std::vector<F> &sComponents() {
-			return sInstance.mComponents;
+			return sInstance().mComponents;
 		}
 
-		void addCollector(CollectorInfo *info) override {
-			info->mBaseIndex = mComponents.size();
-			const std::vector<F> &comps = reinterpret_cast<const std::vector<F>&>(*info->mComponents);
-			for (F f : comps) {
-				mComponents.push_back(f);
-			}
-			mCollectors.push_back(info);
-			mUpdate.emit(info, true, comps);			
+		void addCollector(CollectorInfo *info) {
+			mUnloadedCollectors.push_back(info);
 		}
 
-		void removeCollector(CollectorInfo *info) override {
-			mComponents.erase(mComponents.begin() + info->mBaseIndex, mComponents.begin() + info->mBaseIndex + info->mComponents->size());
-
-			mCollectors.erase(std::remove(mCollectors.begin(), mCollectors.end(), info), mCollectors.end());
-
-			for (CollectorInfo *i : mCollectors) {
-				if (i->mBaseIndex >= info->mBaseIndex)
-					i->mBaseIndex -= info->mComponents->size();
+		void onPluginLoad(const Plugins::BinaryInfo *bin){
+			for (auto it = mUnloadedCollectors.begin(); it != mUnloadedCollectors.end();)
+			{
+				CollectorInfo *info = *it;
+				if (info->mBinary == bin)
+				{
+					mLoadedCollectors.push_back(info);
+					info->mBaseIndex = mComponents.size();
+					const std::vector<F> &comps = reinterpret_cast<const std::vector<F>&>(info->mComponents);
+					for (F f : comps) {
+						mComponents.push_back(f);
+					}
+					mUpdate.emit(info, true, comps);
+					it = mUnloadedCollectors.erase(it);
+				}
+				else
+				{
+					++it;
+				}
 			}
+		}
 
-			std::vector<F> clearV{};
-			mUpdate.emit(info, false, clearV);
-			info->mBaseIndex = -1;
+		void removeCollector(CollectorInfo *info) {
+			//assert(std::find(mLoadedCollectors.begin(), mLoadedCollectors.end(), info) == mLoadedCollectors.end());
+			mUnloadedCollectors.erase(std::remove(mUnloadedCollectors.begin(), mUnloadedCollectors.end(), info), mUnloadedCollectors.end());
+		}
+
+		void onPluginUnload(const Plugins::BinaryInfo *bin) {
+			for (auto it = mLoadedCollectors.begin(); it != mLoadedCollectors.end();)
+			{
+				CollectorInfo *info = *it;
+				if (info->mBinary == bin)
+				{
+					mUnloadedCollectors.push_back(info);
+					mComponents.erase(mComponents.begin() + info->mBaseIndex, mComponents.begin() + info->mBaseIndex + info->mComponents.size());
+
+					for (CollectorInfo *i : mLoadedCollectors) {
+						if (i->mBaseIndex >= info->mBaseIndex)
+							i->mBaseIndex -= info->mComponents.size();
+					}
+					info->mBaseIndex = -1;
+
+					std::vector<F> clearV{};
+					mUpdate.emit(info, false, clearV);
+					it = mLoadedCollectors.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}			
 		}
 
 		static SignalSlot::SignalStub<CollectorInfo*, bool, const std::vector<F>&> &update() {
-			return sInstance.mUpdate;
+			return sInstance().mUpdate;
 		}
 
 	private:
 		std::vector<F> mComponents;
 		SignalSlot::Signal<CollectorInfo*, bool, const std::vector<F>&> mUpdate;
-		std::vector<CollectorInfo*> mCollectors;
+
+		std::vector<CollectorInfo*> mUnloadedCollectors;
 	};
 
 
 	template <class _Base, class _Ty>
-	inline DLL_EXPORT UniqueComponentRegistry<_Base, _Ty> UniqueComponentRegistry<_Base, _Ty>::sInstance{};
+	inline DLL_EXPORT UniqueComponentRegistry<_Base, _Ty> &UniqueComponentRegistry<_Base, _Ty>::sInstance() {
+		static UniqueComponentRegistry dummy;
+		return dummy;
+	}
 
 }
 

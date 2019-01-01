@@ -1,9 +1,8 @@
 #pragma once
 
 #include "handler.h"
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 #include "../scene/contextmasks.h"
-#include "../uniquecomponent/uniquecomponent.h"
 
 #include "Interfaces/scripting/types/scope.h"
 
@@ -78,21 +77,22 @@ namespace Engine
 		};
 
 
-		using GameHandlerCollector = UniqueComponentCollector<GameHandlerBase, UIManager &>;
+		/*using GameHandlerCollector = UniqueComponentCollector<GameHandlerBase, UIManager &>;
 
 		template <class T>
 		using GameHandler = Scripting::Scope<T, UniqueComponent<T, GameHandlerCollector>>;
 
-		using GameHandlerContainer = UniqueComponentContainer<GameHandlerBase, UIManager &>;
+		using GameHandlerContainer = UniqueComponentContainer<GameHandlerBase, UIManager &>;*/
 
 	} // namespace UI
-
-#ifndef PLUGIN_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<UI::GameHandlerBase, UI::UIManager &>;
+	/*
+#ifndef STATIC_BUILD
+	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<UI::GameHandlerBase, UI::UIManager &>;
 #endif
-
+*/
 }
 
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandlerBase, UIManager&, GameHandler, MADGINE_CLIENT);
 
-RegisterClass(Engine::UI::GameHandlerBase);
-RegisterCollector(Engine::UI::GameHandlerCollector);
+RegisterType(Engine::UI::GameHandlerBase);
+//RegisterCollector(Engine::UI::GameHandlerCollector);

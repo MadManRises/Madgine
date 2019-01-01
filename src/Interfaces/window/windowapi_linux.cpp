@@ -12,65 +12,74 @@ namespace Engine {
 
 		DLL_EXPORT Display *sDisplay;
 
+		static Atom WM_DELETE_WINDOW;
+
 		static struct DisplayGuard {
 			DisplayGuard() 
 			{
 				sDisplay = XOpenDisplay(NULL);
+				if (sDisplay)
+					WM_DELETE_WINDOW = XInternAtom(sDisplay, "WM_DELETE_WINDOW", False);
 			}
 				
 
 			~DisplayGuard()
 			{
-				XCloseDisplay(sDisplay);
+				if (sDisplay)
+					XCloseDisplay(sDisplay);
 			}			
 		} sDisplayGuard;
 		
 		struct LinuxWindow : Window {
-			LinuxWindow(::Window hwnd) :
-				Window(hwnd)
+			LinuxWindow(::Window hwnd, size_t width, size_t height) :
+				Window(hwnd),
+				mWidth(width),
+				mHeight(height)
 			{
 			}
 
-/*			bool handle(UINT msg, WPARAM wParam, LPARAM lParam) {
-				switch (msg)
+			bool handle(const XEvent &e) {
+				switch (e.type)
 				{
-				case WM_SIZE:
-					onResize(LOWORD(lParam), HIWORD(lParam));
-					break;
-				case WM_CLOSE:
-					onClose();
-					break;
-				case WM_DESTROY:
+				case ConfigureNotify:
+				{
+					const XConfigureEvent &xce = e.xconfigure;
 
-					return false;
-					break;
-				case WM_PAINT:
-					onRepaint();
+					/* This event type is generated for a variety of
+					   happenings, so check whether the window has been
+					   resized. */
+
+					if (xce.width != mWidth ||
+						xce.height != mHeight) {
+						mWidth = xce.width;
+						mHeight = xce.height;
+						onResize(mWidth, mHeight);
+					}
 					break;
 				}
+				case ClientMessage:
+				{
+					const XClientMessageEvent &xcme = e.xclient;
+					if (xcme.data.l[0] == WM_DELETE_WINDOW)
+					{
+						onClose();
+					}
+					break;
+				}
+				case DestroyNotify:
+					return false;
+				default:
+					LOG(Database::message("Unknown message type: ", "")(e.type));
+				}
 				return true;
-			}*/
-
-			struct Geometry {
-				::Window mRoot;
-				int mX, mY;
-				unsigned int mWidth, mHeight;
-				unsigned int mBorderWidth;
-				unsigned int mDepth;
-			};
-			Geometry getGeometry() {
-				Geometry g;
-				assert(XGetGeometry(sDisplay, mHandle, &g.mRoot, &g.mX, &g.mY, &g.mWidth, &g.mHeight, &g.mBorderWidth, &g.mDepth));
-				return g;
-			}
+			}			
 
 			virtual size_t width() override {
-				return getGeometry().mWidth;
+				return mWidth;
 			}
 
-
 			virtual size_t height() override {
-				return getGeometry().mHeight;
+				return mHeight;
 			}
 
 			virtual size_t renderWidth() override {
@@ -94,10 +103,16 @@ namespace Engine {
 				XDestroyWindow(sDisplay, mHandle);
 			}
 
+			using Window::onResize;
+			using Window::onClose;
+			using Window::onRepaint;
+
+		private:
+			int mWidth;
+			int mHeight;
 		};
 
 		static std::unordered_map<::Window, LinuxWindow> sWindows;
-
 
 
 		Window *sCreateWindow(const WindowSettings &settings) {
@@ -132,24 +147,32 @@ namespace Engine {
 
 			XMapWindow(sDisplay, handle);			
 
+			
+			XSetWMProtocols(sDisplay, handle, &WM_DELETE_WINDOW, 1);
+
 			XEvent event;
 			do
 			{
-				XNextEvent(sDisplay, &event);
+				XWindowEvent(sDisplay, handle, StructureNotifyMask, &event);
 			} while (event.type != MapNotify);
 
-			auto pib = sWindows.try_emplace(handle, handle);
+			auto pib = sWindows.try_emplace(handle, handle, settings.mWidth, settings.mHeight);
 			assert(pib.second);
 
 			return &pib.first->second;
 		}
 
 		void sUpdate() {
-			
-			/*while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+			XEvent event;
+			while (XPending(sDisplay))
 			{
-				
-			}*/
+				XNextEvent(sDisplay, &event);
+				auto it = sWindows.find(event.xany.window);
+				if (it != sWindows.end()) {
+					if (!it->second.handle(event))
+						sWindows.erase(it);
+				}
+			}
 		}
 
 	}

@@ -4,7 +4,7 @@
 #include "../scene/scenecomponentbase.h"
 #include "../core/madgineobject.h"
 #include "../uniquecomponent/uniquecomponentselector.h"
-#include "../render/renderer.h"
+#include "../render/renderercollector.h"
 #include "../core/framelistener.h"
 
 namespace Engine
@@ -27,7 +27,7 @@ namespace Engine
 
 			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			Scene::SceneManager &sceneMgr(bool = true);
 			UI::UIManager &ui(bool = true);
@@ -73,4 +73,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::GUI::GUISystem);
+RegisterType(Engine::GUI::GUISystem);

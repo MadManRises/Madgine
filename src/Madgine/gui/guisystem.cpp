@@ -172,7 +172,7 @@ namespace Engine
 			return mApp.getSceneComponent(i, init);
 		}
 
-		App::GlobalAPIComponentBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

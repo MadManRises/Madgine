@@ -12,9 +12,7 @@
 
 #include "Interfaces/serialize/container/noparent.h"
 #include "../core/framelistener.h"
-#include "../app/globalapicomponent.h"
-
-#include "../uniquecomponent/uniquecomponentcontainer.h"
+#include "../app/globalapicollector.h"
 
 #include "scenecomponentset.h"
 
@@ -23,7 +21,7 @@ namespace Engine
 	namespace Scene
 	{
 		class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-			public Scripting::Scope<SceneManager, UniqueComponent<Serialize::NoParentUnit<SceneManager>, App::GlobalAPICollector>>,
+			public Scripting::Scope<SceneManager, GlobalAPIComponent<Serialize::NoParentUnit<SceneManager>>>,
 			public Core::FrameListener
 		{
 		public:
@@ -64,7 +62,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 			}
 
-			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 
 			App::Application &app(bool = true) const;
@@ -92,7 +90,7 @@ namespace Engine
 			App::Application &mApp;
 			size_t mItemCount;
 
-			SceneComponentContainer mSceneComponents;
+			SceneComponentContainer<SceneComponentSet> mSceneComponents;
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
@@ -110,4 +108,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::SceneManager);
+RegisterType(Engine::Scene::SceneManager);

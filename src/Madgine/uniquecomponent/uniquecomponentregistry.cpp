@@ -4,11 +4,10 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "Interfaces/plugins/pluginmanager.h"
-
 #include "Interfaces/plugins/binaryinfo.h"
 
 #include "Interfaces/util/pathutil.h"
+#include "Interfaces/util/stringutil.h"
 
 
 namespace Engine {
@@ -19,62 +18,70 @@ namespace Engine {
 		}
 	};
 
+	struct GuardGuard {
+		GuardGuard(std::ostream &o, const Plugins::BinaryInfo *b) : out(o), bin(b) {
+			if (bin)
+				out << "#ifdef BUILD_" << bin->mName << "\n";
+		}
+		
+		~GuardGuard() {
+			if (bin)
+				out << "#endif\n";
+		}
+
+		std::ostream &out;
+		const Plugins::BinaryInfo *bin;
+	};
+
+	std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo) {
+		std::experimental::filesystem::path p = PathUtil::make_normalized(pStr);
+		return StringUtil::replace(PathUtil::relative(p, binInfo->mSourceRoot).generic_string(), '\\', '/');
+	};
+
+	void include(std::ostream &out, std::string header, const Plugins::BinaryInfo *bin = nullptr)
+	{
+		//GuardGuard g(out, bin);
+		out << "#include \"" << header << "\"\n";
+	}
+
 	void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip) {
-		std::map<const TypeInfo *, std::vector<const TypeInfo*>, CompareTypeInfo> collectorData;
-		std::set<const Plugins::BinaryInfo *> binaries{ &Plugins::binaryInfo_Base };
+		std::set<const Plugins::BinaryInfo *> binaries;
 
 		auto notInSkip = [&](const TypeInfo *v) {
 			return std::find_if(skip.begin(), skip.end(), [=](const TypeInfo *v2) {return strcmp(v->mFullName, v2->mFullName) == 0; }) == skip.end();
 		};
 
-		for (const std::pair<const std::string, ComponentRegistryBase*> &registry : registryRegistry()) {
-			collectorData[registry.second->type_info()];			
-		}
+		for (auto &[name, reg] : registryRegistry()) {
+			//binaries.insert(reg.mBinary);
 
-		for (CollectorInfo *info : collectorRegistry_Base()->mInfos) {
-			auto &v = collectorData[info->mRegistryInfo];
-			v.insert(v.end(), info->mElementInfos.begin(), info->mElementInfos.end());			
-		}
-
-		for (const std::pair<const std::string, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
-			for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-				if (p.second.isLoaded()) {
-					const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));
-					binaries.insert(binInfo);
-					auto f = (CollectorRegistry*(*)())p.second.getSymbol("collectorRegistry");
-					if (f) {
-						for (CollectorInfo *info : f()->mInfos) {
-							if (notInSkip(info->mBaseInfo)) {
-								auto &v = collectorData[info->mRegistryInfo];
-								std::copy_if(info->mElementInfos.begin(), info->mElementInfos.end(), std::back_inserter(v), notInSkip);
-							}
-						}
-					}
-				}
+			for (CollectorInfo *collector : *reg) {
+				binaries.insert(collector->mBinary);
 			}
 		}
 
 		std::ofstream file(outFile);
 		assert(file);
-
+		GuardGuard g(file, &Plugins::binaryInfo_Base);
 
 		for (const Plugins::BinaryInfo *bin : binaries)
+		{
 			if (strlen(bin->mPrecompiledHeaderPath))
-				file << "#include \"" << bin->mPrecompiledHeaderPath << "\"\n";
+			{
+				include(file, bin->mPrecompiledHeaderPath, bin);
+			}
+		}
 
-		auto fixInclude = [&](const char *pStr) {
-			std::experimental::filesystem::path p = PathUtil::make_case_sensitive(pStr);
-			for (const Plugins::BinaryInfo *binInfo : binaries)
-				if (!PathUtil::relative(p, binInfo->mSourceRoot).empty())
-					return PathUtil::relative(p, binInfo->mSourceRoot);
-			return p;
-		};
 
-		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {
-			file << "#include \"" << fixInclude(p.first->mHeaderPath) << "\"\n";
-
-			for (const TypeInfo *info : p.second) {
-				file << "#include \"" << fixInclude(info->mHeaderPath) << "\"\n";
+		for (auto &[name, reg] : registryRegistry()) {
+			const Plugins::BinaryInfo *bin = reg->mBinary;
+			include(file, fixInclude(reg->type_info()->mHeaderPath, bin), bin);
+			
+			for (CollectorInfo *collector : *reg) {
+				for (const TypeInfo *typeInfo : collector->mElementInfos)
+				{
+					if (notInSkip(typeInfo))
+						include(file, fixInclude(typeInfo->mHeaderPath, collector->mBinary), collector->mBinary);
+				}
 			}
 		}
 
@@ -84,36 +91,43 @@ namespace Engine{
 
 )";
 
-		for (const std::pair<const TypeInfo* const, std::vector<const TypeInfo*>> &p : collectorData) {
-			file << "	template<> std::vector<" << p.first->mFullName << "::F> " << p.first->mFullName << "::sComponents() { return {\n";
+		for (auto &[name, reg] : registryRegistry()) {
+			{
+				//GuardGuard g2(file, p.first->mBinary);
+				file << "	template<> std::vector<" << name << "::F> " << name << "::sComponents() { return {\n";
 
-			bool first = true;
+				for (CollectorInfo *collector : *reg)
+				{
+					for (const TypeInfo *typeInfo : collector->mElementInfos) {
+						//GuardGuard g(file, typeInfo->mBinary);
+						if (notInSkip(typeInfo))
+							file << "		createComponent<" << typeInfo->mFullName << ">,\n";
+					}
+				}
 
-			for (const TypeInfo *info : p.second) {
-				if (first) {
-					first = false;
-				}
-				else {
-					file << ",\n";
-				}
-				file << "		createComponent<" << info->mFullName << ">";
+				file << "\n	}; }\n\n";
 			}
-
-			file << "\n	}; }\n\n";
 
 			size_t i = 0;
-			for (const TypeInfo *info : p.second) {
-				while (info) {
-					file << "    template<> size_t component_index<" << info->mFullName << ">(){ return " << i << "; }\n";
-					info = info->mDecayType;
+			for (CollectorInfo *collector : *reg)
+			{
+				for (const TypeInfo *typeInfo : collector->mElementInfos) {
+					if (notInSkip(typeInfo)) {
+						//GuardGuard g(file, typeInfo->mBinary);
+						while (typeInfo) {
+							file << "    template<> size_t component_index<" << typeInfo->mFullName << ">(){ return " << i << "; }\n";
+							typeInfo = typeInfo->mDecayType;
+						}
+						++i;
+					}
 				}
-				++i;
 			}
+
 
 			file << "\n";
 		}
 
-		file << "}";
+		file << "}\n";
 	}
 
 	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase*>& registryRegistry()

@@ -1,5 +1,7 @@
 #include "../baselib.h"
 
+#ifndef STATIC_BUILD
+
 #include "uniquecomponentcollectormanager.h"
 
 #include "uniquecomponentcollector.h"
@@ -14,45 +16,33 @@ namespace Engine {
 		mMgr(pluginMgr)
 	{
 		mMgr.addListener(this);
-		Plugins::Plugin base("Base");
-		assert(base.load());
-		onPluginLoad(&base);
 	}
 
 	UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
 	{
-		Plugins::Plugin base("Base");
-		assert(base.load());
-		aboutToUnloadPlugin(&base);
 		mMgr.removeListener(this);
 	}
 
 	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)
 	{
-#ifndef STATIC_BUILD
-		auto f = (CollectorRegistry*(*)())p->getSymbol("collectorRegistry");
 
-		if (f) {
-			auto &t = registryRegistry();
-			for (CollectorInfo *info : f()->mInfos) {
-				registryRegistry().at(info->mRegistryInfo->mFullName)->addCollector(info);
-			}
+		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
+
+		for (auto &[name, reg] : registryRegistry()) {
+			reg->onPluginLoad(info);
 		}
-#endif
 	}
 
 	bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin * p)
 	{
-#ifndef STATIC_BUILD
-		auto f = (CollectorRegistry*(*)())p->getSymbol("collectorRegistry");
+		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
 
-		if (f) {
-			for (CollectorInfo *info : f()->mInfos) {
-				registryRegistry().at(info->mRegistryInfo->mFullName)->removeCollector(info);
-			}
+		for (auto &[name, reg] : registryRegistry()) {
+			reg->onPluginUnload(info);
 		}
-#endif
 		return true;
 	}
 
 }
+
+#endif

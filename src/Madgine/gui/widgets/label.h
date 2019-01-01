@@ -22,4 +22,4 @@ namespace Engine
 }
 
 
-RegisterClass(Engine::GUI::Label);
+RegisterType(Engine::GUI::Label);

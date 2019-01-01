@@ -29,7 +29,7 @@ namespace Engine {
 	namespace Render {
 
 		OpenGLRenderer::OpenGLRenderer(GUI::GUISystem *gui) :
-			Renderer<OpenGLRenderer>(gui)
+			RendererComponent<OpenGLRenderer>(gui)
 #if _WIN32
 			, wglCreateContextAttribsARB(nullptr),
 			wglSwapIntervalEXT(nullptr)

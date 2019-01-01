@@ -16,6 +16,8 @@ namespace Engine
 			void setListener(InputListener *listener);
 			InputListener *listener();
 
+			virtual void onResize(size_t width, size_t height);
+
 		protected:
 			void injectKeyPress(const KeyEventArgs& arg);
 			void injectKeyRelease(const KeyEventArgs& arg);
@@ -23,10 +25,11 @@ namespace Engine
 			void injectMouseRelease(const MouseEventArgs& arg);
 			void injectMouseMove(const MouseEventArgs& arg);
 
+
 		private:
 			InputListener* mListener;
 		};
 	}
 }
 
-RegisterClass(Engine::Input::InputHandler);
+RegisterType(Engine::Input::InputHandler);

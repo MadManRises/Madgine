@@ -50,7 +50,7 @@ namespace Engine
 				return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
 			}
 
-			App::GlobalAPIComponentBase &getGlobalAPIComponent(size_t i, bool = true);
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 			SceneComponentBase &getSelf(bool = true);
 
 		protected:
@@ -71,4 +71,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::SceneComponentBase);
+RegisterType(Engine::Scene::SceneComponentBase);

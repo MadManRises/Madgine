@@ -27,4 +27,4 @@ namespace Engine {
 	}
 }
 
-RegisterClass(Engine::Render::RendererBase);
+RegisterType(Engine::Render::RendererBase);

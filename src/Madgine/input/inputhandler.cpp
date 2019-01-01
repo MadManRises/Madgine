@@ -25,6 +25,10 @@ namespace Engine
 			return mListener;
 		}
 
+		void InputHandler::onResize(size_t width, size_t height)
+		{
+		}
+
 
 		void InputHandler::injectKeyPress(const KeyEventArgs& arg)
 			{

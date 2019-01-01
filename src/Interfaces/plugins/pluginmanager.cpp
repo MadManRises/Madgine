@@ -6,6 +6,8 @@
 
 #include "pluginsectionlistener.h"
 
+#include "../util/runtime.h"
+
 namespace Engine
 {
 	namespace Plugins
@@ -25,6 +27,8 @@ namespace Engine
 		{
 			assert(!sSingleton);
 			sSingleton = this;
+
+			setupCoreSection();
 
 			if (!mSettings["State"]["CurrentSelectionFile"].empty()) {
 				std::experimental::filesystem::path p = selectionFiles()[mSettings["State"]["CurrentSelectionFile"]];
@@ -89,6 +93,8 @@ namespace Engine
 			if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
 				mCurrentSelectionFile->clear();
 				for (const std::pair<const std::string, PluginSection> &sec : mSections) {
+					/*if (sec.first == "Core")
+						continue;*/
 					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first];
 					for (const std::pair<const std::string, Plugin> &p : sec.second) {
 						iniSec[p.first] = p.second.isLoaded() ? "On" : "";
@@ -105,6 +111,8 @@ namespace Engine
 				mCurrentSelectionFile->loadFromDisk();
 				mLoadingCurrentSelectionFile = true;
 				for (std::pair<const std::string, Ini::IniSection> &sec : *mCurrentSelectionFile) {
+					if (sec.first == "Core")
+						continue;
 					(*this)[sec.first].loadFromIni(sec.second);					
 				}
 				mLoadingCurrentSelectionFile = false;
@@ -159,6 +167,18 @@ namespace Engine
 			section->removeListener(listener);
 		}
 
+		void PluginManager::setupCoreSection()
+		{
+			const std::set<std::string> coreLibraries = { "Base", "Client" };
+			const std::set<std::string> loadedLibraries = enumerateLoadedLibraries();
+			std::set<std::string> loadedCoreLibraries;
+			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
+				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
+			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);
+			assert(pib.second);
+		}
+
+		
 
 	}
 }

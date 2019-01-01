@@ -204,7 +204,7 @@ namespace Engine
             rfAngle = r;
         }
         void FromAngleAxis (const Vector3& rkAxis, const Radian& fRadians);
-
+		*/
         /** The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
             where yaw is rotation about the Up vector, pitch is rotation about the
             Right axis, and roll is rotation about the Direction axis. */

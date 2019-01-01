@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../plugins/binaryinfo.h"
 
 namespace Engine
 {
@@ -35,16 +36,16 @@ namespace Engine
 	};
 	
 
-#define RegisterClass(T) template<> inline const Engine::TypeInfo &Engine::AccessClassInfo<::T>::get(){static TypeInfo sInfo{ #T, __FILE__ }; return sInfo;}
+#define RegisterType(T) template<> inline const Engine::TypeInfo &Engine::AccessClassInfo<::T>::get(){static TypeInfo sInfo{ #T, __FILE__ }; return sInfo;}
 
 	template <class T>
-	inline const TypeInfo &ClassInfo() {
+	inline const TypeInfo &typeInfo() {
 		return AccessClassInfo<T>::get();
 	}
 	
 	template <class T>
-	inline const char *ClassName() {
-		return ClassInfo<T>().mTypeName;
+	inline const char *typeName() {
+		return typeInfo<T>().mTypeName;
 	}
 
 	

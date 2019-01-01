@@ -2,7 +2,7 @@
 
  def axisList = [
     ["clang-linux",],           //toolchain
-    ["Release","Debug"],      //configuration
+    ["Release","Debug","RelWithDebInfo"],      //configuration
     ["", "OpenGL_Default"]                   //static configuration file
 ]   
 

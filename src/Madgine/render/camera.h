@@ -51,4 +51,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Render::Camera);
+RegisterType(Engine::Render::Camera);

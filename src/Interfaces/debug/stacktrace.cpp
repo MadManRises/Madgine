@@ -73,7 +73,8 @@ namespace Engine {
 					}					
 				}
 				~Guard() {
-					assert(SymCleanup(process));
+					auto result = SymCleanup(process);
+					assert(result);
 				}
 			} guard = {};
 			struct BufferObject {

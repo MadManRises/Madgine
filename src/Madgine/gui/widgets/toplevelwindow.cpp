@@ -52,7 +52,7 @@ namespace Engine
 				mExternalInput = settings.mInput;
 			}
 			else {
-				mInputSelector.emplace(mWindow);
+				mInputHandlerSelector.emplace(mWindow);
 			}
 			input()->setListener(this);
 			gui.app(false).addFrameListener(input());
@@ -389,7 +389,7 @@ namespace Engine
 
 		Input::InputHandler* TopLevelWindow::input()
 		{
-			return mExternalInput ? mExternalInput : *mInputSelector;
+			return mExternalInput ? mExternalInput : *mInputHandlerSelector;
 		}
 
 		void TopLevelWindow::addOverlay(WindowOverlay * overlay)
@@ -526,6 +526,7 @@ namespace Engine
 
 		void TopLevelWindow::onResize(size_t width, size_t height)
 		{
+			input()->onResize(width, height);
 			for (Widget *topLevel : uniquePtrToPtr(mTopLevelWidgets))
 			{
 				topLevel->screenSizeChanged({ static_cast<float>(width), static_cast<float>(height), 1.0f });

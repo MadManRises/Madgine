@@ -83,7 +83,7 @@ namespace Engine
 			}
 		}
 
-		bool MemoryViewer::drawHeader(const char * title, SortMode mode, size_t size)
+		bool MemoryViewer::drawHeader(const char * title, SortMode mode, float size)
 		{
 			bool result = false;
 
@@ -335,13 +335,13 @@ namespace Engine
 					ImGui::EndPopup();
 				}
 
-				size_t width = ImGui::GetWindowWidth() - 20;
-				static size_t addressWidth = ImGui::CalcTextSize(" 0x00000000 ").x;
-				static size_t lineWidth = ImGui::CalcTextSize(" Line v ").x;
-				static size_t sizeWidth = ImGui::CalcTextSize(" 0000000 ").x;
+				float width = ImGui::GetWindowWidth() - 20;
+				static float addressWidth = ImGui::CalcTextSize(" 0x00000000 ").x;
+				static float lineWidth = ImGui::CalcTextSize(" Line v ").x;
+				static float sizeWidth = ImGui::CalcTextSize(" 0000000 ").x;
 
 				ImGui::BeginColumns("cols", 2 + mShowAddress + 2 * mShowFile, ImGuiColumnsFlags_NoPreserveWidths);
-				size_t fixedWidth = (mShowAddress ? addressWidth : 0) + (mShowFile ? lineWidth : 0) + sizeWidth;
+				float fixedWidth = (mShowAddress ? addressWidth : 0) + (mShowFile ? lineWidth : 0) + sizeWidth;
 								
 				resort |= drawHeader("Method %s", METHODNAME_SORTING, mShowFile ? 0 : width - fixedWidth);
 				if (mShowAddress)

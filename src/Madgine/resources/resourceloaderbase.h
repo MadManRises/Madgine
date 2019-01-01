@@ -33,4 +33,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Resources::ResourceLoaderBase);
+RegisterType(Engine::Resources::ResourceLoaderBase);

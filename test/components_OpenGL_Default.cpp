@@ -1,26 +1,27 @@
+#ifdef BUILD_Base
 #include "toolslib.h"
 #include "Madgine/baselib.h"
 #include "oislib.h"
 #include "OpenGL/opengllib.h"
-#include "Madgine\app\globalapicomponentcollector.h"
-#include "Madgine\scene\scenemanager.h"
-#include "renderer\imguiroot.h"
-#include "Madgine\input\inputcollector.h"
+#include "Madgine/app/globalapicollector.h"
+#include "Madgine/scene/scenemanager.h"
+#include "renderer/imguiroot.h"
+#include "Madgine/input/inputcollector.h"
 #include "oisinputhandler.h"
-#include "Madgine\render\renderer.h"
-#include "OpenGL\openglrenderer.h"
-#include "Madgine\resources\resourceloadercollector.h"
-#include "Madgine\resources\scripts\scriptloader.h"
-#include "OpenGL\openglshaderloader.h"
-#include "inspector\layoutloader.h"
-#include "Madgine\scene\scenecomponentcollector.h"
+#include "Madgine/render/renderercollector.h"
+#include "OpenGL/openglrenderer.h"
+#include "Madgine/resources/resourceloadercollector.h"
+#include "Madgine/resources/scripts/scriptloader.h"
+#include "OpenGL/openglshaderloader.h"
+#include "inspector/layoutloader.h"
+#include "Madgine/scene/scenecomponentcollector.h"
 #include "toolscollector.h"
-#include "inspector\inspector.h"
-#include "metrics\metrics.h"
-#include "profiler\profiler.h"
-#include "renderer\imguidemo.h"
-#include "Madgine\ui\gamehandler.h"
-#include "Madgine\ui\guihandler.h"
+#include "inspector/inspector.h"
+#include "metrics/metrics.h"
+#include "profiler/profiler.h"
+#include "renderer/imguidemo.h"
+#include "Madgine/ui/gamehandler.h"
+#include "Madgine/ui/guihandler.h"
 
 
 namespace Engine {
@@ -28,7 +29,8 @@ namespace Engine {
 	template<> std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents() {
 		return {
 createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
-createComponent<Engine::Tools::ImGuiRoot>
+createComponent<Engine::Tools::ImGuiRoot>,
+
 		};
 	}
 
@@ -36,9 +38,10 @@ createComponent<Engine::Tools::ImGuiRoot>
 	template<> size_t component_index<Engine::Scene::SceneManager>() { return 0; }
 	template<> size_t component_index<Engine::Tools::ImGuiRoot>() { return 1; }
 
-	template<> std::vector<Engine::Input::InputCollector::Registry::F> Engine::Input::InputCollector::Registry::sComponents() {
+	template<> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() {
 		return {
-createComponent<Engine::Input::OISInputHandler>
+createComponent<Engine::Input::OISInputHandler>,
+
 		};
 	}
 
@@ -46,7 +49,8 @@ createComponent<Engine::Input::OISInputHandler>
 
 	template<> std::vector<Engine::Render::RendererCollector::Registry::F> Engine::Render::RendererCollector::Registry::sComponents() {
 		return {
-createComponent<Engine::Render::OpenGLRenderer>
+createComponent<Engine::Render::OpenGLRenderer>,
+
 		};
 	}
 
@@ -56,7 +60,8 @@ createComponent<Engine::Render::OpenGLRenderer>
 		return {
 createComponent<Engine::Scripting::Parsing::ScriptLoader>,
 createComponent<Engine::Render::OpenGLShaderLoader>,
-createComponent<Engine::Tools::LayoutLoader>
+createComponent<Engine::Tools::LayoutLoader>,
+
 		};
 	}
 
@@ -76,7 +81,8 @@ createComponent<Engine::Tools::LayoutLoader>
 createComponent<Engine::Tools::Inspector>,
 createComponent<Engine::Tools::Metrics>,
 createComponent<Engine::Tools::Profiler>,
-createComponent<Engine::Tools::ImGuiDemo>
+createComponent<Engine::Tools::ImGuiDemo>,
+
 		};
 	}
 
@@ -100,3 +106,4 @@ createComponent<Engine::Tools::ImGuiDemo>
 
 
 }
+#endif

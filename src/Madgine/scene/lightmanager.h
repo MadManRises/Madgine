@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scenecomponent.h"
+#include "scenecomponentcollector.h"
 
 #include "Interfaces/serialize/container/list.h"
 
@@ -40,4 +40,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::LightManager);
+RegisterType(Engine::Scene::LightManager);

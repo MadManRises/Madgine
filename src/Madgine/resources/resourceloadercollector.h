@@ -1,10 +1,12 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "resourceloaderbase.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Resources, ResourceLoaderBase, ResourceManager&, ResourceLoader, MADGINE_BASE);
+/*
 namespace Engine
 {
 	namespace Resources
@@ -16,6 +18,13 @@ namespace Engine
 
 	}
 
+
+#ifndef STATIC_BUILD
+	MADGINE_BASE_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<Resources::ResourceLoaderBase, Resources::ResourceManager&>;
+#endif
+
+
 }
 
 RegisterCollector(Engine::Resources::ResourceLoaderCollector);
+*/

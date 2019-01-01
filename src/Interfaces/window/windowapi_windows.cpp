@@ -147,7 +147,7 @@ namespace Engine {
 		{
 			auto it = sWindows.find(hwnd);
 			if (it != sWindows.end()) {
-				if (!sWindows.at(hwnd).handle(msg, wParam, lParam))
+				if (!it->second.handle(msg, wParam, lParam))
 					sWindows.erase(it);
 			}
 			return DefWindowProc(hwnd, msg, wParam, lParam);

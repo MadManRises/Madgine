@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_definitions(-D_HAS_TR1_NAMESPACE)
-
 
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
@@ -26,6 +24,13 @@ set(CMAKE_MODULE_PATH
 
 if (UNIX)
 	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
+endif()
+
+
+option(ENABLE_MEMTRACKING "Enables Mempry Tracking for Heap-Allocations")
+
+if (ENABLE_MEMTRACKING)
+	add_definitions(-DENABLE_MEMTRACKING)
 endif()
 
 

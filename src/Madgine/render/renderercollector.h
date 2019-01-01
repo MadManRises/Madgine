@@ -1,11 +1,12 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
-#include "../uniquecomponent/uniquecomponent.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "rendererbase.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Render, RendererBase, GUI::GUISystem*, Renderer, MADGINE_CLIENT);
+/*
 namespace Engine
 {
 
@@ -27,10 +28,11 @@ namespace Engine
 		
 	}
 	
-#ifndef PLUGIN_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Render::RendererBase, GUI::GUISystem *>;
+#ifndef STATIC_BUILD
+	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<Render::RendererBase, GUI::GUISystem *>;
 #endif
 
 }
 
 RegisterCollector(Engine::Render::RendererCollector);
+*/

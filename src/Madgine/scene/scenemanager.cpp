@@ -20,6 +20,8 @@
 
 #include "Interfaces/debug/profiler/profiler.h"
 
+#include "../app/globalapicollector.h"
+
 
 namespace Engine
 {
@@ -93,7 +95,7 @@ namespace Engine
 			SerializableUnitBase::writeState(out);
 		}
 
-		App::GlobalAPIComponentBase & SceneManager::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIBase & SceneManager::getGlobalAPIComponent(size_t i, bool init)
 		{			
 			if (init)
 			{

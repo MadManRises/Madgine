@@ -3,13 +3,16 @@
 /// @cond
 
 #if defined(STATIC_BUILD)
-#define MADGINE_OPENGL_EXPORT
+#	define MADGINE_OPENGL_EXPORT
+#	define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
 #else
-#if defined(OpenGL_EXPORTS)
-#define MADGINE_OPENGL_EXPORT DLL_EXPORT
-#else
-#define MADGINE_OPENGL_EXPORT DLL_IMPORT
-#endif
+#	if defined(OpenGL_EXPORTS)
+#		define MADGINE_OPENGL_EXPORT DLL_EXPORT
+#		define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
+#	else
+#		define MADGINE_OPENGL_EXPORT DLL_IMPORT
+#		define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
+#	endif
 #endif
 
 #include "openglforward.h"
@@ -35,5 +38,7 @@ typedef GLXContext ContextHandle;
 
 
 #endif
+
+#include "glad.h"
 
 /// @endcond

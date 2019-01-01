@@ -1,10 +1,13 @@
 #pragma once
 
 
-#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponentdefine.h"
 
 #include "inputhandler.h"
 
+DEFINE_UNIQUE_COMPONENT(Engine::Input, InputHandler, Window::Window*, InputHandler, MADGINE_CLIENT);
+
+/*
 namespace Engine
 {
 
@@ -16,10 +19,10 @@ namespace Engine
 
 	}
 
-#ifndef PLUGIN_BUILD
-	template struct MADGINE_CLIENT_EXPORT UniqueComponentCollector<Input::InputHandler, Window::Window*>;
+#ifndef STATIC_BUILD
+	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<Input::InputHandler, Window::Window*>;
 #endif
 
 }
 
-RegisterCollector(Engine::Input::InputCollector);
+RegisterCollector(Engine::Input::InputCollector);*/

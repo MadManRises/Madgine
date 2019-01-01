@@ -60,7 +60,7 @@ namespace Engine
 		private:
 			static ResourceManager *sSingleton;
 
-			ResourceLoaderContainer mCollector;
+			ResourceLoaderContainer<std::vector> mCollector;
 
 			struct SubDirCompare
 			{

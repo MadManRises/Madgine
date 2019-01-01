@@ -878,7 +878,7 @@ namespace Engine
 		float fRoot = MaxCubicRoot(afCoeff);
 		float fNorm = Math::Sqrt(fPmax*fRoot);
         return fNorm;
-    }
+    }*/
     //-----------------------------------------------------------------------
     /*void Matrix4::ToAngleAxis (Vector4& rkAxis, Radian& rfRadians) const
     {
@@ -975,9 +975,9 @@ namespace Engine
             rkAxis.y = 0.0;
             rkAxis.z = 0.0;
         }
-    }*/
+    }
     //-----------------------------------------------------------------------
-    /*void Matrix4::FromAngleAxis (const Vector4& rkAxis, const Radian& fRadians)
+    void Matrix4::FromAngleAxis (const Vector4& rkAxis, const Radian& fRadians)
     {
         Real fCos = Math::Cos(fRadians);
         Real fSin = Math::Sin(fRadians);

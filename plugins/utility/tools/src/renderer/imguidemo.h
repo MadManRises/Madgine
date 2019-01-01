@@ -17,4 +17,4 @@ namespace Engine {
 	}
 }
 
-RegisterClass(Engine::Tools::ImGuiDemo);
+RegisterType(Engine::Tools::ImGuiDemo);

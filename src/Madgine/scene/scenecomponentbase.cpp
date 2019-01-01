@@ -74,7 +74,7 @@ namespace Engine
 			return mSceneMgr.getComponent(i, init);
 		}
 
-		App::GlobalAPIComponentBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
+		App::GlobalAPIBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)
 			{

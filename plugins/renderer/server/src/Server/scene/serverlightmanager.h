@@ -25,4 +25,4 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Scene::ServerLightManager);
+RegisterType(Engine::Scene::ServerLightManager);

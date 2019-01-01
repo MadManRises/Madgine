@@ -2,7 +2,10 @@
 
 #include "plugin.h"
 
+#include "../generic/templates.h"
+
 #ifdef _WIN32
+#define NOMINMAX
 #include <Windows.h>
 #include <DbgHelp.h>
 #elif defined(__linux__) || defined(__EMSCRIPTEN__)
@@ -133,11 +136,14 @@ namespace Engine
 			path = buffer;
 #elif __linux__
 			Dl_info info;
-			assert(dladdr(getSymbol("binaryInfo"), &info));
+			auto result = dladdr(getSymbol("binaryInfo"), &info);
+			assert(result);
 			path = info.dli_fname;
 #endif
 			return path;
 		}
+
+
 
 	}
 }

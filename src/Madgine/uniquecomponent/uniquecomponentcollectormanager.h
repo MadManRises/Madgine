@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef STATIC_BUILD
+
 #include "Interfaces/plugins/pluginlistener.h"
 #include "Interfaces/plugins/pluginsectionlistener.h"
 
@@ -20,3 +22,5 @@ namespace Engine {
 	};
 
 }
+
+#endif

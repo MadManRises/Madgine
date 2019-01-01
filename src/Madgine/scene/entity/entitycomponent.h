@@ -77,16 +77,16 @@ namespace Engine
 			};
 
 
-
-#define ENTITYCOMPONENT_IMPL(Name, ...) \
-				template <>  const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
-				template <>  const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
-
 #define	ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, ...) \
-				template <>  const char * Engine::Scene::Entity::EntityComponentVirtualBase<__VA_ARGS__>::componentName(){return #Name;}
+				template <> DLL_EXPORT const char * Engine::Scene::Entity::EntityComponentVirtualBase<__VA_ARGS__>::componentName(){return #Name;}
 
 #define ENTITYCOMPONENTVIRTUALIMPL_IMPL(...) \
-				template <>  const Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_reg = {};
+				template <> const Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_reg = {};
+
+#define ENTITYCOMPONENT_IMPL(Name, ...) \
+				template <> DLL_EXPORT const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
+				template <> const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
+
 		}
 	}
 }

@@ -107,4 +107,9 @@ namespace Engine
 	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 	template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
+	template <class T, size_t S>
+	constexpr size_t array_size(T(&)[S]) {
+		return S;
+	}
+
 }

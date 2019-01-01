@@ -87,7 +87,7 @@ namespace Engine
 					ImGui::PushDisabled();
 				}
 				if (ImGui::Button("Export")) {
-					exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"), {&ClassInfo<PluginManager>()});
+					exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"), {&typeInfo<PluginManager>()});
 				}
 				if (mManager.currentSelectionName().empty()) {
 					ImGui::PopDisabled();
@@ -101,7 +101,7 @@ namespace Engine
 				for (std::pair<const std::string, Plugins::PluginSection> &sec : mManager) {
 					if (ImGui::TreeNode(sec.first.c_str())) {
 						for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-							if (sec.first == "Utility" && p.first == "Tools") {
+							if ((sec.first == "Utility" && p.first == "Tools") || sec.first == "Core") {
 								ImGui::PushDisabled();
 							}
 							bool loaded = p.second.isLoaded();
@@ -119,7 +119,7 @@ namespace Engine
 								else
 									sec.second.unloadPlugin(p.first);
 							}								
-							if (sec.first == "Utility" && p.first == "Tools") {
+							if ((sec.first == "Utility" && p.first == "Tools") || sec.first == "Core") {
 								ImGui::PopDisabled();
 							}
 						}
@@ -130,31 +130,22 @@ namespace Engine
 				ImGui::SameLine();
 
 				ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
-				if (ImGui::TreeNode("Base")) {
-					Plugins::Plugin p("Base");
-					p.load();
-					for (CollectorInfo *info : ((CollectorRegistry*(*)())p.getSymbol("collectorRegistry"))()->mInfos) {
-						if (ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
-							for (const TypeInfo *component : info->mElementInfos) {
-								ImGui::Text(component->mTypeName);
-							}
-							ImGui::TreePop();
-						}
-					}
-					ImGui::TreePop();
-				}
 
 				for (const std::pair<const std::string, Plugins::PluginSection> &sec : mManager) {
 					for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 						if (p.second.isLoaded()) {
-							auto f = (CollectorRegistry*(*)())p.second.getSymbol("collectorRegistry");
-							if (f && ImGui::TreeNode(p.first.c_str())) {								
-								for (CollectorInfo *info : f()->mInfos) {
-									if (ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
-										for (const TypeInfo *component : info->mElementInfos) {
-											ImGui::Text(component->mTypeName);
+							const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));
+							
+							if (ImGui::TreeNode(p.first.c_str())) {
+								for (auto &[name, reg] : registryRegistry())
+								{
+									for (CollectorInfo *info : *reg) {
+										if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
+											for (const TypeInfo *component : info->mElementInfos) {
+												ImGui::Text(component->mTypeName);
+											}
+											ImGui::TreePop();
 										}
-										ImGui::TreePop();
 									}
 								}
 								ImGui::TreePop();

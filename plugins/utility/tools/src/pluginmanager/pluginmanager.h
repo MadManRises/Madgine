@@ -26,6 +26,6 @@ namespace Engine
 	}
 }
 
-RegisterClass(Engine::Tools::PluginManager);
+RegisterType(Engine::Tools::PluginManager);
 
 #endif

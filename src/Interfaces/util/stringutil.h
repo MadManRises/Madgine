@@ -11,5 +11,31 @@ namespace Engine {
 			return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
 		}
 
+		inline std::string & replace(std::string &s, char old, char replace) {
+			for (char &c : s)
+			{
+				if (c == old) c = replace;
+			}
+			return s;
+		}
+
+		inline std::string replace(std::string &&s, char old, char replace) {
+			for (char &c : s)
+			{
+				if (c == old) c = replace;
+			}
+			return std::move(s);
+		}
+
+		inline std::string toLower(std::string &&s) {
+			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+			return std::move(s);
+		}
+
+		inline std::string toUpper(std::string &&s) {
+			std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+			return std::move(s);
+		}
+
 	}
 }

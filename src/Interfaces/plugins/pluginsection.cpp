@@ -19,16 +19,22 @@
 namespace Engine {
 	namespace Plugins {
 
-		PluginSection::PluginSection(PluginManager& mgr, const std::string& name) :
+		PluginSection::PluginSection(PluginManager& mgr, const std::string& name, const std::set<std::string> &fixedPlugins) :
 			mMgr(mgr),
 			mName(name)
 		{
+			for (const std::string &name : fixedPlugins)
+			{
+				auto pib = mPlugins.try_emplace(name, name);
+				assert(pib.second);
+				auto result = pib.first->second.load();
+				assert(result);
+			}
 			for (auto &p : std::experimental::filesystem::directory_iterator(runtimePath()))
 			{
 				if (is_regular_file(p)) {
 					std::experimental::filesystem::path path = p.path();
 					std::string extension = path.extension().generic_string();
-					std::string e = SHARED_LIB_SUFFIX;
 					if (extension == SHARED_LIB_SUFFIX) {
 						std::string filename = path.stem().generic_string();
 						const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + mMgr.project() + "_" + mName + "_";
