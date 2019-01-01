@@ -49,9 +49,13 @@ if (WIN32)
 endif()
 
 if (UNIX)
-	find_package(X11 REQUIRED)
-	find_package(OpenGL REQUIRED)
-	target_link_libraries (Interfaces PRIVATE stdc++fs dl X11 OpenGL::GLX)
+	if (NOT CMAKE_ANDROID_ARCH_ABI)
+		find_package(X11 REQUIRED)
+		find_package(OpenGL REQUIRED)
+		target_link_libraries (Interfaces PRIVATE stdc++fs dl X11 OpenGL::GLX)
+	else ()
+
+	endif()
 endif (UNIX)
 
 install_to_workspace(Madgine TARGETS Interfaces EXPORT_LIB)
