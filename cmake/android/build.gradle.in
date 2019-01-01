@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:3.2.1"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+
+    defaultConfig {
+        applicationId "com.example.native_activity"
+        minSdkVersion 15
+        targetSdkVersion 21
+    }
+
+
+    buildTypes {
+        debug {
+            debuggable true
+            zipAlignEnabled false
+            minifyEnabled false
+        }
+        release {
+            versionNameSuffix ""
+            debuggable false
+            zipAlignEnabled true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "../../../../apk/@PROJECT_NAME@-${variant.name}.apk"
+            }
+        }
+    }
+
+
+    sourceSets {
+        debug {
+            //manifest.srcFile 'config/debug/AndroidManifest.xml'
+        }
+        release {
+            //manifest.srcFile 'config/release/AndroidManifest.xml'
+        }
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            jniLibs.srcDirs = ['bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+        }
+    }
+}
