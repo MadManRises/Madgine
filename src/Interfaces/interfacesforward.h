@@ -160,6 +160,12 @@ namespace Engine
 		struct Window;
 	}
 
+	namespace Filesystem {
+		struct Path;
+		struct FileQuery;
+		struct FileQueryState;
+	}
+
 	class Vector2;
 	class Vector3;
 

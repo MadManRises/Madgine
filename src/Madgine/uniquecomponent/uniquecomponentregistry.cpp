@@ -6,8 +6,9 @@
 
 #include "Interfaces/plugins/binaryinfo.h"
 
-#include "Interfaces/util/pathutil.h"
 #include "Interfaces/util/stringutil.h"
+
+#include "Interfaces/filesystem/api.h"
 
 
 namespace Engine {
@@ -34,8 +35,8 @@ namespace Engine {
 	};
 
 	std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo) {
-		std::experimental::filesystem::path p = PathUtil::make_normalized(pStr);
-		return StringUtil::replace(PathUtil::relative(p, binInfo->mSourceRoot).generic_string(), '\\', '/');
+		Filesystem::Path p = Filesystem::makeNormalized(pStr);
+		return p.relative(binInfo->mSourceRoot).str();
 	};
 
 	void include(std::ostream &out, std::string header, const Plugins::BinaryInfo *bin = nullptr)
@@ -44,7 +45,7 @@ namespace Engine {
 		out << "#include \"" << header << "\"\n";
 	}
 
-	void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip) {
+	void exportStaticComponentHeader(const Filesystem::Path &outFile, std::vector<const TypeInfo*> skip) {
 		std::set<const Plugins::BinaryInfo *> binaries;
 
 		auto notInSkip = [&](const TypeInfo *v) {
@@ -59,7 +60,7 @@ namespace Engine {
 			}
 		}
 
-		std::ofstream file(outFile);
+		std::ofstream file(outFile.str());
 		assert(file);
 		GuardGuard g(file, &Plugins::binaryInfo_Base);
 

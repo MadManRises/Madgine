@@ -37,7 +37,7 @@ namespace Engine{
 		size_t mBaseIndex = 0;
 	};
 
-	MADGINE_BASE_EXPORT void exportStaticComponentHeader(const std::experimental::filesystem::path &outFile, std::vector<const TypeInfo*> skip = {});
+	MADGINE_BASE_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, std::vector<const TypeInfo*> skip = {});
 		
 	MADGINE_BASE_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 

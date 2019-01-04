@@ -33,9 +33,9 @@ namespace Engine
 			void loadCurrentSelectionFile();
 
 			Ini::IniSection &selectionFiles();
-			std::experimental::filesystem::path currentSelectionPath();
+			Filesystem::Path currentSelectionPath();
 			const std::string &currentSelectionName();
-			void setCurrentSelection(const std::string &key, const std::experimental::filesystem::path &path);
+			void setCurrentSelection(const std::string &key, const Filesystem::Path &path);
 
 			void addListener(PluginListener *listener);
 			void removeListener(PluginListener *listener);

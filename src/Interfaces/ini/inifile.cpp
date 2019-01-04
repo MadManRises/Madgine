@@ -6,7 +6,7 @@
 
 #include "../util/stringutil.h"
 
-#include "../util/runtime.h"
+#include "../filesystem/api.h"
 
 namespace Engine {
 	namespace Ini {
@@ -58,7 +58,7 @@ namespace Engine {
 			return mValues.end();
 		}
 
-		IniFile::IniFile(const std::experimental::filesystem::path & path) :
+		IniFile::IniFile(const Filesystem::Path &path) :
 			mPath(path)
 		{
 			loadFromDisk();
@@ -76,7 +76,7 @@ namespace Engine {
 
 		void IniFile::saveToDisk() const
 		{
-			std::ofstream stream(mPath.is_absolute() ? mPath : runtimePath() / mPath);
+			std::ofstream stream((mPath.isAbsolute() ? mPath : Filesystem::runtimePath() / mPath).str());
 			assert(stream);
 			for (const std::pair<const std::string, IniSection> &p : mSections) {
 				stream << "[" << p.first << "]\n";
@@ -87,7 +87,7 @@ namespace Engine {
 		void IniFile::loadFromDisk()
 		{
 			mSections.clear();
-			std::ifstream stream(mPath.is_absolute() ? mPath : runtimePath() / mPath);
+			std::ifstream stream((mPath.isAbsolute() ? mPath : Filesystem::runtimePath() / mPath).str());
 			std::string line;
 			while (std::getline(stream, line)) {
 				if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
@@ -96,7 +96,7 @@ namespace Engine {
 			}
 		}
 
-		const std::experimental::filesystem::path & IniFile::path()
+		const Filesystem::Path &IniFile::path()
 		{
 			return mPath;
 		}

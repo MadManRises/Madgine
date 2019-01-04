@@ -4,6 +4,7 @@
 #include "../uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/plugins/pluginlistener.h"
 #include "../uniquecomponent/uniquecomponent.h"
+#include "Interfaces/filesystem/path.h"
 
 namespace Engine
 {
@@ -21,7 +22,7 @@ namespace Engine
 			ResourceManager();
 			~ResourceManager();
 
-			void registerResourceLocation(const std::experimental::filesystem::path &path, int priority);
+			void registerResourceLocation(const Filesystem::Path &path, int priority);
 
 			template <class Loader>
 			typename Loader::ResourceType *get(const std::string &name)
@@ -54,8 +55,8 @@ namespace Engine
 #endif
 
 		private:
-			void updateResources(const std::experimental::filesystem::path &path, int priority);
-			void updateResources(const std::experimental::filesystem::path &path, int priority, const std::map<std::string, ResourceLoaderBase*> &loaderByExtension);
+			void updateResources(const Filesystem::Path &path, int priority);
+			void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase*> &loaderByExtension);
 
 		private:
 			static ResourceManager *sSingleton;
@@ -64,16 +65,16 @@ namespace Engine
 
 			struct SubDirCompare
 			{
-				bool operator()(const std::experimental::filesystem::path &first, const std::experimental::filesystem::path &second) const
+				bool operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
 				{
-					auto[firstEnd, secondEnd] = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
-					if (firstEnd == first.end() || secondEnd == second.end())
+					auto[firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());
+					if (firstEnd == first.str().end() || secondEnd == second.str().end())
 						return false;
-					return first < second;
+					return first.str() < second.str();
 				}
 			};
 
-			std::map<std::experimental::filesystem::path, int, SubDirCompare> mResourcePaths;
+			std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
 			bool mInitialized = false;
 

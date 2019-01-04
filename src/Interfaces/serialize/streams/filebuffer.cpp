@@ -3,6 +3,8 @@
 
 #include "serializestream.h"
 
+#include "../../filesystem/api.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -33,24 +35,24 @@ namespace Engine
 			return std::vector<char>::end();
 		}
 
-		FileBuffer FileBuffer::readFile(const std::experimental::filesystem::path& path)
+		FileBuffer FileBuffer::readFile(const Filesystem::Path& path)
 		{
-			std::ifstream stream(path.string(), std::ios::binary);
+			std::ifstream stream(path.str(), std::ios::binary);
 			FileBuffer fileContents;
-			fileContents.reserve(file_size(path));
+			//fileContents.reserve(file_size(path)); //TODO
 			fileContents.assign(std::istreambuf_iterator<char>(stream),
                     std::istreambuf_iterator<char>());
 			return fileContents;
 		}
 
-		void FileBuffer::writeFile(const std::experimental::filesystem::path& path, bool createFolders) const
+		void FileBuffer::writeFile(const Filesystem::Path& path, bool createFolders) const
 		{
 			if (createFolders)
-				create_directories(path.parent_path());
+				Filesystem::createDirectories(path.parentPath());
 			else
-				if (!exists(path.parent_path()))
+				if (!Filesystem::exists(path.parentPath()))
 					throw 0;
-			std::ofstream stream(path.string(), std::ios::binary);
+			std::ofstream stream(path.str(), std::ios::binary);
 			stream.write(data(), size());
 		}
 

@@ -10,11 +10,11 @@
 
 #include "../util/exception.h"
 
-#include "../util/runtime.h"
-
 #include "../signalslot/connectionmanager.h"
 
 #include "pluginlistener.h"
+
+#include "../filesystem/api.h"
 
 namespace Engine {
 	namespace Plugins {
@@ -30,19 +30,16 @@ namespace Engine {
 				auto result = pib.first->second.load();
 				assert(result);
 			}
-			for (auto &p : std::experimental::filesystem::directory_iterator(runtimePath()))
+			for (auto path : Filesystem::listFilesRecursive(Filesystem::runtimePath()))
 			{
-				if (is_regular_file(p)) {
-					std::experimental::filesystem::path path = p.path();
-					std::string extension = path.extension().generic_string();
-					if (extension == SHARED_LIB_SUFFIX) {
-						std::string filename = path.stem().generic_string();
-						const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + mMgr.project() + "_" + mName + "_";
-						if (StringUtil::startsWith(filename, prefix)) {
-							std::string name = filename.substr(prefix.size());
-							auto pib = mPlugins.try_emplace(name, name, path);
-							assert(pib.second);
-						}
+				std::string extension = path.extension();
+				if (extension == SHARED_LIB_SUFFIX) {
+					std::string filename = path.stem();
+					const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + mMgr.project() + "_" + mName + "_";
+					if (StringUtil::startsWith(filename, prefix)) {
+						std::string name = filename.substr(prefix.size());
+						auto pib = mPlugins.try_emplace(name, name, path);
+						assert(pib.second);
 					}
 				}
 			}

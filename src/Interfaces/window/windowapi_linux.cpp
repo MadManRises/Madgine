@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#if __linux__
+#if !__ANDROID__ && __linux__
 
 #include "windowapi.h"
 

@@ -30,9 +30,9 @@ namespace Engine
 			}
 
 			virtual std::shared_ptr<Data> load(ResourceType* res) = 0;
-			virtual std::pair<ResourceBase *,bool> addResource(const std::experimental::filesystem::path &path) override
+			virtual std::pair<ResourceBase *,bool> addResource(const Filesystem::Path &path) override
 			{
-				std::string name = path.stem().generic_string();
+				std::string name = path.stem();
 				auto pib = mResources.try_emplace(name, this, path);
 				
 				if (pib.second)				

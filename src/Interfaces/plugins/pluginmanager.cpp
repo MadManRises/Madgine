@@ -6,7 +6,17 @@
 
 #include "pluginsectionlistener.h"
 
-#include "../util/runtime.h"
+#include "../util/stringutil.h"
+
+#if _WIN32
+#define NOMINMAX
+#include <Windows.h>
+#include <psapi.h>
+#elif __linux__
+#include <link.h>
+#endif
+
+#include "../generic/templates.h"
 
 namespace Engine
 {
@@ -31,7 +41,7 @@ namespace Engine
 			setupCoreSection();
 
 			if (!mSettings["State"]["CurrentSelectionFile"].empty()) {
-				std::experimental::filesystem::path p = selectionFiles()[mSettings["State"]["CurrentSelectionFile"]];
+				Filesystem::Path p = selectionFiles()[mSettings["State"]["CurrentSelectionFile"]];
 				p /= mSettings["State"]["CurrentSelectionFile"] + ".cfg";
 				mCurrentSelectionFile = Ini::IniFile(p);
 				loadCurrentSelectionFile();
@@ -124,9 +134,9 @@ namespace Engine
 			return mSettings["SelectionFiles"];
 		}
 
-		std::experimental::filesystem::path PluginManager::currentSelectionPath()
+		Filesystem::Path PluginManager::currentSelectionPath()
 		{
-			return mCurrentSelectionFile ? mCurrentSelectionFile->path().parent_path() : "";
+			return mCurrentSelectionFile ? mCurrentSelectionFile->path().parentPath() : "";
 		}
 
 		const std::string & PluginManager::currentSelectionName()
@@ -134,10 +144,10 @@ namespace Engine
 			return mSettings["State"]["CurrentSelectionFile"];
 		}
 
-		void PluginManager::setCurrentSelection(const std::string & key, const std::experimental::filesystem::path & path)
+		void PluginManager::setCurrentSelection(const std::string & key, const Filesystem::Path &path)
 		{
 			mSettings["State"]["CurrentSelectionFile"] = key;
-			selectionFiles()[key] = path.generic_string();
+			selectionFiles()[key] = path.str();
 			mSettings.saveToDisk();
 			mCurrentSelectionFile = Ini::IniFile(path / (key + ".cfg"));	
 			loadCurrentSelectionFile();		
@@ -166,6 +176,53 @@ namespace Engine
 		{
 			section->removeListener(listener);
 		}
+
+
+#if __linux__
+		static int VisitModule(struct dl_phdr_info *info, size_t size, void *data) {
+			Filesystem::Path file = Filesystem::Path(info->dlpi_name).filename();
+			if (file.extension() == SHARED_LIB_SUFFIX)
+			{
+				std::string name = file.stem();
+				if (StringUtil::startsWith(name, SHARED_LIB_PREFIX))
+				{
+					std::set<std::string> *modules = static_cast<std::set<std::string> *>(data);
+					modules->insert(name.substr(strlen(SHARED_LIB_PREFIX)));
+				}
+			}
+			return 0;
+		}
+#endif
+
+		std::set<std::string> enumerateLoadedLibraries()
+		{
+			std::set<std::string> result;
+
+#if _WIN32
+			DWORD count;
+			HMODULE modules[512];
+			auto check = EnumProcessModules(GetCurrentProcess(), modules, array_size(modules), &count);
+			assert(check);
+			count /= sizeof(HMODULE);
+			assert(count < array_size(modules));
+
+			for (DWORD i = 0; i < count; ++i)
+			{
+				char buffer[512];
+				auto check2 = GetModuleFileName(modules[i], buffer, sizeof(buffer));
+				assert(check2);
+				Filesystem::Path path = buffer;
+				result.insert(path.stem());
+			}
+#elif __linux__
+			dl_iterate_phdr(VisitModule, &result);
+#else
+#	error "Unsupported Platform!"
+#endif
+
+			return result;
+		}
+
 
 		void PluginManager::setupCoreSection()
 		{

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../filesystem/path.h"
 
 namespace Engine
 {
@@ -8,7 +9,7 @@ namespace Engine
 		class INTERFACES_EXPORT Plugin
 		{
 		public:
-			Plugin(std::string name = {}, std::experimental::filesystem::path path = {});
+			Plugin(std::string name = {}, Filesystem::Path path = {});
 			~Plugin();
 
 			bool isLoaded() const;
@@ -17,13 +18,13 @@ namespace Engine
 
 			const void *getSymbol(const std::string &name) const;
 
-			std::experimental::filesystem::path fullPath() const;
+			Filesystem::Path fullPath() const;
 
 		private:
 			void *mModule;
 
 			std::string mName;
-			std::experimental::filesystem::path mPath;
+			Filesystem::Path mPath;
 
 		};
 	}

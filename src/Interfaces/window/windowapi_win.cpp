@@ -5,6 +5,7 @@
 #include "windowapi.h"
 #include "windoweventlistener.h"
 
+#define NOMINMAX
 #include <Windows.h>
 
 namespace Engine {

@@ -20,7 +20,7 @@ namespace Engine
 
 		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::load(ResourceType * res)
 		{
-			std::string filename = res->path().stem().generic_string();
+			std::string filename = res->path().stem();
 			
 			ShaderType type;
 			int glType;
@@ -37,7 +37,7 @@ namespace Engine
 			else
 				throw 0;
 
-			std::ifstream ifs(res->path());
+			std::ifstream ifs(res->path().str());
 			std::string source((std::istreambuf_iterator<char>(ifs)),
 				std::istreambuf_iterator<char>());
 

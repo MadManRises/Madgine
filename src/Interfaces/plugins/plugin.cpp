@@ -20,7 +20,7 @@ namespace Engine
 	namespace Plugins
 	{
 
-		Plugin::Plugin(std::string name, std::experimental::filesystem::path path) :
+		Plugin::Plugin(std::string name, Filesystem::Path path) :
 			mModule(nullptr),
 			mPath(std::move(path)),
 			mName(std::move(name))
@@ -64,13 +64,13 @@ namespace Engine
 				if (mPath.empty())
 					mModule = GetModuleHandle(nullptr);
 				else
-					mModule = LoadLibrary(mPath.string().c_str());
+					mModule = LoadLibrary(mPath.c_str());
 				SymRefreshModuleList(GetCurrentProcess());
 #elif __linux__
 				if (mPath.empty())
 					mModule = dlopen(nullptr, RTLD_LAZY);
 				else
-					mModule = dlopen(mPath.string().c_str(), RTLD_NOW);
+					mModule = dlopen(mPath.c_str(), RTLD_NOW);
 				if (!isLoaded())
 					errorMsg = dlerror();
 #endif
@@ -122,9 +122,9 @@ namespace Engine
 #endif
 		}
 
-		std::experimental::filesystem::path Plugin::fullPath() const
+		Filesystem::Path Plugin::fullPath() const
 		{
-			std::experimental::filesystem::path path;
+			Filesystem::Path path;
 
 			if (!isLoaded())
 				return path;

@@ -8,8 +8,6 @@
 #include "../renderer/imguiaddons.h"
 #include "Madgine/app/application.h"
 
-#include <experimental/filesystem>
-
 #include "Interfaces/scripting/types/scopebase.h"
 
 #include "Interfaces/generic/keyvalueiterate.h"

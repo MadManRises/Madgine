@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Interfaces/filesystem/path.h"
+
 namespace Engine
 {
 	namespace Resources
@@ -9,7 +11,7 @@ namespace Engine
 		{
 
 		public:
-			ResourceBase(const std::experimental::filesystem::path &path);
+			ResourceBase(Filesystem::Path path);
 
 			virtual ~ResourceBase() = default;
 
@@ -18,16 +20,16 @@ namespace Engine
 
 			bool isPersistent() const;
 
-			const std::experimental::filesystem::path &path();
+			const Filesystem::Path &path();
 			std::string extension();
 			std::string name();
 
-			void updatePath(const std::experimental::filesystem::path &path) { throw 0; }//TODO
+			void updatePath(const Filesystem::Path &path) { throw 0; }//TODO
 
 		private:
 			bool mIsPersistent;
 
-			std::experimental::filesystem::path mPath;
+			Filesystem::Path mPath;
 
 		};
 

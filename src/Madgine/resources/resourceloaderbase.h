@@ -13,7 +13,7 @@ namespace Engine
 			ResourceLoaderBase(ResourceManager &mgr, std::vector<std::string> &&extensions, bool autoLoad=false);
 			virtual ~ResourceLoaderBase() = default;			
 
-			virtual std::pair<ResourceBase *, bool> addResource(const std::experimental::filesystem::path &path) = 0;
+			virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) = 0;
 
 			void resourceAdded(ResourceBase* res);
 			

@@ -4,9 +4,11 @@
 #include "memory/untrackedmemoryresource.h"
 #include "memory/statsmemoryresource.h"
 
-#ifdef _WIN32
+#if _WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
+#elif __ANDROID__
+
 #elif __linux__
 #include <execinfo.h>
 #endif
@@ -34,8 +36,10 @@ namespace Engine {
 
 		void getStackTrace(size_t skip, void **buffer, size_t size) {
 			size_t trace;
-#ifdef _WIN32
+#if _WIN32
 			trace = CaptureStackBackTrace((DWORD)skip + 1, (DWORD)size, buffer, NULL);
+#elif __ANDROID__
+			trace = 0;
 #elif __linux__
 			void *tmpBuffer[128];
 			assert(size + skip + 1 < sizeof(tmpBuffer) / sizeof(tmpBuffer[0]));			
@@ -85,7 +89,8 @@ namespace Engine {
 			};
 			using AddressBuffer = std::pmr::unordered_map<void *, std::optional<BufferObject>>;
 			static AddressBuffer addressBuffer{ resource };
-
+#elif __ANDROID__
+			size = 0;
 #elif __linux__
 			char **symbols = backtrace_symbols(data, size);
 #endif
@@ -116,6 +121,7 @@ namespace Engine {
 						result.erase(--result.end());
 					result.emplace_back(data[i], pib.first->second->mFunction.c_str(), pib.first->second->mFile.c_str(), pib.first->second->mLineNr);
 				}
+#elif __ANDROID__
 #elif __linux__
 				if (symbols && symbols[i]) {
 					result.emplace_back(data[i], symbols[i]);
@@ -124,7 +130,7 @@ namespace Engine {
 #error "Unsupported Platform!"
 #endif
 			}
-#ifdef __linux__
+#if !__ANDROID__ && __linux__
 			if (symbols)
 				free(symbols);
 #endif

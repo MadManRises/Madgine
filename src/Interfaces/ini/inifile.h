@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../filesystem/path.h"
+
 namespace Engine {
 	namespace Ini {
 
@@ -22,7 +24,7 @@ namespace Engine {
 
 		struct INTERFACES_EXPORT IniFile {
 
-			IniFile(const std::experimental::filesystem::path &path);
+			IniFile(const Filesystem::Path &path);
 
 			IniSection &operator[](const std::string &key);
 
@@ -31,13 +33,13 @@ namespace Engine {
 			void saveToDisk() const;
 			void loadFromDisk();
 
-			const std::experimental::filesystem::path &path();
+			const Filesystem::Path &path();
 
 			std::map<std::string, IniSection>::iterator begin();
 			std::map<std::string, IniSection>::iterator end();
 
 		private:
-			std::experimental::filesystem::path mPath;
+			Filesystem::Path mPath;
 
 			std::map<std::string, IniSection> mSections;
 

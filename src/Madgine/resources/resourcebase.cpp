@@ -4,8 +4,8 @@
 
 namespace Engine {
 	namespace Resources {
-		ResourceBase::ResourceBase(const std::experimental::filesystem::path& path) :
-		mPath(path),
+		ResourceBase::ResourceBase(Filesystem::Path path) :
+		mPath(std::move(path)),
 		mIsPersistent(false)
 		{
 		}
@@ -20,19 +20,19 @@ namespace Engine {
 			return mIsPersistent;
 		}
 
-		const std::experimental::filesystem::path& ResourceBase::path()
+		const Filesystem::Path& ResourceBase::path()
 		{
 			return mPath;
 		}
 
 		std::string ResourceBase::extension()
 		{
-			return mPath.extension().generic_string();
+			return mPath.extension();
 		}
 
 		std::string ResourceBase::name()
 		{
-			return mPath.stem().generic_string();
+			return mPath.stem();
 		}
 	}
 }

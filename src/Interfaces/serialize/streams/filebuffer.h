@@ -20,8 +20,8 @@ namespace Engine
 			const_iterator begin() const;
 			const_iterator end() const;
 
-			static FileBuffer readFile(const std::experimental::filesystem::path &path);
-			void writeFile(const std::experimental::filesystem::path &path, bool createFolders = false) const;
+			static FileBuffer readFile(const Filesystem::Path &path);
+			void writeFile(const Filesystem::Path &path, bool createFolders = false) const;
 		};
 
 		class INTERFACES_EXPORT FileBufferReader : public std::basic_streambuf<char>

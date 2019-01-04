@@ -26,7 +26,7 @@ namespace Engine
 			
 			std::shared_ptr<MethodHolder> ScriptLoader::load(ResourceType *res)
 			{
-				std::ifstream stream(res->path());
+				std::ifstream stream(res->path().str());
 				std::optional<MethodHolder> method{ mParser.parseScript(stream, res->name()) };
 				if (method)
 				{

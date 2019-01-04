@@ -11,7 +11,7 @@ namespace Engine
 		class Resource : public ResourceBase
 		{
 		public:
-			Resource(Loader *loader, const std::experimental::filesystem::path &path) :
+			Resource(Loader *loader, const Filesystem::Path &path) :
 				ResourceBase(path),
 				mLoader(loader) {}
 

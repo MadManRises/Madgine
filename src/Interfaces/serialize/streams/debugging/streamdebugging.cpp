@@ -8,6 +8,8 @@
 
 #include "../../serializemanager.h"
 
+#include "../../../filesystem/api.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -80,16 +82,16 @@ namespace Engine
 					sInstance.mLoggingEnabled = b;
 					if (b)
 					{
-						if (std::experimental::filesystem::exists(sInstance.mPath))
+						if (Filesystem::exists(sInstance.mPath))
 						{
-							for (std::experimental::filesystem::directory_iterator end, it(sInstance.mPath); it != end; ++it)
+							for (const Filesystem::Path &p : Filesystem::listFilesRecursive(sInstance.mPath))
 							{
-								remove_all(it->path());
+								Filesystem::remove(p);
 							}
 						}
 						else
 						{
-							std::experimental::filesystem::create_directories(sInstance.mPath);
+							Filesystem::createDirectories(sInstance.mPath);
 						}
 					}
 				}
