@@ -332,7 +332,7 @@ endfunction(third_party_config)
 
 macro(add_workspace_executable target)
 
-	add_executable(${taret} ${ARGN})
+	add_executable(${target} ${ARGN})
 
 endmacro(add_workspace_executable)
 
