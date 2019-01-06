@@ -19,7 +19,7 @@ if (ANDROID)
 			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
 			WORKING_DIRECTORY gradle)
 
-	function(add_workspace_executable target)
+	macro(add_workspace_executable target)
 
 		string(REGEX REPLACE "\\\\" "\\\\\\\\" ANDROID_SDK_ESCAPED "${ANDROID_SDK}")
 
@@ -45,6 +45,6 @@ if (ANDROID)
 		
 		target_link_libraries(${target} PUBLIC android log)				
 
-	endfunction(add_workspace_executable)
+	endmacro(add_workspace_executable)
 
 endif()
