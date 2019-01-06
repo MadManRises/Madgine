@@ -24,10 +24,6 @@ set(CMAKE_MODULE_PATH
 	"${CMAKE_SOURCE_DIR}/cmake/modules"
 )
 
-if (CMAKE_ANDROID_ARCH_ABI)
-	set (ANDROID 1)
-	set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
-endif()
 
 if (UNIX)
 	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h

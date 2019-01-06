@@ -24,7 +24,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin)
 
 if (NOT WIN32)
 	set (outDir ${CMAKE_BINARY_DIR}/bin)
-	if (ANDROID)
+	
+	if (CMAKE_ANDROID_ARCH_ABI)
+		set (ANDROID 1)
+		set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
 		set (outDir ${outDir}/${CMAKE_ANDROID_ARCH_ABI})
 	endif()
 
@@ -327,6 +330,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_${lib} \"$<TARGET_FILE:${lib}>\" )
 	)
 
 endfunction(third_party_config)
+
+macro(add_workspace_executable target)
+
+	add_executable(${taret} ${ARGN})
+
+endmacro(add_workspace_executable)
 
 macro(add_workspace_library name)
 

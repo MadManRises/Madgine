@@ -2,6 +2,8 @@ include(Util)
 
 include_guard()
 
+include (Workspace)
+
 if (ANDROID)
 
 	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
@@ -17,7 +19,7 @@ if (ANDROID)
 			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
 			WORKING_DIRECTORY gradle)
 
-	function(add_executable target)
+	function(add_workspace_executable target)
 
 		string(REGEX REPLACE "\\\\" "\\\\\\\\" ANDROID_SDK_ESCAPED "${ANDROID_SDK}")
 
@@ -30,7 +32,7 @@ if (ANDROID)
 
 		add_library(${target} SHARED gradle/gradlew ${ARGN})
 
-		_add_executable(${target}_apk android/dummy.cpp)
+		_add_workspace_executable(${target}_apk android/dummy.cpp)
 		target_link_libraries(${target}_apk PRIVATE ${target})
 
 		add_custom_command(
@@ -44,6 +46,6 @@ if (ANDROID)
 		
 		target_link_libraries(${target} PUBLIC android log)				
 
-	endfunction(add_executable)
+	endfunction(add_workspace_executable)
 
 endif()

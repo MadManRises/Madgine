@@ -3,7 +3,9 @@ include (android)
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp)
+if (ANDROID)
 	FolderSources(sources "" android androidlauncher.cpp androidlauncher.h)
+endif(ANDROID)
 
 add_executable(MadgineLauncher ${sources})
 
