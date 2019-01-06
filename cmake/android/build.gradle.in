@@ -22,7 +22,7 @@ android {
     compileSdkVersion 21
 
     defaultConfig {
-        applicationId "com.example.native_activity"
+        applicationId "com.@PROJECT_NAME@.@target@"
         minSdkVersion 15
         targetSdkVersion 21
     }
@@ -44,7 +44,7 @@ android {
 
         applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = "../../../../apk/@PROJECT_NAME@-${variant.name}.apk"
+                outputFileName = "../../../../apk/@target@-${variant.name}.apk"
             }
         }
     }
@@ -59,7 +59,7 @@ android {
         }
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            jniLibs.srcDirs = ['bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+            jniLibs.srcDirs = ['@CMAKE_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
         }
     }
 }

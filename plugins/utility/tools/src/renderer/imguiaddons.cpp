@@ -49,7 +49,7 @@ namespace ImGui {
 	void Duration(std::chrono::nanoseconds dur)
 	{
 		if (dur.count() < 1000) {
-			ImGui::Text("%d ns", dur.count());
+			ImGui::Text("%lld ns", dur.count());
 		}
 		else if (dur.count() < 1000000) {
 			ImGui::Text("%.3f us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());

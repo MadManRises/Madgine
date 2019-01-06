@@ -1,17 +1,16 @@
 
 include (android)
 
-if (NOT CMAKE_ANDROID_ARCH_ABI)
-	add_executable(MadgineLauncher launcher.cpp)
-else()
-	add_library(MadgineLauncher SHARED androidLauncher.cpp launcher.cpp)
-	build_apk(MadgineLauncher)
-endif()
+set(sources "")
+FolderSources(sources "" "" launcher.cpp)
+	FolderSources(sources "" android androidlauncher.cpp androidlauncher.h)
 
-target_link_plugins(MadgineLauncher PRIVATE Client Tools OpenGL)
+add_executable(MadgineLauncher ${sources})
 
-if (NOT CMAKE_ANDROID_ARCH_ABI)
-	target_link_plugins(MadgineLauncher PRIVATE OISHandler)
+target_link_plugins(MadgineLauncher PUBLIC Client Tools OpenGL)
+
+if (NOT ANDROID)
+	target_link_plugins(MadgineLauncher PUBLIC OISHandler)
 endif()
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

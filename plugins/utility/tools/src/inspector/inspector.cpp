@@ -151,8 +151,8 @@ namespace Engine
 					},
 					[&](auto)
 					{
-						ImGui::Text(name.c_str()); ImGui::SameLine();
-						ImGui::Text(("Unsupported ValueType: "s + value.getTypeString()).c_str());
+						ImGui::Text("%s", name.c_str()); ImGui::SameLine();
+						ImGui::Text("%s", ("Unsupported ValueType: "s + value.getTypeString()).c_str());
 					}
 				}
 			);
@@ -205,7 +205,7 @@ namespace Engine
 			}
 			else
 			{
-				ImGui::Text(("Unsupported Tag-Type: "s + element->Name()).c_str());
+				ImGui::Text("%s", ("Unsupported Tag-Type: "s + element->Name()).c_str());
 			}
 		}
 
@@ -227,7 +227,7 @@ namespace Engine
 			{
 				if (!element->Attribute("optional"))
 				{
-					ImGui::Text(("Required field not found: "s + name).c_str());
+					ImGui::Text("%s", ("Required field not found: "s + name).c_str());
 				}
 			}
 		}
@@ -286,14 +286,14 @@ namespace Engine
 			}
 			else
 			{
-				ImGui::Text(("Layout not found: "s + element->Attribute("name")).c_str());
+				ImGui::Text("%s", ("Layout not found: "s + element->Attribute("name")).c_str());
 			}
 		}
 
 		void Inspector::drawConstantString(tinyxml2::XMLElement* element, Scripting::ScopeBase* scope,
 			std::set<std::string>& drawn)
 		{
-			ImGui::Text(element->GetText());
+			ImGui::Text("%s", element->GetText());
 		}
 
 		void Inspector::drawSingleLine(tinyxml2::XMLElement* element, Scripting::ScopeBase* scope,

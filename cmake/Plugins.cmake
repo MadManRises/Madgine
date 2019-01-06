@@ -32,6 +32,8 @@ if (STATIC_BUILD)
 
 	read_ini_file(${STATIC_BUILD} PLUGINSELECTION)
 
+	include(android)
+
 	function(add_executable name)
 		_add_executable(${name} ${ARGN})
 		

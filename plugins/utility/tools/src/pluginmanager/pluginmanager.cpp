@@ -142,7 +142,7 @@ namespace Engine
 									for (CollectorInfo *info : *reg) {
 										if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
 											for (const TypeInfo *component : info->mElementInfos) {
-												ImGui::Text(component->mTypeName);
+												ImGui::Text("%s", component->mTypeName);
 											}
 											ImGui::TreePop();
 										}

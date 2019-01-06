@@ -3,22 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:versionCode="1"
     android:versionName="1.0"
-    package="com.madmanrises.@PROJECT_NAME@">
+    package="com.@PROJECT_NAME@.@target@">
 
     <!-- Beware that these values are overridden by the build.gradle file -->
     <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="21" />
 
     <application
         android:allowBackup="false"
-        android:label="com.madmanrises.@PROJECT_NAME@"
+        android:label="com.@PROJECT_NAME@.@target@"
         android:hasCode="false">
 
         <!-- This name is resolved to com.example.myapp.MainActivity
              based upon the package attribute -->
         <activity android:name="android.app.NativeActivity"
-                android:label="@PROJECT_NAME@">
+                android:label="@target@">
                 <meta-data android:name="android.app.lib_name"
-                        android:value="HelloWorld" />
+                        android:value="@target@" />
                 <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
                         <category android:name="android.intent.category.LAUNCHER" />

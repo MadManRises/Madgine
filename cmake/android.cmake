@@ -1,36 +1,49 @@
+include(Util)
 
-if (CMAKE_ANDROID_ARCH_ABI)
+include_guard()
 
-	configure_file(${CMAKE_CURRENT_LIST_DIR}/android/build.gradle.in build.gradle @ONLY)
-	configure_file(${CMAKE_CURRENT_LIST_DIR}/android/AndroidManifest.xml.in AndroidManifest.xml @ONLY)
+if (ANDROID)
 
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
+	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
 
-	add_custom_command(OUTPUT gradlew
+	if (NOT ANDROID_SDK)
+		MESSAGE(SEND_ERROR "No ANDROID_SDK location provided!")
+	endif()
+
+
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
+
+	add_custom_command(OUTPUT gradle/gradlew
 			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
 			WORKING_DIRECTORY gradle)
 
-	add_library(native_app_glue STATIC ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+	function(add_executable target)
 
-	target_include_directories(native_app_glue PUBLIC ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
+		string(REGEX REPLACE "\\\\" "\\\\\\\\" ANDROID_SDK_ESCAPED "${ANDROID_SDK}")
 
-	target_link_libraries(native_app_glue PUBLIC android log)
+		configure_file(${Android_List_dir}/android/build.gradle.in build.gradle @ONLY)
+		configure_file(${Android_List_dir}/android/local.properties.in local.properties @ONLY)
+		configure_file(${Android_List_dir}/android/AndroidManifest.xml.in AndroidManifest.xml @ONLY)
+		configure_file(${Android_List_dir}/android/launch.vs.json.in ${CMAKE_SOURCE_DIR}/.vs/launch.vs.json @ONLY)
+		configure_file(${Android_List_dir}/android/debug_apk.bat.in debug_${target}_apk.bat @ONLY)
+		configure_file(${Android_List_dir}/android/launch_apk.sh.in launch_${target}_apk.sh @ONLY)
 
+		add_library(${target} SHARED gradle/gradlew ${ARGN})
 
+		_add_executable(${target}_apk android/dummy.cpp)
+		target_link_libraries(${target}_apk PRIVATE ${target})
 
-	function(build_apk target)
-
-		add_custom_target(
-				build_apk ALL
-				COMMAND gradle/gradlew assembleDebug
-				COMMENT "Build APK - ${target}"
-				DEPENDS gradlew
+		add_custom_command(
+			TARGET ${target}
+			POST_BUILD				
+			COMMAND gradle/gradlew assembleDebug
+			COMMAND gradle/gradlew --stop
+			COMMENT "Build APK - ${target}"			
+			BYPRODUCTS apk/${target}-debug.apk
 		)
+		
+		target_link_libraries(${target} PUBLIC android log)				
 
-		target_link_libraries(${target} PRIVATE native_app_glue)
-
-		add_dependencies(build_apk ${target})
-
-	endfunction(build_apk)
+	endfunction(add_executable)
 
 endif()

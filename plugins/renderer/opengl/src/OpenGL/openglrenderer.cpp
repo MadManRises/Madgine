@@ -14,7 +14,8 @@
 
 #include <iostream>
 
-#if __linux__
+#ifdef __ANDROID__
+#elif __linux__
 #include<X11/Xlib.h>
 #include<GL/glx.h>
 namespace Engine {
@@ -132,6 +133,7 @@ namespace Engine {
 			ReleaseDC((HWND)window->mHandle, ourWindowHandleToDeviceContext);
 			
 			wglDeleteContext(ourOpenGLRenderingContext);
+#elif defined __ANDROID__
 #elif __linux__
 			glXMakeCurrent(Window::sDisplay, None, NULL);
 
@@ -189,6 +191,7 @@ namespace Engine {
 				wglSwapIntervalEXT(0);
 
 			return ourOpenGLRenderingContext;
+#elif __ANDROID__
 #elif __linux__
 			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 

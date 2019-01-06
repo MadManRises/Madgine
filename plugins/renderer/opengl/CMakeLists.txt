@@ -15,12 +15,14 @@ FolderSources(sources src OpenGL glad.cpp glad.h openglforward.h opengllib.h ope
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
-if (NOT CMAKE_ANDROID_ARCH_ABI)
+target_link_plugins(OpenGL PUBLIC Client)
+
+if (NOT ANDROID)
 	find_package(OpenGL REQUIRED)
 	
 	target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
-	target_link_libraries(OpenGL PUBLIC Client PRIVATE ${OPENGL_LIBRARIES})
+	target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
 endif()
 
 if (BUILD_TESTING)

@@ -24,10 +24,6 @@ target_link_libraries(Server PUBLIC Base)
 
 target_link_libraries(Server PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
-
-if (UNIX)
-	target_link_libraries (Server PRIVATE stdc++fs)
-endif (UNIX)
  
 if (BUILD_TESTING)
 	add_subdirectory(test)

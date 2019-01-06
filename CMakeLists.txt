@@ -1,6 +1,8 @@
 
 cmake_minimum_required (VERSION 3.8)
 
+MESSAGE(STATUS ${CMAKE_C_COMPILER})
+
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0011 OLD)
 cmake_policy(SET CMP0049 OLD)
@@ -21,6 +23,11 @@ set(CMAKE_MODULE_PATH
 	"${CMAKE_SOURCE_DIR}/cmake"
 	"${CMAKE_SOURCE_DIR}/cmake/modules"
 )
+
+if (CMAKE_ANDROID_ARCH_ABI)
+	set (ANDROID 1)
+	set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
+endif()
 
 if (UNIX)
 	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h

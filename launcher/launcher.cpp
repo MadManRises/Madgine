@@ -1,12 +1,13 @@
 #include "Madgine/clientlib.h"
 
+
 #include "Madgine/app/clientapplication.h"
 #include "Madgine/app/clientappsettings.h"
 #include "Madgine/core/root.h"
 
 #include <iostream>
 
-int main() {
+DLL_EXPORT int main() {
 	int result;
 	{
 		Engine::Core::Root root;
@@ -21,3 +22,15 @@ int main() {
 	std::cin >> i;
 	return result;
 }
+
+
+#ifdef __ANDROID__
+
+#include "android/androidlauncher.h"
+
+extern "C" DLL_EXPORT void ANativeActivity_onCreate(ANativeActivity* activity,
+	void* savedState, size_t savedStateSize) {
+	new Engine::Android::AndroidLauncher(activity);
+}
+
+#endif
