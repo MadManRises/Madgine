@@ -330,11 +330,11 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_${lib} \"$<TARGET_FILE:${lib}>\" )
 
 endfunction(third_party_config)
 
-macro(add_workspace_executable target)
+function(add_workspace_executable target)
 
 	add_executable(${target} ${ARGN})
 
-endmacro(add_workspace_executable)
+endfunction(add_workspace_executable)
 
 macro(add_workspace_library name)
 

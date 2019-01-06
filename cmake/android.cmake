@@ -39,7 +39,6 @@ if (ANDROID)
 			TARGET ${target}
 			POST_BUILD				
 			COMMAND gradle/gradlew assembleDebug
-			COMMAND gradle/gradlew --stop
 			COMMENT "Build APK - ${target}"			
 			BYPRODUCTS apk/${target}-debug.apk
 		)
