@@ -3,12 +3,11 @@
 
 #include <iostream>
 
-#ifdef WIN32
+#if WINDOWS
 #include <conio.h>
 
+#define NOMINMAX
 #include <Windows.h>
-#undef min
-#undef max
 #undef NO_ERROR
 #endif
 
@@ -43,7 +42,7 @@ namespace Engine
 
 		void ServerLog::runConsole()
 		{
-#ifdef WIN32
+#if WINDOWS
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			std::string cmd;
 

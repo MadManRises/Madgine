@@ -22,7 +22,7 @@ namespace Engine
 
 		bool GuiHandlerBase::init()
 		{
-			GUI::Widget* window = mUI.gui().getWidgetByName(mWidgetName);
+			GUI::Widget* window = mUI.gui().getWidget(mWidgetName);
 
 			if (!window)
 			{

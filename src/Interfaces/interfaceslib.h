@@ -46,7 +46,7 @@
 #include <mutex>
 #include <variant>
 #include <atomic>
-#ifdef _WIN32
+#if WINDOWS
 #include <memory_resource>
 #else
 #include <experimental/memory_resource>

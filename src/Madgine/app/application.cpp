@@ -258,8 +258,4 @@ namespace Engine
 
 	}
 
-#ifdef _MSC_VER
-	template struct App::GlobalAPICollector;
-#endif
-
 }

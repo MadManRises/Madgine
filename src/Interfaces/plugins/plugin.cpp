@@ -4,11 +4,11 @@
 
 #include "../generic/templates.h"
 
-#ifdef _WIN32
+#if WINDOWS
 #define NOMINMAX
 #include <Windows.h>
 #include <DbgHelp.h>
-#elif defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif UNIX
 #include <unistd.h>
 #include <dlfcn.h>
 #else
@@ -27,9 +27,9 @@ namespace Engine
 		{
 			if (mPath.empty() && !mName.empty())
 			{
-#if _WIN32
+#if WINDOWS
 				mPath = mName;
-#elif __linux__
+#elif UNIX
 				mPath = "lib" + mName + ".so";
 #endif
 			}
@@ -52,7 +52,7 @@ namespace Engine
 
 			LOG(Database::message("Loading Plugin \"", "\"...")(mName));
 
-#ifdef _WIN32
+#if WINDOWS
 			UINT errorMode = GetErrorMode();
 			//SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
@@ -60,13 +60,13 @@ namespace Engine
 			std::string errorMsg;
 
 			try {
-#ifdef _WIN32
+#if WINDOWS
 				if (mPath.empty())
 					mModule = GetModuleHandle(nullptr);
 				else
 					mModule = LoadLibrary(mPath.c_str());
 				SymRefreshModuleList(GetCurrentProcess());
-#elif __linux__
+#elif UNIX
 				if (mPath.empty())
 					mModule = dlopen(nullptr, RTLD_LAZY);
 				else
@@ -80,7 +80,7 @@ namespace Engine
 				mModule = nullptr;
 			}
 
-#ifdef _WIN32
+#if WINDOWS
 			SetErrorMode(errorMode);
 #endif
 
@@ -100,9 +100,9 @@ namespace Engine
 			if (!isLoaded())
 				return true;
 
-#ifdef _WIN32
+#if WINDOWS
 			bool result = mPath.empty() || (FreeLibrary((HINSTANCE)mModule) != 0);
-#elif defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif UNIX
 			bool result = (dlclose(mModule) == 0);
 #endif
 			assert(result);
@@ -115,9 +115,9 @@ namespace Engine
 
 		const void *Plugin::getSymbol(const std::string &name) const {
 			std::string fullName = name + "_" + mName;
-#ifdef _WIN32
+#if WINDOWS
 			return GetProcAddress((HINSTANCE)mModule, fullName.c_str());
-#elif __linux__
+#elif UNIX
 			return dlsym(mModule, fullName.c_str());
 #endif
 		}
@@ -129,12 +129,12 @@ namespace Engine
 			if (!isLoaded())
 				return path;
 
-#ifdef _WIN32
+#if WINDOWS
 			char buffer[512];
 			auto result = GetModuleFileName((HMODULE)mModule, buffer, sizeof(buffer));
 			assert(result);
 			path = buffer;
-#elif __linux__
+#elif UNIX
 			Dl_info info;
 			auto result = dladdr(getSymbol("binaryInfo"), &info);
 			assert(result);

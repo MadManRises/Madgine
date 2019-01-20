@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#ifdef _WIN32
+#if WINDOWS
 
 #include "windowapi.h"
 #include "windoweventlistener.h"

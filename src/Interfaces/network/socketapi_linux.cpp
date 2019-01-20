@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#ifdef __linux__
+#if LINUX
 
 #include "socketapi.h"
 

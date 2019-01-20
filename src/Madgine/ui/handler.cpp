@@ -118,7 +118,7 @@ namespace Engine
 
 		bool Handler::init()
 		{
-			return installToWidget(mUI.gui().getWidgetByName(mWidgetName));
+			return installToWidget(mUI.gui().getWidget(mWidgetName));
 		}
 
 		void Handler::finalize()

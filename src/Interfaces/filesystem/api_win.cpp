@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#if _WIN32
+#if WINDOWS
 
 #include "api.h"
 #include "path.h"

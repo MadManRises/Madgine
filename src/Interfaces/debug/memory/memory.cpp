@@ -5,7 +5,7 @@
 #include "untrackedmemoryresource.h"
 #include "statsmemoryresource.h"
 
-#ifdef _WIN32
+#if WINDOWS
 #define NOMINMAX
 #include <Windows.h>
 
@@ -36,7 +36,7 @@ typedef struct _CrtMemBlockHeader
          */
 } _CrtMemBlockHeader;
 
-#elif __linux__
+#elif UNIX
 
 #include <iostream>
 #include <malloc.h>
@@ -78,7 +78,7 @@ namespace Engine {
 				return mLinkedFront;
 			}
 
-#ifdef _WIN32
+#if WINDOWS
 
 			int(*sOldHook)(int, void*, size_t, int, long, const unsigned char *, int) = nullptr;
 
@@ -116,7 +116,7 @@ namespace Engine {
 				assert(result);
 			}
 
-#elif __linux__
+#elif LINUX || ANDROID
 
 
 			void *(*sOldMallocHook)(size_t, const void *) = nullptr;
@@ -216,9 +216,9 @@ namespace Engine {
 				assert(!sSingleton);
 				sSingleton = this;
 
-#ifdef _WIN32
+#if WINDOWS
 				sOldHook = _CrtSetAllocHook(&win32Hook);
-#elif __linux__				
+#elif UNIX			
 				sOldMallocHook = __malloc_hook;
 				sOldReallocHook = __realloc_hook;
 				sOldFreeHook = __free_hook;
@@ -229,9 +229,9 @@ namespace Engine {
 			}
 
 			MemoryTracker::~MemoryTracker() {
-#ifdef _WIN32				
+#if WINDOWS			
 				_CrtSetAllocHook(sOldHook);
-#elif __linux__
+#elif UNIX
 				__malloc_hook = sOldMallocHook;
 				__realloc_hook = sOldReallocHook;
 				__free_hook = sOldFreeHook;
@@ -239,7 +239,7 @@ namespace Engine {
 
 				sSingleton = nullptr;
 
-#ifndef _WIN32
+#if UNIX
 #	define OutputDebugString(msg) std::cout << msg
 #endif
 

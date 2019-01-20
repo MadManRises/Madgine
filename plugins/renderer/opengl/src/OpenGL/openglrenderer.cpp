@@ -14,8 +14,7 @@
 
 #include <iostream>
 
-#ifdef __ANDROID__
-#elif __linux__
+#if LINUX
 #include<X11/Xlib.h>
 #include<GL/glx.h>
 namespace Engine {
@@ -125,7 +124,7 @@ namespace Engine {
 
 		void OpenGLRenderer::shutdownWindow(Window::Window * window, ContextHandle ourOpenGLRenderingContext)
 		{
-#if _WIN32
+#if WINODWS
 			HDC ourWindowHandleToDeviceContext = GetDC((HWND)window->mHandle);
 
 			wglMakeCurrent(NULL, NULL);
@@ -133,8 +132,7 @@ namespace Engine {
 			ReleaseDC((HWND)window->mHandle, ourWindowHandleToDeviceContext);
 			
 			wglDeleteContext(ourOpenGLRenderingContext);
-#elif defined __ANDROID__
-#elif __linux__
+#elif LINUX
 			glXMakeCurrent(Window::sDisplay, None, NULL);
 
 			glXDestroyContext(Window::sDisplay, ourOpenGLRenderingContext);
@@ -143,7 +141,7 @@ namespace Engine {
 
 		ContextHandle OpenGLRenderer::setupWindowInternal(Window::Window * window)
 		{
-#if _WIN32
+#if WINDOWS
 			PIXELFORMATDESCRIPTOR pfd =
 			{
 				sizeof(PIXELFORMATDESCRIPTOR),
@@ -191,8 +189,7 @@ namespace Engine {
 				wglSwapIntervalEXT(0);
 
 			return ourOpenGLRenderingContext;
-#elif __ANDROID__
-#elif __linux__
+#elif LINUX
 			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
 			static XVisualInfo *vi = glXChooseVisual(Window::sDisplay, 0, att);

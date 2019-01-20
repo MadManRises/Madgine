@@ -31,7 +31,7 @@ ASSERT_TRUE(server.startServer(1234));
 EXPECT_EQ(future.get(), Engine::Serialize::NO_ERROR);
 }
 
-#ifdef _WIN32
+#if WINDOWS
 TEST(asd, FakeTest)
 {
 	int i = 3;

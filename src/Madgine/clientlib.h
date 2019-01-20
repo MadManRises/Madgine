@@ -42,8 +42,4 @@ namespace std {
 #endif*/
 
 
-#ifdef _MSC_VER
-#undef NO_ERROR
-#endif
-
 /// @endcond

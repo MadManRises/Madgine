@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#if __linux__
+#if LINUX
 
 #include "api.h"
 #include "path.h"

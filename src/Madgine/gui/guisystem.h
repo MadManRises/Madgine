@@ -19,7 +19,7 @@ namespace Engine
 			GUISystem(const GUISystem &) = delete;
 			virtual ~GUISystem();			
 
-			Widget* getWidgetByName(const std::string& name);		
+			Widget* getWidget(const std::string& name);		
 
 
 

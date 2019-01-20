@@ -21,12 +21,12 @@ namespace Engine
 			windowHndStr << (size_t)window->mHandle;
 			pl.insert(make_pair("WINDOW"s, windowHndStr.str()));
 
-#if _WIN32
+#if WINDOWS
 			pl.insert(std::make_pair("w32_mouse"s, "DISCL_FOREGROUND"s));
 			pl.insert(std::make_pair("w32_mouse"s, "DISCL_NONEXCLUSIVE"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_FOREGROUND"s));
 			pl.insert(std::make_pair("w32_keyboard"s, "DISCL_NONEXCLUSIVE"s));
-#elif __linux__
+#elif LINUX
 			pl.insert(std::make_pair("x11_mouse_grab"s, "false"s));
 			pl.insert(std::make_pair("x11_mouse_hide"s, "false"s));
 #endif

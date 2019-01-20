@@ -71,7 +71,7 @@ namespace Engine
 		}
 
 
-		Widget* GUISystem::getWidgetByName(const std::string& name)
+		Widget* GUISystem::getWidget(const std::string& name)
 		{
 			return mWidgets.at(name);
 		}

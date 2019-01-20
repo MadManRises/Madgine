@@ -8,11 +8,11 @@
 
 #include "../util/stringutil.h"
 
-#if _WIN32
+#if WINDOWS
 #define NOMINMAX
 #include <Windows.h>
 #include <psapi.h>
-#elif __linux__
+#elif UNIX
 #include <link.h>
 #endif
 
@@ -178,7 +178,7 @@ namespace Engine
 		}
 
 
-#if __linux__
+#if UNIX
 		static int VisitModule(struct dl_phdr_info *info, size_t size, void *data) {
 			Filesystem::Path file = Filesystem::Path(info->dlpi_name).filename();
 			if (file.extension() == SHARED_LIB_SUFFIX)
@@ -198,7 +198,7 @@ namespace Engine
 		{
 			std::set<std::string> result;
 
-#if _WIN32
+#if WINDOWS
 			DWORD count;
 			HMODULE modules[512];
 			auto check = EnumProcessModules(GetCurrentProcess(), modules, array_size(modules), &count);
@@ -214,7 +214,7 @@ namespace Engine
 				Filesystem::Path path = buffer;
 				result.insert(path.stem());
 			}
-#elif __linux__
+#elif UNIX
 			dl_iterate_phdr(VisitModule, &result);
 #else
 #	error "Unsupported Platform!"

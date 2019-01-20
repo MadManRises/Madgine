@@ -4,12 +4,10 @@
 #include "memory/untrackedmemoryresource.h"
 #include "memory/statsmemoryresource.h"
 
-#if _WIN32
+#if WINDOWS
 #include <Windows.h>
 #include <DbgHelp.h>
-#elif __ANDROID__
-
-#elif __linux__
+#elif LINUX
 #include <execinfo.h>
 #endif
 
@@ -36,11 +34,11 @@ namespace Engine {
 
 		void getStackTrace(size_t skip, void **buffer, size_t size) {
 			size_t trace;
-#if _WIN32
+#if WINDOWS
 			trace = CaptureStackBackTrace((DWORD)skip + 1, (DWORD)size, buffer, NULL);
-#elif __ANDROID__
+#elif ANDROID
 			trace = 0;
-#elif __linux__
+#elif LINUX
 			void *tmpBuffer[128];
 			assert(size + skip + 1 < sizeof(tmpBuffer) / sizeof(tmpBuffer[0]));			
 			trace = backtrace(tmpBuffer, size + skip + 1);
@@ -57,7 +55,7 @@ namespace Engine {
 			FullStackTrace result(resource);
 
 			constexpr size_t BUFFERSIZE = 1024;
-#ifdef _WIN32
+#if WINDOWS
 			char infoBuffer[sizeof(SYMBOL_INFO) + BUFFERSIZE];
 			PSYMBOL_INFO info = reinterpret_cast<PSYMBOL_INFO>(infoBuffer);
 			info->MaxNameLen = BUFFERSIZE;
@@ -89,14 +87,14 @@ namespace Engine {
 			};
 			using AddressBuffer = std::pmr::unordered_map<void *, std::optional<BufferObject>>;
 			static AddressBuffer addressBuffer{ resource };
-#elif __ANDROID__
+#elif ANDROID
 			size = 0;
-#elif __linux__
+#elif LINUX
 			char **symbols = backtrace_symbols(data, size);
 #endif
 
 			for (int i = 0; i < size && result.size() < 6; ++i) {
-#ifdef _WIN32
+#if WINDOWS
 				auto pib = addressBuffer.try_emplace(data[i]);
 				if (pib.second) {
 					if (SymFromAddr(process, reinterpret_cast<DWORD64>(data[i]), nullptr, info)) {
@@ -121,8 +119,8 @@ namespace Engine {
 						result.erase(--result.end());
 					result.emplace_back(data[i], pib.first->second->mFunction.c_str(), pib.first->second->mFile.c_str(), pib.first->second->mLineNr);
 				}
-#elif __ANDROID__
-#elif __linux__
+#elif ANDROID
+#elif LINUX
 				if (symbols && symbols[i]) {
 					result.emplace_back(data[i], symbols[i]);
 				}
@@ -130,7 +128,7 @@ namespace Engine {
 #error "Unsupported Platform!"
 #endif
 			}
-#if !__ANDROID__ && __linux__
+#if LINUX
 			if (symbols)
 				free(symbols);
 #endif

@@ -24,7 +24,7 @@ DLL_EXPORT int main() {
 }
 
 
-#ifdef __ANDROID__
+#if ANDROID
 
 #include "android/androidlauncher.h"
 

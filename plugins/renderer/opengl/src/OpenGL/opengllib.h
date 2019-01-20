@@ -19,7 +19,7 @@
 
 #include "Madgine/clientlib.h"
 
-#if _WIN32
+#if WINDOWS
 
 #define NOMINMAX
 #include <Windows.h>
@@ -29,7 +29,7 @@ typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
 typedef HGLRC ContextHandle;
 
-#elif __linux__
+#elif LINUX
 
 struct __GLXcontextRec;
 typedef struct __GLXcontextRec *GLXContext;
