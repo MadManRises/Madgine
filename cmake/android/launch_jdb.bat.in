@@ -1,0 +1,6 @@
+
+"@ANDROID_SDK@/platform-tools/adb.exe" shell pidof com.@PROJECT_NAME@.@target@ > pid.tmp
+set /p pid= < pid.tmp
+del pid.tmp
+"@ANDROID_SDK@/platform-tools/adb.exe" forward tcp:8500 jdwp:%pid%
+"%JAVA_HOME%/bin/jdb.exe" -connect com.sun.jdi.SocketAttach:hostname=localhost,port=8500

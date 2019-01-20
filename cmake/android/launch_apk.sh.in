@@ -1,12 +1,11 @@
 
 cd $(dirname "$0")
 
-am start -a android.intent.action.MAIN -n com.@PROJECT_NAME@.@target@/android.app.NativeActivity -D -N
+am start-activity -D -N -n com.@PROJECT_NAME@.@target@/android.app.NativeActivity
 
 while [ 1 ]
 do
     pid=`pidof com.@PROJECT_NAME@.@target@`
-    echo $pid
     if [ -z "$pid" ]
     then
             echo "Waiting..."
@@ -16,8 +15,12 @@ do
     sleep 1
 done
 
+echo "PID = $pid"
+
 pkill -f gdbserver
 
-daemonize gdbserver64 --attach localhost:2345 $pid
+daemonize gdbserver localhost:2345 --attach $pid
 
-echo gdbserver connected to @target@ is running
+echo gdbserver connected to @target@ is running. Waiting 2 seconds for security...
+
+sleep 2

@@ -1,0 +1,6 @@
+python
+def start_jdb_to_unblock_app():
+  import subprocess
+  subprocess.Popen('launch_jdb.bat')
+start_jdb_to_unblock_app()
+end

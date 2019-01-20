@@ -28,6 +28,7 @@ if (NOT WIN32)
 	if (CMAKE_ANDROID_ARCH_ABI)
 		set (ANDROID 1)
 		set (outDir ${outDir}/${CMAKE_ANDROID_ARCH_ABI})
+		set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
 	endif()
 
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${outDir})
