@@ -62,10 +62,8 @@ namespace Engine
 			(*mPluginManager)["Renderer"].setExclusive();
 			(*mPluginManager)["Renderer"].setAtleastOne();
 
-#if !ANDROID
 			(*mPluginManager)["Input"].setExclusive();
 			(*mPluginManager)["Input"].setAtleastOne();
-#endif
 #endif
 
 			return true;

@@ -1,6 +1,8 @@
 #pragma once
 
 struct ANativeActivity;
+struct ANativeWindow;
+struct AInputQueue;
 
 namespace Engine {
 	namespace Android {
@@ -13,6 +15,9 @@ namespace Engine {
 			void go();
 
 			void onDestroy();
+			void onNativeWindowCreated(ANativeWindow *window);
+			void onInputQueueCreated(AInputQueue *queue);
+			void onInputQueueDestroyed(AInputQueue *queue);
 
 		private:
 			ANativeActivity *mActivity;

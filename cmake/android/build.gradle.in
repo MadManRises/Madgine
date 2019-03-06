@@ -60,6 +60,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             jniLibs.srcDirs = ['@CMAKE_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+			assets.srcDirs = ['@CMAKE_BINARY_DIR@/data/']
         }
     }
 }

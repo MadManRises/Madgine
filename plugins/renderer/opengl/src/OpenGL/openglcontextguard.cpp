@@ -13,6 +13,13 @@ namespace Engine {
 		extern Display *sDisplay;
 	}
 }
+#elif ANDROID
+#include<EGL/egl.h>
+namespace Engine {
+	namespace Window {
+		extern EGLDisplay sDisplay;
+	}
+}
 #endif
 
 namespace Engine {
@@ -33,6 +40,13 @@ namespace Engine {
 			//TODO so
 
 			glXMakeCurrent(Window::sDisplay, window->mHandle, context);
+#elif ANDROID
+			mLastContext = eglGetCurrentContext();
+			mLastWindow = Window::sFromNative((uintptr_t)eglGetCurrentSurface(EGL_DRAW));
+
+			EGLSurface surface = (EGLSurface)window->mHandle;
+			if (!eglMakeCurrent(Window::sDisplay, surface, surface, context))
+				exit(errno);
 #endif
 		}
 
@@ -62,6 +76,17 @@ namespace Engine {
 				throw 0;
 				//TODO
 				glXMakeCurrent(Window::sDisplay, None, NULL);
+#elif ANDROID
+				if (mLastContext)
+				{
+					EGLSurface surface = (EGLSurface)mLastWindow->mHandle;
+					if (!eglMakeCurrent(Window::sDisplay, surface, surface, mLastContext))
+						exit(errno);
+				}
+				else
+				{
+					eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+				}
 #endif
 			}
 		}

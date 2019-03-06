@@ -10,7 +10,7 @@ Project(OpenGL)
 
 set(sources "")
 FolderSources(sources "" src)
-FolderSources(sources src OpenGL glad.cpp glad.h openglcontextguard.cpp openglcontextguard.h openglforward.h opengllib.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshader.cpp openglshader.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h opengltexture.cpp opengltexture.h)
+FolderSources(sources src OpenGL glad.c glad.h openglcontextguard.cpp openglcontextguard.h openglforward.h opengllib.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshader.cpp openglshader.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h opengltexture.cpp opengltexture.h)
 
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
@@ -19,11 +19,15 @@ target_link_plugins(OpenGL PUBLIC Client)
 
 if (NOT ANDROID)
 	find_package(OpenGL REQUIRED)
-	
-	target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
-
-	target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
+else()
+	set(OPENGL_LIBRARIES EGL)
+	set(OPENGL_INCLUDE_DIR "")
 endif()
+	
+target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
+
+target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
+
 
 if (BUILD_TESTING)
 	add_subdirectory(test)

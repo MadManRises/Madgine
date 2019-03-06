@@ -24,6 +24,13 @@ namespace Engine {
 		extern Display *sDisplay;
 	}
 }
+#elif ANDROID
+#include<EGL/egl.h>
+namespace Engine {
+	namespace Window {
+		extern EGLDisplay sDisplay;
+	}
+}
 #endif
 
 namespace Engine {
@@ -55,7 +62,11 @@ namespace Engine {
 				assert(wglCreateContextAttribsARB);
 				wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
 #endif
-				gladLoadGL();
+#if ANDROID
+				assert(gladLoadGLLoader((GLADloadproc)&eglGetProcAddress));
+#else
+				assert(gladLoadGL());
+#endif
 			}
 			shutdownWindow(tmp, context);
 			tmp->destroy();
@@ -122,8 +133,11 @@ namespace Engine {
 
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(glDebugOutput, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			if (glDebugMessageCallback && glDebugMessageControl)
+			{
+				glDebugMessageCallback(glDebugOutput, nullptr);
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			}
 
 			return std::make_unique<OpenGLRenderWindow>(w, context);
 		}
@@ -167,12 +181,12 @@ namespace Engine {
 				0, 0, 0
 			};
 
-			HDC ourWindowHandleToDeviceContext = GetDC((HWND)window->mHandle);
+			HDC windowDC = GetDC((HWND)window->mHandle);
 
-			int  letWindowsChooseThisPixelFormat = ChoosePixelFormat(ourWindowHandleToDeviceContext, &pfd);
-			SetPixelFormat(ourWindowHandleToDeviceContext, letWindowsChooseThisPixelFormat, &pfd);
+			int  format = ChoosePixelFormat(windowDC, &pfd);
+			SetPixelFormat(windowDC, format, &pfd);
 
-			HGLRC ourOpenGLRenderingContext;
+			HGLRC context;
 			if (wglCreateContextAttribsARB) {
 
 #define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
@@ -182,18 +196,18 @@ namespace Engine {
 					0
 				};
 
-				ourOpenGLRenderingContext = wglCreateContextAttribsARB(ourWindowHandleToDeviceContext, NULL, attribs);
+				context = wglCreateContextAttribsARB(windowDC, NULL, attribs);
 			}
 			else {
-				ourOpenGLRenderingContext = wglCreateContext(ourWindowHandleToDeviceContext);
+				context = wglCreateContext(windowDC);
 			}
 
-			OpenGLContextGuard guard(window, ourOpenGLRenderingContext);
+			OpenGLContextGuard guard(window, context);
 
 			if (wglSwapIntervalEXT)
 				wglSwapIntervalEXT(0);
 
-			return ourOpenGLRenderingContext;
+			return context;
 #elif LINUX
 			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
@@ -201,6 +215,25 @@ namespace Engine {
 			assert(vi);
 
 			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
+
+			return context;
+#elif ANDROID
+
+			const EGLint attribs[] = {
+					EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+					EGL_BLUE_SIZE, 8,
+					EGL_GREEN_SIZE, 8,
+					EGL_RED_SIZE, 8,
+					EGL_NONE
+			};
+
+			EGLConfig config;
+			EGLint numConfigs;
+
+			if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
+				throw 0;
+
+			EGLContext context = eglCreateContext(Window::sDisplay, config, 0, 0);
 
 			return context;
 #endif

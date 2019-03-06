@@ -95,7 +95,7 @@ macro(collect_data target)
 
 	generate_binary_info(${target})
 
-	if (STATIC_BUILD)
+	if (STATIC_BUILD OR ANDROID)
 		if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
 			add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_BINARY_DIR}/data)
 		endif()

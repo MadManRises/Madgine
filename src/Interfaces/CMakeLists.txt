@@ -35,7 +35,7 @@ endif()
 	FolderSources(sources "" threading framelistener.h frameloop.cpp frameloop.h scheduler.cpp scheduler.h tasknode.h workgroup.cpp workgroup.h workgrouphandle.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
-	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
+	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_android.h windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
 

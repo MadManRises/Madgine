@@ -16,7 +16,9 @@ if (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android log)	
 endif()
 
-if (NOT ANDROID)
+if (ANDROID)
+	target_link_plugins(MadgineLauncher PUBLIC AndroidInput)
+else()
 	target_link_plugins(MadgineLauncher PUBLIC OISHandler)
 endif()
 

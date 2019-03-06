@@ -29,13 +29,17 @@ typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
 typedef HGLRC ContextHandle;
 
-#elif UNIX
+#elif LINUX
 
 struct __GLXcontextRec;
 typedef struct __GLXcontextRec *GLXContext;
 
 typedef GLXContext ContextHandle;
 
+#elif ANDROID
+
+typedef void *EGLContext;
+typedef EGLContext ContextHandle;
 
 #endif
 
