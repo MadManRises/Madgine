@@ -58,11 +58,7 @@ if (ANDROID)
 				COMMENT "Build APK - ${target}"			
 				BYPRODUCTS apk/${target}-debug.apk
 			)		
-		endif()
-
-		
-		
-		target_link_libraries(${target} PUBLIC android log)				
+		endif()			
 
 	endmacro(add_workspace_executable)
 

@@ -39,7 +39,7 @@ namespace Engine
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 					in >> args;
-					TupleUnpacker::call(this, &ActionImpl::call, std::tuple_cat(std::make_tuple(std::set<ParticipantId>{}), std::move(args)));
+					TupleUnpacker::call(&ActionImpl::call, this, std::set<ParticipantId>{}, std::move(args));
 				}
 
 				void readRequest(BufferedInOutStream& in) override
@@ -48,7 +48,7 @@ namespace Engine
 					{
 						std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> args;
 						in >> args;
-						TupleUnpacker::call(this, &ActionImpl::tryCall, std::tuple_cat(std::make_tuple(in.id(), std::set<ParticipantId>{}), args));
+						TupleUnpacker::call(&ActionImpl::tryCall, this, in.id(), std::set<ParticipantId>{}, std::move(args));
 					}
 				}
 

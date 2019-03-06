@@ -7,6 +7,17 @@
 namespace Engine {
 	namespace Filesystem {
 
+		FileQueryHandle::FileQueryHandle(FileQueryHandle && other) :
+			mPath(std::move(other.mPath)),
+			mHandle(std::exchange(other.mHandle, nullptr))
+		{
+		}
+
+		FileQueryHandle::~FileQueryHandle()
+		{
+			close();
+		}
+
 		const Path &FileQueryHandle::path() const
 		{
 			return mPath;

@@ -2,7 +2,7 @@
 
 #include "Interfaces/serialize/serializableunit.h"
 #include "Interfaces/scripting/types/scope.h"
-#include "../../uniquecomponent/uniquecomponent.h"
+#include "Interfaces/uniquecomponent/uniquecomponent.h"
 
 namespace Engine
 {

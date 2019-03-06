@@ -35,7 +35,7 @@ namespace Engine
 			Plugins::PluginManager::getSingleton().addListener(this);
 #endif
 			
-			registerResourceLocation(Filesystem::runtimePath().parentPath() / "data", 50);
+			registerResourceLocation(Filesystem::configPath().parentPath() / "data", 50);
 		}
 
 		ResourceManager::~ResourceManager()

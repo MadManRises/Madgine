@@ -9,7 +9,7 @@
 
 #include "openglrenderwindow.h"
 
-#include "Madgine/gui/vertex.h"
+#include "client/gui/vertex.h"
 
 #include <iostream>
 
@@ -20,7 +20,7 @@
 
 #include "Interfaces/math/matrix4.h"
 
-#include "Madgine/render/camera.h"
+#include "client/render/camera.h"
 
 namespace Engine {
 	namespace Render {

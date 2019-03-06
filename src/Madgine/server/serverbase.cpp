@@ -2,7 +2,7 @@
 
 #include "serverbase.h"
 
-#include "../core/framelistener.h"
+#include "Interfaces/threading/framelistener.h"
 
 #include "../core/root.h"
 
@@ -30,10 +30,8 @@ namespace Engine
 		}
 
 
-		int ServerBase::go()
+		/*int ServerBase::go()
 		{					
-			FrameLoop::init();
-
 			start();			
 
 			mLog.startConsole([this](const std::string& cmd) { return performCommand(cmd); });
@@ -42,12 +40,10 @@ namespace Engine
 
 			mLog.stopConsole();
 
-			stop();
-
-			FrameLoop::finalize();
+			stop();			
 
 			return result;
-		}
+		}*/
 
 		ServerLog& ServerBase::log()
 		{

@@ -2,6 +2,7 @@
 
 #include "../app/application.h"
 #include "../app/appsettings.h"
+#include "Interfaces/threading/workgrouphandle.h"
 
 namespace Engine
 {
@@ -15,7 +16,7 @@ namespace Engine
 				mApplication(nullptr),
 				mName("thread_"s + std::to_string(++sInstanceCounter)),
 				mResult(0),
-				mThread(&ServerAppInstance::go<T>, this, std::forward<T>(initCallback))
+				mWorkGroup(&ServerAppInstance::go<T>, this, std::forward<T>(initCallback))
 			{
 			}
 
@@ -27,38 +28,26 @@ namespace Engine
 
 		protected:
 			template <class T>
-			void go(T initCallback)
+			void go(T initCallback, Threading::WorkGroup &workgroup)
 			{
-				try{
-					mResult = -1;
+				mResult = -1;
 
-					SignalSlot::ConnectionManager conMgr;
-
-					App::Application app;
-					mApplication = &app;
-					App::AppSettings settings;
-					settings.mRunMain = false;
-					app.setup(settings);
-					if (app.callInit())
-					{
-						try{
-							TupleUnpacker::call(initCallback, std::make_tuple(std::ref(app)));
-							mResult = app.go();
-						}
-						catch(...)
-						{
-							app.callFinalize();	
-							throw;
-						}
-						app.callFinalize();
-					}
-				}
-				catch(const std::exception &e)	{
-					LOG_ERROR(Database::message("Uncaught Exception in Thread: ", "")(e.what()));
-				}
-				catch(...)
+				App::AppSettings settings;
+				settings.mRunMain = false;
+				App::Application app(settings, workgroup);				
+				mApplication = &app;
+				if (app.callInit())
 				{
-					LOG_ERROR("Uncaught unknown Exception in Thread!");
+					try {
+						TupleUnpacker::invoke(initCallback, app);
+						mResult = Threading::Scheduler(workgroup, { &app.frameLoop() }).go();
+					}
+					catch (...)
+					{
+						app.callFinalize();
+						throw;
+					}
+					app.callFinalize();
 				}
 			}
 
@@ -69,7 +58,7 @@ namespace Engine
 			static size_t sInstanceCounter;
 
 			int mResult;
-			std::thread mThread;
+			Threading::WorkGroupHandle mWorkGroup;
 		};
 	}
 }

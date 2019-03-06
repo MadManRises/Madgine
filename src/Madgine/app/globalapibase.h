@@ -5,7 +5,7 @@
 #include "Interfaces/reflection/classname.h"
 
 
-#include "../uniquecomponent/uniquecomponent.h"
+#include "Interfaces/uniquecomponent/uniquecomponent.h"
 
 namespace Engine
 {

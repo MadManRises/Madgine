@@ -31,23 +31,18 @@ namespace Engine {
 		{
 			if (mHandle == INVALID_HANDLE_VALUE)
 				mHandle = nullptr;			
-			else if (!skipSymbolic(mHandle, data))
+			else if (!skipSymbolic(mHandle, data))			
+				close();			
+		}
+
+
+		void FileQueryHandle::close()
+		{
+			if (mHandle)
 			{
 				FindClose(mHandle);
 				mHandle = nullptr;
 			}
-		}
-
-		FileQueryHandle::FileQueryHandle(FileQueryHandle && other) :
-			mPath(std::move(other.mPath)),
-			mHandle(std::exchange(other.mHandle, nullptr))
-		{
-		}
-
-		FileQueryHandle::~FileQueryHandle()
-		{
-			if (mHandle)
-				FindClose(mHandle);
 		}
 
 		bool FileQueryHandle::advance(FileQueryState &data)
@@ -79,7 +74,7 @@ namespace Engine {
 		}
 
 
-		Path runtimePath()
+		Path configPath()
 		{
 			char buffer[512];
 

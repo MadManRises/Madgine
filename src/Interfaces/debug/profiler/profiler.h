@@ -28,25 +28,33 @@ namespace Engine
 			struct INTERFACES_EXPORT ProfilerThread
 			{
 				ProfilerThread();
+				ProfilerThread(ProfilerThread &&) = delete;
 
+				std::string mId;
+				
 				ProcessStats mStats;
+				ProcessStats *mCurrent;				
 			};
 
 			class INTERFACES_EXPORT Profiler
 			{
 			public:
-				Profiler();
+				Profiler(Threading::WorkGroup &workGroup);
 				Profiler(const Profiler&) = delete;
 				~Profiler();
 
-				const ProcessStats *getThreadStats();
+				Profiler &operator=(const Profiler &) = delete;
+
+				const std::list<ProfilerThread> &getThreadStats();
 
 				static Profiler &getSingleton();
 
-			private:
-				ProfilerThread mMainThread;		
+				void registerCurrentThread();
 
+			private:
 				static Profiler *sSingleton;
+
+				std::list<ProfilerThread> mThreads;
 			};
 
 

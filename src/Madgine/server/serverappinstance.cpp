@@ -12,8 +12,6 @@ namespace Engine
 		{
 			if (mApplication)
 				mApplication->shutdown();
-			if (mThread.joinable())
-				mThread.join();
 		}
 
 		const char* ServerAppInstance::key() const

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "resource.h"
-#include "../uniquecomponent/uniquecomponent.h"
+#include "Interfaces/uniquecomponent/uniquecomponent.h"
 #include "resourceloadercollector.h"
 
 namespace Engine

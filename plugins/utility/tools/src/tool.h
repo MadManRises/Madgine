@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/uniquecomponent/uniquecomponent.h"
+#include "Interfaces/uniquecomponent/uniquecomponent.h"
 
 #include "toolscollector.h"
 

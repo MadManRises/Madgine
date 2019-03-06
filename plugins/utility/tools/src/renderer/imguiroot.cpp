@@ -9,13 +9,13 @@
 #include "opengl/openglimguimanager.h"
 #endif
 
-#include "Madgine/app/clientapplication.h"
+#include "Madgine/app/application.h"
 
-#include "Madgine/gui/guisystem.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "client/gui/guisystem.h"
+#include "client/gui/widgets/toplevelwindow.h"
 #include "Interfaces/math/vector3.h"
 
-#include "Madgine/input/inputhandler.h"
+#include "client/input/inputhandler.h"
 
 #include "Interfaces/debug/profiler/profiler.h"
 
@@ -25,7 +25,7 @@
 
 #include "Interfaces/plugins/pluginmanager.h"
 
-#include "Interfaces/signalslot/connectionmanager.h"
+#include "Interfaces/signalslot/taskqueue.h"
 
 #include "../imgui/imgui.h"
 
@@ -34,7 +34,7 @@ namespace Engine {
 
 	namespace Tools {
 
-		std::unique_ptr<ImGuiManager> createOpenGlManager(App::ClientApplication &);
+		std::unique_ptr<ImGuiManager> createOpenGlManager(App::Application &);
 
 		ImGuiRoot::ImGuiRoot(App::Application &app) :
 		Scope(app),
@@ -113,7 +113,7 @@ namespace Engine {
 
 		bool ImGuiRoot::aboutToUnloadPlugin(const Plugins::Plugin * p)
 		{
-			SignalSlot::ConnectionManager::getSingleton().queue([this]() {
+			app().frameLoop().queue([this]() {
 				destroyManager();
 			});
 			return false;
@@ -128,7 +128,7 @@ namespace Engine {
 		{
 			assert(!mManager);
 			IF_PLUGIN(OpenGL)
-			mManager = createOpenGlManager(static_cast<App::ClientApplication&>(app()));
+			mManager = createOpenGlManager(app());
 			else
 			THROW_PLUGIN("No ImGui-Manager available!");
 			mManager->init();

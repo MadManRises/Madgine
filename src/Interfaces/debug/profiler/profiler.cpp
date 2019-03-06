@@ -2,6 +2,8 @@
 
 #include "profiler.h"
 
+#include "../../threading/workgroup.h"
+
 
 namespace Engine
 {
@@ -11,14 +13,16 @@ namespace Engine
 		namespace Profiler
 		{
 
-			thread_local ProcessStats *sCurrent = nullptr;
+			thread_local ProfilerThread *sThread = nullptr;
 
 			Profiler *Profiler::sSingleton = nullptr;
 
-			Profiler::Profiler()
+			Profiler::Profiler(Threading::WorkGroup &workGroup)
 			{
 				assert(!sSingleton);
 				sSingleton = this;
+				registerCurrentThread();
+				workGroup.addThreadInitializer([this]() { registerCurrentThread(); });
 			}
 
 			Profiler::~Profiler()
@@ -27,9 +31,9 @@ namespace Engine
 				sSingleton = nullptr;
 			}
 
-			const ProcessStats * Profiler::getThreadStats()
+			const std::list<ProfilerThread> &Profiler::getThreadStats()
 			{
-				return &mMainThread.mStats;
+				return mThreads;
 			}
 
 			Profiler & Profiler::getSingleton()
@@ -38,18 +42,34 @@ namespace Engine
 				return *sSingleton;
 			}
 
-			ProfilerThread::ProfilerThread() :
-				mStats("Thread - main()")
+			void Profiler::registerCurrentThread()
 			{
-				sCurrent = &mStats;
+				mThreads.emplace_back();
+			}
+
+			std::string idToString(std::thread::id id)
+			{
+				std::stringstream ss;
+				ss << id;
+				return ss.str();
+			}
+
+			ProfilerThread::ProfilerThread() :
+				mId(idToString(std::this_thread::get_id())),
+				mStats(mId.c_str())
+			{
+				assert(!sThread);
+				sThread = this;
+
+				mCurrent = &mStats;
 				mStats.start();
 			}
 
 			void StaticProcess::start()
 			{
 				if (mStats.start()) {
-					mPrevious = sCurrent;
-					sCurrent = &mStats;
+					mPrevious = sThread->mCurrent;
+					sThread->mCurrent = &mStats;
 				}
 			}
 
@@ -57,14 +77,17 @@ namespace Engine
 			{
 				std::optional<ProcessStats::Data> d = mStats.stop();
 				if (d) {
-					assert(sCurrent == &mStats);
-					sCurrent = mPrevious;
-					mPrevious = nullptr;
-					if (!mParent) {
-						mParent = sCurrent->updateChild(&mStats, *d);
-					}
-					else {
-						mParent->second += *d;
+					assert(sThread->mCurrent == &mStats);
+					sThread->mCurrent = mPrevious;
+					if (mPrevious)
+					{
+						mPrevious = nullptr;
+						if (!mParent) {
+							mParent = sThread->mCurrent->updateChild(&mStats, *d);
+						}
+						else {
+							mParent->second += *d;
+						}
 					}
 				}
 			}

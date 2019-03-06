@@ -14,9 +14,11 @@
 #endif
 #endif
 
+#if WINDOWS
 #pragma warning(disable : 4251)
 #pragma warning(disable : 4275)
 #pragma warning(disable : 4661)
+#endif
 
 #include "debug/memory/memoryglobal.h"
 
@@ -46,6 +48,7 @@
 #include <mutex>
 #include <variant>
 #include <atomic>
+#include <future>
 #if WINDOWS
 #include <memory_resource>
 #else

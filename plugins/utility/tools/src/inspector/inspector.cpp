@@ -65,7 +65,7 @@ namespace Engine
 			ImGui::End();
 		}
 
-		void Inspector::drawRemainingMembers(Scripting::ScopeBase* scope, std::set<std::string>& drawn)
+		void Inspector::drawRemainingMembers(Scripting::ScopeBase *scope, std::set<std::string>& drawn)
 		{
 			
 			for (std::unique_ptr<KeyValueIterator> it = scope->iterator(); !it->ended(); ++(*it))
@@ -77,9 +77,28 @@ namespace Engine
 			}
 		}
 
-		void Inspector::drawValue(tinyxml2::XMLElement* element, Scripting::ScopeBase *parent, const KeyValueIterator &it)
+		static bool style(const char *styleAttr, tinyxml2::XMLElement *element) {
+			const char *style = element->Attribute("style");
+			if (!style)
+				return false;
+			
+			const size_t len = strlen(styleAttr);
+
+			while (const char *found = strstr(style, styleAttr))
+			{
+				if ((found == style || found[-1] == ' ') &&
+					(found[len] == '\0' || found[len] == ' '))
+				{
+					return true;
+				}
+				style = found + len;
+			}
+			return false;
+		}
+
+		void Inspector::drawValue(tinyxml2::XMLElement *element, Scripting::ScopeBase *parent, const KeyValueIterator &it)
 		{
-			bool showName = !element || !element->Attribute("noname");
+			bool showName = !element || !style("noname", element);
 			std::string id = (showName ? std::string() : "##"s) + it.key();
 			std::string name = showName ? it.key() : std::string();
 			ValueType value = it.value();
@@ -88,7 +107,7 @@ namespace Engine
 			if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
 				ImGui::PushDisabled();
 
-			value.visit(
+			bool modified = value.visit(
 				overloaded{
 					[&](Scripting::ScopeBase *scope) 
 					{
@@ -97,62 +116,63 @@ namespace Engine
 							draw(scope, element ? element->Attribute("layout") : nullptr);
 							ImGui::TreePop();
 						}
+						return false;
 					},
-					[&](bool tmp) 
+					[&](bool &tmp) 
 					{
-						if (ImGui::Checkbox(id.c_str(), &tmp))
-							value = tmp;
+						return ImGui::Checkbox(id.c_str(), &tmp);
 					},
-					[&](std::string tmp)
+					[&](const std::string &tmp)
 					{
 						char buf[255];
+#if WINDOWS
+						strcpy_s(buf, sizeof(buf), tmp.c_str());
+#else
 						strcpy(buf, tmp.c_str());
+#endif
 
 						if (ImGui::InputText(id.c_str(), buf, sizeof(buf)))
+						{
 							value = buf;
+							return true;
+						}
+						return false;
 					},
-					[&](int tmp)
+					[&](int &tmp)
 					{
-						if (ImGui::DragInt(id.c_str(), &tmp))
-							value = tmp;
+						return ImGui::DragInt(id.c_str(), &tmp);							
 					},
-					[&](size_t tmp)
+					[&](size_t &tmp)
 					{
-						if (ImGui::DragScalar(id.c_str(), ImGuiDataType_U32, &tmp, 1.0f))
-							value = tmp;
+						return ImGui::DragScalar(id.c_str(), ImGuiDataType_U32, &tmp, 1.0f);							
 					},
-					[&](float tmp)
+					[&](float &tmp)
 					{
-						if (ImGui::DragFloat(id.c_str(), &tmp, 0.15f))
-							value = tmp;
+						return ImGui::DragFloat(id.c_str(), &tmp, 0.15f);
 					},
-					[&](Matrix3 tmp)
+					[&](Matrix3 &tmp)
 					{
-						ImGui::DragFloat3((id + "_1").c_str(), tmp[0], 0.15f);
-						ImGui::DragFloat3((id + "_2").c_str(), tmp[1], 0.15f);
-						ImGui::DragFloat3((id + "_3").c_str(), tmp[2], 0.15f);
-
-						value = tmp;
+						return ImGui::DragFloat3((id + "_1").c_str(), tmp[0], 0.15f) ||
+								ImGui::DragFloat3((id + "_2").c_str(), tmp[1], 0.15f) ||
+								ImGui::DragFloat3((id + "_3").c_str(), tmp[2], 0.15f);
 					},
-					[&](Vector2 tmp)
+					[&](Vector2 &tmp)
 					{
-						if (ImGui::DragFloat2(id.c_str(), tmp.ptr(), 0.15f))
-							value = tmp;
+						return ImGui::DragFloat2(id.c_str(), tmp.ptr(), 0.15f);							
 					},
-					[&](Vector3 tmp)
+					[&](Vector3 &tmp)
 					{
-						if (ImGui::DragFloat3(id.c_str(), tmp.ptr(), 0.15f))
-							value = tmp;
+						return ImGui::DragFloat3(id.c_str(), tmp.ptr(), 0.15f);							
 					},
-					[&](Vector4 tmp)
+					[&](Vector4 &tmp)
 					{
-						if (ImGui::DragFloat4(id.c_str(), tmp.ptr(), 0.15f))
-							value = tmp;
+						return ImGui::DragFloat4(id.c_str(), tmp.ptr(), 0.15f);							
 					},
 					[&](auto)
 					{
 						ImGui::Text("%s", name.c_str()); ImGui::SameLine();
 						ImGui::Text("%s", ("Unsupported ValueType: "s + value.getTypeString()).c_str());
+						return false;
 					}
 				}
 			);
@@ -161,7 +181,7 @@ namespace Engine
 			if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
 				ImGui::PopDisabled();
 
-			if (value != it.value())
+			if (modified)
 				parent->set(it.key(), value);
 		}
 
@@ -218,14 +238,14 @@ namespace Engine
 			if (!value->ended())
 			{
 				drawn.insert(name);
-				if (!element->Attribute("hide"))
+				if (!style("hide", element))
 				{
 					drawValue(element, scope, *value);
 				}
 			}
 			else
 			{
-				if (!element->Attribute("optional"))
+				if (!style("optional", element))
 				{
 					ImGui::Text("%s", ("Required field not found: "s + name).c_str());
 				}

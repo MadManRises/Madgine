@@ -76,7 +76,7 @@ namespace Engine {
 
 		void IniFile::saveToDisk() const
 		{
-			std::ofstream stream((mPath.isAbsolute() ? mPath : Filesystem::runtimePath() / mPath).str());
+			std::ofstream stream((mPath.isAbsolute() ? mPath : Filesystem::configPath() / mPath).str());
 			assert(stream);
 			for (const std::pair<const std::string, IniSection> &p : mSections) {
 				stream << "[" << p.first << "]\n";
@@ -87,7 +87,7 @@ namespace Engine {
 		void IniFile::loadFromDisk()
 		{
 			mSections.clear();
-			std::ifstream stream((mPath.isAbsolute() ? mPath : Filesystem::runtimePath() / mPath).str());
+			std::ifstream stream((mPath.isAbsolute() ? mPath : Filesystem::configPath() / mPath).str());
 			std::string line;
 			while (std::getline(stream, line)) {
 				if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))

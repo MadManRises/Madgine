@@ -12,13 +12,25 @@ namespace Engine
 		typedef R return_type;
 		typedef T class_type;
 		typedef std::tuple<_Ty...> argument_types;
-		static constexpr size_t argument_count = sizeof...(_Ty);
+		static constexpr size_t argument_count = sizeof...(_Ty) + (std::is_same_v<T, void> ? 0 : 1);
 
 		template <template <typename, typename, typename...> typename C, typename... Args>
 		struct instance {
 			using type = C<Args..., R, T, _Ty...>;
 		};
 	};
+
+	template <typename T>
+	struct StaticCallableMaker;
+
+	template <typename F, typename R, typename T, typename... _Ty>
+	struct StaticCallableMaker<CallableType<F, R, T, _Ty...>>
+	{
+		typedef CallableType<T, R, void, _Ty...> type;
+	};
+
+	template <typename T>
+	using makeStaticCallable = typename StaticCallableMaker<T>::type;
 
 	namespace __generic__impl__ {
 		template <typename R, typename T, typename... _Ty>
@@ -30,17 +42,12 @@ namespace Engine
 		template <typename R, typename... _Ty>
 		CallableType<R(*)(_Ty ...), R, void, _Ty...> callableTypeDeducer(R(*f)(_Ty ...));
 
-		template <typename F, typename R = decltype(callableTypeDeducer(&F::operator()))>
+		template <typename F, typename R = makeStaticCallable<decltype(callableTypeDeducer(&F::operator()))>>
 		R callableTypeDeducer(const F&);
 	}
 
 	template <typename F>
 	using CallableTraits = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
-
-	template <typename T>
-	struct Wrap {
-		using type = T;
-	};
 
 	template <template <auto, typename, typename, typename...> typename C, auto f>
 	struct Partial {

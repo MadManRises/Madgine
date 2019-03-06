@@ -8,6 +8,8 @@
 
 #include "Interfaces/debug/profiler/profiler.h"
 
+#include "Interfaces/generic/transformIt.h"
+
 namespace Engine {
 	namespace Tools {
 
@@ -52,7 +54,10 @@ namespace Engine {
 
 				ImGui::BeginColumns("cols", 4);
 
-				drawStats(mProfiler.getThreadStats(), mProfiler.getThreadStats()->totalTime(), mProfiler.getThreadStats()->totalTime());
+				for (const Debug::Profiler::ProfilerThread &thread : mProfiler.getThreadStats())
+				{
+					drawStats(&thread.mStats, thread.mStats.totalTime(), thread.mStats.totalTime());
+				}
 
 				ImGui::EndColumns();
 			}

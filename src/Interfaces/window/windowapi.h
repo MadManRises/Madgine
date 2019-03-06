@@ -61,6 +61,7 @@ namespace Engine {
 
 		INTERFACES_EXPORT Window * sCreateWindow(const WindowSettings &settings);
 		INTERFACES_EXPORT void sUpdate();
+		INTERFACES_EXPORT Window * sFromNative(uintptr_t handle);
 
 	}
 }

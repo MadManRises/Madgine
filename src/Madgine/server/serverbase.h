@@ -5,21 +5,19 @@
 #include "Interfaces/scripting/types/luastate.h"
 
 #include "serverappinstance.h"
-#include "../core/frameloop.h"
-#include "../core/framelistener.h"
+#include "Interfaces/threading/frameloop.h"
+#include "Interfaces/threading/framelistener.h"
 
 
 namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public Core::FrameLoop
+		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public Threading::FrameLoop
 		{
 		public:
 			ServerBase(const std::string& name);
 			virtual ~ServerBase();
-
-			virtual int go() override;
 
 			ServerLog& log();		
 

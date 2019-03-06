@@ -144,6 +144,10 @@ namespace Engine {
 			}
 		}
 
+		Window *sFromNative(uintptr_t handle) {
+			return handle ? &sWindows.at((HWND)handle) : nullptr;
+		}
+
 		LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			auto it = sWindows.find(hwnd);

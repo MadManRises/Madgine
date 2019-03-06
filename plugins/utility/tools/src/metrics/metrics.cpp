@@ -14,7 +14,7 @@ namespace Engine {
 			if (ImGui::BeginChild(label)) {
 				const Debug::HistoryData<float> &d = data.data();
 				ImGui::Text("Average: %.5f, Current: %.5f, Min: %.5f, Max: %.5f", d.average(S), data.buffer()[(d.mIndex + S - 1) % S], d.mMin, d.mMax);
-				ImGui::PlotHistogram("", data.buffer(), S, d.mIndex, overlayText, d.mMin * 1.1f, d.mMax * 1.1f, ImVec2(0, 80));	
+				ImGui::PlotHistogram("", data.buffer(), S, static_cast<int>(d.mIndex), overlayText, d.mMin * 1.1f, d.mMax * 1.1f, ImVec2(0, 80));	
 			}
 			ImGui::EndChild();
 		}

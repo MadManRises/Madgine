@@ -2,25 +2,23 @@
 
 #include "imguimanager.h"
 
-#include "Madgine/app/clientapplication.h"
-#include "Madgine/gui/guisystem.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
-#include "Madgine/input/inputhandler.h"
+#include "Madgine/app/application.h"
+#include "client/gui/guisystem.h"
+#include "client/gui/widgets/toplevelwindow.h"
+#include "client/input/inputhandler.h"
 
 #include "../imgui/imgui.h"
 
-#include "Madgine/input/inputevents.h"
-
-#include "Madgine/app/clientapplication.h"
+#include "client/input/inputevents.h"
 
 #include "Interfaces/math/vector3.h"
 
 namespace Engine {
 	namespace Tools {
-		ImGuiManager::ImGuiManager(Engine::App::ClientApplication &app) :
+		ImGuiManager::ImGuiManager(Engine::App::Application &app) :
 			mApp(app)
 		{
-			app.gui().topLevelWindows().front()->addOverlay(this);
+			app.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->addOverlay(this);
 			ImGui::CreateContext();
 		}
 		ImGuiManager::~ImGuiManager()

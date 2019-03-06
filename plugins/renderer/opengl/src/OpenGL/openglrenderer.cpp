@@ -4,15 +4,17 @@
 
 #include "glad.h"
 
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "client/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
 #include "openglrenderwindow.h"
 
-#include "Madgine/render/camera.h"
+#include "client/render/camera.h"
 
 #include <iostream>
+
+#include "openglcontextguard.h"
 
 #if LINUX
 #include<X11/Xlib.h>
@@ -46,12 +48,15 @@ namespace Engine {
 			Engine::Window::WindowSettings settings;
 			Window::Window *tmp = Window::sCreateWindow(settings);
 			ContextHandle context = setupWindowInternal(tmp);
-#if _WIN32			
-			wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
-			assert(wglCreateContextAttribsARB);
-			wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
+			{
+				OpenGLContextGuard guard(tmp, context);
+#if WINDOWS			
+				wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
+				assert(wglCreateContextAttribsARB);
+				wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
 #endif
-			gladLoadGL();
+				gladLoadGL();
+			}
 			shutdownWindow(tmp, context);
 			tmp->destroy();
 			return true;
@@ -113,6 +118,8 @@ namespace Engine {
 		{
 			ContextHandle context = setupWindowInternal(w->window());
 
+			OpenGLContextGuard guard(w->window(), context);
+
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 			glDebugMessageCallback(glDebugOutput, nullptr);
@@ -127,17 +134,15 @@ namespace Engine {
 #if WINODWS
 			HDC ourWindowHandleToDeviceContext = GetDC((HWND)window->mHandle);
 
-			wglMakeCurrent(NULL, NULL);
-
 			ReleaseDC((HWND)window->mHandle, ourWindowHandleToDeviceContext);
 			
 			wglDeleteContext(ourOpenGLRenderingContext);
 #elif LINUX
-			glXMakeCurrent(Window::sDisplay, None, NULL);
 
 			glXDestroyContext(Window::sDisplay, ourOpenGLRenderingContext);
 #endif
 		}
+
 
 		ContextHandle OpenGLRenderer::setupWindowInternal(Window::Window * window)
 		{
@@ -183,7 +188,7 @@ namespace Engine {
 				ourOpenGLRenderingContext = wglCreateContext(ourWindowHandleToDeviceContext);
 			}
 
-			wglMakeCurrent(ourWindowHandleToDeviceContext, ourOpenGLRenderingContext);
+			OpenGLContextGuard guard(window, ourOpenGLRenderingContext);
 
 			if (wglSwapIntervalEXT)
 				wglSwapIntervalEXT(0);
@@ -196,7 +201,6 @@ namespace Engine {
 			assert(vi);
 
 			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
-			glXMakeCurrent(Window::sDisplay, window->mHandle, context);
 
 			return context;
 #endif

@@ -22,6 +22,8 @@ namespace Engine {
 
 			const Path &path() const;
 
+			void close();
+
 		private:			
 			Path mPath;
 			void *mHandle;

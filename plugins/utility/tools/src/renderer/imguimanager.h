@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Madgine/gui/windowoverlay.h"
+#include "client/gui/windowoverlay.h"
 
 namespace Engine {
 	namespace Tools {
 
 		class ImGuiManager : public Engine::GUI::WindowOverlay {
 		public:
-			ImGuiManager(Engine::App::ClientApplication &app);
+			ImGuiManager(Engine::App::Application &app);
 			virtual ~ImGuiManager();
 
 			virtual void init() = 0;
@@ -28,7 +28,7 @@ namespace Engine {
 			void setMenuHeight(float h);
 
 		protected:
-			Engine::App::ClientApplication &mApp;
+			Engine::App::Application &mApp;
 
 			float mMenuHeight = 0.0f;
 

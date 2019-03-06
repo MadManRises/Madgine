@@ -6,8 +6,8 @@ namespace Engine {
 	namespace Filesystem {
 
 		INTERFACES_EXPORT FileQuery listFilesRecursive(const Path &path);
+		INTERFACES_EXPORT Path configPath();
 
-		INTERFACES_EXPORT Path runtimePath();
 		INTERFACES_EXPORT Path makeNormalized(const char *p);
 
 		INTERFACES_EXPORT void createDirectory(const Path &p);

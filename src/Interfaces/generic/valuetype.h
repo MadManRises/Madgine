@@ -350,9 +350,15 @@ namespace Engine
 		static std::string getTypeString(Type type);
 
 		template <typename V>
-		void visit(V &&visitor) const
+		decltype(auto) visit(V &&visitor) const
 		{
-			std::visit(std::forward<V>(visitor), mUnion);
+			return std::visit(std::forward<V>(visitor), mUnion);
+		}
+
+		template <typename V>
+		decltype(auto) visit(V &&visitor)
+		{
+			return std::visit(std::forward<V>(visitor), mUnion);
 		}
 
 	public:

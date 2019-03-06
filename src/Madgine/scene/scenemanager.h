@@ -11,7 +11,7 @@
 #include "entity/entity.h"
 
 #include "Interfaces/serialize/container/noparent.h"
-#include "../core/framelistener.h"
+#include "Interfaces/threading/framelistener.h"
 #include "../app/globalapicollector.h"
 
 #include "scenecomponentset.h"
@@ -22,7 +22,7 @@ namespace Engine
 	{
 		class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
 			public Scripting::Scope<SceneManager, GlobalAPIComponent<Serialize::NoParentUnit<SceneManager>>>,
-			public Core::FrameListener
+			public Threading::FrameListener
 		{
 		public:
 			SceneManager(App::Application &app);

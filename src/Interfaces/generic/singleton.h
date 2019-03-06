@@ -14,8 +14,7 @@ namespace Engine
 	protected:
 		Singleton()
 		{
-			assert(!sSingleton);
-			sSingleton = static_cast<T*>(this);
+			attachToCurrentThread();
 		}
 
 		~Singleton()
@@ -24,6 +23,12 @@ namespace Engine
 			assert(sSingleton);
 #endif
 			sSingleton = nullptr;
+		}
+
+		void attachToCurrentThread()
+		{
+			assert(!sSingleton);
+			sSingleton = static_cast<T*>(this);
 		}
 
 	public:

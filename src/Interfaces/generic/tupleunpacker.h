@@ -4,58 +4,55 @@
 
 namespace Engine
 {
-	struct TupleUnpacker
+	namespace TupleUnpacker
 	{
-		template <class R, class T, class... Args, class Tuple = std::tuple<Args...>>
-		static R call(T* t, R(T::*f)(Args ...), Tuple&& args)
+
+		template <size_t I, typename Tuple, size_t... S, size_t... T>
+		decltype(auto) expand(Tuple&& tuple, std::index_sequence<S...>, std::index_sequence<T...>)
 		{
-			return unpack(t, f, std::forward<Tuple>(args),
-				std::make_index_sequence<sizeof...(Args)>());
+			return std::tuple_cat(
+				std::forward_as_tuple(std::get<S>(std::forward<Tuple>(tuple))...),
+				std::get<I>(std::forward<Tuple>(tuple)),
+				std::forward_as_tuple(std::get<I + 1 + T>(std::forward<Tuple>(tuple))...)
+			);
 		}
 
-		template <class R, class T, class... Args, size_t... S, class Tuple = std::tuple<Args...>>
-		static R unpack(T* t, R(T::*f)(Args ...), Tuple&& args, std::index_sequence<S...>)
+		template <size_t I, typename Tuple>
+		decltype(auto) expand(Tuple&& tuple)
 		{
-			return (t->*f)(std::get<S>(std::forward<Tuple>(args))...);
-		}
-
-		template <class R, class T, class... Args, class Tuple = std::tuple<Args...>>
-		static R call(const T* t, R(T::*f)(Args ...) const, Tuple&& args)
-		{
-			return unpack(t, f, std::forward<Tuple>(args),
-				std::make_index_sequence<sizeof...(Args)>());
-		}
-
-		template <class R, class T, class... Args, size_t... S, class Tuple = std::tuple<Args...>>
-		static R unpack(const T* t, R(T::*f)(Args ...) const, Tuple&& args, std::index_sequence<S...>)
-		{
-			return (t->*f)(std::get<S>(std::forward<Tuple>(args))...);
-		}
-
-		template <class R, class... Args, class Tuple = std::tuple<Args...>>
-		static R call(R(*f)(Args ...), Tuple&& args)
-		{
-			return unpack(f, std::forward<Tuple>(args), std::make_index_sequence<sizeof...(Args)>());
-		}
-
-		template <class R, class... Args, size_t... S, class Tuple = std::tuple<Args...>>
-		static R unpack(R(*f)(Args ...), Tuple&& args, std::index_sequence<S...>)
-		{
-			return (*f)(std::get<S>(std::forward<Tuple>(args))...);
-		}
-
-		template <class F, class Tuple>
-		static typename CallableTraits<F>::return_type call(F& f, Tuple&& args)
-		{
-			return unpack(f, std::forward<Tuple>(args),
-				std::make_index_sequence<CallableTraits<F>::argument_count>());
+			constexpr size_t S = std::tuple_size_v<Tuple>;
+			return expand<I>(
+				std::forward<Tuple>(tuple),
+				std::make_index_sequence<I>(),
+				std::make_index_sequence<S - 1 - I>()
+			);
 		}
 
 		template <class F, size_t... S, class Tuple>
-		static typename CallableTraits<F>::return_type unpack(F& f, Tuple&& args, std::index_sequence<S...>)
+		typename CallableTraits<F>::return_type unpackTuple(F&& f, Tuple&& args, std::index_sequence<S...>)
 		{
-			return f(std::get<S>(std::forward<Tuple>(args))...);
+			return std::invoke(std::forward<F>(f), std::get<S>(std::forward<Tuple>(args))...);
 		}
+
+		template <class F, class Tuple>
+		typename CallableTraits<F>::return_type invokeTuple(F&& f, Tuple&& args)
+		{
+			return unpackTuple(std::forward<F>(f), std::forward<Tuple>(args),
+				std::make_index_sequence<CallableTraits<F>::argument_count>());
+		}
+
+		template <typename F, typename... Args>
+		typename CallableTraits<F>::return_type invoke(F&& f, Args&&... args)
+		{
+			return invokeTuple(std::forward<F>(f), std::forward_as_tuple(std::forward<Args>(args)...));
+		}
+
+		template <typename F, typename... Args>
+		typename CallableTraits<F>::return_type call(F&& f, Args&&... args)
+		{
+			return invokeTuple(std::forward<F>(f), expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
+		}
+
 	};
 
 

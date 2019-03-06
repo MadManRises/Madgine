@@ -11,6 +11,12 @@ namespace Engine
 	class KeyValueIterator;
 	class KeyValueMapList;
 
+
+	struct IndexHolder;
+
+	struct UniqueComponentCollectorManager;
+	struct ComponentRegistryBase;
+
 	namespace Debug {
 
 		struct TraceBack;
@@ -152,7 +158,7 @@ namespace Engine
 		class ConnectionBase;
 		template <class T, class... _Ty>
 		class ConnectionInstance;
-		class ConnectionManager;
+		struct TaskQueue;
 	}
 
 	namespace Window {
@@ -164,6 +170,18 @@ namespace Engine
 		struct Path;
 		struct FileQuery;
 		struct FileQueryState;
+
+		struct SharedLibraryQuery;
+		struct SharedLibraryQueryState;		
+	}
+
+	namespace Threading {
+		struct WorkGroup;
+		struct WorkGroupHandle;
+		struct Scheduler;
+
+		class FrameListener;
+		struct FrameLoop;
 	}
 
 	class Vector2;

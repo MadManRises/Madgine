@@ -40,7 +40,7 @@ namespace Engine
 			std::weak_ptr<ConnectionBase> connect(T& slot, QueuedConnectionType)
 			{
 				std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<QueuedConnection<T*, _Ty...>>(
-					&slot, slot.manager());
+					&slot, slot.taskQueue());
 				mConnectedSlots.emplace_back(
 					conn
 				);
@@ -60,7 +60,7 @@ namespace Engine
 			std::weak_ptr<ConnectionBase> connect(T&& slot, QueuedConnectionType)
 			{
 				std::weak_ptr<Connection<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<QueuedConnection<T, _Ty...>>(
-					std::forward<T>(slot), ConnectionManager::getSingleton());
+					std::forward<T>(slot), DefaultTaskQueue::getSingleton());
 				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}

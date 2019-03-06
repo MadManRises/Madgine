@@ -34,7 +34,7 @@ namespace Engine
 						[&](const std::weak_ptr<Connection<_Ty...>> &p) {
 							if (std::shared_ptr<Connection<_Ty...>> ptr = p.lock())
 							{
-								(*ptr)(p, args...);
+								(*ptr)(args...);
 								return false;
 							}
 							else

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "resourceloadercollector.h"
-#include "../uniquecomponent/uniquecomponentcontainer.h"
+#include "Interfaces/uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/plugins/pluginlistener.h"
-#include "../uniquecomponent/uniquecomponent.h"
+#include "Interfaces/uniquecomponent/uniquecomponent.h"
 #include "Interfaces/filesystem/path.h"
 
 namespace Engine

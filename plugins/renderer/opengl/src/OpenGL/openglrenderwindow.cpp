@@ -1,5 +1,5 @@
 #include "opengllib.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "client/gui/widgets/toplevelwindow.h"
 #include "openglrenderwindow.h"
 #include "openglrenderer.h"
 
@@ -15,9 +15,9 @@
 #include "Interfaces/math/vector3.h"
 #include "Interfaces/math/vector4.h"
 
-#include "Madgine/gui/widgets/widget.h"
+#include "client/gui/widgets/widget.h"
 
-#include "Madgine/gui/vertex.h"
+#include "client/gui/vertex.h"
 
 #include "openglrendertexture.h"
 
@@ -25,6 +25,8 @@
 #include "openglshaderloader.h"
 
 #include "openglshader.h"
+
+#include "openglcontextguard.h"
 
 
 namespace Engine {
@@ -111,6 +113,8 @@ namespace Engine {
 		{
 			PROFILE();
 
+			OpenGLContextGuard guard(window()->window(), mContext);
+
 			updateRenderTargets();
 			glActiveTexture(GL_TEXTURE0);
 			mDefaultTexture.bind();
@@ -162,14 +166,26 @@ namespace Engine {
 			glBindVertexArray(vao);
 
 			// Draw the triangle !
-			glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // Starting from vertex 0; 3 vertices total -> 1 triangle			
+			glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle			
 			
 		}
 
 
 		std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Camera * camera, const Vector2& size)
 		{
+			OpenGLContextGuard guard(window()->window(), mContext);
 			return std::make_unique<OpenGLRenderTexture>(this, ++mTextureCount, camera, size);
+		}
+
+		OpenGLContextGuard OpenGLRenderWindow::lockContext()
+		{
+			return OpenGLContextGuard{ window()->window(), mContext };
+		}
+
+		void OpenGLRenderWindow::renderOverlays()
+		{
+			OpenGLContextGuard guard(window()->window(), mContext);
+			RenderWindow::renderOverlays();
 		}
 
 	}

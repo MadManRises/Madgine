@@ -11,6 +11,11 @@ add_workspace_executable(MadgineLauncher ${sources})
 
 target_link_plugins(MadgineLauncher PUBLIC Client Tools OpenGL)
 
+
+if (ANDROID)
+	target_link_libraries(MadgineLauncher PRIVATE android log)	
+endif()
+
 if (NOT ANDROID)
 	target_link_plugins(MadgineLauncher PUBLIC OISHandler)
 endif()

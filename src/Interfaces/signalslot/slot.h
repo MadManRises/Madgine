@@ -6,7 +6,7 @@
 
 #include "../generic/callable_traits.h"
 
-#include "connectionmanager.h"
+#include "taskqueue.h"
 
 namespace Engine
 {
@@ -16,8 +16,8 @@ namespace Engine
 		class SlotImpl
 		{
 		public:
-			SlotImpl(T* item) :
-				mManager(ConnectionManager::getSingletonPtr()),
+			SlotImpl(T* item, TaskQueue *queue = nullptr) :
+				mQueue(queue ? queue : DefaultTaskQueue::getSingletonPtr()),
 				mThread(std::this_thread::get_id()),
 				mItem(item)
 			{
@@ -33,7 +33,7 @@ namespace Engine
 
 			void queue(_Ty ... args) const
 			{
-				mManager->queue(oneTimeFunctor<T, _Ty...>(f, mItem, std::forward<_Ty>(args)...));
+				mQueue->queue(oneTimeFunctor<T, _Ty...>(f, mItem, std::forward<_Ty>(args)...));
 			}
 
 			void queue_direct(_Ty ... args) const
@@ -58,20 +58,15 @@ namespace Engine
 				return mConnections;
 			}
 
-			std::thread::id thread() const
+			TaskQueue& taskQueue() const
 			{
-				return mThread;
-			}
-
-			ConnectionManager& manager() const
-			{
-				assert(mManager);
-				return *mManager;
+				assert(mQueue);
+				return *mQueue;
 			}
 
 		private:
 			ConnectionStore mConnections;
-			ConnectionManager* mManager;
+			TaskQueue* mQueue;
 			std::thread::id mThread;
 
 			T* mItem;

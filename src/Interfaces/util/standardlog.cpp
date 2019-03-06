@@ -18,7 +18,14 @@ namespace Engine
 		{
 			time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 			
-			struct tm *p = localtime(&time);
+			struct tm *t; 
+#if WINDOWS
+			struct tm _t;
+			t = &_t;
+			localtime_s(t, &time);
+#else
+			t = localtime(&time);
+#endif
 
 			const char* type;
 			switch (lvl)
@@ -35,7 +42,7 @@ namespace Engine
 			}
 
 			char s[30];
-			strftime(s, 28, "%d/%m/%Y - %H:%M : ", p);
+			strftime(s, 28, "%d/%m/%Y - %H:%M : ", t);
 			std::cout << s << msg << std::endl;
 			Log::log(msg, lvl);
 		}

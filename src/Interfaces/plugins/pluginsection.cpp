@@ -10,11 +10,11 @@
 
 #include "../util/exception.h"
 
-#include "../signalslot/connectionmanager.h"
+#include "../signalslot/taskqueue.h"
 
 #include "pluginlistener.h"
 
-#include "../filesystem/api.h"
+#include "../filesystem/runtime.h"
 
 namespace Engine {
 	namespace Plugins {
@@ -30,7 +30,7 @@ namespace Engine {
 				auto result = pib.first->second.load();
 				assert(result);
 			}
-			for (auto path : Filesystem::listFilesRecursive(Filesystem::runtimePath()))
+			for (auto path : Filesystem::listSharedLibraries())
 			{
 				std::string extension = path.extension();
 				if (extension == SHARED_LIB_SUFFIX) {
@@ -164,7 +164,7 @@ namespace Engine {
 				}
 			}
 			else {
-				SignalSlot::ConnectionManager::getSingleton().queue([this, p, unloadExclusive]() {
+				SignalSlot::DefaultTaskQueue::getSingleton().queue([this, p, unloadExclusive]() {
 					bool ok = true;
 					if (unloadExclusive) {
 						for (PluginListener *listener : mListeners)
@@ -198,7 +198,7 @@ namespace Engine {
 				}
 			}
 			else {
-				SignalSlot::ConnectionManager::getSingleton().queue([this, p]() {
+				SignalSlot::DefaultTaskQueue::getSingleton().queue([this, p]() {
 					if (p->unload()) {
 						for (PluginListener *listener : mListeners)
 							listener->onPluginUnload(p);

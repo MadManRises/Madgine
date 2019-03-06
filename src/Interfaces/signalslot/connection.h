@@ -1,7 +1,7 @@
 #pragma once
 
 #include "connectionstore.h"
-#include "connectionmanager.h"
+#include "taskqueue.h"
 #include "../generic/tupleunpacker.h"
 
 namespace Engine
@@ -31,7 +31,6 @@ namespace Engine
 				return ptr;
 			}
 
-		private:
 			std::shared_ptr<ConnectionBase> mNext;
 			std::shared_ptr<ConnectionBase> *mPrev;
 		};
@@ -43,7 +42,7 @@ namespace Engine
 		public:
 			using ConnectionBase::ConnectionBase;			
 
-			virtual void operator()(const std::weak_ptr<Connection<_Ty...>>& ptr, _Ty ... args) const = 0;
+			virtual void operator()(_Ty ... args) const = 0;
 			virtual std::weak_ptr<Connection<_Ty...>> clone() = 0;
 
 		};
@@ -66,7 +65,7 @@ namespace Engine
 
 			void operator()(_Ty ... args) const
 			{
-				TupleUnpacker::call(mImpl, std::forward_as_tuple(args...));
+				TupleUnpacker::invoke(mImpl, std::forward<_Ty>(args)...);
 			}				
 
 		private:
@@ -89,9 +88,9 @@ namespace Engine
 			{
 			}
 
-			void operator()(_Ty ... args) const
+			void operator()(_Ty ... args) const override
 			{
-				TupleUnpacker::call(*mImpl, std::forward_as_tuple(args...));
+				TupleUnpacker::invoke(*mImpl, std::forward<_Ty>(args)...);
 			}
 
 		private:
@@ -117,11 +116,10 @@ namespace Engine
 				return this->template cloneImpl<DirectConnection>(*this);
 			}
 
-			void operator()(const std::weak_ptr<Connection<_Ty...>>& ptr, _Ty ... args) const override
+			void operator()(_Ty ... args) const override final
 			{
 				ConnectionInstance<T, _Ty...>::operator()(args...);
 			}
-
 		
 		};
 
@@ -130,15 +128,15 @@ namespace Engine
 		{
 		public:			
 			QueuedConnection(std::shared_ptr<ConnectionBase> *prev, T&& impl,
-			                 ConnectionManager& mgr) :
+			                 TaskQueue& queue) :
 				ConnectionInstance<T, _Ty...>(prev, std::forward<T>(impl)),
-				mManager(mgr)
+				mQueue(queue)
 			{
 			}
 
 			QueuedConnection(std::shared_ptr<ConnectionBase> *prev, const QueuedConnection<T, _Ty...>& other) :
 				ConnectionInstance<T, _Ty...>(prev, other),
-				mManager(other.mManager)
+				mQueue(other.mQueue)
 			{
 			}
 
@@ -147,26 +145,20 @@ namespace Engine
 				return this->template cloneImpl<QueuedConnection>(*this);
 			}
 
-			void operator()(const std::weak_ptr<Connection<_Ty...>>& ptr, _Ty ... args) override
+			void operator()(_Ty ... args) override final
 			{
-				if (mManager.thread() == std::this_thread::get_id())
+				std::weak_ptr<ConnectionInstance<T, _Ty...>> ptr = *this->mPrev;
+				mQueue.queue([=]()
 				{
-					ConnectionInstance<T, _Ty...>::operator()(args...);
-				}
-				else
-				{
-					mManager.queue([=]()
+					if (std::shared_ptr<ConnectionInstance<T, _Ty...>> innerPtr = ptr.lock())
 					{
-						if (std::shared_ptr<ConnectionInstance<T, _Ty...>> innerPtr = ptr.lock())
-						{
-							static_cast<ConnectionInstance<T, _Ty...>*>(innerPtr.get())->operator()(args...);
-						}
-					});
-				}
+						innerPtr.get()->ConnectionInstance<T, _Ty...>::operator()(args...);
+					}
+				});
 			}
 
 		private:
-			ConnectionManager& mManager;
+			TaskQueue& mQueue;
 		};
 	}
 }

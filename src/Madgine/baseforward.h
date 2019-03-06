@@ -2,11 +2,7 @@
 
 namespace Engine
 {
-	
-	struct IndexHolder;
 
-	struct UniqueComponentCollectorManager;
-	struct ComponentRegistryBase;
 
 	namespace Scene
 	{
@@ -41,9 +37,9 @@ namespace Engine
 
 		class MadgineObject;
 
-		class FrameListener;
-		class FrameLoop;
 	}
+
+
 
 	namespace Resources
 	{
@@ -54,6 +50,7 @@ namespace Engine
 		class ResourceLoader;
 		class ResourceBase;
 	}
+
 
 	namespace Server
 	{

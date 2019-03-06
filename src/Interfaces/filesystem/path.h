@@ -18,6 +18,7 @@ namespace Engine {
 			}
 
 			bool operator==(const Path &other) const;
+			bool operator!=(const Path &other) const;
 
 			Path parentPath() const;
 			Path relative(const Path &base) const;

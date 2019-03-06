@@ -2,9 +2,9 @@
 
 
 
-  <Member name="Application" optional="" hide=""></Member>
-  <Member name="GUISystem" optional=""></Member>
-  <Member name="UI" optional=""></Member>
+  <Member name="Application" style="optional hide"></Member>
+  <Member name="GUISystem" style="optional"></Member>
+  <Member name="UI" style="optional"></Member>
 
   <MemberList name="Global APIs">
   </MemberList>

@@ -20,7 +20,3 @@ echo "PID = $pid"
 pkill -f gdbserver
 
 daemonize gdbserver localhost:2345 --attach $pid
-
-echo gdbserver connected to @target@ is running. Waiting 2 seconds for security...
-
-sleep 2

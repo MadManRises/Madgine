@@ -1,7 +1,7 @@
 #include "oislib.h"
 #include "oisinputhandler.h"
 
-#include "Madgine/input/inputevents.h"
+#include "client/input/inputevents.h"
 
 #include "Interfaces/window/windowapi.h"
 

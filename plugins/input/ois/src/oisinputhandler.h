@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../ois/includes/OIS.h"
-#include <Madgine/input/inputcollector.h>
-#include <Madgine/uniquecomponent/uniquecomponent.h>
+#include <client/input/inputcollector.h>
+#include <Interfaces/uniquecomponent/uniquecomponent.h>
 #include <Interfaces/window/windoweventlistener.h>
 
 namespace Engine

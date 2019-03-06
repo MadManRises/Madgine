@@ -8,12 +8,12 @@
 
 #include "globalapicollector.h"
 
-#include "../core/framelistener.h"
+#include "Interfaces/threading/framelistener.h"
 
-#include "../uniquecomponent/uniquecomponentcontainer.h"
+#include "Interfaces/uniquecomponent/uniquecomponentcontainer.h"
 
-#include "Interfaces/plugins/pluginlistener.h"
-
+#include "Interfaces/threading/scheduler.h"
+#include "Interfaces/threading/frameloop.h"
 
 namespace Engine
 {
@@ -23,7 +23,7 @@ namespace Engine
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
 		class MADGINE_BASE_EXPORT Application : public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
-			public Core::MadgineObject, public Core::FrameListener, public Plugins::PluginListener
+			public Core::MadgineObject, public Threading::FrameListener
 		{
 		public:
 			/**
@@ -32,42 +32,24 @@ namespace Engine
 			* @return result of the call to go()
 			* @param settings the settings for the Application
 			*/
-			template <class App, class Settings>
-			static int run(const Settings& settings)
+			static int run(AppSettings& settings, Threading::WorkGroup &workGroup)
 			{
-				App app;
-				app.setup(settings);
-				if (!app.callInit()) return -1;
-				int result = app.go();
-				app.callFinalize();
-				return result;
+				Application app(settings, workGroup);				
+				app.frameLoop().queue([&]() {app.callInit(); });
+				app.frameLoop().queueTeardown([&]() {app.callFinalize(); });
+				return Threading::Scheduler(workGroup, { &app.frameLoop() }).go();				
 			}
 
 			/**
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application();
+			Application(const AppSettings& settings, Threading::WorkGroup &workGroup);
 			
 			/**
 			 * \brief Deletes all objects created by the Application.
 			 */
 			virtual ~Application();
-
-			/**
-			* \brief Sets up a standard-log using the given App-name.
-			*
-			* @param settings all necessary information to setup the Application
-			*/
-			void setup(const AppSettings& settings);
-
-			/**
-			 * \brief starts the event loop of the madgine.
-			 * This method will block until the event loop is stopped.
-			 *
-			* @return <code>0</code>, if the Application is started and shutdown properly; <code>-1</code> otherwise
-			*/
-			virtual int go();
 
 			/**
 			* Marks the Application as shutdown. This causes the event loop to return within the next frame.
@@ -127,14 +109,18 @@ namespace Engine
 			* \brief Adds a FrameListener to the application.
 			* \param listener the FrameListener to be added.
 			*/
-			void addFrameListener(Core::FrameListener* listener);
+			void addFrameListener(Threading::FrameListener* listener);
 			/**
 			* \brief Removes a FrameListener from the application.
 			* \param listener the FrameListener to be removed.
 			*/
-			void removeFrameListener(Core::FrameListener* listener);
+			void removeFrameListener(Threading::FrameListener* listener);
 
 			void singleFrame();
+
+			Threading::FrameLoop &frameLoop();
+
+			const AppSettings &settings();
 
 		protected:
 			virtual void clear();
@@ -143,25 +129,23 @@ namespace Engine
 
 			void finalize() override;
 
-			void loadFrameLoop(std::unique_ptr<Core::FrameLoop> &&loop = {});
-
-			virtual bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
-			virtual bool aboutToLoadPlugin(const Plugins::Plugin *plugin) override;
-
-			virtual void onPluginUnload(const Plugins::Plugin *plugin) override;
-			virtual void onPluginLoad(const Plugins::Plugin *plugin) override;
+			void loadFrameLoop(std::unique_ptr<Threading::FrameLoop> &&loop = {});
 
 		private:
+
+			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
 
 			GlobalAPIContainer<std::vector> mGlobalAPIs;
 			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Util::StandardLog> mLog;
 
-			std::unique_ptr<Core::FrameLoop> mLoop;		
+			std::unique_ptr<Threading::FrameLoop> mLoop;
 			bool mRestartLoop = false;
 
-			const AppSettings *mSettings;
+			const AppSettings &mSettings;
+
+			
 			
 		};
 	}

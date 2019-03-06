@@ -17,7 +17,7 @@
 
 #include "openglforward.h"
 
-#include "Madgine/clientlib.h"
+#include "client/clientlib.h"
 
 #if WINDOWS
 
@@ -29,7 +29,7 @@ typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
 typedef HGLRC ContextHandle;
 
-#elif LINUX
+#elif UNIX
 
 struct __GLXcontextRec;
 typedef struct __GLXcontextRec *GLXContext;

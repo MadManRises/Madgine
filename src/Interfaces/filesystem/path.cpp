@@ -47,6 +47,11 @@ namespace Engine {
 			return mPath == other.mPath;
 		}
 
+		bool Path::operator!=(const Path &other) const
+		{
+			return mPath != other.mPath;
+		}
+
 		Path Path::parentPath() const
 		{
 			auto sep = mPath.rfind('/');

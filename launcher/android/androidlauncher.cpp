@@ -1,10 +1,12 @@
-#include "Madgine/clientlib.h"
+#include "client/clientlib.h"
 
 #include "androidlauncher.h"
 
-#include "Madgine/app/clientapplication.h"
-#include "Madgine/app/clientappsettings.h"
+#include "Madgine/app/application.h"
+#include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
+#include "Interfaces/threading/workgroup.h"
+#include "Interfaces/filesystem/runtime_android.h"
 
 #include <android/native_activity.h>
 
@@ -25,19 +27,22 @@ namespace Engine {
 
 			activity->callbacks->onDestroy = delegate<&AndroidLauncher::onDestroy>;
 
+			Engine::Filesystem::setAndroidAssetManager(activity->assetManager);
+
 			mThread = std::thread(&AndroidLauncher::go, this);
 
 		}
 
 		void AndroidLauncher::go()
 		{
+			Engine::Threading::WorkGroup workGroup;
 			Engine::Core::Root root;
 			root.init();
-			Engine::App::ClientAppSettings settings;
+			Engine::App::AppSettings settings;
 			settings.mRunMain = false;
 			settings.mAppName = "Madgine Client";
 			settings.mWindowSettings.mTitle = "Maditor";
-			Engine::App::Application::run<Engine::App::ClientApplication>(settings);
+			Engine::App::Application::run(settings, workGroup);
 		}
 
 		void AndroidLauncher::onDestroy()

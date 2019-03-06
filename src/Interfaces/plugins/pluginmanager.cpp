@@ -201,7 +201,7 @@ namespace Engine
 #if WINDOWS
 			DWORD count;
 			HMODULE modules[512];
-			auto check = EnumProcessModules(GetCurrentProcess(), modules, array_size(modules), &count);
+			auto check = EnumProcessModules(GetCurrentProcess(), modules, static_cast<DWORD>(array_size(modules)), &count);
 			assert(check);
 			count /= sizeof(HMODULE);
 			assert(count < array_size(modules));

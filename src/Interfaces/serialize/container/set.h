@@ -31,7 +31,9 @@ namespace Engine
 			template <class... _Ty>
 			std::pair<iterator, bool> emplace_tuple(std::tuple<_Ty...>&& tuple)
 			{
-				return TupleUnpacker::call(this, &SetImpl::emplace<_Ty...>, std::forward<std::tuple<_Ty...>>(tuple));
+				return TupleUnpacker::call(&SetImpl::emplace<_Ty...>,
+					this, 
+					std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
 		};
