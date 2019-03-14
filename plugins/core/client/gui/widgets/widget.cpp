@@ -341,45 +341,45 @@ namespace Engine
 			return mParent;
 		}
 
-		bool Widget::injectMouseMove(const Input::MouseEventArgs & arg)
+		bool Widget::injectPointerMove(const Input::PointerEventArgs & arg)
 		{
 			mMouseMoveSignal.emit(arg);
 			return true;
 		}
 
-		bool Widget::injectMouseEnter(const Input::MouseEventArgs & arg)
+		bool Widget::injectMouseEnter(const Input::PointerEventArgs & arg)
 		{
 			mMouseEnterSignal.emit(arg);
 			return true;
 		}
 
-		bool Widget::injectMouseLeave(const Input::MouseEventArgs & arg)
+		bool Widget::injectMouseLeave(const Input::PointerEventArgs & arg)
 		{
 			mMouseLeaveSignal.emit(arg);
 			return true;
 		}
 
-		SignalSlot::SignalStub<const Input::MouseEventArgs&>& Widget::mouseMoveEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseMoveEvent()
 		{
 			return mMouseMoveSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::MouseEventArgs&>& Widget::mouseDownEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseDownEvent()
 		{
 			return mMouseDownSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::MouseEventArgs&>& Widget::mouseUpEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseUpEvent()
 		{
 			return mMouseUpSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::MouseEventArgs&>& Widget::mouseEnterEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseEnterEvent()
 		{
 			return mMouseEnterSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::MouseEventArgs&>& Widget::mouseLeaveEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseLeaveEvent()
 		{
 			return mMouseLeaveSignal;
 		}

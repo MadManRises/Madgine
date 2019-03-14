@@ -5,6 +5,7 @@
 namespace Engine
 {
 	
+	//TODO Maybe mutable lambda is enough
 	template <class T, class... Ty>
 	struct OneTimeFunctor
 	{
@@ -42,7 +43,7 @@ namespace Engine
 		{
 			assert(!mCalled);
 			mCalled = true;
-			TupleUnpacker::call(mF, mT, std::move(mData));
+			TupleUnpacker::invokeExpand(mF, mT, std::move(mData));
 		}
 
 	private:

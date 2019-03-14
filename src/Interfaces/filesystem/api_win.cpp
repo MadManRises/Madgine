@@ -127,6 +127,15 @@ namespace Engine {
 			return c == '/' || c == '\\';
 		}
 
+		std::vector<char> readFile(const Path & p)
+		{
+			std::ifstream ifs(p.str());
+			if (!ifs)
+				return {};
+			return std::vector<char>(std::istreambuf_iterator<char>(ifs),
+				std::istreambuf_iterator<char>());
+		}
+
 	}
 }
 

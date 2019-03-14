@@ -108,6 +108,12 @@ namespace Engine {
 				tool->update();
 			}
 
+			/*if (ImGui::Begin("Test"))
+			{
+				ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
+			}
+			ImGui::End();*/
+
 			return true;
 		}
 

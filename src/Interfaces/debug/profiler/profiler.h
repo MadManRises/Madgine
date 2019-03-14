@@ -47,13 +47,9 @@ namespace Engine
 
 				const std::list<ProfilerThread> &getThreadStats();
 
-				static Profiler &getSingleton();
-
 				void registerCurrentThread();
 
 			private:
-				static Profiler *sSingleton;
-
 				std::list<ProfilerThread> mThreads;
 			};
 

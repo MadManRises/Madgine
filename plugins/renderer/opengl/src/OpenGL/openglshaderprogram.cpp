@@ -3,7 +3,6 @@
 #include "openglshaderprogram.h"
 #include "openglshader.h"
 
-#include "glad.h"
 
 #include "Interfaces/math/matrix4.h"
 
@@ -57,21 +56,21 @@ namespace Engine {
 		void OpenGLShaderProgram::setUniform(const std::string & var, int value)
 		{
 			bind();
-			unsigned int location = glGetUniformLocation(mHandle, var.c_str());
+			GLint location = glGetUniformLocation(mHandle, var.c_str());
 			glUniform1i(location, value);
 		}
 
 		void OpenGLShaderProgram::setUniform(const std::string & var, const Matrix4 & value)
 		{
 			bind();
-			unsigned int location = glGetUniformLocation(mHandle, var.c_str());
+			GLint location = glGetUniformLocation(mHandle, var.c_str());
 			glUniformMatrix4fv(location, 1, GL_TRUE, value[0]);
 		}
 
 		void OpenGLShaderProgram::setUniform(const std::string & var, const Vector3 & value)
 		{
 			bind();
-			unsigned int location = glGetUniformLocation(mHandle, var.c_str());
+			GLint location = glGetUniformLocation(mHandle, var.c_str());
 			glUniform3fv(location, 1, value.ptr());
 		}
 

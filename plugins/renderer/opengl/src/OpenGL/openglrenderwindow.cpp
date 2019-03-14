@@ -3,7 +3,6 @@
 #include "openglrenderwindow.h"
 #include "openglrenderer.h"
 
-#include "glad.h"
 
 #include <iostream>
 
@@ -21,12 +20,9 @@
 
 #include "openglrendertexture.h"
 
-#include "Madgine/resources/resourcemanager.h"
 #include "openglshaderloader.h"
 
 #include "openglshader.h"
-
-#include "openglcontextguard.h"
 
 
 namespace Engine {
@@ -35,14 +31,14 @@ namespace Engine {
 
 		static GLuint vertexbuffer = 0;
 
-		static unsigned int vao;
+		static GLuint vao;
 
 		OpenGLRenderWindow::OpenGLRenderWindow(GUI::TopLevelWindow * w, ContextHandle context) :
 			RenderWindow(w),
 			mContext(context)
 		{
-			std::shared_ptr<OpenGLShader> vertexShader = Resources::ResourceManager::getSingleton().load<OpenGLShaderLoader>("ui_VS");
-			std::shared_ptr<OpenGLShader> pixelShader = Resources::ResourceManager::getSingleton().load<OpenGLShaderLoader>("ui_PS");
+			std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("ui_VS");
+			std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("ui_PS");
 
 			if (!mProgram.link(vertexShader.get(), pixelShader.get()))
 				throw 0;
@@ -94,13 +90,13 @@ namespace Engine {
 			glEnableVertexAttribArray(3);			
 
 			mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);			
-			float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			GLubyte borderColor[] = { 255, 255, 255, 255 };
 			mDefaultTexture.setData(1, 1, borderColor);
 
 			glEnable(GL_DEPTH_TEST);
 			glDepthMask(GL_TRUE);
 			glDepthFunc(GL_LESS);
-			glDepthRange(0.0, 1.0);
+			//glDepthRange(0.0, 1.0);
 
 		}
 
@@ -112,8 +108,6 @@ namespace Engine {
 		void OpenGLRenderWindow::render()
 		{
 			PROFILE();
-
-			OpenGLContextGuard guard(window()->window(), mContext);
 
 			updateRenderTargets();
 			glActiveTexture(GL_TEXTURE0);
@@ -173,19 +167,7 @@ namespace Engine {
 
 		std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Camera * camera, const Vector2& size)
 		{
-			OpenGLContextGuard guard(window()->window(), mContext);
 			return std::make_unique<OpenGLRenderTexture>(this, ++mTextureCount, camera, size);
-		}
-
-		OpenGLContextGuard OpenGLRenderWindow::lockContext()
-		{
-			return OpenGLContextGuard{ window()->window(), mContext };
-		}
-
-		void OpenGLRenderWindow::renderOverlays()
-		{
-			OpenGLContextGuard guard(window()->window(), mContext);
-			RenderWindow::renderOverlays();
 		}
 
 	}

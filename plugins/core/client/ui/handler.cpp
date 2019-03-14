@@ -13,9 +13,9 @@ namespace Engine
 			mWidget(nullptr),
 			mUI(ui),
 			mWidgetName(windowName),
-		mMouseMoveSlot(this),
-		mMouseDownSlot(this),
-		mMouseUpSlot(this)
+		mPointerMoveSlot(this),
+		mPointerDownSlot(this),
+		mPointerUpSlot(this)
 		{
 		}
 
@@ -65,34 +65,6 @@ namespace Engine
 			return mUI.getGameHandler(i, init);
 		}
 
-		bool Handler::installToWidget(GUI::Widget* w)
-		{
-			mWidget = w;
-
-			mWidget->mouseMoveEvent().connect(mMouseMoveSlot);
-			mWidget->mouseDownEvent().connect(mMouseDownSlot);
-			mWidget->mouseUpEvent().connect(mMouseUpSlot);
-
-			for (const WindowDescriber& des : mWidgets)
-			{
-				GUI::Widget* window = w->getChildRecursive(des.mWidgetName);
-
-				if (!window)
-				{
-					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
-					return false;
-				}
-
-				if (!des.mInit(window))
-					return false;
-
-			}
-
-			mWidgets.clear();
-
-			return true;
-		}
-
 
 		void Handler::sizeChanged()
 		{
@@ -118,31 +90,62 @@ namespace Engine
 
 		bool Handler::init()
 		{
-			return installToWidget(mUI.gui().getWidget(mWidgetName));
+			GUI::Widget *widget = mUI.gui().getWidget(mWidgetName);
+			if (!widget)
+			{
+				LOG_ERROR(Database::Exceptions::handlerInitializationFailed(mWidgetName));
+				return false;
+			}
+			return init(widget);
 		}
 
 		void Handler::finalize()
-		{			
+		{		
+			mWidget = nullptr;
 		}
 
-		bool Handler::init(GUI::Widget* window)
+		bool Handler::init(GUI::Widget* widget)
 		{
-			return installToWidget(window);				
+			assert(widget);
+			mWidget = widget;
+
+			mWidget->mouseMoveEvent().connect(mPointerMoveSlot);
+			mWidget->mouseDownEvent().connect(mPointerDownSlot);
+			mWidget->mouseUpEvent().connect(mPointerUpSlot);
+
+			for (const WindowDescriber& des : mWidgets)
+			{
+				GUI::Widget* child = widget->getChildRecursive(des.mWidgetName);
+
+				if (!child)
+				{
+					LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
+					return false;
+				}
+
+				if (!des.mInit(child))
+					return false;
+
+			}
+
+			mWidgets.clear();
+
+			return true;
 		}
 
-		void Handler::injectMouseMove(const Input::MouseEventArgs& evt)
+		void Handler::injectPointerMove(const Input::PointerEventArgs& evt)
 		{
-			onMouseMove(evt);
+			onPointerMove(evt);
 		}
 
-		void Handler::injectMouseDown(const Input::MouseEventArgs& evt)
+		void Handler::injectPointerDown(const Input::PointerEventArgs& evt)
 		{
-			onMouseDown(evt);
+			onPointerDown(evt);
 		}
 
-		void Handler::injectMouseUp(const Input::MouseEventArgs& evt)
+		void Handler::injectPointerUp(const Input::PointerEventArgs& evt)
 		{
-			onMouseUp(evt);
+			onPointerUp(evt);
 		}
 
 		bool Handler::injectKeyPress(const Input::KeyEventArgs& evt)
@@ -150,15 +153,15 @@ namespace Engine
 			return onKeyPress(evt);
 		}
 
-		void Handler::onMouseMove(const Input::MouseEventArgs& me)
+		void Handler::onPointerMove(const Input::PointerEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseDown(const Input::MouseEventArgs& me)
+		void Handler::onPointerDown(const Input::PointerEventArgs& me)
 		{
 		}
 
-		void Handler::onMouseUp(const Input::MouseEventArgs& me)
+		void Handler::onPointerUp(const Input::PointerEventArgs& me)
 		{
 		}
 

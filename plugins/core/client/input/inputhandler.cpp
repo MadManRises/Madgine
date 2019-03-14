@@ -42,22 +42,22 @@ namespace Engine
 					mListener->injectKeyRelease(arg);
 			}
 
-			void InputHandler::injectMousePress(const MouseEventArgs& arg)
+			void InputHandler::injectPointerPress(const PointerEventArgs& arg)
 			{
 				if (mListener)
-					mListener->injectMousePress(arg);
+					mListener->injectPointerPress(arg);
 			}
 
-			void InputHandler::injectMouseRelease(const MouseEventArgs& arg)
+			void InputHandler::injectPointerRelease(const PointerEventArgs& arg)
 			{
 				if (mListener)
-					mListener->injectMouseRelease(arg);
+					mListener->injectPointerRelease(arg);
 			}
 
-			void InputHandler::injectMouseMove(const MouseEventArgs& arg)
+			void InputHandler::injectPointerMove(const PointerEventArgs& arg)
 			{
 				if (mListener)
-					mListener->injectMouseMove(arg);
+					mListener->injectPointerMove(arg);
 			}
 
 	}

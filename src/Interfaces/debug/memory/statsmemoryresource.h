@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ENABLE_MEMTRACKING
+
 namespace Engine {
 	namespace Debug {
 		namespace Memory {
@@ -27,3 +29,5 @@ namespace Engine {
 		}
 	}
 }
+
+#endif

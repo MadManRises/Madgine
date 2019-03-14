@@ -3,17 +3,12 @@
 #include "openglrendertexture.h"
 
 
-#include "glad.h"
-
 #include "Interfaces/math/vector4.h"
 
 #include "openglrenderwindow.h"
 
 #include "client/gui/vertex.h"
 
-#include <iostream>
-
-#include "Madgine/resources/resourcemanager.h"
 #include "openglshaderloader.h"
 
 #include "openglshader.h"
@@ -25,7 +20,7 @@
 namespace Engine {
 	namespace Render {
 
-		static unsigned int vao;
+		static GLuint vao;
 
 
 		struct Vertex {
@@ -36,10 +31,11 @@ namespace Engine {
 
 		OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow * window, uint32_t index, Camera *camera, const Vector2 & size) :
 			RenderTarget(window, camera, size),
-			mIndex(index)
+			mIndex(index),
+			mWindow(window)
 		{
-			std::shared_ptr<OpenGLShader> vertexShader = Resources::ResourceManager::getSingleton().load<OpenGLShaderLoader>("scene_VS");
-			std::shared_ptr<OpenGLShader> pixelShader = Resources::ResourceManager::getSingleton().load<OpenGLShaderLoader>("scene_PS");
+			std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
+			std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
 			
 			if (!mProgram.link(vertexShader.get(), pixelShader.get()))
 				throw 0;
@@ -87,19 +83,26 @@ namespace Engine {
 			mTexture.setFilter(GL_NEAREST);
 
 			glGenRenderbuffers(1, &mDepthRenderbuffer);
+			glCheck();
 
 			resize(size);
 			
 			glGenFramebuffers(1, &mFramebuffer);
+			glCheck();
 			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);			
+			glCheck();
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);			
+			glCheck();
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);			
+			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);			
+			glCheck();
 
 			GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-			glDrawBuffers(1, DrawBuffers);			
+			glDrawBuffers(1, DrawBuffers);
+			glCheck();
 
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
 				throw 0;
 			
 		}
@@ -107,11 +110,13 @@ namespace Engine {
 		OpenGLRenderTexture::~OpenGLRenderTexture()
 		{
 			glDeleteRenderbuffers(1, &mDepthRenderbuffer);
+			glCheck();
 		}
 
 		uint32_t OpenGLRenderTexture::textureId() const
 		{
 			glActiveTexture(GL_TEXTURE0 + mIndex);
+			glCheck();
 			mTexture.bind();
 			return mIndex;
 		}
@@ -124,21 +129,23 @@ namespace Engine {
 			mTexture.setData(width, height, nullptr);
 
 			glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+			glCheck();
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+			glCheck();
 
 			RenderTarget::resize(size);
 		}
 
 		void OpenGLRenderTexture::render()
 		{
-			auto check = []() {int e = glGetError(); if (e) exit(e); };
+			
 
 			const Vector2 &size = getSize();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-			check();
+			glCheck();
 			glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));			
-			check();
+			glCheck();
 
 			mProgram.bind();
 
@@ -170,17 +177,17 @@ namespace Engine {
 			};
 
 			glBindBuffer(GL_ARRAY_BUFFER, mVertexbuffer);
-			check();
+			glCheck();
 
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * 12, vertices, GL_STATIC_DRAW);
-			check();
+			glCheck();
 
 			glBindVertexArray(vao);
-			check();
+			glCheck();
 
 			// Draw the triangle !
 			glDrawArrays(GL_TRIANGLES, 0, 12); // Starting from vertex 0; 3 vertices total -> 1 triangle		
-			check();	
+			glCheck();
 		}
 
 	}

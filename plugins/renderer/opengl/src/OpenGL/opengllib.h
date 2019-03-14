@@ -19,13 +19,15 @@
 
 #include "client/clientlib.h"
 
+#if !ANDROID
+#include "../glad/glad.h"
+#else
+#include <GLES3/gl3.h>
+#endif
+
+inline void glCheck() { int e = glGetError(); if (e) throw e; };
+
 #if WINDOWS
-
-#define NOMINMAX
-#include <Windows.h>
-
-typedef HGLRC(WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
-typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
 typedef HGLRC ContextHandle;
 
@@ -43,6 +45,6 @@ typedef EGLContext ContextHandle;
 
 #endif
 
-#include "glad.h"
+
 
 /// @endcond

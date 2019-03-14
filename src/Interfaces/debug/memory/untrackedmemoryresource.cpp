@@ -1,4 +1,7 @@
 #include "../../interfaceslib.h"
+
+#ifdef ENABLE_MEMTRACKING
+
 #include "untrackedmemoryresource.h"
 #include "memory.h"
 
@@ -34,3 +37,4 @@ namespace Engine {
 }
 
 
+#endif

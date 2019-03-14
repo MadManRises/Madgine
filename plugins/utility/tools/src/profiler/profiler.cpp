@@ -10,6 +10,10 @@
 
 #include "Interfaces/generic/transformIt.h"
 
+#include "Madgine/app/application.h"
+
+#include "../renderer/imguiroot.h"
+
 namespace Engine {
 	namespace Tools {
 
@@ -44,7 +48,7 @@ namespace Engine {
 
 		Profiler::Profiler(ImGuiRoot & root) :
 			Tool<Profiler>(root),
-			mProfiler(Debug::Profiler::Profiler::getSingleton())
+			mProfiler(root.app(false).profiler())
 		{
 		}
 

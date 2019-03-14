@@ -10,10 +10,14 @@ namespace Engine
 	
 		struct WorkGroupHandle
 		{
+			WorkGroupHandle() = default;
+
 			template <typename F, typename... Args>
-			WorkGroupHandle(F&& main, Args&&... args) :
-				mThread(&WorkGroupHandle::threadMain<F, Args...>, std::forward<F>(main), std::forward<Args>(args)...)
+			WorkGroupHandle(F&& main, Args&&... args)				
 			{				
+				std::promise<int> p;
+				mResult = p.get_future();
+				mThread = std::thread(&WorkGroupHandle::threadMain<F, Args...>, std::move(p), std::forward<F>(main), std::forward<Args>(args)...);
 			}
 
 			~WorkGroupHandle() 
@@ -21,27 +25,43 @@ namespace Engine
 				if (mThread.joinable())
 				{					
 					mThread.join();
+					mResult.get();
 				}
+			}
+
+			WorkGroupHandle &operator= (WorkGroupHandle &&other)
+			{
+				assert(!mThread.joinable());
+				mResult = std::move(other.mResult);
+				mThread = std::move(other.mThread);
+				return *this;
+			}
+
+			void detach()
+			{
+				assert(mThread.joinable());
+				mThread.detach();
 			}
 
 		private:
 			template <typename F, typename... Args>
-			static void threadMain(F&& main, Args&&... args)
+			static void threadMain(std::promise<int> p, F&& main, Args&&... args)
 			{
 				WorkGroup group;
 				try {
-					TupleUnpacker::invoke(std::forward<F>(main), std::forward<Args>(args)..., group);
+					int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., group);
+					p.set_value(result);
 				}
-				catch (const std::exception &e) {
-					LOG_ERROR(Database::message("Uncaught Exception in Workgroup: ", "")(e.what()));
-				}
-				catch (...)
+				catch (std::exception &e)
 				{
-					LOG_ERROR("Uncaught unknown Exception in Workgroup!");
+					LOG_ERROR("Uncaught Exception in Workgroup-MainThread!");
+					LOG_EXCEPTION(e);
+					throw;
 				}
 			}
 
 		private:
+			std::future<int> mResult;
 			std::thread mThread;			
 		};
 

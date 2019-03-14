@@ -1,11 +1,9 @@
 
 cmake_minimum_required (VERSION 3.8)
 
-MESSAGE(STATUS ${CMAKE_C_COMPILER})
-
 cmake_policy(SET CMP0048 NEW)
-cmake_policy(SET CMP0011 OLD)
-cmake_policy(SET CMP0049 OLD)
+cmake_policy(SET CMP0011 NEW)
+cmake_policy(SET CMP0049 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

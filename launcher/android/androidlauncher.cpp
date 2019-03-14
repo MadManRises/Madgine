@@ -7,13 +7,33 @@
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
 #include "Interfaces/threading/workgroup.h"
-#include "Interfaces/filesystem/runtime_android.h"
-#include "Interfaces/window/windowapi_android.h"
-#include "eventbridge.h"
+#include "Interfaces/threading/scheduler.h"
 
 #include <android/native_activity.h>
 
+#include "Interfaces/threading/systemvariable.h"
+
 namespace Engine {
+	namespace Filesystem {
+
+		extern AAssetManager *sAssetManager;
+
+	}
+
+	namespace Window
+	{
+
+		extern Threading::SystemVariable<ANativeWindow*> sNativeWindow;
+
+	}
+
+	namespace Input
+	{
+
+		extern AInputQueue *sQueue;
+
+	}
+
 	namespace Android {
 
 		template <auto f, typename... Args>
@@ -24,52 +44,70 @@ namespace Engine {
 
 
 		AndroidLauncher::AndroidLauncher(ANativeActivity * activity) :
-			mActivity(activity)
+			mActivity(activity),
+			mApp(nullptr)
 		{
-			activity->instance = this;
+			/*activity->instance = this;
 
 			activity->callbacks->onDestroy = delegate<&AndroidLauncher::onDestroy>;
 			activity->callbacks->onNativeWindowCreated = delegate<&AndroidLauncher::onNativeWindowCreated, ANativeWindow*>;
+			activity->callbacks->onNativeWindowDestroyed = delegate<&AndroidLauncher::onNativeWindowDestroyed, ANativeWindow*>;
 			activity->callbacks->onInputQueueCreated = delegate<&AndroidLauncher::onInputQueueCreated, AInputQueue*>;
 			activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue*>;
 
-			Engine::Filesystem::setAndroidAssetManager(activity->assetManager);
-
-			mThread = std::thread(&AndroidLauncher::go, this);
+			Engine::Filesystem::sAssetManager = activity->assetManager;
+			*/
+			
+			mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
 
 		}
 
-		void AndroidLauncher::go()
+		void AndroidLauncher::go(Threading::WorkGroup &workGroup)
 		{
-			Engine::Threading::WorkGroup workGroup;
-			Engine::Core::Root root;
-			root.init();
+			ANativeActivity * activity = mActivity;
+
+			static Engine::Core::Root root;
 			Engine::App::AppSettings settings;
 			settings.mRunMain = false;
 			settings.mAppName = "Madgine Client";
 			settings.mWindowSettings.mTitle = "Maditor";
-			Engine::App::Application::run(settings, workGroup);
+			
+			Application app(settings);
+			mApp = &app;
+			Threading::Scheduler(workGroup, { &app.frameLoop() }).go();
+			ANativeActivity_finish(activity);
 		}
 
 		void AndroidLauncher::onDestroy()
 		{
+			mApp->shutdown();
+			mThread.detach();
 			mActivity->instance = nullptr;
 			delete this;
 		}
 
 		void AndroidLauncher::onNativeWindowCreated(ANativeWindow * window)
 		{
-			Engine::Window::setAndroidNativeWindow(window);
+			assert(!Window::sNativeWindow);
+			Window::sNativeWindow = window;
+		}
+
+		void AndroidLauncher::onNativeWindowDestroyed(ANativeWindow * window)
+		{
+			assert(Window::sNativeWindow == window);
+			Window::sNativeWindow = nullptr;
 		}
 
 		void AndroidLauncher::onInputQueueCreated(AInputQueue *queue)
 		{
-			Engine::Input::setAndroidInputQueue(queue);
+			assert(!Input::sQueue);
+			Input::sQueue = queue;
 		}
 
 		void AndroidLauncher::onInputQueueDestroyed(AInputQueue *queue)
 		{
-			Engine::Input::setAndroidInputQueue(nullptr);
+			assert(Input::sQueue == queue);
+			Input::sQueue = nullptr;
 		}
 
 	}

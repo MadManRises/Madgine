@@ -60,9 +60,9 @@ namespace Engine
 
 			bool injectKeyPress(const Input::KeyEventArgs& arg) override;
 			bool injectKeyRelease(const Input::KeyEventArgs& arg) override;
-			bool injectMousePress(const Input::MouseEventArgs& arg) override;
-			bool injectMouseRelease(const Input::MouseEventArgs& arg) override;
-			bool injectMouseMove(const Input::MouseEventArgs& arg) override;
+			bool injectPointerPress(const Input::PointerEventArgs& arg) override;
+			bool injectPointerRelease(const Input::PointerEventArgs& arg) override;
+			bool injectPointerMove(const Input::PointerEventArgs& arg) override;
 
 			void renderOverlays();
 

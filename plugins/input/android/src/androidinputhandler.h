@@ -1,6 +1,7 @@
 #pragma once
 
 struct ALooper;
+struct AInputEvent;
 
 #include "client/input/inputcollector.h"
 
@@ -17,6 +18,8 @@ namespace Engine
 
 		private:
 			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+
+			bool handleMotionEvent(const AInputEvent *event);
 
 		private:
 		};

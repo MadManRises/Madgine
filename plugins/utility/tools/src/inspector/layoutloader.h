@@ -11,7 +11,7 @@ namespace Engine {
 			LayoutLoader(Resources::ResourceManager &mgr);
 
 		private:
-			virtual std::shared_ptr<Data> load(ResourceType * res) override;
+			virtual std::shared_ptr<Data> loadImpl(ResourceType * res) override;
 		};
 
 	}

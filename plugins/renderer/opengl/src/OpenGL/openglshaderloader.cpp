@@ -6,7 +6,6 @@
 
 #include "openglshader.h"
 
-#include "glad.h"
 
 namespace Engine
 {
@@ -18,12 +17,12 @@ namespace Engine
 		{
 		}
 
-		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::load(ResourceType * res)
+		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::loadImpl(ResourceType * res)
 		{
 			std::string filename = res->path().stem();
 			
 			ShaderType type;
-			int glType;
+			GLenum glType;
 			if (StringUtil::endsWith(filename, "_VS")) 
 			{
 				type = VertexShader;
@@ -37,20 +36,18 @@ namespace Engine
 			else
 				throw 0;
 
-			std::ifstream ifs(res->path().str());
-			std::string source((std::istreambuf_iterator<char>(ifs)),
-				std::istreambuf_iterator<char>());
+			std::string source = res->readAsText();
 
 			const char *cSource = source.c_str();
 
 			std::shared_ptr<OpenGLShader> shader = std::make_shared<OpenGLShader>(glType, type);
 
-			unsigned int handle = shader->mHandle;
+			GLuint handle = shader->mHandle;
 
 			glShaderSource(handle, 1, &cSource, NULL);
 			glCompileShader(handle);
 			// check for shader compile errors
-			int success;
+			GLint success;
 			char infoLog[512];
 			glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
 			if (!success)

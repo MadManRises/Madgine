@@ -31,18 +31,18 @@ namespace Engine
 		{
 #ifndef STATIC_BUILD
 			(*mPluginManager)["Utility"].loadPlugin("Tools");
+
+			(*mPluginManager)["Core"].loadPlugin("Client");
+
+			(*mPluginManager)["Renderer"].loadPlugin("OpenGL");
+			(*mPluginManager)["Renderer"].setExclusive();
+			(*mPluginManager)["Renderer"].setAtleastOne();
+
+			(*mPluginManager)["Input"].setExclusive();
+			(*mPluginManager)["Input"].setAtleastOne();
 #endif
-		}
 
-		Root::~Root()
-		{
-		}
-
-		bool Root::init()
-		{
-
-			if (!mResources->init())
-				return false;
+			mResources->init();
 
 			for (auto &res : mResources->get<Scripting::Parsing::ScriptLoader>())
 			{
@@ -55,19 +55,10 @@ namespace Engine
 
 			mLuaState->setFinalized();
 
-#ifndef STATIC_BUILD
-			(*mPluginManager)["Core"].loadPlugin("Client");
+		}
 
-			(*mPluginManager)["Renderer"].loadPlugin("OpenGL");
-			(*mPluginManager)["Renderer"].setExclusive();
-			(*mPluginManager)["Renderer"].setAtleastOne();
-
-			(*mPluginManager)["Input"].setExclusive();
-			(*mPluginManager)["Input"].setAtleastOne();
-#endif
-
-			return true;
-
+		Root::~Root()
+		{
 		}
 
 	}

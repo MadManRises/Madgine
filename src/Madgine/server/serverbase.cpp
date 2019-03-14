@@ -20,13 +20,13 @@ namespace Engine
 			mLog(name + "-Log"),
 			mName(name)
 		{
-			Util::UtilMethods::setup(&mLog);			
+			Util::setLog(&mLog);			
 		}
 
 		ServerBase::~ServerBase()
 		{			
 			mInstances.clear();
-			Util::UtilMethods::setup(nullptr);
+			Util::setLog(nullptr);
 		}
 
 

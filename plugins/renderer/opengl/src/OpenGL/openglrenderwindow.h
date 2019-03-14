@@ -6,8 +6,6 @@
 
 #include "opengltexture.h"
 
-#include "openglcontextguard.h"
-
 
 namespace Engine {
 	namespace Render {
@@ -20,11 +18,6 @@ namespace Engine {
 			virtual void render() override;
 
 			virtual std::unique_ptr<RenderTarget> createRenderTarget(Camera * camera, const Vector2& size) override;
-
-			OpenGLContextGuard lockContext();
-
-		protected:
-			virtual void renderOverlays() override;
 
 		private:
 			ContextHandle mContext;

@@ -1,5 +1,7 @@
 #include "../../interfaceslib.h"
 
+#ifdef ENABLE_MEMTRACKING
+
 #include "statsmemoryresource.h"
 
 namespace Engine {
@@ -44,3 +46,5 @@ namespace Engine {
 		}
 	}
 }
+
+#endif

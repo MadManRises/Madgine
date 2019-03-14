@@ -2,6 +2,7 @@
 
 #include "../signalslot/taskqueue.h"
 #include "../generic/tupleunpacker.h"
+#include "../debug/profiler/profiler.h"
 
 namespace Engine 
 {
@@ -10,49 +11,47 @@ namespace Engine
 
 		struct INTERFACES_EXPORT WorkGroup 
 		{
+			WorkGroup();
+			~WorkGroup();
 
 			template <typename F, typename... Args>
 			void createThread(F &&main, Args&&... args)
 			{
-				std::promise<void> p;
-				std::future<void> f = p.get_future();
-
 				mSubThreads.emplace_back(
-					std::thread{ &WorkGroup::threadMain<F, std::remove_reference_t<Args>...>, this, std::move(p), std::forward<F>(main), std::forward<Args>(args)... },					
-					std::move(f)
+					std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::forward<F>(main), std::forward<Args>(args)...)
 				);				
 			}
 
 			void addThreadInitializer(SignalSlot::TaskHandle &&task);
 
 			bool singleThreaded();
+			void checkThreadStates();
 
 		private:
 			template <typename F, typename... Args>
-			void threadMain(std::promise<void> p, F&& main, Args&&... args)
+			int threadMain(F&& main, Args&&... args)
 			{
-				mTaskQueue.attachToCurrentThread();
 				try {
+					mTaskQueue.attachToCurrentThread();
 					for (const SignalSlot::TaskHandle &task : mThreadInitializers)
 					{
 						task();
 					}
-					TupleUnpacker::invoke(std::forward<F>(main), std::forward<Args>(args)..., *this);
+					return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., *this);
 				}
-				catch (const std::exception &e) {
-					LOG_ERROR(Database::message("Uncaught Exception in Workgroup: ", "")(e.what()));
-				}
-				catch (...)
+				catch (std::exception &e)
 				{
-					LOG_ERROR("Uncaught unknown Exception in Workgroup!");
+					LOG_ERROR("Uncaught Exception in Workgroup-Thread!");
+					LOG_EXCEPTION(e);
+					throw;
 				}
-				p.set_value();
 			}
 
 		private:			
 			SignalSlot::DefaultTaskQueue mTaskQueue;
-			std::vector<std::pair<std::thread, std::future<void>>> mSubThreads;
+			std::vector<std::future<int>> mSubThreads;
 			std::vector<SignalSlot::TaskHandle> mThreadInitializers;
+			Debug::Profiler::Profiler mProfiler;
 		};
 
 	}

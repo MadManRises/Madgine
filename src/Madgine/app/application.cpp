@@ -8,8 +8,6 @@
 
 #include "globalapibase.h"
 
-#include "Interfaces/util/standardlog.h"
-
 #include "Interfaces/threading/frameloop.h"
 
 #include "../scene/scenemanager.h"
@@ -20,6 +18,8 @@
 
 #include "Interfaces/scripting/types/luastate.h"
 
+#include "Interfaces/util/exception.h"
+
 #include "Interfaces/debug/profiler/profiler.h"
 
 namespace Engine
@@ -27,24 +27,18 @@ namespace Engine
 
 	namespace App
 	{
-		Application::Application(const AppSettings& settings, Threading::WorkGroup &workGroup) :
+		Application::Application(const AppSettings& settings) :
 			Scope(Scripting::LuaState::getSingleton()),
-			mProfiler(std::make_unique<Debug::Profiler::Profiler>(workGroup)),
 			mSettings(settings),
 			mGlobalAPIs(*this),
 			mGlobalAPIInitCounter(0)			
 		{
-			mLog = std::make_unique<Util::StandardLog>(settings.mAppName);
-			Util::UtilMethods::setup(mLog.get());			
-
 			loadFrameLoop();
 		}
 
 		Application::~Application()
 		{
 			mLoop->removeFrameListener(this);
-			Util::UtilMethods::setup();
-			mLog.reset();
 		}
 
 		bool Application::init()
@@ -82,6 +76,18 @@ namespace Engine
 			}
 			mLoop = std::move(loop);
 			mLoop->addFrameListener(this);
+
+			mLoop->addSetupSteps(
+				[this]() 
+				{
+					if (!callInit())
+						throw exception("App Init Failed!");
+				}, 
+				[this]() 
+				{
+					callFinalize();
+				}
+			);
 		}
 
 		void Application::shutdown()
@@ -214,13 +220,14 @@ namespace Engine
 			return *mLoop;
 		}
 
-		Util::Log &Application::log() {
-			return *mLog;
-		}
-
 		const AppSettings &Application::settings()
 		{
 			return mSettings;
+		}
+
+		Debug::Profiler::Profiler &Application::profiler()
+		{
+			return *mProfiler;
 		}
 
 	}

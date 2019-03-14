@@ -6,6 +6,8 @@
 #include "Interfaces/window/windowapi.h"
 #include "rendertarget.h"
 
+#include "Interfaces/debug/profiler/profiler.h"
+
 namespace Engine {
 	namespace Render {
 
@@ -36,6 +38,7 @@ namespace Engine {
 
 		bool RenderWindow::frameEnded(std::chrono::microseconds)
 		{
+			PROFILE();
 			renderOverlays();
 			mWindow->window()->endFrame();
 			return true;
@@ -59,6 +62,7 @@ namespace Engine {
 
 		void RenderWindow::renderOverlays()
 		{
+			PROFILE();
 			mWindow->renderOverlays();
 		}
 

@@ -7,26 +7,30 @@ namespace Engine
 	namespace Util
 	{
 
-		class INTERFACES_EXPORT UtilMethods
-		{
-		public:
-			static void setup(Log* log = nullptr);
-			static void setup(Log* log, bool logToStdOut);
+		INTERFACES_EXPORT void setLog(Log* log = nullptr);
+		INTERFACES_EXPORT void log(const std::string& msg, MessageType lvl);
 
-			static void log(const std::string& msg, MessageType lvl);
+		struct INTERFACES_EXPORT LogDummy
+		{
+			LogDummy(MessageType lvl);
+			~LogDummy();
+
+			template <typename T>
+			LogDummy &operator<<(T &&t)
+			{
+				mStream << std::forward<T>(t);
+				return *this;
+			}
 
 		private:
-			struct __currentLogHolder {
-				static thread_local Log* sLog;
-				static thread_local bool sLogToStdCout;
-			};
+			std::stringstream mStream;
+			MessageType mLvl;
 		};
 
-#define LOG(s) Engine::Util::UtilMethods::log(s, Engine::Util::LOG_TYPE)
-#define LOG_WARNING(s) Engine::Util::UtilMethods::log(s, Engine::Util::WARNING_TYPE)
-#define LOG_ERROR(s) Engine::Util::UtilMethods::log(s, Engine::Util::ERROR_TYPE)
+#define LOG(s) Engine::Util::LogDummy(Engine::Util::LOG_TYPE) << s
+#define LOG_WARNING(s) Engine::Util::LogDummy(Engine::Util::WARNING_TYPE) << s
+#define LOG_ERROR(s) Engine::Util::LogDummy(Engine::Util::ERROR_TYPE) << s
 #define LOG_EXCEPTION(e) LOG_ERROR(e.what())
 
-#define MADGINE_ABORT() Engine::Util::UtilMethods::abort()
 	}
 }

@@ -5,6 +5,10 @@
 
 #include <time.h>
 
+#if ANDROID
+#include <android/log.h>
+#endif
+
 namespace Engine
 {
 	namespace Util
@@ -16,6 +20,25 @@ namespace Engine
 
 		void StandardLog::log(const std::string& msg, MessageType lvl)
 		{
+#if ANDROID
+			int prio;
+			switch (lvl)
+			{
+			case LOG_TYPE:
+				prio = ANDROID_LOG_INFO;
+				break;
+			case WARNING_TYPE:
+				prio = ANDROID_LOG_WARN;
+				break;
+			case ERROR_TYPE:
+				prio = ANDROID_LOG_ERROR;
+				break;
+			default:
+				throw 0;
+			}
+			__android_log_print(prio, mName.c_str(), "%s", msg.c_str());
+#else
+
 			time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 			
 			struct tm *t; 
@@ -44,6 +67,7 @@ namespace Engine
 			char s[30];
 			strftime(s, 28, "%d/%m/%Y - %H:%M : ", t);
 			std::cout << s << msg << std::endl;
+#endif
 			Log::log(msg, lvl);
 		}
 

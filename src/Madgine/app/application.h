@@ -34,9 +34,7 @@ namespace Engine
 			*/
 			static int run(AppSettings& settings, Threading::WorkGroup &workGroup)
 			{
-				Application app(settings, workGroup);				
-				app.frameLoop().queue([&]() {app.callInit(); });
-				app.frameLoop().queueTeardown([&]() {app.callFinalize(); });
+				Application app(settings);				
 				return Threading::Scheduler(workGroup, { &app.frameLoop() }).go();				
 			}
 
@@ -44,7 +42,7 @@ namespace Engine
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(const AppSettings& settings, Threading::WorkGroup &workGroup);
+			Application(const AppSettings& settings);
 			
 			/**
 			 * \brief Deletes all objects created by the Application.
@@ -103,8 +101,6 @@ namespace Engine
 			Scene::SceneManager &sceneMgr(bool = true);
 			Application &getSelf(bool = true);
 
-			Util::Log &log();
-
 			/**
 			* \brief Adds a FrameListener to the application.
 			* \param listener the FrameListener to be added.
@@ -122,6 +118,8 @@ namespace Engine
 
 			const AppSettings &settings();
 
+			Debug::Profiler::Profiler &profiler();
+
 		protected:
 			virtual void clear();
 
@@ -137,8 +135,6 @@ namespace Engine
 
 			GlobalAPIContainer<std::vector> mGlobalAPIs;
 			int mGlobalAPIInitCounter;
-
-			std::unique_ptr<Util::StandardLog> mLog;
 
 			std::unique_ptr<Threading::FrameLoop> mLoop;
 			bool mRestartLoop = false;

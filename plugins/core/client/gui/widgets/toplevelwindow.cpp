@@ -421,19 +421,19 @@ namespace Engine
 			return false;
 		}
 
-		bool TopLevelWindow::injectMousePress(const Input::MouseEventArgs & arg)
+		bool TopLevelWindow::injectPointerPress(const Input::PointerEventArgs & arg)
 		{
 			for (WindowOverlay *overlay : mOverlays) {
-				if (overlay->injectMousePress(arg))
+				if (overlay->injectPointerPress(arg))
 					return true;
 			}
 			return false;
 		}
 
-		bool TopLevelWindow::injectMouseRelease(const Input::MouseEventArgs & arg)
+		bool TopLevelWindow::injectPointerRelease(const Input::PointerEventArgs & arg)
 		{
 			for (WindowOverlay *overlay : mOverlays) {
-				if (overlay->injectMouseRelease(arg))
+				if (overlay->injectPointerRelease(arg))
 					return true;
 			}
 			return false;
@@ -474,12 +474,12 @@ namespace Engine
 			return getHoveredWidgetDown(pos, screenSize, getHoveredWidgetUp(pos, screenSize, current));
 		}
 
-		bool TopLevelWindow::injectMouseMove(const Input::MouseEventArgs & arg)
+		bool TopLevelWindow::injectPointerMove(const Input::PointerEventArgs & arg)
 		{
 			auto[screenPos, screenSize] = getAvailableScreenSpace();
 
 			for (WindowOverlay *overlay : mOverlays) {
-				if (overlay->injectMouseMove(arg))
+				if (overlay->injectPointerMove(arg))
 					return true;
 			}
 
@@ -499,7 +499,7 @@ namespace Engine
 			}
 
 			if (mHoveredWidget)
-				return mHoveredWidget->injectMouseMove(arg);
+				return mHoveredWidget->injectPointerMove(arg);
 
 			return false;
 		}

@@ -34,10 +34,7 @@ namespace Engine
 
 			GuiHandlerBase &getSelf(bool = true);
 
-		protected:	
-
-			bool init() override;
-			void finalize() override;
+		protected:
 
 			void setContext(Scene::ContextMask context);
 
@@ -49,22 +46,10 @@ namespace Engine
 
 			Scene::ContextMask mContext;
 		};
-		/*
-		using GuiHandlerCollector = UniqueComponentCollector<GuiHandlerBase, UIManager &>;
-		template <class T>
-		using GuiHandler = Scripting::Scope<T, UniqueComponent<T, GuiHandlerCollector>>;
-
-
-		using GuiHandlerContainer = UniqueComponentContainer<GuiHandlerBase, UIManager &>;*/
-	} // namespace GuiHandler
-/*
-#ifndef STATIC_BUILD
-	MADGINE_CLIENT_TEMPLATE_INSTANTIATION struct UniqueComponentRegistry<UI::GuiHandlerBase, UI::UIManager &>;
-#endif
-*/
-} // namespace Cegui
+	}
+}
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
 
 RegisterType(Engine::UI::GuiHandlerBase);
-//RegisterCollector(Engine::UI::GuiHandlerCollector);
+

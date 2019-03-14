@@ -25,7 +25,7 @@ namespace Engine
 			void registerResourceLocation(const Filesystem::Path &path, int priority);
 
 			template <class Loader>
-			typename Loader::ResourceType *get(const std::string &name)
+			typename Loader::ResourceType *getResource(const std::string &name)
 			{
 				return mCollector.get<Loader>().get(name);
 			}
@@ -39,14 +39,14 @@ namespace Engine
 			template <class Loader>
 			std::shared_ptr<typename Loader::Data> load(const std::string &name)
 			{
-				typename Loader::ResourceType *res = get<Loader>(name);
+				typename Loader::ResourceType *res = getResource<Loader>(name);
 				if (res)
-					return res->loadImpl();
+					return res->loadData();
 				else
 					return {};
 			}
 
-			bool init();
+			void init();
 
 #ifndef STATIC_BUILD
 		protected:
@@ -57,6 +57,10 @@ namespace Engine
 		private:
 			void updateResources(const Filesystem::Path &path, int priority);
 			void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase*> &loaderByExtension);
+
+			void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase*> &loaderByExtension);
+
+			std::map<std::string, ResourceLoaderBase*> getLoaderByExtension();
 
 		private:
 			static ResourceManager *sSingleton;

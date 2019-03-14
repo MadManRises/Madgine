@@ -11,10 +11,10 @@ namespace Engine {
 
 		struct OpenGLShader 
 		{
-			OpenGLShader(int glType, ShaderType type);
+			OpenGLShader(GLenum glType, ShaderType type);
 			~OpenGLShader();
 
-			unsigned int mHandle;
+			GLuint mHandle;
 			ShaderType mType;
 		};
 

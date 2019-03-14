@@ -4,30 +4,23 @@
 
 namespace Engine
 {
-	SINGLETON_IMPL(SignalSlot::DefaultTaskQueue);
-
 	namespace SignalSlot
-	{		
+	{
+
+		static thread_local DefaultTaskQueue *sSingleton = nullptr;
 
 		void TaskQueue::execute()
 		{
 			while (std::optional<TaskHandle> f = fetch())
 			{
-				try
-				{
-					(*f)();
-				}
-				catch (const std::exception& e)
-				{
-					LOG_ERROR("Unhandled Exception during Task-Dispatching!");
-					LOG_ERROR(e.what());
-				}
+				(*f)();
 			}
 		}
 		
 		DefaultTaskQueue::DefaultTaskQueue() :
 			mProxy(nullptr)
 		{
+			attachToCurrentThread();
 		}
 
 		void DefaultTaskQueue::queue(TaskHandle&& f)
@@ -69,6 +62,23 @@ namespace Engine
 		{
 			std::lock_guard<std::mutex> lock(mMutex);
 			return mQueue.empty();
+		}
+
+		void DefaultTaskQueue::attachToCurrentThread()
+		{
+			assert(!sSingleton);
+			sSingleton = this;
+		}
+
+		DefaultTaskQueue &DefaultTaskQueue::getSingleton()
+		{
+			assert(sSingleton);
+			return *sSingleton;
+		}
+
+		DefaultTaskQueue *DefaultTaskQueue::getSingletonPtr()
+		{
+			return sSingleton;
 		}
 
 	}

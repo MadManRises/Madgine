@@ -19,7 +19,6 @@ namespace Engine
 
 			std::string mWidgetName;
 			std::function<bool(GUI::Widget*)> mInit;
-			;
 		};
 
 
@@ -76,9 +75,6 @@ namespace Engine
 
 			void registerWidget(const std::string& name, std::function<bool(GUI::Widget*)> init);
 
-		private:
-			bool installToWidget(GUI::Widget* w);
-
 		protected:
 
 			bool init() override;
@@ -87,11 +83,11 @@ namespace Engine
 			bool init(GUI::Widget* w);
 
 
-			virtual void onMouseMove(const Input::MouseEventArgs& me);
+			virtual void onPointerMove(const Input::PointerEventArgs& me);
 
-			virtual void onMouseDown(const Input::MouseEventArgs& me);
+			virtual void onPointerDown(const Input::PointerEventArgs& me);
 
-			virtual void onMouseUp(const Input::MouseEventArgs& me);
+			virtual void onPointerUp(const Input::PointerEventArgs& me);
 
 			virtual bool onKeyPress(const Input::KeyEventArgs& evt);
 
@@ -99,9 +95,9 @@ namespace Engine
 
 		public:
 			
-			void injectMouseMove(const Input::MouseEventArgs& evt);
-			void injectMouseDown(const Input::MouseEventArgs& evt);
-			void injectMouseUp(const Input::MouseEventArgs& evt);
+			void injectPointerMove(const Input::PointerEventArgs& evt);
+			void injectPointerDown(const Input::PointerEventArgs& evt);
+			void injectPointerUp(const Input::PointerEventArgs& evt);
 			bool injectKeyPress(const Input::KeyEventArgs& evt);
 
 		protected:
@@ -114,10 +110,9 @@ namespace Engine
 		private:
 			std::list<WindowDescriber> mWidgets;
 
-			SignalSlot::Slot<&Handler::injectMouseMove> mMouseMoveSlot;
-			SignalSlot::Slot<&Handler::injectMouseDown> mMouseDownSlot;
-			SignalSlot::Slot<&Handler::injectMouseUp> mMouseUpSlot;
-
+			SignalSlot::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
+			SignalSlot::Slot<&Handler::injectPointerDown> mPointerDownSlot;
+			SignalSlot::Slot<&Handler::injectPointerUp> mPointerUpSlot;
 
 		};
 	}

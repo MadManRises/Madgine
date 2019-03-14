@@ -47,7 +47,8 @@ namespace Engine
 		template <class T>
 		static size_t registerComponent()
 		{
-			LOG(Database::message("Registering Component: ", "...")(typeName<T>()));
+
+			LOG("Registering Component: " << typeName<T>() << "...");
 			sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<Collector_F<void, void*>>(&createComponent<T, Base, Ty>));
 			sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
 			return sInstance().mInfo.mComponents.size() - 1;

@@ -6,19 +6,15 @@
 
 #include <EGL/egl.h>
 #include <android/native_window.h>
-#include "windowapi_android.h"
+
+#include "../threading/systemvariable.h"
 
 namespace Engine
 {
 	namespace Window
 	{
 
-		DLL_EXPORT ANativeWindow *sNativeWindow = nullptr;
-
-		void setAndroidNativeWindow(ANativeWindow * window)
-		{
-			sNativeWindow = window;
-		}
+		DLL_EXPORT Threading::SystemVariable<ANativeWindow*> sNativeWindow = nullptr;
 
 		DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;
 
@@ -42,11 +38,16 @@ namespace Engine
 		} sDisplayGuard;
 
 		struct AndroidWindow : Window {
-			AndroidWindow(EGLSurface surface, size_t width, size_t height) :
-				Window((uintptr_t)surface),
-				mWidth(width),
-				mHeight(height)
+			AndroidWindow(EGLSurface surface) :
+				Window((uintptr_t)surface)
 			{
+				EGLint width;
+				EGLint height;
+				if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) ||
+					!eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
+					throw 0;
+				mWidth = width;
+				mHeight = height;
 			}
 
 			virtual size_t width() override {			
@@ -71,6 +72,7 @@ namespace Engine
 			}
 
 			virtual void endFrame() override {
+				eglSwapBuffers(sDisplay, (EGLSurface)mHandle);
 			}
 
 			virtual void destroy() override;
@@ -99,6 +101,8 @@ namespace Engine
 					EGL_BLUE_SIZE, 8,
 					EGL_GREEN_SIZE, 8,
 					EGL_RED_SIZE, 8,
+					EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+					EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
 					EGL_NONE
 				};
 
@@ -112,7 +116,7 @@ namespace Engine
 				if (!eglGetConfigAttrib(sDisplay, config, EGL_NATIVE_VISUAL_ID, &format))
 					return nullptr;
 
-				while (!sNativeWindow);
+				sNativeWindow.wait();
 
 				ANativeWindow_setBuffersGeometry(sNativeWindow, 0, 0, format);
 
@@ -122,7 +126,7 @@ namespace Engine
 					return nullptr;
 			}
 
-			auto pib = sWindows.try_emplace(handle, handle, settings.mWidth, settings.mHeight);
+			auto pib = sWindows.try_emplace(handle, handle);
 			assert(pib.second);
 
 			return &pib.first->second;

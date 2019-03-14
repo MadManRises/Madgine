@@ -26,6 +26,8 @@ namespace Engine
 
 			void updatePath(const Filesystem::Path &path) { throw 0; }//TODO
 
+			std::string readAsText();
+
 		private:
 			bool mIsPersistent;
 

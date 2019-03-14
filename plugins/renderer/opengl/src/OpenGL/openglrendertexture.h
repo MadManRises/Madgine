@@ -22,13 +22,15 @@ namespace Engine {
 		private:
 			uint32_t mIndex;
 
-			unsigned int mFramebuffer;
-			unsigned int mVertexbuffer;			
-			unsigned int mDepthRenderbuffer;
+			GLuint mFramebuffer;
+			GLuint mVertexbuffer;			
+			GLuint mDepthRenderbuffer;
 
 			OpenGLShaderProgram mProgram;
 
 			OpenGLTexture mTexture;
+
+			OpenGLRenderWindow *mWindow;
 
 		};
 

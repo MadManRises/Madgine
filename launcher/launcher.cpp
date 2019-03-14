@@ -15,7 +15,6 @@ DLL_EXPORT int main() {
 	{
 		Engine::Threading::WorkGroup workGroup;
 		Engine::Core::Root root;
-		root.init();
 		Engine::App::AppSettings settings;
 		settings.mRunMain = false;
 		settings.mAppName = "Madgine Client";
@@ -36,6 +35,11 @@ DLL_EXPORT int main() {
 extern "C" DLL_EXPORT void ANativeActivity_onCreate(ANativeActivity* activity,
 	void* savedState, size_t savedStateSize) {
 	new Engine::Android::AndroidLauncher(activity);
+}
+
+extern "C" DLL_EXPORT void Java_com_example_myapplication_NativeActivity_onCreate()
+{
+	new Engine::Android::AndroidLauncher(nullptr);
 }
 
 #endif

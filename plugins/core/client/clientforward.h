@@ -41,7 +41,7 @@ namespace Engine
 		class InputListener;
 
 		struct KeyEventArgs;
-		struct MouseEventArgs;
+		struct PointerEventArgs;
 
 		namespace MouseButton
 		{

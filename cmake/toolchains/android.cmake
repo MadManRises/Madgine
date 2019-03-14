@@ -6,8 +6,7 @@ if (NOT EXISTS ${ANDROID_SDK})
 endif()
 
 set(ANDROID_NO_UNDEFINED report-all)
-set(ANDROID_PLATFORM android-28) # API level
-set(ANDROID_ABI x86)
+set(ANDROID_PLATFORM android-21) # API level
 
 set(ANDROID_NDK ${ANDROID_SDK}/ndk-bundle)
 

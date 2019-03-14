@@ -2,8 +2,6 @@
 
 #include "openglrenderer.h"
 
-#include "glad.h"
-
 #include "client/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
@@ -12,11 +10,14 @@
 
 #include "client/render/camera.h"
 
-#include <iostream>
+#if WINDOWS
+typedef HGLRC(WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
 
-#include "openglcontextguard.h"
+static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
+static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 
-#if LINUX
+#elif LINUX
 #include<X11/Xlib.h>
 #include<GL/glx.h>
 namespace Engine {
@@ -39,10 +40,6 @@ namespace Engine {
 
 		OpenGLRenderer::OpenGLRenderer(GUI::GUISystem *gui) :
 			RendererComponent<OpenGLRenderer>(gui)
-#if _WIN32
-			, wglCreateContextAttribsARB(nullptr),
-			wglSwapIntervalEXT(nullptr)
-#endif
 		{			
 		}
 
@@ -52,24 +49,22 @@ namespace Engine {
 
 		bool OpenGLRenderer::init()
 		{	
+#if !ANDROID
 			Engine::Window::WindowSettings settings;
 			Window::Window *tmp = Window::sCreateWindow(settings);
 			ContextHandle context = setupWindowInternal(tmp);
-			{
-				OpenGLContextGuard guard(tmp, context);
+
 #if WINDOWS			
-				wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
-				assert(wglCreateContextAttribsARB);
-				wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
+			wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
+			assert(wglCreateContextAttribsARB);
+			wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
 #endif
-#if ANDROID
-				assert(gladLoadGLLoader((GLADloadproc)&eglGetProcAddress));
-#else
-				assert(gladLoadGL());
-#endif
-			}
+			bool result = gladLoadGL();
+			assert(result);
+
 			shutdownWindow(tmp, context);
 			tmp->destroy();
+#endif
 			return true;
 		}
 
@@ -78,7 +73,8 @@ namespace Engine {
 
 		}
 
-		static void APIENTRY glDebugOutput(GLenum source,
+#if !ANDROID
+		static void glDebugOutput(GLenum source,
 			GLenum type,
 			GLuint id,
 			GLenum severity,
@@ -89,71 +85,81 @@ namespace Engine {
 			// ignore non-significant error/warning codes
 			if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
-			std::cout << "---------------" << std::endl;
-			std::cout << "Debug message (" << id << "): " << message << std::endl;
+			Util::MessageType lvl;
+			switch (severity)
+			{
+			case GL_DEBUG_SEVERITY_HIGH:         lvl = Util::ERROR_TYPE; break;
+			case GL_DEBUG_SEVERITY_MEDIUM:       lvl = Util::WARNING_TYPE; break;
+			case GL_DEBUG_SEVERITY_LOW:          
+			case GL_DEBUG_SEVERITY_NOTIFICATION: lvl = Util::LOG_TYPE; break;
+			} 
+
+			Util::LogDummy cout(lvl);
+			cout << "Debug message (" << id << "): " << message << "\n";
 
 			switch (source)
 			{
-			case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-			case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-			case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-			case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-			case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-			case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-			} std::cout << std::endl;
+			case GL_DEBUG_SOURCE_API:             cout << "Source: API"; break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   cout << "Source: Window System"; break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER: cout << "Source: Shader Compiler"; break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY:     cout << "Source: Third Party"; break;
+			case GL_DEBUG_SOURCE_APPLICATION:     cout << "Source: Application"; break;
+			case GL_DEBUG_SOURCE_OTHER:           cout << "Source: Other"; break;
+			} cout << "\n";
 
 			switch (type)
 			{
-			case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-			case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-			case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-			case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-			case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-			case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-			case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-			} std::cout << std::endl;
+			case GL_DEBUG_TYPE_ERROR:               cout << "Type: Error"; break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: cout << "Type: Deprecated Behaviour"; break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  cout << "Type: Undefined Behaviour"; break;
+			case GL_DEBUG_TYPE_PORTABILITY:         cout << "Type: Portability"; break;
+			case GL_DEBUG_TYPE_PERFORMANCE:         cout << "Type: Performance"; break;
+			case GL_DEBUG_TYPE_MARKER:              cout << "Type: Marker"; break;
+			case GL_DEBUG_TYPE_PUSH_GROUP:          cout << "Type: Push Group"; break;
+			case GL_DEBUG_TYPE_POP_GROUP:           cout << "Type: Pop Group"; break;
+			case GL_DEBUG_TYPE_OTHER:               cout << "Type: Other"; break;
+			} cout << "\n";
 
-			switch (severity)
-			{
-			case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-			case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-			case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-			case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-			} std::cout << std::endl;
-			std::cout << std::endl;
 		}
+#endif
 
 		std::unique_ptr<RenderWindow> OpenGLRenderer::createWindow(GUI::TopLevelWindow * w)
 		{
 			ContextHandle context = setupWindowInternal(w->window());
 
-			OpenGLContextGuard guard(w->window(), context);
-
+#if !ANDROID
 			glEnable(GL_DEBUG_OUTPUT);
+			glCheck();
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			if (glDebugMessageCallback && glDebugMessageControl)
-			{
-				glDebugMessageCallback(glDebugOutput, nullptr);
-				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-			}
+			glCheck();
+			glDebugMessageCallback(glDebugOutput, nullptr);
+			glCheck();
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glCheck();
+#endif
 
 			return std::make_unique<OpenGLRenderWindow>(w, context);
 		}
 
 
-		void OpenGLRenderer::shutdownWindow(Window::Window * window, ContextHandle ourOpenGLRenderingContext)
+		void OpenGLRenderer::shutdownWindow(Window::Window * window, ContextHandle context)
 		{
 #if WINODWS
-			HDC ourWindowHandleToDeviceContext = GetDC((HWND)window->mHandle);
+			wglMakeCurrent(NULL, NULL);
 
-			ReleaseDC((HWND)window->mHandle, ourWindowHandleToDeviceContext);
+			HDC device = GetDC((HWND)window->mHandle);
+
+			ReleaseDC((HWND)window->mHandle, device);
 			
-			wglDeleteContext(ourOpenGLRenderingContext);
+			wglDeleteContext(context);
 #elif LINUX
+			glXMakeCurrent(Window::sDisplay, None, NULL);
 
-			glXDestroyContext(Window::sDisplay, ourOpenGLRenderingContext);
+			glXDestroyContext(Window::sDisplay, context);
+#elif ANDROID
+			eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+			eglDestroyContext(Window::sDisplay, context);
 #endif
 		}
 
@@ -202,7 +208,8 @@ namespace Engine {
 				context = wglCreateContext(windowDC);
 			}
 
-			OpenGLContextGuard guard(window, context);
+			if (!wglMakeCurrent(windowDC, context))
+				exit(GetLastError());
 
 			if (wglSwapIntervalEXT)
 				wglSwapIntervalEXT(0);
@@ -216,6 +223,9 @@ namespace Engine {
 
 			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
 
+			if (!glXMakeCurrent(Window::sDisplay, window->mHandle, context))
+				exit(errno);
+
 			return context;
 #elif ANDROID
 
@@ -224,6 +234,13 @@ namespace Engine {
 					EGL_BLUE_SIZE, 8,
 					EGL_GREEN_SIZE, 8,
 					EGL_RED_SIZE, 8,
+					EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+					EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+					EGL_NONE
+			};
+
+			const EGLint contextAttribs[] = {
+					EGL_CONTEXT_CLIENT_VERSION, 2,
 					EGL_NONE
 			};
 
@@ -233,7 +250,11 @@ namespace Engine {
 			if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
 				throw 0;
 
-			EGLContext context = eglCreateContext(Window::sDisplay, config, 0, 0);
+			EGLContext context = eglCreateContext(Window::sDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+
+			EGLSurface surface = (EGLSurface)window->mHandle;
+			if (!eglMakeCurrent(Window::sDisplay, surface, surface, context))
+				exit(errno);
 
 			return context;
 #endif

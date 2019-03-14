@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "Interfaces/uniquecomponent/uniquecomponent.h"
 #include "resourceloadercollector.h"
+#include "resourcemanager.h"
 
 namespace Engine
 {
@@ -29,7 +30,12 @@ namespace Engine
 					return nullptr;
 			}
 
-			virtual std::shared_ptr<Data> load(ResourceType* res) = 0;
+			static std::shared_ptr<Data> load(const std::string &name)
+			{
+				return Resources::ResourceManager::getSingleton().load<T>(name);
+			}
+
+			virtual std::shared_ptr<Data> loadImpl(ResourceType* res) = 0;
 			virtual std::pair<ResourceBase *,bool> addResource(const Filesystem::Path &path) override
 			{
 				std::string name = path.stem();
@@ -50,6 +56,8 @@ namespace Engine
 			{
 				return mResources.end();
 			}
+
+
 
 		private:
 			std::map<std::string, ResourceType> mResources;

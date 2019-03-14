@@ -5,18 +5,17 @@
     android:versionName="1.0"
     package="com.@PROJECT_NAME@.@target@">
 
-    <!-- Beware that these values are overridden by the build.gradle file -->
-    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="21" />
-
     <application
         android:allowBackup="false"
         android:label="com.@PROJECT_NAME@.@target@"
-        android:hasCode="false">
+        android:hasCode="true"
+        android:theme="@android:style/Theme.NoTitleBar">
 
         <!-- This name is resolved to com.example.myapp.MainActivity
              based upon the package attribute -->
         <activity android:name="android.app.NativeActivity"
-                android:label="@target@">
+                  android:label="@target@"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <meta-data android:name="android.app.lib_name"
                         android:value="@target@" />
                 <intent-filter>

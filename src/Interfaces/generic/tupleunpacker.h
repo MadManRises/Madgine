@@ -48,9 +48,22 @@ namespace Engine
 		}
 
 		template <typename F, typename... Args>
-		typename CallableTraits<F>::return_type call(F&& f, Args&&... args)
+		typename CallableTraits<F>::return_type invokeExpand(F&& f, Args&&... args)
 		{
 			return invokeTuple(std::forward<F>(f), expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
+		}
+
+		template <typename R, typename F, typename... Args>
+		std::enable_if_t<std::is_convertible_v<typename CallableTraits<F>::return_type, R>, R> invokeDefaultResult(R&&, F&& f, Args&&... args)
+		{
+			return invoke(std::forward<F>(f), std::forward<Args>(args)...);
+		}
+
+		template <typename R, typename F, typename... Args>
+		std::enable_if_t<!std::is_convertible_v<typename CallableTraits<F>::return_type, R>, R> invokeDefaultResult(R&& defaultValue, F&& f, Args&&... args)
+		{
+			TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+			return std::forward<R>(defaultValue);
 		}
 
 	};

@@ -69,7 +69,7 @@ namespace Engine {
 				case DestroyNotify:
 					return false;
 				default:
-					LOG(Database::message("Unknown message type: ", "")(e.type));
+					LOG("Unknown message type: " << e.type);
 				}
 				return true;
 			}			
@@ -173,6 +173,11 @@ namespace Engine {
 						sWindows.erase(it);
 				}
 			}
+		}
+
+
+		Window *sFromNative(uintptr_t handle) {
+			return handle ? &sWindows.at((::Window)handle) : nullptr;
 		}
 
 	}

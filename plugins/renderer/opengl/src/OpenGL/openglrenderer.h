@@ -18,19 +18,10 @@ namespace Engine {
 
 			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) override;			
 			
-			static void shutdownWindow(Window::Window *window, ContextHandle ourOpenGLRenderingContext);
+			static void shutdownWindow(Window::Window *window, ContextHandle context);
 
 		protected:
 			ContextHandle setupWindowInternal(Window::Window *window);
-
-		private:
-#if _WIN32
-			PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
-			PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;		
-#endif
-
-
-
 		};
 
 	}

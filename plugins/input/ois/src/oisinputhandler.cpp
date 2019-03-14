@@ -87,7 +87,7 @@ namespace Engine
 		bool OISInputHandler::mousePressed(const OIS::MouseEvent& arg,
 		                                   OIS::MouseButtonID id)
 		{
-			injectMousePress({
+			injectPointerPress({
 				{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)},
 				convertMouseButton(id)
 			});
@@ -96,7 +96,7 @@ namespace Engine
 
 		bool OISInputHandler::mouseMoved(const OIS::MouseEvent& arg)
 		{
-			injectMouseMove({
+			injectPointerMove({
 				{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)},
 				{static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale)},
 				arg.state.Z.rel / 120.0f
@@ -107,7 +107,7 @@ namespace Engine
 		bool OISInputHandler::mouseReleased(const OIS::MouseEvent& arg,
 		                                    OIS::MouseButtonID id)
 		{
-			injectMouseRelease({
+			injectPointerRelease({
 				{static_cast<float>(arg.state.X.abs), static_cast<float>(arg.state.Y.abs)},
 				convertMouseButton(id)
 			});

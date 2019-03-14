@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../generic/tupleunpacker.h"
+
 namespace Engine
 {
 	namespace SignalSlot
@@ -26,7 +28,7 @@ namespace Engine
 			virtual ~Task() = default;
 		};
 
-		template <typename F, typename R = std::remove_reference_t<std::invoke_result_t<F>>>
+		template <typename F>
 		struct TaskImpl : Task {
 
 			TaskImpl(F &&f) :
@@ -36,28 +38,10 @@ namespace Engine
 
 			TaskState execute() override
 			{
-				mF();
-				return SUCCESS;
+				return TupleUnpacker::invokeDefaultResult(SUCCESS, mF);
 			}
 
 		private:
-			F mF;
-		};
-
-		template <typename F>
-		struct TaskImpl<F, TaskState> : Task {
-
-			TaskImpl(F &&f) :
-				mF(std::forward<F>(f))
-			{
-			}
-
-			TaskState execute() override
-			{
-				return mF();				
-			}
-
-		private:			
 			F mF;
 		};
 

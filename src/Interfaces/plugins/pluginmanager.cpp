@@ -8,15 +8,9 @@
 
 #include "../util/stringutil.h"
 
-#if WINDOWS
-#define NOMINMAX
-#include <Windows.h>
-#include <psapi.h>
-#elif UNIX
-#include <link.h>
-#endif
-
 #include "../generic/templates.h"
+
+#include "../filesystem/runtime.h"
 
 namespace Engine
 {
@@ -177,65 +171,16 @@ namespace Engine
 			section->removeListener(listener);
 		}
 
-
-#if UNIX
-		static int VisitModule(struct dl_phdr_info *info, size_t size, void *data) {
-			Filesystem::Path file = Filesystem::Path(info->dlpi_name).filename();
-			if (file.extension() == SHARED_LIB_SUFFIX)
-			{
-				std::string name = file.stem();
-				if (StringUtil::startsWith(name, SHARED_LIB_PREFIX))
-				{
-					std::set<std::string> *modules = static_cast<std::set<std::string> *>(data);
-					modules->insert(name.substr(strlen(SHARED_LIB_PREFIX)));
-				}
-			}
-			return 0;
-		}
-#endif
-
-		std::set<std::string> enumerateLoadedLibraries()
-		{
-			std::set<std::string> result;
-
-#if WINDOWS
-			DWORD count;
-			HMODULE modules[512];
-			auto check = EnumProcessModules(GetCurrentProcess(), modules, static_cast<DWORD>(array_size(modules)), &count);
-			assert(check);
-			count /= sizeof(HMODULE);
-			assert(count < array_size(modules));
-
-			for (DWORD i = 0; i < count; ++i)
-			{
-				char buffer[512];
-				auto check2 = GetModuleFileName(modules[i], buffer, sizeof(buffer));
-				assert(check2);
-				Filesystem::Path path = buffer;
-				result.insert(path.stem());
-			}
-#elif UNIX
-			dl_iterate_phdr(VisitModule, &result);
-#else
-#	error "Unsupported Platform!"
-#endif
-
-			return result;
-		}
-
-
 		void PluginManager::setupCoreSection()
 		{
-			const std::set<std::string> coreLibraries = { "Base", "Client" };
-			const std::set<std::string> loadedLibraries = enumerateLoadedLibraries();
+			const std::set<std::string> coreLibraries = { "Base" };
+			const std::set<std::string> loadedLibraries = Filesystem::listLoadedLibraries();
 			std::set<std::string> loadedCoreLibraries;
 			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
 				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
 			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);
 			assert(pib.second);
-		}
-
-		
+		}		
 
 	}
 }

@@ -31,7 +31,7 @@ namespace Engine
 			virtual std::optional<SignalSlot::TaskHandle> fetch() override;
 			virtual bool empty() override;
 
-			void queueTeardown(SignalSlot::TaskHandle &&task);
+			void addSetupSteps(std::optional<SignalSlot::TaskHandle> &&init, std::optional<SignalSlot::TaskHandle> &&finalize = {});
 
 		protected:
 
@@ -44,7 +44,9 @@ namespace Engine
 			bool mRunning = true;
 
 			std::list<SignalSlot::TaskHandle> mTaskQueue;
-			std::list<SignalSlot::TaskHandle> mTeardownQueue;
+
+			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>> mSetupSteps;
+			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>>::iterator mSetupState;
 
 			std::vector<FrameListener*> mListeners;
 

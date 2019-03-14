@@ -18,7 +18,7 @@ namespace Engine {
 			void setUniform(const std::string &var, const Vector3 &value);
 
 		private:
-			unsigned int mHandle = 0;
+			GLuint mHandle = 0;
 		};
 
 	}

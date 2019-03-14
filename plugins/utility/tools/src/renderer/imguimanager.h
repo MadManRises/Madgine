@@ -19,9 +19,9 @@ namespace Engine {
 
 			bool injectKeyPress(const Engine::Input::KeyEventArgs& arg) override;
 			bool injectKeyRelease(const Engine::Input::KeyEventArgs& arg) override;
-			bool injectMousePress(const Engine::Input::MouseEventArgs& arg) override;
-			bool injectMouseRelease(const Engine::Input::MouseEventArgs& arg) override;
-			bool injectMouseMove(const Engine::Input::MouseEventArgs& arg) override;
+			bool injectPointerPress(const Engine::Input::PointerEventArgs& arg) override;
+			bool injectPointerRelease(const Engine::Input::PointerEventArgs& arg) override;
+			bool injectPointerMove(const Engine::Input::PointerEventArgs& arg) override;
 
 			void calculateAvailableScreenSpace(Vector3 &pos, Vector3 &size) override;
 

@@ -21,9 +21,9 @@ namespace Engine
 		protected:
 			void injectKeyPress(const KeyEventArgs& arg);
 			void injectKeyRelease(const KeyEventArgs& arg);
-			void injectMousePress(const MouseEventArgs& arg);
-			void injectMouseRelease(const MouseEventArgs& arg);
-			void injectMouseMove(const MouseEventArgs& arg);
+			void injectPointerPress(const PointerEventArgs& arg);
+			void injectPointerRelease(const PointerEventArgs& arg);
+			void injectPointerMove(const PointerEventArgs& arg);
 
 
 		private:

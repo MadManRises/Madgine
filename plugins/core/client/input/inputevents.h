@@ -235,7 +235,7 @@ namespace Engine
 			};
 		}
 
-		enum class EventType
+		/*enum class EventType
 		{
 			ButtonClick,
 			CloseClicked,
@@ -245,7 +245,7 @@ namespace Engine
 			MouseEntered,
 			MouseLeft,
 			WindowResized
-		};
+		};*/
 
 		struct KeyEventArgs
 		{
@@ -259,16 +259,16 @@ namespace Engine
 			}
 		};
 
-		struct MouseEventArgs
+		struct PointerEventArgs
 		{
-			MouseEventArgs(const Vector2& pos, MouseButton::MouseButton button) :
+			PointerEventArgs(const Vector2& pos, MouseButton::MouseButton button) :
 				position(pos),
 				button(button),
 				scrollWheel(0.0f)
 			{
 			}
 
-			MouseEventArgs(const Vector2& pos, const Vector2& move, float scroll,
+			PointerEventArgs(const Vector2& pos, const Vector2& move, float scroll,
 			               MouseButton::MouseButton button = MouseButton::NO_BUTTON) :
 				position(pos),
 				moveDelta(move),

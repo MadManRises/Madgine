@@ -19,12 +19,12 @@ allprojects {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion @ANDROID_PLATFORM_LEVEL@
 
     defaultConfig {
         applicationId "com.@PROJECT_NAME@.@target@"
-        minSdkVersion 15
-        targetSdkVersion 21
+        minSdkVersion @ANDROID_PLATFORM_LEVEL@
+        targetSdkVersion @ANDROID_PLATFORM_LEVEL@
     }
 
 
@@ -44,19 +44,13 @@ android {
 
         applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = "../../../../apk/@target@-${variant.name}.apk"
+                outputFileName = "../../../../apk/@target@.apk"
             }
         }
     }
 
 
     sourceSets {
-        debug {
-            //manifest.srcFile 'config/debug/AndroidManifest.xml'
-        }
-        release {
-            //manifest.srcFile 'config/release/AndroidManifest.xml'
-        }
         main {
             manifest.srcFile 'AndroidManifest.xml'
             jniLibs.srcDirs = ['@CMAKE_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']

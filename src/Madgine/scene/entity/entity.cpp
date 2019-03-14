@@ -66,7 +66,7 @@ namespace Engine
 						}
 						else
 						{
-							LOG_WARNING(Database::message("Non-Table value at key \"", "\"!")(p.first));
+							LOG_WARNING("Non-Table value at key \"" << p.first << "\"!");
 						}
 					}
 				}

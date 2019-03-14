@@ -10,9 +10,9 @@ namespace Engine
 		public:
 			virtual bool injectKeyPress(const KeyEventArgs& arg) = 0;
 			virtual bool injectKeyRelease(const KeyEventArgs& arg) = 0;
-			virtual bool injectMousePress(const MouseEventArgs& arg) = 0;
-			virtual bool injectMouseRelease(const MouseEventArgs& arg) = 0;
-			virtual bool injectMouseMove(const MouseEventArgs& arg) = 0;
+			virtual bool injectPointerPress(const PointerEventArgs& arg) = 0;
+			virtual bool injectPointerRelease(const PointerEventArgs& arg) = 0;
+			virtual bool injectPointerMove(const PointerEventArgs& arg) = 0;
 
 		};
 

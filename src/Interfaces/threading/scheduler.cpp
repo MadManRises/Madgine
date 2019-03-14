@@ -27,6 +27,7 @@ namespace Engine
 			while (!queue->empty() || !mWorkgroup.singleThreaded())
 			{
 				schedulerLoop(queue);
+				mWorkgroup.checkThreadStates();
 			}
 
 			for (SignalSlot::TaskQueue *queue : mAdditionalQueues)

@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
 
-cmake_policy(SET CMP0049 OLD)
-cmake_policy(SET CMP0048 NEW)
-
 Project(Interfaces)
 
 find_package(Threads REQUIRED)
@@ -10,12 +7,12 @@ find_package(Threads REQUIRED)
 set(sources)
 
 FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
-	FolderSources(sources "" database exceptionmessages.h message.h messages.h)
+	FolderSources(sources "" database exceptionmessages.h message.h)
 	FolderSources(sources "" debug stacktrace.cpp stacktrace.h traceback.cpp traceback.h)
 		FolderSources(sources debug memory memory.cpp memory.h memoryglobal.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
 		FolderSources(sources debug profiler processstats.cpp processstats.h profiler.cpp profiler.h)
-	FolderSources(sources "" filesystem api.cpp api.h api_unix.cpp api_win.cpp filequery.cpp filequery.h path.cpp path.h runtime.cpp runtime.h runtime_android.cpp runtime_android.h runtime_unix.cpp runtime_win.cpp)
-	FolderSources(sources "" generic keyvalue.h keyvalueiterate.cpp keyvalueiterate.h singleton.h templates.h valuetype.cpp valuetype.h)
+	FolderSources(sources "" filesystem api.cpp api.h api_android.cpp api_linux.cpp api_win.cpp filequery.cpp filequery.h path.cpp path.h runtime.cpp runtime.h runtime_unix.cpp runtime_win.cpp)
+	FolderSources(sources "" generic keyvalue.h keyvalueiterate.cpp keyvalueiterate.h templates.h valuetype.cpp valuetype.h)
 	FolderSources(sources "" ini inifile.cpp inifile.h)
 	FolderSources(sources "" lua lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lutf8lib.c lvm.c lzio.c lauxlib.c lbaselib.c lbitlib.c lcorolib.c ldblib.c liolib.c lmathlib.c loslib.c lstrlib.c ltablib.c loadlib.c linit.c)
 	FolderSources(sources "" math bounds.cpp bounds.h matrix4.cpp matrix4.h matrix3.cpp matrix3.h vector3.cpp vector3.h vector2.cpp vector2.h)
@@ -35,7 +32,7 @@ endif()
 	FolderSources(sources "" threading framelistener.h frameloop.cpp frameloop.h scheduler.cpp scheduler.h tasknode.h workgroup.cpp workgroup.h workgrouphandle.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
-	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_android.h windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
+	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} ${CMAKE_SOURCE_DIR}/misc/Madgine.natvis SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
 
@@ -52,7 +49,7 @@ if (WIN32)
 endif()
 
 if (ANDROID)
-	target_link_libraries(Interfaces PRIVATE android EGL)	
+	target_link_libraries(Interfaces PRIVATE android EGL log)	
 endif()
 
 if (UNIX)

@@ -6,6 +6,8 @@ include (Workspace)
 
 if (ANDROID)
 
+	MESSAGE(STATUS "Targeting Android-SDK version: ${ANDROID_PLATFORM_LEVEL}")
+
 	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
 
 	if (NOT ANDROID_SDK)
@@ -16,7 +18,7 @@ if (ANDROID)
 	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
 
 	add_custom_command(OUTPUT gradle/gradlew
-		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
+		COMMAND ${Android_List_dir}/android/gradle/bin/gradle wrapper --gradle-version=4.10.2 --distribution-type=all
 		WORKING_DIRECTORY gradle)
 
 
@@ -54,7 +56,8 @@ if (ANDROID)
 			add_custom_command(
 				TARGET ${target}
 				POST_BUILD				
-				COMMAND gradle/gradlew assembleDebug				
+				COMMAND gradle/gradlew assembleDebug	
+				COMMAND gradle/gradlew --stop
 				COMMENT "Build APK - ${target}"			
 				BYPRODUCTS apk/${target}-debug.apk
 			)		

@@ -7,8 +7,6 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/examples/imgui_impl_opengl3.h"
 
-#include "OpenGL/glad.h"
-#include "OpenGL/openglcontextguard.h"
 #include "OpenGL/openglrenderwindow.h"
 
 #include "Interfaces/math/vector3.h"
@@ -31,7 +29,6 @@ namespace Engine {
 
 		void OpenGLImGuiManager::init()
 		{
-			Render::OpenGLContextGuard guard = static_cast<Render::OpenGLRenderWindow*>(mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->getRenderer())->lockContext();
 			ImGui_ImplOpenGL3_Init();
 			ImGui_ImplOpenGL3_CreateDeviceObjects();
 			ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
@@ -44,13 +41,13 @@ namespace Engine {
 
 		void OpenGLImGuiManager::newFrame(float timeSinceLastFrame)
 		{
-			Render::OpenGLContextGuard guard = static_cast<Render::OpenGLRenderWindow*>(mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->getRenderer())->lockContext();
 			ImGuiIO& io = ImGui::GetIO();
 
 			io.DeltaTime = timeSinceLastFrame;
 
 			Vector3 size = mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->getScreenSize();
-			io.DisplaySize = ImVec2(size.x, size.y);
+			
+			io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
 
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();

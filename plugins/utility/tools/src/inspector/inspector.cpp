@@ -43,7 +43,7 @@ namespace Engine
 			for (auto &[name, resource] : Resources::ResourceManager::getSingleton().get<LayoutLoader>())
 			{
 				
-				InspectorLayout &layout = mLayouts.try_emplace(name, resource.loadImpl()).first->second;
+				InspectorLayout &layout = mLayouts.try_emplace(name, resource.loadData()).first->second;
 				for (const std::string &assoc : layout.associations())
 				{
 					mAssociations[assoc] = &layout;

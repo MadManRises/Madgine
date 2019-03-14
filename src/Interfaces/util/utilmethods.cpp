@@ -4,34 +4,37 @@
 
 #include "log.h"
 #include "loglistener.h"
+#include "standardlog.h"
 
 namespace Engine
 {
 	namespace Util
 	{
 
-		thread_local Log* UtilMethods::__currentLogHolder::sLog = nullptr;
-		thread_local bool UtilMethods::__currentLogHolder::sLogToStdCout = true;
+		static StandardLog sStandardLog{ "Madgine" };
+		static thread_local Log* sLog = &sStandardLog;
+		
 
-		void UtilMethods::setup(Log* log)
+		void setLog(Log* log)
 		{
-			__currentLogHolder::sLog = log;
+			sLog = log ? log : &sStandardLog;
 		}
 
-
-		void UtilMethods::setup(Log* log, bool logToStdCout)
+		void log(const std::string& msg, MessageType level)
 		{
-			__currentLogHolder::sLog = log;
-			__currentLogHolder::sLogToStdCout = logToStdCout;
+			sLog->log(msg.c_str(), level);
 		}
 
-		void UtilMethods::log(const std::string& msg, MessageType level)
+		LogDummy::LogDummy(MessageType lvl) :
+			mLvl(lvl)
 		{
-			if (__currentLogHolder::sLog)
-				__currentLogHolder::sLog->log(msg.c_str(), level);
-			else if (__currentLogHolder::sLogToStdCout)
-				std::cout << msg << std::endl;
 		}
+
+		LogDummy::~LogDummy()
+		{
+			log(mStream.str(), mLvl);
+		}
+
 
 	}
 }

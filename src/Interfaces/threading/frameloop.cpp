@@ -13,7 +13,8 @@ namespace Engine
 	{
 		FrameLoop::FrameLoop() :
 			mTimeBank(0),			
-			mLastFrame(std::chrono::high_resolution_clock::now())
+			mLastFrame(std::chrono::high_resolution_clock::now()),
+			mSetupState(mSetupSteps.begin())
 		{
 		}
 
@@ -98,49 +99,84 @@ namespace Engine
 			mTaskQueue.emplace_back(std::move(task));
 		}
 
-		void FrameLoop::queueTeardown(SignalSlot::TaskHandle &&task)
-		{
-			mTeardownQueue.emplace_front(std::move(task));
-		}
-
 		std::optional<SignalSlot::TaskHandle> FrameLoop::fetch()
 		{
+			if (mRunning)
+			{
+				while (mSetupState != mSetupSteps.end())
+				{
+					std::optional<SignalSlot::TaskHandle> init = std::move(mSetupState->first);
+					++mSetupState;
+					if (init)
+						return init;
+				}
+			}
 			if (!mTaskQueue.empty())
 			{
 				SignalSlot::TaskHandle task = std::move(mTaskQueue.front());
 				mTaskQueue.pop_front();
 				return task;
 			}
-			else
+			if (mRunning) 
 			{
-				if (mRunning)
-				{
-					return [this]() {
-						auto now = std::chrono::high_resolution_clock::now();
-						mRunning &= singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame));
-						mLastFrame = now;
-					};
-				}
-				else
-				{
-					if (!mTeardownQueue.empty())
-					{
-						SignalSlot::TaskHandle task = std::move(mTeardownQueue.front());
-						mTeardownQueue.pop_front();
-						return task;
-					}
-					else
-					{
-						return {};
-					}
-				}
-			}			
-			
+				return [this]() {
+					auto now = std::chrono::high_resolution_clock::now();
+					mRunning &= singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame));
+					mLastFrame = now;
+				};
+			}
+			while (mSetupState != mSetupSteps.begin())
+			{
+				--mSetupState;
+				std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
+				if (finalize)
+					return finalize;
+			}
+			return {};
 		}
 
 		bool FrameLoop::empty()
 		{
-			return mTaskQueue.empty();
+			return mTaskQueue.empty() && mSetupState == mSetupSteps.begin();
+		}
+
+		void FrameLoop::addSetupSteps(std::optional<SignalSlot::TaskHandle>&& init, std::optional<SignalSlot::TaskHandle>&& finalize)
+		{
+			bool isItEnd = mSetupState == mSetupSteps.end();
+			if (init && finalize)
+			{
+				std::promise<bool> p;
+				std::future<bool> f = p.get_future();
+				mSetupSteps.emplace_back(
+					[init{ std::move(*init) }, p{ std::move(p) }]() mutable {
+						SignalSlot::TaskState state;
+						try { 
+							state = init();
+							assert(state == SignalSlot::SUCCESS || state == SignalSlot::FAILURE);
+							p.set_value(state == SignalSlot::SUCCESS);
+						}
+						catch (std::exception &)
+						{
+							p.set_value(false);
+							throw;
+						}
+						return state;
+					},
+					[finalize{ std::move(*finalize) }, f{ std::move(f) }]() mutable {
+						if (f.get())
+							return finalize();
+						return SignalSlot::SUCCESS;
+					}
+				);
+			}
+			else
+			{
+				mSetupSteps.emplace_back(std::move(init), std::move(finalize));
+			}
+			if (isItEnd)
+			{
+				mSetupState = std::prev(mSetupState);
+			}
 		}
 
 	}

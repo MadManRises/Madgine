@@ -41,7 +41,7 @@ namespace Engine
 			{
 				beginMessage(cmd);
 
-				(*this << ... << args);
+				(void)(*this << ... << args);
 
 				endMessage();
 			}

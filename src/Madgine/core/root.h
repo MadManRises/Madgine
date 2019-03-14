@@ -12,8 +12,6 @@ namespace Engine
 			Root();
 			~Root();
 
-			bool init();
-
 		private:
 
 #ifndef STATIC_BUILD

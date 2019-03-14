@@ -15,6 +15,11 @@
 
 #include "Interfaces/debug/profiler/profiler.h"
 
+//TODO Make uniform
+#if UNIX
+template <> DLL_EXPORT Engine::App::GlobalAPICollector::ComponentRegistrator<Engine::GUI::GUISystem> Engine::UniqueComponent<Engine::GUI::GUISystem, Engine::App::GlobalAPICollector>::_reg;
+#endif
+
 namespace Engine
 {
 

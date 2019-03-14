@@ -19,27 +19,6 @@ namespace Engine
 		{
 		}
 
-
-		bool GuiHandlerBase::init()
-		{
-			GUI::Widget* window = mUI.gui().getWidget(mWidgetName);
-
-			if (!window)
-			{
-				LOG_ERROR(Database::Exceptions::guiHandlerInitializationFailed(mWidgetName));
-				return false;
-			}
-			if (window)
-				return Handler::init(window);
-			return Handler::init();
-		}
-
-		void GuiHandlerBase::finalize()
-		{
-			Handler::finalize();
-			mWidget = nullptr;
-		}
-
 		void GuiHandlerBase::open()
 		{
 			if (getState() != ObjectState::INITIALIZED)

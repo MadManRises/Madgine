@@ -17,5 +17,7 @@ namespace Engine {
 		INTERFACES_EXPORT bool isAbsolute(const Path &p);
 		INTERFACES_EXPORT bool isSeparator(char c);
 
+		INTERFACES_EXPORT std::vector<char> readFile(const Path &p);
+
 	}
 }

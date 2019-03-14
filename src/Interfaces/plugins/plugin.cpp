@@ -50,7 +50,7 @@ namespace Engine
 			if (isLoaded())
 				return true;
 
-			LOG(Database::message("Loading Plugin \"", "\"...")(mName));
+			LOG("Loading Plugin \"" << mName << "\"...");
 
 #if WINDOWS
 			UINT errorMode = GetErrorMode();
@@ -86,7 +86,7 @@ namespace Engine
 
 			if (!isLoaded())
 			{
-				LOG_ERROR(Database::message("Load of plugin \"", "\" failed with error: ", "")(mName, errorMsg));
+				LOG_ERROR("Load of plugin \"" << mName << "\" failed with error: " << errorMsg);
 			}
 			else
 			{

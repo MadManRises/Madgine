@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ENABLE_MEMTRACKING
+
 #include "../stacktrace.h"
 
 namespace Engine {
@@ -62,4 +64,6 @@ namespace Engine {
 		}
 	}
 }
+
+#endif
 

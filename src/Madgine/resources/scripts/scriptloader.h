@@ -16,7 +16,7 @@ namespace Engine
 				virtual ~ScriptLoader();
 
 
-				virtual std::shared_ptr<MethodHolder> load(ResourceType* res) override;
+				virtual std::shared_ptr<MethodHolder> loadImpl(ResourceType* res) override;
 
 			private:
 

@@ -26,7 +26,7 @@ namespace Engine
 		{
 			mDragging = false;
 			mWidget->releaseInput();
-			onMouseDragAbort();
+			onPointerDragAbort();
 		}
 
 		void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask)
@@ -59,7 +59,7 @@ namespace Engine
 			return *this;
 		}
 
-		void GameHandlerBase::onMouseMove(const Input::MouseEventArgs& me)
+		void GameHandlerBase::onPointerMove(const Input::PointerEventArgs& me)
 		{
 			//clampToWindow(me);
 			if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON)
@@ -69,29 +69,29 @@ namespace Engine
 					fabs(me.position[0] - mDragStart[0]) + fabs(me.position[1] - mDragStart[1]) > mDragStartThreshold)
 				{
 					mSingleClick = false;
-					if (mMouseDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED)
+					if (mPointerDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED)
 					{
 						mDragging = true;
 						mWidget->captureInput();
-						if (mMouseDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
+						if (mPointerDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
 						{
 							mUI.hideCursor();
 						}
-						onMouseDragBegin(me);
+						onPointerDragBegin(me);
 					}
 				}
 			}
 			if (mDragging)
 			{
-				onMouseDrag(me);
+				onPointerDrag(me);
 			}
 			else if (mUI.isCursorVisible())
 			{
-				onMouseHover(me);
+				onPointerHover(me);
 			}
 		}
 
-		void GameHandlerBase::onMouseDown(const Input::MouseEventArgs& me)
+		void GameHandlerBase::onPointerDown(const Input::PointerEventArgs& me)
 		{
 			if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON)
 			{
@@ -101,7 +101,7 @@ namespace Engine
 			}
 		}
 
-		void GameHandlerBase::onMouseUp(const Input::MouseEventArgs& me)
+		void GameHandlerBase::onPointerUp(const Input::PointerEventArgs& me)
 		{
 			//clampToWindow(me);
 			if (me.button == mCurrentMouseButton)
@@ -110,46 +110,46 @@ namespace Engine
 				{
 					mDragging = false;
 					mWidget->releaseInput();
-					if (mMouseDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
+					if (mPointerDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR)
 					{
 						mUI.showCursor();
 					}
-					onMouseDragEnd(me);
+					onPointerDragEnd(me);
 				}
 				else if (mSingleClick)
 				{
 					mSingleClick = false;
-					onMouseClick(me);
+					onPointerClick(me);
 				}
 				mCurrentMouseButton = Input::MouseButton::NO_BUTTON;
 			}
 		}
 
-		void GameHandlerBase::onMouseHover(const Input::MouseEventArgs& evt)
+		void GameHandlerBase::onPointerHover(const Input::PointerEventArgs& evt)
 		{
 		}
 
-		void GameHandlerBase::onMouseClick(const Input::MouseEventArgs& evt)
+		void GameHandlerBase::onPointerClick(const Input::PointerEventArgs& evt)
 		{
 		}
 
-		void GameHandlerBase::onMouseDragBegin(const Input::MouseEventArgs& evt)
+		void GameHandlerBase::onPointerDragBegin(const Input::PointerEventArgs& evt)
 		{
 		}
 
-		void GameHandlerBase::onMouseDrag(const Input::MouseEventArgs& evt)
+		void GameHandlerBase::onPointerDrag(const Input::PointerEventArgs& evt)
 		{
 		}
 
-		void GameHandlerBase::onMouseDragEnd(const Input::MouseEventArgs& evt)
+		void GameHandlerBase::onPointerDragEnd(const Input::PointerEventArgs& evt)
 		{
 		}
 
-		void GameHandlerBase::onMouseDragAbort()
+		void GameHandlerBase::onPointerDragAbort()
 		{
 		}
 
-		void GameHandlerBase::clampToWindow(Input::MouseEventArgs& me)
+		void GameHandlerBase::clampToWindow(Input::PointerEventArgs& me)
 		{
 			if (me.position[0] < 0.f) me.position[0] = 0.f;
 			if (me.position[0] > 1.f) me.position[0] = 1.f;
@@ -157,9 +157,9 @@ namespace Engine
 			if (me.position[1] > 1.f) me.position[1] = 1.f;
 		}
 
-		void GameHandlerBase::setMouseDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode)
+		void GameHandlerBase::setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode)
 		{
-			mMouseDragModes[button] = mode;
+			mPointerDragModes[button] = mode;
 		}
 
 		const Vector2& GameHandlerBase::dragStart() const

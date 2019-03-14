@@ -205,7 +205,7 @@ namespace Engine
 	template <class T>
 	struct KeyType
 	{
-		typedef FixString_t<std::remove_const_t<std::remove_reference_t<decltype(kvKey(std::declval<T>()))>>> type;
+		typedef FixString_t<std::decay_t<decltype(kvKey(std::declval<T>()))>> type;
 	};
 
 	template <class T>
@@ -247,7 +247,7 @@ namespace Engine
 
 		constexpr size_t operator()(const _Ty& _Arg) const
 		{
-			return std::hash<typename KeyType<_Ty>::type>{}(kvKey(_Arg));
+			return std::hash<KeyType_t<_Ty>>{}(kvKey(_Arg));
 		}
 	};
 

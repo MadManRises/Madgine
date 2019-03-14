@@ -12,13 +12,13 @@ namespace Engine {
 
 			void setData(GLsizei width, GLsizei height, void *data);
 
-			unsigned int handle();
+			GLuint handle();
 
-			void setWrapMode(unsigned int mode);
-			void setFilter(unsigned int filter);
+			void setWrapMode(GLint mode);
+			void setFilter(GLint filter);
 
 		private:
-			unsigned int mHandle;
+			GLuint mHandle;
 		};
 
 	}

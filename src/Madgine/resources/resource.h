@@ -18,7 +18,7 @@ namespace Engine
 			virtual ~Resource()
 			{
 				if (!unload())
-					LOG_WARNING(Database::message("Deleted Resource \"", "\" still used. Memory not freed!")(name() + extension()));
+					LOG_WARNING("Deleted Resource \"" << name() << extension() << "\" still used. Memory not freed!");
 			}
 
 			std::shared_ptr<typename Loader::Data> data()
@@ -26,7 +26,7 @@ namespace Engine
 				return mPtr;
 			}
 
-			std::shared_ptr<typename Loader::Data> loadImpl()
+			std::shared_ptr<typename Loader::Data> loadData()
 			{
 				if (mPtr)
 				{
@@ -38,7 +38,7 @@ namespace Engine
 				}
 				else
 				{
-					ptr = mLoader->load(this);
+					ptr = mLoader->loadImpl(this);
 					mWeakPtr = ptr;
 					if (isPersistent())
 						mPtr = ptr;
@@ -48,7 +48,7 @@ namespace Engine
 
 			virtual bool load() override
 			{
-				return loadImpl().operator bool();
+				return loadData().operator bool();
 			}
 
 			bool unload()

@@ -27,29 +27,29 @@ namespace Engine
 			GameHandlerBase &getSelf(bool = true);
 
 		protected:
-			void onMouseMove(const Input::MouseEventArgs& me) override;
+			void onPointerMove(const Input::PointerEventArgs& me) override;
 
-			void onMouseDown(const Input::MouseEventArgs& me) override;
+			void onPointerDown(const Input::PointerEventArgs& me) override;
 
-			void onMouseUp(const Input::MouseEventArgs& me) override;
+			void onPointerUp(const Input::PointerEventArgs& me) override;
 
-			virtual void onMouseHover(const Input::MouseEventArgs& evt);
+			virtual void onPointerHover(const Input::PointerEventArgs& evt);
 
-			virtual void onMouseClick(const Input::MouseEventArgs& evt);
+			virtual void onPointerClick(const Input::PointerEventArgs& evt);
 
-			virtual void onMouseDragBegin(const Input::MouseEventArgs& evt);
+			virtual void onPointerDragBegin(const Input::PointerEventArgs& evt);
 
-			virtual void onMouseDrag(const Input::MouseEventArgs& evt);
+			virtual void onPointerDrag(const Input::PointerEventArgs& evt);
 
-			virtual void onMouseDragEnd(const Input::MouseEventArgs& evt);
+			virtual void onPointerDragEnd(const Input::PointerEventArgs& evt);
 
-			virtual void onMouseDragAbort();
+			virtual void onPointerDragAbort();
 
 			virtual void update(std::chrono::microseconds timeSinceLastFrame);
 			virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
 
-			static void clampToWindow(Input::MouseEventArgs& me);
+			static void clampToWindow(Input::PointerEventArgs& me);
 
 			enum class MouseDragMode
 			{
@@ -58,14 +58,14 @@ namespace Engine
 				ENABLED_HIDECURSOR
 			};
 
-			void setMouseDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode);
+			void setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode);
 
 			const Vector2& dragStart() const;
 
 		private:
 			static const float mDragStartThreshold;
 
-			std::array<MouseDragMode, Input::MouseButton::BUTTON_COUNT> mMouseDragModes;
+			std::array<MouseDragMode, Input::MouseButton::BUTTON_COUNT> mPointerDragModes;
 
 			Input::MouseButton::MouseButton mCurrentMouseButton;
 

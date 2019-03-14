@@ -15,31 +15,19 @@ namespace Engine
 
 			thread_local ProfilerThread *sThread = nullptr;
 
-			Profiler *Profiler::sSingleton = nullptr;
-
 			Profiler::Profiler(Threading::WorkGroup &workGroup)
 			{
-				assert(!sSingleton);
-				sSingleton = this;
 				registerCurrentThread();
 				workGroup.addThreadInitializer([this]() { registerCurrentThread(); });
 			}
 
 			Profiler::~Profiler()
 			{
-				assert(sSingleton == this);
-				sSingleton = nullptr;
 			}
 
 			const std::list<ProfilerThread> &Profiler::getThreadStats()
 			{
 				return mThreads;
-			}
-
-			Profiler & Profiler::getSingleton()
-			{
-				assert(sSingleton);
-				return *sSingleton;
 			}
 
 			void Profiler::registerCurrentThread()

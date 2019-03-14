@@ -6,8 +6,6 @@
 namespace Engine {
 	namespace Render {
 
-
-
 		RenderTarget::RenderTarget(RenderWindow *window, Camera * camera, const Vector2 & size) :
 			mWindow(window),
 			mCamera(camera),

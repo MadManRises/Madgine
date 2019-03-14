@@ -16,7 +16,7 @@ namespace Engine
 			const auto doubleEventName = message("Double Event definition: '", "'");
 			const auto doubleGlobalMethodDefinition = message("Double global method definition: '", "'");
 			const auto doubleTypeDefinition = message("Double type definition: '", "'");
-			const auto guiHandlerInitializationFailed = message("Initialization of GuiHandler for Window '", "' failed!");
+			const auto handlerInitializationFailed = message("Initialization of GuiHandler for Window '", "' failed!");
 			//const auto incompatiblePackets = message("Incompatible Datapackets!");
 			const auto invalidExpression = message("Invalid Expression at Line ", "!");
 			const auto invalidReturn = message("Invalid return-Statement!");

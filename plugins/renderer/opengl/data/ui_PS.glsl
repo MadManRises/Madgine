@@ -1,4 +1,6 @@
-#version 330 core
+#version 300 es
+
+precision mediump float;
 
 uniform sampler2D textures[2];
 
@@ -10,6 +12,6 @@ out vec4 FragColor;
 
 void main()
 {
-   vec4 texColor = texture2D(textures[/*texIdx*/1], uv);
+   vec4 texColor = texture(textures[/*texIdx*/1], uv);
    FragColor = color * texColor;
 }

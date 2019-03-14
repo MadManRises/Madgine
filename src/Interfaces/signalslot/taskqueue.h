@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../generic/singleton.h"
 #include "task.h"
 
 namespace Engine
@@ -19,8 +18,7 @@ namespace Engine
 			void execute();
 		};
 		
-		struct INTERFACES_EXPORT DefaultTaskQueue : Singleton<DefaultTaskQueue>,
-			TaskQueue
+		struct INTERFACES_EXPORT DefaultTaskQueue : TaskQueue
 		{
 		public:
 			DefaultTaskQueue();
@@ -34,7 +32,10 @@ namespace Engine
 
 			virtual bool empty() override;
 
-			using Singleton::attachToCurrentThread;
+			void attachToCurrentThread();
+
+			static DefaultTaskQueue &getSingleton();
+			static DefaultTaskQueue *getSingletonPtr();
 
 		private:
 

@@ -9,7 +9,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		template struct UnitHelper<ValueType, false>;
+//		template struct UnitHelper<ValueType, false>;
 
 
 		void SerializeUnitHelper::read_state(SerializeInStream& in, Serializable& item)

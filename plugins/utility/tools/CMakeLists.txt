@@ -1,9 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
 
-cmake_policy(SET CMP0049 OLD)
-cmake_policy(SET CMP0048 NEW)
-cmake_policy(SET CMP0022 NEW)
-
 Project(Tools)
 
 set(sources "")
@@ -27,5 +23,6 @@ add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
 target_link_plugins(Tools PUBLIC OpenGL)
 
-
 target_link_libraries(Tools PUBLIC Client)
+
+set_source_files_properties(src/imgui/examples/imgui_impl_opengl3.cpp PROPERTIES COMPILE_DEFINITIONS IMGUI_IMPL_OPENGL_LOADER_GLAD)

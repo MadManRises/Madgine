@@ -36,6 +36,10 @@ namespace Engine
 #endif
 			
 			registerResourceLocation(Filesystem::configPath().parentPath() / "data", 50);
+
+#if ANDROID
+			registerResourceLocation("assets:", 25);
+#endif
 		}
 
 		ResourceManager::~ResourceManager()
@@ -62,32 +66,33 @@ namespace Engine
 
 		}
 
-		bool ResourceManager::init()
+		void ResourceManager::init()
 		{
 			mInitialized = true;
 
-			std::map<std::string, ResourceLoaderBase *> loaderByExtension;
-
-			for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector)
-			{
-				for (const std::string &ext : loader->fileExtensions())
-				{
-					loaderByExtension[ext] = loader.get();
-				}
-			}	
+			std::map<std::string, ResourceLoaderBase*> loaderByExtension = getLoaderByExtension();
 
 			for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths)
 			{
 				updateResources(p.first, p.second, loaderByExtension);
 			}
 
-			return true;
 		}
 
 #ifndef STATIC_BUILD
 		void ResourceManager::onPluginLoad(const Plugins::Plugin * plugin)
 		{
-			const Plugins::BinaryInfo *info = static_cast<const Plugins::BinaryInfo*>(plugin->getSymbol("binaryInfo"));					
+			std::map<std::string, ResourceLoaderBase*> loaderByExtension = getLoaderByExtension();
+
+			if (mInitialized)
+			{
+				for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths)
+				{
+					updateResources(p.first, p.second, loaderByExtension);
+				}
+			}
+
+			const Plugins::BinaryInfo *info = static_cast<const Plugins::BinaryInfo*>(plugin->getSymbol("binaryInfo"));	
 			Filesystem::Path binPath = info->mBinaryDir;
 			bool isLocal = plugin->fullPath().parentPath() == binPath;
 			if (isLocal)
@@ -104,7 +109,43 @@ namespace Engine
 
 		void ResourceManager::updateResources(const Filesystem::Path &path, int priority)
 		{
+			updateResources(path, priority, getLoaderByExtension());
+		}
+
+		void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase*>& loaderByExtension)
+		{
+			for (Filesystem::Path p : Filesystem::listFilesRecursive(path))
+			{
+				updateResource(p, priority, loaderByExtension);
+			}
+
+		}
+
+		void ResourceManager::updateResource(const Filesystem::Path & path, int priority, const std::map<std::string, ResourceLoaderBase*>& loaderByExtension)
+		{
+			std::string extension = path.extension();
+
+			auto it = loaderByExtension.find(extension);
+			if (it != loaderByExtension.end())
+			{
+				auto[resource, b] = it->second->addResource(path);
+
+				if (!b)
+				{
+					int otherPriority = mResourcePaths.at(resource->path());
+					if (priority > otherPriority || (priority == otherPriority && it->second->extensionIndex(extension) < it->second->extensionIndex(resource->path().extension())))
+					{
+						resource->updatePath(path);
+					}
+				}
+			}
+
+		}
+
+		std::map<std::string, ResourceLoaderBase*> ResourceManager::getLoaderByExtension()
+		{
 			std::map<std::string, ResourceLoaderBase *> loaderByExtension;
+
 			for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector)
 			{
 				for (const std::string &ext : loader->fileExtensions())
@@ -112,32 +153,7 @@ namespace Engine
 					loaderByExtension[ext] = loader.get();
 				}
 			}
-			updateResources(path, priority, loaderByExtension);
-		}
-
-		void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase*>& loaderByExtension)
-		{
-			for (auto p : Filesystem::listFilesRecursive(path))
-			{
-				std::string extension = p.extension();
-
-				auto it = loaderByExtension.find(extension);
-				if (it != loaderByExtension.end())
-				{
-					auto[resource, b] = it->second->addResource(p);
-					
-					if (!b)
-					{
-						int otherPriority = mResourcePaths.at(resource->path());
-						if (priority > otherPriority || (priority == otherPriority && it->second->extensionIndex(p.extension()) < it->second->extensionIndex(resource->path().extension())))
-						{
-							resource->updatePath(p);
-						}
-					}
-				}			
-
-			}
-
+			return loaderByExtension;
 		}
 
 	}

@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0048 NEW)
-
 
 project(Interfaces_Test)
 

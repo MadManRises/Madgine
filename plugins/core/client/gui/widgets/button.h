@@ -19,8 +19,8 @@ namespace Engine
 
 			std::vector<Vertex> vertices(const Vector3 &screenSize) override;
 
-			bool injectMouseEnter(const Input::MouseEventArgs &arg) override;
-			bool injectMouseLeave(const Input::MouseEventArgs &arg) override;
+			bool injectMouseEnter(const Input::PointerEventArgs &arg) override;
+			bool injectMouseLeave(const Input::PointerEventArgs &arg) override;
 
 		protected:
 			void emitClicked();

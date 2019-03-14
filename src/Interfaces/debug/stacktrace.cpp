@@ -14,6 +14,25 @@
 namespace Engine {
 	namespace Debug {
 
+		//TODO
+		struct DefaultMemResource : std::pmr::memory_resource
+		{
+			virtual void *do_allocate(std::size_t bytes, std::size_t alignment) override
+			{
+				return malloc(bytes);
+			}
+
+			virtual void do_deallocate(void *ptr, std::size_t bytes, std::size_t alignment) override
+			{
+				free(ptr);
+			}
+
+			virtual bool do_is_equal(const std::pmr::memory_resource &res) const noexcept override
+			{
+				return this == &res;
+			}
+		};
+
 		static void findAndReplaceAll(std::pmr::string & data, const char *toSearch, const char *replaceStr)
 		{
 			// Get the first occurrence
@@ -51,7 +70,12 @@ namespace Engine {
 		}
 
 		FullStackTrace resolveSymbols(void *const *data, size_t size) {
+#ifdef ENABLE_MEMTRACKING
 			std::pmr::memory_resource *resource = Memory::UntrackedMemoryResource::sInstance();
+#else
+			static DefaultMemResource defMem;
+			std::pmr::memory_resource *resource = &defMem;
+#endif
 			FullStackTrace result(resource);
 
 			constexpr size_t BUFFERSIZE = 1024;

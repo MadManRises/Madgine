@@ -7,6 +7,7 @@ namespace Engine
 	struct TypeInfo {
 		static const char *fix(const char* s)
 		{
+			//TODO <> templates
 			const char* f = strrchr(s, ':');
 			return f ? f + 1 : s;
 		}

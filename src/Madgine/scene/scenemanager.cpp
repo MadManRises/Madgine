@@ -239,7 +239,7 @@ namespace Engine
 			}
 			else
 			{
-				LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behavior));
+				LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
 			}
 			mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
 			return &mEntities.back();
@@ -255,7 +255,7 @@ namespace Engine
 			}
 			else
 			{
-				LOG_ERROR(Database::message("Behaviour \"", "\" not found!")(behavior));
+				LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
 			}
 			const std::tuple<SceneManager &, bool, std::string>& data = createEntityData(name, true);
 			return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
