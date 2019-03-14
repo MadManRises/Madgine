@@ -174,11 +174,12 @@ namespace Engine
 		void PluginManager::setupCoreSection()
 		{
 			const std::set<std::string> coreLibraries = { "Base" };
-			const std::set<std::string> loadedLibraries = Filesystem::listLoadedLibraries();
+			/*const std::set<std::string> loadedLibraries = Filesystem::listLoadedLibraries();
 			std::set<std::string> loadedCoreLibraries;
 			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
 				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
-			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);
+			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);*/
+			auto pib = mSections.try_emplace("Core", *this, "Core", coreLibraries);
 			assert(pib.second);
 		}		
 

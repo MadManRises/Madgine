@@ -80,7 +80,7 @@ namespace Engine
 			return SharedLibraryQuery{ Path(buffer).parentPath() };
 		}
 
-		std::set<std::string> listLoadedLibraries()
+		/*std::set<std::string> listLoadedLibraries()
 		{
 			std::set<std::string> result;
 
@@ -101,7 +101,7 @@ namespace Engine
 			}
 
 			return result;
-		}
+		}*/
 
 	}
 }

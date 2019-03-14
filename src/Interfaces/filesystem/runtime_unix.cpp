@@ -92,7 +92,7 @@ namespace Engine
 #endif
 		}
 
-		static int visitModule(struct dl_phdr_info *info, size_t size, void *data) {
+		/*static int visitModule(struct dl_phdr_info *info, size_t size, void *data) {
 			if (info->dlpi_name)
 			{
 				Filesystem::Path file = Filesystem::Path(info->dlpi_name).filename();
@@ -114,7 +114,7 @@ namespace Engine
 			std::set<std::string> result;
 			dl_iterate_phdr(visitModule, &result);
 			return result;
-		}
+		}*/
 
 	}
 }

@@ -48,6 +48,6 @@ namespace Engine
 
 
 		INTERFACES_EXPORT SharedLibraryQuery listSharedLibraries();
-		INTERFACES_EXPORT std::set<std::string> listLoadedLibraries();
+		//INTERFACES_EXPORT std::set<std::string> listLoadedLibraries();
 	}
 }
