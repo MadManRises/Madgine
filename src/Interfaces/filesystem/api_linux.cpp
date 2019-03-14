@@ -126,6 +126,11 @@ namespace Engine {
 			return c == '/';
 		}
 
+		bool isEqual(const Path &p1, const Path &p2)
+		{
+			return p1 == p2;
+		}
+
 		std::vector<char> readFile(const Path & p)
 		{
 			std::ifstream ifs(p.str());

@@ -8,6 +8,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
+#include <cctype>
 
 namespace Engine {
 	namespace Filesystem {
@@ -107,9 +108,6 @@ namespace Engine {
 			auto result = GetLongPathNameA(p, buffer, sizeof(buffer));
 			assert(result > 0 && result < sizeof(buffer));
 			buffer[0] = toupper(buffer[0]);
-			for (size_t i = 0; i < result; ++i)
-				if (buffer[i] == '\\')
-					buffer[i] = '/';
 			return { buffer };
 		}
 
@@ -125,6 +123,21 @@ namespace Engine {
 		bool isSeparator(char c)
 		{
 			return c == '/' || c == '\\';
+		}
+
+		static bool compareChar(char c1, char c2)
+		{
+			if (c1 == c2)
+				return true;
+			else if (std::toupper(c1) == std::toupper(c2))
+				return true;
+			return false;
+		}
+
+		bool isEqual(const Path &p1, const Path &p2)
+		{
+			return ((p1.str().size() == p2.str().size()) &&
+				std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
 		}
 
 		std::vector<char> readFile(const Path & p)

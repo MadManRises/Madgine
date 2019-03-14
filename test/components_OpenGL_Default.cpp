@@ -1,14 +1,15 @@
-#ifdef BUILD_Base
-#include "toolslib.h"
 #include "Madgine/baselib.h"
+#include "toolslib.h"
+#include "client/clientlib.h"
 #include "oislib.h"
 #include "OpenGL/opengllib.h"
 #include "Madgine/app/globalapicollector.h"
 #include "Madgine/scene/scenemanager.h"
 #include "renderer/imguiroot.h"
-#include "Madgine/input/inputcollector.h"
+#include "client/gui/guisystem.h"
+#include "client/input/inputcollector.h"
 #include "oisinputhandler.h"
-#include "Madgine/render/renderercollector.h"
+#include "client/render/renderercollector.h"
 #include "OpenGL/openglrenderer.h"
 #include "Madgine/resources/resourceloadercollector.h"
 #include "Madgine/resources/scripts/scriptloader.h"
@@ -20,8 +21,8 @@
 #include "metrics/metrics.h"
 #include "profiler/profiler.h"
 #include "renderer/imguidemo.h"
-#include "Madgine/ui/gamehandler.h"
-#include "Madgine/ui/guihandler.h"
+#include "client/ui/gamehandler.h"
+#include "client/ui/guihandler.h"
 
 
 namespace Engine {
@@ -30,6 +31,7 @@ namespace Engine {
 		return {
 createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
 createComponent<Engine::Tools::ImGuiRoot>,
+createComponent<Engine::GUI::GUISystem>,
 
 		};
 	}
@@ -37,6 +39,7 @@ createComponent<Engine::Tools::ImGuiRoot>,
 	template<> size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>() { return 0; }
 	template<> size_t component_index<Engine::Scene::SceneManager>() { return 0; }
 	template<> size_t component_index<Engine::Tools::ImGuiRoot>() { return 1; }
+	template<> size_t component_index<Engine::GUI::GUISystem>() { return 2; }
 
 	template<> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() {
 		return {
@@ -106,4 +109,3 @@ createComponent<Engine::Tools::ImGuiDemo>,
 
 
 }
-#endif

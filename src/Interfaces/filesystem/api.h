@@ -16,6 +16,7 @@ namespace Engine {
 		INTERFACES_EXPORT bool remove(const Path &p);
 		INTERFACES_EXPORT bool isAbsolute(const Path &p);
 		INTERFACES_EXPORT bool isSeparator(char c);
+		INTERFACES_EXPORT bool isEqual(const Path &p1, const Path &p2);
 
 		INTERFACES_EXPORT std::vector<char> readFile(const Path &p);
 

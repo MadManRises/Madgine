@@ -27,13 +27,14 @@ namespace Engine
 
 			struct INTERFACES_EXPORT ProfilerThread
 			{
-				ProfilerThread();
+				ProfilerThread(Profiler *profiler);
 				ProfilerThread(ProfilerThread &&) = delete;
 
 				std::string mId;
 				
 				ProcessStats mStats;
-				ProcessStats *mCurrent;				
+				ProcessStats *mCurrent;			
+				Profiler *mProfiler;
 			};
 
 			class INTERFACES_EXPORT Profiler
@@ -48,6 +49,8 @@ namespace Engine
 				const std::list<ProfilerThread> &getThreadStats();
 
 				void registerCurrentThread();
+
+				static Profiler &getCurrent();
 
 			private:
 				std::list<ProfilerThread> mThreads;

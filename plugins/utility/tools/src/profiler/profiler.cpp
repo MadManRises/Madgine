@@ -48,7 +48,7 @@ namespace Engine {
 
 		Profiler::Profiler(ImGuiRoot & root) :
 			Tool<Profiler>(root),
-			mProfiler(root.app(false).profiler())
+			mProfiler(Debug::Profiler::Profiler::getCurrent())
 		{
 		}
 

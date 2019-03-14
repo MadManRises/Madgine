@@ -32,7 +32,12 @@ namespace Engine
 
 			void Profiler::registerCurrentThread()
 			{
-				mThreads.emplace_back();
+				mThreads.emplace_back(this);
+			}
+
+			Profiler & Profiler::getCurrent()
+			{
+				return *sThread->mProfiler;
 			}
 
 			std::string idToString(std::thread::id id)
@@ -42,9 +47,10 @@ namespace Engine
 				return ss.str();
 			}
 
-			ProfilerThread::ProfilerThread() :
+			ProfilerThread::ProfilerThread(Profiler *profiler) :
 				mId(idToString(std::this_thread::get_id())),
-				mStats(mId.c_str())
+				mStats(mId.c_str()),
+				mProfiler(profiler)
 			{
 				assert(!sThread);
 				sThread = this;

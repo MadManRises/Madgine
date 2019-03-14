@@ -59,11 +59,6 @@ macro(add_plugin name base type)
 
 		target_compile_definitions(${name} PRIVATE PLUGIN_BUILD)
 
-		install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
-		export_to_workspace(${name})
-
-		cpack_add_component(${name} GROUP ${type})
-
 	else()
 
 		if (NOT PLUGINSELECTION_${type}_${name})
@@ -72,6 +67,11 @@ macro(add_plugin name base type)
 		endif()
 
 	endif()
+
+	install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
+	export_to_workspace(${name})
+
+	cpack_add_component(${name} GROUP ${type})
 
 	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")
 

@@ -23,7 +23,6 @@ FolderSources(sources "" src oisinputhandler.cpp oisinputhandler.h)
 add_plugin(OISHandler Madgine Input ${sources} PRECOMPILED_HEADER src/oislib.h)
 
 
-
 target_link_libraries(OISHandler PUBLIC Client PRIVATE OIS)
 
 if (BUILD_TESTING)

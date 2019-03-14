@@ -66,7 +66,7 @@ namespace Engine {
 			if (baseCount >= count)
 				return {};
 
-			if (mPath.substr(0, baseCount) != base.mPath)
+			if (!isEqual(mPath.substr(0, baseCount), base.mPath))
 				return {};
 
 			if (baseCount == count)
