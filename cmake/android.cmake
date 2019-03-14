@@ -6,21 +6,22 @@ include (Workspace)
 
 if (ANDROID)
 
-	MESSAGE(STATUS "Targeting Android-SDK version: ${ANDROID_PLATFORM_LEVEL}")
-
 	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
 
 	if (NOT ANDROID_SDK)
 		MESSAGE(SEND_ERROR "No ANDROID_SDK location provided!")
 	endif()
 
+	MESSAGE(STATUS "Targeting Android-SDK version: ${ANDROID_PLATFORM_LEVEL}")
+
 
 	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
 
 	add_custom_command(OUTPUT gradle/gradlew
-		COMMAND ${Android_List_dir}/android/gradle/bin/gradle wrapper --gradle-version=4.10.2 --distribution-type=all
+		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
 		WORKING_DIRECTORY gradle)
 
+	add_custom_target(gradlew DEPENDS gradle/gradlew)
 
 	macro(add_workspace_executable target)
 
@@ -37,31 +38,21 @@ if (ANDROID)
 		configure_file(${Android_List_dir}/android/gdbcommands.in gdbcommands_${target}_apk @ONLY)
 		configure_file(${Android_List_dir}/android/launch_jdb.bat.in launch_jdb.bat @ONLY)
 
-		add_library(${target} SHARED gradle/gradlew ${ARGN})
+		add_library(${target} SHARED ${ARGN})
 
 		_add_workspace_executable(${target}_apk android/dummy.cpp)
 
 		target_link_libraries(${target}_apk PRIVATE ${target})
-
-		if (CMAKE_HOST_WIN32)			
-			add_custom_command(
-				TARGET ${target}
-				POST_BUILD				
-				COMMAND gradle/gradlew assembleDebug
-				COMMAND gradle/gradlew --stop
-				COMMENT "Build APK - ${target}"			
-				BYPRODUCTS apk/${target}-debug.apk
-			)	
-		else()
-			add_custom_command(
-				TARGET ${target}
-				POST_BUILD				
-				COMMAND gradle/gradlew assembleDebug	
-				COMMAND gradle/gradlew --stop
-				COMMENT "Build APK - ${target}"			
-				BYPRODUCTS apk/${target}-debug.apk
-			)		
-		endif()			
+	
+		add_custom_command(
+			TARGET ${target}
+			POST_BUILD				
+			COMMAND gradle/gradlew assembleDebug
+			COMMAND gradle/gradlew --stop
+			COMMENT "Build APK - ${target}"			
+			BYPRODUCTS apk/${target}-debug.apk
+			DEPENDS gradlew
+		)		
 
 	endmacro(add_workspace_executable)
 
