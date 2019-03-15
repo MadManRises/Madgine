@@ -17,11 +17,11 @@ if (ANDROID)
 
 	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
 
-	add_custom_command(OUTPUT gradle/gradlew
+	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew
 		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
-		WORKING_DIRECTORY gradle)
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
 
-	add_custom_target(gradlew DEPENDS gradle/gradlew)
+	add_custom_target(gradlew DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew)
 
 	macro(add_workspace_executable target)
 
@@ -32,11 +32,11 @@ if (ANDROID)
 		configure_file(${Android_List_dir}/android/build.gradle.in build.gradle @ONLY)
 		configure_file(${Android_List_dir}/android/local.properties.in local.properties @ONLY)
 		configure_file(${Android_List_dir}/android/AndroidManifest.xml.in AndroidManifest.xml @ONLY)
-		configure_file(${Android_List_dir}/android/launch.vs.json.in ${CMAKE_SOURCE_DIR}/.vs/launch.vs.json @ONLY)
-		configure_file(${Android_List_dir}/android/debug_apk.bat.in debug_${target}_apk.bat @ONLY)
-		configure_file(${Android_List_dir}/android/launch_apk.sh.in launch_${target}_apk.sh @ONLY)
-		configure_file(${Android_List_dir}/android/gdbcommands.in gdbcommands_${target}_apk @ONLY)
-		configure_file(${Android_List_dir}/android/launch_jdb.bat.in launch_jdb.bat @ONLY)
+		#configure_file(${Android_List_dir}/android/launch.vs.json.in ${CMAKE_SOURCE_DIR}/.vs/launch.vs.json @ONLY)
+		#configure_file(${Android_List_dir}/android/debug_apk.bat.in debug_${target}_apk.bat @ONLY)
+		#configure_file(${Android_List_dir}/android/launch_apk.sh.in launch_${target}_apk.sh @ONLY)
+		#configure_file(${Android_List_dir}/android/gdbcommands.in gdbcommands_${target}_apk @ONLY)
+		#configure_file(${Android_List_dir}/android/launch_jdb.bat.in launch_jdb.bat @ONLY)
 
 		add_library(${target} SHARED ${ARGN})
 
@@ -47,8 +47,8 @@ if (ANDROID)
 		add_custom_command(
 			TARGET ${target}
 			POST_BUILD				
-			COMMAND gradle/gradlew assembleDebug
-			COMMAND gradle/gradlew --stop
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
+			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew --stop
 			COMMENT "Build APK - ${target}"			
 			BYPRODUCTS apk/${target}-debug.apk
 		)		

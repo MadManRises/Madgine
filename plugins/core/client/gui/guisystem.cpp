@@ -16,7 +16,7 @@
 #include "Interfaces/debug/profiler/profiler.h"
 
 //TODO Make uniform
-#if UNIX
+#if UNIX && !defined(STATIC_BUILD)
 template <> DLL_EXPORT Engine::App::GlobalAPICollector::ComponentRegistrator<Engine::GUI::GUISystem> Engine::UniqueComponent<Engine::GUI::GUISystem, Engine::App::GlobalAPICollector>::_reg;
 #endif
 
