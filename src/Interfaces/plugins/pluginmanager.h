@@ -4,6 +4,8 @@
 
 #include "pluginsection.h"
 
+#include "../macros.h"
+
 namespace Engine
 {
 	namespace Plugins
@@ -80,8 +82,6 @@ namespace Engine
 }
 
 #ifdef STATIC_BUILD
-#define STRINGIFY(a) #a
-#define STRINGIFY2(a) STRINGIFY(a)
 #define IF_PLUGIN(p) if constexpr(!Engine::streq("BUILD_PLUGIN_" #p, STRINGIFY2(BUILD_PLUGIN_ ## p)))
 #define THROW_PLUGIN(errorMsg) throw errorMsg
 #else
