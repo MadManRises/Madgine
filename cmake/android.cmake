@@ -44,14 +44,24 @@ if (ANDROID)
 
 		target_link_libraries(${target}_apk PRIVATE ${target})
 	
-		add_custom_command(
-			TARGET ${target}
-			POST_BUILD				
-			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
-			COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew --stop
-			COMMENT "Build APK - ${target}"			
-			BYPRODUCTS apk/${target}-debug.apk
-		)		
+		if (CMAKE_HOST_WIN32)	
+			add_custom_command(
+				TARGET ${target}
+				POST_BUILD				
+				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
+				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew --stop
+				COMMENT "Build APK - ${target}"			
+				BYPRODUCTS apk/${target}-debug.apk
+			)	
+		else()
+			add_custom_command(
+				TARGET ${target}
+				POST_BUILD				
+				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
+				COMMENT "Build APK - ${target}"			
+				BYPRODUCTS apk/${target}-debug.apk
+			)		
+		endif()
 
 		add_dependencies(${target} gradlew)
 
