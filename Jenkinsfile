@@ -23,7 +23,7 @@ def task = {
     def name = "${it.join('-')}"    
 
 	if (staticConfig?.trim())
-		staticConfig = "test/${staticConfig}.cfg"
+		staticConfig = "test/${staticConfig}_${toolchain}.cfg"
 
     return {
         // This is where the important work happens for each combination
