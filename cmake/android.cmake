@@ -51,8 +51,9 @@ if (ANDROID)
 			COMMAND gradle/gradlew --stop
 			COMMENT "Build APK - ${target}"			
 			BYPRODUCTS apk/${target}-debug.apk
-			DEPENDS gradlew
 		)		
+
+		add_dependencies(${target} gradlew)
 
 	endmacro(add_workspace_executable)
 
