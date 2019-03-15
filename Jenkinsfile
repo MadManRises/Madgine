@@ -3,7 +3,7 @@
  def axisList = [
     ["clang-linux","clang-android"],           //toolchain
     ["Release","Debug","RelWithDebInfo"],      //configuration
-    ["", "OpenGL_Default"]                   //static configuration file
+    ["", "OpenGL"]                   //static configuration file
 ]   
 
 def tasks = [:]
