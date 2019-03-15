@@ -41,7 +41,7 @@ def task = {
             stage("build") {				
 				sh """
 				cd ${name}
-				make
+				make clean all
 				"""				
             }
 			stage("Test") {
