@@ -193,20 +193,85 @@ namespace Engine {
 			return p1 == p2;
 		}
 
+		struct AAsset_Streambuf : public std::basic_streambuf<char>
+		{
+			AAsset_Streambuf(const char *path)
+				: mAsset(AAssetManager_open(sAssetManager, path, AASSET_MODE_RANDOM)) 
+			{
+			}
+
+			~AAsset_Streambuf()
+			{
+				AAsset_close(mAsset);
+			}
+
+			pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+				std::ios_base::openmode mode = std::ios_base::in) override
+			{
+				assert(mode & std::ios_base::in);					
+
+				int whence;
+				switch (mode) {
+				case std::ios_base::beg:
+					whence = SEEK_SET;
+					break;
+				case std::ios_base::cur:
+					whence = SEEK_CUR;
+					break;
+				case std::ios_base::end:
+					whence = SEEK_END;
+					break;
+				}
+
+				off_t pos = AAsset_seek(mAsset, off, whence);
+				if (pos != (off_t)-1)
+				{
+					fetch();
+				}
+				return pos_type(off_type(-1));
+			}
+
+			pos_type seekpos(pos_type pos,
+				std::ios_base::openmode mode = std::ios_base::in) override
+			{
+				assert(mode & std::ios_base::in);
+
+				off_t newPos = AAsset_seek(mAsset, pos, SEEK_SET);
+				if (newPos != (off_t)-1)
+				{
+					fetch();
+				}
+
+				return pos_type(off_type(-1));
+			}
+
+			int underflow() override 
+			{
+				return fetch();
+			}
+
+			int fetch()
+			{
+				int count = AAsset_read(mAsset, mBuffer.data(), BUFFER_SIZE);
+				if (count < 0)
+					std::terminate();
+				setg(mBuffer.data(), mBuffer.data(), mBuffer.data() + count);
+				if (count == 0)
+					return EOF;
+				return *gptr();
+			}
+
+		private:
+			static const constexpr size_t BUFFER_SIZE = 100;
+			std::array<char, BUFFER_SIZE> mBuffer;
+			AAsset *mAsset;
+		};
+
 		InStream readFile(const Path & p)
 		{
 			if (isAssetPath(p))
 			{
-				//TODO use fd
-				throw 0;
-				/*AAsset *asset = AAssetManager_open(sAssetManager, assetDir(p), AASSET_MODE_STREAMING);
-				if (!asset)
-					return {};
-				size_t len = AAsset_getLength64(asset);
-				std::vector<char> buffer(len);
-				int read = AAsset_read(asset, buffer.data(), len);
-				assert(read == len);
-				return buffer;*/
+				return { std::make_unique<AAsset_Streambuf>(assetDir(p)) };
 			}
 			else
 			{
