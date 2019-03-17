@@ -21,6 +21,7 @@ if (ANDROID)
 
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
 		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
+		COMMAND gradle --stop
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 
 	add_custom_target(gradlew DEPENDS ${CMAKE_BINARY_DIR}/gradle/gradlew)
