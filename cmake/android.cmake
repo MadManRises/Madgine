@@ -4,6 +4,8 @@ include_guard()
 
 include (Workspace)
 
+include (Plugins)
+
 if (ANDROID)
 
 	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
@@ -39,6 +41,10 @@ if (ANDROID)
 		#configure_file(${Android_List_dir}/android/launch_jdb.bat.in launch_jdb.bat @ONLY)
 
 		add_library(${target} SHARED ${ARGN})
+
+		if (STATIC_BUILD)
+			patch_toplevel_target(${target})
+		endif()
 
 		_add_workspace_executable(${target}_apk android/dummy.cpp)
 

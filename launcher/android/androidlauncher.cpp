@@ -47,7 +47,7 @@ namespace Engine {
 			mActivity(activity),
 			mApp(nullptr)
 		{
-			/*activity->instance = this;
+			activity->instance = this;
 
 			activity->callbacks->onDestroy = delegate<&AndroidLauncher::onDestroy>;
 			activity->callbacks->onNativeWindowCreated = delegate<&AndroidLauncher::onNativeWindowCreated, ANativeWindow*>;
@@ -56,7 +56,6 @@ namespace Engine {
 			activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue*>;
 
 			Engine::Filesystem::sAssetManager = activity->assetManager;
-			*/
 			
 			mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
 

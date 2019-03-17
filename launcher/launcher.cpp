@@ -37,9 +37,4 @@ extern "C" DLL_EXPORT void ANativeActivity_onCreate(ANativeActivity* activity,
 	new Engine::Android::AndroidLauncher(activity);
 }
 
-extern "C" DLL_EXPORT void Java_com_example_myapplication_NativeActivity_onCreate()
-{
-	new Engine::Android::AndroidLauncher(nullptr);
-}
-
 #endif

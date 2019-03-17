@@ -34,12 +34,15 @@ if (STATIC_BUILD)
 
 	include(android)
 
+	function(patch_toplevel_target name)
+		get_static_config_file(components_source components ".cpp")
+		target_sources(${name} PRIVATE ${components_source})
+	endfunction(patch_toplevel_target)
+
 	function(add_executable name)
 		_add_executable(${name} ${ARGN})
 		
-		get_static_config_file(components_source components ".cpp")
-		target_sources(${name} PRIVATE ${components_source})
-
+		patch_toplevel_target(${name})
 	endfunction(add_executable)
 
 endif ()
