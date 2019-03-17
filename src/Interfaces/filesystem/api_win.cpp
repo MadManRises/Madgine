@@ -140,13 +140,11 @@ namespace Engine {
 				std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
 		}
 
-		std::vector<char> readFile(const Path & p)
+		InStream readFile(const Path & p)
 		{
-			std::ifstream ifs(p.str());
-			if (!ifs)
-				return {};
-			return std::vector<char>(std::istreambuf_iterator<char>(ifs),
-				std::istreambuf_iterator<char>());
+			std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
+			buffer->open(p.c_str(), std::ios_base::in);
+			return std::move(buffer);
 		}
 
 	}

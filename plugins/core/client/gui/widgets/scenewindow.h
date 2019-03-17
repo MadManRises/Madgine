@@ -14,7 +14,7 @@ namespace Engine
 			using Widget::Widget;
 			virtual ~SceneWindow();
 
-			void setCamera(Render::Camera *camera);
+			void setCamera(Scene::Camera *camera);
 
 			std::vector<Vertex> vertices(const Vector3 &screenSize) override;
 

@@ -1,29 +1,31 @@
 #pragma once
 
 #include "Interfaces/math/vector3.h"
+#include "Interfaces/math/vector4.h"
 #include "Interfaces/math/quaternion.h"
 #include "Interfaces/scripting/types/scope.h"
 
 namespace Engine
 {
-	namespace Render
+	namespace Scene
 	{
+		struct Vertex {
+			Vector3 mPos;
+			Vector4 mColor;
+			Vector3 mNormal;
+		};
 		
-		class MADGINE_CLIENT_EXPORT Camera : public Scripting::Scope<Camera>
+		class MADGINE_BASE_EXPORT Camera : public Scripting::Scope<Camera>
 		{
 		public:
-			Camera(RendererBase *renderer);
-			virtual ~Camera() = default;
+			Camera(SceneManager &scene);
+			~Camera() = default;
 
 			void setPosition(const Vector3 &pos);
 			Vector3 getPosition();
 
-			void addTargetWindow(GUI::SceneWindow *window);
-			void removeTargetWindow(GUI::SceneWindow *window);
-
 			Matrix4 getViewProjectionMatrix(float aspectRatio);
 
-		protected:
 			float getF() const;
 			void setF(float f);
 			float getN() const;
@@ -36,6 +38,9 @@ namespace Engine
 			Vector3 getOrientationHandle() const;
 			void setOrientationHandle(const Vector3 &rot);
 
+			const std::vector<Vertex> &vertices() const;
+			void setVertices(std::vector<Vertex> &&vertices);
+
 		private:
 			Vector3 mPosition;
 			Quaternion mOrientation;
@@ -44,11 +49,11 @@ namespace Engine
 			float mN;
 			float mFOV;
 
-			std::vector<GUI::SceneWindow*> mTargetWindows;
+			std::vector<Vertex> mCurrentVertices;
 
 		};
 
 	}
 }
 
-RegisterType(Engine::Render::Camera);
+RegisterType(Engine::Scene::Camera);

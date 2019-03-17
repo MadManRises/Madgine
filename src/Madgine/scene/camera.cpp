@@ -1,19 +1,19 @@
-#include "../clientlib.h"
+#include "../baselib.h"
 
 #include "camera.h"
 
 #include "Interfaces/math/matrix4.h"
 
-#include "rendererbase.h"
+#include "scenemanager.h"
 
 #include "Interfaces/generic/keyvalueiterate.h"
 #include "Interfaces/scripting/types/api.h"
 
 namespace Engine {
-	namespace Render {
+	namespace Scene {
 
-		Camera::Camera(RendererBase * renderer) :
-			Scope(renderer),
+		Camera::Camera(SceneManager &scene) :
+			Scope(&scene),
 			mN(1.0f),
 			mF(20.0f),
 			mFOV(0.2f),
@@ -29,16 +29,6 @@ namespace Engine {
 		Vector3 Camera::getPosition()
 		{
 			return mPosition;
-		}
-
-		void Camera::addTargetWindow(GUI::SceneWindow * window)
-		{
-			mTargetWindows.push_back(window);
-		}
-
-		void Camera::removeTargetWindow(GUI::SceneWindow * window)
-		{
-			mTargetWindows.erase(std::find(mTargetWindows.begin(), mTargetWindows.end(), window));
 		}
 
 		Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
@@ -109,6 +99,16 @@ namespace Engine {
 		void Camera::setOrientationHandle(const Vector3 & rot)
 		{
 			mOrientation = Quaternion(rot.x, Vector3::UNIT_Y) * Quaternion(rot.y, Vector3::UNIT_X) * Quaternion(rot.z, Vector3::UNIT_Z) * mOrientation;
+		}
+
+		const std::vector<Vertex>& Camera::vertices() const
+		{
+			return mCurrentVertices;
+		}
+
+		void Camera::setVertices(std::vector<Vertex>&& vertices)
+		{
+			mCurrentVertices = std::move(vertices);
 		}
 
 	}

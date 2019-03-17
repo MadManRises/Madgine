@@ -16,6 +16,8 @@
 
 #include "scenecomponentset.h"
 
+#include "camera.h"
+
 namespace Engine
 {
 	namespace Scene
@@ -45,6 +47,9 @@ namespace Engine
 
 			Entity::Entity* makeLocalCopy(Entity::Entity& e);
 			Entity::Entity* makeLocalCopy(Entity::Entity&& e);			
+
+			Scene::Camera *createCamera();
+			void destroyCamera(Scene::Camera *camera);
 
 			void clear();
 
@@ -79,6 +84,8 @@ namespace Engine
 
 		private:
 
+			void updateCamera(Camera &camera);
+
 			void removeQueuedEntities();
 
 			std::string generateUniqueName();
@@ -94,7 +101,9 @@ namespace Engine
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
-			std::list<Entity::Entity *> mEntityRemoveQueue;			
+			std::list<Entity::Entity *> mEntityRemoveQueue;
+
+			std::list<Scene::Camera> mCameras;
 
 			SignalSlot::Signal<> mStateLoadedSignal;
 			SignalSlot::Signal<> mClearedSignal;

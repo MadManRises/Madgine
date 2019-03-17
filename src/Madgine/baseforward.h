@@ -22,6 +22,8 @@ namespace Engine
 
 		class LightManager;
 		class Light;
+
+		class Camera;
 	}
 
 	namespace App

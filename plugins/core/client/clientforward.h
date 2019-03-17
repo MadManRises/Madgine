@@ -53,7 +53,6 @@ namespace Engine
 		class RendererBase;
 		class RenderWindow;
 		struct RenderTarget;
-		class Camera;
 	}
 
 }

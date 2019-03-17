@@ -15,21 +15,14 @@
 
 #include "Interfaces/math/matrix4.h"
 
-#include "client/render/camera.h"
+#include "Madgine/scene/camera.h"
 
 namespace Engine {
 	namespace Render {
 
 		static GLuint vao;
 
-
-		struct Vertex {
-			Vector3 mPos;
-			Vector4 mColor;
-			Vector3 mNormal;
-		};
-
-		OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow * window, uint32_t index, Camera *camera, const Vector2 & size) :
+		OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow * window, uint32_t index, Scene::Camera *camera, const Vector2 & size) :
 			RenderTarget(window, camera, size),
 			mIndex(index),
 			mWindow(window)
@@ -55,7 +48,7 @@ namespace Engine {
 				3,                  // size
 				GL_FLOAT,           // type
 				GL_FALSE,           // normalized?
-				sizeof(Vertex),                  // stride
+				sizeof(Scene::Vertex),                  // stride
 				(void*)0            // array buffer offset
 			);
 			glEnableVertexAttribArray(0);
@@ -64,7 +57,7 @@ namespace Engine {
 				4,                  // size
 				GL_FLOAT,           // type
 				GL_FALSE,           // normalized?
-				sizeof(Vertex),                  // stride
+				sizeof(Scene::Vertex),                  // stride
 				(void*)12            // array buffer offset
 			);
 			glEnableVertexAttribArray(1);
@@ -73,7 +66,7 @@ namespace Engine {
 				3,                  // size
 				GL_FLOAT,           // type
 				GL_FALSE,           // normalized?
-				sizeof(Vertex),                  // stride
+				sizeof(Scene::Vertex),                  // stride
 				(void*)28            // array buffer offset
 			);
 			glEnableVertexAttribArray(2);
@@ -161,32 +154,20 @@ namespace Engine {
 			mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
 			mProgram.setUniform("m", Matrix4{ test.toMatrix() });
 
-			Vertex vertices[] = {
-				{{-0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-				{ {0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-				{ {0.0f, 0.0f, 0.25f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-				{{-0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-				{ {0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-				{ {0.0f, 0.75f, 0.0f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-				{{-0.5f, 0.0f, -0.5f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-				{ {0.0f, 0.0f, 0.25f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-				{ {0.0f, 0.75f, 0.0f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-				{{0.5f, 0.0f, -0.5f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-				{ {0.0f, 0.0f, 0.25f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-				{ {0.0f, 0.75f, 0.0f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-			};
+			const std::vector<Scene::Vertex> &vertices = camera()->vertices();
+			
 
 			glBindBuffer(GL_ARRAY_BUFFER, mVertexbuffer);
 			glCheck();
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * 12, vertices, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 			glCheck();
 
 			glBindVertexArray(vao);
 			glCheck();
 
 			// Draw the triangle !
-			glDrawArrays(GL_TRIANGLES, 0, 12); // Starting from vertex 0; 3 vertices total -> 1 triangle		
+			glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // Starting from vertex 0; 3 vertices total -> 1 triangle		
 			glCheck();
 		}
 

@@ -6,7 +6,7 @@
 namespace Engine {
 	namespace Render {
 
-		RenderTarget::RenderTarget(RenderWindow *window, Camera * camera, const Vector2 & size) :
+		RenderTarget::RenderTarget(RenderWindow *window, Scene::Camera * camera, const Vector2 & size) :
 			mWindow(window),
 			mCamera(camera),
 			mSize(size)
@@ -19,7 +19,7 @@ namespace Engine {
 			mWindow->removeRenderTarget(this);
 		}
 
-		Camera * RenderTarget::camera() const
+		Scene::Camera * RenderTarget::camera() const
 		{
 			return mCamera;
 		}

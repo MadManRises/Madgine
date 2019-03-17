@@ -134,6 +134,11 @@ namespace Engine
 
 			removeQueuedEntities();
 
+			for (Camera &camera : mCameras)
+			{
+				updateCamera(camera);
+			}
+
 			return true;
 		}
 
@@ -210,6 +215,16 @@ namespace Engine
 			return &mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
 		}
 
+		Scene::Camera * SceneManager::createCamera()
+		{
+			return &mCameras.emplace_back(*this);
+		}
+
+		void SceneManager::destroyCamera(Scene::Camera * camera)
+		{
+			mCameras.erase(std::find_if(mCameras.begin(), mCameras.end(), [=](const Scene::Camera &c) {return &c == camera; }));
+		}
+
 		std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string& name)
 		{
 			return createEntityData(name, false);
@@ -259,6 +274,26 @@ namespace Engine
 			}
 			const std::tuple<SceneManager &, bool, std::string>& data = createEntityData(name, true);
 			return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
+		}
+
+		void SceneManager::updateCamera(Camera & camera)
+		{
+			std::vector<Vertex> vertices = {
+	{{-0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
+	{ {0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
+	{ {0.0f, 0.0f, 0.25f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
+	{{-0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
+	{ {0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
+	{ {0.0f, 0.75f, 0.0f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
+	{{-0.5f, 0.0f, -0.5f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
+	{ {0.0f, 0.0f, 0.25f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
+	{ {0.0f, 0.75f, 0.0f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
+	{ {0.5f, 0.0f, -0.5f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
+	{ {0.0f, 0.0f, 0.25f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
+	{ {0.0f, 0.75f, 0.0f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
+			};
+
+			camera.setVertices(std::move(vertices));
 		}
 
 		void SceneManager::removeQueuedEntities()

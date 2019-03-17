@@ -9,7 +9,7 @@ namespace Engine {
 
 		struct OpenGLRenderTexture : RenderTarget {
 
-			OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Camera *camera, const Vector2 &size);
+			OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size);
 			~OpenGLRenderTexture();
 
 

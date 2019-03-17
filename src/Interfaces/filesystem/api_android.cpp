@@ -193,10 +193,11 @@ namespace Engine {
 			return p1 == p2;
 		}
 
-		std::vector<char> readFile(const Path & p)
+		InStream readFile(const Path & p)
 		{
 			if (isAssetPath(p))
 			{
+				//TODO use fd
 				AAsset *asset = AAssetManager_open(sAssetManager, assetDir(p), AASSET_MODE_STREAMING);
 				if (!asset)
 					return {};
@@ -208,11 +209,9 @@ namespace Engine {
 			}
 			else
 			{
-				std::ifstream ifs(p.str());
-				if (!ifs)
-					return {};
-				return std::vector<char>(std::istreambuf_iterator<char>(ifs),
-					std::istreambuf_iterator<char>());
+				std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
+				buffer->open(p.c_str(), std::ios_base::in);
+				return std::move(buffer);
 			}
 		}
 

@@ -8,7 +8,7 @@
 
 #include "../guisystem.h"
 
-#include "../../render/camera.h"
+#include "Madgine/scene/camera.h"
 
 #include "toplevelwindow.h"
 
@@ -23,10 +23,8 @@ namespace Engine
 		{
 		}
 
-		void SceneWindow::setCamera(Render::Camera * camera)
+		void SceneWindow::setCamera(Scene::Camera * camera)
 		{
-			if (mTarget)
-				mTarget->camera()->removeTargetWindow(this);
 			const Engine::Vector3 screenSize = window().getScreenSize();
 			mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
 		}

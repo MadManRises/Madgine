@@ -39,7 +39,7 @@ namespace Engine {
 
 		std::string ResourceBase::readAsText()
 		{
-			std::vector<char> buffer = Filesystem::readFile(mPath);
+			InStream buffer = Filesystem::readFile(mPath);
 			return std::string{ buffer.begin(), buffer.end() };
 			/*std::string result(buffer.size(), ' ');
 			auto it = std::copy_if(buffer.begin(), buffer.end(), result.begin(), [](char c) {return c != '\r'; });

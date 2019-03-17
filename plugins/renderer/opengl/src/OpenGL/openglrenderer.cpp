@@ -8,7 +8,7 @@
 
 #include "openglrenderwindow.h"
 
-#include "client/render/camera.h"
+#include "Madgine/scene/camera.h"
 
 #if WINDOWS
 typedef HGLRC(WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);

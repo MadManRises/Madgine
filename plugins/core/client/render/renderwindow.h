@@ -16,7 +16,7 @@ namespace Engine {
 			virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
 			virtual bool frameEnded(std::chrono::microseconds) override;
 
-			virtual std::unique_ptr<RenderTarget> createRenderTarget(Camera *camera, const Vector2 &size) = 0;
+			virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera *camera, const Vector2 &size) = 0;
 
 			void addRenderTarget(RenderTarget *target);
 			void removeRenderTarget(RenderTarget *target);

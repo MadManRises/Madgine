@@ -17,13 +17,13 @@ if (ANDROID)
 	MESSAGE(STATUS "Targeting Android-SDK version: ${ANDROID_PLATFORM_LEVEL}")
 
 
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
 		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gradle)
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 
-	add_custom_target(gradlew DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew)
+	add_custom_target(gradlew DEPENDS ${CMAKE_BINARY_DIR}/gradle/gradlew)
 
 	macro(add_workspace_executable target)
 
@@ -54,8 +54,8 @@ if (ANDROID)
 			add_custom_command(
 				TARGET ${target}
 				POST_BUILD				
-				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
-				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew --stop
+				COMMAND ${CMAKE_BINARY_DIR}/gradle/gradlew assembleDebug
+				COMMAND ${CMAKE_BINARY_DIR}/gradle/gradlew --stop
 				COMMENT "Build APK - ${target}"			
 				BYPRODUCTS apk/${target}-debug.apk
 			)	
@@ -63,7 +63,7 @@ if (ANDROID)
 			add_custom_command(
 				TARGET ${target}
 				POST_BUILD				
-				COMMAND ${CMAKE_CURRENT_BINARY_DIR}/gradle/gradlew assembleDebug
+				COMMAND ${CMAKE_BINARY_DIR}/gradle/gradlew assembleDebug
 				COMMENT "Build APK - ${target}"			
 				BYPRODUCTS apk/${target}-debug.apk
 			)		

@@ -16,12 +16,7 @@ namespace Engine {
 			void operator=(const RendererBase&) = delete;
 
 			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) = 0;
-			Camera *createCamera();
 
-			KeyValueMapList maps() override;
-
-		private:
-			std::vector<std::unique_ptr<Camera>> mCameras;
 		};
 
 	}

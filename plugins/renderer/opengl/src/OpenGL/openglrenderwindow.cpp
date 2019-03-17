@@ -165,7 +165,7 @@ namespace Engine {
 		}
 
 
-		std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Camera * camera, const Vector2& size)
+		std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Scene::Camera * camera, const Vector2& size)
 		{
 			return std::make_unique<OpenGLRenderTexture>(this, ++mTextureCount, camera, size);
 		}

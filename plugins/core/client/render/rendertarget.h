@@ -6,10 +6,10 @@ namespace Engine {
 	namespace Render {
 
 		struct MADGINE_CLIENT_EXPORT RenderTarget {
-			RenderTarget(RenderWindow *window, Camera *camera, const Vector2 &size);
+			RenderTarget(RenderWindow *window, Scene::Camera *camera, const Vector2 &size);
 			virtual ~RenderTarget();
 
-			Camera *camera() const;
+			Scene::Camera *camera() const;
 
 			virtual void render() = 0;
 
@@ -21,7 +21,7 @@ namespace Engine {
 
 		private:
 			RenderWindow *mWindow;
-			Camera *mCamera;
+			Scene::Camera *mCamera;
 			Vector2 mSize;
 		};
 

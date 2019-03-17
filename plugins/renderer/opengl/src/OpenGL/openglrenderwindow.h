@@ -17,7 +17,7 @@ namespace Engine {
 
 			virtual void render() override;
 
-			virtual std::unique_ptr<RenderTarget> createRenderTarget(Camera * camera, const Vector2& size) override;
+			virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera * camera, const Vector2& size) override;
 
 		private:
 			ContextHandle mContext;
