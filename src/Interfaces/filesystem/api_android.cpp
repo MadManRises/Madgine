@@ -198,20 +198,21 @@ namespace Engine {
 			if (isAssetPath(p))
 			{
 				//TODO use fd
-				AAsset *asset = AAssetManager_open(sAssetManager, assetDir(p), AASSET_MODE_STREAMING);
+				throw 0;
+				/*AAsset *asset = AAssetManager_open(sAssetManager, assetDir(p), AASSET_MODE_STREAMING);
 				if (!asset)
 					return {};
 				size_t len = AAsset_getLength64(asset);
 				std::vector<char> buffer(len);
 				int read = AAsset_read(asset, buffer.data(), len);
 				assert(read == len);
-				return buffer;
+				return buffer;*/
 			}
 			else
 			{
 				std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
 				buffer->open(p.c_str(), std::ios_base::in);
-				return std::move(buffer);
+				return { std::move(buffer) };
 			}
 		}
 

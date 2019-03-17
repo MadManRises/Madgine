@@ -135,7 +135,7 @@ namespace Engine {
 		{
 			std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
 			buffer->open(p.c_str(), std::ios_base::in);
-			return std::move(buffer);
+			return { std::move(buffer) };
 		}
 
 	}
