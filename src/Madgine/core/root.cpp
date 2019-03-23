@@ -40,6 +40,8 @@ namespace Engine
 
 			(*mPluginManager)["Input"].setExclusive();
 			(*mPluginManager)["Input"].setAtleastOne();
+
+			mPluginManager->section("TW", "Core");
 #endif
 
 			mResources->init();

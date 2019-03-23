@@ -44,7 +44,7 @@ namespace Engine
 
 		bool PluginManager::isLoaded(const std::string & plugin) const
 		{
-			for (const std::pair<const std::string, PluginSection> &sec : mSections) {
+			for (const std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections) {
 				if (sec.second.isLoaded(plugin))
 					return true;
 			}
@@ -56,38 +56,48 @@ namespace Engine
 			return mProject;
 		}
 
-		PluginSection& PluginManager::operator[](const std::string& name)
+		PluginSection & PluginManager::section(const std::string & project, const std::string & name)
 		{
-			auto pib = mSections.try_emplace(name, *this, name);
+			auto pib = mSections.try_emplace({ project, name }, *this, project, name);
 			if (pib.second) {
 				for (PluginListener *listener : mListeners) {
-					setupListenerOnSectionAdded(listener, &pib.first->second);					
+					setupListenerOnSectionAdded(listener, &pib.first->second);
 				}
 			}
 			return pib.first->second;
 		}
 
-		const PluginSection& PluginManager::at(const std::string& name) const
+		PluginSection& PluginManager::operator[](const std::string& name)
 		{
-			return mSections.at(name);
+			return section(mProject, name);
 		}
 
-		std::map<std::string, PluginSection>::const_iterator PluginManager::begin() const
+		const PluginSection & PluginManager::at(const std::string & project, const std::string & name) const
+		{
+			return mSections.at({ project, name });
+		}
+
+		const PluginSection& PluginManager::at(const std::string& name) const
+		{
+			return at(mProject, name);
+		}
+
+		std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator PluginManager::begin() const
 		{
 			return mSections.begin();
 		}
 
-		std::map<std::string, PluginSection>::const_iterator PluginManager::end() const
+		std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator PluginManager::end() const
 		{
 			return mSections.end();
 		}
 
-		std::map<std::string, PluginSection>::iterator PluginManager::begin()
+		std::map<std::pair<std::string, std::string>, PluginSection>::iterator PluginManager::begin()
 		{
 			return mSections.begin();
 		}
 
-		std::map<std::string, PluginSection>::iterator PluginManager::end()
+		std::map<std::pair<std::string, std::string>, PluginSection>::iterator PluginManager::end()
 		{
 			return mSections.end();
 		}
@@ -96,10 +106,10 @@ namespace Engine
 		{
 			if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
 				mCurrentSelectionFile->clear();
-				for (const std::pair<const std::string, PluginSection> &sec : mSections) {
+				for (const std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections) {
 					/*if (sec.first == "Core")
 						continue;*/
-					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first];
+					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first.second];
 					for (const std::pair<const std::string, Plugin> &p : sec.second) {
 						iniSec[p.first] = p.second.isLoaded() ? "On" : "";
 					}
@@ -151,7 +161,7 @@ namespace Engine
 		void PluginManager::addListener(PluginListener * listener)
 		{
 			mListeners.push_back(listener);
-			for (std::pair<const std::string, PluginSection> &sec : mSections)
+			for (std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections)
 				setupListenerOnSectionAdded(listener, &sec.second);
 		}
 
@@ -179,7 +189,7 @@ namespace Engine
 			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
 				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
 			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);*/
-			auto pib = mSections.try_emplace("Core", *this, "Core", coreLibraries);
+			auto pib = mSections.try_emplace({ mProject, "Core" }, *this, mProject, "Core", coreLibraries);
 			assert(pib.second);
 		}		
 

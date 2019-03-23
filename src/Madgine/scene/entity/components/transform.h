@@ -3,7 +3,8 @@
 #include "../entitycomponent.h"
 #include "Interfaces/serialize/container/serializedmapper.h"
 #include "Interfaces/math/vector3.h"
-#include "Interfaces/math/vector4.h"
+#include "Interfaces/math/matrix4.h"
+#include "Interfaces/math/quaternion.h"
 
 namespace Engine
 {
@@ -12,39 +13,30 @@ namespace Engine
 		namespace Entity
 		{
 			
-			class MADGINE_BASE_EXPORT Transform : public EntityComponentVirtualBase<Transform>
+			class MADGINE_BASE_EXPORT Transform : public EntityComponent<Transform>
 			{
 			public:
-				using EntityComponentVirtualBase<Transform>::EntityComponentVirtualBase;
-				virtual ~Transform() = default;
+				using EntityComponent<Transform>::EntityComponent;
 
-				virtual Vector3 getPosition() const = 0;
-				virtual Vector3 getScale() const = 0;
-				virtual Vector4 getOrientation() const = 0;
+				const Vector3 &getPosition() const;
+				const Vector3 &getScale() const;
+				const Quaternion &getOrientation() const;
 
-				virtual void setPosition(const Vector3 &v) = 0;
-				virtual void setScale(const Vector3 &scale) = 0;
-				virtual void setOrientation(const Vector4 &orientation) = 0;
+				void setPosition(const Vector3 &position);
+				void setScale(const Vector3 &scale);
+				void setOrientation(const Quaternion &orientation);
 
-				virtual void translate(const Vector3 &v) = 0;
-				virtual void rotate(const Vector4 &q) = 0;
+				void translate(const Vector3 &v);
+				void rotate(const Quaternion &q);
 
 				KeyValueMapList maps() override;
 
+				Matrix4 matrix() const;
+
 			private:
-				Vector3 getPosition2() const
-				{
-					return getPosition();
-				}
-
-				void setPosition2(const Vector3 &v)
-				{
-					setPosition(v);
-				}
-
-				Serialize::SerializedMapper<&Transform::getPosition2, 
-					&Transform::setPosition2> mSerializedPosition;
-
+				Vector3 mPosition;
+				Vector3 mScale = Vector3::UNIT_SCALE;
+				Quaternion mOrientation;
 			};
 
 		}

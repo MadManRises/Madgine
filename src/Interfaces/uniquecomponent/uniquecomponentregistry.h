@@ -14,7 +14,7 @@ namespace Engine {
 	template <class Base, class _Ty>
 	using Collector_F = std::unique_ptr<Base>(*)(_Ty);
 
-	template <class _Base, class _Ty, template <class...> class Container = std::vector>
+	template <class _Base, class _Ty, typename C = std::vector<std::unique_ptr<_Base>>>
 	class UniqueComponentContainer;
 
 	template <class _Base, class _Ty>

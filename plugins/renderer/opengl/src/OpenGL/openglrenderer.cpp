@@ -2,7 +2,7 @@
 
 #include "openglrenderer.h"
 
-#include "client/gui/widgets/toplevelwindow.h"
+#include "gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 

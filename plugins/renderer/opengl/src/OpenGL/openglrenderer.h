@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/render/renderercollector.h"
+#include "render/renderercollector.h"
 
 namespace Engine {
 	namespace Render {

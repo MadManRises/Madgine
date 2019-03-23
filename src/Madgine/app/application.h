@@ -133,7 +133,7 @@ namespace Engine
 
 			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
 
-			GlobalAPIContainer<std::vector> mGlobalAPIs;
+			GlobalAPIContainer<> mGlobalAPIs;
 			int mGlobalAPIInitCounter;
 
 			std::unique_ptr<Threading::FrameLoop> mLoop;

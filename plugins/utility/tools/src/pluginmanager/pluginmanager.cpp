@@ -98,30 +98,34 @@ namespace Engine
 
 				ImGui::BeginChild("Child1", v, false, ImGuiWindowFlags_HorizontalScrollbar);
 
-				for (std::pair<const std::string, Plugins::PluginSection> &sec : mManager) {
-					if (ImGui::TreeNode(sec.first.c_str())) {
-						for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-							if ((sec.first == "Utility" && p.first == "Tools") || sec.first == "Core") {
-								ImGui::PushDisabled();
-							}
-							bool loaded = p.second.isLoaded();
-							bool clicked = false;
-							if (sec.second.isExclusive()) {
-								clicked = ImGui::RadioButton(p.first.c_str(), loaded);
-								if (clicked)
-									loaded = true;
-							}
-							else
-								clicked = ImGui::Checkbox(p.first.c_str(), &loaded);
-							if (clicked) {
-								if (loaded)
-									sec.second.loadPlugin(p.first);
+				for (std::pair<const std::pair<std::string, std::string>, Plugins::PluginSection> &sec : mManager) {
+					if (ImGui::TreeNode(sec.first.first.c_str()))
+					{
+						if (ImGui::TreeNode(sec.first.second.c_str())) {
+							for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
+								if (sec.first.first == "Madgine" && ((sec.first.second == "Utility" && p.first == "Tools") || sec.first.second == "Core")) {
+									ImGui::PushDisabled();
+								}
+								bool loaded = p.second.isLoaded();
+								bool clicked = false;
+								if (sec.second.isExclusive()) {
+									clicked = ImGui::RadioButton(p.first.c_str(), loaded);
+									if (clicked)
+										loaded = true;
+								}
 								else
-									sec.second.unloadPlugin(p.first);
-							}								
-							if ((sec.first == "Utility" && p.first == "Tools") || sec.first == "Core") {
-								ImGui::PopDisabled();
+									clicked = ImGui::Checkbox(p.first.c_str(), &loaded);
+								if (clicked) {
+									if (loaded)
+										sec.second.loadPlugin(p.first);
+									else
+										sec.second.unloadPlugin(p.first);
+								}
+								if (sec.first.first == "Madgine" && ((sec.first.second == "Utility" && p.first == "Tools") || sec.first.second == "Core")) {
+									ImGui::PopDisabled();
+								}
 							}
+							ImGui::TreePop();
 						}
 						ImGui::TreePop();
 					}
@@ -131,7 +135,7 @@ namespace Engine
 
 				ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
 
-				for (const std::pair<const std::string, Plugins::PluginSection> &sec : mManager) {
+				for (const std::pair<const std::pair<std::string, std::string>, Plugins::PluginSection> &sec : mManager) {
 					for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
 						if (p.second.isLoaded()) {
 							const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));

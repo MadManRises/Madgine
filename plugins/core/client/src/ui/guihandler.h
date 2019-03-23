@@ -51,5 +51,17 @@ namespace Engine
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
 
+namespace Engine 
+{
+	namespace UI
+	{
+
+		template <typename T>
+		using GuiHandler = Scripting::Scope<T, GuiHandlerComponent<T>>;
+
+	}
+}
+
+
 RegisterType(Engine::UI::GuiHandlerBase);
 

@@ -25,10 +25,9 @@ namespace Engine
 			}
 
 			MethodHolder::MethodHolder(MethodHolder&& other) :
-				mState(other.mState),
+				mState(std::exchange(other.mState, nullptr)),
 				mIndex(other.mIndex)
-			{
-				other.mState = nullptr;
+			{				
 			}
 
 			MethodHolder::~MethodHolder()
@@ -109,7 +108,7 @@ namespace Engine
 
 				mState.env().push();
 				lua_setupvalue(state, -2, 1);
-				return state;
+				return MethodHolder{ state };
 				
 			}
 

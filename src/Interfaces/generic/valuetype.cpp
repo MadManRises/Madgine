@@ -47,6 +47,12 @@ namespace Engine
 				std::to_string(std::get<Vector4>(mUnion)[1]) + ", " +
 				std::to_string(std::get<Vector4>(mUnion)[2]) + ", " +
 				std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
+		case Type::QuaternionValue:
+			return "{"s +
+				std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).w) + "}";
 		default:
 			throw Scripting::ScriptingException("Unknown Type!");
 		}
@@ -85,6 +91,8 @@ namespace Engine
 			return "Vector3";
 		case Type::Vector4Value:
 			return "Vector4";
+		case Type::QuaternionValue:
+			return "Quaternion";
 		case Type::ApiMethodValue:
 			return "Method";
 		default:

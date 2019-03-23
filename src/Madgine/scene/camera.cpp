@@ -17,7 +17,7 @@ namespace Engine {
 			mN(1.0f),
 			mF(20.0f),
 			mFOV(0.2f),
-			mPosition(0, 0, -4)
+			mPosition(0, 0, 4)
 		{
 		}
 
@@ -26,9 +26,19 @@ namespace Engine {
 			mPosition = pos;
 		}
 
-		Vector3 Camera::getPosition()
+		const Vector3 & Camera::position()
 		{
 			return mPosition;
+		}
+
+		void Camera::setOrientation(const Quaternion & q)
+		{
+			mOrientation = q;
+		}
+
+		const Quaternion & Camera::orientation()
+		{
+			return mOrientation;
 		}
 
 		Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
@@ -38,7 +48,7 @@ namespace Engine {
 			Matrix4 v = {
 				1, 0, 0, -mPosition.x,
 				0, 1, 0, -mPosition.y,
-				0, 0, -1, mPosition.z,
+				0, 0, 1, -mPosition.z,
 				0, 0, 0, 1
 			};
 
@@ -88,7 +98,7 @@ namespace Engine {
 
 		KeyValueMapList Camera::maps()
 		{
-			return Scope::maps().merge(MAP(F, getF, setF), MAP(N, getN, setN), MAP(FOV, getFOV, setFOV), MAP(Position, getPosition, setPosition), MAP(Rotate, getOrientationHandle, setOrientationHandle));
+			return Scope::maps().merge(MAP(F, getF, setF), MAP(N, getN, setN), MAP(FOV, getFOV, setFOV), MAP(Position, position, setPosition), MAP(Rotate, getOrientationHandle, setOrientationHandle));
 		}
 
 		Vector3 Camera::getOrientationHandle() const
@@ -101,14 +111,14 @@ namespace Engine {
 			mOrientation = Quaternion(rot.x, Vector3::UNIT_Y) * Quaternion(rot.y, Vector3::UNIT_X) * Quaternion(rot.z, Vector3::UNIT_Z) * mOrientation;
 		}
 
-		const std::vector<Vertex>& Camera::vertices() const
+		const std::vector<Entity::Entity*>& Camera::visibleEntities() const
 		{
-			return mCurrentVertices;
+			return mVisibleEntities;
 		}
 
-		void Camera::setVertices(std::vector<Vertex>&& vertices)
+		void Camera::setVisibleEntities(std::vector<Entity::Entity*>&& visibleEntities)
 		{
-			mCurrentVertices = std::move(vertices);
+			mVisibleEntities = std::move(visibleEntities);
 		}
 
 	}

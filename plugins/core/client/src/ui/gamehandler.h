@@ -94,5 +94,16 @@ namespace Engine
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandlerBase, UIManager&, GameHandler, MADGINE_CLIENT);
 
+namespace Engine
+{
+	namespace UI
+	{
+
+		template <typename T>
+		using GameHandler = Scripting::Scope<T, GameHandlerComponent<T>>;
+
+	}
+}
+
 RegisterType(Engine::UI::GameHandlerBase);
 //RegisterCollector(Engine::UI::GameHandlerCollector);

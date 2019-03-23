@@ -11,7 +11,7 @@
 namespace ns \
 { \
 	using prefix ## Collector = Engine::UniqueComponentCollector<base, arg>; \
-	template <template <typename ...> typename C> \
+	template <typename C = std::vector<std::unique_ptr<base>>> \
 	using prefix ## Container = Engine::UniqueComponentContainer<base, arg, C>; \
 	using prefix ## Selector = Engine::UniqueComponentSelector<base, arg>; \
 	template <typename T> \

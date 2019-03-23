@@ -12,6 +12,8 @@
 
 #include "Interfaces/serialize/container/noparent.h"
 #include "Interfaces/threading/framelistener.h"
+#include "Interfaces/generic/observablecontainer.h"
+#include "../core/madgineobjectobserver.h"
 #include "../app/globalapicollector.h"
 
 #include "scenecomponentset.h"
@@ -97,7 +99,7 @@ namespace Engine
 			App::Application &mApp;
 			size_t mItemCount;
 
-			SceneComponentContainer<SceneComponentSet> mSceneComponents;
+			SceneComponentContainer<ObservableContainer<SceneComponentSet, MadgineObjectObserver>> mSceneComponents;
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;

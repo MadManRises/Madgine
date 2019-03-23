@@ -11,11 +11,11 @@
 
 #include "Madgine/app/application.h"
 
-#include "client/gui/guisystem.h"
-#include "client/gui/widgets/toplevelwindow.h"
+#include "gui/guisystem.h"
+#include "gui/widgets/toplevelwindow.h"
 #include "Interfaces/math/vector3.h"
 
-#include "client/input/inputhandler.h"
+#include "input/inputhandler.h"
 
 #include "Interfaces/debug/profiler/profiler.h"
 

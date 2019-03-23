@@ -3,13 +3,13 @@
 #include "imguimanager.h"
 
 #include "Madgine/app/application.h"
-#include "client/gui/guisystem.h"
-#include "client/gui/widgets/toplevelwindow.h"
-#include "client/input/inputhandler.h"
+#include "gui/guisystem.h"
+#include "gui/widgets/toplevelwindow.h"
+#include "input/inputhandler.h"
 
 #include "../imgui/imgui.h"
 
-#include "client/input/inputevents.h"
+#include "input/inputevents.h"
 
 #include "Interfaces/math/vector3.h"
 

@@ -1,4 +1,4 @@
-#include "opengllib.h"
+#include "../opengllib.h"
 
 #include "opengltexture.h"
 

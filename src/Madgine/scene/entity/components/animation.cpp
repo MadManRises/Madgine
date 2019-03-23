@@ -17,6 +17,11 @@ namespace Engine
 			
 			ENTITYCOMPONENTVIRTUALBASE_IMPL(Animation, Animation);
 
+			void Animation::resetDefaultAnimation()
+			{
+				setDefaultAnimation("");
+			}
+
 		}
 	}
 }

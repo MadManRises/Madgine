@@ -23,9 +23,12 @@
 #include "../app/globalapicollector.h"
 
 
+
+#include "entity/components/mesh.h"
+#include "entity/components/transform.h"
+
 namespace Engine
 {
-
 	namespace Scene
 	{		
 
@@ -47,6 +50,14 @@ namespace Engine
 				if (!component->callInit())
 					return false;
 			}
+
+			app().frameLoop().queue([this]() {
+				Entity::Entity *e = createEntity();
+				e->addComponent<Entity::Mesh>()->setName("mage");
+				Entity::Transform *t = e->addComponent<Entity::Transform>();
+				t->setPosition(Vector3::ZERO);
+				t->setScale({ 0.2f,0.2f,0.2f });
+			});
 
 			return true;
 		}
@@ -245,7 +256,7 @@ namespace Engine
 
 		Entity::Entity* SceneManager::createEntity(const std::string& behavior, const std::string& name,
 		                                               const std::function<void(Entity::Entity&)> &init)
-		{
+		{			
 			ValueType behaviorTable = app().table()[behavior];
 			Scripting::LuaTable table;
 			if (behaviorTable.is<Scripting::LuaTable>())
@@ -256,7 +267,10 @@ namespace Engine
 			{
 				LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
 			}
-			mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+			if (init)
+				mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+			else
+				mEntities.emplace_tuple_back(tuple_cat(createEntityData(name, false), std::make_tuple(table)));
 			return &mEntities.back();
 		}
 
@@ -278,22 +292,10 @@ namespace Engine
 
 		void SceneManager::updateCamera(Camera & camera)
 		{
-			std::vector<Vertex> vertices = {
-	{{-0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{{-0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{{-0.5f, 0.0f, -0.5f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-			};
+			auto &transform = toPointer(mEntities);
+			std::vector<Entity::Entity*> entities{ transform.begin(), transform.end() };		
 
-			camera.setVertices(std::move(vertices));
+			camera.setVisibleEntities(std::move(entities));
 		}
 
 		void SceneManager::removeQueuedEntities()

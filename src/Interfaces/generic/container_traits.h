@@ -11,8 +11,11 @@ namespace Engine
 	template <class T>
 	struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {};
 
+	template <typename Container>
+	struct container_traits;
+
 	template <template <class...> class C, class T>
-	struct container_traits
+	struct container_traits<C<T>>
 	{
 		static constexpr const bool sorted = false;
 
@@ -22,6 +25,9 @@ namespace Engine
 		typedef typename container::value_type value_type;
 		typedef void key_type;
 		typedef T type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
@@ -46,7 +52,7 @@ namespace Engine
 	};
 
 	template <class T>
-	struct container_traits<std::list, T>
+	struct container_traits<std::list<T>>
 	{
 		static constexpr const bool sorted = false;
 
@@ -56,6 +62,9 @@ namespace Engine
 		typedef typename container::value_type value_type;
 		typedef void key_type;
 		typedef T type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
@@ -80,7 +89,7 @@ namespace Engine
 	};
 
 	template <class T>
-	struct container_traits<std::vector, T>
+	struct container_traits<std::vector<T>>
 	{
 		static constexpr const bool sorted = false;
 
@@ -90,6 +99,9 @@ namespace Engine
 		typedef typename container::value_type value_type;
 		typedef void key_type;
 		typedef T type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
@@ -259,7 +271,7 @@ namespace Engine
 
 
 	template <class T>
-	struct container_traits<std::set, T>
+	struct container_traits<std::set<T>>
 	{
 		static constexpr const bool sorted = true;
 
@@ -269,6 +281,9 @@ namespace Engine
 		typedef typename KeyType<T>::type key_type;
 		typedef typename container::value_type value_type;
 		typedef T type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
@@ -294,7 +309,7 @@ namespace Engine
 
 
 	template <class K, class T>
-	struct container_traits<std::map, std::pair<const K, T>>
+	struct container_traits<std::map<K, T>>
 	{
 		static constexpr const bool sorted = true;
 
@@ -304,6 +319,9 @@ namespace Engine
 		typedef K key_type;
 		typedef T value_type;
 		typedef std::pair<const K, T> type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
@@ -326,4 +344,6 @@ namespace Engine
 			return dist;
 		}
 	};
+
+
 }

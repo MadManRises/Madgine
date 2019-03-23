@@ -4,23 +4,25 @@
 
 
 #include "Interfaces/math/vector4.h"
+#include "Interfaces/math/matrix4.h"
 
 #include "openglrenderwindow.h"
 
-#include "client/gui/vertex.h"
+#include "gui/vertex.h"
 
 #include "openglshaderloader.h"
 
-#include "openglshader.h"
+#include "util/openglshader.h"
 
-#include "Interfaces/math/matrix4.h"
+
 
 #include "Madgine/scene/camera.h"
+#include "Madgine/scene/entity/entity.h"
+#include "Madgine/scene/entity/components/transform.h"
+#include "openglmesh.h"
 
 namespace Engine {
 	namespace Render {
-
-		static GLuint vao;
 
 		OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow * window, uint32_t index, Scene::Camera *camera, const Vector2 & size) :
 			RenderTarget(window, camera, size),
@@ -33,43 +35,9 @@ namespace Engine {
 			if (!mProgram.link(vertexShader.get(), pixelShader.get()))
 				throw 0;
 
-			mProgram.setUniform("lightColor", { 1.0f,0.9f,0.8f });
-			mProgram.setUniform("lightDir", Vector3{ -1.0f,-0.5f,1.0f }.normalisedCopy());
+			mProgram.setUniform("lightColor", { 1.0f,1.0f,1.0f });
+			mProgram.setUniform("lightDir", Vector3{ 0.0f,0.0f,-1.0f }.normalisedCopy());
 
-			glGenVertexArrays(1, &vao);
-			glBindVertexArray(vao);
-
-			// Generate 1 buffer, put the resulting identifier in vertexbuffer
-			glGenBuffers(1, &mVertexbuffer);
-
-			glBindBuffer(GL_ARRAY_BUFFER, mVertexbuffer);
-			glVertexAttribPointer(
-				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-				3,                  // size
-				GL_FLOAT,           // type
-				GL_FALSE,           // normalized?
-				sizeof(Scene::Vertex),                  // stride
-				(void*)0            // array buffer offset
-			);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(
-				1,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-				4,                  // size
-				GL_FLOAT,           // type
-				GL_FALSE,           // normalized?
-				sizeof(Scene::Vertex),                  // stride
-				(void*)12            // array buffer offset
-			);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(
-				2,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-				3,                  // size
-				GL_FLOAT,           // type
-				GL_FALSE,           // normalized?
-				sizeof(Scene::Vertex),                  // stride
-				(void*)28            // array buffer offset
-			);
-			glEnableVertexAttribArray(2);
 			
 						
 			mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
@@ -152,23 +120,34 @@ namespace Engine {
 			test = Quaternion(0.001f, Vector3::UNIT_Y) * test * Quaternion(0.0001f, Vector3::UNIT_X);
 
 			mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
-			mProgram.setUniform("m", Matrix4{ test.toMatrix() });
-
-			const std::vector<Scene::Vertex> &vertices = camera()->vertices();
 			
 
-			glBindBuffer(GL_ARRAY_BUFFER, mVertexbuffer);
-			glCheck();
+			for (Scene::Entity::Entity *e : camera()->visibleEntities())
+			{
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-			glCheck();
+				OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
+				Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+				if (mesh && mesh->isVisible() && transform)
+				{
+					OpenGLMeshData *meshData = mesh->data();
+					if (meshData)
+					{
+						Matrix4 m = Matrix4{ test.toMatrix() } * transform->matrix();
+						mProgram.setUniform("m", m);
 
-			glBindVertexArray(vao);
-			glCheck();
+						glBindVertexArray(meshData->mVAO);
+						glCheck();
+						
+						glDrawArrays(GL_TRIANGLES, 0, meshData->mVertexCount);
+						glCheck();
+					}
+						
+				}
+			}
 
-			// Draw the triangle !
-			glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // Starting from vertex 0; 3 vertices total -> 1 triangle		
-			glCheck();
+
+
+
 		}
 
 	}

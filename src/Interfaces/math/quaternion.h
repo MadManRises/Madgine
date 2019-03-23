@@ -87,7 +87,7 @@ namespace Engine {
 			return q;
 		}
 
-		Matrix3 toMatrix()
+		Matrix3 toMatrix() const
 		{
 			return Matrix3{
 				1 - 2 * (v.y * v.y + v.z * v.z),     2 * (v.x * v.y - v.z * w  ),     2 * (v.x * v.z + v.y * w  ),
@@ -96,9 +96,14 @@ namespace Engine {
 			};
 		}
 
-		Vector3 operator *(const Vector3 &dir)
+		Vector3 operator *(const Vector3 &dir) const
 		{
 			return toMatrix() * dir;
+		}
+
+		bool operator==(const Quaternion &other) const
+		{
+			return w == other.w && v == other.v;
 		}
 
 		float w;

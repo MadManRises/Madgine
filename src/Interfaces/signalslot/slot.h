@@ -18,7 +18,6 @@ namespace Engine
 		public:
 			SlotImpl(T* item, TaskQueue *queue = nullptr) :
 				mQueue(queue ? queue : DefaultTaskQueue::getSingletonPtr()),
-				mThread(std::this_thread::get_id()),
 				mItem(item)
 			{
 			}
@@ -27,7 +26,8 @@ namespace Engine
 
 			void operator()(_Ty ... args) const
 			{
-				assert(std::this_thread::get_id() == mThread);
+				//TODO Check via queue
+				//assert(std::this_thread::get_id() == mThread);
 				(mItem ->* f)(std::forward<_Ty>(args)...);
 			}
 
@@ -38,11 +38,12 @@ namespace Engine
 
 			void queue_direct(_Ty ... args) const
 			{
-				if (std::this_thread::get_id() == mThread)
+				//TODO check via queue
+				/*if (std::this_thread::get_id() == mThread)
 				{
 					(mItem ->* f)(std::forward<_Ty>(args)...);
 				}
-				else
+				else*/
 				{
 					queue(std::forward<_Ty>(args)...);
 				}
@@ -66,8 +67,7 @@ namespace Engine
 
 		private:
 			ConnectionStore mConnections;
-			TaskQueue* mQueue;
-			std::thread::id mThread;
+			TaskQueue* mQueue;			
 
 			T* mItem;
 		};

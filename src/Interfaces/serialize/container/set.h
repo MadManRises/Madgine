@@ -43,16 +43,16 @@ namespace Engine
 
 		template <class T, class Creator = DefaultCreator<>>
 		using SerializableSet = SetImpl<SerializableContainer<
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
+			container_traits<std::set<typename UnitHelper<T>::Type>>, Creator>>;
 
 		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
 		using ObservableSet = ObservableSetImpl<ObservableContainer<
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
+			container_traits<std::set<typename UnitHelper<T>::Type>>, Creator, Config>>;
 	}
 
 
 	template <class T>
-	struct container_traits<Serialize::SerializableSet, T>
+	struct container_traits<Serialize::SerializableSet<T>>
 	{
 		static constexpr const bool sorted = true;
 
@@ -62,6 +62,9 @@ namespace Engine
 		typedef typename KeyType<T>::type key_type;
 		typedef typename container::value_type value_type;
 		typedef T type;
+
+		template <typename C>
+		using api = C;
 
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)

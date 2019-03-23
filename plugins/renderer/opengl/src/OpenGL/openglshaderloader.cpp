@@ -4,7 +4,7 @@
 
 #include "Interfaces/util/stringutil.h"
 
-#include "openglshader.h"
+#include "util/openglshader.h"
 
 
 namespace Engine

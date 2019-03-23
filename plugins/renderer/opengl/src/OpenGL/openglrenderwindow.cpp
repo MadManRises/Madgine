@@ -1,5 +1,5 @@
 #include "opengllib.h"
-#include "client/gui/widgets/toplevelwindow.h"
+#include "gui/widgets/toplevelwindow.h"
 #include "openglrenderwindow.h"
 #include "openglrenderer.h"
 
@@ -14,15 +14,15 @@
 #include "Interfaces/math/vector3.h"
 #include "Interfaces/math/vector4.h"
 
-#include "client/gui/widgets/widget.h"
+#include "gui/widgets/widget.h"
 
-#include "client/gui/vertex.h"
+#include "gui/vertex.h"
 
 #include "openglrendertexture.h"
 
 #include "openglshaderloader.h"
 
-#include "openglshader.h"
+#include "util/openglshader.h"
 
 
 namespace Engine {
