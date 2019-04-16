@@ -1,16 +1,3 @@
-[submodule "Madgine/plugins/tools/imgui"]
-	path = Madgine/plugins/tools/imgui
-	url = https://github.com/ocornut/imgui.git
-
-[submodule "src/Interfaces/lua"]
-	path = src/Interfaces/lua
-	url = https://github.com/lua/lua.git
-[submodule "plugins/input/ois/ois"]
-	path = plugins/input/ois/ois
-	url = https://github.com/wgois/OIS.git
-[submodule "plugins/shared/assimp"]
-	path = plugins/shared/assimp
-	url = https://github.com/assimp/assimp.git
 [submodule "test/googletest"]
 	path = test/googletest
 	url = https://github.com/google/googletest.git
