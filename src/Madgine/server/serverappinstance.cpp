@@ -19,9 +19,9 @@ namespace Engine
 			return mName.c_str();
 		}
 
-		ValueType ServerAppInstance::toValueType() const
+		/*ValueType ServerAppInstance::toValueType() const
 		{
 			return ValueType(Scripting::LuaThread(mApplication->lua_state()));
-		}
+		}*/
 	}
 }

@@ -6,9 +6,24 @@ namespace Engine
 {
 	namespace Threading
 	{
-		WorkGroup::WorkGroup() :
-			mProfiler(*this)
-		{}
+		static std::vector<void(*)(WorkGroup &group)> &sWorkgroupLocalVariables()
+		{
+			static std::vector<void(*)(WorkGroup &)> data;
+			return data;
+		}
+
+		static size_t sWorkgroupInstanceCounter = 0;		
+
+		WorkGroup::WorkGroup(const std::string & name) :
+			mProfiler(*this),
+			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name)
+		{
+			setCurrentThreadName(mName + "_Main");
+			for (auto f : sWorkgroupLocalVariables())
+			{
+				f(*this);
+			}
+		}
 
 		WorkGroup::~WorkGroup()
 		{
@@ -42,6 +57,16 @@ namespace Engine
 			}
 
 			mSubThreads.erase(pivot, mSubThreads.end());
+		}
+
+		const std::string & WorkGroup::name() const
+		{
+			return mName;
+		}
+
+		void WorkGroup::registerWorkgroupLocalVariable(void(*f)(WorkGroup &))
+		{
+			sWorkgroupLocalVariables().push_back(f);
 		}
 
 	}

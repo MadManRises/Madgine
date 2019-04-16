@@ -86,7 +86,7 @@ namespace Engine
 				return error;
 			}
 
-			mConnectionEstablished.queue_direct(timeout);
+			mConnectionEstablished.queue(timeout);
 
 			return Serialize::NO_ERROR;
 		}

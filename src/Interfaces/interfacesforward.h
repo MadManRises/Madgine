@@ -100,6 +100,7 @@ namespace Engine
 
 		class LuaState;
 		class LuaTable;
+		struct LuaThread;
 		class LuaTableIterator;
 
 		struct Mapper;
@@ -182,6 +183,8 @@ namespace Engine
 
 		class FrameListener;
 		struct FrameLoop;
+
+		struct DataMutex;
 	}
 
 	class Vector2;

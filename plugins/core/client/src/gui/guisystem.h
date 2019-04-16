@@ -21,15 +21,9 @@ namespace Engine
 			GUISystem(const GUISystem &) = delete;
 			virtual ~GUISystem();			
 
-			Widget* getWidget(const std::string& name);		
-
-			UI::UIManager &ui(bool = true);
 
 			GUISystem &getSelf(bool = true);
-			
-			void registerWidget(Widget* w);
 
-			void unregisterWidget(Widget *w);
 			
 			void clear();
 
@@ -40,6 +34,12 @@ namespace Engine
 			void closeTopLevelWindow(TopLevelWindow *w);
 
 			Render::RendererBase &renderer();
+
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
+
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+
+			Scene::SceneManager &sceneMgr(bool = true);
 
 		protected:
 
@@ -52,11 +52,7 @@ namespace Engine
 
 		private:
 
-			std::map<std::string, Widget *> mWidgets;
 			std::vector<std::unique_ptr<TopLevelWindow>> mWindows;			
-
-			std::unique_ptr<UI::UIManager> mUI;
-
 
 			Render::RendererSelector mRenderer;
 

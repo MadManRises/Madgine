@@ -7,6 +7,8 @@
 
 #include "Interfaces/debug/profiler/profiler.h"
 
+UNIQUECOMPONENT(Engine::Input::OISInputHandler);
+
 namespace Engine
 {
 	namespace Input

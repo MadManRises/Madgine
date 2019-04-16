@@ -4,10 +4,21 @@
 
 #include "openglmeshloader.h"
 
+#include "Interfaces/generic/valuetype.h"
+
 namespace Engine {
 	ENTITYCOMPONENTVIRTUALIMPL_IMPL(Render::OpenGLMesh, Scene::Entity::Mesh);
 
-	namespace Render {		
+	namespace Render {
+		OpenGLMesh::OpenGLMesh(Scene::Entity::Entity & e, const Scripting::LuaTable & data) :
+			EntityComponentVirtualImpl<OpenGLMesh, Scene::Entity::Mesh>(e, data),
+			mResource(nullptr)
+		{
+			if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>())
+			{
+				setName(v.as<std::string>());
+			}
+		}
 
 		OpenGLMeshData *OpenGLMesh::data() const
 		{
@@ -16,12 +27,16 @@ namespace Engine {
 
 		std::string OpenGLMesh::getName() const
 		{
-			return std::string();
+			return mResource->name();
 		}
 
 		void OpenGLMesh::setName(const std::string & name)
 		{
-			mData = OpenGLMeshLoader::load(name);
+			mResource = Resources::ResourceManager::getSingleton().get<OpenGLMeshLoader>().get(name);
+			if (mResource)
+				mData = mResource->loadData();
+			else
+				mData.reset();
 		}
 
 		void OpenGLMesh::setVisible(bool vis)

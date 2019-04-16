@@ -7,6 +7,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
+
 namespace Engine
 {
 	namespace Render 

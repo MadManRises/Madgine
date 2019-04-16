@@ -106,11 +106,6 @@ namespace Engine
 		private:
 			SerializableUnitMap mSlaveMappings;
 
-			struct intern
-			{
-				static thread_local SerializableUnitMap sMasterMappings;
-			};
-
 			static size_t sNextUnitId;
 
 			bool mReceivingMasterState;

@@ -6,6 +6,8 @@
 #include "Interfaces/math/matrix4.h"
 #include "Interfaces/math/quaternion.h"
 
+#include "Interfaces/serialize/container/serialized.h"
+
 namespace Engine
 {
 	namespace Scene
@@ -34,7 +36,7 @@ namespace Engine
 				Matrix4 matrix() const;
 
 			private:
-				Vector3 mPosition;
+				Serialize::Serialized<Vector3> mPosition;
 				Vector3 mScale = Vector3::UNIT_SCALE;
 				Quaternion mOrientation;
 			};

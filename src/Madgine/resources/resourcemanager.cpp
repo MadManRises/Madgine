@@ -17,7 +17,7 @@ namespace Engine
 	namespace Resources
 	{
 		
-		ResourceManager *ResourceManager::sSingleton = nullptr;
+		static ResourceManager *sSingleton = nullptr;
 
 		ResourceManager& ResourceManager::getSingleton()
 		{

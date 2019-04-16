@@ -2,6 +2,7 @@
 
 #include "toplevelwindow.h"
 
+#include "../../ui/uimanager.h"
 
 #include "bar.h"
 #include "button.h"
@@ -39,7 +40,8 @@ namespace Engine
 	{
 		TopLevelWindow::TopLevelWindow(GUISystem& gui) :
 			Scope(&gui),
-			mGui(gui)
+			mGui(gui),
+			mUI(std::make_unique<UI::UIManager>(*this))
 		{
 			const App::AppSettings &settings = gui.app().settings();
 
@@ -66,7 +68,7 @@ namespace Engine
 			Widget *loadMsg = loading->createChildLabel("LoadingMsg");
 			Widget *ingame = createTopLevelWidget("ingame");
 			SceneWindow *game = ingame->createChildSceneWindow("game");
-			game->setCamera(gui.sceneMgr().createCamera());
+			//game->setCamera(gui.sceneMgr().createCamera());
 			game->setSize({ 0.8f,0,0,0,1,0,0,0,1 });
 			/*Widget *placeBaseButton = game->createChildButton("PlaceBaseButton");
 			placeBaseButton->setPos({ 1,0,-120,0,0,30,0,0,0 });
@@ -157,8 +159,7 @@ namespace Engine
 			Widget *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
 			Widget *backButton = lobbyListMenu->createChildButton("BackButton");
 			Widget *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-
-			ingame->show();
+			
 		}
 
 		TopLevelWindow::~TopLevelWindow()
@@ -166,10 +167,13 @@ namespace Engine
 			mGui.app(false).removeFrameListener(input());
 			mWindow->removeListener(this);
 
-			mWindow->destroy();
+			mUI.reset();
 
 			mTopLevelWidgets.clear();
+
+			mWindow->destroy();			
 			
+			assert(mWidgets.empty());
 		}
 
 		void TopLevelWindow::close()
@@ -382,9 +386,28 @@ namespace Engine
 			return std::make_unique<Textbox>(name, *this);
 		}
 
+		const Core::MadgineObject * TopLevelWindow::parent() const
+		{
+			return nullptr;
+		}
+
+		UI::UIManager & TopLevelWindow::ui()
+		{
+			return *mUI;
+		}
+
+		App::Application & TopLevelWindow::app(bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGui.app(init);
+		}
+
 		KeyValueMapList TopLevelWindow::maps()
 		{
-			return Scope::maps().merge(mTopLevelWidgets);
+			return Scope::maps().merge(mTopLevelWidgets, mUI);
 		}
 
 		Input::InputHandler* TopLevelWindow::input()
@@ -421,10 +444,34 @@ namespace Engine
 			return false;
 		}
 
+		static bool propagateInput(Widget *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, bool (Widget::*f)(const Input::PointerEventArgs&))
+		{
+			if (!w->isVisible())
+				return false;
+			
+			if (!w->containsPoint(arg.position, screenSize))
+				return false;
+			
+			for (Widget *c : w->children())
+			{
+				if (propagateInput(c, arg, screenSize, f))
+					return true;
+			}
+			return (w->*f)(arg);			
+		}
+
 		bool TopLevelWindow::injectPointerPress(const Input::PointerEventArgs & arg)
 		{
 			for (WindowOverlay *overlay : mOverlays) {
 				if (overlay->injectPointerPress(arg))
+					return true;
+			}
+
+			Vector3 screenSize = getScreenSize();
+
+			for (Widget *w : uniquePtrToPtr(mTopLevelWidgets))
+			{
+				if (propagateInput(w, arg, screenSize, &Widget::injectPointerPress))
 					return true;
 			}
 			return false;
@@ -434,6 +481,14 @@ namespace Engine
 		{
 			for (WindowOverlay *overlay : mOverlays) {
 				if (overlay->injectPointerRelease(arg))
+					return true;
+			}
+
+			auto[_, screenSize] = getAvailableScreenSpace();
+
+			for (Widget *w : uniquePtrToPtr(mTopLevelWidgets))
+			{
+				if (propagateInput(w, arg, screenSize, &Widget::injectPointerRelease))
 					return true;
 			}
 			return false;
@@ -490,12 +545,12 @@ namespace Engine
 			{
 
 				if (mHoveredWidget)
-					mHoveredWidget->injectMouseLeave(arg);
+					mHoveredWidget->injectPointerLeave(arg);
 
 				mHoveredWidget = hoveredWidget;
 
 				if (mHoveredWidget)
-					mHoveredWidget->injectMouseEnter(arg);
+					mHoveredWidget->injectPointerEnter(arg);
 			}
 
 			if (mHoveredWidget)
@@ -512,6 +567,52 @@ namespace Engine
 		Render::RenderWindow * TopLevelWindow::getRenderer()
 		{
 			return mRenderWindow.get();
+		}
+
+		GUI::TopLevelWindow & TopLevelWindow::getSelf(bool init)
+		{
+			if (init)
+			{
+				checkDependency();
+			}
+			return *this;
+		}
+
+		Scene::SceneComponentBase & TopLevelWindow::getSceneComponent(size_t i, bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGui.getSceneComponent(i, init);
+		}
+
+		App::GlobalAPIBase & TopLevelWindow::getGlobalAPIComponent(size_t i, bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGui.getGlobalAPIComponent(i, init);
+		}
+
+		Scene::SceneManager & TopLevelWindow::sceneMgr(bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mGui.sceneMgr(init);
+		}
+
+		bool TopLevelWindow::init()
+		{
+			return mUI->callInit();;
+		}
+
+		void TopLevelWindow::finalize()
+		{
+			mUI->callFinalize();
 		}
 
 		void TopLevelWindow::onClose()
@@ -558,5 +659,27 @@ namespace Engine
 		{
 			return mGui;
 		}
+
+		Widget* TopLevelWindow::getWidget(const std::string& name)
+		{
+			return mWidgets.at(name);
+		}
+
+		void TopLevelWindow::registerWidget(Widget* w)
+		{
+			if (!w->getName().empty()) {
+				auto pib = mWidgets.try_emplace(w->getName(), w);
+				assert(pib.second);
+			}
+		}
+
+		void TopLevelWindow::unregisterWidget(Widget* w)
+		{
+			if (!w->getName().empty()) {
+				size_t result = mWidgets.erase(w->getName());
+				assert(result == 1);
+			}
+		}
+
 	}
 }

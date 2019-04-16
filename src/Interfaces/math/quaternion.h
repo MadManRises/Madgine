@@ -2,6 +2,7 @@
 
 #include "vector3.h"
 #include "matrix3.h"
+#include "pi.h"
 
 namespace Engine {
 
@@ -9,12 +10,22 @@ namespace Engine {
 
 		Quaternion() : w(1.0f), v(Vector3::ZERO) {}
 	
-		Quaternion(float radian, Vector3 axis) :
+		Quaternion(float radian, const Vector3 &axis) :
 			w(cosf(0.5f*radian)),
-			v(std::move(axis))
+			v(axis)
 		{
 			v.normalise();
 			v *= sinf(0.5f*radian);
+		}
+
+		static Quaternion FromRadian(const Vector3 &angles)
+		{
+			return Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.z, Vector3::UNIT_Z);
+		}
+
+		static Quaternion FromDegrees(const Vector3 &angles)
+		{
+			return FromRadian(angles / 180.0f * PI);
 		}
 
 		void operator *=(const Quaternion &other)
@@ -80,7 +91,7 @@ namespace Engine {
 			v *= -1;
 		}
 
-		Quaternion inverse()
+		Quaternion inverse() const
 		{
 			Quaternion q{ *this };
 			q.invert();

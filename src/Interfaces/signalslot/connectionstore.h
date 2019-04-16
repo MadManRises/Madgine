@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace Engine
 {
 	namespace SignalSlot
@@ -23,6 +25,7 @@ namespace Engine
 			template <class Con, class... Args>
 			std::weak_ptr<Con> emplace_front(Args&&... args)
 			{
+				std::lock_guard lock(mMutex);
 				std::shared_ptr<Con> ptr = create<Con>(&mBegin, std::forward<Args>(args)...);
 				mBegin = ptr;
 				return ptr;
@@ -38,13 +41,14 @@ namespace Engine
 			static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
 			std::shared_ptr<ConnectionBase> mBegin;
+			std::mutex mMutex;
 		};
 
 		template <class T, class = void>
 		struct has_store : std::false_type {};
 
 		template <class T>
-		struct has_store<T, std::void_t<std::enable_if_t<std::is_same_v<decltype(&T::connectionStore), ConnectionStore &(T::*)()>>>> : std::true_type {};
+		struct has_store<T, std::void_t<std::enable_if_t<std::is_same_v<std::invoke_result_t<decltype(&T::connectionStore), T>, ConnectionStore &>>>> : std::true_type {};
 
 	}
 }

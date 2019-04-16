@@ -45,15 +45,29 @@ namespace Engine
 			return result;
 		}
 
-		bool Button::injectMouseEnter(const Input::PointerEventArgs & arg)
+		bool Button::injectPointerEnter(const Input::PointerEventArgs & arg)
 		{
 			mHovered = true;
 			return true;
 		}
 
-		bool Button::injectMouseLeave(const Input::PointerEventArgs & arg)
+		bool Button::injectPointerLeave(const Input::PointerEventArgs & arg)
 		{
 			mHovered = false;
+			mClicking = false;
+			return true;
+		}
+
+		bool Button::injectPointerPress(const Input::PointerEventArgs & arg)
+		{
+			mClicking = true;
+			return true;
+		}
+
+		bool Button::injectPointerRelease(const Input::PointerEventArgs & arg)
+		{
+			if (mClicking)
+				emitClicked();
 			return true;
 		}
 

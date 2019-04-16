@@ -36,7 +36,9 @@ namespace Engine
 
 			virtual const char* key() const = 0;
 			
-			App::Application &app(bool = true);
+
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
 			UIManager &ui(bool = true);
 
 			template <class T>

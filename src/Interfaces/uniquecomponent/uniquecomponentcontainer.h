@@ -11,7 +11,7 @@
 namespace Engine
 {
 
-	template <class _Base, class _Ty, typename C>
+	template <class _Base, class _Ty, template <class...> class C>
 	class UniqueComponentContainer
 	{
 	public:
@@ -19,7 +19,7 @@ namespace Engine
 		typedef typename Registry::F F;
 		typedef typename Registry::Base Base;
 
-		typedef C Container;
+		typedef C<std::unique_ptr<Base>> Container;
 
 		typedef typename Container::const_iterator const_iterator;
 
@@ -31,14 +31,14 @@ namespace Engine
 		{
 			size_t count = Registry::sComponents().size();
 			mSortedComponents.reserve(count);
-			/*if constexpr (std::is_same_v<C, std::vector<F>>) {
+			if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
 				mComponents.reserve(count);
-			}*/
+			}
 			for (auto f : Registry::sComponents())
 			{
 				std::unique_ptr<Base> p = f(arg);
 				mSortedComponents.push_back(p.get());
-				container_traits_helper<C>::emplace(mComponents, mComponents.end(), std::move(p));
+				container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
 			}
 #ifndef STATIC_BUILD
 			Registry::update().connect(mUpdateSlot);
@@ -93,13 +93,13 @@ namespace Engine
 			if (add){
 				assert(mComponents.size() == info->mBaseIndex);
 				mSortedComponents.reserve(info->mBaseIndex + vals.size());
-				/*if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
+				if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
 					mComponents.reserve(info->mBaseIndex + vals.size());
-				}*/
+				}
 				for (F f : vals) {
 					std::unique_ptr<Base> p = f(mArg);
 					mSortedComponents.push_back(p.get());
-					container_traits_helper<C>::emplace(mComponents, mComponents.end(), std::move(p));
+					container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
 				}
 			}
 			else {

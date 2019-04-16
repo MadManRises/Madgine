@@ -109,6 +109,7 @@ namespace Engine {
 
 		void PluginSection::addListener(PluginListener * listener)
 		{
+			std::unique_lock lock(mMgr.mListenersMutex);
 			mListeners.push_back(listener);
 			for (const std::pair<const std::string, Plugins::Plugin> &p : *this) {
 				if (p.second.isLoaded())
@@ -118,6 +119,7 @@ namespace Engine {
 
 		void PluginSection::removeListener(PluginListener * listener)
 		{
+			std::unique_lock lock(mMgr.mListenersMutex);
 			for (const std::pair<const std::string, Plugins::Plugin> &p : *this) {
 				if (p.second.isLoaded())
 					listener->aboutToUnloadPlugin(&p.second);
@@ -135,19 +137,21 @@ namespace Engine {
 			if (p->isLoaded())
 				return true;
 
+			std::unique_lock lock(mMgr.mListenersMutex);
+
 			bool ok = true;
 			Plugin *unloadExclusive = nullptr;
 			if (mExclusive) {
 				for (std::pair<const std::string, Plugin> &p : mPlugins) {
 					if (p.second.isLoaded()) {
 						assert(!unloadExclusive);
-						unloadExclusive = &p.second;
+						unloadExclusive = &p.second;						
 						for (PluginListener *listener : mListeners)
 							ok &= listener->aboutToUnloadPlugin(&p.second);
 					}
 				}
 			}
-
+						
 			for (PluginListener *listener : mListeners)
 				ok &= listener->aboutToLoadPlugin(p);
 			if (ok) {
@@ -166,6 +170,7 @@ namespace Engine {
 			}
 			else {
 				SignalSlot::DefaultTaskQueue::getSingleton().queue([this, p, unloadExclusive]() {
+					std::unique_lock lock(mMgr.mListenersMutex);
 					bool ok = true;
 					if (unloadExclusive) {
 						for (PluginListener *listener : mListeners)
@@ -187,6 +192,7 @@ namespace Engine {
 		bool PluginSection::unloadPlugin(Plugin * p)
 		{
 			assert(!mAtleastOne);
+			std::unique_lock lock(mMgr.mListenersMutex);
 			bool ok = true;
 			for (PluginListener *listener : mListeners)
 				ok &= listener->aboutToUnloadPlugin(p);
@@ -200,6 +206,7 @@ namespace Engine {
 			}
 			else {
 				SignalSlot::DefaultTaskQueue::getSingleton().queue([this, p]() {
+					std::unique_lock lock(mMgr.mListenersMutex);
 					if (p->unload()) {
 						for (PluginListener *listener : mListeners)
 							listener->onPluginUnload(p);

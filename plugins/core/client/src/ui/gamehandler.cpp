@@ -61,10 +61,11 @@ namespace Engine
 
 		void GameHandlerBase::onPointerMove(const Input::PointerEventArgs& me)
 		{
+			Input::PointerEventArgs args = me;
 			//clampToWindow(me);
 			if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON)
 			{
-				//me.button = mCurrentMouseButton;
+				args.button = mCurrentMouseButton;
 				if (!mDragging && mSingleClick &&
 					fabs(me.position[0] - mDragStart[0]) + fabs(me.position[1] - mDragStart[1]) > mDragStartThreshold)
 				{
@@ -83,11 +84,11 @@ namespace Engine
 			}
 			if (mDragging)
 			{
-				onPointerDrag(me);
+				onPointerDrag(args);
 			}
 			else if (mUI.isCursorVisible())
 			{
-				onPointerHover(me);
+				onPointerHover(args);
 			}
 		}
 

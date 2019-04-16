@@ -27,6 +27,8 @@
 #include "entity/components/mesh.h"
 #include "entity/components/transform.h"
 
+UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
+
 namespace Engine
 {
 	namespace Scene
@@ -50,14 +52,6 @@ namespace Engine
 				if (!component->callInit())
 					return false;
 			}
-
-			app().frameLoop().queue([this]() {
-				Entity::Entity *e = createEntity();
-				e->addComponent<Entity::Mesh>()->setName("mage");
-				Entity::Transform *t = e->addComponent<Entity::Transform>();
-				t->setPosition(Vector3::ZERO);
-				t->setScale({ 0.2f,0.2f,0.2f });
-			});
 
 			return true;
 		}
@@ -124,6 +118,11 @@ namespace Engine
 			return *this;
 		}
 
+		const Core::MadgineObject * SceneManager::parent() const
+		{
+			return &mApp;
+		}
+
 		void SceneManager::readState(Serialize::SerializeInStream& in)
 		{
 			clear();
@@ -183,7 +182,7 @@ namespace Engine
 		KeyValueMapList SceneManager::maps()
 		{
 			return Scope::maps().merge(mSceneComponents, toPointer(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
-				MAP_RO(Synced, isSynced));
+				MAP_RO(Synced, isSynced), toPointer(mCameras));
 		}
 
 		std::string SceneManager::generateUniqueName()
@@ -194,10 +193,10 @@ namespace Engine
 
 		void SceneManager::removeLater(Entity::Entity* e)
 		{
-			mEntityRemoveQueue.push_back(e);
+ 			mEntityRemoveQueue.push_back(e);
 		}
 
-		App::Application& SceneManager::app(bool init) const
+		App::Application& SceneManager::app(bool init)
 		{
 			if (init)
 			{

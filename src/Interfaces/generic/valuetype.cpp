@@ -127,7 +127,7 @@ namespace Engine
 				}
 				else
 				{
-					result = Scripting::LuaState::getGlobalTable(state).registerTable(state, index);
+					result = Scripting::LuaState::getThread(state)->table().registerTable(state, index);
 				}
 				lua_pop(state, 1);
 
@@ -172,7 +172,7 @@ namespace Engine
 			lua_pushnil(state);
 			return 1;
 		case Type::ScopeValue:
-			as<Scripting::ScopeBase*>()->push();
+			as<Scripting::ScopeBase*>()->push(state);
 			return 1;
 		case Type::StringValue:
 			lua_pushstring(state, as<std::string>().c_str());

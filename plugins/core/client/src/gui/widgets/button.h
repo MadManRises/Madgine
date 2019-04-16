@@ -19,8 +19,11 @@ namespace Engine
 
 			std::vector<Vertex> vertices(const Vector3 &screenSize) override;
 
-			bool injectMouseEnter(const Input::PointerEventArgs &arg) override;
-			bool injectMouseLeave(const Input::PointerEventArgs &arg) override;
+			bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
+			bool injectPointerLeave(const Input::PointerEventArgs &arg) override;
+
+			bool injectPointerPress(const Input::PointerEventArgs &arg) override;
+			bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
 
 		protected:
 			void emitClicked();
@@ -29,6 +32,7 @@ namespace Engine
 			SignalSlot::Signal<> mClicked;
 
 			bool mHovered = false;
+			bool mClicking = false;
 		};
 
 	}

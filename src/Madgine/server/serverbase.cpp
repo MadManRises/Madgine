@@ -15,55 +15,59 @@ namespace Engine
 {
 	namespace Server
 	{
-		ServerBase::ServerBase(const std::string& name) :
+		ServerBase::ServerBase(Threading::WorkGroup &workgroup) :
 			Scope(Scripting::LuaState::getSingleton()),
-			mLog(name + "-Log"),
-			mName(name)
+			mLog(workgroup.name() + "-Log"),
+			TaskQueue("Default")
 		{
-			Util::setLog(&mLog);			
+			Util::setLog(&mLog);	
+			workgroup.addThreadInitializer([&]() {Util::setLog(&mLog); });
+			mLog.startConsole();
+			addRepeatedTask([this]() {consoleCheck(); }, std::chrono::milliseconds(20));
 		}
 
 		ServerBase::~ServerBase()
-		{			
-			mInstances.clear();
-			Util::setLog(nullptr);
-		}
-
-
-		/*int ServerBase::go()
-		{					
-			start();			
-
-			mLog.startConsole([this](const std::string& cmd) { return performCommand(cmd); });
-
-			int result = FrameLoop::go();
-
+		{	
 			mLog.stopConsole();
-
-			stop();			
-
-			return result;
-		}*/
+			mInstances.clear();
+			Util::setLog(nullptr);			
+		}
 
 		ServerLog& ServerBase::log()
 		{
 			return mLog;
 		}
 
+		void ServerBase::shutdown()
+		{
+			stop();
+		}
 
-		bool ServerBase::performCommand(const std::string& cmd)
+		void ServerBase::performCommand(const std::string& cmd)
 		{
 			if (cmd == "shutdown")
 			{
-				shutdown();
-				return true;
+				shutdown();				
 			}
-			return false;
+			else
+			{
+				LOG("Unknown Command \"" << cmd << "\"!");
+			}
+		}
+
+		void ServerBase::consoleCheck()
+		{
+			for (const std::string &cmd : mLog.update())
+			{
+				performCommand(cmd);
+			}
+			mLastConsoleCheck = std::chrono::steady_clock::now();
 		}
 
 		KeyValueMapList ServerBase::maps()
 		{
-			return Scope::maps().merge(mInstances, this, MAP_F(shutdown));
+			return Scope::maps().merge(this, MAP_F(shutdown));
 		}
+
 	}
 }

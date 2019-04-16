@@ -25,11 +25,7 @@ namespace Engine
 			void removeFrameListener(FrameListener* listener);
 
 			void shutdown();
-			bool isShutdown();
-
-			virtual void queue(SignalSlot::TaskHandle &&task) override;
-			virtual std::optional<SignalSlot::TaskHandle> fetch() override;
-			virtual bool empty() override;
+			bool isShutdown() const;
 
 			void addSetupSteps(std::optional<SignalSlot::TaskHandle> &&init, std::optional<SignalSlot::TaskHandle> &&finalize = {});
 
@@ -40,10 +36,11 @@ namespace Engine
 			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 
-		private:
-			bool mRunning = true;
+			virtual std::optional<SignalSlot::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask) override;
+			virtual std::optional<SignalSlot::TaskTracker> fetch_on_idle() override;
+			virtual bool idle() const override;
 
-			std::list<SignalSlot::TaskHandle> mTaskQueue;
+		private:			
 
 			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>> mSetupSteps;
 			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>>::iterator mSetupState;

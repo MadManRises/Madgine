@@ -44,6 +44,8 @@ namespace Engine
 			void addListener(PluginListener *listener);
 			void removeListener(PluginListener *listener);
 
+			std::mutex mListenersMutex;
+
 		protected:
 			void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
 			void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
@@ -54,6 +56,8 @@ namespace Engine
 			std::map<std::pair<std::string, std::string>, PluginSection> mSections;
 
 			std::vector<PluginListener*> mListeners;
+
+			
 
 			std::string mProject;
 

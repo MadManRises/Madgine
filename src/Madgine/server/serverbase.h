@@ -13,41 +13,37 @@ namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public Threading::FrameLoop
+		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public SignalSlot::TaskQueue
 		{
 		public:
-			ServerBase(const std::string& name);
+			ServerBase(Threading::WorkGroup &workgroup);
 			virtual ~ServerBase();
 
 			ServerLog& log();		
 
-		protected:
-			virtual void start() = 0;
-			virtual void stop() = 0;
+			void shutdown();
 
-			virtual bool performCommand(const std::string& cmd);
+		protected:
+
+			virtual void performCommand(const std::string& cmd);
 
 			template <class T>
-			void spawnInstance(T&& init)
+			void spawnInstance(T&& init, const App::AppSettings &settings = {})
 			{
-				mInstances.emplace_back(std::forward<T>(init));
+				mInstances.emplace_back(std::forward<T>(init), settings);
 			}
+
+			void consoleCheck();
 
 			KeyValueMapList maps() override;
 
 		private:
-
 			ServerLog mLog;
-			std::string mName;
 
-			std::list<ServerAppInstance> mInstances;
-			
+			std::list<ServerAppInstance> mInstances;	
+
+			std::chrono::steady_clock::time_point mLastConsoleCheck;
 		};
-
-#define SERVER_INSTANCE(Class) \
-		extern "C" DLL_EXPORT Engine::Server::ServerBase *createServer(const std::string &name) {\
-			return new TW::Server::Server(name);\
-		}
 
 	}
 }

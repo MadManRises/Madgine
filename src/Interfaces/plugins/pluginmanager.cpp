@@ -160,14 +160,22 @@ namespace Engine
 
 		void PluginManager::addListener(PluginListener * listener)
 		{
-			mListeners.push_back(listener);
+			{
+				std::unique_lock lock(mListenersMutex);
+				mListeners.push_back(listener);
+			}
 			for (std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections)
 				setupListenerOnSectionAdded(listener, &sec.second);
 		}
 
 		void PluginManager::removeListener(PluginListener * listener)
 		{
-			mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+			{
+				std::unique_lock lock(mListenersMutex);
+				mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+			}
+			for (std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections)
+				shutdownListenerAboutToRemoveSection(listener, &sec.second);
 		}
 
 

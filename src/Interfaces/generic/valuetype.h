@@ -42,8 +42,7 @@ namespace Engine
 			Vector2,
 			std::shared_ptr<KeyValueIterator>,
 			Scripting::ApiMethod,
-			Scripting::LuaTable,
-			Scripting::LuaThread
+			Scripting::LuaTable
 		>;
 
 		template <class T>
@@ -72,7 +71,6 @@ namespace Engine
 			KeyValueIteratorValue,
 			ApiMethodValue,
 			LuaTableValue,
-			LuaStateValue,
 
 			MAX_VALUETYPE_TYPE
 		};

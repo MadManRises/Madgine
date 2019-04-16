@@ -57,10 +57,12 @@ namespace Engine
 	};
 
 
-	template <class T, class Collector>
-	class UniqueComponent : public Collector::Base
+	template <class T, class _Collector>
+	class UniqueComponent : public _Collector::Base
 	{
 	public:
+		using Collector = _Collector;
+
 		using Collector::Base::Base;
 
 		static size_t component_index()
@@ -79,8 +81,13 @@ namespace Engine
 		static typename Collector::template ComponentRegistrator<T> _reg;
 	};
 
-	template <class T, class Collector>
-	typename Collector::template ComponentRegistrator<T> UniqueComponent<T, Collector>::_reg;
+	/*template <class T, class Collector>
+	extern typename Collector::template ComponentRegistrator<T> UniqueComponent<T, Collector>::_reg;*/
+#if WINDOWS
+#define UNIQUECOMPONENT(Name) template <> Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg;
+#else
+#define UNIQUECOMPONENT(Name) template <> DLL_EXPORT Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg;
+#endif
 
 	template <class T>
 	size_t component_index() {

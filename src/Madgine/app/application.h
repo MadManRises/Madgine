@@ -120,29 +120,28 @@ namespace Engine
 
 			Debug::Profiler::Profiler &profiler();
 
+			virtual const Core::MadgineObject *parent() const override;
+			virtual Application &app(bool = true) override;
+
 		protected:
 			virtual void clear();
 
 			bool init() override;
 
-			void finalize() override;
-
-			void loadFrameLoop(std::unique_ptr<Threading::FrameLoop> &&loop = {});
+			void finalize() override;			
 
 		private:
 
-			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
-
-			GlobalAPIContainer<> mGlobalAPIs;
-			int mGlobalAPIInitCounter;
-
-			std::unique_ptr<Threading::FrameLoop> mLoop;
-			bool mRestartLoop = false;
-
 			const AppSettings &mSettings;
 
+			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
+
+			Threading::FrameLoop mLoop;
 			
-			
+			int mGlobalAPIInitCounter;
+			GlobalAPIContainer<std::vector> mGlobalAPIs;
+						
+			bool mRestartLoop = false;			
 		};
 	}
 }

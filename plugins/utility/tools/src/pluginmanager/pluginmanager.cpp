@@ -15,6 +15,8 @@
 
 #include "Interfaces/reflection/classname.h"
 
+UNIQUECOMPONENT(Engine::Tools::PluginManager);
+
 namespace Engine
 {
 	namespace Tools

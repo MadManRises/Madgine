@@ -30,6 +30,8 @@
 #include "../imgui/imgui.h"
 
 
+UNIQUECOMPONENT(Engine::Tools::ImGuiRoot);
+
 namespace Engine {
 
 	namespace Tools {
@@ -134,7 +136,7 @@ namespace Engine {
 		{
 			assert(!mManager);
 			IF_PLUGIN(OpenGL)
-			mManager = createOpenGlManager(app());
+			mManager = createOpenGlManager(app(false));
 			else
 			THROW_PLUGIN("No ImGui-Manager available!");
 			mManager->init();

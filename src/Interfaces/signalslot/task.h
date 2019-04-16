@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../generic/tupleunpacker.h"
+#include "../generic/copy_traits.h"
 
 namespace Engine
 {
@@ -25,6 +26,7 @@ namespace Engine
 
 		struct Task {
 			virtual TaskState execute() = 0;
+			virtual std::unique_ptr<Task> clone() = 0;
 			virtual ~Task() = default;
 		};
 
@@ -41,6 +43,11 @@ namespace Engine
 				return TupleUnpacker::invokeDefaultResult(SUCCESS, mF);
 			}
 
+			std::unique_ptr<Task> clone() override
+			{
+				return std::make_unique<TaskImpl<F>>(tryCopy(mF));
+			}
+
 		private:
 			F mF;
 		};
@@ -53,11 +60,30 @@ namespace Engine
 
 			TaskHandle(TaskHandle &&) = default;
 
-			TaskHandle(const TaskHandle &) = delete;
-			TaskHandle& operator=(const TaskHandle &) = delete;
-
 			TaskState operator()() const {
 				return mTask->execute();
+			}
+
+			operator bool()
+			{
+				return mTask.operator bool();
+			}
+
+			TaskHandle clone() const
+			{
+				return *this;
+			}
+
+		protected:
+			TaskHandle(const TaskHandle &other) :
+				mTask(other.mTask->clone())
+			{
+
+			}
+
+			TaskHandle &operator=(const TaskHandle &other)
+			{
+				mTask = other.mTask->clone();
 			}
 
 		private:

@@ -3,6 +3,7 @@
 #include "../signalslot/taskqueue.h"
 #include "../generic/tupleunpacker.h"
 #include "../debug/profiler/profiler.h"
+#include "threadapi.h"
 
 namespace Engine 
 {
@@ -11,26 +12,39 @@ namespace Engine
 
 		struct INTERFACES_EXPORT WorkGroup 
 		{
-			WorkGroup();
+			WorkGroup(const std::string &name = "");
 			~WorkGroup();
 
 			template <typename F, typename... Args>
 			void createThread(F &&main, Args&&... args)
 			{
-				mSubThreads.emplace_back(
-					std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::forward<F>(main), std::forward<Args>(args)...)
-				);				
+				createNamedThread("thread_" + std::to_string(mInstanceCounter), std::forward<F>(main), std::forward<Args>(args)...);
 			}
+
+			template <typename F, typename... Args>
+			void createNamedThread(const std::string &name, F &&main, Args&&... args)
+			{
+				mSubThreads.emplace_back(
+					std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, name, std::forward<F>(main), std::forward<Args>(args)...)
+				);
+			}
+
 
 			void addThreadInitializer(SignalSlot::TaskHandle &&task);
 
 			bool singleThreaded();
 			void checkThreadStates();
 
+			const std::string &name() const;
+
+			static void registerWorkgroupLocalVariable(void(*)(WorkGroup &));
+
 		private:
+
 			template <typename F, typename... Args>
-			int threadMain(F&& main, Args&&... args)
+			int threadMain(const std::string &name, F&& main, Args&&... args)
 			{
+				setCurrentThreadName(mName + "_" + name);
 				try {
 					mTaskQueue.attachToCurrentThread();
 					for (const SignalSlot::TaskHandle &task : mThreadInitializers)
@@ -48,10 +62,41 @@ namespace Engine
 			}
 
 		private:			
+			std::string mName;
+			size_t mInstanceCounter = 0;
+
 			SignalSlot::DefaultTaskQueue mTaskQueue;
 			std::vector<std::future<int>> mSubThreads;
 			std::vector<SignalSlot::TaskHandle> mThreadInitializers;
 			Debug::Profiler::Profiler mProfiler;
+		};
+
+
+
+		template <typename T, size_t ID = 0 >
+		struct WorkgroupLocal
+		{
+			inline static thread_local T *data = nullptr;
+			inline static struct _Reg {
+				_Reg() {
+					WorkGroup::registerWorkgroupLocalVariable([](WorkGroup &group) {
+						T *item = new T;
+						data = item;
+						group.addThreadInitializer([item]() {data = item; });
+					});
+				}
+			} _reg = {};
+
+			T *operator->()
+			{
+				return data;
+			}
+
+			T &operator*()
+			{
+				return *data;
+			}
+			
 		};
 
 	}

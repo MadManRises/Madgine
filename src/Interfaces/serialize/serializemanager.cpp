@@ -8,13 +8,15 @@
 
 #include "toplevelserializableunit.h"
 
+#include "../threading/workgroup.h"
+
 //#include <iostream>
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		thread_local std::map<size_t, SerializableUnitBase*> SerializeManager::intern::sMasterMappings;
+		Threading::WorkgroupLocal<std::map<size_t, SerializableUnitBase*>> sMasterMappings;
 		size_t SerializeManager::sNextUnitId = RESERVED_ID_COUNT;
 		ParticipantId SerializeManager::sRunningStreamId = sLocalMasterId;
 
@@ -119,17 +121,17 @@ namespace Engine
 			SerializableUnitBase* item, size_t id)
 		{
 			assert(id < RESERVED_ID_COUNT && id >= BEGIN_STATIC_ID_SPACE &&
-				intern::sMasterMappings.find(id) == intern::sMasterMappings.end());
-			intern::sMasterMappings[id] = item;
+				sMasterMappings->find(id) == sMasterMappings->end());
+			(*sMasterMappings)[id] = item;
 			//std::cout << "Master: " << id << " -> add static " << typeid(*item).name() << std::endl;
-			return {id, &intern::sMasterMappings};
+			return {id, &*sMasterMappings};
 		}
 
 		std::pair<size_t, SerializableUnitMap*> SerializeManager::addMasterMapping(SerializableUnitBase* item)
 		{
-			intern::sMasterMappings[sNextUnitId] = item;
+			(*sMasterMappings)[sNextUnitId] = item;
 			//std::cout << "Master: " << sNextUnitId << " -> add " << typeid(*item).name() << std::endl;
-			return {sNextUnitId++, &intern::sMasterMappings};
+			return {sNextUnitId++, &*sMasterMappings};
 		}
 
 		void SerializeManager::removeMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id,
@@ -144,15 +146,15 @@ namespace Engine
 		updateMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id, SerializableUnitBase* item)
 		{
 			assert(id.first >= RESERVED_ID_COUNT);
-			if (&intern::sMasterMappings == id.second)
+			if (&*sMasterMappings == id.second)
 			{
 				auto it = id.second->find(id.first);
 				SerializableUnitBase* old = it->second;
 				it->second = item;
 				return {id, addMasterMapping(old)};
 			}
-			intern::sMasterMappings[id.first] = item;
-			return {{id.first, &intern::sMasterMappings}, id};
+			(*sMasterMappings)[id.first] = item;
+			return {{id.first, &*sMasterMappings}, id};
 		}
 
 
@@ -474,7 +476,7 @@ namespace Engine
 				{
 					return mSlaveMappings.at(unit);
 				}
-				SerializableUnitBase* u = intern::sMasterMappings.at(unit);
+				SerializableUnitBase* u = sMasterMappings->at(unit);
 				if (find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end())
 				{
 					throw SerializeException("Illegal Toplevel-Id used! Possible configuration mismatch!");

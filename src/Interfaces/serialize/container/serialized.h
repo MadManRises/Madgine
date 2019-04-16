@@ -30,13 +30,28 @@ namespace Engine
 				{
 					return mData;
 				}
+				 
+				const T& operator*() const
+				{
+					return mData;
+				}
 
 				T* operator->()
 				{
 					return &mData;
 				}
 
+				const T* operator->() const
+				{
+					return &mData;
+				}
+
 				T* ptr()
+				{
+					return &mData;
+				}
+
+				const T* ptr() const
 				{
 					return &mData;
 				}
@@ -97,7 +112,17 @@ namespace Engine
 					return &mData;
 				}
 
+				const T* operator->() const
+				{
+					return &mData;
+				}
+
 				T* ptr()
+				{
+					return &mData;
+				}
+
+				const T* ptr() const
 				{
 					return &mData;
 				}

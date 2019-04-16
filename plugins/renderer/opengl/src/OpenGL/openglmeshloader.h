@@ -5,7 +5,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLMeshLoader : Resources::ResourceLoader<OpenGLMeshLoader, OpenGLMeshData>
+		struct OpenGLMeshLoader : Resources::ResourceLoader<OpenGLMeshLoader, OpenGLMeshData, Resources::ThreadLocalResource>
 		{
 			OpenGLMeshLoader(Resources::ResourceManager &mgr);
 

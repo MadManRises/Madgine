@@ -72,10 +72,10 @@ namespace Engine
 			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 
-			App::Application &app(bool = true) const;
 			SceneManager &getSelf(bool = true);
-			
-			
+
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
 
 		protected:
 
@@ -99,7 +99,7 @@ namespace Engine
 			App::Application &mApp;
 			size_t mItemCount;
 
-			SceneComponentContainer<ObservableContainer<SceneComponentSet, MadgineObjectObserver>> mSceneComponents;
+			SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>> mSceneComponents;
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;

@@ -18,6 +18,8 @@
 
 #include "Interfaces/debug/memory/untrackedmemoryresource.h"
 
+UNIQUECOMPONENT(Engine::Tools::MemoryViewer);
+
 namespace Engine
 {
 	namespace Tools

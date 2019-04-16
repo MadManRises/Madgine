@@ -13,7 +13,7 @@
 DLL_EXPORT int main() {
 	int result;
 	{
-		Engine::Threading::WorkGroup workGroup;
+		Engine::Threading::WorkGroup workGroup("Launcher");
 		Engine::Core::Root root;
 		Engine::App::AppSettings settings;
 		settings.mRunMain = false;

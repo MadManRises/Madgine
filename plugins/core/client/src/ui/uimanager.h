@@ -14,7 +14,7 @@ namespace Engine
 			public Core::MadgineObject, public Threading::FrameListener
 		{
 		public:
-			UIManager(GUI::GUISystem &gui);
+			UIManager(GUI::TopLevelWindow &window);
 			~UIManager();
 
 			
@@ -35,11 +35,10 @@ namespace Engine
 
 			Scene::ContextMask currentContext();
 
-			GUI::GUISystem &gui(bool = true) const;
+			GUI::TopLevelWindow &window(bool = true) const;
 
 			std::set<GameHandlerBase*> getGameHandlers();
 			std::set<GuiHandlerBase*> getGuiHandlers();
-			App::Application& app(bool = true);
 
 			static const constexpr int sMaxInitOrder = 4;
 
@@ -49,13 +48,28 @@ namespace Engine
 
 			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			GameHandlerBase &getGameHandler(size_t i, bool = true);
+			template <class T>
+			T &getGuiHandler(bool init = true)
+			{
+				return static_cast<T&>(getGuiHandler(T::component_index(), init));
+			}
 
 			GuiHandlerBase &getGuiHandler(size_t i, bool = true);
+
+			template <class T>
+			T &getGameHandler(bool init = true)
+			{
+				return static_cast<T&>(getGameHandler(T::component_index(), init));
+			}
+
+			GameHandlerBase &getGameHandler(size_t i, bool = true);
 
 			Scene::SceneManager &sceneMgr(bool = true);
 
 			UIManager &getSelf(bool = true);
+
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
 
 		protected:
 
@@ -65,7 +79,7 @@ namespace Engine
 			KeyValueMapList maps() override;
 
 		private:
-			GUI::GUISystem &mGUI;
+			GUI::TopLevelWindow &mWindow;
 			
 			GuiHandlerContainer<std::vector> mGuiHandlers;
 			GameHandlerContainer<std::vector> mGameHandlers;

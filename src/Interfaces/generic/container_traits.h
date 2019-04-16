@@ -11,48 +11,13 @@ namespace Engine
 	template <class T>
 	struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {};
 
-	template <typename Container>
-	struct container_traits;
-
 	template <template <class...> class C, class T>
-	struct container_traits<C<T>>
+	struct container_traits : C<T>::traits
 	{
-		static constexpr const bool sorted = false;
-
-		typedef C<T> container;
-		typedef typename container::iterator iterator;
-		typedef typename container::const_iterator const_iterator;
-		typedef typename container::value_type value_type;
-		typedef void key_type;
-		typedef T type;
-
-		template <typename C>
-		using api = C;
-
-		template <class... _Ty>
-		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
-		{
-			return c.emplace(where, std::forward<_Ty>(args)...);
-		}
-
-		static iterator keepIterator(const iterator& begin, const iterator& it)
-		{
-			return it;
-		}
-
-		static iterator revalidateIteratorInsert(const iterator& begin, const iterator& dist, const iterator& it)
-		{
-			return dist;
-		}
-
-		static iterator revalidateIteratorRemove(const iterator& begin, const iterator& dist, const iterator& it, size_t count = 1)
-		{
-			return dist;
-		}
 	};
 
 	template <class T>
-	struct container_traits<std::list<T>>
+	struct container_traits<std::list, T>
 	{
 		static constexpr const bool sorted = false;
 
@@ -89,7 +54,7 @@ namespace Engine
 	};
 
 	template <class T>
-	struct container_traits<std::vector<T>>
+	struct container_traits<std::vector, T>
 	{
 		static constexpr const bool sorted = false;
 
@@ -271,7 +236,7 @@ namespace Engine
 
 
 	template <class T>
-	struct container_traits<std::set<T>>
+	struct container_traits<std::set, T>
 	{
 		static constexpr const bool sorted = true;
 
@@ -309,7 +274,7 @@ namespace Engine
 
 
 	template <class K, class T>
-	struct container_traits<std::map<K, T>>
+	struct container_traits<std::map, std::pair<const K, T>>
 	{
 		static constexpr const bool sorted = true;
 
@@ -345,5 +310,16 @@ namespace Engine
 		}
 	};
 
+	template <typename>
+	struct container_traits_helper2;
+
+	template <template <typename...> typename C, typename T>
+	struct container_traits_helper2<C<T>>
+	{
+		typedef container_traits<C, T> type;
+	};
+
+	template <typename T>
+	using container_traits_helper = typename container_traits_helper2<T>::type;
 
 }

@@ -19,20 +19,6 @@ namespace Engine
 				this->sync();
 			}
 
-			NoParentUnit(const NoParentUnit<T>& t) :
-				T(t)
-			{
-				this->postConstruct();
-				this->sync();
-			}
-
-			NoParentUnit(NoParentUnit<T>&& t) noexcept :
-				T(std::forward<NoParentUnit<T>>(t))
-			{
-				this->postConstruct();
-				this->sync();
-			}
-
 			~NoParentUnit()
 			{
 				this->unsync();

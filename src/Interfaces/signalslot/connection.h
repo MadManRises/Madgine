@@ -145,14 +145,15 @@ namespace Engine
 				return this->template cloneImpl<QueuedConnection>(*this);
 			}
 
-			void operator()(_Ty ... args) override final
+			void operator()(_Ty ... args) const override final
 			{
-				std::weak_ptr<ConnectionInstance<T, _Ty...>> ptr = *this->mPrev;
+				std::weak_ptr<ConnectionInstance<T, _Ty...>> ptr = std::static_pointer_cast<ConnectionInstance<T, _Ty...>>(*this->mPrev);
+				std::tuple<_Ty...> t = std::make_tuple(args...);
 				mQueue.queue([=]()
 				{
 					if (std::shared_ptr<ConnectionInstance<T, _Ty...>> innerPtr = ptr.lock())
 					{
-						innerPtr.get()->ConnectionInstance<T, _Ty...>::operator()(args...);
+						TupleUnpacker::invokeExpand([&](_Ty ... args) {innerPtr->ConnectionInstance<T, _Ty...>::operator()(args...); }, t);
 					}
 				});
 			}

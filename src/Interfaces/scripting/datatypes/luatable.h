@@ -16,8 +16,8 @@ namespace Engine
 			LuaTable();
 
 
-			static LuaTable global(lua_State* state);
-			static LuaTable registry(lua_State* state);
+			static LuaTable global(LuaThread *thread);
+			static LuaTable registry(LuaThread *thread);
 
 			void setValue(const std::string& name, const ValueType& value);
 			ValueType getValue(const std::string& name) const;
@@ -28,7 +28,7 @@ namespace Engine
 			bool hasFunction(const std::string& name) const;
 			ArgumentList callMethod(const std::string& name, const ArgumentList& args);
 
-			void push(lua_State* state = nullptr) const;
+			void push(lua_State* state) const;
 			void clear();
 
 			LuaTableFieldAccessor operator[](const std::string &name);
@@ -37,11 +37,11 @@ namespace Engine
 			ValueType operator[](const char *name) const;
 			operator bool() const;
 
-			LuaTable createTable(lua_State* state = nullptr);
+			LuaTable createTable(LuaThread *thread = nullptr);
 			LuaTable createTable(const std::string& name);
 			LuaTable registerTable(lua_State* state, int index);
 
-			lua_State* state() const;
+			LuaThread* thread() const;
 
 			typedef LuaTableIterator iterator;
 

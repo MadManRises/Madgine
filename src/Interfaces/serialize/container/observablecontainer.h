@@ -8,6 +8,7 @@
 #include "operations.h"
 #include "../../signalslot/connection.h"
 #include "../../signalslot/signal.h"
+#include "../../generic/observablecontainer.h"
 
 namespace Engine
 {

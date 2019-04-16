@@ -99,7 +99,6 @@ namespace Engine {
 
 		void OpenGLRenderTexture::render()
 		{
-			
 
 			const Vector2 &size = getSize();
 
@@ -115,10 +114,6 @@ namespace Engine {
 
 			float aspectRatio = size.x / size.y;
 
-			static Quaternion test;
-			
-			test = Quaternion(0.001f, Vector3::UNIT_Y) * test * Quaternion(0.0001f, Vector3::UNIT_X);
-
 			mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
 			
 
@@ -131,9 +126,8 @@ namespace Engine {
 				{
 					OpenGLMeshData *meshData = mesh->data();
 					if (meshData)
-					{
-						Matrix4 m = Matrix4{ test.toMatrix() } * transform->matrix();
-						mProgram.setUniform("m", m);
+					{						
+						mProgram.setUniform("m", transform->matrix());
 
 						glBindVertexArray(meshData->mVAO);
 						glCheck();

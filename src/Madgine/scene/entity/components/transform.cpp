@@ -24,9 +24,9 @@ namespace Engine
 
 			Matrix4 Transform::matrix() const
 			{
-				return Matrix4{ mOrientation.toMatrix() } *Matrix4{ mScale.x, 0, 0, mPosition.x,
-																	0, mScale.y, 0, mPosition.y,
-																	0, 0, mScale.z, mPosition.z,
+				return Matrix4{ mOrientation.toMatrix() } *Matrix4{ mScale.x, 0, 0, mPosition->x,
+																	0, mScale.y, 0, mPosition->y,
+																	0, 0, mScale.z, mPosition->z,
 																	0, 0, 0, 1 };
 			}
 
@@ -56,7 +56,7 @@ namespace Engine
 			}
 			void Transform::translate(const Vector3 & v)
 			{
-				mPosition += v;
+				*mPosition += v;
 			}
 			void Transform::rotate(const Quaternion & q)
 			{

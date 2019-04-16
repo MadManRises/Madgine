@@ -1,7 +1,7 @@
 #include "../clientlib.h"
 #include "handler.h"
 #include "../ui/uimanager.h"
-#include "../gui/guisystem.h"
+#include "../gui/widgets/toplevelwindow.h"
 #include "../gui/widgets/widget.h"
 
 namespace Engine
@@ -79,6 +79,11 @@ namespace Engine
 			return mUI.app(init);
 		}
 
+		const Core::MadgineObject * Handler::parent() const
+		{
+			return &mUI;
+		}
+
 		UIManager& Handler::ui(bool init)
 		{
 			if (init)
@@ -90,7 +95,7 @@ namespace Engine
 
 		bool Handler::init()
 		{
-			GUI::Widget *widget = mUI.gui().getWidget(mWidgetName);
+			GUI::Widget *widget = mUI.window(false).getWidget(mWidgetName);
 			if (!widget)
 			{
 				LOG_ERROR(Database::Exceptions::handlerInitializationFailed(mWidgetName));
@@ -109,9 +114,9 @@ namespace Engine
 			assert(widget);
 			mWidget = widget;
 
-			mWidget->mouseMoveEvent().connect(mPointerMoveSlot);
-			mWidget->mouseDownEvent().connect(mPointerDownSlot);
-			mWidget->mouseUpEvent().connect(mPointerUpSlot);
+			mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
+			mWidget->pointerDownEvent().connect(mPointerDownSlot);
+			mWidget->pointerUpEvent().connect(mPointerUpSlot);
 
 			for (const WindowDescriber& des : mWidgets)
 			{

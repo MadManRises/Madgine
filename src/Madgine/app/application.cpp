@@ -8,7 +8,7 @@
 
 #include "globalapibase.h"
 
-#include "Interfaces/threading/frameloop.h"
+
 
 #include "../scene/scenemanager.h"
 
@@ -33,12 +33,24 @@ namespace Engine
 			mGlobalAPIs(*this),
 			mGlobalAPIInitCounter(0)			
 		{
-			loadFrameLoop();
+			mLoop.addFrameListener(this);
+
+			mLoop.addSetupSteps(
+				[this]()
+			{
+				if (!callInit())
+					throw exception("App Init Failed!");
+			},
+				[this]()
+			{
+				callFinalize();
+			}
+			);
 		}
 
 		Application::~Application()
 		{
-			mLoop->removeFrameListener(this);
+			mLoop.removeFrameListener(this);
 		}
 
 		bool Application::init()
@@ -65,34 +77,10 @@ namespace Engine
 			}			
 		}
 
-		void Application::loadFrameLoop(std::unique_ptr<Threading::FrameLoop>&& loop)
-		{
-			if (!loop) {
-				loop = std::make_unique<Threading::FrameLoop>();
-			}
-
-			if (mLoop) {
-				mLoop->removeFrameListener(this);
-			}
-			mLoop = std::move(loop);
-			mLoop->addFrameListener(this);
-
-			mLoop->addSetupSteps(
-				[this]() 
-				{
-					if (!callInit())
-						throw exception("App Init Failed!");
-				}, 
-				[this]() 
-				{
-					callFinalize();
-				}
-			);
-		}
 
 		void Application::shutdown()
 		{
-			mLoop->shutdown();
+			mLoop.shutdown();
 		}
 
 		/*int Application::go()
@@ -139,7 +127,7 @@ namespace Engine
 
 		bool Application::isShutdown() const
 		{
-			return mLoop->isShutdown();
+			return mLoop.isShutdown();
 		}
 
 		float Application::getFPS()
@@ -202,22 +190,22 @@ namespace Engine
 
 		void Application::addFrameListener(Threading::FrameListener* listener)
 		{
-			mLoop->addFrameListener(listener);
+			mLoop.addFrameListener(listener);
 		}
 
 		void Application::removeFrameListener(Threading::FrameListener* listener)
 		{
-			mLoop->removeFrameListener(listener);
+			mLoop.removeFrameListener(listener);
 		}
 
 		void Application::singleFrame()
 		{
-			mLoop->singleFrame();
+			mLoop.singleFrame();
 		}
 
 		Threading::FrameLoop & Application::frameLoop()
 		{
-			return *mLoop;
+			return mLoop;
 		}
 
 		const AppSettings &Application::settings()
@@ -228,6 +216,16 @@ namespace Engine
 		Debug::Profiler::Profiler &Application::profiler()
 		{
 			return *mProfiler;
+		}
+
+		const Core::MadgineObject * Application::parent() const
+		{
+			return nullptr;
+		}
+
+		Application & Application::app(bool init)
+		{
+			return getSelf(init);
 		}
 
 	}

@@ -5,6 +5,8 @@
 namespace Engine {
 	namespace Render {
 
+		void shutdownWindow(Window::Window *window, ContextHandle context);
+
 		class OpenGLRenderer : public RendererComponent<OpenGLRenderer>
 		{
 
@@ -17,11 +19,6 @@ namespace Engine {
 			virtual void finalize() override;
 
 			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) override;			
-			
-			static void shutdownWindow(Window::Window *window, ContextHandle context);
-
-		protected:
-			ContextHandle setupWindowInternal(Window::Window *window);
 		};
 
 	}

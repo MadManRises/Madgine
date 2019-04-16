@@ -117,17 +117,24 @@ namespace Engine {
 
 				// Create window
 				HINSTANCE hInstance = GetModuleHandle(nullptr);
-				RECT rc = { 0, 0, (LONG)settings.mWidth, (LONG)settings.mHeight };
+				RECT rc = { 0, 0, (LONG)settings.mSize.x, (LONG)settings.mSize.y };
 				AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+				int x = CW_USEDEFAULT, y = CW_USEDEFAULT;
+				if (settings.mPosition)
+				{
+					x = settings.mPosition->x;
+					y = settings.mPosition->y;
+				}
 				handle = CreateWindow(windowClass, settings.mTitle,
 					WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX | WS_MAXIMIZEBOX,
-					CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
+					x, y, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
 					nullptr);
 				if (!handle)
 					return nullptr;
 			}
 
-			ShowWindow(handle, SW_SHOW);
+			if (!settings.mHidden)
+				ShowWindow(handle, SW_SHOW);
 
 			auto pib = sWindows.try_emplace(handle, handle);
 			assert(pib.second);

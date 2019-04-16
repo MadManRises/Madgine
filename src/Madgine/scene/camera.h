@@ -33,7 +33,7 @@ namespace Engine
 			KeyValueMapList maps() override;
 
 			Vector3 getOrientationHandle() const;
-			void setOrientationHandle(const Vector3 &rot);
+			void rotate(const Vector3 &rot);
 
 			const std::vector<Entity::Entity*> &visibleEntities() const;
 			void setVisibleEntities(std::vector<Entity::Entity*> &&entities);

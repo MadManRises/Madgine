@@ -9,12 +9,18 @@ namespace Engine
 {
 	namespace Scripting
 	{
-		ScopeBase::ScopeBase(const LuaTable& table) :
+		ScopeBase::ScopeBase(LuaTable table) :
 			mTable(table)
 		{
 			assert(table);
 			mTable.setLightUserdata("___scope___", this);
 			mTable.setMetatable("Interfaces.Scope");
+		}
+
+		ScopeBase::ScopeBase(const LuaThread *thread) :
+			ScopeBase(thread->table())
+		{
+
 		}
 
 		ScopeBase::ScopeBase(ScopeBase* parent) :
@@ -26,9 +32,9 @@ namespace Engine
 		{
 		}
 
-		void ScopeBase::push() const
+		void ScopeBase::push(lua_State *state) const
 		{
-			mTable.push();
+			mTable.push(state);
 		}
 
 		std::unique_ptr<KeyValueIterator> ScopeBase::find(const std::string& key)

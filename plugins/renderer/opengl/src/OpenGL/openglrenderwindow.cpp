@@ -102,7 +102,7 @@ namespace Engine {
 
 		OpenGLRenderWindow::~OpenGLRenderWindow()
 		{
-			OpenGLRenderer::shutdownWindow(window()->window(), mContext);
+			shutdownWindow(window()->window(), mContext);
 		}
 
 		void OpenGLRenderWindow::render()

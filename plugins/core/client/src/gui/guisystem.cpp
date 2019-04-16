@@ -3,7 +3,6 @@
 #include "guisystem.h"
 #include "Madgine/app/application.h"
 
-#include "../ui/uimanager.h"
 
 #include "widgets/toplevelwindow.h"
 
@@ -15,10 +14,7 @@
 
 #include "Interfaces/debug/profiler/profiler.h"
 
-//TODO Make uniform
-#if UNIX && !defined(STATIC_BUILD)
-template <> DLL_EXPORT Engine::App::GlobalAPICollector::ComponentRegistrator<Engine::GUI::GUISystem> Engine::UniqueComponent<Engine::GUI::GUISystem, Engine::App::GlobalAPICollector>::_reg;
-#endif
+UNIQUECOMPONENT(Engine::GUI::GUISystem);
 
 namespace Engine
 {
@@ -30,7 +26,6 @@ namespace Engine
 		
 		GUISystem::GUISystem(App::Application &app) :
 			App::GlobalAPI<GUISystem>(app),			
-            mUI(std::make_unique<UI::UIManager>(*this)),
 			mRenderer(this)
 		{
 		}
@@ -38,11 +33,6 @@ namespace Engine
 
 		GUISystem::~GUISystem()
 		{
-
-			mUI.reset();
-
-			mWindows.clear();
-			assert(mWidgets.empty());
 		}
 
 		
@@ -53,21 +43,23 @@ namespace Engine
 
 			markInitialized();
 			
-			if (!mRenderer->callInit() && mUI->callInit())
+			if (!mRenderer->callInit())
 				return false;
 			
 			createTopLevelWindow();
 
-			return true;
+			return true;			
 		}
 
 		void GUISystem::finalize()
-		{
-			app(false).removeFrameListener(this);
+		{			
 
-			mUI->callFinalize();
-			mRenderer->callFinalize();
 			clear();
+
+			mRenderer->callFinalize();
+			
+			app(false).removeFrameListener(this);			
+		
 		}
 
 		
@@ -77,26 +69,7 @@ namespace Engine
 		}
 
 
-		Widget* GUISystem::getWidget(const std::string& name)
-		{
-			return mWidgets.at(name);
-		}
-
-		void GUISystem::registerWidget(Widget* w)
-		{
-			if (!w->getName().empty()) {
-				auto pib = mWidgets.try_emplace(w->getName(), w);
-				assert(pib.second);
-			}
-		}
-
-		void GUISystem::unregisterWidget(Widget* w)
-		{
-			if (!w->getName().empty()) {
-				size_t result = mWidgets.erase(w->getName());
-				assert(result == 1);
-			}
-		}
+		
 
 
 		KeyValueMapList GUISystem::maps()
@@ -111,6 +84,7 @@ namespace Engine
 
 		void GUISystem::closeTopLevelWindow(TopLevelWindow * w)
 		{
+			w->callFinalize();
 			mWindows.erase(std::find_if(mWindows.begin(), mWindows.end(), [w](const std::unique_ptr<TopLevelWindow> &p) {return p.get() == w; }));
 		}
 
@@ -119,10 +93,11 @@ namespace Engine
 			return *mRenderer;
 		}
 
-
 		TopLevelWindow *GUISystem::createTopLevelWindow()
 		{
-			return mWindows.emplace_back(std::make_unique<TopLevelWindow>(*this)).get();
+			TopLevelWindow *w = mWindows.emplace_back(std::make_unique<TopLevelWindow>(*this)).get();
+			w->callInit();
+			return w;
 		}
 
 		bool GUISystem::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
@@ -132,17 +107,6 @@ namespace Engine
 			return !mWindows.empty();
 		}
 
-
-		UI::UIManager& GUISystem::ui(bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-				mUI->callInit();
-			}
-			return mUI->getSelf(init);
-		}
-
 		GUISystem& GUISystem::getSelf(bool init)
 		{
 			if (init)
@@ -150,6 +114,33 @@ namespace Engine
 				checkDependency();
 			}
 			return *this;
+		}
+
+		Scene::SceneComponentBase& GUISystem::getSceneComponent(size_t i, bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return app(false).getSceneComponent(i, init);
+		}
+
+		App::GlobalAPIBase& GUISystem::getGlobalAPIComponent(size_t i, bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return app(false).getGlobalAPIComponent(i, init);
+		}
+
+		Scene::SceneManager& GUISystem::sceneMgr(bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return app(false).sceneMgr(init);
 		}
 
 

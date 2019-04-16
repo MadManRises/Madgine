@@ -43,16 +43,16 @@ namespace Engine
 
 		template <class T, class Creator = DefaultCreator<>>
 		using SerializableSet = SetImpl<SerializableContainer<
-			container_traits<std::set<typename UnitHelper<T>::Type>>, Creator>>;
+			container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
 
 		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
 		using ObservableSet = ObservableSetImpl<ObservableContainer<
-			container_traits<std::set<typename UnitHelper<T>::Type>>, Creator, Config>>;
+			container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
 	}
 
 
 	template <class T>
-	struct container_traits<Serialize::SerializableSet<T>>
+	struct container_traits<Serialize::SerializableSet, T>
 	{
 		static constexpr const bool sorted = true;
 

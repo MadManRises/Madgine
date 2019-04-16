@@ -3,7 +3,7 @@
 
 #include "../types/luastate.h"
 
-
+#include "../datatypes/luathread.h"
 
 
 namespace Engine
@@ -25,12 +25,13 @@ namespace Engine
 
 		void GlobalScopeBase::executeString(const std::string& cmd)
 		{
-			mState.executeString(table().state(), cmd);
+			std::lock_guard guard(*table().thread());
+			mState.executeString(table().thread()->state(), cmd);
 		}
 
-		lua_State* GlobalScopeBase::lua_state() const
+		LuaThread* GlobalScopeBase::luaThread() const
 		{
-			return table().state();
+			return table().thread();
 		}
 
 		

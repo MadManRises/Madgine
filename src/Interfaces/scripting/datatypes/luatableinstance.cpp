@@ -19,63 +19,78 @@ namespace Engine
 	namespace Scripting
 	{
 
-		LuaTableInstance::LuaTableInstance(lua_State* state, const std::shared_ptr<LuaTableInstance>& parent) :
+		LuaTableInstance::LuaTableInstance(LuaThread* thread, const std::shared_ptr<LuaTableInstance>& parent) :
 			mParent(parent),
-			mState(state)
+			mThread(thread)
 		{
+			assert(mThread);
 		}
 
 		void LuaTableInstance::setMetatable(const std::string& metatable)
 		{
-			push();
-			luaL_setmetatable(mState, metatable.c_str());
-			lua_pop(mState, 1);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			luaL_setmetatable(state, metatable.c_str());
+			lua_pop(state, 1);
 		}
 
 
 		void LuaTableInstance::setValue(const std::string& name, const ValueType& value)
 		{
-			push();
-			value.push(mState);
-			lua_setfield(mState, -2, name.c_str());
-			lua_pop(mState, 1);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			value.push(state);
+			lua_setfield(state, -2, name.c_str());
+			lua_pop(state, 1);
 		}
 
 		ValueType LuaTableInstance::getValue(const std::string& name) const
 		{
-			push();
-			lua_getfield(mState, -1, name.c_str());
-			ValueType result = ValueType::fromStack(mState, -1);
-			lua_pop(mState, 2);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			lua_getfield(state, -1, name.c_str());
+			ValueType result = ValueType::fromStack(state, -1);
+			lua_pop(state, 2);
 			return result;
 		}
 
 		void LuaTableInstance::setMetatable(const LuaTable& metatable)
 		{
-			push();
-			metatable.push();
-			lua_setmetatable(mState, -2);
-			lua_pop(mState, 1);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			metatable.push(state);
+			lua_setmetatable(state, -2);
+			lua_pop(state, 1);
 		}
 
-		std::shared_ptr<LuaTableInstance> LuaTableInstance::createTable(lua_State* state,
+		std::shared_ptr<LuaTableInstance> LuaTableInstance::createTable(LuaThread *thread,
 		                                                                const std::shared_ptr<LuaTableInstance>& ptr)
 		{
-			push(state ? state : mState);
-			lua_newtable(state ? state : mState);
-			int index = luaL_ref(state ? state : mState, -2);
-			lua_pop(state ? state : mState, 1);
-			return std::make_shared<IntLuaTableInstance>(state ? state : mState, index, ptr);
+			if (!thread)
+				thread = mThread;
+			std::lock_guard guard(*thread);
+			lua_State *state = thread->state();
+			push(state);
+			lua_newtable(state);
+			int index = luaL_ref(state, -2);
+			lua_pop(state, 1);
+			return std::make_shared<IntLuaTableInstance>(thread, index, ptr);
 		}
 
 		std::shared_ptr<LuaTableInstance> LuaTableInstance::createTable(const std::string& name,
 		                                                                const std::shared_ptr<LuaTableInstance>& ptr)
 		{
-			push(mState);
-			lua_newtable(mState);
-			lua_setfield(mState, -2, name.c_str());
-			lua_pop(mState, 1);
-			return std::make_shared<StringLuaTableInstance>(mState, name, ptr);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			lua_newtable(state);
+			lua_setfield(state, -2, name.c_str());
+			lua_pop(state, 1);
+			return std::make_shared<StringLuaTableInstance>(mThread, name, ptr);
 		}
 
 		std::shared_ptr<LuaTableInstance> LuaTableInstance::registerTable(lua_State* state, int index,
@@ -84,67 +99,73 @@ namespace Engine
 			push(state);
 			if (index < 0 && index > -100)
 				--index;
-			lua_pushvalue(state ? state : mState, index);
-			int regIndex = luaL_ref(state ? state : mState, -2);
-			lua_pop(state ? state : mState, 1);
-			return std::make_shared<IntLuaTableInstance>(state ? state : mState, regIndex, ptr);
+			lua_pushvalue(state, index);
+			int regIndex = luaL_ref(state, -2);
+			lua_pop(state, 1);
+			return std::make_shared<IntLuaTableInstance>(mThread, regIndex, ptr);
 		}
 
 		void LuaTableInstance::setLightUserdata(const std::string& name, void* userdata)
 		{
-			push();
-			lua_pushlightuserdata(mState, userdata);
-			lua_setfield(mState, -2, name.c_str());
-			lua_pop(mState, 1);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			lua_pushlightuserdata(state, userdata);
+			lua_setfield(state, -2, name.c_str());
+			lua_pop(state, 1);
 		}
 
 		bool LuaTableInstance::hasFunction(const std::string& name) const
 		{
-			push();
-			lua_getfield(mState, -1, name.c_str());
-			bool result = lua_isfunction(mState, -1);
-			lua_pop(mState, 2);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			push(state);
+			lua_getfield(state, -1, name.c_str());
+			bool result = lua_isfunction(state, -1);
+			lua_pop(state, 2);
 			return result;
 		}
 
 		ArgumentList LuaTableInstance::callMethod(const std::string& name, const ArgumentList& args)
 		{
-			int level = lua_gettop(mState);
+			std::lock_guard guard(*mThread);
+			lua_State *state = mThread->state();
+			int level = lua_gettop(state);
 
-			push();
+			push(state);
 
-			lua_getfield(mState, -1, name.c_str());
+			lua_getfield(state, -1, name.c_str());
 
-			if (!lua_isfunction(mState, -1))
+			if (!lua_isfunction(state, -1))
 			{
-				ValueType v = ValueType::fromStack(mState, -2);
+				ValueType v = ValueType::fromStack(state, -2);
 
 				std::string object = v.is<ScopeBase*>() ? v.as<ScopeBase*>()->getIdentifier() : "<anonymous Table>";
 
-				lua_pop(mState, 2);
+				lua_pop(state, 2);
 
 				throw ScriptingException(Database::Exceptions::unknownMethod(name, object));
 			}
 
-			lua_insert(mState, -2);
+			lua_insert(state, -2);
 
-			args.pushToStack(mState);
+			args.pushToStack(state);
 
-			switch (lua_pcall(mState, static_cast<int>(args.size()) + 1, LUA_MULTRET, 0))
+			switch (lua_pcall(state, static_cast<int>(args.size()) + 1, LUA_MULTRET, 0))
 			{
 			case 0:
 				break;
 			case LUA_ERRRUN:
 				{
-					int iType = lua_type(mState, -1);
+					int iType = lua_type(state, -1);
 					const char* msg = "unknown Error";
 					if (iType == LUA_TSTRING)
 					{
-						msg = lua_tostring(mState, -1);
+						msg = lua_tostring(state, -1);
 					}
 					else
 					{
-						lua_pop(mState, 1);
+						lua_pop(state, 1);
 					}
 					throw ScriptingException("Runtime Error: "s + msg);
 				}
@@ -153,14 +174,14 @@ namespace Engine
 			default:
 				throw 0;
 			}
-			int nresults = lua_gettop(mState) - level;
+			int nresults = lua_gettop(state) - level;
 
-			return ArgumentList(mState, nresults);
+			return ArgumentList(state, nresults);
 		}
 
-		lua_State* LuaTableInstance::state() const
+		LuaThread* LuaTableInstance::thread() const
 		{
-			return mState;
+			return mThread;
 		}
 
 	}

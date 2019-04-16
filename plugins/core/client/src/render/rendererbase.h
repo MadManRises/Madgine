@@ -17,6 +17,12 @@ namespace Engine {
 
 			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) = 0;
 
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
+
+		private:
+			GUI::GUISystem *mGui;
+
 		};
 
 	}

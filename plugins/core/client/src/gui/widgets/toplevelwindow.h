@@ -8,12 +8,14 @@
 
 #include "Interfaces/generic/transformIt.h"
 
+#include "Madgine/core/madgineobject.h"
+
 namespace Engine
 {
 	namespace GUI
 	{
 		
-		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener, public Window::WindowEventListener
+		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener, public Window::WindowEventListener, public Core::MadgineObject		
 		{
 
 		public:
@@ -29,6 +31,13 @@ namespace Engine
 			virtual void setCursorVisibility(bool v);
 			virtual void setCursorPosition(const Vector2& pos);
 			virtual Vector2 getCursorPosition();*/
+
+			Widget* getWidget(const std::string& name);
+
+			void registerWidget(Widget* w);
+
+			void unregisterWidget(Widget *w);
+
 			Vector3 getScreenSize();
 			std::pair<Vector3, Vector3> getAvailableScreenSpace();
 
@@ -75,7 +84,23 @@ namespace Engine
 
 			Render::RenderWindow *getRenderer();
 
+			GUI::TopLevelWindow &getSelf(bool = true);
+
+			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
+
+			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+
+			Scene::SceneManager &sceneMgr(bool = true);
+
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
+
+			UI::UIManager &ui();
+
 		protected:			
+
+			virtual bool init() override;
+			virtual void finalize() override;
 
 			void onClose() override;
 			void onRepaint() override;
@@ -101,6 +126,10 @@ namespace Engine
 			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name);
 
 		private:
+
+
+			std::map<std::string, Widget *> mWidgets;
+			std::unique_ptr<UI::UIManager> mUI;
 
 			std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
 			GUISystem &mGui;

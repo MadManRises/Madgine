@@ -13,7 +13,7 @@ namespace Engine
 
 			void executeString(const std::string& cmd);
 
-			lua_State* lua_state() const;
+			LuaThread* luaThread() const;
 
 			using ScopeBase::table;			
 

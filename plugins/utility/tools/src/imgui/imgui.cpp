@@ -947,7 +947,7 @@ static void             ImeSetInputScreenPosFn_DefaultImpl(int x, int y);
 // - Change this variable to use thread local storage. You may #define GImGui in imconfig.h for that purpose. Future development aim to make this context pointer explicit to all calls. Also read https://github.com/ocornut/imgui/issues/586
 // - Having multiple instances of the ImGui code compiled inside different namespace (easiest/safest, if you have a finite number of contexts)
 #ifndef GImGui
-ImGuiContext*   GImGui = NULL;
+thread_local ImGuiContext*   GImGui = NULL;
 #endif
 
 // Memory Allocator functions. Use SetAllocatorFunctions() to change them.

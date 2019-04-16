@@ -74,15 +74,17 @@ namespace Engine
 			Widget *getChildRecursive(const std::string& name);
 			Widget *getParent() const;
 
+			virtual bool injectPointerPress(const Input::PointerEventArgs& arg);
+			virtual bool injectPointerRelease(const Input::PointerEventArgs& arg);
 			virtual bool injectPointerMove(const Input::PointerEventArgs& arg);
-			virtual bool injectMouseEnter(const Input::PointerEventArgs& arg);
-			virtual bool injectMouseLeave(const Input::PointerEventArgs& arg);
+			virtual bool injectPointerEnter(const Input::PointerEventArgs& arg);
+			virtual bool injectPointerLeave(const Input::PointerEventArgs& arg);
 
-			SignalSlot::SignalStub<const Input::PointerEventArgs&> &mouseMoveEvent();
-			SignalSlot::SignalStub<const Input::PointerEventArgs&> &mouseDownEvent();
-			SignalSlot::SignalStub<const Input::PointerEventArgs&> &mouseUpEvent();
-			SignalSlot::SignalStub<const Input::PointerEventArgs&> &mouseEnterEvent();
-			SignalSlot::SignalStub<const Input::PointerEventArgs&> &mouseLeaveEvent();
+			SignalSlot::SignalStub<const Input::PointerEventArgs&> &pointerMoveEvent();
+			SignalSlot::SignalStub<const Input::PointerEventArgs&> &pointerDownEvent();
+			SignalSlot::SignalStub<const Input::PointerEventArgs&> &pointerUpEvent();
+			SignalSlot::SignalStub<const Input::PointerEventArgs&> &pointerEnterEvent();
+			SignalSlot::SignalStub<const Input::PointerEventArgs&> &pointerLeaveEvent();
 
 			decltype(auto) children() const 
 			{
@@ -121,7 +123,7 @@ namespace Engine
 
 			KeyValueMapList maps() override;
 
-			SignalSlot::Signal<const Input::PointerEventArgs&> mMouseMoveSignal, mMouseDownSignal, mMouseUpSignal, mMouseEnterSignal, mMouseLeaveSignal;
+			SignalSlot::Signal<const Input::PointerEventArgs&> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
 
 		private:
 			std::string mName;

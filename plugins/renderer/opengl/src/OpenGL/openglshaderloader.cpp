@@ -6,6 +6,7 @@
 
 #include "util/openglshader.h"
 
+UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
 namespace Engine
 {

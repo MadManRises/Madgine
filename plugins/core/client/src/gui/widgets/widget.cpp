@@ -40,7 +40,7 @@ namespace Engine
 			mParent(parent),
 			mWindow(parent->window())
 		{
-			gui().registerWidget(this);
+			mWindow.registerWidget(this);
 		}
 
 		Widget::Widget(const std::string &name, TopLevelWindow &window) :
@@ -49,12 +49,12 @@ namespace Engine
 			mParent(nullptr),
 			mWindow(window)
 		{
-			gui().registerWidget(this);
+			mWindow.registerWidget(this);
 		}
 
 		Widget::~Widget()
 		{
-			gui().unregisterWidget(this);
+			mWindow.unregisterWidget(this);
 		}
 
 		void Widget::setSize(const Matrix3& size)
@@ -273,11 +273,6 @@ namespace Engine
 			return mParent ? mParent->depth() + 1 : 0;
 		}
 
-		GUISystem& Widget::gui()
-		{
-			return mWindow.gui();
-		}
-
 		TopLevelWindow& Widget::window()
 		{
 			return mWindow;
@@ -341,47 +336,59 @@ namespace Engine
 			return mParent;
 		}
 
+		bool Widget::injectPointerPress(const Input::PointerEventArgs & arg)
+		{
+			mPointerDownSignal.emit(arg);
+			return true;
+		}
+
+		bool Widget::injectPointerRelease(const Input::PointerEventArgs & arg)
+		{
+			mPointerUpSignal.emit(arg);
+			return true;
+		}
+
 		bool Widget::injectPointerMove(const Input::PointerEventArgs & arg)
 		{
-			mMouseMoveSignal.emit(arg);
+			mPointerMoveSignal.emit(arg);
 			return true;
 		}
 
-		bool Widget::injectMouseEnter(const Input::PointerEventArgs & arg)
+		bool Widget::injectPointerEnter(const Input::PointerEventArgs & arg)
 		{
-			mMouseEnterSignal.emit(arg);
+			mPointerEnterSignal.emit(arg);
 			return true;
 		}
 
-		bool Widget::injectMouseLeave(const Input::PointerEventArgs & arg)
+		bool Widget::injectPointerLeave(const Input::PointerEventArgs & arg)
 		{
-			mMouseLeaveSignal.emit(arg);
+			mPointerLeaveSignal.emit(arg);
 			return true;
 		}
 
-		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseMoveEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::pointerMoveEvent()
 		{
-			return mMouseMoveSignal;
+			return mPointerMoveSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseDownEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::pointerDownEvent()
 		{
-			return mMouseDownSignal;
+			return mPointerDownSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseUpEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::pointerUpEvent()
 		{
-			return mMouseUpSignal;
+			return mPointerUpSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseEnterEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::pointerEnterEvent()
 		{
-			return mMouseEnterSignal;
+			return mPointerEnterSignal;
 		}
 
-		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::mouseLeaveEvent()
+		SignalSlot::SignalStub<const Input::PointerEventArgs&>& Widget::pointerLeaveEvent()
 		{
-			return mMouseLeaveSignal;
+			return mPointerLeaveSignal;
 		}
 
 		bool Widget::containsPoint(const Vector2 & point, const Vector3 &screenSize) const

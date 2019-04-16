@@ -9,10 +9,10 @@ namespace Engine
 		class StringLuaTableInstance : public LuaTableInstance
 		{
 		public:
-			StringLuaTableInstance(lua_State* state, const std::string& index,
+			StringLuaTableInstance(LuaThread *thread, const std::string& index,
 			                       const std::shared_ptr<LuaTableInstance>& parent = {});
 			virtual ~StringLuaTableInstance();
-			void push(lua_State* state = nullptr) const override;
+			void push(lua_State* state) const override;
 		private:
 			std::string mIndex;
 		};

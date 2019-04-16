@@ -48,7 +48,7 @@ namespace Engine
 		class ResourceManager;
 		template <class Loader>
 		class Resource;
-		template <class T, class Data>
+		template <class T, class Data, template <typename> typename ResourceKind = Resource>
 		class ResourceLoader;
 		class ResourceBase;
 	}

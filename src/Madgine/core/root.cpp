@@ -41,7 +41,13 @@ namespace Engine
 			(*mPluginManager)["Input"].setExclusive();
 			(*mPluginManager)["Input"].setAtleastOne();
 
-			mPluginManager->section("TW", "Core");
+			mPluginManager->section("TW", "Core").loadPlugin("Common");
+			mPluginManager->section("TW", "Core").loadPlugin("Static");
+			mPluginManager->section("TW", "Core").loadPlugin("Camera");
+			mPluginManager->section("TW", "Core").loadPlugin("TWClient");
+			mPluginManager->section("TW", "Core").loadPlugin("Menues");
+			mPluginManager->section("TW", "Core").loadPlugin("Animation");
+			mPluginManager->section("TW", "Core").loadPlugin("TWServer");
 #endif
 
 			mResources->init();
@@ -51,7 +57,7 @@ namespace Engine
 				std::shared_ptr<Scripting::Parsing::MethodHolder> p = res.second.data();
 				if (p)
 				{
-					p->call(mLuaState->state());
+					p->call(mLuaState->mainThread());
 				}
 			}
 

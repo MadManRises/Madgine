@@ -36,8 +36,10 @@ namespace Engine
 					luaL_unref(mState, LUA_REGISTRYINDEX, mIndex);
 			}
 
-			void MethodHolder::call(lua_State *state)
+			void MethodHolder::call(LuaThread *thread)
 			{
+				std::lock_guard guard(*thread);
+				lua_State *state = thread->state();
 				lua_rawgeti(state, LUA_REGISTRYINDEX, mIndex);
 				switch (lua_pcall(state, 0, 0, 0))
 				{
@@ -88,7 +90,9 @@ namespace Engine
 				char buffer[READ_BUFFER];
 				mBuffer = buffer;
 
-				lua_State *state = mState.state();
+				LuaThread *thread = mState.mainThread();
+				std::lock_guard guard(*thread);
+				lua_State *state = thread->state();
 
 				while (mChunk)
 				{
@@ -106,7 +110,7 @@ namespace Engine
 					}
 				}
 
-				mState.env().push();
+				mState.env().push(state);
 				lua_setupvalue(state, -2, 1);
 				return MethodHolder{ state };
 				

@@ -2,7 +2,7 @@
 
 #include "uimanager.h"
 
-#include "../gui/guisystem.h"
+#include "../gui/widgets/toplevelwindow.h"
 
 #include "../gui/widgets/widget.h"
 
@@ -21,10 +21,10 @@ namespace Engine
 	namespace UI
 	{		
 
-		UIManager::UIManager(GUI::GUISystem &gui) :
-			Scope(&gui),
+		UIManager::UIManager(GUI::TopLevelWindow &window) :
+			Scope(&window),
 			mCurrentRoot(nullptr),
-			mGUI(gui),
+			mWindow(window),
 			mKeepingCursorPos(false),
 		    mGuiHandlers(*this),
 		    mGameHandlers(*this)
@@ -52,8 +52,8 @@ namespace Engine
 
 			markInitialized();
 
-        	if (mGUI.app().settings().mRunMain) {
-				std::optional<Scripting::ArgumentList> res = app().callMethodIfAvailable("afterViewInit", {});
+        	if (app(false).settings().mRunMain) {
+				std::optional<Scripting::ArgumentList> res = app(false).callMethodIfAvailable("afterViewInit", {});
 				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 					return false;
 			}
@@ -172,7 +172,12 @@ namespace Engine
 			{
 				checkInitState();
 			}
-			return mGUI.app(init);
+			return mWindow.app(init);
+		}
+
+		const Core::MadgineObject * UIManager::parent() const
+		{
+			return &mWindow;
 		}
 
 		bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
@@ -237,13 +242,13 @@ namespace Engine
 		}
 
 
-		GUI::GUISystem &UIManager::gui(bool init) const
+		GUI::TopLevelWindow &UIManager::window(bool init) const
 		{
 			if (init)
 			{
 				checkInitState();
 			}
-			return mGUI.getSelf(init);
+			return mWindow.getSelf(init);
 		}
 
 		KeyValueMapList UIManager::maps()
@@ -262,7 +267,7 @@ namespace Engine
 			{
 				checkInitState();
 			}
-			return mGUI.getSceneComponent(i, init);
+			return mWindow.getSceneComponent(i, init);
 		}
 
 		App::GlobalAPIBase& UIManager::getGlobalAPIComponent(size_t i, bool init)
@@ -271,7 +276,16 @@ namespace Engine
 			{
 				checkInitState();
 			}
-			return mGUI.getGlobalAPIComponent(i, init);
+			return mWindow.getGlobalAPIComponent(i, init);
+		}
+
+		Scene::SceneManager& UIManager::sceneMgr(bool init)
+		{
+			if (init)
+			{
+				checkInitState();
+			}
+			return mWindow.sceneMgr(init);
 		}
 
 		GameHandlerBase& UIManager::getGameHandler(size_t i, bool init)
@@ -296,14 +310,7 @@ namespace Engine
 			return handler.getSelf(init);
 		}
 
-		Scene::SceneManager& UIManager::sceneMgr(bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-			}
-			return mGUI.sceneMgr(init);
-		}
+		
 	}
 }
 

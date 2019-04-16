@@ -71,6 +71,11 @@ namespace Engine
 					MAP_RO(Synced, isSynced));
 			}
 
+			const Scripting::LuaTable & EntityComponentBase::initTable()
+			{
+				return mInitTable;
+			}
+
 			void EntityComponentBase::moveToEntity(Entity* entity)
 			{
 				mEntity = entity;

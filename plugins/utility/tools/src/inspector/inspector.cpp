@@ -21,6 +21,8 @@
 
 #include "../tinyxml/tinyxml2.h"
 
+UNIQUECOMPONENT(Engine::Tools::Inspector);
+
 namespace Engine
 {
 	namespace Tools

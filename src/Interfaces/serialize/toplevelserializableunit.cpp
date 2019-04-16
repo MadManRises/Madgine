@@ -139,10 +139,8 @@ namespace Engine
 		void TopLevelSerializableUnitBase::removeManager(SerializeManager* mgr)
 		{
 			if (mgr->isMaster())
-			{
-				size_t check = mMasterManagers.size();
+			{				
 				mMasterManagers.erase(std::remove(mMasterManagers.begin(), mMasterManagers.end(), mgr), mMasterManagers.end());
-				assert(mMasterManagers.size() == check - 1);
 			}
 			else
 			{

@@ -63,8 +63,6 @@ namespace Engine
 			std::map<std::string, ResourceLoaderBase*> getLoaderByExtension();
 
 		private:
-			static ResourceManager *sSingleton;
-
 			ResourceLoaderContainer<std::vector> mCollector;
 
 			struct SubDirCompare

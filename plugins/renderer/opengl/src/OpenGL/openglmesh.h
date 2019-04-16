@@ -1,14 +1,15 @@
 #include "Madgine/scene/entity/components/mesh.h"
 
 #include "openglmeshdata.h"
+#include "openglmeshloader.h"
 
 namespace Engine 
 {
 	namespace Render {
 
 		struct MADGINE_OPENGL_EXPORT OpenGLMesh : Scene::Entity::EntityComponentVirtualImpl<OpenGLMesh, Scene::Entity::Mesh>
-		{
-			using EntityComponentVirtualImpl::EntityComponentVirtualImpl;
+		{			
+			OpenGLMesh(Scene::Entity::Entity &e, const Scripting::LuaTable &init);			
 
 			OpenGLMeshData *data() const;
 
@@ -20,6 +21,7 @@ namespace Engine
 
 		private:
 			std::shared_ptr<OpenGLMeshData> mData;
+			typename OpenGLMeshLoader::ResourceType *mResource;
 		};
 
 	}
