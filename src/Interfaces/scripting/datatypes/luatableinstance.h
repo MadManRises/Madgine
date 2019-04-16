@@ -9,8 +9,8 @@ namespace Engine
 		class LuaTableInstance
 		{
 		public:
-			LuaTableInstance(lua_State* state, const std::shared_ptr<LuaTableInstance>& parent = {});
-			LuaTableInstance(const LuaTableInstance& other) = delete;
+			LuaTableInstance(LuaThread *thread, const std::shared_ptr<LuaTableInstance> &parent = {});
+			LuaTableInstance(const LuaTableInstance &other) = delete;
 			virtual ~LuaTableInstance() = default;
 
 			void setValue(const std::string& name, const ValueType& value);
@@ -22,18 +22,18 @@ namespace Engine
 			bool hasFunction(const std::string& name) const;
 			ArgumentList callMethod(const std::string& name, const ArgumentList& args);
 
-			std::shared_ptr<LuaTableInstance> createTable(lua_State* state, const std::shared_ptr<LuaTableInstance>& ptr);
+			std::shared_ptr<LuaTableInstance> createTable(LuaThread *thread, const std::shared_ptr<LuaTableInstance>& ptr);
 			std::shared_ptr<LuaTableInstance> createTable(const std::string& name, const std::shared_ptr<LuaTableInstance>& ptr);
 			std::shared_ptr<LuaTableInstance> registerTable(lua_State* state, int index,
 			                                                const std::shared_ptr<LuaTableInstance>& ptr);
 
-			virtual void push(lua_State* state = nullptr) const = 0;
+			virtual void push(lua_State* state) const = 0;
 
-			lua_State* state() const;
+			LuaThread* thread() const;
 
 		protected:
 			std::shared_ptr<LuaTableInstance> mParent;
-			lua_State* mState;
+			LuaThread* mThread;
 		};
 
 

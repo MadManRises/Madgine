@@ -5,7 +5,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader>
+		struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader, Resources::ThreadLocalResource>
 		{			
 			OpenGLShaderLoader(Resources::ResourceManager &mgr);
 

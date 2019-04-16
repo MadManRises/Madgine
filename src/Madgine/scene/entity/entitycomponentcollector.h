@@ -14,7 +14,7 @@ namespace Engine
 			};
 
 #ifdef PLUGIN_BUILD
-			extern "C" DLL_EXPORT PluginEntityComponents *pluginEntityComponents();
+			extern "C" DLL_EXPORT PluginEntityComponents *PLUGIN_LOCAL(pluginEntityComponents)();
 #endif
 
 			class MADGINE_BASE_EXPORT EntityComponentCollector
@@ -37,7 +37,7 @@ namespace Engine
 					}
 				};
 
-				friend PluginEntityComponents *pluginEntityComponents() {
+				friend PluginEntityComponents *PLUGIN_LOCAL(pluginEntityComponents)() {
 					return LocalComponentStore::sRegisteredComponentsByName();
 				}
 

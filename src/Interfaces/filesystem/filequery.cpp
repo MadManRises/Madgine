@@ -74,11 +74,11 @@ namespace Engine {
 			Path p = mHandles.empty() ? mQuery->path() : **this;
 
 			FileQueryHandle handle(p, *mBuffer);
-			if (!handle)
-				throw 0;
-
-			mHandles.emplace_back(std::move(handle));
-			verify();
+			if (handle)
+			{
+				mHandles.emplace_back(std::move(handle));
+				verify();
+			}
 		}
 
 		void FileQueryIterator::leaveDir()

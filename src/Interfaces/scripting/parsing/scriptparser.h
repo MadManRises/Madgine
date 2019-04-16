@@ -19,7 +19,7 @@ namespace Engine
 
 				~MethodHolder();
 
-				void call(lua_State *state);
+				void call(LuaThread *thread);
 
 				operator bool();
 

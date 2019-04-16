@@ -9,8 +9,11 @@ namespace Engine
 	{
 		class INTERFACES_EXPORT ScopeBase
 		{
+		private:
+			ScopeBase(LuaTable table);
+
 		public:
-			ScopeBase(const LuaTable& table);
+			ScopeBase(const LuaThread *thread);
 			ScopeBase(ScopeBase *parent);
 			ScopeBase(const ScopeBase&) = delete;
 			ScopeBase(ScopeBase&&) = default;
@@ -24,7 +27,7 @@ namespace Engine
 			std::optional<ArgumentList> callMethodIfAvailable(const std::string& name, const ArgumentList& args);
 			std::optional<ArgumentList> callMethodCatch(const std::string& name, const ArgumentList& args);
 
-			void push() const;
+			void push(lua_State *state) const;
 
 			std::unique_ptr<KeyValueIterator> find(const std::string &key);
 			std::optional<ValueType> get(const std::string& key);

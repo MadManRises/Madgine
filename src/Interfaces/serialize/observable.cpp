@@ -14,6 +14,16 @@ namespace Engine
 		{
 		}
 
+		Observable::Observable(const Observable &) :
+			Observable()
+		{
+		}
+
+		Observable::Observable(Observable &&) noexcept :
+			Observable()
+		{
+		}
+
 		std::set<BufferedOutStream*, CompareStreamId> Observable::getMasterActionMessageTargets(
 			const std::set<ParticipantId>& targets) const
 		{

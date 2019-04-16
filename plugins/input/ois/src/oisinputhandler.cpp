@@ -1,11 +1,13 @@
 #include "oislib.h"
 #include "oisinputhandler.h"
 
-#include "client/input/inputevents.h"
+#include "input/inputevents.h"
 
 #include "Interfaces/window/windowapi.h"
 
 #include "Interfaces/debug/profiler/profiler.h"
+
+UNIQUECOMPONENT(Engine::Input::OISInputHandler);
 
 namespace Engine
 {

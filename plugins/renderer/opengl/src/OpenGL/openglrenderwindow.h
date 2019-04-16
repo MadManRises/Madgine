@@ -1,10 +1,10 @@
 #pragma once
 
-#include "client/render/renderwindow.h"
+#include "render/renderwindow.h"
 
 #include "openglshaderprogram.h"
 
-#include "opengltexture.h"
+#include "util/opengltexture.h"
 
 
 namespace Engine {

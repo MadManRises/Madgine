@@ -176,7 +176,7 @@ namespace Engine
 			}
 
 			App::Application& Entity::app(bool init)
-			{
+			{		
 				return mSceneManager.app(init);
 			}
 

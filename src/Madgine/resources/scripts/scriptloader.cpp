@@ -6,6 +6,7 @@
 
 #include "Interfaces/reflection/classname.h"
 
+UNIQUECOMPONENT(Engine::Scripting::Parsing::ScriptLoader);
 
 namespace Engine
 {

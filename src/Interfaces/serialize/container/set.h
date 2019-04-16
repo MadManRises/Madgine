@@ -63,6 +63,9 @@ namespace Engine
 		typedef typename container::value_type value_type;
 		typedef T type;
 
+		template <typename C>
+		using api = C;
+
 		template <class... _Ty>
 		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
 		{

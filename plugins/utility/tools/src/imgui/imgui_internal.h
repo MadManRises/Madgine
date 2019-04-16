@@ -85,7 +85,7 @@ namespace ImGuiStb
 //-----------------------------------------------------------------------------
 
 #ifndef GImGui
-extern IMGUI_API ImGuiContext* GImGui;  // Current implicit ImGui context pointer
+extern thread_local IMGUI_API ImGuiContext* GImGui;  // Current implicit ImGui context pointer
 #endif
 
 //-----------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 
 #include "openglforward.h"
 
-#include "client/clientlib.h"
+#include "clientlib.h"
 
 #if !ANDROID
 #include "../glad/glad.h"

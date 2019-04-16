@@ -1,7 +1,7 @@
 #include "opengllib.h"
 
 #include "openglshaderprogram.h"
-#include "openglshader.h"
+#include "util/openglshader.h"
 
 
 #include "Interfaces/math/matrix4.h"

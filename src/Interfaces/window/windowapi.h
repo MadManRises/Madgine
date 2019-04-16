@@ -8,10 +8,15 @@ namespace Engine {
 		struct WindowSettings {
 			uintptr_t mHandle = 0;
 
-			size_t mWidth = 800;
-			size_t mHeight = 600;
+			struct WindowVector { size_t x; size_t y; };
+
+			WindowVector mSize = { 800, 600 };
+			
+			std::optional<WindowVector> mPosition;
 
 			const char *mTitle = "Interfaces - Window";
+
+			bool mHidden = false;
 		};
 
 		struct INTERFACES_EXPORT Window {

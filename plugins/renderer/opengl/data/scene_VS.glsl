@@ -17,6 +17,7 @@ void main()
 {
 	worldPos = vec3(m * vec4(aPos, 1.0));
     gl_Position = vp * vec4(worldPos, 1.0);
+	gl_Position.z *= -1.0f;
     color = aColor;
 	normal = mat3(transpose(inverse(m))) * aNormal;
 }

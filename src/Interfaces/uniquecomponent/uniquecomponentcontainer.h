@@ -11,7 +11,7 @@
 namespace Engine
 {
 
-	template <class _Base, class _Ty, template <class...> class Container>
+	template <class _Base, class _Ty, template <class...> class C>
 	class UniqueComponentContainer
 	{
 	public:
@@ -19,7 +19,9 @@ namespace Engine
 		typedef typename Registry::F F;
 		typedef typename Registry::Base Base;
 
-		typedef typename Container<std::unique_ptr<Base>>::const_iterator const_iterator;
+		typedef C<std::unique_ptr<Base>> Container;
+
+		typedef typename Container::const_iterator const_iterator;
 
 		UniqueComponentContainer(_Ty arg)
 #ifndef STATIC_BUILD
@@ -29,14 +31,14 @@ namespace Engine
 		{
 			size_t count = Registry::sComponents().size();
 			mSortedComponents.reserve(count);
-			if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
+			if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
 				mComponents.reserve(count);
 			}
 			for (auto f : Registry::sComponents())
 			{
 				std::unique_ptr<Base> p = f(arg);
 				mSortedComponents.push_back(p.get());
-				container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
+				container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
 			}
 #ifndef STATIC_BUILD
 			Registry::update().connect(mUpdateSlot);
@@ -62,7 +64,7 @@ namespace Engine
 			return mComponents.size();
 		}
 
-		const Container<std::unique_ptr<Base>>& data() const
+		const Container& data() const
 		{
 			return mComponents;
 		}
@@ -81,7 +83,7 @@ namespace Engine
 
 
 	private:
-		Container<std::unique_ptr<Base>> mComponents;
+		Container mComponents;
 		std::vector<Base*> mSortedComponents;
 
 #ifndef STATIC_BUILD
@@ -91,15 +93,13 @@ namespace Engine
 			if (add){
 				assert(mComponents.size() == info->mBaseIndex);
 				mSortedComponents.reserve(info->mBaseIndex + vals.size());
-				if constexpr (std::is_same_v<Container<F>, std::vector<F>>) {
+				if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
 					mComponents.reserve(info->mBaseIndex + vals.size());
 				}
-				size_t i = 0;
 				for (F f : vals) {
 					std::unique_ptr<Base> p = f(mArg);
 					mSortedComponents.push_back(p.get());
-					container_traits<Container, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
-					++i;
+					container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
 				}
 			}
 			else {
@@ -109,7 +109,7 @@ namespace Engine
 		}
 
 	private:
-		SignalSlot::Slot<&UniqueComponentContainer<Base, _Ty, Container>::updateComponents> mUpdateSlot;
+		SignalSlot::Slot<&UniqueComponentContainer<Base, _Ty, C>::updateComponents> mUpdateSlot;
 		_Ty mArg;
 
 #endif

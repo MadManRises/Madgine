@@ -6,6 +6,8 @@
 
 #include "../renderer/imguiaddons.h"
 
+UNIQUECOMPONENT(Engine::Tools::Metrics);
+
 namespace Engine {
 	namespace Tools {
 

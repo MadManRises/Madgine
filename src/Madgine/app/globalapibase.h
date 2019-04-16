@@ -42,8 +42,9 @@ namespace Engine
 			Scripting::GlobalScopeBase &globalScope();
 
 			GlobalAPIBase &getSelf(bool = true);
-
-			App::Application &app(bool = true);
+		
+			virtual App::Application &app(bool = true) override;
+			virtual const Core::MadgineObject *parent() const override;
 
 			/*template <class T>
 			T &getGuiHandler()

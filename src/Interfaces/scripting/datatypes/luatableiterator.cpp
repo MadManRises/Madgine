@@ -14,8 +14,9 @@ namespace Engine
 		LuaTableIterator::LuaTableIterator(const std::shared_ptr<LuaTableInstance>& instance) :
 			mInstance(instance)
 		{
-			lua_State* state = mInstance->state();
-			mInstance->push();
+			std::lock_guard guard(*mInstance->thread());
+			lua_State* state = mInstance->thread()->state();
+			mInstance->push(state);
 			lua_pushnil(state);
 			if (lua_next(state, -2) != 0)
 			{
@@ -32,8 +33,9 @@ namespace Engine
 
 		void LuaTableIterator::operator++()
 		{
-			lua_State* state = mInstance->state();
-			mInstance->push();
+			std::lock_guard guard(*mInstance->thread());
+			lua_State* state = mInstance->thread()->state();
+			mInstance->push(state);
 			lua_pushstring(state, mCurrent.first.c_str());
 			if (lua_next(state, -2) != 0)
 			{

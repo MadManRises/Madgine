@@ -10,13 +10,13 @@ namespace Engine
 	namespace Resources
 	{
 		
-		template <class T, class _Data>
+		template <class T, class _Data, template <typename> typename ResourceKind>
 		class ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector>
 		{
 		public:
 
 			using Data = _Data;
-			using ResourceType = Resource<ResourceLoader<T, Data>>;
+			using ResourceType = ResourceKind<ResourceLoader<T, Data, ResourceKind>>;
 
 			using UniqueComponent<T, ResourceLoaderCollector>::UniqueComponent;
 

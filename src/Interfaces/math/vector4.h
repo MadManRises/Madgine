@@ -36,7 +36,7 @@ namespace Engine
 	A direction in 4D space represented as distances along the 3
 	orthogonal axes + w (x, y, z, w). 
 	*/
-	class Vector4
+	class INTERFACES_EXPORT Vector4
 	{
 	public:
 		float x, y, z, w;

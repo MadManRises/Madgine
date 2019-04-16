@@ -7,6 +7,7 @@
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector4.h"
+#include "../math/quaternion.h"
 
 #include "invscopeptr.h"
 
@@ -35,13 +36,13 @@ namespace Engine
 			Scripting::ScopeBase *,
 			InvScopePtr,
 			Matrix3,
+			Quaternion,
 			Vector4,
 			Vector3,
 			Vector2,
 			std::shared_ptr<KeyValueIterator>,
 			Scripting::ApiMethod,
-			Scripting::LuaTable,
-			Scripting::LuaThread
+			Scripting::LuaTable
 		>;
 
 		template <class T>
@@ -63,13 +64,13 @@ namespace Engine
 			ScopeValue,
 			InvScopePtrValue,
 			Matrix3Value,
+			QuaternionValue,
 			Vector4Value,
 			Vector3Value,
 			Vector2Value,
 			KeyValueIteratorValue,
 			ApiMethodValue,
 			LuaTableValue,
-			LuaStateValue,
 
 			MAX_VALUETYPE_TYPE
 		};

@@ -53,6 +53,9 @@ namespace Engine
 			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 			SceneComponentBase &getSelf(bool = true);
 
+			virtual const Core::MadgineObject *parent() const override;
+			virtual App::Application &app(bool = true) override;
+
 		protected:
 			virtual bool init() override;
 			virtual void finalize() override;

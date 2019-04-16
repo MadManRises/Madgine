@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../datatypes/luatable.h"
+#include "../datatypes/luathread.h"
 
 namespace Engine
 {
@@ -20,36 +21,45 @@ namespace Engine
 
 			void executeString(lua_State* state, const std::string& cmd);
 
-			LuaTable createThread(ScopeBase *global);
+			const LuaThread *createThread(ScopeBase *global);
+			static const LuaThread *getThread(lua_State *thread);
 
 			int pushThread(lua_State* state, lua_State* thread);
 
 			LuaTable env() const;
-			lua_State* state() const;
+			LuaThread* mainThread();
 
-			void setGlobalMethod(const std::string &name, int (*f)(lua_State*));
-
-			static ScopeBase *getGlobal(lua_State *state);
-
-			static LuaTable getGlobalTable(lua_State* state);
-			
+			void setGlobalMethod(const std::string &name, int (*f)(lua_State*));			
 
 		private:
 			bool mFinalized;
 
-			lua_State* mState;
 			LuaTable mRegistry;
 			LuaTable mEnv;
 			LuaTable mGlobal;
 
-			struct ThreadDescriptor
-			{
-				int mRegIndex;
-				ScopeBase *mGlobal;
-				LuaTable mTable;
-			};
+			LuaThread mMainThread;
 
-			std::map<lua_State *, ThreadDescriptor> mThreads;
+			struct LuaThreadComparator
+			{
+				using is_transparent = void;
+
+				bool operator()(const LuaThread &first, const LuaThread &second) const
+				{
+					return first.state() < second.state();
+				}
+
+				bool operator()(const LuaThread &first, lua_State *second) const
+				{
+					return first.state() < second;
+				}
+
+				bool operator()(lua_State *first, const LuaThread &second) const
+				{
+					return first < second.state();
+				}
+			};
+			std::set<LuaThread, LuaThreadComparator> mThreads;
 
 			static LuaState* sSingleton;
 

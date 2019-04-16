@@ -47,6 +47,12 @@ namespace Engine
 				std::to_string(std::get<Vector4>(mUnion)[1]) + ", " +
 				std::to_string(std::get<Vector4>(mUnion)[2]) + ", " +
 				std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
+		case Type::QuaternionValue:
+			return "{"s +
+				std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " +
+				std::to_string(std::get<Quaternion>(mUnion).w) + "}";
 		default:
 			throw Scripting::ScriptingException("Unknown Type!");
 		}
@@ -85,6 +91,8 @@ namespace Engine
 			return "Vector3";
 		case Type::Vector4Value:
 			return "Vector4";
+		case Type::QuaternionValue:
+			return "Quaternion";
 		case Type::ApiMethodValue:
 			return "Method";
 		default:
@@ -119,7 +127,7 @@ namespace Engine
 				}
 				else
 				{
-					result = Scripting::LuaState::getGlobalTable(state).registerTable(state, index);
+					result = Scripting::LuaState::getThread(state)->table().registerTable(state, index);
 				}
 				lua_pop(state, 1);
 
@@ -164,7 +172,7 @@ namespace Engine
 			lua_pushnil(state);
 			return 1;
 		case Type::ScopeValue:
-			as<Scripting::ScopeBase*>()->push();
+			as<Scripting::ScopeBase*>()->push(state);
 			return 1;
 		case Type::StringValue:
 			lua_pushstring(state, as<std::string>().c_str());

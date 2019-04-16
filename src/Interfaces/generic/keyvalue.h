@@ -12,6 +12,21 @@ namespace Engine
 	};
 
 	template <class T>
+	struct FixString
+	{
+		typedef T type;
+	};
+
+	template <>
+	struct FixString<const char*>
+	{
+		typedef std::string type;
+	};
+
+	template <class T>
+	using FixString_t = typename FixString<T>::type;
+
+	template <class T, typename = void>
 	struct KeyValue
 	{
 		static T& value(T& v)
@@ -19,7 +34,21 @@ namespace Engine
 			return v;
 		}
 
-		static typename std::template invoke_result<decltype(&T::key), T*>::type key(const T& v)
+		static const T& key(const T& v)
+		{
+			return v;
+		}
+	};
+
+	template <typename T>
+	struct KeyValue<T, std::void_t<std::invoke_result_t<decltype(&T::key), T*>>>
+	{
+		static T& value(T& v)
+		{
+			return v;
+		}
+
+		static std::invoke_result_t<decltype(&T::key), T*> key(const T& v)
 		{
 			return v.key();
 		}
@@ -124,13 +153,13 @@ namespace Engine
 	template <class T>
 	decltype(auto) kvKey(T& v)
 	{
-		return KeyValue<T>::key(v);
+		return FixString_t<std::decay_t<decltype(KeyValue<T>::key(v))>>(KeyValue<T>::key(v));
 	}
 
 	template <class T>
 	decltype(auto) kvKey(const T& v)
 	{
-		return KeyValue<const T>::key(v);
+		return FixString_t<std::decay_t<decltype(KeyValue<const T>::key(v))>>(KeyValue<const T>::key(v));
 	}
 
 	template <class T, class K>
@@ -188,31 +217,16 @@ namespace Engine
 	}
 
 	template <class T>
-	struct FixString
-	{
-		typedef T type;
-	};
-
-	template <>
-	struct FixString<const char*>
-	{
-		typedef std::string type;
-	};
-
-	template <class T>
-	using FixString_t = typename FixString<T>::type;
-
-	template <class T>
 	struct KeyType
 	{
-		typedef FixString_t<std::decay_t<decltype(kvKey(std::declval<T>()))>> type;
+		typedef std::decay_t<decltype(kvKey(std::declval<T>()))> type;
 	};
 
 	template <class T>
 	using KeyType_t = typename KeyType<T>::type;
 
 
-	template <class _Ty = void>
+	template <class _Ty, typename = void>
 	struct KeyCompare
 	{
 		// functor for operator<
@@ -236,6 +250,21 @@ namespace Engine
 		constexpr bool operator()(const _Ty& _Left, const KeyType_t<_Ty>& _Right) const
 		{
 			return (kvKey(_Left) < _Right);
+		}
+	};
+
+	template <typename T>
+	struct KeyCompare<T, std::enable_if_t<std::is_same_v<KeyType_t<T>, T>>>
+	{
+		// functor for operator<
+		typedef T first_argument_type;
+		typedef T second_argument_type;
+		typedef bool result_type;		
+
+		constexpr bool operator()(const T& _Left, const T& _Right) const
+		{
+			// apply operator< to operands
+			return (kvKey(_Left) < kvKey(_Right));
 		}
 	};
 

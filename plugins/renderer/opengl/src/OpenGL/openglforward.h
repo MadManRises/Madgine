@@ -7,6 +7,8 @@ namespace Engine
 		class OpenGLRenderWindow;
 
 		struct OpenGLShader;
+
+		struct OpenGLMeshData;
 	}
 
 }

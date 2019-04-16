@@ -1,8 +1,9 @@
 #pragma once
 
-#include "client/render/rendertarget.h"
+#include "render/rendertarget.h"
 #include "openglshaderprogram.h"
-#include "opengltexture.h"
+#include "util/opengltexture.h"
+#include "util/openglbuffer.h"
 
 namespace Engine {
 	namespace Render {
@@ -23,7 +24,6 @@ namespace Engine {
 			uint32_t mIndex;
 
 			GLuint mFramebuffer;
-			GLuint mVertexbuffer;			
 			GLuint mDepthRenderbuffer;
 
 			OpenGLShaderProgram mProgram;

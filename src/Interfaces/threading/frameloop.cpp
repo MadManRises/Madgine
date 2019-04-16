@@ -12,6 +12,7 @@ namespace Engine
 	namespace Threading
 	{
 		FrameLoop::FrameLoop() :
+			TaskQueue("FrameLoop"),
 			mTimeBank(0),			
 			mLastFrame(std::chrono::high_resolution_clock::now()),
 			mSetupState(mSetupSteps.begin())
@@ -35,12 +36,12 @@ namespace Engine
 
 		void FrameLoop::shutdown()
 		{
-			mRunning = false;
+			stop();
 		}
 
-		bool FrameLoop::isShutdown()
+		bool FrameLoop::isShutdown() const
 		{
-			return !mRunning;
+			return !running();
 		}
 
 		bool FrameLoop::sendFrameStarted(std::chrono::microseconds timeSinceLastFrame)
@@ -94,51 +95,51 @@ namespace Engine
 			return result;
 		}
 
-		void FrameLoop::queue(SignalSlot::TaskHandle &&task)
+		std::optional<SignalSlot::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask)
 		{
-			mTaskQueue.emplace_back(std::move(task));
-		}
-
-		std::optional<SignalSlot::TaskHandle> FrameLoop::fetch()
-		{
-			if (mRunning)
+			if (running())
 			{
 				while (mSetupState != mSetupSteps.end())
 				{
 					std::optional<SignalSlot::TaskHandle> init = std::move(mSetupState->first);
 					++mSetupState;
-					if (init)
-						return init;
+					if (init) {
+						return wrapTask(std::move(*init));
+					}
 				}
 			}
-			if (!mTaskQueue.empty())
+			if (std::optional<SignalSlot::TaskTracker> task = TaskQueue::fetch(nextTask))
 			{
-				SignalSlot::TaskHandle task = std::move(mTaskQueue.front());
-				mTaskQueue.pop_front();
 				return task;
 			}
-			if (mRunning) 
+			if (!running() && nextTask.time_since_epoch() == std::chrono::steady_clock::duration(0))
 			{
-				return [this]() {
-					auto now = std::chrono::high_resolution_clock::now();
-					mRunning &= singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame));
-					mLastFrame = now;
-				};
-			}
-			while (mSetupState != mSetupSteps.begin())
-			{
-				--mSetupState;
-				std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
-				if (finalize)
-					return finalize;
+				while (mSetupState != mSetupSteps.begin())
+				{
+					--mSetupState;
+					std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
+					if (finalize)
+						return wrapTask(std::move(*finalize));
+				}
 			}
 			return {};
 		}
 
-		bool FrameLoop::empty()
+		std::optional<SignalSlot::TaskTracker> FrameLoop::fetch_on_idle()
 		{
-			return mTaskQueue.empty() && mSetupState == mSetupSteps.begin();
+			return wrapTask([this]() {
+				auto now = std::chrono::high_resolution_clock::now();
+				if (!singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame)))
+					stop();
+				mLastFrame = now;
+			});
 		}
+
+		bool FrameLoop::idle() const
+		{
+			return TaskQueue::idle() && mSetupState == mSetupSteps.begin();
+		}
+
 
 		void FrameLoop::addSetupSteps(std::optional<SignalSlot::TaskHandle>&& init, std::optional<SignalSlot::TaskHandle>&& finalize)
 		{

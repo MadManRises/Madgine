@@ -7,6 +7,8 @@ namespace Engine
 {
 	namespace SignalSlot
 	{
+		extern INTERFACES_EXPORT std::mutex sSignalConnectMutex;
+
 		template <class... _Ty>
 		class SignalStub
 		{
@@ -28,11 +30,10 @@ namespace Engine
 			template <class T, class _ = std::enable_if_t<has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T& slot, DirectConnectionType = {})
 			{
-				std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<
-					DirectConnection<T*, _Ty...>>(&slot);
-				mConnectedSlots.emplace_back(
-					conn
-				);
+				std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<DirectConnection<T*, _Ty...>>(
+					&slot);
+				std::lock_guard<std::mutex> guard(sSignalConnectMutex);
+				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}
 
@@ -41,9 +42,8 @@ namespace Engine
 			{
 				std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<QueuedConnection<T*, _Ty...>>(
 					&slot, slot.taskQueue());
-				mConnectedSlots.emplace_back(
-					conn
-				);
+				std::lock_guard<std::mutex> guard(sSignalConnectMutex);
+				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}
 
@@ -52,6 +52,7 @@ namespace Engine
 			{
 				std::weak_ptr<Connection<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<DirectConnection<T, _Ty...>>(
 					std::forward<T>(slot));
+				std::lock_guard<std::mutex> guard(sSignalConnectMutex);
 				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}
@@ -61,6 +62,7 @@ namespace Engine
 			{
 				std::weak_ptr<Connection<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<QueuedConnection<T, _Ty...>>(
 					std::forward<T>(slot), DefaultTaskQueue::getSingleton());
+				std::lock_guard<std::mutex> guard(sSignalConnectMutex);
 				mConnectedSlots.emplace_back(conn);
 				return conn;
 			}

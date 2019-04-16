@@ -61,6 +61,9 @@ namespace Engine
 				KeyValueMapList maps() override;
 				
 
+			protected:
+				const Scripting::LuaTable &initTable();
+
 			private:
 
 				Entity* mEntity;

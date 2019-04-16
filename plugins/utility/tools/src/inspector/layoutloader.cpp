@@ -4,6 +4,8 @@
 
 #include "../tinyxml/tinyxml2.h"
 
+UNIQUECOMPONENT(Engine::Tools::LayoutLoader);
+
 namespace Engine {
 	namespace Tools {
 		

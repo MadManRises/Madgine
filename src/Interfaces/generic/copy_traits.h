@@ -23,7 +23,7 @@ namespace Engine
 		};
 
 		template <class T>
-		struct _custom_is_copy_constructible<void_t<decltype(T(std::declval<const T &>()))>, T> : std::true_type
+		struct _custom_is_copy_constructible<std::void_t<decltype(T(std::declval<const T &>()))>, T> : std::true_type
 		{
 		};
 	}
@@ -31,7 +31,7 @@ namespace Engine
 	template <class T>
 	struct custom_is_copy_constructible
 	{
-		static const constexpr bool value = __generic__impl__::_custom_is_copy_constructible<void_t<>, T>::value;
+		static const constexpr bool value = __generic__impl__::_custom_is_copy_constructible<std::void_t<>, T>::value;
 	};
 
 	template <class U, class V>
@@ -42,5 +42,17 @@ namespace Engine
 
 	template <class T>
 	using CopyTraits = std::conditional_t<custom_is_copy_constructible<T>::value, CopyType, NonCopyType>;
+
+	template <typename T, typename = std::enable_if_t<custom_is_copy_constructible<T>::value>>
+	T tryCopy(T &t)
+	{
+		return t;
+	}
+
+	template <typename T, typename = std::enable_if_t<!custom_is_copy_constructible<std::remove_reference_t<T>>::value>>
+	std::remove_reference_t<T> tryCopy(T &&t)
+	{
+		throw 0;
+	}
 
 }

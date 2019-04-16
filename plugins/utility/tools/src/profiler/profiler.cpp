@@ -14,26 +14,29 @@
 
 #include "../renderer/imguiroot.h"
 
+UNIQUECOMPONENT(Engine::Tools::Profiler);
+
 namespace Engine {
 	namespace Tools {
 
 		static void drawStats(const Debug::Profiler::ProcessStats *stats, std::chrono::nanoseconds overallTime, std::chrono::nanoseconds parentTotalTime) {
 			std::chrono::nanoseconds totalTime = stats->totalTime();
 
+			
 
 			bool open = ImGui::SpanningTreeNode(stats, stats->function(), stats->children().empty());
 
 			ImGui::NextColumn();
 
-			ImGui::Duration(totalTime);
+			ImGui::RightAlignDuration(totalTime);
 
 			ImGui::NextColumn();
 
-			ImGui::Text("%.2f%%", 100.0f * totalTime.count() / parentTotalTime.count());
+			ImGui::RightAlignText("%.2f%%", 100.0f * totalTime.count() / parentTotalTime.count());
 
 			ImGui::NextColumn();
 
-			ImGui::Text("%.2f%%", 100.0f * totalTime.count() / overallTime.count());
+			ImGui::RightAlignText("%.2f%%", 100.0f * totalTime.count() / overallTime.count());
 
 			ImGui::NextColumn();
 

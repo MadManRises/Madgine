@@ -58,9 +58,47 @@ namespace ImGui {
 			ImGui::Text("%.4f ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
 		}
 		else {
-			ImGui::Text("%.4f s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
+			ImGui::Text("%.4f  s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
 		}
 
+	}
+
+	void RightAlignDuration(std::chrono::nanoseconds dur)
+	{
+		if (dur.count() < 1000) {
+			ImGui::RightAlignText("%lld ns", dur.count());
+		}
+		else if (dur.count() < 1000000) {
+			ImGui::RightAlignText("%.3f us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());
+		}
+		else if (dur.count() < 1000000000) {
+			ImGui::RightAlignText("%.4f ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
+		}
+		else {
+			ImGui::RightAlignText("%.4f  s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
+		}
+
+	}
+
+	void RightAlignText(const char * s, ...)
+	{
+		char buffer[1024];
+		va_list args;
+
+		va_start(args, s);
+		int len = vsprintf(buffer, s, args);
+		va_end(args);
+		assert(len >= 0);
+
+		ImGuiContext &g = *ImGui::GetCurrentContext();
+
+		ImFont* font = g.Font;
+		const float font_size = g.FontSize;
+
+		float w = font->CalcTextSizeA(font_size, FLT_MAX, 0.0f, buffer, buffer + len, NULL).x;
+
+		ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - w);
+		ImGui::Text("%s", buffer);
 	}
 
 }

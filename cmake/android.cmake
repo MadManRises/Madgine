@@ -19,9 +19,16 @@ if (ANDROID)
 
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 
-	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
-		COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
+	if (CMAKE_HOST_WIN32)	
+		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
+			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
+			COMMAND gradle --stop
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
+	else()
+		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
+			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all			
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
+	endif()
 
 	add_custom_target(gradlew DEPENDS ${CMAKE_BINARY_DIR}/gradle/gradlew)
 

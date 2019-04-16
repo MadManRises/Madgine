@@ -7,6 +7,11 @@ namespace Engine
 
 		class DependencyInitException {};
 
+		bool MadgineObject::isInitialized() const
+		{
+			return mState == ObjectState::INITIALIZED || mState == ObjectState::MARKED_INITIALIZED;
+		}
+
 		MadgineObject::MadgineObject() :
 			mState(ObjectState::UNINITIALIZED),
 			mOrder(-1)
@@ -48,7 +53,7 @@ namespace Engine
 				}
 				else throw 0;
 			}
-			return mState == ObjectState::INITIALIZED || mState == ObjectState::MARKED_INITIALIZED;
+			return isInitialized();
 		}
 
 		bool MadgineObject::callInit(int& count)

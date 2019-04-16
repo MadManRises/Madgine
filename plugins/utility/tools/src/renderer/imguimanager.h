@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client/gui/windowoverlay.h"
+#include "gui/windowoverlay.h"
 
 namespace Engine {
 	namespace Tools {

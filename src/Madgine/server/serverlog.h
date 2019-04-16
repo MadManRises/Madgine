@@ -16,26 +16,17 @@ namespace Engine
 			// Inherited via Log
 			void log(const std::string& msg, Util::MessageType lvl) override;
 
-			void startConsole(const std::function<bool(const std::string&)>& evaluator);
+			bool startConsole();
 			void stopConsole();
 
-		private:
-			void runConsole();
-
-			void handle(const std::string& cmd);
-
-			void charTyped(char, const std::string&);
+			std::vector<std::string> update();
 
 		private:
-			SignalSlot::Slot<&ServerLog::charTyped> mCharTypedSlot;
-			SignalSlot::Slot<&ServerLog::handle> mHandleSlot;
 
-			bool mRunning;
+		private:
 
 			bool mEcho;
 			std::string mCurrentCmd;
-			std::thread mConsoleThread;
-			std::function<bool(const std::string&)> mEvaluator;
 		};
 	}
 }

@@ -9,11 +9,6 @@ namespace Engine
 {
 	namespace Scene
 	{
-		struct Vertex {
-			Vector3 mPos;
-			Vector4 mColor;
-			Vector3 mNormal;
-		};
 		
 		class MADGINE_BASE_EXPORT Camera : public Scripting::Scope<Camera>
 		{
@@ -22,7 +17,9 @@ namespace Engine
 			~Camera() = default;
 
 			void setPosition(const Vector3 &pos);
-			Vector3 getPosition();
+			const Vector3 &position();
+			void setOrientation(const Quaternion &q);
+			const Quaternion &orientation();
 
 			Matrix4 getViewProjectionMatrix(float aspectRatio);
 
@@ -36,10 +33,10 @@ namespace Engine
 			KeyValueMapList maps() override;
 
 			Vector3 getOrientationHandle() const;
-			void setOrientationHandle(const Vector3 &rot);
+			void rotate(const Vector3 &rot);
 
-			const std::vector<Vertex> &vertices() const;
-			void setVertices(std::vector<Vertex> &&vertices);
+			const std::vector<Entity::Entity*> &visibleEntities() const;
+			void setVisibleEntities(std::vector<Entity::Entity*> &&entities);
 
 		private:
 			Vector3 mPosition;
@@ -49,7 +46,7 @@ namespace Engine
 			float mN;
 			float mFOV;
 
-			std::vector<Vertex> mCurrentVertices;
+			std::vector<Entity::Entity*> mVisibleEntities;
 
 		};
 

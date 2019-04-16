@@ -133,6 +133,11 @@ function(install_to_workspace name)
 	endif()
 
 	foreach(target ${OPTIONS_TARGETS})
+		get_target_property(TARGET_SOURCE_DIR ${target} SOURCE_DIR)
+		if (EXISTS ${TARGET_SOURCE_DIR}/data)
+			install(DIRECTORY ${TARGET_SOURCE_DIR}/data DESTINATION . COMPONENT ${name})
+		endif()
+
 		target_include_directories(${target} INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${target}/include>)
 	endforeach()
 
@@ -362,7 +367,7 @@ macro(add_workspace_library name)
 		get_filename_component(abs_precompile_include ${LIB_CONFIG_PRECOMPILED_HEADER} ABSOLUTE)
 		
 		file(RELATIVE_PATH precompile_include ${abs_source_root} ${abs_precompile_include})
-
+		
 		add_precompiled_header(${name} ${LIB_CONFIG_PRECOMPILED_HEADER} FORCEINCLUDE)
 
 		set_target_properties(${name} PROPERTIES PRECOMPILED_HEADER ${precompile_include})

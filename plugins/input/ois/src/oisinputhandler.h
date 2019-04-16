@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ois/includes/OIS.h"
-#include "client/input/inputcollector.h"
+#include "input/inputcollector.h"
 #include "Interfaces/window/windoweventlistener.h"
 
 namespace Engine

@@ -2,9 +2,9 @@
 
 #include "servermesh.h"
 
-#include "servertransform.h"
-
 #include "Interfaces/generic/valuetype.h"
+
+#include "Madgine/scene/entity/components/transform.h"
 
 namespace Engine
 {

@@ -23,9 +23,14 @@
 #include "../app/globalapicollector.h"
 
 
+
+#include "entity/components/mesh.h"
+#include "entity/components/transform.h"
+
+UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
+
 namespace Engine
 {
-
 	namespace Scene
 	{		
 
@@ -113,6 +118,11 @@ namespace Engine
 			return *this;
 		}
 
+		const Core::MadgineObject * SceneManager::parent() const
+		{
+			return &mApp;
+		}
+
 		void SceneManager::readState(Serialize::SerializeInStream& in)
 		{
 			clear();
@@ -172,7 +182,7 @@ namespace Engine
 		KeyValueMapList SceneManager::maps()
 		{
 			return Scope::maps().merge(mSceneComponents, toPointer(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
-				MAP_RO(Synced, isSynced));
+				MAP_RO(Synced, isSynced), toPointer(mCameras));
 		}
 
 		std::string SceneManager::generateUniqueName()
@@ -183,10 +193,10 @@ namespace Engine
 
 		void SceneManager::removeLater(Entity::Entity* e)
 		{
-			mEntityRemoveQueue.push_back(e);
+ 			mEntityRemoveQueue.push_back(e);
 		}
 
-		App::Application& SceneManager::app(bool init) const
+		App::Application& SceneManager::app(bool init)
 		{
 			if (init)
 			{
@@ -245,7 +255,7 @@ namespace Engine
 
 		Entity::Entity* SceneManager::createEntity(const std::string& behavior, const std::string& name,
 		                                               const std::function<void(Entity::Entity&)> &init)
-		{
+		{			
 			ValueType behaviorTable = app().table()[behavior];
 			Scripting::LuaTable table;
 			if (behaviorTable.is<Scripting::LuaTable>())
@@ -256,7 +266,10 @@ namespace Engine
 			{
 				LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
 			}
-			mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+			if (init)
+				mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+			else
+				mEntities.emplace_tuple_back(tuple_cat(createEntityData(name, false), std::make_tuple(table)));
 			return &mEntities.back();
 		}
 
@@ -278,22 +291,10 @@ namespace Engine
 
 		void SceneManager::updateCamera(Camera & camera)
 		{
-			std::vector<Vertex> vertices = {
-	{{-0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.25,0.5,0.75,1.0}, {0.0f, -1.0f, 0.0f}},
-	{{-0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.5,0.5,0.75,1.0}, {0.0f, 0.3f, -0.5f}},
-	{{-0.5f, 0.0f, -0.5f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.25,0,0.75,1.0}, {-0.25f, 0.25f, 0.25f}},
-	{ {0.5f, 0.0f, -0.5f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.0f, 0.25f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-	{ {0.0f, 0.75f, 0.0f}, {0.5,0,0.75,1.0}, {0.25f, 0.25f, 0.25f}},
-			};
+			auto &transform = toPointer(mEntities);
+			std::vector<Entity::Entity*> entities{ transform.begin(), transform.end() };		
 
-			camera.setVertices(std::move(vertices));
+			camera.setVisibleEntities(std::move(entities));
 		}
 
 		void SceneManager::removeQueuedEntities()

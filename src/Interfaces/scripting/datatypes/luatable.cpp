@@ -18,14 +18,14 @@ namespace Engine
 		{
 		}
 
-		LuaTable LuaTable::global(lua_State* state)
+		LuaTable LuaTable::global(LuaThread *thread)
 		{
-			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(state, LUA_RIDX_GLOBALS));
+			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(thread, LUA_RIDX_GLOBALS));
 		}
 
-		LuaTable LuaTable::registry(lua_State* state)
+		LuaTable LuaTable::registry(LuaThread *thread)
 		{
-			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(state, LUA_REGISTRYINDEX));
+			return std::static_pointer_cast<LuaTableInstance>(std::make_shared<IntLuaTableInstance>(thread, LUA_REGISTRYINDEX));
 		}
 
 		void LuaTable::clear()
@@ -94,9 +94,9 @@ namespace Engine
 			mInstance->push(state);
 		}
 
-		LuaTable LuaTable::createTable(lua_State* state)
+		LuaTable LuaTable::createTable(LuaThread *thread)
 		{
-			return mInstance->createTable(state, mInstance);
+			return mInstance->createTable(thread, mInstance);
 		}
 
 		LuaTable LuaTable::createTable(const std::string& name)
@@ -114,9 +114,9 @@ namespace Engine
 		{
 		}
 
-		lua_State* LuaTable::state() const
+		LuaThread* LuaTable::thread() const
 		{
-			return mInstance->state();
+			return mInstance->thread();
 		}
 
 		LuaTable::iterator LuaTable::begin() const

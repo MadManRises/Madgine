@@ -2,7 +2,7 @@
 
 #include "openglrenderer.h"
 
-#include "client/gui/widgets/toplevelwindow.h"
+#include "gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -34,9 +34,158 @@ namespace Engine {
 }
 #endif
 
+
+UNIQUECOMPONENT(Engine::Render::OpenGLRenderer);
+
 namespace Engine {
 	
 	namespace Render {
+
+		ContextHandle setupWindowInternal(Window::Window * window)
+		{
+#if WINDOWS
+			PIXELFORMATDESCRIPTOR pfd =
+			{
+				sizeof(PIXELFORMATDESCRIPTOR),
+				1,
+				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
+				PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
+				32,                   // Colordepth of the framebuffer.
+				0, 0, 0, 0, 0, 0,
+				0,
+				0,
+				0,
+				0, 0, 0, 0,
+				24,                   // Number of bits for the depthbuffer
+				8,                    // Number of bits for the stencilbuffer
+				0,                    // Number of Aux buffers in the framebuffer.
+				PFD_MAIN_PLANE,
+				0,
+				0, 0, 0
+			};
+
+			HDC windowDC = GetDC((HWND)window->mHandle);
+
+			int  format = ChoosePixelFormat(windowDC, &pfd);
+			SetPixelFormat(windowDC, format, &pfd);
+
+			HGLRC context;
+			if (wglCreateContextAttribsARB) {
+
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+
+				int attribs[] = {
+					WGL_CONTEXT_PROFILE_MASK_ARB, GL_TRUE,
+					0
+				};
+
+				context = wglCreateContextAttribsARB(windowDC, NULL, attribs);
+			}
+			else {
+				context = wglCreateContext(windowDC);
+			}
+
+			if (!wglMakeCurrent(windowDC, context))
+				exit(GetLastError());
+
+			if (wglSwapIntervalEXT)
+				wglSwapIntervalEXT(0);
+
+#elif LINUX
+			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+
+			static XVisualInfo *vi = glXChooseVisual(Window::sDisplay, 0, att);
+			assert(vi);
+
+			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
+
+			if (!glXMakeCurrent(Window::sDisplay, window->mHandle, context))
+				exit(errno);
+
+#elif ANDROID
+
+			const EGLint attribs[] = {
+					EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+					EGL_BLUE_SIZE, 8,
+					EGL_GREEN_SIZE, 8,
+					EGL_RED_SIZE, 8,
+					EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+					EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+					EGL_NONE
+			};
+
+			const EGLint contextAttribs[] = {
+					EGL_CONTEXT_CLIENT_VERSION, 2,
+					EGL_NONE
+			};
+
+			EGLConfig config;
+			EGLint numConfigs;
+
+			if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
+				throw 0;
+
+			EGLContext context = eglCreateContext(Window::sDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+
+			EGLSurface surface = (EGLSurface)window->mHandle;
+			if (!eglMakeCurrent(Window::sDisplay, surface, surface, context))
+				exit(errno);
+#endif			
+			return context;
+		}
+
+		void resetContext()
+		{
+#if WINODWS
+			wglMakeCurrent(NULL, NULL);
+#elif LINUX
+			glXMakeCurrent(Window::sDisplay, None, NULL);
+#elif ANDROID
+			eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+#endif
+		}
+
+
+		void shutdownWindow(Window::Window * window, ContextHandle context)
+		{
+			resetContext();
+#if WINODWS
+			HDC device = GetDC((HWND)window->mHandle);
+
+			ReleaseDC((HWND)window->mHandle, device);
+
+			wglDeleteContext(context);
+#elif LINUX
+			glXDestroyContext(Window::sDisplay, context);
+#elif ANDROID
+			eglDestroyContext(Window::sDisplay, context);
+#endif
+		}
+
+
+
+#if !ANDROID
+		namespace {
+			void OpenGLInit() {
+				Engine::Window::WindowSettings settings;
+				settings.mHidden = true;
+				Window::Window *tmp = Window::sCreateWindow(settings);
+				ContextHandle context = setupWindowInternal(tmp);
+
+#if WINDOWS			
+				wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
+				assert(wglCreateContextAttribsARB);
+				wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
+#endif
+				bool result = gladLoadGL();
+				assert(result);
+
+				shutdownWindow(tmp, context);
+				tmp->destroy();
+			}
+		}
+#endif
+
 
 		OpenGLRenderer::OpenGLRenderer(GUI::GUISystem *gui) :
 			RendererComponent<OpenGLRenderer>(gui)
@@ -49,22 +198,17 @@ namespace Engine {
 
 		bool OpenGLRenderer::init()
 		{	
-#if !ANDROID
-			Engine::Window::WindowSettings settings;
-			Window::Window *tmp = Window::sCreateWindow(settings);
-			ContextHandle context = setupWindowInternal(tmp);
+			enum InitState{ UNINITIALIZED, INITIALIZING, INITIALIZED};
+			static std::atomic<InitState> init = UNINITIALIZED;
+			InitState expected = UNINITIALIZED;
+			if (init.compare_exchange_strong(expected, INITIALIZING))
+			{
+				OpenGLInit();
+				init.store(INITIALIZED);
+			}
+			while (init.load() != INITIALIZED)
+				std::this_thread::yield();
 
-#if WINDOWS			
-			wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
-			assert(wglCreateContextAttribsARB);
-			wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
-#endif
-			bool result = gladLoadGL();
-			assert(result);
-
-			shutdownWindow(tmp, context);
-			tmp->destroy();
-#endif
 			return true;
 		}
 
@@ -142,124 +286,6 @@ namespace Engine {
 		}
 
 
-		void OpenGLRenderer::shutdownWindow(Window::Window * window, ContextHandle context)
-		{
-#if WINODWS
-			wglMakeCurrent(NULL, NULL);
-
-			HDC device = GetDC((HWND)window->mHandle);
-
-			ReleaseDC((HWND)window->mHandle, device);
-			
-			wglDeleteContext(context);
-#elif LINUX
-			glXMakeCurrent(Window::sDisplay, None, NULL);
-
-			glXDestroyContext(Window::sDisplay, context);
-#elif ANDROID
-			eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-			eglDestroyContext(Window::sDisplay, context);
-#endif
-		}
-
-
-		ContextHandle OpenGLRenderer::setupWindowInternal(Window::Window * window)
-		{
-#if WINDOWS
-			PIXELFORMATDESCRIPTOR pfd =
-			{
-				sizeof(PIXELFORMATDESCRIPTOR),
-				1,
-				PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
-				PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
-				32,                   // Colordepth of the framebuffer.
-				0, 0, 0, 0, 0, 0,
-				0,
-				0,
-				0,
-				0, 0, 0, 0,
-				24,                   // Number of bits for the depthbuffer
-				8,                    // Number of bits for the stencilbuffer
-				0,                    // Number of Aux buffers in the framebuffer.
-				PFD_MAIN_PLANE,
-				0,
-				0, 0, 0
-			};
-
-			HDC windowDC = GetDC((HWND)window->mHandle);
-
-			int  format = ChoosePixelFormat(windowDC, &pfd);
-			SetPixelFormat(windowDC, format, &pfd);
-
-			HGLRC context;
-			if (wglCreateContextAttribsARB) {
-
-#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
-
-				int attribs[] = {
-					WGL_CONTEXT_PROFILE_MASK_ARB, GL_TRUE,
-					0
-				};
-
-				context = wglCreateContextAttribsARB(windowDC, NULL, attribs);
-			}
-			else {
-				context = wglCreateContext(windowDC);
-			}
-
-			if (!wglMakeCurrent(windowDC, context))
-				exit(GetLastError());
-
-			if (wglSwapIntervalEXT)
-				wglSwapIntervalEXT(0);
-
-			return context;
-#elif LINUX
-			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-
-			static XVisualInfo *vi = glXChooseVisual(Window::sDisplay, 0, att);
-			assert(vi);
-
-			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
-
-			if (!glXMakeCurrent(Window::sDisplay, window->mHandle, context))
-				exit(errno);
-
-			return context;
-#elif ANDROID
-
-			const EGLint attribs[] = {
-					EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-					EGL_BLUE_SIZE, 8,
-					EGL_GREEN_SIZE, 8,
-					EGL_RED_SIZE, 8,
-					EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-					EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
-					EGL_NONE
-			};
-
-			const EGLint contextAttribs[] = {
-					EGL_CONTEXT_CLIENT_VERSION, 2,
-					EGL_NONE
-			};
-
-			EGLConfig config;
-			EGLint numConfigs;
-
-			if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
-				throw 0;
-
-			EGLContext context = eglCreateContext(Window::sDisplay, config, EGL_NO_CONTEXT, contextAttribs);
-
-			EGLSurface surface = (EGLSurface)window->mHandle;
-			if (!eglMakeCurrent(Window::sDisplay, surface, surface, context))
-				exit(errno);
-
-			return context;
-#endif
-
-		}
 
 		
 	}

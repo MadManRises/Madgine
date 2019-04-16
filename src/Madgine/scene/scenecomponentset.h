@@ -11,6 +11,12 @@ namespace Engine
 		template <class T>
 		class SceneComponentSet : public Serialize::SerializableSet<T>
 		{
+		public:
+			struct traits : container_traits<Serialize::SerializableSet, T>
+			{
+				typedef SceneComponentSet<T> container;
+			};
+
 		protected:
 			virtual void writeState(Serialize::SerializeOutStream& out) const override
 			{
@@ -38,8 +44,4 @@ namespace Engine
 				
 	}
 
-	template <class T>
-	struct container_traits<Scene::SceneComponentSet, T> : public container_traits<Serialize::SerializableSet, T>
-	{
-	};
 }

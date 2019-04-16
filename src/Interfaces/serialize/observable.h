@@ -17,6 +17,8 @@ namespace Engine
 
 		protected:
 			Observable();
+			Observable(const Observable &);
+			Observable(Observable &&) noexcept;
 
 			BufferedOutStream* getSlaveActionMessageTarget() const;
 			std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(

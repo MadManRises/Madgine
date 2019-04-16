@@ -32,6 +32,11 @@ namespace Engine
 			return mApp.getSelf(init);
 		}
 
+		const Core::MadgineObject * GlobalAPIBase::parent() const
+		{
+			return &mApp;
+		}
+
 		bool GlobalAPIBase::init()
 		{
 			return true;

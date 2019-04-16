@@ -20,11 +20,12 @@ namespace Engine
 		{
 			for (SignalSlot::TaskQueue *queue : mAdditionalQueues)
 			{
-				mWorkgroup.createThread(&Scheduler::schedulerLoop, this, queue);
+				mWorkgroup.createNamedThread(queue->name(), &Scheduler::schedulerLoop, this, queue);
 			}
 
 			SignalSlot::TaskQueue *queue = SignalSlot::DefaultTaskQueue::getSingletonPtr();
-			while (!queue->empty() || !mWorkgroup.singleThreaded())
+			schedulerLoop(queue);
+			while (!mWorkgroup.singleThreaded())
 			{
 				schedulerLoop(queue);
 				mWorkgroup.checkThreadStates();
@@ -32,16 +33,24 @@ namespace Engine
 
 			for (SignalSlot::TaskQueue *queue : mAdditionalQueues)
 			{
-				assert(queue->empty());
+				assert(queue->idle());
 			}
-			assert(queue->empty());
+			assert(queue->idle());
 
 			return 0;
 		}
 
 		void Scheduler::schedulerLoop(SignalSlot::TaskQueue *queue)
-		{
-			queue->execute();
+		{			
+			while (!queue->idle() || queue->running())
+			{
+				std::chrono::steady_clock::time_point nextAvailableTaskTime;
+				while (std::optional<SignalSlot::TaskTracker> f = queue->fetch(nextAvailableTaskTime))
+				{
+					f->mTask();					
+				}
+				queue->waitForTasks(nextAvailableTaskTime);				
+			}
 		}
 
 	}
