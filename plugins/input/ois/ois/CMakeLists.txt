@@ -3,8 +3,6 @@ project(OIS)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CmakeModules)
 
-set(CMAKE_CXX_STANDARD 11)
-
 set(OIS_MAJOR_VERSION 1)
 set(OIS_MINOR_VERSION 4)
 set(OIS_PATCH_VERSION 0)
@@ -15,7 +13,7 @@ set(OIS_SOVERSION ${OIS_MAJOR_VERSION}.${OIS_MINOR_VERSION}.0)
 
 set(OIS_LIBRARY_NAME OIS)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/OISPrereqs.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/OISPrereqs.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/OISPrereqs.h.in ${CMAKE_CURRENT_BINARY_DIR}/includes/OISPrereqs.h @ONLY)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -133,6 +131,8 @@ endif()
 source_group("OIS" FILES ${ois_source})
 
 add_library(OIS ${ois_source})
+
+target_include_directories(OIS PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/includes)
 
 # This is neccessary to get the dll import/export to work without modifying the
 # source to use cmake's method of setting the dll import/export definitions

@@ -5,6 +5,8 @@ namespace Engine
 	namespace Threading 
 	{
 
+		struct DataLock;
+
 		struct DataMutex 
 		{
 			enum ConsiderResult {

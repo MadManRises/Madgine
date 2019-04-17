@@ -32,13 +32,6 @@ macro(enable_packaging)
 
 	include(CPackComponent)
 	include(CPack)
-	
-
-	function(install_to_workspace name)
-		set(f_ARGN ARGN)
-		_install_to_workspace("${name}" ${${f_ARGN}})
-	
-	endfunction(install_to_workspace)
 
 endmacro()
 

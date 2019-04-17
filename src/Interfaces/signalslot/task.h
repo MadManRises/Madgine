@@ -84,6 +84,7 @@ namespace Engine
 			TaskHandle &operator=(const TaskHandle &other)
 			{
 				mTask = other.mTask->clone();
+				return *this;
 			}
 
 		private:
