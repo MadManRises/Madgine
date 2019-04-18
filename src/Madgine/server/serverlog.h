@@ -25,7 +25,7 @@ namespace Engine
 
 		private:
 
-			bool mEcho;
+			bool mConsole;
 			std::string mCurrentCmd;
 		};
 	}

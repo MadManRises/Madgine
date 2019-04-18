@@ -17,7 +17,7 @@ namespace Engine
 	{
 		ServerLog::ServerLog(const std::string& name) :
 			StandardLog(name),
-			mEcho(false)
+			mConsole(false)
 		{
 		}
 
@@ -42,6 +42,8 @@ namespace Engine
 		{
 			std::cout << "prompt> ";
 			std::cout.flush();
+
+#if WINDOWS
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			std::string cmd;
 
@@ -51,15 +53,20 @@ namespace Engine
 			DWORD fdwMode = fdwOldMode & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
 			console &= static_cast<bool>(SetConsoleMode(input, fdwMode));
 
-			mEcho = console;
+			mConsole = console;
+#else
+			mConsole = true;
+#endif
 
 			return true;
 		}
 
 		void ServerLog::stopConsole()
 		{
+#if WINDOWS
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			SetConsoleMode(input, fdwOldMode);
+#endif
 		}
 
 		std::vector<std::string> ServerLog::update()
@@ -74,7 +81,7 @@ namespace Engine
 
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 
-			if (mEcho)
+			if (mConsole)
 			{
 				if (WaitForSingleObject(input, 0) == WAIT_OBJECT_0)
 				{
@@ -139,8 +146,6 @@ namespace Engine
 							break;
 						default:
 							mCurrentCmd += c;
-							if (mEcho)
-								std::cout << c;
 							break;
 						}
 
