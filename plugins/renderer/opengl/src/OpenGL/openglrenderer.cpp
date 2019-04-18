@@ -198,6 +198,7 @@ namespace Engine {
 
 		bool OpenGLRenderer::init()
 		{	
+#if !ANDROID
 			enum InitState{ UNINITIALIZED, INITIALIZING, INITIALIZED};
 			static std::atomic<InitState> init = UNINITIALIZED;
 			InitState expected = UNINITIALIZED;
@@ -208,6 +209,7 @@ namespace Engine {
 			}
 			while (init.load() != INITIALIZED)
 				std::this_thread::yield();
+#endif
 
 			return true;
 		}
