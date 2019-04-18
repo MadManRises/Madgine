@@ -2,7 +2,7 @@
 
  def axisList = [
     ["clang-linux","clang-android"],           //toolchain
-    ["Release","Debug","RelWithDebInfo"],      //configuration
+    ["Debug","RelWithDebInfo"],      //configuration
     ["", "OpenGL"]                   //static configuration file
 ]   
 
