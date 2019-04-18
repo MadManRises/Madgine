@@ -84,9 +84,8 @@ namespace Engine
 #if WINDOWS
 #define UNIQUECOMPONENT(Name) template <> Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg;
 #else
-	template <class T, class Collector>
-	extern typename Collector::template ComponentRegistrator<T> UniqueComponent<T, Collector>::_reg;
-#define UNIQUECOMPONENT(Name) template DLL_EXPORT Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg;
+#define UNIQUECOMPONENT(Name) template <> Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg; \
+	template DLL_EXPORT Name::Collector::ComponentRegistrator<Name> Engine::UniqueComponent<Name, Name::Collector>::_reg;
 #endif
 
 	template <class T>

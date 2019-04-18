@@ -3,7 +3,7 @@
 struct ALooper;
 struct AInputEvent;
 
-#include "client/input/inputcollector.h"
+#include "input/inputcollector.h"
 
 namespace Engine
 {

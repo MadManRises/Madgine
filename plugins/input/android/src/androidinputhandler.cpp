@@ -8,7 +8,7 @@
 
 #include <android/input.h>
 
-#include "client/input/inputevents.h"
+#include "input/inputevents.h"
 
 namespace Engine
 {
