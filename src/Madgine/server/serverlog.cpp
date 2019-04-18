@@ -35,8 +35,9 @@ namespace Engine
 		}
 
 
-
+#if WINDOWS
 		static DWORD fdwOldMode;		
+#endif
 
 		bool ServerLog::startConsole()
 		{
