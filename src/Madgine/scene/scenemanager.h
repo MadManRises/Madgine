@@ -99,7 +99,7 @@ namespace Engine
 			App::Application &mApp;
 			size_t mItemCount;
 
-			SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>> mSceneComponents;
+			SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
 
 			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
 			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;

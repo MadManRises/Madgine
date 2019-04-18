@@ -135,7 +135,9 @@ namespace Engine {
 				swa.colormap = cmap;
 				swa.event_mask = ExposureMask | KeyPressMask;
 
-				handle = XCreateWindow(sDisplay, root, 0, 0, settings.mWidth, settings.mHeight, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+				WindowVector pos = settings.mPosition ? *settings.mPosition : {0, 0};
+
+				handle = XCreateWindow(sDisplay, root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
 				XStoreName(sDisplay, handle, settings.mTitle);
 
@@ -156,7 +158,7 @@ namespace Engine {
 				XWindowEvent(sDisplay, handle, StructureNotifyMask, &event);
 			} while (event.type != MapNotify);
 
-			auto pib = sWindows.try_emplace(handle, handle, settings.mWidth, settings.mHeight);
+			auto pib = sWindows.try_emplace(handle, handle, settings.mSize.x, settings.mSize.y);
 			assert(pib.second);
 
 			return &pib.first->second;

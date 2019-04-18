@@ -120,10 +120,10 @@ restrictions:
 	OIS_MACRO_END
 
 //-------------- Common Classes, Enums, and Typdef's -------------------------//
-#define OIS_VERSION_MAJOR @OIS_MAJOR_VERSION@
-#define OIS_VERSION_MINOR @OIS_MINOR_VERSION@
-#define OIS_VERSION_PATCH @OIS_PATCH_VERSION@
-#define OIS_VERSION_NAME "@OIS_SOVERSION@"
+#define OIS_VERSION_MAJOR 1
+#define OIS_VERSION_MINOR 4
+#define OIS_VERSION_PATCH 0
+#define OIS_VERSION_NAME "1.4.0"
 
 #define OIS_VERSION ((OIS_VERSION_MAJOR << 16) | (OIS_VERSION_MINOR << 8) | OIS_VERSION_PATCH)
 

@@ -83,7 +83,7 @@ namespace Engine
 	}
 
 	template <template <typename...> typename C, typename Observer>
-	using PartialObservableContainer = typename PartialObservableContainerHelper<C, Observer>::type;
+	using PartialObservableContainer = PartialObservableContainerHelper<C, Observer>;
 
 	template <typename C, typename Observer>
 	using ObservableContainer = typename container_traits_helper<C>::template api<ObservableContainerImpl<container_traits_helper<C>, Observer>>;
