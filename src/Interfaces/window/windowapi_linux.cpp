@@ -135,7 +135,7 @@ namespace Engine {
 				swa.colormap = cmap;
 				swa.event_mask = ExposureMask | KeyPressMask;
 
-				WindowVector pos = settings.mPosition ? *settings.mPosition : {0, 0};
+				WindowSettings::WindowVector pos = settings.mPosition ? *settings.mPosition : WindowSettings::WindowVector{0, 0};
 
 				handle = XCreateWindow(sDisplay, root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 

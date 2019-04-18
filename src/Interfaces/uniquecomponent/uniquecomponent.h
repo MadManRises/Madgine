@@ -111,4 +111,6 @@ namespace Engine {
 	size_t component_index();
 }
 
+#define UNIQUECOMPONENT(Name) 
+
 #endif
