@@ -39,8 +39,8 @@ if (STATIC_BUILD)
 		target_sources(${name} PRIVATE ${components_source})
 	endfunction(patch_toplevel_target)
 
-	function(add_executable name)
-		_add_executable(${name} ${ARGN})
+	macro(add_workspace_executable name)
+		add_executable(${name} ${ARGN})
 		
 		patch_toplevel_target(${name})
 	endfunction(add_executable)

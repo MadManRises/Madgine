@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace Core {
 
-		struct MadgineObjectObserver
+		struct MADGINE_BASE_EXPORT MadgineObjectObserver
 		{
 
 			void handle(MadgineObject *object, int event) const;
