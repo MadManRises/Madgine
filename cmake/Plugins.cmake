@@ -43,7 +43,7 @@ if (STATIC_BUILD)
 		add_executable(${name} ${ARGN})
 		
 		patch_toplevel_target(${name})
-	endfunction(add_executable)
+	endmacro(add_workspace_executable)
 
 endif ()
 
