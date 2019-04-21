@@ -48,6 +48,20 @@ namespace Engine
 		{
 			return mName;
 		}
+
+		void TaskQueue::update()
+		{
+			std::chrono::steady_clock::time_point nextAvailableTaskTime;
+			update(nextAvailableTaskTime);
+		}
+
+		void TaskQueue::update(std::chrono::steady_clock::time_point & nextAvailableTaskTime)
+		{
+			while (std::optional<SignalSlot::TaskTracker> f = fetch(nextAvailableTaskTime))
+			{
+				f->mTask();
+			}
+		}
 		
 		void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
 		{

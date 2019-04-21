@@ -1,18 +1,19 @@
+#include "androidinputlib.h"
+#include "androidinputhandler.h"
 #include "Madgine/baselib.h"
 #include "toolslib.h"
-#include "client/clientlib.h"
-#include "androidinputlib.h"
+#include "clientlib.h"
 #include "OpenGL/opengllib.h"
 #include "Madgine/app/globalapicollector.h"
 #include "Madgine/scene/scenemanager.h"
 #include "renderer/imguiroot.h"
-#include "client/gui/guisystem.h"
-#include "client/input/inputcollector.h"
-#include "androidinputhandler.h"
-#include "client/render/renderercollector.h"
+#include "gui/guisystem.h"
+#include "input/inputcollector.h"
+#include "render/renderercollector.h"
 #include "OpenGL/openglrenderer.h"
 #include "Madgine/resources/resourceloadercollector.h"
 #include "Madgine/resources/scripts/scriptloader.h"
+#include "OpenGL/openglmeshloader.h"
 #include "OpenGL/openglshaderloader.h"
 #include "inspector/layoutloader.h"
 #include "Madgine/scene/scenecomponentcollector.h"
@@ -20,9 +21,8 @@
 #include "inspector/inspector.h"
 #include "metrics/metrics.h"
 #include "profiler/profiler.h"
-#include "renderer/imguidemo.h"
-#include "client/ui/gamehandler.h"
-#include "client/ui/guihandler.h"
+#include "ui/gamehandler.h"
+#include "ui/guihandler.h"
 
 
 namespace Engine {
@@ -62,6 +62,7 @@ createComponent<Engine::Render::OpenGLRenderer>,
 	template<> std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents() {
 		return {
 createComponent<Engine::Scripting::Parsing::ScriptLoader>,
+createComponent<Engine::Render::OpenGLMeshLoader>,
 createComponent<Engine::Render::OpenGLShaderLoader>,
 createComponent<Engine::Tools::LayoutLoader>,
 
@@ -69,8 +70,9 @@ createComponent<Engine::Tools::LayoutLoader>,
 	}
 
 	template<> size_t component_index<Engine::Scripting::Parsing::ScriptLoader>() { return 0; }
-	template<> size_t component_index<Engine::Render::OpenGLShaderLoader>() { return 1; }
-	template<> size_t component_index<Engine::Tools::LayoutLoader>() { return 2; }
+	template<> size_t component_index<Engine::Render::OpenGLMeshLoader>() { return 1; }
+	template<> size_t component_index<Engine::Render::OpenGLShaderLoader>() { return 2; }
+	template<> size_t component_index<Engine::Tools::LayoutLoader>() { return 3; }
 
 	template<> std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents() {
 		return {
@@ -84,7 +86,6 @@ createComponent<Engine::Tools::LayoutLoader>,
 createComponent<Engine::Tools::Inspector>,
 createComponent<Engine::Tools::Metrics>,
 createComponent<Engine::Tools::Profiler>,
-createComponent<Engine::Tools::ImGuiDemo>,
 
 		};
 	}
@@ -92,7 +93,6 @@ createComponent<Engine::Tools::ImGuiDemo>,
 	template<> size_t component_index<Engine::Tools::Inspector>() { return 0; }
 	template<> size_t component_index<Engine::Tools::Metrics>() { return 1; }
 	template<> size_t component_index<Engine::Tools::Profiler>() { return 2; }
-	template<> size_t component_index<Engine::Tools::ImGuiDemo>() { return 3; }
 
 	template<> std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents() {
 		return {

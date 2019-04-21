@@ -37,6 +37,8 @@ namespace Engine
 
 			const std::string &name() const;
 
+			SignalSlot::TaskQueue &taskQueue();
+
 			static void registerWorkgroupLocalVariable(void(*)(WorkGroup &));
 
 		private:

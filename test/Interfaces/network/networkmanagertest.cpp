@@ -4,21 +4,26 @@
 
 #include "Interfaces/network/networkmanager.h"
 
+#include "Interfaces/threading/workgroup.h"
+
 #include <future>
 
 TEST(NetworkManager, Connect)
 {
+	Engine::Threading::WorkGroup wg;
+
 	Engine::Network::NetworkManager server("testNetworkServer");
 
 	bool done = false;
 
-ASSERT_TRUE(server.startServer(1234));
+	ASSERT_TRUE(server.startServer(1234));
 	auto future = std::async(std::launch::async, [&]()
 	{
 		Engine::Serialize::StreamError result = server.acceptConnection(4000ms);
 		while (!done)
 		{
 			server.sendMessages();
+			wg.taskQueue().update();
 		}
 		return result;
 	});
@@ -28,7 +33,7 @@ ASSERT_TRUE(server.startServer(1234));
 
 	done = true;
 
-EXPECT_EQ(future.get(), Engine::Serialize::NO_ERROR);
+	EXPECT_EQ(future.get(), Engine::Serialize::NO_ERROR);
 }
 
 #if WINDOWS

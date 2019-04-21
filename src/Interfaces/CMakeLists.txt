@@ -43,7 +43,9 @@ if (NOT STATIC_BUILD)
 endif()
 
 
-target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+if (NOT ANDROID)
+	target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+endif ()
 
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	

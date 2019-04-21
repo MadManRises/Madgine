@@ -36,6 +36,8 @@ namespace Engine
 
 			const std::string &name() const;
 			
+			void update();
+			void update(std::chrono::steady_clock::time_point &nextAvailableTaskTime);
 			void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
 
 			bool running() const;

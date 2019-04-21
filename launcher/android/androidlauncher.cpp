@@ -1,4 +1,4 @@
-#include "client/clientlib.h"
+#include "clientlib.h"
 #include "androidinputlib.h"
 
 #include "androidlauncher.h"

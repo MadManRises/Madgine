@@ -64,6 +64,11 @@ namespace Engine
 			return mName;
 		}
 
+		SignalSlot::TaskQueue & WorkGroup::taskQueue()
+		{
+			return mTaskQueue;
+		}
+
 		void WorkGroup::registerWorkgroupLocalVariable(void(*f)(WorkGroup &))
 		{
 			sWorkgroupLocalVariables().push_back(f);

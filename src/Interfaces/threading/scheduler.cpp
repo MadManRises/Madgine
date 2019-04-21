@@ -45,10 +45,7 @@ namespace Engine
 			while (!queue->idle() || queue->running())
 			{
 				std::chrono::steady_clock::time_point nextAvailableTaskTime;
-				while (std::optional<SignalSlot::TaskTracker> f = queue->fetch(nextAvailableTaskTime))
-				{
-					f->mTask();					
-				}
+				queue->update(nextAvailableTaskTime);
 				queue->waitForTasks(nextAvailableTaskTime);				
 			}
 		}

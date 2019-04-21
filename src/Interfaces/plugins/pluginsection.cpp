@@ -99,12 +99,18 @@ namespace Engine {
 
 		bool PluginSection::loadPlugin(const std::string & name)
 		{
-			return loadPlugin(getPlugin(name));
+			Plugin *plugin = getPlugin(name);
+			if (!plugin)
+				return false;
+			return loadPlugin(plugin);
 		}
 
 		bool PluginSection::unloadPlugin(const std::string & name)
 		{
-			return unloadPlugin(getPlugin(name));
+			Plugin *plugin = getPlugin(name);
+			if (!plugin)
+				return false;
+			return unloadPlugin(plugin);
 		}
 
 		void PluginSection::addListener(PluginListener * listener)
@@ -129,7 +135,10 @@ namespace Engine {
 
 		Plugin * PluginSection::getPlugin(const std::string & name)
 		{
-			return &mPlugins.at(name);
+			auto it = mPlugins.find(name);
+			if (it == mPlugins.end())
+				return nullptr;
+			return &it->second;
 		}
 
 		bool PluginSection::loadPlugin(Plugin * p)
