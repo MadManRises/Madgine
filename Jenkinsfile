@@ -30,7 +30,10 @@ def task = {
 	    stage ("${name}") {
             stage("cmake") {
 			    sh """
-                mkdir -p ${name}
+				if [ -d "${name}" ]; then 
+					rm -Rf ${name};
+				fi
+				mkdir ${name}
 				cd ${name}
 			    cmake .. \
 		        -DCMAKE_BUILD_TYPE=${configuration} \
