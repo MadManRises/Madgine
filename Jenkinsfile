@@ -30,10 +30,10 @@ def task = {
 	    stage ("${name}") {
             stage("cmake") {
 			    sh """
-				if [ -d "${name}" ]; then 
+				if [ -d "${name}" -a "${params.fullBuild}"="true" ]; then 
 					rm -Rf ${name};
 				fi
-				mkdir ${name}
+				mkdir -p ${name}
 				cd ${name}
 			    cmake .. \
 		        -DCMAKE_BUILD_TYPE=${configuration} \
@@ -44,7 +44,10 @@ def task = {
             stage("build") {				
 				sh """
 				cd ${name}
-				make clean all
+				if ${params.fullBuild}; then
+					make clean;
+				fi
+				make all
 				"""				
             }
 			stage("Test") {
@@ -77,6 +80,10 @@ comboBuilder(axisList, 0)
 
 pipeline {
     agent any
+
+	parameters {
+        booleanParam(defaultValue: false, description: '', name: 'fullBuild')
+    }
 
 	options{
 		ansiColor('xterm')
