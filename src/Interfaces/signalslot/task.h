@@ -54,11 +54,12 @@ namespace Engine
 
 		struct TaskHandle {
 
+			TaskHandle() = default;
+			TaskHandle(TaskHandle &&) = default;
+
 			template <typename F>
 			TaskHandle(F &&f) :
 				mTask(std::make_unique<TaskImpl<std::remove_reference_t<F>>>(std::forward<F>(f))) {}
-
-			TaskHandle(TaskHandle &&) = default;
 
 			TaskState operator()() const {
 				return mTask->execute();

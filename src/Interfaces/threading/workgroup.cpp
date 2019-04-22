@@ -6,9 +6,9 @@ namespace Engine
 {
 	namespace Threading
 	{
-		static std::vector<void(*)(WorkGroup &group)> &sWorkgroupLocalVariables()
+		static std::vector<std::pair<void(*)(WorkGroup &group), void(*)(WorkGroup &group)>> &sWorkgroupLocalVariables()
 		{
-			static std::vector<void(*)(WorkGroup &)> data;
+			static std::vector<std::pair<void(*)(WorkGroup &), void(*)(WorkGroup &)>> data;
 			return data;
 		}
 
@@ -19,14 +19,18 @@ namespace Engine
 			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name)
 		{
 			setCurrentThreadName(mName + "_Main");
-			for (auto f : sWorkgroupLocalVariables())
+			for (auto p : sWorkgroupLocalVariables())
 			{
-				f(*this);
+				p.first(*this);
 			}
 		}
 
 		WorkGroup::~WorkGroup()
 		{
+			for (auto p : sWorkgroupLocalVariables())
+			{
+				p.second(*this);
+			}
 			assert(singleThreaded());
 		}
 
@@ -69,9 +73,9 @@ namespace Engine
 			return mTaskQueue;
 		}
 
-		void WorkGroup::registerWorkgroupLocalVariable(void(*f)(WorkGroup &))
+		void WorkGroup::registerWorkgroupLocalVariable(void(*init)(WorkGroup &), void(*finalize)(WorkGroup&))
 		{
-			sWorkgroupLocalVariables().push_back(f);
+			sWorkgroupLocalVariables().emplace_back(init, finalize);
 		}
 
 	}

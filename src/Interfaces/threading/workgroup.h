@@ -4,6 +4,7 @@
 #include "../generic/tupleunpacker.h"
 #include "../debug/profiler/profiler.h"
 #include "threadapi.h"
+#include "../signalslot/taskguard.h"
 
 namespace Engine 
 {
@@ -39,7 +40,7 @@ namespace Engine
 
 			SignalSlot::TaskQueue &taskQueue();
 
-			static void registerWorkgroupLocalVariable(void(*)(WorkGroup &));
+			static void registerWorkgroupLocalVariable(void(*)(WorkGroup &), void(*)(WorkGroup&));
 
 		private:
 
@@ -48,7 +49,8 @@ namespace Engine
 			{
 				setCurrentThreadName(mName + "_" + name);
 				try {
-					mTaskQueue.attachToCurrentThread();
+					SignalSlot::TaskGuard guard([&]() {mTaskQueue.attachToCurrentThread(); }, [&]() {mTaskQueue.detachFromCurrentThread(); });
+
 					for (const SignalSlot::TaskHandle &task : mThreadInitializers)
 					{
 						task();
@@ -85,6 +87,10 @@ namespace Engine
 						T *item = new T;
 						data = item;
 						group.addThreadInitializer([item]() {data = item; });
+					},
+					[](WorkGroup &group) {
+						delete data;
+						data = nullptr;
 					});
 				}
 			} _reg = {};

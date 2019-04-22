@@ -29,6 +29,7 @@ namespace Engine
 			{
 				ProfilerThread(Profiler *profiler);
 				ProfilerThread(ProfilerThread &&) = delete;
+				~ProfilerThread();
 
 				std::string mId;
 				

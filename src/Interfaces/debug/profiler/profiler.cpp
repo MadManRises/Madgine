@@ -59,6 +59,14 @@ namespace Engine
 				mStats.start();
 			}
 
+			ProfilerThread::~ProfilerThread()
+			{
+				mStats.stop();
+
+				assert(sThread == this);
+				sThread = nullptr;
+			}
+
 			void StaticProcess::start()
 			{
 				if (mStats.start()) {

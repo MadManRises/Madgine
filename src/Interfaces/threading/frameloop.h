@@ -27,7 +27,7 @@ namespace Engine
 			void shutdown();
 			bool isShutdown() const;
 
-			void addSetupSteps(std::optional<SignalSlot::TaskHandle> &&init, std::optional<SignalSlot::TaskHandle> &&finalize = {});
+			void addSetupSteps(SignalSlot::TaskHandle &&init, SignalSlot::TaskHandle &&finalize = {});
 
 		protected:
 
@@ -42,8 +42,8 @@ namespace Engine
 
 		private:			
 
-			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>> mSetupSteps;
-			std::list<std::pair<std::optional<SignalSlot::TaskHandle>, std::optional<SignalSlot::TaskHandle>>>::iterator mSetupState;
+			std::list<std::pair<SignalSlot::TaskHandle, SignalSlot::TaskHandle>> mSetupSteps;
+			std::list<std::pair<SignalSlot::TaskHandle, SignalSlot::TaskHandle>>::iterator mSetupState;
 
 			std::vector<FrameListener*> mListeners;
 

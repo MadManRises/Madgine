@@ -199,16 +199,15 @@ namespace Engine {
 		bool OpenGLRenderer::init()
 		{	
 #if !ANDROID
-			enum InitState{ UNINITIALIZED, INITIALIZING, INITIALIZED};
-			static std::atomic<InitState> init = UNINITIALIZED;
-			InitState expected = UNINITIALIZED;
-			if (init.compare_exchange_strong(expected, INITIALIZING))
+			static std::mutex sMutex;
+			static bool init = false;
+			
+			std::lock_guard guard(sMutex);
+			if (!init)
 			{
 				OpenGLInit();
-				init.store(INITIALIZED);
+				init = true;
 			}
-			while (init.load() != INITIALIZED)
-				std::this_thread::yield();
 #endif
 
 			return true;

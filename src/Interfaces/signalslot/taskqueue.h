@@ -81,10 +81,12 @@ namespace Engine
 		public:
 			DefaultTaskQueue();
 			DefaultTaskQueue(const DefaultTaskQueue&) = delete;
+			~DefaultTaskQueue();
 
 			DefaultTaskQueue &operator=(const DefaultTaskQueue&) = delete;
 
 			void attachToCurrentThread();
+			void detachFromCurrentThread();
 
 			static DefaultTaskQueue &getSingleton();
 			static DefaultTaskQueue *getSingletonPtr();

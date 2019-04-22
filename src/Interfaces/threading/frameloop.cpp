@@ -141,7 +141,7 @@ namespace Engine
 		}
 
 
-		void FrameLoop::addSetupSteps(std::optional<SignalSlot::TaskHandle>&& init, std::optional<SignalSlot::TaskHandle>&& finalize)
+		void FrameLoop::addSetupSteps(SignalSlot::TaskHandle&& init, SignalSlot::TaskHandle&& finalize)
 		{
 			bool isItEnd = mSetupState == mSetupSteps.end();
 			if (init && finalize)
@@ -149,7 +149,7 @@ namespace Engine
 				std::promise<bool> p;
 				std::future<bool> f = p.get_future();
 				mSetupSteps.emplace_back(
-					[init{ std::move(*init) }, p{ std::move(p) }]() mutable {
+					[init{ std::move(init) }, p{ std::move(p) }]() mutable {
 						SignalSlot::TaskState state;
 						try { 
 							state = init();
@@ -163,7 +163,7 @@ namespace Engine
 						}
 						return state;
 					},
-					[finalize{ std::move(*finalize) }, f{ std::move(f) }]() mutable {
+					[finalize{ std::move(finalize) }, f{ std::move(f) }]() mutable {
 						if (f.get())
 							return finalize();
 						return SignalSlot::SUCCESS;

@@ -5,10 +5,13 @@
 #include "Interfaces/serialize/container/list.h"
 #include "Interfaces/serialize/serializableunit.h"
 
+#include "Interfaces/threading/workgroup.h"
 
 TEST(Serialize_Container, Test1)
 {
 	using namespace Engine::Serialize;
+
+	Engine::Threading::WorkGroup wg;
 
 	SerializableList<int> list;
 	list.push_back(3);

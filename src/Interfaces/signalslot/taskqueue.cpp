@@ -94,6 +94,11 @@ namespace Engine
 			attachToCurrentThread();
 		}
 
+		DefaultTaskQueue::~DefaultTaskQueue()
+		{
+			detachFromCurrentThread();
+		}
+
 		void TaskQueue::queue(TaskHandle&& task, const std::vector<Threading::DataMutex*> &dependencies)
 		{
 			queueInternal({ wrapTask(std::move(task)) });
@@ -176,6 +181,12 @@ namespace Engine
 		{
 			assert(!sSingleton);
 			sSingleton = this;
+		}
+
+		void DefaultTaskQueue::detachFromCurrentThread()
+		{
+			assert(sSingleton == this);
+			sSingleton = nullptr;
 		}
 
 		DefaultTaskQueue &DefaultTaskQueue::getSingleton()
