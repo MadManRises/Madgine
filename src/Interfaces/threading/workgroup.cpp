@@ -15,8 +15,8 @@ namespace Engine
 		static size_t sWorkgroupInstanceCounter = 0;		
 
 		WorkGroup::WorkGroup(const std::string & name) :
-			mProfiler(*this),
-			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name)
+			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name),
+			mProfiler(*this)			
 		{
 			setCurrentThreadName(mName + "_Main");
 			for (auto p : sWorkgroupLocalVariables())

@@ -342,6 +342,12 @@ macro(add_workspace_executable target)
 
 endmacro(add_workspace_executable)
 
+macro(add_workspace_application target)
+
+	add_workspace_executable(${target} ${ARGN})
+
+endmacro(add_workspace_application)
+
 macro(add_workspace_library name)
 
 	set(options)

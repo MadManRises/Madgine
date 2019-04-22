@@ -40,15 +40,8 @@ namespace Engine
 				return *sThread->mProfiler;
 			}
 
-			std::string idToString(std::thread::id id)
-			{
-				std::stringstream ss;
-				ss << id;
-				return ss.str();
-			}
-
 			ProfilerThread::ProfilerThread(Profiler *profiler) :
-				mId(idToString(std::this_thread::get_id())),
+				mId(Threading::getCurrentThreadName()),
 				mStats(mId.c_str()),
 				mProfiler(profiler)
 			{

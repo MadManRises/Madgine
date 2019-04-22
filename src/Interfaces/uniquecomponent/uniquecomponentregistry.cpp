@@ -95,7 +95,7 @@ namespace Engine{
 		for (auto &[name, reg] : registryRegistry()) {
 			{
 				//GuardGuard g2(file, p.first->mBinary);
-				file << "	std::vector<" << name << "::F> " << name << "::sComponents() { return {\n";
+				file << "	template <> std::vector<" << name << "::F> " << name << "::sComponents() { return {\n";
 
 				for (CollectorInfo *collector : *reg)
 				{

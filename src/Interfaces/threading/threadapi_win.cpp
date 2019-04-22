@@ -21,6 +21,20 @@ namespace Engine {
 			);			
 		}
 
+		std::string getCurrentThreadName()
+		{
+			std::string result;
+			PWSTR buffer;
+			if (SUCCEEDED(GetThreadDescription(GetCurrentThread(), &buffer)))
+			{
+				size_t len = wcslen(buffer);
+				result.reserve(len);
+				std::copy(buffer, buffer + len, std::back_inserter(result));
+				LocalFree(buffer);
+			}
+			return result;
+		}
+
 	}
 }
 

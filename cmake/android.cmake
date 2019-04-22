@@ -32,7 +32,7 @@ if (ANDROID)
 
 	add_custom_target(gradlew DEPENDS ${CMAKE_BINARY_DIR}/gradle/gradlew)
 
-	macro(add_workspace_executable target)
+	macro(add_workspace_application target)
 
 		set(target ${target})
 
@@ -53,7 +53,7 @@ if (ANDROID)
 			patch_toplevel_target(${target})
 		endif()
 
-		_add_workspace_executable(${target}_apk android/dummy.cpp)
+		add_executable(${target}_apk android/dummy.cpp)
 
 		target_link_libraries(${target}_apk PRIVATE ${target})
 	

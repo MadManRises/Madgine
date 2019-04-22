@@ -81,19 +81,18 @@ namespace Engine
 		struct WorkgroupLocal
 		{
 			inline static thread_local T *data = nullptr;
-			inline static struct _Reg {
-				_Reg() {
-					WorkGroup::registerWorkgroupLocalVariable([](WorkGroup &group) {
-						T *item = new T;
-						data = item;
-						group.addThreadInitializer([item]() {data = item; });
-					},
-					[](WorkGroup &group) {
-						delete data;
-						data = nullptr;
-					});
-				}
-			} _reg = {};
+			WorkgroupLocal() {
+				WorkGroup::registerWorkgroupLocalVariable(
+				[](WorkGroup &group) {
+					T *item = new T;
+					data = item;
+					group.addThreadInitializer([item]() {data = item; });
+				},
+				[](WorkGroup &group) {
+					delete data;
+					data = nullptr;
+				});
+			}
 
 			T *operator->()
 			{
