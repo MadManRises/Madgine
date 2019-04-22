@@ -101,7 +101,7 @@ createComponent<Engine::Tools::Profiler>,
 	}
 
 
-	std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents() {
+	template <> std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents() {
 		return {
 
 		};
