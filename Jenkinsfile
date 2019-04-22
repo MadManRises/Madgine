@@ -30,8 +30,10 @@ def task = {
 	    stage ("${name}") {
             stage("cmake") {
 			    sh """
-				if [ -d "${name}" -a "${params.fullBuild}"="true" ]; then 
-					rm -Rf ${name};
+				if ${params.fullBuild}; then
+					if [ -d "${name}" ]; then 
+						rm -Rf ${name};
+					fi
 				fi
 				mkdir -p ${name}
 				cd ${name}
