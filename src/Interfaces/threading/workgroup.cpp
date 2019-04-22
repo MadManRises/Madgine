@@ -19,6 +19,7 @@ namespace Engine
 			mProfiler(*this)			
 		{
 			setCurrentThreadName(mName + "_Main");
+			mProfiler.registerCurrentThread();
 			for (auto p : sWorkgroupLocalVariables())
 			{
 				p.first(*this);

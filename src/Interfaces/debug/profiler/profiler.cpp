@@ -17,7 +17,6 @@ namespace Engine
 
 			Profiler::Profiler(Threading::WorkGroup &workGroup)
 			{
-				registerCurrentThread();
 				workGroup.addThreadInitializer([this]() { registerCurrentThread(); });
 			}
 

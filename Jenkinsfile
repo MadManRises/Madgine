@@ -80,6 +80,7 @@ pipeline {
 
 	options{
 		ansiColor('xterm')
+		disableConcurrentBuilds()
 	}
 
     stages {
