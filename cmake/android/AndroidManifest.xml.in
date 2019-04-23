@@ -8,7 +8,7 @@
     <application
         android:allowBackup="false"
         android:label="com.@PROJECT_NAME@.@target@"
-        android:hasCode="true"
+        android:hasCode="false"
         android:theme="@android:style/Theme.NoTitleBar">
 
         <!-- This name is resolved to com.example.myapp.MainActivity
