@@ -18,7 +18,7 @@ if (BUILD_TESTING)
 
 	function(add_test_impl name)
 	
-		add_workspace_executable(${name} ${ARGN})
+		add_executable(${name} ${ARGN})
 
 		target_link_libraries(${name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 

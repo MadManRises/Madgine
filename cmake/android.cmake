@@ -78,6 +78,6 @@ if (ANDROID)
 
 		add_dependencies(${target} gradlew)
 
-	endmacro(add_workspace_executable)
+	endmacro(add_workspace_application)
 
 endif()

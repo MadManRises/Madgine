@@ -32,18 +32,14 @@ if (STATIC_BUILD)
 
 	read_ini_file(${STATIC_BUILD} PLUGINSELECTION)
 
-	include(android)
-
-	function(patch_toplevel_target name)
-		get_static_config_file(components_source components ".cpp")
-		target_sources(${name} PRIVATE ${components_source})
+	function(patch_toplevel_target target)
+		get_target_property(target_flag ${target} PATCH_TOPLEVEL)
+		if (NOT target_flag)
+			set_target_properties(${target} PROPERTIES PATCH_TOPLEVEL TRUE)
+			get_static_config_file(components_source components ".cpp")
+			target_sources(${target} PRIVATE ${components_source})
+		endif()
 	endfunction(patch_toplevel_target)
-
-	macro(add_workspace_executable name)
-		add_executable(${name} ${ARGN})
-		
-		patch_toplevel_target(${name})
-	endmacro(add_workspace_executable)
 
 endif ()
 
@@ -94,14 +90,22 @@ function(target_link_plugins target vis)
 
 	endforeach()
 
+	if (STATIC_BUILD)
+		get_target_property(target_type ${target} TYPE)
+		if (target_type STREQUAL "EXECUTABLE")
+			patch_toplevel_target(${target})
+		endif ()
+	endif()
+
 endfunction(target_link_plugins)
 
 
 	
 function(target_link_all_plugins target vis)
 	
-	set(available_core_libs Base Client)
+	set(available_core_libs Base)
 
 	target_link_plugins(${target} ${vis} ${PLUGIN_LIST} ${available_core_libs})
 
 endfunction()
+
