@@ -50,10 +50,6 @@ namespace Engine
 				mActiveIterator = other.mActiveIterator;
 				other.mData.clear();
 				other.mActiveIterator = other.mData.begin();
-				/*if (other.isActive())
-				{
-					other.setActiveFlag(true);
-				}*/ //TODO
 			}
 
 			const_iterator begin() const
@@ -88,6 +84,11 @@ namespace Engine
 				mActiveIterator = mData.begin();
 				sync(wasActive);
 				return *this;
+			}
+
+			bool operator==(const Container<traits, Creator>& other) const
+			{
+				return mData == other.mData;
 			}
 
 			void clear()
@@ -283,9 +284,7 @@ namespace Engine
 				assert(it.second);
 				this->read_state(in, *it.first);
 				if (!in.isMaster())
-				{
 					this->read_id(in, *it.first);
-				}
 				return it;
 			}
 
@@ -296,9 +295,6 @@ namespace Engine
 				if (out.isMaster())
 					this->write_id(out, t);
 			}
-
-			NativeContainerType mData;
-			iterator mActiveIterator;
 
 			bool isItemActive(const iterator& it)
 			{
@@ -370,6 +366,10 @@ namespace Engine
 				return newIt;
 			}
 
+
+		protected:
+			NativeContainerType mData;
+			iterator mActiveIterator;
 		};
 	}
 }

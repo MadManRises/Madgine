@@ -316,7 +316,7 @@ namespace Engine
 				{
 					this->read_item_where_intern(this->end(), in);
 				}
-				afterReset(wasActive, this->end());
+				afterReset(wasActive, this->end(), answerTarget, answerId);
 			}
 
 			// Inherited via Observable
@@ -397,8 +397,9 @@ namespace Engine
 
 				if (id)
 				{
-					if (!mTransactions.empty() && mTransactions.front().mId == id)
+					if (!mTransactions.empty())
 					{
+						assert(mTransactions.front().mId == id);
 						mTransactions.front().mCallback(it, accepted);
 						mTransactions.pop_front();
 					}

@@ -112,11 +112,6 @@ namespace Engine
 			static std::list<SerializableUnitBase*>::iterator findParentIt(void* from, void* to);
 
 			virtual size_t getSize() const = 0;
-
-			struct intern
-			{
-				static thread_local std::list<SerializableUnitBase*> stack;
-			};
 		};
 
 		template <class T, class Base = SerializableUnitBase>

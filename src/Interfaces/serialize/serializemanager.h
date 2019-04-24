@@ -46,8 +46,7 @@ namespace Engine
 			static std::pair<size_t, SerializableUnitMap*> addStaticMasterMapping(SerializableUnitBase* item, size_t id);
 			static std::pair<size_t, SerializableUnitMap*> addMasterMapping(SerializableUnitBase* item);
 			static void removeMasterMapping(const std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
-			static std::pair<std::pair<size_t, SerializableUnitMap*>, std::pair<size_t, SerializableUnitMap*>>
-			updateMasterMapping(const std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
+			static std::pair<size_t, SerializableUnitMap*> updateMasterMapping(std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
 
 			bool isMaster(SerializeStreambuf* stream) const;
 			bool isMaster() const;

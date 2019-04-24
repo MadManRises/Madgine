@@ -79,8 +79,9 @@ namespace Engine
 			void readState(SerializeInStream& in) override
 			{
 				T old = mData;
-				this->read_id(in, mData);
 				this->read_state(in, mData);
+				if (!in.isMaster())
+					this->read_id(in, mData);
 				notify(old);
 			}
 

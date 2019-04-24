@@ -36,9 +36,3 @@ TEST(NetworkManager, Connect)
 	EXPECT_EQ(future.get(), Engine::Serialize::NO_ERROR);
 }
 
-#if WINDOWS
-TEST(asd, FakeTest)
-{
-	int i = 3;
-}
-#endif

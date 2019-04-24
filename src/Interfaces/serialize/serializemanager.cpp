@@ -155,19 +155,19 @@ namespace Engine
 			id.second->erase(it);
 		}
 
-		std::pair<std::pair<size_t, SerializableUnitMap*>, std::pair<size_t, SerializableUnitMap*>> SerializeManager::
-		updateMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id, SerializableUnitBase* item)
+		std::pair<size_t, SerializableUnitMap*> SerializeManager::updateMasterMapping(std::pair<size_t, SerializableUnitMap*>& id,
+																					  SerializableUnitBase* item)
 		{
 			assert(id.first >= RESERVED_ID_COUNT);
-			if (&*sMasterMappings == id.second)
+			auto &map = *sMasterMappings;
+			if (&map == id.second)
 			{
-				auto it = id.second->find(id.first);
-				SerializableUnitBase* old = it->second;
-				it->second = item;
-				return {id, addMasterMapping(old)};
+				auto it = map.find(id.first);
+				SerializableUnitBase* old = std::exchange(it->second, item);
+				return std::exchange(id, addMasterMapping(old));
 			}
-			(*sMasterMappings)[id.first] = item;
-			return {{id.first, &*sMasterMappings}, id};
+			map[id.first] = item;
+			return {id.first, &map};
 		}
 
 

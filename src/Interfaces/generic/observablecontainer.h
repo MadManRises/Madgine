@@ -77,7 +77,7 @@ namespace Engine
 		struct PartialObservableContainer
 		{
 			template <typename T>
-			struct type : ObservableContainerImpl<container_traits<C, T>, Observer> {};
+			using type = ObservableContainerImpl<container_traits<C, T>, Observer>;
 		};
 
 	}

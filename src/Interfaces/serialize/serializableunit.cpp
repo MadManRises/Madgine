@@ -17,7 +17,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		thread_local std::list<SerializableUnitBase*> SerializableUnitBase::intern::stack;
+		thread_local std::list<SerializableUnitBase*> sStack;
 
 		SerializableUnitBase::SerializableUnitBase(size_t masterId)
 		{
@@ -40,13 +40,13 @@ namespace Engine
 
 		SerializableUnitBase::SerializableUnitBase(SerializableUnitBase&& other) noexcept
 		{
-			tie(mMasterId, other.mMasterId) = SerializeManager::updateMasterMapping(other.mMasterId, this);
+			mMasterId = SerializeManager::updateMasterMapping(other.mMasterId, this);
 			insertInstance();
 		}
 
 		SerializableUnitBase::~SerializableUnitBase()
 		{
-			if (find(intern::stack.begin(), intern::stack.end(), this) != intern::stack.end())
+			if (find(sStack.begin(), sStack.end(), this) != sStack.end())
 			{
 				removeInstance();
 			}
@@ -181,15 +181,15 @@ namespace Engine
 		void SerializableUnitBase::insertInstance()
 		{
 			findParentIt(this, this + 1);
-			intern::stack.emplace_front(this);
+			sStack.emplace_front(this);
 			//std::cout << "Stack size: " << sStack.size() << std::endl;
 		}
 
 		void SerializableUnitBase::removeInstance()
 		{
-			assert(*intern::stack.begin() == this);
+			assert(*sStack.begin() == this);
 			//if (it != intern::stack.end()) {
-			intern::stack.erase(intern::stack.begin());
+			sStack.erase(sStack.begin());
 			//std::cout << "Stack size: " << sStack.size() << std::endl;
 			//}
 		}
@@ -197,7 +197,7 @@ namespace Engine
 		SerializableUnitBase* SerializableUnitBase::findParent(void* from, void* to)
 		{
 			auto it = findParentIt(from, to);
-			if (it != intern::stack.end())
+			if (it != sStack.end())
 			{
 				return *it;
 			}
@@ -206,14 +206,14 @@ namespace Engine
 
 		std::list<SerializableUnitBase*>::iterator SerializableUnitBase::findParentIt(void* from, void* to)
 		{
-			auto it = std::find_if(intern::stack.begin(), intern::stack.end(), [&](SerializableUnitBase* const p)
+			auto it = std::find_if(sStack.begin(), sStack.end(), [&](SerializableUnitBase* const p)
 			{
 				return p <= from && to <= reinterpret_cast<char*>(p) + p->getSize();
 			});
-			if (it != intern::stack.end())
+			if (it != sStack.end())
 			{
-				assert(it == intern::stack.begin());
-				intern::stack.erase(intern::stack.begin(), it);
+				assert(it == sStack.begin());
+				sStack.erase(sStack.begin(), it);
 			}
 			return it;
 		}
