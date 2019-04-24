@@ -20,8 +20,8 @@ namespace Engine
 
 	InStream::~InStream()
 	{
-		if (mOwning)
-			delete &buffer();
+		if (mOwning && mStream.rdbuf())
+			delete mStream.rdbuf();
 	}
 
 	std::istreambuf_iterator<char> InStream::begin()
@@ -78,7 +78,8 @@ namespace Engine
 
 	OutStream::~OutStream()
 	{
-		delete &buffer();
+		if (mStream.rdbuf())
+			delete mStream.rdbuf();
 	}
 
 	void OutStream::write(const void * data, size_t count)
