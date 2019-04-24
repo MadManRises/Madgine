@@ -25,21 +25,10 @@ namespace Engine
 
 		NetworkManager::NetworkManager(NetworkManager&& other) noexcept :
 			SerializeManager(std::forward<NetworkManager>(other)),
-			mSocket(other.mSocket),
-			mIsServer(other.mIsServer),
+			mSocket(std::exchange(other.mSocket, Invalid_Socket)),
+			mIsServer(std::exchange(other.mIsServer, false)),
 			mConnectionEstablished(this)
 		{
-			for (std::pair<const Serialize::ParticipantId, NetworkStream>& stream : other.mStreams)
-				if (!stream.second.isClosed())
-					other.moveConnection(stream.first, this);
-			other.mSocket = Invalid_Socket;
-			other.mIsServer = false;
-			if (other.mSlaveStream)
-			{
-				mSlaveStream = std::make_unique<NetworkStream>(std::move(*other.mSlaveStream), *this);
-				setSlaveStream(mSlaveStream.get(), false);
-				other.mSlaveStream.reset();
-			}
 			++sManagerCount;
 		}
 
@@ -106,7 +95,6 @@ namespace Engine
 					SocketAPI::closeSocket(mSocket);
 					mIsServer = false;
 				}
-				assert(mStreams.empty() && mSlaveStream == nullptr);
 				mSocket = Invalid_Socket;
 			}
 		}
@@ -126,7 +114,7 @@ namespace Engine
 					{
 						if (sock != Invalid_Socket)
 						{
-							if (addMasterStream(NetworkStream(sock, *this, createStreamId())) == Serialize::NO_ERROR){
+							if (addMasterStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(sock, *this, createStreamId()) })) {
 								++count;								
 							}
 						}
@@ -148,7 +136,12 @@ namespace Engine
 					std::tie(sock, error) = SocketAPI::accept(mSocket, timeout);
 					if (sock != Invalid_Socket)
 					{
-						return addMasterStream(NetworkStream(sock, *this, createStreamId()));
+						Serialize::BufferedInOutStream stream{ std::make_unique<NetworkBuffer>(sock, *this, createStreamId()) };
+						if (addMasterStream(std::move(stream)))
+						{
+							return Serialize::NO_ERROR;
+						}
+						error = stream.error();
 					}
 					return error;
 				}
@@ -162,67 +155,16 @@ namespace Engine
 			return mSocket != Invalid_Socket;
 		}
 
-		void NetworkManager::moveConnection(Serialize::ParticipantId id, NetworkManager* to)
-		{
-			auto it = mStreams.find(id);
-			if (to->addMasterStream(std::forward<NetworkStream>(it->second), false) != Serialize::NO_ERROR)
-				throw 0;
-			NetworkStream& stream = to->mStreams.at(id);
-			std::list<Serialize::TopLevelSerializableUnitBase*> newTopLevels;
-			set_difference(to->getTopLevelUnits().begin(), to->getTopLevelUnits().end(), getTopLevelUnits().begin(),
-			               getTopLevelUnits().end(), back_inserter(newTopLevels));
-			for (Serialize::TopLevelSerializableUnitBase* newTopLevel : newTopLevels)
-			{
-				sendState(stream, newTopLevel);
-			}
-		}
-
 		SignalSlot::SignalStub<Serialize::StreamError>& NetworkManager::connectionResult()
 		{
 			return mConnectionResult;
 		}
 
-		void NetworkManager::removeSlaveStream()
-		{
-			if (mSlaveStream)
-			{
-				SerializeManager::removeSlaveStream();
-				mSlaveStream.reset();
-				mSocket = Invalid_Socket;
-			}
-		}
-
-		void NetworkManager::removeMasterStream(Serialize::BufferedInOutStream* stream)
-		{
-			SerializeManager::removeMasterStream(stream);
-			mStreams.erase(stream->id());
-		}
-
-		Serialize::StreamError NetworkManager::addMasterStream(NetworkStream&& stream, bool sendState)
-		{
-			//try_emplace TODO
-			auto res = mStreams.emplace(std::piecewise_construct, std::forward_as_tuple(stream.id()),
-			                            std::forward_as_tuple(std::forward<NetworkStream>(stream), *this));
-			if (!res.second)
-				throw 0;
-			if (SerializeManager::addMasterStream(&res.first->second, sendState))
-				return Serialize::NO_ERROR;
-			Serialize::StreamError error = res.first->second.error();
-			mStreams.erase(res.first);
-			return error;
-		}
-
 		void NetworkManager::onConnectionEstablished(std::chrono::milliseconds timeout)
 		{
-			mSlaveStream = std::make_unique<NetworkStream>(mSocket, *this);
-			Serialize::StreamError error = setSlaveStream(mSlaveStream.get(), true, timeout);
-			if (error != Serialize::NO_ERROR)
-			{
-				mSlaveStream.reset();
-				mSocket = Invalid_Socket;
-			}
+			bool success = setSlaveStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(mSocket, *this) }, true, timeout);
 
-			mConnectionResult.emit(error);
+			mConnectionResult.emit(success ? Serialize::NO_ERROR : Serialize::UNKNOWN_ERROR);
 		}
 	}
 }

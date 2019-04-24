@@ -12,10 +12,16 @@ namespace Engine
 	{
 	}
 
+	InStream::InStream(InStream && other) :
+		mStream(other.mStream.rdbuf(nullptr)),
+		mOwning(std::exchange(other.mOwning, false))
+	{
+	}
+
 	InStream::~InStream()
 	{
 		if (mOwning)
-			delete buffer();
+			delete &buffer();
 	}
 
 	std::istreambuf_iterator<char> InStream::begin()
@@ -28,15 +34,36 @@ namespace Engine
 		return std::istreambuf_iterator<char>();
 	}
 
+	bool InStream::read(void * buffer, size_t size)
+	{
+		return mStream.read(static_cast<char*>(buffer), size).good();
+	}
+
+	pos_type InStream::tell()
+	{
+		return mStream.tellg();
+	}
+
+	void InStream::seek(pos_type p)
+	{
+		mStream.seekg(p);
+	}
+
+
+	InStream::operator bool() const
+	{
+		return static_cast<bool>(mStream);
+	}
+
 	InStream::InStream(std::streambuf * buffer) :
 		mStream(buffer),
 		mOwning(false)
 	{
 	}
 
-	std::streambuf * InStream::buffer() const
+	std::streambuf &InStream::buffer() const
 	{
-		return mStream.rdbuf();
+		return *mStream.rdbuf();
 	}
 
 	OutStream::OutStream(std::unique_ptr<std::streambuf>&& buffer) :
@@ -44,14 +71,29 @@ namespace Engine
 	{
 	}
 
-	OutStream::~OutStream()
+	OutStream::OutStream(OutStream && other) :
+		mStream(other.mStream.rdbuf(nullptr))
 	{
-		delete buffer();
 	}
 
-	std::streambuf * OutStream::buffer() const
+	OutStream::~OutStream()
 	{
-		return mStream.rdbuf();
+		delete &buffer();
+	}
+
+	void OutStream::write(const void * data, size_t count)
+	{
+		mStream.write(static_cast<const char*>(data), count);
+	}
+
+	std::streambuf &OutStream::buffer() const
+	{
+		return *mStream.rdbuf();
+	}
+
+	OutStream::operator bool() const
+	{
+		return static_cast<bool>(mStream);
 	}
 
 	Stream::Stream(std::unique_ptr<std::streambuf>&& buffer) :

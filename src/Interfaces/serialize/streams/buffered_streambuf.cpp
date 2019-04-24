@@ -1,13 +1,14 @@
 #include "../../interfaceslib.h"
 #include "buffered_streambuf.h"
-
+#include "../serializemanager.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
 
-		buffered_streambuf::buffered_streambuf() :
+		buffered_streambuf::buffered_streambuf(SerializeManager &mgr, ParticipantId id) :
+			SerializeStreambuf(mgr, id),
 			mIsClosed(false),
 			mBytesToRead(sizeof(BufferedMessageHeader))
 		{
@@ -15,7 +16,7 @@ namespace Engine
 		}
 
 		buffered_streambuf::buffered_streambuf(buffered_streambuf&& other) noexcept :
-			//basic_streambuf<char>(other),
+			SerializeStreambuf(std::move(other)),
 			mIsClosed(other.mIsClosed),
 			mBytesToRead(other.mBytesToRead),
 			mReceiveMessageHeader(other.mReceiveMessageHeader),
@@ -110,13 +111,13 @@ namespace Engine
 			
 		}
 
-		bool buffered_streambuf::isMessageAvailable(const std::string& context)
+		bool buffered_streambuf::isMessageAvailable()
 		{
 			if (mIsClosed)
 				return false;
 			if (!mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback())
 				return true;
-			receive(context);
+			receive();
 			return !mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback();
 		}
 
@@ -213,13 +214,13 @@ namespace Engine
 			return traits_type::eof();
 		}
 
-		void buffered_streambuf::receive(const std::string& context)
+		void buffered_streambuf::receive()
 		{
 			if (!mRecBuffer.empty() && mBytesToRead == 0)
 			{
 				if (gptr() != egptr())
 				{
-					LOG_WARNING(Database::Exceptions::messageNotFullyRead(context));
+					LOG_WARNING(Database::Exceptions::messageNotFullyRead(manager().name()));
 				}
 				mRecBuffer.clear();
 				mBytesToRead = sizeof mReceiveMessageHeader;
@@ -227,7 +228,7 @@ namespace Engine
 			if (mRecBuffer.empty())
 			{
 				assert(mBytesToRead > 0);
-				int num = rec(reinterpret_cast<char*>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
+				int num = recv(reinterpret_cast<char*>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
 				if (num == 0)
 				{
 					close();
@@ -248,7 +249,7 @@ namespace Engine
 
 			if (!mRecBuffer.empty() && mBytesToRead > 0)
 			{
-				int num = rec(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
+				int num = recv(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
 				if (num == 0)
 				{
 					close();
@@ -269,7 +270,7 @@ namespace Engine
 
 		void buffered_streambuf::handleError()
 		{
-			int error = getError();
+			StreamError error = getError();
 			switch (error)
 			{
 			case WOULD_BLOCK:

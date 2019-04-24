@@ -6,5 +6,5 @@
 
 TEST(StreamDebugging, Logging)
 {
-	Engine::Serialize::Debugging::StreamDebugging::setLoggingEnabled(true);
+	Engine::Serialize::Debugging::setLoggingEnabled(true);
 }

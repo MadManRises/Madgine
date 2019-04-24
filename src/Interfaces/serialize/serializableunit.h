@@ -49,7 +49,7 @@ namespace Engine
 
 			void setSynced(bool b);
 
-			virtual bool filter(Stream* stream) const;
+			virtual bool filter(SerializeOutStream* stream) const;
 
 		private:
 
@@ -69,7 +69,7 @@ namespace Engine
 
 			//void writeHeader(SerializeOutStream &out, bool isAction);		
 
-			friend class SerializeManager;
+			friend struct SerializeManager;
 			friend class Serializable;
 			friend class Observable;
 			friend class TopLevelSerializableUnitBase;

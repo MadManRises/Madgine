@@ -15,23 +15,35 @@ namespace Engine
 			return first->id() < second->id();
 		}
 
+		bool CompareStreamId::operator()(const BufferedInOutStream & first, const BufferedOutStream & second) const
+		{
+			return first.id() < second.id();
+		}
 
-		BufferedInStream::BufferedInStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
-			Stream(mgr, id),
-			SerializeInStream(mIfs, mgr, id),
-			mBuffer(buffer),
-			mIfs(&buffer)
+
+		BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer) :
+			SerializeInStream(std::move(buffer))
 		{
 		}
 
-		bool BufferedInStream::isMessageAvailable()
+		BufferedInStream::BufferedInStream(BufferedInStream && other) :
+			SerializeInStream(std::move(other))
 		{
-			return mBuffer.isMessageAvailable(mManager.name());
 		}
 
-		buffered_streambuf* BufferedInStream::rdbuf()
+		bool BufferedInStream::isMessageAvailable() const
 		{
-			return &mBuffer;
+			return buffer().isMessageAvailable();
+		}
+
+		BufferedInStream::BufferedInStream(buffered_streambuf * buffer) :
+			SerializeInStream(buffer)
+		{
+		}
+
+		buffered_streambuf &BufferedInStream::buffer() const
+		{
+			return static_cast<buffered_streambuf&>(SerializeInStream::buffer());
 		}
 
 		void BufferedInStream::readHeader(MessageHeader& header)
@@ -41,11 +53,13 @@ namespace Engine
 			read(header);
 		}
 
-		BufferedOutStream::BufferedOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
-			Stream(mgr, id),
-			SerializeOutStream(mOfs, mgr, id),
-			mBuffer(buffer),
-			mOfs(&buffer)
+		BufferedOutStream::BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer) :
+			SerializeOutStream(std::move(buffer))
+		{
+		}
+
+		BufferedOutStream::BufferedOutStream(BufferedOutStream && other) :
+			SerializeOutStream(std::move(other))
 		{
 		}
 
@@ -53,9 +67,9 @@ namespace Engine
 		{
 			MessageHeader header;
 			header.mType = type;
-			header.mObject = mManager.convertPtr(*this, unit);
-			mLog.logBeginSendMessage(header, typeid(*unit).name());
-			mBuffer.beginMessage();
+			header.mObject = manager().convertPtr(*this, unit);
+			mLog.logBeginMessage(header, typeid(*unit).name());
+			buffer().beginMessage();
 			write(header);
 		}
 
@@ -64,49 +78,58 @@ namespace Engine
 			MessageHeader header;
 			header.mCmd = cmd;
 			header.mObject = SERIALIZE_MANAGER;
-			mLog.logBeginSendMessage(header, mManager.name());
-			mBuffer.beginMessage();
+			mLog.logBeginMessage(header, manager().name());
+			buffer().beginMessage();
 			write(header);
 		}
 
 		void BufferedOutStream::endMessage()
 		{
-			mBuffer.endMessage();
+			buffer().endMessage();
 		}
 
 		int BufferedOutStream::sendMessages()
 		{
-			return mBuffer.sendMessages();
+			return buffer().sendMessages();
+		}
+
+		buffered_streambuf & BufferedOutStream::buffer() const
+		{
+			return static_cast<buffered_streambuf&>(SerializeOutStream::buffer());
 		}
 
 		BufferedOutStream& BufferedOutStream::operator<<(BufferedInStream& in)
 		{
-			mOfs << in.rdbuf();
+			OutStream::operator<<(&in.buffer());
 			return *this;
 		}
 
-		BufferedInOutStream::BufferedInOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id) :
-			Stream(mgr, id),
-			BufferedOutStream(buffer, mgr, id),
-			BufferedInStream(buffer, mgr, id),
-			mBuffer(buffer)
+		BufferedInOutStream::BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer) :
+			BufferedInStream(buffer.get()),
+			BufferedOutStream(std::move(buffer))
+		{
+		}
+
+		BufferedInOutStream::BufferedInOutStream(BufferedInOutStream && other) :
+			BufferedInStream(std::move(other)),
+			BufferedOutStream(std::move(other))
 		{
 		}
 
 		StreamError BufferedInOutStream::error() const
 		{
-			return mBuffer.closeCause();
+			return buffer().closeCause();
 		}
 
-		bool BufferedInOutStream::isClosed()
+		bool BufferedInOutStream::isClosed() const
 		{
-			return !bool(*this) || mBuffer.isClosed();
+			return !bool(*this) || buffer().isClosed();
 		}
 
 		void BufferedInOutStream::close()
 		{
 			writeCommand(STREAM_EOF);
-			mBuffer.close();
+			buffer().close();
 		}
 
 		BufferedInOutStream::operator bool() const

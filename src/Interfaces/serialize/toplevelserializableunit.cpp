@@ -62,16 +62,6 @@ namespace Engine
 			return mSlaveManager == nullptr;
 		}*/
 
-		ParticipantId TopLevelSerializableUnitBase::getLocalMasterParticipantId()
-		{
-			return SerializeManager::getLocalMasterParticipantId();
-		}
-
-		ParticipantId TopLevelSerializableUnitBase::getSlaveParticipantId() const
-		{
-			return mSlaveManager->getSlaveParticipantId();
-		}
-
 		void TopLevelSerializableUnitBase::setStaticSlaveId(size_t staticId)
 		{
 			mStaticSlaveId = staticId;

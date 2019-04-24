@@ -26,7 +26,6 @@ namespace Engine
 
 			void beginActionResponseMessage(BufferedOutStream* stream) const;
 
-			ParticipantId id() const;
 			bool isMaster() const;
 
 			SerializableUnitBase* parent() const;

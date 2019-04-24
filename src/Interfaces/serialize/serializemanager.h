@@ -6,6 +6,10 @@
 
 #include "serializableids.h"
 
+#include "streams/bufferedstream.h"
+
+#include "streams/comparestreamid.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -23,7 +27,7 @@ namespace Engine
 
 		
 
-		class INTERFACES_EXPORT SerializeManager
+		struct INTERFACES_EXPORT SerializeManager
 		{
 		public:
 			SerializeManager(const std::string& name);
@@ -45,10 +49,8 @@ namespace Engine
 			static std::pair<std::pair<size_t, SerializableUnitMap*>, std::pair<size_t, SerializableUnitMap*>>
 			updateMasterMapping(const std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
 
-			bool isMaster(Stream* stream) const;
+			bool isMaster(SerializeStreambuf* stream) const;
 			bool isMaster() const;
-
-			Util::Process& process();
 
 
 			bool filter(const SerializableUnitBase* unit, ParticipantId id);
@@ -61,9 +63,7 @@ namespace Engine
 			void removeTopLevelItem(TopLevelSerializableUnitBase* unit);
 			void moveTopLevelItem(TopLevelSerializableUnitBase* oldUnit, TopLevelSerializableUnitBase* newUnit);
 
-			BufferedOutStream* getSlaveMessageTarget() const;
-			static ParticipantId getLocalMasterParticipantId();
-			ParticipantId getSlaveParticipantId() const;
+			BufferedOutStream* getSlaveMessageTarget();
 
 			bool isMessageAvailable();
 			void receiveMessages(int msgCount = -1);
@@ -78,23 +78,21 @@ namespace Engine
 
 			const std::string& name() const;
 
-			static constexpr ParticipantId sLocalMasterId = 1;
-
 			SignalSlot::SignalStub<> &slaveStreamDisconnected();
 
 		protected:
 
 
-			bool receiveMessages(BufferedInOutStream* stream, int msgCount);
-			bool sendAllMessages(BufferedInOutStream* stream, std::chrono::milliseconds timeout = {});
+			bool receiveMessages(BufferedInOutStream &stream, int msgCount);
+			bool sendAllMessages(BufferedInOutStream &stream, std::chrono::milliseconds timeout = {});
 
-			BufferedInOutStream* getSlaveStream() const;
+			BufferedInOutStream* getSlaveStream();
 
 			void removeAllStreams();
-			StreamError setSlaveStream(BufferedInOutStream* stream, bool receiveState = true, std::chrono::milliseconds timeout = {});
+			StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, std::chrono::milliseconds timeout = {});
 			virtual void removeSlaveStream();
-			bool addMasterStream(BufferedInOutStream* stream, bool sendState = true);
-			virtual void removeMasterStream(BufferedInOutStream* stream);
+			bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
+			//virtual void removeMasterStream(BufferedInOutStream* stream);
 
 			static ParticipantId createStreamId();
 
@@ -106,18 +104,12 @@ namespace Engine
 		private:
 			SerializableUnitMap mSlaveMappings;
 
-			static size_t sNextUnitId;
-
 			bool mReceivingMasterState;
 
-			Util::Process mProcess;
-
-			std::vector<BufferedInOutStream *> mMasterStreams;
-			BufferedInOutStream* mSlaveStream;
+			std::set<BufferedInOutStream, CompareStreamId> mMasterStreams;
+			std::optional<BufferedInOutStream> mSlaveStream;
 
 			std::list<std::function<bool(const SerializableUnitBase*, ParticipantId)>> mFilters;
-
-			static ParticipantId sRunningStreamId;
 
 			std::set<TopLevelSerializableUnitBase*> mTopLevelUnits;
 

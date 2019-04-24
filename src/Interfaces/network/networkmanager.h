@@ -2,7 +2,7 @@
 
 #include "../serialize/serializemanager.h"
 #include "../signalslot/slot.h"
-#include "networkstream.h"
+#include "networkbuffer.h"
 
 namespace Engine
 {
@@ -33,15 +33,15 @@ namespace Engine
 
 			bool isConnected() const;
 
-			void moveConnection(Serialize::ParticipantId id, NetworkManager* to);
+			//void moveConnection(Serialize::ParticipantId id, NetworkManager* to);
 
 			SignalSlot::SignalStub<Serialize::StreamError> &connectionResult();
 
 		protected:
-			void removeSlaveStream() override;
-			void removeMasterStream(Serialize::BufferedInOutStream* stream) override;
+			//void removeSlaveStream() override;
+			//void removeMasterStream(Serialize::BufferedInOutStream* stream) override;
 
-			Serialize::StreamError addMasterStream(NetworkStream&& stream, bool sendState = true);
+			//Serialize::StreamError addMasterStream(NetworkStream&& stream, bool sendState = true);
 
 			void onConnectionEstablished(std::chrono::milliseconds timeout);
 
@@ -50,8 +50,8 @@ namespace Engine
 
 			bool mIsServer;
 
-			std::map<Serialize::ParticipantId, NetworkStream> mStreams;
-			std::unique_ptr<NetworkStream> mSlaveStream;
+			//std::map<Serialize::ParticipantId, NetworkStream> mStreams;
+			//std::unique_ptr<NetworkStream> mSlaveStream;
 
 			//static constexpr UINT sMessageSignature = 1048;
 

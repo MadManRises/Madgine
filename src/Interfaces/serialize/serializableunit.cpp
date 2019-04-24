@@ -300,7 +300,7 @@ namespace Engine
 			return mSlaveId == 0;
 		}
 
-		bool SerializableUnitBase::filter(Stream* stream) const
+		bool SerializableUnitBase::filter(SerializeOutStream* stream) const
 		{
 			return true;
 		}

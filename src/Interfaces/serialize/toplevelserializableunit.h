@@ -28,9 +28,6 @@ namespace Engine
 
 			//bool isMaster() const;
 
-			static ParticipantId getLocalMasterParticipantId();
-			ParticipantId getSlaveParticipantId() const;
-
 			void setStaticSlaveId(size_t staticId);
 			void initSlaveId();
 

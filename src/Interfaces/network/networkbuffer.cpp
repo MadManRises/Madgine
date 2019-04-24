@@ -6,17 +6,17 @@ namespace Engine
 {
 	namespace Network
 	{
-		NetworkBuffer::NetworkBuffer(SocketId socket) :
+		NetworkBuffer::NetworkBuffer(SocketId socket, Serialize::SerializeManager &mgr, Serialize::ParticipantId id) :
+			buffered_streambuf(mgr, id),
 			mSocket(socket)
 		{
 		}
 
 
 		NetworkBuffer::NetworkBuffer(NetworkBuffer&& other) noexcept :
-			buffered_streambuf(std::forward<NetworkBuffer>(other)),
-			mSocket(other.mSocket)
+			buffered_streambuf(std::move(other)),
+			mSocket(std::exchange(other.mSocket, Invalid_Socket))
 		{
-			other.mSocket = Invalid_Socket;
 		}
 
 		NetworkBuffer::~NetworkBuffer()
@@ -25,7 +25,7 @@ namespace Engine
 				SocketAPI::closeSocket(mSocket);
 		}
 
-		int NetworkBuffer::rec(char* buf, size_t len)
+		int NetworkBuffer::recv(char* buf, size_t len)
 		{
 			return SocketAPI::recv(mSocket, buf, len);
 		}

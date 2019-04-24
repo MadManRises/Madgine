@@ -15,9 +15,15 @@ namespace Engine
 	{
 		
 
-		SerializeInStream::SerializeInStream(std::istream& ifs, SerializeManager& mgr, ParticipantId id) :
-			Stream(mgr, id),
-			mIfs(ifs)
+		SerializeInStream::SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer) :
+			InStream(std::move(buffer)),
+			mLog(*this)
+		{
+		}
+
+		SerializeInStream::SerializeInStream(SerializeInStream && other) :
+			InStream(std::move(other)),
+			mLog(*this)
 		{
 		}
 
@@ -135,21 +141,9 @@ namespace Engine
 
 		void SerializeInStream::read(void* buffer, size_t size)
 		{
-			mIfs.read(static_cast<char*>(buffer), size);
-			if (!mIfs.good())
+			if (!InStream::read(buffer, size))
 				throw SerializeException(
 					Database::Exceptions::deserializationFailure);
-		}
-
-
-		pos_type SerializeInStream::tell() const
-		{
-			return mIfs.tellg();
-		}
-
-		void SerializeInStream::seek(pos_type p)
-		{
-			mIfs.seekg(p);
 		}
 
 		bool SerializeInStream::loopRead()
@@ -161,32 +155,75 @@ namespace Engine
 			{
 				EOLType eol;
 				read(eol);
-				mLog.logRead(eol);
+				mLog.log(eol);
 				return false;
 			}
 			seek(pos);
 			return true;
 		}
 
-		SerializeInStream::operator bool() const
-		{
-			return static_cast<bool>(mIfs);
-		}
 
 		void SerializeInStream::logReadHeader(const MessageHeader& header, const std::string& object)
 		{
-			mLog.logBeginReadMessage(header, object);
+			mLog.logBeginMessage(header, object);
+		}
+
+		void SerializeInStream::setManager(SerializeManager & mgr) const
+		{
+			buffer().setManager(mgr);
+		}
+
+		SerializeManager & SerializeInStream::manager() const
+		{
+			return buffer().manager();
+		}
+
+		void SerializeInStream::setId(ParticipantId id)
+		{
+			buffer().setId(id);
+		}
+
+		ParticipantId SerializeInStream::id() const
+		{
+			return buffer().id();
+		}
+
+		bool SerializeInStream::isMaster()
+		{
+			return buffer().isMaster();
+		}
+
+		SerializeInStream::SerializeInStream(SerializeStreambuf * buffer) :
+			InStream(buffer),
+			mLog(*this)
+		{
 		}
 
 		SerializableUnitBase* SerializeInStream::convertPtr(size_t ptr)
 		{
-			return mManager.convertPtr(*this, ptr);
+			return manager().convertPtr(*this, ptr);
 		}
 
-		SerializeOutStream::SerializeOutStream(std::ostream& ofs, SerializeManager& mgr, ParticipantId id) :
-			Stream(mgr, id),
-			mOfs(ofs)
+		SerializeStreambuf & SerializeInStream::buffer() const
 		{
+			return static_cast<SerializeStreambuf&>(InStream::buffer());
+		}
+
+		SerializeOutStream::SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer) :
+			OutStream(std::move(buffer)),
+			mLog(*this)
+		{
+		}
+
+		SerializeOutStream::SerializeOutStream(SerializeOutStream && other) :
+			OutStream(std::move(other)),
+			mLog(std::move(other.mLog))
+		{
+		}
+
+		ParticipantId SerializeOutStream::id() const
+		{
+			return buffer().id();
 		}
 
 		SerializeOutStream& SerializeOutStream::operator<<(const ValueType& v)
@@ -240,7 +277,7 @@ namespace Engine
 		SerializeOutStream& SerializeOutStream::operator<<(SerializableUnitBase* p)
 		{
 			write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase*>);
-			write(mManager.convertPtr(*this, p));
+			write(manager().convertPtr(*this, p));
 			return *this;
 		}
 
@@ -255,12 +292,17 @@ namespace Engine
 			writeData(buffer, size);
 		}
 
-		void SerializeOutStream::writeData(const void* buffer, size_t size)
+		SerializeManager & SerializeOutStream::manager() const
 		{
-			mOfs.write(reinterpret_cast<const char *>(buffer), size);
+			return buffer().manager();
 		}
 
-		pos_type SerializeOutStream::tell() const
+		bool SerializeOutStream::isMaster()
+		{
+			return buffer().isMaster();
+		}
+
+		/*pos_type SerializeOutStream::tell() const
 		{
 			return mOfs.tellp();
 		}
@@ -268,38 +310,16 @@ namespace Engine
 		void SerializeOutStream::seek(pos_type p)
 		{
 			mOfs.seekp(p);
+		}*/
+
+		void SerializeOutStream::writeData(const void * data, size_t count)
+		{
+			OutStream::write(data, count);
 		}
 
-		Stream::Stream(SerializeManager& mgr, ParticipantId id) :
-			mManager(mgr),
-			mId(id),
-			mLog(this)
+		SerializeStreambuf & SerializeOutStream::buffer() const
 		{
-		}
-
-		SerializeManager& Stream::manager()
-		{
-			return mManager;
-		}
-
-		bool Stream::isMaster()
-		{
-			return mManager.isMaster(this);
-		}
-
-		Util::Process& Stream::process() const
-		{
-			return mManager.process();
-		}
-
-		ParticipantId Stream::id() const
-		{
-			return mId;
-		}
-
-		void Stream::setId(ParticipantId id)
-		{
-			mId = id;
+			return static_cast<SerializeStreambuf&>(OutStream::buffer());
 		}
 
 		SerializeOutStream& SerializeOutStream::operator<<(const std::string& s)
@@ -310,9 +330,36 @@ namespace Engine
 			return *this;
 		}
 
-		SerializeOutStream::operator bool() const
+		SerializeStreambuf::SerializeStreambuf(SerializeManager & mgr, ParticipantId id) :
+			mManager(&mgr),
+			mId(id)
 		{
-			return static_cast<bool>(mOfs);
 		}
-	}
+
+		void SerializeStreambuf::setManager(SerializeManager & mgr)
+		{
+			mManager = &mgr;
+		}
+
+		SerializeManager & SerializeStreambuf::manager()
+		{
+			return *mManager;
+		}
+
+		bool SerializeStreambuf::isMaster()
+		{
+			return mManager->isMaster(this);
+		}
+
+		ParticipantId SerializeStreambuf::id() const
+		{
+			return mId;
+		}
+
+		void SerializeStreambuf::setId(ParticipantId id)
+		{
+			mId = id;
+		}
+
+}
 } // namespace Scripting

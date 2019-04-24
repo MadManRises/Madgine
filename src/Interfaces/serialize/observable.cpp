@@ -80,11 +80,6 @@ namespace Engine
 			*stream << mIndex;
 		}
 
-		ParticipantId Observable::id() const
-		{
-			return isMaster() ? mUnit->topLevel()->getLocalMasterParticipantId() : mUnit->topLevel()->getSlaveParticipantId();
-		}
-
 		bool Observable::isMaster() const
 		{
 			return !mUnit->isSynced() || !mUnit->topLevel() || mUnit->topLevel()->isMaster();

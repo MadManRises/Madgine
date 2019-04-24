@@ -10,6 +10,10 @@
 
 #include "../threading/workgroup.h"
 
+#include "../serialize/streams/buffered_streambuf.h"
+
+#include "../generic/transformIt.h"
+
 //#include <iostream>
 
 namespace Engine
@@ -17,26 +21,23 @@ namespace Engine
 	namespace Serialize
 	{
 		Threading::WorkgroupLocal<std::map<size_t, SerializableUnitBase*>> sMasterMappings;
-		size_t SerializeManager::sNextUnitId = RESERVED_ID_COUNT;
-		ParticipantId SerializeManager::sRunningStreamId = sLocalMasterId;
+		std::atomic<size_t> sNextUnitId = RESERVED_ID_COUNT;
+		std::atomic<ParticipantId> sRunningStreamId = 0;
 
 		SerializeManager::SerializeManager(const std::string& name) :
 			mReceivingMasterState(false),
-			mSlaveStream(nullptr),
 			mName(name),
 			mSlaveStreamInvalid(false)
 		{
 		}
 
 		SerializeManager::SerializeManager(SerializeManager&& other) noexcept :
-			mSlaveMappings(std::forward<std::map<size_t, SerializableUnitBase*>>(other.mSlaveMappings)),
+			mSlaveMappings(std::move(other.mSlaveMappings)),
 			mReceivingMasterState(other.mReceivingMasterState),
-			mProcess(std::forward<Util::Process>(other.mProcess)),
-			mSlaveStream(nullptr),
-			mFilters(std::forward<std::list<std::function<bool(const SerializableUnitBase*, ParticipantId)>>>(other.mFilters)),
-			mTopLevelUnits(std::forward<std::set<TopLevelSerializableUnitBase*>>(other.mTopLevelUnits)),
-			mName(std::forward<std::string>(other.mName)),
-			mSlaveStreamInvalid(false)
+			mFilters(std::move(other.mFilters)),
+			mTopLevelUnits(std::move(other.mTopLevelUnits)),
+			mName(std::move(other.mName)),
+			mSlaveStreamInvalid(other.mSlaveStreamInvalid)
 		{
 			other.mSlaveMappings.clear();
 			for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
@@ -46,6 +47,18 @@ namespace Engine
 				assert(result);
 			}
 			other.mTopLevelUnits.clear();
+			if (other.mSlaveStream)
+			{
+				mSlaveStream.emplace(std::move(*other.mSlaveStream));
+				other.mSlaveStream.reset();
+				mSlaveStream->setManager(*this);
+			}
+			mMasterStreams = std::move(other.mMasterStreams);
+			other.mMasterStreams.clear();
+			for (const BufferedInOutStream &stream : mMasterStreams)
+			{
+				stream.setManager(*this);
+			}
 		}
 
 		SerializeManager::~SerializeManager()
@@ -161,11 +174,14 @@ namespace Engine
 		std::set<BufferedOutStream*, CompareStreamId> SerializeManager::getMasterMessageTargets()
 		{
 			std::set<BufferedOutStream*, CompareStreamId> result;
-			std::copy_if(mMasterStreams.begin(), mMasterStreams.end(), inserter(result, result.begin()),
-			             [](BufferedInOutStream* stream)
-			             {
-				             return !stream->isClosed();
-			             });
+
+			for (const BufferedInOutStream &stream : mMasterStreams)
+			{
+				if (!stream.isClosed())
+				{
+					result.insert(const_cast<BufferedInOutStream*>(&stream));
+				}
+			}
 			return result;
 		}
 
@@ -196,9 +212,9 @@ namespace Engine
 
 			if (sendStateFlag && unit->isSynced())
 			{
-				for (BufferedInOutStream* stream : mMasterStreams)
+				for (const BufferedInOutStream &stream : mMasterStreams)
 				{
-					this->sendState(*stream, unit);
+					this->sendState(const_cast<BufferedInOutStream&>(stream), unit);
 				}
 			}
 			return true;
@@ -228,56 +244,40 @@ namespace Engine
 			addTopLevelItem(newUnit, false);
 		}
 
-		BufferedOutStream* SerializeManager::getSlaveMessageTarget() const
+		BufferedOutStream* SerializeManager::getSlaveMessageTarget()
 		{
-			return mSlaveStream;
-		}
-
-		ParticipantId SerializeManager::getLocalMasterParticipantId()
-		{
-			return sLocalMasterId;
-		}
-
-		ParticipantId SerializeManager::getSlaveParticipantId() const
-		{
-			return mSlaveStream ? mSlaveStream->id() : 0;
+			return &*mSlaveStream;
 		}
 
 		bool SerializeManager::isMessageAvailable()
 		{
 			if (mSlaveStream && mSlaveStream->isMessageAvailable())
 				return true;
-			for (BufferedInOutStream *stream : mMasterStreams)
+			for (const BufferedInOutStream &stream : mMasterStreams)
 			{
-				if (stream->isMessageAvailable())
+				if (stream.isMessageAvailable())
 					return true;
 			}
 			return false;
 		}
 
-		bool SerializeManager::isMaster(Stream* stream) const
+		bool SerializeManager::isMaster(SerializeStreambuf* stream) const
 		{
-			return mSlaveStream != stream;
+			return !mSlaveStream || &mSlaveStream->buffer() != stream;
 		}
 
 		bool SerializeManager::isMaster() const
 		{
-			return mSlaveStream == nullptr || mSlaveStreamInvalid;
-		}
-
-		Util::Process& SerializeManager::process()
-		{
-			return mProcess;
+			return !mSlaveStream || mSlaveStreamInvalid;
 		}
 
 		void SerializeManager::removeAllStreams()
 		{
 			removeSlaveStream();
-			while (!mMasterStreams.empty())
-				removeMasterStream(mMasterStreams.front());
+			mMasterStreams.clear();
 		}
 
-		StreamError SerializeManager::setSlaveStream(BufferedInOutStream* stream, bool receiveState, std::chrono::milliseconds timeout)
+		StreamError SerializeManager::setSlaveStream(BufferedInOutStream &&stream, bool receiveState, std::chrono::milliseconds timeout)
 		{
 			if (mSlaveStream)
 				return UNKNOWN_ERROR;
@@ -296,7 +296,7 @@ namespace Engine
 			}
 
 			mSlaveStreamInvalid = true;
-			mSlaveStream = stream;
+			mSlaveStream.emplace(std::move(stream));
 
 
 			if (receiveState)
@@ -317,9 +317,9 @@ namespace Engine
 							state = TIMEOUT;
 							mReceivingMasterState = false;
 						}
-						if (!receiveMessages(stream, -1))
+						if (!receiveMessages(*mSlaveStream, -1))
 						{
-							state = stream->error();
+							state = mSlaveStream->error();
 							mReceivingMasterState = false;
 						}
 					}
@@ -341,7 +341,7 @@ namespace Engine
 					bool result = (*it2)->updateManagerType(this, true);
 					assert(result);
 				}
-				mSlaveStream = nullptr;
+				mSlaveStream.reset();
 			}
 
 			mSlaveStreamInvalid = false;
@@ -364,34 +364,34 @@ namespace Engine
 					topLevel->updateManagerType(this, true);
 				}
 				mSlaveStream->setId(0);
-				mSlaveStream = nullptr;
+				mSlaveStream.reset();
 				mSlaveStreamDisconnected.emit();
 			}
 		}
 
-		bool SerializeManager::addMasterStream(BufferedInOutStream* stream, bool sendStateFlag)
+		bool SerializeManager::addMasterStream(BufferedInOutStream &&stream, bool sendStateFlag)
 		{
-			if (sendStateFlag && *stream)
+			if (sendStateFlag && stream)
 			{
 				for (TopLevelSerializableUnitBase* unit : mTopLevelUnits)
 				{
-					sendState(*stream, unit);
+					sendState(stream, unit);
 				}
-				stream->writeCommand(INITIAL_STATE_DONE, stream->id());
+				stream.writeCommand(INITIAL_STATE_DONE, stream.id());
 			}
 
-			if (*stream)
+			if (stream)
 			{
-				mMasterStreams.push_back(stream);
+				mMasterStreams.emplace(std::move(stream));
 				return true;
 			}
 			return false;
 		}
-
+		/*
 		void SerializeManager::removeMasterStream(BufferedInOutStream* stream)
 		{
 			mMasterStreams.erase(std::remove(mMasterStreams.begin(), mMasterStreams.end(), stream), mMasterStreams.end());
-		}
+		}*/
 
 		bool SerializeManager::filter(const SerializableUnitBase* unit, ParticipantId id)
 		{
@@ -415,20 +415,20 @@ namespace Engine
 		{
 			if (mSlaveStream && !mSlaveStreamInvalid)
 			{
-				if (!receiveMessages(mSlaveStream, msgCount))
+				if (!receiveMessages(*mSlaveStream, msgCount))
 				{
 					removeSlaveStream();
 				}
 			}
-			for (size_t i = 0; i < mMasterStreams.size();)
+			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
 			{
-				if (!receiveMessages(mMasterStreams[i], msgCount))
+				if (!receiveMessages(const_cast<BufferedInOutStream&>(*it), msgCount))
 				{					
-					removeMasterStream(mMasterStreams[i]);
+					it = mMasterStreams.erase(it);
 				}
 				else
 				{
-					++i;
+					++it;
 				}
 			}
 		}
@@ -442,15 +442,15 @@ namespace Engine
 					removeSlaveStream();
 				}
 			}
-			for (size_t i = 0; i < mMasterStreams.size();)
+			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
 			{
-				if (mMasterStreams[i]->sendMessages() == -1)
+				if (const_cast<BufferedInOutStream&>(*it).sendMessages() == -1)
 				{
-					removeMasterStream(mMasterStreams[i]);
+					it = mMasterStreams.erase(it);
 				}
 				else
 				{
-					++i;
+					++it;
 				}
 			}
 		}
@@ -463,7 +463,7 @@ namespace Engine
 
 		size_t SerializeManager::convertPtr(SerializeOutStream& out, SerializableUnitBase* unit) const
 		{
-			return unit == nullptr ? NULL_UNIT_ID : &out != mSlaveStream ? unit->masterId() : unit->slaveId();
+			return unit == nullptr ? NULL_UNIT_ID : (!mSlaveStream || &out != &*mSlaveStream) ? unit->masterId() : unit->slaveId();
 		}
 
 		SerializableUnitBase* SerializeManager::convertPtr(SerializeInStream& in, size_t unit)
@@ -472,7 +472,7 @@ namespace Engine
 				return nullptr;
 			try
 			{
-				if (&in == mSlaveStream)
+				if (mSlaveStream && &in == &*mSlaveStream)
 				{
 					return mSlaveMappings.at(unit);
 				}
@@ -495,9 +495,9 @@ namespace Engine
 		{
 			std::vector<ParticipantId> result;
 			result.reserve(mMasterStreams.size());
-			for (BufferedInOutStream* stream : mMasterStreams)
+			for (const BufferedInOutStream &stream : mMasterStreams)
 			{
-				result.push_back(stream->id());
+				result.push_back(stream.id());
 			}
 			return result;
 		}
@@ -508,34 +508,34 @@ namespace Engine
 			return mSlaveStreamDisconnected;
 		}
 
-		bool SerializeManager::receiveMessages(BufferedInOutStream* stream, int msgCount)
+		bool SerializeManager::receiveMessages(BufferedInOutStream &stream, int msgCount)
 		{
-			if (stream->isClosed()) return false;
+			if (stream.isClosed()) return false;
 
 
-			while (stream->isMessageAvailable() && msgCount != 0)
+			while (stream.isMessageAvailable() && msgCount != 0)
 			{
 				try
 				{
-					readMessage(*stream);
+					readMessage(stream);
 				}
 				catch (const SerializeException& e)
 				{
 					LOG_ERROR(e.what());
 				}
-				if (stream->isClosed())
+				if (stream.isClosed())
 					return false;
 				if (msgCount > 0)
 					--msgCount;
 			}
 
-			return !stream->isClosed();
+			return !stream.isClosed();
 		}
 
-		bool SerializeManager::sendAllMessages(BufferedInOutStream* stream, std::chrono::milliseconds timeout)
+		bool SerializeManager::sendAllMessages(BufferedInOutStream &stream, std::chrono::milliseconds timeout)
 		{
 			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-			while (int result = stream->sendMessages())
+			while (int result = stream.sendMessages())
 			{
 				if (result == -1)
 				{
@@ -551,9 +551,9 @@ namespace Engine
 		}
 
 
-		BufferedInOutStream* SerializeManager::getSlaveStream() const
+		BufferedInOutStream* SerializeManager::getSlaveStream()
 		{
-			return mSlaveStream;
+			return mSlaveStream ? &*mSlaveStream : nullptr;
 		}
 
 

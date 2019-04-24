@@ -3,6 +3,7 @@
 #include "debugging/streamdebugging.h"
 #include "../serializeexception.h"
 #include "../../generic/templates.h"
+#include "../../streams/streams.h"
 
 namespace Engine
 {
@@ -37,33 +38,29 @@ namespace Engine
 		template <class T>
 		const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
-		typedef std::istream::pos_type pos_type;
-
-		class INTERFACES_EXPORT Stream
+		struct INTERFACES_EXPORT SerializeStreambuf : std::basic_streambuf<char>
 		{
 		public:
-			Stream(SerializeManager& mgr, ParticipantId id);
-			virtual ~Stream() = default;
+			SerializeStreambuf(SerializeManager& mgr, ParticipantId id);
+			virtual ~SerializeStreambuf() = default;
 
+			void setManager(SerializeManager &mgr);
 			SerializeManager& manager();
 			bool isMaster();
-
-			Util::Process& process() const;
 
 			ParticipantId id() const;
 			void setId(ParticipantId id);
 
-		protected:
-			SerializeManager& mManager;
+		private:			
+			SerializeManager *mManager;
 			ParticipantId mId;
-			Debugging::StreamLog mLog;
 		};
 
-
-		class INTERFACES_EXPORT SerializeInStream : public virtual Stream
+		struct INTERFACES_EXPORT SerializeInStream : InStream
 		{
 		public:
-			SerializeInStream(std::istream& ifs, SerializeManager& mgr, ParticipantId id = 0);
+			SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer);
+			SerializeInStream(SerializeInStream &&other);
 
 			template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T>>>
 			SerializeInStream& operator >>(T& t)
@@ -73,7 +70,7 @@ namespace Engine
 				if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>)
 					throw SerializeException(Database::Exceptions::unknownSerializationType);
 				read(t);
-				mLog.logRead(t);
+				mLog.log(t);
 				return *this;
 			}
 
@@ -107,16 +104,22 @@ namespace Engine
 
 			bool loopRead();
 
-			explicit operator bool() const;
-
 			void readRaw(void* buffer, size_t size);
 
 			void logReadHeader(const MessageHeader& header, const std::string& object);
 
-		protected:
+			void setManager(SerializeManager &mgr) const;
 
-			pos_type tell() const;
-			void seek(pos_type p);
+			SerializeManager &manager() const;
+
+			void setId(ParticipantId id);
+
+			ParticipantId id() const;
+
+			bool isMaster();
+
+		protected:
+			SerializeInStream(SerializeStreambuf *buffer);
 
 			template <class T>
 			void read(T& t)
@@ -128,14 +131,19 @@ namespace Engine
 
 			SerializableUnitBase* convertPtr(size_t ptr);
 
-		private:
-			std::istream& mIfs;
+			SerializeStreambuf &buffer() const;
+
+		protected:
+			Debugging::StreamLog mLog;
 		};
 
-		class INTERFACES_EXPORT SerializeOutStream : public virtual Stream
+		struct INTERFACES_EXPORT SerializeOutStream : OutStream
 		{
 		public:
-			SerializeOutStream(std::ostream& ofs, SerializeManager& mgr, ParticipantId id = 0);
+			SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer);
+			SerializeOutStream(SerializeOutStream &&other);
+			
+			ParticipantId id() const;
 
 			SerializeOutStream& operator<<(const ValueType& v);
 
@@ -144,7 +152,7 @@ namespace Engine
 			{
 				write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
 				write(t);
-				mLog.logWrite(t);
+				mLog.log(t);
 				return *this;
 			}
 
@@ -154,9 +162,11 @@ namespace Engine
 
 			SerializeOutStream& operator<<(const std::string &s);
 
-			explicit operator bool() const;
-
 			void writeRaw(const void* buffer, size_t size);
+
+			SerializeManager &manager() const;
+
+			bool isMaster();
 
 		protected:
 			pos_type tell() const;
@@ -168,10 +178,12 @@ namespace Engine
 				writeData(&t, sizeof(T));
 			}
 
-			void writeData(const void* buffer, size_t size);
+			void writeData(const void *data, size_t count);
 
-		private:
-			std::ostream& mOfs;
+			SerializeStreambuf &buffer() const;
+
+		protected:
+			Debugging::StreamLog mLog;
 		};
 	}
 } // namespace Scripting

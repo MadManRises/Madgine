@@ -8,10 +8,5 @@ namespace Engine
 	namespace Serialize
 	{
 		
-		bool CompareStreamId::operator()(Stream* first, Stream* second) const
-		{
-			return first->id() < second->id();
-		}
-
 	}
 }

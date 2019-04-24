@@ -1,5 +1,7 @@
 #pragma once
 
+#include "serializestream.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -10,10 +12,10 @@ namespace Engine
 		};
 
 
-		class INTERFACES_EXPORT buffered_streambuf : public std::basic_streambuf<char>
+		struct INTERFACES_EXPORT buffered_streambuf : SerializeStreambuf
 		{
 		public:
-			buffered_streambuf();
+			buffered_streambuf(SerializeManager &mgr, ParticipantId id);
 			buffered_streambuf(const buffered_streambuf&) = delete;
 			buffered_streambuf(buffered_streambuf&&) noexcept;
 
@@ -23,7 +25,7 @@ namespace Engine
 			virtual void close(StreamError cause = NO_ERROR);
 
 			//read
-			bool isMessageAvailable(const std::string& context);
+			bool isMessageAvailable();
 
 			//write
 			void beginMessage();
@@ -43,7 +45,7 @@ namespace Engine
 			pos_type seekpos(pos_type pos,
 			                 std::ios_base::openmode mode = std::ios_base::in) override;
 
-			virtual int rec(char*, size_t) = 0;
+			virtual int recv(char*, size_t) = 0;
 			virtual int send(char*, size_t) = 0;
 
 
@@ -52,7 +54,7 @@ namespace Engine
 
 			int sync() override;
 			void extend();
-			void receive(const std::string& context);
+			void receive();
 
 		private:
 

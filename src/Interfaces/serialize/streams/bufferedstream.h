@@ -6,26 +6,28 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		class INTERFACES_EXPORT BufferedInStream : public SerializeInStream
+		struct INTERFACES_EXPORT BufferedInStream : SerializeInStream
 		{
-		public:
-			BufferedInStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id);
+			friend struct BufferedOutStream;
 
-			bool isMessageAvailable();
+			BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
+			BufferedInStream(BufferedInStream &&other);
 
-			buffered_streambuf* rdbuf();
+			bool isMessageAvailable() const;
 
 			void readHeader(MessageHeader& header);
 
-		private:
-			buffered_streambuf& mBuffer;
-			std::istream mIfs;
+		protected:
+			BufferedInStream(buffered_streambuf *buffer);
+
+			buffered_streambuf &buffer() const;
 		};
 
-		class INTERFACES_EXPORT BufferedOutStream : public SerializeOutStream
+		struct INTERFACES_EXPORT BufferedOutStream : SerializeOutStream
 		{
 		public:
-			BufferedOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id);
+			BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+			BufferedOutStream(BufferedOutStream &&other);
 
 			void beginMessage(SerializableUnitBase* unit, MessageType type);
 			void beginMessage(Command cmd);
@@ -46,26 +48,29 @@ namespace Engine
 				endMessage();
 			}
 
-		private:
-			buffered_streambuf& mBuffer;
-			std::ostream mOfs;
+		protected:
+			buffered_streambuf &buffer() const;
 		};
 
-		class INTERFACES_EXPORT BufferedInOutStream :
-			public BufferedOutStream,
-			public BufferedInStream
+		struct INTERFACES_EXPORT BufferedInOutStream :
+			BufferedInStream,
+			BufferedOutStream
 		{
-		public:
-			BufferedInOutStream(buffered_streambuf& buffer, SerializeManager& mgr, ParticipantId id);
+			friend struct SerializeManager;
+
+			BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+			BufferedInOutStream(BufferedInOutStream &&other);
 
 			StreamError error() const;
-			bool isClosed();
+			bool isClosed() const;
 			void close();
 
 			explicit operator bool() const;
 
-		private:
-			buffered_streambuf& mBuffer;
+			using BufferedInStream::id;
+
+		protected:
+			using BufferedInStream::buffer;
 		};
 	}
 } // namespace Scripting

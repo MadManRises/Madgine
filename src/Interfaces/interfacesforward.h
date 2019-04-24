@@ -17,6 +17,9 @@ namespace Engine
 	struct UniqueComponentCollectorManager;
 	struct ComponentRegistryBase;
 
+	struct InStream;
+	struct OutStream;
+
 	namespace Debug {
 
 		struct TraceBack;
@@ -39,19 +42,19 @@ namespace Engine
 
 	namespace Serialize
 	{
-		class Stream;
-		class SerializeInStream;
-		class SerializeOutStream;
+		struct SerializeInStream;
+		struct SerializeOutStream;
 		class SerializableUnitBase;
-		class BufferedInOutStream;
-		class BufferedInStream;
-		class BufferedOutStream;
+		struct BufferedInOutStream;
+		struct BufferedInStream;
+		struct BufferedOutStream;
 		class TopLevelSerializableUnitBase;
 		class Observable;
 		class Serializable;
 		class FileBuffer;
 		struct MessageHeader;
-		class SerializeManager;
+		struct SerializeManager;
+		struct SerializeStreambuf;
 
 		class EOLType;
 
@@ -59,7 +62,7 @@ namespace Engine
 
 		typedef size_t ParticipantId;
 
-		class buffered_streambuf;
+		struct buffered_streambuf;
 
 		struct noparent_deleter;
 
@@ -120,7 +123,6 @@ namespace Engine
 	namespace Network
 	{
 		class NetworkManager;
-		class NetworkStream;
 	}
 
 
