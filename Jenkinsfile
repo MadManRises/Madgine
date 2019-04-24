@@ -109,4 +109,10 @@ pipeline {
 	        }
         }
     }
+
+	post {
+        always {
+            junit '**/*.xml'
+        }
+    }
 }
