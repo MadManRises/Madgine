@@ -53,7 +53,6 @@ def task = {
 				sh """
 				cd ${name}
 				ctest
-				exit 0
 				"""
             }           
         }
