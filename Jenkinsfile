@@ -46,9 +46,6 @@ def task = {
             stage("build") {				
 				sh """
 				cd ${name}
-				if ${params.fullBuild}; then
-					make clean;
-				fi
 				make all
 				"""				
             }
