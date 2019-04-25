@@ -124,14 +124,14 @@ namespace Engine {
 			struct timeval tv;
 			fd_set readfds;
 
-			if (timeout.isInfinte())
+			if (timeout.isInfinite())
 			{
 				tv.tv_sec = 0;
-				tv.tv_usev = 0;
+				tv.tv_usec = 0;
 			}
 			else
 			{
-				std::chrono::milliseconds remainder = timeout.remainder();
+				std::chrono::milliseconds remainder = std::chrono::duration_cast<std::chrono::milliseconds>(timeout.remainder());
 				tv.tv_sec = static_cast<long>(remainder.count()) / 1000;
 				tv.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
 			}
