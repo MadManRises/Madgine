@@ -20,13 +20,13 @@ namespace Engine
 			void operator=(const NetworkManager&) = delete;
 
 			bool startServer(int port);
-			Serialize::StreamError connect(const std::string& url, int portNr, std::chrono::milliseconds timeout = {});
-			void connect_async(const std::string& url, int portNr, std::chrono::milliseconds timeout = {});
+			Serialize::StreamError connect(const std::string& url, int portNr, TimeOut timeout = {});
+			void connect_async(const std::string& url, int portNr, TimeOut timeout = {});
 
 			void close();
 
 
-			Serialize::StreamError acceptConnection(std::chrono::milliseconds timeout);
+			Serialize::StreamError acceptConnection(TimeOut timeout);
 			int acceptConnections(int limit = -1);
 
 
@@ -43,7 +43,7 @@ namespace Engine
 
 			//Serialize::StreamError addMasterStream(NetworkStream&& stream, bool sendState = true);
 
-			void onConnectionEstablished(std::chrono::milliseconds timeout);
+			void onConnectionEstablished(TimeOut timeout);
 
 		private:
 			SocketId mSocket;

@@ -15,28 +15,21 @@ namespace Engine
 			mSlaveManager(nullptr),
 			mStaticSlaveId(staticId)
 		{
+			assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
 		}
 
 		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase& other) :
-			SerializableUnitBase(other),
+			SerializableUnitBase(other.masterId()),
 			mSlaveManager(nullptr),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
 		}
 
 		TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase&& other) noexcept :
-			SerializableUnitBase(std::forward<TopLevelSerializableUnitBase>(other)),
+			SerializableUnitBase(other.masterId()),
 			mSlaveManager(nullptr),
 			mStaticSlaveId(other.mStaticSlaveId)
 		{
-			while (!other.mMasterManagers.empty())
-			{
-				other.mMasterManagers.front()->moveTopLevelItem(&other, this);
-			}
-			if (other.mSlaveManager)
-			{
-				other.mSlaveManager->moveTopLevelItem(&other, this);
-			}
 		}
 
 
@@ -64,12 +57,13 @@ namespace Engine
 
 		void TopLevelSerializableUnitBase::setStaticSlaveId(size_t staticId)
 		{
+			assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
 			mStaticSlaveId = staticId;
 		}
 
 		void TopLevelSerializableUnitBase::initSlaveId()
 		{
-			setSlaveId(mStaticSlaveId ? mStaticSlaveId : mMasterId.first);
+			setSlaveId(mStaticSlaveId ? mStaticSlaveId : masterId());
 		}
 
 		size_t TopLevelSerializableUnitBase::readId(SerializeInStream& in)

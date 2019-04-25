@@ -20,8 +20,9 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		Threading::WorkgroupLocal<std::map<size_t, SerializableUnitBase*>> sMasterMappings;
-		std::atomic<size_t> sNextUnitId = RESERVED_ID_COUNT;
+		std::mutex sMasterMappingMutex;
+		std::map<size_t, SerializableUnitBase*> sMasterMappings;
+		size_t sNextUnitId = RESERVED_ID_COUNT;
 		std::atomic<ParticipantId> sRunningStreamId = 0;
 
 		SerializeManager::SerializeManager(const std::string& name) :
@@ -130,46 +131,38 @@ namespace Engine
 			assert(result == 1);
 		}
 
-		std::pair<size_t, SerializableUnitMap*> SerializeManager::addStaticMasterMapping(
-			SerializableUnitBase* item, size_t id)
+		size_t SerializeManager::generateMasterId(size_t id, SerializableUnitBase * unit)
 		{
-			assert(id < RESERVED_ID_COUNT && id >= BEGIN_STATIC_ID_SPACE &&
-				sMasterMappings->find(id) == sMasterMappings->end());
-			(*sMasterMappings)[id] = item;
-			//std::cout << "Master: " << id << " -> add static " << typeid(*item).name() << std::endl;
-			return {id, &*sMasterMappings};
-		}
-
-		std::pair<size_t, SerializableUnitMap*> SerializeManager::addMasterMapping(SerializableUnitBase* item)
-		{
-			(*sMasterMappings)[sNextUnitId] = item;
-			//std::cout << "Master: " << sNextUnitId << " -> add " << typeid(*item).name() << std::endl;
-			return {sNextUnitId++, &*sMasterMappings};
-		}
-
-		void SerializeManager::removeMasterMapping(const std::pair<size_t, SerializableUnitMap*>& id,
-		                                           SerializableUnitBase* item)
-		{
-			auto it = id.second->find(id.first);
-			assert(it->second == item);
-			id.second->erase(it);
-		}
-
-		std::pair<size_t, SerializableUnitMap*> SerializeManager::updateMasterMapping(std::pair<size_t, SerializableUnitMap*>& id,
-																					  SerializableUnitBase* item)
-		{
-			assert(id.first >= RESERVED_ID_COUNT);
-			auto &map = *sMasterMappings;
-			if (&map == id.second)
+			if (id == 0 || id >= RESERVED_ID_COUNT)
 			{
-				auto it = map.find(id.first);
-				SerializableUnitBase* old = std::exchange(it->second, item);
-				return std::exchange(id, addMasterMapping(old));
+				std::lock_guard guard(sMasterMappingMutex);
+				id = ++sNextUnitId;
+				sMasterMappings[id] = unit;
+				//std::cout << "Master: " << sNextUnitId << " -> add " << typeid(*item).name() << std::endl;
+				return id;
 			}
-			map[id.first] = item;
-			return {id.first, &map};
+			else
+			{
+				assert(id >= BEGIN_STATIC_ID_SPACE);
+				//std::cout << "Master: " << id << " -> add static " << typeid(*item).name() << std::endl;
+				return id;
+			}
 		}
 
+		void SerializeManager::deleteMasterId(size_t id, SerializableUnitBase * unit)
+		{
+			if (id >= RESERVED_ID_COUNT)
+			{
+				std::lock_guard guard(sMasterMappingMutex);
+				auto it = sMasterMappings.find(id);
+				assert(it->second == unit);
+				sMasterMappings.erase(it);
+			}
+			else
+			{
+				assert(id >= BEGIN_STATIC_ID_SPACE);
+			}
+		}
 
 		std::set<BufferedOutStream*, CompareStreamId> SerializeManager::getMasterMessageTargets()
 		{
@@ -277,7 +270,7 @@ namespace Engine
 			mMasterStreams.clear();
 		}
 
-		StreamError SerializeManager::setSlaveStream(BufferedInOutStream &&stream, bool receiveState, std::chrono::milliseconds timeout)
+		StreamError SerializeManager::setSlaveStream(BufferedInOutStream &&stream, bool receiveState, TimeOut timeout)
 		{
 			if (mSlaveStream)
 				return UNKNOWN_ERROR;
@@ -307,19 +300,18 @@ namespace Engine
 					{
 						unit->initSlaveId();
 					}
-					std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 					mReceivingMasterState = true;
 					while (mReceivingMasterState)
 					{
-						if (timeout > std::chrono::milliseconds{} && std::chrono::duration_cast<std::chrono::milliseconds>
-							(std::chrono::steady_clock::now() - start) > timeout)
-						{
-							state = TIMEOUT;
-							mReceivingMasterState = false;
-						}
-						if (!receiveMessages(*mSlaveStream, -1))
+						int msgCount = -1;
+						if (!receiveMessages(*mSlaveStream, msgCount))
 						{
 							state = mSlaveStream->error();
+							mReceivingMasterState = false;
+						}
+						if (mReceivingMasterState && timeout.expired())
+						{
+							state = TIMEOUT;
 							mReceivingMasterState = false;
 						}
 					}
@@ -411,18 +403,18 @@ namespace Engine
 		}
 
 
-		void SerializeManager::receiveMessages(int msgCount)
+		void SerializeManager::receiveMessages(int msgCount, TimeOut timeout)
 		{
 			if (mSlaveStream && !mSlaveStreamInvalid)
 			{
-				if (!receiveMessages(*mSlaveStream, msgCount))
+				if (!receiveMessages(*mSlaveStream, msgCount, timeout))
 				{
 					removeSlaveStream();
 				}
 			}
 			for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();)
 			{
-				if (!receiveMessages(const_cast<BufferedInOutStream&>(*it), msgCount))
+				if (!receiveMessages(const_cast<BufferedInOutStream&>(*it), msgCount, timeout))
 				{					
 					it = mMasterStreams.erase(it);
 				}
@@ -472,16 +464,39 @@ namespace Engine
 				return nullptr;
 			try
 			{
-				if (mSlaveStream && &in == &*mSlaveStream)
+				if (mSlaveStream && (&in == &*mSlaveStream))
 				{
 					return mSlaveMappings.at(unit);
 				}
-				SerializableUnitBase* u = sMasterMappings->at(unit);
-				if (find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end())
+				else
 				{
-					throw SerializeException("Illegal Toplevel-Id used! Possible configuration mismatch!");
+					if (unit < RESERVED_ID_COUNT)
+					{
+						assert(unit >= BEGIN_STATIC_ID_SPACE);
+						auto it = std::find_if(mTopLevelUnits.begin(), mTopLevelUnits.end(), [unit](TopLevelSerializableUnitBase *topLevel)
+						{
+							return topLevel->masterId() == unit;
+						});
+						if (it == mTopLevelUnits.end())
+						{
+							throw SerializeException("Illegal TopLevel-Id used! Possible configuration mismatch!");
+						}
+						return *it;
+					}
+					else
+					{
+						SerializableUnitBase* u;
+						{
+							std::lock_guard guard(sMasterMappingMutex);
+							u = sMasterMappings.at(unit);
+						}
+						if (find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end())
+						{
+							throw SerializeException("Illegal Toplevel-Id used! Possible configuration mismatch!");
+						}
+						return u;
+					}
 				}
-				return u;
 			}
 			catch (const std::out_of_range&)
 			{
@@ -508,41 +523,44 @@ namespace Engine
 			return mSlaveStreamDisconnected;
 		}
 
-		bool SerializeManager::receiveMessages(BufferedInOutStream &stream, int msgCount)
+		bool SerializeManager::receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout)
 		{
-			if (stream.isClosed()) return false;
 
-
-			while (stream.isMessageAvailable() && msgCount != 0)
+			while (!stream.isClosed() && ((stream.isMessageAvailable() && msgCount == -1) || msgCount > 0))
 			{
-				try
+				while (stream.isMessageAvailable() && msgCount != 0)
 				{
-					readMessage(stream);
+					try
+					{
+						readMessage(stream);
+					}
+					catch (const SerializeException& e)
+					{
+						LOG_ERROR(e.what());
+					}
+					if (msgCount > 0)
+					{
+						--msgCount;
+					}
+					if (!timeout.isZero() && timeout.expired())
+						break;
 				}
-				catch (const SerializeException& e)
-				{
-					LOG_ERROR(e.what());
-				}
-				if (stream.isClosed())
-					return false;
-				if (msgCount > 0)
-					--msgCount;
+				if (timeout.expired())
+					break;
 			}
 
 			return !stream.isClosed();
 		}
 
-		bool SerializeManager::sendAllMessages(BufferedInOutStream &stream, std::chrono::milliseconds timeout)
+		bool SerializeManager::sendAllMessages(BufferedInOutStream &stream, TimeOut timeout)
 		{
-			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 			while (int result = stream.sendMessages())
 			{
 				if (result == -1)
 				{
 					return false;
 				}
-				if (timeout > std::chrono::milliseconds{} && std::chrono::duration_cast<std::chrono::milliseconds>
-					(std::chrono::steady_clock::now() - start) > timeout)
+				if (timeout.expired())
 				{
 					return false;
 				}

@@ -51,6 +51,8 @@ namespace Engine
 
 			virtual bool filter(SerializeOutStream* stream) const;
 
+			void setSlaveId(size_t id);
+
 		private:
 
 			virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
@@ -60,7 +62,6 @@ namespace Engine
 			size_t addObservable(Observable* val);
 			void addSerializable(Serializable* val);
 
-			void setSlaveId(size_t id);
 			void clearSlaveId();
 
 			void setDataSynced(bool b);
@@ -72,7 +73,7 @@ namespace Engine
 			friend struct SerializeManager;
 			friend class Serializable;
 			friend class Observable;
-			friend class TopLevelSerializableUnitBase;
+			//friend class TopLevelSerializableUnitBase;
 			friend struct SerializeUnitHelper;
 			template <class T>
 			friend class __serialized__impl__::SerializedUnit;
@@ -87,7 +88,7 @@ namespace Engine
 			SerializableUnitBase* mParent = nullptr;
 
 			size_t mSlaveId = 0;
-			std::pair<size_t, SerializableUnitMap*> mMasterId;
+			size_t mMasterId;
 
 			bool mSynced = false;
 

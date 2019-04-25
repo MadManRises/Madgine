@@ -102,14 +102,23 @@ namespace Engine
 			return s;
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, std::chrono::milliseconds timeout)
+		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, TimeOut timeout)
 		{
 			fd_set readSet;
 			FD_ZERO(&readSet);
 			FD_SET(s, &readSet);
 			timeval timeout_s;
-			timeout_s.tv_sec = static_cast<long>(timeout.count()) / 1000;
-			timeout_s.tv_usec = static_cast<long>(timeout.count()) % 1000 * 1000;
+			if (timeout.isInfinite())
+			{
+				timeout_s.tv_sec = 0;
+				timeout_s.tv_usec = 0;
+			}
+			else
+			{
+				std::chrono::milliseconds remainder = std::chrono::duration_cast<std::chrono::milliseconds>(timeout.remainder());
+				timeout_s.tv_sec = static_cast<long>(remainder.count()) / 1000;
+				timeout_s.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
+			}
 			if (select(static_cast<int>(s), &readSet, nullptr, nullptr, &timeout_s) > 0)
 			{
 				SocketId sock = ::accept(s, nullptr, nullptr);

@@ -19,29 +19,20 @@ namespace Engine
 	{
 		thread_local std::list<SerializableUnitBase*> sStack;
 
-		SerializableUnitBase::SerializableUnitBase(size_t masterId)
+		SerializableUnitBase::SerializableUnitBase(size_t masterId) :
+			mMasterId(SerializeManager::generateMasterId(masterId, this))
 		{
-			if (masterId == 0)
-			{
-				mMasterId = SerializeManager::addMasterMapping(this);
-			}
-			else
-			{
-				mMasterId = SerializeManager::addStaticMasterMapping(this, masterId);
-			}
 			insertInstance();
 		}
 
-		SerializableUnitBase::SerializableUnitBase(const SerializableUnitBase& other)
+		SerializableUnitBase::SerializableUnitBase(const SerializableUnitBase& other) :
+			SerializableUnitBase()
 		{
-			mMasterId = SerializeManager::addMasterMapping(this);
-			insertInstance();
 		}
 
-		SerializableUnitBase::SerializableUnitBase(SerializableUnitBase&& other) noexcept
+		SerializableUnitBase::SerializableUnitBase(SerializableUnitBase&& other) noexcept :
+			SerializableUnitBase()
 		{
-			mMasterId = SerializeManager::updateMasterMapping(other.mMasterId, this);
-			insertInstance();
 		}
 
 		SerializableUnitBase::~SerializableUnitBase()
@@ -54,7 +45,7 @@ namespace Engine
 			assert(!mSynced);
 
 			clearSlaveId();
-			SerializeManager::removeMasterMapping(mMasterId, this);
+			SerializeManager::deleteMasterId(mMasterId, this);
 		}
 
 		void SerializableUnitBase::writeState(SerializeOutStream& out) const
@@ -67,7 +58,7 @@ namespace Engine
 
 		void SerializableUnitBase::writeId(SerializeOutStream& out) const
 		{
-			out << mMasterId.first;
+			out << mMasterId;
 		}
 
 		size_t SerializableUnitBase::readId(SerializeInStream& in)
@@ -231,7 +222,7 @@ namespace Engine
 
 		size_t SerializableUnitBase::masterId() const
 		{
-			return mMasterId.first;
+			return mMasterId;
 		}
 
 		void SerializableUnitBase::setSlaveId(size_t id)

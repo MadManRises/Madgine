@@ -57,7 +57,7 @@ namespace Engine
 			return false;
 		}
 
-		Serialize::StreamError NetworkManager::connect(const std::string& url, int portNr, std::chrono::milliseconds timeout)
+		Serialize::StreamError NetworkManager::connect(const std::string& url, int portNr, TimeOut timeout)
 		{
 			if (isConnected())
 			{
@@ -80,7 +80,7 @@ namespace Engine
 			return Serialize::NO_ERROR;
 		}
 
-		void NetworkManager::connect_async(const std::string& url, int portNr, std::chrono::milliseconds timeout)
+		void NetworkManager::connect_async(const std::string& url, int portNr, TimeOut timeout)
 		{
 			std::thread(&NetworkManager::connect, this, url, portNr, timeout).detach();
 		}
@@ -125,7 +125,7 @@ namespace Engine
 			return count;
 		}
 
-		Serialize::StreamError NetworkManager::acceptConnection(std::chrono::milliseconds timeout)
+		Serialize::StreamError NetworkManager::acceptConnection(TimeOut timeout)
 		{
 			if (isConnected())
 			{
@@ -160,7 +160,7 @@ namespace Engine
 			return mConnectionResult;
 		}
 
-		void NetworkManager::onConnectionEstablished(std::chrono::milliseconds timeout)
+		void NetworkManager::onConnectionEstablished(TimeOut timeout)
 		{
 			bool success = setSlaveStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(mSocket, *this) }, true, timeout);
 

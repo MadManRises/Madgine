@@ -105,9 +105,16 @@ TEST(Serialize_Container, Test1)
 
 	mgr1.addMasterStream(BufferedInOutStream{ std::make_unique<TestBuf>(buffer, mgr1, 1) });
 	mgr1.sendMessages();
-	mgr2.setSlaveStream(BufferedInOutStream{ std::make_unique<TestBuf>(buffer, mgr2, 0) });
+	mgr2.setSlaveStream(BufferedInOutStream{ std::make_unique<TestBuf>(buffer, mgr2, 0) }, true, std::chrono::milliseconds{ 1000 });
 
 	ASSERT_EQ(unit1.list1, unit2.list1);
+	ASSERT_EQ(unit1.list2, unit2.list2);
+
+	list2.push_back(6);
+
+	mgr1.sendMessages();
+	mgr2.receiveMessages(1, std::chrono::milliseconds{ 1000 });
+
 	ASSERT_EQ(unit1.list2, unit2.list2);
 
 }

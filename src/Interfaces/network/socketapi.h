@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../generic/timeout.h"
+
 namespace Engine
 {
 	namespace Network
@@ -15,7 +17,7 @@ namespace Engine
 
 			static void closeSocket(SocketId id);
 			static SocketId socket(int port);
-			static std::pair<SocketId, Serialize::StreamError> accept(SocketId s, std::chrono::milliseconds timeout = {});
+			static std::pair<SocketId, Serialize::StreamError> accept(SocketId s, TimeOut timeout = {});
 			static std::pair<SocketId, Serialize::StreamError> connect(const std::string& url, int portNr);
 
 			static int send(SocketId id, char* buf, size_t len);

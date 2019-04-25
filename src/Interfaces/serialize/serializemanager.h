@@ -10,6 +10,8 @@
 
 #include "streams/comparestreamid.h"
 
+#include "../generic/timeout.h"
+
 namespace Engine
 {
 	namespace Serialize
@@ -43,10 +45,8 @@ namespace Engine
 			void addSlaveMapping(SerializableUnitBase* item);
 			void removeSlaveMapping(SerializableUnitBase* item);
 
-			static std::pair<size_t, SerializableUnitMap*> addStaticMasterMapping(SerializableUnitBase* item, size_t id);
-			static std::pair<size_t, SerializableUnitMap*> addMasterMapping(SerializableUnitBase* item);
-			static void removeMasterMapping(const std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
-			static std::pair<size_t, SerializableUnitMap*> updateMasterMapping(std::pair<size_t, SerializableUnitMap*>&, SerializableUnitBase* item);
+			static size_t generateMasterId(size_t id, SerializableUnitBase *unit);
+			static void deleteMasterId(size_t id, SerializableUnitBase *unit);
 
 			bool isMaster(SerializeStreambuf* stream) const;
 			bool isMaster() const;
@@ -65,7 +65,7 @@ namespace Engine
 			BufferedOutStream* getSlaveMessageTarget();
 
 			bool isMessageAvailable();
-			void receiveMessages(int msgCount = -1);
+			void receiveMessages(int msgCount = -1, TimeOut timeout = {});
 			void sendMessages();
 			void sendAndReceiveMessages();
 
@@ -82,13 +82,13 @@ namespace Engine
 		protected:
 
 
-			bool receiveMessages(BufferedInOutStream &stream, int msgCount);
-			bool sendAllMessages(BufferedInOutStream &stream, std::chrono::milliseconds timeout = {});
+			bool receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
+			bool sendAllMessages(BufferedInOutStream &stream, TimeOut timeout = {});
 
 			BufferedInOutStream* getSlaveStream();
 
 			void removeAllStreams();
-			StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, std::chrono::milliseconds timeout = {});
+			StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
 			virtual void removeSlaveStream();
 			bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
 			//virtual void removeMasterStream(BufferedInOutStream* stream);
