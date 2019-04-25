@@ -23,11 +23,6 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 
-if (UNIX)
-	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
-endif()
-
-
 option(ENABLE_MEMTRACKING "Enables Mempry Tracking for Heap-Allocations")
 
 if (ENABLE_MEMTRACKING)
