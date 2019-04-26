@@ -43,7 +43,10 @@ namespace Engine
 				if (res)
 					return res->loadData();
 				else
+				{
+					LOG_ERROR("Resource '" << name << "' could not be found!");
 					return {};
+				}
 			}
 
 			void init();

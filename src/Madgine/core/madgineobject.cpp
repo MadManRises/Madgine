@@ -38,6 +38,7 @@ namespace Engine
 				mName = typeid(*this).name();
 				bool result;
 				try {
+					LOG("Initializing: " << mName << "...");
 					result = init();
 				}
 				catch (const DependencyInitException&) {
@@ -52,6 +53,7 @@ namespace Engine
 					callFinalize();
 				}
 				else throw 0;
+				LOG((isInitialized() ? "Success" : "Failure"));
 			}
 			return isInitialized();
 		}
