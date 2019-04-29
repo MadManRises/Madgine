@@ -125,12 +125,6 @@ namespace Engine
 		class NetworkManager;
 	}
 
-
-	namespace Hierarchy
-	{
-		class any_ptr;
-	}
-
 	namespace Plugins
 	{
 		class PluginManager;
