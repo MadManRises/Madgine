@@ -18,7 +18,7 @@ namespace Engine
 		{
 		}
 
-		void StandardLog::log(const std::string& msg, MessageType lvl)
+		void StandardLog::sLog(const std::string& msg, MessageType lvl, const std::string &name)
 		{
 #if ANDROID
 			int prio;
@@ -36,7 +36,7 @@ namespace Engine
 			default:
 				throw 0;
 			}
-			__android_log_print(prio, mName.c_str(), "%s", msg.c_str());
+			__android_log_print(prio, name.c_str(), "%s", msg.c_str());
 #else
 
 			time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -68,6 +68,11 @@ namespace Engine
 			strftime(s, 28, "%d/%m/%Y - %H:%M : ", t);
 			std::cout << s << msg << std::endl;
 #endif
+		}
+
+		void StandardLog::log(const std::string& msg, MessageType lvl)
+		{
+			sLog(msg, lvl, mName);
 			Log::log(msg, lvl);
 		}
 

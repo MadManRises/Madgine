@@ -11,18 +11,20 @@ namespace Engine
 	namespace Util
 	{
 
-		static StandardLog sStandardLog{ "Madgine" };
-		static thread_local Log* sLog = &sStandardLog;
+		static Log* sLog = nullptr;
 		
 
 		void setLog(Log* log)
 		{
-			sLog = log ? log : &sStandardLog;
+			sLog = log;
 		}
 
 		void log(const std::string& msg, MessageType level)
 		{
-			sLog->log(msg.c_str(), level);
+			if (sLog)
+				sLog->log(msg.c_str(), level);
+			else
+				StandardLog::sLog(msg, level);
 		}
 
 		LogDummy::LogDummy(MessageType lvl) :
