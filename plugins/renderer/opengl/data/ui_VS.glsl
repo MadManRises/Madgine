@@ -1,20 +1,20 @@
-#version 300 es
+#version 100
 			
 precision mediump float;
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec4 aColor;
-layout (location = 2) in vec2 aUV;
-layout (location = 3) in uint textureIdx;
+attribute vec3 aPos;
+attribute vec4 aColor;
+attribute vec2 aUV;
+//attribute int textureIdx;
 
-out vec4 color;
-out vec2 uv;
-flat out uint texIdx;
+varying vec4 color;
+varying vec2 uv;
+//varying int texIdx;
 
 void main()
 {
    gl_Position = vec4((aPos * vec3(2,-2,-0.1)) - vec3(1,-1,0), 1.0);
    color = aColor;
    uv = vec2(aUV.x, 1.0 - aUV.y);
-   texIdx = textureIdx;
+   //texIdx = textureIdx;
 }

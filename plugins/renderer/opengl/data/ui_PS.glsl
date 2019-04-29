@@ -1,17 +1,17 @@
-#version 300 es
+#version 100
 
 precision mediump float;
 
 uniform sampler2D textures[2];
 
-in vec4 color;
-in vec2 uv;
-flat in uint texIdx;
+varying vec4 color;
+varying vec2 uv;
+//varying int texIdx;
 
-out vec4 FragColor;
+//out vec4 FragColor;
 
 void main()
 {
-   vec4 texColor = texture(textures[/*texIdx*/1], uv);
-   FragColor = color * texColor;
+   vec4 texColor = texture2D(textures[/*texIdx*/1], uv);
+   gl_FragColor = color * texColor;
 }

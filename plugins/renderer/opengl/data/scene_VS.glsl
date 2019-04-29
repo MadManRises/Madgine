@@ -1,14 +1,14 @@
-#version 300 es
+#version 100
 
 precision mediump float;
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec4 aColor;
-layout (location = 2) in vec3 aNormal;
+attribute vec3 aPos;
+attribute vec4 aColor;
+attribute vec3 aNormal;
 
-out vec4 color;
-out vec3 worldPos;
-out vec3 normal;
+varying vec4 color;
+varying vec3 worldPos;
+varying vec3 normal;
 
 uniform mat4 vp;
 uniform mat4 m;

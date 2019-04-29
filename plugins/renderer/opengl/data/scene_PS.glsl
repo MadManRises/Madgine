@@ -1,12 +1,12 @@
-#version 300 es
+#version 100
 
 precision mediump float;
 
-layout (location = 0) out vec4 FragColor;
+//layout (location = 0) out vec4 FragColor;
 
-in vec4 color;
-in vec3 worldPos;
-in vec3 normal;
+varying vec4 color;
+varying vec3 worldPos;
+varying vec3 normal;
 
 uniform vec3 lightColor;
 uniform vec3 lightDir;
@@ -21,5 +21,5 @@ void main()
 	float diff = max(dot(norm, -lightDir), 0.0f);
 	vec3 diffuse = diffuseStrength * diff * lightColor;
 
-    FragColor = vec4(ambient + diffuse,1.0) * color;
+    gl_FragColor = vec4(ambient + diffuse,1.0) * color;
 }
