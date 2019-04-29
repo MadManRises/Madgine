@@ -21,7 +21,6 @@ namespace Engine
 			TaskQueue("Default")
 		{
 			Util::setLog(&mLog);	
-			workgroup.addThreadInitializer([&]() {Util::setLog(&mLog); });
 			mLog.startConsole();
 			addRepeatedTask([this]() {consoleCheck(); }, std::chrono::milliseconds(20));
 		}
