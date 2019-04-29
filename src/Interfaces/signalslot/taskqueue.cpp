@@ -2,12 +2,12 @@
 
 #include "taskqueue.h"
 
+#include "../threading/workgroup.h"
+
 namespace Engine
 {
 	namespace SignalSlot
 	{
-
-		static thread_local DefaultTaskQueue *sSingleton = nullptr;
 
 		TaskQueue::TaskQueue(const std::string & name) :
 			mName(name)
@@ -49,15 +49,15 @@ namespace Engine
 			return mName;
 		}
 
-		void TaskQueue::update()
+		void TaskQueue::update(int idleCount)
 		{
 			std::chrono::steady_clock::time_point nextAvailableTaskTime;
-			update(nextAvailableTaskTime);
+			update(nextAvailableTaskTime, idleCount);
 		}
 
-		void TaskQueue::update(std::chrono::steady_clock::time_point & nextAvailableTaskTime)
+		void TaskQueue::update(std::chrono::steady_clock::time_point & nextAvailableTaskTime, int idleCount)
 		{
-			while (std::optional<SignalSlot::TaskTracker> f = fetch(nextAvailableTaskTime))
+			while (std::optional<SignalSlot::TaskTracker> f = fetch(nextAvailableTaskTime, idleCount))
 			{
 				f->mTask();
 			}
@@ -91,12 +91,10 @@ namespace Engine
 		DefaultTaskQueue::DefaultTaskQueue() :
 			TaskQueue("Default")
 		{
-			attachToCurrentThread();
 		}
 
 		DefaultTaskQueue::~DefaultTaskQueue()
 		{
-			detachFromCurrentThread();
 		}
 
 		void TaskQueue::queue(TaskHandle&& task, const std::vector<Threading::DataMutex*> &dependencies)
@@ -123,7 +121,7 @@ namespace Engine
 			mCv.notify_one();
 		}
 
-		std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask)
+		std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
 		{
 			std::chrono::steady_clock::time_point nextTaskTimepoint = std::chrono::steady_clock::time_point::max();
 			{
@@ -156,17 +154,19 @@ namespace Engine
 				}
 			}
 			
-			if (mRunning)
+			if (mRunning && idleCount != 0)
 			{
-				if (mTaskCount++ == 0)
+				size_t zero = 0;
+				if (mTaskCount.compare_exchange_strong(zero, 1))
 				{
 					if (std::optional<TaskTracker> task = fetch_on_idle())
 					{
 						--mTaskCount;
+						if (idleCount > 0)
+							--idleCount;
 						return task;
 					}
 				}
-				--mTaskCount;
 			}
 			nextTask = nextTaskTimepoint;
 			return {};
@@ -177,27 +177,14 @@ namespace Engine
 			return mTaskCount == 0;
 		}
 
-		void DefaultTaskQueue::attachToCurrentThread()
-		{
-			assert(!sSingleton);
-			sSingleton = this;
-		}
-
-		void DefaultTaskQueue::detachFromCurrentThread()
-		{
-			assert(sSingleton == this);
-			sSingleton = nullptr;
-		}
-
 		DefaultTaskQueue &DefaultTaskQueue::getSingleton()
 		{
-			assert(sSingleton);
-			return *sSingleton;
+			return Threading::WorkGroup::self().taskQueue();
 		}
 
 		DefaultTaskQueue *DefaultTaskQueue::getSingletonPtr()
 		{
-			return sSingleton;
+			return &getSingleton();
 		}
 
 		TaskTracker::TaskTracker(TaskHandle && task, std::atomic<size_t>& tracker) :

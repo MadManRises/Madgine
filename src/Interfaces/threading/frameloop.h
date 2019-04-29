@@ -36,7 +36,7 @@ namespace Engine
 			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 
-			virtual std::optional<SignalSlot::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask) override;
+			virtual std::optional<SignalSlot::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount) override;
 			virtual std::optional<SignalSlot::TaskTracker> fetch_on_idle() override;
 			virtual bool idle() const override;
 

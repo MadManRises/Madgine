@@ -50,7 +50,9 @@ namespace Engine
 			
 			bool result = true;
 			for (FrameListener* listener : mListeners)
+			{
 				result &= listener->frameStarted(timeSinceLastFrame);
+			}
 			return result;
 		}
 
@@ -59,7 +61,9 @@ namespace Engine
 			PROFILE();
 			bool result = true;
 			for (FrameListener* listener : mListeners)
+			{
 				result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
+			}
 			
 			mTimeBank += timeSinceLastFrame;
 
@@ -91,11 +95,13 @@ namespace Engine
 			PROFILE();
 			bool result = true;
 			for (FrameListener* listener : mListeners)
+			{
 				result &= listener->frameEnded(timeSinceLastFrame);
+			}
 			return result;
 		}
 
-		std::optional<SignalSlot::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask)
+		std::optional<SignalSlot::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
 		{
 			if (running())
 			{
@@ -108,7 +114,7 @@ namespace Engine
 					}
 				}
 			}
-			if (std::optional<SignalSlot::TaskTracker> task = TaskQueue::fetch(nextTask))
+			if (std::optional<SignalSlot::TaskTracker> task = TaskQueue::fetch(nextTask, idleCount))
 			{
 				return task;
 			}
@@ -119,7 +125,9 @@ namespace Engine
 					--mSetupState;
 					std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
 					if (finalize)
+					{
 						return wrapTask(std::move(*finalize));
+					}
 				}
 			}
 			return {};

@@ -23,6 +23,7 @@ namespace Engine
 		struct INTERFACES_EXPORT TaskQueue
 		{
 			TaskQueue(const std::string &name);
+			virtual ~TaskQueue() = default;
 
 			void queue(TaskHandle &&task, const std::vector<Threading::DataMutex*> &dependencies = {});
 			void queue_after(TaskHandle &&task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex*> &dependencies = {});
@@ -30,14 +31,14 @@ namespace Engine
 
 			void addRepeatedTask(TaskHandle &&task, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero());
 
-			virtual std::optional<TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask);
+			virtual std::optional<TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount);
 
 			virtual bool idle() const;
 
 			const std::string &name() const;
 			
-			void update();
-			void update(std::chrono::steady_clock::time_point &nextAvailableTaskTime);
+			void update(int idleCount = -1);
+			void update(std::chrono::steady_clock::time_point &nextAvailableTaskTime, int idleCount = -1);
 			void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
 
 			bool running() const;
@@ -84,9 +85,6 @@ namespace Engine
 			~DefaultTaskQueue();
 
 			DefaultTaskQueue &operator=(const DefaultTaskQueue&) = delete;
-
-			void attachToCurrentThread();
-			void detachFromCurrentThread();
 
 			static DefaultTaskQueue &getSingleton();
 			static DefaultTaskQueue *getSingletonPtr();
