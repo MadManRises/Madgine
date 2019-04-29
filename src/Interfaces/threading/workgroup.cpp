@@ -6,33 +6,31 @@ namespace Engine
 {
 	namespace Threading
 	{
-		static std::vector<std::pair<void(*)(WorkGroup &group), void(*)(WorkGroup &group)>> &sWorkgroupLocalVariables()
+		static THREADLOCAL(WorkGroup*) sSelf = nullptr;
+
+		static std::vector<Any> &sWorkgroupLocalVariables()
 		{
-			static std::vector<std::pair<void(*)(WorkGroup &), void(*)(WorkGroup &)>> data;
-			return data;
+			static std::vector<Any> dummy;
+			return dummy;
 		}
 
 		static size_t sWorkgroupInstanceCounter = 0;		
 
 		WorkGroup::WorkGroup(const std::string & name) :
-			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name),
-			mProfiler(*this)			
+			mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name)		
 		{
-			setCurrentThreadName(mName + "_Main");
-			mProfiler.registerCurrentThread();
-			for (auto p : sWorkgroupLocalVariables())
+			initThread("Main");
+			for (const Any &v : sWorkgroupLocalVariables())
 			{
-				p.first(*this);
+				mLocalVariables.emplace_back(v);
 			}
 		}
 
 		WorkGroup::~WorkGroup()
 		{
-			for (auto p : sWorkgroupLocalVariables())
-			{
-				p.second(*this);
-			}
 			assert(singleThreaded());
+			assert(sSelf == this);
+			sSelf = nullptr;
 		}
 
 		void WorkGroup::addThreadInitializer(SignalSlot::TaskHandle && task)
@@ -69,14 +67,45 @@ namespace Engine
 			return mName;
 		}
 
-		SignalSlot::TaskQueue & WorkGroup::taskQueue()
+		SignalSlot::DefaultTaskQueue & WorkGroup::taskQueue()
 		{
 			return mTaskQueue;
 		}
 
-		void WorkGroup::registerWorkgroupLocalVariable(void(*init)(WorkGroup &), void(*finalize)(WorkGroup&))
+		void WorkGroup::initThread(const std::string &name)
 		{
-			sWorkgroupLocalVariables().emplace_back(init, finalize);
+
+			ThreadLocalStorage::init();
+
+			assert(!sSelf);
+			sSelf = this;
+
+			setCurrentThreadName(mName + "_" + name);
+
+			mProfiler.registerCurrentThread();
+
+			for (const SignalSlot::TaskHandle &task : mThreadInitializers)
+			{
+				task();
+			}
+
+		}
+
+		size_t WorkGroup::registerLocalVariable(Any &&ctor)
+		{
+			sWorkgroupLocalVariables().emplace_back(std::move(ctor));
+			return sWorkgroupLocalVariables().size() - 1;
+		}
+
+		const Any& WorkGroup::localVariable(size_t index)
+		{
+			return self().mLocalVariables.at(index);
+		}
+
+		WorkGroup & WorkGroup::self()
+		{
+			assert(sSelf);
+			return **sSelf;
 		}
 
 	}

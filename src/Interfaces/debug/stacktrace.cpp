@@ -62,6 +62,8 @@ namespace Engine {
 			assert(size + skip + 1 < sizeof(tmpBuffer) / sizeof(tmpBuffer[0]));			
 			trace = backtrace(tmpBuffer, size + skip + 1);
 			memcpy(buffer, tmpBuffer + skip + 1, size * sizeof(void*));				
+#elif EMSCRIPTEN
+			trace = 0;
 #else
 #error "Unsupported Platform!"
 #endif
@@ -115,6 +117,8 @@ namespace Engine {
 			size = 0;
 #elif LINUX
 			char **symbols = backtrace_symbols(data, size);
+#elif EMSCRIPTEN
+			size = 0;
 #endif
 
 			for (int i = 0; i < size && result.size() < 6; ++i) {
@@ -148,6 +152,7 @@ namespace Engine {
 				if (symbols && symbols[i]) {
 					result.emplace_back(data[i], symbols[i]);
 				}
+#elif EMSCRIPTEN
 #else
 #error "Unsupported Platform!"
 #endif

@@ -2,6 +2,10 @@ if (ANDROID)
 
 	add_subdirectory(android)
 
+elseif(EMSCRIPTEN)
+
+	add_subdirectory(sdl)
+
 else()
 
 	option(OIS_BUILD_SHARED_LIBS "Build shared libraries" OFF)

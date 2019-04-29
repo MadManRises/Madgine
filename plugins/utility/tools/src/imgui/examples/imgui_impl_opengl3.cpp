@@ -88,6 +88,10 @@
 #endif
 #endif
 
+#ifdef __EMSCRIPTEN__
+#undef GL_SAMPLER_BINDING
+#endif
+
 // OpenGL Data
 static char         g_GlslVersionString[32] = "";
 static GLuint       g_FontTexture = 0;
@@ -101,8 +105,13 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
 {
     // Store GLSL version string so we can refer to it later in case we recreate shaders. Note: GLSL version is NOT the same as GL version. Leave this to NULL if unsure.
 #ifdef USE_GL_ES3
-    if (glsl_version == NULL)
+#ifdef __EMSCRIPTEN__
+	if (glsl_version == NULL)
+		glsl_version = "#version 100";
+#else
+	if (glsl_version == NULL)
         glsl_version = "#version 300 es";
+#endif
 #else
     if (glsl_version == NULL)
         glsl_version = "#version 130";
@@ -283,7 +292,7 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     glBindTexture(GL_TEXTURE_2D, g_FontTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    //glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
@@ -353,7 +362,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     // Parse GLSL version string
     int glsl_version = 130;
     sscanf(g_GlslVersionString, "#version %d", &glsl_version);
-
+		
     const GLchar* vertex_shader_glsl_120 =
         "uniform mat4 ProjMtx;\n"
         "attribute vec2 Position;\n"

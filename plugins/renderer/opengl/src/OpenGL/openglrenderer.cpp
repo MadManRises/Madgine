@@ -25,7 +25,7 @@ namespace Engine {
 		extern Display *sDisplay;
 	}
 }
-#elif ANDROID
+#elif ANDROID || EMSCRIPTEN
 #include<EGL/egl.h>
 namespace Engine {
 	namespace Window {
@@ -102,7 +102,7 @@ namespace Engine {
 			if (!glXMakeCurrent(Window::sDisplay, window->mHandle, context))
 				exit(errno);
 
-#elif ANDROID
+#elif ANDROID || EMSCRIPTEN
 
 			const EGLint attribs[] = {
 					EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -140,7 +140,7 @@ namespace Engine {
 			wglMakeCurrent(NULL, NULL);
 #elif LINUX
 			glXMakeCurrent(Window::sDisplay, None, NULL);
-#elif ANDROID
+#elif ANDROID || EMSCRIPTEN
 			eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 #endif
 		}
@@ -157,14 +157,14 @@ namespace Engine {
 			wglDeleteContext(context);
 #elif LINUX
 			glXDestroyContext(Window::sDisplay, context);
-#elif ANDROID
+#elif ANDROID || EMSCRIPTEN
 			eglDestroyContext(Window::sDisplay, context);
 #endif
 		}
 
 
 
-#if !ANDROID
+#if !ANDROID && !EMSCRIPTEN
 		namespace {
 			void OpenGLInit() {
 				Engine::Window::WindowSettings settings;
@@ -198,7 +198,7 @@ namespace Engine {
 
 		bool OpenGLRenderer::init()
 		{	
-#if !ANDROID
+#if !ANDROID && !EMSCRIPTEN
 			static std::mutex sMutex;
 			static bool init = false;
 			
@@ -218,7 +218,7 @@ namespace Engine {
 
 		}
 
-#if !ANDROID
+#if !ANDROID && !EMSCRIPTEN
 		static void glDebugOutput(GLenum source,
 			GLenum type,
 			GLuint id,
@@ -272,7 +272,7 @@ namespace Engine {
 		{
 			ContextHandle context = setupWindowInternal(w->window());
 
-#if !ANDROID
+#if !ANDROID && !EMSCRIPTEN
 			glEnable(GL_DEBUG_OUTPUT);
 			glCheck();
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

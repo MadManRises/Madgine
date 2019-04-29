@@ -1,5 +1,6 @@
 
 include (android)
+include (emscripten)
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp)
@@ -18,6 +19,8 @@ endif()
 
 if (ANDROID)
 	target_link_plugins(MadgineLauncher PUBLIC AndroidInput)
+elseif (EMSCRIPTEN)
+	target_link_plugins(MadgineLauncher PUBLIC SDLInput)
 else()
 	target_link_plugins(MadgineLauncher PUBLIC OISHandler)
 endif()

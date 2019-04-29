@@ -11,8 +11,11 @@ namespace Engine
 
 			int go();
 
+			void singleLoop();
+
 		private:
 			void schedulerLoop(SignalSlot::TaskQueue *queue);
+
 
 		private:
 			bool mActive = true;

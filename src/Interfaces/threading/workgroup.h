@@ -6,10 +6,13 @@
 #include "threadapi.h"
 #include "../signalslot/taskguard.h"
 
+#include "threadlocal.h"
+
 namespace Engine 
 {
 	namespace Threading 
 	{
+
 
 		struct INTERFACES_EXPORT WorkGroup 
 		{
@@ -38,23 +41,23 @@ namespace Engine
 
 			const std::string &name() const;
 
-			SignalSlot::TaskQueue &taskQueue();
+			SignalSlot::DefaultTaskQueue &taskQueue();
 
-			static void registerWorkgroupLocalVariable(void(*)(WorkGroup &), void(*)(WorkGroup&));
+			static size_t registerLocalVariable(Any &&);
+
+			static const Any &localVariable(size_t index);
+
+			static WorkGroup &self();
 
 		private:
+
+			void initThread(const std::string &name);
 
 			template <typename F, typename... Args>
 			int threadMain(const std::string &name, F&& main, Args&&... args)
 			{
-				setCurrentThreadName(mName + "_" + name);
+				initThread(name);
 				try {
-					SignalSlot::TaskGuard guard([&]() {mTaskQueue.attachToCurrentThread(); }, [&]() {mTaskQueue.detachFromCurrentThread(); });
-
-					for (const SignalSlot::TaskHandle &task : mThreadInitializers)
-					{
-						task();
-					}
 					return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., *this);
 				}
 				catch (std::exception &e)
@@ -73,38 +76,15 @@ namespace Engine
 			std::vector<std::future<int>> mSubThreads;
 			std::vector<SignalSlot::TaskHandle> mThreadInitializers;
 			Debug::Profiler::Profiler mProfiler;
+
+			std::vector<Any> mLocalVariables;
 		};
 
 
 
-		template <typename T, size_t ID = 0 >
-		struct WorkgroupLocal
-		{
-			inline static thread_local T *data = nullptr;
-			WorkgroupLocal() {
-				WorkGroup::registerWorkgroupLocalVariable(
-				[](WorkGroup &group) {
-					T *item = new T;
-					data = item;
-					group.addThreadInitializer([item]() {data = item; });
-				},
-				[](WorkGroup &group) {
-					delete data;
-					data = nullptr;
-				});
-			}
+		template <typename T>
+		using WorkgroupLocal = ThreadLocal<T, WorkGroup>;
 
-			T *operator->()
-			{
-				return data;
-			}
-
-			T &operator*()
-			{
-				return *data;
-			}
-			
-		};
 
 	}
 }

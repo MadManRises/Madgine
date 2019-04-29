@@ -29,6 +29,8 @@
 
 #include "../imgui/imgui.h"
 
+#include "imguimanager.h"
+
 
 UNIQUECOMPONENT(Engine::Tools::ImGuiRoot);
 

@@ -47,10 +47,10 @@ endif()
 if(HAVE_STDDEF_H)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_STDDEF_H)
 endif()
-check_type_size(off64_t OFF64_T)
-if(HAVE_OFF64_T)
-   add_definitions(-D_LARGEFILE64_SOURCE=1)
-endif()
+#check_type_size(off64_t OFF64_T)
+#if(HAVE_OFF64_T)
+#   add_definitions(-D_LARGEFILE64_SOURCE=1)
+#endif()
 set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 
 #

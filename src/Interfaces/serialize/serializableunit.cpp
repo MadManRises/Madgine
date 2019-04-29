@@ -13,11 +13,13 @@
 
 #include "serializable.h"
 
+#include "../threading/threadlocal.h"
+
 namespace Engine
 {
 	namespace Serialize
 	{
-		thread_local std::list<SerializableUnitBase*> sStack;
+		THREADLOCAL(std::list<SerializableUnitBase*>) sStack;
 
 		SerializableUnitBase::SerializableUnitBase(size_t masterId) :
 			mMasterId(SerializeManager::generateMasterId(masterId, this))
@@ -37,7 +39,7 @@ namespace Engine
 
 		SerializableUnitBase::~SerializableUnitBase()
 		{
-			if (find(sStack.begin(), sStack.end(), this) != sStack.end())
+			if (find(sStack->begin(), sStack->end(), this) != sStack->end())
 			{
 				removeInstance();
 			}
@@ -172,15 +174,15 @@ namespace Engine
 		void SerializableUnitBase::insertInstance()
 		{
 			findParentIt(this, this + 1);
-			sStack.emplace_front(this);
+			sStack->emplace_front(this);
 			//std::cout << "Stack size: " << sStack.size() << std::endl;
 		}
 
 		void SerializableUnitBase::removeInstance()
 		{
-			assert(*sStack.begin() == this);
+			assert(*sStack->begin() == this);
 			//if (it != intern::stack.end()) {
-			sStack.erase(sStack.begin());
+			sStack->erase(sStack->begin());
 			//std::cout << "Stack size: " << sStack.size() << std::endl;
 			//}
 		}
@@ -188,7 +190,7 @@ namespace Engine
 		SerializableUnitBase* SerializableUnitBase::findParent(void* from, void* to)
 		{
 			auto it = findParentIt(from, to);
-			if (it != sStack.end())
+			if (it != sStack->end())
 			{
 				return *it;
 			}
@@ -197,14 +199,14 @@ namespace Engine
 
 		std::list<SerializableUnitBase*>::iterator SerializableUnitBase::findParentIt(void* from, void* to)
 		{
-			auto it = std::find_if(sStack.begin(), sStack.end(), [&](SerializableUnitBase* const p)
+			auto it = std::find_if(sStack->begin(), sStack->end(), [&](SerializableUnitBase* const p)
 			{
 				return p <= from && to <= reinterpret_cast<char*>(p) + p->getSize();
 			});
-			if (it != sStack.end())
+			if (it != sStack->end())
 			{
-				assert(it == sStack.begin());
-				sStack.erase(sStack.begin(), it);
+				assert(it == sStack->begin());
+				sStack->erase(sStack->begin(), it);
 			}
 			return it;
 		}

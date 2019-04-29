@@ -2,6 +2,7 @@
 
 #include "processstats.h"
 
+#include "../../threading/threadlocal.h"
 
 namespace Engine
 {
@@ -15,7 +16,7 @@ namespace Engine
 			{
 				ProfileGuard(T &t) : mT(t) 
 				{
-					t.start();
+					mT.start();
 				}
 				~ProfileGuard()
 				{
@@ -41,7 +42,7 @@ namespace Engine
 			class INTERFACES_EXPORT Profiler
 			{
 			public:
-				Profiler(Threading::WorkGroup &workGroup);
+				Profiler();
 				Profiler(const Profiler&) = delete;
 				~Profiler();
 
@@ -73,7 +74,7 @@ namespace Engine
 			};
 
 
-#define PROFILE_NAMED(name) thread_local Engine::Debug::Profiler::StaticProcess __sProcess(name); Engine::Debug::Profiler::ProfileGuard<Engine::Debug::Profiler::StaticProcess> __profileGuard{ __sProcess }
+#define PROFILE_NAMED(name) static THREADLOCAL(Engine::Debug::Profiler::StaticProcess) __sProcess(name); Engine::Debug::Profiler::ProfileGuard<Engine::Debug::Profiler::StaticProcess> __profileGuard{ __sProcess }
 #define PROFILE() PROFILE_NAMED(__FUNCTION__)
 		}
 	}

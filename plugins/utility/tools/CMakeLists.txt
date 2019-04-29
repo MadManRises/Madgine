@@ -25,4 +25,6 @@ target_link_plugins(Tools PUBLIC OpenGL)
 
 target_link_libraries(Tools PUBLIC Client)
 
-set_source_files_properties(src/imgui/examples/imgui_impl_opengl3.cpp PROPERTIES COMPILE_DEFINITIONS IMGUI_IMPL_OPENGL_LOADER_GLAD)
+if (NOT ANDROID AND NOT EMSCRIPTEN)
+	set_source_files_properties(src/imgui/examples/imgui_impl_opengl3.cpp PROPERTIES COMPILE_DEFINITIONS IMGUI_IMPL_OPENGL_LOADER_GLAD)
+endif()

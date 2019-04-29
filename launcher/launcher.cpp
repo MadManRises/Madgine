@@ -10,16 +10,24 @@
 #	include <conio.h>
 #endif
 
+#if EMSCRIPTEN
+#	define FIX_LOCAL static
+#else
+#	define FIX_LOCAL
+#endif
+
 DLL_EXPORT int main() {
 	int result;
 	{
-		Engine::Threading::WorkGroup workGroup("Launcher");
-		Engine::Core::Root root;
-		Engine::App::AppSettings settings;
+		FIX_LOCAL Engine::Threading::WorkGroup workGroup("Launcher");
+		FIX_LOCAL Engine::Core::Root root;
+		FIX_LOCAL Engine::App::AppSettings settings;
 		settings.mRunMain = false;
 		settings.mAppName = "Madgine Client";
-		settings.mWindowSettings.mTitle = "Maditor";	
-		result = Engine::App::Application::run(settings, workGroup);
+		settings.mWindowSettings.mTitle = "Maditor";
+		FIX_LOCAL Engine::App::Application app(settings);
+		FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup, { &app.frameLoop() });
+		result = scheduler.go();
 	}
 #if WINDOWS
 	while (!_kbhit());

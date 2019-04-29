@@ -80,14 +80,14 @@ namespace Engine {
 				(void*)28            // array buffer offset
 			);
 			glEnableVertexAttribArray(2);			
-			glVertexAttribIPointer(
+			/*glVertexAttribIPointer(
 				3,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
 				1,                  // size
 				GL_UNSIGNED_INT,           // type
 				sizeof(GUI::Vertex),                  // stride
 				(void*)36            // array buffer offset
 			);			
-			glEnableVertexAttribArray(3);			
+			glEnableVertexAttribArray(3);			*/
 
 			mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);			
 			GLubyte borderColor[] = { 255, 255, 255, 255 };
@@ -111,20 +111,21 @@ namespace Engine {
 
 			updateRenderTargets();
 			glActiveTexture(GL_TEXTURE0);
+			glCheck();
 			mDefaultTexture.bind();
-
+			
 			Vector3 screenPos, screenSize;
 			std::tie(screenPos, screenSize) = window()->getAvailableScreenSpace();
-
+			
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
-
+			
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			mProgram.bind();
-
 			
+			mProgram.bind();
+			
+
 			std::vector<GUI::Vertex> vertices;
 
 			std::queue<std::pair<GUI::Widget*, int>> q;
@@ -139,7 +140,7 @@ namespace Engine {
 				GUI::Widget *w = q.front().first;
 				int depth = q.front().second;
 				q.pop();
-				
+	
 
 				for (GUI::Widget *c : w->children()) {
 					if (c->isVisible())
@@ -151,14 +152,14 @@ namespace Engine {
 
 				std::move(localVertices.begin(), localVertices.end(), std::back_inserter(vertices));
 				
-			}			
+			}		
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
+			
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
+			
 			glBindVertexArray(vao);
-
+			
 			// Draw the triangle !
 			glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle			
 			

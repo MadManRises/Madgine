@@ -87,6 +87,8 @@ namespace Engine
 			return SharedLibraryQuery{ Path(buffer).parentPath() };
 #elif ANDROID
 			return SharedLibraryQuery{ Path("/data/data/com.Madgine.MadgineLauncher/lib") };//TODO
+#elif EMSCRIPTEN
+			throw 0;
 #else
 #error "Unsupported Platform!"
 #endif

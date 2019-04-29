@@ -19,13 +19,20 @@
 
 #include "clientlib.h"
 
-#if !ANDROID
+#if !ANDROID && !EMSCRIPTEN
 #include "../glad/glad.h"
 #else
 #include <GLES3/gl3.h>
 #endif
 
-inline void glCheck() { int e = glGetError(); if (e) throw e; };
+inline void glCheck() { 
+	int e = glGetError(); 
+	if (e)
+	{
+		LOG("GL-Error: " << e);
+		throw e;
+	}
+}
 
 #if WINDOWS
 
@@ -38,10 +45,14 @@ typedef struct __GLXcontextRec *GLXContext;
 
 typedef GLXContext ContextHandle;
 
-#elif ANDROID
+#elif ANDROID || EMSCRIPTEN
 
 typedef void *EGLContext;
 typedef EGLContext ContextHandle;
+
+#else
+
+#error "Unsupported Platform!"
 
 #endif
 
