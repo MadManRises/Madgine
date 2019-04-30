@@ -129,17 +129,18 @@ namespace Engine{
 				if (info->mBinary == bin)
 				{
 					mUnloadedCollectors.push_back(info);
+					it = mLoadedCollectors.erase(it);
 					mComponents.erase(mComponents.begin() + info->mBaseIndex, mComponents.begin() + info->mBaseIndex + info->mComponents.size());
 
 					for (CollectorInfo *i : mLoadedCollectors) {
 						if (i->mBaseIndex >= info->mBaseIndex)
 							i->mBaseIndex -= info->mComponents.size();
 					}
-					info->mBaseIndex = -1;
 
 					std::vector<F> clearV{};
 					mUpdate.emit(info, false, clearV);
-					it = mLoadedCollectors.erase(it);
+					
+					info->mBaseIndex = -1;
 				}
 				else
 				{

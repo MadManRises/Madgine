@@ -30,9 +30,7 @@ namespace Engine
 			mSettings("Madgine_plugins.cfg")
 		{
 			assert(!sSingleton);
-			sSingleton = this;
-
-			setupCoreSection();
+			sSingleton = this;			
 
 			if (!mSettings["State"]["CurrentSelectionFile"].empty()) {
 				Filesystem::Path p = selectionFiles()[mSettings["State"]["CurrentSelectionFile"]];
@@ -188,18 +186,6 @@ namespace Engine
 		{
 			section->removeListener(listener);
 		}
-
-		void PluginManager::setupCoreSection()
-		{
-			const std::set<std::string> coreLibraries = { "Base" };
-			/*const std::set<std::string> loadedLibraries = Filesystem::listLoadedLibraries();
-			std::set<std::string> loadedCoreLibraries;
-			std::set_intersection(coreLibraries.begin(), coreLibraries.end(), loadedLibraries.begin(), loadedLibraries.end(),
-				std::inserter(loadedCoreLibraries, loadedCoreLibraries.begin()));
-			auto pib = mSections.try_emplace("Core", *this, "Core", loadedCoreLibraries);*/
-			auto pib = mSections.try_emplace({ mProject, "Core" }, *this, mProject, "Core", coreLibraries);
-			assert(pib.second);
-		}		
 
 	}
 }

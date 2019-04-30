@@ -19,17 +19,10 @@
 namespace Engine {
 	namespace Plugins {
 
-		PluginSection::PluginSection(PluginManager& mgr, const std::string &project, const std::string& name, const std::set<std::string> &fixedPlugins) :
+		PluginSection::PluginSection(PluginManager& mgr, const std::string &project, const std::string& name) :
 			mMgr(mgr),
 			mName(name)
 		{
-			for (const std::string &name : fixedPlugins)
-			{
-				auto pib = mPlugins.try_emplace(name, name);
-				assert(pib.second);
-				auto result = pib.first->second.load();
-				assert(result);
-			}
 			for (auto path : Filesystem::listSharedLibraries())
 			{
 				//TODO
@@ -111,6 +104,13 @@ namespace Engine {
 			if (!plugin)
 				return false;
 			return unloadPlugin(plugin);
+		}
+
+		bool PluginSection::loadPluginByFilename(const std::string & name)
+		{
+			auto pib = mPlugins.try_emplace(name, name);
+			assert(pib.second);
+			return pib.first->second.load();				
 		}
 
 		void PluginSection::addListener(PluginListener * listener)

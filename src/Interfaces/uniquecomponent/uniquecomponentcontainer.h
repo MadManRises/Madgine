@@ -109,6 +109,7 @@ namespace Engine
 		}
 
 	private:
+		//TODO Consider virtual calls instead
 		SignalSlot::Slot<&UniqueComponentContainer<Base, _Ty, C>::updateComponents> mUpdateSlot;
 		_Ty mArg;
 

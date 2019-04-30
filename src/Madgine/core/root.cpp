@@ -30,6 +30,8 @@ namespace Engine
 			mResources(std::make_unique<Resources::ResourceManager>())
 		{
 #ifndef STATIC_BUILD
+			(*mPluginManager)["Core"].loadPluginByFilename("Base");
+
 			(*mPluginManager)["Utility"].loadPlugin("Tools");
 
 			(*mPluginManager)["Core"].loadPlugin("Client");

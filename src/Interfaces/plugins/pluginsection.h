@@ -10,7 +10,7 @@ namespace Engine {
 		class INTERFACES_EXPORT PluginSection
 		{
 		public:
-			PluginSection(PluginManager &mgr, const std::string &project, const std::string &name, const std::set<std::string> &fixedPlugins = {});
+			PluginSection(PluginManager &mgr, const std::string &project, const std::string &name);
 
 			void setAtleastOne(bool atleastOne = true);
 			bool isAtleastOne() const;
@@ -20,6 +20,8 @@ namespace Engine {
 			bool isLoaded(const std::string &name) const;
 			bool loadPlugin(const std::string &name);
 			bool unloadPlugin(const std::string &name);
+
+			bool loadPluginByFilename(const std::string &name);
 
 			void addListener(PluginListener *listener);
 			void removeListener(PluginListener *listener);
