@@ -45,4 +45,4 @@ add_gtest(Interfaces_Test ${sources})
 
 target_link_plugins(Interfaces_Test PRIVATE LibB)
 
-
+generate_binary_info(Interfaces_Test)

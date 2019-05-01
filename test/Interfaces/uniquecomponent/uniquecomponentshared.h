@@ -4,6 +4,7 @@
 
 #if defined(STATIC_BUILD)
 #	define TEST_EXPORT
+#	define TEST_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
 #else
 #	if defined(TestShared_EXPORTS)
 #		define TEST_EXPORT DLL_EXPORT
