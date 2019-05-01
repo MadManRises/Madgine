@@ -357,6 +357,10 @@ macro(add_workspace_library name)
 	if (NOT LIB_CONFIG_SOURCE_ROOT)
 		set(LIB_CONFIG_SOURCE_ROOT src)
 	endif()
+
+	if (NOT EXISTS ${sourceDir}/${LIB_CONFIG_SOURCE_ROOT})
+		MESSAGE(SEND_ERROR "Source directory '${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}' does not exist for Library '${name}'. Use SOURCE_ROOT or create the directory.")
+	endif()
 	
 	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}>)
 

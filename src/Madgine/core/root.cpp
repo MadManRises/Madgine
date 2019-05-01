@@ -50,6 +50,8 @@ namespace Engine
 			(*mPluginManager)["Core"].loadPlugin("Menues");
 			(*mPluginManager)["Core"].loadPlugin("Animation");
 			(*mPluginManager)["Core"].loadPlugin("TWServer");
+
+			(*mPluginManager)["Test"];
 #endif
 
 			mResources->init();

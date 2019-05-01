@@ -5,7 +5,7 @@ project(Interfaces_Test)
 set(sharedSources "")
 	FolderSources(sharedSources "" uniquecomponent uniquecomponentshared.cpp uniquecomponentshared.h)
 
-add_library(TestShared ${sharedSources})
+add_workspace_library(TestShared ${sharedSources} SOURCE_ROOT .)
 
 target_link_libraries(TestShared PUBLIC Interfaces)
 
@@ -18,7 +18,7 @@ export_to_workspace(TestShared)
 set(libASources "")
 	FolderSources(libASources "" uniquecomponent libA.cpp)
 
-add_plugin(LibA Test Test ${libASources})
+add_plugin(LibA Test Test ${libASources} SOURCE_ROOT .)
 
 target_link_libraries(LibA PUBLIC TestShared)
 
@@ -26,7 +26,7 @@ target_link_libraries(LibA PUBLIC TestShared)
 set(libBSources "")
 	FolderSources(libBSources "" uniquecomponent libB.cpp)
 
-add_plugin(LibB Test Test ${libBSources})
+add_plugin(LibB Test Test ${libBSources} SOURCE_ROOT .)
 
 target_link_plugins(LibB PUBLIC LibA)
 
