@@ -14,7 +14,6 @@ namespace Engine
 	template <class _Base, class _Ty>
 	struct UniqueComponentCollector
 	{
-	public:
 		typedef _Base Base;
 		typedef _Ty Ty;
 		typedef Collector_F<Base, Ty> F;
@@ -60,7 +59,7 @@ namespace Engine
 			sInstance().mInfo.mElementInfos[i] = nullptr;
 		}
 
-		static size_t baseIndex()
+		static size_t &baseIndex()
 		{
 			return sInstance().mInfo.mBaseIndex;
 		}
@@ -70,7 +69,8 @@ namespace Engine
 		class ComponentRegistrator : public IndexHolder
 		{
 		public:
-			ComponentRegistrator()
+			ComponentRegistrator() :
+				mBaseIndex(baseIndex())
 			{
 				mIndex = registerComponent<T>();
 			}
@@ -83,12 +83,13 @@ namespace Engine
 
 			size_t index() override
 			{
-				return mIndex + baseIndex();
+				return mIndex + mBaseIndex;
 			}
 
 		private:
 			size_t mIndex = -1;
-
+			//Make it a member to prevent problems through weak symbols during link time
+			size_t &mBaseIndex;
 		};
 
 	};
