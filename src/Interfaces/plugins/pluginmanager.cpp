@@ -12,6 +12,8 @@
 
 #include "../filesystem/runtime.h"
 
+#include "../generic/keyvalue.h"
+
 namespace Engine
 {
 	namespace Plugins
@@ -42,7 +44,7 @@ namespace Engine
 
 		bool PluginManager::isLoaded(const std::string & plugin) const
 		{
-			for (const std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections) {
+			for (const std::pair<const std::string, PluginSection> &sec : mSections) {
 				if (sec.second.isLoaded(plugin))
 					return true;
 			}
@@ -54,9 +56,9 @@ namespace Engine
 			return mProject;
 		}
 
-		PluginSection & PluginManager::section(const std::string & project, const std::string & name)
+		PluginSection & PluginManager::section(const std::string & name)
 		{
-			auto pib = mSections.try_emplace({ project, name }, *this, project, name);
+			auto pib = mSections.try_emplace(name, *this, name);
 			if (pib.second) {
 				for (PluginListener *listener : mListeners) {
 					setupListenerOnSectionAdded(listener, &pib.first->second);
@@ -67,35 +69,30 @@ namespace Engine
 
 		PluginSection& PluginManager::operator[](const std::string& name)
 		{
-			return section(mProject, name);
-		}
-
-		const PluginSection & PluginManager::at(const std::string & project, const std::string & name) const
-		{
-			return mSections.at({ project, name });
+			return section(name);
 		}
 
 		const PluginSection& PluginManager::at(const std::string& name) const
 		{
-			return at(mProject, name);
+			return mSections.at(name);
 		}
 
-		std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator PluginManager::begin() const
+		std::map<std::string, PluginSection>::const_iterator PluginManager::begin() const
 		{
 			return mSections.begin();
 		}
 
-		std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator PluginManager::end() const
+		std::map<std::string, PluginSection>::const_iterator PluginManager::end() const
 		{
 			return mSections.end();
 		}
 
-		std::map<std::pair<std::string, std::string>, PluginSection>::iterator PluginManager::begin()
+		std::map<std::string, PluginSection>::iterator PluginManager::begin()
 		{
 			return mSections.begin();
 		}
 
-		std::map<std::pair<std::string, std::string>, PluginSection>::iterator PluginManager::end()
+		std::map<std::string, PluginSection>::iterator PluginManager::end()
 		{
 			return mSections.end();
 		}
@@ -104,11 +101,10 @@ namespace Engine
 		{
 			if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
 				mCurrentSelectionFile->clear();
-				for (const std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections) {
-					/*if (sec.first == "Core")
-						continue;*/
-					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[sec.first.second];
-					for (const std::pair<const std::string, Plugin> &p : sec.second) {
+				for (auto &[name, section] : mSections)
+				{
+					Ini::IniSection &iniSec = (*mCurrentSelectionFile)[name];
+					for (const std::pair<const std::string, Plugin> &p : section) {
 						iniSec[p.first] = p.second.isLoaded() ? "On" : "";
 					}
 				}
@@ -122,10 +118,10 @@ namespace Engine
 			if (mCurrentSelectionFile) {				
 				mCurrentSelectionFile->loadFromDisk();
 				mLoadingCurrentSelectionFile = true;
-				for (std::pair<const std::string, Ini::IniSection> &sec : *mCurrentSelectionFile) {
-					if (sec.first == "Core")
+				for (auto &[name, section] : *mCurrentSelectionFile) {
+					if (name == "Core")
 						continue;
-					(*this)[sec.first].loadFromIni(sec.second);					
+					(*this)[name].loadFromIni(section);					
 				}
 				mLoadingCurrentSelectionFile = false;
 			}
@@ -162,8 +158,8 @@ namespace Engine
 				std::unique_lock lock(mListenersMutex);
 				mListeners.push_back(listener);
 			}
-			for (std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections)
-				setupListenerOnSectionAdded(listener, &sec.second);
+			for (PluginSection &section : kvValues(mSections))
+				setupListenerOnSectionAdded(listener, &section);
 		}
 
 		void PluginManager::removeListener(PluginListener * listener)
@@ -172,8 +168,8 @@ namespace Engine
 				std::unique_lock lock(mListenersMutex);
 				mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
 			}
-			for (std::pair<const std::pair<std::string, std::string>, PluginSection> &sec : mSections)
-				shutdownListenerAboutToRemoveSection(listener, &sec.second);
+			for (PluginSection &section : kvValues(mSections))
+				shutdownListenerAboutToRemoveSection(listener, &section);
 		}
 
 

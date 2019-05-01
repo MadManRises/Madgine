@@ -9,7 +9,7 @@ namespace Engine
 		class INTERFACES_EXPORT Plugin
 		{
 		public:
-			Plugin(std::string name = {}, Filesystem::Path path = {});
+			Plugin(std::string name = {}, std::string project = {}, Filesystem::Path path = {});
 			~Plugin();
 
 			bool isLoaded() const;
@@ -20,9 +20,12 @@ namespace Engine
 
 			Filesystem::Path fullPath() const;
 
+			const std::string &project() const;
+
 		private:
 			void *mModule;
 
+			std::string mProject;
 			std::string mName;
 			Filesystem::Path mPath;
 

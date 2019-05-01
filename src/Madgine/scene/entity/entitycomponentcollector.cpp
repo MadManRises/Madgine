@@ -40,9 +40,9 @@ namespace Engine
 				if (it == sRegisteredComponentsByName()->mComponents.end()) {
 #ifndef STATIC_BUILD
 					typedef PluginEntityComponents *(*ComponentGetter)();
-					for (const std::pair<const std::pair<std::string, std::string>, Plugins::PluginSection> &sec : Plugins::PluginManager::getSingleton()) {
-						for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-							ComponentGetter getter = (ComponentGetter)p.second.getSymbol("pluginEntityComponents");
+					for (Plugins::PluginSection &section : kvValues(Plugins::PluginManager::getSingleton())) {
+						for (const Plugins::Plugin &plugin : kvValues(section)) {
+							ComponentGetter getter = (ComponentGetter)plugin.getSymbol("pluginEntityComponents");
 							if (getter) {
 								it = getter()->mComponents.find(name);
 								if (it != getter()->mComponents.end()) {

@@ -20,9 +20,10 @@ namespace Engine
 	namespace Plugins
 	{
 
-		Plugin::Plugin(std::string name, Filesystem::Path path) :
+		Plugin::Plugin(std::string name, std::string project, Filesystem::Path path) :
 			mModule(nullptr),
 			mPath(std::move(path)),
+			mProject(std::move(project)),
 			mName(std::move(name))
 		{
 			if (mPath.empty() && !mName.empty())
@@ -141,6 +142,11 @@ namespace Engine
 			path = info.dli_fname;
 #endif
 			return path;
+		}
+
+		const std::string & Plugin::project() const
+		{
+			return mProject;
 		}
 
 

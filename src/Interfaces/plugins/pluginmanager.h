@@ -23,15 +23,14 @@ namespace Engine
 
 			const std::string &project() const;
 
-			PluginSection &section(const std::string &project, const std::string &name);
+			PluginSection &section(const std::string &name);
 			PluginSection &operator[](const std::string &name);
-			const PluginSection &at(const std::string &project, const std::string &name) const;
 			const PluginSection &at(const std::string &name) const;
 
-			std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator begin() const;
-			std::map<std::pair<std::string, std::string>, PluginSection>::const_iterator end() const;
-			std::map<std::pair<std::string, std::string>, PluginSection>::iterator begin();
-			std::map<std::pair<std::string, std::string>, PluginSection>::iterator end();
+			std::map<std::string, PluginSection>::const_iterator begin() const;
+			std::map<std::string, PluginSection>::const_iterator end() const;
+			std::map<std::string, PluginSection>::iterator begin();
+			std::map<std::string, PluginSection>::iterator end();
 
 			void saveCurrentSelectionFile();
 			void loadCurrentSelectionFile();
@@ -51,7 +50,7 @@ namespace Engine
 			void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);			
 
 		private:
-			std::map<std::pair<std::string, std::string>, PluginSection> mSections;
+			std::map<std::string, PluginSection> mSections;
 
 			std::vector<PluginListener*> mListeners;
 

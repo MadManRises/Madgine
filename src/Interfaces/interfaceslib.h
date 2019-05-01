@@ -49,6 +49,7 @@
 #include <variant>
 #include <atomic>
 #include <future>
+#include <regex>
 #if WINDOWS
 #include <memory_resource>
 #else

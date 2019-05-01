@@ -43,13 +43,13 @@ namespace Engine
 			(*mPluginManager)["Input"].setExclusive();
 			(*mPluginManager)["Input"].setAtleastOne();
 
-			mPluginManager->section("TW", "Core").loadPlugin("Common");
-			mPluginManager->section("TW", "Core").loadPlugin("Static");
-			mPluginManager->section("TW", "Core").loadPlugin("Camera");
-			mPluginManager->section("TW", "Core").loadPlugin("TWClient");
-			mPluginManager->section("TW", "Core").loadPlugin("Menues");
-			mPluginManager->section("TW", "Core").loadPlugin("Animation");
-			mPluginManager->section("TW", "Core").loadPlugin("TWServer");
+			(*mPluginManager)["Core"].loadPlugin("Common");
+			(*mPluginManager)["Core"].loadPlugin("Static");
+			(*mPluginManager)["Core"].loadPlugin("Camera");
+			(*mPluginManager)["Core"].loadPlugin("TWClient");
+			(*mPluginManager)["Core"].loadPlugin("Menues");
+			(*mPluginManager)["Core"].loadPlugin("Animation");
+			(*mPluginManager)["Core"].loadPlugin("TWServer");
 #endif
 
 			mResources->init();

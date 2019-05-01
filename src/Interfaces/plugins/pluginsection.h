@@ -10,7 +10,7 @@ namespace Engine {
 		class INTERFACES_EXPORT PluginSection
 		{
 		public:
-			PluginSection(PluginManager &mgr, const std::string &project, const std::string &name);
+			PluginSection(PluginManager &mgr, const std::string &name);
 
 			void setAtleastOne(bool atleastOne = true);
 			bool isAtleastOne() const;

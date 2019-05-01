@@ -100,34 +100,33 @@ namespace Engine
 
 				ImGui::BeginChild("Child1", v, false, ImGuiWindowFlags_HorizontalScrollbar);
 
-				for (std::pair<const std::pair<std::string, std::string>, Plugins::PluginSection> &sec : mManager) {
-					if (ImGui::TreeNode(sec.first.first.c_str()))
+				for (auto&[sectionName, section] : mManager) {
+					if (ImGui::TreeNode(sectionName.c_str()))
 					{
-						if (ImGui::TreeNode(sec.first.second.c_str())) {
-							for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-								if (sec.first.first == "Madgine" && ((sec.first.second == "Utility" && p.first == "Tools") || sec.first.second == "Core")) {
-									ImGui::PushDisabled();
-								}
-								bool loaded = p.second.isLoaded();
-								bool clicked = false;
-								if (sec.second.isExclusive()) {
-									clicked = ImGui::RadioButton(p.first.c_str(), loaded);
-									if (clicked)
-										loaded = true;
-								}
-								else
-									clicked = ImGui::Checkbox(p.first.c_str(), &loaded);
-								if (clicked) {
-									if (loaded)
-										sec.second.loadPlugin(p.first);
-									else
-										sec.second.unloadPlugin(p.first);
-								}
-								if (sec.first.first == "Madgine" && ((sec.first.second == "Utility" && p.first == "Tools") || sec.first.second == "Core")) {
-									ImGui::PopDisabled();
-								}
+						for (auto&[pluginName, plugin] : section) {
+							const std::string &project = plugin.project();
+							if (project == "Madgine" && ((sectionName == "Utility" && pluginName == "Tools") || sectionName == "Core")) {
+								ImGui::PushDisabled();
 							}
-							ImGui::TreePop();
+							bool loaded = plugin.isLoaded();
+							bool clicked = false;
+							std::string displayName{ pluginName + " (" + project + ")" };
+							if (section.isExclusive()) {
+								clicked = ImGui::RadioButton(displayName.c_str(), loaded);
+								if (clicked)
+									loaded = true;
+							}
+							else
+								clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
+							if (clicked) {
+								if (loaded)
+									section.loadPlugin(pluginName);
+								else
+									section.unloadPlugin(pluginName);
+							}
+							if (project == "Madgine" && ((sectionName == "Utility" && pluginName == "Tools") || sectionName == "Core")) {
+								ImGui::PopDisabled();
+							}
 						}
 						ImGui::TreePop();
 					}
@@ -137,13 +136,13 @@ namespace Engine
 
 				ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
 
-				for (const std::pair<const std::pair<std::string, std::string>, Plugins::PluginSection> &sec : mManager) {
-					for (const std::pair<const std::string, Plugins::Plugin> &p : sec.second) {
-						if (p.second.isLoaded()) {
-							const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(p.second.getSymbol("binaryInfo"));
+				for (Plugins::PluginSection &section : kvValues(mManager)) {
+					for (auto &[pluginName, plugin] : section) {
+						if (plugin.isLoaded()) {
+							const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo*>(plugin.getSymbol("binaryInfo"));
 							
-							if (ImGui::TreeNode(p.first.c_str())) {
-								for (auto &[name, reg] : registryRegistry())
+							if (ImGui::TreeNode(pluginName.c_str())) {
+								for (ComponentRegistryBase *reg : kvValues(registryRegistry()))
 								{
 									for (CollectorInfo *info : *reg) {
 										if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {

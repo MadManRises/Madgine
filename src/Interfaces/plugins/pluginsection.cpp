@@ -19,22 +19,19 @@
 namespace Engine {
 	namespace Plugins {
 
-		PluginSection::PluginSection(PluginManager& mgr, const std::string &project, const std::string& name) :
+		PluginSection::PluginSection(PluginManager& mgr, const std::string& name) :
 			mMgr(mgr),
 			mName(name)
 		{
+			const std::regex e{ SHARED_LIB_PREFIX "Plugin_([a-zA-Z]*)_" + mName + "_([a-zA-Z]*)\\" SHARED_LIB_SUFFIX };
+			std::smatch match;
 			for (auto path : Filesystem::listSharedLibraries())
 			{
-				//TODO
-				std::string extension = path.extension();
-				if (extension == SHARED_LIB_SUFFIX) {
-					std::string filename = path.stem();
-					const std::string prefix = SHARED_LIB_PREFIX "Plugin_" + project + "_" + mName + "_";
-					if (StringUtil::startsWith(filename, prefix)) {
-						std::string name = filename.substr(prefix.size());
-						auto pib = mPlugins.try_emplace(name, name, path);
-						assert(pib.second);
-					}
+				if (std::regex_match(path.str(), match, e)) {
+					std::string project = match[1];
+					std::string name = match[2];
+					auto pib = mPlugins.try_emplace(name, name, project, path);
+					assert(pib.second);
 				}
 			}
 		}
