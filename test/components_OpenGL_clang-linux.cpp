@@ -1,10 +1,8 @@
-#include "Madgine/baselib.h"
 #include "toolslib.h"
 #include "clientlib.h"
 #include "OpenGL/opengllib.h"
 #include "oislib.h"
 #include "Madgine/app/globalapicollector.h"
-#include "Madgine/scene/scenemanager.h"
 #include "renderer/imguiroot.h"
 #include "gui/guisystem.h"
 #include "input/inputcollector.h"
@@ -12,32 +10,30 @@
 #include "render/renderercollector.h"
 #include "OpenGL/openglrenderer.h"
 #include "Madgine/resources/resourceloadercollector.h"
-#include "Madgine/resources/scripts/scriptloader.h"
 #include "OpenGL/openglmeshloader.h"
 #include "OpenGL/openglshaderloader.h"
 #include "inspector/layoutloader.h"
-#include "Madgine/scene/scenecomponentcollector.h"
 #include "toolscollector.h"
 #include "inspector/inspector.h"
 #include "metrics/metrics.h"
 #include "profiler/profiler.h"
 #include "ui/gamehandler.h"
 #include "ui/guihandler.h"
+#include "uniquecomponent/uniquecomponentshared.h"
+#include "uniquecomponent/libA.cpp"
+#include "uniquecomponent/libB.cpp"
 
 
 namespace Engine{
 
 	template <> std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents() { return {
-		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
 		createComponent<Engine::Tools::ImGuiRoot>,
 		createComponent<Engine::GUI::GUISystem>,
 
 	}; }
 
-    template<> size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>(){ return 0; }
-    template<> size_t component_index<Engine::Scene::SceneManager>(){ return 0; }
-    template<> size_t component_index<Engine::Tools::ImGuiRoot>(){ return 1; }
-    template<> size_t component_index<Engine::GUI::GUISystem>(){ return 2; }
+    template<> size_t component_index<Engine::Tools::ImGuiRoot>(){ return 0; }
+    template<> size_t component_index<Engine::GUI::GUISystem>(){ return 1; }
 
 	template <> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() { return {
 		createComponent<Engine::Input::OISInputHandler>,
@@ -54,22 +50,15 @@ namespace Engine{
     template<> size_t component_index<Engine::Render::OpenGLRenderer>(){ return 0; }
 
 	template <> std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents() { return {
-		createComponent<Engine::Scripting::Parsing::ScriptLoader>,
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 		createComponent<Engine::Tools::LayoutLoader>,
 
 	}; }
 
-    template<> size_t component_index<Engine::Scripting::Parsing::ScriptLoader>(){ return 0; }
-    template<> size_t component_index<Engine::Render::OpenGLMeshLoader>(){ return 1; }
-    template<> size_t component_index<Engine::Render::OpenGLShaderLoader>(){ return 2; }
-    template<> size_t component_index<Engine::Tools::LayoutLoader>(){ return 3; }
-
-	template <> std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents() { return {
-
-	}; }
-
+    template<> size_t component_index<Engine::Render::OpenGLMeshLoader>(){ return 0; }
+    template<> size_t component_index<Engine::Render::OpenGLShaderLoader>(){ return 1; }
+    template<> size_t component_index<Engine::Tools::LayoutLoader>(){ return 2; }
 
 	template <> std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsCollector::Registry::sComponents() { return {
 		createComponent<Engine::Tools::Inspector>,
@@ -91,5 +80,14 @@ namespace Engine{
 
 	}; }
 
+
+	template <> std::vector<Test::TestCollector::Registry::F> Test::TestCollector::Registry::sComponents() { return {
+		createComponent<LibAComponent>,
+		createComponent<LibBComponent>,
+
+	}; }
+
+    template<> size_t component_index<LibAComponent>(){ return 0; }
+    template<> size_t component_index<LibBComponent>(){ return 1; }
 
 }
