@@ -54,8 +54,8 @@ namespace Engine
 		};
 
 	public:
-		using iterator = TransformIterator<typename T::iterator>;
-		using const_iterator = TransformIterator<typename T::const_iterator>;
+		using iterator = TransformIterator<decltype(std::declval<T>().begin())>;
+		using const_iterator = TransformIterator<decltype(std::declval<const T>().begin())>;
 
 		iterator begin()
 		{

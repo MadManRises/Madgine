@@ -1,6 +1,7 @@
 #pragma once
 
-
+#include "transformIt.h"
+#include "functor.h"
 
 namespace Engine
 {
@@ -14,17 +15,20 @@ namespace Engine
 	template <class T>
 	struct FixString
 	{
-		typedef T type;
+		static T apply(T t)
+		{
+			return std::forward<T>(t);
+		}
 	};
 
 	template <>
 	struct FixString<const char*>
 	{
-		typedef std::string type;
+		static std::string apply(const char *s)
+		{
+			return s;
+		}		
 	};
-
-	template <class T>
-	using FixString_t = typename FixString<T>::type;
 
 	template <class T, typename = void>
 	struct KeyValue
@@ -139,27 +143,27 @@ namespace Engine
 	};
 
 	template <class T>
-	decltype(auto) kvValue(T& v)
+	decltype(auto) kvValue(T&& v)
 	{
-		return KeyValue<T>::value(v);
+		return KeyValue<std::remove_reference_t<T>>::value(std::forward<T>(v));
 	}
 
 	template <class T>
-	decltype(auto) kvValue(const T& v)
+	decltype(auto) kvKey(T&& v)
 	{
-		return KeyValue<const T>::value(v);
+		return FixString<decltype(KeyValue<std::remove_reference_t<T>>::key(v))>::apply(KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v)));
 	}
 
-	template <class T>
-	decltype(auto) kvKey(T& v)
+	template <typename T>
+	decltype(auto) kvValues(T& v)
 	{
-		return FixString_t<std::decay_t<decltype(KeyValue<T>::key(v))>>(KeyValue<T>::key(v));
+		return transformIt<Functor<kvValue<decltype(*v.begin())>>>(v);
 	}
 
-	template <class T>
-	decltype(auto) kvKey(const T& v)
+	template <typename T>
+	decltype(auto) kvKeys(T& v)
 	{
-		return FixString_t<std::decay_t<decltype(KeyValue<const T>::key(v))>>(KeyValue<const T>::key(v));
+		return transformIt<Functor<kvKey<decltype(*v.begin())>>>(v);
 	}
 
 	template <class T, class K>
