@@ -1,11 +1,17 @@
-// ImGui - standalone example application for FreeGLUT + OpenGL2, using legacy fixed pipeline
-// If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
-// (Using GLUT or FreeGLUT is not recommended unless you really miss the 90's)
+// dear imgui: standalone example application for GLUT/FreeGLUT + OpenGL2, using legacy fixed pipeline
+// If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
+
+// !!! GLUT/FreeGLUT IS OBSOLETE SOFTWARE. Using GLUT is not recommended unless you really miss the 90's. !!!
+// !!! If someone or something is teaching you GLUT in 2019, you are being abused. Please show some resistance. !!!
 
 #include "imgui.h"
-#include "../imgui_impl_freeglut.h"
+#include "../imgui_impl_glut.h"
 #include "../imgui_impl_opengl2.h"
-#include <GL/freeglut.h>
+#ifdef __APPLE__
+    #include <GLUT/glut.h>
+#else
+    #include <GL/freeglut.h>
+#endif
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4505) // unreferenced local function has been removed
@@ -32,7 +38,7 @@ void my_display_code()
         ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
         ImGui::Checkbox("Another Window", &show_another_window);
 
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
         ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
         if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
@@ -57,9 +63,9 @@ void my_display_code()
 
 void glut_display_func()
 {
-    // Start the ImGui frame
+    // Start the Dear ImGui frame
     ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplFreeGLUT_NewFrame();
+    ImGui_ImplGLUT_NewFrame();
 
     my_display_code();
 
@@ -82,35 +88,38 @@ void glut_display_func()
 // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 
 int main(int argc, char** argv)
-{ 
+{
     // Create GLUT window
     glutInit(&argc, argv);
+#ifdef __FREEGLUT_EXT_H__
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+#endif
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
     glutInitWindowSize(1280, 720);
-    glutCreateWindow("Dear ImGui FreeGLUT+OpenGL2 Example");
+    glutCreateWindow("Dear ImGui GLUT+OpenGL2 Example");
 
     // Setup GLUT display function
-    // We will also call ImGui_ImplFreeGLUT_InstallFuncs() to get all the other functions installed for us, 
-    // otherwise it is possible to install our own functions and call the imgui_impl_freeglut.h functions ourselves.
+    // We will also call ImGui_ImplGLUT_InstallFuncs() to get all the other functions installed for us,
+    // otherwise it is possible to install our own functions and call the imgui_impl_glut.h functions ourselves.
     glutDisplayFunc(glut_display_func);
 
-    // Setup ImGui binding
+    // Setup Dear ImGui context
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
-    ImGui_ImplFreeGLUT_Init();
-    ImGui_ImplFreeGLUT_InstallFuncs();
-    ImGui_ImplOpenGL2_Init();
-
-    // Setup style
+    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGLUT_Init();
+    ImGui_ImplGLUT_InstallFuncs();
+    ImGui_ImplOpenGL2_Init();
+
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them. 
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple. 
+    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
     // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'misc/fonts/README.txt' for more instructions and details.
@@ -127,7 +136,7 @@ int main(int argc, char** argv)
 
     // Cleanup
     ImGui_ImplOpenGL2_Shutdown();
-    ImGui_ImplFreeGLUT_Shutdown();
+    ImGui_ImplGLUT_Shutdown();
     ImGui::DestroyContext();
 
     return 0;
