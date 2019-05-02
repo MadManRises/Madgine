@@ -324,7 +324,7 @@ namespace Engine
 			int count = 0;
 			for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
 				++count;
-			ImGui::PushMultiItemsWidths(count);
+			ImGui::PushMultiItemsWidths(count, 1.0f); //TODO
 			for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
 			{
 				drawElement(child, scope, drawn);
