@@ -10,6 +10,8 @@
 
 #include "input/inputevents.h"
 
+UNIQUECOMPONENT(Engine::Input::AndroidInputHandler);
+
 namespace Engine
 {
 	namespace Input
