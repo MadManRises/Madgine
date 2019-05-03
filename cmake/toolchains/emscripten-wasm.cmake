@@ -14,7 +14,7 @@ if(NOT EMSCRIPTEN_PREFIX)
     if(DEFINED ENV{EMSCRIPTEN})
         file(TO_CMAKE_PATH "$ENV{EMSCRIPTEN}" EMSCRIPTEN_PREFIX)
     else()
-        set(EMSCRIPTEN_PREFIX "C:/Users/Bub/Documents/emsdk/emscripten/1.38.30")
+        set(EMSCRIPTEN_PREFIX "C:/emsdk/emscripten/1.38.30")
     endif()
 endif()
 
