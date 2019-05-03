@@ -17,9 +17,11 @@ TEST(UniqueComponent, Registry)
 {
 	Engine::Threading::WorkGroup wg;
 
+#ifndef STATIC_BUILD
 	Engine::Plugins::PluginManager pmgr{ "Test" };
 
 	Engine::UniqueComponentCollectorManager cmgr{ pmgr };
+#endif
 
 	TestDriver driver;
 

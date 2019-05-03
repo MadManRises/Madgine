@@ -1,5 +1,7 @@
 #include "../interfaceslib.h"
 
+#ifndef STATIC_BUILD
+
 #include "pluginsection.h"
 
 #include "plugin.h"
@@ -107,7 +109,7 @@ namespace Engine {
 		{
 			auto pib = mPlugins.try_emplace(name, name);
 			assert(pib.second);
-			return pib.first->second.load();				
+			return loadPlugin(&pib.first->second);					
 		}
 
 		void PluginSection::addListener(PluginListener * listener)
@@ -260,3 +262,5 @@ namespace Engine {
 
 	}
 }
+
+#endif

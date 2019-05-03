@@ -131,7 +131,6 @@ namespace Engine
 		class Plugin;
 		class PluginSection;
 		struct PluginListener;
-		struct PluginSectionListener;
 
 		struct BinaryInfo;
 	}

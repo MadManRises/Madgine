@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef STATIC_BUILD
+
 #include "../ini/inifile.h"
 
 #include "plugin.h"
@@ -57,3 +59,5 @@ namespace Engine {
 
 	}
 }
+
+#endif

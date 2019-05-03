@@ -7,6 +7,7 @@ include(ini)
 include(Packaging)
 
 set(PLUGIN_LIST "" CACHE INTERNAL "")
+set(PROJECTS_LINKING_ALL_PLUGINS "" CACHE INTERNAL "")
 
 if (STATIC_BUILD)
 
@@ -50,9 +51,9 @@ macro(add_plugin name base type)
 
 	set_target_properties(${name} PROPERTIES OUTPUT_NAME Plugin_${base}_${type}_${name})
 
-	target_compile_definitions(${name} INTERFACE BUILD_PLUGIN_${name})
-
 	collect_data(${name})
+
+	set(installPlugin TRUE)
 
 	if (NOT STATIC_BUILD)
 
@@ -63,26 +64,33 @@ macro(add_plugin name base type)
 		if (NOT PLUGINSELECTION_${type}_${name})
 			MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
 			set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+			set(installPlugin FALSE)
 		endif()
 
 	endif()
 
-	install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
-	export_to_workspace(${name})
+	if (installPlugin)
+		install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
+		export_to_workspace(${name})
 
-	cpack_add_component(${name} GROUP ${type})
+		cpack_add_component(${name} GROUP ${type})
+	endif()
 
 	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")
 
+	foreach(project ${PROJECTS_LINKING_ALL_PLUGINS})
+		target_link_plugins(${project} ${name})
+	endforeach()
+
 endmacro(add_plugin)
 
-function(target_link_plugins target vis)
+function(target_link_plugins target)
 
 	foreach(plugin ${ARGN})
 
 		get_target_property(exclude ${plugin} EXCLUDE_FROM_ALL)
 		if (NOT exclude)
-			target_link_libraries(${target} ${vis} ${plugin})
+			target_link_libraries(${target} PUBLIC ${plugin})
 			#MESSAGE(STATUS "Linking ${plugin} to ${target}")
 		else()
 			#MESSAGE(STATUS "Not linking ${plugin} to ${target}")
@@ -101,11 +109,13 @@ endfunction(target_link_plugins)
 
 
 	
-function(target_link_all_plugins target vis)
+function(target_link_all_plugins target)
 	
 	set(available_core_libs Base)
 
-	target_link_plugins(${target} ${vis} ${PLUGIN_LIST} ${available_core_libs})
+	target_link_plugins(${target} ${PLUGIN_LIST} ${available_core_libs})
+
+	set(PROJECTS_LINKING_ALL_PLUGINS ${PROJECTS_LINKING_ALL_PLUGINS} ${target} CACHE INTERNAL "")
 
 endfunction()
 

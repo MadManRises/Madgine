@@ -10,7 +10,7 @@ endif(ANDROID)
 
 add_workspace_application(MadgineLauncher ${sources})
 
-target_link_plugins(MadgineLauncher PUBLIC Client Tools OpenGL)
+target_link_plugins(MadgineLauncher Client Tools OpenGL)
 
 
 if (ANDROID)
@@ -18,11 +18,11 @@ if (ANDROID)
 endif()
 
 if (ANDROID)
-	target_link_plugins(MadgineLauncher PUBLIC AndroidInput)
+	target_link_plugins(MadgineLauncher AndroidInput)
 elseif (EMSCRIPTEN)
-	target_link_plugins(MadgineLauncher PUBLIC SDLInput)
+	target_link_plugins(MadgineLauncher SDLInput)
 else()
-	target_link_plugins(MadgineLauncher PUBLIC OISHandler)
+	target_link_plugins(MadgineLauncher OISHandler)
 endif()
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

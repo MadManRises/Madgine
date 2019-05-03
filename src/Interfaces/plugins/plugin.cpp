@@ -1,5 +1,7 @@
 #include "../interfaceslib.h"
 
+#ifndef STATIC_BUILD
+
 #include "plugin.h"
 
 #include "../generic/templates.h"
@@ -153,3 +155,5 @@ namespace Engine
 
 	}
 }
+
+#endif

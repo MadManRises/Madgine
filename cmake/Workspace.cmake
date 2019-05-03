@@ -352,6 +352,8 @@ macro(add_workspace_library name)
 	
 	add_library(${name} ${LIB_CONFIG_UNPARSED_ARGUMENTS})
 
+	target_compile_definitions(${name} INTERFACE BUILD_${name})
+
 	get_target_property(sourceDir ${name} SOURCE_DIR)
 
 	if (NOT LIB_CONFIG_SOURCE_ROOT)

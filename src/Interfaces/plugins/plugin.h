@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef STATIC_BUILD
+
 #include "../filesystem/path.h"
 
 namespace Engine
@@ -32,3 +34,5 @@ namespace Engine
 		};
 	}
 }
+
+#endif

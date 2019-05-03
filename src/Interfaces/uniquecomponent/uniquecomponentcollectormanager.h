@@ -3,7 +3,6 @@
 #ifndef STATIC_BUILD
 
 #include "../plugins/pluginlistener.h"
-#include "../plugins/pluginsectionlistener.h"
 
 namespace Engine {
 

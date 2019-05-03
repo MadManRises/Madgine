@@ -28,7 +28,7 @@ set(libBSources "")
 
 add_plugin(LibB Test Test ${libBSources} SOURCE_ROOT .)
 
-target_link_plugins(LibB PUBLIC LibA)
+target_link_plugins(LibB LibA)
 
 
 set(sources "")
@@ -43,6 +43,6 @@ FolderSources(sources "" "" integrationtests.cpp)
 
 add_gtest(Interfaces_Test ${sources})
 
-target_link_plugins(Interfaces_Test PRIVATE LibB)
+target_link_plugins(Interfaces_Test LibB)
 
 generate_binary_info(Interfaces_Test)

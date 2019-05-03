@@ -12,7 +12,12 @@ namespace Engine
 	namespace Tools
 	{
 		
-		class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPI<ImGuiRoot>, public Threading::FrameListener, public Plugins::PluginListener
+		class MADGINE_TOOLS_EXPORT ImGuiRoot : 
+			  public App::GlobalAPI<ImGuiRoot>
+			, public Threading::FrameListener
+#ifndef STATIC_BUILD
+			, public Plugins::PluginListener
+#endif
 		{
 		public:
 			ImGuiRoot(App::Application &app);
@@ -24,8 +29,10 @@ namespace Engine
 			bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
 			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
+#ifndef STATIC_BUILD
 			bool aboutToUnloadPlugin(const Plugins::Plugin *p) override;
 			void onPluginLoad(const Plugins::Plugin *p) override;
+#endif
 
 		private:
 			void createManager();

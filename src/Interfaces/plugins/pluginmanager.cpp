@@ -1,10 +1,10 @@
 #include "../interfaceslib.h"
 
+#ifndef STATIC_BUILD
+
 #include "pluginmanager.h"
 
 #include "plugin.h"
-
-#include "pluginsectionlistener.h"
 
 #include "../util/stringutil.h"
 
@@ -67,7 +67,7 @@ namespace Engine
 			return pib.first->second;
 		}
 
-		PluginSection& PluginManager::operator[](const std::string& name)
+		PluginSection& PluginManager::operator[](const std::string& name) 
 		{
 			return section(name);
 		}
@@ -185,3 +185,5 @@ namespace Engine
 
 	}
 }
+
+#endif

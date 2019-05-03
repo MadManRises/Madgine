@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef STATIC_BUILD
+
 namespace Engine {
 	namespace Plugins {
 
@@ -13,3 +15,5 @@ namespace Engine {
 
 	}
 }
+
+#endif

@@ -1,10 +1,10 @@
 #pragma once
 
+#ifndef STATIC_BUILD
+
 #include "../ini/inifile.h"
 
 #include "pluginsection.h"
-
-#include "../macros.h"
 
 namespace Engine
 {
@@ -71,23 +71,31 @@ namespace Engine
 
 	}
 
+}
+
+#define IF_PLUGIN(p) if (Engine::Plugins::PluginManager::getSingleton().isLoaded(#p))
+#define THROW_PLUGIN(errorMsg) throw errorMsg
+
+#else
+
+#include "../macros.h"
+
+namespace Engine
+{
 	constexpr bool streq(const char *lhs, const char *rhs)
 	{
 		int i = -1;
-		do{
+		do {
 			++i;
 			if (lhs[i] != rhs[i])
 				return false;
 		} while (lhs[i]);
 		return true;
 	}
-
 }
 
-#ifdef STATIC_BUILD
 #define IF_PLUGIN(p) if constexpr(!Engine::streq("BUILD_PLUGIN_" #p, STRINGIFY2(BUILD_PLUGIN_ ## p)))
 #define THROW_PLUGIN(errorMsg) throw errorMsg
-#else
-#define IF_PLUGIN(p) if (Engine::Plugins::PluginManager::getSingleton().isLoaded(#p))
-#define THROW_PLUGIN(errorMsg) throw errorMsg
+
 #endif
+

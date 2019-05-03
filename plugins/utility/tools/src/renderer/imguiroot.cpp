@@ -121,6 +121,7 @@ namespace Engine {
 			return true;
 		}
 
+#ifndef STATIC_BUILD
 		bool ImGuiRoot::aboutToUnloadPlugin(const Plugins::Plugin * p)
 		{
 			app().frameLoop().queue([this]() {
@@ -133,6 +134,7 @@ namespace Engine {
 		{
 			createManager();
 		}
+#endif
 
 		void ImGuiRoot::createManager()
 		{
