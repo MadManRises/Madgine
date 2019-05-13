@@ -1,10 +1,9 @@
 include(Util)
 
-include_guard()
-
-include (Workspace)
+once()
 
 if (EMSCRIPTEN)
+	set(CMAKE_SHARED_LIBRARY_SUFFIX ".wasm")
 
 	function (add_workspace_application target)
 

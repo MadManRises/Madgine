@@ -1,8 +1,6 @@
 include(Util)
 
-include_guard()
-
-include (Workspace)
+once()
 
 include (Plugins)
 

@@ -1,6 +1,6 @@
 include(Util)
 
-include_guard()
+once()
 
 
 function (read_ini_file filepath prefix)

@@ -1,6 +1,6 @@
 include (Util)
 
-include_guard()
+once()
 
 include(Workspace)
 

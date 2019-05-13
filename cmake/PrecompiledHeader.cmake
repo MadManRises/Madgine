@@ -1,6 +1,6 @@
 include (Util)
 
-include_guard()
+once()
 
 # Function for setting up precompiled headers. Usage:
 #

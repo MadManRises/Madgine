@@ -1,6 +1,6 @@
 include (Util)
 
-include_guard()
+once()
 
 
 cmake_minimum_Required(VERSION 3.0)
