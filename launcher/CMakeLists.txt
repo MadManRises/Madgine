@@ -1,6 +1,4 @@
 
-include (android)
-include (emscripten)
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp)

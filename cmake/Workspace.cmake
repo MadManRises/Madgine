@@ -381,3 +381,8 @@ macro(add_workspace_library name)
 	endif()
 
 endmacro(add_workspace_library)
+
+#TODO Iterate over all files in subdirectory
+
+include (android)
+include (emscripten)
