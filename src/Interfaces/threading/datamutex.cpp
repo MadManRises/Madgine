@@ -32,7 +32,7 @@ namespace Engine
 			mConsidered.clear();
 		}
 
-		DataLock DataMutex::lock()
+		bool DataMutex::lock()
 		{
 			while (consider() != CONSIDERED);
 			std::thread::id expected = {};
@@ -43,7 +43,7 @@ namespace Engine
 					std::terminate();				
 			}
 			unconsider();
-			return DataLock(*this, expected != self);
+			return expected != self;
 		}
 
 		void DataMutex::unlock()
@@ -53,9 +53,9 @@ namespace Engine
 				std::terminate();
 		}
 
-		DataLock::DataLock(DataMutex & mutex, bool holdsLock) :
+		DataLock::DataLock(DataMutex & mutex) :
 			mMutex(mutex),
-			mHoldsLock(holdsLock)
+			mHoldsLock(mutex.lock())
 		{
 		}
 
@@ -70,6 +70,7 @@ namespace Engine
 			if (mHoldsLock)
 				mMutex.unlock();
 		}
+
 
 		bool try_lockData_sorted(DataMutex **begin, DataMutex **end)
 		{

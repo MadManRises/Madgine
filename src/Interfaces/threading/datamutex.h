@@ -18,12 +18,9 @@ namespace Engine
 			bool isAvailable() const;
 			ConsiderResult consider();
 			void unconsider();
-
-			friend struct DataLock;
-			DataLock lock();
-
-		private:
-			void unlock();
+			
+			bool lock();
+            void unlock();			
 
 		private:
 			std::atomic<std::thread::id> mCurrentHolder;
@@ -33,7 +30,7 @@ namespace Engine
 
 		struct DataLock
 		{
-			DataLock(DataMutex &mutex, bool holdsLock);
+			DataLock(DataMutex &mutex);
 			DataLock(const DataLock &) = delete;
 			DataLock(DataLock &&other);
 			~DataLock();
@@ -43,15 +40,12 @@ namespace Engine
 			bool mHoldsLock;
 		};
 
-		bool try_lockData_sorted(DataMutex **begin, DataMutex **end);
-
-		template <typename... Ty>
-		bool try_lockData(Ty*... args)
-		{
-			std::array<DataMutex*, sizeof...(Ty)> mutexes{ args... };
-			std::sort(mutexes.begin(), mutexes.end());
-			return try_lockData_sorted(mutexes.begin(), mutexes.end());
-		}
+		template <size_t S>
+		bool try_lockData(std::array<DataMutex *, S> data) {
+            std::sort(data.begin(), data.end());
+            return try_lockData_sorted(data.begin(), data.end());
+        }
+		bool try_lockData_sorted(DataMutex * const *begin, DataMutex * const *end);      
 
 	}
 }
