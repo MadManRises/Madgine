@@ -79,6 +79,8 @@ namespace Engine
 
 			SignalSlot::SignalStub<> &slaveStreamDisconnected();
 
+			static ParticipantId getParticipantId(SerializeManager *manager);
+
 		protected:
 
 

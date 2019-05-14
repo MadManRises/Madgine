@@ -23,7 +23,8 @@ namespace Engine
 		std::mutex sMasterMappingMutex;
 		std::map<size_t, SerializableUnitBase*> sMasterMappings;
 		size_t sNextUnitId = RESERVED_ID_COUNT;
-		std::atomic<ParticipantId> sRunningStreamId = 0;
+        static ParticipantId sLocalMasterParticipantId = 1;
+		std::atomic<ParticipantId> sRunningStreamId = sLocalMasterParticipantId;
 
 		SerializeManager::SerializeManager(const std::string& name) :
 			mReceivingMasterState(false),
@@ -521,7 +522,19 @@ namespace Engine
 		SignalSlot::SignalStub<>& SerializeManager::slaveStreamDisconnected()
 		{
 			return mSlaveStreamDisconnected;
-		}
+        }
+
+        ParticipantId SerializeManager::getParticipantId(SerializeManager *manager) {
+			if (manager)
+			{
+                assert(manager->mSlaveStream);
+                return manager->mSlaveStream->id();
+			}
+			else
+			{
+                return sLocalMasterParticipantId;
+			}
+        }
 
 		bool SerializeManager::receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout)
 		{

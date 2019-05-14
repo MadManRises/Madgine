@@ -55,7 +55,12 @@ namespace Engine
 			return mSlaveManager == nullptr;
 		}*/
 
-		void TopLevelSerializableUnitBase::setStaticSlaveId(size_t staticId)
+		ParticipantId TopLevelSerializableUnitBase::participantId() const {
+			return SerializeManager::getParticipantId(mSlaveManager);
+        }
+
+        void TopLevelSerializableUnitBase::setStaticSlaveId(
+            size_t staticId)
 		{
 			assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
 			mStaticSlaveId = staticId;

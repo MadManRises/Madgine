@@ -64,6 +64,11 @@ namespace Engine
 			}
 
 			return result;
+        }
+
+        ParticipantId Observable::participantId() 
+		{ 
+			return mUnit->topLevel()->participantId(); 
 		}
 
 		BufferedOutStream* Observable::getSlaveActionMessageTarget() const

@@ -23,6 +23,7 @@ namespace Engine
 			BufferedOutStream* getSlaveActionMessageTarget() const;
 			std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
 				const std::set<ParticipantId>& targets = {}) const;
+            ParticipantId participantId();
 
 			void beginActionResponseMessage(BufferedOutStream* stream) const;
 

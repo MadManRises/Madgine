@@ -27,6 +27,7 @@ namespace Engine
 			bool updateManagerType(SerializeManager* mgr, bool isMaster);
 
 			//bool isMaster() const;
+			ParticipantId participantId() const;
 
 			void setStaticSlaveId(size_t staticId);
 			void initSlaveId();
