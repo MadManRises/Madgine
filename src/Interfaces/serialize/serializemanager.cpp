@@ -525,9 +525,8 @@ namespace Engine
         }
 
         ParticipantId SerializeManager::getParticipantId(SerializeManager *manager) {
-			if (manager)
+			if (manager && manager->mSlaveStream)
 			{
-                assert(manager->mSlaveStream);
                 return manager->mSlaveStream->id();
 			}
 			else

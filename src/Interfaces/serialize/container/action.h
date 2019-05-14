@@ -32,7 +32,7 @@ namespace Engine
 
 				void operator()(_Ty ... args, const std::set<ParticipantId>& targets = {})
 				{
-					tryCall(id(), targets, args...);
+					tryCall(participantId(), targets, args...);
 				}
 
 				void readAction(SerializeInStream& in) override
