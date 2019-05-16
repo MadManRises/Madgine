@@ -2,75 +2,71 @@
 
 #include "serializestream.h"
 
-namespace Engine
-{
-	namespace Serialize
-	{
-		struct INTERFACES_EXPORT BufferedInStream : SerializeInStream
-		{
-			friend struct BufferedOutStream;
+namespace Engine {
+namespace Serialize {
+struct INTERFACES_EXPORT BufferedInStream : SerializeInStream {
+    friend struct BufferedOutStream;
 
-			BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
-			BufferedInStream(BufferedInStream &&other);
+    BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
+    BufferedInStream(BufferedInStream &&other);
+    BufferedInStream(BufferedInStream &&other, SerializeManager &mgr);
 
-			bool isMessageAvailable() const;
+    bool isMessageAvailable() const;
 
-			void readHeader(MessageHeader& header);
+    void readHeader(MessageHeader &header);
 
-		protected:
-			BufferedInStream(buffered_streambuf *buffer);
+  protected:
+    BufferedInStream(buffered_streambuf *buffer);
 
-			buffered_streambuf &buffer() const;
-		};
+    buffered_streambuf &buffer() const;
+};
 
-		struct INTERFACES_EXPORT BufferedOutStream : SerializeOutStream
-		{
-		public:
-			BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
-			BufferedOutStream(BufferedOutStream &&other);
+struct INTERFACES_EXPORT BufferedOutStream : SerializeOutStream {
+  public:
+    BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+    BufferedOutStream(BufferedOutStream &&other);
+    BufferedOutStream(BufferedOutStream &&other, SerializeManager &mgr);
 
-			void beginMessage(SerializableUnitBase* unit, MessageType type);
-			void beginMessage(Command cmd);
-			void endMessage();
+    void beginMessage(SerializableUnitBase *unit, MessageType type);
+    void beginMessage(Command cmd);
+    void endMessage();
 
-			int sendMessages();
+    int sendMessages();
 
-			BufferedOutStream& operator<<(BufferedInStream& in);
-			using SerializeOutStream::operator<<;
+    BufferedOutStream &operator<<(BufferedInStream &in);
+    using SerializeOutStream::operator<<;
 
-			template <class... _Ty>
-			void writeCommand(Command cmd, const _Ty&... args)
-			{
-				beginMessage(cmd);
+    template <class... _Ty>
+    void writeCommand(Command cmd, const _Ty &... args) {
+        beginMessage(cmd);
 
-				(void)(*this << ... << args);
+        (void)(*this << ... << args);
 
-				endMessage();
-			}
+        endMessage();
+    }
 
-		protected:
-			buffered_streambuf &buffer() const;
-		};
+  protected:
+    buffered_streambuf &buffer() const;
+};
 
-		struct INTERFACES_EXPORT BufferedInOutStream :
-			BufferedInStream,
-			BufferedOutStream
-		{
-			friend struct SerializeManager;
+struct INTERFACES_EXPORT BufferedInOutStream : BufferedInStream,
+                                               BufferedOutStream {
+    friend struct SerializeManager;
 
-			BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
-			BufferedInOutStream(BufferedInOutStream &&other);
+    BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+    BufferedInOutStream(BufferedInOutStream &&other);
+    BufferedInOutStream(BufferedInOutStream &&other, SerializeManager &mgr);
 
-			StreamError error() const;
-			bool isClosed() const;
-			void close();
+    StreamError error() const;
+    bool isClosed() const;
+    void close();
 
-			explicit operator bool() const;
+    explicit operator bool() const;
 
-			using BufferedInStream::id;
+    using BufferedInStream::id;
 
-		protected:
-			using BufferedInStream::buffer;
-		};
-	}
-} // namespace Scripting
+  protected:
+    using BufferedInStream::buffer;
+};
+} // namespace Serialize
+} // namespace Engine

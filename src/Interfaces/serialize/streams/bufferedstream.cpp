@@ -1,150 +1,163 @@
 #include "../../interfaceslib.h"
 
-#include "bufferedstream.h"
 #include "buffered_streambuf.h"
+#include "bufferedstream.h"
 
 #include "../serializableunit.h"
 #include "../serializemanager.h"
 
-namespace Engine
-{
-	namespace Serialize {
-		bool CompareStreamId::operator()(ParticipantId first,
-				                         const BufferedInOutStream &second) const {
-			return first < second.id();
-        }
+namespace Engine {
+namespace Serialize {
 
-        bool CompareStreamId::operator()(const BufferedInOutStream &first,
-										 ParticipantId second) const {
-            return first.id() < second;
-        }
+    bool CompareStreamId::operator()(ParticipantId first,
+        const BufferedInOutStream &second) const
+    {
+        return first < second.id();
+    }
 
-		bool CompareStreamId::operator()(BufferedOutStream *first,
-				                         BufferedOutStream *second) const
-		{
-			return first->id() < second->id();
-		}
+    bool CompareStreamId::operator()(const BufferedInOutStream &first,
+        ParticipantId second) const
+    {
+        return first.id() < second;
+    }
 
-		bool CompareStreamId::operator()(const BufferedInOutStream & first, const BufferedOutStream & second) const
-		{
-			return first.id() < second.id();
-		}
+    bool CompareStreamId::operator()(BufferedOutStream *first,
+        BufferedOutStream *second) const
+    {
+        return first->id() < second->id();
+    }
 
+    bool CompareStreamId::operator()(const BufferedInOutStream &first,
+        const BufferedOutStream &second) const
+    {
+        return first.id() < second.id();
+    }
 
-		BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer) :
-			SerializeInStream(std::move(buffer))
-		{
-		}
+    BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer)
+        : SerializeInStream(std::move(buffer))
+    {
+    }
 
-		BufferedInStream::BufferedInStream(BufferedInStream && other) :
-			SerializeInStream(std::move(other))
-		{
-		}
+    BufferedInStream::BufferedInStream(BufferedInStream &&other)
+        : SerializeInStream(std::move(other))
+    {
+    }
 
-		bool BufferedInStream::isMessageAvailable() const
-		{
-			return static_cast<bool>(*this) && buffer().isMessageAvailable();
-		}
+    BufferedInStream::BufferedInStream(BufferedInStream &&other, SerializeManager &mgr)
+        : SerializeInStream(std::move(other), mgr)
+    {
+    }
 
-		BufferedInStream::BufferedInStream(buffered_streambuf * buffer) :
-			SerializeInStream(buffer)
-		{
-		}
+    bool BufferedInStream::isMessageAvailable() const
+    {
+        return static_cast<bool>(*this) && buffer().isMessageAvailable();
+    }
 
-		buffered_streambuf &BufferedInStream::buffer() const
-		{
-			return static_cast<buffered_streambuf&>(SerializeInStream::buffer());
-		}
+    BufferedInStream::BufferedInStream(buffered_streambuf *buffer)
+        : SerializeInStream(buffer)
+    {
+    }
 
-		void BufferedInStream::readHeader(MessageHeader& header)
-		{
-			if (!isMessageAvailable())
-				throw 0;
-			read(header);
-		}
+    buffered_streambuf &BufferedInStream::buffer() const
+    {
+        return static_cast<buffered_streambuf &>(SerializeInStream::buffer());
+    }
 
-		BufferedOutStream::BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer) :
-			SerializeOutStream(std::move(buffer))
-		{
-		}
+    void BufferedInStream::readHeader(MessageHeader &header)
+    {
+        if (!isMessageAvailable())
+            throw 0;
+        read(header);
+    }
 
-		BufferedOutStream::BufferedOutStream(BufferedOutStream && other) :
-			SerializeOutStream(std::move(other))
-		{
-		}
+    BufferedOutStream::BufferedOutStream(
+        std::unique_ptr<buffered_streambuf> &&buffer)
+        : SerializeOutStream(std::move(buffer))
+    {
+    }
 
-		void BufferedOutStream::beginMessage(SerializableUnitBase* unit, MessageType type)
-		{
-			MessageHeader header;
-			header.mType = type;
-			header.mObject = manager().convertPtr(*this, unit);
-			mLog.logBeginMessage(header, typeid(*unit).name());
-			buffer().beginMessage();
-			write(header);
-		}
+    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other)
+        : SerializeOutStream(std::move(other))
+    {
+    }
 
-		void BufferedOutStream::beginMessage(Command cmd)
-		{
-			MessageHeader header;
-			header.mCmd = cmd;
-			header.mObject = SERIALIZE_MANAGER;
-			mLog.logBeginMessage(header, manager().name());
-			buffer().beginMessage();
-			write(header);
-		}
+    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SerializeManager &mgr)
+        : SerializeOutStream(std::move(other), mgr)
+    {
+    }
 
-		void BufferedOutStream::endMessage()
-		{
-			buffer().endMessage();
-		}
+    void BufferedOutStream::beginMessage(SerializableUnitBase *unit,
+        MessageType type)
+    {
+        MessageHeader header;
+        header.mType = type;
+        header.mObject = manager().convertPtr(*this, unit);
+        mLog.logBeginMessage(header, typeid(*unit).name());
+        buffer().beginMessage();
+        write(header);
+    }
 
-		int BufferedOutStream::sendMessages()
-		{
-			return buffer().sendMessages();
-		}
+    void BufferedOutStream::beginMessage(Command cmd)
+    {
+        MessageHeader header;
+        header.mCmd = cmd;
+        header.mObject = SERIALIZE_MANAGER;
+        mLog.logBeginMessage(header, manager().name());
+        buffer().beginMessage();
+        write(header);
+    }
 
-		buffered_streambuf & BufferedOutStream::buffer() const
-		{
-			return static_cast<buffered_streambuf&>(SerializeOutStream::buffer());
-		}
+    void BufferedOutStream::endMessage() { buffer().endMessage(); }
 
-		BufferedOutStream& BufferedOutStream::operator<<(BufferedInStream& in)
-		{
-			OutStream::operator<<(&in.buffer());
-			return *this;
-		}
+    int BufferedOutStream::sendMessages() { return buffer().sendMessages(); }
 
-		BufferedInOutStream::BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer) :
-			BufferedInStream(buffer.get()),
-			BufferedOutStream(std::move(buffer))
-		{
-		}
+    buffered_streambuf &BufferedOutStream::buffer() const
+    {
+        return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
+    }
 
-		BufferedInOutStream::BufferedInOutStream(BufferedInOutStream && other) :
-			BufferedInStream(std::move(other)),
-			BufferedOutStream(std::move(other))
-		{
-		}
+    BufferedOutStream &BufferedOutStream::operator<<(BufferedInStream &in)
+    {
+        OutStream::operator<<(&in.buffer());
+        return *this;
+    }
 
-		StreamError BufferedInOutStream::error() const
-		{
-			return buffer().closeCause();
-		}
+    BufferedInOutStream::BufferedInOutStream(
+        std::unique_ptr<buffered_streambuf> &&buffer)
+        : BufferedInStream(buffer.get())
+        , BufferedOutStream(std::move(buffer))
+    {
+    }
 
-		bool BufferedInOutStream::isClosed() const
-		{
-			return !bool(*this) || buffer().isClosed();
-		}
+    BufferedInOutStream::BufferedInOutStream(BufferedInOutStream &&other)
+        : BufferedInStream(std::move(other))
+        , BufferedOutStream(std::move(other))
+    {
+    }
 
-		void BufferedInOutStream::close()
-		{
-			writeCommand(STREAM_EOF);
-			buffer().close();
-		}
+    BufferedInOutStream::BufferedInOutStream(BufferedInOutStream &&other,
+        SerializeManager &mgr)
+        : BufferedInStream(std::move(other), mgr)
+        , BufferedOutStream(std::move(other), mgr)
+    {
+    }
 
-		BufferedInOutStream::operator bool() const
-		{
-			return this->SerializeInStream::operator bool() && this->SerializeOutStream::operator bool();
-		}
-	}
-} // namespace Scripting
+    StreamError BufferedInOutStream::error() const { return buffer().closeCause(); }
+
+    bool BufferedInOutStream::isClosed() const
+    {
+        return !bool(*this) || buffer().isClosed();
+    }
+
+    void BufferedInOutStream::close()
+    {
+        writeCommand(STREAM_EOF);
+        buffer().close();
+    }
+
+    BufferedInOutStream::operator bool() const
+    {
+        return this->SerializeInStream::operator bool() && this->SerializeOutStream::operator bool();
+    }
+} // namespace Serialize
+} // namespace Engine
