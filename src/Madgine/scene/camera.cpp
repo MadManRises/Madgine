@@ -43,7 +43,7 @@ namespace Engine {
 
 		Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
 		{
-			Matrix4 rot = mOrientation.inverse().toMatrix();
+			Matrix4 rot = Matrix4(mOrientation.inverse().toMatrix());
 
 			Matrix4 v = {
 				1, 0, 0, -mPosition.x,
