@@ -153,7 +153,12 @@ namespace Engine
 		bool NetworkManager::isConnected() const
 		{
 			return mSocket != Invalid_Socket;
-		}
+        }
+
+        bool NetworkManager::moveMasterStream(
+            Serialize::ParticipantId streamId, NetworkManager *target) {
+            return SerializeManager::moveMasterStream(streamId, target);
+        }
 
 		SignalSlot::SignalStub<Serialize::StreamError>& NetworkManager::connectionResult()
 		{

@@ -8,9 +8,19 @@
 
 namespace Engine
 {
-	namespace Serialize
-	{
-		bool CompareStreamId::operator()(BufferedOutStream* first, BufferedOutStream* second) const
+	namespace Serialize {
+		bool CompareStreamId::operator()(ParticipantId first,
+				                         const BufferedInOutStream &second) const {
+			return first < second.id();
+        }
+
+        bool CompareStreamId::operator()(const BufferedInOutStream &first,
+										 ParticipantId second) const {
+            return first.id() < second;
+        }
+
+		bool CompareStreamId::operator()(BufferedOutStream *first,
+				                         BufferedOutStream *second) const
 		{
 			return first->id() < second->id();
 		}

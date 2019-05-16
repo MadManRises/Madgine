@@ -379,12 +379,29 @@ namespace Engine
 				return true;
 			}
 			return false;
-		}
-		/*
-		void SerializeManager::removeMasterStream(BufferedInOutStream* stream)
+        }
+
+        bool SerializeManager::moveMasterStream(ParticipantId streamId, SerializeManager *target) 
 		{
-			mMasterStreams.erase(std::remove(mMasterStreams.begin(), mMasterStreams.end(), stream), mMasterStreams.end());
-		}*/
+            auto it = mMasterStreams.find(streamId);
+            if (it == mMasterStreams.end())
+                throw 0;
+            if (!target->addMasterStream(std::move(const_cast<BufferedInOutStream&>(*it)), false))
+                return false;
+            BufferedInOutStream &stream = const_cast<BufferedInOutStream&>(*target->mMasterStreams.find(streamId));
+            std::vector<Serialize::TopLevelSerializableUnitBase *> newTopLevels;
+            newTopLevels.reserve(16);
+            set_difference(target->getTopLevelUnits().begin(),
+                           target->getTopLevelUnits().end(),
+                           getTopLevelUnits().begin(), getTopLevelUnits().end(),
+                           back_inserter(newTopLevels));
+            for (Serialize::TopLevelSerializableUnitBase *newTopLevel :
+                 newTopLevels) {
+                sendState(stream, newTopLevel);
+            }
+            return true;
+        }
+		
 
 		bool SerializeManager::filter(const SerializableUnitBase* unit, ParticipantId id)
 		{

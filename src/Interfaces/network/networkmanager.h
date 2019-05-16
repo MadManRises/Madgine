@@ -33,15 +33,12 @@ namespace Engine
 
 			bool isConnected() const;
 
-			//void moveConnection(Serialize::ParticipantId id, NetworkManager* to);
+			 bool moveMasterStream(Serialize::ParticipantId streamId,
+                                              NetworkManager *target);
 
 			SignalSlot::SignalStub<Serialize::StreamError> &connectionResult();
 
 		protected:
-			//void removeSlaveStream() override;
-			//void removeMasterStream(Serialize::BufferedInOutStream* stream) override;
-
-			//Serialize::StreamError addMasterStream(NetworkStream&& stream, bool sendState = true);
 
 			void onConnectionEstablished(TimeOut timeout);
 

@@ -93,7 +93,7 @@ namespace Engine
 			StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
 			virtual void removeSlaveStream();
 			bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
-			//virtual void removeMasterStream(BufferedInOutStream* stream);
+            bool moveMasterStream(ParticipantId streamId, SerializeManager *target);
 
 			static ParticipantId createStreamId();
 
