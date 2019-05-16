@@ -35,7 +35,7 @@ namespace Engine
 
 			Profiler & Profiler::getCurrent()
 			{
-				return *(*sThread)->mProfiler;
+				return *sThread->mProfiler;
 			}
 
 			ProfilerThread::ProfilerThread(Profiler *profiler) :
@@ -61,8 +61,8 @@ namespace Engine
 			void StaticProcess::start()
 			{
 				if (mStats.start()) {
-					mPrevious = (*sThread)->mCurrent;
-					(*sThread)->mCurrent = &mStats;
+					mPrevious = sThread->mCurrent;
+					sThread->mCurrent = &mStats;
 				}
 			}
 
@@ -70,13 +70,13 @@ namespace Engine
 			{
 				std::optional<ProcessStats::Data> d = mStats.stop();
 				if (d) {
-					assert((*sThread)->mCurrent == &mStats);
-					(*sThread)->mCurrent = mPrevious;
+					assert(sThread->mCurrent == &mStats);
+					sThread->mCurrent = mPrevious;
 					if (mPrevious)
 					{
 						mPrevious = nullptr;
 						if (!mParent) {
-							mParent = (*sThread)->mCurrent->updateChild(&mStats, *d);
+							mParent = sThread->mCurrent->updateChild(&mStats, *d);
 						}
 						else {
 							mParent->second += *d;

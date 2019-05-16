@@ -105,7 +105,7 @@ namespace Engine
 		WorkGroup & WorkGroup::self()
 		{
 			assert(sSelf);
-			return **sSelf;
+			return *sSelf;
 		}
 
 	}
