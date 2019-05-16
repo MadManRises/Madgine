@@ -71,3 +71,9 @@ namespace ImGui
     void MyFunction(const char* name, const MyMatrix44& v);
 }
 */
+
+#include "Interfaces/threading/threadlocal.h"
+
+struct ImGuiContext;
+extern THREADLOCAL(ImGuiContext *) GImGui;
+#define GImGui GImGui

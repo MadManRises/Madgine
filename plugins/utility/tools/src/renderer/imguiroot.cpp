@@ -31,6 +31,7 @@
 
 #include "imguimanager.h"
 
+THREADLOCAL(ImGuiContext *) GImGui;
 
 UNIQUECOMPONENT(Engine::Tools::ImGuiRoot);
 
