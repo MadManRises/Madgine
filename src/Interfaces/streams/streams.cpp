@@ -52,7 +52,7 @@ namespace Engine
 
 	InStream::operator bool() const
 	{
-		return static_cast<bool>(mStream);
+		return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
 	}
 
 	InStream::InStream(std::streambuf * buffer) :
@@ -94,7 +94,7 @@ namespace Engine
 
 	OutStream::operator bool() const
 	{
-		return static_cast<bool>(mStream);
+        return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
 	}
 
 	Stream::Stream(std::unique_ptr<std::streambuf>&& buffer) :

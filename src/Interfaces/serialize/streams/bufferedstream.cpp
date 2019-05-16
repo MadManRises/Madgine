@@ -43,7 +43,7 @@ namespace Engine
 
 		bool BufferedInStream::isMessageAvailable() const
 		{
-			return buffer().isMessageAvailable();
+			return static_cast<bool>(*this) && buffer().isMessageAvailable();
 		}
 
 		BufferedInStream::BufferedInStream(buffered_streambuf * buffer) :
