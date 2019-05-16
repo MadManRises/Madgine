@@ -128,6 +128,12 @@ namespace Engine {
 					if (meshData)
 					{						
 						mProgram.setUniform("m", transform->matrix());
+                        mProgram.setUniform(
+                                        "anti_m",
+                                        transform->matrix()
+                                            .ToMat3()
+                                            .Inverse()
+                                            .Transpose());
 
 						glBindVertexArray(meshData->mVAO);
 						glCheck();

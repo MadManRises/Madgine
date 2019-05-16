@@ -28,8 +28,8 @@ THE SOFTWARE.
 #pragma once
 
 #include "math.h"
-#include "vector4.h"
 #include "matrix3.h"
+#include "vector4.h"
 
 // NB All code adapted from Wild Magic 0.2 Matrix math (free source code)
 // http://www.geometrictools.com/
@@ -49,267 +49,254 @@ THE SOFTWARE.
 //           0       0       1
 // where t > 0 indicates a counterclockwise rotation in the xy-plane.
 
-namespace Engine
-{
-    /** \addtogroup Core
-    *  @{
-    */
-    /** \addtogroup Math
-    *  @{
-    */
-    /** A 3x3 matrix which can represent rotations around axes.
+namespace Engine {
+/** \addtogroup Core
+ *  @{
+ */
+/** \addtogroup Math
+ *  @{
+ */
+/** A 3x3 matrix which can represent rotations around axes.
+    @note
+        <b>All the code is adapted from the Wild Magic 0.2 Matrix
+        library (http://www.geometrictools.com/).</b>
+    @par
+        The coordinate system is assumed to be <b>right-handed</b>.
+*/
+class INTERFACES_EXPORT Matrix4 {
+  public:
+    /** Default constructor.
         @note
-            <b>All the code is adapted from the Wild Magic 0.2 Matrix
-            library (http://www.geometrictools.com/).</b>
-        @par
-            The coordinate system is assumed to be <b>right-handed</b>.
+            It does <b>NOT</b> initialize the matrix for efficiency.
     */
-    class INTERFACES_EXPORT Matrix4
+    inline Matrix4() {}
+    inline Matrix4(const Matrix3 &in)
+        : m{{in[0][0], in[0][1], in[0][2], 0.0f},
+            {in[1][0], in[1][1], in[1][2], 0.0f},
+            {in[2][0], in[2][1], in[2][2], 0.0f},
+            {0.0f, 0.0f, 0.0f, 1.0f}} {}
+    inline explicit Matrix4(const float arr[4][4]) {
+        memcpy(m, arr, 16 * sizeof(float));
+    }
+    inline Matrix4(const Matrix4 &rkMatrix) {
+        memcpy(m, rkMatrix.m, 16 * sizeof(float));
+    }
+    Matrix4(float fEntry00, float fEntry01, float fEntry02, float fEntry03,
+            float fEntry10, float fEntry11, float fEntry12, float fEntry13,
+            float fEntry20, float fEntry21, float fEntry22, float fEntry23,
+            float fEntry30, float fEntry31, float fEntry32, float fEntry33) {
+        m[0][0] = fEntry00;
+        m[0][1] = fEntry01;
+        m[0][2] = fEntry02;
+        m[0][3] = fEntry03;
+        m[1][0] = fEntry10;
+        m[1][1] = fEntry11;
+        m[1][2] = fEntry12;
+        m[1][3] = fEntry13;
+        m[2][0] = fEntry20;
+        m[2][1] = fEntry21;
+        m[2][2] = fEntry22;
+        m[2][3] = fEntry23;
+        m[3][0] = fEntry30;
+        m[3][1] = fEntry31;
+        m[3][2] = fEntry32;
+        m[3][3] = fEntry33;
+    }
+
+    /** Exchange the contents of this matrix with another.
+     */
+    inline void swap(Matrix4 &other) {
+        std::swap(m[0][0], other.m[0][0]);
+        std::swap(m[0][1], other.m[0][1]);
+        std::swap(m[0][2], other.m[0][2]);
+        std::swap(m[0][3], other.m[0][3]);
+        std::swap(m[1][0], other.m[1][0]);
+        std::swap(m[1][1], other.m[1][1]);
+        std::swap(m[1][2], other.m[1][2]);
+        std::swap(m[1][3], other.m[1][3]);
+        std::swap(m[2][0], other.m[2][0]);
+        std::swap(m[2][1], other.m[2][1]);
+        std::swap(m[2][2], other.m[2][2]);
+        std::swap(m[2][3], other.m[2][3]);
+        std::swap(m[3][0], other.m[3][0]);
+        std::swap(m[3][1], other.m[3][1]);
+        std::swap(m[3][2], other.m[3][2]);
+        std::swap(m[3][3], other.m[3][3]);
+    }
+
+    /// Member access, allows use of construct mat[r][c]
+    inline const float *operator[](size_t iRow) const { return m[iRow]; }
+
+    inline float *operator[](size_t iRow) { return m[iRow]; }
+
+    /*inline operator Real* ()
     {
-    public:
-        /** Default constructor.
-            @note
-                It does <b>NOT</b> initialize the matrix for efficiency.
-        */
-        inline Matrix4 () {}
-		inline Matrix4(const Matrix3 &in) :
-			m{
-				{in[0][0], in[0][1], in[0][2], 0.0f},
-				{in[1][0], in[1][1], in[1][2], 0.0f},
-				{in[2][0], in[2][1], in[2][2], 0.0f},
-				{0.0f    , 0.0f    , 0.0f    , 1.0f}
-			}
-		{}
-        inline explicit Matrix4 (const float arr[4][4])
-        {
-            memcpy(m,arr,16*sizeof(float));
-        }
-        inline Matrix4 (const Matrix4& rkMatrix)
-        {
-            memcpy(m,rkMatrix.m,16*sizeof(float));
-        }
-        Matrix4 (float fEntry00, float fEntry01, float fEntry02, float fEntry03,
-			float fEntry10, float fEntry11, float fEntry12, float fEntry13,
-			float fEntry20, float fEntry21, float fEntry22, float fEntry23,
-			float fEntry30, float fEntry31, float fEntry32, float fEntry33 )
-        {
-            m[0][0] = fEntry00;
-            m[0][1] = fEntry01;
-            m[0][2] = fEntry02;
-			m[0][3] = fEntry03;
-            m[1][0] = fEntry10;
-            m[1][1] = fEntry11;
-            m[1][2] = fEntry12;
-			m[1][3] = fEntry13;
-            m[2][0] = fEntry20;
-            m[2][1] = fEntry21;
-            m[2][2] = fEntry22;
-			m[2][3] = fEntry23;
-			m[3][0] = fEntry30;
-			m[3][1] = fEntry31;
-			m[3][2] = fEntry32;
-			m[3][3] = fEntry33;
-        }
+        return (Real*)m[0];
+    }*/
+    Vector4 GetColumn(size_t iCol) const;
+    void SetColumn(size_t iCol, const Vector4 &vec);
+    void FromAxes(const Vector4 &xAxis, const Vector4 &yAxis,
+                  const Vector4 &zAxis, const Vector4 &wAxis);
 
-        /** Exchange the contents of this matrix with another. 
-        */
-        inline void swap(Matrix4& other)
-        {
-            std::swap(m[0][0], other.m[0][0]);
-            std::swap(m[0][1], other.m[0][1]);
-            std::swap(m[0][2], other.m[0][2]);
-			std::swap(m[0][3], other.m[0][3]);
-            std::swap(m[1][0], other.m[1][0]);
-            std::swap(m[1][1], other.m[1][1]);
-            std::swap(m[1][2], other.m[1][2]);
-			std::swap(m[1][3], other.m[1][3]);
-            std::swap(m[2][0], other.m[2][0]);
-            std::swap(m[2][1], other.m[2][1]);
-            std::swap(m[2][2], other.m[2][2]);
-			std::swap(m[2][3], other.m[2][3]);
-			std::swap(m[3][0], other.m[3][0]);
-			std::swap(m[3][1], other.m[3][1]);
-			std::swap(m[3][2], other.m[3][2]);
-			std::swap(m[3][3], other.m[3][3]);
-        }
+    /// Assignment and comparison
+    inline Matrix4 &operator=(const Matrix4 &rkMatrix) {
+        memcpy(m, rkMatrix.m, 16 * sizeof(float));
+        return *this;
+    }
 
-        /// Member access, allows use of construct mat[r][c]
-        inline const float* operator[] (size_t iRow) const
-        {
-            return m[iRow];
-        }
+    /** Tests 2 matrices for equality.
+     */
+    bool operator==(const Matrix4 &rkMatrix) const;
 
-        inline float* operator[] (size_t iRow)
-        {
-            return m[iRow];
-        }
+    /** Tests 2 matrices for inequality.
+     */
+    inline bool operator!=(const Matrix4 &rkMatrix) const {
+        return !operator==(rkMatrix);
+    }
 
+    // arithmetic operations
+    /** Matrix addition.
+     */
+    Matrix4 operator+(const Matrix4 &rkMatrix) const;
 
+    /** Matrix subtraction.
+     */
+    Matrix4 operator-(const Matrix4 &rkMatrix) const;
 
-        /*inline operator Real* ()
-        {
-            return (Real*)m[0];
-        }*/
-        Vector4 GetColumn (size_t iCol) const;
-        void SetColumn(size_t iCol, const Vector4& vec);
-        void FromAxes(const Vector4& xAxis, const Vector4& yAxis, const Vector4& zAxis, const Vector4 &wAxis);
+    /** Matrix concatenation using '*'.
+     */
+    Matrix4 operator*(const Matrix4 &rkMatrix) const;
+    Matrix4 operator-() const;
 
-        /// Assignment and comparison
-        inline Matrix4& operator= (const Matrix4& rkMatrix)
-        {
-            memcpy(m,rkMatrix.m,16*sizeof(float));
-            return *this;
-        }
+    /// Matrix * vector [3x3 * 3x1 = 3x1]
+    Vector4 operator*(const Vector4 &rkVector) const;
 
-        /** Tests 2 matrices for equality.
-         */
-        bool operator== (const Matrix4& rkMatrix) const;
+    /// Vector * matrix [1x3 * 3x3 = 1x3]
+    INTERFACES_EXPORT friend Vector4 operator*(const Vector4 &rkVector,
+                                               const Matrix4 &rkMatrix);
 
-        /** Tests 2 matrices for inequality.
-         */
-        inline bool operator!= (const Matrix4& rkMatrix) const
-        {
-            return !operator==(rkMatrix);
-        }
+    /// Matrix * scalar
+    Matrix4 operator*(float fScalar) const;
 
-        // arithmetic operations
-        /** Matrix addition.
-         */
-        Matrix4 operator+ (const Matrix4& rkMatrix) const;
+    /// Scalar * matrix
+    INTERFACES_EXPORT friend Matrix4 operator*(float fScalar,
+                                               const Matrix4 &rkMatrix);
 
-        /** Matrix subtraction.
-         */
-        Matrix4 operator- (const Matrix4& rkMatrix) const;
+    // utilities
+    Matrix4 Transpose() const;
+    bool Inverse(Matrix4 &rkInverse, float fTolerance = 1e-06) const;
+    Matrix4 Inverse(float fTolerance = 1e-06) const;
+    /*		float Determinant () const;
 
-        /** Matrix concatenation using '*'.
-         */
-        Matrix4 operator* (const Matrix4& rkMatrix) const;
-        Matrix4 operator- () const;
+            /// Singular value decomposition
+            void SingularValueDecomposition (Matrix4& rkL, Vector4& rkS,
+                Matrix4& rkR) const;
+            void SingularValueComposition (const Matrix4& rkL,
+                const Vector4& rkS, const Matrix4& rkR);
 
-        /// Matrix * vector [3x3 * 3x1 = 3x1]
-        Vector4 operator* (const Vector4& rkVector) const;
+            /// Gram-Schmidt orthonormalization (applied to columns of rotation
+       matrix) void Orthonormalize ();
 
-        /// Vector * matrix [1x3 * 3x3 = 1x3]
-        INTERFACES_EXPORT friend Vector4 operator* (const Vector4& rkVector,
-            const Matrix4& rkMatrix);
+            /// Orthogonal Q, diagonal D, upper triangular U stored as
+       (u01,u02,u12) void QDUDecomposition (Matrix4& rkQ, Vector4& rkD, Vector4&
+       rkU) const;
 
-        /// Matrix * scalar
-        Matrix4 operator* (float fScalar) const;
+                    float SpectralNorm () const;
+                    */
+    /*       /// Note: Matrix must be orthonormal
+           void ToAngleAxis (Vector4& rkAxis, Radian& rfAngle) const;
+           inline void ToAngleAxis (Vector4& rkAxis, Degree& rfAngle) const {
+               Radian r;
+               ToAngleAxis ( rkAxis, r );
+               rfAngle = r;
+           }
+           void FromAngleAxis (const Vector4& rkAxis, const Radian& fRadians);*/
 
-        /// Scalar * matrix
-		INTERFACES_EXPORT friend Matrix4 operator* (float fScalar, const Matrix4& rkMatrix);
+    /** The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
+        where yaw is rotation about the Up vector, pitch is rotation about the
+        Right axis, and roll is rotation about the Direction axis. */
+    /*       bool ToEulerAnglesXYZ (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           bool ToEulerAnglesXZY (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           bool ToEulerAnglesYXZ (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           bool ToEulerAnglesYZX (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           bool ToEulerAnglesZXY (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           bool ToEulerAnglesZYX (Radian& rfYAngle, Radian& rfPAngle,
+               Radian& rfRAngle) const;
+           void FromEulerAnglesXYZ (const Radian& fYAngle, const Radian&
+       fPAngle, const Radian& fRAngle); void FromEulerAnglesXZY (const Radian&
+       fYAngle, const Radian& fPAngle, const Radian& fRAngle); void
+       FromEulerAnglesYXZ (const Radian& fYAngle, const Radian& fPAngle, const
+       Radian& fRAngle); void FromEulerAnglesYZX (const Radian& fYAngle, const
+       Radian& fPAngle, const Radian& fRAngle); void FromEulerAnglesZXY (const
+       Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle); void
+       FromEulerAnglesZYX (const Radian& fYAngle, const Radian& fPAngle, const
+       Radian& fRAngle);*/
+    /// Eigensolver, matrix must be symmetric
+    /*       void EigenSolveSymmetric (float afEigenvalue[3],
+               Vector4 akEigenvector[3]) const;
 
-        // utilities
-/*        Matrix4 Transpose () const;
-        bool Inverse (Matrix4& rkInverse, float fTolerance = 1e-06) const;
-        Matrix4 Inverse (float fTolerance = 1e-06) const;
-		float Determinant () const;
+           static void TensorProduct (const Vector4& rkU, const Vector4& rkV,
+               Matrix4& rkProduct);
+                           */
+    /** Determines if this matrix involves a scaling. */
+    /*inline bool hasScale() const
+    {
+        // check magnitude of column vectors (==local axes)
+                    float t = m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] *
+    m[2][0]; if (!Math::RealEqual(t, 1.0, (float)1e-04)) return true; t =
+    m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1]; if
+    (!Math::RealEqual(t, 1.0, (float)1e-04)) return true; t = m[0][2] * m[0][2]
+    + m[1][2] * m[1][2] + m[2][2] * m[2][2]; if (!Math::RealEqual(t, 1.0,
+    (float)1e-04)) return true;
 
-        /// Singular value decomposition
-        void SingularValueDecomposition (Matrix4& rkL, Vector4& rkS,
-            Matrix4& rkR) const;
-        void SingularValueComposition (const Matrix4& rkL,
-            const Vector4& rkS, const Matrix4& rkR);
+        return false;
+    }*/
 
-        /// Gram-Schmidt orthonormalization (applied to columns of rotation matrix)
-        void Orthonormalize ();
+    Matrix3 ToMat3() {
+        return Matrix3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2],
+                       m[2][0], m[2][1], m[2][2]);
+    }
 
-        /// Orthogonal Q, diagonal D, upper triangular U stored as (u01,u02,u12)
-        void QDUDecomposition (Matrix4& rkQ, Vector4& rkD,
-            Vector4& rkU) const;
+    /** Function for writing to a stream.
+     */
+    inline INTERFACES_EXPORT friend std::ostream &
+    operator<<(std::ostream &o, const Matrix4 &mat) {
+        o << "Matrix4(" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2]
+          << ", " << mat[0][3] << ", " << mat[1][0] << ", " << mat[1][1] << ", "
+          << mat[1][2] << ", " << mat[1][3] << ", " << mat[2][0] << ", "
+          << mat[2][1] << ", " << mat[2][2] << ", " << mat[2][3] << ", "
+          << mat[3][0] << ", " << mat[3][1] << ", " << mat[3][2] << ", "
+          << mat[3][3] << ")";
+        return o;
+    }
 
-		float SpectralNorm () const;
-		*/
- /*       /// Note: Matrix must be orthonormal
-        void ToAngleAxis (Vector4& rkAxis, Radian& rfAngle) const;
-        inline void ToAngleAxis (Vector4& rkAxis, Degree& rfAngle) const {
-            Radian r;
-            ToAngleAxis ( rkAxis, r );
-            rfAngle = r;
-        }
-        void FromAngleAxis (const Vector4& rkAxis, const Radian& fRadians);*/
+    static const float EPSILON;
+    static const Matrix4 ZERO;
+    static const Matrix4 IDENTITY;
 
-        /** The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
-            where yaw is rotation about the Up vector, pitch is rotation about the
-            Right axis, and roll is rotation about the Direction axis. */
- /*       bool ToEulerAnglesXYZ (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        bool ToEulerAnglesXZY (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        bool ToEulerAnglesYXZ (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        bool ToEulerAnglesYZX (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        bool ToEulerAnglesZXY (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        bool ToEulerAnglesZYX (Radian& rfYAngle, Radian& rfPAngle,
-            Radian& rfRAngle) const;
-        void FromEulerAnglesXYZ (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        void FromEulerAnglesXZY (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        void FromEulerAnglesYXZ (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        void FromEulerAnglesYZX (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        void FromEulerAnglesZXY (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);
-        void FromEulerAnglesZYX (const Radian& fYAngle, const Radian& fPAngle, const Radian& fRAngle);*/
-        /// Eigensolver, matrix must be symmetric
- /*       void EigenSolveSymmetric (float afEigenvalue[3],
-            Vector4 akEigenvector[3]) const;
+  protected:
+    // support for eigensolver
+    /* void Tridiagonal (float afDiag[3], float afSubDiag[3]);
+     bool QLAlgorithm (float afDiag[3], float afSubDiag[3]);
 
-        static void TensorProduct (const Vector4& rkU, const Vector4& rkV,
-            Matrix4& rkProduct);
-			*/
-        /** Determines if this matrix involves a scaling. */
-    	/*inline bool hasScale() const
-        {
-            // check magnitude of column vectors (==local axes)
-			float t = m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
-                return true;
-            t = m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
-                return true;
-            t = m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
-                return true;
+     // support for singular value decomposition
+     static const float msSvdEpsilon;
+     static const unsigned int msSvdMaxIterations;
+     static void Bidiagonalize (Matrix4& kA, Matrix4& kL,
+         Matrix4& kR);
+     static void GolubKahanStep (Matrix4& kA, Matrix4& kL,
+         Matrix4& kR);
 
-            return false;
-        }*/
-
-        /** Function for writing to a stream.
-        */
-        inline INTERFACES_EXPORT friend std::ostream& operator <<
-            ( std::ostream& o, const Matrix4& mat )
-        {
-            o << "Matrix4(" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << ", " << mat[0][3] << ", "
-                            << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << ", " << mat[1][3] << ", "
-                            << mat[2][0] << ", " << mat[2][1] << ", " << mat[2][2] << ", " << mat[2][3] << ", "
-							<< mat[3][0] << ", " << mat[3][1] << ", " << mat[3][2] << ", " << mat[3][3] << ")";
-            return o;
-        }
-
-        static const float EPSILON;
-        static const Matrix4 ZERO;
-        static const Matrix4 IDENTITY;
-
-    protected:
-        // support for eigensolver
-       /* void Tridiagonal (float afDiag[3], float afSubDiag[3]);
-        bool QLAlgorithm (float afDiag[3], float afSubDiag[3]);
-
-        // support for singular value decomposition
-        static const float msSvdEpsilon;
-        static const unsigned int msSvdMaxIterations;
-        static void Bidiagonalize (Matrix4& kA, Matrix4& kL,
-            Matrix4& kR);
-        static void GolubKahanStep (Matrix4& kA, Matrix4& kL,
-            Matrix4& kR);
-
-        // support for spectral norm
-        static float MaxCubicRoot (float afCoeff[3]);
-		*/
-		float m[4][4];
-
-    };
-    /** @} */
-    /** @} */
-}
-
+     // support for spectral norm
+     static float MaxCubicRoot (float afCoeff[3]);
+             */
+    float m[4][4];
+};
+/** @} */
+/** @} */
+} // namespace Engine

@@ -12,12 +12,13 @@ varying vec3 normal;
 
 uniform mat4 vp;
 uniform mat4 m;
+uniform mat3 anti_m;
 
 void main()
 {
 	worldPos = vec3(m * vec4(aPos, 1.0));
     gl_Position = vp * vec4(worldPos, 1.0);
-	gl_Position.z *= -1.0f;
+	gl_Position.z *= -1.0;
     color = aColor;
-	normal = mat3(transpose(inverse(m))) * aNormal;
+	normal = anti_m * aNormal;
 }

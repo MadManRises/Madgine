@@ -184,7 +184,7 @@ namespace Engine
         return kProd;
     }
     //-----------------------------------------------------------------------
-    /*Matrix4 Matrix4::Transpose () const
+    Matrix4 Matrix4::Transpose () const
     {
         Matrix4 kTranspose;
         for (size_t iRow = 0; iRow < 4; iRow++)
@@ -244,7 +244,7 @@ namespace Engine
         return kInverse;
     }
     //-----------------------------------------------------------------------
-	float Matrix4::Determinant () const
+	/*float Matrix4::Determinant () const
     {
 		float fCofactor00 = m[1][1]*m[2][2] -
             m[1][2]*m[2][1];

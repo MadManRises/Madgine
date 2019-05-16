@@ -18,7 +18,7 @@ void main()
 
 	float diffuseStrength = 0.7;
 	vec3 norm = normalize(normal);
-	float diff = max(dot(norm, -lightDir), 0.0f);
+	float diff = max(dot(norm, -lightDir), 0.0);
 	vec3 diffuse = diffuseStrength * diff * lightColor;
 
     gl_FragColor = vec4(ambient + diffuse,1.0) * color;
