@@ -58,6 +58,14 @@ namespace Engine {
 			bind();
 			GLint location = glGetUniformLocation(mHandle, var.c_str());
 			glUniform1i(location, value);
+        }
+
+        void OpenGLShaderProgram::setUniform(const std::string &var,
+                                                const Matrix3 &value) 
+		{
+            bind();
+            GLint location = glGetUniformLocation(mHandle, var.c_str());
+            glUniformMatrix3fv(location, 1, GL_TRUE, value[0]);
 		}
 
 		void OpenGLShaderProgram::setUniform(const std::string & var, const Matrix4 & value)

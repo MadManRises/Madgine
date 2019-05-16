@@ -14,6 +14,7 @@ namespace Engine {
 			void bind();
 
 			void setUniform(const std::string &var, int value);
+            void setUniform(const std::string &var, const Matrix3 &value);
 			void setUniform(const std::string &var, const Matrix4 &value);
 			void setUniform(const std::string &var, const Vector3 &value);
 

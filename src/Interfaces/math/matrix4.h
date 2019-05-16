@@ -70,7 +70,7 @@ class INTERFACES_EXPORT Matrix4 {
             It does <b>NOT</b> initialize the matrix for efficiency.
     */
     inline Matrix4() {}
-    inline Matrix4(const Matrix3 &in)
+    inline explicit Matrix4(const Matrix3 &in)
         : m{{in[0][0], in[0][1], in[0][2], 0.0f},
             {in[1][0], in[1][1], in[1][2], 0.0f},
             {in[2][0], in[2][1], in[2][2], 0.0f},
