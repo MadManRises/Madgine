@@ -1,5 +1,5 @@
-#include "serializestream.h"
 #include "../../interfaceslib.h"
+#include "serializestream.h"
 #include "../serializeexception.h"
 
 #include "../serializemanager.h"
