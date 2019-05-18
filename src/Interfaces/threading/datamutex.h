@@ -7,7 +7,7 @@ namespace Engine
 
 		struct DataLock;
 
-		struct DataMutex 
+		struct INTERFACES_EXPORT DataMutex 
 		{
 			enum ConsiderResult {
 				UNAVAILABLE,
@@ -28,7 +28,7 @@ namespace Engine
 		};
 
 
-		struct DataLock
+		struct INTERFACES_EXPORT DataLock
 		{
 			DataLock(DataMutex &mutex);
 			DataLock(const DataLock &) = delete;
