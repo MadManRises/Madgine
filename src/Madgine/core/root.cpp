@@ -49,7 +49,8 @@ namespace Engine
 			(*mPluginManager)["Core"].loadPlugin("TWClient");
 			(*mPluginManager)["Core"].loadPlugin("Menues");
 			(*mPluginManager)["Core"].loadPlugin("Animation");
-			(*mPluginManager)["Core"].loadPlugin("TWServer");
+            (*mPluginManager)["Core"].loadPlugin("IngameUI");
+			(*mPluginManager)["Core"].loadPlugin("TWServer");            
 
 			(*mPluginManager)["Test"];
 #endif
