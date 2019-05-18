@@ -22,8 +22,6 @@
 
 #include "../app/globalapicollector.h"
 
-
-
 #include "entity/components/mesh.h"
 #include "entity/components/transform.h"
 
@@ -121,7 +119,12 @@ namespace Engine
 		const Core::MadgineObject * SceneManager::parent() const
 		{
 			return &mApp;
-		}
+        }
+
+        Threading::DataMutex &SceneManager::mutex()
+        {
+            return mMutex;
+        }
 
 		void SceneManager::readState(Serialize::SerializeInStream& in)
 		{
@@ -136,6 +139,8 @@ namespace Engine
 		{
 			PROFILE();
 				
+			Threading::DataLock lock(mMutex);
+
 			for (const std::unique_ptr<SceneComponentBase>& component : mSceneComponents)
 			{
 				//PROFILE(component->componentName());

@@ -20,6 +20,8 @@
 
 #include "camera.h"
 
+#include "Interfaces/threading/datamutex.h"
+
 namespace Engine
 {
 	namespace Scene
@@ -77,6 +79,8 @@ namespace Engine
 			virtual App::Application &app(bool = true) override;
 			virtual const Core::MadgineObject *parent() const override;
 
+			Threading::DataMutex &mutex();
+
 		protected:
 
 			virtual bool init() final;
@@ -110,6 +114,8 @@ namespace Engine
 			SignalSlot::Signal<> mStateLoadedSignal;
 			SignalSlot::Signal<> mClearedSignal;
 
+			Threading::DataMutex mMutex;
+			
 		public:
 			SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
 
