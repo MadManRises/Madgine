@@ -50,7 +50,9 @@ namespace Serialize {
 
     bool BufferedInStream::isMessageAvailable() const
     {
-        return static_cast<bool>(*this) && buffer().isMessageAvailable();
+        if (!*this)
+            return false;
+        return buffer().isMessageAvailable();
     }
 
     BufferedInStream::BufferedInStream(buffered_streambuf *buffer)
@@ -109,7 +111,11 @@ namespace Serialize {
 
     void BufferedOutStream::endMessage() { buffer().endMessage(); }
 
-    int BufferedOutStream::sendMessages() { return buffer().sendMessages(); }
+    int BufferedOutStream::sendMessages() { 
+		if (!*this)
+            return -1;
+		return buffer().sendMessages(); 
+	}
 
     buffered_streambuf &BufferedOutStream::buffer() const
     {
