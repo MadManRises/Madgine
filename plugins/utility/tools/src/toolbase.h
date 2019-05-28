@@ -7,7 +7,7 @@ namespace Engine
 	namespace Tools
 	{
 		
-		class ToolBase
+		class MADGINE_TOOLS_EXPORT ToolBase
 		{
 		public:
 			ToolBase(ImGuiRoot &root);

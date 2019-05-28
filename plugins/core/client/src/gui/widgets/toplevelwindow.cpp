@@ -70,9 +70,9 @@ namespace Engine
 			SceneWindow *game = ingame->createChildSceneWindow("game");
 			//game->setCamera(gui.sceneMgr().createCamera());
 			game->setSize({ 0.8f,0,0,0,1,0,0,0,1 });
-			/*Widget *placeBaseButton = game->createChildButton("PlaceBaseButton");
+			Widget *placeBaseButton = game->createChildButton("PlaceBaseButton");
 			placeBaseButton->setPos({ 1,0,-120,0,0,30,0,0,0 });
-			placeBaseButton->setSize({ 0,0,100,0,0,30,0,0,1 });*/
+			placeBaseButton->setSize({ 0,0,100,0,0,30,0,0,1 });
 			Widget *endTurnButton = game->createChildButton("EndTurnButton");
 			endTurnButton->setPos({ 1,0,-120,0,0,30,0,0,0 });
 			endTurnButton->setSize({ 0,0,100,0,0,30,0,0,1 });
