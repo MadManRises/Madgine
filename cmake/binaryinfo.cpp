@@ -6,6 +6,8 @@
 	namespace Plugins {
 	*/
 
+		static const char *dependencies[] = { PLUGIN_DEPENDENCIES };
+
 		extern "C" DLL_EXPORT const Engine::Plugins::BinaryInfo PLUGIN_LOCAL(binaryInfo) {
 
 			BINARY_MAJOR_VERSION,
@@ -19,7 +21,8 @@
 				BINARY_BINARY_DIR,
 				BINARY_FILENAME,
 
-				PRECOMPILED_HEADER_PATH
+				PRECOMPILED_HEADER_PATH,
+				dependencies
 
 		};
 

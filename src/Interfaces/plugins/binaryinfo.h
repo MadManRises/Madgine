@@ -22,6 +22,7 @@ namespace Engine {
 
 			const char *mPrecompiledHeaderPath;
 
+			const char **mPluginDependencies;
 
 		};
 

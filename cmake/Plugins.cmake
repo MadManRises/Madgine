@@ -86,17 +86,28 @@ endmacro(add_plugin)
 
 function(target_link_plugins target)
 
+	get_target_property(plugin_dependencies ${target} PLUGIN_DEPENDENCIES)
+	if (NOT plugin_dependencies)
+		set(plugin_dependencies)
+	endif()
+
 	foreach(plugin ${ARGN})
 
 		get_target_property(exclude ${plugin} EXCLUDE_FROM_ALL)
 		if (NOT exclude)
 			target_link_libraries(${target} PUBLIC ${plugin})
+			list(APPEND plugin_dependencies ${plugin})
 			#MESSAGE(STATUS "Linking ${plugin} to ${target}")
 		else()
 			#MESSAGE(STATUS "Not linking ${plugin} to ${target}")
 		endif()
 
 	endforeach()
+
+	list(REMOVE_DUPLICATES plugin_dependencies)
+	if (plugin_dependencies)
+		set_target_properties(${target} PROPERTIES PLUGIN_DEPENDENCIES "${plugin_dependencies}")
+	endif()
 
 	if (STATIC_BUILD)
 		get_target_property(target_type ${target} TYPE)
