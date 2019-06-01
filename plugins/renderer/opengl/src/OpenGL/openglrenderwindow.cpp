@@ -117,7 +117,6 @@ namespace Engine {
 			Vector3 screenPos, screenSize;
 			std::tie(screenPos, screenSize) = window()->getAvailableScreenSpace();
 			
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
 			
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

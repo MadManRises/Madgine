@@ -2,9 +2,8 @@
 
 #include "openglrendertexture.h"
 
-
-#include "Interfaces/math/vector4.h"
 #include "Interfaces/math/matrix4.h"
+#include "Interfaces/math/vector4.h"
 
 #include "openglrenderwindow.h"
 
@@ -14,141 +13,131 @@
 
 #include "util/openglshader.h"
 
-
-
 #include "Madgine/scene/camera.h"
-#include "Madgine/scene/entity/entity.h"
 #include "Madgine/scene/entity/components/transform.h"
+#include "Madgine/scene/entity/entity.h"
 #include "openglmesh.h"
 
 namespace Engine {
-	namespace Render {
+namespace Render {
 
-		OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow * window, uint32_t index, Scene::Camera *camera, const Vector2 & size) :
-			RenderTarget(window, camera, size),
-			mIndex(index),
-			mWindow(window)
-		{
-			std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
-			std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
-			
-			if (!mProgram.link(vertexShader.get(), pixelShader.get()))
-				throw 0;
+    OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size)
+        : RenderTarget(window, camera, size)
+        , mIndex(index)
+        , mWindow(window)
+    {
+        std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
+        std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
 
-			mProgram.setUniform("lightColor", { 1.0f,1.0f,1.0f });
-			mProgram.setUniform("lightDir", Vector3{ 0.0f,0.0f,-1.0f }.normalisedCopy());
+        if (!mProgram.link(vertexShader.get(), pixelShader.get()))
+            throw 0;
 
-			
-						
-			mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
-			mTexture.setFilter(GL_NEAREST);
+        mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
+        mProgram.setUniform("lightDir", Vector3{ 0.0f, 0.0f, -1.0f }.normalisedCopy());
 
-			glGenRenderbuffers(1, &mDepthRenderbuffer);
-			glCheck();
+        mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
+        mTexture.setFilter(GL_NEAREST);
 
-			resize(size);
-			
-			glGenFramebuffers(1, &mFramebuffer);
-			glCheck();
-			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);			
-			glCheck();
+        glGenRenderbuffers(1, &mDepthRenderbuffer);
+        glCheck();
 
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);			
-			glCheck();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);			
-			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);			
-			glCheck();
+        resize(size);
 
-			GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-			glDrawBuffers(1, DrawBuffers);
-			glCheck();
+        glGenFramebuffers(1, &mFramebuffer);
+        glCheck();
+        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+        glCheck();
 
-			if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
-				throw 0;
-			
-		}
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
+        glCheck();
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);
+        //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
+        glCheck();
 
-		OpenGLRenderTexture::~OpenGLRenderTexture()
-		{
-			glDeleteRenderbuffers(1, &mDepthRenderbuffer);
-			glCheck();
-		}
+        GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, DrawBuffers);
+        glCheck();
 
-		uint32_t OpenGLRenderTexture::textureId() const
-		{
-			glActiveTexture(GL_TEXTURE0 + mIndex);
-			glCheck();
-			mTexture.bind();
-			return mIndex;
-		}
+        if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
+            throw 0;
 
-		void OpenGLRenderTexture::resize(const Vector2 & size)
-		{
-			GLsizei width = static_cast<GLsizei>(size.x);
-			GLsizei height = static_cast<GLsizei>(size.y);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 
-			mTexture.setData(width, height, nullptr);
+    OpenGLRenderTexture::~OpenGLRenderTexture()
+    {
+        glDeleteRenderbuffers(1, &mDepthRenderbuffer);
+        glCheck();
+    }
 
-			glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
-			glCheck();
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-			glCheck();
+    uint32_t OpenGLRenderTexture::textureId() const
+    {
+        glActiveTexture(GL_TEXTURE0 + mIndex);
+        glCheck();
+        mTexture.bind();
+        return mIndex;
+    }
 
-			RenderTarget::resize(size);
-		}
+    void OpenGLRenderTexture::resize(const Vector2 &size)
+    {
+        GLsizei width = static_cast<GLsizei>(size.x);
+        GLsizei height = static_cast<GLsizei>(size.y);
 
-		void OpenGLRenderTexture::render()
-		{
+        mTexture.setData(width, height, nullptr);
 
-			const Vector2 &size = getSize();
+        glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
+        glCheck();
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+        glCheck();
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-			glCheck();
-			glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));			
-			glCheck();
+        RenderTarget::resize(size);
+    }
 
-			mProgram.bind();
+    void OpenGLRenderTexture::render()
+    {
 
-			glClearColor(0.1f, 0.01f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        const Vector2 &size = getSize();
 
-			float aspectRatio = size.x / size.y;
+        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+        glCheck();
+        glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
+        glCheck();
 
-			mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
-			
+        mProgram.bind();
 
-			for (Scene::Entity::Entity *e : camera()->visibleEntities())
-			{
+        glClearColor(0.1f, 0.01f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
-				Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-				if (mesh && mesh->isVisible() && transform)
-				{
-					OpenGLMeshData *meshData = mesh->data();
-					if (meshData)
-					{						
-						mProgram.setUniform("m", transform->matrix());
-                        mProgram.setUniform(
-                                        "anti_m",
-                                        transform->matrix()
-                                            .ToMat3()
-                                            .Inverse()
-                                            .Transpose());
+        float aspectRatio = size.x / size.y;
 
-						glBindVertexArray(meshData->mVAO);
-						glCheck();
-						
-						glDrawArrays(GL_TRIANGLES, 0, meshData->mVertexCount);
-						glCheck();
-					}
-						
-				}
-			}
+        mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
 
+        for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
 
+            OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
+            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            if (mesh && mesh->isVisible() && transform) {
+                OpenGLMeshData *meshData = mesh->data();
+                if (meshData) {
+                    mProgram.setUniform("m", transform->matrix());
+                    mProgram.setUniform(
+                        "anti_m",
+                        transform->matrix()
+                            .ToMat3()
+                            .Inverse()
+                            .Transpose());
 
+                    glBindVertexArray(meshData->mVAO);
+                    glCheck();
 
-		}
+                    glDrawArrays(GL_TRIANGLES, 0, meshData->mVertexCount);
+                    glCheck();
+                }
+            }
+        }
 
-	}
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+}
 }
