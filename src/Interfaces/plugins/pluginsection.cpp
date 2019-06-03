@@ -18,6 +18,8 @@
 
 #include "../filesystem/runtime.h"
 
+#include "../generic/keyvalue.h"
+
 namespace Engine {
 	namespace Plugins {
 
@@ -150,12 +152,12 @@ namespace Engine {
 			bool ok = true;
 			Plugin *unloadExclusive = nullptr;
 			if (mExclusive) {
-				for (std::pair<const std::string, Plugin> &p : mPlugins) {
-					if (p.second.isLoaded()) {
+				for (Plugin &p : kvValues(mPlugins)) {
+					if (p.isLoaded()) {
 						assert(!unloadExclusive);
-						unloadExclusive = &p.second;						
+						unloadExclusive = &p;						
 						for (PluginListener *listener : mListeners)
-							ok &= listener->aboutToUnloadPlugin(&p.second);
+							ok &= listener->aboutToUnloadPlugin(&p);
 					}
 				}
 			}
