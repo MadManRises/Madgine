@@ -15,10 +15,10 @@ namespace Plugins {
     {
         void *handle;
 
-        if (mPath.empty())
+        if (name.empty())
             handle = dlopen(nullptr, RTLD_LAZY);
         else
-            handle = dlopen(mPath.c_str(), RTLD_NOW);
+            handle = dlopen(name.c_str(), RTLD_NOW);
         if (!handle)
             throw std::exception(dlerror());
 
