@@ -8,6 +8,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include "../util/exception.h"
+
 namespace Engine {
 namespace Plugins {
 
@@ -20,7 +22,7 @@ namespace Plugins {
         else
             handle = dlopen(name.c_str(), RTLD_NOW);
         if (!handle)
-            throw std::exception(dlerror());
+            throw exception(dlerror());
 
         return handle;
     }
