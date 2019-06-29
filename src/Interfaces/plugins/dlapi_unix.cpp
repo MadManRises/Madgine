@@ -33,7 +33,7 @@ namespace Plugins {
         assert(result == 0);
     }
 
-    void *getDllSymbol(void *dllHandle, const std::string &symbolName)
+    const void *getDllSymbol(void *dllHandle, const std::string &symbolName)
     {
         return dlsym(dllHandle, symbolName.c_str());
     }
