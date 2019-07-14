@@ -65,7 +65,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile,
     std::ofstream file(outFile.str());
     assert(file);
 
-	include(file, "Interfaces/interfaceslib.h");
+	include(file, "Modules/moduleslib.h");
 
     for (const Plugins::BinaryInfo *bin : binaries) {
         if (strlen(bin->mPrecompiledHeaderPath)) {
