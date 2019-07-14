@@ -2,8 +2,8 @@
 
 #include "openglrendertexture.h"
 
-#include "Interfaces/math/matrix4.h"
-#include "Interfaces/math/vector4.h"
+#include "Modules/math/matrix4.h"
+#include "Modules/math/vector4.h"
 
 #include "openglrenderwindow.h"
 

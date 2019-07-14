@@ -73,7 +73,7 @@ namespace ImGui
 }
 */
 
-#include "Interfaces/threading/threadlocal.h"
+#include "Modules/threading/threadlocal.h"
 
 struct ImGuiContext;
 extern THREADLOCAL(ImGuiContext *) GImGui;

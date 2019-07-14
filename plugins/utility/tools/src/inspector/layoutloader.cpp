@@ -4,6 +4,9 @@
 
 #include "../tinyxml/tinyxml2.h"
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
 UNIQUECOMPONENT(Engine::Tools::LayoutLoader);
 
 namespace Engine {
@@ -24,3 +27,8 @@ namespace Engine {
 
 	}
 }
+
+METATABLE_BEGIN(Engine::Tools::LayoutLoader)
+METATABLE_END(Engine::Tools::LayoutLoader)
+
+RegisterType(Engine::Tools::LayoutLoader);

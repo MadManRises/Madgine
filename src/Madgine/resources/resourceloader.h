@@ -1,7 +1,7 @@
 #pragma once
 
 #include "resource.h"
-#include "Interfaces/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
 

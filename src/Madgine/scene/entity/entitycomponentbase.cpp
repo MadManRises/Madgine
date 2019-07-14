@@ -2,10 +2,9 @@
 #include "entitycomponentbase.h"
 #include "entity.h"
 
-#include "Interfaces/scripting/types/api.h"
-#include "Interfaces/generic/keyvalueiterate.h"
 
-
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 namespace Engine
 {
@@ -17,7 +16,6 @@ namespace Engine
 		namespace Entity
 		{
 			EntityComponentBase::EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable) :
-				Scope(&entity),
 				mEntity(&entity),
 				mInitTable(initTable)
 			{
@@ -65,11 +63,11 @@ namespace Engine
 				return mEntity->app(init);
 			}
 
-			KeyValueMapList EntityComponentBase::maps()
+			/*KeyValueMapList EntityComponentBase::maps()
 			{
 				return Scope::maps().merge(MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
 					MAP_RO(Synced, isSynced));
-			}
+			}*/
 
 			const Scripting::LuaTable & EntityComponentBase::initTable()
 			{
@@ -83,3 +81,8 @@ namespace Engine
 		}
 	}
 }
+
+METATABLE_BEGIN(Engine::Scene::Entity::EntityComponentBase)
+METATABLE_END(Engine::Scene::Entity::EntityComponentBase)
+
+RegisterType(Engine::Scene::Entity::EntityComponentBase);

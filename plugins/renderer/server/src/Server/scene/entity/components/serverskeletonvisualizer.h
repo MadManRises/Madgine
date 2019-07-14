@@ -18,5 +18,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::ServerSkeletonVisualizer);

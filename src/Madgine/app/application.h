@@ -1,19 +1,16 @@
 #pragma once
 
 
-#include "Interfaces/scripting/types/scope.h"
 #include "../core/madgineobject.h"
 
-#include "Interfaces/scripting/types/globalscopebase.h"
+#include "Modules/scripting/types/globalscopebase.h"
 
 #include "globalapicollector.h"
 
-#include "Interfaces/threading/framelistener.h"
+#include "Modules/threading/framelistener.h"
 
-#include "Interfaces/uniquecomponent/uniquecomponentcontainer.h"
-
-#include "Interfaces/threading/scheduler.h"
-#include "Interfaces/threading/frameloop.h"
+#include "Modules/threading/scheduler.h"
+#include "Modules/threading/frameloop.h"
 
 namespace Engine
 {
@@ -22,7 +19,7 @@ namespace Engine
 		/**
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
-		class MADGINE_BASE_EXPORT Application : public Scripting::Scope<Application, Scripting::GlobalScopeBase>,
+		class MADGINE_BASE_EXPORT Application : public Scripting::GlobalScopeBase,
 			public Core::MadgineObject, public Threading::FrameListener
 		{
 		public:
@@ -81,7 +78,7 @@ namespace Engine
 			float getFPS();
 
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 			template <class T>
 			T &getGlobalAPIComponent()
@@ -123,6 +120,8 @@ namespace Engine
 			virtual const Core::MadgineObject *parent() const override;
 			virtual Application &app(bool = true) override;
 
+			GlobalAPIContainer<std::vector> mGlobalAPIs;
+
 		protected:
 			virtual void clear();
 
@@ -139,12 +138,8 @@ namespace Engine
 			Threading::FrameLoop mLoop;
 			
 			int mGlobalAPIInitCounter;
-			GlobalAPIContainer<std::vector> mGlobalAPIs;
 						
 			bool mRestartLoop = false;			
 		};
 	}
 }
-
-
-RegisterType(Engine::App::Application);

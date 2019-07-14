@@ -18,9 +18,14 @@ endif()
 if (ANDROID)
 	target_link_plugins(MadgineLauncher AndroidInput)
 elseif (EMSCRIPTEN)
-	target_link_plugins(MadgineLauncher SDLInput)
+	target_link_plugins(MadgineLauncher EmscriptenInput)
 else()
 	target_link_plugins(MadgineLauncher OISHandler)
 endif()
+
+if (PLUGINS_BUILD_SDLINPUT)
+	target_link_plugins(MadgineLauncher SDLInput)
+endif()
+
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

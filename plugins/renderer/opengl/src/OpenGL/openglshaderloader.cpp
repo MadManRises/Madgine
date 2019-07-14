@@ -2,9 +2,12 @@
 
 #include "openglshaderloader.h"
 
-#include "Interfaces/util/stringutil.h"
+#include "Interfaces/stringutil.h"
 
 #include "util/openglshader.h"
+
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
@@ -65,3 +68,7 @@ namespace Engine
 	}
 }
 
+METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
+METATABLE_END(Engine::Render::OpenGLShaderLoader)
+
+RegisterType(Engine::Render::OpenGLShaderLoader);

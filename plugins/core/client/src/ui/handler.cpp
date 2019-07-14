@@ -9,7 +9,6 @@ namespace Engine
 	namespace UI
 	{
 		Handler::Handler(UIManager &ui, const std::string& windowName) :
-			ScopeBase(&ui),
 			mWidget(nullptr),
 			mUI(ui),
 			mWidgetName(windowName),

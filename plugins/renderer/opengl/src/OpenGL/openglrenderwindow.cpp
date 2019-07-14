@@ -9,10 +9,10 @@
 #undef min
 #undef max
 
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profiler.h"
 
-#include "Interfaces/math/vector3.h"
-#include "Interfaces/math/vector4.h"
+#include "Modules/math/vector3.h"
+#include "Modules/math/vector4.h"
 
 #include "gui/widgets/widget.h"
 

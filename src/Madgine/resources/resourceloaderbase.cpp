@@ -4,8 +4,7 @@
 
 #include "resourcebase.h"
 
-#include "Interfaces/reflection/classname.h"
-
+#include "Modules/reflection/classname.h"
 
 
 namespace Engine
@@ -39,3 +38,5 @@ namespace Engine
 		}
 	}
 }
+
+RegisterType(Engine::Resources::ResourceLoaderBase);

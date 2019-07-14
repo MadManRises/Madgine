@@ -1,6 +1,6 @@
 #include "Interfaces/commonlib.h"
 
-#include "Interfaces/plugins/binaryinfo.h"
+#include "Modules/plugins/binaryinfo.h"
 
 /*namespace Engine{
 	namespace Plugins {

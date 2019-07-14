@@ -3,48 +3,44 @@
 
 #include "inspectorlayout.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
-		
+#include "Modules/keyvalue/typedscopeptr.h"
 
-		class MADGINE_TOOLS_EXPORT Inspector : public Tool<Inspector>
-		{
-		public:
-			Inspector(ImGuiRoot &root);
-			Inspector(const Inspector &) = delete;
-			~Inspector();
+namespace Engine {
+namespace Tools {
 
-			virtual void render() override;
+    class MADGINE_TOOLS_EXPORT Inspector : public Tool<Inspector> {
+    public:
+        Inspector(ImGuiRoot &root);
+        Inspector(const Inspector &) = delete;
+        ~Inspector();
 
-			void drawRemainingMembers(Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawValue(tinyxml2::XMLElement *element, Scripting::ScopeBase *parent, const KeyValueIterator &it);
+        virtual void render() override;
 
-			InspectorLayout * getLayout(const std::string& name);
+        void drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
+        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
+        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType value, bool editable);
 
-			const char* key() override;
+        InspectorLayout *getLayout(const std::string &name);
 
-		private:
-			void draw(Scripting::ScopeBase *scope, const char *layoutName);
+        const char *key() override;
 
-			void draw(InspectorLayout *layout, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawElement(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
+    private:
+        void draw(TypedScopePtr scope, const char *layoutName);
 
-			void drawSingleElement(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawElementList(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void inheritLayout(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawConstantString(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			void drawSingleLine(tinyxml2::XMLElement *element, Scripting::ScopeBase *scope, std::set<std::string> &drawn);
-			
-		private:
-			std::map<std::string, InspectorLayout*> mAssociations;
-			std::map<std::string, InspectorLayout> mLayouts;
+        void draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn);
+        void drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
-			static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, Scripting::ScopeBase *, std::set<std::string>&)> sElements;
-		};
+        void drawSingleElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        void drawElementList(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        void inheritLayout(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        void drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        void drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
-	}
+    private:
+        std::map<std::string, InspectorLayout *> mAssociations;
+        std::map<std::string, InspectorLayout> mLayouts;
+
+        static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
+    };
 }
-
-RegisterType(Engine::Tools::Inspector);
+}

@@ -2,7 +2,12 @@
 
 #include "serveranimation.h"
 
-#include "Interfaces/generic/valuetype.h"
+#include "Modules/keyvalue/valuetype.h"
+
+
+#include "Modules/keyvalue/metatable.h"
+#include "Modules/reflection/classname.h"
+
 
 
 namespace Engine
@@ -28,3 +33,4 @@ namespace Engine
 	}
 }
 
+RegisterType(Engine::Scene::Entity::Animation);

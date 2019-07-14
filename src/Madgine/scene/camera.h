@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Interfaces/math/vector3.h"
-#include "Interfaces/math/vector4.h"
-#include "Interfaces/math/quaternion.h"
-#include "Interfaces/scripting/types/scope.h"
+#include "Modules/math/vector3.h"
+#include "Modules/math/vector4.h"
+#include "Modules/math/quaternion.h"
+#include "Modules/keyvalue/scopebase.h"
 
 namespace Engine
 {
 	namespace Scene
 	{
 		
-		class MADGINE_BASE_EXPORT Camera : public Scripting::Scope<Camera>
+		class MADGINE_BASE_EXPORT Camera : public ScopeBase
 		{
 		public:
-			Camera(SceneManager &scene);
+			Camera();
 			~Camera() = default;
 
 			void setPosition(const Vector3 &pos);
@@ -30,7 +30,7 @@ namespace Engine
 			float getFOV() const;
 			void setFOV(float fov);
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 			Vector3 getOrientationHandle() const;
 			void rotate(const Vector3 &rot);
@@ -52,5 +52,3 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Scene::Camera);

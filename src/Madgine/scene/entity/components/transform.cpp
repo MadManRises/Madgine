@@ -2,10 +2,8 @@
 
 #include "transform.h"
 
-#include "Interfaces/scripting/types/api.h"
-#include "Interfaces/generic/keyvalueiterate.h"
-
-
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 namespace Engine
 {
@@ -14,13 +12,11 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			
-			ENTITYCOMPONENT_IMPL(Transform, Transform);
 
-			KeyValueMapList Transform::maps()
+			/*KeyValueMapList Transform::maps()
 			{
 				return Scope::maps().merge(MAP(Position, getPosition, setPosition), MAP(Orientation, getOrientation, setOrientation), MAP(Scale, getScale, setScale));
-			}
+			}*/
 
 			Matrix4 Transform::matrix() const
 			{
@@ -65,3 +61,10 @@ namespace Engine
 		}
 	}
 }
+
+ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);
+
+METATABLE_BEGIN(Engine::Scene::Entity::Transform)
+METATABLE_END(Engine::Scene::Entity::Transform)
+
+RegisterType(Engine::Scene::Entity::Transform);

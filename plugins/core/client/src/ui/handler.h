@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Madgine/core/madgineobject.h"
-#include "Interfaces/scripting/types/scopebase.h"
-#include "Interfaces/signalslot/slot.h"
+#include "Modules/keyvalue/scopebase.h"
+#include "Modules/threading/slot.h"
 
 namespace Engine
 {
@@ -22,7 +22,7 @@ namespace Engine
 		};
 
 
-		class MADGINE_CLIENT_EXPORT Handler : public Core::MadgineObject, public Scripting::ScopeBase
+		class MADGINE_CLIENT_EXPORT Handler : public Core::MadgineObject, public ScopeBase
 		{
 		public:
 			Handler(UIManager &ui, const std::string& windowName);
@@ -112,9 +112,9 @@ namespace Engine
 		private:
 			std::list<WindowDescriber> mWidgets;
 
-			SignalSlot::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
-			SignalSlot::Slot<&Handler::injectPointerDown> mPointerDownSlot;
-			SignalSlot::Slot<&Handler::injectPointerUp> mPointerUpSlot;
+			Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
+                        Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;
+                        Threading::Slot<&Handler::injectPointerUp> mPointerUpSlot;
 
 		};
 	}

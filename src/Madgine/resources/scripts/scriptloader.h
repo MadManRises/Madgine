@@ -1,6 +1,6 @@
 #pragma once
 #include "../resourceloader.h"
-#include "Interfaces/scripting/parsing/scriptparser.h"
+#include "Modules/scripting/parsing/scriptparser.h"
 
 
 namespace Engine
@@ -26,5 +26,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scripting::Parsing::ScriptLoader);

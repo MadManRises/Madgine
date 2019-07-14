@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Interfaces/serialize/container/serializedmapper.h"
+#include "Modules/serialize/container/serializedmapper.h"
 
 namespace Engine
 {
@@ -10,10 +10,10 @@ namespace Engine
 		namespace Entity
 		{
 
-			class MADGINE_BASE_EXPORT Mesh : public EntityComponentVirtualBase<Mesh>
+			class MADGINE_BASE_EXPORT Mesh : public EntityComponent<Mesh>
 			{
 			public:
-				using EntityComponentVirtualBase<Mesh>::EntityComponentVirtualBase;
+				using EntityComponent<Mesh>::EntityComponent;
 				virtual ~Mesh() = default;
 
 				virtual std::string getName() const = 0;
@@ -22,7 +22,7 @@ namespace Engine
 				virtual void setVisible(bool vis) = 0;
 				virtual bool isVisible() const = 0;
 
-				KeyValueMapList maps() override;
+				//KeyValueMapList maps() override;
 
 			private:
 				std::string getName2() const
@@ -43,5 +43,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::Mesh);

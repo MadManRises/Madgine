@@ -4,26 +4,29 @@
 
 #include "inputlistener.h"
 
+#include "Madgine/app/application.h"
+
 namespace Engine
 {
 	namespace Input
 	{
 		
-		InputHandler::InputHandler() :
-		mListener(nullptr)
+		InputHandler::InputHandler(App::Application &app, InputListener *listener)
+                :
+		mListener(listener), mApp(app)
 		{
-			
-		}
+            app.addFrameListener(this);
+                }
 
-		void InputHandler::setListener(InputListener *listener)
-		{
-			mListener = listener;
-		}
+                InputHandler::~InputHandler()
+                {
+                    mApp.removeFrameListener(this);
+                }
 
-		InputListener* InputHandler::listener()
+		/*InputListener* InputHandler::listener()
 		{
 			return mListener;
-		}
+		}*/
 
 		void InputHandler::onResize(size_t width, size_t height)
 		{
@@ -62,3 +65,5 @@ namespace Engine
 
 	}
 }
+
+RegisterType(Engine::Input::InputHandler);

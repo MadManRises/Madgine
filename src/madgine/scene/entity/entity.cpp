@@ -6,16 +6,11 @@
 
 #include "../scenemanager.h"
 
-#include "entitycomponentbase.h"
-
-#include "Interfaces/scripting/datatypes/luatableiterator.h"
+#include "Modules/scripting/datatypes/luatableiterator.h"
 
 #include "entitycomponentcollector.h"
 
-#include "Interfaces/scripting/types/api.h"
-#include "Interfaces/generic/keyvalueiterate.h"
-
-
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
@@ -26,7 +21,6 @@ namespace Engine
 		{
 			Entity::Entity(const Entity& other, bool local) :
 				SerializableUnit(other),
-				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(&other.mSceneManager),
 				mName(other.mName),
 				mLocal(local),
 				mSceneManager(other.mSceneManager)
@@ -36,7 +30,6 @@ namespace Engine
 
 			Entity::Entity(Entity&& other, bool local) :
 				SerializableUnit(std::forward<Entity>(other)),
-				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(std::forward<Entity>(other)),
 				mName(other.mName),
 				mLocal(local),
 				mComponents(std::forward<decltype(mComponents)>(other.mComponents)),
@@ -50,7 +43,6 @@ namespace Engine
 			}
 
 			Entity::Entity(SceneManager &sceneMgr, bool local, const std::string& name, const Scripting::LuaTable& behaviour) :
-				Scope<Engine::Scene::Entity::Entity, Engine::Scripting::ScopeBase>(&sceneMgr),
 				mName(name),
 				mLocal(local),
 				mSceneManager(sceneMgr)
@@ -185,10 +177,10 @@ namespace Engine
 				return addComponent(name, table);
 			}
 
-			KeyValueMapList Entity::maps()
+			/*KeyValueMapList Entity::maps()
 			{
 				return Scope::maps().merge(mComponents, MAP_F(addComponentSimple), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
-			}
+			}*/
 
 			SceneManager& Entity::sceneMgr(bool init) const
 			{
@@ -202,3 +194,9 @@ namespace Engine
 		}
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Scene::Entity::Entity)
+METATABLE_END(Engine::Scene::Entity::Entity)
+
+RegisterType(Engine::Scene::Entity::Entity);

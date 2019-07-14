@@ -3,11 +3,13 @@
 
 #include "../gui/guisystem.h"
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
 namespace Engine {
 	namespace Render {
 
 		RendererBase::RendererBase(GUI::GUISystem *gui) :
-			Scope(gui),
 			mGui(gui)
 		{
 		}
@@ -34,3 +36,8 @@ namespace Engine {
 }
 
 
+
+METATABLE_BEGIN(Engine::Render::RendererBase)
+METATABLE_END(Engine::Render::RendererBase)
+
+RegisterType(Engine::Render::RendererBase);

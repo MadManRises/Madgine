@@ -2,6 +2,8 @@
 
 /// @cond
 
+#include "interfacesconfig.h"
+
 #include "commonlib.h"
 
 #if defined(STATIC_BUILD)
@@ -50,27 +52,29 @@
 #include <atomic>
 #include <future>
 #include <regex>
+
 #if WINDOWS
 #include <memory_resource>
 #else
 #include <experimental/memory_resource>
 namespace std {
-	namespace experimental {
-		namespace pmr {
-			template <class T>
-			using vector = std::vector<T, polymorphic_allocator<T>>;
-			using string = std::basic_string<char, char_traits<char>, polymorphic_allocator<char>>;
-			template <class Key,
-				class T,
-				class Hash = hash<Key>,
-				class Pred = equal_to<Key>>
-			using unordered_map = std::unordered_map<Key, T, Hash, Pred,
-				polymorphic_allocator<pair<const Key, T>>>;
-		}
-	}
-	namespace pmr = experimental::pmr;	
+namespace experimental {
+    namespace pmr {
+        template <class T>
+        using vector = std::vector<T, polymorphic_allocator<T>>;
+        using string = std::basic_string<char, char_traits<char>, polymorphic_allocator<char>>;
+        template <class Key,
+            class T,
+            class Hash = hash<Key>,
+            class Pred = equal_to<Key>>
+        using unordered_map = std::unordered_map<Key, T, Hash, Pred,
+            polymorphic_allocator<pair<const Key, T>>>;
+    }
+}
+namespace pmr = experimental::pmr;
 }
 #endif
+
 #include <optional>
 #include <string_view>
 
@@ -83,8 +87,6 @@ namespace std {
 
 #include "interfacesforward.h"
 
-#include "scripting/scriptingexception.h"
-#include "util/utilmethods.h"
 #include "database/exceptionmessages.h"
 
 

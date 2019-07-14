@@ -1,6 +1,6 @@
 #include "../../interfaceslib.h"
 
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 
 #include "memory.h"
 

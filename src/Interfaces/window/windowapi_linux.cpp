@@ -68,8 +68,6 @@ namespace Engine {
 				}
 				case DestroyNotify:
 					return false;
-				default:
-					LOG("Unknown message type: " << e.type);
 				}
 				return true;
 			}			

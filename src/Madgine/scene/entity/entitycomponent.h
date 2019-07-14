@@ -2,91 +2,51 @@
 
 #include "entitycomponentbase.h"
 #include "entitycomponentcollector.h"
-#include "Interfaces/scripting/types/scope.h"
 
-#include "Interfaces/serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/serializestream.h"
 
-namespace Engine
-{
-	namespace Scene
-	{
-		namespace Entity
-		{
-			template <class T, class Base = EntityComponentBase>
-			class EntityComponentVirtualBase : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
-			{
-			public:
-				using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
+namespace Engine {
+namespace Scene {
+    namespace Entity {
 
-				const char* key() const override
-				{
-					return componentName();
-				}
+        DLL_IMPORT_VARIABLE2(const EntityComponentCollector::ComponentRegistrator<T>, _reg, typename T);
 
-				static const char* componentName();
+        DLL_IMPORT_VARIABLE2(const char *const, _componentName, typename T);
 
-			private:
-				virtual void writeCreationData(Serialize::SerializeOutStream& out) const override
-				{
-					out << componentName();
-				}
-			};
+        template <class T, class Base>
+        using EntityComponentVirtualImpl = Serialize::SerializableUnit<T, Base>;
 
-			template <class T, class Base>
-			class EntityComponentVirtualImpl : public Serialize::SerializableUnit<T, Base>
-			{
-			public:
-				using Serialize::SerializableUnit<T, Base>::SerializableUnit;
+        template <class T, class Base = EntityComponentBase>
+        class EntityComponent : public Serialize::SerializableUnit<T, Base> {
+        public:
+            using Serialize::SerializableUnit<T, Base>::SerializableUnit;
 
-			private:
-				virtual void __reg()
-				{
-					(void)_reg;
-				}
+            const char *key() const override
+            {
+                return componentName();
+            }
 
-				typedef EntityComponentCollector::ComponentRegistrator<T> _Reg;
-				static const _Reg _reg;
-			};
+			static const char* componentName() {
+                return _componentName<T>();
+			}
 
-			template <class T, class Base = EntityComponentBase>
-			class EntityComponent : public Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>
-			{
-			public:
-				using Scripting::Scope<T, Serialize::SerializableUnit<T, Base>>::Scope;
+        private:
+            virtual void writeCreationData(Serialize::SerializeOutStream &out) const override
+            {
+                out << componentName();
+            }
+        };
 
-				const char* key() const override
-				{
-					return componentName();
-				}
+#define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, ...) \
+    DLL_EXPORT_VARIABLE2(constexpr, const char *const, Engine::Scene::Entity::, _componentName, #Name, __VA_ARGS__)
 
-				static const char* componentName();
+#define ENTITYCOMPONENTVIRTUALIMPL_IMPL(Name) \
+    DLL_EXPORT_VARIABLE2(, const Engine::Scene::Entity::EntityComponentCollector::ComponentRegistrator<Name>, Engine::Scene::Entity::, _reg, {}, Name)
 
-			private:
-				virtual void writeCreationData(Serialize::SerializeOutStream& out) const override
-				{
-					out << componentName();
-				}
-				
-				virtual void __reg()
-				{
-					(void)_reg;
-				}				
+#define ENTITYCOMPONENT_IMPL(Name, ...)                                                        \
+    DLL_EXPORT_VARIABLE2(constexpr, const char *const, Engine::Scene::Entity::, _componentName, #Name, __VA_ARGS__); \
+    DLL_EXPORT_VARIABLE2(, const Engine::Scene::Entity::EntityComponentCollector::ComponentRegistrator<__VA_ARGS__>, Engine::Scene::Entity::, _reg, {}, __VA_ARGS__)
 
-				typedef EntityComponentCollector::ComponentRegistrator<T> _Reg;
-				static const _Reg _reg;
-			};
-
-
-#define	ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, ...) \
-				template <> DLL_EXPORT const char * Engine::Scene::Entity::EntityComponentVirtualBase<__VA_ARGS__>::componentName(){return #Name;}
-
-#define ENTITYCOMPONENTVIRTUALIMPL_IMPL(...) \
-				template <> const Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponentVirtualImpl<__VA_ARGS__>::_reg = {};
-
-#define ENTITYCOMPONENT_IMPL(Name, ...) \
-				template <> DLL_EXPORT const char * Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::componentName(){return #Name;} \
-				template <> const Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_Reg Engine::Scene::Entity::EntityComponent<__VA_ARGS__>::_reg = {};
-
-		}
-	}
+    }
+}
 }

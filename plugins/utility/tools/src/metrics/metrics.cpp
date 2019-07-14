@@ -6,6 +6,9 @@
 
 #include "../renderer/imguiaddons.h"
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
 UNIQUECOMPONENT(Engine::Tools::Metrics);
 
 namespace Engine {
@@ -61,3 +64,8 @@ namespace Engine {
 
 	}
 }
+
+METATABLE_BEGIN(Engine::Tools::Metrics)
+METATABLE_END(Engine::Tools::Metrics)
+
+RegisterType(Engine::Tools::Metrics);

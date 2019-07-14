@@ -6,13 +6,16 @@
 #include "../imgui/imgui_internal.h"
 #include "../renderer/imguiaddons.h"
 
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profiler.h"
 
-#include "Interfaces/generic/transformIt.h"
+#include "Modules/generic/transformIt.h"
 
 #include "Madgine/app/application.h"
 
 #include "../renderer/imguiroot.h"
+
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::Profiler);
 
@@ -61,9 +64,9 @@ namespace Engine {
 
 				ImGui::BeginColumns("cols", 4);
 
-				for (const Debug::Profiler::ProfilerThread &thread : mProfiler.getThreadStats())
+				for (const Debug::Profiler::ProfilerThread *thread : mProfiler.getThreadStats())
 				{
-					drawStats(&thread.mStats, thread.mStats.totalTime(), thread.mStats.totalTime());
+					drawStats(&thread->mStats, thread->mStats.totalTime(), thread->mStats.totalTime());
 				}
 
 				ImGui::EndColumns();
@@ -80,3 +83,7 @@ namespace Engine {
 	}
 }
 
+METATABLE_BEGIN(Engine::Tools::Profiler)
+METATABLE_END(Engine::Tools::Profiler)
+
+RegisterType(Engine::Tools::Profiler);

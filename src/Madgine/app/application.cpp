@@ -12,15 +12,13 @@
 
 #include "../scene/scenemanager.h"
 
-#include "Interfaces/scripting/types/api.h"
+#include "Modules/scripting/types/luastate.h"
 
-#include "Interfaces/generic/keyvalueiterate.h"
+#include "Interfaces/exception.h"
 
-#include "Interfaces/scripting/types/luastate.h"
+#include "Modules/debug/profiler/profiler.h"
 
-#include "Interfaces/util/exception.h"
-
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {	
@@ -28,7 +26,7 @@ namespace Engine
 	namespace App
 	{
 		Application::Application(const AppSettings& settings) :
-			Scope(Scripting::LuaState::getSingleton()),
+			Scripting::GlobalScopeBase(Scripting::LuaState::getSingleton()),
 			mSettings(settings),
 			mGlobalAPIs(*this),
 			mGlobalAPIInitCounter(0)			
@@ -136,10 +134,10 @@ namespace Engine
 		}
 
 
-		KeyValueMapList Application::maps()
+		/*KeyValueMapList Application::maps()
 		{
 			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
-		}
+		}*/
 
 		GlobalAPIBase& Application::getGlobalAPIComponent(size_t i, bool init)
 		{
@@ -231,3 +229,9 @@ namespace Engine
 	}
 
 }
+
+METATABLE_BEGIN(Engine::App::Application)
+MEMBER(mGlobalAPIs)
+METATABLE_END(Engine::App::Application)
+
+RegisterType(Engine::App::Application);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "toolscollector.h"
 

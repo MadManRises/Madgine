@@ -7,6 +7,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
 UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 namespace Engine
@@ -126,3 +129,7 @@ namespace Engine
 	}
 }
 
+METATABLE_BEGIN(Engine::Render::OpenGLMeshLoader)
+METATABLE_END(Engine::Render::OpenGLMeshLoader)
+
+RegisterType(Engine::Render::OpenGLMeshLoader);

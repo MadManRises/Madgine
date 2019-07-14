@@ -1,128 +1,117 @@
 #pragma once
 
-#include "Interfaces/scripting/types/scope.h"
-
-#include "Interfaces/serialize/toplevelserializableunit.h"
+#include "Modules/serialize/toplevelserializableunit.h"
 
 #include "scenecomponentcollector.h"
 
-#include "Interfaces/serialize/container/list.h"
+#include "Modules/serialize/container/list.h"
 
 #include "entity/entity.h"
 
-#include "Interfaces/serialize/container/noparent.h"
-#include "Interfaces/threading/framelistener.h"
-#include "Interfaces/generic/observablecontainer.h"
-#include "../core/madgineobjectobserver.h"
 #include "../app/globalapicollector.h"
+#include "../core/madgineobjectobserver.h"
+#include "Modules/keyvalue/observablecontainer.h"
+#include "Modules/serialize/container/noparent.h"
+#include "Modules/threading/framelistener.h"
 
 #include "scenecomponentset.h"
 
 #include "camera.h"
 
-#include "Interfaces/threading/datamutex.h"
+#include "Modules/threading/datamutex.h"
 
-namespace Engine
-{
-	namespace Scene
-	{
-		class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-			public Scripting::Scope<SceneManager, GlobalAPIComponent<Serialize::NoParentUnit<SceneManager>>>,
-			public Threading::FrameListener
-		{
-		public:
-			SceneManager(App::Application &app);
-			virtual ~SceneManager() = default;
+namespace Engine {
+namespace Scene {
+    class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
+                                             public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>>,
+                                             public Threading::FrameListener {
+    public:
+        SceneManager(App::Application &app);
+        SceneManager(const SceneManager &) = delete;
+        virtual ~SceneManager() = default;
 
-			void readState(Serialize::SerializeInStream& in) override;
-			void writeState(Serialize::SerializeOutStream& out) const override;
+        void readState(Serialize::SerializeInStream &in) override;
+        void writeState(Serialize::SerializeOutStream &out) const override;
 
-			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-			bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
 
+        Entity::Entity *createEntity(const std::string &behavior = "", const std::string &name = "",
+            const std::function<void(Entity::Entity &)> &init = {});
+        Entity::Entity *createLocalEntity(const std::string &behavior = "", const std::string &name = "");
+        Entity::Entity *findEntity(const std::string &name);
+        void removeLater(Entity::Entity *e);
 
-			Entity::Entity* createEntity(const std::string& behavior = "", const std::string& name = "",
-			                             const std::function<void(Entity::Entity&)> &init = {});
-			Entity::Entity* createLocalEntity(const std::string& behavior = "", const std::string& name = "");
-			Entity::Entity* findEntity(const std::string& name);
-			std::list<Entity::Entity*> entities();
-			void removeLater(Entity::Entity* e);
+        Entity::Entity *makeLocalCopy(Entity::Entity &e);
+        Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 
+        Scene::Camera *createCamera();
+        void destroyCamera(Scene::Camera *camera);
 
-			Entity::Entity* makeLocalCopy(Entity::Entity& e);
-			Entity::Entity* makeLocalCopy(Entity::Entity&& e);			
+        void clear();
 
-			Scene::Camera *createCamera();
-			void destroyCamera(Scene::Camera *camera);
+        template <class T>
+        T &getComponent(bool init = true)
+        {
+            return static_cast<T &>(getComponent(T::component_index(), init));
+        }
+        SceneComponentBase &getComponent(size_t i, bool = true);
+        size_t getComponentCount();
 
-			void clear();
+        template <class T>
+        T &getGlobalAPIComponent(bool init = true)
+        {
+            return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
+        }
 
-			template <class T>
-			T &getComponent(bool init = true)
-			{
-				return static_cast<T&>(getComponent(T::component_index(), init));
-			}
-			SceneComponentBase &getComponent(size_t i, bool = true);
-			size_t getComponentCount();
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			template <class T>
-			T &getGlobalAPIComponent(bool init = true)
-			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
-			}
+        SceneManager &getSelf(bool = true);
 
-			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        virtual App::Application &app(bool = true) override;
+        virtual const Core::MadgineObject *parent() const override;
 
+        Threading::DataMutex &mutex();
 
-			SceneManager &getSelf(bool = true);
+    protected:
+        virtual bool init() final;
+        virtual void finalize() final;
 
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
+        //KeyValueMapList maps() override;
 
-			Threading::DataMutex &mutex();
+    private:
+        void updateCamera(Camera &camera);
 
-		protected:
+        void removeQueuedEntities();
 
-			virtual bool init() final;
-			virtual void finalize() final;
+        std::string generateUniqueName();
 
-			KeyValueMapList maps() override;
+        std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
+        std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
 
-		private:
+    public:
+        Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
 
-			void updateCamera(Camera &camera);
+    private:
+        App::Application &mApp;
+        size_t mItemCount;
 
-			void removeQueuedEntities();
+        SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
 
-			std::string generateUniqueName();
+        Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
+        std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
+        std::list<Entity::Entity *> mEntityRemoveQueue;
 
-			std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string& name);
-			std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string& name, bool local);
+        std::list<Scene::Camera> mCameras;
 
-		private:
-			App::Application &mApp;
-			size_t mItemCount;
+        SignalSlot::Signal<> mStateLoadedSignal;
+        SignalSlot::Signal<> mClearedSignal;
 
-			SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
+        Threading::DataMutex mMutex;
 
-			Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
-			std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
-			std::list<Entity::Entity *> mEntityRemoveQueue;
+    public:
+        SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
+    };
 
-			std::list<Scene::Camera> mCameras;
-
-			SignalSlot::Signal<> mStateLoadedSignal;
-			SignalSlot::Signal<> mClearedSignal;
-
-			Threading::DataMutex mMutex;
-			
-		public:
-			SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
-
-			
-		};
-
-	}
 }
-
-RegisterType(Engine::Scene::SceneManager);
+}

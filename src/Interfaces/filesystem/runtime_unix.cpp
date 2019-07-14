@@ -9,8 +9,6 @@
 
 #include <link.h>
 
-#include "../util/stringutil.h"
-
 namespace Engine
 {
 	namespace Filesystem

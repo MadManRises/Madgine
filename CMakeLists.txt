@@ -23,12 +23,6 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 
-option(ENABLE_MEMTRACKING "Enables Mempry Tracking for Heap-Allocations")
-
-if (ENABLE_MEMTRACKING)
-	add_definitions(-DENABLE_MEMTRACKING)
-endif()
-
 
 include(Workspace)
 include(Packaging)

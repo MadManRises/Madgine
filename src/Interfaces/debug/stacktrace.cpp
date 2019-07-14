@@ -72,7 +72,7 @@ namespace Engine {
 		}
 
 		FullStackTrace resolveSymbols(void *const *data, size_t size) {
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 			std::pmr::memory_resource *resource = Memory::UntrackedMemoryResource::sInstance();
 #else
 			static DefaultMemResource defMem;

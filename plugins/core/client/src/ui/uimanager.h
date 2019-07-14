@@ -1,98 +1,93 @@
 #pragma once
 
-#include "guihandler.h"
+#include "Modules/threading/framelistener.h"
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "gamehandler.h"
-#include "Interfaces/scripting/types/scope.h"
-#include "Interfaces/threading/framelistener.h"
-#include "Interfaces/uniquecomponent/uniquecomponentcontainer.h"
+#include "guihandler.h"
 
-namespace Engine
-{
-	namespace UI
-	{
-		class MADGINE_CLIENT_EXPORT UIManager : public Scripting::Scope<UIManager>,
-			public Core::MadgineObject, public Threading::FrameListener
-		{
-		public:
-			UIManager(GUI::TopLevelWindow &window);
-			~UIManager();
+#include "Modules/keyvalue/scopebase.h"
 
+namespace Engine {
+namespace UI {
+    class MADGINE_CLIENT_EXPORT UIManager : public ScopeBase,
+                                            public Core::MadgineObject,
+                                            public Threading::FrameListener {
+    public:
+        UIManager(GUI::TopLevelWindow &window);
+        ~UIManager();
+
+        void clear();
+
+        void hideCursor(bool keep = true);
+        void showCursor();
+        bool isCursorVisible() const;
+
+        void swapCurrentRoot(GuiHandlerBase *newRoot);
+        void openModalWindow(GuiHandlerBase *handler);
+        void closeModalWindow(GuiHandlerBase *handler);
+        void openWindow(GuiHandlerBase *handler);
+        void closeWindow(GuiHandlerBase *handler);
+
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+
+        Scene::ContextMask currentContext();
+
+        GUI::TopLevelWindow &window(bool = true) const;
+
+        std::set<GameHandlerBase *> getGameHandlers();
+        std::set<GuiHandlerBase *> getGuiHandlers();
+
+        static const constexpr int sMaxInitOrder = 4;
+
+        const char *key() const;
+
+        Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
+
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+
+        template <class T>
+        T &getGuiHandler(bool init = true)
+        {
+            return static_cast<T &>(getGuiHandler(T::component_index(), init));
+        }
+
+        GuiHandlerBase &getGuiHandler(size_t i, bool = true);
+
+        template <class T>
+        T &getGameHandler(bool init = true)
+        {
+            return static_cast<T &>(getGameHandler(T::component_index(), init));
+        }
+
+        GameHandlerBase &getGameHandler(size_t i, bool = true);
+
+        Scene::SceneManager &sceneMgr(bool = true);
+
+        UIManager &getSelf(bool = true);
+
+        virtual App::Application &app(bool = true) override;
+        virtual const Core::MadgineObject *parent() const override;
+
+    protected:
+        bool init() override;
+        void finalize() override;
+
+        //KeyValueMapList maps() override;
+
+    private:
+        GUI::TopLevelWindow &mWindow;        
 			
-			void clear();
+		GuiHandlerContainer<std::vector> mGuiHandlers;
+        GameHandlerContainer<std::vector> mGameHandlers;
 
-			void hideCursor(bool keep = true);
-			void showCursor();
-			bool isCursorVisible() const;
+        GuiHandlerBase *mCurrentRoot;
 
-			void swapCurrentRoot(GuiHandlerBase* newRoot);
-			void openModalWindow(GuiHandlerBase* handler);
-			void closeModalWindow(GuiHandlerBase* handler);
-			void openWindow(GuiHandlerBase* handler);
-			void closeWindow(GuiHandlerBase* handler);
+        std::stack<GuiHandlerBase *> mModalWindowList;
 
-			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-			bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-
-			Scene::ContextMask currentContext();
-
-			GUI::TopLevelWindow &window(bool = true) const;
-
-			std::set<GameHandlerBase*> getGameHandlers();
-			std::set<GuiHandlerBase*> getGuiHandlers();
-
-			static const constexpr int sMaxInitOrder = 4;
-
-			const char* key() const override;
-
-			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-
-			template <class T>
-			T &getGuiHandler(bool init = true)
-			{
-				return static_cast<T&>(getGuiHandler(T::component_index(), init));
-			}
-
-			GuiHandlerBase &getGuiHandler(size_t i, bool = true);
-
-			template <class T>
-			T &getGameHandler(bool init = true)
-			{
-				return static_cast<T&>(getGameHandler(T::component_index(), init));
-			}
-
-			GameHandlerBase &getGameHandler(size_t i, bool = true);
-
-			Scene::SceneManager &sceneMgr(bool = true);
-
-			UIManager &getSelf(bool = true);
-
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
-
-		protected:
-
-			bool init() override;
-			void finalize() override;
-
-			KeyValueMapList maps() override;
-
-		private:
-			GUI::TopLevelWindow &mWindow;
-			
-			GuiHandlerContainer<std::vector> mGuiHandlers;
-			GameHandlerContainer<std::vector> mGameHandlers;
-
-			GuiHandlerBase* mCurrentRoot;			
-
-			std::stack<GuiHandlerBase *> mModalWindowList;
-
-		private:
-			Vector2 mKeptCursorPosition;
-			bool mKeepingCursorPos;
-		};
-	}
+    private:
+        Vector2 mKeptCursorPosition;
+        bool mKeepingCursorPos;
+    };
 }
-
-RegisterType(Engine::UI::UIManager);
+}

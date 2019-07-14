@@ -11,7 +11,7 @@ FolderSources(sources src OpenGL openglforward.h opengllib.h openglmesh.cpp open
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
 target_link_plugins(OpenGL Client)
-target_link_libraries(OpenGL PRIVATE assimp)
+target_link_libraries(OpenGL PUBLIC assimp) # Might be a bug in MSVC + Clang. Should be PRIVATE
 
 if (NOT ANDROID)
 	find_package(OpenGL REQUIRED)

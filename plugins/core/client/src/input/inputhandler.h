@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Interfaces/reflection/classname.h"
-#include "Interfaces/threading/framelistener.h"
+#include "Modules/reflection/classname.h"
+#include "Modules/threading/framelistener.h"
 
 namespace Engine
 {
@@ -10,11 +10,10 @@ namespace Engine
 		class MADGINE_CLIENT_EXPORT InputHandler : public Threading::FrameListener
 		{
 		public:
-			InputHandler();
-			virtual ~InputHandler() = default;
+                    InputHandler(App::Application &app, InputListener *listener);
+			virtual ~InputHandler();
 			
-			void setListener(InputListener *listener);
-			InputListener *listener();
+			//InputListener *listener();
 
 			virtual void onResize(size_t width, size_t height);
 
@@ -28,8 +27,7 @@ namespace Engine
 
 		private:
 			InputListener* mListener;
+                    App::Application &mApp;
 		};
 	}
 }
-
-RegisterType(Engine::Input::InputHandler);

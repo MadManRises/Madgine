@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Interfaces/serialize/container/serializedmapper.h"
-#include "Interfaces/math/vector3.h"
-#include "Interfaces/math/matrix4.h"
-#include "Interfaces/math/quaternion.h"
+#include "Modules/serialize/container/serializedmapper.h"
+#include "Modules/math/vector3.h"
+#include "Modules/math/matrix4.h"
+#include "Modules/math/quaternion.h"
 
-#include "Interfaces/serialize/container/serialized.h"
+#include "Modules/serialize/container/serialized.h"
 
 namespace Engine
 {
@@ -31,7 +31,7 @@ namespace Engine
 				void translate(const Vector3 &v);
 				void rotate(const Quaternion &q);
 
-				KeyValueMapList maps() override;
+				//KeyValueMapList maps() override;
 
 				Matrix4 matrix() const;
 
@@ -44,5 +44,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::Transform);

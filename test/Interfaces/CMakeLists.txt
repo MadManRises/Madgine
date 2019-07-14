@@ -7,7 +7,7 @@ set(sharedSources "")
 
 add_workspace_library(TestShared ${sharedSources} SOURCE_ROOT .)
 
-target_link_libraries(TestShared PUBLIC Interfaces)
+target_link_libraries(TestShared PUBLIC Modules)
 
 generate_binary_info(TestShared)
 

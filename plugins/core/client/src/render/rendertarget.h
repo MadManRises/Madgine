@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/math/vector2.h"
+#include "Modules/math/vector2.h"
 
 namespace Engine {
 	namespace Render {

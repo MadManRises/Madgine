@@ -22,5 +22,3 @@ namespace Engine {
 
 	}
 }
-
-RegisterType(Engine::Tools::Profiler);

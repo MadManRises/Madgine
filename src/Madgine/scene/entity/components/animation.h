@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Interfaces/serialize/container/serializedmapper.h"
+#include "Modules/serialize/container/serializedmapper.h"
 
 namespace Engine
 {
@@ -10,10 +10,10 @@ namespace Engine
 		namespace Entity
 		{
 
-			class MADGINE_BASE_EXPORT Animation : public EntityComponentVirtualBase<Animation>
+			class MADGINE_BASE_EXPORT Animation : public EntityComponent<Animation>
 			{
 			public:
-				using EntityComponentVirtualBase<Animation>::EntityComponentVirtualBase;
+				using EntityComponent<Animation>::EntityComponent;
 				virtual ~Animation() = default;
 
 				virtual std::string getDefaultAnimation() const = 0;
@@ -40,5 +40,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::Animation);

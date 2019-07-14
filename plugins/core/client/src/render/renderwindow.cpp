@@ -6,7 +6,7 @@
 #include "Interfaces/window/windowapi.h"
 #include "rendertarget.h"
 
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profiler.h"
 
 namespace Engine {
 	namespace Render {

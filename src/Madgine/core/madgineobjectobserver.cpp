@@ -5,7 +5,7 @@
 #include "madgineobject.h"
 #include "../app/application.h"
 
-#include "Interfaces/threading/frameloop.h"
+#include "Modules/threading/frameloop.h"
 
 namespace Engine {
 

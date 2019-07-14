@@ -1,19 +1,17 @@
 #pragma once
 
 #include "serverlog.h"
-#include "Interfaces/scripting/types/globalscopebase.h"
-#include "Interfaces/scripting/types/luastate.h"
+#include "Modules/scripting/types/globalscopebase.h"
 
 #include "serverappinstance.h"
-#include "Interfaces/threading/frameloop.h"
-#include "Interfaces/threading/framelistener.h"
+#include "Modules/signalslot/taskqueue.h"
 
 
 namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerBase : public Scripting::Scope<ServerBase, Scripting::GlobalScopeBase>, public SignalSlot::TaskQueue
+		class MADGINE_BASE_EXPORT ServerBase : public Scripting::GlobalScopeBase, public SignalSlot::TaskQueue
 		{
 		public:
 			ServerBase(Threading::WorkGroup &workgroup);
@@ -35,7 +33,7 @@ namespace Engine
 
 			void consoleCheck();
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 		private:
 			ServerLog mLog;
@@ -47,5 +45,3 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Server::ServerBase);

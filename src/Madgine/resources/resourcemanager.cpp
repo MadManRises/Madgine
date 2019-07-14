@@ -2,13 +2,11 @@
 
 #include "resourcemanager.h"
 
-#include "../core/root.h"
-
 #include "resourcebase.h"
 
-#include "Interfaces/plugins/binaryinfo.h"
-#include "Interfaces/plugins/plugin.h"
-#include "Interfaces/plugins/pluginmanager.h"
+#include "Modules/plugins/binaryinfo.h"
+#include "Modules/plugins/plugin.h"
+#include "Modules/plugins/pluginmanager.h"
 
 #include "Interfaces/filesystem/api.h"
 

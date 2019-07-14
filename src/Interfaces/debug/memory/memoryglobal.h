@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 
 #if WINDOWS
 #define _CRTDBG_MAP_ALLOC  

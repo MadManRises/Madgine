@@ -2,7 +2,9 @@
 
 
 #include "Madgine/scene/entity/entitycomponent.h"
-#include "Interfaces/serialize/container/serialized.h"
+#include "Modules/serialize/container/serialized.h"
+
+
 
 namespace Engine
 {
@@ -22,5 +24,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::Animation);

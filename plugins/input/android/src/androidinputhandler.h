@@ -13,7 +13,7 @@ namespace Engine
 		struct MADGINE_ANDROIDINPUT_EXPORT AndroidInputHandler :
 			public InputHandlerComponent<AndroidInputHandler>
 		{
-			AndroidInputHandler(Window::Window *window);
+            AndroidInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args);
 			~AndroidInputHandler();
 
 		private:
@@ -26,6 +26,3 @@ namespace Engine
 
 	}
 }
-
-
-RegisterType(Engine::Input::AndroidInputHandler);

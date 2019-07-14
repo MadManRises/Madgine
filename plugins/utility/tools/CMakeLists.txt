@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 Project(Tools)
 
 set(sources "")
-FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.h)
+FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.cpp toolscollector.h)
 	FolderSources(sources src imgui imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_widgets.cpp imgui_internal.h)
 		FolderSources(sources imgui examples imgui_impl_opengl3.cpp imgui_impl_opengl3.h)
 	FolderSources(sources src inspector inspector.cpp inspector.h inspectorlayout.cpp inspectorlayout.h layoutloader.cpp layoutloader.h)
@@ -23,8 +23,8 @@ add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
 target_link_plugins(Tools OpenGL)
 
-target_link_libraries(Tools PUBLIC Client)
+target_link_libraries(Tools PUBLIC Client Base)
 
 if (NOT ANDROID AND NOT EMSCRIPTEN)
-	set_source_files_properties(src/imgui/examples/imgui_impl_opengl3.cpp PROPERTIES COMPILE_DEFINITIONS IMGUI_IMPL_OPENGL_LOADER_GLAD)
+	target_compile_definitions(Tools PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 endif()

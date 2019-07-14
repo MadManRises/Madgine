@@ -12,7 +12,7 @@ namespace Engine
 			public InputHandlerComponent<OISInputHandler>
 		{
 		public:
-			OISInputHandler(Window::Window *window);
+			OISInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args);
 			virtual ~OISInputHandler();
 
 		private:
@@ -44,5 +44,3 @@ namespace Engine
 		};
 	}
 }
-
-RegisterType(Engine::Input::OISInputHandler);

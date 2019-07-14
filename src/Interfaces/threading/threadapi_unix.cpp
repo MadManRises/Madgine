@@ -4,6 +4,8 @@
 
 #include <sys/prctl.h>
 
+#include "threadapi.h"
+
 namespace Engine {
 	namespace Threading {
 

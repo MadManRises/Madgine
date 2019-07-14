@@ -6,7 +6,8 @@
 #include "../ui/uimanager.h"
 #include "../gui/widgets/widget.h"
 
-
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
@@ -89,3 +90,10 @@ namespace Engine
 		}
 	} // namespace GuiHandler
 } // namespace Cegui
+
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
+
+METATABLE_BEGIN(Engine::UI::GuiHandlerBase)
+METATABLE_END(Engine::UI::GuiHandlerBase)
+
+RegisterType(Engine::UI::GuiHandlerBase);

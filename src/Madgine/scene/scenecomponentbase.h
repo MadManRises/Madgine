@@ -3,19 +3,19 @@
 #include "contextmasks.h"
 
 #include "../core/madgineobject.h"
-#include "Interfaces/serialize/serializableunit.h"
-#include "Interfaces/scripting/types/scopebase.h"
+#include "Modules/serialize/serializableunit.h"
+#include "Modules/keyvalue/scopebase.h"
 
-#include "Interfaces/reflection/classname.h"
+#include "Modules/reflection/classname.h"
 
-#include "Interfaces/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine
 {
 	namespace Scene
 	{
 		
-		class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public Scripting::ScopeBase,
+		class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public ScopeBase,
 			public Core::MadgineObject
 		{
 		public:
@@ -32,7 +32,7 @@ namespace Engine
 
 			SceneManager &sceneMgr(bool = true) const;
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 			virtual const char* key() const = 0;
 
@@ -73,5 +73,3 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Scene::SceneComponentBase);

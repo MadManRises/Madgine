@@ -2,6 +2,8 @@
 
 #include "serverlightmanager.h"
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
@@ -27,3 +29,8 @@ namespace Engine
 	}
 }
 
+
+METATABLE_BEGIN(Engine::Scene::ServerLightManager)
+METATABLE_END(Engine::Scene::ServerLightManager)
+
+RegisterType(Engine::Scene::ServerLightManager);

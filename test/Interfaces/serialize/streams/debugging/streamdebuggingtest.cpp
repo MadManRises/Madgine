@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
-#include "Interfaces/serialize/streams/debugging/streamdebugging.h"
+#include "Modules/serialize/streams/debugging/streamdebugging.h"
 
 TEST(StreamDebugging, Logging)
 {

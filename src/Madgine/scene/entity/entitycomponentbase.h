@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Interfaces/serialize/serializableunit.h"
-#include "Interfaces/scripting/types/scope.h"
-#include "Interfaces/uniquecomponent/uniquecomponent.h"
+#include "Modules/serialize/serializableunit.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
+#include "Modules/keyvalue/scopebase.h"
+#include "Modules/scripting/datatypes/luatable.h"
 
 namespace Engine
 {
@@ -10,7 +11,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public Scripting::Scope<EntityComponentBase>
+			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public ScopeBase
 			{
 			public:
 				EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable = {});
@@ -22,7 +23,7 @@ namespace Engine
 				void moveToEntity(Entity* ent);
 				Entity& getEntity() const;
 
-				virtual const char* key() const override = 0;
+				virtual const char* key() const = 0;
 
 				template <class T>
 				T *getComponent()
@@ -43,7 +44,7 @@ namespace Engine
 				template <class T>
 				T &getSceneComponent(bool init = true)
 				{
-					return static_cast<T&>(getSceneComponent(component_index<T>(), init));
+					return static_cast<T&>(getSceneComponent(T::component_index, init));
 				}
 
 				SceneComponentBase &getSceneComponent(size_t i, bool = true);
@@ -51,14 +52,14 @@ namespace Engine
 				template <class T>
 				T &getGlobalAPIComponent(bool init = true)
 				{
-					return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
+					return static_cast<T&>(getGlobalAPIComponent(T::component_index, init));
 				}
 
 				App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 				App::Application &app(bool = true);
 
-				KeyValueMapList maps() override;
+				//KeyValueMapList maps() override;
 				
 
 			protected:
@@ -72,5 +73,3 @@ namespace Engine
 		}
 	}
 }
-
-RegisterType(Engine::Scene::Entity::EntityComponentBase);

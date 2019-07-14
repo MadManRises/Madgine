@@ -1,8 +1,8 @@
 #include "../baselib.h"
 #include "scenecomponentbase.h"
-#include "Interfaces/scripting/types/api.h"
-#include "Interfaces/generic/keyvalueiterate.h"
 #include "scenemanager.h"
+
+#include "Modules/keyvalue/metatable_impl.h"
 
 //API_IMPL(Engine::Scene::SceneComponentBase);
 
@@ -14,7 +14,6 @@ namespace Engine
 	namespace Scene
 	{
 		SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr, ContextMask context) :
-			ScopeBase(&sceneMgr),
 			mContext(context),
 			mEnabled(true),
 			mSceneMgr(sceneMgr)
@@ -114,9 +113,15 @@ namespace Engine
 		{
 		}
 
-		KeyValueMapList SceneComponentBase::maps()
+		/*KeyValueMapList SceneComponentBase::maps()
 		{
 			return ScopeBase::maps().merge(MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Synced, isSynced));
-		}
+		}*/
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Scene::SceneComponentBase)
+METATABLE_END(Engine::Scene::SceneComponentBase)
+
+RegisterType(Engine::Scene::SceneComponentBase);

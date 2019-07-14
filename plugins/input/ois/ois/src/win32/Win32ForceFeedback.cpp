@@ -197,7 +197,7 @@ void Win32ForceFeedback::_updateConstantEffect(const Effect* effect)
 {
 	ConstantEffect* eff = static_cast<ConstantEffect*>(effect->getForceEffect());
 
-	DWORD rgdwAxes[2]	= { DIJOFS_X, DIJOFS_Y };
+	DWORD rgdwAxes[2]	= { static_cast<DWORD>(DIJOFS_X), static_cast<DWORD>(DIJOFS_Y) };
 	LONG rglDirection[2] = { 0, 0 };
 	DIENVELOPE diEnvelope;
 	DICONSTANTFORCE cf;
@@ -221,7 +221,7 @@ void Win32ForceFeedback::_updateRampEffect(const Effect* effect)
 {
 	RampEffect* eff = static_cast<RampEffect*>(effect->getForceEffect());
 
-	DWORD rgdwAxes[2]	= { DIJOFS_X, DIJOFS_Y };
+	DWORD rgdwAxes[2]	= { static_cast<DWORD>(DIJOFS_X), static_cast<DWORD>(DIJOFS_Y) };
 	LONG rglDirection[2] = { 0, 0 };
 	DIENVELOPE diEnvelope;
 	DIRAMPFORCE rf;
@@ -240,7 +240,7 @@ void Win32ForceFeedback::_updatePeriodicEffect(const Effect* effect)
 {
 	PeriodicEffect* eff = static_cast<PeriodicEffect*>(effect->getForceEffect());
 
-	DWORD rgdwAxes[2]	= { DIJOFS_X, DIJOFS_Y };
+	DWORD rgdwAxes[2]	= { static_cast<DWORD>(DIJOFS_X), static_cast<DWORD>(DIJOFS_Y) };
 	LONG rglDirection[2] = { 0, 0 };
 	DIENVELOPE diEnvelope;
 	DIPERIODIC pf;
@@ -270,7 +270,7 @@ void Win32ForceFeedback::_updateConditionalEffect(const Effect* effect)
 {
 	ConditionalEffect* eff = static_cast<ConditionalEffect*>(effect->getForceEffect());
 
-	DWORD rgdwAxes[2]	= { DIJOFS_X, DIJOFS_Y };
+	DWORD rgdwAxes[2]	= { static_cast<DWORD>(DIJOFS_X), static_cast<DWORD>(DIJOFS_Y) };
 	LONG rglDirection[2] = { 0, 0 };
 	DIENVELOPE diEnvelope;
 	DICONDITION cf;

@@ -2,9 +2,8 @@
 #include "scriptloader.h"
 #include "../resourcemanager.h"
 
-#include "../../core/root.h"
-
-#include "Interfaces/reflection/classname.h"
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Scripting::Parsing::ScriptLoader);
 
@@ -15,8 +14,7 @@ namespace Engine
 		namespace Parsing
 		{
 			ScriptLoader::ScriptLoader(Resources::ResourceManager &mgr) :
-				ResourceLoader(mgr, { ".lua" }, true),
-				mParser()
+				ResourceLoader(mgr, { ".lua" }, true)
 			{
 			}
 
@@ -41,3 +39,9 @@ namespace Engine
 		}
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Scripting::Parsing::ScriptLoader)
+METATABLE_END(Engine::Scripting::Parsing::ScriptLoader)
+
+RegisterType(Engine::Scripting::Parsing::ScriptLoader);

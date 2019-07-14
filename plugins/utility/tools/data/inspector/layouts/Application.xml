@@ -1,12 +1,4 @@
 <Layout name="Application" depth="1">
 
 
-
-  <Member name="Application" style="optional hide"></Member>
-  <Member name="GUISystem" style="optional"></Member>
-  <Member name="UI" style="optional"></Member>
-
-  <MemberList name="Global APIs">
-  </MemberList>
-
 </Layout>

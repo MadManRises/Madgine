@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Interfaces/serialize/serializableunit.h"
-#include "Interfaces/serialize/container/observed.h"
-#include "Interfaces/signalslot/slot.h"
-#include "Interfaces/math/vector3.h"
+#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/container/observed.h"
+#include "Modules/threading/slot.h"
+#include "Modules/math/vector3.h"
 
 namespace Engine
 {
@@ -38,8 +38,8 @@ namespace Engine
 
 			Serialize::Observed<Vector3> mPosition;
 			Serialize::Observed<float> mPower;
-			SignalSlot::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;
-			SignalSlot::Slot<&Light::onPositionChangedImpl> mPositionChangedSlot;
+			Threading::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;
+                        Threading::Slot<&Light::onPositionChangedImpl> mPositionChangedSlot;
 		};
 	}
 }

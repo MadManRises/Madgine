@@ -2,7 +2,7 @@
 
 #include "../app/application.h"
 #include "../app/appsettings.h"
-#include "Interfaces/threading/workgrouphandle.h"
+#include "Modules/threading/workgrouphandle.h"
 
 namespace Engine
 {

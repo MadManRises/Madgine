@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Interfaces/scripting/types/scope.h"
 #include "Madgine/scene/scenecomponentbase.h"
 #include "Madgine/core/madgineobject.h"
-#include "Interfaces/uniquecomponent/uniquecomponentselector.h"
+#include "Modules/uniquecomponent/uniquecomponentselector.h"
 #include "../render/renderercollector.h"
-#include "Interfaces/threading/framelistener.h"
+#include "Modules/threading/framelistener.h"
 #include "Madgine/app/globalapicollector.h"
 
 namespace Engine
@@ -27,9 +26,9 @@ namespace Engine
 			
 			void clear();
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
-			const std::vector<std::unique_ptr<TopLevelWindow>> &topLevelWindows();			
+			std::vector<std::unique_ptr<TopLevelWindow>> &topLevelWindows();			
 
 			void closeTopLevelWindow(TopLevelWindow *w);
 
@@ -40,6 +39,8 @@ namespace Engine
 			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
 			Scene::SceneManager &sceneMgr(bool = true);
+
+			const std::vector<std::unique_ptr<TopLevelWindow>> &windows();
 
 		protected:
 
@@ -59,5 +60,3 @@ namespace Engine
 		};
 	}
 }
-
-RegisterType(Engine::GUI::GUISystem);

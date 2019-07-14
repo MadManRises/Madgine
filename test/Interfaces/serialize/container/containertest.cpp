@@ -1,19 +1,19 @@
 #include <gtest/gtest.h>
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
-#include "Interfaces/serialize/container/list.h"
-#include "Interfaces/serialize/serializableunit.h"
+#include "Modules/serialize/container/list.h"
+#include "Modules/serialize/serializableunit.h"
 
-#include "Interfaces/threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 
-#include "Interfaces/serialize/serializemanager.h"
+#include "Modules/serialize/serializemanager.h"
 
-#include "Interfaces/serialize/toplevelserializableunit.h"
+#include "Modules/serialize/toplevelserializableunit.h"
 
-#include "Interfaces/serialize/container/noparent.h"
+#include "Modules/serialize/container/noparent.h"
 
-#include "Interfaces/serialize/streams/buffered_streambuf.h"
+#include "Modules/serialize/streams/buffered_streambuf.h"
 
 struct Buffer {
 	std::array<char, 2048> mBuffer[2];

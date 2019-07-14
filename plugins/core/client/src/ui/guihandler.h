@@ -2,9 +2,7 @@
 
 #include "handler.h"
 #include "../gui/widgetnames.h"
-#include "Interfaces/uniquecomponent/uniquecomponentdefine.h"
-
-#include "Interfaces/scripting/types/scope.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 namespace Engine
 {
@@ -49,7 +47,7 @@ namespace Engine
 	}
 }
 
-DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
+DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
 
 namespace Engine 
 {
@@ -57,11 +55,10 @@ namespace Engine
 	{
 
 		template <typename T>
-		using GuiHandler = Scripting::Scope<T, GuiHandlerComponent<T>>;
+		using GuiHandler = GuiHandlerComponent<T>;
 
 	}
 }
 
 
-RegisterType(Engine::UI::GuiHandlerBase);
 

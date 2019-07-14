@@ -2,7 +2,7 @@
 
 #include "../tool.h"
 
-#include "Interfaces/debug/history.h"
+#include "Modules/debug/history.h"
 
 namespace Engine
 {
@@ -30,5 +30,3 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Tools::Metrics);

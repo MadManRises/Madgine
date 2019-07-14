@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../util/stringutil.h"
+#include "../stringutil.h"
 
 #include <android/asset_manager.h> 
 

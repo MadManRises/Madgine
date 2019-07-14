@@ -2,7 +2,7 @@
 
 #include "servermesh.h"
 
-#include "Interfaces/generic/valuetype.h"
+#include "Modules/keyvalue/valuetype.h"
 
 #include "Madgine/scene/entity/components/transform.h"
 
@@ -13,7 +13,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerMesh, Mesh);
+			ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerMesh);
 
 			ServerMesh::ServerMesh(Entity& entity, const Scripting::LuaTable& table) :
 				EntityComponentVirtualImpl<Engine::Scene::Entity::ServerMesh, Engine::Scene::Entity::Mesh>(entity, table),

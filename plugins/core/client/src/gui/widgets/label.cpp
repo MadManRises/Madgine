@@ -2,10 +2,9 @@
 
 #include "label.h"
 
-#include "Interfaces/scripting/types/api.h"
 
-#include "Interfaces/generic/keyvalueiterate.h"
-
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 
 namespace Engine
@@ -18,10 +17,16 @@ namespace Engine
 		void Label::setText(const std::string & text)
 		{
 		}
-		KeyValueMapList Label::maps()
+		/*KeyValueMapList Label::maps()
 		{
 			return Scope::maps().merge(MAP(Text, getText, setText));
-		}
+		}*/
 
 	}
 }
+
+
+METATABLE_BEGIN(Engine::GUI::Label)
+METATABLE_END(Engine::GUI::Label)
+
+RegisterType(Engine::GUI::Label);

@@ -2,7 +2,7 @@
 
 /// @cond
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
 #if defined(STATIC_BUILD)
 #	define MADGINE_BASE_EXPORT

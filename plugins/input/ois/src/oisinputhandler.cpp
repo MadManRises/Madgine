@@ -5,22 +5,24 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profiler.h"
 
-UNIQUECOMPONENT(Engine::Input::OISInputHandler);
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
 	namespace Input
 	{
-		OISInputHandler::OISInputHandler(Window::Window *window) :
-			mWindow(window)
+    OISInputHandler::OISInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args)
+                : UniqueComponent(std::get<1>(args), std::get<2>(args)),
+			mWindow(std::get<0>(args))
 		{
 			LOG("*** Initializing OIS ***");
 			OIS::ParamList pl;			
 			std::ostringstream windowHndStr;
 
-			windowHndStr << (size_t)window->mHandle;
+			windowHndStr << (size_t)mWindow->mHandle;
 			pl.insert(make_pair("WINDOW"s, windowHndStr.str()));
 
 #if WINDOWS
@@ -48,7 +50,8 @@ namespace Engine
 			onResize(mWindow->width(), mWindow->height());			
 		}
 
-		OISInputHandler::~OISInputHandler()
+
+                OISInputHandler::~OISInputHandler()
 		{			
 			//mWindow->removeListener(this);
 
@@ -138,3 +141,10 @@ namespace Engine
 
 	}
 }
+
+UNIQUECOMPONENT(Engine::Input::OISInputHandler);
+
+METATABLE_BEGIN(Engine::Input::OISInputHandler)
+METATABLE_END(Engine::Input::OISInputHandler)
+
+RegisterType(Engine::Input::OISInputHandler);

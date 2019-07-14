@@ -23,5 +23,3 @@ namespace Engine {
 
 	}
 }
-
-RegisterType(Engine::Render::OpenGLRenderer);

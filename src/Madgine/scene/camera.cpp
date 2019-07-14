@@ -2,18 +2,15 @@
 
 #include "camera.h"
 
-#include "Interfaces/math/matrix4.h"
+#include "Modules/math/matrix4.h"
 
-#include "scenemanager.h"
-
-#include "Interfaces/generic/keyvalueiterate.h"
-#include "Interfaces/scripting/types/api.h"
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 namespace Engine {
 	namespace Scene {
 
-		Camera::Camera(SceneManager &scene) :
-			Scope(&scene),
+		Camera::Camera() :
 			mN(1.0f),
 			mF(200.0f),
 			mFOV(1.5708f),
@@ -96,10 +93,10 @@ namespace Engine {
 			mFOV = fov;
 		}
 
-		KeyValueMapList Camera::maps()
+		/*KeyValueMapList Camera::maps()
 		{
 			return Scope::maps().merge(MAP(F, getF, setF), MAP(N, getN, setN), MAP(FOV, getFOV, setFOV), MAP(Position, position, setPosition), MAP(Rotate, getOrientationHandle, rotate));
-		}
+		}*/
 
 		Vector3 Camera::getOrientationHandle() const
 		{
@@ -123,3 +120,9 @@ namespace Engine {
 
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Scene::Camera)
+METATABLE_END(Engine::Scene::Camera)
+
+RegisterType(Engine::Scene::Camera);

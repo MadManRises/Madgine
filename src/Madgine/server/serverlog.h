@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Interfaces/util/standardlog.h"
-#include "Interfaces/signalslot/slot.h"
+#include "Modules/util/standardlog.h"
 
 namespace Engine
 {
@@ -20,8 +19,6 @@ namespace Engine
 			void stopConsole();
 
 			std::vector<std::string> update();
-
-		private:
 
 		private:
 

@@ -14,7 +14,7 @@ namespace Engine
 
 		INTERFACES_EXPORT const char *filename(SharedLibraryQueryState &data);
 
-		struct SharedLibraryIterator
+		struct INTERFACES_EXPORT SharedLibraryIterator
 		{
 			SharedLibraryIterator(const SharedLibraryQuery* query);
 			SharedLibraryIterator(const SharedLibraryQuery* query, end_tag);

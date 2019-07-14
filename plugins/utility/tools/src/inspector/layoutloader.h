@@ -16,5 +16,3 @@ namespace Engine {
 
 	}
 }
-
-RegisterType(Engine::Tools::LayoutLoader);

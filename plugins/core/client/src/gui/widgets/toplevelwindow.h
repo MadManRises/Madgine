@@ -1,21 +1,22 @@
 #pragma once
 
-#include "Interfaces/scripting/types/scope.h"
 #include "../../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "../../input/inputcollector.h"
-#include "Interfaces/uniquecomponent/uniquecomponentselector.h"
+#include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Interfaces/generic/transformIt.h"
+#include "Modules/generic/transformIt.h"
 
 #include "Madgine/core/madgineobject.h"
+
+#include "Modules/keyvalue/scopebase.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
 		
-		class MADGINE_CLIENT_EXPORT TopLevelWindow : public Scripting::Scope<TopLevelWindow>, public Input::InputListener, public Window::WindowEventListener, public Core::MadgineObject		
+		class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener		
 		{
 
 		public:
@@ -61,7 +62,7 @@ namespace Engine
 
 			GUISystem &gui();
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 			Input::InputHandler *input();
 
@@ -84,24 +85,12 @@ namespace Engine
 
 			Render::RenderWindow *getRenderer();
 
-			GUI::TopLevelWindow &getSelf(bool = true);
-
-			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-
-			Scene::SceneManager &sceneMgr(bool = true);
-
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
+			//virtual App::Application &app(bool = true) override;
+			//virtual const Core::MadgineObject *parent() const override;
 
 			UI::UIManager &ui();
 
 		protected:			
-
-			virtual bool init() override;
-			virtual void finalize() override;
-
 			void onClose() override;
 			void onRepaint() override;
 			void onResize(size_t width, size_t height) override;
@@ -148,5 +137,3 @@ namespace Engine
 	}
 }
 
-
-RegisterType(Engine::GUI::TopLevelWindow);

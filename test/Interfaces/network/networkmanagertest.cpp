@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
-#include "Interfaces/network/networkmanager.h"
+#include "Modules/network/networkmanager.h"
 
-#include "Interfaces/threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 
 #include <future>
 

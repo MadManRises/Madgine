@@ -291,7 +291,7 @@ void Win32JoyStick::capture()
 		switch(diBuff[i].dwOfs)
 		{
 			//------ slider -//
-			case DIJOFS_SLIDER0(0):
+			/*case DIJOFS_SLIDER0(0):
 				sliderMoved[0]		   = true;
 				mState.mSliders[0].abX = diBuff[i].dwData;
 				break;
@@ -339,7 +339,7 @@ void Win32JoyStick::capture()
 			case DIJOFS_SLIDER3(1):
 				sliderMoved[3]		   = true;
 				mState.mSliders[3].abY = diBuff[i].dwData;
-				break;
+				break;*/
 			//-----------------------------------------//
 			default:
 				//Handle Button Events Easily using the DX Offset Macros

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/generic/observablecontainer.h"
+#include "Modules/keyvalue/observablecontainer.h"
 
 namespace Engine
 {

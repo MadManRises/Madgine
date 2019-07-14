@@ -2,55 +2,43 @@ cmake_minimum_required (VERSION 2.6)
 
 Project(Interfaces)
 
-find_package(Threads REQUIRED)
+
+option(INTERFACES_USE_CUSTOM_THREADLOCAL "Replace the thread_local keyword with a custom implementation for thread-local variables.")
+option(INTERFACES_USE_PTHREAD_THREADLOCAL_STORE "Use pthread_[set/get]specific instead of thread_local to store all thread-local variables. Useful in combination with INTERFACES_USE_CUSTOM_THREADLOCAL on platforms that don't support thread_local.")
+
+option(INTERFACES_ENABLE_PROFILER "Activates the builtin runtime-profiler." ON)
+option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocations")
 
 set(sources)
 
-FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
+FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforward.h interfaceslib.h stringutil.h)
 	FolderSources(sources "" database exceptionmessages.h message.h)
 	FolderSources(sources "" debug stacktrace.cpp stacktrace.h traceback.cpp traceback.h)
-		FolderSources(sources debug memory memory.cpp memory.h memoryglobal.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
-		FolderSources(sources debug profiler processstats.cpp processstats.h profiler.cpp profiler.h)
+		FolderSources(sources debug memory memory.cpp memory.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
+	FolderSources(sources "" dl dlapi_unix.cpp dlapi_win.cpp dlapi.h)
 	FolderSources(sources "" filesystem api.cpp api.h api_android.cpp api_emscripten.cpp api_linux.cpp api_win.cpp filequery.cpp filequery.h path.cpp path.h runtime.cpp runtime.h runtime_unix.cpp runtime_win.cpp)
-	FolderSources(sources "" generic keyvalue.h keyvalueiterate.cpp keyvalueiterate.h templates.h valuetype.cpp valuetype.h)
-	FolderSources(sources "" ini inifile.cpp inifile.h)
-	FolderSources(sources "" lua lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lutf8lib.c lvm.c lzio.c lauxlib.c lbaselib.c lbitlib.c lcorolib.c ldblib.c liolib.c lmathlib.c loslib.c lstrlib.c ltablib.c loadlib.c linit.c)
-	FolderSources(sources "" math bounds.cpp bounds.h matrix4.cpp matrix4.h matrix3.cpp matrix3.h vector4.cpp vector4.h vector3.cpp vector3.h vector2.cpp vector2.h)
-	FolderSources(sources "" network networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.h socketapi.cpp socketapi.h socketapi_unix.cpp socketapi_win.cpp)
-if (NOT STATIC_BUILD)
-	FolderSources(sources "" plugins dlapi_unix.cpp dlapi_win.cpp dlapi.h pluginmanager.cpp pluginmanager.h pluginsection.cpp pluginsection.h plugin.cpp plugin.h)
-endif()
-	FolderSources(sources "" scripting scriptingexception.h)
-		FolderSources(sources scripting datatypes argumentlist.cpp argumentlist.h intluatableinstance.cpp intluatableinstance.h luatable.cpp luatable.h luatablefieldaccessor.cpp luatablefieldaccessor.h luatableinstance.cpp luatableinstance.h luatableiterator.cpp luatableiterator.h luathread.h stringluatableinstance.cpp stringluatableinstance.h)
-		FolderSources(sources scripting parsing parseexception.h scriptparser.cpp scriptparser.h)
-		FolderSources(sources scripting types api.cpp api.h apihelper.cpp apihelper.h globalscopebase.cpp globalscopebase.h luastate.cpp luastate.h mapper.h scopebase.cpp scopebase.h scope_cast.h scope.h)
-	FolderSources(sources "" serialize fileexception.h observable.cpp observable.h serializable.cpp serializable.h serializableids.h serializableunit.cpp serializableunit.h serializeexception.h serializemanager.cpp serializemanager.h toplevelserializableunit.cpp toplevelserializableunit.h)
-		FolderSources(sources serialize container action.h container.h creationhelper.h list.h map.h observed.h observablecontainer.h serializablecontainer.h serialized.h set.h sortedcontainer.h tupleserialize.h unithelper.cpp unithelper.h unsortedcontainer.h vector.h)
-		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h filebuffer.cpp filebuffer.h serializestream.cpp serializestream.h)
-			FolderSources(sources streams debugging streamdebugging.cpp streamdebugging.h)
-	FolderSources(sources "" signalslot connection.cpp connection.h connectionstore.cpp connectionstore.h slot.h signal.h signalrouter.h signalstub.cpp signalstub.h slot.cpp slot.h task.h taskqueue.cpp taskqueue.h)
+	FolderSources(sources "" os osapi.h osapi_windows.cpp)
+	FolderSources(sources "" socket socketapi.cpp socketapi.h socketapi_unix.cpp socketapi_win.cpp)
 	FolderSources(sources "" streams streams.cpp streams.h)
-	FolderSources(sources "" threading datamutex.cpp datamutex.h framelistener.h frameloop.cpp frameloop.h scheduler.cpp scheduler.h tasknode.h threadapi.h threadapi_unix.cpp threadapi_win.cpp threadlocal.cpp threadlocal.h workgroup.cpp workgroup.h workgrouphandle.h)
-	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
-	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h process.cpp process.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} ${CMAKE_CURRENT_SOURCE_DIR}/../../misc/Madgine.natvis SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
 
+configure_file(interfacesconfig.in.h interfacesconfig.h)
+target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 if (NOT STATIC_BUILD)
-	target_compile_definitions(Interfaces PRIVATE SHARED_LIB_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}" SHARED_LIB_PREFIX="${CMAKE_SHARED_LIBRARY_PREFIX}")
+	target_compile_definitions(Interfaces PUBLIC SHARED_LIB_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}" SHARED_LIB_PREFIX="${CMAKE_SHARED_LIBRARY_PREFIX}")
 endif()
 
-
-target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
 endif()
 
 if (ANDROID)
-	target_link_libraries(Interfaces PRIVATE android EGL log)	
+	target_link_libraries(Interfaces PRIVATE android EGL)	
 endif()
 
 if (UNIX)

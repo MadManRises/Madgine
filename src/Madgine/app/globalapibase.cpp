@@ -4,12 +4,14 @@
 
 #include "application.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
+
 namespace Engine
 {
 	namespace App
 	{
 		GlobalAPIBase::GlobalAPIBase(App::Application &app) :
-		ScopeBase(&app),
 		mApp(app)
 		{
 		}
@@ -85,3 +87,7 @@ namespace Engine
 	}
 }
 
+METATABLE_BEGIN(Engine::App::GlobalAPIBase)
+METATABLE_END(Engine::App::GlobalAPIBase)
+
+RegisterType(Engine::App::GlobalAPIBase);

@@ -2,21 +2,18 @@
 
 #include "serverbase.h"
 
-#include "Interfaces/threading/framelistener.h"
-
 #include "../core/root.h"
 
-#include "Interfaces/generic/keyvalueiterate.h"
-#include "Interfaces/scripting/types/api.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
-
+#include "Modules/scripting/types/luastate.h"
 
 namespace Engine
 {
 	namespace Server
 	{
 		ServerBase::ServerBase(Threading::WorkGroup &workgroup) :
-			Scope(Scripting::LuaState::getSingleton()),
+			GlobalScopeBase(Scripting::LuaState::getSingleton()),
 			mLog(workgroup.name() + "-Log"),
 			TaskQueue("Default")
 		{
@@ -63,10 +60,15 @@ namespace Engine
 			mLastConsoleCheck = std::chrono::steady_clock::now();
 		}
 
-		KeyValueMapList ServerBase::maps()
+		/*KeyValueMapList ServerBase::maps()
 		{
 			return Scope::maps().merge(this, MAP_F(shutdown));
-		}
+		}*/
 
 	}
 }
+
+METATABLE_BEGIN(Engine::Server::ServerBase)
+METATABLE_END(Engine::Server::ServerBase)
+
+RegisterType(Engine::Server::ServerBase);

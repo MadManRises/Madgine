@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
-#include "Interfaces/plugins/pluginmanager.h"
+#include "Modules/plugins/pluginmanager.h"
 
-#include "Interfaces/threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 
-#include "Interfaces/uniquecomponent/uniquecomponentcollectormanager.h"
+#include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 
 #include "uniquecomponentshared.h"
 

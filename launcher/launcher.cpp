@@ -4,7 +4,7 @@
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
-#include "Interfaces/threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 
 #if WINDOWS
 #	include <conio.h>

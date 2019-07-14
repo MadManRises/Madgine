@@ -4,7 +4,8 @@
 #include "../gui/guisystem.h"
 #include "../gui/widgets/widget.h"
 
-
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
@@ -177,3 +178,10 @@ namespace Engine
 		}
 	}
 } // namespace UI
+
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
+
+METATABLE_BEGIN(Engine::UI::GameHandlerBase)
+METATABLE_END(Engine::UI::GameHandlerBase)
+
+RegisterType(Engine::UI::GameHandlerBase);

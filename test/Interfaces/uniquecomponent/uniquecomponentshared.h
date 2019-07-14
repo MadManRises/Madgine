@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/uniquecomponent/uniquecomponentdefine.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 #if defined(STATIC_BUILD)
 #	define TEST_EXPORT
@@ -25,6 +25,4 @@ struct TestBase
 	virtual ~TestBase() = default;
 };
 
-RegisterType(TestBase);
-
-DEFINE_UNIQUE_COMPONENT(Test, TestBase, TestDriver&, Test, TEST);
+DECLARE_UNIQUE_COMPONENT(Test, TestBase, TestDriver &, Test, TEST);

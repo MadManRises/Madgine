@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "Interfaces/interfaceslib.h"
+#include "Modules/moduleslib.h"
 
 #include <future>
 
-#include "Interfaces/scripting/types/scopebase.h"
+#include "Modules/keyvalue/scopebase.h"
 
-#include "Interfaces/generic/valuetype.h"
+#include "Modules/keyvalue/valuetype.h"
 
 
 TEST(ValueType, Construct)

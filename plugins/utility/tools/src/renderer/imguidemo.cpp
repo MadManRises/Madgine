@@ -4,7 +4,7 @@
 
 #include "../imgui/imgui.h"
 
-#include "Interfaces/reflection/classname.h"
+#include "Modules/reflection/classname.h"
 
 namespace Engine {
 	namespace Tools {

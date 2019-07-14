@@ -24,5 +24,3 @@ namespace Engine
 		};
 	}
 }
-
-RegisterType(Engine::Scene::ServerLightManager);

@@ -1,25 +1,21 @@
 #pragma once
 
 #include "../core/madgineobject.h"
-#include "Interfaces/scripting/types/scopebase.h"
-#include "Interfaces/reflection/classname.h"
+#include "Modules/scripting/types/scopeentity.h"
 
-
-#include "Interfaces/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine
 {
 	namespace App
 	{
-		class MADGINE_BASE_EXPORT GlobalAPIBase : public Core::MadgineObject, public Scripting::ScopeBase
+		class MADGINE_BASE_EXPORT GlobalAPIBase : public Core::MadgineObject, public ScopeBase
 		{
 		public:
 			GlobalAPIBase(App::Application &app);
 
 
 			virtual void update();
-
-			virtual const char* key() const = 0;
 
 			template <class T>
 			T &getGlobalAPIComponent(bool init = true)
@@ -71,5 +67,3 @@ namespace Engine
 		};
 	}
 }
-
-RegisterType(Engine::App::GlobalAPIBase);

@@ -11,9 +11,9 @@
 
 #include "input/inputevents.h"
 
-#include "Interfaces/math/vector3.h"
+#include "Modules/math/vector3.h"
 
-#include "Interfaces/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profiler.h"
 
 namespace Engine {
 	namespace Tools {

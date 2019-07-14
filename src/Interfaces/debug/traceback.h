@@ -31,7 +31,7 @@ namespace Engine
 }
 
 namespace std {
-	INTERFACES_EXPORT string to_string(const Engine::Debug::TraceBack &t);
+INTERFACES_EXPORT string to_string(const Engine::Debug::TraceBack &t);
 			
 	template <>
 	struct hash<const char *>

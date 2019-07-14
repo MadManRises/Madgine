@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Interfaces/uniquecomponent/uniquecomponentdefine.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 #include "toolbase.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine::Tools, ToolBase, ImGuiRoot&, Tools, MADGINE_TOOLS);
+DECLARE_UNIQUE_COMPONENT(Engine::Tools, ToolBase, ImGuiRoot&, Tools, MADGINE_TOOLS);
 
 /*
 namespace Engine

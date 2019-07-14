@@ -3,7 +3,7 @@
 #include "lightmanager.h"
 
 
-
+#include "Modules/keyvalue/metatable_impl.h"
 
 
 namespace Engine
@@ -47,3 +47,9 @@ namespace Engine
 		}
 	}	
 }
+
+
+METATABLE_BEGIN(Engine::Scene::LightManager)
+METATABLE_END(Engine::Scene::LightManager)
+
+RegisterType(Engine::Scene::LightManager);

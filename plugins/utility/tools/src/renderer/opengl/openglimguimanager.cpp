@@ -9,7 +9,7 @@
 
 #include "OpenGL/openglrenderwindow.h"
 
-#include "Interfaces/math/vector3.h"
+#include "Modules/math/vector3.h"
 
 #include "Madgine/app/application.h"
 #include "gui/guisystem.h"

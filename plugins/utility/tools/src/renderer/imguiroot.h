@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Madgine/app/globalapicollector.h"
-#include "Interfaces/threading/framelistener.h"
+#include "Modules/threading/framelistener.h"
 
 #include "../toolscollector.h"
 
-#include "Interfaces/plugins/pluginlistener.h"
+#include "Modules/plugins/pluginlistener.h"
 
 namespace Engine
 {
@@ -47,5 +47,3 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Tools::ImGuiRoot);

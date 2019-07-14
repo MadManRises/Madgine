@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/math/vector2.h"
+#include "Modules/math/vector2.h"
 
 namespace Engine
 {
@@ -268,7 +268,7 @@ namespace Engine
 			{
 			}
 
-			PointerEventArgs(const Vector2& pos, const Vector2& move, float scroll,
+			PointerEventArgs(const Vector2& pos, const Vector2& move, float scroll = 0.0f,
 			               MouseButton::MouseButton button = MouseButton::NO_BUTTON) :
 				position(pos),
 				moveDelta(move),

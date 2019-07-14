@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/threading/workgrouphandle.h"
+#include "Modules/threading/workgrouphandle.h"
 
 struct ANativeActivity;
 struct ANativeWindow;

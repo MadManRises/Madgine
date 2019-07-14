@@ -1,195 +1,179 @@
 #pragma once
 
-namespace Engine
-{
-	class ValueType;
+namespace Engine {
+struct ValueType;
 
-	class InvScopePtr;
+struct InvScopePtr;
 
-	enum KeyValueValueFlags : uint8_t;
+enum KeyValueValueFlags : uint8_t;
 
-	class KeyValueIterator;
-	class KeyValueMapList;
+class KeyValueVirtualIteratorBase;
 
+struct ScopeBase;
+struct MetaTable;
+struct ScopeIterator;
+struct Accessor;
 
-	struct IndexHolder;
+struct IndexHolder;
 
-	struct UniqueComponentCollectorManager;
-	struct ComponentRegistryBase;
+struct UniqueComponentCollectorManager;
+struct ComponentRegistryBase;
 
-	struct InStream;
-	struct OutStream;
+struct InStream;
+struct OutStream;
 
-	namespace Debug {
+template <typename RefT>
+struct VirtualIterator;
 
-		struct TraceBack;
-		struct StackTraceIterator;
+using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueType>>;
 
-		namespace Memory {
-			struct StatsMemoryResource;
-			struct MemoryTracker;
-		}
+using ArgumentList = std::vector<ValueType>;
 
-		namespace Profiler {
-			class Profiler;
-		}
-
-	}
-
-	namespace Ini {
-		struct IniFile;
-	}
-
-	namespace Serialize
-	{
-		struct SerializeInStream;
-		struct SerializeOutStream;
-		class SerializableUnitBase;
-		struct BufferedInOutStream;
-		struct BufferedInStream;
-		struct BufferedOutStream;
-		class TopLevelSerializableUnitBase;
-		class Observable;
-		class Serializable;
-		class FileBuffer;
-		struct MessageHeader;
-		struct SerializeManager;
-		struct SerializeStreambuf;
-
-		class EOLType;
-
-		struct CompareStreamId;
-
-		typedef size_t ParticipantId;
-
-		struct buffered_streambuf;
-
-		struct noparent_deleter;
-
-		using SerializableUnitMap = std::map<size_t, SerializableUnitBase*>;
-
-		enum StreamError
-		{
-			NO_ERROR = 0,
-			WOULD_BLOCK,
-			ALREADY_CONNECTED,
-			TIMEOUT,
-			NO_SERVER,
-			NO_CONNECTION,
-			CONNECTION_REFUSED,
-			UNKNOWN_ERROR
-		};
-
-		enum MessageType
-		{
-			STATE,
-			ACTION,
-			REQUEST
-		};
-
-		enum Command
-		{
-			INITIAL_STATE_DONE,
-			STREAM_EOF
-		};
-	}
-
-	namespace Scripting
-	{
-		class ScriptingManager;
-
-		class ScopeBase;
-		class GlobalScopeBase;
-
-		class LuaState;
-		class LuaTable;
-		struct LuaThread;
-		class LuaTableIterator;
-
-		struct Mapper;
-
-		class ArgumentList;
-		typedef std::map<std::string, ValueType> Stack;
-
-		typedef ValueType (*ApiMethod)(ScopeBase*, const ArgumentList&);
-
-		namespace Parsing
-		{
-			class ScriptParser;
-		}
-	}
+typedef ValueType (*ApiMethod)(ScopeBase *, const ArgumentList &);
 
 
-	namespace Network
-	{
-		class NetworkManager;
-	}
+namespace Debug {
 
-	namespace Plugins
-	{
-		class PluginManager;
-		class Plugin;
-		class PluginSection;
-		struct PluginListener;
+    struct TraceBack;
+    struct StackTraceIterator;
 
-		struct BinaryInfo;
-	}
+    namespace Memory {
+        struct StatsMemoryResource;
+        struct MemoryTracker;
+    }
+
+    namespace Profiler {
+        class Profiler;
+    }
+}
+
+namespace Ini {
+    struct IniFile;
+}
+
+namespace Serialize {
+    struct SerializeInStream;
+    struct SerializeOutStream;
+    class SerializableUnitBase;
+    struct BufferedInOutStream;
+    struct BufferedInStream;
+    struct BufferedOutStream;
+    class TopLevelSerializableUnitBase;
+    class Observable;
+    class Serializable;
+    class FileBuffer;
+    struct MessageHeader;
+    struct SerializeManager;
+    struct SerializeStreambuf;
+
+    class EOLType;
+
+    struct CompareStreamId;
+
+    typedef size_t ParticipantId;
+
+    struct buffered_streambuf;
+
+    struct noparent_deleter;
+
+    using SerializableUnitMap = std::map<size_t, SerializableUnitBase *>;
+
+    enum StreamError {
+        NO_ERROR = 0,
+        WOULD_BLOCK,
+        ALREADY_CONNECTED,
+        TIMEOUT,
+        NO_SERVER,
+        NO_CONNECTION,
+        CONNECTION_REFUSED,
+        UNKNOWN_ERROR
+    };
 
 
-	namespace Util
-	{
-		
-		class Log;		
+}
 
-		class LogListener;
+namespace Scripting {
+    class ScriptingManager;
 
-		class Process;
-		class StandardLog;
+    
+    class GlobalScopeBase;
 
-		
-	}
+    class LuaState;
+    class LuaTable;
+    struct LuaThread;
+    class LuaTableIterator;
 
-	namespace SignalSlot
-	{
-		class ConnectionBase;
-		template <class T, class... _Ty>
-		class ConnectionInstance;
-		struct TaskQueue;
-	}
+    struct Mapper;
 
-	namespace Window {
-		struct WindowEventListener;
-		struct Window;
-	}
+    namespace Parsing {
+        class ScriptParser;
+    }
 
-	namespace Filesystem {
-		struct Path;
-		struct FileQuery;
-		struct FileQueryState;
+}
 
-		struct SharedLibraryQuery;
-		struct SharedLibraryQueryState;		
-	}
 
-	namespace Threading {
-		struct WorkGroup;
-		struct WorkGroupHandle;
-		struct Scheduler;
+namespace Network {
+    class NetworkManager;
+}
 
-		class FrameListener;
-		struct FrameLoop;
+namespace Plugins {
+    class PluginManager;
+    class Plugin;
+    class PluginSection;
+    struct PluginListener;
 
-		struct DataMutex;
-	}
+    struct BinaryInfo;
+}
 
-	class Vector2;
-	class Vector3;
+namespace Util {
 
-	class Matrix3;
-	class Matrix4;
+    class Log;
 
-	struct TypeInfo;
+    class LogListener;
 
+    class Process;
+    class StandardLog;
+}
+
+namespace SignalSlot {
+    class ConnectionBase;
+    template <class T, class... _Ty>
+    class ConnectionInstance;
+    struct TaskQueue;
+}
+
+namespace Window {
+    struct WindowEventListener;
+    struct Window;
+}
+
+namespace Filesystem {
+    struct Path;
+    struct FileQuery;
+    struct FileQueryState;
+
+    struct SharedLibraryQuery;
+    struct SharedLibraryQueryState;
+}
+
+namespace Threading {
+    struct WorkGroup;
+    struct WorkGroupHandle;
+    struct Scheduler;
+
+    class FrameListener;
+    struct FrameLoop;
+
+    struct DataMutex;
+}
+
+class Vector2;
+class Vector3;
+
+class Matrix3;
+class Matrix4;
+
+struct TypeInfo;
 }
 
 struct lua_State;

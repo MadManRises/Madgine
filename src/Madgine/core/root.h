@@ -20,7 +20,7 @@ namespace Engine
 #endif
 			std::unique_ptr<Scripting::LuaState> mLuaState;
 
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 			std::unique_ptr<Debug::Memory::MemoryTracker> mMemTracker;
 #endif
 			

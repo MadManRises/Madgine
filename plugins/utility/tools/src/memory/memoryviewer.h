@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 
 #include "../tool.h"
 #include "Interfaces/debug/stacktrace.h"

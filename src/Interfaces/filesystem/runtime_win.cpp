@@ -4,8 +4,6 @@
 
 #include "runtime.h"
 
-#include "../generic/templates.h"
-
 #define NOMINMAX
 #include <Windows.h>
 #include <Psapi.h>

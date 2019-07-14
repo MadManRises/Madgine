@@ -2,15 +2,17 @@ if (ANDROID)
 
 	add_subdirectory(android)
 
-elseif(EMSCRIPTEN)
+elseif (EMSCRIPTEN)
 
-	add_subdirectory(sdl)
+	add_subdirectory(emscripten)
 
 else()
 
-	option(OIS_BUILD_SHARED_LIBS "Build shared libraries" OFF)
-	option(OIS_BUILD_DEMOS "Build demo applications" OFF)
-
 	add_subdirectory(ois)
 
+endif()
+
+option(PLUGINS_BUILD_SDLINPUT "Build the SDL-input plugin")
+if (PLUGINS_BUILD_SDLINPUT)
+	add_subdirectory(sdl)
 endif()

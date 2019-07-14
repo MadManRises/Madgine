@@ -5,14 +5,14 @@
 #ifdef BUILD_Client
 #include "clientlib.h"
 #endif
-#ifdef BUILD_Base
-#include "Madgine/baselib.h"
-#endif
 #ifdef BUILD_OpenGL
 #include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_SDLInput
-#include "sdlinputlib.h"
+#ifdef BUILD_Base
+#include "Madgine/baselib.h"
+#endif
+#ifdef BUILD_EmscriptenInput
+#include "emscripteninputlib.h"
 #endif
 #ifdef BUILD_Base
 #include "Madgine/app/globalapicollector.h"
@@ -29,8 +29,8 @@
 #ifdef BUILD_Client
 #include "input/inputcollector.h"
 #endif
-#ifdef BUILD_SDLInput
-#include "sdlinputhandler.h"
+#ifdef BUILD_EmscriptenInput
+#include "emscripteninputhandler.h"
 #endif
 #ifdef BUILD_Client
 #include "render/renderercollector.h"
@@ -78,25 +78,41 @@
 #include "uniquecomponent/uniquecomponentshared.h"
 #endif
 #ifdef BUILD_LibA
-#include "uniquecomponent/libA.cpp"
+#include "uniquecomponent/libA.h"
 #endif
 #ifdef BUILD_LibB
-#include "uniquecomponent/libB.cpp"
+#include "uniquecomponent/libB.h"
 #endif
 
 namespace Engine {
 
 #ifdef BUILD_Base
 template <>
-std::vector<Engine::App::GlobalAPICollector::Registry::F>
-Engine::App::GlobalAPICollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::App::GlobalAPICollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_Tools
+        &table<Engine::Tools::ImGuiRoot>(),
+#endif
+#ifdef BUILD_Base
+        &table<Engine::Scene::SceneManager>(),
+#endif
+#ifdef BUILD_Client
+        &table<Engine::GUI::GUISystem>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents()
+{
     return {
 #ifdef BUILD_Tools
         createComponent<Engine::Tools::ImGuiRoot>,
 #endif
 #ifdef BUILD_Base
-        createComponent<
-            Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
+        createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
 #endif
 #ifdef BUILD_Client
         createComponent<Engine::GUI::GUISystem>,
@@ -109,30 +125,24 @@ Engine::App::GlobalAPICollector::Registry::sComponents() {
 
 #ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_GlobalAPIBase_Tools = ACC;
-template <> size_t component_index<Engine::Tools::ImGuiRoot>() {
-    return CollectorBaseIndex_GlobalAPIBase_Tools + 0;
-}
+template <>
+size_t component_index<Engine::Tools::ImGuiRoot>() { return CollectorBaseIndex_GlobalAPIBase_Tools + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_GlobalAPIBase_Tools + 1
 #endif
 #ifdef BUILD_Base
 constexpr size_t CollectorBaseIndex_GlobalAPIBase_Base = ACC;
 template <>
-size_t component_index<
-    Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>() {
-    return CollectorBaseIndex_GlobalAPIBase_Base + 0;
-}
-template <> size_t component_index<Engine::Scene::SceneManager>() {
-    return CollectorBaseIndex_GlobalAPIBase_Base + 0;
-}
+size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>() { return CollectorBaseIndex_GlobalAPIBase_Base + 0; }
+template <>
+size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Base + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_GlobalAPIBase_Base + 1
 #endif
 #ifdef BUILD_Client
 constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
-template <> size_t component_index<Engine::GUI::GUISystem>() {
-    return CollectorBaseIndex_GlobalAPIBase_Client + 0;
-}
+template <>
+size_t component_index<Engine::GUI::GUISystem>() { return CollectorBaseIndex_GlobalAPIBase_Client + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_GlobalAPIBase_Client + 1
 #endif
@@ -142,11 +152,22 @@ template <> size_t component_index<Engine::GUI::GUISystem>() {
 #endif
 #ifdef BUILD_Client
 template <>
-std::vector<Engine::Input::InputHandlerCollector::Registry::F>
-Engine::Input::InputHandlerCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::Input::InputHandlerCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_EmscriptenInput
+        &table<Engine::Input::EmscriptenInputHandler>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents()
+{
     return {
-#ifdef BUILD_OISHandler
-        createComponent<Engine::Input::OISInputHandler>,
+#ifdef BUILD_EmscriptenInput
+        createComponent<Engine::Input::EmscriptenInputHandler>,
 #endif
 
     };
@@ -154,13 +175,12 @@ Engine::Input::InputHandlerCollector::Registry::sComponents() {
 
 #define ACC 0
 
-#ifdef BUILD_SDLInput
-constexpr size_t CollectorBaseIndex_InputHandler_SDLInput = ACC;
-template <> size_t component_index<Engine::Input::SDLInputHandler>() {
-    return CollectorBaseIndex_InputHandler_SDLInput + 0;
-}
+#ifdef BUILD_EmscriptenInput
+constexpr size_t CollectorBaseIndex_InputHandler_EmscriptenInput = ACC;
+template <>
+size_t component_index<Engine::Input::EmscriptenInputHandler>() { return CollectorBaseIndex_InputHandler_EmscriptenInput + 0; }
 #undef ACC
-#define ACC CollectorBaseIndex_InputHandler_SDLInput + 1
+#define ACC CollectorBaseIndex_InputHandler_EmscriptenInput + 1
 #endif
 
 #undef ACC
@@ -168,8 +188,19 @@ template <> size_t component_index<Engine::Input::SDLInputHandler>() {
 #endif
 #ifdef BUILD_Client
 template <>
-std::vector<Engine::Render::RendererCollector::Registry::F>
-Engine::Render::RendererCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::Render::RendererCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_OpenGL
+        &table<Engine::Render::OpenGLRenderer>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::Render::RendererCollector::Registry::F> Engine::Render::RendererCollector::Registry::sComponents()
+{
     return {
 #ifdef BUILD_OpenGL
         createComponent<Engine::Render::OpenGLRenderer>,
@@ -182,9 +213,8 @@ Engine::Render::RendererCollector::Registry::sComponents() {
 
 #ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_RendererBase_OpenGL = ACC;
-template <> size_t component_index<Engine::Render::OpenGLRenderer>() {
-    return CollectorBaseIndex_RendererBase_OpenGL + 0;
-}
+template <>
+size_t component_index<Engine::Render::OpenGLRenderer>() { return CollectorBaseIndex_RendererBase_OpenGL + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_RendererBase_OpenGL + 1
 #endif
@@ -194,8 +224,26 @@ template <> size_t component_index<Engine::Render::OpenGLRenderer>() {
 #endif
 #ifdef BUILD_Base
 template <>
-std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F>
-Engine::Resources::ResourceLoaderCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_OpenGL
+        &table<Engine::Render::OpenGLMeshLoader>(),
+        &table<Engine::Render::OpenGLShaderLoader>(),
+#endif
+#ifdef BUILD_Tools
+        &table<Engine::Tools::LayoutLoader>(),
+#endif
+#ifdef BUILD_Base
+        &table<Engine::Scripting::Parsing::ScriptLoader>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents()
+{
     return {
 #ifdef BUILD_OpenGL
         createComponent<Engine::Render::OpenGLMeshLoader>,
@@ -215,28 +263,24 @@ Engine::Resources::ResourceLoaderCollector::Registry::sComponents() {
 
 #ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
-template <> size_t component_index<Engine::Render::OpenGLMeshLoader>() {
-    return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0;
-}
-template <> size_t component_index<Engine::Render::OpenGLShaderLoader>() {
-    return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1;
-}
+template <>
+size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+template <>
+size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 #undef ACC
 #define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2
 #endif
 #ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
-template <> size_t component_index<Engine::Tools::LayoutLoader>() {
-    return CollectorBaseIndex_ResourceLoaderBase_Tools + 0;
-}
+template <>
+size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
 #endif
 #ifdef BUILD_Base
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Base = ACC;
-template <> size_t component_index<Engine::Scripting::Parsing::ScriptLoader>() {
-    return CollectorBaseIndex_ResourceLoaderBase_Base + 0;
-}
+template <>
+size_t component_index<Engine::Scripting::Parsing::ScriptLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Base + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_ResourceLoaderBase_Base + 1
 #endif
@@ -246,8 +290,16 @@ template <> size_t component_index<Engine::Scripting::Parsing::ScriptLoader>() {
 #endif
 #ifdef BUILD_Base
 template <>
-std::vector<Engine::Scene::SceneComponentCollector::Registry::F>
-Engine::Scene::SceneComponentCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::Scene::SceneComponentCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents()
+{
     return {
 
     };
@@ -260,8 +312,21 @@ Engine::Scene::SceneComponentCollector::Registry::sComponents() {
 #endif
 #ifdef BUILD_Tools
 template <>
-std::vector<Engine::Tools::ToolsCollector::Registry::F>
-Engine::Tools::ToolsCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_Tools
+        &table<Engine::Tools::Inspector>(),
+        &table<Engine::Tools::Metrics>(),
+        &table<Engine::Tools::Profiler>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsCollector::Registry::sComponents()
+{
     return {
 #ifdef BUILD_Tools
         createComponent<Engine::Tools::Inspector>,
@@ -276,15 +341,12 @@ Engine::Tools::ToolsCollector::Registry::sComponents() {
 
 #ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ToolBase_Tools = ACC;
-template <> size_t component_index<Engine::Tools::Inspector>() {
-    return CollectorBaseIndex_ToolBase_Tools + 0;
-}
-template <> size_t component_index<Engine::Tools::Metrics>() {
-    return CollectorBaseIndex_ToolBase_Tools + 1;
-}
-template <> size_t component_index<Engine::Tools::Profiler>() {
-    return CollectorBaseIndex_ToolBase_Tools + 2;
-}
+template <>
+size_t component_index<Engine::Tools::Inspector>() { return CollectorBaseIndex_ToolBase_Tools + 0; }
+template <>
+size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 1; }
+template <>
+size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
 #undef ACC
 #define ACC CollectorBaseIndex_ToolBase_Tools + 3
 #endif
@@ -294,8 +356,16 @@ template <> size_t component_index<Engine::Tools::Profiler>() {
 #endif
 #ifdef BUILD_Client
 template <>
-std::vector<Engine::UI::GameHandlerCollector::Registry::F>
-Engine::UI::GameHandlerCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
+{
     return {
 
     };
@@ -308,8 +378,16 @@ Engine::UI::GameHandlerCollector::Registry::sComponents() {
 #endif
 #ifdef BUILD_Client
 template <>
-std::vector<Engine::UI::GuiHandlerCollector::Registry::F>
-Engine::UI::GuiHandlerCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
+{
     return {
 
     };
@@ -322,8 +400,22 @@ Engine::UI::GuiHandlerCollector::Registry::sComponents() {
 #endif
 #ifdef BUILD_TestShared
 template <>
-std::vector<Test::TestCollector::Registry::F>
-Test::TestCollector::Registry::sComponents() {
+const std::vector<const Engine::MetaTable *> &Test::TestCollector::Registry::sTables()
+{
+    static std::vector<const Engine::MetaTable *> dummy = {
+#ifdef BUILD_LibA
+        &table<LibAComponent>(),
+#endif
+#ifdef BUILD_LibB
+        &table<LibBComponent>(),
+#endif
+
+    };
+    return dummy;
+}
+template <>
+std::vector<Test::TestCollector::Registry::F> Test::TestCollector::Registry::sComponents()
+{
     return {
 #ifdef BUILD_LibA
         createComponent<LibAComponent>,
@@ -339,17 +431,15 @@ Test::TestCollector::Registry::sComponents() {
 
 #ifdef BUILD_LibA
 constexpr size_t CollectorBaseIndex_TestBase_LibA = ACC;
-template <> size_t component_index<LibAComponent>() {
-    return CollectorBaseIndex_TestBase_LibA + 0;
-}
+template <>
+size_t component_index<LibAComponent>() { return CollectorBaseIndex_TestBase_LibA + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_TestBase_LibA + 1
 #endif
 #ifdef BUILD_LibB
 constexpr size_t CollectorBaseIndex_TestBase_LibB = ACC;
-template <> size_t component_index<LibBComponent>() {
-    return CollectorBaseIndex_TestBase_LibB + 0;
-}
+template <>
+size_t component_index<LibBComponent>() { return CollectorBaseIndex_TestBase_LibB + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_TestBase_LibB + 1
 #endif
@@ -357,4 +447,4 @@ template <> size_t component_index<LibBComponent>() {
 #undef ACC
 
 #endif
-} // namespace Engine
+}

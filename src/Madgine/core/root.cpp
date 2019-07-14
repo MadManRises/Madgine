@@ -4,14 +4,14 @@
 
 #include "../resources/scripts/scriptloader.h"
 
-#include "Interfaces/scripting/types/luastate.h"
-#include "Interfaces/plugins/pluginmanager.h"
+#include "Modules/scripting/types/luastate.h"
+#include "Modules/plugins/pluginmanager.h"
 #include "../resources/resourcemanager.h"
-#include "Interfaces/threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 #include "Interfaces/debug/memory/memory.h"
 
 
-#include "Interfaces/uniquecomponent/uniquecomponentcollectormanager.h"
+#include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 
 
 namespace Engine
@@ -24,7 +24,7 @@ namespace Engine
 		mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager)),
 #endif		
 		mLuaState(std::make_unique<Scripting::LuaState>()),
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 			mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>()),
 #endif
 			mResources(std::make_unique<Resources::ResourceManager>())

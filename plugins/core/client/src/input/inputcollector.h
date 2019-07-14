@@ -1,8 +1,10 @@
 #pragma once
 
 
-#include "Interfaces/uniquecomponent/uniquecomponentdefine.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 #include "inputhandler.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine::Input, InputHandler, Window::Window*, InputHandler, MADGINE_CLIENT);
+using InputTuple = std::tuple<Engine::Window::Window*, Engine::App::Application&, Engine::Input::InputListener *>;
+
+DECLARE_UNIQUE_COMPONENT(Engine::Input, InputHandler, InputTuple, InputHandler, MADGINE_CLIENT);

@@ -14,5 +14,3 @@ namespace Engine {
 
 	}
 }
-
-RegisterType(Engine::Render::OpenGLShaderLoader);

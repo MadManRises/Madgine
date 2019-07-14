@@ -9,9 +9,10 @@
 
 #include "../renderer/imguiaddons.h"
 
-#include "Interfaces/plugins/pluginmanager.h"
+#include "Modules/plugins/pluginmanager.h"
 
-#include "Interfaces/reflection/classname.h"
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -167,5 +168,8 @@ namespace Tools {
     }
 }
 }
+
+METATABLE_BEGIN(Engine::Tools::PluginManager)
+METATABLE_END(Engine::Tools::PluginManager)
 
 #endif

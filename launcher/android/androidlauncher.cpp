@@ -6,8 +6,8 @@
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
-#include "Interfaces/threading/workgroup.h"
-#include "Interfaces/threading/scheduler.h"
+#include "Modules/threading/workgroup.h"
+#include "Modules/threading/scheduler.h"
 
 #include <android/native_activity.h>
 

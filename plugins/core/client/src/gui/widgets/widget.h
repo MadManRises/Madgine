@@ -1,20 +1,21 @@
 #pragma once
 
-#include "Interfaces/math/matrix3.h"
+#include "Modules/math/matrix3.h"
 
 #include "../../input/inputevents.h"
 
 #include "widgetclass.h"
-#include "Interfaces/scripting/types/scope.h"
-#include "Interfaces/signalslot/signal.h"
+#include "Modules/signalslot/signal.h"
 
-#include "Interfaces/generic/transformIt.h"
+#include "Modules/generic/transformIt.h"
+
+#include "Modules/keyvalue/scopebase.h"
 
 namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT Widget : public Scripting::Scope<Widget>
+		class MADGINE_CLIENT_EXPORT Widget : public ScopeBase
 		{
 		public:
 			Widget(const std::string& name, Widget* parent);
@@ -57,7 +58,7 @@ namespace Engine
 
 			const std::string &getName() const;
 
-			const char * key() const override;
+			const char * key() const;
 
 			Widget* createChild(const std::string& name, Class _class);
 			Widget *createChildWidget(const std::string &name);
@@ -121,7 +122,7 @@ namespace Engine
 
 			void destroyChild(Widget *w);
 
-			KeyValueMapList maps() override;
+			//KeyValueMapList maps() override;
 
 			SignalSlot::Signal<const Input::PointerEventArgs&> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
 
@@ -144,5 +145,3 @@ namespace Engine
 		};
 	}
 }
-
-RegisterType(Engine::GUI::Widget);

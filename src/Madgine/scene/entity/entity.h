@@ -1,119 +1,106 @@
 #pragma once
 
-#include "Interfaces/scripting/types/scope.h"
+#include "Modules/keyvalue/scopebase.h"
 
 #include "entitycomponentbase.h"
 
-#include "Interfaces/serialize/container/set.h"
+#include "Modules/serialize/container/set.h"
 
+namespace Engine {
+namespace Scene {
+    namespace Entity {
 
-namespace Engine
-{
-	namespace Scene
-	{
-		namespace Entity
-		{
+        class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase
+        {
 
+        public:
+            Entity(const Entity &, bool local);
+            Entity(Entity &&, bool local);
 
-			class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public Scripting::Scope<Entity>
-			{
+            Entity(SceneManager &sceneMgr, bool local, const std::string &name, const Scripting::LuaTable &behavior = {});
+            Entity(const Entity &) = delete;
+            ~Entity();
 
-			public:
-				Entity(const Entity&, bool local);
-				Entity(Entity&&, bool local);
+            void setup();
 
-				Entity(SceneManager &sceneMgr, bool local, const std::string& name, const Scripting::LuaTable &behavior = {});
-				~Entity();
+            void remove();
 
-				void setup();
+            const char *key() const;
 
-				void remove();
+            template <class T>
+            T *addComponent(const Scripting::LuaTable &table = {})
+            {
+                return static_cast<T *>(addComponent(T::componentName, table));
+            }
 
-				const char* key() const override;
+            template <class T>
+            void removeComponent()
+            {
+                removeComponent(T::componentName);
+            }
 
-				template <class T>
-				T* addComponent(const Scripting::LuaTable &table = {})
-				{
-					return static_cast<T*>(addComponent(T::componentName(), table));					
-				}
+            template <class T>
+            T *getComponent()
+            {
+                return static_cast<T *>(getComponent(T::componentName()));
+            }
 
-				template <class T>
-				void removeComponent()
-				{
-					removeComponent(T::componentName());
-				}
+            EntityComponentBase *getComponent(const std::string &name);
 
-				template <class T>
-				T* getComponent()
-				{
-					return static_cast<T*>(getComponent(T::componentName()));
-				}
+            template <class T>
+            bool hasComponent()
+            {
+                return hasComponent(T::componentName());
+            }
 
-				EntityComponentBase* getComponent(const std::string& name);
+            bool hasComponent(const std::string &name);
 
-				template <class T>
-				bool hasComponent()
-				{
-					return hasComponent(T::componentName());
-				}
+            EntityComponentBase *addComponent(const std::string &name, const Scripting::LuaTable &table = {});
+            void removeComponent(const std::string &name);
 
-				bool hasComponent(const std::string& name);
+            void writeState(Serialize::SerializeOutStream &of) const override;
+            void readState(Serialize::SerializeInStream &ifs) override;
+            void writeCreationData(Serialize::SerializeOutStream &of) const override;
 
-				EntityComponentBase *addComponent(const std::string& name, const Scripting::LuaTable& table = {});
-				void removeComponent(const std::string& name);
+            SceneManager &sceneMgr(bool = true) const;
 
-				
+            bool isLocal() const;
 
-				void writeState(Serialize::SerializeOutStream& of) const override;
-				void readState(Serialize::SerializeInStream& ifs) override;
-				void writeCreationData(Serialize::SerializeOutStream& of) const override;
+            template <class T>
+            T &getSceneComponent(bool init = true)
+            {
+                return static_cast<T &>(getSceneComponent(T::component_index(), init));
+            }
 
-				SceneManager& sceneMgr(bool = true) const;
+            SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-				bool isLocal() const;
+            template <class T>
+            T &getGlobalAPIComponent(bool init = true)
+            {
+                return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
+            }
 
-				template <class T>
-				T &getSceneComponent(bool init = true)
-				{
-					return static_cast<T&>(getSceneComponent(T::component_index(), init));
-				}
+            App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-				SceneComponentBase &getSceneComponent(size_t i, bool = true);
+            App::Application &app(bool = true);
 
-				template <class T>
-				T &getGlobalAPIComponent(bool init = true)
-				{
-					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
-				}
+        protected:
+            EntityComponentBase *addComponentSimple(const std::string &name, const Scripting::LuaTable &table = {});
 
-				App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+            //KeyValueMapList maps() override;
 
-				App::Application &app(bool = true);
+        private:
+            std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
 
-			protected:
+            std::string mName;
+            bool mLocal;
 
-				EntityComponentBase *addComponentSimple(const std::string& name, const Scripting::LuaTable& table = {});
+            Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>>
+                mComponents;
 
-				KeyValueMapList maps() override;
+            SceneManager &mSceneManager;
+        };
 
-			private:
-
-				std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string& name);
-
-				std::string mName;
-				bool mLocal;
-
-				Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::
-				                         ParentCreator<&Entity::createComponentTuple>>
-				mComponents;
-
-				SceneManager &mSceneManager;
-			};
-
-
-
-		}
-	}
+    }
 }
-
-RegisterType(Engine::Scene::Entity::Entity);
+}

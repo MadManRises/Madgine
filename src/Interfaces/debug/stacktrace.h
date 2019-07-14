@@ -8,7 +8,7 @@ namespace Engine{
 		using FullStackTrace = std::pmr::vector<TraceBack>;
 
 		INTERFACES_EXPORT void getStackTrace(size_t skip, void **buffer, size_t size);
-        INTERFACES_EXPORT FullStackTrace resolveSymbols(void *const *data, size_t size);
+                INTERFACES_EXPORT FullStackTrace resolveSymbols(void *const *data, size_t size);
         
         template <size_t S>
         struct StackTrace{

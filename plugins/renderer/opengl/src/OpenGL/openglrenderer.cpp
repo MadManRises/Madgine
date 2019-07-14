@@ -10,6 +10,9 @@
 
 #include "Madgine/scene/camera.h"
 
+#include "Modules/reflection/classname.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
 #if WINDOWS
 typedef HGLRC(WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int *attribList);
 typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
@@ -293,3 +296,8 @@ namespace Engine {
 }
 
 
+
+METATABLE_BEGIN(Engine::Render::OpenGLRenderer)
+METATABLE_END(Engine::Render::OpenGLRenderer)
+
+RegisterType(Engine::Render::OpenGLRenderer);

@@ -1,6 +1,6 @@
 #include "../toolslib.h"
 
-#ifdef ENABLE_MEMTRACKING
+#if ENABLE_MEMTRACKING
 
 #include "memoryviewer.h"
 #include "../imgui/imgui.h"
@@ -10,9 +10,10 @@
 #include "../renderer/imguiroot.h"
 #include "Madgine/app/application.h"
 
-#include "Interfaces/scripting/types/scopebase.h"
+#include "Modules/keyvalue/scopebase.h"
 
-#include "Interfaces/generic/keyvalueiterate.h"
+//#include "Modules/generic/keyvalueiterate.h"
+#include "Modules/math/math.h"
 
 #include "Interfaces/debug/memory/memory.h"
 
