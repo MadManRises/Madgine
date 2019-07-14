@@ -16,7 +16,7 @@
 #	define FIX_LOCAL
 #endif
 
-DLL_EXPORT int main() {
+DLL_EXPORT_TAG int main() {
 	int result;
 	{
 		FIX_LOCAL Engine::Threading::WorkGroup workGroup("Launcher");

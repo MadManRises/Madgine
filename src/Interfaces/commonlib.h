@@ -2,6 +2,19 @@
 
 #include "macros.h"
 
+#ifdef _WIN32
+#ifdef __GNUC__
+#define DLL_EXPORT_TAG __attribute__((dllexport))
+#define DLL_IMPORT_TAG __attribute__((dllimport))
+#else
+#define DLL_EXPORT_TAG __declspec(dllexport)
+#define DLL_IMPORT_TAG __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT_TAG __attribute__((visibility("default")))
+#define DLL_IMPORT_TAG __attribute__((weak))
+#endif
+
 #if defined(STATIC_BUILD)
 
 #define DLL_IMPORT
@@ -9,18 +22,8 @@
 
 #else
 
-#ifdef _WIN32
-#ifdef __GNUC__
-#define DLL_EXPORT __attribute__((dllexport))
-#define DLL_IMPORT __attribute__((dllimport))
-#else
-#define DLL_EXPORT __declspec(dllexport)
-#define DLL_IMPORT __declspec(dllimport)
-#endif
-#else
-#define DLL_EXPORT __attribute__((visibility("default")))
-#define DLL_IMPORT __attribute__((weak))
-#endif
+#define DLL_IMPORT DLL_IMPORT_TAG
+#define DLL_EXPORT DLL_EXPORT_TAG
 
 #endif
 
