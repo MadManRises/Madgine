@@ -6,6 +6,8 @@
 
 #include "renderer/imguiroot.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Tools {
     ToolBase::ToolBase(ImGuiRoot &root)
