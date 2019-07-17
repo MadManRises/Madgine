@@ -69,6 +69,40 @@ constexpr Accessor member()
     return property<P, nullptr>();
 }
 
+template <auto F, typename R, typename T, typename... Args, size_t... I>
+static ValueType unpackHelper(T *t, const ArgumentList &args, std::index_sequence<I...>)
+{
+    if constexpr (std::is_same_v<R, void>) {
+        (t->*F)(args.at(I).as<std::remove_cv_t<std::remove_reference_t<Args>>>()...);
+        return {};
+    } else {
+        return (t->*F)(args.at(I).as<std::remove_cv_t<std::remove_reference_t<Args>>>()...);
+    }
+}
+
+template <auto F, typename R, typename T, typename... Args>
+static ValueType unpackApiMethod(TypedScopePtr scope, const ArgumentList &args)
+{
+    T *t = scope.safe_cast<T>();
+    return unpackHelper<F, R, T, Args...>(t, args, std::make_index_sequence<sizeof...(Args)>());
+}
+
+template <auto F, typename R, typename T, typename... Args>
+static ApiMethod wrapHelper(R (T::*f)(Args...))
+{
+    return ApiMethod {
+        &unpackApiMethod<F, R, T, Args...>,
+        sizeof...(Args),
+        false
+    };
+}
+
+template <auto F>
+static constexpr BoundApiMethod method(TypedScopePtr scope)
+{
+    return { wrapHelper<F>(F), scope };
+}
+
 }
 
 #define METATABLE_BEGIN(T) \
@@ -95,4 +129,4 @@ constexpr Accessor member()
     { #Name, ::Engine::property<&Ty::Getter, nullptr>() },
 
 #define FUNCTION(F) \
-    { #F, ::Engine::property<&::Engine::BoundApiMethod::wrap<&Ty::F>, nullptr>() },
+    { #F, ::Engine::property<&::Engine::method<&Ty::F>, nullptr>() },

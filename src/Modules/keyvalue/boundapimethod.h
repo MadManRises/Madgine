@@ -27,12 +27,6 @@ struct MODULES_EXPORT BoundApiMethod {
 
     ValueType operator()(const ArgumentList &args) const;
 
-    template <auto F>
-    static constexpr BoundApiMethod wrap(TypedScopePtr scope)
-    {
-        return { ApiMethod::wrap<F>(), scope };
-    }
-
     const TypedScopePtr &scope() const
     {
         return mScope;
