@@ -57,15 +57,15 @@ namespace Engine
 			return false;
 		}
 
-		Serialize::StreamError NetworkManager::connect(const std::string& url, int portNr, TimeOut timeout)
+		StreamError NetworkManager::connect(const std::string& url, int portNr, TimeOut timeout)
 		{
 			if (isConnected())
 			{
-				mConnectionResult.emit(Serialize::ALREADY_CONNECTED);
-				return Serialize::ALREADY_CONNECTED;
+				mConnectionResult.emit(ALREADY_CONNECTED);
+				return ALREADY_CONNECTED;
 			}
 
-			Serialize::StreamError error;
+			StreamError error;
 
 			std::tie(mSocket, error) = SocketAPI::connect(url, portNr);
 
@@ -77,7 +77,7 @@ namespace Engine
 
 			mConnectionEstablished.queue(timeout);
 
-			return Serialize::NO_ERROR;
+			return NO_ERROR;
 		}
 
 		void NetworkManager::connect_async(const std::string& url, int portNr, TimeOut timeout)
@@ -107,10 +107,10 @@ namespace Engine
 			{
 				if (mIsServer)
 				{
-					Serialize::StreamError error;
+					StreamError error;
 					SocketId sock;
 					std::tie(sock, error) = SocketAPI::accept(mSocket);
-					while (error != Serialize::TIMEOUT && (limit == -1 || count < limit))
+					while (error != TIMEOUT && (limit == -1 || count < limit))
 					{
 						if (sock != Invalid_Socket)
 						{
@@ -125,13 +125,12 @@ namespace Engine
 			return count;
 		}
 
-		Serialize::StreamError NetworkManager::acceptConnection(TimeOut timeout)
+		StreamError NetworkManager::acceptConnection(TimeOut timeout)
 		{
 			if (isConnected())
 			{
-				if (mIsServer)
-				{
-					Serialize::StreamError error;
+				if (mIsServer) {
+					StreamError error;
 					SocketId sock;
 					std::tie(sock, error) = SocketAPI::accept(mSocket, timeout);
 					if (sock != Invalid_Socket)
@@ -139,14 +138,14 @@ namespace Engine
 						Serialize::BufferedInOutStream stream{ std::make_unique<NetworkBuffer>(sock, *this, createStreamId()) };
 						if (addMasterStream(std::move(stream)))
 						{
-							return Serialize::NO_ERROR;
+							return NO_ERROR;
 						}
 						error = stream.error();
 					}
 					return error;
 				}
 			}
-			return Serialize::NO_SERVER;
+			return NO_SERVER;
 		}
 
 
@@ -160,7 +159,7 @@ namespace Engine
             return SerializeManager::moveMasterStream(streamId, target);
         }
 
-		SignalSlot::SignalStub<Serialize::StreamError>& NetworkManager::connectionResult()
+		SignalSlot::SignalStub<StreamError>& NetworkManager::connectionResult()
 		{
 			return mConnectionResult;
 		}
@@ -169,7 +168,7 @@ namespace Engine
 		{
 			bool success = setSlaveStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(mSocket, *this) }, true, timeout);
 
-			mConnectionResult.emit(success ? Serialize::NO_ERROR : Serialize::UNKNOWN_ERROR);
+			mConnectionResult.emit(success ? NO_ERROR : UNKNOWN_ERROR);
 		}
 	}
 }

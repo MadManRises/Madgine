@@ -19,7 +19,7 @@ namespace Engine
 
 		protected:
 			// Geerbt über buffered_streambuf
-			Serialize::StreamError getError() override;
+			StreamError getError() override;
 
 			int recv(char*, size_t) override;
 

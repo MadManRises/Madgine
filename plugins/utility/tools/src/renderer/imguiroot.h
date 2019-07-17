@@ -7,43 +7,47 @@
 
 #include "Modules/plugins/pluginlistener.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
-		
-		class MADGINE_TOOLS_EXPORT ImGuiRoot : 
-			  public App::GlobalAPI<ImGuiRoot>
-			, public Threading::FrameListener
+namespace Engine {
+namespace Tools {
+
+    class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPI<ImGuiRoot>, public Threading::FrameListener
 #ifndef STATIC_BUILD
-			, public Plugins::PluginListener
+        ,
+                                           public Plugins::PluginListener
 #endif
-		{
-		public:
-			ImGuiRoot(App::Application &app);
-			~ImGuiRoot();
+    {
+    public:
+        ImGuiRoot(App::Application &app);
+        ~ImGuiRoot();
 
-			bool init() override;
-			void finalize() override;
+        bool init() override;
+        void finalize() override;
 
-			bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
-			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 #ifndef STATIC_BUILD
-			bool aboutToUnloadPlugin(const Plugins::Plugin *p) override;
-			void onPluginLoad(const Plugins::Plugin *p) override;
+        bool aboutToUnloadPlugin(const Plugins::Plugin *p) override;
+        void onPluginLoad(const Plugins::Plugin *p) override;
 #endif
 
-		private:
-			void createManager();
-			void destroyManager();
+        const ToolsContainer<std::vector> &tools();
+        ToolBase &getToolComponent(size_t index, bool = true);
+        template <typename T>
+        T &getTool()
+        {
+            return static_cast<T &>(getToolComponent(component_index<T>()));
+        }
 
-		private:
-			std::unique_ptr<ImGuiManager> mManager;
+    private:
+        void createManager();
+        void destroyManager();
 
-			ToolsContainer<std::vector> mCollector;
+    private:
+        std::unique_ptr<ImGuiManager> mManager;
 
-		};
+        ToolsContainer<std::vector> mCollector;
+    };
 
-	}
+}
 }

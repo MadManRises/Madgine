@@ -20,8 +20,7 @@ namespace Engine {
 namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
-        : mCurrentRoot(nullptr)
-        , mWindow(window)
+        : mWindow(window)
         , mKeepingCursorPos(false)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
@@ -78,9 +77,9 @@ namespace UI {
 
     void UIManager::clear()
     {
-        while (!mModalWindowList.empty()) {
+        /*while (!mModalWindowList.empty()) {
             closeModalWindow(mModalWindowList.top());
-        }
+        }*/
     }
 
     void UIManager::hideCursor(bool keep)
@@ -177,47 +176,12 @@ namespace UI {
         return true;
     }
 
-    Scene::ContextMask UIManager::currentContext()
+    /*Scene::ContextMask UIManager::currentContext()
     {
         return mModalWindowList.empty()
             ? (mCurrentRoot ? mCurrentRoot->context() : Scene::ContextMask::NoContext)
             : mModalWindowList.top()->context();
-    }
-
-    void UIManager::swapCurrentRoot(GuiHandlerBase *newRoot)
-    {
-        if (mCurrentRoot)
-            mCurrentRoot->widget()->hide();
-        mCurrentRoot = newRoot;
-        newRoot->widget()->show();
-    }
-
-    void UIManager::openModalWindow(GuiHandlerBase *handler)
-    {
-        handler->widget()->showModal();
-        mModalWindowList.emplace(handler);
-    }
-
-    void UIManager::openWindow(GuiHandlerBase *handler)
-    {
-        handler->widget()->show();
-    }
-
-    void UIManager::closeModalWindow(GuiHandlerBase *handler)
-    {
-        assert(mModalWindowList.size() > 0 && mModalWindowList.top() == handler);
-        handler->widget()->hideModal();
-        mModalWindowList.pop();
-        if (mModalWindowList.size() > 0)
-            mModalWindowList.top()->widget()->activate();
-        else if (mCurrentRoot)
-            mCurrentRoot->widget()->activate();
-    }
-
-    void UIManager::closeWindow(GuiHandlerBase *handler)
-    {
-        handler->widget()->hide();
-    }
+    }*/
 
     GUI::TopLevelWindow &UIManager::window(bool init) const
     {

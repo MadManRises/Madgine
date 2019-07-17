@@ -162,7 +162,7 @@ namespace Tools {
         ImGui::End();
     }
 
-    const char *PluginManager::key()
+    const char *PluginManager::key() const
     {
         return "Plugin Manager";
     }

@@ -5,7 +5,7 @@
 
 namespace Engine {
 
-    ScopeIterator MetaTable::find(const std::string &key, ScopeBase *scope) const
+    ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
     {
         for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
             if (key == p->first) {
@@ -15,7 +15,7 @@ namespace Engine {
         return { scope, nullptr };
     }
 
-    std::optional<ValueType> MetaTable::get(const std::string &key, ScopeBase *scope) const
+    std::optional<ValueType> MetaTable::get(const std::string &key, TypedScopePtr scope) const
     {
         ScopeIterator it = find(key, scope);
         if (it != ScopeIterator{ scope, nullptr })

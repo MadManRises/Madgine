@@ -22,16 +22,10 @@ namespace UI {
         void showCursor();
         bool isCursorVisible() const;
 
-        void swapCurrentRoot(GuiHandlerBase *newRoot);
-        void openModalWindow(GuiHandlerBase *handler);
-        void closeModalWindow(GuiHandlerBase *handler);
-        void openWindow(GuiHandlerBase *handler);
-        void closeWindow(GuiHandlerBase *handler);
-
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
         bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
-        Scene::ContextMask currentContext();
+        //Scene::ContextMask currentContext();
 
         GUI::TopLevelWindow &window(bool = true) const;
 
@@ -80,10 +74,6 @@ namespace UI {
 			
 		GuiHandlerContainer<std::vector> mGuiHandlers;
         GameHandlerContainer<std::vector> mGameHandlers;
-
-        GuiHandlerBase *mCurrentRoot;
-
-        std::stack<GuiHandlerBase *> mModalWindowList;
 
     private:
         Vector2 mKeptCursorPosition;

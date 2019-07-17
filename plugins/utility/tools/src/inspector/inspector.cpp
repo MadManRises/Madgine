@@ -25,6 +25,8 @@
 
 #include "Modules/keyvalue/scopeiterator.h"
 
+#include "functiontool.h"
+
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
 namespace Engine {
@@ -98,7 +100,7 @@ namespace Tools {
         std::string id = (showName ? std::string() : "##"s) + (*it).first;
         bool editable = /*(it.flags() & Engine::IsEditable) == Engine::IsEditable*/ true;
 
-		drawValue(element, parent, id, (*it).second, editable);
+        drawValue(element, parent, id, (*it).second, editable);
     }
 
     void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType value, bool editable)
@@ -106,69 +108,38 @@ namespace Tools {
         if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
             ImGui::PushDisabled();
 
-        bool modified = value.visit(
-            overloaded{
-                [&](TypedScopePtr scope) {
-                    if (ImGui::TreeNodeEx(id.c_str())) {
-                        draw(scope, element ? element->Attribute("layout") : nullptr);
-                        ImGui::TreePop();
-                    }
-                    return false;
-                },
-                [&](bool &tmp) {
-                    return ImGui::Checkbox(id.c_str(), &tmp);
-                },
-                [&](std::string &tmp) {
-                    char buf[255];
-#if WINDOWS
-                    strcpy_s(buf, sizeof(buf), tmp.c_str());
-#else
-                    strcpy(buf, tmp.c_str());
-#endif
+        bool modified = ImGui::ValueType(&value, overloaded { [&](TypedScopePtr scope) {
 
-                    if (ImGui::InputText(id.c_str(), buf, sizeof(buf))) {
-                        tmp = buf;
-                        return true;
-                    }
-                    return false;
-                },
-                [&](int &tmp) {
-                    return ImGui::DragInt(id.c_str(), &tmp);
-                },
-                [&](size_t &tmp) {
-                    return ImGui::DragScalar(id.c_str(), ImGuiDataType_U32, &tmp, 1.0f);
-                },
-                [&](float &tmp) {
-                    return ImGui::DragFloat(id.c_str(), &tmp, 0.15f);
-                },
-                [&](Matrix3 &tmp) {
-                    return ImGui::DragFloat3((id + "_1").c_str(), tmp[0], 0.15f) || ImGui::DragFloat3((id + "_2").c_str(), tmp[1], 0.15f) || ImGui::DragFloat3((id + "_3").c_str(), tmp[2], 0.15f);
-                },
-                [&](Vector2 &tmp) {
-                    return ImGui::DragFloat2(id.c_str(), tmp.ptr(), 0.15f);
-                },
-                [&](Vector3 &tmp) {
-                    return ImGui::DragFloat3(id.c_str(), tmp.ptr(), 0.15f);
-                },
-                [&](Vector4 &tmp) {
-                    return ImGui::DragFloat4(id.c_str(), tmp.ptr(), 0.15f);
-                },
-				[&](KeyValueVirtualIterator& it) {
-                    if (ImGui::TreeNodeEx(id.c_str())) {
-                        for (; it != VirtualIteratorEnd {}; ++it) {
-                            drawValue(element, parent, (*it).first.toString(), (*it).second, false);
-                        }
-                        //draw(scope, element ? element->Attribute("layout") : nullptr);
-                        ImGui::TreePop();
-                    }
-                    return false;
-				},
-                [&](auto) {
-                    ImGui::Text("%s", id.c_str());
-                    ImGui::SameLine();
-                    ImGui::Text("%s", ("Unsupported ValueType: "s + value.getTypeString()).c_str());
-                    return false;
-                } });
+                                                                 bool b = ImGui::TreeNodeEx(id.c_str());
+                                                                 ImGui::DraggableValueTypeSource(id, parent, value);
+                                                                 if (b) {
+                                                                     draw(scope, element ? element->Attribute("layout") : nullptr);
+                                                                     ImGui::TreePop();
+                                                                 }
+                                                                 return false;
+                                                             },
+                                                     [&](KeyValueVirtualIterator &it) {
+
+                                                         bool b = ImGui::TreeNodeEx(id.c_str());
+                                                         ImGui::DraggableValueTypeSource(id, parent, value);
+                                                         if (b) {
+                                                             for (; it != VirtualIteratorEnd {}; ++it) {
+                                                                 drawValue(element, parent, (*it).first.toString(), (*it).second, false);
+                                                             }
+                                                             //draw(scope, element ? element->Attribute("layout") : nullptr);
+                                                             ImGui::TreePop();
+                                                         }
+                                                         return false;
+                                                     },
+                                                     [&](BoundApiMethod &method) {
+                                                         std::string extended = "-> " + id;
+                                                         if (ImGui::Button(extended.c_str())) {
+                                                             getTool<FunctionTool>().setCurrentFunction(id, method);
+                                                         }
+                                                         ImGui::DraggableValueTypeSource(id, parent, value);
+                                                         return false;
+                                                     } },
+            id.c_str());
 
         if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
             ImGui::PopDisabled();
@@ -308,7 +279,7 @@ namespace Tools {
         return nullptr;
     }
 
-    const char *Inspector::key()
+    const char *Inspector::key() const
     {
         return "Inspector";
     }

@@ -57,7 +57,7 @@ namespace Engine {
 			ToolBase::update();
 		}
 
-		const char * Metrics::key()
+		const char * Metrics::key() const
 		{
 			return "Metrics";
 		}

@@ -14,28 +14,28 @@ namespace Engine
 		{
 			switch(getError())
 			{
-			case Serialize::NO_ERROR:
+			case NO_ERROR:
 				return "No Error";
 				break;
-			case Serialize::WOULD_BLOCK: 
+			case WOULD_BLOCK: 
 				return "Request would block an operation marked as non-blocking";
 				break;
-			case Serialize::ALREADY_CONNECTED: 
+			case ALREADY_CONNECTED: 
 				return "The manager is already connected";
 				break;
-			case Serialize::TIMEOUT: 
+			case TIMEOUT: 
 				return "Timeout";
 				break;
-			case Serialize::NO_SERVER: 
+			case NO_SERVER: 
 				return "The manager is not a server";
 				break;
-			case Serialize::NO_CONNECTION: 
+			case NO_CONNECTION: 
 				return "Accepting the connection failed";
 				break;
-			case Serialize::CONNECTION_REFUSED: 
+			case CONNECTION_REFUSED: 
 				return "The connection was refused by the host";
 				break;
-			case Serialize::UNKNOWN_ERROR: 
+			case UNKNOWN_ERROR: 
 				return "Unknown Error (possibly native error code: "s + std::to_string(getAPIError()) + ")";
 				break;
 			default: 

@@ -30,7 +30,7 @@ namespace Engine
 
 			if (isOpen()) return;
 
-			switch (mType)
+			/*switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
 				mUI.openModalWindow(this);
@@ -41,12 +41,12 @@ namespace Engine
 			case WindowType::ROOT_WINDOW:
 				mUI.swapCurrentRoot(this);
 				break;
-			}
+			}*/
 		}
 
 		void GuiHandlerBase::close()
 		{
-			switch (mType)
+			/*switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
 				mUI.closeModalWindow(this);
@@ -56,7 +56,7 @@ namespace Engine
 				break;
 			case WindowType::ROOT_WINDOW:
 				throw 0;
-			}
+			}*/
 		}
 
 		bool GuiHandlerBase::isOpen() const

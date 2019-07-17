@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../../input/inputcollector.h"
 #include "../../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
-#include "../../input/inputcollector.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
 #include "Modules/generic/transformIt.h"
@@ -11,21 +11,24 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-namespace Engine
-{
-	namespace GUI
-	{
-		
-		class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener		
-		{
+namespace Engine {
+namespace GUI {
 
-		public:
-			TopLevelWindow(GUISystem &gui);
-			virtual ~TopLevelWindow();
+    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener {
 
-			void close();
+    public:
+        TopLevelWindow(GUISystem &gui);
+        virtual ~TopLevelWindow();
 
-			/*void showCursor();
+        void close();
+
+        void swapCurrentRoot(Widget *newRoot);
+        void openModalWidget(Widget *widget);
+        void closeModalWidget(Widget *widget);
+        void openWidget(Widget *widget);
+        void closeWidget(Widget *widget);
+
+        /*void showCursor();
 			void hideCursor();
 
 			virtual bool isCursorVisible();
@@ -33,107 +36,109 @@ namespace Engine
 			virtual void setCursorPosition(const Vector2& pos);
 			virtual Vector2 getCursorPosition();*/
 
-			Widget* getWidget(const std::string& name);
+		bool isHovered(Widget *w);
+		Widget *hoveredWidget();
 
-			void registerWidget(Widget* w);
+        Widget *getWidget(const std::string &name);
 
-			void unregisterWidget(Widget *w);
+        void registerWidget(Widget *w);
 
-			Vector3 getScreenSize();
-			std::pair<Vector3, Vector3> getAvailableScreenSpace();
+        void unregisterWidget(Widget *w);
 
-			Matrix3 getSize();
+        Vector3 getScreenSize();
+        std::pair<Vector3, Vector3> getAvailableScreenSpace();
 
-			Widget *createTopLevelWidget(const std::string &name);
-			Bar *createTopLevelBar(const std::string &name);
-			Button *createTopLevelButton(const std::string &name);
-			Checkbox *createTopLevelCheckbox(const std::string &name);
-			Combobox *createTopLevelCombobox(const std::string &name);
-			Image *createTopLevelImage(const std::string &name);
-			Label *createTopLevelLabel(const std::string &name);
-			SceneWindow *createTopLevelSceneWindow(const std::string &name);
-			TabWidget *createTopLevelTabWidget(const std::string &name);
-			Textbox *createTopLevelTextbox(const std::string &name);
-			
+        Matrix3 getSize();
 
-			void destroyTopLevel(Widget* w);
+        Widget *createTopLevelWidget(const std::string &name);
+        Bar *createTopLevelBar(const std::string &name);
+        Button *createTopLevelButton(const std::string &name);
+        Checkbox *createTopLevelCheckbox(const std::string &name);
+        Combobox *createTopLevelCombobox(const std::string &name);
+        Image *createTopLevelImage(const std::string &name);
+        Label *createTopLevelLabel(const std::string &name);
+        SceneWindow *createTopLevelSceneWindow(const std::string &name);
+        TabWidget *createTopLevelTabWidget(const std::string &name);
+        Textbox *createTopLevelTextbox(const std::string &name);
 
-			void clear();
+        void destroyTopLevel(Widget *w);
 
-			GUISystem &gui();
+        void clear();
 
-			//KeyValueMapList maps() override;
+        GUISystem &gui();
 
-			Input::InputHandler *input();
+        //KeyValueMapList maps() override;
 
-			void addOverlay(WindowOverlay *overlay);
+        Input::InputHandler *input();
 
-			bool injectKeyPress(const Input::KeyEventArgs& arg) override;
-			bool injectKeyRelease(const Input::KeyEventArgs& arg) override;
-			bool injectPointerPress(const Input::PointerEventArgs& arg) override;
-			bool injectPointerRelease(const Input::PointerEventArgs& arg) override;
-			bool injectPointerMove(const Input::PointerEventArgs& arg) override;
+        void addOverlay(WindowOverlay *overlay);
 
-			void renderOverlays();
+        bool injectKeyPress(const Input::KeyEventArgs &arg) override;
+        bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
+        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
+        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
+        bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
-			Window::Window *window();
+        void renderOverlays();
 
-			decltype(auto) widgets()
-			{
-				return uniquePtrToPtr(mTopLevelWidgets);
-			}
+        Window::Window *window();
 
-			Render::RenderWindow *getRenderer();
+        decltype(auto) widgets()
+        {
+            return uniquePtrToPtr(mTopLevelWidgets);
+        }
 
-			//virtual App::Application &app(bool = true) override;
-			//virtual const Core::MadgineObject *parent() const override;
+        Render::RenderWindow *getRenderer();
 
-			UI::UIManager &ui();
+        //virtual App::Application &app(bool = true) override;
+        //virtual const Core::MadgineObject *parent() const override;
 
-		protected:			
-			void onClose() override;
-			void onRepaint() override;
-			void onResize(size_t width, size_t height) override;
+        UI::UIManager &ui();
 
-			void calculateWindowGeometries();
+    protected:
+        void onClose() override;
+        void onRepaint() override;
+        void onResize(size_t width, size_t height) override;
 
-			Widget *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
-			Widget *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
+        void calculateWindowGeometries();
 
+        Widget *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
+        Widget *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
 
-			std::unique_ptr<Widget> createWidgetClass(const std::string& name, Class _class);
+        std::unique_ptr<Widget> createWidgetClass(const std::string &name, Class _class);
 
-			virtual std::unique_ptr<Widget> createWidget(const std::string &name);
-			virtual std::unique_ptr<Bar> createBar(const std::string& name);
-			virtual std::unique_ptr<Button> createButton(const std::string& name);
-			virtual std::unique_ptr<Checkbox> createCheckbox(const std::string& name);
-			virtual std::unique_ptr<Combobox> createCombobox(const std::string& name);
-			virtual std::unique_ptr<Image> createImage(const std::string& name);
-			virtual std::unique_ptr<Label> createLabel(const std::string& name);
-			virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string& name);
-			virtual std::unique_ptr<TabWidget> createTabWidget(const std::string& name);
-			virtual std::unique_ptr<Textbox> createTextbox(const std::string& name);
+        virtual std::unique_ptr<Widget> createWidget(const std::string &name);
+        virtual std::unique_ptr<Bar> createBar(const std::string &name);
+        virtual std::unique_ptr<Button> createButton(const std::string &name);
+        virtual std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
+        virtual std::unique_ptr<Combobox> createCombobox(const std::string &name);
+        virtual std::unique_ptr<Image> createImage(const std::string &name);
+        virtual std::unique_ptr<Label> createLabel(const std::string &name);
+        virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
+        virtual std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
+        virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
-		private:
+    private:
+        std::map<std::string, Widget *> mWidgets;
+        std::unique_ptr<UI::UIManager> mUI;
 
+        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
+        GUISystem &mGui;
 
-			std::map<std::string, Widget *> mWidgets;
-			std::unique_ptr<UI::UIManager> mUI;
+        Input::InputHandler *mExternalInput = nullptr;
+        std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
-			std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
-			GUISystem &mGui;
+        std::vector<WindowOverlay *> mOverlays;
 
-			Input::InputHandler *mExternalInput = nullptr;
-			std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
+        Window::Window *mWindow = nullptr;
+        std::unique_ptr<Render::RenderWindow> mRenderWindow;
 
-			std::vector<WindowOverlay*> mOverlays;
+        Widget *mHoveredWidget = nullptr;
 
-			Window::Window *mWindow = nullptr;
-			std::unique_ptr<Render::RenderWindow> mRenderWindow;			
+		Widget *mCurrentRoot = nullptr;
 
-			Widget *mHoveredWidget = nullptr;
-		};
+        std::stack<Widget *> mModalWidgetList;
+    };
 
-	}
 }
-
+}

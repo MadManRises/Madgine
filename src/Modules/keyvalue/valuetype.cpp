@@ -43,6 +43,10 @@ std::string ValueType::toString() const
         return "["s + std::to_string(std::get<Vector4>(mUnion)[0]) + ", " + std::to_string(std::get<Vector4>(mUnion)[1]) + ", " + std::to_string(std::get<Vector4>(mUnion)[2]) + ", " + std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
     case Type::QuaternionValue:
         return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
+    case Type::ApiMethodValue:
+        return "<method>";
+    case Type::BoundApiMethodValue:
+        return "<boundmethod>";
     default:
         throw Scripting::ScriptingException("Unknown Type!");
     }
@@ -86,7 +90,11 @@ std::string ValueType::getTypeString(Type type)
         return "Method";
     case Type::KeyValueVirtualIteratorValue:
         return "Iterator";
-    default:
+    case Type::BoundApiMethodValue:
+        return "Bound Method";
+    case Type::LuaTableValue:
+        return "Lua Table";
+	default:
         throw 0;
     }
 }
@@ -121,7 +129,7 @@ ValueType ValueType::fromStack(lua_State *state, int index)
             assert(scope);
             const MetaTable *type = static_cast<const MetaTable *>(lua_touserdata(state, -1));
             assert(type);
-            result = TypedScopePtr{scope, type};
+            result = TypedScopePtr { scope, type };
 
             lua_pop(state, 2);
 
@@ -146,7 +154,6 @@ ValueType ValueType::fromStack(lua_State *state, int index)
         throw 0;
     }
 }
-
 
 Scripting::APIHelper::Userdata *pushUserdata(lua_State *state, const Scripting::APIHelper::Userdata &data)
 {
@@ -199,7 +206,6 @@ int ValueType::push(lua_State *state) const
     }
 }
 
-
 int ValueType::apiMethodCaller(lua_State *state)
 {
     int n = lua_gettop(state);
@@ -212,7 +218,7 @@ int ValueType::apiMethodCaller(lua_State *state)
     if (!v.is<TypedScopePtr>())
         luaL_error(state, "First argument has to be a Scope-type!");
     TypedScopePtr scope = v.as<TypedScopePtr>();
-    return (*method)(scope.mScope, args).push(state);
+    return method(scope, args).push(state);
 }
 }
 

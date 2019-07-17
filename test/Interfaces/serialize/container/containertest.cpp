@@ -29,8 +29,8 @@ struct TestBuf : Engine::Serialize::buffered_streambuf
 
 	}
 
-	virtual Engine::Serialize::StreamError getError() {
-		return Engine::Serialize::WOULD_BLOCK;
+	virtual Engine::StreamError getError() {
+		return Engine::WOULD_BLOCK;
 	}
 
 	virtual int recv(char* buffer, size_t count)

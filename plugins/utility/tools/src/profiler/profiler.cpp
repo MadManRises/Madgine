@@ -74,7 +74,7 @@ namespace Engine {
 			ImGui::End();
 		}
 
-		const char * Profiler::key()
+		const char * Profiler::key() const
 		{
 			return "Profiler";
 		}

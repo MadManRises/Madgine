@@ -63,11 +63,19 @@ namespace Tools {
         createManager();
 #endif
 
+		for (const std::unique_ptr<ToolBase> &tool : mCollector) {
+            tool->callInit();
+        }
+
         return true;
     }
 
     void ImGuiRoot::finalize()
     {
+        for (const std::unique_ptr<ToolBase> &tool : mCollector) {
+            tool->callFinalize();
+        }
+
 #ifndef STATIC_BUILD
         Plugins::PluginManager::getSingleton()["Renderer"].removeListener(this);
 #else
@@ -105,6 +113,9 @@ namespace Tools {
                 }
                 ImGui::EndMenu();
             }
+            for (const std::unique_ptr<ToolBase> &tool : mCollector) {
+                tool->renderMenu();
+            }
             ImGui::EndMainMenuBar();
         }
 
@@ -134,6 +145,7 @@ namespace Tools {
     {
         createManager();
     }
+
 #endif
 
     void ImGuiRoot::createManager()
@@ -156,10 +168,27 @@ namespace Tools {
         mManager.reset();
     }
 
+	const ToolsContainer<std::vector> &ImGuiRoot::tools()
+    {
+        return mCollector;
+    }
+
+    ToolBase &ImGuiRoot::getToolComponent(size_t index, bool init)
+    {
+        ToolBase &tool = mCollector.get(index);
+        if (init) {
+            checkInitState();
+            tool.callInit();
+        }
+        return tool.getSelf(init);
+    }
+
+
 }
 }
 
 METATABLE_BEGIN(Engine::Tools::ImGuiRoot)
+READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImGuiRoot)
 
 RegisterType(Engine::Tools::ImGuiRoot);

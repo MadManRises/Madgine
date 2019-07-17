@@ -18,7 +18,7 @@ namespace Engine
 			virtual void render() override;
 			virtual void update() override;
 
-			const char* key() override;
+			const char* key() const override;
 
 		private:
 			Debug::History<float, 120> mFramesPerSecond;

@@ -385,16 +385,26 @@ namespace GUI {
         return mPointerLeaveSignal;
     }
 
-    bool Widget::containsPoint(const Vector2 &point, const Vector3 &screenSize) const
+    bool Widget::containsPoint(const Vector2 &point, const Vector3 &screenSize, float extend) const
     {
-        Vector3 min = mAbsolutePos * screenSize;
-        Vector3 max = mAbsoluteSize * screenSize + min;
+        Vector3 min = mAbsolutePos * screenSize - extend;
+        Vector3 max = mAbsoluteSize * screenSize + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
     std::vector<Vertex> Widget::vertices(const Vector3 &screenSize)
     {
         return {};
+    }
+
+    void *Widget::userData()
+    {
+        return mUserData;
+    }
+
+    void Widget::setUserData(void *userData)
+    {
+        mUserData = userData;
     }
 
     std::unique_ptr<Widget> Widget::createWidgetClass(const std::string &name, Class _class)
@@ -470,6 +480,7 @@ namespace GUI {
 
 METATABLE_BEGIN(Engine::GUI::Widget)
 READONLY_PROPERTY(Widgets, children)
+READONLY_PROPERTY(Size, getSize)
 METATABLE_END(Engine::GUI::Widget)
 
 RegisterType(Engine::GUI::Widget);

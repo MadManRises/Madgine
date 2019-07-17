@@ -1,12 +1,12 @@
 #pragma once
 
-#include "metatable.h"
 #include "../generic/callable_traits.h"
-#include "container_traits.h"
 #include "../generic/tupleunpacker.h"
-#include "valuetype.h"
-#include "accessor.h"
 #include "Interfaces/macros.h"
+#include "accessor.h"
+#include "container_traits.h"
+#include "metatable.h"
+#include "valuetype.h"
 
 namespace Engine {
 
@@ -25,21 +25,26 @@ constexpr Accessor property()
     using Scope = typename getter_traits::class_type;
     using T = typename getter_traits::return_type;
 
-    void (*setter)(ScopeBase *, ValueType) = nullptr;
+    void (*setter)(TypedScopePtr, ValueType) = nullptr;
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
 
         static_assert(std::is_same_v<setter_traits::argument_types, std::tuple<T>>);
 
-        setter = [](ScopeBase *scope, ValueType v) {
-            TupleUnpacker::invoke(Setter, static_cast<Scope *>(scope), v.as<T>());
+        setter = [](TypedScopePtr scope, ValueType v) {
+            TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<T>());
         };
     }
 
     return {
-        [](ScopeBase *scope) {
-            T value = TupleUnpacker::invoke(Getter, static_cast<Scope *>(scope));
+        [](TypedScopePtr scope) {
+            T value = [=]() -> T {
+                if constexpr (std::is_same_v<Scope, void>)
+                    return TupleUnpacker::invoke(Getter, scope);
+                else
+                    return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
+            }();
 
             if constexpr (ValueType::isValueType<T>::value) {
                 return ValueType { std::forward<T>(value) };
@@ -73,18 +78,21 @@ constexpr Accessor member()
             using Ty = T;  \
             constexpr const std::pair<const char *, ::Engine::Accessor> members[] = {
 
-#define METATABLE_END(T)                                          \
-    {                                                             \
-        nullptr, { nullptr, nullptr }                             \
-    }                                                             \
-    }                                                             \
-    ;                                                             \
-    }                                                             \
-    }                                                             \
-	DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG2({ #T, Meta_##T::members }), T); 
+#define METATABLE_END(T)              \
+    {                                 \
+        nullptr, { nullptr, nullptr } \
+    }                                 \
+    }                                 \
+    ;                                 \
+    }                                 \
+    }                                 \
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG2({ #T, Meta_##T::members }), T);
 
 #define MEMBER(M) \
     { #M, ::Engine::member<&Ty::M>() },
 
 #define READONLY_PROPERTY(Name, Getter) \
     { #Name, ::Engine::property<&Ty::Getter, nullptr>() },
+
+#define FUNCTION(F) \
+    { #F, ::Engine::property<&::Engine::BoundApiMethod::wrap<&Ty::F>, nullptr>() },

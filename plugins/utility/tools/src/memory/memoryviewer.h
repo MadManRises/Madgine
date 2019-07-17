@@ -47,7 +47,7 @@ namespace Engine
 
 			virtual void render() override;
 
-			const char* key() override;
+			const char* key() const override;
 
 		private:
 			void traceDraw(const std::pmr::vector<Engine::Debug::TraceBack> &data, size_t size, int depth);
@@ -71,7 +71,5 @@ namespace Engine
 
 	}
 }
-
-RegisterType(Engine::Tools::MemoryViewer);
 
 #endif

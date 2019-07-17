@@ -12,7 +12,7 @@ namespace Engine {
 
 			virtual void render() override;
 
-			const char* key() override;
+			const char* key() const override;
 
 			
 

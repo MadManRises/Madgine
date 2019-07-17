@@ -19,7 +19,12 @@
 
 #include "Interfaces/debug/memory/untrackedmemoryresource.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
+
 UNIQUECOMPONENT(Engine::Tools::MemoryViewer);
+
+
 
 namespace Engine
 {
@@ -459,11 +464,18 @@ namespace Engine
 			}
 			ImGui::End();
 		}
-		const char * MemoryViewer::key()
+
+		const char * MemoryViewer::key() const
 		{
 			return "Memory Viewer";
 		}
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Tools::MemoryViewer)
+METATABLE_END(Engine::Tools::MemoryViewer)
+
+RegisterType(Engine::Tools::MemoryViewer);
 
 #endif

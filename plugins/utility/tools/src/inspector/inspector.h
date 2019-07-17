@@ -22,7 +22,7 @@ namespace Tools {
 
         InspectorLayout *getLayout(const std::string &name);
 
-        const char *key() override;
+        const char *key() const override;
 
     private:
         void draw(TypedScopePtr scope, const char *layoutName);

@@ -1,0 +1,51 @@
+#pragma once
+
+#include "apimethod.h"
+#include "typedscopeptr.h"
+
+namespace Engine {
+
+struct MODULES_EXPORT BoundApiMethod {
+
+    BoundApiMethod() = default;
+
+    constexpr BoundApiMethod(ApiMethod m, TypedScopePtr s)
+        : mMethod(m)
+        , mScope(s)
+    {
+    }
+
+    bool operator==(const BoundApiMethod &other) const
+    {
+        return mMethod == other.mMethod && mScope == other.mScope;
+    }
+
+    size_t arguments_count() const
+    {
+        return mMethod.arguments_count();
+    }
+
+    ValueType operator()(const ArgumentList &args) const;
+
+    template <auto F>
+    static constexpr BoundApiMethod wrap(TypedScopePtr scope)
+    {
+        return { ApiMethod::wrap<F>(), scope };
+    }
+
+    const TypedScopePtr &scope() const
+    {
+        return mScope;
+    }
+
+    const ApiMethod &method() const
+    {
+        return mMethod;
+	}
+
+private:
+    ApiMethod mMethod;
+    TypedScopePtr mScope;
+};
+
+}

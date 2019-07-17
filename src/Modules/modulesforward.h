@@ -13,6 +13,7 @@ struct ScopeBase;
 struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
+struct TypedScopePtr;
 
 struct IndexHolder;
 
@@ -29,7 +30,7 @@ using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueType>>
 
 using ArgumentList = std::vector<ValueType>;
 
-typedef ValueType (*ApiMethod)(ScopeBase *, const ArgumentList &);
+struct ApiMethod;
 
 
 namespace Debug {

@@ -1,39 +1,34 @@
 #pragma once
 
-namespace Engine
-{
-	namespace Math
-	{
-		class MODULES_EXPORT Bounds
-		{
-		public:
-			Bounds(float left = 0.f, float bottom = 0.f, float right = 0.f, float top = 0.f);
-			Bounds(const Vector3& min, const Vector3& max);
+namespace Engine {
+namespace Math {
+    class MODULES_EXPORT Bounds {
+    public:
+        Bounds(float left = 0.f, float bottom = 0.f, float right = 0.f, float top = 0.f);
 
-			float left() const;
+        float left() const;
+        float top() const;
+        float right() const;
+        float bottom() const;
 
-			float top() const;
+        float width() const;
+        float height() const;
 
-			float right() const;
+        Vector2 size() const;
 
-			float bottom() const;
+        Vector2 bottomLeft() const;
+        Vector2 topLeft() const;
+        Vector2 bottomRight() const;
+        Vector2 topRight() const;
 
-			float width() const;
+        std::array<Vector2, 4> corners() const;
 
-			float height() const;
+        Vector2 operator*(const Vector2 &v) const;
 
-			Vector2 size() const;
+        bool isNull() const;
 
-			Vector2 bottomLeft() const;
-
-			std::array<Vector2, 4> corners() const;
-
-			Vector2 operator *(const Vector2& v) const;
-
-			bool isNull() const;
-
-		private:
-			float mLeft, mBottom, mRight, mTop;
-		};
-	} // namespace Math
+    private:
+        float mLeft, mBottom, mRight, mTop;
+    };
+} // namespace Math
 } // namespace Core

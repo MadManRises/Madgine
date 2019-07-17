@@ -20,13 +20,13 @@ namespace Engine
 			void operator=(const NetworkManager&) = delete;
 
 			bool startServer(int port);
-			Serialize::StreamError connect(const std::string& url, int portNr, TimeOut timeout = {});
+			StreamError connect(const std::string& url, int portNr, TimeOut timeout = {});
 			void connect_async(const std::string& url, int portNr, TimeOut timeout = {});
 
 			void close();
 
 
-			Serialize::StreamError acceptConnection(TimeOut timeout);
+			StreamError acceptConnection(TimeOut timeout);
 			int acceptConnections(int limit = -1);
 
 
@@ -36,7 +36,7 @@ namespace Engine
 			 bool moveMasterStream(Serialize::ParticipantId streamId,
                                               NetworkManager *target);
 
-			SignalSlot::SignalStub<Serialize::StreamError> &connectionResult();
+			SignalSlot::SignalStub<StreamError> &connectionResult();
 
 		protected:
 
@@ -54,7 +54,7 @@ namespace Engine
 
 			static int sManagerCount;
 
-			SignalSlot::Signal<Serialize::StreamError> mConnectionResult;
+			SignalSlot::Signal<StreamError> mConnectionResult;
                         Threading::Slot<&NetworkManager::onConnectionEstablished>
 			mConnectionEstablished;
 		};

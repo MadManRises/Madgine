@@ -582,6 +582,22 @@ namespace GUI {
         return mGui;
     }
 
+    bool TopLevelWindow::isHovered(Widget *w)
+    {
+        Widget *hovered = mHoveredWidget;
+        while (hovered) {
+            if (hovered == w)
+                return true;
+            hovered = hovered->getParent();
+        }
+        return false;
+    }
+
+    Widget *TopLevelWindow::hoveredWidget()
+    {
+        return mHoveredWidget;
+    }
+
     Widget *TopLevelWindow::getWidget(const std::string &name)
     {
         return mWidgets.at(name);
@@ -601,6 +617,41 @@ namespace GUI {
             size_t result = mWidgets.erase(w->getName());
             assert(result == 1);
         }
+    }
+
+    void TopLevelWindow::swapCurrentRoot(Widget *newRoot)
+    {
+        if (mCurrentRoot)
+            mCurrentRoot->hide();
+        mCurrentRoot = newRoot;
+        newRoot->show();
+    }
+
+    void TopLevelWindow::openModalWidget(Widget *widget)
+    {
+        widget->showModal();
+        mModalWidgetList.emplace(widget);
+    }
+
+    void TopLevelWindow::openWidget(Widget *widget)
+    {
+        widget->show();
+    }
+
+    void TopLevelWindow::closeModalWidget(Widget *widget)
+    {
+        assert(mModalWidgetList.size() > 0 && mModalWidgetList.top() == widget);
+        widget->hideModal();
+        mModalWidgetList.pop();
+        if (mModalWidgetList.size() > 0)
+            mModalWidgetList.top()->activate();
+        else if (mCurrentRoot)
+            mCurrentRoot->activate();
+    }
+
+    void TopLevelWindow::closeWidget(Widget *widget)
+    {
+        widget->hide();
     }
 
 }

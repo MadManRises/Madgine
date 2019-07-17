@@ -7,7 +7,7 @@ namespace Engine {
 
 struct ScopeIterator {
 
-    ScopeIterator(ScopeBase *scope, const std::pair<const char *, Accessor> *pointer)
+    ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
         : mScope(scope)
         , mPointer(pointer)
     {
@@ -41,7 +41,7 @@ struct ScopeIterator {
     }
 
 private:
-    ScopeBase *mScope;
+    TypedScopePtr mScope;
     const std::pair<const char *, Accessor> *mPointer;
 };
 

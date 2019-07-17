@@ -9,6 +9,7 @@
 #include "../math/vector3.h"
 #include "../math/vector4.h"
 
+#include "boundapimethod.h"
 #include "invscopeptr.h"
 
 #include "valuetypeexception.h"
@@ -23,7 +24,7 @@
 namespace Engine {
 
 struct MODULES_EXPORT ValueType {
-private:
+
     using Union = std::variant<
         std::monostate,
         std::string,
@@ -39,9 +40,11 @@ private:
         Vector3,
         Vector2,
         KeyValueVirtualIterator,
-        ApiMethod,
+        BoundApiMethod,
+		ApiMethod,
         Scripting::LuaTable>;
 
+private:
     template <class T>
     struct _isValueType {
         const constexpr static bool value = variant_contains<Union, T>::value;
@@ -63,6 +66,7 @@ public:
         Vector3Value,
         Vector2Value,
         KeyValueVirtualIteratorValue,
+        BoundApiMethodValue,
         ApiMethodValue,
         LuaTableValue,
 
@@ -111,7 +115,7 @@ public:
     {
     }
 
-	template <class T, class _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
+    template <class T, class _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
     explicit ValueType(T &val)
         : ValueType(TypedScopePtr(&val))
     {
@@ -328,46 +332,64 @@ public:
     static std::string getTypeString(Type type);
 
     template <typename V>
-    decltype(auto) visit(V &&visitor) const
+    decltype(auto) visit(V &&visitor) const &
     {
         return std::visit(std::forward<V>(visitor), mUnion);
     }
 
     template <typename V>
-    decltype(auto) visit(V &&visitor)
+    decltype(auto) visit(V &&visitor) &
     {
         return std::visit(std::forward<V>(visitor), mUnion);
     }
 
+	template <typename V>
+    decltype(auto) visit(V &&visitor) const &&
+    {
+        return std::visit(std::forward<V>(visitor), std::move(mUnion));
+    }
+
+    template <typename V>
+    decltype(auto) visit(V &&visitor) &&
+    {
+        return std::visit(std::forward<V>(visitor), std::move(mUnion));
+    }
+
 public:
     template <class T>
-    std::enable_if_t<_isValueType<T>::value, bool> is() const
+    bool is() const
     {
-        return std::holds_alternative<T>(mUnion);
-    }
-
-    template <class T>
-    std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, bool> is() const
-    {
-        return is<int>();
-    }
-
-    template <class T>
-    std::enable_if_t<_isValueType<T>::value, const T &> as() const
-    {
-        try {
-            return std::get<T>(mUnion);
-        } catch (const std::bad_variant_access &) {
-            throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
-                getTypeString(
-                    static_cast<Type>(variant_index<Union, T>::value))));
+        if constexpr (_isValueType<T>::value) {            
+            return std::holds_alternative<T>(mUnion);
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
+        } else if constexpr (std::is_same_v<T, ValueType>) {
+            return true;
+        } else if constexpr (std::is_enum_v<T>) {
+            return std::holds_alternative<int>(mUnion);
+        } else {
+            static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
         }
     }
 
     template <class T>
-    std::enable_if_t<std::is_same<T, ValueType>::value, const ValueType &> as() const
+    decltype(auto) as() const
     {
-        return *this;
+        if constexpr (_isValueType<T>::value) {
+            try {
+                return std::get<T>(mUnion);
+            } catch (const std::bad_variant_access &) {
+                throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
+                    getTypeString(
+                        static_cast<Type>(variant_index<Union, T>::value))));
+            }
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
+        } else if constexpr (std::is_same_v<T, ValueType>) {
+            return *this;
+        } else if constexpr (std::is_enum_v<T>) {
+            return static_cast<T>(std::get<int>(mUnion));
+        } else {
+            static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
+        }
     }
 
     template <class T>

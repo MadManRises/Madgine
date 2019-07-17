@@ -14,6 +14,8 @@
 #pragma once
 
 #include "../toolslib.h"
+#include "Modules/math/vector2.h"
+#include "Modules/math/vector4.h"
 
 //---- Define assertion handler. Defaults to calling assert().
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
@@ -52,15 +54,15 @@
 
 //---- Define constructor and implicit cast operators to convert back<>forth between your math types and ImVec2/ImVec4.
 // This will be inlined as part of ImVec2 and ImVec4 class declarations.
-/*
+
 #define IM_VEC2_CLASS_EXTRA                                                 \
-        ImVec2(const MyVec2& f) { x = f.x; y = f.y; }                       \
-        operator MyVec2() const { return MyVec2(x,y); }
+        ImVec2(const Engine::Vector2& f) { x = f.x; y = f.y; }                       \
+        operator Engine::Vector2() const { return Engine::Vector2(x,y); }
 
 #define IM_VEC4_CLASS_EXTRA                                                 \
-        ImVec4(const MyVec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
-        operator MyVec4() const { return MyVec4(x,y,z,w); }
-*/
+        ImVec4(const Engine::Vector4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
+        operator Engine::Vector4() const { return Engine::Vector4(x, y, z, w); }
+
 
 //---- Use 32-bit vertex indices (default is 16-bit) to allow meshes with more than 64K vertices. Render function needs to support it.
 //#define ImDrawIdx unsigned int

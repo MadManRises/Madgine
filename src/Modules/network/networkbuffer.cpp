@@ -35,7 +35,7 @@ namespace Engine
 			return SocketAPI::send(mSocket, buf, len);
 		}
 
-		Serialize::StreamError NetworkBuffer::getError()
+		StreamError NetworkBuffer::getError()
 		{
 			return SocketAPI::getError();
 		}

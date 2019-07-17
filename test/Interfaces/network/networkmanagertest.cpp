@@ -19,7 +19,7 @@ TEST(NetworkManager, Connect)
 	ASSERT_TRUE(server.startServer(1234));
 	auto future = std::async(std::launch::async, [&]()
 	{
-		Engine::Serialize::StreamError result = server.acceptConnection(4000ms);
+		Engine::StreamError result = server.acceptConnection(4000ms);
 		while (!done)
 		{
 			server.sendMessages();
@@ -29,10 +29,10 @@ TEST(NetworkManager, Connect)
 	});
 	Engine::Network::NetworkManager client("testNetworkServer");
 
-	EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms ), Engine::Serialize::NO_ERROR);
+	EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms ), Engine::NO_ERROR);
 
 	done = true;
 
-	EXPECT_EQ(future.get(), Engine::Serialize::NO_ERROR);
+	EXPECT_EQ(future.get(), Engine::NO_ERROR);
 }
 

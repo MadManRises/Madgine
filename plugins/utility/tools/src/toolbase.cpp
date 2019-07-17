@@ -4,41 +4,85 @@
 
 #include "Modules/reflection/classname.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
-		ToolBase::ToolBase(ImGuiRoot& root) :
-		mRoot(root),
-		mVisible(false)
-		{
-		}
+#include "renderer/imguiroot.h"
 
-		void ToolBase::render()
-		{
-		}
+namespace Engine {
+namespace Tools {
+    ToolBase::ToolBase(ImGuiRoot &root)
+        : mRoot(root)
+        , mVisible(false)
+    {
+    }
 
-		void ToolBase::update()
-		{
-			if (mVisible)
-				render();
-		}
+    void ToolBase::render()
+    {
+    }
 
-		bool ToolBase::isVisible()
-		{
-			return mVisible;
-		}
+    void ToolBase::renderMenu()
+    {
+    }
 
-		void ToolBase::setVisible(bool v)
-		{
-			mVisible = v;
-		}
+    void ToolBase::update()
+    {
+        if (mVisible)
+            render();
+    }
 
-		ImGuiRoot& ToolBase::root()
-		{
-			return mRoot;
-		}
-	}
+    bool ToolBase::isVisible()
+    {
+        return mVisible;
+    }
+
+    void ToolBase::setVisible(bool v)
+    {
+        mVisible = v;
+    }
+
+    ToolBase &ToolBase::getToolComponent(size_t index, bool init)
+    {
+        if (init) {
+            checkInitState();
+        }
+        return mRoot.getToolComponent(index, init);
+    }
+
+    ToolBase &ToolBase::getSelf(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return *this;
+    }
+
+    ImGuiRoot &ToolBase::root()
+    {
+        return mRoot;
+    }
+
+    const Core::MadgineObject *ToolBase::parent() const
+    {
+        return &mRoot;
+    }
+
+    App::Application &ToolBase::app(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return mRoot.app(init);
+    }
+
+    bool ToolBase::init()
+    {
+        return true;
+    }
+
+    void ToolBase::finalize()
+    {
+    }
 }
+}
+
+
 
 RegisterType(Engine::Tools::ToolBase);

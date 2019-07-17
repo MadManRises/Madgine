@@ -52,17 +52,17 @@ namespace Engine
 			return ::recv(id, buf, static_cast<int>(len), 0);
 		}
 
-		Serialize::StreamError SocketAPI::getError()
+		StreamError SocketAPI::getError()
 		{
 			int error = WSAGetLastError();
 			switch (error)
 			{
 			case WSAECONNREFUSED:
-				return Serialize::CONNECTION_REFUSED;
+				return CONNECTION_REFUSED;
 			case WSAEWOULDBLOCK:
-				return Serialize::WOULD_BLOCK;
+				return WOULD_BLOCK;
 			default:
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace Engine
 			return s;
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, TimeOut timeout)
+		std::pair<SocketId, StreamError> SocketAPI::accept(SocketId s, TimeOut timeout)
 		{
 			fd_set readSet;
 			FD_ZERO(&readSet);
@@ -126,14 +126,14 @@ namespace Engine
 				if (ioctlsocket(sock, FIONBIO, &iMode))
 				{
 					closesocket(sock);
-					return {Invalid_Socket, Serialize::UNKNOWN_ERROR};
+					return {Invalid_Socket, UNKNOWN_ERROR};
 				}
-				return {sock, Serialize::NO_ERROR};
+				return {sock, NO_ERROR};
 			}
-			return {Invalid_Socket, Serialize::TIMEOUT};
+			return {Invalid_Socket, TIMEOUT};
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::connect(const std::string& url, int portNr)
+		std::pair<SocketId, StreamError> SocketAPI::connect(const std::string& url, int portNr)
 		{
 			//Fill out the information needed to initialize a socket…
 			SOCKADDR_IN target; //Socket address information
@@ -153,7 +153,7 @@ namespace Engine
 
 			if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR)
 			{
-				Serialize::StreamError error = getError();
+				StreamError error = getError();
 				closesocket(s);
 				return {Invalid_Socket, error};
 			}
@@ -161,12 +161,12 @@ namespace Engine
 			u_long iMode = 1;
 			if (ioctlsocket(s, FIONBIO, &iMode))
 			{
-				Serialize::StreamError error = getError();
+				StreamError error = getError();
 				closesocket(s);
 				return {Invalid_Socket, error};
 			}
 
-			return {s, Serialize::NO_ERROR};
+			return {s, NO_ERROR};
 		}
 	}
 }
