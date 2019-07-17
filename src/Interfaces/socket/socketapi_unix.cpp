@@ -39,14 +39,14 @@ namespace Engine {
 			return ::read(id, buf, len);
 		}
 
-		Serialize::StreamError SocketAPI::getError() {
+		StreamError SocketAPI::getError() {
 			int error = errno;
 			switch (error) {
 			case EWOULDBLOCK:
 			//case EAGAIN:
-				return Serialize::WOULD_BLOCK;
+				return WOULD_BLOCK;
 			default:
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
 		}
 
@@ -55,31 +55,31 @@ namespace Engine {
 			return errno;
 		}
 
-		Serialize::StreamError preInitSock(SocketId s)
+		StreamError preInitSock(SocketId s)
 		{
 			int on = 1;
 			if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on))  < 0)
 			{
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
 			if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
 			{
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
 			
-			return Serialize::NO_ERROR;
+			return NO_ERROR;
 		}
 		
-		Serialize::StreamError postInitSock(SocketId s){
+		StreamError postInitSock(SocketId s){
 			int flags = fcntl(s, F_GETFL, 0);
 			if (flags < 0) {
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
 			flags |= O_NONBLOCK;
 			if (fcntl(s, F_SETFL, flags) != 0) {
-				return Serialize::UNKNOWN_ERROR;
+				return UNKNOWN_ERROR;
 			}
-			return Serialize::NO_ERROR;
+			return NO_ERROR;
 		}
 
 		SocketId SocketAPI::socket(int port) {
@@ -96,12 +96,12 @@ namespace Engine {
 				return Invalid_Socket;
 			}
 
-			if (preInitSock(s) != Serialize::NO_ERROR){
+			if (preInitSock(s) != NO_ERROR){
 				close(s);
 				return Invalid_Socket;
 			}
 			
-			if (postInitSock(s) != Serialize::NO_ERROR){
+			if (postInitSock(s) != NO_ERROR){
 				close(s);
 				return Invalid_Socket;
 			}
@@ -120,7 +120,7 @@ namespace Engine {
 			return s;
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::accept(SocketId s, TimeOut timeout) {
+		std::pair<SocketId, StreamError> SocketAPI::accept(SocketId s, TimeOut timeout) {
 			struct timeval tv;
 			fd_set readfds;
 
@@ -143,19 +143,19 @@ namespace Engine {
 			if (retval > 0) {
 				int socket = accept4(s, NULL, NULL, O_NONBLOCK);
 				if (socket >= 0)
-					return { socket, Serialize::NO_ERROR };
+					return { socket, NO_ERROR };
 				else
-					return { Invalid_Socket, Serialize::NO_CONNECTION };
+					return { Invalid_Socket, NO_CONNECTION };
 			}
 			else {
 				if (retval == 0)
-					return { Invalid_Socket, Serialize::TIMEOUT };
+					return { Invalid_Socket, TIMEOUT };
 				else
 					return { Invalid_Socket, getError() };
 			}
 		}
 
-		std::pair<SocketId, Serialize::StreamError> SocketAPI::connect(const std::string &url, int portNr) {
+		std::pair<SocketId, StreamError> SocketAPI::connect(const std::string &url, int portNr) {
 			//Fill out the information needed to initialize a socket…
 			struct sockaddr_in target; //Socket address information
 
@@ -172,9 +172,9 @@ namespace Engine {
 				return { Invalid_Socket, getError() };
 			}
 
-			if (preInitSock(s) != Serialize::NO_ERROR)
+			if (preInitSock(s) != NO_ERROR)
 			{
-				Serialize::StreamError error = getError();
+				StreamError error = getError();
 				close(s);
 				return { Invalid_Socket, error };
 			}
@@ -183,19 +183,19 @@ namespace Engine {
 
 			if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0)
 			{
-				Serialize::StreamError error = getError();
+				StreamError error = getError();
 				close(s);
 				return { Invalid_Socket, error };
 			}
 			
-			if (postInitSock(s) != Serialize::NO_ERROR)
+			if (postInitSock(s) != NO_ERROR)
 			{
-				Serialize::StreamError error = getError();
+				StreamError error = getError();
 				close(s);
 				return { Invalid_Socket, error };
 			}
 
-			return { s, Serialize::NO_ERROR };
+			return { s, NO_ERROR };
 		}
 
 
