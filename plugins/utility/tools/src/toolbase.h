@@ -6,6 +6,8 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Tools {
 
