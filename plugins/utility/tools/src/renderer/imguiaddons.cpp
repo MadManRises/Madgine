@@ -425,7 +425,7 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *ena
     ImGuiContext &g = *GImGui;
     bool value_changed = false;
 
-    Text(label);
+    Text("%s", label);
     SameLine();
 
     BeginGroup();
@@ -491,7 +491,7 @@ void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr sco
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
         ValueTypePayload payload { name, scope, value };
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
-        ImGui::Text(name.c_str());
+        ImGui::Text("%s", name.c_str());
         ImGui::EndDragDropSource();
     }
 }
