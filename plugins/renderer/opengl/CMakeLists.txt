@@ -19,6 +19,10 @@ else()
 	set(OPENGL_LIBRARIES EGL GLESv3)
 	set(OPENGL_INCLUDE_DIR "")
 endif()
+
+if (EMSCRIPTEN)
+	set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARIES})
+endif()
 	
 target_include_directories(OpenGL PUBLIC ${OPENGL_INCLUDE_DIR})
 
