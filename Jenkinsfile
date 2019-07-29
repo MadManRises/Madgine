@@ -110,6 +110,8 @@ pipeline {
 	post {
         always {
             junit '**/*.xml'
+		
+	    recordIssues enabledForFailure: true, tools: [clang()]
         }
     }
 }
