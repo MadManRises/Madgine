@@ -74,7 +74,12 @@ namespace Engine
 
 		Root::~Root()
 		{
-		}
+                }
+
+                int Root::errorCode()
+                {
+                    return mErrorCode;
+                }
 
 	}
 }

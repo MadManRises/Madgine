@@ -12,7 +12,11 @@ namespace Engine
 			Root(int argc = 0, char **argv = nullptr);
 			~Root();
 
+			int errorCode();
+
 		private:
+
+			int mErrorCode = 0;
 
 			std::unique_ptr<CLI> mCLI;
 
