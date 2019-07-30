@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-struct CLIOptionBase {
+struct MODULES_EXPORT CLIOptionBase {
 
 	CLIOptionBase(size_t minArgumentCount, size_t maxArgumentCount, std::vector<const char*> options, const char *help = nullptr);
 
@@ -29,7 +29,7 @@ struct CLIOptionImpl : CLIOptionBase {
 		mValue(std::move(defaultValue))
 	{}
 
-	bool parse(const std::vector<const char*> &args) override;
+	MODULES_EXPORT bool parse(const std::vector<const char*> &args) override;
 
 	const char *typeName() override {
 		return std::is_same_v<T, std::string> ? "string" : typeid(T).name();
@@ -68,7 +68,7 @@ struct CLIOption<std::string> : CLIOptionImpl<std::string> {
 	}
 };
 
-struct CLI {
+struct MODULES_EXPORT CLI {
 
 	CLI(int argc, char **argv);
 

@@ -1,6 +1,6 @@
 ﻿#include "../moduleslib.h"
 
-#include "CLI.h"
+#include "cli.h"
 #include "Interfaces/stringutil.h"
 
 namespace Engine {
