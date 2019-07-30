@@ -65,9 +65,13 @@ namespace Plugins {
         if (!isLoaded())
             return true;
 
+		LOG("Unloading Plugin \"" << mName << "\"...");
+
 		closeDll(mModule);
 
         mModule = nullptr;
+
+		LOG("Success");
 
         return true;
     }
