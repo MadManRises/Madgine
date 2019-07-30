@@ -6,6 +6,7 @@ Project(Modules)
 set(sources)
 
 FolderSources(sources "" "" modulesforward.h moduleslib.h)
+	FolderSources(sources "" cli cli.cpp cli.h)
 	FolderSources(sources "" debug)
 		FolderSources(sources debug profiler processstats.cpp processstats.h profiler.cpp profiler.h)
 	FolderSources(sources "" generic templates.h)

@@ -9,10 +9,12 @@ namespace Engine
 		class MADGINE_BASE_EXPORT Root
 		{
 		public:
-			Root();
+			Root(int argc, char **argv);
 			~Root();
 
 		private:
+
+			std::unique_ptr<CLI> mCLI;
 
 #ifndef STATIC_BUILD
 			std::unique_ptr<Plugins::PluginManager> mPluginManager;

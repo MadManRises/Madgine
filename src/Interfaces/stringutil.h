@@ -73,6 +73,21 @@ namespace StringUtil {
         return std::move(s);
     }
 
+	template <typename Cont>
+    std::string join(Cont &&cont, const char *sep)
+    {
+        std::stringstream ss;
+        bool first = true;
+        for (auto &&element : cont) {
+            if (first)
+                first = false;
+            else
+                ss << sep;
+            ss << element;
+        }
+        return ss.str();
+    }
+
 }
 
 constexpr size_t strlen(const char *s)

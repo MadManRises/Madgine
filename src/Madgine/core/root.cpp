@@ -12,13 +12,15 @@
 
 
 #include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
+#include "Modules/cli/cli.h"
 
 
 namespace Engine
 {
 	namespace Core
 	{
-		Root::Root() :
+    Root::Root(int argc, char **argv)
+        : mCLI(std::make_unique<CLI>(argc, argv)),
 #ifndef STATIC_BUILD
 		mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine")),
 		mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager)),

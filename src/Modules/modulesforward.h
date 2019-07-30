@@ -32,6 +32,7 @@ using ArgumentList = std::vector<ValueType>;
 
 struct ApiMethod;
 
+struct CLI;
 
 namespace Debug {
 
