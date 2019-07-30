@@ -14,44 +14,45 @@ CLI::CLI(int argc, char **argv)
     assert(!sSingleton);
     sSingleton = this;
 
-    assert(argc > 0);
-    char **it = argv + 1;
-    char **end = argv + argc;
+    if (argc > 1) {
+        char **it = argv + 1;
+        char **end = argv + argc;
 
-    if (it != end && **it != '-') {
-        LOG_ERROR("Positional arguments are not supported!");
-        ++it;
-        while (it != end && **it != '-')
+        if (it != end && **it != '-') {
+            LOG_ERROR("Positional arguments are not supported!");
             ++it;
-    }
-
-    while (it != end) {
-        assert(**it == '-');
-        auto pib = mArguments.try_emplace(*it);
-        if (!pib.second) {
-            LOG_WARNING("Argument '" << *it << "' provided twice! Last occurence will be used!");
-            pib.first->second.clear();
+            while (it != end && **it != '-')
+                ++it;
         }
-        std::vector<const char *> &args = pib.first->second;
-        ++it;
-        while (it != end && **it != '-') {
-            args.emplace_back(*it);
+
+        while (it != end) {
+            assert(**it == '-');
+            auto pib = mArguments.try_emplace(*it);
+            if (!pib.second) {
+                LOG_WARNING("Argument '" << *it << "' provided twice! Last occurence will be used!");
+                pib.first->second.clear();
+            }
+            std::vector<const char *> &args = pib.first->second;
             ++it;
+            while (it != end && **it != '-') {
+                args.emplace_back(*it);
+                ++it;
+            }
         }
+
+        for (CLIOptionBase *option : options())
+            option->init();
+
+        std::set<std::string_view> unusedArguments;
+        //use kvKeys
+        for (auto &p : mArguments)
+            unusedArguments.insert(p.first);
+        for (CLIOptionBase *option : options())
+            for (const char *o : option->options())
+                unusedArguments.erase(o);
+        for (std::string_view unusedArgument : unusedArguments)
+            LOG_WARNING("Unrecognized command-line argument '" << unusedArgument << "' provided!");
     }
-
-    for (CLIOptionBase *option : options())
-        option->init();
-
-    std::set<std::string_view> unusedArguments;
-    //use kvKeys
-    for (auto &p : mArguments)
-        unusedArguments.insert(p.first);
-    for (CLIOptionBase *option : options())
-        for (const char *o : option->options())
-            unusedArguments.erase(o);
-    for (std::string_view unusedArgument : unusedArguments)
-        LOG_WARNING("Unrecognized command-line argument '" << unusedArgument << "' provided!");
 
     if (showHelp)
         LOG(help());

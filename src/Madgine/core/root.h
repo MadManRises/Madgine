@@ -9,7 +9,7 @@ namespace Engine
 		class MADGINE_BASE_EXPORT Root
 		{
 		public:
-			Root(int argc, char **argv);
+			Root(int argc = 0, char **argv = nullptr);
 			~Root();
 
 		private:
