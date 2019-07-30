@@ -56,12 +56,12 @@ private:
 
 template <typename T>
 struct CLIOption : CLIOptionImpl<T> {
-	using CLIOptionImpl::CLIOptionImpl;
+	using CLIOptionImpl<T>::CLIOptionImpl;
 };
 
 template <>
 struct CLIOption<std::string> : CLIOptionImpl<std::string> {
-	using CLIOptionImpl::CLIOptionImpl;
+	using CLIOptionImpl<std::string>::CLIOptionImpl;
 
 	operator const char *() {
 		return static_cast<const std::string&>(*this).c_str();

@@ -1,7 +1,7 @@
 ﻿#include "../moduleslib.h"
 
-#include "cli.h"
 #include "Interfaces/stringutil.h"
+#include "cli.h"
 
 namespace Engine {
 
@@ -143,6 +143,7 @@ const std::vector<const char *> &CLIOptionBase::options()
     return mOptions;
 }
 
+template <>
 bool CLIOptionImpl<bool>::parse(const std::vector<const char *> &args)
 {
     if (args.empty())
@@ -159,6 +160,7 @@ bool CLIOptionImpl<bool>::parse(const std::vector<const char *> &args)
     return true;
 }
 
+template <>
 bool CLIOptionImpl<int>::parse(const std::vector<const char *> &args)
 {
     errno = 0;
@@ -172,10 +174,10 @@ bool CLIOptionImpl<int>::parse(const std::vector<const char *> &args)
     }
 }
 
+template <>
 bool CLIOptionImpl<std::string>::parse(const std::vector<const char *> &args)
 {
     mValue = args.front();
     return true;
 }
-
 }
