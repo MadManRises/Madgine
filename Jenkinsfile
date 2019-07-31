@@ -49,11 +49,13 @@ def task = {
 				make all
 				"""				
             }
-			stage("Test") {
-				sh """
-				cd ${name}
-				ctest
-				"""
+		    docker.image('ubuntu:latest').inside {
+				stage("Test") {
+					sh """
+					cd ${name}
+					ctest
+					"""
+				}
             }           
         }
     }
