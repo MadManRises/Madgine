@@ -2,9 +2,10 @@
 
  def axisList = [
     ["clang-linux","clang-android","emscripten"],           //toolchain
-    ["Debug","RelWithDebInfo"],      //configuration
-    ["", "OpenGL"]                   //static configuration file
+    ["Debug","RelWithDebInfo"]      //configuration
 ]   
+
+def staticConfigs = ["OpenGL"]
 
 def tasks = [:]
 def comboBuilder
@@ -18,12 +19,12 @@ def task = {
        the index will correspond to the position of this axis in axisList[] */
     def toolchain = it[0]
     def configuration = it[1]
-    def staticConfig = it[2]
+    //def staticConfig = it[2]
 	
     def name = "${it.join('-')}"    
 
-	if (staticConfig?.trim())
-		staticConfig = "test/${staticConfig}_${toolchain}.cfg"
+	//if (staticConfig?.trim())
+	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
 
     return {
         // This is where the important work happens for each combination
@@ -39,9 +40,9 @@ def task = {
 				cd ${name}
 			    cmake .. \
 		        -DCMAKE_BUILD_TYPE=${configuration} \
-		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake \
-                -DSTATIC_BUILD=${staticConfig}
+		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake
 			    """
+		                //    -DSTATIC_BUILD=${staticConfig}
             }
             stage("build") {				
 				sh """
