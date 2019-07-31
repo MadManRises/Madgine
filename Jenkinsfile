@@ -49,7 +49,7 @@ def task = {
 				make all
 				"""				
             }
-		    docker.image('rikorose/gcc-cmake:3.10.3').inside {
+		    docker.image('rikorose/gcc-cmake:latest').inside {
 				stage("Test") {
 					sh """
 					cd ${name}
