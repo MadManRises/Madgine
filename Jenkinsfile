@@ -49,7 +49,7 @@ def task = {
 				make all
 				"""				
             }
-		    docker.image('ubuntu:latest').inside {
+		    docker.image('matrim/cmake-examples:3.10.3').inside {
 				stage("Test") {
 					sh """
 					cd ${name}
