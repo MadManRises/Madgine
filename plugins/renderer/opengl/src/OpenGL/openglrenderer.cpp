@@ -25,7 +25,7 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 #include<GL/glx.h>
 namespace Engine {
 	namespace Window {
-		extern Display *sDisplay;
+		extern Display *sDisplay();
 	}
 }
 #elif ANDROID || EMSCRIPTEN
@@ -97,12 +97,12 @@ namespace Engine {
 #elif LINUX
 			static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
-			static XVisualInfo *vi = glXChooseVisual(Window::sDisplay, 0, att);
+			static XVisualInfo *vi = glXChooseVisual(Window::sDisplay(), 0, att);
 			assert(vi);
 
-			GLXContext context = glXCreateContext(Window::sDisplay, vi, NULL, GL_TRUE);
+			GLXContext context = glXCreateContext(Window::sDisplay(), vi, NULL, GL_TRUE);
 
-			if (!glXMakeCurrent(Window::sDisplay, window->mHandle, context))
+			if (!glXMakeCurrent(Window::sDisplay(), window->mHandle, context))
 				exit(errno);
 
 #elif ANDROID || EMSCRIPTEN
@@ -142,7 +142,7 @@ namespace Engine {
 #if WINODWS
 			wglMakeCurrent(NULL, NULL);
 #elif LINUX
-			glXMakeCurrent(Window::sDisplay, None, NULL);
+			glXMakeCurrent(Window::sDisplay(), None, NULL);
 #elif ANDROID || EMSCRIPTEN
 			eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 #endif
@@ -159,7 +159,7 @@ namespace Engine {
 
 			wglDeleteContext(context);
 #elif LINUX
-			glXDestroyContext(Window::sDisplay, context);
+			glXDestroyContext(Window::sDisplay(), context);
 #elif ANDROID || EMSCRIPTEN
 			eglDestroyContext(Window::sDisplay, context);
 #endif
