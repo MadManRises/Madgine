@@ -15,7 +15,14 @@
 			dockerImage : 'node:latest'
 		]
 	],           
-    ["Debug","RelWithDebInfo"]      //configuration
+    [//configurations
+		[
+			name : "Debug"
+		],
+		[
+			name : "RelWithDebInfo"
+		]
+	]
 ]   
 
 def staticConfigs = ["OpenGL"]
@@ -34,7 +41,7 @@ def task = {
     def configuration = it[1]
     //def staticConfig = it[2]
 	
-    def name = toolchain.name + '-' + configuration    
+    def name = toolchain.name + '-' + configuration.name  
 
 	//if (staticConfig?.trim())
 	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
@@ -52,7 +59,7 @@ def task = {
 				mkdir -p ${name}
 				cd ${name}
 			    cmake .. \
-		        -DCMAKE_BUILD_TYPE=${configuration} \
+		        -DCMAKE_BUILD_TYPE=${configuration.name} \
 		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
 			    """
 		                //    -DSTATIC_BUILD=${staticConfig}
@@ -81,7 +88,7 @@ def task = {
 */
 comboBuilder = { def axes, int level ->
     for ( entry in axes[0] ) {
-        comboEntry[level] = entry
+        comboEntry[level] = entry.name
         if (axes.size() > 1 ) {
             comboBuilder(axes.drop(1), level + 1)
         }
