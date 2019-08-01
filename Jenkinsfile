@@ -1,7 +1,20 @@
 
 
  def axisList = [
-    ["clang-linux","clang-android","emscripten"],           //toolchain
+    [//toolchains
+		[
+			name : "clang-linux",
+			dockerImage : 'rikorose/gcc-cmake:latest'
+		],
+		[
+			name : "clang-android",
+			dockerImage : 'thedrhax/android-avd:latest'
+		],
+		[
+			name : "emscripten",
+			dockerImage : 'node:latest'
+		]
+	],           
     ["Debug","RelWithDebInfo"]      //configuration
 ]   
 
@@ -21,7 +34,7 @@ def task = {
     def configuration = it[1]
     //def staticConfig = it[2]
 	
-    def name = "${it.join('-')}"    
+    def name = toolchain.name + '-' + configuration    
 
 	//if (staticConfig?.trim())
 	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
@@ -40,7 +53,7 @@ def task = {
 				cd ${name}
 			    cmake .. \
 		        -DCMAKE_BUILD_TYPE=${configuration} \
-		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain}.cmake
+		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
 			    """
 		                //    -DSTATIC_BUILD=${staticConfig}
             }
@@ -50,7 +63,7 @@ def task = {
 				make all
 				"""				
             }
-		    docker.image('rikorose/gcc-cmake:latest').inside {
+		    docker.image(toolchain.dockerImage).inside {
 				stage("Test") {
 					sh """
 					cd ${name}
