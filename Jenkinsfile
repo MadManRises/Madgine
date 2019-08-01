@@ -30,6 +30,7 @@ def staticConfigs = ["OpenGL"]
 def tasks = [:]
 def comboBuilder
 def comboEntry = []
+def comboNames = []
 
 
 def task = {
@@ -88,12 +89,13 @@ def task = {
 */
 comboBuilder = { def axes, int level ->
     for ( entry in axes[0] ) {
-        comboEntry[level] = entry.name
+        comboEntry[level] = entry
+		comboNames[level] = entry.name
         if (axes.size() > 1 ) {
             comboBuilder(axes.drop(1), level + 1)
         }
         else {
-            tasks[comboEntry.join("-")] = task(comboEntry.collect())
+            tasks[comboNames.join("-")] = task(comboEntry.collect())
         }
     }
 }
