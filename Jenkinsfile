@@ -4,11 +4,11 @@
     [//toolchains
 		[
 			name : "clang-linux",
-			dockerImage : 'rikorose/gcc-cmake:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest'
 		],
 		[
 			name : "clang-android",
-			dockerImage : 'thedrhax/android-avd:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest'
 		],
 		[
 			name : "emscripten",
