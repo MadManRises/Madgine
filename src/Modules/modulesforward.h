@@ -32,7 +32,9 @@ using ArgumentList = std::vector<ValueType>;
 
 struct ApiMethod;
 
-struct CLI;
+namespace CLI {
+    struct CLI;
+}
 
 namespace Debug {
 
@@ -95,7 +97,6 @@ namespace Serialize {
 namespace Scripting {
     class ScriptingManager;
 
-    
     class GlobalScopeBase;
 
     class LuaState;
@@ -108,9 +109,7 @@ namespace Scripting {
     namespace Parsing {
         class ScriptParser;
     }
-
 }
-
 
 namespace Network {
     class NetworkManager;
