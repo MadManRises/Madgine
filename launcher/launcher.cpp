@@ -10,7 +10,7 @@
 #include <conio.h>
 #endif
 
-static Engine::CLIOption<bool> toolMode{ { "--toolMode", "-t" }, false, "If enabled, no application will be started. Only the root will be initialized and then immediately shutdown again." };
+static Engine::CLI::Parameter<bool> toolMode{ { "--toolMode", "-t" }, false, "If enabled, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
 #if EMSCRIPTEN
 #define FIX_LOCAL static

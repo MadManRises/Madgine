@@ -2,82 +2,90 @@
 
 namespace Engine {
 
-struct MODULES_EXPORT CLIOptionBase {
+namespace CLI {
 
-	CLIOptionBase(size_t minArgumentCount, size_t maxArgumentCount, std::vector<const char*> options, const char *help = nullptr);
+    struct MODULES_EXPORT ParameterBase {
 
-	virtual bool parse(const std::vector<const char*> &args) = 0;
-	virtual const char *typeName() = 0;
+        ParameterBase(size_t minArgumentCount, size_t maxArgumentCount, std::vector<const char *> options, const char *help = nullptr);
 
-	void init();
-	std::string help();
-	const std::vector<const char*> &options();
+        virtual bool parse(const std::vector<const char *> &args) = 0;
+        virtual const char *typeName() = 0;
 
-private:
-	std::vector<const char*> mOptions;
-	const char *mHelp = nullptr;
-	size_t mMinArgumentCount, mMaxArgumentCount;
+        void init();
+        std::string help();
+        const std::vector<const char *> &options();
 
-	bool mInitialized = false;
-};
+    private:
+        std::vector<const char *> mOptions;
+        const char *mHelp = nullptr;
+        size_t mMinArgumentCount, mMaxArgumentCount;
 
-template <typename T>
-struct CLIOptionImpl : CLIOptionBase {
+        bool mInitialized = false;
+    };
 
-	CLIOptionImpl(std::vector<const char*> options, T defaultValue = {}, const char *help = nullptr) :
-		CLIOptionBase(std::is_same_v<T, bool> ? 0 : 1, 1, std::move(options), help),
-		mValue(std::move(defaultValue))
-	{}
+    template <typename T>
+    struct ParameterImpl : ParameterBase {
 
-	MODULES_EXPORT bool parse(const std::vector<const char*> &args) override;
+        ParameterImpl(std::vector<const char *> options, T defaultValue = {}, const char *help = nullptr)
+            : ParameterBase(std::is_same_v<T, bool> ? 0 : 1, 1, std::move(options), help)
+            , mValue(std::move(defaultValue))
+        {
+        }
 
-	const char *typeName() override {
-		return std::is_same_v<T, std::string> ? "string" : typeid(T).name();
-	}
+        MODULES_EXPORT bool parse(const std::vector<const char *> &args) override;
 
-	const T &operator*() {
-		init();
-		return mValue;
-	}
+        const char *typeName() override
+        {
+            return std::is_same_v<T, std::string> ? "string" : typeid(T).name();
+        }
 
-	const T* operator->() {
-		init();
-		return &mValue;
-	}
+        const T &operator*()
+        {
+            init();
+            return mValue;
+        }
 
-	operator const T&() {
-		init();
-		return mValue;
-	}
+        const T *operator->()
+        {
+            init();
+            return &mValue;
+        }
 
-private:
-	T mValue;
-};
+        operator const T &()
+        {
+            init();
+            return mValue;
+        }
 
-template <typename T>
-struct CLIOption : CLIOptionImpl<T> {
-	using CLIOptionImpl<T>::CLIOptionImpl;
-};
+    private:
+        T mValue;
+    };
 
-template <>
-struct CLIOption<std::string> : CLIOptionImpl<std::string> {
-	using CLIOptionImpl<std::string>::CLIOptionImpl;
+    template <typename T>
+    struct Parameter : ParameterImpl<T> {
+        using ParameterImpl<T>::ParameterImpl;
+    };
 
-	operator const char *() {
-		return static_cast<const std::string&>(*this).c_str();
-	}
-};
+    template <>
+    struct Parameter<std::string> : ParameterImpl<std::string> {
+        using ParameterImpl<std::string>::ParameterImpl;
 
-struct MODULES_EXPORT CLI {
+        operator const char *()
+        {
+            return static_cast<const std::string &>(*this).c_str();
+        }
+    };
 
-	CLI(int argc, char **argv);
+    struct MODULES_EXPORT CLI {
 
-	std::string help();
+        CLI(int argc, char **argv);
 
-	static const CLI &getSingleton();
-	static std::vector<CLIOptionBase*> &options();
+        std::string help();
 
-	std::map<std::string_view, std::vector<const char*>> mArguments;
-};
+        static const CLI &getSingleton();
+        static std::vector<ParameterBase *> &parameters();
 
+        std::map<std::string_view, std::vector<const char *>> mArguments;
+    };
+}
 }
