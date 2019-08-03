@@ -6,11 +6,11 @@
 namespace Engine {
 namespace CLI {
 
-    Parameter<bool> showHelp{ { "--help", "-h" }, false, "Show this help message" };
+	Parameter<bool> showHelp { { "--help", "-h" }, false, "Show this help message" };
 
-    static CLI *sSingleton = nullptr;
+    static CLICore *sSingleton = nullptr;
 
-    CLI::CLI(int argc, char **argv)
+    CLICore::CLICore(int argc, char **argv)
     {
         assert(!sSingleton);
         sSingleton = this;
@@ -59,7 +59,7 @@ namespace CLI {
             LOG(help());
     }
 
-    std::string CLI::help()
+    std::string CLICore::help()
     {
         std::stringstream ss;
         ss << "Help:\n";
@@ -69,13 +69,13 @@ namespace CLI {
         return ss.str();
     }
 
-    const CLI &CLI::getSingleton()
+    const CLICore &CLICore::getSingleton()
     {
         assert(sSingleton);
         return *sSingleton;
     }
 
-    std::vector<ParameterBase *> &CLI::parameters()
+    std::vector<ParameterBase *> &CLICore::parameters()
     {
         static std::vector<ParameterBase *> dummy;
         return dummy;
@@ -87,7 +87,7 @@ namespace CLI {
         , mOptions(std::move(options))
         , mHelp(help)
     {
-        CLI::parameters().emplace_back(this);
+        CLICore::parameters().emplace_back(this);
     }
 
     void ParameterBase::init()
@@ -99,8 +99,8 @@ namespace CLI {
             const char *optionName = nullptr;
 
             for (const char *option : mOptions) {
-                auto it = CLI::getSingleton().mArguments.find(option);
-                if (it != CLI::getSingleton().mArguments.end()) {
+                auto it = CLICore::getSingleton().mArguments.find(option);
+                if (it != CLICore::getSingleton().mArguments.end()) {
                     if (args)
                         LOG_WARNING("Different versions of argument '" << option << "' provided! Which version is used is undefined!");
 
@@ -145,42 +145,5 @@ namespace CLI {
         return mOptions;
     }
 
-    template <>
-    bool ParameterImpl<bool>::parse(const std::vector<const char *> &args)
-    {
-        if (args.empty())
-            mValue = true;
-        else {
-            std::string_view arg = args.front();
-            if (arg == "on" || arg == "true")
-                mValue = true;
-            else if (arg == "off" || arg == "false")
-                mValue = false;
-            else
-                return false;
-        }
-        return true;
-    }
-
-    template <>
-    bool ParameterImpl<int>::parse(const std::vector<const char *> &args)
-    {
-        errno = 0;
-        char *end;
-        int value = strtol(args.front(), &end, 0);
-        if (errno == 0 && *end == '\0') {
-            mValue = value;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    template <>
-    bool ParameterImpl<std::string>::parse(const std::vector<const char *> &args)
-    {
-        mValue = args.front();
-        return true;
-    }
 }
 }

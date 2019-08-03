@@ -18,7 +18,7 @@ namespace Engine
 
 			int mErrorCode = 0;
 
-			std::unique_ptr<CLI::CLI> mCLI;
+			std::unique_ptr<CLI::CLICore> mCLI;
 
 #ifndef STATIC_BUILD
 			std::unique_ptr<Plugins::PluginManager> mPluginManager;

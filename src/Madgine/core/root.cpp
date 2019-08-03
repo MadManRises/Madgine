@@ -16,7 +16,7 @@
 namespace Engine {
 namespace Core {
     Root::Root(int argc, char **argv)
-        : mCLI(std::make_unique<CLI::CLI>(argc, argv))
+        : mCLI(std::make_unique<CLI::CLICore>(argc, argv))
         ,
 #ifndef STATIC_BUILD
         mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine"))

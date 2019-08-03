@@ -32,7 +32,7 @@ namespace CLI {
         {
         }
 
-        MODULES_EXPORT bool parse(const std::vector<const char *> &args) override;
+        bool parse(const std::vector<const char *> &args) override;
 
         const char *typeName() override
         {
@@ -61,14 +61,59 @@ namespace CLI {
         T mValue;
     };
 
+	template <>
+    inline bool ParameterImpl<bool>::parse(const std::vector<const char *> &args)
+    {
+        if (args.empty())
+            mValue = true;
+        else {
+            std::string_view arg = args.front();
+            if (arg == "on" || arg == "true")
+                mValue = true;
+            else if (arg == "off" || arg == "false")
+                mValue = false;
+            else
+                return false;
+        }
+        return true;
+    }
+
+    template <>
+    inline bool ParameterImpl<int>::parse(const std::vector<const char *> &args)
+    {
+        errno = 0;
+        char *end;
+        int value = strtol(args.front(), &end, 0);
+        if (errno == 0 && *end == '\0') {
+            mValue = value;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    template <>
+    inline bool ParameterImpl<std::string>::parse(const std::vector<const char *> &args)
+    {
+        mValue = args.front();
+        return true;
+    }
+
     template <typename T>
     struct Parameter : ParameterImpl<T> {
-        using ParameterImpl<T>::ParameterImpl;
+        Parameter(std::vector<const char *> options, T defaultValue, const char *help)
+            : ParameterImpl<T>(std::move(options), std::move(defaultValue), help)
+        {
+        }
     };
 
     template <>
     struct Parameter<std::string> : ParameterImpl<std::string> {
-        using ParameterImpl<std::string>::ParameterImpl;
+        //using ParameterImpl<std::string>::ParameterImpl;
+        Parameter(std::vector<const char *> options, std::string defaultValue, const char *help)
+            : ParameterImpl(std::move(options), std::move(defaultValue), help)
+        {
+        }
 
         operator const char *()
         {
@@ -76,13 +121,12 @@ namespace CLI {
         }
     };
 
-    struct MODULES_EXPORT CLI {
-
-        CLI(int argc, char **argv);
+    struct MODULES_EXPORT CLICore {
+        CLICore(int argc, char **argv);
 
         std::string help();
 
-        static const CLI &getSingleton();
+        static const CLICore &getSingleton();
         static std::vector<ParameterBase *> &parameters();
 
         std::map<std::string_view, std::vector<const char *>> mArguments;
