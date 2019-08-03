@@ -40,6 +40,9 @@ namespace Engine
 			const std::string &currentSelectionName();
 			void setCurrentSelection(const std::string &key, const Filesystem::Path &path);
 
+			void saveSelection(Ini::IniFile &file);
+            void loadSelection(Ini::IniFile &file);
+
 			void addListener(PluginListener *listener);
 			void removeListener(PluginListener *listener);
 
