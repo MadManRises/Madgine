@@ -68,7 +68,7 @@ def task = {
             stage("build") {				
 				sh """
 				cd ${name}
-				make all
+				make -j4 all 
 				"""				
             }
 		    docker.image(toolchain.dockerImage).inside {
