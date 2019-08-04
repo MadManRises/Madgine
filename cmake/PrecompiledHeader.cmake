@@ -226,15 +226,15 @@ function(add_precompiled_header _target _input)
 	list(APPEND _object_depends "${_pch_header}")
 	if(_source MATCHES \\.\(cc|cxx|cpp\)$)
 	  list(APPEND _object_depends "${_output_cxx}")
+	  combine_arguments(_pch_compile_flags)
+	  set_source_files_properties(${_source} PROPERTIES
+	    COMPILE_FLAGS "${_pch_compile_flags}"
+	    OBJECT_DEPENDS "${_object_depends}")
+        endif()
+	  endforeach()
 	else()
-	  list(APPEND _object_depends "${_output_c}")
+	  #list(APPEND _object_depends "${_output_c}")
 	endif()
 
-	combine_arguments(_pch_compile_flags)
-	set_source_files_properties(${_source} PROPERTIES
-	  COMPILE_FLAGS "${_pch_compile_flags}"
-	  OBJECT_DEPENDS "${_object_depends}")
-      endif()
-    endforeach()
   endif()
 endfunction()
