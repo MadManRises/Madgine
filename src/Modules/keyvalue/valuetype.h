@@ -21,7 +21,30 @@
 
 #include "typedscopeptr.h"
 
+namespace std {
+TEMPLATE_INSTANTIATION_IMPORT class variant<
+    std::monostate,
+    std::string,
+    bool,
+    int,
+    size_t,
+    float,
+    Engine::TypedScopePtr,
+    Engine::InvScopePtr,
+    Engine::Matrix3,
+    Engine::Quaternion,
+    Engine::Vector4,
+    Engine::Vector3,
+    Engine::Vector2,
+    Engine::KeyValueVirtualIterator,
+    Engine::BoundApiMethod,
+    Engine::ApiMethod,
+    Engine::Scripting::LuaTable>;
+}
+
 namespace Engine {
+
+
 
 struct MODULES_EXPORT ValueType {
 
