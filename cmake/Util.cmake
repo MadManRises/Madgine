@@ -39,6 +39,6 @@ endif()
 
 if (GCC OR CLANG)
 	add_compile_options(-Wall -fpermissive -fvisibility=hidden)
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined") #TODO
 endif ()
 
