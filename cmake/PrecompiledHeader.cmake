@@ -206,7 +206,7 @@ function(add_precompiled_header _target _input)
 	endif ()
     add_custom_command(
       OUTPUT "${_output_cxx}"
-      COMMAND "${CMAKE_CXX_COMPILER}" ${clang_flags} ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
+      COMMAND "${CMAKE_CXX_COMPILER}" ${clang_flags} ${_compiler_FLAGS} $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
       DEPENDS "${_pch_header}" "${_pch_flags_file}"
       COMMENT "Precompiling ${_name} for ${_target} (C++)")
     #add_custom_command(
