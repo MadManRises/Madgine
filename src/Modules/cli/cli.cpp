@@ -6,7 +6,7 @@
 namespace Engine {
 namespace CLI {
 
-	Parameter<bool> showHelp { { "--help", "-h" }, false, "Show this help message" };
+    Parameter<bool> showHelp { { "--help", "-h" }, false, "Show this help message" };
 
     static CLICore *sSingleton = nullptr;
 
@@ -57,6 +57,12 @@ namespace CLI {
 
         if (showHelp)
             LOG(help());
+    }
+
+    CLICore::~CLICore()
+    {
+        assert(sSingleton == this);
+        sSingleton = nullptr;
     }
 
     std::string CLICore::help()

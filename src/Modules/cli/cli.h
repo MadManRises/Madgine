@@ -123,6 +123,7 @@ namespace CLI {
 
     struct MODULES_EXPORT CLICore {
         CLICore(int argc, char **argv);
+        ~CLICore();
 
         std::string help();
 
