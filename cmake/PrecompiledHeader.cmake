@@ -192,14 +192,21 @@ function(add_precompiled_header _target _input)
     #  COMMAND "${CMAKE_COMMAND}" -E copy "${_pch_header}" "${_pchfile}"
     #  DEPENDS "${_pch_header}"
     #  COMMENT "Updating ${_name}")
-	get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+	set (clang_flags )
+	if (CLANG)
+		if (CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN)
+			list(APPEND "${CMAKE_CXX_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN}${CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN}")
+		endif()
+		if (CMAKE_CXX_COMPILER_TARGET)
+			list(APPEND "${CMAKE_CXX_COMPILER_OPTIONS_TARGET}${CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN}")
+		endif()
+		if (CMAKE_SYSROOT_COMPILE)
+			list(APPEND "${CMAKE_CXX_COMPILER_OPTIONS_SYSROOT}${CMAKE_SYSROOT_COMPILE}")
+		endif()
+	endif ()
     add_custom_command(
       OUTPUT "${_output_cxx}"
-      COMMAND "${CMAKE_CXX_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
+      COMMAND "${CMAKE_CXX_COMPILER}" ${clang_flags} ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
       DEPENDS "${_pch_header}" "${_pch_flags_file}"
       COMMENT "Precompiling ${_name} for ${_target} (C++)")
     #add_custom_command(
