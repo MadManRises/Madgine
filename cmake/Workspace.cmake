@@ -26,7 +26,6 @@ if (NOT WIN32)
 	set (outDir ${CMAKE_BINARY_DIR}/bin)
 	
 	if (CMAKE_ANDROID_ARCH_ABI)
-		set (ANDROID 1)
 		set (outDir ${outDir}/${CMAKE_ANDROID_ARCH_ABI})
 		set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
 	endif()

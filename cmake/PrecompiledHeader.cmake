@@ -173,7 +173,7 @@ function(add_precompiled_header _target _input)
     endif()
   endif(MSVC)
 
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CLANG OR GCC)
     get_filename_component(_name ${_input} NAME)
     set(_pch_header "${CMAKE_CURRENT_SOURCE_DIR}/${_input}")
     get_filename_component(_orig_dir ${_pch_header} DIRECTORY)
@@ -187,6 +187,10 @@ function(add_precompiled_header _target _input)
     set(_pch_flags_file "${_pch_binary_dir}/compile_flags.rsp")
     export_all_flags("${_pch_flags_file}")
     set(_compiler_FLAGS "@${_pch_flags_file}")
+	set(extra_flags "")
+	if (CLANG)
+		set(extra_flags "-emit-pch")
+	endif()
     #add_custom_command(
     #  OUTPUT "${_pchfile}"
     #  COMMAND "${CMAKE_COMMAND}" -E copy "${_pch_header}" "${_pchfile}"
@@ -194,7 +198,7 @@ function(add_precompiled_header _target _input)
     #  COMMENT "Updating ${_name}")
     add_custom_command(
       OUTPUT "${_output_cxx}"
-      COMMAND "${CMAKE_CXX_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
+      COMMAND "${CMAKE_CXX_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) ${extra_flags} -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
       DEPENDS "${_pch_header}" "${_pch_flags_file}"
       COMMENT "Precompiling ${_name} for ${_target} (C++)")
     #add_custom_command(
@@ -214,11 +218,10 @@ function(add_precompiled_header _target _input)
 	endif()
 	separate_arguments(_pch_compile_flags)
 	list(APPEND _pch_compile_flags -Winvalid-pch)
-	if(_PCH_FORCEINCLUDE)
-	  list(APPEND _pch_compile_flags -include "${_pch_header}")
-	else(_PCH_FORCEINCLUDE)
-	  list(APPEND _pch_compile_flags "-I${_pch_binary_dir}")
-	endif(_PCH_FORCEINCLUDE)
+	if(CLANG)
+	  list(APPEND _pch_compile_flags -include-pch "${_pch_header}")
+	endif()
+	list(APPEND _pch_compile_flags "-I${_pch_binary_dir}")
 
 	get_source_file_property(_object_depends "${_source}" OBJECT_DEPENDS)
 	if(NOT _object_depends)
@@ -237,5 +240,5 @@ function(add_precompiled_header _target _input)
 	  OBJECT_DEPENDS "${_object_depends}")
       endif()
     endforeach()
-  endif(CMAKE_COMPILER_IS_GNUCXX)
+  endif()
 endfunction()

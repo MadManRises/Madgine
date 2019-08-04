@@ -24,12 +24,21 @@ endif()
 
 once()
 
+if (CMAKE_ANDROID_ARCH_ABI)
+	set (ANDROID 1)
+endif ()
   
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_compile_options(-Wall -fpermissive)
+	set(GCC 1)
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT MSVC) #Ignore clang in windows with msvc compatibility
+	set(CLANG 1)
+endif()
+
+
+if (GCC OR CLANG)
+	add_compile_options(-Wall -fpermissive -fvisibility=hidden)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 endif ()
 
-if (NOT MSVC)
-	add_compile_options(-fvisibility=hidden)
-endif()
