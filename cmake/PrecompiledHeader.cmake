@@ -192,7 +192,11 @@ function(add_precompiled_header _target _input)
     #  COMMAND "${CMAKE_COMMAND}" -E copy "${_pch_header}" "${_pchfile}"
     #  DEPENDS "${_pch_header}"
     #  COMMENT "Updating ${_name}")
-	MESSAGE(STATUS ${CMAKE_CXX_FLAGS} ", " ${CMAKE_CXX_FLAGS_DEBUG})
+	get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
     add_custom_command(
       OUTPUT "${_output_cxx}"
       COMMAND "${CMAKE_CXX_COMPILER}" ${_compiler_FLAGS} $(CXX_FLAGS) -x c++-header -I "${_orig_dir}" -o "${_output_cxx}" "${_pch_header}"
