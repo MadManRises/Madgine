@@ -101,34 +101,37 @@ namespace CLI {
         if (!mInitialized) {
             mInitialized = true;
 
-            const std::vector<const char *> *args = nullptr;
-            const char *optionName = nullptr;
+            if (sSingleton) {
 
-            for (const char *option : mOptions) {
-                auto it = CLICore::getSingleton().mArguments.find(option);
-                if (it != CLICore::getSingleton().mArguments.end()) {
-                    if (args)
-                        LOG_WARNING("Different versions of argument '" << option << "' provided! Which version is used is undefined!");
+                const std::vector<const char *> *args = nullptr;
+                const char *optionName = nullptr;
 
-                    args = &it->second;
-                    optionName = option;
-                }
-            }
+                for (const char *option : mOptions) {
+                    auto it = CLICore::getSingleton().mArguments.find(option);
+                    if (it != CLICore::getSingleton().mArguments.end()) {
+                        if (args)
+                            LOG_WARNING("Different versions of argument '" << option << "' provided! Which version is used is undefined!");
 
-            if (args) {
-                if (args->size() < mMinArgumentCount) {
-                    LOG_ERROR("Unsufficient amount of arguments provided for option '" << optionName << "'!");
-                    if (mHelp)
-                        LOG_ERROR("\t" << mHelp);
-                    return;
+                        args = &it->second;
+                        optionName = option;
+                    }
                 }
-                if (args->size() > mMaxArgumentCount) {
-                    LOG_WARNING("Too many arguments provided for option '" << optionName << "'! Superfluous arguments will be discarded!");
-                }
-                if (!parse(*args)) {
-                    LOG_ERROR("Invalid parameters provided for option '" << optionName << "': " << StringUtil::join(*args, ", "));
-                    if (mHelp)
-                        LOG_ERROR("\t" << mHelp);
+
+                if (args) {
+                    if (args->size() < mMinArgumentCount) {
+                        LOG_ERROR("Unsufficient amount of arguments provided for option '" << optionName << "'!");
+                        if (mHelp)
+                            LOG_ERROR("\t" << mHelp);
+                        return;
+                    }
+                    if (args->size() > mMaxArgumentCount) {
+                        LOG_WARNING("Too many arguments provided for option '" << optionName << "'! Superfluous arguments will be discarded!");
+                    }
+                    if (!parse(*args)) {
+                        LOG_ERROR("Invalid parameters provided for option '" << optionName << "': " << StringUtil::join(*args, ", "));
+                        if (mHelp)
+                            LOG_ERROR("\t" << mHelp);
+                    }
                 }
             }
         }
