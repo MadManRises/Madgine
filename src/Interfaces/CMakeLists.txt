@@ -28,10 +28,6 @@ add_workspace_library(Interfaces ${sources} ${CMAKE_CURRENT_SOURCE_DIR}/../../mi
 configure_file(interfacesconfig.in.h interfacesconfig.h)
 target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-if (NOT STATIC_BUILD)
-	target_compile_definitions(Interfaces PUBLIC SHARED_LIB_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}" SHARED_LIB_PREFIX="${CMAKE_SHARED_LIBRARY_PREFIX}")
-endif()
-
 
 if (WIN32)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
