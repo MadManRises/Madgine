@@ -32,13 +32,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(GCC 1)
 endif()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT MSVC) #Ignore clang in windows with msvc compatibility
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT MSVC) #Ignore clang on windows with msvc compatibility
 	set(CLANG 1)
 endif()
 
 
 if (GCC OR CLANG)
-	add_compile_options(-Wall -fpermissive -fvisibility=hidden)
+	add_compile_options(-Wall -Wno-extra-qualification Wno-instantiation-after-specialization -fpermissive -fvisibility=hidden)
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined") #TODO
 endif ()
 

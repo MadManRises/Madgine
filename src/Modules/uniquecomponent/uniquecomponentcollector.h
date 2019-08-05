@@ -49,7 +49,7 @@ private:
     static size_t registerComponent()
     {
 
-        LOG("Registering Component: " << typeName<T>() << "...");
+        LOG("Registering Component: " << typeName<T>());
         sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<Collector_F<void, void *>>(&createComponent<T, Base, Ty>));
         sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
         sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);

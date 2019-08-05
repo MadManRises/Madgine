@@ -36,9 +36,14 @@ struct ApiMethod {
         return mFunction;
     }
 
-    size_t arguments_count() const
+    size_t argumentsCount() const
     {
         return mArgumentsCount;
+    }
+
+    bool isVariadic() const
+    {
+        return mIsVariadic;
     }
 
 private:

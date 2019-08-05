@@ -20,9 +20,9 @@ struct MODULES_EXPORT BoundApiMethod {
         return mMethod == other.mMethod && mScope == other.mScope;
     }
 
-    size_t arguments_count() const
+    size_t argumentsCount() const
     {
-        return mMethod.arguments_count();
+        return mMethod.argumentsCount();
     }
 
     ValueType operator()(const ArgumentList &args) const;

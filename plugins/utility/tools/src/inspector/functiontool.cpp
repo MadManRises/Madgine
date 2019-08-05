@@ -39,7 +39,7 @@ namespace Tools {
         mCurrentFunctionName = name;
         mCurrentFunction = method;
         mCurrentArguments.clear();
-        mCurrentArguments.resize(method.arguments_count());
+        mCurrentArguments.resize(method.argumentsCount());
     }
 
     void FunctionTool::refreshMethodCache()
@@ -99,7 +99,7 @@ namespace Tools {
             }
             if (changed) {
                 mCurrentArguments.clear();
-                mCurrentArguments.resize(mCurrentFunction.arguments_count());
+                mCurrentArguments.resize(mCurrentFunction.argumentsCount());
             }
             ImGui::SameLine();
             ImGui::Text("(");

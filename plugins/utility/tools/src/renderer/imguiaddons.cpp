@@ -468,7 +468,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
             ImGui::InputText("filter", filter);
         for (auto &[name, method] : methods) {
             if (!filter) {
-                if (expectedArgumentCount == -1 || method.arguments_count() == expectedArgumentCount) {
+                if (expectedArgumentCount == -1 || method.argumentsCount() == expectedArgumentCount) {
                     bool is_selected = (method == *m);
                     std::string fullItemName = method.scope().mType->mName + ("." + name);
                     if (ImGui::Selectable(fullItemName.c_str(), is_selected)) {

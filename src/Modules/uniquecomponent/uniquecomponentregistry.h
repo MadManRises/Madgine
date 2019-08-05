@@ -95,12 +95,17 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     {
     }
 
-    static UniqueComponentRegistry &sInstance();
+    static UniqueComponentRegistry &sInstance()
+    {
+        static UniqueComponentRegistry dummy;
+        return dummy;
+    }
+
     static std::vector<F> &sComponents()
     {
         return sInstance().mComponents;
     }
-    static const std::vector<const MetaTable*> &sTables()
+    static const std::vector<const MetaTable *> &sTables()
     {
         return sInstance().mTables;
     }
@@ -175,13 +180,6 @@ private:
 
     std::vector<CollectorInfo *> mUnloadedCollectors;
 };
-
-template <class _Base, class _Ty>
-inline UniqueComponentRegistry<_Base, _Ty> &UniqueComponentRegistry<_Base, _Ty>::sInstance()
-{
-    static UniqueComponentRegistry dummy;
-    return dummy;
-}
 
 }
 
