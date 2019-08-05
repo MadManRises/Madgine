@@ -38,7 +38,7 @@ endif()
 
 
 if (GCC OR CLANG)
-	add_compile_options(-Wall -Wno-extra-qualification Wno-instantiation-after-specialization -fpermissive -fvisibility=hidden)
+	add_compile_options(-Wall -Wno-extra-qualification -Wno-instantiation-after-specialization -fpermissive -fvisibility=hidden)
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined") #TODO
 endif ()
 
