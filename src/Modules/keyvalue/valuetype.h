@@ -22,7 +22,7 @@
 #include "typedscopeptr.h"
 
 namespace std {
-TEMPLATE_INSTANTIATION_EXPORT class variant<
+TEMPLATE_INSTANTIATION_IMPORT class variant<
     std::monostate,
     std::string,
     bool,
