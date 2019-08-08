@@ -9,6 +9,12 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Madgine/app/application.h"
+#include "gui/guisystem.h"
+#include "gui/widgets/toplevelwindow.h"
+
+#include "Interfaces/window/windowapi.h"
+
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
 namespace Engine {
@@ -33,7 +39,11 @@ namespace Tools {
     void TestTool::render()
     {
 
-        if (ImGui::Begin("TestTool")) {
+        if (ImGui::Begin("TestTool", &mVisible)) {
+            if (ImGui::Button("Create Tool Window")) {
+                Window::WindowSettings settings;
+                app(false).getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->createToolWindow(settings);
+            }
             ImGui::Text("ValueType size: %d", sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
         }

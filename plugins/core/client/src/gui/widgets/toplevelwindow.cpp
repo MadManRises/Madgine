@@ -35,6 +35,10 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/debug/profiler/profiler.h"
+
+#include "toolwindow.h"
+
 namespace Engine {
 
 namespace GUI {
@@ -54,7 +58,8 @@ namespace GUI {
             mInputHandlerSelector.emplace(std::make_tuple(mWindow, std::ref(gui.app(false)), this));
         }
 
-        mRenderWindow = gui.renderer().createWindow(this);
+        mRenderWindow = gui.renderer().createWindow(mWindow, this);
+        gui.app(false).addFrameListener(this);
 
         Widget *loading = createTopLevelImage("Loading");
         Widget *progress = loading->createChildBar("ProgressBar");
@@ -163,7 +168,7 @@ namespace GUI {
     {
         mUI->callFinalize();
 
-        mGui.app(false).removeFrameListener(input());
+        mGui.app(false).removeFrameListener(this);
         mWindow->removeListener(this);
 
         mUI.reset();
@@ -200,7 +205,7 @@ namespace GUI {
         Vector3 size = getScreenSize();
         Vector3 pos = Vector3::ZERO;
         for (WindowOverlay *overlay : mOverlays)
-            overlay->calculateAvailableScreenSpace(pos, size);
+            overlay->calculateAvailableScreenSpace(mWindow, pos, size);
         return std::make_pair(pos, size);
     }
 
@@ -388,6 +393,18 @@ namespace GUI {
         return *mUI;
     }
 
+    ToolWindow *TopLevelWindow::createToolWindow(const Window::WindowSettings &settings)
+    {
+        return mToolWindows.emplace_back(std::make_unique<ToolWindow>(*this, settings)).get();
+    }
+
+    void TopLevelWindow::destroyToolWindow(ToolWindow *w)
+    {
+        auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const std::unique_ptr<ToolWindow> &ptr) { return ptr.get() == w; });
+        assert(it != mToolWindows.end());
+        mToolWindows.erase(it);
+    }
+
     /*KeyValueMapList TopLevelWindow::maps()
 		{
 			return Scope::maps().merge(mTopLevelWidgets, mUI);
@@ -510,8 +527,8 @@ namespace GUI {
             if (overlay->injectPointerMove(arg))
                 return true;
         }
-
-        Widget *hoveredWidget = getHoveredWidget(arg.position - screenPos.xy(), screenSize, mHoveredWidget);
+		//TODO fix mouse pos
+        Widget *hoveredWidget = getHoveredWidget(arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) }, screenSize, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 
@@ -652,6 +669,26 @@ namespace GUI {
     void TopLevelWindow::closeWidget(Widget *widget)
     {
         widget->hide();
+    }
+
+    bool TopLevelWindow::frameStarted(std::chrono::microseconds)
+    {
+        mRenderWindow->beginFrame();
+        return true;
+    }
+
+    bool TopLevelWindow::frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask)
+    {
+        mRenderWindow->render();
+        return true;
+    }
+
+    bool TopLevelWindow::frameEnded(std::chrono::microseconds)
+    {
+        PROFILE();
+        renderOverlays();
+        mRenderWindow->endFrame();
+        return true;
     }
 
 }

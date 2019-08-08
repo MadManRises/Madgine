@@ -57,7 +57,8 @@ namespace Threading {
     {
         PROFILE();
         bool result = true;
-        for (FrameListener *listener : mListeners) {
+        std::vector<FrameListener*> listeners = mListeners;
+        for (FrameListener *listener : listeners) {
             result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
         }
 
@@ -89,8 +90,11 @@ namespace Threading {
     {
         PROFILE();
         bool result = true;
-        for (FrameListener *listener : mListeners) {
-            result &= listener->frameEnded(timeSinceLastFrame);
+        std::vector<FrameListener *> listeners = mListeners;
+        for (FrameListener *listener : listeners) {
+            auto it = std::find(mListeners.begin(), mListeners.end(), listener);
+            if (it != mListeners.end())
+				result &= listener->frameEnded(timeSinceLastFrame);
         }
         return result;
     }

@@ -33,7 +33,7 @@ namespace Engine {
 		void Metrics::render()
 		{
 
-			if (ImGui::Begin("Metrics")) {
+			if (ImGui::Begin("Metrics", &mVisible)) {
 				ImGui::Text("Time/frame: ");
 				ImGui::Duration(std::chrono::microseconds(static_cast<long long>(ImGui::GetIO().DeltaTime * 1000000.0f)));
 				plot(mFramesTrend, "Frames per Second");

@@ -3,70 +3,110 @@
 #include "windoweventlistener.h"
 
 namespace Engine {
-	namespace Window {
+namespace Window {
 
-		struct WindowSettings {
-			uintptr_t mHandle = 0;
+    struct WindowSettings {
+        uintptr_t mHandle = 0;
 
-			struct WindowVector { size_t x; size_t y; };
+        struct WindowVector {
+            int x;
+            int y;
+        };
 
-			WindowVector mSize = { 800, 600 };
-			
-			std::optional<WindowVector> mPosition;
+        WindowVector mSize = { 800, 600 };
 
-			const char *mTitle = "Interfaces - Window";
+        std::optional<WindowVector> mPosition;
 
-			bool mHidden = false;
-		};
+        const char *mTitle = "Interfaces - Window";
 
-		struct INTERFACES_EXPORT Window {
+        bool mHidden = false;
+        bool mHeadless = false;
+    };
 
-			Window(uintptr_t handle) : mHandle(handle) {}
+    struct INTERFACES_EXPORT Window {
 
-			void addListener(WindowEventListener *listener) {
-				mListeners.push_back(listener);
-			}
+        Window(uintptr_t handle)
+            : mHandle(handle)
+        {
+        }
 
-			void removeListener(WindowEventListener *listener) {
-				mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
-			}
+        void addListener(WindowEventListener *listener)
+        {
+            mListeners.push_back(listener);
+        }
 
-			virtual void beginFrame() = 0;
-			virtual void endFrame() = 0;
+        void removeListener(WindowEventListener *listener)
+        {
+            mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+        }
 
-			virtual size_t width() = 0;
-			virtual size_t height() = 0;
+        virtual void beginFrame() = 0;
+        virtual void endFrame() = 0;
 
-			virtual size_t renderWidth() = 0;
-			virtual size_t renderHeight() = 0;
+        virtual int width() = 0;
+        virtual int height() = 0;
 
-			virtual void destroy() = 0;
+        virtual int renderWidth() = 0;
+        virtual int renderHeight() = 0;
 
-			const uintptr_t mHandle;
+        virtual int x() = 0;
+        virtual int y() = 0;
 
-		protected:
-			void onResize(size_t width, size_t height) {
-				for (WindowEventListener *listener : mListeners)
-					listener->onResize(width, height);
-			}
+		virtual int renderX() = 0;
+        virtual int renderY() = 0;
 
-			void onClose() {
-				for (WindowEventListener *listener : mListeners)
-					listener->onClose();
-			}
+        virtual void setSize(int width, int height) = 0;
+        virtual void setRenderSize(int width, int height) = 0;
 
-			void onRepaint() {
-				for (WindowEventListener *listener : mListeners)
-					listener->onRepaint();
-			}
+        virtual void setPos(int x, int y) = 0;
+        virtual void setRenderPos(int x, int y) = 0;
 
-		private:
-			std::vector<WindowEventListener*> mListeners;
-		};
+		virtual void show() = 0;
+        virtual bool isMinimized() = 0;
 
-		INTERFACES_EXPORT Window * sCreateWindow(const WindowSettings &settings);
-		INTERFACES_EXPORT void sUpdate();
-		INTERFACES_EXPORT Window * sFromNative(uintptr_t handle);
+		virtual void focus() = 0;
+        virtual bool hasFocus() = 0;
 
-	}
+		virtual void setTitle(const char *title) = 0;
+
+        virtual void destroy() = 0;
+
+        const uintptr_t mHandle;
+
+    protected:
+        void onResize(size_t width, size_t height)
+        {
+            for (WindowEventListener *listener : mListeners)
+                listener->onResize(width, height);
+        }
+
+        void onClose()
+        {
+            for (WindowEventListener *listener : mListeners)
+                listener->onClose();
+        }
+
+        void onRepaint()
+        {
+            for (WindowEventListener *listener : mListeners)
+                listener->onRepaint();
+        }
+
+    private:
+        std::vector<WindowEventListener *> mListeners;
+    };
+
+    INTERFACES_EXPORT Window *sCreateWindow(const WindowSettings &settings);
+    INTERFACES_EXPORT void sUpdate();
+    INTERFACES_EXPORT Window *sFromNative(uintptr_t handle);
+
+	 struct MonitorInfo {
+        int x, y;
+        int width, height;
+    };
+
+    INTERFACES_EXPORT std::vector<MonitorInfo> listMonitors();
+
+
+}
 }

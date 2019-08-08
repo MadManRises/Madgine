@@ -14,7 +14,7 @@
 namespace Engine {
 namespace GUI {
 
-    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener {
+    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener, public Threading::FrameListener {
 
     public:
         TopLevelWindow(GUISystem &gui);
@@ -95,6 +95,13 @@ namespace GUI {
 
         UI::UIManager &ui();
 
+		ToolWindow *createToolWindow(const Window::WindowSettings &settings);
+        void destroyToolWindow(ToolWindow *w);
+
+		virtual bool frameStarted(std::chrono::microseconds) override;
+        virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
+        virtual bool frameEnded(std::chrono::microseconds) override;
+
     protected:
         void onClose() override;
         void onRepaint() override;
@@ -121,6 +128,8 @@ namespace GUI {
     private:
         std::map<std::string, Widget *> mWidgets;
         std::unique_ptr<UI::UIManager> mUI;
+
+		std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
         std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
         GUISystem &mGui;

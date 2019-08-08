@@ -308,7 +308,7 @@ bool SelectValueTypeTypes(std::variant<T...>, Engine::ValueType *v)
 bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name)
 {
     if (allowTypeSwitch) {
-        const float width = GetNextItemWidth() - GetFrameHeight();
+        const float width = CalcItemWidth() - GetFrameHeight();
 
         ImGui::PushID(name);
         BeginGroup();
@@ -354,8 +354,8 @@ bool SpanningTreeNode(const void *id, const char *label, bool leaf)
         ImGuiContext &g = *GImGui;
         const ImVec2 label_size = ImGui::CalcTextSize("asd", nullptr, false);
         const ImGuiStyle &style = g.Style;
-        const float text_base_offset_y = ImMax(0.0f, window->DC.CurrentLineTextBaseOffset); // Latch before ItemSize changes it
-        const float frame_height = ImMax(ImMin(window->DC.CurrentLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y);
+        const float text_base_offset_y = ImMax(0.0f, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
+        const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y);
         ImRect frame_bb = ImRect(window->DC.CursorPos, ImVec2(window->Pos.x + ImGui::GetContentRegionMax().x, window->DC.CursorPos.y + frame_height));
         ImGui::RenderArrow(ImVec2(style.FramePadding.x + frame_bb.Min.x, g.FontSize * 0.15f + text_base_offset_y + frame_bb.Min.y), *opened ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
     }
@@ -432,7 +432,7 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *ena
     PushID(m);
 
     for (int i = 0; i < 3; ++i) {
-        PushMultiItemsWidths(3, GetNextItemWidth());
+        PushMultiItemsWidths(3, CalcItemWidth());
         for (int j = 0; j < 3; ++j) {
             PushID(3 * i + j);
             if (enabled && !enabled[3 * i + j])
@@ -458,7 +458,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
     bool result = false;
 
     if (!label)
-        label = "";
+        label = "##testid";
 
     std::string current;
     if (m->scope())

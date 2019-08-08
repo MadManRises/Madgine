@@ -54,11 +54,6 @@ namespace Tools {
         return *this;
     }
 
-    ImGuiRoot &ToolBase::root()
-    {
-        return mRoot;
-    }
-
     const Core::MadgineObject *ToolBase::parent() const
     {
         return &mRoot;

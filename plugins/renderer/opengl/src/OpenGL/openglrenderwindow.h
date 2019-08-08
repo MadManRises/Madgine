@@ -6,29 +6,30 @@
 
 #include "util/opengltexture.h"
 
-
 namespace Engine {
-	namespace Render {
+namespace Render {
 
-		class MADGINE_OPENGL_EXPORT OpenGLRenderWindow : public RenderWindow {
-		public:
-			OpenGLRenderWindow(GUI::TopLevelWindow *w, ContextHandle context);
-			~OpenGLRenderWindow();
+    class MADGINE_OPENGL_EXPORT OpenGLRenderWindow : public RenderWindow {
+    public:
+        OpenGLRenderWindow(Window::Window *w, ContextHandle context, GUI::TopLevelWindow *mTopLevelWindow = nullptr);
+        ~OpenGLRenderWindow();
 
-			virtual void render() override;
+        virtual void render() override;
+        virtual void makeCurrent() override;
 
-			virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera * camera, const Vector2& size) override;
+        virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera *camera, const Vector2 &size) override;
 
-		private:
-			ContextHandle mContext;
+        const ContextHandle mContext;
+    private:
 
-			uint32_t mTextureCount = 0;
+        uint32_t mTextureCount = 0;
 
-			OpenGLShaderProgram mProgram;
+        OpenGLShaderProgram mProgram;
 
-			OpenGLTexture mDefaultTexture;
+        OpenGLTexture mDefaultTexture;
 
-		};
+		GUI::TopLevelWindow *mTopLevelWindow = nullptr;
+    };
 
-	}
+}
 }

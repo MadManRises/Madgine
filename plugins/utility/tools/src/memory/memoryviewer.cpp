@@ -327,7 +327,7 @@ namespace Engine
 		void MemoryViewer::render()
 		{
 			
-			if (ImGui::Begin("Memory Viewer"))
+			if (ImGui::Begin("Memory Viewer", &mVisible))
 			{
 				ImGui::Value("Total Memory", static_cast<unsigned int>(mTracker.totalMemory()));
 				ImGui::Value("Overhead Memory", static_cast<unsigned int>(mTracker.overhead()));

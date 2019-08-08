@@ -88,10 +88,10 @@ namespace CLI {
     }
 
     ParameterBase::ParameterBase(size_t minArgumentCount, size_t maxArgumentCount, std::vector<const char *> options, const char *help)
-        : mMinArgumentCount(minArgumentCount)
-        , mMaxArgumentCount(maxArgumentCount)
-        , mOptions(std::move(options))
+        : mOptions(std::move(options))
         , mHelp(help)
+        , mMinArgumentCount(minArgumentCount)
+        , mMaxArgumentCount(maxArgumentCount)
     {
         CLICore::parameters().emplace_back(this);
     }

@@ -4,28 +4,28 @@
 
 #include "../imgui/imgui.h"
 
-#include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 namespace Engine {
-	namespace Tools {
+namespace Tools {
 
-		ImGuiDemo::ImGuiDemo(ImGuiRoot & root) :
-			Tool<ImGuiDemo>(root)			
-		{
-		}
+    ImGuiDemo::ImGuiDemo(ImGuiRoot &root)
+        : Tool<ImGuiDemo>(root)
+    {
+    }
 
-		void ImGuiDemo::render()
-		{
-			ImGui::ShowDemoWindow();
-		}
+    void ImGuiDemo::render()
+    {
+        ImGui::ShowDemoWindow(&mVisible);
+    }
 
-		const char * ImGuiDemo::key() const
-		{
-			return "ImGuiDemo";
-		}
+    const char *ImGuiDemo::key() const
+    {
+        return "ImGuiDemo";
+    }
 
-	}
+}
 }
 
 UNIQUECOMPONENT(Engine::Tools::ImGuiDemo);

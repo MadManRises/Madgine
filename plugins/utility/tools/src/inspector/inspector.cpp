@@ -60,8 +60,8 @@ namespace Tools {
 
     void Inspector::render()
     {
-        if (ImGui::Begin("Inspector")) {
-            draw(&root().app(), "Application");
+        if (ImGui::Begin("Inspector", &mVisible)) {
+            draw(&app(false), "Application");
         }
         ImGui::End();
     }

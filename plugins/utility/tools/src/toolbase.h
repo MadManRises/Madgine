@@ -25,7 +25,7 @@ namespace Tools {
         bool isVisible();
         void setVisible(bool v);
 
-		ToolBase &getToolComponent(size_t index, bool = true);
+        ToolBase &getToolComponent(size_t index, bool = true);
         template <typename T>
         T &getTool()
         {
@@ -34,16 +34,14 @@ namespace Tools {
         ToolBase &getSelf(bool = true);
 
     protected:
-        ImGuiRoot &root();
 
         virtual const MadgineObject *parent() const override;
         virtual App::Application &app(bool = true) override;
         virtual bool init() override;
         virtual void finalize() override;
 
-    private:
-        ImGuiRoot &mRoot;
         bool mVisible;
+        ImGuiRoot &mRoot;
     };
 
 }

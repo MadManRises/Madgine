@@ -1,58 +1,53 @@
 #pragma once
 
+namespace Engine {
 
-namespace Engine
-{
+namespace UI {
+    class Handler;
+    class GameHandlerBase;
+    class GuiHandlerBase;
+    class UIManager;
+}
 
-	namespace UI
-	{
-		class Handler;
-		class GameHandlerBase;
-		class GuiHandlerBase;
-		class UIManager;
-	}
+namespace GUI {
+    class GUISystem;
+    class Widget;
+    class Bar;
+    class Button;
+    class SceneWindow;
+    class Checkbox;
+    class Combobox;
+    class TabWidget;
+    class Textbox;
+    class Label;
+    class Image;
+    class TopLevelWindow;
+    class ToolWindow;
 
-	namespace GUI
-	{
-		class GUISystem;		
-		class Widget;
-		class Bar;
-		class Button;
-		class SceneWindow;
-		class Checkbox;
-		class Combobox;
-		class TabWidget;
-		class Textbox;
-		class Label;
-		class Image;
-		class TopLevelWindow;
+    enum class Class;
 
-		enum class Class;
+    struct WindowOverlay;
 
-		struct WindowOverlay;
+    struct Vertex;
 
-		struct Vertex;
+}
 
-	}
+namespace Input {
+    class InputHandler;
+    class InputListener;
 
-	namespace Input
-	{
-		class InputHandler;
-		class InputListener;
+    struct KeyEventArgs;
+    struct PointerEventArgs;
 
-		struct KeyEventArgs;
-		struct PointerEventArgs;
+    namespace MouseButton {
+        enum MouseButton : unsigned char;
+    }
+}
 
-		namespace MouseButton
-		{
-			enum MouseButton : unsigned char;
-		}
-	}
-
-	namespace Render {
-		class RendererBase;
-		class RenderWindow;
-		struct RenderTarget;
-	}
+namespace Render {
+    class RendererBase;
+    class RenderWindow;
+    struct RenderTarget;
+}
 
 }

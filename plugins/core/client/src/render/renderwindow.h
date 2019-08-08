@@ -3,35 +3,35 @@
 #include "Modules/threading/framelistener.h"
 
 namespace Engine {
-	namespace Render {
+namespace Render {
 
-		class MADGINE_CLIENT_EXPORT RenderWindow : public Threading::FrameListener {
-		public:
-			RenderWindow(GUI::TopLevelWindow *w);
-			virtual ~RenderWindow();
+    class MADGINE_CLIENT_EXPORT RenderWindow {
+    public:
+        RenderWindow(Window::Window *w);
+        virtual ~RenderWindow();
 
-			virtual void render() = 0;
+        virtual void render() = 0;
 
-			virtual bool frameStarted(std::chrono::microseconds) override;
-			virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
-			virtual bool frameEnded(std::chrono::microseconds) override;
+        virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera *camera, const Vector2 &size) = 0;
 
-			virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera *camera, const Vector2 &size) = 0;
+        void addRenderTarget(RenderTarget *target);
+        void removeRenderTarget(RenderTarget *target);
 
-			void addRenderTarget(RenderTarget *target);
-			void removeRenderTarget(RenderTarget *target);
+        void beginFrame();
+        void endFrame();
 
-		protected:
-			virtual void renderOverlays();
+		virtual void makeCurrent() = 0;
 
-			void updateRenderTargets();
+    protected:
 
-			GUI::TopLevelWindow *window();
+        void updateRenderTargets();
 
-		private:
-			GUI::TopLevelWindow *mWindow;
-			std::vector<RenderTarget *> mRenderTargets;
-		};
+        Window::Window *window();
 
-	}
+    private:
+        Window::Window *mWindow;
+        std::vector<RenderTarget *> mRenderTargets;
+    };
+
+}
 }

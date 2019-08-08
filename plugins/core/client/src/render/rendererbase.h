@@ -14,7 +14,7 @@ namespace Engine {
 
 			void operator=(const RendererBase&) = delete;
 
-			virtual std::unique_ptr<RenderWindow> createWindow(GUI::TopLevelWindow *w) = 0;
+			virtual std::unique_ptr<RenderWindow> createWindow(Window::Window *w, GUI::TopLevelWindow *topLevel = nullptr, RenderWindow *sharedResources = nullptr) = 0;
 
 			virtual App::Application &app(bool = true) override;
 			virtual const Core::MadgineObject *parent() const override;

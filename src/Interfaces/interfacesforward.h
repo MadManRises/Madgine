@@ -31,6 +31,7 @@ namespace Debug {
 namespace Window {
     struct WindowEventListener;
     struct Window;
+    struct WindowSettings;
 }
 
 namespace Filesystem {

@@ -90,7 +90,7 @@ namespace Tools {
 
     void FunctionTool::render()
     {
-        if (ImGui::Begin("FunctionTool")) {
+        if (ImGui::Begin("FunctionTool", &mVisible)) {
             bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &mCurrentFunction, &mCurrentFunctionName);
             const ImGui::ValueTypePayload *payload;
             if (ImGui::DraggableValueTypeTarget(mCurrentFunction, &payload)) {
@@ -107,31 +107,31 @@ namespace Tools {
 
             bool first = true;
 
-			int i = 0;
+            int i = 0;
             for (ValueType &arg : mCurrentArguments) {
                 if (first) {
                     first = false;
                 } else {
                     ImGui::SameLine();
-                    ImGui::Text(", ");                    
+                    ImGui::Text(", ");
                 }
                 ImGui::PushID(i++);
                 ImGui::ValueType(&arg, true);
                 ImGui::DraggableValueTypeTarget(arg);
                 ImGui::PopID();
-				//ImGui::SameLine();
+                //ImGui::SameLine();
             }
 
             ImGui::Text(")");
 
-			if (!mCurrentFunction.method())
+            if (!mCurrentFunction.method())
                 ImGui::PushDisabled();
 
             if (ImGui::Button("Call")) {
                 mCurrentFunction(mCurrentArguments);
             }
 
-			if (!mCurrentFunction.method())
+            if (!mCurrentFunction.method())
                 ImGui::PopDisabled();
 
             if (ImGui::Button("Refresh Cache")) {

@@ -27,7 +27,7 @@ namespace Tools {
 
     void PluginManager::render()
     {
-        if (ImGui::Begin("Plugin Manager")) {
+        if (ImGui::Begin("Plugin Manager", &mVisible)) {
             static char nameBuffer[256];
             static char pathBuffer[256];
 

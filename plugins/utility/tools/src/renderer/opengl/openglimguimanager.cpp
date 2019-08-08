@@ -16,43 +16,46 @@
 #include "gui/widgets/toplevelwindow.h"
 
 namespace Engine {
-	namespace Tools {
+namespace Tools {
 
-		std::unique_ptr<ImGuiManager> createOpenGlManager(App::Application &app) {
-			return std::make_unique<OpenGLImGuiManager>(app);
-		}
+    std::unique_ptr<ImGuiManager> createOpenGlManager(App::Application &app)
+    {
+        return std::make_unique<OpenGLImGuiManager>(app);
+    }
 
-		OpenGLImGuiManager::OpenGLImGuiManager(App::Application & app) :
-			ImGuiManager(app)
-		{
-		}
+    OpenGLImGuiManager::OpenGLImGuiManager(App::Application &app)
+        : ImGuiManager(app)
+    {
+    }
 
-		void OpenGLImGuiManager::init()
-		{
-			ImGui_ImplOpenGL3_Init();
-			ImGui_ImplOpenGL3_CreateDeviceObjects();
-			ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
-		}
+    void OpenGLImGuiManager::init()
+    {
+        ImGui_ImplOpenGL3_Init();
+        ImGui_ImplOpenGL3_CreateDeviceObjects();
+        //ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
+    }
 
-		void OpenGLImGuiManager::finalize()
-		{
-			ImGui_ImplOpenGL3_Shutdown();
-		}
+    void OpenGLImGuiManager::finalize()
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+    }
 
-		void OpenGLImGuiManager::newFrame(float timeSinceLastFrame)
-		{
-			ImGuiIO& io = ImGui::GetIO();
+    void OpenGLImGuiManager::newFrame(float timeSinceLastFrame)
+    {
+        ImGuiIO &io = ImGui::GetIO();
 
-			io.DeltaTime = timeSinceLastFrame;
+        io.DeltaTime = timeSinceLastFrame;
 
-			Vector3 size = mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->getScreenSize();
-			
-			io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
+        GUI::TopLevelWindow &window = *mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front();
+        Vector3 size = window.getScreenSize();
 
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui::NewFrame();
+        io.BackendPlatformUserData = &window;
 
-		}
+        io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
 
-	}
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
+    }
+
+}
 }

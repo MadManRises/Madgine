@@ -26,7 +26,7 @@ namespace Input {
 
     SDLInputHandler::~SDLInputHandler()
     {
-        SDL_Quit();
+        //SDL_Quit();
     }
 
     MouseButton::MouseButton SDLInputHandler::convertMouseButton(Uint8 id)
