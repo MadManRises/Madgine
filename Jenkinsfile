@@ -43,58 +43,45 @@ def staticTask = {
     def configuration = it[1]
     def staticConfig = it[2]
 	
-    def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name;
+    def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
+	def parentName = toolchain.name + '-' + configuration.name  
 
-	//if (staticConfig?.trim())
-	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
+	def staticConfigFile = "test/${staticConfig.name}_${toolchain.name}.cfg"
 
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			stage("echo") {
+			stage("cmake") {
 				sh """
-					echo "test"
-				"""
-			}
-/*			if (toolchain.name != "emscripten") {
-				stage("cmake") {
-					sh """
-					if ${params.fullBuild}; then
-						if [ -d "${name}" ]; then 
-							rm -Rf ${name};
-						fi
+				if ${params.fullBuild}; then
+					if [ -d "${name}" ]; then 
+						rm -Rf ${name};
 					fi
-					mkdir -p ${name}
-					cd ${name}
-					cmake .. \
-					-DCMAKE_BUILD_TYPE=${configuration.name} \
-					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
-					"""
-							//    -DSTATIC_BUILD=${staticConfig}
-				}
-				stage("build") {				
+				fi
+				mkdir -p ${name}
+				cd ${name}
+				cmake .. \
+				-DCMAKE_BUILD_TYPE=${configuration.name} \
+				-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
+				-DPLUGIN_DEFINITION_FILE=${staticConfigFile} \
+				-DBUILD_SHARED_LIBS=OFF
+				"""						
+			}
+			stage("build") {				
+				sh """
+				cd ${name}
+				make all 
+				"""				
+			}
+			docker.image(toolchain.dockerImage).inside {
+				stage("Test") {
 					sh """
 					cd ${name}
-					make all 
-					"""				
+					ctest
+					"""
 				}
-				docker.image(toolchain.dockerImage).inside {
-					stage("Test") {
-						sh """
-						cd ${name}
-						ctest
-						"""
-					}
-				}           
-			} else {
-				
-			}
+			}           
 
-			def staticTasks = [:]
-			fillStatic = { def staticname, def args ->
-				staticTasks[staticname] = staticTask(toolchain, configuration, args.collect())
-			}
-			comboBuilder([staticConfigs.clone()], 0, fillStatic)   */ 
         }
     }
 }
@@ -106,12 +93,9 @@ def task = {
        the index will correspond to the position of this axis in axisList[] */
     def toolchain = it[0]
     def configuration = it[1]
-    //def staticConfig = it[2]
 	
     def name = toolchain.name + '-' + configuration.name  
 
-	//if (staticConfig?.trim())
-	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
 
     return {
         // This is where the important work happens for each combination
@@ -130,7 +114,6 @@ def task = {
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
 					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
 					"""
-							//    -DSTATIC_BUILD=${staticConfig}
 				}
 				stage("build") {				
 					sh """
@@ -149,7 +132,7 @@ def task = {
 			} else {
 				stage("dummy") {
 					sh """
-						echo "dummy"
+						echo "emscripten plugin build is not supported at the moment!"
 					"""
 				}
 			}
@@ -158,7 +141,7 @@ def task = {
 			def fillStatic = { def staticname, def args ->
 				staticTasks[staticname] = staticTask(args.collect())
 			}
-			comboBuilder([staticConfigs.clone()], 0, fillStatic, [toolchain, configuration], [toolchain.name, configuration.name])    
+			comboBuilder([staticConfigs.clone()], 2, fillStatic, [toolchain, configuration], [toolchain.name, configuration.name])    
 
 			parallel staticTasks
         }
