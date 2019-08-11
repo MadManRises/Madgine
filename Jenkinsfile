@@ -53,9 +53,11 @@ def staticTask = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			sh """
-				echo "test"
-			"""
+			stage("echo") {
+				sh """
+					echo "test"
+				"""
+			}
 /*			if (toolchain.name != "emscripten") {
 				stage("cmake") {
 					sh """
@@ -147,7 +149,8 @@ def task = {
 					}
 				}           
 			} else {
-				
+				stage("dummy") {
+				}
 			}
 
 			def staticTasks = [:]
