@@ -7,7 +7,7 @@ function(add_precompiled_header target header)
 	get_filename_component(name ${header} NAME_WE)
 
 	set(output_path "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}_PCH.dir")
-	set(output "${output_path}/${name}.cpp.${CMAKE_CXX_OUTPUT_EXTENSION}")
+	set(output "${output_path}/${name}.cpp${CMAKE_CXX_OUTPUT_EXTENSION}")
     
 	if (MSVC)
 		set(pch_compile_flags "\"/Fp${output}\" /Yc${CMAKE_CURRENT_SOURCE_DIR}/${header}")
