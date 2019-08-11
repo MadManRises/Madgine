@@ -150,6 +150,9 @@ def task = {
 				}           
 			} else {
 				stage("dummy") {
+					sh """
+						echo "dummy"
+					"""
 				}
 			}
 
