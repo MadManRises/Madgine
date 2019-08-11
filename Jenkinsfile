@@ -156,9 +156,9 @@ def task = {
 
 			def staticTasks = [:]
 			def fillStatic = { def staticname, def args ->
-				staticTasks[name + '-' + staticname] = staticTask(toolchain, configuration, args.collect())
+				staticTasks[staticname] = staticTask(args.collect())
 			}
-			comboBuilder([staticConfigs.clone()], 0, fillStatic, [], [])    
+			comboBuilder([staticConfigs.clone()], 0, fillStatic, [toolchain, configuration], [toolchain.name, configuration.name])    
 
 			parallel staticTasks
         }
