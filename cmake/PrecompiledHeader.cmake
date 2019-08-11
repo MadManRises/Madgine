@@ -20,16 +20,16 @@ function(add_precompiled_header target header)
 		endif()
 	endif()
 
-	set(source "${CMAKE_CURRENT_BINARY_DIR}/${name}.cpp")	
-	file(WRITE "${source}" "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${header}\"")
+	set(cppsource "${CMAKE_CURRENT_BINARY_DIR}/${name}.cpp")	
+	file(WRITE "${cppsource}" "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${header}\"")
 	set_source_files_properties(
-		${source}
+		${cppsource}
 		PROPERTIES
 		LANGUAGE CXX
 		COMPILE_FLAGS ${pch_compile_flags}
-		#OBJECT_OUTPUTS ${output}
+		#OBJECT_OUTPUTS ${output} #??
 	)
-	add_library(${target}_PCH OBJECT ${source})
+	add_library(${target}_PCH OBJECT ${cppsource})
 	add_dependencies(${target} ${target}_PCH)
 
 	target_include_directories(${target}_PCH PRIVATE $<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>)	

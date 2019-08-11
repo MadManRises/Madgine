@@ -43,7 +43,7 @@ endif()
 
 
 if (NOT BUILD_SHARED_LIBS)
-	add_compile_definitions(STATIC_BUILD)
+	add_definitions(-DSTATIC_BUILD)
 endif()
 
 if(MSVC)    

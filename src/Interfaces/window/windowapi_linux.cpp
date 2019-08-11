@@ -77,23 +77,23 @@ namespace Window {
             return true;
         }
 
-        virtual size_t width() override
+        virtual int width() override
         {
             return mWidth;
         }
 
-        virtual size_t height() override
+        virtual int height() override
         {
             return mHeight;
         }
 
-        virtual size_t renderWidth() override
+        virtual int renderWidth() override
         {
             //TODO
             return width();
         }
 
-        virtual size_t renderHeight() override
+        virtual int renderHeight() override
         {
             //TODO
             return height();
@@ -106,6 +106,67 @@ namespace Window {
         virtual void endFrame() override
         {
             glXSwapBuffers(sDisplay(), mHandle);
+        }
+
+		virtual int x() override
+        {
+            return 0;
+        }
+
+        virtual int y() override
+        {
+            return 0;
+        }
+
+        virtual int renderX() override
+        {
+            return 0;
+        }
+
+        virtual int renderY() override
+        {
+            return 0;
+        }
+
+        virtual void setSize(int width, int height) override
+        {
+            mWidth = width;
+            mHeight = height;
+        }
+
+        virtual void setRenderSize(int width, int height) override
+        {
+            setSize(width, height);
+        }
+
+        virtual void setPos(int width, int height) override
+        {
+        }
+
+        virtual void setRenderPos(int width, int height) override
+        {
+        }
+
+        virtual void show() override
+        {
+        }
+
+        virtual bool isMinimized() override
+        {
+            return false;
+        }
+
+        virtual void focus() override
+        {
+        }
+
+        virtual bool hasFocus() override
+        {
+            return true;
+        }
+
+        virtual void setTitle(const char *title) override
+        {
         }
 
         virtual void destroy() override
