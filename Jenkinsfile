@@ -46,7 +46,7 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "test/${staticConfig.name}_${toolchain.name}.cfg"
+	def staticConfigFile = "../test/${staticConfig.name}_${toolchain.name}.cfg"
 
     return {
         // This is where the important work happens for each combination
