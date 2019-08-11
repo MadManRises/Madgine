@@ -27,7 +27,7 @@ function(add_precompiled_header target header)
 		PROPERTIES
 		LANGUAGE CXX
 		COMPILE_FLAGS ${pch_compile_flags}
-		OBJECT_OUTPUTS ${output}
+		#OBJECT_OUTPUTS ${output}
 	)
 	add_library(${target}_PCH OBJECT ${source})
 	add_dependencies(${target} ${target}_PCH)
