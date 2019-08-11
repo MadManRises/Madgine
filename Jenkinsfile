@@ -36,7 +36,6 @@ def comboBuilder
 def comboEntry = []
 def comboNames = []
 
-
 def staticTask = {
     // builds and returns the task for each combination
 
