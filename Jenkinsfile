@@ -173,7 +173,7 @@ comboBuilder = { def axes, int level, def f ->
             comboBuilder(axes.drop(1), level + 1)
         }
         else {
-            fill(comboNames.join("-"), comboEntry)
+            f(comboNames.join("-"), comboEntry)
         }
     }
 }
