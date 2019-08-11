@@ -170,7 +170,7 @@ comboBuilder = { def axes, int level, def f ->
         comboEntry[level] = entry
 		comboNames[level] = entry.name
         if (axes.size() > 1 ) {
-            comboBuilder(axes.drop(1), level + 1)
+            comboBuilder(axes.drop(1), level + 1, f)
         }
         else {
             f(comboNames.join("-"), comboEntry)
