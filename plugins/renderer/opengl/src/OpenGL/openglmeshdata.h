@@ -1,3 +1,4 @@
+#pragma once
 
 #include "Modules/math/vector4.h"
 #include "util/openglbuffer.h"

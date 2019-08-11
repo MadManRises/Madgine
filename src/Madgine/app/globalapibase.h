@@ -35,7 +35,7 @@ namespace Engine
 
 			Scene::SceneManager &sceneMgr(bool = true);
 
-			Scripting::GlobalScopeBase &globalScope();
+			//Scripting::GlobalScopeBase &globalScope();
 
 			GlobalAPIBase &getSelf(bool = true);
 		

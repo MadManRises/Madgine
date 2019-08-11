@@ -95,11 +95,11 @@ namespace Tools {
                 ImU32 resizeColor = IM_COL32(0, 255, 255, 255);
                 if (io.KeyCtrl) {
                     resizeMode = RELATIVE;
-                    ImU32 resizeColor = IM_COL32(0, 255, 0, 255);
+                    resizeColor = IM_COL32(0, 255, 0, 255);
                 }
                 if (io.KeyAlt) {
                     resizeMode = ABSOLUTE;
-                    ImU32 resizeColor = IM_COL32(0, 0, 255, 255);
+                    resizeColor = IM_COL32(0, 0, 255, 255);
                 }
 
                 if (!io.WantCaptureMouse) {
@@ -137,13 +137,13 @@ namespace Tools {
                     if (bottomBorder || mDraggingBottom)
                         background->AddLine(bounds.bottomLeft(), bounds.bottomRight(), resizeColor, thickness);
 
-                    if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse - screenPos.xy(), screenSize, borderSize)) {
-                        mMouseDown = true;
-                        mDraggingLeft = leftBorder;
-                        mDraggingRight = rightBorder;
-                        mDraggingTop = topBorder;
-                        mDraggingBottom = bottomBorder;
-                    }
+                if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse, screenSize, screenPos, borderSize)) {
+                    mMouseDown = true;
+                    mDraggingLeft = leftBorder;
+                    mDraggingRight = rightBorder;
+                    mDraggingTop = topBorder;
+                    mDraggingBottom = bottomBorder;
+                }
 
                     if (mMouseDown && dragDistance.length() >= io.MouseDragThreshold && !mDragging) {
                         mSelected->saveGeometry();
@@ -155,7 +155,7 @@ namespace Tools {
 
                     auto [pos, size] = mSelected->savedGeometry();
 
-                    float mod[2][2] { 0 };
+                    float mod[2][2] { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
                     Vector2 relDragDistance = dragDistance / (size * screenSize).xy();
 
                     switch (resizeMode) {

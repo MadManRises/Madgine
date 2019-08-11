@@ -19,8 +19,8 @@ namespace Engine
 		{
 			ENTITYCOMPONENT_IMPL(SkeletonVisualizer, ServerSkeletonVisualizer);
 
-			ServerSkeletonVisualizer::ServerSkeletonVisualizer(Entity& entity, const Scripting::LuaTable& table) :
-				EntityComponent(entity, table)
+			ServerSkeletonVisualizer::ServerSkeletonVisualizer(Entity& entity/*, const Scripting::LuaTable& table*/) :
+				EntityComponent(entity/*, table*/)
 			{
 			}
 

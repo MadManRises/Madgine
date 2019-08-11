@@ -16,8 +16,8 @@ namespace Engine
 	namespace Render 
 	{
 
-		OpenGLShaderLoader::OpenGLShaderLoader(Resources::ResourceManager & mgr) :
-			ResourceLoader(mgr, { ".glsl" })
+		OpenGLShaderLoader::OpenGLShaderLoader() :
+			ResourceLoader({ ".glsl" })
 		{
 		}
 

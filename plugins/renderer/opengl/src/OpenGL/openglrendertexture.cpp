@@ -24,7 +24,6 @@ namespace Render {
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size)
         : RenderTarget(window, camera, size)
         , mIndex(index)
-        , mWindow(window)
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");

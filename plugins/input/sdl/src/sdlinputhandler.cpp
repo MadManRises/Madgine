@@ -14,13 +14,13 @@
 namespace Engine {
 namespace Input {
 
-    SDLInputHandler::SDLInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args)
-        : UniqueComponent(std::get<1>(args), std::get<2>(args))
+    SDLInputHandler::SDLInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
+        : UniqueComponent(app, listener)
     {
         auto result = SDL_Init(SDL_INIT_VIDEO);
         assert(result == 0);
         mWindow
-            = SDL_CreateWindowFrom(reinterpret_cast<const void *>(std::get<0>(args)->mHandle));
+            = SDL_CreateWindowFrom(reinterpret_cast<const void *>(window->mHandle));
         assert(mWindow);
     }
 

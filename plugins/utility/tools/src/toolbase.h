@@ -40,7 +40,7 @@ namespace Tools {
         virtual bool init() override;
         virtual void finalize() override;
 
-        bool mVisible;
+        bool mVisible = false;
         ImGuiRoot &mRoot;
     };
 

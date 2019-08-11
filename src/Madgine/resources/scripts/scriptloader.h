@@ -12,7 +12,7 @@ namespace Engine
 			class MADGINE_BASE_EXPORT ScriptLoader : public Resources::ResourceLoader<ScriptLoader, MethodHolder>
 			{
 			public:
-				ScriptLoader(Resources::ResourceManager &mgr);
+				ScriptLoader();
 				virtual ~ScriptLoader();
 
 

@@ -117,7 +117,7 @@ namespace Network {
 
 namespace Plugins {
     class PluginManager;
-    class Plugin;
+    struct Plugin;
     class PluginSection;
     struct PluginListener;
 
@@ -173,6 +173,8 @@ class Matrix3;
 class Matrix4;
 
 struct TypeInfo;
+
+struct Ray;
 }
 
 struct lua_State;

@@ -9,7 +9,7 @@ namespace Engine {
 namespace Input {
 
     struct MADGINE_SDLINPUT_EXPORT SDLInputHandler : public InputHandlerComponent<SDLInputHandler> {
-        SDLInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args);
+        SDLInputHandler(Window::Window *window, App::Application &app, InputListener *listener);
         ~SDLInputHandler();
 
         MouseButton::MouseButton convertMouseButton(Uint8 id);

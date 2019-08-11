@@ -21,10 +21,7 @@
 
 #include "typedscopeptr.h"
 
-
 namespace Engine {
-
-
 
 struct MODULES_EXPORT ValueType {
 
@@ -44,8 +41,9 @@ struct MODULES_EXPORT ValueType {
         Vector2,
         KeyValueVirtualIterator,
         BoundApiMethod,
-		ApiMethod,
-        Scripting::LuaTable>;
+        ApiMethod
+        //,Scripting::LuaTable
+        >;
 
 private:
     template <class T>
@@ -71,7 +69,7 @@ public:
         KeyValueVirtualIteratorValue,
         BoundApiMethodValue,
         ApiMethodValue,
-        LuaTableValue,
+        //LuaTableValue,
 
         MAX_VALUETYPE_TYPE
     };
@@ -129,8 +127,8 @@ public:
         clear();
     }
 
-    static ValueType fromStack(lua_State *state, int index);
-    int push(lua_State *state) const;
+    /*static ValueType fromStack(lua_State *state, int index);
+    int push(lua_State *state) const;*/
 
     void clear()
     {
@@ -346,7 +344,7 @@ public:
         return std::visit(std::forward<V>(visitor), mUnion);
     }
 
-	template <typename V>
+    template <typename V>
     decltype(auto) visit(V &&visitor) const &&
     {
         return std::visit(std::forward<V>(visitor), std::move(mUnion));
@@ -362,7 +360,7 @@ public:
     template <class T>
     bool is() const
     {
-        if constexpr (_isValueType<T>::value) {            
+        if constexpr (_isValueType<T>::value) {
             return std::holds_alternative<T>(mUnion);
         } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
         } else if constexpr (std::is_same_v<T, ValueType>) {
@@ -418,7 +416,7 @@ public:
 private:
     //Scripting::APIHelper::Userdata *pushUserdata(lua_State *state, const Scripting::APIHelper::Userdata &data) const;
 
-    static int apiMethodCaller(lua_State *);
+    //static int apiMethodCaller(lua_State *);
 
     Union mUnion;
 };

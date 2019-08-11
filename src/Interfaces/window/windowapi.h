@@ -5,6 +5,12 @@
 namespace Engine {
 namespace Window {
 
+	struct PlatformCapabilities {
+        bool mSupportMultipleWindows;
+	};
+
+	INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;
+
     struct WindowSettings {
         uintptr_t mHandle = 0;
 

@@ -10,4 +10,4 @@ add_plugin(EmscriptenInput Madgine Input ${sources} PRECOMPILED_HEADER src/emscr
 
 
 
-target_link_libraries(EmscriptenInput PUBLIC Client)
+target_link_plugins(EmscriptenInput Client)

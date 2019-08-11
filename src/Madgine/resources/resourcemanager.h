@@ -10,8 +10,8 @@ namespace Engine
 {
 	namespace Resources
 	{
-		class MADGINE_BASE_EXPORT ResourceManager 
-#ifndef STATIC_BUILD
+		class MADGINE_BASE_EXPORT ResourceManager final
+#if ENABLE_PLUGINS
 			: Plugins::PluginListener
 #endif
 		{
@@ -51,7 +51,7 @@ namespace Engine
 
 			void init();
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 		protected:
 			void onPluginLoad(const Plugins::Plugin *plugin) override;
 			bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;

@@ -8,7 +8,7 @@ namespace Engine
 		class MADGINE_BASE_EXPORT ResourceLoaderBase
 		{
 		public:
-			ResourceLoaderBase(ResourceManager &mgr, std::vector<std::string> &&extensions, bool autoLoad=false);
+			ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad=false);
 			virtual ~ResourceLoaderBase() = default;			
 
 			virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) = 0;
@@ -20,8 +20,6 @@ namespace Engine
 			size_t extensionIndex(const std::string &ext) const;
 
 		private:
-			ResourceManager &mMgr;
-
 			std::vector<std::string> mExtensions;
 
 			bool mAutoLoad;

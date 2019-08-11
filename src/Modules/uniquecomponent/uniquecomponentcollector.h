@@ -2,7 +2,7 @@
 
 #include "uniquecomponentregistry.h"
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "../reflection/classname.h"
 #include "../keyvalue/metatable.h"
@@ -13,12 +13,12 @@
 
 namespace Engine {
 
-template <class _Base, class _Ty>
+template <class _Base, class... _Ty>
 struct UniqueComponentCollector {
     typedef _Base Base;
-    typedef _Ty Ty;
-    typedef Collector_F<Base, Ty> F;
-    typedef UniqueComponentRegistry<Base, Ty> Registry;
+    typedef std::tuple<_Ty...> Ty;
+    typedef Collector_F<Base, _Ty...> F;
+    typedef UniqueComponentRegistry<Base, _Ty...> Registry;
 
     UniqueComponentCollector()
     {
@@ -50,7 +50,7 @@ private:
     {
 
         LOG("Registering Component: " << typeName<T>());
-        sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<Collector_F<void, void *>>(&createComponent<T, Base, Ty>));
+        sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<Collector_F<void, void *>>(&createComponent<T, Base, _Ty...>));
         sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
         sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);
         return sInstance().mInfo.mComponents.size() - 1;
@@ -96,8 +96,8 @@ public:
     };
 };
 
-template <class _Base, class _Ty>
-UniqueComponentCollector<_Base, _Ty> &UniqueComponentCollector<_Base, _Ty>::sInstance()
+template <class _Base, class... _Ty>
+UniqueComponentCollector<_Base, _Ty...> &UniqueComponentCollector<_Base, _Ty...>::sInstance()
 {
     static UniqueComponentCollector dummy;
     return dummy;
@@ -109,11 +109,11 @@ UniqueComponentCollector<_Base, _Ty> &UniqueComponentCollector<_Base, _Ty>::sIns
 
 namespace Engine {
 
-template <class _Base, class _Ty>
+template <class _Base, class... _Ty>
 struct UniqueComponentCollector {
     typedef _Base Base;
-    typedef _Ty Ty;
-    typedef UniqueComponentRegistry<Base, Ty> Registry;
+    typedef std::tuple<_Ty...> Ty;
+    typedef UniqueComponentRegistry<Base, _Ty...> Registry;
 };
 
 }

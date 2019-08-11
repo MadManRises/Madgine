@@ -1,5 +1,7 @@
 #pragma once
 
+#if ENABLE_THREADING
+
 #include "../app/application.h"
 #include "../app/appsettings.h"
 #include "Modules/threading/workgrouphandle.h"
@@ -49,3 +51,5 @@ namespace Engine
 		};
 	}
 }
+
+#endif

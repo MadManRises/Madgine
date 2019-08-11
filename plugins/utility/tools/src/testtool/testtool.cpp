@@ -32,7 +32,7 @@ namespace Tools {
             { typeid(std::get<Is>(std::declval<ValueType::Union>())).name(), sizeof(std::get<Is>(std::declval<ValueType::Union>())) }...
         };
         for (auto [name, size] : data) {
-            ImGui::Text("  %s size: %d", name, size);
+            ImGui::Text("  %s size: %lu", name, size);
         }
     }
 
@@ -43,8 +43,10 @@ namespace Tools {
             if (ImGui::Button("Create Tool Window")) {
                 Window::WindowSettings settings;
                 app(false).getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->createToolWindow(settings);
-            }
-            ImGui::Text("ValueType size: %d", sizeof(ValueType));
+            }            
+			ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
+
+            ImGui::Text("ValueType size: %lu", sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
         }
         ImGui::End();

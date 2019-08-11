@@ -13,8 +13,8 @@ namespace Engine
 	{
 		namespace Parsing
 		{
-			ScriptLoader::ScriptLoader(Resources::ResourceManager &mgr) :
-				ResourceLoader(mgr, { ".lua" }, true)
+			ScriptLoader::ScriptLoader() :
+				ResourceLoader({ ".lua" }, true)
 			{
 			}
 

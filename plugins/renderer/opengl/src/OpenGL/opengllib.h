@@ -36,6 +36,7 @@ inline void glCheck() {
 
 #if WINDOWS
 
+#undef NO_ERROR
 typedef HGLRC ContextHandle;
 
 #elif LINUX

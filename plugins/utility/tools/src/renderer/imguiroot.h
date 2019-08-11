@@ -11,7 +11,7 @@ namespace Engine {
 namespace Tools {
 
     class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPI<ImGuiRoot>, public Threading::FrameListener
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
         ,
                                            public Plugins::PluginListener
 #endif
@@ -26,7 +26,7 @@ namespace Tools {
         bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
         bool aboutToUnloadPlugin(const Plugins::Plugin *p) override;
         void onPluginLoad(const Plugins::Plugin *p) override;
 #endif

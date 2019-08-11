@@ -55,7 +55,7 @@ namespace GUI {
         if (settings.mInput) {
             mExternalInput = static_cast<Input::InputHandler *>(settings.mInput);
         } else {
-            mInputHandlerSelector.emplace(std::make_tuple(mWindow, std::ref(gui.app(false)), this));
+            mInputHandlerSelector.emplace(mWindow, gui.app(false), this);
         }
 
         mRenderWindow = gui.renderer().createWindow(mWindow, this);
@@ -444,16 +444,16 @@ namespace GUI {
         return false;
     }
 
-    static bool propagateInput(Widget *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, bool (Widget::*f)(const Input::PointerEventArgs &))
+    static bool propagateInput(Widget *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, const Vector3 &screenPos, bool (Widget::*f)(const Input::PointerEventArgs &))
     {
         if (!w->isVisible())
             return false;
 
-        if (!w->containsPoint(arg.position, screenSize))
+        if (!w->containsPoint(arg.position, screenSize, screenPos))
             return false;
 
         for (Widget *c : w->children()) {
-            if (propagateInput(c, arg, screenSize, f))
+            if (propagateInput(c, arg, screenSize, screenPos, f))
                 return true;
         }
         return (w->*f)(arg);
@@ -466,10 +466,10 @@ namespace GUI {
                 return true;
         }
 
-        Vector3 screenSize = getScreenSize();
+        auto [screenPos, screenSize] = getAvailableScreenSpace();
 
         for (Widget *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, &Widget::injectPointerPress))
+            if (propagateInput(w, arg, screenSize, screenSize, &Widget::injectPointerPress))
                 return true;
         }
         return false;
@@ -482,10 +482,10 @@ namespace GUI {
                 return true;
         }
 
-        auto [_, screenSize] = getAvailableScreenSpace();
+        auto [screenPos, screenSize] = getAvailableScreenSpace();
 
         for (Widget *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, &Widget::injectPointerRelease))
+            if (propagateInput(w, arg, screenSize, screenPos, &Widget::injectPointerRelease))
                 return true;
         }
         return false;

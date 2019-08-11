@@ -1,4 +1,4 @@
-#include "Interfaces/commonlib.h"
+#include "Modules/moduleslib.h"
 
 #include "Modules/plugins/binaryinfo.h"
 

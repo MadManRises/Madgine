@@ -17,7 +17,7 @@ namespace Scene {
             Entity(const Entity &, bool local);
             Entity(Entity &&, bool local);
 
-            Entity(SceneManager &sceneMgr, bool local, const std::string &name, const Scripting::LuaTable &behavior = {});
+            Entity(SceneManager &sceneMgr, bool local, const std::string &name/*, const Scripting::LuaTable &behavior = {}*/);
             Entity(const Entity &) = delete;
             ~Entity();
 
@@ -55,7 +55,7 @@ namespace Scene {
 
             bool hasComponent(const std::string &name);
 
-            EntityComponentBase *addComponent(const std::string &name, const Scripting::LuaTable &table = {});
+            EntityComponentBase *addComponent(const std::string &name/*, const Scripting::LuaTable &table = {}*/);
             void removeComponent(const std::string &name);
 
             void writeState(Serialize::SerializeOutStream &of) const override;
@@ -85,7 +85,7 @@ namespace Scene {
             App::Application &app(bool = true);
 
         protected:
-            EntityComponentBase *addComponentSimple(const std::string &name, const Scripting::LuaTable &table = {});
+            EntityComponentBase *addComponentSimple(const std::string &name/*, const Scripting::LuaTable &table = {}*/);
 
             //KeyValueMapList maps() override;
 

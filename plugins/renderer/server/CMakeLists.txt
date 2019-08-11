@@ -2,8 +2,6 @@ cmake_minimum_required (VERSION 2.6)
 
 Project(Server)
 
-find_package(Threads REQUIRED)
-
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src Server serverforward.h serverlib.h)
@@ -15,9 +13,12 @@ FolderSources(sources src Server serverforward.h serverlib.h)
 add_plugin(Server Madgine Renderer ${sources} PRECOMPILED_HEADER src/Server/serverlib.h)
 
 
-target_link_libraries(Server PUBLIC Base)
+target_link_plugins(Server Base)
 
-target_link_libraries(Server PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+if (INTERFACES_ENABLE_THREADING)
+	find_package(Threads REQUIRED)
+	target_link_libraries(Server PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
  
 if (BUILD_TESTING)

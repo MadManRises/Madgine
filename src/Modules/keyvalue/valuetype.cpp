@@ -10,10 +10,10 @@
 
 #include "../scripting/datatypes/argumentlist.h"
 
-extern "C" {
+/*extern "C" {
 #include "../lua/lauxlib.h"
 #include "../lua/lua.h"
-}
+}*/
 
 namespace Engine {
 std::string ValueType::toString() const
@@ -92,14 +92,14 @@ std::string ValueType::getTypeString(Type type)
         return "Iterator";
     case Type::BoundApiMethodValue:
         return "Bound Method";
-    case Type::LuaTableValue:
-        return "Lua Table";
+    /*case Type::LuaTableValue:
+        return "Lua Table";*/
 	default:
         throw 0;
     }
 }
 
-ValueType ValueType::fromStack(lua_State *state, int index)
+/*ValueType ValueType::fromStack(lua_State *state, int index)
 {
     switch (lua_type(state, index)) {
     case LUA_TBOOLEAN:
@@ -219,7 +219,7 @@ int ValueType::apiMethodCaller(lua_State *state)
         luaL_error(state, "First argument has to be a Scope-type!");
     TypedScopePtr scope = v.as<TypedScopePtr>();
     return method(scope, args).push(state);
-}
+}*/
 }
 
 std::ostream &operator<<(std::ostream &stream,

@@ -51,9 +51,6 @@
 #include "inspector/layoutloader.h"
 #endif
 #ifdef BUILD_Base
-#include "Madgine/resources/scripts/scriptloader.h"
-#endif
-#ifdef BUILD_Base
 #include "Madgine/scene/scenecomponentcollector.h"
 #endif
 #ifdef BUILD_Tools
@@ -234,9 +231,6 @@ const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderC
 #ifdef BUILD_Tools
         &table<Engine::Tools::LayoutLoader>(),
 #endif
-#ifdef BUILD_Base
-        &table<Engine::Scripting::Parsing::ScriptLoader>(),
-#endif
 
     };
     return dummy;
@@ -251,9 +245,6 @@ std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Res
 #endif
 #ifdef BUILD_Tools
         createComponent<Engine::Tools::LayoutLoader>,
-#endif
-#ifdef BUILD_Base
-        createComponent<Engine::Scripting::Parsing::ScriptLoader>,
 #endif
 
     };
@@ -276,13 +267,6 @@ template <>
 size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
-#endif
-#ifdef BUILD_Base
-constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Base = ACC;
-template <>
-size_t component_index<Engine::Scripting::Parsing::ScriptLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Base + 0; }
-#undef ACC
-#define ACC CollectorBaseIndex_ResourceLoaderBase_Base + 1
 #endif
 
 #undef ACC

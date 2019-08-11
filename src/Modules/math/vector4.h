@@ -55,7 +55,7 @@ namespace Engine
 		{
 		}
 
-		explicit Vector4(const float afCoordinate[4])
+		Vector4(const float afCoordinate[4])
 			: x(afCoordinate[0]),
 			  y(afCoordinate[1]),
 			  z(afCoordinate[2]),
@@ -791,16 +791,16 @@ namespace Engine
 		}
 
 		// special points
-		static const Vector4 ZERO;
-		static const Vector4 UNIT_X;
-		static const Vector4 UNIT_Y;
-		static const Vector4 UNIT_Z;
-		static const Vector4 UNIT_W;
-		static const Vector4 NEGATIVE_UNIT_X;
-		static const Vector4 NEGATIVE_UNIT_Y;
-		static const Vector4 NEGATIVE_UNIT_Z;
-		static const Vector4 NEGATIVE_UNIT_W;
-		static const Vector4 UNIT_SCALE;
+                static const constexpr float ZERO[] { 0, 0, 0, 0 };
+                static const constexpr float UNIT_X[] { 1, 0, 0, 0 };
+                static const constexpr float UNIT_Y[] { 0, 1, 0, 0 };
+                static const constexpr float UNIT_Z[] { 0, 0, 1, 0 };
+                static const constexpr float UNIT_W[] { 0, 0, 0, 1 };
+                static const constexpr float NEGATIVE_UNIT_X[] { -1, 0, 0, 0 };
+                static const constexpr float NEGATIVE_UNIT_Y[] { 0, -1, 0, 0 };
+                static const constexpr float NEGATIVE_UNIT_Z[] { 0, 0, -1, 0 };
+                static const constexpr float NEGATIVE_UNIT_W[] { 0, 0, 0, -1 };
+                static const constexpr float UNIT_SCALE[] { 1, 1, 1, 1 };
 
 		/** Function for writing to a stream.
 		*/

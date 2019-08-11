@@ -3,6 +3,7 @@
 #include "Modules/math/vector3.h"
 #include "Modules/math/vector4.h"
 #include "Modules/math/quaternion.h"
+#include "Modules/math/ray.h"
 #include "Modules/keyvalue/scopebase.h"
 
 namespace Engine
@@ -37,6 +38,8 @@ namespace Engine
 
 			const std::vector<Entity::Entity*> &visibleEntities() const;
 			void setVisibleEntities(std::vector<Entity::Entity*> &&entities);
+
+						Ray mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize);
 
 		private:
 			Vector3 mPosition;

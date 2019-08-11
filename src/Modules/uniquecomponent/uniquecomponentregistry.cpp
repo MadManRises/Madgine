@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "uniquecomponentregistry.h"
 

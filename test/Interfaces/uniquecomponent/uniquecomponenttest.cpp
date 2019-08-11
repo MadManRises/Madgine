@@ -17,8 +17,8 @@ TEST(UniqueComponent, Registry)
 {
 	Engine::Threading::WorkGroup wg;
 
-#ifndef STATIC_BUILD
-	Engine::Plugins::PluginManager pmgr{ "Test" };
+#if ENABLE_PLUGINS
+	Engine::Plugins::PluginManager pmgr;
 
 	Engine::UniqueComponentCollectorManager cmgr{ pmgr };
 #endif
@@ -27,7 +27,7 @@ TEST(UniqueComponent, Registry)
 
 	::Test::TestContainer<std::vector> v{ driver };
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 	ASSERT_EQ(v.size(), 0);
 
 	ASSERT_TRUE(pmgr["Test"].loadPlugin("LibA"));
@@ -44,7 +44,7 @@ TEST(UniqueComponent, Registry)
 
 	ASSERT_NE(indexA, indexB);
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 	ASSERT_TRUE(pmgr["Test"].unloadPlugin("LibA"));
 
 	ASSERT_EQ(v.size(), 1);

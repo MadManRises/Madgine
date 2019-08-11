@@ -10,6 +10,10 @@
 namespace Engine {
 namespace Window {
 
+		DLL_EXPORT const PlatformCapabilities platformCapabilities {
+        true
+    };
+
     static Atom WM_DELETE_WINDOW;
 
     DLL_EXPORT Display *sDisplay()

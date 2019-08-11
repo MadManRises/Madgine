@@ -13,7 +13,7 @@ FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.cpp t
 	FolderSources(sources src pluginmanager pluginmanager.cpp pluginmanager.h)
 	FolderSources(sources src profiler profiler.cpp profiler.h)
 	FolderSources(sources src renderer imguiaddons.cpp imguiaddons.h imguidemo.cpp imguidemo.h imguimanager.cpp imguimanager.h imguiroot.cpp imguiroot.h)
-	if (NOT STATIC_BUILD OR PLUGINSELECTION_Renderer_OpenGL)
+	if (MODULES_ENABLE_PLUGINS OR PLUGINSELECTION_Renderer_OpenGL)
 		FolderSources(sources renderer opengl openglimguimanager.cpp openglimguimanager.h)
 	endif()
 	FolderSources(sources src testtool testtool.cpp testtool.h)
@@ -23,9 +23,7 @@ FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.cpp t
 add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
 
-target_link_plugins(Tools OpenGL)
-
-target_link_libraries(Tools PUBLIC Client Base)
+target_link_plugins(Tools OpenGL Client Base)
 
 if (NOT ANDROID AND NOT EMSCRIPTEN)
 	target_compile_definitions(Tools PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)

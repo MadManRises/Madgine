@@ -6,32 +6,42 @@ include(Workspace)
 include(ini)
 include(Packaging)
 
+
+set(defaultPlugins ON)
+if (NOT BUILD_SHARED_LIBS)
+	set(defaultPlugins OFF)
+endif()
+
+option(MODULES_ENABLE_PLUGINS "Enable dynamic Plugin loading/unloading" ${defaultPlugins})
+
 set(PLUGIN_LIST "" CACHE INTERNAL "")
 set(PROJECTS_LINKING_ALL_PLUGINS "" CACHE INTERNAL "")
 
-if (STATIC_BUILD)
+if (NOT MODULES_ENABLE_PLUGINS)
 
-	if (NOT IS_ABSOLUTE ${STATIC_BUILD})
-		set (STATIC_BUILD ${CMAKE_SOURCE_DIR}/${STATIC_BUILD})
+	MESSAGE(STATUS ${PLUGIN_DEFINITION_FILE})
+
+	if (NOT IS_ABSOLUTE ${PLUGIN_DEFINITION_FILE})
+		set (PLUGIN_DEFINITION_FILE ${CMAKE_SOURCE_DIR}/${PLUGIN_DEFINITION_FILE})
 	endif()
 
-	if (NOT EXISTS ${STATIC_BUILD})
-		MESSAGE(FATAL_ERROR "Config file ${STATIC_BUILD} not found!")
+	if (NOT EXISTS ${PLUGIN_DEFINITION_FILE})
+		MESSAGE(FATAL_ERROR "Config file ${PLUGIN_DEFINITION_FILE} not found! Please set PLUGIN_DEFINITION_FILE to a proper file if using MODULES_ENABLE_PLUGINS.")
 	endif()
 
-	get_filename_component(extension ${STATIC_BUILD} EXT)
+	get_filename_component(extension ${PLUGIN_DEFINITION_FILE} EXT)
 	if (NOT extension STREQUAL ".cfg")
-		MESSAGE(FATAL_ERROR "Config file ${STATIC_BUILD} must have extension .cfg!")
+		MESSAGE(FATAL_ERROR "PLUGIN_DEFINITION_FILE ${PLUGIN_DEFINITION_FILE} must have extension .cfg!")
 	endif()
 
-	get_filename_component(STATIC_BUILD_NAME ${STATIC_BUILD} NAME_WE)
-	get_filename_component(STATIC_BUILD_DIR ${STATIC_BUILD} DIRECTORY)	
+	get_filename_component(PLUGIN_DEFINITION_NAME ${PLUGIN_DEFINITION_FILE} NAME_WE)
+	get_filename_component(PLUGIN_DEFINITION_DIR ${PLUGIN_DEFINITION_FILE} DIRECTORY)	
 
 	function(get_static_config_file var name ext)
-		set(${var} "${STATIC_BUILD_DIR}/${name}_${STATIC_BUILD_NAME}${ext}" PARENT_SCOPE)
+		set(${var} "${PLUGIN_DEFINITION_DIR}/${name}_${PLUGIN_DEFINITION_NAME}${ext}" PARENT_SCOPE)
 	endfunction(get_static_config_file)
 
-	read_ini_file(${STATIC_BUILD} PLUGINSELECTION)
+	read_ini_file(${PLUGIN_DEFINITION_FILE} PLUGINSELECTION)
 
 	function(patch_toplevel_target target)
 		get_target_property(target_flag ${target} PATCH_TOPLEVEL)
@@ -55,11 +65,7 @@ macro(add_plugin name base type)
 
 	set(installPlugin TRUE)
 
-	if (NOT STATIC_BUILD)
-
-		target_compile_definitions(${name} PRIVATE PLUGIN_BUILD)
-
-	else()
+	if (NOT MODULES_ENABLE_PLUGINS)
 
 		if (NOT PLUGINSELECTION_${type}_${name})
 			MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
@@ -109,7 +115,7 @@ function(target_link_plugins target)
 		set_target_properties(${target} PROPERTIES PLUGIN_DEPENDENCIES "${plugin_dependencies}")
 	endif()
 
-	if (STATIC_BUILD)
+	if (NOT MODULES_ENABLE_PLUGINS)
 		get_target_property(target_type ${target} TYPE)
 		if (target_type STREQUAL "EXECUTABLE")
 			patch_toplevel_target(${target})

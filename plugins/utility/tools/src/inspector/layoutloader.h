@@ -8,7 +8,7 @@ namespace Engine {
 		class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, tinyxml2::XMLDocument> {
 			
 		public:
-			LayoutLoader(Resources::ResourceManager &mgr);
+			LayoutLoader();
 
 		private:
 			virtual std::shared_ptr<Data> loadImpl(ResourceType * res) override;

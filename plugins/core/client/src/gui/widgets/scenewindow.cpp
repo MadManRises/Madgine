@@ -14,58 +14,60 @@
 
 #include "../../render/renderwindow.h"
 
+namespace Engine {
+namespace GUI {
+    SceneWindow::~SceneWindow()
+    {
+    }
 
-namespace Engine
-{
-	namespace GUI
-	{
-		SceneWindow::~SceneWindow()
-		{
-		}
+    void SceneWindow::setCamera(Scene::Camera *camera)
+    {
+        const Engine::Vector3 screenSize = window().getScreenSize();
+        mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
+    }
 
-		void SceneWindow::setCamera(Scene::Camera * camera)
-		{
-			const Engine::Vector3 screenSize = window().getScreenSize();
-			mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
-		}
+    Scene::Camera *SceneWindow::camera()
+    {
+        return mTarget->camera();
+    }
 
-		std::vector<Vertex> SceneWindow::vertices(const Vector3 & screenSize)
-		{
-			std::vector<Vertex> result;
+    std::vector<Vertex> SceneWindow::vertices(const Vector3 &screenSize)
+    {
+        std::vector<Vertex> result;
 
-			Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
-			Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
+        Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
+        Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
 
-			Vector4 color{1,1,1,1};
+        Vector4 color { 1, 1, 1, 1 };
 
-			uint32_t texId = mTarget ? mTarget->textureId() : 0;
+        uint32_t texId = mTarget ? mTarget->textureId() : 0;
 
-			Vector3 v = pos;
-			v.z = static_cast<float>(depth());
-			result.push_back({ v, color, {0,0}, texId });
-			v.x += size.x;
-			result.push_back({ v, color, {1,0}, texId });
-			v.y += size.y;
-			result.push_back({ v, color, {1,1}, texId });
-			result.push_back({ v, color, {1,1}, texId });
-			v.x -= size.x;
-			result.push_back({ v, color, {0,1}, texId });
-			v.y -= size.y;
-			result.push_back({ v, color, {0,0}, texId });
-			return result;
-		}
+        Vector3 v = pos;
+        v.z = static_cast<float>(depth());
+        result.push_back({ v, color, { 0, 0 }, texId });
+        v.x += size.x;
+        result.push_back({ v, color, { 1, 0 }, texId });
+        v.y += size.y;
+        result.push_back({ v, color, { 1, 1 }, texId });
+        result.push_back({ v, color, { 1, 1 }, texId });
+        v.x -= size.x;
+        result.push_back({ v, color, { 0, 1 }, texId });
+        v.y -= size.y;
+        result.push_back({ v, color, { 0, 0 }, texId });
+        return result;
+    }
 
-		Render::RenderTarget * SceneWindow::getRenderTarget()
-		{
-			return mTarget.get();
-		}
+    Render::RenderTarget *SceneWindow::getRenderTarget()
+    {
+        return mTarget.get();
+    }
 
-		void SceneWindow::sizeChanged(const Vector3 &pixelSize)
-		{
-			if (mTarget) {				
-				mTarget->resize(pixelSize.xy());
-			}
-		}
+    void SceneWindow::sizeChanged(const Vector3 &pixelSize)
+    {
+        if (mTarget) {
+            mTarget->resize(pixelSize.xy());
+        }
+    }
 
-	}
+}
 }

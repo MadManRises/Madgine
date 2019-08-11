@@ -91,6 +91,18 @@ namespace GUI {
         return mAbsolutePos;
     }
 
+	Vector3 Widget::getActualSize() const
+    {
+        auto [_, screenSize] = mWindow.getAvailableScreenSpace();
+        return mAbsoluteSize * screenSize;
+    }
+
+    Vector3 Widget::getActualPosition() const
+    {
+        auto [screenPos, screenSize] = mWindow.getAvailableScreenSpace();
+        return mAbsolutePos * screenSize + screenPos;
+    }
+
     void Widget::updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos)
     {
         mAbsoluteSize = mSize * parentSize;
@@ -385,9 +397,9 @@ namespace GUI {
         return mPointerLeaveSignal;
     }
 
-    bool Widget::containsPoint(const Vector2 &point, const Vector3 &screenSize, float extend) const
+    bool Widget::containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos, float extend) const
     {
-        Vector3 min = mAbsolutePos * screenSize - extend;
+        Vector3 min = mAbsolutePos * screenSize + screenPos - extend;
         Vector3 max = mAbsoluteSize * screenSize + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }

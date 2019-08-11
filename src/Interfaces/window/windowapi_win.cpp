@@ -11,6 +11,10 @@
 namespace Engine {
 namespace Window {
 
+	DLL_EXPORT const PlatformCapabilities platformCapabilities {
+        true
+    };
+
     struct WindowsWindow : Window {
         WindowsWindow(HWND hwnd)
             : Window((uintptr_t)hwnd)

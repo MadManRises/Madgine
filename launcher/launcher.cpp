@@ -10,7 +10,7 @@
 #include <conio.h>
 #endif
 
-static Engine::CLI::Parameter<bool> toolMode{ { "--toolMode", "-t" }, false, "If enabled, no application will be started. Only the root will be initialized and then immediately shutdown again." };
+Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If enabled, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
 #if EMSCRIPTEN
 #define FIX_LOCAL static
@@ -20,6 +20,7 @@ static Engine::CLI::Parameter<bool> toolMode{ { "--toolMode", "-t" }, false, "If
 
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
+
     int result;
     {
         FIX_LOCAL Engine::Threading::WorkGroup workGroup("Launcher");

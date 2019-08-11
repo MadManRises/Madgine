@@ -1,4 +1,4 @@
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "../toolslib.h"
 
@@ -94,10 +94,11 @@ namespace Tools {
                 if (ImGui::TreeNode(sectionName.c_str())) {
                     for (auto &[pluginName, plugin] : section) {
                         const std::string &project = plugin.project();
-                        if (project == "Madgine" && ((sectionName == "Utility" && pluginName == "Tools") || sectionName == "Core")) {
+
+                        if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
                             ImGui::PushDisabled();
                         }
-                        bool loaded = plugin.isLoaded();
+                        bool loaded = plugin.isLoaded() == Plugins::Plugin::LOADED;
                         bool clicked = false;
                         std::string displayName{ pluginName + " (" + project + ")" };
                         if (section.isExclusive()) {
@@ -112,7 +113,7 @@ namespace Tools {
                             else
                                 section.unloadPlugin(pluginName);
                         }
-                        if (project == "Madgine" && ((sectionName == "Utility" && pluginName == "Tools") || sectionName == "Core")) {
+                        if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
                             ImGui::PopDisabled();
                         }
                     }
@@ -126,7 +127,7 @@ namespace Tools {
 
             for (Plugins::PluginSection &section : kvValues(mManager)) {
                 for (auto &[pluginName, plugin] : section) {
-                    if (plugin.isLoaded()) {
+                    if (plugin.isLoaded() == Plugins::Plugin::LOADED) {
                         const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
 
                         if (ImGui::TreeNode(pluginName.c_str())) {

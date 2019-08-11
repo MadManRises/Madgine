@@ -14,6 +14,10 @@ namespace Engine
 	namespace Window
 	{
 
+			DLL_EXPORT const PlatformCapabilities platformCapabilities {
+                false
+            };
+
 		DLL_EXPORT Threading::SystemVariable<ANativeWindow*> sNativeWindow = nullptr;
 
 		DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;

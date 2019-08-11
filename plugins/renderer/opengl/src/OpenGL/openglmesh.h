@@ -9,7 +9,7 @@ namespace Engine
 
 		struct MADGINE_OPENGL_EXPORT OpenGLMesh : Scene::Entity::EntityComponentVirtualImpl<OpenGLMesh, Scene::Entity::Mesh>
 		{			
-			OpenGLMesh(Scene::Entity::Entity &e, const Scripting::LuaTable &init);			
+			OpenGLMesh(Scene::Entity::Entity &e/*, const Scripting::LuaTable &init*/);			
 
 			OpenGLMeshData *data() const;
 
@@ -18,6 +18,8 @@ namespace Engine
 			virtual void setName(const std::string & name) override;
 			virtual void setVisible(bool vis) override;
 			virtual bool isVisible() const override;
+
+			void setManual(std::shared_ptr<OpenGLMeshData> data);
 
 		private:
 			std::shared_ptr<OpenGLMeshData> mData;

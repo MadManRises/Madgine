@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "pluginsection.h"
 
@@ -33,7 +33,7 @@ namespace Plugins {
             if (std::regex_match(path.str(), match, e)) {
                 std::string project = match[1];
                 std::string name = match[2];
-                auto pib = mPlugins.try_emplace(name, name, project, path);
+                auto pib = mPlugins.try_emplace(name, name, this, project, path);
                 assert(pib.second);
             }
         }
@@ -89,19 +89,19 @@ namespace Plugins {
         return false;
     }
 
-    bool PluginSection::loadPlugin(const std::string &name)
+    Plugin::LoadState PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
-            return false;
+            return Plugin::UNLOADED;
         return loadPlugin(plugin);
     }
 
-    bool PluginSection::unloadPlugin(const std::string &name)
+    Plugin::LoadState PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
-            return false;
+            return Plugin::UNLOADED;
         return unloadPlugin(plugin);
     }
 
@@ -140,87 +140,112 @@ namespace Plugins {
         return &it->second;
     }
 
-    bool PluginSection::loadPlugin(Plugin *p)
+    Plugin::LoadState PluginSection::loadPlugin(Plugin *p)
     {
-        if (p->isLoaded())
-            return true;
-
-        std::unique_lock lock(mMgr.mListenersMutex);
+        if (p->isLoaded() != Plugin::UNLOADED)
+            return p->isLoaded();
 
         bool ok = true;
-        Plugin *unloadExclusive = nullptr;
-        if (mExclusive) {
-            for (Plugin &p : kvValues(mPlugins)) {
-                if (p.isLoaded()) {
-                    assert(!unloadExclusive);
-                    unloadExclusive = &p;
-                    for (PluginListener *listener : mListeners)
-                        ok &= listener->aboutToUnloadPlugin(&p);
-                }
-            }
+        {
+            std::unique_lock lock(mMgr.mListenersMutex);
+            for (PluginListener *listener : mListeners)
+                ok &= listener->aboutToLoadPlugin(p);
         }
 
-        for (PluginListener *listener : mListeners)
-            ok &= listener->aboutToLoadPlugin(p);
-        if (ok) {
-            if (unloadExclusive) {
-                for (PluginListener *listener : mListeners)
-                    listener->onPluginUnload(unloadExclusive);
-                ok = unloadExclusive->unload();
-            }
-            if (ok) {
-                ok = p->load();
-                if (ok)
-                    for (PluginListener *listener : mListeners)
-                        listener->onPluginLoad(p);
+        auto task = [=]() {
+            Plugin::LoadState result = p->load();
+            auto task = [=]() {
                 mMgr.saveCurrentSelectionFile();
-            }
-        } else {
-            Threading::DefaultTaskQueue::getSingleton().queue([this, p, unloadExclusive]() {
-                std::unique_lock lock(mMgr.mListenersMutex);
-                bool ok = true;
-                if (unloadExclusive) {
-                    for (PluginListener *listener : mListeners)
-                        listener->onPluginUnload(unloadExclusive);
-                    ok = unloadExclusive->unload();
+                Plugin::LoadState result = Plugin::LOADED;
+                Plugin *unloadExclusive
+                    = nullptr;
+                if (mExclusive) {
+                    for (Plugin &p2 : kvValues(mPlugins)) {
+                        if (&p2 != p && p2.isLoaded()) {
+                            assert(!unloadExclusive);
+                            unloadExclusive = &p2;
+                        }
+                    }
                 }
-                if (ok) {
-                    ok = p->load();
-                    if (ok)
+
+                if (unloadExclusive)
+                    result = unloadPlugin(unloadExclusive);
+                auto task = [=]() {
+                    if (unloadExclusive && unloadExclusive->isLoaded())
+                        return p->unload();
+                    else {
+                        std::unique_lock lock(mMgr.mListenersMutex);
                         for (PluginListener *listener : mListeners)
                             listener->onPluginLoad(p);
-                    mMgr.saveCurrentSelectionFile();
+                    }
+                    return Plugin::LOADED;
+                };
+                if (result == Plugin::DELAYED) {
+                    Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
+                    return Plugin::DELAYED;
+                } else {
+                    return task();
                 }
-            });
+            };
+            if (result == Plugin::DELAYED) {
+                Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
+                return Plugin::DELAYED;
+            } else if (result == Plugin::LOADED) {
+                return task();
+            } else {
+                return Plugin::UNLOADED;
+            }
+        };
+
+        if (!ok) {
+            Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
+            return Plugin::DELAYED;
+        } else {
+            return task();
         }
-        return ok;
     }
 
-    bool PluginSection::unloadPlugin(Plugin *p)
+    Plugin::LoadState PluginSection::unloadPlugin(Plugin *p)
     {
-        assert(!mAtleastOne);
-        std::unique_lock lock(mMgr.mListenersMutex);
+        if (p->isLoaded() != Plugin::LOADED)
+            return p->isLoaded();
+
+        //assert(!mAtleastOne);
         bool ok = true;
-        for (PluginListener *listener : mListeners)
-            ok &= listener->aboutToUnloadPlugin(p);
-        if (ok) {
-            ok = p->unload();
-            if (ok) {
-                for (PluginListener *listener : mListeners)
-                    listener->onPluginUnload(p);
+        {
+            std::unique_lock lock(mMgr.mListenersMutex);
+            for (PluginListener *listener : mListeners)
+                ok &= listener->aboutToUnloadPlugin(p);
+        }
+
+        auto task = [=]() {
+            Plugin::LoadState result = p->unload();
+            auto task = [=]() {
                 mMgr.saveCurrentSelectionFile();
-            }
-        } else {
-            Threading::DefaultTaskQueue::getSingleton().queue([this, p]() {
-                std::unique_lock lock(mMgr.mListenersMutex);
-                if (p->unload()) {
+                if (!p->isLoaded()) {
+                    std::unique_lock lock(mMgr.mListenersMutex);
                     for (PluginListener *listener : mListeners)
                         listener->onPluginUnload(p);
-                    mMgr.saveCurrentSelectionFile();
+                    return Plugin::LOADED;
                 }
-            });
+                return Plugin::UNLOADED;
+            };
+            if (result == Plugin::DELAYED) {
+                Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
+                return Plugin::DELAYED;
+            } else if (result == Plugin::LOADED) {
+                return task();
+            } else {
+                return Plugin::UNLOADED;
+            }
+        };
+
+        if (ok) {
+            return task();
+        } else {
+            Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
+            return Plugin::DELAYED;
         }
-        return ok;
     }
 
     std::map<std::string, Plugin>::const_iterator PluginSection::begin() const
@@ -233,13 +258,35 @@ namespace Plugins {
         return mPlugins.end();
     }
 
+    std::map<std::string, Plugin>::iterator PluginSection::begin()
+    {
+        return mPlugins.begin();
+    }
+
+    std::map<std::string, Plugin>::iterator PluginSection::end()
+    {
+        return mPlugins.end();
+    }
+
     void PluginSection::loadFromIni(Ini::IniSection &sec)
     {
         for (const std::pair<const std::string, std::string> &p : sec) {
-            Plugin &plugin = mPlugins.at(p.first);
-            bool result = p.second.empty() ? unloadPlugin(&plugin) : loadPlugin(&plugin);
-            assert(result);
+            auto it = mPlugins.find(p.first);
+            if (it == mPlugins.end()) {
+                LOG("Could not find Plugin \"" << p.first << "\"!");
+                continue;
+            }
+            Plugin &plugin = it->second;
+            bool result = p.second.empty() ? (unloadPlugin(&plugin) == Plugin::UNLOADED) : (loadPlugin(&plugin) == Plugin::LOADED);
+            if (!result) {
+                LOG("Could not load Plugin \"" << p.first << "\"!");
+            }
         }
+    }
+
+    PluginManager &PluginSection::manager()
+    {
+        return mMgr;
     }
 
     const void *PluginSection::getUniqueSymbol(const std::string &name) const

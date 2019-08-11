@@ -126,13 +126,14 @@ namespace GUI {
         virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
     private:
-        std::map<std::string, Widget *> mWidgets;
+        GUISystem &mGui;
+		
+		std::map<std::string, Widget *> mWidgets;
         std::unique_ptr<UI::UIManager> mUI;
 
 		std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
-        GUISystem &mGui;
+        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;        
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;

@@ -1,5 +1,7 @@
 #pragma once
 
+#if ENABLE_THREADING
+
 #include "serverlog.h"
 #include "Modules/scripting/types/globalscopebase.h"
 
@@ -11,7 +13,7 @@ namespace Engine
 {
 	namespace Server
 	{
-		class MADGINE_BASE_EXPORT ServerBase : public Scripting::GlobalScopeBase, public SignalSlot::TaskQueue
+		class MADGINE_BASE_EXPORT ServerBase : public /*Scripting::GlobalScopeBase*/ScopeBase, public SignalSlot::TaskQueue
 		{
 		public:
 			ServerBase(Threading::WorkGroup &workgroup);
@@ -45,3 +47,5 @@ namespace Engine
 
 	}
 }
+
+#endif

@@ -12,8 +12,8 @@ UNIQUECOMPONENT(Engine::Tools::LayoutLoader);
 namespace Engine {
 	namespace Tools {
 		
-		LayoutLoader::LayoutLoader(Resources::ResourceManager & mgr) :
-			ResourceLoader(mgr, { ".xml" })
+		LayoutLoader::LayoutLoader() :
+			ResourceLoader({ ".xml" })
 		{
 		}
 

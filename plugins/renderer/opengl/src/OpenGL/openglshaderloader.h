@@ -7,7 +7,7 @@ namespace Engine {
 
 		struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader, Resources::ThreadLocalResource>
 		{			
-			OpenGLShaderLoader(Resources::ResourceManager &mgr);
+			OpenGLShaderLoader();
 
 			std::shared_ptr<OpenGLShader> loadImpl(ResourceType * res) override;
 		};

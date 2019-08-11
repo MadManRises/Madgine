@@ -4,33 +4,37 @@
 
 #include "Modules/keyvalue/valuetype.h"
 
-
 #include "Modules/keyvalue/metatable.h"
 #include "Modules/reflection/classname.h"
 
+namespace Engine {
 
+namespace Scene {
+    namespace Entity {
+        ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerAnimation);
 
-namespace Engine
-{
-	
+        ServerAnimation::ServerAnimation(Entity &entity/*, const Scripting::LuaTable &table*/)
+            : SerializableUnit(entity/*, table*/)
+            , mDefaultAnimation(/*table["default"].asDefault<std::string>(*/""/*)*/)
+        {
+        }
 
-	namespace Scene
-	{
-		namespace Entity
-		{
-			ENTITYCOMPONENT_IMPL(Animation, Animation);
+        ServerAnimation::~ServerAnimation()
+        {
+        }
 
-			Animation::Animation(Entity& entity, const Scripting::LuaTable& table) :
-				EntityComponent(entity, table),
-				mDefaultAnimation(table["default"].asDefault<std::string>(""))
-			{
-			}
+        std::string ServerAnimation::getDefaultAnimation() const
+        {
+            return mDefaultAnimation;
+        }
 
-			Animation::~Animation()
-			{
-			}
-		}
-	}
+        void ServerAnimation::setDefaultAnimation(const std::string &name)
+        {
+            mDefaultAnimation = name;
+        }
+
+    }
+}
 }
 
-RegisterType(Engine::Scene::Entity::Animation);
+RegisterType(Engine::Scene::Entity::ServerAnimation);

@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "pluginmanager.h"
 
@@ -31,32 +31,45 @@ namespace Plugins {
         return *sSingleton;
     }
 
-    PluginManager::PluginManager(const std::string &project)
-        : mProject(project)
-        , mSettings("Madgine_plugins.cfg")
+	PluginManager::PluginManager()
+		: mSettings("Madgine_plugins.cfg")
+	{
+		assert(!sSingleton);
+		sSingleton = this;
+
+		const std::regex e{ SHARED_LIB_PREFIX "Plugin_[a-zA-Z]*_([a-zA-Z]*)_[a-zA-Z]*\\" SHARED_LIB_SUFFIX };
+		std::smatch match;
+		for (auto path : Filesystem::listSharedLibraries()) {
+			if (std::regex_match(path.str(), match, e)) {
+				std::string section = match[1];
+				mSections.try_emplace(section, *this, section);
+			}
+		}
+
+		std::string currentSelection = mSettings["State"]["CurrentSelectionFile"];
+
+		if (!currentSelection.empty() && !noPluginCache) {
+			Filesystem::Path p = selectionFiles()[currentSelection];
+			p /= currentSelection + ".cfg";
+			mCurrentSelectionFile = Ini::IniFile(p);
+			loadCurrentSelectionFile();
+		}
+
+		if (!loadPlugins->empty()) {
+			Ini::IniFile file{ Filesystem::Path{ *loadPlugins } };
+			LOG("Loading Plugins from '" << loadPlugins << "'");
+			loadSelection(file);
+		}
+	}
+
+    PluginManager::~PluginManager()
     {
-        assert(!sSingleton);
-        sSingleton = this;
 
-        std::string currentSelection = mSettings["State"]["CurrentSelectionFile"];
-
-        if (!currentSelection.empty() && !noPluginCache) {
-            Filesystem::Path p = selectionFiles()[currentSelection];
-            p /= currentSelection + ".cfg";
-            mCurrentSelectionFile = Ini::IniFile(p);
-            loadCurrentSelectionFile();
-        }
-
-        if (!loadPlugins->empty()) {
-            Ini::IniFile file{ Filesystem::Path{ *loadPlugins } };
-            LOG("Loading Plugins from '" << loadPlugins << "'");
-            loadSelection(file);
-        }
-
-        if (!savePlugins->empty()) {
-            Ini::IniFile file{ Filesystem::Path{ *savePlugins } };
-            LOG("Save Plugins to '" << savePlugins << "'");
-            saveSelection(file);
+        for (PluginSection &sec : kvValues(mSections)) {
+            for (Plugin &p : kvValues(sec)) {
+                Plugin::LoadState state = p.unload();
+                assert(state == Plugin::UNLOADED);
+            }
         }
     }
 
@@ -67,11 +80,6 @@ namespace Plugins {
                 return true;
         }
         return false;
-    }
-
-    const std::string &PluginManager::project() const
-    {
-        return mProject;
     }
 
     PluginSection &PluginManager::section(const std::string &name)
@@ -93,6 +101,16 @@ namespace Plugins {
     const PluginSection &PluginManager::at(const std::string &name) const
     {
         return mSections.at(name);
+    }
+
+    Plugin *PluginManager::getPlugin(const std::string &name)
+    {
+        for (PluginSection &sec : kvValues(mSections)) {
+            Plugin *p = sec.getPlugin(name);
+            if (p)
+                return p;
+        }
+        return nullptr;
     }
 
     std::map<std::string, PluginSection>::const_iterator PluginManager::begin() const

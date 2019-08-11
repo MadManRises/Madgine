@@ -8,24 +8,24 @@
 
 namespace Engine {
 
-template <class T, class Base, class _Ty>
-std::unique_ptr<Base> createComponent(_Ty arg)
+template <class T, class Base, class... _Ty>
+std::unique_ptr<Base> createComponent(_Ty... arg)
 {
-    return std::make_unique<T>(std::forward<_Ty>(arg));
+    return std::make_unique<T>(std::forward<_Ty>(arg)...);
 }
 
-template <class Base, class _Ty>
-using Collector_F = std::unique_ptr<Base> (*)(_Ty);
+template <class Base, class... _Ty>
+using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
-template <class _Base, class _Ty, template <class...> class Container = std::vector>
+template <class _Base, template <class...> class Container, class... _Ty>
 class UniqueComponentContainer;
 
-template <class _Base, class _Ty>
+template <class _Base, class... _Ty>
 class UniqueComponentSelector;
 
 }
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 namespace Engine {
 
@@ -83,12 +83,12 @@ private:
     const TypeInfo *mTi;
 };
 
-template <class _Base, class _Ty>
+template <class _Base, class... _Ty>
 struct UniqueComponentRegistry : ComponentRegistryBase {
 
     typedef _Base Base;
-    typedef _Ty Ty;
-    typedef Collector_F<Base, Ty> F;
+    typedef std::tuple<_Ty...> Ty;
+    typedef Collector_F<Base, _Ty...> F;
 
     UniqueComponentRegistry()
         : ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>(), &Plugins::PLUGIN_LOCAL(binaryInfo))
@@ -187,12 +187,12 @@ private:
 
 namespace Engine {
 
-template <class _Base, class _Ty>
+template <class _Base, class... _Ty>
 struct UniqueComponentRegistry {
 
     typedef _Base Base;
-    typedef _Ty Ty;
-    typedef Collector_F<Base, _Ty> F;
+    typedef std::tuple<_Ty...> Ty;
+    typedef Collector_F<Base, _Ty...> F;
 
     static std::vector<F> sComponents();
     static const std::vector<const MetaTable *> &sTables();

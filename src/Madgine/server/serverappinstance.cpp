@@ -1,4 +1,7 @@
 #include "../baselib.h"
+
+#if ENABLE_THREADING
+
 #include "serverappinstance.h"
 
 namespace Engine
@@ -24,3 +27,5 @@ namespace Engine
 		}*/
 	}
 }
+
+#endif

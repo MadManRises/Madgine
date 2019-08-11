@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "../core/madgineobject.h"
 
 #include "Modules/scripting/types/globalscopebase.h"
@@ -9,49 +8,47 @@
 
 #include "Modules/threading/framelistener.h"
 
-#include "Modules/threading/scheduler.h"
 #include "Modules/threading/frameloop.h"
+#include "Modules/threading/scheduler.h"
 
-namespace Engine
-{
-	namespace App
-	{
-		/**
+namespace Engine {
+namespace App {
+    /**
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
-		class MADGINE_BASE_EXPORT Application : public Scripting::GlobalScopeBase,
-			public Core::MadgineObject, public Threading::FrameListener
-		{
-		public:
-			/**
+    class MADGINE_BASE_EXPORT Application : public /*Scripting::GlobalScopeBase*/ScopeBase,
+                                            public Core::MadgineObject,
+                                            public Threading::FrameListener {
+    public:
+        /**
 			* Convenience method, that creates the Application of type T, calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
 			*
 			* @return result of the call to go()
 			* @param settings the settings for the Application
 			*/
-			static int run(AppSettings& settings, Threading::WorkGroup &workGroup)
-			{
-				Application app(settings);				
-				return Threading::Scheduler(workGroup, { &app.frameLoop() }).go();				
-			}
+        static int run(AppSettings &settings, Threading::WorkGroup &workGroup)
+        {
+            Application app(settings);
+            return Threading::Scheduler(workGroup, { &app.frameLoop() }).go();
+        }
 
-			/**
+        /**
 			 * \brief Creates the Application
 			 * \param state A pointer to the global LuaState to which this application will be registered.
 			 */
-			Application(const AppSettings& settings);
-			
-			/**
+        Application(const AppSettings &settings);
+
+        /**
 			 * \brief Deletes all objects created by the Application.
 			 */
-			virtual ~Application();
+        virtual ~Application();
 
-			/**
+        /**
 			* Marks the Application as shutdown. This causes the event loop to return within the next frame.
 			*/
-			virtual void shutdown();
+        virtual void shutdown();
 
-			/**
+        /**
 			* This will be called once every frame. It returns <code>false</code>, if the Application was shutdown().
 			* Otherwise it will call frameRenderingQueued, perform a fixedUpdate if necessary and update all components that need a regular update:
 			*  - The ConnectionManager
@@ -62,84 +59,80 @@ namespace Engine
 			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
 			* @param timeSinceLastFrame holds the time since the last frame
 			*/
-			virtual bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        virtual bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
-			
-			/**
+        /**
 			 * \brief Tells if the application is currently running.
 			 * \return <code>true</code>, if the application is shutdown, so not running. <code>false</code>, otherwise.
 			 */
-			bool isShutdown() const;
+        bool isShutdown() const;
 
-			/**
+        /**
 			* \brief Retrieve the statistical frames-per-second value.
 			* \return the current frames-per-second.
 			*/
-			float getFPS();
+        float getFPS();
 
+        //KeyValueMapList maps() override;
 
-			//KeyValueMapList maps() override;
+        template <class T>
+        T &getGlobalAPIComponent()
+        {
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
+        }
 
-			template <class T>
-			T &getGlobalAPIComponent()
-			{
-				return static_cast<T&>(getGlobalAPIComponent(component_index<T>()));
-			}
+        GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
 
-			GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
+        template <class T>
+        T &getSceneComponent()
+        {
+            return static_cast<T &>(getSceneComponent(component_index<T>()));
+        }
 
-			template <class T>
-			T &getSceneComponent()
-			{
-				return static_cast<T&>(getSceneComponent(component_index<T>()));
-			}
+        Scene::SceneComponentBase &getSceneComponent(size_t, bool = true);
+        Scene::SceneManager &sceneMgr(bool = true);
+        Application &getSelf(bool = true);
 
-			Scene::SceneComponentBase &getSceneComponent(size_t, bool = true);
-			Scene::SceneManager &sceneMgr(bool = true);
-			Application &getSelf(bool = true);
-
-			/**
+        /**
 			* \brief Adds a FrameListener to the application.
 			* \param listener the FrameListener to be added.
 			*/
-			void addFrameListener(Threading::FrameListener* listener);
-			/**
+        void addFrameListener(Threading::FrameListener *listener);
+        /**
 			* \brief Removes a FrameListener from the application.
 			* \param listener the FrameListener to be removed.
 			*/
-			void removeFrameListener(Threading::FrameListener* listener);
+        void removeFrameListener(Threading::FrameListener *listener);
 
-			void singleFrame();
+        void singleFrame();
 
-			Threading::FrameLoop &frameLoop();
+        Threading::FrameLoop &frameLoop();
 
-			const AppSettings &settings();
+        const AppSettings &settings();
 
-			Debug::Profiler::Profiler &profiler();
+        Debug::Profiler::Profiler &profiler();
 
-			virtual const Core::MadgineObject *parent() const override;
-			virtual Application &app(bool = true) override;
+        virtual const Core::MadgineObject *parent() const override;
+        virtual Application &app(bool = true) override;
 
-			GlobalAPIContainer<std::vector> mGlobalAPIs;
+    protected:
+        virtual void clear();
 
-		protected:
-			virtual void clear();
+        bool init() override;
 
-			bool init() override;
+        void finalize() override;
 
-			void finalize() override;			
+    private:
+        const AppSettings &mSettings;
 
-		private:
+        std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
 
-			const AppSettings &mSettings;
+        Threading::FrameLoop mLoop;
 
-			std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
+        int mGlobalAPIInitCounter;
 
-			Threading::FrameLoop mLoop;
-			
-			int mGlobalAPIInitCounter;
-						
-			bool mRestartLoop = false;			
-		};
-	}
+    public:
+        GlobalAPIContainer<std::vector> mGlobalAPIs;
+    };
+}
 }

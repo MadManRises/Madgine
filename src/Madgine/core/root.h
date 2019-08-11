@@ -20,11 +20,11 @@ namespace Engine
 
 			std::unique_ptr<CLI::CLICore> mCLI;
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 			std::unique_ptr<Plugins::PluginManager> mPluginManager;
 			std::unique_ptr<UniqueComponentCollectorManager> mCollectorManager;
 #endif
-			std::unique_ptr<Scripting::LuaState> mLuaState;
+			//std::unique_ptr<Scripting::LuaState> mLuaState;
 
 #if ENABLE_MEMTRACKING
 			std::unique_ptr<Debug::Memory::MemoryTracker> mMemTracker;

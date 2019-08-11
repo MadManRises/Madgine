@@ -4,18 +4,26 @@
 
 #include "../../threading/workgroup.h"
 
+#include "../../signalslot/taskguard.h"
+
 namespace Engine {
 
 namespace Debug {
 
     namespace Profiler {
 
-        THREADLOCAL(ProfilerThread) sThread;
+        THREADLOCAL(ProfilerThread)
+        sThread;
         Threading::WorkgroupLocal<Profiler> sProfiler;
+#if ENABLE_THREADING
         SignalSlot::TaskGuard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
+#endif
 
         Profiler::Profiler()
         {
+#if !ENABLE_THREADING
+            registerThread(&sThread);
+#endif
         }
 
         Profiler::~Profiler()
@@ -43,9 +51,9 @@ namespace Debug {
         }
 
         ProfilerThread::ProfilerThread()
-            : mId(Threading::getCurrentThreadName())
-            , mStats(mId.c_str())
+            : mStats("<unnamed-thread>")
         {
+            updateName();
             mCurrent = &mStats;
             mStats.start();
         }
@@ -54,15 +62,21 @@ namespace Debug {
         {
             mStats.stop();
 
-			if (Threading::WorkGroup::isInitialized())
-				sProfiler->unregisterThread(this);
+#if ENABLE_THREADING
+            if (Threading::WorkGroup::isInitialized())
+                sProfiler->unregisterThread(this);
+#endif
         }
 
-		void ProfilerThread::updateName() 
-		{
-                    mId = Threading::getCurrentThreadName();
-                    mStats.setFunctionName(mId.c_str());
-		}
+        void ProfilerThread::updateName()
+        {
+#if ENABLE_THREADING
+            mId = Threading::getCurrentThreadName();
+#else
+            mId = "Main";
+#endif
+            mStats.setFunctionName(mId.c_str());
+        }
 
         void StaticProcess::start()
         {

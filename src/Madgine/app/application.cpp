@@ -3,12 +3,7 @@
 
 #include "appsettings.h"
 
-
-
-
 #include "globalapibase.h"
-
-
 
 #include "../scene/scenemanager.h"
 
@@ -20,213 +15,176 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-namespace Engine
-{	
+namespace Engine {
 
-	namespace App
-	{
-		Application::Application(const AppSettings& settings) :
-			Scripting::GlobalScopeBase(Scripting::LuaState::getSingleton()),
-			mSettings(settings),
-			mGlobalAPIs(*this),
-			mGlobalAPIInitCounter(0)			
-		{
-			mLoop.addFrameListener(this);
+namespace App {
+    Application::Application(const AppSettings &settings)
+        : //Scripting::GlobalScopeBase(Scripting::LuaState::getSingleton()),
+        mSettings(settings)
+        , mGlobalAPIInitCounter(0)
+        , mGlobalAPIs(*this)
+    {
+        mLoop.addFrameListener(this);
 
-			mLoop.addSetupSteps(
-				[this]()
-			{
-				if (!callInit())
-					throw exception("App Init Failed!");
-			},
-				[this]()
-			{
-				callFinalize();
-			}
-			);
-		}
+        mLoop.addSetupSteps(
+            [this]() {
+                if (!callInit())
+                    throw exception("App Init Failed!");
+            },
+            [this]() {
+                callFinalize();
+            });
+    }
 
-		Application::~Application()
-		{
-			mLoop.removeFrameListener(this);
-		}
+    Application::~Application()
+    {
+        mLoop.removeFrameListener(this);
+    }
 
-		bool Application::init()
-		{
-			
-			markInitialized();
+    bool Application::init()
+    {
 
-			for (const std::unique_ptr<GlobalAPIBase>& api : mGlobalAPIs)
-			{
-				if (!api->callInit(mGlobalAPIInitCounter))
-					return false;
-			}
+        markInitialized();
 
-			return true;
-		}
+        for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
+            if (!api->callInit(mGlobalAPIInitCounter))
+                return false;
+        }
 
-		void Application::finalize()
-		{
-			for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
-				for (const std::unique_ptr<GlobalAPIBase>& api : mGlobalAPIs)
-				{
-					api->callFinalize(mGlobalAPIInitCounter);
-				}
-			}			
-		}
+        return true;
+    }
 
+    void Application::finalize()
+    {
+        for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
+            for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
+                api->callFinalize(mGlobalAPIInitCounter);
+            }
+        }
+    }
 
-		void Application::shutdown()
-		{
-			mLoop.shutdown();
-		}
+    void Application::shutdown()
+    {
+        mLoop.shutdown();
+    }
 
-		/*int Application::go()
-		{
+    bool Application::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    {
+        PROFILE();
+        try {
+            for (const std::unique_ptr<GlobalAPIBase> &p : mGlobalAPIs) {
+                p->update();
+            }
+        } catch (const std::exception &e) {
+            LOG_ERROR("Unhandled Exception during GlobalScope-update!");
+            LOG_EXCEPTION(e);
+        }
 
-			if (mSettings->mRunMain) {
-				if (!callMethodCatch("main", {}))
-				{
-					return -1;
-				}
-			}
+        return true;
+    }
 
+    bool Application::isShutdown() const
+    {
+        return mLoop.isShutdown();
+    }
 
-			int result;
-			do {
-				mRestartLoop = false;
-				result = mLoop->go();
-				SignalSlot::DefaultTaskQueue::getSingleton().execute();
-			} while (mRestartLoop);
-			clear();
-			return result;
-		}*/
+    float Application::getFPS()
+    {
+        return 1.0f;
+    }
 
-		bool Application::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
-		{
-			PROFILE();
-			try
-			{
-				for (const std::unique_ptr<GlobalAPIBase>& p : mGlobalAPIs)
-				{
-					p->update();
-				}
-			}
-			catch (const std::exception& e)
-			{
-				LOG_ERROR("Unhandled Exception during GlobalScope-update!");
-				LOG_EXCEPTION(e);
-			}
-
-			return true;
-		}
-
-		
-
-		bool Application::isShutdown() const
-		{
-			return mLoop.isShutdown();
-		}
-
-		float Application::getFPS()
-		{
-			return 1.0f;
-		}
-
-
-		/*KeyValueMapList Application::maps()
+    /*KeyValueMapList Application::maps()
 		{
 			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
 		}*/
 
-		GlobalAPIBase& Application::getGlobalAPIComponent(size_t i, bool init)
-		{
-			GlobalAPIBase &api = mGlobalAPIs.get(i);
-            if (init){
-                checkInitState();
-                api.callInit(mGlobalAPIInitCounter);
-            }
-			return api.getSelf(init);
-		}
-
-		Scene::SceneComponentBase& Application::getSceneComponent(size_t i, bool init)
-		{
-			Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
-            if (init){
-                checkInitState();
-                sceneMgr.callInit(mGlobalAPIInitCounter);
-            }
-			return sceneMgr.getComponent(i, init);
-		}
-
-		Scene::SceneManager& Application::sceneMgr(bool init)
-		{
-			Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
-            if (init){
-                checkInitState();
-				sceneMgr.callInit(mGlobalAPIInitCounter);
-            }
-			return sceneMgr.getSelf(init);
-		}
-        
-        Application &Application::getSelf(bool init){
-            if (init){
-                checkDependency();
-            }
-            return *this;
+    GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
+    {
+        GlobalAPIBase &api = mGlobalAPIs.get(i);
+        if (init) {
+            checkInitState();
+            api.callInit(mGlobalAPIInitCounter);
         }
+        return api.getSelf(init);
+    }
 
+    Scene::SceneComponentBase &Application::getSceneComponent(size_t i, bool init)
+    {
+        Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
+        if (init) {
+            checkInitState();
+            sceneMgr.callInit(mGlobalAPIInitCounter);
+        }
+        return sceneMgr.getComponent(i, init);
+    }
 
-		void Application::clear()
-		{
-			for (const std::unique_ptr<GlobalAPIBase>& p : mGlobalAPIs)
-			{
-				//p->clear();
-			}
-			mGlobalAPIs.get<Scene::SceneManager>().clear();
-		}
+    Scene::SceneManager &Application::sceneMgr(bool init)
+    {
+        Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
+        if (init) {
+            checkInitState();
+            sceneMgr.callInit(mGlobalAPIInitCounter);
+        }
+        return sceneMgr.getSelf(init);
+    }
 
-		void Application::addFrameListener(Threading::FrameListener* listener)
-		{
-			mLoop.addFrameListener(listener);
-		}
+    Application &Application::getSelf(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return *this;
+    }
 
-		void Application::removeFrameListener(Threading::FrameListener* listener)
-		{
-			mLoop.removeFrameListener(listener);
-		}
+    void Application::clear()
+    {
+        for (const std::unique_ptr<GlobalAPIBase> &p : mGlobalAPIs) {
+            //p->clear();
+        }
+        mGlobalAPIs.get<Scene::SceneManager>().clear();
+    }
 
-		void Application::singleFrame()
-		{
-			mLoop.singleFrame();
-		}
+    void Application::addFrameListener(Threading::FrameListener *listener)
+    {
+        mLoop.addFrameListener(listener);
+    }
 
-		Threading::FrameLoop & Application::frameLoop()
-		{
-			return mLoop;
-		}
+    void Application::removeFrameListener(Threading::FrameListener *listener)
+    {
+        mLoop.removeFrameListener(listener);
+    }
 
-		const AppSettings &Application::settings()
-		{
-			return mSettings;
-		}
+    void Application::singleFrame()
+    {
+        mLoop.singleFrame();
+    }
 
-		Debug::Profiler::Profiler &Application::profiler()
-		{
-			return *mProfiler;
-		}
+    Threading::FrameLoop &Application::frameLoop()
+    {
+        return mLoop;
+    }
 
-		const Core::MadgineObject * Application::parent() const
-		{
-			return nullptr;
-		}
+    const AppSettings &Application::settings()
+    {
+        return mSettings;
+    }
 
-		Application & Application::app(bool init)
-		{
-			return getSelf(init);
-		}
+    Debug::Profiler::Profiler &Application::profiler()
+    {
+        return *mProfiler;
+    }
 
-	}
+    const Core::MadgineObject *Application::parent() const
+    {
+        return nullptr;
+    }
+
+    Application &Application::app(bool init)
+    {
+        return getSelf(init);
+    }
+
+}
 
 }
 

@@ -2,7 +2,7 @@
 
 #include "root.h"
 
-#include "../resources/scripts/scriptloader.h"
+//#include "../resources/scripts/scriptloader.h"
 
 #include "../resources/resourcemanager.h"
 #include "Interfaces/debug/memory/memory.h"
@@ -18,21 +18,21 @@ namespace Core {
     Root::Root(int argc, char **argv)
         : mCLI(std::make_unique<CLI::CLICore>(argc, argv))
         ,
-#ifndef STATIC_BUILD
-        mPluginManager(std::make_unique<Plugins::PluginManager>("Madgine"))
+#if ENABLE_PLUGINS
+        mPluginManager(std::make_unique<Plugins::PluginManager>())
         , mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager))
         ,
 #endif
-        mLuaState(std::make_unique<Scripting::LuaState>())
-        ,
+        /*mLuaState(std::make_unique<Scripting::LuaState>())
+        ,*/
 #if ENABLE_MEMTRACKING
         mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>())
         ,
 #endif
-        mResources(std::make_unique<Resources::ResourceManager>())
-    {
-#ifndef STATIC_BUILD
-        (*mPluginManager)["Core"].loadPluginByFilename("Base");
+			mResources(std::make_unique<Resources::ResourceManager>())
+		{
+#if ENABLE_PLUGINS
+                    mPluginManager->loadCurrentSelectionFile();
 
         (*mPluginManager)["Utility"].loadPlugin("Tools");
 
@@ -59,14 +59,14 @@ namespace Core {
 
         mResources->init();
 
-        for (auto &res : mResources->get<Scripting::Parsing::ScriptLoader>()) {
+        /*for (auto &res : mResources->get<Scripting::Parsing::ScriptLoader>()) {
             std::shared_ptr<Scripting::Parsing::MethodHolder> p = res.second.data();
             if (p) {
                 p->call(mLuaState->mainThread());
             }
         }
 
-        mLuaState->setFinalized();
+        mLuaState->setFinalized();*/
     }
 
     Root::~Root()

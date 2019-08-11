@@ -31,6 +31,9 @@ namespace GUI {
         Matrix3 getAbsoluteSize() const;
         Matrix3 getAbsolutePosition() const;
 
+		Vector3 getActualSize() const;
+        Vector3 getActualPosition() const;
+
         void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos = Matrix3::ZERO);
         void screenSizeChanged(const Vector3 &screenSize);
 
@@ -88,7 +91,7 @@ namespace GUI {
             return uniquePtrToPtr(mChildren);
         }
 
-        bool containsPoint(const Vector2 &point, const Vector3 &screenSize, float extend = 0.0f) const;
+        bool containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos = Vector3::ZERO, float extend = 0.0f) const;
 
         virtual std::vector<Vertex> vertices(const Vector3 &screenSize);
 

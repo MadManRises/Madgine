@@ -12,7 +12,7 @@ namespace Engine
 			public InputHandlerComponent<OISInputHandler>
 		{
 		public:
-			OISInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args);
+                    OISInputHandler(Window::Window *window, App::Application &app, InputListener *listener);
 			virtual ~OISInputHandler();
 
 		private:
@@ -27,6 +27,7 @@ namespace Engine
 			bool mousePressed(const OIS::MouseEvent& arg, OIS::MouseButtonID id) override;
 			bool mouseReleased(const OIS::MouseEvent& arg, OIS::MouseButtonID id) override;
 
+			bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
 			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
 			void onResize(size_t width, size_t height) override;

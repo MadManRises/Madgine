@@ -47,7 +47,7 @@ if (ANDROID)
 
 		add_library(${target} SHARED ${ARGN})
 
-		if (STATIC_BUILD)
+		if (NOT MODULES_ENABLE_PLUGINS)
 			patch_toplevel_target(${target})
 		endif()
 

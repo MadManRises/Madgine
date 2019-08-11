@@ -15,9 +15,9 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			EntityComponentBase::EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable) :
-				mEntity(&entity),
-				mInitTable(initTable)
+			EntityComponentBase::EntityComponentBase(Entity& entity/*, const Scripting::LuaTable& initTable*/) :
+				mEntity(&entity)/*,
+				mInitTable(initTable)*/
 			{
 			}
 
@@ -43,9 +43,9 @@ namespace Engine
 				return mEntity->getComponent(name);
 			}
 
-			EntityComponentBase* EntityComponentBase::addComponent(const std::string& name, const Scripting::LuaTable& init)
+			EntityComponentBase* EntityComponentBase::addComponent(const std::string& name/*, const Scripting::LuaTable& init*/)
 			{
-				return mEntity->addComponent(name, init);
+				return mEntity->addComponent(name/*, init*/);
 			}
 
 			SceneComponentBase& EntityComponentBase::getSceneComponent(size_t i, bool init)
@@ -69,10 +69,10 @@ namespace Engine
 					MAP_RO(Synced, isSynced));
 			}*/
 
-			const Scripting::LuaTable & EntityComponentBase::initTable()
+			/*const Scripting::LuaTable & EntityComponentBase::initTable()
 			{
 				return mInitTable;
-			}
+			}*/
 
 			void EntityComponentBase::moveToEntity(Entity* entity)
 			{

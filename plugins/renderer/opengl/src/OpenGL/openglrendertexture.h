@@ -30,8 +30,6 @@ namespace Engine {
 
 			OpenGLTexture mTexture;
 
-			OpenGLRenderWindow *mWindow;
-
 		};
 
 	}

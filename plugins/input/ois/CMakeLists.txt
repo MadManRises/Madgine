@@ -3,7 +3,7 @@ option(OIS_BUILD_DEMOS "Build demo applications" OFF)
 
 add_subdirectory(ois)
 
-if (NOT STATIC_BUILD)
+if (BUILD_SHARED_LIBS)
 	set_property(TARGET OIS PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -22,8 +22,9 @@ FolderSources(sources "" src oisinputhandler.cpp oisinputhandler.h)
 
 add_plugin(OISHandler Madgine Input ${sources} PRECOMPILED_HEADER src/oislib.h)
 
+target_link_plugins(OISHandler Client)
 
-target_link_libraries(OISHandler PUBLIC Client PRIVATE OIS)
+target_link_libraries(OISHandler PRIVATE OIS)
 
 if (BUILD_TESTING)
 	add_subdirectory(test)

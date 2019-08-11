@@ -5,7 +5,7 @@ namespace Engine
 	
 	
 	template <class T, typename Converter>
-	class TransformItContainer
+	class TransformItContainer : public T
 	{
 	private:
 		TransformItContainer() = delete;
@@ -59,38 +59,36 @@ namespace Engine
 
 		iterator begin()
 		{
-			return mList.begin();
+                    return T::begin();
 		}
 
 		const_iterator begin() const
 		{
-			return mList.begin();
+                    return T::begin();
 		}
 
 		iterator end()
 		{
-			return mList.end();
+                    return T::end();
 		}
 
 		const_iterator end() const
 		{
-			return mList.end();
+			return T::end();
 		}
 
-	private:
-		T mList;
 	};
 
 	template <typename Converter, class T>
 	const TransformItContainer<T, Converter>& transformIt(const T& t)
 	{
-		return reinterpret_cast<const TransformItContainer<T, Converter>&>(t);
+            return static_cast<const TransformItContainer<T, Converter> &>(t);
 	}
 
 	template <typename Converter, class T>
 	TransformItContainer<T, Converter>& transformIt(T& t)
 	{
-		return reinterpret_cast<TransformItContainer<T, Converter>&>(t);
+            return static_cast<TransformItContainer<T, Converter> &>(t);
 	}
 
 	struct ToPointerConverter

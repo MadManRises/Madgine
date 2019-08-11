@@ -8,8 +8,6 @@
 
 #include "toplevelserializableunit.h"
 
-#include "../threading/workgroup.h"
-
 #include "../serialize/streams/buffered_streambuf.h"
 
 #include "../generic/transformIt.h"

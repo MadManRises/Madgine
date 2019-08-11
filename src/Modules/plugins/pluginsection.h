@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "../ini/inifile.h"
 
@@ -20,8 +20,8 @@ namespace Engine {
 			bool isExclusive() const;
 
 			bool isLoaded(const std::string &name) const;
-			bool loadPlugin(const std::string &name);
-			bool unloadPlugin(const std::string &name);
+                        Plugin::LoadState loadPlugin(const std::string &name);
+                        Plugin::LoadState unloadPlugin(const std::string &name);
 
 			bool loadPluginByFilename(const std::string &name);
 
@@ -36,14 +36,20 @@ namespace Engine {
 
 			std::map<std::string, Plugin>::const_iterator begin() const;
 			std::map<std::string, Plugin>::const_iterator end() const;
+                        std::map<std::string, Plugin>::iterator begin();
+                        std::map<std::string, Plugin>::iterator end();
 
 			void loadFromIni(Ini::IniSection &sec);
 
-		private:
-			Plugin *getPlugin(const std::string &name);
+					PluginManager &manager();
 
-			bool loadPlugin(Plugin *p);
-			bool unloadPlugin(Plugin *p);
+                        Plugin *getPlugin(const std::string &name);
+
+		private:
+                        Plugin::LoadState loadPlugin(Plugin *p);
+                        Plugin::LoadState unloadPlugin(Plugin *p);
+
+                        friend struct Plugin;
 
 			std::map<std::string, Plugin> mPlugins;
 			std::vector<PluginListener *> mListeners;

@@ -47,7 +47,7 @@ namespace Engine
 	}
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, UIManager&, GuiHandler, MADGINE_CLIENT);
+DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandlerBase, GuiHandler, MADGINE_CLIENT, UIManager &);
 
 namespace Engine 
 {

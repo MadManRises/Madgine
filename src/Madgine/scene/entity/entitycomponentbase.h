@@ -14,7 +14,7 @@ namespace Engine
 			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public ScopeBase
 			{
 			public:
-				EntityComponentBase(Entity& entity, const Scripting::LuaTable& initTable = {});
+				EntityComponentBase(Entity& entity/*, const Scripting::LuaTable& initTable = {}*/);
 				virtual ~EntityComponentBase() = 0;
 
 				virtual void init();
@@ -39,7 +39,7 @@ namespace Engine
 					return static_cast<T*>(addComponent(T::componentName(), init));
 				}
 
-				EntityComponentBase* addComponent(const std::string &name, const Scripting::LuaTable &init);
+				EntityComponentBase* addComponent(const std::string &name/*, const Scripting::LuaTable &init*/);
 
 				template <class T>
 				T &getSceneComponent(bool init = true)
@@ -63,12 +63,12 @@ namespace Engine
 				
 
 			protected:
-				const Scripting::LuaTable &initTable();
+				//const Scripting::LuaTable &initTable();
 
 			private:
 
 				Entity* mEntity;
-				Scripting::LuaTable mInitTable;
+				//Scripting::LuaTable mInitTable;
 			};
 		}
 	}

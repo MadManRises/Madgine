@@ -12,8 +12,7 @@ namespace Engine
 	namespace Resources
 	{
 
-		ResourceLoaderBase::ResourceLoaderBase(ResourceManager& mgr, std::vector<std::string> &&extensions, bool autoLoad) :
-			mMgr(mgr),
+		ResourceLoaderBase::ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad) :
 			mExtensions(std::forward<std::vector<std::string>>(extensions)),
 			mAutoLoad(autoLoad)
 		{

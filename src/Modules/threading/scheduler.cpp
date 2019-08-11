@@ -4,6 +4,7 @@
 
 #include "workgroup.h"
 
+#include "defaulttaskqueue.h"
 
 #if EMSCRIPTEN
 
@@ -39,12 +40,14 @@ namespace Engine
 			}
 
 			SignalSlot::TaskQueue *queue = DefaultTaskQueue::getSingletonPtr();
-			schedulerLoop(queue);
-			while (!mWorkgroup.singleThreaded())
-			{
-				schedulerLoop(queue);
-				mWorkgroup.checkThreadStates();
-			}
+
+                        do {
+                            std::chrono::steady_clock::time_point nextAvailableTaskTime;
+                            queue->update(nextAvailableTaskTime);
+                            nextAvailableTaskTime = std::min(std::chrono::steady_clock::now() + std::chrono::milliseconds(200), nextAvailableTaskTime);
+                            queue->waitForTasks(nextAvailableTaskTime);
+                            mWorkgroup.checkThreadStates();
+                        } while (!queue->idle() || !mWorkgroup.singleThreaded());
 
 			for (SignalSlot::TaskQueue *queue : mAdditionalQueues)
 			{
@@ -59,7 +62,7 @@ namespace Engine
 		{			
 			while (!queue->idle() || queue->running())
 			{
-				std::chrono::steady_clock::time_point nextAvailableTaskTime;
+                        std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
 				queue->update(nextAvailableTaskTime);
 				queue->waitForTasks(nextAvailableTaskTime);				
 			}

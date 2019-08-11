@@ -10,7 +10,7 @@ namespace Tools {
     public:
         FunctionTool(ImGuiRoot &root);
 
-        const char *key() const;
+        const char *key() const override;
 
 		virtual bool init() override;
 

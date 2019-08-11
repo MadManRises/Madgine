@@ -11,8 +11,8 @@ UNIQUECOMPONENT(Engine::Input::EmscriptenInputHandler);
 namespace Engine {
 namespace Input {
 
-    EmscriptenInputHandler::EmscriptenInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args)
-        : UniqueComponent(std::get<1>(args), std::get<2>(args))
+    EmscriptenInputHandler::EmscriptenInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
+        : UniqueComponent(app, listener)
     {
         emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenInputHandler::handleMouseEvent);
 

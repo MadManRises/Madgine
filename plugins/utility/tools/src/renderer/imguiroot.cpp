@@ -21,8 +21,6 @@
 
 #include "../toolbase.h"
 
-#include "Modules/math/bounds.h"
-
 #include "Modules/plugins/pluginmanager.h"
 
 #include "Modules/signalslot/taskqueue.h"
@@ -58,7 +56,7 @@ namespace Tools {
 
     bool ImGuiRoot::init()
     {
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
         Plugins::PluginManager::getSingleton()["Renderer"].addListener(this);
 #else
         createManager();
@@ -77,7 +75,7 @@ namespace Tools {
             tool->callFinalize();
         }
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
         Plugins::PluginManager::getSingleton()["Renderer"].removeListener(this);
 #else
         destroyManager();
@@ -86,8 +84,6 @@ namespace Tools {
 
     bool ImGuiRoot::frameStarted(std::chrono::microseconds timeSinceLastFrame)
     {
-        mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
-
         return true;
     }
 
@@ -95,41 +91,46 @@ namespace Tools {
     {
         PROFILE_NAMED("ImGui - Rendering");
 
-        ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_PassthruCentralNode;
+		mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
+				
+                    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_PassthruCentralNode;
 
-        // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-        // because it would be confusing to have two docking targets within each others.
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        ImGuiViewport *viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+                    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+                    // because it would be confusing to have two docking targets within each others.
+                    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
-		//??
-        window_flags |= ImGuiWindowFlags_NoBackground;
+                    ImGuiViewport *viewport = ImGui::GetMainViewport();
+                    ImGui::SetNextWindowPos(viewport->Pos);
+                    ImGui::SetNextWindowSize(viewport->Size);
+                    ImGui::SetNextWindowViewport(viewport->ID);
 
-        // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-        // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-        // all active windows docked into it will lose their parent and become undocked.
-        // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-        // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        bool open = true;
-        ImGui::Begin("Madgine Root Window", &open, window_flags);
-        ImGui::PopStyleVar();
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+                    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+                    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-        ImGui::PopStyleVar(2);
+                    //??
+                    window_flags |= ImGuiWindowFlags_NoBackground;
 
-        // DockSpace
-        ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-        ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
+                    // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+                    // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+                    // all active windows docked into it will lose their parent and become undocked.
+                    // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+                    // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+                    bool open = true;
+                    ImGui::Begin("Madgine Root Window", &open, window_flags);
+                    ImGui::PopStyleVar();
 
-		mManager->setCentralNode(node->CentralNode);
+                    ImGui::PopStyleVar(2);
+
+                    // DockSpace
+                    ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
+                    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+                    ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
+
+                    mManager->setCentralNode(node->CentralNode);
+                
 
         if (ImGui::BeginMainMenuBar()) {
 
@@ -160,18 +161,14 @@ namespace Tools {
             tool->update();
         }
 
-		ImGui::End();
-
-        /*if (ImGui::Begin("Test"))
-			{
-				ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
-			}
-			ImGui::End();*/
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+            ImGui::End();
+        }
 
         return true;
     }
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
     bool ImGuiRoot::aboutToUnloadPlugin(const Plugins::Plugin *p)
     {
         app().frameLoop().queue([this]() {

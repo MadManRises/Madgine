@@ -24,6 +24,7 @@ namespace Plugins {
             }
             UINT errorMode;
         } guard;
+        SetErrorMode(SEM_FAILCRITICALERRORS);
 
         void *handle;
         if (name.empty())

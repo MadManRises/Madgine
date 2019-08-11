@@ -1,5 +1,7 @@
 #pragma once
 
+#if ENABLE_THREADING
+
 #include "workgroup.h"
 #include "../generic/tupleunpacker.h"
 
@@ -67,3 +69,5 @@ namespace Engine
 
 	}
 }
+
+#endif

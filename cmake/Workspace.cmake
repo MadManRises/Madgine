@@ -5,7 +5,7 @@ once()
 cmake_policy(SET CMP0022 NEW)
 
 
-
+include(CMakeDependentOption)
 include(ExternalProject)
 
 set (Workspace "" CACHE PATH "Path to the local Workspace")
@@ -42,11 +42,8 @@ endif()
 
 
 
-if (STATIC_BUILD)
-	add_definitions(-DSTATIC_BUILD)
-	set(BUILD_SHARED_LIBS OFF CACHE BOOL "Don't build shared libs with STATIC_BUILD")
-else()
-	set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs with STATIC_BUILD")
+if (NOT BUILD_SHARED_LIBS)
+	add_compile_definitions(STATIC_BUILD)
 endif()
 
 if(MSVC)    

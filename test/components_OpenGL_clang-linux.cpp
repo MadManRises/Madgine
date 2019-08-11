@@ -1,18 +1,18 @@
 #include "Modules/moduleslib.h"
+#ifdef BUILD_OISHandler
+#include "oislib.h"
+#endif
 #ifdef BUILD_Tools
 #include "toolslib.h"
 #endif
 #ifdef BUILD_Client
 #include "clientlib.h"
 #endif
-#ifdef BUILD_OpenGL
-#include "OpenGL/opengllib.h"
-#endif
 #ifdef BUILD_Base
 #include "Madgine/baselib.h"
 #endif
-#ifdef BUILD_SDLInput
-#include "sdlinputlib.h"
+#ifdef BUILD_OpenGL
+#include "OpenGL/opengllib.h"
 #endif
 #ifdef BUILD_Base
 #include "Madgine/app/globalapicollector.h"
@@ -29,8 +29,8 @@
 #ifdef BUILD_Client
 #include "input/inputcollector.h"
 #endif
-#ifdef BUILD_SDLInput
-#include "sdlinputhandler.h"
+#ifdef BUILD_OISHandler
+#include "oisinputhandler.h"
 #endif
 #ifdef BUILD_Client
 #include "render/renderercollector.h"
@@ -60,13 +60,28 @@
 #include "toolscollector.h"
 #endif
 #ifdef BUILD_Tools
+#include "guieditor/guieditor.h"
+#endif
+#ifdef BUILD_Tools
+#include "inspector/functiontool.h"
+#endif
+#ifdef BUILD_Tools
 #include "inspector/inspector.h"
+#endif
+#ifdef BUILD_Tools
+#include "memory/memoryviewer.h"
 #endif
 #ifdef BUILD_Tools
 #include "metrics/metrics.h"
 #endif
 #ifdef BUILD_Tools
 #include "profiler/profiler.h"
+#endif
+#ifdef BUILD_Tools
+#include "renderer/imguidemo.h"
+#endif
+#ifdef BUILD_Tools
+#include "testtool/testtool.h"
 #endif
 #ifdef BUILD_Client
 #include "ui/gamehandler.h"
@@ -146,8 +161,8 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
 #ifdef BUILD_Client
 	template <> const std::vector<const Engine::MetaTable*> &Engine::Input::InputHandlerCollector::Registry::sTables() {
 		static std::vector<const Engine::MetaTable*> dummy = {
-#ifdef BUILD_SDLInput
-			&table<Engine::Input::SDLInputHandler>(),
+#ifdef BUILD_OISHandler
+			&table<Engine::Input::OISInputHandler>(),
 #endif
 
 		}; 
@@ -155,8 +170,8 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
 	}
 	template <> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() {
 		return {
-#ifdef BUILD_SDLInput
-			createComponent<Engine::Input::SDLInputHandler>,
+#ifdef BUILD_OISHandler
+			createComponent<Engine::Input::OISInputHandler>,
 #endif
 
 		}; 
@@ -164,11 +179,11 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
 
 	#define ACC 0
 
-#ifdef BUILD_SDLInput
-constexpr size_t CollectorBaseIndex_InputHandler_SDLInput = ACC;
-    template<> size_t component_index<Engine::Input::SDLInputHandler>(){ return CollectorBaseIndex_InputHandler_SDLInput + 0; }
+#ifdef BUILD_OISHandler
+constexpr size_t CollectorBaseIndex_InputHandler_OISHandler = ACC;
+    template<> size_t component_index<Engine::Input::OISInputHandler>(){ return CollectorBaseIndex_InputHandler_OISHandler + 0; }
 #undef ACC
-#define ACC CollectorBaseIndex_InputHandler_SDLInput + 1
+#define ACC CollectorBaseIndex_InputHandler_OISHandler + 1
 #endif
 
 #undef ACC
@@ -286,9 +301,14 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Base = ACC;
 	template <> const std::vector<const Engine::MetaTable*> &Engine::Tools::ToolsCollector::Registry::sTables() {
 		static std::vector<const Engine::MetaTable*> dummy = {
 #ifdef BUILD_Tools
+			&table<Engine::Tools::GuiEditor>(),
+			&table<Engine::Tools::FunctionTool>(),
 			&table<Engine::Tools::Inspector>(),
+			&table<Engine::Tools::MemoryViewer>(),
 			&table<Engine::Tools::Metrics>(),
 			&table<Engine::Tools::Profiler>(),
+			&table<Engine::Tools::ImGuiDemo>(),
+			&table<Engine::Tools::TestTool>(),
 #endif
 
 		}; 
@@ -297,9 +317,14 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Base = ACC;
 	template <> std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsCollector::Registry::sComponents() {
 		return {
 #ifdef BUILD_Tools
+			createComponent<Engine::Tools::GuiEditor>,
+			createComponent<Engine::Tools::FunctionTool>,
 			createComponent<Engine::Tools::Inspector>,
+			createComponent<Engine::Tools::MemoryViewer>,
 			createComponent<Engine::Tools::Metrics>,
 			createComponent<Engine::Tools::Profiler>,
+			createComponent<Engine::Tools::ImGuiDemo>,
+			createComponent<Engine::Tools::TestTool>,
 #endif
 
 		}; 
@@ -309,11 +334,16 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Base = ACC;
 
 #ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ToolBase_Tools = ACC;
-    template<> size_t component_index<Engine::Tools::Inspector>(){ return CollectorBaseIndex_ToolBase_Tools + 0; }
-    template<> size_t component_index<Engine::Tools::Metrics>(){ return CollectorBaseIndex_ToolBase_Tools + 1; }
-    template<> size_t component_index<Engine::Tools::Profiler>(){ return CollectorBaseIndex_ToolBase_Tools + 2; }
+    template<> size_t component_index<Engine::Tools::GuiEditor>(){ return CollectorBaseIndex_ToolBase_Tools + 0; }
+    template<> size_t component_index<Engine::Tools::FunctionTool>(){ return CollectorBaseIndex_ToolBase_Tools + 1; }
+    template<> size_t component_index<Engine::Tools::Inspector>(){ return CollectorBaseIndex_ToolBase_Tools + 2; }
+    template<> size_t component_index<Engine::Tools::MemoryViewer>(){ return CollectorBaseIndex_ToolBase_Tools + 3; }
+    template<> size_t component_index<Engine::Tools::Metrics>(){ return CollectorBaseIndex_ToolBase_Tools + 4; }
+    template<> size_t component_index<Engine::Tools::Profiler>(){ return CollectorBaseIndex_ToolBase_Tools + 5; }
+    template<> size_t component_index<Engine::Tools::ImGuiDemo>(){ return CollectorBaseIndex_ToolBase_Tools + 6; }
+    template<> size_t component_index<Engine::Tools::TestTool>(){ return CollectorBaseIndex_ToolBase_Tools + 7; }
 #undef ACC
-#define ACC CollectorBaseIndex_ToolBase_Tools + 3
+#define ACC CollectorBaseIndex_ToolBase_Tools + 8
 #endif
 
 #undef ACC

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "indexholder.h"
 

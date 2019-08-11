@@ -2,12 +2,16 @@ cmake_minimum_required (VERSION 2.6)
 
 Project(Interfaces)
 
+CMAKE_DEPENDENT_OPTION(INTERFACES_ENABLE_THREADING "Enable multithreading utilities like thread local or workgroups" ON
+                       "NOT EMSCRIPTEN" OFF)
 
-option(INTERFACES_USE_CUSTOM_THREADLOCAL "Replace the thread_local keyword with a custom implementation for thread-local variables.")
+CMAKE_DEPENDENT_OPTION(INTERFACES_USE_CUSTOM_THREADLOCAL "Replace the thread_local keyword with a custom implementation for thread-local variables." ON "INTERFACES_ENABLE_THREADING" OFF)
 option(INTERFACES_USE_PTHREAD_THREADLOCAL_STORE "Use pthread_[set/get]specific instead of thread_local to store all thread-local variables. Useful in combination with INTERFACES_USE_CUSTOM_THREADLOCAL on platforms that don't support thread_local.")
 
 option(INTERFACES_ENABLE_PROFILER "Activates the builtin runtime-profiler." ON)
 option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocations")
+
+
 
 set(sources)
 

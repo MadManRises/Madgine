@@ -8,6 +8,6 @@ FolderSources(sources "" src androidinputhandler.cpp androidinputhandler.h andro
 
 add_plugin(AndroidInput Madgine Input ${sources} PRECOMPILED_HEADER src/androidinputlib.h)
 
+target_link_plugins(AndroidInput Client)
 
-
-target_link_libraries(AndroidInput PUBLIC Client PRIVATE android)
+target_link_libraries(AndroidInput PRIVATE android)

@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "uniquecomponentcollectormanager.h"
 
@@ -26,7 +26,7 @@ namespace Engine {
 	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)
 	{
 
-		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
+		const Plugins::BinaryInfo *info = p->info();
 
 		for (auto &[name, reg] : registryRegistry()) {
 			reg->onPluginLoad(info);
@@ -35,7 +35,7 @@ namespace Engine {
 
 	bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin * p)
 	{
-		const Plugins::BinaryInfo *info = (const Plugins::BinaryInfo *)p->getSymbol("binaryInfo");
+            const Plugins::BinaryInfo *info = p->info();
 
 		for (auto &[name, reg] : registryRegistry()) {
 			reg->onPluginUnload(info);

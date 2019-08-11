@@ -26,7 +26,7 @@ namespace GUI {
 
         mWindow->addListener(this);
 
-        mInputHandlerSelector.emplace(std::make_tuple(mWindow, std::ref(parent.gui().app(false)), &parent));
+        mInputHandlerSelector.emplace(mWindow, parent.gui().app(false), &parent);
 
         mRenderWindow = parent.gui().renderer().createWindow(mWindow, nullptr, parent.getRenderer());
     }

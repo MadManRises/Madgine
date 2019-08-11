@@ -114,6 +114,11 @@ namespace Scene {
         return mMutex;
     }
 
+	    SignalSlot::SignalStub<> &SceneManager::clearedSignal()
+    {
+        return mClearedSignal;
+    }
+
     void SceneManager::readState(Serialize::SerializeInStream &in)
     {
         clear();
@@ -241,7 +246,8 @@ namespace Scene {
     Entity::Entity *SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
-        ValueType behaviorTable = app().table()[behavior];
+        throw "Todo"; // TODO
+        /*ValueType behaviorTable = app().table()[behavior];
         Scripting::LuaTable table;
         if (behaviorTable.is<Scripting::LuaTable>()) {
             table = behaviorTable.as<Scripting::LuaTable>();
@@ -252,12 +258,13 @@ namespace Scene {
             mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
         else
             mEntities.emplace_tuple_back(tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return &mEntities.back();
+        return &mEntities.back();*/
     }
 
     Entity::Entity *SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
     {
-        ValueType behaviorTable = app().table()[behavior];
+        throw "Todo"; // TODO
+        /*ValueType behaviorTable = app().table()[behavior];
         Scripting::LuaTable table;
         if (behaviorTable.is<Scripting::LuaTable>()) {
             table = behaviorTable.as<Scripting::LuaTable>();
@@ -265,13 +272,15 @@ namespace Scene {
             LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
+        return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);*/
     }
 
     void SceneManager::updateCamera(Camera &camera)
     {
         auto &transform = toPointer(mEntities);
         std::vector<Entity::Entity *> entities { transform.begin(), transform.end() };
+        auto &localTransform = toPointer(mLocalEntities);
+        std::copy(localTransform.begin(), localTransform.end(), std::back_inserter(entities));
 
         camera.setVisibleEntities(std::move(entities));
     }

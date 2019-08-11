@@ -6,7 +6,7 @@ set(binaryinfo_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 macro(generate_binary_info target)
 
-	if (NOT STATIC_BUILD)
+	if (MODULES_ENABLE_PLUGINS)
 
 		target_sources(${target} PRIVATE ${binaryinfo_dir}/binaryinfo.cpp)
 		target_link_libraries(${target} PUBLIC Interfaces)
@@ -37,7 +37,7 @@ macro(generate_binary_info target)
 		BINARY_FILENAME=\"$<TARGET_FILE_NAME:${target}>\"
 		PRECOMPILED_HEADER_PATH=\"$<TARGET_PROPERTY:${target},PRECOMPILED_HEADER>\"
 		BINARY_SOURCE_ROOT=\"$<TARGET_PROPERTY:${target},SOURCE_ROOT>\"
-		PLUGIN_DEPENDENCIES=$<$<BOOL:$<TARGET_PROPERTY:${target},PLUGIN_DEPENDENCIES>>:\"$<JOIN:$<TARGET_PROPERTY:${target},PLUGIN_DEPENDENCIES>,"\",\"">\",>nullptr)
+		PLUGIN_DEPENDENCIES=$<$<BOOL:$<TARGET_PROPERTY:${target},PLUGIN_DEPENDENCIES>>:\"$<JOIN:$<TARGET_PROPERTY:${target},PLUGIN_DEPENDENCIES>,",">\",>nullptr)
 
 
 	endif()

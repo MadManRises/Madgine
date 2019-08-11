@@ -79,10 +79,10 @@ namespace Engine
 			return mApp.sceneMgr(init);
 		}
 
-		Scripting::GlobalScopeBase& GlobalAPIBase::globalScope()
+		/*Scripting::GlobalScopeBase& GlobalAPIBase::globalScope()
 		{
 			return mApp;
-		}
+		}*/
 
 	}
 }

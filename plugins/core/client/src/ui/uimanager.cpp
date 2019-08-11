@@ -21,7 +21,6 @@ namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
         : mWindow(window)
-        , mKeepingCursorPos(false)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {

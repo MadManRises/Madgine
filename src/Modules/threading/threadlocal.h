@@ -6,6 +6,8 @@
 namespace Engine {
 namespace Threading {
 
+#if ENABLE_THREADING
+
     struct MODULES_EXPORT ThreadLocalStorage {
 
 		static int registerLocalBssVariable(std::function<Any()> ctor);
@@ -14,6 +16,7 @@ namespace Threading {
         static const Any &localVariable(int index);
 
         static void init(bool bss);
+        static void finalize(bool bss);
     };
 
     template <typename T, typename G = ThreadLocalStorage>
@@ -74,6 +77,8 @@ namespace Threading {
         int mIndex;
     };
 
+#endif
+
     template <typename T>
     struct Proxy {
 
@@ -118,17 +123,22 @@ namespace Threading {
     private:
         T *mPtr;
     };
-
-#if USE_CUSTOM_THREADLOCAL
-#	define THREADLOCAL(T) ::Engine::Threading::ThreadLocal<T>
-#else
-#	define THREADLOCAL(T) thread_local ::Engine::Threading::Proxy<T>
-#endif
-
-#if EMSCRIPTEN
-#	define thread_local provoke_syntax_error here
-#endif
-
-
+	   
 } // namespace Threading
 } // namespace Engine
+
+#if ENABLE_THREADING
+#if USE_CUSTOM_THREADLOCAL
+#define THREADLOCAL(T) ::Engine::Threading::ThreadLocal<T>
+#else
+#define THREADLOCAL(T) thread_local ::Engine::Threading::Proxy<T>
+#endif
+#else
+#define THREADLOCAL(T) ::Engine::Threading::Proxy<T>
+#endif
+
+
+
+#if EMSCRIPTEN
+#define thread_local thread_local_not_supported_on_emscripten provoke_syntax_error
+#endif

@@ -10,13 +10,13 @@ namespace Engine {
 ENTITYCOMPONENTVIRTUALIMPL_IMPL(Render::OpenGLMesh);
 
 namespace Render {
-    OpenGLMesh::OpenGLMesh(Scene::Entity::Entity &e, const Scripting::LuaTable &data)
-        : Serialize::SerializableUnit<OpenGLMesh, Scene::Entity::Mesh>(e, data)
+    OpenGLMesh::OpenGLMesh(Scene::Entity::Entity &e/*, const Scripting::LuaTable &data*/)
+        : Serialize::SerializableUnit<OpenGLMesh, Scene::Entity::Mesh>(e/*, data*/)
         , mResource(nullptr)
     {
-        if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
+        /*if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
             setName(v.as<std::string>());
-        }
+        }*/
     }
 
     OpenGLMeshData *OpenGLMesh::data() const
@@ -26,7 +26,7 @@ namespace Render {
 
     std::string OpenGLMesh::getName() const
     {
-        return mResource->name();
+        return mResource ? mResource->name() : "";
     }
 
     void OpenGLMesh::setName(const std::string &name)
@@ -47,5 +47,10 @@ namespace Render {
         return true;
     }
 
+    void OpenGLMesh::setManual(std::shared_ptr<OpenGLMeshData> data)
+    {
+        mData = std::move(data);
+        mResource = nullptr;
+    }
 }
 }

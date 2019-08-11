@@ -25,13 +25,80 @@
 	]
 ]   
 
-def staticConfigs = ["OpenGL"]
+def staticConfigs = [
+	[
+		name : "OpenGL"
+	]
+]
 
 def tasks = [:]
 def comboBuilder
 def comboEntry = []
 def comboNames = []
 
+
+def staticTask = {
+    // builds and returns the task for each combination
+
+    /* Map the entries back to a more readable format
+       the index will correspond to the position of this axis in axisList[] */
+    def toolchain = it[0]
+    def configuration = it[1]
+    def staticConfig = it[2]
+	
+    def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name;
+
+	//if (staticConfig?.trim())
+	//	staticConfig = "test/${staticConfig}_${toolchain}.cfg"
+
+    return {
+        // This is where the important work happens for each combination
+	    stage ("${name}") {
+			sh """
+				echo "test"
+			"""
+/*			if (toolchain.name != "emscripten") {
+				stage("cmake") {
+					sh """
+					if ${params.fullBuild}; then
+						if [ -d "${name}" ]; then 
+							rm -Rf ${name};
+						fi
+					fi
+					mkdir -p ${name}
+					cd ${name}
+					cmake .. \
+					-DCMAKE_BUILD_TYPE=${configuration.name} \
+					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
+					"""
+							//    -DSTATIC_BUILD=${staticConfig}
+				}
+				stage("build") {				
+					sh """
+					cd ${name}
+					make all 
+					"""				
+				}
+				docker.image(toolchain.dockerImage).inside {
+					stage("Test") {
+						sh """
+						cd ${name}
+						ctest
+						"""
+					}
+				}           
+			} else {
+				
+			}
+
+			def staticTasks = [:]
+			fillStatic = { def name, def args ->
+				staticTasks[name] = staticTask(toolchain, configuration, args.collect())
+			}
+			comboBuilder([staticConfigs], 0, fillStatic)   */ 
+        }
+    }
+}
 
 def task = {
     // builds and returns the task for each combination
@@ -50,35 +117,47 @@ def task = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-            stage("cmake") {
-			    sh """
-				if ${params.fullBuild}; then
-					if [ -d "${name}" ]; then 
-						rm -Rf ${name};
+			if (toolchain.name != "emscripten") {
+				stage("cmake") {
+					sh """
+					if ${params.fullBuild}; then
+						if [ -d "${name}" ]; then 
+							rm -Rf ${name};
+						fi
 					fi
-				fi
-				mkdir -p ${name}
-				cd ${name}
-			    cmake .. \
-		        -DCMAKE_BUILD_TYPE=${configuration.name} \
-		        -DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
-			    """
-		                //    -DSTATIC_BUILD=${staticConfig}
-            }
-            stage("build") {				
-				sh """
-				cd ${name}
-				make all 
-				"""				
-            }
-		    docker.image(toolchain.dockerImage).inside {
-				stage("Test") {
+					mkdir -p ${name}
+					cd ${name}
+					cmake .. \
+					-DCMAKE_BUILD_TYPE=${configuration.name} \
+					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
+					"""
+							//    -DSTATIC_BUILD=${staticConfig}
+				}
+				stage("build") {				
 					sh """
 					cd ${name}
-					ctest
-					"""
+					make all 
+					"""				
 				}
-            }           
+				docker.image(toolchain.dockerImage).inside {
+					stage("Test") {
+						sh """
+						cd ${name}
+						ctest
+						"""
+					}
+				}           
+			} else {
+				
+			}
+
+			def staticTasks = [:]
+			fillStatic = { def name, def args ->
+				staticTasks[name] = staticTask(toolchain, configuration, args.collect())
+			}
+			comboBuilder([staticConfigs], 0, fillStatic)    
+
+			parallel staticTasks
         }
     }
 }
@@ -87,7 +166,7 @@ def task = {
     This is where the magic happens
     recursively work through the axisList and build all combinations
 */
-comboBuilder = { def axes, int level ->
+comboBuilder = { def axes, int level, def f ->
     for ( entry in axes[0] ) {
         comboEntry[level] = entry
 		comboNames[level] = entry.name
@@ -95,12 +174,16 @@ comboBuilder = { def axes, int level ->
             comboBuilder(axes.drop(1), level + 1)
         }
         else {
-            tasks[comboNames.join("-")] = task(comboEntry.collect())
+            fill(comboNames.join("-"), comboEntry)
         }
     }
 }
 
-comboBuilder(axisList, 0)    
+fill = { def name, def args ->
+	tasks[name] = task(args.collect())
+}
+
+comboBuilder(axisList, 0, fill)    
 
 pipeline {
     agent any
@@ -110,7 +193,6 @@ pipeline {
     }
 
 	options{
-		ansiColor('xterm')
 		disableConcurrentBuilds()
 	}
 

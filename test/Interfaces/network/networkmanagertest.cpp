@@ -6,6 +6,8 @@
 
 #include "Modules/threading/workgroup.h"
 
+#include "Modules/threading/defaulttaskqueue.h"
+
 #include <future>
 
 TEST(NetworkManager, Connect)
@@ -23,7 +25,7 @@ TEST(NetworkManager, Connect)
 		while (!done)
 		{
 			server.sendMessages();
-			wg.taskQueue().update();
+			Engine::Threading::DefaultTaskQueue::getSingleton().update();
 		}
 		return result;
 	});

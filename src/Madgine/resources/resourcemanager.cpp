@@ -24,12 +24,12 @@ namespace Engine
 		}
 
 		ResourceManager::ResourceManager() :
-		mCollector(*this)
+		mCollector()
 		{
 			assert(!sSingleton);
 			sSingleton = this;
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 			Plugins::PluginManager::getSingleton().addListener(this);
 #endif
 			
@@ -42,7 +42,7 @@ namespace Engine
 
 		ResourceManager::~ResourceManager()
 		{
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 			Plugins::PluginManager::getSingleton().removeListener(this);
 #endif
 		}
@@ -77,7 +77,7 @@ namespace Engine
 
 		}
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 		void ResourceManager::onPluginLoad(const Plugins::Plugin * plugin)
 		{
 			std::map<std::string, ResourceLoaderBase*> loaderByExtension = getLoaderByExtension();
@@ -90,7 +90,7 @@ namespace Engine
 				}
 			}
 
-			const Plugins::BinaryInfo *info = static_cast<const Plugins::BinaryInfo*>(plugin->getSymbol("binaryInfo"));	
+			const Plugins::BinaryInfo *info = plugin->info();	
 			Filesystem::Path binPath = info->mBinaryDir;
 			bool isLocal = plugin->fullPath().parentPath() == binPath;
 			if (isLocal)

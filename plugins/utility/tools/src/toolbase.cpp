@@ -10,7 +10,6 @@ namespace Engine {
 namespace Tools {
     ToolBase::ToolBase(ImGuiRoot &root)
         : mRoot(root)
-        , mVisible(false)
     {
     }
 
@@ -77,7 +76,5 @@ namespace Tools {
     }
 }
 }
-
-
 
 RegisterType(Engine::Tools::ToolBase);

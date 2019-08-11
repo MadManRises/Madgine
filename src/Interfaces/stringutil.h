@@ -110,4 +110,15 @@ constexpr const char *strrchr(const char *s, char c)
     return nullptr;
 }
 
+constexpr bool streq(const char *lhs, const char *rhs)
+{
+    int i = -1;
+    do {
+        ++i;
+        if (lhs[i] != rhs[i])
+            return false;
+    } while (lhs[i]);
+    return true;
+}
+
 }

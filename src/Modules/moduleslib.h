@@ -4,6 +4,8 @@
 
 #include "Interfaces/interfaceslib.h"
 
+#include "modulesconfig.h"
+
 #if defined(STATIC_BUILD)
 #define MODULES_EXPORT
 #else

@@ -61,7 +61,7 @@ namespace Engine
 		{
 		}
 
-		explicit Vector2(const float afCoordinate[2])
+		Vector2(const float afCoordinate[2])
 			: x(afCoordinate[0]),
 			  y(afCoordinate[1])
 		{
@@ -519,12 +519,12 @@ namespace Engine
 		}*/
 
 		// special points
-		static const Vector2 ZERO;
-		static const Vector2 UNIT_X;
-		static const Vector2 UNIT_Y;
-		static const Vector2 NEGATIVE_UNIT_X;
-		static const Vector2 NEGATIVE_UNIT_Y;
-		static const Vector2 UNIT_SCALE;
+                static const constexpr float ZERO[] { 0, 0 };
+                static const constexpr float UNIT_X[] { 1, 0 };
+                static const constexpr float UNIT_Y[] { 0, 1 };
+                static const constexpr float NEGATIVE_UNIT_X[] { -1, 0 };
+                static const constexpr float NEGATIVE_UNIT_Y[] { 0, -1 };
+                static const constexpr float UNIT_SCALE[] { 1, 1 };
 
 		/** Function for writing to a stream.
 		*/

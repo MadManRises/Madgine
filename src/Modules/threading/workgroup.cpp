@@ -1,5 +1,7 @@
 #include "../moduleslib.h"
 
+#if ENABLE_THREADING
+
 #include "workgroup.h"
 
 namespace Engine {
@@ -58,8 +60,7 @@ namespace Threading {
     WorkGroup::~WorkGroup()
     {
         assert(singleThreaded());
-        assert(sSelf == this);
-        sSelf = nullptr;
+        finalizeThread();
     }
 
     void WorkGroup::addThreadInitializer(SignalSlot::TaskHandle &&task)
@@ -97,11 +98,6 @@ namespace Threading {
         return mName;
     }
 
-    DefaultTaskQueue &WorkGroup::taskQueue()
-    {
-        return mTaskQueue;
-    }
-
     void WorkGroup::initThread(const std::string &name)
     {
 
@@ -120,6 +116,16 @@ namespace Threading {
         for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
             task();
         }
+    }
+
+	 void WorkGroup::finalizeThread()
+    {
+
+        assert(sSelf == this);
+        sSelf = nullptr;
+
+        ThreadLocalStorage::finalize(false);
+        ThreadLocalStorage::finalize(true);
     }
 
     int WorkGroup::registerLocalBssVariable(std::function<Any()> ctor)
@@ -155,3 +161,5 @@ namespace Threading {
 
 }
 }
+
+#endif

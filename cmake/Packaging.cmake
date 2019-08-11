@@ -88,7 +88,7 @@ macro(collect_data target)
 
 	generate_binary_info(${target})
 
-	if (STATIC_BUILD OR ANDROID OR EMSCRIPTEN)
+	if (NOT BUILD_SHARED_LIBS OR ANDROID OR EMSCRIPTEN)
 		if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
 			add_custom_command(
 				TARGET ${target} 

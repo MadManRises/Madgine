@@ -1,38 +1,53 @@
 #pragma once
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "Interfaces/filesystem/path.h"
 
-namespace Engine
-{
-	namespace Plugins
-	{
-		class MODULES_EXPORT Plugin
-		{
-		public:
-			Plugin(std::string name = {}, std::string project = {}, Filesystem::Path path = {});
-			~Plugin();
+namespace Engine {
+namespace Plugins {
+    struct MODULES_EXPORT Plugin {
+        Plugin(std::string name = {}, PluginSection *section = nullptr, std::string project = {}, Filesystem::Path path = {});
+        ~Plugin();
 
-			bool isLoaded() const;
-			bool load();
-			bool unload();
+        enum LoadState {
+            UNLOADED,
+            DELAYED,
+            LOADED
+        };
 
-			const void *getSymbol(const std::string &name) const;
+        LoadState isLoaded() const;
+        LoadState load();
+        LoadState unload();
 
-			Filesystem::Path fullPath() const;
+        const void *getSymbol(const std::string &name) const;
 
-			const std::string &project() const;
+        Filesystem::Path fullPath() const;
 
-		private:
-			void *mModule;
+        const std::string &project() const;
 
-			std::string mProject;
-			std::string mName;
-			Filesystem::Path mPath;
+        const BinaryInfo *info() const;
 
-		};
-	}
+        bool isDependencyOf(Plugin *p) const;
+
+    protected:
+        void addDependency(Plugin *dependency);
+        void removeDependency(Plugin *dependency);
+        void clearDependencies();
+
+    private:
+        void *mModule;
+
+        std::string mProject;
+        PluginSection *mSection;
+        std::string mName;
+        Filesystem::Path mPath;
+        LoadState mState;
+
+        std::vector<Plugin *> mDependencies;
+        std::vector<Plugin *> mDependents;
+    };
+}
 }
 
 #endif

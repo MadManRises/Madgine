@@ -42,6 +42,8 @@ if (GCC OR CLANG)
 	if (NOT MSVC)
 		add_compile_options(-Wall -fpermissive -fvisibility=hidden)
 	endif()
-	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined") #TODO
+	if (EMSCRIPTEN) #TODO add more
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+	endif()
 endif ()
 

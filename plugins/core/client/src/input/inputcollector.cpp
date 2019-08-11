@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../clientlib.h"
 
 #include "inputcollector.h"

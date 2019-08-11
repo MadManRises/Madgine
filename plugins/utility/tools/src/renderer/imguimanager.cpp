@@ -114,39 +114,42 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+        if (Window::platformCapabilities.mSupportMultipleWindows) {
+            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 #if ANDROID
-        io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);
+            io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);
 #endif
 
-        ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
-        platform_io.Platform_CreateWindow = CreateImGuiToolWindow;
-        platform_io.Platform_DestroyWindow = DestroyImGuiToolWindow;
-        platform_io.Platform_ShowWindow = ShowImGuiToolWindow;
-        platform_io.Platform_SetWindowPos = SetImGuiToolWindowPos;
-        platform_io.Platform_GetWindowPos = GetImGuiToolWindowPos;
-        platform_io.Platform_SetWindowSize = SetImGuiToolWindowSize;
-        platform_io.Platform_GetWindowSize = GetImGuiToolWindowSize;
-        platform_io.Platform_SetWindowFocus = SetImGuiToolWindowFocus;
-        platform_io.Platform_GetWindowFocus = GetImGuiToolWindowFocus;
-        platform_io.Platform_GetWindowMinimized = GetImGuiToolWindowMinimized;
-        platform_io.Platform_SetWindowTitle = SetImGuiToolWindowTitle;
-        platform_io.Platform_RenderWindow = RenderImGuiToolWindow;
-        platform_io.Platform_SwapBuffers = SwapImGuiToolWindowBuffers;
+            ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
+            platform_io.Platform_CreateWindow = CreateImGuiToolWindow;
+            platform_io.Platform_DestroyWindow = DestroyImGuiToolWindow;
+            platform_io.Platform_ShowWindow = ShowImGuiToolWindow;
+            platform_io.Platform_SetWindowPos = SetImGuiToolWindowPos;
+            platform_io.Platform_GetWindowPos = GetImGuiToolWindowPos;
+            platform_io.Platform_SetWindowSize = SetImGuiToolWindowSize;
+            platform_io.Platform_GetWindowSize = GetImGuiToolWindowSize;
+            platform_io.Platform_SetWindowFocus = SetImGuiToolWindowFocus;
+            platform_io.Platform_GetWindowFocus = GetImGuiToolWindowFocus;
+            platform_io.Platform_GetWindowMinimized = GetImGuiToolWindowMinimized;
+            platform_io.Platform_SetWindowTitle = SetImGuiToolWindowTitle;
+            platform_io.Platform_RenderWindow = RenderImGuiToolWindow;
+            platform_io.Platform_SwapBuffers = SwapImGuiToolWindowBuffers;
 
-        io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports | ImGuiBackendFlags_PlatformHasViewports;
+            io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports | ImGuiBackendFlags_PlatformHasViewports;
 
-        platform_io.Monitors.clear();
-        for (Window::MonitorInfo info : Window::listMonitors()) {
-            ImGuiPlatformMonitor monitor;
-            monitor.MainPos = monitor.WorkPos = ImVec2 { static_cast<float>(info.x), static_cast<float>(info.y) };
-            monitor.MainSize = monitor.WorkSize = ImVec2 { static_cast<float>(info.width), static_cast<float>(info.height) };
-            platform_io.Monitors.push_back(monitor);
+            platform_io.Monitors.clear();
+            for (Window::MonitorInfo info : Window::listMonitors()) {
+                ImGuiPlatformMonitor monitor;
+                monitor.MainPos = monitor.WorkPos = ImVec2 { static_cast<float>(info.x), static_cast<float>(info.y) };
+                monitor.MainSize = monitor.WorkSize = ImVec2 { static_cast<float>(info.width), static_cast<float>(info.height) };
+                platform_io.Monitors.push_back(monitor);
+            }
+
+            ImGuiViewport *main_viewport = ImGui::GetMainViewport();
+            main_viewport->PlatformHandle = window.window();
         }
-
-        ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-        main_viewport->PlatformHandle = window.window();
     }
 
     ImGuiManager::~ImGuiManager()
@@ -162,11 +165,14 @@ namespace Tools {
         main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?
 
         ImGui::Render();
-        ImGui::UpdatePlatformWindows();
 
-        ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            ImGui::UpdatePlatformWindows();
 
-        ImGui::RenderPlatformWindowsDefault();
+            ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
+
+            ImGui::RenderPlatformWindowsDefault();
+        }
     }
 
     bool ImGuiManager::injectKeyPress(const Engine::Input::KeyEventArgs &arg)
@@ -214,11 +220,7 @@ namespace Tools {
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 
-        static float oldScrollWheel = arg.scrollWheel;
-        io.MouseWheel = arg.scrollWheel - oldScrollWheel;
-        oldScrollWheel = arg.scrollWheel;
-
-        LOG(io.MouseWheel);
+        io.MouseWheel += arg.scrollWheel;
 
         return io.WantCaptureMouse;
     }

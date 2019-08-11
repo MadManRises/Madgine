@@ -14,10 +14,10 @@
 
 namespace Engine {
 
-template <class _Base, class _Ty, template <class...> class C>
+template <class _Base, template <class...> class C, class... _Ty>
 class UniqueComponentContainer {
 public:
-    typedef UniqueComponentRegistry<_Base, _Ty> Registry;
+    typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
@@ -25,10 +25,10 @@ public:
 
     typedef typename Container::const_iterator const_iterator;
 
-    UniqueComponentContainer(_Ty arg)
-#ifndef STATIC_BUILD
+    UniqueComponentContainer(_Ty... arg)
+#if ENABLE_PLUGINS
         : mUpdateSlot(this)
-        , mArg(arg)
+        , mArg(arg...)
 #endif
     {
         size_t count = Registry::sComponents().size();
@@ -37,11 +37,11 @@ public:
             mComponents.reserve(count);
         }
         for (auto f : Registry::sComponents()) {
-            std::unique_ptr<Base> p = f(arg);
+            std::unique_ptr<Base> p = f(arg...);
             mSortedComponents.push_back(p.get());
             container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
         }
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
         Registry::update().connect(mUpdateSlot);
 #endif
     }
@@ -128,7 +128,7 @@ private:
     Container mComponents;
     std::vector<Base *> mSortedComponents;
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 protected:
     void updateComponents(CollectorInfo *info, bool add, const std::vector<F> &vals)
@@ -140,20 +140,24 @@ protected:
                 mComponents.reserve(info->mBaseIndex + vals.size());
             }
             for (F f : vals) {
-                std::unique_ptr<Base> p = f(mArg);
+                std::unique_ptr<Base> p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
                 container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
             }
         } else {
-            mSortedComponents.erase(mSortedComponents.begin() + info->mBaseIndex, mSortedComponents.begin() + info->mBaseIndex + info->mElementInfos.size());
-            mComponents.erase(std::next(mComponents.begin(), info->mBaseIndex), std::next(mComponents.begin(), info->mBaseIndex + info->mElementInfos.size()));
+            size_t from = info->mBaseIndex;
+            size_t to = info->mBaseIndex + info->mElementInfos.size();
+            for (size_t i = from; i != to; ++i) {
+                mComponents.erase(std::remove_if(mComponents.begin(), mComponents.end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
+            }
+            mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }
     }
 
 private:
     //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainer<Base, _Ty, C>::updateComponents> mUpdateSlot;
-    _Ty mArg;
+    Threading::Slot<&UniqueComponentContainer<Base, C, _Ty...>::updateComponents> mUpdateSlot;
+    std::tuple<_Ty...> mArg;
 
 #endif
 };

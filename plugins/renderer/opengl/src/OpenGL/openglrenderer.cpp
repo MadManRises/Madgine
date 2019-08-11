@@ -337,6 +337,8 @@ namespace Render {
         glCheck();
 #endif
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         return std::make_unique<OpenGLRenderWindow>(w, context, topLevel);
     }
 }

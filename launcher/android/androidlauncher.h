@@ -7,26 +7,26 @@ struct ANativeWindow;
 struct AInputQueue;
 
 namespace Engine {
-	namespace Android {
+namespace Android {
 
-		struct AndroidLauncher {
+    struct AndroidLauncher {
 
-			AndroidLauncher(ANativeActivity *activity);
+        AndroidLauncher(ANativeActivity *activity);
 
-		protected:
-			void go(Threading::WorkGroup &workGroup);
+    protected:
+        void go(Threading::WorkGroup &workGroup);
 
-			void onDestroy();
-			void onNativeWindowCreated(ANativeWindow *window);
-			void onNativeWindowDestroyed(ANativeWindow *window);
-			void onInputQueueCreated(AInputQueue *queue);
-			void onInputQueueDestroyed(AInputQueue *queue);
+        void onDestroy();
+        void onNativeWindowCreated(ANativeWindow *window);
+        void onNativeWindowDestroyed(ANativeWindow *window);
+        void onInputQueueCreated(AInputQueue *queue);
+        void onInputQueueDestroyed(AInputQueue *queue);
 
-		private:
-			ANativeActivity *mActivity;
-			Threading::WorkGroupHandle mThread;
-			App::Application *mApp;
-		};
+    private:
+        ANativeActivity *mActivity;
+        Threading::WorkGroupHandle mThread;
+        App::Application *mApp;
+    };
 
-	}
+}
 }

@@ -4,7 +4,7 @@
 
 #include "toolbase.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Tools, ToolBase, ImGuiRoot&, Tools, MADGINE_TOOLS);
+DECLARE_UNIQUE_COMPONENT(Engine::Tools, ToolBase, Tools, MADGINE_TOOLS, ImGuiRoot &);
 
 /*
 namespace Engine

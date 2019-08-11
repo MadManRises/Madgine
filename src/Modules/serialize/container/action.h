@@ -23,8 +23,9 @@ namespace Engine
 			{
 			public:
 
-				ActionImpl() :
-					mParent(dynamic_cast<T*>(parent()))
+				ActionImpl(T *t = nullptr)
+                                :
+					mParent(t ? t : dynamic_cast<T*>(parent()))
 				{
 					if (!mParent)
 						throw 0;
@@ -124,7 +125,9 @@ namespace Engine
 		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
 
 		template <auto f, class C>
-		class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C>::type{};
+                class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C>::type {
+                    using MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C>::type::type;
+                };
 
 	}
 }

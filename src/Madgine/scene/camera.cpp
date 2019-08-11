@@ -117,7 +117,18 @@ namespace Scene {
         mVisibleEntities = std::move(visibleEntities);
     }
 
-}
+		Ray Camera::mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize)
+                {
+                    float aspectRatio = viewportSize.x / viewportSize.y;
+
+                    float t = tanf(mFOV / 2.0f) * mN;
+                    float r = t * aspectRatio;
+
+                    Vector3 dir = mOrientation * Vector3 { (2.f * mousePos.x / viewportSize.x - 1.f) * r, (1.f - 2.f * mousePos.y / viewportSize.y) * t, mN };
+                    return { mPosition, dir };
+                }
+
+	}
 }
 
 METATABLE_BEGIN(Engine::Scene::Camera)

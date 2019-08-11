@@ -24,10 +24,13 @@ namespace Engine {
 
 			const char **mPluginDependencies;
 
+			mutable Plugin *mSelf;
+
 		};
 
-#if !defined(STATIC_BUILD)
+#if ENABLE_PLUGINS
 		extern "C" const BinaryInfo PLUGIN_LOCAL(binaryInfo);
+#define PLUGIN_SELF Engine::Plugins::PLUGIN_LOCAL(binaryInfo).mSelf
 #endif
 
 	}

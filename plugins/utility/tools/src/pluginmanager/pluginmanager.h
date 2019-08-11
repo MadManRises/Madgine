@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef STATIC_BUILD
+#if ENABLE_PLUGINS
 
 #include "../tool.h"
 #include "../tinyxml/tinyxml2.h"

@@ -73,6 +73,8 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
+					SignalSlot::SignalStub<> &clearedSignal();
+
     protected:
         virtual bool init() final;
         virtual void finalize() final;

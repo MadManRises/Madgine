@@ -8,8 +8,7 @@ endif(ANDROID)
 
 add_workspace_application(MadgineLauncher ${sources})
 
-target_link_plugins(MadgineLauncher Client Tools OpenGL)
-
+target_link_plugins(MadgineLauncher Client Tools OpenGL Base)
 
 if (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android log)	
@@ -27,5 +26,7 @@ if (PLUGINS_BUILD_SDLINPUT)
 	target_link_plugins(MadgineLauncher SDLInput)
 endif()
 
+
+generate_binary_info(MadgineLauncher)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

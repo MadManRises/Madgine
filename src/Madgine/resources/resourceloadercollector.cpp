@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../baselib.h"
 
 #include "resourceloadercollector.h"

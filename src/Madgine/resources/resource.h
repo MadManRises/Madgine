@@ -81,11 +81,14 @@ namespace Resources {
         {
         }
 
-        virtual ~ThreadLocalResource()
-        {
-            if (!unload())
-                LOG_WARNING("Deleted Resource \"" << name() << extension() << "\" still used. Memory not freed!");
-        }
+			virtual ~ThreadLocalResource()
+			{
+                            for (auto& [thread, data] : mData) {
+                                data.mPtr.reset();
+                                if (!data.mWeakPtr.expired())
+                                    LOG_WARNING("Deleted thread-local Resource \"" << name() << extension() << "\" still used by thread " << thread << ". Memory not freed!");
+                            }
+                        }
 
         std::shared_ptr<typename Loader::Data> data()
         {

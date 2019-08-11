@@ -71,13 +71,13 @@ namespace UI {
 
     private:
         GUI::TopLevelWindow &mWindow;        
-			
-		GuiHandlerContainer<std::vector> mGuiHandlers;
-        GameHandlerContainer<std::vector> mGameHandlers;
+		
+		Vector2 mKeptCursorPosition;
+        bool mKeepingCursorPos = false;
 
-    private:
-        Vector2 mKeptCursorPosition;
-        bool mKeepingCursorPos;
+		GuiHandlerContainer<std::vector> mGuiHandlers;
+        GameHandlerContainer<std::vector> mGameHandlers;    
+        
     };
 }
 }

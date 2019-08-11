@@ -12,9 +12,9 @@
 
 namespace Engine {
 namespace Input {
-    OISInputHandler::OISInputHandler(std::tuple<Window::Window *, App::Application &, InputListener *> args)
-        : UniqueComponent(std::get<1>(args), std::get<2>(args))
-        , mWindow(std::get<0>(args))
+    OISInputHandler::OISInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
+        : UniqueComponent(app, listener)
+        , mWindow(window)
     {
         LOG("*** Initializing OIS ***");
         OIS::ParamList pl;
@@ -109,12 +109,17 @@ namespace Input {
         return true;
     }
 
-    bool OISInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool OISInputHandler::frameStarted(std::chrono::microseconds timeSinceLastFrame)
     {
         PROFILE();
         //Need to capture/update each device
         mKeyboard->capture();
         mMouse->capture();
+        return true;
+    }
+
+    bool OISInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    {        
         return true;
     }
 

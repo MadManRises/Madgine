@@ -14,5 +14,5 @@ FolderSources(sources "" src clientforward.h clientlib.h)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/clientlib.h)
 
-target_link_libraries(Client PUBLIC Base)
+target_link_plugins(Client Base)
 

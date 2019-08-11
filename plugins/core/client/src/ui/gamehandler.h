@@ -47,7 +47,7 @@ namespace Engine
 			virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
 
-			static void clampToWindow(Input::PointerEventArgs& me);
+			void clampToWindow(Input::PointerEventArgs& me);
 
 			enum class MouseDragMode
 			{
@@ -79,7 +79,7 @@ namespace Engine
 
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandlerBase, UIManager&, GameHandler, MADGINE_CLIENT);
+DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandlerBase, GameHandler, MADGINE_CLIENT, UIManager &);
 
 namespace Engine
 {

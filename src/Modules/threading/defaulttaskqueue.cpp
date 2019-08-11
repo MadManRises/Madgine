@@ -7,7 +7,9 @@
 namespace Engine {
 namespace Threading {
 
-			DefaultTaskQueue::DefaultTaskQueue()
+    WorkgroupLocal<DefaultTaskQueue> sSingleton;
+
+    DefaultTaskQueue::DefaultTaskQueue()
         : TaskQueue("Default")
     {
     }
@@ -18,7 +20,7 @@ namespace Threading {
 
     DefaultTaskQueue &DefaultTaskQueue::getSingleton()
     {
-        return Threading::WorkGroup::self().taskQueue();
+        return sSingleton;
     }
 
     DefaultTaskQueue *DefaultTaskQueue::getSingletonPtr()

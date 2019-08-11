@@ -13,6 +13,10 @@
 namespace Engine {
 namespace Window {
 
+	DLL_EXPORT const PlatformCapabilities platformCapabilities {
+        false
+	};
+
     //DLL_EXPORT Threading::SystemVariable<ANativeWindow*> sNativeWindow = nullptr;
 
     DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;
@@ -46,23 +50,23 @@ namespace Window {
             mHeight = height;
         }
 
-        virtual size_t width() override
+        virtual int width() override
         {
             return mWidth;
         }
 
-        virtual size_t height() override
+        virtual int height() override
         {
             return mHeight;
         }
 
-        virtual size_t renderWidth() override
+        virtual int renderWidth() override
         {
             //TODO
             return width();
         }
 
-        virtual size_t renderHeight() override
+        virtual int renderHeight() override
         {
             //TODO
             return height();
@@ -77,19 +81,73 @@ namespace Window {
             eglSwapBuffers(sDisplay, (EGLSurface)mHandle);
         }
 
-        virtual void destroy() override;
+        virtual int x() override
+        {
+            return 0;
+        }
 
-        void resize(int width, int height)
+        virtual int y() override
+        {
+            return 0;
+        }
+
+        virtual int renderX() override
+        {
+            return 0;
+        }
+
+        virtual int renderY() override
+        {
+            return 0;
+        }
+
+        virtual void setSize(int width, int height) override
         {
             mWidth = width;
             mHeight = height;
             emscripten_set_canvas_element_size("#canvas", mWidth, mHeight);
         }
 
+        virtual void setRenderSize(int width, int height) override
+        {
+            setSize(width, height);
+        }
+
+        virtual void setPos(int width, int height) override
+        {
+        }
+
+        virtual void setRenderPos(int width, int height) override
+        {
+        }
+
+        virtual void show() override
+        {
+        }
+
+        virtual bool isMinimized() override
+        {
+            return false;
+        }
+
+        virtual void focus() override
+        {
+        }
+
+        virtual bool hasFocus() override
+        {
+            return true;
+        }
+
+        virtual void setTitle(const char *title) override
+        {
+        }
+
+        virtual void destroy() override;
+
     private:
         int mWidth;
         int mHeight;
-        bool mDirty = false;
     };
 
     static std::unordered_map<EGLSurface, EmscriptenWindow> sWindows;
@@ -107,7 +165,7 @@ namespace Window {
 
         emscripten_get_element_css_size(nullptr, &w, &h);
 
-        static_cast<EmscriptenWindow *>(userData)->resize(static_cast<int>(w), static_cast<int>(h));
+        static_cast<EmscriptenWindow *>(userData)->setSize(static_cast<int>(w), static_cast<int>(h));
         return true;
     }
 
@@ -154,11 +212,11 @@ namespace Window {
 
         emscripten_set_resize_callback("#window", window, false, &eventCallback);
 
-		double w;
+        double w;
         double h;
 
         emscripten_get_element_css_size(nullptr, &w, &h);
-        window->resize(static_cast<int>(w), static_cast<int>(h));
+        window->setSize(static_cast<int>(w), static_cast<int>(h));
 
         return window;
     }
@@ -174,6 +232,18 @@ namespace Window {
     Window *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
+    }
+
+	std::vector<MonitorInfo> listMonitors()
+    {
+        double w;
+        double h;
+
+        emscripten_get_element_css_size(nullptr, &w, &h);
+        
+		MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
+
+        return { info };
     }
 
 }

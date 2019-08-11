@@ -15,6 +15,13 @@ namespace Threading {
         , mLastFrame(std::chrono::high_resolution_clock::now())
         , mSetupState(mSetupSteps.begin())
     {
+        addRepeatedTask([this]() {
+            auto now = std::chrono::high_resolution_clock::now();
+            if (!singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame)))
+                stop();
+            mLastFrame = now;
+        },
+            std::chrono::microseconds(1000000 / 60));
     }
 
     bool FrameLoop::singleFrame(std::chrono::microseconds timeSinceLastFrame)
@@ -113,7 +120,8 @@ namespace Threading {
         if (std::optional<SignalSlot::TaskTracker> task = TaskQueue::fetch(nextTask, idleCount)) {
             return task;
         }
-        if (!running() && nextTask.time_since_epoch() == std::chrono::steady_clock::duration(0)) {
+        if (!running() && nextTask == std::chrono::steady_clock::time_point::max()) {
+
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
                 std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
@@ -127,12 +135,13 @@ namespace Threading {
 
     std::optional<SignalSlot::TaskTracker> FrameLoop::fetch_on_idle()
     {
-        return wrapTask([this]() {
+        /*return wrapTask([this]() {
             auto now = std::chrono::high_resolution_clock::now();
             if (!singleFrame(std::chrono::duration_cast<std::chrono::microseconds>(now - mLastFrame)))
                 stop();
             mLastFrame = now;
-        });
+        });*/
+        return {};
     }
 
     bool FrameLoop::idle() const
