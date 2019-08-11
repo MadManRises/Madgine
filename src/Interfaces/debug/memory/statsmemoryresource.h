@@ -20,8 +20,8 @@ namespace Engine {
 				bool do_is_equal(const std::pmr::memory_resource& _That) const noexcept override;
 
 			private:
-				size_t mAllocationCount;
-				size_t mAllocationSize;
+				size_t mAllocationCount = 0;
+				size_t mAllocationSize = 0;
 
 				std::pmr::memory_resource *mUpstream;
 			};

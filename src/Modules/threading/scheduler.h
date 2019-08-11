@@ -18,7 +18,6 @@ namespace Engine
 
 
 		private:
-			bool mActive = true;
 			WorkGroup &mWorkgroup;
 			std::vector<SignalSlot::TaskQueue*> mAdditionalQueues;
 		};

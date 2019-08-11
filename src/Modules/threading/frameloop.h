@@ -49,7 +49,7 @@ namespace Engine
 
 			std::chrono::high_resolution_clock::time_point mLastFrame;
 
-			std::chrono::microseconds mTimeBank;
+			std::chrono::microseconds mTimeBank{ 0 };
 
 			static constexpr std::chrono::microseconds FIXED_TIMESTEP{ 15000 };
 		};

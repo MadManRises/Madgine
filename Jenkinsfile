@@ -33,8 +33,6 @@ def staticConfigs = [
 
 def tasks = [:]
 def comboBuilder
-def comboEntry = []
-def comboNames = []
 
 def staticTask = {
     // builds and returns the task for each combination
@@ -160,7 +158,7 @@ def task = {
 			def fillStatic = { def staticname, def args ->
 				staticTasks[name + '-' + staticname] = staticTask(toolchain, configuration, args.collect())
 			}
-			comboBuilder([staticConfigs], 0, fillStatic)    
+			comboBuilder([staticConfigs], 0, fillStatic, [], [])    
 
 			parallel staticTasks
         }
@@ -171,12 +169,12 @@ def task = {
     This is where the magic happens
     recursively work through the axisList and build all combinations
 */
-comboBuilder = { def axes, int level, def f ->
+comboBuilder = { def axes, int level, def f, def comboEntry, def comboNames ->
     for ( entry in axes[0] ) {
         comboEntry[level] = entry
 		comboNames[level] = entry.name
         if (axes.size() > 1 ) {
-            comboBuilder(axes.drop(1), level + 1, f)
+            comboBuilder(axes.drop(1), level + 1, f, comboEntry, comboNames)
         }
         else {
             f(comboNames.join("-"), comboEntry)
@@ -188,7 +186,7 @@ def fill = { def name, def args ->
 	tasks[name] = task(args.collect())
 }
 
-comboBuilder(axisList, 0, fill)    
+comboBuilder(axisList, 0, fill, [], [])    
 
 pipeline {
     agent any

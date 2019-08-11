@@ -40,10 +40,15 @@ if (NOT WIN32)
 
 endif()
 
+get_property(support_shared GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
 
+if (NOT support_shared)
+	MESSAGE(STATUS "Forcing static libraries as shared libraries are not supported on that platform!")
+	set(BUILD_SHARED_LIBS OFF CACHE "" "" FORCE)
+endif()
 
 if (NOT BUILD_SHARED_LIBS)
-	add_definitions(-DSTATIC_BUILD)
+	add_definitions(-DSTATIC_BUILD=1)
 endif()
 
 if(MSVC)    

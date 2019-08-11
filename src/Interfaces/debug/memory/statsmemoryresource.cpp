@@ -8,8 +8,6 @@ namespace Engine {
 	namespace Debug {
 		namespace Memory {
 			StatsMemoryResource::StatsMemoryResource(std::pmr::memory_resource * upstream) :
-				mAllocationSize(0),
-				mAllocationCount(0),
 				mUpstream(upstream)
 			{
 			}

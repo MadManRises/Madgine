@@ -11,9 +11,8 @@ namespace Engine {
 namespace Threading {
     FrameLoop::FrameLoop()
         : TaskQueue("FrameLoop")
-        , mTimeBank(0)
-        , mLastFrame(std::chrono::high_resolution_clock::now())
         , mSetupState(mSetupSteps.begin())
+        , mLastFrame(std::chrono::high_resolution_clock::now())
     {
         addRepeatedTask([this]() {
             auto now = std::chrono::high_resolution_clock::now();

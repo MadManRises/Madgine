@@ -6,13 +6,16 @@ include(Workspace)
 include(ini)
 include(Packaging)
 
+set (PLUGIN_DEFINITION_FILE "" CACHE FILEPATH "Provide path to fixed plugin selection (optional)")
 
-set(defaultPlugins ON)
-if (NOT BUILD_SHARED_LIBS)
-	set(defaultPlugins OFF)
+set(MODULES_ENABLE_PLUGINS ON)
+if (PLUGIN_DEFINITION_FILE)
+	set(MODULES_ENABLE_PLUGINS OFF)
 endif()
 
-option(MODULES_ENABLE_PLUGINS "Enable dynamic Plugin loading/unloading" ${defaultPlugins})
+if (MODULES_ENABLE_PLUGINS AND NOT BUILD_SHARED_LIBS)
+	MESSAGE(FATAL_ERROR "Currently static builds with plugins are not supported!")
+endif()
 
 set(PLUGIN_LIST "" CACHE INTERNAL "")
 set(PROJECTS_LINKING_ALL_PLUGINS "" CACHE INTERNAL "")
@@ -59,7 +62,8 @@ macro(add_plugin name base type)
 
 	add_workspace_library(${name} ${ARGN})
 
-	set_target_properties(${name} PROPERTIES OUTPUT_NAME Plugin_${base}_${type}_${name})
+	set_target_properties(${name} 
+		PROPERTIES OUTPUT_NAME Plugin_${base}_${type}_${name})
 
 	collect_data(${name})
 
