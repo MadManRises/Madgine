@@ -92,8 +92,8 @@ def staticTask = {
 			}
 
 			def staticTasks = [:]
-			fillStatic = { def name, def args ->
-				staticTasks[name] = staticTask(toolchain, configuration, args.collect())
+			fillStatic = { def staticname, def args ->
+				staticTasks[staticname] = staticTask(toolchain, configuration, args.collect())
 			}
 			comboBuilder([staticConfigs], 0, fillStatic)   */ 
         }
