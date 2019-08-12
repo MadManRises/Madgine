@@ -65,7 +65,6 @@ def staticTask = {
 					cp ../test/components_${staticConfig.name}_${toolchain.name}.cpp components_plugins.cpp
 				fi
 				"""
-				}
 			}
 			stage("cmake") {
 				sh """
