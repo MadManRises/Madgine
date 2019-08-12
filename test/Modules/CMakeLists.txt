@@ -1,5 +1,5 @@
 
-project(Interfaces_Test)
+project(Modules_Test)
 
 
 set(sharedSources "")
@@ -41,8 +41,10 @@ FolderSources(sources "" "" integrationtests.cpp)
 			FolderSources(sources streams debugging streamdebuggingtest.cpp)
 	FolderSources(sources "" uniquecomponent uniquecomponentshared.h uniquecomponenttest.cpp)		
 
-add_gtest(Interfaces_Test ${sources})
+add_gtest(Modules_Test ${sources})
 
-target_link_plugins(Interfaces_Test LibB)
+target_link_libraries(Modules_Test PRIVATE Modules)
 
-generate_binary_info(Interfaces_Test)
+target_link_plugins(Modules_Test LibB)
+
+generate_binary_info(Modules_Test)

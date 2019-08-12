@@ -17,17 +17,17 @@ TEST(UniqueComponent, Registry)
 {
     Engine::Threading::WorkGroup wg;
 
+	//TODO test properly
+
 #if ENABLE_PLUGINS
     Engine::Plugins::PluginManager pmgr;
 
     Engine::UniqueComponentCollectorManager cmgr { pmgr };
-#endif
 
     TestDriver driver;
 
     ::Test::TestContainer<std::vector> v { driver };
 
-#if ENABLE_PLUGINS
     ASSERT_EQ(v.size(), 0);
 
     ASSERT_EQ(pmgr["Test"].loadPlugin("LibA"), Engine::Plugins::Plugin::LOADED);
@@ -35,7 +35,7 @@ TEST(UniqueComponent, Registry)
     ASSERT_EQ(v.size(), 1);
 
     ASSERT_EQ(pmgr["Test"].loadPlugin("LibB"), Engine::Plugins::Plugin::LOADED);
-#endif
+
 
     ASSERT_EQ(v.size(), 2);
 
@@ -44,7 +44,7 @@ TEST(UniqueComponent, Registry)
 
     ASSERT_NE(indexA, indexB);
 
-#if ENABLE_PLUGINS
+
     ASSERT_EQ(pmgr["Test"].unloadPlugin("LibB"), Engine::Plugins::Plugin::UNLOADED);
 
     ASSERT_EQ(v.size(), 1);
