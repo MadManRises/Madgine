@@ -51,10 +51,14 @@ void include(std::ostream &out, std::string header,
     out << "#include \"" << StringUtil::replace(header, ".cpp", ".h") << "\"\n";
 }
 
-std::vector<const TypeInfo *> sSkip;
+static std::vector<const TypeInfo *> &sSkip()
+{
+    static std::vector<const TypeInfo *> dummy;
+    return dummy;
+}
 
 void skipUniqueComponentOnExport(const TypeInfo *t) {
-    sSkip.push_back(t);
+    sSkip().push_back(t);
 }
 
 void exportStaticComponentHeader(const Filesystem::Path &outFile)
@@ -64,9 +68,9 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile)
     std::set<const Plugins::BinaryInfo *> binaries;
 
     auto notInSkip = [&](const TypeInfo *v) {
-        return std::find_if(sSkip.begin(), sSkip.end(), [=](const TypeInfo *v2) {
+        return std::find_if(sSkip().begin(), sSkip().end(), [=](const TypeInfo *v2) {
             return strcmp(v->mFullName, v2->mFullName) == 0;
-        }) == sSkip.end();
+        }) == sSkip().end();
     };
 
     for (auto &[name, reg] : registryRegistry()) {

@@ -1,18 +1,18 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_Client
-#include "clientlib.h"
-#endif
 #ifdef BUILD_Tools
 #include "toolslib.h"
 #endif
-#ifdef BUILD_Base
-#include "Madgine/baselib.h"
+#ifdef BUILD_Client
+#include "clientlib.h"
 #endif
-#ifdef BUILD_EmscriptenInput
-#include "emscripteninputlib.h"
+#ifdef BUILD_OISHandler
+#include "oislib.h"
 #endif
 #ifdef BUILD_OpenGL
 #include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_Base
+#include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_Base
 #include "Madgine/app/globalapicollector.h"
@@ -29,8 +29,8 @@
 #ifdef BUILD_Client
 #include "input/inputcollector.h"
 #endif
-#ifdef BUILD_EmscriptenInput
-#include "emscripteninputhandler.h"
+#ifdef BUILD_OISHandler
+#include "oisinputhandler.h"
 #endif
 #ifdef BUILD_Client
 #include "render/renderercollector.h"
@@ -146,8 +146,8 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Tools = ACC;
 #ifdef BUILD_Client
 	template <> const std::vector<const Engine::MetaTable*> &Engine::Input::InputHandlerCollector::Registry::sTables() {
 		static std::vector<const Engine::MetaTable*> dummy = {
-#ifdef BUILD_EmscriptenInput
-                &table<Engine::Input::EmscriptenInputHandler>(),
+#ifdef BUILD_OISHandler
+			&table<Engine::Input::OISInputHandler>(),
 #endif
 
 		}; 
@@ -155,8 +155,8 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Tools = ACC;
 	}
 	template <> std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents() {
 		return {
-#ifdef BUILD_EmscriptenInput
-                createComponent<Engine::Input::EmscriptenInputHandler>,
+#ifdef BUILD_OISHandler
+			createComponent<Engine::Input::OISInputHandler>,
 #endif
 
 		}; 
@@ -164,10 +164,9 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Tools = ACC;
 
 	#define ACC 0
 
-#ifdef BUILD_EmscriptenInput
-        constexpr size_t CollectorBaseIndex_InputHandler_OISHandler = ACC;
-        template <>
-        size_t component_index<Engine::Input::EmscriptenInputHandler>() { return CollectorBaseIndex_InputHandler_OISHandler + 0; }
+#ifdef BUILD_OISHandler
+constexpr size_t CollectorBaseIndex_InputHandler_OISHandler = ACC;
+    template<> size_t component_index<Engine::Input::OISInputHandler>(){ return CollectorBaseIndex_InputHandler_OISHandler + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_InputHandler_OISHandler + 1
 #endif

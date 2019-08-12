@@ -14,16 +14,25 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/signalslot/taskguard.h"
+
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {
 namespace Tools {
 
+	static SignalSlot::TaskGuard excludeFromExport {
+		[]() {
+            skipUniqueComponentOnExport(&typeInfo<PluginManager>());
+        },
+        {}
+    };
+
     PluginManager::PluginManager(ImGuiRoot &root)
         : Tool<PluginManager>(root)
         , mManager(Plugins::PluginManager::getSingleton())
     {
-        skipUniqueComponentOnExport(&typeInfo<PluginManager>());
+        
     }
 
     void PluginManager::render()

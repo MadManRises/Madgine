@@ -66,9 +66,6 @@
 #include "inspector/inspector.h"
 #endif
 #ifdef BUILD_Tools
-#include "memory/memoryviewer.h"
-#endif
-#ifdef BUILD_Tools
 #include "metrics/metrics.h"
 #endif
 #ifdef BUILD_Tools
@@ -279,8 +276,7 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
 #ifdef BUILD_Tools
 			&table<Engine::Tools::GuiEditor>(),
 			&table<Engine::Tools::FunctionTool>(),
-			&table<Engine::Tools::Inspector>(),
-			&table<Engine::Tools::MemoryViewer>(),
+			&table<Engine::Tools::Inspector>(),			
 			&table<Engine::Tools::Metrics>(),
 			&table<Engine::Tools::Profiler>(),
 			&table<Engine::Tools::ImGuiDemo>(),
@@ -296,7 +292,6 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
 			createComponent<Engine::Tools::GuiEditor>,
 			createComponent<Engine::Tools::FunctionTool>,
 			createComponent<Engine::Tools::Inspector>,
-			createComponent<Engine::Tools::MemoryViewer>,
 			createComponent<Engine::Tools::Metrics>,
 			createComponent<Engine::Tools::Profiler>,
 			createComponent<Engine::Tools::ImGuiDemo>,
@@ -313,11 +308,10 @@ constexpr size_t CollectorBaseIndex_ToolBase_Tools = ACC;
     template<> size_t component_index<Engine::Tools::GuiEditor>(){ return CollectorBaseIndex_ToolBase_Tools + 0; }
     template<> size_t component_index<Engine::Tools::FunctionTool>(){ return CollectorBaseIndex_ToolBase_Tools + 1; }
     template<> size_t component_index<Engine::Tools::Inspector>(){ return CollectorBaseIndex_ToolBase_Tools + 2; }
-    template<> size_t component_index<Engine::Tools::MemoryViewer>(){ return CollectorBaseIndex_ToolBase_Tools + 3; }
-    template<> size_t component_index<Engine::Tools::Metrics>(){ return CollectorBaseIndex_ToolBase_Tools + 4; }
-    template<> size_t component_index<Engine::Tools::Profiler>(){ return CollectorBaseIndex_ToolBase_Tools + 5; }
-    template<> size_t component_index<Engine::Tools::ImGuiDemo>(){ return CollectorBaseIndex_ToolBase_Tools + 6; }
-    template<> size_t component_index<Engine::Tools::TestTool>(){ return CollectorBaseIndex_ToolBase_Tools + 7; }
+    template<> size_t component_index<Engine::Tools::Metrics>(){ return CollectorBaseIndex_ToolBase_Tools + 3; }
+    template<> size_t component_index<Engine::Tools::Profiler>(){ return CollectorBaseIndex_ToolBase_Tools + 4; }
+    template<> size_t component_index<Engine::Tools::ImGuiDemo>(){ return CollectorBaseIndex_ToolBase_Tools + 5; }
+    template<> size_t component_index<Engine::Tools::TestTool>(){ return CollectorBaseIndex_ToolBase_Tools + 6; }
 #undef ACC
 #define ACC CollectorBaseIndex_ToolBase_Tools + 8
 #endif
