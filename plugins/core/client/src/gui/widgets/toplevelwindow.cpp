@@ -469,7 +469,7 @@ namespace GUI {
         auto [screenPos, screenSize] = getAvailableScreenSpace();
 
         for (Widget *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, screenSize, &Widget::injectPointerPress))
+            if (propagateInput(w, arg, screenSize, screenPos, &Widget::injectPointerPress))
                 return true;
         }
         return false;
@@ -527,8 +527,12 @@ namespace GUI {
             if (overlay->injectPointerMove(arg))
                 return true;
         }
+
+
+		Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
+
 		//TODO fix mouse pos
-        Widget *hoveredWidget = getHoveredWidget(arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) }, screenSize, mHoveredWidget);
+        Widget *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 

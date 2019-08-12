@@ -39,17 +39,22 @@ namespace Tools {
 
         if (ImGui::Begin("GuiEditor", &mVisible)) {
 
-            ImDrawList *background = ImGui::GetBackgroundDrawList();
+            ImDrawList *background = ImGui::GetBackgroundDrawList(ImGui::GetMainViewport());
 
             auto [screenPos, screenSize] = mWindow->getAvailableScreenSpace();
-            screenPos += Vector3 {
+
+			Vector3 windowPos = {
                 static_cast<float>(mWindow->window()->renderX()), static_cast<float>(mWindow->window()->renderY()), 0.0f
             };
 
-            ImGuiIO &io = ImGui::GetIO();
+			ImGuiIO &io = ImGui::GetIO();
+			           
 
             Vector2 mouse = ImGui::GetMousePos();
             Vector2 dragDistance = mouse - io.MouseClickedPos[0];
+
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+                screenPos += windowPos;
 
             GUI::Widget *hoveredWidget = mWindow->hoveredWidget();
             WidgetSettings *hoveredSettings = nullptr;
@@ -247,7 +252,7 @@ namespace Tools {
                 hoveredSettings->render();
             }
 
-			io.WantCaptureMouse = true;
+			//io.WantCaptureMouse = true;
         }
         ImGui::End();
     }
