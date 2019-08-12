@@ -64,6 +64,7 @@ def staticTask = {
 					sh """
 					cd ${name}
 					cp ../test/${staticConfig.name}_${toolchain.name}.cfg plugins.cfg
+					cp ../test/components_${staticConfig.name}_${toolchain.name}.cfg components_plugins.cfg
 					"""
 				}
 			}
