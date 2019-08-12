@@ -55,6 +55,8 @@ namespace Core {
         (*mPluginManager)["Core"].loadPlugin("TWServer");
 
         (*mPluginManager)["Test"];
+
+		mPluginManager->executeCLI();
 #endif
 
         mResources->init();

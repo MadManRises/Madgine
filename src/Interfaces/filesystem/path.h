@@ -40,3 +40,7 @@ namespace Engine {
 
 	}
 }
+
+inline std::ostream& operator<<(std::ostream& out, const Engine::Filesystem::Path& p) {
+    return out << p.str();
+}

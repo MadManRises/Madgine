@@ -23,6 +23,7 @@ namespace Tools {
         : Tool<PluginManager>(root)
         , mManager(Plugins::PluginManager::getSingleton())
     {
+        skipUniqueComponentOnExport(&typeInfo<PluginManager>());
     }
 
     void PluginManager::render()
@@ -79,7 +80,7 @@ namespace Tools {
                 ImGui::PushDisabled();
             }
             if (ImGui::Button("Export")) {
-                exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"), { &typeInfo<PluginManager>() });
+                exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"));
             }
             if (mManager.currentSelectionName().empty()) {
                 ImGui::PopDisabled();

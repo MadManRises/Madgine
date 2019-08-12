@@ -13,18 +13,23 @@
 namespace Engine {
 
 struct CompareTypeInfo {
-    bool operator()(const TypeInfo *t1, const TypeInfo *t2) const {
+    bool operator()(const TypeInfo *t1, const TypeInfo *t2) const
+    {
         return strcmp(t1->mFullName, t2->mFullName) == -1;
     }
 };
 
 struct GuardGuard {
-    GuardGuard(std::ostream &o, const Plugins::BinaryInfo *b) : out(o), bin(b) {
+    GuardGuard(std::ostream &o, const Plugins::BinaryInfo *b)
+        : out(o)
+        , bin(b)
+    {
         if (bin)
             out << "#ifdef BUILD_" << bin->mName << "\n";
     }
 
-    ~GuardGuard() {
+    ~GuardGuard()
+    {
         if (bin)
             out << "#endif\n";
     }
@@ -33,25 +38,35 @@ struct GuardGuard {
     const Plugins::BinaryInfo *bin;
 };
 
-std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo) {
+std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
+{
     Filesystem::Path p = Filesystem::makeNormalized(pStr);
     return p.relative(binInfo->mSourceRoot).str();
 };
 
 void include(std::ostream &out, std::string header,
-             const Plugins::BinaryInfo *bin = nullptr) {
+    const Plugins::BinaryInfo *bin = nullptr)
+{
     GuardGuard g(out, bin);
     out << "#include \"" << StringUtil::replace(header, ".cpp", ".h") << "\"\n";
 }
 
-void exportStaticComponentHeader(const Filesystem::Path &outFile,
-                                 std::vector<const TypeInfo *> skip) {
+std::vector<const TypeInfo *> sSkip;
+
+void skipUniqueComponentOnExport(const TypeInfo *t) {
+    sSkip.push_back(t);
+}
+
+void exportStaticComponentHeader(const Filesystem::Path &outFile)
+{
+    LOG("Exporting uniquecomponent configuration source file '" << outFile << "'");
+
     std::set<const Plugins::BinaryInfo *> binaries;
 
     auto notInSkip = [&](const TypeInfo *v) {
-        return std::find_if(skip.begin(), skip.end(), [=](const TypeInfo *v2) {
-                   return strcmp(v->mFullName, v2->mFullName) == 0;
-               }) == skip.end();
+        return std::find_if(sSkip.begin(), sSkip.end(), [=](const TypeInfo *v2) {
+            return strcmp(v->mFullName, v2->mFullName) == 0;
+        }) == sSkip.end();
     };
 
     for (auto &[name, reg] : registryRegistry()) {
@@ -65,7 +80,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile,
     std::ofstream file(outFile.str());
     assert(file);
 
-	include(file, "Modules/moduleslib.h");
+    include(file, "Modules/moduleslib.h");
 
     for (const Plugins::BinaryInfo *bin : binaries) {
         if (strlen(bin->mPrecompiledHeaderPath)) {
@@ -119,7 +134,7 @@ namespace Engine{
 	}
 )";
 
-    file << "	template <> std::vector<" << name << "::F> " << name
+        file << "	template <> std::vector<" << name << "::F> " << name
              << R"(::sComponents() {
 		return {
 )";
@@ -161,8 +176,8 @@ namespace Engine{
                     ++i;
                 }
             }
-            file << "#undef ACC\n" 
-				 << "#define ACC CollectorBaseIndex_"
+            file << "#undef ACC\n"
+                 << "#define ACC CollectorBaseIndex_"
                  << collector->mBaseInfo->mTypeName << "_"
                  << collector->mBinary->mName << " + " << i << "\n";
         }
@@ -174,7 +189,8 @@ namespace Engine{
 }
 
 MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &
-registryRegistry() {
+registryRegistry()
+{
     static std::map<std::string, ComponentRegistryBase *> dummy;
     return dummy;
 }

@@ -6,6 +6,8 @@
 
 #include "plugin.h"
 
+#include "../uniquecomponent/uniquecomponentregistry.h"
+
 #include "Interfaces/stringutil.h"
 
 #include "../generic/templates.h"
@@ -19,9 +21,9 @@
 namespace Engine {
 namespace Plugins {
 
-    CLI::Parameter<bool> noPluginCache{ { "--no-plugin-cache", "-npc" }, false, "Disables the loading of the cached plugin selection at startup." };
-    CLI::Parameter<std::string> loadPlugins{ { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
-    CLI::Parameter<std::string> savePlugins{ { "--save-plugins", "-sp" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file." };
+    CLI::Parameter<bool> noPluginCache { { "--no-plugin-cache", "-npc" }, false, "Disables the loading of the cached plugin selection at startup." };
+    CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
+    CLI::Parameter<std::string> exportPlugins { { "--export-plugins", "-ep" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file and will export a corresponding uniquecomponent configuration source file." };
 
     PluginManager *PluginManager::sSingleton = nullptr;
 
@@ -31,36 +33,30 @@ namespace Plugins {
         return *sSingleton;
     }
 
-	PluginManager::PluginManager()
-		: mSettings("Madgine_plugins.cfg")
-	{
-		assert(!sSingleton);
-		sSingleton = this;
+    PluginManager::PluginManager()
+        : mSettings("Madgine_plugins.cfg")
+    {
+        assert(!sSingleton);
+        sSingleton = this;
 
-		const std::regex e{ SHARED_LIB_PREFIX "Plugin_[a-zA-Z]*_([a-zA-Z]*)_[a-zA-Z]*\\" SHARED_LIB_SUFFIX };
-		std::smatch match;
-		for (auto path : Filesystem::listSharedLibraries()) {
-			if (std::regex_match(path.str(), match, e)) {
-				std::string section = match[1];
-				mSections.try_emplace(section, *this, section);
-			}
-		}
+        const std::regex e { SHARED_LIB_PREFIX "Plugin_[a-zA-Z]*_([a-zA-Z]*)_[a-zA-Z]*\\" SHARED_LIB_SUFFIX };
+        std::smatch match;
+        for (auto path : Filesystem::listSharedLibraries()) {
+            if (std::regex_match(path.str(), match, e)) {
+                std::string section = match[1];
+                mSections.try_emplace(section, *this, section);
+            }
+        }
 
-		std::string currentSelection = mSettings["State"]["CurrentSelectionFile"];
+        std::string currentSelection = mSettings["State"]["CurrentSelectionFile"];
 
-		if (!currentSelection.empty() && !noPluginCache) {
-			Filesystem::Path p = selectionFiles()[currentSelection];
-			p /= currentSelection + ".cfg";
-			mCurrentSelectionFile = Ini::IniFile(p);
-			loadCurrentSelectionFile();
-		}
-
-		if (!loadPlugins->empty()) {
-			Ini::IniFile file{ Filesystem::Path{ *loadPlugins } };
-			LOG("Loading Plugins from '" << loadPlugins << "'");
-			loadSelection(file);
-		}
-	}
+        if (!currentSelection.empty() && !noPluginCache) {
+            Filesystem::Path p = selectionFiles()[currentSelection];
+            p /= currentSelection + ".cfg";
+            mCurrentSelectionFile = Ini::IniFile(p);
+            loadCurrentSelectionFile();
+        }
+    }
 
     PluginManager::~PluginManager()
     {
@@ -70,6 +66,26 @@ namespace Plugins {
                 Plugin::LoadState state = p.unload();
                 assert(state == Plugin::UNLOADED);
             }
+        }
+    }
+
+    void PluginManager::executeCLI()
+    {
+        if (!loadPlugins->empty()) {
+            Ini::IniFile file { Filesystem::Path { *loadPlugins } };
+            LOG("Loading Plugins from '" << loadPlugins << "'");
+            loadSelection(file);
+        }
+
+        if (!exportPlugins->empty()) {
+            Filesystem::Path p = *exportPlugins;
+            Ini::IniFile file { p };
+            LOG("Saving Plugins to '" << exportPlugins << "'");
+            saveSelection(file);
+
+            Filesystem::Path exportPath = p.parentPath() / ("components_" + p.stem() + ".cpp");
+
+            exportStaticComponentHeader(exportPath);
         }
     }
 

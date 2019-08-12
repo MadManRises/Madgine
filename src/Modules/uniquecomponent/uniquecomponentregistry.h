@@ -39,7 +39,8 @@ struct CollectorInfo {
     size_t mBaseIndex = 0;
 };
 
-MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, std::vector<const TypeInfo *> skip = {});
+MODULES_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
+MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile);
 
 MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 

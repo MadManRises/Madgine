@@ -46,11 +46,27 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "../test/${staticConfig.name}_${toolchain.name}.cfg"
+	def staticConfigFile = "../test/${staticConfig.name}.cfg"	
 
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
+			stage("generate config") {
+				if (toolchain.name != "emscripten") {
+					sh """
+					cd ${name}
+					../${parentName}/bin/MadgineLauncher -t \
+					--load-plugins ${staticConfigFile} \
+					--export-plugins plugins.cfg \
+					--no-plugin-cache
+					"""
+				} else {
+					sh """
+					cd ${name}
+					cp ../test/${staticConfig.name}_${toolchain.name}.cfg plugins.cfg
+					"""
+				}
+			}
 			stage("cmake") {
 				sh """
 				if ${params.fullBuild}; then
@@ -63,7 +79,7 @@ def staticTask = {
 				cmake .. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
-				-DPLUGIN_DEFINITION_FILE=${staticConfigFile} \
+				-DPLUGIN_DEFINITION_FILE=plugins.cfg \
 				-DBUILD_SHARED_LIBS=OFF
 				"""						
 			}
