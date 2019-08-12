@@ -21,7 +21,7 @@ function(add_precompiled_header target header)
 	endif()
 
 	set(cppsource "${CMAKE_CURRENT_BINARY_DIR}/${name}.cpp")	
-	file(WRITE "${cppsource}" "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${header}\"")
+	file(GENERATE OUTPUT "${cppsource}" CONTENT "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${header}\"")
 	set_source_files_properties(
 		${cppsource}
 		PROPERTIES

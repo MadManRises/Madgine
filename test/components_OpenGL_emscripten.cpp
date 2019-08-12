@@ -8,8 +8,8 @@
 #ifdef BUILD_Base
 #include "Madgine/baselib.h"
 #endif
-#ifdef BUILD_OISHandler
-#include "oislib.h"
+#ifdef BUILD_EmscriptenInput
+#include "emscripteninputlib.h"
 #endif
 #ifdef BUILD_OpenGL
 #include "OpenGL/opengllib.h"
