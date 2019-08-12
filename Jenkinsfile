@@ -51,21 +51,20 @@ def staticTask = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			stage("generate config") {
-				if (toolchain.name != "emscripten") {
-					sh """
-					cd ${name}
-					../${parentName}/bin/MadgineLauncher -t \
-					--load-plugins ${staticConfigFile} \
-					--export-plugins plugins.cfg \
-					--no-plugin-cache
-					"""
-				} else {
-					sh """
-					cd ${name}
+			stage("generate config") {				
+				sh """
+				cd ${name}
+				if ../${parentName}/bin/MadgineLauncher -t \
+				--load-plugins ${staticConfigFile} \
+				--export-plugins plugins.cfg \
+				--no-plugin-cache ; then
+					echo "Success"
+				else
+					echo "generating failed! Falling back to repository version"
 					cp ../test/${staticConfig.name}_${toolchain.name}.cfg plugins.cfg
 					cp ../test/components_${staticConfig.name}_${toolchain.name}.cpp components_plugins.cpp
-					"""
+				fi
+				"""
 				}
 			}
 			stage("cmake") {
