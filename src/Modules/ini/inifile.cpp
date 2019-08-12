@@ -4,8 +4,6 @@
 
 #include "Interfaces/stringutil.h"
 
-#include "Interfaces/filesystem/api.h"
-
 namespace Engine {
 namespace Ini {
 
@@ -73,7 +71,7 @@ namespace Ini {
 
     void IniFile::saveToDisk() const
     {
-        std::ofstream stream((mPath.isAbsolute() ? mPath : Filesystem::configPath() / mPath).str());
+        std::ofstream stream(mPath.str());
         assert(stream);
         for (const std::pair<const std::string, IniSection> &p : mSections) {
             stream << "[" << p.first << "]\n";
@@ -84,7 +82,7 @@ namespace Ini {
     void IniFile::loadFromDisk()
     {
         mSections.clear();
-        std::ifstream stream((mPath.isAbsolute() ? mPath : Filesystem::configPath() / mPath).str());
+        std::ifstream stream(mPath.str());
         std::string line;
         while (std::getline(stream, line)) {
             if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))

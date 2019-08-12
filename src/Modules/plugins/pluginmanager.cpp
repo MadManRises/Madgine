@@ -16,6 +16,8 @@
 
 #include "../keyvalue/keyvalue.h"
 
+#include "Interfaces/filesystem/api.h"
+
 #include "../cli/cli.h"
 
 namespace Engine {
@@ -34,7 +36,7 @@ namespace Plugins {
     }
 
     PluginManager::PluginManager()
-        : mSettings("Madgine_plugins.cfg")
+        : mSettings(Filesystem::configPath() / "Madgine_plugins.cfg")
     {
         assert(!sSingleton);
         sSingleton = this;
