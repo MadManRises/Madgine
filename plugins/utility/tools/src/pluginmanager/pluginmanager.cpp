@@ -1,6 +1,6 @@
-#if ENABLE_PLUGINS
-
 #include "../toolslib.h"
+
+#if ENABLE_PLUGINS
 
 #include "pluginmanager.h"
 

@@ -2,6 +2,7 @@
 
 #include "../tool.h"
 #include "Modules/keyvalue/boundapimethod.h"
+#include "Modules/keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Tools {
