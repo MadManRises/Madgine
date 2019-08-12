@@ -12,7 +12,7 @@
 		],
 		[
 			name : "emscripten",
-			dockerImage : 'node:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest'
 		]
 	],           
     [//configurations
@@ -95,7 +95,14 @@ def staticTask = {
 					ctest
 					"""
 				}
-			}           
+			}     
+			if (name == "emscripten-RelWithDebInfo-OpenGL") {
+				stage("Deploy") {
+					sh """
+					cp ${name}/bin/MadgineLauncher.* /var/www/html/latest/
+					"""
+				}
+			}
 
         }
     }

@@ -22,7 +22,7 @@ if (BUILD_TESTING)
 
 		target_link_libraries(${name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
-		if (NOT ANDROID)
+		if (NOT ANDROID AND NOT EMSCRIPTEN)
 			add_test(
 				NAME ${name}
 				COMMAND ${name} --gtest_output=xml:${name}.xml
