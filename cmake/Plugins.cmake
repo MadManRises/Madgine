@@ -114,8 +114,8 @@ function(target_link_plugins target)
 
 	endforeach()
 
-	list(REMOVE_DUPLICATES plugin_dependencies)
 	if (plugin_dependencies)
+		list(REMOVE_DUPLICATES plugin_dependencies)
 		set_target_properties(${target} PROPERTIES PLUGIN_DEPENDENCIES "${plugin_dependencies}")
 	endif()
 
