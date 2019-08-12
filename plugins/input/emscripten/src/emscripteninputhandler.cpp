@@ -6,6 +6,8 @@
 
 #include "input/inputevents.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
 UNIQUECOMPONENT(Engine::Input::EmscriptenInputHandler);
 
 namespace Engine {

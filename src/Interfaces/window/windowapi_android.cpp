@@ -210,10 +210,8 @@ namespace Window {
 
     std::vector<MonitorInfo> listMonitors()
     {
-        EGLint width;
-        EGLint height;
-        if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
-            throw 0;
+        int width = ANativeWindow_getWidth(sNativeWindow);
+        int height = ANativeWindow_getHeight(sNativeWindow);
 
 		MonitorInfo info { 0, 0, width, height };
 
