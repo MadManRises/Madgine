@@ -72,3 +72,6 @@ namespace Input {
 }
 
 RegisterType(Engine::Input::EmscriptenInputHandler);
+
+METATABLE_BEGIN(Engine::Input::EmscriptenInputHandler)
+METATABLE_END(Engine::Input::EmscriptenInputHandler)

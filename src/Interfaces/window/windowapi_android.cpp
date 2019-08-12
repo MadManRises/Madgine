@@ -103,7 +103,7 @@ namespace Window {
         virtual void setSize(int width, int height) override
         {
             mWidth = width;
-            mHeight = height;            
+            mHeight = height;
         }
 
         virtual void setRenderSize(int width, int height) override
@@ -206,6 +206,18 @@ namespace Window {
     Window *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
+    }
+
+    std::vector<MonitorInfo> listMonitors()
+    {
+        EGLint width;
+        EGLint height;
+        if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
+            throw 0;
+
+		MonitorInfo info { 0, 0, width, height };
+
+		return { info };
     }
 
 }

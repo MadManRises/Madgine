@@ -19,7 +19,7 @@ if (EMSCRIPTEN)
 
 		set_target_properties(${target} PROPERTIES SUFFIX ".html")
 
-		_target_link_libraries(${target} PRIVATE "--preload-file data")
+		_target_link_libraries(${target} PRIVATE "--preload-file ${CMAKE_BINARY_DIR}/data")
 
 	endfunction (add_workspace_application)
 

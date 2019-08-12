@@ -250,6 +250,27 @@ namespace Window {
     {
         return handle ? &sWindows.at((::Window)handle) : nullptr;
     }
+
+	static std::vector<MonitorInfo> sBuffer;
+
+    static void updateMonitors()
+    {
+        sBuffer.clear();
+        for (int i = 0; i < XScreenCount(sDisplay()); ++i) {
+            Screen *screen = XScreenOfDisplay(sDisplay(), i);
+			//TODO position
+			sBuffer.push_back({ 0, 0, XWidthOfScreen(screen), XHeightOfScreen(screen) });
+		}
+    }
+	
+    std::vector<MonitorInfo> listMonitors()
+    {
+        if (sBuffer.empty())
+            updateMonitors();
+        return sBuffer;
+    }
+
+
 }
 }
 
