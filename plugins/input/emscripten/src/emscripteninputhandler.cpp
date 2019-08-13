@@ -83,12 +83,12 @@ namespace Input {
 
         switch (eventType) {
         case EMSCRIPTEN_EVENT_KEYDOWN:
-            mKeyDown[keyEvent->code] = true;
-            _this->injectKeyPress({ static_cast<Key>(keyEvent->code), keyEvent->key });
+            _this->mKeyDown[keyEvent->code] = true;
+            _this->injectKeyPress({ static_cast<Key>(keyEvent->keyCode), keyEvent->key[0] });
             return EM_TRUE;
         case EMSCRIPTEN_EVENT_KEYUP:
-            mKeyDown[keyEvent->code] = false;
-            _this->injectKeyRelease({ static_cast<Key>(keyEvent->code), keyEvent->key });
+            _this->mKeyDown[keyEvent->code] = false;
+            _this->injectKeyRelease({ static_cast<Key>(keyEvent->keyCode) });
             return EM_TRUE;
         }
 
