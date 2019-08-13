@@ -96,7 +96,7 @@ def staticTask = {
 					"""
 				}
 			}     
-			if (name == "emscripten-RelWithDebInfo-OpenGL") {
+			if (name == "emscripten-Debug-OpenGL") {
 				stage("Deploy") {
 					sh """
 					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}

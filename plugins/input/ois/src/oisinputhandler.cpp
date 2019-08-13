@@ -59,6 +59,11 @@ namespace Input {
         mInputManager = nullptr;
     }
 
+    bool OISInputHandler::isKeyDown(Key key)
+    {
+        return mKeyboard->isKeyDown(static_cast<OIS::KeyCode>(key));
+    }
+
     MouseButton::MouseButton OISInputHandler::convertMouseButton(OIS::MouseButtonID id)
     {
         switch (id) {

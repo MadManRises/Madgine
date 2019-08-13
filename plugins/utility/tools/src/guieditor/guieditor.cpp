@@ -98,7 +98,7 @@ namespace Tools {
 
                 ResizeMode resizeMode = PROPORTIONAL;
                 ImU32 resizeColor = IM_COL32(0, 255, 255, 255);
-                if (io.KeyCtrl) {
+                if (io.KeyShift) {
                     resizeMode = RELATIVE;
                     resizeColor = IM_COL32(0, 255, 0, 255);
                 }

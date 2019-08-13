@@ -32,6 +32,7 @@ namespace Tools {
 
     protected:
         Engine::App::Application &mApp;
+        GUI::TopLevelWindow &mWindow;
 
         Vector2 mAreaPos = Vector2::ZERO;
         Vector2 mAreaSize = Vector2::ZERO;

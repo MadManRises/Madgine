@@ -3,31 +3,31 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/threading/framelistener.h"
 
-namespace Engine
-{
-	namespace Input
-	{
-		class MADGINE_CLIENT_EXPORT InputHandler : public Threading::FrameListener
-		{
-		public:
-                    InputHandler(App::Application &app, InputListener *listener);
-			virtual ~InputHandler();
-			
-			//InputListener *listener();
+#include "inputevents.h"
 
-			virtual void onResize(size_t width, size_t height);
+namespace Engine {
+namespace Input {
+    class MADGINE_CLIENT_EXPORT InputHandler : public Threading::FrameListener {
+    public:
+        InputHandler(App::Application &app, InputListener *listener);
+        virtual ~InputHandler();
 
-		protected:
-			void injectKeyPress(const KeyEventArgs& arg);
-			void injectKeyRelease(const KeyEventArgs& arg);
-			void injectPointerPress(const PointerEventArgs& arg);
-			void injectPointerRelease(const PointerEventArgs& arg);
-			void injectPointerMove(const PointerEventArgs& arg);
+        //InputListener *listener();
 
+        virtual void onResize(size_t width, size_t height);
 
-		private:
-			InputListener* mListener;
-                    App::Application &mApp;
-		};
-	}
+		virtual bool isKeyDown(Key key) = 0;
+
+    protected:
+        void injectKeyPress(const KeyEventArgs &arg);
+        void injectKeyRelease(const KeyEventArgs &arg);
+        void injectPointerPress(const PointerEventArgs &arg);
+        void injectPointerRelease(const PointerEventArgs &arg);
+        void injectPointerMove(const PointerEventArgs &arg);
+
+    private:
+        InputListener *mListener;
+        App::Application &mApp;
+    };
+}
 }
