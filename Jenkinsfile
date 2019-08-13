@@ -99,7 +99,8 @@ def staticTask = {
 			if (name == "emscripten-RelWithDebInfo-OpenGL") {
 				stage("Deploy") {
 					sh """
-					cp ${name}/bin/MadgineLauncher.* /var/www/html/latest/
+					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
+					cp ${name}/bin/MadgineLauncher.* /var/www/html/latest/${env.BRANCH_NAME}
 					"""
 				}
 			}
