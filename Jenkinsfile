@@ -135,7 +135,8 @@ def task = {
 					cd ${name}
 					cmake .. \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
-					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake
+					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
+					-DBUILD_SHARED_LIBS=ON
 					"""
 				}
 				stage("build") {				
