@@ -18,6 +18,8 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "../threading/defaulttaskqueue.h"
+
 #include "../cli/cli.h"
 
 namespace Engine {
@@ -80,6 +82,8 @@ namespace Plugins {
         }
 
         if (!exportPlugins->empty()) {
+            Threading::DefaultTaskQueue::getSingleton().update(0);
+
             Filesystem::Path p = *exportPlugins;
             Ini::IniFile file { p };
             LOG("Saving Plugins to '" << exportPlugins << "'");
