@@ -88,8 +88,8 @@ def staticTask = {
 				make all 
 				"""				
 			}
-			docker.image(toolchain.dockerImage).inside {
-				stage("Test") {
+			stage("Test") {
+				docker.image(toolchain.dockerImage).inside {
 					sh """
 					cd ${name}
 					ctest
@@ -144,8 +144,8 @@ def task = {
 					make all 
 					"""				
 				}
-				docker.image(toolchain.dockerImage).inside {
-					stage("Test") {
+				stage("Test") {
+					docker.image(toolchain.dockerImage).inside {
 						sh """
 						cd ${name}
 						ctest
