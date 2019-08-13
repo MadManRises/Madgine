@@ -85,7 +85,7 @@ def staticTask = {
 			stage("build") {				
 				sh """
 				cd ${name}
-				make all 
+				make all -j2
 				"""				
 			}
 			stage("Test") {
@@ -141,7 +141,7 @@ def task = {
 				stage("build") {				
 					sh """
 					cd ${name}
-					make all 
+					make all -j2
 					"""				
 				}
 				stage("Test") {
