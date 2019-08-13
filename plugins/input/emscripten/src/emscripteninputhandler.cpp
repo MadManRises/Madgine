@@ -15,14 +15,15 @@ namespace Input {
 
     EmscriptenInputHandler::EmscriptenInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
         : UniqueComponent(app, listener)
+        , mKeyDown {}
     {
         emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenInputHandler::handleMouseEvent);
 
         emscripten_set_mousedown_callback("#canvas", this, 0, EmscriptenInputHandler::handleMouseEvent);
         emscripten_set_mouseup_callback("#document", this, 0, EmscriptenInputHandler::handleMouseEvent);
 
-        //emscripten_set_keydown_callback("#window", this, 0, EmscriptenInputHandler::handleKey);
-        //emscripten_set_keyup_callback("#window", this, 0, EmscriptenInputHandler::handleKey);
+        emscripten_set_keydown_callback("#window", this, 0, EmscriptenInputHandler::handleKeyEvent);
+        emscripten_set_keyup_callback("#window", this, 0, EmscriptenInputHandler::handleKeyEvent);
     }
 
     EmscriptenInputHandler::~EmscriptenInputHandler()
@@ -49,6 +50,11 @@ namespace Input {
         }
     }
 
+    bool EmscriptenInputHandler::isKeyDown(Key key)
+    {
+        return mKeyDown[key];
+    }
+
     EM_BOOL EmscriptenInputHandler::handleMouseEvent(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData)
     {
         EmscriptenInputHandler *_this = static_cast<EmscriptenInputHandler *>(userData);
@@ -69,6 +75,24 @@ namespace Input {
         }
 
         return EM_FALSE;
+    }
+
+    EM_BOOL EmscriptenInputHandler::handleKeyEvent(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData)
+    {
+        EmscriptenInputHandler *_this = static_cast<EmscriptenInputHandler *>(userData);
+
+        switch (eventType) {
+        case EMSCRIPTEN_EVENT_KEYDOWN:
+            mKeyDown[keyEvent->code] = true;
+            _this->injectKeyPress({ static_cast<Key>(keyEvent->code), keyEvent->key });
+            return EM_TRUE;
+        case EMSCRIPTEN_EVENT_KEYUP:
+            mKeyDown[keyEvent->code] = false;
+            _this->injectKeyRelease({ static_cast<Key>(keyEvent->code), keyEvent->key });
+            return EM_TRUE;
+        }
+
+        return EM_BOOL();
     }
 }
 }

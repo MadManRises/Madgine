@@ -28,6 +28,11 @@ namespace Input {
     {
     }
 
+    bool AndroidInputHandler::isKeyDown(Key key)
+    {
+        return false;
+    }
+
     bool AndroidInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
     {
         PROFILE();

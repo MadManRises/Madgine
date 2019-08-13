@@ -40,7 +40,12 @@ namespace Input {
             return MouseButton::MIDDLE_BUTTON;
         default:
             throw 0;
-		}
+        }
+    }
+
+    bool SDLInputHandler::isKeyDown(Key key)
+    {
+        return SDL_GetKeyboardState(NULL)[key] != 0;
     }
 
     bool SDLInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)

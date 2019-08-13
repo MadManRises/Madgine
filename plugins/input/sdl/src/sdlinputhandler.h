@@ -14,6 +14,8 @@ namespace Input {
 
         MouseButton::MouseButton convertMouseButton(Uint8 id);
 
+		virtual bool isKeyDown(Key key) override;
+
     private:
         bool
         frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;

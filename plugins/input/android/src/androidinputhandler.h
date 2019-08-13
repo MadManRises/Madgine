@@ -16,6 +16,8 @@ namespace Engine
                 AndroidInputHandler(Window::Window *window, App::Application &app, InputListener *listener);
 			~AndroidInputHandler();
 
+			virtual bool isKeyDown(Key key) override;
+
 		private:
 			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
