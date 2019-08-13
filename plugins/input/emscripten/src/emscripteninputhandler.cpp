@@ -92,7 +92,7 @@ namespace Input {
             return EM_TRUE;
         }
 
-        return EM_BOOL();
+        return EM_FALSE;
     }
 }
 }
