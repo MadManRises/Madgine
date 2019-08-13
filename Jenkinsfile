@@ -53,6 +53,12 @@ def staticTask = {
 	    stage ("${name}") {
 			stage("generate config") {				
 				sh """
+				if ${params.fullBuild}; then
+					if [ -d "${name}" ]; then 
+						rm -Rf ${name};
+					fi
+				fi
+				mkdir -p ${name}
 				cd ${name}
 				if ../${parentName}/bin/MadgineLauncher -t \
 				--load-plugins ${staticConfigFile} \
@@ -68,12 +74,6 @@ def staticTask = {
 			}
 			stage("cmake") {
 				sh """
-				if ${params.fullBuild}; then
-					if [ -d "${name}" ]; then 
-						rm -Rf ${name};
-					fi
-				fi
-				mkdir -p ${name}
 				cd ${name}
 				cmake .. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
