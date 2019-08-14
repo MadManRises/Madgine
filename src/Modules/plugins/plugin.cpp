@@ -115,8 +115,6 @@ namespace Plugins {
         if (mState != LOADED)
             return mState;
 
-        LOG("Unloading Plugin \"" << mName << "\".");
-
 		std::vector<Plugin *> dependents = mDependents; 
         for (Plugin *dep : dependents) {
             LoadState result = dep->mSection->unloadPlugin(dep);

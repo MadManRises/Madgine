@@ -175,6 +175,8 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     }
 
 private:
+    static inline UniqueComponentRegistry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
+
     std::vector<F> mComponents;
     std::vector<const MetaTable *> mTables;
     SignalSlot::Signal<CollectorInfo *, bool, const std::vector<F> &> mUpdate;
