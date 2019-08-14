@@ -1,0 +1,6 @@
+#pragma once
+
+#cmakedefine01 MODULES_ENABLE_PLUGINS
+
+//plugins
+#define ENABLE_PLUGINS MODULES_ENABLE_PLUGINS

@@ -1,0 +1,28 @@
+
+GET_PREREQUISITES($<TARGET_FILE:@target@> Dependencies 1 1 "$<TARGET_FILE_DIR:@target@>" "")
+
+foreach(dep ${Dependencies})
+	MESSAGE(STATUS "Try resolving ${dep}...")
+	GP_RESOLVE_ITEM($<TARGET_FILE:@target@> ${dep} "$<TARGET_FILE_DIR:@target@>" "" path)
+	if (NOT IS_ABSOLUTE ${path})
+		MESSAGE(SEND_ERROR "Dependency ${path} not found!")
+	endif()	
+	GP_FILE_TYPE($<TARGET_FILE:@target@> ${path} type)
+	if (NOT ${type} STREQUAL "local")
+		file(COPY ${path} DESTINATION @CMAKE_BINARY_DIR@/dependencies_bin/@target@)
+		MESSAGE(STATUS "Fetching file: ${path}(${type})")
+	else()
+		MESSAGE(STATUS "Skipping local: ${path}")
+	endif()
+endforeach()
+
+
+foreach(plugin_pattern @plugin_pattern@)
+
+	file(GLOB plugins
+		${plugin_pattern}
+	)
+	foreach(f ${plugins})
+		file(COPY ${f} DESTINATION @CMAKE_BINARY_DIR@/dependencies_bin/@target@)
+	endforeach()
+endforeach()

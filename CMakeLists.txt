@@ -1,10 +1,14 @@
-cmake_minimum_required (VERSION 3.3)
+
+cmake_minimum_required (VERSION 3.8)
 
 cmake_policy(SET CMP0048 NEW)
+cmake_policy(SET CMP0011 NEW)
+cmake_policy(SET CMP0049 NEW)
 
-set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_definitions(-D_HAS_TR1_NAMESPACE)
 
 set(MADGINE_MAJOR_VERSION 0)
 set(MADGINE_MINOR_VERSION 1)
@@ -12,35 +16,50 @@ set(MADGINE_PATCH_VERSION 0)
 
 project(Madgine VERSION ${MADGINE_MAJOR_VERSION}.${MADGINE_MINOR_VERSION}.${MADGINE_PATCH_VERSION})
 
-if (UNIX)
-	add_definitions(-D__STDC_VERSION__=201112L) #fix for luaconf.h
-endif()
-
-set(BUILD_OGRE TRUE CACHE BOOL "Build OgreApplication")
-
-set(CMAKE_MODULE_PATH
-	"${CMAKE_MODULE_PATH}"
-	"${CMAKE_SOURCE_DIR}/cmake"
+list(APPEND CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
 )
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
+
+
 
 include(Workspace)
+include(Packaging)
 include(PrecompiledHeader)
 include(Project)
 include(multiConfig)
-  
-multiConfig(Madgine)  
-
+include(Plugins)
 include(Testing)
 
-add_subdirectory(interfaces)
-add_subdirectory(base)
-if (BUILD_OGRE AND NOT CONFIG_BUILD)
-	add_subdirectory(ogre)
-endif ()
-add_subdirectory(server)
+set (CPACK_NSIS_MODIFY_PATH ON)
+set (CPACK_PACKAGE_VENDOR "MadMan Studios")
 
-install_header(Madgine)
+#set (CPACK_PACKAGE_EXECUTABLES "Maditor;Maditor")
+
+enable_packaging()
+
+multiConfig(Madgine) 
+
+
+
+add_subdirectory(src)
+
+add_subdirectory(plugins)
+
+add_subdirectory(launcher)
+
+
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
+
 
 export_to_workspace(Madgine)
 
+cpack_add_component(Madgine REQUIRED)
+
+cpack_add_component_group(Renderer EXPANDED)
+
 configure_file(doc/Doxyfile.in Doxyfile)
+

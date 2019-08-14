@@ -11,7 +11,6 @@
 *.userprefs
 
 # Build results
-[Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
@@ -252,3 +251,8 @@ packages/
 CMakeSettings.json
 
 docs/
+.vscode/tasks.json
+
+build/
+
+.vscode/

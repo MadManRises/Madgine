@@ -1,0 +1,2 @@
+If the launch.vs.json does not work:
+https://stackoverflow.com/questions/37612888/unable-to-start-debugging-the-startup-project-could-not-be-launched-vs2015
