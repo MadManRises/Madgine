@@ -233,7 +233,7 @@ pipeline {
 		success {
 			sh """
 			doxygen clang-linux-Debug/Doxyfile
-			cp -ur docs /var/www/html/latest/${env.BRANCH_NAME}
+			cp -ur doc /var/www/html/latest/${env.BRANCH_NAME}
 			"""
 		}
     }

@@ -250,7 +250,9 @@ packages/
 
 CMakeSettings.json
 
-docs/
+doc/
+**/*/docs/
+
 .vscode/tasks.json
 
 build/

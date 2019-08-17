@@ -12,7 +12,7 @@ To be able to achieve that all parts of the engine are available for you to use 
 
 ### Why do you want to use the Madgine?
 
-The framework comes bundled with a lot of useful implementations, that are commonly used in game development. Having a preset of those implementations can save a lot of development and debug time and allows to spend that time on developing those features that make your engine the best in the world. For an overview of all the available implementations please check the [Modules][] page.
+You are unsatisfied with the flexibility of other game engines? You want to build your own engine, but you are afraid it would be too big of a task? Then this framework might be exactly what you are looking for. It comes bundled with a lot of useful implementations, that are commonly used in game development including platform abstraction und thread management. Having a preset of those implementations can save a lot of development and debug time and allows to spend that time on developing those features that make your engine the best in the world. For an overview of all the available implementations please check the [Modules][] page.
 
 ## Features
 
