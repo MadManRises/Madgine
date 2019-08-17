@@ -5,26 +5,14 @@ This article describes all the neccessary steps to compile your first applicatio
 ## Dependencies
 
 The Madgine is built using CMake. It can be downloaded [here](https://cmake.org/download/). 
-
-The following Libraries need to be available:
-
-* [Ogre 1.10](http://www.ogre3d.org/download/sdk)
-* Ogre Dependencies (e.g. [here](https://bitbucket.org/cabalistic/ogredeps), SDL2 not needed)
-
-Also atleast one of the following Libraries needs to be available:
-
-* [MyGUI](http://mygui.info/) Built with Ogre-support. Tested with version 3.2.2
-
-
-*Recommended:*        
-If you want to use the [Maditor-IDE](https://github.com/MadManRises/Maditor), the following libraries will also be neccessary:
-
-* [Boost](.) vx.x or higher
-* [Qt5](.)
-
+All source and library dependencies are included in the repository itself.
+A fully C++17 conforming compiler is necessary.
 
 ## Building The Madgine
 
 Download the source code from [GitHub](https://github.com/MadManRises/Madgine).
 
-Set the CMake-Variables `OGRE_SDK` and `MYGUISDK` to the locations of your libraries.
+Generate the solution using CMake and your preferred compiler and IDE. It is recommended to provide a build
+directory outside of the source directory tree. There are no additional CMake settings necessary. Build the
+solution and start `MadgineLauncher`. The executable (including the platform suffix for executables) can be 
+found in the `bin` folder. Congratulations, you successfully compiled the Madgine Framework. 

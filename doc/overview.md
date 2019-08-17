@@ -1,31 +1,14 @@
 # Overview
 
-The Madgine-Design can be split semantically into two parts:
+The framework is strongly plugin-oriented. It contains only two fixed libraries that need to be included
+in a working Madgine-Application: Interfaces and Modules. These contain abstract concept implementations
+(see below for details) that are not necessarily tied to game development, but at the same time are used
+often in different parts of the code, which makes it not suitable for plugins. These libraries also contain
+the full [Plugins][] system. Further features and implementations can then be included as desired using 
+that system. This keeps the minimal footprint of the framework low and allows customisations to as much
+parts of the code as possible.
 
-- The Interfaces layer
-- The Game-Logic layer
-
-## The Generic Layer
-
-The generic layer offers functionality, that is shared by many different components, that are distincted in the logic layer:
-
-- Serialization
-- Scripting APIs.
-
-### Serialization
-
-The serialization-component offers a collection of classes to enable serialization and synchronisation in a server-client manner. 
-The aim is, that there has to be written exactly one version of the game logic, which will be used for any executables of the game (eg. client, headless server).
-To make a custom class serializable it has to inherit the class SerializableUnit. 
-The specification which data-members are used for serialization is done by using one of the template classes offered. 
-Those include wrappers for single data members, aswell as implementations of the most common stl containers.   
+![libraries](img/libraries.svg)
 
 
-On the other hand the logic layer models the different parts of the engine:
-
-- GUI
-- UI (Handlers)
-- 3D-Scene
-- Scripting
-- Input
-
+[Plugins]: plugins.md
