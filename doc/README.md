@@ -1,10 +1,10 @@
-# Madgine
+# Madgine - Build your own game engine
 
 [![Build Status](http://www.madman-studios.com/jenkins/buildStatus/icon?job=Madgine%2Fmaster)](http://www.madman-studios.com/jenkins/job/Madgine/job/master/)
 
 ## Description
 
-The Madgine is an Engine Building Framework, that can be used as a functional engine from the get go. It is written purely in C++ and uses the C++17-Standard. Its main focus is to provide a basic engine, in which every component can be easily adjusted or even replaced. This leaves developers with the freedom to only spend time on their favorite parts of engine development and not loosing time creating e.g. platform abstractions. 
+The Madgine is an Engine Building Framework, that can be used as a functional engine from the get go. It is written purely in C++ and uses the C++17-Standard. Its main focus is to provide a basic engine, in which every component can be easily adjusted or even replaced. This leaves developers with the freedom to spend time on their favorite parts of engine development and not loosing time creating e.g. platform abstractions. 
 
 That being said the target audience of this project are at the moment engine developers as opposed to game developers, as the provided implementations are minimal and lack useful tooling. Hopefully, as time passes the available set of tools and plugins will grow, such that the engine can be used as a general purpose engine for game progammers and designers without having to know all details of the engine itself.
 
@@ -22,7 +22,7 @@ The framework comes bundled with a lot of useful implementations, that are commo
 
 ## Documentation
 
-There is currently no documentation in code. Please refer to the explanations of general the concepts in this docs in combination to the implementation. There is also a doxygen page, that lists all the interfaces and APIs. You can find it on the [Studio][project homepage] by selecting the `docs` on the respective branch. If you need further help or if the documents are outdated or lacking, please let me now either by raising an issue on [GitHub][] or by reaching out to me during a live coding stream on [Twitch][].
+There is currently no documentation in code. Please refer to the explanations of general the concepts in this docs in combination to the implementation. There is also a doxygen page, that lists all the interfaces and APIs. You can find it on the [MadMan Studios homepage][Studio] by selecting the `docs` on the respective branch. If you need further help or if the documents are outdated or lacking, please let me now either by raising an issue on [GitHub][] or by reaching out to me during a live coding stream on [Twitch][].
 
 ## Table Of Contents
 
@@ -31,13 +31,19 @@ There is currently no documentation in code. Please refer to the explanations of
     * [Modules][]
         * [Plugins & Unique Components][]
 
+
+### License
+
+The Madgine is licensed under the MIT License, see [LICENSE.md][] for more information.
+
 [Studio]: http://www.madman-studios.com
 [CMake]: https://www.cmake.org
 [GitHub]: https://github.com/MadManRises/Madgine/issues
 [Twitch]: https://www.twitch.tv/madmanrises
 [Patreon]: https://www.patreon.com/madmanstudios
 
-[Getting Started]: doc/gettingStarted.md
-[Overview]: doc/overview.md
-[Plugins & Unique Components]: doc/plugins.md
-[Modules]: doc/modules.md
+[Getting Started]: gettingStarted.md
+[Overview]: overview.md
+[Plugins & Unique Components]: plugins.md
+[Modules]: modules.md
+[LICENSE.md]: ../LICENSE.md

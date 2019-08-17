@@ -4,11 +4,15 @@ Plugins are one of the core features that the whole framework is built around. T
 
 ## Plugins
 
-Plugins are implemented traditionally using shared libraries. They can be loaded and unloaded at rutime to extend the programm or disable certain features. The implementation contains a dependency tracker that is integrated with the CMake-System. Loading a plugin at runtime will automatically trigger a load of those dependency plugins that are linked to the main plugin in CMake. Furthermore it is possible to group plugins in sections and mark them with any combination of `exclusive` and/or `atleastOne`. Those invariants will then be respected if other plugins of the same section are tried to be loaded. Looking up symbols of plugins by name is also supported but discouraged in favor of Unique Components.
+Plugins are implemented traditionally using shared libraries. They can be loaded and unloaded at rutime to extend the programm or disable certain features. The implementation contains a dependency tracker that is integrated with the CMake-System. Loading a plugin at runtime will automatically trigger a load of those dependency plugins that are linked to the main plugin in CMake. Furthermore it is possible to group plugins in sections and mark them with any combination of `exclusive` and/or `atleastOne`. Those invariants will then be respected if other plugins of the same section are tried to be loaded. Looking up symbols of plugins by name is also supported but discouraged in favor of Unique Components (see below).
+
+### Plugin Definition Files
+
+The framework allows to provide a `PLUGIN_DEFINITION_FILE`, an ini-format file describing which plugins should be enabled. If it is set, all dynamic plugin loading code will be excluded from the build and instead the provided configuration will be statically applied. Due to its static linking nature this option currently is only supported with the CMake option [`BUILD_SHARED_LIBS`][] being disabled.
 
 ## Unique Components
 
-Unique Components are a way to avoid using possibly mangled name lookup on shared libraries in a plugin-based system. They allow code to be registered with the system by just writing it **without editing any setup code** somewhere in the engine. 
+Unique Components are a way to avoid using possibly mangled name lookup on shared libraries in a plugin-based system. They allow code to be registered with the system by just writing it **without editing any setup code** somewhere in the engine. When exporting a plugin definition file, the plugin manager also generates a source file that contains the registered components for that configuration, removing most of the overhead introduced by the system in a static build. 
 
 ### How it works
 
@@ -22,8 +26,9 @@ The library comes with two kinds of accessors to use the registered types: Conta
 
 The implementation of this feature is highly compiler and linker specific and relies on behavior not defined by the standard. If you encounter a bug or try to use it on a new platform, please [file a bug][] (following this [guidelines][]).
 
-
 [Overview]: overview.md
 [Modules]: modules.md
 [file a bug]: https://github.com/MadManRises/Madgine/issues
 [guidelines]: ../.github/ISSUE_TEMPLATE/bug_report.md
+
+[`BUILD_SHARED_LIBS`]: https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html

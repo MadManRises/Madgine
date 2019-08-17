@@ -50,12 +50,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-    /** \addtogroup Core
-    *  @{
-    */
-    /** \addtogroup Math
-    *  @{
-    */
     /** A 3x3 matrix which can represent rotations around axes.
         @note
             <b>All the code is adapted from the Wild Magic 0.2 Matrix
@@ -286,7 +280,5 @@ namespace Engine
         // for faster access
         friend class Matrix4;
     };
-    /** @} */
-    /** @} */
 }
 

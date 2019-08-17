@@ -50,12 +50,6 @@ THE SOFTWARE.
 // where t > 0 indicates a counterclockwise rotation in the xy-plane.
 
 namespace Engine {
-/** \addtogroup Core
- *  @{
- */
-/** \addtogroup Math
- *  @{
- */
 /** A 3x3 matrix which can represent rotations around axes.
     @note
         <b>All the code is adapted from the Wild Magic 0.2 Matrix
@@ -297,6 +291,4 @@ class MODULES_EXPORT Matrix4 {
              */
     float m[4][4];
 };
-/** @} */
-/** @} */
 } // namespace Engine
