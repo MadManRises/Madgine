@@ -44,16 +44,16 @@ namespace GUI {
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
-        result.push_back({ v, color, { 0, 0 }, texId });
+        result.push_back({ v, color, { 0, 0 }/*, texId*/ });
         v.x += size.x;
-        result.push_back({ v, color, { 1, 0 }, texId });
+        result.push_back({ v, color, { 1, 0 }/*, texId*/ });
         v.y += size.y;
-        result.push_back({ v, color, { 1, 1 }, texId });
-        result.push_back({ v, color, { 1, 1 }, texId });
+        result.push_back({ v, color, { 1, 1 }/*, texId*/ });
+        result.push_back({ v, color, { 1, 1 }/*, texId*/ });
         v.x -= size.x;
-        result.push_back({ v, color, { 0, 1 }, texId });
+        result.push_back({ v, color, { 0, 1 }/*, texId*/ });
         v.y -= size.y;
-        result.push_back({ v, color, { 0, 0 }, texId });
+        result.push_back({ v, color, { 0, 0 }/*, texId*/ });
         return result;
     }
 

@@ -34,6 +34,8 @@ inline void glCheck() {
 	}
 }
 
+#define GL_CHECK() glCheck()
+
 #if WINDOWS
 
 #undef NO_ERROR

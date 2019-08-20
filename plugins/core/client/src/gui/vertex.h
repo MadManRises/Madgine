@@ -1,15 +1,15 @@
 #pragma once
 
-
 namespace Engine {
-	namespace GUI {
+namespace GUI {
 
-		struct Vertex {
-			Vector3 mPos;
-			Vector4 mColor;
-			Vector2 mUV = {};
-			uint32_t mTextureIndex = 0;
-		};
+    struct Vertex {
 
-	}
+        Vector3 mPos;
+        Vector4 mColor;
+        Vector2 mUV = {};
+        //uint32_t mTextureIndex = 0;
+    };
+
+}
 }
