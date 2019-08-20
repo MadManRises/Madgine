@@ -156,7 +156,7 @@ namespace Window {
             WINDOWPLACEMENT placement;
             auto result = GetWindowPlacement((HWND)mHandle, &placement);
             assert(result);
-            return placement.showCmd & SW_MINIMIZE;
+            return placement.showCmd == SW_MINIMIZE;
         }
 
         virtual void focus() override
