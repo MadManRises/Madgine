@@ -109,7 +109,6 @@ namespace Tools {
                     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
                     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-                    //??
                     window_flags |= ImGuiWindowFlags_NoBackground;
 
                     // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
