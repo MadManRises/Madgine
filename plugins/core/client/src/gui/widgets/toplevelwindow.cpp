@@ -45,6 +45,7 @@ namespace GUI {
     TopLevelWindow::TopLevelWindow(GUISystem &gui)
         : mGui(gui)
         , mUI(std::make_unique<UI::UIManager>(*this))
+        , mComponents(*this)
     {
         const App::AppSettings &settings = gui.app().settings();
 
@@ -162,10 +163,19 @@ namespace GUI {
 
         bool result = mUI->callInit();
         assert(result);
+
+        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+            result = comp->callInit();
+            assert(result);
+        }
     }
 
     TopLevelWindow::~TopLevelWindow()
     {
+        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+            comp->callFinalize();            
+        }
+
         mUI->callFinalize();
 
         mGui.app(false).removeFrameListener(this);
@@ -528,10 +538,9 @@ namespace GUI {
                 return true;
         }
 
+        Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
 
-		Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
-
-		//TODO fix mouse pos
+        //TODO fix mouse pos
         Widget *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
@@ -554,6 +563,11 @@ namespace GUI {
     Window::Window *TopLevelWindow::window()
     {
         return mWindow;
+    }
+
+    Widget *TopLevelWindow::currentRoot()
+    {
+        return mCurrentRoot;
     }
 
     Render::RenderWindow *TopLevelWindow::getRenderer()
@@ -695,11 +709,37 @@ namespace GUI {
         return true;
     }
 
+    TopLevelWindowComponentBase::TopLevelWindowComponentBase(TopLevelWindow &window)
+        : mWindow(window)
+    {
+    }
+
+    TopLevelWindow &TopLevelWindowComponentBase::window()
+    {
+        return mWindow;
+    }
+
+    const Core::MadgineObject *TopLevelWindowComponentBase::parent() const
+    {
+        return &mWindow.gui();
+    }
+
+    App::Application &TopLevelWindowComponentBase::app(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return mWindow.gui().app(init);
+    }
+
 }
 }
+
+DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
 
 METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
 READONLY_PROPERTY(Widgets, widgets)
 METATABLE_END(Engine::GUI::TopLevelWindow)
 
 RegisterType(Engine::GUI::TopLevelWindow);
+RegisterType(Engine::GUI::TopLevelWindowComponentBase);

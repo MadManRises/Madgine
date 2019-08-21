@@ -39,14 +39,16 @@ namespace Tools {
     }
     static void DestroyImGuiToolWindow(ImGuiViewport *vp)
     {
-        ImGuiIO &io = ImGui::GetIO();
-        GUI::TopLevelWindow *topLevel = static_cast<GUI::TopLevelWindow *>(io.BackendPlatformUserData);
+        if (vp->PlatformUserData) {
+            ImGuiIO &io = ImGui::GetIO();
+            GUI::TopLevelWindow *topLevel = static_cast<GUI::TopLevelWindow *>(io.BackendPlatformUserData);
 
-        GUI::ToolWindow *toolWindow = static_cast<GUI::ToolWindow *>(vp->PlatformUserData);
-        vp->PlatformUserData = nullptr;
-        vp->PlatformHandle = nullptr;
-        vp->PlatformHandleRaw = nullptr;
-        topLevel->destroyToolWindow(toolWindow);
+            GUI::ToolWindow *toolWindow = static_cast<GUI::ToolWindow *>(vp->PlatformUserData);
+            vp->PlatformUserData = nullptr;
+            vp->PlatformHandle = nullptr;
+            vp->PlatformHandleRaw = nullptr;
+            topLevel->destroyToolWindow(toolWindow);
+        }
     }
     static void ShowImGuiToolWindow(ImGuiViewport *vp)
     {
@@ -104,8 +106,8 @@ namespace Tools {
         toolWindow->endFrame();
     }
 
-    ImGuiManager::ImGuiManager(Engine::App::Application &app)
-        : mApp(app), mWindow(*app.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front())
+    ImGuiManager::ImGuiManager(GUI::TopLevelWindow &window)
+        : mWindow(window)
     {
         mWindow.addOverlay(this);
         ImGui::CreateContext();

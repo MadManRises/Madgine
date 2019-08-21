@@ -38,8 +38,24 @@ namespace Tools {
             true, true, true
         };
 
-        ImGui::DragMatrix3("Pos", &pos, 0.15f, enabled);
-        ImGui::DragMatrix3("Size", &size, 0.15f, enabled);
+        float speeds[9] = {
+            0.01f,
+            0.01f,
+            1.0f,
+            0.01f,
+            0.01f,
+            1.0f,
+            0.01f,
+            0.01f,
+            1.0f,
+        };
+
+        if (ImGui::DragMatrix3("Pos", &pos, speeds, enabled))
+            mWidget->setPos(pos);
+        if (ImGui::DragMatrix3("Size", &size, 0.15f, enabled)) {
+            mWidget->setSize(size);
+            enforceAspectRatio();
+        }
 
         if (ImGui::Checkbox("AspectRatio", &mEnforceAspectRatio))
             enforceAspectRatio();

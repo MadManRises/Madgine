@@ -416,7 +416,7 @@ void RightAlignText(const char *s, ...)
     ImGui::Text("%s", buffer);
 }
 
-bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled)
+bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled)
 {
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
@@ -437,7 +437,7 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *ena
             PushID(3 * i + j);
             if (enabled && !enabled[3 * i + j])
                 PushDisabled();
-            value_changed |= DragFloat("", &(*m)[i][j], v_speed);
+            value_changed |= DragFloat("", &(*m)[i][j], v_speeds[3 * i + j]);
             if (enabled && !enabled[3 * i + j])
                 PopDisabled();
             PopItemWidth();
@@ -451,6 +451,13 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *ena
     EndGroup();
 
     return value_changed;
+}
+
+bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled)
+{
+    float speeds[9];
+    std::fill_n(speeds, 9, v_speed);
+    return DragMatrix3(label, m, speeds, enabled);
 }
 
 bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter, int expectedArgumentCount)

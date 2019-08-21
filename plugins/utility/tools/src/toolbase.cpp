@@ -6,6 +6,8 @@
 
 #include "renderer/imguiroot.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
 namespace Engine {
 namespace Tools {
     ToolBase::ToolBase(ImGuiRoot &root)
@@ -76,5 +78,10 @@ namespace Tools {
     }
 }
 }
+
+
+METATABLE_BEGIN(Engine::Tools::ToolBase)
+PROPERTY(visible, isVisible, setVisible)
+METATABLE_END(Engine::Tools::ToolBase)
 
 RegisterType(Engine::Tools::ToolBase);

@@ -57,12 +57,12 @@ namespace Engine
 				ImGui::NextColumn();
 			}
 			if (mShowFile) {
-				ImGui::Text(traceback.mFile);
+				ImGui::Text("%s", traceback.mFile);
 				ImGui::NextColumn();
 				ImGui::Text("%d", traceback.mLineNr);
 				ImGui::NextColumn();
 			}
-			ImGui::Text("%d", size);
+			ImGui::Text("%zu", size);
 			ImGui::NextColumn();
 
 			return opened;

@@ -7,7 +7,7 @@ namespace Engine {
 
 		class OpenGLImGuiManager : public ImGuiManager {
 		public:
-			OpenGLImGuiManager(App::Application &app);
+			OpenGLImGuiManager(GUI::TopLevelWindow &window);
 
 			// Geerbt über ImGuiManager
 			virtual void init() override;

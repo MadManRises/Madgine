@@ -83,6 +83,7 @@ void RightAlignDuration(std::chrono::nanoseconds dur);
 void RightAlignText(const char *s, ...);
 
 bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
+bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
 
 bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 

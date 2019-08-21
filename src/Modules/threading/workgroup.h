@@ -40,7 +40,9 @@ namespace Threading {
         const std::string &name() const;
 
         static int registerLocalBssVariable(std::function<Any()> ctor);
+        static void unregisterLocalBssVariable(int index);
         static int registerLocalObjectVariable(std::function<Any()> ctor);
+        static void unregisterLocalObjectVariable(int index);
 
         static const Any &localVariable(int index);
 

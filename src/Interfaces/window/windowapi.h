@@ -88,7 +88,8 @@ namespace Window {
 
         void onClose()
         {
-            for (WindowEventListener *listener : mListeners)
+            std::vector<WindowEventListener *> listeners = mListeners;
+            for (WindowEventListener *listener : listeners)
                 listener->onClose();
         }
 

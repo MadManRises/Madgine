@@ -61,11 +61,11 @@ public:
 
     struct typed_const_iterator {
         using It = typename std::vector<Base *>::const_iterator;
-		using TypeIt = typename std::vector<const MetaTable*>::const_iterator;
+        using TypeIt = typename std::vector<const MetaTable *>::const_iterator;
 
         typed_const_iterator(It &&it, TypeIt &&type)
-                    : mIt(std::move(it))
-                    , mType(std::move(type))
+            : mIt(std::move(it))
+            , mType(std::move(type))
         {
         }
 
@@ -77,8 +77,7 @@ public:
 
         TypedScopePtr operator*() const
         {
-            return
-            {
+            return {
                 *mIt, *mType
             };
         }
@@ -87,6 +86,11 @@ public:
         {
             return mIt == other.mIt;
         }
+
+        bool operator!=(const typed_const_iterator &other) const
+        {
+            return mIt != other.mIt;
+		}
 
     private:
         It mIt;

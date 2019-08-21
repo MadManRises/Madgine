@@ -74,10 +74,22 @@ namespace Threading {
         return -static_cast<int>(sLocalBssVariableConstructors().size());
     }
 
+    void ThreadLocalStorage::unregisterLocalBssVariable(int index)
+    {
+        //sLocalVariables().mBssVariables[-(index + 1)] = {};
+        sLocalBssVariableConstructors()[-(index + 1)] = {};
+    }
+
     int ThreadLocalStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
         sLocalObjectVariableConstructors().emplace_back(std::move(ctor));
         return sLocalObjectVariableConstructors().size() - 1;
+    }
+
+    void ThreadLocalStorage::unregisterLocalObjectVariable(int index)
+    {
+        //sLocalVariables().mObjectVariables[index] = {};
+        sLocalObjectVariableConstructors()[index] = {};
     }
 
     const Any &ThreadLocalStorage::localVariable(int index)

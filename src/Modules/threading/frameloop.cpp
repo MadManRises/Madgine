@@ -65,7 +65,8 @@ namespace Threading {
         bool result = true;
         std::vector<FrameListener*> listeners = mListeners;
         for (FrameListener *listener : listeners) {
-            result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
+            if (std::find(mListeners.begin(), mListeners.end(), listener) != mListeners.end())
+				result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
         }
 
         mTimeBank += timeSinceLastFrame;

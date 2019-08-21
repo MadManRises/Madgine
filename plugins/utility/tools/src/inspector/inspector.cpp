@@ -109,7 +109,6 @@ namespace Tools {
             ImGui::PushDisabled();
 
         bool modified = ImGui::ValueType(&value, overloaded { [&](TypedScopePtr scope) {
-
                                                                  bool b = ImGui::TreeNodeEx(id.c_str());
                                                                  ImGui::DraggableValueTypeSource(id, parent, value);
                                                                  if (b) {
@@ -119,7 +118,6 @@ namespace Tools {
                                                                  return false;
                                                              },
                                                      [&](KeyValueVirtualIterator &it) {
-
                                                          bool b = ImGui::TreeNodeEx(id.c_str());
                                                          ImGui::DraggableValueTypeSource(id, parent, value);
                                                          if (b) {

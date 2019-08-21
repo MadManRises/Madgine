@@ -30,7 +30,7 @@ constexpr Accessor property()
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
 
-        static_assert(std::is_same_v<setter_traits::argument_types, std::tuple<T>>);
+        static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
             TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<T>());
@@ -127,6 +127,9 @@ static constexpr BoundApiMethod method(TypedScopePtr scope)
 
 #define READONLY_PROPERTY(Name, Getter) \
     { #Name, ::Engine::property<&Ty::Getter, nullptr>() },
+
+#define PROPERTY(Name, Getter, Setter) \
+    { #Name, ::Engine::property<&Ty::Getter, &Ty::Setter>() },
 
 #define FUNCTION(F) \
     { #F, ::Engine::property<&::Engine::method<&Ty::F>, nullptr>() },

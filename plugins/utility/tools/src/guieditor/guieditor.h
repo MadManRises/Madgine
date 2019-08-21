@@ -11,7 +11,7 @@ namespace Tools {
     public:
         GuiEditor(ImGuiRoot &root);
 
-		virtual bool init() override;
+        virtual bool init() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
@@ -20,12 +20,19 @@ namespace Tools {
         const char *key() const override;
 
     private:
-        GUI::TopLevelWindow *mWindow;
+        void renderSelection(GUI::Widget *hoveredWidget = nullptr);
+        void renderHierarchy(GUI::Widget **hoveredWidget = nullptr);
+        void listWidgets(GUI::Widget *w, GUI::Widget **hoveredWidget = nullptr);
+
+    private:
+        GUI::TopLevelWindow &mWindow;
         WidgetSettings *mSelected = nullptr;
         std::list<WidgetSettings> mSettings;
 
-		bool mMouseDown = false;
-		bool mDragging = false;
+		bool mHierarchyVisible = false;
+
+        bool mMouseDown = false;
+        bool mDragging = false;
         bool mDraggingLeft = false, mDraggingTop = false, mDraggingRight = false, mDraggingBottom = false;
     };
 

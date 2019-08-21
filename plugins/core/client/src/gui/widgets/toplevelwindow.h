@@ -4,12 +4,34 @@
 #include "../../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 #include "Modules/generic/transformIt.h"
 
 #include "Madgine/core/madgineobject.h"
 
 #include "Modules/keyvalue/scopebase.h"
+
+namespace Engine {
+namespace GUI {
+
+    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, Core::MadgineObject {
+        TopLevelWindowComponentBase(TopLevelWindow &window);
+        virtual ~TopLevelWindowComponentBase() = default;
+
+        TopLevelWindow &window();
+
+        virtual const MadgineObject *parent() const override;
+        virtual App::Application &app(bool = true) override;
+
+    protected:
+        TopLevelWindow &mWindow;
+    };
+
+}
+}
+
+DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindowComponentBase, TopLevelWindow, MADGINE_CLIENT, TopLevelWindow &);
 
 namespace Engine {
 namespace GUI {
@@ -36,8 +58,8 @@ namespace GUI {
 			virtual void setCursorPosition(const Vector2& pos);
 			virtual Vector2 getCursorPosition();*/
 
-		bool isHovered(Widget *w);
-		Widget *hoveredWidget();
+        bool isHovered(Widget *w);
+        Widget *hoveredWidget();
 
         Widget *getWidget(const std::string &name);
 
@@ -82,6 +104,7 @@ namespace GUI {
         void renderOverlays();
 
         Window::Window *window();
+        Widget *currentRoot();
 
         decltype(auto) widgets()
         {
@@ -95,10 +118,10 @@ namespace GUI {
 
         UI::UIManager &ui();
 
-		ToolWindow *createToolWindow(const Window::WindowSettings &settings);
+        ToolWindow *createToolWindow(const Window::WindowSettings &settings);
         void destroyToolWindow(ToolWindow *w);
 
-		virtual bool frameStarted(std::chrono::microseconds) override;
+        virtual bool frameStarted(std::chrono::microseconds) override;
         virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
@@ -127,13 +150,15 @@ namespace GUI {
 
     private:
         GUISystem &mGui;
-		
-		std::map<std::string, Widget *> mWidgets;
+
+        std::map<std::string, Widget *> mWidgets;
         std::unique_ptr<UI::UIManager> mUI;
 
-		std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
+		TopLevelWindowContainer<std::vector> mComponents;
 
-        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;        
+        std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
+
+        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
@@ -145,10 +170,11 @@ namespace GUI {
 
         Widget *mHoveredWidget = nullptr;
 
-		Widget *mCurrentRoot = nullptr;
+        Widget *mCurrentRoot = nullptr;
 
         std::stack<Widget *> mModalWidgetList;
     };
 
 }
 }
+

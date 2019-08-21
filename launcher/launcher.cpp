@@ -37,10 +37,6 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
             result = root.errorCode();
         }
     }
-#if WINDOWS
-    while (!_kbhit())
-        ;
-#endif
     return result;
 }
 

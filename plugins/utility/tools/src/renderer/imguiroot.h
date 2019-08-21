@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/app/globalapicollector.h"
+#include "gui/widgets/toplevelwindow.h"
 #include "Modules/threading/framelistener.h"
 
 #include "../toolscollector.h"
@@ -10,14 +10,14 @@
 namespace Engine {
 namespace Tools {
 
-    class MADGINE_TOOLS_EXPORT ImGuiRoot : public App::GlobalAPI<ImGuiRoot>, public Threading::FrameListener
+    class MADGINE_TOOLS_EXPORT ImGuiRoot : public GUI::TopLevelWindowComponent<ImGuiRoot>, public Threading::FrameListener
 #if ENABLE_PLUGINS
         ,
                                            public Plugins::PluginListener
 #endif
     {
     public:
-        ImGuiRoot(App::Application &app);
+        ImGuiRoot(GUI::TopLevelWindow &window);
         ~ImGuiRoot();
 
         bool init() override;

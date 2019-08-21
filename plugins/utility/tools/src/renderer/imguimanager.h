@@ -10,7 +10,7 @@ namespace Tools {
 
     class ImGuiManager : public Engine::GUI::WindowOverlay {
     public:
-        ImGuiManager(Engine::App::Application &app);
+        ImGuiManager(GUI::TopLevelWindow &window);
         virtual ~ImGuiManager();
 
         virtual void init() = 0;
@@ -31,7 +31,6 @@ namespace Tools {
         void setCentralNode(ImGuiDockNode *node);
 
     protected:
-        Engine::App::Application &mApp;
         GUI::TopLevelWindow &mWindow;
 
         Vector2 mAreaPos = Vector2::ZERO;

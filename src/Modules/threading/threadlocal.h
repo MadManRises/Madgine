@@ -10,8 +10,10 @@ namespace Threading {
 
     struct MODULES_EXPORT ThreadLocalStorage {
 
-		static int registerLocalBssVariable(std::function<Any()> ctor);
+        static int registerLocalBssVariable(std::function<Any()> ctor);
+        static void unregisterLocalBssVariable(int index);
         static int registerLocalObjectVariable(std::function<Any()> ctor);
+        static void unregisterLocalObjectVariable(int index);
 
         static const Any &localVariable(int index);
 
@@ -25,7 +27,7 @@ namespace Threading {
         template <typename... Args>
         ThreadLocal(Args &&... args)
         {
-            std::tuple<Args...> tuple { 
+            std::tuple<Args...> tuple {
                 std::forward<Args>(args)...
             };
             auto lambda = [=]() { return TupleUnpacker::constructExpand<Any>(Any::inplace<T>, tuple); };
@@ -37,13 +39,22 @@ namespace Threading {
             }
         }
 
+        ~ThreadLocal()
+        {
+            if constexpr (std::is_trivially_copyable_v<T>) {
+                G::unregisterLocalBssVariable(mIndex);
+            } else {
+                G::unregisterLocalObjectVariable(mIndex);
+            }
+        }
+
         T *operator->() { return &data(); }
 
         T &operator*() { return data(); }
 
         operator T &() { return data(); }
 
-		T *operator&() { return &data(); }
+        T *operator&() { return &data(); }
 
         void operator=(const T &t) { data() = t; }
 
@@ -61,13 +72,18 @@ namespace Threading {
             mIndex = G::registerLocalBssVariable([=]() { return Any { initial }; });
         }
 
+        ~ThreadLocal()
+        {
+            G::unregisterLocalBssVariable(mIndex);
+		}
+
         T *operator->() { return data(); }
 
         T &operator*() { return *data(); }
 
         operator T *() { return data(); }
 
-		T *operator&() { return data(); }
+        T *operator&() { return data(); }
 
         void operator=(T *t) { data() = t; }
 
@@ -114,7 +130,7 @@ namespace Threading {
 
         T &operator*() { return *mPtr; }
 
-		 T *operator&() { return mPtr; }
+        T *operator&() { return mPtr; }
 
         operator T *() { return mPtr; }
 
@@ -123,7 +139,7 @@ namespace Threading {
     private:
         T *mPtr;
     };
-	   
+
 } // namespace Threading
 } // namespace Engine
 
@@ -136,8 +152,6 @@ namespace Threading {
 #else
 #define THREADLOCAL(T) ::Engine::Threading::Proxy<T>
 #endif
-
-
 
 #if EMSCRIPTEN
 #define thread_local thread_local_not_supported_on_emscripten provoke_syntax_error

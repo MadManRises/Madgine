@@ -18,13 +18,13 @@
 namespace Engine {
 namespace Tools {
 
-    std::unique_ptr<ImGuiManager> createOpenGlManager(App::Application &app)
+    std::unique_ptr<ImGuiManager> createOpenGlManager(GUI::TopLevelWindow &window)
     {
-        return std::make_unique<OpenGLImGuiManager>(app);
+        return std::make_unique<OpenGLImGuiManager>(window);
     }
 
-    OpenGLImGuiManager::OpenGLImGuiManager(App::Application &app)
-        : ImGuiManager(app)
+    OpenGLImGuiManager::OpenGLImGuiManager(GUI::TopLevelWindow &window)
+        : ImGuiManager(window)
     {
     }
 
@@ -46,11 +46,10 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         io.DeltaTime = timeSinceLastFrame;
+        
+        Vector3 size = mWindow.getScreenSize();
 
-        GUI::TopLevelWindow &window = *mApp.getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front();
-        Vector3 size = window.getScreenSize();
-
-        io.BackendPlatformUserData = &window;
+        io.BackendPlatformUserData = &mWindow;
 
         io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
 

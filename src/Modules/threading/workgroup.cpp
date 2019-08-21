@@ -134,10 +134,22 @@ namespace Threading {
         return -static_cast<int>(sWorkgroupLocalBssConstructors().size());
     }
 
+	void WorkGroup::unregisterLocalBssVariable(int index)
+    {
+        //sLocalVariables().mBssVariables[-(index + 1)] = {};
+        sWorkgroupLocalBssConstructors()[-(index + 1)] = {};
+    }
+
 	    int WorkGroup::registerLocalObjectVariable(std::function<Any()> ctor)
     {
         sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor));
         return sWorkgroupLocalObjectConstructors().size() - 1;
+    }
+
+		    void WorkGroup::unregisterLocalObjectVariable(int index)
+    {
+        //sLocalVariables().mObjectVariables[index] = {};
+        sWorkgroupLocalObjectConstructors()[index] = {};
     }
 
     const Any &WorkGroup::localVariable(int index)
