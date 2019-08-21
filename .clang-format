@@ -13,3 +13,5 @@ PointerAlignment: Right
 IncludeCategories:
   - Regex:     '^"(\.\./)*[a-zA-Z]+lib\.h"$'
     Priority:  -1
+
+IndentPPDirectives: AfterHash
