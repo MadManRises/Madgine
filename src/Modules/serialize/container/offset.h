@@ -16,9 +16,9 @@ namespace Serialize {
 
             size_t offset = reinterpret_cast<size_t>(&(static_cast<Parent *>(static_cast<_Parent *>(nullptr))->*P));
 
-#if !defined(__has_cpp_attribute) || !__has_cpp_attribute(no_unique_address)           
+//#if !defined(__has_cpp_attribute) || !__has_cpp_attribute(no_unique_address)           
             offset = alignTo(offset + sizeof(Dummy), alignment);
-#endif
+//#endif
 
             ObservableBase *o = reinterpret_cast<ObservableBase *>(static_cast<char *>(nullptr) + offset);
 

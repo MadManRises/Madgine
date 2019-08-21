@@ -80,11 +80,11 @@
 #define TEMPLATE_INSTANTIATION_EXPORT template
 #define TEMPLATE_INSTANTIATION_IMPORT extern template
 
-#ifdef __has_cpp_attribute // Check if __has_cpp_attribute is present
+/*#ifdef __has_cpp_attribute // Check if __has_cpp_attribute is present
 #    if __has_cpp_attribute(no_unique_address) // Check for an attribute
 #        define NO_UNIQUE_ADDRESS [[no_unique_address]]
 #    endif
-#endif
+#endif*/
 #ifndef NO_UNIQUE_ADDRESS
 #    define NO_UNIQUE_ADDRESS
 #endif
