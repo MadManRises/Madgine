@@ -5,4 +5,4 @@
 
 #include "inputhandler.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Input, InputHandler, InputHandler, MADGINE_CLIENT, Engine::Window::Window *, Engine::App::Application &, Engine::Input::InputListener *);
+DECLARE_UNIQUE_COMPONENT(Engine::Input, InputHandler, MADGINE_CLIENT, InputHandler, Engine::Window::Window *, Engine::App::Application &, Engine::Input::InputListener *);

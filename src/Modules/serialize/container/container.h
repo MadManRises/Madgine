@@ -330,7 +330,7 @@ namespace Engine
 			std::pair<iterator, bool> emplace_tuple_intern(const const_iterator& where, std::tuple<_Ty...>&& tuple)
 			{
 				return TupleUnpacker::invokeExpand(&Container<traits, Creator>::emplace_intern<_Ty...>,
-					static_cast<Container<traits, Creator>*>(this),
+					this,
 					where,
 					std::forward<std::tuple<_Ty...>>(tuple));
 			}

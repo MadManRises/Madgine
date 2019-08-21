@@ -88,7 +88,7 @@ namespace Serialize {
     {
     }
 
-    void BufferedOutStream::beginMessage(SerializableUnitBase *unit,
+    void BufferedOutStream::beginMessage(const SerializableUnitBase *unit,
         MessageType type)
     {
         MessageHeader header;

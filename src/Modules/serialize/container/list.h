@@ -93,8 +93,8 @@ namespace Engine
 		using SerializableList = ListImpl<SerializableContainer<
 			container_traits<std::list, typename UnitHelper<T>::Type>, Creator>>;
 
-		template <class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
-		using ObservableList = ObservableListImpl<ObservableContainer<
+		template <typename PtrOffset, class T, typename Config, class Creator = DefaultCreator<>>
+		using ObservableList = ObservableListImpl<ObservableContainer<PtrOffset,
 			container_traits<std::list, typename UnitHelper<T>::Type>, Creator, Config>>;
 	}
 }

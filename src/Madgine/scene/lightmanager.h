@@ -27,7 +27,8 @@ namespace Scene {
         std::tuple<std::unique_ptr<Light>> createLightTuple();
 
     private:
-        Serialize::ObservableList<std::unique_ptr<Light>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&LightManager::createLightTuple>>
+        NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
+        Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, std::unique_ptr<Light>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&LightManager::createLightTuple>>
             mLights;
     };
 

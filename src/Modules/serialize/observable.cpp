@@ -4,95 +4,65 @@
 #include "streams/bufferedstream.h"
 #include "toplevelserializableunit.h"
 
-namespace Engine
-{
-	namespace Serialize
-	{
-		Observable::Observable() :
-			mUnit(SerializableUnitBase::findParent(this)),
-			mIndex(mUnit->addObservable(this))
-		{
-		}
+namespace Engine {
+namespace Serialize {
 
-		Observable::Observable(const Observable &) :
-			Observable()
-		{
-		}
-
-		Observable::Observable(Observable &&) noexcept :
-			Observable()
-		{
-		}
-
-		std::set<BufferedOutStream*, CompareStreamId> Observable::getMasterActionMessageTargets(
-			const std::set<ParticipantId>& targets) const
-		{
-			std::set<BufferedOutStream*, CompareStreamId> result = mUnit->getMasterMessageTargets();
-			if (targets.empty())
-			{
-				for (BufferedOutStream* out : result)
-				{
-					out->beginMessage(mUnit, ACTION);
-					*out << mIndex;
-				}
-			}
-			else
-			{
-				auto it1 = result.begin();
-				auto it2 = targets.begin();
-				while (it1 != result.end() && it2 != targets.end())
-				{
-					BufferedOutStream* out = *it1;
-					while (*it2 < out->id())
-					{
-						LOG_WARNING("Specific Target not in MessageTargetList!");
-						++it2;
-					}
-					if (*it2 == out->id())
-					{
-						out->beginMessage(mUnit, ACTION);
-						*out << mIndex;
-						++it2;
-						++it1;
-					}
-					else
-					{
-						it1 = result.erase(it1);
-					}
-				}
-				result.erase(it1, result.end());
-			}
-
-			return result;
+    std::set<BufferedOutStream *, CompareStreamId> ObservableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t offset,
+        const std::set<ParticipantId> &targets) const
+    {
+        std::set<BufferedOutStream *, CompareStreamId> result = parent->getMasterMessageTargets();
+        if (targets.empty()) {
+            for (BufferedOutStream *out : result) {
+                out->beginMessage(parent, ACTION);
+                *out << offset;
+            }
+        } else {
+            auto it1 = result.begin();
+            auto it2 = targets.begin();
+            while (it1 != result.end() && it2 != targets.end()) {
+                BufferedOutStream *out = *it1;
+                while (*it2 < out->id()) {
+                    LOG_WARNING("Specific Target not in MessageTargetList!");
+                    ++it2;
+                }
+                if (*it2 == out->id()) {
+                    out->beginMessage(parent, ACTION);
+                    *out << 0;
+                    ++it2;
+                    ++it1;
+                } else {
+                    it1 = result.erase(it1);
+                }
+            }
+            result.erase(it1, result.end());
         }
 
-        ParticipantId Observable::participantId() 
-		{ 
-			return mUnit->topLevel()->participantId(); 
-		}
+        return result;
+    }
 
-		BufferedOutStream* Observable::getSlaveActionMessageTarget() const
-		{
-			BufferedOutStream* out = mUnit->getSlaveMessageTarget();
-			out->beginMessage(mUnit, REQUEST);
-			*out << mIndex;
-			return out;
-		}
+    ParticipantId ObservableBase::participantId(const SerializableUnitBase *parent)
+    {
+        return parent->topLevel()->participantId();
+    }
 
-		void Observable::beginActionResponseMessage(BufferedOutStream* stream) const
-		{
-			stream->beginMessage(mUnit, ACTION);
-			*stream << mIndex;
-		}
+    BufferedOutStream *ObservableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const
+    {
+        BufferedOutStream *out = parent->getSlaveMessageTarget();
+        out->beginMessage(parent, REQUEST);
+        *out << offset;
+        return out;
+    }
 
-		bool Observable::isMaster() const
-		{
-			return !mUnit->isSynced() || !mUnit->topLevel() || mUnit->topLevel()->isMaster();
-		}
+    void ObservableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t offset, BufferedOutStream *stream) const
+    {
+        stream->beginMessage(parent, ACTION);
+        *stream << offset;
+    }
 
-		SerializableUnitBase* Observable::parent() const
-		{
-			return mUnit;
-		}
-	}
+    bool ObservableBase::isMaster(const SerializableUnitBase *parent) const
+    {
+        return !parent->isSynced() || !parent->topLevel() || parent->topLevel()->isMaster();
+    }
+
+}
 }

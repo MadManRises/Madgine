@@ -8,7 +8,7 @@
 #include "Modules/keyvalue/typenamekeyimpl.h"
 
 
-DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponentBase, SceneComponent, MADGINE_BASE, SceneManager &);
+DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, MADGINE_BASE, SceneComponentBase, SceneManager &);
 
 namespace Engine
 {

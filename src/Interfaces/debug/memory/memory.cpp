@@ -2,332 +2,318 @@
 
 #if ENABLE_MEMTRACKING
 
-#include "memory.h"
+#    include "memory.h"
 
-#include "untrackedmemoryresource.h"
-#include "statsmemoryresource.h"
+#    include "statsmemoryresource.h"
+#    include "untrackedmemoryresource.h"
 
-#if WINDOWS
-#define NOMINMAX
-#include <Windows.h>
+#    if WINDOWS
+#        define NOMINMAX
+#        include <Windows.h>
 
-#define nNoMansLandSize 4
+#        define nNoMansLandSize 4
 
-typedef struct _CrtMemBlockHeader
-{
-        struct _CrtMemBlockHeader * pBlockHeaderNext;
-        struct _CrtMemBlockHeader * pBlockHeaderPrev;
-        char *                      szFileName;
-        int                         nLine;
-#ifdef _WIN64
-        /* These items are reversed on Win64 to eliminate gaps in the struct
+typedef struct _CrtMemBlockHeader {
+    struct _CrtMemBlockHeader *pBlockHeaderNext;
+    struct _CrtMemBlockHeader *pBlockHeaderPrev;
+    char *szFileName;
+    int nLine;
+#        ifdef _WIN64
+    /* These items are reversed on Win64 to eliminate gaps in the struct
          * and ensure that sizeof(struct)%16 == 0, so 16-byte alignment is
          * maintained in the debug heap.
          */
-        int                         nBlockUse;
-        size_t                      nDataSize;
-#else  /* _WIN64 */
-        size_t                      nDataSize;
-        int                         nBlockUse;
-#endif  /* _WIN64 */
-        long                        lRequest;
-        unsigned char               gap[nNoMansLandSize];
-        /* followed by:
+    int nBlockUse;
+    size_t nDataSize;
+#        else /* _WIN64 */
+    size_t nDataSize;
+    int nBlockUse;
+#        endif /* _WIN64 */
+    long lRequest;
+    unsigned char gap[nNoMansLandSize];
+    /* followed by:
          *  unsigned char           data[nDataSize];
          *  unsigned char           anotherGap[nNoMansLandSize];
          */
 } _CrtMemBlockHeader;
 
-#elif UNIX
+#    elif UNIX
 
-#include <iostream>
-#include <malloc.h>
+#        include <iostream>
+#        include <malloc.h>
 
-#endif
+#    endif
 
 namespace Engine {
-	namespace Debug {
-		namespace Memory {
+namespace Debug {
+    namespace Memory {
 
+        static MemoryTracker *sSingleton;
 
+        MemoryTracker &MemoryTracker::getSingleton()
+        {
+            assert(sSingleton);
+            return *sSingleton;
+        }
 
-			static MemoryTracker *sSingleton;
+        size_t MemoryTracker::overhead()
+        {
+            return UntrackedMemoryResource::sInstance()->allocation_size();
+        }
 
+        size_t MemoryTracker::totalMemory()
+        {
+            return mTotalMemory;
+        }
 
-			MemoryTracker &MemoryTracker::getSingleton()
-			{
-				assert(sSingleton);
-				return *sSingleton;
-			}
+        const std::pmr::unordered_map<FullStackTrace, TracedAllocationData> &MemoryTracker::stacktraces()
+        {
+            return mFullStacktraces;
+        }
 
-			size_t MemoryTracker::overhead()
-			{
-				return UntrackedMemoryResource::sInstance()->allocation_size();
-			}
+        std::atomic<const std::pair<const FullStackTrace, TracedAllocationData> *> &MemoryTracker::linkedFront()
+        {
+            return mLinkedFront;
+        }
 
-			size_t MemoryTracker::totalMemory()
-			{
-				return mTotalMemory;
-			}
+#    if WINDOWS
 
-			const std::pmr::unordered_map<FullStackTrace, TracedAllocationData>& MemoryTracker::stacktraces()
-			{
-				return mFullStacktraces;
-			}
+        int (*sOldHook)(int, void *, size_t, int, long, const unsigned char *, int) = nullptr;
 
-			std::atomic<const std::pair<const FullStackTrace, TracedAllocationData> *>& MemoryTracker::linkedFront()
-			{
-				return mLinkedFront;
-			}
+        static int win32Hook(int allocType, void *userData, size_t size, int blockType, long requestNumber, const unsigned char *filename, int lineNumber)
+        {
+            _CrtMemBlockHeader *header;
+            switch (allocType) {
+            case _HOOK_ALLOC:
+                sSingleton->onMalloc(requestNumber, size);
+                break;
+            case _HOOK_FREE:
+                header = ((_CrtMemBlockHeader *)userData) - 1;
+                sSingleton->onFree(header->lRequest, header->nDataSize);
+                break;
+            case _HOOK_REALLOC:
+                header = ((_CrtMemBlockHeader *)userData) - 1;
+                sSingleton->onFree(header->lRequest, header->nDataSize);
+                sSingleton->onMalloc(requestNumber, size);
+                break;
+            }
 
-#if WINDOWS
+            return true;
+        }
 
-			int(*sOldHook)(int, void*, size_t, int, long, const unsigned char *, int) = nullptr;
+        void *MemoryTracker::allocateUntracked(size_t size, size_t align)
+        {
+            static HANDLE heap = GetProcessHeap();
+            return HeapAlloc(heap, HEAP_GENERATE_EXCEPTIONS, size);
+        }
 
-			static int win32Hook(int allocType, void * userData, size_t size, int blockType, long requestNumber, const unsigned char * filename, int lineNumber)
-			{
-				_CrtMemBlockHeader *header;
-				switch (allocType) {
-				case _HOOK_ALLOC:
-					sSingleton->onMalloc(requestNumber, size);
-					break;
-				case _HOOK_FREE:
-					header = ((_CrtMemBlockHeader*)userData) - 1;
-					sSingleton->onFree(header->lRequest, header->nDataSize);
-					break;
-				case _HOOK_REALLOC:
-					header = ((_CrtMemBlockHeader*)userData) - 1;
-					sSingleton->onFree(header->lRequest, header->nDataSize);
-					sSingleton->onMalloc(requestNumber, size);
-					break;
-				}
+        void MemoryTracker::deallocateUntracked(void *ptr, size_t size, size_t align)
+        {
+            static HANDLE heap = GetProcessHeap();
+            auto result = HeapFree(heap, 0, ptr);
+            assert(result);
+        }
 
-				return true;
-			}
+#    elif LINUX || ANDROID
 
-			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
-			{
-				static HANDLE heap = GetProcessHeap();
-				return HeapAlloc(heap, HEAP_GENERATE_EXCEPTIONS, size);
-			}
+        void *(*sOldMallocHook)(size_t, const void *) = nullptr;
+        void *(*sOldReallocHook)(void *, size_t, const void *) = nullptr;
+        void (*sOldFreeHook)(void *, const void *) = nullptr;
 
-			void MemoryTracker::deallocateUntracked(void * ptr, size_t size, size_t align)
-			{
-				static HANDLE heap = GetProcessHeap();
-				auto result = HeapFree(heap, 0, ptr);
-				assert(result);
-			}
+        static void *linuxMallocHook(size_t size, const void *);
+        static void *linuxReallocHook(void *ptr, size_t size, const void *);
+        static void linuxFreeHook(void *ptr, const void *);
 
-#elif LINUX || ANDROID
+        static bool pushUntracked()
+        {
+            if (__malloc_hook == sOldMallocHook)
+                return false;
+            __malloc_hook = sOldMallocHook;
+            __realloc_hook = sOldReallocHook;
+            __free_hook = sOldFreeHook;
+            return true;
+        }
 
+        static void popUntracked(bool b)
+        {
+            if (b) {
+                __malloc_hook = linuxMallocHook;
+                __realloc_hook = linuxReallocHook;
+                __free_hook = linuxFreeHook;
+            }
+        }
 
-			void *(*sOldMallocHook)(size_t, const void *) = nullptr;
-			void *(*sOldReallocHook)(void *, size_t, const void *) = nullptr;
-			void (*sOldFreeHook)(void *, const void *) = nullptr;
+        void *MemoryTracker::allocateUntracked(size_t size, size_t align)
+        {
+            bool b = pushUntracked();
+            void *ptr = malloc(size);
+            popUntracked(b);
+            return ptr;
+        }
 
-			static void *linuxMallocHook(size_t size, const void *);
-			static void *linuxReallocHook(void *ptr, size_t size, const void *);
-			static void linuxFreeHook(void *ptr, const void *);
+        void MemoryTracker::deallocateUntracked(void *ptr, size_t size, size_t align)
+        {
+            bool b = pushUntracked();
+            free(ptr);
+            popUntracked(b);
+        }
 
-			static bool pushUntracked()
-			{
-				if (__malloc_hook == sOldMallocHook)
-					return false;
-				__malloc_hook = sOldMallocHook;
-				__realloc_hook = sOldReallocHook;
-				__free_hook = sOldFreeHook;
-				return true;
-			}
+        void *reallocUntracked(void *ptr, size_t size)
+        {
+            bool b = pushUntracked();
+            void *result = realloc(ptr, size);
+            popUntracked(b);
+            return result;
+        }
 
-			static void popUntracked(bool b)
-			{
-				if (b)
-				{
-					__malloc_hook = linuxMallocHook;
-					__realloc_hook = linuxReallocHook;
-					__free_hook = linuxFreeHook;
-				}
-			}
+        static void *linuxMallocHook(size_t size, const void *)
+        {
+            bool b = pushUntracked();
+            void *ptr = malloc(size);
+            sSingleton->onMalloc(reinterpret_cast<uintptr_t>(ptr), size);
+            popUntracked(b);
+            return ptr;
+        }
 
-			void * MemoryTracker::allocateUntracked(size_t size, size_t align)
-			{
-				bool b = pushUntracked();
-				void *ptr = malloc(size);
-				popUntracked(b);
-				return ptr;
-			}
+        static void *linuxReallocHook(void *ptr, size_t size, const void *)
+        {
+            bool b = pushUntracked();
+            sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), size);
+            void *result = realloc(ptr, size);
+            sSingleton->onMalloc(reinterpret_cast<uintptr_t>(result), size);
+            popUntracked(b);
+            return result;
+        }
 
-			void MemoryTracker::deallocateUntracked(void * ptr, size_t size, size_t align)
-			{
-				bool b = pushUntracked();
-				free(ptr);
-				popUntracked(b);
-			}
+        static void linuxFreeHook(void *ptr, const void *)
+        {
+            bool b = pushUntracked();
+            //TODO (0)
+            sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), 0);
+            free(ptr);
+            popUntracked(b);
+        }
 
-			void *reallocUntracked(void * ptr, size_t size)
-			{
-				bool b = pushUntracked();
-				void *result = realloc(ptr, size);
-				popUntracked(b);
-				return result;
-			}
+#    else
+#        error "Unsupported Platform!"
+#    endif
 
-			static void *linuxMallocHook(size_t size, const void *)
-			{
-				bool b = pushUntracked();
-				void *ptr = malloc(size);
-				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(ptr), size);
-				popUntracked(b);
-				return ptr;
-			}
+        MemoryTracker::MemoryTracker()
+            : mUnknownFullStacktraces(UntrackedMemoryResource::sInstance())
+            , mUnknownAllocations(UntrackedMemoryResource::sInstance())
+            , mAllocations(UntrackedMemoryResource::sInstance())
+            , mStacktraces(UntrackedMemoryResource::sInstance())
+            , mFullStacktraces(UntrackedMemoryResource::sInstance())
+        {
+            assert(!sSingleton);
+            sSingleton = this;
 
-			static void *linuxReallocHook(void *ptr, size_t size, const void *)
-			{
-				bool b = pushUntracked();
-				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), size);
-				void *result = realloc(ptr, size);
-				sSingleton->onMalloc(reinterpret_cast<uintptr_t>(result), size);
-				popUntracked(b);
-				return result;
-			}
+#    if WINDOWS
+            sOldHook = _CrtSetAllocHook(&win32Hook);
+#    elif UNIX
+            sOldMallocHook = __malloc_hook;
+            sOldReallocHook = __realloc_hook;
+            sOldFreeHook = __free_hook;
+            __malloc_hook = linuxMallocHook;
+            __realloc_hook = linuxReallocHook;
+            __free_hook = linuxFreeHook;
+#    endif
+        }
 
-			static void linuxFreeHook(void *ptr, const void *)
-			{
-				bool b = pushUntracked();
-				//TODO (0)
-				sSingleton->onFree(reinterpret_cast<uintptr_t>(ptr), 0);
-				free(ptr);
-				popUntracked(b);
-			}
+        MemoryTracker::~MemoryTracker()
+        {
+#    if WINDOWS
+            _CrtSetAllocHook(sOldHook);
+#    elif UNIX
+            __malloc_hook = sOldMallocHook;
+            __realloc_hook = sOldReallocHook;
+            __free_hook = sOldFreeHook;
+#    endif
 
-#else
-#	error "Unsupported Platform!"
-#endif
+            sSingleton = nullptr;
 
+#    if UNIX
+#        define OutputDebugString(msg) std::cout << msg
+#    endif
 
-			MemoryTracker::MemoryTracker() :
-				mTotalMemory(0),
-				mUnknownAllocationSize(0),				
-				mStacktraces(UntrackedMemoryResource::sInstance()),
-				mUnknownAllocations(UntrackedMemoryResource::sInstance()),
-				mUnknownFullStacktraces(UntrackedMemoryResource::sInstance()),
-				mFullStacktraces(UntrackedMemoryResource::sInstance()),
-				mAllocations(UntrackedMemoryResource::sInstance()),
-				mLinkedFront(nullptr)
-			{
-				assert(!sSingleton);
-				sSingleton = this;
+            OutputDebugString("-------- Madgine Memory Tracker Report --------\n");
 
-#if WINDOWS
-				sOldHook = _CrtSetAllocHook(&win32Hook);
-#elif UNIX			
-				sOldMallocHook = __malloc_hook;
-				sOldReallocHook = __realloc_hook;
-				sOldFreeHook = __free_hook;
-				__malloc_hook = linuxMallocHook;
-				__realloc_hook = linuxReallocHook;
-				__free_hook = linuxFreeHook;
-#endif
-			}
+            for (auto &track : mFullStacktraces) {
+                if (track.second.mSize == 0)
+                    continue;
+                for (const TraceBack &trace : track.first) {
+                    OutputDebugString((std::to_string(trace) + '\n').c_str());
+                }
+                OutputDebugString(("Current Size: "s + std::to_string(track.second.mSize) + '\n').c_str());
+            }
 
-			MemoryTracker::~MemoryTracker() {
-#if WINDOWS			
-				_CrtSetAllocHook(sOldHook);
-#elif UNIX
-				__malloc_hook = sOldMallocHook;
-				__realloc_hook = sOldReallocHook;
-				__free_hook = sOldFreeHook;
-#endif
+            OutputDebugString("-------- Unknown Deallocations --------\n");
 
-				sSingleton = nullptr;
+            for (auto &track : mUnknownFullStacktraces) {
+                if (track.second.mSize == 0)
+                    continue;
+                for (const TraceBack &trace : track.first) {
+                    OutputDebugString((std::to_string(trace) + '\n').c_str());
+                }
+                OutputDebugString(("Total Size: "s + std::to_string(track.second.mSize) + '\n').c_str());
+            }
 
-#if UNIX
-#	define OutputDebugString(msg) std::cout << msg
-#endif
+            OutputDebugString("-------- Madgine Memory Tracker Summary --------\n");
 
-				OutputDebugString("-------- Madgine Memory Tracker Report --------\n");
+            OutputDebugString(("Total Leak: "s + std::to_string(mTotalMemory) + '\n').c_str());
+            OutputDebugString(("Total Overhead: "s + std::to_string(overhead()) + '\n').c_str());
 
-				for (auto &track : mFullStacktraces) {
-					if (track.second.mSize == 0)
-						continue;
-					for (const TraceBack &trace : track.first) {
-						OutputDebugString((std::to_string(trace) + '\n').c_str());
-					}
-					OutputDebugString(("Current Size: "s + std::to_string(track.second.mSize) + '\n').c_str());
-				}
+            OutputDebugString("-------- Madgine Memory Tracker End --------\n");
+        }
 
-				OutputDebugString("-------- Unknown Deallocations --------\n");
+        void MemoryTracker::onMalloc(uintptr_t id, size_t s)
+        {
+            mTotalMemory += s;
 
-				for (auto &track : mUnknownFullStacktraces) {
-					if (track.second.mSize == 0)
-						continue;
-					for (const TraceBack &trace : track.first) {
-						OutputDebugString((std::to_string(trace) + '\n').c_str());
-					}
-					OutputDebugString(("Total Size: "s + std::to_string(track.second.mSize) + '\n').c_str());
-				}
+            auto pib = mStacktraces.try_emplace(StackTrace::getCurrent(6));
 
-				OutputDebugString("-------- Madgine Memory Tracker Summary --------\n");
+            if (pib.second) {
+                auto pib2 = mFullStacktraces.try_emplace(pib.first->first.calculateReadable());
+                pib.first->second = &pib2.first->second;
+                if (pib2.second) {
+                    pib2.first->second.mNext = mLinkedFront;
+                    mLinkedFront = &*pib2.first;
+                }
+            }
 
-				OutputDebugString(("Total Leak: "s + std::to_string(mTotalMemory) + '\n').c_str());
-				OutputDebugString(("Total Overhead: "s + std::to_string(overhead()) + '\n').c_str());
+            pib.first->second->mSize += s;
+            pib.first->second->mGeneration = std::min(pib.first->second->mGeneration, size_t(1));
 
-				OutputDebugString("-------- Madgine Memory Tracker End --------\n");
-			}
+            auto pib2 = mAllocations.try_emplace(id, pib.first->second);
+            assert(pib2.second);
+        }
 
-			void MemoryTracker::onMalloc(uintptr_t id, size_t s)
-			{
-				mTotalMemory += s;
+        void MemoryTracker::onFree(uintptr_t id, size_t s)
+        {
+            auto it = mAllocations.find(id);
+            if (it != mAllocations.end()) {
 
-				auto pib = mStacktraces.try_emplace(StackTrace::getCurrent(6));
+                mTotalMemory -= s;
 
-				if (pib.second) {
-					auto pib2 = mFullStacktraces.try_emplace(pib.first->first.calculateReadable());
-					pib.first->second = &pib2.first->second;
-					if (pib2.second) {
-						pib2.first->second.mNext = mLinkedFront;
-						mLinkedFront = &*pib2.first;
-					}
-				}
-				
+                assert(it != mAllocations.end());
 
-				pib.first->second->mSize += s;
-				pib.first->second->mGeneration = std::min(pib.first->second->mGeneration, size_t(1));
+                it->second->mSize -= s;
+                it->second->mGeneration = std::min(it->second->mGeneration, size_t(1));
 
-				auto pib2 = mAllocations.try_emplace(id, pib.first->second);
-				assert(pib2.second);
+                mAllocations.erase(it);
+            } else {
+                mUnknownAllocationSize += s;
+                auto pib = mUnknownAllocations.try_emplace(StackTrace::getCurrent(6));
+                if (pib.second) {
+                    auto pib2 = mUnknownFullStacktraces.try_emplace(pib.first->first.calculateReadable());
+                    pib.first->second = &pib2.first->second;
+                }
+                pib.first->second->mSize += s;
+            }
+        }
 
-			}
-
-			void MemoryTracker::onFree(uintptr_t id, size_t s)
-			{
-				auto it = mAllocations.find(id);
-				if (it != mAllocations.end()) {
-
-					mTotalMemory -= s;
-
-
-					assert(it != mAllocations.end());
-
-					it->second->mSize -= s;
-					it->second->mGeneration = std::min(it->second->mGeneration, size_t(1));
-
-					mAllocations.erase(it);
-				}
-				else {
-					mUnknownAllocationSize += s;
-					auto pib = mUnknownAllocations.try_emplace(StackTrace::getCurrent(6));
-					if (pib.second) {
-						auto pib2 = mUnknownFullStacktraces.try_emplace(pib.first->first.calculateReadable());
-						pib.first->second = &pib2.first->second;
-					}
-					pib.first->second->mSize += s;
-				}
-			}
-
-
-		}
-	}
+    }
+}
 }
 
 #endif

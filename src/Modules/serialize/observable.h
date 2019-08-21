@@ -2,38 +2,52 @@
 
 #include "streams/comparestreamid.h"
 
-namespace Engine
-{
-	namespace Serialize
-	{
-		
-		class MODULES_EXPORT Observable
-		{
-		public:
-			virtual ~Observable() = default;
+namespace Engine {
+namespace Serialize {
 
-			virtual void readRequest(BufferedInOutStream& in) = 0;
-			virtual void readAction(SerializeInStream& in) = 0;
+    struct MODULES_EXPORT ObservableBase {
+        virtual ~ObservableBase() = default;
+
+        virtual void readRequest(BufferedInOutStream &in) = 0;
+        virtual void readAction(SerializeInStream &in) = 0;
 
 		protected:
-			Observable();
-			Observable(const Observable &);
-			Observable(Observable &&) noexcept;
+        BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const;
+                    std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t offset,
+            const std::set<ParticipantId> &targets = {}) const;
+        ParticipantId participantId(const SerializableUnitBase *parent);
 
-			BufferedOutStream* getSlaveActionMessageTarget() const;
-			std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
-				const std::set<ParticipantId>& targets = {}) const;
-            ParticipantId participantId();
+        void beginActionResponseMessage(const SerializableUnitBase *parent, size_t offset, BufferedOutStream *stream) const;
 
-			void beginActionResponseMessage(BufferedOutStream* stream) const;
+        bool isMaster(const SerializableUnitBase *parent) const;
+    };
 
-			bool isMaster() const;
+    template <typename PtrOffset>
+    struct Observable : ObservableBase {
+    protected:
+		BufferedOutStream* getSlaveActionMessageTarget() const {
+                    return ObservableBase::getSlaveActionMessageTarget(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>());
+		}
+		std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
+			const std::set<ParticipantId>& targets = {}) const {
+                    return ObservableBase::getMasterActionMessageTargets(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>(), targets);
+		}
+		ParticipantId participantId() {
+                    return ObservableBase::participantId(parent());
+				}
 
-			SerializableUnitBase* parent() const;
+		void beginActionResponseMessage(BufferedOutStream* stream) const {
+                    ObservableBase::beginActionResponseMessage(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>(), stream);
+		}
 
-		private:
-			SerializableUnitBase* mUnit;
-			size_t mIndex;
-		};
-	}
+		bool isMaster() const {
+                    return ObservableBase::isMaster(parent());
+		}
+
+        const SerializableUnitBase *parent() const
+        {
+            return PtrOffset::parent(this);
+        }
+    };
+}
 }

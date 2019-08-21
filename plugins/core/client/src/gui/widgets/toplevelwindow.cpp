@@ -56,7 +56,7 @@ namespace GUI {
         if (settings.mInput) {
             mExternalInput = static_cast<Input::InputHandler *>(settings.mInput);
         } else {
-            mInputHandlerSelector.emplace(mWindow, gui.app(false), this);
+            mInputHandlerSelector.emplace(mWindow, gui.app(false), this, 0);
         }
 
         mRenderWindow = gui.renderer().createWindow(mWindow, this);

@@ -11,8 +11,8 @@ namespace Engine
 	namespace Serialize
 	{
 		Serializable::Serializable(bool local) :
-			mUnit(local ? nullptr : SerializableUnitBase::findParent(this))
-		{
+			 mUnit(local ? nullptr : SerializableUnitBase::findParent(this))
+		{                   
 			if (mUnit)
 			{
 				mUnit->addSerializable(this);

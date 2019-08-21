@@ -17,7 +17,7 @@ std::unique_ptr<Base> createComponent(_Ty... arg)
 template <class Base, class... _Ty>
 using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
-template <class _Base, template <class...> class Container, class... _Ty>
+template <template <class...> class Container, class _Base, class... _Ty>
 class UniqueComponentContainer;
 
 template <class _Base, class... _Ty>
@@ -30,7 +30,7 @@ class UniqueComponentSelector;
 namespace Engine {
 
 struct CollectorInfo {
-    std::vector<Collector_F<void, void *>> mComponents;
+    std::vector<void *> mComponents;
     const TypeInfo *mRegistryInfo;
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;

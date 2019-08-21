@@ -387,7 +387,8 @@ void SerializeManager::sendAndReceiveMessages() {
 }
 
 size_t SerializeManager::convertPtr(SerializeOutStream &out,
-                                    SerializableUnitBase *unit) const {
+    const SerializableUnitBase *unit) const
+{
     return unit == nullptr
                ? NULL_UNIT_ID
                : (!mSlaveStream || &out != &*mSlaveStream) ? unit->masterId()

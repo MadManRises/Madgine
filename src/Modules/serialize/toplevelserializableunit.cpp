@@ -77,7 +77,7 @@ namespace Engine
 			return mStaticSlaveId;
 		}
 
-		std::set<BufferedOutStream*, CompareStreamId> TopLevelSerializableUnitBase::getMasterMessageTargets()
+		std::set<BufferedOutStream*, CompareStreamId> TopLevelSerializableUnitBase::getMasterMessageTargets() const
 		{
 			std::set<BufferedOutStream*, CompareStreamId> result;
 			for (SerializeManager* mgr : mMasterManagers)

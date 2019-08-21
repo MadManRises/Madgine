@@ -5,13 +5,19 @@
 #include "../streams/bufferedstream.h"
 #include "../../signalslot/signal.h"
 #include "unithelper.h"
+#include "offset.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		template <class T>
-		class Observed : public Observable, public Serializable, public UnitHelper<T>
+
+		#define OBSERVED(Type, Name)   \
+    NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy CONCAT2(__d, __LINE__); \
+    ::Engine::Serialize::Observed<::Engine::Serialize::ObservableDummyOffset<&Self::CONCAT2(__d, __LINE__), Self, alignof(Type)>, Type> Name
+
+		template <typename PtrOffset, class T>
+		class Observed : public Observable<PtrOffset>, public Serializable, public UnitHelper<T>
 		{
 		public:
 			template <class... _Ty>
@@ -124,7 +130,7 @@ namespace Engine
 			{
 				if (isSynced())
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
 						this->write_state(*out, this->mData);
 						out->endMessage();

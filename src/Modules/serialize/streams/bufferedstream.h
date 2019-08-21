@@ -27,7 +27,7 @@ struct MODULES_EXPORT BufferedOutStream : SerializeOutStream {
     BufferedOutStream(BufferedOutStream &&other);
     BufferedOutStream(BufferedOutStream &&other, SerializeManager &mgr);
 
-    void beginMessage(SerializableUnitBase *unit, MessageType type);
+    void beginMessage(const SerializableUnitBase *unit, MessageType type);
     void beginMessage(Command cmd);
     void endMessage();
 

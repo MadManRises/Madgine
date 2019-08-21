@@ -55,11 +55,9 @@ namespace Engine
 
 		private:
 
-			virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets();
+			virtual std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() const;
 			BufferedOutStream* getSlaveMessageTarget() const;
 
-
-			size_t addObservable(Observable* val);
 			void addSerializable(Serializable* val);
 
 			void clearSlaveId();
@@ -72,7 +70,7 @@ namespace Engine
 
 			friend struct SerializeManager;
 			friend class Serializable;
-			friend class Observable;
+			friend struct ObservableBase;
 			//friend class TopLevelSerializableUnitBase;
 			friend struct SerializeUnitHelper;
 			template <class T>
@@ -82,7 +80,6 @@ namespace Engine
 			*/
 
 		private:
-			std::vector<Observable*> mObservedValues;
 			std::vector<Serializable*> mStateValues;
 
 			SerializableUnitBase* mParent = nullptr;
@@ -120,6 +117,8 @@ namespace Engine
 		{
 		protected:
 			using Base::Base;
+
+			using Self = T;
 
 			virtual size_t getSize() const override
 			{

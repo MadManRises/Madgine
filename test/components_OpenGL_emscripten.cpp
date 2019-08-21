@@ -96,9 +96,6 @@ namespace Engine{
 #ifdef BUILD_Client
 			&table<Engine::GUI::GUISystem>(),
 #endif
-#ifdef BUILD_Tools
-			&table<Engine::Tools::ImGuiRoot>(),
-#endif
 
 		}; 
 		return dummy;
@@ -110,9 +107,6 @@ namespace Engine{
 #endif
 #ifdef BUILD_Client
 			createComponent<Engine::GUI::GUISystem>,
-#endif
-#ifdef BUILD_Tools
-			createComponent<Engine::Tools::ImGuiRoot>,
 #endif
 
 		}; 
@@ -132,12 +126,6 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
     template<> size_t component_index<Engine::GUI::GUISystem>(){ return CollectorBaseIndex_GlobalAPIBase_Client + 0; }
 #undef ACC
 #define ACC CollectorBaseIndex_GlobalAPIBase_Client + 1
-#endif
-#ifdef BUILD_Tools
-constexpr size_t CollectorBaseIndex_GlobalAPIBase_Tools = ACC;
-    template<> size_t component_index<Engine::Tools::ImGuiRoot>(){ return CollectorBaseIndex_GlobalAPIBase_Tools + 0; }
-#undef ACC
-#define ACC CollectorBaseIndex_GlobalAPIBase_Tools + 1
 #endif
 
 #undef ACC

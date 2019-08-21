@@ -31,7 +31,7 @@ namespace GUI {
 }
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindowComponentBase, TopLevelWindow, MADGINE_CLIENT, TopLevelWindow &);
+DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow, MADGINE_CLIENT, TopLevelWindowComponentBase, TopLevelWindow &);
 
 namespace Engine {
 namespace GUI {

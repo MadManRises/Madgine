@@ -22,6 +22,10 @@ namespace Engine
 					NO_REQUESTS
 				};
 
+			template <RequestMode mode>
+			struct ContainerPolicy {
+                            static constexpr RequestMode requestMode = mode;
+                        };
 
 			template <class traits, class Creator>
 		using ContainerSelector = std::conditional_t<
@@ -31,21 +35,17 @@ namespace Engine
 		>;
 		}
 
-		struct ContainerPolicy
-		{
-			__observablecontainer__impl__::RequestMode mRequestMode;
-		};
-
-		struct ContainerPolicies{
-			static const constexpr ContainerPolicy allowAll{__observablecontainer__impl__::ALL_REQUESTS};
-			static const constexpr ContainerPolicy masterOnly{__observablecontainer__impl__::NO_REQUESTS};
-		};
-
 		
 
-		template <class traits, class Creator, const ContainerPolicy &Config>
+		struct ContainerPolicies{
+			using allowAll = __observablecontainer__impl__::ContainerPolicy<__observablecontainer__impl__::ALL_REQUESTS>;
+			using masterOnly = __observablecontainer__impl__::ContainerPolicy<__observablecontainer__impl__::NO_REQUESTS>;
+		};
+
+
+		template <typename PtrOffset, class traits, class Creator, typename Config>
 		class ObservableContainer :
-			public __observablecontainer__impl__::ContainerSelector<traits, Creator>, public Observable
+			public __observablecontainer__impl__::ContainerSelector<traits, Creator>, public Observable<PtrOffset> 
 		{
 		public:
 			typedef size_t TransactionId;
@@ -91,7 +91,7 @@ namespace Engine
 			template <class T>
 			void operator=(T&& arg)
 			{
-				if (isMaster())
+				if (this->isMaster())
 				{
 					bool wasActive = beforeReset(this->end());
 					Base::operator=(std::forward<T>(arg));
@@ -99,11 +99,11 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
+					if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						Base temp(std::forward<T>(arg));
 
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << TransactionId(0);
 						*out << RESET;
 						temp.writeState(*out);
@@ -131,7 +131,7 @@ namespace Engine
 			{
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
 
-				if (isMaster())
+				if (this->isMaster())
 				{
 					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
 					if (it.second)
@@ -139,12 +139,12 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
+					if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
 
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << TransactionId(0);
 						*out << INSERT_ITEM;
 						this->write_item(*out, where, temp);
@@ -162,7 +162,7 @@ namespace Engine
 			std::pair<iterator, bool> emplace_init(T&& init, const iterator& where, _Ty&&... args)
 			{
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
-				if (isMaster())
+				if (this->isMaster())
 				{
 					it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
 					if (it.second)
@@ -173,14 +173,14 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
+					if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
 						type temp(std::forward<_Ty>(args)...);
 						this->postConstruct(temp);
 
 						init(temp);
 
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << TransactionId(0);
 						*out << INSERT_ITEM;
 						this->write_item(*out, where, temp);
@@ -196,7 +196,7 @@ namespace Engine
 
 			std::pair<iterator, bool> read_item_where(const const_iterator &where, BufferedInStream &in) {
 				std::pair<iterator, bool> it = std::make_pair(this->end(), false);
-				if (isMaster()) {
+				if (this->isMaster()) {
 					it = Base::read_item_where_intern(where, in);
 					if (it.second)
 						onInsert(it.first);
@@ -210,7 +210,7 @@ namespace Engine
 			{
 				iterator it = this->end();
 
-				if (isMaster())
+				if (this->isMaster())
 				{
 					bool b = beforeRemove(where);
 					it = Base::erase_intern(where);
@@ -218,9 +218,9 @@ namespace Engine
 				}
 				else
 				{
-					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
+					if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << TransactionId(0);
 						*out << REMOVE_ITEM;
 						this->write_iterator(*out, where);
@@ -238,7 +238,7 @@ namespace Engine
 			{
 				iterator it = this->end();
 
-				if (isMaster())
+				if (this->isMaster())
 				{
 					size_t count = beforeRemoveRange(from, to);
 					it = Base::erase_intern(from, to);
@@ -246,9 +246,9 @@ namespace Engine
 				}
 				else 
 				{
-					if (Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS)
+					if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS)
 					{
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << TransactionId(0);
 						*out << REMOVE_RANGE;
 						this->write_iterator(*out, from);
@@ -322,7 +322,7 @@ namespace Engine
 			// Inherited via Observable
 			void readRequest(BufferedInOutStream& inout) override
 			{
-				bool accepted = Config.mRequestMode == __observablecontainer__impl__::ALL_REQUESTS; //Check TODO
+				bool accepted = (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS); //Check TODO
 
 				TransactionId id;
 				inout >> id;
@@ -335,7 +335,7 @@ namespace Engine
 				{
 					if (id)
 					{
-						beginActionResponseMessage(&inout);
+						this->beginActionResponseMessage(&inout);
 						inout << id;
 						inout << (op | REJECT);
 						inout.endMessage();
@@ -343,7 +343,7 @@ namespace Engine
 				}
 				else
 				{
-					if (isMaster())
+					if (this->isMaster())
 					{
 						performOperation(op, inout, inout.id(), id);
 					}
@@ -354,7 +354,7 @@ namespace Engine
 						{
 							newId = ++mTransactionCounter;
 						}
-						BufferedOutStream* out = getSlaveActionMessageTarget();
+						BufferedOutStream* out = this->getSlaveActionMessageTarget();
 						*out << newId;
 						*out << op;
 						*out << inout;
@@ -442,7 +442,7 @@ namespace Engine
 			{
 				if (this->isSynced())
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
 						if (answerTarget == out->id())
 						{
@@ -469,7 +469,7 @@ namespace Engine
 			{
 				if (this->isSynced())
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
 						if (answerTarget == out->id())
 						{
@@ -506,7 +506,7 @@ namespace Engine
 			{
 				if (this->isSynced())
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
 						if (answerTarget == out->id())
 						{
@@ -560,7 +560,7 @@ namespace Engine
 			{
 				if (this->isSynced())
 				{
-					for (BufferedOutStream* out : getMasterActionMessageTargets())
+					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
 						if (answerTarget == out->id())
 						{

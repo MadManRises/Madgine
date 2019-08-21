@@ -14,7 +14,7 @@
 
 namespace Engine {
 
-template <class _Base, template <class...> class C, class... _Ty>
+template <template <class...> class C, class _Base, class... _Ty>
 class UniqueComponentContainer {
 public:
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
@@ -160,7 +160,7 @@ protected:
 
 private:
     //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainer<Base, C, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentContainer<C, Base, _Ty...>::updateComponents> mUpdateSlot;
     std::tuple<_Ty...> mArg;
 
 #endif

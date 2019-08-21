@@ -26,7 +26,7 @@ namespace GUI {
 
         mWindow->addListener(this);
 
-        mInputHandlerSelector.emplace(mWindow, parent.gui().app(false), &parent);
+        mInputHandlerSelector.emplace(mWindow, parent.gui().app(false), &parent, 0);
 
         mRenderWindow = parent.gui().renderer().createWindow(mWindow, nullptr, parent.getRenderer());
     }

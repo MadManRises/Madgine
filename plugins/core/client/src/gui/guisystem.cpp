@@ -24,7 +24,7 @@ namespace GUI {
 
     GUISystem::GUISystem(App::Application &app)
         : App::GlobalAPI<GUISystem>(app)
-        , mRenderer(this)
+        , mRenderer(this, 0)
     {
     }
 

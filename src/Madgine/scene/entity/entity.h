@@ -6,6 +6,8 @@
 
 #include "Modules/serialize/container/set.h"
 
+#include "Modules/serialize/container/offset.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -95,8 +97,10 @@ namespace Scene {
             std::string mName;
             bool mLocal;
 
-            Serialize::ObservableSet<std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>>
+			NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
+            Serialize::ObservableSet<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>>
                 mComponents;
+
 
             SceneManager &mSceneManager;
         };

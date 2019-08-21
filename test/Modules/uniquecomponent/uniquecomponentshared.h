@@ -25,4 +25,4 @@ struct TestBase
 	virtual ~TestBase() = default;
 };
 
-DECLARE_UNIQUE_COMPONENT(Test, TestBase, Test, TEST, TestDriver &);
+DECLARE_UNIQUE_COMPONENT(Test, Test, TEST, TestBase, TestDriver &);

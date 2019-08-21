@@ -15,6 +15,8 @@
 
 #include "Modules/serialize/streams/buffered_streambuf.h"
 
+#include "Modules/serialize/container/offset.h"
+
 struct Buffer {
 	std::array<char, 2048> mBuffer[2];
 	size_t mWrittenCount[2] = { 0,0 };
@@ -99,7 +101,8 @@ TEST(Serialize_Container, Test1)
 		{}
 
 		SerializableList<int> list1;
-		ObservableList<int, ContainerPolicies::allowAll> list2;
+                NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
+                ObservableList<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, int, ContainerPolicies::allowAll> list2;
 	};
 	NoParentUnit<TestUnit> unit1;
 	NoParentUnit<TestUnit> unit2;

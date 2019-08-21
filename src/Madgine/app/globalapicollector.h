@@ -3,7 +3,7 @@
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "globalapibase.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::App, GlobalAPIBase, GlobalAPI, MADGINE_BASE, Application &);
+DECLARE_UNIQUE_COMPONENT(Engine::App, GlobalAPI, MADGINE_BASE, GlobalAPIBase, Application &);
 
 namespace Engine
 {

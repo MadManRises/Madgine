@@ -5,4 +5,4 @@
 
 #include "rendererbase.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Render, RendererBase, Renderer, MADGINE_CLIENT, GUI::GUISystem *);
+DECLARE_UNIQUE_COMPONENT(Engine::Render, Renderer, MADGINE_CLIENT, RendererBase, GUI::GUISystem *);

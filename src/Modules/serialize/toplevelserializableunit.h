@@ -36,7 +36,7 @@ namespace Engine
 
 			const TopLevelSerializableUnitBase* topLevel() const override;
 
-			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() override;
+			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() const override;
 
 		private:
 			std::vector<SerializeManager*> mMasterManagers;

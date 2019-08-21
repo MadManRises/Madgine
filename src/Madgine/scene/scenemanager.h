@@ -20,6 +20,8 @@
 
 #include "Modules/threading/datamutex.h"
 
+#include "Modules/serialize/container/offset.h"
+
 namespace Engine {
 namespace Scene {
     class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -91,16 +93,14 @@ namespace Scene {
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
 
-    public:
-        Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
-
     private:
         App::Application &mApp;
         size_t mItemCount;
-
+					
         SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
 
-        Serialize::ObservableList<Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
+		NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
+        Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -112,6 +112,8 @@ namespace Scene {
         Threading::DataMutex mMutex;
 
     public:
+        Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&SceneManager::__d, SceneManager, 8>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
+
         SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };
 

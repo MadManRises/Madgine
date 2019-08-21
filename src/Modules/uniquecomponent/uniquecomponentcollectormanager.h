@@ -9,7 +9,7 @@ namespace Engine {
 	struct MODULES_EXPORT UniqueComponentCollectorManager : Plugins::PluginListener{
 
 		UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr);
-		~UniqueComponentCollectorManager();
+		virtual ~UniqueComponentCollectorManager();
 
 	protected:
 		void onPluginLoad(const Plugins::Plugin *p) override;

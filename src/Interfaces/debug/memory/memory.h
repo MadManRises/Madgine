@@ -43,10 +43,10 @@ namespace Engine {
 
 			private:
 
-				size_t mTotalMemory;
-				size_t mUnknownAllocationSize;
+				size_t mTotalMemory = 0;
+				size_t mUnknownAllocationSize = 0;
 
-				std::atomic<const std::pair<const FullStackTrace, TracedAllocationData>*> mLinkedFront;
+				std::atomic<const std::pair<const FullStackTrace, TracedAllocationData>*> mLinkedFront = nullptr;
 
 				std::pmr::unordered_map<FullStackTrace, TracedAllocationData> mUnknownFullStacktraces;
 				std::pmr::unordered_map<StackTrace, TracedAllocationData*> mUnknownAllocations;

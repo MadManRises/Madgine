@@ -67,7 +67,7 @@ namespace Engine
 			void sendMessages();
 			void sendAndReceiveMessages();
 
-			size_t convertPtr(SerializeOutStream& out, SerializableUnitBase* unit) const;
+			size_t convertPtr(SerializeOutStream &out, const SerializableUnitBase *unit) const;
 			SerializableUnitBase* convertPtr(SerializeInStream& in, size_t unit);
 
 			std::vector<ParticipantId> getMasterParticipantIds();
