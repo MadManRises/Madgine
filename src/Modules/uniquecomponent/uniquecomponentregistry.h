@@ -30,7 +30,13 @@ class UniqueComponentSelector;
 namespace Engine {
 
 struct CollectorInfo {
-    std::vector<void *> mComponents;
+#    ifdef _MSC_VER
+    typedef void *ComponentType;
+#    else
+    typedef Collector_F<void> ComponentType;
+#    endif
+
+    std::vector<ComponentType> mComponents;
     const TypeInfo *mRegistryInfo;
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
