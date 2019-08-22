@@ -99,8 +99,7 @@ namespace Scene {
 					
         SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
 
-		NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
-        Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities;
+        Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities; DEFINE_OBSERVABLE_OFFSET(mEntities);                                         
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -112,7 +111,7 @@ namespace Scene {
         Threading::DataMutex mMutex;
 
     public:
-        Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&SceneManager::__d, SceneManager, 8>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
+        Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
 
         SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };

@@ -17,6 +17,9 @@
 
 #include "Modules/serialize/container/offset.h"
 
+	using namespace Engine::Serialize;
+	using namespace std::chrono_literals;
+
 struct Buffer {
 	std::array<char, 2048> mBuffer[2];
 	size_t mWrittenCount[2] = { 0,0 };
@@ -82,28 +85,26 @@ struct TestManager : Engine::Serialize::SerializeManager
 };
 
 
+struct TestUnit : TopLevelSerializableUnit<TestUnit> {
+    TestUnit()
+        : TopLevelSerializableUnit<TestUnit>(10)
+    {
+    }
 
+    SerializableList<int> list1;
+    ObservableList<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, int, ContainerPolicies::allowAll> list2; DEFINE_OBSERVABLE_OFFSET(list2);
+};
 
 TEST(Serialize_Container, Test1)
 {
-	using namespace Engine::Serialize;
-	using namespace std::chrono_literals;
+
 
 	Engine::Threading::WorkGroup wg;
 
 	TestManager mgr1;
 	TestManager mgr2;
 
-	struct TestUnit : TopLevelSerializableUnit<TestUnit>
-	{
-		TestUnit() :
-			TopLevelSerializableUnit<TestUnit>(10)
-		{}
 
-		SerializableList<int> list1;
-                NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
-                ObservableList<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, int, ContainerPolicies::allowAll> list2;
-	};
 	NoParentUnit<TestUnit> unit1;
 	NoParentUnit<TestUnit> unit2;
 

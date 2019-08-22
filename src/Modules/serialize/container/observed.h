@@ -13,8 +13,8 @@ namespace Engine
 	{
 
 		#define OBSERVED(Type, Name)   \
-    NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy CONCAT2(__d, __LINE__); \
-    ::Engine::Serialize::Observed<::Engine::Serialize::ObservableDummyOffset<&Self::CONCAT2(__d, __LINE__), Self, alignof(Type)>, Type> Name
+    ::Engine::Serialize::Observed<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, Type> Name;\
+DEFINE_OBSERVABLE_OFFSET(Name)
 
 		template <typename PtrOffset, class T>
 		class Observed : public Observable<PtrOffset>, public Serializable, public UnitHelper<T>

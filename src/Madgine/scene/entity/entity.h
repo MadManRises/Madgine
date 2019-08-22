@@ -97,9 +97,7 @@ namespace Scene {
             std::string mName;
             bool mLocal;
 
-			NO_UNIQUE_ADDRESS ::Engine::Serialize::Dummy __d;
-            Serialize::ObservableSet<::Engine::Serialize::ObservableDummyOffset<&Self::__d, Self, 8>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>>
-                mComponents;
+            Serialize::ObservableSet<::Engine::Serialize::ObservableOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>> mComponents; DEFINE_OBSERVABLE_OFFSET(mComponents);
 
 
             SceneManager &mSceneManager;

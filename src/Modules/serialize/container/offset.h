@@ -1,42 +1,37 @@
 #pragma once
 
-#include "../../generic/align.h"
+#include "../../generic/offsetptr.h"
+
+template <typename T, size_t L>
+Engine::OffsetPtr<T, Engine::Serialize::ObservableBase> ObservableOffsetInstance();
 
 namespace Engine {
 namespace Serialize {
 
-    struct Dummy {
-    };
+    template <typename T, size_t L>
+    struct ObservableOffsetPtr {
+        static T *parent(ObservableBase *o)
+        {
+            return ObservableOffsetInstance<T, L>().parent(o);
+        }
 
-    template <auto P, typename Parent, size_t alignment>
-    struct ObservableDummyOffset {
-        template <typename Target, typename _Parent = Parent>
+		static const T *parent(const ObservableBase *o)
+        {
+            return ObservableOffsetInstance<T, L>().parent(o);
+        }
+
+        template <typename _T = T, typename _M = ObservableBase>
         static size_t offset()
         {
-
-            size_t offset = reinterpret_cast<size_t>(&(static_cast<Parent *>(static_cast<_Parent *>(nullptr))->*P));
-
-//#if !defined(__has_cpp_attribute) || !__has_cpp_attribute(no_unique_address)           
-            offset = alignTo(offset + sizeof(Dummy), alignment);
-//#endif
-
-            ObservableBase *o = reinterpret_cast<ObservableBase *>(static_cast<char *>(nullptr) + offset);
-
-            Target *t = static_cast<Target *>(o);
-
-            size_t diff = reinterpret_cast<size_t>(t);
-
-            return diff;
+            return ObservableOffsetInstance<T, L>().template offset<_T, _M>();
         }
-
-        template <typename Target>
-        static const Parent *parent(Target *p)
-        {
-
-            return reinterpret_cast<const Parent *>(reinterpret_cast<const char *>(p) - offset<Target>());
-        }
-
     };
+
+	#define DEFINE_OBSERVABLE_OFFSET(Name)                                                               \
+    friend ::Engine::OffsetPtr<Self, ::Engine::Serialize::ObservableBase> ObservableOffsetInstance<Self, __LINE__>() \
+    {                                                                                 \
+        return { &Self::Name };                                                       \
+    }
 
 }
 }

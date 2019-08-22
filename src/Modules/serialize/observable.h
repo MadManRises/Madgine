@@ -26,18 +26,18 @@ namespace Serialize {
     struct Observable : ObservableBase {
     protected:
 		BufferedOutStream* getSlaveActionMessageTarget() const {
-                    return ObservableBase::getSlaveActionMessageTarget(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>());
+                    return ObservableBase::getSlaveActionMessageTarget(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>());
 		}
 		std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
 			const std::set<ParticipantId>& targets = {}) const {
-                    return ObservableBase::getMasterActionMessageTargets(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>(), targets);
+                    return ObservableBase::getMasterActionMessageTargets(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>(), targets);
 		}
 		ParticipantId participantId() {
                     return ObservableBase::participantId(parent());
 				}
 
 		void beginActionResponseMessage(BufferedOutStream* stream) const {
-                    ObservableBase::beginActionResponseMessage(parent(), PtrOffset::template offset<ObservableBase, SerializableUnitBase>(), stream);
+                    ObservableBase::beginActionResponseMessage(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>(), stream);
 		}
 
 		bool isMaster() const {

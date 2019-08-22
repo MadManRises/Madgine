@@ -57,7 +57,7 @@ namespace Scene {
         }
     }
 
-    Serialize::ObservableList<::Engine::Serialize::ObservableDummyOffset<&SceneManager::__d, SceneManager, 8>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &SceneManager::entities()
+    Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &SceneManager::entities()
     {
         /*std::list<Entity::Entity *> result;
         for (Entity::Entity &e : mEntities) {

@@ -30,12 +30,12 @@ namespace Scene {
             : SerializableUnit(std::forward<Entity>(other))
             , mName(other.mName)
             , mLocal(local)
-            , mComponents(std::forward<decltype(mComponents)>(other.mComponents))
+           // , mComponents(std::forward<decltype(mComponents)>(other.mComponents))
             , mSceneManager(other.mSceneManager)
         {
-            for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
+            /*for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
                 comp->moveToEntity(this);
-            }
+            }*/
             setup();
         }
 
@@ -64,7 +64,7 @@ namespace Scene {
 
         void Entity::setup()
         {
-            mComponents.signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
+            /*mComponents.signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
                 using namespace Serialize;
                 switch (op) {
                 case BEFORE | RESET:
@@ -78,7 +78,7 @@ namespace Scene {
                     (*it)->finalize();
                     break;
                 }
-            });
+            });*/
         }
 
         const char *Entity::key() const
@@ -94,32 +94,32 @@ namespace Scene {
 
         EntityComponentBase *Entity::getComponent(const std::string &name)
         {
-            auto it = mComponents.find(name);
+            /*auto it = mComponents.find(name);
             if (it == mComponents.end())
                 throw 0;
-            return it->get();
+            return it->get();*/
         }
 
         bool Entity::hasComponent(const std::string &name)
         {
-            return mComponents.contains(name);
+            //return mComponents.contains(name);
         }
 
         EntityComponentBase *Entity::addComponent(const std::string &name/*, const Scripting::LuaTable &table*/)
         {
-            auto it = mComponents.find(name);
+            /*auto it = mComponents.find(name);
             if (it != mComponents.end()) {
                 return it->get();
             } else {
-                return mComponents.emplace(EntityComponentCollector::createComponent(*this, name/*, table*/)).first->get();
-            }
+                return mComponents.emplace(EntityComponentCollector::createComponent(*this, name/*, table*///)).first->get();
+            //}
         }
 
         void Entity::removeComponent(const std::string &name)
         {
-            auto it = mComponents.find(name);
+            /*auto it = mComponents.find(name);
             assert(it != mComponents.end());
-            mComponents.erase(it);
+            mComponents.erase(it);*/
         }
 
         std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
