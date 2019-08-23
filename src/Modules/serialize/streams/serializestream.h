@@ -68,7 +68,7 @@ namespace Serialize {
                     return *this;
 		}
 
-        template <class T, typename... Args, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<Serializable, T>::value>>
+        template <class T, typename... Args, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value>>
         void read(T &t, Args&&... args)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
@@ -78,7 +78,7 @@ namespace Serialize {
                     throw SerializeException(Database::Exceptions::unknownSerializationType);
                 readRaw(t);
                 mLog.log(t);
-            } else if constexpr (std::is_base_of<Serializable, T>::value) {
+            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.readState(*this, std::forward<Args>(args)...);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
@@ -151,14 +151,14 @@ namespace Serialize {
 
         SerializeOutStream &operator<<(const ValueType &v);
 
-        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<Serializable, T>::value>>
+        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value>>
         SerializeOutStream &operator<<(const T &t)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
                 write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
                 write(t);
                 mLog.log(t);
-            } else if constexpr (std::is_base_of<Serializable, T>::value) {
+            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.writeState(*this);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");

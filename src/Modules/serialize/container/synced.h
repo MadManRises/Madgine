@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../observable.h"
+#include "../syncable.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../../signalslot/signal.h"
@@ -12,16 +12,17 @@ namespace Engine
 	namespace Serialize
 	{
 
-		#define OBSERVED(Type, Name)   \
-    ::Engine::Serialize::Observed<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Type> Name; \
+		#define SYNCED(Type, Name)   \
+    ::Engine::Serialize::Synced<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Type> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 
 		template <typename PtrOffset, class T>
-		class Observed : public Observable<PtrOffset>, public _Serializable<PtrOffset>, public UnitHelper<T>
+		class Synced : public Syncable<PtrOffset>, public Serializable<PtrOffset>, public UnitHelper<T>
 		{
 		public:
 			template <class... _Ty>
-			Observed(_Ty&&... args) :
+                    Synced(_Ty &&... args)
+                        :
 				mData(std::forward<_Ty>(args)...)
 			{
 			}

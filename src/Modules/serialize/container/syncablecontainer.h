@@ -3,7 +3,7 @@
 #include "../../keyvalue/observablecontainer.h" //TODO
 #include "../../signalslot/connection.h"
 #include "../../signalslot/signal.h"
-#include "../observable.h"
+#include "../syncable.h"
 #include "../streams/bufferedstream.h"
 #include "operations.h"
 #include "serializablecontainer.h"
@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Serialize {
 
-    namespace __observablecontainer__impl__ {
+    namespace __syncablecontainer__impl__ {
         enum RequestMode {
             ALL_REQUESTS,
             NO_REQUESTS
@@ -32,16 +32,16 @@ namespace Serialize {
     }
 
     struct ContainerPolicies {
-        using allowAll = __observablecontainer__impl__::ContainerPolicy<__observablecontainer__impl__::ALL_REQUESTS>;
-        using masterOnly = __observablecontainer__impl__::ContainerPolicy<__observablecontainer__impl__::NO_REQUESTS>;
+        using allowAll = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::ALL_REQUESTS>;
+        using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
     };
 
     template <typename PtrOffset, class traits, typename Config>
-    class ObservableContainer : public __observablecontainer__impl__::ContainerSelector<PtrOffset, traits>, public Observable<PtrOffset> {
+    class SyncableContainer : public __syncablecontainer__impl__::ContainerSelector<PtrOffset, traits>, public Syncable<PtrOffset> {
     public:
         typedef size_t TransactionId;
 
-        typedef __observablecontainer__impl__::ContainerSelector<PtrOffset, traits> Base;
+        typedef __syncablecontainer__impl__::ContainerSelector<PtrOffset, traits> Base;
 
         typedef typename traits::iterator iterator;
         typedef typename traits::const_iterator const_iterator;
@@ -60,20 +60,20 @@ namespace Serialize {
             std::function<void(const iterator &, bool)> mCallback;
         };
 
-        ObservableContainer()
+        SyncableContainer()
             : mTransactionCounter(0)
         {
         }
 
-        ObservableContainer(const ObservableContainer &other)
+        SyncableContainer(const SyncableContainer &other)
             : Base(other)
             , mTransactionCounter(0)
         {
         }
 
-        ObservableContainer(ObservableContainer &&other) = default;
+        SyncableContainer(SyncableContainer &&other) = default;
 
-        ~ObservableContainer()
+        ~SyncableContainer()
         {
         }
 
@@ -117,7 +117,7 @@ namespace Serialize {
                 if (it.second)
                     onInsert(it.first);
             } else {
-                if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     type temp(std::forward<_Ty>(args)...);
 
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
@@ -183,7 +183,7 @@ namespace Serialize {
                 it = Base::erase_intern(where);
                 afterRemove(b);
             } else {
-                if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << TransactionId(0);
                     *out << REMOVE_ITEM;
@@ -273,7 +273,7 @@ namespace Serialize {
         template <typename Creator = DefaultCreator<>>
         void readRequest(BufferedInOutStream &inout, Creator &&creator = {})
         {
-            bool accepted = (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS); //Check TODO
+            bool accepted = (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
 
             TransactionId id;
             inout >> id;

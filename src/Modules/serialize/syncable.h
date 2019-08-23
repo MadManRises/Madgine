@@ -5,8 +5,8 @@
 namespace Engine {
 namespace Serialize {
 
-    struct MODULES_EXPORT ObservableBase {
-        ~ObservableBase() = default;
+    struct MODULES_EXPORT SyncableBase {
+        ~SyncableBase() = default;
 
         /*virtual void readRequest(BufferedInOutStream &in) = 0;
         virtual void readAction(SerializeInStream &in) = 0;*/
@@ -23,25 +23,25 @@ namespace Serialize {
     };
 
     template <typename PtrOffset>
-    struct Observable : ObservableBase {
+    struct Syncable : SyncableBase {
     protected:
 		BufferedOutStream* getSlaveActionMessageTarget() const {
-                    return ObservableBase::getSlaveActionMessageTarget(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>());
+                    return SyncableBase::getSlaveActionMessageTarget(parent(), PtrOffset::template offset<SerializableUnitBase, SyncableBase>());
 		}
 		std::set<BufferedOutStream*, CompareStreamId> getMasterActionMessageTargets(
 			const std::set<ParticipantId>& targets = {}) const {
-                    return ObservableBase::getMasterActionMessageTargets(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>(), targets);
+                    return SyncableBase::getMasterActionMessageTargets(parent(), PtrOffset::template offset<SerializableUnitBase, SyncableBase>(), targets);
 		}
 		ParticipantId participantId() {
-                    return ObservableBase::participantId(parent());
+                    return SyncableBase::participantId(parent());
 				}
 
 		void beginActionResponseMessage(BufferedOutStream* stream) const {
-                    ObservableBase::beginActionResponseMessage(parent(), PtrOffset::template offset<SerializableUnitBase, ObservableBase>(), stream);
+                    SyncableBase::beginActionResponseMessage(parent(), PtrOffset::template offset<SerializableUnitBase, SyncableBase>(), stream);
 		}
 
 		bool isMaster() const {
-                    return ObservableBase::isMaster(parent());
+                    return SyncableBase::isMaster(parent());
 		}
 
         const SerializableUnitBase *parent() const

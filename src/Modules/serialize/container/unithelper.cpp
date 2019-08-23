@@ -17,7 +17,7 @@ namespace Engine
 			item.readId(in);
 		}
 
-		void SerializeUnitHelper::read_id(SerializeInStream& in, Serializable& item)
+		void SerializeUnitHelper::read_id(SerializeInStream& in, SerializableBase& item)
 		{
 		}
 
@@ -26,7 +26,7 @@ namespace Engine
 			item.writeId(out);
 		}
 
-		void SerializeUnitHelper::write_id(SerializeOutStream& out, const Serializable& item)
+		void SerializeUnitHelper::write_id(SerializeOutStream &out, const SerializableBase &item)
 		{
 		}
 
@@ -35,7 +35,7 @@ namespace Engine
 			return /*item.filter(&out)*/true; //TODO
 		}
 
-		bool SerializeUnitHelper::filter(SerializeOutStream& out, const Serializable& item)
+		bool SerializeUnitHelper::filter(SerializeOutStream &out, const SerializableBase &item)
 		{
 			return true;
 		}
@@ -45,7 +45,7 @@ namespace Engine
 			item.applySerializableMap(map);
 		}
 
-		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, Serializable &item)
+		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableBase &item)
 		{
 			item.applySerializableMap(map);
 		}
@@ -55,7 +55,7 @@ namespace Engine
 			item.setParent(parent);
 		}
 
-		void SerializeUnitHelper::setParent(Serializable& item, SerializableUnitBase* parent)
+		void SerializeUnitHelper::setParent(SerializableBase &item, SerializableUnitBase *parent)
 		{
 		}
 
@@ -64,7 +64,7 @@ namespace Engine
 			item.setDataSynced(b);
 		}
 
-		void SerializeUnitHelper::setItemDataSynced(Serializable& item, bool b)
+		void SerializeUnitHelper::setItemDataSynced(SerializableBase &item, bool b)
 		{
 		}
 
@@ -73,7 +73,7 @@ namespace Engine
 			item.setActive(active);
 		}
 
-		void SerializeUnitHelper::setItemActive(Serializable& item, bool active)
+		void SerializeUnitHelper::setItemActive(SerializableBase &item, bool active)
 		{
 		}
 

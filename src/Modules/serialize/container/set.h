@@ -1,24 +1,25 @@
 #pragma once
 
 #include "creationhelper.h"
-#include "observablecontainer.h"
+#include "syncablecontainer.h"
 #include "../../keyvalue/container_traits.h"
+#include "sortedcontainerapi.h"
 
 namespace Engine
 {
 	namespace Serialize
 	{
-		template <class C>
-		class SetImpl : public C
+		template <typename C>
+		struct SetImpl : SortedContainerApi<C>
 		{
-		public:
+			using Base = SortedContainerApi<C>;
 
-			typedef typename C::value_type value_type;
+			typedef typename Base::value_type value_type;
 
-			typedef typename C::iterator iterator;
-			typedef typename C::const_iterator const_iterator;
+			typedef typename Base::iterator iterator;
+			typedef typename Base::const_iterator const_iterator;
 
-			using C::C;
+			using Base::Base;
 
 
 			template <class... _Ty>
@@ -38,14 +39,14 @@ namespace Engine
 		};
 
 		template <class C>
-		using ObservableSetImpl = SetImpl<C>;
+		using SyncableSetImpl = SetImpl<C>;
 
 		template <typename PtrOffset, class T>
 		using SerializableSet = SetImpl<SerializableContainer<PtrOffset,
 			container_traits<std::set, typename UnitHelper<T>::Type>>>;
 
 		template <typename PtrOffset, class T, typename Config>
-		using ObservableSet = ObservableSetImpl<ObservableContainer<PtrOffset, 
+		using SyncableSet = SyncableSetImpl<SyncableContainer<PtrOffset, 
 			container_traits<std::set, typename UnitHelper<T>::Type>, Config>>;
 	}
 

@@ -63,8 +63,8 @@ namespace Serialize {
     struct BufferedInStream;
     struct BufferedOutStream;
     class TopLevelSerializableUnitBase;
-    struct ObservableBase;
-    class Serializable;
+    struct SyncableBase;
+    struct SerializableBase;
     class FileBuffer;
     struct MessageHeader;
     struct SerializeManager;

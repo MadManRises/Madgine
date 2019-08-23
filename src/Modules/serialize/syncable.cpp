@@ -1,13 +1,13 @@
 #include "../moduleslib.h"
 
-#include "observable.h"
+#include "syncable.h"
 #include "streams/bufferedstream.h"
 #include "toplevelserializableunit.h"
 
 namespace Engine {
 namespace Serialize {
 
-    std::set<BufferedOutStream *, CompareStreamId> ObservableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t offset,
+    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t offset,
         const std::set<ParticipantId> &targets) const
     {
         std::set<BufferedOutStream *, CompareStreamId> result = parent->getMasterMessageTargets();
@@ -40,12 +40,12 @@ namespace Serialize {
         return result;
     }
 
-    ParticipantId ObservableBase::participantId(const SerializableUnitBase *parent)
+    ParticipantId SyncableBase::participantId(const SerializableUnitBase *parent)
     {
         return parent->topLevel()->participantId();
     }
 
-    BufferedOutStream *ObservableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const
+    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const
     {
         BufferedOutStream *out = parent->getSlaveMessageTarget();
         out->beginMessage(parent, REQUEST);
@@ -53,13 +53,13 @@ namespace Serialize {
         return out;
     }
 
-    void ObservableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t offset, BufferedOutStream *stream) const
+    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t offset, BufferedOutStream *stream) const
     {
         stream->beginMessage(parent, ACTION);
         *stream << offset;
     }
 
-    bool ObservableBase::isMaster(const SerializableUnitBase *parent) const
+    bool SyncableBase::isMaster(const SerializableUnitBase *parent) const
     {
         return !parent->isSynced() || !parent->topLevel() || parent->topLevel()->isMaster();
     }

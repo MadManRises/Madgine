@@ -95,7 +95,7 @@ namespace Scene {
             std::string mName;
             bool mLocal;
 
-            Serialize::ObservableSet<::Engine::Serialize::CombinedOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly> mComponents;            DEFINE_COMBINED_OFFSET(mComponents);
+            Serialize::SyncableSet<::Engine::Serialize::CombinedOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly> mComponents;            DEFINE_COMBINED_OFFSET(mComponents);
 
 
             SceneManager &mSceneManager;

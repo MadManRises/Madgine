@@ -19,6 +19,7 @@ namespace Engine
 	namespace {
 
 
+
 		template <typename _traits, typename Observer>
 		struct ObservableContainerImpl : _traits::container, private Observer
 		{			

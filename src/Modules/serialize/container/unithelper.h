@@ -167,45 +167,45 @@ namespace Serialize {
     };
 
     struct MODULES_EXPORT SerializeUnitHelper {
-        static void read_state(SerializeInStream &in, Serializable &item);
+        static void read_state(SerializeInStream &in, SerializableBase &item);
 
         static void read_state(SerializeInStream &in, SerializableUnitBase &unit);
 
         static void read_id(SerializeInStream &in, SerializableUnitBase &item);
 
-        static void read_id(SerializeInStream &in, Serializable &item);
+        static void read_id(SerializeInStream &in, SerializableBase &item);
 
         static void write_id(SerializeOutStream &out, const SerializableUnitBase &item);
 
-        static void write_id(SerializeOutStream &out, const Serializable &item);
+        static void write_id(SerializeOutStream &out, const SerializableBase &item);
 
-        static void write_creation(SerializeOutStream &out, const Serializable &item);
+        static void write_creation(SerializeOutStream &out, const SerializableBase &item);
 
         static void write_creation(SerializeOutStream &out, const SerializableUnitBase &item);
 
-        static void write_state(SerializeOutStream &out, const Serializable &item);
+        static void write_state(SerializeOutStream &out, const SerializableBase &item);
 
         static void write_state(SerializeOutStream &out, const SerializableUnitBase &unit);
 
         static bool filter(SerializeOutStream &out, const SerializableUnitBase &item);
 
-        static bool filter(SerializeOutStream &out, const Serializable &item);
+        static bool filter(SerializeOutStream &out, const SerializableBase &item);
 
         static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableUnitBase &item);
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, Serializable &item);
+        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableBase &item);
 
         static void setParent(SerializableUnitBase &item, SerializableUnitBase *parent);
 
-        static void setParent(Serializable &item, SerializableUnitBase *parent);
+        static void setParent(SerializableBase &item, SerializableUnitBase *parent);
 
         static void setItemDataSynced(SerializableUnitBase &item, bool b);
 
-        static void setItemDataSynced(Serializable &item, bool b);
+        static void setItemDataSynced(SerializableBase &item, bool b);
 
         static void setItemActive(SerializableUnitBase &item, bool active);
 
-        static void setItemActive(Serializable &item, bool active);
+        static void setItemActive(SerializableBase &item, bool active);
     };
 
     template <class T>

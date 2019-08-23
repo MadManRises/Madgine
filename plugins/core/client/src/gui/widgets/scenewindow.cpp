@@ -40,7 +40,7 @@ namespace GUI {
 
         Vector4 color { 1, 1, 1, 1 };
 
-        uint32_t texId = mTarget ? mTarget->textureId() : 0;
+        //uint32_t texId = mTarget ? mTarget->textureId() : 0;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());

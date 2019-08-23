@@ -1,6 +1,6 @@
 #pragma once
 
-#include "observablecontainer.h"
+#include "syncablecontainer.h"
 #include "creationhelper.h"
 #include "../../keyvalue/container_traits.h"
 
@@ -65,7 +65,7 @@ namespace Engine
 		};
 
 		template <class C>
-		class ObservableListImpl : public ListImpl<C>
+                class SyncableListImpl : public ListImpl<C>
 		{
 		public:
 			using ListImpl<C>::ListImpl;
@@ -94,7 +94,7 @@ namespace Engine
 			container_traits<std::list, typename UnitHelper<T>::Type>>>;
 
 		template <typename PtrOffset, class T, typename Config>
-		using ObservableList = ObservableListImpl<ObservableContainer<PtrOffset,
+		using ObservableList = SyncableListImpl<SyncableContainer<PtrOffset,
 			container_traits<std::list, typename UnitHelper<T>::Type>, Config>>;
 	}
 }

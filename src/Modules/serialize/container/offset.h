@@ -3,52 +3,52 @@
 #include "../../generic/offsetptr.h"
 
 template <typename T, size_t L>
-Engine::OffsetPtr<T, Engine::Serialize::ObservableBase> ObservableOffsetInstance();
+Engine::OffsetPtr<T, Engine::Serialize::SyncableBase> SyncableOffsetInstance();
 
 template <typename T, size_t L>
-Engine::OffsetPtr<T, Engine::Serialize::Serializable> SerializableOffsetInstance();
+Engine::OffsetPtr<T, Engine::Serialize::SerializableBase> SerializableOffsetInstance();
 
 namespace Engine {
 namespace Serialize {
 
     template <typename T, size_t L>
-    struct ObservableOffsetPtr {
-        static T *parent(ObservableBase *o)
+    struct SyncableOffsetPtr {
+        static T *parent(SyncableBase *o)
         {
-            return ObservableOffsetInstance<T, L>().parent(o);
+            return SyncableOffsetInstance<T, L>().parent(o);
         }
 
-		static const T *parent(const ObservableBase *o)
+		static const T *parent(const SyncableBase *o)
         {
-            return ObservableOffsetInstance<T, L>().parent(o);
+                    return SyncableOffsetInstance<T, L>().parent(o);
         }
 
-        template <typename _T = T, typename _M = ObservableBase>
+        template <typename _T = T, typename _M = SyncableBase>
         static size_t offset()
         {
-            return ObservableOffsetInstance<T, L>().template offset<_T, _M>();
+            return SyncableOffsetInstance<T, L>().template offset<_T, _M>();
         }
     };
 
-	#define DEFINE_OBSERVABLE_OFFSET(Name)                                                               \
-    friend ::Engine::OffsetPtr<Self, ::Engine::Serialize::ObservableBase> ObservableOffsetInstance<Self, __LINE__>() \
+	#define DEFINE_SYNCABLE_OFFSET(Name)                                                               \
+    friend ::Engine::OffsetPtr<Self, ::Engine::Serialize::SyncableBase> SyncableOffsetInstance<Self, __LINE__>() \
     {                                                                                 \
         return { &Self::Name };                                                       \
     }
 
 	template <typename T, size_t L>
     struct SerializableOffsetPtr {
-        static T *parent(Serializable *o)
+        static T *parent(SerializableBase *o)
         {
             return SerializableOffsetInstance<T, L>().parent(o);
         }
 
-        static const T *parent(const Serializable *o)
+        static const T *parent(const SerializableBase *o)
         {
             return SerializableOffsetInstance<T, L>().parent(o);
         }
 
-        template <typename _T = T, typename _M = Serializable>
+        template <typename _T = T, typename _M = SerializableBase>
         static size_t offset()
         {
             return SerializableOffsetInstance<T, L>().template offset<_T, _M>();
@@ -56,45 +56,45 @@ namespace Serialize {
     };
 
 #define DEFINE_SERIALIZABLE_OFFSET(Name)                                                                               \
-    friend ::Engine::OffsetPtr<Self, ::Engine::Serialize::Serializable> SerializableOffsetInstance<Self, __LINE__>() \
+    friend ::Engine::OffsetPtr<Self, ::Engine::Serialize::SerializableBase> SerializableOffsetInstance<Self, __LINE__>() \
     {                                                                                                                \
         return { &Self::Name };                                                                                      \
     }
 
 	template <typename T, size_t L>
-    struct CombinedOffsetPtr : SerializableOffsetPtr<T, L>, ObservableOffsetPtr<T, L> {
+    struct CombinedOffsetPtr : SerializableOffsetPtr<T, L>, SyncableOffsetPtr<T, L> {
 		
 		template <typename Ty>
 		static T *parent(Ty *o)
             {
-                    if constexpr (std::is_convertible_v<Ty &, Serializable &>)
+                    if constexpr (std::is_convertible_v<Ty &, SerializableBase &>)
                     return SerializableOffsetPtr<T, L>::parent(o);
                     else
-                        return ObservableOffsetPtr<T, L>::parent(o);
+                        return SyncableOffsetPtr<T, L>::parent(o);
             }
 
             template <typename Ty>
             static const T *parent(const Ty *o)
             {
-                if constexpr (std::is_convertible_v<Ty &, Serializable &>)
+                if constexpr (std::is_convertible_v<Ty &, SerializableBase &>)
                     return SerializableOffsetPtr<T, L>::parent(o);
                 else
-                    return ObservableOffsetPtr<T, L>::parent(o);
+                    return SyncableOffsetPtr<T, L>::parent(o);
             }
 
 				
 		template <typename _T, typename _M>
             static size_t offset()
             {
-                if constexpr (std::is_convertible_v<_M&, ObservableBase&>)
-                    return ObservableOffsetPtr<T, L>::template offset<_T, _M>();
+                    if constexpr (std::is_convertible_v<_M &, SyncableBase &>)
+                    return SyncableOffsetPtr<T, L>::template offset<_T, _M>();
                 else
                     return SerializableOffsetPtr<T, L>::template offset<_T, _M>();
             }
 
     };
 
-	#define DEFINE_COMBINED_OFFSET(Name) DEFINE_SERIALIZABLE_OFFSET(Name) DEFINE_OBSERVABLE_OFFSET(Name)
+	#define DEFINE_COMBINED_OFFSET(Name) DEFINE_SERIALIZABLE_OFFSET(Name) DEFINE_SYNCABLE_OFFSET(Name)
 
 }
 }

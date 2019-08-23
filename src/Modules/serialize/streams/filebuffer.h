@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		class MODULES_EXPORT FileBuffer : std::vector<char>, public Serializable
+		class MODULES_EXPORT FileBuffer : std::vector<char>, public SerializableBase
 		{
 		public:
 			using vector::vector;

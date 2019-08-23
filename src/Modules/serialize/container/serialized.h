@@ -9,7 +9,7 @@ namespace Engine
 	{
 		
 			template <class T>
-			class Serialized : UnitHelper<T>, public Serializable
+			class Serialized : UnitHelper<T>, public SerializableBase
 			{
 			public:
 				template <class... _Ty>

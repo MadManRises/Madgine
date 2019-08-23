@@ -17,7 +17,7 @@ namespace Engine
 			};
 
 			template <class T, class Return, class Argument, Return(T::*g)() const, void (T::*s)(Argument)>
-			class SerializedMapperImpl : public Serializable
+			class SerializedMapperImpl : public SerializableBase
 			{
 			public:
 				SerializedMapperImpl() :

@@ -55,8 +55,8 @@ namespace Serialize {
         return
         {
             []() { 
-				if constexpr (std::is_base_of_v<ObservableBase, T>)
-                    return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, ObservableBase>();
+				if constexpr (std::is_base_of_v<SyncableBase, T>)
+                    return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, SyncableBase>();
                 else
                     return size_t { 0 };
 			},
@@ -75,13 +75,13 @@ namespace Serialize {
 					out << unit->*P;
 			},
 			[](SerializableUnitBase* unit, SerializeInStream& in) {
-                if constexpr (std::is_base_of_v<ObservableBase, T>)
+                if constexpr (std::is_base_of_v<SyncableBase, T>)
                     (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(unit)...);
                 else 
 					throw "Unsupported";
 			},
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
-                if constexpr (std::is_base_of_v<ObservableBase, T>)
+                if constexpr (std::is_base_of_v<SyncableBase, T>)
                     (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(unit)...);
                 else
                     throw "Unsupported";

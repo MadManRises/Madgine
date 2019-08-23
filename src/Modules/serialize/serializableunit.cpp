@@ -7,7 +7,7 @@
 
 #include "toplevelserializableunit.h"
 
-#include "observable.h"
+#include "syncable.h"
 
 #include "serializeexception.h"
 

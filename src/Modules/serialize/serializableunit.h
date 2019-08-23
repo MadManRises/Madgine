@@ -60,7 +60,7 @@ namespace Serialize {
 
         friend struct SerializeManager;        
         friend struct SerializeUnitHelper;
-        friend struct ObservableBase;
+        friend struct SyncableBase;
 
         template <typename T, typename Base>
         friend struct TableInitializer;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Modules/math/vector3.h"
-#include "Modules/serialize/container/observed.h"
+#include "Modules/serialize/container/synced.h"
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/threading/slot.h"
 
@@ -33,8 +33,8 @@ namespace Scene {
         }
 
     private:
-        OBSERVED(Vector3, mPosition);
-        OBSERVED(float, mPower);
+        SYNCED(Vector3, mPosition);
+        SYNCED(float, mPower);
         //Serialize::Observed<int, Vector3> mPosition;
         //Serialize::Observed<int, float> mPower;
         Threading::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;

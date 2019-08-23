@@ -10,44 +10,44 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		Serializable::Serializable()
+    SerializableBase::SerializableBase()
 		{                   
 		}
 
-		Serializable::Serializable(const Serializable&) :
-			Serializable()
+		SerializableBase::SerializableBase(const SerializableBase &)
+                    : SerializableBase()
 		{
 		}
 
-		Serializable::Serializable(Serializable&&) noexcept :
-			Serializable()
+		SerializableBase::SerializableBase(SerializableBase &&) noexcept
+                    : SerializableBase()
 		{
 		}
 
-		Serializable::~Serializable()
+		SerializableBase::~SerializableBase()
         {
 		}
 
-		Serializable& Serializable::operator=(const Serializable& other)
+		SerializableBase &SerializableBase::operator=(const SerializableBase &other)
 		{
 			return *this;
 		}
 
-		void Serializable::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
+		void SerializableBase::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
 		{
 		}
 
-		void Serializable::setDataSynced(bool b)
+		void SerializableBase::setDataSynced(bool b)
 		{
 		}
 
-		void Serializable::setActive(bool active)
+		void SerializableBase::setActive(bool active)
 		{
 			assert(mActive != active);
 			mActive = active;
 		}
 
-		bool Serializable::isActive() const
+		bool SerializableBase::isActive() const
 		{
 			return mActive;
 		}
