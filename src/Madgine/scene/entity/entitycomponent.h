@@ -19,7 +19,7 @@ namespace Scene {
         template <class T, class Base = EntityComponentBase>
         class EntityComponent : public Serialize::SerializableUnit<T, Base> {
         public:
-            using Serialize::SerializableUnit<T, Base>::SerializableUnit;
+			using Serialize::SerializableUnit<T, Base>::SerializableUnit;
 
             const char *key() const override
             {
@@ -31,7 +31,7 @@ namespace Scene {
 			}
 
         private:
-            virtual void writeCreationData(Serialize::SerializeOutStream &out) const override
+            void writeCreationData(Serialize::SerializeOutStream &out) const
             {
                 out << componentName();
             }

@@ -29,33 +29,33 @@ namespace Serialize {
     {
     }
 
-    SerializeInStream &SerializeInStream::operator>>(ValueType &result)
+    void SerializeInStream::read(ValueType &result)
     {
         ValueType::Type type;
-        read(type);
+        readRaw(type);
 
         switch (type) {
         case ValueType::Type::BoolValue:
             bool b;
-            read(b);
+            readRaw(b);
             result = b;
             break;
         case ValueType::Type::StringValue: {
             decltype(std::declval<std::string>().size()) size;
-            read(size);
+            readRaw(size);
             std::string temp(size, ' ');
-            read(&temp[0], size);
+            readRaw(&temp[0], size);
             result = temp;
             break;
         }
         case ValueType::Type::IntValue:
             int i;
-            read(i);
+            readRaw(i);
             result = i;
             break;
         case ValueType::Type::UIntValue:
             size_t s;
-            read(s);
+            readRaw(s);
             result = s;
             break;
         case ValueType::Type::NullValue:
@@ -63,30 +63,30 @@ namespace Serialize {
             break;
         case ValueType::Type::Vector2Value: {
             Vector2 a2;
-            read(a2);
+            readRaw(a2);
             result = a2;
             break;
         }
         case ValueType::Type::Vector3Value: {
             Vector3 a3;
-            read(a3);
+            readRaw(a3);
             result = a3;
             break;
         }
         case ValueType::Type::Vector4Value: {
             Vector4 a4;
-            read(a4);
+            readRaw(a4);
             result = a4;
             break;
         }
         case ValueType::Type::FloatValue:
             float f;
-            read(f);
+            readRaw(f);
             result = f;
             break;
         case ValueType::Type::InvScopePtrValue: {
             InvScopePtr p;
-            read(p);
+            readRaw(p);
             result = p;
             break;
         }
@@ -94,48 +94,34 @@ namespace Serialize {
             throw SerializeException(Database::Exceptions::unknownDeserializationType);
         }
         //mLog.logRead(result);
-        return *this;
     }
 
-    SerializeInStream &SerializeInStream::operator>>(Serializable &s)
-    {
-        s.readState(*this);
-        return *this;
-    }
-
-    SerializeInStream &SerializeInStream::operator>>(SerializableUnitBase *&p)
+    void SerializeInStream::read(SerializableUnitBase *&p)
     {
         int type;
-        read(type);
+        readRaw(type);
         if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>)
             throw SerializeException(Database::Exceptions::notValueType("SerializableUnit"));
         size_t ptr;
-        read(ptr);
+        readRaw(ptr);
         p = convertPtr(ptr);
-        return *this;
     }
 
-    SerializeInStream &SerializeInStream::operator>>(std::string &s)
+    void SerializeInStream::read(std::string &s)
     {
         int type;
-        read(type);
+        readRaw(type);
         if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>)
             throw SerializeException(Database::Exceptions::notValueType("std::string"));
         decltype(std::declval<std::string>().size()) size;
-        read(size);
+        readRaw(size);
         s.resize(size);
-        read(&s[0], size);
-        return *this;
+        readRaw(&s[0], size);
     }
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
     {
-        read(buffer, size);
-    }
-
-    void SerializeInStream::read(void *buffer, size_t size)
-    {
-        if (!InStream::read(buffer, size))
+        if (!InStream::readRaw(buffer, size))
             throw SerializeException(
                 Database::Exceptions::deserializationFailure);
     }
@@ -144,10 +130,10 @@ namespace Serialize {
     {
         pos_type pos = tell();
         int type;
-        read(type);
+        readRaw(type);
         if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>) {
             EOLType eol;
-            read(eol);
+            readRaw(eol);
             mLog.log(eol);
             return false;
         }
@@ -269,12 +255,6 @@ namespace Serialize {
     {
         write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>);
         write(manager().convertPtr(*this, p));
-        return *this;
-    }
-
-    SerializeOutStream &SerializeOutStream::operator<<(const Serializable &s)
-    {
-        s.writeState(*this);
         return *this;
     }
 

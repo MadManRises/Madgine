@@ -6,6 +6,7 @@
 
 #include "Modules/keyvalue/metatable.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine {
 
@@ -36,5 +37,9 @@ namespace Scene {
     }
 }
 }
+
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::ServerAnimation)
+SERIALIZETABLE_END(Engine::Scene::Entity::ServerAnimation)
 
 RegisterType(Engine::Scene::Entity::ServerAnimation);

@@ -7,12 +7,12 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		template <class traits, class Creator>
-		class SortedContainer : public SerializableContainer<traits, Creator>
+    template <typename OffsetPtr, class traits>
+            class SortedContainer : public SerializableContainer<OffsetPtr, traits>
 		{
 		public:
 
-			typedef SerializableContainer<traits, Creator> Base;
+			typedef SerializableContainer<OffsetPtr, traits> Base;
 			using Base::Base;
 			using Base::operator=;
 

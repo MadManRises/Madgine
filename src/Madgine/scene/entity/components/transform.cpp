@@ -4,6 +4,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine
 {
@@ -67,4 +68,7 @@ ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);
 METATABLE_BEGIN(Engine::Scene::Entity::Transform)
 METATABLE_END(Engine::Scene::Entity::Transform)
 
-RegisterType(Engine::Scene::Entity::Transform);
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)
+SERIALIZETABLE_END(Engine::Scene::Entity::Transform)
+
+    RegisterType(Engine::Scene::Entity::Transform);

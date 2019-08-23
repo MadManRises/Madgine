@@ -6,6 +6,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
 namespace Engine
 {
 	
@@ -15,7 +17,8 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			EntityComponentBase::EntityComponentBase(Entity& entity/*, const Scripting::LuaTable& initTable*/) :
+                EntityComponentBase::EntityComponentBase(Entity &entity /*, const Scripting::LuaTable& initTable*/)
+                    : 
 				mEntity(&entity)/*,
 				mInitTable(initTable)*/
 			{
@@ -84,5 +87,9 @@ namespace Engine
 
 METATABLE_BEGIN(Engine::Scene::Entity::EntityComponentBase)
 METATABLE_END(Engine::Scene::Entity::EntityComponentBase)
+
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::EntityComponentBase)
+SERIALIZETABLE_END(Engine::Scene::Entity::EntityComponentBase)
 
 RegisterType(Engine::Scene::Entity::EntityComponentBase);

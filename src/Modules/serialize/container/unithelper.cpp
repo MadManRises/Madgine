@@ -12,17 +12,7 @@ namespace Engine
 //		template struct UnitHelper<ValueType, false>;
 
 
-		void SerializeUnitHelper::read_state(SerializeInStream& in, Serializable& item)
-		{
-			item.readState(in);
-		}
-
-		void SerializeUnitHelper::read_state(SerializeInStream& in, SerializableUnitBase& item)
-		{
-			item.readState(in);
-		}
-
-		void SerializeUnitHelper::read_id(SerializeInStream& in, SerializableUnitBase& item)
+		void SerializeUnitHelper::read_id(SerializeInStream &in, SerializableUnitBase &item)
 		{
 			item.readId(in);
 		}
@@ -40,29 +30,9 @@ namespace Engine
 		{
 		}
 
-		void SerializeUnitHelper::write_creation(SerializeOutStream& out, const Serializable& item)
-		{
-			item.writeCreationData(out);
-		}
-
-		void SerializeUnitHelper::write_creation(SerializeOutStream& out, const SerializableUnitBase& item)
-		{
-			item.writeCreationData(out);
-		}
-
-		void SerializeUnitHelper::write_state(SerializeOutStream& out, const Serializable& item)
-		{
-			item.writeState(out);
-		}
-
-		void SerializeUnitHelper::write_state(SerializeOutStream& out, const SerializableUnitBase& item)
-		{
-			item.writeState(out);
-		}
-
 		bool SerializeUnitHelper::filter(SerializeOutStream& out, const SerializableUnitBase& item)
 		{
-			return item.filter(&out);
+			return /*item.filter(&out)*/true; //TODO
 		}
 
 		bool SerializeUnitHelper::filter(SerializeOutStream& out, const Serializable& item)
@@ -70,23 +40,14 @@ namespace Engine
 			return true;
 		}
 
-		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase*>& map, SerializableUnitBase& item)
+		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableUnitBase &item)
 		{
 			item.applySerializableMap(map);
 		}
 
-		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase*>& map, Serializable& item)
+		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, Serializable &item)
 		{
 			item.applySerializableMap(map);
-		}
-
-		void SerializeUnitHelper::postConstruct(SerializableUnitBase& item)
-		{
-			item.postConstruct();
-		}
-
-		void SerializeUnitHelper::postConstruct(Serializable& item)
-		{
 		}
 
 		void SerializeUnitHelper::setParent(SerializableUnitBase& item, SerializableUnitBase* parent)

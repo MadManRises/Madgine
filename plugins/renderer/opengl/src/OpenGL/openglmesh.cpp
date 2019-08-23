@@ -5,6 +5,7 @@
 #include "openglmeshloader.h"
 
 #include "Modules/keyvalue/valuetype.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine {
 ENTITYCOMPONENTVIRTUALIMPL_IMPL(Render::OpenGLMesh);
@@ -54,3 +55,7 @@ namespace Render {
     }
 }
 }
+
+
+SERIALIZETABLE_BEGIN(Engine::Render::OpenGLMesh)
+SERIALIZETABLE_END(Engine::Render::OpenGLMesh)

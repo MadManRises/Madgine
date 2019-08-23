@@ -12,6 +12,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
 
 namespace Engine {
 
@@ -132,15 +134,6 @@ namespace Scene {
             mSceneManager.removeLater(this);
         }
 
-        void Entity::writeState(Serialize::SerializeOutStream &of) const
-        {
-            SerializableUnitBase::writeState(of);
-        }
-
-        void Entity::readState(Serialize::SerializeInStream &ifs)
-        {
-            SerializableUnitBase::readState(ifs);
-        }
 
         SceneComponentBase &Entity::getSceneComponent(size_t i, bool init)
         {
@@ -182,5 +175,9 @@ namespace Scene {
 
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 METATABLE_END(Engine::Scene::Entity::Entity)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
+//mComponents -> Serialize::ParentCreator<&Entity::createComponentTuple>
+SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 RegisterType(Engine::Scene::Entity::Entity);

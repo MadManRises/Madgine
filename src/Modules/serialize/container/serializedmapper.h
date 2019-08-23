@@ -21,19 +21,19 @@ namespace Engine
 			{
 			public:
 				SerializedMapperImpl() :
-					mParent(dynamic_cast<T*>(unit()))
+					mParent(/*dynamic_cast<T*>(unit())*/nullptr)
 				{
 					assert(mParent);
 				}
 
-				void readState(SerializeInStream& in) override
+				void readState(SerializeInStream& in) 
 				{
 					std::decay_t<Argument> arg;
 					in >> arg;
 					(mParent ->* s)(arg);
 				}
 
-				void writeState(SerializeOutStream& out) const override
+				void writeState(SerializeOutStream& out) const 
 				{
 					out << (mParent ->* g)();
 				}

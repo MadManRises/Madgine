@@ -11,12 +11,11 @@ namespace Engine
 	{
 
 		template <class FirstCreator, class SecondCreator>
-		class PairCreator : private FirstCreator, private SecondCreator
-		{
-		public:
+		struct PairCreator : private FirstCreator, private SecondCreator
+		{		
 			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::ArgsTuple, typename SecondCreator::
-			                             ArgsTuple>;
-		protected:
+			                             ArgsTuple>;		
+
 			auto readCreationData(SerializeInStream& in)
 			{
 				auto&& first = FirstCreator::readCreationData(in);
@@ -25,11 +24,10 @@ namespace Engine
 		};
 
 		template <class... Args>
-		class DefaultCreator
+		struct DefaultCreator
 		{
-		public:
 			using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>;
-		protected:
+		
 			ArgsTuple readCreationData(SerializeInStream& in)
 			{
 				ArgsTuple tuple;
@@ -38,19 +36,17 @@ namespace Engine
 			}
 		};
 
-		namespace __creationhelper__impl__{
+		/*namespace __creationhelper__impl__{
 			template <class R, class T, class... _Ty>
-			class _CustomCreator
+			struct _CustomCreator
 			{
-			public:
+				using ArgsTuple = R;
+
 				void setCreator(const std::function<R(_Ty ...)>& f)
 				{
 					mCallback = f;
 				}
 
-				using ArgsTuple = R;
-
-			protected:
 				R readCreationData(SerializeInStream& in)
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
@@ -64,22 +60,20 @@ namespace Engine
 		}
 
 		template <typename F>
-		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;
+		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;*/
 
 		namespace __creationhelper__impl__{
 			template <auto f, class R, class T, class... _Ty>
-			class _ParentCreator
-			{
-			public:
-				_ParentCreator() :
-					mParent(dynamic_cast<T*>(SerializableUnitBase::findParent(this)))
+			struct _ParentCreator
+			{	
+				using ArgsTuple = R;
+				
+				_ParentCreator(T *t) :
+					mParent(t)
 				{
 					assert(mParent);
 				}
 
-				using ArgsTuple = R;
-
-			protected:
 				R readCreationData(SerializeInStream& in)
 				{
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;

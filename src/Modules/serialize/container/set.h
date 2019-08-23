@@ -40,35 +40,13 @@ namespace Engine
 		template <class C>
 		using ObservableSetImpl = SetImpl<C>;
 
-		template <class T, class Creator = DefaultCreator<>>
-		using SerializableSet = SetImpl<SerializableContainer<
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator>>;
+		template <typename PtrOffset, class T>
+		using SerializableSet = SetImpl<SerializableContainer<PtrOffset,
+			container_traits<std::set, typename UnitHelper<T>::Type>>>;
 
-		template <typename PtrOffset, class T, typename Config, class Creator = DefaultCreator<>>
+		template <typename PtrOffset, class T, typename Config>
 		using ObservableSet = ObservableSetImpl<ObservableContainer<PtrOffset, 
-			container_traits<std::set, typename UnitHelper<T>::Type>, Creator, Config>>;
+			container_traits<std::set, typename UnitHelper<T>::Type>, Config>>;
 	}
 
-
-	template <class T>
-	struct container_traits<Serialize::SerializableSet, T>
-	{
-		static constexpr const bool sorted = true;
-
-		typedef Serialize::SerializableSet<T> container;
-		typedef SetIterator<T> iterator;
-		typedef SetConstIterator<T> const_iterator;
-		typedef typename KeyType<T>::type key_type;
-		typedef typename container::value_type value_type;
-		typedef T type;
-
-		template <typename C>
-		using api = C;
-
-		template <class... _Ty>
-		static std::pair<iterator, bool> emplace(container& c, const const_iterator& where, _Ty&&... args)
-		{
-			return c.emplace(std::forward<_Ty>(args)...);
-		}
-	};
 }

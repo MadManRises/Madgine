@@ -27,7 +27,7 @@ namespace Scene {
         std::tuple<std::unique_ptr<Light>> createLightTuple();
 
     private:
-        Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, std::unique_ptr<Light>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&LightManager::createLightTuple>> mLights;        DEFINE_OBSERVABLE_OFFSET(mLights);
+        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::unique_ptr<Light>, Serialize::ContainerPolicies::masterOnly> mLights;        DEFINE_COMBINED_OFFSET(mLights);
     };
 
 }

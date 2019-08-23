@@ -69,7 +69,7 @@ namespace Serialize {
     {
         if (!isMessageAvailable())
             throw 0;
-        read(header);
+        readRaw(header);
     }
 
     BufferedOutStream::BufferedOutStream(

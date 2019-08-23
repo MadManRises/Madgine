@@ -16,8 +16,7 @@ namespace Engine
 				Serialized(_Ty&&... args) :
 					mData(std::forward<_Ty>(args)...)
 				{
-					this->postConstruct(mData);
-					this->setParent(mData, unit());
+					//this->setParent(mData, unit());
 				}
 
 				template <class Ty>
@@ -61,26 +60,26 @@ namespace Engine
 					return mData;
 				}
 
-				void readState(SerializeInStream& in) override
+				void readState(SerializeInStream& in)
 				{
 					this->read_state(in, mData);
 					if (!in.isMaster())
 						this->read_id(in, mData);
 				}
 
-				void writeState(SerializeOutStream& out) const override
+				void writeState(SerializeOutStream& out) const
 				{
 					this->write_state(out, mData);
 					if (out.isMaster())
 						this->write_id(out, mData);
 				}
 
-				void setDataSynced(bool b) override
+				void setDataSynced(bool b)
 				{
 					this->setItemDataSynced(mData, b);
 				}
 
-				void setActive(bool active) override
+				void setActive(bool active)
 				{
 					Serializable::setActive(active);
 					this->setItemActive(mData, active);

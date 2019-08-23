@@ -34,7 +34,7 @@ namespace Engine
 		return std::istreambuf_iterator<char>();
 	}
 
-	bool InStream::read(void * buffer, size_t size)
+	bool InStream::readRaw(void * buffer, size_t size)
 	{
 		return mStream.read(static_cast<char*>(buffer), size).good();
 	}

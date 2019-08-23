@@ -14,8 +14,8 @@ namespace Engine
 			friend class FileBufferWriter;
 			friend class FileBufferReader;
 
-			void writeState(SerializeOutStream& out) const override;
-			void readState(SerializeInStream& in) override;
+			void writeState(SerializeOutStream& out) const;
+			void readState(SerializeInStream& in);
 
 			const_iterator begin() const;
 			const_iterator end() const;

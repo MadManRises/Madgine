@@ -4,7 +4,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-//API_IMPL(Engine::Scene::SceneComponentBase);
+#include "Modules/serialize/serializetable_impl.h"
 
 
 namespace Engine
@@ -13,7 +13,7 @@ namespace Engine
 
 	namespace Scene
 	{
-		SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr, ContextMask context) :
+    SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr, ContextMask context):
 			mContext(context),
 			mEnabled(true),
 			mSceneMgr(sceneMgr)
@@ -123,5 +123,9 @@ namespace Engine
 
 METATABLE_BEGIN(Engine::Scene::SceneComponentBase)
 METATABLE_END(Engine::Scene::SceneComponentBase)
+
+
+SERIALIZETABLE_BEGIN(Engine::Scene::SceneComponentBase)
+SERIALIZETABLE_END(Engine::Scene::SceneComponentBase)
 
 RegisterType(Engine::Scene::SceneComponentBase);

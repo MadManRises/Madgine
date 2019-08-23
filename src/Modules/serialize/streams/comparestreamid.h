@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Serialize {
 
-struct CompareStreamId {
+struct MODULES_EXPORT CompareStreamId {
     bool operator()(ParticipantId first,
                     const BufferedInOutStream &second) const;
     bool operator()(const BufferedInOutStream &first,

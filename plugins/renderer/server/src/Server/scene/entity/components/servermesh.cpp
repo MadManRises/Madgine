@@ -5,6 +5,7 @@
 #include "Modules/keyvalue/valuetype.h"
 
 #include "Madgine/scene/entity/components/transform.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine
 {
@@ -64,3 +65,6 @@ namespace Engine
 		}
 	}
 }
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::ServerMesh)
+SERIALIZETABLE_END(Engine::Scene::Entity::ServerMesh)

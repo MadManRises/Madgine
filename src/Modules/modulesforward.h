@@ -80,6 +80,7 @@ namespace Serialize {
 
     struct noparent_deleter;
 
+	struct SerializeTable;
     using SerializableUnitMap = std::map<size_t, SerializableUnitBase *>;
 
     enum MessageType {

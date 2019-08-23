@@ -14,7 +14,7 @@ namespace Engine
 			class MADGINE_BASE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public ScopeBase
 			{
 			public:
-				EntityComponentBase(Entity& entity/*, const Scripting::LuaTable& initTable = {}*/);
+                            EntityComponentBase(Entity &entity /*, const Scripting::LuaTable& initTable = {}*/);                            
 				virtual ~EntityComponentBase() = 0;
 
 				virtual void init();

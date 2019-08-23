@@ -10,18 +10,8 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		Serializable::Serializable(bool local) :
-			 mUnit(local ? nullptr : SerializableUnitBase::findParent(this))
+		Serializable::Serializable()
 		{                   
-			if (mUnit)
-			{
-				mUnit->addSerializable(this);
-				assert(!mUnit->isSynced());
-			}
-			else
-			{
-				mActive = true;
-			}
 		}
 
 		Serializable::Serializable(const Serializable&) :
@@ -35,9 +25,7 @@ namespace Engine
 		}
 
 		Serializable::~Serializable()
-		{
-			if (mUnit)
-				assert(!mUnit->isSynced());
+        {
 		}
 
 		Serializable& Serializable::operator=(const Serializable& other)
@@ -45,11 +33,7 @@ namespace Engine
 			return *this;
 		}
 
-		void Serializable::applySerializableMap(const std::map<size_t, SerializableUnitBase*>& map)
-		{
-		}
-
-		void Serializable::writeCreationData(SerializeOutStream& out) const
+		void Serializable::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
 		{
 		}
 
@@ -68,37 +52,12 @@ namespace Engine
 			return mActive;
 		}
 
-		bool Serializable::isSynced() const
+		/*bool Serializable::isSynced() const
 		{
 			return mUnit ? mUnit->isSynced() : true;
-		}
+		}*/
 
-		std::set<BufferedOutStream*, CompareStreamId> Serializable::getMasterStateMessageTargets() const
-		{
-			std::set<BufferedOutStream*, CompareStreamId> result;
-			if (mUnit)
-			{
-				result = mUnit->getMasterMessageTargets();
-
-				for (BufferedOutStream* out : result)
-				{
-					out->beginMessage(mUnit, STATE);
-				}
-			}
-
-			return result;
-		}
-
-		void Serializable::sendState()
-		{
-			for (BufferedOutStream* out : getMasterStateMessageTargets())
-			{
-				writeState(*out);
-				out->endMessage();
-			}
-		}
-
-		const TopLevelSerializableUnitBase* Serializable::topLevel() const
+		/*const TopLevelSerializableUnitBase* Serializable::topLevel() const
 		{
 			return mUnit ? mUnit->topLevel() : nullptr;
 		}
@@ -106,6 +65,6 @@ namespace Engine
 		SerializableUnitBase* Serializable::unit() const
 		{
 			return mUnit;
-		}
+		}*/
 	}
 }

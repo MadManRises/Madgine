@@ -32,8 +32,8 @@ namespace Scene {
         SceneManager(const SceneManager &) = delete;
         virtual ~SceneManager() = default;
 
-        void readState(Serialize::SerializeInStream &in) override;
-        void writeState(Serialize::SerializeOutStream &out) const override;
+        /*void readState(Serialize::SerializeInStream &in) override;
+        void writeState(Serialize::SerializeOutStream &out) const override;*/
 
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
         bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
@@ -97,9 +97,9 @@ namespace Scene {
         App::Application &mApp;
         size_t mItemCount;
 					
-        SceneComponentContainer<PartialObservableContainer<SceneComponentSet, Core::MadgineObjectObserver>::type> mSceneComponents;
+        SceneComponentContainer<PartialObservableContainer<Serialize::PartialSerializableContainer<SceneComponentSet, Engine::Serialize::SerializableOffsetPtr<Self, 100>>::type, Core::MadgineObjectObserver>::type> mSceneComponents;        DEFINE_SERIALIZABLE_OFFSET(mSceneComponents);
 
-        Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> mEntities; DEFINE_OBSERVABLE_OFFSET(mEntities);                                         
+        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> mEntities;        DEFINE_COMBINED_OFFSET(mEntities);              
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -111,7 +111,7 @@ namespace Scene {
         Threading::DataMutex mMutex;
 
     public:
-        Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &entities();
+        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> &entities();
 
         SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };

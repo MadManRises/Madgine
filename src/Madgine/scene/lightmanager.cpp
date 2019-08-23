@@ -4,7 +4,7 @@
 
 
 #include "Modules/keyvalue/metatable_impl.h"
-
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine
 {
@@ -51,5 +51,11 @@ namespace Engine
 
 METATABLE_BEGIN(Engine::Scene::LightManager)
 METATABLE_END(Engine::Scene::LightManager)
+
+
+
+SERIALIZETABLE_BEGIN(Engine::Scene::LightManager)
+//mLights -> Serialize::ParentCreator<&LightManager::createLightTuple>
+SERIALIZETABLE_END(Engine::Scene::LightManager)
 
 RegisterType(Engine::Scene::LightManager);

@@ -9,10 +9,10 @@ namespace Engine
 		class MODULES_EXPORT TopLevelSerializableUnitBase : public SerializableUnitBase
 		{
 		public:
-			TopLevelSerializableUnitBase(size_t staticId = 0);
-			TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase& other);
-			TopLevelSerializableUnitBase(TopLevelSerializableUnitBase&& other) noexcept;
-			virtual ~TopLevelSerializableUnitBase();
+                    TopLevelSerializableUnitBase(size_t staticId = 0);
+                    TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
+                    TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept;
+			~TopLevelSerializableUnitBase();
 
 			void copyStaticSlaveId(const TopLevelSerializableUnitBase& other);
 
@@ -32,11 +32,7 @@ namespace Engine
 			void setStaticSlaveId(size_t staticId);
 			void initSlaveId();
 
-			size_t readId(SerializeInStream& in) override;
-
-			const TopLevelSerializableUnitBase* topLevel() const override;
-
-			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() const override;
+			std::set<BufferedOutStream*, CompareStreamId> getMasterMessageTargets() const;
 
 		private:
 			std::vector<SerializeManager*> mMasterManagers;

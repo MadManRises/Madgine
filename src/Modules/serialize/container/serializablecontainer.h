@@ -8,8 +8,17 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		template <class traits, class Creator>
+    template <typename OffsetPtr, class traits>
 		using SerializableContainer = std::conditional_t<
-			traits::sorted, SortedContainerApi<traits, Creator>, Container<traits, Creator>>;
+                traits::sorted, SortedContainerApi<OffsetPtr, traits>, Container<OffsetPtr, traits>>;
+
+
+
+	template <template <typename...> typename C, typename OffsetPtr>
+    struct PartialSerializableContainer {
+        template <typename... Args>
+        using type = C<OffsetPtr, Args...>;
+    };
+
 	}
 }

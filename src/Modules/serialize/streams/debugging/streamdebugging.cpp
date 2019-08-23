@@ -25,6 +25,7 @@ namespace Engine
 					sPath + stream.manager().name() + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
 					to_string(stream.id()) + "r.log")
 			{
+                            assert(mLogger);
 				if (stream.manager().name().empty())
 					throw 0;
 			}
@@ -34,6 +35,7 @@ namespace Engine
 					sPath + stream.manager().name() + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
 					to_string(stream.id()) + "w.log")
 			{
+                            assert(mLogger);
 				if (stream.manager().name().empty())
 					throw 0;
 			}

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../generic/templates.h"
-#include "Interfaces/streams/streams.h"
 #include "../serializeexception.h"
+#include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
 
 namespace Engine {
@@ -62,36 +62,44 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager &mgr);
 
-        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T>>>
-        SerializeInStream &operator>>(T &t)
-        {
-            int type;
-            read(type);
-            if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>)
-                throw SerializeException(Database::Exceptions::unknownSerializationType);
+		template <typename T>
+		SerializeInStream& operator>>(T& t) {
             read(t);
-            mLog.log(t);
-            return *this;
+                    return *this;
+		}
+
+        template <class T, typename... Args, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<Serializable, T>::value>>
+        void read(T &t, Args&&... args)
+        {
+            if constexpr (PrimitiveTypesContain_v<T>) {
+                int type;
+                readRaw(type);
+                if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>)
+                    throw SerializeException(Database::Exceptions::unknownSerializationType);
+                readRaw(t);
+                mLog.log(t);
+            } else if constexpr (std::is_base_of<Serializable, T>::value) {
+                t.readState(*this, std::forward<Args>(args)...);
+            } else {
+                static_assert(dependent_bool<T, false>::value, "Invalid Type");
+			}
         }
 
-        SerializeInStream &operator>>(ValueType &result);
+        void read(ValueType &result);
 
         template <class T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
-        SerializeInStream &operator>>(T *&p)
+        void read(T *&p)
         {
             SerializableUnitBase *unit;
             *this >> unit;
             p = dynamic_cast<T *>(unit);
             if (unit && !p)
                 throw 0;
-            return *this;
         }
 
-        SerializeInStream &operator>>(SerializableUnitBase *&p);
+        void read(SerializableUnitBase *&p);
 
-        SerializeInStream &operator>>(Serializable &s);
-
-        SerializeInStream &operator>>(std::string &s);
+        void read(std::string &s);
 
         template <class T>
         bool loopRead(T &val)
@@ -120,12 +128,10 @@ namespace Serialize {
         SerializeInStream(SerializeStreambuf *buffer);
 
         template <class T>
-        void read(T &t)
+        void readRaw(T &t)
         {
-            read(&t, sizeof(T));
-        }
-
-        void read(void *buffer, size_t size);
+            readRaw(&t, sizeof(T));
+        }        
 
         SerializableUnitBase *convertPtr(size_t ptr);
 
@@ -145,18 +151,22 @@ namespace Serialize {
 
         SerializeOutStream &operator<<(const ValueType &v);
 
-        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T>>>
+        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<Serializable, T>::value>>
         SerializeOutStream &operator<<(const T &t)
         {
-            write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
-            write(t);
-            mLog.log(t);
+            if constexpr (PrimitiveTypesContain_v<T>) {
+                write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
+                write(t);
+                mLog.log(t);
+            } else if constexpr (std::is_base_of<Serializable, T>::value) {
+                t.writeState(*this);
+            } else {
+                static_assert(dependent_bool<T, false>::value, "Invalid Type");
+            }
             return *this;
         }
 
         SerializeOutStream &operator<<(SerializableUnitBase *p);
-
-        SerializeOutStream &operator<<(const Serializable &s);
 
         SerializeOutStream &operator<<(const std::string &s);
 

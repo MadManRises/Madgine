@@ -8,7 +8,7 @@ struct OffsetPtr {
     template <typename Target>
     OffsetPtr(Target(T::*P))
     {
-        mOffset = reinterpret_cast<size_t>(static_cast<M *>(&(static_cast<T *>(nullptr)->*P)));
+        mOffset = reinterpret_cast<size_t>(&static_cast<M &>(static_cast<T *>(reinterpret_cast<void *>(0x1))->*P)) - 1;
     }
 
     T *parent(M *m)
@@ -24,8 +24,8 @@ struct OffsetPtr {
 	template <typename _T = T, typename _M = M>
 	size_t offset() {
         size_t offset = mOffset;
-        offset += reinterpret_cast<size_t>(static_cast<T *>(static_cast<_T *>(nullptr)));
-        offset += reinterpret_cast<size_t>(static_cast<_M *>(static_cast<M *>(nullptr)));
+        offset += reinterpret_cast<size_t>(static_cast<T *>(static_cast<_T *>(reinterpret_cast<void*>(0x1)))) - 1;
+        offset += reinterpret_cast<size_t>(static_cast<_M *>(static_cast<M *>(reinterpret_cast<void *>(0x1)))) - 1;
         return offset;
 	}
 

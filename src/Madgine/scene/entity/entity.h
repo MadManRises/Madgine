@@ -60,9 +60,7 @@ namespace Scene {
             EntityComponentBase *addComponent(const std::string &name/*, const Scripting::LuaTable &table = {}*/);
             void removeComponent(const std::string &name);
 
-            void writeState(Serialize::SerializeOutStream &of) const override;
-            void readState(Serialize::SerializeInStream &ifs) override;
-            void writeCreationData(Serialize::SerializeOutStream &of) const override;
+            void writeCreationData(Serialize::SerializeOutStream &of) const;
 
             SceneManager &sceneMgr(bool = true) const;
 
@@ -97,7 +95,7 @@ namespace Scene {
             std::string mName;
             bool mLocal;
 
-            Serialize::ObservableSet<::Engine::Serialize::ObservableOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&Entity::createComponentTuple>> mComponents; DEFINE_OBSERVABLE_OFFSET(mComponents);
+            Serialize::ObservableSet<::Engine::Serialize::CombinedOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly> mComponents;            DEFINE_COMBINED_OFFSET(mComponents);
 
 
             SceneManager &mSceneManager;

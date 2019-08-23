@@ -20,7 +20,7 @@ namespace Engine
 		std::istreambuf_iterator<char> begin();
 		std::istreambuf_iterator<char> end();
 
-		bool read(void *buffer, size_t size);
+		bool readRaw(void *buffer, size_t size);
 
 		operator bool() const;
 

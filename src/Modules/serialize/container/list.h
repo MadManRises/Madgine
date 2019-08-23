@@ -89,12 +89,12 @@ namespace Engine
 			}
 		};
 
-		template <class T, class Creator = DefaultCreator<>>
-		using SerializableList = ListImpl<SerializableContainer<
-			container_traits<std::list, typename UnitHelper<T>::Type>, Creator>>;
+		template <typename OffsetPtr, class T>
+		using SerializableList = ListImpl<SerializableContainer<OffsetPtr, 
+			container_traits<std::list, typename UnitHelper<T>::Type>>>;
 
-		template <typename PtrOffset, class T, typename Config, class Creator = DefaultCreator<>>
+		template <typename PtrOffset, class T, typename Config>
 		using ObservableList = ObservableListImpl<ObservableContainer<PtrOffset,
-			container_traits<std::list, typename UnitHelper<T>::Type>, Creator, Config>>;
+			container_traits<std::list, typename UnitHelper<T>::Type>, Config>>;
 	}
 }

@@ -6,10 +6,10 @@ namespace Engine {
 namespace Serialize {
 
     struct MODULES_EXPORT ObservableBase {
-        virtual ~ObservableBase() = default;
+        ~ObservableBase() = default;
 
-        virtual void readRequest(BufferedInOutStream &in) = 0;
-        virtual void readAction(SerializeInStream &in) = 0;
+        /*virtual void readRequest(BufferedInOutStream &in) = 0;
+        virtual void readAction(SerializeInStream &in) = 0;*/
 
 		protected:
         BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const;

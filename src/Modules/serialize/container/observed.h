@@ -13,11 +13,11 @@ namespace Engine
 	{
 
 		#define OBSERVED(Type, Name)   \
-    ::Engine::Serialize::Observed<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, Type> Name;\
-DEFINE_OBSERVABLE_OFFSET(Name)
+    ::Engine::Serialize::Observed<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Type> Name; \
+    DEFINE_COMBINED_OFFSET(Name)
 
 		template <typename PtrOffset, class T>
-		class Observed : public Observable<PtrOffset>, public Serializable, public UnitHelper<T>
+		class Observed : public Observable<PtrOffset>, public _Serializable<PtrOffset>, public UnitHelper<T>
 		{
 		public:
 			template <class... _Ty>
@@ -68,21 +68,21 @@ DEFINE_OBSERVABLE_OFFSET(Name)
 				return mData;
 			}
 
-			void readRequest(BufferedInOutStream& in) override
+			void readRequest(BufferedInOutStream& in)
 			{
 				T old = mData;
 				this->read_state(in, this->mData);
 				notify(old);
 			}
 
-			void readAction(SerializeInStream& in) override
+			void readAction(SerializeInStream& in)
 			{
 				T old = mData;
 				this->read_state(in, this->mData);
 				notify(old);
 			}
 
-			void readState(SerializeInStream& in) override
+			void readState(SerializeInStream& in)
 			{
 				T old = mData;
 				this->read_state(in, mData);
@@ -91,7 +91,7 @@ DEFINE_OBSERVABLE_OFFSET(Name)
 				notify(old);
 			}
 
-			void writeState(SerializeOutStream& out) const override
+			void writeState(SerializeOutStream& out) const
 			{
 				this->write_id(out, mData);
 				this->write_state(out, mData);
@@ -103,23 +103,23 @@ DEFINE_OBSERVABLE_OFFSET(Name)
 				mNotifySignal.connect(std::forward<Ty>(slot));
 			}
 
-			void setDataSynced(bool b) override
+			void setDataSynced(bool b) 
 			{
 				this->setItemDataSynced(mData, b);
 			}
 
-			void setActive(bool active) override
+			void setActive(bool active) 
 			{
 				if (!active)
 				{
-					Serializable::setActive(active);
+                                _Serializable<PtrOffset>::setActive(active);
 					if (mData != T())
 						mNotifySignal.emit(T(), mData);
 				}
 				this->setItemActive(mData, active);
 				if (active)
 				{
-					Serializable::setActive(active);
+                                    _Serializable<PtrOffset>::setActive(active);
 					if (mData != T())
 						mNotifySignal.emit(mData, T());
 				}
@@ -128,7 +128,7 @@ DEFINE_OBSERVABLE_OFFSET(Name)
 		protected:
 			void notify(const T& old)
 			{
-				if (isSynced())
+				if (!PtrOffset::parent(this) || PtrOffset::parent(this)->isSynced())
 				{
 					for (BufferedOutStream* out : this->getMasterActionMessageTargets())
 					{
@@ -136,7 +136,7 @@ DEFINE_OBSERVABLE_OFFSET(Name)
 						out->endMessage();
 					}
 				}
-				if (isActive())
+				if (this->isActive())
 				{
 					mNotifySignal.emit(mData, old);
 				}

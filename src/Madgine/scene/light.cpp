@@ -2,6 +2,9 @@
 
 #include "light.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
+
 namespace Engine
 {
 	namespace Scene
@@ -43,3 +46,6 @@ namespace Engine
 		}
 	}
 }
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Light)
+SERIALIZETABLE_END(Engine::Scene::Light)

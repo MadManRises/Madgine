@@ -17,13 +17,10 @@
 
 namespace Engine {
 namespace Serialize {
-    THREADLOCAL(std::list<SerializableUnitBase *>)
-    sStack;
 
     SerializableUnitBase::SerializableUnitBase(size_t masterId)
         : mMasterId(SerializeManager::generateMasterId(masterId, this))
     {
-        insertInstance();
     }
 
     SerializableUnitBase::SerializableUnitBase(const SerializableUnitBase &other)
@@ -36,12 +33,9 @@ namespace Serialize {
     {
     }
 
+
     SerializableUnitBase::~SerializableUnitBase()
     {
-        if (find(sStack->begin(), sStack->end(), this) != sStack->end()) {
-            removeInstance();
-        }
-
         assert(!mSynced);
 
         clearSlaveId();
@@ -50,9 +44,7 @@ namespace Serialize {
 
     void SerializableUnitBase::writeState(SerializeOutStream &out) const
     {
-        for (Serializable *val : mStateValues) {
-            val->writeState(out);
-        }
+        mType->writeBinary(this, out);
     }
 
     void SerializableUnitBase::writeId(SerializeOutStream &out) const
@@ -60,30 +52,30 @@ namespace Serialize {
         out << mMasterId;
     }
 
-    size_t SerializableUnitBase::readId(SerializeInStream &in)
+    void SerializableUnitBase::readId(SerializeInStream &in)
     {
         size_t id;
         in >> id;
         if (&in.manager() == topLevel()->getSlaveManager()) {
             setSlaveId(id);
         }
-        return id;
+        if (mType->mIsTopLevelUnit)
+            static_cast<TopLevelSerializableUnitBase *>(this)->setStaticSlaveId(id);
     }
 
     void SerializableUnitBase::readState(SerializeInStream &in)
     {
-        for (Serializable *val : mStateValues) {
-            val->readState(in);
-        }
+        mType->readBinary(this, in);
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)
     {
         size_t index;
         in >> index;
-        //try { //TODO unsafe
-            reinterpret_cast<ObservableBase *>(reinterpret_cast<char *>(this) + index)
-                ->readAction(in);
+        //try { //TODO check error
+        mType->readAction(this, in, index);
+            /*reinterpret_cast<ObservableBase *>(reinterpret_cast<char *>(this) + index)
+                ->readAction(in);*/
         /*} catch (const std::out_of_range &) {
             throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
         }*/
@@ -93,21 +85,21 @@ namespace Serialize {
     {
         size_t index;
         in >> index;
-        //try { //TODO unsafe
-            reinterpret_cast<ObservableBase*>(reinterpret_cast<char *>(this) + index)
-            ->readRequest(in);
+        //try { //TODO check error
+        mType->readRequest(this, in, index);
+            /*reinterpret_cast<ObservableBase*>(reinterpret_cast<char *>(this) + index)
+            ->readRequest(in);*/
         /*} catch (const std::out_of_range &) {
             throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
         }*/
     }
 
-    void SerializableUnitBase::addSerializable(Serializable *val)
-    {
-        mStateValues.push_back(val);
-    }
-
     std::set<BufferedOutStream *, CompareStreamId> SerializableUnitBase::getMasterMessageTargets() const
     {
+        if (mType->mIsTopLevelUnit) {
+            return static_cast<const TopLevelSerializableUnitBase *>(this)->getMasterMessageTargets();
+		}
+
         std::set<BufferedOutStream *, CompareStreamId> result;
         if (mSynced && mParent) {
             result = mParent->getMasterMessageTargets();
@@ -130,7 +122,10 @@ namespace Serialize {
 
     const TopLevelSerializableUnitBase *SerializableUnitBase::topLevel() const
     {
-        return mParent ? mParent->topLevel() : nullptr;
+        if (mType->mIsTopLevelUnit)
+            return static_cast<const TopLevelSerializableUnitBase *>(this);
+        else
+			return mParent ? mParent->topLevel() : nullptr;
     }
 
     void SerializableUnitBase::clearSlaveId()
@@ -141,57 +136,10 @@ namespace Serialize {
         }
     }
 
-    void SerializableUnitBase::postConstruct()
-    {
-        removeInstance();
-    }
-
     void SerializableUnitBase::setParent(SerializableUnitBase *parent)
     {
         clearSlaveId();
         mParent = parent;
-    }
-
-    void SerializableUnitBase::insertInstance()
-    {
-        findParentIt(this, this + 1);
-        sStack->emplace_front(this);
-        //std::cout << "Stack size: " << sStack.size() << std::endl;
-    }
-
-    void SerializableUnitBase::removeInstance()
-    {
-        assert(*sStack->begin() == this);
-        //if (it != intern::stack.end()) {
-        sStack->erase(sStack->begin());
-        //std::cout << "Stack size: " << sStack.size() << std::endl;
-        //}
-    }
-
-    SerializableUnitBase *SerializableUnitBase::findParent(void *from, void *to)
-    {
-        auto it = findParentIt(from, to);
-        if (it != sStack->end()) {
-            return *it;
-        }
-        return nullptr;
-    }
-
-    std::list<SerializableUnitBase *>::iterator SerializableUnitBase::findParentIt(void *from, void *to)
-    {
-        auto it = std::find_if(sStack->begin(), sStack->end(), [&](SerializableUnitBase *const p) {
-            return p <= from && to <= reinterpret_cast<char *>(p) + p->getSize();
-        });
-        if (it != sStack->end()) {
-            assert(it == sStack->begin());
-            sStack->erase(sStack->begin(), it);
-        }
-        return it;
-    }
-
-    size_t SerializableUnitBase::getSize() const
-    {
-        return sizeof(SerializableUnitBase);
     }
 
     size_t SerializableUnitBase::slaveId() const
@@ -217,9 +165,7 @@ namespace Serialize {
 
     void SerializableUnitBase::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
     {
-        for (Serializable *ser : mStateValues) {
-            ser->applySerializableMap(map);
-        }
+        mType->applySerializableMap(this, map);
     }
 
     void SerializableUnitBase::setSynced(bool b)
@@ -232,17 +178,13 @@ namespace Serialize {
     {
         assert(mSynced != b);
         mSynced = b;
-        for (Serializable *ser : mStateValues) {
-            ser->setDataSynced(b);
-        }
+        mType->setDataSynced(this, b);
     }
 
     void SerializableUnitBase::setActive(bool active)
     {
         assert(mSynced == active);
-        for (Serializable *ser : mStateValues) {
-            ser->setActive(active);
-        }
+        mType->setActive(this, active);
     }
 
     void SerializableUnitBase::sync()
@@ -265,9 +207,9 @@ namespace Serialize {
         return mSlaveId == 0;
     }
 
-    bool SerializableUnitBase::filter(SerializeOutStream *stream) const
+    /*bool SerializableUnitBase::filter(SerializeOutStream *stream) const
     {
         return true;
-    }
+    }*/
 } // namespace Serialize
 } // namespace Core

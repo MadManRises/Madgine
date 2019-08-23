@@ -39,6 +39,7 @@ FolderSources(sources "" "" integrationtests.cpp)
 		FolderSources(sources serialize container containertest.cpp)
 		FolderSources(sources serialize streams)
 			FolderSources(sources streams debugging streamdebuggingtest.cpp)
+		FolderSources(sources serialize table serializetabletest.cpp)
 	FolderSources(sources "" uniquecomponent uniquecomponentshared.h uniquecomponenttest.cpp)		
 
 add_gtest(Modules_Test ${sources})

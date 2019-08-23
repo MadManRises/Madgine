@@ -4,11 +4,11 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		template <class traits, class Creator>
-		class UnsortedContainer : public SerializableContainer<traits, Creator>
+    template <typename OffsetPtr, class traits>
+            class UnsortedContainer : public SerializableContainer<OffsetPtr, traits>
 		{
 		public:
-			typedef SerializableContainer<traits, Creator> Base;
+        typedef SerializableContainer<OffsetPtr, traits> Base;
 			using Base::Base;
 			using Base::operator=;
 
@@ -32,9 +32,10 @@ namespace Engine
 				out << static_cast<int>(std::distance(this->begin(), it));
 			}
 
-			std::pair<iterator, bool> read_item(SerializeInStream& in)
+			template <typename Creator>
+			std::pair<iterator, bool> read_item(SerializeInStream& in, Creator &&creator)
 			{
-				return this->read_item_where_intern(read_iterator(in), in);
+				return this->read_item_where_intern(read_iterator(in), in, std::forward<Creator>(creator));
 			}
 
 			void write_item(SerializeOutStream& out, const const_iterator& it) const

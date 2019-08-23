@@ -7,82 +7,23 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Modules/serialize/serializemanager.h"
 
 #include "Modules/serialize/toplevelserializableunit.h"
 
 #include "Modules/serialize/container/noparent.h"
 
-#include "Modules/serialize/streams/buffered_streambuf.h"
+
 
 #include "Modules/serialize/container/offset.h"
+
+#include "Modules/serialize/serializetable_impl.h"
+
+#include "../testManager.h"
 
 	using namespace Engine::Serialize;
 	using namespace std::chrono_literals;
 
-struct Buffer {
-	std::array<char, 2048> mBuffer[2];
-	size_t mWrittenCount[2] = { 0,0 };
-};
 
-struct TestBuf : Engine::Serialize::buffered_streambuf
-{
-	TestBuf(Buffer &buffer, Engine::Serialize::SerializeManager &mgr, Engine::Serialize::ParticipantId id) :
-		buffered_streambuf(mgr, id),
-		mBuffer(buffer)
-	{
-
-	}
-
-	virtual Engine::StreamError getError() {
-		return Engine::WOULD_BLOCK;
-	}
-
-	virtual int recv(char* buffer, size_t count)
-	{
-		size_t index = isMaster() ? 0 : 1;
-
-		size_t avail = mBuffer.mWrittenCount[index] - mReadOffset;
-		size_t readCount = std::min(count, avail);
-		if (readCount == 0)
-			return -1;
-		std::memcpy(buffer, mBuffer.mBuffer[index].data() + mReadOffset, readCount);
-		mReadOffset += readCount;
-		return static_cast<int>(readCount);
-	}
-
-	virtual int send(char* buffer, size_t count)
-	{
-		size_t index = isMaster() ? 1 : 0;
-
-		assert(mBuffer.mWrittenCount[index] + count <= mBuffer.mBuffer[index].size());
-		std::memcpy(mBuffer.mBuffer[index].data() + mBuffer.mWrittenCount[index], buffer, count);
-		mBuffer.mWrittenCount[index] += count;
-		return static_cast<int>(count);
-	}
-
-	Buffer &mBuffer;
-	size_t mReadOffset = 0;
-};
-
-
-
-struct TestManager : Engine::Serialize::SerializeManager
-{
-	TestManager() :
-		SerializeManager("Test-Manager")
-	{
-	}
-
-	void setBuffer(Buffer &buffer, bool slave)
-	{
-		if (slave)
-			setSlaveStream(Engine::Serialize::BufferedInOutStream{ std::make_unique<TestBuf>(buffer, *this, 0) }, true, std::chrono::milliseconds{ 1000 });
-		else
-			addMasterStream(Engine::Serialize::BufferedInOutStream{ std::make_unique<TestBuf>(buffer, *this, 1) });
-	}
-
-};
 
 
 struct TestUnit : TopLevelSerializableUnit<TestUnit> {
@@ -91,18 +32,25 @@ struct TestUnit : TopLevelSerializableUnit<TestUnit> {
     {
     }
 
-    SerializableList<int> list1;
-    ObservableList<::Engine::Serialize::ObservableOffsetPtr<Self, __LINE__>, int, ContainerPolicies::allowAll> list2; DEFINE_OBSERVABLE_OFFSET(list2);
+    SerializableList<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, int> list1;  DEFINE_SERIALIZABLE_OFFSET(list1);
+    ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, int, ContainerPolicies::allowAll> list2;   DEFINE_COMBINED_OFFSET(list2);
 };
+
+SERIALIZETABLE_BEGIN(TestUnit)
+FIELD(list1)
+FIELD(list2)
+SERIALIZETABLE_END(TestUnit)
 
 TEST(Serialize_Container, Test1)
 {
 
+		Engine::Serialize::Debugging::setLoggingEnabled(true);
+
 
 	Engine::Threading::WorkGroup wg;
 
-	TestManager mgr1;
-	TestManager mgr2;
+	TestManager mgr1("container1");
+	TestManager mgr2("container2");
 
 
 	NoParentUnit<TestUnit> unit1;

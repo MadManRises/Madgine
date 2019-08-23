@@ -7,7 +7,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
-
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine
 {
@@ -35,5 +35,8 @@ namespace Engine
 
 METATABLE_BEGIN(Engine::Scene::Entity::ServerSkeletonVisualizer)
 METATABLE_END(Engine::Scene::Entity::ServerSkeletonVisualizer)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::ServerSkeletonVisualizer)
+SERIALIZETABLE_END(Engine::Scene::Entity::ServerSkeletonVisualizer)
 
 RegisterType(Engine::Scene::Entity::ServerSkeletonVisualizer);

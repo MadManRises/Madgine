@@ -13,7 +13,6 @@ namespace Serialize {
         NoParentUnit(Args &&... args)
             : T(std::forward<Args>(args)...)
         {
-            this->postConstruct();
             this->sync();
         }
 

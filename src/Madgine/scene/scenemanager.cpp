@@ -20,6 +20,7 @@
 
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
@@ -57,7 +58,7 @@ namespace Scene {
         }
     }
 
-    Serialize::ObservableList<::Engine::Serialize::ObservableOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>> &SceneManager::entities()
+    Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> &SceneManager::entities()
     {
         /*std::list<Entity::Entity *> result;
         for (Entity::Entity &e : mEntities) {
@@ -83,10 +84,10 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    void SceneManager::writeState(Serialize::SerializeOutStream &out) const
+    /*void SceneManager::writeState(Serialize::SerializeOutStream &out) const
     {
         SerializableUnitBase::writeState(out);
-    }
+    }*/
 
     App::GlobalAPIBase &SceneManager::getGlobalAPIComponent(size_t i, bool init)
     {
@@ -119,14 +120,14 @@ namespace Scene {
         return mClearedSignal;
     }
 
-    void SceneManager::readState(Serialize::SerializeInStream &in)
+    /*void SceneManager::readState(Serialize::SerializeInStream &in)
     {
         clear();
 
         SerializableUnitBase::readState(in);
 
         mStateLoadedSignal.emit();
-    }
+    }*/
 
     bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
     {
@@ -317,5 +318,11 @@ namespace Scene {
 METATABLE_BEGIN(Engine::Scene::SceneManager)
 READONLY_PROPERTY(entities, entities)
 METATABLE_END(Engine::Scene::SceneManager)
+
+
+SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
+//mEntities ->  Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>
+SERIALIZETABLE_END(Engine::Scene::SceneManager)
+
 
 RegisterType(Engine::Scene::SceneManager);

@@ -117,6 +117,14 @@ public:
         return mComponents;
     }
 
+	operator const Container& () const {
+            return mComponents;
+	}
+
+	operator Container& () {
+            return mComponents;
+	}
+
     template <class T>
     T &get()
     {
