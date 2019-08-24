@@ -17,7 +17,7 @@
 
 #include "openglforward.h"
 
-#include "clientlib.h"
+#include "Madgine/clientlib.h"
 
 #if !ANDROID && !EMSCRIPTEN
 #include "../glad/glad.h"

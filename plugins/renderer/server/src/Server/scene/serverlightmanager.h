@@ -10,7 +10,7 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class MADGINE_SERVER_EXPORT ServerLightManager :
+    class MADGINE_SERVERRENDERER_EXPORT ServerLightManager :
 			public VirtualSceneComponentImpl<ServerLightManager, LightManager>
 		{
 		public:

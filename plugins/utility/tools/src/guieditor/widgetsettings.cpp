@@ -4,7 +4,7 @@
 
 #include "../imgui/imgui.h"
 
-#include "gui/widgets/widget.h"
+#include "Madgine/gui/widgets/widget.h"
 
 #include "../renderer/imguiaddons.h"
 

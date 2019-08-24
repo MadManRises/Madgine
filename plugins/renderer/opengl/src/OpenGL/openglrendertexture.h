@@ -1,6 +1,6 @@
 #pragma once
 
-#include "render/rendertarget.h"
+#include "Madgine/render/rendertarget.h"
 #include "openglshaderprogram.h"
 #include "util/opengltexture.h"
 #include "util/openglbuffer.h"

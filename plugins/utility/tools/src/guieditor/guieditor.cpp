@@ -11,9 +11,9 @@
 #include "Modules/math/bounds.h"
 #include "Modules/reflection/classname.h"
 
-#include "gui/guisystem.h"
-#include "gui/widgets/toplevelwindow.h"
-#include "gui/widgets/widget.h"
+#include "Madgine/gui/guisystem.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/widgets/widget.h"
 
 #include "Interfaces/window/windowapi.h"
 

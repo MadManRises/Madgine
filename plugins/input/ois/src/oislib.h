@@ -15,7 +15,7 @@
 #	endif
 #endif
 
-#include "clientlib.h"
+#include "Madgine/clientlib.h"
 
 
 /// @endcond

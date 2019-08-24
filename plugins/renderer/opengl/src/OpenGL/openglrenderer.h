@@ -1,6 +1,6 @@
 #pragma once
 
-#include "render/renderercollector.h"
+#include "Madgine/render/renderercollector.h"
 
 namespace Engine {
 	namespace Render {

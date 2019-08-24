@@ -1,3 +1,2 @@
 add_subdirectory(Interfaces)
 add_subdirectory(Modules)
-add_subdirectory(Madgine)

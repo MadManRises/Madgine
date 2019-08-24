@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/windowoverlay.h"
+#include "Madgine/gui/windowoverlay.h"
 #include "Modules/math/vector2.h"
 
 struct ImGuiDockNode;

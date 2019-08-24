@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_SERVER_EXPORT ServerSkeletonVisualizer : public EntityComponent<ServerSkeletonVisualizer>
+                class MADGINE_SERVERRENDERER_EXPORT ServerSkeletonVisualizer : public EntityComponent<ServerSkeletonVisualizer>
 			{
 			public:
 				ServerSkeletonVisualizer(Entity& entity/*, const Scripting::LuaTable& table = {}*/);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gui/widgets/toplevelwindow.h"
-#include "Modules/threading/framelistener.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/threading/framelistener.h"
 
 #include "../toolscollector.h"
 

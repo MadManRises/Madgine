@@ -10,8 +10,8 @@
 #include "Modules/reflection/classname.h"
 
 #include "Madgine/app/application.h"
-#include "gui/guisystem.h"
-#include "gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/guisystem.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 

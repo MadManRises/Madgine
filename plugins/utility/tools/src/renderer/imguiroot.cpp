@@ -2,9 +2,6 @@
 
 #include "imguiroot.h"
 
-#ifdef BUILD_PLUGIN_Ogre
-#include "ogre/ogreimguimanager.h"
-#endif
 #ifdef BUILD_PLUGIN_OpenGL
 #include "opengl/openglimguimanager.h"
 #endif
@@ -12,10 +9,10 @@
 #include "Madgine/app/application.h"
 
 #include "Modules/math/vector3.h"
-#include "gui/guisystem.h"
-#include "gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/guisystem.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
 
-#include "input/inputhandler.h"
+#include "Madgine/input/inputhandler.h"
 
 #include "Modules/debug/profiler/profiler.h"
 

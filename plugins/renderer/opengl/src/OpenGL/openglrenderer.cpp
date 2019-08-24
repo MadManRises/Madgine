@@ -2,7 +2,7 @@
 
 #include "openglrenderer.h"
 
-#include "gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 

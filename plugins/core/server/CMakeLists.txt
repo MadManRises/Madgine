@@ -1,0 +1,16 @@
+cmake_minimum_required (VERSION 2.6)
+
+Project(Server)
+
+set(sources "")
+FolderSources(sources "" src)
+	FolderSources(sources src Madgine serverforward.h serverlib.h)
+		FolderSources(sources Madgine server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h serverlog.cpp serverlog.h)
+
+
+add_plugin(Server Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/serverlib.h)
+
+target_link_plugins(Server Base)
+
+target_link_libraries(Server PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+

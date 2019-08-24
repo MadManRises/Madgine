@@ -9,7 +9,7 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class MADGINE_SERVER_EXPORT ServerMesh : public EntityComponentVirtualImpl<ServerMesh, Mesh>
+                class MADGINE_SERVERRENDERER_EXPORT ServerMesh : public EntityComponentVirtualImpl<ServerMesh, Mesh>
 			{
 			public:
 				ServerMesh(Entity& entity/*, const Scripting::LuaTable& table*/);

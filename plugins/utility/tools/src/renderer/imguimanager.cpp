@@ -3,20 +3,20 @@
 #include "imguimanager.h"
 
 #include "Madgine/app/application.h"
-#include "gui/guisystem.h"
-#include "gui/widgets/toplevelwindow.h"
-#include "input/inputhandler.h"
+#include "Madgine/gui/guisystem.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/input/inputhandler.h"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
 
-#include "input/inputevents.h"
+#include "Madgine/input/inputevents.h"
 
 #include "Modules/math/vector3.h"
 
 #include "Modules/debug/profiler/profiler.h"
 
-#include "gui/widgets/toolwindow.h"
+#include "Madgine/gui/widgets/toolwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 

@@ -2,7 +2,7 @@
 
 #include "../ois/includes/OIS.h"
 #include "Interfaces/window/windoweventlistener.h"
-#include "input/inputcollector.h"
+#include "Madgine/input/inputcollector.h"
 
 namespace Engine {
 namespace Input {

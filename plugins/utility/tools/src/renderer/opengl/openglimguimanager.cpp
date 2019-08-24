@@ -12,8 +12,8 @@
 #include "Modules/math/vector3.h"
 
 #include "Madgine/app/application.h"
-#include "gui/guisystem.h"
-#include "gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/guisystem.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
 
 namespace Engine {
 namespace Tools {

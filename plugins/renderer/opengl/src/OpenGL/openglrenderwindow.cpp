@@ -1,6 +1,6 @@
 #include "opengllib.h"
 #include "openglrenderwindow.h"
-#include "gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/widgets/toplevelwindow.h"
 #include "openglrenderer.h"
 
 #include <iostream>
@@ -13,9 +13,9 @@
 #include "Modules/math/vector3.h"
 #include "Modules/math/vector4.h"
 
-#include "gui/widgets/widget.h"
+#include "Madgine/gui/widgets/widget.h"
 
-#include "gui/vertex.h"
+#include "Madgine/gui/vertex.h"
 
 #include "openglrendertexture.h"
 
