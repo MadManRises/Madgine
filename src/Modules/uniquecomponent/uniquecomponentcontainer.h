@@ -39,7 +39,7 @@ public:
         for (auto f : Registry::sComponents()) {
             std::unique_ptr<Base> p = f(arg...);
             mSortedComponents.push_back(p.get());
-            container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
+            container_traits<C<std::unique_ptr<Base>>>::emplace(mComponents, mComponents.end(), std::move(p));
         }
 #if ENABLE_PLUGINS
         Registry::update().connect(mUpdateSlot);
@@ -154,7 +154,7 @@ protected:
             for (F f : vals) {
                 std::unique_ptr<Base> p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
-                container_traits<C, std::unique_ptr<Base>>::emplace(mComponents, mComponents.end(), std::move(p));
+                container_traits<C<std::unique_ptr<Base>>>::emplace(mComponents, mComponents.end(), std::move(p));
             }
         } else {
             size_t from = info->mBaseIndex;

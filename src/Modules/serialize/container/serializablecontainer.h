@@ -22,12 +22,11 @@ namespace Serialize {
             }
         };
 
-        //protected:
         typedef typename _traits::container NativeContainerType;
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
 
-        typedef typename _traits::type Type;
+        typedef typename _traits::type type;
 
         SerializableContainer()
             : mActiveIterator(mData.begin())
@@ -84,53 +83,7 @@ namespace Serialize {
             return mData;
         }
 
-        SerializableContainer<OffsetPtr, _traits> &operator=(const NativeContainerType &other)
-        {
-            bool wasActive = unsync();
-            mData = other;
-            mActiveIterator = mData.begin();
-            sync(wasActive);
-            return *this;
-        }
-
-        bool operator==(const SerializableContainer<OffsetPtr, _traits> &other) const
-        {
-            return mData == other.mData;
-        }
-
-        void clear()
-        {
-            bool wasActive = unsync();
-            mData.clear();
-            mActiveIterator = mData.begin();
-            sync(wasActive);
-        }
-
-        iterator erase(const iterator &it)
-        {
-            if (this->isSynced()) {
-                this->setItemDataSynced(*it, false);
-            }
-            if (isItemActive(it)) {
-                this->setItemActive(*it, false);
-            }
-            return erase_intern(it);
-        }
-
-        iterator erase(const iterator &from, const iterator &to)
-        {
-            if (isSynced()) {
-                for (iterator it = from; it != to; ++it) {
-                    this->setItemDataSynced(*it, false);
-                }
-            }
-            for (iterator it = from; it != to && isItemActive(it); ++it) {
-                this->setItemActive(*it, false);
-            }
-            return erase_intern(from, to);
-        }
-
-        size_t size() const
+		size_t size() const
         {
             return this->mData.size();
         }
@@ -139,6 +92,70 @@ namespace Serialize {
         {
             return this->mData.empty();
         }
+
+		bool operator==(const SerializableContainer<OffsetPtr, _traits> &other) const
+        {
+            return mData == other.mData;
+        }
+
+        SerializableContainer<OffsetPtr, _traits> &operator=(const NativeContainerType &other)
+        {
+            bool wasActive = beforeReset();
+            mData = other;
+            mActiveIterator = mData.begin();
+            afterReset(wasActive);
+            return *this;
+        }
+
+        void clear()
+        {
+            bool wasActive = beforeReset();
+            mData.clear();
+            mActiveIterator = mData.begin();
+            afterReset(wasActive);
+        }
+
+		
+        template <class... _Ty>
+        std::pair<iterator, bool> emplace(const const_iterator &where, _Ty &&... args)
+        {
+            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
+            if (it.second)
+                onInsert(it.first);
+            return it;
+        }
+
+        template <class T, class... _Ty>
+        std::pair<iterator, bool> emplace_init(T &&init, const const_iterator &where, _Ty &&... args)
+        {
+            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
+            if (it.second) {
+                init(*it.first);
+                onInsert(it.first);
+            }
+            return it;
+        }
+
+        iterator erase(const iterator &where)
+        {
+            beforeRemove(where);
+            return erase_intern(where);
+        }
+
+        iterator erase(const iterator &from, const iterator &to)
+        {
+            beforeRemoveRange(from, to);
+            return erase_intern(from, to);
+        }
+
+		std::pair<iterator, bool> read_item_where(SerializeInStream &in, const const_iterator &where)
+        {
+            std::pair<iterator, bool> it = read_item_where_intern(in, where);
+            if (it.second)
+                onInsert(it.first);
+            return it;
+        }
+
 
         void writeState(SerializeOutStream &out) const
         {
@@ -153,13 +170,13 @@ namespace Serialize {
 		template <typename Creator = DefaultCreator<>>
         void readState(SerializeInStream &in, Creator &&creator = {})
         {
-            bool wasActive = unsync();
+            bool wasActive = beforeReset();
             mData.clear();
             mActiveIterator = mData.begin();
             while (in.loopRead()) {
-                this->read_item_where_intern(end(), in, std::forward<Creator>(creator));
+                this->read_item_where_intern(in, end(), std::forward<Creator>(creator));
             }
-            sync(wasActive);
+            afterReset(wasActive);
         }
 
         void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map) 
@@ -186,68 +203,49 @@ namespace Serialize {
             }
             Serializable<OffsetPtr>::setActive(active);
             if (active) {
-                for (mActiveIterator = begin(); mActiveIterator != end();) {
-                    Type &t = *mActiveIterator;
+                while (mActiveIterator != end()) {
+                    type &t = *mActiveIterator;
                     ++mActiveIterator;
                     this->setItemActive(t, active);
                 }
             }
         }
 
-        template <class... _Ty>
-        std::pair<iterator, bool> emplace(const const_iterator &where, _Ty &&... args)
-        {
-            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
-            if (it.second) {
-                if (this->isSynced()) {
-                    this->setItemDataSynced(*it.first, true);
-                }
-                if (isItemActive(it.first))
-                    this->setItemActive(*it.first, true);
-            }
-            return it;
-        }
-
-        template <class T, class... _Ty>
-        std::pair<iterator, bool> emplace_init(T &&init, const const_iterator &where, _Ty &&... args)
-        {
-            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
-            if (it.second) {
-                init(*it.first);
-                if (this->isSynced()) {
-                    this->setItemDataSynced(*it.first, true);
-                }
-                if (isItemActive(it.first))
-                    this->setItemActive(*it.first, true);
-            }
-            return it;
-        }
-
-        template <class... _Ty>
-        std::pair<iterator, bool> emplace_tuple(const const_iterator &where, std::tuple<_Ty...> &&tuple)
-        {
-            return TupleUnpacker::invokeExpand(&Container<OffsetPtr, _traits, Creator>::emplace<_Ty...>,
-                this,
-                where,
-                std::forward<std::tuple<_Ty...>>(tuple));
-        }
-
-        std::pair<iterator, bool> read_item_where(const const_iterator &where, SerializeInStream &in)
-        {
-            std::pair<iterator, bool> it = read_item_where_intern(where, in);
-            if (it.second) {
-                if (isSynced()) {
-                    this->setItemDataSynced(*it.first, true);
-                }
-                if (isItemActive(it.first))
-                    this->setItemActive(*it.first, true);
-            }
-            return it;
-        }
-
     protected:
 
-        bool unsync()
+		void onInsert(const iterator &it)
+        {
+            if (this->isSynced()) {
+                this->setItemDataSynced(*it, true);
+            }
+            if (isItemActive(it))
+                this->setItemActive(*it, true);
+        }
+
+		
+		void beforeRemove(const iterator &it)
+        {
+            if (this->isSynced()) {
+                this->setItemDataSynced(*it, false);
+            }
+            if (isItemActive(it)) {
+                this->setItemActive(*it, false);
+            }
+        }
+
+		void beforeRemoveRange(const iterator &from, const iterator &to)
+        {
+            if (isSynced()) {
+                for (iterator it = from; it != to; ++it) {
+                    this->setItemDataSynced(*it, false);
+                }
+            }
+            for (iterator it = from; it != to && isItemActive(it); ++it) {
+                this->setItemActive(*it, false);
+            }
+        }
+
+		bool beforeReset()
         {
             if (this->isSynced()) {
                 setDataSynced(false);
@@ -259,17 +257,17 @@ namespace Serialize {
             return false;
         }
 
-        void sync(bool wasActive)
-        {
-            if (this->isSynced()) {
-                setDataSynced(true);
-            }
-            if (wasActive)
-                setActive(true);
-        }
+
+		void afterReset(bool wasActive) {
+                    if (this->isSynced()) {
+                        setDataSynced(true);
+                    }
+                    if (wasActive)
+                        setActive(true);
+		}
 
 		template <typename Creator>
-        std::pair<iterator, bool> read_item_where_intern(const const_iterator &where, SerializeInStream &in, Creator &&creator)
+                std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
@@ -279,7 +277,7 @@ namespace Serialize {
             return it;
         }
 
-        void write_item(SerializeOutStream &out, const Type &t) const
+        void write_item(SerializeOutStream &out, const type &t) const
         {
             this->write_creation(out, t);
             this->write_state(out, t);

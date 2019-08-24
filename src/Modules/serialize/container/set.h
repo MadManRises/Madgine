@@ -43,11 +43,11 @@ namespace Engine
 
 		template <typename PtrOffset, class T>
 		using SerializableSet = SetImpl<SerializableContainer<PtrOffset,
-			container_traits<std::set, typename UnitHelper<T>::Type>>>;
+			container_traits<std::set<typename UnitHelper<T>::type>>>>;
 
 		template <typename PtrOffset, class T, typename Config>
 		using SyncableSet = SyncableSetImpl<SyncableContainer<PtrOffset, 
-			container_traits<std::set, typename UnitHelper<T>::Type>, Config>>;
+			container_traits<std::set<typename UnitHelper<T>::type>>, Config>>;
 	}
 
 }

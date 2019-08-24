@@ -13,14 +13,14 @@ namespace Engine
 		{
 		public:
 
-			typedef typename C::Type Type;
+			typedef typename C::type type;
 
 			typedef typename C::iterator iterator;
 			typedef typename C::const_iterator const_iterator;
 
 			using C::C;
 
-			void remove(const Type& item)
+			void remove(const type& item)
 			{
 				for (iterator it = this->begin(); it != this->end();)
 				{
@@ -35,7 +35,7 @@ namespace Engine
 				}
 			}
 
-			void push_back(const Type& item)
+			void push_back(const type& item)
 			{
 				this->emplace(this->end(), item);
 			}
@@ -46,19 +46,12 @@ namespace Engine
 				return this->emplace(this->end(), std::forward<_Ty>(args)...);
 			}
 
-
-			template <class... _Ty>
-			std::pair<iterator, bool> emplace_tuple_back(std::tuple<_Ty...>&& tuple)
-			{
-				return TupleUnpacker::invokeExpand(&ListImpl::emplace_back<_Ty...>, this, std::forward<std::tuple<_Ty...>>(tuple));
-			}
-
-			const Type& back() const
+			const type& back() const
 			{
 				return this->mData.back();
 			}
 
-			Type& back()
+			type& back()
 			{
 				return this->mData.back();
 			}
@@ -79,22 +72,14 @@ namespace Engine
 				this->emplace_init(std::forward<T>(init), this->end(), std::forward<_Ty>(args)...);
 			}
 
-			template <class T, class... _Ty>
-			void emplace_tuple_back_init(T&& init, std::tuple<_Ty...>&& args)
-			{
-				TupleUnpacker::invokeExpand(&ObservableListImpl::emplace_back_init<T, _Ty...>,
-					this,
-					std::forward<T>(init),
-					std::forward<std::tuple<_Ty...>>(args));
-			}
 		};
 
 		template <typename OffsetPtr, class T>
 		using SerializableList = ListImpl<SerializableContainer<OffsetPtr, 
-			container_traits<std::list, typename UnitHelper<T>::Type>>>;
+			container_traits<std::list<typename UnitHelper<T>::type>>>>;
 
 		template <typename PtrOffset, class T, typename Config>
 		using ObservableList = SyncableListImpl<SyncableContainer<PtrOffset,
-			container_traits<std::list, typename UnitHelper<T>::Type>, Config>>;
+			container_traits<std::list<typename UnitHelper<T>::type>>, Config>>;
 	}
 }

@@ -13,7 +13,7 @@ namespace Engine
 		{
 		public:
 
-			typedef typename C::Type Type;
+			typedef typename C::type type;
 
 			typedef typename C::iterator iterator;
 			typedef typename C::const_iterator const_iterator;
@@ -27,7 +27,7 @@ namespace Engine
 				this->mData.resize(size);
 			}
 
-			void remove(const Type& item)
+			void remove(const type& item)
 			{
 				for (const_iterator it = this->begin(); it != this->end();)
 				{
@@ -42,7 +42,7 @@ namespace Engine
 				}
 			}
 
-			void push_back(const Type& item)
+			void push_back(const type& item)
 			{
 				emplace(this->end(), item);
 			}
@@ -62,22 +62,22 @@ namespace Engine
 					std::forward<std::tuple<_Ty...>>(tuple));
 			}
 
-			Type& at(size_t i)
+			type& at(size_t i)
 			{
 				return this->mData.at(i);
 			}
 
-			const Type& at(size_t i) const
+			const type& at(size_t i) const
 			{
 				return this->mData.at(i);
 			}
 
-			Type& operator[](size_t i)
+			type& operator[](size_t i)
 			{
 				return this->mData[i];
 			}
 
-			const Type& operator[](size_t i) const
+			const type& operator[](size_t i) const
 			{
 				return this->mData[i];
 			}
@@ -102,12 +102,12 @@ namespace Engine
 		};
 
 
-		template <class T, class Creator = DefaultCreator<>>
+		template <class T>
 		using SerializableVector = VectorImpl<SerializableContainer<
-			container_traits<std::vector, typename UnitHelper<T>::Type>, Creator>>;
+			container_traits<std::vector, typename UnitHelper<T>::type>>>;
 
-		template <typename PtrOffset, class T, const ContainerPolicy &Config, class Creator = DefaultCreator<>>
+		template <typename PtrOffset, class T, const ContainerPolicy &Config>
 		using ObservableVector = ObservableVectorImpl<ObservableContainer<PtrOffset
-			container_traits<std::vector, typename UnitHelper<T>::Type>, Creator, Config>>;
+			container_traits<std::vector, typename UnitHelper<T>::type>, Config>>;
 	}
 }

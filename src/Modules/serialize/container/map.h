@@ -54,16 +54,13 @@ namespace Engine
 			using MapImpl<Key, C>::MapImpl;
 		};
 
-		template <class Key, class T, class Creator = DefaultCreator<>, class KeyCreator = DefaultCreator<Key>>
+		template <class Key, class T>
 		using SerializableMap = MapImpl<Key, SerializableContainer<
-			                                container_traits<std::map, typename UnitHelper<std::pair<const Key, T>>::Type>,
-			                                PairCreator<KeyCreator, Creator>>>;
+			                                container_traits<std::map<typename UnitHelper<std::pair<const Key, T>>::type>>>>;
 
-		template <class Key, class T, typename PtrOffset, const ContainerPolicy &Config, class Creator = DefaultCreator<>, class KeyCreator =
-		          DefaultCreator<Key>>
+		template <class Key, class T, typename PtrOffset, const ContainerPolicy &Config>
 		using ObservableMap = ObservableMapImpl<Key, ObservableContainer<PtrOffset,
 			                                        container_traits<
-				                                        std::map, typename UnitHelper<std::pair<const Key, T>>::Type>, PairCreator<
-				                                        KeyCreator, Creator>, Config>>;
+				                                        std::map<typename UnitHelper<std::pair<const Key, T>>::type>>, Config>>;
 	}
 }

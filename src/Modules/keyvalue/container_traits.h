@@ -12,12 +12,12 @@ template <class T>
 struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {
 };
 
-template <template <class...> class C, class T>
-struct container_traits : C<T>::traits {
+template <typename C>
+struct container_traits : C::traits {
 };
 
-template <class T>
-struct container_traits<std::list, T> {
+template <typename T>
+struct container_traits<std::list<T>> {
     static constexpr const bool sorted = false;
 
     typedef std::list<T> container;
@@ -30,7 +30,7 @@ struct container_traits<std::list, T> {
     template <typename C>
     using api = C;
 
-    template <class... _Ty>
+    template <typename... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
@@ -52,8 +52,8 @@ struct container_traits<std::list, T> {
     }
 };
 
-template <class T>
-struct container_traits<std::vector, T> {
+template <typename T>
+struct container_traits<std::vector<T>> {
     static constexpr const bool sorted = false;
 
     typedef std::vector<T> container;
@@ -231,8 +231,8 @@ private:
     It mIterator;
 };
 
-template <class T>
-struct container_traits<std::set, T> {
+template <typename T>
+struct container_traits<std::set<T>> {
     static constexpr const bool sorted = true;
 
     typedef std::set<T, KeyCompare<T>> container;
@@ -267,8 +267,8 @@ struct container_traits<std::set, T> {
     }
 };
 
-template <class K, class T>
-struct container_traits<std::map, std::pair<const K, T>> {
+template <typename K, typename T>
+struct container_traits<std::map<K, T>> {
     static constexpr const bool sorted = true;
 
     typedef std::map<K, T> container;
@@ -303,14 +303,4 @@ struct container_traits<std::map, std::pair<const K, T>> {
     }
 };
 
-template <typename>
-struct container_traits_helper2;
-
-template <template <typename...> typename C, typename T>
-struct container_traits_helper2<C<T>> {
-    typedef container_traits<C, T> type;
-};
-
-template <typename T>
-using container_traits_helper = typename container_traits_helper2<T>::type;
 }
