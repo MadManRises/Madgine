@@ -4,7 +4,7 @@
 
 #include "scenecomponentcollector.h"
 
-#include "Modules/serialize/container/list.h"
+#include "Modules/serialize/container/syncablecontainer.h"
 
 #include "entity/entity.h"
 
@@ -99,7 +99,7 @@ namespace Scene {
 					
         SceneComponentContainer<PartialObservableContainer<Serialize::PartialSerializableContainer<SceneComponentSet, Engine::Serialize::SerializableOffsetPtr<Self, 100>>::type, Core::MadgineObjectObserver>::type> mSceneComponents;        DEFINE_SERIALIZABLE_OFFSET(mSceneComponents);
 
-        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> mEntities;        DEFINE_COMBINED_OFFSET(mEntities);              
+        Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> mEntities;        DEFINE_COMBINED_OFFSET(mEntities);              
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -111,9 +111,9 @@ namespace Scene {
         Threading::DataMutex mMutex;
 
     public:
-        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> &entities();
+        Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> &entities();
 
-        SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
+        //SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };
 
 }

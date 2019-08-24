@@ -58,7 +58,7 @@ namespace Scene {
         }
     }
 
-    Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, Entity::Entity, Serialize::ContainerPolicies::masterOnly> &SceneManager::entities()
+    Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> &SceneManager::entities()
     {
         /*std::list<Entity::Entity *> result;
         for (Entity::Entity &e : mEntities) {
@@ -239,10 +239,10 @@ namespace Scene {
         return make_tuple(std::ref(*this), local, actualName);
     }
 
-    SignalSlot::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
+    /*SignalSlot::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
     {
         return mEntities.observer().signal();
-    }
+    }*/
 
     Entity::Entity *SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)

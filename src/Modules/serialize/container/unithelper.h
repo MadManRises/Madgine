@@ -386,5 +386,9 @@ namespace Serialize {
     struct UnitHelper<std::tuple<Ty...>, false> : public decltype(tupleUnitHelperDeducer<Ty...>(
                                                       std::make_index_sequence<sizeof...(Ty)>())) {
     };
+
+	template <typename T>
+		using UnitHelper_t = typename UnitHelper<T>::type;
+
 }
 }

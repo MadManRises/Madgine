@@ -1,29 +1,13 @@
 #pragma once
 
 #include "../../keyvalue/observerevent.h"
-#include "../../signalslot/connection.h"
-#include "../../signalslot/signal.h"
-#include "../syncable.h"
 #include "../streams/bufferedstream.h"
+#include "../syncable.h"
 #include "serializablecontainer.h"
+#include "../../generic/noopfunctor.h"
 
 namespace Engine {
 namespace Serialize {
-
-	template <typename... Args>
-	struct SignalObserver {
-		void operator()(Args... args) {
-                    mSignal.emit(args...);
-		}
-
-		SignalSlot::SignalStub<Args...>& signal() {
-                    return mSignal;
-		}
-
-	private:
-        SignalSlot::Signal<Args...> mSignal;
-	};
-
 
     namespace __syncablecontainer__impl__ {
         enum RequestMode {
@@ -42,12 +26,14 @@ namespace Serialize {
         using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
     };
 
-    template <typename PtrOffset, class _traits, typename Config, typename Observer = SignalObserver<const typename _traits::iterator&, int>>
-	struct SyncableContainer : SerializableContainer<PtrOffset, _traits>, Syncable<PtrOffset>, private Observer {
+    template <typename PtrOffset, typename C, typename Config, typename Observer = NoOpFunctor>
+    struct SyncableContainerImpl : SerializableContainerImpl<PtrOffset, C>, Syncable<PtrOffset>, private Observer {
+
+        using _traits = container_traits<C>;
 
         struct traits : _traits {
 
-            typedef SyncableContainer<PtrOffset, _traits, Config, Observer> container;
+            typedef SyncableContainerImpl<PtrOffset, C, Config, Observer> container;
 
             template <class... _Ty>
             static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
@@ -58,7 +44,7 @@ namespace Serialize {
 
         typedef size_t TransactionId;
 
-        typedef SerializableContainer<PtrOffset, _traits> Base;
+        typedef SerializableContainerImpl<PtrOffset, C> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
@@ -77,23 +63,23 @@ namespace Serialize {
             std::function<void(const iterator &, bool)> mCallback;
         };
 
-        SyncableContainer() = default;
+        SyncableContainerImpl() = default;
 
-        SyncableContainer(const SyncableContainer &other)
+        SyncableContainerImpl(const SyncableContainerImpl &other)
             : Base(other)
             , mTransactionCounter(0)
         {
         }
 
-        SyncableContainer(SyncableContainer &&other) = default;
-		
+        SyncableContainerImpl(SyncableContainerImpl &&other) = default;
+
         Observer &observer()
         {
             return *this;
         }
 
         template <class T>
-        SyncableContainer<PtrOffset, _traits, Config, Observer> &operator=(T &&arg)
+        SyncableContainerImpl<PtrOffset, C, Config, Observer> &operator=(T &&arg)
         {
             if (this->isMaster()) {
                 bool wasActive = beforeReset();
@@ -118,8 +104,8 @@ namespace Serialize {
         void clear()
         {
             bool wasActive = beforeReset();
-            this->mData.clear();
-            this->mActiveIterator = this->mData.begin();
+            Base::Base::clear();
+            this->mActiveIterator = this->begin();
             afterReset(wasActive, this->end());
         }
 
@@ -158,7 +144,7 @@ namespace Serialize {
                 if (it.second) {
                     init(*it.first);
                 }
-                onInsert(it.second, it.first);                
+                onInsert(it.second, it.first);
             } else {
                 if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
                     type temp(std::forward<_Ty>(args)...);
@@ -223,7 +209,7 @@ namespace Serialize {
             return it;
         }
 
-		std::pair<iterator, bool> read_item_where(BufferedInStream &in, const const_iterator &where)
+        std::pair<iterator, bool> read_item_where(BufferedInStream &in, const const_iterator &where)
         {
             std::pair<iterator, bool> it = std::make_pair(this->end(), false);
             if (this->isMaster()) {
@@ -240,8 +226,8 @@ namespace Serialize {
         void readState(SerializeInStream &in, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             bool wasActive = beforeReset();
-            this->mData.clear();
-            this->mActiveIterator = this->mData.begin();
+            Base::Base::clear();
+            this->mActiveIterator = Base::Base::begin();
             while (in.loopRead()) {
                 this->read_item_where_intern(in, this->end(), std::forward<Creator>(creator));
             }
@@ -288,7 +274,7 @@ namespace Serialize {
             }
         }
 
-		template <typename Creator = DefaultCreator<>>
+        template <typename Creator = DefaultCreator<>>
         void readAction(SerializeInStream &inout, Creator &&creator = {})
         {
             TransactionId id;
@@ -322,8 +308,6 @@ namespace Serialize {
             }
         }
 
-		
-
         template <typename Creator>
         std::pair<iterator, bool> performOperation(ObserverEvent op, SerializeInStream &in, Creator &&creator, ParticipantId partId,
             TransactionId id)
@@ -336,7 +320,7 @@ namespace Serialize {
                     it.first = read_iterator(in);
                 }
                 beforeInsert(it.first);
-                it = this->read_item_where_intern(in, it.first, std::forward<Creator>(creator));                
+                it = this->read_item_where_intern(in, it.first, std::forward<Creator>(creator));
                 afterInsert(it.second, it.first, partId, id);
                 break;
             case REMOVE_ITEM:
@@ -387,9 +371,10 @@ namespace Serialize {
         }
 
     private:
-		void beforeInsert(const iterator& it) {
+        void beforeInsert(const iterator &it)
+        {
             Observer::operator()(it, BEFORE | INSERT_ITEM);
-		}
+        }
 
         void afterInsert(bool inserted, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
@@ -412,7 +397,7 @@ namespace Serialize {
                 }
             }
             if (this->isItemActive(it)) {
-				Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
+                Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
             }
         }
 
@@ -509,20 +494,20 @@ namespace Serialize {
             }
         }
 
-		iterator read_iterator(SerializeInStream &in)
+        iterator read_iterator(SerializeInStream &in)
         {
-                    if constexpr (_traits::sorted) {
-                        typename _traits::key_type key;
-                        in >> key;
-                        return kvFind(this->mData, key);
-                    } else {
-                        int i;
-                        in >> i;
-                        return std::next(this->begin(), i);
-					}
+            if constexpr (_traits::sorted) {
+                typename _traits::key_type key;
+                in >> key;
+                return kvFind(*this, key);
+            } else {
+                int i;
+                in >> i;
+                return std::next(this->begin(), i);
+            }
         }
 
-		void write_iterator(SerializeOutStream &out, const const_iterator &it) const
+        void write_iterator(SerializeOutStream &out, const const_iterator &it) const
         {
             if constexpr (_traits::sorted) {
                 out << kvKey(*it);
@@ -531,37 +516,40 @@ namespace Serialize {
             }
         }
 
-		template <typename Creator>
+        template <typename Creator>
         std::pair<iterator, bool> read_item(SerializeInStream &in, Creator &&creator)
         {
             iterator it = this->end();
             if constexpr (!_traits::sorted) {
-                        it = read_iterator(in);
+                it = read_iterator(in);
             }
-			return this->read_item_where_intern(in, it, std::forward<Creator>(creator));
+            return this->read_item_where_intern(in, it, std::forward<Creator>(creator));
         }
 
-		void write_item(SerializeOutStream &out, const const_iterator &it) const
+        void write_item(SerializeOutStream &out, const const_iterator &it) const
         {
             this->write_item(out, it, *it);
         }
 
-		void write_item(SerializeOutStream &out, const const_iterator &it, const type &t) const
+        void write_item(SerializeOutStream &out, const const_iterator &it, const type &t) const
         {
-                    if constexpr (!_traits::sorted) {
-                        write_iterator(out, it);
-                    }
+            if constexpr (!_traits::sorted) {
+                write_iterator(out, it);
+            }
             this->write_item(out, t);
         }
 
-		using Base::write_item;
+        using Base::write_item;
 
     private:
-
         std::list<Transaction> mTransactions;
         std::list<std::pair<TransactionId, std::pair<ParticipantId, TransactionId>>> mPassTransactions;
 
         TransactionId mTransactionCounter = 0;
     };
+
+	template <typename OffsetPtr, typename C, typename Config, typename Observer = NoOpFunctor>
+    using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<OffsetPtr, C, Config, Observer>>;
+
 }
 }

@@ -2,6 +2,8 @@
 
 #include "../keyvalue/keyvalue.h"
 
+#include "sortedcontainerapi.h"
+
 namespace Engine {
 
 template <class T, typename = void>
@@ -26,9 +28,47 @@ struct container_traits<std::list<T>> {
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
+		
+	template <template <typename> typename M>
+	using rebind = container_traits<std::list<M<T>>>;
 
     template <typename C>
-    using api = C;
+    struct api : C {
+
+			using C::C;
+
+            void remove(const type &item)
+            {
+                for (iterator it = this->begin(); it != this->end();) {
+                    if (*it == item) {
+                        it = this->erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+            }
+
+            void push_back(const type &item)
+            {
+                this->emplace(this->end(), item);
+            }
+
+            template <class... _Ty>
+            std::pair<iterator, bool> emplace_back(_Ty &&... args)
+            {
+                return this->emplace(this->end(), std::forward<_Ty>(args)...);
+            }
+
+            const type &back() const
+            {
+                return C::back();
+            }
+
+            type &back()
+            {
+                return C::back();
+            }
+    };
 
     template <typename... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -62,9 +102,64 @@ struct container_traits<std::vector<T>> {
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
+	
+	template <template <typename> typename M>
+	using rebind = container_traits<std::vector<M<T>>>;
 
     template <typename C>
-    using api = C;
+        struct api : C {
+            
+            using C::C;
+
+            using C::operator=;
+
+            /*void resize(size_t size)
+            {
+                C::resize(size);
+            }*/
+
+            void remove(const type &item)
+            {
+                for (const_iterator it = this->begin(); it != this->end();) {
+                    if (*it == item) {
+                        it = erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+            }
+
+            void push_back(const type &item)
+            {
+                emplace(this->end(), item);
+            }
+
+            template <typename... _Ty>
+            iterator emplace_back(_Ty &&... args)
+            {
+                return emplace(this->end(), std::forward<_Ty>(args)...);
+            }
+
+            type &at(size_t i)
+            {
+                return Base::at(i);
+            }
+
+            const type &at(size_t i) const
+            {
+                return Base::at(i);
+            }
+
+            type &operator[](size_t i)
+            {
+                return Base::operator[](i);
+            }
+
+            const type &operator[](size_t i) const
+            {
+                return Base::operator[](i);
+            }
+        };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -242,8 +337,22 @@ struct container_traits<std::set<T>> {
     typedef typename container::value_type value_type;
     typedef T type;
 
-    template <typename C>
-    using api = C;
+	template <template <typename> typename M>
+	using rebind = container_traits<std::set<M<T>>>;
+
+   template <typename C>
+        struct api : SortedContainerApi<C> {
+            using Base = SortedContainerApi<C>;
+
+            using Base::Base;
+
+            template <class... _Ty>
+            std::pair<iterator, bool> emplace(_Ty &&... args)
+            {
+                return this->Base::emplace(this->end(), std::forward<_Ty>(args)...);
+            }
+
+        };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -278,8 +387,37 @@ struct container_traits<std::map<K, T>> {
     typedef T value_type;
     typedef std::pair<const K, T> type;
 
+	template <template <typename> typename M>
+	using rebind = container_traits<std::map<M<K>, M<T>>>;
+
     template <typename C>
-    using api = C;
+        struct api : C {
+            using C::C;
+
+            T &operator[](const K &key) {
+				iterator it = this->mData.lower_bound(key);
+				if (it == this->end() || it->first != key) {
+                    auto pib = try_emplace(key);
+                                    assert(pib.second);
+                    it = pib.first;
+				}
+				return it->second;
+			}
+
+            const T &at(const std::string &key) const {
+				return mData.at(key);
+			}
+
+            template <class... _Ty>
+            std::pair<iterator, bool> try_emplace(const K &key, _Ty &&... args)
+            {
+                auto it = this->mData.lower_bound(key);
+                if (it != this->end() && it->first == key) {
+                    return { it, false };
+                }
+                return this->emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
+            }
+        };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)

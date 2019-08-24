@@ -28,7 +28,7 @@ namespace Engine
 
 		const std::list<std::unique_ptr<Light>> &LightManager::lights() const
 		{
-			return mLights.data();
+			return mLights;
 		}
 
 		void LightManager::finalize()

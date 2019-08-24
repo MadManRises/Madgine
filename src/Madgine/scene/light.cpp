@@ -9,12 +9,12 @@ namespace Engine
 {
 	namespace Scene
 	{
-		Light::Light() :
+		Light::Light()/* :
 			mPowerChangedSlot(this),
-			mPositionChangedSlot(this)
+			mPositionChangedSlot(this)*/
 		{
-			mPower.setCallback(mPowerChangedSlot);
-			mPosition.setCallback(mPositionChangedSlot);
+			/*mPower.observer().signal().connect(mPowerChangedSlot);
+			mPosition.observer().signal().connect(mPositionChangedSlot);*/
 		}
 
 		void Light::setPower(float power)
@@ -37,13 +37,13 @@ namespace Engine
 			return mPosition;
 		}
 
-		void Light::onPowerChanged(float power)
+		/*void Light::onPowerChanged(float power)
 		{
 		}
 
 		void Light::onPositionChanged(const Vector3& position)
 		{
-		}
+		}*/
 	}
 }
 

@@ -2,7 +2,7 @@
 
 #include "scenecomponentcollector.h"
 
-#include "Modules/serialize/container/list.h"
+#include "Modules/serialize/container/syncablecontainer.h"
 
 #include "light.h"
 
@@ -27,7 +27,7 @@ namespace Scene {
         std::tuple<std::unique_ptr<Light>> createLightTuple();
 
     private:
-        Serialize::ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::unique_ptr<Light>, Serialize::ContainerPolicies::masterOnly> mLights;        DEFINE_COMBINED_OFFSET(mLights);
+        Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::list<std::unique_ptr<Light>>, Serialize::ContainerPolicies::masterOnly> mLights;        DEFINE_COMBINED_OFFSET(mLights);
     };
 
 }

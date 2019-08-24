@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-	namespace Serialize
-	{
     template <typename C>
             struct SortedContainerApi : C
 		{
@@ -26,14 +24,13 @@ namespace Engine
 
 			bool contains(const key_type& key)
 			{
-				return find(key) != this->end();
+				return this->find(key) != this->end();
 			}
 
-			template <class Ty, class _ = decltype(std::declval<typename C::NativeContainerType>().find(std::declval<Ty>()))>
+			/*template <class Ty, class _ = decltype(std::declval<typename C::NativeContainerType>().find(std::declval<Ty>()))>
 			iterator find(const Ty& v)
 			{
 				return this->mData.find(v);
-			}
+			}*/
 		};
-	}
 }

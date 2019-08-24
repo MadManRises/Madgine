@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/serialize/container/set.h"
+#include "Modules/serialize/container/syncablecontainer.h"
 #include "scenecomponentbase.h"
 
 namespace Engine
@@ -9,10 +9,10 @@ namespace Engine
 	{
 
 		template <typename OffsetPtr, class T>
-            class SceneComponentSet : public Serialize::SerializableSet<OffsetPtr, T>
+            class SceneComponentSet : public Serialize::SerializableContainerImpl<OffsetPtr, std::set<T>>
 		{
 		public:
-                    struct traits : Serialize::SerializableSet<OffsetPtr, T>::traits
+                    struct traits : Serialize::SerializableContainerImpl<OffsetPtr, std::set<T>>::traits
 			{
                         typedef SceneComponentSet<OffsetPtr, T> container;
 			};

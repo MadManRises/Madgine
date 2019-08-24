@@ -3,9 +3,9 @@
 #include "../syncable.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
-#include "../../signalslot/signal.h"
 #include "unithelper.h"
 #include "offset.h"
+#include "../../generic/noopfunctor.h"
 
 namespace Engine
 {
@@ -16,8 +16,8 @@ namespace Engine
     ::Engine::Serialize::Synced<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Type> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 
-		template <typename PtrOffset, class T>
-		class Synced : public Syncable<PtrOffset>, public Serializable<PtrOffset>, public UnitHelper<T>
+		template <typename PtrOffset, class T, typename Observer = NoOpFunctor>
+		class Synced : public Syncable<PtrOffset>, public Serializable<PtrOffset>, public UnitHelper<T>, private Observer
 		{
 		public:
 			template <class... _Ty>
@@ -26,6 +26,10 @@ namespace Engine
 				mData(std::forward<_Ty>(args)...)
 			{
 			}
+
+					Observer& observer() {
+                                            return *this;
+					}
 
 			template <class Ty>
 			void operator =(Ty&& v)
@@ -98,12 +102,6 @@ namespace Engine
 				this->write_state(out, mData);
 			}
 
-			template <class Ty>
-			void setCallback(Ty&& slot)
-			{
-				mNotifySignal.connect(std::forward<Ty>(slot));
-			}
-
 			void setDataSynced(bool b) 
 			{
 				this->setItemDataSynced(mData, b);
@@ -139,13 +137,12 @@ namespace Engine
 				}
 				if (this->isActive())
 				{
-					mNotifySignal.emit(mData, old);
+                                    Observer::operator()(mData, old);					
 				}
 			}
 
 		private:
 			T mData;
-			SignalSlot::Signal<const T &, const T &> mNotifySignal;
 		};
 	}
 }

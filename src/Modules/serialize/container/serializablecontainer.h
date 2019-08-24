@@ -1,19 +1,24 @@
 #pragma once
 
 #include "../../generic/tupleunpacker.h"
+#include "../../keyvalue/container_traits.h"
 #include "../serializable.h"
 #include "../streams/serializestream.h"
-#include "unithelper.h"
 #include "creationhelper.h"
+#include "unithelper.h"
 
 namespace Engine {
 namespace Serialize {
-    template <typename OffsetPtr, class _traits>
-    class SerializableContainer : public Serializable<OffsetPtr>, protected UnitHelper<typename _traits::type> {
-    public:
-        struct traits : _traits{
+    template <typename OffsetPtr, typename C>
+    struct SerializableContainerImpl : Serializable<OffsetPtr>,
+                                   protected UnitHelper<typename container_traits<C>::type>,
+                                   container_traits<C>::template rebind<UnitHelper_t>::container {
 
-            typedef SerializableContainer<OffsetPtr, _traits> container;
+        using _traits = typename container_traits<C>::template rebind<UnitHelper_t>;
+
+        struct traits : _traits {
+
+            typedef SerializableContainerImpl<OffsetPtr, C> container;
 
             template <class... _Ty>
             static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
@@ -22,87 +27,77 @@ namespace Serialize {
             }
         };
 
-        typedef typename _traits::container NativeContainerType;
+        typedef typename _traits::container Base;
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
 
         typedef typename _traits::type type;
 
-        SerializableContainer()
-            : mActiveIterator(mData.begin())
+        SerializableContainerImpl()
+            : mActiveIterator(Base::begin())
         {
         }
 
-        SerializableContainer(const NativeContainerType &c)
-            : mData(c)
-            , mActiveIterator(mData.begin())
+        SerializableContainerImpl(const Base &c)
+            : Base(c)
+            , mActiveIterator(Base::begin())
         {
         }
 
-        SerializableContainer(const SerializableContainer &other)
-            : mData(other.mData)
-            , mActiveIterator(mData.begin())
+        SerializableContainerImpl(const SerializableContainerImpl &other)
+            : Base(other)
+            , mActiveIterator(Base::begin())
         {
         }
 
-        SerializableContainer(SerializableContainer &&other)
+        SerializableContainerImpl(SerializableContainerImpl &&other)
         {
             if (other.isSynced()) {
                 other.setDataSynced(false);
             }
-            mData = std::forward<NativeContainerType>(other.mData);
+            Base::operator=(std::forward<Base>(other));
             for (auto &t : *this)
                 this->setParent(t, OffsetPtr::parent(this));
             mActiveIterator = other.mActiveIterator;
-            other.mData.clear();
-            other.mActiveIterator = other.mData.begin();
-        }
-
-        const_iterator begin() const
-        {
-            return mData.begin();
-        }
-
-        const_iterator end() const
-        {
-            return mData.end();
+            Base::clear();
+            other.mActiveIterator = other.Base::begin();
         }
 
         iterator begin()
         {
-            return mData.begin();
+            return Base::begin();
         }
 
+        const_iterator begin() const
+        {
+            return Base::begin();
+		}
+
+		
         iterator end()
+                {
+                    return Base::end();
+                }
+
+                const_iterator end() const
+                {
+                    return Base::end();
+                }
+
+
+        using Base::empty;
+        using Base::size;
+
+        bool operator==(const SerializableContainerImpl<OffsetPtr, C> &other) const
         {
-            return mData.end();
+            return static_cast<const Base&>(*this) == other;
         }
 
-        const NativeContainerType &data() const
-        {
-            return mData;
-        }
-
-		size_t size() const
-        {
-            return this->mData.size();
-        }
-
-        bool empty() const
-        {
-            return this->mData.empty();
-        }
-
-		bool operator==(const SerializableContainer<OffsetPtr, _traits> &other) const
-        {
-            return mData == other.mData;
-        }
-
-        SerializableContainer<OffsetPtr, _traits> &operator=(const NativeContainerType &other)
+        SerializableContainerImpl<OffsetPtr, C> &operator=(const Base &other)
         {
             bool wasActive = beforeReset();
-            mData = other;
-            mActiveIterator = mData.begin();
+            Base::operator=(other);
+            mActiveIterator = Base::begin();
             afterReset(wasActive);
             return *this;
         }
@@ -110,12 +105,11 @@ namespace Serialize {
         void clear()
         {
             bool wasActive = beforeReset();
-            mData.clear();
-            mActiveIterator = mData.begin();
+            Base::clear();
+            mActiveIterator = Base::begin();
             afterReset(wasActive);
         }
 
-		
         template <class... _Ty>
         std::pair<iterator, bool> emplace(const const_iterator &where, _Ty &&... args)
         {
@@ -148,14 +142,13 @@ namespace Serialize {
             return erase_intern(from, to);
         }
 
-		std::pair<iterator, bool> read_item_where(SerializeInStream &in, const const_iterator &where)
+        std::pair<iterator, bool> read_item_where(SerializeInStream &in, const const_iterator &where)
         {
             std::pair<iterator, bool> it = read_item_where_intern(in, where);
             if (it.second)
                 onInsert(it.first);
             return it;
         }
-
 
         void writeState(SerializeOutStream &out) const
         {
@@ -167,33 +160,33 @@ namespace Serialize {
             out << EOLType();
         }
 
-		template <typename Creator = DefaultCreator<>>
+        template <typename Creator = DefaultCreator<>>
         void readState(SerializeInStream &in, Creator &&creator = {})
         {
             bool wasActive = beforeReset();
-            mData.clear();
-            mActiveIterator = mData.begin();
+            Base::clear();
+            mActiveIterator = Base::begin();
             while (in.loopRead()) {
                 this->read_item_where_intern(in, end(), std::forward<Creator>(creator));
             }
             afterReset(wasActive);
         }
 
-        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map) 
+        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
         {
             for (auto &t : *this) {
                 this->applyMap(map, t);
             }
         }
 
-        void setDataSynced(bool b) 
+        void setDataSynced(bool b)
         {
             for (auto &t : *this) {
                 this->setItemDataSynced(t, b);
             }
         }
 
-        void setActive(bool active) 
+        void setActive(bool active)
         {
             if (!active) {
                 while (mActiveIterator != begin()) {
@@ -212,8 +205,7 @@ namespace Serialize {
         }
 
     protected:
-
-		void afterInsert(const iterator &it)
+        void afterInsert(const iterator &it)
         {
             if (this->isSynced()) {
                 this->setItemDataSynced(*it, true);
@@ -222,8 +214,7 @@ namespace Serialize {
                 this->setItemActive(*it, true);
         }
 
-		
-		void beforeRemove(const iterator &it)
+        void beforeRemove(const iterator &it)
         {
             if (this->isSynced()) {
                 this->setItemDataSynced(*it, false);
@@ -233,7 +224,7 @@ namespace Serialize {
             }
         }
 
-		void beforeRemoveRange(const iterator &from, const iterator &to)
+        void beforeRemoveRange(const iterator &from, const iterator &to)
         {
             if (isSynced()) {
                 for (iterator it = from; it != to; ++it) {
@@ -245,7 +236,7 @@ namespace Serialize {
             }
         }
 
-		bool beforeReset()
+        bool beforeReset()
         {
             if (this->isSynced()) {
                 setDataSynced(false);
@@ -257,17 +248,17 @@ namespace Serialize {
             return false;
         }
 
+        void afterReset(bool wasActive)
+        {
+            if (this->isSynced()) {
+                setDataSynced(true);
+            }
+            if (wasActive)
+                setActive(true);
+        }
 
-		void afterReset(bool wasActive) {
-                    if (this->isSynced()) {
-                        setDataSynced(true);
-                    }
-                    if (wasActive)
-                        setActive(true);
-		}
-
-		template <typename Creator>
-                std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
+        template <typename Creator>
+        std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
@@ -300,7 +291,7 @@ namespace Serialize {
         std::pair<iterator, bool> emplace_intern(const const_iterator &where, _Ty &&... args)
         {
             auto keep = _traits::keepIterator(begin(), mActiveIterator);
-            std::pair<iterator, bool> it = _traits::emplace(mData, where, std::forward<_Ty>(args)...);
+            std::pair<iterator, bool> it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
             if (it.second) {
                 iterator oldActiveIt = _traits::revalidateIteratorInsert(begin(), keep, it.first);
                 if (std::next(it.first) == oldActiveIt && !this->isActive())
@@ -315,7 +306,7 @@ namespace Serialize {
         template <class... _Ty>
         std::pair<iterator, bool> emplace_tuple_intern(const const_iterator &where, std::tuple<_Ty...> &&tuple)
         {
-            return TupleUnpacker::invokeExpand(&SerializableContainer<OffsetPtr, _traits>::emplace_intern<_Ty...>,
+            return TupleUnpacker::invokeExpand(&SerializableContainerImpl<OffsetPtr, C>::emplace_intern<_Ty...>,
                 this,
                 where,
                 std::forward<std::tuple<_Ty...>>(tuple));
@@ -325,7 +316,7 @@ namespace Serialize {
         {
             bool test = mActiveIterator == it;
             auto keep = _traits::keepIterator(begin(), mActiveIterator);
-            iterator newIt = mData.erase(it);
+            iterator newIt = Base::erase(it);
             if (test)
                 mActiveIterator = newIt;
             else
@@ -344,7 +335,7 @@ namespace Serialize {
                     ++count;
             }
             auto keep = _traits::keepIterator(begin(), mActiveIterator);
-            iterator newIt = mData.erase(from, to);
+            iterator newIt = Base::erase(from, to);
             if (test)
                 mActiveIterator = newIt;
             else
@@ -353,16 +344,19 @@ namespace Serialize {
         }
 
     protected:
-        NativeContainerType mData;
         iterator mActiveIterator;
     };
 
-	
-	template <template <typename...> typename C, typename OffsetPtr>
+    template <template <typename...> typename C, typename OffsetPtr>
     struct PartialSerializableContainer {
         template <typename... Args>
         using type = C<OffsetPtr, Args...>;
     };
+
+
+	template <typename OffsetPtr, typename C>
+	using SerializableContainer = typename container_traits<C>::template api<SerializableContainerImpl<OffsetPtr, C>>;
+
 
 }
 }

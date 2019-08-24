@@ -4,7 +4,7 @@
 
 #include "entitycomponentbase.h"
 
-#include "Modules/serialize/container/set.h"
+#include "Modules/serialize/container/syncablecontainer.h"
 
 #include "Modules/serialize/container/offset.h"
 
@@ -95,7 +95,7 @@ namespace Scene {
             std::string mName;
             bool mLocal;
 
-            Serialize::SyncableSet<::Engine::Serialize::CombinedOffsetPtr<Entity, __LINE__>, std::unique_ptr<EntityComponentBase>, Serialize::ContainerPolicies::masterOnly> mComponents;            DEFINE_COMBINED_OFFSET(mComponents);
+            Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Entity, __LINE__>, std::set<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly> mComponents;            DEFINE_COMBINED_OFFSET(mComponents);
 
 
             SceneManager &mSceneManager;

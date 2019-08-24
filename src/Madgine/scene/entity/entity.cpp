@@ -66,7 +66,8 @@ namespace Scene {
 
         void Entity::setup()
         {
-            mComponents.observer().signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
+            throw "Todo";
+            /*mComponents.observer().signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
                 using namespace Serialize;
                 switch (op) {
                 case BEFORE | RESET:
@@ -80,7 +81,7 @@ namespace Scene {
                     (*it)->finalize();
                     break;
                 }
-            });
+            });*/
         }
 
         const char *Entity::key() const

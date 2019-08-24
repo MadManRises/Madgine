@@ -4,6 +4,7 @@
 #include "Modules/serialize/container/synced.h"
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/threading/slot.h"
+#include "Modules/signalslot/signalfunctor.h"
 
 namespace Engine {
 namespace Scene {
@@ -19,7 +20,7 @@ namespace Scene {
         const Vector3 &position() const;
 
     protected:
-        virtual void onPowerChanged(float power);
+        /*virtual void onPowerChanged(float power);
         virtual void onPositionChanged(const Vector3 &position);
 
         void onPowerChangedImpl(float power)
@@ -30,15 +31,15 @@ namespace Scene {
         void onPositionChangedImpl(const Vector3 &position)
         {
             onPositionChanged(position);
-        }
+        }*/
 
     private:
         SYNCED(Vector3, mPosition);
         SYNCED(float, mPower);
         //Serialize::Observed<int, Vector3> mPosition;
         //Serialize::Observed<int, float> mPower;
-        Threading::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;
-        Threading::Slot<&Light::onPositionChangedImpl> mPositionChangedSlot;
+        /*Threading::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;
+        Threading::Slot<&Light::onPositionChangedImpl> mPositionChangedSlot;*/
     };
 }
 }

@@ -4,12 +4,12 @@
 #include "observerevent.h"
 
 namespace Engine {
-namespace {
 
-    template <typename _traits, typename Observer>
-    struct ObservableContainerImpl : _traits::container, private Observer {
+    template <typename C, typename Observer>
+    struct ObservableContainer : C, private Observer {
+		using _traits = container_traits<C>;
         struct traits : _traits {
-            typedef ObservableContainerImpl<_traits, Observer> container;
+            typedef ObservableContainer<C, Observer> container;
 
             typedef typename _traits::iterator iterator;
             typedef typename _traits::const_iterator const_iterator;
@@ -65,7 +65,7 @@ namespace {
         }
 
         template <typename T>
-        ObservableContainerImpl<_traits, Observer> &operator=(T &&t)
+        ObservableContainer<C, Observer> &operator=(T &&t)
         {
             Observer::operator()(this->begin(), BEFORE | RESET);
             _traits::container::operator=(std::forward<T>(t));
@@ -77,15 +77,8 @@ namespace {
     template <template <typename...> typename C, typename Observer>
     struct PartialObservableContainer {
         template <typename T>
-        using type = ObservableContainerImpl<container_traits<C<T>>, Observer>;
+        using type = ObservableContainer<C<T>, Observer>;
     };
 
-}
-
-/*template <template <typename...> typename C, typename Observer>
-	using PartialObservableContainer = PartialObservableContainerHelper<C, Observer>::type;*/
-
-template <typename C, typename Observer>
-using ObservableContainer = ObservableContainerImpl<container_traits<C>, Observer>;
 
 }

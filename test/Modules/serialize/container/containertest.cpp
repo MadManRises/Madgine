@@ -2,7 +2,7 @@
 
 #include "Modules/moduleslib.h"
 
-#include "Modules/serialize/container/list.h"
+#include "Modules/serialize/container/syncablecontainer.h"
 #include "Modules/serialize/serializableunit.h"
 
 #include "Modules/threading/workgroup.h"
@@ -32,8 +32,8 @@ struct TestUnit : TopLevelSerializableUnit<TestUnit> {
     {
     }
 
-    SerializableList<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, int> list1;  DEFINE_SERIALIZABLE_OFFSET(list1);
-    ObservableList<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, int, ContainerPolicies::allowAll> list2;   DEFINE_COMBINED_OFFSET(list2);
+    SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, std::list<int>> list1;  DEFINE_SERIALIZABLE_OFFSET(list1);
+    SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::list<int>, ContainerPolicies::allowAll> list2;   DEFINE_COMBINED_OFFSET(list2);
 };
 
 SERIALIZETABLE_BEGIN(TestUnit)
