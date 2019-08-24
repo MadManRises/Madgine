@@ -32,8 +32,8 @@ struct TestUnit : TopLevelSerializableUnit<TestUnit> {
     {
     }
 
-    SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, std::list<int>> list1;  DEFINE_SERIALIZABLE_OFFSET(list1);
-    SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::list<int>, ContainerPolicies::allowAll> list2;   DEFINE_COMBINED_OFFSET(list2);
+	SERIALIZABLE_CONTAINER(list1, std::list<int>);
+    SYNCABLE_CONTAINER(list2, std::list<int>, ContainerPolicies::allowAll);
 };
 
 SERIALIZETABLE_BEGIN(TestUnit)

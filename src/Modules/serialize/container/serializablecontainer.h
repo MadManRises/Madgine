@@ -6,13 +6,14 @@
 #include "../streams/serializestream.h"
 #include "creationhelper.h"
 #include "unithelper.h"
+#include "offset.h"
 
 namespace Engine {
 namespace Serialize {
     template <typename OffsetPtr, typename C>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
-                                   protected UnitHelper<typename container_traits<C>::type>,
-                                   container_traits<C>::template rebind<UnitHelper_t>::container {
+                                       protected UnitHelper<typename container_traits<C>::type>,
+                                       container_traits<C>::template rebind<UnitHelper_t>::container {
 
         using _traits = typename container_traits<C>::template rebind<UnitHelper_t>;
 
@@ -71,26 +72,24 @@ namespace Serialize {
         const_iterator begin() const
         {
             return Base::begin();
-		}
+        }
 
-		
         iterator end()
-                {
-                    return Base::end();
-                }
+        {
+            return Base::end();
+        }
 
-                const_iterator end() const
-                {
-                    return Base::end();
-                }
-
+        const_iterator end() const
+        {
+            return Base::end();
+        }
 
         using Base::empty;
         using Base::size;
 
         bool operator==(const SerializableContainerImpl<OffsetPtr, C> &other) const
         {
-            return static_cast<const Base&>(*this) == other;
+            return static_cast<const Base &>(*this) == other;
         }
 
         SerializableContainerImpl<OffsetPtr, C> &operator=(const Base &other)
@@ -353,10 +352,16 @@ namespace Serialize {
         using type = C<OffsetPtr, Args...>;
     };
 
+    template <typename OffsetPtr, typename C>
+    using SerializableContainer = typename container_traits<C>::template api<SerializableContainerImpl<OffsetPtr, C>>;
 
-	template <typename OffsetPtr, typename C>
-	using SerializableContainer = typename container_traits<C>::template api<SerializableContainerImpl<OffsetPtr, C>>;
+#define SERIALIZABLE_CONTAINER(Name, ...) \
+    ::Engine::Serialize::SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name;\
+    DEFINE_SERIALIZABLE_OFFSET(Name)
 
+	#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...) \
+    Pre Serialize::PartialSerializableContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, 100>>::type __VA_ARGS__ Name; \
+    DEFINE_SERIALIZABLE_OFFSET(Name)
 
 }
 }

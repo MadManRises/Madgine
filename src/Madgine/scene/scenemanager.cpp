@@ -58,7 +58,7 @@ namespace Scene {
         }
     }
 
-    Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> &SceneManager::entities()
+    decltype(SceneManager::mEntities) &SceneManager::entities()
     {
         /*std::list<Entity::Entity *> result;
         for (Entity::Entity &e : mEntities) {

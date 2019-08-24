@@ -75,7 +75,7 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
-					SignalSlot::SignalStub<> &clearedSignal();
+        SignalSlot::SignalStub<> &clearedSignal();
 
     protected:
         virtual bool init() final;
@@ -96,10 +96,10 @@ namespace Scene {
     private:
         App::Application &mApp;
         size_t mItemCount;
-					
-        SceneComponentContainer<PartialObservableContainer<Serialize::PartialSerializableContainer<SceneComponentSet, Engine::Serialize::SerializableOffsetPtr<Self, 100>>::type, Core::MadgineObjectObserver>::type> mSceneComponents;        DEFINE_SERIALIZABLE_OFFSET(mSceneComponents);
 
-        Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> mEntities;        DEFINE_COMBINED_OFFSET(mEntities);              
+		SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<, SceneComponentSet, ,Core::MadgineObjectObserver>::type>);        
+
+        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -111,7 +111,7 @@ namespace Scene {
         Threading::DataMutex mMutex;
 
     public:
-        Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<SceneManager, 102>, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly> &entities();
+        decltype(mEntities) &entities();
 
         //SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };
