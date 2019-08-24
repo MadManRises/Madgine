@@ -66,7 +66,7 @@ namespace Scene {
 
         void Entity::setup()
         {
-            mComponents.signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
+            mComponents.observer().signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
                 using namespace Serialize;
                 switch (op) {
                 case BEFORE | RESET:

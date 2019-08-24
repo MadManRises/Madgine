@@ -121,7 +121,7 @@ namespace Serialize {
         {
             std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
             if (it.second)
-                onInsert(it.first);
+                afterInsert(it.first);
             return it;
         }
 
@@ -213,7 +213,7 @@ namespace Serialize {
 
     protected:
 
-		void onInsert(const iterator &it)
+		void afterInsert(const iterator &it)
         {
             if (this->isSynced()) {
                 this->setItemDataSynced(*it, true);

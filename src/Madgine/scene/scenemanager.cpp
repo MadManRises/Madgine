@@ -241,7 +241,7 @@ namespace Scene {
 
     SignalSlot::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
     {
-        return mEntities.signal();
+        return mEntities.observer().signal();
     }
 
     Entity::Entity *SceneManager::createEntity(const std::string &behavior, const std::string &name,
