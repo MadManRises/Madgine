@@ -82,7 +82,7 @@ namespace Engine
 			delete mStream.rdbuf();
 	}
 
-	void OutStream::write(const void * data, size_t count)
+	void OutStream::writeRaw(const void * data, size_t count)
 	{
 		mStream.write(static_cast<const char*>(data), count);
 	}

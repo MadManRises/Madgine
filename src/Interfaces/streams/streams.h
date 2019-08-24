@@ -49,7 +49,7 @@ namespace Engine
 			return *this;
 		}
 
-		void write(const void *data, size_t count);
+		void writeRaw(const void *data, size_t count);
 
 		operator bool() const;
 

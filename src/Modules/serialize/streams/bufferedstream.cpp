@@ -96,7 +96,7 @@ namespace Serialize {
         header.mObject = manager().convertPtr(*this, unit);
         mLog.logBeginMessage(header, typeid(*unit).name());
         buffer().beginMessage();
-        write(header);
+        writeRaw(header);
     }
 
     void BufferedOutStream::beginMessage(Command cmd)
@@ -106,7 +106,7 @@ namespace Serialize {
         header.mObject = SERIALIZE_MANAGER;
         mLog.logBeginMessage(header, manager().name());
         buffer().beginMessage();
-        write(header);
+        writeRaw(header);
     }
 
     void BufferedOutStream::endMessage() { buffer().endMessage(); }

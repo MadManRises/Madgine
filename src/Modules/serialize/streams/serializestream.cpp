@@ -207,42 +207,42 @@ namespace Serialize {
 
     SerializeOutStream &SerializeOutStream::operator<<(const ValueType &v)
     {
-        write(v.type());
+        writeRaw(v.type());
         switch (v.type()) {
         case ValueType::Type::BoolValue:
-            write(v.as<bool>());
+            writeRaw(v.as<bool>());
             break;
         case ValueType::Type::StringValue: {
             const std::string &s = v.as<std::string>();
             auto size = s.size();
-            write(size);
-            writeData(s.c_str(), size);
+            writeRaw(size);
+            writeRaw(s.c_str(), size);
             break;
         }
         case ValueType::Type::IntValue:
-            write(v.as<int>());
+            writeRaw(v.as<int>());
             break;
         case ValueType::Type::UIntValue:
-            write(v.as<size_t>());
+            writeRaw(v.as<size_t>());
             break;
         case ValueType::Type::NullValue:
             break;
         case ValueType::Type::ScopeValue:
             throw SerializeException("Cannot Serialize a Scope-Pointer!");
         case ValueType::Type::Vector2Value:
-            writeData(v.as<Vector2>().ptr(), sizeof(float) * 2);
+            writeRaw(v.as<Vector2>().ptr(), sizeof(float) * 2);
             break;
         case ValueType::Type::Vector3Value:
-            writeData(v.as<Vector3>().ptr(), sizeof(float) * 3);
+            writeRaw(v.as<Vector3>().ptr(), sizeof(float) * 3);
             break;
         case ValueType::Type::Vector4Value:
-            writeData(v.as<Vector4>().ptr(), sizeof(float) * 4);
+            writeRaw(v.as<Vector4>().ptr(), sizeof(float) * 4);
             break;
         case ValueType::Type::FloatValue:
-            write(v.as<float>());
+            writeRaw(v.as<float>());
             break;
         case ValueType::Type::InvScopePtrValue:
-            write(v.as<InvScopePtr>());
+            writeRaw(v.as<InvScopePtr>());
             break;
         default:
             throw SerializeException(Database::Exceptions::unknownSerializationType);
@@ -253,14 +253,14 @@ namespace Serialize {
 
     SerializeOutStream &SerializeOutStream::operator<<(SerializableUnitBase *p)
     {
-        write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>);
-        write(manager().convertPtr(*this, p));
+        writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>);
+        writeRaw(manager().convertPtr(*this, p));
         return *this;
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)
     {
-        writeData(buffer, size);
+        OutStream::writeRaw(buffer, size);
     }
 
     SerializeManager &SerializeOutStream::manager() const
@@ -283,11 +283,6 @@ namespace Serialize {
 			mOfs.seekp(p);
 		}*/
 
-    void SerializeOutStream::writeData(const void *data, size_t count)
-    {
-        OutStream::write(data, count);
-    }
-
     SerializeStreambuf &SerializeOutStream::buffer() const
     {
         return static_cast<SerializeStreambuf &>(OutStream::buffer());
@@ -295,9 +290,9 @@ namespace Serialize {
 
     SerializeOutStream &SerializeOutStream::operator<<(const std::string &s)
     {
-        write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>);
-        write(s.size());
-        writeData(s.c_str(), s.size());
+        writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>);
+        writeRaw(s.size());
+        writeRaw(s.c_str(), s.size());
         return *this;
     }
 

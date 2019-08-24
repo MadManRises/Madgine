@@ -155,8 +155,8 @@ namespace Serialize {
         SerializeOutStream &operator<<(const T &t)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
-                write<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
-                write(t);
+                writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
+                writeRaw(t);
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.writeState(*this);
@@ -181,12 +181,10 @@ namespace Serialize {
         void seek(pos_type p);
 
         template <class T>
-        void write(const T &t)
+        void writeRaw(const T &t)
         {
-            writeData(&t, sizeof(T));
-        }
-
-        void writeData(const void *data, size_t count);
+            writeRaw(&t, sizeof(T));
+        }        
 
         SerializeStreambuf &buffer() const;
 
