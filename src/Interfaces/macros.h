@@ -10,5 +10,6 @@
 
 #define SINGLE_ARG2(a, b) a, b 
 #define SINGLE_ARG3(a, b, c) a, b, c
+#define SINGLE_ARG4(a, b, c, d) a, b, c, d
 
 #define FIRST(a, ...) a

@@ -62,7 +62,12 @@ namespace Engine
 				checkInitState();
 			}
 			return mSceneMgr.getSelf(init);
-		}
+                }
+
+                const char *SceneComponentBase::key() const
+                {
+                    return type()->mTypeName;
+                }
 
 		SceneComponentBase& SceneComponentBase::getSceneComponent(size_t i, bool init)
 		{

@@ -14,7 +14,6 @@
 
 #include "valuetypeexception.h"
 
-#include "../scripting/scriptingexception.h"
 #include "keyvalueiterate.h"
 
 #include "../math/matrix3.h"
@@ -169,7 +168,7 @@ public:
             case Type::StringValue:
                 return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
             default:
-                throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
+                throw  ValueTypeException(Database::Exceptions::invalidValueType);
             }
         case Type::IntValue:
             switch (other.type()) {
@@ -178,10 +177,10 @@ public:
             case Type::FloatValue:
                 return std::get<int>(mUnion) < std::get<float>(other.mUnion);
             default:
-                throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
+                throw  ValueTypeException(Database::Exceptions::invalidValueType);
             }
         default:
-            throw Scripting::ScriptingException(Database::Exceptions::invalidValueType);
+            throw  ValueTypeException(Database::Exceptions::invalidValueType);
         }
     }
 
@@ -216,7 +215,7 @@ public:
             }
             break;
         default:
-            throw Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other.getTypeString()));
+            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other.getTypeString()));
         }
     }
 
@@ -242,7 +241,7 @@ public:
             }
             break;
         default:
-            throw Scripting::ScriptingException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
+            throw  ValueTypeException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
         }
     }
 

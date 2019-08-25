@@ -48,7 +48,7 @@ std::string ValueType::toString() const
     case Type::BoundApiMethodValue:
         return "<boundmethod>";
     default:
-        throw Scripting::ScriptingException("Unknown Type!");
+        throw ValueTypeException("Unknown Type!");
     }
 }
 

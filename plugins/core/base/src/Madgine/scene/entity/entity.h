@@ -6,7 +6,6 @@
 
 #include "Modules/serialize/container/syncablecontainer.h"
 
-#include "Modules/serialize/container/offset.h"
 
 namespace Engine {
 namespace Scene {

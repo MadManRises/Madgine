@@ -34,7 +34,7 @@ namespace Engine
 
 			//KeyValueMapList maps() override;
 
-			virtual const char* key() const = 0;
+			const char* key() const;
 
 			template <class T>
 			T &getSceneComponent(bool init = true)

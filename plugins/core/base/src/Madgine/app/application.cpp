@@ -7,7 +7,7 @@
 
 #include "../scene/scenemanager.h"
 
-#include "Modules/scripting/types/luastate.h"
+//#include "Modules/scripting/types/luastate.h"
 
 #include "Interfaces/exception.h"
 

@@ -7,6 +7,8 @@
 
 #include "../threading/frameloop.h"
 
+#include "Modules/keyvalue/observerevent.h"
+
 namespace Engine {
 
 	namespace Core {

@@ -7,7 +7,8 @@ namespace Serialize {
 
 
 
-    struct MODULES_EXPORT SerializeTable {        
+    struct MODULES_EXPORT SerializeTable {   
+		const char *mTypeName;
         const std::pair<const char *, Serializer> *mFields;
         bool mIsTopLevelUnit;
 

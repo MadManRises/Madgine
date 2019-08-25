@@ -20,8 +20,6 @@
 
 #include "Modules/threading/datamutex.h"
 
-#include "Modules/serialize/container/offset.h"
-
 namespace Engine {
 namespace Scene {
     class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,

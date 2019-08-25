@@ -33,7 +33,6 @@ namespace Serialize {
     {
     }
 
-
     SerializableUnitBase::~SerializableUnitBase()
     {
         assert(!mSynced);
@@ -74,7 +73,7 @@ namespace Serialize {
         in >> index;
         //try { //TODO check error
         mType->readAction(this, in, index);
-            /*reinterpret_cast<ObservableBase *>(reinterpret_cast<char *>(this) + index)
+        /*reinterpret_cast<ObservableBase *>(reinterpret_cast<char *>(this) + index)
                 ->readAction(in);*/
         /*} catch (const std::out_of_range &) {
             throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
@@ -87,7 +86,7 @@ namespace Serialize {
         in >> index;
         //try { //TODO check error
         mType->readRequest(this, in, index);
-            /*reinterpret_cast<ObservableBase*>(reinterpret_cast<char *>(this) + index)
+        /*reinterpret_cast<ObservableBase*>(reinterpret_cast<char *>(this) + index)
             ->readRequest(in);*/
         /*} catch (const std::out_of_range &) {
             throw SerializeException("Unknown Observed-Id used! Possible binary mismatch!");
@@ -98,7 +97,7 @@ namespace Serialize {
     {
         if (mType->mIsTopLevelUnit) {
             return static_cast<const TopLevelSerializableUnitBase *>(this)->getMasterMessageTargets();
-		}
+        }
 
         std::set<BufferedOutStream *, CompareStreamId> result;
         if (mSynced && mParent) {
@@ -125,7 +124,7 @@ namespace Serialize {
         if (mType->mIsTopLevelUnit)
             return static_cast<const TopLevelSerializableUnitBase *>(this);
         else
-			return mParent ? mParent->topLevel() : nullptr;
+            return mParent ? mParent->topLevel() : nullptr;
     }
 
     void SerializableUnitBase::clearSlaveId()
@@ -205,6 +204,11 @@ namespace Serialize {
     bool SerializableUnitBase::isMaster() const
     {
         return mSlaveId == 0;
+    }
+
+    const SerializeTable *SerializableUnitBase::type() const
+    {
+        return mType;
     }
 
     /*bool SerializableUnitBase::filter(SerializeOutStream *stream) const

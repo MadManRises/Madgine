@@ -5,7 +5,6 @@
 
 #include "scenecomponentbase.h"
 #include "Modules/serialize/serializableunit.h"
-#include "Modules/keyvalue/typenamekeyimpl.h"
 
 
 DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, MADGINE_BASE, SceneComponentBase, SceneManager &);
@@ -16,11 +15,10 @@ namespace Engine
 	{
 
 		template <class T>
-		using SceneComponent = Serialize::SerializableUnit <
-			T, TypenameKeyImpl<T, SceneComponentComponent<T>>>;
+		using SceneComponent = Serialize::SerializableUnit<T, SceneComponentComponent<T>>;
 
 		template <class T>
-		using VirtualSceneComponentBase = Serialize::SerializableUnit<T, TypenameKeyImpl<T, SceneComponentVirtualBase<T>>>;
+		using VirtualSceneComponentBase = Serialize::SerializableUnit<T, SceneComponentVirtualBase<T>>;
 
 		template <class T, class Base>
 		using VirtualSceneComponentImpl = Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>;

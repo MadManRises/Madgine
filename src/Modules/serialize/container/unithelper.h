@@ -4,7 +4,7 @@
 
 #include "../../generic/copy_traits.h"
 
-#include "../../keyvalue/valuetype.h"
+//#include "../../keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Serialize {
@@ -77,7 +77,7 @@ namespace Serialize {
         }
     };
 
-    template <>
+    /*template <>
     struct MODULES_EXPORT UnitHelper<ValueType, false> : public UnitHelperBase<ValueType> {
         typedef ValueType type;
 
@@ -94,7 +94,7 @@ namespace Serialize {
         static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, ValueType &item)
         {
         }
-    };
+    };*/
 
     template <class T>
     struct UnitHelper<T *, false> : public UnitHelperBase<T *> {

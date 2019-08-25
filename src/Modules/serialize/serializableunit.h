@@ -48,6 +48,8 @@ namespace Serialize {
 
         void setSlaveId(size_t id);
 
+		const SerializeTable *type() const;
+
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
         BufferedOutStream *getSlaveMessageTarget() const;
