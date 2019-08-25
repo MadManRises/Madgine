@@ -82,6 +82,9 @@ namespace Serialize {
 	};
 
 	template <typename T, typename Base>
+    struct SerializableUnit;
+
+	template <typename T, typename Base>
         struct TableInitializer {
 			template <typename... Args>
             TableInitializer(Args&&...)
@@ -90,8 +93,8 @@ namespace Serialize {
             }
 		};
 
-    template <class T, class Base = SerializableUnitBase>
-    struct SerializableUnit : Base, TableInitializer<T, Base> {
+    template <typename T, typename Base = SerializableUnitBase>
+    struct SerializableUnit : Base, private TableInitializer<T, Base> {
     protected:
         using Self = T;
 		
