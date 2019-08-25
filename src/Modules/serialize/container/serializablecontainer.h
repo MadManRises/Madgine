@@ -225,7 +225,7 @@ namespace Serialize {
 
         void beforeRemoveRange(const iterator &from, const iterator &to)
         {
-            if (isSynced()) {
+            if (this->isSynced()) {
                 for (iterator it = from; it != to; ++it) {
                     this->setItemDataSynced(*it, false);
                 }

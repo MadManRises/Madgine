@@ -142,22 +142,22 @@ struct container_traits<std::vector<T>> {
 
             type &at(size_t i)
             {
-                return Base::at(i);
+                return C::at(i);
             }
 
             const type &at(size_t i) const
             {
-                return Base::at(i);
+                return C::at(i);
             }
 
             type &operator[](size_t i)
             {
-                return Base::operator[](i);
+                return C::operator[](i);
             }
 
             const type &operator[](size_t i) const
             {
-                return Base::operator[](i);
+                return C::operator[](i);
             }
         };
 

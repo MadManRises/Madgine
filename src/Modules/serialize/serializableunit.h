@@ -94,7 +94,7 @@ namespace Serialize {
 		};
 
     template <typename T, typename Base = SerializableUnitBase>
-    struct SerializableUnit : Base, private TableInitializer<T, Base> {
+    struct SerializableUnit : Base, TableInitializer<T, Base> {
     protected:
         using Self = T;
 		

@@ -86,7 +86,7 @@ namespace Serialize {
                 Base::operator=(std::forward<T>(arg));
                 afterReset(wasActive, this->end());
             } else {
-                if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     Base temp(std::forward<T>(arg));
 
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
@@ -146,7 +146,7 @@ namespace Serialize {
                 }
                 onInsert(it.second, it.first);
             } else {
-                if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     type temp(std::forward<_Ty>(args)...);
                     this->postConstruct(temp);
 
@@ -195,7 +195,7 @@ namespace Serialize {
                 it = Base::erase_intern(from, to);
                 afterRemoveRange(count);
             } else {
-                if constexpr (Config::requestMode == __observablecontainer__impl__::ALL_REQUESTS) {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << TransactionId(0);
                     *out << REMOVE_RANGE;
@@ -354,8 +354,8 @@ namespace Serialize {
             if (!active) {
                 while (this->mActiveIterator != this->begin()) {
                     --this->mActiveIterator;
-                    mSignal.emit(this->mActiveIterator, BEFORE | REMOVE_ITEM);
-                    mSignal.emit(this->end(), AFTER | REMOVE_ITEM);
+                    Observer::operator()this->mActiveIterator, BEFORE | REMOVE_ITEM);
+                    Observer::operator()(this->end(), AFTER | REMOVE_ITEM);
                     this->setItemActive(*this->mActiveIterator, active);
                 }
             }
@@ -365,7 +365,7 @@ namespace Serialize {
                     auto it = this->mActiveIterator;
                     ++this->mActiveIterator;
                     this->setItemActive(*it, active);
-                    mSignal.emit(it, INSERT_ITEM);
+                    Observer::operator()(it, INSERT_ITEM);
                 }
             }
         }
