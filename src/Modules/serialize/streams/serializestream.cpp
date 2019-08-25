@@ -23,7 +23,7 @@ namespace Serialize {
     {
     }
 
-    SerializeInStream::SerializeInStream(SerializeInStream &&other, SerializeManager &mgr)
+    SerializeInStream::SerializeInStream(SerializeInStream &&other, SerializeManager *mgr)
         : InStream(std::move(other))
         , mLog((buffer().setManager(mgr), *this))
     {
@@ -141,12 +141,57 @@ namespace Serialize {
         return true;
     }
 
+	std::string SerializeInStream::readPlainN(size_t n)
+    {
+        std::string buffer(n, '\0');
+        readRaw(&buffer[0], n);
+        return buffer;
+    }
+
+	std::string SerializeInStream::readPlainUntil(char c)
+    {
+        char buffer[255];
+        size_t i = 0;
+        do {
+            if (!InStream::readRaw(&buffer[i], 1))
+                break;
+			++i;
+        } while (buffer[i-1] != c);
+        buffer[i] = '\0';
+
+        return buffer;
+    }
+
+	std::string SerializeInStream::peekPlainUntil(char c)
+    {
+        pos_type pos = tell();
+        std::string result = readPlainUntil(c);
+        seek(pos);
+        return result;
+    }
+
+	bool SerializeInStream::loopReadPlain(Formatter &format)
+    {
+            /*pos_type pos = tell();
+            int type;
+            readRaw(type);
+            if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>) {
+                EOLType eol;
+                readRaw(eol);
+                mLog.log(eol);
+                return false;
+            }
+            seek(pos);
+        return true;*/
+        throw 0;
+    }
+
     void SerializeInStream::logReadHeader(const MessageHeader &header, const std::string &object)
     {
         mLog.logBeginMessage(header, object);
     }
 
-    SerializeManager &SerializeInStream::manager() const
+    SerializeManager *SerializeInStream::manager() const
     {
         return buffer().manager();
     }
@@ -174,7 +219,7 @@ namespace Serialize {
 
     SerializableUnitBase *SerializeInStream::convertPtr(size_t ptr)
     {
-        return manager().convertPtr(*this, ptr);
+        return manager()->convertPtr(*this, ptr);
     }
 
     SerializeStreambuf &SerializeInStream::buffer() const
@@ -194,7 +239,7 @@ namespace Serialize {
     {
     }
 
-    SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager &mgr)
+    SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr)
         : OutStream(std::move(other))
         , mLog((buffer().setManager(mgr), *this))
     {        
@@ -254,7 +299,7 @@ namespace Serialize {
     SerializeOutStream &SerializeOutStream::operator<<(SerializableUnitBase *p)
     {
         writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>);
-        writeRaw(manager().convertPtr(*this, p));
+        writeRaw(manager()->convertPtr(*this, p));
         return *this;
     }
 
@@ -263,7 +308,7 @@ namespace Serialize {
         OutStream::writeRaw(buffer, size);
     }
 
-    SerializeManager &SerializeOutStream::manager() const
+    SerializeManager *SerializeOutStream::manager() const
     {
         return buffer().manager();
     }
@@ -302,19 +347,19 @@ namespace Serialize {
     {
     }
 
-    void SerializeStreambuf::setManager(SerializeManager &mgr)
+    void SerializeStreambuf::setManager(SerializeManager *mgr)
     {
-        mManager = &mgr;
+        mManager = mgr;
     }
 
-    SerializeManager &SerializeStreambuf::manager()
+    SerializeManager *SerializeStreambuf::manager()
     {
-        return *mManager;
+        return mManager;
     }
 
     bool SerializeStreambuf::isMaster()
     {
-        return mManager->isMaster(this);
+        return !mManager || mManager->isMaster(this);
     }
 
     ParticipantId SerializeStreambuf::id() const

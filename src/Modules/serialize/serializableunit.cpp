@@ -46,6 +46,11 @@ namespace Serialize {
         mType->writeBinary(this, out);
     }
 
+	void SerializableUnitBase::writeStatePlain(SerializeOutStream &out, Formatter &format, bool emitObjectHeader) const
+    {
+        mType->writePlain(this, out, format, emitObjectHeader);
+    }
+
     void SerializableUnitBase::writeId(SerializeOutStream &out) const
     {
         out << mMasterId;
@@ -55,7 +60,7 @@ namespace Serialize {
     {
         size_t id;
         in >> id;
-        if (&in.manager() == topLevel()->getSlaveManager()) {
+        if (in.manager() == topLevel()->getSlaveManager()) {
             setSlaveId(id);
         }
         if (mType->mIsTopLevelUnit)
@@ -65,6 +70,11 @@ namespace Serialize {
     void SerializableUnitBase::readState(SerializeInStream &in)
     {
         mType->readBinary(this, in);
+    }
+
+	void SerializableUnitBase::readStatePlain(SerializeInStream &in, Formatter &format, bool emitObjectHeader)
+    {
+        mType->readPlain(this, in, format, emitObjectHeader);
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)

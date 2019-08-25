@@ -6,6 +6,7 @@
 #include "../renderer/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 #include "Madgine/app/application.h"
 
@@ -146,5 +147,8 @@ namespace Tools {
 
 METATABLE_BEGIN(Engine::Tools::FunctionTool)
 METATABLE_END(Engine::Tools::FunctionTool)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::FunctionTool, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::FunctionTool)
 
 RegisterType(Engine::Tools::FunctionTool);

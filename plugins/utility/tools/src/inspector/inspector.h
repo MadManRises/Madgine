@@ -1,5 +1,5 @@
 #pragma once
-#include "../tool.h"
+#include "../toolscollector.h"
 
 #include "inspectorlayout.h"
 

@@ -8,6 +8,7 @@
 
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::Metrics);
 
@@ -67,5 +68,8 @@ namespace Engine {
 
 METATABLE_BEGIN(Engine::Tools::Metrics)
 METATABLE_END(Engine::Tools::Metrics)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Metrics, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::Metrics)
 
 RegisterType(Engine::Tools::Metrics);

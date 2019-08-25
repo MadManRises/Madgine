@@ -4,4 +4,15 @@
 
 #include "toolbase.h"
 
+#include "Modules/serialize/serializableunit.h"
+
 DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, MADGINE_TOOLS, ToolBase, ImGuiRoot &);
+
+namespace Engine {
+namespace Tools {
+
+	template <typename T>
+	using Tool = Serialize::SerializableUnit<T, ToolsComponent<T>>;
+
+}
+}

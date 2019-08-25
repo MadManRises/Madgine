@@ -32,6 +32,10 @@
 
 #include "Modules/keyvalue/scopeiterator.h"
 
+#include "Modules/serialize/streams/serializestream.h"
+
+#include "Modules/ini/iniformatter.h"
+
 THREADLOCAL(ImGuiContext *)
 GImGui;
 
@@ -45,25 +49,46 @@ namespace Tools {
 
     void *ToolReadOpen(ImGuiContext *ctx, ImGuiSettingsHandler *handler, const char *name) // Read: Called when entering into a new ini entry e.g. "[Window][Name]"
     {
+        ImGuiRoot *root = static_cast<ImGuiRoot *>(handler->UserData);
+        for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
+            if (streq(tool->key(), name))
+                return tool;
+        }		
         return nullptr;
     }
 
     void ToolReadLine(ImGuiContext *ctx, ImGuiSettingsHandler *handler, void *entry, const char *line) // Read: Called for every line of text within an ini entry
     {
+        if (strlen(line) > 0) {
+            Ini::IniFormatter format;
+
+            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(line);
+            Serialize::SerializeInStream in { std::move(buf) };
+
+            ToolBase *tool = static_cast<ToolBase *>(entry);
+            tool->readStatePlain(in, format, false);
+        }
     }
 
     void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entries into 'out_buf'
     {
-        ImGuiRoot *root = static_cast<ImGuiRoot *>(handler->UserData);
-        int i = 0;
-        for (auto it = root->tools().typedBegin(); it != root->tools().typedEnd(); ++it) {
-            out_buf->appendf("[Tool][%s]\n", (*std::next(root->tools().begin(), i++))->key());
-            for (std::pair<const char *, ValueType> p : (*it)) {
-                if (p.second.type() != Engine::ValueType::Type::BoundApiMethodValue)
-					out_buf->appendf("%s=%s\n", p.first, p.second.toString().c_str());
-            }
-            out_buf->append("\n");
-        }
+        Ini::IniFormatter format;
+
+        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>();
+        std::stringbuf *outBuffer = buf.get();
+		Serialize::SerializeOutStream out { std::move(buf) };
+
+		ImGuiRoot *root = static_cast<ImGuiRoot *>(handler->UserData);
+        for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
+            out_buf->appendf("[Tool][%s]\n", tool->key());
+           
+			tool->writeStatePlain(out, format, false);            
+            out_buf->append(outBuffer->str().c_str());
+            outBuffer->str("");
+
+			out_buf->append("\n");
+		}		
+
     }
 
     ImGuiRoot::ImGuiRoot(GUI::TopLevelWindow &window)

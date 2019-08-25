@@ -9,7 +9,7 @@ struct MODULES_EXPORT BufferedInStream : SerializeInStream {
 
     BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
     BufferedInStream(BufferedInStream &&other);
-    BufferedInStream(BufferedInStream &&other, SerializeManager &mgr);
+    BufferedInStream(BufferedInStream &&other, SerializeManager *mgr);
 
     bool isMessageAvailable() const;
 
@@ -25,7 +25,7 @@ struct MODULES_EXPORT BufferedOutStream : SerializeOutStream {
   public:
     BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
     BufferedOutStream(BufferedOutStream &&other);
-    BufferedOutStream(BufferedOutStream &&other, SerializeManager &mgr);
+    BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
 
     void beginMessage(const SerializableUnitBase *unit, MessageType type);
     void beginMessage(Command cmd);
@@ -55,7 +55,7 @@ struct MODULES_EXPORT BufferedInOutStream : BufferedInStream,
 
     BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
     BufferedInOutStream(BufferedInOutStream &&other);
-    BufferedInOutStream(BufferedInOutStream &&other, SerializeManager &mgr);
+    BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
 
     StreamError error() const;
     bool isClosed() const;

@@ -13,6 +13,7 @@
 
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/signalslot/taskguard.h"
 
@@ -182,5 +183,8 @@ namespace Tools {
 
 METATABLE_BEGIN(Engine::Tools::PluginManager)
 METATABLE_END(Engine::Tools::PluginManager)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::PluginManager, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::PluginManager)
 
 #endif

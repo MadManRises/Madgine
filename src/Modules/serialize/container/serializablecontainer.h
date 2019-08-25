@@ -159,6 +159,15 @@ namespace Serialize {
             out << EOLType();
         }
 
+		void writeStatePlain(SerializeOutStream &out, Formatter &format) const
+        {
+            for (const auto &t : *this) {
+                if (this->filter(out, t)) {
+                    write_item_plain(out, t, format);
+                }
+            }
+        }
+
         template <typename Creator = DefaultCreator<>>
         void readState(SerializeInStream &in, Creator &&creator = {})
         {
@@ -167,6 +176,18 @@ namespace Serialize {
             mActiveIterator = Base::begin();
             while (in.loopRead()) {
                 this->read_item_where_intern(in, end(), std::forward<Creator>(creator));
+            }
+            afterReset(wasActive);
+        }
+
+		        template <typename Creator = DefaultCreator<>>
+        void readStatePlain(SerializeInStream &in, Formatter &format, Creator &&creator = {})
+        {
+            bool wasActive = beforeReset();
+            Base::clear();
+            mActiveIterator = Base::begin();
+            while (in.loopReadPlain(format)) {
+                this->read_item_plain_where_intern(in, format, end(), std::forward<Creator>(creator));
             }
             afterReset(wasActive);
         }
@@ -267,12 +288,31 @@ namespace Serialize {
             return it;
         }
 
+		template <typename Creator>
+        std::pair<iterator, bool> read_item_plain_where_intern(SerializeInStream &in, Formatter &format, const const_iterator &where, Creator &&creator)
+        {
+            std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationDataPlain(in, format));
+            assert(it.second);
+            this->read_state_plain(in, *it.first, format);
+            if (!in.isMaster())
+                this->read_id_plain(in, *it.first, format);
+            return it;
+        }
+
         void write_item(SerializeOutStream &out, const type &t) const
         {
             this->write_creation(out, t);
             this->write_state(out, t);
             if (out.isMaster())
                 this->write_id(out, t);
+        }
+
+		void write_item_plain(SerializeOutStream &out, const type &t, Formatter &format) const
+        {
+            this->write_creation_plain(out, t, format);
+            this->write_state_plain(out, t, format);
+            if (out.isMaster())
+                this->write_id_plain(out, t, format);
         }
 
         bool isItemActive(const iterator &it)

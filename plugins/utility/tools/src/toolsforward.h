@@ -5,7 +5,7 @@ namespace Engine
 {
 	namespace Tools
 	{
-		class ToolBase;
+		struct ToolBase;
 		class ImGuiRoot;
 		class Inspector;
 		class ImGuiManager;

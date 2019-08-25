@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../tool.h"
+#include "../toolscollector.h"
 #include "Modules/keyvalue/boundapimethod.h"
 #include "Modules/keyvalue/valuetype.h"
 

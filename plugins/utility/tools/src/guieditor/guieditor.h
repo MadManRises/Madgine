@@ -1,14 +1,16 @@
 #pragma once
 
-#include "../tool.h"
+#include "../toolscollector.h"
 
 #include "widgetsettings.h"
 
 namespace Engine {
 namespace Tools {
 
-    class GuiEditor : public Tool<GuiEditor> {
-    public:
+    struct GuiEditor : public Tool<GuiEditor> {    
+
+        SERIALIZABLEUNIT(GuiEditor);
+
         GuiEditor(ImGuiRoot &root);
 
         virtual bool init() override;

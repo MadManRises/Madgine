@@ -44,11 +44,11 @@ namespace Serialize {
         }
         other.mTopLevelUnits.clear();
         if (other.mSlaveStream) {
-            mSlaveStream.emplace(std::move(*other.mSlaveStream), *this);
+            mSlaveStream.emplace(std::move(*other.mSlaveStream), this);
             other.mSlaveStream.reset();
         }
         for (const BufferedInOutStream &stream : other.mMasterStreams) {
-            mMasterStreams.emplace(std::move(const_cast<BufferedInOutStream &>(stream)), *this);
+            mMasterStreams.emplace(std::move(const_cast<BufferedInOutStream &>(stream)), this);
         }
     }
 

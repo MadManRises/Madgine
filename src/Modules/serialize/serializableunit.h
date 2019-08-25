@@ -24,6 +24,9 @@ namespace Serialize {
         void writeState(SerializeOutStream &out) const;
         void readState(SerializeInStream &in);
 
+		void writeStatePlain(SerializeOutStream &out, Formatter &format, bool emitObjectHeader = true) const;
+        void readStatePlain(SerializeInStream &in, Formatter &format, bool emitObjectHeader = true);
+
         void readAction(BufferedInOutStream &in);
         void readRequest(BufferedInOutStream &in);
 
@@ -101,5 +104,13 @@ namespace Serialize {
 		using Base::Base;       
 
     };
+
+
+	template <typename>
+    struct __SerializeInstance;
+
+	#define SERIALIZABLEUNIT(Name) friend struct ::Engine::Serialize::__SerializeInstance<Name>
+
 } // namespace Serialize
 } // namespace Core
+

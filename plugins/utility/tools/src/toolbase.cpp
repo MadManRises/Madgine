@@ -7,6 +7,7 @@
 #include "renderer/imguiroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine {
 namespace Tools {
@@ -83,5 +84,11 @@ namespace Tools {
 METATABLE_BEGIN(Engine::Tools::ToolBase)
 PROPERTY(visible, isVisible, setVisible)
 METATABLE_END(Engine::Tools::ToolBase)
+
+
+
+SERIALIZETABLE_BEGIN(Engine::Tools::ToolBase)
+FIELD(mVisible)
+SERIALIZETABLE_END(Engine::Tools::ToolBase)
 
 RegisterType(Engine::Tools::ToolBase);

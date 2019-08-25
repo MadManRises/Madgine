@@ -70,6 +70,8 @@ namespace Serialize {
     struct SerializeManager;
     struct SerializeStreambuf;
 
+	struct Formatter;
+
     class EOLType;
 
     struct CompareStreamId;

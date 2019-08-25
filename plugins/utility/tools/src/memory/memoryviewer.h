@@ -2,7 +2,7 @@
 
 #if ENABLE_MEMTRACKING
 
-#include "../tool.h"
+#include "../toolscollector.h"
 #include "Interfaces/debug/stacktrace.h"
 #include "Interfaces/debug/memory/memory.h"
 

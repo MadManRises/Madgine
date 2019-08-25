@@ -14,7 +14,15 @@ namespace Serialize {
         {
         }
 
+		static void read_id_plain(SerializeInStream &in, T &item, Formatter &format)
+        {
+        }
+
         static void write_id(SerializeOutStream &out, const T &item)
+        {
+        }
+
+        static void write_id_plain(SerializeOutStream &out, const T &item, Formatter &format)
         {
         }
 
@@ -22,11 +30,23 @@ namespace Serialize {
         {
         }
 
+        static void write_creation_plain(SerializeOutStream &out, const T &item, Formatter &format)
+        {
+        }
+
         static void read_state(SerializeInStream &in, T &item)
         {
         }
 
+		static void read_state_plain(SerializeInStream& in, T& item, Formatter& format) {
+
+		}
+
         static void write_state(SerializeOutStream &out, const T &item)
+        {
+        }
+
+        static void write_state_plain(SerializeOutStream &out, const T &item, Formatter &format)
         {
         }
 
@@ -61,9 +81,19 @@ namespace Serialize {
             in >> item;
         }
 
+		static void read_state(SerializeInStream &in, type &item, Formatter &format)
+        {
+            in.readPlain(item, format);
+        }
+
         static void write_state(SerializeOutStream &out, const type &item)
         {
             out << item;
+        }
+		
+        static void write_state_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            out.writePlain(item, format);
         }
     };
 
@@ -74,6 +104,11 @@ namespace Serialize {
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             out << item;
+        }
+
+		static void write_creation_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            out.writePlain(item, format);
         }
     };
 
@@ -105,9 +140,19 @@ namespace Serialize {
             in >> item;
         }
 
+		        static void read_state_plain(SerializeInStream &in, T *&item, Formatter &format)
+        {
+            in.readPlain(plain, format);
+        }
+
         static void write_state(SerializeOutStream &out, T *item)
         {
             out << item;
+        }
+
+		static void write_state_plain(SerializeOutStream &out, T *item, Formatter &format)
+        {
+            out.writePlain(item, format);
         }
     };
 
@@ -120,9 +165,19 @@ namespace Serialize {
             UnitHelper<T>::read_state(in, *item);
         }
 
+		        static void read_state_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            UnitHelper<T>::read_state_plain(in, *item, format);
+        }
+
         static void read_id(SerializeInStream &in, type &item)
         {
             UnitHelper<T>::read_id(in, *item);
+        }
+
+        static void read_id_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            UnitHelper<T>::read_id_plain(in, *item, format);
         }
 
         static void write_id(SerializeOutStream &out, const type &item)
@@ -130,14 +185,29 @@ namespace Serialize {
             UnitHelper<T>::write_id(out, *item);
         }
 
+		        static void write_id_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<T>::write_id_plain(out, *item, format);
+        }
+
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             UnitHelper<T>::write_creation(out, *item);
         }
 
+		static void write_creation(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<T>::write_creation_plain(out, *item, format);
+        }
+
         static void write_state(SerializeOutStream &out, const type &item)
         {
             UnitHelper<T>::write_state(out, *item);
+        }
+
+		static void write_state_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<T>::write_state_plain(out, *item, format);
         }
 
         static bool filter(SerializeOutStream &out, const type &item)
@@ -171,21 +241,41 @@ namespace Serialize {
 
         static void read_state(SerializeInStream &in, SerializableUnitBase &unit);
 
+		static void read_state_plain(SerializeInStream &in, SerializableBase &item, Formatter &format);
+
+        static void read_state_plain(SerializeInStream &in, SerializableUnitBase &unit, Formatter &format);
+
         static void read_id(SerializeInStream &in, SerializableUnitBase &item);
 
         static void read_id(SerializeInStream &in, SerializableBase &item);
+
+		static void read_id_plain(SerializeInStream &in, SerializableUnitBase &item, Formatter &format);
+
+        static void read_id_plain(SerializeInStream &in, SerializableBase &item, Formatter &format);
 
         static void write_id(SerializeOutStream &out, const SerializableUnitBase &item);
 
         static void write_id(SerializeOutStream &out, const SerializableBase &item);
 
+		static void write_id_plain(SerializeOutStream &out, const SerializableUnitBase &item, Formatter &format);
+
+        static void write_id_plain(SerializeOutStream &out, const SerializableBase &item, Formatter &format);
+
         static void write_creation(SerializeOutStream &out, const SerializableBase &item);
 
         static void write_creation(SerializeOutStream &out, const SerializableUnitBase &item);
 
+		static void write_creation_plain(SerializeOutStream &out, const SerializableBase &item, Formatter &format);
+
+        static void write_creation_plain(SerializeOutStream &out, const SerializableUnitBase &item, Formatter &format);
+
         static void write_state(SerializeOutStream &out, const SerializableBase &item);
 
         static void write_state(SerializeOutStream &out, const SerializableUnitBase &unit);
+
+		static void write_state_plain(SerializeOutStream &out, const SerializableBase &item, Formatter &format);
+
+        static void write_state_plain(SerializeOutStream &out, const SerializableUnitBase &unit, Formatter &format);
 
         static bool filter(SerializeOutStream &out, const SerializableUnitBase &item);
 
@@ -216,18 +306,35 @@ namespace Serialize {
         {
             item.readState(in);
         }
+				
+        static void read_state_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            item.readStatePlain(in, format);
+        }
 
         static void write_state(SerializeOutStream &out, const type &item)
         {
             item.writeState(out);
         }
 
+		        static void write_state_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            item.writeStatePlain(out, format);
+        }
+
 
         static void write_creation(SerializeOutStream &out, const type &item)
         {
-			//Maybe remove the call for Serializables, implying default ctor for all Serializables.
-			//Only critical with containers containing serializables.
+            //Maybe remove the call for Serializables, implying default ctor for all Serializables.
+            //Only critical with containers containing serializables.
             item.writeCreationData(out);
+        }
+
+		static void write_creation_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            //Maybe remove the call for Serializables, implying default ctor for all Serializables.
+            //Only critical with containers containing serializables.
+            item.writeCreationDataPlain(out, format);
         }
     };
 
@@ -241,16 +348,34 @@ namespace Serialize {
             UnitHelper<V>::read_state(in, item.second);
         }
 
+		static void read_state_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            UnitHelper<U>::read_state_plain(in, item.first, format);
+            UnitHelper<V>::read_state_plain(in, item.second, format);
+        }
+
         static void read_id(SerializeInStream &in, type &item)
         {
             UnitHelper<U>::read_id(in, item.first);
             UnitHelper<V>::read_id(in, item.second);
         }
 
+        static void read_id_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            UnitHelper<U>::read_id_plain(in, item.first,format);
+            UnitHelper<V>::read_id_plain(in, item.second,format);
+        }
+
         static void write_id(SerializeOutStream &out, const type &item)
         {
             UnitHelper<U>::write_id(out, item.first);
             UnitHelper<V>::write_id(out, item.second);
+        }
+		
+        static void write_id_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<U>::write_id_plain(out, item.first, format);
+            UnitHelper<V>::write_id_plain(out, item.second, format);
         }
 
         static void write_creation(SerializeOutStream &out, const type &item)
@@ -259,10 +384,22 @@ namespace Serialize {
             UnitHelper<V>::write_creation(out, item.second);
         }
 
+		        static void write_creation_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<U>::write_creation_plain(out, item.first, format);
+            UnitHelper<V>::write_creation_plain(out, item.second, format);
+        }
+
         static void write_state(SerializeOutStream &out, const type &item)
         {
             UnitHelper<U>::write_state(out, item.first);
             UnitHelper<V>::write_state(out, item.second);
+        }
+
+		        static void write_state_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            UnitHelper<U>::write_state_plain(out, item.first, format);
+            UnitHelper<V>::write_state_plain(out, item.second, format);
         }
 
         static bool filter(SerializeOutStream &out, const type &item)
@@ -305,14 +442,26 @@ namespace Serialize {
             (void)unpacker {
                 (UnitHelper<typename std::tuple_element<Is, type>::type>::read_state(in, std::get<Is>(item)), true)...
             };
-            /*UnitHelper<U>::read_state(in, item.first);
-				UnitHelper<V>::read_state(in, item.second);*/
+        }
+
+		        static void read_state_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            (void)unpacker {
+                (UnitHelper<typename std::tuple_element<Is, type>::type>::read_state_plain(in, std::get<Is>(item), format), true)...
+            };
         }
 
         static void read_id(SerializeInStream &in, type &item)
         {
             (void)unpacker {
                 (UnitHelper<typename std::tuple_element<Is, type>::type>::read_id(in, std::get<Is>(item)), true)...
+            };
+        }
+
+        static void read_id_plain(SerializeInStream &in, type &item, Formatter &format)
+        {
+            (void)unpacker {
+                (UnitHelper<typename std::tuple_element<Is, type>::type>::read_id_plain(in, std::get<Is>(item), format), true)...
             };
         }
 
@@ -323,10 +472,24 @@ namespace Serialize {
             };
         }
 
+		        static void write_id_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            (void)unpacker {
+                (UnitHelper<typename std::tuple_element<Is, type>::type>::write_id_plain(out, std::get<Is>(item), format), true)...
+            };
+        }
+
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             (void)unpacker {
                 (UnitHelper<typename std::tuple_element<Is, type>::type>::write_creation(out, std::get<Is>(item)), true)...
+            };
+        }
+				
+        static void write_creation_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            (void)unpacker {
+                (UnitHelper<typename std::tuple_element<Is, type>::type>::write_creation_plain(out, std::get<Is>(item), format), true)...
             };
         }
 
@@ -334,6 +497,13 @@ namespace Serialize {
         {
             (void)unpacker {
                 (UnitHelper<typename std::tuple_element<Is, type>::type>::write_state(out, std::get<Is>(item)), true)...
+            };
+        }
+
+		 static void write_state_plain(SerializeOutStream &out, const type &item, Formatter &format)
+        {
+            (void)unpacker {
+                (UnitHelper<typename std::tuple_element<Is, type>::type>::write_state_plain(out, std::get<Is>(item), format), true)...
             };
         }
 
@@ -387,8 +557,8 @@ namespace Serialize {
                                                       std::make_index_sequence<sizeof...(Ty)>())) {
     };
 
-	template <typename T>
-		using UnitHelper_t = typename UnitHelper<T>::type;
+    template <typename T>
+    using UnitHelper_t = typename UnitHelper<T>::type;
 
 }
 }

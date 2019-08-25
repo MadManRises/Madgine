@@ -8,11 +8,14 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
+#include "Modules/serialize/serializableunit.h"
+
 namespace Engine {
 namespace Tools {
 
-    class MADGINE_TOOLS_EXPORT ToolBase : public Core::MadgineObject, public ScopeBase {
-    public:
+    struct MADGINE_TOOLS_EXPORT ToolBase : public Core::MadgineObject, public ScopeBase, public Serialize::SerializableUnit<ToolBase> {
+        SERIALIZABLEUNIT(ToolBase);
+
         ToolBase(ImGuiRoot &root);
         virtual ~ToolBase() = default;
 
@@ -32,7 +35,7 @@ namespace Tools {
             return static_cast<T &>(getToolComponent(component_index<T>()));
         }
         ToolBase &getSelf(bool = true);
-
+		
     protected:
 
         virtual const MadgineObject *parent() const override;
@@ -40,7 +43,8 @@ namespace Tools {
         virtual bool init() override;
         virtual void finalize() override;
 
-        bool mVisible = false;
+		bool mVisible = false;
+        
         ImGuiRoot &mRoot;
     };
 

@@ -2,7 +2,7 @@
 
 #if ENABLE_PLUGINS
 
-#include "../tool.h"
+#include "../toolscollector.h"
 #include "../tinyxml/tinyxml2.h"
 
 namespace Engine

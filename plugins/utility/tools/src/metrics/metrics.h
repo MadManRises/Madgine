@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../tool.h"
+#include "../toolscollector.h"
 
 #include "Modules/debug/history.h"
 

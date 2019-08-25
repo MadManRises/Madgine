@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 Project(Tools)
 
 set(sources "")
-FolderSources(sources "" src tool.h toolbase.cpp toolbase.h toolscollector.cpp toolscollector.h)
+FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscollector.h)
 	FolderSources(sources src guieditor guieditor.cpp guieditor.h widgetsettings.cpp widgetsettings.h)
 	FolderSources(sources src imgui imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_widgets.cpp imgui_internal.h)
 		FolderSources(sources imgui examples imgui_impl_opengl3.cpp imgui_impl_opengl3.h)

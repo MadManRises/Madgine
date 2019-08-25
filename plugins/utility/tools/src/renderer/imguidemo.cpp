@@ -5,6 +5,7 @@
 #include "../imgui/imgui.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
 namespace Engine {
@@ -32,5 +33,8 @@ UNIQUECOMPONENT(Engine::Tools::ImGuiDemo);
 
 METATABLE_BEGIN(Engine::Tools::ImGuiDemo)
 METATABLE_END(Engine::Tools::ImGuiDemo)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ImGuiDemo, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::ImGuiDemo)
 
 RegisterType(Engine::Tools::ImGuiDemo);

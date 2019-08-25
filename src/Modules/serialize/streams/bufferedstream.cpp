@@ -43,7 +43,7 @@ namespace Serialize {
     {
     }
 
-    BufferedInStream::BufferedInStream(BufferedInStream &&other, SerializeManager &mgr)
+    BufferedInStream::BufferedInStream(BufferedInStream &&other, SerializeManager *mgr)
         : SerializeInStream(std::move(other), mgr)
     {
     }
@@ -83,7 +83,7 @@ namespace Serialize {
     {
     }
 
-    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SerializeManager &mgr)
+    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr)
         : SerializeOutStream(std::move(other), mgr)
     {
     }
@@ -93,7 +93,7 @@ namespace Serialize {
     {
         MessageHeader header;
         header.mType = type;
-        header.mObject = manager().convertPtr(*this, unit);
+        header.mObject = manager()->convertPtr(*this, unit);
         mLog.logBeginMessage(header, typeid(*unit).name());
         buffer().beginMessage();
         writeRaw(header);
@@ -104,7 +104,7 @@ namespace Serialize {
         MessageHeader header;
         header.mCmd = cmd;
         header.mObject = SERIALIZE_MANAGER;
-        mLog.logBeginMessage(header, manager().name());
+        mLog.logBeginMessage(header, manager()->name());
         buffer().beginMessage();
         writeRaw(header);
     }
@@ -142,7 +142,7 @@ namespace Serialize {
     }
 
     BufferedInOutStream::BufferedInOutStream(BufferedInOutStream &&other,
-        SerializeManager &mgr)
+        SerializeManager *mgr)
         : BufferedInStream(std::move(other), mgr)
         , BufferedOutStream(std::move(other), mgr)
     {

@@ -8,6 +8,7 @@
 #include "../renderer/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/math/bounds.h"
 #include "Modules/reflection/classname.h"
 
@@ -351,5 +352,9 @@ namespace Tools {
 
 METATABLE_BEGIN(Engine::Tools::GuiEditor)
 METATABLE_END(Engine::Tools::GuiEditor)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
+FIELD(mHierarchyVisible)
+SERIALIZETABLE_END(Engine::Tools::GuiEditor)
 
 RegisterType(Engine::Tools::GuiEditor);

@@ -7,6 +7,7 @@
 #include "../renderer/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
 #include "Madgine/app/application.h"
@@ -80,5 +81,8 @@ METATABLE_BEGIN(Engine::Tools::TestTool)
 FUNCTION(logTest)
 FUNCTION(logValue)
 METATABLE_END(Engine::Tools::TestTool)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::TestTool)
 
 RegisterType(Engine::Tools::TestTool);

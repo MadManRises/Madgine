@@ -20,6 +20,7 @@
 #include "Interfaces/debug/memory/untrackedmemoryresource.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Tools::MemoryViewer);
@@ -475,6 +476,9 @@ namespace Engine
 
 METATABLE_BEGIN(Engine::Tools::MemoryViewer)
 METATABLE_END(Engine::Tools::MemoryViewer)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::MemoryViewer, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::MemoryViewer)
 
 RegisterType(Engine::Tools::MemoryViewer);
 

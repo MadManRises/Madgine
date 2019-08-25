@@ -22,21 +22,21 @@ namespace Engine
 
 			StreamLog::StreamLog(SerializeInStream &stream) :
 				mLogger(
-					sPath + stream.manager().name() + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
+					sPath + (stream.manager() ? stream.manager()->name() : "unnamed") + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
 					to_string(stream.id()) + "r.log")
 			{
                             assert(mLogger);
-				if (stream.manager().name().empty())
+				if (stream.manager() && stream.manager()->name().empty())
 					throw 0;
 			}
 
 			StreamLog::StreamLog(SerializeOutStream &stream) :
 				mLogger(
-					sPath + stream.manager().name() + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
+					sPath + (stream.manager() ? stream.manager()->name() : "unnamed") + "_" + (stream.isMaster() ? "m" : "s") + "_" + std::
 					to_string(stream.id()) + "w.log")
 			{
                             assert(mLogger);
-				if (stream.manager().name().empty())
+				if (stream.manager() && stream.manager()->name().empty())
 					throw 0;
 			}
 

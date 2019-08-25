@@ -15,6 +15,7 @@
 #include "../renderer/imguiroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Tools::Profiler);
@@ -82,5 +83,8 @@ namespace Tools {
 
 METATABLE_BEGIN(Engine::Tools::Profiler)
 METATABLE_END(Engine::Tools::Profiler)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Profiler, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::Profiler)
 
 RegisterType(Engine::Tools::Profiler);

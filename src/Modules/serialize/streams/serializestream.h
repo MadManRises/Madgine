@@ -41,35 +41,95 @@ namespace Serialize {
 
     struct MODULES_EXPORT SerializeStreambuf : std::basic_streambuf<char> {
     public:
+        SerializeStreambuf() = default;
         SerializeStreambuf(SerializeManager &mgr, ParticipantId id);
         virtual ~SerializeStreambuf() = default;
 
-        void setManager(SerializeManager &mgr);
-        SerializeManager &manager();
+        void setManager(SerializeManager *mgr);
+        SerializeManager *manager();
         bool isMaster();
 
         ParticipantId id() const;
         void setId(ParticipantId id);
 
     private:
-        SerializeManager *mManager;
-        ParticipantId mId;
+        SerializeManager *mManager = nullptr;
+        ParticipantId mId = 0;
+    };
+
+    template <typename Buf>
+    struct WrappingSerializeStreambuf : SerializeStreambuf, Buf {
+        using Buf::Buf;
+
+        void imbue(const std::locale &loc) override
+        {
+            Buf::imbue(loc);
+        }
+
+        pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+            std::ios_base::openmode mode = std::ios_base::in) override
+        {
+            return Buf::seekoff(off, dir, mode);
+        }
+        pos_type seekpos(pos_type pos,
+            std::ios_base::openmode mode = std::ios_base::in) override
+        {
+            return Buf::seekpos(pos, mode);
+        }
+
+        std::streamsize showmanyc() override
+        {
+            return Buf::showmanyc();
+        }
+
+        std::streamsize xsgetn(char *s, std::streamsize n) override
+        {
+            return Buf::xsgetn(s, n);
+        }
+
+		int pbackfail(int c = EOF) override {
+                    return Buf::pbackfail(c);
+		}
+
+        int_type overflow(int c = EOF) override
+        {
+            return Buf::overflow(c);
+        }
+
+		std::streamsize xsputn(const char* s, std::streamsize n) override {
+                    return Buf::xsputn(s, n);
+		}
+
+        int_type underflow() override
+        {
+            return Buf::underflow();
+        }
+
+		int uflow() override {
+                    return Buf::uflow();
+		}
+
+        int sync() override
+        {
+            return Buf::sync();
+        }
     };
 
     struct MODULES_EXPORT SerializeInStream : InStream {
     public:
         SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer);
         SerializeInStream(SerializeInStream &&other);
-        SerializeInStream(SerializeInStream &&other, SerializeManager &mgr);
+        SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
-		template <typename T>
-		SerializeInStream& operator>>(T& t) {
+        template <typename T>
+        SerializeInStream &operator>>(T &t)
+        {
             read(t);
-                    return *this;
-		}
+            return *this;
+        }
 
         template <class T, typename... Args, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value>>
-        void read(T &t, Args&&... args)
+        void read(T &t, Args &&... args)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
                 int type;
@@ -82,7 +142,7 @@ namespace Serialize {
                 t.readState(*this, std::forward<Args>(args)...);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
-			}
+            }
         }
 
         void read(ValueType &result);
@@ -112,11 +172,30 @@ namespace Serialize {
 
         bool loopRead();
 
+        template <typename T>
+        SerializeInStream &readPlain(T &t, Formatter &format)
+        {
+            if constexpr (PrimitiveTypesContain_v<T>) {
+                InStream::operator>>(t);
+            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
+                t.readStatePlain(*this, format);
+            } else {
+                static_assert(dependent_bool<T, false>::value, "Invalid Type");
+            }
+            return *this;
+        }
+
+		std::string readPlainN(size_t n);
+        std::string readPlainUntil(char c);
+        std::string peekPlainUntil(char c);
+
+        bool loopReadPlain(Formatter &format);
+
         void readRaw(void *buffer, size_t size);
 
         void logReadHeader(const MessageHeader &header, const std::string &object);
 
-        SerializeManager &manager() const;
+        SerializeManager *manager() const;
 
         void setId(ParticipantId id);
 
@@ -131,7 +210,7 @@ namespace Serialize {
         void readRaw(T &t)
         {
             readRaw(&t, sizeof(T));
-        }        
+        }
 
         SerializableUnitBase *convertPtr(size_t ptr);
 
@@ -145,7 +224,7 @@ namespace Serialize {
     public:
         SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer);
         SerializeOutStream(SerializeOutStream &&other);
-        SerializeOutStream(SerializeOutStream &&other, SerializeManager &mgr);
+        SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
 
         ParticipantId id() const;
 
@@ -170,9 +249,22 @@ namespace Serialize {
 
         SerializeOutStream &operator<<(const std::string &s);
 
+        template <typename T>
+        SerializeOutStream &writePlain(const T &t, Formatter &format)
+        {
+            if constexpr (PrimitiveTypesContain_v<T>) {
+                OutStream::operator<<(t);
+            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
+                t.writeStatePlain(*this, format);
+            } else {
+                static_assert(dependent_bool<T, false>::value, "Invalid Type");
+            }
+            return *this;
+        }
+
         void writeRaw(const void *buffer, size_t size);
 
-        SerializeManager &manager() const;
+        SerializeManager *manager() const;
 
         bool isMaster();
 
@@ -184,7 +276,7 @@ namespace Serialize {
         void writeRaw(const T &t)
         {
             writeRaw(&t, sizeof(T));
-        }        
+        }
 
         SerializeStreambuf &buffer() const;
 
