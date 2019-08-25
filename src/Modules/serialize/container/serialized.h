@@ -81,7 +81,7 @@ namespace Engine
 
 				void setActive(bool active)
 				{
-					Serializable::setActive(active);
+					SerializableBase::setActive(active);
 					this->setItemActive(mData, active);
 				}
 
