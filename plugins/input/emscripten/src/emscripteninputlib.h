@@ -1,6 +1,6 @@
 #pragma once
 
-#include "clientlib.h"
+#include "Madgine/clientlib.h"
 
 #if defined(STATIC_BUILD)
 #	define MADGINE_EMSCRIPTENINPUT_EXPORT

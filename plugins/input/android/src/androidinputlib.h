@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Madgine/clientlib.h"
 
 #if defined(STATIC_BUILD)
 #	define MADGINE_ANDROIDINPUT_EXPORT
@@ -15,4 +16,3 @@
 #endif
 
 
-#include "clientlib.h"
