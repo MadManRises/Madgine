@@ -142,7 +142,7 @@ namespace Serialize {
 
 		        static void read_state_plain(SerializeInStream &in, T *&item, Formatter &format)
         {
-            in.readPlain(plain, format);
+            in.readPlain(item, format);
         }
 
         static void write_state(SerializeOutStream &out, T *item)
