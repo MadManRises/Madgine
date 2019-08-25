@@ -1,5 +1,5 @@
 #include "androidinputlib.h"
-#include "clientlib.h"
+#include "Madgine/clientlib.h"
 
 #include "androidlauncher.h"
 
