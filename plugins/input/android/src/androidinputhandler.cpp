@@ -8,7 +8,7 @@
 
 #include <android/input.h>
 
-#include "input/inputevents.h"
+#include "Madgine/input/inputevents.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 

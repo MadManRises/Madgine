@@ -3,7 +3,7 @@
 struct ALooper;
 struct AInputEvent;
 
-#include "input/inputcollector.h"
+#include "Madgine/input/inputcollector.h"
 #include <emscripten/html5.h>
 
 namespace Engine {

@@ -4,7 +4,7 @@
 
 #include "Modules/math/vector2.h"
 
-#include "input/inputevents.h"
+#include "Madgine/input/inputevents.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
