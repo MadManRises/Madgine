@@ -395,7 +395,7 @@ struct container_traits<std::map<K, T>> {
             using C::C;
 
             T &operator[](const K &key) {
-				iterator it = this->mData.lower_bound(key);
+				iterator it = C::lower_bound(key);
 				if (it == this->end() || it->first != key) {
                     auto pib = try_emplace(key);
                                     assert(pib.second);
@@ -405,17 +405,17 @@ struct container_traits<std::map<K, T>> {
 			}
 
             const T &at(const std::string &key) const {
-				return mData.at(key);
+				return C::at(key);
 			}
 
             template <class... _Ty>
             std::pair<iterator, bool> try_emplace(const K &key, _Ty &&... args)
             {
-                auto it = this->mData.lower_bound(key);
+                auto it = C::lower_bound(key);
                 if (it != this->end() && it->first == key) {
                     return { it, false };
                 }
-                return this->emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
+                return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
             }
         };
 

@@ -354,7 +354,7 @@ namespace Serialize {
             if (!active) {
                 while (this->mActiveIterator != this->begin()) {
                     --this->mActiveIterator;
-                    Observer::operator()this->mActiveIterator, BEFORE | REMOVE_ITEM);
+                    Observer::operator()(this->mActiveIterator, BEFORE | REMOVE_ITEM);
                     Observer::operator()(this->end(), AFTER | REMOVE_ITEM);
                     this->setItemActive(*this->mActiveIterator, active);
                 }
