@@ -10,7 +10,6 @@
 #include "../math/vector4.h"
 
 #include "boundapimethod.h"
-#include "invscopeptr.h"
 
 #include "valuetypeexception.h"
 
@@ -32,7 +31,6 @@ struct MODULES_EXPORT ValueType {
         size_t,
         float,
         TypedScopePtr,
-        InvScopePtr,
         Matrix3,
         Quaternion,
         Vector4,
@@ -59,7 +57,6 @@ public:
         UIntValue,
         FloatValue,
         ScopeValue,
-        InvScopePtrValue,
         Matrix3Value,
         QuaternionValue,
         Vector4Value,

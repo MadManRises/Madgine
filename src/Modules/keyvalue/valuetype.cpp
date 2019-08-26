@@ -31,8 +31,6 @@ std::string ValueType::toString() const
         return "NULL";
     case Type::ScopeValue:
         return std::get<TypedScopePtr>(mUnion).mType->mName;
-    case Type::InvScopePtrValue:
-        return std::to_string(reinterpret_cast<uintptr_t>(std::get<InvScopePtr>(mUnion).validate()));
     case Type::FloatValue:
         return std::to_string(std::get<float>(mUnion));
     case Type::Vector2Value:
@@ -68,8 +66,6 @@ std::string ValueType::getTypeString(Type type)
         return "Integer";
     case Type::UIntValue:
         return "Unsigned Integer";
-    case Type::InvScopePtrValue:
-        return "Invalid Scope";
     case Type::NullValue:
         return "Null-Type";
     case Type::ScopeValue:

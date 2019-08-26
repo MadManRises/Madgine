@@ -84,12 +84,6 @@ namespace Serialize {
             readRaw(f);
             result = f;
             break;
-        case ValueType::Type::InvScopePtrValue: {
-            InvScopePtr p;
-            readRaw(p);
-            result = p;
-            break;
-        }
         default:
             throw SerializeException(Database::Exceptions::unknownDeserializationType);
         }
@@ -285,9 +279,6 @@ namespace Serialize {
             break;
         case ValueType::Type::FloatValue:
             writeRaw(v.as<float>());
-            break;
-        case ValueType::Type::InvScopePtrValue:
-            writeRaw(v.as<InvScopePtr>());
             break;
         default:
             throw SerializeException(Database::Exceptions::unknownSerializationType);
