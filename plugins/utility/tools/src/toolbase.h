@@ -14,7 +14,7 @@ namespace Engine {
 namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT ToolBase : public Core::MadgineObject, public ScopeBase, public Serialize::SerializableUnit<ToolBase> {
-        SERIALIZABLEUNIT(ToolBase);
+        SERIALIZABLEUNIT;
 
         ToolBase(ImGuiRoot &root);
         virtual ~ToolBase() = default;

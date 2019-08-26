@@ -109,7 +109,7 @@ namespace Serialize {
 	template <typename>
     struct __SerializeInstance;
 
-	#define SERIALIZABLEUNIT(Name) friend struct ::Engine::Serialize::__SerializeInstance<Name>
+	#define SERIALIZABLEUNIT friend struct ::Engine::Serialize::__SerializeInstance<Self>
 
 } // namespace Serialize
 } // namespace Core
