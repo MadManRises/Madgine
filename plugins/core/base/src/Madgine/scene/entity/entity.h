@@ -31,7 +31,7 @@ namespace Scene {
             template <class T>
             T *addComponent(/*const Scripting::LuaTable &table = {}*/)
             {
-                return static_cast<T *>(addComponent(T::componentName, table));
+                return static_cast<T *>(addComponent(T::componentName/*, table*/));
             }
 
             template <class T>
