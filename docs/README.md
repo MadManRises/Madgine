@@ -28,6 +28,9 @@ There is currently no documentation in code. Please refer to the explanations of
 
 * [Getting Started][]
 * [Overview][]
+	* [Concepts][]
+        * [Meta Information][]
+	* [Interfaces][]
     * [Modules][]
         * [Plugins & Unique Components][]
 
@@ -42,8 +45,15 @@ The Madgine is licensed under the MIT License, see [LICENSE.md][] for more infor
 [Twitch]: https://www.twitch.tv/madmanrises
 [Patreon]: https://www.patreon.com/madmanstudios
 
-[Getting Started]: gettingStarted.md
-[Overview]: overview.md
-[Plugins & Unique Components]: plugins.md
-[Modules]: modules.md
 [LICENSE.md]: ../LICENSE.md
+[Getting Started]: gettingStarted.md
+
+[Overview]: overview.md
+
+[Concepts]: concepts.md
+[Meta Information]: meta.md
+
+[Interfaces]: interfaces.md
+
+[Modules]: modules.md
+[Plugins & Unique Components]: plugins.md
