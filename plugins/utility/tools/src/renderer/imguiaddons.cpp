@@ -274,6 +274,25 @@ void ValueTypeDrawer::draw(const Engine::Quaternion &q)
     ImGui::Text("<quaternion>");
 }
 
+bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<object>");
+    return false;
+}
+
+void ValueTypeDrawer::draw(const Engine::ObjectPtr& o) 
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<object>");
+}
+
 bool InputText(const char *label, std::string *s)
 {
     char buf[255];

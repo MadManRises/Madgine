@@ -8,13 +8,10 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/scripting/types/luastate.h"
-
 namespace Engine {
 namespace Server {
     ServerBase::ServerBase(Threading::WorkGroup &workgroup)
-        : /*GlobalScopeBase(Scripting::LuaState::getSingleton())
-        , */TaskQueue("Default")
+        : TaskQueue("Default")
         , mLog(workgroup.name() + "-Log")
     {
         Util::setLog(&mLog);

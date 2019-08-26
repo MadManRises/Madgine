@@ -2,8 +2,6 @@
 
 #include "../generic/templates.h"
 
-#include "../scripting/datatypes/luatable.h"
-
 #include "../math/quaternion.h"
 #include "../math/vector2.h"
 #include "../math/vector3.h"
@@ -16,6 +14,8 @@
 #include "keyvalueiterate.h"
 
 #include "../math/matrix3.h"
+
+#include "objectptr.h"
 
 #include "typedscopeptr.h"
 
@@ -38,8 +38,8 @@ struct MODULES_EXPORT ValueType {
         Vector2,
         KeyValueVirtualIterator,
         BoundApiMethod,
-        ApiMethod
-        //,Scripting::LuaTable
+        ApiMethod,
+        ObjectPtr
         >;
 
 private:
@@ -65,7 +65,7 @@ public:
         KeyValueVirtualIteratorValue,
         BoundApiMethodValue,
         ApiMethodValue,
-        //LuaTableValue,
+        ObjectValue,
 
         MAX_VALUETYPE_TYPE
     };

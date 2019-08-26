@@ -7,7 +7,6 @@
 #include "../resources/resourcemanager.h"
 #include "Interfaces/debug/memory/memory.h"
 #include "Modules/plugins/pluginmanager.h"
-#include "Modules/scripting/types/luastate.h"
 #include "Modules/threading/workgroup.h"
 
 #include "Modules/cli/cli.h"
@@ -23,8 +22,6 @@ namespace Core {
         , mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager))
         ,
 #endif
-        /*mLuaState(std::make_unique<Scripting::LuaState>())
-        ,*/
 #if ENABLE_MEMTRACKING
         mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>())
         ,
@@ -60,15 +57,6 @@ namespace Core {
 #endif
 
         mResources->init();
-
-        /*for (auto &res : mResources->get<Scripting::Parsing::ScriptLoader>()) {
-            std::shared_ptr<Scripting::Parsing::MethodHolder> p = res.second.data();
-            if (p) {
-                p->call(mLuaState->mainThread());
-            }
-        }
-
-        mLuaState->setFinalized();*/
     }
 
     Root::~Root()

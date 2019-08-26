@@ -15,6 +15,9 @@ struct ScopeIterator;
 struct Accessor;
 struct TypedScopePtr;
 
+struct ObjectInstance;
+struct ObjectFieldAccessor;
+
 struct IndexHolder;
 
 struct UniqueComponentCollectorManager;

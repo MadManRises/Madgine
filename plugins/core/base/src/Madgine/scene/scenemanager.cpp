@@ -12,8 +12,6 @@
 
 #include "../app/application.h"
 
-#include "Modules/scripting/datatypes/luatablefieldaccessor.h"
-
 #include "Modules/debug/profiler/profiler.h"
 
 #include "../app/globalapicollector.h"

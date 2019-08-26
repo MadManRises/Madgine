@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../core/madgineobject.h"
-#include "Modules/scripting/types/scopeentity.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
+
+#include "Modules/keyvalue/scopebase.h"
 
 namespace Engine
 {

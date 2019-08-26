@@ -3,7 +3,6 @@
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/keyvalue/scopebase.h"
-#include "Modules/scripting/datatypes/luatable.h"
 
 namespace Engine
 {
@@ -34,7 +33,7 @@ namespace Engine
 				EntityComponentBase* getComponent(const std::string& name);
 
 				template <class T>
-				T *addComponent(const Scripting::LuaTable &init = {})
+				T *addComponent(/*const Scripting::LuaTable &init = {}*/)
 				{
 					return static_cast<T*>(addComponent(T::componentName(), init));
 				}

@@ -2,8 +2,6 @@
 
 #include "../core/madgineobject.h"
 
-#include "Modules/scripting/types/globalscopebase.h"
-
 #include "globalapicollector.h"
 
 #include "../threading/framelistener.h"
@@ -16,7 +14,7 @@ namespace App {
     /**
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
-    class MADGINE_BASE_EXPORT Application : public /*Scripting::GlobalScopeBase*/ScopeBase,
+    class MADGINE_BASE_EXPORT Application : public ScopeBase,
                                             public Core::MadgineObject,
                                             public Threading::FrameListener {
     public:

@@ -3,7 +3,7 @@
 #if ENABLE_THREADING
 
 #include "serverlog.h"
-#include "Modules/scripting/types/globalscopebase.h"
+#include "Modules/keyvalue/scopebase.h"
 
 #include "serverappinstance.h"
 #include "Modules/signalslot/taskqueue.h"
@@ -13,7 +13,7 @@ namespace Engine
 {
 	namespace Server
 	{
-    class MADGINE_SERVER_EXPORT ServerBase : public /*Scripting::GlobalScopeBase*/ ScopeBase, public SignalSlot::TaskQueue
+    class MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public SignalSlot::TaskQueue
 		{
 		public:
 			ServerBase(Threading::WorkGroup &workgroup);
@@ -34,8 +34,6 @@ namespace Engine
 			}
 
 			void consoleCheck();
-
-			//KeyValueMapList maps() override;
 
 		private:
 			ServerLog mLog;

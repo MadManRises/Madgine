@@ -24,7 +24,6 @@ namespace Engine
 			std::unique_ptr<Plugins::PluginManager> mPluginManager;
 			std::unique_ptr<UniqueComponentCollectorManager> mCollectorManager;
 #endif
-			//std::unique_ptr<Scripting::LuaState> mLuaState;
 
 #if ENABLE_MEMTRACKING
 			std::unique_ptr<Debug::Memory::MemoryTracker> mMemTracker;

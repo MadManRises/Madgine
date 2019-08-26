@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Modules/scripting/datatypes/luatable.h"
 #include "Modules/plugins/pluginlocal.h"
 
 namespace Engine {

@@ -40,6 +40,8 @@ struct ValueTypeDrawer {
     void draw(const Engine::Scripting::LuaTable &t);
     bool draw(Engine::Quaternion &q);
     void draw(const Engine::Quaternion &q);
+    bool draw(Engine::ObjectPtr &o);
+    void draw(const Engine::ObjectPtr &o);
 
     const char *mName;
 };

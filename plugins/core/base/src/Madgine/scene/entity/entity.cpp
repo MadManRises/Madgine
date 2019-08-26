@@ -6,8 +6,6 @@
 
 #include "../scenemanager.h"
 
-#include "Modules/scripting/datatypes/luatableiterator.h"
-
 #include "entitycomponentcollector.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
