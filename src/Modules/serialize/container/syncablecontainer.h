@@ -144,7 +144,7 @@ namespace Serialize {
                 if (it.second) {
                     init(*it.first);
                 }
-                onInsert(it.second, it.first);
+                afterInsert(it.second, it.first);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     type temp(std::forward<_Ty>(args)...);

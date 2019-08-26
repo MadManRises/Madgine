@@ -2,12 +2,14 @@
 
 #include "Modules/plugins/pluginlocal.h"
 
+#include "Modules/keyvalue/objectptr.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
 
         struct PluginEntityComponents {
-            std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity &/*, const Scripting::LuaTable &*/)>> mComponents;
+            std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity &, const ObjectPtr &)>> mComponents;
         };
 
 #if ENABLE_PLUGINS
@@ -20,11 +22,11 @@ namespace Scene {
 
             static std::set<std::string> registeredComponentNames();
 
-            static std::unique_ptr<EntityComponentBase> createComponent(Entity &e, const std::string &name/*,
-                const Scripting::LuaTable &table = {}*/);
+            static std::unique_ptr<EntityComponentBase> createComponent(Entity &e, const std::string &name,
+                const ObjectPtr &table = {});
 
         private:
-            typedef std::function<std::unique_ptr<EntityComponentBase>(Entity &/*, const Scripting::LuaTable &*/)> ComponentBuilder;
+            typedef std::function<std::unique_ptr<EntityComponentBase>(Entity &, const ObjectPtr &)> ComponentBuilder;
 #if ENABLE_PLUGINS
             struct LocalComponentStore {
                 static PluginEntityComponents *sRegisteredComponentsByName()
@@ -48,9 +50,9 @@ namespace Scene {
 #endif
 
             template <class T>
-            static std::unique_ptr<EntityComponentBase> createComponent_t(Entity &e/*, const Scripting::LuaTable &table = {}*/)
+            static std::unique_ptr<EntityComponentBase> createComponent_t(Entity &e, const ObjectPtr &table = {})
             {
-                return std::make_unique<T>(e/*, table*/);
+                return std::make_unique<T>(e, table);
             }
 
         public:

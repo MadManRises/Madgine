@@ -11,13 +11,13 @@ namespace Engine {
 ENTITYCOMPONENTVIRTUALIMPL_IMPL(Render::OpenGLMesh);
 
 namespace Render {
-    OpenGLMesh::OpenGLMesh(Scene::Entity::Entity &e/*, const Scripting::LuaTable &data*/)
+    OpenGLMesh::OpenGLMesh(Scene::Entity::Entity &e, const ObjectPtr &data)
         : Serialize::SerializableUnit<OpenGLMesh, Scene::Entity::Mesh>(e/*, data*/)
         , mResource(nullptr)
     {
-        /*if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
+        if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
             setName(v.as<std::string>());
-        }*/
+        }
     }
 
     OpenGLMeshData *OpenGLMesh::data() const

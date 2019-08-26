@@ -9,7 +9,7 @@ namespace Scene {
     namespace Entity {
         class MADGINE_SERVERRENDERER_EXPORT ServerAnimation : public EntityComponentVirtualImpl<ServerAnimation, Animation> {
         public:
-            ServerAnimation(Entity &entity/*, const Scripting::LuaTable &table*/);
+            ServerAnimation(Entity &entity, const ObjectPtr &table);
             virtual ~ServerAnimation();
 
             // Geerbt über SerializableUnit

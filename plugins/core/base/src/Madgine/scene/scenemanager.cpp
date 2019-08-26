@@ -16,10 +16,9 @@
 
 #include "../app/globalapicollector.h"
 
-#include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
-
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
@@ -113,7 +112,7 @@ namespace Scene {
         return mMutex;
     }
 
-	    SignalSlot::SignalStub<> &SceneManager::clearedSignal()
+    SignalSlot::SignalStub<> &SceneManager::clearedSignal()
     {
         return mClearedSignal;
     }
@@ -245,33 +244,31 @@ namespace Scene {
     Entity::Entity *SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
-        throw "Todo"; // TODO
-        /*ValueType behaviorTable = app().table()[behavior];
-        Scripting::LuaTable table;
-        if (behaviorTable.is<Scripting::LuaTable>()) {
-            table = behaviorTable.as<Scripting::LuaTable>();
+        ValueType behaviorTable /* = app().table()[behavior]*/;
+        ObjectPtr table;
+        if (behaviorTable.is<ObjectPtr>()) {
+            table = behaviorTable.as<ObjectPtr>();
         } else {
             LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         if (init)
-            mEntities.emplace_tuple_back_init(init, tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+            TupleUnpacker::invokeFromTuple(&decltype(mEntities)::emplace_init<decltype(init), SceneManager &, bool, std::string, ObjectPtr>, tuple_cat(std::make_tuple(&mEntities, init, mEntities.end()), createEntityData(name, false), std::make_tuple(table)));
         else
-            mEntities.emplace_tuple_back(tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return &mEntities.back();*/
+            TupleUnpacker::invokeFromTuple(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, tuple_cat(std::make_tuple(&mEntities, mEntities.end()), createEntityData(name, false), std::make_tuple(table)));
+        return &mEntities.back();
     }
 
     Entity::Entity *SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
     {
-        throw "Todo"; // TODO
-        /*ValueType behaviorTable = app().table()[behavior];
-        Scripting::LuaTable table;
-        if (behaviorTable.is<Scripting::LuaTable>()) {
-            table = behaviorTable.as<Scripting::LuaTable>();
+        ValueType behaviorTable /* = app().table()[behavior]*/;
+        ObjectPtr table;
+        if (behaviorTable.is<ObjectPtr>()) {
+            table = behaviorTable.as<ObjectPtr>();
         } else {
             LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);*/
+        return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
     }
 
     void SceneManager::updateCamera(Camera &camera)
@@ -317,10 +314,8 @@ METATABLE_BEGIN(Engine::Scene::SceneManager)
 READONLY_PROPERTY(entities, entities)
 METATABLE_END(Engine::Scene::SceneManager)
 
-
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
 //mEntities ->  Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
-
 
 RegisterType(Engine::Scene::SceneManager);

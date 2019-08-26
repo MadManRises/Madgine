@@ -39,23 +39,22 @@ namespace Scene {
             setup();
         }
 
-        Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name/*, const Scripting::LuaTable &behaviour*/)
+        Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behaviour)
             : mName(name)
             , mLocal(local)
             , mSceneManager(sceneMgr)
         {
             setup();
-            throw "Todo"; // TODO
-            /*
             if (behaviour) {
-                for (const std::pair<std::string, ValueType> &p : behaviour) {
+                /*for (const std::pair<std::string, ValueType> &p : behaviour) {
 					if (p.second.is<Scripting::LuaTable>()) {
                         addComponent(p.first, p.second.as<Scripting::LuaTable>());
                     } else {
                         LOG_WARNING("Non-Table value at key \"" << p.first << "\"!");
                     }
-                }
-            }*/
+                }*/
+                throw "Todo";
+            }
         }
 
         Entity::~Entity()
@@ -106,13 +105,13 @@ namespace Scene {
             return mComponents.contains(name);
         }
 
-        EntityComponentBase *Entity::addComponent(const std::string &name/*, const Scripting::LuaTable &table*/)
+        EntityComponentBase *Entity::addComponent(const std::string &name, const ObjectPtr &table)
         {
             auto it = mComponents.find(name);
             if (it != mComponents.end()) {
                 return it->get();
             } else {
-                return mComponents.emplace(EntityComponentCollector::createComponent(*this, name/*, table*/)).first->get();
+                return mComponents.emplace(EntityComponentCollector::createComponent(*this, name, table)).first->get();
             }
         }
 
@@ -149,15 +148,10 @@ namespace Scene {
             return mSceneManager.app(init);
         }
 
-        EntityComponentBase *Entity::addComponentSimple(const std::string &name/*, const Scripting::LuaTable &table*/)
+        EntityComponentBase *Entity::addComponentSimple(const std::string &name, const ObjectPtr &table)
         {
-            return addComponent(name/*, table*/);
+            return addComponent(name, table);
         }
-
-        /*KeyValueMapList Entity::maps()
-			{
-				return Scope::maps().merge(mComponents, MAP_F(addComponentSimple), MAP_F(remove), MAP_RO(Synced, isSynced), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId));
-			}*/
 
         SceneManager &Entity::sceneMgr(bool init) const
         {

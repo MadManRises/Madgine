@@ -18,7 +18,7 @@ namespace Scene {
             Entity(const Entity &, bool local);
             Entity(Entity &&, bool local);
 
-            Entity(SceneManager &sceneMgr, bool local, const std::string &name/*, const Scripting::LuaTable &behavior = {}*/);
+            Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behavior = {});
             Entity(const Entity &) = delete;
             ~Entity();
 
@@ -29,9 +29,9 @@ namespace Scene {
             const char *key() const;
 
             template <class T>
-            T *addComponent(/*const Scripting::LuaTable &table = {}*/)
+            T *addComponent(const ObjectPtr &table = {})
             {
-                return static_cast<T *>(addComponent(T::componentName/*, table*/));
+                return static_cast<T *>(addComponent(T::componentName, table));
             }
 
             template <class T>
@@ -56,7 +56,7 @@ namespace Scene {
 
             bool hasComponent(const std::string &name);
 
-            EntityComponentBase *addComponent(const std::string &name/*, const Scripting::LuaTable &table = {}*/);
+            EntityComponentBase *addComponent(const std::string &name, const ObjectPtr &table = {});
             void removeComponent(const std::string &name);
 
             void writeCreationData(Serialize::SerializeOutStream &of) const;
@@ -84,9 +84,7 @@ namespace Scene {
             App::Application &app(bool = true);
 
         protected:
-            EntityComponentBase *addComponentSimple(const std::string &name/*, const Scripting::LuaTable &table = {}*/);
-
-            //KeyValueMapList maps() override;
+            EntityComponentBase *addComponentSimple(const std::string &name, const ObjectPtr &table = {});
 
         private:
             std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);

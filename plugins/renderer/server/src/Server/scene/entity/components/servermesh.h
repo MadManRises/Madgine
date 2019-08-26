@@ -12,7 +12,7 @@ namespace Engine
                 class MADGINE_SERVERRENDERER_EXPORT ServerMesh : public EntityComponentVirtualImpl<ServerMesh, Mesh>
 			{
 			public:
-				ServerMesh(Entity& entity/*, const Scripting::LuaTable& table*/);
+                    ServerMesh(Entity &entity, const ObjectPtr &table);
 				ServerMesh(Entity& entity, const std::string& meshName);
 				virtual ~ServerMesh();
 

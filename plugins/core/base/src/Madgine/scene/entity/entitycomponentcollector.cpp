@@ -34,10 +34,8 @@ namespace Engine
 			}
 
 			std::unique_ptr<EntityComponentBase> EntityComponentCollector::createComponent(Entity &e,
-				const std::string& name/*, const Scripting::LuaTable& table*/)
+                            const std::string &name, const ObjectPtr &table)
 			{
-                            throw "Todo"; //TODO
-                            /*
 				auto it = sRegisteredComponentsByName()->mComponents.find(name);
 				if (it == sRegisteredComponentsByName()->mComponents.end()) {
 #if ENABLE_PLUGINS
@@ -56,7 +54,7 @@ namespace Engine
 #endif
 					throw ComponentException(Database::Exceptions::unknownComponent(name));
 				}
-				return it->second(e, table);*/
+				return it->second(e, table);
 			}
 
 			PluginEntityComponents* EntityComponentCollector::sRegisteredComponentsByName()

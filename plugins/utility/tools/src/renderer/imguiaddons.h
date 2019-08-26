@@ -36,8 +36,6 @@ struct ValueTypeDrawer {
     void draw(const Engine::BoundApiMethod &m);
     bool draw(std::monostate &);
     void draw(const std::monostate &);
-    bool draw(Engine::Scripting::LuaTable &t);
-    void draw(const Engine::Scripting::LuaTable &t);
     bool draw(Engine::Quaternion &q);
     void draw(const Engine::Quaternion &q);
     bool draw(Engine::ObjectPtr &o);

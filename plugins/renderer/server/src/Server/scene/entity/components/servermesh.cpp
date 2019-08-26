@@ -16,10 +16,11 @@ namespace Engine
 		{
 			ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerMesh);
 
-			ServerMesh::ServerMesh(Entity& entity/*, const Scripting::LuaTable& table*/) :
-				EntityComponentVirtualImpl<Engine::Scene::Entity::ServerMesh, Engine::Scene::Entity::Mesh>(entity/*, table*/),
+			ServerMesh::ServerMesh(Entity &entity, const ObjectPtr &table)
+                            :
+				EntityComponentVirtualImpl<Engine::Scene::Entity::ServerMesh, Engine::Scene::Entity::Mesh>(entity, table),
 				mTransform(nullptr),
-				mMeshName(/*table["mesh"].as<std::string>()*/)
+				mMeshName(table["mesh"].as<std::string>())
 			{
 			}
 

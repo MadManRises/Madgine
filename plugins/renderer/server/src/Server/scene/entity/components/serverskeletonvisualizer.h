@@ -12,7 +12,7 @@ namespace Engine
                 class MADGINE_SERVERRENDERER_EXPORT ServerSkeletonVisualizer : public EntityComponent<ServerSkeletonVisualizer>
 			{
 			public:
-				ServerSkeletonVisualizer(Entity& entity/*, const Scripting::LuaTable& table = {}*/);
+                    ServerSkeletonVisualizer(Entity &entity, const ObjectPtr &table = {});
 				virtual ~ServerSkeletonVisualizer();
 			};
 		}

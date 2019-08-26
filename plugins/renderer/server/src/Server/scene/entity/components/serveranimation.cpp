@@ -14,9 +14,9 @@ namespace Scene {
     namespace Entity {
         ENTITYCOMPONENTVIRTUALIMPL_IMPL(ServerAnimation);
 
-        ServerAnimation::ServerAnimation(Entity &entity/*, const Scripting::LuaTable &table*/)
-            : SerializableUnit(entity/*, table*/)
-            , mDefaultAnimation(/*table["default"].asDefault<std::string>(*/""/*)*/)
+        ServerAnimation::ServerAnimation(Entity &entity, const ObjectPtr &table)
+            : SerializableUnit(entity, table)
+            , mDefaultAnimation(table["default"].asDefault<std::string>(""))
         {
         }
 

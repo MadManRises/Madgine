@@ -9,7 +9,7 @@ namespace Engine
 
 		struct MADGINE_OPENGL_EXPORT OpenGLMesh : Scene::Entity::EntityComponentVirtualImpl<OpenGLMesh, Scene::Entity::Mesh>
 		{			
-			OpenGLMesh(Scene::Entity::Entity &e/*, const Scripting::LuaTable &init*/);			
+			OpenGLMesh(Scene::Entity::Entity &e, const ObjectPtr &init);			
 
 			OpenGLMeshData *data() const;
 

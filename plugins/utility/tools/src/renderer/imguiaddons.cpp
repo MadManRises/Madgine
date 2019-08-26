@@ -236,25 +236,6 @@ void ValueTypeDrawer::draw(const std::monostate &)
     ImGui::Text("<null>");
 }
 
-bool ValueTypeDrawer::draw(Engine::Scripting::LuaTable &t)
-{
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<table>");
-    return false;
-}
-
-void ValueTypeDrawer::draw(const Engine::Scripting::LuaTable &t)
-{
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<table>");
-}
-
 bool ValueTypeDrawer::draw(Engine::Quaternion &q)
 {
     if (strlen(mName)) {

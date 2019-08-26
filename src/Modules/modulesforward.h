@@ -16,6 +16,7 @@ struct Accessor;
 struct TypedScopePtr;
 
 struct ObjectInstance;
+struct ObjectPtr;
 struct ObjectFieldAccessor;
 
 struct IndexHolder;
@@ -98,23 +99,6 @@ namespace Serialize {
         INITIAL_STATE_DONE,
         STREAM_EOF
     };
-}
-
-namespace Scripting {
-    class ScriptingManager;
-
-    class GlobalScopeBase;
-
-    class LuaState;
-    class LuaTable;
-    struct LuaThread;
-    class LuaTableIterator;
-
-    struct Mapper;
-
-    namespace Parsing {
-        class ScriptParser;
-    }
 }
 
 namespace Network {

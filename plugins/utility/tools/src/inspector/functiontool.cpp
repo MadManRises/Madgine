@@ -80,7 +80,7 @@ namespace Tools {
                 void operator()(Vector4 &&) {}
                 void operator()(Vector3 &&) {}
                 void operator()(Vector2 &&) {}
-                void operator()(Scripting::LuaTable &&) {}
+                void operator()(ObjectPtr &&) {}
 
                 FunctionTool *mTool;
                 std::string mName;
