@@ -35,7 +35,7 @@ namespace Engine
 				template <class T>
 				T *addComponent(/*const Scripting::LuaTable &init = {}*/)
 				{
-					return static_cast<T*>(addComponent(T::componentName(), init));
+					return static_cast<T*>(addComponent(T::componentName()/*, init*/));
 				}
 
 				EntityComponentBase* addComponent(const std::string &name/*, const Scripting::LuaTable &init*/);
