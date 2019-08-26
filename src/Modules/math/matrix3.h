@@ -145,6 +145,7 @@ namespace Engine
         // arithmetic operations
         /** Matrix addition.
          */
+        Matrix3 &operator+=(const Matrix3 &rkMatrix);
         Matrix3 operator+ (const Matrix3& rkMatrix) const;
 
         /** Matrix subtraction.

@@ -16,7 +16,7 @@ namespace Input {
         : UniqueComponent(app, listener)
         , mWindow(window)
     {
-        LOG("*** Initializing OIS ***");
+        //LOG("*** Initializing OIS ***");
         OIS::ParamList pl;
         std::ostringstream windowHndStr;
 

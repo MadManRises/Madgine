@@ -8,9 +8,9 @@
 #include "../renderer/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/math/bounds.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 #include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
@@ -24,7 +24,8 @@ namespace Engine {
 namespace Tools {
 
     GuiEditor::GuiEditor(ImGuiRoot &root)
-        : Tool<GuiEditor>(root), mWindow(root.window())
+        : Tool<GuiEditor>(root)
+        , mWindow(root.window())
     {
     }
 
@@ -76,6 +77,8 @@ namespace Tools {
 
     void GuiEditor::renderSelection(GUI::Widget *hoveredWidget)
     {
+        constexpr float borderSize = 10.0f;
+
         if (ImGui::Begin("GuiEditor", &mVisible)) {
 
             ImDrawList *background = ImGui::GetBackgroundDrawList(ImGui::GetMainViewport());
@@ -94,7 +97,7 @@ namespace Tools {
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
                 screenPos += windowPos;
 
-            bool acceptHover = hoveredWidget != nullptr || !io.WantCaptureMouse;
+            bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse) && (!mSelected || !mSelected->widget()->containsPoint(mouse, screenSize, screenPos, borderSize));
 
             if (mSelected) {
                 GUI::Widget *selectedWidget = mSelected->widget();
@@ -107,17 +110,13 @@ namespace Tools {
                 background->AddRect(bounds.topLeft(), bounds.bottomRight(), IM_COL32(255, 255, 255, 255));
 
                 ImU32 resizeColor = IM_COL32(0, 255, 255, 255);
-                if (io.KeyShift) {                    
+                if (io.KeyShift) {
                     resizeColor = IM_COL32(0, 255, 0, 255);
-                }
-                if (io.KeyAlt) {
-                    resizeColor = IM_COL32(0, 0, 255, 255);
                 }
 
                 if (!io.WantCaptureMouse) {
 
                     bool rightBorder = false, leftBorder = false, topBorder = false, bottomBorder = false;
-                    constexpr float borderSize = 10.0f;
 
                     if (!mDragging && selectedWidget->containsPoint(mouse, screenSize, screenPos, borderSize)) {
                         leftBorder = abs(mouse.x - bounds.left()) < borderSize;
@@ -136,7 +135,7 @@ namespace Tools {
                             }
                         }
 
-						acceptHover &= (!rightBorder && !leftBorder && !topBorder && !bottomBorder);
+                        acceptHover &= (!rightBorder && !leftBorder && !topBorder && !bottomBorder);
                     }
 
                     constexpr float thickness = 4.0f;
@@ -193,87 +192,72 @@ namespace Tools {
 
             if (mSelected) {
 
-				enum ResizeMode {
-                    PROPORTIONAL,
+                enum ResizeMode {
                     RELATIVE,
                     ABSOLUTE
                 };
 
-                ResizeMode resizeMode = PROPORTIONAL;                
+                ResizeMode resizeMode = RELATIVE;
                 if (io.KeyShift) {
-                    resizeMode = RELATIVE;
-                }
-                if (io.KeyAlt) {
-                    resizeMode = ABSOLUTE;                    
+                    resizeMode = ABSOLUTE;
                 }
 
                 if (mDragging) {
 
                     auto [pos, size] = mSelected->savedGeometry();
 
-                    float mod[2][2] { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
-                    Vector2 relDragDistance = dragDistance / (size * screenSize).xy();
+                    Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getAbsoluteSize() : Matrix3::IDENTITY;
+
+                    Vector2 relDragDistance = dragDistance / (parentSize * screenSize).xy();
+
+                    Matrix3 dragDistanceSize;
 
                     switch (resizeMode) {
-                    case PROPORTIONAL:
-                        mod[0][0] = relDragDistance.x;
-                        mod[1][0] = relDragDistance.y;
+                    case RELATIVE:
+                        dragDistanceSize = Matrix3 {
+                            relDragDistance.x, 0, 0,
+                            0, relDragDistance.y, 0,
+                            0, 0, 0
+                        };
                         break;
                     case ABSOLUTE:
-                        mod[0][1] = dragDistance.x;
-                        mod[1][1] = dragDistance.y;
-                        break;
-                    case RELATIVE:
+                        dragDistanceSize = Matrix3 {
+                            0, 0, dragDistance.x / parentSize[2][2],
+                            0, 0, dragDistance.y / parentSize[2][2],
+                            0, 0, 0
+                        };
                         break;
                     }
 
                     if (!mDraggingLeft && !mDraggingRight && !mDraggingTop && !mDraggingBottom) {
-                        pos[0][0] += mod[0][0] * size[0][0];
-                        pos[0][1] += mod[0][0] * size[0][1];
-                        pos[0][2] += mod[0][0] * size[0][2] + mod[0][1];
-                        pos[1][0] += mod[1][0] * size[1][0];
-                        pos[1][1] += mod[1][0] * size[1][1];
-                        pos[1][2] += mod[1][0] * size[1][2] + mod[1][1];
+                        pos += dragDistanceSize;
                     } else {
-
-                        if (mDraggingLeft) {
-                            mod[0][0] *= -1.0f;
-                            mod[0][1] *= -1.0f;
+                        Matrix3 dragDistancePos { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        if (!mDraggingLeft && !mDraggingRight) {
+                            dragDistanceSize[0][0] = 0.0f;
+                            dragDistanceSize[0][2] = 0.0f;
+                            dragDistancePos[0][0] = 0.0f;
+                            dragDistancePos[0][2] = 0.0f;
+                        } else if (mDraggingLeft) {
+                            dragDistancePos[0][0] = dragDistanceSize[0][0];
+                            dragDistancePos[0][2] = dragDistanceSize[0][2];
+							dragDistanceSize[0][0] *= -1.0f;                            
+							dragDistanceSize[0][2] *= -1.0f;                            
                         }
-                        if (mDraggingTop) {
-                            mod[1][0] *= -1.0f;
-                            mod[1][1] *= -1.0f;
-                        }
-
-                        std::optional<float> aspectRatio = mSelected->aspectRatio();
-                        if (aspectRatio) {
-                            mod[1][0] = mod[0][0];
-                            mod[1][1] = mod[0][1] / *aspectRatio;
-                        }
-
-                        if (mDraggingLeft || mDraggingRight) {
-                            if (mDraggingLeft) {
-                                pos[0][0] -= mod[0][0] * size[0][0];
-                                pos[0][1] -= mod[0][0] * size[0][1];
-                                pos[0][2] -= mod[0][0] * size[0][2] + mod[0][1];
-                            }
-
-                            size[0][0] += mod[0][0] * size[0][0];
-                            size[0][1] += mod[0][0] * size[0][1];
-                            size[0][2] += mod[0][0] * size[0][2] + mod[0][1];
+                        if (!mDraggingTop && !mDraggingBottom) {
+                            dragDistanceSize[1][1] = 0.0f;
+                            dragDistanceSize[1][2] = 0.0f;
+                            dragDistancePos[1][1] = 0.0f;
+                            dragDistancePos[1][2] = 0.0f;
+                        } else if (mDraggingBottom) {
+                            dragDistancePos[1][1] = dragDistanceSize[1][1];
+                            dragDistancePos[1][2] = dragDistanceSize[1][2];
+                            dragDistanceSize[1][1] *= -1.0f;
+                            dragDistanceSize[1][2] *= -1.0f;
                         }
 
-                        if (mDraggingTop || mDraggingBottom) {
-                            if (mDraggingTop) {
-                                pos[1][0] -= mod[1][0] * size[1][0];
-                                pos[1][1] -= mod[1][0] * size[1][1];
-                                pos[1][2] -= mod[1][0] * size[1][2] + mod[1][1];
-                            }
-
-                            size[1][0] += mod[1][0] * size[1][0];
-                            size[1][1] += mod[1][0] * size[1][1];
-                            size[1][2] += mod[1][0] * size[1][2] + mod[1][1];
-                        }
+                        pos += dragDistancePos;
+                        size += dragDistanceSize;
                     }
 
                     mSelected->setSize(size);
@@ -298,10 +282,10 @@ namespace Tools {
                 ImGui::Text("Selected");
                 mSelected->render();
             }
-            if (hoveredSettings && !mDragging && hoveredSettings != mSelected) {
+            /*if (hoveredSettings && !mDragging && hoveredSettings != mSelected) {
                 ImGui::Text("Hovered");
                 hoveredSettings->render();
-            }
+            }*/
 
             //io.WantCaptureMouse = true;
         }
@@ -312,19 +296,15 @@ namespace Tools {
     {
         for (GUI::Widget *child : w->children()) {
 
-            bool selected = mSelected && mSelected->widget() == child;
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+            if (child->children().empty())
+                flags |= ImGuiTreeNodeFlags_Leaf;
+            if (mSelected && mSelected->widget() == child)
+                flags |= ImGuiTreeNodeFlags_Selected;
 
-            if (child->children().empty()) {
-                ImGui::Selectable(child->getName().c_str(), &selected);
-            } else {
-                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-                if (selected)
-                    flags |= ImGuiTreeNodeFlags_Selected;
-
-                if (ImGui::TreeNodeEx(child->getName().c_str(), flags)) {
-                    listWidgets(child, hoveredWidget);
-                    ImGui::TreePop();
-                }
+            if (ImGui::TreeNodeEx(child->getName().c_str(), flags)) {
+                listWidgets(child, hoveredWidget);
+                ImGui::TreePop();
             }
             if (hoveredWidget && !*hoveredWidget) {
                 if (ImGui::IsItemHovered()) {
