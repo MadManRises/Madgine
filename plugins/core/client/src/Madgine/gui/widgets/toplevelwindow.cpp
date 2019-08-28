@@ -739,6 +739,7 @@ DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
 
 METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
 READONLY_PROPERTY(Widgets, widgets)
+READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::GUI::TopLevelWindow)
 
 RegisterType(Engine::GUI::TopLevelWindow);

@@ -16,6 +16,8 @@ FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscol
 	if (MODULES_ENABLE_PLUGINS OR PLUGINSELECTION_Renderer_OpenGL)
 		FolderSources(sources renderer opengl openglimguimanager.cpp openglimguimanager.h)
 	endif()
+	FolderSources(sources src sceneeditor sceneeditor.cpp sceneeditor.h sceneview.cpp sceneview.h)
+		FolderSources(sources sceneeditor opengl openglgridpass.cpp openglgridpass.h)
 	FolderSources(sources src testtool testtool.cpp testtool.h)
 	FolderSources(sources src tinyxml tinyxml2.cpp tinyxml2.h)
 	

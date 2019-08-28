@@ -3,8 +3,8 @@
 #include "../../input/inputcollector.h"
 #include "../../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
-#include "Modules/uniquecomponent/uniquecomponentselector.h"
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
+#include "Modules/uniquecomponent/uniquecomponentselector.h"
 
 #include "Modules/generic/transformIt.h"
 
@@ -111,7 +111,13 @@ namespace GUI {
             return uniquePtrToPtr(mTopLevelWidgets);
         }
 
-        Render::RenderWindow *getRenderer();
+        decltype(auto) components()
+        {
+            return uniquePtrToPtr(mComponents);
+        }
+
+        Render::RenderWindow *
+        getRenderer();
 
         //virtual App::Application &app(bool = true) override;
         //virtual const Core::MadgineObject *parent() const override;
@@ -151,22 +157,22 @@ namespace GUI {
     private:
         GUISystem &mGui;
 
+        Window::Window *mWindow = nullptr;
+        std::unique_ptr<Render::RenderWindow> mRenderWindow;
+
+        Input::InputHandler *mExternalInput = nullptr;
+        std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
+
         std::map<std::string, Widget *> mWidgets;
         std::unique_ptr<UI::UIManager> mUI;
-
-		TopLevelWindowContainer<std::vector> mComponents;
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
         std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
 
-        Input::InputHandler *mExternalInput = nullptr;
-        std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
-
         std::vector<WindowOverlay *> mOverlays;
 
-        Window::Window *mWindow = nullptr;
-        std::unique_ptr<Render::RenderWindow> mRenderWindow;
+        TopLevelWindowContainer<std::vector> mComponents;
 
         Widget *mHoveredWidget = nullptr;
 
@@ -177,4 +183,3 @@ namespace GUI {
 
 }
 }
-

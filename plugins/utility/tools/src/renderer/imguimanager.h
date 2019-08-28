@@ -18,12 +18,13 @@ namespace Tools {
 
         virtual void newFrame(float timeSinceLastFrame) = 0;
         virtual void render() override;
+        virtual void render(Render::RenderTarget &target) const = 0;
 
-        bool injectKeyPress(const Engine::Input::KeyEventArgs &arg) override;
-        bool injectKeyRelease(const Engine::Input::KeyEventArgs &arg) override;
-        bool injectPointerPress(const Engine::Input::PointerEventArgs &arg) override;
-        bool injectPointerRelease(const Engine::Input::PointerEventArgs &arg) override;
-        bool injectPointerMove(const Engine::Input::PointerEventArgs &arg) override;
+        bool injectKeyPress(const Input::KeyEventArgs &arg) override;
+        bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
+        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
+        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
+        bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
         void calculateAvailableScreenSpace(Window::Window *w, Vector3 &pos, Vector3 &size) override;
 

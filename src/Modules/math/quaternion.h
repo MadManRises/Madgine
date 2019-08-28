@@ -35,7 +35,7 @@ namespace Engine {
 			w = newW;			
 		}
 
-		Quaternion operator *(const Quaternion &other)
+		Quaternion operator *(const Quaternion &other) const
 		{
 			Quaternion q{ *this };
 			q *= other;

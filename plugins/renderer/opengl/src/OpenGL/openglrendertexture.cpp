@@ -18,6 +18,8 @@
 #include "Madgine/scene/entity/entity.h"
 #include "openglmesh.h"
 
+#include "Madgine/render/renderpass.h"
+
 namespace Engine {
 namespace Render {
 
@@ -32,7 +34,7 @@ namespace Render {
             throw 0;
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
-        mProgram.setUniform("lightDir", Vector3{ 0.0f, 0.0f, -1.0f }.normalisedCopy());
+        mProgram.setUniform("lightDir", Vector3 { 0.0f, 0.0f, -1.0f }.normalisedCopy());
 
         mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         mTexture.setFilter(GL_NEAREST);
@@ -105,12 +107,17 @@ namespace Render {
 
         mProgram.bind();
 
-        glClearColor(0.1f, 0.01f, 0.3f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float aspectRatio = size.x / size.y;
 
         mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
+
+        for (RenderPass *pass : uniquePtrToPtr(preRenderPasses())) {
+            pass->render(camera(), size);
+            mProgram.bind();
+        }
 
         for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
 
@@ -136,7 +143,17 @@ namespace Render {
             }
         }
 
+        for (RenderPass *pass : uniquePtrToPtr(postRenderPasses())) {
+            pass->render(camera(), size);
+            mProgram.bind();
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    const OpenGLTexture &OpenGLRenderTexture::texture() const
+    {
+        return mTexture;
     }
 }
 }

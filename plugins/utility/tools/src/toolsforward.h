@@ -10,7 +10,6 @@ namespace Engine
 		class Inspector;
 		class ImGuiManager;
 
-		class OgreImguiManager;
 		class OpenGLImguiManager;
 	}
 }

@@ -48,6 +48,7 @@ namespace Render {
     class RendererBase;
     class RenderWindow;
     struct RenderTarget;
+    struct RenderPass;
 }
 
 }

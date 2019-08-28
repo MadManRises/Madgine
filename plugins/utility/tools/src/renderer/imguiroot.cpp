@@ -149,7 +149,7 @@ namespace Tools {
 
         mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
 
-        ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_PassthruCentralNode;
+        ImGuiDockNodeFlags dockspace_flags = /*ImGuiDockNodeFlags_NoDockingInCentralNode | */ImGuiDockNodeFlags_PassthruCentralNode;
 
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
         // because it would be confusing to have two docking targets within each others.
@@ -236,6 +236,11 @@ namespace Tools {
     }
 
 #endif
+
+    const ImGuiManager &ImGuiRoot::manager() const
+    {
+        return *mManager;
+    }
 
     void ImGuiRoot::createManager()
     {

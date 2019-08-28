@@ -3,7 +3,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLTexture {
+		struct MADGINE_OPENGL_EXPORT OpenGLTexture {
 
 			OpenGLTexture();
 			~OpenGLTexture();
@@ -12,7 +12,7 @@ namespace Engine {
 
 			void setData(GLsizei width, GLsizei height, void *data);
 
-			GLuint handle();
+			GLuint handle() const;
 
 			void setWrapMode(GLint mode);
 			void setFilter(GLint filter);

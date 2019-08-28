@@ -3,7 +3,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLShaderProgram {			
+		struct MADGINE_OPENGL_EXPORT OpenGLShaderProgram {			
 			
 			~OpenGLShaderProgram();
 

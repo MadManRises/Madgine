@@ -3,7 +3,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLBuffer {
+		struct MADGINE_OPENGL_EXPORT OpenGLBuffer {
 
 			OpenGLBuffer();
 			~OpenGLBuffer();

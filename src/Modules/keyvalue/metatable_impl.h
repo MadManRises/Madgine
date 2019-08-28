@@ -29,11 +29,12 @@ constexpr Accessor property()
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
+		using SetterScope = typename setter_traits::class_type;
 
         static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
-            TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<T>());
+            TupleUnpacker::invoke(Setter, scope.safe_cast<SetterScope>(), v.as<T>());
         };
     }
 
@@ -56,6 +57,8 @@ constexpr Accessor property()
                 return ValueType {
                     KeyValueVirtualIterator { KeyValueIterator { value.begin() }, KeyValueIterator { value.end() } }
                 };
+            } else {
+                static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
             }
         },
         setter

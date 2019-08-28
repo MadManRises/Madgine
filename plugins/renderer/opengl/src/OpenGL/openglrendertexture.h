@@ -8,7 +8,7 @@
 namespace Engine {
 	namespace Render {
 
-		struct OpenGLRenderTexture : RenderTarget {
+		struct MADGINE_OPENGL_EXPORT OpenGLRenderTexture : RenderTarget {
 
 			OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size);
 			~OpenGLRenderTexture();
@@ -16,9 +16,11 @@ namespace Engine {
 
 			uint32_t textureId() const override;
 
-			void resize(const Vector2 &size) override;
+			void resize(const Vector2 &size) override;            
 
 			virtual void render() override;
+
+			const OpenGLTexture &texture() const;
 
 		private:
 			uint32_t mIndex;

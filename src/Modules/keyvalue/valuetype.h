@@ -72,7 +72,7 @@ public:
 
     template <class T>
     struct isValueType {
-        const constexpr static bool value = _isValueType<std::decay_t<T>>::value || std::is_enum<T>::value;
+        const constexpr static bool value = _isValueType<std::decay_t<T>>::value || std::is_enum<T>::value || std::is_base_of_v<ScopeBase, std::decay_t<T>>;
     };
 
     ValueType()
@@ -356,8 +356,8 @@ public:
     template <class T>
     bool is() const
     {
-        if constexpr (_isValueType<T>::value) {
-            return std::holds_alternative<T>(mUnion);
+        if constexpr (_isValueType<std::decay_t<T>>::value) {
+            return std::holds_alternative<std::decay_t<T>>(mUnion);
         } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
         } else if constexpr (std::is_same_v<T, ValueType>) {
             return true;
@@ -371,13 +371,13 @@ public:
     template <class T>
     decltype(auto) as() const
     {
-        if constexpr (_isValueType<T>::value) {
+        if constexpr (_isValueType<std::decay_t<T>>::value) {
             try {
-                return std::get<T>(mUnion);
+                return std::get<std::decay_t<T>>(mUnion);
             } catch (const std::bad_variant_access &) {
                 throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
                     getTypeString(
-                        static_cast<Type>(variant_index<Union, T>::value))));
+                        static_cast<Type>(variant_index<Union, std::decay_t<T>>::value))));
             }
         } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
         } else if constexpr (std::is_same_v<T, ValueType>) {

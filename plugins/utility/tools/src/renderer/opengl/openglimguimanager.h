@@ -9,10 +9,11 @@ namespace Engine {
 		public:
 			OpenGLImGuiManager(GUI::TopLevelWindow &window);
 
-			// Geerbt über ImGuiManager
 			virtual void init() override;
 			virtual void finalize() override;
 			virtual void newFrame(float timeSinceLastFrame) override;
+
+			virtual void render(Render::RenderTarget &target) const override;
 		};
 
 	}

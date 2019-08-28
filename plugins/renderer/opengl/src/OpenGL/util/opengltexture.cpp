@@ -33,7 +33,7 @@ namespace Engine {
 			glCheck();
 		}
 
-		GLuint OpenGLTexture::handle()
+		GLuint OpenGLTexture::handle() const
 		{
 			return mHandle;
 		}

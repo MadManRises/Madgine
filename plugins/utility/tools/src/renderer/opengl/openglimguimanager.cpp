@@ -8,6 +8,7 @@
 #include "../../imgui/examples/imgui_impl_opengl3.h"
 
 #include "OpenGL/openglrenderwindow.h"
+#include "OpenGL/openglrendertexture.h"
 
 #include "Modules/math/vector3.h"
 
@@ -55,6 +56,13 @@ namespace Tools {
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
+    }
+
+    void OpenGLImGuiManager::render(Render::RenderTarget &target) const
+    {
+        Render::OpenGLRenderTexture &texture = static_cast<Render::OpenGLRenderTexture &>(target);
+
+		ImGui::Image((void *)(intptr_t)texture.texture().handle(), texture.getSize(), { 0, 1 }, { 1, 0 });
     }
 
 }

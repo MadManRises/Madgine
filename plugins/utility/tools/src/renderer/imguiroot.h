@@ -39,6 +39,8 @@ namespace Tools {
             return static_cast<T &>(getToolComponent(::Engine::component_index<T>()));
         }
 
+		const ImGuiManager &manager() const;
+
     private:
         void createManager();
         void destroyManager();

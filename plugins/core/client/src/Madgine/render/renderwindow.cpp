@@ -18,6 +18,7 @@ namespace Render {
 
     RenderWindow::~RenderWindow()
     {
+        assert(mRenderTargets.empty());
     }
 
     void RenderWindow::beginFrame()
