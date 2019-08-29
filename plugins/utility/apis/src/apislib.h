@@ -17,3 +17,5 @@
 #define MADGINE_APIS_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
 #endif
 #endif
+
+#include <numeric>

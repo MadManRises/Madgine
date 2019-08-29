@@ -7,6 +7,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Modules/math/pi.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -14,8 +16,8 @@ namespace Scene {
         : mName(std::move(name))
         , mPosition(0, 0, 0)
         , mF(200.0f)
-        , mN(1.0f)
-        , mFOV(1.8326f)
+        , mN(0.1f)
+        , mFOV(105)
     {
     }
 
@@ -45,7 +47,7 @@ namespace Scene {
 
         Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
             
-		float r = tanf(mFOV / 2.0f) * mN;
+		float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
         float t = r / aspectRatio;        
 
         Matrix4 p = {

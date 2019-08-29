@@ -49,6 +49,7 @@ namespace Render {
     class RenderWindow;
     struct RenderTarget;
     struct RenderPass;
+    struct Vertex;
 }
 
 }

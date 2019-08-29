@@ -168,7 +168,18 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-		Apis::Im3D::Mesh();
+		if (Entity::Transform *t = entity->getComponent<Entity::Transform>()) {
+            const Render::Vertex vertices[] = {
+                { { 0, 0, 0 }, { 1, 0, 0, 1 }, { -1, -1, -1 } },
+                { { 1, 0, 0 }, { 0, 1, 0, 1 }, { 1, 0, 0 } },
+                { { 0, 1, 0 }, { 0, 0, 1, 1 }, { 0, 1, 0 } },
+                { { 0, 0, 1 }, { 1, 0, 1, 1 }, { 0, 0, 1 } },
+            };
+            const unsigned int indices[] = {
+                0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3
+            };
+            Apis::Im3D::Mesh(vertices, 4, t->matrix(), indices, 12);
+        }
     }
 
     void SceneEditor::renderCamera(Scene::Camera *camera)
