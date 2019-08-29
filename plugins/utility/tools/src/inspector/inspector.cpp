@@ -99,12 +99,12 @@ namespace Tools {
     {
         bool showName = !element || !style("noname", element);
         std::string id = (showName ? std::string() : "##"s) + (*it).first;
-        bool editable = /*(it.flags() & Engine::IsEditable) == Engine::IsEditable*/ true;
+        bool editable = parent.isEditable((*it).first);
 
-        drawValue(element, parent, id, (*it).second, editable);
+        drawValue(element, parent, id, (*it).first, (*it).second, editable);
     }
 
-    void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType value, bool editable)
+    void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable)
     {
         if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
             ImGui::PushDisabled();
@@ -123,9 +123,8 @@ namespace Tools {
                                                          ImGui::DraggableValueTypeSource(id, parent, value);
                                                          if (b) {
                                                              for (; it != VirtualIteratorEnd {}; ++it) {
-                                                                 drawValue(element, parent, (*it).first.toString(), (*it).second, false);
+                                                                 drawValue(element, parent, (*it).first.toString(), (*it).first.toString(), (*it).second, false);
                                                              }
-                                                             //draw(scope, element ? element->Attribute("layout") : nullptr);
                                                              ImGui::TreePop();
                                                          }
                                                          return false;
@@ -143,8 +142,8 @@ namespace Tools {
         if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
             ImGui::PopDisabled();
 
-        /*if (modified)
-				parent.set(it.key(), value);*/
+        if (modified)
+			parent.set(key, value);
     }
 
     void Inspector::draw(TypedScopePtr scope, const char *layoutName)

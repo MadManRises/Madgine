@@ -8,8 +8,13 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
+		struct PluginEntityComponentInfo {
+            std::function<std::unique_ptr<EntityComponentBase>(Entity &, const ObjectPtr &)> mCtor;
+            const MetaTable *mType;
+		};
+
         struct PluginEntityComponents {
-            std::map<std::string, std::function<std::unique_ptr<EntityComponentBase>(Entity &, const ObjectPtr &)>> mComponents;
+            std::map<std::string, PluginEntityComponentInfo> mComponents;
         };
 
 #if ENABLE_PLUGINS
@@ -24,6 +29,8 @@ namespace Scene {
 
             static std::unique_ptr<EntityComponentBase> createComponent(Entity &e, const std::string &name,
                 const ObjectPtr &table = {});
+
+			static const MetaTable *getComponentType(const std::string &name);
 
         private:
             typedef std::function<std::unique_ptr<EntityComponentBase>(Entity &, const ObjectPtr &)> ComponentBuilder;
@@ -63,7 +70,7 @@ namespace Scene {
                 {
                     const std::string name = T::componentName();
                     assert(PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.find(name) == PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents.end());
-                    PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents[name] = &createComponent_t<T>;
+                    PLUGABLE_COMPONENT sRegisteredComponentsByName()->mComponents[name] = { &createComponent_t<T>, &table<T>() };
                 }
 
                 ~ComponentRegistrator()

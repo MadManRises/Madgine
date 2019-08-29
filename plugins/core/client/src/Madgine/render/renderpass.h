@@ -6,7 +6,7 @@ namespace Render {
 	struct RenderPass {
         virtual ~RenderPass() = default;
 
-        virtual void render(Scene::Camera *camera, const Vector2 &size) = 0;
+        virtual void render(Render::RenderTarget *target, Scene::Camera *camera) = 0;
 	};
 
 }

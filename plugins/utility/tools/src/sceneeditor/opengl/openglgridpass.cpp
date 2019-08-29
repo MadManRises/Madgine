@@ -8,6 +8,7 @@
 #include "Modules/math/matrix4.h"
 
 #include "Madgine/scene/camera.h"
+#include "Madgine/render/rendertarget.h"
 
 namespace Engine {
 namespace Tools {
@@ -20,10 +21,7 @@ namespace Tools {
         if (!mProgram.link(vertexShader.get(), pixelShader.get()))
             throw 0;
 
-        glGenVertexArrays(1, &mVAO);
-        GL_CHECK();
-        glBindVertexArray(mVAO);
-        GL_CHECK();
+        mVAO.bind();
 
         mVertexBuffer.bind(GL_ARRAY_BUFFER);
         GL_CHECK();
@@ -53,37 +51,14 @@ namespace Tools {
         mIndexBuffer.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices);
     }
 
-    void OpenGlGridPass::render(Scene::Camera *camera, const Vector2 &size)
+    void OpenGlGridPass::render(Render::RenderTarget *target, Scene::Camera *camera)
     {
+        const Vector2 &size = target->getSize();
         float aspectRatio = size.x / size.y;
 
-        mProgram.bind();
+        mProgram.setUniform("mvp", camera->getViewProjectionMatrix(aspectRatio));
 
-        float n = camera->getN();
-        float fov = camera->getFOV();
-        float t = tanf(fov / 2.0f) * n;
-        float r = t * aspectRatio;
-
-        Matrix4 pos = {
-            1, 0, 0, -camera->position().x,
-            0, 1, 0, -camera->position().y,
-            0, 0, 1, -camera->position().z,
-            0, 0, 0, 1
-        };
-
-        Matrix4 rot = Matrix4(camera->orientation().inverse().toMatrix());
-
-        Matrix4 p = {
-            n / r, 0, 0, 0,
-            0, n / t, 0, 0,
-            0, 0, -1, 2 * n,
-            0, 0, 1, 0
-        };
-
-        mProgram.setUniform("mvp", p * rot * pos);
-
-        glBindVertexArray(mVAO);
-        GL_CHECK();
+        mVAO.bind();
 
         mVertexBuffer.bind(GL_ARRAY_BUFFER);
         mIndexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);

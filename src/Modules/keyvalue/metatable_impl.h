@@ -31,7 +31,8 @@ constexpr Accessor property()
         using setter_traits = CallableTraits<decltype(Setter)>;
 		using SetterScope = typename setter_traits::class_type;
 
-        static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
+		//TODO remove const in tuple types
+        //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
             TupleUnpacker::invoke(Setter, scope.safe_cast<SetterScope>(), v.as<T>());

@@ -2,6 +2,7 @@
 
 #include "Modules/math/vector2.h"
 #include "renderpass.h"
+#include "vertex.h"
 
 namespace Engine {
 namespace Render {
@@ -15,6 +16,7 @@ namespace Render {
         Scene::Camera *camera() const;
 
         virtual void render() = 0;
+        virtual void renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
 
         virtual uint32_t textureId() const = 0;
 

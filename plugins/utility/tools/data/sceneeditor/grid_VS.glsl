@@ -11,5 +11,6 @@ uniform mat4 mvp;
 void main()
 {	
 	worldPos = aPos;
-    gl_Position = mvp * worldPos;	    
+    gl_Position = mvp * worldPos;
+	gl_Position.z *= -1.0;
 }

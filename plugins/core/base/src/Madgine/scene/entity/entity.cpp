@@ -12,7 +12,6 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
-
 namespace Engine {
 
 namespace Scene {
@@ -23,7 +22,6 @@ namespace Scene {
             , mLocal(local)
             , mSceneManager(other.mSceneManager)
         {
-            setup();
         }
 
         Entity::Entity(Entity &&other, bool local)
@@ -36,7 +34,6 @@ namespace Scene {
             for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
                 comp->moveToEntity(this);
             }
-            setup();
         }
 
         Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behaviour)
@@ -44,7 +41,6 @@ namespace Scene {
             , mLocal(local)
             , mSceneManager(sceneMgr)
         {
-            setup();
             if (behaviour) {
                 /*for (const std::pair<std::string, ValueType> &p : behaviour) {
 					if (p.second.is<Scripting::LuaTable>()) {
@@ -59,26 +55,6 @@ namespace Scene {
 
         Entity::~Entity()
         {
-        }
-
-        void Entity::setup()
-        {
-            throw "Todo";
-            /*mComponents.observer().signal().connect([](const decltype(mComponents)::const_iterator &it, int op) {
-                using namespace Serialize;
-                switch (op) {
-                case BEFORE | RESET:
-                    break;
-                case AFTER | RESET:
-                    break;
-                case INSERT_ITEM:
-                    (*it)->init();
-                    break;
-                case BEFORE | REMOVE_ITEM:
-                    (*it)->finalize();
-                    break;
-                }
-            });*/
         }
 
         const char *Entity::key() const
@@ -96,7 +72,7 @@ namespace Scene {
         {
             auto it = mComponents.find(name);
             if (it == mComponents.end())
-                throw 0;
+                return nullptr;
             return it->get();
         }
 
@@ -132,7 +108,6 @@ namespace Scene {
             mSceneManager.removeLater(this);
         }
 
-
         SceneComponentBase &Entity::getSceneComponent(size_t i, bool init)
         {
             return mSceneManager.getComponent(i, init);
@@ -161,6 +136,22 @@ namespace Scene {
         bool Entity::isLocal() const
         {
             return mLocal;
+        }
+
+        void EntityComponentObserver::operator()(const SetIterator<std::unique_ptr<EntityComponentBase>> &it, int op)
+        {
+            switch (op) {
+            case BEFORE | RESET:
+                throw "TODO";
+            case AFTER | RESET:
+                throw "TODO";
+            case AFTER | INSERT_ITEM:
+                (*it)->init();
+                break;
+            case BEFORE | REMOVE_ITEM:
+                (*it)->finalize();
+                break;
+            }
         }
     }
 }

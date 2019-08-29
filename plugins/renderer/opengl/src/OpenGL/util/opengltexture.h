@@ -6,6 +6,8 @@ namespace Engine {
 		struct MADGINE_OPENGL_EXPORT OpenGLTexture {
 
 			OpenGLTexture();
+                    OpenGLTexture(const OpenGLTexture &) = delete;
+                        OpenGLTexture(OpenGLTexture &&);
 			~OpenGLTexture();
 
 			void bind() const;

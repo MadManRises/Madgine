@@ -45,8 +45,9 @@ namespace Scene {
         Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 
-        Scene::Camera *createCamera();
-        void destroyCamera(Scene::Camera *camera);
+        Camera *createCamera(std::string name = "");
+        void destroyCamera(Camera *camera);
+        std::list<Camera> &cameras();
 
         void clear();
 

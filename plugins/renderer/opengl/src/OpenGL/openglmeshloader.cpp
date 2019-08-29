@@ -10,6 +10,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Madgine/render/vertex.h"
+
 UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 namespace Engine {
@@ -37,9 +39,11 @@ namespace Render {
         }
 
         std::vector<Vertex> vertices;
-        //data->mVertices.resize(mesh->mNumFaces * 3);
+        std::vector<unsigned int> indices;
+        //Reserve??		
 
         for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+            unsigned int baseVertexIndex = vertices.size();
             aiMesh *mesh = scene->mMeshes[meshIndex];
 
             aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
@@ -50,46 +54,49 @@ namespace Render {
                 diffuseColor = { aiDiffuseColor.r, aiDiffuseColor.g, aiDiffuseColor.b, 1.0f };
             }
 
+            for (size_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
+                Vertex &vertex = vertices.emplace_back();
+                aiVector3D &v = mesh->mVertices[vertexIndex];
+                vertex.mPos = { v.x, v.z, v.y };
+                aiVector3D &n = mesh->mNormals[vertexIndex];
+                vertex.mNormal = { n.x, n.z, n.y };
+                aiColor4D *c = mesh->mColors[0];
+                vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : diffuseColor;
+            }
+
             for (size_t i = 0; i < mesh->mNumFaces; ++i) {
                 aiFace &face = mesh->mFaces[i];
 
-                auto toVertex = [&](size_t j) {
-                    Vertex result;
-                    size_t index = face.mIndices[j];
-                    aiVector3D &v = mesh->mVertices[index];
-                    result.mPos = { v.x, v.z, v.y };
-                    aiVector3D &n = mesh->mNormals[index];
-                    result.mNormal = { n.x, n.z, n.y };
-                    aiColor4D *c = mesh->mColors[0];
-                    result.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : diffuseColor;
-                    return result;
-                };
-
-                Vertex v0 = toVertex(0);
-                Vertex lastVertex = toVertex(1);
+                unsigned int v0 = face.mIndices[0];
+                unsigned int lastIndex = face.mIndices[1];
 
                 for (size_t j = 2; j < face.mNumIndices; ++j) {
-                    Vertex v = toVertex(j);
-                    vertices.push_back(v0);
-                    vertices.push_back(lastVertex);
-                    vertices.push_back(v);
-                    lastVertex = v;
+                    unsigned int index = face.mIndices[j];
+
+                    indices.push_back(v0 + baseVertexIndex);
+                    indices.push_back(lastIndex + baseVertexIndex);
+                    indices.push_back(index + baseVertexIndex);
+                    lastIndex = index;
                 }
             }
         }
 
-        return generate(vertices);
+        return std::make_shared<OpenGLMeshData>(generate(vertices.data(), vertices.size(), indices.data(), indices.size()));
     }
 
-    std::shared_ptr<OpenGLMeshData> OpenGLMeshLoader::generate(const std::vector<Vertex> &vertices)
+    OpenGLMeshData OpenGLMeshLoader::generate(Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
 
-        std::shared_ptr<OpenGLMeshData> data = std::make_shared<OpenGLMeshData>();
+        OpenGLMeshData data;
 
-        glGenVertexArrays(1, &data->mVAO);
-        glBindVertexArray(data->mVAO);
+        data.mVAO.bind();
 
-        data->mVertices.bind(GL_ARRAY_BUFFER);
+        if (indices) {
+            data.mIndices = {};
+            data.mIndices.bind(GL_ELEMENT_ARRAY_BUFFER);
+        }
+
+        data.mVertices.bind(GL_ARRAY_BUFFER);
         glVertexAttribPointer(
             0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
@@ -118,16 +125,21 @@ namespace Render {
         );
         glEnableVertexAttribArray(2);
 
-        update(data, vertices);
+        update(data, vertices, vertexCount, indices, indexCount);
 
         return data;
     }
 
-    void OpenGLMeshLoader::update(const std::shared_ptr<OpenGLMeshData> &data, const std::vector<Vertex> &vertices)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
 
-        data->mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data());
-        data->mVertexCount = vertices.size();
+        data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
+        if (indices) {
+            data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices);
+            data.mElementCount = indexCount;
+        } else {
+            data.mElementCount = vertexCount;
+        }
     }
 
 }

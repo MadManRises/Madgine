@@ -7,6 +7,7 @@
 #include "Modules/keyvalue/metatable.h"
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine {
 
@@ -38,6 +39,9 @@ namespace Scene {
 }
 }
 
+
+METATABLE_BEGIN(Engine::Scene::Entity::ServerAnimation)
+METATABLE_END(Engine::Scene::Entity::ServerAnimation)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::ServerAnimation)
 SERIALIZETABLE_END(Engine::Scene::Entity::ServerAnimation)

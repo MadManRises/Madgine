@@ -98,6 +98,40 @@ namespace Render {
     void OpenGLRenderTexture::render()
     {
 
+        setupProgram();
+
+        for (RenderPass *pass : uniquePtrToPtr(preRenderPasses())) {
+            pass->render(this, camera());
+            mProgram.bind();
+        }
+
+        for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
+
+            OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
+            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            if (mesh && mesh->isVisible() && transform) {
+                OpenGLMeshData *meshData = mesh->data();
+                if (meshData) {
+                    renderMesh(meshData, transform->matrix());
+                }
+            }
+        }
+
+        for (RenderPass *pass : uniquePtrToPtr(postRenderPasses())) {
+            pass->render(this, camera());
+            mProgram.bind();
+        }
+
+        resetProgram();
+    }
+
+    const OpenGLTexture &OpenGLRenderTexture::texture() const
+    {
+        return mTexture;
+    }
+
+    void OpenGLRenderTexture::setupProgram()
+    {
         const Vector2 &size = getSize();
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
@@ -113,47 +147,41 @@ namespace Render {
         float aspectRatio = size.x / size.y;
 
         mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
+    }
 
-        for (RenderPass *pass : uniquePtrToPtr(preRenderPasses())) {
-            pass->render(camera(), size);
-            mProgram.bind();
-        }
-
-        for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
-
-            OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (mesh && mesh->isVisible() && transform) {
-                OpenGLMeshData *meshData = mesh->data();
-                if (meshData) {
-                    mProgram.setUniform("m", transform->matrix());
-                    mProgram.setUniform(
-                        "anti_m",
-                        transform->matrix()
-                            .ToMat3()
-                            .Inverse()
-                            .Transpose());
-
-                    glBindVertexArray(meshData->mVAO);
-                    glCheck();
-
-                    glDrawArrays(GL_TRIANGLES, 0, meshData->mVertexCount);
-                    glCheck();
-                }
-            }
-        }
-
-        for (RenderPass *pass : uniquePtrToPtr(postRenderPasses())) {
-            pass->render(camera(), size);
-            mProgram.bind();
-        }
-
+    void OpenGLRenderTexture::resetProgram()
+    {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    const OpenGLTexture &OpenGLRenderTexture::texture() const
+    void OpenGLRenderTexture::renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix)
     {
-        return mTexture;
+        mProgram.setUniform("m", transformMatrix);
+        mProgram.setUniform(
+            "anti_m",
+            transformMatrix
+                .ToMat3()
+                .Inverse()
+                .Transpose());
+
+        mesh->mVAO.bind();
+
+        if (mesh->mIndices) {            
+            glDrawElements(GL_TRIANGLES, mesh->mElementCount, GL_UNSIGNED_INT, 0);
+        }        
+        else glDrawArrays(GL_TRIANGLES, 0, mesh->mElementCount);
+        glCheck();
+    }
+
+    void OpenGLRenderTexture::renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    {
+        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(vertices, vertexCount, indices, indexCount);
+
+        //setupProgram();
+
+        renderMesh(&tempMesh);
+
+        //resetProgram();
     }
 }
 }

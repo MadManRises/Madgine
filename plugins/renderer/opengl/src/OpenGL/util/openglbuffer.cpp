@@ -2,42 +2,60 @@
 
 #include "openglbuffer.h"
 
-
 namespace Engine {
-	namespace Render {
+namespace Render {
 
+    OpenGLBuffer::OpenGLBuffer()
+    {
+        glGenBuffers(1, &mHandle);
+        glCheck();
+    }
 
+    OpenGLBuffer::OpenGLBuffer(dont_create_buffer_t)
+    {
+    }
 
-		OpenGLBuffer::OpenGLBuffer()
-		{
-			glGenBuffers(1, &mHandle);
-			glCheck();
-		}
+    OpenGLBuffer::OpenGLBuffer(OpenGLBuffer &&other)
+        : mHandle(std::exchange(other.mHandle, 0))
+    {
+    }
 
-		OpenGLBuffer::~OpenGLBuffer()
-		{
-			glDeleteBuffers(1, &mHandle);
-			glCheck();
-		}
+    OpenGLBuffer::~OpenGLBuffer()
+    {
+        if (mHandle) {
+            glDeleteBuffers(1, &mHandle);
+            glCheck();
+        }
+    }
 
-		void OpenGLBuffer::bind(GLenum target) const
-		{
-			glBindBuffer(target, mHandle);
-			glCheck();
-		}
+    OpenGLBuffer &OpenGLBuffer::operator=(OpenGLBuffer &&other)
+    {
+        mHandle = std::exchange(other.mHandle, 0);
+        return *this;
+    }
 
-		void OpenGLBuffer::setData(GLenum target, GLsizei size, const void * data)
-		{
-			bind(target);
-			glBufferData(target, size, data, GL_STATIC_DRAW);
-			glCheck();
-		}
+    OpenGLBuffer::operator bool() const
+    {
+        return mHandle != 0;
+    }
 
-		GLuint OpenGLBuffer::handle()
-		{
-			return mHandle;
-		}
+    void OpenGLBuffer::bind(GLenum target) const
+    {
+        glBindBuffer(target, mHandle);
+        glCheck();
+    }
 
+    void OpenGLBuffer::setData(GLenum target, GLsizei size, const void *data)
+    {
+        bind(target);
+        glBufferData(target, size, data, GL_STATIC_DRAW);
+        glCheck();
+    }
 
-	}
+    GLuint OpenGLBuffer::handle()
+    {
+        return mHandle;
+    }
+
+}
 }

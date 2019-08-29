@@ -6,6 +6,7 @@
 
 #include "Modules/keyvalue/valuetype.h"
 #include "Modules/serialize/serializetable_impl.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine {
 ENTITYCOMPONENTVIRTUALIMPL_IMPL(Render::OpenGLMesh);
@@ -56,6 +57,9 @@ namespace Render {
 }
 }
 
+METATABLE_BEGIN(Engine::Render::OpenGLMesh)
+PROPERTY(Name, getName, setName)
+METATABLE_END(Engine::Render::OpenGLMesh)
 
 SERIALIZETABLE_BEGIN(Engine::Render::OpenGLMesh)
 SERIALIZETABLE_END(Engine::Render::OpenGLMesh)

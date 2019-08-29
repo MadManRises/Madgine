@@ -10,11 +10,12 @@
 namespace Engine {
 namespace Scene {
 
-    Camera::Camera()
-        : mPosition(0, 0, 4)
-        , mF(105.0f)
+    Camera::Camera(std::string name)
+        : mName(std::move(name))
+        , mPosition(0, 0, 0)
+        , mF(200.0f)
         , mN(1.0f)
-        , mFOV(1.5708f)
+        , mFOV(1.8326f)
     {
     }
 
@@ -40,17 +41,12 @@ namespace Scene {
 
     Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
     {
-        Matrix4 rot = Matrix4(mOrientation.inverse().toMatrix());
+        Matrix4 rotate = Matrix4(mOrientation.inverse().toMatrix());
 
-        Matrix4 v = {
-            1, 0, 0, -mPosition.x,
-            0, 1, 0, -mPosition.y,
-            0, 0, 1, -mPosition.z,
-            0, 0, 0, 1
-        };
-
-        float t = tanf(mFOV / 2.0f) * mN;
-        float r = t * aspectRatio;
+        Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
+            
+		float r = tanf(mFOV / 2.0f) * mN;
+        float t = r / aspectRatio;        
 
         Matrix4 p = {
             mN / r, 0, 0, 0,
@@ -59,7 +55,7 @@ namespace Scene {
             0, 0, 1, 0
         };
 
-        return p * rot * v;
+        return p * rotate * translate;
     }
 
     float Camera::getF() const
@@ -92,6 +88,16 @@ namespace Scene {
         mFOV = fov;
     }
 
+    const std::string &Camera::getName() const
+    {
+        return mName;
+    }
+
+    void Camera::setName(const std::string &name)
+    {
+        mName = name;
+    }
+
     Vector3 Camera::getOrientationHandle() const
     {
         return Vector3::ZERO;
@@ -107,9 +113,9 @@ namespace Scene {
         return mVisibleEntities;
     }
 
-    void Camera::setVisibleEntities(std::vector<Entity::Entity *> &&visibleEntities)
+    void Camera::setVisibleEntities(std::vector<Entity::Entity *> visibleEntities)
     {
-        mVisibleEntities = std::move(visibleEntities);
+        mVisibleEntities.swap(visibleEntities);
     }
 
     Ray Camera::mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize)
@@ -127,6 +133,7 @@ namespace Scene {
 }
 
 METATABLE_BEGIN(Engine::Scene::Camera)
+PROPERTY(Name, getName, setName)
 PROPERTY(Position, position, setPosition)
 PROPERTY(Near, getN, setN)
 PROPERTY(Far, getF, setF)

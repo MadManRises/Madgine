@@ -1509,4 +1509,13 @@ namespace Engine
     }
     //-----------------------------------------------------------------------
 	*/
-}
+
+	Matrix4 Matrix4::TranslationMatrix(const Vector3 &t)
+    {
+            return { 1, 0, 0, t.x,
+                0, 1, 0, t.y,
+                0, 0, 1, t.z,
+                0, 0, 0, 1 };
+            ;
+    }
+    }

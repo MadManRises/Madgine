@@ -11,9 +11,15 @@ namespace Engine {
 		{			
 		}
 
-		OpenGLShader::~OpenGLShader()
+		OpenGLShader::OpenGLShader(OpenGLShader &&other)
+                    : mHandle(std::exchange(other.mHandle, 0))
+                {
+                }
+
+                OpenGLShader::~OpenGLShader()
 		{
-			glDeleteShader(mHandle);
+            if (mHandle)
+				glDeleteShader(mHandle);
 		}
 
 	}

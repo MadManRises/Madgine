@@ -18,14 +18,16 @@ namespace Tools {
 
         void drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
         void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
-        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType value, bool editable);
+        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
+
+		void draw(TypedScopePtr scope, const char *layoutName = nullptr);
 
         InspectorLayout *getLayout(const std::string &name);
 
         const char *key() const override;
 
     private:
-        void draw(TypedScopePtr scope, const char *layoutName);
+        
 
         void draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn);
         void drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);

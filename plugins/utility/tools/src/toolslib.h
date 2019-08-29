@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/clientlib.h"
+#include "apislib.h"
 
 #include "toolsforward.h"
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Modules/serialize/container/serializedmapper.h"
 
 namespace Engine
 {
@@ -21,22 +20,6 @@ namespace Engine
 
 				virtual void setVisible(bool vis) = 0;
 				virtual bool isVisible() const = 0;
-
-				//KeyValueMapList maps() override;
-
-			private:
-				std::string getName2() const
-				{
-					return getName();
-				}
-
-				void setName2(const std::string &name)
-				{
-					setName(name);
-				}
-
-				Serialize::SerializedMapper<&Mesh::getName2, &Mesh::setName2>
-					mSerializedObject;
 
 			};
 

@@ -14,10 +14,17 @@ namespace Engine {
 			glCheck();
 		}
 
-		OpenGLTexture::~OpenGLTexture()
+		OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
+                    : mHandle(std::exchange(other.mHandle, 0))
+                {
+                }
+
+                OpenGLTexture::~OpenGLTexture()
 		{
-			glDeleteTextures(1, &mHandle);
-			glCheck();
+                    if (mHandle) {
+                        glDeleteTextures(1, &mHandle);
+                        glCheck();
+                    }
 		}
 
 		void OpenGLTexture::bind() const

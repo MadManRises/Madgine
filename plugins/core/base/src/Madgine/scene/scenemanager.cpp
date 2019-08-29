@@ -213,14 +213,19 @@ namespace Scene {
         return &mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
     }
 
-    Scene::Camera *SceneManager::createCamera()
+    Scene::Camera *SceneManager::createCamera(std::string name)
     {
-        return &mCameras.emplace_back();
+        return &mCameras.emplace_back(std::move(name));
     }
 
     void SceneManager::destroyCamera(Scene::Camera *camera)
     {
         mCameras.erase(std::find_if(mCameras.begin(), mCameras.end(), [=](const Scene::Camera &c) { return &c == camera; }));
+    }
+
+    std::list<Camera> &SceneManager::cameras()
+    {
+        return mCameras;
     }
 
     std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)

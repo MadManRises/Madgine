@@ -66,6 +66,8 @@ namespace Engine
 ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Transform)
+PROPERTY(Position, getPosition, setPosition)
+PROPERTY(Scale, getScale, setScale)
 METATABLE_END(Engine::Scene::Entity::Transform)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)

@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct SceneEditor : public Tool<SceneEditor> {    
+    struct SceneEditor : public Tool<SceneEditor> {
 
         SERIALIZABLEUNIT;
 
@@ -22,21 +22,29 @@ namespace Tools {
 
         const char *key() const override;
 
-		std::vector<SceneView> &views() 
-		{
+        std::vector<SceneView> &views()
+        {
             return mSceneViews;
-		}
+        }
 
     private:
         void renderSelection();
         void renderHierarchy();
+        void renderEntity(Scene::Entity::Entity *entity);
+        void renderCamera(Scene::Camera *camera);
 
     private:
         GUI::TopLevelWindow &mWindow;
 
-		std::vector<SceneView> mSceneViews;
+        std::vector<SceneView> mSceneViews;
 
-		bool mHierarchyVisible = false;
+        Inspector *mInspector;
+        Scene::SceneManager *mSceneMgr;
+
+        Scene::Entity::Entity *mSelectedEntity = nullptr;
+        Scene::Camera *mSelectedCamera = nullptr;
+
+        bool mHierarchyVisible = false;
     };
 
 }

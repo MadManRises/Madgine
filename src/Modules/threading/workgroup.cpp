@@ -155,8 +155,12 @@ namespace Threading {
     const Any &WorkGroup::localVariable(int index)
     {
         std::vector<Any> &variables = index < 0 ? self().mBssVariables : self().mObjectVariables;
+        std::vector<std::function<Any()>> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
         if (index < 0)
             index = -(index + 1);
+        while (variables.size() <= index) {
+            variables.emplace_back(constructors[variables.size()]());
+        }
         return variables.at(index);
     }
 

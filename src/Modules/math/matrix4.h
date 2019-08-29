@@ -251,7 +251,7 @@ class MODULES_EXPORT Matrix4 {
         return false;
     }*/
 
-    Matrix3 ToMat3() {
+    Matrix3 ToMat3() const {
         return Matrix3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2],
                        m[2][0], m[2][1], m[2][2]);
     }
@@ -268,6 +268,8 @@ class MODULES_EXPORT Matrix4 {
           << mat[3][3] << ")";
         return o;
     }
+
+	static Matrix4 TranslationMatrix(const Vector3 &t);
 
     static const float EPSILON;
     static const Matrix4 ZERO;

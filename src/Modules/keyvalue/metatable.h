@@ -8,6 +8,8 @@ struct MetaTable {
 
     ScopeIterator find(const std::string &key, TypedScopePtr scope) const;
     std::optional<ValueType> get(const std::string &key, TypedScopePtr scope) const;
+    void set(const std::string &key, const ValueType &value, TypedScopePtr scope) const;
+    bool isEditable(const std::string &key) const;
 
     template <typename T>
     bool isInstance() const;

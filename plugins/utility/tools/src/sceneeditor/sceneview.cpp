@@ -18,15 +18,19 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "im3d/im3drenderpass.h"
+
 namespace Engine {
 namespace Tools {
 
     SceneView::SceneView(Engine::Render::RenderWindow *renderer, const ImGuiManager &manager)
         : mManager(manager)
     {
-        mCamera.setPosition({ 1, 1, 1 });
+        mCamera.setPosition({ 0, 0.5, -1 });
 
         mRenderTarget = renderer->createRenderTarget(&mCamera, { 100, 100 });
+
+		mRenderTarget->addPostRenderPass(std::make_unique<Apis::Im3DRenderPass>());
 
         std::unique_ptr<Render::RenderPass> pass;
 
@@ -35,7 +39,7 @@ namespace Tools {
         else LOG_WARNING("No Grid RenderPass implemented!");
 
         if (pass)
-            mRenderTarget->addPreRenderPass(std::move(pass));
+            mRenderTarget->addPostRenderPass(std::move(pass));
     }
 
     SceneView::~SceneView()
@@ -87,6 +91,8 @@ namespace Tools {
         }
         ImGui::End();
         ImGui::PopID();
+
+
     }
 
     Scene::Camera &SceneView::camera()

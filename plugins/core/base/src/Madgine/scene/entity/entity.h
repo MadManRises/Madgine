@@ -11,6 +11,10 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
+		struct EntityComponentObserver {
+            void operator()(const SetIterator<std::unique_ptr<EntityComponentBase>> &it, int op);
+        };
+
         class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase
         {
 
@@ -21,8 +25,6 @@ namespace Scene {
             Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behavior = {});
             Entity(const Entity &) = delete;
             ~Entity();
-
-            void setup();
 
             void remove();
 
@@ -47,6 +49,10 @@ namespace Scene {
             }
 
             EntityComponentBase *getComponent(const std::string &name);
+
+			decltype(auto) components() {
+                return uniquePtrToPtr(mComponents);
+			}
 
             template <class T>
             bool hasComponent()
@@ -86,13 +92,15 @@ namespace Scene {
         protected:
             EntityComponentBase *addComponentSimple(const std::string &name, const ObjectPtr &table = {});
 
+		public:
+            std::string mName;
+
         private:
             std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
-
-            std::string mName;
+			            
             bool mLocal;
 
-			SYNCABLE_CONTAINER(mComponents, std::set<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly);
+			SYNCABLE_CONTAINER(mComponents, std::set<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
 
             SceneManager &mSceneManager;
         };

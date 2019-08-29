@@ -6,6 +6,7 @@
 
 #include "Madgine/scene/entity/components/transform.h"
 #include "Modules/serialize/serializetable_impl.h"
+#include "Modules/keyvalue/metatable_impl.h"
 
 namespace Engine
 {
@@ -66,6 +67,10 @@ namespace Engine
 		}
 	}
 }
+
+
+METATABLE_BEGIN(Engine::Scene::Entity::ServerMesh)
+METATABLE_END(Engine::Scene::Entity::ServerMesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::ServerMesh)
 SERIALIZETABLE_END(Engine::Scene::Entity::ServerMesh)

@@ -10,9 +10,9 @@ namespace Render {
 
         std::shared_ptr<OpenGLMeshData> loadImpl(ResourceType *res) override;
 
-        std::shared_ptr<OpenGLMeshData> generate(const std::vector<Vertex> &vertices);
+        static OpenGLMeshData generate(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
 
-        void update(const std::shared_ptr<OpenGLMeshData> &data, const std::vector<Vertex> &vertices);
+        static void update(OpenGLMeshData &data, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
     };
 
 }

@@ -400,7 +400,7 @@ namespace Serialize {
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
 	#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...) \
-    Pre Serialize::PartialSerializableContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, 100>>::type __VA_ARGS__ Name; \
+    Pre Serialize::PartialSerializableContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>>::type __VA_ARGS__ Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
 }

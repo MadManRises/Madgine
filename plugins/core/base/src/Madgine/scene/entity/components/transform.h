@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Modules/serialize/container/serializedmapper.h"
 #include "Modules/math/vector3.h"
 #include "Modules/math/matrix4.h"
 #include "Modules/math/quaternion.h"

@@ -16,6 +16,8 @@
 #include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
 
+#include "im3d/im3d.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -56,6 +58,7 @@ namespace Tools {
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
+        Apis::Im3D::NewFrame();
     }
 
     void OpenGLImGuiManager::render(Render::RenderTarget &target) const

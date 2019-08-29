@@ -11,6 +11,16 @@ namespace Engine {
         return mType->get(key, *this);
     }
 
+	void TypedScopePtr::set(const std::string &key, const ValueType &value)
+    {
+        mType->set(key, value, *this);
+    }
+
+	bool TypedScopePtr::isEditable(const std::string &key) const
+    {
+        return mType->isEditable(key);
+    }
+
     ScopeIterator TypedScopePtr::find(const std::string &key) const
     {
         return mType->find(key, *this);
