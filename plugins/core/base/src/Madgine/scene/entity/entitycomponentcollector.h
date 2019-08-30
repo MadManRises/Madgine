@@ -4,6 +4,8 @@
 
 #include "Modules/keyvalue/objectptr.h"
 
+#include "Modules/keyvalue/metatable.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
