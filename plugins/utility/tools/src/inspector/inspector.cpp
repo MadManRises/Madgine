@@ -1,12 +1,12 @@
 #include "../toolslib.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "inspector.h"
 
-#include "../renderer/imguiaddons.h"
 #include "../renderer/imguiroot.h"
 #include "Madgine/app/application.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
@@ -106,7 +106,9 @@ namespace Tools {
 
     void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable)
     {
-        if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
+        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue || value.type() == Engine::ValueType::Type::BoundApiMethodValue;
+
+        if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
 
         bool modified = ImGui::ValueType(&value, overloaded { [&](TypedScopePtr scope) {
@@ -139,11 +141,11 @@ namespace Tools {
                                                      } },
             id.c_str());
 
-        if (!editable && value.type() != Engine::ValueType::Type::ScopeValue)
+        if (!editable && !cannotBeDisabled)
             ImGui::PopDisabled();
 
         if (modified)
-			parent.set(key, value);
+            parent.set(key, value);
     }
 
     void Inspector::draw(TypedScopePtr scope, const char *layoutName)

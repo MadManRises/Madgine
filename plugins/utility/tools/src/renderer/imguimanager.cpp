@@ -7,8 +7,8 @@
 #include "Madgine/gui/widgets/toplevelwindow.h"
 #include "Madgine/input/inputhandler.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #include "Madgine/input/inputevents.h"
 

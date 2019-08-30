@@ -2,9 +2,9 @@
 
 #include "profiler.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
-#include "../renderer/imguiaddons.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/debug/profiler/profiler.h"
 

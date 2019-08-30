@@ -1,4 +1,4 @@
-#include "../toolslib.h"
+#include "../apislib.h"
 
 #include "imguiaddons.h"
 
@@ -9,6 +9,9 @@
 
 #include "Modules/generic/templates.h"
 #include "Modules/keyvalue/typedscopeptr.h"
+
+DLL_EXPORT Engine::Threading::WorkgroupLocal<ImGuiContext *>
+GImGui;
 
 namespace ImGui {
 

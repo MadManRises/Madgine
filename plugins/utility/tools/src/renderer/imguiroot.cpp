@@ -22,8 +22,8 @@
 
 #include "Modules/signalslot/taskqueue.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #include "imguimanager.h"
 
@@ -36,8 +36,7 @@
 
 #include "Modules/ini/iniformatter.h"
 
-THREADLOCAL(ImGuiContext *)
-GImGui;
+
 
 UNIQUECOMPONENT(Engine::Tools::ImGuiRoot);
 

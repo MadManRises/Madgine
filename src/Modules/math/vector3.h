@@ -48,16 +48,16 @@ namespace Engine
 		@note
 		It does <b>NOT</b> initialize the vector for efficiency.
 		*/
-		Vector3()
+        Vector3()
 		{
 		}
 
-		Vector3(const float fX, const float fY, const float fZ)
+		constexpr Vector3(const float fX, const float fY, const float fZ)
 			: x(fX), y(fY), z(fZ)
 		{
 		}
 
-		Vector3(const float afCoordinate[3])
+		constexpr Vector3(const float afCoordinate[3])
 			: x(afCoordinate[0]),
 			  y(afCoordinate[1]),
 			  z(afCoordinate[2])

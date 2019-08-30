@@ -5,14 +5,7 @@
 namespace Engine {
 
 struct Ray {
-
-    Ray(const Vector3 &point, const Vector3 &dir)
-        : mPoint(point)
-        , mDir(dir)
-    {
-    }
-
-    Vector3 mPoint;
-    Vector3 mDir;
+    Vector3 mPoint = Vector3::ZERO;
+    NormalizedVector3 mDir = Vector3 { Vector3::ZERO };
 };
 }

@@ -27,6 +27,9 @@ namespace Tools {
             return mSceneViews;
         }
 
+		int hoveredAxis() const;
+        Scene::Entity::Transform *hoveredTransform() const;
+
     private:
         void renderSelection();
         void renderHierarchy();
@@ -45,6 +48,9 @@ namespace Tools {
         Scene::Camera *mSelectedCamera = nullptr;
 
         bool mHierarchyVisible = false;
+
+		int mHoveredAxis = -1;
+        Scene::Entity::Transform *mHoveredTransform = nullptr;
     };
 
 }

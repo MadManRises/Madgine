@@ -4,8 +4,8 @@
 
 #include "openglimguimanager.h"
 
-#include "../../imgui/imgui.h"
-#include "../../imgui/examples/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/examples/imgui_impl_opengl3.h"
 
 #include "OpenGL/openglrenderwindow.h"
 #include "OpenGL/openglrendertexture.h"
@@ -58,7 +58,7 @@ namespace Tools {
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
-        Apis::Im3D::NewFrame();
+        Im3D::NewFrame();
     }
 
     void OpenGLImGuiManager::render(Render::RenderTarget &target) const

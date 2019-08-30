@@ -2,9 +2,8 @@
 
 #include "metrics.h"
 
-#include "../imgui/imgui.h"
-
-#include "../renderer/imguiaddons.h"
+#include "imgui/imgui.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"

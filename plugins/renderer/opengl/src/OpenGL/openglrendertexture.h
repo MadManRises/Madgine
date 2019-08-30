@@ -20,6 +20,7 @@ namespace Render {
 
         virtual void render() override;
         virtual void renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;
+        virtual void clearDepthBuffer() override;
 
         const OpenGLTexture &texture() const;
 

@@ -17,7 +17,7 @@ namespace Scene {
         , mPosition(0, 0, 0)
         , mF(200.0f)
         , mN(0.1f)
-        , mFOV(105)
+        , mFOV(90)
     {
     }
 
@@ -46,9 +46,9 @@ namespace Scene {
         Matrix4 rotate = Matrix4(mOrientation.inverse().toMatrix());
 
         Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
-            
-		float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
-        float t = r / aspectRatio;        
+
+        float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
+        float t = r /* / aspectRatio*/;
 
         Matrix4 p = {
             mN / r, 0, 0, 0,
@@ -124,10 +124,18 @@ namespace Scene {
     {
         float aspectRatio = viewportSize.x / viewportSize.y;
 
-        float t = tanf(mFOV / 2.0f) * mN;
-        float r = t * aspectRatio;
+        float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
+        float t = r /* / aspectRatio*/;
 
-        Vector3 dir = mOrientation * Vector3 { (2.f * mousePos.x / viewportSize.x - 1.f) * r, (1.f - 2.f * mousePos.y / viewportSize.y) * t, mN };
+        Vector3 dir = mOrientation * Vector3 { (2.f * mousePos.x / viewportSize.x - 1.0f) * r, (1.0f - 2.f * mousePos.y / viewportSize.y) * t, mN };
+        dir.normalise();
+        return { mPosition, dir };
+    }
+
+    Ray Camera::toRay() const
+    {
+        Vector3 dir = mOrientation * Vector3 { 0, 0, mN };
+        dir.normalise();
         return { mPosition, dir };
     }
 
@@ -139,6 +147,7 @@ PROPERTY(Name, getName, setName)
 PROPERTY(Position, position, setPosition)
 PROPERTY(Near, getN, setN)
 PROPERTY(Far, getF, setF)
+PROPERTY(FOV, getFOV, setFOV)
 METATABLE_END(Engine::Scene::Camera)
 
 RegisterType(Engine::Scene::Camera);

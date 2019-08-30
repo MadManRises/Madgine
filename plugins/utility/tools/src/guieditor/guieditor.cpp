@@ -2,10 +2,10 @@
 
 #include "guieditor.h"
 
-#include "../imgui/imgui.h"
+#include "imgui/imgui.h"
 #include "../renderer/imguiroot.h"
 
-#include "../renderer/imguiaddons.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/math/bounds.h"

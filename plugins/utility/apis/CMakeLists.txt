@@ -5,6 +5,8 @@ Project(Apis)
 set(sources "")
 FolderSources(sources "" src apisforward.h apislib.h)
 	FolderSources(sources src im3d im3d.cpp im3d.h im3drenderpass.cpp im3drenderpass.h)
+	FolderSources(sources src imgui imgui.cpp imgui.h imguiaddons.cpp imguiaddons.h imgui_demo.cpp imgui_draw.cpp imgui_widgets.cpp imgui_internal.h)
+		FolderSources(sources imgui examples imgui_impl_opengl3.cpp imgui_impl_opengl3.h)
 
 	
 
@@ -15,3 +17,7 @@ target_link_plugins(Apis OpenGL Client Base)
 
 install_to_workspace(Apis TARGETS Apis EXPORT_LIB)
 export_to_workspace(Apis)
+
+if (NOT ANDROID AND NOT EMSCRIPTEN)
+	target_compile_definitions(Apis PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
+endif()

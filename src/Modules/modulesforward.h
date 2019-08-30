@@ -165,6 +165,8 @@ class Matrix4;
 struct TypeInfo;
 
 struct Ray;
+struct Sphere;
+struct Plane;
 }
 
 struct lua_State;

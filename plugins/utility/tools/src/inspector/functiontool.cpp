@@ -2,8 +2,8 @@
 
 #include "functiontool.h"
 
-#include "../imgui/imgui.h"
-#include "../renderer/imguiaddons.h"
+#include "imgui/imgui.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"

@@ -3,9 +3,9 @@
 #if ENABLE_MEMTRACKING
 
 #include "memoryviewer.h"
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
-#include "../renderer/imguiaddons.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "imgui/imguiaddons.h"
 
 #include "../renderer/imguiroot.h"
 #include "Madgine/app/application.h"

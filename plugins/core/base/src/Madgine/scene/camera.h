@@ -40,6 +40,7 @@ namespace Scene {
         void setVisibleEntities(std::vector<Entity::Entity *> entities);
 
         Ray mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize);
+        Ray toRay() const;
 
     private:
         std::string mName;

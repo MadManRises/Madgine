@@ -195,52 +195,73 @@ namespace Engine
         return kTranspose;
     }
     //-----------------------------------------------------------------------
-    bool Matrix4::Inverse (Matrix4& rkInverse, float fTolerance) const
+    void Matrix4::Inverse (Matrix4& rkInverse) const
     {
-        // Invert a 4x4 using cofactors.  This is about 8 times faster than
-        // the Numerical Recipes code which uses Gaussian elimination.
+        float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
+        float m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
+        float m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
+        float m30 = m[3][0], m31 = m[3][1], m32 = m[3][2], m33 = m[3][3];
 
-        rkInverse[0][0] = m[1][1]*m[2][2] -
-            m[1][2]*m[2][1];
-        rkInverse[0][1] = m[0][2]*m[2][1] -
-            m[0][1]*m[2][2];
-        rkInverse[0][2] = m[0][1]*m[1][2] -
-            m[0][2]*m[1][1];
-        rkInverse[1][0] = m[1][2]*m[2][0] -
-            m[1][0]*m[2][2];
-        rkInverse[1][1] = m[0][0]*m[2][2] -
-            m[0][2]*m[2][0];
-        rkInverse[1][2] = m[0][2]*m[1][0] -
-            m[0][0]*m[1][2];
-        rkInverse[2][0] = m[1][0]*m[2][1] -
-            m[1][1]*m[2][0];
-        rkInverse[2][1] = m[0][1]*m[2][0] -
-            m[0][0]*m[2][1];
-        rkInverse[2][2] = m[0][0]*m[1][1] -
-            m[0][1]*m[1][0];
+        float v0 = m20 * m31 - m21 * m30;
+        float v1 = m20 * m32 - m22 * m30;
+        float v2 = m20 * m33 - m23 * m30;
+        float v3 = m21 * m32 - m22 * m31;
+        float v4 = m21 * m33 - m23 * m31;
+        float v5 = m22 * m33 - m23 * m32;
 
-		float fDet =
-            m[0][0]*rkInverse[0][0] +
-            m[0][1]*rkInverse[1][0]+
-            m[0][2]*rkInverse[2][0];
+        float t00 = +(v5 * m11 - v4 * m12 + v3 * m13);
+        float t10 = -(v5 * m10 - v2 * m12 + v1 * m13);
+        float t20 = +(v4 * m10 - v2 * m11 + v0 * m13);
+        float t30 = -(v3 * m10 - v1 * m11 + v0 * m12);
 
-        if ( Math::Abs(fDet) <= fTolerance )
-            return false;
+        float invDet = 1 / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
 
-		float fInvDet = 1.0f/fDet;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-                rkInverse[iRow][iCol] *= fInvDet;
-        }
+        float d00 = t00 * invDet;
+        float d10 = t10 * invDet;
+        float d20 = t20 * invDet;
+        float d30 = t30 * invDet;
 
-        return true;
+        float d01 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+        float d11 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+        float d21 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+        float d31 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+        v0 = m10 * m31 - m11 * m30;
+        v1 = m10 * m32 - m12 * m30;
+        v2 = m10 * m33 - m13 * m30;
+        v3 = m11 * m32 - m12 * m31;
+        v4 = m11 * m33 - m13 * m31;
+        v5 = m12 * m33 - m13 * m32;
+
+        float d02 = +(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+        float d12 = -(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+        float d22 = +(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+        float d32 = -(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+        v0 = m21 * m10 - m20 * m11;
+        v1 = m22 * m10 - m20 * m12;
+        v2 = m23 * m10 - m20 * m13;
+        v3 = m22 * m11 - m21 * m12;
+        v4 = m23 * m11 - m21 * m13;
+        v5 = m23 * m12 - m22 * m13;
+
+        float d03 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+        float d13 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+        float d23 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+        float d33 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+
+        rkInverse = {
+            d00, d01, d02, d03,
+            d10, d11, d12, d13,
+            d20, d21, d22, d23,
+            d30, d31, d32, d33
+        };
     }
     //-----------------------------------------------------------------------
-    Matrix4 Matrix4::Inverse (float fTolerance) const
+    Matrix4 Matrix4::Inverse () const
     {
         Matrix4 kInverse = Matrix4::ZERO;
-        Inverse(kInverse,fTolerance);
+        Inverse(kInverse);
         return kInverse;
     }
     //-----------------------------------------------------------------------
@@ -904,8 +925,8 @@ namespace Engine
         // z^2-1.  We can solve these for axis (x,y,z).  Because the angle is pi,
         // it does not matter which sign you choose on the square roots.
 
-        Real fTrace = m[0][0] + m[1][1] + m[2][2];
-        Real fCos = 0.5f*(fTrace-1.0f);
+        float fTrace = m[0][0] + m[1][1] + m[2][2];
+        float fCos = 0.5f*(fTrace-1.0f);
         rfRadians = Math::ACos(fCos);  // in [0,PI]
 
         if ( rfRadians > Radian(0.0) )
@@ -979,18 +1000,18 @@ namespace Engine
     //-----------------------------------------------------------------------
     void Matrix4::FromAngleAxis (const Vector4& rkAxis, const Radian& fRadians)
     {
-        Real fCos = Math::Cos(fRadians);
-        Real fSin = Math::Sin(fRadians);
-        Real fOneMinusCos = 1.0f-fCos;
-        Real fX2 = rkAxis.x*rkAxis.x;
-        Real fY2 = rkAxis.y*rkAxis.y;
-        Real fZ2 = rkAxis.z*rkAxis.z;
-        Real fXYM = rkAxis.x*rkAxis.y*fOneMinusCos;
-        Real fXZM = rkAxis.x*rkAxis.z*fOneMinusCos;
-        Real fYZM = rkAxis.y*rkAxis.z*fOneMinusCos;
-        Real fXSin = rkAxis.x*fSin;
-        Real fYSin = rkAxis.y*fSin;
-        Real fZSin = rkAxis.z*fSin;
+        float fCos = Math::Cos(fRadians);
+        float fSin = Math::Sin(fRadians);
+        float fOneMinusCos = 1.0f-fCos;
+        float fX2 = rkAxis.x*rkAxis.x;
+        float fY2 = rkAxis.y*rkAxis.y;
+        float fZ2 = rkAxis.z*rkAxis.z;
+        float fXYM = rkAxis.x*rkAxis.y*fOneMinusCos;
+        float fXZM = rkAxis.x*rkAxis.z*fOneMinusCos;
+        float fYZM = rkAxis.y*rkAxis.z*fOneMinusCos;
+        float fXSin = rkAxis.x*fSin;
+        float fYSin = rkAxis.y*fSin;
+        float fZSin = rkAxis.z*fSin;
 
         m[0][0] = fX2*fOneMinusCos+fCos;
         m[0][1] = fXYM-fZSin;
@@ -1216,7 +1237,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesXYZ (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);
@@ -1236,7 +1257,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesXZY (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);
@@ -1256,7 +1277,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesYXZ (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);
@@ -1276,7 +1297,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesYZX (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);
@@ -1296,7 +1317,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesZXY (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);
@@ -1316,7 +1337,7 @@ namespace Engine
     void Matrix4::FromEulerAnglesZYX (const Radian& fYAngle, const Radian& fPAngle,
         const Radian& fRAngle)
     {
-        Real fCos, fSin;
+        float fCos, fSin;
 
         fCos = Math::Cos(fYAngle);
         fSin = Math::Sin(fYAngle);

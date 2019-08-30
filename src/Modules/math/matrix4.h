@@ -178,8 +178,8 @@ class MODULES_EXPORT Matrix4 {
 
     // utilities
     Matrix4 Transpose() const;
-    bool Inverse(Matrix4 &rkInverse, float fTolerance = 1e-06) const;
-    Matrix4 Inverse(float fTolerance = 1e-06) const;
+    void Inverse(Matrix4 &rkInverse) const;
+    Matrix4 Inverse() const;
     /*		float Determinant () const;
 
             /// Singular value decomposition

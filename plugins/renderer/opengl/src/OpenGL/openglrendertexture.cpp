@@ -183,5 +183,10 @@ namespace Render {
 
         //resetProgram();
     }
+
+    void OpenGLRenderTexture::clearDepthBuffer()
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
 }
 }

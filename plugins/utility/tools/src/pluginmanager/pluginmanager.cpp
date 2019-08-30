@@ -4,10 +4,10 @@
 
 #include "pluginmanager.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
-#include "../renderer/imguiaddons.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/plugins/pluginmanager.h"
 

@@ -2,11 +2,11 @@
 
 #include "widgetsettings.h"
 
-#include "../imgui/imgui.h"
+#include "imgui/imgui.h"
 
 #include "Madgine/gui/widgets/widget.h"
 
-#include "../renderer/imguiaddons.h"
+#include "imgui/imguiaddons.h"
 
 namespace Engine {
 namespace Tools {

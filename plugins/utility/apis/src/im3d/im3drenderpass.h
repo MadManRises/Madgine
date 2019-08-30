@@ -4,11 +4,11 @@
 
 
 namespace Engine {
-namespace Apis {
+namespace Render {
 
-	struct MADGINE_APIS_EXPORT Im3DRenderPass : Render::RenderPass {
+    struct MADGINE_APIS_EXPORT Im3DRenderPass : RenderPass {
 
-        virtual void render(Render::RenderTarget *target, Scene::Camera *camera) override;
+        virtual void render(RenderTarget *target, Scene::Camera *camera) override;
     };
 
 }

@@ -2,9 +2,9 @@
 
 #include "sceneeditor.h"
 
-#include "../imgui/imgui.h"
-#include "../renderer/imguiaddons.h"
 #include "../renderer/imguiroot.h"
+#include "imgui/imgui.h"
+#include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
@@ -34,7 +34,7 @@ namespace Tools {
     {
         mSceneMgr = &app().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
-        mSceneViews.emplace_back(mWindow.getRenderer(), mRoot.manager());
+        mSceneViews.emplace_back(this, mWindow.getRenderer(), mRoot.manager());
         return ToolBase::init();
     }
 
@@ -79,6 +79,16 @@ namespace Tools {
     const char *SceneEditor::key() const
     {
         return "SceneEditor";
+    }
+
+    int SceneEditor::hoveredAxis() const
+    {
+        return mHoveredAxis;
+    }
+
+    Scene::Entity::Transform *SceneEditor::hoveredTransform() const
+    {
+        return mHoveredTransform;
     }
 
     void SceneEditor::renderSelection()
@@ -168,17 +178,53 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-		if (Entity::Transform *t = entity->getComponent<Entity::Transform>()) {
-            const Render::Vertex vertices[] = {
-                { { 0, 0, 0 }, { 1, 0, 0, 1 }, { -1, -1, -1 } },
-                { { 1, 0, 0 }, { 0, 1, 0, 1 }, { 1, 0, 0 } },
-                { { 0, 1, 0 }, { 0, 0, 1, 1 }, { 0, 1, 0 } },
-                { { 0, 0, 1 }, { 1, 0, 1, 1 }, { 0, 0, 1 } },
+        if (Entity::Transform *t = entity->getComponent<Entity::Transform>()) {
+            Vector4 colors[] = {
+                { 0.5f, 0, 0, 0.5f },
+                { 0, 0.5f, 0, 0.5f },
+                { 0, 0, 0.5f, 0.5f }
             };
+            Matrix4 transforms[] = {
+                Matrix4::IDENTITY,
+                { 0, 1, 0, 0,
+                    1, 0, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1 },
+                { 0, 0, 1, 0,
+                    0, 1, 0, 0,
+                    1, 0, 0, 0,
+                    0, 0, 0, 1 }
+            };
+
             const unsigned int indices[] = {
-                0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3
+                0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
-            Apis::Im3D::Mesh(vertices, 4, t->matrix(), indices, 12);
+
+            const char *labels[] = {
+                "x-move",
+                "y-move",
+                "z-move"
+            };
+
+            mHoveredAxis = -1;
+            mHoveredTransform = nullptr;
+
+            for (size_t i = 0; i < 3; ++i) {
+                const Render::Vertex vertices[]
+                    = { { { 0, 0, 0 }, colors[i], { -1, 0, 0 } },
+                          { { 0.1, 0.1, -0.1 }, colors[i], { 0, 1, -1 } },
+                          { { 0.1, 0.1, 0.1 }, colors[i], { 0, 1, 1 } },
+                          { { 0.1, -0.1, 0.1 }, colors[i], { 0, -1, 1 } },
+                          { { 0.1, -0.1, -0.1 }, colors[i], { 0, -1, -1 } },
+                          { { 1, 0, 0 }, colors[i], { 1, 0, 0 } } };
+
+                Im3D::Mesh(labels[i], vertices, 6, t->matrix() * transforms[i], indices, 24);
+
+                if (Im3D::IsObjectHovered()) {
+                    mHoveredAxis = i;
+                    mHoveredTransform = t;
+                }
+            }
         }
     }
 

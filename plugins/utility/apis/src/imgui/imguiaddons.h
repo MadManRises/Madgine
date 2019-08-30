@@ -1,11 +1,14 @@
 #pragma once
 
+#include "imconfig.h"
+
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "Modules/keyvalue/valuetype.h"
 
 namespace ImGui {
 
-struct ValueTypeDrawer {
+struct IMGUI_API ValueTypeDrawer
+{
     bool draw(Engine::TypedScopePtr &scope);
     void draw(const Engine::TypedScopePtr &scope);
     bool draw(Engine::InvScopePtr &p);
@@ -68,29 +71,29 @@ bool ValueType(Engine::ValueType *v, F &&f, const char *name = "")
     });
 }
 
-bool InputText(const char *label, std::string *s);
+IMGUI_API bool InputText(const char *label, std::string *s);
 
-bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, const char *name = "");
+IMGUI_API bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, const char *name = "");
 
-void PushDisabled();
-void PopDisabled();
+IMGUI_API void PushDisabled();
+IMGUI_API void PopDisabled();
 
-bool SpanningTreeNode(const void *id, const char *label, bool leaf = false);
+IMGUI_API bool SpanningTreeNode(const void *id, const char *label, bool leaf = false);
 
-void Duration(std::chrono::nanoseconds dur);
-void RightAlignDuration(std::chrono::nanoseconds dur);
+IMGUI_API void Duration(std::chrono::nanoseconds dur);
+IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
 
-void RightAlignText(const char *s, ...);
+IMGUI_API void RightAlignText(const char *s, ...);
 
-bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
-bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
+IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
+IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
 
-bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
+IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
-void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value);
-const ValueTypePayload *GetValuetypePayload();
-bool AcceptingDraggableValueTypeTarget(const ValueTypePayload **payloadPointer = nullptr);
-void RejectingDraggableValueTypeTarget();
+IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value);
+IMGUI_API const ValueTypePayload *GetValuetypePayload();
+IMGUI_API bool AcceptingDraggableValueTypeTarget(const ValueTypePayload **payloadPointer = nullptr);
+IMGUI_API void RejectingDraggableValueTypeTarget();
 template <typename T>
 bool DraggableValueTypeTarget(T &result, const ValueTypePayload **payloadPointer = nullptr)
 {
