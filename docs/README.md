@@ -28,11 +28,15 @@ There is currently no documentation in code. Please refer to the explanations of
 
 * [Getting Started][]
 * [Overview][]
-	* [Concepts][]
+    * [Concepts][]
         * [Meta Information][]
-	* [Interfaces][]
+    * [Interfaces][]
     * [Modules][]
         * [Plugins & Unique Components][]
+        * [Signals & Slots][]
+        * [KeyValue][]
+        * [Workgroups & Threading][]
+        * [Event handling][]
 
 
 ### License
@@ -57,3 +61,7 @@ The Madgine is licensed under the MIT License, see [LICENSE.md][] for more infor
 
 [Modules]: modules.md
 [Plugins & Unique Components]: plugins.md
+[Signals & Slots]: signalslot.md
+[KeyValue]:keyvalue.md
+[Workgroups & Threading]: workgroup.md
+[Event handling]: event.md
