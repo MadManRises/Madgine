@@ -16,7 +16,7 @@ namespace Render {
 
         uint32_t textureId() const override;
 
-        void resize(const Vector2 &size) override;
+        bool resize(const Vector2 &size) override;
 
         virtual void render() override;
         virtual void renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;

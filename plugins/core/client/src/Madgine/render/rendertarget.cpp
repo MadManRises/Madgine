@@ -24,9 +24,12 @@ namespace Render {
         return mCamera;
     }
 
-    void RenderTarget::resize(const Vector2 &size)
+    bool RenderTarget::resize(const Vector2 &size)
     {
+        if (mSize == size)
+            return false;
         mSize = size;
+        return true;
     }
 
     const Vector2 &RenderTarget::getSize()

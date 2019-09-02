@@ -24,7 +24,7 @@ namespace Engine {
 namespace Render {
 
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size)
-        : RenderTarget(window, camera, size)
+        : RenderTarget(window, camera, { 0, 0 })
         , mIndex(index)
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
@@ -42,18 +42,23 @@ namespace Render {
         glGenRenderbuffers(1, &mDepthRenderbuffer);
         glCheck();
 
-        resize(size);
-
         glGenFramebuffers(1, &mFramebuffer);
         glCheck();
+
+        resize(size);
+
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         glCheck();
+        glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
+        glCheck();
 
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
         glCheck();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);
         //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
         glCheck();
+
 
         GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, DrawBuffers);
@@ -62,11 +67,16 @@ namespace Render {
         if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
             throw 0;
 
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glCheck();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCheck();
     }
 
     OpenGLRenderTexture::~OpenGLRenderTexture()
     {
+        glDeleteFramebuffers(1, &mFramebuffer);
+        glCheck();
         glDeleteRenderbuffers(1, &mDepthRenderbuffer);
         glCheck();
     }
@@ -79,20 +89,34 @@ namespace Render {
         return mIndex;
     }
 
-    void OpenGLRenderTexture::resize(const Vector2 &size)
+    bool OpenGLRenderTexture::resize(const Vector2 &size)
     {
-        GLsizei width = static_cast<GLsizei>(size.x);
+        if (!RenderTarget::resize(size))
+            return false;
+		
+		GLsizei width = static_cast<GLsizei>(size.x);
         GLsizei height = static_cast<GLsizei>(size.y);
+
+        assert(width > 0 && height > 0);
 
         mTexture.setData(width, height, nullptr);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+        glCheck();
         glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
         glCheck();
+
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
         glCheck();
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-        RenderTarget::resize(size);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glCheck();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCheck();
+
+		return true;
     }
 
     void OpenGLRenderTexture::render()
@@ -142,7 +166,9 @@ namespace Render {
         mProgram.bind();
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glCheck();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glCheck();
 
         float aspectRatio = size.x / size.y;
 
@@ -166,10 +192,10 @@ namespace Render {
 
         mesh->mVAO.bind();
 
-        if (mesh->mIndices) {            
+        if (mesh->mIndices) {
             glDrawElements(GL_TRIANGLES, mesh->mElementCount, GL_UNSIGNED_INT, 0);
-        }        
-        else glDrawArrays(GL_TRIANGLES, 0, mesh->mElementCount);
+        } else
+            glDrawArrays(GL_TRIANGLES, 0, mesh->mElementCount);
         glCheck();
     }
 
@@ -187,6 +213,7 @@ namespace Render {
     void OpenGLRenderTexture::clearDepthBuffer()
     {
         glClear(GL_DEPTH_BUFFER_BIT);
+        glCheck();
     }
 }
 }

@@ -21,7 +21,7 @@ namespace Render {
 
         virtual uint32_t textureId() const = 0;
 
-        virtual void resize(const Vector2 &size);
+        virtual bool resize(const Vector2 &size);
 
         const Vector2 &getSize();
 
