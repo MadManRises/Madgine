@@ -22,7 +22,7 @@ FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscol
 
 add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
-target_link_libraries(Tools PRIVATE Apis)
+target_link_libraries(Tools PUBLIC Apis)
 
 target_link_plugins(Tools OpenGL Client Base)
 

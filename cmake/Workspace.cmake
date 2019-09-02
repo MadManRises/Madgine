@@ -65,7 +65,7 @@ if(MSVC)
 		CMAKE_CXX_FLAGS_RELEASE
 		CMAKE_CXX_FLAGS_RELWITHDEBINFO
 	)
-	if(STATIC_BUILD)
+	if(NOT BUILD_SHARED_LIBS)
 		message(STATUS
 		"MSVC -> forcing use of statically-linked runtime."
 		)

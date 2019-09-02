@@ -258,3 +258,5 @@ doc/
 build/
 
 .vscode/
+
+/test/local
