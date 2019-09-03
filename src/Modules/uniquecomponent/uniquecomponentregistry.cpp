@@ -12,6 +12,8 @@
 
 namespace Engine {
 
+	static size_t sLevel = 0;
+
 struct CompareTypeInfo {
     bool operator()(const TypeInfo *t1, const TypeInfo *t2) const
     {
@@ -24,14 +26,18 @@ struct GuardGuard {
         : out(o)
         , bin(b)
     {
-        if (bin)
-            out << "#ifdef BUILD_" << bin->mName << "\n";
+        if (bin) {
+            out << "#" << std::string(4 * sLevel, ' ') << "ifdef BUILD_" << bin->mName << "\n";
+            ++sLevel;
+        }
     }
 
     ~GuardGuard()
     {
-        if (bin)
-            out << "#endif\n";
+        if (bin) {
+            --sLevel;
+            out << "#" << std::string(4 * sLevel, ' ') << "endif\n";
+        }
     }
 
     std::ostream &out;
@@ -48,7 +54,7 @@ void include(std::ostream &out, std::string header,
     const Plugins::BinaryInfo *bin = nullptr)
 {
     GuardGuard g(out, bin);
-    out << "#include \"" << StringUtil::replace(header, ".cpp", ".h") << "\"\n";
+    out << "#" << std::string(4 * sLevel, ' ') << "include \"" << StringUtil::replace(header, ".cpp", ".h") << "\"\n";
 }
 
 static std::vector<const TypeInfo *> &sSkip()
@@ -109,16 +115,18 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile)
 
     file << R"(
 
-namespace Engine{
+namespace Engine {
 
 )";
 
     for (auto &[name, reg] : registryRegistry()) {
         GuardGuard g2(file, reg->mBinary);
 
-        file << "	template <> const std::vector<const Engine::MetaTable*> &" << name
-             << R"(::sTables() {
-		static std::vector<const Engine::MetaTable*> dummy = {
+        file << R"(template <>
+const std::vector<const Engine::MetaTable *> &)" << name
+             << R"(::sTables() 
+{
+	static std::vector<const Engine::MetaTable *> dummy = {
 )";
 
         for (CollectorInfo *collector : *reg) {
@@ -127,36 +135,38 @@ namespace Engine{
                 while (typeInfo->mDecayType)
                     typeInfo = typeInfo->mDecayType;
                 if (notInSkip(typeInfo))
-                    file << "			&table<"
+                    file << "		&table<"
                          << typeInfo->mFullName << ">(),\n";
             }
         }
 
         file << R"(
-		}; 
-		return dummy;
-	}
+	}; 
+	return dummy;
+}
 )";
 
-        file << "	template <> std::vector<" << name << "::F> " << name
-             << R"(::sComponents() {
-		return {
+        file << R"(template <>
+std::vector<)" << name << "::F> " << name
+             << R"(::sComponents()
+{
+	return {
 )";
 
         for (CollectorInfo *collector : *reg) {
             GuardGuard g(file, collector->mBinary);
             for (const TypeInfo *typeInfo : collector->mElementInfos) {
                 if (notInSkip(typeInfo))
-                    file << "			createComponent<"
+                    file << "		createComponent<"
                          << typeInfo->mFullName << ">,\n";
             }
         }
 
         file << R"(
-		}; 
-	}
+	}; 
+}
 
-	#define ACC 0
+#    define ACC 0
 
 )";
 
@@ -169,9 +179,10 @@ namespace Engine{
             for (const TypeInfo *typeInfo : collector->mElementInfos) {
                 if (notInSkip(typeInfo)) {
                     while (typeInfo) {
-                        file << "    template<> size_t component_index<"
+                        file << R"(template <>
+size_t component_index<)"
                              << typeInfo->mFullName
-                             << ">(){ return CollectorBaseIndex_"
+                             << ">() { return CollectorBaseIndex_"
                              << collector->mBaseInfo->mTypeName << "_"
                              << collector->mBinary->mName << " + " << i
                              << "; }\n";
@@ -180,13 +191,13 @@ namespace Engine{
                     ++i;
                 }
             }
-            file << "#undef ACC\n"
-                 << "#define ACC CollectorBaseIndex_"
+            file << "#        undef ACC\n"
+                 << "#        define ACC CollectorBaseIndex_"
                  << collector->mBaseInfo->mTypeName << "_"
                  << collector->mBinary->mName << " + " << i << "\n";
         }
 
-        file << "\n#undef ACC\n\n";
+        file << "\n#    undef ACC\n\n";
     }
 
     file << "}\n";
