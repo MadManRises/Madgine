@@ -64,7 +64,8 @@ namespace Render {
     {
         bind();
         GLint location = glGetUniformLocation(mHandle, var.c_str());
-        glUniformMatrix3fv(location, 1, GL_TRUE, value[0]);
+        Matrix3 transposed = value.Transpose();
+        glUniformMatrix3fv(location, 1, GL_FALSE, transposed[0]);
         GL_CHECK();
     }
 
@@ -72,7 +73,8 @@ namespace Render {
     {
         bind();
         GLint location = glGetUniformLocation(mHandle, var.c_str());
-        glUniformMatrix4fv(location, 1, GL_TRUE, value[0]);
+        Matrix4 transposed = value.Transpose();
+        glUniformMatrix4fv(location, 1, GL_FALSE, transposed[0]);
         GL_CHECK();
     }
 
