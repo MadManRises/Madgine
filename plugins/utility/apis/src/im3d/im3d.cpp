@@ -44,6 +44,7 @@ namespace Engine {
 
             c.mHoveredObject = c.mNextHoveredObject;
             c.mNextHoveredObject = nullptr;
+            c.mNextHoveredPriority = 0;
             c.mNextHoveredDistance = std::numeric_limits<float>::max();
 
             Im3DIO &io = c.mIO;
@@ -76,7 +77,7 @@ namespace Engine {
             return o;
         }
 
-        void Mesh(const char *name, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount)
+        void Mesh(const char *name, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount, size_t priority)
         {
             Im3DContext &c = sContext;
 
@@ -138,7 +139,7 @@ namespace Engine {
             float rayParam;
             if (!c.mMouseRay.mDir.isZeroLength()) {
                 if (Intersect(c.mMouseRay, object->mBounds, &rayParam)) {
-                    if (rayParam > 0.0f && rayParam < c.mNextHoveredDistance) {
+                    if (rayParam > 0.0f && (rayParam < c.mNextHoveredDistance || priority > c.mNextHoveredPriority)) {
                         c.mNextHoveredObject = object;
                         c.mNextHoveredDistance = rayParam;
                     }

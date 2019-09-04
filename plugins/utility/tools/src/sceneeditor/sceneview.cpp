@@ -34,6 +34,28 @@
 namespace Engine {
 namespace Tools {
 
+    static Plane cameraPlane(const Scene::Camera &camera, const Vector3 &point, const Vector3 *axis1 = nullptr, const Vector3 *axis2 = nullptr)
+    {
+
+        const Ray &ray = camera.toRay();
+
+        Vector3 normal;
+
+        if (axis1) {
+            Vector3 helper;
+            if (axis2) {
+                helper = *axis2;
+            } else {
+                helper = axis1->crossProduct(ray.mDir);
+            }
+            normal = helper.crossProduct(*axis1);
+        } else {
+            normal = ray.mDir;
+        }
+
+        return { point, normal };
+    }
+
     SceneView::SceneView(SceneEditor *editor, Engine::Render::RenderWindow *renderer, const ImGuiManager &manager)
         : mManager(manager)
         , mEditor(editor)
@@ -70,15 +92,34 @@ namespace Tools {
 
             Vector2 dragDistance = io.MouseDelta;
 
+			
+			constexpr Vector3 axes[3] = {
+                { 1, 0, 0 },
+                { 0, 1, 0 },
+                { 0, 0, 1 }
+            };
+
             if (ImGui::IsItemHovered()) {
 
                 if (io.MouseClicked[0] && mEditor->hoveredAxis() >= 0) {
-                    mMouseDown[0] = true;
-                    mDraggedAxis = mEditor->hoveredAxis();
+					mDraggedAxis = mEditor->hoveredAxis();
                     mDragStartRay = Im3D::GetCurrentContext()->mMouseRay;
-                    mDragTransform = mEditor->hoveredTransform();
-                    mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
                     mDragStoredPosition = mEditor->hoveredTransform()->getPosition();
+
+                    Vector3 axis = axes[mDraggedAxis];
+
+					float intersect;
+
+					Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
+
+                    if (Intersect(plane, mDragStartRay, &intersect)) {
+
+						mMouseDown[0] = true;
+                        mDragTransform = mEditor->hoveredTransform();
+                        mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
+                        mDragRelMousePosition = mDragStartRay.point(intersect) - mDragStoredPosition;
+
+					}
                 }
 
                 for (int i = 1; i < 3; ++i) {
@@ -119,19 +160,9 @@ namespace Tools {
 
             if (mDragging[0]) {
 
-                const Ray &cameraRay = mCamera.toRay();
-
-                constexpr Vector3 axes[3] = {
-                    { 1, 0, 0 },
-                    { 0, 1, 0 },
-                    { 0, 0, 1 }
-                };
-
                 Vector3 axis = axes[mDraggedAxis];
 
-                Vector3 helper = axis.crossProduct(cameraRay.mDir);
-
-                Plane targetPlane { mDragStoredPosition, helper.crossProduct(axis) };
+                Plane targetPlane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
                 const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
 
@@ -139,7 +170,7 @@ namespace Tools {
 
                 if (Intersect(targetPlane, ray, &rayParam)) {
 
-                    Vector3 distance = ray.mPoint + rayParam * ray.mDir - mDragStoredPosition;
+                    Vector3 distance = ray.point(rayParam) - mDragStoredPosition - mDragRelMousePosition;
 
                     if (mDraggedAxis != 0)
                         distance.x = 0.0f;

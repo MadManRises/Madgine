@@ -18,21 +18,22 @@ namespace Tools {
 
         void render();
 
-		Scene::Camera &camera();
+        Scene::Camera &camera();
 
     private:
         Scene::Camera mCamera;
         std::unique_ptr<Render::RenderTarget> mRenderTarget;
         const ImGuiManager &mManager;
 
-		SceneEditor *mEditor;
+        SceneEditor *mEditor;
 
-		bool mMouseDown[3] = { false, false, false }, mDragging[3] = { false, false, false };
-                int mDraggedAxis;
-                Ray mDragStartRay;
-                Scene::Entity::Transform *mDragTransform;
-                Matrix4 mDragStoredMatrix;
-                Vector3 mDragStoredPosition;
+        bool mMouseDown[3] = { false, false, false }, mDragging[3] = { false, false, false };
+        int mDraggedAxis;
+        Ray mDragStartRay;
+        Scene::Entity::Transform *mDragTransform;
+        Matrix4 mDragStoredMatrix;
+        Vector3 mDragStoredPosition;
+        Vector3 mDragRelMousePosition;
     };
 
 }

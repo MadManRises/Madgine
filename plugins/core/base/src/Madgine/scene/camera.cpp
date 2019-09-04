@@ -135,7 +135,6 @@ namespace Scene {
     Ray Camera::toRay() const
     {
         Vector3 dir = mOrientation * Vector3 { 0, 0, mN };
-        dir.normalise();
         return { mPosition, dir };
     }
 
