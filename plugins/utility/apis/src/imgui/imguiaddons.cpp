@@ -11,7 +11,7 @@
 #include "Modules/keyvalue/typedscopeptr.h"
 
 DLL_EXPORT Engine::Threading::WorkgroupLocal<ImGuiContext *>
-GImGui;
+    GImGui;
 
 namespace ImGui {
 
@@ -268,7 +268,7 @@ bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::ObjectPtr& o) 
+void ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -517,26 +517,46 @@ const ValueTypePayload *GetValuetypePayload()
     return nullptr;
 }
 
-bool AcceptingDraggableValueTypeTarget(const ValueTypePayload **payloadPointer)
+bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer)
 {
-    bool result = false;
-    if (ImGui::BeginDragDropTarget()) {
-        if (ImGui::AcceptDragDropPayload("ValueType")) {
-            if (payloadPointer)
-                *payloadPointer = GetValuetypePayload();
-            result = true;
-        }
-        ImGui::EndDragDropTarget();
+    if (ImGui::AcceptDragDropPayload("ValueType")) {
+        if (payloadPointer)
+            *payloadPointer = GetValuetypePayload();
+        return true;
     }
-    return result;
+    return false;
 }
 
-void RejectingDraggableValueTypeTarget()
+void RejectDraggableValueType()
 {
-    if (ImGui::BeginDragDropTarget()) {
-        ImGui::SetTooltip("Reject");
-        ImGui::EndDragDropTarget();
+    ImGui::SetTooltip("Reject");
+}
+
+bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
+{
+    ImGuiContext &g = *GImGui;
+    if (!g.DragDropActive)
+        return false;
+
+    ImGuiWindow *window = g.CurrentWindow;
+    if (!(window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HoveredRect))
+        return false;
+    if (g.HoveredWindowUnderMovingWindow == NULL || window->RootWindow != g.HoveredWindowUnderMovingWindow->RootWindow)
+        return false;
+
+    const ImRect &display_rect = (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HasDisplayRect) ? window->DC.LastItemDisplayRect : window->DC.LastItemRect;
+    ImGuiID id = window->DC.LastItemId;
+    if (id == 0)
+        id = window->GetIDFromRectangle(display_rect);
+    if (g.DragDropPayload.SourceId == id)
+        return false;
+
+    if (g.DragDropAcceptIdPrev == id) {
+        if (payloadPointer)
+            *payloadPointer = GetValuetypePayload();
+        return true;
     }
+    return false;
 }
 
 }

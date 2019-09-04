@@ -91,22 +91,35 @@ IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::
 
 IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value);
 IMGUI_API const ValueTypePayload *GetValuetypePayload();
-IMGUI_API bool AcceptingDraggableValueTypeTarget(const ValueTypePayload **payloadPointer = nullptr);
-IMGUI_API void RejectingDraggableValueTypeTarget();
+IMGUI_API bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer = nullptr);
 template <typename T, typename Validator = bool(*)(const T&)>
-bool DraggableValueTypeTarget(
+bool AcceptDraggableValueType(
     T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
 {
     const ValueTypePayload *payload = GetValuetypePayload();
     if (payload) {
         if (payload->mValue.is<T>()) {
-            if (validate(payload->mValue.as<T>()) && AcceptingDraggableValueTypeTarget(payloadPointer)) {
+            if (validate(payload->mValue.as<T>()) && AcceptDraggableValueType(payloadPointer)) {
                 result = payload->mValue.as<T>();
                 return true;
             }
-        } else {
-            RejectingDraggableValueTypeTarget();
-        }
+        } 
+    }
+    return false;
+}
+IMGUI_API bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer = nullptr);
+template <typename T, typename Validator = bool (*)(const T &)>
+bool IsDraggableValueTypeBeingAccepted(
+    T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
+{
+    const ValueTypePayload *payload = GetValuetypePayload();
+    if (payload) {
+        if (payload->mValue.is<T>()) {
+            if (validate(payload->mValue.as<T>()) && IsDraggableValueTypeBeingAccepted(payloadPointer)) {
+                result = payload->mValue.as<T>();
+                return true;
+            }
+        } 
     }
     return false;
 }

@@ -123,11 +123,14 @@ namespace Tools {
                                                                  bool b = ImGui::TreeNodeEx(id.c_str());
                                                                  ImGui::DraggableValueTypeSource(id, parent, value);
                                                                  if (editable) {
-                                                                     if (ImGui::DraggableValueTypeTarget(scope, nullptr, [&](const TypedScopePtr &ptr) {
-                                                                             return ptr.mType->isDerivedFrom(scope.mType);
-                                                                         })) {
-                                                                         value = scope;
-                                                                         modified = true;
+                                                                     if (ImGui::BeginDragDropTarget()) {
+                                                                         if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
+                                                                                 return ptr.mType->isDerivedFrom(scope.mType);
+                                                                             })) {
+                                                                             value = scope;
+                                                                             modified = true;
+                                                                         }
+                                                                         ImGui::EndDragDropTarget();
                                                                      }
                                                                      //TODO: type -> list<ScopeBase*> selector
                                                                  }

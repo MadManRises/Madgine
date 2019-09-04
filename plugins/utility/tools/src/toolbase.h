@@ -36,10 +36,11 @@ namespace Tools {
         }
         ToolBase &getSelf(bool = true);
 		
+		virtual App::Application &app(bool = true) override;
+
     protected:
 
         virtual const MadgineObject *parent() const override;
-        virtual App::Application &app(bool = true) override;
         virtual bool init() override;
         virtual void finalize() override;
 

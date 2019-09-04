@@ -14,9 +14,12 @@ namespace Render {
     {
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
-		target->clearDepthBuffer();
+        target->clearDepthBuffer();
 
-        target->renderTriangles(context->mTriangleVertices.data(), context->mTriangleVertices.size(), context->mTriangleIndices.data(), context->mTriangleIndices.size());        
+        for (const std::pair<Im3D::Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
+            target->renderInstancedMesh(p.first, p.second);
+
+        target->renderTriangles(context->mTriangleVertices.data(), context->mTriangleVertices.size(), context->mTriangleIndices.data(), context->mTriangleIndices.size());
     }
 
 }

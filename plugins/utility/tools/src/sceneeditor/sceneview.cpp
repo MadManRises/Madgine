@@ -31,6 +31,16 @@
 
 #include "Modules/math/geometry.h"
 
+#include "OpenGL/openglmeshloader.h"
+
+#include "Madgine/app/application.h"
+
+#include "Madgine/scene/scenemanager.h"
+
+#include "Madgine/scene/entity/entity.h"
+
+#include "Madgine/scene/entity/components/mesh.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -92,34 +102,34 @@ namespace Tools {
 
             Vector2 dragDistance = io.MouseDelta;
 
-			
-			constexpr Vector3 axes[3] = {
+            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
+
+            constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },
                 { 0, 1, 0 },
                 { 0, 0, 1 }
             };
 
-            if (ImGui::IsItemHovered()) {
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
 
                 if (io.MouseClicked[0] && mEditor->hoveredAxis() >= 0) {
-					mDraggedAxis = mEditor->hoveredAxis();
-                    mDragStartRay = Im3D::GetCurrentContext()->mMouseRay;
+                    mDraggedAxis = mEditor->hoveredAxis();
+                    mDragStartRay = ray;
                     mDragStoredPosition = mEditor->hoveredTransform()->getPosition();
 
                     Vector3 axis = axes[mDraggedAxis];
 
-					float intersect;
+                    float intersect;
 
-					Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
+                    Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
                     if (Intersect(plane, mDragStartRay, &intersect)) {
 
-						mMouseDown[0] = true;
+                        mMouseDown[0] = true;
                         mDragTransform = mEditor->hoveredTransform();
                         mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
                         mDragRelMousePosition = mDragStartRay.point(intersect) - mDragStoredPosition;
-
-					}
+                    }
                 }
 
                 for (int i = 1; i < 3; ++i) {
@@ -132,9 +142,12 @@ namespace Tools {
                 Vector2 size = ImGui::GetItemRectSize();
 
                 Im3D::GetIO().mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
+
+
             }
 
             for (int i = 0; i < 3; ++i) {
+                mMouseClicked[i] = false;
                 if (mMouseDown[i]) {
 
                     if (dragDistance.length() >= io.MouseDragThreshold / 3.0f && !mDragging[0] && !mDragging[1] && !mDragging[2]) {
@@ -143,6 +156,9 @@ namespace Tools {
 
                     if (io.MouseReleased[i]) {
                         mMouseDown[i] = false;
+                        if (!mDragging[i]) {
+                            mMouseClicked[i] = true;
+                        }
                         mDragging[i] = false;
                     }
                 }
@@ -164,8 +180,6 @@ namespace Tools {
 
                 Plane targetPlane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
-
                 float rayParam;
 
                 if (Intersect(targetPlane, ray, &rayParam)) {
@@ -181,6 +195,20 @@ namespace Tools {
 
                     mDragTransform->setPosition(mDragStoredPosition + distance);
                 }
+            }
+            if (ImGui::BeginDragDropTarget()) {
+                Vector3 pos = ray.point(5.0f);
+                Render::OpenGLMeshLoader::ResourceType *resource;
+                if (ImGui::AcceptDraggableValueType(resource)) {
+                    Scene::Entity::Entity *e = mEditor->app().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
+                    e->addComponent<Scene::Entity::Transform>()->setPosition(pos);
+                    e->addComponent<Scene::Entity::Mesh>()->setName(resource->name());
+                    mEditor->select(e);
+                } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
+                    resource->setPersistent(true);
+                    Im3D::NativeMesh("newMesh", resource->loadData().get(), Matrix4::TranslationMatrix(pos));
+                }
+                ImGui::EndDragDropTarget();
             }
         }
         ImGui::End();

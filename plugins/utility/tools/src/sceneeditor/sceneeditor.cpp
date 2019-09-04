@@ -91,6 +91,18 @@ namespace Tools {
         return mHoveredTransform;
     }
 
+    void SceneEditor::select(Scene::Camera *camera)
+    {
+        mSelectedEntity = nullptr;
+        mSelectedCamera = camera;
+    }
+
+    void SceneEditor::select(Scene::Entity::Entity *entity)
+    {
+        mSelectedEntity = entity;
+        mSelectedCamera = nullptr;
+    }
+
     void SceneEditor::renderSelection()
     {
         if (ImGui::Begin("SceneEditor", &mVisible)) {
@@ -111,15 +123,13 @@ namespace Tools {
                 if (!name[0])
                     name = "<unnamed>";
                 if (ImGui::Selectable(name, mSelectedEntity == &e)) {
-                    mSelectedEntity = &e;
-                    mSelectedCamera = nullptr;
+                    select(&e);
                 }
                 ImGui::DraggableValueTypeSource(name, this, ValueType { e });
             }
 
             if (ImGui::Button("+ New Entity")) {
-                mSelectedEntity = mSceneMgr->createEntity();
-                mSelectedCamera = nullptr;
+                select(mSceneMgr->createEntity());
             }
 
             ImGui::Separator();
@@ -129,15 +139,13 @@ namespace Tools {
                 if (name.empty())
                     name = "<unnamed camera>";
                 if (ImGui::Selectable(name.c_str(), mSelectedCamera == &camera)) {
-                    mSelectedCamera = &camera;
-                    mSelectedEntity = nullptr;
+                    select(&camera);
                 }
                 ImGui::DraggableValueTypeSource(name, this, ValueType { camera });
             }
 
             if (ImGui::Button("+ New Camera")) {
-                mSelectedCamera = mSceneMgr->createCamera();
-                mSelectedEntity = nullptr;
+                select(mSceneMgr->createCamera());
             }
         }
         ImGui::End();

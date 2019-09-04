@@ -32,6 +32,8 @@ namespace Im3D {
         std::vector<Render::Vertex> mTriangleVertices;
         std::vector<unsigned int> mTriangleIndices;
 
+		std::map<Im3DNativeMesh, std::vector<Matrix4>> mNativeMeshes;
+
         std::vector<std::unique_ptr<Im3DObject>> mObjects;
         ImGuiStorage mObjectsById;
 

@@ -30,6 +30,9 @@ namespace Tools {
 		int hoveredAxis() const;
         Scene::Entity::Transform *hoveredTransform() const;
 
+		void select(Scene::Camera *camera);
+        void select(Scene::Entity::Entity *entity);
+
     private:
         void renderSelection();
         void renderHierarchy();

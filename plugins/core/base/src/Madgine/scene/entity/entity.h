@@ -33,13 +33,13 @@ namespace Scene {
             template <class T>
             T *addComponent(const ObjectPtr &table = {})
             {
-                return static_cast<T *>(addComponent(T::componentName, table));
+                return static_cast<T *>(addComponent(T::componentName(), table));
             }
 
             template <class T>
             void removeComponent()
             {
-                removeComponent(T::componentName);
+                removeComponent(T::componentName());
             }
 
             template <class T>

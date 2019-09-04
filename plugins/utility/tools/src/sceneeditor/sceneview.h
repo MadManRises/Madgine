@@ -27,7 +27,9 @@ namespace Tools {
 
         SceneEditor *mEditor;
 
-        bool mMouseDown[3] = { false, false, false }, mDragging[3] = { false, false, false };
+        bool mMouseDown[3] = { false, false, false };
+        bool mDragging[3] = { false, false, false };
+		bool mMouseClicked[3] = { false, false, false };
         int mDraggedAxis;
         Ray mDragStartRay;
         Scene::Entity::Transform *mDragTransform;

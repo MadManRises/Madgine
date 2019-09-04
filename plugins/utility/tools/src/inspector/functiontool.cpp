@@ -93,14 +93,17 @@ namespace Tools {
     {
         if (ImGui::Begin("FunctionTool", &mVisible)) {
             bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &mCurrentFunction, &mCurrentFunctionName);
-            const ImGui::ValueTypePayload *payload;
-            if (ImGui::DraggableValueTypeTarget(mCurrentFunction, &payload)) {
-                mCurrentFunctionName = payload->mName;
-                changed = true;
-            }
-            if (changed) {
-                mCurrentArguments.clear();
-                mCurrentArguments.resize(mCurrentFunction.argumentsCount());
+            if (ImGui::BeginDragDropTarget()) {
+                const ImGui::ValueTypePayload *payload;
+                if (ImGui::AcceptDraggableValueType(mCurrentFunction, &payload)) {
+                    mCurrentFunctionName = payload->mName;
+                    changed = true;
+                }
+                if (changed) {
+                    mCurrentArguments.clear();
+                    mCurrentArguments.resize(mCurrentFunction.argumentsCount());
+                }
+                ImGui::EndDragDropTarget();
             }
             ImGui::SameLine();
             ImGui::Text("(");
@@ -118,7 +121,10 @@ namespace Tools {
                 }
                 ImGui::PushID(i++);
                 ImGui::ValueType(&arg, true);
-                ImGui::DraggableValueTypeTarget(arg);
+                if (ImGui::BeginDragDropTarget()) {
+                    ImGui::AcceptDraggableValueType(arg);
+                    ImGui::EndDragDropTarget();
+                }
                 ImGui::PopID();
                 //ImGui::SameLine();
             }
@@ -141,7 +147,6 @@ namespace Tools {
         }
         ImGui::End();
     }
-
 }
 }
 

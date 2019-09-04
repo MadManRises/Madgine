@@ -361,6 +361,7 @@ public:
         if constexpr (_isValueType<std::decay_t<T>>::value) {
             return std::holds_alternative<std::decay_t<T>>(mUnion);
         } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
+            return std::holds_alternative<TypedScopePtr>(mUnion) && std::get<TypedScopePtr>(mUnion).mType->isDerivedFrom<std::remove_pointer_t<T>>();
         } else if constexpr (std::is_same_v<T, ValueType>) {
             return true;
         } else if constexpr (std::is_enum_v<T>) {

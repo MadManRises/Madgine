@@ -199,6 +199,13 @@ namespace Render {
         glCheck();
     }
 
+    void OpenGLRenderTexture::renderInstancedMesh(void *meshData, const std::vector<Matrix4> &transforms)
+    {
+        for (const Matrix4 &transform : transforms) {
+            renderMesh(static_cast<OpenGLMeshData *>(meshData), transform);
+		}
+    }
+
     void OpenGLRenderTexture::renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
         OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(vertices, vertexCount, indices, indexCount);
