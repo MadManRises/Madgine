@@ -7,6 +7,7 @@
 #include "container_traits.h"
 #include "metatable.h"
 #include "valuetype.h"
+#include "../reflection/decay.h"
 
 namespace Engine {
 
@@ -35,7 +36,7 @@ constexpr Accessor property()
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
-            TupleUnpacker::invoke(Setter, scope.safe_cast<SetterScope>(), v.as<T>());
+            TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<SetterScope>>(), v.as<T>());
         };
     }
 
@@ -45,7 +46,7 @@ constexpr Accessor property()
                 if constexpr (std::is_same_v<Scope, void>)
                     return TupleUnpacker::invoke(Getter, scope);
                 else
-                    return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
+                    return TupleUnpacker::invoke(Getter, scope.safe_cast<decayed_t<Scope>>());
             }();
 
             if constexpr (ValueType::isValueType<T>::value) {

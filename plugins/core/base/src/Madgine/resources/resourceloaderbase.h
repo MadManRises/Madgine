@@ -1,13 +1,14 @@
 #pragma once 
 
+#include "Modules/keyvalue/scopebase.h"
+
 namespace Engine
 {
 	namespace Resources
 	{
 	
-		class MADGINE_BASE_EXPORT ResourceLoaderBase
+		struct MADGINE_BASE_EXPORT ResourceLoaderBase : ScopeBase
 		{
-		public:
 			ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad=false);
 			virtual ~ResourceLoaderBase() = default;			
 

@@ -5,18 +5,18 @@
 #include "Modules/plugins/pluginlistener.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Interfaces/filesystem/path.h"
+#include "Modules/keyvalue/scopebase.h"
+
 
 namespace Engine
 {
 	namespace Resources
 	{
-		class MADGINE_BASE_EXPORT ResourceManager final
+		struct MADGINE_BASE_EXPORT ResourceManager final : ScopeBase
 #if ENABLE_PLUGINS
-			: Plugins::PluginListener
+			, Plugins::PluginListener
 #endif
 		{
-			
-		public:
 			static ResourceManager &getSingleton();
 
 			ResourceManager();
@@ -51,6 +51,8 @@ namespace Engine
 
 			void init();
 
+						ResourceLoaderContainer<std::vector> mCollector;
+
 #if ENABLE_PLUGINS
 		protected:
 			void onPluginLoad(const Plugins::Plugin *plugin) override;
@@ -66,7 +68,6 @@ namespace Engine
 			std::map<std::string, ResourceLoaderBase*> getLoaderByExtension();
 
 		private:
-			ResourceLoaderContainer<std::vector> mCollector;
 
 			struct SubDirCompare
 			{

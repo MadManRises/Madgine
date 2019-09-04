@@ -12,8 +12,6 @@
 
 #include "Madgine/render/vertex.h"
 
-UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
-
 namespace Engine {
 namespace Render {
 
@@ -145,7 +143,13 @@ namespace Render {
 }
 }
 
+UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
+
 METATABLE_BEGIN(Engine::Render::OpenGLMeshLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
+
+METATABLE_BEGIN(Engine::Render::OpenGLMeshLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLMeshLoader);

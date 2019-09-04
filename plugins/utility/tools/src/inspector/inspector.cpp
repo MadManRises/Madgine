@@ -62,7 +62,14 @@ namespace Tools {
     void Inspector::render()
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
-            draw(&app(false), "Application");
+            if (ImGui::TreeNode("Application")) {
+                draw(&app(false), "Application");
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Resources")) {
+                draw(&ResourceManager::getSingleton(), "Resources");
+                ImGui::TreePop();
+			}
         }
         ImGui::End();
     }
@@ -112,13 +119,23 @@ namespace Tools {
             ImGui::PushDisabled();
 
         bool modified = ImGui::ValueType(&value, overloaded { [&](TypedScopePtr scope) {
+                                                                 bool modified = false;
                                                                  bool b = ImGui::TreeNodeEx(id.c_str());
                                                                  ImGui::DraggableValueTypeSource(id, parent, value);
+                                                                 if (editable) {
+                                                                     if (ImGui::DraggableValueTypeTarget(scope, nullptr, [&](const TypedScopePtr &ptr) {
+                                                                             return ptr.mType->isDerivedFrom(scope.mType);
+                                                                         })) {
+                                                                         value = scope;
+                                                                         modified = true;
+                                                                     }
+                                                                     //TODO: type -> list<ScopeBase*> selector
+                                                                 }
                                                                  if (b) {
                                                                      draw(scope, element ? element->Attribute("layout") : nullptr);
                                                                      ImGui::TreePop();
                                                                  }
-                                                                 return false;
+                                                                 return modified;
                                                              },
                                                      [&](KeyValueVirtualIterator &it) {
                                                          bool b = ImGui::TreeNodeEx(id.c_str());

@@ -45,4 +45,10 @@ bool MetaTable::isEditable(const std::string &key) const
     throw 0;
 }
 
+bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
+{
+	//TODO inheritance
+    return this == baseType;
+}
+
 }

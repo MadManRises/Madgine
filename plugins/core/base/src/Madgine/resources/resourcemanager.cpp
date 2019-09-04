@@ -10,6 +10,8 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
 namespace Engine
 {
 	namespace Resources
@@ -156,3 +158,7 @@ namespace Engine
 
 	}
 }
+
+METATABLE_BEGIN(Engine::Resources::ResourceManager)
+MEMBER(mCollector)
+METATABLE_END(Engine::Resources::ResourceManager)

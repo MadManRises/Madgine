@@ -45,12 +45,12 @@ namespace Engine
 
 	namespace Resources
 	{
-		class ResourceManager;
+		struct ResourceManager;
 		template <class Loader>
 		class Resource;
 		template <class T, class Data, template <typename> typename ResourceKind = Resource>
-		class ResourceLoader;
-		class ResourceBase;
+		struct ResourceLoader;
+		struct ResourceBase;
 	}
 
 

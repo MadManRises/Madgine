@@ -2,15 +2,15 @@
 
 #include "Interfaces/filesystem/path.h"
 
+#include "Modules/keyvalue/scopebase.h"
+
 namespace Engine
 {
 	namespace Resources
 	{
 
-		class MADGINE_BASE_EXPORT ResourceBase
+		struct MADGINE_BASE_EXPORT ResourceBase : ScopeBase
 		{
-
-		public:
 			ResourceBase(Filesystem::Path path);
 
 			virtual ~ResourceBase() = default;

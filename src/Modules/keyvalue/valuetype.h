@@ -72,7 +72,9 @@ public:
 
     template <class T>
     struct isValueType {
-        const constexpr static bool value = _isValueType<std::decay_t<T>>::value || std::is_enum<T>::value || std::is_base_of_v<ScopeBase, std::decay_t<T>>;
+        const constexpr static bool value = _isValueType<std::decay_t<T>>::value
+            || std::is_enum<T>::value
+            || std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<T>>>;
     };
 
     ValueType()
@@ -372,14 +374,14 @@ public:
     decltype(auto) as() const
     {
         if constexpr (_isValueType<std::decay_t<T>>::value) {
-            try {
+            if (std::holds_alternative<std::decay_t<T>>(mUnion))
                 return std::get<std::decay_t<T>>(mUnion);
-            } catch (const std::bad_variant_access &) {
+            else
                 throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
                     getTypeString(
                         static_cast<Type>(variant_index<Union, std::decay_t<T>>::value))));
-            }
         } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
+            return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
         } else if constexpr (std::is_same_v<T, ValueType>) {
             return *this;
         } else if constexpr (std::is_enum_v<T>) {

@@ -33,11 +33,7 @@ namespace Render {
 
     void OpenGLMesh::setName(const std::string &name)
     {
-        mResource = Resources::ResourceManager::getSingleton().get<OpenGLMeshLoader>().get(name);
-        if (mResource)
-            mData = mResource->loadData();
-        else
-            mData.reset();
+        set(Resources::ResourceManager::getSingleton().get<OpenGLMeshLoader>().get(name));
     }
 
     void OpenGLMesh::setVisible(bool vis)
@@ -54,11 +50,25 @@ namespace Render {
         mData = std::move(data);
         mResource = nullptr;
     }
+
+    void OpenGLMesh::set(OpenGLMeshLoader::ResourceType *mesh)
+    {
+        mResource = mesh;
+        if (mResource)
+            mData = mResource->loadData();
+        else
+            mData.reset();
+    }
+
+    OpenGLMeshLoader::ResourceType *OpenGLMesh::get() const
+    {
+        return mResource;
+    }
 }
 }
 
 METATABLE_BEGIN(Engine::Render::OpenGLMesh)
-PROPERTY(Name, getName, setName)
+PROPERTY(Mesh, get, set)
 METATABLE_END(Engine::Render::OpenGLMesh)
 
 SERIALIZETABLE_BEGIN(Engine::Render::OpenGLMesh)

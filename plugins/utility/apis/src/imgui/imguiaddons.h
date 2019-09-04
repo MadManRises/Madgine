@@ -7,8 +7,7 @@
 
 namespace ImGui {
 
-struct IMGUI_API ValueTypeDrawer
-{
+struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
     void draw(const Engine::TypedScopePtr &scope);
     bool draw(Engine::InvScopePtr &p);
@@ -94,13 +93,14 @@ IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedSc
 IMGUI_API const ValueTypePayload *GetValuetypePayload();
 IMGUI_API bool AcceptingDraggableValueTypeTarget(const ValueTypePayload **payloadPointer = nullptr);
 IMGUI_API void RejectingDraggableValueTypeTarget();
-template <typename T>
-bool DraggableValueTypeTarget(T &result, const ValueTypePayload **payloadPointer = nullptr)
+template <typename T, typename Validator = bool(*)(const T&)>
+bool DraggableValueTypeTarget(
+    T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
 {
     const ValueTypePayload *payload = GetValuetypePayload();
     if (payload) {
         if (payload->mValue.is<T>()) {
-            if (AcceptingDraggableValueTypeTarget(payloadPointer)) {
+            if (validate(payload->mValue.as<T>()) && AcceptingDraggableValueTypeTarget(payloadPointer)) {
                 result = payload->mValue.as<T>();
                 return true;
             }

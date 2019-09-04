@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-struct MetaTable {
+struct MODULES_EXPORT MetaTable {
     const char *mName;
     const std::pair<const char *, Accessor> *mMember;
 
@@ -12,16 +12,26 @@ struct MetaTable {
     bool isEditable(const std::string &key) const;
 
     template <typename T>
-    bool isInstance() const;
+    bool isDerivedFrom() const;
+    bool isDerivedFrom(const MetaTable *baseType) const;
 };
 
 }
 
 DLL_IMPORT_VARIABLE2(const Engine::MetaTable, table, typename T);
 
+template <typename X>
+struct is_template : std::false_type {
+};
+
+template <template <class T, class _Data, template <typename> typename ResourceKind> class X, typename A, typename B, template <typename> typename C>
+struct is_template<X<A, B, C>> : std::true_type {
+};
+
 template <typename T>
-bool Engine::MetaTable::isInstance() const
+bool Engine::MetaTable::isDerivedFrom() const
 {
     static_assert(std::is_base_of_v<ScopeBase, T>, "Only can check ScopeBase types");
-    return this == &table<T>();
+    static_assert(!is_template<T>::value);
+    return isDerivedFrom(&table<T>());
 }
