@@ -2,13 +2,13 @@
 
 #include "geometry.h"
 
+#include "boundingbox.h"
+#include "plane.h"
 #include "ray.h"
 #include "sphere.h"
-#include "plane.h"
 #include "vector3.h"
 
 #include "common.h"
-
 
 namespace Engine {
 
@@ -33,7 +33,65 @@ bool Intersect(const Ray &ray, const Sphere &sphere, float *rayClosestParameter)
         return true;
     } else {
         return false;
-	}
+    }
+}
+
+bool Intersect(const Ray &ray, const BoundingBox &box, float *rayClosestParameter)
+{
+    Plane minX { box.mMin, box.mDirX };
+    Plane maxX { box.mMax, box.mDirX };
+
+    float tMin = std::numeric_limits<float>::lowest();
+    float tMax = std::numeric_limits<float>::max();
+
+    Intersect(minX, ray, &tMin);
+    Intersect(maxX, ray, &tMax);
+
+    if (tMin > tMax)
+        std::swap(tMin, tMax);
+
+    Plane minY { box.mMin, box.mDirY };
+    Plane maxY { box.mMax, box.mDirY };
+
+    float t2Min = std::numeric_limits<float>::lowest();
+    float t2Max = std::numeric_limits<float>::max();
+
+    Intersect(minY, ray, &t2Min);
+    Intersect(maxY, ray, &t2Max);
+
+    if (t2Min > t2Max)
+        std::swap(t2Min, t2Max);
+
+    tMin = std::max(tMin, t2Min);
+    tMax = std::min(tMax, t2Max);
+
+	if (tMin > tMax)
+        return false;
+
+    NormalizedVector3 dirZ = box.mDirX.crossProduct(box.mDirY);
+
+	Plane minZ { box.mMin, dirZ };
+    Plane maxZ { box.mMax, dirZ };
+
+    t2Min = std::numeric_limits<float>::lowest();
+    t2Max = std::numeric_limits<float>::max();
+
+    Intersect(minZ, ray, &t2Min);
+    Intersect(maxZ, ray, &t2Max);
+
+    if (t2Min > t2Max)
+        std::swap(t2Min, t2Max);
+
+    tMin = std::max(tMin, t2Min);
+    tMax = std::min(tMax, t2Max);
+
+    if (tMin > tMax)
+        return false;
+
+	if (rayClosestParameter)
+        *rayClosestParameter = tMin;
+
+	return true;
 }
 
 bool Intersect(const Plane &plane, const Ray &ray, float *rayParameter)
@@ -45,7 +103,7 @@ bool Intersect(const Plane &plane, const Ray &ray, float *rayParameter)
         if (rayParameter)
             *rayParameter = t;
         return true;
-    } 
+    }
     return false;
 }
 

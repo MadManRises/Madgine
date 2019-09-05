@@ -57,22 +57,6 @@ namespace Tools {
 
     void SceneEditor::render()
     {
-
-        constexpr Render::Vertex lines[] = {
-            { { -1, -1, -1 }, { 1, 1, 1, 1 }, { -1, -1, -1 } },
-            { { -1, -1, 1 }, { 1, 1, 1, 1 }, { -1, -1, 1 } },
-            { { -1, 1, -1 }, { 1, 1, 1, 1 }, { -1, 1, -1 } },
-            { { -1, 1, 1 }, { 1, 1, 1, 1 }, { -1, 1, 1 } },
-            { { 1, -1, -1 }, { 1, 1, 1, 1 }, { 1, -1, -1 } },
-            { { 1, -1, 1 }, { 1, 1, 1, 1 }, { 1, -1, 1 } },
-            { { 1, 1, -1 }, { 1, 1, 1, 1 }, { 1, 1, -1 } },
-            { { 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1 } },
-        };
-        constexpr unsigned int lineIndices[] = {
-            0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
-        };
-        Im3D::Mesh(IM3D_LINES, lines, 8, Matrix4::IDENTITY, lineIndices, 24);
-
         if (mHierarchyVisible)
             renderHierarchy();
         renderSelection();
@@ -124,6 +108,12 @@ namespace Tools {
         return mHoveredTransform;
     }
 
+    void SceneEditor::deselect()
+    {
+        mSelectedEntity = nullptr;
+        mSelectedCamera = nullptr;
+    }
+
     void SceneEditor::select(Scene::Camera *camera)
     {
         mSelectedEntity = nullptr;
@@ -156,19 +146,27 @@ namespace Tools {
                 if (!name[0])
                     name = "<unnamed>";
 
-                Engine::Matrix4 transform = Matrix4::IDENTITY;
-                Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-                if (e.hasComponent<Scene::Entity::Transform>())
-                    transform = e.getComponent<Scene::Entity::Transform>()->matrix();
-                if (e.hasComponent<Scene::Entity::Mesh>())
-                    bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
+				bool hovered = mSelectedEntity == &e;
 
-                Im3D::BoundingSphere(name, bb, transform);
-                if (ImGui::IsMouseClicked(0) && Im3D::IsObjectHovered()) {
-                    select(&e);
+                if (e.hasComponent<Scene::Entity::Transform>()) {
+                    Engine::Matrix4 transform = e.getComponent<Scene::Entity::Transform>()->matrix();
+                    Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
+                    if (e.hasComponent<Scene::Entity::Mesh>())
+                        bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
+
+                    Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
+                    if (hovered)
+                        flags |= Im3DBoundingObjectFlags_ShowOutline;
+
+                    if (Im3D::BoundingBox(name, bb, transform, flags)) {
+                        if (ImGui::IsMouseClicked(0)) {
+                            select(&e);
+                        }
+                        hovered = true;
+                    }
                 }
 
-                if (ImGui::Selectable(name, mSelectedEntity == &e || Im3D::IsObjectHovered())) {
+                if (ImGui::Selectable(name, hovered)) {
                     select(&e);
                 }
                 ImGui::DraggableValueTypeSource(name, this, ValueType { e });
@@ -273,8 +271,7 @@ namespace Tools {
                           { { 1, 0, 0 }, colors[i], { 1, 0, 0 } } };
 
                 Im3D::Mesh(IM3D_TRIANGLES, vertices, 6, t->matrix() * transforms[i], indices, 24);
-                Im3D::BoundingSphere(labels[i], 2);
-                if (Im3D::IsObjectHovered()) {
+                if (Im3D::BoundingBox(labels[i], 0, 2)) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;
                 }

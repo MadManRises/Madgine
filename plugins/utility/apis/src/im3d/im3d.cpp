@@ -140,23 +140,23 @@ namespace Im3D {
         c.mTemp.mLastTransform = transform;
     }
 
-    void BoundingSphere(const char *name, size_t priority)
+    bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        BoundingSphere(ImHashStr(name), priority);
+        return BoundingSphere(ImHashStr(name), flags, priority);
     }
 
-    void BoundingSphere(Im3DID id, size_t priority)
+    bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
     {
         Im3DContext &c = sContext;
-        BoundingSphere(id, c.mTemp.mLastAABB, c.mTemp.mLastTransform, priority);
+        return BoundingSphere(id, c.mTemp.mLastAABB, c.mTemp.mLastTransform, flags, priority);
     }
 
-    void BoundingSphere(const char *name, const AABB &bb, const Matrix4 &transform, size_t priority)
+    bool BoundingSphere(const char *name, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        BoundingSphere(ImHashStr(name), bb, transform, priority);
+        return BoundingSphere(ImHashStr(name), bb, transform, flags, priority);
     }
 
-    void BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform, size_t priority)
+    bool BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
         Im3DContext &c = sContext;
 
@@ -167,10 +167,57 @@ namespace Im3D {
         float distance = 0.0f;
         Intersect(c.mMouseRay, transform * bounds, &distance);
 
-        BoundingObject(id, distance, priority);
+        return BoundingObject(id, distance, flags, priority);
     }
 
-    void BoundingObject(Im3DID id, float distance, size_t priority)
+    bool BoundingBox(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
+    {
+        return BoundingBox(ImHashStr(name), flags, priority);
+    }
+
+    bool BoundingBox(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
+    {
+        Im3DContext &c = sContext;
+        return BoundingBox(id, c.mTemp.mLastAABB, c.mTemp.mLastTransform, flags, priority);
+    }
+
+    bool BoundingBox(const char *name, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
+    {
+        return BoundingBox(ImHashStr(name), bb, transform, flags, priority);
+    }
+
+    bool BoundingBox(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
+    {
+        Im3DContext &c = sContext;
+
+        //Check if Hovered
+        float distance = 0.0f;
+        Intersect(c.mMouseRay, transform * bb, &distance);
+
+        bool hovered = BoundingObject(id, distance, flags, priority);
+
+        if ((flags & Im3DBoundingObjectFlags_ShowOutline) || (hovered && (flags & Im3DBoundingObjectFlags_ShowOnHover))) {
+            std::array<Vector3, 8> corners = bb.corners();
+            Render::Vertex vertices[] = {
+                { corners[0], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[1], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[2], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[3], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[4], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[5], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[6], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[7], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+            };
+            unsigned int indices[] = {
+                0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
+            };
+            Mesh(IM3D_LINES, vertices, 8, transform, indices, 24);
+        }
+
+		return hovered;
+    }
+
+    bool BoundingObject(Im3DID id, float distance, Im3DBoundingObjectFlags flags, size_t priority)
     {
         Im3DContext &c = sContext;
 
@@ -195,12 +242,20 @@ namespace Im3D {
         }
 
         c.mTemp.mLastObject = object;
+
+        return object == c.mHoveredObject;
     }
 
     bool IsObjectHovered()
     {
         Im3DContext &c = sContext;
         return c.mTemp.mLastObject && c.mTemp.mLastObject == c.mHoveredObject;
+    }
+
+    bool IsAnyObjectHovered()
+    {
+        Im3DContext &c = sContext;
+        return c.mHoveredObject || c.mNextHoveredObject;
     }
 
 }

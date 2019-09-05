@@ -16,13 +16,20 @@ enum Im3DMeshType {
     IM3D_MESHTYPE_COUNT
 };
 
+
+typedef void *Im3DNativeMesh;
+
+typedef unsigned int Im3DID;
+typedef int Im3DBoundingObjectFlags;
+
+enum Im3DBoundingObjectFlags_ {
+    Im3DBoundingObjectFlags_ShowOutline = 1 << 0,
+    Im3DBoundingObjectFlags_ShowOnHover = 1 << 1
+};
+
 namespace Im3D {
 
     struct Im3DObject;
-
-    typedef void *Im3DNativeMesh;
-
-    typedef unsigned int Im3DID;
 
     MADGINE_APIS_EXPORT Im3DContext *GetCurrentContext();
 
@@ -34,14 +41,20 @@ namespace Im3D {
 
     MADGINE_APIS_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
 
-    MADGINE_APIS_EXPORT void BoundingSphere(const char *name, size_t priority = 1);
-    MADGINE_APIS_EXPORT void BoundingSphere(Im3DID id, size_t priority = 1);
-    MADGINE_APIS_EXPORT void BoundingSphere(const char *name, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, size_t priority = 1);
-    MADGINE_APIS_EXPORT void BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingSphere(const char *name, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
 
-    MADGINE_APIS_EXPORT void BoundingObject(Im3DID id, float distance = 0.0f, size_t priority = 1);
+	MADGINE_APIS_EXPORT bool BoundingBox(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingBox(Im3DID id, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingBox(const char *name, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+    MADGINE_APIS_EXPORT bool BoundingBox(Im3DID id, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
+
+    MADGINE_APIS_EXPORT bool BoundingObject(Im3DID id, float distance = 0.0f, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
 
     MADGINE_APIS_EXPORT bool IsObjectHovered();
+    MADGINE_APIS_EXPORT bool IsAnyObjectHovered();
 }
 
 }

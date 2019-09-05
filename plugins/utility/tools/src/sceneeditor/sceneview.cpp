@@ -201,6 +201,12 @@ namespace Tools {
                     mDragTransform->setPosition(mDragStoredPosition + distance);
                 }
             }
+
+			if (ImGui::IsItemClicked(0)) {
+                if (!Im3D::IsAnyObjectHovered())
+                    mEditor->deselect();
+            }
+
             if (ImGui::BeginDragDropTarget()) {
                 Vector3 pos = ray.point(5.0f);
                 Render::OpenGLMeshLoader::ResourceType *resource;
@@ -212,7 +218,7 @@ namespace Tools {
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
                     std::shared_ptr<Render::OpenGLMeshData> data = resource->loadData();
-                    Im3D::NativeMesh(data.get(), data->aabb(), Matrix4::TranslationMatrix(pos));
+                    Im3D::NativeMesh(data.get(), data->mAABB, Matrix4::TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

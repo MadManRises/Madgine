@@ -168,6 +168,7 @@ struct Ray;
 struct Sphere;
 struct Plane;
 struct AABB;
+struct BoundingBox;
 }
 
 struct lua_State;

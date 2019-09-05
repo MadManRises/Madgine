@@ -28,6 +28,7 @@ THE SOFTWARE.
 #pragma once
 
 #include "vector2.h"
+#include "math.h"
 
 namespace Engine {
 /** Standard 3-dimensional vector.
@@ -449,9 +450,9 @@ public:
 		will be no changes made to their components.
 		@return The previous length of the vector.
 		*/
-    float normalise()
+    constexpr float normalise()
     {
-        float fLength = sqrtf(x * x + y * y + z * z);
+        float fLength = Math::sqrtf(x * x + y * y + z * z);
 
         // Will also work for zero-sized vectors, but will change nothing
         // We're not using epsilons because we don't need to.
@@ -767,13 +768,13 @@ public:
 };
 
 struct NormalizedVector3 : Vector3 {
-    NormalizedVector3(const Vector3 &v)
+    constexpr NormalizedVector3(const Vector3 &v)
         : Vector3(v)
     {
         normalise();
     }
 
-    NormalizedVector3 &operator=(const Vector3 &v)
+    constexpr NormalizedVector3 &operator=(const Vector3 &v)
     {
         Vector3::operator=(v);
         normalise();

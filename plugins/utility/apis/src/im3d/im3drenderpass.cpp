@@ -16,7 +16,7 @@ namespace Render {
 
         target->clearDepthBuffer();
 
-        for (const std::pair<Im3D::Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
+        for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(p.first, p.second);
 
 		for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i)
