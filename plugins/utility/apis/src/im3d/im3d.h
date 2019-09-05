@@ -37,6 +37,9 @@ namespace Im3D {
 
     MADGINE_APIS_EXPORT void NewFrame();
 
+	MADGINE_APIS_EXPORT void PushID(const void *ptr);
+    MADGINE_APIS_EXPORT void PopID();
+
     MADGINE_APIS_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0);
 
     MADGINE_APIS_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);

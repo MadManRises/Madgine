@@ -49,6 +49,8 @@ namespace Im3D {
         for (std::pair<const Im3DNativeMesh, std::vector<Matrix4>> &p : c.mNativeMeshes)
             p.second.clear();
 
+        assert(c.mIDStack.empty());
+
         c.mHoveredObject = c.mNextHoveredObject;
         c.mNextHoveredObject = nullptr;
         c.mNextHoveredPriority = 0;
@@ -73,6 +75,33 @@ namespace Im3D {
     {
         ImGuiID id = ImHashStr(name);
         return FindObjectByID(id);
+    }
+
+    Im3DID GetID(const char *name)
+    {
+        Im3DContext &c = sContext;
+        Im3DID seed = c.mIDStack.empty() ? 0 : c.mIDStack.back();
+        Im3DID id = ImHashStr(name, 0, seed);
+        return id;
+    }
+
+    Im3DID GetID(const void *ptr)
+    {
+        Im3DContext &c = sContext;
+        ImGuiID seed = c.mIDStack.empty() ? 0 : c.mIDStack.back();
+        return ImHashData(&ptr, sizeof(void *), seed);
+    }
+
+    void PushID(const void *ptr)
+    {
+        Im3DContext &c = sContext;
+        c.mIDStack.push_back(GetID(ptr));
+    }
+
+    void PopID()
+    {
+        Im3DContext &c = sContext;
+        c.mIDStack.pop_back();
     }
 
     Im3DObject *CreateNewObject(Im3DID id)
@@ -142,7 +171,7 @@ namespace Im3D {
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        return BoundingSphere(ImHashStr(name), flags, priority);
+        return BoundingSphere(GetID(name), flags, priority);
     }
 
     bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
@@ -153,7 +182,7 @@ namespace Im3D {
 
     bool BoundingSphere(const char *name, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        return BoundingSphere(ImHashStr(name), bb, transform, flags, priority);
+        return BoundingSphere(GetID(name), bb, transform, flags, priority);
     }
 
     bool BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
@@ -172,7 +201,7 @@ namespace Im3D {
 
     bool BoundingBox(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        return BoundingBox(ImHashStr(name), flags, priority);
+        return BoundingBox(GetID(name), flags, priority);
     }
 
     bool BoundingBox(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
@@ -183,7 +212,7 @@ namespace Im3D {
 
     bool BoundingBox(const char *name, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        return BoundingBox(ImHashStr(name), bb, transform, flags, priority);
+        return BoundingBox(GetID(name), bb, transform, flags, priority);
     }
 
     bool BoundingBox(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
@@ -214,7 +243,7 @@ namespace Im3D {
             Mesh(IM3D_LINES, vertices, 8, transform, indices, 24);
         }
 
-		return hovered;
+        return hovered;
     }
 
     bool BoundingObject(Im3DID id, float distance, Im3DBoundingObjectFlags flags, size_t priority)

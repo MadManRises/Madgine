@@ -147,6 +147,9 @@ namespace Tools {
                     name = "<unnamed>";
 
 				bool hovered = mSelectedEntity == &e;
+				
+				ImGui::PushID(&e);
+                Im3D::PushID(&e);
 
                 if (e.hasComponent<Scene::Entity::Transform>()) {
                     Engine::Matrix4 transform = e.getComponent<Scene::Entity::Transform>()->matrix();
@@ -170,6 +173,8 @@ namespace Tools {
                     select(&e);
                 }
                 ImGui::DraggableValueTypeSource(name, this, ValueType { e });
+                ImGui::PopID();
+                Im3D::PopID();
             }
 
             if (ImGui::Button("+ New Entity")) {

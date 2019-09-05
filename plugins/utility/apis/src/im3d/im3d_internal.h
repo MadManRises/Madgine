@@ -36,6 +36,7 @@ namespace Im3D {
 
         std::vector<std::unique_ptr<Im3DObject>> mObjects;
         ImGuiStorage mObjectsById;
+        std::vector<Im3DID> mIDStack;
 
         Ray mMouseRay;
         Im3DObject *mHoveredObject;
@@ -49,6 +50,9 @@ namespace Im3D {
     MADGINE_APIS_EXPORT Im3DObject *FindObjectByID(Im3DID id);
 
     MADGINE_APIS_EXPORT Im3DObject *FindObjectByName(const char *name);
+
+	MADGINE_APIS_EXPORT Im3DID GetID(const char *name);
+    MADGINE_APIS_EXPORT Im3DID GetID(const void *ptr);
 
 }
 }
