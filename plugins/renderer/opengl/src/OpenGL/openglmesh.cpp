@@ -45,6 +45,11 @@ namespace Render {
         return true;
     }
 
+    AABB OpenGLMesh::aabb() const
+    {
+        return mData->mAABB;
+    }
+
     void OpenGLMesh::setManual(std::shared_ptr<OpenGLMeshData> data)
     {
         mData = std::move(data);

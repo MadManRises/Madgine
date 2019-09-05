@@ -19,7 +19,7 @@ namespace Render {
         bool resize(const Vector2 &size) override;
 
         virtual void render() override;
-        virtual void renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;
+        virtual void renderVertices(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;
         virtual void renderInstancedMesh(void *meshData, const std::vector<Matrix4> &transforms) override;
         virtual void clearDepthBuffer() override;
 

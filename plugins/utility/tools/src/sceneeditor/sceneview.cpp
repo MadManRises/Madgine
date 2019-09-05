@@ -43,6 +43,8 @@
 
 #include "../inspector/inspector.h"
 
+#include "OpenGL/openglmeshdata.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -209,7 +211,8 @@ namespace Tools {
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
-                    Im3D::NativeMesh("newMesh", resource->loadData().get(), Matrix4::TranslationMatrix(pos));
+                    std::shared_ptr<Render::OpenGLMeshData> data = resource->loadData();
+                    Im3D::NativeMesh(data.get(), data->aabb(), Matrix4::TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

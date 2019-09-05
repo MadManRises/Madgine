@@ -19,7 +19,8 @@ namespace Render {
         for (const std::pair<Im3D::Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(p.first, p.second);
 
-        target->renderTriangles(context->mTriangleVertices.data(), context->mTriangleVertices.size(), context->mTriangleIndices.data(), context->mTriangleIndices.size());
+		for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i)
+			target->renderVertices(i + 1, context->mVertices[i].data(), context->mVertices[i].size(), context->mIndices[i].data(), context->mIndices[i].size());
     }
 
 }

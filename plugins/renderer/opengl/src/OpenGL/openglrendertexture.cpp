@@ -192,10 +192,19 @@ namespace Render {
 
         mesh->mVAO.bind();
 
+		constexpr GLenum modes[]
+        {
+            GL_POINTS,
+                GL_LINES,
+                GL_TRIANGLES
+        };
+
+		GLenum mode = modes[mesh->mGroupSize - 1];
+
         if (mesh->mIndices) {
-            glDrawElements(GL_TRIANGLES, mesh->mElementCount, GL_UNSIGNED_INT, 0);
+            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
         } else
-            glDrawArrays(GL_TRIANGLES, 0, mesh->mElementCount);
+            glDrawArrays(mode, 0, mesh->mElementCount);
         glCheck();
     }
 
@@ -206,9 +215,9 @@ namespace Render {
 		}
     }
 
-    void OpenGLRenderTexture::renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLRenderTexture::renderVertices(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
-        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(vertices, vertexCount, indices, indexCount);
+        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
 
         //setupProgram();
 

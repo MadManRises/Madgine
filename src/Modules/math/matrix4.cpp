@@ -32,9 +32,7 @@ THE SOFTWARE.
 
 namespace Engine
 {
-    const float Matrix4::EPSILON = 1e-06f;
-    const Matrix4 Matrix4::ZERO(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-    const Matrix4 Matrix4::IDENTITY(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+    //const float Matrix4::EPSILON = 1e-06f;
     /*const float Matrix4::msSvdEpsilon = 1e-04f;
     const unsigned int Matrix4::msSvdMaxIterations = 42;*/
 
@@ -260,7 +258,7 @@ namespace Engine
     //-----------------------------------------------------------------------
     Matrix4 Matrix4::Inverse () const
     {
-        Matrix4 kInverse = Matrix4::ZERO;
+        Matrix4 kInverse { Matrix4::ZERO };
         Inverse(kInverse);
         return kInverse;
     }

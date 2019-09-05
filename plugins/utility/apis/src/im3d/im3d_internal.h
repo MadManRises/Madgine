@@ -3,6 +3,7 @@
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
 #include "Modules/math/sphere.h"
+#include "Modules/math/boundingbox.h"
 
 namespace Engine {
 namespace Im3D {
@@ -10,27 +11,26 @@ namespace Im3D {
     constexpr size_t MAX_PRIORITY_COUNT = 3;
 
     struct Im3DObject {
-        Im3DObject(const char *name);
+        Im3DObject(Im3DID id);
 
         std::string mName;
         ImU32 mID;
 
-        Matrix4 mTransform;
-        Matrix4 mInverseTransform;
-
-        Sphere mBounds;
     };
 
     struct ImObjectTempData {
         Im3DObject *mLastObject;
+        AABB mLastAABB;
+        Matrix4 mLastTransform;
     };
 
     struct Im3DContext {
 
         Im3DIO mIO;
 
-        std::vector<Render::Vertex> mTriangleVertices;
-        std::vector<unsigned int> mTriangleIndices;
+        std::vector<Render::Vertex> mVertices[IM3D_MESHTYPE_COUNT];
+        std::vector<unsigned int> mIndices[IM3D_MESHTYPE_COUNT];
+        size_t mVertexBase[IM3D_MESHTYPE_COUNT];
 
 		std::map<Im3DNativeMesh, std::vector<Matrix4>> mNativeMeshes;
 
@@ -46,7 +46,7 @@ namespace Im3D {
         ImObjectTempData mTemp;
     };
 
-    MADGINE_APIS_EXPORT Im3DObject *FindObjectByID(ImGuiID id);
+    MADGINE_APIS_EXPORT Im3DObject *FindObjectByID(Im3DID id);
 
     MADGINE_APIS_EXPORT Im3DObject *FindObjectByName(const char *name);
 

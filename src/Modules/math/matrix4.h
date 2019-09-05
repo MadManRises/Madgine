@@ -58,48 +58,45 @@ namespace Engine {
         The coordinate system is assumed to be <b>right-handed</b>.
 */
 class MODULES_EXPORT Matrix4 {
-  public:
+public:
     /** Default constructor.
         @note
             It does <b>NOT</b> initialize the matrix for efficiency.
     */
     inline Matrix4() {}
-    inline explicit Matrix4(const Matrix3 &in)
-        : m{{in[0][0], in[0][1], in[0][2], 0.0f},
-            {in[1][0], in[1][1], in[1][2], 0.0f},
-            {in[2][0], in[2][1], in[2][2], 0.0f},
-            {0.0f, 0.0f, 0.0f, 1.0f}} {}
-    inline explicit Matrix4(const float arr[4][4]) {
-        memcpy(m, arr, 16 * sizeof(float));
+    inline constexpr explicit Matrix4(const Matrix3 &in)
+        : m { { in[0][0], in[0][1], in[0][2], 0.0f },
+            { in[1][0], in[1][1], in[1][2], 0.0f },
+            { in[2][0], in[2][1], in[2][2], 0.0f },
+            { 0.0f, 0.0f, 0.0f, 1.0f } }
+    {
     }
-    inline Matrix4(const Matrix4 &rkMatrix) {
+    inline constexpr Matrix4(const float arr[4][4])
+        : m { { arr[0][0], arr[0][1], arr[0][2], arr[0][3] },
+            { arr[1][0], arr[1][1], arr[1][2], arr[1][3] },
+            { arr[2][0], arr[2][1], arr[2][2], arr[2][3] },
+            { arr[3][0], arr[3][1], arr[3][2], arr[3][3] } }
+    {
+    }
+    inline Matrix4(const Matrix4 &rkMatrix)
+    {
         memcpy(m, rkMatrix.m, 16 * sizeof(float));
     }
-    Matrix4(float fEntry00, float fEntry01, float fEntry02, float fEntry03,
-            float fEntry10, float fEntry11, float fEntry12, float fEntry13,
-            float fEntry20, float fEntry21, float fEntry22, float fEntry23,
-            float fEntry30, float fEntry31, float fEntry32, float fEntry33) {
-        m[0][0] = fEntry00;
-        m[0][1] = fEntry01;
-        m[0][2] = fEntry02;
-        m[0][3] = fEntry03;
-        m[1][0] = fEntry10;
-        m[1][1] = fEntry11;
-        m[1][2] = fEntry12;
-        m[1][3] = fEntry13;
-        m[2][0] = fEntry20;
-        m[2][1] = fEntry21;
-        m[2][2] = fEntry22;
-        m[2][3] = fEntry23;
-        m[3][0] = fEntry30;
-        m[3][1] = fEntry31;
-        m[3][2] = fEntry32;
-        m[3][3] = fEntry33;
+    constexpr Matrix4(float fEntry00, float fEntry01, float fEntry02, float fEntry03,
+        float fEntry10, float fEntry11, float fEntry12, float fEntry13,
+        float fEntry20, float fEntry21, float fEntry22, float fEntry23,
+        float fEntry30, float fEntry31, float fEntry32, float fEntry33)
+        : m { { fEntry00, fEntry01, fEntry02, fEntry03 },
+            { fEntry10, fEntry11, fEntry12, fEntry13 },
+            { fEntry20, fEntry21, fEntry22, fEntry23 },
+            { fEntry30, fEntry31, fEntry32, fEntry33 } }
+    {
     }
 
     /** Exchange the contents of this matrix with another.
      */
-    inline void swap(Matrix4 &other) {
+    inline void swap(Matrix4 &other)
+    {
         std::swap(m[0][0], other.m[0][0]);
         std::swap(m[0][1], other.m[0][1]);
         std::swap(m[0][2], other.m[0][2]);
@@ -130,10 +127,11 @@ class MODULES_EXPORT Matrix4 {
     Vector4 GetColumn(size_t iCol) const;
     void SetColumn(size_t iCol, const Vector4 &vec);
     void FromAxes(const Vector4 &xAxis, const Vector4 &yAxis,
-                  const Vector4 &zAxis, const Vector4 &wAxis);
+        const Vector4 &zAxis, const Vector4 &wAxis);
 
     /// Assignment and comparison
-    inline Matrix4 &operator=(const Matrix4 &rkMatrix) {
+    inline Matrix4 &operator=(const Matrix4 &rkMatrix)
+    {
         memcpy(m, rkMatrix.m, 16 * sizeof(float));
         return *this;
     }
@@ -144,7 +142,8 @@ class MODULES_EXPORT Matrix4 {
 
     /** Tests 2 matrices for inequality.
      */
-    inline bool operator!=(const Matrix4 &rkMatrix) const {
+    inline bool operator!=(const Matrix4 &rkMatrix) const
+    {
         return !operator==(rkMatrix);
     }
 
@@ -167,14 +166,14 @@ class MODULES_EXPORT Matrix4 {
 
     /// Vector * matrix [1x3 * 3x3 = 1x3]
     MODULES_EXPORT friend Vector4 operator*(const Vector4 &rkVector,
-                                               const Matrix4 &rkMatrix);
+        const Matrix4 &rkMatrix);
 
     /// Matrix * scalar
     Matrix4 operator*(float fScalar) const;
 
     /// Scalar * matrix
     MODULES_EXPORT friend Matrix4 operator*(float fScalar,
-                                               const Matrix4 &rkMatrix);
+        const Matrix4 &rkMatrix);
 
     // utilities
     Matrix4 Transpose() const;
@@ -251,15 +250,17 @@ class MODULES_EXPORT Matrix4 {
         return false;
     }*/
 
-    Matrix3 ToMat3() const {
+    Matrix3 ToMat3() const
+    {
         return Matrix3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2],
-                       m[2][0], m[2][1], m[2][2]);
+            m[2][0], m[2][1], m[2][2]);
     }
 
     /** Function for writing to a stream.
      */
     inline MODULES_EXPORT friend std::ostream &
-    operator<<(std::ostream &o, const Matrix4 &mat) {
+    operator<<(std::ostream &o, const Matrix4 &mat)
+    {
         o << "Matrix4(" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2]
           << ", " << mat[0][3] << ", " << mat[1][0] << ", " << mat[1][1] << ", "
           << mat[1][2] << ", " << mat[1][3] << ", " << mat[2][0] << ", "
@@ -269,13 +270,13 @@ class MODULES_EXPORT Matrix4 {
         return o;
     }
 
-	static Matrix4 TranslationMatrix(const Vector3 &t);
+    static Matrix4 TranslationMatrix(const Vector3 &t);
 
-    static const float EPSILON;
-    static const Matrix4 ZERO;
-    static const Matrix4 IDENTITY;
+    //static const float EPSILON;
+    static constexpr float ZERO[4][4] { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+    static constexpr float IDENTITY[4][4] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } };
 
-  protected:
+protected:
     // support for eigensolver
     /* void Tridiagonal (float afDiag[3], float afSubDiag[3]);
      bool QLAlgorithm (float afDiag[3], float afSubDiag[3]);

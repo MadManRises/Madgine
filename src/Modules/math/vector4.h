@@ -48,7 +48,7 @@ public:
     {
     }
 
-    Vector4(const float fX, const float fY, const float fZ, const float fW)
+    constexpr Vector4(const float fX, const float fY, const float fZ, const float fW)
         : x(fX)
         , y(fY)
         , z(fZ)
@@ -56,7 +56,7 @@ public:
     {
     }
 
-    Vector4(const float afCoordinate[4])
+    constexpr Vector4(const float afCoordinate[4])
         : x(afCoordinate[0])
         , y(afCoordinate[1])
         , z(afCoordinate[2])
@@ -72,7 +72,7 @@ public:
         w = static_cast<float>(afCoordinate[3]);
     }
 
-    explicit Vector4(float *const r)
+    constexpr explicit Vector4(float *const r)
         : x(r[0])
         , y(r[1])
         , z(r[2])
@@ -80,7 +80,7 @@ public:
     {
     }
 
-    explicit Vector4(const float scaler)
+    constexpr explicit Vector4(const float scaler)
         : x(scaler)
         , y(scaler)
         , z(scaler)
@@ -88,7 +88,7 @@ public:
     {
     }
 
-    explicit Vector4(const Vector3 &xyz, const float w)
+    constexpr Vector4(const Vector3 &xyz, const float w)
         : x(xyz.x)
         , y(xyz.y)
         , z(xyz.z)

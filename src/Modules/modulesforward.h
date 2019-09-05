@@ -167,6 +167,7 @@ struct TypeInfo;
 struct Ray;
 struct Sphere;
 struct Plane;
+struct AABB;
 }
 
 struct lua_State;

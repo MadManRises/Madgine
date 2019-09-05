@@ -17,6 +17,8 @@ namespace Render {
         virtual void setVisible(bool vis) override;
         virtual bool isVisible() const override;
 
+		virtual AABB aabb() const override;
+
         void setManual(std::shared_ptr<OpenGLMeshData> data);
 
         void set(OpenGLMeshLoader::ResourceType *mesh);

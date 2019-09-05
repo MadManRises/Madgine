@@ -16,7 +16,7 @@ namespace Render {
         Scene::Camera *camera() const;
 
         virtual void render() = 0;
-        virtual void renderTriangles(Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
+        virtual void renderVertices(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
         virtual void renderInstancedMesh(void *meshData, const std::vector<Matrix4> &transforms) = 0;
         virtual void clearDepthBuffer() = 0;
 

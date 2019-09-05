@@ -26,6 +26,8 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
+#include "Modules/math/boundingbox.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -45,7 +47,7 @@ namespace Tools {
             Render::OpenGLMeshLoader &loader = Resources::ResourceManager::getSingleton().get<Render::OpenGLMeshLoader>();
             std::vector<std::pair<std::string, TypedScopePtr>> result;
             std::transform(loader.begin(), loader.end(), std::back_inserter(result), [](std::pair<const std::string, Render::OpenGLMeshLoader::ResourceType> &p) {
-                return std::make_pair( p.first, &p.second );
+                return std::make_pair(p.first, &p.second);
             });
             return result;
         });
@@ -55,6 +57,22 @@ namespace Tools {
 
     void SceneEditor::render()
     {
+
+        constexpr Render::Vertex lines[] = {
+            { { -1, -1, -1 }, { 1, 1, 1, 1 }, { -1, -1, -1 } },
+            { { -1, -1, 1 }, { 1, 1, 1, 1 }, { -1, -1, 1 } },
+            { { -1, 1, -1 }, { 1, 1, 1, 1 }, { -1, 1, -1 } },
+            { { -1, 1, 1 }, { 1, 1, 1, 1 }, { -1, 1, 1 } },
+            { { 1, -1, -1 }, { 1, 1, 1, 1 }, { 1, -1, -1 } },
+            { { 1, -1, 1 }, { 1, 1, 1, 1 }, { 1, -1, 1 } },
+            { { 1, 1, -1 }, { 1, 1, 1, 1 }, { 1, 1, -1 } },
+            { { 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1 } },
+        };
+        constexpr unsigned int lineIndices[] = {
+            0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
+        };
+        Im3D::Mesh(IM3D_LINES, lines, 8, Matrix4::IDENTITY, lineIndices, 24);
+
         if (mHierarchyVisible)
             renderHierarchy();
         renderSelection();
@@ -137,7 +155,20 @@ namespace Tools {
                 const char *name = e.key();
                 if (!name[0])
                     name = "<unnamed>";
-                if (ImGui::Selectable(name, mSelectedEntity == &e)) {
+
+                Engine::Matrix4 transform = Matrix4::IDENTITY;
+                Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
+                if (e.hasComponent<Scene::Entity::Transform>())
+                    transform = e.getComponent<Scene::Entity::Transform>()->matrix();
+                if (e.hasComponent<Scene::Entity::Mesh>())
+                    bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
+
+                Im3D::BoundingSphere(name, bb, transform);
+                if (ImGui::IsMouseClicked(0) && Im3D::IsObjectHovered()) {
+                    select(&e);
+                }
+
+                if (ImGui::Selectable(name, mSelectedEntity == &e || Im3D::IsObjectHovered())) {
                     select(&e);
                 }
                 ImGui::DraggableValueTypeSource(name, this, ValueType { e });
@@ -202,12 +233,12 @@ namespace Tools {
         }
 
         if (Entity::Transform *t = entity->getComponent<Entity::Transform>()) {
-            Vector4 colors[] = {
+            constexpr Vector4 colors[] = {
                 { 0.5f, 0, 0, 0.5f },
                 { 0, 0.5f, 0, 0.5f },
                 { 0, 0, 0.5f, 0.5f }
             };
-            Matrix4 transforms[] = {
+            constexpr Matrix4 transforms[] = {
                 Matrix4::IDENTITY,
                 { 0, 1, 0, 0,
                     1, 0, 0, 0,
@@ -219,7 +250,7 @@ namespace Tools {
                     0, 0, 0, 1 }
             };
 
-            const unsigned int indices[] = {
+            constexpr unsigned int indices[] = {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
 
@@ -241,8 +272,8 @@ namespace Tools {
                           { { 0.1, -0.1, -0.1 }, colors[i], { 0, -1, -1 } },
                           { { 1, 0, 0 }, colors[i], { 1, 0, 0 } } };
 
-                Im3D::Mesh(labels[i], vertices, 6, t->matrix() * transforms[i], indices, 24);
-
+                Im3D::Mesh(IM3D_TRIANGLES, vertices, 6, t->matrix() * transforms[i], indices, 24);
+                Im3D::BoundingSphere(labels[i], 2);
                 if (Im3D::IsObjectHovered()) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;

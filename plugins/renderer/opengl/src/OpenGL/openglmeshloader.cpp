@@ -38,7 +38,7 @@ namespace Render {
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        //Reserve??		
+        //Reserve??
 
         for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
             unsigned int baseVertexIndex = vertices.size();
@@ -79,10 +79,10 @@ namespace Render {
             }
         }
 
-        return std::make_shared<OpenGLMeshData>(generate(vertices.data(), vertices.size(), indices.data(), indices.size()));
+        return std::make_shared<OpenGLMeshData>(generate(3, vertices.data(), vertices.size(), indices.data(), indices.size()));
     }
 
-    OpenGLMeshData OpenGLMeshLoader::generate(Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
 
         OpenGLMeshData data;
@@ -123,15 +123,27 @@ namespace Render {
         );
         glEnableVertexAttribArray(2);
 
-        update(data, vertices, vertexCount, indices, indexCount);
+        update(data, groupSize, vertices, vertexCount, indices, indexCount);
 
         return data;
     }
 
-    void OpenGLMeshLoader::update(OpenGLMeshData &data, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
-
+        data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
+
+        Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+        Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
+
+        for (size_t i = 0; i < vertexCount; ++i) {
+            Vertex &v = vertices[i];
+            minP = min(v.mPos, minP);
+            maxP = max(v.mPos, maxP);
+        }
+        data.mAABB = { minP,
+            maxP };
+
         if (indices) {
             data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices);
             data.mElementCount = indexCount;
