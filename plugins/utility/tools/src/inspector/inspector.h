@@ -26,9 +26,10 @@ namespace Tools {
 
         const char *key() const override;
 
-		void addObjectSuggestion(const MetaTable *type, std::function<std::vector<ScopeBase *>()> getter);
+		void addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter);
 		template <typename T>
-		void addObjectSuggestion(std::function<std::vector<ScopeBase*>()> getter) {
+                void addObjectSuggestion(std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
+                {
                     addObjectSuggestion(&table<T>(), std::move(getter));
 				}
 
@@ -48,7 +49,7 @@ namespace Tools {
         std::map<std::string, InspectorLayout *> mAssociations;
         std::map<std::string, InspectorLayout> mLayouts;
 
-		std::map<const MetaTable *, std::function<std::vector<ScopeBase *>()>> mObjectSuggestionsByType; 
+		std::map<const MetaTable *, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()>> mObjectSuggestionsByType; 
 
         static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
     };

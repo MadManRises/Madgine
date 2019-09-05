@@ -21,6 +21,11 @@
 
 #include "im3d/im3d.h"
 
+#include "OpenGL/opengllib.h"
+#include "OpenGL/openglmeshloader.h"
+
+#include "Madgine/resources/resourcemanager.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -35,6 +40,16 @@ namespace Tools {
         mSceneMgr = &app().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
         mSceneViews.emplace_back(this, mWindow.getRenderer(), mRoot.manager());
+
+        mInspector->addObjectSuggestion<Render::OpenGLMeshLoader::ResourceType>([]() {
+            Render::OpenGLMeshLoader &loader = Resources::ResourceManager::getSingleton().get<Render::OpenGLMeshLoader>();
+            std::vector<std::pair<std::string, TypedScopePtr>> result;
+            std::transform(loader.begin(), loader.end(), std::back_inserter(result), [](std::pair<const std::string, Render::OpenGLMeshLoader::ResourceType> &p) {
+                return std::make_pair( p.first, &p.second );
+            });
+            return result;
+        });
+
         return ToolBase::init();
     }
 

@@ -130,7 +130,12 @@ namespace Tools {
                                                                      ImGui::BeginTreeArrow(id.c_str());
                                                                      ImGui::SameLine(0.0f, 0.0f);
                                                                      if (ImGui::BeginCombo("##suggestions", id.c_str())) {
-
+                                                                         for (std::pair<std::string, TypedScopePtr> p : it->second()) {
+                                                                             if (ImGui::Selectable(p.first.c_str())) {
+                                                                                 value = p.second;
+                                                                                 modified = true;
+                                                                             }
+																		 }
                                                                          ImGui::EndCombo();
                                                                      }
                                                                      open = ImGui::EndTreeArrow();
@@ -318,7 +323,7 @@ namespace Tools {
         return "Inspector";
     }
 
-    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<ScopeBase *>()> getter)
+    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
     {
         mObjectSuggestionsByType[type] = getter;
     }
