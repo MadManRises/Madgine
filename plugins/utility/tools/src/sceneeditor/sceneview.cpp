@@ -41,6 +41,8 @@
 
 #include "Madgine/scene/entity/components/mesh.h"
 
+#include "../inspector/inspector.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -84,6 +86,8 @@ namespace Tools {
             mRenderTarget->addPostRenderPass(std::move(pass));
 
         mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
+
+		editor->getTool<Inspector>().addObjectSuggestion<Render::OpenGLMeshLoader::ResourceType>([]() { return std::vector<ScopeBase *> {}; });
     }
 
     SceneView::~SceneView()

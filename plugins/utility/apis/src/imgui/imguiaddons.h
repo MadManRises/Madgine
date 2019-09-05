@@ -7,6 +7,9 @@
 
 namespace ImGui {
 
+    typedef int ImGuiDragDropFlags;
+    typedef int ImGuiTreeNodeFlags;
+
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
     void draw(const Engine::TypedScopePtr &scope);
@@ -77,7 +80,10 @@ IMGUI_API bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, con
 IMGUI_API void PushDisabled();
 IMGUI_API void PopDisabled();
 
-IMGUI_API bool SpanningTreeNode(const void *id, const char *label, bool leaf = false);
+IMGUI_API void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags = 0);
+IMGUI_API bool EndTreeArrow(bool *opened = nullptr);
+IMGUI_API void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags flags = 0);
+IMGUI_API bool EndSpanningTreeNode();
 
 IMGUI_API void Duration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
@@ -89,7 +95,7 @@ IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speed
 
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
-IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value);
+IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags = 0);
 IMGUI_API const ValueTypePayload *GetValuetypePayload();
 IMGUI_API bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer = nullptr);
 template <typename T, typename Validator = bool(*)(const T&)>

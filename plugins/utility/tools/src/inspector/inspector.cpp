@@ -69,7 +69,7 @@ namespace Tools {
             if (ImGui::TreeNode("Resources")) {
                 draw(&ResourceManager::getSingleton(), "Resources");
                 ImGui::TreePop();
-			}
+            }
         }
         ImGui::End();
     }
@@ -120,21 +120,35 @@ namespace Tools {
 
         bool modified = ImGui::ValueType(&value, overloaded { [&](TypedScopePtr scope) {
                                                                  bool modified = false;
-                                                                 bool b = ImGui::TreeNodeEx(id.c_str());
-                                                                 ImGui::DraggableValueTypeSource(id, parent, value);
-                                                                 if (editable) {
-                                                                     if (ImGui::BeginDragDropTarget()) {
-                                                                         if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
-                                                                                 return ptr.mType->isDerivedFrom(scope.mType);
-                                                                             })) {
-                                                                             value = scope;
-                                                                             modified = true;
-                                                                         }
-                                                                         ImGui::EndDragDropTarget();
+
+                                                                 auto it = mObjectSuggestionsByType.find(scope.mType);
+                                                                 bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
+
+                                                                 bool open;
+                                                                 if (hasSuggestions) {
+                                                                     
+                                                                     ImGui::BeginTreeArrow(id.c_str());
+                                                                     ImGui::SameLine(0.0f, 0.0f);
+                                                                     if (ImGui::BeginCombo("##suggestions", id.c_str())) {
+
+                                                                         ImGui::EndCombo();
                                                                      }
-                                                                     //TODO: type -> list<ScopeBase*> selector
+                                                                     open = ImGui::EndTreeArrow();
+                                                                 } else {
+                                                                     open = ImGui::TreeNodeEx(id.c_str());
                                                                  }
-                                                                 if (b) {
+                                                                 ImGui::DraggableValueTypeSource(id, parent, value, ImGuiDragDropFlags_SourceAllowNullID);
+                                                                 if (editable && ImGui::BeginDragDropTarget()) {
+                                                                     if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
+                                                                             return ptr.mType->isDerivedFrom(scope.mType);
+                                                                         })) {
+                                                                         value = scope;
+                                                                         modified = true;
+                                                                     }
+                                                                     ImGui::EndDragDropTarget();
+                                                                 }
+
+                                                                 if (open) {
                                                                      draw(scope, element ? element->Attribute("layout") : nullptr);
                                                                      ImGui::TreePop();
                                                                  }
@@ -303,6 +317,12 @@ namespace Tools {
     {
         return "Inspector";
     }
+
+    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<ScopeBase *>()> getter)
+    {
+        mObjectSuggestionsByType[type] = getter;
+    }
+
 }
 }
 

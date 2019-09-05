@@ -15,8 +15,8 @@
 #include "../renderer/imguiroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::Profiler);
 
@@ -27,7 +27,7 @@ namespace Tools {
     {
         std::chrono::nanoseconds totalTime = stats->totalTime();
 
-        bool open = ImGui::SpanningTreeNode(stats, stats->function(), stats->children().empty());
+        ImGui::BeginSpanningTreeNode(stats, stats->function(), stats->children().empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
         ImGui::NextColumn();
 
@@ -43,8 +43,7 @@ namespace Tools {
 
         ImGui::NextColumn();
 
-        if (open) {
-            ImGui::TreePush();
+        if (ImGui::EndSpanningTreeNode()) {
             for (const std::pair<Debug::Profiler::ProcessStats *const, Debug::Profiler::ProcessStats::Data> &child : stats->children()) {
                 drawStats(child.first, overallTime, totalTime);
             }

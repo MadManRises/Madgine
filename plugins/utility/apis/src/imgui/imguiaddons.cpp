@@ -347,29 +347,68 @@ void PopDisabled()
     ImGui::PopItemFlag();
 }
 
-bool SpanningTreeNode(const void *id, const char *label, bool leaf)
+void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags)
 {
-    ImGui::PushID(id);
+    ImGui::PushID(label);
+    ImGuiID id = ImGui::GetID("treeArrow");
+    
     ImGuiStorage *storage = ImGui::GetStateStorage();
-    bool *opened = storage->GetBoolRef(ImGui::GetID(id));
-    if (!leaf) {
-        ImGuiWindow *window = ImGui::GetCurrentWindow();
-        ImGuiContext &g = *GImGui;
-        const ImVec2 label_size = ImGui::CalcTextSize("asd", nullptr, false);
-        const ImGuiStyle &style = g.Style;
-        const float text_base_offset_y = ImMax(0.0f, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
-        const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y);
-        ImRect frame_bb = ImRect(window->DC.CursorPos, ImVec2(window->Pos.x + ImGui::GetContentRegionMax().x, window->DC.CursorPos.y + frame_height));
+    bool *opened = storage->GetBoolRef(id);
+
+    ImGuiWindow *window = ImGui::GetCurrentWindow();
+    ImGuiContext &g = *GImGui;
+    const ImVec2 label_size = ImGui::CalcTextSize("asd", nullptr, false);
+    const ImGuiStyle &style = g.Style;
+    const float text_base_offset_y = ImMax(0.0f, window->DC.CurrLineTextBaseOffset); // Latch before ItemSize changes it
+    const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y);
+    ImRect frame_bb = ImRect(window->DC.CursorPos, ImVec2(window->Pos.x + ImGui::GetContentRegionMax().x, window->DC.CursorPos.y + frame_height));
+    ItemSize(ImVec2(label_size.x, frame_height), text_base_offset_y);
+
+    if (!(flags & ImGuiTreeNodeFlags_Leaf)) {
         ImGui::RenderArrow(ImVec2(style.FramePadding.x + frame_bb.Min.x, g.FontSize * 0.15f + text_base_offset_y + frame_bb.Min.y), *opened ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
+
+        const ImRect interact_bb = ImRect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + style.ItemSpacing.x * 2, frame_bb.Max.y);
+
+        bool pressed = ImGui::ButtonBehavior(interact_bb, id, nullptr, nullptr);
+
+        if (pressed)
+            *opened = !*opened;
     }
-    ImGui::Indent(20.0f);
+}
+
+bool EndTreeArrow(bool *opened)
+{
+    ImGuiID id = ImGui::GetID("treeArrow");
+    if (!opened) {
+        ImGuiStorage *storage = ImGui::GetStateStorage();
+        opened = storage->GetBoolRef(id);
+    }
+
+    ImGui::PopID();
+
+    if (*opened)
+        ImGui::TreePushOverrideID(id);
+
+    return *opened;
+}
+
+void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags flags)
+{
+
+    BeginTreeArrow(id, flags);
+    ImGui::SameLine(0.0f, 0.0f);
+
     bool b = ImGui::Selectable(label, false, ImGuiSelectableFlags_SpanAllColumns);
-    ImGui::Unindent(20.0f);
-    if (!leaf && b) {
+
+    if (b) {
+        ImGuiStorage *storage = ImGui::GetStateStorage();
+        bool *opened = storage->GetBoolRef(ImGui::GetID("treeArrow"));
         *opened = !*opened;
     }
-    ImGui::PopID();
-    return *opened;
+}
+
+bool EndSpanningTreeNode() {
+    return EndTreeArrow();
 }
 
 void Duration(std::chrono::nanoseconds dur)
@@ -496,9 +535,9 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
     return result;
 }
 
-void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value)
+void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags)
 {
-    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+    if (ImGui::BeginDragDropSource(flags)) {
         ValueTypePayload payload { name, scope, value };
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text("%s", name.c_str());

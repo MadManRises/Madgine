@@ -74,7 +74,6 @@ namespace Engine
 		{
 			for (BlockData *b = block.mFirstChild; b; b = b->mNext) {
 				if (traceLevel(b->mFront->first[depth], b->mSize, depth >= b->mFront->first.size() - 1)) {
-					ImGui::TreePush();
 					drawBlock(*b, depth + 1);
 					ImGui::TreePop();
 				}
@@ -84,7 +83,6 @@ namespace Engine
 		void MemoryViewer::traceDraw(const std::pmr::vector<Engine::Debug::TraceBack> &data, size_t size, int depth) {
 			if (traceLevel(data[depth], size, depth >= data.size() - 1))
 			{			
-				ImGui::TreePush();
 				traceDraw(data, size, depth+1);
 				ImGui::TreePop();
 			}
