@@ -146,9 +146,9 @@ namespace Tools {
                 if (!name[0])
                     name = "<unnamed>";
 
-				bool hovered = mSelectedEntity == &e;
-				
-				ImGui::PushID(&e);
+                bool hovered = mSelectedEntity == &e;
+
+                ImGui::PushID(&e);
                 Im3D::PushID(&e);
 
                 if (e.hasComponent<Scene::Entity::Transform>()) {

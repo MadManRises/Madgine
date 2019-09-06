@@ -29,8 +29,17 @@ namespace Render {
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
+        std::shared_ptr<OpenGLShader> pixelShader_nolight = OpenGLShaderLoader::load("scene_nolight_PS");
+        std::shared_ptr<OpenGLShader> vertexShader2 = OpenGLShaderLoader::load("scene2_VS");
+        std::shared_ptr<OpenGLShader> pixelShader2 = OpenGLShaderLoader::load("scene2_PS");
 
         if (!mProgram.link(vertexShader.get(), pixelShader.get()))
+            throw 0;
+
+        if (!mProgram_nolight.link(vertexShader.get(), pixelShader_nolight.get()))
+            throw 0;
+
+		 if (!mProgram2.link(vertexShader2.get(), pixelShader2.get()))
             throw 0;
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
@@ -52,13 +61,11 @@ namespace Render {
         glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
         glCheck();
 
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
         glCheck();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);
         //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
         glCheck();
-
 
         GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, DrawBuffers);
@@ -93,8 +100,8 @@ namespace Render {
     {
         if (!RenderTarget::resize(size))
             return false;
-		
-		GLsizei width = static_cast<GLsizei>(size.x);
+
+        GLsizei width = static_cast<GLsizei>(size.x);
         GLsizei height = static_cast<GLsizei>(size.y);
 
         assert(width > 0 && height > 0);
@@ -109,25 +116,41 @@ namespace Render {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
         glCheck();
 
-
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glCheck();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glCheck();
 
-		return true;
+        return true;
     }
 
     void OpenGLRenderTexture::render()
     {
+        const Vector2 &size = getSize();
 
-        setupProgram();
+        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
+        glCheck();
+        glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
+        glCheck();
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glCheck();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glCheck();
+
+        float aspectRatio = size.x / size.y;
+
+        mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
+        mProgram_nolight.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
+        mProgram2.setUniform("v", camera()->getViewMatrix());
+        mProgram2.setUniform("p", camera()->getProjectionMatrix(aspectRatio));
 
         for (RenderPass *pass : uniquePtrToPtr(preRenderPasses())) {
             pass->render(this, camera());
-            mProgram.bind();
         }
+
+        mProgram.bind();
 
         for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
 
@@ -143,10 +166,9 @@ namespace Render {
 
         for (RenderPass *pass : uniquePtrToPtr(postRenderPasses())) {
             pass->render(this, camera());
-            mProgram.bind();
         }
 
-        resetProgram();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     const OpenGLTexture &OpenGLRenderTexture::texture() const
@@ -154,36 +176,30 @@ namespace Render {
         return mTexture;
     }
 
-    void OpenGLRenderTexture::setupProgram()
+    void OpenGLRenderTexture::setupProgram(RenderPassFlags flags)
     {
-        const Vector2 &size = getSize();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-        glCheck();
-        glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
-        glCheck();
-
-        mProgram.bind();
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glCheck();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glCheck();
-
-        float aspectRatio = size.x / size.y;
-
-        mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
-    }
-
-    void OpenGLRenderTexture::resetProgram()
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        switch (flags) {
+        case RenderPassFlags_None:
+            mCurrentProgram = &mProgram;
+            break;
+        case RenderPassFlags_NoLighting:
+            mCurrentProgram = &mProgram_nolight;
+            break;
+        case RenderPassFlags_DataFormat2:
+            throw "Unsupported DataFormat2 with Lighting!";
+        case RenderPassFlags_DataFormat2 | RenderPassFlags_NoLighting:
+            mCurrentProgram = &mProgram2;
+            break;
+        default:
+            throw "Unknown render flags";
+		}
+        mCurrentProgram->bind();
     }
 
     void OpenGLRenderTexture::renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix)
     {
-        mProgram.setUniform("m", transformMatrix);
-        mProgram.setUniform(
+        mCurrentProgram->setUniform("m", transformMatrix);
+        mCurrentProgram->setUniform(
             "anti_m",
             transformMatrix
                 .ToMat3()
@@ -192,14 +208,13 @@ namespace Render {
 
         mesh->mVAO.bind();
 
-		constexpr GLenum modes[]
-        {
+        constexpr GLenum modes[] {
             GL_POINTS,
-                GL_LINES,
-                GL_TRIANGLES
+            GL_LINES,
+            GL_TRIANGLES
         };
 
-		GLenum mode = modes[mesh->mGroupSize - 1];
+        GLenum mode = modes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
             glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
@@ -208,22 +223,31 @@ namespace Render {
         glCheck();
     }
 
-    void OpenGLRenderTexture::renderInstancedMesh(void *meshData, const std::vector<Matrix4> &transforms)
+    void OpenGLRenderTexture::renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms)
     {
+        setupProgram(flags);
+
         for (const Matrix4 &transform : transforms) {
             renderMesh(static_cast<OpenGLMeshData *>(meshData), transform);
-		}
+        }
     }
 
-    void OpenGLRenderTexture::renderVertices(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
         OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
 
-        //setupProgram();
+        setupProgram(flags);
 
         renderMesh(&tempMesh);
+    }
 
-        //resetProgram();
+	void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    {
+        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
+
+        setupProgram(flags | RenderPassFlags_DataFormat2);
+
+        renderMesh(&tempMesh);
     }
 
     void OpenGLRenderTexture::clearDepthBuffer()

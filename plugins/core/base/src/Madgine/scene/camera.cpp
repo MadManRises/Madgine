@@ -43,10 +43,20 @@ namespace Scene {
 
     Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
     {
+        return getProjectionMatrix(aspectRatio) * getViewMatrix();
+    }
+
+    Matrix4 Camera::getViewMatrix()
+    {
         Matrix4 rotate = Matrix4(mOrientation.inverse().toMatrix());
 
         Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
 
+        return rotate * translate;
+    }
+
+    Matrix4 Camera::getProjectionMatrix(float aspectRatio)
+    {
         float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
         float t = r /* / aspectRatio*/;
 
@@ -57,7 +67,7 @@ namespace Scene {
             0, 0, 1, 0
         };
 
-        return p * rotate * translate;
+        return p;
     }
 
     float Camera::getF() const

@@ -7,6 +7,14 @@
 namespace Engine {
 namespace Render {
 
+	typedef int RenderPassFlags;
+    enum RenderPassFlags_ {
+        RenderPassFlags_None = 0,
+		RenderPassFlags_DataFormat2 = 1 << 0,
+        RenderPassFlags_NoLighting = 1 << 1,
+		RenderPassFlags_NoPerspective = 1 << 2
+	};
+
     struct MADGINE_CLIENT_EXPORT RenderTarget {
         RenderTarget(RenderWindow *window, Scene::Camera *camera, const Vector2 &size);
         RenderTarget(const RenderTarget &) = delete;
@@ -16,8 +24,9 @@ namespace Render {
         Scene::Camera *camera() const;
 
         virtual void render() = 0;
-        virtual void renderVertices(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
-        virtual void renderInstancedMesh(void *meshData, const std::vector<Matrix4> &transforms) = 0;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
+        virtual void renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms) = 0;
         virtual void clearDepthBuffer() = 0;
 
         virtual uint32_t textureId() const = 0;

@@ -20,6 +20,8 @@ namespace Scene {
         const Quaternion &orientation();
 
         Matrix4 getViewProjectionMatrix(float aspectRatio);
+        Matrix4 getViewMatrix();
+        Matrix4 getProjectionMatrix(float aspectRatio);
 
         float getF() const;
         void setF(float f);

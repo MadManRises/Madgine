@@ -101,7 +101,7 @@ namespace Render {
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex), // stride
-            (void *)0 // array buffer offset
+            (void *)offsetof(Vertex, mPos) // array buffer offset
         );
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(
@@ -110,7 +110,7 @@ namespace Render {
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex), // stride
-            (void *)12 // array buffer offset
+            (void *)offsetof(Vertex, mColor) // array buffer offset
         );
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(
@@ -119,9 +119,64 @@ namespace Render {
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex), // stride
-            (void *)28 // array buffer offset
+            (void *)offsetof(Vertex, mNormal) // array buffer offset
         );
         glEnableVertexAttribArray(2);
+
+        update(data, groupSize, vertices, vertexCount, indices, indexCount);
+
+        return data;
+    }
+
+	OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    {
+
+        OpenGLMeshData data;
+
+        data.mVAO.bind();
+
+        if (indices) {
+            data.mIndices = {};
+            data.mIndices.bind(GL_ELEMENT_ARRAY_BUFFER);
+        }
+
+        data.mVertices.bind(GL_ARRAY_BUFFER);
+        glVertexAttribPointer(
+            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            3, // size
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            sizeof(Vertex2), // stride
+            (void *)offsetof(Vertex2, mPos) // array buffer offset
+        );
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            1, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            2, // size
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            sizeof(Vertex2), // stride
+            (void *)offsetof(Vertex2, mPos2) // array buffer offset
+        );
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(
+            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            4, // size
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            sizeof(Vertex2), // stride
+            (void *)offsetof(Vertex2, mColor) // array buffer offset
+        );
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(
+            3, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            2, // size
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            sizeof(Vertex2), // stride
+            (void *)offsetof(Vertex2, mUV) // array buffer offset
+        );
+        glEnableVertexAttribArray(3);
 
         update(data, groupSize, vertices, vertexCount, indices, indexCount);
 
@@ -138,6 +193,30 @@ namespace Render {
 
         for (size_t i = 0; i < vertexCount; ++i) {
             Vertex &v = vertices[i];
+            minP = min(v.mPos, minP);
+            maxP = max(v.mPos, maxP);
+        }
+        data.mAABB = { minP,
+            maxP };
+
+        if (indices) {
+            data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices);
+            data.mElementCount = indexCount;
+        } else {
+            data.mElementCount = vertexCount;
+        }
+    }
+
+	void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    {
+        data.mGroupSize = groupSize;
+        data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
+
+        Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+        Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
+
+        for (size_t i = 0; i < vertexCount; ++i) {
+            Vertex2 &v = vertices[i];
             minP = min(v.mPos, minP);
             maxP = max(v.mPos, maxP);
         }

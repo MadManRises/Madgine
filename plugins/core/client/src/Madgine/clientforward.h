@@ -50,6 +50,7 @@ namespace Render {
     struct RenderTarget;
     struct RenderPass;
     struct Vertex;
+    struct Vertex2;
 }
 
 }

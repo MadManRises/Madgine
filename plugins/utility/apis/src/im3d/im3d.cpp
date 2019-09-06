@@ -44,6 +44,9 @@ namespace Im3D {
             c.mIndices[i].clear();
             c.mVertices[i].clear();
             c.mVertexBase[i] = 0;
+            c.mIndices2[i].clear();
+            c.mVertices2[i].clear();
+            c.mVertexBase2[i] = 0;
         }
 
         for (std::pair<const Im3DNativeMesh, std::vector<Matrix4>> &p : c.mNativeMeshes)
@@ -121,6 +124,9 @@ namespace Im3D {
         for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
             c.mVertexBase[i] = c.mVertices[i].size();
         }
+        for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
+            c.mVertexBase2[i] = c.mVertices2[i].size();
+        }
 
         Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
         Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
@@ -152,6 +158,50 @@ namespace Im3D {
             size_t oldIndexCount = c.mIndices[type].size();
             c.mIndices[type].resize(oldIndexCount + vertexCount);
             std::iota(c.mIndices[type].begin() + oldIndexCount, c.mIndices[type].end(), c.mVertexBase[type]);
+        }
+    }
+
+	void Mesh(Im3DMeshType type, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount)
+    {
+        Im3DContext &c = sContext;
+
+        for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
+            c.mVertexBase[i] = c.mVertices[i].size();
+        }
+        for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
+            c.mVertexBase2[i] = c.mVertices2[i].size();
+        }
+
+        Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+        Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
+
+        std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mVertices2[type]), [&](const Render::Vertex2 &v) {
+            Render::Vertex2 result = v;
+
+            minP = min(v.mPos, minP);
+            maxP = max(v.mPos, maxP);
+
+            result.mPos = (transform * Vector4 { v.mPos, 1.0f }).xyz();
+
+            /*if (c.mHoveredObject == object)
+                result.mColor *= 2.f;*/
+
+            return result;
+        });
+
+        c.mTemp.mLastAABB = { minP, maxP };
+        c.mTemp.mLastTransform = transform;
+
+        size_t groupSize = (size_t)type + 1;
+
+        if (indices) {
+            assert(indexCount % groupSize == 0);
+            std::transform(indices, indices + indexCount, std::back_inserter(c.mIndices2[type]), [&](unsigned int i) { return i + c.mVertexBase2[type]; });
+        } else {
+            assert(vertexCount % groupSize == 0);
+            size_t oldIndexCount = c.mIndices2[type].size();
+            c.mIndices2[type].resize(oldIndexCount + vertexCount);
+            std::iota(c.mIndices2[type].begin() + oldIndexCount, c.mIndices2[type].end(), c.mVertexBase2[type]);
         }
     }
 
