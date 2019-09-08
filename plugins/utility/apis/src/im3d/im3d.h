@@ -20,6 +20,7 @@ enum Im3DMeshType {
 typedef void *Im3DNativeMesh;
 
 typedef unsigned int Im3DID;
+typedef unsigned int Im3DTextureId;
 typedef int Im3DBoundingObjectFlags;
 
 enum Im3DBoundingObjectFlags_ {
@@ -41,9 +42,11 @@ namespace Im3D {
     MADGINE_APIS_EXPORT void PopID();
 
     MADGINE_APIS_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0);
-    MADGINE_APIS_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0);
+    MADGINE_APIS_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
 
     MADGINE_APIS_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
+
+	MADGINE_APIS_EXPORT void Text(const char *text, const Matrix4 &transform, float fontSize = 24, bool facingX = true, bool facingY = true, const char *fontName = "OpenSans-Regular", Vector2 pivot = { 0.5f, 0.5f });
 
     MADGINE_APIS_EXPORT bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
     MADGINE_APIS_EXPORT bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);

@@ -2,8 +2,8 @@
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
-#include "Modules/math/sphere.h"
 #include "Modules/math/boundingbox.h"
+#include "Modules/math/sphere.h"
 
 namespace Engine {
 namespace Im3D {
@@ -15,7 +15,6 @@ namespace Im3D {
 
         std::string mName;
         ImU32 mID;
-
     };
 
     struct ImObjectTempData {
@@ -28,14 +27,17 @@ namespace Im3D {
 
         Im3DIO mIO;
 
-        std::vector<Render::Vertex> mVertices[IM3D_MESHTYPE_COUNT];
-        std::vector<unsigned int> mIndices[IM3D_MESHTYPE_COUNT];
-        size_t mVertexBase[IM3D_MESHTYPE_COUNT];
-        std::vector<Render::Vertex2> mVertices2[IM3D_MESHTYPE_COUNT];
-        std::vector<unsigned int> mIndices2[IM3D_MESHTYPE_COUNT];
-        size_t mVertexBase2[IM3D_MESHTYPE_COUNT];
+        struct RenderData {
+            std::vector<Render::Vertex> mVertices[IM3D_MESHTYPE_COUNT];
+            std::vector<unsigned int> mIndices[IM3D_MESHTYPE_COUNT];
+            size_t mVertexBase[IM3D_MESHTYPE_COUNT];
+            std::vector<Render::Vertex2> mVertices2[IM3D_MESHTYPE_COUNT];
+            std::vector<unsigned int> mIndices2[IM3D_MESHTYPE_COUNT];
+            size_t mVertexBase2[IM3D_MESHTYPE_COUNT];
+        };
+        std::map<Im3DTextureId, RenderData> mRenderData;
 
-		std::map<Im3DNativeMesh, std::vector<Matrix4>> mNativeMeshes;
+        std::map<Im3DNativeMesh, std::vector<Matrix4>> mNativeMeshes;
 
         std::vector<std::unique_ptr<Im3DObject>> mObjects;
         ImGuiStorage mObjectsById;
@@ -54,7 +56,7 @@ namespace Im3D {
 
     MADGINE_APIS_EXPORT Im3DObject *FindObjectByName(const char *name);
 
-	MADGINE_APIS_EXPORT Im3DID GetID(const char *name);
+    MADGINE_APIS_EXPORT Im3DID GetID(const char *name);
     MADGINE_APIS_EXPORT Im3DID GetID(const void *ptr);
 
 }

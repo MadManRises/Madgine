@@ -7,14 +7,24 @@
 #include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/gui/guisystem.h"
+#include "../renderer/imguiroot.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
+
+#include "Modules/math/atlas2.h"
+
+#include "im3d/im3d.h"
+
+#include "Madgine/render/vertex.h"
+
+#include "OpenGL/opengllib.h"
+#include "OpenGL/openglfontloader.h"
+#include "OpenGL/openglfontdata.h"
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
@@ -43,9 +53,57 @@ namespace Tools {
         if (ImGui::Begin("TestTool", &mVisible)) {
             if (ImGui::Button("Create Tool Window")) {
                 Window::WindowSettings settings;
-                app(false).getGlobalAPIComponent<GUI::GUISystem>().topLevelWindows().front()->createToolWindow(settings);
-            }            
-			ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
+                mRoot.window().createToolWindow(settings);
+            }
+
+			std::shared_ptr<Render::OpenGLFontData> font = Render::OpenGLFontLoader::load("OpenSans-Regular", true);
+            ImGui::Image((void *)(intptr_t)font->mTexture.handle(), font->mTextureSize, { 0, 1 }, { 1, 0 });
+
+			Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
+
+            static std::vector<Render::Vertex> vertices;
+            static std::vector<unsigned int> indices;
+            if (ImGui::Button("Update Atlas")) {
+                vertices.clear();
+                indices.clear();
+
+                constexpr size_t COUNT = 80;
+                Vector2i array[COUNT];
+                for (int i = 0; i < COUNT; ++i) {
+                    array[i] = { rand() % 128,
+                        rand() % 128 };
+                }
+                Vector2i origin { 0, 0 };
+                Atlas2 atlas { { 512, 512 } };
+
+                std::vector<Atlas2::Entry> entries = atlas.insert({ array, array + COUNT }, [&]() { atlas.addBin(origin); origin.x += 512; });
+
+                for (const Atlas2::Entry &entry : entries) {
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
+                }
+
+                for (Render::Vertex &v : vertices) {
+                    v.mPos *= 0.01f;
+                }
+
+                for (size_t i = 0; i < COUNT; ++i) {
+                    indices.push_back(4 * i + 0);
+                    indices.push_back(4 * i + 1);
+                    indices.push_back(4 * i + 0);
+                    indices.push_back(4 * i + 2);
+                    indices.push_back(4 * i + 1);
+                    indices.push_back(4 * i + 3);
+                    indices.push_back(4 * i + 2);
+                    indices.push_back(4 * i + 3);
+                }
+            }
+
+            Im3D::Mesh(IM3D_LINES, vertices.data(), vertices.size(), Matrix4::IDENTITY, indices.data(), indices.size());
+
+            ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
             ImGui::Text("ValueType size: %lu", sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());

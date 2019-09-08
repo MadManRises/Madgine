@@ -19,11 +19,12 @@ namespace Render {
         for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(RenderPassFlags_NoLighting, p.first, p.second);
 
-		for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-            target->renderVertices(RenderPassFlags_NoLighting, i + 1, context->mVertices[i].data(), context->mVertices[i].size(), context->mIndices[i].data(), context->mIndices[i].size());
-            target->renderVertices(RenderPassFlags_NoLighting, i + 1, context->mVertices2[i].data(), context->mVertices2[i].size(), context->mIndices2[i].data(), context->mIndices2[i].size());
+        for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
+            for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
+                target->renderVertices(RenderPassFlags_NoLighting, i + 1, p.second.mVertices[i].data(), p.second.mVertices[i].size(), p.second.mIndices[i].data(), p.second.mIndices[i].size());
+                target->renderVertices(RenderPassFlags_NoLighting, i + 1, p.second.mVertices2[i].data(), p.second.mVertices2[i].size(), p.second.mIndices2[i].data(), p.second.mIndices2[i].size(), p.first);
+            }
         }
-
     }
 
 }

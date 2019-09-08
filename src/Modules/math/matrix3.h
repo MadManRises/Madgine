@@ -233,13 +233,13 @@ namespace Engine
         {
             // check magnitude of column vectors (==local axes)
 			float t = m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
+            if (!isZero(t - 1.0f))
                 return true;
             t = m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
+            if (!isZero(t - 1.0f))
                 return true;
             t = m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2];
-            if (!Math::RealEqual(t, 1.0, (float)1e-04))
+            if (!isZero(t - 1.0f))
                 return true;
 
             return false;
@@ -256,7 +256,6 @@ namespace Engine
             return o;
         }
 
-        static const float EPSILON;
         static const Matrix3 ZERO;
         static const Matrix3 IDENTITY;
 

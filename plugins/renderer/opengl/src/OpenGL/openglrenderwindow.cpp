@@ -96,8 +96,8 @@ namespace Render {
         glEnableVertexAttribArray(3);*/
 
         mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);
-        GLubyte borderColor[] = { 255, 255, 255, 255 };
-        mDefaultTexture.setData(1, 1, borderColor);
+        Vector4 borderColor = { 1, 1, 1, 1 };
+        mDefaultTexture.setData({ 1, 1 }, &borderColor);
 
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);

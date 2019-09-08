@@ -26,9 +26,9 @@ namespace Resources {
                 return nullptr;
         }
 
-        static std::shared_ptr<Data> load(const std::string &name)
+        static std::shared_ptr<Data> load(const std::string &name, bool persistent = false)
         {
-            return Resources::ResourceManager::getSingleton().load<T>(name);
+            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
         }
 
         virtual std::shared_ptr<Data> loadImpl(ResourceType *res) = 0;

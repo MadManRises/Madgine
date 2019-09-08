@@ -8,7 +8,8 @@ namespace Render {
     struct OpenGLShader;
 
     struct OpenGLMeshData;
-    struct Vertex;
+
+	struct OpenGLFontData;
 }
 
 }

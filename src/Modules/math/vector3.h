@@ -28,7 +28,7 @@ THE SOFTWARE.
 #pragma once
 
 #include "vector2.h"
-#include "math.h"
+#include "common.h"
 
 namespace Engine {
 /** Standard 3-dimensional vector.
@@ -452,7 +452,7 @@ public:
 		*/
     constexpr float normalise()
     {
-        float fLength = Math::sqrtf(x * x + y * y + z * z);
+        float fLength = sqrtf(x * x + y * y + z * z);
 
         // Will also work for zero-sized vectors, but will change nothing
         // We're not using epsilons because we don't need to.

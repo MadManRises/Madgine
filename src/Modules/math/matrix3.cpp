@@ -32,7 +32,6 @@ THE SOFTWARE.
 
 namespace Engine
 {
-    const float Matrix3::EPSILON = 1e-06f;
     const Matrix3 Matrix3::ZERO(0,0,0,0,0,0,0,0,0);
     const Matrix3 Matrix3::IDENTITY(1,0,0,0,1,0,0,0,1);
     const float Matrix3::msSvdEpsilon = 1e-04f;
@@ -223,7 +222,7 @@ namespace Engine
             m[0][1]*rkInverse[1][0]+
             m[0][2]*rkInverse[2][0];
 
-        if ( Math::Abs(fDet) <= fTolerance )
+        if ( isZero(fDet) )
             return false;
 
 		float fInvDet = 1.0f/fDet;
@@ -268,7 +267,7 @@ namespace Engine
         bool bIdentity;
 
         // map first column to (*,0,0)
-        fLength = Math::Sqrt(kA[0][0]*kA[0][0] + kA[1][0]*kA[1][0] +
+        fLength = sqrtf(kA[0][0]*kA[0][0] + kA[1][0]*kA[1][0] +
             kA[2][0]*kA[2][0]);
         if ( fLength > 0.0 )
         {
@@ -305,7 +304,7 @@ namespace Engine
         }
 
         // map first row to (*,*,0)
-        fLength = Math::Sqrt(kA[0][1]*kA[0][1]+kA[0][2]*kA[0][2]);
+        fLength = sqrtf(kA[0][1]*kA[0][1]+kA[0][2]*kA[0][2]);
         if ( fLength > 0.0 )
         {
             fSign = (kA[0][1] > 0.0f ? 1.0f : -1.0f);
@@ -335,7 +334,7 @@ namespace Engine
         }
 
         // map second column to (*,*,0)
-        fLength = Math::Sqrt(kA[1][1]*kA[1][1]+kA[2][1]*kA[2][1]);
+        fLength = sqrtf(kA[1][1]*kA[1][1]+kA[2][1]*kA[2][1]);
         if ( fLength > 0.0 )
         {
             fSign = (kA[1][1] > 0.0f ? 1.0f : -1.0f);
@@ -383,15 +382,15 @@ namespace Engine
 		float fT12 = kA[1][1]*kA[1][2];
 		float fTrace = fT11+fT22;
 		float fDiff = fT11-fT22;
-		float fDiscr = Math::Sqrt(fDiff*fDiff+4.0f*fT12*fT12);
+		float fDiscr = sqrtf(fDiff*fDiff+4.0f*fT12*fT12);
 		float fRoot1 = 0.5f*(fTrace+fDiscr);
 		float fRoot2 = 0.5f*(fTrace-fDiscr);
 
         // adjust right
-		float fY = kA[0][0] - (Math::Abs(fRoot1-fT22) <=
-            Math::Abs(fRoot2-fT22) ? fRoot1 : fRoot2);
+		float fY = kA[0][0] - (abs(fRoot1-fT22) <=
+            abs(fRoot2-fT22) ? fRoot1 : fRoot2);
 		float fZ = kA[0][1];
-		float fInvLength = Math::InvSqrt(fY*fY+fZ*fZ);
+		float fInvLength = 1.0f / sqrtf(fY*fY+fZ*fZ);
 		float fSin = fZ*fInvLength;
 		float fCos = -fY*fInvLength;
 
@@ -414,7 +413,7 @@ namespace Engine
         // adjust left
         fY = kA[0][0];
         fZ = kA[1][0];
-        fInvLength = Math::InvSqrt(fY*fY+fZ*fZ);
+        fInvLength = 1.0f / sqrtf(fY*fY+fZ*fZ);
         fSin = fZ*fInvLength;
         fCos = -fY*fInvLength;
 
@@ -438,7 +437,7 @@ namespace Engine
         // adjust right
         fY = kA[0][1];
         fZ = kA[0][2];
-        fInvLength = Math::InvSqrt(fY*fY+fZ*fZ);
+        fInvLength = 1.0f / sqrtf(fY*fY+fZ*fZ);
         fSin = fZ*fInvLength;
         fCos = -fY*fInvLength;
 
@@ -461,7 +460,7 @@ namespace Engine
         // adjust left
         fY = kA[1][1];
         fZ = kA[2][1];
-        fInvLength = Math::InvSqrt(fY*fY+fZ*fZ);
+        fInvLength = 1.0f / sqrtf(fY*fY+fZ*fZ);
         fSin = fZ*fInvLength;
         fCos = -fY*fInvLength;
 
@@ -496,10 +495,10 @@ namespace Engine
 			float fSin0, fCos0, fTan0;
 			float fSin1, fCos1, fTan1;
 
-            bool bTest1 = (Math::Abs(kA[0][1]) <=
-                msSvdEpsilon*(Math::Abs(kA[0][0])+Math::Abs(kA[1][1])));
-            bool bTest2 = (Math::Abs(kA[1][2]) <=
-                msSvdEpsilon*(Math::Abs(kA[1][1])+Math::Abs(kA[2][2])));
+            bool bTest1 = (abs(kA[0][1]) <=
+                msSvdEpsilon*(abs(kA[0][0])+abs(kA[1][1])));
+            bool bTest2 = (abs(kA[1][2]) <=
+                msSvdEpsilon*(abs(kA[1][1])+abs(kA[2][2])));
             if ( bTest1 )
             {
                 if ( bTest2 )
@@ -514,8 +513,8 @@ namespace Engine
                     // 2x2 closed form factorization
                     fTmp = (kA[1][1]*kA[1][1] - kA[2][2]*kA[2][2] +
                         kA[1][2]*kA[1][2])/(kA[1][2]*kA[2][2]);
-                    fTan0 = 0.5f*(fTmp+Math::Sqrt(fTmp*fTmp + 4.0f));
-                    fCos0 = Math::InvSqrt(1.0f+fTan0*fTan0);
+                    fTan0 = 0.5f*(fTmp+sqrtf(fTmp*fTmp + 4.0f));
+                    fCos0 = 1.0f / sqrtf(1.0f+fTan0*fTan0);
                     fSin0 = fTan0*fCos0;
 
                     for (iCol = 0; iCol < 3; iCol++)
@@ -527,7 +526,7 @@ namespace Engine
                     }
 
                     fTan1 = (kA[1][2]-kA[2][2]*fTan0)/kA[1][1];
-                    fCos1 = Math::InvSqrt(1.0f+fTan1*fTan1);
+                    fCos1 = 1.0f / sqrtf(1.0f+fTan1*fTan1);
                     fSin1 = -fTan1*fCos1;
 
                     for (iRow = 0; iRow < 3; iRow++)
@@ -553,8 +552,8 @@ namespace Engine
                     // 2x2 closed form factorization
                     fTmp = (kA[0][0]*kA[0][0] + kA[1][1]*kA[1][1] -
                         kA[0][1]*kA[0][1])/(kA[0][1]*kA[1][1]);
-                    fTan0 = 0.5f*(-fTmp+Math::Sqrt(fTmp*fTmp + 4.0f));
-                    fCos0 = Math::InvSqrt(1.0f+fTan0*fTan0);
+                    fTan0 = 0.5f*(-fTmp+sqrtf(fTmp*fTmp + 4.0f));
+                    fCos0 = 1.0f / sqrtf(1.0f+fTan0*fTan0);
                     fSin0 = fTan0*fCos0;
 
                     for (iCol = 0; iCol < 3; iCol++)
@@ -566,7 +565,7 @@ namespace Engine
                     }
 
                     fTan1 = (kA[0][1]-kA[1][1]*fTan0)/kA[0][0];
-                    fCos1 = Math::InvSqrt(1.0f+fTan1*fTan1);
+                    fCos1 = 1.0f / sqrtf(1.0f+fTan1*fTan1);
                     fSin1 = -fTan1*fCos1;
 
                     for (iRow = 0; iRow < 3; iRow++)
@@ -641,7 +640,7 @@ namespace Engine
         // product of vectors A and B.
 
         // compute q0
-		float fInvLength = Math::InvSqrt(m[0][0]*m[0][0]
+		float fInvLength = 1.0f / sqrtf(m[0][0]*m[0][0]
             + m[1][0]*m[1][0] +
             m[2][0]*m[2][0]);
 
@@ -659,7 +658,7 @@ namespace Engine
         m[1][1] -= fDot0*m[1][0];
         m[2][1] -= fDot0*m[2][0];
 
-        fInvLength = Math::InvSqrt(m[0][1]*m[0][1] +
+        fInvLength = 1.0f / sqrtf(m[0][1]*m[0][1] +
             m[1][1]*m[1][1] +
             m[2][1]*m[2][1]);
 
@@ -682,7 +681,7 @@ namespace Engine
         m[1][2] -= fDot0*m[1][0] + fDot1*m[1][1];
         m[2][2] -= fDot0*m[2][0] + fDot1*m[2][1];
 
-        fInvLength = Math::InvSqrt(m[0][2]*m[0][2] +
+        fInvLength = 1.0f / sqrtf(m[0][2]*m[0][2] +
             m[1][2]*m[1][2] +
             m[2][2]*m[2][2]);
 
@@ -722,7 +721,7 @@ namespace Engine
         // U stores the entries U[0] = u01, U[1] = u02, U[2] = u12
 
         // build orthogonal matrix Q
-		float fInvLength = Math::InvSqrt(m[0][0]*m[0][0] + m[1][0]*m[1][0] + m[2][0]*m[2][0]);
+		float fInvLength = 1.0f / sqrtf(m[0][0]*m[0][0] + m[1][0]*m[1][0] + m[2][0]*m[2][0]);
 
         kQ[0][0] = m[0][0]*fInvLength;
         kQ[1][0] = m[1][0]*fInvLength;
@@ -733,7 +732,7 @@ namespace Engine
         kQ[0][1] = m[0][1]-fDot*kQ[0][0];
         kQ[1][1] = m[1][1]-fDot*kQ[1][0];
         kQ[2][1] = m[2][1]-fDot*kQ[2][0];
-        fInvLength = Math::InvSqrt(kQ[0][1]*kQ[0][1] + kQ[1][1]*kQ[1][1] + kQ[2][1]*kQ[2][1]);
+        fInvLength = 1.0f / sqrtf(kQ[0][1]*kQ[0][1] + kQ[1][1]*kQ[1][1] + kQ[2][1]*kQ[2][1]);
         
         kQ[0][1] *= fInvLength;
         kQ[1][1] *= fInvLength;
@@ -749,7 +748,7 @@ namespace Engine
         kQ[0][2] -= fDot*kQ[0][1];
         kQ[1][2] -= fDot*kQ[1][1];
         kQ[2][2] -= fDot*kQ[2][1];
-        fInvLength = Math::InvSqrt(kQ[0][2]*kQ[0][2] + kQ[1][2]*kQ[1][2] + kQ[2][2]*kQ[2][2]);
+        fInvLength = 1.0f / sqrtf(kQ[0][2]*kQ[0][2] + kQ[1][2]*kQ[1][2] + kQ[2][2]*kQ[2][2]);
 
         kQ[0][2] *= fInvLength;
         kQ[1][2] *= fInvLength;
@@ -814,11 +813,11 @@ namespace Engine
         if ( fPoly < 0.0 )
         {
             // uses a matrix norm to find an upper bound on maximum root
-            fX = Math::Abs(afCoeff[0]);
-			float fTmp = 1.0f+Math::Abs(afCoeff[1]);
+            fX = abs(afCoeff[0]);
+			float fTmp = 1.0f+abs(afCoeff[1]);
             if ( fTmp > fX )
                 fX = fTmp;
-            fTmp = 1.0f+Math::Abs(afCoeff[2]);
+            fTmp = 1.0f+abs(afCoeff[2]);
             if ( fTmp > fX )
                 fX = fTmp;
         }
@@ -828,7 +827,7 @@ namespace Engine
         for (int i = 0; i < 16; i++)
         {
             fPoly = afCoeff[0]+fX*(afCoeff[1]+fX*(afCoeff[2]+fX));
-            if ( Math::Abs(fPoly) <= fEpsilon )
+            if ( abs(fPoly) <= fEpsilon )
                 return fX;
 
 			float fDeriv = afCoeff[1]+fX*(fTwoC2+3.0f*fX);
@@ -875,7 +874,7 @@ namespace Engine
         afCoeff[2] = -(kP[0][0]+kP[1][1]+kP[2][2]);
 
 		float fRoot = MaxCubicRoot(afCoeff);
-		float fNorm = Math::Sqrt(fPmax*fRoot);
+		float fNorm = sqrtf(fPmax*fRoot);
         return fNorm;
     }
     //-----------------------------------------------------------------------
@@ -1351,9 +1350,9 @@ namespace Engine
 
         afDiag[0] = fA;
         afSubDiag[2] = 0.0;
-        if ( Math::Abs(fC) >= EPSILON )
+        if ( !isZero(fC) )
         {
-			float fLength = Math::Sqrt(fB*fB+fC*fC);
+			float fLength = sqrtf(fB*fB+fC*fC);
 			float fInvLength = 1.0f/fLength;
             fB *= fInvLength;
             fC *= fInvLength;
@@ -1404,16 +1403,16 @@ namespace Engine
                 int i1;
                 for (i1 = i0; i1 <= 1; i1++)
                 {
-					float fSum = Math::Abs(afDiag[i1]) +
-                        Math::Abs(afDiag[i1+1]);
-                    if ( Math::Abs(afSubDiag[i1]) + fSum == fSum )
+					float fSum = abs(afDiag[i1]) +
+                        abs(afDiag[i1+1]);
+                    if ( abs(afSubDiag[i1]) + fSum == fSum )
                         break;
                 }
                 if ( i1 == i0 )
                     break;
 
 				float fTmp0 = (afDiag[i0+1]-afDiag[i0])/(2.0f*afSubDiag[i0]);
-				float fTmp1 = Math::Sqrt(fTmp0*fTmp0+1.0f);
+				float fTmp1 = sqrtf(fTmp0*fTmp0+1.0f);
                 if ( fTmp0 < 0.0 )
                     fTmp0 = afDiag[i1]-afDiag[i0]+afSubDiag[i0]/(fTmp0-fTmp1);
                 else
@@ -1425,10 +1424,10 @@ namespace Engine
                 {
 					float fTmp3 = fSin*afSubDiag[i2];
 					float fTmp4 = fCos*afSubDiag[i2];
-                    if ( Math::Abs(fTmp3) >= Math::Abs(fTmp0) )
+                    if ( abs(fTmp3) >= abs(fTmp0) )
                     {
                         fCos = fTmp0/fTmp3;
-                        fTmp1 = Math::Sqrt(fCos*fCos+1.0f);
+                        fTmp1 = sqrtf(fCos*fCos+1.0f);
                         afSubDiag[i2+1] = fTmp3*fTmp1;
                         fSin = 1.0f/fTmp1;
                         fCos *= fSin;
@@ -1436,7 +1435,7 @@ namespace Engine
                     else
                     {
                         fSin = fTmp3/fTmp0;
-                        fTmp1 = Math::Sqrt(fSin*fSin+1.0f);
+                        fTmp1 = sqrtf(fSin*fSin+1.0f);
                         afSubDiag[i2+1] = fTmp0*fTmp1;
                         fCos = 1.0f/fTmp1;
                         fSin *= fCos;

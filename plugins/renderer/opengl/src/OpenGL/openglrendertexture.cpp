@@ -20,6 +20,9 @@
 
 #include "Madgine/render/renderpass.h"
 
+#include "openglfontdata.h"
+#include "openglfontloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -39,7 +42,7 @@ namespace Render {
         if (!mProgram_nolight.link(vertexShader.get(), pixelShader_nolight.get()))
             throw 0;
 
-		 if (!mProgram2.link(vertexShader2.get(), pixelShader2.get()))
+        if (!mProgram2.link(vertexShader2.get(), pixelShader2.get()))
             throw 0;
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
@@ -106,7 +109,7 @@ namespace Render {
 
         assert(width > 0 && height > 0);
 
-        mTexture.setData(width, height, nullptr);
+        mTexture.setData({ width, height }, nullptr);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         glCheck();
@@ -176,7 +179,7 @@ namespace Render {
         return mTexture;
     }
 
-    void OpenGLRenderTexture::setupProgram(RenderPassFlags flags)
+    void OpenGLRenderTexture::setupProgram(RenderPassFlags flags, unsigned int textureId)
     {
         switch (flags) {
         case RenderPassFlags_None:
@@ -189,11 +192,18 @@ namespace Render {
             throw "Unsupported DataFormat2 with Lighting!";
         case RenderPassFlags_DataFormat2 | RenderPassFlags_NoLighting:
             mCurrentProgram = &mProgram2;
-            break;
+			break;
         default:
             throw "Unknown render flags";
-		}
+        }
         mCurrentProgram->bind();
+
+		if (textureId) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, textureId);
+            glCheck();
+		}
+
     }
 
     void OpenGLRenderTexture::renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix)
@@ -241,11 +251,11 @@ namespace Render {
         renderMesh(&tempMesh);
     }
 
-	void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount, unsigned int textureId)
     {
         OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
 
-        setupProgram(flags | RenderPassFlags_DataFormat2);
+        setupProgram(flags | RenderPassFlags_DataFormat2, textureId);
 
         renderMesh(&tempMesh);
     }

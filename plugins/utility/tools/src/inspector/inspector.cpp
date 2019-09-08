@@ -126,7 +126,7 @@ namespace Tools {
 
                                                                  bool open;
                                                                  if (hasSuggestions) {
-                                                                     
+
                                                                      ImGui::BeginTreeArrow(id.c_str());
                                                                      ImGui::SameLine(0.0f, 0.0f);
                                                                      if (ImGui::BeginCombo("##suggestions", id.c_str())) {
@@ -135,7 +135,7 @@ namespace Tools {
                                                                                  value = p.second;
                                                                                  modified = true;
                                                                              }
-																		 }
+                                                                         }
                                                                          ImGui::EndCombo();
                                                                      }
                                                                      open = ImGui::EndTreeArrow();

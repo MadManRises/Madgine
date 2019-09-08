@@ -21,5 +21,5 @@ void main()
     gl_Position = p * (v * vec4(worldPos, 1.0) + vec4(aPos2, 0.0, 0.0));
 	gl_Position.z *= -1.0;
     color = aColor;
-	uv = aUV;
+	uv = vec2(aUV.x, 1.0 - aUV.y);
 }

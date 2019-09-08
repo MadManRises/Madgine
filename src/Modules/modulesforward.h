@@ -159,6 +159,8 @@ namespace Threading {
 class Vector2;
 class Vector3;
 
+struct Vector2i;
+
 class Matrix3;
 class Matrix4;
 

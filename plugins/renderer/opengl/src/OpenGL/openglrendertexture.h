@@ -20,14 +20,14 @@ namespace Render {
 
         virtual void render() override;
         virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) override;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0, unsigned int textureId = 0) override;
         virtual void renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms) override;
         virtual void clearDepthBuffer() override;
 
         const OpenGLTexture &texture() const;
 
     protected:
-        void setupProgram(RenderPassFlags flags);
+        void setupProgram(RenderPassFlags flags, unsigned int textureId = 0);
 
         void renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix = Matrix4::IDENTITY);
 

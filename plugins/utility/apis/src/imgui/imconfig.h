@@ -15,6 +15,7 @@
 
 #include "../apislib.h"
 #include "Modules/math/vector2.h"
+#include "Modules/math/vector2i.h"
 #include "Modules/math/vector4.h"
 #include "Modules/threading/workgroup.h"
 
@@ -58,7 +59,8 @@
 
 #define IM_VEC2_CLASS_EXTRA                                                 \
         ImVec2(const Engine::Vector2& f) { x = f.x; y = f.y; }                       \
-        operator Engine::Vector2() const { return Engine::Vector2(x,y); }
+        operator Engine::Vector2() const { return Engine::Vector2(x,y); } \
+        ImVec2(const Engine::Vector2i &f) { x = f.x; y = f.y;}
 
 #define IM_VEC4_CLASS_EXTRA                                                 \
         ImVec4(const Engine::Vector4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \

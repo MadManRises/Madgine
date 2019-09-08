@@ -241,6 +241,7 @@ namespace Tools {
         return *mManager;
     }
 
+
     void ImGuiRoot::createManager()
     {
         assert(!mManager);
