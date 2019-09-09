@@ -8,7 +8,7 @@ struct AnyHolderBase {
 
 template <typename T>
 struct AnyHolder : AnyHolderBase {
-	template <typename... Args>
+    template <typename... Args>
     AnyHolder(Args &&... args)
         : data(std::forward<Args>(args)...)
     {
@@ -25,6 +25,8 @@ struct Any {
     template <typename T>
     static constexpr inline inplace_t<T> inplace = {};
 
+    Any() = default;
+
     template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>, typename... Args>
     Any(inplace_t<T>, Args &&... args)
         : mData(std::make_unique<AnyHolder<std::remove_const_t<std::remove_reference_t<T>>>>(std::forward<Args>(args)...))
@@ -33,7 +35,7 @@ struct Any {
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>>
     Any(T &&data)
-        : mData(std::make_unique < AnyHolder<std::remove_const_t<std::remove_reference_t<T>>>>(std::forward<T>(data)))
+        : mData(std::make_unique<AnyHolder<std::remove_const_t<std::remove_reference_t<T>>>>(std::forward<T>(data)))
     {
     }
 
@@ -46,6 +48,11 @@ struct Any {
     {
         mData = std::move(other.mData);
         return *this;
+    }
+
+    operator bool() const
+    {
+        return mData.operator bool();
     }
 
     template <typename T>

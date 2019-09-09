@@ -83,14 +83,12 @@ namespace Threading {
         }
 
     private:
-        std::string mName;
         size_t mInstanceCounter = 0;
+        std::string mName;
 
         std::vector<std::future<int>> mSubThreads;
         std::vector<SignalSlot::TaskHandle> mThreadInitializers;
 
-        std::vector<Any> mBssVariables;
-        std::vector<Any> mObjectVariables;
     };
 
     template <typename T>

@@ -2,35 +2,36 @@
 
 #if ENABLE_THREADING
 
-#include "workgroup.h"
+#    include "workgroup.h"
 
 namespace Engine {
 namespace Threading {
-	
+
     static THREADLOCAL(WorkGroup *) sSelf = nullptr;
 
-    static std::vector<std::function<Any()>> &sWorkgroupLocalBssConstructors()
+    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sWorkgroupLocalBssConstructors()
     {
-        static std::vector<std::function<Any()>> dummy;
+        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
         return dummy;
     }
 
-	static std::vector<std::function<Any()>> &sWorkgroupLocalObjectConstructors()
+    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sWorkgroupLocalObjectConstructors()
     {
-        static std::vector<std::function<Any()>> dummy;
+        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
         return dummy;
     }
 
-	static std::vector<SignalSlot::TaskHandle> &sThreadInitializers()
+    static std::vector<SignalSlot::TaskHandle> &sThreadInitializers()
     {
         static std::vector<SignalSlot::TaskHandle> dummy;
         return dummy;
     }
 
-    static size_t sWorkgroupInstanceCounter = 0;
+    static std::atomic<size_t> sWorkgroupInstanceCounter = 0;
 
     WorkGroup::WorkGroup(const std::string &name)
-        : mName(name.empty() ? "Workgroup_" + std::to_string(++sWorkgroupInstanceCounter) : name)
+        : mInstanceCounter(sWorkgroupInstanceCounter.fetch_add(1))
+        , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
     {
         ThreadLocalStorage::init(true);
         ThreadLocalStorage::init(false);
@@ -38,23 +39,29 @@ namespace Threading {
         assert(!sSelf);
         sSelf = this;
 
-		setCurrentThreadName(mName + "_Main");  
-		
-        for (const std::function<Any()> &ctor : sWorkgroupLocalBssConstructors()) {
-            mBssVariables.emplace_back(ctor());
-        }
-        for (const std::function<Any()> &ctor : sWorkgroupLocalObjectConstructors()) {
-            mObjectVariables.emplace_back(ctor());
-        }  
+        setCurrentThreadName(mName + "_Main");
 
-		for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
+        for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalBssConstructors()) {
+            if (p.second.size() <= mInstanceCounter)
+                p.second.resize(mInstanceCounter + 1);
+            if (!p.second[mInstanceCounter])
+                p.second[mInstanceCounter] = p.first();
+        }
+
+        for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalObjectConstructors()) {
+            if (p.second.size() <= mInstanceCounter)
+                p.second.resize(mInstanceCounter + 1);
+            if (!p.second[mInstanceCounter])
+                p.second[mInstanceCounter] = p.first();
+        }
+
+        for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
             task();
         }
 
-		for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
+        for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
             task();
         }
-
     }
 
     WorkGroup::~WorkGroup()
@@ -69,7 +76,7 @@ namespace Threading {
         mThreadInitializers.emplace_back(std::move(task));
     }
 
-	void WorkGroup::addStaticThreadInitializer(SignalSlot::TaskHandle &&task)
+    void WorkGroup::addStaticThreadInitializer(SignalSlot::TaskHandle &&task)
     {
         sThreadInitializers().emplace_back(std::move(task));
     }
@@ -102,23 +109,23 @@ namespace Threading {
     {
 
         ThreadLocalStorage::init(true);
-		ThreadLocalStorage::init(false);
+        ThreadLocalStorage::init(false);
 
-		assert(!sSelf);
+        assert(!sSelf);
         sSelf = this;
 
-		setCurrentThreadName(mName + "_" + name);
+        setCurrentThreadName(mName + "_" + name);
 
-		for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
-                    task();
-                }
+        for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
+            task();
+        }
 
         for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
             task();
         }
     }
 
-	 void WorkGroup::finalizeThread()
+    void WorkGroup::finalizeThread()
     {
 
         assert(sSelf == this);
@@ -130,38 +137,38 @@ namespace Threading {
 
     int WorkGroup::registerLocalBssVariable(std::function<Any()> ctor)
     {
-        sWorkgroupLocalBssConstructors().emplace_back(std::move(ctor));
+        sWorkgroupLocalBssConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
         return -static_cast<int>(sWorkgroupLocalBssConstructors().size());
     }
 
-	void WorkGroup::unregisterLocalBssVariable(int index)
+    void WorkGroup::unregisterLocalBssVariable(int index)
     {
-        //sLocalVariables().mBssVariables[-(index + 1)] = {};
         sWorkgroupLocalBssConstructors()[-(index + 1)] = {};
     }
 
-	    int WorkGroup::registerLocalObjectVariable(std::function<Any()> ctor)
+    int WorkGroup::registerLocalObjectVariable(std::function<Any()> ctor)
     {
-        sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor));
+        sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
         return sWorkgroupLocalObjectConstructors().size() - 1;
     }
 
-		    void WorkGroup::unregisterLocalObjectVariable(int index)
+    void WorkGroup::unregisterLocalObjectVariable(int index)
     {
-        //sLocalVariables().mObjectVariables[index] = {};
         sWorkgroupLocalObjectConstructors()[index] = {};
     }
 
     const Any &WorkGroup::localVariable(int index)
     {
-        std::vector<Any> &variables = index < 0 ? self().mBssVariables : self().mObjectVariables;
-        std::vector<std::function<Any()>> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
+        size_t selfIndex = self().mInstanceCounter;
+        std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
         if (index < 0)
             index = -(index + 1);
-        while (variables.size() <= index) {
-            variables.emplace_back(constructors[variables.size()]());
-        }
-        return variables.at(index);
+        std::pair<std::function<Any()>, std::vector<Any>> &p = constructors[index];
+        if (p.second.size() <= selfIndex)
+            p.second.resize(selfIndex + 1);
+        if (!p.second[selfIndex])
+            p.second[selfIndex] = p.first();
+        return p.second.at(selfIndex);
     }
 
     WorkGroup &WorkGroup::self()

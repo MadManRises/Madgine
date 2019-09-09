@@ -2,47 +2,55 @@
 
 #if ENABLE_THREADING
 
-#include "threadlocal.h"
+#    include "threadlocal.h"
 
-#if USE_PTHREAD_THREADLOCAL_STORE
-#include <pthread.h>
-#endif
+#    if USE_PTHREAD_THREADLOCAL_STORE
+#        include <pthread.h>
+#    endif
 
 namespace Engine {
 namespace Threading {
 
-    static std::vector<std::function<Any()>> &sLocalBssVariableConstructors()
+    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sLocalBssVariableConstructors()
     {
-        static std::vector<std::function<Any()>> dummy;
+        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
         return dummy;
     }
 
-    static std::vector<std::function<Any()>> &sLocalObjectVariableConstructors()
+    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sLocalObjectVariableConstructors()
     {
-        static std::vector<std::function<Any()>> dummy;
+        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
         return dummy;
     }
 
     struct VariableStore {
         VariableStore()
         {
-            for (const std::function<Any()> &ctor : sLocalBssVariableConstructors()) {
-                mBssVariables.emplace_back(ctor());
+            mIndex = sCount.fetch_add(1);
+
+            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalBssVariableConstructors()) {
+                if (p.second.size() <= mIndex)
+                    p.second.resize(mIndex + 1);
+                if (!p.second[mIndex])
+                    p.second[mIndex] = p.first();
             }
         }
 
         void init()
         {
-            while (mObjectVariables.size() < sLocalObjectVariableConstructors().size()) {
-                mObjectVariables.emplace_back(sLocalObjectVariableConstructors()[mObjectVariables.size()]());
+            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalObjectVariableConstructors()) {
+                if (p.second.size() <= mIndex)
+                    p.second.resize(mIndex + 1);
+                if (!p.second[mIndex])
+                    p.second[mIndex] = p.first();
             }
         }
 
-        std::vector<Any> mBssVariables;
-        std::vector<Any> mObjectVariables;
+        size_t mIndex;
+        static inline std::atomic<size_t> sCount = 0;
     };
 
-#if USE_PTHREAD_THREADLOCAL_STORE
+#    if USE_PTHREAD_THREADLOCAL_STORE
     static pthread_key_t &sKey()
     {
         static pthread_key_t dummy;
@@ -60,63 +68,66 @@ namespace Threading {
     {
         delete static_cast<VariableStore *>(store);
     }
-#else
+#    else
     static VariableStore &sLocalVariables()
     {
         static thread_local VariableStore dummy;
         return dummy;
     }
-#endif
+#    endif
 
     int ThreadLocalStorage::registerLocalBssVariable(std::function<Any()> ctor)
     {
-        sLocalBssVariableConstructors().emplace_back(std::move(ctor));
+        sLocalBssVariableConstructors().emplace_back(std::move(ctor), std::vector<Any>{});
         return -static_cast<int>(sLocalBssVariableConstructors().size());
     }
 
     void ThreadLocalStorage::unregisterLocalBssVariable(int index)
     {
-        //sLocalVariables().mBssVariables[-(index + 1)] = {};
         sLocalBssVariableConstructors()[-(index + 1)] = {};
     }
 
     int ThreadLocalStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
-        sLocalObjectVariableConstructors().emplace_back(std::move(ctor));
+        sLocalObjectVariableConstructors().emplace_back(std::move(ctor), std::vector<Any>{});
         return sLocalObjectVariableConstructors().size() - 1;
     }
 
     void ThreadLocalStorage::unregisterLocalObjectVariable(int index)
     {
-        //sLocalVariables().mObjectVariables[index] = {};
         sLocalObjectVariableConstructors()[index] = {};
     }
 
     const Any &ThreadLocalStorage::localVariable(int index)
     {
-        std::vector<Any> &variables = index < 0 ? sLocalVariables().mBssVariables : sLocalVariables().mObjectVariables;
-        std::vector<std::function<Any()>> &constructors = index < 0 ? sLocalBssVariableConstructors() : sLocalObjectVariableConstructors();
+        size_t self = sLocalVariables().mIndex;
+        std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &constructors = index < 0 ? sLocalBssVariableConstructors() : sLocalObjectVariableConstructors();
         if (index < 0)
             index = -(index + 1);
-        while (variables.size() <= index) {
-            variables.emplace_back(constructors[variables.size()]());
-        }
-        return variables.at(index);
+        std::pair<std::function<Any()>, std::vector<Any>> &p = constructors[index];
+        if (p.second.size() <= self)
+            p.second.resize(self + 1);
+        if (!p.second[self])
+            p.second[self] = p.first();
+        return p.second.at(self);
     }
 
     void ThreadLocalStorage::init(bool bss)
     {
         if (bss) {
 
-#if USE_PTHREAD_THREADLOCAL_STORE
+#    if USE_PTHREAD_THREADLOCAL_STORE
             static int result = pthread_key_create(&sKey(), &destructTLS);
             assert(result == 0);
 
             pthread_setspecific(sKey(), new VariableStore);
-#endif
+#    endif
 
-            while (sLocalVariables().mBssVariables.size() < sLocalBssVariableConstructors().size()) {
-                sLocalVariables().mBssVariables.emplace_back(sLocalBssVariableConstructors()[sLocalVariables().mBssVariables.size()]());
+            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalBssVariableConstructors()) {
+                if (p.second.size() <= sLocalVariables().mIndex)
+                    p.second.resize(sLocalVariables().mIndex + 1);
+                if (!p.second[sLocalVariables().mIndex])
+                    p.second[sLocalVariables().mIndex] = p.first();
             }
         } else {
             sLocalVariables().init();
@@ -126,9 +137,15 @@ namespace Threading {
     void ThreadLocalStorage::finalize(bool bss)
     {
         if (bss) {
-            sLocalVariables().mBssVariables.clear();
+            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalBssVariableConstructors()) {
+                if (p.second.size() > sLocalVariables().mIndex)
+                    p.second[sLocalVariables().mIndex] = {};
+            }
         } else {
-            sLocalVariables().mObjectVariables.clear();
+            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalObjectVariableConstructors()) {
+                if (p.second.size() > sLocalVariables().mIndex)
+                    p.second[sLocalVariables().mIndex] = {};
+            }
         }
     }
 
