@@ -12,7 +12,7 @@
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
 
-#include "Modules/math/geometry.h"
+#include "Modules/math/geometry3.h"
 
 #include "Modules/math/boundingbox.h"
 
@@ -359,7 +359,8 @@ namespace Im3D {
 
         //Check if Hovered
         float distance = 0.0f;
-        Intersect(c.mMouseRay, transform * bounds, &distance);
+        if (auto intersection = Intersect(c.mMouseRay, transform * bounds))
+			distance = intersection[0];
 
         return BoundingObject(id, distance, flags, priority);
     }
@@ -386,7 +387,8 @@ namespace Im3D {
 
         //Check if Hovered
         float distance = 0.0f;
-        Intersect(c.mMouseRay, transform * bb, &distance);
+        if (auto intersection = Intersect(c.mMouseRay, transform * bb))
+            distance = intersection[0];
 
         bool hovered = BoundingObject(id, distance, flags, priority);
 

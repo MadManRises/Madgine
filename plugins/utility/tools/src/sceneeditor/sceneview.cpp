@@ -29,7 +29,7 @@
 
 #include "Modules/math/plane.h"
 
-#include "Modules/math/geometry.h"
+#include "Modules/math/geometry3.h"
 
 #include "OpenGL/openglmeshloader.h"
 
@@ -124,16 +124,14 @@ namespace Tools {
 
                     Vector3 axis = axes[mDraggedAxis];
 
-                    float intersect;
-
                     Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                    if (Intersect(plane, mDragStartRay, &intersect)) {
+                    if (auto intersection = Intersect(plane, mDragStartRay)) {
 
                         mMouseDown[0] = true;
                         mDragTransform = mEditor->hoveredTransform();
                         mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
-                        mDragRelMousePosition = mDragStartRay.point(intersect) - mDragStoredPosition;
+                        mDragRelMousePosition = mDragStartRay.point(intersection[0]) - mDragStoredPosition;
                     }
                 }
 
@@ -185,11 +183,9 @@ namespace Tools {
 
                 Plane targetPlane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                float rayParam;
+                if (auto intersection = Intersect(targetPlane, ray)) {
 
-                if (Intersect(targetPlane, ray, &rayParam)) {
-
-                    Vector3 distance = ray.point(rayParam) - mDragStoredPosition - mDragRelMousePosition;
+                    Vector3 distance = ray.point(intersection[0]) - mDragStoredPosition - mDragRelMousePosition;
 
                     if (mDraggedAxis != 0)
                         distance.x = 0.0f;

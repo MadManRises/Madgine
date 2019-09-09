@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#include "geometry.h"
+#include "geometry3.h"
 
 #include "boundingbox.h"
 #include "plane.h"
@@ -19,7 +19,7 @@ float Distance(const Ray &ray, const Vector3 &point, float *rayClosestParameter)
     return ray.mDir.crossProduct(point - ray.mPoint).length();
 }
 
-bool Intersect(const Ray &ray, const Sphere &sphere, float *rayClosestParameter)
+UpTo<float, 2> Intersect(const Ray &ray, const Sphere &sphere)
 {
     Vector3 oc = ray.mPoint - sphere.mCenter;
     float a = ray.mDir.dotProduct(ray.mDir);
@@ -27,16 +27,16 @@ bool Intersect(const Ray &ray, const Sphere &sphere, float *rayClosestParameter)
     float c = oc.dotProduct(oc) - sphere.mRadius * sphere.mRadius;
     float discriminant = b * b - 4 * a * c;
 
+    UpTo<float, 2> result;
     if (discriminant >= 0) {
-        if (rayClosestParameter)
-            *rayClosestParameter = (-b - sqrt(discriminant)) / (2.0 * a);
-        return true;
-    } else {
-        return false;
+        result.push_back((-b - sqrt(discriminant)) / (2.0 * a));
+        if (discriminant > 0)
+            result.push_back((-b + sqrt(discriminant)) / (2.0 * a));
     }
+    return result;
 }
 
-bool Intersect(const Ray &ray, const BoundingBox &box, float *rayClosestParameter)
+UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box)
 {
     Plane minX { box.mMin, box.mDirX };
     Plane maxX { box.mMax, box.mDirX };
@@ -44,8 +44,10 @@ bool Intersect(const Ray &ray, const BoundingBox &box, float *rayClosestParamete
     float tMin = std::numeric_limits<float>::lowest();
     float tMax = std::numeric_limits<float>::max();
 
-    Intersect(minX, ray, &tMin);
-    Intersect(maxX, ray, &tMax);
+    if (auto intersection = Intersect(minX, ray))
+        tMin = intersection[0];
+    if (auto intersection = Intersect(maxX, ray))
+        tMax = intersection[0];
 
     if (tMin > tMax)
         std::swap(tMin, tMax);
@@ -56,28 +58,10 @@ bool Intersect(const Ray &ray, const BoundingBox &box, float *rayClosestParamete
     float t2Min = std::numeric_limits<float>::lowest();
     float t2Max = std::numeric_limits<float>::max();
 
-    Intersect(minY, ray, &t2Min);
-    Intersect(maxY, ray, &t2Max);
-
-    if (t2Min > t2Max)
-        std::swap(t2Min, t2Max);
-
-    tMin = std::max(tMin, t2Min);
-    tMax = std::min(tMax, t2Max);
-
-	if (tMin > tMax)
-        return false;
-
-    NormalizedVector3 dirZ = box.mDirX.crossProduct(box.mDirY);
-
-	Plane minZ { box.mMin, dirZ };
-    Plane maxZ { box.mMax, dirZ };
-
-    t2Min = std::numeric_limits<float>::lowest();
-    t2Max = std::numeric_limits<float>::max();
-
-    Intersect(minZ, ray, &t2Min);
-    Intersect(maxZ, ray, &t2Max);
+    if (auto intersection = Intersect(minY, ray))
+        t2Min = intersection[0];
+    if (auto intersection = Intersect(maxY, ray))
+        t2Max = intersection[0];
 
     if (t2Min > t2Max)
         std::swap(t2Min, t2Max);
@@ -86,25 +70,49 @@ bool Intersect(const Ray &ray, const BoundingBox &box, float *rayClosestParamete
     tMax = std::min(tMax, t2Max);
 
     if (tMin > tMax)
-        return false;
+        return {};
 
-	if (rayClosestParameter)
-        *rayClosestParameter = tMin;
+    NormalizedVector3 dirZ = box.mDirX.crossProduct(box.mDirY);
 
-	return true;
+    Plane minZ { box.mMin, dirZ };
+    Plane maxZ { box.mMax, dirZ };
+
+    t2Min = std::numeric_limits<float>::lowest();
+    t2Max = std::numeric_limits<float>::max();
+
+    if (auto intersection = Intersect(minZ, ray))
+        t2Min = intersection[0];
+    if (auto intersection = Intersect(maxZ, ray))
+        t2Max = intersection[0];
+
+    if (t2Min > t2Max)
+        std::swap(t2Min, t2Max);
+
+    tMin = std::max(tMin, t2Min);
+    tMax = std::min(tMax, t2Max);
+
+    UpTo<float, 2> result;
+
+    if (tMax >= tMin) {
+        result.push_back(tMin);
+        if (tMax > tMin)
+            result.push_back(tMax);
+    }
+
+    return result;
 }
 
-bool Intersect(const Plane &plane, const Ray &ray, float *rayParameter)
+UpTo<float, 1> Intersect(const Plane &plane, const Ray &ray)
 {
+    UpTo<float, 1> result;
+
     float denom = plane.mNormal.dotProduct(ray.mDir);
     if (!isZero(denom)) {
         Vector3 pDist = plane.mNormal * plane.mDistance - ray.mPoint;
         float t = pDist.dotProduct(plane.mNormal) / denom;
-        if (rayParameter)
-            *rayParameter = t;
-        return true;
+        result.push_back(t);
     }
-    return false;
+    return result;
 }
 
 }
