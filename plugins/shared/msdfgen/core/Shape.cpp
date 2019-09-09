@@ -58,7 +58,7 @@ void Shape::miterBounds(double &l, double &b, double &r, double &t, double borde
         contour->miterBounds(l, b, r, t, border, miterLimit);
 }
 
-void Shape::scanline(Scanline &line, double y) const {
+/*void Shape::scanline(Scanline &line, double y) const {
     std::vector<Scanline::Intersection> intersections;
     double x[3];
     int dy[3];
@@ -76,6 +76,6 @@ void Shape::scanline(Scanline &line, double y) const {
 #else
     line.setIntersections(intersections);
 #endif
-}
+}*/
 
 }

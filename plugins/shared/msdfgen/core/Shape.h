@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "Contour.h"
-#include "Scanline.h"
 
 namespace msdfgen {
 
@@ -33,7 +32,7 @@ public:
     /// Adjusts the bounding box to fit the shape border's mitered corners.
     void miterBounds(double &l, double &b, double &r, double &t, double border, double miterLimit) const;
     /// Outputs the scanline that intersects the shape at y.
-    void scanline(Scanline &line, double y) const;
+    //void scanline(Scanline &line, double y) const;
 
 };
 

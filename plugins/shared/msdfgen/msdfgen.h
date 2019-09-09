@@ -16,12 +16,10 @@
 
 #include "core/arithmetics.hpp"
 #include "core/Vector2.h"
-#include "core/Scanline.h"
 #include "core/Shape.h"
 #include "core/BitmapRef.hpp"
 #include "core/Bitmap.h"
 #include "core/edge-coloring.h"
-#include "core/estimate-sdf-error.h"
 
 #define MSDFGEN_VERSION "1.6"
 
