@@ -6,6 +6,8 @@
 #include "util/openglbuffer.h"
 #include "util/opengltexture.h"
 
+#include "Madgine/render/renderpassflags.h"
+
 namespace Engine {
 namespace Render {
 

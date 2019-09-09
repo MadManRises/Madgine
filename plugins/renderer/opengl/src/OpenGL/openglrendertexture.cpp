@@ -175,6 +175,8 @@ namespace Render {
 
 		mProgram.setUniform("hasLight", !(flags & RenderPassFlags_NoLighting));
 
+		mProgram.setUniform("hasDistanceField", !!(flags & RenderPassFlags_DistanceField));
+
 		mProgram.setUniform("hasTexture", textureId != 0);
 		if (textureId) {
             glActiveTexture(GL_TEXTURE0);

@@ -8,6 +8,8 @@
 #include "Modules/serialize/serializetable_impl.h"
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/math/boundingbox.h"
+
 namespace Engine
 {
 
@@ -53,7 +55,12 @@ namespace Engine
 			bool ServerMesh::isVisible() const
 			{
 				return true;
-			}
+                        }
+
+                        AABB ServerMesh::aabb() const
+                        {
+                            return AABB();
+                        }
 
 			Vector3 ServerMesh::getCenter() const
 			{

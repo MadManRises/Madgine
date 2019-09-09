@@ -176,7 +176,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount, Im3DTextureId texId)
+    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount, Im3DTextureId texId)
     {
         Im3DContext &c = sContext;
 
@@ -213,6 +213,7 @@ namespace Im3D {
             c.mRenderData[texId].mIndices2[type].resize(oldIndexCount + vertexCount);
             std::iota(c.mRenderData[texId].mIndices2[type].begin() + oldIndexCount, c.mRenderData[texId].mIndices2[type].end(), c.mRenderData[texId].mVertexBase2[type]);
         }
+        c.mRenderData[texId].mFlags = flags;
     }
 
     void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform)
@@ -331,7 +332,7 @@ namespace Im3D {
             cursorX += g.mAdvance / 64.0f * scale;
         }
 
-        Mesh(IM3D_TRIANGLES, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, font->mTexture.handle());
+        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, font->mTexture.handle());
     }
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)

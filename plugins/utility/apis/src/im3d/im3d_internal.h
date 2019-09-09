@@ -5,6 +5,8 @@
 #include "Modules/math/boundingbox.h"
 #include "Modules/math/sphere.h"
 
+#include "Madgine/render/renderpassflags.h"
+
 namespace Engine {
 namespace Im3D {
 
@@ -34,6 +36,7 @@ namespace Im3D {
             std::vector<Render::Vertex2> mVertices2[IM3D_MESHTYPE_COUNT];
             std::vector<unsigned int> mIndices2[IM3D_MESHTYPE_COUNT];
             size_t mVertexBase2[IM3D_MESHTYPE_COUNT];
+            Render::RenderPassFlags mFlags = Render::RenderPassFlags_NoLighting;
         };
         std::map<Im3DTextureId, RenderData> mRenderData;
 

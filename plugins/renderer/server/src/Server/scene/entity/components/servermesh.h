@@ -27,6 +27,7 @@ namespace Engine
 				virtual void setVisible(bool b) override;
 				virtual bool isVisible() const override;
 
+				virtual AABB aabb() const override;
 
 			private:
 				Transform* mTransform;

@@ -13,7 +13,7 @@ FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfon
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
 target_link_plugins(OpenGL Client)
-target_link_libraries(OpenGL PUBLIC assimp freetype) # Might be a bug in MSVC + Clang. Should be PRIVATE
+target_link_libraries(OpenGL PUBLIC assimp freetype lib_msdfgen) # Might be a bug in MSVC + Clang. Should be PRIVATE
 
 if (NOT ANDROID)
 	find_package(OpenGL REQUIRED)

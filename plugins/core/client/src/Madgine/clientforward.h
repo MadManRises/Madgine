@@ -51,6 +51,7 @@ namespace Render {
     struct RenderPass;
     struct Vertex;
     struct Vertex2;
+    typedef int RenderPassFlags;
 }
 
 }
