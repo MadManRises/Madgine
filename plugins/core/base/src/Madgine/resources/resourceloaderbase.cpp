@@ -18,16 +18,7 @@ namespace Engine
 		{
 		}
 
-		void ResourceLoaderBase::resourceAdded(ResourceBase* res)
-		{
-			if (mAutoLoad)
-			{
-				res->setPersistent(true);
-				res->load();
-			}
-		}
-
-		const std::vector<std::string>& ResourceLoaderBase::fileExtensions() const
+		const std::vector<std::string> &ResourceLoaderBase::fileExtensions() const
 		{
 			return mExtensions;
 		}

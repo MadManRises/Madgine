@@ -13,11 +13,10 @@ namespace Engine
 		{
 			ResourceBase(Filesystem::Path path);
 
-			virtual ~ResourceBase() = default;
+			~ResourceBase() = default;
 
-			virtual void setPersistent(bool b);
-			virtual bool load() = 0;
-
+			void setPersistent(bool b);
+			
 			bool isPersistent() const;
 
 			const Filesystem::Path &path();

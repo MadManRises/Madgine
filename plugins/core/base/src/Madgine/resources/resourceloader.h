@@ -1,10 +1,10 @@
 #pragma once
 
-#include "resource.h"
+#include "Modules/reflection/decay.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
+#include "resource.h"
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
-#include "Modules/reflection/decay.h"
 
 namespace Engine {
 namespace Resources {
@@ -24,6 +24,11 @@ namespace Resources {
                 return &it->second;
             else
                 return nullptr;
+        }
+
+        static T &getSingleton()
+        {
+            return Resources::ResourceManager::getSingleton().get<T>();
         }
 
         static std::shared_ptr<Data> load(const std::string &name, bool persistent = false)

@@ -13,6 +13,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "openglfontloader.h"
+
 #if WINDOWS
 typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
@@ -137,6 +139,10 @@ namespace Render {
 
     void resetContext()
     {
+        for (std::pair<const std::string, OpenGLFontLoader::ResourceType> &p : OpenGLFontLoader::getSingleton()) {
+            p.second.unload();
+		}
+
 #if WINODWS
         wglMakeCurrent(NULL, NULL);
 #elif LINUX

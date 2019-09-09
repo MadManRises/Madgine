@@ -1,31 +1,34 @@
-#pragma once 
+#pragma once
 
 #include "Modules/keyvalue/scopebase.h"
 
-namespace Engine
-{
-	namespace Resources
-	{
-	
-		struct MADGINE_BASE_EXPORT ResourceLoaderBase : ScopeBase
-		{
-			ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad=false);
-			virtual ~ResourceLoaderBase() = default;			
+namespace Engine {
+namespace Resources {
 
-			virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) = 0;
+    struct MADGINE_BASE_EXPORT ResourceLoaderBase : ScopeBase {
+        ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad = false);
+        virtual ~ResourceLoaderBase() = default;
 
-			void resourceAdded(ResourceBase* res);
-			
-			const std::vector<std::string> &fileExtensions() const;
+        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) = 0;
 
-			size_t extensionIndex(const std::string &ext) const;
+        template <typename T>
+        void resourceAdded(T *res)
+        {
+            if (mAutoLoad) {
+                res->setPersistent(true);
+                res->load();
+            }
+        }
 
-		private:
-			std::vector<std::string> mExtensions;
+        const std::vector<std::string> &fileExtensions() const;
 
-			bool mAutoLoad;
+        size_t extensionIndex(const std::string &ext) const;
 
-		};
+    private:
+        std::vector<std::string> mExtensions;
 
-	}
+        bool mAutoLoad;
+    };
+
+}
 }

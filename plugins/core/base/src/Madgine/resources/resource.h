@@ -8,13 +8,13 @@ namespace Resources {
     template <class Loader>
     class Resource : public ResourceBase {
     public:
-        Resource(Loader *loader, const Filesystem::Path &path)
+        Resource(Loader* loader, const Filesystem::Path& path)
             : ResourceBase(path)
             , mLoader(loader)
         {
         }
 
-        virtual ~Resource()
+        ~Resource()
         {
             if (!unload())
                 LOG_WARNING("Deleted Resource \"" << name() << extension() << "\" still used. Memory not freed!");
@@ -40,7 +40,7 @@ namespace Resources {
             }
         }
 
-        virtual bool load() override
+        bool load() 
         {
             return loadData().operator bool();
         }
@@ -53,7 +53,7 @@ namespace Resources {
             return b;
         }
 
-        virtual void setPersistent(bool b) override
+        void setPersistent(bool b)
         {
             ResourceBase::setPersistent(b);
             if (b) {
@@ -69,26 +69,26 @@ namespace Resources {
         std::shared_ptr<typename Loader::Data> mPtr;
         std::weak_ptr<typename Loader::Data> mWeakPtr;
 
-        Loader *mLoader;
+        Loader* mLoader;
     };
 
     template <class Loader>
     class ThreadLocalResource : public ResourceBase {
     public:
-        ThreadLocalResource(Loader *loader, const Filesystem::Path &path)
+        ThreadLocalResource(Loader* loader, const Filesystem::Path& path)
             : ResourceBase(path)
             , mLoader(loader)
         {
         }
 
-			virtual ~ThreadLocalResource()
-			{
-                            for (auto& [thread, data] : mData) {
-                                data.mPtr.reset();
-                                if (!data.mWeakPtr.expired())
-                                    LOG_WARNING("Deleted thread-local Resource \"" << name() << extension() << "\" still used by thread " << thread << ". Memory not freed!");
-                            }
-                        }
+        ~ThreadLocalResource()
+        {
+            for (auto& [thread, data] : mData) {
+                data.mPtr.reset();
+                if (!data.mWeakPtr.expired())
+                    LOG_WARNING("Deleted thread-local Resource \"" << name() << extension() << "\" still used by thread " << thread << ". Memory not freed!");
+            }
+        }
 
         std::shared_ptr<typename Loader::Data> data()
         {
@@ -97,7 +97,7 @@ namespace Resources {
 
         std::shared_ptr<typename Loader::Data> loadData()
         {
-            Data &d = mData[std::this_thread::get_id()];
+            Data& d = mData[std::this_thread::get_id()];
             if (d.mPtr) {
                 return d.mPtr;
             } else if (std::shared_ptr<typename Loader::Data> ptr = d.mWeakPtr.lock()) {
@@ -111,7 +111,7 @@ namespace Resources {
             }
         }
 
-        virtual bool load() override
+        bool load()
         {
             return loadData().operator bool();
         }
@@ -121,24 +121,24 @@ namespace Resources {
             auto it = mData.find(std::this_thread::get_id());
             if (it == mData.end())
                 return true;
-            Data &d = it->second;
+            Data& d = it->second;
             d.mPtr.reset();
             bool b = d.mWeakPtr.expired();
             d.mWeakPtr.reset();
             return b;
         }
 
-        virtual void setPersistent(bool b) override
+        void setPersistent(bool b)
         {
             ResourceBase::setPersistent(b);
             if (b) {
-                for (std::pair<const std::thread::id, Data> &d : mData) {
+                for (std::pair<const std::thread::id, Data>& d : mData) {
                     if (!d.second.mPtr && !d.second.mWeakPtr.expired()) {
                         d.second.mPtr = std::shared_ptr<typename Loader::Data>(d.second.mWeakPtr);
                     }
                 }
             } else {
-                for (std::pair<const std::thread::id, Data> &d : mData) {
+                for (std::pair<const std::thread::id, Data>& d : mData) {
                     d.second.mPtr.reset();
                 }
             }
@@ -152,7 +152,7 @@ namespace Resources {
 
         std::map<std::thread::id, Data> mData;
 
-        Loader *mLoader;
+        Loader* mLoader;
     };
 }
 }
