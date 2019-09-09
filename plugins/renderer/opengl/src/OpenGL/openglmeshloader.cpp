@@ -87,14 +87,13 @@ namespace Render {
 
         OpenGLMeshData data;
 
-        data.mVAO.bind();
-
         if (indices) {
             data.mIndices = {};
             data.mIndices.bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
+        data.mVAO.bind();
         glVertexAttribPointer(
             0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
@@ -104,36 +103,36 @@ namespace Render {
             (void *)offsetof(Vertex, mPos) // array buffer offset
         );
         glEnableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         glVertexAttribPointer(
-            1, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             4, // size
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex), // stride
             (void *)offsetof(Vertex, mColor) // array buffer offset
         );
-        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
         glVertexAttribPointer(
-            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            3, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex), // stride
             (void *)offsetof(Vertex, mNormal) // array buffer offset
         );
-        glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
+        glDisableVertexAttribArray(4);
 
         update(data, groupSize, vertices, vertexCount, indices, indexCount);
 
         return data;
     }
 
-	OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
 
         OpenGLMeshData data;
-
-        data.mVAO.bind();
 
         if (indices) {
             data.mIndices = {};
@@ -141,6 +140,7 @@ namespace Render {
         }
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
+        data.mVAO.bind();
         glVertexAttribPointer(
             0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
@@ -168,15 +168,17 @@ namespace Render {
             (void *)offsetof(Vertex2, mColor) // array buffer offset
         );
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(
-            3, // attribute 0. No particular reason for 0, but must match the layout in the shader.
+        glDisableVertexAttribArray(3);
+		glVertexAttribPointer(
+            4, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             2, // size
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             sizeof(Vertex2), // stride
             (void *)offsetof(Vertex2, mUV) // array buffer offset
         );
-        glEnableVertexAttribArray(3);
+        glEnableVertexAttribArray(4);       
+
 
         update(data, groupSize, vertices, vertexCount, indices, indexCount);
 
@@ -207,7 +209,7 @@ namespace Render {
         }
     }
 
-	void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
         data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);

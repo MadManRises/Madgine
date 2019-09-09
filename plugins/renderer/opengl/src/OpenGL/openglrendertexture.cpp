@@ -32,17 +32,8 @@ namespace Render {
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
-        std::shared_ptr<OpenGLShader> pixelShader_nolight = OpenGLShaderLoader::load("scene_nolight_PS");
-        std::shared_ptr<OpenGLShader> vertexShader2 = OpenGLShaderLoader::load("scene2_VS");
-        std::shared_ptr<OpenGLShader> pixelShader2 = OpenGLShaderLoader::load("scene2_PS");
 
         if (!mProgram.link(vertexShader.get(), pixelShader.get()))
-            throw 0;
-
-        if (!mProgram_nolight.link(vertexShader.get(), pixelShader_nolight.get()))
-            throw 0;
-
-        if (!mProgram2.link(vertexShader2.get(), pixelShader2.get()))
             throw 0;
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
@@ -144,16 +135,14 @@ namespace Render {
 
         float aspectRatio = size.x / size.y;
 
-        mProgram.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
-        mProgram_nolight.setUniform("vp", camera()->getViewProjectionMatrix(aspectRatio));
-        mProgram2.setUniform("v", camera()->getViewMatrix());
-        mProgram2.setUniform("p", camera()->getProjectionMatrix(aspectRatio));
+        mProgram.setUniform("v", camera()->getViewMatrix());
+        mProgram.setUniform("p", camera()->getProjectionMatrix(aspectRatio));
 
         for (RenderPass *pass : uniquePtrToPtr(preRenderPasses())) {
             pass->render(this, camera());
         }
 
-        mProgram.bind();
+        setupProgram();
 
         for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
 
@@ -181,23 +170,12 @@ namespace Render {
 
     void OpenGLRenderTexture::setupProgram(RenderPassFlags flags, unsigned int textureId)
     {
-        switch (flags) {
-        case RenderPassFlags_None:
-            mCurrentProgram = &mProgram;
-            break;
-        case RenderPassFlags_NoLighting:
-            mCurrentProgram = &mProgram_nolight;
-            break;
-        case RenderPassFlags_DataFormat2:
-            throw "Unsupported DataFormat2 with Lighting!";
-        case RenderPassFlags_DataFormat2 | RenderPassFlags_NoLighting:
-            mCurrentProgram = &mProgram2;
-			break;
-        default:
-            throw "Unknown render flags";
-        }
-        mCurrentProgram->bind();
+        
+        mProgram.bind();
 
+		mProgram.setUniform("hasLight", !(flags & RenderPassFlags_NoLighting));
+
+		mProgram.setUniform("hasTexture", textureId != 0);
 		if (textureId) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textureId);
@@ -208,8 +186,8 @@ namespace Render {
 
     void OpenGLRenderTexture::renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix)
     {
-        mCurrentProgram->setUniform("m", transformMatrix);
-        mCurrentProgram->setUniform(
+        mProgram.setUniform("m", transformMatrix);
+        mProgram.setUniform(
             "anti_m",
             transformMatrix
                 .ToMat3()
@@ -244,20 +222,24 @@ namespace Render {
 
     void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
     {
-        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
+        if ((!indices && vertexCount > 0) || indexCount > 0) {
+            OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
 
-        setupProgram(flags);
+            setupProgram(flags);
 
-        renderMesh(&tempMesh);
+            renderMesh(&tempMesh);
+        }
     }
 
     void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount, unsigned int textureId)
     {
-        OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
+        if ((!indices && vertexCount > 0) || indexCount > 0) {
+            OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
 
-        setupProgram(flags | RenderPassFlags_DataFormat2, textureId);
+            setupProgram(flags, textureId);
 
-        renderMesh(&tempMesh);
+            renderMesh(&tempMesh);
+        }
     }
 
     void OpenGLRenderTexture::clearDepthBuffer()

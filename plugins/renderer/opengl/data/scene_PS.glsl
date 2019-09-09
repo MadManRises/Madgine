@@ -7,19 +7,36 @@ precision mediump float;
 varying vec4 color;
 varying vec3 worldPos;
 varying vec3 normal;
+varying vec2 uv;
 
 uniform vec3 lightColor;
 uniform vec3 lightDir;
 
+uniform bool hasLight;
+uniform bool hasTexture;
+
+uniform sampler2D tex;
+
 void main()
 {
-    float ambientStrength = 0.4;
-	vec3 ambient = ambientStrength * lightColor;
 
-	float diffuseStrength = 0.7;
-	vec3 norm = normalize(normal);
-	float diff = max(dot(norm, -lightDir), 0.0);
-	vec3 diffuse = diffuseStrength * diff * lightColor;
+	vec4 colorAcc = color;
 
-    gl_FragColor = vec4(ambient + diffuse,1.0) * color;
+	if (hasLight){
+		float ambientStrength = 0.4;
+		vec3 ambient = ambientStrength * lightColor;
+
+		float diffuseStrength = 0.7;
+		vec3 norm = normalize(normal);
+		float diff = max(dot(norm, -lightDir), 0.0);
+		vec3 diffuse = diffuseStrength * diff * lightColor;
+
+		colorAcc = vec4(ambient + diffuse,1.0) * colorAcc;
+	}
+
+	if (hasTexture){
+		colorAcc = colorAcc * texture2D(tex, uv);
+	}
+
+    gl_FragColor = colorAcc;
 }

@@ -27,7 +27,7 @@ namespace Render {
         const OpenGLTexture &texture() const;
 
     protected:
-        void setupProgram(RenderPassFlags flags, unsigned int textureId = 0);
+        void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0);
 
         void renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix = Matrix4::IDENTITY);
 
@@ -37,8 +37,7 @@ namespace Render {
         GLuint mFramebuffer;
         GLuint mDepthRenderbuffer;
 
-        OpenGLShaderProgram mProgram, mProgram_nolight, mProgram2;
-        OpenGLShaderProgram *mCurrentProgram = nullptr;
+        OpenGLShaderProgram mProgram;
 
         OpenGLTexture mTexture;
 

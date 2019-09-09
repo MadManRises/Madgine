@@ -8,23 +8,12 @@ namespace Engine {
 namespace Render {
 
 	typedef int RenderPassFlags;
-    enum RenderPassFlags_ {
+	enum RenderPassFlags_ {
         RenderPassFlags_None = 0,
-		RenderPassFlags_DataFormat2 = 1 << 0,
-        RenderPassFlags_NoLighting = 1 << 1,
-		RenderPassFlags_NoPerspective = 1 << 2
-	};
-
-	/*enum RenderPassFlags_ {
-        RenderPassFlags_None = 0,
-        RenderPassFlags_HasColor = 1 << 0,
-        RenderPassFlags_HasUV = 1 << 1,
-        RenderPassFlags_HasPos2 = 1 << 2,
-        RenderPassFlags_HasNormal = 1 << 3,
-        RenderPassFlags_NoLighting = 1 << 4,
-        RenderPassFlags_NoPerspective = 1 << 5,
-        RenderPassFlags_DistanceField = 1 << 6
-    };*/
+        RenderPassFlags_NoLighting = 1 << 0,
+        RenderPassFlags_NoPerspective = 1 << 1,
+        RenderPassFlags_DistanceField = 1 << 2
+    };
 
     struct MADGINE_CLIENT_EXPORT RenderTarget {
         RenderTarget(RenderWindow *window, Scene::Camera *camera, const Vector2 &size);
