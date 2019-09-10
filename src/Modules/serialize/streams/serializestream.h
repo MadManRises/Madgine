@@ -5,6 +5,7 @@
 #include "../serializeexception.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
+#include "../serializetable.h"
 
 namespace Engine {
 namespace Serialize {
@@ -168,7 +169,7 @@ namespace Serialize {
         {
             SerializableUnitBase *unit;
             readUnformatted(unit);
-            if (&serializeTable<T>() != unit->mType)
+            if (serializeTable<T>().isInstance(unit))
                 throw 0;
             p = static_cast<T *>(unit);
         }

@@ -63,6 +63,7 @@ namespace Serialize {
         friend struct SerializeManager;        
         friend struct SerializeUnitHelper;
         friend struct SyncableBase;
+        friend struct SerializeTable;
 		template <typename T, bool b>
         friend struct UnitHelper;
         template <typename T, typename Base>

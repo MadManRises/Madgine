@@ -22,6 +22,8 @@ namespace Serialize {
 		void applySerializableMap(SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableUnitBase *unit, bool b) const;
+
+		bool isInstance(SerializableUnitBase *unit) const;
     };
 
 }

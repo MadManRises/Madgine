@@ -8,6 +8,8 @@
 
 #include "streams/serializestream.h"
 
+#include "serializableunit.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -132,6 +134,11 @@ namespace Serialize {
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
+    }
+
+	bool SerializeTable::isInstance(SerializableUnitBase *unit) const
+    {
+        return unit->mType == this;
     }
 
 }
