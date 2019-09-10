@@ -190,8 +190,8 @@ namespace Render {
         data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
 
-        Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
-        Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
+        Vector3 minP { std::numeric_limits<float>::max() };
+        Vector3 maxP { std::numeric_limits<float>::lowest() };
 
         for (size_t i = 0; i < vertexCount; ++i) {
             Vertex &v = vertices[i];
