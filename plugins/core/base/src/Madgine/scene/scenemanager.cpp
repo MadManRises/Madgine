@@ -321,6 +321,7 @@ METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
 //mEntities ->  Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>
+FIELD(mEntities, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
 RegisterType(Engine::Scene::SceneManager);

@@ -17,6 +17,7 @@ namespace Scene {
 
         class MADGINE_BASE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase
         {
+            SERIALIZABLEUNIT;
 
         public:
             Entity(const Entity &, bool local);

@@ -47,14 +47,14 @@ TEST(Serialize_Table, Test1)
     t1.i = 1;
     t1.s.j = 2;
 
-    serializeTable<TestStruct>().writeBinary(&t1, stream1);
+    serializeTable<TestStruct>().writeState(&t1, stream1);
     stream1.endMessage();
     stream1.sendMessages();
 
 	TestStruct t2;
 
 	stream2.isMessageAvailable();
-	serializeTable<TestStruct>().readBinary(&t2, stream2);
+	serializeTable<TestStruct>().readState(&t2, stream2);
 
 	ASSERT_EQ(t1.i, t2.i);
 }

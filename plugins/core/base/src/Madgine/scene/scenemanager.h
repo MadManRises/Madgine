@@ -25,6 +25,8 @@ namespace Scene {
     class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
                                              public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>>,
                                              public Threading::FrameListener {
+        SERIALIZABLEUNIT;
+
     public:
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;

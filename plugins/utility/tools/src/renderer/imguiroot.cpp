@@ -59,21 +59,18 @@ namespace Tools {
     void ToolReadLine(ImGuiContext *ctx, ImGuiSettingsHandler *handler, void *entry, const char *line) // Read: Called for every line of text within an ini entry
     {
         if (strlen(line) > 0) {
-            Ini::IniFormatter format;
-
-            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(line);
+            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>(), line);
             Serialize::SerializeInStream in { std::move(buf) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            tool->readStatePlain(in, format, false);
+            tool->readState(in);
         }
     }
 
     void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entries into 'out_buf'
     {
-        Ini::IniFormatter format;
 
-        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>();
+        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>());
         std::stringbuf *outBuffer = buf.get();
 		Serialize::SerializeOutStream out { std::move(buf) };
 
@@ -81,7 +78,7 @@ namespace Tools {
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
             out_buf->appendf("[Tool][%s]\n", tool->key());
            
-			tool->writeStatePlain(out, format, false);            
+			tool->writeState(out);            
             out_buf->append(outBuffer->str().c_str());
             outBuffer->str("");
 

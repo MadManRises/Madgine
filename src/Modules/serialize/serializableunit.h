@@ -24,9 +24,6 @@ namespace Serialize {
         void writeState(SerializeOutStream &out) const;
         void readState(SerializeInStream &in);
 
-		void writeStatePlain(SerializeOutStream &out, Formatter &format, bool emitObjectHeader = true) const;
-        void readStatePlain(SerializeInStream &in, Formatter &format, bool emitObjectHeader = true);
-
         void readAction(BufferedInOutStream &in);
         void readRequest(BufferedInOutStream &in);
 
@@ -66,7 +63,8 @@ namespace Serialize {
         friend struct SerializeManager;        
         friend struct SerializeUnitHelper;
         friend struct SyncableBase;
-
+		template <typename T, bool b>
+        friend struct UnitHelper;
         template <typename T, typename Base>
         friend struct TableInitializer;
 		

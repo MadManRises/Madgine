@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../generic/templates.h"
+#include "../formatter.h"
 #include "../serializeexception.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
@@ -13,16 +14,10 @@ namespace Serialize {
         constexpr bool operator==(const EOLType &) const { return true; }
     };
 
-    constexpr const int SERIALIZE_MAGIC_NUMBER = 0x12345678;
-
-    using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, EOLType, std::string, Vector2, Vector3, InvScopePtr>;
+    using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Vector2, Vector3, InvScopePtr>;
 
     template <class T, class = void>
     struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, T> {
-    };
-
-    template <class T>
-    struct PrimitiveTypeIndex<T, std::enable_if_t<std::is_enum_v<T>>> : PrimitiveTypeIndex<int> {
     };
 
     template <class T>
@@ -33,15 +28,12 @@ namespace Serialize {
     };
 
     template <class T>
-    struct PrimitiveTypesContain<T, std::enable_if_t<std::is_enum_v<T>>> : PrimitiveTypesContain<int> {
-    };
-
-    template <class T>
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     struct MODULES_EXPORT SerializeStreambuf : std::basic_streambuf<char> {
     public:
-        SerializeStreambuf() = default;
+        SerializeStreambuf(std::unique_ptr<Formatter> format);
+        SerializeStreambuf(SerializeStreambuf &&) = default;
         SerializeStreambuf(SerializeManager &mgr, ParticipantId id);
         virtual ~SerializeStreambuf() = default;
 
@@ -52,14 +44,23 @@ namespace Serialize {
         ParticipantId id() const;
         void setId(ParticipantId id);
 
+        Formatter &format() const;
+
     private:
         SerializeManager *mManager = nullptr;
         ParticipantId mId = 0;
+        std::unique_ptr<Formatter> mFormatter;
     };
 
     template <typename Buf>
     struct WrappingSerializeStreambuf : SerializeStreambuf, Buf {
-        using Buf::Buf;
+
+        template <typename... Args>
+        WrappingSerializeStreambuf(std::unique_ptr<Formatter> format, Args &&... args)
+            : SerializeStreambuf(std::move(format))
+            , Buf(std::forward<Args>(args)...)
+        {
+        }
 
         void imbue(const std::locale &loc) override
         {
@@ -87,27 +88,30 @@ namespace Serialize {
             return Buf::xsgetn(s, n);
         }
 
-		int pbackfail(int c = EOF) override {
-                    return Buf::pbackfail(c);
-		}
+        int pbackfail(int c = EOF) override
+        {
+            return Buf::pbackfail(c);
+        }
 
         int_type overflow(int c = EOF) override
         {
             return Buf::overflow(c);
         }
 
-		std::streamsize xsputn(const char* s, std::streamsize n) override {
-                    return Buf::xsputn(s, n);
-		}
+        std::streamsize xsputn(const char *s, std::streamsize n) override
+        {
+            return Buf::xsputn(s, n);
+        }
 
         int_type underflow() override
         {
             return Buf::underflow();
         }
 
-		int uflow() override {
-                    return Buf::uflow();
-		}
+        int uflow() override
+        {
+            return Buf::uflow();
+        }
 
         int sync() override
         {
@@ -121,25 +125,28 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
-        template <typename T>
+        template <typename T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_enum_v<T>>>
         SerializeInStream &operator>>(T &t)
         {
             read(t);
             return *this;
         }
 
-        template <class T, typename... Args, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value>>
+
+        template <class T, typename... Args>
         void read(T &t, Args &&... args)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
-                int type;
-                readRaw(type);
-                if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>)
-                    throw SerializeException(Database::Exceptions::unknownSerializationType);
-                readRaw(t);
+                format().beginPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                readUnformatted(t);
+                format().endPrimitive(*this, PrimitiveTypeIndex_v<T>);
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.readState(*this, std::forward<Args>(args)...);
+            } else if constexpr (std::is_enum_v<T>){
+                int dummy;
+                read(dummy, std::forward<Args>(args)...);
+                t = static_cast<T>(dummy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -147,19 +154,28 @@ namespace Serialize {
 
         void read(ValueType &result);
 
-        template <class T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
-        void read(T *&p)
+        template <typename T>
+        void readUnformatted(T &t)
         {
-            SerializableUnitBase *unit;
-            *this >> unit;
-            p = dynamic_cast<T *>(unit);
-            if (unit && !p)
-                throw 0;
+            if (format().mBinary)
+                readRaw(t);
+            else
+                InStream::operator>>(t);
         }
 
-        void read(SerializableUnitBase *&p);
+        template <class T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
+        void readUnformatted(T *&p)
+        {
+            SerializableUnitBase *unit;
+            readUnformatted(unit);
+            if (&serializeTable<T>() != unit->mType)
+                throw 0;
+            p = static_cast<T *>(unit);
+        }
 
-        void read(std::string &s);
+        void readUnformatted(SerializableUnitBase *&p);
+
+        void readUnformatted(std::string &s);
 
         template <class T>
         bool loopRead(T &val)
@@ -172,26 +188,16 @@ namespace Serialize {
 
         bool loopRead();
 
-        template <typename T>
-        SerializeInStream &readPlain(T &t, Formatter &format)
-        {
-            if constexpr (PrimitiveTypesContain_v<T>) {
-                InStream::operator>>(t);
-            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
-                t.readStatePlain(*this, format);
-            } else {
-                static_assert(dependent_bool<T, false>::value, "Invalid Type");
-            }
-            return *this;
-        }
-
-		std::string readPlainN(size_t n);
-        std::string readPlainUntil(char c);
-        std::string peekPlainUntil(char c);
-
-        bool loopReadPlain(Formatter &format);
+        std::string readN(size_t n);
+        std::string readUntil(char c);
+        std::string peekUntil(char c);
 
         void readRaw(void *buffer, size_t size);
+        template <class T>
+        void readRaw(T &t)
+        {
+            readRaw(&t, sizeof(T));
+        }
 
         void logReadHeader(const MessageHeader &header, const std::string &object);
 
@@ -201,16 +207,12 @@ namespace Serialize {
 
         ParticipantId id() const;
 
+        Formatter &format() const;
+
         bool isMaster();
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
-
-        template <class T>
-        void readRaw(T &t)
-        {
-            readRaw(&t, sizeof(T));
-        }
 
         SerializableUnitBase *convertPtr(size_t ptr);
 
@@ -228,56 +230,68 @@ namespace Serialize {
 
         ParticipantId id() const;
 
-        SerializeOutStream &operator<<(const ValueType &v);
-
-        template <class T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value>>
+        template <typename T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_enum_v<T>>>
         SerializeOutStream &operator<<(const T &t)
         {
+            write(t);
+            return *this;
+        }
+
+        SerializeOutStream &operator<<(const char *s)
+        {
+            write(std::string(s));
+            return *this;
+        }
+
+        SerializeOutStream &operator<<(EOLType)
+        {
+            format().writeEOL(*this);
+            return *this;
+		}
+
+        template <class T>
+        void write(const T &t)
+        {
             if constexpr (PrimitiveTypesContain_v<T>) {
-                writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<T>);
-                writeRaw(t);
+                format().beginPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                writeUnformatted(t);
+                format().endPrimitive(*this, PrimitiveTypeIndex_v<T>);
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.writeState(*this);
+            } else if constexpr (std::is_enum_v<T>){
+                write(static_cast<int>(t));
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
-            return *this;
         }
-
-        SerializeOutStream &operator<<(SerializableUnitBase *p);
-
-        SerializeOutStream &operator<<(const std::string &s);
 
         template <typename T>
-        SerializeOutStream &writePlain(const T &t, Formatter &format)
+        void writeUnformatted(const T &t)
         {
-            if constexpr (PrimitiveTypesContain_v<T>) {
+            if (format().mBinary)
+                writeRaw(t);
+            else
                 OutStream::operator<<(t);
-            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
-                t.writeStatePlain(*this, format);
-            } else {
-                static_assert(dependent_bool<T, false>::value, "Invalid Type");
-            }
-            return *this;
         }
 
+        void writeUnformatted(SerializableUnitBase *p);
+        void writeUnformatted(const std::string &s);
+
         void writeRaw(const void *buffer, size_t size);
-
-        SerializeManager *manager() const;
-
-        bool isMaster();
-
-    protected:
-        pos_type tell() const;
-        void seek(pos_type p);
-
         template <class T>
         void writeRaw(const T &t)
         {
             writeRaw(&t, sizeof(T));
         }
 
+        SerializeManager *manager() const;
+
+        Formatter &format() const;
+
+        bool isMaster();
+
+    protected:
         SerializeStreambuf &buffer() const;
 
     protected:

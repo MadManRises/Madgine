@@ -90,27 +90,23 @@ namespace Serialize {
         //mLog.logRead(result);
     }
 
-    void SerializeInStream::read(SerializableUnitBase *&p)
+    void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
     {
-        int type;
-        readRaw(type);
-        if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>)
-            throw SerializeException(Database::Exceptions::notValueType("SerializableUnit"));
         size_t ptr;
-        readRaw(ptr);
+        readUnformatted(ptr);
         p = convertPtr(ptr);
     }
 
-    void SerializeInStream::read(std::string &s)
+    void SerializeInStream::readUnformatted(std::string &s)
     {
-        int type;
-        readRaw(type);
-        if (type != SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>)
-            throw SerializeException(Database::Exceptions::notValueType("std::string"));
-        decltype(std::declval<std::string>().size()) size;
-        readRaw(size);
-        s.resize(size);
-        readRaw(&s[0], size);
+        if (format().mBinary) {
+            decltype(std::declval<std::string>().size()) size;
+            readRaw(size);
+            s.resize(size);
+            readRaw(&s[0], size);
+        } else {
+            InStream::operator>>(s);
+		}
     }
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
@@ -122,62 +118,40 @@ namespace Serialize {
 
     bool SerializeInStream::loopRead()
     {
-        pos_type pos = tell();
-        int type;
-        readRaw(type);
-        if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>) {
-            EOLType eol;
-            readRaw(eol);
-            mLog.log(eol);
-            return false;
-        }
-        seek(pos);
-        return true;
+        return !format().readEOL(*this);
     }
 
-	std::string SerializeInStream::readPlainN(size_t n)
+    std::string SerializeInStream::readN(size_t n)
     {
+        assert(!format().mBinary);
         std::string buffer(n, '\0');
         readRaw(&buffer[0], n);
         return buffer;
     }
 
-	std::string SerializeInStream::readPlainUntil(char c)
+    std::string SerializeInStream::readUntil(char c)
     {
+        assert(!format().mBinary);
         char buffer[255];
         size_t i = 0;
         do {
             if (!InStream::readRaw(&buffer[i], 1))
                 break;
-			++i;
-        } while (buffer[i-1] != c);
+            ++i;
+        } while (buffer[i - 1] != c);
         buffer[i] = '\0';
 
         return buffer;
     }
 
-	std::string SerializeInStream::peekPlainUntil(char c)
+    std::string SerializeInStream::peekUntil(char c)
     {
+        assert(!format().mBinary);
+
         pos_type pos = tell();
-        std::string result = readPlainUntil(c);
+        std::string result = readUntil(c);
         seek(pos);
         return result;
-    }
-
-	bool SerializeInStream::loopReadPlain(Formatter &format)
-    {
-            /*pos_type pos = tell();
-            int type;
-            readRaw(type);
-            if (type == SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<EOLType>) {
-                EOLType eol;
-                readRaw(eol);
-                mLog.log(eol);
-                return false;
-            }
-            seek(pos);
-        return true;*/
-        throw 0;
     }
 
     void SerializeInStream::logReadHeader(const MessageHeader &header, const std::string &object)
@@ -211,6 +185,11 @@ namespace Serialize {
     {
     }
 
+    Formatter &SerializeInStream::format() const
+    {
+        return buffer().format();
+    }
+
     SerializableUnitBase *SerializeInStream::convertPtr(size_t ptr)
     {
         return manager()->convertPtr(*this, ptr);
@@ -236,7 +215,7 @@ namespace Serialize {
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr)
         : OutStream(std::move(other))
         , mLog((buffer().setManager(mgr), *this))
-    {        
+    {
     }
 
     ParticipantId SerializeOutStream::id() const
@@ -244,7 +223,7 @@ namespace Serialize {
         return buffer().id();
     }
 
-    SerializeOutStream &SerializeOutStream::operator<<(const ValueType &v)
+    /*SerializeOutStream &SerializeOutStream::operator<<(const ValueType &v)
     {
         writeRaw(v.type());
         switch (v.type()) {
@@ -285,13 +264,11 @@ namespace Serialize {
         }
         //mLog.logWrite(v);
         return *this;
-    }
+    }*/
 
-    SerializeOutStream &SerializeOutStream::operator<<(SerializableUnitBase *p)
+    void SerializeOutStream::writeUnformatted(SerializableUnitBase *p)
     {
-        writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<SerializableUnitBase *>);
-        writeRaw(manager()->convertPtr(*this, p));
-        return *this;
+        writeUnformatted(manager()->convertPtr(*this, p));
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)
@@ -309,27 +286,29 @@ namespace Serialize {
         return buffer().isMaster();
     }
 
-    /*pos_type SerializeOutStream::tell() const
-		{
-			return mOfs.tellp();
-		}
-
-		void SerializeOutStream::seek(pos_type p)
-		{
-			mOfs.seekp(p);
-		}*/
-
     SerializeStreambuf &SerializeOutStream::buffer() const
     {
         return static_cast<SerializeStreambuf &>(OutStream::buffer());
     }
 
-    SerializeOutStream &SerializeOutStream::operator<<(const std::string &s)
+    Formatter &SerializeOutStream::format() const
     {
-        writeRaw<int>(SERIALIZE_MAGIC_NUMBER + PrimitiveTypeIndex_v<std::string>);
-        writeRaw(s.size());
-        writeRaw(s.c_str(), s.size());
-        return *this;
+        return buffer().format();
+    }
+
+    void SerializeOutStream::writeUnformatted(const std::string &s)
+    {
+        if (format().mBinary) {
+            writeRaw(s.size());
+            writeRaw(s.c_str(), s.size());
+        } else {
+            OutStream::operator<<(s);
+		}
+    }
+
+	SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
+        : mFormatter(std::move(format))
+    {
     }
 
     SerializeStreambuf::SerializeStreambuf(SerializeManager &mgr, ParticipantId id)
@@ -346,6 +325,11 @@ namespace Serialize {
     SerializeManager *SerializeStreambuf::manager()
     {
         return mManager;
+    }
+
+    Formatter &SerializeStreambuf::format() const
+    {
+        return *mFormatter;
     }
 
     bool SerializeStreambuf::isMaster()

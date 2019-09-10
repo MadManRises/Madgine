@@ -14,6 +14,7 @@
 #include "Modules/reflection/classname.h"
 
 #include "openglfontloader.h"
+#include "openglmeshloader.h"
 
 #if WINDOWS
 typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
@@ -23,15 +24,15 @@ static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
 static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 
 #elif LINUX
-#include <GL/glx.h>
-#include <X11/Xlib.h>
+#    include <GL/glx.h>
+#    include <X11/Xlib.h>
 namespace Engine {
 namespace Window {
     extern Display *sDisplay();
 }
 }
 #elif ANDROID || EMSCRIPTEN
-#include <EGL/egl.h>
+#    include <EGL/egl.h>
 namespace Engine {
 namespace Window {
     extern EGLDisplay sDisplay;
@@ -75,7 +76,7 @@ namespace Render {
         HGLRC context;
         if (wglCreateContextAttribsARB) {
 
-#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#    define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
 
             int attribs[] = {
                 WGL_CONTEXT_PROFILE_MASK_ARB, GL_TRUE,
@@ -87,7 +88,7 @@ namespace Render {
             context = wglCreateContext(windowDC);
         }
 
-		if (sharedContext)
+        if (sharedContext)
             wglShareLists(sharedContext, context);
 
 #elif LINUX
@@ -139,9 +140,6 @@ namespace Render {
 
     void resetContext()
     {
-        for (std::pair<const std::string, OpenGLFontLoader::ResourceType> &p : OpenGLFontLoader::getSingleton()) {
-            p.second.unload();
-		}
 
 #if WINODWS
         wglMakeCurrent(NULL, NULL);
@@ -171,6 +169,7 @@ namespace Render {
     void shutdownWindow(Window::Window *window, ContextHandle context)
     {
         resetContext();
+
 #if WINODWS
         HDC device = GetDC((HWND)window->mHandle);
 
@@ -193,11 +192,11 @@ namespace Render {
             Window::Window *tmp = Window::sCreateWindow(settings);
             ContextHandle context = setupWindowInternal(tmp, nullptr);
 
-#if WINDOWS
+#    if WINDOWS
             wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
             assert(wglCreateContextAttribsARB);
             wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
-#endif
+#    endif
             bool result = gladLoadGL();
             assert(result);
 
@@ -234,6 +233,14 @@ namespace Render {
 
     void OpenGLRenderer::finalize()
     {
+
+        for (std::pair<const std::string, OpenGLFontLoader::ResourceType> &p : OpenGLFontLoader::getSingleton()) {
+            p.second.unload();
+        }
+
+        for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &p : OpenGLMeshLoader::getSingleton()) {
+            p.second.unload();
+        }
     }
 
 #if !ANDROID && !EMSCRIPTEN
@@ -343,8 +350,8 @@ namespace Render {
         glCheck();
 #endif
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         return std::make_unique<OpenGLRenderWindow>(w, context, topLevel);
     }
 }

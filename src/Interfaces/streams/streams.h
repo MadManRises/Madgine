@@ -24,13 +24,14 @@ namespace Engine
 
 		operator bool() const;
 
+				pos_type tell();
+                void seek(pos_type p);
+
+
 	protected:
 		InStream(std::streambuf *buffer);
 
 		std::streambuf &buffer() const;
-
-		pos_type tell();
-		void seek(pos_type p);
 
 	private:
 		std::istream mStream;

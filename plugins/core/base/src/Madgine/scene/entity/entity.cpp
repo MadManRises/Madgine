@@ -161,7 +161,7 @@ METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-//mComponents -> Serialize::ParentCreator<&Entity::createComponentTuple>
+FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 RegisterType(Engine::Scene::Entity::Entity);

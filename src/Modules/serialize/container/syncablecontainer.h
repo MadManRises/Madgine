@@ -234,18 +234,6 @@ namespace Serialize {
             afterReset(wasActive, this->end(), answerTarget, answerId);
         }
 
-		template <typename Creator = DefaultCreator<>>
-        void readStatePlain(SerializeInStream &in, Formatter &format, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            bool wasActive = beforeReset();
-            Base::Base::clear();
-            this->mActiveIterator = Base::Base::begin();
-            while (in.loopReadPlain(format)) {
-                this->read_item_plain_where_intern(in, format, this->end(), std::forward<Creator>(creator));
-            }
-            afterReset(wasActive, this->end(), answerTarget, answerId);
-        }
-
         // Inherited via Observable
         template <typename Creator = DefaultCreator<>>
         void readRequest(BufferedInOutStream &inout, Creator &&creator = {})

@@ -35,6 +35,8 @@ namespace Serialize {
 
     SerializableUnitBase::~SerializableUnitBase()
     {
+		//If this fails, you forgot to add all Serializables to the SerializeTable.
+		//Temporary solution! Proper solution: Move mSynced into Serializable (=> evtl default mActive to true)
         assert(!mSynced);
 
         clearSlaveId();
@@ -43,12 +45,7 @@ namespace Serialize {
 
     void SerializableUnitBase::writeState(SerializeOutStream &out) const
     {
-        mType->writeBinary(this, out);
-    }
-
-	void SerializableUnitBase::writeStatePlain(SerializeOutStream &out, Formatter &format, bool emitObjectHeader) const
-    {
-        mType->writePlain(this, out, format, emitObjectHeader);
+        mType->writeState(this, out);
     }
 
     void SerializableUnitBase::writeId(SerializeOutStream &out) const
@@ -69,12 +66,7 @@ namespace Serialize {
 
     void SerializableUnitBase::readState(SerializeInStream &in)
     {
-        mType->readBinary(this, in);
-    }
-
-	void SerializableUnitBase::readStatePlain(SerializeInStream &in, Formatter &format, bool emitObjectHeader)
-    {
-        mType->readPlain(this, in, format, emitObjectHeader);
+        mType->readState(this, in);
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)

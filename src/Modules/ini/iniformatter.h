@@ -15,6 +15,9 @@ struct MODULES_EXPORT IniFormatter : Serialize::Formatter {
         virtual void beginMember(Serialize::SerializeInStream &, const char *name, bool first) override;
         virtual void endMember(Serialize::SerializeInStream &, const char *name, bool first) override;
 
+		virtual void writeEOL(Serialize::SerializeOutStream &) override;
+        virtual bool readEOL(Serialize::SerializeInStream &) override;
+
 		virtual std::string lookupFieldName(Serialize::SerializeInStream &) override;
 };
 

@@ -6,40 +6,21 @@
 
 #include "formatter.h"
 
+#include "streams/serializestream.h"
+
 namespace Engine {
 namespace Serialize {
 
-    void SerializeTable::writeBinary(const SerializableUnitBase *unit, SerializeOutStream &out) const
+    void SerializeTable::writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const
     {
-        const SerializeTable *table = this;
-        while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mWriteBinary(unit, out);
-            }
-            table = table->mBaseType ? &table->mBaseType() : nullptr;
-        }
-    }
+        Formatter &format = out.format();
 
-    void SerializeTable::readBinary(SerializableUnitBase *unit, SerializeInStream &in) const
-    {
-        const SerializeTable *table = this;
-        while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mReadBinary(unit, in);
-            }
-            table = table->mBaseType ? &table->mBaseType() : nullptr;
-        }
-    }
-
-    void SerializeTable::writePlain(const SerializableUnitBase *unit, SerializeOutStream &out, Formatter &format, bool emitObjectHeader) const
-    {
-        bool first = true;
-
+		bool first = true;
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                 format.beginMember(out, it->second.mFieldName, first);
-                it->second.mWritePlain(unit, out, format);
+                it->second.mWriteState(unit, out);
                 format.endMember(out, it->second.mFieldName, first);
                 first = false;
             }
@@ -47,8 +28,10 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::readPlain(SerializableUnitBase *unit, SerializeInStream &in, Formatter &format, bool emitObjectHeader) const
+    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in) const
     {
+        Formatter &format = in.format();
+
         if (format.mSupportNameLookup) {
             std::string name = format.lookupFieldName(in);
             bool first = true;
@@ -59,7 +42,7 @@ namespace Serialize {
                     for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                         if (name == it->second.mFieldName) {
                             format.beginMember(in, it->second.mFieldName, first);
-                            it->second.mReadPlain(unit, in, format);
+                            it->second.mReadState(unit, in);
                             format.endMember(in, it->second.mFieldName, first);
                             first = false;
                             found = true;
@@ -77,7 +60,7 @@ namespace Serialize {
             while (table) {
                 for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                     format.beginMember(in, it->second.mFieldName, first);
-                    it->second.mReadPlain(unit, in, format);
+                    it->second.mReadState(unit, in);
                     format.endMember(in, it->second.mFieldName, first);
                     first = false;
                 }
@@ -106,7 +89,6 @@ namespace Serialize {
     {
         const SerializeTable *table = this;
         while (table) {
-            //reinterpret_cast<ObservableBase *>(reinterpret_cast<char *>(this) + index);
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                 if (it->second.mIndex() == index) {
                     it->second.mReadRequest(unit, inout);

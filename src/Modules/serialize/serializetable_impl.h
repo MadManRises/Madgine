@@ -6,6 +6,7 @@
 #include "Interfaces/macros.h"
 #include "serializetable.h"
 #include "streams/serializestream.h"
+#include "container/unithelper.h"
 
 namespace Engine {
 namespace Serialize {
@@ -17,41 +18,6 @@ namespace Serialize {
         using Unit = typename traits::class_type;
         using T = std::decay_t<typename traits::return_type>;
 
-        /*void (*setter)(TypedScopePtr, ValueType) = nullptr;
-
-        if constexpr (Setter != nullptr) {
-            using setter_traits = CallableTraits<decltype(Setter)>;
-
-            static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
-
-            setter = [](TypedScopePtr scope, ValueType v) {
-                TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<T>());
-            };
-        }
-
-        return {
-            [](TypedScopePtr scope) {
-                T value = [=]() -> T {
-                    if constexpr (std::is_same_v<Scope, void>)
-                        return TupleUnpacker::invoke(Getter, scope);
-                    else
-                        return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
-                }();
-
-                if constexpr (ValueType::isValueType<T>::value) {
-                    return ValueType { std::forward<T>(value) };
-                } else if constexpr (is_typed_iterable<T>::value) {
-                    return ValueType {
-                        KeyValueVirtualIterator { KeyValueIterator { value.typedBegin() }, KeyValueIterator { value.typedEnd() } }
-                    };
-                } else if constexpr (is_iterable<T>::value) {
-                    return ValueType {
-                        KeyValueVirtualIterator { KeyValueIterator { value.begin() }, KeyValueIterator { value.end() } }
-                    };
-                }
-            },
-            setter
-        };*/
         return {
             name,
             []() {
@@ -63,48 +29,36 @@ namespace Serialize {
             [](const SerializableUnitBase *_unit, SerializeOutStream &out) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().writeBinary(&(unit->*P), out);
+                    serializeTable<T>().writeState(&(unit->*P), out);
                 else
                     out << unit->*P;
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().readBinary(&(unit->*P), in);
+                    serializeTable<T>().readState(&(unit->*P), in);
                 else
                     in.read(unit->*P, TupleUnpacker::construct<Args>(unit)...);
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, Formatter &format) {
-                const Unit *unit = static_cast<const Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().writePlain(&(unit->*P), out, format);
-                else
-                    out.writePlain(unit->*P, format);
-            },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, Formatter &format) {
-                Unit *unit = static_cast<Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().readPlain(&(unit->*P), in, format);
-                else
-                    in.readPlain(unit->*P, format);
-            },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(unit)...);
+                    (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(static_cast<Unit*>(unit))...);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(unit)...);
+                    (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(static_cast<Unit*>(unit))...);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) {
             },
             [](SerializableUnitBase *unit, bool b) {
+                UnitHelper<T>::setItemDataSynced(static_cast<Unit*>(unit)->*P, b);
             },
             [](SerializableUnitBase *unit, bool b) {
+                UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
             }
         };
     }

@@ -59,23 +59,5 @@ namespace Engine
 		{
 		}
 
-		void SerializeUnitHelper::setItemDataSynced(SerializableUnitBase& item, bool b)
-		{
-			item.setDataSynced(b);
-		}
-
-		void SerializeUnitHelper::setItemDataSynced(SerializableBase &item, bool b)
-		{
-		}
-
-		void SerializeUnitHelper::setItemActive(SerializableUnitBase& item, bool active)
-		{
-			item.setActive(active);
-		}
-
-		void SerializeUnitHelper::setItemActive(SerializableBase &item, bool active)
-		{
-		}
-
 	}
 }

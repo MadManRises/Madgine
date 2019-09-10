@@ -7,11 +7,8 @@ namespace Serialize {
         const char *mFieldName;
         size_t (*mIndex)();
 
-        void (*mWriteBinary)(const SerializableUnitBase *, SerializeOutStream &);
-		void (*mReadBinary)(SerializableUnitBase *, SerializeInStream &);        
-
-		void (*mWritePlain)(const SerializableUnitBase *, SerializeOutStream &, Formatter &);
-        void (*mReadPlain)(SerializableUnitBase *, SerializeInStream &, Formatter &);
+        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &);
+		void (*mReadState)(SerializableUnitBase *, SerializeInStream &);        
 
 		void (*mReadAction)(SerializableUnitBase *, SerializeInStream &);
         void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &);
