@@ -88,7 +88,6 @@ namespace Tools {
             mRenderTarget->addPostRenderPass(std::move(pass));
 
         mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
-
     }
 
     SceneView::~SceneView()
@@ -100,7 +99,10 @@ namespace Tools {
         ImGui::PushID(this);
         if (ImGui::Begin("SceneView")) {
             mRenderTarget->resize(ImGui::GetContentRegionAvail());
-            mManager.render(*mRenderTarget);
+            bool pressed = mManager.render(*mRenderTarget);
+			if (pressed && !mDragging[0])
+                if (!Im3D::IsAnyObjectHovered())
+                    mEditor->deselect();
 
             ImGuiIO &io = ImGui::GetIO();
             Im3DIO &io3D = Im3D::GetIO();
@@ -146,7 +148,7 @@ namespace Tools {
 
                 Im3D::GetIO().mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
 
-
+                mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f);
             }
 
             for (int i = 0; i < 3; ++i) {
@@ -171,8 +173,6 @@ namespace Tools {
                 mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { -dragDistance.x / 50.0f, dragDistance.y / 50.0f, 0.0f });
             }
 
-            mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f);
-
             if (mDragging[1]) {
                 mCamera.setOrientation(Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.orientation() * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X });
             }
@@ -196,11 +196,6 @@ namespace Tools {
 
                     mDragTransform->setPosition(mDragStoredPosition + distance);
                 }
-            }
-
-			if (ImGui::IsItemClicked(0)) {
-                if (!Im3D::IsAnyObjectHovered())
-                    mEditor->deselect();
             }
 
             if (ImGui::BeginDragDropTarget()) {

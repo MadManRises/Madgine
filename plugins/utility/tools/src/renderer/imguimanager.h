@@ -18,7 +18,7 @@ namespace Tools {
 
         virtual void newFrame(float timeSinceLastFrame) = 0;
         virtual void render() override;
-        virtual void render(Render::RenderTarget &target) const = 0;
+        virtual bool render(Render::RenderTarget &target) const = 0;
 
         bool injectKeyPress(const Input::KeyEventArgs &arg) override;
         bool injectKeyRelease(const Input::KeyEventArgs &arg) override;

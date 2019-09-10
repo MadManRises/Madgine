@@ -61,11 +61,11 @@ namespace Tools {
         Im3D::NewFrame();
     }
 
-    void OpenGLImGuiManager::render(Render::RenderTarget &target) const
+    bool OpenGLImGuiManager::render(Render::RenderTarget &target) const
     {
         Render::OpenGLRenderTexture &texture = static_cast<Render::OpenGLRenderTexture &>(target);
 
-		ImGui::Image((void *)(intptr_t)texture.texture().handle(), texture.getSize(), { 0, 1 }, { 1, 0 });
+		return ImGui::ImageButton((void *)(intptr_t)texture.texture().handle(), texture.getSize(), { 0, 1 }, { 1, 0 }, 0);
     }
 
 }

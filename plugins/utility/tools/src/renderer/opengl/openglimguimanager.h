@@ -13,7 +13,7 @@ namespace Engine {
 			virtual void finalize() override;
 			virtual void newFrame(float timeSinceLastFrame) override;
 
-			virtual void render(Render::RenderTarget &target) const override;
+			virtual bool render(Render::RenderTarget &target) const override;
 		};
 
 	}

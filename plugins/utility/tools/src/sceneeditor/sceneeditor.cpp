@@ -112,18 +112,21 @@ namespace Tools {
     {
         mSelectedEntity = nullptr;
         mSelectedCamera = nullptr;
+        mHoveredAxis = -1;
     }
 
     void SceneEditor::select(Scene::Camera *camera)
     {
         mSelectedEntity = nullptr;
         mSelectedCamera = camera;
+        mHoveredAxis = -1;
     }
 
     void SceneEditor::select(Scene::Entity::Entity *entity)
     {
         mSelectedEntity = entity;
         mSelectedCamera = nullptr;
+        mHoveredAxis = -1;
     }
 
     void SceneEditor::renderSelection()
