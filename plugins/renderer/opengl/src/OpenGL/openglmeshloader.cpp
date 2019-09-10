@@ -86,14 +86,14 @@ namespace Render {
     {
 
         OpenGLMeshData data;
-
+        data.mVAO.bind();
         if (indices) {
             data.mIndices = {};
             data.mIndices.bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
-        data.mVAO.bind();
+
         glVertexAttribPointer(
             0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
@@ -133,14 +133,14 @@ namespace Render {
     {
 
         OpenGLMeshData data;
-
+        data.mVAO.bind();
         if (indices) {
             data.mIndices = {};
             data.mIndices.bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
-        data.mVAO.bind();
+
         glVertexAttribPointer(
             0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
             3, // size
