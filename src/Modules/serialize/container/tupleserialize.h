@@ -17,14 +17,6 @@ namespace Engine
 		inline void readTuple(std::tuple<>& tuple, SerializeInStream& in, std::index_sequence<>){}
                 
 		template <class Arg, class... Args, size_t... S>
-                void readTuplePlain(std::tuple<Arg, Args...> &tuple, SerializeInStream &in, Formatter &format, std::index_sequence<S...>)
-                {
-                    (in.readPlain(std::get<S>(tuple), format) , ...);
-                }
-
-                inline void readTuplePlain(std::tuple<> &tuple, SerializeInStream &in, Formatter &format, std::index_sequence<>) {}
-
-		template <class Arg, class... Args, size_t... S>
 		static void writeTuple(const std::tuple<Arg, Args...>& tuple, SerializeOutStream& out,
 		                       std::index_sequence<S...>)
 		{
@@ -50,13 +42,6 @@ namespace Engine
 		__tupleserializer__impl__::writeTuple(tuple, out, std::make_index_sequence<sizeof...(Args)>());
 		return out;
 	}		
-
-		template <class... Args>
-	static SerializeInStream &readTuplePlain(SerializeInStream &in, std::tuple<Args...> &tuple, Formatter &format)
-        {
-                    __tupleserializer__impl__::readTuplePlain(tuple, in, format, std::make_index_sequence<sizeof...(Args)>());
-                    return in;
-        }
 
 
 	}
