@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_internal.h"
 #include "Modules/math/boundingbox.h"
 #include "Modules/math/sphere.h"
 
@@ -16,10 +14,10 @@ namespace Im3D {
         Im3DObject(Im3DID id);
 
         std::string mName;
-        ImU32 mID;
+        Im3DID mID;
     };
 
-    struct ImObjectTempData {
+    struct Im3DObjectTempData {
         Im3DObject *mLastObject;
         AABB mLastAABB;
         Matrix4 mLastTransform;
@@ -42,8 +40,7 @@ namespace Im3D {
 
         std::map<Im3DNativeMesh, std::vector<Matrix4>> mNativeMeshes;
 
-        std::vector<std::unique_ptr<Im3DObject>> mObjects;
-        ImGuiStorage mObjectsById;
+        std::map<Im3DID, Im3DObject> mObjects;
         std::vector<Im3DID> mIDStack;
 
         Ray mMouseRay;
@@ -52,7 +49,7 @@ namespace Im3D {
         float mNextHoveredDistance;
         size_t mNextHoveredPriority;
 
-        ImObjectTempData mTemp;
+        Im3DObjectTempData mTemp;
     };
 
     MADGINE_APIS_EXPORT Im3DObject *FindObjectByID(Im3DID id);

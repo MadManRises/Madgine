@@ -77,7 +77,10 @@ namespace Im3D {
     Im3DObject *FindObjectByID(Im3DID id)
     {
         Im3DContext &c = sContext;
-        return (Im3DObject *)c.mObjectsById.GetVoidPtr(id);
+        auto it = c.mObjects.find(id);
+        if (it == c.mObjects.end())
+            return nullptr;
+        return &it->second;
     }
 
     Im3DObject *FindObjectByName(const char *name)
@@ -117,9 +120,8 @@ namespace Im3D {
     {
         Im3DContext &c = sContext;
 
-        Im3DObject *o = c.mObjects.emplace_back(std::make_unique<Im3DObject>(id)).get();
+        Im3DObject *o = &c.mObjects.try_emplace(id, id).first->second;
 
-        c.mObjectsById.SetVoidPtr(id, o);
         return o;
     }
 

@@ -19,7 +19,7 @@ enum Im3DMeshType {
 
 typedef void *Im3DNativeMesh;
 
-typedef unsigned int Im3DID;
+typedef uint32_t Im3DID;
 typedef unsigned int Im3DTextureId;
 typedef int Im3DBoundingObjectFlags;
 
