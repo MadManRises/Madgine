@@ -32,5 +32,6 @@ target_include_directories(lib_msdfgen PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_
 set_target_properties(lib_msdfgen PROPERTIES OUTPUT_NAME msdfgen)
 target_link_libraries(lib_msdfgen PUBLIC freetype)
 
+set_property(TARGET lib_msdfgen PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 install_to_workspace(OpenGL EXPORT_LIB TARGETS lib_msdfgen)
