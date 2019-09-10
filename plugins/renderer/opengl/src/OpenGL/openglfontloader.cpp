@@ -89,7 +89,7 @@ namespace Render {
             LOG_ERROR("FREETYPE: Failed to load font");
         }
 
-        FT_Set_Pixel_Sizes(face, 0, 48);
+        FT_Set_Pixel_Sizes(face, 0, 64);
 
         std::shared_ptr<OpenGLFontData> data = std::make_shared<OpenGLFontData>();
 

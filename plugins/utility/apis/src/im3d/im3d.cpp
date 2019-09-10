@@ -237,7 +237,7 @@ namespace Im3D {
         if (textLen == 0)
             return;
 
-        float scale = 1.0f / 48.0f * fontSize / 100.0f;
+        float scale = fontSize / 5000.0f;
 
         const float padding = 1.0f * scale;
 
