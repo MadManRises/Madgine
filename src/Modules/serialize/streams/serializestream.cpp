@@ -311,9 +311,10 @@ namespace Serialize {
     {
     }
 
-    SerializeStreambuf::SerializeStreambuf(SerializeManager &mgr, ParticipantId id)
+    SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id)
         : mManager(&mgr)
         , mId(id)
+        , mFormatter(std::move(format))
     {
     }
 

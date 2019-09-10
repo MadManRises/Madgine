@@ -35,7 +35,7 @@ namespace Serialize {
     public:
         SerializeStreambuf(std::unique_ptr<Formatter> format);
         SerializeStreambuf(SerializeStreambuf &&) = default;
-        SerializeStreambuf(SerializeManager &mgr, ParticipantId id);
+        SerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
         virtual ~SerializeStreambuf() = default;
 
         void setManager(SerializeManager *mgr);

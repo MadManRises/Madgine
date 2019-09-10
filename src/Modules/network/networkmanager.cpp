@@ -2,6 +2,7 @@
 
 #include "networkmanager.h"
 
+#include "../serialize/formatter/safebinaryformatter.h"
 
 namespace Engine
 {
@@ -114,7 +115,7 @@ namespace Engine
 					{
 						if (sock != Invalid_Socket)
 						{
-							if (addMasterStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(sock, *this, createStreamId()) })) {
+                                                if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) })) {
 								++count;								
 							}
 						}
@@ -135,7 +136,7 @@ namespace Engine
 					std::tie(sock, error) = SocketAPI::accept(mSocket, timeout);
 					if (sock != Invalid_Socket)
 					{
-						Serialize::BufferedInOutStream stream{ std::make_unique<NetworkBuffer>(sock, *this, createStreamId()) };
+						Serialize::BufferedInOutStream stream{ std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) };
 						if (addMasterStream(std::move(stream)))
 						{
 							return NO_ERROR;
@@ -166,7 +167,7 @@ namespace Engine
 
 		void NetworkManager::onConnectionEstablished(TimeOut timeout)
 		{
-			bool success = setSlaveStream(Serialize::BufferedInOutStream{ std::make_unique<NetworkBuffer>(mSocket, *this) }, true, timeout);
+                    bool success = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(mSocket, std::make_unique<Serialize::SafeBinaryFormatter>(), *this) }, true, timeout);
 
 			mConnectionResult.emit(success ? NO_ERROR : UNKNOWN_ERROR);
 		}

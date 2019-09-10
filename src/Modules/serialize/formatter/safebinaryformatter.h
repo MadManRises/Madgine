@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Serialize {
 
-    struct SafeBinaryFormatter : Formatter {
+    struct MODULES_EXPORT SafeBinaryFormatter : Formatter {
         SafeBinaryFormatter();
 
         virtual void beginPrimitive(SerializeOutStream &, size_t typeId) override;

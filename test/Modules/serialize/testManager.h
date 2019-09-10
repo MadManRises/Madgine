@@ -4,6 +4,8 @@
 
 #include "Modules/serialize/serializemanager.h"
 
+#include "Modules/serialize/formatter/safebinaryformatter.h"
+
 using namespace Engine::Serialize;
 
 struct Buffer {
@@ -13,7 +15,7 @@ struct Buffer {
 
 struct TestBuf : Engine::Serialize::buffered_streambuf {
     TestBuf(Buffer &buffer, Engine::Serialize::SerializeManager &mgr, Engine::Serialize::ParticipantId id)
-        : buffered_streambuf(mgr, id)
+        : buffered_streambuf(std::make_unique<SafeBinaryFormatter>(), mgr, id)
         , mBuffer(buffer)
     {
     }
