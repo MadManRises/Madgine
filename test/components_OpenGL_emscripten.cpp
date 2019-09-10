@@ -1,18 +1,18 @@
 #include "Modules/moduleslib.h"
+#ifdef BUILD_Base
+#    include "Madgine/baselib.h"
+#endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
+#endif
 #ifdef BUILD_EmscriptenInput
 #    include "emscripteninputlib.h"
-#endif
-#ifdef BUILD_Base
-#    include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
@@ -43,6 +43,9 @@
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/resources/resourceloadercollector.h"
+#endif
+#ifdef BUILD_OpenGL
+#    include "OpenGL/openglfontloader.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/openglmeshloader.h"
@@ -267,6 +270,7 @@ const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderC
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_OpenGL
+		&table<Engine::Render::OpenGLFontLoader>(),
 		&table<Engine::Render::OpenGLMeshLoader>(),
 		&table<Engine::Render::OpenGLShaderLoader>(),
 #    endif
@@ -282,6 +286,7 @@ std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Res
 {
 	return {
 #    ifdef BUILD_OpenGL
+		createComponent<Engine::Render::OpenGLFontLoader>,
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 #    endif
@@ -297,11 +302,13 @@ std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Res
 #    ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
-size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+template <>
+size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3
 #    endif
 #    ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
