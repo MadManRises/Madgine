@@ -21,11 +21,6 @@ namespace Engine
 				auto&& first = FirstCreator::readCreationData(in);
 				return std::make_tuple(std::piecewise_construct, first, SecondCreator::readCreationData(in));
 			}
-
-			auto readCreationDataPlain(SerializeInStream& in, Formatter& format) {
-                            auto &&first = FirstCreator::readCreationDataPlain(in, format);
-                            return std::make_tuple(std::piecewise_construct, first, SecondCreator::readCreationDataPlain(in, format));
-			}
 		};
 
 		template <class... Args>
@@ -38,12 +33,6 @@ namespace Engine
 				ArgsTuple tuple;
 				in >> tuple;
 				return std::move(tuple);
-			}
-
-			ArgsTuple readCreationDataPlain(SerializeInStream& in, Formatter& format) {
-                            ArgsTuple tuple;
-                            readTuplePlain(in, tuple, format);
-                            return std::move(tuple);
 			}
 		};
 
@@ -90,12 +79,6 @@ namespace Engine
 					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
 					in >> tuple;
 					return TupleUnpacker::invokeExpand(f, mParent, std::move(tuple));
-				}
-
-				R readCreationDataPlain(SerializeInStream& in, Formatter& format) {
-                    std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
-                    in.readPlain(tuple, format);
-                    return TupleUnpacker::invokeExpand(f, mParent, std::move(tuple));
 				}
 
 			private:
