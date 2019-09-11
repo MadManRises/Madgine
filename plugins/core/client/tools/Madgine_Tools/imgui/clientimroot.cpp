@@ -15,15 +15,14 @@ namespace Tools {
 
     ClientImRoot::ClientImRoot(GUI::TopLevelWindow &window)
         : UniqueComponent(window)
-        , mManager(window, ImManagerSelector::INVALID)
         , mRoot(this)
     {
     }
 
     bool ClientImRoot::init()
     {
-        mManager.assign(0);
-        assert(mManager);
+        mManager.emplace(mWindow);
+        assert(*mManager);
 
         if (!mRoot.callInit())
             return false;
@@ -49,20 +48,20 @@ namespace Tools {
 
     bool ClientImRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
     {
-        mManager->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
+        (*mManager)->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
 
         ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
         ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
 
         if (node)
-            mManager->setCentralNode(node->CentralNode);
+            (*mManager)->setCentralNode(node->CentralNode);
 
         return mRoot.frame();
     }
 
     const ImManager &ClientImRoot::manager() const
     {
-        return *mManager;
+        return **mManager;
     }
 
 }

@@ -51,27 +51,6 @@ public:
         return mValue.get();
     }
 
-    void assign(size_t index)
-    {
-        if (mIndex != index) {
-            if (mIndex != INVALID) {
-                mValue.reset();
-            }
-            mIndex = index;
-            if (mIndex != INVALID) {
-                if (Registry::sComponents().size() > index)
-                    mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
-                else
-                    mIndex = INVALID;
-            }
-        }
-    }
-
-    void reset()
-    {
-        assign(INVALID);
-    }
-
 private:
     std::unique_ptr<Base> mValue;
     size_t mIndex;

@@ -25,7 +25,7 @@ namespace Tools {
 
 		ImRoot mRoot;
     private:
-        ImManagerSelector mManager;
+        std::optional<ImManagerSelector> mManager;
 
     };
 
