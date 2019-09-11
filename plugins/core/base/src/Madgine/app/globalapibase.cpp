@@ -48,10 +48,6 @@ namespace Engine
 		{
 		}
 
-		void GlobalAPIBase::update()
-		{
-		}
-
 		GlobalAPIBase& GlobalAPIBase::getGlobalAPIComponent(size_t i, bool init)
 		{
 			if (init)

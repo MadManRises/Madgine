@@ -4,8 +4,6 @@
 
 #include "globalapicollector.h"
 
-#include "../threading/framelistener.h"
-
 #include "../threading/frameloop.h"
 #include "Modules/threading/scheduler.h"
 
@@ -15,8 +13,7 @@ namespace App {
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
     class MADGINE_BASE_EXPORT Application : public ScopeBase,
-                                            public MadgineObject,
-                                            public Threading::FrameListener {
+                                            public MadgineObject {
     public:
         /**
 			* Convenience method, that creates the Application of type T, calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
@@ -44,20 +41,7 @@ namespace App {
         /**
 			* Marks the Application as shutdown. This causes the event loop to return within the next frame.
 			*/
-        virtual void shutdown();
-
-        /**
-			* This will be called once every frame. It returns <code>false</code>, if the Application was shutdown().
-			* Otherwise it will call frameRenderingQueued, perform a fixedUpdate if necessary and update all components that need a regular update:
-			*  - The ConnectionManager
-			*  - All GlobalApiComponents
-			*  
-			* This is the toplevel method of the Madgine, in which every derived class should recursively update all elements that need update per frame.
-			*
-			* @return <code>true</code>, if the Application is not shutdown, <code>false</code> otherwise
-			* @param timeSinceLastFrame holds the time since the last frame
-			*/
-        virtual bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        void shutdown();
 
         /**
 			 * \brief Tells if the application is currently running.
@@ -115,7 +99,6 @@ namespace App {
 		static Application &getSingleton();
 
     protected:
-        virtual void clear();
 
         bool init() override;
 

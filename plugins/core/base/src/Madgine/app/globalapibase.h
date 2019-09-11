@@ -16,8 +16,6 @@ namespace Engine
 			GlobalAPIBase(App::Application &app);
 
 
-			virtual void update();
-
 			template <class T>
 			T &getGlobalAPIComponent(bool init = true)
 			{

@@ -32,8 +32,6 @@ namespace App {
         assert(!sApp);
         sApp = this;
 
-        mLoop.addFrameListener(this);
-
         mLoop.addSetupSteps(
             [this]() {
                 if (!callInit())
@@ -48,8 +46,6 @@ namespace App {
     {
         assert(sApp == this);
         sApp = nullptr;
-
-        mLoop.removeFrameListener(this);
     }
 
     bool Application::init()
@@ -77,21 +73,6 @@ namespace App {
     void Application::shutdown()
     {
         mLoop.shutdown();
-    }
-
-    bool Application::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
-    {
-        PROFILE();
-        try {
-            for (const std::unique_ptr<GlobalAPIBase> &p : mGlobalAPIs) {
-                p->update();
-            }
-        } catch (const std::exception &e) {
-            LOG_ERROR("Unhandled Exception during GlobalScope-update!");
-            LOG_EXCEPTION(e);
-        }
-
-        return true;
     }
 
     bool Application::isShutdown() const
@@ -145,14 +126,6 @@ namespace App {
             checkDependency();
         }
         return *this;
-    }
-
-    void Application::clear()
-    {
-        for (const std::unique_ptr<GlobalAPIBase> &p : mGlobalAPIs) {
-            //p->clear();
-        }
-        mGlobalAPIs.get<Scene::SceneManager>().clear();
     }
 
     void Application::addFrameListener(Threading::FrameListener *listener)
