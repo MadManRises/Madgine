@@ -12,19 +12,13 @@ target_link_plugins(MadgineLauncher Base)
 
 if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")
-endif()
-
-if (ANDROID)
+elseif (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android)	
-endif()
-
-if (ANDROID)
 	target_link_plugins(MadgineLauncher AndroidInput)
 endif()
 
+target_depend_on_all_plugins(MadgineLauncher)
 
 generate_binary_info(MadgineLauncher)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)
-
-add_dependencies(MadgineLauncher OpenGLTools OISHandler)

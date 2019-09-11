@@ -18,7 +18,7 @@ if (MODULES_ENABLE_PLUGINS AND NOT BUILD_SHARED_LIBS)
 endif()
 
 set(PLUGIN_LIST "" CACHE INTERNAL "")
-set(PROJECTS_LINKING_ALL_PLUGINS "" CACHE INTERNAL "")
+set(PROJECTS_DEPENDING_ON_ALL_PLUGINS "" CACHE INTERNAL "")
 
 if (NOT MODULES_ENABLE_PLUGINS)
 
@@ -88,8 +88,8 @@ macro(add_plugin name base type)
 
 	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")
 
-	foreach(project ${PROJECTS_LINKING_ALL_PLUGINS})
-		target_link_plugins(${project} ${name})
+	foreach(project ${PROJECTS_DEPENDING_ON_ALL_PLUGINS})
+		add_dependencies(${project} ${name})
 	endforeach()
 
 endmacro(add_plugin)
@@ -130,13 +130,11 @@ endfunction(target_link_plugins)
 
 
 	
-function(target_link_all_plugins target)
+function(target_depend_on_all_plugins target)
 	
-	set(available_core_libs Base)
+	add_dependencies(${target} ${PLUGIN_LIST})
 
-	target_link_plugins(${target} ${PLUGIN_LIST} ${available_core_libs})
-
-	set(PROJECTS_LINKING_ALL_PLUGINS ${PROJECTS_LINKING_ALL_PLUGINS} ${target} CACHE INTERNAL "")
+	set(PROJECTS_DEPENDING_ON_ALL_PLUGINS ${PROJECTS_DEPENDING_ON_ALL_PLUGINS} ${target} CACHE INTERNAL "")
 
 endfunction()
 
