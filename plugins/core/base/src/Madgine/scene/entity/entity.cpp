@@ -118,10 +118,10 @@ namespace Scene {
             return mSceneManager.getGlobalAPIComponent(i, init);
         }
 
-        App::Application &Entity::app(bool init)
+        /*App::Application &Entity::app(bool init)
         {
             return mSceneManager.app(init);
-        }
+        }*/
 
         EntityComponentBase *Entity::addComponentSimple(const std::string &name, const ObjectPtr &table)
         {

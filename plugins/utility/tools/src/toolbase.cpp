@@ -4,14 +4,14 @@
 
 #include "Modules/reflection/classname.h"
 
-#include "renderer/imguiroot.h"
+#include "renderer/imroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
 namespace Engine {
 namespace Tools {
-    ToolBase::ToolBase(ImGuiRoot &root)
+    ToolBase::ToolBase(ImRoot &root)
         : mRoot(root)
     {
     }
@@ -56,18 +56,18 @@ namespace Tools {
         return *this;
     }
 
-    const Core::MadgineObject *ToolBase::parent() const
+    const MadgineObject *ToolBase::parent() const
     {
         return &mRoot;
     }
 
-    App::Application &ToolBase::app(bool init)
+    /*App::Application &ToolBase::app(bool init)
     {
         if (init) {
             checkDependency();
         }
         return mRoot.app(init);
-    }
+    }*/
 
     bool ToolBase::init()
     {

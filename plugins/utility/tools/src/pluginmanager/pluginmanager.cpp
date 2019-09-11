@@ -29,7 +29,7 @@ namespace Tools {
         {}
     };
 
-    PluginManager::PluginManager(ImGuiRoot &root)
+    PluginManager::PluginManager(ImRoot &root)
         : Tool<PluginManager>(root)
         , mManager(Plugins::PluginManager::getSingleton())
     {

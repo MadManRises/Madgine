@@ -10,9 +10,6 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Madgine/app/application.h"
-#include "../renderer/imguiroot.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -20,18 +17,15 @@
 
 #include "im3d/im3d.h"
 
-#include "Madgine/render/vertex.h"
+#include "Modules/render/vertex.h"
 
-#include "OpenGL/opengllib.h"
-#include "OpenGL/openglfontloader.h"
-#include "OpenGL/openglfontdata.h"
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
 namespace Engine {
 namespace Tools {
 
-    TestTool::TestTool(ImGuiRoot &root)
+    TestTool::TestTool(ImRoot &root)
         : Tool<TestTool>(root)
     {
     }
@@ -51,13 +45,10 @@ namespace Tools {
     {
 
         if (ImGui::Begin("TestTool", &mVisible)) {
-            if (ImGui::Button("Create Tool Window")) {
+            /*if (ImGui::Button("Create Tool Window")) {
                 Window::WindowSettings settings;
-                mRoot.window().createToolWindow(settings);
-            }
-
-			std::shared_ptr<Render::OpenGLFontData> font = Render::OpenGLFontLoader::load("OpenSans-Regular", true);
-            ImGui::Image((void *)(intptr_t)font->mTexture.handle(), font->mTextureSize, { 0, 1 }, { 1, 0 });
+                static_cast<const ClientImRoot&>(*mRoot.parent()).window().createToolWindow(settings);
+            }*/
 
 			Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
 

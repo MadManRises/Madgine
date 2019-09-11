@@ -4,22 +4,16 @@
 
 #include "Modules/math/vector2i.h"
 
+#include "Modules/font/glyph.h"
+
 namespace Engine {
 namespace Render {
-
-    struct Glyph {
-        Vector2i mSize;
-        Vector2i mUV;
-        int mBearingY;
-        int mAdvance;
-        bool mFlipped;
-    };
 
     struct MADGINE_OPENGL_EXPORT OpenGLFontData {
         OpenGLTexture mTexture;
         Vector2i mTextureSize;
 
-        std::array<Glyph, 128> mGlyphs;
+        std::array<Font::Glyph, 128> mGlyphs;
     };
 
 }

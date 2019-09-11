@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Madgine/scene/scenecomponentbase.h"
-#include "Madgine/core/madgineobject.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 #include "../render/renderercollector.h"
 #include "Madgine/threading/framelistener.h"

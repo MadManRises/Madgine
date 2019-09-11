@@ -13,7 +13,7 @@ namespace Engine
 		{
 		public:
 
-			Metrics(ImGuiRoot &root);
+			Metrics(ImRoot &root);
 
 			virtual void render() override;
 			virtual void update() override;

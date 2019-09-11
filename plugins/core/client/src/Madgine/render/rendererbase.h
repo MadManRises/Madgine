@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Modules/reflection/classname.h"
-#include "Madgine/core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 namespace Engine {
 	namespace Render {
 
-		class MADGINE_CLIENT_EXPORT RendererBase : public Core::MadgineObject {
+		class MADGINE_CLIENT_EXPORT RendererBase : public MadgineObject {
 		public:			
 			RendererBase(GUI::GUISystem *gui);
 			RendererBase(const RendererBase&) = delete;
@@ -16,8 +16,8 @@ namespace Engine {
 
 			virtual std::unique_ptr<RenderWindow> createWindow(Window::Window *w, GUI::TopLevelWindow *topLevel = nullptr, RenderWindow *sharedResources = nullptr) = 0;
 
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
+			//virtual App::Application &app(bool = true) override;
+			virtual const MadgineObject *parent() const override;
 
 		private:
 			GUI::GUISystem *mGui;

@@ -30,7 +30,6 @@ file(GLOB_RECURSE msdfgen_SOURCES
 add_library(lib_msdfgen STATIC ${msdfgen_SOURCES} ${msdfgen_HEADERS})
 target_include_directories(lib_msdfgen PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(lib_msdfgen PROPERTIES OUTPUT_NAME msdfgen)
-target_link_libraries(lib_msdfgen PUBLIC freetype)
 
 set_property(TARGET lib_msdfgen PROPERTY POSITION_INDEPENDENT_CODE ON)
 

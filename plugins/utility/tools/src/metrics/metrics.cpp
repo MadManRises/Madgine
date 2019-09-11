@@ -24,7 +24,7 @@ namespace Engine {
 			ImGui::EndChild();
 		}
 
-		Metrics::Metrics(ImGuiRoot & root) :
+		Metrics::Metrics(ImRoot & root) :
 			Tool<Metrics>(root),
 			mTimeBank(0.0f)
 		{

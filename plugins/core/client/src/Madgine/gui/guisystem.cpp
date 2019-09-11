@@ -34,7 +34,7 @@ namespace GUI {
 
     bool GUISystem::init()
     {
-        app(false).addFrameListener(this);
+        App::Application::getSingleton().addFrameListener(this);
 
         markInitialized();
 
@@ -53,7 +53,7 @@ namespace GUI {
 
         mRenderer->callFinalize();
 
-        app(false).removeFrameListener(this);
+        App::Application::getSingleton().removeFrameListener(this);
     }
 
     void GUISystem::clear()
@@ -107,7 +107,7 @@ namespace GUI {
         if (init) {
             checkInitState();
         }
-        return app(false).getSceneComponent(i, init);
+        return App::Application::getSingleton().getSceneComponent(i, init);
     }
 
     App::GlobalAPIBase &GUISystem::getGlobalAPIComponent(size_t i, bool init)
@@ -115,7 +115,7 @@ namespace GUI {
         if (init) {
             checkInitState();
         }
-        return app(false).getGlobalAPIComponent(i, init);
+        return App::Application::getSingleton().getGlobalAPIComponent(i, init);
     }
 
     Scene::SceneManager &GUISystem::sceneMgr(bool init)
@@ -123,7 +123,7 @@ namespace GUI {
         if (init) {
             checkInitState();
         }
-        return app(false).sceneMgr(init);
+        return App::Application::getSingleton().sceneMgr(init);
     }
 
     const std::vector<std::unique_ptr<TopLevelWindow>> &GUISystem::windows()

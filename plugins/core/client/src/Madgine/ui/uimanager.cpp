@@ -40,11 +40,11 @@ namespace UI {
 
     bool UIManager::init()
     {
-        app(false).addFrameListener(this);
+        App::Application::getSingleton().addFrameListener(this);
 
         markInitialized();
 
-        if (app(false).settings().mRunMain) {
+        if (App::Application::getSingleton().settings().mRunMain) {
             /*std::optional<Scripting::ArgumentList> res = app(false).callMethodIfAvailable("afterViewInit", {});
 				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
 					return false;*/
@@ -71,7 +71,7 @@ namespace UI {
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
             handler->callFinalize();
 
-        app(false).removeFrameListener(this);
+        App::Application::getSingleton().removeFrameListener(this);
     }
 
     void UIManager::clear()
@@ -145,15 +145,15 @@ namespace UI {
         return result;
     }
 
-    App::Application &UIManager::app(bool init)
+    /*App::Application &UIManager::app(bool init)
     {
         if (init) {
             checkInitState();
         }
         return mWindow.gui().app(init);
-    }
+    }*/
 
-    const Core::MadgineObject *UIManager::parent() const
+    const MadgineObject *UIManager::parent() const
     {
         return &mWindow.gui();
     }

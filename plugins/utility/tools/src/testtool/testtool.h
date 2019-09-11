@@ -12,7 +12,7 @@ namespace Engine
 		{
 		public:
 
-			TestTool(ImGuiRoot &root);
+			TestTool(ImRoot &root);
 
 			virtual void render() override;
 			virtual void update() override;

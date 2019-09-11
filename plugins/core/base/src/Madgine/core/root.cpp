@@ -2,9 +2,7 @@
 
 #include "root.h"
 
-//#include "../resources/scripts/scriptloader.h"
-
-#include "../resources/resourcemanager.h"
+#include "Modules/resources/resourcemanager.h"
 #include "Interfaces/debug/memory/memory.h"
 #include "Modules/plugins/pluginmanager.h"
 #include "Modules/threading/workgroup.h"
@@ -38,6 +36,8 @@ namespace Core {
         (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
         (*mPluginManager)["Renderer"].setExclusive();
         (*mPluginManager)["Renderer"].setAtleastOne();
+
+		(*mPluginManager)["Tools"].loadPlugin("OpenGLTools");
 
         (*mPluginManager)["Input"].setExclusive();
         (*mPluginManager)["Input"].setAtleastOne();

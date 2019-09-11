@@ -6,11 +6,11 @@ namespace Engine
 	namespace Tools
 	{
 		struct ToolBase;
-		class ImGuiRoot;
+		struct ImRoot;
 		class Inspector;
-		class ImGuiManager;
+		class ImManager;
 
-		class OpenGLImguiManager;
+		class OpenGLImManager;
 
 		struct SceneEditor;
 	}

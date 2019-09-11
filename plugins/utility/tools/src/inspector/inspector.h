@@ -10,7 +10,7 @@ namespace Tools {
 
     class MADGINE_TOOLS_EXPORT Inspector : public Tool<Inspector> {
     public:
-        Inspector(ImGuiRoot &root);
+        Inspector(ImRoot &root);
         Inspector(const Inspector &) = delete;
         ~Inspector();
 

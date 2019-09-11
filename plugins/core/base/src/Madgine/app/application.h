@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 #include "globalapicollector.h"
 
@@ -15,7 +15,7 @@ namespace App {
 		 * \brief The Base-class for any Application that runs the Madgine.
 		 */
     class MADGINE_BASE_EXPORT Application : public ScopeBase,
-                                            public Core::MadgineObject,
+                                            public MadgineObject,
                                             public Threading::FrameListener {
     public:
         /**
@@ -110,8 +110,9 @@ namespace App {
 
         Debug::Profiler::Profiler &profiler();
 
-        virtual const Core::MadgineObject *parent() const override;
-        virtual Application &app(bool = true) override;
+        virtual const MadgineObject *parent() const override;
+        
+		static Application &getSingleton();
 
     protected:
         virtual void clear();

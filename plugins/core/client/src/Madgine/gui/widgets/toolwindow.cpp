@@ -26,14 +26,13 @@ namespace GUI {
 
         mWindow->addListener(this);
 
-        mInputHandlerSelector.emplace(mWindow, parent.gui().app(false), &parent, 0);
+        mInputHandlerSelector.emplace(mWindow, App::Application::getSingleton(), &parent, 0);
 
         mRenderWindow = parent.gui().renderer().createWindow(mWindow, nullptr, parent.getRenderer());
     }
 
     ToolWindow::~ToolWindow()
     {
-        mParent.gui().app(false).removeFrameListener(input());
         mWindow->removeListener(this);
 
         mWindow->destroy();

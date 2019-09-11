@@ -13,7 +13,7 @@ namespace Engine
 		class PluginManager : public Tool<PluginManager>
 		{
 		public:
-			PluginManager(ImGuiRoot &root);
+			PluginManager(ImRoot &root);
 
 			virtual void render() override;
 

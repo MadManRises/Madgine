@@ -2,18 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 Project(OpenGL)
 
-set(sources "")
-FolderSources(sources "" src)
-if (NOT ANDROID AND NOT EMSCRIPTEN)
-	FolderSources(sources src glad glad.c glad.h)
-endif()
-FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfontloader.h openglforward.h opengllib.h openglmesh.cpp openglmesh.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h)
-	FolderSources(sources OpenGL util openglbuffer.cpp openglbuffer.h openglshader.cpp openglshader.h opengltexture.cpp opengltexture.h openglvertexarray.cpp openglvertexarray.h)
 
-add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
-
-target_link_plugins(OpenGL Client)
-target_link_libraries(OpenGL PUBLIC assimp freetype lib_msdfgen) # Might be a bug in MSVC + Clang. Should be PRIVATE
 
 if (NOT ANDROID)
 	find_package(OpenGL REQUIRED)
@@ -26,9 +15,35 @@ if (EMSCRIPTEN)
 	set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARIES})
 endif()
 	
-target_include_directories(OpenGL PUBLIC ${OPENGL_INCLUDE_DIR})
 
-target_link_libraries(OpenGL PUBLIC ${OPENGL_LIBRARIES})
+
+set(sources "")
+FolderSources(sources "" src)
+if (NOT ANDROID AND NOT EMSCRIPTEN)
+	FolderSources(sources src glad glad.c glad.h)
+endif()
+FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfontloader.h openglforward.h opengllib.h openglmesh.cpp openglmesh.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h)
+	FolderSources(sources OpenGL util openglbuffer.cpp openglbuffer.h openglshader.cpp openglshader.h opengltexture.cpp opengltexture.h openglvertexarray.cpp openglvertexarray.h)
+
+add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
+
+target_link_plugins(OpenGL Client)
+target_link_libraries(OpenGL PRIVATE assimp freetype lib_msdfgen) # Might be a bug in MSVC + Clang. Should be PRIVATE
+target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
+
+target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
+
+
+set(sources "")
+FolderSources(sources "" tools)
+	FolderSources(sources tools OpenGL_Tools)
+		FolderSources(sources OpenGL_Tools imgui imgui_impl_opengl3.cpp imgui_impl_opengl3.h openglimmanager.cpp openglimmanager.h)
+		FolderSources(sources OpenGL_Tools sceneeditor sceneeditor.cpp sceneeditor.h sceneview.cpp sceneview.h)
+			FolderSources(sources sceneeditor opengl openglgridpass.cpp openglgridpass.h)
+
+add_plugin(OpenGLTools Madgine Tools ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h SOURCE_ROOT tools)
+
+target_link_plugins(OpenGLTools OpenGL ClientTools)
 
 
 if (BUILD_TESTING)

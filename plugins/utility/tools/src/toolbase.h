@@ -2,7 +2,7 @@
 
 #include "Modules/reflection/classname.h"
 
-#include "Madgine/core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
@@ -13,10 +13,10 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : public Core::MadgineObject, public ScopeBase, public Serialize::SerializableUnit<ToolBase> {
+    struct MADGINE_TOOLS_EXPORT ToolBase : public MadgineObject, public ScopeBase, public Serialize::SerializableUnit<ToolBase> {
         SERIALIZABLEUNIT;
 
-        ToolBase(ImGuiRoot &root);
+        ToolBase(ImRoot &root);
         virtual ~ToolBase() = default;
 
         virtual void render();
@@ -36,7 +36,7 @@ namespace Tools {
         }
         ToolBase &getSelf(bool = true);
 		
-		virtual App::Application &app(bool = true) override;
+		//virtual App::Application &app(bool = true) override;
 
     protected:
 
@@ -46,7 +46,7 @@ namespace Tools {
 
 		bool mVisible = false;
         
-        ImGuiRoot &mRoot;
+        ImRoot &mRoot;
     };
 
 }

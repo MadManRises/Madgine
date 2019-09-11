@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Tools {
 
-    ImGuiDemo::ImGuiDemo(ImGuiRoot &root)
+    ImGuiDemo::ImGuiDemo(ImRoot &root)
         : Tool<ImGuiDemo>(root)
     {
     }

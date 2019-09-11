@@ -8,21 +8,21 @@
 
 #include "Modules/generic/transformIt.h"
 
-#include "Madgine/core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
 namespace Engine {
 namespace GUI {
 
-    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, Core::MadgineObject {
+    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, MadgineObject {
         TopLevelWindowComponentBase(TopLevelWindow &window);
         virtual ~TopLevelWindowComponentBase() = default;
 
-        TopLevelWindow &window();
+        TopLevelWindow &window() const;
 
         virtual const MadgineObject *parent() const override;
-        virtual App::Application &app(bool = true) override;
+        //virtual App::Application &app(bool = true) override;
 
     protected:
         TopLevelWindow &mWindow;
@@ -103,7 +103,7 @@ namespace GUI {
 
         void renderOverlays();
 
-        Window::Window *window();
+        Window::Window *window() const;
         Widget *currentRoot();
 
         decltype(auto) widgets()
@@ -116,8 +116,7 @@ namespace GUI {
             return uniquePtrToPtr(mComponents);
         }
 
-        Render::RenderWindow *
-        getRenderer();
+        Render::RenderWindow *getRenderer();
 
         //virtual App::Application &app(bool = true) override;
         //virtual const Core::MadgineObject *parent() const override;

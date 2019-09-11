@@ -2,7 +2,7 @@
 
 #include "Modules/math/vector2.h"
 #include "renderpass.h"
-#include "vertex.h"
+#include "Modules/render/vertex.h"
 
 namespace Engine {
 namespace Render {

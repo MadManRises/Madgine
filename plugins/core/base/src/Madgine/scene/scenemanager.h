@@ -9,7 +9,7 @@
 #include "entity/entity.h"
 
 #include "../app/globalapicollector.h"
-#include "../core/madgineobjectobserver.h"
+#include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/keyvalue/observablecontainer.h"
 #include "Modules/serialize/container/noparent.h"
 #include "../threading/framelistener.h"
@@ -71,8 +71,8 @@ namespace Scene {
 
         SceneManager &getSelf(bool = true);
 
-        virtual App::Application &app(bool = true) override;
-        virtual const Core::MadgineObject *parent() const override;
+        //virtual App::Application &app(bool = true) override;
+        virtual const MadgineObject *parent() const override;
 
         Threading::DataMutex &mutex();
 
@@ -98,7 +98,7 @@ namespace Scene {
         App::Application &mApp;
         size_t mItemCount;
 
-		SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<, SceneComponentSet, ,Core::MadgineObjectObserver>::type>);        
+		SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<, SceneComponentSet, ,MadgineObjectObserver>::type>);        
 
         SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;

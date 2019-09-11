@@ -10,9 +10,7 @@
 
 #include "Modules/generic/transformIt.h"
 
-#include "Madgine/app/application.h"
-
-#include "../renderer/imguiroot.h"
+#include "../renderer/imroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
@@ -51,7 +49,7 @@ namespace Tools {
         }
     }
 
-    Profiler::Profiler(ImGuiRoot &root)
+    Profiler::Profiler(ImRoot &root)
         : Tool<Profiler>(root)
         , mProfiler(Debug::Profiler::Profiler::getCurrent())
     {

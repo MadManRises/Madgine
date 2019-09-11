@@ -88,7 +88,7 @@ namespace Scene {
 
             App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-            App::Application &app(bool = true);
+            //App::Application &app(bool = true);
 
         protected:
             EntityComponentBase *addComponentSimple(const std::string &name, const ObjectPtr &table = {});

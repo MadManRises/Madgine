@@ -37,21 +37,11 @@ namespace Engine
 	{
 		class Root;
 
-		class MadgineObject;
-
 	}
 
 
 
-	namespace Resources
-	{
-		struct ResourceManager;
-		template <class Loader>
-		class Resource;
-		template <class T, class Data, template <typename> typename ResourceKind = Resource>
-		struct ResourceLoader;
-		struct ResourceBase;
-	}
+
 
 
 	namespace Server

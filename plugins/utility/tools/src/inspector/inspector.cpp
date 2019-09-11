@@ -4,8 +4,7 @@
 #include "imgui/imgui_internal.h"
 #include "inspector.h"
 
-#include "../renderer/imguiroot.h"
-#include "Madgine/app/application.h"
+#include "../renderer/imroot.h"
 #include "imgui/imguiaddons.h"
 
 #include "Modules/keyvalue/scopebase.h"
@@ -16,7 +15,7 @@
 
 #include "Modules/plugins/binaryinfo.h"
 
-#include "Madgine/resources/resourcemanager.h"
+#include "Modules/resources/resourcemanager.h"
 #include "layoutloader.h"
 
 #include "../tinyxml/tinyxml2.h"
@@ -42,7 +41,7 @@ namespace Tools {
         { "SingleLine", &Inspector::drawSingleLine }
     };
 
-    Inspector::Inspector(ImGuiRoot &root)
+    Inspector::Inspector(ImRoot &root)
         : Tool<Inspector>(root)
     {
 
@@ -63,7 +62,7 @@ namespace Tools {
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
             if (ImGui::TreeNode("Application")) {
-                draw(&app(false), "Application");
+                //draw(&app(false), "Application");
                 ImGui::TreePop();
             }
             if (ImGui::TreeNode("Resources")) {

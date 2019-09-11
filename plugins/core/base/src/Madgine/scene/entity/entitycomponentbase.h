@@ -58,7 +58,7 @@ namespace Engine
 
 				App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-				App::Application &app(bool = true);
+				//App::Application &app(bool = true);
 
 
 			protected:

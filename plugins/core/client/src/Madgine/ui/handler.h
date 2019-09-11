@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/threading/slot.h"
 
@@ -22,7 +22,7 @@ namespace Engine
 		};
 
 
-		class MADGINE_CLIENT_EXPORT Handler : public Core::MadgineObject, public ScopeBase
+		class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase
 		{
 		public:
 			Handler(UIManager &ui, const std::string& windowName);
@@ -37,8 +37,8 @@ namespace Engine
 			virtual const char* key() const = 0;
 			
 
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
+			//virtual App::Application &app(bool = true) override;
+			virtual const MadgineObject *parent() const override;
 			UIManager &ui(bool = true);
 
 			template <class T>

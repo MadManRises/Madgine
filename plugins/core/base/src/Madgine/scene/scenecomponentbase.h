@@ -2,7 +2,7 @@
 
 #include "contextmasks.h"
 
-#include "../core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/keyvalue/scopebase.h"
 
@@ -16,7 +16,7 @@ namespace Engine
 	{
 		
 		class MADGINE_BASE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public ScopeBase,
-			public Core::MadgineObject
+			public MadgineObject
 		{
 		public:
 			virtual ~SceneComponentBase() = default;
@@ -53,8 +53,8 @@ namespace Engine
 			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 			SceneComponentBase &getSelf(bool = true);
 
-			virtual const Core::MadgineObject *parent() const override;
-			virtual App::Application &app(bool = true) override;
+			virtual const MadgineObject *parent() const override;
+			//virtual App::Application &app(bool = true) override;
 
 		protected:
 			virtual bool init() override;

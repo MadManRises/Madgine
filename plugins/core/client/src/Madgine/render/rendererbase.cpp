@@ -18,16 +18,16 @@ namespace Engine {
 		{
 		}
 
-		App::Application & RendererBase::app(bool init)
+		/*App::Application & RendererBase::app(bool init)
 		{
 			if (init)
 			{
 				checkInitState();
 			}
 			return mGui->app(init);
-		}
+		}*/
 
-		const Core::MadgineObject * RendererBase::parent() const
+		const MadgineObject * RendererBase::parent() const
 		{
 			return mGui;
 		}

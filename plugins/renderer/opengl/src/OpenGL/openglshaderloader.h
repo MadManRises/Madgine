@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/resources/resourceloader.h"
+#include "Modules/resources/resourceloader.h"
 
 namespace Engine {
 	namespace Render {

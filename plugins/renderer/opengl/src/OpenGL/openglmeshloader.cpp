@@ -10,7 +10,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
-#include "Madgine/render/vertex.h"
+#include "Modules/render/vertex.h"
 
 namespace Engine {
 namespace Render {

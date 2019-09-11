@@ -69,16 +69,16 @@ namespace Engine
 		{
 		}
 
-		App::Application& Handler::app(bool init)
+		/*App::Application& Handler::app(bool init)
 		{
 			if (init)
 			{
 				checkInitState();
 			}
 			return mUI.app(init);
-		}
+		}*/
 
-		const Core::MadgineObject * Handler::parent() const
+		const MadgineObject * Handler::parent() const
 		{
 			return &mUI;
 		}

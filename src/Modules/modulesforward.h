@@ -74,7 +74,7 @@ namespace Serialize {
     struct SerializeManager;
     struct SerializeStreambuf;
 
-	struct Formatter;
+    struct Formatter;
 
     class EOLType;
 
@@ -86,7 +86,7 @@ namespace Serialize {
 
     struct noparent_deleter;
 
-	struct SerializeTable;
+    struct SerializeTable;
     using SerializableUnitMap = std::map<size_t, SerializableUnitBase *>;
 
     enum MessageType {
@@ -156,6 +156,27 @@ namespace Threading {
     struct DataMutex;
 }
 
+namespace Font {
+
+    struct Glyph;
+
+}
+
+namespace Render {
+    struct Vertex;
+    struct Vertex2;
+    typedef int RenderPassFlags;
+}
+
+namespace Resources {
+    struct ResourceManager;
+    template <class Loader>
+    class Resource;
+    template <class T, class Data, template <typename> typename ResourceKind = Resource>
+    struct ResourceLoader;
+    struct ResourceBase;
+}
+
 class Vector2;
 class Vector3;
 
@@ -171,7 +192,6 @@ struct Sphere;
 struct Plane;
 struct AABB;
 struct BoundingBox;
-}
 
-struct lua_State;
-struct luaL_Reg;
+class MadgineObject;
+}

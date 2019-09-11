@@ -96,19 +96,19 @@ namespace Engine
 			return *this;
 		}
 
-		const Core::MadgineObject * SceneComponentBase::parent() const
+		const MadgineObject * SceneComponentBase::parent() const
 		{
 			return &mSceneMgr;
 		}
 
-		App::Application & SceneComponentBase::app(bool init)
+		/*App::Application & SceneComponentBase::app(bool init)
 		{
 			if (init)
 			{
 				checkInitState();
 			}
 			return mSceneMgr.app(init);
-		}
+		}*/
 
 		void SceneComponentBase::update(std::chrono::microseconds)
 		{

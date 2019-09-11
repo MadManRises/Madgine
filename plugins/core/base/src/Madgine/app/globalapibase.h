@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
@@ -10,7 +10,7 @@ namespace Engine
 {
 	namespace App
 	{
-		class MADGINE_BASE_EXPORT GlobalAPIBase : public Core::MadgineObject, public ScopeBase
+		class MADGINE_BASE_EXPORT GlobalAPIBase : public MadgineObject, public ScopeBase
 		{
 		public:
 			GlobalAPIBase(App::Application &app);
@@ -40,8 +40,8 @@ namespace Engine
 
 			GlobalAPIBase &getSelf(bool = true);
 		
-			virtual App::Application &app(bool = true) override;
-			virtual const Core::MadgineObject *parent() const override;
+			//virtual App::Application &app(bool = true) override;
+			virtual const MadgineObject *parent() const override;
 
 			/*template <class T>
 			T &getGuiHandler()

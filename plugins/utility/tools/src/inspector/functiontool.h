@@ -9,7 +9,7 @@ namespace Tools {
 
     class MADGINE_TOOLS_EXPORT FunctionTool : public Tool<FunctionTool> {
     public:
-        FunctionTool(ImGuiRoot &root);
+        FunctionTool(ImRoot &root);
 
         const char *key() const override;
 

@@ -10,7 +10,7 @@
 namespace Engine {
 namespace UI {
     class MADGINE_CLIENT_EXPORT UIManager : public ScopeBase,
-                                            public Core::MadgineObject,
+                                            public MadgineObject,
                                             public Threading::FrameListener {
     public:
         UIManager(GUI::TopLevelWindow &window);
@@ -60,8 +60,8 @@ namespace UI {
 
         UIManager &getSelf(bool = true);
 
-        virtual App::Application &app(bool = true) override;
-        virtual const Core::MadgineObject *parent() const override;
+        //virtual App::Application &app(bool = true) override;
+        virtual const MadgineObject *parent() const override;
 
     protected:
         bool init() override;

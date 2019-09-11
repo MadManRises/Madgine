@@ -9,7 +9,6 @@ macro(generate_binary_info target)
 	if (MODULES_ENABLE_PLUGINS)
 
 		target_sources(${target} PRIVATE ${binaryinfo_dir}/binaryinfo.cpp)
-		target_link_libraries(${target} PUBLIC Interfaces)
 
 		set (major_version ${PROJECT_VERSION_MAJOR})
 		if (NOT major_version)

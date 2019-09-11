@@ -15,15 +15,23 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/workgroup.h"
+
 namespace Engine {
 
 namespace App {
+
+    static Threading::WorkgroupLocal<Application *> sApp;
+
     Application::Application(const AppSettings &settings)
         : //Scripting::GlobalScopeBase(Scripting::LuaState::getSingleton()),
         mSettings(settings)
         , mGlobalAPIInitCounter(0)
         , mGlobalAPIs(*this)
     {
+        assert(!sApp);
+        sApp = this;
+
         mLoop.addFrameListener(this);
 
         mLoop.addSetupSteps(
@@ -38,6 +46,9 @@ namespace App {
 
     Application::~Application()
     {
+        assert(sApp == this);
+        sApp = nullptr;
+
         mLoop.removeFrameListener(this);
     }
 
@@ -174,16 +185,20 @@ namespace App {
         return *mProfiler;
     }
 
-    const Core::MadgineObject *Application::parent() const
+    const MadgineObject *Application::parent() const
     {
         return nullptr;
     }
 
-    Application &Application::app(bool init)
+    /*Application &Application::app(bool init)
     {
         return getSelf(init);
-    }
+    }*/
 
+    Application &Application::getSingleton()
+    {
+        return *sApp;
+    }
 }
 
 }

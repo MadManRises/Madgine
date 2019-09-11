@@ -8,7 +8,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Madgine/app/application.h"
+//#include "Madgine/app/application.h"
 
 #include "Modules/keyvalue/keyvalueiterate.h"
 #include "Modules/keyvalue/scopeiterator.h"
@@ -18,7 +18,7 @@ UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 namespace Engine {
 namespace Tools {
 
-    FunctionTool::FunctionTool(ImGuiRoot &root)
+    FunctionTool::FunctionTool(ImRoot &root)
         : Tool<FunctionTool>(root)
     {
     }
@@ -46,7 +46,7 @@ namespace Tools {
     void FunctionTool::refreshMethodCache()
     {
         mMethodCache.clear();
-        parseMethods(&app());
+        //parseMethods(&app());
     }
 
     void FunctionTool::parseMethods(TypedScopePtr scope)

@@ -36,7 +36,7 @@ namespace Scene {
 
     bool SceneManager::init()
     {
-        app().addFrameListener(this);
+        mApp.addFrameListener(this);
         markInitialized();
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             if (!component->callInit())
@@ -53,6 +53,8 @@ namespace Scene {
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             component->callFinalize();
         }
+
+        mApp.removeFrameListener(this);
     }
 
     decltype(SceneManager::mEntities) &SceneManager::entities()
@@ -102,7 +104,7 @@ namespace Scene {
         return *this;
     }
 
-    const Core::MadgineObject *SceneManager::parent() const
+    const MadgineObject *SceneManager::parent() const
     {
         return &mApp;
     }
@@ -186,13 +188,13 @@ namespace Scene {
         mEntityRemoveQueue.push_back(e);
     }
 
-    App::Application &SceneManager::app(bool init)
+    /*App::Application &SceneManager::app(bool init)
     {
         if (init) {
             checkInitState();
         }
         return mApp.getSelf(init);
-    }
+    }*/
 
     void SceneManager::clear()
     {

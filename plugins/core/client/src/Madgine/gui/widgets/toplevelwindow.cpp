@@ -47,7 +47,7 @@ namespace GUI {
         , mUI(std::make_unique<UI::UIManager>(*this))
         , mComponents(*this)
     {
-        const App::AppSettings &settings = gui.app().settings();
+        const App::AppSettings &settings = App::Application::getSingleton().settings();
 
         mWindow = Window::sCreateWindow(settings.mWindowSettings);
 
@@ -56,11 +56,11 @@ namespace GUI {
         if (settings.mInput) {
             mExternalInput = static_cast<Input::InputHandler *>(settings.mInput);
         } else {
-            mInputHandlerSelector.emplace(mWindow, gui.app(false), this, 0);
+            mInputHandlerSelector.emplace(mWindow, App::Application::getSingleton(), this, 0);
         }
 
         mRenderWindow = gui.renderer().createWindow(mWindow, this);
-        gui.app(false).addFrameListener(this);
+        App::Application::getSingleton().addFrameListener(this);
 
         Widget *loading = createTopLevelImage("Loading");
         Widget *progress = loading->createChildBar("ProgressBar");
@@ -178,7 +178,7 @@ namespace GUI {
 
         mUI->callFinalize();
 
-        mGui.app(false).removeFrameListener(this);
+        App::Application::getSingleton().removeFrameListener(this);
         mWindow->removeListener(this);
 
         mUI.reset();
@@ -560,7 +560,7 @@ namespace GUI {
         return false;
     }
 
-    Window::Window *TopLevelWindow::window()
+    Window::Window *TopLevelWindow::window() const
     {
         return mWindow;
     }
@@ -714,23 +714,23 @@ namespace GUI {
     {
     }
 
-    TopLevelWindow &TopLevelWindowComponentBase::window()
+    TopLevelWindow &TopLevelWindowComponentBase::window() const
     {
         return mWindow;
     }
 
-    const Core::MadgineObject *TopLevelWindowComponentBase::parent() const
+    const MadgineObject *TopLevelWindowComponentBase::parent() const
     {
         return &mWindow.gui();
     }
 
-    App::Application &TopLevelWindowComponentBase::app(bool init)
+    /*App::Application &TopLevelWindowComponentBase::app(bool init)
     {
         if (init) {
             checkDependency();
         }
         return mWindow.gui().app(init);
-    }
+    }*/
 
 }
 }

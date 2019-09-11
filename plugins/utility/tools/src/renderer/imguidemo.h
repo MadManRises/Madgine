@@ -7,7 +7,7 @@ namespace Engine {
 
 		class ImGuiDemo : public Tool<ImGuiDemo>{
 		public:
-			ImGuiDemo(ImGuiRoot &root);
+			ImGuiDemo(ImRoot &root);
 
 			void render() override;
 

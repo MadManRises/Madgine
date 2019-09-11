@@ -11,9 +11,19 @@ FolderSources(sources "" src)
 		FolderSources(sources Madgine render renderercollector.cpp renderercollector.h rendererbase.cpp rendererbase.h renderwindow.cpp renderwindow.h rendertarget.cpp rendertarget.h)	
 		FolderSources(sources Madgine ui gamehandler.cpp gamehandler.h guihandler.cpp guihandler.h handler.cpp handler.h uimanager.cpp uimanager.h)
 
-
-
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 
 target_link_plugins(Client Base)
+
+
+set(sources "")
+FolderSources(sources "" tools)
+	FolderSources(sources tools Madgine_Tools)
+		FolderSources(sources Madgine_Tools guieditor guieditor.cpp guieditor.h widgetsettings.cpp widgetsettings.h)
+		FolderSources(sources Madgine_Tools im3d im3drenderpass.cpp im3drenderpass.h)
+		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h immanager.cpp immanager.h)
+
+add_plugin(ClientTools MadgineTools Core ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h SOURCE_ROOT tools)
+
+target_link_plugins(ClientTools Client Tools)
 

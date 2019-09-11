@@ -49,9 +49,6 @@ namespace Render {
     class RenderWindow;
     struct RenderTarget;
     struct RenderPass;
-    struct Vertex;
-    struct Vertex2;
-    typedef int RenderPassFlags;
 }
 
 }

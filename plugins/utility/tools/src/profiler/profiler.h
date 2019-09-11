@@ -8,7 +8,7 @@ namespace Engine {
 		class Profiler : public Tool<Profiler> 
 		{
 		public:
-			Profiler(ImGuiRoot &root);
+			Profiler(ImRoot &root);
 
 			virtual void render() override;
 

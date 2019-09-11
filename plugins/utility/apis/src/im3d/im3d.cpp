@@ -1,11 +1,10 @@
 #include "../apislib.h"
-#include "OpenGL/opengllib.h"
 
 #include "im3d.h"
 
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/render/vertex.h"
+#include "Modules/render/vertex.h"
 
 #include "im3d_internal.h"
 
@@ -16,18 +15,30 @@
 
 #include "Modules/math/boundingbox.h"
 
-#include "OpenGL/openglfontdata.h"
-#include "OpenGL/openglfontloader.h"
+#include "Modules/font/glyph.h"
 
 namespace Engine {
 
 namespace Im3D {
 
-    Threading::WorkgroupLocal<Im3DContext> sContext;
+    Threading::WorkgroupLocal<Im3DContext *> sContext;
+
+    void CreateContext()
+    {
+        assert(sContext == nullptr);
+        sContext = new Im3DContext;
+    }
+
+    void DestroyContext()
+    {
+        assert(sContext != nullptr);
+        delete sContext;
+        sContext = nullptr;
+    }
 
     Im3DContext *GetCurrentContext()
     {
-        return &sContext;
+        return sContext;
     }
 
     Im3DIO &GetIO()
@@ -42,7 +53,7 @@ namespace Im3D {
 
     void NewFrame()
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         for (std::pair<const Im3DTextureId, Im3DContext::RenderData> &p : c.mRenderData) {
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
@@ -76,7 +87,7 @@ namespace Im3D {
 
     Im3DObject *FindObjectByID(Im3DID id)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         auto it = c.mObjects.find(id);
         if (it == c.mObjects.end())
             return nullptr;
@@ -91,7 +102,7 @@ namespace Im3D {
 
     Im3DID GetID(const char *name)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         Im3DID seed = c.mIDStack.empty() ? 0 : c.mIDStack.back();
         Im3DID id = ImHashStr(name, 0, seed);
         return id;
@@ -99,26 +110,26 @@ namespace Im3D {
 
     Im3DID GetID(const void *ptr)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         ImGuiID seed = c.mIDStack.empty() ? 0 : c.mIDStack.back();
         return ImHashData(&ptr, sizeof(void *), seed);
     }
 
     void PushID(const void *ptr)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         c.mIDStack.push_back(GetID(ptr));
     }
 
     void PopID()
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         c.mIDStack.pop_back();
     }
 
     Im3DObject *CreateNewObject(Im3DID id)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         Im3DObject *o = &c.mObjects.try_emplace(id, id).first->second;
 
@@ -127,7 +138,7 @@ namespace Im3D {
 
     static void ResetLastObject()
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         for (std::pair<const Im3DTextureId, Im3DContext::RenderData> &p : c.mRenderData) {
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
@@ -141,7 +152,7 @@ namespace Im3D {
 
     void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         ResetLastObject();
 
@@ -180,7 +191,7 @@ namespace Im3D {
 
     void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount, Im3DTextureId texId)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         ResetLastObject();
 
@@ -220,7 +231,7 @@ namespace Im3D {
 
     void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         ResetLastObject();
 
@@ -232,7 +243,7 @@ namespace Im3D {
 
     void Text(const char *text, const Matrix4 &transform, float fontSize, bool facingX, bool facingY, const char *fontName, Vector2 pivot)
     {
-        std::shared_ptr<Render::OpenGLFontData> font = Render::OpenGLFontLoader::load(fontName);
+        Im3DFont font = GetIO().mFetchFont(fontName);
 
         size_t textLen = strlen(text);
 
@@ -248,7 +259,7 @@ namespace Im3D {
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font->mGlyphs[text[i]];
+            Font::Glyph &g = font.mGlyphs[text[i]];
 
             fullWidth += g.mSize.x * scale;
             maxY = max(maxY, g.mBearingY * scale);
@@ -266,7 +277,7 @@ namespace Im3D {
         float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font->mGlyphs[text[i]];
+            Font::Glyph &g = font.mGlyphs[text[i]];
 
             float width = g.mSize.x * scale;
             float height = g.mSize.y * scale;
@@ -309,9 +320,9 @@ namespace Im3D {
             if (g.mFlipped)
                 std::swap(uvWidth, uvHeight);
 
-            Vector2 uvTopLeft = { float(g.mUV.x) / font->mTextureSize.x, float(g.mUV.y) / font->mTextureSize.y };
-            Vector2 uvBottomRight = { float(g.mUV.x + uvWidth) / font->mTextureSize.x,
-                float(g.mUV.y + uvHeight) / font->mTextureSize.y };
+            Vector2 uvTopLeft = { float(g.mUV.x) / font.mTextureSize.x, float(g.mUV.y) / font.mTextureSize.y };
+            Vector2 uvBottomRight = { float(g.mUV.x + uvWidth) / font.mTextureSize.x,
+                float(g.mUV.y + uvHeight) / font.mTextureSize.y };
 
             Vector2 uvTopRight = { uvBottomRight.x, uvTopLeft.y };
             Vector2 uvBottomLeft = { uvTopLeft.x, uvBottomRight.y };
@@ -334,7 +345,10 @@ namespace Im3D {
             cursorX += g.mAdvance / 64.0f * scale;
         }
 
-        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, font->mTexture.handle());
+        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, font.mTexture);
+
+		if (GetIO().mReleaseFont)
+            GetIO().mReleaseFont(font);
     }
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
@@ -344,7 +358,7 @@ namespace Im3D {
 
     bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         return BoundingSphere(id, c.mTemp.mLastAABB, c.mTemp.mLastTransform, flags, priority);
     }
 
@@ -355,7 +369,7 @@ namespace Im3D {
 
     bool BoundingSphere(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         Sphere bounds = { bb.center(),
             0.4f * bb.diameter() };
@@ -363,7 +377,7 @@ namespace Im3D {
         //Check if Hovered
         float distance = 0.0f;
         if (auto intersection = Intersect(c.mMouseRay, transform * bounds))
-			distance = intersection[0];
+            distance = intersection[0];
 
         return BoundingObject(id, distance, flags, priority);
     }
@@ -375,7 +389,7 @@ namespace Im3D {
 
     bool BoundingBox(Im3DID id, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         return BoundingBox(id, c.mTemp.mLastAABB, c.mTemp.mLastTransform, flags, priority);
     }
 
@@ -386,7 +400,7 @@ namespace Im3D {
 
     bool BoundingBox(Im3DID id, const AABB &bb, const Matrix4 &transform, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         //Check if Hovered
         float distance = 0.0f;
@@ -418,7 +432,7 @@ namespace Im3D {
 
     bool BoundingObject(Im3DID id, float distance, Im3DBoundingObjectFlags flags, size_t priority)
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
 
         Im3DObject *object = FindObjectByID(id);
         const bool object_just_created = (object == nullptr);
@@ -449,13 +463,13 @@ namespace Im3D {
 
     bool IsObjectHovered()
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         return c.mTemp.mLastObject && c.mTemp.mLastObject == c.mHoveredObject;
     }
 
     bool IsAnyObjectHovered()
     {
-        Im3DContext &c = sContext;
+        Im3DContext &c = *sContext;
         return c.mHoveredObject || c.mNextHoveredObject;
     }
 

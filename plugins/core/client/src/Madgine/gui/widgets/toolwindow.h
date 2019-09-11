@@ -7,7 +7,7 @@
 
 #include "Modules/generic/transformIt.h"
 
-#include "Madgine/core/madgineobject.h"
+#include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
