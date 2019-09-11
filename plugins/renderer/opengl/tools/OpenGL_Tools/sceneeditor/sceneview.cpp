@@ -145,7 +145,7 @@ namespace Tools {
                 Vector2 pos = ImGui::GetItemRectMin();
                 Vector2 size = ImGui::GetItemRectSize();
 
-                Im3D::GetIO().mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
+                io3D.mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
 
                 mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f);
             }
