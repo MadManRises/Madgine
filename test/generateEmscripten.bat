@@ -1,4 +1,4 @@
-"%1/bin/MadgineLauncher.exe" -t -lp OpenGL.cfg -ep OpenGL_emscripten.cfg
+"%1/bin/MadgineLauncher.exe" -t -npc -lp OpenGL.cfg -ep OpenGL_emscripten.cfg
 
 powershell -Command "(gc OpenGL_emscripten.cfg) -creplace 'OISHandler', 'EmscriptenInput' | Out-File -encoding ASCII OpenGL_emscripten.cfg"
 
