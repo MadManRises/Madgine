@@ -30,7 +30,6 @@ add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/open
 target_link_plugins(OpenGL Client)
 target_link_libraries(OpenGL PRIVATE assimp freetype lib_msdfgen) # Might be a bug in MSVC + Clang. Should be PRIVATE
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
-
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
 
@@ -44,7 +43,8 @@ FolderSources(sources "" tools)
 add_plugin(OpenGLTools Madgine Tools ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h SOURCE_ROOT tools)
 
 target_link_plugins(OpenGLTools OpenGL ClientTools)
-
+target_link_libraries(OpenGLTools PRIVATE ${OPENGL_LIBRARIES})
+target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 
 if (BUILD_TESTING)
 	add_subdirectory(test)
