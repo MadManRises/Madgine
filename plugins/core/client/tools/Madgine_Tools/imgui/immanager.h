@@ -10,7 +10,7 @@ struct ImGuiDockNode;
 namespace Engine {
 namespace Tools {
 
-    class MADGINE_TOOLS_EXPORT ImManager : public Engine::GUI::WindowOverlay {
+    class MADGINE_CLIENT_TOOLS_EXPORT ImManager : public Engine::GUI::WindowOverlay {
     public:
         ImManager(GUI::TopLevelWindow &window);
         virtual ~ImManager();
