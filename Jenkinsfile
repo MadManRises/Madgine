@@ -79,7 +79,8 @@ def staticTask = {
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
 				-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
 				-DPLUGIN_DEFINITION_FILE=plugins.cfg \
-				-DBUILD_SHARED_LIBS=OFF
+				-DBUILD_SHARED_LIBS=OFF \
+				${cmake_args}
 				"""						
 			}
 			stage("build") {				
@@ -136,7 +137,8 @@ def task = {
 					cmake .. \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
 					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
-					-DBUILD_SHARED_LIBS=ON
+					-DBUILD_SHARED_LIBS=ON \
+					${cmake_args}
 					"""
 				}
 				stage("build") {				
@@ -200,6 +202,8 @@ pipeline {
 
 	parameters {
         booleanParam(defaultValue: false, description: '', name: 'fullBuild')
+		booleanParam(defaultValue: false, description: '', name: 'timeTrace')
+		booleanParam(defaultValue: false, description: '', name: 'iwyu')
     }
 
 	options{
@@ -218,6 +222,13 @@ pipeline {
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
+					cmake_args = ""
+					if (params.timeTrace){
+						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
+					}
+					if (params.iwyu){
+						cmake_args = cmake_args + "-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/home/jenkins/tools/usr/local/bin/include-what-you-use "
+					}
 				    parallel tasks
 			    }
 	        }
