@@ -202,7 +202,7 @@ pipeline {
 
 	parameters {
         booleanParam(defaultValue: false, description: '', name: 'fullBuild')
-		booleanParam(defaultValue: false, description: '', name: 'timeTrace')
+		booleanParam(defaultValue: true, description: '', name: 'timeTrace')
 		booleanParam(defaultValue: false, description: '', name: 'iwyu')
     }
 
