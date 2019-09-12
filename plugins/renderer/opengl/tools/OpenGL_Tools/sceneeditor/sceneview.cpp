@@ -96,6 +96,7 @@ namespace Tools {
     void SceneView::render()
     {
         ImGui::PushID(this);
+        ImGui::SetNextWindowSizeConstraints({ 100, 100 }, { 1000000, 1000000 });
         if (ImGui::Begin("SceneView")) {
             mRenderTarget->resize(ImGui::GetContentRegionAvail());
             bool pressed = mManager.render(*mRenderTarget);

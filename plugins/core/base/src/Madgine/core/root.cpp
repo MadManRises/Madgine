@@ -29,8 +29,6 @@ namespace Core {
 #if ENABLE_PLUGINS
                     mPluginManager->loadCurrentSelectionFile();
 
-        (*mPluginManager)["Utility"].loadPlugin("Tools");
-
         (*mPluginManager)["Core"].loadPlugin("Client");
 
         (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
