@@ -3,16 +3,16 @@
 /// @cond
 
 #if defined(STATIC_BUILD)
-#	define MADGINE_OPENGL_EXPORT
-#	define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
+#    define MADGINE_OPENGL_EXPORT
+#    define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
 #else
-#	if defined(OpenGL_EXPORTS)
-#		define MADGINE_OPENGL_EXPORT DLL_EXPORT
-#		define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
-#	else
-#		define MADGINE_OPENGL_EXPORT DLL_IMPORT
-#		define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
-#	endif
+#    if defined(OpenGL_EXPORTS)
+#        define MADGINE_OPENGL_EXPORT DLL_EXPORT
+#        define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
+#    else
+#        define MADGINE_OPENGL_EXPORT DLL_IMPORT
+#        define MADGINE_OPENGL_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
+#    endif
 #endif
 
 #include "openglforward.h"
@@ -20,25 +20,26 @@
 #include "Madgine/clientlib.h"
 
 #if !ANDROID && !EMSCRIPTEN
-#include "../glad/glad.h"
+#    include "../glad/glad.h"
 #else
-#include <GLES3/gl3.h>
+#    include <GLES3/gl3.h>
 #endif
 
-inline void glCheck() { 
-	int e = glGetError(); 
-	if (e)
-	{
-		LOG("GL-Error: " << e);
-		throw e;
-	}
+inline void glCheck()
+{
+    int e = glGetError();
+    if (e) {
+        LOG("GL-Error: " << e);
+        std::terminate();
+        throw e;
+    }
 }
 
 #define GL_CHECK() glCheck()
 
 #if WINDOWS
 
-#undef NO_ERROR
+#    undef NO_ERROR
 typedef HGLRC ContextHandle;
 
 #elif LINUX
@@ -55,10 +56,8 @@ typedef EGLContext ContextHandle;
 
 #else
 
-#error "Unsupported Platform!"
+#    error "Unsupported Platform!"
 
 #endif
-
-
 
 /// @endcond
