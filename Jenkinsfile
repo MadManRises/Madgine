@@ -227,7 +227,7 @@ pipeline {
 						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
 					}
 					if (params.iwyu){
-						cmake_args = cmake_args + "-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/home/jenkins/tools/usr/local/bin/include-what-you-use "
+						cmake_args = cmake_args + """-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE="/home/jenkins/tools/usr/local/bin/include-what-you-use;-Xiwyu;--pch_in_code;-Xiwyu;--prefix_header_includes=remove" """
 					}
 				    parallel tasks
 			    }
