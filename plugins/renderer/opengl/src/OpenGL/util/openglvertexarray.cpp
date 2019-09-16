@@ -49,7 +49,7 @@ namespace Render {
         glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &dummy);
         return dummy;
 #else
-        return reinterpret_cast<unsigned int>(sCurrentBound);
+        return reinterpret_cast<uintptr_t>(sCurrentBound);
 #endif
     }
 
