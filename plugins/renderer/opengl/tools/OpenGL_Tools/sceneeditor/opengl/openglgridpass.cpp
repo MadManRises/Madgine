@@ -23,18 +23,10 @@ namespace Tools {
         mVAO.bind();
 
         mVertexBuffer.bind(GL_ARRAY_BUFFER);
-        GL_CHECK();
-        glVertexAttribPointer(
-            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            4, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vector4), // stride
-            (void *)0 // array buffer offset
-        );
-        glEnableVertexAttribArray(0);
-        GL_CHECK();
+        mIndexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
 
+		mVAO.enableVertexAttribute(0, 4, GL_FLOAT, sizeof(Vector4), 0);
+        
         Vector4 vertices[] = {
             { 0, 0, 0, 1 }, { 1, 0, 0, 0 }, { 0, 0, 1, 0 }, { -1, 0, 0, 0 }, { 0, 0, -1, 0 }/*,
             { 0, 0, 0, 1 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -1, 0, 0 }, { 0, 0, -1, 0 },
@@ -59,27 +51,13 @@ namespace Tools {
 
         mVAO.bind();
 
-        mVertexBuffer.bind(GL_ARRAY_BUFFER);
-        mIndexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
-        GL_CHECK();
-        glVertexAttribPointer(
-            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            4, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vector4), // stride
-            (void *)0 // array buffer offset
-        );
-        glEnableVertexAttribArray(0);
-        GL_CHECK();
-
         glDrawElements(
             GL_TRIANGLES, // mode
             12, // count
             GL_UNSIGNED_INT, // type
             (void *)0 // element array buffer offset
         );
-
+        GL_CHECK();
 
     }
 }

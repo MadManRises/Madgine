@@ -86,7 +86,7 @@ namespace Tools {
         if (pass)
             mRenderTarget->addPostRenderPass(std::move(pass));
 
-        mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
+        //mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
     }
 
     SceneView::~SceneView()

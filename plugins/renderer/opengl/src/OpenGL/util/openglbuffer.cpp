@@ -2,6 +2,10 @@
 
 #include "openglbuffer.h"
 
+#if OPENGL_ES
+#    include "openglvertexarray.h"
+#endif
+
 namespace Engine {
 namespace Render {
 
@@ -42,7 +46,14 @@ namespace Render {
     void OpenGLBuffer::bind(GLenum target) const
     {
         glBindBuffer(target, mHandle);
-        glCheck();
+        GL_LOG("Bind Buffer " << target << " -> " << mHandle);
+        GL_CHECK();
+#if OPENGL_ES
+        if (target == GL_ELEMENT_ARRAY_BUFFER)
+            OpenGLVertexArray::onBindEBO(mHandle);
+        if (target == GL_ARRAY_BUFFER)
+            OpenGLVertexArray::onBindVBO(mHandle);
+#endif
     }
 
     void OpenGLBuffer::setData(GLenum target, GLsizei size, const void *data)

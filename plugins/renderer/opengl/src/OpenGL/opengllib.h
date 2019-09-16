@@ -21,21 +21,28 @@
 
 #if !ANDROID && !EMSCRIPTEN
 #    include "../glad/glad.h"
+#    define OPENGL_ES 0
 #else
 #    include <GLES3/gl3.h>
+#    define OPENGL_ES 1
 #endif
+
+MADGINE_OPENGL_EXPORT void glDump();
 
 inline void glCheck()
 {
     int e = glGetError();
     if (e) {
         LOG("GL-Error: " << e);
+        glDump();
         std::terminate();
         throw e;
     }
 }
 
 #define GL_CHECK() glCheck()
+//#define GL_LOG(x) LOG("GL: " << x)
+#define GL_LOG(x)
 
 #if WINDOWS
 

@@ -94,35 +94,11 @@ namespace Render {
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
 
-        glVertexAttribPointer(
-            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex), // stride
-            (void *)offsetof(Vertex, mPos) // array buffer offset
-        );
-        glEnableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glVertexAttribPointer(
-            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            4, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex), // stride
-            (void *)offsetof(Vertex, mColor) // array buffer offset
-        );
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(
-            3, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex), // stride
-            (void *)offsetof(Vertex, mNormal) // array buffer offset
-        );
-        glEnableVertexAttribArray(3);
-        glDisableVertexAttribArray(4);
+        data.mVAO.enableVertexAttribute(0, &Vertex::mPos);
+        data.mVAO.disableVertexAttribute(1);
+        data.mVAO.enableVertexAttribute(2, &Vertex::mColor);
+        data.mVAO.enableVertexAttribute(3, &Vertex::mNormal);
+        data.mVAO.disableVertexAttribute(4);
 
         update(data, groupSize, vertices, vertexCount, indices, indexCount);
 
@@ -141,44 +117,11 @@ namespace Render {
 
         data.mVertices.bind(GL_ARRAY_BUFFER);
 
-        glVertexAttribPointer(
-            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex2), // stride
-            (void *)offsetof(Vertex2, mPos) // array buffer offset
-        );
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            1, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            2, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex2), // stride
-            (void *)offsetof(Vertex2, mPos2) // array buffer offset
-        );
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(
-            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            4, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex2), // stride
-            (void *)offsetof(Vertex2, mColor) // array buffer offset
-        );
-        glEnableVertexAttribArray(2);
-        glDisableVertexAttribArray(3);
-		glVertexAttribPointer(
-            4, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            2, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(Vertex2), // stride
-            (void *)offsetof(Vertex2, mUV) // array buffer offset
-        );
-        glEnableVertexAttribArray(4);       
-
+        data.mVAO.enableVertexAttribute(0, &Vertex2::mPos);
+        data.mVAO.enableVertexAttribute(1, &Vertex2::mPos2);
+        data.mVAO.enableVertexAttribute(2, &Vertex2::mColor);
+        data.mVAO.disableVertexAttribute(3);
+        data.mVAO.enableVertexAttribute(4, &Vertex2::mUV);
 
         update(data, groupSize, vertices, vertexCount, indices, indexCount);
 

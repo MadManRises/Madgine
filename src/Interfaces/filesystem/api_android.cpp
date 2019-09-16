@@ -267,7 +267,7 @@ namespace Engine {
 			AAsset *mAsset;
 		};
 
-		InStream readFile(const Path & p)
+		InStream openFile(const Path & p)
 		{
 			if (isAssetPath(p))
 			{

@@ -22,6 +22,8 @@
 
 #include "im3d/im3d.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -296,5 +298,8 @@ namespace Tools {
 }
 
 DEFINE_UNIQUE_COMPONENT(Engine::Tools, ImManager)
+
+METATABLE_BEGIN(Engine::Tools::ImManager)
+METATABLE_END(Engine::Tools::ImManager)
 
 RegisterType(Engine::Tools::ImManager)

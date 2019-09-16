@@ -19,6 +19,7 @@ endif()
 
 target_depend_on_all_plugins(MadgineLauncher)
 
+target_link_libraries(MadgineLauncher PRIVATE freetype)
 generate_binary_info(MadgineLauncher)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)

@@ -210,7 +210,7 @@ namespace Render {
             glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
         } else
             glDrawArrays(mode, 0, mesh->mElementCount);
-        glCheck();
+        GL_CHECK();
     }
 
     void OpenGLRenderTexture::renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms)

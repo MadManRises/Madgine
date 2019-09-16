@@ -28,10 +28,6 @@
 namespace Engine {
 namespace Render {
 
-    static GLuint vertexbuffer = 0;
-
-    static GLuint vao;
-
     OpenGLRenderWindow::OpenGLRenderWindow(Window::Window *w, ContextHandle context, GUI::TopLevelWindow *topLevelWindow)
         : RenderWindow(w)
         , mContext(context)
@@ -46,54 +42,13 @@ namespace Render {
         mProgram.setUniform("textures[0]", 0);
         mProgram.setUniform("textures[1]", 1);
 
-        glGenVertexArrays(1, &vao);
-        GL_CHECK();
-        glBindVertexArray(vao);
-        GL_CHECK();
+        mVAO.bind();
 
-        // Generate 1 buffer, put the resulting identifier in vertexbuffer
-        glGenBuffers(1, &vertexbuffer);
-        GL_CHECK();
+        mVBO.bind(GL_ARRAY_BUFFER);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        GL_CHECK();
-        glVertexAttribPointer(
-            0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(GUI::Vertex), // stride
-            (void *)offsetof(GUI::Vertex, mPos) // array buffer offset
-        );
-        glEnableVertexAttribArray(0);
-        GL_CHECK();
-        glVertexAttribPointer(
-            1, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            4, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(GUI::Vertex), // stride
-            (void *)offsetof(GUI::Vertex, mColor) // array buffer offset
-        );
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(
-            2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            2, // size
-            GL_FLOAT, // type
-            GL_FALSE, // normalized?
-            sizeof(GUI::Vertex), // stride
-            (void *)offsetof(GUI::Vertex, mUV) // array buffer offset
-        );
-        glEnableVertexAttribArray(2);
-        /*glVertexAttribPointer(
-            3, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            1, // size
-            GL_UNSIGNED_INT, // type
-            GL_FALSE,
-            sizeof(GUI::Vertex), // stride
-            (void *)offsetof(GUI::Vertex, mTextureIndex) // array buffer offset
-        );
-        glEnableVertexAttribArray(3);*/
+        mVAO.enableVertexAttribute(0, &GUI::Vertex::mPos);
+        mVAO.enableVertexAttribute(1, &GUI::Vertex::mColor);
+        mVAO.enableVertexAttribute(2, &GUI::Vertex::mUV);
 
         mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         Vector4 borderColor = { 1, 1, 1, 1 };
@@ -165,44 +120,10 @@ namespace Render {
 
             if (!vertices.empty()) {
 
-                glBindVertexArray(vao);
-                GL_CHECK();
+				mVAO.bind();
 
-                glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-                GL_CHECK();
+				mVBO.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data());
 
-                glVertexAttribPointer(
-                    0, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                    3, // size
-                    GL_FLOAT, // type
-                    GL_FALSE, // normalized?
-                    sizeof(GUI::Vertex), // stride
-                    (void *)offsetof(GUI::Vertex, mPos) // array buffer offset
-                );
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(
-                    1, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                    4, // size
-                    GL_FLOAT, // type
-                    GL_FALSE, // normalized?
-                    sizeof(GUI::Vertex), // stride
-                    (void *)offsetof(GUI::Vertex, mColor) // array buffer offset
-                );
-                glEnableVertexAttribArray(1);
-                glVertexAttribPointer(
-                    2, // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                    2, // size
-                    GL_FLOAT, // type
-                    GL_FALSE, // normalized?
-                    sizeof(GUI::Vertex), // stride
-                    (void *)offsetof(GUI::Vertex, mUV) // array buffer offset
-                );
-                glEnableVertexAttribArray(2);
-
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
-                GL_CHECK();
-
-                // Draw the triangle !
                 glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle
                 GL_CHECK();
             }

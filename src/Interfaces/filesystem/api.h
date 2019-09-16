@@ -10,7 +10,9 @@ namespace Engine {
 		INTERFACES_EXPORT Path configPath();
 
 		INTERFACES_EXPORT Path makeNormalized(const char *p);
-
+		
+		INTERFACES_EXPORT Path getCwd();
+		INTERFACES_EXPORT void setCwd(const Path &p);
 		INTERFACES_EXPORT void createDirectory(const Path &p);
 		INTERFACES_EXPORT void createDirectories(const Path &p);
 		INTERFACES_EXPORT bool exists(const Path &p);
@@ -20,6 +22,6 @@ namespace Engine {
 		INTERFACES_EXPORT bool isEqual(const Path &p1, const Path &p2);
 
 		//INTERFACES_EXPORT std::vector<char> readFile(const Path &p);
-		INTERFACES_EXPORT InStream readFile(const Path &p);
+		INTERFACES_EXPORT InStream openFile(const Path &p);
 	}
 }

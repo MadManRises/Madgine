@@ -55,13 +55,17 @@ namespace Filesystem {
     Path Path::parentPath() const
     {
         auto sep = mPath.rfind('/');
-        return sep == std::string::npos ? std::string {} : mPath.substr(0, sep);
+        if (sep == std::string::npos)
+            return {};
+        std::string result = mPath.substr(0, sep);
+        if (result.empty())
+            result = "/";
+        return result;
     }
 
     Path Path::relative(const Path &base) const
     {
         size_t baseCount = base.mPath.size();
-        ;
         size_t count = mPath.size();
 
         if (baseCount >= count)
@@ -101,7 +105,7 @@ namespace Filesystem {
 
     bool Path::isAbsolute() const
     {
-        return Filesystem::isAbsolute(mPath);
+        return Filesystem::isAbsolute(*this);
     }
 
     bool Path::isRelative() const

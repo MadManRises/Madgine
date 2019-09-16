@@ -36,11 +36,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	set(CLANG 1)
 endif()
 
+set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+set (CMAKE_C_VISIBILITY_PRESET hidden)
 
 if (GCC OR CLANG)
 	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization)
 	if (NOT MSVC)
-		add_compile_options(-Wall -fpermissive -fvisibility=hidden)
+		add_compile_options(-Wall -fpermissive)
 	endif()
 	if (EMSCRIPTEN) #TODO add more
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")

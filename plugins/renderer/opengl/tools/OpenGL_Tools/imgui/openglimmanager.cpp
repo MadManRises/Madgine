@@ -19,6 +19,8 @@
 #include "OpenGL/openglfontloader.h"
 #include "OpenGL/openglfontdata.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -74,5 +76,8 @@ namespace Tools {
 }
 
 UNIQUECOMPONENT(Engine::Tools::OpenGLImManager)
+
+METATABLE_BEGIN(Engine::Tools::OpenGLImManager)
+METATABLE_END(Engine::Tools::OpenGLImManager)
 
 RegisterType(Engine::Tools::OpenGLImManager)

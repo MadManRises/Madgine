@@ -5,6 +5,8 @@
 #include "openglshaderprogram.h"
 
 #include "util/opengltexture.h"
+#include "util/openglvertexarray.h"
+#include "util/openglbuffer.h"
 
 namespace Engine {
 namespace Render {
@@ -27,6 +29,9 @@ namespace Render {
         OpenGLShaderProgram mProgram;
 
         OpenGLTexture mDefaultTexture;
+
+		OpenGLVertexArray mVAO;
+        OpenGLBuffer mVBO;
 
 		GUI::TopLevelWindow *mTopLevelWindow = nullptr;
     };
