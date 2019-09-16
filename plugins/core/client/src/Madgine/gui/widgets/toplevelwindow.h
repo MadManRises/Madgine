@@ -121,8 +121,6 @@ namespace GUI {
         //virtual App::Application &app(bool = true) override;
         //virtual const Core::MadgineObject *parent() const override;
 
-        UI::UIManager &ui();
-
         ToolWindow *createToolWindow(const Window::WindowSettings &settings);
         void destroyToolWindow(ToolWindow *w);
 
@@ -163,7 +161,6 @@ namespace GUI {
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
         std::map<std::string, Widget *> mWidgets;
-        std::unique_ptr<UI::UIManager> mUI;
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 

@@ -44,7 +44,6 @@ namespace Engine {
 namespace GUI {
     TopLevelWindow::TopLevelWindow(GUISystem &gui)
         : mGui(gui)
-        , mUI(std::make_unique<UI::UIManager>(*this))
         , mComponents(*this)
     {
         const App::AppSettings &settings = App::Application::getSingleton().settings();
@@ -161,11 +160,8 @@ namespace GUI {
         Widget *backButton = lobbyListMenu->createChildButton("BackButton");
         Widget *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
 
-        bool result = mUI->callInit();
-        assert(result);
-
         for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
-            result = comp->callInit();
+            bool result = comp->callInit();
             assert(result);
         }
     }
@@ -176,12 +172,8 @@ namespace GUI {
             comp->callFinalize();            
         }
 
-        mUI->callFinalize();
-
         App::Application::getSingleton().removeFrameListener(this);
         mWindow->removeListener(this);
-
-        mUI.reset();
 
         mTopLevelWidgets.clear();
 
@@ -396,11 +388,6 @@ namespace GUI {
     std::unique_ptr<Textbox> TopLevelWindow::createTextbox(const std::string &name)
     {
         return std::make_unique<Textbox>(name, *this);
-    }
-
-    UI::UIManager &TopLevelWindow::ui()
-    {
-        return *mUI;
     }
 
     ToolWindow *TopLevelWindow::createToolWindow(const Window::WindowSettings &settings)

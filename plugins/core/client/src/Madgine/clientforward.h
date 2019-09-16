@@ -6,7 +6,7 @@ namespace UI {
     class Handler;
     class GameHandlerBase;
     class GuiHandlerBase;
-    class UIManager;
+    struct UIManager;
 }
 
 namespace GUI {

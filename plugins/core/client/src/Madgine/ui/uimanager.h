@@ -7,12 +7,12 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "../gui/widgets/toplevelwindow.h"
+
 namespace Engine {
 namespace UI {
-    class MADGINE_CLIENT_EXPORT UIManager : public ScopeBase,
-                                            public MadgineObject,
-                                            public Threading::FrameListener {
-    public:
+    struct MADGINE_CLIENT_EXPORT UIManager : GUI::TopLevelWindowComponent<UIManager>,
+                                             Threading::FrameListener {
         UIManager(GUI::TopLevelWindow &window);
         ~UIManager();
 
@@ -70,14 +70,12 @@ namespace UI {
         //KeyValueMapList maps() override;
 
     private:
-        GUI::TopLevelWindow &mWindow;        
-		
-		Vector2 mKeptCursorPosition;
+
+        Vector2 mKeptCursorPosition;
         bool mKeepingCursorPos = false;
 
-		GuiHandlerContainer<std::vector> mGuiHandlers;
-        GameHandlerContainer<std::vector> mGameHandlers;    
-        
+        GuiHandlerContainer<std::vector> mGuiHandlers;
+        GameHandlerContainer<std::vector> mGameHandlers;
     };
 }
 }

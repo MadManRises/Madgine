@@ -20,7 +20,7 @@ namespace Engine {
 namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
-        : mWindow(window)
+        : UniqueComponent(window)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
@@ -246,6 +246,8 @@ namespace UI {
 
 }
 }
+
+UNIQUECOMPONENT(Engine::UI::UIManager)
 
 METATABLE_BEGIN(Engine::UI::UIManager)
 METATABLE_END(Engine::UI::UIManager)
