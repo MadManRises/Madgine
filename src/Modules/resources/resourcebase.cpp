@@ -39,7 +39,7 @@ namespace Resources {
 
     std::string ResourceBase::readAsText()
     {
-        InStream buffer = Filesystem::readFile(mPath);
+        InStream buffer = Filesystem::openFile(mPath);
         return std::string { buffer.begin(), buffer.end() };
         /*std::string result(buffer.size(), ' ');
 			auto it = std::copy_if(buffer.begin(), buffer.end(), result.begin(), [](char c) {return c != '\r'; });
