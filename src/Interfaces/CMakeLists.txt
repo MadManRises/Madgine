@@ -27,7 +27,7 @@ FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforw
 	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
-add_workspace_library(Interfaces ${sources} ${CMAKE_CURRENT_SOURCE_DIR}/../../misc/Madgine.natvis SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
+add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
 
 configure_file(interfacesconfig.in.h interfacesconfig.h)
 target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
