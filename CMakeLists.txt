@@ -45,6 +45,8 @@ multiConfig(Madgine)
 
 add_subdirectory(src)
 
+add_subdirectory(shared)
+
 add_subdirectory(plugins)
 
 add_subdirectory(launcher)

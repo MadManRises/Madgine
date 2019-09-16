@@ -1,3 +1,4 @@
 add_subdirectory(base)
+add_subdirectory(tools)
 add_subdirectory(client)
 add_subdirectory(server)
