@@ -2,8 +2,11 @@
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp)
+if (EMSCRIPTEN)
+	FolderSources(sources "" emscripten emscripten_main.cpp)
+endif(EMSCRIPTEN)
 if (ANDROID)
-	FolderSources(sources "" android androidlauncher.cpp androidlauncher.h)
+	FolderSources(sources "" android android_main.cpp androidlauncher.cpp androidlauncher.h)
 endif(ANDROID)
 
 add_workspace_application(MadgineLauncher ${sources})

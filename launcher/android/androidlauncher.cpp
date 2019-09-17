@@ -13,6 +13,8 @@
 
 #include "Interfaces/threading/systemvariable.h"
 
+extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root);
+
 namespace Engine {
 namespace Filesystem {
     extern AAssetManager *sAssetManager;
@@ -56,15 +58,10 @@ namespace Android {
         ANativeActivity *activity = mActivity;
 
         static Engine::Core::Root root;
-        Engine::App::AppSettings settings;
-        settings.mRunMain = false;
-        settings.mAppName = "Madgine Client";
-        settings.mWindowSettings.mTitle = "Maditor";
 
-        Application app(settings);
-        mApp = &app;
-        Threading::Scheduler(workGroup, { &app.frameLoop() }).go();
-        ANativeActivity_finish(activity);
+		launch(workGroup, root);
+		
+		ANativeActivity_finish(activity);
     }
 
     void AndroidLauncher::onDestroy()
