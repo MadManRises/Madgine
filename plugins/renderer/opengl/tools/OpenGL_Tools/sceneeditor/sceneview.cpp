@@ -38,7 +38,7 @@
 
 #include "Madgine/scene/entity/entity.h"
 
-#include "Madgine/scene/entity/components/mesh.h"
+#include "OpenGL/openglmesh.h"
 
 #include "inspector/inspector.h"
 
@@ -86,7 +86,7 @@ namespace Tools {
         if (pass)
             mRenderTarget->addPostRenderPass(std::move(pass));
 
-        //mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
+        mRenderTarget->addPostRenderPass(std::make_unique<Render::Im3DRenderPass>());
     }
 
     SceneView::~SceneView()
@@ -204,7 +204,7 @@ namespace Tools {
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::Entity *e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
                     e->addComponent<Scene::Entity::Transform>()->setPosition(pos);
-                    e->addComponent<Scene::Entity::Mesh>()->setName(resource->name());
+                    e->addComponent<Render::OpenGLMesh>()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
