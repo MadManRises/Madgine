@@ -24,18 +24,6 @@
 
 #pragma once
 
-// Specific OpenGL versions
-//#define IMGUI_IMPL_OPENGL_ES2     // Auto-detected on Emscripten
-//#define IMGUI_IMPL_OPENGL_ES3     // Auto-detected on iOS/Android
-
-// Set default OpenGL3 loader to be gl3w
-#if !defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)     \
- && !defined(IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
-#    define IMGUI_IMPL_OPENGL_LOADER_GLAD
-#endif
-
 bool     ImGui_ImplOpenGL3_Init(const char* glsl_version = NULL);
 void     ImGui_ImplOpenGL3_Shutdown();
 void     ImGui_ImplOpenGL3_NewFrame();

@@ -61,9 +61,11 @@ namespace Render {
         //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
         glCheck();
 
+#if !OPENGL_ES
         GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, DrawBuffers);
         glCheck();
+#endif
 
         if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
             throw 0;
@@ -170,20 +172,19 @@ namespace Render {
 
     void OpenGLRenderTexture::setupProgram(RenderPassFlags flags, unsigned int textureId)
     {
-        
+
         mProgram.bind();
 
-		mProgram.setUniform("hasLight", !(flags & RenderPassFlags_NoLighting));
+        mProgram.setUniform("hasLight", !(flags & RenderPassFlags_NoLighting));
 
-		mProgram.setUniform("hasDistanceField", !!(flags & RenderPassFlags_DistanceField));
+        mProgram.setUniform("hasDistanceField", !!(flags & RenderPassFlags_DistanceField));
 
-		mProgram.setUniform("hasTexture", textureId != 0);
-		if (textureId) {
+        mProgram.setUniform("hasTexture", textureId != 0);
+        if (textureId) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textureId);
             glCheck();
-		}
-
+        }
     }
 
     void OpenGLRenderTexture::renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix)
