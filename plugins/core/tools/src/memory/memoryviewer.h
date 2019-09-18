@@ -43,7 +43,7 @@ namespace Engine
 				SIZE_SORTING
 			};
 
-			MemoryViewer(ImGuiRoot &root);
+			MemoryViewer(ImRoot &root);
 
 			virtual void render() override;
 

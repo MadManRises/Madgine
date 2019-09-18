@@ -7,13 +7,11 @@
 #include "imgui/imgui_internal.h"
 #include "imgui/imguiaddons.h"
 
-#include "../renderer/imguiroot.h"
-#include "Madgine/app/application.h"
+#include "../renderer/imroot.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
-//#include "Modules/generic/keyvalueiterate.h"
-#include "Modules/math/math.h"
+//#include "Modules/math/math.h"
 
 #include "Interfaces/debug/memory/memory.h"
 
@@ -43,14 +41,14 @@ namespace Engine
 			return descending ? "v" : "^";
 		}
 
-		MemoryViewer::MemoryViewer(ImGuiRoot & root) :
+		MemoryViewer::MemoryViewer(ImRoot & root) :
 			Tool<MemoryViewer>(root),
 			mTracker(Debug::Memory::MemoryTracker::getSingleton())
 		{
 		}
 
 		bool MemoryViewer::traceLevel(const Engine::Debug::TraceBack &traceback, size_t size, bool leaf) {
-			bool opened = ImGui::SpanningTreeNode(&traceback, traceback.mFunction, leaf);
+			ImGui::BeginSpanningTreeNode(&traceback, traceback.mFunction, leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
 			ImGui::NextColumn();
 			if (mShowAddress) {
@@ -66,7 +64,7 @@ namespace Engine
 			ImGui::Text("%zu", size);
 			ImGui::NextColumn();
 
-			return opened;
+			return ImGui::EndSpanningTreeNode();
 
 		}
 
@@ -130,7 +128,7 @@ namespace Engine
 
 		static int methodNameSorting(const Item& first, const Item& second)
 		{		
-			return Math::Sign(methodNameCmp(first, second));			
+			return sign(methodNameCmp(first, second));			
 		}
 
 		static int addressSorting(const Item& first, const Item& second)

@@ -400,7 +400,7 @@ void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags
 
     bool b = ImGui::Selectable(label, false, ImGuiSelectableFlags_SpanAllColumns);
 
-    if (b) {
+    if (b && !(flags & ImGuiTreeNodeFlags_Leaf)) {
         ImGuiStorage *storage = ImGui::GetStateStorage();
         bool *opened = storage->GetBoolRef(ImGui::GetID("treeArrow"));
         *opened = !*opened;

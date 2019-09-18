@@ -41,4 +41,8 @@ T max(const T &a, const T &b)
     return a > b ? a : b;
 }
 
+constexpr int sign(int i) {
+    return i == 0 ? 0 : (i < 0 ? -1 : 1);
+}
+
 }
