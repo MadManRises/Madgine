@@ -58,6 +58,20 @@ namespace Resources {
             return mResources.end();
         }
 
+        virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() override
+        {
+            std::vector<std::pair<std::string, TypedScopePtr>> result;
+            std::transform(mResources.begin(), mResources.end(), std::back_inserter(result), [](std::pair<const std::string, ResourceType> &p) {
+                return std::make_pair(p.first, &p.second);
+            });
+            return result;
+        }
+
+        virtual const MetaTable *resourceType() const override
+        {
+            return &table<ResourceType>();
+        }
+
         std::map<std::string, ResourceType> mResources;
     };
 

@@ -24,6 +24,9 @@ namespace Resources {
 
         size_t extensionIndex(const std::string &ext) const;
 
+		virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() = 0;
+        virtual const MetaTable *resourceType() const = 0;
+
     private:
         std::vector<std::string> mExtensions;
 
