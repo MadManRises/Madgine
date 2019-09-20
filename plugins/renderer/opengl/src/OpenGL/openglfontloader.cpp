@@ -174,12 +174,12 @@ namespace Render {
             Vector2i pos = entries[c].mArea.mTopLeft;
             if (entries[c].mFlipped)
                 std::swap(size.x, size.y);
-            pos = { pos.x, areaSize * UNIT_SIZE - pos.y - size.y };
+            pos = { pos.x, pos.y };
 
             std::unique_ptr<Vector4[]> colors = std::make_unique<Vector4[]>(size.x * size.y);
             for (int y = 0; y < size.y; ++y) {
                 for (int x = 0; x < size.x; ++x) {
-                    int index = (size.y - y - 1) * size.x + x;
+                    int index = y * size.x + x;
                     int sourceIndex = entries[c].mFlipped ? x * size.y + y : y * size.x + x;
 
                     colors[index] = /*Vector4 { 1, 1, 1, 1 } * (face->glyph->bitmap.buffer[sourceIndex] / 255.0f)*/

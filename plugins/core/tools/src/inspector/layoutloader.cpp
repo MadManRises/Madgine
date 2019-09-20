@@ -31,4 +31,7 @@ namespace Engine {
 METATABLE_BEGIN(Engine::Tools::LayoutLoader)
 METATABLE_END(Engine::Tools::LayoutLoader)
 
+METATABLE_BEGIN(Engine::Tools::LayoutLoader::ResourceType)
+METATABLE_END(Engine::Tools::LayoutLoader::ResourceType)
+
 RegisterType(Engine::Tools::LayoutLoader);

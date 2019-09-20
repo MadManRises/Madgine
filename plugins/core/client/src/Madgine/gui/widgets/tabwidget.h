@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class TabWidget : public Widget
+		class TabWidget : public Widget<TabWidget>
 		{
 		public:			
 			using Widget::Widget;

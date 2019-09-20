@@ -2,6 +2,11 @@
 
 #include "combobox.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::GUI::Combobox)
+METATABLE_END(Engine::GUI::Combobox)
+
 namespace Engine
 {
 	namespace GUI

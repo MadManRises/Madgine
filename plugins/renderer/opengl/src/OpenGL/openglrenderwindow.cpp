@@ -25,6 +25,8 @@
 
 #include "Interfaces/window/windowapi.h"
 
+#include "imagedata.h"
+
 namespace Engine {
 namespace Render {
 
@@ -32,6 +34,7 @@ namespace Render {
         : RenderWindow(w)
         , mContext(context)
         , mTopLevelWindow(topLevelWindow)
+        , mUIAtlas({ 512, 512 })
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("ui_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("ui_PS");
@@ -39,8 +42,7 @@ namespace Render {
         if (!mProgram.link(vertexShader.get(), pixelShader.get()))
             throw 0;
 
-        mProgram.setUniform("textures[0]", 0);
-        mProgram.setUniform("textures[1]", 1);
+        mProgram.setUniform("texture", 0);
 
         mVAO.bind();
 
@@ -94,38 +96,62 @@ namespace Render {
 
             mProgram.bind();
 
-            std::vector<GUI::Vertex> vertices;
+            std::map<uint32_t, std::vector<GUI::Vertex>> vertices;
 
-            std::queue<std::pair<GUI::Widget *, int>> q;
-            for (GUI::Widget *w : mTopLevelWindow->widgets()) {
+            std::queue<std::pair<GUI::WidgetBase *, int>> q;
+            for (GUI::WidgetBase *w : mTopLevelWindow->widgets()) {
                 if (w->isVisible()) {
                     q.push(std::make_pair(w, 0));
                 }
             }
             while (!q.empty()) {
 
-                GUI::Widget *w = q.front().first;
+                GUI::WidgetBase *w = q.front().first;
                 int depth = q.front().second;
                 q.pop();
 
-                for (GUI::Widget *c : w->children()) {
+                for (GUI::WidgetBase *c : w->children()) {
                     if (c->isVisible())
                         q.push(std::make_pair(c, depth + 1));
                 }
 
-                std::vector<GUI::Vertex> localVertices = w->vertices(screenSize);
+                std::pair<std::vector<GUI::Vertex>, uint32_t> localVertices = w->vertices(screenSize);
 
-                std::move(localVertices.begin(), localVertices.end(), std::back_inserter(vertices));
+                Resources::ImageLoader::ResourceType *resource = w->resource();
+                if (resource) {
+                    auto it = mUIAtlasEntries.find(resource);
+                    if (it == mUIAtlasEntries.end()) {
+                        std::shared_ptr<Resources::ImageData> data = resource->loadData();
+                        it = mUIAtlasEntries.try_emplace(resource, mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { expandUIAtlas(); })).first;
+                        mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, data->mBuffer, GL_UNSIGNED_BYTE);
+                    }
+
+                    std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const GUI::Vertex &v) {
+                        return GUI::Vertex {
+                            v.mPos,
+                            v.mColor,
+                            { (it->second.mArea.mSize.x / (512.f * mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (512.f * mUIAtlasSize),
+                                (it->second.mArea.mSize.y / (512.f * mUIAtlasSize)) * v.mUV.y + it->second.mArea.mTopLeft.y / (512.f * mUIAtlasSize) }
+                        };
+                    });
+
+                } else {
+                    std::move(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]));
+                }
             }
 
-            if (!vertices.empty()) {
+            mVAO.bind();
 
-				mVAO.bind();
+            for (const std::pair<const uint32_t, std::vector<GUI::Vertex>> &p : vertices) {
+                if (!p.second.empty()) {
 
-				mVBO.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data());
+                    glBindTexture(GL_TEXTURE_2D, p.first != std::numeric_limits<uint32_t>::max() ? p.first : mUIAtlasTexture.handle());
 
-                glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle
-                GL_CHECK();
+                    mVBO.setData(GL_ARRAY_BUFFER, sizeof(p.second[0]) * p.second.size(), p.second.data());
+
+                    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(p.second.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle
+                    GL_CHECK();
+                }
             }
         }
     }
@@ -137,7 +163,31 @@ namespace Render {
 
     std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Scene::Camera *camera, const Vector2 &size)
     {
-        return std::make_unique<OpenGLRenderTexture>(this, ++mTextureCount, camera, size);
+        return std::make_unique<OpenGLRenderTexture>(this, camera, size);
+    }
+
+    void OpenGLRenderWindow::expandUIAtlas()
+    {
+        if (mUIAtlasSize == 0) {
+            mUIAtlasSize = 4;
+            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr);
+            for (int x = 0; x < mUIAtlasSize; ++x) {
+                for (int y = 0; y < mUIAtlasSize; ++y) {
+                    mUIAtlas.addBin({ 512 * x, 512 * y });
+                }
+			}
+        } else {
+            /*for (int x = 0; x < mUIAtlasSize; ++x) {
+                for (int y = 0; y < mUIAtlasSize; ++y) {
+                    mUIAtlas.addBin({ 512 * x, 512 * (y + mUIAtlasSize) });
+                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * y });
+                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * (y + mUIAtlasSize) });
+                }
+            }
+            mUIAtlasSize *= 2;
+            mUIAtlasTexture.resize({ 512 * mUIAtlasSize, 512 * mUIAtlasSize });*/
+            throw "TODO";
+        }
     }
 
 }

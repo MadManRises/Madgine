@@ -8,11 +8,14 @@
 
 #include "imgui/imguiaddons.h"
 
+#include "inspector/inspector.h"
+
 namespace Engine {
 namespace Tools {
 
-    WidgetSettings::WidgetSettings(GUI::Widget *widget)
+    WidgetSettings::WidgetSettings(GUI::WidgetBase *widget, Inspector &inspector)
         : mWidget(widget)
+        , mInspector(inspector)
     {
         mWidget->setUserData(this);
     }
@@ -22,7 +25,7 @@ namespace Tools {
         mWidget->setUserData(nullptr);
     }
 
-    GUI::Widget *WidgetSettings::widget()
+    GUI::WidgetBase *WidgetSettings::widget()
     {
         return mWidget;
     }
@@ -67,6 +70,10 @@ namespace Tools {
             enforceAspectRatio();
         if (!mEnforceAspectRatio)
             ImGui::PopDisabled();
+
+		ImGui::Separator();
+
+		mInspector.draw({ mWidget, mWidget->type() });
     }
 
     void WidgetSettings::saveGeometry()

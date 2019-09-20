@@ -1,121 +1,109 @@
 #pragma once
 
-#include "Modules/madgineobject/madgineobject.h"
 #include "Modules/keyvalue/scopebase.h"
+#include "Modules/madgineobject/madgineobject.h"
 #include "Modules/threading/slot.h"
 
-namespace Engine
-{
-	namespace UI
-	{
-		struct MADGINE_CLIENT_EXPORT WindowDescriber
-		{
-			WindowDescriber(const std::string& widgetName,
-			                std::function<bool(GUI::Widget*)> init) :
-				mWidgetName(widgetName),
-				mInit(init)
-			{
-			}
+namespace Engine {
+namespace UI {
+    struct MADGINE_CLIENT_EXPORT WindowDescriber {
+        WindowDescriber(const std::string &widgetName,
+            std::function<bool(GUI::WidgetBase *)> init)
+            : mWidgetName(widgetName)
+            , mInit(init)
+        {
+        }
 
-			std::string mWidgetName;
-			std::function<bool(GUI::Widget*)> mInit;
-		};
+        std::string mWidgetName;
+        std::function<bool(GUI::WidgetBase *)> mInit;
+    };
 
+    class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase {
+    public:
+        Handler(UIManager &ui, const std::string &windowName);
+        virtual ~Handler() = default;
 
-		class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase
-		{
-		public:
-			Handler(UIManager &ui, const std::string& windowName);
-			virtual ~Handler() = default;
+        virtual void onMouseVisibilityChanged(bool b);
 
-			virtual void onMouseVisibilityChanged(bool b);
+        GUI::WidgetBase *widget() const;
 
-			GUI::Widget* widget() const;
+        virtual void sizeChanged();
 
-			virtual void sizeChanged();
+        virtual const char *key() const = 0;
 
-			virtual const char* key() const = 0;
-			
+        //virtual App::Application &app(bool = true) override;
+        virtual const MadgineObject *parent() const override;
+        UIManager &ui(bool = true);
 
-			//virtual App::Application &app(bool = true) override;
-			virtual const MadgineObject *parent() const override;
-			UIManager &ui(bool = true);
+        template <class T>
+        T &getSceneComponent(bool init = true)
+        {
+            return static_cast<T &>(getSceneComponent(T::component_index(), init));
+        }
 
-			template <class T>
-			T &getSceneComponent(bool init = true)
-			{
-				return static_cast<T&>(getSceneComponent(T::component_index(), init));
-			}
+        Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
+        Scene::SceneManager &sceneMgr(bool = true);
 
-			Scene::SceneManager &sceneMgr(bool = true);
+        template <class T>
+        T &getGlobalAPIComponent(bool init = true)
+        {
+            return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
+        }
 
-			template <class T>
-			T &getGlobalAPIComponent(bool init = true)
-			{
-				return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
-			}
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        template <class T>
+        T &getGuiHandler(bool init = true)
+        {
+            return static_cast<T &>(getGuiHandler(T::component_index(), init));
+        }
 
-			template <class T>
-			T &getGuiHandler(bool init = true)
-			{
-				return static_cast<T&>(getGuiHandler(T::component_index(), init));
-			}
+        GuiHandlerBase &getGuiHandler(size_t i, bool = true);
 
-			GuiHandlerBase &getGuiHandler(size_t i, bool = true);
+        template <class T>
+        T &getGameHandler(bool init = true)
+        {
+            return static_cast<T &>(getGameHandler(T::component_index(), init));
+        }
 
-			template <class T>
-			T &getGameHandler(bool init = true)
-			{
-				return static_cast<T&>(getGameHandler(T::component_index(), init));
-			}
+        GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-			GameHandlerBase &getGameHandler(size_t i, bool = true);
+        void registerWidget(const std::string &name, std::function<bool(GUI::WidgetBase *)> init);
 
-			void registerWidget(const std::string& name, std::function<bool(GUI::Widget*)> init);
+    protected:
+        bool init() override;
+        void finalize() override;
 
-		protected:
+        bool init(GUI::WidgetBase *w);
 
-			bool init() override;
-			void finalize() override;
+        virtual void onPointerMove(const Input::PointerEventArgs &me);
 
-			bool init(GUI::Widget* w);
+        virtual void onPointerDown(const Input::PointerEventArgs &me);
 
+        virtual void onPointerUp(const Input::PointerEventArgs &me);
 
-			virtual void onPointerMove(const Input::PointerEventArgs& me);
+        virtual bool onKeyPress(const Input::KeyEventArgs &evt);
 
-			virtual void onPointerDown(const Input::PointerEventArgs& me);
+    public:
+        void injectPointerMove(const Input::PointerEventArgs &evt);
+        void injectPointerDown(const Input::PointerEventArgs &evt);
+        void injectPointerUp(const Input::PointerEventArgs &evt);
+        bool injectKeyPress(const Input::KeyEventArgs &evt);
 
-			virtual void onPointerUp(const Input::PointerEventArgs& me);
+    protected:
+        GUI::WidgetBase *mWidget;
 
-			virtual bool onKeyPress(const Input::KeyEventArgs& evt);
+        UIManager &mUI;
 
-			
+        const std::string mWidgetName;
 
-		public:
-			
-			void injectPointerMove(const Input::PointerEventArgs& evt);
-			void injectPointerDown(const Input::PointerEventArgs& evt);
-			void injectPointerUp(const Input::PointerEventArgs& evt);
-			bool injectKeyPress(const Input::KeyEventArgs& evt);
+    private:
+        std::list<WindowDescriber> mWidgets;
 
-		protected:
-			GUI::Widget* mWidget;
-
-			UIManager &mUI;
-
-			const std::string mWidgetName;
-
-		private:
-			std::list<WindowDescriber> mWidgets;
-
-			Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
-                        Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;
-                        Threading::Slot<&Handler::injectPointerUp> mPointerUpSlot;
-
-		};
-	}
+        Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
+        Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;
+        Threading::Slot<&Handler::injectPointerUp> mPointerUpSlot;
+    };
+}
 }

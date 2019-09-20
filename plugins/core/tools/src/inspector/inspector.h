@@ -20,22 +20,27 @@ namespace Tools {
         void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
         void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
 
-		void draw(TypedScopePtr scope, const char *layoutName = nullptr);
+        void draw(TypedScopePtr scope, const char *layoutName = nullptr);
 
         InspectorLayout *getLayout(const std::string &name);
 
         const char *key() const override;
 
-		void addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter);
-		template <typename T>
-                void addObjectSuggestion(std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
-                {
-                    addObjectSuggestion(&table<T>(), std::move(getter));
-				}
+        void addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter);
+        template <typename T>
+        void addObjectSuggestion(std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
+        {
+            addObjectSuggestion(&table<T>(), std::move(getter));
+        }
+
+        void addPreviewDefinition(const MetaTable *type, std::function<void(TypedScopePtr)> preview);
+        template <typename T>
+        void addPreviewDefinition(std::function<void(T *)> preview)
+        {
+            addPreviewDefinition(&table<T>(), [=](TypedScopePtr p) { preview(p.safe_cast<T>()); });
+        }
 
     private:
-        
-
         void draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn);
         void drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
@@ -49,7 +54,8 @@ namespace Tools {
         std::map<std::string, InspectorLayout *> mAssociations;
         std::map<std::string, InspectorLayout> mLayouts;
 
-		std::map<const MetaTable *, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()>> mObjectSuggestionsByType; 
+        std::map<const MetaTable *, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()>> mObjectSuggestionsByType;
+        std::map<const MetaTable *, std::function<void(TypedScopePtr)>> mPreviews;
 
         static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
     };

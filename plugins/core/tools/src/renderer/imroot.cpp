@@ -115,6 +115,8 @@ namespace Tools {
 
         bool running = true;
 
+		ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
+
         ImGuiDockNodeFlags dockspace_flags = /*ImGuiDockNodeFlags_NoDockingInCentralNode | */ ImGuiDockNodeFlags_PassthruCentralNode;
 
         // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -145,7 +147,6 @@ namespace Tools {
         ImGui::PopStyleVar(2);
 
         // DockSpace
-        ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
         ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
 

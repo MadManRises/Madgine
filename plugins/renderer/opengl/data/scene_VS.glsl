@@ -25,5 +25,5 @@ void main()
 	gl_Position.z *= -1.0;
     color = aColor;
 	normal = anti_m * aNormal;
-	uv = vec2(aUV.x, 1.0 - aUV.y);
+	uv = aUV;
 }

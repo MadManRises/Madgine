@@ -35,14 +35,14 @@ target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
 set(sources "")
 FolderSources(sources "" tools)
-	FolderSources(sources tools OpenGL_Tools)
+	FolderSources(sources tools OpenGL_Tools opengltoolconfig.cpp opengltoolconfig.h opengltoolsforward.h opengltoolslib.h)
 		FolderSources(sources OpenGL_Tools imgui imgui_impl_opengl3.cpp imgui_impl_opengl3.h openglimmanager.cpp openglimmanager.h)
 		FolderSources(sources OpenGL_Tools sceneeditor sceneeditor.cpp sceneeditor.h sceneview.cpp sceneview.h)
 			FolderSources(sources sceneeditor opengl openglgridpass.cpp openglgridpass.h)
 
 add_plugin(OpenGLTools Madgine Tools ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h SOURCE_ROOT tools)
 
-target_link_plugins(OpenGLTools OpenGL ClientTools)
+target_link_plugins(OpenGLTools OpenGL ClientTools ImageLoader)
 target_link_libraries(OpenGLTools PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 

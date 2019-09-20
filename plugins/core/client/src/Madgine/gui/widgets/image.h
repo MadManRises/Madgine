@@ -2,18 +2,29 @@
 
 #include "widget.h"
 
-namespace Engine
-{
-	namespace GUI
-	{
-		class Image : public Widget
-		{
-		public:
-			using Widget::Widget;
-			virtual ~Image() = default;
+#include "imageloaderlib.h"
+#include "imageloader.h"
 
-			virtual void setImage(const std::string &name);
-			virtual std::string getImage() const;
-		};
-	}
+namespace Engine {
+namespace GUI {
+    class Image : public Widget<Image> {
+    public:
+        using Widget::Widget;
+        virtual ~Image() = default;
+
+		void setImageByName(const std::string &name);
+        void setImage(Resources::ImageLoader::ResourceType *image);
+
+        std::string getImageName() const;
+        Resources::ImageLoader::ResourceType *image() const;
+
+		
+		Resources::ImageLoader::ResourceType *resource() const override;
+
+		std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize) override;
+
+    private:
+        Resources::ImageLoader::ResourceType *mImage = nullptr;
+    };
+}
 }

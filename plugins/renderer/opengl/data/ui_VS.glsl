@@ -5,7 +5,6 @@ precision mediump float;
 attribute vec3 aPos;
 attribute vec4 aColor;
 attribute vec2 aUV;
-//attribute int textureIdx;
 
 varying vec4 color;
 varying vec2 uv;
@@ -15,6 +14,5 @@ void main()
 {
    gl_Position = vec4((aPos * vec3(2,-2,-0.1)) - vec3(1,-1,0), 1.0);
    color = aColor;
-   uv = vec2(aUV.x, 1.0 - aUV.y);
-   //texIdx = textureIdx;
+   uv = aUV;
 }

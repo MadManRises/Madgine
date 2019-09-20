@@ -44,11 +44,11 @@ namespace GUI {
 
         void close();
 
-        void swapCurrentRoot(Widget *newRoot);
-        void openModalWidget(Widget *widget);
-        void closeModalWidget(Widget *widget);
-        void openWidget(Widget *widget);
-        void closeWidget(Widget *widget);
+        void swapCurrentRoot(WidgetBase *newRoot);
+        void openModalWidget(WidgetBase *widget);
+        void closeModalWidget(WidgetBase *widget);
+        void openWidget(WidgetBase *widget);
+        void closeWidget(WidgetBase *widget);
 
         /*void showCursor();
 			void hideCursor();
@@ -58,21 +58,21 @@ namespace GUI {
 			virtual void setCursorPosition(const Vector2& pos);
 			virtual Vector2 getCursorPosition();*/
 
-        bool isHovered(Widget *w);
-        Widget *hoveredWidget();
+        bool isHovered(WidgetBase *w);
+        WidgetBase *hoveredWidget();
 
-        Widget *getWidget(const std::string &name);
+        WidgetBase *getWidget(const std::string &name);
 
-        void registerWidget(Widget *w);
+        void registerWidget(WidgetBase *w);
 
-        void unregisterWidget(Widget *w);
+        void unregisterWidget(WidgetBase *w);
 
         Vector3 getScreenSize();
         std::pair<Vector3, Vector3> getAvailableScreenSpace();
 
         Matrix3 getSize();
 
-        Widget *createTopLevelWidget(const std::string &name);
+        WidgetBase *createTopLevelWidget(const std::string &name);
         Bar *createTopLevelBar(const std::string &name);
         Button *createTopLevelButton(const std::string &name);
         Checkbox *createTopLevelCheckbox(const std::string &name);
@@ -83,7 +83,7 @@ namespace GUI {
         TabWidget *createTopLevelTabWidget(const std::string &name);
         Textbox *createTopLevelTextbox(const std::string &name);
 
-        void destroyTopLevel(Widget *w);
+        void destroyTopLevel(WidgetBase *w);
 
         void clear();
 
@@ -104,7 +104,7 @@ namespace GUI {
         void renderOverlays();
 
         Window::Window *window() const;
-        Widget *currentRoot();
+        WidgetBase *currentRoot();
 
         decltype(auto) widgets()
         {
@@ -135,12 +135,12 @@ namespace GUI {
 
         void calculateWindowGeometries();
 
-        Widget *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
-        Widget *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, Widget *current);
+        WidgetBase *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
+        WidgetBase *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
 
-        std::unique_ptr<Widget> createWidgetClass(const std::string &name, Class _class);
+        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, Class _class);
 
-        virtual std::unique_ptr<Widget> createWidget(const std::string &name);
+        virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         virtual std::unique_ptr<Bar> createBar(const std::string &name);
         virtual std::unique_ptr<Button> createButton(const std::string &name);
         virtual std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
@@ -159,22 +159,22 @@ namespace GUI {
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
-
-        std::map<std::string, Widget *> mWidgets;
+        
+        std::map<std::string, WidgetBase *> mWidgets;
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        std::vector<std::unique_ptr<Widget>> mTopLevelWidgets;
+        std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
 
         std::vector<WindowOverlay *> mOverlays;
 
         TopLevelWindowContainer<std::vector> mComponents;
 
-        Widget *mHoveredWidget = nullptr;
+        WidgetBase *mHoveredWidget = nullptr;
 
-        Widget *mCurrentRoot = nullptr;
+        WidgetBase *mCurrentRoot = nullptr;
 
-        std::stack<Widget *> mModalWidgetList;
+        std::stack<WidgetBase *> mModalWidgetList;
     };
 
 }

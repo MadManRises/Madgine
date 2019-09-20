@@ -36,18 +36,37 @@ namespace Render {
         glCheck();
     }
 
-    void OpenGLTexture::setData(Vector2i size, void *data)
+    void OpenGLTexture::setData(Vector2i size, void *data, GLenum type)
     {
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_FLOAT, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, type, data);
+        glCheck();
+        mSize = size;
+    }
+
+    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, void *data, GLenum type)
+    {
+        bind();
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, type, data);
         glCheck();
     }
 
-    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, void *data)
+    void OpenGLTexture::resize(Vector2i size)
     {
-        bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, GL_FLOAT, data);
-        glCheck();
+        throw "TODO";
+        /*Vector2i commonSize = min(size, mSize);
+        GLuint tempTex;
+        glGenTextures(1, &tempTex);
+        GL_CHECK();
+        std::swap(tempTex, mHandle);
+
+        setData(size, nullptr);
+
+        glCopyImageSubData(tempTex, GL_TEXTURE_2D, 0, 0, 0, 0, mHandle, GL_TEXTURE_2D, 0, 0, 0, 0, commonSize.x, commonSize.y, 1);
+        GL_CHECK();
+
+        glDeleteTextures(1, &tempTex);
+        GL_CHECK();*/
     }
 
     GLuint OpenGLTexture::handle() const

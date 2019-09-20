@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace GUI {
-    class MADGINE_CLIENT_EXPORT SceneWindow : public Widget {
+    class MADGINE_CLIENT_EXPORT SceneWindow : public Widget<SceneWindow> {
     public:
         using Widget::Widget;
         virtual ~SceneWindow();
@@ -14,7 +14,7 @@ namespace GUI {
         void setCamera(Scene::Camera *camera);
         Scene::Camera *camera();
 
-        std::vector<Vertex> vertices(const Vector3 &screenSize) override;
+        std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize) override;
 
         Render::RenderTarget *getRenderTarget();
 

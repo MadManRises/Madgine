@@ -26,9 +26,8 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size)
+    OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderWindow *window, Scene::Camera *camera, const Vector2 &size)
         : RenderTarget(window, camera, { 0, 0 })
-        , mIndex(index)
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
@@ -86,11 +85,8 @@ namespace Render {
 
     uint32_t OpenGLRenderTexture::textureId() const
     {
-        glActiveTexture(GL_TEXTURE0 + mIndex);
-        glCheck();
-        mTexture.bind();
-        return mIndex;
-    }
+        return mTexture.handle();
+	}
 
     bool OpenGLRenderTexture::resize(const Vector2 &size)
     {

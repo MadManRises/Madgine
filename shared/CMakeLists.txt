@@ -11,4 +11,6 @@ add_subdirectory(imgui)
 
 add_subdirectory(im3d)
 
+add_subdirectory(stb)
+
 export_to_workspace(Shared)

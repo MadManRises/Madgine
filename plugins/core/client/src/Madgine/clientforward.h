@@ -11,7 +11,7 @@ namespace UI {
 
 namespace GUI {
     class GUISystem;
-    class Widget;
+    class WidgetBase;
     class Bar;
     class Button;
     class SceneWindow;

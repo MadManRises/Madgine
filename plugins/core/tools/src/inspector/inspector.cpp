@@ -52,6 +52,12 @@ namespace Tools {
                 mAssociations[assoc] = &layout;
             }
         }
+
+        for (Resources::ResourceLoaderBase *loader : uniquePtrToPtr(Resources::ResourceManager::getSingleton().mCollector)) {
+            addObjectSuggestion(loader->resourceType(), [=]() {
+                return loader->resources();
+            });
+        }
     }
 
     Inspector::~Inspector()
@@ -153,7 +159,9 @@ namespace Tools {
                                                                  }
 
                                                                  if (open) {
-                                                                     draw(scope, element ? element->Attribute("layout") : nullptr);
+                                                                     if (scope) {
+                                                                         draw(scope, element ? element->Attribute("layout") : nullptr);
+                                                                     }
                                                                      ImGui::TreePop();
                                                                  }
                                                                  return modified;
@@ -202,6 +210,11 @@ namespace Tools {
             draw(layout, scope, drawn);
         }
         drawRemainingMembers(scope, drawn);
+
+        auto it2 = mPreviews.find(scope.mType);
+        if (it2 != mPreviews.end()) {
+            it2->second(scope);
+        }
     }
 
     void Inspector::draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn)
@@ -325,6 +338,11 @@ namespace Tools {
     void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
     {
         mObjectSuggestionsByType[type] = getter;
+    }
+
+    void Inspector::addPreviewDefinition(const MetaTable *type, std::function<void(TypedScopePtr)> preview)
+    {
+        mPreviews[type] = preview;
     }
 
 }

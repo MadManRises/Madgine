@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTexture : RenderTarget {
 
-        OpenGLRenderTexture(OpenGLRenderWindow *window, uint32_t index, Scene::Camera *camera, const Vector2 &size);
+        OpenGLRenderTexture(OpenGLRenderWindow *window, Scene::Camera *camera, const Vector2 &size);
         ~OpenGLRenderTexture();
 
         uint32_t textureId() const override;
@@ -34,8 +34,6 @@ namespace Render {
         void renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix = Matrix4::IDENTITY);
 
     private:
-        uint32_t mIndex;
-
         GLuint mFramebuffer;
         GLuint mDepthRenderbuffer;
 

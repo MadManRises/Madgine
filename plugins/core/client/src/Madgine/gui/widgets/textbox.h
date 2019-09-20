@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Textbox : public Widget
+		class Textbox : public Widget<Textbox>
 		{
 		public:		
 			using Widget::Widget;

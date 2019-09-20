@@ -7,7 +7,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT Label : public Widget
+		class MADGINE_CLIENT_EXPORT Label : public Widget<Label>
 		{
 		public:
 			using Widget::Widget;

@@ -19,6 +19,9 @@
 
 #include "Modules/render/vertex.h"
 
+#include "imageloaderlib.h"
+#include "imageloader.h"
+
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
@@ -49,6 +52,8 @@ namespace Tools {
                 Window::WindowSettings settings;
                 static_cast<const ClientImRoot&>(*mRoot.parent()).window().createToolWindow(settings);
             }*/
+
+			Resources::ImageLoader::load("Grass-01", true);
 
 			Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
 

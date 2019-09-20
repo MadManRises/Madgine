@@ -7,6 +7,8 @@
 
 #include "imgui/imguiaddons.h"
 
+#include "inspector/inspector.h"
+
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/math/bounds.h"
 #include "Modules/reflection/classname.h"
@@ -36,7 +38,7 @@ namespace Tools {
 
     void GuiEditor::render()
     {
-        GUI::Widget *hoveredWidget = nullptr;
+        GUI::WidgetBase *hoveredWidget = nullptr;
         if (mHierarchyVisible)
             renderHierarchy(&hoveredWidget);
         renderSelection(hoveredWidget);
@@ -45,7 +47,7 @@ namespace Tools {
     void GuiEditor::renderMenu()
     {
         if (ImGui::BeginMenu("Layouts")) {
-            for (GUI::Widget *w : mWindow.widgets()) {
+            for (GUI::WidgetBase *w : mWindow.widgets()) {
                 if (ImGui::MenuItem(w->key(), nullptr, w->isVisible())) {
                     mWindow.swapCurrentRoot(w);
                 }
@@ -75,7 +77,7 @@ namespace Tools {
         return "GuiEditor";
     }
 
-    void GuiEditor::renderSelection(GUI::Widget *hoveredWidget)
+    void GuiEditor::renderSelection(GUI::WidgetBase *hoveredWidget)
     {
         constexpr float borderSize = 10.0f;
 
@@ -100,7 +102,7 @@ namespace Tools {
             bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse) && (!mSelected || !mSelected->widget()->containsPoint(mouse, screenSize, screenPos, borderSize));
 
             if (mSelected) {
-                GUI::Widget *selectedWidget = mSelected->widget();
+                GUI::WidgetBase *selectedWidget = mSelected->widget();
 
                 Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * screenSize;
                 Vector3 absolutePos = selectedWidget->getAbsolutePosition() * screenSize + screenPos;
@@ -173,7 +175,7 @@ namespace Tools {
                 if (hoveredWidget) {
                     hoveredSettings = static_cast<WidgetSettings *>(hoveredWidget->userData());
                     if (!hoveredSettings) {
-                        hoveredSettings = &mSettings.emplace_back(hoveredWidget);
+                        hoveredSettings = &mSettings.emplace_back(hoveredWidget, getTool<Inspector>());
                     }
 
                     if (!mDragging) {
@@ -292,9 +294,9 @@ namespace Tools {
         ImGui::End();
     }
 
-    void GuiEditor::listWidgets(GUI::Widget *w, GUI::Widget **hoveredWidget)
+    void GuiEditor::listWidgets(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget)
     {
-        for (GUI::Widget *child : w->children()) {
+        for (GUI::WidgetBase *child : w->children()) {
 
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
             if (child->children().empty())
@@ -314,10 +316,10 @@ namespace Tools {
         }
     }
 
-    void GuiEditor::renderHierarchy(GUI::Widget **hoveredWidget)
+    void GuiEditor::renderHierarchy(GUI::WidgetBase **hoveredWidget)
     {
         if (ImGui::Begin("GuiEditor - Hierarchy", &mHierarchyVisible)) {
-            GUI::Widget *root = mWindow.currentRoot();
+            GUI::WidgetBase *root = mWindow.currentRoot();
             if (root) {
                 listWidgets(root, hoveredWidget);
             } else {

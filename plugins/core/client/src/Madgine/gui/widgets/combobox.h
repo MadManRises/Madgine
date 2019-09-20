@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Combobox : public Widget
+		class Combobox : public Widget<Combobox>
 		{
 		public:
 			using Widget::Widget;

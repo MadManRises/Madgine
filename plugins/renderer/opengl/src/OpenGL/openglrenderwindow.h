@@ -8,6 +8,11 @@
 #include "util/openglvertexarray.h"
 #include "util/openglbuffer.h"
 
+#include "Modules/math/atlas2.h"
+
+#include "imageloaderlib.h"
+#include "imageloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -24,11 +29,15 @@ namespace Render {
         const ContextHandle mContext;
     private:
 
-        uint32_t mTextureCount = 0;
+		void expandUIAtlas();
 
         OpenGLShaderProgram mProgram;
 
         OpenGLTexture mDefaultTexture;
+        OpenGLTexture mUIAtlasTexture;
+        Atlas2 mUIAtlas;
+        int mUIAtlasSize = 0;
+        std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
 
 		OpenGLVertexArray mVAO;
         OpenGLBuffer mVBO;

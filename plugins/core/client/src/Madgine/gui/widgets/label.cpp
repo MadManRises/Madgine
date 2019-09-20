@@ -7,6 +7,11 @@
 #include "Modules/reflection/classname.h"
 
 
+METATABLE_BEGIN(Engine::GUI::Label)
+METATABLE_END(Engine::GUI::Label)
+
+RegisterType(Engine::GUI::Label);
+
 namespace Engine
 {
 	namespace GUI {
@@ -25,8 +30,3 @@ namespace Engine
 	}
 }
 
-
-METATABLE_BEGIN(Engine::GUI::Label)
-METATABLE_END(Engine::GUI::Label)
-
-RegisterType(Engine::GUI::Label);

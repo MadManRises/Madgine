@@ -11,17 +11,22 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "Modules/keyvalue/metatable.h"
+
+#include "imageloaderlib.h"
+#include "imageloader.h"
+
 namespace Engine {
 namespace GUI {
-    class MADGINE_CLIENT_EXPORT Widget : public ScopeBase {
+    class MADGINE_CLIENT_EXPORT WidgetBase : public ScopeBase {
     public:
-        Widget(const std::string &name, Widget *parent);
+        WidgetBase(const std::string &name, WidgetBase *parent);
 
-        Widget(const std::string &name, TopLevelWindow &window);
+        WidgetBase(const std::string &name, TopLevelWindow &window);
 
-        Widget(const Widget &) = delete;
+        WidgetBase(const WidgetBase &) = delete;
 
-        virtual ~Widget();
+        virtual ~WidgetBase();
 
         void setSize(const Matrix3 &size);
         const Matrix3 &getSize();
@@ -31,7 +36,7 @@ namespace GUI {
         Matrix3 getAbsoluteSize() const;
         Matrix3 getAbsolutePosition() const;
 
-		Vector3 getActualSize() const;
+        Vector3 getActualSize() const;
         Vector3 getActualPosition() const;
 
         void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos = Matrix3::ZERO);
@@ -59,8 +64,8 @@ namespace GUI {
 
         const char *key() const;
 
-        Widget *createChild(const std::string &name, Class _class);
-        Widget *createChildWidget(const std::string &name);
+        WidgetBase *createChild(const std::string &name, Class _class);
+        WidgetBase *createChildWidget(const std::string &name);
         Bar *createChildBar(const std::string &name);
         Button *createChildButton(const std::string &name);
         Checkbox *createChildCheckbox(const std::string &name);
@@ -71,8 +76,8 @@ namespace GUI {
         Textbox *createChildTextbox(const std::string &name);
         Image *createChildImage(const std::string &name);
 
-        Widget *getChildRecursive(const std::string &name);
-        Widget *getParent() const;
+        WidgetBase *getChildRecursive(const std::string &name);
+        WidgetBase *getParent() const;
 
         virtual bool injectPointerPress(const Input::PointerEventArgs &arg);
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg);
@@ -93,15 +98,19 @@ namespace GUI {
 
         bool containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos = Vector3::ZERO, float extend = 0.0f) const;
 
-        virtual std::vector<Vertex> vertices(const Vector3 &screenSize);
+        virtual std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize);
 
         void *userData();
         void setUserData(void *userData);
 
-    protected:
-        std::unique_ptr<Widget> createWidgetClass(const std::string &name, Class _class);
+        virtual const MetaTable *type();
 
-        virtual std::unique_ptr<Widget> createWidget(const std::string &name);
+		virtual Resources::ImageLoader::ResourceType *resource() const;
+
+    protected:
+        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, Class _class);
+
+        virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         virtual std::unique_ptr<Bar> createBar(const std::string &name);
         virtual std::unique_ptr<Button> createButton(const std::string &name);
         virtual std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
@@ -119,7 +128,7 @@ namespace GUI {
 
         TopLevelWindow &window();
 
-        void destroyChild(Widget *w);
+        void destroyChild(WidgetBase *w);
 
         //KeyValueMapList maps() override;
 
@@ -127,11 +136,11 @@ namespace GUI {
 
     private:
         std::string mName;
-        Widget *mParent;
+        WidgetBase *mParent;
 
         TopLevelWindow &mWindow;
 
-        std::vector<std::unique_ptr<Widget>> mChildren;
+        std::vector<std::unique_ptr<WidgetBase>> mChildren;
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
@@ -141,6 +150,17 @@ namespace GUI {
         bool mVisible = true;
 
         void *mUserData = nullptr;
+    };
+
+    template <typename T>
+    struct Widget : WidgetBase {
+
+		using WidgetBase::WidgetBase;
+
+        virtual const MetaTable *type() override
+        {
+            return &table<T>();
+        }
     };
 }
 }

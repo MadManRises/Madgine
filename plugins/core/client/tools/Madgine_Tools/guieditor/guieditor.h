@@ -22,9 +22,9 @@ namespace Tools {
         const char *key() const override;
 
     private:
-        void renderSelection(GUI::Widget *hoveredWidget = nullptr);
-        void renderHierarchy(GUI::Widget **hoveredWidget = nullptr);
-        void listWidgets(GUI::Widget *w, GUI::Widget **hoveredWidget = nullptr);
+        void renderSelection(GUI::WidgetBase *hoveredWidget = nullptr);
+        void renderHierarchy(GUI::WidgetBase **hoveredWidget = nullptr);
+        void listWidgets(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget = nullptr);
 
     private:
         GUI::TopLevelWindow &mWindow;

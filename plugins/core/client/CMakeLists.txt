@@ -13,7 +13,7 @@ FolderSources(sources "" src)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 
-target_link_plugins(Client Base)
+target_link_plugins(Client Base ImageLoader)
 
 
 set(sources "")
@@ -25,5 +25,5 @@ FolderSources(sources "" tools)
 
 add_plugin(ClientTools MadgineTools Core ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h SOURCE_ROOT tools)
 
-target_link_plugins(ClientTools Client Tools)
+target_link_plugins(ClientTools Client Tools ImageLoader)
 

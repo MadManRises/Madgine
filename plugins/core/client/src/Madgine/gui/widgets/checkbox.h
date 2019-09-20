@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Checkbox : public Widget
+		class Checkbox : public Widget<Checkbox>
 		{
 		public:
 			using Widget::Widget;

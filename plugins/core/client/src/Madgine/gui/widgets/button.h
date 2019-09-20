@@ -8,7 +8,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class MADGINE_CLIENT_EXPORT Button : public Widget
+		class MADGINE_CLIENT_EXPORT Button : public Widget<Button>
 		{
 		public:
 			using Widget::Widget;
@@ -17,7 +17,7 @@ namespace Engine
 
 			SignalSlot::SignalStub<> &clickEvent();
 
-			std::vector<Vertex> vertices(const Vector3 &screenSize) override;
+			std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize) override;
 
 			bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
 			bool injectPointerLeave(const Input::PointerEventArgs &arg) override;

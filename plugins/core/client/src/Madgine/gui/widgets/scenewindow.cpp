@@ -14,6 +14,13 @@
 
 #include "../../render/renderwindow.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
+
+METATABLE_BEGIN(Engine::GUI::SceneWindow)
+PROPERTY(Camera, camera, setCamera)
+METATABLE_END(Engine::GUI::SceneWindow)
+
 namespace Engine {
 namespace GUI {
     SceneWindow::~SceneWindow()
@@ -28,10 +35,10 @@ namespace GUI {
 
     Scene::Camera *SceneWindow::camera()
     {
-        return mTarget->camera();
+        return mTarget ? mTarget->camera() : nullptr;
     }
 
-    std::vector<Vertex> SceneWindow::vertices(const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, uint32_t> SceneWindow::vertices(const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -40,21 +47,21 @@ namespace GUI {
 
         Vector4 color { 1, 1, 1, 1 };
 
-        //uint32_t texId = mTarget ? mTarget->textureId() : 0;
+        uint32_t texId = mTarget ? mTarget->textureId() : 0;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
-        result.push_back({ v, color, { 0, 0 }/*, texId*/ });
+        result.push_back({ v, color, { 0, 0 } });
         v.x += size.x;
-        result.push_back({ v, color, { 1, 0 }/*, texId*/ });
+        result.push_back({ v, color, { 1, 0 } });
         v.y += size.y;
-        result.push_back({ v, color, { 1, 1 }/*, texId*/ });
-        result.push_back({ v, color, { 1, 1 }/*, texId*/ });
+        result.push_back({ v, color, { 1, 1 } });
+        result.push_back({ v, color, { 1, 1 } });
         v.x -= size.x;
-        result.push_back({ v, color, { 0, 1 }/*, texId*/ });
+        result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
-        result.push_back({ v, color, { 0, 0 }/*, texId*/ });
-        return result;
+        result.push_back({ v, color, { 0, 0 } });
+        return { result, texId };
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()

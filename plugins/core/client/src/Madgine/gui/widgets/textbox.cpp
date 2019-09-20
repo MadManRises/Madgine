@@ -2,6 +2,11 @@
 
 #include "textbox.h"
 
+#include "Modules/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::GUI::Textbox)
+METATABLE_END(Engine::GUI::Textbox)
+
 namespace Engine
 {
 	namespace GUI

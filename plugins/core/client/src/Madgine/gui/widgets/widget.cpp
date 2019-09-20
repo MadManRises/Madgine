@@ -23,16 +23,22 @@
 
 #include "../vertex.h"
 
-
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+
+METATABLE_BEGIN(Engine::GUI::WidgetBase)
+READONLY_PROPERTY(Widgets, children)
+READONLY_PROPERTY(Size, getSize)
+METATABLE_END(Engine::GUI::WidgetBase)
+
+RegisterType(Engine::GUI::WidgetBase);
 
 namespace Engine {
 
 namespace GUI {
 
-    Widget::Widget(const std::string &name, Widget *parent)
+    WidgetBase::WidgetBase(const std::string &name, WidgetBase *parent)
         : mName(name)
         , mParent(parent)
         , mWindow(parent->window())
@@ -40,7 +46,7 @@ namespace GUI {
         mWindow.registerWidget(this);
     }
 
-    Widget::Widget(const std::string &name, TopLevelWindow &window)
+    WidgetBase::WidgetBase(const std::string &name, TopLevelWindow &window)
         : mName(name)
         , mParent(nullptr)
         , mWindow(window)
@@ -48,12 +54,12 @@ namespace GUI {
         mWindow.registerWidget(this);
     }
 
-    Widget::~Widget()
+    WidgetBase::~WidgetBase()
     {
         mWindow.unregisterWidget(this);
     }
 
-    void Widget::setSize(const Matrix3 &size)
+    void WidgetBase::setSize(const Matrix3 &size)
     {
         mSize = size;
         if (mParent)
@@ -62,12 +68,12 @@ namespace GUI {
             updateGeometry(window().getScreenSize(), Matrix3::IDENTITY);
     }
 
-    const Matrix3 &Widget::getSize()
+    const Matrix3 &WidgetBase::getSize()
     {
         return mSize;
     }
 
-    void Widget::setPos(const Matrix3 &pos)
+    void WidgetBase::setPos(const Matrix3 &pos)
     {
         mPos = pos;
         if (mParent)
@@ -76,60 +82,60 @@ namespace GUI {
             updateGeometry(window().getScreenSize(), Matrix3::IDENTITY);
     }
 
-    const Matrix3 &Widget::getPos() const
+    const Matrix3 &WidgetBase::getPos() const
     {
         return mPos;
     }
 
-    Matrix3 Widget::getAbsoluteSize() const
+    Matrix3 WidgetBase::getAbsoluteSize() const
     {
         return mAbsoluteSize;
     }
 
-    Matrix3 Widget::getAbsolutePosition() const
+    Matrix3 WidgetBase::getAbsolutePosition() const
     {
         return mAbsolutePos;
     }
 
-	Vector3 Widget::getActualSize() const
+    Vector3 WidgetBase::getActualSize() const
     {
         auto [_, screenSize] = mWindow.getAvailableScreenSpace();
         return mAbsoluteSize * screenSize;
     }
 
-    Vector3 Widget::getActualPosition() const
+    Vector3 WidgetBase::getActualPosition() const
     {
         auto [screenPos, screenSize] = mWindow.getAvailableScreenSpace();
         return mAbsolutePos * screenSize + screenPos;
     }
 
-    void Widget::updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos)
+    void WidgetBase::updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos)
     {
         mAbsoluteSize = mSize * parentSize;
         mAbsolutePos = mPos * parentSize + parentPos;
 
         sizeChanged(mAbsoluteSize * screenSize);
 
-        for (Widget *child : uniquePtrToPtr(mChildren)) {
+        for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
             child->updateGeometry(screenSize, getAbsoluteSize(), getAbsolutePosition());
         }
     }
 
-    void Widget::screenSizeChanged(const Vector3 &screenSize)
+    void WidgetBase::screenSizeChanged(const Vector3 &screenSize)
     {
         sizeChanged(mAbsoluteSize * screenSize);
 
-        for (Widget *child : uniquePtrToPtr(mChildren)) {
+        for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
             child->screenSizeChanged(screenSize);
         }
     }
 
-    Class Widget::getClass()
+    Class WidgetBase::getClass()
     {
         return Class::WIDGET_CLASS;
     }
 
-    void Widget::destroy()
+    void WidgetBase::destroy()
     {
         if (mParent)
             mParent->destroyChild(this);
@@ -137,29 +143,29 @@ namespace GUI {
             mWindow.destroyTopLevel(this);
     }
 
-    void Widget::releaseInput()
+    void WidgetBase::releaseInput()
     {
     }
 
-    void Widget::captureInput()
+    void WidgetBase::captureInput()
     {
     }
 
-    void Widget::activate()
+    void WidgetBase::activate()
     {
     }
 
-    const std::string &Widget::getName() const
+    const std::string &WidgetBase::getName() const
     {
         return mName;
     }
 
-    const char *Widget::key() const
+    const char *WidgetBase::key() const
     {
         return mName.c_str();
     }
 
-    Widget *Widget::createChild(const std::string &name, Class _class)
+    WidgetBase *WidgetBase::createChild(const std::string &name, Class _class)
     {
         switch (_class) {
         case Class::BAR_CLASS:
@@ -185,14 +191,14 @@ namespace GUI {
         }
     }
 
-    Widget *Widget::createChildWidget(const std::string &name)
+    WidgetBase *WidgetBase::createChildWidget(const std::string &name)
     {
-        Widget *w = mChildren.emplace_back(createWidget(name)).get();
+        WidgetBase *w = mChildren.emplace_back(createWidget(name)).get();
         w->updateGeometry(window().getScreenSize(), getAbsoluteSize());
         return w;
     }
 
-    Bar *Widget::createChildBar(const std::string &name)
+    Bar *WidgetBase::createChildBar(const std::string &name)
     {
         std::unique_ptr<Bar> p = createBar(name);
         Bar *b = p.get();
@@ -201,7 +207,7 @@ namespace GUI {
         return b;
     }
 
-    Button *Widget::createChildButton(const std::string &name)
+    Button *WidgetBase::createChildButton(const std::string &name)
     {
         std::unique_ptr<Button> p = createButton(name);
         Button *b = p.get();
@@ -210,7 +216,7 @@ namespace GUI {
         return b;
     }
 
-    Checkbox *Widget::createChildCheckbox(const std::string &name)
+    Checkbox *WidgetBase::createChildCheckbox(const std::string &name)
     {
         std::unique_ptr<Checkbox> p = createCheckbox(name);
         Checkbox *c = p.get();
@@ -219,7 +225,7 @@ namespace GUI {
         return c;
     }
 
-    Combobox *Widget::createChildCombobox(const std::string &name)
+    Combobox *WidgetBase::createChildCombobox(const std::string &name)
     {
         std::unique_ptr<Combobox> p = createCombobox(name);
         Combobox *c = p.get();
@@ -228,7 +234,7 @@ namespace GUI {
         return c;
     }
 
-    Label *Widget::createChildLabel(const std::string &name)
+    Label *WidgetBase::createChildLabel(const std::string &name)
     {
         std::unique_ptr<Label> p = createLabel(name);
         Label *l = p.get();
@@ -237,7 +243,7 @@ namespace GUI {
         return l;
     }
 
-    SceneWindow *Widget::createChildSceneWindow(const std::string &name)
+    SceneWindow *WidgetBase::createChildSceneWindow(const std::string &name)
     {
         std::unique_ptr<SceneWindow> p = createSceneWindow(name);
         SceneWindow *s = p.get();
@@ -246,7 +252,7 @@ namespace GUI {
         return s;
     }
 
-    TabWidget *Widget::createChildTabWidget(const std::string &name)
+    TabWidget *WidgetBase::createChildTabWidget(const std::string &name)
     {
         std::unique_ptr<TabWidget> p = createTabWidget(name);
         TabWidget *t = p.get();
@@ -255,7 +261,7 @@ namespace GUI {
         return t;
     }
 
-    Textbox *Widget::createChildTextbox(const std::string &name)
+    Textbox *WidgetBase::createChildTextbox(const std::string &name)
     {
         std::unique_ptr<Textbox> p = createTextbox(name);
         Textbox *t = p.get();
@@ -264,7 +270,7 @@ namespace GUI {
         return t;
     }
 
-    Image *Widget::createChildImage(const std::string &name)
+    Image *WidgetBase::createChildImage(const std::string &name)
     {
         std::unique_ptr<Image> p = createImage(name);
         Image *i = p.get();
@@ -273,19 +279,19 @@ namespace GUI {
         return i;
     }
 
-    size_t Widget::depth()
+    size_t WidgetBase::depth()
     {
         return mParent ? mParent->depth() + 1 : 0;
     }
 
-    TopLevelWindow &Widget::window()
+    TopLevelWindow &WidgetBase::window()
     {
         return mWindow;
     }
 
-    void Widget::destroyChild(Widget *w)
+    void WidgetBase::destroyChild(WidgetBase *w)
     {
-        auto it = std::find_if(mChildren.begin(), mChildren.end(), [=](const std::unique_ptr<Widget> &ptr) { return ptr.get() == w; });
+        auto it = std::find_if(mChildren.begin(), mChildren.end(), [=](const std::unique_ptr<WidgetBase> &ptr) { return ptr.get() == w; });
         assert(it != mChildren.end());
         mChildren.erase(it);
     }
@@ -295,131 +301,131 @@ namespace GUI {
 			return Scope::maps().merge(mChildren, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible), MAP(Size, getSize, setSize), MAP(Position, getPos, setPos));
 		}*/
 
-    bool Widget::isVisible() const
+    bool WidgetBase::isVisible() const
     {
         return mVisible;
     }
 
-    void Widget::showModal()
+    void WidgetBase::showModal()
     {
     }
 
-    void Widget::hideModal()
+    void WidgetBase::hideModal()
     {
     }
 
-    void Widget::show()
+    void WidgetBase::show()
     {
         setVisible(true);
     }
 
-    void Widget::hide()
+    void WidgetBase::hide()
     {
         setVisible(false);
     }
 
-    void Widget::setVisible(bool b)
+    void WidgetBase::setVisible(bool b)
     {
         mVisible = b;
     }
 
-    void Widget::setEnabled(bool b)
+    void WidgetBase::setEnabled(bool b)
     {
     }
 
-    Widget *Widget::getChildRecursive(const std::string &name)
+    WidgetBase *WidgetBase::getChildRecursive(const std::string &name)
     {
         if (name == getName() || name == WidgetNames::thisWidget)
             return this;
-        for (const std::unique_ptr<Widget> &w : mChildren)
-            if (Widget *f = w->getChildRecursive(name))
+        for (const std::unique_ptr<WidgetBase> &w : mChildren)
+            if (WidgetBase *f = w->getChildRecursive(name))
                 return f;
         return nullptr;
     }
 
-    Widget *Widget::getParent() const
+    WidgetBase *WidgetBase::getParent() const
     {
         return mParent;
     }
 
-    bool Widget::injectPointerPress(const Input::PointerEventArgs &arg)
+    bool WidgetBase::injectPointerPress(const Input::PointerEventArgs &arg)
     {
         mPointerDownSignal.emit(arg);
         return true;
     }
 
-    bool Widget::injectPointerRelease(const Input::PointerEventArgs &arg)
+    bool WidgetBase::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
         mPointerUpSignal.emit(arg);
         return true;
     }
 
-    bool Widget::injectPointerMove(const Input::PointerEventArgs &arg)
+    bool WidgetBase::injectPointerMove(const Input::PointerEventArgs &arg)
     {
         mPointerMoveSignal.emit(arg);
         return true;
     }
 
-    bool Widget::injectPointerEnter(const Input::PointerEventArgs &arg)
+    bool WidgetBase::injectPointerEnter(const Input::PointerEventArgs &arg)
     {
         mPointerEnterSignal.emit(arg);
         return true;
     }
 
-    bool Widget::injectPointerLeave(const Input::PointerEventArgs &arg)
+    bool WidgetBase::injectPointerLeave(const Input::PointerEventArgs &arg)
     {
         mPointerLeaveSignal.emit(arg);
         return true;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &Widget::pointerMoveEvent()
+    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
     {
         return mPointerMoveSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &Widget::pointerDownEvent()
+    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerDownEvent()
     {
         return mPointerDownSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &Widget::pointerUpEvent()
+    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerUpEvent()
     {
         return mPointerUpSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &Widget::pointerEnterEvent()
+    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerEnterEvent()
     {
         return mPointerEnterSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &Widget::pointerLeaveEvent()
+    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerLeaveEvent()
     {
         return mPointerLeaveSignal;
     }
 
-    bool Widget::containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos, float extend) const
+    bool WidgetBase::containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos, float extend) const
     {
         Vector3 min = mAbsolutePos * screenSize + screenPos - extend;
         Vector3 max = mAbsoluteSize * screenSize + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<Vertex> Widget::vertices(const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, uint32_t> WidgetBase::vertices(const Vector3 &screenSize)
     {
         return {};
     }
 
-    void *Widget::userData()
+    void *WidgetBase::userData()
     {
         return mUserData;
     }
 
-    void Widget::setUserData(void *userData)
+    void WidgetBase::setUserData(void *userData)
     {
         mUserData = userData;
     }
 
-    std::unique_ptr<Widget> Widget::createWidgetClass(const std::string &name, Class _class)
+    std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, Class _class)
     {
         switch (_class) {
         case Class::BAR_CLASS:
@@ -444,55 +450,59 @@ namespace GUI {
             throw 0;
         }
     }
-    std::unique_ptr<Widget> Widget::createWidget(const std::string &name)
+    std::unique_ptr<WidgetBase> WidgetBase::createWidget(const std::string &name)
     {
-        return std::make_unique<Widget>(name, this);
+        return std::make_unique<WidgetBase>(name, this);
     }
-    std::unique_ptr<Bar> Widget::createBar(const std::string &name)
+    std::unique_ptr<Bar> WidgetBase::createBar(const std::string &name)
     {
         return std::make_unique<Bar>(name, this);
     }
-    std::unique_ptr<Button> Widget::createButton(const std::string &name)
+    std::unique_ptr<Button> WidgetBase::createButton(const std::string &name)
     {
         return std::make_unique<Button>(name, this);
     }
-    std::unique_ptr<Checkbox> Widget::createCheckbox(const std::string &name)
+    std::unique_ptr<Checkbox> WidgetBase::createCheckbox(const std::string &name)
     {
         return std::make_unique<Checkbox>(name, this);
     }
-    std::unique_ptr<Combobox> Widget::createCombobox(const std::string &name)
+    std::unique_ptr<Combobox> WidgetBase::createCombobox(const std::string &name)
     {
         return std::make_unique<Combobox>(name, this);
     }
-    std::unique_ptr<Image> Widget::createImage(const std::string &name)
+    std::unique_ptr<Image> WidgetBase::createImage(const std::string &name)
     {
         return std::make_unique<Image>(name, this);
     }
-    std::unique_ptr<Label> Widget::createLabel(const std::string &name)
+    std::unique_ptr<Label> WidgetBase::createLabel(const std::string &name)
     {
         return std::make_unique<Label>(name, this);
     }
-    std::unique_ptr<SceneWindow> Widget::createSceneWindow(const std::string &name)
+    std::unique_ptr<SceneWindow> WidgetBase::createSceneWindow(const std::string &name)
     {
         return std::make_unique<SceneWindow>(name, this);
     }
-    std::unique_ptr<TabWidget> Widget::createTabWidget(const std::string &name)
+    std::unique_ptr<TabWidget> WidgetBase::createTabWidget(const std::string &name)
     {
         return std::make_unique<TabWidget>(name, this);
     }
-    std::unique_ptr<Textbox> Widget::createTextbox(const std::string &name)
+    std::unique_ptr<Textbox> WidgetBase::createTextbox(const std::string &name)
     {
         return std::make_unique<Textbox>(name, this);
     }
-    void Widget::sizeChanged(const Vector3 &pixelSize)
+    void WidgetBase::sizeChanged(const Vector3 &pixelSize)
     {
     }
+
+	const MetaTable *WidgetBase::type()
+    {
+        return &table<WidgetBase>();
+    }
+
+	Resources::ImageLoader::ResourceType *WidgetBase::resource() const
+    {
+        return nullptr;
+    }
+
 }
 }
-
-METATABLE_BEGIN(Engine::GUI::Widget)
-READONLY_PROPERTY(Widgets, children)
-READONLY_PROPERTY(Size, getSize)
-METATABLE_END(Engine::GUI::Widget)
-
-RegisterType(Engine::GUI::Widget);

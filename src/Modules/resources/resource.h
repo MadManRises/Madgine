@@ -40,7 +40,7 @@ namespace Resources {
             }
         }
 
-        bool load() 
+        bool load()
         {
             return loadData().operator bool();
         }
@@ -126,6 +126,14 @@ namespace Resources {
             bool b = d.mWeakPtr.expired();
             d.mWeakPtr.reset();
             return b;
+        }
+
+        bool isLoaded() const
+        {
+            auto it = mData.find(std::this_thread::get_id());
+            if (it == mData.end())
+                return false;
+            return !it->second.mWeakPtr.expired();            
         }
 
         void setPersistent(bool b)

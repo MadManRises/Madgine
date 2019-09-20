@@ -8,72 +8,75 @@
 
 #include <iostream>
 
-namespace Engine
-{
-	namespace GUI
-	{
-		void Button::setText(const std::string & text)
-		{
-		}
+#include "Modules/keyvalue/metatable_impl.h"
 
-		SignalSlot::SignalStub<>& Button::clickEvent()
-		{
-			return mClicked;
-		}
+METATABLE_BEGIN(Engine::GUI::Button)
+METATABLE_END(Engine::GUI::Button)
 
-		std::vector<Vertex> Button::vertices(const Vector3 & screenSize)
-		{
-			std::vector<Vertex> result;
+namespace Engine {
+namespace GUI {
+    void Button::setText(const std::string &text)
+    {
+    }
 
-			Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
-			Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
+    SignalSlot::SignalStub<> &Button::clickEvent()
+    {
+        return mClicked;
+    }
 
-			Vector4 color = mHovered ? Vector4{ 1.0f, 0.1f, 0.1f, 1.0f } : Vector4{0.4f, 0.4f, 0.4f, 1.0f};
+    std::pair<std::vector<Vertex>, uint32_t> Button::vertices(const Vector3 &screenSize)
+    {
+        std::vector<Vertex> result;
 
-			Vector3 v = pos;
-			v.z = static_cast<float>(depth());
-			result.push_back({ v, color });
-			v.x += size.x;
-			result.push_back({ v, color });
-			v.y += size.y;
-			result.push_back({ v, color });
-			result.push_back({ v, color });
-			v.x -= size.x;
-			result.push_back({ v, color });
-			v.y -= size.y;
-			result.push_back({ v, color });
-			return result;
-		}
+        Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
+        Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
 
-		bool Button::injectPointerEnter(const Input::PointerEventArgs & arg)
-		{
-			mHovered = true;
-			return true;
-		}
+        Vector4 color = mHovered ? Vector4 { 1.0f, 0.1f, 0.1f, 1.0f } : Vector4 { 0.4f, 0.4f, 0.4f, 1.0f };
 
-		bool Button::injectPointerLeave(const Input::PointerEventArgs & arg)
-		{
-			mHovered = false;
-			mClicking = false;
-			return true;
-		}
+        Vector3 v = pos;
+        v.z = static_cast<float>(depth());
+        result.push_back({ v, color });
+        v.x += size.x;
+        result.push_back({ v, color });
+        v.y += size.y;
+        result.push_back({ v, color });
+        result.push_back({ v, color });
+        v.x -= size.x;
+        result.push_back({ v, color });
+        v.y -= size.y;
+        result.push_back({ v, color });
+        return { result, 0 };
+    }
 
-		bool Button::injectPointerPress(const Input::PointerEventArgs & arg)
-		{
-			mClicking = true;
-			return true;
-		}
+    bool Button::injectPointerEnter(const Input::PointerEventArgs &arg)
+    {
+        mHovered = true;
+        return true;
+    }
 
-		bool Button::injectPointerRelease(const Input::PointerEventArgs & arg)
-		{
-			if (mClicking)
-				emitClicked();
-			return true;
-		}
+    bool Button::injectPointerLeave(const Input::PointerEventArgs &arg)
+    {
+        mHovered = false;
+        mClicking = false;
+        return true;
+    }
 
-		void Button::emitClicked()
-		{
-			mClicked.emit();
-		}
-	}
+    bool Button::injectPointerPress(const Input::PointerEventArgs &arg)
+    {
+        mClicking = true;
+        return true;
+    }
+
+    bool Button::injectPointerRelease(const Input::PointerEventArgs &arg)
+    {
+        if (mClicking)
+            emitClicked();
+        return true;
+    }
+
+    void Button::emitClicked()
+    {
+        mClicked.emit();
+    }
+}
 }

@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		class Bar : public Widget
+		class Bar : public Widget<Bar>
 		{
 		public:
 			using Widget::Widget;

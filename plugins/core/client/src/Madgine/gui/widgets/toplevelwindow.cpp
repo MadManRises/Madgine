@@ -61,104 +61,104 @@ namespace GUI {
         mRenderWindow = gui.renderer().createWindow(mWindow, this);
         App::Application::getSingleton().addFrameListener(this);
 
-        Widget *loading = createTopLevelImage("Loading");
-        Widget *progress = loading->createChildBar("ProgressBar");
+        WidgetBase *loading = createTopLevelImage("Loading");
+        WidgetBase *progress = loading->createChildBar("ProgressBar");
         progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
         progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        Widget *loadMsg = loading->createChildLabel("LoadingMsg");
-        Widget *ingame = createTopLevelWidget("ingame");
+        WidgetBase *loadMsg = loading->createChildLabel("LoadingMsg");
+        WidgetBase *ingame = createTopLevelWidget("ingame");
         SceneWindow *game = ingame->createChildSceneWindow("game");
         //game->setCamera(gui.sceneMgr().createCamera());
         game->setSize({ 0.8f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        Widget *placeBaseButton = game->createChildButton("PlaceBaseButton");
+        WidgetBase *placeBaseButton = game->createChildButton("PlaceBaseButton");
         placeBaseButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
         placeBaseButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        Widget *endTurnButton = game->createChildButton("EndTurnButton");
+        WidgetBase *endTurnButton = game->createChildButton("EndTurnButton");
         endTurnButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
         endTurnButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        Widget *unitUI = ingame->createChildWidget("UnitUI");
+        WidgetBase *unitUI = ingame->createChildWidget("UnitUI");
         unitUI->setPos({ 0.8f, 0, 0, 0, 0, 0, 0, 0, 0 });
         unitUI->setSize({ 0.2f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        Widget *fieldImage = unitUI->createChildImage("FieldImage");
+        WidgetBase *fieldImage = unitUI->createChildImage("FieldImage");
         fieldImage->setPos({ 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         fieldImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        Widget *defenderImage = unitUI->createChildImage("DefenderImage");
+        WidgetBase *defenderImage = unitUI->createChildImage("DefenderImage");
         defenderImage->setPos({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
         defenderImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        Widget *defenderHealth = defenderImage->createChildBar("DefenderHealth");
+        WidgetBase *defenderHealth = defenderImage->createChildBar("DefenderHealth");
         defenderHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
         defenderHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *defenderExp = defenderImage->createChildBar("DefenderExp");
+        WidgetBase *defenderExp = defenderImage->createChildBar("DefenderExp");
         defenderExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         defenderExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *attackerImage = unitUI->createChildImage("AttackerImage");
+        WidgetBase *attackerImage = unitUI->createChildImage("AttackerImage");
         attackerImage->setPos({ 0, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
         attackerImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        Widget *attackerHealth = attackerImage->createChildBar("AttackerHealth");
+        WidgetBase *attackerHealth = attackerImage->createChildBar("AttackerHealth");
         attackerHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
         attackerHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *attackerExp = attackerImage->createChildBar("AttackerExp");
+        WidgetBase *attackerExp = attackerImage->createChildBar("AttackerExp");
         attackerExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         attackerExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *modifierImage = unitUI->createChildImage("ModifierImage");
+        WidgetBase *modifierImage = unitUI->createChildImage("ModifierImage");
         modifierImage->setPos({ 1.15f, 0, 0, 0.15f, 0, 0, 0, 0, 0 });
         modifierImage->setSize({ 0.2f, 0, 0, 0.2f, 0, 0, 0, 0, 1 });
         Image *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
         attackerStrengthIcon->setPos({ 0.025f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
         attackerStrengthIcon->setSize({ 0.15f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        attackerStrengthIcon->setImage("Sword-01.png");
-        Widget *attackerStrength = unitUI->createChildLabel("AttackerStrength");
+        attackerStrengthIcon->setImageByName("Sword-01");
+        WidgetBase *attackerStrength = unitUI->createChildLabel("AttackerStrength");
         attackerStrength->setPos({ 0.2f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
         attackerStrength->setSize({ 0.2f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        Widget *strengthArrow = unitUI->createChildImage("StrengthArrow");
+        WidgetBase *strengthArrow = unitUI->createChildImage("StrengthArrow");
         strengthArrow->setPos({ 0.4f, 0, 0, 1.075f, 0, 0, 0, 0, 0 });
         strengthArrow->setSize({ 0.2f, 0, 0, 0.05f, 0, 0, 0, 0, 1 });
-        Widget *defenderStrength = unitUI->createChildLabel("DefenderStrength");
+        WidgetBase *defenderStrength = unitUI->createChildLabel("DefenderStrength");
         defenderStrength->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         defenderStrength->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
+        WidgetBase *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
         defenderStrengthIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         defenderStrengthIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *contentWindow = unitUI->createChildWidget("ContentWindow");
+        WidgetBase *contentWindow = unitUI->createChildWidget("ContentWindow");
         contentWindow->setPos({ 0, 0, 0, 1, 0, 0, 0, 0, 0 });
         contentWindow->setSize({ 1, 0, 0, -1, 1, 0, 0, 0, 1 });
-        Widget *movementIcon = unitUI->createChildImage("MovementIcon");
+        WidgetBase *movementIcon = unitUI->createChildImage("MovementIcon");
         movementIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         movementIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *movement = unitUI->createChildLabel("Movement");
+        WidgetBase *movement = unitUI->createChildLabel("Movement");
         movement->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         movement->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *health = unitUI->createChildLabel("Health");
+        WidgetBase *health = unitUI->createChildLabel("Health");
         health->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
         health->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        Widget *mainMenu = createTopLevelWidget("MainMenu");
-        Widget *optionsButton = mainMenu->createChildButton("OptionsButton");
+        WidgetBase *mainMenu = createTopLevelWidget("MainMenu");
+        WidgetBase *optionsButton = mainMenu->createChildButton("OptionsButton");
         optionsButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
         optionsButton->setPos({ 0.55f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        Widget *findMatchButton = mainMenu->createChildButton("FindMatchButton");
+        WidgetBase *findMatchButton = mainMenu->createChildButton("FindMatchButton");
         findMatchButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
         findMatchButton->setPos({ 0.55f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
-        Widget *playButton = mainMenu->createChildButton("PlayButton");
+        WidgetBase *playButton = mainMenu->createChildButton("PlayButton");
         playButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
         playButton->setPos({ 0.05f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        Widget *quitButton = mainMenu->createChildButton("QuitButton");
+        WidgetBase *quitButton = mainMenu->createChildButton("QuitButton");
         quitButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
         quitButton->setPos({ 0.05f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
         Image *titleScreen = mainMenu->createChildImage("noname");
-        titleScreen->setImage("img/MainMenu/TitleScreen.png");
+        titleScreen->setImageByName("TitleScreen");
         titleScreen->setSize({ 0.8f, 0, 0, 0.1f, 0, 0, 0, 0, 1 });
         titleScreen->setPos({ 0.1f, 0, 0, 0, 0.05f, 0, 0, 0, 0 });
-        Widget *connectionFailureWindow = createTopLevelWidget("ConnectionFailureWindow");
-        Widget *connectionLabel = connectionFailureWindow->createChildLabel("ConnectionLabel");
-        Widget *retryButton = connectionFailureWindow->createChildButton("RetryButton");
-        Widget *abortButton = connectionFailureWindow->createChildButton("AbortButton");
-        Widget *lobbyMenu = createTopLevelWidget("LobbyMenu");
-        Widget *startGameButton = lobbyMenu->createChildButton("StartGameButton");
-        Widget *lobbyListMenu = createTopLevelWidget("LobbyListMenu");
-        Widget *createLobbyButton = lobbyListMenu->createChildButton("CreateLobbyButton");
-        Widget *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
-        Widget *backButton = lobbyListMenu->createChildButton("BackButton");
-        Widget *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
+        WidgetBase *connectionFailureWindow = createTopLevelWidget("ConnectionFailureWindow");
+        WidgetBase *connectionLabel = connectionFailureWindow->createChildLabel("ConnectionLabel");
+        WidgetBase *retryButton = connectionFailureWindow->createChildButton("RetryButton");
+        WidgetBase *abortButton = connectionFailureWindow->createChildButton("AbortButton");
+        WidgetBase *lobbyMenu = createTopLevelWidget("LobbyMenu");
+        WidgetBase *startGameButton = lobbyMenu->createChildButton("StartGameButton");
+        WidgetBase *lobbyListMenu = createTopLevelWidget("LobbyListMenu");
+        WidgetBase *createLobbyButton = lobbyListMenu->createChildButton("CreateLobbyButton");
+        WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
+        WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
+        WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
 
         for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
             bool result = comp->callInit();
@@ -216,9 +216,9 @@ namespace GUI {
         return Matrix3::IDENTITY;
     }
 
-    Widget *TopLevelWindow::createTopLevelWidget(const std::string &name)
+    WidgetBase *TopLevelWindow::createTopLevelWidget(const std::string &name)
     {
-        Widget *w = mTopLevelWidgets.emplace_back(createWidget(name)).get();
+        WidgetBase *w = mTopLevelWidgets.emplace_back(createWidget(name)).get();
         w->hide();
         w->updateGeometry(getScreenSize(), getSize());
         return w;
@@ -314,7 +314,7 @@ namespace GUI {
         return t;
     }
 
-    std::unique_ptr<Widget> TopLevelWindow::createWidgetClass(const std::string &name, Class _class)
+    std::unique_ptr<WidgetBase> TopLevelWindow::createWidgetClass(const std::string &name, Class _class)
     {
         switch (_class) {
         case Class::BAR_CLASS:
@@ -340,9 +340,9 @@ namespace GUI {
         }
     }
 
-    std::unique_ptr<Widget> TopLevelWindow::createWidget(const std::string &name)
+    std::unique_ptr<WidgetBase> TopLevelWindow::createWidget(const std::string &name)
     {
-        return std::make_unique<Widget>(name, *this);
+        return std::make_unique<WidgetBase>(name, *this);
     }
 
     std::unique_ptr<Bar> TopLevelWindow::createBar(const std::string &name)
@@ -441,7 +441,7 @@ namespace GUI {
         return false;
     }
 
-    static bool propagateInput(Widget *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, const Vector3 &screenPos, bool (Widget::*f)(const Input::PointerEventArgs &))
+    static bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, const Vector3 &screenPos, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
     {
         if (!w->isVisible())
             return false;
@@ -449,7 +449,7 @@ namespace GUI {
         if (!w->containsPoint(arg.position, screenSize, screenPos))
             return false;
 
-        for (Widget *c : w->children()) {
+        for (WidgetBase *c : w->children()) {
             if (propagateInput(c, arg, screenSize, screenPos, f))
                 return true;
         }
@@ -465,8 +465,8 @@ namespace GUI {
 
         auto [screenPos, screenSize] = getAvailableScreenSpace();
 
-        for (Widget *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, screenPos, &Widget::injectPointerPress))
+        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
+            if (propagateInput(w, arg, screenSize, screenPos, &WidgetBase::injectPointerPress))
                 return true;
         }
         return false;
@@ -481,14 +481,14 @@ namespace GUI {
 
         auto [screenPos, screenSize] = getAvailableScreenSpace();
 
-        for (Widget *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, screenPos, &Widget::injectPointerRelease))
+        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
+            if (propagateInput(w, arg, screenSize, screenPos, &WidgetBase::injectPointerRelease))
                 return true;
         }
         return false;
     }
 
-    static Widget *getHoveredWidgetUp(const Vector2 &pos, const Vector3 &screenSize, Widget *current)
+    static WidgetBase *getHoveredWidgetUp(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
     {
         if (!current) {
             return nullptr;
@@ -499,11 +499,11 @@ namespace GUI {
         }
     }
 
-    Widget *TopLevelWindow::getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, Widget *current)
+    WidgetBase *TopLevelWindow::getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
     {
         const auto &widgets = current ? current->children() : uniquePtrToPtr(mTopLevelWidgets);
 
-        for (Widget *w : widgets) {
+        for (WidgetBase *w : widgets) {
             if (w->isVisible() && w->containsPoint(pos, screenSize)) {
                 return getHoveredWidgetDown(pos, screenSize, w);
             }
@@ -511,7 +511,7 @@ namespace GUI {
         return current;
     }
 
-    Widget *TopLevelWindow::getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, Widget *current)
+    WidgetBase *TopLevelWindow::getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
     {
         return getHoveredWidgetDown(pos, screenSize, getHoveredWidgetUp(pos, screenSize, current));
     }
@@ -528,7 +528,7 @@ namespace GUI {
         Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
 
         //TODO fix mouse pos
-        Widget *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
+        WidgetBase *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 
@@ -552,7 +552,7 @@ namespace GUI {
         return mWindow;
     }
 
-    Widget *TopLevelWindow::currentRoot()
+    WidgetBase *TopLevelWindow::currentRoot()
     {
         return mCurrentRoot;
     }
@@ -575,21 +575,21 @@ namespace GUI {
     void TopLevelWindow::onResize(size_t width, size_t height)
     {
         input()->onResize(width, height);
-        for (Widget *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
+        for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
             topLevel->screenSizeChanged({ static_cast<float>(width), static_cast<float>(height), 1.0f });
         }
     }
 
     void TopLevelWindow::calculateWindowGeometries()
     {
-        for (Widget *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
+        for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
             topLevel->updateGeometry(getScreenSize(), getSize());
         }
     }
 
-    void TopLevelWindow::destroyTopLevel(Widget *w)
+    void TopLevelWindow::destroyTopLevel(WidgetBase *w)
     {
-        auto it = std::find_if(mTopLevelWidgets.begin(), mTopLevelWidgets.end(), [=](const std::unique_ptr<Widget> &ptr) { return ptr.get() == w; });
+        auto it = std::find_if(mTopLevelWidgets.begin(), mTopLevelWidgets.end(), [=](const std::unique_ptr<WidgetBase> &ptr) { return ptr.get() == w; });
         assert(it != mTopLevelWidgets.end());
         mTopLevelWidgets.erase(it);
     }
@@ -604,9 +604,9 @@ namespace GUI {
         return mGui;
     }
 
-    bool TopLevelWindow::isHovered(Widget *w)
+    bool TopLevelWindow::isHovered(WidgetBase *w)
     {
-        Widget *hovered = mHoveredWidget;
+        WidgetBase *hovered = mHoveredWidget;
         while (hovered) {
             if (hovered == w)
                 return true;
@@ -615,17 +615,17 @@ namespace GUI {
         return false;
     }
 
-    Widget *TopLevelWindow::hoveredWidget()
+    WidgetBase *TopLevelWindow::hoveredWidget()
     {
         return mHoveredWidget;
     }
 
-    Widget *TopLevelWindow::getWidget(const std::string &name)
+    WidgetBase *TopLevelWindow::getWidget(const std::string &name)
     {
         return mWidgets.at(name);
     }
 
-    void TopLevelWindow::registerWidget(Widget *w)
+    void TopLevelWindow::registerWidget(WidgetBase *w)
     {
         if (!w->getName().empty()) {
             auto pib = mWidgets.try_emplace(w->getName(), w);
@@ -633,7 +633,7 @@ namespace GUI {
         }
     }
 
-    void TopLevelWindow::unregisterWidget(Widget *w)
+    void TopLevelWindow::unregisterWidget(WidgetBase *w)
     {
         if (!w->getName().empty()) {
             size_t result = mWidgets.erase(w->getName());
@@ -641,7 +641,7 @@ namespace GUI {
         }
     }
 
-    void TopLevelWindow::swapCurrentRoot(Widget *newRoot)
+    void TopLevelWindow::swapCurrentRoot(WidgetBase *newRoot)
     {
         if (mCurrentRoot)
             mCurrentRoot->hide();
@@ -649,18 +649,18 @@ namespace GUI {
         newRoot->show();
     }
 
-    void TopLevelWindow::openModalWidget(Widget *widget)
+    void TopLevelWindow::openModalWidget(WidgetBase *widget)
     {
         widget->showModal();
         mModalWidgetList.emplace(widget);
     }
 
-    void TopLevelWindow::openWidget(Widget *widget)
+    void TopLevelWindow::openWidget(WidgetBase *widget)
     {
         widget->show();
     }
 
-    void TopLevelWindow::closeModalWidget(Widget *widget)
+    void TopLevelWindow::closeModalWidget(WidgetBase *widget)
     {
         assert(mModalWidgetList.size() > 0 && mModalWidgetList.top() == widget);
         widget->hideModal();
@@ -671,7 +671,7 @@ namespace GUI {
             mCurrentRoot->activate();
     }
 
-    void TopLevelWindow::closeWidget(Widget *widget)
+    void TopLevelWindow::closeWidget(WidgetBase *widget)
     {
         widget->hide();
     }

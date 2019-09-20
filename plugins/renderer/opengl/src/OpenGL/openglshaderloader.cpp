@@ -71,4 +71,7 @@ namespace Engine
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
 METATABLE_END(Engine::Render::OpenGLShaderLoader)
 
+METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLShaderLoader::ResourceType)
+
 RegisterType(Engine::Render::OpenGLShaderLoader);
