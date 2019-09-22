@@ -1,15 +1,12 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_AndroidInput
-#    include "androidinputlib.h"
-#endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
-#ifdef BUILD_ClientTools
-#    include "Madgine_Tools/clienttoolslib.h"
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_OpenGLTools
-#    include "OpenGL_Tools/opengltoolslib.h"
+#ifdef BUILD_AndroidInput
+#    include "androidinputlib.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
@@ -17,14 +14,17 @@
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
 #endif
-#ifdef BUILD_Base
-#    include "Madgine/baselib.h"
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolslib.h"
 #endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
+#ifdef BUILD_ClientTools
+#    include "Madgine_Tools/clienttoolslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
+#endif
+#ifdef BUILD_Base
+#    include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
@@ -91,9 +91,6 @@
 #endif
 #ifdef BUILD_Tools
 #    include "inspector/inspector.h"
-#endif
-#ifdef BUILD_Tools
-#    include "memory/memoryviewer.h"
 #endif
 #ifdef BUILD_Tools
 #    include "metrics/metrics.h"
@@ -444,7 +441,6 @@ const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Reg
 #    ifdef BUILD_Tools
 		&table<Engine::Tools::FunctionTool>(),
 		&table<Engine::Tools::Inspector>(),
-		&table<Engine::Tools::MemoryViewer>(),
 		&table<Engine::Tools::Metrics>(),
 		&table<Engine::Tools::Profiler>(),
 		&table<Engine::Tools::ImGuiDemo>(),
@@ -468,7 +464,6 @@ std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsColl
 #    ifdef BUILD_Tools
 		createComponent<Engine::Tools::FunctionTool>,
 		createComponent<Engine::Tools::Inspector>,
-		createComponent<Engine::Tools::MemoryViewer>,
 		createComponent<Engine::Tools::Metrics>,
 		createComponent<Engine::Tools::Profiler>,
 		createComponent<Engine::Tools::ImGuiDemo>,
@@ -494,17 +489,15 @@ size_t component_index<Engine::Tools::FunctionTool>() { return CollectorBaseInde
 template <>
 size_t component_index<Engine::Tools::Inspector>() { return CollectorBaseIndex_ToolBase_Tools + 1; }
 template <>
-size_t component_index<Engine::Tools::MemoryViewer>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
+size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
 template <>
-size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 3; }
+size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 3; }
 template <>
-size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 4; }
+size_t component_index<Engine::Tools::ImGuiDemo>() { return CollectorBaseIndex_ToolBase_Tools + 4; }
 template <>
-size_t component_index<Engine::Tools::ImGuiDemo>() { return CollectorBaseIndex_ToolBase_Tools + 5; }
-template <>
-size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_ToolBase_Tools + 6; }
+size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_ToolBase_Tools + 5; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_Tools + 7
+#        define ACC CollectorBaseIndex_ToolBase_Tools + 6
 #    endif
 #    ifdef BUILD_ClientTools
 constexpr size_t CollectorBaseIndex_ToolBase_ClientTools = ACC;
