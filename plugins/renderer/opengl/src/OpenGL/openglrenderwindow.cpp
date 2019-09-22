@@ -170,7 +170,7 @@ namespace Render {
     {
         if (mUIAtlasSize == 0) {
             mUIAtlasSize = 4;
-            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr);
+            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr, GL_UNSIGNED_BYTE);
             for (int x = 0; x < mUIAtlasSize; ++x) {
                 for (int y = 0; y < mUIAtlasSize; ++y) {
                     mUIAtlas.addBin({ 512 * x, 512 * y });
