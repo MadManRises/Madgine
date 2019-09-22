@@ -40,7 +40,7 @@ namespace Tools {
             { typeid(std::get<Is>(std::declval<ValueType::Union>())).name(), sizeof(std::get<Is>(std::declval<ValueType::Union>())) }...
         };
         for (auto [name, size] : data) {
-            ImGui::Text("  %s size: %lu", name, size);
+            ImGui::Text("  %s size: %llu", name, size);
         }
     }
 
@@ -101,7 +101,7 @@ namespace Tools {
 
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
-            ImGui::Text("ValueType size: %lu", sizeof(ValueType));
+            ImGui::Text("ValueType size: %llu", sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
         }
         ImGui::End();

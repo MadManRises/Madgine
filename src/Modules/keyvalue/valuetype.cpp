@@ -20,7 +20,7 @@ std::string ValueType::toString() const
     case Type::NullValue:
         return "NULL";
     case Type::ScopeValue:
-        return std::get<TypedScopePtr>(mUnion).mType->mName;
+        return std::get<TypedScopePtr>(mUnion).name();
     case Type::FloatValue:
         return std::to_string(std::get<float>(mUnion));
     case Type::Vector2Value:

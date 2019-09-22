@@ -2,12 +2,12 @@
 
 #include "../generic/callable_traits.h"
 #include "../generic/tupleunpacker.h"
+#include "../reflection/decay.h"
 #include "Interfaces/macros.h"
 #include "accessor.h"
 #include "container_traits.h"
 #include "metatable.h"
 #include "valuetype.h"
-#include "../reflection/decay.h"
 
 namespace Engine {
 
@@ -30,9 +30,9 @@ constexpr Accessor property()
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
-		using SetterScope = typename setter_traits::class_type;
+        using SetterScope = typename setter_traits::class_type;
 
-		//TODO remove const in tuple types
+        //TODO remove const in tuple types
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
@@ -110,11 +110,16 @@ static constexpr BoundApiMethod method(TypedScopePtr scope)
 
 }
 
-#define METATABLE_BEGIN(T) \
-    namespace {            \
-        namespace Meta_##T \
-        {                  \
-            using Ty = T;  \
+#define METATABLE_BEGIN(T) _METATABLE_BEGIN_IMPL(T, nullptr)
+
+#define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>)
+
+#define _METATABLE_BEGIN_IMPL(T, BasePtr)                   \
+    namespace {                                             \
+        namespace Meta_##T                                  \
+        {                                                   \
+            using Ty = T;                                   \
+            constexpr const ::Engine::MetaTable &(*baseClassGetter)() = BasePtr; \
             constexpr const std::pair<const char *, ::Engine::Accessor> members[] = {
 
 #define METATABLE_END(T)              \
@@ -125,7 +130,7 @@ static constexpr BoundApiMethod method(TypedScopePtr scope)
     ;                                 \
     }                                 \
     }                                 \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG2({ #T, Meta_##T::members }), T);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG3({ #T, Meta_##T::baseClassGetter, Meta_##T::members }), T);
 
 #define MEMBER(M) \
     { #M, ::Engine::member<Ty, &Ty::M>() },

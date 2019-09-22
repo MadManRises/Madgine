@@ -58,6 +58,8 @@ struct MODULES_EXPORT TypedScopePtr {
     bool isEditable(const std::string &key) const;
     ScopeIterator begin() const;
     ScopeIterator end() const;
+
+	std::string name() const;
 };
 
 }

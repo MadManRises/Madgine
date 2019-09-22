@@ -12,7 +12,11 @@ ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
             return { scope, p };
         }
     }
-    return { scope, nullptr };
+    if (mBaseGetter) {
+        return mBaseGetter().find(key, scope);
+    } else {
+        return { scope, nullptr };
+    }
 }
 
 std::optional<ValueType> MetaTable::get(const std::string &key, TypedScopePtr scope) const
@@ -32,7 +36,11 @@ void MetaTable::set(const std::string &key, const ValueType &value, TypedScopePt
             return;
         }
     }
-    throw 0;
+    if (mBaseGetter) {
+        mBaseGetter().set(key, value, scope);
+    } else {
+        throw 0;
+    }
 }
 
 bool MetaTable::isEditable(const std::string &key) const
@@ -42,13 +50,25 @@ bool MetaTable::isEditable(const std::string &key) const
             return p->second.mSetter;
         }
     }
-    throw 0;
+    if (mBaseGetter) {
+        return mBaseGetter().isEditable(key);
+    } else {
+        throw 0;
+    }
 }
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
 {
-	//TODO inheritance
-    return this == baseType;
+    return this == baseType || (mBaseGetter && mBaseGetter().isDerivedFrom(baseType));
 }
 
+std::string MetaTable::name(TypedScopePtr scope) const
+{
+    std::optional<ValueType> name = get("Name", scope);
+    if (name && name->is<std::string>()) {
+        return name->as<std::string>();
+    } else {
+        return "<"s + mTypeName + ">";
+    }
+}
 }

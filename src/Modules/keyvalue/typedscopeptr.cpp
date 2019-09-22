@@ -39,4 +39,12 @@ namespace Engine {
         return { *this, p};
     }
 
+    std::string TypedScopePtr::name() const
+    {
+        if (mScope)
+            return mType->name(*this);
+        else
+            return "<NULL>";
+    }
+
 }

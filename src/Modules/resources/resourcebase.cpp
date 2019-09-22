@@ -4,6 +4,13 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "../keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Resources::ResourceBase)
+READONLY_PROPERTY(Name, name)
+PROPERTY(Persistent, isPersistent, setPersistent)
+METATABLE_END(Engine::Resources::ResourceBase)
+
 namespace Engine {
 namespace Resources {
     ResourceBase::ResourceBase(Filesystem::Path path)

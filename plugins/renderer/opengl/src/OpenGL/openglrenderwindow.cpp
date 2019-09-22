@@ -33,8 +33,8 @@ namespace Render {
     OpenGLRenderWindow::OpenGLRenderWindow(Window::Window *w, ContextHandle context, GUI::TopLevelWindow *topLevelWindow)
         : RenderWindow(w)
         , mContext(context)
-        , mTopLevelWindow(topLevelWindow)
         , mUIAtlas({ 512, 512 })
+        , mTopLevelWindow(topLevelWindow)
     {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("ui_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("ui_PS");

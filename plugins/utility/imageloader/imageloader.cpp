@@ -19,7 +19,7 @@ METATABLE_BEGIN(Engine::Resources::ImageLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Resources::ImageLoader)
 
-METATABLE_BEGIN(Engine::Resources::ImageLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Resources::ImageLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Resources::ImageLoader::ResourceType)
 
 RegisterType(Engine::Resources::ImageLoader)

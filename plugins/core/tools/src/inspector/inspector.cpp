@@ -130,11 +130,11 @@ namespace Tools {
                                                                  bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
 
                                                                  bool open;
-                                                                 if (hasSuggestions) {
 
+                                                                 if (hasSuggestions) {
                                                                      ImGui::BeginTreeArrow(id.c_str());
-                                                                     ImGui::SameLine(0.0f, 0.0f);
-                                                                     if (ImGui::BeginCombo("##suggestions", id.c_str())) {
+                                                                     ImGui::SameLine();
+                                                                     if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
                                                                          for (std::pair<std::string, TypedScopePtr> p : it->second()) {
                                                                              if (ImGui::Selectable(p.first.c_str())) {
                                                                                  value = p.second;
@@ -145,8 +145,9 @@ namespace Tools {
                                                                      }
                                                                      open = ImGui::EndTreeArrow();
                                                                  } else {
-                                                                     open = ImGui::TreeNodeEx(id.c_str());
-                                                                 }
+                                                                     open = ImGui::TreeNode(id.c_str());
+                                                                 }                                                                 
+
                                                                  ImGui::DraggableValueTypeSource(id, parent, value, ImGuiDragDropFlags_SourceAllowNullID);
                                                                  if (editable && ImGui::BeginDragDropTarget()) {
                                                                      if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
@@ -197,7 +198,7 @@ namespace Tools {
     void Inspector::draw(TypedScopePtr scope, const char *layoutName)
     {
         std::set<std::string> drawn;
-        const char *type = scope.mType->mName;
+        const char *type = scope.mType->mTypeName;
         InspectorLayout *layout = nullptr;
         auto it = mAssociations.find(type);
         if (it != mAssociations.end()) {
@@ -263,7 +264,7 @@ namespace Tools {
                 bool skip = false;
                 for (tinyxml2::XMLElement *condition = element->FirstChildElement("Condition"); condition; condition = condition->NextSiblingElement("Condition")) {
                     const char *expectedType = condition->Attribute("type");
-                    std::string type = (*it).second.is<TypedScopePtr>() ? (*it).second.as<TypedScopePtr>().mType->mName : "";
+                    std::string type = (*it).second.is<TypedScopePtr>() ? (*it).second.as<TypedScopePtr>().mType->mTypeName : "";
                     if (expectedType && type != expectedType) {
                         skip = true;
                         break;

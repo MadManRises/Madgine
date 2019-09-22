@@ -99,7 +99,7 @@ namespace Tools {
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
                 screenPos += windowPos;
 
-            bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse) && (!mSelected || !mSelected->widget()->containsPoint(mouse, screenSize, screenPos, borderSize));
+            bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse);
 
             if (mSelected) {
                 GUI::WidgetBase *selectedWidget = mSelected->widget();
@@ -187,7 +187,7 @@ namespace Tools {
                         background->AddRect(bounds.topLeft(), bounds.bottomRight(), IM_COL32(127, 127, 127, 255));
                     }
                 }
-                if (io.MouseClicked[0] && !mDragging) {
+                if (io.MouseReleased[0] && !mDragging) {
                     mSelected = hoveredSettings;
                 }
             }
@@ -251,9 +251,15 @@ namespace Tools {
                             dragDistanceSize[1][2] = 0.0f;
                             dragDistancePos[1][1] = 0.0f;
                             dragDistancePos[1][2] = 0.0f;
-                        } else if (mDraggingBottom) {
-                            dragDistancePos[1][1] = dragDistanceSize[1][1];
-                            dragDistancePos[1][2] = dragDistanceSize[1][2];
+                        } else if (mDraggingTop) {
+                            if (mSelected->aspectRatio()) {
+                                dragDistancePos[1][0] = -dragDistanceSize[0][0];
+                                dragDistancePos[1][1] = 0.0f;
+                                dragDistancePos[1][2] = -dragDistanceSize[0][2];
+                            } else {
+                                dragDistancePos[1][1] = dragDistanceSize[1][1];
+                                dragDistancePos[1][2] = dragDistanceSize[1][2];
+							}
                             dragDistanceSize[1][1] *= -1.0f;
                             dragDistanceSize[1][2] *= -1.0f;
                         }

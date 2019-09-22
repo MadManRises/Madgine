@@ -3,7 +3,8 @@
 namespace Engine {
 
 struct MODULES_EXPORT MetaTable {
-    const char *mName;
+    const char *mTypeName;
+    const MetaTable &(*mBaseGetter)();
     const std::pair<const char *, Accessor> *mMember;
 
     ScopeIterator find(const std::string &key, TypedScopePtr scope) const;
@@ -14,6 +15,8 @@ struct MODULES_EXPORT MetaTable {
     template <typename T>
     bool isDerivedFrom() const;
     bool isDerivedFrom(const MetaTable *baseType) const;
+
+	std::string name(TypedScopePtr scope) const;
 };
 
 }

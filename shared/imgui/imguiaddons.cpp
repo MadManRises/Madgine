@@ -511,7 +511,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
 
     std::string current;
     if (m->scope())
-        current = m->scope().mType->mName + ("." + *currentName);
+        current = m->scope().name() + ("." + *currentName);
     if (ImGui::BeginCombo(label, current.c_str())) {
         if (filter)
             ImGui::InputText("filter", filter);
@@ -519,7 +519,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
             if (!filter) {
                 if (expectedArgumentCount == -1 || method.argumentsCount() == expectedArgumentCount) {
                     bool is_selected = (method == *m);
-                    std::string fullItemName = method.scope().mType->mName + ("." + name);
+                    std::string fullItemName = method.scope().name() + ("." + name);
                     if (ImGui::Selectable(fullItemName.c_str(), is_selected)) {
                         *currentName = name;
                         *m = method;
