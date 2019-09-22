@@ -27,6 +27,15 @@
 #    define OPENGL_ES 1
 #endif
 
+namespace Engine {
+namespace Render {
+
+    constexpr struct dont_create_t {
+    } dont_create;
+
+}
+}
+
 MADGINE_OPENGL_EXPORT void glDump();
 
 inline void glCheck()

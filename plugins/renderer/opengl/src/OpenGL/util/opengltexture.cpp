@@ -17,6 +17,10 @@ namespace Render {
 #endif
     }
 
+    OpenGLTexture::OpenGLTexture(dont_create_t)
+    {
+    }
+
     OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
         : mHandle(std::exchange(other.mHandle, 0))
     {
@@ -28,6 +32,12 @@ namespace Render {
             glDeleteTextures(1, &mHandle);
             glCheck();
         }
+    }
+
+    OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
+    {
+        mHandle = std::exchange(other.mHandle, 0);
+        return *this;
     }
 
     void OpenGLTexture::bind() const

@@ -15,7 +15,7 @@ namespace Render {
         glCheck();
     }
 
-    OpenGLBuffer::OpenGLBuffer(dont_create_buffer_t)
+    OpenGLBuffer::OpenGLBuffer(dont_create_t)
     {
     }
 

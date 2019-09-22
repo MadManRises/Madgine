@@ -19,7 +19,7 @@ namespace Tools {
         const char *key() const override;
 
     private:
-        Render::OpenGLTexture mImageTexture;
+        Render::OpenGLTexture mImageTexture = Render::dont_create;
     };
 
 }

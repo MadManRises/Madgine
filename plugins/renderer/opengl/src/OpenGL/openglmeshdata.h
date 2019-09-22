@@ -9,7 +9,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLMeshData {
         OpenGLBuffer mVertices;
-        OpenGLBuffer mIndices = dont_create_buffer;
+        OpenGLBuffer mIndices = dont_create;
         size_t mGroupSize;
         size_t mElementCount;
         OpenGLVertexArray mVAO;

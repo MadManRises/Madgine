@@ -8,9 +8,12 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLTexture {
 
         OpenGLTexture();
+        OpenGLTexture(dont_create_t);
         OpenGLTexture(const OpenGLTexture &) = delete;
         OpenGLTexture(OpenGLTexture &&);
         ~OpenGLTexture();
+
+		OpenGLTexture &operator=(OpenGLTexture &&);
 
         void bind() const;
 
@@ -25,7 +28,7 @@ namespace Render {
         void setFilter(GLint filter);
 
     private:
-        GLuint mHandle;
+        GLuint mHandle = 0;
         Vector2i mSize = { 0, 0 };
     };
 

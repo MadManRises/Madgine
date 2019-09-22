@@ -28,6 +28,8 @@ namespace Tools {
 
     bool OpenGLToolConfig::init()
     {
+        mImageTexture = {};
+
         getTool<Inspector>().addPreviewDefinition<Render::OpenGLFontLoader::ResourceType>([](Render::OpenGLFontLoader::ResourceType *font) {
             font->setPersistent(true);
             ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture.handle(), { 100, 100 });
