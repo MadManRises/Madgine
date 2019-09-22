@@ -1,18 +1,9 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
+#ifdef BUILD_AndroidInput
+#    include "androidinputlib.h"
 #endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_AndroidInput
-#    include "androidinputlib.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/clienttoolslib.h"
@@ -20,8 +11,20 @@
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
 #endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
+#endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
+#endif
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_ImageLoader
+#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
@@ -34,6 +37,9 @@
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/gui/widgets/toplevelwindow.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/ui/uimanager.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/imgui/clientimroot.h"
@@ -53,8 +59,8 @@
 #ifdef BUILD_Modules
 #    include "Modules/resources/resourceloadercollector.h"
 #endif
-#ifdef BUILD_Tools
-#    include "inspector/layoutloader.h"
+#ifdef BUILD_ImageLoader
+#    include "imageloader.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/openglfontloader.h"
@@ -64,6 +70,9 @@
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/openglshaderloader.h"
+#endif
+#ifdef BUILD_Tools
+#    include "inspector/layoutloader.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/scene/scenecomponentcollector.h"
@@ -84,6 +93,9 @@
 #    include "inspector/inspector.h"
 #endif
 #ifdef BUILD_Tools
+#    include "memory/memoryviewer.h"
+#endif
+#ifdef BUILD_Tools
 #    include "metrics/metrics.h"
 #endif
 #ifdef BUILD_Tools
@@ -97,6 +109,9 @@
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/guieditor/guieditor.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolconfig.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/sceneeditor/sceneeditor.h"
@@ -176,6 +191,9 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_Client
+		&table<Engine::UI::UIManager>(),
+#    endif
 #    ifdef BUILD_ClientTools
 		&table<Engine::Tools::ClientImRoot>(),
 #    endif
@@ -187,6 +205,9 @@ template <>
 std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
 {
 	return {
+#    ifdef BUILD_Client
+		createComponent<Engine::UI::UIManager>,
+#    endif
 #    ifdef BUILD_ClientTools
 		createComponent<Engine::Tools::ClientImRoot>,
 #    endif
@@ -196,6 +217,13 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 
 #    define ACC 0
 
+#    ifdef BUILD_Client
+constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_Client = ACC;
+template <>
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Client + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_Client + 1
+#    endif
 #    ifdef BUILD_ClientTools
 constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_ClientTools = ACC;
 template <>
@@ -284,13 +312,16 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Tools
-		&table<Engine::Tools::LayoutLoader>(),
+#    ifdef BUILD_ImageLoader
+		&table<Engine::Resources::ImageLoader>(),
 #    endif
 #    ifdef BUILD_OpenGL
 		&table<Engine::Render::OpenGLFontLoader>(),
 		&table<Engine::Render::OpenGLMeshLoader>(),
 		&table<Engine::Render::OpenGLShaderLoader>(),
+#    endif
+#    ifdef BUILD_Tools
+		&table<Engine::Tools::LayoutLoader>(),
 #    endif
 
 	}; 
@@ -300,13 +331,16 @@ template <>
 std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents()
 {
 	return {
-#    ifdef BUILD_Tools
-		createComponent<Engine::Tools::LayoutLoader>,
+#    ifdef BUILD_ImageLoader
+		createComponent<Engine::Resources::ImageLoader>,
 #    endif
 #    ifdef BUILD_OpenGL
 		createComponent<Engine::Render::OpenGLFontLoader>,
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 		createComponent<Engine::Render::OpenGLShaderLoader>,
+#    endif
+#    ifdef BUILD_Tools
+		createComponent<Engine::Tools::LayoutLoader>,
 #    endif
 
 	}; 
@@ -314,12 +348,12 @@ std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Res
 
 #    define ACC 0
 
-#    ifdef BUILD_Tools
-constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
+#    ifdef BUILD_ImageLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_ImageLoader = ACC;
 template <>
-size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
+size_t component_index<Engine::Resources::ImageLoader>() { return CollectorBaseIndex_ResourceLoaderBase_ImageLoader + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_ImageLoader + 1
 #    endif
 #    ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
@@ -331,6 +365,13 @@ template <>
 size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3
+#    endif
+#    ifdef BUILD_Tools
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
+template <>
+size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
 #    endif
 
 #    undef ACC
@@ -403,6 +444,7 @@ const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Reg
 #    ifdef BUILD_Tools
 		&table<Engine::Tools::FunctionTool>(),
 		&table<Engine::Tools::Inspector>(),
+		&table<Engine::Tools::MemoryViewer>(),
 		&table<Engine::Tools::Metrics>(),
 		&table<Engine::Tools::Profiler>(),
 		&table<Engine::Tools::ImGuiDemo>(),
@@ -412,6 +454,7 @@ const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Reg
 		&table<Engine::Tools::GuiEditor>(),
 #    endif
 #    ifdef BUILD_OpenGLTools
+		&table<Engine::Tools::OpenGLToolConfig>(),
 		&table<Engine::Tools::SceneEditor>(),
 #    endif
 
@@ -425,6 +468,7 @@ std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsColl
 #    ifdef BUILD_Tools
 		createComponent<Engine::Tools::FunctionTool>,
 		createComponent<Engine::Tools::Inspector>,
+		createComponent<Engine::Tools::MemoryViewer>,
 		createComponent<Engine::Tools::Metrics>,
 		createComponent<Engine::Tools::Profiler>,
 		createComponent<Engine::Tools::ImGuiDemo>,
@@ -434,6 +478,7 @@ std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsColl
 		createComponent<Engine::Tools::GuiEditor>,
 #    endif
 #    ifdef BUILD_OpenGLTools
+		createComponent<Engine::Tools::OpenGLToolConfig>,
 		createComponent<Engine::Tools::SceneEditor>,
 #    endif
 
@@ -449,15 +494,17 @@ size_t component_index<Engine::Tools::FunctionTool>() { return CollectorBaseInde
 template <>
 size_t component_index<Engine::Tools::Inspector>() { return CollectorBaseIndex_ToolBase_Tools + 1; }
 template <>
-size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
+size_t component_index<Engine::Tools::MemoryViewer>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
 template <>
-size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 3; }
+size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 3; }
 template <>
-size_t component_index<Engine::Tools::ImGuiDemo>() { return CollectorBaseIndex_ToolBase_Tools + 4; }
+size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 4; }
 template <>
-size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_ToolBase_Tools + 5; }
+size_t component_index<Engine::Tools::ImGuiDemo>() { return CollectorBaseIndex_ToolBase_Tools + 5; }
+template <>
+size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_ToolBase_Tools + 6; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_Tools + 6
+#        define ACC CollectorBaseIndex_ToolBase_Tools + 7
 #    endif
 #    ifdef BUILD_ClientTools
 constexpr size_t CollectorBaseIndex_ToolBase_ClientTools = ACC;
@@ -469,9 +516,11 @@ size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_T
 #    ifdef BUILD_OpenGLTools
 constexpr size_t CollectorBaseIndex_ToolBase_OpenGLTools = ACC;
 template <>
-size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 0; }
+size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 0; }
+template <>
+size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 1; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
+#        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 2
 #    endif
 
 #    undef ACC
