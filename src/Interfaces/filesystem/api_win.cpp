@@ -2,152 +2,161 @@
 
 #if WINDOWS
 
-#include "api.h"
-#include "path.h"
+#    include "api.h"
+#    include "path.h"
 
-#define NOMINMAX
-#include <Windows.h>
+#    define NOMINMAX
+#    include <Windows.h>
 
-#include <cctype>
+#    include <cctype>
+
+#    include <direct.h>
 
 namespace Engine {
-	namespace Filesystem {
+namespace Filesystem {
 
-		struct FileQueryState {
-			WIN32_FIND_DATA mData;
-		};
+    struct FileQueryState {
+        WIN32_FIND_DATA mData;
+    };
 
-		static bool skipSymbolic(void *handle, FileQueryState &data)
-		{
-			while (strcmp(data.mData.cFileName, ".") == 0 ||
-				strcmp(data.mData.cFileName, "..") == 0)
-				if (!FindNextFile(handle, &data.mData))
-					return false;
-			return true;
-		}
+    static bool skipSymbolic(void *handle, FileQueryState &data)
+    {
+        while (strcmp(data.mData.cFileName, ".") == 0 || strcmp(data.mData.cFileName, "..") == 0)
+            if (!FindNextFile(handle, &data.mData))
+                return false;
+        return true;
+    }
 
-		FileQueryHandle::FileQueryHandle(Path p, FileQueryState & data) :
-			mPath(std::move(p)),
-			mHandle(FindFirstFile((mPath.str() + "/*").c_str(), &data.mData))
-		{
-			if (mHandle == INVALID_HANDLE_VALUE)
-				mHandle = nullptr;			
-			else if (!skipSymbolic(mHandle, data))			
-				close();			
-		}
+    FileQueryHandle::FileQueryHandle(Path p, FileQueryState &data)
+        : mPath(std::move(p))
+        , mHandle(FindFirstFile((mPath.str() + "/*").c_str(), &data.mData))
+    {
+        if (mHandle == INVALID_HANDLE_VALUE)
+            mHandle = nullptr;
+        else if (!skipSymbolic(mHandle, data))
+            close();
+    }
 
+    void FileQueryHandle::close()
+    {
+        if (mHandle) {
+            FindClose(mHandle);
+            mHandle = nullptr;
+        }
+    }
 
-		void FileQueryHandle::close()
-		{
-			if (mHandle)
-			{
-				FindClose(mHandle);
-				mHandle = nullptr;
-			}
-		}
+    bool FileQueryHandle::advance(FileQueryState &data)
+    {
+        if (!FindNextFile(mHandle, &data.mData))
+            return false;
+        return skipSymbolic(mHandle, data);
+    }
 
-		bool FileQueryHandle::advance(FileQueryState &data)
-		{
-			if (!FindNextFile(mHandle, &data.mData))
-				return false;
-			return skipSymbolic(mHandle, data);
-		}
+    FileQueryState *createQueryState()
+    {
+        return new FileQueryState;
+    }
 
+    void destroyQueryState(FileQueryState *state)
+    {
+        delete state;
+    }
 
-		FileQueryState * createQueryState()
-		{
-			return new FileQueryState;
-		}
+    bool isDir(const FileQueryState &data)
+    {
+        return (data.mData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    }
 
-		void destroyQueryState(FileQueryState * state)
-		{
-			delete state;
-		}
-		
-		bool isDir(FileQueryState &data)
-		{
-			return (data.mData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-		}
+    const char *filename(const FileQueryState &data)
+    {
+        return data.mData.cFileName;
+    }
 
-		const char *filename(FileQueryState &data)
-		{
-			return data.mData.cFileName;
-		}
+    Path configPath()
+    {
+        char buffer[512];
 
+        auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
+        assert(result > 0);
 
-		Path configPath()
-		{
-			char buffer[512];
+        return Path(buffer).parentPath();
+    }
 
-			auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
-			assert(result > 0);
+    void createDirectory(const Path &p)
+    {
+        auto result = CreateDirectory(p.c_str(), NULL);
+        assert(result);
+    }
 
-			return Path(buffer).parentPath();
-		}
+    bool exists(const Path &p)
+    {
+        return GetFileAttributes(p.c_str()) != INVALID_FILE_ATTRIBUTES;
+    }
 
+    bool remove(const Path &p)
+    {
+        return DeleteFile(p.c_str());
+    }
 
-		void createDirectory(const Path & p)
-		{
-			auto result = CreateDirectory(p.c_str(), NULL);
-			assert(result);
-		}
+    Path makeNormalized(const char *p)
+    {
+        char buffer[512];
+        auto result = GetLongPathNameA(p, buffer, sizeof(buffer));
+        assert(result > 0 && result < sizeof(buffer));
+        buffer[0] = toupper(buffer[0]);
+        return { buffer };
+    }
 
-		bool exists(const Path & p)
-		{
-			return GetFileAttributes(p.c_str()) != INVALID_FILE_ATTRIBUTES;
-		}
+    bool isAbsolute(const Path &p)
+    {
+        auto colon = p.str().find(':');
+        if (colon == std::string::npos)
+            return false;
+        auto sep = p.str().find('/');
+        return sep == std::string::npos || colon < sep;
+    }
 
-		bool remove(const Path & p)
-		{
-			return DeleteFile(p.c_str());
-		}
+    bool isSeparator(char c)
+    {
+        return c == '/' || c == '\\';
+    }
 
-		Path makeNormalized(const char * p)
-		{
-			char buffer[512];
-			auto result = GetLongPathNameA(p, buffer, sizeof(buffer));
-			assert(result > 0 && result < sizeof(buffer));
-			buffer[0] = toupper(buffer[0]);
-			return { buffer };
-		}
+    static bool compareChar(char c1, char c2)
+    {
+        if (c1 == c2)
+            return true;
+        else if (std::toupper(c1) == std::toupper(c2))
+            return true;
+        return false;
+    }
 
-		bool isAbsolute(const Path &p)
-		{
-			auto colon = p.str().find(':');
-			if (colon == std::string::npos)
-				return false;
-			auto sep = p.str().find('/');
-			return sep == std::string::npos || colon < sep;
-		}
+    bool isEqual(const Path &p1, const Path &p2)
+    {
+        return ((p1.str().size() == p2.str().size()) && std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
+    }
 
-		bool isSeparator(char c)
-		{
-			return c == '/' || c == '\\';
-		}
+    InStream openFile(const Path &p)
+    {
+        std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
+        buffer->open(p.c_str(), std::ios_base::in);
+        return { std::move(buffer) };
+    }
 
-		static bool compareChar(char c1, char c2)
-		{
-			if (c1 == c2)
-				return true;
-			else if (std::toupper(c1) == std::toupper(c2))
-				return true;
-			return false;
-		}
+    void setCwd(const Path &p)
+    {
+        auto result = _chdir(p.c_str());
+        assert(result == 0);
+    }
 
-		bool isEqual(const Path &p1, const Path &p2)
-		{
-			return ((p1.str().size() == p2.str().size()) &&
-				std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
-		}
+    Path getCwd()
+    {
+        char buffer[256];
+        auto result = _getcwd(buffer, sizeof(buffer));
+        assert(result);
+        return buffer;
+    }
 
-		InStream openFile(const Path & p)
-		{
-			std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
-			buffer->open(p.c_str(), std::ios_base::in);
-			return { std::move(buffer) };
-		}
-
-	}
+}
 }
 
 #endif

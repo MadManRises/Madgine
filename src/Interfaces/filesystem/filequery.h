@@ -3,71 +3,76 @@
 #include "path.h"
 
 namespace Engine {
-	namespace Filesystem {
+namespace Filesystem {
 
-		INTERFACES_EXPORT FileQueryState *createQueryState();
-		INTERFACES_EXPORT void destroyQueryState(FileQueryState *state);
-		
-		INTERFACES_EXPORT bool isDir(FileQueryState &data);
-		INTERFACES_EXPORT const char *filename(FileQueryState &data);
+    INTERFACES_EXPORT FileQueryState *createQueryState();
+    INTERFACES_EXPORT void destroyQueryState(FileQueryState *state);
 
-		struct INTERFACES_EXPORT FileQueryHandle {
-			FileQueryHandle(Path p, FileQueryState &data);
-			FileQueryHandle(FileQueryHandle &&other);
-			~FileQueryHandle();
+    INTERFACES_EXPORT bool isDir(const FileQueryState &data);
+    INTERFACES_EXPORT const char *filename(const FileQueryState &data);
 
-			bool advance(FileQueryState &data);
-			operator bool();
-			bool operator==(const FileQueryHandle &other) const;
+    struct INTERFACES_EXPORT FileQueryHandle {
+        FileQueryHandle(Path p, FileQueryState &data);
+        FileQueryHandle(FileQueryHandle &&other);
+        ~FileQueryHandle();
 
-			const Path &path() const;
+        bool advance(FileQueryState &data);
+        operator bool();
+        bool operator==(const FileQueryHandle &other) const;
 
-			void close();
+        const Path &path() const;
 
-		private:			
-			Path mPath;
-			void *mHandle;
-		};
+        void close();
 
-		struct INTERFACES_EXPORT FileQueryIterator {
-			FileQueryIterator(const FileQuery *query);
-			FileQueryIterator(FileQueryIterator &&);
-			~FileQueryIterator();
+    private:
+        Path mPath;
+        void *mHandle;
+    };
 
-			Path operator *() const;
-			void operator++();
+    struct INTERFACES_EXPORT FileQueryResult {
+        const FileQueryHandle *mHandle;
+        const FileQueryState *mState;
 
-			bool operator!=(const FileQueryIterator &other) const;
+        bool isDir() const;
+        operator Path() const;
+        Path path() const;
+    };
 
-			void enterDir();
-			void leaveDir();
+    struct INTERFACES_EXPORT FileQueryIterator {
+        FileQueryIterator(const FileQuery *query);
+        FileQueryIterator(FileQueryIterator &&);
+        ~FileQueryIterator();
 
-			bool currentIsDir();
+        FileQueryResult operator*() const;
+        void operator++();
 
-		protected:
-			void verify();			
+        bool operator!=(const FileQueryIterator &other) const;
 
-		private:
-			std::vector<FileQueryHandle> mHandles;
-			const FileQuery *mQuery;			
-			std::unique_ptr<FileQueryState, decltype(&Filesystem::destroyQueryState)> mBuffer;
-		};
+        void enterDir();
+        void leaveDir();
 
-		struct INTERFACES_EXPORT FileQuery {
-			FileQuery(Path path, bool recursive);
+        bool currentIsDir();
 
-			FileQueryIterator begin() const;
-			FileQueryIterator end() const;
+    protected:
+        void verify();
 
-			bool isRecursive() const;
+    private:
+        std::vector<FileQueryHandle> mHandles;
+        const FileQuery *mQuery;
+        std::unique_ptr<FileQueryState, decltype(&Filesystem::destroyQueryState)> mBuffer;
+    };
 
-			const Path &path() const;
+    struct INTERFACES_EXPORT FileQuery {
 
-		private:
-			Path mPath;
-			bool mRecursive;
-		};
+        FileQueryIterator begin() const;
+        FileQueryIterator end() const;
+
+        Path mPath;
+        bool mRecursive = false;
+        bool mShowFolders = false;
+        bool mShowFiles = true;
+    };
 
 
-	}
+}
 }

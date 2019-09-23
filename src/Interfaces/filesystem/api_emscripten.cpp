@@ -70,7 +70,7 @@ namespace Filesystem {
         delete state;
     }
 
-    bool isDir(FileQueryState &data)
+    bool isDir(const FileQueryState &data)
     {
         struct stat statbuffer;
         auto result = stat((data.mPath / data.mData->d_name).c_str(), &statbuffer);
@@ -78,7 +78,7 @@ namespace Filesystem {
         return (statbuffer.st_mode & S_IFMT) == S_IFDIR;
     }
 
-    const char *filename(FileQueryState &data)
+    const char *filename(const FileQueryState &data)
     {
         return data.mData->d_name;
     }

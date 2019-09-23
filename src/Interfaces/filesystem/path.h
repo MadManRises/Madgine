@@ -21,7 +21,12 @@ namespace Filesystem {
         bool operator!=(const Path &other) const;
 
         Path parentPath() const;
+        Path relative() const;
         Path relative(const Path &base) const;
+        Path absolute() const;
+        Path absolute(const Path &base) const;
+
+		void normalize();
 
         Path filename() const;
         std::string stem() const;

@@ -6,29 +6,15 @@ namespace Engine {
 namespace Filesystem {
 
     Path::Path(const std::string &s)
-        : Path(s.c_str())
+        : mPath(s)
     {
+        normalize();
     }
 
     Path::Path(const char *s)
+        : mPath(s)
     {
-        size_t size = strlen(s);
-        mPath.reserve(size);
-        bool hadSeparator = false;
-        for (size_t i = 0; i < size; ++i) {
-            if (isSeparator(s[i])) {
-                if (!hadSeparator) {
-                    hadSeparator = true;
-                    mPath.push_back('/');
-                }
-            } else {
-                hadSeparator = false;
-                mPath.push_back(s[i]);
-            }
-        }
-        if (hadSeparator && mPath.size() > 1) {
-            mPath.pop_back();
-        }
+        normalize();
     }
 
     Path &Path::operator/=(const Path &other)
@@ -39,6 +25,7 @@ namespace Filesystem {
             mPath.push_back('/');
         }
         mPath.append(other.mPath);
+        normalize();
         return *this;
     }
 
@@ -63,6 +50,11 @@ namespace Filesystem {
         return result;
     }
 
+    Path Path::relative() const
+    {
+        return relative(getCwd());
+    }
+
     Path Path::relative(const Path &base) const
     {
         size_t baseCount = base.mPath.size();
@@ -81,6 +73,71 @@ namespace Filesystem {
             return {};
 
         return mPath.substr(baseCount + 1);
+    }
+
+    Path Path::absolute() const
+    {
+        return absolute(getCwd());
+    }
+
+    Path Path::absolute(const Path &base) const
+    {
+        if (isAbsolute())
+            return *this;
+        else
+            return base / *this;
+    }
+
+    void Path::normalize()
+    {
+        std::string lastElement;
+
+        std::string s = std::move(mPath);
+
+        size_t size = s.size();
+        mPath.reserve(size);
+        bool hadSeparator = false;
+        for (size_t i = 0; i < size; ++i) {
+            if (isSeparator(s[i])) {
+                if (!hadSeparator) {
+                    hadSeparator = true;
+                    if (lastElement == ".") {
+                        mPath.resize(mPath.size() - 1);
+                    } else if (lastElement == "..") {
+                        if (!mPath.empty()) {
+                            mPath.resize(mPath.size() - 1);
+                            mPath.resize(mPath.rfind('/') + 1);
+                        }
+                    } else {
+                        mPath += lastElement + "/";
+                    }
+                    lastElement.clear();
+                }
+            } else {
+                hadSeparator = false;
+                lastElement.push_back(s[i]);
+            }
+        }
+
+        if (!lastElement.empty()) {
+            if (lastElement == "." && !mPath.empty()) {
+                mPath.resize(mPath.size() - 1);
+            } else if (lastElement == ".." && !mPath.empty()) {
+                mPath.resize(mPath.size() - 1);
+                size_t pos = mPath.rfind('/');
+                if (pos != std::string::npos) {
+                    mPath.resize(pos);
+                } else {
+                    mPath.clear();
+				}
+            } else {
+                mPath += lastElement;
+            }
+        }
+
+        if (hadSeparator && mPath.size() > 1) {
+            mPath.pop_back();
+        }
     }
 
     Path Path::filename() const

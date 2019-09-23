@@ -135,9 +135,9 @@ struct container_traits<std::vector<T>> {
             }
 
             template <typename... _Ty>
-            iterator emplace_back(_Ty &&... args)
+            type &emplace_back(_Ty &&... args)
             {
-                return emplace(this->end(), std::forward<_Ty>(args)...);
+                return *this->emplace(this->end(), std::forward<_Ty>(args)...).first;
             }
 
             type &at(size_t i)
