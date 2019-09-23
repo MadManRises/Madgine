@@ -9,6 +9,7 @@ FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscol
 	FolderSources(sources src metrics metrics.cpp metrics.h)
 	FolderSources(sources src pluginmanager pluginmanager.cpp pluginmanager.h)
 	FolderSources(sources src profiler profiler.cpp profiler.h)
+	FolderSources(sources src project projectmanager.cpp projectmanager.h)
 	FolderSources(sources src renderer imguidemo.cpp imguidemo.h imroot.cpp imroot.h)
 	FolderSources(sources src testtool testtool.cpp testtool.h)
 	FolderSources(sources src tinyxml tinyxml2.cpp tinyxml2.h)
