@@ -28,6 +28,7 @@ endif()
 	FolderSources(sources "" threading datamutex.cpp datamutex.h defaulttaskqueue.cpp defaulttaskqueue.h scheduler.cpp scheduler.h tasknode.h  threadlocal.cpp threadlocal.h workgroup.cpp workgroup.h workgrouphandle.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" xml xmlformatter.cpp xmlformatter.h)
 	
 
 add_workspace_library(Modules ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER moduleslib.h)

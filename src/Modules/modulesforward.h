@@ -76,8 +76,6 @@ namespace Serialize {
 
     struct Formatter;
 
-    class EOLType;
-
     struct CompareStreamId;
 
     typedef size_t ParticipantId;

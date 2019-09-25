@@ -7,12 +7,14 @@
 METATABLE_BEGIN(Engine::GUI::Bar)
 METATABLE_END(Engine::GUI::Bar)
 
-namespace Engine
-{
-	namespace GUI
-	{
-		void Bar::setRatio(float f)
-		{
-		}
-	}
+namespace Engine {
+namespace GUI {
+    void Bar::setRatio(float f)
+    {
+    }
+    WidgetClass Bar::getClass() const
+    {
+        return WidgetClass::BAR_CLASS;
+    }
+}
 }

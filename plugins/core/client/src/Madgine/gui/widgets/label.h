@@ -16,6 +16,8 @@ namespace Engine
 			virtual std::string getText();
 			virtual void setText(const std::string& text);
 
+			virtual WidgetClass getClass() const override;
+
 			//KeyValueMapList maps() override;
 		};
 	}

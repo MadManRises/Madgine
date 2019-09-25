@@ -25,14 +25,21 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
-
+#include "Modules/serialize/serializetable_impl.h"
 
 METATABLE_BEGIN(Engine::GUI::WidgetBase)
 READONLY_PROPERTY(Widgets, children)
 READONLY_PROPERTY(Size, getSize)
+MEMBER(mVisible)
 METATABLE_END(Engine::GUI::WidgetBase)
 
 RegisterType(Engine::GUI::WidgetBase);
+
+SERIALIZETABLE_BEGIN(Engine::GUI::WidgetBase)
+FIELD(mChildren, Serialize::ParentCreator<&WidgetBase::createWidgetClassTuple>)
+FIELD(mPos)
+FIELD(mSize)
+SERIALIZETABLE_END(Engine::GUI::WidgetBase)
 
 namespace Engine {
 
@@ -130,9 +137,9 @@ namespace GUI {
         }
     }
 
-    Class WidgetBase::getClass()
+    WidgetClass WidgetBase::getClass() const
     {
-        return Class::WIDGET_CLASS;
+        return WidgetClass::WIDGET_CLASS;
     }
 
     void WidgetBase::destroy()
@@ -165,26 +172,26 @@ namespace GUI {
         return mName.c_str();
     }
 
-    WidgetBase *WidgetBase::createChild(const std::string &name, Class _class)
+    WidgetBase *WidgetBase::createChild(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
-        case Class::BAR_CLASS:
+        case WidgetClass::BAR_CLASS:
             return createChildBar(name);
-        case Class::CHECKBOX_CLASS:
+        case WidgetClass::CHECKBOX_CLASS:
             return createChildCheckbox(name);
-        case Class::LABEL_CLASS:
+        case WidgetClass::LABEL_CLASS:
             return createChildLabel(name);
-        case Class::TABWIDGET_CLASS:
+        case WidgetClass::TABWIDGET_CLASS:
             return createChildTabWidget(name);
-        case Class::BUTTON_CLASS:
+        case WidgetClass::BUTTON_CLASS:
             return createChildButton(name);
-        case Class::COMBOBOX_CLASS:
+        case WidgetClass::COMBOBOX_CLASS:
             return createChildCombobox(name);
-        case Class::TEXTBOX_CLASS:
+        case WidgetClass::TEXTBOX_CLASS:
             return createChildTextbox(name);
-        case Class::SCENEWINDOW_CLASS:
+        case WidgetClass::SCENEWINDOW_CLASS:
             return createChildSceneWindow(name);
-        case Class::IMAGE_CLASS:
+        case WidgetClass::IMAGE_CLASS:
             return createChildImage(name);
         default:
             throw 0;
@@ -301,11 +308,6 @@ namespace GUI {
 			return Scope::maps().merge(mChildren, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible), MAP(Size, getSize, setSize), MAP(Position, getPos, setPos));
 		}*/
 
-    bool WidgetBase::isVisible() const
-    {
-        return mVisible;
-    }
-
     void WidgetBase::showModal()
     {
     }
@@ -316,17 +318,12 @@ namespace GUI {
 
     void WidgetBase::show()
     {
-        setVisible(true);
+        mVisible = true;
     }
 
     void WidgetBase::hide()
     {
-        setVisible(false);
-    }
-
-    void WidgetBase::setVisible(bool b)
-    {
-        mVisible = b;
+        mVisible = false;
     }
 
     void WidgetBase::setEnabled(bool b)
@@ -425,30 +422,38 @@ namespace GUI {
         mUserData = userData;
     }
 
-    std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, Class _class)
+    std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
-        case Class::BAR_CLASS:
+        case WidgetClass::WIDGET_CLASS:
+            return createWidget(name);
+        case WidgetClass::BAR_CLASS:
             return createBar(name);
-        case Class::CHECKBOX_CLASS:
+        case WidgetClass::CHECKBOX_CLASS:
             return createCheckbox(name);
-        case Class::LABEL_CLASS:
+        case WidgetClass::LABEL_CLASS:
             return createLabel(name);
-        case Class::TABWIDGET_CLASS:
+        case WidgetClass::TABWIDGET_CLASS:
             return createTabWidget(name);
-        case Class::BUTTON_CLASS:
+        case WidgetClass::BUTTON_CLASS:
             return createButton(name);
-        case Class::COMBOBOX_CLASS:
+        case WidgetClass::COMBOBOX_CLASS:
             return createCombobox(name);
-        case Class::TEXTBOX_CLASS:
+        case WidgetClass::TEXTBOX_CLASS:
             return createTextbox(name);
-        case Class::SCENEWINDOW_CLASS:
+        case WidgetClass::SCENEWINDOW_CLASS:
             return createSceneWindow(name);
-        case Class::IMAGE_CLASS:
+        case WidgetClass::IMAGE_CLASS:
             return createImage(name);
         default:
             throw 0;
         }
+    }
+    std::tuple<std::unique_ptr<WidgetBase>> Engine::GUI::WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)
+    {
+        return {
+            createWidgetClass(name, _class)
+        };
     }
     std::unique_ptr<WidgetBase> WidgetBase::createWidget(const std::string &name)
     {
@@ -494,14 +499,21 @@ namespace GUI {
     {
     }
 
-	const MetaTable *WidgetBase::type()
+    const MetaTable *WidgetBase::type()
     {
         return &table<WidgetBase>();
     }
 
-	Resources::ImageLoader::ResourceType *WidgetBase::resource() const
+    Resources::ImageLoader::ResourceType *WidgetBase::resource() const
     {
         return nullptr;
+    }
+
+    void WidgetBase::writeCreationData(Serialize::SerializeOutStream &of) const
+    {
+        SerializableUnitBase::writeCreationData(of);
+        of.write(mName, "name");
+		of.write(getClass(), "type");
     }
 
 }

@@ -2,8 +2,8 @@
 
 #include "guieditor.h"
 
-#include "imgui/imgui.h"
 #include "../imgui/clientimroot.h"
+#include "imgui/imgui.h"
 
 #include "imgui/imguiaddons.h"
 
@@ -20,6 +20,14 @@
 
 #include "Interfaces/window/windowapi.h"
 
+#include "project/projectmanager.h"
+
+#include "Modules/serialize/streams/serializestream.h"
+
+#include "Modules/xml/xmlformatter.h"
+
+#include "Modules/serialize/streams/debugging/streamdebugging.h"
+
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {
@@ -27,12 +35,18 @@ namespace Tools {
 
     GuiEditor::GuiEditor(ImRoot &root)
         : Tool<GuiEditor>(root)
-        , mWindow(static_cast<const ClientImRoot&>(*root.parent()).window())
+        , mWindow(static_cast<const ClientImRoot &>(*root.parent()).window())
     {
     }
 
     bool GuiEditor::init()
     {
+        getTool<ProjectManager>().mProjectRootChanged.connect([this]() {
+            loadLayout();
+        });
+
+        loadLayout();
+
         return ToolBase::init();
     }
 
@@ -48,7 +62,7 @@ namespace Tools {
     {
         if (ImGui::BeginMenu("Layouts")) {
             for (GUI::WidgetBase *w : mWindow.widgets()) {
-                if (ImGui::MenuItem(w->key(), nullptr, w->isVisible())) {
+                if (ImGui::MenuItem(w->key(), nullptr, w->mVisible)) {
                     mWindow.swapCurrentRoot(w);
                 }
             }
@@ -61,6 +75,14 @@ namespace Tools {
 
                 ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
 
+                if (ImGui::MenuItem("Save Layout")) {
+                    saveLayout();
+                }
+
+                if (ImGui::MenuItem("Load Layout")) {
+                    loadLayout();
+                }
+
                 ImGui::EndMenu();
             }
         }
@@ -68,13 +90,41 @@ namespace Tools {
 
     void GuiEditor::update()
     {
-
         ToolBase::update();
     }
 
     const char *GuiEditor::key() const
     {
         return "GuiEditor";
+    }
+
+    void GuiEditor::saveLayout()
+    {
+        Engine::Serialize::Debugging::setLoggingEnabled(true);
+
+        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "default.layout";
+
+        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::make_unique<XML::XMLFormatter>());
+        buf->open(filePath.str(), std::ios::out);
+        Serialize::SerializeOutStream out { std::move(buf) };
+
+        mWindow.writeState(out);
+    }
+
+    void GuiEditor::loadLayout()
+    {
+        Engine::Serialize::Debugging::setLoggingEnabled(true);
+
+        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "default.layout";
+
+        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::make_unique<XML::XMLFormatter>());
+        if (buf->open(filePath.str(), std::ios::in)) {
+            Serialize::SerializeInStream in { std::move(buf) };
+
+            mWindow.readState(in);
+
+            mWindow.calculateWindowGeometries();
+        }
     }
 
     void GuiEditor::renderSelection(GUI::WidgetBase *hoveredWidget)
@@ -243,8 +293,8 @@ namespace Tools {
                         } else if (mDraggingLeft) {
                             dragDistancePos[0][0] = dragDistanceSize[0][0];
                             dragDistancePos[0][2] = dragDistanceSize[0][2];
-							dragDistanceSize[0][0] *= -1.0f;                            
-							dragDistanceSize[0][2] *= -1.0f;                            
+                            dragDistanceSize[0][0] *= -1.0f;
+                            dragDistanceSize[0][2] *= -1.0f;
                         }
                         if (!mDraggingTop && !mDraggingBottom) {
                             dragDistanceSize[1][1] = 0.0f;
@@ -259,7 +309,7 @@ namespace Tools {
                             } else {
                                 dragDistancePos[1][1] = dragDistanceSize[1][1];
                                 dragDistancePos[1][2] = dragDistanceSize[1][2];
-							}
+                            }
                             dragDistanceSize[1][1] *= -1.0f;
                             dragDistanceSize[1][2] *= -1.0f;
                         }

@@ -49,7 +49,7 @@ namespace Tools {
             Serialize::SerializeInStream in { std::move(buf) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            tool->readState(in);
+            tool->readState(in, nullptr, true);
         }
     }
 
@@ -64,7 +64,7 @@ namespace Tools {
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
             out_buf->appendf("[Tool][%s]\n", tool->key());
 
-            tool->writeState(out);
+            tool->writeState(out, nullptr, true);
             out_buf->append(outBuffer->str().c_str());
             outBuffer->str("");
 

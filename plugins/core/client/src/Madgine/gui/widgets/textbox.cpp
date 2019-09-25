@@ -21,5 +21,9 @@ namespace Engine
 		void Textbox::setEditable(bool b)
 		{
 		}
+                WidgetClass Textbox::getClass() const
+                {
+                    return WidgetClass::TEXTBOX_CLASS;
+                }
 	}
 }

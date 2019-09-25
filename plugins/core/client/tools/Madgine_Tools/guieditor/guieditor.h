@@ -21,6 +21,9 @@ namespace Tools {
 
         const char *key() const override;
 
+		void saveLayout();
+        void loadLayout();
+
     private:
         void renderSelection(GUI::WidgetBase *hoveredWidget = nullptr);
         void renderHierarchy(GUI::WidgetBase **hoveredWidget = nullptr);

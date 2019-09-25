@@ -13,6 +13,8 @@ namespace Engine
 			virtual ~Bar() = default;
 
 			virtual void setRatio(float f);
+
+			virtual WidgetClass getClass() const override;
 		};
 	}
 }

@@ -15,6 +15,7 @@ namespace Serialize {
         : InStream(std::move(buffer))
         , mLog(*this)
     {
+        format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other)
@@ -29,7 +30,7 @@ namespace Serialize {
     {
     }
 
-    void SerializeInStream::read(ValueType &result)
+    void SerializeInStream::read(ValueType &result, const char *name)
     {
         ValueType::Type type;
         readRaw(type);
@@ -106,7 +107,7 @@ namespace Serialize {
             readRaw(&s[0], size);
         } else {
             InStream::operator>>(s);
-		}
+        }
     }
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
@@ -116,35 +117,58 @@ namespace Serialize {
                 Database::Exceptions::deserializationFailure);
     }
 
-    bool SerializeInStream::loopRead()
-    {
-        return !format().readEOL(*this);
-    }
-
     std::string SerializeInStream::readN(size_t n)
     {
+        if (n == 0)
+            return {};
+
+        char firstNonWs = ' ';
+
+        while (std::isspace(firstNonWs))
+            if (!InStream::readRaw(&firstNonWs, 1))
+                throw 0;
+
         assert(!format().mBinary);
         std::string buffer(n, '\0');
-        readRaw(&buffer[0], n);
+        buffer[0] = firstNonWs;
+        readRaw(&buffer[1], n - 1);
         return buffer;
     }
 
-    std::string SerializeInStream::readUntil(char c)
+    std::string SerializeInStream::peekN(size_t n)
     {
         assert(!format().mBinary);
+
+        pos_type pos = tell();
+        std::string result = readN(n);
+        seek(pos);
+        return result;
+    }
+
+    std::string SerializeInStream::readUntil(const char *c)
+    {
+        assert(!format().mBinary);
+
+        char firstNonWs = ' ';
+
+        while (std::isspace(firstNonWs))
+            if (!InStream::readRaw(&firstNonWs, 1))
+                return {};
+
         char buffer[255];
         size_t i = 0;
+        buffer[i++] = firstNonWs;
         do {
             if (!InStream::readRaw(&buffer[i], 1))
                 break;
             ++i;
-        } while (buffer[i - 1] != c);
+        } while (!strchr(c, buffer[i - 1]));
         buffer[i] = '\0';
 
         return buffer;
     }
 
-    std::string SerializeInStream::peekUntil(char c)
+    std::string SerializeInStream::peekUntil(const char *c)
     {
         assert(!format().mBinary);
 
@@ -176,7 +200,7 @@ namespace Serialize {
 
     bool SerializeInStream::isMaster()
     {
-        return buffer().isMaster();
+        return buffer().isMaster(StreamMode::READ);
     }
 
     SerializeInStream::SerializeInStream(SerializeStreambuf *buffer)
@@ -204,6 +228,7 @@ namespace Serialize {
         : OutStream(std::move(buffer))
         , mLog(*this)
     {
+        format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other)
@@ -283,7 +308,7 @@ namespace Serialize {
 
     bool SerializeOutStream::isMaster()
     {
-        return buffer().isMaster();
+        return buffer().isMaster(StreamMode::WRITE);
     }
 
     SerializeStreambuf &SerializeOutStream::buffer() const
@@ -303,10 +328,10 @@ namespace Serialize {
             writeRaw(s.c_str(), s.size());
         } else {
             OutStream::operator<<(s);
-		}
+        }
     }
 
-	SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
+    SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
         : mFormatter(std::move(format))
     {
     }
@@ -333,9 +358,11 @@ namespace Serialize {
         return *mFormatter;
     }
 
-    bool SerializeStreambuf::isMaster()
+    bool SerializeStreambuf::isMaster(StreamMode mode)
     {
-        return !mManager || mManager->isMaster(this);
+        if (mManager)
+            return mManager->isMaster(this);
+        return mode == StreamMode::WRITE;
     }
 
     ParticipantId SerializeStreambuf::id() const

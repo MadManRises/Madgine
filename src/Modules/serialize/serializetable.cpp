@@ -15,16 +15,10 @@ namespace Serialize {
 
     void SerializeTable::writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const
     {
-        Formatter &format = out.format();
-
-		bool first = true;
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                format.beginMember(out, it->second.mFieldName, first);
-                it->second.mWriteState(unit, out);
-                format.endMember(out, it->second.mFieldName, first);
-                first = false;
+                it->second.mWriteState(unit, out, it->second.mFieldName);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -36,35 +30,29 @@ namespace Serialize {
 
         if (format.mSupportNameLookup) {
             std::string name = format.lookupFieldName(in);
-            bool first = true;
             while (!name.empty()) {
                 bool found = false;
                 const SerializeTable *table = this;
                 while (table && !found) {
                     for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                         if (name == it->second.mFieldName) {
-                            format.beginMember(in, it->second.mFieldName, first);
-                            it->second.mReadState(unit, in);
-                            format.endMember(in, it->second.mFieldName, first);
-                            first = false;
+                            it->second.mReadState(unit, in, it->second.mFieldName);
                             found = true;
                             break;
                         }
                     }
                     table = table->mBaseType ? &table->mBaseType() : nullptr;
                 }
+                if (!found)
+                    throw 0;
                 name = format.lookupFieldName(in);
             }
         } else {
-            bool first = true;
 
             const SerializeTable *table = this;
             while (table) {
                 for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                    format.beginMember(in, it->second.mFieldName, first);
-                    it->second.mReadState(unit, in);
-                    format.endMember(in, it->second.mFieldName, first);
-                    first = false;
+                    it->second.mReadState(unit, in, it->second.mFieldName);
                 }
                 table = table->mBaseType ? &table->mBaseType() : nullptr;
             }

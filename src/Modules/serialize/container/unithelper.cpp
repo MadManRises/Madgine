@@ -11,25 +11,6 @@ namespace Engine
 	{
 //		template struct UnitHelper<ValueType, false>;
 
-
-		void SerializeUnitHelper::read_id(SerializeInStream &in, SerializableUnitBase &item)
-		{
-			item.readId(in);
-		}
-
-		void SerializeUnitHelper::read_id(SerializeInStream& in, SerializableBase& item)
-		{
-		}
-
-		void SerializeUnitHelper::write_id(SerializeOutStream& out, const SerializableUnitBase& item)
-		{
-			item.writeId(out);
-		}
-
-		void SerializeUnitHelper::write_id(SerializeOutStream &out, const SerializableBase &item)
-		{
-		}
-
 		bool SerializeUnitHelper::filter(SerializeOutStream& out, const SerializableUnitBase& item)
 		{
 			return /*item.filter(&out)*/true; //TODO

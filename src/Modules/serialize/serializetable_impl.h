@@ -4,9 +4,9 @@
 #include "../generic/offsetptr.h"
 #include "../generic/tupleunpacker.h"
 #include "Interfaces/macros.h"
+#include "container/unithelper.h"
 #include "serializetable.h"
 #include "streams/serializestream.h"
-#include "container/unithelper.h"
 
 namespace Engine {
 namespace Serialize {
@@ -26,36 +26,36 @@ namespace Serialize {
                 else
                     return size_t { 0 };
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out) {
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().writeState(&(unit->*P), out);
+                    (unit->*P).writeState(out, name);
                 else
-                    out << unit->*P;
+                    out.write(unit->*P, name);
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
-                    serializeTable<T>().readState(&(unit->*P), in);
+                    (unit->*P).readState(in, name);
                 else
-                    in.read(unit->*P, TupleUnpacker::construct<Args>(unit)...);
+                    in.read(unit->*P, name, TupleUnpacker::construct<Args>(unit)...);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(static_cast<Unit*>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(static_cast<Unit*>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) {
             },
             [](SerializableUnitBase *unit, bool b) {
-                UnitHelper<T>::setItemDataSynced(static_cast<Unit*>(unit)->*P, b);
+                UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
             },
             [](SerializableUnitBase *unit, bool b) {
                 UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
@@ -66,15 +66,13 @@ namespace Serialize {
 }
 }
 
-
-
-#define SERIALIZETABLE_BEGIN_IMPL(T, Base)\
-    namespace Engine {                      \
-        namespace Serialize {               \
-            template <>                     \
-            struct __SerializeInstance<T> { \
-                using Ty = T;               \
-				static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
+#define SERIALIZETABLE_BEGIN_IMPL(T, Base)                                                        \
+    namespace Engine {                                                                            \
+        namespace Serialize {                                                                     \
+            template <>                                                                           \
+            struct __SerializeInstance<T> {                                                       \
+                using Ty = T;                                                                     \
+                static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
                 static constexpr const std::pair<const char *, ::Engine::Serialize::Serializer> fields[] = {
 
 #define SERIALIZETABLE_INHERIT_BEGIN(T, Base) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>)
@@ -97,3 +95,10 @@ namespace Serialize {
 #define FIELD(...) \
     { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<&Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 //read:   #define FIELD(M, ...) { #M, ::Engine::Serialize::field<&Ty::M, __VA_ARGS__>(#M) },
+
+/*
+#define ABSTRACT_FIELD(Name, Getter, Setter)                                   \
+    {                                                                          \
+        #Name, ::Engine::Serialize::abstract_field<&Ty::Getter, &Ty::Setter>() \
+    },
+	*/

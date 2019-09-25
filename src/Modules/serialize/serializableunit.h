@@ -21,8 +21,8 @@ namespace Serialize {
     public:
         const TopLevelSerializableUnitBase *topLevel() const;
 
-        void writeState(SerializeOutStream &out) const;
-        void readState(SerializeInStream &in);
+        void writeState(SerializeOutStream &out, const char *name = nullptr, bool skipId = false) const;
+        void readState(SerializeInStream &in, const char *name = nullptr, bool skipId = false);
 
         void readAction(BufferedInOutStream &in);
         void readRequest(BufferedInOutStream &in);

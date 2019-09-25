@@ -14,5 +14,10 @@ namespace Engine
 		void TabWidget::addTab(Widget * w)
 		{
 		}
+
+		    WidgetClass TabWidget::getClass() const
+                {
+                    return WidgetClass::TABWIDGET_CLASS;
+                }
 	}
 }

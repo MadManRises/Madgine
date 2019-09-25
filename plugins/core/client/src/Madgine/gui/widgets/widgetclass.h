@@ -4,7 +4,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		enum class Class
+		enum class WidgetClass
 		{
 			WIDGET_CLASS,
 			SCENEWINDOW_CLASS,

@@ -27,6 +27,11 @@ namespace Engine
 			return Scope::maps().merge(MAP(Text, getText, setText));
 		}*/
 
+		    WidgetClass Label::getClass() const
+                {
+                    return WidgetClass::LABEL_CLASS;
+                }
+
 	}
 }
 

@@ -27,7 +27,7 @@ struct TestBuf : Engine::Serialize::buffered_streambuf {
 
     virtual int recv(char *buffer, size_t count)
     {
-        size_t index = isMaster() ? 0 : 1;
+        size_t index = isMaster(StreamMode::READ) ? 0 : 1;
 
         size_t avail = mBuffer.mWrittenCount[index] - mReadOffset;
         size_t readCount = std::min(count, avail);
@@ -40,7 +40,7 @@ struct TestBuf : Engine::Serialize::buffered_streambuf {
 
     virtual int send(char *buffer, size_t count)
     {
-        size_t index = isMaster() ? 1 : 0;
+        size_t index = isMaster(StreamMode::WRITE) ? 1 : 0;
 
         assert(mBuffer.mWrittenCount[index] + count <= mBuffer.mBuffer[index].size());
         std::memcpy(mBuffer.mBuffer[index].data() + mBuffer.mWrittenCount[index], buffer, count);

@@ -78,5 +78,10 @@ namespace GUI {
     {
         mClicked.emit();
     }
+
+    WidgetClass Button::getClass() const
+    {
+        return WidgetClass::BUTTON_CLASS;
+    }
 }
 }

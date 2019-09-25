@@ -18,5 +18,9 @@ namespace Engine
 		void Checkbox::setChecked(bool b)
 		{
 		}
+                WidgetClass Checkbox::getClass() const
+                {
+                    return WidgetClass::CHECKBOX_CLASS;
+                }
 	}
 }

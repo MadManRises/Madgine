@@ -18,6 +18,8 @@ namespace GUI {
 
         Render::RenderTarget *getRenderTarget();
 
+		virtual WidgetClass getClass() const override;
+
     protected:
         void sizeChanged(const Vector3 &pixelSize) override;
 

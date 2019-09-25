@@ -76,5 +76,10 @@ namespace GUI {
         }
     }
 
+	    WidgetClass SceneWindow::getClass() const
+    {
+        return WidgetClass::SCENEWINDOW_CLASS;
+    }
+
 }
 }

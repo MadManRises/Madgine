@@ -12,20 +12,22 @@ namespace Serialize {
         }
         virtual ~Formatter() = default;
 
-        virtual void beginMember(SerializeOutStream &, const char *name, bool first) {};
-        virtual void endMember(SerializeOutStream &, const char *name, bool first) {};
+		virtual void setupStream(std::istream &) {};
+        virtual void setupStream(std::ostream &) {}; 
 
-        virtual void beginMember(SerializeInStream &, const char *name, bool first) {};
-        virtual void endMember(SerializeInStream &, const char *name, bool first) {};
+        virtual void beginExtendedCompound(Serialize::SerializeOutStream &, const char *name) {};
+        virtual void beginCompound(Serialize::SerializeOutStream &, const char *name) {};
+        virtual void endCompound(Serialize::SerializeOutStream &, const char *name) {};
 
-		virtual void beginPrimitive(SerializeOutStream &, size_t typeId) {}
-        virtual void endPrimitive(SerializeOutStream &, size_t typeId) {}
+		virtual void beginExtendedCompound(Serialize::SerializeInStream &, const char *name) {};
+        virtual void beginCompound(Serialize::SerializeInStream &, const char *name) {};
+        virtual void endCompound(Serialize::SerializeInStream &, const char *name) {};
 
-		virtual void beginPrimitive(SerializeInStream &, size_t typeId) {}
-        virtual void endPrimitive(SerializeInStream &, size_t typeId) {}
+        virtual void beginPrimitive(SerializeOutStream &, const char *name, size_t typeId) {}
+        virtual void endPrimitive(SerializeOutStream &, const char *name, size_t typeId) {}
 
-		virtual void writeEOL(SerializeOutStream &) = 0;
-        virtual bool readEOL(SerializeInStream &) = 0;
+        virtual void beginPrimitive(SerializeInStream &, const char *name, size_t typeId) {}
+        virtual void endPrimitive(SerializeInStream &, const char *name, size_t typeId) {}
 
         virtual std::string lookupFieldName(SerializeInStream &)
         {

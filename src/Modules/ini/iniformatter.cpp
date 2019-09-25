@@ -12,43 +12,33 @@ namespace Ini {
     {
     }
 
-    void IniFormatter::beginMember(Serialize::SerializeOutStream &out, const char *name, bool first)
+    void IniFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
     {
         out.writeUnformatted(std::string(name));
         out.writeUnformatted("="s);
     }
 
-    void IniFormatter::endMember(Serialize::SerializeOutStream &out, const char *name, bool first)
+    void IniFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
     {
         out.writeUnformatted("\n"s);
     }
 
-    void IniFormatter::beginMember(Serialize::SerializeInStream &in, const char *name, bool first)
+    void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
     {
         std::string prefix = in.readN(strlen(name) + 1);
         if (prefix != std::string(name) + "=")
             throw 0;
     }
 
-    void IniFormatter::endMember(Serialize::SerializeInStream &in, const char *name, bool first)
+    void IniFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
     {
         /*if (in.readPlainN(1) != "\n")
             throw 0;*/
     }
 
-    void IniFormatter::writeEOL(Serialize::SerializeOutStream &)
-    {
-        throw "Not implemented";
-    }
-
-    bool IniFormatter::readEOL(Serialize::SerializeInStream &)
-    {
-        throw "Not implemented";
-    }
-
     std::string IniFormatter::lookupFieldName(Serialize::SerializeInStream &in)
     {
-        std::string name = in.peekUntil('=');
+        std::string name = in.peekUntil("=");
         if (!name.empty())
             name = name.substr(0, name.size() - 1);
         return name;

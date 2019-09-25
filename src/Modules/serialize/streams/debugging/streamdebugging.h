@@ -24,12 +24,6 @@ namespace Engine
 						mLogger << std::setw(20) << typeid(T).name() << " " << v << std::endl;
 				}
 
-				void log(const EOLType &)
-				{
-					if (isLoggingEnabled())
-						mLogger << std::setw(20) << "EOL" << std::endl;
-				}
-
 				void logBeginMessage(const MessageHeader& header, const std::string& object);
 
 			private:

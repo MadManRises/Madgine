@@ -20,6 +20,8 @@ namespace Engine
 			{
 				setText("");
 			}
+
+			virtual WidgetClass getClass() const override;
 		};
 	}
 }

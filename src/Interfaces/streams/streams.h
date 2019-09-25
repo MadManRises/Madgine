@@ -33,8 +33,9 @@ namespace Engine
 
 		std::streambuf &buffer() const;
 
-	private:
 		std::istream mStream;
+
+	private:
 		bool mOwning = true;
 	};
 
@@ -56,8 +57,7 @@ namespace Engine
 
 	protected:
 		std::streambuf &buffer() const;
-
-	private:
+	
 		std::ostream mStream;
 	};
 

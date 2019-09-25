@@ -13,6 +13,8 @@ namespace Engine
 			virtual ~TabWidget() = default;
 
 			virtual void addTab(Widget* w);
+
+			virtual WidgetClass getClass() const override;
 		};
 	}
 }

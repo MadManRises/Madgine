@@ -61,7 +61,7 @@ namespace Engine
 
 		bool GuiHandlerBase::isOpen() const
 		{
-			return mWidget->isVisible();
+			return mWidget->mVisible;
 		}
 
 

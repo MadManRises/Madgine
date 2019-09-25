@@ -223,12 +223,14 @@ namespace Serialize {
         }
 
         template <typename Creator = DefaultCreator<>>
-        void readState(SerializeInStream &in, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        void readState(SerializeInStream &in, const char *name, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
+            decltype(this->size()) count;
+            in >> count;
             bool wasActive = beforeReset();
             Base::Base::clear();
             this->mActiveIterator = Base::Base::begin();
-            while (in.loopRead()) {
+            while (count--) {
                 this->read_item_where_intern(in, this->end(), std::forward<Creator>(creator));
             }
             afterReset(wasActive, this->end(), answerTarget, answerId);
@@ -340,7 +342,7 @@ namespace Serialize {
                 break;
             }
             case RESET:
-                readState(in, std::forward<Creator>(creator), partId, id);
+                readState(in, nullptr, std::forward<Creator>(creator), partId, id);
                 it.second = true;
                 break;
             default:

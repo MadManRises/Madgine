@@ -3,19 +3,19 @@
 #include "../../generic/templates.h"
 #include "../formatter.h"
 #include "../serializeexception.h"
+#include "../serializetable.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
-#include "../serializetable.h"
 
 namespace Engine {
 namespace Serialize {
 
-    class EOLType {
-    public:
-        constexpr bool operator==(const EOLType &) const { return true; }
+    enum class StreamMode {
+        READ,
+        WRITE
     };
 
-    using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Vector2, Vector3, InvScopePtr>;
+    using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Vector2, Vector3, Matrix3, InvScopePtr>;
 
     template <class T, class = void>
     struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, T> {
@@ -40,7 +40,7 @@ namespace Serialize {
 
         void setManager(SerializeManager *mgr);
         SerializeManager *manager();
-        bool isMaster();
+        bool isMaster(StreamMode mode);
 
         ParticipantId id() const;
         void setId(ParticipantId id);
@@ -133,27 +133,32 @@ namespace Serialize {
             return *this;
         }
 
+        template <typename T>
+        void read(T &t)
+        {
+            read(t, nullptr);
+        }
 
         template <class T, typename... Args>
-        void read(T &t, Args &&... args)
+        void read(T &t, const char *name, Args &&... args)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
-                format().beginPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                format().beginPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 readUnformatted(t);
-                format().endPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                format().endPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
-                t.readState(*this, std::forward<Args>(args)...);
-            } else if constexpr (std::is_enum_v<T>){
+                t.readState(*this, name, std::forward<Args>(args)...);
+            } else if constexpr (std::is_enum_v<T>) {
                 int dummy;
-                read(dummy, std::forward<Args>(args)...);
+                read(dummy, name, std::forward<Args>(args)...);
                 t = static_cast<T>(dummy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
         }
 
-        void read(ValueType &result);
+        void read(ValueType &result, const char *name);
 
         template <typename T>
         void readUnformatted(T &t)
@@ -178,20 +183,10 @@ namespace Serialize {
 
         void readUnformatted(std::string &s);
 
-        template <class T>
-        bool loopRead(T &val)
-        {
-            bool result = loopRead();
-            if (result)
-                *this >> val;
-            return result;
-        }
-
-        bool loopRead();
-
         std::string readN(size_t n);
-        std::string readUntil(char c);
-        std::string peekUntil(char c);
+        std::string peekN(size_t n);
+        std::string readUntil(const char *set);
+        std::string peekUntil(const char *set);
 
         void readRaw(void *buffer, size_t size);
         template <class T>
@@ -244,24 +239,18 @@ namespace Serialize {
             return *this;
         }
 
-        SerializeOutStream &operator<<(EOLType)
-        {
-            format().writeEOL(*this);
-            return *this;
-		}
-
         template <class T>
-        void write(const T &t)
+        void write(const T &t, const char *name = nullptr)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
-                format().beginPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                format().beginPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 writeUnformatted(t);
-                format().endPrimitive(*this, PrimitiveTypeIndex_v<T>);
+                format().endPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
-                t.writeState(*this);
-            } else if constexpr (std::is_enum_v<T>){
-                write(static_cast<int>(t));
+                t.writeState(*this, name);
+            } else if constexpr (std::is_enum_v<T>) {
+                write(static_cast<int>(t), name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }

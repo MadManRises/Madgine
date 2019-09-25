@@ -64,5 +64,9 @@ namespace GUI {
         result.push_back({ v, color, { 0, 0 } });
         return { result, mImage ? std::numeric_limits<uint32_t>::max() : 0 };
     }
+    WidgetClass Image::getClass() const
+    {
+        return WidgetClass::IMAGE_CLASS;
+    }
 }
 }

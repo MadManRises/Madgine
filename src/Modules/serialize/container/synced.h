@@ -123,7 +123,7 @@ namespace Serialize {
         {
             if (!PtrOffset::parent(this) || PtrOffset::parent(this)->isSynced()) {
                 for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                    this->write_state(*out, mData);
+                    this->write_state(*out, mData, nullptr);
                     out->endMessage();
                 }
             }

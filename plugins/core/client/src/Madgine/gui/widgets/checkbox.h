@@ -14,6 +14,8 @@ namespace Engine
 
 			virtual bool isChecked();
 			virtual void setChecked(bool b);
+
+			virtual WidgetClass getClass() const override;
 		};
 	}
 }

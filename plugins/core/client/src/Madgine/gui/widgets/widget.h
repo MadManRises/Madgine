@@ -16,9 +16,14 @@
 #include "imageloaderlib.h"
 #include "imageloader.h"
 
+#include "Modules/serialize/container/serializablecontainer.h"
+
 namespace Engine {
 namespace GUI {
-    class MADGINE_CLIENT_EXPORT WidgetBase : public ScopeBase {
+    class MADGINE_CLIENT_EXPORT WidgetBase : public ScopeBase,
+                                             public Serialize::SerializableUnit<WidgetBase> {
+        SERIALIZABLEUNIT;
+
     public:
         WidgetBase(const std::string &name, WidgetBase *parent);
 
@@ -39,10 +44,10 @@ namespace GUI {
         Vector3 getActualSize() const;
         Vector3 getActualPosition() const;
 
-        void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos = Matrix3::ZERO);
+        void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
         void screenSizeChanged(const Vector3 &screenSize);
 
-        virtual Class getClass();
+        virtual WidgetClass getClass() const;
 
         void destroy();
 
@@ -51,12 +56,10 @@ namespace GUI {
         virtual void activate();
         //virtual void moveToFront();
 
-        virtual bool isVisible() const;
         virtual void showModal();
         virtual void hideModal();
         void show();
         void hide();
-        virtual void setVisible(bool b);
 
         virtual void setEnabled(bool b);
 
@@ -64,7 +67,7 @@ namespace GUI {
 
         const char *key() const;
 
-        WidgetBase *createChild(const std::string &name, Class _class);
+        WidgetBase *createChild(const std::string &name, WidgetClass _class);
         WidgetBase *createChildWidget(const std::string &name);
         Bar *createChildBar(const std::string &name);
         Button *createChildButton(const std::string &name);
@@ -93,7 +96,7 @@ namespace GUI {
 
         decltype(auto) children() const
         {
-            return uniquePtrToPtr(mChildren);
+            return uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mChildren));
         }
 
         bool containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos = Vector3::ZERO, float extend = 0.0f) const;
@@ -105,10 +108,15 @@ namespace GUI {
 
         virtual const MetaTable *type();
 
-		virtual Resources::ImageLoader::ResourceType *resource() const;
+        virtual Resources::ImageLoader::ResourceType *resource() const;
+
+        void writeCreationData(Serialize::SerializeOutStream &of) const;
+
+		bool mVisible = true;
 
     protected:
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, Class _class);
+        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
+        std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
 
         virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         virtual std::unique_ptr<Bar> createBar(const std::string &name);
@@ -140,14 +148,12 @@ namespace GUI {
 
         TopLevelWindow &mWindow;
 
-        std::vector<std::unique_ptr<WidgetBase>> mChildren;
+        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>);
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
 
         Matrix3 mAbsolutePos, mAbsoluteSize;
-
-        bool mVisible = true;
 
         void *mUserData = nullptr;
     };
@@ -155,7 +161,7 @@ namespace GUI {
     template <typename T>
     struct Widget : WidgetBase {
 
-		using WidgetBase::WidgetBase;
+        using WidgetBase::WidgetBase;
 
         virtual const MetaTable *type() override
         {

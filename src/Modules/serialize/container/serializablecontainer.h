@@ -149,26 +149,40 @@ namespace Serialize {
             return it;
         }
 
-        void writeState(SerializeOutStream &out) const
+        void writeState(SerializeOutStream &out, const char *name = nullptr) const
         {
+            if (name)
+                out.format().beginExtendedCompound(out, name);
+            out.write(this->size(), "size");
+            if (name)
+                out.format().beginCompound(out, name);
             for (const auto &t : *this) {
                 if (this->filter(out, t)) {
                     write_item(out, t);
                 }
             }
-            out << EOLType();
+            if (name)
+                out.format().endCompound(out, name);
         }
 
         template <typename Creator = DefaultCreator<>>
-        void readState(SerializeInStream &in, Creator &&creator = {})
+        void readState(SerializeInStream &in, const char *name = nullptr, Creator &&creator = {})
         {
+            if (name)
+                in.format().beginExtendedCompound(in, name);
+            decltype(this->size()) count;
+            in.read(count, "size");
+            if (name)
+                in.format().beginCompound(in, name);
             bool wasActive = beforeReset();
             Base::clear();
             mActiveIterator = Base::begin();
-            while (in.loopRead()) {
+            while (count--) {
                 this->read_item_where_intern(in, end(), std::forward<Creator>(creator));
             }
             afterReset(wasActive);
+            if (name)
+                in.format().endCompound(in, name);
         }
 
         void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
@@ -259,20 +273,22 @@ namespace Serialize {
         template <typename Creator>
         std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
+            if constexpr (this->sIsUnit) {
+                in.format().beginExtendedCompound(in, "Item");
+            }
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
-            this->read_state(in, *it.first);
-            if (!in.isMaster())
-                this->read_id(in, *it.first);
+            this->read_state(in, *it.first, "Item");            
             return it;
         }
 
         void write_item(SerializeOutStream &out, const type &t) const
         {
+            if constexpr (this->sIsUnit) {
+                out.format().beginExtendedCompound(out, "Item");
+			}
             this->write_creation(out, t);
-            this->write_state(out, t);
-            if (out.isMaster())
-                this->write_id(out, t);
+            this->write_state(out, t, "Item");
         }
 
         bool isItemActive(const iterator &it)

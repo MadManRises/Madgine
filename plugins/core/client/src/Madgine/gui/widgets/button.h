@@ -25,6 +25,8 @@ namespace Engine
 			bool injectPointerPress(const Input::PointerEventArgs &arg) override;
 			bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
 
+			virtual WidgetClass getClass() const override;
+
 		protected:
 			void emitClicked();
 

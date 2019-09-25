@@ -14,18 +14,19 @@ namespace Tools {
 
         virtual void renderMenu() override;
 
-		void setProjectRoot(const Filesystem::Path &root);
+        void setProjectRoot(const Filesystem::Path &root);
 
-		const Filesystem::Path projectRoot() const;
+        const Filesystem::Path projectRoot() const;
 
-		//TODO remove
-		std::string mProjectRootString;
+        //TODO remove
+        std::string mProjectRootString;
+        SignalSlot::Signal<const std::string &> mProjectRootChanged;
 
     private:
         Filesystem::Path mCurrentSelectionPath;
         Filesystem::Path mCurrentPath;
 
-		Filesystem::Path mProjectRoot;
+        Filesystem::Path mProjectRoot;
     };
 
 }

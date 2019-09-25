@@ -41,7 +41,7 @@ RegisterType(Engine::Tools::ProjectManager)
         {
             if (mProjectRootString != mProjectRoot.str()) {
                 setProjectRoot(mProjectRootString);
-			}
+            }
 
             ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
             if (ImGui::BeginPopupModal("OpenFolder")) {
@@ -119,22 +119,20 @@ RegisterType(Engine::Tools::ProjectManager)
         void ProjectManager::setProjectRoot(const Filesystem::Path &root)
         {
             if (mProjectRoot != root) {
-                
-				if (!mProjectRoot.empty()) {
 
-					//Resources::ResourceManager::getSingleton().unregisterResourceLocation(mProjectRoot);
-                
-				}
-				
-				mProjectRoot = root;
+                if (!mProjectRoot.empty()) {
+
+                    //Resources::ResourceManager::getSingleton().unregisterResourceLocation(mProjectRoot);
+                }
+
+                mProjectRoot = root;
                 mProjectRootString = mProjectRoot.str();
+                mProjectRootChanged.emit(mProjectRootString);
 
-				if (!mProjectRoot.empty()) {
-                
-					Resources::ResourceManager::getSingleton().registerResourceLocation(mProjectRoot / "data", 80);
-						
-				}
+                if (!mProjectRoot.empty()) {
 
+                    Resources::ResourceManager::getSingleton().registerResourceLocation(mProjectRoot / "data", 80);
+                }
             }
         }
 

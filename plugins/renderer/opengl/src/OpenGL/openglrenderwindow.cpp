@@ -100,7 +100,7 @@ namespace Render {
 
             std::queue<std::pair<GUI::WidgetBase *, int>> q;
             for (GUI::WidgetBase *w : mTopLevelWindow->widgets()) {
-                if (w->isVisible()) {
+                if (w->mVisible) {
                     q.push(std::make_pair(w, 0));
                 }
             }
@@ -111,7 +111,7 @@ namespace Render {
                 q.pop();
 
                 for (GUI::WidgetBase *c : w->children()) {
-                    if (c->isVisible())
+                    if (c->mVisible)
                         q.push(std::make_pair(c, depth + 1));
                 }
 

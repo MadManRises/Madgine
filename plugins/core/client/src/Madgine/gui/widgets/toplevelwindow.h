@@ -12,6 +12,10 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "Modules/serialize/serializableunit.h"
+
+#include "Modules/serialize/container/serializablecontainer.h"
+
 namespace Engine {
 namespace GUI {
 
@@ -36,7 +40,12 @@ DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow, MADGINE_CLIENT, TopLevelWi
 namespace Engine {
 namespace GUI {
 
-    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase, public Input::InputListener, public Window::WindowEventListener, public Threading::FrameListener {
+    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase,
+                                                 public Input::InputListener,
+                                                 public Window::WindowEventListener,
+                                                 public Threading::FrameListener,
+                                                 public Serialize::SerializableUnit<TopLevelWindow> {
+        SERIALIZABLEUNIT;
 
     public:
         TopLevelWindow(GUISystem &gui);
@@ -69,8 +78,6 @@ namespace GUI {
 
         Vector3 getScreenSize();
         std::pair<Vector3, Vector3> getAvailableScreenSpace();
-
-        Matrix3 getSize();
 
         WidgetBase *createTopLevelWidget(const std::string &name);
         Bar *createTopLevelBar(const std::string &name);
@@ -128,17 +135,18 @@ namespace GUI {
         virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
+		void calculateWindowGeometries();
+
     protected:
         void onClose() override;
         void onRepaint() override;
         void onResize(size_t width, size_t height) override;
 
-        void calculateWindowGeometries();
-
         WidgetBase *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
         WidgetBase *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
 
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, Class _class);
+        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
+        std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
 
         virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         virtual std::unique_ptr<Bar> createBar(const std::string &name);
@@ -159,12 +167,12 @@ namespace GUI {
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
-        
+
         std::map<std::string, WidgetBase *> mWidgets;
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
+        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>);
 
         std::vector<WindowOverlay *> mOverlays;
 

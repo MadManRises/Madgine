@@ -24,5 +24,9 @@ namespace Engine
 		{
 			return std::string();
 		}
+                WidgetClass Combobox::getClass() const
+                {
+                    return WidgetClass::COMBOBOX_CLASS;
+                }
 	}
 }

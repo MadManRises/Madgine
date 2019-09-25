@@ -43,30 +43,46 @@ namespace Serialize {
         SerializeManager::deleteMasterId(mMasterId, this);
     }
 
-    void SerializableUnitBase::writeState(SerializeOutStream &out) const
+    void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, bool skipId) const
     {
+        if (name)
+			out.format().beginExtendedCompound(out, name);
+        if (out.isMaster() && !skipId)
+            this->writeId(out);
+        if (name)
+            out.format().beginCompound(out, name);
         mType->writeState(this, out);
+        if (name)
+			out.format().endCompound(out, name);
     }
 
     void SerializableUnitBase::writeId(SerializeOutStream &out) const
     {
-        out << mMasterId;
+        out.write(mMasterId, "id");
     }
 
     void SerializableUnitBase::readId(SerializeInStream &in)
     {
         size_t id;
-        in >> id;
-        if (in.manager() == topLevel()->getSlaveManager()) {
+        in.read(id, "id");
+        if (topLevel() && in.manager() == topLevel()->getSlaveManager()) {
             setSlaveId(id);
         }
         if (mType->mIsTopLevelUnit)
             static_cast<TopLevelSerializableUnitBase *>(this)->setStaticSlaveId(id);
     }
 
-    void SerializableUnitBase::readState(SerializeInStream &in)
+    void SerializableUnitBase::readState(SerializeInStream &in, const char *name, bool skipId)
     {
+        if (name)
+			in.format().beginExtendedCompound(in, name);
+        if (!in.isMaster() && !skipId)
+            readId(in);
+        if (name)
+            in.format().beginCompound(in, name);
         mType->readState(this, in);
+        if (name)
+			in.format().endCompound(in, name);
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)

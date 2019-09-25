@@ -23,6 +23,8 @@ namespace GUI {
 
 		std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize) override;
 
+		virtual WidgetClass getClass() const override;
+
     private:
         Resources::ImageLoader::ResourceType *mImage = nullptr;
     };

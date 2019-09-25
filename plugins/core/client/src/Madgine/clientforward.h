@@ -24,7 +24,7 @@ namespace GUI {
     class TopLevelWindow;
     class ToolWindow;
 
-    enum class Class;
+    enum class WidgetClass;
 
     struct WindowOverlay;
 

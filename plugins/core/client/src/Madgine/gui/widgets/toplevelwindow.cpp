@@ -39,6 +39,12 @@
 
 #include "toolwindow.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
+SERIALIZETABLE_BEGIN(Engine::GUI::TopLevelWindow)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&TopLevelWindow::createWidgetClassTuple>)
+SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
+
 namespace Engine {
 
 namespace GUI {
@@ -61,7 +67,7 @@ namespace GUI {
         mRenderWindow = gui.renderer().createWindow(mWindow, this);
         App::Application::getSingleton().addFrameListener(this);
 
-        WidgetBase *loading = createTopLevelImage("Loading");
+        /*WidgetBase *loading = createTopLevelImage("Loading");
         WidgetBase *progress = loading->createChildBar("ProgressBar");
         progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
         progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
@@ -159,7 +165,7 @@ namespace GUI {
         WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
         WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
         WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-
+		*/
         for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
             bool result = comp->callInit();
             assert(result);
@@ -169,7 +175,7 @@ namespace GUI {
     TopLevelWindow::~TopLevelWindow()
     {
         for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
-            comp->callFinalize();            
+            comp->callFinalize();
         }
 
         App::Application::getSingleton().removeFrameListener(this);
@@ -211,17 +217,10 @@ namespace GUI {
         return std::make_pair(pos, size);
     }
 
-    Matrix3 TopLevelWindow::getSize()
-    {
-        return Matrix3::IDENTITY;
-    }
-
     WidgetBase *TopLevelWindow::createTopLevelWidget(const std::string &name)
     {
-        WidgetBase *w = mTopLevelWidgets.emplace_back(createWidget(name)).get();
-        w->hide();
-        w->updateGeometry(getScreenSize(), getSize());
-        return w;
+        std::unique_ptr<WidgetBase> w = createWidget(name);
+        return mTopLevelWidgets.emplace_back(std::move(w)).get();
     }
 
     Bar *TopLevelWindow::createTopLevelBar(const std::string &name)
@@ -229,8 +228,6 @@ namespace GUI {
         std::unique_ptr<Bar> p = createBar(name);
         Bar *b = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        b->hide();
-        b->updateGeometry(getScreenSize(), getSize());
         return b;
     }
 
@@ -239,8 +236,6 @@ namespace GUI {
         std::unique_ptr<Button> p = createButton(name);
         Button *b = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        b->hide();
-        b->updateGeometry(getScreenSize(), getSize());
         return b;
     }
 
@@ -249,8 +244,6 @@ namespace GUI {
         std::unique_ptr<Checkbox> p = createCheckbox(name);
         Checkbox *c = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        c->hide();
-        c->updateGeometry(getScreenSize(), getSize());
         return c;
     }
 
@@ -259,8 +252,6 @@ namespace GUI {
         std::unique_ptr<Combobox> p = createCombobox(name);
         Combobox *c = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        c->hide();
-        c->updateGeometry(getScreenSize(), getSize());
         return c;
     }
 
@@ -269,8 +260,6 @@ namespace GUI {
         std::unique_ptr<Image> p = createImage(name);
         Image *i = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        i->hide();
-        i->updateGeometry(getScreenSize(), getSize());
         return i;
     }
 
@@ -279,8 +268,6 @@ namespace GUI {
         std::unique_ptr<Label> p = createLabel(name);
         Label *l = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        l->hide();
-        l->updateGeometry(getScreenSize(), getSize());
         return l;
     }
 
@@ -289,8 +276,6 @@ namespace GUI {
         std::unique_ptr<SceneWindow> p = createSceneWindow(name);
         SceneWindow *s = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        s->hide();
-        s->updateGeometry(getScreenSize(), getSize());
         return s;
     }
 
@@ -299,8 +284,6 @@ namespace GUI {
         std::unique_ptr<TabWidget> p = createTabWidget(name);
         TabWidget *t = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        t->hide();
-        t->updateGeometry(getScreenSize(), getSize());
         return t;
     }
 
@@ -309,85 +292,120 @@ namespace GUI {
         std::unique_ptr<Textbox> p = createTextbox(name);
         Textbox *t = p.get();
         mTopLevelWidgets.emplace_back(std::move(p));
-        t->hide();
-        t->updateGeometry(getScreenSize(), getSize());
         return t;
     }
 
-    std::unique_ptr<WidgetBase> TopLevelWindow::createWidgetClass(const std::string &name, Class _class)
+    std::unique_ptr<WidgetBase> TopLevelWindow::createWidgetClass(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
-        case Class::BAR_CLASS:
+        case WidgetClass::WIDGET_CLASS:
+            return createWidget(name);
+        case WidgetClass::BAR_CLASS:
             return createBar(name);
-        case Class::CHECKBOX_CLASS:
+        case WidgetClass::CHECKBOX_CLASS:
             return createCheckbox(name);
-        case Class::LABEL_CLASS:
+        case WidgetClass::LABEL_CLASS:
             return createLabel(name);
-        case Class::TABWIDGET_CLASS:
+        case WidgetClass::TABWIDGET_CLASS:
             return createTabWidget(name);
-        case Class::BUTTON_CLASS:
+        case WidgetClass::BUTTON_CLASS:
             return createButton(name);
-        case Class::COMBOBOX_CLASS:
+        case WidgetClass::COMBOBOX_CLASS:
             return createCombobox(name);
-        case Class::TEXTBOX_CLASS:
+        case WidgetClass::TEXTBOX_CLASS:
             return createTextbox(name);
-        case Class::SCENEWINDOW_CLASS:
+        case WidgetClass::SCENEWINDOW_CLASS:
             return createSceneWindow(name);
-        case Class::IMAGE_CLASS:
+        case WidgetClass::IMAGE_CLASS:
             return createImage(name);
         default:
             throw 0;
         }
     }
 
+    std::tuple<std::unique_ptr<WidgetBase>> Engine::GUI::TopLevelWindow::createWidgetClassTuple(const std::string &name, WidgetClass _class)
+    {
+        return { createWidgetClass(name, _class) };
+    }
+
     std::unique_ptr<WidgetBase> TopLevelWindow::createWidget(const std::string &name)
     {
-        return std::make_unique<WidgetBase>(name, *this);
+        std::unique_ptr<WidgetBase> w = std::make_unique<WidgetBase>(name, *this);
+        w->hide();
+        w->updateGeometry(getScreenSize());
+        return w;
     }
 
     std::unique_ptr<Bar> TopLevelWindow::createBar(const std::string &name)
     {
-        return std::make_unique<Bar>(name, *this);
+        std::unique_ptr<Bar> b = std::make_unique<Bar>(name, *this);
+        b->hide();
+        b->updateGeometry(getScreenSize());
+        return b;
     }
 
     std::unique_ptr<Button> TopLevelWindow::createButton(const std::string &name)
     {
-        return std::make_unique<Button>(name, *this);
+        std::unique_ptr<Button> b = std::make_unique<Button>(name, *this);
+        b->hide();
+        b->updateGeometry(getScreenSize());
+        return b;
     }
 
     std::unique_ptr<Checkbox> TopLevelWindow::createCheckbox(const std::string &name)
     {
-        return std::make_unique<Checkbox>(name, *this);
+        std::unique_ptr<Checkbox> c = std::make_unique<Checkbox>(name, *this);
+        c->hide();
+        c->updateGeometry(getScreenSize());
+        return c;
     }
 
     std::unique_ptr<Combobox> TopLevelWindow::createCombobox(const std::string &name)
     {
-        return std::make_unique<Combobox>(name, *this);
+        std::unique_ptr<Combobox> c = std::make_unique<Combobox>(name, *this);
+        c->hide();
+        c->updateGeometry(getScreenSize());
+        return c;
     }
 
     std::unique_ptr<Image> TopLevelWindow::createImage(const std::string &name)
     {
-        return std::make_unique<Image>(name, *this);
+        std::unique_ptr<Image> i = std::make_unique<Image>(name, *this);
+        i->hide();
+        i->updateGeometry(getScreenSize());
+        return i;
     }
 
     std::unique_ptr<Label> TopLevelWindow::createLabel(const std::string &name)
     {
-        return std::make_unique<Label>(name, *this);
+        std::unique_ptr<Label> l = std::make_unique<Label>(name, *this);
+        l->hide();
+        l->updateGeometry(getScreenSize());
+        return l;
     }
 
     std::unique_ptr<SceneWindow> TopLevelWindow::createSceneWindow(const std::string &name)
     {
-        return std::make_unique<SceneWindow>(name, *this);
+        std::unique_ptr<SceneWindow> s = std::make_unique<SceneWindow>(name, *this);
+        s->hide();
+        s->updateGeometry(getScreenSize());
+        return s;
     }
 
     std::unique_ptr<TabWidget> TopLevelWindow::createTabWidget(const std::string &name)
     {
-        return std::make_unique<TabWidget>(name, *this);
+        std::unique_ptr<TabWidget> t = std::make_unique<TabWidget>(name, *this);
+        t->hide();
+        t->updateGeometry(getScreenSize());
+        return t;
     }
 
     std::unique_ptr<Textbox> TopLevelWindow::createTextbox(const std::string &name)
     {
-        return std::make_unique<Textbox>(name, *this);
+        std::unique_ptr<Textbox> t = std::make_unique<Textbox>(name, *this);
+        t->hide();
+        t->updateGeometry(getScreenSize());
+        return t;
     }
 
     ToolWindow *TopLevelWindow::createToolWindow(const Window::WindowSettings &settings)
@@ -443,7 +461,7 @@ namespace GUI {
 
     static bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, const Vector3 &screenPos, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
     {
-        if (!w->isVisible())
+        if (!w->mVisible)
             return false;
 
         if (!w->containsPoint(arg.position, screenSize, screenPos))
@@ -492,7 +510,7 @@ namespace GUI {
     {
         if (!current) {
             return nullptr;
-        } else if (!current->isVisible() || !current->containsPoint(pos, screenSize)) {
+        } else if (!current->mVisible || !current->containsPoint(pos, screenSize)) {
             return getHoveredWidgetUp(pos, screenSize, current->getParent());
         } else {
             return current;
@@ -501,10 +519,10 @@ namespace GUI {
 
     WidgetBase *TopLevelWindow::getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
     {
-        const auto &widgets = current ? current->children() : uniquePtrToPtr(mTopLevelWidgets);
+        const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
 
         for (WidgetBase *w : widgets) {
-            if (w->isVisible() && w->containsPoint(pos, screenSize)) {
+            if (w->mVisible && w->containsPoint(pos, screenSize)) {
                 return getHoveredWidgetDown(pos, screenSize, w);
             }
         }
@@ -527,7 +545,9 @@ namespace GUI {
 
         Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
 
-        //TODO fix mouse pos
+        if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
+            mHoveredWidget = nullptr;
+
         WidgetBase *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
@@ -583,7 +603,7 @@ namespace GUI {
     void TopLevelWindow::calculateWindowGeometries()
     {
         for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
-            topLevel->updateGeometry(getScreenSize(), getSize());
+            topLevel->updateGeometry(getScreenSize());
         }
     }
 
