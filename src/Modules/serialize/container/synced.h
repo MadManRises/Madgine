@@ -6,6 +6,7 @@
 #include "../syncable.h"
 #include "offset.h"
 #include "unithelper.h"
+#include "../../generic/tupleunpacker.h"
 
 namespace Engine {
 namespace Serialize {

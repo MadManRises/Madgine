@@ -234,7 +234,9 @@ namespace Serialize {
             mSlaveStream.reset();
         }
 
-        setSlaveStreambuf(&mSlaveStream->buffer());
+		if (state == NO_ERROR) {
+            setSlaveStreambuf(&mSlaveStream->buffer());
+        }
 
         return state;
     }
