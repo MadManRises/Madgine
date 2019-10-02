@@ -1,14 +1,14 @@
 #pragma once
 
+#include "../../keyvalue/container_traits.h"
+#include "../container/unithelper.h"
 #include "../formatter.h"
+#include "../primitivetypes.h"
 #include "../serializeexception.h"
 #include "../serializetable.h"
+#include "../statesubmissionflags.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
-#include "../../keyvalue/container_traits.h"
-#include "../statesubmissionflags.h"
-#include "../primitivetypes.h"
-#include "../container/unithelper.h"
 
 namespace Engine {
 namespace Serialize {
@@ -43,7 +43,7 @@ namespace Serialize {
     template <typename Buf>
     struct WrappingSerializeStreambuf : SerializeStreambuf, Buf {
 
-		WrappingSerializeStreambuf(std::unique_ptr<Formatter> format)
+        WrappingSerializeStreambuf(std::unique_ptr<Formatter> format)
             : SerializeStreambuf(std::move(format))
         {
         }
@@ -55,7 +55,7 @@ namespace Serialize {
         {
         }
 
-		template <typename... Args>
+        template <typename... Args>
         WrappingSerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id, Args &&... args)
             : SerializeStreambuf(std::move(format), mgr, id)
             , Buf(std::forward<Args>(args)...)
@@ -208,7 +208,7 @@ namespace Serialize {
 
         bool isMaster();
 
-		SerializeStreambuf &buffer() const;
+        SerializeStreambuf &buffer() const;
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
@@ -247,7 +247,7 @@ namespace Serialize {
                 format().beginPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 writeUnformatted(t);
                 format().endPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
-                //mLog.log(t);
+                mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value) {
                 t.writeState(*this, name);
             } else if constexpr (std::is_enum_v<T>) {
@@ -264,8 +264,8 @@ namespace Serialize {
         template <typename C>
         void writeContainer(const C &container, const char *name = nullptr)
         {
-			using traits = container_traits<C>;
-			using T = typename traits::type;
+            using traits = container_traits<C>;
+            using T = typename traits::type;
 
             if (name)
                 format().beginExtendedCompound(*this, name);
@@ -309,7 +309,7 @@ namespace Serialize {
         Formatter &format() const;
 
         bool isMaster();
-    
+
         SerializeStreambuf &buffer() const;
 
     protected:
