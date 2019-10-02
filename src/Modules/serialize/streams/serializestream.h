@@ -8,6 +8,7 @@
 #include "../../keyvalue/container_traits.h"
 #include "../statesubmissionflags.h"
 #include "../primitivetypes.h"
+#include "../container/unithelper.h"
 
 namespace Engine {
 namespace Serialize {
