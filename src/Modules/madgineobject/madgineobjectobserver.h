@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../keyvalue/observerevent.h"
+
 namespace Engine {
 
 struct MODULES_EXPORT MadgineObjectObserver {

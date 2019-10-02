@@ -64,8 +64,8 @@ TEST(Serialize_Container, Test1)
 	unit1.list2.push_back(1);
 	unit1.list2.push_back(2);
 
-	mgr1.addTopLevelItem(&unit1);
-	mgr2.addTopLevelItem(&unit2);
+	ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
+	ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
 	Buffer buffer;
 	mgr1.setBuffer(buffer, false);
