@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../streams/serializestream.h"
+#include "../primitivetypes.h"
 
 #include "../../generic/copy_traits.h"
-
-//#include "../../keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Serialize {
@@ -16,14 +14,6 @@ namespace Serialize {
         static void write_creation(SerializeOutStream &out, const T &item)
         {
         }
-
-        /*static void read_state(SerializeInStream &in, T &item, const char *name)
-        {
-        }
-
-        static void write_state(SerializeOutStream &out, const T &item, const char *name)
-        {
-        }*/
 
         static bool filter(SerializeOutStream &out, const T &item)
         {
@@ -50,60 +40,11 @@ namespace Serialize {
     template <class T, bool b = isPrimitiveType_v<std::decay_t<T>>>
     struct UnitHelper : public UnitHelperBase<T> {
         typedef T type;
-
-        /*static void read_state(SerializeInStream &in, type &item, const char *name)
-        {
-            in >> item;
-        }
-
-        static void write_state(SerializeOutStream &out, const type &item, const char *name)
-        {
-            out << item;
-        }*/
     };
-
-    template <class T>
-    struct UnitHelper<const T, true> : public UnitHelperBase<const T> {
-        typedef const T type;
-
-        static void write_creation(SerializeOutStream &out, const type &item)
-        {
-            out << item;
-        }
-    };
-
-    /*template <>
-    struct MODULES_EXPORT UnitHelper<ValueType, false> : public UnitHelperBase<ValueType> {
-        typedef ValueType type;
-
-        static void read_state(SerializeInStream &in, ValueType &item)
-        {
-            in >> item;
-        }
-
-        static void write_state(SerializeOutStream &out, const ValueType &item)
-        {
-            out << item;
-        }
-
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, ValueType &item)
-        {
-        }
-    };*/
 
     template <class T>
     struct UnitHelper<T *, true> : public UnitHelperBase<T *> {
         typedef T *type;
-
-        /*static void read_state(SerializeInStream &in, T *&item, const char *name)
-        {
-            in >> item;
-        }
-
-        static void write_state(SerializeOutStream &out, T *item, const char *name)
-        {
-            out << item;
-        }*/
 
         static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, T *&item)
         {
@@ -121,20 +62,10 @@ namespace Serialize {
 
         static constexpr const bool sIsUnit = UnitHelper<T>::sIsUnit;
 
-        /*static void read_state(SerializeInStream &in, type &item, const char *name)
-        {
-            UnitHelper<T>::read_state(in, *item, name);
-        }*/
-
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             UnitHelper<T>::write_creation(out, *item);
         }
-
-        /*static void write_state(SerializeOutStream &out, const type &item, const char *name)
-        {
-            UnitHelper<T>::write_state(out, *item, name);
-        }*/
 
         static bool filter(SerializeOutStream &out, const type &item)
         {
@@ -183,16 +114,6 @@ namespace Serialize {
 
         static constexpr const bool sIsUnit = std::is_base_of_v<SerializableUnitBase, T>;
 
-        /*static void read_state(SerializeInStream &in, type &item, const char *name)
-        {
-            item.readState(in, name);
-        }
-
-        static void write_state(SerializeOutStream &out, const type &item, const char *name)
-        {
-            item.writeState(out, name);
-        }*/
-
         static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, type &item)
         {
             item.applySerializableMap(map);
@@ -220,25 +141,11 @@ namespace Serialize {
     struct UnitHelper<std::pair<U, V>, false> : public UnitHelperBase<std::pair<U, V>> {
         typedef std::pair<typename UnitHelper<U>::type, typename UnitHelper<V>::type> type;
 
-        /*static void read_state(SerializeInStream &in, type &item, const char *name)
-        {
-			//TODO: fix name
-            UnitHelper<U>::read_state(in, item.first, name);
-            UnitHelper<V>::read_state(in, item.second, name);
-        }*/
-
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             UnitHelper<U>::write_creation(out, item.first);
             UnitHelper<V>::write_creation(out, item.second);
         }
-
-        /*static void write_state(SerializeOutStream &out, const type &item, const char *name)
-        {
-			//TODO: fix name
-            UnitHelper<U>::write_state(out, item.first, name);
-            UnitHelper<V>::write_state(out, item.second, name);
-        }*/
 
         static bool filter(SerializeOutStream &out, const type &item)
         {
@@ -275,28 +182,12 @@ namespace Serialize {
         typedef Tuple type;
         using unpacker = bool[];
 
-        /*static void read_state(SerializeInStream &in, type &item, const char *name)
-        {
-			//TODO: fix name
-            (void)unpacker {
-                (UnitHelper<typename std::tuple_element<Is, type>::type>::read_state(in, std::get<Is>(item), name), true)...
-            };
-        }*/
-
         static void write_creation(SerializeOutStream &out, const type &item)
         {
             (void)unpacker {
                 (UnitHelper<typename std::tuple_element<Is, type>::type>::write_creation(out, std::get<Is>(item)), true)...
             };
         }
-
-        /*static void write_state(SerializeOutStream &out, const type &item, const char *name)
-        {
-			//TODO: fix name
-            (void)unpacker {
-                (UnitHelper<typename std::tuple_element<Is, type>::type>::write_state(out, std::get<Is>(item), name), true)...
-            };
-        }*/
 
         static bool filter(SerializeOutStream &out, const type &item)
         {
