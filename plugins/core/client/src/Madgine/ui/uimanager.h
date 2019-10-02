@@ -11,8 +11,10 @@
 
 namespace Engine {
 namespace UI {
-    struct MADGINE_CLIENT_EXPORT UIManager : GUI::TopLevelWindowComponent<UIManager>,
+    struct MADGINE_CLIENT_EXPORT UIManager : Serialize::SerializableUnit<UIManager, GUI::TopLevelWindowComponent<UIManager>>,
                                              Threading::FrameListener {
+        SERIALIZABLEUNIT;
+
         UIManager(GUI::TopLevelWindow &window);
         ~UIManager();
 
@@ -34,7 +36,7 @@ namespace UI {
 
         static const constexpr int sMaxInitOrder = 4;
 
-        const char *key() const;
+        const char *key() const override;
 
         Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
@@ -60,22 +62,19 @@ namespace UI {
 
         UIManager &getSelf(bool = true);
 
-        //virtual App::Application &app(bool = true) override;
+
         virtual const MadgineObject *parent() const override;
+
+		SERIALIZABLE_CONTAINER_EXT(mGuiHandlers, GuiHandlerContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
+        SERIALIZABLE_CONTAINER_EXT(mGameHandlers, GameHandlerContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
 
     protected:
         bool init() override;
         void finalize() override;
-
-        //KeyValueMapList maps() override;
-
+		
     private:
-
         Vector2 mKeptCursorPosition;
-        bool mKeepingCursorPos = false;
-
-        GuiHandlerContainer<std::vector> mGuiHandlers;
-        GameHandlerContainer<std::vector> mGameHandlers;
+        bool mKeepingCursorPos = false;        
     };
 }
 }

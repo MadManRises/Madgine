@@ -18,7 +18,7 @@ template <class Base, class... _Ty>
 using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
 template <template <class...> class Container, class _Base, class... _Ty>
-class UniqueComponentContainer;
+struct UniqueComponentContainer;
 
 template <class _Base, class... _Ty>
 class UniqueComponentSelector;

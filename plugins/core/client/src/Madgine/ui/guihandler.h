@@ -18,8 +18,7 @@ namespace Engine
 				ROOT_WINDOW
 			};
 
-			GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type);
-
+			GuiHandlerBase(UIManager &ui, WindowType type);
 
 
 			virtual void open();

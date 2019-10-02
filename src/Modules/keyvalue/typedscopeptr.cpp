@@ -32,11 +32,8 @@ namespace Engine {
     }
 
     ScopeIterator TypedScopePtr::end() const
-    {
-        const std::pair<const char *, Accessor> *p = mType->mMember;
-        while (p->first)
-            ++p;
-        return { *this, p};
+    {        
+        return { *this, nullptr};
     }
 
     std::string TypedScopePtr::name() const

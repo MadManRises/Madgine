@@ -11,17 +11,25 @@ struct ScopeIterator {
         : mScope(scope)
         , mPointer(pointer)
     {
+        if (mPointer) {
+            checkDerived();
+        }
     }
 
     bool operator==(const ScopeIterator &other) const
     {
         assert(mScope == other.mScope);
-        return mPointer == other.mPointer;
+        if (mPointer == other.mPointer)
+            return true;
+        if (!mPointer)
+            return !other.mPointer->first;
+        else
+            return !mPointer->first;
     }
 
     bool operator!=(const ScopeIterator &other) const
     {
-        assert(mScope == other.mScope);
+        assert(mScope.mScope == other.mScope.mScope);
         if (mPointer == other.mPointer)
             return false;
         if (!mPointer)
@@ -37,10 +45,20 @@ struct ScopeIterator {
 
     void operator++()
     {
+        assert(mPointer);
         ++mPointer;
+        checkDerived();
     }
 
 private:
+    void checkDerived()
+    {
+        while (!mPointer->first && mScope.mType->mBaseGetter) {
+            mScope.mType = &mScope.mType->mBaseGetter();
+            mPointer = mScope.mType->mMember;
+        }
+    }
+
     TypedScopePtr mScope;
     const std::pair<const char *, Accessor> *mPointer;
 };

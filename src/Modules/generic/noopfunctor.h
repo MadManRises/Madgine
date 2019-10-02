@@ -2,9 +2,10 @@
 
 namespace Engine {
 
-	    struct NoOpFunctor {
-    template <typename... Args>
-    void operator()(Args &&...) {}
+struct NoOpFunctor {
+    /*template <typename... Args>
+    void operator()(Args &&...) {}*/
+    void operator()() {}
 };
 
 }

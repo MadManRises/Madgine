@@ -350,6 +350,9 @@ namespace Render {
         glCheck();
 #endif
 
+		glVertexAttrib2f(1, 0, 0);
+        glVertexAttrib2f(4, 0, 0);
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         return std::make_unique<OpenGLRenderWindow>(w, context, topLevel);

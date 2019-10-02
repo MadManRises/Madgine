@@ -22,6 +22,7 @@ namespace Tools {
 		bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
+		virtual const char *key() const override;
 
 		ImRoot mRoot;
     private:

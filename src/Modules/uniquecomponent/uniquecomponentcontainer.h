@@ -15,8 +15,7 @@
 namespace Engine {
 
 template <template <class...> class C, class _Base, class... _Ty>
-class UniqueComponentContainer {
-public:
+struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
@@ -24,6 +23,9 @@ public:
     typedef C<std::unique_ptr<Base>> Container;
 
     typedef typename Container::const_iterator const_iterator;
+
+	struct traits : container_traits<Container> {
+    };
 
     UniqueComponentContainer(_Ty... arg)
 #if ENABLE_PLUGINS
@@ -34,12 +36,12 @@ public:
         size_t count = Registry::sComponents().size();
         mSortedComponents.reserve(count);
         if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
-            mComponents.reserve(count);
+            this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {
             std::unique_ptr<Base> p = f(arg...);
             mSortedComponents.push_back(p.get());
-            container_traits<C<std::unique_ptr<Base>>>::emplace(mComponents, mComponents.end(), std::move(p));
+            traits::emplace(*this, Container::end(), std::move(p));
         }
 #if ENABLE_PLUGINS
         Registry::update().connect(mUpdateSlot);
@@ -51,12 +53,12 @@ public:
 
     const_iterator begin() const
     {
-        return mComponents.begin();
+        return Container::begin();
     }
 
     const_iterator end() const
     {
-        return mComponents.end();
+        return Container::end();
     }
 
     struct typed_const_iterator {
@@ -107,24 +109,6 @@ public:
         return { mSortedComponents.end(), Registry::sTables().end() };
     }
 
-    size_t size()
-    {
-        return mComponents.size();
-    }
-
-    const Container &data() const
-    {
-        return mComponents;
-    }
-
-	operator const Container& () const {
-            return mComponents;
-	}
-
-	operator Container& () {
-            return mComponents;
-	}
-
     template <class T>
     T &get()
     {
@@ -137,7 +121,6 @@ public:
     }
 
 private:
-    Container mComponents;
     std::vector<Base *> mSortedComponents;
 
 #if ENABLE_PLUGINS
@@ -146,21 +129,21 @@ protected:
     void updateComponents(CollectorInfo *info, bool add, const std::vector<F> &vals)
     {
         if (add) {
-            assert(mComponents.size() == info->mBaseIndex);
+            assert(this->size() == info->mBaseIndex);
             mSortedComponents.reserve(info->mBaseIndex + vals.size());
             if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
-                mComponents.reserve(info->mBaseIndex + vals.size());
+                this->reserve(info->mBaseIndex + vals.size());
             }
             for (F f : vals) {
                 std::unique_ptr<Base> p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
-                container_traits<C<std::unique_ptr<Base>>>::emplace(mComponents, mComponents.end(), std::move(p));
+                traits::emplace(*this, Container::end(), std::move(p));
             }
         } else {
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                mComponents.erase(std::remove_if(mComponents.begin(), mComponents.end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
+                this->erase(std::remove_if(Container::begin(), Container::end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }

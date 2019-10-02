@@ -3,6 +3,7 @@
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
 #include "Modules/threading/slot.h"
+#include "Modules/serialize/serializableunit.h"
 
 namespace Engine {
 namespace UI {
@@ -18,14 +19,16 @@ namespace UI {
         std::function<bool(GUI::WidgetBase *)> mInit;
     };
 
-    class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase {
+    class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase, public Serialize::SerializableUnit<Handler> {
+        SERIALIZABLEUNIT;
     public:
-        Handler(UIManager &ui, const std::string &windowName);
+        Handler(UIManager &ui);
         virtual ~Handler() = default;
 
         virtual void onMouseVisibilityChanged(bool b);
 
         GUI::WidgetBase *widget() const;
+        virtual void setWidget(GUI::WidgetBase *w);
 
         virtual void sizeChanged();
 
@@ -75,8 +78,6 @@ namespace UI {
         bool init() override;
         void finalize() override;
 
-        bool init(GUI::WidgetBase *w);
-
         virtual void onPointerMove(const Input::PointerEventArgs &me);
 
         virtual void onPointerDown(const Input::PointerEventArgs &me);
@@ -92,11 +93,9 @@ namespace UI {
         bool injectKeyPress(const Input::KeyEventArgs &evt);
 
     protected:
-        GUI::WidgetBase *mWidget;
+        GUI::WidgetBase *mWidget = nullptr;
 
         UIManager &mUI;
-
-        const std::string mWidgetName;
 
     private:
         std::list<WindowDescriber> mWidgets;

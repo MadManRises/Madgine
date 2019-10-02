@@ -17,7 +17,7 @@ FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscol
 
 add_plugin(Tools Madgine Utility ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
-target_link_libraries(Tools PUBLIC ImGui Im3D)
+target_link_libraries(Tools PUBLIC ImGui Im3D Base)
 
 target_link_plugins(Tools ImageLoader)
 

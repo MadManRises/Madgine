@@ -45,7 +45,7 @@ namespace Engine
 				template <class T>
 				T &getSceneComponent(bool init = true)
 				{
-					return static_cast<T&>(getSceneComponent(T::component_index, init));
+					return static_cast<T&>(getSceneComponent(T::component_index(), init));
 				}
 
 				SceneComponentBase &getSceneComponent(size_t i, bool = true);
@@ -53,7 +53,7 @@ namespace Engine
 				template <class T>
 				T &getGlobalAPIComponent(bool init = true)
 				{
-					return static_cast<T&>(getGlobalAPIComponent(T::component_index, init));
+					return static_cast<T&>(getGlobalAPIComponent(T::component_index(), init));
 				}
 
 				App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);

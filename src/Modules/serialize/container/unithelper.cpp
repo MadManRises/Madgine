@@ -21,16 +21,6 @@ namespace Engine
 			return true;
 		}
 
-		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableUnitBase &item)
-		{
-			item.applySerializableMap(map);
-		}
-
-		void SerializeUnitHelper::applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableBase &item)
-		{
-			item.applySerializableMap(map);
-		}
-
 		void SerializeUnitHelper::setParent(SerializableUnitBase& item, SerializableUnitBase* parent)
 		{
 			item.setParent(parent);

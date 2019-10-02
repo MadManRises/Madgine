@@ -50,13 +50,14 @@ namespace Tools {
     {
         (*mManager)->newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
 
-        ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
-        ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
-
-        if (node)
-            (*mManager)->setCentralNode(node->CentralNode);
+        (*mManager)->setCentralNode(mRoot.dockNode());
 
         return mRoot.frame();
+    }
+
+    const char *ClientImRoot::key() const
+    {
+        return "ClientImRoot";
     }
 
     const ImManager &ClientImRoot::manager() const

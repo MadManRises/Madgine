@@ -4,6 +4,8 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
+struct ImGuiDockNode;
+
 namespace Engine {
 namespace Tools {
 
@@ -26,10 +28,14 @@ namespace Tools {
 
         virtual const MadgineObject *parent() const override;
 
+		ImGuiDockNode *dockNode() const;
+
     private:
         const MadgineObject *mParent; //TODO Find proper solution
 		
 		ToolsContainer<std::vector> mCollector;		
+
+		ImGuiDockNode *mDockNode = nullptr;
     };
 
 }

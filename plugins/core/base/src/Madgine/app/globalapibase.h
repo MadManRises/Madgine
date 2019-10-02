@@ -61,7 +61,6 @@ namespace Engine
 			bool init() override;
 			void finalize() override;
 
-		private:
 			App::Application & mApp;
 		};
 	}

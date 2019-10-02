@@ -2,8 +2,8 @@
 
 #include "uimanager.h"
 
-#include "../gui/widgets/toplevelwindow.h"
 #include "../gui/guisystem.h"
+#include "../gui/widgets/toplevelwindow.h"
 
 #include "../gui/widgets/widget.h"
 
@@ -13,14 +13,29 @@
 #include "Modules/debug/profiler/profiler.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
+
+UNIQUECOMPONENT(Engine::UI::UIManager)
+
+METATABLE_BEGIN(Engine::UI::UIManager)
+MEMBER(mGuiHandlers)
+MEMBER(mGameHandlers)
+METATABLE_END(Engine::UI::UIManager)
+
+SERIALIZETABLE_BEGIN(Engine::UI::UIManager)
+FIELD(mGuiHandlers)
+FIELD(mGameHandlers)
+SERIALIZETABLE_END(Engine::UI::UIManager)
+
+RegisterType(Engine::UI::UIManager);
 
 namespace Engine {
 
 namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
-        : UniqueComponent(window)
+        : SerializableUnit(window)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
@@ -190,11 +205,6 @@ namespace UI {
         return mWindow;
     }
 
-    /*KeyValueMapList UIManager::maps()
-		{
-			return Scope::maps().merge(mGuiHandlers, mGameHandlers, MAP_F(showCursor));
-		}*/
-
     const char *UIManager::key() const
     {
         return "UI";
@@ -246,10 +256,3 @@ namespace UI {
 
 }
 }
-
-UNIQUECOMPONENT(Engine::UI::UIManager)
-
-METATABLE_BEGIN(Engine::UI::UIManager)
-METATABLE_END(Engine::UI::UIManager)
-
-RegisterType(Engine::UI::UIManager);

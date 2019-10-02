@@ -12,7 +12,7 @@ namespace Engine {
 		{
 			switch (event)
 			{
-			case INSERT_ITEM:
+			case AFTER | INSERT_ITEM:
 				if (!object->parent() || object->parent()->isInitialized())
 				{
 					//object->app(false).frameLoop().queue([=]() {

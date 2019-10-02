@@ -4,7 +4,7 @@
 
 namespace Engine {
 namespace Network {
-    NetworkBuffer::NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SerializeManager &mgr, Serialize::ParticipantId id)
+    NetworkBuffer::NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id)
         : buffered_streambuf(std::move(format), mgr, id)
         , mSocket(socket)
     {

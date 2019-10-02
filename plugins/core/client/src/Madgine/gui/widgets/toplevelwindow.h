@@ -12,14 +12,14 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/toplevelserializableunit.h"
 
-#include "Modules/serialize/container/serializablecontainer.h"
+#include "Modules/serialize/container/controlledcontainer.h"
 
 namespace Engine {
 namespace GUI {
 
-    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, MadgineObject {
+    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, MadgineObject, Serialize::SerializableUnitBase {
         TopLevelWindowComponentBase(TopLevelWindow &window);
         virtual ~TopLevelWindowComponentBase() = default;
 
@@ -27,6 +27,10 @@ namespace GUI {
 
         virtual const MadgineObject *parent() const override;
         //virtual App::Application &app(bool = true) override;
+
+		TopLevelWindowComponentBase &getSelf(bool = true);
+
+		virtual const char *key() const = 0;
 
     protected:
         TopLevelWindow &mWindow;
@@ -44,7 +48,7 @@ namespace GUI {
                                                  public Input::InputListener,
                                                  public Window::WindowEventListener,
                                                  public Threading::FrameListener,
-                                                 public Serialize::SerializableUnit<TopLevelWindow> {
+                                                 public Serialize::TopLevelSerializableUnit<TopLevelWindow> {
         SERIALIZABLEUNIT;
 
     public:
@@ -135,7 +139,15 @@ namespace GUI {
         virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
-		void calculateWindowGeometries();
+        void calculateWindowGeometries();
+
+        template <class T>
+        T &getWindowComponent(bool init = true)
+        {
+            return static_cast<T &>(getWindowComponent(T::component_index(), init));
+        }
+
+        TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
 
     protected:
         void onClose() override;
@@ -176,7 +188,9 @@ namespace GUI {
 
         std::vector<WindowOverlay *> mOverlays;
 
-        TopLevelWindowContainer<std::vector> mComponents;
+
+
+		SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer<elevate<, Serialize::ControlledContainer, ,std::vector>::type>);
 
         WidgetBase *mHoveredWidget = nullptr;
 

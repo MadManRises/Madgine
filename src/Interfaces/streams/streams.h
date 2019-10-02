@@ -17,7 +17,7 @@ namespace Engine
 			return *this;
 		}
 
-		std::istreambuf_iterator<char> begin();
+		std::istreambuf_iterator<char> iterator();
 		std::istreambuf_iterator<char> end();
 
 		bool readRaw(void *buffer, size_t size);
@@ -27,6 +27,7 @@ namespace Engine
 				pos_type tell();
                 void seek(pos_type p);
 
+				void skipWs();
 
 	protected:
 		InStream(std::streambuf *buffer);

@@ -3,7 +3,7 @@
 
 #include "streams/bufferedstream.h"
 
-#include "serializemanager.h"
+#include "syncmanager.h"
 
 #include "toplevelserializableunit.h"
 
@@ -35,25 +35,26 @@ namespace Serialize {
 
     SerializableUnitBase::~SerializableUnitBase()
     {
-		//If this fails, you forgot to add all Serializables to the SerializeTable.
-		//Temporary solution! Proper solution: Move mSynced into Serializable (=> evtl default mActive to true)
+        //If this fails, you forgot to add all Serializables to the SerializeTable.
+        //Temporary solution! Proper solution: Move mSynced into Serializable (=> evtl default mActive to true)
         assert(!mSynced);
 
-        clearSlaveId();
+		if (!mSlaveId)
+            static auto &log = LOG_ERROR("Fix SerializableUnitBase::clearSlaveId calls!");
         SerializeManager::deleteMasterId(mMasterId, this);
     }
 
-    void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, bool skipId) const
+    void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
     {
         if (name)
-			out.format().beginExtendedCompound(out, name);
-        if (out.isMaster() && !skipId)
+            out.format().beginExtendedCompound(out, name);
+        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId))
             this->writeId(out);
         if (name)
             out.format().beginCompound(out, name);
         mType->writeState(this, out);
         if (name)
-			out.format().endCompound(out, name);
+            out.format().endCompound(out, name);
     }
 
     void SerializableUnitBase::writeId(SerializeOutStream &out) const
@@ -65,24 +66,30 @@ namespace Serialize {
     {
         size_t id;
         in.read(id, "id");
-        if (topLevel() && in.manager() == topLevel()->getSlaveManager()) {
-            setSlaveId(id);
+        if (in.manager() && in.manager()->getSlaveStreambuf() == &in.buffer()) {
+            setSlaveId(id, in.manager());
         }
-        if (mType->mIsTopLevelUnit)
+        if (id < RESERVED_ID_COUNT) {
+            assert(mType->mIsTopLevelUnit);
             static_cast<TopLevelSerializableUnitBase *>(this)->setStaticSlaveId(id);
+        }
     }
 
-    void SerializableUnitBase::readState(SerializeInStream &in, const char *name, bool skipId)
+    void SerializableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
     {
         if (name)
-			in.format().beginExtendedCompound(in, name);
-        if (!in.isMaster() && !skipId)
+            in.format().beginExtendedCompound(in, name);
+        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId))
             readId(in);
         if (name)
             in.format().beginCompound(in, name);
         mType->readState(this, in);
         if (name)
-			in.format().endCompound(in, name);
+            in.format().endCompound(in, name);
+        if (!(flags & StateTransmissionFlags_DontApplyMap)) {            
+			assert(in.manager());
+            mType->applySerializableMap(this, in.manager()->slavesMap());
+        }
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)
@@ -139,23 +146,22 @@ namespace Serialize {
 
     const TopLevelSerializableUnitBase *SerializableUnitBase::topLevel() const
     {
-        if (mType->mIsTopLevelUnit)
+        if (mType && mType->mIsTopLevelUnit)
             return static_cast<const TopLevelSerializableUnitBase *>(this);
         else
             return mParent ? mParent->topLevel() : nullptr;
     }
 
-    void SerializableUnitBase::clearSlaveId()
+    void SerializableUnitBase::clearSlaveId(SerializeManager *mgr)
     {
         if (mSlaveId != 0) {
-            topLevel()->getSlaveManager()->removeSlaveMapping(this);
+            mgr->removeSlaveMapping(this);
             mSlaveId = 0;
         }
     }
 
     void SerializableUnitBase::setParent(SerializableUnitBase *parent)
     {
-        clearSlaveId();
         mParent = parent;
     }
 
@@ -169,14 +175,14 @@ namespace Serialize {
         return mMasterId;
     }
 
-    void SerializableUnitBase::setSlaveId(size_t id)
+    void SerializableUnitBase::setSlaveId(size_t id, SerializeManager *mgr)
     {
         if (mSlaveId != id) {
             if (mSlaveId != 0) {
-                clearSlaveId();
+                clearSlaveId(mgr);
             }
             mSlaveId = id;
-            topLevel()->getSlaveManager()->addSlaveMapping(this);
+            mgr->addSlaveMapping(this);
         }
     }
 

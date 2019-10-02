@@ -3,8 +3,8 @@
 #include "Modules/math/vector3.h"
 #include "Modules/serialize/container/synced.h"
 #include "Modules/serialize/serializableunit.h"
-#include "Modules/threading/slot.h"
 #include "Modules/signalslot/signalfunctor.h"
+#include "Modules/threading/slot.h"
 
 namespace Engine {
 namespace Scene {
@@ -34,8 +34,8 @@ namespace Scene {
         }*/
 
     private:
-        SYNCED(Vector3, mPosition);
-        SYNCED(float, mPower);
+        SYNCED(mPosition, Vector3);
+        SYNCED(mPower, float);
         //Serialize::Observed<int, Vector3> mPosition;
         //Serialize::Observed<int, float> mPower;
         /*Threading::Slot<&Light::onPowerChangedImpl> mPowerChangedSlot;

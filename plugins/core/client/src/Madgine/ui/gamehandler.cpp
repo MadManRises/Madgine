@@ -7,12 +7,20 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
+
+METATABLE_BEGIN_BASE(Engine::UI::GameHandlerBase, Engine::UI::Handler)
+METATABLE_END(Engine::UI::GameHandlerBase)
+
+RegisterType(Engine::UI::GameHandlerBase);
+
 namespace Engine {
 namespace UI {
     const float GameHandlerBase::mDragStartThreshold = 0.01f;
 
-    GameHandlerBase::GameHandlerBase(UIManager &ui, const std::string &windowName, Scene::ContextMask context)
-        : Handler(ui, windowName)
+    GameHandlerBase::GameHandlerBase(UIManager &ui, Scene::ContextMask context)
+        : Handler(ui)
         , mCurrentMouseButton(Input::MouseButton::NO_BUTTON)
         , mDragging(false)
         , mSingleClick(false)
@@ -166,10 +174,3 @@ namespace UI {
     }
 }
 } // namespace UI
-
-DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
-
-METATABLE_BEGIN(Engine::UI::GameHandlerBase)
-METATABLE_END(Engine::UI::GameHandlerBase)
-
-RegisterType(Engine::UI::GameHandlerBase);

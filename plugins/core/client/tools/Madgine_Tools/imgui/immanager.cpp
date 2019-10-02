@@ -265,7 +265,7 @@ namespace Tools {
     }
 
     void ImManager::calculateAvailableScreenSpace(Window::Window *w, Vector3 &pos, Vector3 &size)
-    {
+    {        
         pos.x += mAreaPos.x - w->renderX();
         pos.y += mAreaPos.y - w->renderY();
         if (mAreaSize != Vector2::ZERO) {

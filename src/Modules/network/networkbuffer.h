@@ -12,7 +12,7 @@ namespace Engine
 			public Serialize::buffered_streambuf
 		{
 		public:
-                    NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SerializeManager &mgr, Serialize::ParticipantId id = 0);
+                    NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id = 0);
 			NetworkBuffer(const NetworkBuffer&) = delete;
 			NetworkBuffer(NetworkBuffer&& other) noexcept;
 			virtual ~NetworkBuffer();

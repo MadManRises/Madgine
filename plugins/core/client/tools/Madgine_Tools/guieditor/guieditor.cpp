@@ -28,6 +28,10 @@
 
 #include "Modules/serialize/streams/debugging/streamdebugging.h"
 
+#include "Modules/serialize/serializemanager.h"
+
+#include "Modules/filesystem/filemanager.h"
+
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {
@@ -117,14 +121,17 @@ namespace Tools {
 
         Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "default.layout";
 
-        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::make_unique<XML::XMLFormatter>());
-        if (buf->open(filePath.str(), std::ios::in)) {
-            Serialize::SerializeInStream in { std::move(buf) };
-
-            mWindow.readState(in);
+        Filesystem::FileManager file("Layout");
+        std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
+        if (in) {
+            mWindow.readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
 
             mWindow.calculateWindowGeometries();
-        }
+
+			mWindow.applySerializableMap(file.slavesMap());
+		}
+        
+        
     }
 
     void GuiEditor::renderSelection(GUI::WidgetBase *hoveredWidget)
@@ -360,7 +367,11 @@ namespace Tools {
             if (mSelected && mSelected->widget() == child)
                 flags |= ImGuiTreeNodeFlags_Selected;
 
-            if (ImGui::TreeNodeEx(child->getName().c_str(), flags)) {
+            bool open = ImGui::TreeNodeEx(child->getName().c_str(), flags);
+
+            ImGui::DraggableValueTypeSource(child->getName(), w, Engine::ValueType { child });
+
+            if (open) {
                 listWidgets(child, hoveredWidget);
                 ImGui::TreePop();
             }

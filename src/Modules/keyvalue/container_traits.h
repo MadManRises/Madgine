@@ -6,13 +6,16 @@
 
 namespace Engine {
 
-template <class T, typename = void>
+template <typename T, typename = void>
 struct is_iterable : std::false_type {
 };
 
-template <class T>
+template <typename T>
 struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {
 };
+
+template <typename T>
+constexpr const bool is_iterable_v = is_iterable<T>::value;
 
 template <typename C>
 struct container_traits : C::traits {
@@ -28,46 +31,46 @@ struct container_traits<std::list<T>> {
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
-		
-	template <template <typename> typename M>
-	using rebind = container_traits<std::list<M<T>>>;
+
+    template <template <typename> typename M>
+    using rebind = container_traits<std::list<M<T>>>;
 
     template <typename C>
     struct api : C {
 
-			using C::C;
+        using C::C;
 
-            void remove(const type &item)
-            {
-                for (iterator it = this->begin(); it != this->end();) {
-                    if (*it == item) {
-                        it = this->erase(it);
-                    } else {
-                        ++it;
-                    }
+        void remove(const type &item)
+        {
+            for (iterator it = this->begin(); it != this->end();) {
+                if (*it == item) {
+                    it = this->erase(it);
+                } else {
+                    ++it;
                 }
             }
+        }
 
-            void push_back(const type &item)
-            {
-                this->emplace(this->end(), item);
-            }
+        void push_back(const type &item)
+        {
+            this->emplace(this->end(), item);
+        }
 
-            template <class... _Ty>
-            std::pair<iterator, bool> emplace_back(_Ty &&... args)
-            {
-                return this->emplace(this->end(), std::forward<_Ty>(args)...);
-            }
+        template <class... _Ty>
+        std::pair<iterator, bool> emplace_back(_Ty &&... args)
+        {
+            return this->emplace(this->end(), std::forward<_Ty>(args)...);
+        }
 
-            const type &back() const
-            {
-                return C::back();
-            }
+        const type &back() const
+        {
+            return C::back();
+        }
 
-            type &back()
-            {
-                return C::back();
-            }
+        type &back()
+        {
+            return C::back();
+        }
     };
 
     template <typename... _Ty>
@@ -102,64 +105,64 @@ struct container_traits<std::vector<T>> {
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
-	
-	template <template <typename> typename M>
-	using rebind = container_traits<std::vector<M<T>>>;
+
+    template <template <typename> typename M>
+    using rebind = container_traits<std::vector<M<T>>>;
 
     template <typename C>
-        struct api : C {
-            
-            using C::C;
+    struct api : C {
 
-            using C::operator=;
+        using C::C;
 
-            /*void resize(size_t size)
+        using C::operator=;
+
+        /*void resize(size_t size)
             {
                 C::resize(size);
             }*/
 
-            void remove(const type &item)
-            {
-                for (const_iterator it = this->begin(); it != this->end();) {
-                    if (*it == item) {
-                        it = erase(it);
-                    } else {
-                        ++it;
-                    }
+        void remove(const type &item)
+        {
+            for (const_iterator it = this->begin(); it != this->end();) {
+                if (*it == item) {
+                    it = erase(it);
+                } else {
+                    ++it;
                 }
             }
+        }
 
-            void push_back(const type &item)
-            {
-                emplace(this->end(), item);
-            }
+        void push_back(const type &item)
+        {
+            emplace(this->end(), item);
+        }
 
-            template <typename... _Ty>
-            type &emplace_back(_Ty &&... args)
-            {
-                return *this->emplace(this->end(), std::forward<_Ty>(args)...).first;
-            }
+        template <typename... _Ty>
+        type &emplace_back(_Ty &&... args)
+        {
+            return *this->emplace(this->end(), std::forward<_Ty>(args)...).first;
+        }
 
-            type &at(size_t i)
-            {
-                return C::at(i);
-            }
+        type &at(size_t i)
+        {
+            return C::at(i);
+        }
 
-            const type &at(size_t i) const
-            {
-                return C::at(i);
-            }
+        const type &at(size_t i) const
+        {
+            return C::at(i);
+        }
 
-            type &operator[](size_t i)
-            {
-                return C::operator[](i);
-            }
+        type &operator[](size_t i)
+        {
+            return C::operator[](i);
+        }
 
-            const type &operator[](size_t i) const
-            {
-                return C::operator[](i);
-            }
-        };
+        const type &operator[](size_t i) const
+        {
+            return C::operator[](i);
+        }
+    };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -337,22 +340,21 @@ struct container_traits<std::set<T>> {
     typedef typename container::value_type value_type;
     typedef T type;
 
-	template <template <typename> typename M>
-	using rebind = container_traits<std::set<M<T>>>;
+    template <template <typename> typename M>
+    using rebind = container_traits<std::set<M<T>>>;
 
-   template <typename C>
-        struct api : SortedContainerApi<C> {
-            using Base = SortedContainerApi<C>;
+    template <typename C>
+    struct api : SortedContainerApi<C> {
+        using Base = SortedContainerApi<C>;
 
-            using Base::Base;
+        using Base::Base;
 
-            template <class... _Ty>
-            std::pair<iterator, bool> emplace(_Ty &&... args)
-            {
-                return this->Base::emplace(this->end(), std::forward<_Ty>(args)...);
-            }
-
-        };
+        template <class... _Ty>
+        std::pair<iterator, bool> emplace(_Ty &&... args)
+        {
+            return this->Base::emplace(this->end(), std::forward<_Ty>(args)...);
+        }
+    };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -387,37 +389,39 @@ struct container_traits<std::map<K, T>> {
     typedef T value_type;
     typedef std::pair<const K, T> type;
 
-	template <template <typename> typename M>
-	using rebind = container_traits<std::map<M<K>, M<T>>>;
+    template <template <typename> typename M>
+    using rebind = container_traits<std::map<M<K>, M<T>>>;
 
     template <typename C>
-        struct api : C {
-            using C::C;
+    struct api : C {
+        using C::C;
 
-            T &operator[](const K &key) {
-				iterator it = C::lower_bound(key);
-				if (it == this->end() || it->first != key) {
-                    auto pib = try_emplace(key);
-                                    assert(pib.second);
-                    it = pib.first;
-				}
-				return it->second;
-			}
-
-            const T &at(const std::string &key) const {
-				return C::at(key);
-			}
-
-            template <class... _Ty>
-            std::pair<iterator, bool> try_emplace(const K &key, _Ty &&... args)
-            {
-                auto it = C::lower_bound(key);
-                if (it != this->end() && it->first == key) {
-                    return { it, false };
-                }
-                return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
+        T &operator[](const K &key)
+        {
+            iterator it = C::lower_bound(key);
+            if (it == this->end() || it->first != key) {
+                auto pib = try_emplace(key);
+                assert(pib.second);
+                it = pib.first;
             }
-        };
+            return it->second;
+        }
+
+        const T &at(const std::string &key) const
+        {
+            return C::at(key);
+        }
+
+        template <class... _Ty>
+        std::pair<iterator, bool> try_emplace(const K &key, _Ty &&... args)
+        {
+            auto it = C::lower_bound(key);
+            if (it != this->end() && it->first == key) {
+                return { it, false };
+            }
+            return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
+        }
+    };
 
     template <class... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)

@@ -10,8 +10,8 @@
 namespace Engine {
 namespace Serialize {
 
-#define SYNCED(Type, Name)                                                                          \
-    ::Engine::Serialize::Synced<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, Type> Name; \
+#define SYNCED(Name, ...)                                                                          \
+    ::Engine::Serialize::Synced<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 
     template <typename PtrOffset, class T, typename Observer = NoOpFunctor>
@@ -72,30 +72,27 @@ namespace Serialize {
         void readRequest(BufferedInOutStream &in)
         {
             T old = mData;
-            this->read_state(in, this->mData);
+            in.read(mData);            
             notify(old);
         }
 
         void readAction(SerializeInStream &in)
         {
             T old = mData;
-            this->read_state(in, this->mData);
+            in.read(mData);
             notify(old);
         }
 
-        void readState(SerializeInStream &in)
+        void readState(SerializeInStream &in, const char *name)
         {
             T old = mData;
-            this->read_state(in, mData);
-            if (!in.isMaster())
-                this->read_id(in, mData);
+            in.read(mData, name);            
             notify(old);
         }
 
-        void writeState(SerializeOutStream &out) const
+        void writeState(SerializeOutStream &out, const char *name) const
         {
-            this->write_id(out, mData);
-            this->write_state(out, mData);
+            out.write(mData, name);
         }
 
         void setDataSynced(bool b)
@@ -108,13 +105,13 @@ namespace Serialize {
             if (!active) {
                 Serializable<PtrOffset>::setActive(active);
                 if (mData != T {})
-                    Observer::operator()(T {}, mData);
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), T {}, mData);
             }
             this->setItemActive(mData, active);
             if (active) {
                 Serializable<PtrOffset>::setActive(active);
                 if (mData != T {})
-                    Observer::operator()(mData, T {});
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), mData, T {});
             }
         }
 
@@ -123,12 +120,12 @@ namespace Serialize {
         {
             if (!PtrOffset::parent(this) || PtrOffset::parent(this)->isSynced()) {
                 for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                    this->write_state(*out, mData, nullptr);
+                    out->write(mData, nullptr);
                     out->endMessage();
                 }
             }
             if (this->isActive()) {
-                Observer::operator()(mData, old);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), mData, old);
             }
         }
 

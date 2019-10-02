@@ -3,10 +3,10 @@
 #include "../../generic/offsetptr.h"
 
 template <typename T, size_t L>
-Engine::OffsetPtr<T, Engine::Serialize::SyncableBase> SyncableOffsetInstance();
+extern Engine::OffsetPtr<T, Engine::Serialize::SyncableBase> SyncableOffsetInstance();
 
 template <typename T, size_t L>
-Engine::OffsetPtr<T, Engine::Serialize::SerializableBase> SerializableOffsetInstance();
+extern Engine::OffsetPtr<T, Engine::Serialize::SerializableBase> SerializableOffsetInstance();
 
 namespace Engine {
 namespace Serialize {

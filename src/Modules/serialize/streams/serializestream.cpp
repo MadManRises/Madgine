@@ -22,12 +22,14 @@ namespace Serialize {
         : InStream(std::move(other))
         , mLog(*this)
     {
+        format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other, SerializeManager *mgr)
         : InStream(std::move(other))
         , mLog((buffer().setManager(mgr), *this))
     {
+        format().setupStream(mStream);
     }
 
     void SerializeInStream::read(ValueType &result, const char *name)
@@ -95,7 +97,9 @@ namespace Serialize {
     {
         size_t ptr;
         readUnformatted(ptr);
-        p = convertPtr(ptr);
+        if (ptr)
+            ptr = (ptr << 1) | 0x1;
+        p = reinterpret_cast<SerializableUnitBase*>(ptr);
     }
 
     void SerializeInStream::readUnformatted(std::string &s)
@@ -106,7 +110,15 @@ namespace Serialize {
             s.resize(size);
             readRaw(&s[0], size);
         } else {
-            InStream::operator>>(s);
+            if (!(mStream.flags() & std::ios::skipws)) {
+                std::string peek = peekN(1);
+                if (!peek.empty() && std::isspace(peek[0], mStream.getloc())) {
+                    s.clear();
+                    return;
+				}
+			}
+            if (!InStream::operator>>(s))
+                throw 0;
         }
     }
 
@@ -122,16 +134,11 @@ namespace Serialize {
         if (n == 0)
             return {};
 
-        char firstNonWs = ' ';
-
-        while (std::isspace(firstNonWs))
-            if (!InStream::readRaw(&firstNonWs, 1))
-                throw 0;
+		skipWs();
 
         assert(!format().mBinary);
-        std::string buffer(n, '\0');
-        buffer[0] = firstNonWs;
-        readRaw(&buffer[1], n - 1);
+        std::string buffer(n, '\0');        
+        readRaw(&buffer[0], n);
         return buffer;
     }
 
@@ -235,12 +242,14 @@ namespace Serialize {
         : OutStream(std::move(other))
         , mLog(*this)
     {
+        format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr)
         : OutStream(std::move(other))
         , mLog((buffer().setManager(mgr), *this))
     {
+        format().setupStream(mStream);
     }
 
     ParticipantId SerializeOutStream::id() const
@@ -293,7 +302,7 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(SerializableUnitBase *p)
     {
-        writeUnformatted(manager()->convertPtr(*this, p));
+        writeUnformatted(SerializeManager::convertPtr(manager(), *this, p));
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)

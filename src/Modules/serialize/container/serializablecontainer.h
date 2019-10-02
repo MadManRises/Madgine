@@ -5,8 +5,8 @@
 #include "../serializable.h"
 #include "../streams/serializestream.h"
 #include "creationhelper.h"
-#include "unithelper.h"
 #include "offset.h"
+#include "unithelper.h"
 
 namespace Engine {
 namespace Serialize {
@@ -278,7 +278,7 @@ namespace Serialize {
             }
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
-            this->read_state(in, *it.first, "Item");            
+            in.read(*it.first, "Item");
             return it;
         }
 
@@ -286,9 +286,9 @@ namespace Serialize {
         {
             if constexpr (this->sIsUnit) {
                 out.format().beginExtendedCompound(out, "Item");
-			}
+            }
             this->write_creation(out, t);
-            this->write_state(out, t, "Item");
+            out.write(t, "Item");
         }
 
         bool isItemActive(const iterator &it)
@@ -362,21 +362,19 @@ namespace Serialize {
         iterator mActiveIterator;
     };
 
+	
     template <template <typename...> typename C, typename OffsetPtr>
-    struct PartialSerializableContainer {
-        template <typename... Args>
-        using type = C<OffsetPtr, Args...>;
-    };
+    using PartialOffsetContainer = partial<C, type_pack<OffsetPtr>>;
 
-    template <typename OffsetPtr, typename C>
-    using SerializableContainer = typename container_traits<C>::template api<SerializableContainerImpl<OffsetPtr, C>>;
+    template <typename OffsetPtr, typename... C>
+    using SerializableContainer = typename container_traits<C...>::template api<SerializableContainerImpl<OffsetPtr, C...>>;
 
-#define SERIALIZABLE_CONTAINER(Name, ...) \
-    ::Engine::Serialize::SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name;\
+#define SERIALIZABLE_CONTAINER(Name, ...)                                                                                     \
+    ::Engine::Serialize::SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
-	#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...) \
-    Pre Serialize::PartialSerializableContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>>::type __VA_ARGS__ Name; \
+#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...)                                                                                \
+    Pre Serialize::PartialOffsetContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>>::type __VA_ARGS__ Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
 }

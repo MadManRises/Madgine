@@ -13,6 +13,8 @@
 
 #include "Modules/debug/profiler/profiler.h"
 
+#include "Modules/serialize/container/noparent.h"
+
 #include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
 
@@ -83,7 +85,7 @@ namespace GUI {
 
     TopLevelWindow *GUISystem::createTopLevelWindow()
     {
-        TopLevelWindow *w = mWindows.emplace_back(std::make_unique<TopLevelWindow>(*this)).get();        
+        TopLevelWindow *w = mWindows.emplace_back(std::make_unique<Serialize::NoParentUnit<TopLevelWindow>>(*this)).get();        
         return w;
     }
 

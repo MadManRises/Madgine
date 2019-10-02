@@ -4,69 +4,72 @@
 
 namespace Engine {
 namespace Serialize {
-struct MODULES_EXPORT BufferedInStream : SerializeInStream {
-    friend struct BufferedOutStream;
+    struct MODULES_EXPORT BufferedInStream : SerializeInStream {
+        friend struct BufferedOutStream;
 
-    BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
-    BufferedInStream(BufferedInStream &&other);
-    BufferedInStream(BufferedInStream &&other, SerializeManager *mgr);
+        BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedInStream(BufferedInStream &&other);
+        BufferedInStream(BufferedInStream &&other, SerializeManager *mgr);
 
-    bool isMessageAvailable() const;
+        bool isMessageAvailable() const;
 
-    void readHeader(MessageHeader &header);
+        void readHeader(MessageHeader &header);
 
-  protected:
-    BufferedInStream(buffered_streambuf *buffer);
+        SyncManager *manager() const;
 
-    buffered_streambuf &buffer() const;
-};
+    protected:
+        BufferedInStream(buffered_streambuf *buffer);
 
-struct MODULES_EXPORT BufferedOutStream : SerializeOutStream {
-  public:
-    BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
-    BufferedOutStream(BufferedOutStream &&other);
-    BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
+        buffered_streambuf &buffer() const;
+    };
 
-    void beginMessage(const SerializableUnitBase *unit, MessageType type);
-    void beginMessage(Command cmd);
-    void endMessage();
+    struct MODULES_EXPORT BufferedOutStream : SerializeOutStream {
+    public:
+        BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedOutStream(BufferedOutStream &&other);
+        BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
 
-    int sendMessages();
+        void beginMessage(const SerializableUnitBase *unit, MessageType type);
+        void beginMessage(Command cmd);
+        void endMessage();
 
-    BufferedOutStream &operator<<(BufferedInStream &in);
-    using SerializeOutStream::operator<<;
+        int sendMessages();
 
-    template <class... _Ty>
-    void writeCommand(Command cmd, const _Ty &... args) {
-        beginMessage(cmd);
+        BufferedOutStream &operator<<(BufferedInStream &in);
+        using SerializeOutStream::operator<<;
 
-        (void)(*this << ... << args);
+        template <class... _Ty>
+        void writeCommand(Command cmd, const _Ty &... args)
+        {
+            beginMessage(cmd);
 
-        endMessage();
-    }
+            (void)(*this << ... << args);
 
-  protected:
-    buffered_streambuf &buffer() const;
-};
+            endMessage();
+        }
 
-struct MODULES_EXPORT BufferedInOutStream : BufferedInStream,
-                                               BufferedOutStream {
-    friend struct SerializeManager;
+        SyncManager *manager() const;
 
-    BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
-    BufferedInOutStream(BufferedInOutStream &&other);
-    BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
+    protected:
+        buffered_streambuf &buffer() const;
+    };
 
-    StreamError error() const;
-    bool isClosed() const;
-    void close();
+    struct MODULES_EXPORT BufferedInOutStream : BufferedInStream,
+                                                BufferedOutStream {
+        friend struct SerializeManager;
 
-    explicit operator bool() const;
+        BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedInOutStream(BufferedInOutStream &&other);
+        BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
 
-    using BufferedInStream::id;
+        StreamError error() const;
+        bool isClosed() const;
+        void close();
 
-  protected:
-    using BufferedInStream::buffer;
-};
+        explicit operator bool() const;
+
+        using BufferedInStream::id;
+        using BufferedInStream::buffer;
+    };
 } // namespace Serialize
 } // namespace Engine

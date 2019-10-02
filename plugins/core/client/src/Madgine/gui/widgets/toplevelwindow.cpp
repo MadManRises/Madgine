@@ -43,6 +43,7 @@
 
 SERIALIZETABLE_BEGIN(Engine::GUI::TopLevelWindow)
 FIELD(mTopLevelWidgets, Serialize::ParentCreator<&TopLevelWindow::createWidgetClassTuple>)
+FIELD(mComponents)
 SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
 
 namespace Engine {
@@ -67,7 +68,7 @@ namespace GUI {
         mRenderWindow = gui.renderer().createWindow(mWindow, this);
         App::Application::getSingleton().addFrameListener(this);
 
-        /*WidgetBase *loading = createTopLevelImage("Loading");
+        WidgetBase *loading = createTopLevelImage("Loading");
         WidgetBase *progress = loading->createChildBar("ProgressBar");
         progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
         progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
@@ -165,7 +166,7 @@ namespace GUI {
         WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
         WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
         WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-		*/
+		
         for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
             bool result = comp->callInit();
             assert(result);
@@ -642,7 +643,10 @@ namespace GUI {
 
     WidgetBase *TopLevelWindow::getWidget(const std::string &name)
     {
-        return mWidgets.at(name);
+        auto it = mWidgets.find(name);
+        if (it == mWidgets.end())
+            return nullptr;
+        return it->second;
     }
 
     void TopLevelWindow::registerWidget(WidgetBase *w)
@@ -729,6 +733,23 @@ namespace GUI {
     const MadgineObject *TopLevelWindowComponentBase::parent() const
     {
         return &mWindow.gui();
+    }
+
+    TopLevelWindowComponentBase &Engine::GUI::TopLevelWindow::getWindowComponent(size_t i, bool init)
+    {
+        TopLevelWindowComponentBase &component = mComponents.get(i);
+        if (init) {
+            component.callInit();
+        }
+        return component.getSelf(init);
+    }
+
+    TopLevelWindowComponentBase &TopLevelWindowComponentBase::getSelf(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return *this;
     }
 
     /*App::Application &TopLevelWindowComponentBase::app(bool init)

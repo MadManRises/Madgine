@@ -1,4 +1,5 @@
 #include "../toolslib.h"
+#include "Madgine/baselib.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -26,6 +27,8 @@
 #include "Modules/keyvalue/scopeiterator.h"
 
 #include "functiontool.h"
+
+#include "Madgine/app/application.h"
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
@@ -68,7 +71,7 @@ namespace Tools {
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
             if (ImGui::TreeNode("Application")) {
-                //draw(&app(false), "Application");
+                draw(&App::Application::getSingleton(), "Application");
                 ImGui::TreePop();
             }
             if (ImGui::TreeNode("Resources")) {

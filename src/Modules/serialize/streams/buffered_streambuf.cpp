@@ -1,11 +1,11 @@
 #include "../../moduleslib.h"
 #include "buffered_streambuf.h"
-#include "../serializemanager.h"
+#include "../syncmanager.h"
 
 namespace Engine {
 namespace Serialize {
 
-    buffered_streambuf::buffered_streambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id)
+    buffered_streambuf::buffered_streambuf(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
         : SerializeStreambuf(std::move(format), mgr, id)
         , mIsClosed(false)
         , mBytesToRead(sizeof(BufferedMessageHeader))
@@ -233,6 +233,11 @@ namespace Serialize {
                 setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
             }
         }
+    }
+
+    SyncManager *buffered_streambuf::manager()
+    {
+        return static_cast<SyncManager*>(SerializeStreambuf::manager());
     }
 
     void buffered_streambuf::handleError()

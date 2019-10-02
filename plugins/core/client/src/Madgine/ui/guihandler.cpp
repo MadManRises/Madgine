@@ -3,34 +3,40 @@
 //#include "Database/translationunit.h"
 
 #include "../gui/guisystem.h"
-#include "../ui/uimanager.h"
 #include "../gui/widgets/widget.h"
+#include "../ui/uimanager.h"
 
-#include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
-namespace Engine
-{
-	namespace UI
-	{
-		GuiHandlerBase::GuiHandlerBase(UIManager &ui, const std::string& windowName, WindowType type) :
-			Handler(ui, windowName),
-			mType(type),
-			mContext(Scene::ContextMask::NoContext)
-		{
-		}
+DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
 
-		void GuiHandlerBase::open()
-		{
-			if (getState() != ObjectState::INITIALIZED)
-			{
-				LOG_ERROR("Failed to open unitialized GuiHandler!");
-				return;
-			}
+METATABLE_BEGIN_BASE(Engine::UI::GuiHandlerBase, Engine::UI::Handler)
+METATABLE_END(Engine::UI::GuiHandlerBase)
 
-			if (isOpen()) return;
+RegisterType(Engine::UI::GuiHandlerBase);
 
-			/*switch (mType)
+namespace Engine {
+namespace UI {
+    GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type)
+        : Handler(ui)
+        , mType(type)
+        , mContext(Scene::ContextMask::NoContext)
+    {
+    }
+
+    void GuiHandlerBase::open()
+    {
+        if (getState() != ObjectState::INITIALIZED) {
+            LOG_ERROR("Failed to open unitialized GuiHandler!");
+            return;
+        }
+
+        if (isOpen())
+            return;
+
+        throw "TODO";
+        /*switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
 				mUI.openModalWindow(this);
@@ -42,11 +48,12 @@ namespace Engine
 				mUI.swapCurrentRoot(this);
 				break;
 			}*/
-		}
+    }
 
-		void GuiHandlerBase::close()
-		{
-			/*switch (mType)
+    void GuiHandlerBase::close()
+    {
+        throw "TODO";
+        /*switch (mType)
 			{
 			case WindowType::MODAL_OVERLAY:
 				mUI.closeModalWindow(this);
@@ -57,43 +64,34 @@ namespace Engine
 			case WindowType::ROOT_WINDOW:
 				throw 0;
 			}*/
-		}
+    }
 
-		bool GuiHandlerBase::isOpen() const
-		{
-			return mWidget->mVisible;
-		}
+    bool GuiHandlerBase::isOpen() const
+    {
+        return mWidget->mVisible;
+    }
 
+    bool GuiHandlerBase::isRootWindow() const
+    {
+        return mType == WindowType::ROOT_WINDOW;
+    }
 
-		bool GuiHandlerBase::isRootWindow() const
-		{
-			return mType == WindowType::ROOT_WINDOW;
-		}
+    Scene::ContextMask GuiHandlerBase::context() const
+    {
+        return mContext;
+    }
 
-		Scene::ContextMask GuiHandlerBase::context() const
-		{
-			return mContext;
-		}
+    GuiHandlerBase &GuiHandlerBase::getSelf(bool init)
+    {
+        if (init) {
+            checkDependency();
+        }
+        return *this;
+    }
 
-		GuiHandlerBase& GuiHandlerBase::getSelf(bool init)
-		{
-			if (init)
-			{
-				checkDependency();
-			}
-			return *this;
-		}
-
-		void GuiHandlerBase::setContext(Scene::ContextMask context)
-		{
-			mContext = context;
-		}
-	} // namespace GuiHandler
+    void GuiHandlerBase::setContext(Scene::ContextMask context)
+    {
+        mContext = context;
+    }
+} // namespace GuiHandler
 } // namespace Cegui
-
-DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
-
-METATABLE_BEGIN(Engine::UI::GuiHandlerBase)
-METATABLE_END(Engine::UI::GuiHandlerBase)
-
-RegisterType(Engine::UI::GuiHandlerBase);

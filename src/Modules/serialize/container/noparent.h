@@ -11,7 +11,7 @@ namespace Serialize {
     public:
         template <class... Args>
         NoParentUnit(Args &&... args)
-            : T(std::forward<Args>(args)...)
+            :  T(std::forward<Args>(args)...)
         {
             this->sync();
         }

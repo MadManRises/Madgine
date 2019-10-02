@@ -2,105 +2,107 @@
 
 #include "streams.h"
 
-namespace Engine
+namespace Engine {
+
+InStream::InStream(std::unique_ptr<std::streambuf> &&buffer)
+    : mStream(buffer.release())
 {
+}
 
+InStream::InStream(InStream &&other)
+    : mStream(other.mStream.rdbuf(nullptr))
+    , mOwning(std::exchange(other.mOwning, false))
+{
+}
 
+InStream::~InStream()
+{
+    if (mOwning && mStream.rdbuf())
+        delete mStream.rdbuf();
+}
 
-	InStream::InStream(std::unique_ptr<std::streambuf>&& buffer) :
-		mStream(buffer.release())
-	{
-	}
+std::istreambuf_iterator<char> InStream::iterator()
+{
+    return std::istreambuf_iterator<char>(mStream);
+}
 
-	InStream::InStream(InStream && other) :
-		mStream(other.mStream.rdbuf(nullptr)),
-		mOwning(std::exchange(other.mOwning, false))
-	{
-	}
+std::istreambuf_iterator<char> InStream::end()
+{
+    return std::istreambuf_iterator<char>();
+}
 
-	InStream::~InStream()
-	{
-		if (mOwning && mStream.rdbuf())
-			delete mStream.rdbuf();
-	}
+bool InStream::readRaw(void *buffer, size_t size)
+{
+    return mStream.read(static_cast<char *>(buffer), size).good();
+}
 
-	std::istreambuf_iterator<char> InStream::begin()
-	{
-		return std::istreambuf_iterator<char>(mStream);
-	}
+pos_type InStream::tell()
+{
+    return mStream.tellg();
+}
 
-	std::istreambuf_iterator<char> InStream::end()
-	{
-		return std::istreambuf_iterator<char>();
-	}
+void InStream::seek(pos_type p)
+{
+    mStream.seekg(p);
+}
 
-	bool InStream::readRaw(void * buffer, size_t size)
-	{
-		return mStream.read(static_cast<char*>(buffer), size).good();
-	}
+void InStream::skipWs()
+{
+    if (mStream.flags() & std::ios_base::skipws)
+        mStream >> std::ws;
+}
 
-	pos_type InStream::tell()
-	{
-		return mStream.tellg();
-	}
+InStream::operator bool() const
+{
+    return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
+}
 
-	void InStream::seek(pos_type p)
-	{
-		mStream.seekg(p);
-	}
+InStream::InStream(std::streambuf *buffer)
+    : mStream(buffer)
+    , mOwning(false)
+{
+}
 
+std::streambuf &InStream::buffer() const
+{
+    return *mStream.rdbuf();
+}
 
-	InStream::operator bool() const
-	{
-		return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
-	}
+OutStream::OutStream(std::unique_ptr<std::streambuf> &&buffer)
+    : mStream(buffer.release())
+{
+}
 
-	InStream::InStream(std::streambuf * buffer) :
-		mStream(buffer),
-		mOwning(false)
-	{
-	}
+OutStream::OutStream(OutStream &&other)
+    : mStream(other.mStream.rdbuf(nullptr))
+{
+}
 
-	std::streambuf &InStream::buffer() const
-	{
-		return *mStream.rdbuf();
-	}
+OutStream::~OutStream()
+{
+    if (mStream.rdbuf())
+        delete mStream.rdbuf();
+}
 
-	OutStream::OutStream(std::unique_ptr<std::streambuf>&& buffer) :
-		mStream(buffer.release())
-	{
-	}
+void OutStream::writeRaw(const void *data, size_t count)
+{
+    mStream.write(static_cast<const char *>(data), count);
+}
 
-	OutStream::OutStream(OutStream && other) :
-		mStream(other.mStream.rdbuf(nullptr))
-	{
-	}
+std::streambuf &OutStream::buffer() const
+{
+    return *mStream.rdbuf();
+}
 
-	OutStream::~OutStream()
-	{
-		if (mStream.rdbuf())
-			delete mStream.rdbuf();
-	}
+OutStream::operator bool() const
+{
+    return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
+}
 
-	void OutStream::writeRaw(const void * data, size_t count)
-	{
-		mStream.write(static_cast<const char*>(data), count);
-	}
-
-	std::streambuf &OutStream::buffer() const
-	{
-		return *mStream.rdbuf();
-	}
-
-	OutStream::operator bool() const
-	{
-        return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
-	}
-
-	Stream::Stream(std::unique_ptr<std::streambuf>&& buffer) :
-		InStream(buffer.get()),
-		OutStream(std::move(buffer))
-	{
-	}
+Stream::Stream(std::unique_ptr<std::streambuf> &&buffer)
+    : InStream(buffer.get())
+    , OutStream(std::move(buffer))
+{
+}
 
 }

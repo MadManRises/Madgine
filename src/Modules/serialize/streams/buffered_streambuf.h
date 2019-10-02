@@ -10,7 +10,7 @@ namespace Serialize {
 
     struct MODULES_EXPORT buffered_streambuf : SerializeStreambuf {
     public:
-        buffered_streambuf(std::unique_ptr<Formatter> format,SerializeManager &mgr, ParticipantId id);
+        buffered_streambuf(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id);
         buffered_streambuf(const buffered_streambuf &) = delete;
         buffered_streambuf(buffered_streambuf &&) noexcept;
 
@@ -48,6 +48,8 @@ namespace Serialize {
         int sync() override;
         void extend();
         void receive();
+
+        SyncManager *manager();
 
     private:
         bool mIsClosed;

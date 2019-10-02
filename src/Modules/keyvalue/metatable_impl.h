@@ -19,7 +19,7 @@ template <class T>
 struct is_typed_iterable<T, std::void_t<decltype(std::declval<T>().typedBegin()), decltype(std::declval<T>().typedEnd())>> : std::true_type {
 };
 
-template <typename, auto Getter, auto Setter>
+template <auto Getter, auto Setter>
 constexpr Accessor property()
 {
     using getter_traits = CallableTraits<decltype(Getter)>;
@@ -67,11 +67,11 @@ constexpr Accessor property()
     };
 }
 
-template <typename T, auto P>
+template <auto P>
 constexpr Accessor member()
 {
     //TODO check const
-    return property<T, P, nullptr>();
+    return property<P, nullptr>();
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
@@ -133,13 +133,13 @@ static constexpr BoundApiMethod method(TypedScopePtr scope)
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG3({ #T, Meta_##T::baseClassGetter, Meta_##T::members }), T);
 
 #define MEMBER(M) \
-    { #M, ::Engine::member<Ty, &Ty::M>() },
+    { #M, ::Engine::member<&Ty::M>() },
 
 #define READONLY_PROPERTY(Name, Getter) \
-    { #Name, ::Engine::property<Ty, &Ty::Getter, nullptr>() },
+    { #Name, ::Engine::property<&Ty::Getter, nullptr>() },
 
 #define PROPERTY(Name, Getter, Setter) \
-    { #Name, ::Engine::property<Ty, &Ty::Getter, &Ty::Setter>() },
+    { #Name, ::Engine::property<&Ty::Getter, &Ty::Setter>() },
 
 #define FUNCTION(F) \
-    { #F, ::Engine::property<Ty, &::Engine::method<&Ty::F>, nullptr>() },
+    { #F, ::Engine::property<&::Engine::method<&Ty::F>, nullptr>() },

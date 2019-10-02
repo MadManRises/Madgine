@@ -2,7 +2,7 @@
 
 #include "Modules/serialize/streams/buffered_streambuf.h"
 
-#include "Modules/serialize/serializemanager.h"
+#include "Modules/serialize/syncmanager.h"
 
 #include "Modules/serialize/formatter/safebinaryformatter.h"
 
@@ -14,7 +14,7 @@ struct Buffer {
 };
 
 struct TestBuf : Engine::Serialize::buffered_streambuf {
-    TestBuf(Buffer &buffer, Engine::Serialize::SerializeManager &mgr, Engine::Serialize::ParticipantId id)
+    TestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr, Engine::Serialize::ParticipantId id)
         : buffered_streambuf(std::make_unique<SafeBinaryFormatter>(), mgr, id)
         , mBuffer(buffer)
     {
@@ -52,9 +52,9 @@ struct TestBuf : Engine::Serialize::buffered_streambuf {
     size_t mReadOffset = 0;
 };
 
-struct TestManager : Engine::Serialize::SerializeManager {
+struct TestManager : Engine::Serialize::SyncManager {
     TestManager(const char *id)
-        : SerializeManager("Test-Manager_"s + id)
+        : SyncManager("Test-Manager_"s + id)
     {
     }
 

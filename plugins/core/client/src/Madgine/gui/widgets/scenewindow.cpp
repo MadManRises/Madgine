@@ -29,8 +29,12 @@ namespace GUI {
 
     void SceneWindow::setCamera(Scene::Camera *camera)
     {
-        const Engine::Vector3 screenSize = window().getScreenSize();
-        mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
+        if (camera) {
+            const Engine::Vector3 screenSize = window().getScreenSize();
+            mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
+        } else {
+            mTarget.reset();
+		}
     }
 
     Scene::Camera *SceneWindow::camera()

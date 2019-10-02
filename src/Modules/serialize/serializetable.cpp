@@ -126,7 +126,7 @@ namespace Serialize {
 
 	bool SerializeTable::isInstance(SerializableUnitBase *unit) const
     {
-        return unit->mType == this;
+        return !unit || unit->mType == this;
     }
 
 }

@@ -2,14 +2,23 @@
 #include "handler.h"
 #include "../gui/widgets/toplevelwindow.h"
 #include "../gui/widgets/widget.h"
-#include "../ui/uimanager.h"
+#include "uimanager.h"
+
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
+
+METATABLE_BEGIN(Engine::UI::Handler)
+PROPERTY(Widget, widget, setWidget)
+METATABLE_END(Engine::UI::Handler)
+
+SERIALIZETABLE_BEGIN(Engine::UI::Handler)
+ENCAPSULATED_FIELD(mWidget, widget, setWidget)
+SERIALIZETABLE_END(Engine::UI::Handler)
 
 namespace Engine {
 namespace UI {
-    Handler::Handler(UIManager &ui, const std::string &windowName)
-        : mWidget(nullptr)
-        , mUI(ui)
-        , mWidgetName(windowName)
+    Handler::Handler(UIManager &ui)
+        : mUI(ui)
         , mPointerMoveSlot(this)
         , mPointerDownSlot(this)
         , mPointerUpSlot(this)
@@ -84,12 +93,7 @@ namespace UI {
 
     bool Handler::init()
     {
-        GUI::WidgetBase *widget = mUI.window(false).getWidget(mWidgetName);
-        if (!widget) {
-            LOG_ERROR(Database::Exceptions::handlerInitializationFailed(mWidgetName));
-            return false;
-        }
-        return init(widget);
+        return true;
     }
 
     void Handler::finalize()
@@ -97,30 +101,32 @@ namespace UI {
         mWidget = nullptr;
     }
 
-    bool Handler::init(GUI::WidgetBase *widget)
+    void Handler::setWidget(GUI::WidgetBase *widget)
     {
-        assert(widget);
-        mWidget = widget;
-
-        mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
-        mWidget->pointerDownEvent().connect(mPointerDownSlot);
-        mWidget->pointerUpEvent().connect(mPointerUpSlot);
-
-        for (const WindowDescriber &des : mWidgets) {
-            GUI::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
-
-            if (!child) {
-                LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
-                return false;
+        if (mWidget != widget) {
+            if (mWidget) {
+                mPointerMoveSlot.disconnectAll();
+                mPointerDownSlot.disconnectAll();
+                mPointerUpSlot.disconnectAll();
             }
+            mWidget = widget;
 
-            if (!des.mInit(child))
-                return false;
+			if (mWidget) {
+                mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
+                mWidget->pointerDownEvent().connect(mPointerDownSlot);
+                mWidget->pointerUpEvent().connect(mPointerUpSlot);
+
+                for (const WindowDescriber &des : mWidgets) {
+                    GUI::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
+
+                    if (!child) {
+                        LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
+                    }
+                    if (!des.mInit(child))
+                        LOG_ERROR("ERROR");
+                }
+            }
         }
-
-        mWidgets.clear();
-
-        return true;
     }
 
     void Handler::injectPointerMove(const Input::PointerEventArgs &evt)

@@ -13,7 +13,7 @@ namespace Engine
 		class MADGINE_CLIENT_EXPORT GameHandlerBase : public Handler
 		{
 		public:
-			GameHandlerBase(UIManager &ui, const std::string& windowName, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			GameHandlerBase(UIManager &ui, Scene::ContextMask context = Scene::ContextMask::SceneContext);
 
 			void abortDrag();
 

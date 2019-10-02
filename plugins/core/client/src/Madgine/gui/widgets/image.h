@@ -7,7 +7,7 @@
 
 namespace Engine {
 namespace GUI {
-    class Image : public Widget<Image> {
+    class MADGINE_CLIENT_EXPORT Image : public Widget<Image> {
     public:
         using Widget::Widget;
         virtual ~Image() = default;

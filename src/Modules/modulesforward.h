@@ -72,6 +72,7 @@ namespace Serialize {
     class FileBuffer;
     struct MessageHeader;
     struct SerializeManager;
+    struct SyncManager;
     struct SerializeStreambuf;
 
     struct Formatter;

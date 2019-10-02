@@ -9,12 +9,12 @@
 #include "entity/entity.h"
 
 #include "../app/globalapicollector.h"
-#include "Modules/madgineobject/madgineobjectobserver.h"
-#include "Modules/keyvalue/observablecontainer.h"
-#include "Modules/serialize/container/noparent.h"
 #include "../threading/framelistener.h"
+#include "Modules/keyvalue/observablecontainer.h"
+#include "Modules/madgineobject/madgineobjectobserver.h"
+#include "Modules/serialize/container/noparent.h"
 
-#include "scenecomponentset.h"
+#include "Modules/serialize/container/controlledcontainer.h"
 
 #include "camera.h"
 
@@ -31,9 +31,6 @@ namespace Scene {
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;
         virtual ~SceneManager() = default;
-
-        /*void readState(Serialize::SerializeInStream &in) override;
-        void writeState(Serialize::SerializeOutStream &out) const override;*/
 
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
         bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
@@ -71,7 +68,6 @@ namespace Scene {
 
         SceneManager &getSelf(bool = true);
 
-        //virtual App::Application &app(bool = true) override;
         virtual const MadgineObject *parent() const override;
 
         Threading::DataMutex &mutex();
@@ -81,8 +77,6 @@ namespace Scene {
     protected:
         virtual bool init() final;
         virtual void finalize() final;
-
-        //KeyValueMapList maps() override;
 
     private:
         void updateCamera(Camera &camera);
@@ -98,8 +92,10 @@ namespace Scene {
         App::Application &mApp;
         size_t mItemCount;
 
-		SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<, SceneComponentSet, ,MadgineObjectObserver>::type>);        
+    public:
+        SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, ,std::set>::type, MadgineObjectObserver>::type>);
 
+    private:
         SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;

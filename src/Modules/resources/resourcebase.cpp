@@ -47,7 +47,7 @@ namespace Resources {
     std::string ResourceBase::readAsText()
     {
         InStream buffer = Filesystem::openFile(mPath);
-        return std::string { buffer.begin(), buffer.end() };
+        return std::string { buffer.iterator(), buffer.end() };
         /*std::string result(buffer.size(), ' ');
 			auto it = std::copy_if(buffer.begin(), buffer.end(), result.begin(), [](char c) {return c != '\r'; });
 			result.resize(std::distance(result.begin(), it));

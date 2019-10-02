@@ -12,6 +12,15 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
+METATABLE_BEGIN(Engine::Scene::Entity::Entity)
+METATABLE_END(Engine::Scene::Entity::Entity)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
+FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple>)
+SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
+
+RegisterType(Engine::Scene::Entity::Entity);
+
 namespace Engine {
 
 namespace Scene {
@@ -156,12 +165,3 @@ namespace Scene {
     }
 }
 }
-
-METATABLE_BEGIN(Engine::Scene::Entity::Entity)
-METATABLE_END(Engine::Scene::Entity::Entity)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple>)
-SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
-
-RegisterType(Engine::Scene::Entity::Entity);

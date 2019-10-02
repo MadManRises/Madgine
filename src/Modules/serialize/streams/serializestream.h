@@ -6,6 +6,8 @@
 #include "../serializetable.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
+#include "../../keyvalue/container_traits.h"
+#include "../statesubmissionflags.h"
 
 namespace Engine {
 namespace Serialize {
@@ -17,8 +19,18 @@ namespace Serialize {
 
     using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Vector2, Vector3, Matrix3, InvScopePtr>;
 
+    template <typename T, typename = void>
+    struct SerializableUnitReducer {
+        typedef T type;
+    };
+
+    template <typename T>
+    struct SerializableUnitReducer<T, std::enable_if_t<std::is_convertible_v<T, SerializableUnitBase *>>> {
+        typedef SerializableUnitBase *type;
+    };
+
     template <class T, class = void>
-    struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, T> {
+    struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, typename SerializableUnitReducer<T>::type> {
     };
 
     template <class T>
@@ -29,7 +41,10 @@ namespace Serialize {
     };
 
     template <class T>
-    const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
+    const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value || std::is_convertible_v<T, SerializableUnitBase *>;
+
+    template <typename T>
+    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || /*std::is_base_of<SerializableBase, T>::value || */ std::is_enum_v<T>;
 
     struct MODULES_EXPORT SerializeStreambuf : std::basic_streambuf<char> {
     public:
@@ -56,9 +71,21 @@ namespace Serialize {
     template <typename Buf>
     struct WrappingSerializeStreambuf : SerializeStreambuf, Buf {
 
-        template <typename... Args>
+		WrappingSerializeStreambuf(std::unique_ptr<Formatter> format)
+            : SerializeStreambuf(std::move(format))
+        {
+        }
+
+        template <typename... Args, typename = std::enable_if_t<!std::is_convertible_v<typename first<Args...>::type, SerializeManager &>>>
         WrappingSerializeStreambuf(std::unique_ptr<Formatter> format, Args &&... args)
             : SerializeStreambuf(std::move(format))
+            , Buf(std::forward<Args>(args)...)
+        {
+        }
+
+		template <typename... Args>
+        WrappingSerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id, Args &&... args)
+            : SerializeStreambuf(std::move(format), mgr, id)
             , Buf(std::forward<Args>(args)...)
         {
         }
@@ -126,7 +153,7 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
-        template <typename T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_enum_v<T>>>
+        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value>>
         SerializeInStream &operator>>(T &t)
         {
             read(t);
@@ -149,10 +176,14 @@ namespace Serialize {
                 mLog.log(t);
             } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
                 t.readState(*this, name, std::forward<Args>(args)...);
+            } else if constexpr (std::is_base_of<SerializableUnitBase, T>::value) {
+                t.readState(*this, name, StateTransmissionFlags_DontApplyMap);
             } else if constexpr (std::is_enum_v<T>) {
                 int dummy;
                 read(dummy, name, std::forward<Args>(args)...);
                 t = static_cast<T>(dummy);
+            } else if constexpr (is_instance_v<T, std::unique_ptr>) {
+                read(*t, name, std::forward<Args>(args)...);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -174,9 +205,7 @@ namespace Serialize {
         {
             SerializableUnitBase *unit;
             readUnformatted(unit);
-            if (serializeTable<T>().isInstance(unit))
-                throw 0;
-            p = static_cast<T *>(unit);
+            p = reinterpret_cast<T *>(unit);
         }
 
         void readUnformatted(SerializableUnitBase *&p);
@@ -207,12 +236,12 @@ namespace Serialize {
 
         bool isMaster();
 
+		SerializeStreambuf &buffer() const;
+
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
 
         SerializableUnitBase *convertPtr(size_t ptr);
-
-        SerializeStreambuf &buffer() const;
 
     protected:
         Debugging::StreamLog mLog;
@@ -226,7 +255,7 @@ namespace Serialize {
 
         ParticipantId id() const;
 
-        template <typename T, typename = std::enable_if_t<PrimitiveTypesContain_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_enum_v<T>>>
+        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T>>>
         SerializeOutStream &operator<<(const T &t)
         {
             write(t);
@@ -246,17 +275,45 @@ namespace Serialize {
                 format().beginPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
                 writeUnformatted(t);
                 format().endPrimitive(*this, name, PrimitiveTypeIndex_v<T>);
-                mLog.log(t);
-            } else if constexpr (std::is_base_of<SerializableBase, T>::value) {
+                //mLog.log(t);
+            } else if constexpr (std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value) {
                 t.writeState(*this, name);
             } else if constexpr (std::is_enum_v<T>) {
                 write(static_cast<int>(t), name);
+            } else if constexpr (is_instance_v<T, std::unique_ptr>) {
+                write(*t, name);
+            } else if constexpr (is_iterable_v<T>) {
+                writeContainer(t, name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
         }
 
-        template <typename T>
+        template <typename C>
+        void writeContainer(const C &container, const char *name = nullptr)
+        {
+			using traits = container_traits<C>;
+			using T = typename traits::type;
+
+            if (name)
+                format().beginExtendedCompound(*this, name);
+            write(container.size(), "size");
+            if (name)
+                format().beginCompound(*this, name);
+            for (const auto &t : container) {
+                if (UnitHelper<T>::filter(*this, t)) {
+                    if constexpr (UnitHelper<T>::sIsUnit) {
+                        format().beginExtendedCompound(*this, "Item");
+                    }
+                    UnitHelper<T>::write_creation(*this, t);
+                    write(t, "Item");
+                }
+            }
+            if (name)
+                format().endCompound(*this, name);
+        }
+
+        template <typename T, typename = std::enable_if_t<!std::is_pointer_v<T>>>
         void writeUnformatted(const T &t)
         {
             if (format().mBinary)
@@ -280,8 +337,7 @@ namespace Serialize {
         Formatter &format() const;
 
         bool isMaster();
-
-    protected:
+    
         SerializeStreambuf &buffer() const;
 
     protected:

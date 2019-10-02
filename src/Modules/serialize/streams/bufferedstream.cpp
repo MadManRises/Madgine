@@ -4,7 +4,9 @@
 #include "bufferedstream.h"
 
 #include "../serializableunit.h"
-#include "../serializemanager.h"
+#include "../syncmanager.h"
+
+#include "../messageheader.h"
 
 namespace Engine {
 namespace Serialize {
@@ -93,7 +95,7 @@ namespace Serialize {
     {
         MessageHeader header;
         header.mType = type;
-        header.mObject = manager()->convertPtr(*this, unit);
+        header.mObject = SerializeManager::convertPtr(manager(), *this, unit);
         mLog.logBeginMessage(header, typeid(*unit).name());
         buffer().beginMessage();
         writeRaw(header);
@@ -117,7 +119,12 @@ namespace Serialize {
 		return buffer().sendMessages(); 
 	}
 
-    buffered_streambuf &BufferedOutStream::buffer() const
+    SyncManager *BufferedOutStream::manager() const
+        {
+            return static_cast<SyncManager*>(SerializeOutStream::manager());
+        }
+
+        buffered_streambuf &BufferedOutStream::buffer() const
     {
         return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
     }

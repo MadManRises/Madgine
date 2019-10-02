@@ -356,8 +356,8 @@ namespace Serialize {
             if (!active) {
                 while (this->mActiveIterator != this->begin()) {
                     --this->mActiveIterator;
-                    Observer::operator()(this->mActiveIterator, BEFORE | REMOVE_ITEM);
-                    Observer::operator()(this->end(), AFTER | REMOVE_ITEM);
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->mActiveIterator, BEFORE | REMOVE_ITEM);
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
                     this->setItemActive(*this->mActiveIterator, active);
                 }
             }
@@ -367,7 +367,8 @@ namespace Serialize {
                     auto it = this->mActiveIterator;
                     ++this->mActiveIterator;
                     this->setItemActive(*it, active);
-                    Observer::operator()(it, INSERT_ITEM);
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | INSERT_ITEM);
+                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, AFTER | INSERT_ITEM);
                 }
             }
         }
@@ -375,7 +376,7 @@ namespace Serialize {
     private:
         void beforeInsert(const iterator &it)
         {
-            Observer::operator()(it, BEFORE | INSERT_ITEM);
+            TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | INSERT_ITEM);
         }
 
         void afterInsert(bool inserted, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
@@ -399,7 +400,7 @@ namespace Serialize {
                 }
             }
             if (this->isItemActive(it)) {
-                Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
             }
         }
 
@@ -419,7 +420,7 @@ namespace Serialize {
                 this->setItemDataSynced(*it, false);
             }
             if (this->isItemActive(it)) {
-                Observer::operator()(it, BEFORE | REMOVE_ITEM);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | REMOVE_ITEM);
                 this->setItemActive(*it, false);
                 return true;
             }
@@ -429,7 +430,7 @@ namespace Serialize {
         void afterRemove(bool b)
         {
             if (b) {
-                Observer::operator()(this->end(), AFTER | REMOVE_ITEM);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
             }
         }
 
@@ -454,7 +455,7 @@ namespace Serialize {
 
             size_t count = 0;
             for (iterator it = from; it != to && this->isItemActive(it); ++it) {
-                Observer::operator()(it, BEFORE | REMOVE_ITEM);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | REMOVE_ITEM);
                 this->setItemActive(*it, false);
                 ++count;
             }
@@ -464,14 +465,14 @@ namespace Serialize {
         void afterRemoveRange(size_t count)
         {
             for (size_t i = 0; i < count; ++i) {
-                Observer::operator()(this->end(), AFTER | REMOVE_ITEM);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
             }
         }
 
         bool beforeReset()
         {
             if (this->isActive()) {
-                Observer::operator()(this->end(), BEFORE | RESET);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), BEFORE | RESET);
             }
             return Base::beforeReset();
         }
@@ -492,7 +493,7 @@ namespace Serialize {
             }
             Base::afterReset(wasActive);
             if (wasActive) {
-                Observer::operator()(it, AFTER | RESET);
+                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, AFTER | RESET);
             }
         }
 

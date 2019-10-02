@@ -4,6 +4,8 @@
 
 #include "serializetable.h"
 
+#include "statesubmissionflags.h"
+
 namespace Engine {
 namespace Serialize {
     namespace __serialized__impl__ {
@@ -21,8 +23,8 @@ namespace Serialize {
     public:
         const TopLevelSerializableUnitBase *topLevel() const;
 
-        void writeState(SerializeOutStream &out, const char *name = nullptr, bool skipId = false) const;
-        void readState(SerializeInStream &in, const char *name = nullptr, bool skipId = false);
+        void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0) const;
+        void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0);
 
         void readAction(BufferedInOutStream &in);
         void readRequest(BufferedInOutStream &in);
@@ -46,7 +48,7 @@ namespace Serialize {
 
         void setSynced(bool b);
 
-        void setSlaveId(size_t id);
+        void setSlaveId(size_t id, SerializeManager *mgr);
 
 		const SerializeTable *type() const;
 
@@ -54,13 +56,13 @@ namespace Serialize {
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
         BufferedOutStream *getSlaveMessageTarget() const;
 
-        void clearSlaveId();
+        void clearSlaveId(SerializeManager *mgr);
 
         void setDataSynced(bool b);
         void setActive(bool active);
 
 
-        friend struct SerializeManager;        
+        friend struct SyncManager;        
         friend struct SerializeUnitHelper;
         friend struct SyncableBase;
         friend struct SerializeTable;
@@ -96,9 +98,11 @@ namespace Serialize {
 		};
 
     template <typename T, typename Base = SerializableUnitBase>
-    struct SerializableUnit : Base, TableInitializer<T, Base> {
+    struct SerializableUnit : Base, private TableInitializer<T, Base> {
     protected:
-        using Self = T;
+        friend struct TableInitializer<T, Base>;
+
+        typedef T Self;
 		
 		using Base::Base;       
 

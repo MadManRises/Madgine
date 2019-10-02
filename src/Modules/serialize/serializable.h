@@ -14,6 +14,8 @@ namespace Serialize {
         void setDataSynced(bool b);
         void setActive(bool active);
 
+		void writeCreationData(SerializeOutStream &) const;
+
     protected:
         bool isActive() const;
 

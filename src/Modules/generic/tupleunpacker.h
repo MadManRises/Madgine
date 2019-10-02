@@ -5,6 +5,11 @@
 namespace Engine {
 namespace TupleUnpacker {
 
+#define LIFT(fname)                                            \
+    [&](auto &&... args) -> decltype(auto) {                   \
+        return (fname)(std::forward<decltype(args)>(args)...); \
+    }
+
     template <size_t I, typename Tuple, size_t... S, size_t... T>
     decltype(auto) expand(Tuple &&tuple, std::index_sequence<S...>, std::index_sequence<T...>)
     {
@@ -25,26 +30,26 @@ namespace TupleUnpacker {
     }
 
     template <class F, size_t... S, class Tuple>
-    typename CallableTraits<F>::return_type unpackTuple(F &&f, Tuple &&args, std::index_sequence<S...>)
+    decltype(auto) unpackTuple(F &&f, Tuple &&args, std::index_sequence<S...>)
     {
         return std::invoke(std::forward<F>(f), std::get<S>(std::forward<Tuple>(args))...);
     }
 
     template <class F, class Tuple>
-    typename CallableTraits<F>::return_type invokeFromTuple(F &&f, Tuple &&args)
+    decltype(auto) invokeFromTuple(F &&f, Tuple &&args)
     {
         return unpackTuple(std::forward<F>(f), std::forward<Tuple>(args),
-            std::make_index_sequence<CallableTraits<F>::argument_count>());
+            std::make_index_sequence<callable_argument_count<F>(std::tuple_size<std::remove_reference_t<Tuple>>::value)>());
     }
 
     template <typename F, typename... Args>
-    typename CallableTraits<F>::return_type invoke(F &&f, Args &&... args)
+    decltype(auto) invoke(F &&f, Args &&... args)
     {
         return invokeFromTuple(std::forward<F>(f), std::forward_as_tuple(std::forward<Args>(args)...));
     }
 
     template <typename F, typename... Args>
-    typename CallableTraits<F>::return_type invokeExpand(F &&f, Args &&... args)
+    decltype(auto) invokeExpand(F &&f, Args &&... args)
     {
         return invokeFromTuple(std::forward<F>(f), expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
@@ -78,7 +83,7 @@ namespace TupleUnpacker {
     T construct(Args &&... args)
     {
         return constructFromTuple<T>(std::forward_as_tuple(std::forward<Args>(args)...));
-	}
+    }
 
     template <typename T, typename... Args>
     T constructExpand(Args &&... args)

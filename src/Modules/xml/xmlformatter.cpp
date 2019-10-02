@@ -9,12 +9,12 @@
 namespace Engine {
 namespace XML {
 
-	struct xml_ctype : std::ctype<char> {
+    struct xml_ctype : std::ctype<char> {
         static const mask *make_table()
         {
             // make a copy of the "C" locale table
             static std::vector<mask> v(classic_table(), classic_table() + table_size);
-            v['"'] |= space; // comma will be classified as whitespace            
+            v['"'] |= space; // comma will be classified as whitespace
             return &v[0];
         }
         xml_ctype(std::size_t refs = 0)
@@ -33,12 +33,12 @@ namespace XML {
         in.imbue(std::locale(in.getloc(), new xml_ctype));
     }
 
-	void XMLFormatter::setupStream(std::ostream &out)
+    void XMLFormatter::setupStream(std::ostream &out)
     {
         out.imbue(std::locale(out.getloc(), new xml_ctype));
     }
-    
-	void XMLFormatter::beginExtendedCompound(Serialize::SerializeOutStream &out, const char *name)
+
+    void XMLFormatter::beginExtendedCompound(Serialize::SerializeOutStream &out, const char *name)
     {
         if (!mCurrentExtended) {
             out.writeUnformatted(indent() + "<" + std::string(name));
@@ -122,9 +122,11 @@ namespace XML {
                 if (in.readUntil("=").empty())
                     throw 0;
             }
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
+                in.InStream::operator>>(std::noskipws);
                 if (in.readN(1) != "\"")
                     throw 0;
+            }
         } else {
             std::string prefix = in.readN(strlen(name) + 2);
             if (prefix != "<" + std::string(name) + ">")
@@ -135,9 +137,11 @@ namespace XML {
     void XMLFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
     {
         if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
                 if (in.readN(1) != "\"")
                     throw 0;
+                in.InStream::operator>>(std::skipws);
+            }
         } else {
             std::string prefix = in.readN(strlen(name) + 3);
             if (prefix != "</" + std::string(name) + ">")

@@ -10,6 +10,8 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "../../messageheader.h"
+
 namespace Engine
 {
 	namespace Serialize

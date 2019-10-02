@@ -22,6 +22,18 @@
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
+METATABLE_BEGIN(Engine::Scene::SceneManager)
+READONLY_PROPERTY(entities, entities)
+MEMBER(mSceneComponents)
+METATABLE_END(Engine::Scene::SceneManager)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
+FIELD(mEntities, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>)
+FIELD(mSceneComponents)
+SERIALIZETABLE_END(Engine::Scene::SceneManager)
+
+RegisterType(Engine::Scene::SceneManager);
+
 namespace Engine {
 namespace Scene {
 
@@ -83,11 +95,6 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    /*void SceneManager::writeState(Serialize::SerializeOutStream &out) const
-    {
-        SerializableUnitBase::writeState(out);
-    }*/
-
     App::GlobalAPIBase &SceneManager::getGlobalAPIComponent(size_t i, bool init)
     {
         if (init) {
@@ -118,15 +125,6 @@ namespace Scene {
     {
         return mClearedSignal;
     }
-
-    /*void SceneManager::readState(Serialize::SerializeInStream &in)
-    {
-        clear();
-
-        SerializableUnitBase::readState(in);
-
-        mStateLoadedSignal.emit();
-    }*/
 
     bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
     {
@@ -172,12 +170,6 @@ namespace Scene {
         return &*it;
     }
 
-    /*KeyValueMapList SceneManager::maps()
-		{
-			return Scope::maps().merge(mSceneComponents, toPointer(mEntities), MAP_F(findEntity), MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId),
-				MAP_RO(Synced, isSynced), toPointer(mCameras));
-		}*/
-
     std::string SceneManager::generateUniqueName()
     {
         return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
@@ -187,14 +179,6 @@ namespace Scene {
     {
         mEntityRemoveQueue.push_back(e);
     }
-
-    /*App::Application &SceneManager::app(bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mApp.getSelf(init);
-    }*/
 
     void SceneManager::clear()
     {
@@ -317,13 +301,3 @@ namespace Scene {
 }
 }
 
-METATABLE_BEGIN(Engine::Scene::SceneManager)
-READONLY_PROPERTY(entities, entities)
-METATABLE_END(Engine::Scene::SceneManager)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-//mEntities ->  Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>
-FIELD(mEntities, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>)
-SERIALIZETABLE_END(Engine::Scene::SceneManager)
-
-RegisterType(Engine::Scene::SceneManager);

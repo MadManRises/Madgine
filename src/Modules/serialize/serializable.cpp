@@ -6,58 +6,60 @@
 
 #include "streams/bufferedstream.h"
 
-namespace Engine
-{
-	namespace Serialize
-	{
+namespace Engine {
+namespace Serialize {
     SerializableBase::SerializableBase()
-		{                   
-		}
+    {
+    }
 
-		SerializableBase::SerializableBase(const SerializableBase &)
-                    : SerializableBase()
-		{
-		}
+    SerializableBase::SerializableBase(const SerializableBase &)
+        : SerializableBase()
+    {
+    }
 
-		SerializableBase::SerializableBase(SerializableBase &&) noexcept
-                    : SerializableBase()
-		{
-		}
+    SerializableBase::SerializableBase(SerializableBase &&) noexcept
+        : SerializableBase()
+    {
+    }
 
-		SerializableBase::~SerializableBase()
-        {
-		}
+    SerializableBase::~SerializableBase()
+    {
+    }
 
-		SerializableBase &SerializableBase::operator=(const SerializableBase &other)
-		{
-			return *this;
-		}
+    SerializableBase &SerializableBase::operator=(const SerializableBase &other)
+    {
+        return *this;
+    }
 
-		void SerializableBase::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
-		{
-		}
+    void SerializableBase::applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
+    {
+    }
 
-		void SerializableBase::setDataSynced(bool b)
-		{
-		}
+    void SerializableBase::setDataSynced(bool b)
+    {
+    }
 
-		void SerializableBase::setActive(bool active)
-		{
-			assert(mActive != active);
-			mActive = active;
-		}
+    void SerializableBase::setActive(bool active)
+    {
+        assert(mActive != active);
+        mActive = active;
+    }
 
-		bool SerializableBase::isActive() const
-		{
-			return mActive;
-		}
+    bool SerializableBase::isActive() const
+    {
+        return mActive;
+    }
 
-		/*bool Serializable::isSynced() const
+    void SerializableBase::writeCreationData(SerializeOutStream &) const
+    {
+    }
+
+    /*bool Serializable::isSynced() const
 		{
 			return mUnit ? mUnit->isSynced() : true;
 		}*/
 
-		/*const TopLevelSerializableUnitBase* Serializable::topLevel() const
+    /*const TopLevelSerializableUnitBase* Serializable::topLevel() const
 		{
 			return mUnit ? mUnit->topLevel() : nullptr;
 		}
@@ -66,5 +68,5 @@ namespace Engine
 		{
 			return mUnit;
 		}*/
-	}
+}
 }

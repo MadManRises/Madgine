@@ -28,6 +28,12 @@
 
 #include "Modules/ini/iniformatter.h"
 
+METATABLE_BEGIN(Engine::Tools::ImRoot)
+READONLY_PROPERTY(Tools, tools)
+METATABLE_END(Engine::Tools::ImRoot)
+
+RegisterType(Engine::Tools::ImRoot);
+
 namespace Engine {
 
 namespace Tools {
@@ -49,7 +55,7 @@ namespace Tools {
             Serialize::SerializeInStream in { std::move(buf) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            tool->readState(in, nullptr, true);
+            tool->readState(in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap | Serialize::StateTransmissionFlags_SkipId);
         }
     }
 
@@ -64,7 +70,7 @@ namespace Tools {
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
             out_buf->appendf("[Tool][%s]\n", tool->key());
 
-            tool->writeState(out, nullptr, true);
+            tool->writeState(out, nullptr, Serialize::StateTransmissionFlags_SkipId);
             out_buf->append(outBuffer->str().c_str());
             outBuffer->str("");
 
@@ -115,7 +121,7 @@ namespace Tools {
 
         bool running = true;
 
-		ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
+        ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
 
         ImGuiDockNodeFlags dockspace_flags = /*ImGuiDockNodeFlags_NoDockingInCentralNode | */ ImGuiDockNodeFlags_PassthruCentralNode;
 
@@ -148,7 +154,7 @@ namespace Tools {
 
         // DockSpace
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-        ImGuiDockNode *node = ImGui::DockBuilderGetNode(dockspace_id);
+        mDockNode = ImGui::DockBuilderGetNode(dockspace_id)->CentralNode;
 
         if (ImGui::BeginMainMenuBar()) {
 
@@ -206,11 +212,10 @@ namespace Tools {
         return mParent;
     }
 
+    ImGuiDockNode *ImRoot::dockNode() const
+    {
+        return mDockNode;
+    }
+
 }
 }
-
-METATABLE_BEGIN(Engine::Tools::ImRoot)
-READONLY_PROPERTY(Tools, tools)
-METATABLE_END(Engine::Tools::ImRoot)
-
-RegisterType(Engine::Tools::ImRoot);
