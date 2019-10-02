@@ -119,7 +119,7 @@ namespace Serialize {
     {
         return unit == nullptr
             ? NULL_UNIT_ID
-            : (!mgr || !mgr->isMaster(&out.buffer())) ? unit->masterId()
+            : (!mgr || mgr->isMaster(&out.buffer())) ? unit->masterId()
                                                       : unit->slaveId();
     }
 

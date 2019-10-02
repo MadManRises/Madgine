@@ -200,6 +200,7 @@ namespace Serialize {
         }
 
         mSlaveStream.emplace(std::move(stream));
+        setSlaveStreambuf(&mSlaveStream->buffer());
 
         if (receiveState) {
             if (state == NO_ERROR) {
@@ -231,12 +232,10 @@ namespace Serialize {
                 bool result = (*it2)->updateManagerType(this, true);
                 assert(result);
             }
+            setSlaveStreambuf(nullptr);
             mSlaveStream.reset();
         }
 
-		if (state == NO_ERROR) {
-            setSlaveStreambuf(&mSlaveStream->buffer());
-        }
 
         return state;
     }
