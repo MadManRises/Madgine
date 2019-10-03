@@ -70,6 +70,8 @@ namespace Serialize {
         friend struct UnitHelper;
         template <typename T, typename Base>
         friend struct TableInitializer;
+		template <typename T>
+        friend struct Syncable;
 		
     protected:
         void setParent(SerializableUnitBase *parent);

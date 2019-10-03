@@ -27,6 +27,9 @@ namespace Engine
 		struct DefaultCreator
 		{
 			using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>;
+
+			DefaultCreator() = default;
+			DefaultCreator(const void *) {}
 		
 			ArgsTuple readCreationData(SerializeInStream& in)
 			{

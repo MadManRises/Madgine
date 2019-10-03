@@ -7,14 +7,14 @@
 namespace Engine {
 namespace Serialize {
 
-    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t offset,
+    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index,
         const std::set<ParticipantId> &targets) const
     {
         std::set<BufferedOutStream *, CompareStreamId> result = parent->getMasterMessageTargets();
         if (targets.empty()) {
             for (BufferedOutStream *out : result) {
                 out->beginMessage(parent, ACTION);
-                *out << offset;
+                *out << index;
             }
         } else {
             auto it1 = result.begin();
@@ -27,7 +27,7 @@ namespace Serialize {
                 }
                 if (*it2 == out->id()) {
                     out->beginMessage(parent, ACTION);
-                    *out << 0;
+                    *out << index;
                     ++it2;
                     ++it1;
                 } else {
@@ -45,18 +45,18 @@ namespace Serialize {
         return parent->topLevel()->participantId();
     }
 
-    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t offset) const
+    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index) const
     {
         BufferedOutStream *out = parent->getSlaveMessageTarget();
         out->beginMessage(parent, REQUEST);
-        *out << offset;
+        *out << index;
         return out;
     }
 
-    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t offset, BufferedOutStream *stream) const
+    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream) const
     {
         stream->beginMessage(parent, ACTION);
-        *stream << offset;
+        *stream << index;
     }
 
     bool SyncableBase::isMaster(const SerializableUnitBase *parent) const

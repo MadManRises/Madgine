@@ -61,34 +61,12 @@ namespace Serialize {
 
     void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, size_t index) const
     {
-        const SerializeTable *table = this;
-        while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                if (it->second.mIndex() == index) {
-                    it->second.mReadAction(unit, in);
-                    return;
-                }
-            }
-            table = table->mBaseType ? &table->mBaseType() : nullptr;
-        }
-        //Corrupt package
-        throw 0;
+        get(index).mReadAction(unit, in);
     }
 
     void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, size_t index) const
     {
-        const SerializeTable *table = this;
-        while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                if (it->second.mIndex() == index) {
-                    it->second.mReadRequest(unit, inout);
-                    return;
-                }
-            }
-            table = table->mBaseType ? &table->mBaseType() : nullptr;
-        }
-        //Corrupt package
-        throw 0;
+        get(index).mReadRequest(unit, inout);
     }
 
     void SerializeTable::applySerializableMap(SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) const
@@ -124,9 +102,58 @@ namespace Serialize {
         }
     }
 
-	bool SerializeTable::isInstance(SerializableUnitBase *unit) const
+    bool SerializeTable::isInstance(SerializableUnitBase *unit) const
     {
         return !unit || unit->mType == this;
+    }
+
+    size_t SerializeTable::getIndex(size_t offset) const
+    {
+        size_t index = 0;
+
+        std::stack<const SerializeTable *> tables;
+        const SerializeTable *table = this;
+        while (table) {
+            tables.push(table);
+            table = table->mBaseType ? &table->mBaseType() : nullptr;
+        }
+
+        while (!tables.empty()) {
+            table = tables.top();
+            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+                if (it->second.mOffset() == offset) {                    
+                    return index;
+                }
+                ++index;
+            }
+            tables.pop();
+        }
+
+        throw 0;
+    }
+
+    const Serializer &SerializeTable::get(size_t index) const
+    {
+        std::stack<const SerializeTable *> tables;
+        const SerializeTable *table = this;
+        while (table) {
+            tables.push(table);
+            table = table->mBaseType ? &table->mBaseType() : nullptr;
+        }
+
+        while (!tables.empty()) {
+            table = tables.top();
+            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+                if (index == 0){
+                    return it->second;
+                }
+                --index;
+            }
+            tables.pop();
+        }
+
+        //Corrupt package
+        throw 0;
     }
 
 }

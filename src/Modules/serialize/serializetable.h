@@ -24,6 +24,9 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool b) const;
 
 		bool isInstance(SerializableUnitBase *unit) const;
+
+		size_t getIndex(size_t offset) const;
+        const Serializer &get(size_t index) const;
     };
 
 }

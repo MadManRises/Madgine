@@ -11,15 +11,15 @@
 namespace Engine {
 namespace Serialize {
 
-    template <auto P, auto Getter, auto Setter, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P, auto Getter, auto Setter, typename... Args>
     constexpr Serializer encapsulated_field(const char *name)
     {
-		using traits = CallableTraits<decltype(P)>;
-		using Unit = typename traits::class_type;
-		using T = std::decay_t<typename traits::return_type>;
+        using traits = CallableTraits<decltype(P)>;
+        using Unit = typename traits::class_type;
+        using T = std::decay_t<typename traits::return_type>;
 
-        using getter_traits = CallableTraits<decltype(Getter)>;   
-		static_assert(std::is_same_v<Unit, std::remove_const_t<typename getter_traits::class_type>>);
+        using getter_traits = CallableTraits<decltype(Getter)>;
+        static_assert(std::is_same_v<Unit, std::remove_const_t<typename getter_traits::class_type>>);
         static_assert(std::is_same_v<T, typename getter_traits::return_type>);
 
         using setter_traits = CallableTraits<decltype(Setter)>;
@@ -70,7 +70,7 @@ namespace Serialize {
         };
     }
 
-    template <auto P, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P, typename... Args>
     constexpr Serializer field(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -117,6 +117,43 @@ namespace Serialize {
         };
     }
 
+	template <typename _disambiguate__dont_remove, auto P>
+    constexpr Serializer sync(const char *name)
+    {
+        using traits = CallableTraits<decltype(P)>;
+        using Unit = typename traits::class_type;
+        using T = std::decay_t<typename traits::return_type>;
+        static_assert(std::is_base_of_v<SyncableBase, T>);
+
+        return {
+            name,
+            []() {
+                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, SyncableBase>();
+            },
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+                
+            },
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+                
+            },
+            [](SerializableUnitBase *unit, SerializeInStream &in) {
+                (static_cast<Unit *>(unit)->*P).readAction(in);
+            },
+            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
+                (static_cast<Unit *>(unit)->*P).readRequest(inout);
+            },
+            [](SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) {
+            },
+            [](SerializableUnitBase *unit, bool b) {
+                //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
+            },
+            [](SerializableUnitBase *unit, bool b) {
+                //UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
+            }
+        };
+    }
+
+
 }
 }
 
@@ -147,10 +184,13 @@ namespace Serialize {
 //First argument M left out to prevent bug with empty __VA_ARGS__.
 //That way it contains at least one item
 #define FIELD(...) \
-    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<&Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
+    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 //read:   #define FIELD(M, ...) { #M, ::Engine::Serialize::field<&Ty::M, __VA_ARGS__>(#M) },
+
+#define SYNC(...) \
+    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 
 #define ENCAPSULATED_FIELD(Name, Getter, Setter)                                                   \
     {                                                                                              \
-        #Name, ::Engine::Serialize::encapsulated_field<&Ty::Name, &Ty::Getter, &Ty::Setter>(#Name) \
+        #Name, ::Engine::Serialize::encapsulated_field<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name) \
     },

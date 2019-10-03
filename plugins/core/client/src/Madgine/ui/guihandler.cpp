@@ -27,6 +27,9 @@ namespace UI {
 
     void GuiHandlerBase::open()
     {
+        if (!mWidget)
+            return;
+
         if (getState() != ObjectState::INITIALIZED) {
             LOG_ERROR("Failed to open unitialized GuiHandler!");
             return;
@@ -35,35 +38,31 @@ namespace UI {
         if (isOpen())
             return;
 
-        throw "TODO";
-        /*switch (mType)
-			{
-			case WindowType::MODAL_OVERLAY:
-				mUI.openModalWindow(this);
-				break;
-			case WindowType::NONMODAL_OVERLAY:
-				mUI.openWindow(this);
-				break;
-			case WindowType::ROOT_WINDOW:
-				mUI.swapCurrentRoot(this);
-				break;
-			}*/
+        switch (mType) {
+        case WindowType::MODAL_OVERLAY:
+            ui().window().openModalWidget(mWidget);
+            break;
+        case WindowType::NONMODAL_OVERLAY:
+            ui().window().openWidget(mWidget);
+            break;
+        case WindowType::ROOT_WINDOW:
+            ui().window().swapCurrentRoot(mWidget);
+            break;
+        }
     }
 
     void GuiHandlerBase::close()
     {
-        throw "TODO";
-        /*switch (mType)
-			{
-			case WindowType::MODAL_OVERLAY:
-				mUI.closeModalWindow(this);
-				break;
-			case WindowType::NONMODAL_OVERLAY:
-				mUI.closeWindow(this);
-				break;
-			case WindowType::ROOT_WINDOW:
-				throw 0;
-			}*/
+        switch (mType) {
+        case WindowType::MODAL_OVERLAY:
+            ui().window().closeModalWidget(mWidget);
+            break;
+        case WindowType::NONMODAL_OVERLAY:
+            ui().window().closeWidget(mWidget);
+            break;
+        case WindowType::ROOT_WINDOW:
+            throw 0;
+        }
     }
 
     bool GuiHandlerBase::isOpen() const

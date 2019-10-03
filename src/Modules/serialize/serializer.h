@@ -5,7 +5,7 @@ namespace Serialize {
 
     struct Serializer {
         const char *mFieldName;
-        size_t (*mIndex)();
+        size_t (*mOffset)();
 
         void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *name);
         void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *name);        
