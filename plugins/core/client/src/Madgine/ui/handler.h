@@ -5,6 +5,8 @@
 #include "Modules/threading/slot.h"
 #include "Modules/serialize/serializableunit.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace UI {
     struct MADGINE_CLIENT_EXPORT WindowDescriber {
