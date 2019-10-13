@@ -33,7 +33,7 @@ namespace Server {
             App::Application app(mSettings);
             mApplication = &app;
             TupleUnpacker::invoke(std::move(initCallback), app);
-            return Threading::Scheduler(workgroup, { &app.frameLoop() }).go();
+            return Threading::Scheduler(workgroup).go();
         }
 
     private:
