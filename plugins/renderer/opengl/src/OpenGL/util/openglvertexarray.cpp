@@ -40,7 +40,15 @@ namespace Render {
 
     OpenGLVertexArray &OpenGLVertexArray::operator=(OpenGLVertexArray &&other)
     {
+#if !OPENGL_ES
         std::swap(mHandle, other.mHandle);
+#else
+        if (sCurrentBound == &other)
+            sCurrentBound = this;
+        mAttributes = std::move(other.mAttributes);
+        mVBO = std::exchange(other.mVBO, 0);
+        mEBO = std::exchange(other.mEBO, 0);
+#endif
         return *this;
     }
 
@@ -122,9 +130,9 @@ namespace Render {
 
     void OpenGLVertexArray::disableVertexAttribute(unsigned int index)
     {
-#if !OPENGL_ES
         glDisableVertexAttribArray(index);
-#else
+
+#if OPENGL_ES
         assert(sCurrentBound == this);
         if (mAttributes.size() <= index) {
             if (mAttributes.size() < index)
