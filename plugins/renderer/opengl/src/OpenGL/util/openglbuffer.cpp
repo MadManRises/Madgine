@@ -26,15 +26,12 @@ namespace Render {
 
     OpenGLBuffer::~OpenGLBuffer()
     {
-        if (mHandle) {
-            glDeleteBuffers(1, &mHandle);
-            glCheck();
-        }
+        reset();
     }
 
     OpenGLBuffer &OpenGLBuffer::operator=(OpenGLBuffer &&other)
     {
-        mHandle = std::exchange(other.mHandle, 0);
+        std::swap(mHandle, other.mHandle);
         return *this;
     }
 
@@ -54,6 +51,15 @@ namespace Render {
         if (target == GL_ARRAY_BUFFER)
             OpenGLVertexArray::onBindVBO(mHandle);
 #endif
+    }
+
+    void OpenGLBuffer::reset()
+    {
+        if (mHandle) {
+            glDeleteBuffers(1, &mHandle);
+            glCheck();
+            mHandle = 0;
+        }
     }
 
     void OpenGLBuffer::setData(GLenum target, GLsizei size, const void *data)

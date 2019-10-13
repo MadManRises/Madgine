@@ -20,8 +20,6 @@ namespace Plugins {
 
         bool isLoaded(const std::string &plugin) const;
 
-        const std::string &project() const;
-
         PluginSection &section(const std::string &name);
         PluginSection &operator[](const std::string &name);
         const PluginSection &at(const std::string &name) const;
@@ -33,15 +31,7 @@ namespace Plugins {
         std::map<std::string, PluginSection>::iterator begin();
         std::map<std::string, PluginSection>::iterator end();
 
-        void saveCurrentSelectionFile();
-        void loadCurrentSelectionFile();
-
-        Ini::IniSection &selectionFiles();
-        Filesystem::Path currentSelectionPath();
-        const std::string &currentSelectionName();
-        void setCurrentSelection(const std::string &key, const Filesystem::Path &path);
-
-        void saveSelection(Ini::IniFile &file);
+        void saveSelection(Ini::IniFile &file, bool withTools);
         void loadSelection(Ini::IniFile &file);
 
         void addListener(PluginListener *listener);
@@ -58,15 +48,9 @@ namespace Plugins {
 
         std::vector<PluginListener *> mListeners;
 
-        std::string mProject;
-
-        Ini::IniFile mSettings;
-
-        std::optional<Ini::IniFile> mCurrentSelectionFile;
-
         static PluginManager *sSingleton;
 
-        bool mLoadingCurrentSelectionFile = false;
+        bool mLoadingSelectionFile = false;
     };
 
 }

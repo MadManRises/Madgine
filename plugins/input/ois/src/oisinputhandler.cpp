@@ -10,10 +10,12 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Madgine/gui/widgets/toplevelwindow.h"
+
 namespace Engine {
 namespace Input {
-    OISInputHandler::OISInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
-        : UniqueComponent(app, listener)
+    OISInputHandler::OISInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener)
+        : UniqueComponent(topLevel, listener)
         , mWindow(window)
     {
         //LOG("*** Initializing OIS ***");

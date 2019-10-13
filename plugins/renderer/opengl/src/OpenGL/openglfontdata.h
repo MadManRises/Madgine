@@ -1,19 +1,18 @@
 #pragma once
 
+#include "Modules/font/font.h"
 #include "util/opengltexture.h"
-
-#include "Modules/math/vector2i.h"
-
-#include "Modules/font/glyph.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLFontData {
-        OpenGLTexture mTexture;
-        Vector2i mTextureSize;
+    struct OpenGLFontData : Font::Font {
+        OpenGLFontData()
+        {
+            mTextureHandle = mTexture.handle();
+        }
 
-        std::array<Font::Glyph, 128> mGlyphs;
+        OpenGLTexture mTexture;
     };
 
 }

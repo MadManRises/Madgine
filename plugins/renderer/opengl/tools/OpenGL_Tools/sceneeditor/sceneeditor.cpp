@@ -40,9 +40,16 @@ namespace Tools {
     {
         mSceneMgr = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
-        mSceneViews.emplace_back(this, mWindow.getRenderer(), static_cast<const ClientImRoot&>(*mRoot.parent()).manager());
+        mSceneViews.emplace_back(this, mWindow.getRenderer(), static_cast<const ClientImRoot &>(*mRoot.parent()).manager());
 
         return ToolBase::init();
+    }
+
+    void SceneEditor::finalize()
+    {
+        mSceneViews.clear();
+
+        ToolBase::finalize();
     }
 
     void SceneEditor::render()
@@ -71,16 +78,6 @@ namespace Tools {
                 ImGui::EndMenu();
             }
         }
-    }
-
-    void SceneEditor::update()
-    {
-        for (SceneView &sceneView : mSceneViews) {
-            auto &c = toPointer(mSceneMgr->entities());
-            sceneView.camera().setVisibleEntities({ c.begin(), c.end() });
-        }
-
-        ToolBase::update();
     }
 
     const char *SceneEditor::key() const
@@ -176,8 +173,8 @@ namespace Tools {
 
             ImGui::Separator();
 
-            for (Scene::Camera &camera : mSceneMgr->cameras()) {
-                std::string name = camera.getName();
+            /*for (Scene::Camera &camera : mSceneMgr->cameras()) {
+                std::string name = camera.mName;
                 if (name.empty())
                     name = "<unnamed camera>";
                 if (ImGui::Selectable(name.c_str(), mSelectedCamera == &camera)) {
@@ -188,7 +185,7 @@ namespace Tools {
 
             if (ImGui::Button("+ New Camera")) {
                 select(mSceneMgr->createCamera());
-            }
+            }*/
         }
         ImGui::End();
     }

@@ -6,8 +6,6 @@
 
 #include "../vertex.h"
 
-#include "../guisystem.h"
-
 #include "Madgine/scene/camera.h"
 
 #include "toplevelwindow.h"
@@ -15,11 +13,15 @@
 #include "../../render/renderwindow.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 
 METATABLE_BEGIN(Engine::GUI::SceneWindow)
 PROPERTY(Camera, camera, setCamera)
 METATABLE_END(Engine::GUI::SceneWindow)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::SceneWindow, Engine::GUI::WidgetBase)
+SERIALIZETABLE_END(Engine::GUI::SceneWindow)
 
 namespace Engine {
 namespace GUI {
@@ -42,7 +44,7 @@ namespace GUI {
         return mTarget ? mTarget->camera() : nullptr;
     }
 
-    std::pair<std::vector<Vertex>, uint32_t> SceneWindow::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -55,17 +57,17 @@ namespace GUI {
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
-        result.push_back({ v, color, { 0, 0 } });
-        v.x += size.x;
-        result.push_back({ v, color, { 1, 0 } });
-        v.y += size.y;
-        result.push_back({ v, color, { 1, 1 } });
-        result.push_back({ v, color, { 1, 1 } });
-        v.x -= size.x;
         result.push_back({ v, color, { 0, 1 } });
-        v.y -= size.y;
+        v.x += size.x;
+        result.push_back({ v, color, { 1, 1 } });
+        v.y += size.y;
+        result.push_back({ v, color, { 1, 0 } });
+        result.push_back({ v, color, { 1, 0 } });
+        v.x -= size.x;
         result.push_back({ v, color, { 0, 0 } });
-        return { result, texId };
+        v.y -= size.y;
+        result.push_back({ v, color, { 0, 1 } });
+        return { { result, { texId } } };
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()

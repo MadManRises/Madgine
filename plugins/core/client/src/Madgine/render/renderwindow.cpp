@@ -1,12 +1,16 @@
 #include "../clientlib.h"
 #include "renderwindow.h"
-#include "../gui/guisystem.h"
 #include "../gui/widgets/toplevelwindow.h"
 #include "Interfaces/window/windowapi.h"
 #include "Madgine/app/application.h"
 #include "rendertarget.h"
 
 #include "Modules/debug/profiler/profiler.h"
+
+#include "Modules/keyvalue/metatable_impl.h"
+
+RegisterType(Engine::Render::RenderWindow)
+
 
 namespace Engine {
 namespace Render {

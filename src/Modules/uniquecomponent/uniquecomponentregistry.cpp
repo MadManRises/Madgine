@@ -2,17 +2,17 @@
 
 #if ENABLE_PLUGINS
 
-#include "uniquecomponentregistry.h"
+#    include "uniquecomponentregistry.h"
 
-#include "../plugins/binaryinfo.h"
+#    include "../plugins/binaryinfo.h"
 
-#include "Interfaces/stringutil.h"
+#    include "Interfaces/stringutil.h"
 
-#include "Interfaces/filesystem/api.h"
+#    include "Interfaces/filesystem/api.h"
 
 namespace Engine {
 
-	static size_t sLevel = 0;
+static size_t sLevel = 0;
 
 struct CompareTypeInfo {
     bool operator()(const TypeInfo *t1, const TypeInfo *t2) const
@@ -63,11 +63,12 @@ static std::vector<const TypeInfo *> &sSkip()
     return dummy;
 }
 
-void skipUniqueComponentOnExport(const TypeInfo *t) {
+void skipUniqueComponentOnExport(const TypeInfo *t)
+{
     sSkip().push_back(t);
 }
 
-void exportStaticComponentHeader(const Filesystem::Path &outFile)
+void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
 {
     LOG("Exporting uniquecomponent configuration source file '" << outFile << "'");
 
@@ -79,11 +80,18 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile)
         }) == sSkip().end();
     };
 
+    auto skipBinary = [&](const Plugins::BinaryInfo *bin) {
+        return !hasTools && StringUtil::endsWith(bin->mName, "Tools");
+    };
+
     for (auto &[name, reg] : registryRegistry()) {
+        if (skipBinary(reg->mBinary))
+            continue;
         binaries.insert(reg->mBinary);
 
         for (CollectorInfo *collector : *reg) {
-            binaries.insert(collector->mBinary);
+            if (!skipBinary(collector->mBinary))
+                binaries.insert(collector->mBinary);
         }
     }
 
@@ -100,9 +108,13 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile)
 
     for (auto &[name, reg] : registryRegistry()) {
         const Plugins::BinaryInfo *bin = reg->mBinary;
+        if (skipBinary(bin))
+            continue;
         include(file, fixInclude(reg->type_info()->mHeaderPath, bin), bin);
 
         for (CollectorInfo *collector : *reg) {
+            if (skipBinary(collector->mBinary))
+                continue;
             for (const TypeInfo *typeInfo : collector->mElementInfos) {
                 if (notInSkip(typeInfo))
                     include(
@@ -120,20 +132,25 @@ namespace Engine {
 )";
 
     for (auto &[name, reg] : registryRegistry()) {
+        if (skipBinary(reg->mBinary))
+            continue;
         GuardGuard g2(file, reg->mBinary);
 
         file << R"(template <>
-const std::vector<const Engine::MetaTable *> &)" << name
+const std::vector<const Engine::MetaTable *> &)"
+             << name
              << R"(::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 )";
 
         for (CollectorInfo *collector : *reg) {
+            if (skipBinary(collector->mBinary))
+                continue;
             GuardGuard g(file, collector->mBinary);
             for (const TypeInfo *typeInfo : collector->mElementInfos) {
                 while (typeInfo->mDecayType)
-                    typeInfo = typeInfo->mDecayType;
+                    typeInfo = &typeInfo->mDecayType();
                 if (notInSkip(typeInfo))
                     file << "		&table<"
                          << typeInfo->mFullName << ">(),\n";
@@ -147,13 +164,16 @@ const std::vector<const Engine::MetaTable *> &)" << name
 )";
 
         file << R"(template <>
-std::vector<)" << name << "::F> " << name
+std::vector<)"
+             << name << "::F> " << name
              << R"(::sComponents()
 {
 	return {
 )";
 
         for (CollectorInfo *collector : *reg) {
+            if (skipBinary(collector->mBinary))
+                continue;
             GuardGuard g(file, collector->mBinary);
             for (const TypeInfo *typeInfo : collector->mElementInfos) {
                 if (notInSkip(typeInfo))
@@ -171,6 +191,8 @@ std::vector<)" << name << "::F> " << name
 )";
 
         for (CollectorInfo *collector : *reg) {
+            if (skipBinary(collector->mBinary))
+                continue;
             GuardGuard g(file, collector->mBinary);
             file << "constexpr size_t CollectorBaseIndex_"
                  << collector->mBaseInfo->mTypeName << "_"
@@ -186,7 +208,7 @@ size_t component_index<)"
                              << collector->mBaseInfo->mTypeName << "_"
                              << collector->mBinary->mName << " + " << i
                              << "; }\n";
-                        typeInfo = typeInfo->mDecayType;
+                        typeInfo = typeInfo->mDecayType ? &typeInfo->mDecayType() : nullptr;
                     }
                     ++i;
                 }

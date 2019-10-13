@@ -12,9 +12,14 @@ namespace Render {
         OpenGLVertexArray();
         OpenGLVertexArray(const OpenGLVertexArray &) = delete;
         OpenGLVertexArray(OpenGLVertexArray &&);
+        OpenGLVertexArray(dont_create_t);
         ~OpenGLVertexArray();
 
+		OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
+
 		static unsigned int getCurrent();
+
+		void reset();
 
         void bind();
 
@@ -52,7 +57,7 @@ namespace Render {
 
     private:
 #if !OPENGL_ES
-        GLuint mHandle;
+        GLuint mHandle = 0;
 #else
         GLuint mVBO = 0;
         GLuint mEBO = 0;

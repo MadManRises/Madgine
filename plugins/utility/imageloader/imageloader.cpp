@@ -15,8 +15,12 @@
 
 UNIQUECOMPONENT(Engine::Resources::ImageLoader)
 
-METATABLE_BEGIN(Engine::Resources::ImageLoader)
+using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Resources::ImageData, Engine::Resources::Resource>;
+METATABLE_BEGIN(LoaderImpl)
 MEMBER(mResources)
+METATABLE_END(LoaderImpl)
+
+METATABLE_BEGIN_BASE(Engine::Resources::ImageLoader, LoaderImpl)
 METATABLE_END(Engine::Resources::ImageLoader)
 
 METATABLE_BEGIN_BASE(Engine::Resources::ImageLoader::ResourceType, Engine::Resources::ResourceBase)
@@ -43,13 +47,13 @@ RegisterType(Engine::Resources::ImageLoader)
         }
 
         ImageLoader::ImageLoader()
-            : ResourceLoader({ ".png" })
+            : ResourceLoader({ ".png", ".jpg" })
         {
         }
 
         std::shared_ptr<ImageData> ImageLoader::loadImpl(ResourceType *res)
         {
-            return std::make_shared<ImageData>(res->path().c_str());            
+            return std::make_shared<ImageData>(res->path().c_str());
         }
 
     }

@@ -31,7 +31,11 @@ namespace Tools {
     }
 
     void WidgetSettings::render()
-    {
+    {        
+		std::string name = mWidget->getName();
+        if (ImGui::InputText("Name", &name))
+            mWidget->setName(name);
+
         Matrix3 pos = mWidget->getPos();
         Matrix3 size = mWidget->getSize();
 

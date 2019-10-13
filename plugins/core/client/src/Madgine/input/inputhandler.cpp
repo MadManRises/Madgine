@@ -4,23 +4,23 @@
 
 #include "inputlistener.h"
 
-#include "Madgine/app/application.h"
+#include "../gui/widgets/toplevelwindow.h"
 
 namespace Engine
 {
 	namespace Input
 	{
 		
-		InputHandler::InputHandler(App::Application &app, InputListener *listener)
+		InputHandler::InputHandler(GUI::TopLevelWindow &window, InputListener *listener)
                 :
-		mListener(listener), mApp(app)
+		mListener(listener), mWindow(window)
 		{
-            app.addFrameListener(this);
+            window.addFrameListener(this);
                 }
 
                 InputHandler::~InputHandler()
                 {
-                    mApp.removeFrameListener(this);
+                    mWindow.removeFrameListener(this);
                 }
 
 		/*InputListener* InputHandler::listener()

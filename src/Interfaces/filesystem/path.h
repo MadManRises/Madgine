@@ -8,6 +8,9 @@ namespace Filesystem {
         Path(const std::string &s);
         Path(const char *s = "");
 
+		Path &operator=(const std::string &s);
+        Path &operator=(const char *s);
+
         Path &operator/=(const Path &p);
 
         Path operator/(const Path &p) const

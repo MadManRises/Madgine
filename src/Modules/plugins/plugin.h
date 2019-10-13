@@ -30,6 +30,8 @@ namespace Plugins {
 
         bool isDependencyOf(Plugin *p) const;
 
+		const std::string &name() const;
+
     protected:
         void addDependency(Plugin *dependency);
         void removeDependency(Plugin *dependency);

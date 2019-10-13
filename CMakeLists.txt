@@ -30,6 +30,7 @@ include(PrecompiledHeader)
 include(Project)
 include(multiConfig)
 include(Plugins)
+include(Tools)
 include(Testing)
 
 set (CPACK_NSIS_MODIFY_PATH ON)
@@ -48,6 +49,8 @@ add_subdirectory(src)
 add_subdirectory(shared)
 
 add_subdirectory(plugins)
+
+add_subdirectory(samples)
 
 add_subdirectory(launcher)
 

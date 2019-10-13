@@ -27,7 +27,7 @@ namespace Tools {
     private:
         void renderSelection(GUI::WidgetBase *hoveredWidget = nullptr);
         void renderHierarchy(GUI::WidgetBase **hoveredWidget = nullptr);
-        void listWidgets(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget = nullptr);
+        bool drawWidget(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget = nullptr);
 
     private:
         GUI::TopLevelWindow &mWindow;

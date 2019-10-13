@@ -22,13 +22,13 @@ FolderSources(sources "" src)
 if (NOT ANDROID AND NOT EMSCRIPTEN)
 	FolderSources(sources src glad glad.c glad.h)
 endif()
-FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfontloader.h openglforward.h opengllib.h openglmesh.cpp openglmesh.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglrenderer.cpp openglrenderer.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h)
+FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfontloader.h openglforward.h opengllib.h openglmesh.cpp openglmesh.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h openglshaderprogram.cpp openglshaderprogram.h)
 	FolderSources(sources OpenGL util gldump.cpp openglbuffer.cpp openglbuffer.h openglshader.cpp openglshader.h opengltexture.cpp opengltexture.h openglvertexarray.cpp openglvertexarray.h)
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
 target_link_plugins(OpenGL Client)
-target_link_libraries(OpenGL PRIVATE assimp freetype lib_msdfgen) # Might be a bug in MSVC + Clang. Should be PRIVATE
+target_link_libraries(OpenGL PRIVATE assimp freetype lib_msdfgen)
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
@@ -40,9 +40,9 @@ FolderSources(sources "" tools)
 		FolderSources(sources OpenGL_Tools sceneeditor sceneeditor.cpp sceneeditor.h sceneview.cpp sceneview.h)
 			FolderSources(sources sceneeditor opengl openglgridpass.cpp openglgridpass.h)
 
-add_plugin(OpenGLTools Madgine Tools ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h SOURCE_ROOT tools)
+add_tools(OpenGL ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h)
 
-target_link_plugins(OpenGLTools OpenGL ClientTools ImageLoader)
+target_link_plugins(OpenGLTools ClientTools ImageLoader)
 target_link_libraries(OpenGLTools PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 

@@ -16,24 +16,39 @@ public:
     static const constexpr size_t INVALID = std::numeric_limits<size_t>::max();
 
     UniqueComponentSelector(_Ty... arg, size_t index = 0)
-        : mIndex(index)
+        : mIndex(INVALID)
+        , mArg(arg...)
 #if ENABLE_PLUGINS
         , mUpdateSlot(this)
-        , mArg(arg...)
 #endif
     {
-        if (index != INVALID) {
-            if (Registry::sComponents().size() > index)
-                mValue = Registry::sComponents().at(index)(arg...);
-            else
-                mIndex = INVALID;
-        }
+        set(index);
 #if ENABLE_PLUGINS
         Registry::update().connect(mUpdateSlot);
 #endif
     }
 
-    UniqueComponentSelector(const UniqueComponentSelector &) = delete;
+    void set(size_t index)
+    {
+        if (index >= Registry::sComponents().size())
+            index = INVALID;
+        if (index != mIndex) {
+            if (index != INVALID) {
+                mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
+            } else {
+                mValue.reset();
+            }
+            mIndex = index;
+        }
+    }
+
+    void reset()
+    {
+        set(INVALID);
+    }
+
+    UniqueComponentSelector(const UniqueComponentSelector &)
+        = delete;
     void operator=(const UniqueComponentSelector &) = delete;
 
     Base *operator->() const
@@ -53,6 +68,7 @@ public:
 
 private:
     std::unique_ptr<Base> mValue;
+    std::tuple<_Ty...> mArg;
     size_t mIndex;
 
 #if ENABLE_PLUGINS
@@ -79,8 +95,6 @@ protected:
 
 private:
     Threading::Slot<&UniqueComponentSelector<Base, _Ty...>::updateComponents> mUpdateSlot;
-    std::tuple<_Ty...> mArg;
-
 #endif
 };
 

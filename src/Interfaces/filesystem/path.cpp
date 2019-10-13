@@ -17,6 +17,20 @@ namespace Filesystem {
         normalize();
     }
 
+    Path &Path::operator=(const std::string &s)
+    {
+        mPath = s;
+        normalize();
+        return *this;
+    }
+
+    Path &Path::operator=(const char *s)
+    {
+        mPath = s;
+        normalize();
+        return *this;
+    }
+
     Path &Path::operator/=(const Path &other)
     {
         assert(other.isRelative());
@@ -102,7 +116,8 @@ namespace Filesystem {
                 if (!hadSeparator) {
                     hadSeparator = true;
                     if (lastElement == ".") {
-                        mPath.resize(mPath.size() - 1);
+                        if (!mPath.empty())
+							mPath.resize(mPath.size() - 1);
                     } else if (lastElement == "..") {
                         if (!mPath.empty()) {
                             mPath.resize(mPath.size() - 1);

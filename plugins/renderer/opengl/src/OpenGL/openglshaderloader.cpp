@@ -21,7 +21,7 @@ namespace Engine
 		{
 		}
 
-		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::loadImpl(ResourceType * res)
+		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::loadImpl(ResourceType *res)
 		{
 			std::string filename = res->path().stem();
 			
@@ -71,7 +71,7 @@ namespace Engine
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
 METATABLE_END(Engine::Render::OpenGLShaderLoader)
 
-METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLShaderLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::OpenGLShaderLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLShaderLoader);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/threading/framelistener.h"
+#include "../threading/framelistener.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "gamehandler.h"
 #include "guihandler.h"
@@ -8,6 +8,10 @@
 #include "Modules/keyvalue/scopebase.h"
 
 #include "../gui/widgets/toplevelwindow.h"
+
+#include "Modules/keyvalue/observablecontainer.h"
+
+#include "Modules/madgineobject/madgineobjectobserver.h"
 
 namespace Engine {
 namespace UI {
@@ -38,10 +42,6 @@ namespace UI {
 
         const char *key() const override;
 
-        Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-
         template <class T>
         T &getGuiHandler(bool init = true)
         {
@@ -58,15 +58,12 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-        Scene::SceneManager &sceneMgr(bool = true);
 
         UIManager &getSelf(bool = true);
 
-
-        virtual const MadgineObject *parent() const override;
-
-		SERIALIZABLE_CONTAINER_EXT(mGuiHandlers, GuiHandlerContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
-        SERIALIZABLE_CONTAINER_EXT(mGameHandlers, GameHandlerContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
+		
+        SERIALIZABLE_CONTAINER_EXT(mGuiHandlers, GuiHandlerContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type, MadgineObjectObserver>::type>);
+        SERIALIZABLE_CONTAINER_EXT(mGameHandlers, GameHandlerContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type, MadgineObjectObserver>::type>);
 
     protected:
         bool init() override;

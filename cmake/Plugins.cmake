@@ -62,8 +62,10 @@ macro(add_plugin name base type)
 
 	add_workspace_library(${name} ${ARGN})
 
-	set_target_properties(${name} 
-		PROPERTIES OUTPUT_NAME Plugin_${base}_${type}_${name})
+	set_target_properties(${name} PROPERTIES 
+		OUTPUT_NAME Plugin_${base}_${type}_${name}
+		PLUGIN_BASE ${base}
+		PLUGIN_TYPE ${type})
 
 	collect_data(${name})
 

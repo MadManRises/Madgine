@@ -5,9 +5,8 @@ namespace Engine
 
 	namespace Threading
 	{
-		class MADGINE_BASE_EXPORT FrameListener
-		{
-		public:
+		struct MADGINE_CLIENT_EXPORT FrameListener
+		{		
 			virtual ~FrameListener() = default;
 
 			virtual bool frameStarted(std::chrono::microseconds timeSinceLastFrame) { return true; }

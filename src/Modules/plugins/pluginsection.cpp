@@ -50,7 +50,6 @@ namespace Plugins {
                     return;
             if (!loadPlugin(&mPlugins.begin()->second))
                 throw exception("Failed to load default Plugin for atleastOne Section: "s + mPlugins.begin()->first);
-            mMgr.saveCurrentSelectionFile();
         }
     }
 
@@ -71,8 +70,7 @@ namespace Plugins {
                     else if (!unloadPlugin(&p.second))
                         throw exception("Failed to unload Plugin for exclusive Section: "s + p.first);
                 }
-            }
-            mMgr.saveCurrentSelectionFile();
+            }            
         }
     }
 
@@ -92,6 +90,8 @@ namespace Plugins {
     Plugin::LoadState PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
+        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(name + "Tools"))
+            plugin = toolPlugin;
         if (!plugin)
             return Plugin::UNLOADED;
         return loadPlugin(plugin);
@@ -100,6 +100,8 @@ namespace Plugins {
     Plugin::LoadState PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
+        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(name + "Tools"))
+            plugin = toolPlugin;
         if (!plugin)
             return Plugin::UNLOADED;
         return unloadPlugin(plugin);
@@ -155,7 +157,6 @@ namespace Plugins {
         auto task = [=]() {
             Plugin::LoadState result = p->load();
             auto task = [=]() {
-                mMgr.saveCurrentSelectionFile();
                 Plugin::LoadState result = Plugin::LOADED;
                 Plugin *unloadExclusive
                     = nullptr;
@@ -178,6 +179,7 @@ namespace Plugins {
                         for (PluginListener *listener : mListeners)
                             listener->onPluginLoad(p);
                     }
+
                     return Plugin::LOADED;
                 };
                 if (result == Plugin::DELAYED) {
@@ -220,8 +222,7 @@ namespace Plugins {
 
         auto task = [=]() {
             Plugin::LoadState result = p->unload();
-            auto task = [=]() {
-                mMgr.saveCurrentSelectionFile();
+            auto task = [=]() {                
                 if (!p->isLoaded()) {
                     std::unique_lock lock(mMgr.mListenersMutex);
                     for (PluginListener *listener : mListeners)

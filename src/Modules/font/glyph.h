@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../math/vector2i.h"
+
 namespace Engine {
 namespace Font {
 

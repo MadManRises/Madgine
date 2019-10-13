@@ -15,10 +15,10 @@ namespace Tools {
         SceneEditor(const SceneEditor &) = delete;
 
         virtual bool init() override;
+        virtual void finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
-        virtual void update() override;
 
         const char *key() const override;
 

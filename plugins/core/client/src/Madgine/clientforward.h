@@ -29,7 +29,6 @@ namespace GUI {
     struct WindowOverlay;
 
     struct Vertex;
-
 }
 
 namespace Input {

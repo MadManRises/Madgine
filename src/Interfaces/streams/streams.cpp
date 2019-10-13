@@ -48,8 +48,9 @@ void InStream::seek(pos_type p)
 
 void InStream::skipWs()
 {
-    if (mStream.flags() & std::ios_base::skipws)
+    if (mStream.flags() & std::ios_base::skipws) {
         mStream >> std::ws;
+    }
 }
 
 InStream::operator bool() const

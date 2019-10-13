@@ -3,7 +3,6 @@
 #include "immanager.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
 #include "Madgine/input/inputhandler.h"
 

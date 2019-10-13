@@ -2,7 +2,6 @@
 
 #include "uimanager.h"
 
-#include "../gui/guisystem.h"
 #include "../gui/widgets/toplevelwindow.h"
 
 #include "../gui/widgets/widget.h"
@@ -55,7 +54,7 @@ namespace UI {
 
     bool UIManager::init()
     {
-        App::Application::getSingleton().addFrameListener(this);
+        mWindow.addFrameListener(this);
 
         markInitialized();
 
@@ -86,7 +85,7 @@ namespace UI {
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
             handler->callFinalize();
 
-        App::Application::getSingleton().removeFrameListener(this);
+        mWindow.removeFrameListener(this);
     }
 
     void UIManager::clear()
@@ -160,18 +159,7 @@ namespace UI {
         return result;
     }
 
-    /*App::Application &UIManager::app(bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow.gui().app(init);
-    }*/
 
-    const MadgineObject *UIManager::parent() const
-    {
-        return &mWindow.gui();
-    }
 
     bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
     {
@@ -208,30 +196,6 @@ namespace UI {
     const char *UIManager::key() const
     {
         return "UI";
-    }
-
-    Scene::SceneComponentBase &UIManager::getSceneComponent(size_t i, bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow.gui().getSceneComponent(i, init);
-    }
-
-    App::GlobalAPIBase &UIManager::getGlobalAPIComponent(size_t i, bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow.gui().getGlobalAPIComponent(i, init);
-    }
-
-    Scene::SceneManager &UIManager::sceneMgr(bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow.gui().sceneMgr(init);
     }
 
     GameHandlerBase &UIManager::getGameHandler(size_t i, bool init)

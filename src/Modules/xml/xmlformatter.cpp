@@ -9,20 +9,6 @@
 namespace Engine {
 namespace XML {
 
-    struct xml_ctype : std::ctype<char> {
-        static const mask *make_table()
-        {
-            // make a copy of the "C" locale table
-            static std::vector<mask> v(classic_table(), classic_table() + table_size);
-            v['"'] |= space; // comma will be classified as whitespace
-            return &v[0];
-        }
-        xml_ctype(std::size_t refs = 0)
-            : ctype(make_table(), false, refs)
-        {
-        }
-    };
-
     XMLFormatter::XMLFormatter()
         : Formatter(false, true)
     {
@@ -30,12 +16,10 @@ namespace XML {
 
     void XMLFormatter::setupStream(std::istream &in)
     {
-        in.imbue(std::locale(in.getloc(), new xml_ctype));
     }
 
     void XMLFormatter::setupStream(std::ostream &out)
     {
-        out.imbue(std::locale(out.getloc(), new xml_ctype));
     }
 
     void XMLFormatter::beginExtendedCompound(Serialize::SerializeOutStream &out, const char *name)
@@ -96,7 +80,7 @@ namespace XML {
     {
         if (mCurrentExtended) {
             out.writeUnformatted(" " + std::string(name) + "=");
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
                 out.writeUnformatted("\"");
         } else
             out.writeUnformatted(indent() + "<" + std::string(name) + ">");
@@ -105,7 +89,7 @@ namespace XML {
     void XMLFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
     {
         if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
                 out.writeUnformatted("\"");
         } else
             out.writeUnformatted("</" + std::string(name) + ">\n");
@@ -122,29 +106,27 @@ namespace XML {
                 if (in.readUntil("=").empty())
                     throw 0;
             }
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
-                in.InStream::operator>>(std::noskipws);
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
                 if (in.readN(1) != "\"")
                     throw 0;
+                in.setNextFormattedStringDelimiter('"');
             }
         } else {
             std::string prefix = in.readN(strlen(name) + 2);
             if (prefix != "<" + std::string(name) + ">")
                 throw 0;
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+                in.setNextFormattedStringDelimiter('<');
+            }
         }
     }
 
     void XMLFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
     {
-        if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
-                if (in.readN(1) != "\"")
-                    throw 0;
-                in.InStream::operator>>(std::skipws);
-            }
-        } else {
-            std::string prefix = in.readN(strlen(name) + 3);
-            if (prefix != "</" + std::string(name) + ">")
+        if (!mCurrentExtended) {
+            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) ? "/" : "</");
+            std::string prefix = in.readN(strlen(name) + 1 + strlen(cPrefix));
+            if (prefix != cPrefix + std::string(name) + ">")
                 throw 0;
         }
     }

@@ -2,42 +2,23 @@
 
 #include "Interfaces/stringutil.h"
 #include "Interfaces/macros.h"
+#include "decay.h"
 
 namespace Engine {
 
-
-struct TypeInfo {
-    static constexpr const char *fix(const char *s)
-    {
-        //TODO <> templates
-        const char *f = strrchr(s, ':');
-        return f ? f + 1 : s;
-    }
-
-    constexpr TypeInfo(const char *fullName, const char *headerPath, const TypeInfo *decayType = nullptr)
-        : mFullName(fullName)
-        , mTypeName(fix(mFullName))
-        , mHeaderPath(headerPath)
-        , mDecayType(decayType)
-    {
-    }
-
-    inline std::string namespaceName() const
-    {
-        return std::string { mFullName, strlen(mFullName) - 2 - strlen(mTypeName) };
-    }
-
-    const char *mFullName;
-    const char *mTypeName;
-    const char *mHeaderPath;
-    const TypeInfo *mDecayType;
+	template <typename T>
+struct typeMarker_t {
 };
+
+template <typename T>
+constexpr typeMarker_t<T> typeMarker;
+
 
 }
 
 DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfoInstance, typename T);
 
-#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfoInstance, SINGLE_ARG2({ #T, __FILE__ }), T)
+#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfoInstance, SINGLE_ARG3({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
 
 
 namespace Engine {
@@ -61,5 +42,34 @@ inline const char *typeName()
 {
     return typeInfo<T>().mTypeName;
 }
+
+struct TypeInfo {
+    static constexpr const char *fix(const char *s)
+    {
+        //TODO <> templates
+        const char *f = strrchr(s, ':');
+        return f ? f + 1 : s;
+    }
+
+    template <typename T>
+    constexpr TypeInfo(const char *fullName, const char *headerPath, typeMarker_t<T> type)
+        : mFullName(fullName)
+        , mTypeName(fix(mFullName))
+        , mHeaderPath(headerPath)
+        , mDecayType(std::is_same_v<decay_t<T>, void> ? nullptr : &typeInfo<decay_t<T>>)
+    {
+    }
+
+    inline std::string namespaceName() const
+    {
+        return std::string { mFullName, strlen(mFullName) - 2 - strlen(mTypeName) };
+    }
+
+    const char *mFullName;
+    const char *mTypeName;
+    const char *mHeaderPath;
+    const TypeInfo &(*mDecayType)();
+};
+
 
 }

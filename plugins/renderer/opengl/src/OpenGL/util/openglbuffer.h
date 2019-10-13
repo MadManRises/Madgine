@@ -18,6 +18,7 @@ namespace Render {
 
         void bind(GLenum target) const;
 
+		void reset();
         void setData(GLenum target, GLsizei size, const void *data);
 
         GLuint handle();

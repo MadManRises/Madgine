@@ -2,28 +2,32 @@
 
 #if ENABLE_PLUGINS
 
-#include "pluginmanager.h"
+#    include "pluginmanager.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
+#    include "imgui/imgui.h"
+#    include "imgui/imgui_internal.h"
 
-#include "imgui/imguiaddons.h"
+#    include "imgui/imguiaddons.h"
 
-#include "Modules/plugins/pluginmanager.h"
+#    include "Modules/plugins/pluginmanager.h"
 
-#include "Modules/reflection/classname.h"
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#    include "Modules/keyvalue/metatable_impl.h"
+#    include "Modules/reflection/classname.h"
+#    include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/signalslot/taskguard.h"
+#    include "Modules/signalslot/taskguard.h"
+
+#    include "Interfaces/filesystem/api.h"
+
+#    include "../project/projectmanager.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {
 namespace Tools {
 
-	static SignalSlot::TaskGuard excludeFromExport {
-		[]() {
+    static SignalSlot::TaskGuard excludeFromExport {
+        []() {
             skipUniqueComponentOnExport(&typeInfo<PluginManager>());
         },
         {}
@@ -32,151 +36,154 @@ namespace Tools {
     PluginManager::PluginManager(ImRoot &root)
         : Tool<PluginManager>(root)
         , mManager(Plugins::PluginManager::getSingleton())
+        , mUpdateConfigSlot(this)
     {
-        
     }
 
     void PluginManager::render()
     {
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
-            static char nameBuffer[256];
-            static char pathBuffer[256];
 
-            if (ImGui::BeginPopupModal("fileSelect")) {
+            ProjectManager &project = getTool<ProjectManager>();
+            const Filesystem::Path &projectRoot = project.projectRoot();
+            const std::string &config = project.config();
 
-                ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer));
-                ImGui::InputText("Path", pathBuffer, sizeof(pathBuffer));
-                if (strlen(nameBuffer) == 0 || strlen(pathBuffer) == 0) {
+            if (projectRoot.empty()) {
+                ImGui::Text("Please open a Project to modify the plugin selections.");
+            } else {
+
+                if (config.empty()) {
                     ImGui::PushDisabled();
                 }
-                if (ImGui::Button("Ok")) {
-                    mManager.setCurrentSelection(nameBuffer, pathBuffer);
-                    ImGui::CloseCurrentPopup();
-                }
-                if (strlen(nameBuffer) == 0 || strlen(pathBuffer) == 0) {
-                    ImGui::PopDisabled();
+                if (ImGui::Button("Export (with Tools)")) {
+                    exportStaticComponentHeader(projectRoot / ("components_"s + config + "(tools).cpp"), true);
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Abort"))
-                    ImGui::CloseCurrentPopup();
-                ImGui::EndPopup();
-            }
-
-            bool openDialog = false;
-
-            if (ImGui::BeginCombo("Plugin Selection file", mManager.currentSelectionName().c_str())) {
-                for (const std::pair<const std::string, std::string> &p : mManager.selectionFiles()) {
-                    bool is_selected = (mManager.currentSelectionName() == p.first); // You can store your selection however you want, outside or inside your objects
-                    if (ImGui::Selectable(p.first.c_str(), is_selected))
-                        mManager.setCurrentSelection(p.first, p.second);
-                    if (is_selected)
-                        ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                if (ImGui::Button("Export (without Tools)")) {
+                    exportStaticComponentHeader(projectRoot / ("components_"s + config + ".cpp"), false);
                 }
-                ImGui::Separator();
-
-                if (ImGui::Selectable("New ...")) {
-                    openDialog = true;
+                if (config.empty()) {
+                    ImGui::PopDisabled();
                 }
-                ImGui::EndCombo();
-            }
 
-            if (openDialog) {
-                nameBuffer[0] = '\0';
-                pathBuffer[0] = '\0';
-                ImGui::OpenPopup("fileSelect");
-            }
+                ImVec2 v = ImGui::GetContentRegionAvail();
+                v.x *= 0.5f;
 
-            if (mManager.currentSelectionName().empty()) {
-                ImGui::PushDisabled();
-            }
-            if (ImGui::Button("Export")) {
-                exportStaticComponentHeader(mManager.currentSelectionPath() / ("components_"s + mManager.currentSelectionName() + ".cpp"));
-            }
-            if (mManager.currentSelectionName().empty()) {
-                ImGui::PopDisabled();
-            }
+                ImGui::BeginChild("Child1", v, false, ImGuiWindowFlags_HorizontalScrollbar);
 
-            ImVec2 v = ImGui::GetContentRegionAvail();
-            v.x *= 0.5f;
+                for (auto &[sectionName, section] : mManager) {
+                    if (ImGui::TreeNode(sectionName.c_str())) {
+                        for (auto &[pluginName, plugin] : section) {
+                            const std::string &project = plugin.project();
 
-            ImGui::BeginChild("Child1", v, false, ImGuiWindowFlags_HorizontalScrollbar);
-
-            for (auto &[sectionName, section] : mManager) {
-                if (ImGui::TreeNode(sectionName.c_str())) {
-                    for (auto &[pluginName, plugin] : section) {
-                        const std::string &project = plugin.project();
-
-                        if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
-                            ImGui::PushDisabled();
-                        }
-                        bool loaded = plugin.isLoaded() == Plugins::Plugin::LOADED;
-                        bool clicked = false;
-                        std::string displayName{ pluginName + " (" + project + ")" };
-                        if (section.isExclusive()) {
-                            clicked = ImGui::RadioButton(displayName.c_str(), loaded);
-                            if (clicked)
-                                loaded = true;
-                        } else
-                            clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
-                        if (clicked) {
-                            if (loaded)
-                                section.loadPlugin(pluginName);
-                            else
-                                section.unloadPlugin(pluginName);
-                        }
-                        if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
-                            ImGui::PopDisabled();
-                        }
-                    }
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::EndChild();
-            ImGui::SameLine();
-
-            ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
-
-            for (Plugins::PluginSection &section : kvValues(mManager)) {
-                for (auto &[pluginName, plugin] : section) {
-                    if (plugin.isLoaded() == Plugins::Plugin::LOADED) {
-                        const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
-
-                        if (ImGui::TreeNode(pluginName.c_str())) {
-                            const char **dep = binInfo->mPluginDependencies;
-                            if (*dep && ImGui::TreeNode("Dependencies")) {
-                                while (*dep) {
-                                    ImGui::Text("%s", *dep);
-                                    ++dep;
-                                }
-                                ImGui::TreePop();
+                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
+                                ImGui::PushDisabled();
                             }
+                            bool loaded = plugin.isLoaded() == Plugins::Plugin::LOADED;
+                            bool clicked = false;
+                            std::string displayName { pluginName + " (" + project + ")" };
+                            if (section.isExclusive()) {
+                                clicked = ImGui::RadioButton(displayName.c_str(), loaded);
+                                if (clicked)
+                                    loaded = true;
+                            } else
+                                clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
+                            if (clicked) {
+                                if (loaded)
+                                    section.loadPlugin(pluginName);
+                                else
+                                    section.unloadPlugin(pluginName);
+                                updateConfigFile();
+                            }
+                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
+                                ImGui::PopDisabled();
+                            }
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::EndChild();
+                ImGui::SameLine();
 
-                            if (ImGui::TreeNode("UniqueComponents")) {
-                                for (ComponentRegistryBase *reg : kvValues(registryRegistry())) {
-                                    for (CollectorInfo *info : *reg) {
-                                        if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
-                                            for (const TypeInfo *component : info->mElementInfos) {
-                                                ImGui::Text("%s", component->mTypeName);
+                ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
+
+                for (Plugins::PluginSection &section : kvValues(mManager)) {
+                    for (auto &[pluginName, plugin] : section) {
+                        if (plugin.isLoaded() == Plugins::Plugin::LOADED) {
+                            const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
+
+                            if (ImGui::TreeNode(pluginName.c_str())) {
+                                const char **dep = binInfo->mPluginDependencies;
+                                if (*dep && ImGui::TreeNode("Dependencies")) {
+                                    while (*dep) {
+                                        ImGui::Text("%s", *dep);
+                                        ++dep;
+                                    }
+                                    ImGui::TreePop();
+                                }
+
+                                if (ImGui::TreeNode("UniqueComponents")) {
+                                    for (ComponentRegistryBase *reg : kvValues(registryRegistry())) {
+                                        for (CollectorInfo *info : *reg) {
+                                            if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
+                                                for (const TypeInfo *component : info->mElementInfos) {
+                                                    ImGui::Text("%s", component->mTypeName);
+                                                }
+                                                ImGui::TreePop();
                                             }
-                                            ImGui::TreePop();
                                         }
                                     }
+                                    ImGui::TreePop();
                                 }
                                 ImGui::TreePop();
                             }
-                            ImGui::TreePop();
                         }
                     }
                 }
+                ImGui::EndChild();
             }
-            ImGui::EndChild();
         }
         ImGui::End();
+    }
+
+    bool PluginManager::init()
+    {
+        ProjectManager &project = getTool<ProjectManager>();
+
+        project.mProjectChanged.connect(mUpdateConfigSlot);
+        setCurrentConfig(project.projectRoot(), project.config());
+
+        return ToolBase::init();
     }
 
     const char *PluginManager::key() const
     {
         return "Plugin Manager";
+    }
+
+    void PluginManager::setCurrentConfig(const Filesystem::Path &path, const std::string &name)
+    {
+        if (!name.empty()) {
+            Filesystem::Path p = path / (name + ".cfg");
+            if (Filesystem::exists(p)) {
+                Ini::IniFile file { p };
+                mManager.loadSelection(file);
+            }
+        }
+        updateConfigFile();
+    }
+
+    void PluginManager::updateConfigFile()
+    {
+        ProjectManager &project = getTool<ProjectManager>();
+        if (!project.config().empty()) {
+            Filesystem::Path p = project.projectRoot() / (project.config() + "(tools).cfg");
+            Ini::IniFile file { p };
+            mManager.saveSelection(file, true);
+            Filesystem::Path p_notools = project.projectRoot() / (project.config() + ".cfg");
+            Ini::IniFile file_notools { p_notools };
+            mManager.saveSelection(file_notools, false);
+        }
     }
 }
 }

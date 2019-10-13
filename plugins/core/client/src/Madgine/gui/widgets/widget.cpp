@@ -16,7 +16,6 @@
 #include "tabwidget.h"
 #include "textbox.h"
 
-#include "../guisystem.h"
 #include "Madgine/app/application.h"
 
 #include "Modules/math/vector4.h"
@@ -26,6 +25,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
+
+#include "Modules/font/font.h"
 
 METATABLE_BEGIN(Engine::GUI::WidgetBase)
 READONLY_PROPERTY(Widgets, children)
@@ -39,6 +40,7 @@ SERIALIZETABLE_BEGIN(Engine::GUI::WidgetBase)
 FIELD(mChildren, Serialize::ParentCreator<&WidgetBase::createWidgetClassTuple>)
 FIELD(mPos)
 FIELD(mSize)
+FIELD(mName)
 SERIALIZETABLE_END(Engine::GUI::WidgetBase)
 
 namespace Engine {
@@ -150,21 +152,15 @@ namespace GUI {
             mWindow.destroyTopLevel(this);
     }
 
-    void WidgetBase::releaseInput()
-    {
-    }
-
-    void WidgetBase::captureInput()
-    {
-    }
-
-    void WidgetBase::activate()
-    {
-    }
-
     const std::string &WidgetBase::getName() const
     {
         return mName;
+    }
+
+    void Engine::GUI::WidgetBase::setName(const std::string &name)
+    {
+        mWindow.updateWidget(this, name);
+        mName = name;
     }
 
     const char *WidgetBase::key() const
@@ -308,14 +304,6 @@ namespace GUI {
 			return Scope::maps().merge(mChildren, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible), MAP(Size, getSize, setSize), MAP(Position, getPos, setPos));
 		}*/
 
-    void WidgetBase::showModal()
-    {
-    }
-
-    void WidgetBase::hideModal()
-    {
-    }
-
     void WidgetBase::show()
     {
         mVisible = true;
@@ -338,6 +326,14 @@ namespace GUI {
             if (WidgetBase *f = w->getChildRecursive(name))
                 return f;
         return nullptr;
+    }
+
+    void WidgetBase::setParent(WidgetBase *parent)
+    {
+        auto it = std::find_if(mParent->mChildren.begin(), mParent->mChildren.end(), [this](std::unique_ptr<WidgetBase> &p) { return p.get() == this; });
+        parent->mChildren.emplace_back(mParent->mChildren.extract(it));
+        mParent = parent;
+        updateGeometry(window().getScreenSize(), parent->getAbsoluteSize());
     }
 
     WidgetBase *WidgetBase::getParent() const
@@ -407,7 +403,7 @@ namespace GUI {
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::pair<std::vector<Vertex>, uint32_t> WidgetBase::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
     {
         return {};
     }
@@ -513,7 +509,81 @@ namespace GUI {
     {
         SerializableUnitBase::writeCreationData(of);
         of.write(mName, "name");
-		of.write(getClass(), "type");
+        of.write(getClass(), "type");
+    }
+
+    std::pair<std::vector<Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    {
+        std::vector<Vertex> result;
+
+        size_t textLen = text.size();
+
+        if (textLen == 0)
+            return {};
+
+        float scaleX = fontSize / 5.0f / screenSize.x;
+        float scaleY = fontSize / 5.0f / screenSize.y;
+
+        const float padding = 1.0f * scaleX;
+
+        float fullWidth = padding * (textLen - 1);
+        float minY = 0.0f;
+        float maxY = 0.0f;
+
+        for (size_t i = 0; i < textLen; ++i) {
+            Font::Glyph &g = font->mGlyphs[text[i]];
+
+            fullWidth += g.mSize.x * scaleX;
+            maxY = max(maxY, g.mBearingY * scaleY);
+            minY = min(minY, (g.mBearingY - g.mSize.y) * scaleY);
+        }
+
+        float fullHeight = maxY - minY;
+
+        float xLeft = -fullWidth * pivot.x;
+        float yTop = -fullHeight * pivot.y;
+
+        float cursorX = xLeft;
+
+        for (size_t i = 0; i < textLen; ++i) {
+            Font::Glyph &g = font->mGlyphs[text[i]];
+
+            float width = g.mSize.x * scaleX;
+            float height = g.mSize.y * scaleY;
+
+            float vPosX1 = cursorX;
+            float vPosX2 = cursorX + width;
+            float vPosY1 = yTop + fullHeight - g.mBearingY * scaleY;
+            float vPosY2 = vPosY1 + height;
+
+            Vector3 v11 = { vPosX1, vPosY1, pos.z + 0.5f }, v12 = { vPosX2, vPosY1, pos.z + 0.5f }, v21 = { vPosX1, vPosY2, pos.z + 0.5f }, v22 = { vPosX2, vPosY2, pos.z + 0.5f };
+
+            int uvWidth = g.mSize.x;
+            int uvHeight = g.mSize.y;
+
+            if (g.mFlipped)
+                std::swap(uvWidth, uvHeight);
+
+            Vector2 uvTopLeft = { float(g.mUV.x) / font->mTextureSize.x, float(g.mUV.y) / font->mTextureSize.y };
+            Vector2 uvBottomRight = { float(g.mUV.x + uvWidth) / font->mTextureSize.x,
+                float(g.mUV.y + uvHeight) / font->mTextureSize.y };
+
+            Vector2 uvTopRight = { uvBottomRight.x, uvTopLeft.y };
+            Vector2 uvBottomLeft = { uvTopLeft.x, uvBottomRight.y };
+
+            if (g.mFlipped)
+                std::swap(uvTopRight, uvBottomLeft);
+
+            result.push_back({ v11 + pos, { 1, 1, 1, 1 }, uvTopLeft });
+            result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
+            result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
+            result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
+            result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
+            result.push_back({ v22 + pos, { 1, 1, 1, 1 }, uvBottomRight });
+
+            cursorX += g.mAdvance / 64.0f * scaleX;
+        }
+        return { result, { font->mTextureHandle, Render::TextureFlag_IsDistanceField } };
     }
 
 }

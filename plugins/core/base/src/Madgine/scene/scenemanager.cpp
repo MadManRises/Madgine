@@ -48,7 +48,6 @@ namespace Scene {
 
     bool SceneManager::init()
     {
-        mApp.addFrameListener(this);
         markInitialized();
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             if (!component->callInit())
@@ -66,7 +65,6 @@ namespace Scene {
             component->callFinalize();
         }
 
-        mApp.removeFrameListener(this);
     }
 
     decltype(SceneManager::mEntities) &SceneManager::entities()
@@ -126,7 +124,7 @@ namespace Scene {
         return mClearedSignal;
     }
 
-    bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
+    /*bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
     {
         PROFILE();
 
@@ -157,7 +155,7 @@ namespace Scene {
         }
 
         return true;
-    }
+    }*/
 
     Entity::Entity *SceneManager::findEntity(const std::string &name)
     {
@@ -197,21 +195,6 @@ namespace Scene {
     Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
     {
         return &mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
-    }
-
-    Scene::Camera *SceneManager::createCamera(std::string name)
-    {
-        return &mCameras.emplace_back(std::move(name));
-    }
-
-    void SceneManager::destroyCamera(Scene::Camera *camera)
-    {
-        mCameras.erase(std::find_if(mCameras.begin(), mCameras.end(), [=](const Scene::Camera &c) { return &c == camera; }));
-    }
-
-    std::list<Camera> &SceneManager::cameras()
-    {
-        return mCameras;
     }
 
     std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)
@@ -262,18 +245,8 @@ namespace Scene {
         return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
     }
 
-    void SceneManager::updateCamera(Camera &camera)
-    {
-        auto &transform = toPointer(mEntities);
-        std::vector<Entity::Entity *> entities { transform.begin(), transform.end() };
-        auto &localTransform = toPointer(mLocalEntities);
-        std::copy(localTransform.begin(), localTransform.end(), std::back_inserter(entities));
-
-        camera.setVisibleEntities(std::move(entities));
-    }
-
     void SceneManager::removeQueuedEntities()
-    {
+    {        
         std::list<Entity::Entity *>::iterator it = mEntityRemoveQueue.begin();
 
         auto find = [&](const Entity::Entity &ent) { return &ent == *it; };
@@ -300,4 +273,3 @@ namespace Scene {
     }
 }
 }
-

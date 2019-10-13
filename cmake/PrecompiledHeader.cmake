@@ -30,6 +30,7 @@ function(add_precompiled_header target header)
 		#OBJECT_OUTPUTS ${output} #??
 	)
 	add_library(${target}_PCH OBJECT ${cppsource})
+	set_target_properties(${target}_PCH PROPERTIES EXCLUDE_FROM_ALL TRUE)
 	add_dependencies(${target} ${target}_PCH)
 
 	target_include_directories(${target}_PCH PRIVATE $<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>)	

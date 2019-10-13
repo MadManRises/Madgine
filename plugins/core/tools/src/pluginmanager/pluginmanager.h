@@ -2,28 +2,33 @@
 
 #if ENABLE_PLUGINS
 
-#include "../toolscollector.h"
-#include "../tinyxml/tinyxml2.h"
+#    include "../tinyxml/tinyxml2.h"
+#    include "../toolscollector.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
+namespace Engine {
+namespace Tools {
 
-		class PluginManager : public Tool<PluginManager>
-		{
-		public:
-			PluginManager(ImRoot &root);
+    class PluginManager : public Tool<PluginManager> {
+    public:
+        PluginManager(ImRoot &root);
 
-			virtual void render() override;
+        virtual void render() override;
 
-			const char* key() const override;
+		virtual bool init() override;
 
-		private:
-			Plugins::PluginManager &mManager;
-		};
+        const char *key() const override;
 
-	}
+        void setCurrentConfig(const Filesystem::Path &path, const std::string &name);
+
+    protected:
+        void updateConfigFile();
+
+    private:
+        Plugins::PluginManager &mManager;
+        Threading::Slot<&PluginManager::setCurrentConfig> mUpdateConfigSlot;
+    };
+
+}
 }
 
 RegisterType(Engine::Tools::PluginManager);

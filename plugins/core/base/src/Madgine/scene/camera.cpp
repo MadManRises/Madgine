@@ -21,26 +21,6 @@ namespace Scene {
     {
     }
 
-    void Camera::setPosition(const Vector3 &pos)
-    {
-        mPosition = pos;
-    }
-
-    const Vector3 &Camera::position()
-    {
-        return mPosition;
-    }
-
-    void Camera::setOrientation(const Quaternion &q)
-    {
-        mOrientation = q;
-    }
-
-    const Quaternion &Camera::orientation()
-    {
-        return mOrientation;
-    }
-
     Matrix4 Camera::getViewProjectionMatrix(float aspectRatio)
     {
         return getProjectionMatrix(aspectRatio) * getViewMatrix();
@@ -70,66 +50,6 @@ namespace Scene {
         return p;
     }
 
-    float Camera::getF() const
-    {
-        return mF;
-    }
-
-    void Camera::setF(float f)
-    {
-        mF = f;
-    }
-
-    float Camera::getN() const
-    {
-        return mN;
-    }
-
-    void Camera::setN(float n)
-    {
-        mN = n;
-    }
-
-    float Camera::getFOV() const
-    {
-        return mFOV;
-    }
-
-    void Camera::setFOV(float fov)
-    {
-        mFOV = fov;
-    }
-
-    const std::string &Camera::getName() const
-    {
-        return mName;
-    }
-
-    void Camera::setName(const std::string &name)
-    {
-        mName = name;
-    }
-
-    Vector3 Camera::getOrientationHandle() const
-    {
-        return Vector3::ZERO;
-    }
-
-    void Camera::rotate(const Vector3 &rot)
-    {
-        mOrientation = Quaternion::FromRadian(rot) * mOrientation;
-    }
-
-    const std::vector<Entity::Entity *> &Camera::visibleEntities() const
-    {
-        return mVisibleEntities;
-    }
-
-    void Camera::setVisibleEntities(std::vector<Entity::Entity *> visibleEntities)
-    {
-        mVisibleEntities.swap(visibleEntities);
-    }
-
     Ray Camera::mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize)
     {
         float aspectRatio = viewportSize.x / viewportSize.y;
@@ -137,8 +57,8 @@ namespace Scene {
         float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
         float t = r /* / aspectRatio*/;
 
-        Vector3 dir = mOrientation * Vector3 { (2.f * mousePos.x / viewportSize.x - 1.0f) * r, (1.0f - 2.f * mousePos.y / viewportSize.y) * t, mN };
-        dir.normalise();
+        Vector3 dir = mOrientation * Vector3 { (2.f * (mousePos.x + 0.5f) / viewportSize.x - 1.0f) * r, (1.0f - 2.f * (mousePos.y + 0.5f) / viewportSize.y) * t, mN };
+        dir.normalize();
         return { mPosition, dir };
     }
 
@@ -152,11 +72,11 @@ namespace Scene {
 }
 
 METATABLE_BEGIN(Engine::Scene::Camera)
-PROPERTY(Name, getName, setName)
-PROPERTY(Position, position, setPosition)
-PROPERTY(Near, getN, setN)
-PROPERTY(Far, getF, setF)
-PROPERTY(FOV, getFOV, setFOV)
+MEMBER(mName)
+MEMBER(mPosition)
+MEMBER(mN)
+MEMBER(mF)
+MEMBER(mFOV)
 METATABLE_END(Engine::Scene::Camera)
 
 RegisterType(Engine::Scene::Camera);

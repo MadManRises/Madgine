@@ -29,17 +29,19 @@ namespace Render {
     {
     }
 
+    OpenGLVertexArray::OpenGLVertexArray(dont_create_t)
+    {
+    }
+
     OpenGLVertexArray::~OpenGLVertexArray()
     {
-#if OPENGL_ES
-        if (sCurrentBound == this)
-            sCurrentBound = nullptr;
-#else
-        if (mHandle) {
-            glDeleteVertexArrays(1, &mHandle);
-            glCheck();
-        }
-#endif
+        reset();
+    }
+
+    OpenGLVertexArray &OpenGLVertexArray::operator=(OpenGLVertexArray &&other)
+    {
+        std::swap(mHandle, other.mHandle);
+        return *this;
     }
 
     unsigned int OpenGLVertexArray::getCurrent()
@@ -50,6 +52,23 @@ namespace Render {
         return dummy;
 #else
         return reinterpret_cast<uintptr_t>(sCurrentBound);
+#endif
+    }
+
+    void OpenGLVertexArray::reset()
+    {
+#if OPENGL_ES
+        if (sCurrentBound == this)
+            sCurrentBound = nullptr;
+        mAttributes.clear();
+        mVBO = 0;
+        mEBO = 0;
+#else
+        if (mHandle) {
+            glDeleteVertexArrays(1, &mHandle);
+            glCheck();
+            mHandle = 0;
+        }
 #endif
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../serialize/serializemanager.h"
+#include "Interfaces/filesystem/path.h"
 
 namespace Engine {
 namespace Filesystem {

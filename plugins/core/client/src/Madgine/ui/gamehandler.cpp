@@ -1,6 +1,5 @@
 #include "../clientlib.h"
 #include "gamehandler.h"
-#include "../gui/guisystem.h"
 #include "../gui/widgets/widget.h"
 #include "uimanager.h"
 
@@ -17,7 +16,7 @@ RegisterType(Engine::UI::GameHandlerBase);
 
 namespace Engine {
 namespace UI {
-    const float GameHandlerBase::mDragStartThreshold = 0.01f;
+    const float GameHandlerBase::mDragStartThreshold = 100.0f;
 
     GameHandlerBase::GameHandlerBase(UIManager &ui, Scene::ContextMask context)
         : Handler(ui)
@@ -31,7 +30,6 @@ namespace UI {
     void GameHandlerBase::abortDrag()
     {
         mDragging = false;
-        mWidget->releaseInput();
         onPointerDragAbort();
     }
 
@@ -45,14 +43,6 @@ namespace UI {
     {
         if (mContext & mask)
             fixedUpdate(timeStep);
-    }
-
-    Scene::SceneManager &GameHandlerBase::sceneMgr(bool init) const
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.sceneMgr(init);
     }
 
     GameHandlerBase &GameHandlerBase::getSelf(bool init)
@@ -73,7 +63,6 @@ namespace UI {
                 mSingleClick = false;
                 if (mPointerDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED) {
                     mDragging = true;
-                    mWidget->captureInput();
                     if (mPointerDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR) {
                         mUI.hideCursor();
                     }
@@ -104,7 +93,6 @@ namespace UI {
         if (args.button == mCurrentMouseButton) {
             if (mDragging) {
                 mDragging = false;
-                mWidget->releaseInput();
                 if (mPointerDragModes[mCurrentMouseButton] == MouseDragMode::ENABLED_HIDECURSOR) {
                     mUI.showCursor();
                 }

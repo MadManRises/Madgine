@@ -23,7 +23,7 @@ namespace Engine
 			std::string extension();
 			std::string name();
 
-			void updatePath(const Filesystem::Path &path) { throw 0; }//TODO
+			void updatePath(const Filesystem::Path &path) { LOG_WARNING("Implement updatePath!"); } //TODO
 
 			std::string readAsText();
 

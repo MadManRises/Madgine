@@ -141,6 +141,14 @@ namespace Serialize {
             return erase_intern(from, to);
         }
 
+        type extract(const iterator &which)
+        {
+            beforeRemove(which);
+            type temp = std::move(*which);
+            erase_intern(which);
+            return temp;
+        }
+
         std::pair<iterator, bool> read_item_where(SerializeInStream &in, const const_iterator &where)
         {
             std::pair<iterator, bool> it = read_item_where_intern(in, where);
@@ -362,7 +370,6 @@ namespace Serialize {
         iterator mActiveIterator;
     };
 
-	
     template <template <typename...> typename C, typename OffsetPtr>
     using PartialOffsetContainer = partial<C, type_pack<OffsetPtr>>;
 
@@ -373,7 +380,7 @@ namespace Serialize {
     ::Engine::Serialize::SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
-#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...)                                                                                \
+#define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...)                                                                          \
     Pre Serialize::PartialOffsetContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>>::type __VA_ARGS__ Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 

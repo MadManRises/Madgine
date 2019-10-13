@@ -14,16 +14,11 @@
 #include "tabwidget.h"
 #include "textbox.h"
 
-#include "../guisystem.h"
-
 #include "../../input/inputhandler.h"
 
 #include "Modules/keyvalue/keyvalueiterate.h"
 
 #include "Interfaces/window/windowapi.h"
-
-#include "Madgine/app/application.h"
-#include "Madgine/app/appsettings.h"
 
 #include "../windowoverlay.h"
 
@@ -41,157 +36,45 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Interfaces/exception.h"
+
+DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
+
+METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
+READONLY_PROPERTY(Widgets, widgets)
+READONLY_PROPERTY(Components, components)
+MEMBER(mStartupWidget)
+METATABLE_END(Engine::GUI::TopLevelWindow)
+
+RegisterType(Engine::GUI::TopLevelWindow);
+RegisterType(Engine::GUI::TopLevelWindowComponentBase);
+
 SERIALIZETABLE_BEGIN(Engine::GUI::TopLevelWindow)
 FIELD(mTopLevelWidgets, Serialize::ParentCreator<&TopLevelWindow::createWidgetClassTuple>)
 FIELD(mComponents)
+FIELD(mStartupWidget)
 SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
 
 namespace Engine {
 
 namespace GUI {
-    TopLevelWindow::TopLevelWindow(GUISystem &gui)
-        : mGui(gui)
-        , mComponents(*this)
+    TopLevelWindow::TopLevelWindow(const Window::WindowSettings &settings)
+        : mComponents(*this)
+        , mSettings(settings)
     {
-        const App::AppSettings &settings = App::Application::getSingleton().settings();
-
-        mWindow = Window::sCreateWindow(settings.mWindowSettings);
-
-        mWindow->addListener(this);
-
-        if (settings.mInput) {
-            mExternalInput = static_cast<Input::InputHandler *>(settings.mInput);
-        } else {
-            mInputHandlerSelector.emplace(mWindow, App::Application::getSingleton(), this, 0);
-        }
-
-        mRenderWindow = gui.renderer().createWindow(mWindow, this);
-        App::Application::getSingleton().addFrameListener(this);
-
-        WidgetBase *loading = createTopLevelImage("Loading");
-        WidgetBase *progress = loading->createChildBar("ProgressBar");
-        progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
-        progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        WidgetBase *loadMsg = loading->createChildLabel("LoadingMsg");
-        WidgetBase *ingame = createTopLevelWidget("ingame");
-        SceneWindow *game = ingame->createChildSceneWindow("game");
-        //game->setCamera(gui.sceneMgr().createCamera());
-        game->setSize({ 0.8f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        WidgetBase *placeBaseButton = game->createChildButton("PlaceBaseButton");
-        placeBaseButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
-        placeBaseButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        WidgetBase *endTurnButton = game->createChildButton("EndTurnButton");
-        endTurnButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
-        endTurnButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        WidgetBase *unitUI = ingame->createChildWidget("UnitUI");
-        unitUI->setPos({ 0.8f, 0, 0, 0, 0, 0, 0, 0, 0 });
-        unitUI->setSize({ 0.2f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        WidgetBase *fieldImage = unitUI->createChildImage("FieldImage");
-        fieldImage->setPos({ 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        fieldImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderImage = unitUI->createChildImage("DefenderImage");
-        defenderImage->setPos({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
-        defenderImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderHealth = defenderImage->createChildBar("DefenderHealth");
-        defenderHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        defenderHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *defenderExp = defenderImage->createChildBar("DefenderExp");
-        defenderExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *attackerImage = unitUI->createChildImage("AttackerImage");
-        attackerImage->setPos({ 0, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
-        attackerImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *attackerHealth = attackerImage->createChildBar("AttackerHealth");
-        attackerHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        attackerHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *attackerExp = attackerImage->createChildBar("AttackerExp");
-        attackerExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        attackerExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *modifierImage = unitUI->createChildImage("ModifierImage");
-        modifierImage->setPos({ 1.15f, 0, 0, 0.15f, 0, 0, 0, 0, 0 });
-        modifierImage->setSize({ 0.2f, 0, 0, 0.2f, 0, 0, 0, 0, 1 });
-        Image *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
-        attackerStrengthIcon->setPos({ 0.025f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
-        attackerStrengthIcon->setSize({ 0.15f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        attackerStrengthIcon->setImageByName("Sword-01");
-        WidgetBase *attackerStrength = unitUI->createChildLabel("AttackerStrength");
-        attackerStrength->setPos({ 0.2f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
-        attackerStrength->setSize({ 0.2f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        WidgetBase *strengthArrow = unitUI->createChildImage("StrengthArrow");
-        strengthArrow->setPos({ 0.4f, 0, 0, 1.075f, 0, 0, 0, 0, 0 });
-        strengthArrow->setSize({ 0.2f, 0, 0, 0.05f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderStrength = unitUI->createChildLabel("DefenderStrength");
-        defenderStrength->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderStrength->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
-        defenderStrengthIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderStrengthIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *contentWindow = unitUI->createChildWidget("ContentWindow");
-        contentWindow->setPos({ 0, 0, 0, 1, 0, 0, 0, 0, 0 });
-        contentWindow->setSize({ 1, 0, 0, -1, 1, 0, 0, 0, 1 });
-        WidgetBase *movementIcon = unitUI->createChildImage("MovementIcon");
-        movementIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        movementIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *movement = unitUI->createChildLabel("Movement");
-        movement->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        movement->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *health = unitUI->createChildLabel("Health");
-        health->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        health->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *mainMenu = createTopLevelWidget("MainMenu");
-        WidgetBase *optionsButton = mainMenu->createChildButton("OptionsButton");
-        optionsButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        optionsButton->setPos({ 0.55f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        WidgetBase *findMatchButton = mainMenu->createChildButton("FindMatchButton");
-        findMatchButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        findMatchButton->setPos({ 0.55f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
-        WidgetBase *playButton = mainMenu->createChildButton("PlayButton");
-        playButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        playButton->setPos({ 0.05f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        WidgetBase *quitButton = mainMenu->createChildButton("QuitButton");
-        quitButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        quitButton->setPos({ 0.05f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
-        Image *titleScreen = mainMenu->createChildImage("noname");
-        titleScreen->setImageByName("TitleScreen");
-        titleScreen->setSize({ 0.8f, 0, 0, 0.1f, 0, 0, 0, 0, 1 });
-        titleScreen->setPos({ 0.1f, 0, 0, 0, 0.05f, 0, 0, 0, 0 });
-        WidgetBase *connectionFailureWindow = createTopLevelWidget("ConnectionFailureWindow");
-        WidgetBase *connectionLabel = connectionFailureWindow->createChildLabel("ConnectionLabel");
-        WidgetBase *retryButton = connectionFailureWindow->createChildButton("RetryButton");
-        WidgetBase *abortButton = connectionFailureWindow->createChildButton("AbortButton");
-        WidgetBase *lobbyMenu = createTopLevelWidget("LobbyMenu");
-        WidgetBase *startGameButton = lobbyMenu->createChildButton("StartGameButton");
-        WidgetBase *lobbyListMenu = createTopLevelWidget("LobbyListMenu");
-        WidgetBase *createLobbyButton = lobbyListMenu->createChildButton("CreateLobbyButton");
-        WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
-        WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
-        WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-		
-        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
-            bool result = comp->callInit();
-            assert(result);
-        }
+        mLoop.addSetupSteps(
+            [this]() {
+                if (!callInit())
+                    throw exception("Window Init Failed!");
+            },
+            [this]() {
+                callFinalize();
+            });
     }
 
     TopLevelWindow::~TopLevelWindow()
     {
-        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
-            comp->callFinalize();
-        }
-
-        App::Application::getSingleton().removeFrameListener(this);
-        mWindow->removeListener(this);
-
-        mTopLevelWidgets.clear();
-
-        mWindow->destroy();
-
         assert(mWidgets.empty());
-    }
-
-    void TopLevelWindow::close()
-    {
-        mGui.closeTopLevelWindow(this);
     }
 
     /*void TopLevelWindow::showCursor()
@@ -206,6 +89,8 @@ namespace GUI {
 
     Vector3 TopLevelWindow::getScreenSize()
     {
+        if (!mWindow)
+            return { 0, 0, 1.0f };
         return { (float)mWindow->renderWidth(), (float)mWindow->renderHeight(), 1.0f };
     }
 
@@ -409,6 +294,153 @@ namespace GUI {
         return t;
     }
 
+    const MadgineObject *TopLevelWindow::parent() const
+    {
+        return nullptr;
+    }
+
+    bool TopLevelWindow::init()
+    {
+
+        mWindow = Window::sCreateWindow(mSettings);
+
+        mWindow->addListener(this);
+
+        if (mSettings.mInput) {
+            mExternalInput = static_cast<Input::InputHandler *>(mSettings.mInput);
+        } else {
+            mInputHandlerSelector.emplace(*this, mWindow, this, 0);
+        }
+
+        mRenderWindow.emplace(mWindow, this, nullptr);
+        addFrameListener(this);
+
+        /*WidgetBase *loading = createTopLevelImage("Loading");
+        WidgetBase *progress = loading->createChildBar("ProgressBar");
+        progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
+        progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
+        WidgetBase *loadMsg = loading->createChildLabel("LoadingMsg");
+        WidgetBase *ingame = createTopLevelWidget("ingame");
+        SceneWindow *game = ingame->createChildSceneWindow("game");
+        //game->setCamera(gui.sceneMgr().createCamera());
+        game->setSize({ 0.8f, 0, 0, 0, 1, 0, 0, 0, 1 });
+        WidgetBase *placeBaseButton = game->createChildButton("PlaceBaseButton");
+        placeBaseButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
+        placeBaseButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
+        WidgetBase *endTurnButton = game->createChildButton("EndTurnButton");
+        endTurnButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
+        endTurnButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
+        WidgetBase *unitUI = ingame->createChildWidget("UnitUI");
+        unitUI->setPos({ 0.8f, 0, 0, 0, 0, 0, 0, 0, 0 });
+        unitUI->setSize({ 0.2f, 0, 0, 0, 1, 0, 0, 0, 1 });
+        WidgetBase *fieldImage = unitUI->createChildImage("FieldImage");
+        fieldImage->setPos({ 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        fieldImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
+        WidgetBase *defenderImage = unitUI->createChildImage("DefenderImage");
+        defenderImage->setPos({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
+        defenderImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
+        WidgetBase *defenderHealth = defenderImage->createChildBar("DefenderHealth");
+        defenderHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
+        defenderHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *defenderExp = defenderImage->createChildBar("DefenderExp");
+        defenderExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        defenderExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *attackerImage = unitUI->createChildImage("AttackerImage");
+        attackerImage->setPos({ 0, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
+        attackerImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
+        WidgetBase *attackerHealth = attackerImage->createChildBar("AttackerHealth");
+        attackerHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
+        attackerHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *attackerExp = attackerImage->createChildBar("AttackerExp");
+        attackerExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        attackerExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *modifierImage = unitUI->createChildImage("ModifierImage");
+        modifierImage->setPos({ 1.15f, 0, 0, 0.15f, 0, 0, 0, 0, 0 });
+        modifierImage->setSize({ 0.2f, 0, 0, 0.2f, 0, 0, 0, 0, 1 });
+        Image *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
+        attackerStrengthIcon->setPos({ 0.025f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
+        attackerStrengthIcon->setSize({ 0.15f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
+        attackerStrengthIcon->setImageByName("Sword-01");
+        WidgetBase *attackerStrength = unitUI->createChildLabel("AttackerStrength");
+        attackerStrength->setPos({ 0.2f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
+        attackerStrength->setSize({ 0.2f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
+        WidgetBase *strengthArrow = unitUI->createChildImage("StrengthArrow");
+        strengthArrow->setPos({ 0.4f, 0, 0, 1.075f, 0, 0, 0, 0, 0 });
+        strengthArrow->setSize({ 0.2f, 0, 0, 0.05f, 0, 0, 0, 0, 1 });
+        WidgetBase *defenderStrength = unitUI->createChildLabel("DefenderStrength");
+        defenderStrength->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        defenderStrength->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
+        defenderStrengthIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        defenderStrengthIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *contentWindow = unitUI->createChildWidget("ContentWindow");
+        contentWindow->setPos({ 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        contentWindow->setSize({ 1, 0, 0, -1, 1, 0, 0, 0, 1 });
+        WidgetBase *movementIcon = unitUI->createChildImage("MovementIcon");
+        movementIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        movementIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *movement = unitUI->createChildLabel("Movement");
+        movement->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        movement->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *health = unitUI->createChildLabel("Health");
+        health->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
+        health->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        WidgetBase *mainMenu = createTopLevelWidget("MainMenu");
+        WidgetBase *optionsButton = mainMenu->createChildButton("OptionsButton");
+        optionsButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        optionsButton->setPos({ 0.55f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
+        WidgetBase *findMatchButton = mainMenu->createChildButton("FindMatchButton");
+        findMatchButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        findMatchButton->setPos({ 0.55f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
+        WidgetBase *playButton = mainMenu->createChildButton("PlayButton");
+        playButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        playButton->setPos({ 0.05f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
+        WidgetBase *quitButton = mainMenu->createChildButton("QuitButton");
+        quitButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
+        quitButton->setPos({ 0.05f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
+        Image *titleScreen = mainMenu->createChildImage("noname");
+        titleScreen->setImageByName("TitleScreen");
+        titleScreen->setSize({ 0.8f, 0, 0, 0.1f, 0, 0, 0, 0, 1 });
+        titleScreen->setPos({ 0.1f, 0, 0, 0, 0.05f, 0, 0, 0, 0 });
+        WidgetBase *connectionFailureWindow = createTopLevelWidget("ConnectionFailureWindow");
+        WidgetBase *connectionLabel = connectionFailureWindow->createChildLabel("ConnectionLabel");
+        WidgetBase *retryButton = connectionFailureWindow->createChildButton("RetryButton");
+        WidgetBase *abortButton = connectionFailureWindow->createChildButton("AbortButton");
+        WidgetBase *lobbyMenu = createTopLevelWidget("LobbyMenu");
+        WidgetBase *startGameButton = lobbyMenu->createChildButton("StartGameButton");
+        WidgetBase *lobbyListMenu = createTopLevelWidget("LobbyListMenu");
+        WidgetBase *createLobbyButton = lobbyListMenu->createChildButton("CreateLobbyButton");
+        WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
+        WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
+        WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");*/
+
+        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+            bool result = comp->callInit();
+            assert(result);
+        }
+        return true;
+    }
+
+    void TopLevelWindow::finalize()
+    {
+        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+            comp->callFinalize();
+        }
+
+        removeFrameListener(this);
+
+        mTopLevelWidgets.clear();
+
+		mRenderWindow->reset();
+
+		mInputHandlerSelector.reset();
+
+        if (mWindow) {
+            mWindow->removeListener(this);
+            mWindow->destroy();
+        }
+    }
+
     ToolWindow *TopLevelWindow::createToolWindow(const Window::WindowSettings &settings)
     {
         return mToolWindows.emplace_back(std::make_unique<ToolWindow>(*this, settings)).get();
@@ -484,8 +516,16 @@ namespace GUI {
 
         auto [screenPos, screenSize] = getAvailableScreenSpace();
 
+        Input::PointerEventArgs modArgs = arg;
+        modArgs.position -= Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
+
+        for (WidgetBase *modalWidget : mModalWidgetList) {
+            if (propagateInput(modalWidget, modArgs, screenSize, screenPos, &WidgetBase::injectPointerPress))
+                return true;
+        }
+
         for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, screenPos, &WidgetBase::injectPointerPress))
+            if (propagateInput(w, modArgs, screenSize, screenPos, &WidgetBase::injectPointerPress))
                 return true;
         }
         return false;
@@ -500,8 +540,16 @@ namespace GUI {
 
         auto [screenPos, screenSize] = getAvailableScreenSpace();
 
+        Input::PointerEventArgs modArgs = arg;
+        modArgs.position -= Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
+
+        for (WidgetBase *modalWidget : mModalWidgetList) {
+            if (propagateInput(modalWidget, modArgs, screenSize, screenPos, &WidgetBase::injectPointerRelease))
+                return true;
+        }
+
         for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, arg, screenSize, screenPos, &WidgetBase::injectPointerRelease))
+            if (propagateInput(w, modArgs, screenSize, screenPos, &WidgetBase::injectPointerRelease))
                 return true;
         }
         return false;
@@ -520,6 +568,8 @@ namespace GUI {
 
     WidgetBase *TopLevelWindow::getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
     {
+        static auto &logOnce = LOG_WARNING("Handle modal widgets for hover");
+
         const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
 
         for (WidgetBase *w : widgets) {
@@ -580,12 +630,13 @@ namespace GUI {
 
     Render::RenderWindow *TopLevelWindow::getRenderer()
     {
-        return mRenderWindow.get();
+        return mRenderWindow->get();
     }
 
     void TopLevelWindow::onClose()
-    {
-        close();
+    {        
+        mWindow = nullptr;
+        callFinalize();
     }
 
     void TopLevelWindow::onRepaint()
@@ -620,11 +671,6 @@ namespace GUI {
         mTopLevelWidgets.clear();
     }
 
-    GUISystem &TopLevelWindow::gui()
-    {
-        return mGui;
-    }
-
     bool TopLevelWindow::isHovered(WidgetBase *w)
     {
         WidgetBase *hovered = mHoveredWidget;
@@ -652,16 +698,26 @@ namespace GUI {
     void TopLevelWindow::registerWidget(WidgetBase *w)
     {
         if (!w->getName().empty()) {
-            auto pib = mWidgets.try_emplace(w->getName(), w);
-            assert(pib.second);
+            mWidgets.try_emplace(w->getName(), w);
+        }
+    }
+
+    void TopLevelWindow::updateWidget(WidgetBase *w, const std::string &newName)
+    {
+        unregisterWidget(w);
+        if (!newName.empty()) {
+            mWidgets.try_emplace(newName, w);
         }
     }
 
     void TopLevelWindow::unregisterWidget(WidgetBase *w)
     {
         if (!w->getName().empty()) {
-            size_t result = mWidgets.erase(w->getName());
-            assert(result == 1);
+            auto it = mWidgets.find(w->getName());
+            assert(it != mWidgets.end());
+            if (it->second == w) {
+                mWidgets.erase(it);
+            }
         }
     }
 
@@ -675,8 +731,8 @@ namespace GUI {
 
     void TopLevelWindow::openModalWidget(WidgetBase *widget)
     {
-        widget->showModal();
-        mModalWidgetList.emplace(widget);
+        widget->show();
+        mModalWidgetList.emplace(mModalWidgetList.begin(), widget);
     }
 
     void TopLevelWindow::openWidget(WidgetBase *widget)
@@ -686,13 +742,9 @@ namespace GUI {
 
     void TopLevelWindow::closeModalWidget(WidgetBase *widget)
     {
-        assert(mModalWidgetList.size() > 0 && mModalWidgetList.top() == widget);
-        widget->hideModal();
-        mModalWidgetList.pop();
-        if (mModalWidgetList.size() > 0)
-            mModalWidgetList.top()->activate();
-        else if (mCurrentRoot)
-            mCurrentRoot->activate();
+        assert(mModalWidgetList.size() > 0 && mModalWidgetList.front() == widget);
+        widget->hide();
+        mModalWidgetList.erase(mModalWidgetList.begin());
     }
 
     void TopLevelWindow::closeWidget(WidgetBase *widget)
@@ -702,21 +754,22 @@ namespace GUI {
 
     bool TopLevelWindow::frameStarted(std::chrono::microseconds)
     {
-        mRenderWindow->beginFrame();
+        (*mRenderWindow)->beginFrame();
         return true;
     }
 
     bool TopLevelWindow::frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask)
     {
-        mRenderWindow->render();
-        return true;
+        (*mRenderWindow)->render();
+        Window::sUpdate();
+        return mWindow;
     }
 
     bool TopLevelWindow::frameEnded(std::chrono::microseconds)
     {
         PROFILE();
         renderOverlays();
-        mRenderWindow->endFrame();
+        (*mRenderWindow)->endFrame();
         return true;
     }
 
@@ -732,7 +785,7 @@ namespace GUI {
 
     const MadgineObject *TopLevelWindowComponentBase::parent() const
     {
-        return &mWindow.gui();
+        return &mWindow;
     }
 
     TopLevelWindowComponentBase &Engine::GUI::TopLevelWindow::getWindowComponent(size_t i, bool init)
@@ -752,6 +805,12 @@ namespace GUI {
         return *this;
     }
 
+    void TopLevelWindow::openStartupWidget()
+    {
+        if (mStartupWidget)
+            swapCurrentRoot(mStartupWidget);
+    }
+
     /*App::Application &TopLevelWindowComponentBase::app(bool init)
     {
         if (init) {
@@ -760,15 +819,25 @@ namespace GUI {
         return mWindow.gui().app(init);
     }*/
 
+    void TopLevelWindow::addFrameListener(Threading::FrameListener *listener)
+    {
+        mLoop.addFrameListener(listener);
+    }
+
+    void TopLevelWindow::removeFrameListener(Threading::FrameListener *listener)
+    {
+        mLoop.removeFrameListener(listener);
+    }
+
+    void TopLevelWindow::singleFrame()
+    {
+        mLoop.singleFrame();
+    }
+
+    Threading::FrameLoop &TopLevelWindow::frameLoop()
+    {
+        return mLoop;
+    }
+
 }
 }
-
-DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
-
-METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
-READONLY_PROPERTY(Widgets, widgets)
-READONLY_PROPERTY(Components, components)
-METATABLE_END(Engine::GUI::TopLevelWindow)
-
-RegisterType(Engine::GUI::TopLevelWindow);
-RegisterType(Engine::GUI::TopLevelWindowComponentBase);

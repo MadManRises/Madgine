@@ -11,6 +11,8 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "../../render/renderwindowcollector.h"
+
 namespace Engine {
 namespace GUI {
 
@@ -44,7 +46,7 @@ namespace GUI {
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
         Window::Window *mWindow = nullptr;
-        std::unique_ptr<Render::RenderWindow> mRenderWindow;
+        std::optional<Render::RenderWindowSelector> mRenderWindow;
 
     };
 

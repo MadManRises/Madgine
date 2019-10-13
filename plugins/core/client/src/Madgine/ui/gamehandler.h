@@ -20,8 +20,6 @@ namespace Engine
 			void update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask);
 			void fixedUpdate(std::chrono::microseconds timeStep, Scene::ContextMask mask);
 
-			Scene::SceneManager &sceneMgr(bool = true) const;
-
 			GameHandlerBase &getSelf(bool = true);
 
 		protected:

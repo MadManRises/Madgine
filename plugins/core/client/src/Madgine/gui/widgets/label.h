@@ -1,26 +1,25 @@
 #pragma once
 
-#include "widget.h"
 #include "Modules/generic/virtualbase.h"
+#include "widget.h"
 
-namespace Engine
-{
-	namespace GUI
-	{
-		class MADGINE_CLIENT_EXPORT Label : public Widget<Label>
-		{
-		public:
-			using Widget::Widget;
-			virtual ~Label() = default;
+namespace Engine {
+namespace GUI {
+    class MADGINE_CLIENT_EXPORT Label : public Widget<Label> {
+    public:
+        using Widget::Widget;
+        virtual ~Label() = default;
 
-			virtual std::string getText();
-			virtual void setText(const std::string& text);
+        virtual WidgetClass getClass() const override;
 
-			virtual WidgetClass getClass() const override;
+        std::string getFontName() const;
+        void setFontName(const std::string &name);
 
-			//KeyValueMapList maps() override;
-		};
-	}
+        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+
+        std::string mText;
+        int mFontSize = 16;
+        Resources::ThreadLocalResource<Font::Font> *mFont = nullptr;
+    };
 }
-
-
+}

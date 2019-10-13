@@ -183,6 +183,7 @@ namespace Serialize {
         void readUnformatted(SerializableUnitBase *&p);
 
         void readUnformatted(std::string &s);
+        void readUnformatted(Filesystem::Path &p);
 
         std::string readN(size_t n);
         std::string peekN(size_t n);
@@ -210,6 +211,8 @@ namespace Serialize {
 
         SerializeStreambuf &buffer() const;
 
+		void setNextFormattedStringDelimiter(char c);
+
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
 
@@ -217,6 +220,8 @@ namespace Serialize {
 
     protected:
         Debugging::StreamLog mLog;
+
+		char mNextFormattedStringDelimiter = 0;
     };
 
     struct MODULES_EXPORT SerializeOutStream : OutStream {
@@ -296,6 +301,7 @@ namespace Serialize {
 
         void writeUnformatted(SerializableUnitBase *p);
         void writeUnformatted(const std::string &s);
+        void writeUnformatted(const Filesystem::Path &p);
 
         void writeRaw(const void *buffer, size_t size);
         template <class T>

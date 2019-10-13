@@ -29,7 +29,7 @@ struct AccessClassInfo<Serialize::NoParentUnit<T>> {
     {
         static const TypeInfo &tType = typeInfo<T>();
         static std::string className = "Engine::Serialize::NoParentUnit<"s + tType.mFullName + ">";
-        static TypeInfo sInfo { className.c_str(), tType.mHeaderPath, &tType };
+        static TypeInfo sInfo { className.c_str(), tType.mHeaderPath, typeMarker<Serialize::NoParentUnit<T>> };
         return sInfo;
     }
 };

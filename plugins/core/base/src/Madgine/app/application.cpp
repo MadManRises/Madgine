@@ -32,18 +32,23 @@ namespace App {
         assert(!sApp);
         sApp = this;
 
-        mLoop.addSetupSteps(
+        /*mLoop.addSetupSteps(
             [this]() {
                 if (!callInit())
                     throw exception("App Init Failed!");
             },
             [this]() {
                 callFinalize();
-            });
+            });*/
+
+		 if (!callInit())
+            throw exception("App Init Failed!");
     }
 
     Application::~Application()
     {
+        callFinalize();
+
         assert(sApp == this);
         sApp = nullptr;
     }
@@ -70,7 +75,7 @@ namespace App {
         }
     }
 
-    void Application::shutdown()
+    /*void Application::shutdown()
     {
         mLoop.shutdown();
     }
@@ -78,7 +83,7 @@ namespace App {
     bool Application::isShutdown() const
     {
         return mLoop.isShutdown();
-    }
+    }*/
 
     float Application::getFPS()
     {
@@ -126,26 +131,6 @@ namespace App {
             checkDependency();
         }
         return *this;
-    }
-
-    void Application::addFrameListener(Threading::FrameListener *listener)
-    {
-        mLoop.addFrameListener(listener);
-    }
-
-    void Application::removeFrameListener(Threading::FrameListener *listener)
-    {
-        mLoop.removeFrameListener(listener);
-    }
-
-    void Application::singleFrame()
-    {
-        mLoop.singleFrame();
-    }
-
-    Threading::FrameLoop &Application::frameLoop()
-    {
-        return mLoop;
     }
 
     const AppSettings &Application::settings()

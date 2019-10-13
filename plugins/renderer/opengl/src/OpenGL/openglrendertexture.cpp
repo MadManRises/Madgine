@@ -23,6 +23,9 @@
 #include "openglfontdata.h"
 #include "openglfontloader.h"
 
+#include "Madgine/app/application.h"
+#include "Madgine/scene/scenemanager.h"
+
 namespace Engine {
 namespace Render {
 
@@ -36,7 +39,7 @@ namespace Render {
             throw 0;
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
-        mProgram.setUniform("lightDir", Vector3 { 0.0f, 0.0f, -1.0f }.normalisedCopy());
+        mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
 
         mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         mTexture.setFilter(GL_NEAREST);
@@ -140,15 +143,15 @@ namespace Render {
             pass->render(this, camera());
         }
 
-        setupProgram();
+		//TODO Culling
+        for (Scene::Entity::Entity &e : App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().entities()) {
 
-        for (Scene::Entity::Entity *e : camera()->visibleEntities()) {
-
-            OpenGLMesh *mesh = e->getComponent<OpenGLMesh>();
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            OpenGLMesh *mesh = e.getComponent<OpenGLMesh>();
+            Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
             if (mesh && mesh->isVisible() && transform) {
                 OpenGLMeshData *meshData = mesh->data();
                 if (meshData) {
+                    setupProgram(0, meshData->mTexture.handle());
                     renderMesh(meshData, transform->matrix());
                 }
             }

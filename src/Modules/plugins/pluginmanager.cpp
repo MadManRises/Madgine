@@ -38,7 +38,6 @@ namespace Plugins {
     }
 
     PluginManager::PluginManager()
-        : mSettings(Filesystem::configPath() / "Madgine_plugins.cfg")
     {
         assert(!sSingleton);
         sSingleton = this;
@@ -50,15 +49,6 @@ namespace Plugins {
                 std::string section = match[1];
                 mSections.try_emplace(section, *this, section);
             }
-        }
-
-        std::string currentSelection = mSettings["State"]["CurrentSelectionFile"];
-
-        if (!currentSelection.empty() && !noPluginCache) {
-            Filesystem::Path p = selectionFiles()[currentSelection];
-            p /= currentSelection + ".cfg";
-            mCurrentSelectionFile = Ini::IniFile(p);
-            loadCurrentSelectionFile();
         }
     }
 
@@ -87,11 +77,11 @@ namespace Plugins {
             Filesystem::Path p = *exportPlugins;
             Ini::IniFile file { p };
             LOG("Saving Plugins to '" << exportPlugins << "'");
-            saveSelection(file);
+            saveSelection(file, true);
 
             Filesystem::Path exportPath = p.parentPath() / ("components_" + p.stem() + ".cpp");
 
-            exportStaticComponentHeader(exportPath);
+            exportStaticComponentHeader(exportPath, true);
         }
     }
 
@@ -155,49 +145,12 @@ namespace Plugins {
         return mSections.end();
     }
 
-    void PluginManager::saveCurrentSelectionFile()
-    {
-        if (mCurrentSelectionFile && !mLoadingCurrentSelectionFile) {
-            saveSelection(*mCurrentSelectionFile);
-        }
-    }
-
-    void PluginManager::loadCurrentSelectionFile()
-    {
-        assert(!mLoadingCurrentSelectionFile);
-        if (mCurrentSelectionFile) {
-            loadSelection(*mCurrentSelectionFile);
-        }
-    }
-
-    Ini::IniSection &PluginManager::selectionFiles()
-    {
-        return mSettings["SelectionFiles"];
-    }
-
-    Filesystem::Path PluginManager::currentSelectionPath()
-    {
-        return mCurrentSelectionFile ? mCurrentSelectionFile->path().parentPath() : "";
-    }
-
-    const std::string &PluginManager::currentSelectionName()
-    {
-        return mSettings["State"]["CurrentSelectionFile"];
-    }
-
-    void PluginManager::setCurrentSelection(const std::string &key, const Filesystem::Path &path)
-    {
-        mSettings["State"]["CurrentSelectionFile"] = key;
-        selectionFiles()[key] = path.str();
-        mSettings.saveToDisk();
-        mCurrentSelectionFile = Ini::IniFile(path / (key + ".cfg"));
-        loadCurrentSelectionFile();
-    }
-
-    void PluginManager::saveSelection(Ini::IniFile &file)
+    void PluginManager::saveSelection(Ini::IniFile &file, bool withTools)
     {
         file.clear();
         for (auto &[name, section] : mSections) {
+            if (!withTools && name == "Tools")
+                continue;
             Ini::IniSection &iniSec = file[name];
             for (const std::pair<const std::string, Plugin> &p : section) {
                 iniSec[p.first] = p.second.isLoaded() ? "On" : "";
@@ -208,15 +161,16 @@ namespace Plugins {
 
     void PluginManager::loadSelection(Ini::IniFile &file)
     {
+        if (mLoadingSelectionFile)
+            return;
         file.loadFromDisk();
-        mLoadingCurrentSelectionFile = true;
+        mLoadingSelectionFile = true;
         for (auto &[name, section] : file) {
             if (name == "Core")
                 continue;
             (*this)[name].loadFromIni(section);
         }
-        mLoadingCurrentSelectionFile = false;
-        saveCurrentSelectionFile();
+        mLoadingSelectionFile = false;        
     }
 
     void PluginManager::addListener(PluginListener *listener)

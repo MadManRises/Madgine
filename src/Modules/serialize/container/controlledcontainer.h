@@ -41,7 +41,12 @@ namespace Serialize {
                 in.format().beginExtendedCompound(in, "Item");
                 in.read(key, "key");
                 auto it = kvFind(*this, key);
-                in.read(*it, "Item");
+                if (it != this->end()) {
+                    in.read(*it, "Item");
+                } else {
+                    LOG_ERROR("Could not find \"" << key << "\"!");
+					throw 0;
+				}
             }
 
             if (name)

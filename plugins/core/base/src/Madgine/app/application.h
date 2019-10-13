@@ -4,7 +4,6 @@
 
 #include "globalapicollector.h"
 
-#include "../threading/frameloop.h"
 #include "Modules/threading/scheduler.h"
 
 namespace Engine {
@@ -15,17 +14,6 @@ namespace App {
     class MADGINE_BASE_EXPORT Application : public ScopeBase,
                                             public MadgineObject {
     public:
-        /**
-			* Convenience method, that creates the Application of type T, calls setup(), init() and go() with the given <code>settings</code> and returns the result of the call to go().
-			*
-			* @return result of the call to go()
-			* @param settings the settings for the Application
-			*/
-        static int run(AppSettings &settings, Threading::WorkGroup &workGroup)
-        {
-            Application app(settings);
-            return Threading::Scheduler(workGroup, { &app.frameLoop() }).go();
-        }
 
         /**
 			 * \brief Creates the Application
@@ -41,13 +29,13 @@ namespace App {
         /**
 			* Marks the Application as shutdown. This causes the event loop to return within the next frame.
 			*/
-        void shutdown();
+        //void shutdown();
 
         /**
 			 * \brief Tells if the application is currently running.
 			 * \return <code>true</code>, if the application is shutdown, so not running. <code>false</code>, otherwise.
 			 */
-        bool isShutdown() const;
+        //bool isShutdown() const;
 
         /**
 			* \brief Retrieve the statistical frames-per-second value.
@@ -75,21 +63,7 @@ namespace App {
         Scene::SceneManager &sceneMgr(bool = true);
         Application &getSelf(bool = true);
 
-        /**
-			* \brief Adds a FrameListener to the application.
-			* \param listener the FrameListener to be added.
-			*/
-        void addFrameListener(Threading::FrameListener *listener);
-        /**
-			* \brief Removes a FrameListener from the application.
-			* \param listener the FrameListener to be removed.
-			*/
-        void removeFrameListener(Threading::FrameListener *listener);
-
-        void singleFrame();
-
-        Threading::FrameLoop &frameLoop();
-
+        
         const AppSettings &settings();
 
         Debug::Profiler::Profiler &profiler();
@@ -108,8 +82,6 @@ namespace App {
         const AppSettings &mSettings;
 
         std::unique_ptr<Debug::Profiler::Profiler> mProfiler;
-
-        Threading::FrameLoop mLoop;
 
         int mGlobalAPIInitCounter;
 

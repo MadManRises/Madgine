@@ -74,7 +74,7 @@ public:
     struct isValueType {
         const constexpr static bool value = _isValueType<std::decay_t<T>>::value
             || std::is_enum<T>::value
-            || std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<T>>>;
+            || std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>;
     };
 
     ValueType()

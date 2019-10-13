@@ -26,30 +26,14 @@ namespace Core {
 #endif
 			mResources(std::make_unique<Resources::ResourceManager>())
 		{
-#if ENABLE_PLUGINS
-                    mPluginManager->loadCurrentSelectionFile();
-
-        (*mPluginManager)["Core"].loadPlugin("Client");
+#if ENABLE_PLUGINS                    
 
         (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
         (*mPluginManager)["Renderer"].setExclusive();
         (*mPluginManager)["Renderer"].setAtleastOne();
 
-		(*mPluginManager)["Tools"].loadPlugin("OpenGLTools");
-
         (*mPluginManager)["Input"].setExclusive();
         (*mPluginManager)["Input"].setAtleastOne();
-
-        (*mPluginManager)["Core"].loadPlugin("Common");
-        (*mPluginManager)["Core"].loadPlugin("Static");
-        (*mPluginManager)["Core"].loadPlugin("Camera");
-        (*mPluginManager)["Core"].loadPlugin("TWClient");
-        (*mPluginManager)["Core"].loadPlugin("Menues");
-        (*mPluginManager)["Core"].loadPlugin("Animation");
-        (*mPluginManager)["Core"].loadPlugin("IngameUI");
-        (*mPluginManager)["Core"].loadPlugin("TWServer");
-
-        (*mPluginManager)["Test"];
 
 		mPluginManager->executeCLI();
 #endif

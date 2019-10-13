@@ -16,6 +16,10 @@
 
 #include "Modules/serialize/container/controlledcontainer.h"
 
+#include "../../render/renderwindowcollector.h"
+
+#include "../../threading/frameloop.h"
+
 namespace Engine {
 namespace GUI {
 
@@ -26,11 +30,10 @@ namespace GUI {
         TopLevelWindow &window() const;
 
         virtual const MadgineObject *parent() const override;
-        //virtual App::Application &app(bool = true) override;
 
-		TopLevelWindowComponentBase &getSelf(bool = true);
+        TopLevelWindowComponentBase &getSelf(bool = true);
 
-		virtual const char *key() const = 0;
+        virtual const char *key() const = 0;
 
     protected:
         TopLevelWindow &mWindow;
@@ -48,14 +51,13 @@ namespace GUI {
                                                  public Input::InputListener,
                                                  public Window::WindowEventListener,
                                                  public Threading::FrameListener,
-                                                 public Serialize::TopLevelSerializableUnit<TopLevelWindow> {
+                                                 public Serialize::TopLevelSerializableUnit<TopLevelWindow>,
+                                                 public MadgineObject {
         SERIALIZABLEUNIT;
 
     public:
-        TopLevelWindow(GUISystem &gui);
+        TopLevelWindow(const Window::WindowSettings &settings);
         virtual ~TopLevelWindow();
-
-        void close();
 
         void swapCurrentRoot(WidgetBase *newRoot);
         void openModalWidget(WidgetBase *widget);
@@ -77,6 +79,7 @@ namespace GUI {
         WidgetBase *getWidget(const std::string &name);
 
         void registerWidget(WidgetBase *w);
+        void updateWidget(WidgetBase *w, const std::string &newName);
 
         void unregisterWidget(WidgetBase *w);
 
@@ -97,8 +100,6 @@ namespace GUI {
         void destroyTopLevel(WidgetBase *w);
 
         void clear();
-
-        GUISystem &gui();
 
         //KeyValueMapList maps() override;
 
@@ -149,6 +150,28 @@ namespace GUI {
 
         TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
 
+        WidgetBase *mStartupWidget = nullptr;
+        void openStartupWidget();
+
+        virtual const MadgineObject *parent() const override;
+        virtual bool init() override;
+        virtual void finalize() override;
+
+        /**
+			* \brief Adds a FrameListener to the application.
+			* \param listener the FrameListener to be added.
+			*/
+        void addFrameListener(Threading::FrameListener *listener);
+        /**
+			* \brief Removes a FrameListener from the application.
+			* \param listener the FrameListener to be removed.
+			*/
+        void removeFrameListener(Threading::FrameListener *listener);
+
+        void singleFrame();
+
+        Threading::FrameLoop &frameLoop();
+
     protected:
         void onClose() override;
         void onRepaint() override;
@@ -172,10 +195,8 @@ namespace GUI {
         virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
     private:
-        GUISystem &mGui;
-
         Window::Window *mWindow = nullptr;
-        std::unique_ptr<Render::RenderWindow> mRenderWindow;
+        std::optional<Render::RenderWindowSelector> mRenderWindow;
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
@@ -188,15 +209,17 @@ namespace GUI {
 
         std::vector<WindowOverlay *> mOverlays;
 
-
-
-		SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer<elevate<, Serialize::ControlledContainer, ,std::vector>::type>);
+        SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
 
         WidgetBase *mHoveredWidget = nullptr;
 
         WidgetBase *mCurrentRoot = nullptr;
 
-        std::stack<WidgetBase *> mModalWidgetList;
+        std::vector<WidgetBase *> mModalWidgetList;
+
+        Threading::FrameLoop mLoop;
+
+        const Window::WindowSettings &mSettings;
     };
 
 }

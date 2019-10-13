@@ -9,6 +9,7 @@ struct CallableType {
     typedef R return_type;
     typedef T class_type;
     typedef std::tuple<_Ty...> argument_types;
+    typedef std::tuple<std::decay_t<_Ty>...> decay_argument_types;
 
     static constexpr size_t argument_count = sizeof...(_Ty) + (std::is_same_v<T, void> ? 0 : 1);
 

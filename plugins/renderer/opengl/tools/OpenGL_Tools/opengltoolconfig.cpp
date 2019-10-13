@@ -32,7 +32,7 @@ namespace Tools {
 
         getTool<Inspector>().addPreviewDefinition<Render::OpenGLFontLoader::ResourceType>([](Render::OpenGLFontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture.handle(), { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)font->loadData()->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
@@ -44,6 +44,13 @@ namespace Tools {
         });
 
         return ToolBase::init();
+    }
+
+    void OpenGLToolConfig::finalize()
+    {
+        mImageTexture.reset();
+
+		ToolBase::finalize();
     }
 
     const char *OpenGLToolConfig::key() const

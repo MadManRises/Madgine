@@ -5,11 +5,11 @@
 namespace Engine {
 namespace Window {
 
-	struct PlatformCapabilities {
+    struct PlatformCapabilities {
         bool mSupportMultipleWindows;
-	};
+    };
 
-	INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;
+    INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;
 
     struct WindowSettings {
         uintptr_t mHandle = 0;
@@ -27,6 +27,11 @@ namespace Window {
 
         bool mHidden = false;
         bool mHeadless = false;
+
+        /**
+		 * (optional) might be set to specify an InputHandler. Otherwise the default one will be created.
+		 */
+        void *mInput = nullptr;
     };
 
     struct INTERFACES_EXPORT Window {
@@ -58,7 +63,7 @@ namespace Window {
         virtual int x() = 0;
         virtual int y() = 0;
 
-		virtual int renderX() = 0;
+        virtual int renderX() = 0;
         virtual int renderY() = 0;
 
         virtual void setSize(int width, int height) = 0;
@@ -67,13 +72,13 @@ namespace Window {
         virtual void setPos(int x, int y) = 0;
         virtual void setRenderPos(int x, int y) = 0;
 
-		virtual void show() = 0;
+        virtual void show() = 0;
         virtual bool isMinimized() = 0;
 
-		virtual void focus() = 0;
+        virtual void focus() = 0;
         virtual bool hasFocus() = 0;
 
-		virtual void setTitle(const char *title) = 0;
+        virtual void setTitle(const char *title) = 0;
 
         virtual void destroy() = 0;
 
@@ -107,13 +112,12 @@ namespace Window {
     INTERFACES_EXPORT void sUpdate();
     INTERFACES_EXPORT Window *sFromNative(uintptr_t handle);
 
-	 struct MonitorInfo {
+    struct MonitorInfo {
         int x, y;
         int width, height;
     };
 
     INTERFACES_EXPORT std::vector<MonitorInfo> listMonitors();
-
 
 }
 }

@@ -5,11 +5,15 @@
 #include "../vertex.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
 METATABLE_BEGIN(Engine::GUI::Image)
 PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::GUI::Image)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Image, Engine::GUI::WidgetBase)
+SERIALIZETABLE_END(Engine::GUI::Image)
 
 RegisterType(Engine::GUI::Image);
 
@@ -41,7 +45,7 @@ namespace GUI {
         return mImage;
     }
 
-    std::pair<std::vector<Vertex>, uint32_t> Image::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -62,7 +66,7 @@ namespace GUI {
         result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 0 } });
-        return { result, mImage ? std::numeric_limits<uint32_t>::max() : 0 };
+        return { { result, { mImage ? std::numeric_limits<Render::TextureHandle>::max() : 0 } } };
     }
     WidgetClass Image::getClass() const
     {

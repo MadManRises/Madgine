@@ -2,7 +2,6 @@
 #include "guihandler.h"
 //#include "Database/translationunit.h"
 
-#include "../gui/guisystem.h"
 #include "../gui/widgets/widget.h"
 #include "../ui/uimanager.h"
 

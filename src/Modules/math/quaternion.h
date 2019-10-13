@@ -1,124 +1,142 @@
 #pragma once
 
-#include "vector3.h"
 #include "matrix3.h"
 #include "pi.h"
+#include "vector3.h"
 
 namespace Engine {
 
-	struct Quaternion {
+struct Quaternion {
 
-		Quaternion() : w(1.0f), v(Vector3::ZERO) {}
-	
-		Quaternion(float radian, const Vector3 &axis) :
-			w(cosf(0.5f*radian)),
-			v(axis)
-		{
-			v.normalise();
-			v *= sinf(0.5f*radian);
-		}
+    Quaternion()
+        : w(1.0f)
+        , v(Vector3::ZERO)
+    {
+    }
 
-		static Quaternion FromRadian(const Vector3 &angles)
-		{
-			return Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.z, Vector3::UNIT_Z);
-		}
+    Quaternion(float radian, const Vector3 &axis)
+        : w(cosf(0.5f * radian))
+        , v(axis)
+    {
+        v.normalize();
+        v *= sinf(0.5f * radian);
+    }
 
-		static Quaternion FromDegrees(const Vector3 &angles)
-		{
-			return FromRadian(angles / 180.0f * PI);
-		}
+    static Quaternion FromRadian(const Vector3 &angles)
+    {
+        return Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.z, Vector3::UNIT_Z);
+    }
 
-		void operator *=(const Quaternion &other)
-		{
-			float newW = w * other.w - v.dotProduct(other.v);
-			v = w * other.v + other.w * v + v.crossProduct(other.v);
-			w = newW;			
-		}
+    static Quaternion FromDegrees(const Vector3 &angles)
+    {
+        return FromRadian(angles / 180.0f * PI);
+    }
 
-		Quaternion operator *(const Quaternion &other) const
-		{
-			Quaternion q{ *this };
-			q *= other;
-			return q;			
-		}
+    void operator*=(const Quaternion &other)
+    {
+        float newW = w * other.w - v.dotProduct(other.v);
+        v = w * other.v + other.w * v + v.crossProduct(other.v);
+        w = newW;
+    }
 
-		/*void operator +=(const Quaternion &other)
-		{
-			w += other.w;
-			v += other.v;			
-		}
+    Quaternion operator*(const Quaternion &other) const
+    {
+        Quaternion q { *this };
+        q *= other;
+        return q;
+    }
 
-		Quaternion operator +(const Quaternion &other)
-		{
-			Quaternion q{ *this };
-			q += other;
-			return q;
-		}
+    void operator+=(const Quaternion &other)
+    {
+        w += other.w;
+        v += other.v;
+    }
 
-		void operator -=(const Quaternion &other)
-		{
-			w -= other.w;
-			v -= other.v;			
-		}
+    Quaternion operator+(const Quaternion &other)
+    {
+        Quaternion q { *this };
+        q += other;
+        return q;
+    }
 
-		Quaternion operator -(const Quaternion &other)
-		{
-			Quaternion q{ *this };
-			q -= other;
-			return q;
-		}
+    void operator-=(const Quaternion &other)
+    {
+        w -= other.w;
+        v -= other.v;
+    }
 
-		void operator *=(float c)
-		{
-			w *= c;
-			v *= c;
-		}
+    Quaternion operator-(const Quaternion &other)
+    {
+        Quaternion q { *this };
+        q -= other;
+        return q;
+    }
 
-		Quaternion operator *(float c)
-		{
-			Quaternion q{ *this };
-			q *= c;
-			return q;
-		}*/
+    void operator*=(float c)
+    {
+        v *= c;
+        w *= c;
+    }
 
-		float dotProduct(const Quaternion &other)
-		{
-			return w * other.w + v.dotProduct(other.v);
-		}
+    Quaternion operator*(float c)
+    {
+        Quaternion q { *this };
+        q *= c;
+        return q;
+    }
 
-		void invert()
-		{
-			v *= -1;
-		}
+    float dotProduct(const Quaternion &other)
+    {
+        return w * other.w + v.dotProduct(other.v);
+    }
 
-		Quaternion inverse() const
-		{
-			Quaternion q{ *this };
-			q.invert();
-			return q;
-		}
+    void invert()
+    {
+        v *= -1;
+    }
 
-		Matrix3 toMatrix() const
-		{
-			return Matrix3{
-				1 - 2 * (v.y * v.y + v.z * v.z),     2 * (v.x * v.y - v.z * w  ),     2 * (v.x * v.z + v.y * w  ),
-					2 * (v.x * v.y + v.z * w  ), 1 - 2 * (v.x * v.x + v.z * v.z),     2 * (v.y * v.z - v.x * w  ),
-					2 * (v.x * v.z - v.y * w  ),     2 * (v.y * v.z + v.x * w  ), 1 - 2 * (v.x * v.x + v.y * v.y)
-			};
-		}
+    Quaternion inverse() const
+    {
+        Quaternion q { *this };
+        q.invert();
+        return q;
+    }
 
-		Vector3 operator *(const Vector3 &dir) const
-		{
-			return toMatrix() * dir;
-		}
+    Matrix3 toMatrix() const
+    {
+        return Matrix3 {
+            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y - v.z * w), 2 * (v.x * v.z + v.y * w),
+            2 * (v.x * v.y + v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z - v.x * w),
+            2 * (v.x * v.z - v.y * w), 2 * (v.y * v.z + v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
+        };
+    }
 
-		bool operator==(const Quaternion &other) const
-		{
-			return w == other.w && v == other.v;
-		}
+    Vector3 operator*(const Vector3 &dir) const
+    {
+        return toMatrix() * dir;
+    }
 
-		float w;
-		Vector3 v;
-	};
+    bool operator==(const Quaternion &other) const
+    {
+        return w == other.w && v == other.v;
+    }
+
+    Quaternion operator-() const
+    {
+        return inverse();
+    }
+
+    void normalize()
+    {
+        float invNorm = 1.0f / sqrtf(w * w + v.squaredLength());
+        v *= invNorm;
+        w *= invNorm;
+    }
+
+    float w;
+    Vector3 v;
+};
+
+MODULES_EXPORT Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio);
 
 }

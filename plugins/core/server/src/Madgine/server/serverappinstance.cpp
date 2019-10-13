@@ -12,8 +12,8 @@ namespace Engine
 
 		ServerAppInstance::~ServerAppInstance()
 		{
-			if (mApplication)
-				mApplication->shutdown();
+			/*if (mApplication)
+				mApplication->shutdown();*/
 		}
 
 		const char* ServerAppInstance::key() const

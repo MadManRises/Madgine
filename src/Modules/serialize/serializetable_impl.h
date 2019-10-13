@@ -12,7 +12,7 @@ namespace Engine {
 namespace Serialize {
 
     template <typename _disambiguate__dont_remove, auto P, auto Getter, auto Setter, typename... Args>
-    constexpr Serializer encapsulated_field(const char *name)
+    constexpr Serializer encapsulated_pointer(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
         using Unit = typename traits::class_type;
@@ -39,14 +39,8 @@ namespace Serialize {
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                if constexpr (std::is_pointer_v<T>) {
-                    (unit->*Setter)(nullptr);
-                    in.read(unit->*P, name);
-                } else {
-                    T dummy;
-                    in.read(dummy, name, TupleUnpacker::construct<Args>(unit)...);
-                    (unit->*Setter)(std::move(dummy));
-                }
+                (unit->*Setter)(nullptr);
+                in.read(unit->*P, name);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 throw "Unsupported";
@@ -55,13 +49,54 @@ namespace Serialize {
                 throw "Unsupported";
             },
             [](SerializableUnitBase *_unit, const std::map<size_t, SerializableUnitBase *> &map) {
-                if constexpr (std::is_pointer_v<T>) {
-                    Unit *unit = static_cast<Unit *>(_unit);
-                    T val = unit->*P;
-                    unit->*P = nullptr;
-                    UnitHelper<T>::applyMap(map, val);
-                    (unit->*Setter)(val);
-                }
+                Unit *unit = static_cast<Unit *>(_unit);
+                T val = unit->*P;
+                unit->*P = nullptr;
+                UnitHelper<T>::applyMap(map, val);
+                (unit->*Setter)(val);
+            },
+            [](SerializableUnitBase *unit, bool b) {
+            },
+            [](SerializableUnitBase *unit, bool b) {
+            }
+        };
+    }
+
+    template <typename _disambiguate__dont_remove, auto Getter, auto Setter, typename... Args>
+    constexpr Serializer encapsulated_field(const char *name)
+    {
+
+        using getter_traits = CallableTraits<decltype(Getter)>;
+        using Unit = std::decay_t<typename getter_traits::class_type>;
+        using T = std::decay_t<typename getter_traits::return_type>;
+
+        using setter_traits = CallableTraits<decltype(Setter)>;
+        static_assert(std::is_same_v<Unit, std::decay_t<typename setter_traits::class_type>>);
+        
+        static_assert(std::is_same_v<typename setter_traits::decay_argument_types, std::tuple<T>>);
+
+        return {
+            name,
+            []() {
+                return size_t { 0 };
+            },
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+                const Unit *unit = static_cast<const Unit *>(_unit);
+                out.write((unit->*Getter)(), name);
+            },
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+                Unit *unit = static_cast<Unit *>(_unit);
+                T dummy;
+                in.read(dummy, name, TupleUnpacker::construct<Args>(unit)...);
+                (unit->*Setter)(std::move(dummy));
+            },
+            [](SerializableUnitBase *unit, SerializeInStream &in) {
+                throw "Unsupported";
+            },
+            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
+                throw "Unsupported";
+            },
+            [](SerializableUnitBase *_unit, const std::map<size_t, SerializableUnitBase *> &map) {
             },
             [](SerializableUnitBase *unit, bool b) {
             },
@@ -117,7 +152,7 @@ namespace Serialize {
         };
     }
 
-	template <typename _disambiguate__dont_remove, auto P>
+    template <typename _disambiguate__dont_remove, auto P>
     constexpr Serializer sync(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -131,10 +166,10 @@ namespace Serialize {
                 return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, SyncableBase>();
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
-                
+
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
-                
+
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 (static_cast<Unit *>(unit)->*P).readAction(in);
@@ -152,7 +187,6 @@ namespace Serialize {
             }
         };
     }
-
 
 }
 }
@@ -190,7 +224,12 @@ namespace Serialize {
 #define SYNC(...) \
     { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 
-#define ENCAPSULATED_FIELD(Name, Getter, Setter)                                                   \
-    {                                                                                              \
-        #Name, ::Engine::Serialize::encapsulated_field<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name) \
+#define ENCAPSULATED_FIELD(Name, Getter, Setter)                                            \
+    {                                                                                       \
+        #Name, ::Engine::Serialize::encapsulated_field<Ty, &Ty::Getter, &Ty::Setter>(#Name) \
+    },
+
+#define ENCAPSULATED_POINTER(Name, Getter, Setter)                                                       \
+    {                                                                                                    \
+        #Name, ::Engine::Serialize::encapsulated_pointer<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name) \
     },

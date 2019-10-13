@@ -17,7 +17,7 @@ namespace Engine {
 		{
 		}
 
-		std::shared_ptr<tinyxml2::XMLDocument> Engine::Tools::LayoutLoader::loadImpl(ResourceType * res)
+		std::shared_ptr<tinyxml2::XMLDocument> Engine::Tools::LayoutLoader::loadImpl(ResourceType *res)
 		{
 			std::shared_ptr<tinyxml2::XMLDocument> doc = std::make_shared<tinyxml2::XMLDocument>();
 			if (doc->LoadFile(res->path().c_str()))
@@ -31,7 +31,7 @@ namespace Engine {
 METATABLE_BEGIN(Engine::Tools::LayoutLoader)
 METATABLE_END(Engine::Tools::LayoutLoader)
 
-METATABLE_BEGIN(Engine::Tools::LayoutLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Tools::LayoutLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Tools::LayoutLoader::ResourceType)
 
 RegisterType(Engine::Tools::LayoutLoader);

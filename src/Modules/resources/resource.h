@@ -5,8 +5,10 @@
 namespace Engine {
 namespace Resources {
 
-    template <class Loader>
+    template <typename Data>
     class Resource : public ResourceBase {
+        using Loader = ResourceLoaderImpl<Data, Resource>;
+
     public:
         Resource(Loader* loader, const Filesystem::Path& path)
             : ResourceBase(path)
@@ -20,16 +22,16 @@ namespace Resources {
                 LOG_WARNING("Deleted Resource \"" << name() << extension() << "\" still used. Memory not freed!");
         }
 
-        std::shared_ptr<typename Loader::Data> data()
+        std::shared_ptr<Data> data()
         {
             return mPtr;
         }
 
-        std::shared_ptr<typename Loader::Data> loadData()
+        std::shared_ptr<Data> loadData()
         {
             if (mPtr) {
                 return mPtr;
-            } else if (std::shared_ptr<typename Loader::Data> ptr = mWeakPtr.lock()) {
+            } else if (std::shared_ptr<Data> ptr = mWeakPtr.lock()) {
                 return ptr;
             } else {
                 ptr = mLoader->loadImpl(this);
@@ -58,22 +60,23 @@ namespace Resources {
             ResourceBase::setPersistent(b);
             if (b) {
                 if (!mPtr && !mWeakPtr.expired()) {
-                    mPtr = std::shared_ptr<typename Loader::Data>(mWeakPtr);
+                    mPtr = std::shared_ptr<Data>(mWeakPtr);
                 }
             } else {
                 mPtr.reset();
             }
         }
 
-    private:
-        std::shared_ptr<typename Loader::Data> mPtr;
-        std::weak_ptr<typename Loader::Data> mWeakPtr;
-
+    protected:
+        std::shared_ptr<Data> mPtr;
+        std::weak_ptr<Data> mWeakPtr;
         Loader* mLoader;
     };
 
-    template <class Loader>
+    template <typename Data>
     class ThreadLocalResource : public ResourceBase {
+        using Loader = ResourceLoaderImpl<Data, ThreadLocalResource>;
+
     public:
         ThreadLocalResource(Loader* loader, const Filesystem::Path& path)
             : ResourceBase(path)
@@ -90,17 +93,17 @@ namespace Resources {
             }
         }
 
-        std::shared_ptr<typename Loader::Data> data()
+        std::shared_ptr<Data> data()
         {
             return mData.at(std::this_thread::get_id()).mPtr;
         }
 
-        std::shared_ptr<typename Loader::Data> loadData()
+        std::shared_ptr<Data> loadData()
         {
-            Data& d = mData[std::this_thread::get_id()];
+            StorageData& d = mData[std::this_thread::get_id()];
             if (d.mPtr) {
                 return d.mPtr;
-            } else if (std::shared_ptr<typename Loader::Data> ptr = d.mWeakPtr.lock()) {
+            } else if (std::shared_ptr<Data> ptr = d.mWeakPtr.lock()) {
                 return ptr;
             } else {
                 ptr = mLoader->loadImpl(this);
@@ -121,7 +124,7 @@ namespace Resources {
             auto it = mData.find(std::this_thread::get_id());
             if (it == mData.end())
                 return true;
-            Data& d = it->second;
+            StorageData& d = it->second;
             d.mPtr.reset();
             bool b = d.mWeakPtr.expired();
             d.mWeakPtr.reset();
@@ -133,34 +136,34 @@ namespace Resources {
             auto it = mData.find(std::this_thread::get_id());
             if (it == mData.end())
                 return false;
-            return !it->second.mWeakPtr.expired();            
+            return !it->second.mWeakPtr.expired();
         }
 
         void setPersistent(bool b)
         {
             ResourceBase::setPersistent(b);
             if (b) {
-                for (std::pair<const std::thread::id, Data>& d : mData) {
+                for (std::pair<const std::thread::id, StorageData>& d : mData) {
                     if (!d.second.mPtr && !d.second.mWeakPtr.expired()) {
-                        d.second.mPtr = std::shared_ptr<typename Loader::Data>(d.second.mWeakPtr);
+                        d.second.mPtr = std::shared_ptr<Data>(d.second.mWeakPtr);
                     }
                 }
             } else {
-                for (std::pair<const std::thread::id, Data>& d : mData) {
+                for (std::pair<const std::thread::id, StorageData>& d : mData) {
                     d.second.mPtr.reset();
                 }
             }
         }
 
-    private:
-        struct Data {
-            std::shared_ptr<typename Loader::Data> mPtr;
-            std::weak_ptr<typename Loader::Data> mWeakPtr;
+    protected:
+        struct StorageData {
+            std::shared_ptr<Data> mPtr;
+            std::weak_ptr<Data> mWeakPtr;
         };
 
-        std::map<std::thread::id, Data> mData;
-
+        std::map<std::thread::id, StorageData> mData;
         Loader* mLoader;
     };
+
 }
 }

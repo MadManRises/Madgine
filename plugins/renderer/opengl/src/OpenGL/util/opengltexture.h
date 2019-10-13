@@ -15,6 +15,8 @@ namespace Render {
 
 		OpenGLTexture &operator=(OpenGLTexture &&);
 
+		void reset();
+
         void bind() const;
 
         void setData(Vector2i size, void *data, GLenum type = GL_FLOAT);

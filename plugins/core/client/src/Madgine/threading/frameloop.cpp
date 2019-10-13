@@ -1,4 +1,4 @@
-#include "../baselib.h"
+#include "../clientlib.h"
 
 #include "framelistener.h"
 #include "frameloop.h"
@@ -51,41 +51,42 @@ namespace Threading {
     bool FrameLoop::sendFrameStarted(std::chrono::microseconds timeSinceLastFrame)
     {
         PROFILE();
-
-        bool result = true;
+        
         for (FrameListener *listener : mListeners) {
-            result &= listener->frameStarted(timeSinceLastFrame);
+            if (!listener->frameStarted(timeSinceLastFrame))
+                return false;
         }
-		return result;
+		return true;
     }
 
     bool FrameLoop::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
     {
-        PROFILE();
-        bool result = true;
+        PROFILE();        
         std::vector<FrameListener*> listeners = mListeners;
         for (FrameListener *listener : listeners) {
             if (std::find(mListeners.begin(), mListeners.end(), listener) != mListeners.end())
-				result &= listener->frameRenderingQueued(timeSinceLastFrame, context);
+                if (!listener->frameRenderingQueued(timeSinceLastFrame, context))
+                    return false;
         }
 
         mTimeBank += timeSinceLastFrame;
 
-        while (mTimeBank >= FIXED_TIMESTEP && result) {
-            result &= sendFrameFixedUpdate(FIXED_TIMESTEP);
+        while (mTimeBank >= FIXED_TIMESTEP) {
+            if (!sendFrameFixedUpdate(FIXED_TIMESTEP))
+                return false;
             mTimeBank -= FIXED_TIMESTEP;
         }
 
-        return result;
+        return true;
     }
 
     bool FrameLoop::sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
     {
-        PROFILE();
-        bool result = true;
+        PROFILE();        
         for (FrameListener *listener : mListeners)
-            result &= listener->frameFixedUpdate(timeSinceLastFrame, context);
-        return result;
+            if (!listener->frameFixedUpdate(timeSinceLastFrame, context))
+                return false;
+        return true;
     }
 
     std::chrono::nanoseconds FrameLoop::fixedRemainder() const
@@ -95,15 +96,14 @@ namespace Threading {
 
     bool FrameLoop::sendFrameEnded(std::chrono::microseconds timeSinceLastFrame)
     {
-        PROFILE();
-        bool result = true;
+        PROFILE();        
         std::vector<FrameListener *> listeners = mListeners;
-        for (FrameListener *listener : listeners) {
-            auto it = std::find(mListeners.begin(), mListeners.end(), listener);
-            if (it != mListeners.end())
-				result &= listener->frameEnded(timeSinceLastFrame);
+        for (FrameListener *listener : listeners) {            
+            if (std::find(mListeners.begin(), mListeners.end(), listener) != mListeners.end())
+                if (!listener->frameEnded(timeSinceLastFrame))
+                    return false;
         }
-        return result;
+        return true;
     }
 
     std::optional<SignalSlot::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
@@ -124,9 +124,9 @@ namespace Threading {
 
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
-                std::optional<SignalSlot::TaskHandle> finalize = std::move(mSetupState->second);
+                SignalSlot::TaskHandle finalize = std::move(mSetupState->second);
                 if (finalize) {
-                    return wrapTask(std::move(*finalize));
+                    return wrapTask(std::move(finalize));
                 }
             }
         }

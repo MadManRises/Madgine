@@ -39,27 +39,9 @@ namespace UI {
         UIManager &ui(bool = true);
 
         template <class T>
-        T &getSceneComponent(bool init = true)
-        {
-            return static_cast<T &>(getSceneComponent(T::component_index(), init));
-        }
-
-        Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-        Scene::SceneManager &sceneMgr(bool = true);
-
-        template <class T>
-        T &getGlobalAPIComponent(bool init = true)
-        {
-            return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
-        }
-
-        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-
-        template <class T>
         T &getGuiHandler(bool init = true)
         {
-            return static_cast<T &>(getGuiHandler(T::component_index(), init));
+            return static_cast<T &>(getGuiHandler(component_index<T>(), init));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i, bool = true);
@@ -67,7 +49,7 @@ namespace UI {
         template <class T>
         T &getGameHandler(bool init = true)
         {
-            return static_cast<T &>(getGameHandler(T::component_index(), init));
+            return static_cast<T &>(getGameHandler(component_index<T>(), init));
         }
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);

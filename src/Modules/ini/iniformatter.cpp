@@ -16,6 +16,10 @@ namespace Ini {
     {
         out.writeUnformatted(std::string(name));
         out.writeUnformatted("="s);
+        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+			//Dirty trick to allow empty strings in specific setup reading only one line at a time (see imgui tool loading)
+            out.writeUnformatted(" "s);
+        }
     }
 
     void IniFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
@@ -28,12 +32,13 @@ namespace Ini {
         std::string prefix = in.readN(strlen(name) + 1);
         if (prefix != std::string(name) + "=")
             throw 0;
+        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+            in.setNextFormattedStringDelimiter('\n');
+        }
     }
 
     void IniFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
     {
-        /*if (in.readPlainN(1) != "\n")
-            throw 0;*/
     }
 
     std::string IniFormatter::lookupFieldName(Serialize::SerializeInStream &in)

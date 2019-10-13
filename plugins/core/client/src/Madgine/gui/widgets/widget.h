@@ -18,6 +18,8 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
+#include "../../render/texturedescriptor.h"
+
 namespace Engine {
 namespace GUI {
     class MADGINE_CLIENT_EXPORT WidgetBase : public ScopeBase,
@@ -51,19 +53,13 @@ namespace GUI {
 
         void destroy();
 
-        virtual void releaseInput();
-        virtual void captureInput();
-        virtual void activate();
-        //virtual void moveToFront();
-
-        virtual void showModal();
-        virtual void hideModal();
         void show();
         void hide();
 
         virtual void setEnabled(bool b);
 
         const std::string &getName() const;
+        void setName(const std::string &name);
 
         const char *key() const;
 
@@ -80,6 +76,7 @@ namespace GUI {
         Image *createChildImage(const std::string &name);
 
         WidgetBase *getChildRecursive(const std::string &name);
+        void setParent(WidgetBase *parent);
         WidgetBase *getParent() const;
 
         virtual bool injectPointerPress(const Input::PointerEventArgs &arg);
@@ -101,7 +98,7 @@ namespace GUI {
 
         bool containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos = Vector3::ZERO, float extend = 0.0f) const;
 
-        virtual std::pair<std::vector<Vertex>, uint32_t> vertices(const Vector3 &screenSize);
+        virtual std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
 
         void *userData();
         void setUserData(void *userData);
@@ -111,6 +108,8 @@ namespace GUI {
         virtual Resources::ImageLoader::ResourceType *resource() const;
 
         void writeCreationData(Serialize::SerializeOutStream &of) const;
+
+		size_t depth();
 
 		bool mVisible = true;
 
@@ -131,8 +130,9 @@ namespace GUI {
 
         virtual void sizeChanged(const Vector3 &pixelSize);
 
+		std::pair<std::vector<Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+
     protected:
-        size_t depth();
 
         TopLevelWindow &window();
 
@@ -159,9 +159,9 @@ namespace GUI {
     };
 
     template <typename T>
-    struct Widget : WidgetBase {
+    struct Widget : Serialize::SerializableUnit<T, WidgetBase> {
 
-        using WidgetBase::WidgetBase;
+        using Serialize::SerializableUnit<T, WidgetBase>::SerializableUnit;
 
         virtual const MetaTable *type() override
         {

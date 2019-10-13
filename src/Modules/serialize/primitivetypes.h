@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Serialize {
 
-	using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Vector2, Vector3, Matrix3, InvScopePtr>;
+	using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, Filesystem::Path, Vector2, Vector3, Matrix3, InvScopePtr>;
 
     template <typename T, typename = void>
     struct SerializableUnitReducer {

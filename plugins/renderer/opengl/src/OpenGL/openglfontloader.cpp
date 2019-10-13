@@ -1,3 +1,9 @@
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+
+
 #include "opengllib.h"
 
 #include "openglfontloader.h"
@@ -9,10 +15,6 @@
 
 #include "Modules/math/atlas2.h"
 #include "Modules/math/vector2i.h"
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
 
 #undef INFINITE
 #include "msdfgen.h"
@@ -71,11 +73,11 @@ namespace Engine {
 namespace Render {
 
     OpenGLFontLoader::OpenGLFontLoader()
-        : ResourceLoader({ ".ttf" })
+        : VirtualResourceLoaderImpl({ ".ttf" })
     {
     }
 
-    std::shared_ptr<OpenGLFontData> OpenGLFontLoader::loadImpl(ResourceType *res)
+    std::shared_ptr<Font::Font> OpenGLFontLoader::loadImpl(ResourceType *res)
     {
 
         FT_Library ft;
@@ -199,13 +201,14 @@ namespace Render {
 }
 }
 
-UNIQUECOMPONENT(Engine::Render::OpenGLFontLoader);
+VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLFontLoader);
 
-METATABLE_BEGIN(Engine::Render::OpenGLFontLoader)
+using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Font::Font, Engine::Resources::ThreadLocalResource>;
+METATABLE_BEGIN(LoaderImpl)
 MEMBER(mResources)
-METATABLE_END(Engine::Render::OpenGLFontLoader)
+METATABLE_END(LoaderImpl)
 
-METATABLE_BEGIN(Engine::Render::OpenGLFontLoader::ResourceType)
-METATABLE_END(Engine::Render::OpenGLFontLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLFontLoader, LoaderImpl)
+METATABLE_END(Engine::Render::OpenGLFontLoader)
 
 RegisterType(Engine::Render::OpenGLFontLoader);

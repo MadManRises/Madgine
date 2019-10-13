@@ -12,7 +12,7 @@ PROPERTY(Widget, widget, setWidget)
 METATABLE_END(Engine::UI::Handler)
 
 SERIALIZETABLE_BEGIN(Engine::UI::Handler)
-ENCAPSULATED_FIELD(mWidget, widget, setWidget)
+ENCAPSULATED_POINTER(mWidget, widget, setWidget)
 SERIALIZETABLE_END(Engine::UI::Handler)
 
 namespace Engine {
@@ -23,30 +23,6 @@ namespace UI {
         , mPointerDownSlot(this)
         , mPointerUpSlot(this)
     {
-    }
-
-    Scene::SceneComponentBase &Handler::getSceneComponent(size_t i, bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.getSceneComponent(i, init);
-    }
-
-    Scene::SceneManager &Handler::sceneMgr(bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.sceneMgr(init);
-    }
-
-    App::GlobalAPIBase &Handler::getGlobalAPIComponent(size_t i, bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.getGlobalAPIComponent(i, init);
     }
 
     UI::GuiHandlerBase &Handler::getGuiHandler(size_t i, bool init)

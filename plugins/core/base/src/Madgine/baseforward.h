@@ -23,7 +23,7 @@ namespace Engine
 		class LightManager;
 		class Light;
 
-		class Camera;
+		struct Camera;
 	}
 
 	namespace App

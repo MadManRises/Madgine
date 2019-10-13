@@ -3,16 +3,16 @@
 #include "Modules/resources/resourceloader.h"
 
 namespace Engine {
-	namespace Tools {
+namespace Tools {
 
-		class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, tinyxml2::XMLDocument> {
-			
-		public:
-			LayoutLoader();
+    class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, tinyxml2::XMLDocument> {
 
-		private:
-			virtual std::shared_ptr<Data> loadImpl(ResourceType * res) override;
-		};
+    public:
+        LayoutLoader();
 
-	}
+    private:
+        virtual std::shared_ptr<Data> loadImpl(ResourceType *res) override;
+    };
+
+}
 }

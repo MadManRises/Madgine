@@ -450,7 +450,7 @@ public:
 		will be no changes made to their components.
 		@return The previous length of the vector.
 		*/
-    constexpr float normalise()
+    constexpr float normalize()
     {
         float fLength = sqrtf(x * x + y * y + z * z);
 
@@ -582,7 +582,7 @@ public:
         Vector3 perp = fabs(x) > fabs(z)
             ? Vector3(-y, x, 0.0)
             : Vector3(0.0, -z, y);
-        return perp.normalisedCopy();
+        return perp.normalizedCopy();
     }
 
     /* Generates a new random vector which deviates from this vector by a
@@ -691,10 +691,10 @@ public:
 
     /** As normalise, except that this vector is unaffected and the
 		normalised vector is returned as a copy. */
-    Vector3 normalisedCopy() const
+    Vector3 normalizedCopy() const
     {
         Vector3 ret = *this;
-        ret.normalise();
+        ret.normalize();
         return ret;
     }
 
@@ -771,13 +771,13 @@ struct NormalizedVector3 : Vector3 {
     constexpr NormalizedVector3(const Vector3 &v)
         : Vector3(v)
     {
-        normalise();
+        normalize();
     }
 
     constexpr NormalizedVector3 &operator=(const Vector3 &v)
     {
         Vector3::operator=(v);
-        normalise();
+        normalize();
         return *this;
     }
 };

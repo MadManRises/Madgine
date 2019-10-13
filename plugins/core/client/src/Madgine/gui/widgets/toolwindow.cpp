@@ -12,8 +12,6 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "../guisystem.h"
-
 #include "Madgine/app/application.h"
 
 namespace Engine {
@@ -26,13 +24,15 @@ namespace GUI {
 
         mWindow->addListener(this);
 
-        mInputHandlerSelector.emplace(mWindow, App::Application::getSingleton(), &parent, 0);
+        mInputHandlerSelector.emplace(parent, mWindow, &parent, 0);
 
-        mRenderWindow = parent.gui().renderer().createWindow(mWindow, nullptr, parent.getRenderer());
+		mRenderWindow.emplace(mWindow, nullptr, parent.getRenderer());
     }
 
     ToolWindow::~ToolWindow()
     {
+        mParent.getRenderer()->makeCurrent();
+
         mWindow->removeListener(this);
 
         mWindow->destroy();
@@ -70,12 +70,12 @@ namespace GUI {
 
     Render::RenderWindow *ToolWindow::getRenderer()
     {
-        return mRenderWindow.get();
+        return mRenderWindow->get();
     }
 
     void ToolWindow::beginFrame()
     {
-        mRenderWindow->makeCurrent();
+        (*mRenderWindow)->makeCurrent();
         mWindow->beginFrame();
     }
 

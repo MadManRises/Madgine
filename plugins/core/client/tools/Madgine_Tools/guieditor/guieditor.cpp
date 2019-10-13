@@ -14,7 +14,6 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
 #include "Madgine/gui/widgets/widget.h"
 
@@ -32,6 +31,8 @@
 
 #include "Modules/filesystem/filemanager.h"
 
+#include "Madgine/gui/widgets/widgetclass.h"
+
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {
@@ -45,11 +46,13 @@ namespace Tools {
 
     bool GuiEditor::init()
     {
-        getTool<ProjectManager>().mProjectRootChanged.connect([this]() {
+#if ENABLE_PLUGINS
+        getTool<ProjectManager>().mProjectChanged.connect([this]() {
             loadLayout();
         });
 
         loadLayout();
+#endif
 
         return ToolBase::init();
     }
@@ -69,6 +72,10 @@ namespace Tools {
                 if (ImGui::MenuItem(w->key(), nullptr, w->mVisible)) {
                     mWindow.swapCurrentRoot(w);
                 }
+            }
+            ImGui::Separator();
+            if (ImGui::Button("Create Layout")) {
+                mWindow.createTopLevelWidget("Unnamed");
             }
             ImGui::EndMenu();
         }
@@ -106,7 +113,7 @@ namespace Tools {
     {
         Engine::Serialize::Debugging::setLoggingEnabled(true);
 
-        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "default.layout";
+        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "data" / "default.layout";
 
         auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::make_unique<XML::XMLFormatter>());
         buf->open(filePath.str(), std::ios::out);
@@ -117,21 +124,27 @@ namespace Tools {
 
     void GuiEditor::loadLayout()
     {
-        Engine::Serialize::Debugging::setLoggingEnabled(true);
+        ProjectManager &project = getTool<ProjectManager>();
+        const Filesystem::Path &root = project.projectRoot();
+        const std::string &config = project.config();
 
-        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "default.layout";
+        if (!config.empty()) {
 
-        Filesystem::FileManager file("Layout");
-        std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
-        if (in) {
-            mWindow.readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
+            Filesystem::Path filePath = root / "data" / (config + ".layout");
 
-            mWindow.calculateWindowGeometries();
+            Filesystem::FileManager file("Layout");
+            std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
+            if (in) {
 
-			mWindow.applySerializableMap(file.slavesMap());
-		}
-        
-        
+                mWindow.readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
+
+                mWindow.calculateWindowGeometries();
+
+                mWindow.applySerializableMap(file.slavesMap());
+
+                mWindow.openStartupWidget();
+            }
+        }
     }
 
     void GuiEditor::renderSelection(GUI::WidgetBase *hoveredWidget)
@@ -357,30 +370,46 @@ namespace Tools {
         ImGui::End();
     }
 
-    void GuiEditor::listWidgets(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget)
+    bool GuiEditor::drawWidget(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget)
     {
-        for (GUI::WidgetBase *child : w->children()) {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+        if (w->children().empty())
+            flags |= ImGuiTreeNodeFlags_Leaf;
+        if (mSelected && mSelected->widget() == w)
+            flags |= ImGuiTreeNodeFlags_Selected;
 
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
-            if (child->children().empty())
-                flags |= ImGuiTreeNodeFlags_Leaf;
-            if (mSelected && mSelected->widget() == child)
-                flags |= ImGuiTreeNodeFlags_Selected;
+        bool open = ImGui::TreeNodeEx(w->getName().c_str(), flags);
 
-            bool open = ImGui::TreeNodeEx(child->getName().c_str(), flags);
-
-            ImGui::DraggableValueTypeSource(child->getName(), w, Engine::ValueType { child });
-
-            if (open) {
-                listWidgets(child, hoveredWidget);
-                ImGui::TreePop();
+        ImGui::DraggableValueTypeSource(w->getName(), w, Engine::ValueType { w });
+        if (ImGui::BeginDragDropTarget()) {
+            GUI::WidgetBase *newChild = nullptr;
+            if (ImGui::AcceptDraggableValueType(newChild)) {
+                newChild->setParent(w);
             }
-            if (hoveredWidget && !*hoveredWidget) {
-                if (ImGui::IsItemHovered()) {
-                    *hoveredWidget = child;
-                }
+            ImGui::EndDragDropTarget();
+            if (newChild) {
+                if (open)
+                    ImGui::TreePop();
+                return false;
             }
         }
+
+        if (open) {
+            for (GUI::WidgetBase *child : w->children()) {
+                if (!drawWidget(child, hoveredWidget)) {
+                    break;
+                }
+            }
+
+            ImGui::TreePop();
+        }
+
+        if (hoveredWidget && !*hoveredWidget) {
+            if (ImGui::IsItemHovered()) {
+                *hoveredWidget = w;
+            }
+        }
+        return true;
     }
 
     void GuiEditor::renderHierarchy(GUI::WidgetBase **hoveredWidget)
@@ -388,7 +417,18 @@ namespace Tools {
         if (ImGui::Begin("GuiEditor - Hierarchy", &mHierarchyVisible)) {
             GUI::WidgetBase *root = mWindow.currentRoot();
             if (root) {
-                listWidgets(root, hoveredWidget);
+                if (ImGui::BeginPopup("WidgetSelector")) {
+                    for (int c = 0; c < (int)GUI::WidgetClass::CLASS_COUNT; ++c) {
+                        if (ImGui::Selectable(GUI::widgetClassNames[c])) {
+                            root->createChild("unnamed", (GUI::WidgetClass)c);
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+                if (ImGui::Button("+ New Widget"))
+                    ImGui::OpenPopup("WidgetSelector");
+                drawWidget(root, hoveredWidget);
             } else {
                 ImGui::Text("%s", "Please select a root window under 'Layout' in the menu bar.");
             }

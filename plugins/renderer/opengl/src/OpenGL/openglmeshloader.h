@@ -12,9 +12,11 @@ namespace Render {
 
         static OpenGLMeshData generate(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
         static OpenGLMeshData generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
+        static OpenGLMeshData generate(size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
 
         static void update(OpenGLMeshData &data, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
         static void update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
+        static void update(OpenGLMeshData &data, size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0);
     };
 
 }

@@ -30,13 +30,13 @@ constexpr Accessor property()
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
-        using SetterScope = typename setter_traits::class_type;
+        using SetterScope = std::conditional_t<std::is_same_v<typename setter_traits::class_type, void>, std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>, typename setter_traits::class_type>;
 
         //TODO remove const in tuple types
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
-            TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<SetterScope>>(), v.as<T>());
+            TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<SetterScope>>(), v.as<std::remove_reference_t<T>>());
         };
     }
 
@@ -67,11 +67,17 @@ constexpr Accessor property()
     };
 }
 
-template <typename T, auto P>
+template <typename Ty, auto P>
 constexpr Accessor member()
 {
-    //TODO check const
-    return property<T, P, nullptr>();
+    using traits = CallableTraits<decltype(P)>;
+    using Scope = typename traits::class_type;
+    using T = std::remove_reference_t<typename traits::return_type>;
+
+    if constexpr (std::is_const_v<Scope> || !std::is_assignable_v<T&, const T&> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
+        return property<Ty, P, nullptr>();
+    else
+        return property<Ty, P, static_cast<void(*)(Scope*, const T&)>([](Scope *s, const T &t) { s->*P = t; })>();
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
@@ -114,11 +120,11 @@ static constexpr BoundApiMethod method(TypedScopePtr scope)
 
 #define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>)
 
-#define _METATABLE_BEGIN_IMPL(T, BasePtr)                   \
-    namespace {                                             \
-        namespace Meta_##T                                  \
-        {                                                   \
-            using Ty = T;                                   \
+#define _METATABLE_BEGIN_IMPL(T, BasePtr)                                        \
+    namespace {                                                                  \
+        namespace Meta_##T                                                       \
+        {                                                                        \
+            using Ty = T;                                                        \
             constexpr const ::Engine::MetaTable &(*baseClassGetter)() = BasePtr; \
             constexpr const std::pair<const char *, ::Engine::Accessor> members[] = {
 

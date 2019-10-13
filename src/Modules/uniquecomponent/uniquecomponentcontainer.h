@@ -14,6 +14,11 @@
 
 namespace Engine {
 
+namespace Resources {
+    template <typename Data>
+    class ThreadLocalResource;
+}
+
 template <template <class...> class C, class _Base, class... _Ty>
 struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
@@ -24,7 +29,7 @@ struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
 
     typedef typename Container::const_iterator const_iterator;
 
-	struct traits : container_traits<Container> {
+    struct traits : container_traits<Container> {
     };
 
     UniqueComponentContainer(_Ty... arg)
@@ -92,7 +97,7 @@ struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
         bool operator!=(const typed_const_iterator &other) const
         {
             return mIt != other.mIt;
-		}
+        }
 
     private:
         It mIt;

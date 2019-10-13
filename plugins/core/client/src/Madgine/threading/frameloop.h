@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../scene/contextmasks.h"
+#include "Madgine/scene/contextmasks.h"
 #include "Modules/signalslot/taskqueue.h"
 
 namespace Engine
 {
 	namespace Threading
 	{
-		struct MADGINE_BASE_EXPORT FrameLoop : SignalSlot::TaskQueue
+		struct MADGINE_CLIENT_EXPORT FrameLoop : SignalSlot::TaskQueue
 		{
 		public:
 			

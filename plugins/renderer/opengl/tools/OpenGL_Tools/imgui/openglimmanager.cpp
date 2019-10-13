@@ -11,7 +11,6 @@
 #include "Modules/math/vector3.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/gui/guisystem.h"
 #include "Madgine/gui/widgets/toplevelwindow.h"
 
 #include "im3d/im3d.h"
@@ -33,10 +32,10 @@ namespace Tools {
             ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
 
         Im3D::GetIO().mFetchFont = [](const char *fontName) {
-            std::shared_ptr<Render::OpenGLFontData> font = Render::OpenGLFontLoader::load(fontName, true);
+            std::shared_ptr<Font::Font> font = Render::OpenGLFontLoader::load(fontName, true);
 
             return Im3DFont {
-                font->mTexture.handle(),
+                font->mTextureHandle,
                 font->mTextureSize,
                 font->mGlyphs.data()
             };

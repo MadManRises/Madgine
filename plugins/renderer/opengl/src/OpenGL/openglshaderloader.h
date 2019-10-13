@@ -9,7 +9,7 @@ namespace Engine {
 		{			
 			OpenGLShaderLoader();
 
-			std::shared_ptr<OpenGLShader> loadImpl(ResourceType * res) override;
+			std::shared_ptr<OpenGLShader> loadImpl(ResourceType *res) override;
 		};
 
 	}

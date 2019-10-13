@@ -46,7 +46,7 @@ struct CollectorInfo {
 };
 
 MODULES_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
-MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile);
+MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools);
 
 MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
 

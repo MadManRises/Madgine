@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/render/renderwindow.h"
+#include "Madgine/render/renderwindowcollector.h"
 
 #include "openglshaderprogram.h"
 
@@ -16,9 +16,9 @@
 namespace Engine {
 namespace Render {
 
-    class MADGINE_OPENGL_EXPORT OpenGLRenderWindow : public RenderWindow {
+    class MADGINE_OPENGL_EXPORT OpenGLRenderWindow : public RenderWindowComponent<OpenGLRenderWindow> {
     public:
-        OpenGLRenderWindow(Window::Window *w, ContextHandle context, GUI::TopLevelWindow *mTopLevelWindow = nullptr);
+        OpenGLRenderWindow(Window::Window *w, GUI::TopLevelWindow *topLevel, RenderWindow *reusedResources = nullptr);
         ~OpenGLRenderWindow();
 
         virtual void render() override;
@@ -26,23 +26,24 @@ namespace Render {
 
         virtual std::unique_ptr<RenderTarget> createRenderTarget(Scene::Camera *camera, const Vector2 &size) override;
 
-        const ContextHandle mContext;
+        ContextHandle mContext = 0;
     private:
 
 		void expandUIAtlas();
 
         OpenGLShaderProgram mProgram;
 
-        OpenGLTexture mDefaultTexture;
-        OpenGLTexture mUIAtlasTexture;
+        OpenGLTexture mDefaultTexture = dont_create;
+        OpenGLTexture mUIAtlasTexture = dont_create;
         Atlas2 mUIAtlas;
         int mUIAtlasSize = 0;
         std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
 
-		OpenGLVertexArray mVAO;
-        OpenGLBuffer mVBO;
+		OpenGLVertexArray mVAO = dont_create;
+        OpenGLBuffer mVBO = dont_create;
 
 		GUI::TopLevelWindow *mTopLevelWindow = nullptr;
+        bool mReusedContext;
     };
 
 }

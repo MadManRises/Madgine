@@ -52,6 +52,8 @@ namespace Resources {
 
         ResourceLoaderContainer<std::vector> mCollector;
 
+			Filesystem::Path findResourceFile(const std::string &fileName);
+
 #if ENABLE_PLUGINS
     protected:
         void onPluginLoad(const Plugins::Plugin *plugin) override;

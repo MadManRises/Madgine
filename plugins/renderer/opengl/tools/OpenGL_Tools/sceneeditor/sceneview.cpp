@@ -73,7 +73,7 @@ namespace Tools {
         : mManager(manager)
         , mEditor(editor)
     {
-        mCamera.setPosition({ 0, 0.5, -1 });
+        mCamera.mPosition = { 0, 0.5, -1 };
 
         mRenderTarget = renderer->createRenderTarget(&mCamera, { 100, 100 });
 
@@ -148,7 +148,7 @@ namespace Tools {
 
                 io3D.mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
 
-                mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f);
+                mCamera.mPosition += mCamera.mOrientation * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f;
             }
 
             for (int i = 0; i < 3; ++i) {
@@ -170,11 +170,11 @@ namespace Tools {
             }
 
             if (mDragging[2]) {
-                mCamera.setPosition(mCamera.position() + mCamera.orientation() * Vector3 { -dragDistance.x / 50.0f, dragDistance.y / 50.0f, 0.0f });
+                mCamera.mPosition += mCamera.mOrientation * Vector3 { -dragDistance.x / 50.0f, dragDistance.y / 50.0f, 0.0f };
             }
 
             if (mDragging[1]) {
-                mCamera.setOrientation(Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.orientation() * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X });
+                mCamera.mOrientation = Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.mOrientation * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X };
             }
 
             if (mDragging[0]) {

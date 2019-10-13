@@ -9,22 +9,18 @@
 #include "entity/entity.h"
 
 #include "../app/globalapicollector.h"
-#include "../threading/framelistener.h"
 #include "Modules/keyvalue/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 
 #include "Modules/serialize/container/controlledcontainer.h"
 
-#include "camera.h"
-
 #include "Modules/threading/datamutex.h"
 
 namespace Engine {
 namespace Scene {
     class MADGINE_BASE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-                                             public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>>,
-                                             public Threading::FrameListener {
+                                             public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>>{
         SERIALIZABLEUNIT;
 
     public:
@@ -32,8 +28,8 @@ namespace Scene {
         SceneManager(const SceneManager &) = delete;
         virtual ~SceneManager() = default;
 
-        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-        bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;
+        /*bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;*/
 
         Entity::Entity *createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
@@ -43,10 +39,6 @@ namespace Scene {
 
         Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
-
-        Camera *createCamera(std::string name = "");
-        void destroyCamera(Camera *camera);
-        std::list<Camera> &cameras();
 
         void clear();
 
@@ -74,15 +66,13 @@ namespace Scene {
 
         SignalSlot::SignalStub<> &clearedSignal();
 
+		void removeQueuedEntities();
+
     protected:
         virtual bool init() final;
         virtual void finalize() final;
 
     private:
-        void updateCamera(Camera &camera);
-
-        void removeQueuedEntities();
-
         std::string generateUniqueName();
 
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
@@ -99,8 +89,6 @@ namespace Scene {
         SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);
         std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
-
-        std::list<Scene::Camera> mCameras;
 
         SignalSlot::Signal<> mStateLoadedSignal;
         SignalSlot::Signal<> mClearedSignal;

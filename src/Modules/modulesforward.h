@@ -149,7 +149,7 @@ namespace Threading {
     struct WorkGroupHandle;
     struct Scheduler;
 
-    class FrameListener;
+    struct FrameListener;
     struct FrameLoop;
 
     struct DataMutex;
@@ -157,6 +157,7 @@ namespace Threading {
 
 namespace Font {
 
+    struct Font;
     struct Glyph;
 
 }
@@ -164,15 +165,18 @@ namespace Font {
 namespace Render {
     struct Vertex;
     struct Vertex2;
+    struct Vertex3;
     typedef int RenderPassFlags;
 }
 
 namespace Resources {
     struct ResourceManager;
-    template <class Loader>
+    template <typename Data>
     class Resource;
     template <class T, class Data, template <typename> typename ResourceKind = Resource>
     struct ResourceLoader;
+    template <class _Data, template <typename> typename ResourceKind = Resource>
+    struct ResourceLoaderImpl;
     struct ResourceBase;
 }
 

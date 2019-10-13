@@ -15,6 +15,7 @@ namespace Tools {
         OpenGLToolConfig(const SceneEditor &) = delete;
 
         virtual bool init() override;
+        virtual void finalize() override;
 
         const char *key() const override;
 

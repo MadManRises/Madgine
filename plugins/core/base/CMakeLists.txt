@@ -10,7 +10,6 @@ FolderSources(sources "" src)
 		FolderSources(sources Madgine scene camera.cpp camera.h contextmasks.h light.cpp light.h lightmanager.cpp lightmanager.h scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
 			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 				FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h transform.cpp transform.h)
-		FolderSources(sources Madgine threading framelistener.h frameloop.cpp frameloop.h)
 
 add_plugin(Base Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/baselib.h)
 

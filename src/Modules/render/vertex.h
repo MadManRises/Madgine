@@ -5,18 +5,24 @@
 namespace Engine {
 namespace Render {
 
-	struct Vertex {
+    struct Vertex {
         Vector3 mPos;
         Vector4 mColor;
         Vector3 mNormal;
     };
-	
-	struct Vertex2 {
+
+    struct Vertex2 {
         Vector3 mPos;
         Vector2 mPos2;
         Vector4 mColor;
         Vector2 mUV;
-	};
+    };
+
+    struct Vertex3 {
+        Vector3 mPos;        
+		Vector3 mNormal;
+        Vector2 mUV;
+    };
 
 }
 }

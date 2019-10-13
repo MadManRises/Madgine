@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Modules/reflection/classname.h"
-#include "Madgine/threading/framelistener.h"
+#include "../threading/framelistener.h"
 
 #include "inputevents.h"
 
@@ -9,7 +9,7 @@ namespace Engine {
 namespace Input {
     class MADGINE_CLIENT_EXPORT InputHandler : public Threading::FrameListener {
     public:
-        InputHandler(App::Application &app, InputListener *listener);
+        InputHandler(GUI::TopLevelWindow &window, InputListener *listener);
         virtual ~InputHandler();
 
         //InputListener *listener();
@@ -27,7 +27,7 @@ namespace Input {
 
     private:
         InputListener *mListener;
-        App::Application &mApp;
+        GUI::TopLevelWindow &mWindow;
     };
 }
 }

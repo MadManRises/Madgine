@@ -27,14 +27,14 @@ namespace Tools {
         if (!mRoot.callInit())
             return false;
 
-        App::Application::getSingleton().addFrameListener(this);
+        mWindow.addFrameListener(this);
 
         return true;
     }
 
     void ClientImRoot::finalize()
     {
-        App::Application::getSingleton().removeFrameListener(this);
+        mWindow.removeFrameListener(this);
 
         mRoot.callFinalize();
 

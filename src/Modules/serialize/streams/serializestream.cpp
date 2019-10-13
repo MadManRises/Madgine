@@ -8,6 +8,8 @@
 
 #include "../../keyvalue/valuetype.h"
 
+#include "Interfaces//filesystem/path.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -99,7 +101,13 @@ namespace Serialize {
         readUnformatted(ptr);
         if (ptr)
             ptr = (ptr << 1) | 0x1;
-        p = reinterpret_cast<SerializableUnitBase*>(ptr);
+        p = reinterpret_cast<SerializableUnitBase *>(ptr);
+    }
+
+    void SerializeInStream::setNextFormattedStringDelimiter(char c)
+    {
+        assert(!(c && mNextFormattedStringDelimiter));
+        mNextFormattedStringDelimiter = c;
     }
 
     void SerializeInStream::readUnformatted(std::string &s)
@@ -110,16 +118,22 @@ namespace Serialize {
             s.resize(size);
             readRaw(&s[0], size);
         } else {
-            if (!(mStream.flags() & std::ios::skipws)) {
-                std::string peek = peekN(1);
-                if (!peek.empty() && std::isspace(peek[0], mStream.getloc())) {
-                    s.clear();
-                    return;
-				}
-			}
-            if (!InStream::operator>>(s))
-                throw 0;
+            if (mNextFormattedStringDelimiter) {
+                if (!std::getline(mStream, s, mNextFormattedStringDelimiter))
+                    throw 0;
+                mNextFormattedStringDelimiter = 0;
+            } else {
+                if (!InStream::operator>>(s))
+                    throw 0;
+            }
         }
+    }
+
+    void SerializeInStream::readUnformatted(Filesystem::Path &p)
+    {
+        std::string s;
+        readUnformatted(s);
+        p = s;
     }
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
@@ -134,10 +148,10 @@ namespace Serialize {
         if (n == 0)
             return {};
 
-		skipWs();
+        skipWs();
 
         assert(!format().mBinary);
-        std::string buffer(n, '\0');        
+        std::string buffer(n, '\0');
         readRaw(&buffer[0], n);
         return buffer;
     }
@@ -338,6 +352,11 @@ namespace Serialize {
         } else {
             OutStream::operator<<(s);
         }
+    }
+
+    void SerializeOutStream::writeUnformatted(const Filesystem::Path &p)
+    {
+        writeUnformatted(p.str());
     }
 
     SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)

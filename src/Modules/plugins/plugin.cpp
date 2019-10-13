@@ -180,6 +180,11 @@ namespace Plugins {
         return false;
     }
 
+    const std::string &Plugin::name() const
+    {
+        return mName;
+    }
+
     void Plugin::addDependency(Plugin *dependency)
     {
         mDependencies.push_back(dependency);

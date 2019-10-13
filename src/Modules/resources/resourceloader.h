@@ -6,16 +6,18 @@
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
 
+#include "../generic/templates.h"
+
 namespace Engine {
 namespace Resources {
 
-    template <class T, class _Data, template <typename> typename ResourceKind>
-    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector> {
+    template <class _Data, template <typename> typename ResourceKind>
+    struct ResourceLoaderImpl : ResourceLoaderBase {
 
         using Data = _Data;
-        using ResourceType = ResourceKind<ResourceLoader<T, Data, ResourceKind>>;
+        using ResourceType = ResourceKind<Data>;
 
-        using UniqueComponent<T, ResourceLoaderCollector>::UniqueComponent;
+        using ResourceLoaderBase::ResourceLoaderBase;
 
         ResourceType *get(const std::string &name)
         {
@@ -24,16 +26,6 @@ namespace Resources {
                 return &it->second;
             else
                 return nullptr;
-        }
-
-        static T &getSingleton()
-        {
-            return Resources::ResourceManager::getSingleton().get<T>();
-        }
-
-        static std::shared_ptr<Data> load(const std::string &name, bool persistent = false)
-        {
-            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
         }
 
         virtual std::shared_ptr<Data> loadImpl(ResourceType *res) = 0;
@@ -75,11 +67,53 @@ namespace Resources {
         std::map<std::string, ResourceType> mResources;
     };
 
-}
+    template <class T, class _Data, template <typename> typename ResourceKind>
+    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>> {
 
-template <class T, class Data, template <typename> typename ResourceKind>
-struct decay<ResourceLoader<T, Data, ResourceKind>> {
-    using type = T;
-};
+        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>>::UniqueComponent;
+
+        static T &getSingleton()
+        {
+            return Resources::ResourceManager::getSingleton().get<T>();
+        }
+
+        static std::shared_ptr<_Data> load(const std::string &name, bool persistent = false)
+        {
+            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
+        }
+    };
+
+    template <typename T, class _Data, template <typename> typename ResourceKind>
+    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>> {
+        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>>::VirtualUniqueComponentBase;
+
+        static ResourceLoaderImpl<_Data, ResourceKind> &getSingleton()
+        {
+            static_assert(!std::is_same_v<T, ResourceLoaderImpl<_Data, ResourceKind>>);
+            return Resources::ResourceManager::getSingleton().get<T>();
+        }
+
+        static std::shared_ptr<_Data> load(const std::string &name, bool persistent = false)
+        {
+            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
+        }
+    };
+
+    template <typename T, typename Base>
+    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, Base> {
+        using VirtualUniqueComponentImpl<T, Base>::VirtualUniqueComponentImpl;
+
+        static T &getSingleton()
+        {
+            return Resources::ResourceManager::getSingleton().get<T>();
+        }
+
+        static std::shared_ptr<typename Base::Data> load(const std::string &name, bool persistent = false)
+        {
+            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
+        }
+    };
+
+}
 
 }
