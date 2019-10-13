@@ -268,7 +268,7 @@ namespace Render {
             if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
                 throw 0;
 
-            context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/nullptr, contextAttribs);
+            context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
         }
 
 #endif
@@ -342,7 +342,9 @@ namespace Render {
         , mTopLevelWindow(topLevel)
         , mReusedContext(reusedResources)
     {
+#if !ANDROID && !EMSCRIPTEN
         OpenGLInit();
+#endif
 
         ContextHandle reusedContext = nullptr;
         if (reusedResources) {
