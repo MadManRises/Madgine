@@ -13,8 +13,8 @@ UNIQUECOMPONENT(Engine::Input::EmscriptenInputHandler);
 namespace Engine {
 namespace Input {
 
-    EmscriptenInputHandler::EmscriptenInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
-        : UniqueComponent(app, listener)
+    EmscriptenInputHandler::EmscriptenInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener)
+        : UniqueComponent(topLevel, listener)
         , mKeyDown {}
     {
         emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenInputHandler::handleMouseEvent);

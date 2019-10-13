@@ -10,7 +10,7 @@ namespace Engine {
 namespace Input {
 
     struct MADGINE_EMSCRIPTENINPUT_EXPORT EmscriptenInputHandler : public InputHandlerComponent<EmscriptenInputHandler> {
-        EmscriptenInputHandler(Window::Window *window, App::Application &app, InputListener *listener);
+        EmscriptenInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener);
         ~EmscriptenInputHandler();
 
         static MouseButton::MouseButton convertMouseButton(unsigned short button);
