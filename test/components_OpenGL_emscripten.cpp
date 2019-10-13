@@ -1,15 +1,9 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_ClientTools
-#    include "Madgine_Tools/clienttoolslib.h"
-#endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
@@ -17,8 +11,14 @@
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
 #endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
+#endif
 #ifdef BUILD_EmscriptenInput
 #    include "emscripteninputlib.h"
+#endif
+#ifdef BUILD_ClientTools
+#    include "Madgine_Tools/clienttoolslib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
@@ -31,9 +31,6 @@
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/scene/scenemanager.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/gui/guisystem.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/gui/widgets/toplevelwindow.h"
@@ -51,10 +48,10 @@
 #    include "emscripteninputhandler.h"
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/render/renderercollector.h"
+#    include "Madgine/render/renderwindowcollector.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/openglrenderer.h"
+#    include "OpenGL/openglrenderwindow.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/resources/resourceloadercollector.h"
@@ -143,9 +140,6 @@ const std::vector<const Engine::MetaTable *> &Engine::App::GlobalAPICollector::R
 #    ifdef BUILD_Base
 		&table<Engine::Scene::SceneManager>(),
 #    endif
-#    ifdef BUILD_Client
-		&table<Engine::GUI::GUISystem>(),
-#    endif
 
 	}; 
 	return dummy;
@@ -156,9 +150,6 @@ std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPI
 	return {
 #    ifdef BUILD_Base
 		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
-#    endif
-#    ifdef BUILD_Client
-		createComponent<Engine::GUI::GUISystem>,
 #    endif
 
 	}; 
@@ -174,13 +165,6 @@ template <>
 size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Base + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_GlobalAPIBase_Base + 1
-#    endif
-#    ifdef BUILD_Client
-constexpr size_t CollectorBaseIndex_GlobalAPIBase_Client = ACC;
-template <>
-size_t component_index<Engine::GUI::GUISystem>() { return CollectorBaseIndex_GlobalAPIBase_Client + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_GlobalAPIBase_Client + 1
 #    endif
 
 #    undef ACC
@@ -273,22 +257,22 @@ size_t component_index<Engine::Input::EmscriptenInputHandler>() { return Collect
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Render::RendererCollector::Registry::sTables() 
+const std::vector<const Engine::MetaTable *> &Engine::Render::RenderWindowCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLRenderer>(),
+		&table<Engine::Render::OpenGLRenderWindow>(),
 #    endif
 
 	}; 
 	return dummy;
 }
 template <>
-std::vector<Engine::Render::RendererCollector::Registry::F> Engine::Render::RendererCollector::Registry::sComponents()
+std::vector<Engine::Render::RenderWindowCollector::Registry::F> Engine::Render::RenderWindowCollector::Registry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGL
-		createComponent<Engine::Render::OpenGLRenderer>,
+		createComponent<Engine::Render::OpenGLRenderWindow>,
 #    endif
 
 	}; 
@@ -297,11 +281,11 @@ std::vector<Engine::Render::RendererCollector::Registry::F> Engine::Render::Rend
 #    define ACC 0
 
 #    ifdef BUILD_OpenGL
-constexpr size_t CollectorBaseIndex_RendererBase_OpenGL = ACC;
+constexpr size_t CollectorBaseIndex_RenderWindow_OpenGL = ACC;
 template <>
-size_t component_index<Engine::Render::OpenGLRenderer>() { return CollectorBaseIndex_RendererBase_OpenGL + 0; }
+size_t component_index<Engine::Render::OpenGLRenderWindow>() { return CollectorBaseIndex_RenderWindow_OpenGL + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_RendererBase_OpenGL + 1
+#        define ACC CollectorBaseIndex_RenderWindow_OpenGL + 1
 #    endif
 
 #    undef ACC
@@ -316,7 +300,7 @@ const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderC
 		&table<Engine::Resources::ImageLoader>(),
 #    endif
 #    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLFontLoader>(),
+		&table<Engine::Font::FontLoader>(),
 		&table<Engine::Render::OpenGLMeshLoader>(),
 		&table<Engine::Render::OpenGLShaderLoader>(),
 #    endif
@@ -359,6 +343,8 @@ size_t component_index<Engine::Resources::ImageLoader>() { return CollectorBaseI
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
 size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+template <>
+size_t component_index<Engine::Font::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
 size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
