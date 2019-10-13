@@ -34,19 +34,21 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
         FIX_LOCAL Engine::GUI::TopLevelWindow window { windowSettings };
 
         if (topLevelPointer)
-            *topLevelPointer = &window;        
+            *topLevelPointer = &window;
 
 #if !ENABLE_PLUGINS
-            window.frameLoop()
-                .addSetupSteps([&]() {
-                    Engine::Filesystem::FileManager mgr("Layout");
-                    std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+        window.frameLoop()
+            .addSetupSteps([&]() {
+                Engine::Filesystem::FileManager mgr("Layout");
+                std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
+                if (file) {
                     window.readState(*file, nullptr, Engine::Serialize::StateTransmissionFlags_DontApplyMap);
                     window.calculateWindowGeometries();
                     window.applySerializableMap(mgr.slavesMap());
                     window.openStartupWidget();
-                });
+                }
+            });
 #endif
 
         FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup, { &window.frameLoop() });
