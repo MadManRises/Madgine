@@ -25,7 +25,7 @@ namespace Android {
     private:
         ANativeActivity *mActivity;
         Threading::WorkGroupHandle mThread;
-        App::Application *mApp;
+        GUI::TopLevelWindow *mWindow;
     };
 
 }

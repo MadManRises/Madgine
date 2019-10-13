@@ -21,7 +21,7 @@ Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If enabl
 #    define FIX_LOCAL
 #endif
 
-int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root)
+int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr)
 {
     if (!toolMode) {
         FIX_LOCAL Engine::App::AppSettings settings;
@@ -33,16 +33,20 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root)
         windowSettings.mTitle = "Maditor";
         FIX_LOCAL Engine::GUI::TopLevelWindow window { windowSettings };
 
-#if !ENABLE_PLUGINS
-        window.frameLoop().addSetupSteps([&]() {
-            Engine::Filesystem::FileManager mgr("Layout");
-            std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+        if (topLevelPointer)
+            *topLevelPointer = &window;        
 
-            window.readState(*file, nullptr, Engine::Serialize::StateTransmissionFlags_DontApplyMap);
-            window.calculateWindowGeometries();
-            window.applySerializableMap(mgr.slavesMap());
-            window.openStartupWidget();
-        });
+#if !ENABLE_PLUGINS
+            window.frameLoop()
+                .addSetupSteps([&]() {
+                    Engine::Filesystem::FileManager mgr("Layout");
+                    std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+
+                    window.readState(*file, nullptr, Engine::Serialize::StateTransmissionFlags_DontApplyMap);
+                    window.calculateWindowGeometries();
+                    window.applySerializableMap(mgr.slavesMap());
+                    window.openStartupWidget();
+                });
 #endif
 
         FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup, { &window.frameLoop() });

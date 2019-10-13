@@ -431,9 +431,9 @@ namespace GUI {
 
         mTopLevelWidgets.clear();
 
-		mRenderWindow->reset();
+        mRenderWindow->reset();
 
-		mInputHandlerSelector.reset();
+        mInputHandlerSelector.reset();
 
         if (mWindow) {
             mWindow->removeListener(this);
@@ -634,7 +634,7 @@ namespace GUI {
     }
 
     void TopLevelWindow::onClose()
-    {        
+    {
         mWindow = nullptr;
         callFinalize();
     }
@@ -837,6 +837,11 @@ namespace GUI {
     Threading::FrameLoop &TopLevelWindow::frameLoop()
     {
         return mLoop;
+    }
+
+    void TopLevelWindow::shutdown()
+    {
+        mLoop.shutdown();
     }
 
 }

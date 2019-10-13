@@ -170,6 +170,8 @@ namespace GUI {
 
         void singleFrame();
 
+		void shutdown();
+
         Threading::FrameLoop &frameLoop();
 
     protected:

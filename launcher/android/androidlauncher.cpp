@@ -3,17 +3,15 @@
 
 #include "androidlauncher.h"
 
-#include "Madgine/app/application.h"
-#include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
-#include "Modules/threading/scheduler.h"
-#include "Modules/threading/workgroup.h"
+
+#include "Madgine/gui/widgets/toplevewindow.h"
 
 #include <android/native_activity.h>
 
 #include "Interfaces/threading/systemvariable.h"
 
-extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root);
+extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
 
 namespace Engine {
 namespace Filesystem {
@@ -38,7 +36,7 @@ namespace Android {
 
     AndroidLauncher::AndroidLauncher(ANativeActivity *activity)
         : mActivity(activity)
-        , mApp(nullptr)
+        , mWindow(nullptr)
     {
         activity->instance = this;
 
@@ -59,14 +57,14 @@ namespace Android {
 
         static Engine::Core::Root root;
 
-		launch(workGroup, root);
+		launch(workGroup, root, &mWindow);
 		
 		ANativeActivity_finish(activity);
     }
 
     void AndroidLauncher::onDestroy()
     {
-        mApp->shutdown();
+        mWindow->shutdown();
         mThread.detach();
         mActivity->instance = nullptr;
         delete this;
