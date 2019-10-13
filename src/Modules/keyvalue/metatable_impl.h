@@ -67,6 +67,12 @@ constexpr Accessor property()
     };
 }
 
+template <auto P, typename Scope, typename T>
+void setField(Scope *s, const T &t)
+{
+    s->*P = t;
+}
+
 template <typename Ty, auto P>
 constexpr Accessor member()
 {
@@ -74,10 +80,10 @@ constexpr Accessor member()
     using Scope = typename traits::class_type;
     using T = std::remove_reference_t<typename traits::return_type>;
 
-    if constexpr (std::is_const_v<Scope> || !std::is_assignable_v<T&, const T&> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
+    if constexpr (std::is_const_v<Scope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
         return property<Ty, P, nullptr>();
     else
-        return property<Ty, P, static_cast<void(*)(Scope*, const T&)>([](Scope *s, const T &t) { s->*P = t; })>();
+        return property<Ty, P, &setField<P, Scope,T>>();
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
