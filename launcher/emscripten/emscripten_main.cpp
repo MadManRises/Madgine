@@ -8,7 +8,7 @@
 #    include "Modules/threading/workgroup.h"
 #    include <emscripten.h>
 
-extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root);
+extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
 
 EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
 {
