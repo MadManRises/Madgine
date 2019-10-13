@@ -31,13 +31,13 @@
 
 RegisterType(Engine::Render::OpenGLRenderWindow)
 
-UNIQUECOMPONENT(Engine::Render::OpenGLRenderWindow)
+    UNIQUECOMPONENT(Engine::Render::OpenGLRenderWindow)
 
-METATABLE_BEGIN(Engine::Render::OpenGLRenderWindow) 
-METATABLE_END(Engine::Render::OpenGLRenderWindow)
+        METATABLE_BEGIN(Engine::Render::OpenGLRenderWindow)
+            METATABLE_END(Engine::Render::OpenGLRenderWindow)
 
 #if WINDOWS
-typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+                typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
 
 static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
@@ -46,17 +46,19 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 #elif LINUX
 #    include <GL/glx.h>
 #    include <X11/Xlib.h>
-namespace Engine {
-namespace Window {
-    extern Display *sDisplay();
-}
+                namespace Engine
+{
+    namespace Window {
+        extern Display *sDisplay();
+    }
 }
 #elif ANDROID || EMSCRIPTEN
 #    include <EGL/egl.h>
-namespace Engine {
-namespace Window {
-    extern EGLDisplay sDisplay;
-}
+                namespace Engine
+{
+    namespace Window {
+        extern EGLDisplay sDisplay;
+    }
 }
 #endif
 
@@ -227,37 +229,47 @@ namespace Render {
             wglShareLists(sharedContext, context);*/
 
 #elif LINUX
-        static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+        GLXContext context;
+        if (reusedContext) {
+            context = reusedContext;
+        } else {
+            static GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
-        static XVisualInfo *vi = glXChooseVisual(Window::sDisplay(), 0, att);
-        assert(vi);
+            static XVisualInfo *vi = glXChooseVisual(Window::sDisplay(), 0, att);
+            assert(vi);
 
-        GLXContext context = glXCreateContext(Window::sDisplay(), vi, sharedContext, GL_TRUE);
+            context = glXCreateContext(Window::sDisplay(), vi, /*sharedContext*/ nullptr, GL_TRUE);
+        }
 
 #elif ANDROID || EMSCRIPTEN
 
-        const EGLint attribs[] = {
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_BLUE_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_RED_SIZE, 8,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
-            EGL_NONE
-        };
+        EGLContext context;
+        if (reusedContext) {
+            context = reusedContext;
+        } else {
+            const EGLint attribs[] = {
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+                EGL_BLUE_SIZE, 8,
+                EGL_GREEN_SIZE, 8,
+                EGL_RED_SIZE, 8,
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+                EGL_NONE
+            };
 
-        const EGLint contextAttribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
-        };
+            const EGLint contextAttribs[] = {
+                EGL_CONTEXT_CLIENT_VERSION, 2,
+                EGL_NONE
+            };
 
-        EGLConfig config;
-        EGLint numConfigs;
+            EGLConfig config;
+            EGLint numConfigs;
 
-        if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
-            throw 0;
+            if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
+                throw 0;
 
-        EGLContext context = eglCreateContext(Window::sDisplay, config, sharedContext, contextAttribs);
+            context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/nullptr, contextAttribs);
+        }
 
 #endif
 
@@ -276,7 +288,7 @@ namespace Render {
     void shutdownWindow(Window::Window *window, ContextHandle context, bool reusedContext = false)
     {
         if (!reusedContext)
-			resetContext();
+            resetContext();
 
 #if WINDOWS
         HDC device = GetDC((HWND)window->mHandle);
@@ -412,12 +424,12 @@ namespace Render {
     void OpenGLRenderWindow::render()
     {
         PROFILE();
-				
-		//TODO Remove this temp solution
+
+        //TODO Remove this temp solution
         Engine::App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().removeQueuedEntities();
 
         updateRenderTargets();
-		
+
         glActiveTexture(GL_TEXTURE0);
         glCheck();
         mDefaultTexture.bind();
