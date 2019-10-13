@@ -19,7 +19,7 @@ namespace Input {
 
     DLL_EXPORT AInputQueue *sQueue = nullptr;
 
-    AndroidInputHandler::AndroidInputHandler(Window::Window *window, App::Application &app, InputListener *listener)
+    AndroidInputHandler::AndroidInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener)
         : UniqueComponent(app, listener)
     {
     }

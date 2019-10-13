@@ -5,26 +5,22 @@ struct AInputEvent;
 
 #include "Madgine/input/inputcollector.h"
 
-namespace Engine
-{
-	namespace Input
-	{
+namespace Engine {
+namespace Input {
 
-		struct MADGINE_ANDROIDINPUT_EXPORT AndroidInputHandler :
-			public InputHandlerComponent<AndroidInputHandler>
-		{
-                AndroidInputHandler(Window::Window *window, App::Application &app, InputListener *listener);
-			~AndroidInputHandler();
+    struct MADGINE_ANDROIDINPUT_EXPORT AndroidInputHandler : public InputHandlerComponent<AndroidInputHandler> {
+        AndroidInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener);
+        ~AndroidInputHandler();
 
-			virtual bool isKeyDown(Key key) override;
+        virtual bool isKeyDown(Key key) override;
 
-		private:
-			bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+    private:
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
 
-			bool handleMotionEvent(const AInputEvent *event);
+        bool handleMotionEvent(const AInputEvent *event);
 
-		private:
-		};
+    private:
+    };
 
-	}
+}
 }
