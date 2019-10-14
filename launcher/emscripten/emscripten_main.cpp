@@ -21,7 +21,7 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
                     assert(!err);
                 }););
     },
-        std::chrono::seconds { 5 });
+        std::chrono::seconds { 15 });
     static Engine::Core::Root root;
     return launch(workGroup, root);
 }
