@@ -117,10 +117,10 @@ namespace Filesystem {
                     hadSeparator = true;
                     if (lastElement == ".") {
                         if (!mPath.empty())
-							mPath.resize(mPath.size() - 1);
+                            mPath.pop_back();
                     } else if (lastElement == "..") {
                         if (!mPath.empty()) {
-                            mPath.resize(mPath.size() - 1);
+                            mPath.pop_back();
                             mPath.resize(mPath.rfind('/') + 1);
                         }
                     } else {
@@ -136,15 +136,15 @@ namespace Filesystem {
 
         if (!lastElement.empty()) {
             if (lastElement == "." && !mPath.empty()) {
-                mPath.resize(mPath.size() - 1);
+                mPath.pop_back();
             } else if (lastElement == ".." && !mPath.empty()) {
-                mPath.resize(mPath.size() - 1);
+                mPath.pop_back();
                 size_t pos = mPath.rfind('/');
                 if (pos != std::string::npos) {
                     mPath.resize(pos);
                 } else {
                     mPath.clear();
-				}
+                }
             } else {
                 mPath += lastElement;
             }

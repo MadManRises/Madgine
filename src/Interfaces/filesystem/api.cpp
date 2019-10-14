@@ -24,9 +24,14 @@ namespace Filesystem {
         return { path, false };
     }
 
-	FileQuery listFolders(const Path &path)
+    FileQuery listFolders(const Path &path)
     {
         return { path, false, true, false };
+    }
+
+    bool isSeparator(char c)
+    {
+        return c == '/' || c == '\\';
     }
 
 }

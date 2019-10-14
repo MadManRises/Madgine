@@ -116,18 +116,9 @@ namespace Filesystem {
         return sep == std::string::npos || colon < sep;
     }
 
-    bool isSeparator(char c)
-    {
-        return c == '/' || c == '\\';
-    }
-
     static bool compareChar(char c1, char c2)
     {
-        if (c1 == c2)
-            return true;
-        else if (std::toupper(c1) == std::toupper(c2))
-            return true;
-        return false;
+        return std::toupper(c1) == std::toupper(c2);
     }
 
     bool isEqual(const Path &p1, const Path &p2)

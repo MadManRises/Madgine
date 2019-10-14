@@ -114,11 +114,6 @@ namespace Filesystem {
         return p.c_str()[0] == '/';
     }
 
-    bool isSeparator(char c)
-    {
-        return c == '/';
-    }
-
     bool isEqual(const Path &p1, const Path &p2)
     {
         return p1 == p2;
