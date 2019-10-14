@@ -38,6 +38,8 @@ namespace Render {
         if (!mProgram.link(vertexShader.get(), pixelShader.get()))
             throw 0;
 
+		mProgram.setUniform("tex", 0);
+
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
         mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
 

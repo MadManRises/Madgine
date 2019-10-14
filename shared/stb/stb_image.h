@@ -3973,8 +3973,7 @@ static stbi_uc *load_jpeg_image(stbi__jpeg *z, int *out_x, int *out_y, int *comp
                 r->resample = stbi__resample_row_generic;
         }
 
-        // can't error after this so, this is safe
-		LOG(n << ", " << z->s->img_x << ", " << z->s->img_y);
+        // can't error after this so, this is safe		
         output = (stbi_uc *)stbi__malloc_mad3(n, z->s->img_x, z->s->img_y, 1);
         if (!output) {
             stbi__cleanup_jpeg(z);
