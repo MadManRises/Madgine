@@ -8,11 +8,11 @@
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
 #endif
-#ifdef BUILD_Base
-#    include "Madgine/baselib.h"
-#endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
+#endif
+#ifdef BUILD_Base
+#    include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_EmscriptenInput
 #    include "emscripteninputlib.h"
@@ -116,8 +116,20 @@
 #ifdef BUILD_Client
 #    include "Madgine/ui/gamehandler.h"
 #endif
+#ifdef BUILD_UI
+#    include "gamemanager.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/ui/guihandler.h"
+#endif
+#ifdef BUILD_UI
+#    include "mainmenuhandler.h"
+#endif
+#ifdef BUILD_UI
+#    include "gamehandler.h"
+#endif
+#ifdef BUILD_UI
+#    include "gameoverhandler.h"
 #endif
 #ifdef BUILD_TestShared
 #    include "uniquecomponent/uniquecomponentshared.h"
@@ -517,6 +529,9 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_UI
+		&table<ClickBrick::UI::GameManager>(),
+#    endif
 
 	}; 
 	return dummy;
@@ -525,12 +540,22 @@ template <>
 std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
 {
 	return {
+#    ifdef BUILD_UI
+		createComponent<ClickBrick::UI::GameManager>,
+#    endif
 
 	}; 
 }
 
 #    define ACC 0
 
+#    ifdef BUILD_UI
+constexpr size_t CollectorBaseIndex_GameHandlerBase_UI = ACC;
+template <>
+size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseIndex_GameHandlerBase_UI + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_GameHandlerBase_UI + 1
+#    endif
 
 #    undef ACC
 
@@ -540,6 +565,11 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_UI
+		&table<ClickBrick::UI::MainMenuHandler>(),
+		&table<ClickBrick::UI::GameHandler>(),
+		&table<ClickBrick::UI::GameOverHandler>(),
+#    endif
 
 	}; 
 	return dummy;
@@ -548,12 +578,28 @@ template <>
 std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
 {
 	return {
+#    ifdef BUILD_UI
+		createComponent<ClickBrick::UI::MainMenuHandler>,
+		createComponent<ClickBrick::UI::GameHandler>,
+		createComponent<ClickBrick::UI::GameOverHandler>,
+#    endif
 
 	}; 
 }
 
 #    define ACC 0
 
+#    ifdef BUILD_UI
+constexpr size_t CollectorBaseIndex_GuiHandlerBase_UI = ACC;
+template <>
+size_t component_index<ClickBrick::UI::MainMenuHandler>() { return CollectorBaseIndex_GuiHandlerBase_UI + 0; }
+template <>
+size_t component_index<ClickBrick::UI::GameHandler>() { return CollectorBaseIndex_GuiHandlerBase_UI + 1; }
+template <>
+size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBaseIndex_GuiHandlerBase_UI + 2; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_GuiHandlerBase_UI + 3
+#    endif
 
 #    undef ACC
 
