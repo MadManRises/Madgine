@@ -13,7 +13,7 @@ namespace Render {
     {
 #if !OPENGL_ES
         glGenVertexArrays(1, &mHandle);
-        glCheck();
+        GL_CHECK();
 #endif
     }
 
@@ -74,7 +74,7 @@ namespace Render {
 #else
         if (mHandle) {
             glDeleteVertexArrays(1, &mHandle);
-            glCheck();
+            GL_CHECK();
             mHandle = 0;
         }
 #endif
@@ -84,7 +84,7 @@ namespace Render {
     {
 #if !OPENGL_ES
         glBindVertexArray(mHandle);
-        glCheck();
+        GL_CHECK();
 #else
         sCurrentBound = this;
 

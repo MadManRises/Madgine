@@ -357,13 +357,13 @@ namespace Render {
 
 #if !ANDROID && !EMSCRIPTEN
         glEnable(GL_DEBUG_OUTPUT);
-        glCheck();
+        GL_CHECK();
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glCheck();
+        GL_CHECK();
         glDebugMessageCallback(glDebugOutput, nullptr);
-        glCheck();
+        GL_CHECK();
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-        glCheck();
+        GL_CHECK();
 #endif
 
         glVertexAttrib2f(1, 0, 0);
@@ -433,7 +433,7 @@ namespace Render {
         updateRenderTargets();
 
         glActiveTexture(GL_TEXTURE0);
-        glCheck();
+        GL_CHECK();
         mDefaultTexture.bind();
 
         Vector2 actualScreenSize { static_cast<float>(window()->renderWidth()), static_cast<float>(window()->renderHeight()) };

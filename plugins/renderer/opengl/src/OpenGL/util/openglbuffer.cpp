@@ -12,7 +12,7 @@ namespace Render {
     OpenGLBuffer::OpenGLBuffer()
     {
         glGenBuffers(1, &mHandle);
-        glCheck();
+        GL_CHECK();
     }
 
     OpenGLBuffer::OpenGLBuffer(dont_create_t)
@@ -57,7 +57,7 @@ namespace Render {
     {
         if (mHandle) {
             glDeleteBuffers(1, &mHandle);
-            glCheck();
+            GL_CHECK();
             mHandle = 0;
         }
     }
@@ -66,7 +66,7 @@ namespace Render {
     {
         bind(target);
         glBufferData(target, size, data, GL_STATIC_DRAW);
-        glCheck();
+        GL_CHECK();
     }
 
     GLuint OpenGLBuffer::handle()

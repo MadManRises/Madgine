@@ -8,12 +8,12 @@ namespace Render {
     OpenGLTexture::OpenGLTexture()
     {
         glGenTextures(1, &mHandle);
-        glCheck();
+        GL_CHECK();
         bind();
 #if !OPENGL_ES
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-        glCheck();
+        GL_CHECK();
 #endif
     }
 
@@ -41,7 +41,7 @@ namespace Render {
     {
         if (mHandle) {
             glDeleteTextures(1, &mHandle);
-            glCheck();
+            GL_CHECK();
             mHandle = 0;
         }
     }
@@ -49,14 +49,14 @@ namespace Render {
     void OpenGLTexture::bind() const
     {
         glBindTexture(GL_TEXTURE_2D, mHandle);
-        glCheck();
+        GL_CHECK();
     }
 
     void OpenGLTexture::setData(Vector2i size, void *data, GLenum type)
     {
         bind();
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, type, data);
-        glCheck();
+        GL_CHECK();
         mSize = size;
     }
 
@@ -64,7 +64,7 @@ namespace Render {
     {
         bind();
         glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, type, data);
-        glCheck();
+        GL_CHECK();
     }
 
     void OpenGLTexture::resize(Vector2i size)
@@ -94,16 +94,16 @@ namespace Render {
     {
         bind();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode);
-        glCheck();
+        GL_CHECK();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode);
-        glCheck();
+        GL_CHECK();
     }
 
     void OpenGLTexture::setFilter(GLint filter)
     {
         bind();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-        glCheck();
+        GL_CHECK();
     }
 
 }

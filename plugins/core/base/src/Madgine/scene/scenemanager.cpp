@@ -64,7 +64,6 @@ namespace Scene {
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             component->callFinalize();
         }
-
     }
 
     decltype(SceneManager::mEntities) &SceneManager::entities()
@@ -223,7 +222,8 @@ namespace Scene {
         if (behaviorTable.is<ObjectPtr>()) {
             table = behaviorTable.as<ObjectPtr>();
         } else {
-            LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
+            if (!behavior.empty())
+                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         if (init)
             TupleUnpacker::invokeFromTuple(&decltype(mEntities)::emplace_init<decltype(init), SceneManager &, bool, std::string, ObjectPtr>, tuple_cat(std::make_tuple(&mEntities, init, mEntities.end()), createEntityData(name, false), std::make_tuple(table)));
@@ -239,14 +239,15 @@ namespace Scene {
         if (behaviorTable.is<ObjectPtr>()) {
             table = behaviorTable.as<ObjectPtr>();
         } else {
-            LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
+            if (!behavior.empty())
+                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
         return &mLocalEntities.emplace_back(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
     }
 
     void SceneManager::removeQueuedEntities()
-    {        
+    {
         std::list<Entity::Entity *>::iterator it = mEntityRemoveQueue.begin();
 
         auto find = [&](const Entity::Entity &ent) { return &ent == *it; };

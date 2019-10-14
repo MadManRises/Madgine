@@ -146,8 +146,6 @@ RegisterType(ClickBrick::UI::GameManager)
         {
             Engine::Ray ray = mCamera.mousePointToRay(evt.position - mGameWindow->getActualPosition().xy(), mGameWindow->getActualSize().xy());
 
-            LOG(ray.mDir);
-
             Engine::Scene::Entity::Entity *hit = nullptr;
             float distance = std::numeric_limits<float>::max();
 

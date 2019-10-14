@@ -45,45 +45,45 @@ namespace Render {
         mTexture.setFilter(GL_NEAREST);
 
         glGenRenderbuffers(1, &mDepthRenderbuffer);
-        glCheck();
+        GL_CHECK();
 
         glGenFramebuffers(1, &mFramebuffer);
-        glCheck();
+        GL_CHECK();
 
         resize(size);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-        glCheck();
+        GL_CHECK();
         glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
-        glCheck();
+        GL_CHECK();
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRenderbuffer);
-        glCheck();
+        GL_CHECK();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);
         //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mTexture.handle(), 0);
-        glCheck();
+        GL_CHECK();
 
 #if !OPENGL_ES
         GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, DrawBuffers);
-        glCheck();
+        GL_CHECK();
 #endif
 
         if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
             throw 0;
 
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glCheck();
+        GL_CHECK();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glCheck();
+        GL_CHECK();
     }
 
     OpenGLRenderTexture::~OpenGLRenderTexture()
     {
         glDeleteFramebuffers(1, &mFramebuffer);
-        glCheck();
+        GL_CHECK();
         glDeleteRenderbuffers(1, &mDepthRenderbuffer);
-        glCheck();
+        GL_CHECK();
     }
 
     uint32_t OpenGLRenderTexture::textureId() const
@@ -104,18 +104,18 @@ namespace Render {
         mTexture.setData({ width, height }, nullptr);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-        glCheck();
+        GL_CHECK();
         glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
-        glCheck();
+        GL_CHECK();
 
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-        glCheck();
+        GL_CHECK();
 
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glCheck();
+        GL_CHECK();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glCheck();
+        GL_CHECK();
 
         return true;
     }
@@ -125,14 +125,14 @@ namespace Render {
         const Vector2 &size = getSize();
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
-        glCheck();
+        GL_CHECK();
         glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
-        glCheck();
+        GL_CHECK();
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glCheck();
+        GL_CHECK();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glCheck();
+        GL_CHECK();
 
         float aspectRatio = size.x / size.y;
 
@@ -182,7 +182,7 @@ namespace Render {
         if (textureId) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textureId);
-            glCheck();
+            GL_CHECK();
         }
     }
 
@@ -247,7 +247,7 @@ namespace Render {
     void OpenGLRenderTexture::clearDepthBuffer()
     {
         glClear(GL_DEPTH_BUFFER_BIT);
-        glCheck();
+        GL_CHECK();
     }
 }
 }
