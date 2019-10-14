@@ -16,10 +16,6 @@ namespace Ini {
     {
         out.writeUnformatted(std::string(name));
         out.writeUnformatted("="s);
-        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
-			//Dirty trick to allow empty strings in specific setup reading only one line at a time (see imgui tool loading)
-            out.writeUnformatted(" "s);
-        }
     }
 
     void IniFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)

@@ -51,7 +51,7 @@ namespace Tools {
     void ToolReadLine(ImGuiContext *ctx, ImGuiSettingsHandler *handler, void *entry, const char *line) // Read: Called for every line of text within an ini entry
     {
         if (strlen(line) > 0) {
-            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>(), line);
+            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>(), line + "\n"s);
             Serialize::SerializeInStream in { std::move(buf) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
