@@ -3974,6 +3974,7 @@ static stbi_uc *load_jpeg_image(stbi__jpeg *z, int *out_x, int *out_y, int *comp
         }
 
         // can't error after this so, this is safe
+		LOG(n << ", " << z->s->img_x << ", " << z->s->img_y);
         output = (stbi_uc *)stbi__malloc_mad3(n, z->s->img_x, z->s->img_y, 1);
         if (!output) {
             stbi__cleanup_jpeg(z);
