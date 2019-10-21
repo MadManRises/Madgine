@@ -122,7 +122,10 @@ namespace Filesystem {
     InStream openFile(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
-        buffer->open(p.c_str(), std::ios_base::in | (isBinary ? std::ios_base::binary : std::ios_base::openmode { 0 }));
+        std::ios_base::openmode mode = std::ios_base::in;
+        if (isBinary)
+            mode |= std::ios_base::binary;
+        buffer->open(p.c_str(), mode);
         return { std::move(buffer) };
     }
 
