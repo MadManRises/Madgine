@@ -162,7 +162,7 @@ namespace Scene {
             return e.key() == name;
         });
         if (it == mEntities.end()) {
-            throw 0;
+            std::terminate();
         }
         return &*it;
     }
@@ -258,14 +258,14 @@ namespace Scene {
                 if (ent != mLocalEntities.end()) {
                     mLocalEntities.erase(ent);
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             } else {
                 auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
                 if (ent != mEntities.end()) {
                     mEntities.erase(ent);
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
 

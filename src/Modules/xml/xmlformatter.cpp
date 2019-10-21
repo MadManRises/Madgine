@@ -51,7 +51,7 @@ namespace XML {
         if (!mCurrentExtended) {
             std::string prefix = in.readN(strlen(name) + 2);
             if (!StringUtil::startsWith(prefix, "<" + std::string(name)))
-                throw 0;
+                std::terminate();
             mCurrentExtended = true;
         }
     }
@@ -61,11 +61,11 @@ namespace XML {
         if (!mCurrentExtended) {
             std::string prefix = in.readN(strlen(name) + 1);
             if (prefix != "<" + std::string(name))
-                throw 0;
+                std::terminate();
         }
         std::string prefix = in.readN(1);
         if (prefix != ">")
-            throw 0;
+            std::terminate();
         mCurrentExtended = false;
     }
 
@@ -73,7 +73,7 @@ namespace XML {
     {
         std::string prefix = in.readN(strlen(name) + 3);
         if (prefix != "</" + std::string(name) + ">")
-            throw 0;
+            std::terminate();
     }
 
     void XMLFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
@@ -101,20 +101,20 @@ namespace XML {
             if (name) {
                 std::string prefix = in.readN(strlen(name) + 1);
                 if (prefix != std::string(name) + "=")
-                    throw 0;
+                    std::terminate();
             } else {
                 if (in.readUntil("=").empty())
-                    throw 0;
+                    std::terminate();
             }
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
                 if (in.readN(1) != "\"")
-                    throw 0;
+                    std::terminate();
                 in.setNextFormattedStringDelimiter('"');
             }
         } else {
             std::string prefix = in.readN(strlen(name) + 2);
             if (prefix != "<" + std::string(name) + ">")
-                throw 0;
+                std::terminate();
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
                 in.setNextFormattedStringDelimiter('<');
             }
@@ -127,7 +127,7 @@ namespace XML {
             const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) ? "/" : "</");
             std::string prefix = in.readN(strlen(name) + 1 + strlen(cPrefix));
             if (prefix != cPrefix + std::string(name) + ">")
-                throw 0;
+                std::terminate();
         }
     }
 
@@ -136,7 +136,7 @@ namespace XML {
         std::string name = in.peekUntil("> ");
         if (!name.empty()) {
             if (name[0] != '<')
-                throw 0;
+                std::terminate();
             if (name[1] == '/')
                 return {};
             return name.substr(1, name.size() - 2);

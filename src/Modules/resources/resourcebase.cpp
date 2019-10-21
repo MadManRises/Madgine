@@ -54,5 +54,11 @@ namespace Resources {
 			return result;*/
     }
 
+    std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob()
+    {
+        InStream buffer = Filesystem::openFile(mPath, true);
+        return std::vector<unsigned char> { buffer.iterator(), buffer.end() };
+    }
+
 }
 }

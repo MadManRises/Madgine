@@ -266,7 +266,7 @@ namespace Render {
             EGLint numConfigs;
 
             if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
-                throw 0;
+                std::terminate();
 
             context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
         }
@@ -376,8 +376,8 @@ namespace Render {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("ui_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("ui_PS");
 
-        if (!mProgram.link(vertexShader.get(), pixelShader.get()))
-            throw 0;
+        if (!mProgram.link(vertexShader.get(), pixelShader.get(), { "aPos", "aColor", "aUV" }))
+            std::terminate();
 
         mProgram.setUniform("texture", 0);
 
@@ -394,7 +394,7 @@ namespace Render {
         mDefaultTexture = {};
         mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         Vector4 borderColor = { 1, 1, 1, 1 };
-        mDefaultTexture.setData({ 1, 1 }, &borderColor);
+        mDefaultTexture.setData({ 1, 1 }, &borderColor, GL_UNSIGNED_BYTE);
 
         mUIAtlasTexture = {};
 

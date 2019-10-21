@@ -32,9 +32,10 @@ RegisterType(Engine::Resources::ImageLoader)
 {
     namespace Resources {
 
-        ImageData::ImageData(const char *path)
+        ImageData::ImageData(const std::vector<unsigned char> &buffer)
         {
-            mBuffer = stbi_load(path,
+
+            mBuffer = stbi_load_from_memory(buffer.data(), buffer.size(),
                 &mWidth,
                 &mHeight,
                 &mChannels,
@@ -53,7 +54,7 @@ RegisterType(Engine::Resources::ImageLoader)
 
         std::shared_ptr<ImageData> ImageLoader::loadImpl(ResourceType *res)
         {
-            return std::make_shared<ImageData>(res->path().c_str());
+            return std::make_shared<ImageData>(res->readAsBlob());
         }
 
     }

@@ -2,8 +2,7 @@
 
 #include "Madgine/render/renderwindowcollector.h"
 
-#include "openglshaderprogram.h"
-
+#include "util/openglprogram.h"
 #include "util/opengltexture.h"
 #include "util/openglvertexarray.h"
 #include "util/openglbuffer.h"
@@ -31,7 +30,7 @@ namespace Render {
 
 		void expandUIAtlas();
 
-        OpenGLShaderProgram mProgram;
+        OpenGLProgram mProgram;
 
         OpenGLTexture mDefaultTexture = dont_create;
         OpenGLTexture mUIAtlasTexture = dont_create;

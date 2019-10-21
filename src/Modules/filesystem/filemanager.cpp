@@ -4,7 +4,9 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "Modules/serialize/streams/buffered_streambuf.h"
+#include "Interfaces/filesystem/api.h"
+
+#include "../serialize/streams/wrappingserializestreambuf.h"
 
 namespace Engine {
 namespace Filesystem {
@@ -18,11 +20,9 @@ namespace Filesystem {
     {
         assert(!getSlaveStreambuf());
 
-        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::move(format), *this, createStreamId());
-        if (!buf->open(path.str(), std::ios::in))
-            return {};
+		InStream stream = openFile(path);
 
-        Serialize::SerializeInStream in { std::move(buf) };
+        Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(stream.release(), std::move(format), *this, createStreamId()) };
         setSlaveStreambuf(&in.buffer());
 
         return in;

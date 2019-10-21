@@ -329,7 +329,7 @@ namespace Serialize {
         template <class... _Ty>
         std::pair<iterator, bool> emplace_tuple_intern(const const_iterator &where, std::tuple<_Ty...> &&tuple)
         {
-            return TupleUnpacker::invokeExpand(&SerializableContainerImpl<OffsetPtr, C>::emplace_intern<_Ty...>,
+            return TupleUnpacker::invokeExpand(&SerializableContainerImpl<OffsetPtr, C>::template emplace_intern<_Ty...>,
                 this,
                 where,
                 std::forward<std::tuple<_Ty...>>(tuple));
@@ -376,12 +376,14 @@ namespace Serialize {
     template <typename OffsetPtr, typename... C>
     using SerializableContainer = typename container_traits<C...>::template api<SerializableContainerImpl<OffsetPtr, C...>>;
 
-#define SERIALIZABLE_CONTAINER(Name, ...)                                                                                     \
-    ::Engine::Serialize::SerializableContainer<::Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
+#define SERIALIZABLE_CONTAINER(Name, ...)                                                    \
+    DECLARE_SERIALIZABLE_OFFSET(Name)                                                        \
+    ::Engine::Serialize::SerializableContainer<SERIALIZABLE_OFFSET(Name), __VA_ARGS__> Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
 #define SERIALIZABLE_CONTAINER_EXT(Name, Pre, Type, ...)                                                                          \
-    Pre Serialize::PartialOffsetContainer<Type, Engine::Serialize::SerializableOffsetPtr<Self, __LINE__>>::type __VA_ARGS__ Name; \
+    DECLARE_SERIALIZABLE_OFFSET(Name)                                                                                             \
+    Pre Serialize::PartialOffsetContainer<Type, SERIALIZABLE_OFFSET(Name)>::type __VA_ARGS__ Name; \
     DEFINE_SERIALIZABLE_OFFSET(Name)
 
 }

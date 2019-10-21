@@ -60,7 +60,7 @@ struct Any {
     {
         AnyHolder<T> *holder = dynamic_cast<AnyHolder<T> *>(mData.get());
         if (!holder)
-            throw 0;
+            std::terminate();
         return holder->data;
     }
 

@@ -19,8 +19,8 @@ namespace Render {
 
         void bind() const;
 
-        void setData(Vector2i size, void *data, GLenum type = GL_FLOAT);
-        void setSubData(Vector2i offset, Vector2i size, void *data, GLenum type = GL_FLOAT);
+        void setData(Vector2i size, void *data, GLenum type);
+        void setSubData(Vector2i offset, Vector2i size, void *data, GLenum type);
 
 		void resize(Vector2i size);
 

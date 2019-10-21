@@ -43,7 +43,7 @@ struct MODULES_EXPORT TypedScopePtr {
     T *safe_cast() const
     {
         if (!mType->isDerivedFrom<std::remove_const_t<T>>())
-            throw 0;
+            std::terminate();
         return static_cast<T *>(mScope);
     }
 

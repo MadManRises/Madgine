@@ -81,7 +81,7 @@ std::string ValueType::getTypeString(Type type)
     case Type::ObjectValue:
         return "Object";
 	default:
-        throw 0;
+        std::terminate();
     }
 }
 

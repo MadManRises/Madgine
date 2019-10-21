@@ -20,7 +20,10 @@ namespace Engine {
 		std::shared_ptr<tinyxml2::XMLDocument> Engine::Tools::LayoutLoader::loadImpl(ResourceType *res)
 		{
 			std::shared_ptr<tinyxml2::XMLDocument> doc = std::make_shared<tinyxml2::XMLDocument>();
-			if (doc->LoadFile(res->path().c_str()))
+			
+			std::string content = res->readAsText();
+
+			if (doc->Parse(content.c_str()))
 				return {};
 			return doc;
 		}

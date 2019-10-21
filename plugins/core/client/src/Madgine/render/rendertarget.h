@@ -16,8 +16,8 @@ namespace Render {
         Scene::Camera *camera() const;
 
         virtual void render() = 0;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0) = 0;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices = nullptr, size_t indexCount = 0, unsigned int textureId = 0) = 0;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0) = 0;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0, unsigned int textureId = 0) = 0;
         virtual void renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms) = 0;
         virtual void clearDepthBuffer() = 0;
 

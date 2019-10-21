@@ -98,7 +98,7 @@ namespace Debug {
                 auto result = SymSetOptions(SYMOPT_LOAD_LINES) && SymInitialize(GetCurrentProcess(), NULL, TRUE);
                 if (!result) {
                     int error = GetLastError();
-                    throw 0;
+                    std::terminate();
                 }
             }
             ~Guard()

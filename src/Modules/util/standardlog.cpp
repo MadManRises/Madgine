@@ -34,7 +34,7 @@ namespace Engine
 				prio = ANDROID_LOG_ERROR;
 				break;
 			default:
-				throw 0;
+				std::terminate();
 			}
 			__android_log_print(prio, name.c_str(), "%s", msg.c_str());
 #else

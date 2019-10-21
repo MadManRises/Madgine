@@ -9,7 +9,10 @@ namespace Render {
 
     struct OpenGLMeshData;
 
-	struct OpenGLFontData;
+    struct OpenGLFontData;
+
+    constexpr struct dont_create_t {
+    } dont_create;
 }
 
 }

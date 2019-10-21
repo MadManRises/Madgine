@@ -1,28 +1,34 @@
-#include "opengllib.h"
+#include "../opengllib.h"
 
-#include "openglshaderprogram.h"
-#include "util/openglshader.h"
+#include "openglprogram.h"
+#include "openglshader.h"
 
 #include "Modules/math/matrix4.h"
 
 namespace Engine {
 namespace Render {
 
-    OpenGLShaderProgram::~OpenGLShaderProgram()
+    OpenGLProgram::~OpenGLProgram()
     {
         reset();
     }
 
-    bool OpenGLShaderProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader)
+    bool OpenGLProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char *> &attributeNames)
     {
         reset();
 
         if (vertexShader->mType != VertexShader || pixelShader->mType != PixelShader)
-            throw 0;
+            std::terminate();
 
         mHandle = glCreateProgram();
         glAttachShader(mHandle, vertexShader->mHandle);
         glAttachShader(mHandle, pixelShader->mHandle);
+
+        for (size_t i = 0; i < attributeNames.size(); ++i) {
+            glBindAttribLocation(mHandle, i, attributeNames[i]);
+            GL_CHECK();
+        }
+
         glLinkProgram(mHandle);
         // check for linking errors
         GLint success;
@@ -37,7 +43,7 @@ namespace Render {
         return success;
     }
 
-    void OpenGLShaderProgram::reset()
+    void OpenGLProgram::reset()
     {
         if (mHandle) {
             glDeleteProgram(mHandle);
@@ -45,13 +51,13 @@ namespace Render {
         }
     }
 
-    void OpenGLShaderProgram::bind()
+    void OpenGLProgram::bind()
     {
         assert(mHandle);
         glUseProgram(mHandle);
     }
 
-    void OpenGLShaderProgram::setUniform(const std::string &var, int value)
+    void OpenGLProgram::setUniform(const std::string &var, int value)
     {
         bind();
         GLint location = glGetUniformLocation(mHandle, var.c_str());
@@ -59,7 +65,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLShaderProgram::setUniform(const std::string &var,
+    void OpenGLProgram::setUniform(const std::string &var,
         const Matrix3 &value)
     {
         bind();
@@ -69,7 +75,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLShaderProgram::setUniform(const std::string &var, const Matrix4 &value)
+    void OpenGLProgram::setUniform(const std::string &var, const Matrix4 &value)
     {
         bind();
         GLint location = glGetUniformLocation(mHandle, var.c_str());
@@ -78,7 +84,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLShaderProgram::setUniform(const std::string &var, const Vector3 &value)
+    void OpenGLProgram::setUniform(const std::string &var, const Vector3 &value)
     {
         bind();
         GLint location = glGetUniformLocation(mHandle, var.c_str());

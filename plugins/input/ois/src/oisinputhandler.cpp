@@ -76,7 +76,7 @@ namespace Input {
         case OIS::MB_Middle:
             return MouseButton::MIDDLE_BUTTON;
         default:
-            throw 0;
+            std::terminate();
         }
     }
 

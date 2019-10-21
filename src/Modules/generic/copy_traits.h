@@ -52,7 +52,7 @@ namespace Engine
 	template <typename T, typename = std::enable_if_t<!custom_is_copy_constructible<std::remove_reference_t<T>>::value>>
 	std::remove_reference_t<T> tryCopy(T &&t)
 	{
-		throw 0;
+		std::terminate();
 	}
 
 }

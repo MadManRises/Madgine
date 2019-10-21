@@ -25,6 +25,7 @@
 #include "Modules/keyvalue/scopeiterator.h"
 
 #include "Modules/serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
 #include "Modules/ini/iniformatter.h"
 
@@ -51,8 +52,8 @@ namespace Tools {
     void ToolReadLine(ImGuiContext *ctx, ImGuiSettingsHandler *handler, void *entry, const char *line) // Read: Called for every line of text within an ini entry
     {
         if (strlen(line) > 0) {
-            auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>(), line + "\n"s);
-            Serialize::SerializeInStream in { std::move(buf) };
+            auto buf = std::make_unique<std::stringbuf>(line + "\n"s);
+            Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
             tool->readState(in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap | Serialize::StateTransmissionFlags_SkipId);
@@ -62,9 +63,9 @@ namespace Tools {
     void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entries into 'out_buf'
     {
 
-        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::stringbuf>>(std::make_unique<Ini::IniFormatter>());
+        auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::SerializeOutStream out { std::move(buf) };
+        Serialize::SerializeOutStream out { std::make_unique < Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {

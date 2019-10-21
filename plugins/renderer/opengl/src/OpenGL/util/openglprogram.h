@@ -3,11 +3,11 @@
 namespace Engine {
 	namespace Render {
 
-		struct MADGINE_OPENGL_EXPORT OpenGLShaderProgram {			
+		struct MADGINE_OPENGL_EXPORT OpenGLProgram {			
 			
-			~OpenGLShaderProgram();
+			~OpenGLProgram();
 
-			bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader);
+			bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char*> &attributeNames);
 
 			void reset();
 

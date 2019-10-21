@@ -7,7 +7,8 @@ namespace Resources {
 
     template <typename Data>
     class Resource : public ResourceBase {
-        using Loader = ResourceLoaderImpl<Data, Resource>;
+        //Resources:: namespace fixes weird issue on MSVC. DONT REMOVE!
+        using Loader = ResourceLoaderImpl<Data, Resources::Resource>;
 
     public:
         Resource(Loader* loader, const Filesystem::Path& path)
@@ -75,7 +76,8 @@ namespace Resources {
 
     template <typename Data>
     class ThreadLocalResource : public ResourceBase {
-        using Loader = ResourceLoaderImpl<Data, ThreadLocalResource>;
+		//Resources:: namespace fixes weird issue on MSVC. DONT REMOVE!
+        using Loader = ResourceLoaderImpl<Data, Resources::ThreadLocalResource>;
 
     public:
         ThreadLocalResource(Loader* loader, const Filesystem::Path& path)

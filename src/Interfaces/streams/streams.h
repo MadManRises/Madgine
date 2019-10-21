@@ -1,71 +1,72 @@
 #pragma once
 
-namespace Engine
-{
-	
-	typedef std::istream::pos_type pos_type;
+namespace Engine {
 
-	struct INTERFACES_EXPORT InStream {
-		InStream(std::unique_ptr<std::streambuf> &&buffer);
-		InStream(InStream &&other);
-		~InStream();
+typedef std::istream::pos_type pos_type;
 
-		template <typename T>
-		InStream &operator>>(T &t)
-		{
-			mStream >> t;
-			return *this;
-		}
+struct INTERFACES_EXPORT InStream {
+    InStream(std::unique_ptr<std::streambuf> &&buffer);
+    InStream(InStream &&other);
+    ~InStream();
 
-		std::istreambuf_iterator<char> iterator();
-		std::istreambuf_iterator<char> end();
+    template <typename T>
+    InStream &operator>>(T &t)
+    {
+        mStream >> t;
+        return *this;
+    }
 
-		bool readRaw(void *buffer, size_t size);
+    std::istreambuf_iterator<char> iterator();
+    std::istreambuf_iterator<char> end();
 
-		operator bool() const;
+    bool readRaw(void *buffer, size_t size);
 
-				pos_type tell();
-                void seek(pos_type p);
+    operator bool() const;
 
-				void skipWs();
+    pos_type tell();
+    void seek(pos_type p);
 
-	protected:
-		InStream(std::streambuf *buffer);
+    void skipWs();
 
-		std::streambuf &buffer() const;
+	std::unique_ptr<std::streambuf> release();
 
-		std::istream mStream;
+protected:
+    InStream(std::streambuf *buffer);
 
-	private:
-		bool mOwning = true;
-	};
+    std::streambuf &buffer() const;
 
-	struct INTERFACES_EXPORT OutStream {
-		OutStream(std::unique_ptr<std::streambuf> &&buffer);
-		OutStream(OutStream &&other);
-		~OutStream();
+    std::istream mStream;
 
-		template <typename T>
-		OutStream &operator<<(const T &t)
-		{
-			mStream << t;
-			return *this;
-		}
+private:
+    bool mOwning = true;
+};
 
-		void writeRaw(const void *data, size_t count);
+struct INTERFACES_EXPORT OutStream {
+    OutStream(std::unique_ptr<std::streambuf> &&buffer);
+    OutStream(OutStream &&other);
+    ~OutStream();
 
-		operator bool() const;
+    template <typename T>
+    OutStream &operator<<(const T &t)
+    {
+        mStream << t;
+        return *this;
+    }
 
-	protected:
-		std::streambuf &buffer() const;
-	
-		std::ostream mStream;
-	};
+    void writeRaw(const void *data, size_t count);
 
-	struct INTERFACES_EXPORT Stream : InStream, OutStream {
-		Stream(std::unique_ptr<std::streambuf> &&buffer);
+    operator bool() const;
 
-		using InStream::buffer;
-	};
+protected:
+    std::streambuf &buffer() const;
+
+    std::ostream mStream;
+};
+
+struct INTERFACES_EXPORT Stream : InStream, OutStream {
+    Stream(std::unique_ptr<std::streambuf> &&buffer);
+
+    using InStream::buffer;
+};
 
 }

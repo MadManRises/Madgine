@@ -38,7 +38,7 @@ namespace Engine
 				glType = GL_FRAGMENT_SHADER;
 			}
 			else
-				throw 0;
+				std::terminate();
 
 			std::string source = res->readAsText();
 

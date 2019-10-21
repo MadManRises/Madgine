@@ -45,7 +45,7 @@ namespace Window {
             EGLint width;
             EGLint height;
             if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
-                throw 0;
+                std::terminate();
             mWidth = width;
             mHeight = height;
         }

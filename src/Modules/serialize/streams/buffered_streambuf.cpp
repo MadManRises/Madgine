@@ -128,7 +128,7 @@ namespace Serialize {
         if (mIsClosed)
             return;
         if (pptr() != pbase())
-            throw 0;
+            std::terminate();
     }
 
     void buffered_streambuf::endMessage()
@@ -159,7 +159,7 @@ namespace Serialize {
                     return mIsClosed ? -1 : static_cast<int>(mBufferedSendMsgs.size());
                 }
                 if (num != sizeof it->mHeader) {
-                    throw 0;
+                    std::terminate();
                 }
                 it->mHeaderSent = true;
             }

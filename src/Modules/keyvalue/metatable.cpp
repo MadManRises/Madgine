@@ -39,7 +39,7 @@ void MetaTable::set(const std::string &key, const ValueType &value, TypedScopePt
     if (mBaseGetter) {
         mBaseGetter().set(key, value, scope);
     } else {
-        throw 0;
+        std::terminate();
     }
 }
 
@@ -53,7 +53,7 @@ bool MetaTable::isEditable(const std::string &key) const
     if (mBaseGetter) {
         return mBaseGetter().isEditable(key);
     } else {
-        throw 0;
+        std::terminate();
     }
 }
 

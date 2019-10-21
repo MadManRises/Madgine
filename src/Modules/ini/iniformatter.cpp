@@ -27,7 +27,7 @@ namespace Ini {
     {
         std::string prefix = in.readN(strlen(name) + 1);
         if (prefix != std::string(name) + "=")
-            throw 0;
+            std::terminate();
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
             in.setNextFormattedStringDelimiter('\n');
         }

@@ -39,7 +39,7 @@ namespace Engine
 				return "Unknown Error (possibly native error code: "s + std::to_string(getAPIError()) + ")";
 				break;
 			default: 
-				throw 0;
+				std::terminate();
 			}
 		}
 

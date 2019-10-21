@@ -3,7 +3,6 @@
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 
-
 #include "opengllib.h"
 
 #include "openglfontloader.h"
@@ -66,7 +65,6 @@ static int ftCubicTo(const FT_Vector *control1, const FT_Vector *control2, const
     return 0;
 }
 
-
 }
 
 namespace Engine {
@@ -86,14 +84,18 @@ namespace Render {
             return {};
         }
 
+        std::vector<unsigned char> fontBuffer = res->readAsBlob();
+
         FT_Face face;
-        if (FT_New_Face(ft, res->path().c_str(), 0, &face)) {
+        if (FT_New_Memory_Face(ft, fontBuffer.data(), fontBuffer.size(), 0, &face)) {
             LOG_ERROR("FREETYPE: Failed to load font");
         }
 
         FT_Set_Pixel_Sizes(face, 0, 64);
 
         std::shared_ptr<OpenGLFontData> data = std::make_shared<OpenGLFontData>();
+        
+		data->mTexture.setFilter(GL_NEAREST);
 
         std::vector<Vector2i> sizes;
         sizes.resize(128);
@@ -135,7 +137,7 @@ namespace Render {
 
         data->mTextureSize = { areaSize * UNIT_SIZE,
             areaSize * UNIT_SIZE };
-        data->mTexture.setData(data->mTextureSize, nullptr);
+        data->mTexture.setData(data->mTextureSize, nullptr, GL_UNSIGNED_BYTE);
 
         for (GLubyte c = 0; c < 128; c++) {
 
@@ -145,9 +147,9 @@ namespace Render {
                 continue;
             }
 
-            std::unique_ptr<Vector3[]> test = std::make_unique<Vector3[]>(sizes[c].x * sizes[c].y);
+            std::unique_ptr<Vector3[]> buffer = std::make_unique<Vector3[]>(sizes[c].x * sizes[c].y);
 
-            msdfgen::BitmapRef<float, 3> bm { test[0].ptr(), sizes[c].x, sizes[c].y };
+            msdfgen::BitmapRef<float, 3> bm { buffer[0].ptr(), sizes[c].x, sizes[c].y };
 
             msdfgen::Shape shape;
             shape.inverseYAxis = true;
@@ -163,8 +165,8 @@ namespace Render {
             ftFunctions.delta = 0;
             FT_Outline_Decompose(&face->glyph->outline, &ftFunctions, &context);
 
-			msdfgen::edgeColoringSimple(shape, 3);
-            msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1),static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
+            msdfgen::edgeColoringSimple(shape, 3);
+            msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
 
             data->mGlyphs[c].mSize = sizes[c];
             data->mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
@@ -178,18 +180,20 @@ namespace Render {
                 std::swap(size.x, size.y);
             pos = { pos.x, pos.y };
 
-            std::unique_ptr<Vector4[]> colors = std::make_unique<Vector4[]>(size.x * size.y);
+            std::unique_ptr<unsigned char[]> colors = std::make_unique<unsigned char[]>(4 * size.x * size.y);
             for (int y = 0; y < size.y; ++y) {
                 for (int x = 0; x < size.x; ++x) {
                     int index = y * size.x + x;
                     int sourceIndex = entries[c].mFlipped ? x * size.y + y : y * size.x + x;
 
-                    colors[index] = /*Vector4 { 1, 1, 1, 1 } * (face->glyph->bitmap.buffer[sourceIndex] / 255.0f)*/
-                        Vector4 { test[sourceIndex], 1 };
+                    colors[4 * index] = clamp(buffer[sourceIndex].x, 0.0f, 1.0f) * 255;
+                    colors[4 * index + 1] = clamp(buffer[sourceIndex].y, 0.0f, 1.0f) * 255;
+                    colors[4 * index + 2] = clamp(buffer[sourceIndex].z, 0.0f, 1.0f) * 255;
+                    colors[4 * index + 3] = 255;
                 }
             }
 
-            data->mTexture.setSubData(pos, size, colors.get());
+            data->mTexture.setSubData(pos, size, colors.get(), GL_UNSIGNED_BYTE);
         }
 
         FT_Done_Face(face);

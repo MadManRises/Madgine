@@ -22,6 +22,7 @@
 #include "project/projectmanager.h"
 
 #include "Modules/serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
 #include "Modules/xml/xmlformatter.h"
 
@@ -115,9 +116,9 @@ namespace Tools {
 
         Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "data" / "default.layout";
 
-        auto buf = std::make_unique<Serialize::WrappingSerializeStreambuf<std::filebuf>>(std::make_unique<XML::XMLFormatter>());
+        auto buf = std::make_unique<std::filebuf>();
         buf->open(filePath.str(), std::ios::out);
-        Serialize::SerializeOutStream out { std::move(buf) };
+        Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<XML::XMLFormatter>()) };
 
         mWindow.writeState(out);
     }
@@ -179,7 +180,7 @@ namespace Tools {
 
                 Math::Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
-                background->AddRect(bounds.topLeft(), bounds.bottomRight(), IM_COL32(255, 255, 255, 255));
+                background->AddRect(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, IM_COL32(255, 255, 255, 255));
 
                 ImU32 resizeColor = IM_COL32(0, 255, 255, 255);
                 if (io.KeyShift) {
@@ -214,13 +215,13 @@ namespace Tools {
 
                     //TODO
                     if (leftBorder || mDraggingLeft)
-                        background->AddLine(bounds.topLeft(), bounds.bottomLeft(), resizeColor, thickness);
+                        background->AddLine(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomLeft() / io.DisplayFramebufferScale, resizeColor, thickness);
                     if (rightBorder || mDraggingRight)
-                        background->AddLine(bounds.topRight(), bounds.bottomRight(), resizeColor, thickness);
+                        background->AddLine(bounds.topRight() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, resizeColor, thickness);
                     if (topBorder || mDraggingTop)
-                        background->AddLine(bounds.topLeft(), bounds.topRight(), resizeColor, thickness);
+                        background->AddLine(bounds.topLeft() / io.DisplayFramebufferScale, bounds.topRight() / io.DisplayFramebufferScale, resizeColor, thickness);
                     if (bottomBorder || mDraggingBottom)
-                        background->AddLine(bounds.bottomLeft(), bounds.bottomRight(), resizeColor, thickness);
+                        background->AddLine(bounds.bottomLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, resizeColor, thickness);
 
                     if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse, screenSize, screenPos, borderSize)) {
                         mMouseDown = true;
@@ -254,7 +255,7 @@ namespace Tools {
 
                         Math::Bounds bounds(pos.x, pos.y + size.y, pos.x + size.x, pos.y);
 
-                        background->AddRect(bounds.topLeft(), bounds.bottomRight(), IM_COL32(127, 127, 127, 255));
+                        background->AddRect(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, IM_COL32(127, 127, 127, 255));
                     }
                 }
                 if (io.MouseReleased[0] && !mDragging) {

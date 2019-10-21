@@ -205,7 +205,7 @@ namespace GUI {
         case WidgetClass::IMAGE_CLASS:
             return createImage(name);
         default:
-            throw 0;
+            std::terminate();
         }
     }
 

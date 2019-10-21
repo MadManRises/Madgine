@@ -28,7 +28,7 @@ namespace Engine
 					to_string(stream.id()) + "r.log")
 			{
 				if (stream.manager() && stream.manager()->name().empty())
-					throw 0;
+					std::terminate();
 			}
 
 			StreamLog::StreamLog(SerializeOutStream &stream) :
@@ -37,7 +37,7 @@ namespace Engine
 					to_string(stream.id()) + "w.log")
 			{
 				if (stream.manager() && stream.manager()->name().empty())
-					throw 0;
+					std::terminate();
 			}
 
 			void StreamLog::logBeginMessage(const MessageHeader& header, const std::string& object)

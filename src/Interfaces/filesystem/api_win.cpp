@@ -126,10 +126,10 @@ namespace Filesystem {
         return ((p1.str().size() == p2.str().size()) && std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
     }
 
-    InStream openFile(const Path &p)
+    InStream openFile(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
-        buffer->open(p.c_str(), std::ios_base::in);
+        buffer->open(p.c_str(), std::ios_base::in | (isBinary ? std::ios_base::binary : 0));
         return { std::move(buffer) };
     }
 
@@ -145,6 +145,15 @@ namespace Filesystem {
         auto result = _getcwd(buffer, sizeof(buffer));
         assert(result);
         return buffer;
+    }
+
+    FileInfo fileInfo(const Path &path)
+    {
+        struct _stat64 stats;
+        _stat64(path.c_str(), &stats);
+        return {
+            static_cast<size_t>(stats.st_size)
+        };
     }
 
 }

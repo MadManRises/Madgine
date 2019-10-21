@@ -80,7 +80,7 @@ namespace Serialize {
                             (*out << ... << args);
                             out->endMessage();
                         } else {
-                            throw 0;
+                            std::terminate();
                         }
                     }
                 }

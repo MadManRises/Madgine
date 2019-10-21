@@ -279,7 +279,7 @@ namespace Serialize {
     {
         auto it = mMasterStreams.find(streamId);
         if (it == mMasterStreams.end())
-            throw 0;
+            std::terminate();
         if (!target->addMasterStream(
                 std::move(const_cast<BufferedInOutStream &>(*it)), false))
             return false;

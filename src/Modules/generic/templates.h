@@ -133,8 +133,8 @@ template <typename, template <typename...> typename>
 struct is_instance : public std::false_type {
 };
 
-template <typename T, template <typename...> typename U>
-struct is_instance<U<T>, U> : public std::true_type {
+template <typename... T, template <typename...> typename U>
+struct is_instance<U<T...>, U> : public std::true_type {
 };
 
 template <typename T, template <typename...> typename U>

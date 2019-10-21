@@ -44,7 +44,7 @@ namespace Serialize {
                     table = table->mBaseType ? &table->mBaseType() : nullptr;
                 }
                 if (!found)
-                    throw 0;
+                    std::terminate();
                 name = format.lookupFieldName(in);
             }
         } else {
@@ -129,7 +129,7 @@ namespace Serialize {
             tables.pop();
         }
 
-        throw 0;
+        std::terminate();
     }
 
     const Serializer &SerializeTable::get(size_t index) const
@@ -153,7 +153,7 @@ namespace Serialize {
         }
 
         //Corrupt package
-        throw 0;
+        std::terminate();
     }
 
 }

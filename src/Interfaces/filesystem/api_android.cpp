@@ -191,23 +191,31 @@ namespace Filesystem {
             assert(mode & std::ios_base::in);
 
             int whence;
-            switch (mode) {
+            switch (dir) {
             case std::ios_base::beg:
                 whence = SEEK_SET;
                 break;
             case std::ios_base::cur:
                 whence = SEEK_CUR;
+                off += gptr() - egptr();
+                if (off >= eback() - egptr() && off <= 0) {
+                    setg(eback(), egptr() + off, egptr());
+                    off_t cur = AAsset_seek(mAsset, 0, SEEK_CUR);
+                    return pos_type(off_type(cur + off));
+                }
                 break;
             case std::ios_base::end:
                 whence = SEEK_END;
                 break;
+            default:
+                std::terminate();
             }
 
             off_t pos = AAsset_seek(mAsset, off, whence);
             if (pos != (off_t)-1) {
                 fetch();
             }
-            return pos_type(off_type(-1));
+            return pos_type(off_type(pos));
         }
 
         pos_type seekpos(pos_type pos,
@@ -220,7 +228,7 @@ namespace Filesystem {
                 fetch();
             }
 
-            return pos_type(off_type(-1));
+            return pos_type(off_type(pos));
         }
 
         int underflow() override
@@ -236,7 +244,7 @@ namespace Filesystem {
             setg(mBuffer.data(), mBuffer.data(), mBuffer.data() + count);
             if (count == 0)
                 return EOF;
-            return *gptr();
+            return int((unsigned char)(*gptr()));
         }
 
     private:
@@ -245,13 +253,13 @@ namespace Filesystem {
         AAsset *mAsset;
     };
 
-    InStream openFile(const Path &p)
+    InStream openFile(const Path &p, bool isBinary)
     {
         if (isAssetPath(p)) {
             return { std::make_unique<AAsset_Streambuf>(assetDir(p)) };
         } else {
             std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
-            buffer->open(p.c_str(), std::ios_base::in);
+            buffer->open(p.c_str(), std::ios_base::in | (isBinary ? std::ios_base::binary : 0));
             return { std::move(buffer) };
         }
     }

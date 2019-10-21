@@ -29,10 +29,10 @@ namespace Im3D {
 
         struct RenderData {
             std::vector<Render::Vertex> mVertices[IM3D_MESHTYPE_COUNT];
-            std::vector<unsigned int> mIndices[IM3D_MESHTYPE_COUNT];
+            std::vector<unsigned short> mIndices[IM3D_MESHTYPE_COUNT];
             size_t mVertexBase[IM3D_MESHTYPE_COUNT];
             std::vector<Render::Vertex2> mVertices2[IM3D_MESHTYPE_COUNT];
-            std::vector<unsigned int> mIndices2[IM3D_MESHTYPE_COUNT];
+            std::vector<unsigned short> mIndices2[IM3D_MESHTYPE_COUNT];
             size_t mVertexBase2[IM3D_MESHTYPE_COUNT];
             Render::RenderPassFlags mFlags = Render::RenderPassFlags_NoLighting;
         };

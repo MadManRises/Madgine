@@ -16,7 +16,7 @@ namespace Network {
     {
         if (sManagerCount == 0) {
             if (!SocketAPI::init())
-                throw 0;
+                std::terminate();
         }
         ++sManagerCount;
     }

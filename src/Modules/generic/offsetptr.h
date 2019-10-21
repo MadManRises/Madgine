@@ -5,6 +5,8 @@ namespace Engine {
 	
 template <typename T, typename M>
 struct OffsetPtr {
+    OffsetPtr() = default;
+
     template <typename Target>
     OffsetPtr(Target(T::*P))
     {
@@ -29,7 +31,7 @@ struct OffsetPtr {
         return offset;
 	}
 
-    size_t mOffset;
+    size_t mOffset = -1;
 };
 
 }

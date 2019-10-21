@@ -55,7 +55,7 @@ namespace Resources {
 
         auto [it, b] = mResourcePaths.try_emplace(path, priority);
         /*if (!b)
-				throw 0;*/
+				std::terminate();*/
 
         if (mInitialized) {
             updateResources(path, priority);

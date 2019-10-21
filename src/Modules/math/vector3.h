@@ -139,7 +139,7 @@ public:
 		@param
 		rkVector The other vector
 		*/
-    Vector3 &operator=(const Vector3 &rkVector)
+    constexpr Vector3 &operator=(const Vector3 &rkVector)
     {
         x = rkVector.x;
         y = rkVector.y;
@@ -148,7 +148,7 @@ public:
         return *this;
     }
 
-    Vector3 &operator=(const float fScaler)
+    constexpr Vector3 &operator=(const float fScaler)
     {
         x = fScaler;
         y = fScaler;
@@ -360,7 +360,7 @@ public:
 		length (e.g. for just comparing lengths) use squaredLength()
 		instead.
 		*/
-    float length() const
+    constexpr float length() const
     {
         return sqrtf(x * x + y * y + z * z);
     }

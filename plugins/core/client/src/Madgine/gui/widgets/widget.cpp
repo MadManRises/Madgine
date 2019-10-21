@@ -190,7 +190,7 @@ namespace GUI {
         case WidgetClass::IMAGE_CLASS:
             return createChildImage(name);
         default:
-            throw 0;
+            std::terminate();
         }
     }
 
@@ -442,7 +442,7 @@ namespace GUI {
         case WidgetClass::IMAGE_CLASS:
             return createImage(name);
         default:
-            throw 0;
+            std::terminate();
         }
     }
     std::tuple<std::unique_ptr<WidgetBase>> Engine::GUI::WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)

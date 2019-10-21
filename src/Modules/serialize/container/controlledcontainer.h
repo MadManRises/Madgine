@@ -45,7 +45,7 @@ namespace Serialize {
                     in.read(*it, "Item");
                 } else {
                     LOG_ERROR("Could not find \"" << key << "\"!");
-					throw 0;
+					std::terminate();
 				}
             }
 

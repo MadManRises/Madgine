@@ -60,23 +60,27 @@ namespace Tools {
     }
     static void SetImGuiToolWindowPos(ImGuiViewport *vp, ImVec2 pos)
     {
+        ImGuiIO &io = ImGui::GetIO();
         Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
-        w->setRenderPos(static_cast<size_t>(pos.x), static_cast<size_t>(pos.y));
+        w->setRenderPos(static_cast<size_t>(pos.x * io.DisplayFramebufferScale.x), static_cast<size_t>(pos.y * io.DisplayFramebufferScale.y));
     }
     static ImVec2 GetImGuiToolWindowPos(ImGuiViewport *vp)
     {
+        ImGuiIO &io = ImGui::GetIO();
         Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
-        return { static_cast<float>(w->renderX()), static_cast<float>(w->renderY()) };
+        return { static_cast<float>(w->renderX() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderY() / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowSize(ImGuiViewport *vp, ImVec2 size)
     {
+        ImGuiIO &io = ImGui::GetIO();
         Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
-        w->setRenderSize(static_cast<size_t>(size.x), static_cast<size_t>(size.y));
+        w->setRenderSize(static_cast<size_t>(size.x * io.DisplayFramebufferScale.x), static_cast<size_t>(size.y * io.DisplayFramebufferScale.y));
     }
     static ImVec2 GetImGuiToolWindowSize(ImGuiViewport *vp)
     {
+        ImGuiIO &io = ImGui::GetIO();
         Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
-        return { static_cast<float>(w->renderWidth()), static_cast<float>(w->renderHeight()) };
+        return { static_cast<float>(w->renderWidth() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderHeight() / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowFocus(ImGuiViewport *vp)
     {
@@ -118,14 +122,14 @@ namespace Tools {
 
         ImGuiIO &io = ImGui::GetIO();
 
+#if ANDROID
+        io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);
+#endif
+
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         if (Window::platformCapabilities.mSupportMultipleWindows) {
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-#if ANDROID
-            io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);
-#endif
 
             ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
             platform_io.Platform_CreateWindow = CreateImGuiToolWindow;
@@ -156,7 +160,7 @@ namespace Tools {
             main_viewport->PlatformHandle = mWindow.window();
         }
 
-		//Input
+        //Input
         io.KeyMap[ImGuiKey_Tab] = Input::KC_TAB;
         io.KeyMap[ImGuiKey_LeftArrow] = Input::KC_LEFT;
         io.KeyMap[ImGuiKey_RightArrow] = Input::KC_RIGHT;
@@ -211,7 +215,7 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-		io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
+        io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
         io.KeyCtrl = mWindow.input()->isKeyDown(Input::KC_LCONTROL) || mWindow.input()->isKeyDown(Input::KC_RCONTROL);
         io.KeyAlt = mWindow.input()->isKeyDown(Input::KC_LMENU) || mWindow.input()->isKeyDown(Input::KC_RMENU);
 
@@ -226,7 +230,7 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = false;
 
-		io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
+        io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
         io.KeyCtrl = mWindow.input()->isKeyDown(Input::KC_LCONTROL) || mWindow.input()->isKeyDown(Input::KC_RCONTROL);
         io.KeyAlt = mWindow.input()->isKeyDown(Input::KC_LMENU) || mWindow.input()->isKeyDown(Input::KC_RMENU);
 
@@ -253,8 +257,7 @@ namespace Tools {
     {
         ImGuiIO &io = ImGui::GetIO();
 
-        io.MousePos.x = arg.position.x / io.DisplayFramebufferScale.x;
-        io.MousePos.y = arg.position.y / io.DisplayFramebufferScale.y;
+        io.MousePos = arg.position / io.DisplayFramebufferScale;        
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 
@@ -264,7 +267,9 @@ namespace Tools {
     }
 
     void ImManager::calculateAvailableScreenSpace(Window::Window *w, Vector3 &pos, Vector3 &size)
-    {        
+    {
+        ImGuiIO &io = ImGui::GetIO();
+
         pos.x += mAreaPos.x - w->renderX();
         pos.y += mAreaPos.y - w->renderY();
         if (mAreaSize != Vector2::ZERO) {
@@ -278,15 +283,19 @@ namespace Tools {
 
     void ImManager::setMenuHeight(float h)
     {
+        ImGuiIO &io = ImGui::GetIO();
+
         if (mAreaPos.x == 0.0f)
-            mAreaPos.y = h;
+            mAreaPos.y = h * io.DisplayFramebufferScale.y;
     }
 
     void ImManager::setCentralNode(ImGuiDockNode *node)
     {
+        ImGuiIO &io = ImGui::GetIO();
+
         if (node) {
-            mAreaPos = Vector2 { node->Pos };
-            mAreaSize = Vector2 { node->Size };
+            mAreaPos = Vector2 { node->Pos } * io.DisplayFramebufferScale;
+            mAreaSize = Vector2 { node->Size } * io.DisplayFramebufferScale;
         } else {
             mAreaPos = Vector2::ZERO;
             mAreaSize = Vector2::ZERO;

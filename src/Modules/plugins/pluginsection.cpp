@@ -297,7 +297,7 @@ namespace Plugins {
             const void *s = p.second.getSymbol(name);
             if (s) {
                 if (symbol)
-                    throw 0;
+                    std::terminate();
                 symbol = s;
             }
         }

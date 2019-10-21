@@ -19,7 +19,7 @@ namespace Detail {
     {
         return curr == prev
             ? curr
-            : sqrtNewtonRaphson(x, 0.5 * (curr + x / curr), curr);
+            : sqrtNewtonRaphson(x, 0.5f * (curr + x / curr), curr);
     }
 }
 
@@ -39,6 +39,11 @@ template <typename T>
 T max(const T &a, const T &b)
 {
     return a > b ? a : b;
+}
+
+template <typename T>
+T clamp(const T& v, const T& minV, const T& maxV) {
+    return min(max(v, minV), maxV);
 }
 
 constexpr int sign(int i) {

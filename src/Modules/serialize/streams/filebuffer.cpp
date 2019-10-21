@@ -51,7 +51,7 @@ namespace Engine
 				Filesystem::createDirectories(path.parentPath());
 			else
 				if (!Filesystem::exists(path.parentPath()))
-					throw 0;
+					std::terminate();
 			std::ofstream stream(path.str(), std::ios::binary);
 			stream.write(data(), size());
 		}

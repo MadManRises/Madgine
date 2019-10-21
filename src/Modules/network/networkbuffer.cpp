@@ -2,6 +2,8 @@
 
 #include "networkbuffer.h"
 
+#include "../serialize/formatter.h"
+
 namespace Engine {
 namespace Network {
     NetworkBuffer::NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id)

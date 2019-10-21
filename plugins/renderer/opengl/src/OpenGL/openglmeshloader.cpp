@@ -28,11 +28,11 @@ namespace Render {
     std::shared_ptr<OpenGLMeshData> loadVertices(const aiScene *scene, const Filesystem::Path &texturePath)
     {
         std::vector<V> vertices;
-        std::vector<unsigned int> indices;
+        std::vector<unsigned short> indices;
         //Reserve??
 
         for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-            unsigned int baseVertexIndex = vertices.size();
+            unsigned short baseVertexIndex = vertices.size();
             aiMesh *mesh = scene->mMeshes[meshIndex];
 
             aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
@@ -65,11 +65,11 @@ namespace Render {
             for (size_t i = 0; i < mesh->mNumFaces; ++i) {
                 aiFace &face = mesh->mFaces[i];
 
-                unsigned int v0 = face.mIndices[0];
-                unsigned int lastIndex = face.mIndices[1];
+                unsigned short v0 = face.mIndices[0];
+                unsigned short lastIndex = face.mIndices[1];
 
                 for (size_t j = 2; j < face.mNumIndices; ++j) {
-                    unsigned int index = face.mIndices[j];
+                    unsigned short index = face.mIndices[j];
 
                     indices.push_back(v0 + baseVertexIndex);
                     indices.push_back(lastIndex + baseVertexIndex);
@@ -86,6 +86,7 @@ namespace Render {
             std::shared_ptr<Resources::ImageData> tex = Resources::ImageLoader::load(imageName);
 
 			data->mTexture = {};
+            data->mTexture.setFilter(GL_NEAREST);
             data->mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer, GL_UNSIGNED_BYTE);
         }
 
@@ -96,7 +97,9 @@ namespace Render {
     {
         Assimp::Importer importer;
 
-        const aiScene *scene = importer.ReadFile(res->path().str(), 0);
+		std::vector<unsigned char> buffer = res->readAsBlob();
+
+        const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
 
         if (!scene) {
             LOG_ERROR(importer.GetErrorString());
@@ -115,7 +118,7 @@ namespace Render {
             for (size_t i = 0; i < count; ++i) {
                 aiString tempTexturePath;
                 if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &tempTexturePath) != AI_SUCCESS)
-                    throw 0;
+                    std::terminate();
                 if (tempTexturePath.length > 0) {
                     if (!texturePath.empty() && texturePath != tempTexturePath.C_Str())
                         throw "Only one texture is allowed at the moment!";
@@ -131,7 +134,7 @@ namespace Render {
         }
     }
 
-    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
 
         OpenGLMeshData data;
@@ -154,7 +157,7 @@ namespace Render {
         return data;
     }
 
-    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
 
         OpenGLMeshData data;
@@ -177,7 +180,7 @@ namespace Render {
         return data;
     }
 
-    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    OpenGLMeshData OpenGLMeshLoader::generate(size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
 
         OpenGLMeshData data;
@@ -200,7 +203,7 @@ namespace Render {
         return data;
     }
 
-    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
@@ -224,7 +227,7 @@ namespace Render {
         }
     }
 
-    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);
@@ -248,7 +251,7 @@ namespace Render {
         }
     }
 
-    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLMeshLoader::update(OpenGLMeshData &data, size_t groupSize, Vertex3 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         data.mGroupSize = groupSize;
         data.mVertices.setData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices);

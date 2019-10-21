@@ -7,7 +7,7 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		
+		//TODO: Implement OffsetPtr interface
 			template <class T>
 			class Serialized : UnitHelper<T>, public SerializableBase
 			{

@@ -60,7 +60,7 @@ namespace UI {
             ui().window().closeWidget(mWidget);
             break;
         case WindowType::ROOT_WINDOW:
-            throw 0;
+            std::terminate();
         }
     }
 

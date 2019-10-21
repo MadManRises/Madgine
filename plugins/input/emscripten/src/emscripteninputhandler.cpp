@@ -46,7 +46,7 @@ namespace Input {
         case 2:
             return MouseButton::RIGHT_BUTTON;
         default:
-            throw 0;
+            std::terminate();
         }
     }
 

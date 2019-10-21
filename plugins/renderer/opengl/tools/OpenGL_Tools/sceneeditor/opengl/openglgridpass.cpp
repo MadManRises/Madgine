@@ -17,8 +17,8 @@ namespace Tools {
         std::shared_ptr<Render::OpenGLShader> vertexShader = Render::OpenGLShaderLoader::load("grid_VS");
         std::shared_ptr<Render::OpenGLShader> pixelShader = Render::OpenGLShaderLoader::load("grid_PS");
 
-        if (!mProgram.link(vertexShader.get(), pixelShader.get()))
-            throw 0;
+        if (!mProgram.link(vertexShader.get(), pixelShader.get(), { "aPos" }))
+            std::terminate();
 
         mVAO.bind();
 
@@ -34,7 +34,7 @@ namespace Tools {
         };
         mVertexBuffer.setData(GL_ARRAY_BUFFER, sizeof(vertices), vertices);
 
-        unsigned int indices[] = {
+        unsigned short indices[] = {
             0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1/*,
             5, 6, 7, 5, 7, 8, 5, 8, 9, 5, 9, 6,
             10, 11, 12, 10, 12, 13, 10, 13, 14, 10, 14, 11*/
@@ -54,7 +54,7 @@ namespace Tools {
         glDrawElements(
             GL_TRIANGLES, // mode
             12, // count
-            GL_UNSIGNED_INT, // type
+            GL_UNSIGNED_SHORT, // type
             (void *)0 // element array buffer offset
         );
         GL_CHECK();

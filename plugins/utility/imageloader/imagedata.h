@@ -4,7 +4,7 @@ namespace Engine {
 namespace Resources {
 
     struct ImageData {
-        ImageData(const char *path);
+        ImageData(const std::vector<unsigned char> &buffer);
         ~ImageData();
 
 		unsigned char *mBuffer;

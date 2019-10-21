@@ -69,6 +69,12 @@ std::streambuf &InStream::buffer() const
     return *mStream.rdbuf();
 }
 
+std::unique_ptr<std::streambuf> InStream::release()
+{
+    assert(mOwning);
+    return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));    
+}
+
 OutStream::OutStream(std::unique_ptr<std::streambuf> &&buffer)
     : mStream(buffer.release())
 {

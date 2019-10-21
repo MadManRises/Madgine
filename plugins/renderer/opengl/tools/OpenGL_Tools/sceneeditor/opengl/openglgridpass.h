@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Madgine/render/renderpass.h"
-#include "OpenGL/openglshaderprogram.h"
+#include "OpenGL/util/openglprogram.h"
 #include "OpenGL/util/openglbuffer.h"
 #include "OpenGL/util/openglvertexarray.h"
 
@@ -15,7 +15,7 @@ namespace Tools {
         virtual void render(Render::RenderTarget *target, Scene::Camera *camera) override;
 
 	private:
-        Render::OpenGLShaderProgram mProgram;        
+        Render::OpenGLProgram mProgram;        
         Render::OpenGLBuffer mVertexBuffer;
         Render::OpenGLBuffer mIndexBuffer;
         Render::OpenGLVertexArray mVAO;

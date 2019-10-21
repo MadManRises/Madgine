@@ -39,7 +39,7 @@ namespace Input {
         case SDL_BUTTON_MIDDLE:
             return MouseButton::MIDDLE_BUTTON;
         default:
-            throw 0;
+            std::terminate();
         }
     }
 

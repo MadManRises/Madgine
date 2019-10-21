@@ -35,10 +35,10 @@ namespace Render {
         std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
         std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
 
-        if (!mProgram.link(vertexShader.get(), pixelShader.get()))
-            throw 0;
+        if (!mProgram.link(vertexShader.get(), pixelShader.get(), {"aPos", "aPos2", "aColor", "aNormal", "aUV"}))
+            std::terminate();
 
-		mProgram.setUniform("tex", 0);
+        mProgram.setUniform("tex", 0);
 
         mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
         mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
@@ -71,8 +71,11 @@ namespace Render {
         GL_CHECK();
 #endif
 
-        if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE)
-            throw 0;
+        if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE) {
+            LOG_ERROR("Incomplete Framebuffer Status: " << check);
+            glDump();
+            std::terminate();
+        }
 
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         GL_CHECK();
@@ -91,7 +94,7 @@ namespace Render {
     uint32_t OpenGLRenderTexture::textureId() const
     {
         return mTexture.handle();
-	}
+    }
 
     bool OpenGLRenderTexture::resize(const Vector2 &size)
     {
@@ -103,7 +106,7 @@ namespace Render {
 
         assert(width > 0 && height > 0);
 
-        mTexture.setData({ width, height }, nullptr);
+        mTexture.setData({ width, height }, nullptr, GL_UNSIGNED_BYTE);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         GL_CHECK();
@@ -145,7 +148,7 @@ namespace Render {
             pass->render(this, camera());
         }
 
-		//TODO Culling
+        //TODO Culling
         for (Scene::Entity::Entity &e : App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().entities()) {
 
             OpenGLMesh *mesh = e.getComponent<OpenGLMesh>();
@@ -209,7 +212,7 @@ namespace Render {
         GLenum mode = modes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
-            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
+            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0);
         } else
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
@@ -224,7 +227,7 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount)
+    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
             OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);
@@ -235,7 +238,7 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned int *indices, size_t indexCount, unsigned int textureId)
+    void OpenGLRenderTexture::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount, unsigned int textureId)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
             OpenGLMeshData tempMesh = OpenGLMeshLoader::generate(groupSize, vertices, vertexCount, indices, indexCount);

@@ -11,7 +11,7 @@ struct typeMarker_t {
 };
 
 template <typename T>
-constexpr typeMarker_t<T> typeMarker;
+constexpr typeMarker_t<T> typeMarker {};
 
 
 }

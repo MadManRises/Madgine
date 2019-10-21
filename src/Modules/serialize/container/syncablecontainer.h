@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../../generic/noopfunctor.h"
 #include "../../keyvalue/observerevent.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
 #include "serializablecontainer.h"
-#include "../../generic/noopfunctor.h"
 
 namespace Engine {
 namespace Serialize {
@@ -95,7 +95,7 @@ namespace Serialize {
                     temp.writeState(*out);
                     out->endMessage();
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
             return *this;
@@ -128,7 +128,7 @@ namespace Serialize {
                     this->write_item(*out, where, temp);
                     out->endMessage();
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
             return it;
@@ -158,7 +158,7 @@ namespace Serialize {
                     this->write_item(*out, where, temp);
                     out->endMessage();
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
             return it;
@@ -180,7 +180,7 @@ namespace Serialize {
                     this->write_iterator(*out, where);
                     out->endMessage();
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
             return it;
@@ -203,7 +203,7 @@ namespace Serialize {
                     this->write_iterator(*out, to);
                     out->endMessage();
                 } else {
-                    throw 0;
+                    std::terminate();
                 }
             }
             return it;
@@ -217,7 +217,7 @@ namespace Serialize {
                 it = Base::read_item_where_intern(in, where);
                 onInsert(it.second, it.first);
             } else {
-                throw 0;
+                std::terminate();
             }
             return it;
         }
@@ -346,7 +346,7 @@ namespace Serialize {
                 it.second = true;
                 break;
             default:
-                throw 0;
+                std::terminate();
             }
             return it;
         }
@@ -551,11 +551,12 @@ namespace Serialize {
         TransactionId mTransactionCounter = 0;
     };
 
-	template <typename OffsetPtr, typename C, typename Config, typename Observer = NoOpFunctor>
+    template <typename OffsetPtr, typename C, typename Config, typename Observer = NoOpFunctor>
     using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<OffsetPtr, C, Config, Observer>>;
 
-	#define SYNCABLE_CONTAINER(Name, ...)                                                                                     \
-    ::Engine::Serialize::SyncableContainer<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
+#define SYNCABLE_CONTAINER(Name, ...)                                                                                 \
+    DECLARE_COMBINED_OFFSET(Name)                                                                                     \
+    ::Engine::Serialize::SyncableContainer<COMBINED_OFFSET(Name), __VA_ARGS__> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 
 }

@@ -37,7 +37,7 @@ namespace Ini {
             }
             size_t pos = line.find('=');
             if (pos == std::string::npos || line.rfind('=') != pos)
-                throw 0;
+                std::terminate();
             mValues[line.substr(0, pos)] = line.substr(pos + 1);
             save = stream.tellg();
         }
@@ -86,7 +86,7 @@ namespace Ini {
         std::string line;
         while (std::getline(stream, line)) {
             if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
-                throw 0;
+                std::terminate();
             std::string sectionName = line.substr(1, line.size() - 2);
             auto pib = mSections.try_emplace(sectionName, &stream);
             if (!pib.second) {

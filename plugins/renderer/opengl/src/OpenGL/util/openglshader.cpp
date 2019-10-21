@@ -3,24 +3,24 @@
 #include "openglshader.h"
 
 namespace Engine {
-	namespace Render {
+namespace Render {
 
-		OpenGLShader::OpenGLShader(GLenum glType, ShaderType type) :
-			mHandle(glCreateShader(glType)),
-			mType(type)
-		{			
-		}
+    OpenGLShader::OpenGLShader(GLenum glType, ShaderType type)
+        : mHandle(glCreateShader(glType))
+        , mType(type)
+    {
+    }
 
-		OpenGLShader::OpenGLShader(OpenGLShader &&other)
-                    : mHandle(std::exchange(other.mHandle, 0))
-                {
-                }
+    OpenGLShader::OpenGLShader(OpenGLShader &&other)
+        : mHandle(std::exchange(other.mHandle, 0))
+    {
+    }
 
-                OpenGLShader::~OpenGLShader()
-		{
-            if (mHandle)
-				glDeleteShader(mHandle);
-		}
+    OpenGLShader::~OpenGLShader()
+    {
+        if (mHandle)
+            glDeleteShader(mHandle);
+    }
 
-	}
+}
 }

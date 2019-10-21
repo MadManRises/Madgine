@@ -4,35 +4,32 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-namespace Engine
-{
-	namespace Resources
-	{
+namespace Engine {
+namespace Resources {
 
-		struct MODULES_EXPORT ResourceBase : ScopeBase
-		{
-			ResourceBase(Filesystem::Path path);
+    struct MODULES_EXPORT ResourceBase : ScopeBase {
+        ResourceBase(Filesystem::Path path);
 
-			~ResourceBase() = default;
+        ~ResourceBase() = default;
 
-			void setPersistent(bool b);
-			
-			bool isPersistent() const;
+        void setPersistent(bool b);
 
-			const Filesystem::Path &path();
-			std::string extension();
-			std::string name();
+        bool isPersistent() const;
 
-			void updatePath(const Filesystem::Path &path) { LOG_WARNING("Implement updatePath!"); } //TODO
+        const Filesystem::Path &path();
+        std::string extension();
+        std::string name();
 
-			std::string readAsText();
+        void updatePath(const Filesystem::Path &path) { LOG_WARNING("Implement updatePath!"); } //TODO
 
-		private:
-			bool mIsPersistent;
+        std::string readAsText();
+        std::vector<unsigned char> readAsBlob();
 
-			Filesystem::Path mPath;
+    private:
+        bool mIsPersistent;
 
-		};
+        Filesystem::Path mPath;
+    };
 
-	}
+}
 }

@@ -157,7 +157,7 @@ namespace Serialize {
     void SerializeManager::setSlaveStreambuf(SerializeStreambuf *buf)
     {
         if (mSlaveStreambuf && buf)
-            throw 0;
+            std::terminate();
         mSlaveStreambuf = buf;
     }
 

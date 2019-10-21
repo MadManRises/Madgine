@@ -101,7 +101,7 @@ namespace Tools {
 
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
-            ImGui::Text("ValueType size: %llu", sizeof(ValueType));
+            ImGui::Text("ValueType size: %u", (unsigned int)sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
         }
         ImGui::End();

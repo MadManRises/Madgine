@@ -12,7 +12,8 @@ namespace Engine {
 namespace Serialize {
 
 #define SYNCED(Name, ...)                                                                          \
-    ::Engine::Serialize::Synced<::Engine::Serialize::CombinedOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
+DECLARE_COMBINED_OFFSET(Name)\
+    ::Engine::Serialize::Synced<COMBINED_OFFSET(Name), __VA_ARGS__> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 
     template <typename PtrOffset, class T, typename Observer = NoOpFunctor>

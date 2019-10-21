@@ -51,7 +51,7 @@ namespace Engine
 					mState = ObjectState::INITIALIZED;
 					callFinalize();
 				}
-				else throw 0;
+				else std::terminate();
 				LOG((isInitialized() ? "Success" : "Failure"));
 			}
 			return isInitialized();

@@ -206,21 +206,13 @@ RegisterType(Engine::Tools::ProjectManager)
 #    endif
 
         const Filesystem::Path &Engine::Tools::ProjectManager::projectRoot() const
-        {
-			#if ENABLE_PLUGINS
+        {			
             return mProjectRoot;
-			#else
-            return "";
-			#endif
         }
 
         const std::string &Engine::Tools::ProjectManager::config() const
         {
-			#if ENABLE_PLUGINS
-            return mConfig;
-			#else
-            return "";
-			#endif
+            return mConfig;			
         }
 
     }

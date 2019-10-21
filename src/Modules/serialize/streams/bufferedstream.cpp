@@ -70,7 +70,7 @@ namespace Serialize {
     void BufferedInStream::readHeader(MessageHeader &header)
     {
         if (!isMessageAvailable())
-            throw 0;
+            std::terminate();
         readRaw(header);
     }
 

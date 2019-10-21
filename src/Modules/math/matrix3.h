@@ -63,27 +63,25 @@ public:
                 It does <b>NOT</b> initialize the matrix for efficiency.
         */
     inline Matrix3() {}
-    inline explicit Matrix3(const float arr[3][3])
+    inline constexpr explicit Matrix3(const float arr[3][3])
+        : m { { arr[0][0], arr[0][1], arr[0][2] },
+            { arr[1][0], arr[1][1], arr[1][2] },
+            { arr[2][0], arr[2][1], arr[2][2] } }
     {
-        memcpy(m, arr, 9 * sizeof(float));
     }
-    inline Matrix3(const Matrix3 &rkMatrix)
+    inline constexpr Matrix3(const Matrix3 &rkMatrix)
+        : m { { rkMatrix.m[0][0], rkMatrix.m[0][1], rkMatrix.m[0][2] },
+            { rkMatrix.m[1][0], rkMatrix.m[1][1], rkMatrix.m[1][2] },
+            { rkMatrix.m[2][0], rkMatrix.m[2][1], rkMatrix.m[2][2] } }
     {
-        memcpy(m, rkMatrix.m, 9 * sizeof(float));
     }
-    Matrix3(float fEntry00, float fEntry01, float fEntry02,
+    constexpr Matrix3(float fEntry00, float fEntry01, float fEntry02,
         float fEntry10, float fEntry11, float fEntry12,
         float fEntry20, float fEntry21, float fEntry22)
+        : m { { fEntry00, fEntry01, fEntry02 },
+            { fEntry10, fEntry11, fEntry12 },
+            { fEntry20, fEntry21, fEntry22 } }
     {
-        m[0][0] = fEntry00;
-        m[0][1] = fEntry01;
-        m[0][2] = fEntry02;
-        m[1][0] = fEntry10;
-        m[1][1] = fEntry11;
-        m[1][2] = fEntry12;
-        m[2][0] = fEntry20;
-        m[2][1] = fEntry21;
-        m[2][2] = fEntry22;
     }
 
     /** Exchange the contents of this matrix with another. 
@@ -102,12 +100,12 @@ public:
     }
 
     /// Member access, allows use of construct mat[r][c]
-    inline const float *operator[](size_t iRow) const
+    inline constexpr const float *operator[](size_t iRow) const
     {
         return m[iRow];
     }
 
-    inline float *operator[](size_t iRow)
+    inline constexpr float *operator[](size_t iRow)
     {
         return m[iRow];
     }
@@ -255,21 +253,21 @@ public:
         char c;
         in >> c;
         if (c != '[')
-            throw 0;
+            std::terminate();
         for (int x = 0; x < 3; ++x) {
             for (int y = 0; y < 3; ++y) {
                 in >> mat[x][y];
                 in >> c;
                 if (x != 2 || y != 2) {
                     if (c != ',')
-                        throw 0;
+                        std::terminate();
                 } else {
                     if (c != ']')
-                        throw 0;
-				}
+                        std::terminate();
+                }
             }
-		} 
-		return in;
+        }
+        return in;
     }
 
     static const Matrix3 ZERO;

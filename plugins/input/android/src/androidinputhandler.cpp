@@ -46,7 +46,7 @@ namespace Input {
                 switch (AInputEvent_getType(event)) {
                 case AINPUT_EVENT_TYPE_KEY:
                     //TODO
-                    throw 0;
+                    std::terminate();
                     break;
                 case AINPUT_EVENT_TYPE_MOTION:
                     handled = handleMotionEvent(event);
