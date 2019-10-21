@@ -95,7 +95,7 @@ namespace Render {
 
         std::shared_ptr<OpenGLFontData> data = std::make_shared<OpenGLFontData>();
         
-		data->mTexture.setFilter(GL_NEAREST);
+		data->mTexture.setFilter(GL_LINEAR);
 
         std::vector<Vector2i> sizes;
         sizes.resize(128);
