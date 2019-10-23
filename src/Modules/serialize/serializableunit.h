@@ -99,14 +99,14 @@ namespace Serialize {
             }
 		};
 
-    template <typename T, typename Base = SerializableUnitBase>
-    struct SerializableUnit : Base, private TableInitializer<T, Base> {
+    template <typename T, typename _Base = SerializableUnitBase>
+    struct SerializableUnit : _Base, private TableInitializer<T, _Base> {
     protected:
-        friend struct TableInitializer<T, Base>;
+        friend TableInitializer<T, _Base>;
 
         typedef T Self;
 		
-		using Base::Base;       
+		using _Base::_Base;       
 
     };
 

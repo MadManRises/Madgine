@@ -75,7 +75,7 @@ namespace Tools {
                 ImGui::TreePop();
             }
             if (ImGui::TreeNode("Resources")) {
-                draw(&ResourceManager::getSingleton(), "Resources");
+                draw(&Resources::ResourceManager::getSingleton(), "Resources");
                 ImGui::TreePop();
             }
         }

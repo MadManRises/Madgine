@@ -38,7 +38,7 @@ RegisterType(ClickBrick::UI::MainMenuHandler)
             if (widget()) {
                 mStartGameSlot.disconnectAll();
             }
-            Engine::GuiHandlerBase::setWidget(w);
+            Engine::UI::GuiHandlerBase::setWidget(w);
             if (widget()) {
                 mStartGameButton->clickEvent().connect(mStartGameSlot);
             }

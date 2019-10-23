@@ -6,4 +6,4 @@
 #include "resourceloaderbase.h"
 
 
-DECLARE_UNIQUE_COMPONENT(Engine::Resources, ResourceLoader, MODULES, ResourceLoaderBase);
+DECLARE_UNIQUE_COMPONENT(Engine::Resources, ResourceLoader, ResourceLoaderBase);

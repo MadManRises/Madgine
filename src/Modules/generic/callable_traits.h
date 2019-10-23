@@ -45,6 +45,8 @@ namespace __generic__impl__ {
 
     template <typename F, typename R = makeStaticCallable<decltype(callableTypeDeducer(&F::operator()))>>
     R callableTypeDeducer(const F &);
+
+	CallableType<nullptr_t, void, void, void> callableTypeDeducer(nullptr_t);
 }
 
 template <typename F>

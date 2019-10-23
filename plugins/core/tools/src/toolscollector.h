@@ -6,7 +6,7 @@
 
 #include "Modules/serialize/serializableunit.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, MADGINE_TOOLS, ToolBase, ImRoot &);
+DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, ToolBase, ImRoot &);
 
 namespace Engine {
 namespace Tools {

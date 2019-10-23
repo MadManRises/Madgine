@@ -554,8 +554,8 @@ namespace Serialize {
     template <typename OffsetPtr, typename C, typename Config, typename Observer = NoOpFunctor>
     using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<OffsetPtr, C, Config, Observer>>;
 
-#define SYNCABLE_CONTAINER(Name, ...)                                                                                 \
-    DECLARE_COMBINED_OFFSET(Name)                                                                                     \
+#define SYNCABLE_CONTAINER(Name, ...)                                                \
+    DECLARE_COMBINED_OFFSET(Name)                                                    \
     ::Engine::Serialize::SyncableContainer<COMBINED_OFFSET(Name), __VA_ARGS__> Name; \
     DEFINE_COMBINED_OFFSET(Name)
 

@@ -3,19 +3,15 @@
 /// @cond
 
 #if defined(STATIC_BUILD)
-#	define MADGINE_OIS_EXPORT
-#	define MADGINE_OIS_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
+#    define MADGINE_OIS_EXPORT
 #else
-#	if defined(OISHandler_EXPORTS)
-#		define MADGINE_OIS_EXPORT DLL_EXPORT
-#		define MADGINE_OIS_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
-#	else
-#		define MADGINE_OIS_EXPORT DLL_IMPORT
-#		define MADGINE_OIS_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
-#	endif
+#    if defined(OISHandler_EXPORTS)
+#        define MADGINE_OIS_EXPORT DLL_EXPORT
+#    else
+#        define MADGINE_OIS_EXPORT DLL_IMPORT
+#    endif
 #endif
 
 #include "Madgine/clientlib.h"
-
 
 /// @endcond

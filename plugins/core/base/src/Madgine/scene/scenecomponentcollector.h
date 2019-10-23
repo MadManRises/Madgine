@@ -7,7 +7,7 @@
 #include "Modules/serialize/serializableunit.h"
 
 
-DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, MADGINE_BASE, SceneComponentBase, SceneManager &);
+DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &);
 
 namespace Engine
 {

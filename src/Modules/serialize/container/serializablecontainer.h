@@ -281,9 +281,10 @@ namespace Serialize {
         template <typename Creator>
         std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
-            if constexpr (UnitHelper<typename container_traits<C>::type>::sIsUnit) {
+            this->beginExtendedItem(in, *static_cast<const type *>(nullptr));
+            /*if constexpr (UnitHelper<typename container_traits<C>::type>::sIsUnit) {
                 in.format().beginExtendedCompound(in, "Item");
-            }
+            }*/
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
             in.read(*it.first, "Item");
@@ -292,9 +293,10 @@ namespace Serialize {
 
         void write_item(SerializeOutStream &out, const type &t) const
         {
-            if constexpr (UnitHelper<typename container_traits<C>::type>::sIsUnit) {
+            this->beginExtendedItem(out, t);
+            /*if constexpr (UnitHelper<typename container_traits<C>::type>::sIsUnit) {
                 out.format().beginExtendedCompound(out, "Item");
-            }
+            }*/
             this->write_creation(out, t);
             out.write(t, "Item");
         }

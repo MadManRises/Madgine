@@ -16,10 +16,10 @@ UNIQUECOMPONENT(ClickBrick::UI::GameOverHandler)
 
 RegisterType(ClickBrick::UI::GameOverHandler)
 
-    METATABLE_BEGIN_BASE(ClickBrick::UI::GameOverHandler, Engine::UI::GuiHandlerBase)
-        METATABLE_END(ClickBrick::UI::GameOverHandler)
+METATABLE_BEGIN_BASE(ClickBrick::UI::GameOverHandler, Engine::UI::GuiHandlerBase)
+METATABLE_END(ClickBrick::UI::GameOverHandler)
 
-            namespace ClickBrick
+namespace ClickBrick
 {
     namespace UI {
 
@@ -40,7 +40,7 @@ RegisterType(ClickBrick::UI::GameOverHandler)
             if (widget()) {
                 mRestartGameSlot.disconnectAll();
             }
-            Engine::GuiHandlerBase::setWidget(w);
+            Engine::UI::GuiHandlerBase::setWidget(w);
             if (widget()) {
                 widget()->pointerUpEvent().connect(mRestartGameSlot);
             }

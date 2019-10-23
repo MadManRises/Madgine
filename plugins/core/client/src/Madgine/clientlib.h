@@ -3,28 +3,25 @@
 /// @cond
 
 #if defined(STATIC_BUILD)
-#	define MADGINE_CLIENT_EXPORT
-#	define MADGINE_CLIENT_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
+#    define MADGINE_CLIENT_EXPORT
 #else
-#	if defined(Client_EXPORTS)
-#		define MADGINE_CLIENT_EXPORT DLL_EXPORT
-#		define MADGINE_CLIENT_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
-#	else
-#		define MADGINE_CLIENT_EXPORT DLL_IMPORT
-#		define MADGINE_CLIENT_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
-#	endif
+#    if defined(Client_EXPORTS)
+#        define MADGINE_CLIENT_EXPORT DLL_EXPORT
+#    else
+#        define MADGINE_CLIENT_EXPORT DLL_IMPORT
+#    endif
 #endif
 
 #include "Madgine/baselib.h"
 
-#include <stack>
-#include <memory>
-#include <map>
 #include <array>
-#include <sstream>
-#include <vector>
-#include <typeindex>
 #include <future>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <stack>
+#include <typeindex>
+#include <vector>
 
 #include "clientforward.h"
 
@@ -40,6 +37,5 @@ namespace std {
 	}
 }
 #endif*/
-
 
 /// @endcond

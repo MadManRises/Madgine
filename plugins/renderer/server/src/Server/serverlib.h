@@ -3,23 +3,20 @@
 /// @cond
 
 #if defined(STATIC_BUILD)
-#	define MADGINE_SERVERRENDERER_EXPORT
-#	define MADGINE_SERVERRENDERER_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION
+#    define MADGINE_SERVERRENDERER_EXPORT
 #else
-#	if defined(ServerRenderer_EXPORTS)
-#		define MADGINE_SERVERRENDERER_EXPORT DLL_EXPORT
-#		define MADGINE_SERVERRENDERER_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_EXPORT
-#	else
-#		define MADGINE_SERVERRENDERER_EXPORT DLL_IMPORT
-#		define MADGINE_SERVERRENDERER_TEMPLATE_INSTANTIATION TEMPLATE_INSTANTIATION_IMPORT
-#	endif
+#    if defined(ServerRenderer_EXPORTS)
+#        define MADGINE_SERVERRENDERER_EXPORT DLL_EXPORT
+#    else
+#        define MADGINE_SERVERRENDERER_EXPORT DLL_IMPORT
+#    endif
 #endif
 
 #include "serverforward.h"
 
 #include "Madgine/baselib.h"
 
-#include <thread>
 #include <fstream>
+#include <thread>
 
 /// @endcond

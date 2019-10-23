@@ -76,6 +76,6 @@
     }                                                                   \
     template Type &ns Name<__VA_ARGS__>();
 
-#define TEMPLATE_INSTANTIATION template
-#define TEMPLATE_INSTANTIATION_EXPORT template
-#define TEMPLATE_INSTANTIATION_IMPORT extern template
+/*#define TEMPLATE_INSTANTIATION(type) template type
+#define TEMPLATE_INSTANTIATION_EXPORT(type) template type DLL_EXPORT
+#define TEMPLATE_INSTANTIATION_IMPORT(type) extern template type*/

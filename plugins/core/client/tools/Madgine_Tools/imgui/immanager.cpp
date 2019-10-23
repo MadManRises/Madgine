@@ -23,6 +23,14 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+
+DEFINE_UNIQUE_COMPONENT(Engine::Tools, ImManager)
+
+METATABLE_BEGIN(Engine::Tools::ImManager)
+METATABLE_END(Engine::Tools::ImManager)
+
+RegisterType(Engine::Tools::ImManager)
+
 namespace Engine {
 namespace Tools {
 
@@ -304,10 +312,3 @@ namespace Tools {
 
 }
 }
-
-DEFINE_UNIQUE_COMPONENT(Engine::Tools, ImManager)
-
-METATABLE_BEGIN(Engine::Tools::ImManager)
-METATABLE_END(Engine::Tools::ImManager)
-
-RegisterType(Engine::Tools::ImManager)

@@ -5,4 +5,4 @@
 
 #include "renderwindow.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderWindow, MADGINE_CLIENT, RenderWindow, Window::Window *, GUI::TopLevelWindow *, Engine::Render::RenderWindow *);
+DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderWindow, RenderWindow, Window::Window *, GUI::TopLevelWindow *, Engine::Render::RenderWindow *);

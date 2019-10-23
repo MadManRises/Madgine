@@ -27,7 +27,7 @@ namespace GUI {
         void setFontName(const std::string &name);
 
         std::string mText;
-        int mFontSize = 16;
+        float mFontSize = 16;
         Resources::ThreadLocalResource<Font::Font> *mFont = nullptr;
 
     protected:

@@ -40,4 +40,4 @@ namespace Tools {
 }
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::Tools, ImManager, MADGINE_CLIENT_TOOLS, ImManager, GUI::TopLevelWindow &);
+DECLARE_UNIQUE_COMPONENT(Engine::Tools, ImManager, ImManager, GUI::TopLevelWindow &);

@@ -38,6 +38,7 @@ namespace Filesystem {
         bool isAbsolute() const;
         bool isRelative() const;
 
+		void clear();
         bool empty() const;
         const std::string &str() const;
         const char *c_str() const;

@@ -91,6 +91,11 @@ private:
 };
 
 template <class _Base, class... _Ty>
+struct UniqueComponentRegistry;
+
+DLL_IMPORT_VARIABLE2(Registry, uniqueComponentRegistry, typename Registry);
+
+template <class _Base, class... _Ty>
 struct UniqueComponentRegistry : ComponentRegistryBase {
 
     typedef _Base Base;
@@ -104,8 +109,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
 
     static UniqueComponentRegistry &sInstance()
     {
-        static UniqueComponentRegistry dummy;
-        return dummy;
+        return uniqueComponentRegistry<UniqueComponentRegistry<Base, _Ty...>>();
     }
 
     static std::vector<F> &sComponents()

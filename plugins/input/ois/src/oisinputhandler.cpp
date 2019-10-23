@@ -10,7 +10,12 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
-#include "Madgine/gui/widgets/toplevelwindow.h"
+UNIQUECOMPONENT(Engine::Input::OISInputHandler);
+
+METATABLE_BEGIN(Engine::Input::OISInputHandler)
+METATABLE_END(Engine::Input::OISInputHandler)
+
+RegisterType(Engine::Input::OISInputHandler);
 
 namespace Engine {
 namespace Input {
@@ -142,9 +147,3 @@ namespace Input {
 }
 }
 
-UNIQUECOMPONENT(Engine::Input::OISInputHandler);
-
-METATABLE_BEGIN(Engine::Input::OISInputHandler)
-METATABLE_END(Engine::Input::OISInputHandler)
-
-RegisterType(Engine::Input::OISInputHandler);

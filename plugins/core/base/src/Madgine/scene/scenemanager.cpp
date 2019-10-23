@@ -28,7 +28,7 @@ MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData>)
+FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::createNonLocalEntityData>)
 FIELD(mSceneComponents)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 

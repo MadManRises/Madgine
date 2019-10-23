@@ -68,8 +68,9 @@ public:
 
 private:
     std::unique_ptr<Base> mValue;
-    std::tuple<_Ty...> mArg;
     size_t mIndex;
+	std::tuple<_Ty...> mArg;
+    
 
 #if ENABLE_PLUGINS
 

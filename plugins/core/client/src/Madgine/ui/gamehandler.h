@@ -77,7 +77,7 @@ namespace Engine
 
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandler, MADGINE_CLIENT, GameHandlerBase, UIManager &);
+DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandler, GameHandlerBase, UIManager &);
 
 namespace Engine
 {

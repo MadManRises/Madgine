@@ -145,7 +145,7 @@ RegisterType(Engine::Tools::ProjectManager)
             if (openFolderDialog) {
                 if (mProjectRoot.empty()) {
                     mCurrentPath = Filesystem::Path { "." }.absolute();
-                    mCurrentSelectionPath = {};
+                    mCurrentSelectionPath.clear();
                 } else {
                     mCurrentSelectionPath = mProjectRoot.absolute();
                     mCurrentPath = mCurrentSelectionPath.parentPath();

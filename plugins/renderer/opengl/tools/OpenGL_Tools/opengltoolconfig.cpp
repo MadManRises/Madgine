@@ -37,7 +37,7 @@ namespace Tools {
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
             image->setPersistent(true);
-            std::shared_ptr<ImageData> data = image->loadData();
+            std::shared_ptr<Resources::ImageData> data = image->loadData();
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, data->mBuffer, GL_UNSIGNED_BYTE);
             ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });

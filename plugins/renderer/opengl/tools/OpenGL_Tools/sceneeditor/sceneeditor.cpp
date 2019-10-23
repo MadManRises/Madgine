@@ -131,7 +131,7 @@ namespace Tools {
     {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mHierarchyVisible)) {
 
-            for (Entity::Entity &e : mSceneMgr->entities()) {
+            for (Scene::Entity::Entity &e : mSceneMgr->entities()) {
                 const char *name = e.key();
                 if (!name[0])
                     name = "<unnamed>";
@@ -194,11 +194,11 @@ namespace Tools {
     {
         ImGui::InputText("Name", &entity->mName);
 
-        for (Entity::EntityComponentBase *component : entity->components()) {
+        for (Scene::Entity::EntityComponentBase *component : entity->components()) {
             bool open = ImGui::TreeNode(component->key());
             ImGui::DraggableValueTypeSource(component->key(), this, ValueType { component });
             if (open) {
-                mInspector->draw({ component, Entity::EntityComponentCollector::getComponentType(component->key()) });
+                mInspector->draw({ component, Scene::Entity::EntityComponentCollector::getComponentType(component->key()) });
                 ImGui::TreePop();
             }
         }
@@ -208,15 +208,15 @@ namespace Tools {
         }
 
         if (ImGui::BeginPopup("add_component_popup")) {
-            for (const std::string &componentName : Entity::EntityComponentCollector::registeredComponentNames()) {
+            for (const std::string &componentName : Scene::Entity::EntityComponentCollector::registeredComponentNames()) {
                 if (!entity->hasComponent(componentName)) {
                     if (ImGui::Selectable(componentName.c_str())) {
                         entity->addComponent(componentName);
                         if (componentName == "Transform") {
-                            entity->getComponent<Entity::Transform>()->setPosition({ 0, 0, 0 });
+                            entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
                         }
                         if (componentName == "Mesh") {
-                            entity->getComponent<Entity::Mesh>()->setName("mage");
+                            entity->getComponent<Scene::Entity::Mesh>()->setName("mage");
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -225,7 +225,7 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-        if (Entity::Transform *t = entity->getComponent<Entity::Transform>()) {
+        if (Scene::Entity::Transform *t = entity->getComponent<Scene::Entity::Transform>()) {
             constexpr Vector4 colors[] = {
                 { 0.5f, 0, 0, 0.5f },
                 { 0, 0.5f, 0, 0.5f },

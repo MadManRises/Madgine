@@ -37,7 +37,7 @@ METATABLE_END(Engine::GUI::WidgetBase)
 RegisterType(Engine::GUI::WidgetBase);
 
 SERIALIZETABLE_BEGIN(Engine::GUI::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&WidgetBase::createWidgetClassTuple>)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::GUI::WidgetBase::createWidgetClassTuple>)
 FIELD(mPos)
 FIELD(mSize)
 FIELD(mName)

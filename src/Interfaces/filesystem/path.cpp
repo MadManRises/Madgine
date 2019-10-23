@@ -185,6 +185,11 @@ namespace Filesystem {
         return !isAbsolute();
     }
 
+	void Path::clear()
+    {
+            mPath.clear();
+    }
+
     bool Path::empty() const
     {
         return mPath.empty();

@@ -20,6 +20,8 @@
 
 #include "../../threading/frameloop.h"
 
+#include "widget.h"
+
 namespace Engine {
 namespace GUI {
 
@@ -42,7 +44,7 @@ namespace GUI {
 }
 }
 
-DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow, MADGINE_CLIENT, TopLevelWindowComponentBase, TopLevelWindow &);
+DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow, TopLevelWindowComponentBase, TopLevelWindow &);
 
 namespace Engine {
 namespace GUI {
@@ -65,13 +67,6 @@ namespace GUI {
         void openWidget(WidgetBase *widget);
         void closeWidget(WidgetBase *widget);
 
-        /*void showCursor();
-			void hideCursor();
-
-			virtual bool isCursorVisible();
-			virtual void setCursorVisibility(bool v);
-			virtual void setCursorPosition(const Vector2& pos);
-			virtual Vector2 getCursorPosition();*/
 
         bool isHovered(WidgetBase *w);
         WidgetBase *hoveredWidget();
@@ -100,8 +95,6 @@ namespace GUI {
         void destroyTopLevel(WidgetBase *w);
 
         void clear();
-
-        //KeyValueMapList maps() override;
 
         Input::InputHandler *input();
 

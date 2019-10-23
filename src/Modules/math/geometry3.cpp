@@ -23,15 +23,15 @@ UpTo<float, 2> Intersect(const Ray &ray, const Sphere &sphere)
 {
     Vector3 oc = ray.mPoint - sphere.mCenter;
     float a = ray.mDir.dotProduct(ray.mDir);
-    float b = 2.0 * oc.dotProduct(ray.mDir);
+    float b = 2.0f * oc.dotProduct(ray.mDir);
     float c = oc.dotProduct(oc) - sphere.mRadius * sphere.mRadius;
     float discriminant = b * b - 4 * a * c;
 
     UpTo<float, 2> result;
     if (discriminant >= 0) {
-        result.push_back((-b - sqrt(discriminant)) / (2.0 * a));
+        result.push_back((-b - sqrt(discriminant)) / (2.0f * a));
         if (discriminant > 0)
-            result.push_back((-b + sqrt(discriminant)) / (2.0 * a));
+            result.push_back((-b + sqrt(discriminant)) / (2.0f * a));
     }
     return result;
 }
