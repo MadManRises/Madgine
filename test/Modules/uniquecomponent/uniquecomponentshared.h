@@ -2,14 +2,10 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#if defined(STATIC_BUILD)
-#    define TEST_EXPORT
+#if defined(TestShared_EXPORTS)
+#    define TEST_EXPORT DLL_EXPORT
 #else
-#    if defined(TestShared_EXPORTS)
-#        define TEST_EXPORT DLL_EXPORT
-#    else
-#        define TEST_EXPORT DLL_IMPORT
-#    endif
+#    define TEST_EXPORT DLL_IMPORT
 #endif
 
 struct TestDriver {
@@ -20,4 +16,3 @@ struct TestBase {
 };
 
 DECLARE_UNIQUE_COMPONENT(Test, Test, TestBase, TestDriver &);
-

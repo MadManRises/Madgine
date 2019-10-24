@@ -1,13 +1,9 @@
 #pragma once
 
-#if defined(STATIC_BUILD)
-#    define MADGINE_IM3D_EXPORT
+#if defined(Im3D_EXPORTS)
+#    define MADGINE_IM3D_EXPORT DLL_EXPORT
 #else
-#    if defined(Im3D_EXPORTS)
-#        define MADGINE_IM3D_EXPORT DLL_EXPORT
-#    else
-#        define MADGINE_IM3D_EXPORT DLL_IMPORT
-#    endif
+#    define MADGINE_IM3D_EXPORT DLL_IMPORT
 #endif
 
 #include "Modules/math/matrix4.h"

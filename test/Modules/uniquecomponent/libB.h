@@ -1,23 +1,16 @@
 #pragma once
 
-#if defined(STATIC_BUILD)
-#	define LIBB_EXPORT
+#if defined(LibB_EXPORTS)
+#    define LIBB_EXPORT DLL_EXPORT
 #else
-#	if defined(LibB_EXPORTS)
-#		define LIBB_EXPORT DLL_EXPORT
-#	else
-#		define LIBB_EXPORT DLL_IMPORT
-#	endif
+#    define LIBB_EXPORT DLL_IMPORT
 #endif
 
 #include "uniquecomponentshared.h"
 
-struct LIBB_EXPORT LibBComponent : Test::TestComponent<LibBComponent>
-{
+struct LIBB_EXPORT LibBComponent : Test::TestComponent<LibBComponent> {
 
-	LibBComponent(TestDriver &driver)
-	{
-
-	}
-
+    LibBComponent(TestDriver &driver)
+    {
+    }
 };

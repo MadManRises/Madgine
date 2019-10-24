@@ -2,14 +2,10 @@
 
 /// @cond
 
-#if defined(STATIC_BUILD)
-#    define MADGINE_SERVERRENDERER_EXPORT
+#if defined(ServerRenderer_EXPORTS)
+#    define MADGINE_SERVERRENDERER_EXPORT DLL_EXPORT
 #else
-#    if defined(ServerRenderer_EXPORTS)
-#        define MADGINE_SERVERRENDERER_EXPORT DLL_EXPORT
-#    else
-#        define MADGINE_SERVERRENDERER_EXPORT DLL_IMPORT
-#    endif
+#    define MADGINE_SERVERRENDERER_EXPORT DLL_IMPORT
 #endif
 
 #include "serverforward.h"

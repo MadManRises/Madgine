@@ -6,57 +6,51 @@
 
 #include "commonlib.h"
 
-#if defined(STATIC_BUILD)
-#define INTERFACES_EXPORT
-#else
 #if defined(Interfaces_EXPORTS)
-#define INTERFACES_EXPORT DLL_EXPORT
+#    define INTERFACES_EXPORT DLL_EXPORT
 #else
-#define INTERFACES_EXPORT DLL_IMPORT
-#endif
+#    define INTERFACES_EXPORT DLL_IMPORT
 #endif
 
 #if WINDOWS
-#pragma warning(disable : 4251)
-#pragma warning(disable : 4275)
-#pragma warning(disable : 4661)
+#    pragma warning(disable : 4251)
+#    pragma warning(disable : 4275)
+#    pragma warning(disable : 4661)
 #endif
 
 #include "debug/memory/memoryglobal.h"
 
+#include <algorithm>
+#include <array>
+#include <atomic>
 #include <cstring>
-#include <string>
+#include <fstream>
+#include <functional>
+#include <future>
+#include <iomanip>
 #include <list>
 #include <map>
-#include <unordered_map>
-#include <array>
-#include <vector>
-#include <functional>
 #include <memory>
-#include <stdlib.h>
-#include <sstream>
-#include <algorithm>
-#include <set>
-#include <unordered_set>
-#include <stack>
-#include <thread>
-#include <queue>
 #include <mutex>
-#include <variant>
-#include <fstream>
-#include <iomanip>
-#include <type_traits>
 #include <optional>
-#include <mutex>
-#include <variant>
-#include <atomic>
-#include <future>
+#include <queue>
 #include <regex>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdlib.h>
+#include <string>
+#include <thread>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#include <variant>
+#include <vector>
 
 #if WINDOWS
-#include <memory_resource>
+#    include <memory_resource>
 #else
-#include <experimental/memory_resource>
+#    include <experimental/memory_resource>
 namespace std {
 namespace experimental {
     namespace pmr {
@@ -84,11 +78,9 @@ namespace pmr = experimental::pmr;
 
 #include <assert.h>
 
-
 #include "interfacesforward.h"
 
 #include "database/exceptionmessages.h"
-
 
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;

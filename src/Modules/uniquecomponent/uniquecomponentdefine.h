@@ -17,6 +17,12 @@
     using prefix##VirtualBase = Engine::VirtualUniqueComponentBase<T, prefix##Collector>; \
     }
 
-#define DEFINE_UNIQUE_COMPONENT(ns, prefix) \
+#if defined(STATIC_BUILD)
+#    define EXPORT_REGISTRY(Registry)
+#else
+#    define EXPORT_REGISTRY(Registry) DLL_EXPORT_VARIABLE2(, Registry, Engine::, uniqueComponentRegistry, {}, Registry)
+#endif
+
+#define DEFINE_UNIQUE_COMPONENT(ns, prefix)        \
     RegisterType(ns::prefix##Collector::Registry); \
-	DLL_EXPORT_VARIABLE2(, ns::prefix##Collector::Registry, Engine::, uniqueComponentRegistry, {}, ns::prefix##Collector::Registry)
+    EXPORT_REGISTRY(ns::prefix##Collector::Registry)

@@ -6,14 +6,10 @@
 
 #include "modulesconfig.h"
 
-#if defined(STATIC_BUILD)
-#    define MODULES_EXPORT
+#if defined(Modules_EXPORTS)
+#    define MODULES_EXPORT DLL_EXPORT
 #else
-#    if defined(Modules_EXPORTS)
-#        define MODULES_EXPORT DLL_EXPORT
-#    else
-#        define MODULES_EXPORT DLL_IMPORT
-#    endif
+#    define MODULES_EXPORT DLL_IMPORT
 #endif
 
 #if WINDOWS
@@ -64,6 +60,5 @@
 
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
-
 
 /// @endcond

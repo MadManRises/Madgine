@@ -2,17 +2,13 @@
 
 /// @cond
 
-#if defined(STATIC_BUILD)
-#    define MADGINE_CLIENT_TOOLS_EXPORT
+#if defined(ClientTools_EXPORTS)
+#    define MADGINE_CLIENT_TOOLS_EXPORT DLL_EXPORT
 #else
-#    if defined(ClientTools_EXPORTS)
-#        define MADGINE_CLIENT_TOOLS_EXPORT DLL_EXPORT
-#    else
-#        define MADGINE_CLIENT_TOOLS_EXPORT DLL_IMPORT
-#    endif
+#    define MADGINE_CLIENT_TOOLS_EXPORT DLL_IMPORT
 #endif
 
-#include "Madgine/clientlib.h"
 #include "toolslib.h"
+#include "Madgine/clientlib.h"
 
 #include "clienttoolsforward.h"

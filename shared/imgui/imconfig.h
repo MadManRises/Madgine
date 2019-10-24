@@ -24,14 +24,10 @@
 //#define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows.
-#if defined(STATIC_BUILD)
-#    define IMGUI_API
+#if defined(ImGui_EXPORTS)
+#    define IMGUI_API DLL_EXPORT
 #else
-#    if defined(ImGui_EXPORTS)
-#        define IMGUI_API DLL_EXPORT
-#    else
-#        define IMGUI_API DLL_IMPORT
-#    endif
+#    define IMGUI_API DLL_IMPORT
 #endif
 
 //---- Don't define obsolete functions/enums names. Consider enabling from time to time after updating to avoid using soon-to-be obsolete function/names.

@@ -45,14 +45,11 @@
 #endif
 
 #ifdef STATIC_BUILD
-
 #    define DLL_IMPORT
 #    define DLL_EXPORT
-
 #else
 #    define DLL_IMPORT DLL_IMPORT_TAG
 #    define DLL_EXPORT DLL_EXPORT_TAG
-
 #endif
 
 /*
