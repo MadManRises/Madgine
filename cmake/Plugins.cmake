@@ -11,6 +11,9 @@ set (PLUGIN_DEFINITION_FILE "" CACHE FILEPATH "Provide path to fixed plugin sele
 set(MODULES_ENABLE_PLUGINS ON CACHE INTERNAL "")
 if (PLUGIN_DEFINITION_FILE)
 	set(MODULES_ENABLE_PLUGINS OFF CACHE INTERNAL "")
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "") #Provide default value OFF for given plugin config
+else()
+	set(BUILD_SHARED_LIBS ON CACHE BOOL "") #Provide default value ON for given plugin config
 endif()
 
 if (MODULES_ENABLE_PLUGINS AND NOT BUILD_SHARED_LIBS)

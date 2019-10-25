@@ -7,7 +7,7 @@ function(add_precompiled_header target header)
 	get_filename_component(name ${header} NAME_WE)
 
 	set(output_path "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}_PCH.dir")
-	set(output "${output_path}/${name}.cpp${CMAKE_CXX_OUTPUT_EXTENSION}")
+	set(output "${output_path}/${name}.pch")
     
 	if (MSVC)
 		set(pch_compile_flags "\"/Fp${output}\" /Yc${CMAKE_CURRENT_SOURCE_DIR}/${header} -Od")
@@ -27,7 +27,7 @@ function(add_precompiled_header target header)
 		PROPERTIES
 		LANGUAGE CXX
 		COMPILE_FLAGS ${pch_compile_flags}
-		#OBJECT_OUTPUTS ${output} #??
+		OBJECT_OUTPUTS ${output}
 	)
 	add_library(${target}_PCH OBJECT ${cppsource})
 	set_target_properties(${target}_PCH PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -46,7 +46,6 @@ function(add_precompiled_header target header)
 			if(NOT object_depends)
 				set(object_depends)
 			endif()
-			list(APPEND object_depends "${_pch_header}")
 			if(source MATCHES \\.\(cc|cxx|cpp\)$)
 				list(APPEND object_depends "${output}")
 				set_source_files_properties(${source} PROPERTIES				

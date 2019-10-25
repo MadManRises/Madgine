@@ -7,7 +7,7 @@ include(Workspace)
 if (EXISTS ${Workspace}/cmake/Configs.txt)
     file(STRINGS ${Workspace}/cmake/Configs.txt __configs)
 else()
-    message(WARNING "/cmake/Configs.txt is not available in Workspace")
+    message(STATUS "/cmake/Configs.txt is not available in Workspace")
     set(__configs )
 endif()
 
