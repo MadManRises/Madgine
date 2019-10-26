@@ -22,7 +22,7 @@ You are unsatisfied with the flexibility of other game engines? You want to buil
 
 ## Documentation
 
-There is currently no documentation in code. Please refer to the explanations of general the concepts in this docs in combination to the implementation. There is also a doxygen page, that lists all the interfaces and APIs. You can find it on the [MadMan Studios homepage][Studio] by selecting the `docs` on the respective branch. If you need further help or if the documents are outdated or lacking, please let me now either by raising an issue on [GitHub][] or by reaching out to me during a live coding stream on [Twitch][].
+There is currently no documentation in code. Please refer to the explanations of general the concepts in this docs in combination to the implementation. There is also a doxygen page, that lists all the interfaces and APIs. You can find it on my [homepage][Homepage] by selecting the `docs` on the respective branch. If you need further help or if the documents are outdated or lacking, please let me now either by raising an issue on [GitHub][] or by reaching out to me during a live coding stream on [Twitch][].
 
 ## Table Of Contents
 
@@ -43,7 +43,7 @@ There is currently no documentation in code. Please refer to the explanations of
 
 The Madgine is licensed under the MIT License, see [LICENSE.md][] for more information.
 
-[Studio]: http://www.madman-studios.com
+[Homepage]: http://www.madmanrises.com
 [CMake]: https://www.cmake.org
 [GitHub]: https://github.com/MadManRises/Madgine/issues
 [Twitch]: https://www.twitch.tv/madmanrises
