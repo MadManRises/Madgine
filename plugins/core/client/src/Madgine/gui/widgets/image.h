@@ -6,7 +6,7 @@
 #include "imageloader.h"
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
     class MADGINE_CLIENT_EXPORT Image : public Widget<Image> {
     public:
         using Widget::Widget;
@@ -21,7 +21,7 @@ namespace GUI {
 		
 		Resources::ImageLoader::ResourceType *resource() const override;
 
-		std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+		std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
 		virtual WidgetClass getClass() const override;
 

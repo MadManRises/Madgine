@@ -19,5 +19,3 @@ add_plugin(Tools Madgine Tools ${sources} PRECOMPILED_HEADER src/toolslib.h)
 
 target_link_libraries(Tools PUBLIC ImGui Im3D Base)
 
-target_link_plugins(Tools ImageLoader)
-

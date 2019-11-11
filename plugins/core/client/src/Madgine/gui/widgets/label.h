@@ -4,7 +4,7 @@
 #include "widget.h"
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
     class MADGINE_CLIENT_EXPORT Label : public Widget<Label> {
     public:
         using Widget::Widget;
@@ -15,7 +15,7 @@ namespace GUI {
         std::string getFontName() const;
         void setFontName(const std::string &name);
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
         std::string mText;
         int mFontSize = 16;

@@ -4,7 +4,9 @@
 
 #include "Modules/debug/profiler/profiler.h"
 
+#include "Modules/math/vector2i.h"
 #include "Modules/math/vector3.h"
+#include "Modules/math/vector3i.h"
 #include "Modules/math/vector4.h"
 
 #include "Madgine/gui/widgets/widget.h"
@@ -26,18 +28,10 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Madgine/app/application.h"
-#include "Madgine/scene/scenemanager.h"
-
 RegisterType(Engine::Render::OpenGLRenderWindow)
 
-    UNIQUECOMPONENT(Engine::Render::OpenGLRenderWindow)
-
-        METATABLE_BEGIN(Engine::Render::OpenGLRenderWindow)
-            METATABLE_END(Engine::Render::OpenGLRenderWindow)
-
 #if WINDOWS
-                typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+    typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
 
 static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
@@ -46,7 +40,7 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 #elif LINUX
 #    include <GL/glx.h>
 #    include <X11/Xlib.h>
-                namespace Engine
+    namespace Engine
 {
     namespace Window {
         extern Display *sDisplay();
@@ -54,7 +48,7 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 }
 #elif ANDROID || EMSCRIPTEN
 #    include <EGL/egl.h>
-                namespace Engine
+    namespace Engine
 {
     namespace Window {
         extern EGLDisplay sDisplay;
@@ -336,10 +330,9 @@ namespace Render {
     }
 #endif
 
-    OpenGLRenderWindow::OpenGLRenderWindow(Window::Window *w, GUI::TopLevelWindow *topLevel, RenderWindow *reusedResources)
-        : UniqueComponent(w)
-        , mUIAtlas({ 512, 512 })
-        , mTopLevelWindow(topLevel)
+    OpenGLRenderWindow::OpenGLRenderWindow(OpenGLRenderContext *context, Window::Window *w, OpenGLRenderWindow *reusedResources)
+        : OpenGLRenderTarget(context, dont_create)
+        , mWindow(w)
         , mReusedContext(reusedResources)
     {
 #if !ANDROID && !EMSCRIPTEN
@@ -366,6 +359,7 @@ namespace Render {
         GL_CHECK();
 #endif
 
+        glVertexAttrib3f(0, 0, 0, 0);
         glVertexAttrib2f(1, 0, 0);
         glVertexAttrib4f(2, 1, 1, 1, 1);
         glVertexAttrib2f(4, 0, 0);
@@ -373,35 +367,12 @@ namespace Render {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("ui_VS");
-        std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("ui_PS");
-
-        if (!mProgram.link(vertexShader.get(), pixelShader.get(), { "aPos", "aColor", "aUV" }))
-            std::terminate();
-
-        mProgram.setUniform("texture", 0);
-
-        mVAO = {};
-        mVAO.bind();
-
-        mVBO = {};
-        mVBO.bind(GL_ARRAY_BUFFER);
-
-        mVAO.enableVertexAttribute(0, &GUI::Vertex::mPos);
-        mVAO.enableVertexAttribute(1, &GUI::Vertex::mColor);
-        mVAO.enableVertexAttribute(2, &GUI::Vertex::mUV);
-
-        mDefaultTexture = {};
-        mDefaultTexture.setWrapMode(GL_CLAMP_TO_EDGE);
-        Vector4 borderColor = { 1, 1, 1, 1 };
-        mDefaultTexture.setData({ 1, 1 }, &borderColor, GL_UNSIGNED_BYTE);
-
-        mUIAtlasTexture = {};
-
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
+
+		mTempBuffer = {};
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
@@ -416,145 +387,43 @@ namespace Render {
             }
         }
 
-        mDefaultTexture.reset();
-        mUIAtlasTexture.reset();
-        mVAO.reset();
-        mVBO.reset();
-        shutdownWindow(window(), mContext, mReusedContext);
+        shutdownWindow(mWindow, mContext, mReusedContext);
     }
 
-    void OpenGLRenderWindow::render()
+    void OpenGLRenderWindow::beginFrame()
     {
         PROFILE();
 
-        //TODO Remove this temp solution
-        Engine::App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().removeQueuedEntities();
+        Vector2i screenSize { mWindow->renderWidth(), mWindow->renderHeight() };
+        Vector2i screenPos { mWindow->renderX(), mWindow->renderY() };
 
-        updateRenderTargets();
+        mWindow->beginFrame();
 
-        glActiveTexture(GL_TEXTURE0);
-        GL_CHECK();
-        mDefaultTexture.bind();
+		Engine::Render::makeCurrent(mWindow, mContext);
 
-        Vector2 actualScreenSize { static_cast<float>(window()->renderWidth()), static_cast<float>(window()->renderHeight()) };
-        Vector3 screenPos, screenSize;
-        if (mTopLevelWindow) {
-            std::tie(screenPos, screenSize) = mTopLevelWindow->getAvailableScreenSpace();
-        } else {
-            screenPos = Vector3::ZERO;
-            screenSize = { actualScreenSize.x,
-                actualScreenSize.y,
-                1.0f };
-        }
-
-        glViewport(static_cast<GLsizei>(screenPos.x), static_cast<GLsizei>(actualScreenSize.y - screenPos.y - screenSize.y), static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        if (mTopLevelWindow) {
-
-            mProgram.bind();
-
-            std::map<Render::TextureDescriptor, std::vector<GUI::Vertex>> vertices;
-
-            std::queue<std::pair<GUI::WidgetBase *, int>> q;
-            for (GUI::WidgetBase *w : mTopLevelWindow->widgets()) {
-                if (w->mVisible) {
-                    q.push(std::make_pair(w, 0));
-                }
-            }
-            while (!q.empty()) {
-
-                GUI::WidgetBase *w = q.front().first;
-                int depth = q.front().second;
-                q.pop();
-
-                for (GUI::WidgetBase *c : w->children()) {
-                    if (c->mVisible)
-                        q.push(std::make_pair(c, depth + 1));
-                }
-
-                std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(screenSize);
-
-                Resources::ImageLoader::ResourceType *resource = w->resource();
-                if (resource) {
-                    auto it = mUIAtlasEntries.find(resource);
-                    if (it == mUIAtlasEntries.end()) {
-                        std::shared_ptr<Resources::ImageData> data = resource->loadData();
-                        it = mUIAtlasEntries.try_emplace(resource, mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { expandUIAtlas(); })).first;
-                        mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, data->mBuffer, GL_UNSIGNED_BYTE);
-                    }
-
-                    for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
-
-                        std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const GUI::Vertex &v) {
-                            return GUI::Vertex {
-                                v.mPos,
-                                v.mColor,
-                                { (it->second.mArea.mSize.x / (512.f * mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (512.f * mUIAtlasSize),
-                                    (it->second.mArea.mSize.y / (512.f * mUIAtlasSize)) * v.mUV.y + it->second.mArea.mTopLeft.y / (512.f * mUIAtlasSize) }
-                            };
-                        });
-                    }
-
-                } else {
-                    for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
-                        std::move(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]));
-                    }
-                }
-            }
-
-            mVAO.bind();
-
-            for (const std::pair<const Render::TextureDescriptor, std::vector<GUI::Vertex>> &p : vertices) {
-                if (!p.second.empty()) {
-
-                    mProgram.setUniform("hasDistanceField", bool(p.first.mFlags & TextureFlag_IsDistanceField));
-
-                    glBindTexture(GL_TEXTURE_2D, p.first.mHandle != std::numeric_limits<uint32_t>::max() ? p.first.mHandle : mUIAtlasTexture.handle());
-
-                    mVBO.setData(GL_ARRAY_BUFFER, sizeof(p.second[0]) * p.second.size(), p.second.data());
-
-                    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(p.second.size())); // Starting from vertex 0; 3 vertices total -> 1 triangle
-                    GL_CHECK();
-                }
-            }
-        }
+        OpenGLRenderTarget::beginFrame();
     }
 
-    void OpenGLRenderWindow::makeCurrent()
+    void OpenGLRenderWindow::endFrame()
     {
-        Engine::Render::makeCurrent(window(), mContext);
+        OpenGLRenderTarget::endFrame();
+
+        mWindow->endFrame();
     }
 
-    std::unique_ptr<RenderTarget> OpenGLRenderWindow::createRenderTarget(Scene::Camera *camera, const Vector2 &size)
+    Texture *OpenGLRenderWindow::texture() const
     {
-        return std::make_unique<OpenGLRenderTexture>(this, camera, size);
+        return nullptr;
     }
 
-    void OpenGLRenderWindow::expandUIAtlas()
+    Vector2i OpenGLRenderWindow::size() const
     {
-        if (mUIAtlasSize == 0) {
-            mUIAtlasSize = 4;
-            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr, GL_UNSIGNED_BYTE);
-            for (int x = 0; x < mUIAtlasSize; ++x) {
-                for (int y = 0; y < mUIAtlasSize; ++y) {
-                    mUIAtlas.addBin({ 512 * x, 512 * y });
-                }
-            }
-        } else {
-            /*for (int x = 0; x < mUIAtlasSize; ++x) {
-                for (int y = 0; y < mUIAtlasSize; ++y) {
-                    mUIAtlas.addBin({ 512 * x, 512 * (y + mUIAtlasSize) });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * y });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * (y + mUIAtlasSize) });
-                }
-            }
-            mUIAtlasSize *= 2;
-            mUIAtlasTexture.resize({ 512 * mUIAtlasSize, 512 * mUIAtlasSize });*/
-            throw "TODO";
-        }
+        return { mWindow->renderWidth(), mWindow->renderHeight() };
+    }
+
+    bool OpenGLRenderWindow::resize(const Vector2i &size)
+    {
+        throw 0;
     }
 
 }

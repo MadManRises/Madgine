@@ -3,48 +3,25 @@
 #include "../../input/inputcollector.h"
 #include "../../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
-#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
 #include "Modules/generic/transformIt.h"
 
-#include "Modules/madgineobject/madgineobject.h"
-
-#include "Modules/keyvalue/scopebase.h"
 
 #include "Modules/serialize/toplevelserializableunit.h"
 
 #include "Modules/serialize/container/controlledcontainer.h"
 
-#include "../../render/renderwindowcollector.h"
+#include "../../render/rendercontextcollector.h"
 
 #include "../../threading/frameloop.h"
 
 #include "widget.h"
 
-namespace Engine {
-namespace GUI {
+#include "Modules/math/vector3i.h"
 
-    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, MadgineObject, Serialize::SerializableUnitBase {
-        TopLevelWindowComponentBase(TopLevelWindow &window);
-        virtual ~TopLevelWindowComponentBase() = default;
+#include "toplevelwindowcomponent.h"
 
-        TopLevelWindow &window() const;
-
-        virtual const MadgineObject *parent() const override;
-
-        TopLevelWindowComponentBase &getSelf(bool = true);
-
-        virtual const char *key() const = 0;
-
-    protected:
-        TopLevelWindow &mWindow;
-    };
-
-}
-}
-
-DECLARE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow, TopLevelWindowComponentBase, TopLevelWindow &);
 
 namespace Engine {
 namespace GUI {
@@ -61,44 +38,10 @@ namespace GUI {
         TopLevelWindow(const Window::WindowSettings &settings);
         virtual ~TopLevelWindow();
 
-        void swapCurrentRoot(WidgetBase *newRoot);
-        void openModalWidget(WidgetBase *widget);
-        void closeModalWidget(WidgetBase *widget);
-        void openWidget(WidgetBase *widget);
-        void closeWidget(WidgetBase *widget);
 
-
-        bool isHovered(WidgetBase *w);
-        WidgetBase *hoveredWidget();
-
-        WidgetBase *getWidget(const std::string &name);
-
-        void registerWidget(WidgetBase *w);
-        void updateWidget(WidgetBase *w, const std::string &newName);
-
-        void unregisterWidget(WidgetBase *w);
-
-        Vector3 getScreenSize();
-        std::pair<Vector3, Vector3> getAvailableScreenSpace();
-
-        WidgetBase *createTopLevelWidget(const std::string &name);
-        Bar *createTopLevelBar(const std::string &name);
-        Button *createTopLevelButton(const std::string &name);
-        Checkbox *createTopLevelCheckbox(const std::string &name);
-        Combobox *createTopLevelCombobox(const std::string &name);
-        Image *createTopLevelImage(const std::string &name);
-        Label *createTopLevelLabel(const std::string &name);
-        SceneWindow *createTopLevelSceneWindow(const std::string &name);
-        TabWidget *createTopLevelTabWidget(const std::string &name);
-        Textbox *createTopLevelTextbox(const std::string &name);
-
-        void destroyTopLevel(WidgetBase *w);
-
-        void clear();
+        Rect2i getScreenSpace();
 
         Input::InputHandler *input();
-
-        void addOverlay(WindowOverlay *overlay);
 
         bool injectKeyPress(const Input::KeyEventArgs &arg) override;
         bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
@@ -106,34 +49,25 @@ namespace GUI {
         bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
-        void renderOverlays();
-
         Window::Window *window() const;
-        WidgetBase *currentRoot();
 
-        decltype(auto) widgets()
-        {
-            return uniquePtrToPtr(mTopLevelWidgets);
-        }
 
         decltype(auto) components()
         {
             return uniquePtrToPtr(mComponents);
         }
 
-        Render::RenderWindow *getRenderer();
-
-        //virtual App::Application &app(bool = true) override;
-        //virtual const Core::MadgineObject *parent() const override;
+        Render::RenderContext *getRenderer();
+        Render::RenderTarget *getRenderWindow();
 
         ToolWindow *createToolWindow(const Window::WindowSettings &settings);
         void destroyToolWindow(ToolWindow *w);
 
         virtual bool frameStarted(std::chrono::microseconds) override;
-        virtual bool frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask) override;
+        virtual bool frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
-        void calculateWindowGeometries();
+
 
         template <class T>
         T &getWindowComponent(bool init = true)
@@ -143,8 +77,6 @@ namespace GUI {
 
         TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
 
-        WidgetBase *mStartupWidget = nullptr;
-        void openStartupWidget();
 
         virtual const MadgineObject *parent() const override;
         virtual bool init() override;
@@ -167,50 +99,25 @@ namespace GUI {
 
         Threading::FrameLoop &frameLoop();
 
+		void applyClientSpaceResize(TopLevelWindowComponentBase *component = nullptr);
+
     protected:
         void onClose() override;
         void onRepaint() override;
         void onResize(size_t width, size_t height) override;
 
-        WidgetBase *getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
-        WidgetBase *getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current);
-
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
-        std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
-
-        virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
-        virtual std::unique_ptr<Bar> createBar(const std::string &name);
-        virtual std::unique_ptr<Button> createButton(const std::string &name);
-        virtual std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
-        virtual std::unique_ptr<Combobox> createCombobox(const std::string &name);
-        virtual std::unique_ptr<Image> createImage(const std::string &name);
-        virtual std::unique_ptr<Label> createLabel(const std::string &name);
-        virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
-        virtual std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
-        virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
     private:
         Window::Window *mWindow = nullptr;
-        std::optional<Render::RenderWindowSelector> mRenderWindow;
+        std::optional<Render::RenderContextSelector> mRenderContext;
+        std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
-        std::map<std::string, WidgetBase *> mWidgets;
-
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>);
-
-        std::vector<WindowOverlay *> mOverlays;
-
-        SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type>);
-
-        WidgetBase *mHoveredWidget = nullptr;
-
-        WidgetBase *mCurrentRoot = nullptr;
-
-        std::vector<WidgetBase *> mModalWidgetList;
+        SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer<elevate<, Serialize::ControlledContainer, , partial<std::set, type_pack<>, type_pack<TopLevelWindowComponentComparator>>::type>::type>);
 
         Threading::FrameLoop mLoop;
 

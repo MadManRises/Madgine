@@ -8,7 +8,7 @@ namespace Engine
 		struct ToolBase;
 		struct ImRoot;
 		class Inspector;
-		class ImManager;
+		struct ImManager;
 
 		class OpenGLImManager;
 

@@ -5,15 +5,15 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::GUI::Checkbox)
-METATABLE_END(Engine::GUI::Checkbox)
+METATABLE_BEGIN(Engine::Widgets::Checkbox)
+METATABLE_END(Engine::Widgets::Checkbox)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Checkbox, Engine::GUI::WidgetBase)
-SERIALIZETABLE_END(Engine::GUI::Checkbox)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Checkbox, Engine::Widgets::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::Checkbox)
 
 namespace Engine
 {
-	namespace GUI
+namespace Widgets
 	{
 		bool Checkbox::isChecked()
 		{

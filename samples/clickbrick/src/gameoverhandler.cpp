@@ -1,4 +1,6 @@
 #include "Madgine/clientlib.h"
+#include "Madgine/scenelib.h"
+#include "Madgine/scenerendererlib.h"
 
 #include "gameoverhandler.h"
 
@@ -35,7 +37,7 @@ namespace ClickBrick
             return "GameOverHandler";
         }
 
-        void GameOverHandler::setWidget(Engine::GUI::WidgetBase *w)
+        void GameOverHandler::setWidget(Engine::Widgets::WidgetBase *w)
         {
             if (widget()) {
                 mRestartGameSlot.disconnectAll();

@@ -6,10 +6,10 @@ namespace Engine {
 namespace Tools {
 
     struct WidgetSettings {
-        WidgetSettings(GUI::WidgetBase *widget, Inspector &inspector);
+        WidgetSettings(Widgets::WidgetBase *widget, Inspector &inspector);
         ~WidgetSettings();
 
-        GUI::WidgetBase *widget();
+        Widgets::WidgetBase *widget();
 
         void render();
 
@@ -28,7 +28,7 @@ namespace Tools {
         void enforceAspectRatio();
 
     private:
-        GUI::WidgetBase *mWidget;
+        Widgets::WidgetBase *mWidget;
         Inspector &mInspector;
 
         Matrix3 mSavedPos, mSavedSize;

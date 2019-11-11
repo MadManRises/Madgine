@@ -13,22 +13,22 @@
 
 #include "Modules/resources/resource.h"
 
-#include "Modules/font/font.h"
+#include "fontloader.h"
 
-METATABLE_BEGIN(Engine::GUI::Button)
+METATABLE_BEGIN(Engine::Widgets::Button)
 MEMBER(mText)
 MEMBER(mFontSize)
 MEMBER(mFont)
-METATABLE_END(Engine::GUI::Button)
+METATABLE_END(Engine::Widgets::Button)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Button, Engine::GUI::WidgetBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 FIELD(mFontSize)
 FIELD(mText)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
-SERIALIZETABLE_END(Engine::GUI::Button)
+SERIALIZETABLE_END(Engine::Widgets::Button)
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
 
     SignalSlot::SignalStub<> &Button::clickEvent()
     {
@@ -37,11 +37,11 @@ namespace GUI {
 
  
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Button::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Button::vertices(const Vector3 &screenSize)
     {
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> returnSet;
-        std::vector<Vertex> result;
+        std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> returnSet;
+        std::vector<GUI::Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
@@ -50,23 +50,23 @@ namespace GUI {
         Vector4 color = mHovered ? Vector4 { 1.0f, 0.1f, 0.1f, 1.0f } : Vector4 { 0.4f, 0.4f, 0.4f, 1.0f };
 
         Vector3 v = pos;        
-        result.push_back({ v, color });
+        result.push_back({ v, color, { 0.0f, 0.0f } });
         v.x += size.x;
-        result.push_back({ v, color });
+        result.push_back({ v, color, { 1.0f, 0.0f } });
         v.y += size.y;
-        result.push_back({ v, color });
-        result.push_back({ v, color });
+        result.push_back({ v, color, { 1.0f, 1.0f } });
+        result.push_back({ v, color, { 1.0f, 1.0f } });
         v.x -= size.x;
-        result.push_back({ v, color });
+        result.push_back({ v, color, { 0.0f, 1.0f } });
         v.y -= size.y;
-        result.push_back({ v, color });
+        result.push_back({ v, color, { 0.0f, 0.0f } });
 
         returnSet.push_back({ result, {} });
 
         if (mFont) {
             mFont->setPersistent(true);
             if (mFont->load()) {
-                std::pair<std::vector<Vertex>, Render::TextureDescriptor> fontVertices = renderText(mText, pos + 0.5f * size, mFont->data().get(), mFontSize, { 0.5f, 0.5f }, screenSize);
+                std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> fontVertices = renderText(mText, pos + 0.5f * size, mFont->data().get(), mFontSize, { 0.5f, 0.5f }, screenSize);
                 if (!fontVertices.first.empty())
                     returnSet.push_back(fontVertices);
             }

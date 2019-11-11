@@ -9,6 +9,7 @@
 #include "Modules/math/matrix4.h"
 #include "Modules/math/ray.h"
 #include "Modules/math/vector2i.h"
+#include "Modules/render/vertex.h"
 
 namespace Engine {
 
@@ -19,7 +20,10 @@ enum Im3DMeshType {
     IM3D_MESHTYPE_COUNT
 };
 
-typedef void *Im3DNativeMesh;
+namespace Resources {
+    struct MeshData;
+}
+typedef Resources::MeshData *Im3DNativeMesh;
 
 typedef uint32_t Im3DID;
 typedef unsigned int Im3DTextureId;

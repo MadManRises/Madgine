@@ -9,6 +9,11 @@
 #endif
 
 #include "Madgine/baselib.h"
+#include "programloaderlib.h"
+#include "imageloaderlib.h"
+#include "meshloaderlib.h"
+#include "textureloaderlib.h"
+#include "fontloaderlib.h"
 
 #include <array>
 #include <future>

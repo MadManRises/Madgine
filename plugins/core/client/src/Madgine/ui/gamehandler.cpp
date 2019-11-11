@@ -18,7 +18,7 @@ namespace Engine {
 namespace UI {
     const float GameHandlerBase::mDragStartThreshold = 100.0f;
 
-    GameHandlerBase::GameHandlerBase(UIManager &ui, Scene::ContextMask context)
+    GameHandlerBase::GameHandlerBase(UIManager &ui, Threading::ContextMask context)
         : Handler(ui)
         , mCurrentMouseButton(Input::MouseButton::NO_BUTTON)
         , mDragging(false)
@@ -33,13 +33,13 @@ namespace UI {
         onPointerDragAbort();
     }
 
-    void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask)
+    void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask)
     {
         if (mContext & mask)
             update(timeSinceLastFrame);
     }
 
-    void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep, Scene::ContextMask mask)
+    void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask)
     {
         if (mContext & mask)
             fixedUpdate(timeStep);

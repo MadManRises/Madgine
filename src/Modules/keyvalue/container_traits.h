@@ -193,13 +193,13 @@ struct container_traits<std::vector<T>> {
     }
 };
 
-template <class T>
+template <typename T, typename Cmp>
 class SetConstIterator;
 
-template <class T>
+template <typename T, typename Cmp>
 class SetIterator {
 public:
-    typedef typename std::set<T>::iterator It;
+    typedef typename std::set<T, Cmp>::iterator It;
 
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
@@ -231,23 +231,23 @@ public:
         return &const_cast<T &>(*mIterator);
     }
 
-    bool operator!=(const SetIterator<T> &other) const
+    bool operator!=(const SetIterator<T, Cmp> &other) const
     {
         return mIterator != other.mIterator;
     }
 
-    bool operator==(const SetIterator<T> &other) const
+    bool operator==(const SetIterator<T, Cmp> &other) const
     {
         return mIterator == other.mIterator;
     }
 
-    SetIterator<T> &operator++()
+    SetIterator<T, Cmp> &operator++()
     {
         ++mIterator;
         return *this;
     }
 
-    SetIterator<T> &operator--()
+    SetIterator<T, Cmp> &operator--()
     {
         --mIterator;
         return *this;
@@ -259,15 +259,15 @@ public:
     }
 
 private:
-    friend class SetConstIterator<T>;
+    friend class SetConstIterator<T, Cmp>;
 
     It mIterator;
 };
 
-template <class T>
+template <class T, typename Cmp>
 class SetConstIterator {
 public:
-    typedef typename std::set<T>::const_iterator It;
+    typedef typename std::set<T, Cmp>::const_iterator It;
 
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
@@ -285,7 +285,7 @@ public:
     {
     }
 
-    SetConstIterator(const SetIterator<T> &it)
+    SetConstIterator(const SetIterator<T, Cmp> &it)
         : mIterator(it.mIterator)
     {
     }
@@ -300,12 +300,12 @@ public:
         return &*mIterator;
     }
 
-    bool operator!=(const SetConstIterator<T> &other) const
+    bool operator!=(const SetConstIterator<T, Cmp> &other) const
     {
         return mIterator != other.mIterator;
     }
 
-    bool operator==(const SetConstIterator<T> &other) const
+    bool operator==(const SetConstIterator<T, Cmp> &other) const
     {
         return mIterator == other.mIterator;
     }
@@ -329,19 +329,19 @@ private:
     It mIterator;
 };
 
-template <typename T>
-struct container_traits<std::set<T>> {
+template <typename T, typename Cmp>
+struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool sorted = true;
 
-    typedef std::set<T, KeyCompare<T>> container;
-    typedef SetIterator<T> iterator;
-    typedef SetConstIterator<T> const_iterator;
-    typedef typename KeyType<T>::type key_type;
+    typedef std::set<T, Cmp> container;
+    typedef SetIterator<T, Cmp> iterator;
+    typedef SetConstIterator<T, Cmp> const_iterator;
+    typedef typename Cmp::cmp_type key_type;
     typedef typename container::value_type value_type;
     typedef T type;
 
     template <template <typename> typename M>
-    using rebind = container_traits<std::set<M<T>>>;
+    using rebind = container_traits<std::set<M<T>, Cmp>>;
 
     template <typename C>
     struct api : SortedContainerApi<C> {

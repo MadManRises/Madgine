@@ -105,7 +105,7 @@ namespace Network {
 }
 
 namespace Plugins {
-    class PluginManager;
+    struct PluginManager;
     struct Plugin;
     class PluginSection;
     struct PluginListener;
@@ -163,9 +163,9 @@ namespace Font {
 }
 
 namespace Render {
-    struct Vertex;
+    /*struct Vertex;
     struct Vertex2;
-    struct Vertex3;
+    struct Vertex3;*/
     typedef int RenderPassFlags;
 }
 
@@ -184,6 +184,9 @@ class Vector2;
 class Vector3;
 
 struct Vector2i;
+struct Vector3i;
+
+struct Rect2i;
 
 class Matrix3;
 class Matrix4;

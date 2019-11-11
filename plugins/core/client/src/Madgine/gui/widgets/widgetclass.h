@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-	namespace GUI
+namespace Widgets
 	{
 		enum class WidgetClass
 		{

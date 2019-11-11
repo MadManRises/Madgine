@@ -24,15 +24,6 @@ namespace Engine
 
 			GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			template <class T>
-			T &getSceneComponent(bool init = true)
-			{
-				return static_cast<T&>(getSceneComponent(component_index<T>(), init));
-			}
-
-			Scene::SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-			Scene::SceneManager &sceneMgr(bool = true);
 
 			//Scripting::GlobalScopeBase &globalScope();
 

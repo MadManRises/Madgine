@@ -8,17 +8,19 @@
 #include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
 
-METATABLE_BEGIN(Engine::GUI::Image)
+#include "widgetmanager.h"
+
+METATABLE_BEGIN(Engine::Widgets::Image)
 PROPERTY(Image, image, setImage)
-METATABLE_END(Engine::GUI::Image)
+METATABLE_END(Engine::Widgets::Image)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Image, Engine::GUI::WidgetBase)
-SERIALIZETABLE_END(Engine::GUI::Image)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::Image)
 
-RegisterType(Engine::GUI::Image);
+RegisterType(Engine::Widgets::Image);
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
 
     void Image::setImageByName(const std::string &name)
     {
@@ -45,9 +47,9 @@ namespace GUI {
         return mImage;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
     {
-        std::vector<Vertex> result;
+        std::vector<GUI::Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
@@ -66,7 +68,7 @@ namespace GUI {
         result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 0 } });
-        return { { result, { mImage ? std::numeric_limits<Render::TextureHandle>::max() : 0 } } };
+        return { { result, { mImage ? &manager().uiTexture() : nullptr } } };
     }
     WidgetClass Image::getClass() const
     {

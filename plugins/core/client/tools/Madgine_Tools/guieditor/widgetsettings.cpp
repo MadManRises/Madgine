@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Tools {
 
-    WidgetSettings::WidgetSettings(GUI::WidgetBase *widget, Inspector &inspector)
+    WidgetSettings::WidgetSettings(Widgets::WidgetBase *widget, Inspector &inspector)
         : mWidget(widget)
         , mInspector(inspector)
     {
@@ -25,7 +25,7 @@ namespace Tools {
         mWidget->setUserData(nullptr);
     }
 
-    GUI::WidgetBase *WidgetSettings::widget()
+    Widgets::WidgetBase *WidgetSettings::widget()
     {
         return mWidget;
     }

@@ -3,29 +3,6 @@
 namespace Engine
 {
 
-
-	namespace Scene
-	{
-		class SceneManager;
-		class SceneComponentBase;
-
-		enum class ContextMask : unsigned int;
-
-		namespace Entity
-		{
-			class Entity;
-			class EntityComponentBase;
-			class Transform;
-			class Animation;
-			class Mesh;
-		}
-
-		class LightManager;
-		class Light;
-
-		struct Camera;
-	}
-
 	namespace App
 	{
 		struct AppSettings;
@@ -36,13 +13,7 @@ namespace Engine
 	namespace Core
 	{
 		class Root;
-
 	}
-
-
-
-
-
 
 	namespace Server
 	{

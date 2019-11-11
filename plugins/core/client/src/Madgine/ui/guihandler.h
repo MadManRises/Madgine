@@ -27,13 +27,13 @@ namespace Engine
 
 			bool isRootWindow() const;
 
-			Scene::ContextMask context() const;
+			Threading::ContextMask context() const;
 
 			GuiHandlerBase &getSelf(bool = true);
 
 		protected:
 
-			void setContext(Scene::ContextMask context);
+			void setContext(Threading::ContextMask context);
 
 
 		private:
@@ -41,7 +41,7 @@ namespace Engine
 			const WindowType mType;
 
 
-			Scene::ContextMask mContext;
+			Threading::ContextMask mContext;
 		};
 	}
 }

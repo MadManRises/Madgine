@@ -137,7 +137,7 @@ namespace Render {
 
         data->mTextureSize = { areaSize * UNIT_SIZE,
             areaSize * UNIT_SIZE };
-        data->mTexture.setData(data->mTextureSize, nullptr, GL_UNSIGNED_BYTE);
+        data->mTexture.setData(data->mTextureSize, nullptr);
 
         for (GLubyte c = 0; c < 128; c++) {
 
@@ -193,7 +193,7 @@ namespace Render {
                 }
             }
 
-            data->mTexture.setSubData(pos, size, colors.get(), GL_UNSIGNED_BYTE);
+            data->mTexture.setSubData(pos, size, colors.get());
         }
 
         FT_Done_Face(face);

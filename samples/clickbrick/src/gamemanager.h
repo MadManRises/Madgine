@@ -4,7 +4,9 @@
 
 #include "Madgine/ui/widgetptr.h"
 
-#include "Madgine/scene/camera.h"
+#include "Madgine/render/camera.h"
+
+#include "Madgine/render/scenerenderpass.h"
 
 namespace ClickBrick {
 namespace UI {
@@ -17,7 +19,7 @@ namespace UI {
 
         virtual const char *key() const override;
 
-        virtual void setWidget(Engine::GUI::WidgetBase *w) override;
+        virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
         virtual void update(std::chrono::microseconds timeSinceLastFrame) override;
 
@@ -32,11 +34,11 @@ namespace UI {
         void start();
 
     private:
-        Engine::Scene::Camera mCamera;
+        Engine::Render::Camera mCamera;
 
-        Engine::UI::WidgetPtr<Engine::GUI::SceneWindow> mGameWindow;
-        Engine::UI::WidgetPtr<Engine::GUI::Label> mScoreLabel;
-        Engine::UI::WidgetPtr<Engine::GUI::Label> mLifeLabel;
+        Engine::UI::WidgetPtr<Engine::Widgets::SceneWindow> mGameWindow;
+        Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
+        Engine::UI::WidgetPtr<Engine::Widgets::Label> mLifeLabel;
 
         int mScore = 0;
         int mLife = 100000;
@@ -45,6 +47,8 @@ namespace UI {
         std::chrono::microseconds mAcc { 0 };
 
         std::list<Engine::Scene::Entity::Entity *> mBricks;
+
+		Engine::Render::SceneRenderPass mSceneRenderer;
     };
 
 }

@@ -5,7 +5,8 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLTexture::OpenGLTexture()
+    OpenGLTexture::OpenGLTexture(GLenum type)
+        : mType(type)
     {
         glGenTextures(1, &mHandle);
         GL_CHECK();
@@ -16,6 +17,7 @@ namespace Render {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         GL_CHECK();
 #endif
+        mTextureHandle = mHandle;
     }
 
     OpenGLTexture::OpenGLTexture(dont_create_t)
@@ -23,7 +25,9 @@ namespace Render {
     }
 
     OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
-        : mHandle(std::exchange(other.mHandle, 0))
+        : Texture(std::move(other))
+        , mType(other.mType)
+        , mHandle(std::exchange(other.mHandle, 0))
     {
     }
 
@@ -34,7 +38,8 @@ namespace Render {
 
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
-        std::swap(mHandle, other.mHandle);        
+        std::swap(mHandle, other.mHandle);
+        mType = other.mType;
         return *this;
     }
 
@@ -53,18 +58,18 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLTexture::setData(Vector2i size, void *data, GLenum type)
+    void OpenGLTexture::setData(Vector2i size, void *data)
     {
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, type, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, mType, data);
         GL_CHECK();
         mSize = size;
     }
 
-    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, void *data, GLenum type)
+    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, void *data)
     {
         bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, type, data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, mType, data);
         GL_CHECK();
     }
 

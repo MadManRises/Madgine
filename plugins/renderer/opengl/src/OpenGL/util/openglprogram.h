@@ -1,9 +1,11 @@
 #pragma once
 
+#include "program.h"
+
 namespace Engine {
 	namespace Render {
 
-		struct MADGINE_OPENGL_EXPORT OpenGLProgram {			
+		struct MADGINE_OPENGL_EXPORT OpenGLProgram : Program {			
 			
 			~OpenGLProgram();
 

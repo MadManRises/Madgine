@@ -5,7 +5,7 @@
 #include "Modules/signalslot/signal.h"
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
     class MADGINE_CLIENT_EXPORT Button : public Widget<Button> {
     public:
         using Widget::Widget;
@@ -13,7 +13,7 @@ namespace GUI {
 
         SignalSlot::SignalStub<> &clickEvent();
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
         bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
         bool injectPointerLeave(const Input::PointerEventArgs &arg) override;

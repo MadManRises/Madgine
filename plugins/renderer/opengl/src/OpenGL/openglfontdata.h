@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Modules/font/font.h"
+#include "font.h"
 #include "util/opengltexture.h"
 
 namespace Engine {
 namespace Render {
 
     struct OpenGLFontData : Font::Font {
-        OpenGLFontData()
+        OpenGLFontData() : mTexture(GL_UNSIGNED_BYTE)
         {
-            mTextureHandle = mTexture.handle();
+            Font::mTexture = &mTexture;
         }
 
         OpenGLTexture mTexture;

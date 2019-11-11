@@ -1,40 +1,31 @@
 #pragma once
 
-#include "Madgine/gui/windowoverlay.h"
 #include "Modules/math/vector2.h"
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
+#include "Madgine/render/renderpass.h"
+
 struct ImGuiDockNode;
+struct ImGuiViewport;
 
 namespace Engine {
 namespace Tools {
 
-    class MADGINE_CLIENT_TOOLS_EXPORT ImManager : public Engine::GUI::WindowOverlay {
-    public:
+    struct MADGINE_CLIENT_TOOLS_EXPORT ImManager : Render::RenderPass {
         ImManager(GUI::TopLevelWindow &window);
         virtual ~ImManager();
 
         virtual void newFrame(float timeSinceLastFrame) = 0;
-        virtual void render() override;
-        virtual bool render(Render::RenderTarget &target) const = 0;
+        virtual void render(Render::RenderTarget *target) override;
 
-        bool injectKeyPress(const Input::KeyEventArgs &arg) override;
-        bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
-        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
-        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
-        bool injectPointerMove(const Input::PointerEventArgs &arg) override;
-
-        void calculateAvailableScreenSpace(Window::Window *w, Vector3 &pos, Vector3 &size) override;
-
-        void setMenuHeight(float h);
-        void setCentralNode(ImGuiDockNode *node);
+        void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
+        void removeViewportMapping(Render::RenderTarget *target);
 
     protected:
         GUI::TopLevelWindow &mWindow;
 
-        Vector2 mAreaPos = Vector2::ZERO;
-        Vector2 mAreaSize = Vector2::ZERO;
+        std::map<Render::RenderTarget *, ImGuiViewport *> mViewportMappings;
     };
 
 }

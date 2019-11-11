@@ -25,12 +25,13 @@ namespace Tools {
         void loadLayout();
 
     private:
-        void renderSelection(GUI::WidgetBase *hoveredWidget = nullptr);
-        void renderHierarchy(GUI::WidgetBase **hoveredWidget = nullptr);
-        bool drawWidget(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget = nullptr);
+        void renderSelection(Widgets::WidgetBase *hoveredWidget = nullptr);
+        void renderHierarchy(Widgets::WidgetBase **hoveredWidget = nullptr);
+        bool drawWidget(Widgets::WidgetBase *w, Widgets::WidgetBase **hoveredWidget = nullptr);
 
     private:
-        GUI::TopLevelWindow &mWindow;
+        GUI::TopLevelWindow *mWindow = nullptr;
+        Widgets::WidgetManager *mWidgetManager = nullptr;
         WidgetSettings *mSelected = nullptr;
         std::list<WidgetSettings> mSettings;
 

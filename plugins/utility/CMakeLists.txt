@@ -1,1 +1,5 @@
 add_subdirectory(imageloader)
+add_subdirectory(meshloader)
+add_subdirectory(programloader)
+add_subdirectory(textureloader)
+add_subdirectory(fontloader)

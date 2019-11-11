@@ -7,14 +7,14 @@ namespace Engine
 	namespace UI
 	{
 		
-		template <class T = GUI::WidgetBase>
+		template <class T = Widgets::WidgetBase>
 		class WidgetPtr
 		{
 		public:
 			WidgetPtr(Handler *handler, const std::string &name) :
 				mPtr(nullptr)
 			{
-				handler->registerWidget(name, [this](GUI::WidgetBase *w)
+                            handler->registerWidget(name, [this](Widgets::WidgetBase *w)
 				{
 					mPtr = dynamic_cast<T*>(w);
 					return mPtr;

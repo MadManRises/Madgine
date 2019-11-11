@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/scene/contextmasks.h"
+#include "contextmasks.h"
 #include "Modules/signalslot/taskqueue.h"
 
 namespace Engine
@@ -32,8 +32,8 @@ namespace Engine
 		protected:
 
 			bool sendFrameStarted(std::chrono::microseconds timeSinceLastFrame);
-			bool sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
-			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			bool sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask context = ContextMask::SceneContext);
+			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, ContextMask context = ContextMask::SceneContext);
 			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 
 			virtual std::optional<SignalSlot::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount) override;

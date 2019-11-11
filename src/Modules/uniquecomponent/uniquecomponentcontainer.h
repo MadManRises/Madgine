@@ -27,10 +27,10 @@ struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
 
     typedef C<std::unique_ptr<Base>> Container;
 
-    typedef typename Container::const_iterator const_iterator;
-
     struct traits : container_traits<Container> {
     };
+
+    typedef typename traits::const_iterator const_iterator;
 
     UniqueComponentContainer(_Ty... arg)
 #if ENABLE_PLUGINS
@@ -148,7 +148,7 @@ protected:
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                this->erase(std::remove_if(Container::begin(), Container::end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
+                this->erase(std::find_if(Container::begin(), Container::end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }

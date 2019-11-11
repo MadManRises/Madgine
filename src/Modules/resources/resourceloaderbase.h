@@ -9,7 +9,7 @@ namespace Resources {
         ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad = false);
         virtual ~ResourceLoaderBase() = default;
 
-        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) = 0;
+        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) = 0;
 
         template <typename T>
         void resourceAdded(T *res)

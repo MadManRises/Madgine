@@ -11,7 +11,7 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "../../render/renderwindowcollector.h"
+#include "../../render/rendercontextcollector.h"
 
 namespace Engine {
 namespace GUI {
@@ -30,10 +30,7 @@ namespace GUI {
 
         Window::Window *window();
 
-        Render::RenderWindow *getRenderer();
-
-		void beginFrame();
-        void endFrame();
+        Render::RenderTarget *getRenderer();
 
     protected:
         void onClose() override;
@@ -46,7 +43,7 @@ namespace GUI {
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
         Window::Window *mWindow = nullptr;
-        std::optional<Render::RenderWindowSelector> mRenderWindow;
+        std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
     };
 

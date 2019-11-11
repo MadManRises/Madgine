@@ -1,16 +1,14 @@
 #pragma once
 
-#include "Modules/math/vector4.h"
+#include "Modules/render/vertex.h"
 
 namespace Engine {
 namespace GUI {
 
-    struct Vertex {
-
-        Vector3 mPos;
-        Vector4 mColor;
-        Vector2 mUV = {};
-    };
+	using Vertex = Compound<
+		Render::VertexPos_3D, 
+		Render::VertexColor, 
+		Render::VertexUV>;
 
 }
 }

@@ -8,6 +8,6 @@ FolderSources(sources "" src brick.cpp brick.h mainmenuhandler.cpp mainmenuhandl
 
 add_plugin(UI ClickBrick Game ${sources})
 
-target_link_plugins(UI Client)
+target_link_plugins(UI Client SceneRenderer)
 
 target_link_libraries(UI PUBLIC Modules)

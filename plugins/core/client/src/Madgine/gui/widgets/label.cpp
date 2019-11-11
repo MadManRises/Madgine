@@ -8,31 +8,31 @@
 
 #include "../vertex.h"
 
-#include "Modules/font/font.h"
+#include "fontloader.h"
 
-METATABLE_BEGIN(Engine::GUI::Label)
+METATABLE_BEGIN(Engine::Widgets::Label)
 MEMBER(mText)
 MEMBER(mFontSize)
 MEMBER(mFont)
-METATABLE_END(Engine::GUI::Label)
+METATABLE_END(Engine::Widgets::Label)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Label, Engine::GUI::WidgetBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Label, Engine::Widgets::WidgetBase)
 FIELD(mFontSize)
 FIELD(mText)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
-SERIALIZETABLE_END(Engine::GUI::Label)
+SERIALIZETABLE_END(Engine::Widgets::Label)
 
-RegisterType(Engine::GUI::Label);
+RegisterType(Engine::Widgets::Label);
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
 
     WidgetClass Label::getClass() const
     {
         return WidgetClass::LABEL_CLASS;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Label::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Label::vertices(const Vector3 &screenSize)
     {
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         pos.z = depth();

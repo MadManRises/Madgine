@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	namespace GUI
+namespace Widgets
 	{
 		class Bar : public Widget<Bar>
 		{

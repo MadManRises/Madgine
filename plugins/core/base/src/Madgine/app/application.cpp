@@ -5,8 +5,6 @@
 
 #include "globalapibase.h"
 
-#include "../scene/scenemanager.h"
-
 //#include "Modules/scripting/types/luastate.h"
 
 #include "Interfaces/exception.h"
@@ -103,26 +101,6 @@ namespace App {
             api.callInit(mGlobalAPIInitCounter);
         }
         return api.getSelf(init);
-    }
-
-    Scene::SceneComponentBase &Application::getSceneComponent(size_t i, bool init)
-    {
-        Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
-        if (init) {
-            checkInitState();
-            sceneMgr.callInit(mGlobalAPIInitCounter);
-        }
-        return sceneMgr.getComponent(i, init);
-    }
-
-    Scene::SceneManager &Application::sceneMgr(bool init)
-    {
-        Scene::SceneManager &sceneMgr = mGlobalAPIs.get<Scene::SceneManager>();
-        if (init) {
-            checkInitState();
-            sceneMgr.callInit(mGlobalAPIInitCounter);
-        }
-        return sceneMgr.getSelf(init);
     }
 
     Application &Application::getSelf(bool init)

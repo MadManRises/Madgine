@@ -20,8 +20,10 @@
 
 #include "../../render/texturedescriptor.h"
 
+#include "../vertex.h"
+
 namespace Engine {
-namespace GUI {
+namespace Widgets {
     class MADGINE_CLIENT_EXPORT WidgetBase : public ScopeBase,
                                              public Serialize::SerializableUnit<WidgetBase> {
         SERIALIZABLEUNIT;
@@ -29,7 +31,7 @@ namespace GUI {
     public:
         WidgetBase(const std::string &name, WidgetBase *parent);
 
-        WidgetBase(const std::string &name, TopLevelWindow &window);
+        WidgetBase(const std::string &name, WidgetManager &manager);
 
         WidgetBase(const WidgetBase &) = delete;
 
@@ -46,8 +48,8 @@ namespace GUI {
         Vector3 getActualSize() const;
         Vector3 getActualPosition() const;
 
-        void updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
-        void screenSizeChanged(const Vector3 &screenSize);
+        void updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
+        void screenSpaceChanged(const Rect2i &screenSpace);
 
         virtual WidgetClass getClass() const;
 
@@ -96,9 +98,9 @@ namespace GUI {
             return uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mChildren));
         }
 
-        bool containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos = Vector3::ZERO, float extend = 0.0f) const;
+        bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
-        virtual std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
+        virtual std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
 
         void *userData();
         void setUserData(void *userData);
@@ -128,13 +130,13 @@ namespace GUI {
         virtual std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
         virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
-        virtual void sizeChanged(const Vector3 &pixelSize);
+        virtual void sizeChanged(const Vector3i &pixelSize);
 
-		std::pair<std::vector<Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+		std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
 
-        TopLevelWindow &window();
+        WidgetManager &manager();
 
         void destroyChild(WidgetBase *w);
 
@@ -146,7 +148,7 @@ namespace GUI {
         std::string mName;
         WidgetBase *mParent;
 
-        TopLevelWindow &mWindow;
+        WidgetManager &mManager;
 
         SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>);
 

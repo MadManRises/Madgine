@@ -4,8 +4,11 @@
 
 #include "Modules/math/vector4.h"
 
+#include "Modules/render/attributedescriptor.h"
+
 namespace Engine {
 namespace Render {
+    
 
     struct MADGINE_OPENGL_EXPORT OpenGLVertexArray {
 
@@ -15,11 +18,11 @@ namespace Render {
         OpenGLVertexArray(dont_create_t);
         ~OpenGLVertexArray();
 
-		OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
+        OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
 
-		static unsigned int getCurrent();
+        static unsigned int getCurrent();
 
-		void reset();
+        void reset();
 
         void bind();
 
@@ -27,31 +30,12 @@ namespace Render {
         static void onBindVBO(GLuint buffer);
         static void onBindEBO(GLuint buffer);
 
-		static std::pair<unsigned int, unsigned int> getCurrentBindings();
+        static std::pair<unsigned int, unsigned int> getCurrentBindings();
 #else
         GLuint handle();
 #endif
 
-        template <typename T, typename M>
-        void enableVertexAttribute(unsigned int index, M T::*m)
-        {
-            GLenum type;
-            GLint size;
-            if constexpr (std::is_same_v<M, Vector2>) {
-                type = GL_FLOAT;
-                size = 2;
-            } else if constexpr (std::is_same_v<M, Vector3>) {
-                type = GL_FLOAT;
-                size = 3;
-            } else if constexpr (std::is_same_v<M, Vector4>) {
-                type = GL_FLOAT;
-                size = 4;
-            } else {
-                static_assert(dependent_bool<M, false>::value, "Unsupported Attribute type!");
-            }
-            enableVertexAttribute(index, size, type, sizeof(T), static_cast<GLsizei>(reinterpret_cast<size_t>(&(static_cast<T *>(nullptr)->*m))));
-        }
-        void enableVertexAttribute(unsigned int index, GLint size, GLenum type, GLsizei stride, GLsizei offset);
+        void enableVertexAttribute(unsigned int index, AttributeDescriptor attribute);
 
         void disableVertexAttribute(unsigned int index);
 
@@ -64,11 +48,7 @@ namespace Render {
 
         struct VertexArrayAttribute {
             bool mEnabled = false;
-            GLint mSize;
-            GLenum mType;
-            //GLboolean normalized,
-            GLsizei mStride;
-            GLsizei mOffset;
+            AttributeType mAttribute;
         };
 
         std::vector<VertexArrayAttribute> mAttributes;

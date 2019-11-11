@@ -1,85 +1,5 @@
 <id>257</id>
-<mTopLevelWidgets size=3>
-    <Item name="MainMenu" type=0 id=275>
-        <mChildren size=1>
-            <Item name="StartGameButton" type=6 id=276>
-                <mFontSize>5</mFontSize>
-                <mText>StartGame</mText>
-                <mFont>OpenSans-Regular</mFont>
-                <mChildren size=0>
-                </mChildren>
-                <mPos>[0.25, 0, 0, 0, 0.2, 0, 0, 0, 0]</mPos>
-                <mSize>[0.5, 0, 0, 0, 0.1, 0, 0, 0, 1]</mSize>
-                <mName>StartGameButton</mName>
-            </Item>
-        </mChildren>
-        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-        <mName>MainMenu</mName>
-    </Item>
-    <Item name="Ingame" type=0 id=277>
-        <mChildren size=1>
-            <Item name="GameView" type=1 id=278>
-                <mChildren size=2>
-                    <Item name="Score" type=8 id=279>
-                        <mFontSize>3</mFontSize>
-                        <mText>Score:123</mText>
-                        <mFont>OpenSans-Bold</mFont>
-                        <mChildren size=0>
-                        </mChildren>
-                        <mPos>[0.8, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-                        <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                        <mName>Score</mName>
-                    </Item>
-                    <Item name="Life" type=8 id=280>
-                        <mFontSize>3</mFontSize>
-                        <mText>Life: 99986</mText>
-                        <mFont>OpenSans-Bold</mFont>
-                        <mChildren size=0>
-                        </mChildren>
-                        <mPos>[0, 0, 5, 0, 0, 0, 0, 0, 0]</mPos>
-                        <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                        <mName>Life</mName>
-                    </Item>
-                </mChildren>
-                <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-                <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                <mName>GameView</mName>
-            </Item>
-        </mChildren>
-        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-        <mName>Ingame</mName>
-    </Item>
-    <Item name="GameOver" type=0 id=281>
-        <mChildren size=2>
-            <Item name="GameOverLabel" type=8 id=282>
-                <mFontSize>9</mFontSize>
-                <mText>Game Over</mText>
-                <mFont>OpenSans-Bold</mFont>
-                <mChildren size=0>
-                </mChildren>
-                <mPos>[0.2, 0, 0, 0, 0.4, 0, 0, 0, 0]</mPos>
-                <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
-                <mName>GameOverLabel</mName>
-            </Item>
-            <Item name="ScoreLabel" type=8 id=283>
-                <mFontSize>4</mFontSize>
-                <mText>Your Score: </mText>
-                <mFont>OpenSans-Regular</mFont>
-                <mChildren size=0>
-                </mChildren>
-                <mPos>[0.3, 0, 0, 0, 0.55, 0, 0, 0, 0]</mPos>
-                <mSize>[0.4, 0, 0, 0, 0.05, 0, 0, 0, 1]</mSize>
-                <mName>ScoreLabel</mName>
-            </Item>
-        </mChildren>
-        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-        <mName>GameOver</mName>
-    </Item>
-</mTopLevelWidgets>
-<mComponents size=1>
+<mComponents size=2>
     <Item key="UI" id=258>
         <mGuiHandlers size=3>
             <Item key="MainMenuHandler" id=259>
@@ -98,5 +18,87 @@
             </Item>
         </mGameHandlers>
     </Item>
+  <Item key="WidgetManager" id=600>
+    <mTopLevelWidgets size=3>
+      <Item name="MainMenu" type=0 id=275>
+        <mChildren size=1>
+          <Item name="StartGameButton" type=6 id=276>
+            <mFontSize>5</mFontSize>
+            <mText>StartGame</mText>
+            <mFont>OpenSans-Regular</mFont>
+            <mChildren size=0>
+            </mChildren>
+            <mPos>[0.25, 0, 0, 0, 0.2, 0, 0, 0, 0]</mPos>
+            <mSize>[0.5, 0, 0, 0, 0.1, 0, 0, 0, 1]</mSize>
+            <mName>StartGameButton</mName>
+          </Item>
+        </mChildren>
+        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
+        <mName>MainMenu</mName>
+      </Item>
+      <Item name="Ingame" type=0 id=277>
+        <mChildren size=1>
+          <Item name="GameView" type=1 id=278>
+            <mChildren size=2>
+              <Item name="Score" type=8 id=279>
+                <mFontSize>3</mFontSize>
+                <mText>Score:123</mText>
+                <mFont>OpenSans-Bold</mFont>
+                <mChildren size=0>
+                </mChildren>
+                <mPos>[0.8, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+                <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
+                <mName>Score</mName>
+              </Item>
+              <Item name="Life" type=8 id=280>
+                <mFontSize>3</mFontSize>
+                <mText>Life: 99986</mText>
+                <mFont>OpenSans-Bold</mFont>
+                <mChildren size=0>
+                </mChildren>
+                <mPos>[0, 0, 5, 0, 0, 0, 0, 0, 0]</mPos>
+                <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
+                <mName>Life</mName>
+              </Item>
+            </mChildren>
+            <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+            <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
+            <mName>GameView</mName>
+          </Item>
+        </mChildren>
+        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
+        <mName>Ingame</mName>
+      </Item>
+      <Item name="GameOver" type=0 id=281>
+        <mChildren size=2>
+          <Item name="GameOverLabel" type=8 id=282>
+            <mFontSize>9</mFontSize>
+            <mText>Game Over</mText>
+            <mFont>OpenSans-Bold</mFont>
+            <mChildren size=0>
+            </mChildren>
+            <mPos>[0.2, 0, 0, 0, 0.4, 0, 0, 0, 0]</mPos>
+            <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
+            <mName>GameOverLabel</mName>
+          </Item>
+          <Item name="ScoreLabel" type=8 id=283>
+            <mFontSize>4</mFontSize>
+            <mText>Your Score: </mText>
+            <mFont>OpenSans-Regular</mFont>
+            <mChildren size=0>
+            </mChildren>
+            <mPos>[0.3, 0, 0, 0, 0.55, 0, 0, 0, 0]</mPos>
+            <mSize>[0.4, 0, 0, 0, 0.05, 0, 0, 0, 1]</mSize>
+            <mName>ScoreLabel</mName>
+          </Item>
+        </mChildren>
+        <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+        <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
+        <mName>GameOver</mName>
+      </Item>
+    </mTopLevelWidgets>
+    <mStartupWidget>275</mStartupWidget>
+  </Item>
 </mComponents>
-<mStartupWidget>275</mStartupWidget>

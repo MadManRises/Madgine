@@ -11,14 +11,14 @@ namespace Engine {
 namespace UI {
     struct MADGINE_CLIENT_EXPORT WindowDescriber {
         WindowDescriber(const std::string &widgetName,
-            std::function<bool(GUI::WidgetBase *)> init)
+            std::function<bool(Widgets::WidgetBase *)> init)
             : mWidgetName(widgetName)
             , mInit(init)
         {
         }
 
         std::string mWidgetName;
-        std::function<bool(GUI::WidgetBase *)> mInit;
+        std::function<bool(Widgets::WidgetBase *)> mInit;
     };
 
     class MADGINE_CLIENT_EXPORT Handler : public MadgineObject, public ScopeBase, public Serialize::SerializableUnit<Handler> {
@@ -29,8 +29,8 @@ namespace UI {
 
         virtual void onMouseVisibilityChanged(bool b);
 
-        GUI::WidgetBase *widget() const;
-        virtual void setWidget(GUI::WidgetBase *w);
+        Widgets::WidgetBase *widget() const;
+        virtual void setWidget(Widgets::WidgetBase *w);
 
         virtual void sizeChanged();
 
@@ -56,7 +56,7 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-        void registerWidget(const std::string &name, std::function<bool(GUI::WidgetBase *)> init);
+        void registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init);
 
     protected:
         bool init() override;
@@ -77,7 +77,7 @@ namespace UI {
         bool injectKeyPress(const Input::KeyEventArgs &evt);
 
     protected:
-        GUI::WidgetBase *mWidget = nullptr;
+        Widgets::WidgetBase *mWidget = nullptr;
 
         UIManager &mUI;
 

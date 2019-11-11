@@ -4,6 +4,10 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
+#include "Modules/keyvalue/observablecontainer.h"
+
+#include "Modules/madgineobject/madgineobjectobserver.h"
+
 struct ImGuiDockNode;
 
 namespace Engine {
@@ -16,7 +20,7 @@ namespace Tools {
         bool init() override;
         void finalize() override;
 
-        const ToolsContainer<std::vector> &tools();
+        const std::vector<std::unique_ptr<ToolBase>> &tools();
         ToolBase &getToolComponent(size_t index, bool = true);
         template <typename T>
         T &getTool()
@@ -33,7 +37,7 @@ namespace Tools {
     private:
         const MadgineObject *mParent; //TODO Find proper solution
 		
-		ToolsContainer<std::vector> mCollector;		
+		ToolsContainer<PartialObservableContainer<std::vector, MadgineObjectObserver>::type> mCollector;		
 
 		ImGuiDockNode *mDockNode = nullptr;
     };

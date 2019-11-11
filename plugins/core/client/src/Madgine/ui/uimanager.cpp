@@ -34,7 +34,7 @@ namespace Engine {
 namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
-        : SerializableUnit(window)
+        : SerializableUnit(window, 50)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
@@ -161,7 +161,7 @@ namespace UI {
 
 
 
-    bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         PROFILE();
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
@@ -170,7 +170,7 @@ namespace UI {
         return true;
     }
 
-    bool UIManager::frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool UIManager::frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
             h->fixedUpdate(timeSinceLastFrame, context);

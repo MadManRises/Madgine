@@ -5,14 +5,14 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::GUI::Bar)
-METATABLE_END(Engine::GUI::Bar)
+METATABLE_BEGIN(Engine::Widgets::Bar)
+METATABLE_END(Engine::Widgets::Bar)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Bar, Engine::GUI::WidgetBase)
-SERIALIZETABLE_END(Engine::GUI::Bar)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Bar, Engine::Widgets::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::Bar)
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
     void Bar::setRatio(float f)
     {
     }

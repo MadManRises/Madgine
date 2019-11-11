@@ -166,8 +166,6 @@ namespace Plugins {
         file.loadFromDisk();
         mLoadingSelectionFile = true;
         for (auto &[name, section] : file) {
-            if (name == "Core")
-                continue;
             (*this)[name].loadFromIni(section);
         }
         mLoadingSelectionFile = false;        

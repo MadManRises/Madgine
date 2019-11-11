@@ -202,6 +202,7 @@ struct KeyCompare {
     // functor for operator<
     typedef _Ty first_argument_type;
     typedef _Ty second_argument_type;
+    typedef KeyType_t<_Ty> cmp_type;
     typedef bool result_type;
 
     using is_transparent = void;

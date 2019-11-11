@@ -1,5 +1,7 @@
 #pragma once
 
+#include "textureloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -10,12 +12,12 @@ namespace Render {
 
     typedef uint32_t TextureHandle;
     struct TextureDescriptor {
-        TextureHandle mHandle = 0;
+        const Texture *mTexture;
         TextureFlags mFlags = 0;
 
         bool operator<(const TextureDescriptor &other) const
         {
-            return mHandle < other.mHandle || (mHandle == other.mHandle && mFlags < other.mFlags);
+            return mTexture < other.mTexture || (mTexture == other.mTexture && mFlags < other.mFlags);
         }
     };
 

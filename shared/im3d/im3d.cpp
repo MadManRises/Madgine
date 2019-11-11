@@ -15,7 +15,7 @@
 
 #include "Modules/math/boundingbox.h"
 
-#include "Modules/font/glyph.h"
+#include "glyph.h"
 
 #include <numeric>
 

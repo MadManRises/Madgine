@@ -9,6 +9,16 @@ namespace Render {
     static thread_local OpenGLVertexArray *sCurrentBound = nullptr;
 #endif
 
+	static GLenum glType(AttributeType type)
+    {
+        switch (type) {
+        case ATTRIBUTE_FLOAT:
+            return GL_FLOAT;
+        default:
+            std::terminate();
+        }
+    }
+
     OpenGLVertexArray::OpenGLVertexArray()
     {
 #if !OPENGL_ES
@@ -95,7 +105,7 @@ namespace Render {
 
         for (size_t i = 0; i < mAttributes.size(); ++i) {
             if (mAttributes[i].mEnabled) {
-                glVertexAttribPointer(i, mAttributes[i].mSize, mAttributes[i].mType, GL_FALSE, mAttributes[i].mStride, reinterpret_cast<void *>(mAttributes[i].mOffset));
+                glVertexAttribPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType, GL_FALSE, mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
                 glEnableVertexAttribArray(i);
             } else {
                 glDisableVertexAttribArray(i);
@@ -112,9 +122,11 @@ namespace Render {
 #endif
     }
 
-    void OpenGLVertexArray::enableVertexAttribute(unsigned int index, GLint size, GLenum type, GLsizei stride, GLsizei offset)
+    void OpenGLVertexArray::enableVertexAttribute(unsigned int index, AttributeDescriptor attribute)
     {
-        glVertexAttribPointer(index, size, type, GL_FALSE, stride, reinterpret_cast<void *>(offset));
+        
+
+        glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
         glEnableVertexAttribArray(index);
 
 #if OPENGL_ES
@@ -124,7 +136,7 @@ namespace Render {
                 LOG_WARNING("Non consecutive Vertex Attribute!");
             mAttributes.resize(index + 1);
         }
-        mAttributes[index] = { true, size, type, stride, offset };
+        mAttributes[index] = { true, attribute };
 #endif
     }
 

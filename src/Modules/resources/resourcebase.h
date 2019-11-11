@@ -8,7 +8,7 @@ namespace Engine {
 namespace Resources {
 
     struct MODULES_EXPORT ResourceBase : ScopeBase {
-        ResourceBase(Filesystem::Path path);
+        ResourceBase(Filesystem::Path path = {});
 
         ~ResourceBase() = default;
 

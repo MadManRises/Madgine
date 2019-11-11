@@ -77,7 +77,7 @@ namespace UI {
         mWidget = nullptr;
     }
 
-    void Handler::setWidget(GUI::WidgetBase *widget)
+    void Handler::setWidget(Widgets::WidgetBase *widget)
     {
         if (mWidget != widget) {
             if (mWidget) {
@@ -93,7 +93,7 @@ namespace UI {
                 mWidget->pointerUpEvent().connect(mPointerUpSlot);
 
                 for (const WindowDescriber &des : mWidgets) {
-                    GUI::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
+                    Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
 
                     if (!child) {
                         LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
@@ -142,7 +142,7 @@ namespace UI {
         return false;
     }
 
-    void Handler::registerWidget(const std::string &name, std::function<bool(GUI::WidgetBase *)> init)
+    void Handler::registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init)
     {
         assert(!mWidget);
         mWidgets.emplace_back(name, init);
@@ -152,7 +152,7 @@ namespace UI {
     {
     }
 
-    GUI::WidgetBase *Handler::widget() const
+    Widgets::WidgetBase *Handler::widget() const
     {
         return mWidget;
     }

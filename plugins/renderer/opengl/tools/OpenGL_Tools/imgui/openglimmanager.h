@@ -11,8 +11,6 @@ namespace Tools {
         ~OpenGLImManager();
 
         virtual void newFrame(float timeSinceLastFrame) override;
-
-        virtual bool render(Render::RenderTarget &target) const override;
     };
 
 }

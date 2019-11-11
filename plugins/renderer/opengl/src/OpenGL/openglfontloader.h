@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/font/font.h"
+#include "fontloader.h"
 
 namespace Engine {
 namespace Render {

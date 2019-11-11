@@ -2,58 +2,44 @@
 
 #include "scenewindow.h"
 
+#include "widgetmanager.h"
+
 #include "Modules/math/vector4.h"
 
 #include "../vertex.h"
 
-#include "Madgine/scene/camera.h"
+#include "../../render/camera.h"
 
 #include "toplevelwindow.h"
 
-#include "../../render/renderwindow.h"
+#include "../../render/rendercontext.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+METATABLE_BEGIN(Engine::Widgets::SceneWindow)
+METATABLE_END(Engine::Widgets::SceneWindow)
 
-METATABLE_BEGIN(Engine::GUI::SceneWindow)
-PROPERTY(Camera, camera, setCamera)
-METATABLE_END(Engine::GUI::SceneWindow)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::SceneWindow, Engine::GUI::WidgetBase)
-SERIALIZETABLE_END(Engine::GUI::SceneWindow)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::SceneWindow)
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
+
     SceneWindow::~SceneWindow()
     {
     }
 
-    void SceneWindow::setCamera(Scene::Camera *camera)
+    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
     {
-        if (camera) {
-            const Engine::Vector3 screenSize = window().getScreenSize();
-            mTarget = window().getRenderer()->createRenderTarget(camera, (getAbsoluteSize() * screenSize).xy());
-        } else {
-            mTarget.reset();
-		}
-    }
-
-    Scene::Camera *SceneWindow::camera()
-    {
-        return mTarget ? mTarget->camera() : nullptr;
-    }
-
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
-    {
-        std::vector<Vertex> result;
+        std::vector<GUI::Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
 
         Vector4 color { 1, 1, 1, 1 };
 
-        uint32_t texId = mTarget ? mTarget->textureId() : 0;
+        const Render::Texture *tex = mTarget ? mTarget->texture() : nullptr;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
@@ -67,7 +53,7 @@ namespace GUI {
         result.push_back({ v, color, { 0, 0 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 1 } });
-        return { { result, { texId } } };
+        return { { result, { tex } } };
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()
@@ -75,14 +61,15 @@ namespace GUI {
         return mTarget.get();
     }
 
-    void SceneWindow::sizeChanged(const Vector3 &pixelSize)
+    void SceneWindow::sizeChanged(const Vector3i &pixelSize)
     {
-        if (mTarget) {
+        if (!mTarget)
+            mTarget = manager().window().getRenderer()->createRenderTexture(pixelSize.xy());
+        else
             mTarget->resize(pixelSize.xy());
-        }
     }
 
-	    WidgetClass SceneWindow::getClass() const
+    WidgetClass SceneWindow::getClass() const
     {
         return WidgetClass::SCENEWINDOW_CLASS;
     }

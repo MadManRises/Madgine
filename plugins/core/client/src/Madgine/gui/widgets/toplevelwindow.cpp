@@ -4,56 +4,39 @@
 
 #include "../../ui/uimanager.h"
 
-#include "bar.h"
-#include "button.h"
-#include "checkbox.h"
-#include "combobox.h"
-#include "image.h"
-#include "label.h"
-#include "scenewindow.h"
-#include "tabwidget.h"
-#include "textbox.h"
-
 #include "../../input/inputhandler.h"
 
 #include "Modules/keyvalue/keyvalueiterate.h"
 
 #include "Interfaces/window/windowapi.h"
 
-#include "../windowoverlay.h"
-
-#include "../../render/renderwindow.h"
+#include "../../render/rendercontext.h"
 
 #include "Modules/generic/transformIt.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
 #include "Modules/debug/profiler/profiler.h"
 
 #include "toolwindow.h"
 
-#include "Modules/serialize/serializetable_impl.h"
-
 #include "Interfaces/exception.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
+#include "Modules/generic/reverseIt.h"
+
+#include "../../render/rendertarget.h"
 
 METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
-READONLY_PROPERTY(Widgets, widgets)
 READONLY_PROPERTY(Components, components)
-MEMBER(mStartupWidget)
 METATABLE_END(Engine::GUI::TopLevelWindow)
 
 RegisterType(Engine::GUI::TopLevelWindow);
-RegisterType(Engine::GUI::TopLevelWindowComponentBase);
 
 SERIALIZETABLE_BEGIN(Engine::GUI::TopLevelWindow)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::GUI::TopLevelWindow::createWidgetClassTuple>)
 FIELD(mComponents)
-FIELD(mStartupWidget)
 SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
-
-
 
 namespace Engine {
 
@@ -75,214 +58,13 @@ namespace GUI {
 
     TopLevelWindow::~TopLevelWindow()
     {
-        assert(mWidgets.empty());
     }
 
-    Vector3 TopLevelWindow::getScreenSize()
+    Rect2i TopLevelWindow::getScreenSpace()
     {
         if (!mWindow)
-            return { 0, 0, 1.0f };
-        return { (float)mWindow->renderWidth(), (float)mWindow->renderHeight(), 1.0f };
-    }
-
-    std::pair<Vector3, Vector3> TopLevelWindow::getAvailableScreenSpace()
-    {
-        Vector3 size = getScreenSize();
-        Vector3 pos = Vector3::ZERO;
-        for (WindowOverlay *overlay : mOverlays)
-            overlay->calculateAvailableScreenSpace(mWindow, pos, size);
-        return std::make_pair(pos, size);
-    }
-
-    WidgetBase *TopLevelWindow::createTopLevelWidget(const std::string &name)
-    {
-        std::unique_ptr<WidgetBase> w = createWidget(name);
-        return mTopLevelWidgets.emplace_back(std::move(w)).get();
-    }
-
-    Bar *TopLevelWindow::createTopLevelBar(const std::string &name)
-    {
-        std::unique_ptr<Bar> p = createBar(name);
-        Bar *b = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return b;
-    }
-
-    Button *TopLevelWindow::createTopLevelButton(const std::string &name)
-    {
-        std::unique_ptr<Button> p = createButton(name);
-        Button *b = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return b;
-    }
-
-    Checkbox *TopLevelWindow::createTopLevelCheckbox(const std::string &name)
-    {
-        std::unique_ptr<Checkbox> p = createCheckbox(name);
-        Checkbox *c = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return c;
-    }
-
-    Combobox *TopLevelWindow::createTopLevelCombobox(const std::string &name)
-    {
-        std::unique_ptr<Combobox> p = createCombobox(name);
-        Combobox *c = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return c;
-    }
-
-    Image *TopLevelWindow::createTopLevelImage(const std::string &name)
-    {
-        std::unique_ptr<Image> p = createImage(name);
-        Image *i = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return i;
-    }
-
-    Label *TopLevelWindow::createTopLevelLabel(const std::string &name)
-    {
-        std::unique_ptr<Label> p = createLabel(name);
-        Label *l = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return l;
-    }
-
-    SceneWindow *TopLevelWindow::createTopLevelSceneWindow(const std::string &name)
-    {
-        std::unique_ptr<SceneWindow> p = createSceneWindow(name);
-        SceneWindow *s = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return s;
-    }
-
-    TabWidget *TopLevelWindow::createTopLevelTabWidget(const std::string &name)
-    {
-        std::unique_ptr<TabWidget> p = createTabWidget(name);
-        TabWidget *t = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return t;
-    }
-
-    Textbox *TopLevelWindow::createTopLevelTextbox(const std::string &name)
-    {
-        std::unique_ptr<Textbox> p = createTextbox(name);
-        Textbox *t = p.get();
-        mTopLevelWidgets.emplace_back(std::move(p));
-        return t;
-    }
-
-    std::unique_ptr<WidgetBase> TopLevelWindow::createWidgetClass(const std::string &name, WidgetClass _class)
-    {
-        switch (_class) {
-        case WidgetClass::WIDGET_CLASS:
-            return createWidget(name);
-        case WidgetClass::BAR_CLASS:
-            return createBar(name);
-        case WidgetClass::CHECKBOX_CLASS:
-            return createCheckbox(name);
-        case WidgetClass::LABEL_CLASS:
-            return createLabel(name);
-        case WidgetClass::TABWIDGET_CLASS:
-            return createTabWidget(name);
-        case WidgetClass::BUTTON_CLASS:
-            return createButton(name);
-        case WidgetClass::COMBOBOX_CLASS:
-            return createCombobox(name);
-        case WidgetClass::TEXTBOX_CLASS:
-            return createTextbox(name);
-        case WidgetClass::SCENEWINDOW_CLASS:
-            return createSceneWindow(name);
-        case WidgetClass::IMAGE_CLASS:
-            return createImage(name);
-        default:
-            std::terminate();
-        }
-    }
-
-    std::tuple<std::unique_ptr<WidgetBase>> Engine::GUI::TopLevelWindow::createWidgetClassTuple(const std::string &name, WidgetClass _class)
-    {
-        return { createWidgetClass(name, _class) };
-    }
-
-    std::unique_ptr<WidgetBase> TopLevelWindow::createWidget(const std::string &name)
-    {
-        std::unique_ptr<WidgetBase> w = std::make_unique<WidgetBase>(name, *this);
-        w->hide();
-        w->updateGeometry(getScreenSize());
-        return w;
-    }
-
-    std::unique_ptr<Bar> TopLevelWindow::createBar(const std::string &name)
-    {
-        std::unique_ptr<Bar> b = std::make_unique<Bar>(name, *this);
-        b->hide();
-        b->updateGeometry(getScreenSize());
-        return b;
-    }
-
-    std::unique_ptr<Button> TopLevelWindow::createButton(const std::string &name)
-    {
-        std::unique_ptr<Button> b = std::make_unique<Button>(name, *this);
-        b->hide();
-        b->updateGeometry(getScreenSize());
-        return b;
-    }
-
-    std::unique_ptr<Checkbox> TopLevelWindow::createCheckbox(const std::string &name)
-    {
-        std::unique_ptr<Checkbox> c = std::make_unique<Checkbox>(name, *this);
-        c->hide();
-        c->updateGeometry(getScreenSize());
-        return c;
-    }
-
-    std::unique_ptr<Combobox> TopLevelWindow::createCombobox(const std::string &name)
-    {
-        std::unique_ptr<Combobox> c = std::make_unique<Combobox>(name, *this);
-        c->hide();
-        c->updateGeometry(getScreenSize());
-        return c;
-    }
-
-    std::unique_ptr<Image> TopLevelWindow::createImage(const std::string &name)
-    {
-        std::unique_ptr<Image> i = std::make_unique<Image>(name, *this);
-        i->hide();
-        i->updateGeometry(getScreenSize());
-        return i;
-    }
-
-    std::unique_ptr<Label> TopLevelWindow::createLabel(const std::string &name)
-    {
-        std::unique_ptr<Label> l = std::make_unique<Label>(name, *this);
-        l->hide();
-        l->updateGeometry(getScreenSize());
-        return l;
-    }
-
-    std::unique_ptr<SceneWindow> TopLevelWindow::createSceneWindow(const std::string &name)
-    {
-        std::unique_ptr<SceneWindow> s = std::make_unique<SceneWindow>(name, *this);
-        s->hide();
-        s->updateGeometry(getScreenSize());
-        return s;
-    }
-
-    std::unique_ptr<TabWidget> TopLevelWindow::createTabWidget(const std::string &name)
-    {
-        std::unique_ptr<TabWidget> t = std::make_unique<TabWidget>(name, *this);
-        t->hide();
-        t->updateGeometry(getScreenSize());
-        return t;
-    }
-
-    std::unique_ptr<Textbox> TopLevelWindow::createTextbox(const std::string &name)
-    {
-        std::unique_ptr<Textbox> t = std::make_unique<Textbox>(name, *this);
-        t->hide();
-        t->updateGeometry(getScreenSize());
-        return t;
+            return { { 0, 0 }, { 0, 0 } };
+        return { { mWindow->renderX(), mWindow->renderY() }, { mWindow->renderWidth(), mWindow->renderHeight() } };
     }
 
     const MadgineObject *TopLevelWindow::parent() const
@@ -303,7 +85,8 @@ namespace GUI {
             mInputHandlerSelector.emplace(*this, mWindow, this, 0);
         }
 
-        mRenderWindow.emplace(mWindow, this, nullptr);
+        mRenderContext.emplace();
+        mRenderWindow = (*mRenderContext)->createRenderWindow(mWindow);
         addFrameListener(this);
 
         //WidgetBase *loading = createTopLevelImage("Loading");
@@ -409,6 +192,9 @@ namespace GUI {
             bool result = comp->callInit();
             assert(result);
         }
+
+		applyClientSpaceResize();
+
         return true;
     }
 
@@ -420,9 +206,8 @@ namespace GUI {
 
         removeFrameListener(this);
 
-        mTopLevelWidgets.clear();
-
-        mRenderWindow->reset();
+        mRenderWindow.reset();
+        mRenderContext.reset();
 
         mInputHandlerSelector.reset();
 
@@ -449,21 +234,10 @@ namespace GUI {
         return mExternalInput ? mExternalInput : *mInputHandlerSelector;
     }
 
-    void TopLevelWindow::addOverlay(WindowOverlay *overlay)
-    {
-        mOverlays.push_back(overlay);
-    }
-
-    void TopLevelWindow::renderOverlays()
-    {
-        for (WindowOverlay *overlay : mOverlays)
-            overlay->render();
-    }
-
     bool TopLevelWindow::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        for (WindowOverlay *overlay : mOverlays) {
-            if (overlay->injectKeyPress(arg))
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (comp->injectKeyPress(arg))
                 return true;
         }
         return false;
@@ -471,135 +245,42 @@ namespace GUI {
 
     bool TopLevelWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
     {
-        for (WindowOverlay *overlay : mOverlays) {
-            if (overlay->injectKeyRelease(arg))
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (comp->injectKeyRelease(arg))
                 return true;
         }
         return false;
     }
 
-    static bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, const Vector3 &screenSize, const Vector3 &screenPos, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
-    {
-        if (!w->mVisible)
-            return false;
-
-        if (!w->containsPoint(arg.position, screenSize, screenPos))
-            return false;
-
-        for (WidgetBase *c : w->children()) {
-            if (propagateInput(c, arg, screenSize, screenPos, f))
-                return true;
-        }
-        return (w->*f)(arg);
-    }
-
     bool TopLevelWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
-        for (WindowOverlay *overlay : mOverlays) {
-            if (overlay->injectPointerPress(arg))
+
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (comp->injectPointerPress(arg))
                 return true;
         }
 
-        auto [screenPos, screenSize] = getAvailableScreenSpace();
-
-        Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
-
-        for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, modArgs, screenSize, screenPos, &WidgetBase::injectPointerPress))
-                return true;
-        }
-
-        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, modArgs, screenSize, screenPos, &WidgetBase::injectPointerPress))
-                return true;
-        }
         return false;
     }
 
     bool TopLevelWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
-        for (WindowOverlay *overlay : mOverlays) {
-            if (overlay->injectPointerRelease(arg))
+
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (comp->injectPointerRelease(arg))
                 return true;
         }
 
-        auto [screenPos, screenSize] = getAvailableScreenSpace();
-
-        Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
-
-        for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, modArgs, screenSize, screenPos, &WidgetBase::injectPointerRelease))
-                return true;
-        }
-
-        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, modArgs, screenSize, screenPos, &WidgetBase::injectPointerRelease))
-                return true;
-        }
         return false;
-    }
-
-    static WidgetBase *getHoveredWidgetUp(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
-    {
-        if (!current) {
-            return nullptr;
-        } else if (!current->mVisible || !current->containsPoint(pos, screenSize)) {
-            return getHoveredWidgetUp(pos, screenSize, current->getParent());
-        } else {
-            return current;
-        }
-    }
-
-    WidgetBase *TopLevelWindow::getHoveredWidgetDown(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
-    {
-        static auto &logOnce = LOG_WARNING("Handle modal widgets for hover");
-
-        const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
-
-        for (WidgetBase *w : widgets) {
-            if (w->mVisible && w->containsPoint(pos, screenSize)) {
-                return getHoveredWidgetDown(pos, screenSize, w);
-            }
-        }
-        return current;
-    }
-
-    WidgetBase *TopLevelWindow::getHoveredWidget(const Vector2 &pos, const Vector3 &screenSize, WidgetBase *current)
-    {
-        return getHoveredWidgetDown(pos, screenSize, getHoveredWidgetUp(pos, screenSize, current));
     }
 
     bool TopLevelWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-        auto [screenPos, screenSize] = getAvailableScreenSpace();
 
-        for (WindowOverlay *overlay : mOverlays) {
-            if (overlay->injectPointerMove(arg))
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (comp->injectPointerMove(arg))
                 return true;
         }
-
-        Vector2 mouse = arg.position - screenPos.xy() - Vector2 { static_cast<float>(mWindow->renderX()), static_cast<float>(mWindow->renderY()) };
-
-        if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
-            mHoveredWidget = nullptr;
-
-        WidgetBase *hoveredWidget = getHoveredWidget(mouse, screenSize, mHoveredWidget);
-
-        if (mHoveredWidget != hoveredWidget) {
-
-            if (mHoveredWidget)
-                mHoveredWidget->injectPointerLeave(arg);
-
-            mHoveredWidget = hoveredWidget;
-
-            if (mHoveredWidget)
-                mHoveredWidget->injectPointerEnter(arg);
-        }
-
-        if (mHoveredWidget)
-            return mHoveredWidget->injectPointerMove(arg);
 
         return false;
     }
@@ -609,14 +290,9 @@ namespace GUI {
         return mWindow;
     }
 
-    WidgetBase *TopLevelWindow::currentRoot()
+    Render::RenderContext *TopLevelWindow::getRenderer()
     {
-        return mCurrentRoot;
-    }
-
-    Render::RenderWindow *TopLevelWindow::getRenderer()
-    {
-        return mRenderWindow->get();
+        return mRenderContext->get();
     }
 
     void TopLevelWindow::onClose()
@@ -633,168 +309,54 @@ namespace GUI {
     void TopLevelWindow::onResize(size_t width, size_t height)
     {
         input()->onResize(width, height);
-        for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
-            topLevel->screenSizeChanged({ static_cast<float>(width), static_cast<float>(height), 1.0f });
-        }
+        applyClientSpaceResize();
     }
 
-    void TopLevelWindow::calculateWindowGeometries()
+    void TopLevelWindow::applyClientSpaceResize(TopLevelWindowComponentBase *component)
     {
-        for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
-            topLevel->updateGeometry(getScreenSize());
-        }
-    }
+        Rect2i space;
+        if (!component)
+			space = { { 0, 0 }, { mWindow->renderWidth(), mWindow->renderHeight() } };
+        else
+            space = component->getChildClientSpace();
 
-    void TopLevelWindow::destroyTopLevel(WidgetBase *w)
-    {
-        auto it = std::find_if(mTopLevelWidgets.begin(), mTopLevelWidgets.end(), [=](const std::unique_ptr<WidgetBase> &ptr) { return ptr.get() == w; });
-        assert(it != mTopLevelWidgets.end());
-        mTopLevelWidgets.erase(it);
-    }
-
-    void TopLevelWindow::clear()
-    {
-        mTopLevelWidgets.clear();
-    }
-
-    bool TopLevelWindow::isHovered(WidgetBase *w)
-    {
-        WidgetBase *hovered = mHoveredWidget;
-        while (hovered) {
-            if (hovered == w)
-                return true;
-            hovered = hovered->getParent();
-        }
-        return false;
-    }
-
-    WidgetBase *TopLevelWindow::hoveredWidget()
-    {
-        return mHoveredWidget;
-    }
-
-    WidgetBase *TopLevelWindow::getWidget(const std::string &name)
-    {
-        auto it = mWidgets.find(name);
-        if (it == mWidgets.end())
-            return nullptr;
-        return it->second;
-    }
-
-    void TopLevelWindow::registerWidget(WidgetBase *w)
-    {
-        if (!w->getName().empty()) {
-            mWidgets.try_emplace(w->getName(), w);
-        }
-    }
-
-    void TopLevelWindow::updateWidget(WidgetBase *w, const std::string &newName)
-    {
-        unregisterWidget(w);
-        if (!newName.empty()) {
-            mWidgets.try_emplace(newName, w);
-        }
-    }
-
-    void TopLevelWindow::unregisterWidget(WidgetBase *w)
-    {
-        if (!w->getName().empty()) {
-            auto it = mWidgets.find(w->getName());
-            assert(it != mWidgets.end());
-            if (it->second == w) {
-                mWidgets.erase(it);
+        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+            if (component) {
+                if (component == comp) {
+                    component = nullptr;                    
+                }
+            } else {
+                comp->mClientSpace = space;
+                space = comp->getChildClientSpace();
             }
         }
     }
 
-    void TopLevelWindow::swapCurrentRoot(WidgetBase *newRoot)
-    {
-        if (mCurrentRoot)
-            mCurrentRoot->hide();
-        mCurrentRoot = newRoot;
-        newRoot->show();
-    }
-
-    void TopLevelWindow::openModalWidget(WidgetBase *widget)
-    {
-        widget->show();
-        mModalWidgetList.emplace(mModalWidgetList.begin(), widget);
-    }
-
-    void TopLevelWindow::openWidget(WidgetBase *widget)
-    {
-        widget->show();
-    }
-
-    void TopLevelWindow::closeModalWidget(WidgetBase *widget)
-    {
-        assert(mModalWidgetList.size() > 0 && mModalWidgetList.front() == widget);
-        widget->hide();
-        mModalWidgetList.erase(mModalWidgetList.begin());
-    }
-
-    void TopLevelWindow::closeWidget(WidgetBase *widget)
-    {
-        widget->hide();
-    }
-
     bool TopLevelWindow::frameStarted(std::chrono::microseconds)
     {
-        (*mRenderWindow)->beginFrame();
         return true;
     }
 
-    bool TopLevelWindow::frameRenderingQueued(std::chrono::microseconds, Scene::ContextMask)
+    bool TopLevelWindow::frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask)
     {
-        (*mRenderWindow)->render();
-        Window::sUpdate();
+
         return mWindow;
     }
 
     bool TopLevelWindow::frameEnded(std::chrono::microseconds)
     {
-        PROFILE();
-        renderOverlays();
-        (*mRenderWindow)->endFrame();
-        return true;
-    }
-
-    TopLevelWindowComponentBase::TopLevelWindowComponentBase(TopLevelWindow &window)
-        : mWindow(window)
-    {
-    }
-
-    TopLevelWindow &TopLevelWindowComponentBase::window() const
-    {
+        (*mRenderContext)->render();
+        Window::sUpdate();
         return mWindow;
     }
 
-    const MadgineObject *TopLevelWindowComponentBase::parent() const
-    {
-        return &mWindow;
-    }
-
-    TopLevelWindowComponentBase &Engine::GUI::TopLevelWindow::getWindowComponent(size_t i, bool init)
+    TopLevelWindowComponentBase &TopLevelWindow::getWindowComponent(size_t i, bool init)
     {
         TopLevelWindowComponentBase &component = mComponents.get(i);
         if (init) {
             component.callInit();
         }
         return component.getSelf(init);
-    }
-
-    TopLevelWindowComponentBase &TopLevelWindowComponentBase::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
-    void TopLevelWindow::openStartupWidget()
-    {
-        if (mStartupWidget)
-            swapCurrentRoot(mStartupWidget);
     }
 
     void TopLevelWindow::addFrameListener(Threading::FrameListener *listener)
@@ -820,6 +382,11 @@ namespace GUI {
     void TopLevelWindow::shutdown()
     {
         mLoop.shutdown();
+    }
+
+    Render::RenderTarget *TopLevelWindow::getRenderWindow()
+    {
+        return mRenderWindow.get();
     }
 
 }

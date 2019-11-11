@@ -26,7 +26,7 @@ namespace Input {
         bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id) override;
 
         bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
-        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
 
         void onResize(size_t width, size_t height) override;
 

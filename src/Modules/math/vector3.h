@@ -27,8 +27,9 @@ THE SOFTWARE.
 */
 #pragma once
 
-#include "vector2.h"
 #include "common.h"
+#include "vector2.h"
+#include "vector3i.h"
 
 namespace Engine {
 /** Standard 3-dimensional vector.
@@ -72,6 +73,13 @@ public:
         z = static_cast<float>(afCoordinate[2]);
     }
 
+    Vector3(const Vector3i &v)
+    {
+        x = static_cast<float>(v[0]);
+        y = static_cast<float>(v[1]);
+        z = static_cast<float>(v[2]);
+    }
+
     explicit Vector3(float *const r)
         : x(r[0])
         , y(r[1])
@@ -97,7 +105,7 @@ public:
 		*/
     Vector2 xy() const
     {
-        return Vector2(x, y);
+        return { x, y };
     }
 
     /** Exchange the contents of this vector with another.
@@ -746,6 +754,11 @@ public:
         if (absy > absz)
             return y > 0 ? UNIT_Y : NEGATIVE_UNIT_Y;
         return z > 0 ? UNIT_Z : NEGATIVE_UNIT_Z;
+    }
+
+    constexpr Vector3i floor() const
+    {
+        return { static_cast<int>(x), static_cast<int>(y), static_cast<int>(z) };
     }
 
     // special points

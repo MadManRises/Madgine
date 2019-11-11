@@ -1,4 +1,6 @@
 #include "Madgine/clientlib.h"
+#include "Madgine/scenelib.h"
+#include "Madgine/scenerendererlib.h"
 
 #include "mainmenuhandler.h"
 
@@ -33,7 +35,7 @@ RegisterType(ClickBrick::UI::MainMenuHandler)
             return "MainMenuHandler";
         }
 
-        void ClickBrick::UI::MainMenuHandler::setWidget(Engine::GUI::WidgetBase *w)
+        void ClickBrick::UI::MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
         {
             if (widget()) {
                 mStartGameSlot.disconnectAll();

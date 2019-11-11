@@ -1,28 +1,59 @@
 #pragma once
 
 #include "../math/vector4.h"
+#include "Modules/generic/compound.h"
 
 namespace Engine {
 namespace Render {
 
-    struct Vertex {
+    struct VertexPos_3D {
+        using ctor = Vector3;
         Vector3 mPos;
-        Vector4 mColor;
+    };
+
+    struct VertexPos_4D {
+        using ctor = Vector4;
+        Vector4 mPos;
+    };
+
+    struct VertexPos2 {
+        using ctor = Vector2;
+        Vector2 mPos2;
+    };
+
+    struct VertexNormal {
+        using ctor = Vector3;
         Vector3 mNormal;
     };
 
-    struct Vertex2 {
-        Vector3 mPos;
-        Vector2 mPos2;
+    struct VertexColor {
+        using ctor = Vector4;
         Vector4 mColor;
+    };
+
+    struct VertexUV {
+        using ctor = Vector2;
         Vector2 mUV;
     };
 
-    struct Vertex3 {
-        Vector3 mPos;        
-		Vector3 mNormal;
-        Vector2 mUV;
-    };
+    //
+
+    using Vertex = Compound<
+        VertexPos_3D,
+        VertexColor,
+        VertexNormal>;
+
+    using Vertex2 = Compound<
+        VertexPos_3D,
+        VertexPos2,
+        VertexColor,
+        VertexUV>;
+
+    using Vertex3 = Compound<
+        VertexPos_3D,
+        VertexNormal,
+        VertexUV>;
+
 
 }
 }

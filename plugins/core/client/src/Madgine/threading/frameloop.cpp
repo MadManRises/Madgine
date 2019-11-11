@@ -59,7 +59,7 @@ namespace Threading {
 		return true;
     }
 
-    bool FrameLoop::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool FrameLoop::sendFrameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         PROFILE();        
         std::vector<FrameListener*> listeners = mListeners;
@@ -80,7 +80,7 @@ namespace Threading {
         return true;
     }
 
-    bool FrameLoop::sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool FrameLoop::sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         PROFILE();        
         for (FrameListener *listener : mListeners)

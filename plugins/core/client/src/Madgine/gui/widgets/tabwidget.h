@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	namespace GUI
+namespace Widgets
 	{
 		class TabWidget : public Widget<TabWidget>
 		{

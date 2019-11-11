@@ -15,7 +15,7 @@ namespace UI {
 
         virtual const char *key() const override;
 
-        virtual void setWidget(Engine::GUI::WidgetBase *w) override;
+        virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
         void restartGame();
 
@@ -24,7 +24,7 @@ namespace UI {
     private:
         Engine::Threading::Slot<&GameOverHandler::restartGame> mRestartGameSlot;
 
-        Engine::UI::WidgetPtr<Engine::GUI::Label> mScoreLabel;
+        Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
     };
 
 }

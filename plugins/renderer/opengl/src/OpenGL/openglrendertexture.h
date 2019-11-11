@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/render/rendertarget.h"
+#include "openglrendertarget.h"
 #include "Modules/math/matrix4.h"
 #include "util/openglprogram.h"
 #include "util/openglbuffer.h"
@@ -11,37 +11,26 @@
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLRenderTexture : RenderTarget {
+    struct MADGINE_OPENGL_EXPORT OpenGLRenderTexture : OpenGLRenderTarget {
 
-        OpenGLRenderTexture(OpenGLRenderWindow *window, Scene::Camera *camera, const Vector2 &size);
+        OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size);
         ~OpenGLRenderTexture();
 
-        uint32_t textureId() const override;
+        bool resize(const Vector2i &size) override;
+        Vector2i size() const override;
 
-        bool resize(const Vector2 &size) override;
+        virtual void beginFrame() override;
+        virtual void endFrame() override;
 
-        virtual void render() override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0) override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0, unsigned int textureId = 0) override;
-        virtual void renderInstancedMesh(RenderPassFlags flags, void *meshData, const std::vector<Matrix4> &transforms) override;
-        virtual void clearDepthBuffer() override;
-
-        const OpenGLTexture &texture() const;
-
-    protected:
-        void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0);
-
-        void renderMesh(OpenGLMeshData *mesh, const Matrix4 &transformMatrix = Matrix4::IDENTITY);
+        virtual const OpenGLTexture *texture() const override;
 
     private:
         GLuint mFramebuffer;
         GLuint mDepthRenderbuffer;
 
-        OpenGLProgram mProgram;
-
         OpenGLTexture mTexture;
 
-        OpenGLBuffer mTempBuffer;
+		Vector2i mSize;
     };
 
 }

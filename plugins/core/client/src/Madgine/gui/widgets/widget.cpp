@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "toplevelwindow.h"
+#include "widgetmanager.h"
 
 #include "../widgetnames.h"
 
@@ -26,55 +26,55 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/font/font.h"
+#include "font.h"
 
-METATABLE_BEGIN(Engine::GUI::WidgetBase)
+METATABLE_BEGIN(Engine::Widgets::WidgetBase)
 READONLY_PROPERTY(Widgets, children)
 READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
-METATABLE_END(Engine::GUI::WidgetBase)
+METATABLE_END(Engine::Widgets::WidgetBase)
 
-RegisterType(Engine::GUI::WidgetBase);
+RegisterType(Engine::Widgets::WidgetBase);
 
-SERIALIZETABLE_BEGIN(Engine::GUI::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::GUI::WidgetBase::createWidgetClassTuple>)
+SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::createWidgetClassTuple>)
 FIELD(mPos)
 FIELD(mSize)
 FIELD(mName)
-SERIALIZETABLE_END(Engine::GUI::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::WidgetBase)
 
 namespace Engine {
 
-namespace GUI {
+namespace Widgets {
 
     WidgetBase::WidgetBase(const std::string &name, WidgetBase *parent)
         : mName(name)
         , mParent(parent)
-        , mWindow(parent->window())
+        , mManager(parent->manager())
     {
-        mWindow.registerWidget(this);
+        mManager.registerWidget(this);
     }
 
-    WidgetBase::WidgetBase(const std::string &name, TopLevelWindow &window)
+    WidgetBase::WidgetBase(const std::string &name, WidgetManager &manager)
         : mName(name)
         , mParent(nullptr)
-        , mWindow(window)
+        , mManager(manager)
     {
-        mWindow.registerWidget(this);
+        mManager.registerWidget(this);
     }
 
     WidgetBase::~WidgetBase()
     {
-        mWindow.unregisterWidget(this);
+        mManager.unregisterWidget(this);
     }
 
     void WidgetBase::setSize(const Matrix3 &size)
     {
         mSize = size;
         if (mParent)
-            updateGeometry(window().getScreenSize(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(window().getScreenSize(), Matrix3::IDENTITY);
+            updateGeometry(manager().getScreenSpace(), Matrix3::IDENTITY);
     }
 
     const Matrix3 &WidgetBase::getSize()
@@ -86,9 +86,9 @@ namespace GUI {
     {
         mPos = pos;
         if (mParent)
-            updateGeometry(window().getScreenSize(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(window().getScreenSize(), Matrix3::IDENTITY);
+            updateGeometry(manager().getScreenSpace(), Matrix3::IDENTITY);
     }
 
     const Matrix3 &WidgetBase::getPos() const
@@ -108,34 +108,34 @@ namespace GUI {
 
     Vector3 WidgetBase::getActualSize() const
     {
-        auto [_, screenSize] = mWindow.getAvailableScreenSpace();
-        return mAbsoluteSize * screenSize;
+        auto screenSize = mManager.getScreenSpace().mSize;
+        return mAbsoluteSize * Vector3 { screenSize, 1.0f };
     }
 
     Vector3 WidgetBase::getActualPosition() const
     {
-        auto [screenPos, screenSize] = mWindow.getAvailableScreenSpace();
-        return mAbsolutePos * screenSize + screenPos;
+        Rect2i screenSpace = mManager.getScreenSpace();
+        return mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
     }
 
-    void WidgetBase::updateGeometry(const Vector3 &screenSize, const Matrix3 &parentSize, const Matrix3 &parentPos)
+    void WidgetBase::updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize, const Matrix3 &parentPos)
     {
         mAbsoluteSize = mSize * parentSize;
         mAbsolutePos = mPos * parentSize + parentPos;
 
-        sizeChanged(mAbsoluteSize * screenSize);
+        sizeChanged((mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f }).floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->updateGeometry(screenSize, getAbsoluteSize(), getAbsolutePosition());
+            child->updateGeometry(screenSpace, getAbsoluteSize(), getAbsolutePosition());
         }
     }
 
-    void WidgetBase::screenSizeChanged(const Vector3 &screenSize)
+    void WidgetBase::screenSpaceChanged(const Rect2i &screenSpace)
     {
-        sizeChanged(mAbsoluteSize * screenSize);
+        sizeChanged((mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f }).floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->screenSizeChanged(screenSize);
+            child->screenSpaceChanged(screenSpace);
         }
     }
 
@@ -149,7 +149,7 @@ namespace GUI {
         if (mParent)
             mParent->destroyChild(this);
         else
-            mWindow.destroyTopLevel(this);
+            mManager.destroyTopLevel(this);
     }
 
     const std::string &WidgetBase::getName() const
@@ -157,9 +157,9 @@ namespace GUI {
         return mName;
     }
 
-    void Engine::GUI::WidgetBase::setName(const std::string &name)
+    void WidgetBase::setName(const std::string &name)
     {
-        mWindow.updateWidget(this, name);
+        mManager.updateWidget(this, name);
         mName = name;
     }
 
@@ -197,7 +197,7 @@ namespace GUI {
     WidgetBase *WidgetBase::createChildWidget(const std::string &name)
     {
         WidgetBase *w = mChildren.emplace_back(createWidget(name)).get();
-        w->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        w->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return w;
     }
 
@@ -206,7 +206,7 @@ namespace GUI {
         std::unique_ptr<Bar> p = createBar(name);
         Bar *b = p.get();
         mChildren.emplace_back(std::move(p));
-        b->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        b->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return b;
     }
 
@@ -215,7 +215,7 @@ namespace GUI {
         std::unique_ptr<Button> p = createButton(name);
         Button *b = p.get();
         mChildren.emplace_back(std::move(p));
-        b->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        b->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return b;
     }
 
@@ -224,7 +224,7 @@ namespace GUI {
         std::unique_ptr<Checkbox> p = createCheckbox(name);
         Checkbox *c = p.get();
         mChildren.emplace_back(std::move(p));
-        c->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        c->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return c;
     }
 
@@ -233,7 +233,7 @@ namespace GUI {
         std::unique_ptr<Combobox> p = createCombobox(name);
         Combobox *c = p.get();
         mChildren.emplace_back(std::move(p));
-        c->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        c->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return c;
     }
 
@@ -242,7 +242,7 @@ namespace GUI {
         std::unique_ptr<Label> p = createLabel(name);
         Label *l = p.get();
         mChildren.emplace_back(std::move(p));
-        l->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        l->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return l;
     }
 
@@ -251,7 +251,7 @@ namespace GUI {
         std::unique_ptr<SceneWindow> p = createSceneWindow(name);
         SceneWindow *s = p.get();
         mChildren.emplace_back(std::move(p));
-        s->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        s->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return s;
     }
 
@@ -260,7 +260,7 @@ namespace GUI {
         std::unique_ptr<TabWidget> p = createTabWidget(name);
         TabWidget *t = p.get();
         mChildren.emplace_back(std::move(p));
-        t->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        t->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return t;
     }
 
@@ -269,7 +269,7 @@ namespace GUI {
         std::unique_ptr<Textbox> p = createTextbox(name);
         Textbox *t = p.get();
         mChildren.emplace_back(std::move(p));
-        t->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        t->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return t;
     }
 
@@ -278,7 +278,7 @@ namespace GUI {
         std::unique_ptr<Image> p = createImage(name);
         Image *i = p.get();
         mChildren.emplace_back(std::move(p));
-        i->updateGeometry(window().getScreenSize(), getAbsoluteSize());
+        i->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return i;
     }
 
@@ -287,9 +287,9 @@ namespace GUI {
         return mParent ? mParent->depth() + 1 : 0;
     }
 
-    TopLevelWindow &WidgetBase::window()
+    WidgetManager &WidgetBase::manager()
     {
-        return mWindow;
+        return mManager;
     }
 
     void WidgetBase::destroyChild(WidgetBase *w)
@@ -333,7 +333,7 @@ namespace GUI {
         auto it = std::find_if(mParent->mChildren.begin(), mParent->mChildren.end(), [this](std::unique_ptr<WidgetBase> &p) { return p.get() == this; });
         parent->mChildren.emplace_back(mParent->mChildren.extract(it));
         mParent = parent;
-        updateGeometry(window().getScreenSize(), parent->getAbsoluteSize());
+        updateGeometry(mManager.getScreenSpace(), parent->getAbsoluteSize());
     }
 
     WidgetBase *WidgetBase::getParent() const
@@ -396,14 +396,14 @@ namespace GUI {
         return mPointerLeaveSignal;
     }
 
-    bool WidgetBase::containsPoint(const Vector2 &point, const Vector3 &screenSize, const Vector3 &screenPos, float extend) const
+    bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const
     {
-        Vector3 min = mAbsolutePos * screenSize + screenPos - extend;
-        Vector3 max = mAbsoluteSize * screenSize + min + 2 * extend;
+        Vector3 min = mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f } - extend;
+        Vector3 max = mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f } + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
     {
         return {};
     }
@@ -445,7 +445,7 @@ namespace GUI {
             std::terminate();
         }
     }
-    std::tuple<std::unique_ptr<WidgetBase>> Engine::GUI::WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)
+    std::tuple<std::unique_ptr<WidgetBase>> WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)
     {
         return {
             createWidgetClass(name, _class)
@@ -491,7 +491,7 @@ namespace GUI {
     {
         return std::make_unique<Textbox>(name, this);
     }
-    void WidgetBase::sizeChanged(const Vector3 &pixelSize)
+    void WidgetBase::sizeChanged(const Vector3i &pixelSize)
     {
     }
 
@@ -512,9 +512,9 @@ namespace GUI {
         of.write(getClass(), "type");
     }
 
-    std::pair<std::vector<Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
-        std::vector<Vertex> result;
+        std::vector<GUI::Vertex> result;
 
         size_t textLen = text.size();
 
@@ -583,7 +583,7 @@ namespace GUI {
 
             cursorX += g.mAdvance / 64.0f * scaleX;
         }
-        return { result, { font->mTextureHandle, Render::TextureFlag_IsDistanceField } };
+        return { result, { font->mTexture, Render::TextureFlag_IsDistanceField } };
     }
 
 }

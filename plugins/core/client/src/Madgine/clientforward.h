@@ -10,25 +10,15 @@ namespace UI {
 }
 
 namespace GUI {
-    class GUISystem;
-    class WidgetBase;
-    class Bar;
-    class Button;
-    class SceneWindow;
-    class Checkbox;
-    class Combobox;
-    class TabWidget;
-    class Textbox;
-    class Label;
-    class Image;
+
     class TopLevelWindow;
     class ToolWindow;
 
-    enum class WidgetClass;
-
     struct WindowOverlay;
+}
 
-    struct Vertex;
+namespace Threading {
+    enum class ContextMask : unsigned int;
 }
 
 namespace Input {
@@ -44,10 +34,33 @@ namespace Input {
 }
 
 namespace Render {
-    class RendererBase;
-    class RenderWindow;
+    struct RendererBase;
+    struct RenderContext;
     struct RenderTarget;
     struct RenderPass;
+    struct Camera;
+}
+
+namespace Resources {
+    struct MeshData;
+}
+
+namespace Widgets {
+    struct WidgetManager;
+
+	class WidgetBase;
+    class Bar;
+    class Button;
+    class SceneWindow;
+    class Checkbox;
+    class Combobox;
+    class TabWidget;
+    class Textbox;
+    class Label;
+    class Image;
+
+    enum class WidgetClass;
+
 }
 
 }

@@ -28,8 +28,8 @@ namespace UI {
         void showCursor();
         bool isCursorVisible() const;
 
-        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-        bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
+        bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
 
         //Scene::ContextMask currentContext();
 

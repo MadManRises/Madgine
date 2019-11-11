@@ -57,24 +57,6 @@ namespace Engine
 			return mApp.getGlobalAPIComponent(i, init);
 		}
 
-		Scene::SceneComponentBase& GlobalAPIBase::getSceneComponent(size_t i, bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-			}
-			return mApp.getSceneComponent(i, init);
-		}
-
-		Scene::SceneManager& GlobalAPIBase::sceneMgr(bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-			}
-			return mApp.sceneMgr(init);
-		}
-
 		/*Scripting::GlobalScopeBase& GlobalAPIBase::globalScope()
 		{
 			return mApp;

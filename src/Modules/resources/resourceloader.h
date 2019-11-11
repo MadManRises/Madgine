@@ -28,11 +28,22 @@ namespace Resources {
                 return nullptr;
         }
 
-        virtual std::shared_ptr<Data> loadImpl(ResourceType *res) = 0;
-        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path) override
+		ResourceType *getOrCreate(const std::string &name)
         {
-            std::string name = path.stem();
-            auto pib = mResources.try_emplace(name, this, path);
+            return &mResources.try_emplace(name, this).first->second;
+        }
+
+        ResourceType *getOrCreateManual(const std::string &name, std::function<std::shared_ptr<Data>(ResourceType *)> ctor)
+        {
+            return &mResources.try_emplace(name, ctor).first->second;
+        }
+
+        virtual std::shared_ptr<Data>
+        loadImpl(ResourceType *res) = 0;
+        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) override
+        {
+            std::string actualName = name.empty() ? path.stem() : name;
+            auto pib = mResources.try_emplace(actualName, this, path);
 
             if (pib.second)
                 this->resourceAdded(&pib.first->second);
@@ -87,7 +98,7 @@ namespace Resources {
     struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>> {
         using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>>::VirtualUniqueComponentBase;
 
-        static ResourceLoaderImpl<_Data, ResourceKind> &getSingleton()
+        static T &getSingleton()
         {
             static_assert(!std::is_same_v<T, ResourceLoaderImpl<_Data, ResourceKind>>);
             return Resources::ResourceManager::getSingleton().get<T>();
@@ -115,5 +126,4 @@ namespace Resources {
     };
 
 }
-
 }

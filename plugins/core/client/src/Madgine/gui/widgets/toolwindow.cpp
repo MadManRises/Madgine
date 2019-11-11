@@ -8,11 +8,13 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "../../render/renderwindow.h"
+#include "../../render/rendercontext.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
 #include "Madgine/app/application.h"
+
+#include "../../render/rendertarget.h"
 
 namespace Engine {
 
@@ -26,13 +28,11 @@ namespace GUI {
 
         mInputHandlerSelector.emplace(parent, mWindow, &parent, 0);
 
-		mRenderWindow.emplace(mWindow, nullptr, parent.getRenderer());
+        mRenderWindow = parent.getRenderer()->createRenderWindow(mWindow);
     }
 
     ToolWindow::~ToolWindow()
     {
-        mParent.getRenderer()->makeCurrent();
-
         mWindow->removeListener(this);
 
         mWindow->destroy();
@@ -68,21 +68,9 @@ namespace GUI {
         return mWindow;
     }
 
-    Render::RenderWindow *ToolWindow::getRenderer()
+    Render::RenderTarget *ToolWindow::getRenderer()
     {
-        return mRenderWindow->get();
-    }
-
-    void ToolWindow::beginFrame()
-    {
-        (*mRenderWindow)->makeCurrent();
-        mWindow->beginFrame();
-    }
-
-    void ToolWindow::endFrame()
-    {
-        mWindow->endFrame();
-        mParent.getRenderer()->makeCurrent();
+        return mRenderWindow.get();
     }
 
     void ToolWindow::onClose()

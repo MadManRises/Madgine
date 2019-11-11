@@ -1,4 +1,5 @@
 #include "Madgine/clientlib.h"
+#include "Madgine/scenerendererlib.h"
 
 #include "gamemanager.h"
 
@@ -39,6 +40,7 @@ RegisterType(ClickBrick::UI::GameManager)
             , mGameWindow(this, "GameView")
             , mScoreLabel(this, "Score")
             , mLifeLabel(this, "Life")
+            , mSceneRenderer(&mCamera)
         {
         }
 
@@ -54,18 +56,18 @@ RegisterType(ClickBrick::UI::GameManager)
             mCamera.mOrientation = {};
 
             if (mGameWindow) {
-                mGameWindow->setCamera(&mCamera);
+                mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
             }
 
             return GameHandlerBase::init();
         }
 
-        void GameManager::setWidget(Engine::GUI::WidgetBase *w)
+        void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
         {
             GameHandlerBase::setWidget(w);
 
             if (widget()) {
-                mGameWindow->setCamera(&mCamera);
+                mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
             }
         }
 

@@ -35,7 +35,7 @@ namespace Tools {
             std::shared_ptr<Font::Font> font = Render::OpenGLFontLoader::load(fontName, true);
 
             return Im3DFont {
-                font->mTextureHandle,
+                font->mTexture->mTextureHandle,
                 font->mTextureSize,
                 font->mGlyphs.data()
             };
@@ -53,7 +53,7 @@ namespace Tools {
 
         io.DeltaTime = timeSinceLastFrame;
         
-        Vector3 size = mWindow.getScreenSize();
+        Vector2i size = mWindow.getScreenSpace().mSize;
 
         io.BackendPlatformUserData = &mWindow;
 
@@ -62,13 +62,6 @@ namespace Tools {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
         Im3D::NewFrame();
-    }
-
-    bool OpenGLImManager::render(Render::RenderTarget &target) const
-    {
-        Render::OpenGLRenderTexture &texture = static_cast<Render::OpenGLRenderTexture &>(target);
-
-		return ImGui::ImageButton((void *)(intptr_t)texture.texture().handle(), texture.getSize(), { 0, 1 }, { 1, 0 }, 0);
     }
 
 }

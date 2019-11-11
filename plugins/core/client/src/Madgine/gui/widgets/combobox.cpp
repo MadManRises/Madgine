@@ -5,15 +5,15 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::GUI::Combobox)
-METATABLE_END(Engine::GUI::Combobox)
+METATABLE_BEGIN(Engine::Widgets::Combobox)
+METATABLE_END(Engine::Widgets::Combobox)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::GUI::Combobox, Engine::GUI::WidgetBase)
-SERIALIZETABLE_END(Engine::GUI::Combobox)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Combobox, Engine::Widgets::WidgetBase)
+SERIALIZETABLE_END(Engine::Widgets::Combobox)
 
 namespace Engine
 {
-	namespace GUI
+namespace Widgets
 	{
 		void Combobox::addItem(const std::string & text)
 		{

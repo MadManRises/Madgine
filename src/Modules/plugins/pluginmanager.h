@@ -9,8 +9,7 @@
 namespace Engine {
 namespace Plugins {
 
-    class MODULES_EXPORT PluginManager {
-    public:
+    struct MODULES_EXPORT PluginManager {
         static PluginManager &getSingleton();
 
         PluginManager();

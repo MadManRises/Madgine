@@ -16,6 +16,7 @@
 
 #include "Madgine/gui/widgets/toplevelwindow.h"
 #include "Madgine/gui/widgets/widget.h"
+#include "Madgine/gui/widgets/widgetmanager.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -34,6 +35,8 @@
 
 #include "Madgine/gui/widgets/widgetclass.h"
 
+#include "Madgine/gui/widgets/widgetmanager.h"
+
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {
@@ -41,12 +44,14 @@ namespace Tools {
 
     GuiEditor::GuiEditor(ImRoot &root)
         : Tool<GuiEditor>(root)
-        , mWindow(static_cast<const ClientImRoot &>(*root.parent()).window())
     {
     }
 
     bool GuiEditor::init()
     {
+        mWindow = &static_cast<const ClientImRoot &>(*mRoot.parent()).window();
+        mWidgetManager = &mWindow->getWindowComponent<Widgets::WidgetManager>();
+
 #if ENABLE_PLUGINS
         getTool<ProjectManager>().mProjectChanged.connect([this]() {
             loadLayout();
@@ -60,7 +65,7 @@ namespace Tools {
 
     void GuiEditor::render()
     {
-        GUI::WidgetBase *hoveredWidget = nullptr;
+        Widgets::WidgetBase *hoveredWidget = nullptr;
         if (mHierarchyVisible)
             renderHierarchy(&hoveredWidget);
         renderSelection(hoveredWidget);
@@ -69,14 +74,14 @@ namespace Tools {
     void GuiEditor::renderMenu()
     {
         if (ImGui::BeginMenu("Layouts")) {
-            for (GUI::WidgetBase *w : mWindow.widgets()) {
+            for (Widgets::WidgetBase *w : mWidgetManager->widgets()) {
                 if (ImGui::MenuItem(w->key(), nullptr, w->mVisible)) {
-                    mWindow.swapCurrentRoot(w);
+                    mWidgetManager->swapCurrentRoot(w);
                 }
             }
             ImGui::Separator();
             if (ImGui::Button("Create Layout")) {
-                mWindow.createTopLevelWidget("Unnamed");
+                mWidgetManager->createTopLevelWidget("Unnamed");
             }
             ImGui::EndMenu();
         }
@@ -120,7 +125,7 @@ namespace Tools {
         buf->open(filePath.str(), std::ios::out);
         Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<XML::XMLFormatter>()) };
 
-        mWindow.writeState(out);
+        mWindow->writeState(out);
     }
 
     void GuiEditor::loadLayout()
@@ -137,18 +142,18 @@ namespace Tools {
             std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
 
-                mWindow.readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
+                mWindow->readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
 
-                mWindow.calculateWindowGeometries();
+                mWidgetManager->calculateWindowGeometries();
 
-                mWindow.applySerializableMap(file.slavesMap());
+                mWindow->applySerializableMap(file.slavesMap());
 
-                mWindow.openStartupWidget();
+                mWidgetManager->openStartupWidget();
             }
         }
     }
 
-    void GuiEditor::renderSelection(GUI::WidgetBase *hoveredWidget)
+    void GuiEditor::renderSelection(Widgets::WidgetBase *hoveredWidget)
     {
         constexpr float borderSize = 10.0f;
 
@@ -156,10 +161,10 @@ namespace Tools {
 
             ImDrawList *background = ImGui::GetBackgroundDrawList(ImGui::GetMainViewport());
 
-            auto [screenPos, screenSize] = mWindow.getAvailableScreenSpace();
+            Rect2i screenSpace = mWidgetManager->mClientSpace;
 
-            Vector3 windowPos = {
-                static_cast<float>(mWindow.window()->renderX()), static_cast<float>(mWindow.window()->renderY()), 0.0f
+            Vector3i windowPos = {
+                mWidgetManager->window().window()->renderX(), mWidgetManager->window().window()->renderY(), 0
             };
 
             ImGuiIO &io = ImGui::GetIO();
@@ -168,15 +173,15 @@ namespace Tools {
             Vector2 dragDistance = mouse - io.MouseClickedPos[0];
 
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-                screenPos += windowPos;
+                screenSpace += mWidgetManager->getScreenSpace().mTopLeft;
 
             bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse);
 
             if (mSelected) {
-                GUI::WidgetBase *selectedWidget = mSelected->widget();
+                Widgets::WidgetBase *selectedWidget = mSelected->widget();
 
-                Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * screenSize;
-                Vector3 absolutePos = selectedWidget->getAbsolutePosition() * screenSize + screenPos;
+                Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * Vector3 { screenSpace.mSize, 1.0f };
+                Vector3 absolutePos = selectedWidget->getAbsolutePosition() * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
 
                 Math::Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
@@ -191,7 +196,7 @@ namespace Tools {
 
                     bool rightBorder = false, leftBorder = false, topBorder = false, bottomBorder = false;
 
-                    if (!mDragging && selectedWidget->containsPoint(mouse, screenSize, screenPos, borderSize)) {
+                    if (!mDragging && selectedWidget->containsPoint(mouse, screenSpace, borderSize)) {
                         leftBorder = abs(mouse.x - bounds.left()) < borderSize;
                         rightBorder = abs(mouse.x - bounds.right()) < borderSize;
                         topBorder = abs(mouse.y - bounds.top()) < borderSize;
@@ -223,7 +228,7 @@ namespace Tools {
                     if (bottomBorder || mDraggingBottom)
                         background->AddLine(bounds.bottomLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, resizeColor, thickness);
 
-                    if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse, screenSize, screenPos, borderSize)) {
+                    if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse, screenSpace, borderSize)) {
                         mMouseDown = true;
                         mDraggingLeft = leftBorder;
                         mDraggingRight = rightBorder;
@@ -239,7 +244,7 @@ namespace Tools {
             }
 
             if (!hoveredWidget)
-                hoveredWidget = mWindow.hoveredWidget();
+                hoveredWidget = mWidgetManager->hoveredWidget();
             WidgetSettings *hoveredSettings = nullptr;
 
             if (acceptHover) {
@@ -250,8 +255,8 @@ namespace Tools {
                     }
 
                     if (!mDragging) {
-                        Vector3 size = hoveredWidget->getAbsoluteSize() * screenSize;
-                        Vector3 pos = hoveredWidget->getAbsolutePosition() * screenSize + screenPos;
+                        Vector3 size = hoveredWidget->getAbsoluteSize() * Vector3 { screenSpace.mSize, 1.0f };
+                        Vector3 pos = hoveredWidget->getAbsolutePosition() * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
 
                         Math::Bounds bounds(pos.x, pos.y + size.y, pos.x + size.x, pos.y);
 
@@ -281,7 +286,7 @@ namespace Tools {
 
                     Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getAbsoluteSize() : Matrix3::IDENTITY;
 
-                    Vector2 relDragDistance = dragDistance / (parentSize * screenSize).xy();
+                    Vector2 relDragDistance = dragDistance / (parentSize * Vector3 { screenSpace.mSize, 1.0f }).xy();
 
                     Matrix3 dragDistanceSize;
 
@@ -371,7 +376,7 @@ namespace Tools {
         ImGui::End();
     }
 
-    bool GuiEditor::drawWidget(GUI::WidgetBase *w, GUI::WidgetBase **hoveredWidget)
+    bool GuiEditor::drawWidget(Widgets::WidgetBase *w, Widgets::WidgetBase **hoveredWidget)
     {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
         if (w->children().empty())
@@ -383,7 +388,7 @@ namespace Tools {
 
         ImGui::DraggableValueTypeSource(w->getName(), w, Engine::ValueType { w });
         if (ImGui::BeginDragDropTarget()) {
-            GUI::WidgetBase *newChild = nullptr;
+            Widgets::WidgetBase *newChild = nullptr;
             if (ImGui::AcceptDraggableValueType(newChild)) {
                 newChild->setParent(w);
             }
@@ -396,7 +401,7 @@ namespace Tools {
         }
 
         if (open) {
-            for (GUI::WidgetBase *child : w->children()) {
+            for (Widgets::WidgetBase *child : w->children()) {
                 if (!drawWidget(child, hoveredWidget)) {
                     break;
                 }
@@ -413,15 +418,15 @@ namespace Tools {
         return true;
     }
 
-    void GuiEditor::renderHierarchy(GUI::WidgetBase **hoveredWidget)
+    void GuiEditor::renderHierarchy(Widgets::WidgetBase **hoveredWidget)
     {
         if (ImGui::Begin("GuiEditor - Hierarchy", &mHierarchyVisible)) {
-            GUI::WidgetBase *root = mWindow.currentRoot();
+            Widgets::WidgetBase *root = mWidgetManager->currentRoot();
             if (root) {
                 if (ImGui::BeginPopup("WidgetSelector")) {
-                    for (int c = 0; c < (int)GUI::WidgetClass::CLASS_COUNT; ++c) {
-                        if (ImGui::Selectable(GUI::widgetClassNames[c])) {
-                            root->createChild("unnamed", (GUI::WidgetClass)c);
+                    for (int c = 0; c < (int)Widgets::WidgetClass::CLASS_COUNT; ++c) {
+                        if (ImGui::Selectable(Widgets::widgetClassNames[c])) {
+                            root->createChild("unnamed", (Widgets::WidgetClass)c);
                             ImGui::CloseCurrentPopup();
                         }
                     }

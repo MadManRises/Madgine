@@ -101,7 +101,8 @@ namespace Plugins {
     {
         Plugin *plugin = getPlugin(name);
         if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(name + "Tools"))
-            plugin = toolPlugin;
+            if (toolPlugin->isLoaded())
+				plugin = toolPlugin;
         if (!plugin)
             return Plugin::UNLOADED;
         return unloadPlugin(plugin);
@@ -278,7 +279,7 @@ namespace Plugins {
                 continue;
             }
             Plugin &plugin = it->second;
-            bool result = p.second.empty() ? (unloadPlugin(&plugin) == Plugin::UNLOADED) : (loadPlugin(&plugin) == Plugin::LOADED);
+            bool result = p.second.empty() ? (unloadPlugin(p.first) == Plugin::UNLOADED) : (loadPlugin(p.first) == Plugin::LOADED);
             if (!result) {
                 LOG("Could not load Plugin \"" << p.first << "\"!");
             }

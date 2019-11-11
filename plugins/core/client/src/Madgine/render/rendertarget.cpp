@@ -1,60 +1,51 @@
 #include "../clientlib.h"
 
 #include "rendertarget.h"
-#include "renderwindow.h"
+#include "rendercontext.h"
 
 namespace Engine {
 namespace Render {
 
-    RenderTarget::RenderTarget(RenderWindow *window, Scene::Camera *camera, const Vector2 &size)
-        : mWindow(window)
-        , mCamera(camera)
-        , mSize(size)
+    RenderTarget::RenderTarget(RenderContext *context)
+        : mContext(context)
     {
-        mWindow->addRenderTarget(this);
+        mContext->addRenderTarget(this);
     }
 
     RenderTarget::~RenderTarget()
     {
-        mWindow->removeRenderTarget(this);
+        mContext->removeRenderTarget(this);
     }
 
-    Scene::Camera *RenderTarget::camera() const
+    void RenderTarget::render()
     {
-        return mCamera;
+        beginFrame();
+        for (RenderPass *pass : mRenderPasses)
+            pass->render(this);
+        endFrame();
     }
 
-    bool RenderTarget::resize(const Vector2 &size)
+    void RenderTarget::addRenderPass(RenderPass *pass)
     {
-        if (mSize == size)
-            return false;
-        mSize = size;
-        return true;
+        mRenderPasses.push_back(pass);
     }
 
-    const Vector2 &RenderTarget::getSize()
+    void RenderTarget::removeRenderPass(RenderPass *pass)
     {
-        return mSize;
+        mRenderPasses.erase(std::find(mRenderPasses.begin(), mRenderPasses.end(), pass));
     }
 
-    void RenderTarget::addPreRenderPass(std::unique_ptr<RenderPass> &&pass)
+    const std::vector<RenderPass*> &RenderTarget::renderPasses()
     {
-        mPreRenderPasses.emplace_back(std::move(pass));
+        return mRenderPasses;
     }
 
-    void RenderTarget::addPostRenderPass(std::unique_ptr<RenderPass> &&pass)
+    void RenderTarget::beginFrame()
     {
-        mPostRenderPasses.emplace_back(std::move(pass));
     }
 
-    const std::vector<std::unique_ptr<RenderPass>> &RenderTarget::preRenderPasses()
+    void RenderTarget::endFrame()
     {
-        return mPreRenderPasses;
-    }
-
-    const std::vector<std::unique_ptr<RenderPass>> &RenderTarget::postRenderPasses()
-    {
-        return mPostRenderPasses;
     }
 
 }

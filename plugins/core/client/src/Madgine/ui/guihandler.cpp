@@ -3,6 +3,7 @@
 //#include "Database/translationunit.h"
 
 #include "../gui/widgets/widget.h"
+#include "../gui/widgets/widgetmanager.h"
 #include "../ui/uimanager.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
@@ -20,7 +21,7 @@ namespace UI {
     GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type)
         : Handler(ui)
         , mType(type)
-        , mContext(Scene::ContextMask::NoContext)
+        , mContext(Threading::ContextMask::NoContext)
     {
     }
 
@@ -39,13 +40,13 @@ namespace UI {
 
         switch (mType) {
         case WindowType::MODAL_OVERLAY:
-            ui().window().openModalWidget(mWidget);
+            ui().getWindowComponent<Widgets::WidgetManager>().openModalWidget(mWidget);
             break;
         case WindowType::NONMODAL_OVERLAY:
-            ui().window().openWidget(mWidget);
+            ui().getWindowComponent<Widgets::WidgetManager>().openWidget(mWidget);
             break;
         case WindowType::ROOT_WINDOW:
-            ui().window().swapCurrentRoot(mWidget);
+            ui().getWindowComponent<Widgets::WidgetManager>().swapCurrentRoot(mWidget);
             break;
         }
     }
@@ -54,10 +55,10 @@ namespace UI {
     {
         switch (mType) {
         case WindowType::MODAL_OVERLAY:
-            ui().window().closeModalWidget(mWidget);
+            ui().getWindowComponent<Widgets::WidgetManager>().closeModalWidget(mWidget);
             break;
         case WindowType::NONMODAL_OVERLAY:
-            ui().window().closeWidget(mWidget);
+            ui().getWindowComponent<Widgets::WidgetManager>().closeWidget(mWidget);
             break;
         case WindowType::ROOT_WINDOW:
             std::terminate();
@@ -74,7 +75,7 @@ namespace UI {
         return mType == WindowType::ROOT_WINDOW;
     }
 
-    Scene::ContextMask GuiHandlerBase::context() const
+    Threading::ContextMask GuiHandlerBase::context() const
     {
         return mContext;
     }
@@ -87,7 +88,7 @@ namespace UI {
         return *this;
     }
 
-    void GuiHandlerBase::setContext(Scene::ContextMask context)
+    void GuiHandlerBase::setContext(Threading::ContextMask context)
     {
         mContext = context;
     }

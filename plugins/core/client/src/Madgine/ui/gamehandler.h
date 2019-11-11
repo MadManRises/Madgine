@@ -2,7 +2,7 @@
 
 #include "handler.h"
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
-#include "Madgine/scene/contextmasks.h"
+#include "../threading/contextmasks.h"
 
 #include "../input/inputevents.h"
 
@@ -13,12 +13,12 @@ namespace Engine
 		class MADGINE_CLIENT_EXPORT GameHandlerBase : public Handler
 		{
 		public:
-			GameHandlerBase(UIManager &ui, Scene::ContextMask context = Scene::ContextMask::SceneContext);
+			GameHandlerBase(UIManager &ui, Threading::ContextMask context = Threading::ContextMask::SceneContext);
 
 			void abortDrag();
 
-			void update(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask mask);
-			void fixedUpdate(std::chrono::microseconds timeStep, Scene::ContextMask mask);
+			void update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask);
+			void fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask);
 
 			GameHandlerBase &getSelf(bool = true);
 
@@ -69,7 +69,7 @@ namespace Engine
 
 			Vector2 mDragStart;
 
-			Scene::ContextMask mContext;
+			Threading::ContextMask mContext;
 		};
 
 

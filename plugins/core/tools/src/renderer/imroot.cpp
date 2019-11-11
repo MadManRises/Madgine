@@ -29,6 +29,8 @@
 
 #include "Modules/ini/iniformatter.h"
 
+#include "Modules/generic/safeiterator.h"
+
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImRoot)
@@ -65,7 +67,7 @@ namespace Tools {
 
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::SerializeOutStream out { std::make_unique < Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
+        Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
@@ -182,7 +184,7 @@ namespace Tools {
             ImGui::EndMainMenuBar();
         }
 
-        for (const std::unique_ptr<ToolBase> &tool : mCollector) {
+        for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
             tool->update();
         }
 
@@ -190,10 +192,12 @@ namespace Tools {
             ImGui::End();
         }
 
+        ImGui::Render();
+
         return running;
     }
 
-    const ToolsContainer<std::vector> &ImRoot::tools()
+    const std::vector<std::unique_ptr<ToolBase>> &ImRoot::tools()
     {
         return mCollector;
     }

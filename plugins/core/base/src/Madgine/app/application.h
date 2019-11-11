@@ -53,14 +53,7 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
 
-        template <class T>
-        T &getSceneComponent()
-        {
-            return static_cast<T &>(getSceneComponent(component_index<T>()));
-        }
 
-        Scene::SceneComponentBase &getSceneComponent(size_t, bool = true);
-        Scene::SceneManager &sceneMgr(bool = true);
         Application &getSelf(bool = true);
 
         

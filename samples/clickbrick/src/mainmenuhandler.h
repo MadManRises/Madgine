@@ -15,7 +15,7 @@ namespace UI {
 
         virtual const char *key() const override;
 
-		virtual void setWidget(Engine::GUI::WidgetBase *w) override;
+		virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
         void startGame();
 
@@ -23,7 +23,7 @@ namespace UI {
     private:
         Engine::Threading::Slot<&MainMenuHandler::startGame> mStartGameSlot;
 
-		Engine::UI::WidgetPtr<Engine::GUI::Button> mStartGameButton;
+		Engine::UI::WidgetPtr<Engine::Widgets::Button> mStartGameButton;
 
     };
 

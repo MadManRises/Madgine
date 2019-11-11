@@ -130,7 +130,7 @@ namespace Input {
         return true;
     }
 
-    bool OISInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool OISInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {        
         return true;
     }

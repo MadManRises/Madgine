@@ -1,6 +1,9 @@
 #pragma once
 
 namespace Engine {
+template <typename T>
+using id = T;
+
 template <typename V, typename...>
 struct last {
     typedef V type;
@@ -17,6 +20,13 @@ struct first {
 
 template <typename...>
 using void_t = void;
+
+template <typename>
+struct type_holder_t {
+};
+
+template <typename T>
+const constexpr type_holder_t<T> type_holder = {};
 
 template <typename...>
 struct type_pack;
