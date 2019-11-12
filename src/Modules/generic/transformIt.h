@@ -115,6 +115,18 @@ TransformItContainer<T, Converter> &transformIt(T &t)
     return static_cast<TransformItContainer<T, Converter> &>(t);
 }
 
+template <typename Converter, class T>
+const TransformItContainer<T, Converter> &transformIt(const T &&t)
+{
+    static_assert(dependent_bool<T, false>, "rvalues are not allowed for transformIt");
+}
+
+template <typename Converter, class T>
+TransformItContainer<T, Converter> &transformIt(T &&t)
+{
+    static_assert(dependent_bool<T, false>, "rvalues are not allowed for transformIt");
+}
+
 struct ToPointerConverter {
     template <class T>
     T *operator()(T &t)
@@ -124,9 +136,9 @@ struct ToPointerConverter {
 };
 
 template <class T>
-decltype(auto) toPointer(T &t)
+decltype(auto) toPointer(T &&t)
 {
-    return transformIt<ToPointerConverter>(t);
+    return transformIt<ToPointerConverter>(std::forward<T>(t));
 }
 
 struct UniquePtrToPtrConverter {
@@ -138,9 +150,9 @@ struct UniquePtrToPtrConverter {
 };
 
 template <class T>
-decltype(auto) uniquePtrToPtr(const T &t)
+decltype(auto) uniquePtrToPtr(T &&t)
 {
-    return transformIt<UniquePtrToPtrConverter>(t);
+    return transformIt<UniquePtrToPtrConverter>(std::forward<T>(t));
 }
 
 }

@@ -321,9 +321,9 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow.window()->renderX()), static_cast<float>(mWindow.window()->renderY()) };
+        modArgs.position -= Vector2 { static_cast<float>(mWindow.window()->renderX()), static_cast<float>(mWindow.window()->renderY()) } + mClientSpace.mTopLeft;
 
-        Rect2i clientSpace = mClientSpace;
+        Rect2i clientSpace = { { 0, 0 }, mClientSpace.mSize };
 
         for (WidgetBase *modalWidget : mModalWidgetList) {
             if (propagateInput(modalWidget, modArgs, clientSpace, &WidgetBase::injectPointerRelease))

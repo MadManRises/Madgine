@@ -178,7 +178,7 @@ namespace Tools {
                 }
                 ImGui::EndMenu();
             }
-            for (const std::unique_ptr<ToolBase> &tool : mCollector) {
+            for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
                 tool->renderMenu();
             }
             ImGui::EndMainMenuBar();

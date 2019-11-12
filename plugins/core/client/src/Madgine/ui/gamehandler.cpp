@@ -132,15 +132,14 @@ namespace UI {
     void GameHandlerBase::clampToWindow(Input::PointerEventArgs &me)
     {
         Engine::Vector3 size = mWidget->getActualSize();
-        Engine::Vector3 pos = mWidget->getActualPosition();
-        if (me.position.x < pos.x)
-            me.position.x = pos.x;
-        if (me.position.x > pos.x + size.x)
-            me.position.x = pos.x + size.x;
-        if (me.position.y < pos.y)
-            me.position.y = pos.y;
-        if (me.position.y > pos.y + size.y)
-            me.position.y = pos.y + size.y;
+        if (me.position.x < 0.0f)
+            me.position.x = 0.0f;
+        if (me.position.x > size.x)
+            me.position.x = size.x;
+        if (me.position.y < 0)
+            me.position.y = 0;
+        if (me.position.y > size.y)
+            me.position.y = size.y;
     }
 
     void GameHandlerBase::setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode)

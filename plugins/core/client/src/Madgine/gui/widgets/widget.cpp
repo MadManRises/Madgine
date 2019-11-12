@@ -108,13 +108,13 @@ namespace Widgets {
 
     Vector3 WidgetBase::getActualSize() const
     {
-        auto screenSize = mManager.getScreenSpace().mSize;
-        return mAbsoluteSize * Vector3 { screenSize, 1.0f };
+        auto screenSpace = mManager.mClientSpace;
+        return mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f };
     }
 
     Vector3 WidgetBase::getActualPosition() const
     {
-        Rect2i screenSpace = mManager.getScreenSpace();
+        Rect2i screenSpace = mManager.mClientSpace;
         return mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
     }
 
