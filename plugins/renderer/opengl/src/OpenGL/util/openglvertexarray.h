@@ -48,7 +48,7 @@ namespace Render {
 
         struct VertexArrayAttribute {
             bool mEnabled = false;
-            AttributeType mAttribute;
+            AttributeDescriptor mAttribute;
         };
 
         std::vector<VertexArrayAttribute> mAttributes;
