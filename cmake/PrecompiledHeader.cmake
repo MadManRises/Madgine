@@ -9,10 +9,10 @@ function(add_precompiled_header target header)
 	set(output_path "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}_PCH.dir")
 	if (GCC)
 		set(output_name "${name}.gch")
-	else()
+	elseif(MSVC)
 		set(output_name "${name}.pch")
-	#else()
-	#	set(output "${output_path}/${name}.cpp${CMAKE_CXX_OUTPUT_EXTENSION}")
+	else()
+		set(output_name "${name}.cpp${CMAKE_CXX_OUTPUT_EXTENSION}")
 	endif()
 	set(output "${output_path}/${output_name}")
     
@@ -36,8 +36,15 @@ function(add_precompiled_header target header)
 		PROPERTIES
 		LANGUAGE CXX
 		COMPILE_FLAGS ${pch_compile_flags}
-		OBJECT_OUTPUTS ${output}
 	)
+
+	if (GCC OR MSVC)
+		set_source_files_properties(
+			${cppsource}
+			OBJECT_OUTPUTS ${output}
+		)
+	endif()
+
 	add_library(${target}_PCH OBJECT ${cppsource})
 	set_target_properties(${target}_PCH PROPERTIES EXCLUDE_FROM_ALL TRUE)
 	add_dependencies(${target} ${target}_PCH)
