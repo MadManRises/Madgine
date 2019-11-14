@@ -3,5 +3,3 @@ add_subdirectory(meshloader)
 add_subdirectory(programloader)
 add_subdirectory(textureloader)
 add_subdirectory(fontloader)
-
-export_to_workspace(Utility)
