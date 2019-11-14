@@ -9,3 +9,5 @@ add_plugin(MeshLoader Madgine Utility ${sources} PRECOMPILED_HEADER meshloaderli
 
 target_link_libraries(MeshLoader PUBLIC Modules)
 target_link_libraries(MeshLoader PRIVATE assimp)
+
+install_to_workspace(Utility EXPORT_LIB TARGETS MeshLoader)

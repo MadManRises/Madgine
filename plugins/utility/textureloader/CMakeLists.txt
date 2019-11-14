@@ -8,3 +8,5 @@ FolderSources(sources "" "" texture.h textureloader.cpp textureloader.h texturel
 add_plugin(TextureLoader Madgine Utility ${sources} PRECOMPILED_HEADER textureloaderlib.h SOURCE_ROOT .)
 
 target_link_libraries(TextureLoader PUBLIC Modules)
+
+install_to_workspace(Utility EXPORT_LIB TARGETS TextureLoader)

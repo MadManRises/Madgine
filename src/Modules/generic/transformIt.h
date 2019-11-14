@@ -118,13 +118,13 @@ TransformItContainer<T, Converter> &transformIt(T &t)
 template <typename Converter, class T>
 const TransformItContainer<T, Converter> &transformIt(const T &&t)
 {
-    static_assert(dependent_bool<T, false>, "rvalues are not allowed for transformIt");
+    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt");
 }
 
 template <typename Converter, class T>
 TransformItContainer<T, Converter> &transformIt(T &&t)
 {
-    static_assert(dependent_bool<T, false>, "rvalues are not allowed for transformIt");
+    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt");
 }
 
 struct ToPointerConverter {
