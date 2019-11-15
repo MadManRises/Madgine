@@ -15,7 +15,7 @@ namespace Input {
         virtual bool isKeyDown(Key key) override;
 
     private:
-        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
 
         bool handleMotionEvent(const AInputEvent *event);
 

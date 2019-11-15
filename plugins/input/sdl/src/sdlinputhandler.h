@@ -18,7 +18,7 @@ namespace Input {
 
     private:
         bool
-        frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
+        frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
 
         bool keyPressed(const SDL_KeyboardEvent &event);
         bool keyReleased(const SDL_KeyboardEvent &event);
