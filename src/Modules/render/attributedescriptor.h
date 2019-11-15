@@ -5,15 +5,17 @@
 namespace Engine {
 namespace Render {
 
-	enum AttributeType {
+    enum AttributeType {
         ATTRIBUTE_FLOAT
     };
 
     struct AttributeDescriptor {
+        AttributeDescriptor() = default;
+
         template <typename T, typename M, typename BaseType = T>
         AttributeDescriptor(M T::*m, type_holder_t<BaseType> = {})
             : mStride(sizeof(BaseType))
-            , mOffset(reinterpret_cast<size_t>(&(reinterpret_cast<BaseType *>(0x1)->*m))-1)
+            , mOffset(reinterpret_cast<size_t>(&(reinterpret_cast<BaseType *>(0x1)->*m)) - 1)
         {
             if constexpr (std::is_same_v<M, Vector2>) {
                 mType = ATTRIBUTE_FLOAT;
