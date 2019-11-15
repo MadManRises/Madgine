@@ -17,9 +17,6 @@
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Resources::MeshData, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
-MEMBER(mResources)
-METATABLE_END(LoaderImpl)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, LoaderImpl)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)

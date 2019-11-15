@@ -12,9 +12,6 @@
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 
 using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Render::Program, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
-MEMBER(mResources)
-METATABLE_END(LoaderImpl)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, LoaderImpl)
 METATABLE_END(Engine::Render::OpenGLProgramLoader)

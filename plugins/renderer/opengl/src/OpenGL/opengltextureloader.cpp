@@ -10,9 +10,6 @@
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
 
 using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Render::Texture, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
-MEMBER(mResources)
-METATABLE_END(LoaderImpl)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader, LoaderImpl)
 METATABLE_END(Engine::Render::OpenGLTextureLoader)

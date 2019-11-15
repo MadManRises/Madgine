@@ -8,6 +8,8 @@
 #include "Modules/cli/cli.h"
 #include "Modules/threading/workgroup.h"
 
+#include "Madgine/gui/widgets/widgetmanager.h"
+
 #include "Modules/filesystem/filemanager.h"
 #include "Modules/xml/xmlformatter.h"
 
@@ -44,9 +46,9 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
 
                 if (file) {
                     window.readState(*file, nullptr, Engine::Serialize::StateTransmissionFlags_DontApplyMap);
-                    window.calculateWindowGeometries();
+                    window.getWindowComponent<Engine::Widgets::WidgetManager>().calculateWindowGeometries();
                     window.applySerializableMap(mgr.slavesMap());
-                    window.openStartupWidget();
+                    window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
                 }
             });
 #endif

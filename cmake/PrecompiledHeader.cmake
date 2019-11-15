@@ -41,6 +41,7 @@ function(add_precompiled_header target header)
 	if (GCC OR MSVC)
 		set_source_files_properties(
 			${cppsource}
+			PROPERTIES
 			OBJECT_OUTPUTS ${output}
 		)
 	endif()

@@ -72,7 +72,7 @@ namespace GUI {
         template <class T>
         T &getWindowComponent(bool init = true)
         {
-            return static_cast<T &>(getWindowComponent(T::component_index(), init));
+            return static_cast<T &>(getWindowComponent(component_index<T>(), init));
         }
 
         TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
