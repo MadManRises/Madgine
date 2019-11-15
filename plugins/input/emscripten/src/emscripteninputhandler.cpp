@@ -30,7 +30,7 @@ namespace Input {
     {
     }
 
-    bool EmscriptenInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool EmscriptenInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
 
         return true;

@@ -33,7 +33,7 @@ namespace Input {
         return false;
     }
 
-    bool AndroidInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool AndroidInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         PROFILE();
         if (sQueue) {

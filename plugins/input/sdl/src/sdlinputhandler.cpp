@@ -48,7 +48,7 @@ namespace Input {
         return SDL_GetKeyboardState(NULL)[key] != 0;
     }
 
-    bool SDLInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context)
+    bool SDLInputHandler::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
