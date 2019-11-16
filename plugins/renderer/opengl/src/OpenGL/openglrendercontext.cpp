@@ -1,5 +1,5 @@
 #include "opengllib.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 #include "openglrenderwindow.h"
 
 #include "Modules/debug/profiler/profiler.h"
@@ -8,10 +8,6 @@
 #include "Modules/math/vector3.h"
 #include "Modules/math/vector3i.h"
 #include "Modules/math/vector4.h"
-
-#include "Madgine/gui/widgets/widget.h"
-
-#include "Madgine/gui/vertex.h"
 
 #include "openglrendertexture.h"
 

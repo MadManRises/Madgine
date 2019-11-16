@@ -11,7 +11,7 @@
 #include "Modules/math/vector3.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 
 #include "im3d/im3d.h"
 

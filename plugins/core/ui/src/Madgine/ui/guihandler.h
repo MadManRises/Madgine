@@ -1,0 +1,62 @@
+#pragma once
+
+#include "handler.h"
+#include "Modules/uniquecomponent/uniquecomponentdefine.h"
+
+namespace Engine
+{
+	namespace UI
+	{
+    class MADGINE_UI_EXPORT GuiHandlerBase : public Handler
+		{
+		public:
+			enum class WindowType
+			{
+				MODAL_OVERLAY,
+				NONMODAL_OVERLAY,
+				ROOT_WINDOW
+			};
+
+			GuiHandlerBase(UIManager &ui, WindowType type);
+
+
+			virtual void open();
+			virtual void close();
+			bool isOpen() const;
+
+			bool isRootWindow() const;
+
+			Threading::ContextMask context() const;
+
+			GuiHandlerBase &getSelf(bool = true);
+
+		protected:
+
+			void setContext(Threading::ContextMask context);
+
+
+		private:
+
+			const WindowType mType;
+
+
+			Threading::ContextMask mContext;
+		};
+	}
+}
+
+DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandler, GuiHandlerBase, UIManager &);
+
+namespace Engine 
+{
+	namespace UI
+	{
+
+		template <typename T>
+		using GuiHandler = GuiHandlerComponent<T>;
+
+	}
+}
+
+
+

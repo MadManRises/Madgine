@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 #include "Madgine/threading/framelistener.h"
 
 #include "renderer/imroot.h"

@@ -195,7 +195,7 @@ RegisterType(Engine::Tools::ProjectManager)
             return result;
         }
 
-        void Engine::Tools::ProjectManager::setConfig(const std::string &config)
+        void ProjectManager::setConfig(const std::string &config)
         {
             assert(!mProjectRoot.empty() || config.empty());
             if (mConfig != config) {

@@ -3,7 +3,7 @@
 #include "immanager.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 #include "Madgine/input/inputhandler.h"
 
 #include "imgui/imgui.h"
@@ -15,15 +15,13 @@
 
 #include "Modules/debug/profiler/profiler.h"
 
-#include "Madgine/gui/widgets/toolwindow.h"
+#include "Madgine/gui/toolwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
 #include "im3d/im3d.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-
-#include "Madgine/gui/widgets/toolwindow.h"
 
 #include "Madgine/render/rendertarget.h"
 

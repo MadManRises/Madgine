@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iterator.h"
+
 namespace Engine {
 
 template <typename T>

@@ -1,5 +1,4 @@
-#include "Madgine/clientlib.h"
-#include "Madgine/scenelib.h"
+#include "clickbricklib.h"
 
 #include "brick.h"
 

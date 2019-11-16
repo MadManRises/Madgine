@@ -1,12 +1,10 @@
-#include "Madgine/clientlib.h"
-#include "Madgine/scenelib.h"
-#include "Madgine/scenerendererlib.h"
+#include "clickbricklib.h"
 
 #include "mainmenuhandler.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Madgine/gui/widgets/button.h"
+#include "Madgine/widgets/button.h"
 
 #include "gamehandler.h"
 
@@ -26,7 +24,7 @@ RegisterType(ClickBrick::UI::MainMenuHandler)
         MainMenuHandler::MainMenuHandler(Engine::UI::UIManager &ui)
             : Engine::UI::GuiHandler<MainMenuHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::ROOT_WINDOW)
             , mStartGameSlot(this)
-			, mStartGameButton(this, "StartGameButton")            
+            , mStartGameButton(this, "StartGameButton")
         {
         }
 

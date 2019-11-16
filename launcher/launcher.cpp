@@ -4,11 +4,12 @@
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 #include "Modules/cli/cli.h"
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/gui/widgets/widgetmanager.h"
+#include "Madgine/widgetslib.h"
+#include "Madgine/widgets/widgetmanager.h"
 
 #include "Modules/filesystem/filemanager.h"
 #include "Modules/xml/xmlformatter.h"

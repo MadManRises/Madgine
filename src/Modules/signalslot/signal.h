@@ -2,52 +2,41 @@
 
 #include "signalstub.h"
 
+namespace Engine {
+namespace SignalSlot {
 
-namespace Engine
-{
-	namespace SignalSlot
-	{
+    template <class... _Ty>
+    class Signal : public SignalStub<_Ty...> {
+    public:
+        Signal() = default;
 
-		template <class... _Ty>
-		class Signal : public SignalStub<_Ty...>
-		{
-		public:
-			Signal() = default;
+        Signal(const Signal<_Ty...> &other) = default;
 
-			Signal(const Signal<_Ty...>& other) = default;
+        Signal(Signal<_Ty...> &&other) noexcept = default;
 
-			Signal(Signal<_Ty...>&& other) noexcept = default;
+        ~Signal()
+        {
+            this->disconnectAll();
+        }
 
-			~Signal()
-			{
-				this->disconnectAll();
-			}
-			
-			void emit(_Ty ... args)
-			{
-				auto end = this->mConnectedSlots.end();
+        void emit(_Ty... args)
+        {
+            size_t end = this->mConnectedSlots.size();
 
-				this->mConnectedSlots.erase(
-					std::remove_if(
-						this->mConnectedSlots.begin(),
-						end,
-						[&](const std::weak_ptr<Connection<_Ty...>> &p) {
-							if (std::shared_ptr<Connection<_Ty...>> ptr = p.lock())
-							{
-								(*ptr)(args...);
-								return false;
-							}
-							else
-							{
-								return true;
-							}
-						}
-					),
-					end
-				);
+            size_t marker = 0;
 
-			}		
-			
-		};
-	}
+            for (size_t i = 0; i < end; ++i) {
+                if (std::shared_ptr<Connection<_Ty...>> ptr = this->mConnectedSlots[i].lock()) {
+                    if (marker < i)
+                        this->mConnectedSlots[marker] = ptr;
+                    ++marker;
+					(*ptr)(args...);                    
+                } 
+            }
+
+			this->mConnectedSlots.erase(this->mConnectedSlots.begin() + marker, this->mConnectedSlots.begin() + end);
+
+        }
+    };
+}
 }

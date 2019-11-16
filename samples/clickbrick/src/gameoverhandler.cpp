@@ -1,6 +1,4 @@
-#include "Madgine/clientlib.h"
-#include "Madgine/scenelib.h"
-#include "Madgine/scenerendererlib.h"
+#include "clickbricklib.h"
 
 #include "gameoverhandler.h"
 
@@ -8,9 +6,9 @@
 
 #include "gamehandler.h"
 
-#include "Madgine/gui/widgets/widget.h"
+#include "Madgine/widgets/widget.h"
 
-#include "Madgine/gui/widgets/label.h"
+#include "Madgine/widgets/label.h"
 
 #include "gamemanager.h"
 

@@ -4,7 +4,7 @@
 
 #include "inputlistener.h"
 
-#include "../gui/widgets/toplevelwindow.h"
+#include "../gui/toplevelwindow.h"
 
 namespace Engine
 {

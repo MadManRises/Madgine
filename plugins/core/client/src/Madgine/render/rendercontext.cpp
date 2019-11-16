@@ -1,5 +1,5 @@
 #include "../clientlib.h"
-#include "../gui/widgets/toplevelwindow.h"
+#include "../gui/toplevelwindow.h"
 #include "Interfaces/window/windowapi.h"
 #include "Madgine/app/application.h"
 #include "rendertarget.h"

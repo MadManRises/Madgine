@@ -7,8 +7,6 @@
 
 #include "openglrenderwindow.h"
 
-#include "Madgine/gui/vertex.h"
-
 #include "openglshaderloader.h"
 
 #include "util/openglshader.h"
