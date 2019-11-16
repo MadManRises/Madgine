@@ -118,11 +118,9 @@ namespace Filesystem {
                     if (lastElement == ".") {
                         if (!mPath.empty())
                             mPath.pop_back();
-                    } else if (lastElement == "..") {
-                        if (!mPath.empty()) {
-                            mPath.pop_back();
-                            mPath.resize(mPath.rfind('/') + 1);
-                        }
+                    } else if (lastElement == ".." && !mPath.empty()) {
+                        mPath.pop_back();
+                        mPath.resize(mPath.rfind('/') + 1);
                     } else {
                         mPath += lastElement + "/";
                     }
@@ -185,9 +183,9 @@ namespace Filesystem {
         return !isAbsolute();
     }
 
-	void Path::clear()
+    void Path::clear()
     {
-            mPath.clear();
+        mPath.clear();
     }
 
     bool Path::empty() const
