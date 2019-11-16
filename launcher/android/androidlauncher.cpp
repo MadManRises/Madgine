@@ -5,7 +5,7 @@
 
 #include "Madgine/core/root.h"
 
-#include "Madgine/gui/widgets/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindow.h"
 
 #include <android/native_activity.h>
 

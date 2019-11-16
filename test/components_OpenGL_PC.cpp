@@ -1,21 +1,21 @@
 #include "Modules/moduleslib.h"
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_OISHandler
 #    include "oislib.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/clienttoolslib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
@@ -30,13 +30,7 @@
 #    include "Madgine/app/globalapicollector.h"
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/gui/widgets/toplevelwindowcomponent.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/gui/widgets/widgetmanager.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/ui/uimanager.h"
+#    include "Madgine/gui/toplevelwindowcomponent.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/imgui/clientimroot.h"
@@ -107,17 +101,8 @@
 #ifdef BUILD_Tools
 #    include "testtool/testtool.h"
 #endif
-#ifdef BUILD_ClientTools
-#    include "Madgine_Tools/guieditor/guieditor.h"
-#endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolconfig.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/ui/gamehandler.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/ui/guihandler.h"
 #endif
 #ifdef BUILD_TestShared
 #    include "uniquecomponent/uniquecomponentshared.h"
@@ -160,10 +145,6 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Client
-		&table<Engine::Widgets::WidgetManager>(),
-		&table<Engine::UI::UIManager>(),
-#    endif
 #    ifdef BUILD_ClientTools
 		&table<Engine::Tools::ClientImRoot>(),
 #    endif
@@ -175,10 +156,6 @@ template <>
 std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
 {
 	return {
-#    ifdef BUILD_Client
-		createComponent<Engine::Widgets::WidgetManager>,
-		createComponent<Engine::UI::UIManager>,
-#    endif
 #    ifdef BUILD_ClientTools
 		createComponent<Engine::Tools::ClientImRoot>,
 #    endif
@@ -188,15 +165,6 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 
 #    define ACC 0
 
-#    ifdef BUILD_Client
-constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_Client = ACC;
-template <>
-size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Client + 0; }
-template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Client + 1; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_Client + 2
-#    endif
 #    ifdef BUILD_ClientTools
 constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_ClientTools = ACC;
 template <>
@@ -416,9 +384,6 @@ const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Reg
 		&table<Engine::Tools::ImGuiDemo>(),
 		&table<Engine::Tools::TestTool>(),
 #    endif
-#    ifdef BUILD_ClientTools
-		&table<Engine::Tools::GuiEditor>(),
-#    endif
 #    ifdef BUILD_OpenGLTools
 		&table<Engine::Tools::OpenGLToolConfig>(),
 #    endif
@@ -438,9 +403,6 @@ std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsColl
 		createComponent<Engine::Tools::ProjectManager>,
 		createComponent<Engine::Tools::ImGuiDemo>,
 		createComponent<Engine::Tools::TestTool>,
-#    endif
-#    ifdef BUILD_ClientTools
-		createComponent<Engine::Tools::GuiEditor>,
 #    endif
 #    ifdef BUILD_OpenGLTools
 		createComponent<Engine::Tools::OpenGLToolConfig>,
@@ -470,13 +432,6 @@ size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_To
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_Tools + 7
 #    endif
-#    ifdef BUILD_ClientTools
-constexpr size_t CollectorBaseIndex_ToolBase_ClientTools = ACC;
-template <>
-size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_ToolBase_ClientTools + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_ClientTools + 1
-#    endif
 #    ifdef BUILD_OpenGLTools
 constexpr size_t CollectorBaseIndex_ToolBase_OpenGLTools = ACC;
 template <>
@@ -484,52 +439,6 @@ size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBase
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
 #    endif
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
-{
-	return {
-
-	}; 
-}
-
-#    define ACC 0
-
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
-{
-	return {
-
-	}; 
-}
-
-#    define ACC 0
-
 
 #    undef ACC
 
