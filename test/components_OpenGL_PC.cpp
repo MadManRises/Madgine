@@ -1,18 +1,30 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
 #endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
+#endif
 #ifdef BUILD_OISHandler
 #    include "oislib.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/clienttoolslib.h"
@@ -29,11 +41,20 @@
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
 #endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/scenemanager.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/gui/toplevelwindowcomponent.h"
 #endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/imgui/clientimroot.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgets/widgetmanager.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/ui/uimanager.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/input/inputcollector.h"
@@ -71,6 +92,9 @@
 #ifdef BUILD_Tools
 #    include "inspector/layoutloader.h"
 #endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/scenecomponentcollector.h"
+#endif
 #ifdef BUILD_ClientTools
 #    include "Madgine_Tools/imgui/immanager.h"
 #endif
@@ -104,6 +128,24 @@
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolconfig.h"
 #endif
+#ifdef BUILD_UI
+#    include "Madgine/ui/gamehandler.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "gamemanager.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/ui/guihandler.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "mainmenuhandler.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "gamehandler.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "gameoverhandler.h"
+#endif
 #ifdef BUILD_TestShared
 #    include "uniquecomponent/uniquecomponentshared.h"
 #endif
@@ -122,6 +164,9 @@ template <>
 const std::vector<const Engine::MetaTable *> &Engine::App::GlobalAPICollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_Scene
+		&table<Engine::Scene::SceneManager>(),
+#    endif
 
 	}; 
 	return dummy;
@@ -130,12 +175,24 @@ template <>
 std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents()
 {
 	return {
+#    ifdef BUILD_Scene
+		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
+#    endif
 
 	}; 
 }
 
 #    define ACC 0
 
+#    ifdef BUILD_Scene
+constexpr size_t CollectorBaseIndex_GlobalAPIBase_Scene = ACC;
+template <>
+size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
+template <>
+size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_GlobalAPIBase_Scene + 1
+#    endif
 
 #    undef ACC
 
@@ -148,6 +205,12 @@ const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollect
 #    ifdef BUILD_ClientTools
 		&table<Engine::Tools::ClientImRoot>(),
 #    endif
+#    ifdef BUILD_Widgets
+		&table<Engine::Widgets::WidgetManager>(),
+#    endif
+#    ifdef BUILD_UI
+		&table<Engine::UI::UIManager>(),
+#    endif
 
 	}; 
 	return dummy;
@@ -158,6 +221,12 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 	return {
 #    ifdef BUILD_ClientTools
 		createComponent<Engine::Tools::ClientImRoot>,
+#    endif
+#    ifdef BUILD_Widgets
+		createComponent<Engine::Widgets::WidgetManager>,
+#    endif
+#    ifdef BUILD_UI
+		createComponent<Engine::UI::UIManager>,
 #    endif
 
 	}; 
@@ -171,6 +240,20 @@ template <>
 size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_ClientTools + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_ClientTools + 1
+#    endif
+#    ifdef BUILD_Widgets
+constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_Widgets = ACC;
+template <>
+size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Widgets + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_Widgets + 1
+#    endif
+#    ifdef BUILD_UI
+constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_UI = ACC;
+template <>
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_UI + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_UI + 1
 #    endif
 
 #    undef ACC
@@ -334,6 +417,29 @@ size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseInde
 #    undef ACC
 
 #endif
+#ifdef BUILD_Scene
+template <>
+const std::vector<const Engine::MetaTable *> &Engine::Scene::SceneComponentCollector::Registry::sTables() 
+{
+	static std::vector<const Engine::MetaTable *> dummy = {
+
+	}; 
+	return dummy;
+}
+template <>
+std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents()
+{
+	return {
+
+	}; 
+}
+
+#    define ACC 0
+
+
+#    undef ACC
+
+#endif
 #ifdef BUILD_ClientTools
 template <>
 const std::vector<const Engine::MetaTable *> &Engine::Tools::ImManagerCollector::Registry::sTables() 
@@ -438,6 +544,86 @@ template <>
 size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_UI
+template <>
+const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables() 
+{
+	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_ClickBrick
+		&table<ClickBrick::UI::GameManager>(),
+#    endif
+
+	}; 
+	return dummy;
+}
+template <>
+std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
+{
+	return {
+#    ifdef BUILD_ClickBrick
+		createComponent<ClickBrick::UI::GameManager>,
+#    endif
+
+	}; 
+}
+
+#    define ACC 0
+
+#    ifdef BUILD_ClickBrick
+constexpr size_t CollectorBaseIndex_GameHandlerBase_ClickBrick = ACC;
+template <>
+size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseIndex_GameHandlerBase_ClickBrick + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_GameHandlerBase_ClickBrick + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_UI
+template <>
+const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables() 
+{
+	static std::vector<const Engine::MetaTable *> dummy = {
+#    ifdef BUILD_ClickBrick
+		&table<ClickBrick::UI::MainMenuHandler>(),
+		&table<ClickBrick::UI::GameHandler>(),
+		&table<ClickBrick::UI::GameOverHandler>(),
+#    endif
+
+	}; 
+	return dummy;
+}
+template <>
+std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
+{
+	return {
+#    ifdef BUILD_ClickBrick
+		createComponent<ClickBrick::UI::MainMenuHandler>,
+		createComponent<ClickBrick::UI::GameHandler>,
+		createComponent<ClickBrick::UI::GameOverHandler>,
+#    endif
+
+	}; 
+}
+
+#    define ACC 0
+
+#    ifdef BUILD_ClickBrick
+constexpr size_t CollectorBaseIndex_GuiHandlerBase_ClickBrick = ACC;
+template <>
+size_t component_index<ClickBrick::UI::MainMenuHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 0; }
+template <>
+size_t component_index<ClickBrick::UI::GameHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 1; }
+template <>
+size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 2; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_GuiHandlerBase_ClickBrick + 3
 #    endif
 
 #    undef ACC
