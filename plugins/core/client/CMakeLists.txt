@@ -19,7 +19,7 @@ set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools)
 		FolderSources(sources Madgine_Tools im3d im3drenderpass.cpp im3drenderpass.h)
-		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h immanager.cpp immanager.h)
+		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 

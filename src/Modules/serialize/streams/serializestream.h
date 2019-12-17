@@ -6,7 +6,7 @@
 #include "../primitivetypes.h"
 #include "../serializeexception.h"
 #include "../serializetable.h"
-#include "../statesubmissionflags.h"
+#include "../statetransmissionflags.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
 
@@ -175,9 +175,7 @@ namespace Serialize {
                 format().beginCompound(*this, name);
             for (const auto &t : container) {
                 if (UnitHelper<T>::filter(*this, t)) {
-                    if constexpr (UnitHelper<T>::sIsUnit) {
-                        format().beginExtendedCompound(*this, "Item");
-                    }
+                    UnitHelper<T>::beginExtendedItem(*this, t);
                     UnitHelper<T>::write_creation(*this, t);
                     write(t, "Item");
                 }

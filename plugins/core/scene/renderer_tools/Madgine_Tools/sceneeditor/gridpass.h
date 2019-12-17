@@ -12,15 +12,19 @@ namespace Tools {
 
     struct GridPass : Render::RenderPass {
 
-        GridPass(Render::Camera *camera);
+        GridPass(Render::Camera *camera, int priority);
 
         virtual void render(Render::RenderTarget *target) override;
+
+		virtual int priority() const override;
 
     private:
         Resources::MeshLoader::ResourceType *mMesh = nullptr;
         Render::ProgramLoader::ResourceType *mProgram = nullptr;
 
 		Render::Camera *mCamera;
+
+		int mPriority;
     };
 
 }

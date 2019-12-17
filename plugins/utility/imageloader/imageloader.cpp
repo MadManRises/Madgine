@@ -34,7 +34,6 @@ RegisterType(Engine::Resources::ImageLoader)
 
         ImageData::ImageData(const std::vector<unsigned char> &buffer)
         {
-
             mBuffer = stbi_load_from_memory(buffer.data(), buffer.size(),
                 &mWidth,
                 &mHeight,
@@ -42,9 +41,25 @@ RegisterType(Engine::Resources::ImageLoader)
                 STBI_rgb_alpha);
         }
 
+        ImageData::ImageData(ImageData &&other)
+            : mBuffer(std::exchange(other.mBuffer, nullptr))
+            , mChannels(other.mChannels)
+            , mWidth(other.mWidth)
+            , mHeight(other.mHeight)
+        {
+        }
+
         ImageData::~ImageData()
         {
-            stbi_image_free(mBuffer);
+            clear();
+        }
+
+        void ImageData::clear()
+        {
+            if (mBuffer) {
+                stbi_image_free(mBuffer);
+                mBuffer = nullptr;
+            }
         }
 
         ImageLoader::ImageLoader()
@@ -52,9 +67,15 @@ RegisterType(Engine::Resources::ImageLoader)
         {
         }
 
-        std::shared_ptr<ImageData> ImageLoader::loadImpl(ResourceType *res)
+        bool ImageLoader::loadImpl(ImageData &data, ResourceType *res)
         {
-            return std::make_shared<ImageData>(res->readAsBlob());
+            data = { res->readAsBlob() };
+            return true;
+        }
+
+        void ImageLoader::unloadImpl(ImageData &data)
+        {
+            data.clear();
         }
 
     }

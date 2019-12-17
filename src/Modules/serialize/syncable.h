@@ -22,17 +22,17 @@ namespace Serialize {
         bool isMaster(const SerializableUnitBase *parent) const;
     };
 
-    template <typename PtrOffset>
+    template <typename OffsetPtr>
     struct Syncable : SyncableBase {
     protected:
         BufferedOutStream *getSlaveActionMessageTarget() const
         {
-            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->type()->getIndex(PtrOffset::template offset<SerializableUnitBase, SyncableBase>()));
+            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
         }
         std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(
             const std::set<ParticipantId> &targets = {}) const
         {
-            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->type()->getIndex(PtrOffset::template offset<SerializableUnitBase, SyncableBase>()), targets);
+            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), targets);
         }
         ParticipantId participantId()
         {
@@ -41,7 +41,7 @@ namespace Serialize {
 
         void beginActionResponseMessage(BufferedOutStream *stream) const
         {
-            SyncableBase::beginActionResponseMessage(parent(), parent()->type()->getIndex(PtrOffset::template offset<SerializableUnitBase, SyncableBase>()), stream);
+            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream);
         }
 
         bool isMaster() const
@@ -51,8 +51,13 @@ namespace Serialize {
 
         const SerializableUnitBase *parent() const
         {
-            return PtrOffset::parent(this);
+            return OffsetPtr::parent(this);
         }
+
+		/*bool isActive() const
+        {
+                    return !parent() || parent()->isActive(parent()->type()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
+        }*/
     };
 }
 }

@@ -20,7 +20,7 @@
 namespace Engine {
 namespace Scene {
     class MADGINE_SCENE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-                                             public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>>{
+                                              public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
         SERIALIZABLEUNIT;
 
     public:
@@ -66,7 +66,7 @@ namespace Scene {
 
         SignalSlot::SignalStub<> &clearedSignal();
 
-		void removeQueuedEntities();
+        void removeQueuedEntities();
 
     protected:
         virtual bool init() final;
@@ -83,7 +83,7 @@ namespace Scene {
         size_t mItemCount;
 
     public:
-        SERIALIZABLE_CONTAINER_EXT(mSceneComponents, SceneComponentContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, ,partial<std::set, type_pack<>, type_pack<KeyCompare<std::unique_ptr<SceneComponentBase>>>>::type>::type, MadgineObjectObserver>::type>);
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver>>);
 
     private:
         SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);

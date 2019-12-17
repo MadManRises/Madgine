@@ -10,6 +10,11 @@ namespace TupleUnpacker {
         return (fname)(std::forward<decltype(args)>(args)...); \
     }
 
+#define LIFT_MEMBER(fname)                                                                           \
+    [&](auto &&_this, auto &&... args) -> decltype(auto) {                                           \
+        return (std::forward<decltype(_this)>(_this)->fname)(std::forward<decltype(args)>(args)...); \
+    }
+
     template <size_t I, typename Tuple, size_t... S, size_t... T>
     decltype(auto) expand(Tuple &&tuple, std::index_sequence<S...>, std::index_sequence<T...>)
     {

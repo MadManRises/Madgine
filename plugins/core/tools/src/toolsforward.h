@@ -8,9 +8,6 @@ namespace Engine
 		struct ToolBase;
 		struct ImRoot;
 		class Inspector;
-		struct ImManager;
-
-		class OpenGLImManager;
 
 		struct SceneEditor;
 	}

@@ -90,8 +90,6 @@ namespace Plugins {
     Plugin::LoadState PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
-        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(name + "Tools"))
-            plugin = toolPlugin;
         if (!plugin)
             return Plugin::UNLOADED;
         return loadPlugin(plugin);
@@ -100,9 +98,6 @@ namespace Plugins {
     Plugin::LoadState PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
-        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(name + "Tools"))
-            if (toolPlugin->isLoaded())
-				plugin = toolPlugin;
         if (!plugin)
             return Plugin::UNLOADED;
         return unloadPlugin(plugin);
@@ -181,6 +176,9 @@ namespace Plugins {
                             listener->onPluginLoad(p);
                     }
 
+			        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
+                        return loadPlugin(toolPlugin);
+
                     return Plugin::LOADED;
                 };
                 if (result == Plugin::DELAYED) {
@@ -210,6 +208,10 @@ namespace Plugins {
 
     Plugin::LoadState PluginSection::unloadPlugin(Plugin *p)
     {
+        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
+            if (toolPlugin->isLoaded())
+                p = toolPlugin;
+
         if (p->isLoaded() != Plugin::LOADED)
             return p->isLoaded();
 
@@ -279,7 +281,7 @@ namespace Plugins {
                 continue;
             }
             Plugin &plugin = it->second;
-            bool result = p.second.empty() ? (unloadPlugin(p.first) == Plugin::UNLOADED) : (loadPlugin(p.first) == Plugin::LOADED);
+            bool result = p.second.empty() ? (unloadPlugin(&plugin) == Plugin::UNLOADED) : (loadPlugin(&plugin) == Plugin::LOADED);
             if (!result) {
                 LOG("Could not load Plugin \"" << p.first << "\"!");
             }

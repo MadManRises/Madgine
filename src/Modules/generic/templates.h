@@ -44,6 +44,9 @@ struct select_type<0, type_pack<Head, Tail...>> {
     typedef Head type;
 };
 
+template <size_t I, typename T>
+using select_type_t = typename select_type<I, T>::type;
+
 namespace __generic__impl__ {
     template <typename T, size_t n, size_t... Is>
     struct type_pack_selector
@@ -150,19 +153,49 @@ struct is_instance<U<T...>, U> : public std::true_type {
 template <typename T, template <typename...> typename U>
 constexpr const bool is_instance_v = is_instance<T, U>::value;
 
-template <template <typename...> typename C, typename BeforePack, typename AfterPack = type_pack<>>
-struct partial;
 
-template <template <typename...> typename C, typename... Before, typename... After>
-struct partial<C, type_pack<Before...>, type_pack<After...>> {
-    template <typename... Args>
-    using type = C<Before..., Args..., After...>;
+struct DefaultTag;
+
+template <typename Tag, size_t>
+struct TaggedPlaceholder;
+
+template <size_t N>
+using Placeholder = TaggedPlaceholder<DefaultTag, N>;
+
+template <typename T>
+struct replace {
+    template <typename Tag, typename...>
+	using tagged = T;
+	
+	template <typename...>
+    using type = T;	
 };
 
-template <template <typename...> typename Outer, template <typename...> typename Inner>
-struct elevate {
+template <typename Tag, size_t N> 
+struct replace<TaggedPlaceholder<Tag, N>> {
+	template <typename Tag2, typename... Args>
+	using tagged = std::conditional_t<std::is_same_v<Tag, Tag2>, select_type_t<N, type_pack<Args...>>, TaggedPlaceholder<Tag,N>>;
+
     template <typename... Args>
-    using type = Outer<Inner<Args...>>;
+    using type = tagged<DefaultTag, Args...>;
+};
+
+template <template <typename...> typename C, typename... Ty>
+struct replace<C<Ty...>> {
+	template <typename Tag, typename... Args>
+	using tagged = C<typename replace<Ty>::template tagged<Tag, Args...>...>;
+
+	template <typename... Args>
+    using type = tagged<DefaultTag, Args...>;
+};
+
+template <template <auto, typename...> typename C, auto V, typename... Ty>
+struct replace<C<V, Ty...>> {
+    template <typename Tag, typename... Args>
+    using tagged = C<V, typename replace<Ty>::template tagged<Tag, Args...>...>;
+
+	template <typename... Args>
+    using type = tagged<DefaultTag, Args...>;
 };
 
 }

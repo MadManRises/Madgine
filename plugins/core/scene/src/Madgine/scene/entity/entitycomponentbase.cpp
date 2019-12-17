@@ -59,10 +59,10 @@ namespace Scene {
             return mEntity->app(init);
         }*/
 
-        const ObjectPtr & EntityComponentBase::initTable()
-			{
-				return mInitTable;
-			}
+        const ObjectPtr &EntityComponentBase::initTable()
+        {
+            return mInitTable;
+        }
 
         void EntityComponentBase::moveToEntity(Entity *entity)
         {

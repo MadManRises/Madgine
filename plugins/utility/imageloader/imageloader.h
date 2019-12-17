@@ -11,7 +11,8 @@ namespace Resources {
     
 		ImageLoader();
 
-		std::shared_ptr<ImageData> loadImpl(ResourceType *res) override;
+		bool loadImpl(ImageData &data, ResourceType *res) override;
+        void unloadImpl(ImageData &data) override;
 
 	};
 

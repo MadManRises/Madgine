@@ -39,7 +39,7 @@ RegisterType(ClickBrick::UI::GameManager)
             , mGameWindow(this, "GameView")
             , mScoreLabel(this, "Score")
             , mLifeLabel(this, "Life")
-            , mSceneRenderer(&mCamera)
+            , mSceneRenderer(&mCamera, 50)
         {
         }
 

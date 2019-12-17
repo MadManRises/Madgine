@@ -50,7 +50,7 @@ namespace Resources {
 
         void init();
 
-        ResourceLoaderContainer<std::vector> mCollector;
+        ResourceLoaderContainer<std::vector<Placeholder<0>>> mCollector;
 
 			Filesystem::Path findResourceFile(const std::string &fileName);
 

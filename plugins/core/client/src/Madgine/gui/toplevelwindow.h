@@ -7,10 +7,9 @@
 
 #include "Modules/generic/transformIt.h"
 
-
-#include "Modules/serialize/toplevelserializableunit.h"
 #include "Modules/keyvalue/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
+#include "Modules/serialize/toplevelserializableunit.h"
 
 #include "Modules/serialize/container/controlledcontainer.h"
 
@@ -22,9 +21,35 @@
 
 #include "toplevelwindowcomponent.h"
 
-
 namespace Engine {
 namespace GUI {
+
+    template <typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct TopLevelWindowComponentObserver : MadgineObjectObserver {
+        template <typename It>
+        void operator()(const It &it, int event)
+        {
+            MadgineObjectObserver::operator()(it, event);
+
+            if (event == (AFTER | ACTIVATE_ITEM)) 
+			{
+                auto end = OffsetPtr::parent(this)->mComponents.end();
+                auto next = std::next(it);
+                if (end == next)
+                    OffsetPtr::parent(this)->applyClientSpaceResize();
+                else
+                    OffsetPtr::parent(this)->applyClientSpaceResize(next->get());
+            }
+			if (event == (AFTER | DEACTIVATE_ITEM))
+            {
+                auto end = OffsetPtr::parent(this)->mComponents.end();
+                if (end == it)
+                    OffsetPtr::parent(this)->applyClientSpaceResize();
+                else
+                    OffsetPtr::parent(this)->applyClientSpaceResize(it->get());
+            }
+        }
+    };
 
     class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase,
                                                  public Input::InputListener,
@@ -38,7 +63,6 @@ namespace GUI {
         TopLevelWindow(const Window::WindowSettings &settings);
         virtual ~TopLevelWindow();
 
-
         Rect2i getScreenSpace();
 
         Input::InputHandler *input();
@@ -50,7 +74,6 @@ namespace GUI {
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
         Window::Window *window() const;
-
 
         decltype(auto) components()
         {
@@ -67,8 +90,6 @@ namespace GUI {
         virtual bool frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
-
-
         template <class T>
         T &getWindowComponent(bool init = true)
         {
@@ -76,7 +97,6 @@ namespace GUI {
         }
 
         TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
-
 
         virtual const MadgineObject *parent() const override;
         virtual bool init() override;
@@ -95,17 +115,16 @@ namespace GUI {
 
         void singleFrame();
 
-		void shutdown();
+        void shutdown();
 
         Threading::FrameLoop &frameLoop();
 
-		void applyClientSpaceResize(TopLevelWindowComponentBase *component = nullptr);
+        void applyClientSpaceResize(TopLevelWindowComponentBase *component = nullptr);
 
     protected:
         void onClose() override;
         void onRepaint() override;
         void onResize(size_t width, size_t height) override;
-
 
     private:
         Window::Window *mWindow = nullptr;
@@ -117,11 +136,14 @@ namespace GUI {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        SERIALIZABLE_CONTAINER_EXT(mComponents, TopLevelWindowContainer < PartialObservableContainer<elevate<, Serialize::ControlledContainer, , partial<std::set, type_pack<>, type_pack<TopLevelWindowComponentComparator>>::type>::type, MadgineObjectObserver>::type>);
+        OFFSET_CONTAINER(mComponents, TopLevelWindowContainer<Serialize::ControlledContainer<std::set<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
 
         Threading::FrameLoop mLoop;
 
         const Window::WindowSettings &mSettings;
+
+		template <typename OffsetPtr>
+        friend struct TopLevelWindowComponentObserver;
     };
 
 }

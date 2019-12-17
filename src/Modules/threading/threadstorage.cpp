@@ -2,7 +2,8 @@
 
 #if ENABLE_THREADING
 
-#    include "threadlocal.h"
+#    include "threadstorage.h"
+#include "../generic/any.h"
 
 #    if USE_PTHREAD_THREADLOCAL_STORE
 #        include <pthread.h>
@@ -76,29 +77,29 @@ namespace Threading {
     }
 #    endif
 
-    int ThreadLocalStorage::registerLocalBssVariable(std::function<Any()> ctor)
+    int ThreadStorage::registerLocalBssVariable(std::function<Any()> ctor)
     {
-        sLocalBssVariableConstructors().emplace_back(std::move(ctor), std::vector<Any>{});
+        sLocalBssVariableConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
         return -static_cast<int>(sLocalBssVariableConstructors().size());
     }
 
-    void ThreadLocalStorage::unregisterLocalBssVariable(int index)
+    void ThreadStorage::unregisterLocalBssVariable(int index)
     {
         sLocalBssVariableConstructors()[-(index + 1)] = {};
     }
 
-    int ThreadLocalStorage::registerLocalObjectVariable(std::function<Any()> ctor)
+    int ThreadStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
-        sLocalObjectVariableConstructors().emplace_back(std::move(ctor), std::vector<Any>{});
+        sLocalObjectVariableConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
         return sLocalObjectVariableConstructors().size() - 1;
     }
 
-    void ThreadLocalStorage::unregisterLocalObjectVariable(int index)
+    void ThreadStorage::unregisterLocalObjectVariable(int index)
     {
         sLocalObjectVariableConstructors()[index] = {};
     }
 
-    const Any &ThreadLocalStorage::localVariable(int index)
+    const Any &ThreadStorage::localVariable(int index)
     {
         size_t self = sLocalVariables().mIndex;
         std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &constructors = index < 0 ? sLocalBssVariableConstructors() : sLocalObjectVariableConstructors();
@@ -112,7 +113,7 @@ namespace Threading {
         return p.second.at(self);
     }
 
-    void ThreadLocalStorage::init(bool bss)
+    void ThreadStorage::init(bool bss)
     {
         if (bss) {
 
@@ -134,7 +135,7 @@ namespace Threading {
         }
     }
 
-    void ThreadLocalStorage::finalize(bool bss)
+    void ThreadStorage::finalize(bool bss)
     {
         if (bss) {
             for (std::pair<std::function<Any()>, std::vector<Any>> &p : sLocalBssVariableConstructors()) {

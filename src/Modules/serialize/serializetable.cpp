@@ -10,6 +10,8 @@
 
 #include "serializableunit.h"
 
+#include "serializemanager.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -24,9 +26,14 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in) const
+    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags) const
     {
         Formatter &format = in.format();
+
+        bool wasActive = unit->mActiveIndex > 0; //Not exact, but active unit with 0 members doesn't matter
+        if (wasActive) {
+            setActive(unit, false, false);
+        }
 
         if (format.mSupportNameLookup) {
             std::string name = format.lookupFieldName(in);
@@ -48,7 +55,6 @@ namespace Serialize {
                 name = format.lookupFieldName(in);
             }
         } else {
-
             const SerializeTable *table = this;
             while (table) {
                 for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
@@ -57,6 +63,15 @@ namespace Serialize {
                 table = table->mBaseType ? &table->mBaseType() : nullptr;
             }
         }
+
+		if (!(flags & StateTransmissionFlags_DontApplyMap)) {
+            assert(in.manager());
+            applySerializableMap(unit, in.manager()->slavesMap());
+        }
+
+		if (wasActive) {
+            setActive(unit, true, false);
+		}
     }
 
     void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, size_t index) const
@@ -91,15 +106,25 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::setActive(SerializableUnitBase *unit, bool b) const
+    void SerializeTable::setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const
     {
+        if (active)
+            assert(unit->mActiveIndex == 0);
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mSetActive(unit, b);
+                if (active)
+                    ++unit->mActiveIndex;
+                else {
+                    assert(unit->mActiveIndex > 0);
+                    --unit->mActiveIndex;
+                }
+                it->second.mSetActive(unit, active, existenceChanged);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
+        if (!active)
+            assert(unit->mActiveIndex == 0);
     }
 
     bool SerializeTable::isInstance(SerializableUnitBase *unit) const
@@ -121,7 +146,7 @@ namespace Serialize {
         while (!tables.empty()) {
             table = tables.top();
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                if (it->second.mOffset() == offset) {                    
+                if (it->second.mOffset() == offset) {
                     return index;
                 }
                 ++index;
@@ -144,7 +169,7 @@ namespace Serialize {
         while (!tables.empty()) {
             table = tables.top();
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                if (index == 0){
+                if (index == 0) {
                     return it->second;
                 }
                 --index;

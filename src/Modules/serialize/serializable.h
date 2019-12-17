@@ -2,36 +2,24 @@
 
 namespace Engine {
 namespace Serialize {
-    struct MODULES_EXPORT SerializableBase {
-        SerializableBase();
-        SerializableBase(const SerializableBase &);
-        SerializableBase(SerializableBase &&) noexcept;
-        ~SerializableBase();
 
-        SerializableBase &operator=(const SerializableBase &);
+    struct SerializableBase {
+        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map) {};
+        void setDataSynced(bool b) {};
 
-        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map);
-        void setDataSynced(bool b);
-        void setActive(bool active);
-
-		void writeCreationData(SerializeOutStream &) const;
-
-    protected:
-        bool isActive() const;
-
-    private:
-        bool mActive = false;
+        void writeCreationData(SerializeOutStream &) const {};
     };
 
     template <typename OffsetPtr>
     struct Serializable : SerializableBase {
-        bool isActive() const
-        {
-            return !OffsetPtr::parent(this) || SerializableBase::isActive();
-        }
         bool isSynced() const
         {
             return OffsetPtr::parent(this) && OffsetPtr::parent(this)->isSynced();
+        }
+
+        bool isActive() const
+        {
+            return !OffsetPtr::parent(this) || OffsetPtr::parent(this)->isActive(OffsetPtr::parent(this)->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
         }
     };
 }

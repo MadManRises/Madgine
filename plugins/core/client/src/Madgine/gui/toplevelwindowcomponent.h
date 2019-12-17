@@ -27,10 +27,11 @@ namespace GUI {
 
         virtual const char *key() const = 0;
 
-        virtual void calculateAvailableScreenSpace(Window::Window *w, Vector3i &pos, Vector3i &size);
-        virtual void onResize(size_t width, size_t height);
+        virtual void onResize(const Rect2i &space);
 
-        Rect2i getScreenSpace() const;        
+        Rect2i getScreenSpace() const;      
+		const Rect2i &getClientSpace() const;
+        virtual Rect2i getChildClientSpace();
 
         template <class T>
         T &getWindowComponent(bool init = true)
@@ -42,12 +43,9 @@ namespace GUI {
 
         const int mPriority;
 
-		virtual Rect2i getChildClientSpace();
-
-		Rect2i mClientSpace;
-
     protected:
         TopLevelWindow &mWindow;		
+		Rect2i mClientSpace;
     };
 
     struct TopLevelWindowComponentComparator {

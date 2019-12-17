@@ -19,7 +19,7 @@ namespace Tools {
 
     struct SceneView : ScopeBase {
 
-        SceneView(SceneEditor *editor, Render::RenderContext *renderer, const ImManager &manager);
+        SceneView(SceneEditor *editor, Render::RenderContext *renderer);
         SceneView(SceneView &&) = default;
         ~SceneView();
 
@@ -30,7 +30,6 @@ namespace Tools {
     private:
         Render::Camera mCamera;
         std::unique_ptr<Render::RenderTarget> mRenderTarget;
-        const ImManager &mManager;
 
         SceneEditor *mEditor;
 

@@ -12,10 +12,11 @@
 namespace Engine {
 namespace Render {
 
-    Im3DRenderPass::Im3DRenderPass(Camera *camera)
+    Im3DRenderPass::Im3DRenderPass(Camera *camera, int priority)
         : mCamera(camera)
+        , mPriority(priority)
     {
-        mProgram = ProgramLoader::getSingleton().getOrCreateManual("scene", [](const ProgramLoader::ResourceType *res) {
+        mProgram = ProgramLoader::getSingleton().getOrCreateManual("scene", {}, [](const ProgramLoader::ResourceType *res) {
             return ProgramLoader::getSingleton().create("scene");
         });
 
@@ -37,7 +38,7 @@ namespace Render {
 
         ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasDistanceField", false);
 
-		ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "m", Matrix4::IDENTITY);
+        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "m", Matrix4::IDENTITY);
         ProgramLoader::getSingleton().setUniform(*mProgram->loadData(),
             "anti_m",
             Matrix3::IDENTITY);
@@ -57,6 +58,11 @@ namespace Render {
                 target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices2[i].data(), p.second.mVertices2[i].size(), p.second.mIndices2[i].data(), p.second.mIndices2[i].size(), p.first);
             }
         }
+    }
+
+    int Im3DRenderPass::priority() const
+    {
+        return mPriority;
     }
 
 }

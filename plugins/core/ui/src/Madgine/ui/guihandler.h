@@ -1,62 +1,48 @@
 #pragma once
 
-#include "handler.h"
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
+#include "handler.h"
 
-namespace Engine
-{
-	namespace UI
-	{
-    class MADGINE_UI_EXPORT GuiHandlerBase : public Handler
-		{
-		public:
-			enum class WindowType
-			{
-				MODAL_OVERLAY,
-				NONMODAL_OVERLAY,
-				ROOT_WINDOW
-			};
+namespace Engine {
+namespace UI {
+    class MADGINE_UI_EXPORT GuiHandlerBase : public Handler {
+    public:
+        enum class WindowType {
+            MODAL_OVERLAY,
+            NONMODAL_OVERLAY,
+            ROOT_WINDOW
+        };
 
-			GuiHandlerBase(UIManager &ui, WindowType type);
+        GuiHandlerBase(UIManager &ui, WindowType type);
 
+        virtual void open();
+        virtual void close();
+        bool isOpen() const;
 
-			virtual void open();
-			virtual void close();
-			bool isOpen() const;
+        bool isRootWindow() const;
 
-			bool isRootWindow() const;
+        Threading::ContextMask context() const;
 
-			Threading::ContextMask context() const;
+        GuiHandlerBase &getSelf(bool = true);
 
-			GuiHandlerBase &getSelf(bool = true);
+    protected:
+        void setContext(Threading::ContextMask context);
 
-		protected:
+    private:
+        const WindowType mType;
 
-			void setContext(Threading::ContextMask context);
-
-
-		private:
-
-			const WindowType mType;
-
-
-			Threading::ContextMask mContext;
-		};
-	}
+        Threading::ContextMask mContext;
+    };
+}
 }
 
 DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandler, GuiHandlerBase, UIManager &);
 
-namespace Engine 
-{
-	namespace UI
-	{
+namespace Engine {
+namespace UI {
 
-		template <typename T>
-		using GuiHandler = GuiHandlerComponent<T>;
+    template <typename T>
+    using GuiHandler = GuiHandlerComponent<T>;
 
-	}
 }
-
-
-
+}

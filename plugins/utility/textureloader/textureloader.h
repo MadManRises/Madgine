@@ -2,6 +2,8 @@
 
 #include "Modules/resources/resourceloader.h"
 
+#include "Modules/threading/threadstorage.h"
+
 namespace Engine {
 namespace Render {
 
@@ -15,7 +17,7 @@ namespace Render {
 
     struct Texture;
 
-    struct MADGINE_TEXTURELOADER_EXPORT TextureLoader : Resources::VirtualResourceLoaderBase<TextureLoader, Texture, Resources::ThreadLocalResource> {
+    struct MADGINE_TEXTURELOADER_EXPORT TextureLoader : Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::vector<Placeholder<0>>, Threading::ThreadStorage> {
 
         TextureLoader();
 

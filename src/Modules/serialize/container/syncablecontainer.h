@@ -26,14 +26,14 @@ namespace Serialize {
         using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
     };
 
-    template <typename PtrOffset, typename C, typename Config, typename Observer = NoOpFunctor>
-    struct SyncableContainerImpl : SerializableContainerImpl<PtrOffset, C>, Syncable<PtrOffset>, private Observer {
+    template <typename C, typename Config, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
 
         struct traits : _traits {
 
-            typedef SyncableContainerImpl<PtrOffset, C, Config, Observer> container;
+            typedef SyncableContainerImpl<C, Config, Observer, OffsetPtr> container;
 
             template <class... _Ty>
             static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
@@ -44,7 +44,7 @@ namespace Serialize {
 
         typedef size_t TransactionId;
 
-        typedef SerializableContainerImpl<PtrOffset, C> Base;
+        typedef SerializableContainerImpl<C, Observer, OffsetPtr> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
@@ -73,18 +73,13 @@ namespace Serialize {
 
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
-        Observer &observer()
-        {
-            return *this;
-        }
-
         template <class T>
-        SyncableContainerImpl<PtrOffset, C, Config, Observer> &operator=(T &&arg)
+        SyncableContainerImpl<C, Config, Observer, OffsetPtr> &operator=(T &&arg)
         {
             if (this->isMaster()) {
                 bool wasActive = beforeReset();
                 Base::operator=(std::forward<T>(arg));
-                afterReset(wasActive, this->end());
+                afterReset(wasActive);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     Base temp(std::forward<T>(arg));
@@ -105,8 +100,8 @@ namespace Serialize {
         {
             bool wasActive = beforeReset();
             Base::Base::clear();
-            this->mActiveIterator = this->begin();
-            afterReset(wasActive, this->end());
+            this->mActiveIterator = Base::Base::begin();
+            afterReset(wasActive);
         }
 
         template <class... _Ty>
@@ -171,7 +166,7 @@ namespace Serialize {
             if (this->isMaster()) {
                 bool b = beforeRemove(where);
                 it = Base::erase_intern(where);
-                afterRemove(b);
+                afterRemove(b, it);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
@@ -225,15 +220,9 @@ namespace Serialize {
         template <typename Creator = DefaultCreator<>>
         void readState(SerializeInStream &in, const char *name, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
-            decltype(this->size()) count;
-            in >> count;
             bool wasActive = beforeReset();
-            Base::Base::clear();
-            this->mActiveIterator = Base::Base::begin();
-            while (count--) {
-                this->read_item_where_intern(in, this->end(), std::forward<Creator>(creator));
-            }
-            afterReset(wasActive, this->end(), answerTarget, answerId);
+            Base::readState_intern(in, name, std::forward<Creator>(creator));
+            afterReset(wasActive, answerTarget, answerId);
         }
 
         // Inherited via Observable
@@ -329,7 +318,7 @@ namespace Serialize {
                 it.first = this->read_iterator(in);
                 b = beforeRemove(it.first, partId, id);
                 it.first = Base::erase_intern(it.first);
-                afterRemove(b);
+                afterRemove(b, it.first);
                 it.second = true;
                 break;
             case REMOVE_RANGE: {
@@ -337,7 +326,7 @@ namespace Serialize {
                 iterator to = this->read_iterator(in);
                 size_t count = beforeRemoveRange(from, to, partId, id);
                 it.first = Base::erase_intern(from, to);
-                afterRemoveRange(count);
+                afterRemoveRange(count, it.first);
                 it.second = true;
                 break;
             }
@@ -351,32 +340,10 @@ namespace Serialize {
             return it;
         }
 
-        void setActive(bool active)
-        {
-            if (!active) {
-                while (this->mActiveIterator != this->begin()) {
-                    --this->mActiveIterator;
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->mActiveIterator, BEFORE | REMOVE_ITEM);
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
-                    this->setItemActive(*this->mActiveIterator, active);
-                }
-            }
-            Serializable<PtrOffset>::setActive(active);
-            if (active) {
-                while (this->mActiveIterator != this->end()) {
-                    auto it = this->mActiveIterator;
-                    ++this->mActiveIterator;
-                    this->setItemActive(*it, active);
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | INSERT_ITEM);
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, AFTER | INSERT_ITEM);
-                }
-            }
-        }
-
     private:
         void beforeInsert(const iterator &it)
         {
-            TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | INSERT_ITEM);
+            Base::beforeInsert(it);
         }
 
         void afterInsert(bool inserted, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
@@ -393,15 +360,9 @@ namespace Serialize {
                         this->write_item(*out, it);
                         out->endMessage();
                     }
-                    this->setItemDataSynced(*it, true);
-                }
-                if (this->isItemActive(it)) {
-                    this->setItemActive(*it, true);
                 }
             }
-            if (this->isItemActive(it)) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
-            }
+            Base::afterInsert(inserted, it);
         }
 
         bool beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
@@ -417,21 +378,13 @@ namespace Serialize {
                     this->write_iterator(*out, it);
                     out->endMessage();
                 }
-                this->setItemDataSynced(*it, false);
             }
-            if (this->isItemActive(it)) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | REMOVE_ITEM);
-                this->setItemActive(*it, false);
-                return true;
-            }
-            return false;
+            return Base::beforeRemove(it);
         }
 
-        void afterRemove(bool b)
+        void afterRemove(bool b, const iterator &it)
         {
-            if (b) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
-            }
+            Base::afterRemove(b, it);
         }
 
         size_t beforeRemoveRange(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
@@ -448,36 +401,22 @@ namespace Serialize {
                     this->write_iterator(*out, to);
                     out->endMessage();
                 }
-                for (iterator it = from; it != to; ++it) {
-                    this->setItemDataSynced(*it, false);
-                }
             }
 
-            size_t count = 0;
-            for (iterator it = from; it != to && this->isItemActive(it); ++it) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, BEFORE | REMOVE_ITEM);
-                this->setItemActive(*it, false);
-                ++count;
-            }
-            return count;
+            return Base::beforeRemoveRange(from, to);
         }
 
-        void afterRemoveRange(size_t count)
+        void afterRemoveRange(size_t count, const iterator &it)
         {
-            for (size_t i = 0; i < count; ++i) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), AFTER | REMOVE_ITEM);
-            }
+            Base::afterRemoveRange(count, it);
         }
 
         bool beforeReset()
         {
-            if (this->isActive()) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), this->end(), BEFORE | RESET);
-            }
             return Base::beforeReset();
         }
 
-        void afterReset(bool wasActive, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        void afterReset(bool wasActive, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
                 for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
@@ -492,9 +431,6 @@ namespace Serialize {
                 }
             }
             Base::afterReset(wasActive);
-            if (wasActive) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), it, AFTER | RESET);
-            }
         }
 
         iterator read_iterator(SerializeInStream &in)
@@ -506,7 +442,7 @@ namespace Serialize {
             } else {
                 int i;
                 in >> i;
-                return std::next(this->begin(), i);
+                return std::next(Base::Base::begin(), i);
             }
         }
 
@@ -515,7 +451,7 @@ namespace Serialize {
             if constexpr (_traits::sorted) {
                 out << kvKey(*it);
             } else {
-                out << static_cast<int>(std::distance(this->begin(), it));
+                out << static_cast<int>(std::distance(Base::Base::begin(), it));
             }
         }
 
@@ -539,10 +475,8 @@ namespace Serialize {
             if constexpr (!_traits::sorted) {
                 write_iterator(out, it);
             }
-            this->write_item(out, t);
+            Base::write_item(out, t);
         }
-
-        using Base::write_item;
 
     private:
         std::list<Transaction> mTransactions;
@@ -551,13 +485,10 @@ namespace Serialize {
         TransactionId mTransactionCounter = 0;
     };
 
-    template <typename OffsetPtr, typename C, typename Config, typename Observer = NoOpFunctor>
-    using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<OffsetPtr, C, Config, Observer>>;
+    template <typename C, typename Config, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<C, Config, Observer, OffsetPtr>>;
 
-#define SYNCABLE_CONTAINER(Name, ...)                                                \
-    DECLARE_COMBINED_OFFSET(Name)                                                    \
-    ::Engine::Serialize::SyncableContainer<COMBINED_OFFSET(Name), __VA_ARGS__> Name; \
-    DEFINE_COMBINED_OFFSET(Name)
+#define SYNCABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 }

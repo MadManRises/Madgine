@@ -26,6 +26,18 @@ SERIALIZETABLE_END(Engine::Widgets::SceneWindow)
 namespace Engine {
 namespace Widgets {
 
+    SceneWindow::SceneWindow(const std::string &name, WidgetBase *parent)
+        : Widget(name, parent)
+    {
+        mTarget = manager().window().getRenderer()->createRenderTexture();
+    }
+
+    SceneWindow::SceneWindow(const std::string &name, WidgetManager &manager)
+        : Widget(name, manager)
+    {
+        mTarget = manager.window().getRenderer()->createRenderTexture();
+    }
+
     SceneWindow::~SceneWindow()
     {
     }
@@ -63,10 +75,7 @@ namespace Widgets {
 
     void SceneWindow::sizeChanged(const Vector3i &pixelSize)
     {
-        if (!mTarget)
-            mTarget = manager().window().getRenderer()->createRenderTexture(pixelSize.xy());
-        else
-            mTarget->resize(pixelSize.xy());
+        mTarget->resize(pixelSize.xy());
     }
 
     WidgetClass SceneWindow::getClass() const

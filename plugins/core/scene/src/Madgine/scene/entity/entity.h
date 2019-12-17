@@ -6,17 +6,15 @@
 
 #include "Modules/serialize/container/syncablecontainer.h"
 
-
 namespace Engine {
 namespace Scene {
     namespace Entity {
 
-		struct EntityComponentObserver {
-            void operator()(const SetIterator<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>> &it, int op);
+        struct EntityComponentObserver {
+            void operator()(const SetIterator<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>::iterator> &it, int op);
         };
 
-        class MADGINE_SCENE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase
-        {
+        class MADGINE_SCENE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase {
             SERIALIZABLEUNIT;
 
         public:
@@ -51,9 +49,10 @@ namespace Scene {
 
             EntityComponentBase *getComponent(const std::string &name);
 
-			decltype(auto) components() {
+            decltype(auto) components()
+            {
                 return uniquePtrToPtr(mComponents);
-			}
+            }
 
             template <class T>
             bool hasComponent()
@@ -93,15 +92,15 @@ namespace Scene {
         protected:
             EntityComponentBase *addComponentSimple(const std::string &name, const ObjectPtr &table = {});
 
-		public:
+        public:
             std::string mName;
 
         private:
             std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
-			            
+
             bool mLocal;
 
-			SYNCABLE_CONTAINER(mComponents, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
+            SYNCABLE_CONTAINER(mComponents, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
 
             SceneManager &mSceneManager;
         };

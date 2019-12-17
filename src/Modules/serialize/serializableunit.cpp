@@ -83,13 +83,9 @@ namespace Serialize {
             readId(in);
         if (name)
             in.format().beginCompound(in, name);
-        mType->readState(this, in);
+        mType->readState(this, in, flags);
         if (name)
             in.format().endCompound(in, name);
-        if (!(flags & StateTransmissionFlags_DontApplyMap)) {            
-			assert(in.manager());
-            mType->applySerializableMap(this, in.manager()->slavesMap());
-        }
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)
@@ -194,7 +190,7 @@ namespace Serialize {
     void SerializableUnitBase::setSynced(bool b)
     {
         setDataSynced(b);
-        setActive(b);
+        setActive(b, true);
     }
 
     void SerializableUnitBase::setDataSynced(bool b)
@@ -204,10 +200,15 @@ namespace Serialize {
         mType->setDataSynced(this, b);
     }
 
-    void SerializableUnitBase::setActive(bool active)
+    void SerializableUnitBase::setActive(bool active, bool existenceChanged)
     {
-        assert(mSynced == active);
-        mType->setActive(this, active);
+        //assert(mSynced == active);
+        mType->setActive(this, active, existenceChanged);
+    }
+
+    bool SerializableUnitBase::isActive(size_t index) const
+    {
+        return index < mActiveIndex;        
     }
 
     void SerializableUnitBase::sync()
@@ -230,7 +231,7 @@ namespace Serialize {
         return mSlaveId == 0;
     }
 
-    const SerializeTable *SerializableUnitBase::type() const
+    const SerializeTable *SerializableUnitBase::serializeType() const
     {
         return mType;
     }

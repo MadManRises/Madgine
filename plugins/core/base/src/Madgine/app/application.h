@@ -79,7 +79,7 @@ namespace App {
         int mGlobalAPIInitCounter;
 
     public:
-        GlobalAPIContainer<std::vector> mGlobalAPIs;
+        GlobalAPIContainer<std::vector<Placeholder<0>>> mGlobalAPIs;
     };
 }
 }

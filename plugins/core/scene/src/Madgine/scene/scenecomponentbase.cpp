@@ -66,7 +66,7 @@ namespace Engine
 
                 const char *SceneComponentBase::key() const
                 {
-                    return type()->mTypeName;
+                    return serializeType()->mTypeName;
                 }
 
 		SceneComponentBase& SceneComponentBase::getSceneComponent(size_t i, bool init)

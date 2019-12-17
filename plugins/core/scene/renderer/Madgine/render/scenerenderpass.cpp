@@ -17,8 +17,9 @@
 namespace Engine {
 namespace Render {
 
-    SceneRenderPass::SceneRenderPass(Camera *camera)
+    SceneRenderPass::SceneRenderPass(Camera *camera, int priority)
         : mCamera(camera)
+        , mPriority(priority)
     {
         mProgram = ProgramLoader::getSingleton().getOrCreateManual("scene", [](const ProgramLoader::ResourceType *res) {
             return ProgramLoader::getSingleton().create("scene");
@@ -73,6 +74,11 @@ namespace Render {
                 }
             }
         }
+    }
+
+    int SceneRenderPass::priority() const
+    {
+        return mPriority;
     }
 
 }

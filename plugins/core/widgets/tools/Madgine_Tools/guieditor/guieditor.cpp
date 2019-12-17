@@ -146,11 +146,7 @@ namespace Tools {
             std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
 
-                mWindow->readState(*in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap);
-
-                mWidgetManager->calculateWindowGeometries();
-
-                mWindow->applySerializableMap(file.slavesMap());
+                mWindow->readState(*in);
 
                 mWidgetManager->openStartupWidget();
             }
@@ -165,7 +161,7 @@ namespace Tools {
 
             ImDrawList *background = ImGui::GetBackgroundDrawList(ImGui::GetMainViewport());
 
-            Rect2i screenSpace = mWidgetManager->mClientSpace;
+            Rect2i screenSpace = mWidgetManager->getClientSpace();
 
             Vector3i windowPos = {
                 mWidgetManager->window().window()->renderX(), mWidgetManager->window().window()->renderY(), 0

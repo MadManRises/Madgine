@@ -15,7 +15,7 @@ namespace Serialize {
 
 		void (*mApplySerializableMap)(SerializableUnitBase *, const std::map<size_t, SerializableUnitBase *> &);
         void (*mSetDataSynced)(SerializableUnitBase *, bool);
-        void (*mSetActive)(SerializableUnitBase *, bool);
+        void (*mSetActive)(SerializableUnitBase *, bool, bool);
     };
 
 }

@@ -3,8 +3,8 @@
 #include "../../generic/tupleunpacker.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
+#include "../../generic/offsetptr.h"
 #include "tupleserialize.h"
-#include "offset.h"
 
 namespace Engine {
 namespace Serialize {
@@ -15,8 +15,8 @@ namespace Serialize {
             static constexpr bool sCallByMasterOnly = callByMasterOnly;
         };
 
-        template <auto f, typename PtrOffset, class Config, class R, class T, class... _Ty>
-        class ActionImpl : public Syncable<PtrOffset> {
+        template <auto f, class Config, typename OffsetPtr, class R, class T, class... _Ty>
+        class ActionImpl : public Syncable<OffsetPtr> {
         public:
             ActionImpl()
             {
@@ -66,7 +66,7 @@ namespace Serialize {
                     assert(targets.empty());
                 }
 
-                (PtrOffset::parent(this)->*f)(args...);
+                (OffsetPtr::parent(this)->*f)(args...);
             }
 
             void tryCall(ParticipantId id, const std::set<ParticipantId> &targets, _Ty... args)
@@ -101,14 +101,12 @@ namespace Serialize {
     /*template <typename F, F f, class C>
 		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
 
-    template <typename PtrOffset, auto f, class C>
-    class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, PtrOffset, C>::type {
-        using MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, PtrOffset, C>::type::type;
+    template <auto f, class C, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C, OffsetPtr>::type {
+        using MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C, OffsetPtr>::type::type;
     };
 
-#define ACTION(Name, ...)                                                                                 \
-    ::Engine::Serialize::Action<::Engine::Serialize::SyncableOffsetPtr<Self, __LINE__>, __VA_ARGS__> Name; \
-    DEFINE_SYNCABLE_OFFSET(Name)
+#define ACTION(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Action<__VA_ARGS__>)
 
 }
 }

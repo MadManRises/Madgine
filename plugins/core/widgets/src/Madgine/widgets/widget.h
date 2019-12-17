@@ -49,7 +49,6 @@ namespace Widgets {
         Vector3 getActualPosition() const;
 
         void updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
-        void screenSpaceChanged(const Rect2i &screenSpace);
 
         virtual WidgetClass getClass() const;
 

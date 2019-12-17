@@ -19,7 +19,7 @@ namespace Serialize {
         SyncManager(const std::string &name);
         SyncManager(const SerializeManager &) = delete;
         SyncManager(SyncManager &&) noexcept;
-        virtual ~SyncManager();
+        ~SyncManager();
 
         void readMessage(BufferedInOutStream &);
 
@@ -55,7 +55,7 @@ namespace Serialize {
 
         void removeAllStreams();
         StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
-        virtual void removeSlaveStream();
+        void removeSlaveStream();
         bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
         bool moveMasterStream(ParticipantId streamId, SyncManager *target);
 

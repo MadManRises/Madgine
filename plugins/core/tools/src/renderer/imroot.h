@@ -37,7 +37,7 @@ namespace Tools {
     private:
         const MadgineObject *mParent; //TODO Find proper solution
 		
-		ToolsContainer<PartialObservableContainer<std::vector, MadgineObjectObserver>::type> mCollector;		
+		ToolsContainer<ObservableContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>> mCollector;		
 
 		ImGuiDockNode *mDockNode = nullptr;
     };

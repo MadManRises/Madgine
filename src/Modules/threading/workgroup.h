@@ -1,12 +1,12 @@
 #pragma once
 
-#include "threadlocal.h"
-
 #if ENABLE_THREADING
 
-#include "../generic/tupleunpacker.h"
-#include "../signalslot/task.h"
-#include "Interfaces/threading/threadapi.h"
+#    include "../generic/tupleunpacker.h"
+#    include "../signalslot/task.h"
+#    include "Interfaces/threading/threadapi.h"
+#    include "global.h"
+#    include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {
@@ -16,7 +16,7 @@ namespace Threading {
         WorkGroup(const WorkGroup &) = delete;
         ~WorkGroup();
 
-		void operator=(const WorkGroup &) = delete;
+        void operator=(const WorkGroup &) = delete;
 
         template <typename F, typename... Args>
         void createThread(F &&main, Args &&... args)
@@ -38,13 +38,6 @@ namespace Threading {
         void checkThreadStates();
 
         const std::string &name() const;
-
-        static int registerLocalBssVariable(std::function<Any()> ctor);
-        static void unregisterLocalBssVariable(int index);
-        static int registerLocalObjectVariable(std::function<Any()> ctor);
-        static void unregisterLocalObjectVariable(int index);
-
-        static const Any &localVariable(int index);
 
         static WorkGroup &self();
         static bool isInitialized();
@@ -83,21 +76,24 @@ namespace Threading {
         }
 
     private:
+        friend struct WorkGroupStorage;
+
         size_t mInstanceCounter = 0;
         std::string mName;
 
         std::vector<std::future<int>> mSubThreads;
         std::vector<SignalSlot::TaskHandle> mThreadInitializers;
-
     };
 
     template <typename T>
-    using WorkgroupLocal = ThreadLocal<T, WorkGroup>;
+    using WorkgroupLocal = Global<T, WorkGroupStorage>;
 
 }
 }
 
 #else
+
+#    include "../generic/proxy.h"
 
 namespace Engine {
 namespace Threading {

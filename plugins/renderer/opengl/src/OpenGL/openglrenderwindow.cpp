@@ -368,7 +368,7 @@ namespace Render {
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
 
-		mTempBuffer = {};
+        mTempBuffer = {};
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
@@ -383,6 +383,8 @@ namespace Render {
             }
         }
 
+        mTempBuffer.reset();
+
         shutdownWindow(mWindow, mContext, mReusedContext);
     }
 
@@ -390,12 +392,9 @@ namespace Render {
     {
         PROFILE();
 
-        Vector2i screenSize { mWindow->renderWidth(), mWindow->renderHeight() };
-        Vector2i screenPos { mWindow->renderX(), mWindow->renderY() };
-
         mWindow->beginFrame();
 
-		Engine::Render::makeCurrent(mWindow, mContext);
+        Engine::Render::makeCurrent(mWindow, mContext);
 
         OpenGLRenderTarget::beginFrame();
     }

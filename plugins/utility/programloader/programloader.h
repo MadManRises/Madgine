@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Modules/resources/resourceloader.h"
+#include "Modules/threading/threadstorage.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, Resources::ThreadLocalResource> {
+    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::ThreadStorage> {
         ProgramLoader();
 
 		virtual std::shared_ptr<Program> create(const std::string &name) = 0;

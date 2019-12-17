@@ -39,17 +39,19 @@ namespace GUI {
         return *this;
     }
 
-    void TopLevelWindowComponentBase::calculateAvailableScreenSpace(Window::Window *w, Vector3i &pos, Vector3i &size)
+    void TopLevelWindowComponentBase::onResize(const Rect2i &space)
     {
-    }
-
-    void TopLevelWindowComponentBase::onResize(size_t width, size_t height)
-    {
+        mClientSpace = space;
     }
 
     Rect2i TopLevelWindowComponentBase::getScreenSpace() const
     {
         return mWindow.getScreenSpace();
+    }
+
+    const Rect2i &TopLevelWindowComponentBase::getClientSpace() const
+    {
+        return mClientSpace;
     }
 
     TopLevelWindowComponentBase &TopLevelWindowComponentBase::getWindowComponent(size_t i, bool init)

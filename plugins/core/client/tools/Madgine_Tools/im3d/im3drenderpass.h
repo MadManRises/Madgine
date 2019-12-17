@@ -8,14 +8,18 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_TOOLS_EXPORT Im3DRenderPass : RenderPass {
-        Im3DRenderPass(Camera *camera);
+        Im3DRenderPass(Camera *camera, int priority);
 
         virtual void render(RenderTarget *target) override;
+
+		virtual int priority() const override;
 
     private:
         ProgramLoader::ResourceType *mProgram;
 
         Camera *mCamera;
+
+		int mPriority;
     };
 
 }

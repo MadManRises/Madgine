@@ -19,20 +19,20 @@ namespace Resources {
     class ThreadLocalResource;
 }
 
-template <template <class...> class C, class _Base, class... _Ty>
-struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
+template <typename C, class _Base, class... _Ty>
+struct UniqueComponentContainerImpl : C {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
-    typedef C<std::unique_ptr<Base>> Container;
+    typedef C Container;
 
     struct traits : container_traits<Container> {
     };
 
     typedef typename traits::const_iterator const_iterator;
 
-    UniqueComponentContainer(_Ty... arg)
+    UniqueComponentContainerImpl(_Ty... arg)
 #if ENABLE_PLUGINS
         : mUpdateSlot(this)
         , mArg(arg...)
@@ -40,7 +40,7 @@ struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
     {
         size_t count = Registry::sComponents().size();
         mSortedComponents.reserve(count);
-        if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
+        if constexpr (is_instance_v<C, std::vector>) {
             this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {
@@ -53,8 +53,8 @@ struct UniqueComponentContainer : C<std::unique_ptr<_Base>> {
 #endif
     }
 
-    UniqueComponentContainer(const UniqueComponentContainer &) = delete;
-    void operator=(const UniqueComponentContainer &) = delete;
+    UniqueComponentContainerImpl(const UniqueComponentContainerImpl &) = delete;
+    void operator=(const UniqueComponentContainerImpl &) = delete;
 
     const_iterator begin() const
     {
@@ -136,7 +136,7 @@ protected:
         if (add) {
             assert(this->size() == info->mBaseIndex);
             mSortedComponents.reserve(info->mBaseIndex + vals.size());
-            if constexpr (std::is_same_v<C<F>, std::vector<F>>) {
+            if constexpr (is_instance_v<C, std::vector>) {
                 this->reserve(info->mBaseIndex + vals.size());
             }
             for (F f : vals) {
@@ -156,10 +156,14 @@ protected:
 
 private:
     //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainer<C, Base, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentContainerImpl<C, Base, _Ty...>::updateComponents> mUpdateSlot;
     std::tuple<_Ty...> mArg;
 
 #endif
 };
+
+
+template <typename C, class _Base, class... _Ty>
+using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<_Base>>, _Base, _Ty...>;
 
 }

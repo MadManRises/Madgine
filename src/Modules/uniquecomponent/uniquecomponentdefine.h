@@ -8,7 +8,7 @@
 #define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base,*/...)                                \
     namespace ns {                                                                        \
     using prefix##Collector = Engine::UniqueComponentCollector<__VA_ARGS__>;              \
-    template <template <typename...> typename C>                                          \
+    template <typename C>                                                                 \
     using prefix##Container = Engine::UniqueComponentContainer<C, __VA_ARGS__>;           \
     using prefix##Selector = Engine::UniqueComponentSelector<__VA_ARGS__>;                \
     template <typename T>                                                                 \

@@ -18,13 +18,14 @@
 namespace Engine {
 namespace Tools {
 
-    GridPass::GridPass(Render::Camera *camera) : mCamera(camera)
+    GridPass::GridPass(Render::Camera *camera, int priority)
+        : mCamera(camera)
+        , mPriority(priority)
     {
 
         mProgram = Render::ProgramLoader::getSingleton().getOrCreateManual("grid", [](Render::ProgramLoader::ResourceType *res) {
             return Render::ProgramLoader::getSingleton().create("grid");
         });
-
 
         mMesh = Resources::MeshLoader::getSingleton().getOrCreateManual("grid", [](Resources::MeshLoader::ResourceType *res) {
             Compound<Render::VertexPos_4D> vertices[] = {
@@ -48,11 +49,16 @@ namespace Tools {
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
 
-		std::shared_ptr<Render::Program> program = mProgram->loadData();
+        std::shared_ptr<Render::Program> program = mProgram->loadData();
         Render::ProgramLoader::getSingleton().setUniform(*program, "mvp", mCamera->getViewProjectionMatrix(aspectRatio));
         Render::ProgramLoader::getSingleton().bind(*program);
 
         target->renderMesh(mMesh->loadData().get());
+    }
+
+    int GridPass::priority() const
+    {
+        return mPriority;
     }
 }
 }

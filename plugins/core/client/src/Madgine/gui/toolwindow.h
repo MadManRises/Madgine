@@ -38,7 +38,6 @@ namespace GUI {
         void onResize(size_t width, size_t height) override;
 
     private:
-        TopLevelWindow &mParent;
 
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 

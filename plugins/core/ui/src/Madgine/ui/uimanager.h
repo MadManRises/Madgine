@@ -16,7 +16,7 @@
 namespace Engine {
 namespace UI {
     struct MADGINE_UI_EXPORT UIManager : Serialize::SerializableUnit<UIManager, GUI::TopLevelWindowComponent<UIManager>>,
-                                             Threading::FrameListener {
+                                         Threading::FrameListener {
         SERIALIZABLEUNIT;
 
         UIManager(GUI::TopLevelWindow &window);
@@ -58,20 +58,18 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-
         UIManager &getSelf(bool = true);
 
-		
-        SERIALIZABLE_CONTAINER_EXT(mGuiHandlers, GuiHandlerContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type, MadgineObjectObserver>::type>);
-        SERIALIZABLE_CONTAINER_EXT(mGameHandlers, GameHandlerContainer<PartialObservableContainer<elevate<, Serialize::ControlledContainer, , std::vector>::type, MadgineObjectObserver>::type>);
+        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>>);
+        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>>)
 
     protected:
         bool init() override;
         void finalize() override;
-		
+
     private:
         Vector2 mKeptCursorPosition;
-        bool mKeepingCursorPos = false;        
+        bool mKeepingCursorPos = false;
     };
 }
 }

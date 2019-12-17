@@ -38,7 +38,7 @@ namespace Tools {
     {
         mSceneMgr = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
-        mSceneViews.emplace_back(this, mWindow.getRenderer(), static_cast<const ClientImRoot &>(*mRoot.parent()).manager());
+        mSceneViews.emplace_back(this, mWindow.getRenderer());
 
         return ToolBase::init();
     }

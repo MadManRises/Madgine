@@ -15,7 +15,7 @@ namespace Serialize {
         SerializeManager(const std::string &name);
         SerializeManager(const SerializeManager &) = delete;
         SerializeManager(SerializeManager &&) noexcept;
-        virtual ~SerializeManager();
+        ~SerializeManager();
 
         const SerializableUnitMap &slavesMap() const;
 

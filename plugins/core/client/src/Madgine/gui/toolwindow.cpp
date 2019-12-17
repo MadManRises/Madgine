@@ -20,7 +20,6 @@ namespace Engine {
 
 namespace GUI {
     ToolWindow::ToolWindow(TopLevelWindow &parent, const Window::WindowSettings &settings)
-        : mParent(parent)
     {
         mWindow = Window::sCreateWindow(settings);
 

@@ -46,9 +46,7 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
                 std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
                 if (file) {
-                    window.readState(*file, nullptr, Engine::Serialize::StateTransmissionFlags_DontApplyMap);
-                    window.getWindowComponent<Engine::Widgets::WidgetManager>().calculateWindowGeometries();
-                    window.applySerializableMap(mgr.slavesMap());
+                    window.readState(*file);
                     window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
                 }
             });

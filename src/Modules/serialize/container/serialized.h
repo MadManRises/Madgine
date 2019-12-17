@@ -79,10 +79,9 @@ namespace Engine
 					this->setItemDataSynced(mData, b);
 				}
 
-				void setActive(bool active)
+				void setActive(bool active, bool existenceChanged)
 				{
-					SerializableBase::setActive(active);
-					this->setItemActive(mData, active);
+					this->setItemActive(mData, active, existenceChanged);
 				}
 
 			private:

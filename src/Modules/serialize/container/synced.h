@@ -4,20 +4,17 @@
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
-#include "offset.h"
+#include "../../generic/offsetptr.h"
 #include "unithelper.h"
 #include "../../generic/tupleunpacker.h"
 
 namespace Engine {
 namespace Serialize {
 
-#define SYNCED(Name, ...)                                                                          \
-DECLARE_COMBINED_OFFSET(Name)\
-    ::Engine::Serialize::Synced<COMBINED_OFFSET(Name), __VA_ARGS__> Name; \
-    DEFINE_COMBINED_OFFSET(Name)
+#define SYNCED(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>) 
 
-    template <typename PtrOffset, class T, typename Observer = NoOpFunctor>
-    class Synced : public Syncable<PtrOffset>, public Serializable<PtrOffset>, public UnitHelper<T>, private Observer {
+    template <class T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    class Synced : public Syncable<OffsetPtr>, public Serializable<OffsetPtr>, public UnitHelper<T>, private Observer {
     public:
         template <class... _Ty>
         Synced(_Ty &&... args)
@@ -102,32 +99,30 @@ DECLARE_COMBINED_OFFSET(Name)\
             this->setItemDataSynced(mData, b);
         }
 
-        void setActive(bool active)
+        void setActive(bool active, bool existenceChanged)
         {
             if (!active) {
-                Serializable<PtrOffset>::setActive(active);
                 if (mData != T {})
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), T {}, mData);
+                    Observer::operator()(T {}, mData);
             }
-            this->setItemActive(mData, active);
+            this->setItemActive(mData, active, existenceChanged);
             if (active) {
-                Serializable<PtrOffset>::setActive(active);
                 if (mData != T {})
-                    TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), mData, T {});
+                    Observer::operator()(mData, T {});
             }
         }
 
     protected:
         void notify(const T &old)
         {
-            if (!PtrOffset::parent(this) || PtrOffset::parent(this)->isSynced()) {
+            if (this->isSynced()) {
                 for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
                     out->write(mData, nullptr);
                     out->endMessage();
                 }
             }
             if (this->isActive()) {
-                TupleUnpacker::invoke(&Observer::operator(), static_cast<Observer *>(this), mData, old);
+                Observer::operator()(mData, old);
             }
         }
 

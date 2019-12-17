@@ -24,10 +24,18 @@ struct container_traits : C::traits {
 template <typename T>
 struct container_traits<std::list<T>> {
     static constexpr const bool sorted = false;
+    static constexpr const bool has_dependent_handle = false;
+    static constexpr const bool remove_invalidates_handles = false;
 
     typedef std::list<T> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef T *handle;
+    typedef const T *const_handle;
+    typedef iterator position_handle;
+    typedef const_iterator const_position_handle;
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
@@ -79,29 +87,50 @@ struct container_traits<std::list<T>> {
         return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
     }
 
-    static iterator keepIterator(const iterator &begin, const iterator &it)
+    static position_handle toPositionHandle(container &c, const iterator &it)
     {
         return it;
     }
 
-    static iterator revalidateIteratorInsert(const iterator &begin, const iterator &dist, const iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        return dist;
     }
 
-    static iterator revalidateIteratorRemove(const iterator &begin, const iterator &dist, const iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
     {
-        return dist;
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return handle;
+    }
+
+    static position_handle next(const position_handle &handle)
+    {
+        return std::next(handle);
     }
 };
 
 template <typename T>
 struct container_traits<std::vector<T>> {
     static constexpr const bool sorted = false;
+    static constexpr const bool has_dependent_handle = true;
+    static constexpr const bool remove_invalidates_handles = true;
 
     typedef std::vector<T> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef size_t handle;
+    typedef size_t const_handle;
+    typedef size_t position_handle;
+    typedef size_t const_position_handle;
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
@@ -170,37 +199,48 @@ struct container_traits<std::vector<T>> {
         return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
     }
 
-    static size_t keepIterator(const iterator &begin, const iterator &it)
+    static position_handle toPositionHandle(container &c, const iterator &it)
     {
-        return std::distance(begin, it);
+        return std::distance(c.begin(), it);
     }
 
-    static iterator revalidateIteratorInsert(const iterator &begin, size_t dist, const iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        size_t item = std::distance(begin, it);
-        if (item <= dist)
-            ++dist;
-        return std::next(begin, dist);
+        size_t item = std::distance(c.begin(), it);
+        if (item <= handle)
+            ++handle;
     }
 
-    static iterator revalidateIteratorRemove(const iterator &begin, size_t dist, const iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
     {
-        size_t pivot = std::distance(begin, it);
-        assert(dist < pivot || dist >= pivot + count);
-        if (dist > pivot)
-            dist -= count;
-        return std::next(begin, dist);
+        size_t pivot = std::distance(c.begin(), it);
+        assert(handle < pivot || handle >= pivot + count);
+        if (handle > pivot)
+            handle -= count;
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+	static position_handle next(const position_handle &handle)
+    {
+        return handle + 1;
     }
 };
 
-template <typename T, typename Cmp>
+template <typename T, typename Cmp, typename It>
 class SetConstIterator;
 
-template <typename T, typename Cmp>
+template <typename T, typename Cmp, typename It>
 class SetIterator {
 public:
-    typedef typename std::set<T, Cmp>::iterator It;
-
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
     using difference_type = typename It::difference_type;
@@ -221,6 +261,12 @@ public:
     {
     }
 
+    template <typename It2>
+    SetIterator(const SetIterator<T, Cmp, It2> &other)
+        : mIterator(static_cast<const It2 &>(other))
+    {
+    }
+
     T &operator*() const
     {
         return const_cast<T &>(*mIterator);
@@ -231,23 +277,24 @@ public:
         return &const_cast<T &>(*mIterator);
     }
 
-    bool operator!=(const SetIterator<T, Cmp> &other) const
+    bool operator!=(const SetIterator<T, Cmp, It> &other) const
     {
         return mIterator != other.mIterator;
     }
 
-    bool operator==(const SetIterator<T, Cmp> &other) const
+    bool operator==(const SetIterator<T, Cmp, It> &other) const
     {
         return mIterator == other.mIterator;
     }
 
-    SetIterator<T, Cmp> &operator++()
+    SetIterator<T, Cmp, It> &
+    operator++()
     {
         ++mIterator;
         return *this;
     }
 
-    SetIterator<T, Cmp> &operator--()
+    SetIterator<T, Cmp, It> &operator--()
     {
         --mIterator;
         return *this;
@@ -259,16 +306,14 @@ public:
     }
 
 private:
-    friend class SetConstIterator<T, Cmp>;
+    friend class SetConstIterator<T, Cmp, It>;
 
     It mIterator;
 };
 
-template <class T, typename Cmp>
+template <class T, typename Cmp, typename It>
 class SetConstIterator {
 public:
-    typedef typename std::set<T, Cmp>::const_iterator It;
-
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
     using difference_type = typename It::difference_type;
@@ -285,7 +330,7 @@ public:
     {
     }
 
-    SetConstIterator(const SetIterator<T, Cmp> &it)
+    SetConstIterator(const SetIterator<T, Cmp, It> &it)
         : mIterator(it.mIterator)
     {
     }
@@ -300,12 +345,12 @@ public:
         return &*mIterator;
     }
 
-    bool operator!=(const SetConstIterator<T, Cmp> &other) const
+    bool operator!=(const SetConstIterator<T, Cmp, It> &other) const
     {
         return mIterator != other.mIterator;
     }
 
-    bool operator==(const SetConstIterator<T, Cmp> &other) const
+    bool operator==(const SetConstIterator<T, Cmp, It> &other) const
     {
         return mIterator == other.mIterator;
     }
@@ -326,17 +371,40 @@ public:
     }
 
 private:
+    friend class SetIterator<T, Cmp, It>;
+
     It mIterator;
 };
 
 template <typename T, typename Cmp>
+struct cmp_type {
+    using type = typename Cmp::cmp_type;
+};
+
+template <typename T, typename V>
+struct cmp_type<T, std::less<V>> {
+    using type = T;
+};
+
+template <typename T, typename Cmp>
+using cmp_type_t = typename cmp_type<T, Cmp>::type;
+
+template <typename T, typename Cmp>
 struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool sorted = true;
+    static constexpr const bool has_dependent_handle = false;
+    static constexpr const bool remove_invalidates_handles = false;
 
     typedef std::set<T, Cmp> container;
-    typedef SetIterator<T, Cmp> iterator;
-    typedef SetConstIterator<T, Cmp> const_iterator;
-    typedef typename Cmp::cmp_type key_type;
+    typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::iterator> iterator;
+    typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_iterator> const_iterator;
+    typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::reverse_iterator> reverse_iterator;
+    typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_reverse_iterator> const_reverse_iterator;
+    typedef T *handle;
+    typedef const T *const_handle;
+    typedef iterator position_handle;
+    typedef const_iterator const_position_handle;
+    typedef cmp_type_t<T, Cmp> key_type;
     typedef typename container::value_type value_type;
     typedef T type;
 
@@ -362,29 +430,50 @@ struct container_traits<std::set<T, Cmp>> {
         return c.emplace(std::forward<_Ty>(args)...);
     }
 
-    static iterator keepIterator(const iterator &begin, const iterator &it)
+    static position_handle toPositionHandle(container &c, const iterator &it)
     {
         return it;
     }
 
-    static iterator revalidateIteratorInsert(const iterator &begin, const iterator &dist, const iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        return dist;
     }
 
-    static iterator revalidateIteratorRemove(const iterator &begin, const iterator &dist, const iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
     {
-        return dist;
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return handle;
+    }
+
+	static position_handle next(const position_handle &handle)
+    {
+        return std::next(handle);
     }
 };
 
 template <typename K, typename T>
 struct container_traits<std::map<K, T>> {
     static constexpr const bool sorted = true;
+    static constexpr const bool has_dependent_handle = false;
+    static constexpr const bool remove_invalidates_handles = false;
 
     typedef std::map<K, T> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef std::pair<const K, T> *handle;
+    typedef const std::pair<const K, T> *const_handle;
+    typedef iterator position_handle;
+    typedef const_iterator const_position_handle;
     typedef K key_type;
     typedef T value_type;
     typedef std::pair<const K, T> type;
@@ -429,19 +518,32 @@ struct container_traits<std::map<K, T>> {
         return c.emplace(std::forward<_Ty>(args)...);
     }
 
-    static iterator keepIterator(const iterator &begin, const iterator &it)
+    static position_handle toPositionHandle(container &c, const iterator &it)
     {
         return it;
     }
 
-    static iterator revalidateIteratorInsert(const iterator &begin, const iterator &dist, const iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        return dist;
     }
 
-    static iterator revalidateIteratorRemove(const iterator &begin, const iterator &dist, const iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
     {
-        return dist;
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return handle;
+    }
+
+	static position_handle next(const position_handle &handle)
+    {
+        return std::next(handle);
     }
 };
 

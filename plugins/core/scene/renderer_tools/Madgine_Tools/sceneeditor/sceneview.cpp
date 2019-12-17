@@ -9,8 +9,6 @@
 
 #include "Madgine/render/rendercontext.h"
 
-#include "Madgine_Tools/imgui/immanager.h"
-
 #include "Modules/plugins/pluginmanager.h"
 
 
@@ -69,12 +67,11 @@ namespace Tools {
         return { point, normal };
     }
 
-    SceneView::SceneView(SceneEditor *editor, Engine::Render::RenderContext *context, const ImManager &manager)
-        : mManager(manager)
-        , mEditor(editor)
-        , mGridRenderer(&mCamera)
-        , mSceneRenderer(&mCamera)
-        , mIm3DRenderer(&mCamera)
+    SceneView::SceneView(SceneEditor *editor, Engine::Render::RenderContext *context)
+        : mEditor(editor)
+        , mSceneRenderer(&mCamera, 25)
+        , mGridRenderer(&mCamera, 50)
+        , mIm3DRenderer(&mCamera, 75)
     {
         mCamera.mPosition = { 0, 0.5, -1 };
 

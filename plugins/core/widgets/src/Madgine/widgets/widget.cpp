@@ -106,13 +106,13 @@ namespace Widgets {
 
     Vector3 WidgetBase::getActualSize() const
     {
-        auto screenSpace = mManager.mClientSpace;
+        const Rect2i &screenSpace = mManager.getClientSpace();
         return mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f };
     }
 
     Vector3 WidgetBase::getActualPosition() const
     {
-        Rect2i screenSpace = mManager.mClientSpace;
+        const Rect2i &screenSpace = mManager.getClientSpace();
         return mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
     }
 
@@ -125,15 +125,6 @@ namespace Widgets {
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
             child->updateGeometry(screenSpace, getAbsoluteSize(), getAbsolutePosition());
-        }
-    }
-
-    void WidgetBase::screenSpaceChanged(const Rect2i &screenSpace)
-    {
-        sizeChanged((mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f }).floor());
-
-        for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->screenSpaceChanged(screenSpace);
         }
     }
 

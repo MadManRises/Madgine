@@ -36,6 +36,8 @@ using ArgumentList = std::vector<ValueType>;
 
 struct ApiMethod;
 
+struct Any;
+
 namespace CLI {
     struct CLICore;
 }
@@ -171,11 +173,11 @@ namespace Render {
 
 namespace Resources {
     struct ResourceManager;
-    template <typename Data>
+    template <typename Data, typename Container, typename Storage>
     class Resource;
-    template <class T, class Data, template <typename> typename ResourceKind = Resource>
+    template <class T, class Data, typename Container, typename Storage>
     struct ResourceLoader;
-    template <class _Data, template <typename> typename ResourceKind = Resource>
+    template <class _Data, typename Container, typename Storage>
     struct ResourceLoaderImpl;
     struct ResourceBase;
 }

@@ -36,7 +36,7 @@ target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools OpenGL_Tools opengltoolconfig.cpp opengltoolconfig.h opengltoolsforward.h opengltoolslib.h)
-		FolderSources(sources OpenGL_Tools imgui imgui_impl_opengl3.cpp imgui_impl_opengl3.h openglimmanager.cpp openglimmanager.h)
+		FolderSources(sources OpenGL_Tools imgui imgui_impl_opengl3.cpp imgui_impl_opengl3.h openglimroot.cpp openglimroot.h)
 
 
 add_tools(OpenGL ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h)

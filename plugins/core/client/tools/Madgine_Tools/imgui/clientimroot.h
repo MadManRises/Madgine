@@ -5,21 +5,32 @@
 
 #include "renderer/imroot.h"
 
-#include "immanager.h"
+#include "Madgine/render/renderpass.h"
 
+
+struct ImGuiDockNode;
+struct ImGuiViewport;
 
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : GUI::TopLevelWindowComponent<ClientImRoot>,
-                                                      Threading::FrameListener {
+    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : GUI::TopLevelWindowVirtualBase<ClientImRoot>,
+                                                      Threading::FrameListener,
+                                                      Render::RenderPass {
 
         ClientImRoot(GUI::TopLevelWindow &window);
-
-        const ImManager &manager() const;
+        ~ClientImRoot();
 
         bool init() override;
         void finalize() override;
+
+        virtual void newFrame(float timeSinceLastFrame) = 0;
+        virtual void render(Render::RenderTarget *target) override;
+
+        void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
+        void removeViewportMapping(Render::RenderTarget *target);
+
+        virtual int priority() const override;
 
         bool frameStarted(std::chrono::microseconds timeSinceLastFrame) override;
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
@@ -37,10 +48,10 @@ namespace Tools {
 
         ImRoot mRoot;
 
-		Rect2i getChildClientSpace() override;
+        Rect2i getChildClientSpace() override;
 
     private:
-        std::optional<ImManagerSelector> mManager;
+        std::map<Render::RenderTarget *, ImGuiViewport *> mViewportMappings;
 
         Vector2 mAreaPos = Vector2::ZERO;
         Vector2 mAreaSize = Vector2::ZERO;

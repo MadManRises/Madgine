@@ -32,8 +32,7 @@ namespace Server {
             mSettings.mRunMain = false;
             App::Application app(mSettings);
             mApplication = &app;
-            TupleUnpacker::invoke(std::move(initCallback), app);
-            return Threading::Scheduler(workgroup).go();
+            return TupleUnpacker::invokeDefaultResult(0, std::move(initCallback), workgroup, app);
         }
 
     private:

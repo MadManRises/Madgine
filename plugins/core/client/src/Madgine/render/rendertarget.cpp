@@ -1,7 +1,7 @@
 #include "../clientlib.h"
 
-#include "rendertarget.h"
 #include "rendercontext.h"
+#include "rendertarget.h"
 
 namespace Engine {
 namespace Render {
@@ -27,7 +27,10 @@ namespace Render {
 
     void RenderTarget::addRenderPass(RenderPass *pass)
     {
-        mRenderPasses.push_back(pass);
+        mRenderPasses.insert(
+            std::upper_bound(mRenderPasses.begin(), mRenderPasses.end(), pass,
+                [](RenderPass *first, RenderPass *second) { return first->priority() < second->priority(); }),
+            pass);
     }
 
     void RenderTarget::removeRenderPass(RenderPass *pass)
@@ -35,7 +38,7 @@ namespace Render {
         mRenderPasses.erase(std::find(mRenderPasses.begin(), mRenderPasses.end(), pass));
     }
 
-    const std::vector<RenderPass*> &RenderTarget::renderPasses()
+    const std::vector<RenderPass *> &RenderTarget::renderPasses()
     {
         return mRenderPasses;
     }

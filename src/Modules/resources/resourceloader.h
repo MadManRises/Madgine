@@ -1,21 +1,23 @@
 #pragma once
 
-#include "Modules/reflection/decay.h"
-#include "Modules/uniquecomponent/uniquecomponent.h"
+#include "../reflection/decay.h"
+#include "../uniquecomponent/uniquecomponent.h"
 #include "resource.h"
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
 
 #include "../generic/templates.h"
 
+#include "../threading/globalstorage.h"
+
 namespace Engine {
 namespace Resources {
 
-    template <class _Data, template <typename> typename ResourceKind>
+    template <typename _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
     struct ResourceLoaderImpl : ResourceLoaderBase {
 
         using Data = _Data;
-        using ResourceType = ResourceKind<Data>;
+        using ResourceType = Resource<Data, Container, Storage>;
 
         using ResourceLoaderBase::ResourceLoaderBase;
 
@@ -28,18 +30,13 @@ namespace Resources {
                 return nullptr;
         }
 
-		ResourceType *getOrCreate(const std::string &name)
+        ResourceType *getOrCreateManual(const std::string &name, const Filesystem::Path &path = {}, std::function<std::shared_ptr<Data>(ResourceType *)> ctor = {})
         {
-            return &mResources.try_emplace(name, this).first->second;
+            return &mResources.try_emplace(name, this, path, ctor).first->second;
         }
 
-        ResourceType *getOrCreateManual(const std::string &name, std::function<std::shared_ptr<Data>(ResourceType *)> ctor)
-        {
-            return &mResources.try_emplace(name, ctor).first->second;
-        }
-
-        virtual std::shared_ptr<Data>
-        loadImpl(ResourceType *res) = 0;
+        virtual bool loadImpl(Data &data, ResourceType *res) = 0;
+        virtual void unloadImpl(Data &data) = 0;
         virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) override
         {
             std::string actualName = name.empty() ? path.stem() : name;
@@ -78,10 +75,10 @@ namespace Resources {
         std::map<std::string, ResourceType> mResources;
     };
 
-    template <class T, class _Data, template <typename> typename ResourceKind>
-    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>> {
+    template <class T, class _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
+    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>> {
 
-        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>>::UniqueComponent;
+        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>>::UniqueComponent;
 
         static T &getSingleton()
         {
@@ -94,13 +91,12 @@ namespace Resources {
         }
     };
 
-    template <typename T, class _Data, template <typename> typename ResourceKind>
-    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>> {
-        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, ResourceKind>>::VirtualUniqueComponentBase;
+    template <typename T, class _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
+    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>> {
+        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>>::VirtualUniqueComponentBase;
 
         static T &getSingleton()
-        {
-            static_assert(!std::is_same_v<T, ResourceLoaderImpl<_Data, ResourceKind>>);
+        {            
             return Resources::ResourceManager::getSingleton().get<T>();
         }
 

@@ -122,8 +122,6 @@ namespace Render {
 
     void OpenGLRenderTexture::beginFrame()
     {
-        Vector2i screenSize = size();
-
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         GL_CHECK();
 

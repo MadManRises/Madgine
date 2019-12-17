@@ -26,7 +26,7 @@ TEST(UniqueComponent, Registry)
 
     TestDriver driver;
 
-    ::Test::TestContainer<std::vector> v { driver };
+    ::Test::TestContainer<std::vector<Engine::Placeholder<0>>> v { driver };
 
     ASSERT_EQ(v.size(), 0);
 

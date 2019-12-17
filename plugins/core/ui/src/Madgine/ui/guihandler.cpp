@@ -92,5 +92,6 @@ namespace UI {
     {
         mContext = context;
     }
+
 } // namespace GuiHandler
 } // namespace Cegui

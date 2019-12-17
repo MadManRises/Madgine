@@ -12,9 +12,9 @@ struct VirtualUniqueComponentImpl : _Base {
     using Base = _Base;
     using Base::Base;
 
-	typedef Base decay_t;
+    //typedef Base decay_t;
 
-    struct Inner {    
+    struct Inner {
         Inner()
         {
             Base::_preg() = &reg;

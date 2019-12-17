@@ -45,8 +45,6 @@ namespace Widgets {
         virtual bool init() override;
         virtual void finalize() override;
 
-        void calculateWindowGeometries();
-
         WidgetBase *currentRoot();
 
         void clear();
@@ -75,9 +73,10 @@ namespace Widgets {
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
-        virtual void calculateAvailableScreenSpace(Window::Window *w, Vector3i &pos, Vector3i &size) override;
-        virtual void onResize(size_t width, size_t height) override;
+        virtual void onResize(const Rect2i &space) override;
         virtual void render(Render::RenderTarget *target) override;
+
+		virtual int priority() const override;
 
         Render::Texture &uiTexture() const;
 

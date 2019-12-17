@@ -8,7 +8,9 @@ namespace Engine {
 namespace Widgets {
     class MADGINE_WIDGETS_EXPORT SceneWindow : public Widget<SceneWindow> {
     public:
-       using Widget::Widget;
+        SceneWindow(const std::string &name, WidgetBase *parent);
+        SceneWindow(const std::string &name, WidgetManager &manager);
+		
         virtual ~SceneWindow();
 
         std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;

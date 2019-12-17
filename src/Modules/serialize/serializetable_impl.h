@@ -50,14 +50,21 @@ namespace Serialize {
             },
             [](SerializableUnitBase *_unit, const std::map<size_t, SerializableUnitBase *> &map) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                T val = unit->*P;
-                unit->*P = nullptr;
-                UnitHelper<T>::applyMap(map, val);
-                (unit->*Setter)(val);
+                UnitHelper<T>::applyMap(map, unit->*P);
             },
             [](SerializableUnitBase *unit, bool b) {
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableUnitBase *_unit, bool active, bool existenceChanged) {
+                Unit *unit = static_cast<Unit *>(_unit);
+                if (active) {
+                    T val = unit->*P;
+                    unit->*P = nullptr;
+                    (unit->*Setter)(val);
+                } else {
+                    T val = unit->*P;
+                    (unit->*Setter)(nullptr);
+                    unit->*P = val;
+                }
             }
         };
     }
@@ -72,7 +79,7 @@ namespace Serialize {
 
         using setter_traits = CallableTraits<decltype(Setter)>;
         static_assert(std::is_same_v<Unit, std::decay_t<typename setter_traits::class_type>>);
-        
+
         static_assert(std::is_same_v<typename setter_traits::decay_argument_types, std::tuple<T>>);
 
         return {
@@ -100,7 +107,7 @@ namespace Serialize {
             },
             [](SerializableUnitBase *unit, bool b) {
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
             }
         };
     }
@@ -115,10 +122,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, SyncableBase>();
-                else
-                    return size_t { 0 };
+                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase>();
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
@@ -146,8 +150,8 @@ namespace Serialize {
             [](SerializableUnitBase *unit, bool b) {
                 UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
             },
-            [](SerializableUnitBase *unit, bool b) {
-                UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
+            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
+                UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
             }
         };
     }
@@ -163,7 +167,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase, SyncableBase>();
+                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase>();
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
 
@@ -182,7 +186,7 @@ namespace Serialize {
             [](SerializableUnitBase *unit, bool b) {
                 //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
                 //UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
             }
         };

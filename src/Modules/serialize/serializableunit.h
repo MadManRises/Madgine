@@ -4,7 +4,7 @@
 
 #include "serializetable.h"
 
-#include "statesubmissionflags.h"
+#include "statetransmissionflags.h"
 
 namespace Engine {
 namespace Serialize {
@@ -50,7 +50,7 @@ namespace Serialize {
 
         void setSlaveId(size_t id, SerializeManager *mgr);
 
-		const SerializeTable *type() const;
+        const SerializeTable *serializeType() const;
 
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
@@ -59,20 +59,23 @@ namespace Serialize {
         void clearSlaveId(SerializeManager *mgr);
 
         void setDataSynced(bool b);
-        void setActive(bool active);
+        void setActive(bool active, bool existenceChanged);
 
+        bool isActive(size_t index) const;
 
-        friend struct SyncManager;        
+        friend struct SyncManager;
         friend struct SerializeUnitHelper;
         friend struct SyncableBase;
         friend struct SerializeTable;
-		template <typename T, bool b>
+        template <typename T, bool b>
         friend struct UnitHelper;
         template <typename T, typename Base>
         friend struct TableInitializer;
-		template <typename T>
+        template <typename T>
         friend struct Syncable;
-		
+        template <typename T>
+        friend struct Serializable;
+
     protected:
         void setParent(SerializableUnitBase *parent);
 
@@ -81,23 +84,24 @@ namespace Serialize {
 
         size_t mSlaveId = 0;
         size_t mMasterId;
+        size_t mActiveIndex = 0;
 
         bool mSynced = false;
 
-		const SerializeTable *mType = nullptr;
-	};
+        const SerializeTable *mType = nullptr;
+    };
 
-	template <typename T, typename Base>
+    template <typename T, typename Base>
     struct SerializableUnit;
 
-	template <typename T, typename Base>
-        struct TableInitializer {
-			template <typename... Args>
-            TableInitializer(Args&&...)
-            {
-                static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
-            }
-		};
+    template <typename T, typename Base>
+    struct TableInitializer {
+        template <typename... Args>
+        TableInitializer(Args &&...)
+        {
+            static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+    };
 
     template <typename T, typename _Base = SerializableUnitBase>
     struct SerializableUnit : _Base, private TableInitializer<T, _Base> {
@@ -105,17 +109,14 @@ namespace Serialize {
         friend TableInitializer<T, _Base>;
 
         typedef T Self;
-		
-		using _Base::_Base;       
 
+        using _Base::_Base;
     };
 
-
-	template <typename>
+    template <typename>
     struct __SerializeInstance;
 
-	#define SERIALIZABLEUNIT friend struct ::Engine::Serialize::__SerializeInstance<Self>
+#define SERIALIZABLEUNIT friend struct ::Engine::Serialize::__SerializeInstance<Self>
 
 } // namespace Serialize
 } // namespace Core
-

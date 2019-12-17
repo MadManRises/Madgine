@@ -11,7 +11,8 @@ namespace Tools {
         LayoutLoader();
 
     private:
-        virtual std::shared_ptr<Data> loadImpl(ResourceType *res) override;
+        virtual bool loadImpl(Data &data, ResourceType *res) override;
+        virtual void unloadImpl(Data &data) override;
     };
 
 }

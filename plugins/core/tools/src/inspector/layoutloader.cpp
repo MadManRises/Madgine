@@ -4,31 +4,32 @@
 
 #include "../tinyxml/tinyxml2.h"
 
-#include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Tools::LayoutLoader);
 
 namespace Engine {
-	namespace Tools {
-		
-		LayoutLoader::LayoutLoader() :
-			ResourceLoader({ ".xml" })
-		{
-		}
+namespace Tools {
 
-		std::shared_ptr<tinyxml2::XMLDocument> Engine::Tools::LayoutLoader::loadImpl(ResourceType *res)
-		{
-			std::shared_ptr<tinyxml2::XMLDocument> doc = std::make_shared<tinyxml2::XMLDocument>();
-			
-			std::string content = res->readAsText();
+    LayoutLoader::LayoutLoader()
+        : ResourceLoader({ ".xml" })
+    {
+    }
 
-			if (doc->Parse(content.c_str()))
-				return {};
-			return doc;
-		}
+    bool LayoutLoader::loadImpl(tinyxml2::XMLDocument &doc, ResourceType *res)
+    {
+        std::string content = res->readAsText();
 
-	}
+        return !doc.Parse(content.c_str());
+    }
+
+    void LayoutLoader::unloadImpl(tinyxml2::XMLDocument &doc)
+    {
+        doc.Clear();
+    }
+
+}
 }
 
 METATABLE_BEGIN(Engine::Tools::LayoutLoader)
