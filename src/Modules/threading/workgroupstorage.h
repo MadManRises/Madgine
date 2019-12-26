@@ -1,6 +1,9 @@
 #pragma once
 
 #include "global.h"
+
+#if ENABLE_THREADING
+
 #include "workgroup.h"
 
 namespace Engine {
@@ -37,8 +40,30 @@ namespace Threading {
         static void finalize(bool bss);
     };
 
+}
+}
+
+#else
+
+#include "globalstorage.h"
+
+namespace Engine {
+	namespace Threading {
+
+		using WorkGroupStorage = GlobalStorage;
+
+	}
+}
+
+#endif
+
+namespace Engine {
+namespace Threading {
+
+	
     template <typename T>
     using WorkgroupLocal = Global<T, WorkGroupStorage>;
+
 
 }
 }

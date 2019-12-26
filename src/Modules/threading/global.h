@@ -4,10 +4,10 @@
 #include "../generic/tupleunpacker.h"
 #include "../generic/proxy.h"
 
+#include "globalstorage.h"
+
 namespace Engine {
 namespace Threading {
-
-#if ENABLE_THREADING
 
     template <typename T, typename Storage>
     struct Global {
@@ -81,7 +81,10 @@ namespace Threading {
         int mIndex;
     };
 
-#endif
+template <typename T>
+    struct Global<T, GlobalStorage> : Proxy<T> {
+		using Proxy<T>::Proxy;
+    };
 
 } // namespace Threading
 } // namespace Engine
