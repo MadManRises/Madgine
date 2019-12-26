@@ -76,10 +76,14 @@ size_t component_index()
 
 namespace Engine {
 template <class T, class Base>
-using VirtualUniqueComponentImpl = Base;
+struct VirtualUniqueComponentImpl : Base {
+	using Base::Base;
+};
 
 template <class T, class Collector, typename Base = typename Collector::Base>
-using VirtualUniqueComponentBase = Base;
+struct VirtualUniqueComponentBase : Base {
+    using Base::Base;
+};
 
 template <class T, class Collector, typename Base = typename Collector::Base>
 struct UniqueComponent : Base {
