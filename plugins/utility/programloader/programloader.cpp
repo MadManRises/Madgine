@@ -5,14 +5,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
-
-
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Render::Program, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
-MEMBER(mResources)
-METATABLE_END(LoaderImpl)
-
-METATABLE_BEGIN_BASE(Engine::Render::ProgramLoader, LoaderImpl)
+METATABLE_BEGIN(Engine::Render::ProgramLoader)
 METATABLE_END(Engine::Render::ProgramLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::ProgramLoader::ResourceType, Engine::Resources::ResourceBase)
@@ -29,5 +22,46 @@ RegisterType(Engine::Render::ProgramLoader)
         {
         }
 
+        void ProgramLoader::HandleType::create(const std::string &name, ProgramLoader *loader)
+        {
+            *this = ProgramLoader::loadManual(
+                name, {}, [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceType *res) { return loader->create(program, name); }, {},
+                loader);
+        }
+
+        void ProgramLoader::HandleType::bind(ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->bind(getData(*this, loader));
+        }
+
+        void ProgramLoader::HandleType::setUniform(const std::string &var, int value, ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->setUniform(getData(*this, loader), var, value);
+        }
+
+        void ProgramLoader::HandleType::setUniform(const std::string &var, const Matrix3 &value, ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->setUniform(getData(*this, loader), var, value);
+        }
+
+        void ProgramLoader::HandleType::setUniform(const std::string &var, const Matrix4 &value, ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->setUniform(getData(*this, loader), var, value);
+        }
+
+        void ProgramLoader::HandleType::setUniform(const std::string &var, const Vector3 &value, ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->setUniform(getData(*this, loader), var, value);
+        }
     }
 }

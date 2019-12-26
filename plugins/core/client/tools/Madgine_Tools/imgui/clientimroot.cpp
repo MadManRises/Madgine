@@ -257,9 +257,9 @@ namespace Tools {
 
     bool ClientImRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
-        setCentralNode(mRoot.dockNode());
-
         mRoot.frame();
+
+		setCentralNode(mRoot.dockNode());
 
         return true;
     }

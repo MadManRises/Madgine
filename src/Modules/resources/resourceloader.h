@@ -2,7 +2,7 @@
 
 #include "../reflection/decay.h"
 #include "../uniquecomponent/uniquecomponent.h"
-#include "resource.h"
+#include "resourcebase.h"
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
 
@@ -10,37 +10,150 @@
 
 #include "../threading/globalstorage.h"
 
+#include "handle.h"
+
 namespace Engine {
 namespace Resources {
 
-    template <typename _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
-    struct ResourceLoaderImpl : ResourceLoaderBase {
+    template <typename T, typename _Data, typename _Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage, typename Base = ResourceLoaderBase>
+    struct ResourceLoaderImpl : Base {
 
         using Data = _Data;
-        using ResourceType = Resource<Data, Container, Storage>;
+        using Container = _Container;
 
-        using ResourceLoaderBase::ResourceLoaderBase;
+        using decay_t = T;
 
-        ResourceType *get(const std::string &name)
+        struct ResourceType;
+
+        using DataContainer = typename replace<Container>::template type<std::pair<ResourceType *, Data>>;
+
+        using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
+
+        struct StorageUnit : Base::ResourceType {
+            using Base::ResourceType::ResourceType;
+
+            typename Storage::template container_type<typename container_traits<DataContainer>::position_handle> mData;
+        };
+
+        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
+        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
+
+        using ResourceBaseType = std::conditional_t<std::is_same_v<ResourceLoaderBase, Base>, StorageUnit, typename Base::ResourceType>;
+
+        struct ResourceType : ResourceBaseType {
+
+            ResourceType(const Filesystem::Path &path, Ctor ctor = {}, Dtor dtor = {})
+                : ResourceBaseType(path)
+                , mCtor(ctor ? std::move(ctor) : [=](T *loader, Data &data, ResourceType *res) { return loader->loadImpl(data, res); })
+                , mDtor(dtor ? std::move(dtor) : [=](T *loader, Data &data, ResourceType *res) { loader->unloadImpl(data, res); })
+            {
+            }
+
+            HandleType loadData()
+            {
+                return load(this);
+            }
+
+            void unloadData()
+            {
+                unload(this);
+            }
+
+            Ctor mCtor;
+            Dtor mDtor;
+        };
+
+        using Base::Base;
+
+        static T &getSingleton()
         {
-            auto it = mResources.find(name);
-            if (it != mResources.end())
+            return Resources::ResourceManager::getSingleton().get<T>();
+        }
+
+        static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return load(get(name, loader), persistent, loader);
+        }
+
+        static ResourceType *get(const std::string &name, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+
+            auto it = loader->mResources.find(name);
+            if (it != loader->mResources.end())
                 return &it->second;
             else
                 return nullptr;
         }
 
-        ResourceType *getOrCreateManual(const std::string &name, const Filesystem::Path &path = {}, std::function<std::shared_ptr<Data>(ResourceType *)> ctor = {})
+        static ResourceType *get(const HandleType &handle, T *loader = nullptr)
         {
-            return &mResources.try_emplace(name, this, path, ctor).first->second;
+            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                return (*loader->mData)[handle.mData].first;
+            } else {
+                return handle.mData->first;
+            }
         }
 
-        virtual bool loadImpl(Data &data, ResourceType *res) = 0;
-        virtual void unloadImpl(Data &data) = 0;
-        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) override
+        static ResourceType *getOrCreateManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return &loader->mResources.try_emplace(name, path, ctor, dtor).first->second;
+        }
+
+        static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
+        {
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            if (!handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                handle = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::pair<ResourceType *, Data> { resource, Data {} }).first);
+                *resource->mData = (decltype(*resource->mData))handle.mData;
+                resource->mCtor(loader, getData(handle, loader), resource);
+            }
+            return handle;
+        }
+
+        static void unload(ResourceType *resource, T *loader = nullptr)
+        {
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            if (handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                resource->mDtor(loader, getData(handle, loader), resource);
+            }
+        }
+
+        static HandleType loadManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return load(getOrCreateManual(name, path, ctor, dtor, loader), loader);
+        }
+
+        static Data &getData(const HandleType &handle, T *loader = nullptr)
+        {
+            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                return (*loader->mData)[handle.mData].second;
+            } else {
+                return handle.mData->second;
+            }
+        }
+
+        //bool load(Data &data, ResourceType *res) = 0;
+        //void unload(Data &data) = 0;
+        std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) override
         {
             std::string actualName = name.empty() ? path.stem() : name;
-            auto pib = mResources.try_emplace(actualName, this, path);
+            auto pib = mResources.try_emplace(actualName, path);
 
             if (pib.second)
                 this->resourceAdded(&pib.first->second);
@@ -73,53 +186,148 @@ namespace Resources {
         }
 
         std::map<std::string, ResourceType> mResources;
+
+        typename Storage::template container_type<DataContainer> mData;
     };
 
     template <class T, class _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
-    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>> {
+    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>> {
 
-        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>>::UniqueComponent;
+        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>>::UniqueComponent;
+    };
+
+    template <typename T, class _Data, typename _Container = std::vector<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
+    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderBase> {
+
+        using Data = _Data;
+        using Container = _Container;
+        using Storage = _Storage;
+
+        using decay_t = T;
+
+        struct ResourceType;
+
+        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
+        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
+
+        using DataContainer = typename replace<Container>::template type<std::pair<ResourceType *, Data>>;
+
+        using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
+        using OriginalHandleType = HandleType;
+
+        struct ResourceType : ResourceLoaderBase::ResourceType {
+
+            using ResourceLoaderBase::ResourceType::ResourceType;
+
+            HandleType loadData()
+            {
+                return load(this);
+            }
+
+            void unloadData()
+            {
+                return unload(this);
+            }
+
+            typename Storage::template container_type<typename container_traits<DataContainer>::position_handle> mData;
+        };
+
+        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderBase>::VirtualUniqueComponentBase;
 
         static T &getSingleton()
         {
             return Resources::ResourceManager::getSingleton().get<T>();
         }
 
-        static std::shared_ptr<_Data> load(const std::string &name, bool persistent = false)
+        static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
         {
-            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
+            if (!loader)
+                loader = &getSingleton();
+            return loader->loadVImpl(name, persistent);
         }
+
+        static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return loader->loadVImpl(resource, persistent);
+        }
+
+        static void unload(ResourceType *resource, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return loader->unloadVImpl(resource);
+        }
+
+        static HandleType loadManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &getSingleton();
+            return loader->loadManualVImpl(name, path, std::move(ctor), std::move(dtor));
+        }
+
+        static Data &getData(const HandleType &handle, T *loader = nullptr)
+        {
+            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                return loader->getDataVImpl(handle);
+            } else {
+                return handle.mData->second;
+            }
+        }
+
+        static ResourceType *get(const HandleType &handle, T *loader = nullptr)
+        {
+            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                return loader->getVImpl(handle);
+            } else {
+                return handle.mData->first;
+            }
+        }
+
+        virtual HandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}) = 0;
+        virtual HandleType loadVImpl(const std::string &name, bool persistent = false) = 0;
+        virtual HandleType loadVImpl(ResourceType *resource, bool persistent = false) = 0;
+        virtual void unloadVImpl(ResourceType *resource) = 0;
+        virtual Data &getDataVImpl(const HandleType &handle) = 0;
+        virtual ResourceType *getVImpl(const HandleType &handle) = 0;
     };
 
-    template <typename T, class _Data, typename Container = std::vector<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
-    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>> {
-        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderImpl<_Data, Container, Storage>>::VirtualUniqueComponentBase;
+    template <typename T, typename _Data, typename Base>
+    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename Base::Container, typename Base::Storage, Base>> {
 
-        static T &getSingleton()
-        {            
-            return Resources::ResourceManager::getSingleton().get<T>();
-        }
+        using Data = _Data;
 
-        static std::shared_ptr<_Data> load(const std::string &name, bool persistent = false)
+        using VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>::VirtualUniqueComponentImpl;
+
+        virtual typename Base::OriginalHandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
         {
-            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
+            return this->loadManual(name, path, ctor, dtor, static_cast<T*>(this));
+        }
+        virtual typename Base::OriginalHandleType loadVImpl(const std::string &name, bool persistent = false) override
+        {
+            return this->load(name, persistent, static_cast<T *>(this));
+        }
+        virtual typename Base::OriginalHandleType loadVImpl(typename Base::ResourceType *resource, bool persistent = false) override
+        {
+            return this->load(static_cast<ResourceType *>(resource), persistent, static_cast<T *>(this));
+        }
+        virtual void unloadVImpl(typename Base::ResourceType *resource) override
+        {
+            this->unload(static_cast<ResourceType *>(resource), static_cast<T *>(this));
+        }
+        virtual typename Base::Data &getDataVImpl(const typename Base::OriginalHandleType &handle) override
+        {
+            return this->getData(handle, static_cast<T *>(this));
+        }
+        virtual typename Base::ResourceType *getVImpl(const typename Base::OriginalHandleType &handle) override
+        {
+            return this->get(handle, static_cast<T *>(this));
         }
     };
-
-    template <typename T, typename Base>
-    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, Base> {
-        using VirtualUniqueComponentImpl<T, Base>::VirtualUniqueComponentImpl;
-
-        static T &getSingleton()
-        {
-            return Resources::ResourceManager::getSingleton().get<T>();
-        }
-
-        static std::shared_ptr<typename Base::Data> load(const std::string &name, bool persistent = false)
-        {
-            return Resources::ResourceManager::getSingleton().load<T>(name, persistent);
-        }
-    };
-
 }
 }

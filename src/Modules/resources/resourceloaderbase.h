@@ -6,8 +6,14 @@ namespace Engine {
 namespace Resources {
 
     struct MODULES_EXPORT ResourceLoaderBase : ScopeBase {
+
+        using ResourceType = ResourceBase;
+
         ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad = false);
+        ResourceLoaderBase(const ResourceLoaderBase &) = delete;
         virtual ~ResourceLoaderBase() = default;
+
+		ResourceLoaderBase &operator=(const ResourceLoaderBase &) = delete;
 
         virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) = 0;
 
@@ -16,7 +22,7 @@ namespace Resources {
         {
             if (mAutoLoad) {
                 res->setPersistent(true);
-                res->load();
+                res->loadData();
             }
         }
 
@@ -24,7 +30,7 @@ namespace Resources {
 
         size_t extensionIndex(const std::string &ext) const;
 
-		virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() = 0;
+        virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() = 0;
         virtual const MetaTable *resourceType() const = 0;
 
     private:

@@ -11,8 +11,6 @@
 
 #include "openglrendertexture.h"
 
-#include "openglshaderloader.h"
-
 #include "util/openglshader.h"
 
 #include "Interfaces/window/windowapi.h"
@@ -21,6 +19,9 @@
 
 #include "openglfontloader.h"
 #include "openglmeshloader.h"
+#include "openglprogramloader.h"
+#include "opengltextureloader.h"
+#include "openglshaderloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
@@ -327,7 +328,7 @@ namespace Render {
 #endif
 
     OpenGLRenderWindow::OpenGLRenderWindow(OpenGLRenderContext *context, Window::Window *w, OpenGLRenderWindow *reusedResources)
-        : OpenGLRenderTarget(context, dont_create)
+        : OpenGLRenderTarget(context)
         , mWindow(w)
         , mReusedContext(reusedResources)
     {
@@ -375,11 +376,23 @@ namespace Render {
     {
         if (!mReusedContext) {
             for (std::pair<const std::string, OpenGLFontLoader::ResourceType> &p : OpenGLFontLoader::getSingleton()) {
-                p.second.unload();
+                p.second.unloadData();
             }
 
             for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &p : OpenGLMeshLoader::getSingleton()) {
-                p.second.unload();
+                p.second.unloadData();
+            }
+
+            for (std::pair<const std::string, OpenGLProgramLoader::ResourceType> &p : OpenGLProgramLoader::getSingleton()) {
+                p.second.unloadData();
+            }
+
+            for (std::pair<const std::string, OpenGLShaderLoader::ResourceType> &p : OpenGLShaderLoader::getSingleton()) {
+                p.second.unloadData();
+            }
+
+			for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &p : OpenGLTextureLoader::getSingleton()) {
+                p.second.unloadData();
             }
         }
 

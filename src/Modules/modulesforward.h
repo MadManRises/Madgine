@@ -177,7 +177,7 @@ namespace Resources {
     class Resource;
     template <class T, class Data, typename Container, typename Storage>
     struct ResourceLoader;
-    template <class _Data, typename Container, typename Storage>
+    template <typename T, class _Data, typename Container, typename Storage, typename Base>
     struct ResourceLoaderImpl;
     struct ResourceBase;
 }

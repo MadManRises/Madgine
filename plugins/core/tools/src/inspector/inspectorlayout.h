@@ -1,5 +1,7 @@
 #pragma once
 
+#include "layoutloader.h"
+
 namespace Engine
 {
 	namespace Tools
@@ -8,7 +10,7 @@ namespace Engine
 		class MADGINE_TOOLS_EXPORT InspectorLayout
 		{
 		public:
-			InspectorLayout(std::shared_ptr<tinyxml2::XMLDocument> &&document);
+			InspectorLayout(LayoutLoader::HandleType &&document);
 
 			tinyxml2::XMLElement *rootElement();
 
@@ -17,7 +19,7 @@ namespace Engine
 
 		private:
 
-			std::shared_ptr<tinyxml2::XMLDocument> mDocument;
+			LayoutLoader::HandleType mDocument;
 			
 		};
 

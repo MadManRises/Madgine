@@ -13,6 +13,16 @@ namespace Render {
         reset();
     }
 
+    OpenGLProgram::OpenGLProgram(OpenGLProgram &&other)
+        : mHandle(std::exchange(other.mHandle, 0))
+    {
+    }
+
+    OpenGLProgram &OpenGLProgram::operator=(OpenGLProgram &&other)
+    {
+        std::swap(mHandle, other.mHandle);
+    }
+
     bool OpenGLProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char *> &attributeNames)
     {
         reset();

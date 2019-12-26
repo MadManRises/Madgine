@@ -14,7 +14,7 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTarget : RenderTarget {
 
         OpenGLRenderTarget(OpenGLRenderContext *context);
-        OpenGLRenderTarget(OpenGLRenderContext *context, dont_create_t);
+        OpenGLRenderTarget(OpenGLRenderContext *context, create_t);
         ~OpenGLRenderTarget();
 
 		virtual void beginFrame() override;

@@ -2,14 +2,10 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/resources/resource.h"
-
 #include "fontloader.h"
 
-using FontResource = Engine::Resources::ThreadLocalResource<Engine::Font::Font>;
-
-METATABLE_BEGIN_BASE(FontResource, Engine::Resources::ResourceBase)
-METATABLE_END(FontResource)
+METATABLE_BEGIN_BASE(Engine::Font::FontLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Font::FontLoader::ResourceType)
 
 RegisterType(Engine::Font::FontLoader)
 METATABLE_BEGIN(Engine::Font::FontLoader)

@@ -17,16 +17,21 @@ namespace Tools {
     {
     }
 
-    bool LayoutLoader::loadImpl(tinyxml2::XMLDocument &doc, ResourceType *res)
+    bool LayoutLoader::loadImpl(XMLDocument &doc, ResourceType *res)
     {
         std::string content = res->readAsText();
 
-        return !doc.Parse(content.c_str());
+        return !doc->Parse(content.c_str());
     }
 
-    void LayoutLoader::unloadImpl(tinyxml2::XMLDocument &doc)
+    void LayoutLoader::unloadImpl(XMLDocument &doc, ResourceType *res)
     {
-        doc.Clear();
+        doc->Clear();
+    }
+
+	XMLDocument::XMLDocument()
+        : mPtr(std::make_unique<tinyxml2::XMLDocument>())
+    {
     }
 
 }

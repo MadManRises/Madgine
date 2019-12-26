@@ -20,10 +20,6 @@ namespace Render {
         mTextureHandle = mHandle;
     }
 
-    OpenGLTexture::OpenGLTexture(dont_create_t)
-    {
-    }
-
     OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
         : Texture(std::move(other))
         , mType(other.mType)
@@ -39,7 +35,7 @@ namespace Render {
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
         std::swap(mHandle, other.mHandle);
-        mType = other.mType;
+        std::swap(mType, other.mType);
         return *this;
     }
 

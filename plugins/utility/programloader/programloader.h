@@ -1,15 +1,36 @@
 #pragma once
 
 #include "Modules/resources/resourceloader.h"
-#include "Modules/threading/threadstorage.h"
+#include "Modules/threading/workgroupstorage.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::ThreadStorage> {
+    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::WorkGroupStorage> {
+
+        using Base = Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::WorkGroupStorage>;
+
+        struct MADGINE_PROGRAMLOADER_EXPORT HandleType : Base::HandleType {
+
+            using Base::HandleType::HandleType;
+            HandleType(Base::HandleType handle)
+                : Base::HandleType(handle)
+            {
+            }
+
+			void create(const std::string &name, ProgramLoader *loader = nullptr);
+
+            void bind(ProgramLoader *loader = nullptr);
+
+            void setUniform(const std::string &var, int value, ProgramLoader *loader = nullptr);
+            void setUniform(const std::string &var, const Matrix3 &value, ProgramLoader *loader = nullptr);
+            void setUniform(const std::string &var, const Matrix4 &value, ProgramLoader *loader = nullptr);
+            void setUniform(const std::string &var, const Vector3 &value, ProgramLoader *loader = nullptr);
+        };
+
         ProgramLoader();
 
-		virtual std::shared_ptr<Program> create(const std::string &name) = 0;
+        virtual bool create(Program &program, const std::string &name) = 0;
 
         virtual void bind(Program &program) = 0;
 

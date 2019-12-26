@@ -32,12 +32,12 @@ namespace Tools {
 
         getTool<Inspector>().addPreviewDefinition<Render::OpenGLFontLoader::ResourceType>([](Render::OpenGLFontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture->mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture.mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
             image->setPersistent(true);
-            std::shared_ptr<Resources::ImageData> data = image->loadData();
+            Resources::ImageLoader::HandleType data = image->loadData();
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, data->mBuffer);
             ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });

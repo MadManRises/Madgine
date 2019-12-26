@@ -105,7 +105,7 @@ struct container_traits<std::list<T>> {
         return handle;
     }
 
-	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
     {
         return handle;
     }
@@ -127,10 +127,30 @@ struct container_traits<std::vector<T>> {
     typedef typename container::const_iterator const_iterator;
     typedef typename container::reverse_iterator reverse_iterator;
     typedef typename container::const_reverse_iterator const_reverse_iterator;
-    typedef size_t handle;
-    typedef size_t const_handle;
-    typedef size_t position_handle;
-    typedef size_t const_position_handle;
+
+    struct handle_t {
+        handle_t(size_t index = std::numeric_limits<size_t>::max())
+            : mIndex(index)
+        {
+        }
+
+        operator size_t() const { return mIndex; }
+
+        void operator++() { ++mIndex; }
+        void operator--() { --mIndex; }
+        handle_t &operator-=(size_t s)
+        {
+            mIndex -= s;
+            return *this;
+        }
+
+        size_t mIndex;
+    };
+
+    typedef handle_t handle;
+    typedef handle_t const_handle;
+    typedef handle_t position_handle;
+    typedef handle_t const_position_handle;
     typedef typename container::value_type value_type;
     typedef void key_type;
     typedef T type;
@@ -224,12 +244,12 @@ struct container_traits<std::vector<T>> {
         return c.begin() + handle;
     }
 
-	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
     {
         return c.begin() + handle;
     }
 
-	static position_handle next(const position_handle &handle)
+    static position_handle next(const position_handle &handle)
     {
         return handle + 1;
     }
@@ -448,12 +468,12 @@ struct container_traits<std::set<T, Cmp>> {
         return handle;
     }
 
-	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
     {
         return handle;
     }
 
-	static position_handle next(const position_handle &handle)
+    static position_handle next(const position_handle &handle)
     {
         return std::next(handle);
     }
@@ -536,12 +556,12 @@ struct container_traits<std::map<K, T>> {
         return handle;
     }
 
-	static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
     {
         return handle;
     }
 
-	static position_handle next(const position_handle &handle)
+    static position_handle next(const position_handle &handle)
     {
         return std::next(handle);
     }

@@ -9,14 +9,10 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLBuffer::OpenGLBuffer()
+    OpenGLBuffer::OpenGLBuffer(create_t)
     {
         glGenBuffers(1, &mHandle);
         GL_CHECK();
-    }
-
-    OpenGLBuffer::OpenGLBuffer(dont_create_t)
-    {
     }
 
     OpenGLBuffer::OpenGLBuffer(OpenGLBuffer &&other)

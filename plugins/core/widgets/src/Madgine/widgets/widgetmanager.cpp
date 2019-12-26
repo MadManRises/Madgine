@@ -63,21 +63,20 @@ namespace Widgets {
 
     bool WidgetManager::init()
     {
-        mProgram = Render::ProgramLoader::getSingleton().getOrCreateManual("ui", [](Render::ProgramLoader::ResourceType *res) {
-            return Render::ProgramLoader::getSingleton().create("ui");
+        mProgram = Render::ProgramLoader::loadManual("ui", {}, [](Render::ProgramLoader *loader, Render::Program &program, Render::ProgramLoader::ResourceType *res) {
+            return loader->create(program, "ui");
         });
 
-        Render::ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "texture", 0);
+        mProgram.setUniform("texture", 0);
 
-        mMesh = Resources::MeshLoader::getSingleton().getOrCreateManual("widgetMesh", [](Resources::MeshLoader::ResourceType *res) {
-            return Resources::MeshLoader::getSingleton().generate<GUI::Vertex>(3, nullptr, 0);
+        mMesh = Resources::MeshLoader::loadManual("widgetMesh", {}, [](Resources::MeshLoader *loader, Resources::MeshData &mesh, Resources::MeshLoader::ResourceType *res) {
+            return loader->generate<GUI::Vertex>(mesh, 3, nullptr, 0);
         });
 
-        mUIAtlasTexture = Render::TextureLoader::getSingleton().getOrCreateManual("widgetUIAtlas", [](Render::TextureLoader::ResourceType *res) { return Render::TextureLoader::getSingleton().create(Render::FORMAT_UNSIGNED_BYTE); });
+        mUIAtlasTexture = Render::TextureLoader::loadManual("widgetUIAtlas", {}, [](Render::TextureLoader *loader, Render::Texture &tex, Render::TextureLoader::ResourceType *res) { return loader->create(tex, Render::FORMAT_UNSIGNED_BYTE); });
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
-		
         //WidgetBase *loading = createTopLevelImage("Loading");
         //WidgetBase *progress = loading->createChildBar("ProgressBar");
         //progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
@@ -176,7 +175,6 @@ namespace Widgets {
         //WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
         //WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
         //WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");
-
 
         return true;
     }
@@ -618,8 +616,7 @@ namespace Widgets {
 
         target->setRenderSpace(screenSpace);
 
-            Render::ProgramLoader::getSingleton()
-                .bind(*mProgram->loadData());
+        mProgram.bind();
 
         std::map<Render::TextureDescriptor, std::vector<GUI::Vertex>> vertices;
 
@@ -646,9 +643,9 @@ namespace Widgets {
             if (resource) {
                 auto it = mUIAtlasEntries.find(resource);
                 if (it == mUIAtlasEntries.end()) {
-                    std::shared_ptr<Resources::ImageData> data = resource->loadData();
+                    Resources::ImageLoader::HandleType data = resource->loadData();
                     it = mUIAtlasEntries.try_emplace(resource, mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { expandUIAtlas(); })).first;
-                    Render::TextureLoader::getSingleton().setSubData(*mUIAtlasTexture->loadData(), { it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, data->mBuffer);
+                    mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, data->mBuffer);
                 }
 
                 for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
@@ -673,13 +670,16 @@ namespace Widgets {
         for (const std::pair<const Render::TextureDescriptor, std::vector<GUI::Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
-                Render::ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasDistanceField", bool(p.first.mFlags & Render::TextureFlag_IsDistanceField));
+                mProgram.setUniform("hasDistanceField", bool(p.first.mFlags & Render::TextureFlag_IsDistanceField));
 
-                Render::TextureLoader::getSingleton().bind(p.first.mTexture ? *p.first.mTexture : *mUIAtlasTexture->loadData());
+                if (p.first.mTexture)
+                    Render::TextureLoader::getSingleton().bind(*p.first.mTexture);
+                else
+                    mUIAtlasTexture.bind();
 
-                Resources::MeshLoader::getSingleton().update(*mMesh->loadData(), 3, p.second.data(), p.second.size());
+                mMesh.update(3, p.second.data(), p.second.size());
 
-                target->renderMesh(mMesh->loadData().get());
+                target->renderMesh(mMesh);
             }
         }
     }
@@ -688,7 +688,7 @@ namespace Widgets {
     {
         if (mUIAtlasSize == 0) {
             mUIAtlasSize = 4;
-            Render::TextureLoader::getSingleton().setData(*mUIAtlasTexture->loadData(), { mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr);
+            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr);
             for (int x = 0; x < mUIAtlasSize; ++x) {
                 for (int y = 0; y < mUIAtlasSize; ++y) {
                     mUIAtlas.addBin({ 512 * x, 512 * y });
@@ -710,10 +710,10 @@ namespace Widgets {
 
     Render::Texture &WidgetManager::uiTexture() const
     {
-        return *mUIAtlasTexture->loadData();
+        return *mUIAtlasTexture;
     }
 
-	int WidgetManager::priority() const
+    int WidgetManager::priority() const
     {
         return mPriority;
     }

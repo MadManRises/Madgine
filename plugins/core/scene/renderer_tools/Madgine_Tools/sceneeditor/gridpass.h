@@ -19,8 +19,8 @@ namespace Tools {
 		virtual int priority() const override;
 
     private:
-        Resources::MeshLoader::ResourceType *mMesh = nullptr;
-        Render::ProgramLoader::ResourceType *mProgram = nullptr;
+        Resources::MeshLoader::HandleType mMesh;
+        Render::ProgramLoader::HandleType mProgram;
 
 		Render::Camera *mCamera;
 

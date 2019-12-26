@@ -2,6 +2,9 @@
 
 #include "../generic/proxy.h"
 
+#include "threadstorage.h"
+#include "global.h"
+
 #if ENABLE_THREADING
 #    if USE_CUSTOM_THREADLOCAL
 #        define THREADLOCAL(T) ::Engine::Threading::Global<T, ::Engine::Threading::ThreadStorage>

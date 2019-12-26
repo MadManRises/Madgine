@@ -13,7 +13,7 @@
 METATABLE_BEGIN(Engine::Widgets::Label)
 MEMBER(mText)
 MEMBER(mFontSize)
-MEMBER(mFont)
+PROPERTY(Font, getFont, setFont)
 METATABLE_END(Engine::Widgets::Label)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Label, Engine::Widgets::WidgetBase)
@@ -36,25 +36,33 @@ namespace Widgets {
     {
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         pos.z = depth();
-        
-		if (mFont) {
-            mFont->setPersistent(true);
-            if (mFont->load()) {
-                return { renderText(mText, pos, mFont->data().get(), mFontSize, { 0, 0 }, screenSize) };        
-            }
+
+        if (mFont) {
+            //mFont->setPersistent(true);
+            return { renderText(mText, pos, mFont, mFontSize, { 0, 0 }, screenSize) };
         }
 
-		return {};
+        return {};
     }
 
     std::string Label::getFontName() const
     {
-        return mFont ? mFont->name() : "";
+        return mFont.name();
     }
 
     void Label::setFontName(const std::string &name)
     {
-        mFont = Font::FontLoader::getSingleton().get(name);
+        mFont.load(name);
+    }
+	
+    Font::FontLoader::ResourceType *Label::getFont() const
+    {
+        return mFont.resource();
+    }
+
+    void Label::setFont(Font::FontLoader::ResourceType *font)
+    {
+        mFont = font;
     }
 
 }

@@ -4,14 +4,17 @@
 
 #include "programloader.h"
 
+#include "util/openglprogram.h"
+
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLProgramLoader : Resources::VirtualResourceLoaderImpl<OpenGLProgramLoader, ProgramLoader> {
+    struct MADGINE_OPENGL_EXPORT OpenGLProgramLoader : Resources::VirtualResourceLoaderImpl<OpenGLProgramLoader, OpenGLProgram, ProgramLoader> {
         OpenGLProgramLoader();
 
-        std::shared_ptr<Program> loadImpl(ResourceType *res) override;
-        std::shared_ptr<Program> create(const std::string &name) override;
+        bool loadImpl(OpenGLProgram &program, ResourceType *res);
+        void unloadImpl(OpenGLProgram &program, ResourceType *res);
+        bool create(Program &program, const std::string &name) override;
 
         virtual void bind(Program &program) override;
 

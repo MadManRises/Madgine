@@ -15,7 +15,7 @@ namespace Render {
 		virtual int priority() const override;
 
     private:
-        ProgramLoader::ResourceType *mProgram;
+        ProgramLoader::HandleType mProgram;
 
         Camera *mCamera;
 

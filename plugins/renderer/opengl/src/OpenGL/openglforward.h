@@ -13,8 +13,8 @@ namespace Render {
 
 	struct OpenGLRenderContext;
 
-    constexpr struct dont_create_t {
-    } dont_create;
+    constexpr struct create_t {
+    } create;
 }
 
 }

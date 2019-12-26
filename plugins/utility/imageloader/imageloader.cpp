@@ -15,12 +15,8 @@
 
 UNIQUECOMPONENT(Engine::Resources::ImageLoader)
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Resources::ImageData, Engine::Resources::Resource>;
-METATABLE_BEGIN(LoaderImpl)
+METATABLE_BEGIN(Engine::Resources::ImageLoader)
 MEMBER(mResources)
-METATABLE_END(LoaderImpl)
-
-METATABLE_BEGIN_BASE(Engine::Resources::ImageLoader, LoaderImpl)
 METATABLE_END(Engine::Resources::ImageLoader)
 
 METATABLE_BEGIN_BASE(Engine::Resources::ImageLoader::ResourceType, Engine::Resources::ResourceBase)
@@ -54,6 +50,15 @@ RegisterType(Engine::Resources::ImageLoader)
             clear();
         }
 
+        ImageData &ImageData::operator=(ImageData &&other)
+        {
+            std::swap(mBuffer, other.mBuffer);
+            std::swap(mChannels, other.mChannels);
+            std::swap(mWidth, other.mWidth);
+            std::swap(mHeight, other.mHeight);
+            return *this;
+        }
+
         void ImageData::clear()
         {
             if (mBuffer) {
@@ -73,7 +78,7 @@ RegisterType(Engine::Resources::ImageLoader)
             return true;
         }
 
-        void ImageLoader::unloadImpl(ImageData &data)
+        void ImageLoader::unloadImpl(ImageData &data, ResourceType *res)
         {
             data.clear();
         }

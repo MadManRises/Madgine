@@ -10,7 +10,7 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLTexture : Texture {
 
         OpenGLTexture(GLenum type);
-        OpenGLTexture(dont_create_t);
+        OpenGLTexture() = default;
         OpenGLTexture(const OpenGLTexture &) = delete;
         OpenGLTexture(OpenGLTexture &&);
         ~OpenGLTexture();

@@ -204,8 +204,8 @@ namespace Tools {
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
-                    std::shared_ptr<Resources::MeshData> data = resource->loadData();
-                    Im3D::NativeMesh(data.get(), data->mAABB, Matrix4::TranslationMatrix(pos));
+                    Resources::MeshLoader::HandleType handle = resource->loadData();
+                    Im3D::NativeMesh(handle, handle->mAABB, Matrix4::TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

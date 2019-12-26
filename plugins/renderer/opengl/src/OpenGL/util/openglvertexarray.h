@@ -12,10 +12,10 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLVertexArray {
 
-        OpenGLVertexArray();
+        OpenGLVertexArray() = default;
         OpenGLVertexArray(const OpenGLVertexArray &) = delete;
         OpenGLVertexArray(OpenGLVertexArray &&);
-        OpenGLVertexArray(dont_create_t);
+        OpenGLVertexArray(create_t);
         ~OpenGLVertexArray();
 
         OpenGLVertexArray &operator=(OpenGLVertexArray &&other);

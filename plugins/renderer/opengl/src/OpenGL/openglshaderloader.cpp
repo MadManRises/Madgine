@@ -6,66 +6,66 @@
 
 #include "util/openglshader.h"
 
-#include "Modules/reflection/classname.h"
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
-namespace Engine
-{
-	namespace Render 
-	{
+namespace Engine {
+namespace Render {
 
-		OpenGLShaderLoader::OpenGLShaderLoader() :
-			ResourceLoader({ ".glsl" })
-		{
-		}
+    OpenGLShaderLoader::OpenGLShaderLoader()
+        : ResourceLoader({ ".glsl" })
+    {
+    }
 
-		std::shared_ptr<OpenGLShader> OpenGLShaderLoader::loadImpl(ResourceType *res)
-		{
-			std::string filename = res->path().stem();
-			
-			ShaderType type;
-			GLenum glType;
-			if (StringUtil::endsWith(filename, "_VS")) 
-			{
-				type = VertexShader;
-				glType = GL_VERTEX_SHADER;
-			}
-			else if (StringUtil::endsWith(filename, "_PS"))
-			{
-				type = PixelShader;
-				glType = GL_FRAGMENT_SHADER;
-			}
-			else
-				std::terminate();
+    bool OpenGLShaderLoader::loadImpl(OpenGLShader &shader, ResourceType *res)
+    {
+        std::string filename = res->path().stem();
 
-			std::string source = res->readAsText();
+        ShaderType type;
+        GLenum glType;
+        if (StringUtil::endsWith(filename, "_VS")) {
+            type = VertexShader;
+            glType = GL_VERTEX_SHADER;
+        } else if (StringUtil::endsWith(filename, "_PS")) {
+            type = PixelShader;
+            glType = GL_FRAGMENT_SHADER;
+        } else
+            std::terminate();
 
-			const char *cSource = source.c_str();
+        std::string source = res->readAsText();
 
-			std::shared_ptr<OpenGLShader> shader = std::make_shared<OpenGLShader>(glType, type);
+        const char *cSource = source.c_str();
 
-			GLuint handle = shader->mHandle;
+        OpenGLShader tempShader { glType, type };
 
-			glShaderSource(handle, 1, &cSource, NULL);
-			glCompileShader(handle);
-			// check for shader compile errors
-			GLint success;
-			char infoLog[512];
-			glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
-			if (!success)
-			{
-				glGetShaderInfoLog(handle, 512, NULL, infoLog);
-				LOG_ERROR("Loading of Shader '"s + filename + "' failed:");
-				LOG_ERROR(infoLog);			
-				return {};
-			}
-			
-			return shader;
-		}
+        GLuint handle = tempShader.mHandle;
 
-	}
+        glShaderSource(handle, 1, &cSource, NULL);
+        glCompileShader(handle);
+        // check for shader compile errors
+        GLint success;
+        char infoLog[512];
+        glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(handle, 512, NULL, infoLog);
+            LOG_ERROR("Loading of Shader '"s + filename + "' failed:");
+            LOG_ERROR(infoLog);
+            return false;
+        }
+
+        shader = std::move(tempShader);
+
+        return true;
+    }
+
+    void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader, ResourceType *res)
+    {
+        shader.reset();
+    }
+
+}
 }
 
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)

@@ -4,6 +4,8 @@
 
 #include "../../threading/workgroup.h"
 
+#include "../../threading/threadlocal.h"
+
 #include "../../signalslot/taskguard.h"
 
 namespace Engine {

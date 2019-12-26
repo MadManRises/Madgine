@@ -145,6 +145,8 @@ namespace Resources {
 
         for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
             for (const std::string &ext : loader->fileExtensions()) {
+                if (loaderByExtension[ext])
+                    LOG_WARNING("Double assigned extension: " << ext);
                 loaderByExtension[ext] = loader.get();
             }
         }

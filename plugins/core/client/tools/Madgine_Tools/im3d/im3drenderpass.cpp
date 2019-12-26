@@ -16,11 +16,9 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram = ProgramLoader::getSingleton().getOrCreateManual("scene", {}, [](const ProgramLoader::ResourceType *res) {
-            return ProgramLoader::getSingleton().create("scene");
-        });
+        mProgram.create("scene");
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "tex", 0);
+        mProgram.setUniform("tex", 0);
     }
 
     void Im3DRenderPass::render(RenderTarget *target)
@@ -31,15 +29,15 @@ namespace Render {
 
         float aspectRatio = float(size.x) / size.y;
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "v", mCamera->getViewMatrix());
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "p", mCamera->getProjectionMatrix(aspectRatio));
+        mProgram.setUniform("v", mCamera->getViewMatrix());
+        mProgram.setUniform("p", mCamera->getProjectionMatrix(aspectRatio));
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasLight", false);
+        mProgram.setUniform("hasLight", false);
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasDistanceField", false);
+        mProgram.setUniform("hasDistanceField", false);
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "m", Matrix4::IDENTITY);
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(),
+        mProgram.setUniform("m", Matrix4::IDENTITY);
+        mProgram.setUniform(
             "anti_m",
             Matrix3::IDENTITY);
 
@@ -50,7 +48,7 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasTexture", p.first != 0);
+			mProgram.setUniform("hasTexture", p.first != 0);
             TextureLoader::getSingleton().bind(p.first);
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {

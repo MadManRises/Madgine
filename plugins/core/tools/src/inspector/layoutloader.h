@@ -5,14 +5,25 @@
 namespace Engine {
 namespace Tools {
 
-    class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, tinyxml2::XMLDocument> {
+	struct XMLDocument {
+        XMLDocument();
+
+		XMLDocument(XMLDocument &&) = default;
+
+		XMLDocument &operator=(XMLDocument &&) = default;
+
+		tinyxml2::XMLDocument *operator->() const { return mPtr.get(); }
+
+        std::unique_ptr<tinyxml2::XMLDocument> mPtr;
+	};
+
+    class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, XMLDocument> {
 
     public:
         LayoutLoader();
 
-    private:
-        virtual bool loadImpl(Data &data, ResourceType *res) override;
-        virtual void unloadImpl(Data &data) override;
+        bool loadImpl(Data &data, ResourceType *res);
+        void unloadImpl(Data &data, ResourceType *res);
     };
 
 }

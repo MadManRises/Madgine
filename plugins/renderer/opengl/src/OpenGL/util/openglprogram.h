@@ -3,26 +3,30 @@
 #include "program.h"
 
 namespace Engine {
-	namespace Render {
+namespace Render {
 
-		struct MADGINE_OPENGL_EXPORT OpenGLProgram : Program {			
-			
-			~OpenGLProgram();
+    struct MADGINE_OPENGL_EXPORT OpenGLProgram : Program {
 
-			bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char*> &attributeNames);
+        OpenGLProgram() = default;
+        OpenGLProgram(OpenGLProgram &&other);
+        ~OpenGLProgram();
 
-			void reset();
+        OpenGLProgram &operator=(OpenGLProgram &&other);
 
-			void bind();
+        bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char *> &attributeNames);
 
-			void setUniform(const std::string &var, int value);
-            void setUniform(const std::string &var, const Matrix3 &value);
-			void setUniform(const std::string &var, const Matrix4 &value);
-			void setUniform(const std::string &var, const Vector3 &value);
+        void reset();
 
-		private:
-			GLuint mHandle = 0;
-		};
+        void bind();
 
-	}
+        void setUniform(const std::string &var, int value);
+        void setUniform(const std::string &var, const Matrix3 &value);
+        void setUniform(const std::string &var, const Matrix4 &value);
+        void setUniform(const std::string &var, const Vector3 &value);
+
+    private:
+        GLuint mHandle = 0;
+    };
+
+}
 }

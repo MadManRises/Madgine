@@ -11,14 +11,12 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/resources/resource.h"
-
 #include "fontloader.h"
 
 METATABLE_BEGIN(Engine::Widgets::Button)
 MEMBER(mText)
 MEMBER(mFontSize)
-MEMBER(mFont)
+PROPERTY(Font, getFont, setFont)
 METATABLE_END(Engine::Widgets::Button)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
@@ -35,8 +33,6 @@ namespace Widgets {
         return mClicked;
     }
 
- 
-
     std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Button::vertices(const Vector3 &screenSize)
     {
 
@@ -49,7 +45,7 @@ namespace Widgets {
 
         Vector4 color = mHovered ? Vector4 { 1.0f, 0.1f, 0.1f, 1.0f } : Vector4 { 0.4f, 0.4f, 0.4f, 1.0f };
 
-        Vector3 v = pos;        
+        Vector3 v = pos;
         result.push_back({ v, color, { 0.0f, 0.0f } });
         v.x += size.x;
         result.push_back({ v, color, { 1.0f, 0.0f } });
@@ -64,12 +60,10 @@ namespace Widgets {
         returnSet.push_back({ result, {} });
 
         if (mFont) {
-            mFont->setPersistent(true);
-            if (mFont->load()) {
-                std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> fontVertices = renderText(mText, pos + 0.5f * size, mFont->data().get(), mFontSize, { 0.5f, 0.5f }, screenSize);
-                if (!fontVertices.first.empty())
-                    returnSet.push_back(fontVertices);
-            }
+            //mFont->setPersistent(true);
+            std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> fontVertices = renderText(mText, pos + 0.5f * size, mFont, mFontSize, { 0.5f, 0.5f }, screenSize);
+            if (!fontVertices.first.empty())
+                returnSet.push_back(fontVertices);
         }
 
         return returnSet;
@@ -113,12 +107,23 @@ namespace Widgets {
 
     std::string Button::getFontName() const
     {
-        return mFont ? mFont->name() : "";
+        return mFont.name();
     }
 
     void Button::setFontName(const std::string &name)
     {
-        mFont = Font::FontLoader::getSingleton().get(name);
+        mFont.load(name);
     }
+
+    Font::FontLoader::ResourceType *Button::getFont() const
+    {
+        return mFont.resource();
+    }
+
+    void Button::setFont(Font::FontLoader::ResourceType *font)
+    {
+        mFont = font;
+    }
+
 }
 }

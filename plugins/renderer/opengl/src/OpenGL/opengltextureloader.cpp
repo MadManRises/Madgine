@@ -9,10 +9,12 @@
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Render::Texture, Engine::Resources::ThreadLocalResource>;
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader, LoaderImpl)
+METATABLE_BEGIN(Engine::Render::OpenGLTextureLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLTextureLoader)
+
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader::ResourceType, Engine::Render::TextureLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLTextureLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLTextureLoader);
 
@@ -23,12 +25,17 @@ namespace Render {
     {
     }
 
-    std::shared_ptr<Texture> OpenGLTextureLoader::loadImpl(ResourceType *res)
+    bool OpenGLTextureLoader::loadImpl(OpenGLTexture &tex, ResourceType *res)
     {
         throw 0;
     }
 
-    std::shared_ptr<Texture> OpenGLTextureLoader::create(DataFormat format)
+    void OpenGLTextureLoader::unloadImpl(OpenGLTexture &tex, ResourceType *res)
+    {
+        tex.reset();
+    }
+
+    bool OpenGLTextureLoader::create(Texture &tex, DataFormat format)
     {
         GLenum type;
         switch (format) {
@@ -37,12 +44,11 @@ namespace Render {
             break;
         default:
             std::terminate();
-		}
+        }
 
-        std::shared_ptr<OpenGLTexture> texture = std::make_shared<OpenGLTexture>(type);
+        static_cast<OpenGLTexture &>(tex) = OpenGLTexture { type };
 
-        
-        return texture;
+        return true;
     }
 
     void OpenGLTextureLoader::bind(const Texture &texture)
@@ -75,12 +81,10 @@ namespace Render {
             break;
         default:
             std::terminate();
-		}
+        }
 
         static_cast<OpenGLTexture &>(tex).setWrapMode(glMode);
     }
-
-
 
 }
 }

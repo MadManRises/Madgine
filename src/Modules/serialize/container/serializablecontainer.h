@@ -401,7 +401,7 @@ namespace Serialize {
         template <typename Creator>
         std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
-            this->beginExtendedItem(in, *static_cast<const type *>(nullptr));
+            this->beginExtendedItem(in, *reinterpret_cast<const type *>(0x1));
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
             in.read(*it.first, "Item");

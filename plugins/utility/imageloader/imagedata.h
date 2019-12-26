@@ -9,6 +9,8 @@ namespace Resources {
         ImageData(ImageData &&other);
         ~ImageData();
 
+		ImageData &operator=(ImageData &&other);
+
 		void clear();
 
 		unsigned char *mBuffer = nullptr;

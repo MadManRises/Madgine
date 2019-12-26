@@ -5,8 +5,8 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLBuffer {
 
-        OpenGLBuffer();
-        OpenGLBuffer(dont_create_t);
+        OpenGLBuffer() = default;
+        OpenGLBuffer(create_t);
         OpenGLBuffer(const OpenGLBuffer &) = delete;
         OpenGLBuffer(OpenGLBuffer &&);
         ~OpenGLBuffer();

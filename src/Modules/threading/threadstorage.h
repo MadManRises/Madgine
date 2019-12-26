@@ -3,7 +3,6 @@
 namespace Engine {
 namespace Threading {
 
-	
     struct MODULES_EXPORT ThreadStorage {
 
         template <typename T>
@@ -11,6 +10,11 @@ namespace Threading {
             T *operator->()
             {
                 return &mData[std::this_thread::get_id()];
+            }
+
+            T &operator*()
+            {
+                return mData[std::this_thread::get_id()];
             }
 
         private:

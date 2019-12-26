@@ -75,7 +75,7 @@ namespace Render {
     {
     }
 
-    std::shared_ptr<Font::Font> OpenGLFontLoader::loadImpl(ResourceType *res)
+    bool OpenGLFontLoader::loadImpl(OpenGLFontData &font, ResourceType *res)
     {
 
         FT_Library ft;
@@ -93,9 +93,7 @@ namespace Render {
 
         FT_Set_Pixel_Sizes(face, 0, 64);
 
-        std::shared_ptr<OpenGLFontData> data = std::make_shared<OpenGLFontData>();
-        
-		data->mTexture.setFilter(GL_LINEAR);
+        font.mTexture.setFilter(GL_LINEAR);
 
         std::vector<Vector2i> sizes;
         sizes.resize(128);
@@ -135,9 +133,9 @@ namespace Render {
         std::vector<Atlas2::Entry> entries = atlas.insert(
             extendedSizes, expand, true);
 
-        data->mTextureSize = { areaSize * UNIT_SIZE,
+        font.mTextureSize = { areaSize * UNIT_SIZE,
             areaSize * UNIT_SIZE };
-        data->mTexture.setData(data->mTextureSize, nullptr);
+        font.mTexture.setData(font.mTextureSize, nullptr);
 
         for (GLubyte c = 0; c < 128; c++) {
 
@@ -168,11 +166,11 @@ namespace Render {
             msdfgen::edgeColoringSimple(shape, 3);
             msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
 
-            data->mGlyphs[c].mSize = sizes[c];
-            data->mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
-            data->mGlyphs[c].mFlipped = entries[c].mFlipped;
-            data->mGlyphs[c].mAdvance = face->glyph->advance.x;
-            data->mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
+            font.mGlyphs[c].mSize = sizes[c];
+            font.mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
+            font.mGlyphs[c].mFlipped = entries[c].mFlipped;
+            font.mGlyphs[c].mAdvance = face->glyph->advance.x;
+            font.mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
 
             Vector2i size = sizes[c];
             Vector2i pos = entries[c].mArea.mTopLeft;
@@ -193,13 +191,18 @@ namespace Render {
                 }
             }
 
-            data->mTexture.setSubData(pos, size, colors.get());
+            font.mTexture.setSubData(pos, size, colors.get());
         }
 
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
 
-        return data;
+        return true;
+    }
+
+    void OpenGLFontLoader::unloadImpl(OpenGLFontData &font, ResourceType *res)
+    {
+        font.mTexture.reset();
     }
 
 }
@@ -207,12 +210,11 @@ namespace Render {
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLFontLoader);
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Font::Font, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
+METATABLE_BEGIN(Engine::Render::OpenGLFontLoader)
 MEMBER(mResources)
-METATABLE_END(LoaderImpl)
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLFontLoader, LoaderImpl)
 METATABLE_END(Engine::Render::OpenGLFontLoader)
+
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLFontLoader::ResourceType, Engine::Font::FontLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLFontLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLFontLoader);

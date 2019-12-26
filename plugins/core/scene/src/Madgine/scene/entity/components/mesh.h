@@ -18,17 +18,16 @@ namespace Scene {
 
             AABB aabb() const;
 
-            void setManual(std::shared_ptr<Resources::MeshData> data);
+            void setManual(Resources::MeshLoader::HandleType handle);
+            void set(Resources::MeshLoader::ResourceType *res);
 
-            void set(Resources::MeshLoader::ResourceType *mesh);
             Resources::MeshLoader::ResourceType *get() const;
 
             void setVisible(bool vis);
             bool isVisible() const;
 
         private:
-            std::shared_ptr<Resources::MeshData> mData;
-            typename Resources::MeshLoader::ResourceType *mResource;
+            typename Resources::MeshLoader::HandleType mMesh;
         };
 
     }

@@ -4,6 +4,8 @@
 
 #include "openglshaderloader.h"
 
+#include "util/openglshader.h"
+
 #include "util/openglprogram.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
@@ -11,10 +13,11 @@
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Render::Program, Engine::Resources::ThreadLocalResource>;
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, LoaderImpl)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, Engine::Render::ProgramLoader)
 METATABLE_END(Engine::Render::OpenGLProgramLoader)
+
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader::ResourceType, Engine::Render::ProgramLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLProgramLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLProgramLoader);
 
@@ -25,22 +28,29 @@ namespace Render {
     {
     }
 
-    std::shared_ptr<Program> OpenGLProgramLoader::loadImpl(ResourceType *res)
+    bool OpenGLProgramLoader::loadImpl(OpenGLProgram &program, ResourceType *res)
     {
         throw 0;
     }
 
-    std::shared_ptr<Program> OpenGLProgramLoader::create(const std::string &name)
+    void OpenGLProgramLoader::unloadImpl(OpenGLProgram &program, ResourceType *res)
     {
-        std::shared_ptr<OpenGLProgram> program = std::make_shared<OpenGLProgram>();
+        program.reset();
+    }
 
-        std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load(name + "_VS");
-        std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load(name + "_PS");
+    bool OpenGLProgramLoader::create(Program &_program, const std::string &name)
+    {
+        OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 
-        if (!program->link(vertexShader.get(), pixelShader.get(), { "aPos", "aPos2", "aColor", "aNormal", "aUV" }))
+        OpenGLShaderLoader::HandleType vertexShader;
+        vertexShader.load(name + "_VS");
+        OpenGLShaderLoader::HandleType pixelShader;
+        pixelShader.load(name + "_PS");
+
+        if (!program.link(vertexShader, pixelShader, { "aPos", "aPos2", "aColor", "aNormal", "aUV" }))
             std::terminate();
 
-        return program;
+        return true;
     }
 
     void OpenGLProgramLoader::bind(Program &program)

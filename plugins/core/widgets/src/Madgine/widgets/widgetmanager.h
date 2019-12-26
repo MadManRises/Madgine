@@ -111,10 +111,10 @@ namespace Widgets {
 
         void expandUIAtlas();
 
-        Render::ProgramLoader::ResourceType *mProgram = nullptr;
-        Resources::MeshLoader::ResourceType *mMesh = nullptr;
+        Render::ProgramLoader::HandleType mProgram;
+        Resources::MeshLoader::HandleType mMesh;
 
-        Render::TextureLoader::ResourceType *mUIAtlasTexture = nullptr;
+        Render::TextureLoader::HandleType mUIAtlasTexture;
         Atlas2 mUIAtlas;
         int mUIAtlasSize = 0;
         std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;

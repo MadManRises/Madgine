@@ -11,8 +11,8 @@ namespace Resources {
     
 		ImageLoader();
 
-		bool loadImpl(ImageData &data, ResourceType *res) override;
-        void unloadImpl(ImageData &data) override;
+		bool loadImpl(ImageData &data, ResourceType *res);
+        void unloadImpl(ImageData &data, ResourceType *res);
 
 	};
 

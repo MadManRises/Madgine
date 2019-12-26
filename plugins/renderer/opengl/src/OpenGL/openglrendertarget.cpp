@@ -30,9 +30,9 @@ namespace Render {
     {
     }
 
-    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, dont_create_t)
+    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, create_t)
         : RenderTarget(context)
-        , mTempBuffer(dont_create)
+        , mTempBuffer(create)
     {
     }
 
@@ -96,22 +96,24 @@ namespace Render {
     void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
-            std::shared_ptr<Resources::MeshData> tempMesh = OpenGLMeshLoader::getSingleton().generate(groupSize, vertices, vertexCount, indices, indexCount);
+            Resources::MeshData tempMesh;
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
 
             //setupProgram(flags);
 
-            renderMesh(tempMesh.get());
+            renderMesh(&tempMesh);
         }
     }
 
     void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount, unsigned int textureId)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
-            std::shared_ptr<Resources::MeshData> tempMesh = OpenGLMeshLoader::getSingleton().generate(groupSize, vertices, vertexCount, indices, indexCount);
+            Resources::MeshData tempMesh;
+			OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
 
             //setupProgram(flags, textureId);
 
-            renderMesh(tempMesh.get());
+            renderMesh(&tempMesh);
         }
     }
 

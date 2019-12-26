@@ -28,19 +28,6 @@ namespace Render {
         , mTexture(GL_UNSIGNED_BYTE)
         , mSize({ 0, 0 })
     {
-        //addRenderPass(std::make_unique<OpenGLSceneRenderPass>());
-
-        /*std::shared_ptr<OpenGLShader> vertexShader = OpenGLShaderLoader::load("scene_VS");
-        std::shared_ptr<OpenGLShader> pixelShader = OpenGLShaderLoader::load("scene_PS");
-
-        if (!mProgram.link(vertexShader.get(), pixelShader.get(), { "aPos", "aPos2", "aColor", "aNormal", "aUV" }))
-            std::terminate();
-
-        mProgram.setUniform("tex", 0);
-
-        mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
-        mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
-		*/
         mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         mTexture.setFilter(GL_NEAREST);
 

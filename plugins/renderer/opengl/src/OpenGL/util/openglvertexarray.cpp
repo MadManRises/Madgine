@@ -19,7 +19,7 @@ namespace Render {
         }
     }
 
-    OpenGLVertexArray::OpenGLVertexArray()
+    OpenGLVertexArray::OpenGLVertexArray(create_t)
     {
 #if !OPENGL_ES
         glGenVertexArrays(1, &mHandle);
@@ -36,10 +36,6 @@ namespace Render {
         , mEBO(other.mEBO)
         , mAttributes(std::move(other.mAttributes))
 #endif
-    {
-    }
-
-    OpenGLVertexArray::OpenGLVertexArray(dont_create_t)
     {
     }
 

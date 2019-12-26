@@ -4,14 +4,17 @@
 
 #include "textureloader.h"
 
+#include "util/opengltexture.h"
+
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLTextureLoader : Resources::VirtualResourceLoaderImpl<OpenGLTextureLoader, TextureLoader> {
+    struct MADGINE_OPENGL_EXPORT OpenGLTextureLoader : Resources::VirtualResourceLoaderImpl<OpenGLTextureLoader, OpenGLTexture, TextureLoader> {
         OpenGLTextureLoader();
 
-        std::shared_ptr<Texture> loadImpl(ResourceType *res) override;
-        std::shared_ptr<Texture> create(DataFormat format) override;
+        bool loadImpl(OpenGLTexture &tex, ResourceType *res);
+        void unloadImpl(OpenGLTexture &tex, ResourceType *res);
+        bool create(Texture &texture, DataFormat format) override;
 
         virtual void bind(const Texture &texture) override;
         virtual void bind(unsigned int textureHandle) override;

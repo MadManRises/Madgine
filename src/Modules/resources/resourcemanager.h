@@ -12,7 +12,7 @@ namespace Resources {
     struct MODULES_EXPORT ResourceManager final : ScopeBase
 #if ENABLE_PLUGINS
         ,
-                                                       Plugins::PluginListener
+                                                  Plugins::PluginListener
 #endif
     {
         static ResourceManager &getSingleton();
@@ -34,25 +34,11 @@ namespace Resources {
             return mCollector.get<Loader>();
         }
 
-        template <class Loader>
-        std::shared_ptr<typename Loader::Data> load(const std::string &name, bool persistent = false)
-        {
-            typename Loader::ResourceType *res = getResource<Loader>(name);
-            if (res) {
-                if (persistent)
-                    res->setPersistent(true);
-                return res->loadData();
-            } else {
-                LOG_ERROR("Resource '" << name << "' could not be found!");
-                return {};
-            }
-        }
-
         void init();
 
         ResourceLoaderContainer<std::vector<Placeholder<0>>> mCollector;
 
-			Filesystem::Path findResourceFile(const std::string &fileName);
+        Filesystem::Path findResourceFile(const std::string &fileName);
 
 #if ENABLE_PLUGINS
     protected:

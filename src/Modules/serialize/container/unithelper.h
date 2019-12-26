@@ -95,7 +95,7 @@ namespace Serialize {
 
         static void beginExtendedItem(SerializeInStream &in, const std::unique_ptr<T> &item)
         {
-            UnitHelper<T>::beginExtendedItem(in, *static_cast<const T *>(nullptr));
+            UnitHelper<T>::beginExtendedItem(in, *reinterpret_cast<const T *>(0x1));
         }
     };
 

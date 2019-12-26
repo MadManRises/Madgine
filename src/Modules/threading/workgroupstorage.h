@@ -1,21 +1,30 @@
 #pragma once
 
+#include "workgroup.h"
+
 namespace Engine {
 namespace Threading {
 
-	
-	struct MODULES_EXPORT WorkGroupStorage {
+    struct MODULES_EXPORT WorkGroupStorage {
         template <typename T>
         struct container_type {
+            container_type() = default;
+            container_type(const container_type &) = delete;
+
             T *operator->()
             {
-                return &mData[&self()];
+                return &mData[&WorkGroup::self()];
+            }
+
+            T &operator*()
+            {
+                return mData[&WorkGroup::self()];
             }
 
         private:
             std::map<WorkGroup *, T> mData;
         };
-
+			
         static int registerLocalBssVariable(std::function<Any()> ctor);
         static void unregisterLocalBssVariable(int index);
         static int registerLocalObjectVariable(std::function<Any()> ctor);
@@ -26,7 +35,6 @@ namespace Threading {
         static void init(bool bss);
         static void finalize(bool bss);
     };
-
 
 }
 }

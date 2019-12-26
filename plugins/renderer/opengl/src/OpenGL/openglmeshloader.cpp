@@ -4,22 +4,20 @@
 
 #include "openglmeshdata.h"
 
-
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
-
 #include "imageloaderlib.h"
-#include "imageloader.h"
 #include "imagedata.h"
-
+#include "imageloader.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Resources::MeshData, Engine::Resources::ThreadLocalResource>;
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, LoaderImpl)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Resources::MeshLoader)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
+
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Resources::MeshLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLMeshLoader);
 
@@ -30,41 +28,40 @@ namespace Render {
     {
     }
 
-
-
-    std::shared_ptr<Resources::MeshData> OpenGLMeshLoader::generateImpl(const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices, size_t indexCount, const Filesystem::Path &texturePath)
+    bool OpenGLMeshLoader::generateImpl(Resources::MeshData &_data, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices, size_t indexCount, const Filesystem::Path &texturePath)
     {
-        std::shared_ptr<OpenGLMeshData> data = std::make_shared<OpenGLMeshData>();
-        data->mVAO.bind();
-        
-		data->mVertices.bind(GL_ARRAY_BUFFER);
+        OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
+        data.mVAO = create;
+        data.mVAO.bind();
 
-		if (indices) {
-            data->mIndices = {};
+		data.mVertices = create;
+        data.mVertices.bind(GL_ARRAY_BUFFER);
+
+        if (indices) {
+            data.mIndices = create;
         }
 
-		if (!texturePath.empty()) {
+        if (!texturePath.empty()) {
             std::string imageName = texturePath.stem();
-            std::shared_ptr<Resources::ImageData> tex = Resources::ImageLoader::load(imageName);
+            Resources::ImageLoader::HandleType tex;
+            tex.load(imageName);
 
-            OpenGLMeshData &_data = static_cast<OpenGLMeshData &>(*data);
-
-            _data.mTexture = {GL_UNSIGNED_BYTE};
-            _data.mTexture.setFilter(GL_NEAREST);
-            _data.mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer);
-            data->mTextureHandle = _data.mTexture.handle();
+            data.mTexture = { GL_UNSIGNED_BYTE };
+            data.mTexture.setFilter(GL_NEAREST);
+            data.mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer);
+            data.mTextureHandle = data.mTexture.handle();
         }
 
-        updateImpl(*data, bb, groupSize, vertices, vertexCount, vertexSize, indices, indexCount);
+        updateImpl(data, bb, groupSize, vertices, vertexCount, vertexSize, indices, indexCount);
 
         for (int i = 0; i < 5; ++i) {
             if (attributeList[i])
-                data->mVAO.enableVertexAttribute(i, *attributeList[i]);
+                data.mVAO.enableVertexAttribute(i, *attributeList[i]);
             else
-                data->mVAO.disableVertexAttribute(i);
+                data.mVAO.disableVertexAttribute(i);
         }
 
-        return data;
+        return true;
     }
 
     void OpenGLMeshLoader::updateImpl(Resources::MeshData &_data, const AABB &bb, size_t groupSize, const void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices, size_t indexCount)
@@ -82,6 +79,11 @@ namespace Render {
         } else {
             data.mElementCount = vertexCount;
         }
+    }
+
+    void OpenGLMeshLoader::resetImpl(Resources::MeshData &data)
+    {
+        static_cast<OpenGLMeshData &>(data).reset();
     }
 
 }

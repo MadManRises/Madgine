@@ -43,10 +43,11 @@ RegisterType(Engine::Tools::OpenGLImRoot)
                 ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
 
             Im3D::GetIO().mFetchFont = [](const char *fontName) {
-                std::shared_ptr<Font::Font> font = Render::OpenGLFontLoader::load(fontName, true);
+                Render::OpenGLFontLoader::HandleType font;
+				font.load(fontName);
 
                 return Im3DFont {
-                    font->mTexture->mTextureHandle,
+                    font->mTexture.mTextureHandle,
                     font->mTextureSize,
                     font->mGlyphs.data()
                 };

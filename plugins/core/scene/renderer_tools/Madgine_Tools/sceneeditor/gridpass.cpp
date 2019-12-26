@@ -23,11 +23,9 @@ namespace Tools {
         , mPriority(priority)
     {
 
-        mProgram = Render::ProgramLoader::getSingleton().getOrCreateManual("grid", [](Render::ProgramLoader::ResourceType *res) {
-            return Render::ProgramLoader::getSingleton().create("grid");
-        });
+        mProgram.create("grid");
 
-        mMesh = Resources::MeshLoader::getSingleton().getOrCreateManual("grid", [](Resources::MeshLoader::ResourceType *res) {
+        mMesh = Resources::MeshLoader::loadManual("grid", {}, [](Resources::MeshLoader *loader, Resources::MeshData &data, Resources::MeshLoader::ResourceType * res) {
             Compound<Render::VertexPos_4D> vertices[] = {
                 { { 0, 0, 0, 1 } },
                 { { 1, 0, 0, 0 } },
@@ -40,7 +38,7 @@ namespace Tools {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1
             };
 
-            return Resources::MeshLoader::getSingleton().generate(3, vertices, 5, indices, 12);
+            return loader->generate(data, 3, vertices, 5, indices, 12);
         });
     }
 
@@ -49,11 +47,10 @@ namespace Tools {
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
 
-        std::shared_ptr<Render::Program> program = mProgram->loadData();
-        Render::ProgramLoader::getSingleton().setUniform(*program, "mvp", mCamera->getViewProjectionMatrix(aspectRatio));
-        Render::ProgramLoader::getSingleton().bind(*program);
+        mProgram.setUniform("mvp", mCamera->getViewProjectionMatrix(aspectRatio));
+        mProgram.bind();
 
-        target->renderMesh(mMesh->loadData().get());
+        target->renderMesh(mMesh);
     }
 
     int GridPass::priority() const

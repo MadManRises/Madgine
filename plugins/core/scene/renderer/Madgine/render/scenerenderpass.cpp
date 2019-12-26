@@ -21,14 +21,12 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram = ProgramLoader::getSingleton().getOrCreateManual("scene", [](const ProgramLoader::ResourceType *res) {
-            return ProgramLoader::getSingleton().create("scene");
-        });
+        mProgram.create("scene");
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "tex", 0);
+        mProgram.setUniform("tex", 0);
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "lightColor", { 1.0f, 1.0f, 1.0f });
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
+        mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
+        mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
     }
 
     void SceneRenderPass::render(Render::RenderTarget *target)
@@ -40,8 +38,8 @@ namespace Render {
 
         float aspectRatio = float(size.x) / size.y;
 
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "v", mCamera->getViewMatrix());
-        ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "p", mCamera->getProjectionMatrix(aspectRatio));
+        mProgram.setUniform("v", mCamera->getViewMatrix());
+        mProgram.setUniform("p", mCamera->getProjectionMatrix(aspectRatio));
 
         //TODO Culling
         for (Scene::Entity::Entity &e : App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().entities()) {
@@ -52,18 +50,18 @@ namespace Render {
                 Resources::MeshData *meshData = mesh->data();
                 if (meshData) {
 
-                    ProgramLoader::getSingleton().bind(*mProgram->loadData());
+                    mProgram.bind();
 
-                    ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasLight", true);
+                    mProgram.setUniform("hasLight", true);
 
-                    ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasDistanceField", false);
+                    mProgram.setUniform("hasDistanceField", false);
 
-                    ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "hasTexture", meshData->mTextureHandle != 0);
+                    mProgram.setUniform("hasTexture", meshData->mTextureHandle != 0);
 
                     TextureLoader::getSingleton().bind(meshData->mTextureHandle);
 
-                    ProgramLoader::getSingleton().setUniform(*mProgram->loadData(), "m", transform->matrix());
-                    ProgramLoader::getSingleton().setUniform(*mProgram->loadData(),
+                    mProgram.setUniform("m", transform->matrix());
+                    mProgram.setUniform(
                         "anti_m",
                         transform->matrix()
                             .ToMat3()

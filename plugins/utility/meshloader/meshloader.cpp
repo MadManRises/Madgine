@@ -17,12 +17,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
-using LoaderImpl = Engine::Resources::ResourceLoaderImpl<Engine::Resources::MeshData, Engine::Resources::ThreadLocalResource>;
-METATABLE_BEGIN(LoaderImpl)
-MEMBER(mResources)
-METATABLE_END(LoaderImpl)
-
-METATABLE_BEGIN_BASE(Engine::Resources::MeshLoader, LoaderImpl)
+METATABLE_BEGIN(Engine::Resources::MeshLoader)
 METATABLE_END(Engine::Resources::MeshLoader)
 
 METATABLE_BEGIN_BASE(Engine::Resources::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
@@ -40,7 +35,7 @@ RegisterType(Engine::Resources::MeshLoader)
         }
 
 		    template <typename V>
-        std::shared_ptr<MeshData> loadVertices(MeshLoader &loader, const aiScene *scene, const Filesystem::Path &texturePath)
+        bool loadVertices(MeshData &mesh, MeshLoader &loader, const aiScene *scene, const Filesystem::Path &texturePath)
         {
             std::vector<V> vertices;
             std::vector<unsigned short> indices;
@@ -94,10 +89,10 @@ RegisterType(Engine::Resources::MeshLoader)
                 }
             }
 
-            return loader.generate(3, vertices.data(), vertices.size(), indices.data(), indices.size(), texturePath);
+            return loader.generate(mesh, 3, vertices.data(), vertices.size(), indices.data(), indices.size(), texturePath);
         }
 
-        std::shared_ptr<MeshData> MeshLoader::loadImpl(ResourceType *res)
+        bool MeshLoader::loadImpl(MeshData &mesh, ResourceType *res)
         {
             Assimp::Importer importer;
 
@@ -132,10 +127,15 @@ RegisterType(Engine::Resources::MeshLoader)
             }
 
             if (texturePath.empty()) {
-                return loadVertices<Render::Vertex>(*this, scene, texturePath);
+                return loadVertices<Render::Vertex>(mesh, *this, scene, texturePath);
             } else {
-                return loadVertices<Render::Vertex3>(*this, scene, texturePath);
+                return loadVertices<Render::Vertex3>(mesh, *this, scene, texturePath);
             }
+        }
+
+        void MeshLoader::unloadImpl(MeshData &data, ResourceType *res)
+        {
+            resetImpl(data);
         }
 
     }
