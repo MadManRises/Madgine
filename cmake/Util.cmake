@@ -40,9 +40,11 @@ set (CMAKE_CXX_VISIBILITY_PRESET hidden)
 set (CMAKE_C_VISIBILITY_PRESET hidden)
 
 if (GCC OR CLANG)
-	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization)
+	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization -Wno-dll-attribute-on-redeclaration -Wno-pragma-pack)
 	if (NOT MSVC)
 		add_compile_options(-Wall -fpermissive)
+	else ()
+		add_compile_options(-Wno-microsoft-cast)
 	endif()
 	if (EMSCRIPTEN) #TODO add more
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")

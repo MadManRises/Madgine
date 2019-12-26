@@ -302,31 +302,33 @@ namespace Resources {
 
         using Data = _Data;
 
-        using VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>::VirtualUniqueComponentImpl;
+		using Self = VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>;
+
+        using Self::Self;		
 
         virtual typename Base::OriginalHandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
         {
-            return this->loadManual(name, path, ctor, dtor, static_cast<T*>(this));
+            return Self::loadManual(name, path, ctor, dtor, static_cast<T*>(this));
         }
         virtual typename Base::OriginalHandleType loadVImpl(const std::string &name, bool persistent = false) override
         {
-            return this->load(name, persistent, static_cast<T *>(this));
+            return Self::load(name, persistent, static_cast<T *>(this));
         }
         virtual typename Base::OriginalHandleType loadVImpl(typename Base::ResourceType *resource, bool persistent = false) override
         {
-            return this->load(static_cast<ResourceType *>(resource), persistent, static_cast<T *>(this));
+            return Self::load(static_cast<typename Self::ResourceType *>(resource), persistent, static_cast<T *>(this));
         }
         virtual void unloadVImpl(typename Base::ResourceType *resource) override
         {
-            this->unload(static_cast<ResourceType *>(resource), static_cast<T *>(this));
+            Self::unload(static_cast<typename Self::ResourceType *>(resource), static_cast<T *>(this));
         }
         virtual typename Base::Data &getDataVImpl(const typename Base::OriginalHandleType &handle) override
         {
-            return this->getData(handle, static_cast<T *>(this));
+            return Self::getData(handle, static_cast<T *>(this));
         }
         virtual typename Base::ResourceType *getVImpl(const typename Base::OriginalHandleType &handle) override
         {
-            return this->get(handle, static_cast<T *>(this));
+            return Self::get(handle, static_cast<T *>(this));
         }
     };
 }

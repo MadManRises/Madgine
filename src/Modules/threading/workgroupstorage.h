@@ -1,5 +1,6 @@
 #pragma once
 
+#include "global.h"
 #include "workgroup.h"
 
 namespace Engine {
@@ -24,7 +25,7 @@ namespace Threading {
         private:
             std::map<WorkGroup *, T> mData;
         };
-			
+
         static int registerLocalBssVariable(std::function<Any()> ctor);
         static void unregisterLocalBssVariable(int index);
         static int registerLocalObjectVariable(std::function<Any()> ctor);
@@ -35,6 +36,9 @@ namespace Threading {
         static void init(bool bss);
         static void finalize(bool bss);
     };
+
+    template <typename T>
+    using WorkgroupLocal = Global<T, WorkGroupStorage>;
 
 }
 }

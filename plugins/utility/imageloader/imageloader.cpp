@@ -39,9 +39,9 @@ RegisterType(Engine::Resources::ImageLoader)
 
         ImageData::ImageData(ImageData &&other)
             : mBuffer(std::exchange(other.mBuffer, nullptr))
-            , mChannels(other.mChannels)
             , mWidth(other.mWidth)
             , mHeight(other.mHeight)
+            , mChannels(other.mChannels)
         {
         }
 

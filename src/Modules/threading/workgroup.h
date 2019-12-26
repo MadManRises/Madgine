@@ -5,7 +5,6 @@
 #    include "../generic/tupleunpacker.h"
 #    include "../signalslot/task.h"
 #    include "Interfaces/threading/threadapi.h"
-#    include "global.h"
 #    include "workgroupstorage.h"
 
 namespace Engine {
@@ -84,9 +83,6 @@ namespace Threading {
         std::vector<std::future<int>> mSubThreads;
         std::vector<SignalSlot::TaskHandle> mThreadInitializers;
     };
-
-    template <typename T>
-    using WorkgroupLocal = Global<T, WorkGroupStorage>;
 
 }
 }

@@ -16,7 +16,7 @@ namespace Render {
 
         virtual void updateImpl(Resources::MeshData &data, const AABB &bb, size_t groupSize, const void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices = nullptr, size_t indexCount = 0) override;
 
-		virtual void resetImpl(Resources::MeshData &data);
+		virtual void resetImpl(Resources::MeshData &data) override;
     };
 }
 }
