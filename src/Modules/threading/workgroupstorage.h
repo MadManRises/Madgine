@@ -4,7 +4,7 @@
 
 #if ENABLE_THREADING
 
-#include "workgroup.h"
+#    include "workgroup.h"
 
 namespace Engine {
 namespace Threading {
@@ -40,30 +40,25 @@ namespace Threading {
         static void finalize(bool bss);
     };
 
+	template <typename T>
+	using WorkgroupLocal = Global<T, WorkGroupStorage>;
+
 }
 }
 
 #else
 
-#include "globalstorage.h"
-
-namespace Engine {
-	namespace Threading {
-
-		using WorkGroupStorage = GlobalStorage;
-
-	}
-}
-
-#endif
+#    include "globalstorage.h"
 
 namespace Engine {
 namespace Threading {
 
-	
+    using WorkGroupStorage = GlobalStorage;
+
     template <typename T>
-    using WorkgroupLocal = Global<T, WorkGroupStorage>;
-
+    using WorkgroupLocal = Proxy<T>;
 
 }
 }
+
+#endif

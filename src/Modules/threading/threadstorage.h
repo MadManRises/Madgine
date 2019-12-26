@@ -1,5 +1,7 @@
 #pragma once
 
+#if ENABLE_THREADING
+
 namespace Engine {
 namespace Threading {
 
@@ -34,3 +36,5 @@ namespace Threading {
 
 }
 }
+
+#endif
