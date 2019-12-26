@@ -417,7 +417,7 @@ namespace Serialize {
 
         bool isItemActive(const iterator &it)
         {
-            iterator active = _traits::toIterator(*this, mActiveIterator);
+            typename Base::iterator active = _traits::toIterator(*this, mActiveIterator);
             if (active == Base::end())
                 return this->isActive();
             for (auto it2 = Base::begin(); it2 != active; ++it2) {
