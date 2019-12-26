@@ -95,7 +95,7 @@ namespace ImGui
 }
 */
 
-#include "Modules/threading/threadlocal.h"
+#include "Modules/threading/workgroupstorage.h"
 
 struct ImGuiContext;
 extern IMGUI_API Engine::Threading::WorkgroupLocal<ImGuiContext *> GImGui;

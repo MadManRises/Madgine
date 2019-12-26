@@ -5,6 +5,7 @@
 #    include "threadlocal.h"
 #    include "threadstorage.h"
 #    include "workgroup.h"
+#    include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {
@@ -38,7 +39,7 @@ namespace Threading {
             task();
         }
 
-		//Is that useful at all?
+        //Is that useful at all?
         for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
             task();
         }

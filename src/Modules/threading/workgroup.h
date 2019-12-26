@@ -5,7 +5,6 @@
 #    include "../generic/tupleunpacker.h"
 #    include "../signalslot/task.h"
 #    include "Interfaces/threading/threadapi.h"
-#    include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {

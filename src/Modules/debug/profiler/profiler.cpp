@@ -2,7 +2,7 @@
 
 #include "profiler.h"
 
-#include "../../threading/workgroup.h"
+#include "../../threading/workgroupstorage.h"
 
 #include "../../threading/threadlocal.h"
 

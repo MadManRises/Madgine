@@ -2,7 +2,7 @@
 
 #include "defaulttaskqueue.h"
 
-#include "workgroup.h"
+#include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {

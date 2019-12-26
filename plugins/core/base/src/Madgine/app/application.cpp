@@ -13,7 +13,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/threading/workgroup.h"
+#include "Modules/threading/workgroupstorage.h"
 
 namespace Engine {
 
