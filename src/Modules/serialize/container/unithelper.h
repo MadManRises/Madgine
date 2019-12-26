@@ -258,7 +258,7 @@ namespace Serialize {
         static void beginExtendedItem(SerializeInStream &in, const Tuple &item)
         {
             (void)unpacker {
-                (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::beginExtendedItem(in, *static_cast<const typename std::tuple_element<Is, type>::type *>(nullptr)), true)...
+                (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::beginExtendedItem(in, *static_cast<const typename std::tuple_element<Is, Tuple>::type *>(nullptr)), true)...
             };
         }
     };
