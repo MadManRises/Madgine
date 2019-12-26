@@ -98,9 +98,6 @@ namespace Threading {
         ~WorkGroup() {};
     };
 
-    template <typename T>
-    using WorkgroupLocal = Proxy<T>;
-
 }
 }
 

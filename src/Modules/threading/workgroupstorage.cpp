@@ -1,7 +1,11 @@
 #include "../moduleslib.h"
 
+
+#if ENABLE_THREADING
+
 #include "workgroupstorage.h"
 #include "workgroup.h"
+
 
 namespace Engine {
 namespace Threading {
@@ -92,3 +96,5 @@ namespace Threading {
 
 }
 }
+
+#endif
