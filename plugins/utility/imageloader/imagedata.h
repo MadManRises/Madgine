@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Resources {
 
-    struct ImageData {
+    struct MADGINE_IMAGELOADER_EXPORT ImageData {
         ImageData() = default;
         ImageData(const std::vector<unsigned char> &buffer);
         ImageData(ImageData &&other);
