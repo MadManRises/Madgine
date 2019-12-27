@@ -4,6 +4,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "util/openglshader.h"
+
 namespace Engine {
 namespace Render {
 

@@ -2,10 +2,10 @@
 
 #include "Modules/resources/resourceloader.h"
 
+#include "imagedata.h"
+
 namespace Engine {
 namespace Resources {
-
-	struct ImageData;
 
 	struct MADGINE_IMAGELOADER_EXPORT ImageLoader : ResourceLoader<ImageLoader, ImageData> {
     

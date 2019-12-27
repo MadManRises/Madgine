@@ -14,11 +14,6 @@
 
 namespace Engine {
 
-namespace Resources {
-    template <typename Data>
-    class ThreadLocalResource;
-}
-
 template <typename C, class _Base, class... _Ty>
 struct UniqueComponentContainerImpl : C {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
