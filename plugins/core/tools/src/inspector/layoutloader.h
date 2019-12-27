@@ -2,6 +2,8 @@
 
 #include "Modules/resources/resourceloader.h"
 
+#include "../tinyxml/tinyxml2.h"
+
 namespace Engine {
 namespace Tools {
 
