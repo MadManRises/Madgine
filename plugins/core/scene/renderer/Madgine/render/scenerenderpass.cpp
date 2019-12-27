@@ -21,16 +21,19 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram.create("scene");
-
-        mProgram.setUniform("tex", 0);
-
-        mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
-        mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
     }
 
     void SceneRenderPass::render(Render::RenderTarget *target)
     {
+        if (!mProgram) {
+            mProgram.create("scene");
+
+            mProgram.setUniform("tex", 0);
+
+            mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
+            mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
+        }
+
         //TODO Remove this temp solution
         Engine::App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().removeQueuedEntities();
 
