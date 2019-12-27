@@ -115,7 +115,8 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
         for (CollectorInfo *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
-            for (const TypeInfo *typeInfo : collector->mElementInfos) {
+            for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
+                const TypeInfo *typeInfo = typeInfos.front();
                 if (notInSkip(typeInfo))
                     include(
                         file,
@@ -148,7 +149,8 @@ const std::vector<const Engine::MetaTable *> &)"
             if (skipBinary(collector->mBinary))
                 continue;
             GuardGuard g(file, collector->mBinary);
-            for (const TypeInfo *typeInfo : collector->mElementInfos) {
+            for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
+                const TypeInfo *typeInfo = typeInfos.front();
                 while (typeInfo->mDecayType)
                     typeInfo = &typeInfo->mDecayType();
                 if (notInSkip(typeInfo))
@@ -175,7 +177,8 @@ std::vector<)"
             if (skipBinary(collector->mBinary))
                 continue;
             GuardGuard g(file, collector->mBinary);
-            for (const TypeInfo *typeInfo : collector->mElementInfos) {
+            for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
+                const TypeInfo *typeInfo = typeInfos.front();
                 if (notInSkip(typeInfo))
                     file << "		createComponent<"
                          << typeInfo->mFullName << ">,\n";
@@ -198,17 +201,19 @@ std::vector<)"
                  << collector->mBaseInfo->mTypeName << "_"
                  << collector->mBinary->mName << " = ACC;\n";
             size_t i = 0;
-            for (const TypeInfo *typeInfo : collector->mElementInfos) {
-                if (notInSkip(typeInfo)) {
-                    while (typeInfo) {
-                        file << R"(template <>
+            for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
+                if (notInSkip(typeInfos.front())) {
+                    for (const TypeInfo *typeInfo : typeInfos) {
+                        while (typeInfo) {
+                            file << R"(template <>
 size_t component_index<)"
-                             << typeInfo->mFullName
-                             << ">() { return CollectorBaseIndex_"
-                             << collector->mBaseInfo->mTypeName << "_"
-                             << collector->mBinary->mName << " + " << i
-                             << "; }\n";
-                        typeInfo = typeInfo->mDecayType ? &typeInfo->mDecayType() : nullptr;
+                                 << typeInfo->mFullName
+                                 << ">() { return CollectorBaseIndex_"
+                                 << collector->mBaseInfo->mTypeName << "_"
+                                 << collector->mBinary->mName << " + " << i
+                                 << "; }\n";
+                            typeInfo = typeInfo->mDecayType ? &typeInfo->mDecayType() : nullptr;
+                        }
                     }
                     ++i;
                 }

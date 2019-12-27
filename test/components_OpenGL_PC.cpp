@@ -2,17 +2,14 @@
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
 #endif
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
+#endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
@@ -20,20 +17,23 @@
 #ifdef BUILD_SceneRendererTools
 #    include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
 #endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
 #endif
 #ifdef BUILD_OISHandler
 #    include "oislib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
@@ -241,6 +241,8 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools = ACC;
 template <>
 size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 0; }
+template <>
+size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 1
 #    endif
@@ -398,13 +400,21 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
 size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
+size_t component_index<Engine::Font::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+template <>
 size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
+size_t component_index<Engine::Resources::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+template <>
 size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
+template <>
+size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 template <>
 size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 template <>
 size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
+template <>
+size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 5
 #    endif

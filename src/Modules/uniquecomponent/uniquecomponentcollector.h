@@ -11,7 +11,11 @@
 
 #include "../reflection/decay.h"
 
+#include "../generic/derive.h"
+
 namespace Engine {
+
+	DERIVE_TYPEDEF(Base)
 
 template <class _Base, class... _Ty>
 struct UniqueComponentCollector {
@@ -51,7 +55,12 @@ private:
 
         LOG("Registering Component: " << typeName<T>());
         sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<CollectorInfo::ComponentType>(&createComponent<T, Base, _Ty...>));
-        sInstance().mInfo.mElementInfos.push_back(&typeInfo<T>());
+        std::vector<const TypeInfo *> elementInfos;
+        elementInfos.push_back(&typeInfo<T>());
+        if constexpr (has_typedef_Base<T>::value) {
+            elementInfos.push_back(&typeInfo<typename T::Base>());
+		}
+        sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
         sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);
         return sInstance().mInfo.mComponents.size() - 1;
     }
@@ -59,7 +68,7 @@ private:
     static void unregisterComponent(size_t i)
     {
         sInstance().mInfo.mComponents[i] = nullptr;
-        sInstance().mInfo.mElementInfos[i] = nullptr;
+        sInstance().mInfo.mElementInfos[i].clear();
         sInstance().mInfo.mElementTables[i] = nullptr;
     }
 

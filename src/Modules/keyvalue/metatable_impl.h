@@ -39,13 +39,13 @@ constexpr Accessor property()
             if constexpr (std::is_same_v<SetterScope, void>) {
                 using SetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>;
                 if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
-                    TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<Scope>>(), v.as<std::remove_reference_t<T>>());
+                    TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<std::remove_reference_t<T>>());
                 } else {
                     TupleUnpacker::invoke(Setter, scope, v.as<std::remove_reference_t<T>>());
                 }
             } else {
                 static_assert(std::is_convertible_v<Scope &, SetterScope &>);
-                TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<Scope>>(), v.as<std::remove_reference_t<T>>());
+                TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<std::remove_reference_t<T>>());
             }
         };
     }
@@ -56,13 +56,13 @@ constexpr Accessor property()
                 if constexpr (std::is_same_v<GetterScope, void>) {
                     using GetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename getter_traits::argument_types>>;
                     if constexpr (std::is_convertible_v<Scope &, GetterScope &>) {
-                        return TupleUnpacker::invoke(Getter, scope.safe_cast<decayed_t<Scope>>());
+                        return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
                     } else {
                         return TupleUnpacker::invoke(Getter, scope);
 					}
                 } else {
                     static_assert(std::is_convertible_v<Scope &, GetterScope &>);
-                    return TupleUnpacker::invoke(Getter, scope.safe_cast<decayed_t<Scope>>());
+                    return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
                 }
             }();
 

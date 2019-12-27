@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../reflection/decay.h"
 #include "../uniquecomponent/uniquecomponent.h"
 #include "resourcebase.h"
 #include "resourceloadercollector.h"
@@ -293,14 +292,15 @@ namespace Resources {
         virtual ResourceType *getVImpl(const HandleType &handle) = 0;
     };
 
-    template <typename T, typename _Data, typename Base>
-    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename Base::Container, typename Base::Storage, Base>> {
+    template <typename T, typename _Data, typename _Base>
+    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename _Base::Container, typename _Base::Storage, _Base>> {
 
         using Data = _Data;
+		using Base = _Base;
 
 		using Self = VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>;
 
-        using Self::Self;		
+        using Self::Self;
 
         virtual typename Base::OriginalHandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
         {

@@ -126,8 +126,8 @@ namespace Tools {
                                     for (ComponentRegistryBase *reg : kvValues(registryRegistry())) {
                                         for (CollectorInfo *info : *reg) {
                                             if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
-                                                for (const TypeInfo *component : info->mElementInfos) {
-                                                    ImGui::Text("%s", component->mTypeName);
+                                                for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
+                                                    ImGui::Text("%s", components.front()->mTypeName);
                                                 }
                                                 ImGui::TreePop();
                                             }

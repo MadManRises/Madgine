@@ -40,7 +40,7 @@ struct CollectorInfo {
     const TypeInfo *mRegistryInfo;
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
-    std::vector<const TypeInfo *> mElementInfos;
+    std::vector<std::vector<const TypeInfo *>> mElementInfos;
     std::vector<const MetaTable *> mElementTables;
     size_t mBaseIndex = 0;
 };

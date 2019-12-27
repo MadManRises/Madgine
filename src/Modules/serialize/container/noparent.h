@@ -7,8 +7,9 @@ namespace Engine {
 
 namespace Serialize {
     template <class T>
-    class NoParentUnit : public T {
-    public:
+    struct NoParentUnit : T {
+		using decay_t = T;
+
         template <class... Args>
         NoParentUnit(Args &&... args)
             :  T(std::forward<Args>(args)...)
@@ -32,11 +33,6 @@ struct AccessClassInfo<Serialize::NoParentUnit<T>> {
         static TypeInfo sInfo { className.c_str(), tType.mHeaderPath, typeMarker<Serialize::NoParentUnit<T>> };
         return sInfo;
     }
-};
-
-template <typename T>
-struct decay<Serialize::NoParentUnit<T>> {
-	using type = T;
 };
 
 }

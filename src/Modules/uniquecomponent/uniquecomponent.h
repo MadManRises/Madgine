@@ -2,7 +2,6 @@
 
 #if ENABLE_PLUGINS
 
-#    include "../reflection/decay.h"
 #    include "indexholder.h"
 
 namespace Engine {
@@ -11,8 +10,6 @@ template <typename T, typename _Base>
 struct VirtualUniqueComponentImpl : _Base {
     using Base = _Base;
     using Base::Base;
-
-    //typedef Base decay_t;
 
     struct Inner {
         Inner()
