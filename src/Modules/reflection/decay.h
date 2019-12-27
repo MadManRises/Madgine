@@ -31,11 +31,6 @@ struct decayed<T, void> {
 };
 
 template <typename T>
-struct decayed<T, T> {
-	using type = T;
-};
-
-template <typename T>
 using decayed_t = typename decayed<T, decay_t<T>>::type;
 
 }

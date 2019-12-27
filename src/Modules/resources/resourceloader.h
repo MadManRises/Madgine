@@ -21,8 +21,6 @@ namespace Resources {
         using Data = _Data;
         using Container = _Container;
 
-        using decay_t = T;
-
         struct ResourceType;
 
         using DataContainer = typename replace<Container>::template type<std::pair<ResourceType *, Data>>;
@@ -202,8 +200,6 @@ namespace Resources {
         using Data = _Data;
         using Container = _Container;
         using Storage = _Storage;
-
-        using decay_t = T;
 
         struct ResourceType;
 

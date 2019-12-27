@@ -19,34 +19,51 @@ template <class T>
 struct is_typed_iterable<T, std::void_t<decltype(std::declval<T>().typedBegin()), decltype(std::declval<T>().typedEnd())>> : std::true_type {
 };
 
-template <typename _disambiguate__dont_remove, auto Getter, auto Setter>
+template <typename Scope, auto Getter, auto Setter>
 constexpr Accessor property()
 {
     using getter_traits = CallableTraits<decltype(Getter)>;
-    using Scope = typename getter_traits::class_type;
+    using GetterScope = typename getter_traits::class_type;
     using T = typename getter_traits::return_type;
 
     void (*setter)(TypedScopePtr, ValueType) = nullptr;
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
-        using SetterScope = std::conditional_t<std::is_same_v<typename setter_traits::class_type, void>, std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>, typename setter_traits::class_type>;
+        using SetterScope = typename setter_traits::class_type;
 
         //TODO remove const in tuple types
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
         setter = [](TypedScopePtr scope, ValueType v) {
-            TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<SetterScope>>(), v.as<std::remove_reference_t<T>>());
+            if constexpr (std::is_same_v<SetterScope, void>) {
+                using SetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>;
+                if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
+                    TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<Scope>>(), v.as<std::remove_reference_t<T>>());
+                } else {
+                    TupleUnpacker::invoke(Setter, scope, v.as<std::remove_reference_t<T>>());
+                }
+            } else {
+                static_assert(std::is_convertible_v<Scope &, SetterScope &>);
+                TupleUnpacker::invoke(Setter, scope.safe_cast<decayed_t<Scope>>(), v.as<std::remove_reference_t<T>>());
+            }
         };
     }
 
     return {
         [](TypedScopePtr scope) {
             T value = [=]() -> T {
-                if constexpr (std::is_same_v<Scope, void>)
-                    return TupleUnpacker::invoke(Getter, scope);
-                else
+                if constexpr (std::is_same_v<GetterScope, void>) {
+                    using GetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename getter_traits::argument_types>>;
+                    if constexpr (std::is_convertible_v<Scope &, GetterScope &>) {
+                        return TupleUnpacker::invoke(Getter, scope.safe_cast<decayed_t<Scope>>());
+                    } else {
+                        return TupleUnpacker::invoke(Getter, scope);
+					}
+                } else {
+                    static_assert(std::is_convertible_v<Scope &, GetterScope &>);
                     return TupleUnpacker::invoke(Getter, scope.safe_cast<decayed_t<Scope>>());
+                }
             }();
 
             if constexpr (ValueType::isValueType<T>::value) {
@@ -73,17 +90,17 @@ void setField(Scope *s, const T &t)
     s->*P = t;
 }
 
-template <typename Ty, auto P>
+template <typename Scope, auto P>
 constexpr Accessor member()
 {
     using traits = CallableTraits<decltype(P)>;
-    using Scope = typename traits::class_type;
+    using DerivedScope = typename traits::class_type;
     using T = std::remove_reference_t<typename traits::return_type>;
 
-    if constexpr (std::is_const_v<Scope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
-        return property<Ty, P, nullptr>();
+    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
+        return property<Scope, P, nullptr>();
     else
-        return property<Ty, P, &setField<P, Scope,T>>();
+        return property<Scope, P, &setField<P, DerivedScope, T>>();
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
