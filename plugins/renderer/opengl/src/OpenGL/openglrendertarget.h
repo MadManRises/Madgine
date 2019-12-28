@@ -14,7 +14,6 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTarget : RenderTarget {
 
         OpenGLRenderTarget(OpenGLRenderContext *context);
-        OpenGLRenderTarget(OpenGLRenderContext *context, create_t);
         ~OpenGLRenderTarget();
 
 		virtual void beginFrame() override;
@@ -27,9 +26,6 @@ namespace Render {
 		virtual void clearDepthBuffer() override;
 		
 		//void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;        
-
-    protected:
-        OpenGLBuffer mTempBuffer;
     };
 
 }

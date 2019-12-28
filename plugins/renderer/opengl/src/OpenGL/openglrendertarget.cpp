@@ -30,12 +30,6 @@ namespace Render {
     {
     }
 
-    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, create_t)
-        : RenderTarget(context)
-        , mTempBuffer(create)
-    {
-    }
-
     OpenGLRenderTarget::~OpenGLRenderTarget()
     {
     }
@@ -82,6 +76,8 @@ namespace Render {
         } else
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
+
+        mesh->mVAO.unbind();
     }
 
     /*void OpenGLRenderTexture::renderInstancedMesh(RenderPassFlags flags, Resources::MeshData *meshData, const std::vector<Matrix4> &transforms)
@@ -96,7 +92,7 @@ namespace Render {
     void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
-            Resources::MeshData tempMesh;
+            OpenGLMeshData tempMesh;
             OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
 
             //setupProgram(flags);
@@ -108,8 +104,8 @@ namespace Render {
     void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount, unsigned int textureId)
     {
         if ((!indices && vertexCount > 0) || indexCount > 0) {
-            Resources::MeshData tempMesh;
-			OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
+            OpenGLMeshData tempMesh;
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
 
             //setupProgram(flags, textureId);
 

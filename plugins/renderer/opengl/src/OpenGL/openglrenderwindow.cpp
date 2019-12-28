@@ -368,8 +368,6 @@ namespace Render {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
-
-        mTempBuffer = {};
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
@@ -395,8 +393,6 @@ namespace Render {
                 p.second.unloadData();
             }
         }
-
-        mTempBuffer.reset();
 
         shutdownWindow(mWindow, mContext, mReusedContext);
     }

@@ -34,8 +34,7 @@ namespace Render {
         data.mVAO = create;
         data.mVAO.bind();
 
-		data.mVertices = create;
-        data.mVertices.bind(GL_ARRAY_BUFFER);
+        data.mVertices = create;
 
         if (indices) {
             data.mIndices = create;
@@ -61,6 +60,8 @@ namespace Render {
                 data.mVAO.disableVertexAttribute(i);
         }
 
+		data.mVAO.unbind();
+
         return true;
     }
 
@@ -71,6 +72,7 @@ namespace Render {
         data.mAABB = bb;
 
         data.mGroupSize = groupSize;
+
         data.mVertices.setData(GL_ARRAY_BUFFER, vertexSize * vertexCount, vertices);
 
         if (indices) {

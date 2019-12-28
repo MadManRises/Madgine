@@ -25,6 +25,7 @@ namespace Render {
         void reset();
 
         void bind();
+        void unbind();
 
 #if OPENGL_ES
         static void onBindVBO(GLuint buffer);

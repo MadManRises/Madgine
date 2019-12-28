@@ -9,7 +9,7 @@ namespace Render {
     static thread_local OpenGLVertexArray *sCurrentBound = nullptr;
 #endif
 
-	static GLenum glType(AttributeType type)
+    static GLenum glType(AttributeType type)
     {
         switch (type) {
         case ATTRIBUTE_FLOAT:
@@ -92,6 +92,7 @@ namespace Render {
         glBindVertexArray(mHandle);
         GL_CHECK();
 #else
+        assert(sCurrentBound == nullptr);
         sCurrentBound = this;
 
         GL_LOG("Bind VAO -> " << mVBO << ", " << mEBO);
@@ -118,9 +119,19 @@ namespace Render {
 #endif
     }
 
+    void OpenGLVertexArray::unbind()
+    {
+#if !OPENGL_ES
+        glBindVertexArray(0);
+        GL_CHECK();
+#else
+        assert(sCurrentBound == this);
+        sCurrentBound = nullptr;
+#endif
+    }
+
     void OpenGLVertexArray::enableVertexAttribute(unsigned int index, AttributeDescriptor attribute)
     {
-        
 
         glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
         glEnableVertexAttribArray(index);
