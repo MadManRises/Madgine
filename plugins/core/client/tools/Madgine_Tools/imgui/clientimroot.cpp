@@ -223,11 +223,13 @@ namespace Tools {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?
 
+            ImGui::Render();
+
             if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 ImGui::UpdatePlatformWindows();
 
                 ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
-            }
+            } 
         } else {
             ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
         }
@@ -259,7 +261,7 @@ namespace Tools {
     {
         mRoot.frame();
 
-		setCentralNode(mRoot.dockNode());
+        setCentralNode(mRoot.dockNode());
 
         return true;
     }
@@ -272,7 +274,7 @@ namespace Tools {
     Rect2i ClientImRoot::getChildClientSpace()
     {
         ImGuiIO &io = ImGui::GetIO();
-        if (mAreaSize == Vector2{ 0, 0 })
+        if (mAreaSize == Vector2 { 0, 0 })
             return mClientSpace;
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
             return { (mAreaPos - getScreenSpace().mTopLeft).floor(), mAreaSize.floor() };
@@ -328,7 +330,10 @@ namespace Tools {
     {
         ImGuiIO &io = ImGui::GetIO();
 
-        io.MousePos = arg.position / io.DisplayFramebufferScale;
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            io.MousePos = arg.position / io.DisplayFramebufferScale;
+        else
+            io.MousePos = (arg.position - Vector2 { float(mWindow.window()->renderX()), float(mWindow.window()->renderY()) }) / io.DisplayFramebufferScale;
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 
@@ -351,7 +356,7 @@ namespace Tools {
     {
         ImGuiIO &io = ImGui::GetIO();
 
-		Vector2 oldSize = mAreaSize;
+        Vector2 oldSize = mAreaSize;
 
         if (node) {
             mAreaPos = Vector2 { node->Pos } * io.DisplayFramebufferScale;
@@ -361,8 +366,8 @@ namespace Tools {
             mAreaSize = Vector2::ZERO;
         }
 
-		if (mAreaSize != oldSize)
-			mWindow.applyClientSpaceResize(this);
+        if (mAreaSize != oldSize)
+            mWindow.applyClientSpaceResize(this);
     }
 
 }

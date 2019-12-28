@@ -192,7 +192,8 @@ namespace Tools {
             ImGui::End();
         }
 
-        ImGui::Render();
+        //ImGui::Render();
+        ImGui::EndFrame();
 
         return running;
     }
