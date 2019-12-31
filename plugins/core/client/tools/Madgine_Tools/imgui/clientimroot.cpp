@@ -18,6 +18,8 @@
 
 #include "Madgine/gui/toolwindow.h"
 
+#include "Madgine/gui/toplevelwindow.h"
+
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
 METATABLE_BEGIN(Engine::Tools::ClientImRoot)
@@ -223,13 +225,13 @@ namespace Tools {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?
 
-            ImGui::Render();
-
             if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 ImGui::UpdatePlatformWindows();
 
                 ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
-            } 
+            } else {
+                ImGui::Render();            
+			}
         } else {
             ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
         }

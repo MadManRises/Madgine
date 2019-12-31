@@ -10,8 +10,6 @@
 
 RegisterType(Engine::GUI::TopLevelWindowComponentBase);
 
-DEFINE_UNIQUE_COMPONENT(Engine::GUI, TopLevelWindow)
-
 namespace Engine {
 namespace GUI {
 

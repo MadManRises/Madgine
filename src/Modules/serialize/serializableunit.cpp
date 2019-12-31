@@ -13,8 +13,6 @@
 
 #include "serializable.h"
 
-#include "../threading/threadlocal.h"
-
 namespace Engine {
 namespace Serialize {
 

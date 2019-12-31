@@ -163,7 +163,7 @@ template <class T, class K>
 struct Finder {
     static auto find(T &c, const K &key)
     {
-        return std::find_if(c.begin(), c.end(), [&](decltype(*c.begin()) v) { return kvKey(v) == key; });
+        return std::find_if(c.begin(), c.end(), [&](const typename T::value_type &v) { return kvKey(v) == key; });
     }
 };
 

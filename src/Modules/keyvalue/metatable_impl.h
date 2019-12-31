@@ -2,12 +2,11 @@
 
 #include "../generic/callable_traits.h"
 #include "../generic/tupleunpacker.h"
-#include "../reflection/decay.h"
 #include "Interfaces/macros.h"
 #include "accessor.h"
-#include "container_traits.h"
 #include "metatable.h"
 #include "valuetype.h"
+#include "keyvalueiterator.h"
 
 namespace Engine {
 

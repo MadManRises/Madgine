@@ -4,8 +4,6 @@
 
 #include "../input/inputhandler.h"
 
-#include "Modules/keyvalue/keyvalueiterate.h"
-
 #include "Interfaces/window/windowapi.h"
 
 #include "../render/rendercontext.h"
@@ -39,6 +37,7 @@ SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
 namespace Engine {
 
 namespace GUI {
+
     TopLevelWindow::TopLevelWindow(const Window::WindowSettings &settings)
         : mComponents(*this)
         , mSettings(settings)

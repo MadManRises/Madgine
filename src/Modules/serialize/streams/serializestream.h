@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../keyvalue/container_traits.h"
 #include "../container/unithelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
@@ -9,6 +8,7 @@
 #include "../statetransmissionflags.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
+#include "../../generic/iterator_traits.h"
 
 namespace Engine {
 namespace Serialize {
@@ -165,8 +165,7 @@ namespace Serialize {
         template <typename C>
         void writeContainer(const C &container, const char *name = nullptr)
         {
-            using traits = container_traits<C>;
-            using T = typename traits::type;
+            using T = typename C::value_type;
 
             if (name)
                 format().beginExtendedCompound(*this, name);

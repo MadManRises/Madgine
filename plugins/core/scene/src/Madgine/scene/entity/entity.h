@@ -6,12 +6,14 @@
 
 #include "Modules/serialize/container/syncablecontainer.h"
 
+#include "Modules/keyvalue/keyvalueset.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
 
         struct EntityComponentObserver {
-            void operator()(const SetIterator<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>::iterator> &it, int op);
+            void operator()(const typename KeyValueSet<std::unique_ptr<EntityComponentBase>>::iterator &it, int op);
         };
 
         class MADGINE_SCENE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase {
@@ -100,7 +102,7 @@ namespace Scene {
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
+            SYNCABLE_CONTAINER(mComponents, KeyValueSet<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
 
             SceneManager &mSceneManager;
         };

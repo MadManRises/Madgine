@@ -1,21 +1,8 @@
 #pragma once
 
-#include "../keyvalue/keyvalue.h"
-
 #include "sortedcontainerapi.h"
 
 namespace Engine {
-
-template <typename T, typename = void>
-struct is_iterable : std::false_type {
-};
-
-template <typename T>
-struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : std::true_type {
-};
-
-template <typename T>
-constexpr const bool is_iterable_v = is_iterable<T>::value;
 
 template <typename C>
 struct container_traits : C::traits {
@@ -38,7 +25,6 @@ struct container_traits<std::list<T>> {
     typedef const_iterator const_position_handle;
     typedef typename container::value_type value_type;
     typedef void key_type;
-    typedef T type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::list<M<T>>>;
@@ -48,7 +34,7 @@ struct container_traits<std::list<T>> {
 
         using C::C;
 
-        void remove(const type &item)
+        void remove(const value_type &item)
         {
             for (iterator it = this->begin(); it != this->end();) {
                 if (*it == item) {
@@ -59,7 +45,7 @@ struct container_traits<std::list<T>> {
             }
         }
 
-        void push_back(const type &item)
+        void push_back(const value_type &item)
         {
             this->emplace(this->end(), item);
         }
@@ -70,12 +56,12 @@ struct container_traits<std::list<T>> {
             return this->emplace(this->end(), std::forward<_Ty>(args)...);
         }
 
-        const type &back() const
+        const value_type &back() const
         {
             return C::back();
         }
 
-        type &back()
+        value_type &back()
         {
             return C::back();
         }
@@ -153,7 +139,6 @@ struct container_traits<std::vector<T>> {
     typedef handle_t const_position_handle;
     typedef typename container::value_type value_type;
     typedef void key_type;
-    typedef T type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::vector<M<T>>>;
@@ -170,7 +155,7 @@ struct container_traits<std::vector<T>> {
                 C::resize(size);
             }*/
 
-        void remove(const type &item)
+        void remove(const value_type &item)
         {
             for (const_iterator it = this->begin(); it != this->end();) {
                 if (*it == item) {
@@ -181,33 +166,33 @@ struct container_traits<std::vector<T>> {
             }
         }
 
-        void push_back(const type &item)
+        void push_back(const value_type &item)
         {
             emplace(this->end(), item);
         }
 
         template <typename... _Ty>
-        type &emplace_back(_Ty &&... args)
+        value_type &emplace_back(_Ty &&... args)
         {
             return *this->emplace(this->end(), std::forward<_Ty>(args)...).first;
         }
 
-        type &at(size_t i)
+        value_type &at(size_t i)
         {
             return C::at(i);
         }
 
-        const type &at(size_t i) const
+        const value_type &at(size_t i) const
         {
             return C::at(i);
         }
 
-        type &operator[](size_t i)
+        value_type &operator[](size_t i)
         {
             return C::operator[](i);
         }
 
-        const type &operator[](size_t i) const
+        const value_type &operator[](size_t i) const
         {
             return C::operator[](i);
         }
@@ -255,147 +240,6 @@ struct container_traits<std::vector<T>> {
     }
 };
 
-template <typename T, typename Cmp, typename It>
-class SetConstIterator;
-
-template <typename T, typename Cmp, typename It>
-class SetIterator {
-public:
-    using iterator_category = typename It::iterator_category;
-    using value_type = typename It::value_type;
-    using difference_type = typename It::difference_type;
-    using pointer = std::remove_const_t<typename It::value_type> *;
-    using reference = std::remove_const_t<typename It::value_type> &;
-
-    SetIterator()
-    {
-    }
-
-    SetIterator(It &&it)
-        : mIterator(std::forward<It>(it))
-    {
-    }
-
-    SetIterator(const It &it)
-        : mIterator(it)
-    {
-    }
-
-    template <typename It2>
-    SetIterator(const SetIterator<T, Cmp, It2> &other)
-        : mIterator(static_cast<const It2 &>(other))
-    {
-    }
-
-    T &operator*() const
-    {
-        return const_cast<T &>(*mIterator);
-    }
-
-    T *operator->() const
-    {
-        return &const_cast<T &>(*mIterator);
-    }
-
-    bool operator!=(const SetIterator<T, Cmp, It> &other) const
-    {
-        return mIterator != other.mIterator;
-    }
-
-    bool operator==(const SetIterator<T, Cmp, It> &other) const
-    {
-        return mIterator == other.mIterator;
-    }
-
-    SetIterator<T, Cmp, It> &
-    operator++()
-    {
-        ++mIterator;
-        return *this;
-    }
-
-    SetIterator<T, Cmp, It> &operator--()
-    {
-        --mIterator;
-        return *this;
-    }
-
-    operator const It &() const
-    {
-        return mIterator;
-    }
-
-private:
-    friend class SetConstIterator<T, Cmp, It>;
-
-    It mIterator;
-};
-
-template <class T, typename Cmp, typename It>
-class SetConstIterator {
-public:
-    using iterator_category = typename It::iterator_category;
-    using value_type = typename It::value_type;
-    using difference_type = typename It::difference_type;
-    using pointer = typename It::pointer;
-    using reference = typename It::reference;
-
-    SetConstIterator(It &&it)
-        : mIterator(std::forward<It>(it))
-    {
-    }
-
-    SetConstIterator(const It &it)
-        : mIterator(it)
-    {
-    }
-
-    SetConstIterator(const SetIterator<T, Cmp, It> &it)
-        : mIterator(it.mIterator)
-    {
-    }
-
-    const T &operator*() const
-    {
-        return *mIterator;
-    }
-
-    const T *operator->() const
-    {
-        return &*mIterator;
-    }
-
-    bool operator!=(const SetConstIterator<T, Cmp, It> &other) const
-    {
-        return mIterator != other.mIterator;
-    }
-
-    bool operator==(const SetConstIterator<T, Cmp, It> &other) const
-    {
-        return mIterator == other.mIterator;
-    }
-
-    void operator++()
-    {
-        ++mIterator;
-    }
-
-    void operator--()
-    {
-        --mIterator;
-    }
-
-    operator const It &() const
-    {
-        return mIterator;
-    }
-
-private:
-    friend class SetIterator<T, Cmp, It>;
-
-    It mIterator;
-};
-
 template <typename T, typename Cmp>
 struct cmp_type {
     using type = typename Cmp::cmp_type;
@@ -416,17 +260,16 @@ struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool remove_invalidates_handles = false;
 
     typedef std::set<T, Cmp> container;
-    typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::iterator> iterator;
-    typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_iterator> const_iterator;
-    typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::reverse_iterator> reverse_iterator;
-    typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_reverse_iterator> const_reverse_iterator;
+    typedef typename container::iterator iterator;
+    typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
     typedef T *handle;
     typedef const T *const_handle;
     typedef iterator position_handle;
     typedef const_iterator const_position_handle;
     typedef cmp_type_t<T, Cmp> key_type;
     typedef typename container::value_type value_type;
-    typedef T type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::set<M<T>, Cmp>>;

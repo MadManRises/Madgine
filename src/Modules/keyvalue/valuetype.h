@@ -6,14 +6,13 @@
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector4.h"
+#include "../math/matrix3.h"
 
 #include "boundapimethod.h"
 
 #include "valuetypeexception.h"
 
-#include "keyvalueiterate.h"
-
-#include "../math/matrix3.h"
+#include "keyvaluevirtualiterator.h"
 
 #include "objectptr.h"
 

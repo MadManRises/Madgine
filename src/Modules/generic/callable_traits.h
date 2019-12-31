@@ -53,10 +53,10 @@ template <typename F>
 using CallableTraits = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
 
 template <typename F, typename = void>
-struct callable_is_variadic : std::bool_constant<true> {};
+struct callable_is_variadic : std::true_type {};
 
 template <typename F>
-struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::bool_constant<false> {};
+struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::false_type {};
 
 template <typename F>
 constexpr const bool callable_is_variadic_v = callable_is_variadic<F>::value;
@@ -82,7 +82,7 @@ struct Partial {
 template <auto f>
 struct Callable {
     using traits = CallableTraits<decltype(f)>;
-    static constexpr typename traits::type value = f;
+    //static constexpr typename traits::type value = f;
 
     template <template <auto, typename, typename, typename...> typename C, typename... Args>
     struct instance {

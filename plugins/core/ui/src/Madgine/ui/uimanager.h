@@ -7,11 +7,13 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindowcomponentcollector.h"
 
-#include "Modules/keyvalue/observablecontainer.h"
+#include "Modules/generic/observablecontainer.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
+
+#include "Modules/serialize/container/controlledcontainer.h"
 
 namespace Engine {
 namespace UI {

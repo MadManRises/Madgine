@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iterator.h"
+#include "iterator_traits.h"
 
 namespace Engine {
 
@@ -142,8 +142,8 @@ decltype(auto) toPointer(T &&t)
 }
 
 struct UniquePtrToPtrConverter {
-    template <class T>
-    T *operator()(const std::unique_ptr<T> &p)
+    template <typename T, typename D>
+    T *operator()(const std::unique_ptr<T, D> &p)
     {
         return p.get();
     }

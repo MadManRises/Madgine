@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../keyvalue/observerevent.h"
+#include "../generic/observerevent.h"
 
 namespace Engine {
 

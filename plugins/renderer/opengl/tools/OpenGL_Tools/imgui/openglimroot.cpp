@@ -12,6 +12,8 @@
 #include "OpenGL/openglfontloader.h"
 #include "OpenGL/openglfontdata.h"
 
+#include "Madgine/gui/toplevelwindow.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Tools::OpenGLImRoot)
 
 METATABLE_BEGIN_BASE(Engine::Tools::OpenGLImRoot, Engine::Tools::ClientImRoot)

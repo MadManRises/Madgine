@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/gui/toplevelwindowcomponent.h"
+#include "Madgine/gui/toplevelwindowcomponentcollector.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
@@ -12,6 +12,8 @@
 #include "textureloader.h"
 
 #include "Madgine/render/renderpass.h"
+
+#include "Modules/generic/transformIt.h"
 
 namespace Engine {
 namespace Widgets {

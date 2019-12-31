@@ -7,6 +7,9 @@ namespace GUI {
     class TopLevelWindow;
     class ToolWindow;
 
+	struct TopLevelWindowComponentBase;
+    struct TopLevelWindowComponentComparator;
+
     struct WindowOverlay;
 }
 

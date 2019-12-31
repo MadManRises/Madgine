@@ -3,8 +3,8 @@
 #include "../../generic/noopfunctor.h"
 #include "../../generic/offsetptr.h"
 #include "../../generic/tupleunpacker.h"
-#include "../../keyvalue/container_traits.h"
-#include "../../keyvalue/observerevent.h"
+#include "../../generic/container_traits.h"
+#include "../../generic/observerevent.h"
 #include "../serializable.h"
 #include "../streams/serializestream.h"
 #include "creationhelper.h"
@@ -14,7 +14,7 @@ namespace Engine {
 namespace Serialize {
     template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
-                                       protected UnitHelper<typename container_traits<C>::type>,
+                                       protected UnitHelper<typename container_traits<C>::value_type>,
                                        C,
                                        Observer {
 
@@ -38,7 +38,7 @@ namespace Serialize {
         typedef typename _traits::const_reverse_iterator const_reverse_iterator;
         typedef typename _traits::position_handle position_handle;
 
-        typedef typename _traits::type type;
+        typedef typename _traits::value_type value_type;
 
         SerializableContainerImpl()
             : mActiveIterator(_traits::toPositionHandle(*this, Base::begin()))
@@ -174,10 +174,10 @@ namespace Serialize {
             return it;
         }
 
-        type extract(const iterator &which)
+        value_type extract(const iterator &which)
         {
             bool b = beforeRemove(which);
-            type temp = std::move(*which);
+            value_type temp = std::move(*which);
             iterator it = erase_intern(which);
             afterRemove(b, it);
             return temp;
@@ -217,14 +217,14 @@ namespace Serialize {
 
         void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
         {
-            for (type &t : physical()) {
+            for (value_type &t : physical()) {
                 this->applyMap(map, t);
             }
         }
 
         void setDataSynced(bool b)
         {
-            for (type &t : physical()) {
+            for (value_type &t : physical()) {
                 this->setItemDataSynced(t, b);
             }
         }
@@ -269,6 +269,8 @@ namespace Serialize {
             {
                 return mContainer.end();
             }
+
+			typedef value_type value_type;
 
             T &mContainer;
         };
@@ -401,14 +403,14 @@ namespace Serialize {
         template <typename Creator>
         std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
-            this->beginExtendedItem(in, *reinterpret_cast<const type *>(0x1));
+            this->beginExtendedItem(in, nullref<const value_type>);
             std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
             assert(it.second);
             in.read(*it.first, "Item");
             return it;
         }
 
-        void write_item(SerializeOutStream &out, const type &t) const
+        void write_item(SerializeOutStream &out, const value_type &t) const
         {
             this->beginExtendedItem(out, t);
             this->write_creation(out, t);

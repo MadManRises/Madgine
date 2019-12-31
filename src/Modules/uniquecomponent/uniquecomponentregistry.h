@@ -11,7 +11,7 @@ namespace Engine {
 template <class T, class Base, class... _Ty>
 std::unique_ptr<Base> createComponent(_Ty... arg)
 {
-    return std::make_unique<T>(std::forward<_Ty>(arg)...);
+    return std::make_unique<T>(std::forward<_Ty>(arg)...) ;
 }
 
 template <class Base, class... _Ty>

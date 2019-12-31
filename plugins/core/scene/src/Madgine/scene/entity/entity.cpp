@@ -147,7 +147,7 @@ namespace Scene {
             return mLocal;
         }
 
-        void EntityComponentObserver::operator()(const SetIterator<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>, std::set<std::unique_ptr<EntityComponentBase>, KeyCompare<std::unique_ptr<EntityComponentBase>>>::iterator> &it, int op)
+        void EntityComponentObserver::operator()(const typename KeyValueSet<std::unique_ptr<EntityComponentBase>>::iterator &it, int op)
         {
             switch (op) {
             case BEFORE | RESET:

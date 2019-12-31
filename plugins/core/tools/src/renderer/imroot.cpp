@@ -192,8 +192,10 @@ namespace Tools {
             ImGui::End();
         }
 
-        //ImGui::Render();
-        ImGui::EndFrame();
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            ImGui::Render();
+        else
+            ImGui::EndFrame();
 
         return running;
     }

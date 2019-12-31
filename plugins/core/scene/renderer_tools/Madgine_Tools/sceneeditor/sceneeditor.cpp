@@ -25,6 +25,8 @@
 
 #include "Modules/math/boundingbox.h"
 
+#include "Madgine/gui/toplevelwindow.h"
+
 namespace Engine {
 namespace Tools {
 

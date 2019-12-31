@@ -1,11 +1,8 @@
 #pragma once
 
 #include "keyvalue.h"
-#include "../generic/virtualiterator.h"
 
-namespace Engine {
-
-using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueType>>;
+namespace Engine{
 
 template <typename It>
 struct KeyValueIterator {
@@ -29,7 +26,7 @@ struct KeyValueIterator {
     {
         decltype(auto) k = kvKey(*mIt);
         decltype(auto) v = kvValue(*mIt);
-        return std::pair<decltype(k), decltype(v)>(k,v);
+        return std::pair<decltype(k), decltype(v)>(k, v);
     }
 
 private:

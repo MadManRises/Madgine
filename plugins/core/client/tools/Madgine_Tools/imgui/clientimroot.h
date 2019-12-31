@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/gui/toplevelwindowcomponentcollector.h"
 #include "Madgine/threading/framelistener.h"
 
 #include "renderer/imroot.h"
 
 #include "Madgine/render/renderpass.h"
+
+#include "Modules/math/vector2.h"
 
 
 struct ImGuiDockNode;

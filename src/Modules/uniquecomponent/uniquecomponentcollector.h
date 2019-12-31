@@ -57,7 +57,7 @@ private:
         sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<CollectorInfo::ComponentType>(&createComponent<T, Base, _Ty...>));
         std::vector<const TypeInfo *> elementInfos;
         elementInfos.push_back(&typeInfo<T>());
-        if constexpr (has_typedef_Base<T>::value) {
+        if constexpr (has_typedef_Base_v<T>) {
             elementInfos.push_back(&typeInfo<typename T::Base>());
 		}
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));

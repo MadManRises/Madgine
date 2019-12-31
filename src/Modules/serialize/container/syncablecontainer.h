@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../generic/noopfunctor.h"
-#include "../../keyvalue/observerevent.h"
+#include "../../generic/observerevent.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
 #include "serializablecontainer.h"
@@ -48,7 +48,6 @@ namespace Serialize {
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
-        typedef typename _traits::type type;
         typedef typename _traits::value_type value_type;
 
         struct Transaction {
@@ -115,7 +114,7 @@ namespace Serialize {
                 afterInsert(it.second, it.first);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    type temp(std::forward<_Ty>(args)...);
+                    value_type temp(std::forward<_Ty>(args)...);
 
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << TransactionId(0);
@@ -142,7 +141,7 @@ namespace Serialize {
                 afterInsert(it.second, it.first);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    type temp(std::forward<_Ty>(args)...);
+                    value_type temp(std::forward<_Ty>(args)...);
                     this->postConstruct(temp);
 
                     init(temp);
@@ -470,7 +469,7 @@ namespace Serialize {
             this->write_item(out, it, *it);
         }
 
-        void write_item(SerializeOutStream &out, const const_iterator &it, const type &t) const
+        void write_item(SerializeOutStream &out, const const_iterator &it, const value_type &t) const
         {
             if constexpr (!_traits::sorted) {
                 write_iterator(out, it);

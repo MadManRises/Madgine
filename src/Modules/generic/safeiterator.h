@@ -1,12 +1,12 @@
 #pragma once
 
-#include "iterator.h"
+#include "iterator_traits.h"
 
 namespace Engine {
 
 template <typename T>
 struct SafeIterator {
-    using value_type = std::remove_reference_t<decltype(*std::declval<T>().begin())>;
+    using value_type = typename derive_iterator<T>::iterator::value_type;
 
     using traits = derive_iterator<std::vector<value_type>>;
 

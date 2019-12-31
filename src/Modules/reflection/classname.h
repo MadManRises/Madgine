@@ -16,13 +16,13 @@ constexpr typeMarker_t<T> typeMarker {};
 
 }
 
-DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfoInstance, typename T);
+DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfo, typename T);
 
-#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfoInstance, SINGLE_ARG3({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
+#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfo, SINGLE_ARG3({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
 
 
 namespace Engine {
-
+/*
 template <class T>
 struct AccessClassInfo {
     static const TypeInfo &get()
@@ -36,7 +36,7 @@ inline const TypeInfo &typeInfo()
 {
     return AccessClassInfo<T>::get();
 }
-
+*/
 template <class T>
 inline const char *typeName()
 {

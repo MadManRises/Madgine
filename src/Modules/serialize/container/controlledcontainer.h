@@ -45,7 +45,7 @@ namespace Serialize {
 
             std::remove_const_t<std::remove_reference_t<decltype(kvKey(*this->begin()))>> key;
             while (size--) {
-                this->beginExtendedItem(in, *reinterpret_cast<const typename Base::type *>(0x1));
+                this->beginExtendedItem(in, nullref<const typename Base::value_type>);
                 in.read(key, "key");
                 auto it = kvFind(physical, key);
                 if (it != physical.end()) {

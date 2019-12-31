@@ -10,7 +10,7 @@
 
 //#include "Madgine/app/application.h"
 
-#include "Modules/keyvalue/keyvalueiterate.h"
+#include "Modules/keyvalue/keyvaluevirtualiterator.h"
 #include "Modules/keyvalue/scopeiterator.h"
 
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);

@@ -9,7 +9,7 @@
 #include "entity/entity.h"
 
 #include "Madgine/app/globalapicollector.h"
-#include "Modules/keyvalue/observablecontainer.h"
+#include "Modules/generic/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 
@@ -83,7 +83,7 @@ namespace Scene {
         size_t mItemCount;
 
     public:
-        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver>>);
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver>>);
 
     private:
         SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);

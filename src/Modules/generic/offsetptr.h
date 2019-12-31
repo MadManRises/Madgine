@@ -2,13 +2,13 @@
 
 namespace Engine {
 
-	struct OffsetPtrTag;
-	
+struct OffsetPtrTag;
+
 template <typename T, typename M>
 struct OffsetPtr {
 
-	using member_type = M;
-	using parent_type = T;
+    using member_type = M;
+    using parent_type = T;
 
     OffsetPtr() = default;
 
@@ -23,23 +23,24 @@ struct OffsetPtr {
         return reinterpret_cast<T *>(reinterpret_cast<char *>(m) - mOffset);
     }
 
-	const T* parent(const M* m) 
-	{
+    const T *parent(const M *m)
+    {
         return reinterpret_cast<const T *>(reinterpret_cast<const char *>(m) - mOffset);
-	}
+    }
 
-	template <typename _T, typename _M = M>
-	size_t offset() {
+    template <typename _T, typename _M = M>
+    size_t offset()
+    {
         size_t offset = mOffset;
-        offset += reinterpret_cast<size_t>(static_cast<T *>(static_cast<_T *>(reinterpret_cast<void*>(0x1)))) - 1;
+        offset += reinterpret_cast<size_t>(static_cast<T *>(static_cast<_T *>(reinterpret_cast<void *>(0x1)))) - 1;
         offset += reinterpret_cast<size_t>(static_cast<_M *>(static_cast<M *>(reinterpret_cast<void *>(0x1)))) - 1;
         return offset;
-	}
+    }
 
     size_t mOffset = -1;
 };
 
-    template <typename P>
+template <typename P>
 struct OffsetPtrWrapper {
 
     using ptr_type = decltype(P::value);
@@ -77,10 +78,9 @@ struct OffsetPtrWrapper {
         static inline ::Engine::OffsetPtr<Self, decltype(Name)> value = __##Name##_value__(); \
     };
 
-#define OFFSET_CONTAINER(Name, ...)                                                                 \
-    DECLARE_OFFSET(Name)                                                                            \
+#define OFFSET_CONTAINER(Name, ...)                                                                                                \
+    DECLARE_OFFSET(Name)                                                                                                           \
     typename ::Engine::replace<__VA_ARGS__>::tagged<::Engine::OffsetPtrTag, ::Engine::OffsetPtrWrapper<__access_##Name##__>> Name; \
     DEFINE_OFFSET(Name)
-
 
 }

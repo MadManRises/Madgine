@@ -10,7 +10,7 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "Modules/keyvalue/keyvalueiterate.h"
+#include "Modules/keyvalue/keyvaluevirtualiterator.h"
 
 #include "Modules/plugins/plugin.h"
 

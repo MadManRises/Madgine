@@ -2,9 +2,6 @@
 
 namespace Engine {
 
-/*template <typename It>
-using IteratorValueType = decltype(*std::declval<It>());*/
-
 struct VirtualIteratorEnd {
 };
 

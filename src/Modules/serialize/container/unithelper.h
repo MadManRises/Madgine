@@ -4,6 +4,8 @@
 
 #include "../../generic/copy_traits.h"
 
+#include "../../generic/nullref.h"
+
 namespace Engine {
 namespace Serialize {
     template <class T>
@@ -55,47 +57,47 @@ namespace Serialize {
         }
     };
 
-    template <class T>
-    struct UnitHelper<std::unique_ptr<T>, false> : public UnitHelperBase<std::unique_ptr<T>> {
+    template <typename T, typename D>
+    struct UnitHelper<std::unique_ptr<T, D>, false> : public UnitHelperBase<std::unique_ptr<T, D>> {
 
-        static void write_creation(SerializeOutStream &out, const std::unique_ptr<T> &item)
+        static void write_creation(SerializeOutStream &out, const std::unique_ptr<T, D> &item)
         {
             UnitHelper<T>::write_creation(out, *item);
         }
 
-        static bool filter(SerializeOutStream &out, const std::unique_ptr<T> &item)
+        static bool filter(SerializeOutStream &out, const std::unique_ptr<T, D> &item)
         {
             return UnitHelper<T>::filter(out, *item);
         }
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, const std::unique_ptr<T> &item)
+        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, const std::unique_ptr<T, D> &item)
         {
             UnitHelper<T>::applyMap(map, *item);
         }
 
-        static void setParent(std::unique_ptr<T> &item, SerializableUnitBase *parent)
+        static void setParent(std::unique_ptr<T, D> &item, SerializableUnitBase *parent)
         {
             UnitHelper<T>::setParent(*item, parent);
         }
 
-        static void setItemDataSynced(std::unique_ptr<T> &item, bool b)
+        static void setItemDataSynced(std::unique_ptr<T, D> &item, bool b)
         {
             UnitHelper<T>::setItemDataSynced(*item, b);
         }
 
-        static void setItemActive(std::unique_ptr<T> &item, bool active, bool existenceChanged)
+        static void setItemActive(std::unique_ptr<T, D> &item, bool active, bool existenceChanged)
         {
             UnitHelper<T>::setItemActive(*item, active, existenceChanged);
         }
 
-        static void beginExtendedItem(SerializeOutStream &out, const std::unique_ptr<T> &item)
+        static void beginExtendedItem(SerializeOutStream &out, const std::unique_ptr<T, D> &item)
         {
             UnitHelper<T>::beginExtendedItem(out, *item);
         }
 
-        static void beginExtendedItem(SerializeInStream &in, const std::unique_ptr<T> &item)
+        static void beginExtendedItem(SerializeInStream &in, const std::unique_ptr<T, D> &item)
         {
-            UnitHelper<T>::beginExtendedItem(in, *reinterpret_cast<const T *>(0x1));
+            UnitHelper<T>::beginExtendedItem(in, nullref<T>);
         }
     };
 
@@ -192,8 +194,8 @@ namespace Serialize {
 
         static void beginExtendedItem(SerializeInStream &in, const std::pair<U, V> &item)
         {
-            UnitHelper<U>::beginExtendedItem(in, *static_cast<const U *>(nullptr));
-            UnitHelper<V>::beginExtendedItem(in, *static_cast<const V *>(nullptr));
+            UnitHelper<U>::beginExtendedItem(in, nullref<const U>);
+            UnitHelper<V>::beginExtendedItem(in, nullref<const V>);
         }
     };
 
@@ -258,7 +260,7 @@ namespace Serialize {
         static void beginExtendedItem(SerializeInStream &in, const Tuple &item)
         {
             (void)unpacker {
-                (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::beginExtendedItem(in, *static_cast<const typename std::tuple_element<Is, Tuple>::type *>(nullptr)), true)...
+                (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::beginExtendedItem(in, nullref<const typename std::tuple_element<Is, Tuple>::type>), true)...
             };
         }
     };

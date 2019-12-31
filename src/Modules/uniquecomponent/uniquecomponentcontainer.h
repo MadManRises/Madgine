@@ -2,7 +2,7 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "../keyvalue/container_traits.h"
+#include "../generic/container_traits.h"
 
 #include "../threading/slot.h"
 
@@ -12,6 +12,9 @@
 
 #include "../threading/defaulttaskqueue.h"
 
+#include "../generic/templates.h"
+
+
 namespace Engine {
 
 template <typename C, class _Base, class... _Ty>
@@ -19,6 +22,8 @@ struct UniqueComponentContainerImpl : C {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
+
+	typedef typename C::value_type value_type;
 
     typedef C Container;
 
@@ -39,7 +44,7 @@ struct UniqueComponentContainerImpl : C {
             this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {
-            std::unique_ptr<Base> p = f(arg...);
+            value_type p = f(arg...);
             mSortedComponents.push_back(p.get());
             traits::emplace(*this, Container::end(), std::move(p));
         }
@@ -135,7 +140,7 @@ protected:
                 this->reserve(info->mBaseIndex + vals.size());
             }
             for (F f : vals) {
-                std::unique_ptr<Base> p = TupleUnpacker::invokeFromTuple(f, mArg);
+                value_type p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
                 traits::emplace(*this, Container::end(), std::move(p));
             }
@@ -143,7 +148,7 @@ protected:
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                this->erase(std::find_if(Container::begin(), Container::end(), [&](std::unique_ptr<Base> &p) { return p.get() == mSortedComponents[i]; }));
+                this->erase(std::find_if(Container::begin(), Container::end(), [&](value_type &p) { return p.get() == mSortedComponents[i]; }));
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }

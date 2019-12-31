@@ -7,7 +7,7 @@
 
 #include "Modules/generic/transformIt.h"
 
-#include "Modules/keyvalue/observablecontainer.h"
+#include "Modules/generic/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/toplevelserializableunit.h"
 
@@ -19,7 +19,13 @@
 
 #include "Modules/math/vector3i.h"
 
-#include "toplevelwindowcomponent.h"
+#include "toplevelwindowcomponentcollector.h"
+
+#include "Modules/keyvalue/keyvalueset.h"
+
+#include "Modules/keyvalue/scopebase.h"
+
+#include "Modules/madgineobject/madgineobject.h"
 
 namespace Engine {
 namespace GUI {
@@ -31,8 +37,7 @@ namespace GUI {
         {
             MadgineObjectObserver::operator()(it, event);
 
-            if (event == (AFTER | ACTIVATE_ITEM)) 
-			{
+            if (event == (AFTER | ACTIVATE_ITEM)) {
                 auto end = OffsetPtr::parent(this)->mComponents.end();
                 auto next = std::next(it);
                 if (end == next)
@@ -40,14 +45,22 @@ namespace GUI {
                 else
                     OffsetPtr::parent(this)->applyClientSpaceResize(next->get());
             }
-			if (event == (AFTER | DEACTIVATE_ITEM))
-            {
+            if (event == (AFTER | DEACTIVATE_ITEM)) {
                 auto end = OffsetPtr::parent(this)->mComponents.end();
                 if (end == it)
                     OffsetPtr::parent(this)->applyClientSpaceResize();
                 else
                     OffsetPtr::parent(this)->applyClientSpaceResize(it->get());
             }
+        }
+    };
+
+    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentComparator {
+        using cmp_type = int;
+
+        bool operator()(const std::unique_ptr<TopLevelWindowComponentBase> &first, const std::unique_ptr<TopLevelWindowComponentBase> &second) const
+        {
+            return first->mPriority < second->mPriority;
         }
     };
 
@@ -136,13 +149,13 @@ namespace GUI {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        OFFSET_CONTAINER(mComponents, TopLevelWindowContainer<Serialize::ControlledContainer<std::set<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
+        OFFSET_CONTAINER(mComponents, TopLevelWindowContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
 
         Threading::FrameLoop mLoop;
 
         const Window::WindowSettings &mSettings;
 
-		template <typename OffsetPtr>
+        template <typename OffsetPtr>
         friend struct TopLevelWindowComponentObserver;
     };
 

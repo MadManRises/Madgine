@@ -75,10 +75,4 @@ struct ObservableContainer : C, Observer {
     }
 };
 
-template <template <typename...> typename C, typename Observer>
-struct PartialObservableContainer {
-    template <typename T>
-    using type = ObservableContainer<C<T>, Observer>;
-};
-
 }
