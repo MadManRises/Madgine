@@ -10,6 +10,8 @@
 
 #include "../input/inputlistener.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace GUI {
 
