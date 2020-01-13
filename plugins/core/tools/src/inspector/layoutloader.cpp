@@ -44,4 +44,3 @@ METATABLE_BEGIN_BASE(Engine::Tools::LayoutLoader::ResourceType, Engine::Resource
 METATABLE_END(Engine::Tools::LayoutLoader::ResourceType)
 
 RegisterType(Engine::Tools::LayoutLoader)
-RegisterType(Engine::Tools::LayoutLoader::Base)

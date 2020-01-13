@@ -32,8 +32,8 @@ namespace Render {
 #if !OPENGL_ES
         mHandle(std::exchange(other.mHandle, 0))
 #else
-        mVBO(other.mVBO)
-        , mEBO(other.mEBO)
+        mVBO(std::exchange(other.mVBO, 0))
+        , mEBO(std::exchange(other.mEBO, 0))
         , mAttributes(std::move(other.mAttributes))
 #endif
     {
@@ -60,7 +60,11 @@ namespace Render {
 
     OpenGLVertexArray::operator bool() const
     {
+#if !OPENGL_ES
         return mHandle != 0;
+#else
+        return mVBO != 0;
+#endif
     }
 
     unsigned int OpenGLVertexArray::getCurrent()

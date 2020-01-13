@@ -6,9 +6,9 @@
 
 namespace Engine {
 
-template <typename T, typename _Base>
-struct VirtualUniqueComponentImpl : _Base {
-    using Base = _Base;
+template <typename T, typename Base>
+struct VirtualUniqueComponentImpl : Base {
+    using VBase = typename Base::Collector::Base;
     using Base::Base;
 
     struct Inner {
@@ -24,7 +24,7 @@ struct VirtualUniqueComponentImpl : _Base {
 
 DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
 
-#    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::Base)
+#    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::VBase)
 
 template <class T, class _Collector, typename Base = typename _Collector::Base>
 class VirtualUniqueComponentBase : public Base {

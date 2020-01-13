@@ -1,9 +1,6 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
-#ifdef BUILD_Tools
-#    include "toolslib.h"
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
@@ -11,20 +8,20 @@
 #ifdef BUILD_SceneRendererTools
 #    include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
 #ifdef BUILD_WidgetsTools
 #    include "Madgine_Tools/widgetstoolslib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
+#endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
 #endif
 #ifdef BUILD_OISHandler
 #    include "oislib.h"
@@ -38,6 +35,9 @@
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
 #endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
+#endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
 #endif
@@ -48,7 +48,7 @@
 #    include "Madgine/scene/scenemanager.h"
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/gui/toplevelwindowcomponent.h"
+#    include "Madgine/gui/toplevelwindowcomponentcollector.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/imgui/openglimroot.h"
@@ -202,7 +202,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
+const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowComponentCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_OpenGLTools
@@ -219,7 +219,7 @@ const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollect
 	return dummy;
 }
 template <>
-std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
+std::vector<Engine::GUI::TopLevelWindowComponentCollector::Registry::F> Engine::GUI::TopLevelWindowComponentCollector::Registry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGLTools
@@ -241,8 +241,6 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools = ACC;
 template <>
 size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 0; }
-template <>
-size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 1
 #    endif
@@ -400,21 +398,13 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
 size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Font::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
-template <>
 size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Resources::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
-template <>
 size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
-template <>
-size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 template <>
 size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 template <>
 size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
-template <>
-size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 5
 #    endif

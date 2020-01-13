@@ -15,7 +15,7 @@
 
 namespace Engine {
 
-	DERIVE_TYPEDEF(Base)
+	DERIVE_TYPEDEF(VBase)
 
 template <class _Base, class... _Ty>
 struct UniqueComponentCollector {
@@ -57,9 +57,9 @@ private:
         sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<CollectorInfo::ComponentType>(&createComponent<T, Base, _Ty...>));
         std::vector<const TypeInfo *> elementInfos;
         elementInfos.push_back(&typeInfo<T>());
-        if constexpr (has_typedef_Base_v<T>) {
-            elementInfos.push_back(&typeInfo<typename T::Base>());
-		}
+        /*if constexpr (has_typedef_VBase_v<T>) {
+            elementInfos.push_back(&typeInfo<typename T::VBase>());
+		}*/
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
         sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);
         return sInstance().mInfo.mComponents.size() - 1;
