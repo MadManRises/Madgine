@@ -63,15 +63,11 @@ namespace Engine
 				void readState(SerializeInStream& in)
 				{
 					this->read_state(in, mData);
-					if (!in.isMaster())
-						this->read_id(in, mData);
 				}
 
 				void writeState(SerializeOutStream& out) const
 				{
-					this->write_state(out, mData);
-					if (out.isMaster())
-						this->write_id(out, mData);
+					this->write_state(out, mData);					
 				}
 
 				void setDataSynced(bool b)
