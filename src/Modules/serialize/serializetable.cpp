@@ -2,16 +2,11 @@
 
 #include "serializetable.h"
 
-#include "../keyvalue/keyvalue.h"
-
 #include "formatter.h"
 
-#include "streams/serializestream.h"
 #include "streams/bufferedstream.h"
 
 #include "serializableunit.h"
-
-#include "serializemanager.h"
 
 namespace Engine {
 namespace Serialize {
