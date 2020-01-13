@@ -8,6 +8,8 @@
 
 #include "../serialize/streams/wrappingserializestreambuf.h"
 
+#include "../serialize/streams/serializestream.h"
+
 namespace Engine {
 namespace Filesystem {
 

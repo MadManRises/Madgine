@@ -4,6 +4,8 @@
 
 #include "../serializemanager.h"
 
+#include "../formatter.h"
+
 namespace Engine {
 namespace Serialize {
 
