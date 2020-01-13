@@ -3,8 +3,6 @@
 #include "entitycomponentbase.h"
 #include "entitycomponentcollector.h"
 
-#include "Modules/serialize/streams/serializestream.h"
-
 namespace Engine {
 namespace Scene {
     namespace Entity {
