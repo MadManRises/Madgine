@@ -8,8 +8,12 @@
 #include "../streams/serializestream.h"
 
 namespace Engine {
-namespace Serialize {
-    //		template struct UnitHelper<ValueType, false>;
+namespace Serialize {    
+
+	SerializableUnitBase *Engine::Serialize::convertPtr(SerializeInStream &in, size_t id)
+    {
+        return in.convertPtr(id);
+    }
 
     bool SerializeUnitHelper::filter(SerializeOutStream &out, const SerializableUnitBase &item)
     {

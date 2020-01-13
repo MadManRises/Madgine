@@ -9,6 +9,7 @@
 #include "debugging/streamdebugging.h"
 #include "../../generic/iterator_traits.h"
 #include "../container/creationhelper.h"
+#include "../../generic/container_traits.h"
 
 namespace Engine {
 namespace Serialize {

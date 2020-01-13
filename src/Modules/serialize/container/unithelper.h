@@ -6,6 +6,8 @@
 
 #include "../../generic/nullref.h"
 
+#include "../../generic/iterator_traits.h"
+
 namespace Engine {
 namespace Serialize {
     template <class T>
@@ -44,6 +46,8 @@ namespace Serialize {
     struct UnitHelper : public UnitHelperBase<T> {
     };
 
+	MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, size_t id);
+
     template <class T>
     struct UnitHelper<T *, true> : public UnitHelperBase<T *> {        
 
@@ -52,7 +56,7 @@ namespace Serialize {
             size_t id = reinterpret_cast<size_t>(item);
             if (id & 0x1) {
                 id >>= 1;
-                item = static_cast<T *>(in.convertPtr(id));
+                item = static_cast<T *>(convertPtr(in, id));
             }
         }
     };
