@@ -4,7 +4,7 @@
 namespace Engine {
 
 	
-    template <typename T>
+    template <typename T, bool simplifyPointer = true>
 struct Proxy {
 
     template <typename... Args>
@@ -28,7 +28,7 @@ private:
 };
 
 template <typename T>
-struct Proxy<T *> {
+struct Proxy<T *, true> {
 
     Proxy(T *t = nullptr)
         : mPtr(t)

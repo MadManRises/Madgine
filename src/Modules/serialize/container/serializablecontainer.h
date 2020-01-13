@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../../generic/container_traits.h"
 #include "../../generic/noopfunctor.h"
+#include "../../generic/observerevent.h"
 #include "../../generic/offsetptr.h"
 #include "../../generic/tupleunpacker.h"
-#include "../../generic/container_traits.h"
-#include "../../generic/observerevent.h"
 #include "../serializable.h"
 #include "../streams/serializestream.h"
 #include "creationhelper.h"
@@ -62,24 +62,19 @@ namespace Serialize {
             if (other.isSynced()) {
                 other.setDataSynced(false);
             }
-            Base::operator=(std::forward<Base>(other));
-            for (auto &t : *this)
+            Base::operator=(std::move(other));
+            mActiveIterator = std::move(other.mActiveIterator);
+            for (auto &t : physical())
                 this->setParent(t, OffsetPtr::parent(this));
-            mActiveIterator = other.mActiveIterator;
             other.Base::clear();
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
-        }
-
-        bool operator==(const SerializableContainerImpl<C, Observer, OffsetPtr> &other) const
-        {
-            return static_cast<const Base &>(*this) == other;
         }
 
         SerializableContainerImpl<C, Observer, OffsetPtr> &operator=(const Base &other)
         {
             bool wasActive = beforeReset();
             Base::operator=(other);
-            mActiveIterator = Base::begin();
+            mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
             afterReset(wasActive);
             return *this;
         }
@@ -127,6 +122,11 @@ namespace Serialize {
         const_reverse_iterator rend() const
         {
             return Base::rend();
+        }
+
+        size_t size() const
+        {
+            return std::distance(Base::begin(), _traits::toIterator(*this, mActiveIterator));
         }
 
         void clear()
@@ -195,10 +195,10 @@ namespace Serialize {
         {
             if (name)
                 out.format().beginExtendedCompound(out, name);
-            out.write(this->size(), "size");
+            out.write(Base::size(), "size");
             if (name)
                 out.format().beginCompound(out, name);
-            for (const auto &t : *this) {
+            for (const auto &t : physical()) {
                 if (this->filter(out, t)) {
                     write_item(out, t);
                 }
@@ -215,10 +215,10 @@ namespace Serialize {
             afterReset(wasActive);
         }
 
-        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map)
+        void applySerializableMap(SerializeInStream &in)
         {
             for (value_type &t : physical()) {
-                this->applyMap(map, t);
+                this->applyMap(in, t);
             }
         }
 
@@ -258,31 +258,32 @@ namespace Serialize {
             }
         }
 
-        template <typename T>
-        struct Physical {
-            iterator begin()
-            {
-                return mContainer.begin();
-            }
-
-            iterator end()
-            {
-                return mContainer.end();
-            }
-
-			typedef value_type value_type;
-
-            T &mContainer;
-        };
-
-        Physical<const C> physical() const
+        const C &physical() const
         {
-            return { *this };
+            return *this;
         }
 
-        Physical<C> physical()
+        C &physical()
         {
-            return { *this };
+            return *this;
+        }
+
+        template <typename T>
+        iterator find(T &&t)
+        {
+            iterator it = Base::find(std::forward<T>(t));
+            if (it == Base::end())
+                it = end();
+            return it;
+        }
+
+        template <typename T>
+        const_iterator find(T &&t) const
+        {
+            const_iterator it = Base::find(std::forward<T>(t));
+            if (it == Base::end())
+                it = end();
+            return it;
         }
 
     protected:
@@ -298,14 +299,14 @@ namespace Serialize {
             if (inserted) {
                 if (this->isSynced())
                     this->setItemDataSynced(*it, true);
-            }            
+            }
             if (isItemActive(it)) {
                 Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
-				if (inserted) {
+                if (inserted) {
                     Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
                     this->setItemActive(*it, true, true);
                     Observer::operator()(it, AFTER | ACTIVATE_ITEM);
-                }                
+                }
             }
         }
 
@@ -389,7 +390,7 @@ namespace Serialize {
             mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
             if (name)
                 in.format().beginExtendedCompound(in, name);
-            decltype(this->size()) count;
+            decltype(Base::size()) count;
             in.read(count, "size");
             if (name)
                 in.format().beginCompound(in, name);
@@ -404,9 +405,16 @@ namespace Serialize {
         std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
             this->beginExtendedItem(in, nullref<const value_type>);
-            std::pair<iterator, bool> it = emplace_tuple_intern(where, creator.readCreationData(in));
+            std::pair<iterator, bool> it;
+            if constexpr (std::is_const_v<value_type>) {
+                std::remove_const_t<value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<value_type>>(creator.readCreationData(in));
+                in.read(temp, "Item");
+                it = emplace_intern(where, std::move(temp));
+            } else {
+                it = emplace_tuple_intern(where, creator.readCreationData(in));
+                in.read(*it.first, "Item");
+            }
             assert(it.second);
-            in.read(*it.first, "Item");
             return it;
         }
 
@@ -437,7 +445,7 @@ namespace Serialize {
                 _traits::revalidateHandleAfterInsert(mActiveIterator, *this, it.first);
                 position_handle newHandle = _traits::toPositionHandle(*this, it.first);
                 if (_traits::next(newHandle) == mActiveIterator && !this->isActive())
-                    mActiveIterator = newHandle;                    
+                    mActiveIterator = newHandle;
                 this->setParent(*it.first, OffsetPtr::parent(this));
             }
             return it;
@@ -470,8 +478,7 @@ namespace Serialize {
             for (iterator it = from; it != to; ++it) {
                 if (mActiveIterator == _traits::toPositionHandle(*this, it))
                     test = true;
-                if (test)
-                    ++count;
+                ++count;
             }
             iterator newIt = Base::erase(from, to);
             if (test)

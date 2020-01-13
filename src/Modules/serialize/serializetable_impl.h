@@ -48,9 +48,9 @@ namespace Serialize {
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *_unit, const std::map<size_t, SerializableUnitBase *> &map) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                UnitHelper<T>::applyMap(map, unit->*P);
+                UnitHelper<T>::applyMap(in, unit->*P);
             },
             [](SerializableUnitBase *unit, bool b) {
             },
@@ -103,7 +103,7 @@ namespace Serialize {
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *_unit, const std::map<size_t, SerializableUnitBase *> &map) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in) {
             },
             [](SerializableUnitBase *unit, bool b) {
             },
@@ -144,8 +144,8 @@ namespace Serialize {
                 else
                     throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) {
-                UnitHelper<T>::applyMap(map, static_cast<Unit *>(unit)->*P);
+            [](SerializableUnitBase *unit, SerializeInStream &in) {
+                UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P);
             },
             [](SerializableUnitBase *unit, bool b) {
                 UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
@@ -181,7 +181,7 @@ namespace Serialize {
             [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
                 (static_cast<Unit *>(unit)->*P).readRequest(inout);
             },
-            [](SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) {
+            [](SerializableUnitBase *unit, SerializeInStream &in) {
             },
             [](SerializableUnitBase *unit, bool b) {
                 //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);

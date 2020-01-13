@@ -52,8 +52,8 @@ namespace Render {
             TextureLoader::getSingleton().bind(p.first);
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices[i].data(), p.second.mVertices[i].size(), p.second.mIndices[i].data(), p.second.mIndices[i].size());
-                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices2[i].data(), p.second.mVertices2[i].size(), p.second.mIndices2[i].data(), p.second.mIndices2[i].size(), p.first);
+                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
+                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
             }
         }
     }

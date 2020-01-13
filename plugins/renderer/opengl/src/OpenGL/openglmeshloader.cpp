@@ -11,6 +11,8 @@
 #include "imagedata.h"
 #include "imageloader.h"
 
+#include "openglrendercontext.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Resources::MeshLoader)
@@ -28,59 +30,65 @@ namespace Render {
     {
     }
 
-    bool OpenGLMeshLoader::generateImpl(Resources::MeshData &_data, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices, size_t indexCount, const Filesystem::Path &texturePath)
+    bool OpenGLMeshLoader::generateImpl(Resources::MeshData &_data, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices, const Filesystem::Path &texturePath)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
-        data.mVAO = create;
-        data.mVAO.bind();
+        data.mAABB = bb;
 
-        data.mVertices = create;
+		OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
+            data.mVAO = create;
+            data.mVAO.bind();
 
-        if (indices) {
-            data.mIndices = create;
-        }
+            data.mVertices = create;
 
-        if (!texturePath.empty()) {
-            std::string imageName = texturePath.stem();
-            Resources::ImageLoader::HandleType tex;
-            tex.load(imageName);
+            if (!indices.empty()) {
+                data.mIndices = create;
+            }
 
-            data.mTexture = { GL_UNSIGNED_BYTE };
-            data.mTexture.setFilter(GL_NEAREST);
-            data.mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer);
-            data.mTextureHandle = data.mTexture.handle();
-        }
+            if (!texturePath.empty()) {
+                std::string imageName = texturePath.stem();
+                Resources::ImageLoader::HandleType tex;
+                tex.load(imageName);
 
-        updateImpl(data, bb, groupSize, vertices, vertexCount, vertexSize, indices, indexCount);
+                data.mTexture = { GL_UNSIGNED_BYTE };
+                data.mTexture.setFilter(GL_NEAREST);
+                data.mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer);
+                data.mTextureHandle = data.mTexture.handle();
+            }
 
-        for (int i = 0; i < 5; ++i) {
-            if (attributeList[i])
-                data.mVAO.enableVertexAttribute(i, *attributeList[i]);
-            else
-                data.mVAO.disableVertexAttribute(i);
-        }
+            updateImpl(data, bb, groupSize, std::move(vertices), vertexSize, std::move(indices));
 
-		data.mVAO.unbind();
+            for (int i = 0; i < 5; ++i) {
+                if (attributeList[i])
+                    data.mVAO.enableVertexAttribute(i, *attributeList[i]);
+                else
+                    data.mVAO.disableVertexAttribute(i);
+            }
+
+            data.mVAO.unbind();
+        });
 
         return true;
     }
 
-    void OpenGLMeshLoader::updateImpl(Resources::MeshData &_data, const AABB &bb, size_t groupSize, const void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices, size_t indexCount)
+    void OpenGLMeshLoader::updateImpl(Resources::MeshData &_data, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
 
         data.mAABB = bb;
 
-        data.mGroupSize = groupSize;
+		OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
+            data.mGroupSize = groupSize;
 
-        data.mVertices.setData(GL_ARRAY_BUFFER, vertexSize * vertexCount, vertices);
+            data.mVertices.setData(GL_ARRAY_BUFFER, vertices.mSize, vertices.mData);
 
-        if (indices) {
-            data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices);
-            data.mElementCount = indexCount;
-        } else {
-            data.mElementCount = vertexCount;
-        }
+            if (!indices.empty()) {
+                data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data());
+                data.mElementCount = indices.size();
+            } else {
+                data.mElementCount = vertices.mSize / vertexSize;
+            }
+        });
     }
 
     void OpenGLMeshLoader::resetImpl(Resources::MeshData &data)

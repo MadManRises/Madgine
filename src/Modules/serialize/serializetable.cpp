@@ -7,6 +7,7 @@
 #include "formatter.h"
 
 #include "streams/serializestream.h"
+#include "streams/bufferedstream.h"
 
 #include "serializableunit.h"
 
@@ -66,7 +67,7 @@ namespace Serialize {
 
 		if (!(flags & StateTransmissionFlags_DontApplyMap)) {
             assert(in.manager());
-            applySerializableMap(unit, in.manager()->slavesMap());
+            applySerializableMap(unit, in);
         }
 
 		if (wasActive) {
@@ -74,22 +75,26 @@ namespace Serialize {
 		}
     }
 
-    void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, size_t index) const
+    void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in) const
     {
+        size_t index;
+        in >> index;
         get(index).mReadAction(unit, in);
     }
 
-    void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, size_t index) const
+    void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout) const
     {
+        size_t index;
+        inout >> index;
         get(index).mReadRequest(unit, inout);
     }
 
-    void SerializeTable::applySerializableMap(SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) const
+    void SerializeTable::applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const
     {
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mApplySerializableMap(unit, map);
+                it->second.mApplySerializableMap(unit, in);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }

@@ -11,8 +11,6 @@ namespace Engine
 		{
 			std::string mAppName;
 
-			bool mRunMain = true;
-
 		};
 	}
 }

@@ -148,9 +148,10 @@ private:
 template <typename T, typename Cmp = KeyCompare<T>>
 struct KeyValueSet : std::set<T, Cmp> {
 
-    using _traits = container_traits<std::set<T, Cmp>>;
+    using Base = std::set<T, Cmp>;
 
-    typedef KeyValueSet<T, Cmp> container;
+    using _traits = container_traits<Base>;
+
     typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::iterator> iterator;
     typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_iterator> const_iterator;
     typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::reverse_iterator> reverse_iterator;
@@ -158,18 +159,21 @@ struct KeyValueSet : std::set<T, Cmp> {
 
     struct traits : _traits {
 
+        typedef KeyValueSet<T, Cmp> container;
         typedef typename container::iterator iterator;
         typedef typename container::const_iterator const_iterator;
         typedef typename container::reverse_iterator reverse_iterator;
         typedef typename container::const_reverse_iterator const_reverse_iterator;
 
+        typedef T *handle;
+        typedef const T *const_handle;
         typedef iterator position_handle;
         typedef const_iterator const_position_handle;
         typedef cmp_type_t<T, Cmp> key_type;
         typedef typename container::value_type value_type;
 
         template <template <typename> typename M>
-        using rebind = container_traits<KeyValueSet<M<T>, Cmp>>;
+        using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
 
         template <class... _Ty>
         static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -180,6 +184,13 @@ struct KeyValueSet : std::set<T, Cmp> {
         static position_handle toPositionHandle(container &c, const iterator &it)
         {
             return it;
+        }
+
+        static handle toHandle(container &c, const iterator &it)
+        {
+            if (it == c.end())
+                return nullptr;
+            return &*it;
         }
 
         static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
@@ -205,6 +216,58 @@ struct KeyValueSet : std::set<T, Cmp> {
             return std::next(handle);
         }
     };
+
+    template <typename Arg>
+    iterator find(Arg &&arg)
+    {
+        return Base::find(std::forward<Arg>(arg));
+    }
+
+    template <typename Arg>
+    const_iterator find(Arg &&arg) const
+    {
+        return Base::find(std::forward<Arg>(arg));
+    }
+
+    iterator begin()
+    {
+        return Base::begin();
+    }
+
+    const_iterator begin() const
+    {
+        return Base::begin();
+    }
+
+    iterator end()
+    {
+        return Base::end();
+    }
+
+    const_iterator end() const
+    {
+        return Base::end();
+    }
+
+    reverse_iterator rbegin()
+    {
+        return Base::rbegin();
+    }
+
+    const_reverse_iterator rbegin() const
+    {
+        return Base::rbegin();
+    }
+
+    reverse_iterator rend()
+    {
+        return Base::rend();
+    }
+
+    const_reverse_iterator rend() const
+    {
+        return Base::rend();
+    }
 };
 
 }

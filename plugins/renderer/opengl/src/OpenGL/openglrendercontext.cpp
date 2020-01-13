@@ -36,7 +36,9 @@ RegisterType(Engine::Render::OpenGLRenderContext)
 {
     namespace Render {
 
-        OpenGLRenderContext::OpenGLRenderContext()
+
+
+        OpenGLRenderContext::OpenGLRenderContext(SignalSlot::TaskQueue *queue) : UniqueComponent(queue)
         {
         }
 
@@ -51,6 +53,8 @@ RegisterType(Engine::Render::OpenGLRenderContext)
 
         std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderWindow(Window::Window *w)
         {
+            checkThread();
+
             OpenGLRenderWindow *sharedContext = nullptr;
             for (RenderTarget *target : mRenderTargets) {
                 sharedContext = dynamic_cast<OpenGLRenderWindow *>(target);

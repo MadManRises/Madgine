@@ -54,6 +54,10 @@ RegisterType(Engine::Scene::SceneManager)
                     return false;
             }
 
+            mLastFrame = std::chrono::steady_clock::now();
+
+            Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 10000 });
+
             return true;
         }
 
@@ -61,19 +65,13 @@ RegisterType(Engine::Scene::SceneManager)
         {
             clear();
 
-            for (const std::unique_ptr<SceneComponentBase> & component : mSceneComponents) {
+            for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
                 component->callFinalize();
             }
         }
 
         decltype(SceneManager::mEntities) &SceneManager::entities()
         {
-            /*std::list<Entity::Entity *> result;
-        for (Entity::Entity &e : mEntities) {
-            if (std::find(mEntityRemoveQueue.begin(), mEntityRemoveQueue.end(), &e) == mEntityRemoveQueue.end())
-                result.push_back(&e);
-        }
-        return result;*/
             return mEntities;
         }
 
@@ -118,43 +116,23 @@ RegisterType(Engine::Scene::SceneManager)
             return mMutex;
         }
 
-        SignalSlot::SignalStub<> &SceneManager::clearedSignal()
+        void SceneManager::update()
         {
-            return mClearedSignal;
-        }
+            PROFILE();
 
-        /*bool SceneManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, ContextMask mask)
-    {
-        PROFILE();
+            Threading::DataLock lock(mMutex, Threading::AccessMode::WRITE);
 
-        Threading::DataLock lock(mMutex);
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::duration timeSinceLastFrame = now - mLastFrame;
+            mLastFrame = now;
 
-        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-            //PROFILE(component->componentName());
-            component->update(timeSinceLastFrame, mask);
-        }
-
-        removeQueuedEntities();
-
-        for (Camera &camera : mCameras) {
-            updateCamera(camera);
-        }
-
-        return true;
-    }
-
-    bool SceneManager::frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask mask)
-    {
-        {
-            //PROFILE("SceneComponents");
             for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
                 //PROFILE(component->componentName());
-                component->fixedUpdate(timeStep, mask);
+                component->update(std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceLastFrame));
             }
-        }
 
-        return true;
-    }*/
+            removeQueuedEntities();
+        }
 
         Entity::Entity *SceneManager::findEntity(const std::string &name)
         {
@@ -179,8 +157,6 @@ RegisterType(Engine::Scene::SceneManager)
 
         void SceneManager::clear()
         {
-            mClearedSignal.emit();
-
             mEntities.clear();
             mLocalEntities.clear();
             mEntityRemoveQueue.clear();
@@ -193,7 +169,7 @@ RegisterType(Engine::Scene::SceneManager)
 
         Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
         {
-            return &mLocalEntities.emplace_back(std::forward<Entity::Entity>(e), true);
+            return &mLocalEntities.emplace_back(std::move(e), true);
         }
 
         std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)
@@ -271,6 +247,11 @@ RegisterType(Engine::Scene::SceneManager)
 
                 it = mEntityRemoveQueue.erase(it);
             }
+        }
+
+        SignalSlot::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &Engine::Scene::SceneManager::entitiesSignal()
+        {
+            return mEntities.observer().signal();
         }
     }
 }

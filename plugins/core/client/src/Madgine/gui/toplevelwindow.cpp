@@ -84,7 +84,7 @@ namespace GUI {
             mInputHandlerSelector.emplace(*this, mWindow, this, 0);
         }
 
-        mRenderContext.emplace();
+        mRenderContext.emplace(&mLoop);
         mRenderWindow = (*mRenderContext)->createRenderWindow(mWindow);
         addFrameListener(this);
 

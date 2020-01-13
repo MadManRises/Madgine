@@ -4,11 +4,11 @@
 #include "../formatter.h"
 #include "../primitivetypes.h"
 #include "../serializeexception.h"
-#include "../serializetable.h"
 #include "../statetransmissionflags.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
 #include "../../generic/iterator_traits.h"
+#include "../container/creationhelper.h"
 
 namespace Engine {
 namespace Serialize {
@@ -17,11 +17,12 @@ namespace Serialize {
 
     struct MODULES_EXPORT SerializeInStream : InStream {
     public:
+        SerializeInStream();
         SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer);
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
-        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value>>
+        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T>>>
         SerializeInStream &operator>>(T &t)
         {
             read(t);
@@ -52,12 +53,39 @@ namespace Serialize {
                 t = static_cast<T>(dummy);
             } else if constexpr (is_instance_v<T, std::unique_ptr>) {
                 read(*t, name, std::forward<Args>(args)...);
+            } else if constexpr (is_iterable_v<T>) {
+                readContainer(t, name, std::forward<Args>(args)...);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
         }
 
         void read(ValueType &result, const char *name);
+
+		template <typename C, typename Creator = DefaultCreator<>>
+        void readContainer(C &container, const char *name = nullptr, Creator &&creator = {})
+        {
+            using T = typename C::value_type;
+
+			container.clear();
+
+            if (name)
+                format().beginExtendedCompound(*this, name);
+            decltype(container.size()) size;
+            read(size, "size");
+            if (name)
+                format().beginCompound(*this, name);
+            while (size--){
+				//TODO use creator
+                UnitHelper<T>::beginExtendedItem(*this, nullref<T>);
+				auto pib = container_traits<C>::emplace(container, container.end());
+                assert(pib.second);
+                auto &t = *pib.first;                    
+                read(t, "Item");
+            }
+            if (name)
+                format().endCompound(*this, name);
+        }
 
         template <typename T>
         void readUnformatted(T &t)
@@ -109,10 +137,10 @@ namespace Serialize {
 
 		void setNextFormattedStringDelimiter(char c);
 
-    protected:
-        SerializeInStream(SerializeStreambuf *buffer);
+		SerializableUnitBase *convertPtr(size_t ptr);
 
-        SerializableUnitBase *convertPtr(size_t ptr);
+    protected:
+        SerializeInStream(SerializeStreambuf *buffer);        
 
     protected:
         Debugging::StreamLog mLog;
@@ -122,6 +150,7 @@ namespace Serialize {
 
     struct MODULES_EXPORT SerializeOutStream : OutStream {
     public:
+        SerializeOutStream();
         SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer);
         SerializeOutStream(SerializeOutStream &&other);
         SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);

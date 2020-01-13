@@ -3,12 +3,14 @@
 #include "Modules/resources/resourceloader.h"
 #include "Modules/threading/workgroupstorage.h"
 
+#include "program.h"
+
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct MADGINE_PROGRAMLOADER_EXPORT ProgramLoader : Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
 
-        using Base = Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::vector<Placeholder<0>>, Threading::WorkGroupStorage>;
+        using Base = Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
         struct MADGINE_PROGRAMLOADER_EXPORT HandleType : Base::HandleType {
 

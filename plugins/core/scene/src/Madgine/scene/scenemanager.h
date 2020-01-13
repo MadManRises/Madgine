@@ -17,6 +17,8 @@
 
 #include "Modules/threading/datamutex.h"
 
+#include "Modules/signalslot/signalfunctor.h"
+
 namespace Engine {
 namespace Scene {
     class MADGINE_SCENE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -28,8 +30,7 @@ namespace Scene {
         SceneManager(const SceneManager &) = delete;
         virtual ~SceneManager() = default;
 
-        /*bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Scene::ContextMask context) override;
-        bool frameFixedUpdate(std::chrono::microseconds timeStep, ContextMask context) override final;*/
+        void update();        
 
         Entity::Entity *createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
@@ -64,9 +65,9 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
-        SignalSlot::SignalStub<> &clearedSignal();
-
         void removeQueuedEntities();
+
+		SignalSlot::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
 
     protected:
         virtual bool init() final;
@@ -86,14 +87,13 @@ namespace Scene {
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver>>);
 
     private:
-        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly);
-        std::list<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
+        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, SignalSlot::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
+        std::list<Entity::Entity> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
-        SignalSlot::Signal<> mStateLoadedSignal;
-        SignalSlot::Signal<> mClearedSignal;
-
         Threading::DataMutex mMutex;
+
+        std::chrono::steady_clock::time_point mLastFrame;
 
     public:
         decltype(mEntities) &entities();

@@ -26,7 +26,7 @@ namespace Tools {
         mProgram.create("grid");
 
         mMesh = Resources::MeshLoader::loadManual("grid", {}, [](Resources::MeshLoader *loader, Resources::MeshData &data, Resources::MeshLoader::ResourceType * res) {
-            Compound<Render::VertexPos_4D> vertices[] = {
+            std::vector<Compound<Render::VertexPos_4D>> vertices{
                 { { 0, 0, 0, 1 } },
                 { { 1, 0, 0, 0 } },
                 { { 0, 0, 1, 0 } },
@@ -34,11 +34,11 @@ namespace Tools {
                 { { 0, 0, -1, 0 } }
             };
 
-            unsigned short indices[] = {
+            std::vector<unsigned short> indices{
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1
             };
 
-            return loader->generate(data, 3, vertices, 5, indices, 12);
+            return loader->generate(data, 3, std::move(vertices), std::move(indices));
         });
     }
 

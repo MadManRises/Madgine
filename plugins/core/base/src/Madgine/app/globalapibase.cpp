@@ -25,15 +25,6 @@ namespace Engine
 			return *this;
 		}
 
-		/*App::Application& GlobalAPIBase::app(bool init)
-		{
-			if (init)
-			{
-				checkDependency();
-			}
-			return mApp.getSelf(init);
-		}*/
-
 		const MadgineObject * GlobalAPIBase::parent() const
 		{
 			return &mApp;
@@ -56,11 +47,6 @@ namespace Engine
 			}
 			return mApp.getGlobalAPIComponent(i, init);
 		}
-
-		/*Scripting::GlobalScopeBase& GlobalAPIBase::globalScope()
-		{
-			return mApp;
-		}*/
 
 	}
 }

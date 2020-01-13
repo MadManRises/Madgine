@@ -8,10 +8,6 @@
 
 namespace Engine {
 namespace Serialize {
-    namespace __serialized__impl__ {
-        template <class T>
-        class SerializedUnit;
-    }
 
     class MODULES_EXPORT SerializableUnitBase {
     protected:
@@ -29,10 +25,7 @@ namespace Serialize {
         void readAction(BufferedInOutStream &in);
         void readRequest(BufferedInOutStream &in);
 
-        void writeId(SerializeOutStream &out) const;
-        void readId(SerializeInStream &in);
-
-        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map);
+        void applySerializableMap(SerializeInStream &in);
 
         void writeCreationData(SerializeOutStream &out) const;
 
@@ -51,6 +44,8 @@ namespace Serialize {
         void setSlaveId(size_t id, SerializeManager *mgr);
 
         const SerializeTable *serializeType() const;
+
+		size_t moveMasterId(size_t newId = 0);
 
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;

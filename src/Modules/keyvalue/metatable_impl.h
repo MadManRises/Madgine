@@ -4,9 +4,9 @@
 #include "../generic/tupleunpacker.h"
 #include "Interfaces/macros.h"
 #include "accessor.h"
+#include "keyvalueiterator.h"
 #include "metatable.h"
 #include "valuetype.h"
-#include "keyvalueiterator.h"
 
 namespace Engine {
 
@@ -58,7 +58,7 @@ constexpr Accessor property()
                         return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
                     } else {
                         return TupleUnpacker::invoke(Getter, scope);
-					}
+                    }
                 } else {
                     static_assert(std::is_convertible_v<Scope &, GetterScope &>);
                     return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
@@ -67,6 +67,8 @@ constexpr Accessor property()
 
             if constexpr (ValueType::isValueType<T>::value) {
                 return ValueType { std::forward<T>(value) };
+            } else if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase&>){
+                return ValueType { &value };
             } else if constexpr (is_typed_iterable<T>::value) {
                 return ValueType {
                     KeyValueVirtualIterator { KeyValueIterator { value.typedBegin() }, KeyValueIterator { value.typedEnd() } }
@@ -89,17 +91,25 @@ void setField(Scope *s, const T &t)
     s->*P = t;
 }
 
+template <auto P, typename Scope, typename T>
+T *getFieldPtr(Scope *s)
+{
+    return &(s->*P);
+}
+
 template <typename Scope, auto P>
 constexpr Accessor member()
 {
     using traits = CallableTraits<decltype(P)>;
     using DerivedScope = typename traits::class_type;
-    using T = std::remove_reference_t<typename traits::return_type>;
+    using T = typename traits::return_type;
 
-    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
+    if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
+        return property<Scope, &getFieldPtr<P, DerivedScope, std::remove_reference_t<T>>, nullptr>();
+    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string, T>))
         return property<Scope, P, nullptr>();
     else
-        return property<Scope, P, &setField<P, DerivedScope, T>>();
+        return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>

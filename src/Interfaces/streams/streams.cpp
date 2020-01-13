@@ -4,6 +4,11 @@
 
 namespace Engine {
 
+InStream::InStream()
+    : mStream(nullptr)
+{
+}
+
 InStream::InStream(std::unique_ptr<std::streambuf> &&buffer)
     : mStream(buffer.release())
 {
@@ -72,7 +77,12 @@ std::streambuf &InStream::buffer() const
 std::unique_ptr<std::streambuf> InStream::release()
 {
     assert(mOwning);
-    return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));    
+    return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
+}
+
+OutStream::OutStream()
+    : mStream(nullptr)
+{
 }
 
 OutStream::OutStream(std::unique_ptr<std::streambuf> &&buffer)

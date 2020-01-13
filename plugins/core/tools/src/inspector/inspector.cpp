@@ -74,6 +74,10 @@ namespace Tools {
                 draw(&App::Application::getSingleton(), "Application");
                 ImGui::TreePop();
             }
+            if (ImGui::TreeNode("TopLevelWindow")) {
+                draw(mRoot.toolsTopLevel(), "TopLevelWindow");
+                ImGui::TreePop();
+            }
             if (ImGui::TreeNode("Resources")) {
                 draw(&Resources::ResourceManager::getSingleton(), "Resources");
                 ImGui::TreePop();
@@ -149,7 +153,7 @@ namespace Tools {
                                                                      open = ImGui::EndTreeArrow();
                                                                  } else {
                                                                      open = ImGui::TreeNode(id.c_str());
-                                                                 }                                                                 
+                                                                 }
 
                                                                  ImGui::DraggableValueTypeSource(id, parent, value, ImGuiDragDropFlags_SourceAllowNullID);
                                                                  if (editable && ImGui::BeginDragDropTarget()) {
@@ -200,6 +204,11 @@ namespace Tools {
 
     void Inspector::draw(TypedScopePtr scope, const char *layoutName)
     {
+        if (!scope) {
+            ImGui::Text("<NULL>");
+            return;
+        }
+
         std::set<std::string> drawn;
         const char *type = scope.mType->mTypeName;
         InspectorLayout *layout = nullptr;

@@ -2,6 +2,7 @@
 
 #include "../../generic/noopfunctor.h"
 #include "../../generic/observerevent.h"
+#include "../../keyvalue/keyvalue.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
 #include "serializablecontainer.h"
@@ -119,7 +120,7 @@ namespace Serialize {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << TransactionId(0);
                     *out << INSERT_ITEM;
-                    this->write_item(*out, where, temp);
+                    write_item(*out, where, temp);
                     out->endMessage();
                 } else {
                     std::terminate();
@@ -149,7 +150,7 @@ namespace Serialize {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << TransactionId(0);
                     *out << INSERT_ITEM;
-                    this->write_item(*out, where, temp);
+                    write_item(*out, where, temp);
                     out->endMessage();
                 } else {
                     std::terminate();
@@ -217,11 +218,11 @@ namespace Serialize {
         }
 
         template <typename Creator = DefaultCreator<>>
-        void readState(SerializeInStream &in, const char *name, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        void readState(SerializeInStream &in, const char *name, Creator &&creator = {})
         {
             bool wasActive = beforeReset();
             Base::readState_intern(in, name, std::forward<Creator>(creator));
-            afterReset(wasActive, answerTarget, answerId);
+            afterReset(wasActive);
         }
 
         // Inherited via Observable
@@ -303,7 +304,6 @@ namespace Serialize {
             TransactionId id)
         {
             std::pair<iterator, bool> it = std::make_pair(this->end(), false);
-            bool b;
             switch (op) {
             case INSERT_ITEM:
                 if constexpr (!_traits::sorted) {
@@ -313,13 +313,14 @@ namespace Serialize {
                 it = this->read_item_where_intern(in, it.first, std::forward<Creator>(creator));
                 afterInsert(it.second, it.first, partId, id);
                 break;
-            case REMOVE_ITEM:
+            case REMOVE_ITEM: {
                 it.first = this->read_iterator(in);
-                b = beforeRemove(it.first, partId, id);
+                bool b = beforeRemove(it.first, partId, id);
                 it.first = Base::erase_intern(it.first);
                 afterRemove(b, it.first);
                 it.second = true;
                 break;
+            }
             case REMOVE_RANGE: {
                 iterator from = this->read_iterator(in);
                 iterator to = this->read_iterator(in);
@@ -329,10 +330,13 @@ namespace Serialize {
                 it.second = true;
                 break;
             }
-            case RESET:
-                readState(in, nullptr, std::forward<Creator>(creator), partId, id);
+            case RESET: {
+                bool wasActive = beforeReset();
+                Base::readState_intern(in, nullptr, std::forward<Creator>(creator));
+                afterReset(wasActive, partId, id);
                 it.second = true;
                 break;
+            }
             default:
                 std::terminate();
             }
@@ -356,7 +360,7 @@ namespace Serialize {
                             *out << TransactionId(0);
                         }
                         *out << INSERT_ITEM;
-                        this->write_item(*out, it);
+                        write_item(*out, it, *it);
                         out->endMessage();
                     }
                 }
@@ -457,16 +461,13 @@ namespace Serialize {
         template <typename Creator>
         std::pair<iterator, bool> read_item(SerializeInStream &in, Creator &&creator)
         {
-            iterator it = this->end();
-            if constexpr (!_traits::sorted) {
+            iterator it;
+            if constexpr (_traits::sorted) {
+                it = this->end();
+            } else {
                 it = read_iterator(in);
             }
             return this->read_item_where_intern(in, it, std::forward<Creator>(creator));
-        }
-
-        void write_item(SerializeOutStream &out, const const_iterator &it) const
-        {
-            this->write_item(out, it, *it);
         }
 
         void write_item(SerializeOutStream &out, const const_iterator &it, const value_type &t) const

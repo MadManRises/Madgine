@@ -5,6 +5,7 @@ namespace Engine {
 typedef std::istream::pos_type pos_type;
 
 struct INTERFACES_EXPORT InStream {
+    InStream();
     InStream(std::unique_ptr<std::streambuf> &&buffer);
     InStream(InStream &&other);
     ~InStream();
@@ -42,6 +43,7 @@ private:
 };
 
 struct INTERFACES_EXPORT OutStream {
+    OutStream();
     OutStream(std::unique_ptr<std::streambuf> &&buffer);
     OutStream(OutStream &&other);
     ~OutStream();

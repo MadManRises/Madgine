@@ -2,74 +2,55 @@
 
 //#include "contextmasks.h"
 
+#include "Modules/keyvalue/scopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
 #include "Modules/serialize/serializableunit.h"
-#include "Modules/keyvalue/scopebase.h"
 
 #include "Modules/reflection/classname.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-namespace Engine
-{
-	namespace Scene
-	{
-		
-		class MADGINE_SCENE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public ScopeBase,
-			public MadgineObject
-		{
-		public:
-			virtual ~SceneComponentBase() = default;
+namespace Engine {
+namespace Scene {
 
-			SceneComponentBase(SceneManager &sceneMgr/*, ContextMask context = ContextMask::SceneContext*/);
+    class MADGINE_SCENE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public ScopeBase, public MadgineObject {
+    public:
+        virtual ~SceneComponentBase() = default;
 
-			/*void update(std::chrono::microseconds timeSinceLastFrame, ContextMask mask);
-			void fixedUpdate(std::chrono::microseconds timeStep, ContextMask mask);*/
+        SceneComponentBase(SceneManager &sceneMgr);
 
+        SceneManager &sceneMgr(bool = true) const;
 
-			void setEnabled(bool b);
-			bool isEnabled() const;
+        virtual void update(std::chrono::microseconds);
 
-			SceneManager &sceneMgr(bool = true) const;
+        const char *key() const;
 
-			//KeyValueMapList maps() override;
+        template <class T>
+        T &getSceneComponent(bool init = true)
+        {
+            return static_cast<T &>(getSceneComponent(component_index<T>(), init));
+        }
 
-			const char* key() const;
+        SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-			template <class T>
-			T &getSceneComponent(bool init = true)
-			{
-				return static_cast<T&>(getSceneComponent(component_index<T>(), init));
-			}
+        template <class T>
+        T &getGlobalAPIComponent(bool init = true)
+        {
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
+        }
 
-			SceneComponentBase &getSceneComponent(size_t i, bool = true);
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        SceneComponentBase &getSelf(bool = true);
 
-			template <class T>
-			T &getGlobalAPIComponent(bool init = true)
-			{
-				return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
-			}
+        virtual const MadgineObject *parent() const override;
 
-			App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-			SceneComponentBase &getSelf(bool = true);
+    protected:
+        virtual bool init() override;
+        virtual void finalize() override;
 
-			virtual const MadgineObject *parent() const override;
-			//virtual App::Application &app(bool = true) override;
+    private:
+        SceneManager &mSceneMgr;
+    };
 
-		protected:
-			virtual bool init() override;
-			virtual void finalize() override;
-
-			virtual void update(std::chrono::microseconds);
-			virtual void fixedUpdate(std::chrono::microseconds);
-
-		private:
-			//const ContextMask mContext;
-
-			bool mEnabled;
-
-			SceneManager &mSceneMgr;
-		};
-
-	}
+}
 }

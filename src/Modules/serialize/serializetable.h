@@ -16,10 +16,10 @@ namespace Serialize {
         void writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const;
         void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0) const;
 
-        void readAction(SerializableUnitBase *unit, SerializeInStream &in, size_t index) const;
-        void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, size_t index) const;
+        void readAction(SerializableUnitBase *unit, SerializeInStream &in) const;
+        void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in) const;
 
-        void applySerializableMap(SerializableUnitBase *unit, const std::map<size_t, SerializableUnitBase *> &map) const;
+        void applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
 

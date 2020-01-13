@@ -17,7 +17,7 @@
 
 namespace Engine {
 namespace UI {
-    struct MADGINE_UI_EXPORT UIManager : Serialize::SerializableUnit<UIManager, GUI::TopLevelWindowComponent<UIManager>>,
+    struct MADGINE_UI_EXPORT UIManager : GUI::TopLevelWindowComponent<UIManager>,
                                          Threading::FrameListener {
         SERIALIZABLEUNIT;
 

@@ -20,12 +20,15 @@ namespace Filesystem {
     {
         assert(!getSlaveStreambuf());
 
-		InStream stream = openFile(path);
+        InStream stream = openFile(path);
+        if (stream) {
+            Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(stream.release(), std::move(format), *this, createStreamId()) };
+            setSlaveStreambuf(&in.buffer());
 
-        Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(stream.release(), std::move(format), *this, createStreamId()) };
-        setSlaveStreambuf(&in.buffer());
-
-        return in;
+            return in;
+        } else {
+            return {};
+        }
     }
 
     std::optional<Serialize::SerializeOutStream> FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)

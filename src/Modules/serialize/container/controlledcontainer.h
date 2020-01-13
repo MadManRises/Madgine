@@ -41,14 +41,12 @@ namespace Serialize {
             if (name)
                 in.format().beginCompound(in, name);
 
-            auto physical = this->physical();
-
             std::remove_const_t<std::remove_reference_t<decltype(kvKey(*this->begin()))>> key;
             while (size--) {
                 this->beginExtendedItem(in, nullref<const typename Base::value_type>);
                 in.read(key, "key");
-                auto it = kvFind(physical, key);
-                if (it != physical.end()) {
+                auto it = kvFind(this->physical(), key);
+                if (it != this->physical().end()) {
                     in.read(*it, "Item");
                 } else {
                     LOG_ERROR("Could not find \"" << key << "\"!");

@@ -71,8 +71,8 @@ namespace Debug {
     struct HistoryData {
         HistoryData()
             : mCurrentTotal {}
-            , mMin {}
-            , mMax {}
+            , mMin { std::numeric_limits<T>::max() }
+            , mMax { std::numeric_limits<T>::lowest() }
             , mTotal {}
             , mCount(0)
             , mIndex(0)
@@ -120,6 +120,12 @@ namespace Debug {
         const T *buffer() const
         {
             return mBuffer.data();
+        }
+
+        void resetExtremeValues()
+        {
+            mData.mMax = std::numeric_limits<float>::lowest();
+            mData.mMin = std::numeric_limits<float>::max();
         }
 
     private:

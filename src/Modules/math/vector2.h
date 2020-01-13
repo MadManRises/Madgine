@@ -69,8 +69,8 @@ public:
     }
 
     Vector2(const Vector2i &v)
-        : x(v.x)
-        , y(v.y)
+        : x(static_cast<float>(v.x))
+        , y(static_cast<float>(v.y))
     {
     }
 

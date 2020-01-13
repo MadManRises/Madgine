@@ -216,9 +216,6 @@ namespace Render {
             }
         }
 
-        /*if (sharedContext)
-            wglShareLists(sharedContext, context);*/
-
 #elif LINUX
         GLXContext context;
         if (reusedContext) {
@@ -264,7 +261,7 @@ namespace Render {
 
 #endif
 
-        if (!reusedContext /* && !sharedContext*/) {
+        if (!reusedContext) {
             makeCurrent(window, context);
 
 #if WINDOWS
@@ -338,9 +335,7 @@ namespace Render {
 
         ContextHandle reusedContext = nullptr;
         if (reusedResources) {
-            OpenGLRenderWindow *reusedWindow = dynamic_cast<OpenGLRenderWindow *>(reusedResources);
-            assert(reusedWindow);
-            reusedContext = reusedWindow->mContext;
+            reusedContext = reusedResources->mContext;
         }
 
         mContext = setupWindowInternal(w, reusedContext);

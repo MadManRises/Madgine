@@ -34,8 +34,6 @@ namespace Render {
             mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
         }
 
-        //TODO Remove this temp solution
-        Engine::App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().removeQueuedEntities();
 
         Vector2i size = target->size();
 

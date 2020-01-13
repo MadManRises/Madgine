@@ -50,11 +50,11 @@ DLL_IMPORT_VARIABLE2(typename Collector::template ComponentRegistrator<T>, _reg,
 
 #    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name, Name::Collector)
 
-template <typename T, typename _Collector, typename Base = typename _Collector::Base>
-struct UniqueComponent : Base {
+template <typename T, typename _Collector, typename _Base = typename _Collector::Base>
+struct UniqueComponent : _Base {
     using Collector = _Collector;
 
-    using Base::Base;
+    using _Base::_Base;
 
     static size_t component_index()
     {

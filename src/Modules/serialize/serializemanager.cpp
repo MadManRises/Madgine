@@ -16,10 +16,9 @@ namespace Engine {
 namespace Serialize {
 
     static std::mutex sMasterMappingMutex;
-    static std::map<size_t, SerializableUnitBase *> sMasterMappings;
+    static SerializableUnitMap sMasterMappings;
     static size_t sNextUnitId = RESERVED_ID_COUNT;
-    static ParticipantId sLocalMasterParticipantId = 1;
-    static std::atomic<ParticipantId> sRunningStreamId = sLocalMasterParticipantId;
+    static std::atomic<ParticipantId> sRunningStreamId = SerializeManager::sLocalMasterParticipantId;
 
     SerializeManager::SerializeManager(const std::string &name)
         : mName(name)
@@ -37,10 +36,14 @@ namespace Serialize {
 
     SerializeManager::~SerializeManager() {}
 
-    const std::map<size_t, SerializableUnitBase *> &
-    SerializeManager::slavesMap() const
+    const SerializableUnitMap &SerializeManager::slavesMap() const
     {
         return mSlaveMappings;
+    }
+
+	const SerializableUnitMap &SerializeManager::mastersMap() const
+    {
+        return sMasterMappings;
     }
 
     void SerializeManager::addSlaveMapping(SerializableUnitBase *item)
@@ -60,19 +63,18 @@ namespace Serialize {
     size_t SerializeManager::generateMasterId(size_t id,
         SerializableUnitBase *unit)
     {
-        if (id == 0 || id >= RESERVED_ID_COUNT) {
+        if (id == 0) {
             std::lock_guard guard(sMasterMappingMutex);
             id = ++sNextUnitId;
             sMasterMappings[id] = unit;
-            // std::cout << "Master: " << sNextUnitId << " -> add " <<
-            // typeid(*item).name() << std::endl;
-            return id;
         } else {
             assert(id >= BEGIN_STATIC_ID_SPACE);
-            // std::cout << "Master: " << id << " -> add static " <<
-            // typeid(*item).name() << std::endl;
-            return id;
+            if (id >= RESERVED_ID_COUNT) {
+                bool b = sMasterMappings.try_emplace(id, unit).second;
+                assert(b);
+            }
         }
+        return id;
     }
 
     void SerializeManager::deleteMasterId(size_t id, SerializableUnitBase *unit)
@@ -120,7 +122,7 @@ namespace Serialize {
         return unit == nullptr
             ? NULL_UNIT_ID
             : (!mgr || mgr->isMaster(&out.buffer())) ? unit->masterId()
-                                                      : unit->slaveId();
+                                                     : unit->slaveId();
     }
 
     SerializableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
@@ -132,14 +134,7 @@ namespace Serialize {
             if (mSlaveStreambuf && (&in.buffer() == mSlaveStreambuf)) {
                 return mSlaveMappings.at(unit);
             } else {
-                {
-                    SerializableUnitBase *u;
-                    {
-                        std::lock_guard guard(sMasterMappingMutex);
-                        u = sMasterMappings.at(unit);
-                    }
-                    return u;
-                }
+                return getByMasterId(unit);
             }
         } catch (const std::out_of_range &) {
             std::stringstream ss;
@@ -162,6 +157,12 @@ namespace Serialize {
     }
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }
+
+    SerializableUnitBase *SerializeManager::getByMasterId(size_t unit)
+    {
+        std::lock_guard guard(sMasterMappingMutex);
+        return sMasterMappings.at(unit);
+    }
 
     const std::string &SerializeManager::name() const
     {

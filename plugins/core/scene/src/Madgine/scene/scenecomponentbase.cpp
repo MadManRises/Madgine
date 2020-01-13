@@ -13,28 +13,10 @@ namespace Engine
 
 	namespace Scene
 	{
-    SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr/*, Threading::ContextMask context*/):
-			/*mContext(context),*/
-			mEnabled(true),
+    SceneComponentBase::SceneComponentBase(SceneManager &sceneMgr):
 			mSceneMgr(sceneMgr)
 		{
 		}
-
-		/*void SceneComponentBase::update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask)
-		{
-			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
-			{
-				update(timeSinceLastFrame);
-			}
-		}
-
-		void SceneComponentBase::fixedUpdate(std::chrono::microseconds timeStep, ContextMask mask)
-		{
-			if (mEnabled && mContext & (mask | ContextMask::AnyContext))
-			{
-				fixedUpdate(timeStep);
-			}
-		}*/
 
 		bool SceneComponentBase::init()
 		{
@@ -43,16 +25,6 @@ namespace Engine
 
 		void SceneComponentBase::finalize()
 		{			
-		}
-
-		void SceneComponentBase::setEnabled(bool b)
-		{
-			mEnabled = b;
-		}
-
-		bool SceneComponentBase::isEnabled() const
-		{
-			return mEnabled;
 		}
 
 		SceneManager &SceneComponentBase::sceneMgr(bool init) const
@@ -111,10 +83,6 @@ namespace Engine
 		}*/
 
 		void SceneComponentBase::update(std::chrono::microseconds)
-		{
-		}
-
-		void SceneComponentBase::fixedUpdate(std::chrono::microseconds)
 		{
 		}
 

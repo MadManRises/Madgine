@@ -61,6 +61,9 @@ namespace Render {
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
 
+		if (!mesh->mVAO)
+            return;
+
         mesh->mVAO.bind();
 
         constexpr GLenum modes[] {
@@ -89,11 +92,11 @@ namespace Render {
         }
     }*/
 
-    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount)
+    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
-        if ((!indices && vertexCount > 0) || indexCount > 0) {
+        if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
 
             //setupProgram(flags);
 
@@ -101,11 +104,11 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, Vertex2 *vertices, size_t vertexCount, unsigned short *indices, size_t indexCount, unsigned int textureId)
+    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, unsigned int textureId)
     {
-        if ((!indices && vertexCount > 0) || indexCount > 0) {
+        if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, vertices, vertexCount, indices, indexCount);
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
 
             //setupProgram(flags, textureId);
 

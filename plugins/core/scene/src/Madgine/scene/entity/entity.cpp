@@ -34,13 +34,13 @@ namespace Scene {
         }
 
         Entity::Entity(Entity &&other, bool local)
-            : SerializableUnit(std::forward<Entity>(other))
+            : SerializableUnit(std::move(other))
             , mName(other.mName)
             , mLocal(local)
-            , mComponents(std::forward<decltype(mComponents)>(other.mComponents))
+            , mComponents(std::move(other.mComponents))
             , mSceneManager(other.mSceneManager)
         {
-            for (const std::unique_ptr<EntityComponentBase> &comp : mComponents) {
+            for (const std::unique_ptr<EntityComponentBase> &comp : mComponents.physical()) {
                 comp->moveToEntity(this);
             }
         }
@@ -79,8 +79,8 @@ namespace Scene {
 
         EntityComponentBase *Entity::getComponent(const std::string &name)
         {
-            auto it = mComponents.find(name);
-            if (it == mComponents.end())
+            auto it = mComponents.physical().find(name);
+            if (it == mComponents.physical().end())
                 return nullptr;
             return it->get();
         }
@@ -92,8 +92,8 @@ namespace Scene {
 
         EntityComponentBase *Entity::addComponent(const std::string &name, const ObjectPtr &table)
         {
-            auto it = mComponents.find(name);
-            if (it != mComponents.end()) {
+            auto it = mComponents.physical().find(name);
+            if (it != mComponents.physical().end()) {
                 return it->get();
             } else {
                 return mComponents.emplace(EntityComponentCollector::createComponent(*this, name, table)).first->get();

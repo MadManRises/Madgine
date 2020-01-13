@@ -51,7 +51,8 @@ namespace Resources {
 
         std::string name() const
         {
-            return "";
+            typename Loader::ResourceType *res = resource();
+            return res ? res->name() : "";
         }
 
         operator bool() const

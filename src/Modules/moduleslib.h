@@ -44,6 +44,7 @@
 #include <unordered_set>
 #include <variant>
 #include <vector>
+#include <shared_mutex>
 
 #include <optional>
 #include <string_view>

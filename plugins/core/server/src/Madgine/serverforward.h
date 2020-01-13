@@ -5,7 +5,7 @@ namespace Engine
 
 	namespace Server
 	{
-		class ServerBase;
+		struct ServerBase;
 	}
 
 }

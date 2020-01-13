@@ -14,9 +14,11 @@
 #pragma once
 
 #include "Modules/moduleslib.h"
+
 #include "Modules/math/vector2.h"
 #include "Modules/math/vector2i.h"
 #include "Modules/math/vector4.h"
+#include "Modules/moduleslib.h"
 #include "Modules/threading/workgroup.h"
 
 //---- Define assertion handler. Defaults to calling assert().
@@ -70,8 +72,8 @@
     operator Engine::Vector2() const { return Engine::Vector2(x, y); } \
     ImVec2(const Engine::Vector2i &f)                                  \
     {                                                                  \
-        x = f.x;                                                       \
-        y = f.y;                                                       \
+        x = static_cast<float>(f.x);                                   \
+        y = static_cast<float>(f.y);                                   \
     }
 
 #define IM_VEC4_CLASS_EXTRA          \

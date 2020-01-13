@@ -5,7 +5,7 @@ Project(Server)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine serverforward.h serverlib.h)
-		FolderSources(sources Madgine server serverbase.cpp serverbase.h serverappinstance.cpp serverappinstance.h serverlog.cpp serverlog.h)
+		FolderSources(sources Madgine server serverbase.cpp serverbase.h serverinstance.cpp serverinstance.h serverlog.cpp serverlog.h)
 
 
 add_plugin(Server Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/serverlib.h)

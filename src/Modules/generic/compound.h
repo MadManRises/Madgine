@@ -4,10 +4,13 @@
 
 namespace Engine {
 
+	template <typename T>
+	using ctor_t = typename T::ctor;
+
 template <typename... Ty>
 struct Compound : Ty... {
     Compound() = default;
-    Compound(typename Ty::ctor... args)
+    Compound(ctor_t<Ty>... args)
         : Ty({ args })...
     {
     }

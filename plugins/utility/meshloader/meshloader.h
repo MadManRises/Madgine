@@ -9,14 +9,18 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "Modules/render/bytebuffer.h"
+
+#include "meshdata.h"
+
 namespace Engine {
 namespace Resources {
 
     struct MeshData;
 
-    struct MADGINE_MESHLOADER_EXPORT MeshLoader : VirtualResourceLoaderBase<MeshLoader, MeshData, std::vector<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct MADGINE_MESHLOADER_EXPORT MeshLoader : VirtualResourceLoaderBase<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
 
-        using Base = VirtualResourceLoaderBase<MeshLoader, MeshData, std::vector<Placeholder<0>>, Threading::WorkGroupStorage>;
+        using Base = VirtualResourceLoaderBase<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
         struct HandleType : Base::HandleType {
             using Base::HandleType::HandleType;
@@ -26,11 +30,11 @@ namespace Resources {
             }
 
             template <typename VertexType>
-            void update(size_t groupSize, VertexType *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0, MeshLoader *loader = nullptr)
+            void update(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, MeshLoader *loader = nullptr)
             {
                 if (!loader)
                     loader = &MeshLoader::getSingleton();
-                loader->update(getData(*this, loader), groupSize, vertices, vertexCount, indices, indexCount);
+                loader->update(getData(*this, loader), groupSize, std::move(vertices), std::move(indices));
             }
         };
 
@@ -40,13 +44,12 @@ namespace Resources {
         void unloadImpl(MeshData &data, ResourceType *res);
 
         template <typename VertexType>
-        static AABB calculateAABB(VertexType *vertices, size_t vertexCount)
+        static AABB calculateAABB(const std::vector<VertexType> &vertices)
         {
             Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
             Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
 
-            for (size_t i = 0; i < vertexCount; ++i) {
-                VertexType &v = vertices[i];
+            for (const VertexType &v : vertices) {                
                 Vector3 pos;
                 if constexpr (VertexType::template holds<Render::VertexPos_3D>)
                     pos = v.mPos;
@@ -60,7 +63,7 @@ namespace Resources {
         }
 
         template <typename VertexType>
-        bool generate(MeshData &mesh, size_t groupSize, VertexType *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0, const Filesystem::Path &texturePath = {})
+        bool generate(MeshData &mesh, size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {})
         {
             std::vector<std::optional<Render::AttributeDescriptor>> attributeList;
 
@@ -89,18 +92,20 @@ namespace Resources {
             else
                 attributeList.emplace_back();
 
-            return generateImpl(mesh, attributeList, calculateAABB(vertices, vertexCount), groupSize, vertices, vertexCount, sizeof(VertexType), indices, indexCount, texturePath);
+			AABB aabb = calculateAABB(vertices);
+            return generateImpl(mesh, attributeList, std::move(aabb), groupSize, std::move(vertices), sizeof(VertexType), std::move(indices), texturePath);
         }
 
-        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<Render::AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices = nullptr, size_t indexCount = 0, const Filesystem::Path &texturePath = {}) = 0;
+        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<Render::AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {}) = 0;
 
         template <typename VertexType>
-        void update(MeshData &data, size_t groupSize, VertexType *vertices, size_t vertexCount, unsigned short *indices = nullptr, size_t indexCount = 0)
+        void update(MeshData &mesh, size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {})
         {
-            updateImpl(data, calculateAABB(vertices, vertexCount), groupSize, vertices, vertexCount, sizeof(VertexType), indices, indexCount);
+            AABB aabb = calculateAABB(vertices);
+            updateImpl(mesh, std::move(aabb), groupSize, std::move(vertices), sizeof(VertexType), std::move(indices));
         }
 
-        virtual void updateImpl(MeshData &data, const AABB &bb, size_t groupSize, const void *vertices, size_t vertexCount, size_t vertexSize, unsigned short *indices = nullptr, size_t indexCount = 0) = 0;
+        virtual void updateImpl(MeshData &mesh, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}) = 0;
 
         virtual void resetImpl(MeshData &mesh) = 0;
     };

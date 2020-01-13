@@ -5,75 +5,66 @@
 
 #include "workgroupstorage.h"
 #include "workgroup.h"
+#include "globalvariablemanager.h"
 
 
 namespace Engine {
 namespace Threading {
 
-    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sWorkgroupLocalBssConstructors()
+    static std::vector<GlobalVariableManager> &sWorkgroupLocalBssConstructors()
     {
-        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
+        static std::vector<GlobalVariableManager> dummy;
         return dummy;
     }
 
-    static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &sWorkgroupLocalObjectConstructors()
+    static std::vector<GlobalVariableManager> &sWorkgroupLocalObjectConstructors()
     {
-        static std::vector<std::pair<std::function<Any()>, std::vector<Any>>> dummy;
+        static std::vector<GlobalVariableManager> dummy;
         return dummy;
     }
 
     int WorkGroupStorage::registerLocalBssVariable(std::function<Any()> ctor)
     {
-        sWorkgroupLocalBssConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
+        sWorkgroupLocalBssConstructors().emplace_back(std::move(ctor));
         return -static_cast<int>(sWorkgroupLocalBssConstructors().size());
     }
 
     void WorkGroupStorage::unregisterLocalBssVariable(int index)
     {
-        sWorkgroupLocalBssConstructors()[-(index + 1)] = {};
+        sWorkgroupLocalBssConstructors()[-(index + 1)].reset();
     }
 
     int WorkGroupStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
-        sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor), std::vector<Any> {});
+        sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor));
         return sWorkgroupLocalObjectConstructors().size() - 1;
     }
 
     void WorkGroupStorage::unregisterLocalObjectVariable(int index)
     {
-        sWorkgroupLocalObjectConstructors()[index] = {};
+        sWorkgroupLocalObjectConstructors()[index].reset();
     }
 
     const Any &WorkGroupStorage::localVariable(int index)
     {
         size_t selfIndex = WorkGroup::self().mInstanceCounter;
-        std::vector<std::pair<std::function<Any()>, std::vector<Any>>> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
+        std::vector<GlobalVariableManager> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
         if (index < 0)
             index = -(index + 1);
-        std::pair<std::function<Any()>, std::vector<Any>> &p = constructors[index];
-        if (p.second.size() <= selfIndex)
-            p.second.resize(selfIndex + 1);
-        if (!p.second[selfIndex])
-            p.second[selfIndex] = p.first();
-        return p.second.at(selfIndex);
+        GlobalVariableManager &m = constructors[index];
+        return m[selfIndex];
     }
 
     void WorkGroupStorage::init(bool bss)
     {
         size_t selfIndex = WorkGroup::self().mInstanceCounter;
         if (bss) {
-            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalBssConstructors()) {
-                if (p.second.size() <= selfIndex)
-                    p.second.resize(selfIndex + 1);
-                if (!p.second[selfIndex])
-                    p.second[selfIndex] = p.first();
+            for (GlobalVariableManager &m : sWorkgroupLocalBssConstructors()) {
+                m[selfIndex];
             }
         } else {
-            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalObjectConstructors()) {
-                if (p.second.size() <= selfIndex)
-                    p.second.resize(selfIndex + 1);
-                if (!p.second[selfIndex])
-                    p.second[selfIndex] = p.first();
+            for (GlobalVariableManager &m : sWorkgroupLocalObjectConstructors()) {
+                m[selfIndex];
             }
         }
     }
@@ -82,14 +73,12 @@ namespace Threading {
     {
         size_t selfIndex = WorkGroup::self().mInstanceCounter;
         if (bss) {
-            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalBssConstructors()) {
-                if (p.second.size() > selfIndex)
-                    p.second[selfIndex] = {};
+            for (GlobalVariableManager &m : sWorkgroupLocalBssConstructors()) {
+                m.remove(selfIndex);
             }
         } else {
-            for (std::pair<std::function<Any()>, std::vector<Any>> &p : sWorkgroupLocalObjectConstructors()) {
-                if (p.second.size() > selfIndex)
-                    p.second[selfIndex] = {};
+            for (GlobalVariableManager &m : sWorkgroupLocalObjectConstructors()) {
+                m.remove(selfIndex);
             }
         }
     }

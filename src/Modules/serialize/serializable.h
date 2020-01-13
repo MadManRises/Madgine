@@ -4,10 +4,11 @@ namespace Engine {
 namespace Serialize {
 
     struct SerializableBase {
-        void applySerializableMap(const std::map<size_t, SerializableUnitBase *> &map) {};
-        void setDataSynced(bool b) {};
+        void applySerializableMap(SerializeInStream &in) {}
+        void setDataSynced(bool b) {}
+        void setActive(bool active, bool existenceChange) {}
 
-        void writeCreationData(SerializeOutStream &) const {};
+        void writeCreationData(SerializeOutStream &) const {}
     };
 
     template <typename OffsetPtr>

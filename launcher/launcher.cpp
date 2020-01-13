@@ -28,7 +28,7 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
 {
     if (!toolMode) {
         FIX_LOCAL Engine::App::AppSettings settings;
-        settings.mRunMain = false;
+
         settings.mAppName = "Madgine Client";
         FIX_LOCAL Engine::App::Application app { settings };
 

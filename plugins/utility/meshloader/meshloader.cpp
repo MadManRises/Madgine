@@ -9,8 +9,6 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
-#include "meshdata.h"
-
 
 #include "Modules/render/vertex.h"
 
@@ -89,7 +87,7 @@ RegisterType(Engine::Resources::MeshLoader)
                 }
             }
 
-            return loader.generate(mesh, 3, vertices.data(), vertices.size(), indices.data(), indices.size(), texturePath);
+            return loader.generate(mesh, 3, std::move(vertices), std::move(indices), texturePath);
         }
 
         bool MeshLoader::loadImpl(MeshData &mesh, ResourceType *res)

@@ -22,6 +22,8 @@
 
 #include "vertex.h"
 
+#include "Modules/serialize/serializableunit.h"
+
 namespace Engine {
 namespace Widgets {
     class MADGINE_WIDGETS_EXPORT WidgetBase : public ScopeBase,

@@ -10,12 +10,16 @@ namespace Engine {
 namespace Serialize {
 
     struct MODULES_EXPORT SerializeManager {
+
+		static constexpr ParticipantId sLocalMasterParticipantId = 1;
+
         SerializeManager(const std::string &name);
         SerializeManager(const SerializeManager &) = delete;
         SerializeManager(SerializeManager &&) noexcept;
         ~SerializeManager();
 
         const SerializableUnitMap &slavesMap() const;
+        const SerializableUnitMap &mastersMap() const;
 
         void addSlaveMapping(SerializableUnitBase *item);
         void removeSlaveMapping(SerializableUnitBase *item);
@@ -41,7 +45,10 @@ namespace Serialize {
 
         static ParticipantId createStreamId();
 
+		SerializableUnitBase *getByMasterId(size_t unit);
+
     private:
+
         SerializableUnitMap mSlaveMappings;        
 
 		SerializeStreambuf *mSlaveStreambuf = nullptr;

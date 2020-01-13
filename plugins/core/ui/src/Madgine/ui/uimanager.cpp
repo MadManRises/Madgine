@@ -58,12 +58,6 @@ namespace UI {
 
         markInitialized();
 
-        if (App::Application::getSingleton().settings().mRunMain) {
-            /*std::optional<Scripting::ArgumentList> res = app(false).callMethodIfAvailable("afterViewInit", {});
-				if (res && !res->empty() && (!res->front().is<bool>() || !res->front().as<bool>()))
-					return false;*/
-        }
-
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
             if (!handler->callInit())
                 return false;

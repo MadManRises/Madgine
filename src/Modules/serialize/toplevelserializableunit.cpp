@@ -9,24 +9,28 @@ namespace Engine {
 namespace Serialize {
     TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId)
         : SerializableUnitBase(staticId)
-        , mSlaveManager(nullptr)
         , mStaticSlaveId(staticId)
     {
         assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
     }
 
     TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other)
-        : SerializableUnitBase(other.masterId())
+        : SerializableUnitBase()
         , mSlaveManager(nullptr)
         , mStaticSlaveId(other.mStaticSlaveId)
     {
     }
 
     TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept
-        : SerializableUnitBase(other.masterId())
-        , mSlaveManager(nullptr)
+        : SerializableUnitBase(other.moveMasterId())
         , mStaticSlaveId(other.mStaticSlaveId)
     {
+        if (other.mSlaveManager) {
+            other.mSlaveManager->moveTopLevelItem(&other, this);
+        }
+        while (!other.mMasterManagers.empty()) {
+            other.mMasterManagers.front()->moveTopLevelItem(&other, this);
+        }
     }
 
     TopLevelSerializableUnitBase::~TopLevelSerializableUnitBase()
@@ -39,16 +43,6 @@ namespace Serialize {
         }
     }
 
-    void TopLevelSerializableUnitBase::copyStaticSlaveId(const TopLevelSerializableUnitBase &other)
-    {
-        mStaticSlaveId = other.mStaticSlaveId;
-    }
-
-    /*bool TopLevelSerializableUnitBase::isMaster() const
-		{
-			return mSlaveManager == nullptr;
-		}*/
-
     ParticipantId TopLevelSerializableUnitBase::participantId() const
     {
         return SyncManager::getParticipantId(mSlaveManager);
@@ -57,7 +51,7 @@ namespace Serialize {
     void TopLevelSerializableUnitBase::setStaticSlaveId(
         size_t staticId)
     {
-        assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
+        assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE /* && staticId < RESERVED_ID_COUNT*/));
         mStaticSlaveId = staticId;
     }
 

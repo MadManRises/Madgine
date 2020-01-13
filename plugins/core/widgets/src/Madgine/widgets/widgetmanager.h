@@ -18,7 +18,7 @@
 namespace Engine {
 namespace Widgets {
 
-    struct MADGINE_WIDGETS_EXPORT WidgetManager : Serialize::SerializableUnit<WidgetManager, GUI::TopLevelWindowComponent<WidgetManager>>,
+    struct MADGINE_WIDGETS_EXPORT WidgetManager : GUI::TopLevelWindowComponent<WidgetManager>,
                                                  Render::RenderPass {
 
         SERIALIZABLEUNIT;

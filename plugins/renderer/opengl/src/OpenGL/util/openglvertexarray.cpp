@@ -58,6 +58,11 @@ namespace Render {
         return *this;
     }
 
+    OpenGLVertexArray::operator bool() const
+    {
+        return mHandle != 0;
+    }
+
     unsigned int OpenGLVertexArray::getCurrent()
     {
 #if !OPENGL_ES

@@ -54,6 +54,7 @@ namespace Tools {
 
     void SceneEditor::render()
     {
+        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
         if (mHierarchyVisible)
             renderHierarchy();
         renderSelection();

@@ -5,6 +5,9 @@
 #include "glyph.h"
 
 namespace Engine {
+namespace Render {
+    struct Texture;
+}
 namespace Font {
 
     struct Font {
@@ -13,7 +16,6 @@ namespace Font {
 
         std::array<Glyph, 128> mGlyphs;
     };
-
 
 }
 }

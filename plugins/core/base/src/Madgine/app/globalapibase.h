@@ -6,53 +6,29 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-namespace Engine
-{
-	namespace App
-	{
-		class MADGINE_BASE_EXPORT GlobalAPIBase : public MadgineObject, public ScopeBase
-		{
-		public:
-			GlobalAPIBase(App::Application &app);
+namespace Engine {
+namespace App {
+    class MADGINE_BASE_EXPORT GlobalAPIBase : public MadgineObject, public ScopeBase {
+    public:
+        GlobalAPIBase(App::Application &app);
 
+        template <class T>
+        T &getGlobalAPIComponent(bool init = true)
+        {
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
+        }
 
-			template <class T>
-			T &getGlobalAPIComponent(bool init = true)
-			{
-				return static_cast<T&>(getGlobalAPIComponent(component_index<T>(), init));
-			}
+        GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-			GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        GlobalAPIBase &getSelf(bool = true);
 
+        virtual const MadgineObject *parent() const override;
 
-			//Scripting::GlobalScopeBase &globalScope();
+    protected:
+        bool init() override;
+        void finalize() override;
 
-			GlobalAPIBase &getSelf(bool = true);
-		
-			//virtual App::Application &app(bool = true) override;
-			virtual const MadgineObject *parent() const override;
-
-			/*template <class T>
-			T &getGuiHandler()
-			{
-				return static_cast<T&>(getGuiHandler(T::component_index()));
-			}
-
-			UI::GuiHandlerBase &getGuiHandler(size_t i);
-
-			template <class T>
-			T &getGameHandler()
-			{
-				return static_cast<T&>(getGameHandler(T::component_index()));
-			}
-
-			UI::GameHandlerBase &getGameHandler(size_t i);*/
-
-		protected:
-			bool init() override;
-			void finalize() override;
-
-			App::Application & mApp;
-		};
-	}
+        App::Application &mApp;
+    };
+}
 }

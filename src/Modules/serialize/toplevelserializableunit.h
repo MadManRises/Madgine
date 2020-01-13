@@ -11,8 +11,6 @@ namespace Serialize {
         TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept;
         ~TopLevelSerializableUnitBase();
 
-        void copyStaticSlaveId(const TopLevelSerializableUnitBase &other);
-
         BufferedOutStream *getSlaveMessageTarget() const;
 
         const std::vector<SyncManager *> &getMasterManagers() const;
@@ -23,7 +21,6 @@ namespace Serialize {
 
         bool updateManagerType(SyncManager *mgr, bool isMaster);
 
-        //bool isMaster() const;
         ParticipantId participantId() const;
 
         void setStaticSlaveId(size_t staticId);
@@ -33,7 +30,7 @@ namespace Serialize {
 
     private:
         std::vector<SyncManager *> mMasterManagers;
-        SyncManager *mSlaveManager;
+        SyncManager *mSlaveManager = nullptr;
         size_t mStaticSlaveId;
     };
 

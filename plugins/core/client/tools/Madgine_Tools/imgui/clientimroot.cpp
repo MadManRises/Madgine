@@ -9,6 +9,8 @@
 
 #include "im3d/im3d.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
@@ -25,6 +27,9 @@
 METATABLE_BEGIN(Engine::Tools::ClientImRoot)
 MEMBER(mRoot)
 METATABLE_END(Engine::Tools::ClientImRoot)
+
+SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
+SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
 
 RegisterType(Engine::Tools::ClientImRoot);
 
@@ -115,8 +120,8 @@ namespace Tools {
     }
 
     ClientImRoot::ClientImRoot(GUI::TopLevelWindow &window)
-        : VirtualUniqueComponentBase(window, 80)
-        , mRoot(this)
+        : SerializableUnit(window, 80)
+        , mRoot(this, &window)
     {
     }
 

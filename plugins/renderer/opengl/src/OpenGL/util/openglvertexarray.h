@@ -20,6 +20,8 @@ namespace Render {
 
         OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
 
+		operator bool() const;
+
         static unsigned int getCurrent();
 
         void reset();

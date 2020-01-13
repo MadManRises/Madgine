@@ -20,7 +20,7 @@ namespace Serialize {
             return true;
         }
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, T &item)
+        static void applyMap(SerializeInStream &in, T &item)
         {
         }
 
@@ -47,12 +47,12 @@ namespace Serialize {
     template <class T>
     struct UnitHelper<T *, true> : public UnitHelperBase<T *> {        
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, T *&item)
+        static void applyMap(SerializeInStream &in, T *&item)
         {
             size_t id = reinterpret_cast<size_t>(item);
             if (id & 0x1) {
                 id >>= 1;
-                item = static_cast<T *>(map.at(id));
+                item = static_cast<T *>(in.convertPtr(id));
             }
         }
     };
@@ -70,9 +70,9 @@ namespace Serialize {
             return UnitHelper<T>::filter(out, *item);
         }
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, const std::unique_ptr<T, D> &item)
+        static void applyMap(SerializeInStream &in, const std::unique_ptr<T, D> &item)
         {
-            UnitHelper<T>::applyMap(map, *item);
+            UnitHelper<T>::applyMap(in, *item);
         }
 
         static void setParent(std::unique_ptr<T, D> &item, SerializableUnitBase *parent)
@@ -107,9 +107,9 @@ namespace Serialize {
 
         static bool filter(SerializeOutStream &out, const SerializableBase &item);
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableUnitBase &item);
+        static void applyMap(SerializeInStream &in, SerializableUnitBase &item);
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, SerializableBase &item);
+        static void applyMap(SerializeInStream &in, SerializableBase &item);
 
         static void setParent(SerializableUnitBase &item, SerializableUnitBase *parent);
 
@@ -125,9 +125,15 @@ namespace Serialize {
     template <class T>
     struct UnitHelper<T, false> : public CopyTraits<T>, public SerializeUnitHelper {
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, T &item)
+        static void applyMap(SerializeInStream &in, T &item)
         {
-            item.applySerializableMap(map);
+            if constexpr (std::is_convertible_v<T &, SerializableBase &> || std::is_convertible_v<T &, SerializableUnitBase &>) {
+                item.applySerializableMap(in);
+            } else if constexpr (is_iterable_v<T>) {
+                for (auto &t : item) {
+                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
+				}
+			}
         }
 
         static void write_creation(SerializeOutStream &out, const T &item)
@@ -162,10 +168,10 @@ namespace Serialize {
             return UnitHelper<U>::filter(out, item.first) && UnitHelper<V>::filter(out, item.second);
         }
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, std::pair<U, V> &item)
+        static void applyMap(SerializeInStream &in, std::pair<U, V> &item)
         {
-            UnitHelper<U>::applyMap(map, item.first);
-            UnitHelper<V>::applyMap(map, item.second);
+            UnitHelper<U>::applyMap(in, item.first);
+            UnitHelper<V>::applyMap(in, item.second);
         }
 
         static void setParent(std::pair<U, V> &item, SerializableUnitBase *parent)
@@ -222,11 +228,13 @@ namespace Serialize {
             return true;
         }
 
-        static void applyMap(const std::map<size_t, SerializableUnitBase *> &map, Tuple &item)
+        static void applyMap(SerializeInStream &in, Tuple &item)
         {
-            (void)unpacker {
-                (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::applyMap(map, std::get<Is>(item)), true)...
-            };
+            if constexpr (!std::is_same_v<Tuple, std::tuple<>>) {
+                (void)unpacker {
+                    (UnitHelper<typename std::tuple_element<Is, Tuple>::type>::applyMap(in, std::get<Is>(item)), true)...
+                };
+            }
         }
 
         static void setParent(Tuple &item, SerializableUnitBase *parent)

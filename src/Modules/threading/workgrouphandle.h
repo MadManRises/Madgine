@@ -2,72 +2,67 @@
 
 #if ENABLE_THREADING
 
-#include "workgroup.h"
-#include "../generic/tupleunpacker.h"
+#    include "../generic/tupleunpacker.h"
+#    include "workgroup.h"
 
-namespace Engine
-{
-	namespace Threading
-	{
-	
-		struct WorkGroupHandle
-		{
-			WorkGroupHandle() = default;
+namespace Engine {
+namespace Threading {
 
-			template <typename F, typename... Args>
-			WorkGroupHandle(F&& main, Args&&... args)				
-			{				
-				std::promise<int> p;
-				mResult = p.get_future();
-				mThread = std::thread(&WorkGroupHandle::threadMain<F, Args...>, std::move(p), std::forward<F>(main), std::forward<Args>(args)...);
-			}
+    struct WorkGroupHandle {
+        WorkGroupHandle() = default;
+        WorkGroupHandle(const WorkGroupHandle &) = delete;
 
-			~WorkGroupHandle() 
-			{
-				if (mThread.joinable())
-				{					
-					mThread.join();
-					mResult.get();
-				}
-			}
+        template <typename F, typename... Args>
+        WorkGroupHandle(F &&main, Args &&... args)
+        {
+            std::promise<int> p;
+            mResult = p.get_future();
+            mThread = std::thread(&WorkGroupHandle::threadMain<F, Args...>, std::move(p), std::forward<F>(main), std::forward<Args>(args)...);
+        }
 
-			WorkGroupHandle &operator= (WorkGroupHandle &&other)
-			{
-				assert(!mThread.joinable());
-				mResult = std::move(other.mResult);
-				mThread = std::move(other.mThread);
-				return *this;
-			}
+        ~WorkGroupHandle()
+        {
+            if (mThread.joinable()) {
+                mThread.join();
+                mResult.get();
+            }
+        }
 
-			void detach()
-			{
-				assert(mThread.joinable());
-				mThread.detach();
-			}
+        WorkGroupHandle &operator=(WorkGroupHandle &&other)
+        {
+            assert(!mThread.joinable());
+            mResult = std::move(other.mResult);
+            mThread = std::move(other.mThread);
+            return *this;
+        }
 
-		private:
-			template <typename F, typename... Args>
-			static void threadMain(std::promise<int> p, F&& main, Args&&... args)
-			{
-				WorkGroup group;
-				try {
-					int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., group);
-					p.set_value(result);
-				}
-				catch (std::exception &e)
-				{
-					LOG_ERROR("Uncaught Exception in Workgroup-MainThread!");
-					LOG_EXCEPTION(e);
-					throw;
-				}
-			}
+        void detach()
+        {
+            assert(mThread.joinable());
+            mThread.detach();
+        }
 
-		private:
-			std::future<int> mResult;
-			std::thread mThread;			
-		};
+    private:
+        template <typename F, typename... Args>
+        static void threadMain(std::promise<int> p, F &&main, Args &&... args)
+        {
+            WorkGroup group;
+            try {
+                int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., group);
+                p.set_value(result);
+            } catch (std::exception &e) {
+                LOG_ERROR("Uncaught Exception in Workgroup-MainThread!");
+                LOG_EXCEPTION(e);
+                throw;
+            }
+        }
 
-	}
+    private:
+        std::future<int> mResult;
+        std::thread mThread;
+    };
+
+}
 }
 
 #endif

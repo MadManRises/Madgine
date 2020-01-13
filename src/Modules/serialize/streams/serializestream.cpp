@@ -15,6 +15,12 @@
 namespace Engine {
 namespace Serialize {
 
+    SerializeInStream::SerializeInStream()
+        : mLog(*this)
+    {
+        format().setupStream(mStream);
+    }
+
     SerializeInStream::SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer)
         : InStream(std::move(buffer))
         , mLog(*this)
@@ -245,6 +251,12 @@ namespace Serialize {
     SerializeStreambuf &SerializeInStream::buffer() const
     {
         return static_cast<SerializeStreambuf &>(InStream::buffer());
+    }
+
+    SerializeOutStream::SerializeOutStream()
+        : mLog(*this)
+    {
+        format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer)

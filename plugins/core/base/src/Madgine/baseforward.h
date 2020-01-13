@@ -15,9 +15,4 @@ namespace Engine
 		class Root;
 	}
 
-	namespace Server
-	{
-		class ServerBase;
-	}
-
 }

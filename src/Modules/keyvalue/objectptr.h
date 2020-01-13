@@ -4,7 +4,7 @@
 namespace Engine {
 
 struct MODULES_EXPORT ObjectPtr {
-public:
+
     ObjectPtr();
     ObjectPtr(const std::shared_ptr<ObjectInstance> &instance);
 

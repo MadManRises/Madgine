@@ -139,7 +139,7 @@ protected:
             if constexpr (is_instance_v<C, std::vector>) {
                 this->reserve(info->mBaseIndex + vals.size());
             }
-            for (F f : vals) {
+            for (const F &f : vals) {
                 value_type p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
                 traits::emplace(*this, Container::end(), std::move(p));

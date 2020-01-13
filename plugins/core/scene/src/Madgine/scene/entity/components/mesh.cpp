@@ -79,6 +79,7 @@ PROPERTY(Mesh, get, set)
 METATABLE_END(Engine::Scene::Entity::Mesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
+ENCAPSULATED_FIELD(Mesh, getName, setName)
 SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
 
 RegisterType(Engine::Scene::Entity::Mesh);

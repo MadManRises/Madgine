@@ -13,7 +13,7 @@ namespace Serialize {
 		void (*mReadAction)(SerializableUnitBase *, SerializeInStream &);
         void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &);
 
-		void (*mApplySerializableMap)(SerializableUnitBase *, const std::map<size_t, SerializableUnitBase *> &);
+		void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &);
         void (*mSetDataSynced)(SerializableUnitBase *, bool);
         void (*mSetActive)(SerializableUnitBase *, bool, bool);
     };

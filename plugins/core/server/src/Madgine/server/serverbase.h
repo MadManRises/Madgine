@@ -2,48 +2,42 @@
 
 #if ENABLE_THREADING
 
-#include "serverlog.h"
-#include "Modules/keyvalue/scopebase.h"
+#    include "Modules/keyvalue/scopebase.h"
+#    include "serverlog.h"
 
-#include "serverappinstance.h"
-#include "Modules/signalslot/taskqueue.h"
+#    include "Modules/signalslot/taskqueue.h"
+#    include "serverinstance.h"
 
+namespace Engine {
+namespace Server {
+    struct MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public SignalSlot::TaskQueue {    
+        ServerBase(Threading::WorkGroup &workgroup);
+        virtual ~ServerBase();
 
-namespace Engine
-{
-	namespace Server
-	{
-    class MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public SignalSlot::TaskQueue
-		{
-		public:
-			ServerBase(Threading::WorkGroup &workgroup);
-			virtual ~ServerBase();
+        ServerLog &log();
 
-			ServerLog& log();		
+        void shutdown();
 
-			void shutdown();
+    protected:
+        virtual void performCommand(const std::string &cmd);
 
-		protected:
+        template <class T>
+        void spawnInstance(T &&init)
+        {
+            mInstances.emplace_back(std::forward<T>(init));
+        }
 
-			virtual void performCommand(const std::string& cmd);
+        void consoleCheck();
 
-			template <class T>
-			void spawnInstance(T&& init, const App::AppSettings &settings = {})
-			{
-				mInstances.emplace_back(std::forward<T>(init), settings);
-			}
+    private:
+        ServerLog mLog;
 
-			void consoleCheck();
+        std::list<ServerInstance> mInstances;
 
-		private:
-			ServerLog mLog;
+        std::chrono::steady_clock::time_point mLastConsoleCheck;
+    };
 
-			std::list<ServerAppInstance> mInstances;	
-
-			std::chrono::steady_clock::time_point mLastConsoleCheck;
-		};
-
-	}
+}
 }
 
 #endif

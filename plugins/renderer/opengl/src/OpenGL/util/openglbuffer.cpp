@@ -61,7 +61,7 @@ namespace Render {
     void OpenGLBuffer::setData(GLenum target, GLsizei size, const void *data)
     {
         bind(target);
-        glBufferData(target, size, data, GL_STATIC_DRAW);
+        glBufferData(target, size, data, GL_STATIC_DRAW); 
         GL_CHECK();
     }
 

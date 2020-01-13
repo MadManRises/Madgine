@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../generic/any.h"
-#include "../generic/tupleunpacker.h"
 #include "../generic/proxy.h"
+#include "../generic/tupleunpacker.h"
 
 namespace Engine {
 namespace Threading {
@@ -42,7 +42,11 @@ namespace Threading {
 
         T *operator&() { return &data(); }
 
-        void operator=(const T &t) { data() = t; }
+        Global<T, Storage> &operator=(const T &t)
+        {
+            data() = t;
+            return *this;
+        }
 
         T &data() { return Storage::localVariable(mIndex).template as<T>(); }
 
@@ -78,7 +82,6 @@ namespace Threading {
     private:
         int mIndex;
     };
-
 
 } // namespace Threading
 } // namespace Engine

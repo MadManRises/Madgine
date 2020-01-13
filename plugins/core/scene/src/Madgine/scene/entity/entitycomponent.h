@@ -30,11 +30,6 @@ namespace Scene {
                 return _componentName<T>();
 			}
 
-        private:
-            void writeCreationData(Serialize::SerializeOutStream &out) const
-            {
-                out << componentName();
-            }
         };
 
 #define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, ...) \

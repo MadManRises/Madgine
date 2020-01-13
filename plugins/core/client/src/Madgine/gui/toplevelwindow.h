@@ -149,7 +149,7 @@ namespace GUI {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        OFFSET_CONTAINER(mComponents, TopLevelWindowContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
+        OFFSET_CONTAINER(mComponents, TopLevelWindowComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
 
         Threading::FrameLoop mLoop;
 

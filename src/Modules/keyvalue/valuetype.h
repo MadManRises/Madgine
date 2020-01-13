@@ -2,11 +2,11 @@
 
 #include "../generic/templates.h"
 
+#include "../math/matrix3.h"
 #include "../math/quaternion.h"
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector4.h"
-#include "../math/matrix3.h"
 
 #include "boundapimethod.h"
 
@@ -38,8 +38,7 @@ struct MODULES_EXPORT ValueType {
         KeyValueVirtualIterator,
         BoundApiMethod,
         ApiMethod,
-        ObjectPtr
-        >;
+        ObjectPtr>;
 
 private:
     template <class T>
@@ -73,7 +72,7 @@ public:
     struct isValueType {
         const constexpr static bool value = _isValueType<std::decay_t<T>>::value
             || std::is_enum<T>::value
-            || std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>;
+            || (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>> && std::is_pointer_v<std::remove_reference_t<T>>);
     };
 
     ValueType()
@@ -166,7 +165,7 @@ public:
             case Type::StringValue:
                 return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
             default:
-                throw  ValueTypeException(Database::Exceptions::invalidValueType);
+                throw ValueTypeException(Database::Exceptions::invalidValueType);
             }
         case Type::IntValue:
             switch (other.type()) {
@@ -175,10 +174,10 @@ public:
             case Type::FloatValue:
                 return std::get<int>(mUnion) < std::get<float>(other.mUnion);
             default:
-                throw  ValueTypeException(Database::Exceptions::invalidValueType);
+                throw ValueTypeException(Database::Exceptions::invalidValueType);
             }
         default:
-            throw  ValueTypeException(Database::Exceptions::invalidValueType);
+            throw ValueTypeException(Database::Exceptions::invalidValueType);
         }
     }
 
@@ -239,7 +238,7 @@ public:
             }
             break;
         default:
-            throw  ValueTypeException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
+            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
         }
     }
 
@@ -359,8 +358,9 @@ public:
     {
         if constexpr (_isValueType<std::decay_t<T>>::value) {
             return std::holds_alternative<std::decay_t<T>>(mUnion);
-        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
-            return std::holds_alternative<TypedScopePtr>(mUnion) && std::get<TypedScopePtr>(mUnion).mType->isDerivedFrom<std::remove_pointer_t<T>>();
+        } else if constexpr (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>) {
+            static_assert(!std::is_reference_v<T>, "References are currently not supported!");
+            return std::holds_alternative<TypedScopePtr>(mUnion) && std::get<TypedScopePtr>(mUnion).mType->isDerivedFrom<std::remove_pointer_t<std::remove_reference_t<T>>>();
         } else if constexpr (std::is_same_v<T, ValueType>) {
             return true;
         } else if constexpr (std::is_enum_v<T>) {
@@ -380,8 +380,13 @@ public:
                 throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
                     getTypeString(
                         static_cast<Type>(variant_index<Union, std::decay_t<T>>::value))));
-        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<ScopeBase, std::remove_pointer_t<T>>) {
-            return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
+        } else if constexpr (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>) {
+            if constexpr (std::is_pointer_v<T>) {
+                return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
+            } else {
+                static_assert(dependent_bool<T, false>::value, "References are currently not supported!");
+                return *std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
+            }
         } else if constexpr (std::is_same_v<T, ValueType>) {
             return *this;
         } else if constexpr (std::is_enum_v<T>) {

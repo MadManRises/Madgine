@@ -17,12 +17,6 @@
 namespace Engine {
 namespace Serialize {
 
-    std::mutex sMasterMappingMutex;
-    std::map<size_t, SerializableUnitBase *> sMasterMappings;
-    size_t sNextUnitId = RESERVED_ID_COUNT;
-    static ParticipantId sLocalMasterParticipantId = 1;
-    std::atomic<ParticipantId> sRunningStreamId = sLocalMasterParticipantId;
-
     SyncManager::SyncManager(const std::string &name)
         : SerializeManager(name)
         , mReceivingMasterState(false)
@@ -86,7 +80,6 @@ namespace Serialize {
                 break;
             case STATE:
                 object->readState(stream);
-                object->applySerializableMap(slavesMap());
                 break;
             default:
                 throw SerializeException("Invalid Message-Type: " + std::to_string(header.mType));
@@ -367,11 +360,7 @@ namespace Serialize {
                     }
                     return *it;
                 } else {
-                    SerializableUnitBase *u;
-                    {
-                        std::lock_guard guard(sMasterMappingMutex);
-                        u = sMasterMappings.at(unit);
-                    }
+                    SerializableUnitBase *u = getByMasterId(unit);
                     if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end()) {
                         throw SerializeException(
                             "Illegal Toplevel-Id used! Possible configuration "

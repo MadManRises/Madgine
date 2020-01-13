@@ -4,6 +4,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "texture.h"
+
 namespace Engine {
 namespace Render {
 
@@ -17,9 +19,9 @@ namespace Render {
 
     struct Texture;
 
-    struct MADGINE_TEXTURELOADER_EXPORT TextureLoader : Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::vector<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct MADGINE_TEXTURELOADER_EXPORT TextureLoader : Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
 
-        using Base = Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::vector<Placeholder<0>>, Threading::WorkGroupStorage>;
+        using Base = Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
         struct MADGINE_TEXTURELOADER_EXPORT HandleType : Base::HandleType {
 
