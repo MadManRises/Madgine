@@ -1,10 +1,8 @@
 #pragma once
 
-
 namespace Engine {
 
-	
-    template <typename T, bool simplifyPointer = true>
+template <typename T, bool simplifyPointer = true>
 struct Proxy {
 
     template <typename... Args>
@@ -21,7 +19,11 @@ struct Proxy {
 
     operator T &() { return mData; }
 
-    void operator=(const T &t) { mData = t; }
+    Proxy<T, simplifyPointer> &operator=(const T &t)
+    {
+        mData = t;
+        return *this;
+    }
 
 private:
     T mData;
@@ -43,11 +45,14 @@ struct Proxy<T *, true> {
 
     operator T *() { return mPtr; }
 
-    void operator=(T *t) { mPtr = t; }
+    Proxy<T *, true> &operator=(T *t)
+    {
+        mPtr = t;
+        return *this;
+    }
 
 private:
     T *mPtr;
 };
-
 
 }
