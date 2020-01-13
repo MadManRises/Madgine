@@ -4,7 +4,6 @@
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/plugins/pluginlistener.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
-#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "resourceloadercollector.h"
 
 namespace Engine {

@@ -16,6 +16,8 @@ namespace Serialize {
 
         virtual ~buffered_streambuf();
 
+		SyncManager *manager();
+
         virtual bool isClosed();
         virtual void close(StreamError cause = NO_ERROR);
 
@@ -29,6 +31,7 @@ namespace Serialize {
         int sendMessages();
 
         StreamError closeCause() const;
+
 
     protected:
         virtual StreamError getError() = 0;
@@ -48,8 +51,6 @@ namespace Serialize {
         int sync() override;
         void extend();
         void receive();
-
-        SyncManager *manager();
 
     private:
         bool mIsClosed;

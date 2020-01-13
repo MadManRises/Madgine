@@ -7,7 +7,6 @@
 
 #include "Modules/generic/transformIt.h"
 
-#include "Modules/generic/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/toplevelserializableunit.h"
 
@@ -26,6 +25,8 @@
 #include "Modules/keyvalue/scopebase.h"
 
 #include "Modules/madgineobject/madgineobject.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 namespace Engine {
 namespace GUI {

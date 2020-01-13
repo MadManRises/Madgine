@@ -4,6 +4,7 @@
 
 #    include "../tinyxml/tinyxml2.h"
 #    include "../toolscollector.h"
+#    include "Modules/threading/slot.h"
 
 namespace Engine {
 namespace Tools {
@@ -14,7 +15,7 @@ namespace Tools {
 
         virtual void render() override;
 
-		virtual bool init() override;
+        virtual bool init() override;
 
         const char *key() const override;
 

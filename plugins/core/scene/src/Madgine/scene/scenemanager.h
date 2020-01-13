@@ -9,7 +9,6 @@
 #include "entity/entity.h"
 
 #include "Madgine/app/globalapicollector.h"
-#include "Modules/generic/observablecontainer.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 

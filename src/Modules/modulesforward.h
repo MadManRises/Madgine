@@ -22,6 +22,7 @@ struct ObjectFieldAccessor;
 struct IndexHolder;
 
 struct UniqueComponentCollectorManager;
+
 struct ComponentRegistryBase;
 
 struct InStream;

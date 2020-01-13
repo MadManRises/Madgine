@@ -8,6 +8,10 @@
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 
+#include "Modules/keyvalue/typedscopeptr.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
+
 struct ImGuiDockNode;
 
 namespace Engine {

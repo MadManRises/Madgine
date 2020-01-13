@@ -1,15 +1,12 @@
 #pragma once
 
 #include "Madgine/threading/framelistener.h"
-#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "gamehandler.h"
 #include "guihandler.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
 #include "Madgine/gui/toplevelwindowcomponentcollector.h"
-
-#include "Modules/generic/observablecontainer.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 

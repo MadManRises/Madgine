@@ -10,8 +10,6 @@
 
 #include "../keyvalue/typedscopeptr.h"
 
-#include "../threading/defaulttaskqueue.h"
-
 #include "../generic/templates.h"
 
 
