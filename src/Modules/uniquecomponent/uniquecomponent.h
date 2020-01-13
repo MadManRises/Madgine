@@ -6,9 +6,9 @@
 
 namespace Engine {
 
-template <typename T, typename Base>
+template <typename T, typename Base, typename _VBase = Base>
 struct VirtualUniqueComponentImpl : Base {
-    using VBase = typename Base::Collector::Base;
+    using VBase = _VBase;
     using Base::Base;
 
     struct Inner {
@@ -72,7 +72,7 @@ size_t component_index()
 #else
 
 namespace Engine {
-template <class T, class Base>
+template <class T, class Base, typename _VBase = Base>
 struct VirtualUniqueComponentImpl : Base {
 	using Base::Base;
 };

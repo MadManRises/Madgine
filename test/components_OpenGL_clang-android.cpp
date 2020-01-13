@@ -1,6 +1,9 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_Tools
-#    include "toolslib.h"
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
+#endif
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
@@ -8,32 +11,29 @@
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
 #endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
-#endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
 #endif
-#ifdef BUILD_SceneRendererTools
-#    include "Madgine_Tools/scenerenderertoolslib.h"
+#ifdef BUILD_AndroidInput
+#    include "androidinputlib.h"
+#endif
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
-#endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
-#endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
-#endif
-#ifdef BUILD_AndroidInput
-#    include "androidinputlib.h"
-#endif
-#ifdef BUILD_OpenGLTools
-#    include "OpenGL_Tools/opengltoolslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
@@ -48,7 +48,7 @@
 #    include "Madgine/scene/scenemanager.h"
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/gui/toplevelwindowcomponent.h"
+#    include "Madgine/gui/toplevelwindowcomponentcollector.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/imgui/openglimroot.h"
@@ -202,7 +202,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
+const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowComponentCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_OpenGLTools
@@ -219,7 +219,7 @@ const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollect
 	return dummy;
 }
 template <>
-std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
+std::vector<Engine::GUI::TopLevelWindowComponentCollector::Registry::F> Engine::GUI::TopLevelWindowComponentCollector::Registry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGLTools

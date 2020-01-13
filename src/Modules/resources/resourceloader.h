@@ -307,12 +307,12 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename _Base>
-    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename _Base::Container, typename _Base::Storage, _Base>> {
+    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename _Base::Container, typename _Base::Storage, _Base>, _Base> {
 
         using Data = _Data;
         using Base = _Base;
 
-        using Self = VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>;
+        using Self = VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>, _Base>;
 
         using Self::Self;
 
