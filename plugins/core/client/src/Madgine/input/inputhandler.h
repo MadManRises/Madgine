@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Modules/reflection/classname.h"
 #include "../threading/framelistener.h"
 
 #include "inputevents.h"

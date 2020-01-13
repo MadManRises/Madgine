@@ -26,8 +26,6 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
-
 namespace Engine {
 namespace GUI {
 
