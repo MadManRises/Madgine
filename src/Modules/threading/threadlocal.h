@@ -12,6 +12,8 @@
 #        define THREADLOCAL(T) thread_local ::Engine::Proxy<T>
 #    endif
 #else
+#        include "../generic/proxy.h"
+
 #    define THREADLOCAL(T) ::Engine::Proxy<T>
 #endif
 
