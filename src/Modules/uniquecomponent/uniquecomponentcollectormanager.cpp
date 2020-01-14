@@ -8,6 +8,8 @@
 
 #include "../plugins/pluginmanager.h"
 
+#include "../plugins/plugin.h"
+
 namespace Engine {
 
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "valuetype.h"
-
 namespace Engine
 {
 		struct MODULES_EXPORT ObjectFieldAccessor

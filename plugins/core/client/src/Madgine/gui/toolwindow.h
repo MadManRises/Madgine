@@ -1,17 +1,10 @@
 #pragma once
 
 #include "../input/inputcollector.h"
-#include "../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Modules/generic/transformIt.h"
-
-#include "Modules/madgineobject/madgineobject.h"
-
 #include "Modules/keyvalue/scopebase.h"
-
-#include "../render/rendercontextcollector.h"
 
 namespace Engine {
 namespace GUI {

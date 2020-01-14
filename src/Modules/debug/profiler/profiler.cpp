@@ -8,14 +8,15 @@
 
 #include "../../threading/taskguard.h"
 
+#include "profilerthread.h"
+
 namespace Engine {
 
 namespace Debug {
 
     namespace Profiler {
 
-        THREADLOCAL(ProfilerThread)
-        sThread;
+        THREADLOCAL(ProfilerThread) sThread;
         Threading::WorkgroupLocal<Profiler> sProfiler;
 #if ENABLE_THREADING
         Threading::TaskGuard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
@@ -50,59 +51,6 @@ namespace Debug {
         Profiler &Profiler::getCurrent()
         {
             return sProfiler;
-        }
-
-        ProfilerThread::ProfilerThread()
-            : mStats("<unnamed-thread>")
-        {
-            updateName();
-            mCurrent = &mStats;
-            mStats.start();
-        }
-
-        ProfilerThread::~ProfilerThread()
-        {
-            mStats.stop();
-
-#if ENABLE_THREADING
-            if (Threading::WorkGroup::isInitialized())
-                sProfiler->unregisterThread(this);
-#endif
-        }
-
-        void ProfilerThread::updateName()
-        {
-#if ENABLE_THREADING
-            mId = Threading::getCurrentThreadName();
-#else
-            mId = "Main";
-#endif
-            mStats.setFunctionName(mId.c_str());
-        }
-
-        void StaticProcess::start()
-        {
-            if (mStats.start()) {
-                mPrevious = sThread->mCurrent;
-                sThread->mCurrent = &mStats;
-            }
-        }
-
-        void StaticProcess::stop()
-        {
-            std::optional<ProcessStats::Data> d = mStats.stop();
-            if (d) {
-                assert(sThread->mCurrent == &mStats);
-                sThread->mCurrent = mPrevious;
-                if (mPrevious) {
-                    mPrevious = nullptr;
-                    if (!mParent) {
-                        mParent = sThread->mCurrent->updateChild(&mStats, *d);
-                    } else {
-                        mParent->second += *d;
-                    }
-                }
-            }
         }
 
     }

@@ -4,8 +4,6 @@
 
 #include "serverbase.h"
 
-#include "Madgine/core/root.h"
-
 #include "Modules/keyvalue/metatable_impl.h"
 
 #include "Modules/reflection/classname.h"
@@ -54,11 +52,6 @@ namespace Server {
         }
         mLastConsoleCheck = std::chrono::steady_clock::now();
     }
-
-    /*KeyValueMapList ServerBase::maps()
-		{
-			return Scope::maps().merge(this, MAP_F(shutdown));
-		}*/
 
 }
 }

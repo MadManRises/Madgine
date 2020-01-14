@@ -116,6 +116,8 @@ namespace Widgets {
 
 		bool mVisible = true;
 
+		WidgetManager &manager();
+
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
@@ -136,8 +138,6 @@ namespace Widgets {
 		std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
-
-        WidgetManager &manager();
 
         void destroyChild(WidgetBase *w);
 

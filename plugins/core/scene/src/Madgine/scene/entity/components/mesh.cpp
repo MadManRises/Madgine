@@ -63,11 +63,6 @@ namespace Scene {
         {
             return mMesh.resource();
         }
-
-        /*KeyValueMapList Mesh::maps()
-			{
-				return Scope::maps().merge(MAP(Name, getName, setName), MAP(Visible, isVisible, setVisible));
-			}*/
     }
 }
 }

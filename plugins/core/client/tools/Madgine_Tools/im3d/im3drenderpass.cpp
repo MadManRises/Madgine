@@ -9,6 +9,8 @@
 
 #include "Madgine/render/camera.h"
 
+#include "textureloader.h"
+
 namespace Engine {
 namespace Render {
 

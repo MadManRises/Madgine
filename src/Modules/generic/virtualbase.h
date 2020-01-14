@@ -3,9 +3,8 @@
 namespace Engine
 {
 	template <class T>
-	class VirtualBase : public virtual T
-	{
-	public:
+	struct VirtualBase : virtual T
+	{	
 		using T::T;
 	};
 }

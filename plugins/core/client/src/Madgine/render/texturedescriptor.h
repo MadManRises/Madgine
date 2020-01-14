@@ -1,7 +1,5 @@
 #pragma once
 
-#include "textureloader.h"
-
 namespace Engine {
 namespace Render {
 

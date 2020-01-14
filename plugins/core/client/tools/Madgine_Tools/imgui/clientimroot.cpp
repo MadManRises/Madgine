@@ -16,7 +16,7 @@
 
 #include "Madgine/render/rendertarget.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Madgine/gui/toolwindow.h"
 

@@ -3,13 +3,7 @@
 
 #include "appsettings.h"
 
-#include "globalapibase.h"
-
-//#include "Modules/scripting/types/luastate.h"
-
 #include "Interfaces/exception.h"
-
-#include "Modules/debug/profiler/profiler.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
@@ -22,22 +16,12 @@ namespace App {
     static Threading::WorkgroupLocal<Application *> sApp;
 
     Application::Application(const AppSettings &settings)
-        : //Scripting::GlobalScopeBase(Scripting::LuaState::getSingleton()),
-        mSettings(settings)
+        : mSettings(settings)
         , mGlobalAPIInitCounter(0)
         , mGlobalAPIs(*this)
     {
         assert(!sApp);
         sApp = this;
-
-        /*mLoop.addSetupSteps(
-            [this]() {
-                if (!callInit())
-                    throw exception("App Init Failed!");
-            },
-            [this]() {
-                callFinalize();
-            });*/
 
 		 if (!callInit())
             throw exception("App Init Failed!");
@@ -73,26 +57,6 @@ namespace App {
         }
     }
 
-    /*void Application::shutdown()
-    {
-        mLoop.shutdown();
-    }
-
-    bool Application::isShutdown() const
-    {
-        return mLoop.isShutdown();
-    }*/
-
-    float Application::getFPS()
-    {
-        return 1.0f;
-    }
-
-    /*KeyValueMapList Application::maps()
-		{
-			return Scope::maps().merge(mGlobalAPIs, this, MAP_F(shutdown));
-		}*/
-
     GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
     {
         GlobalAPIBase &api = mGlobalAPIs.get(i);
@@ -116,20 +80,10 @@ namespace App {
         return mSettings;
     }
 
-    Debug::Profiler::Profiler &Application::profiler()
-    {
-        return *mProfiler;
-    }
-
     const MadgineObject *Application::parent() const
     {
         return nullptr;
     }
-
-    /*Application &Application::app(bool init)
-    {
-        return getSelf(init);
-    }*/
 
     Application &Application::getSingleton()
     {

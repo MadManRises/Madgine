@@ -2,6 +2,7 @@
 
 #include "rendercontext.h"
 #include "rendertarget.h"
+#include "renderpass.h"
 
 namespace Engine {
 namespace Render {

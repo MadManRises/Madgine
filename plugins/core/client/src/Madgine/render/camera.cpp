@@ -9,6 +9,8 @@
 
 #include "Modules/math/pi.h"
 
+#include "Modules/math/ray.h"
+
 namespace Engine {
 namespace Render {
 

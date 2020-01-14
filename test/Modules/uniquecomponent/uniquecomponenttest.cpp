@@ -3,6 +3,7 @@
 #include "Modules/moduleslib.h"
 
 #include "Modules/plugins/pluginmanager.h"
+#include "Modules/plugins/pluginsection.h"
 
 #include "Modules/threading/workgroup.h"
 

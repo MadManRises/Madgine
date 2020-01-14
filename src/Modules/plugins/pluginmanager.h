@@ -4,8 +4,6 @@
 
 #include "../ini/inifile.h"
 
-#include "pluginsection.h"
-
 namespace Engine {
 namespace Plugins {
 

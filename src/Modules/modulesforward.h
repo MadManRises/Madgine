@@ -41,6 +41,7 @@ struct Any;
 
 namespace CLI {
     struct CLICore;
+    struct ParameterBase;
 }
 
 namespace Debug {
@@ -55,11 +56,13 @@ namespace Debug {
 
     namespace Profiler {
         class Profiler;
+        struct ProfilerThread;
     }
 }
 
 namespace Ini {
     struct IniFile;
+    struct IniSection;
 }
 
 namespace Serialize {

@@ -73,23 +73,10 @@ namespace Engine
 			return &mSceneMgr;
 		}
 
-		/*App::Application & SceneComponentBase::app(bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-			}
-			return mSceneMgr.app(init);
-		}*/
-
 		void SceneComponentBase::update(std::chrono::microseconds)
 		{
 		}
 
-		/*KeyValueMapList SceneComponentBase::maps()
-		{
-			return ScopeBase::maps().merge(MAP_RO(MasterId, masterId), MAP_RO(SlaveId, slaveId), MAP_RO(Synced, isSynced));
-		}*/
 	}
 }
 

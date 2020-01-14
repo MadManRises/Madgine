@@ -20,7 +20,11 @@
 
 #include "../threading/defaulttaskqueue.h"
 
-#include "../cli/cli.h"
+#include "../cli/parameter.h"
+
+#include "../ini/inisection.h"
+
+#include "pluginsection.h"
 
 namespace Engine {
 namespace Plugins {

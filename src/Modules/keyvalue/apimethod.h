@@ -1,7 +1,5 @@
 #pragma once
 
-#include "typedscopeptr.h"
-
 namespace Engine {
 
 struct ApiMethod {

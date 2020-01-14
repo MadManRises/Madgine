@@ -8,13 +8,9 @@
 
 #include "../render/rendercontext.h"
 
-#include "Modules/generic/transformIt.h"
-
 #include "Modules/keyvalue/metatable_impl.h"
 
 #include "Modules/serialize/serializetable_impl.h"
-
-#include "Modules/debug/profiler/profiler.h"
 
 #include "toolwindow.h"
 
@@ -88,7 +84,7 @@ namespace GUI {
         mRenderWindow = (*mRenderContext)->createRenderWindow(mWindow);
         addFrameListener(this);
 
-        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+        for (TopLevelWindowComponentBase *comp : components()) {
             bool result = comp->callInit();
             assert(result);
         }
@@ -98,7 +94,7 @@ namespace GUI {
 
     void TopLevelWindow::finalize()
     {
-        for (TopLevelWindowComponentBase *comp : uniquePtrToPtr(mComponents)) {
+        for (TopLevelWindowComponentBase *comp : components()) {
             comp->callFinalize();
         }
 

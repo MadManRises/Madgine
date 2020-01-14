@@ -5,8 +5,9 @@
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
 #include "Madgine/gui/toplevelwindow.h"
-#include "Modules/cli/cli.h"
+#include "Modules/cli/parameter.h"
 #include "Modules/threading/workgroup.h"
+#include "Modules/threading/scheduler.h"
 
 #include "Madgine/widgetslib.h"
 #include "Madgine/widgets/widgetmanager.h"

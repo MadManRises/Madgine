@@ -12,6 +12,8 @@
 
 #include "rendertarget.h"
 
+#include "Modules/threading/taskqueue.h"
+
 RegisterType(Engine::Render::RenderContext)
 
     namespace Engine

@@ -16,8 +16,6 @@
 
 #include "../threading/frameloop.h"
 
-#include "Modules/math/vector3i.h"
-
 #include "toplevelwindowcomponentcollector.h"
 
 #include "Modules/keyvalue/keyvalueset.h"

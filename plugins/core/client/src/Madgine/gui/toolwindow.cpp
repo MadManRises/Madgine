@@ -12,8 +12,6 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Madgine/app/application.h"
-
 #include "../render/rendertarget.h"
 
 namespace Engine {

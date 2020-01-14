@@ -2,9 +2,7 @@
 
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/math/quaternion.h"
-#include "Modules/math/ray.h"
 #include "Modules/math/vector3.h"
-#include "Modules/math/vector4.h"
 
 namespace Engine {
 namespace Render {

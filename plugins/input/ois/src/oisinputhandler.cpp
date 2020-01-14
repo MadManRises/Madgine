@@ -5,7 +5,7 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"

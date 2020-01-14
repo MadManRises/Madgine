@@ -2,6 +2,8 @@
 
 #include "metatable.h"
 #include "scopeiterator.h"
+#include "accessor.h"
+#include "valuetype.h"
 
 namespace Engine {
 

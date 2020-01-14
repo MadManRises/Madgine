@@ -2,7 +2,7 @@
 
 #include "imroot.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "../toolbase.h"
 

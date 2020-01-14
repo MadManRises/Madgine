@@ -5,7 +5,7 @@
 
 #include "Modules/threading/taskqueue.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/generic/safeiterator.h"
 

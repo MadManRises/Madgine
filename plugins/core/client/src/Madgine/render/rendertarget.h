@@ -1,12 +1,7 @@
 #pragma once
 
-#include "Modules/math/vector2.h"
-#include "Modules/math/matrix4.h"
-#include "renderpass.h"
 #include "Modules/render/vertex.h"
-#include "Modules/render/renderpassflags.h"
-
-#include "textureloader.h"
+//#include "Modules/render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

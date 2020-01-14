@@ -4,21 +4,19 @@
 
 #include "Modules/serialize/serializableids.h"
 
-#include "Modules/generic/transformIt.h"
-
 #include "scenecomponentbase.h"
 
 #include "Madgine/app/application.h"
 
-#include "Modules/debug/profiler/profiler.h"
-
-#include "Madgine/app/globalapicollector.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/threading/defaulttaskqueue.h"
+
+#include "entity/entity.h"
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
@@ -45,6 +43,10 @@ RegisterType(Engine::Scene::SceneManager)
             , mApp(app)
             , mItemCount(0)
             , mSceneComponents(*this)
+        {
+        }
+
+		Engine::Scene::SceneManager::~SceneManager()
         {
         }
 

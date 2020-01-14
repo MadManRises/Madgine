@@ -5,7 +5,7 @@ Project(Scene)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine sceneforward.h scenelib.h)
-		FolderSources(sources Madgine scene light.cpp light.h lightmanager.cpp lightmanager.h scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
+		FolderSources(sources Madgine scene scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
 			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h componentexception.h entity.cpp entity.h entitycomponent.h masks.h)
 				FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h transform.cpp transform.h)
 

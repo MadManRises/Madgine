@@ -7,8 +7,8 @@
 #include "imgui/imguiaddons.h"
 
 #include "Modules/debug/profiler/profiler.h"
-
-#include "Modules/generic/transformIt.h"
+#include "Modules/debug/profiler/profilerthread.h"
+#include "Modules/debug/profiler/processstats.h"
 
 #include "../renderer/imroot.h"
 

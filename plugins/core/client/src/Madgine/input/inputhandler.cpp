@@ -6,64 +6,61 @@
 
 #include "../gui/toplevelwindow.h"
 
-namespace Engine
-{
-	namespace Input
-	{
-		
-		InputHandler::InputHandler(GUI::TopLevelWindow &window, InputListener *listener)
-                :
-		mListener(listener), mWindow(window)
-		{
-            window.addFrameListener(this);
-                }
+namespace Engine {
+namespace Input {
 
-                InputHandler::~InputHandler()
-                {
-                    mWindow.removeFrameListener(this);
-                }
+    InputHandler::InputHandler(GUI::TopLevelWindow &window, InputListener *listener)
+        : mListener(listener)
+        , mWindow(window)
+    {
+        window.addFrameListener(this);
+    }
 
-		/*InputListener* InputHandler::listener()
+    InputHandler::~InputHandler()
+    {
+        mWindow.removeFrameListener(this);
+    }
+
+    /*InputListener* InputHandler::listener()
 		{
 			return mListener;
 		}*/
 
-		void InputHandler::onResize(size_t width, size_t height)
-		{
-		}
+    void InputHandler::onResize(size_t width, size_t height)
+    {
+    }
 
+    void InputHandler::injectKeyPress(const KeyEventArgs &arg)
+    {
+        if (mListener)
+            mListener->injectKeyPress(arg);
+    }
 
-		void InputHandler::injectKeyPress(const KeyEventArgs& arg)
-			{
-				if (mListener)
-					mListener->injectKeyPress(arg);
-			}
+    void InputHandler::injectKeyRelease(const KeyEventArgs &arg)
+    {
+        if (mListener)
+            mListener->injectKeyRelease(arg);
+    }
 
-			void InputHandler::injectKeyRelease(const KeyEventArgs& arg)
-			{
-				if (mListener)
-					mListener->injectKeyRelease(arg);
-			}
+    void InputHandler::injectPointerPress(const PointerEventArgs &arg)
+    {
+        if (mListener)
+            mListener->injectPointerPress(arg);
+    }
 
-			void InputHandler::injectPointerPress(const PointerEventArgs& arg)
-			{
-				if (mListener)
-					mListener->injectPointerPress(arg);
-			}
+    void InputHandler::injectPointerRelease(const PointerEventArgs &arg)
+    {
+        if (mListener)
+            mListener->injectPointerRelease(arg);
+    }
 
-			void InputHandler::injectPointerRelease(const PointerEventArgs& arg)
-			{
-				if (mListener)
-					mListener->injectPointerRelease(arg);
-			}
+    void InputHandler::injectPointerMove(const PointerEventArgs &arg)
+    {
+        if (mListener)
+            mListener->injectPointerMove(arg);
+    }
 
-			void InputHandler::injectPointerMove(const PointerEventArgs& arg)
-			{
-				if (mListener)
-					mListener->injectPointerMove(arg);
-			}
-
-	}
+}
 }
 
 RegisterType(Engine::Input::InputHandler);

@@ -2,7 +2,7 @@
 #include "openglrenderwindow.h"
 #include "Madgine/gui/toplevelwindow.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/math/vector2i.h"
 #include "Modules/math/vector3.h"

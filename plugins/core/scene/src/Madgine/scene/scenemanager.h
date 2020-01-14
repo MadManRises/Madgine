@@ -6,8 +6,6 @@
 
 #include "Modules/serialize/container/syncablecontainer.h"
 
-#include "entity/entity.h"
-
 #include "Madgine/app/globalapicollector.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
@@ -18,6 +16,8 @@
 
 #include "Modules/threading/signalfunctor.h"
 
+#include "Modules/keyvalue/keyvalueset.h"
+
 namespace Engine {
 namespace Scene {
     class MADGINE_SCENE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -27,7 +27,7 @@ namespace Scene {
     public:
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;
-        virtual ~SceneManager() = default;
+        ~SceneManager();
 
         void update();        
 

@@ -54,11 +54,6 @@ namespace Scene {
             return mEntity->getGlobalAPIComponent(i, init);
         }
 
-        /*App::Application &EntityComponentBase::app(bool init)
-        {
-            return mEntity->app(init);
-        }*/
-
         const ObjectPtr &EntityComponentBase::initTable()
         {
             return mInitTable;

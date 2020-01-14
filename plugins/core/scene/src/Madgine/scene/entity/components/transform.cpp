@@ -11,11 +11,6 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        /*KeyValueMapList Transform::maps()
-			{
-				return Scope::maps().merge(MAP(Position, getPosition, setPosition), MAP(Orientation, getOrientation, setOrientation), MAP(Scale, getScale, setScale));
-			}*/
-
         Matrix4 Transform::matrix() const
         {
             return Matrix4 { mScale.x, 0, 0, mPosition->x,

@@ -23,6 +23,10 @@
 
 #include "Madgine/app/application.h"
 
+#include "Modules/math/ray.h"
+
+#include "Madgine/scene/entity/entity.h"
+
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
 RegisterType(ClickBrick::UI::GameManager)

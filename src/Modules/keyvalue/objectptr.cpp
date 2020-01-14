@@ -2,6 +2,7 @@
 #include "objectptr.h"
 #include "objectfieldaccessor.h"
 #include "objectinstance.h"
+#include "valuetype.h"
 
 namespace Engine {
 ObjectPtr::ObjectPtr()

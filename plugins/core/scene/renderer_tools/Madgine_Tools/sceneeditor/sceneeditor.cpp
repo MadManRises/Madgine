@@ -27,6 +27,8 @@
 
 #include "Madgine/gui/toplevelwindow.h"
 
+#include "Madgine/scene/entity/entity.h"
+
 namespace Engine {
 namespace Tools {
 

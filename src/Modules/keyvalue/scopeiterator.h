@@ -1,63 +1,23 @@
 #pragma once
 
-#include "accessor.h"
-#include "valuetype.h"
+#include "typedscopeptr.h"
 
 namespace Engine {
 
-struct ScopeIterator {
+struct MODULES_EXPORT ScopeIterator {
 
-    ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
-        : mScope(scope)
-        , mPointer(pointer)
-    {
-        if (mPointer) {
-            checkDerived();
-        }
-    }
+    ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer);
 
-    bool operator==(const ScopeIterator &other) const
-    {
-        assert(mScope == other.mScope);
-        if (mPointer == other.mPointer)
-            return true;
-        if (!mPointer)
-            return !other.mPointer->first;
-        else
-            return !mPointer->first;
-    }
+    bool operator==(const ScopeIterator &other) const;
 
-    bool operator!=(const ScopeIterator &other) const
-    {
-        assert(mScope.mScope == other.mScope.mScope);
-        if (mPointer == other.mPointer)
-            return false;
-        if (!mPointer)
-            return other.mPointer->first;
-        else
-            return mPointer->first;
-    }
+    bool operator!=(const ScopeIterator &other) const;
 
-    std::pair<const char *, ValueType> operator*() const
-    {
-        return { mPointer->first, mPointer->second.mGetter(mScope) };
-    }
+    std::pair<const char *, ValueType> operator*() const;
 
-    void operator++()
-    {
-        assert(mPointer);
-        ++mPointer;
-        checkDerived();
-    }
+    void operator++();
 
 private:
-    void checkDerived()
-    {
-        while (!mPointer->first && mScope.mType->mBaseGetter) {
-            mScope.mType = &mScope.mType->mBaseGetter();
-            mPointer = mScope.mType->mMember;
-        }
-    }
+    void checkDerived();
 
     TypedScopePtr mScope;
     const std::pair<const char *, Accessor> *mPointer;

@@ -6,7 +6,11 @@
 
 #include "componentexception.h"
 
-#include "entity.h"
+#include "Modules/keyvalue/keyvalue.h"
+
+#include "entitycomponentbase.h"
+
+#include "Modules/plugins/pluginsection.h"
 
 namespace Engine {
 namespace Scene {

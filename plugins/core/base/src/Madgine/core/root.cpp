@@ -10,6 +10,8 @@
 #include "Modules/cli/cli.h"
 #include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 
+#include "Modules/plugins/pluginsection.h"
+
 namespace Engine {
 namespace Core {
     Root::Root(int argc, char **argv)

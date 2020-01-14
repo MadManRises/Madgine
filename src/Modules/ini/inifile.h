@@ -3,47 +3,33 @@
 #include "Interfaces/filesystem/path.h"
 
 namespace Engine {
-	namespace Ini {
+namespace Ini {
 
-		struct MODULES_EXPORT IniSection {
-			IniSection(std::istream *stream = nullptr);
+    struct MODULES_EXPORT IniFile {
 
-			std::string &operator[](const std::string &key);
+        IniFile(const Filesystem::Path &path);
+        IniFile(const IniFile &) = delete;
+        ~IniFile();
 
-			void save(std::ostream &stream) const;
-			void load(std::istream &stream);
+		IniFile &operator=(const IniFile &) = delete;
 
-			std::map<std::string, std::string>::iterator begin();
-			std::map<std::string, std::string>::iterator end();
+        IniSection &operator[](const std::string &key);
 
-		private:		
+        void clear();
 
-			std::map<std::string, std::string> mValues;
+        void saveToDisk() const;
+        void loadFromDisk();
 
-		};
+        const Filesystem::Path &path();
 
-		struct MODULES_EXPORT IniFile {
+        std::map<std::string, IniSection>::iterator begin();
+        std::map<std::string, IniSection>::iterator end();
 
-			IniFile(const Filesystem::Path &path);
+    private:
+        Filesystem::Path mPath;
 
-			IniSection &operator[](const std::string &key);
+        std::map<std::string, IniSection> mSections;
+    };
 
-			void clear();
-
-			void saveToDisk() const;
-			void loadFromDisk();
-
-			const Filesystem::Path &path();
-
-			std::map<std::string, IniSection>::iterator begin();
-			std::map<std::string, IniSection>::iterator end();
-
-		private:
-			Filesystem::Path mPath;
-
-			std::map<std::string, IniSection> mSections;
-
-		};
-
-	}
+}
 }

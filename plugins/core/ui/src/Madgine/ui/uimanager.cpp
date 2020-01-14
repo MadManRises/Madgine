@@ -9,7 +9,7 @@
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"

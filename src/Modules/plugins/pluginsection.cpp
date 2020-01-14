@@ -20,6 +20,8 @@
 
 #include "../keyvalue/keyvalue.h"
 
+#include "../ini/inisection.h"
+
 namespace Engine {
 namespace Plugins {
 

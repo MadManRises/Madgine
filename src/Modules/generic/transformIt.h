@@ -6,7 +6,7 @@ namespace Engine {
 
 template <class T, typename Converter>
 struct TransformItContainer : T {
-    using traits = derive_iterator<T>;
+    using iterator_traits = derive_iterator<T>;
 
     template <typename It>
     class TransformIterator {
@@ -51,10 +51,10 @@ struct TransformItContainer : T {
         It mIt;
     };
 
-    using iterator = TransformIterator<typename traits::iterator>;
-    using const_iterator = TransformIterator<typename traits::const_iterator>;
-    using reverse_iterator = TransformIterator<typename traits::reverse_iterator>;
-    using const_reverse_iterator = TransformIterator<typename traits::const_reverse_iterator>;
+    using iterator = TransformIterator<typename iterator_traits::iterator>;
+    using const_iterator = TransformIterator<typename iterator_traits::const_iterator>;
+    using reverse_iterator = TransformIterator<typename iterator_traits::reverse_iterator>;
+    using const_reverse_iterator = TransformIterator<typename iterator_traits::const_reverse_iterator>;
 
 private:
     TransformItContainer() = delete;
@@ -118,13 +118,13 @@ TransformItContainer<T, Converter> &transformIt(T &t)
 template <typename Converter, class T>
 const TransformItContainer<T, Converter> &transformIt(const T &&t)
 {
-    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt");
+    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt"); //Consider returning temporary
 }
 
 template <typename Converter, class T>
 TransformItContainer<T, Converter> &transformIt(T &&t)
 {
-    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt");
+    static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt"); //Consider returning temporary
 }
 
 struct ToPointerConverter {

@@ -21,6 +21,8 @@
 
 #    include "../project/projectmanager.h"
 
+#    include "Modules/plugins/pluginsection.h"
+
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {

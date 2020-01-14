@@ -1,6 +1,5 @@
 #include "../uilib.h"
 #include "guihandler.h"
-//#include "Database/translationunit.h"
 
 #include "Madgine/widgets/widget.h"
 #include "Madgine/widgets/widgetmanager.h"
@@ -40,13 +39,13 @@ namespace UI {
 
         switch (mType) {
         case WindowType::MODAL_OVERLAY:
-            ui().getWindowComponent<Widgets::WidgetManager>().openModalWidget(mWidget);
+            mWidget->manager().openModalWidget(mWidget);
             break;
         case WindowType::NONMODAL_OVERLAY:
-            ui().getWindowComponent<Widgets::WidgetManager>().openWidget(mWidget);
+            mWidget->manager().openWidget(mWidget);
             break;
         case WindowType::ROOT_WINDOW:
-            ui().getWindowComponent<Widgets::WidgetManager>().swapCurrentRoot(mWidget);
+            mWidget->manager().swapCurrentRoot(mWidget);
             break;
         }
     }
@@ -55,10 +54,10 @@ namespace UI {
     {
         switch (mType) {
         case WindowType::MODAL_OVERLAY:
-            ui().getWindowComponent<Widgets::WidgetManager>().closeModalWidget(mWidget);
+            mWidget->manager().closeModalWidget(mWidget);
             break;
         case WindowType::NONMODAL_OVERLAY:
-            ui().getWindowComponent<Widgets::WidgetManager>().closeWidget(mWidget);
+            mWidget->manager().closeWidget(mWidget);
             break;
         case WindowType::ROOT_WINDOW:
             std::terminate();
