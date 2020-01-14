@@ -9,20 +9,10 @@ namespace Engine
 	{
 
 		enum TaskState {
-			STARTING,
 			YIELD,
 			SUCCESS,
 			FAILURE
 		};
-
-		/*template <typename R, typename Y = void>
-		struct TaskResult {
-			TaskState mState;
-			union {
-				R mResult;
-				Y mYield;
-			};
-		};*/
 
 		struct Task {
 			virtual TaskState execute() = 0;

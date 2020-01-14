@@ -26,7 +26,7 @@ DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
 
 #    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::VBase)
 
-template <class T, class _Collector, typename Base = typename _Collector::Base>
+template <class T, class _Collector, typename Base>
 class VirtualUniqueComponentBase : public Base {
 public:
     using Collector = _Collector;
@@ -50,7 +50,7 @@ DLL_IMPORT_VARIABLE2(typename Collector::template ComponentRegistrator<T>, _reg,
 
 #    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name, Name::Collector)
 
-template <typename T, typename _Collector, typename _Base = typename _Collector::Base>
+template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
     using Collector = _Collector;
 

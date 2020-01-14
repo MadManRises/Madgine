@@ -31,11 +31,11 @@ TEST(UniqueComponent, Registry)
 
     ASSERT_EQ(v.size(), 0);
 
-    ASSERT_EQ(pmgr["Test"].loadPlugin("LibA"), Engine::Plugins::Plugin::LOADED);
+    ASSERT_EQ(pmgr["Test"].loadPlugin("LibA"), Engine::Plugins::LOADED);
 
     ASSERT_EQ(v.size(), 1);
 
-    ASSERT_EQ(pmgr["Test"].loadPlugin("LibB"), Engine::Plugins::Plugin::LOADED);
+    ASSERT_EQ(pmgr["Test"].loadPlugin("LibB"), Engine::Plugins::LOADED);
 
 
     ASSERT_EQ(v.size(), 2);
@@ -46,7 +46,7 @@ TEST(UniqueComponent, Registry)
     ASSERT_NE(indexA, indexB);
 
 
-    ASSERT_EQ(pmgr["Test"].unloadPlugin("LibB"), Engine::Plugins::Plugin::UNLOADED);
+    ASSERT_EQ(pmgr["Test"].unloadPlugin("LibB"), Engine::Plugins::UNLOADED);
 
     ASSERT_EQ(v.size(), 1);
 #endif

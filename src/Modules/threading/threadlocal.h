@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../generic/proxy.h"
-
-#include "threadstorage.h"
-#include "global.h"
-
 #if ENABLE_THREADING
 #    if USE_CUSTOM_THREADLOCAL
+#        include "global.h"
+#        include "threadstorage.h"
+
 #        define THREADLOCAL(T) ::Engine::Threading::Global<T, ::Engine::Threading::ThreadStorage>
 #    else
+#        include "../generic/proxy.h"
+
 #        define THREADLOCAL(T) thread_local ::Engine::Proxy<T>
 #    endif
 #else

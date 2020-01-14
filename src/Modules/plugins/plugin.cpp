@@ -4,7 +4,6 @@
 
 #include "plugin.h"
 
-#include "../generic/templates.h"
 #include "Interfaces/dl/dlapi.h"
 
 #include "binaryinfo.h"
@@ -41,12 +40,12 @@ namespace Plugins {
         assert(mDependents.empty());
     }
 
-    Plugin::LoadState Plugin::isLoaded() const
+    LoadState Plugin::isLoaded() const
     {
         return mState;
     }
 
-    Plugin::LoadState Plugin::load()
+    LoadState Plugin::load()
     {
         if (mState != UNLOADED)
             return mState;
@@ -110,7 +109,7 @@ namespace Plugins {
         return mState;
     }
 
-    Plugin::LoadState Plugin::unload()
+    LoadState Plugin::unload()
     {
         if (mState != LOADED)
             return mState;

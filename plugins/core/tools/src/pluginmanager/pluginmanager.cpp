@@ -21,7 +21,10 @@
 
 #    include "../project/projectmanager.h"
 
+#    include "Modules/plugins/plugin.h"
 #    include "Modules/plugins/pluginsection.h"
+
+#    include "Modules/ini/inifile.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -78,10 +81,10 @@ namespace Tools {
                         for (auto &[pluginName, plugin] : section) {
                             const std::string &project = plugin.project();
 
-                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
+                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::DELAYED) {
                                 ImGui::PushDisabled();
                             }
-                            bool loaded = plugin.isLoaded() == Plugins::Plugin::LOADED;
+                            bool loaded = plugin.isLoaded() == Plugins::LOADED;
                             bool clicked = false;
                             std::string displayName { pluginName + " (" + project + ")" };
                             if (section.isExclusive()) {
@@ -97,7 +100,7 @@ namespace Tools {
                                     section.unloadPlugin(pluginName);
                                 updateConfigFile();
                             }
-                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::Plugin::DELAYED) {
+                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::DELAYED) {
                                 ImGui::PopDisabled();
                             }
                         }
@@ -111,7 +114,7 @@ namespace Tools {
 
                 for (Plugins::PluginSection &section : kvValues(mManager)) {
                     for (auto &[pluginName, plugin] : section) {
-                        if (plugin.isLoaded() == Plugins::Plugin::LOADED) {
+                        if (plugin.isLoaded() == Plugins::LOADED) {
                             const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
 
                             if (ImGui::TreeNode(pluginName.c_str())) {

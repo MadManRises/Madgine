@@ -73,5 +73,5 @@ namespace Serialize {
 
         std::list<BufferedSendMessage> mBufferedSendMsgs;
     };
-} // namespace Serialize
-} // namespace Core
+} 
+} 

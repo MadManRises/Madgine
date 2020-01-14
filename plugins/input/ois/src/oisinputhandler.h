@@ -3,6 +3,7 @@
 #include "../ois/includes/OIS.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "Madgine/input/inputcollector.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Input {

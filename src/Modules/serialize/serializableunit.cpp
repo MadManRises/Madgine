@@ -1,17 +1,11 @@
 #include "../moduleslib.h"
 #include "serializableunit.h"
 
-#include "streams/bufferedstream.h"
-
-#include "syncmanager.h"
+#include "serializemanager.h"
 
 #include "toplevelserializableunit.h"
 
-#include "syncable.h"
-
-#include "serializeexception.h"
-
-#include "serializable.h"
+#include "streams/bufferedstream.h"
 
 namespace Engine {
 namespace Serialize {

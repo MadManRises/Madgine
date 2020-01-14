@@ -1,17 +1,15 @@
 #pragma once
 
-#include "Interfaces/filesystem/path.h"
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/plugins/pluginlistener.h"
-#include "Modules/uniquecomponent/uniquecomponent.h"
 #include "resourceloadercollector.h"
 
 namespace Engine {
 namespace Resources {
-    struct MODULES_EXPORT ResourceManager final : ScopeBase
+    struct MODULES_EXPORT ResourceManager : ScopeBase
 #if ENABLE_PLUGINS
         ,
-                                                  Plugins::PluginListener
+                                            Plugins::PluginListener
 #endif
     {
         static ResourceManager &getSingleton();
@@ -55,13 +53,7 @@ namespace Resources {
 
     private:
         struct SubDirCompare {
-            bool operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
-            {
-                auto [firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());
-                if (firstEnd == first.str().end() || secondEnd == second.str().end())
-                    return false;
-                return first.str() < second.str();
-            }
+            bool operator()(const Filesystem::Path &first, const Filesystem::Path &second) const;
         };
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;

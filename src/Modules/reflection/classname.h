@@ -22,21 +22,7 @@ DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfo, typename T);
 
 
 namespace Engine {
-/*
-template <class T>
-struct AccessClassInfo {
-    static const TypeInfo &get()
-    {
-        return typeInfoInstance<T>();
-    }
-};
 
-template <class T>
-inline const TypeInfo &typeInfo()
-{
-    return AccessClassInfo<T>::get();
-}
-*/
 template <class T>
 inline const char *typeName()
 {

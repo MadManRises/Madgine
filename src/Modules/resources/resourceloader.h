@@ -11,6 +11,8 @@
 
 #include "handle.h"
 
+#include "../keyvalue/typedscopeptr.h"
+
 namespace Engine {
 namespace Resources {
 

@@ -7,8 +7,8 @@ namespace Engine {
 namespace Serialize {
 
     template <typename Config, typename... _Ty>
-    struct ObservedSignal : Threading::Signal<_Ty...> {
-        ObservedSignal()
+    struct SyncedSignal : Threading::Signal<_Ty...> {
+        SyncedSignal()
             : mAction(this)
 		{
 

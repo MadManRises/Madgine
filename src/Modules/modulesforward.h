@@ -22,6 +22,10 @@ struct ObjectFieldAccessor;
 struct IndexHolder;
 
 struct UniqueComponentCollectorManager;
+template <typename T, typename _Collector, typename _Base = typename _Collector::Base>
+struct UniqueComponent;
+template <class T, class _Collector, typename Base = typename _Collector::Base>
+class VirtualUniqueComponentBase;
 
 struct ComponentRegistryBase;
 
@@ -80,6 +84,8 @@ namespace Serialize {
     struct SerializeManager;
     struct SyncManager;
     struct SerializeStreambuf;
+
+	struct Serializer;
 
     struct Formatter;
 

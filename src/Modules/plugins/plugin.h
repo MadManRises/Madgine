@@ -2,19 +2,15 @@
 
 #if ENABLE_PLUGINS
 
+#include "loadstate.h"
+
 #include "Interfaces/filesystem/path.h"
 
 namespace Engine {
 namespace Plugins {
     struct MODULES_EXPORT Plugin {
-        Plugin(std::string name = {}, PluginSection *section = nullptr, std::string project = {}, Filesystem::Path path = {});
+        Plugin(std::string name, PluginSection *section = nullptr, std::string project = {}, Filesystem::Path path = {});
         ~Plugin();
-
-        enum LoadState {
-            UNLOADED,
-            DELAYED,
-            LOADED
-        };
 
         LoadState isLoaded() const;
         LoadState load();

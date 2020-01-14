@@ -8,8 +8,6 @@
 
 #include "pluginmanager.h"
 
-#include "Interfaces/stringutil.h"
-
 #include "Interfaces/exception.h"
 
 #include "../threading/defaulttaskqueue.h"
@@ -89,19 +87,19 @@ namespace Plugins {
         return false;
     }
 
-    Plugin::LoadState PluginSection::loadPlugin(const std::string &name)
+    LoadState PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
-            return Plugin::UNLOADED;
+            return UNLOADED;
         return loadPlugin(plugin);
     }
 
-    Plugin::LoadState PluginSection::unloadPlugin(const std::string &name)
+    LoadState PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
-            return Plugin::UNLOADED;
+            return UNLOADED;
         return unloadPlugin(plugin);
     }
 
@@ -140,9 +138,9 @@ namespace Plugins {
         return &it->second;
     }
 
-    Plugin::LoadState PluginSection::loadPlugin(Plugin *p)
+    LoadState PluginSection::loadPlugin(Plugin *p)
     {
-        if (p->isLoaded() != Plugin::UNLOADED)
+        if (p->isLoaded() != UNLOADED)
             return p->isLoaded();
 
         bool ok = true;
@@ -153,9 +151,9 @@ namespace Plugins {
         }
 
         auto task = [=]() {
-            Plugin::LoadState result = p->load();
+            LoadState result = p->load();
             auto task = [=]() {
-                Plugin::LoadState result = Plugin::LOADED;
+                LoadState result = LOADED;
                 Plugin *unloadExclusive
                     = nullptr;
                 if (mExclusive) {
@@ -181,40 +179,40 @@ namespace Plugins {
 			        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
                         return loadPlugin(toolPlugin);
 
-                    return Plugin::LOADED;
+                    return LOADED;
                 };
-                if (result == Plugin::DELAYED) {
+                if (result == DELAYED) {
                     Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-                    return Plugin::DELAYED;
+                    return DELAYED;
                 } else {
                     return task();
                 }
             };
-            if (result == Plugin::DELAYED) {
+            if (result == DELAYED) {
                 Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-                return Plugin::DELAYED;
-            } else if (result == Plugin::LOADED) {
+                return DELAYED;
+            } else if (result == LOADED) {
                 return task();
             } else {
-                return Plugin::UNLOADED;
+                return UNLOADED;
             }
         };
 
         if (!ok) {
             Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-            return Plugin::DELAYED;
+            return DELAYED;
         } else {
             return task();
         }
     }
 
-    Plugin::LoadState PluginSection::unloadPlugin(Plugin *p)
+    LoadState PluginSection::unloadPlugin(Plugin *p)
     {
         if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
             if (toolPlugin->isLoaded())
                 p = toolPlugin;
 
-        if (p->isLoaded() != Plugin::LOADED)
+        if (p->isLoaded() != LOADED)
             return p->isLoaded();
 
         //assert(!mAtleastOne);
@@ -226,23 +224,23 @@ namespace Plugins {
         }
 
         auto task = [=]() {
-            Plugin::LoadState result = p->unload();
+            LoadState result = p->unload();
             auto task = [=]() {                
                 if (!p->isLoaded()) {
                     std::unique_lock lock(mMgr.mListenersMutex);
                     for (PluginListener *listener : mListeners)
                         listener->onPluginUnload(p);
-                    return Plugin::LOADED;
+                    return LOADED;
                 }
-                return Plugin::UNLOADED;
+                return UNLOADED;
             };
-            if (result == Plugin::DELAYED) {
+            if (result == DELAYED) {
                 Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-                return Plugin::DELAYED;
-            } else if (result == Plugin::LOADED) {
+                return DELAYED;
+            } else if (result == LOADED) {
                 return task();
             } else {
-                return Plugin::UNLOADED;
+                return UNLOADED;
             }
         };
 
@@ -250,7 +248,7 @@ namespace Plugins {
             return task();
         } else {
             Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-            return Plugin::DELAYED;
+            return DELAYED;
         }
     }
 
@@ -283,7 +281,7 @@ namespace Plugins {
                 continue;
             }
             Plugin &plugin = it->second;
-            bool result = p.second.empty() ? (unloadPlugin(&plugin) == Plugin::UNLOADED) : (loadPlugin(&plugin) == Plugin::LOADED);
+            bool result = p.second.empty() ? (unloadPlugin(&plugin) == UNLOADED) : (loadPlugin(&plugin) == LOADED);
             if (!result) {
                 LOG("Could not load Plugin \"" << p.first << "\"!");
             }

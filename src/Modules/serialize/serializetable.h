@@ -1,7 +1,5 @@
 #pragma once
 
-#include "serializer.h"
-
 #include "statetransmissionflags.h"
 
 namespace Engine {

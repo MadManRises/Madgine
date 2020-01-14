@@ -48,10 +48,6 @@ namespace Resources {
     {
         InStream buffer = Filesystem::openFile(mPath);
         return std::string { buffer.iterator(), buffer.end() };
-        /*std::string result(buffer.size(), ' ');
-			auto it = std::copy_if(buffer.begin(), buffer.end(), result.begin(), [](char c) {return c != '\r'; });
-			result.resize(std::distance(result.begin(), it));
-			return result;*/
     }
 
     std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob()

@@ -10,6 +10,8 @@
 
 #include "../../messageheader.h"
 
+#include "../../serializableids.h"
+
 namespace Engine
 {
 	namespace Serialize

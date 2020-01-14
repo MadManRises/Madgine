@@ -2,15 +2,13 @@
 
 #include "serializemanager.h"
 
-#include "streams/bufferedstream.h"
+#include "serializableunit.h"
 
 #include "serializeexception.h"
 
-#include "toplevelserializableunit.h"
+#include "streams/serializestream.h"
 
-#include "../serialize/streams/buffered_streambuf.h"
-
-#include "../generic/transformIt.h"
+#include "serializableids.h"
 
 namespace Engine {
 namespace Serialize {

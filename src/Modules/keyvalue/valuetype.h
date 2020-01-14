@@ -10,13 +10,13 @@
 
 #include "boundapimethod.h"
 
-#include "valuetypeexception.h"
-
 #include "keyvaluevirtualiterator.h"
 
 #include "objectptr.h"
 
 #include "typedscopeptr.h"
+
+#include "valuetypeexception.h"
 
 namespace Engine {
 
@@ -75,19 +75,11 @@ public:
             || (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>> && std::is_pointer_v<std::remove_reference_t<T>>);
     };
 
-    ValueType()
-    {
-    }
+    ValueType();
 
-    ValueType(const ValueType &other)
-        : mUnion(other.mUnion)
-    {
-    }
+    ValueType(const ValueType &other);
 
-    ValueType(ValueType &&other) noexcept
-        : mUnion(std::forward<decltype(other.mUnion)>(other.mUnion))
-    {
-    }
+    ValueType(ValueType &&other) noexcept;
 
     template <class T, class _ = std::enable_if_t<_isValueType<T>::value>>
     explicit ValueType(const T &v)
@@ -101,10 +93,7 @@ public:
     {
     }
 
-    explicit ValueType(const char *s)
-        : ValueType(std::string(s))
-    {
-    }
+    explicit ValueType(const char *s);
 
     template <class T, class _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
     explicit ValueType(T *val)
@@ -118,23 +107,11 @@ public:
     {
     }
 
-    ~ValueType()
-    {
-        clear();
-    }
+    ~ValueType();
 
-    /*static ValueType fromStack(lua_State *state, int index);
-    int push(lua_State *state) const;*/
+    void clear();
 
-    void clear()
-    {
-        mUnion = std::monostate {};
-    }
-
-    void operator=(const ValueType &other)
-    {
-        mUnion = other.mUnion;
-    }
+    void operator=(const ValueType &other);
 
     template <class T, class _ = std::enable_if_t<isValueType<T>::value>>
     void operator=(T &&t)
@@ -142,186 +119,31 @@ public:
         mUnion = std::forward<T>(t);
     }
 
-    void operator=(const char *const s)
-    {
-        mUnion = std::string(s);
-    }
+    void operator=(const char *const s);
 
-    bool operator==(const ValueType &other) const
-    {
-        return mUnion == other.mUnion;
-    }
+    bool operator==(const ValueType &other) const;
 
-    bool operator!=(const ValueType &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const ValueType &other) const;
 
-    bool operator<(const ValueType &other) const
-    {
-        switch (type()) {
-        case Type::StringValue:
-            switch (other.type()) {
-            case Type::StringValue:
-                return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
-            default:
-                throw ValueTypeException(Database::Exceptions::invalidValueType);
-            }
-        case Type::IntValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                return std::get<int>(mUnion) < std::get<int>(other.mUnion);
-            case Type::FloatValue:
-                return std::get<int>(mUnion) < std::get<float>(other.mUnion);
-            default:
-                throw ValueTypeException(Database::Exceptions::invalidValueType);
-            }
-        default:
-            throw ValueTypeException(Database::Exceptions::invalidValueType);
-        }
-    }
+    bool operator<(const ValueType &other) const;
 
-    bool operator>(const ValueType &other) const
-    {
-        return other < *this;
-    }
+    bool operator>(const ValueType &other) const;
 
-    void operator+=(const ValueType &other)
-    {
-        switch (type()) {
-        case Type::StringValue:
-            switch (other.type()) {
-            case Type::StringValue:
-                std::get<std::string>(mUnion) += std::get<std::string>(other.mUnion);
-                return;
-            case Type::IntValue:
-                std::get<std::string>(mUnion) += std::to_string(std::get<int>(other.mUnion));
-            default:
-                break;
-            }
-            break;
-        case Type::IntValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<int>(mUnion) += std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                *this = std::get<int>(mUnion) + std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        default:
-            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other.getTypeString()));
-        }
-    }
+    void operator+=(const ValueType &other);
 
-    ValueType operator+(const ValueType &other) const
-    {
-        ValueType result = *this;
-        result += other;
-        return result;
-    }
+    ValueType operator+(const ValueType &other) const;
 
-    void operator-=(const ValueType &other)
-    {
-        switch (type()) {
-        case Type::IntValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<int>(mUnion) -= std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                *this = std::get<int>(mUnion) - std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        default:
-            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
-        }
-    }
+    void operator-=(const ValueType &other);
 
-    ValueType operator-(const ValueType &other) const
-    {
-        ValueType result = *this;
-        result -= other;
-        return result;
-    }
+    ValueType operator-(const ValueType &other) const;
 
-    void operator/=(const ValueType &other)
-    {
-        switch (type()) {
-        case Type::IntValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<int>(mUnion) /= std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                *this = std::get<int>(mUnion) / std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        case Type::FloatValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<float>(mUnion) /= std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                std::get<float>(mUnion) /= std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        default:
-            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.getTypeString()));
-        }
-    }
+    void operator/=(const ValueType &other);
 
-    ValueType operator/(const ValueType &other) const
-    {
-        ValueType result = *this;
-        result /= other;
-        return result;
-    }
+    ValueType operator/(const ValueType &other) const;
 
-    void operator*=(const ValueType &other)
-    {
-        switch (type()) {
-        case Type::IntValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<int>(mUnion) *= std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                *this = std::get<int>(mUnion) * std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        case Type::FloatValue:
-            switch (other.type()) {
-            case Type::IntValue:
-                std::get<float>(mUnion) *= std::get<int>(other.mUnion);
-                return;
-            case Type::FloatValue:
-                std::get<float>(mUnion) *= std::get<float>(other.mUnion);
-            default:
-                break;
-            }
-            break;
-        default:
-            throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.getTypeString()));
-        }
-    }
+    void operator*=(const ValueType &other);
 
-    ValueType operator*(const ValueType &other) const
-    {
-        ValueType result = *this;
-        result *= other;
-        return result;
-    }
+    ValueType operator*(const ValueType &other) const;
 
     std::string toString() const;
 
@@ -411,16 +233,9 @@ public:
         return as<T>();
     }
 
-    Type type() const
-    {
-        return static_cast<Type>(mUnion.index());
-    }
+    Type type() const;
 
 private:
-    //Scripting::APIHelper::Userdata *pushUserdata(lua_State *state, const Scripting::APIHelper::Userdata &data) const;
-
-    //static int apiMethodCaller(lua_State *);
-
     Union mUnion;
 };
 }

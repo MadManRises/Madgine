@@ -2,7 +2,6 @@
 #include "bounds.h"
 
 #include "vector2.h"
-#include "vector3.h"
 
 namespace Engine {
 namespace Math {

@@ -4,7 +4,7 @@
 
 #include "uniquecomponentcollectormanager.h"
 
-#include "uniquecomponentcollector.h"
+#include "uniquecomponentregistry.h"
 
 #include "../plugins/pluginmanager.h"
 

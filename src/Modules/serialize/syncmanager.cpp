@@ -2,17 +2,11 @@
 
 #include "syncmanager.h"
 
-#include "streams/bufferedstream.h"
-
-#include "serializeexception.h"
-
 #include "toplevelserializableunit.h"
 
-#include "../serialize/streams/buffered_streambuf.h"
-
-#include "../generic/transformIt.h"
-
 #include "messageheader.h"
+
+#include "streams/buffered_streambuf.h"
 
 namespace Engine {
 namespace Serialize {

@@ -8,15 +8,9 @@
 
 #include "../uniquecomponent/uniquecomponentregistry.h"
 
-#include "Interfaces/stringutil.h"
-
-#include "../generic/templates.h"
-
 #include "Interfaces/filesystem/runtime.h"
 
 #include "../keyvalue/keyvalue.h"
-
-#include "Interfaces/filesystem/api.h"
 
 #include "../threading/defaulttaskqueue.h"
 
@@ -25,6 +19,8 @@
 #include "../ini/inisection.h"
 
 #include "pluginsection.h"
+
+#include "../ini/inifile.h"
 
 namespace Engine {
 namespace Plugins {
@@ -61,8 +57,8 @@ namespace Plugins {
 
         for (PluginSection &sec : kvValues(mSections)) {
             for (Plugin &p : kvValues(sec)) {
-                Plugin::LoadState state = p.unload();
-                assert(state == Plugin::UNLOADED);
+                LoadState state = p.unload();
+                assert(state == UNLOADED);
             }
         }
     }
@@ -85,7 +81,7 @@ namespace Plugins {
 
             Filesystem::Path exportPath = p.parentPath() / ("components_" + p.stem() + ".cpp");
 
-            exportStaticComponentHeader(exportPath, true);
+            exportStaticComponentHeader(exportPath, true); //TODO Consider using a signal to remove dependency plugin->uniquecomponent
         }
     }
 

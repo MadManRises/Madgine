@@ -2,8 +2,6 @@
 
 #include "resourceloaderbase.h"
 
-#include "resourcebase.h"
-
 #include "Modules/reflection/classname.h"
 
 

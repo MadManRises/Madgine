@@ -7,6 +7,7 @@
 #endif
 
 #include "uniquecomponentshared.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 struct LIBB_EXPORT LibBComponent : Test::TestComponent<LibBComponent> {
 

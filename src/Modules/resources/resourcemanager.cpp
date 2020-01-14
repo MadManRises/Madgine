@@ -4,7 +4,6 @@
 
 #include "resourcebase.h"
 
-#include "Modules/plugins/binaryinfo.h"
 #include "Modules/plugins/plugin.h"
 #include "Modules/plugins/pluginmanager.h"
 
@@ -99,7 +98,7 @@ namespace Resources {
         Filesystem::Path binPath = info->mBinaryDir;
         bool isLocal = plugin->fullPath().parentPath() == binPath;
         if (isLocal)
-            registerResourceLocation(Filesystem::Path(info->mProjectRoot) / "data", 75);
+            registerResourceLocation(Filesystem::Path { info->mProjectRoot } / "data", 75);
         //else
         //registerResourceLocation(binPath.parent_path() / "data" / plugin->());
     }
@@ -151,6 +150,14 @@ namespace Resources {
             }
         }
         return loaderByExtension;
+    }
+
+	bool ResourceManager::SubDirCompare::operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
+    {
+        auto [firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());
+        if (firstEnd == first.str().end() || secondEnd == second.str().end())
+            return false;
+        return first.str() < second.str();
     }
 
 }

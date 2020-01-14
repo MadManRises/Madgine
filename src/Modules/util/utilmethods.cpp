@@ -1,9 +1,6 @@
 #include "../moduleslib.h"
 
-#include <iostream>
-
 #include "log.h"
-#include "loglistener.h"
 #include "standardlog.h"
 
 namespace Engine

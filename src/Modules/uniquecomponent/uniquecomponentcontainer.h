@@ -6,12 +6,6 @@
 
 #include "../threading/slot.h"
 
-#include "uniquecomponent.h"
-
-#include "../keyvalue/typedscopeptr.h"
-
-#include "../generic/templates.h"
-
 
 namespace Engine {
 

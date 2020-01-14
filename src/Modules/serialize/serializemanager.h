@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../threading/signal.h"
-
-#include "serializableids.h"
-
 namespace Engine {
 namespace Serialize {
 

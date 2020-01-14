@@ -2,8 +2,6 @@
 
 #if ENABLE_PLUGINS
 
-#include "../ini/inifile.h"
-
 namespace Engine {
 namespace Plugins {
 

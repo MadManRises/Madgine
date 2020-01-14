@@ -29,18 +29,6 @@ namespace Threading {
         return TaskTracker { std::move(task), mTaskCount };
     }
 
-    /*TaskTracker TaskQueue::wrapTask_for(TaskHandle && task, std::chrono::steady_clock::time_point timePoint)
-		{
-			TaskTracker tracker(std::move(task), mTaskCount);
-			tracker.mScheduledFor = timePoint;
-			return tracker;
-		}
-
-		TaskTracker TaskQueue::wrapTask_after(TaskHandle && task, std::chrono::steady_clock::duration duration)
-		{
-			return wrapTask_for(std::move(task), std::chrono::steady_clock::now() + duration);
-		}*/
-
     const std::string &TaskQueue::name() const
     {
         return mName;

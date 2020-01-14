@@ -1,7 +1,6 @@
 #include "../moduleslib.h"
 
 #include "typedscopeptr.h"
-#include "metatable.h"
 #include "scopeiterator.h"
 #include "valuetype.h"
 

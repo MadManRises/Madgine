@@ -3,87 +3,83 @@
 #include "../serializable.h"
 #include "unithelper.h"
 
-namespace Engine
-{
-	namespace Serialize
-	{
-		//TODO: Implement OffsetPtr interface
-			template <class T>
-			class Serialized : UnitHelper<T>, public SerializableBase
-			{
-			public:
-				template <class... _Ty>
-				Serialized(_Ty&&... args) :
-					mData(std::forward<_Ty>(args)...)
-				{
-					//this->setParent(mData, unit());
-				}
+namespace Engine {
+namespace Serialize {
+    //TODO: Implement OffsetPtr interface
+    template <class T>
+    class Serialized : UnitHelper<T>, public SerializableBase {
+    public:
+        template <class... _Ty>
+        Serialized(_Ty &&... args)
+            : mData(std::forward<_Ty>(args)...)
+        {
+            //this->setParent(mData, unit());
+        }
 
-				template <class Ty>
-				void operator =(Ty&& v)
-				{
-					mData = std::forward<Ty>(v);
-				}
+        template <class Ty>
+        void operator=(Ty &&v)
+        {
+            mData = std::forward<Ty>(v);
+        }
 
-				T& operator*()
-				{
-					return mData;
-				}
-				 
-				const T& operator*() const
-				{
-					return mData;
-				}
+        T &operator*()
+        {
+            return mData;
+        }
 
-				T* operator->()
-				{
-					return &mData;
-				}
+        const T &operator*() const
+        {
+            return mData;
+        }
 
-				const T* operator->() const
-				{
-					return &mData;
-				}
+        T *operator->()
+        {
+            return &mData;
+        }
 
-				T* ptr()
-				{
-					return &mData;
-				}
+        const T *operator->() const
+        {
+            return &mData;
+        }
 
-				const T* ptr() const
-				{
-					return &mData;
-				}
+        T *ptr()
+        {
+            return &mData;
+        }
 
-				operator const T &() const
-				{
-					return mData;
-				}
+        const T *ptr() const
+        {
+            return &mData;
+        }
 
-				void readState(SerializeInStream& in)
-				{
-					this->read_state(in, mData);
-				}
+        operator const T &() const
+        {
+            return mData;
+        }
 
-				void writeState(SerializeOutStream& out) const
-				{
-					this->write_state(out, mData);					
-				}
+        void readState(SerializeInStream &in)
+        {
+            this->read_state(in, mData);
+        }
 
-				void setDataSynced(bool b)
-				{
-					this->setItemDataSynced(mData, b);
-				}
+        void writeState(SerializeOutStream &out) const
+        {
+            this->write_state(out, mData);
+        }
 
-				void setActive(bool active, bool existenceChanged)
-				{
-					this->setItemActive(mData, active, existenceChanged);
-				}
+        void setDataSynced(bool b)
+        {
+            this->setItemDataSynced(mData, b);
+        }
 
-			private:
-				T mData;
-			};
+        void setActive(bool active, bool existenceChanged)
+        {
+            this->setItemActive(mData, active, existenceChanged);
+        }
 
+    private:
+        T mData;
+    };
 
-	}
+}
 }

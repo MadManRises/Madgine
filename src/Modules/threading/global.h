@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../generic/any.h"
-#include "../generic/proxy.h"
 #include "../generic/tupleunpacker.h"
 
 namespace Engine {

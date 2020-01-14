@@ -1,6 +1,5 @@
 #pragma once
 
-#include "uniquecomponent.h"
 #include "uniquecomponentcollector.h"
 #include "uniquecomponentcontainer.h"
 

@@ -26,8 +26,6 @@ namespace Serialize {
         setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
         pbump(static_cast<int>(other.pptr() - other.pbase()));
         other.mIsClosed = true;
-
-        //setp(mSendBuffer.back().data(), mSendBuffer.back().data() + (other.pptr() - other.pbase()), mSendBuffer.back().data() + BUFFER_SIZE);
     }
 
     buffered_streambuf::~buffered_streambuf()
@@ -250,5 +248,5 @@ namespace Serialize {
             close(UNKNOWN_ERROR);
         }
     }
-} // namespace Serialize
-} // namespace Core
+} 
+}

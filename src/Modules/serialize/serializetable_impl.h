@@ -7,6 +7,7 @@
 #include "container/unithelper.h"
 #include "serializetable.h"
 #include "streams/serializestream.h"
+#include "serializer.h"
 
 namespace Engine {
 namespace Serialize {

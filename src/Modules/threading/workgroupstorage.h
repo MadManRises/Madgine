@@ -1,9 +1,8 @@
 #pragma once
 
-#include "global.h"
-
 #if ENABLE_THREADING
 
+#    include "global.h"
 #    include "workgroup.h"
 
 namespace Engine {
@@ -40,14 +39,15 @@ namespace Threading {
         static void finalize(bool bss);
     };
 
-	template <typename T>
-	using WorkgroupLocal = Global<T, WorkGroupStorage>;
+    template <typename T>
+    using WorkgroupLocal = Global<T, WorkGroupStorage>;
 
 }
 }
 
 #else
 
+#    include "../generic/proxy.h"
 #    include "globalstorage.h"
 
 namespace Engine {

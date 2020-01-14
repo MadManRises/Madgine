@@ -12,6 +12,8 @@
 
 #include "Modules/plugins/pluginsection.h"
 
+#include "Modules/plugins/plugin.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {

@@ -2,9 +2,7 @@
 
 #if ENABLE_PLUGINS
 
-#    include "../ini/inifile.h"
-
-#    include "plugin.h"
+#include "loadstate.h"
 
 namespace Engine {
 namespace Plugins {
@@ -19,8 +17,8 @@ namespace Plugins {
         bool isExclusive() const;
 
         bool isLoaded(const std::string &name) const;
-        Plugin::LoadState loadPlugin(const std::string &name);
-        Plugin::LoadState unloadPlugin(const std::string &name);
+        LoadState loadPlugin(const std::string &name);
+        LoadState unloadPlugin(const std::string &name);
 
         bool loadPluginByFilename(const std::string &name);
 
@@ -46,8 +44,8 @@ namespace Plugins {
         Plugin *getPlugin(const std::string &name);
 
     private:
-        Plugin::LoadState loadPlugin(Plugin *p);
-        Plugin::LoadState unloadPlugin(Plugin *p);
+        LoadState loadPlugin(Plugin *p);
+        LoadState unloadPlugin(Plugin *p);
 
         friend struct Plugin;
 
