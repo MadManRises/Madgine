@@ -9,8 +9,7 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        class MADGINE_SCENE_EXPORT EntityComponentBase : public Serialize::SerializableUnitBase, public ScopeBase {
-        public:
+        struct MADGINE_SCENE_EXPORT EntityComponentBase : Serialize::SerializableUnitBase, ScopeBase {        
             EntityComponentBase(Entity &entity, const ObjectPtr &initTable = {});
             virtual ~EntityComponentBase() = 0;
 
@@ -22,7 +21,7 @@ namespace Scene {
 
             virtual const char *key() const = 0;
 
-            template <class T>
+            template <typename T>
             T *getComponent()
             {
                 return static_cast<T *>(getComponent(T::componentName()));
@@ -30,7 +29,7 @@ namespace Scene {
 
             EntityComponentBase *getComponent(const std::string &name);
 
-            template <class T>
+            template <typename T>
             T *addComponent(const ObjectPtr &init = {})
             {
                 return static_cast<T *>(addComponent(T::componentName(), init));
@@ -38,7 +37,7 @@ namespace Scene {
 
             EntityComponentBase *addComponent(const std::string &name, const ObjectPtr &init);
 
-            template <class T>
+            template <typename T>
             T &getSceneComponent(bool init = true)
             {
                 return static_cast<T &>(getSceneComponent(T::component_index(), init));
@@ -46,7 +45,7 @@ namespace Scene {
 
             SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-            template <class T>
+            template <typename T>
             T &getGlobalAPIComponent(bool init = true)
             {
                 return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));

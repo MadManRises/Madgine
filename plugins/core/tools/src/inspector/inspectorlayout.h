@@ -2,27 +2,19 @@
 
 #include "layoutloader.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
+namespace Engine {
+namespace Tools {
 
-		class MADGINE_TOOLS_EXPORT InspectorLayout
-		{
-		public:
-			InspectorLayout(LayoutLoader::HandleType &&document);
+    struct MADGINE_TOOLS_EXPORT InspectorLayout {
+        InspectorLayout(LayoutLoader::HandleType &&document);
 
-			tinyxml2::XMLElement *rootElement();
+        tinyxml2::XMLElement *rootElement();
 
-			std::vector<std::string> associations();
+        std::vector<std::string> associations();
 
+    private:
+        LayoutLoader::HandleType mDocument;
+    };
 
-		private:
-
-			LayoutLoader::HandleType mDocument;
-			
-		};
-
-
-	}
+}
 }

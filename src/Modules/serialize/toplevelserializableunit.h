@@ -4,8 +4,7 @@
 
 namespace Engine {
 namespace Serialize {
-    class MODULES_EXPORT TopLevelSerializableUnitBase : public SerializableUnitBase {
-    public:
+    struct MODULES_EXPORT TopLevelSerializableUnitBase : SerializableUnitBase {    
         TopLevelSerializableUnitBase(size_t staticId = 0);
         TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
         TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept;
@@ -34,7 +33,7 @@ namespace Serialize {
         size_t mStaticSlaveId;
     };
 
-    template <class T>
+    template <typename T>
     using TopLevelSerializableUnit = SerializableUnit<T, TopLevelSerializableUnitBase>;
 } // namespace Serialize
 } // namespace Core

@@ -35,9 +35,8 @@ namespace Threading {
         TaskQueue *mQueue;
     };
 
-    template <auto f, class R, class T, class... _Ty>
-    class SlotImpl : public SlotBase {
-    public:
+    template <auto f, typename R, typename T, typename... _Ty>
+    struct SlotImpl : SlotBase {
         SlotImpl(T *item, TaskQueue *queue = nullptr)
             : SlotBase(queue)
             , mItem(item)

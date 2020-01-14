@@ -7,14 +7,13 @@
 namespace Engine {
 namespace App {
 
-    class MADGINE_BASE_EXPORT Application : public ScopeBase,
-                                            public MadgineObject {
-    public:
+    struct MADGINE_BASE_EXPORT Application : ScopeBase,
+                                             MadgineObject {
         Application(const AppSettings &settings);
 
         virtual ~Application();
 
-        template <class T>
+        template <typename T>
         T &getGlobalAPIComponent()
         {
             return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
@@ -22,18 +21,15 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
 
-
         Application &getSelf(bool = true);
 
-        
         const AppSettings &settings();
 
         virtual const MadgineObject *parent() const override;
-        
-		static Application &getSingleton();
+
+        static Application &getSingleton();
 
     protected:
-
         bool init() override;
 
         void finalize() override;

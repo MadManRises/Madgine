@@ -3,19 +3,19 @@
 namespace Engine {
 namespace Debug {
 
-    template <class T>
+    template <typename T>
     const T &min(const T &a, const T &b)
     {
         return std::min(a, b);
     }
 
-    template <class T>
+    template <typename T>
     const T &max(const T &a, const T &b)
     {
         return std::max(a, b);
     }
 
-    template <class... Ty>
+    template <typename... Ty>
     struct Record {
         Record() = default;
         Record(Ty... data)
@@ -55,19 +55,19 @@ namespace Debug {
         std::tuple<Ty...> mData;
     };
 
-    template <class... Ty>
+    template <typename... Ty>
     Record<Ty...> min(const Record<Ty...> &a, const Record<Ty...> &b)
     {
         return { Debug::min(std::get<Ty>(a.mData), std::get<Ty>(b.mData))... };
     }
 
-    template <class... Ty>
+    template <typename... Ty>
     Record<Ty...> max(const Record<Ty...> &a, const Record<Ty...> &b)
     {
         return { Debug::max(std::get<Ty>(a.mData), std::get<Ty>(b.mData))... };
     }
 
-    template <class T>
+    template <typename T>
     struct HistoryData {
         HistoryData()
             : mCurrentTotal {}
@@ -88,7 +88,7 @@ namespace Debug {
         size_t mCount, mIndex;
     };
 
-    template <class T, size_t S>
+    template <typename T, size_t S>
     struct History {
         History()
             : mBuffer { {} }
@@ -133,7 +133,7 @@ namespace Debug {
         std::array<T, S> mBuffer;
     };
 
-    template <class T, size_t S>
+    template <typename T, size_t S>
     struct Atomic_History {
         Atomic_History()
             : mBuffer { {} }

@@ -7,10 +7,9 @@ namespace Engine
 	namespace UI
 	{
 		
-		template <class T = Widgets::WidgetBase>
-		class WidgetPtr
+		template <typename T = Widgets::WidgetBase>
+		struct WidgetPtr
 		{
-		public:
 			WidgetPtr(Handler *handler, const std::string &name) :
 				mPtr(nullptr)
 			{

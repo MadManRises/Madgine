@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Serialize {
 
-    class MODULES_EXPORT SerializableUnitBase {
+    struct MODULES_EXPORT SerializableUnitBase {
     protected:
         SerializableUnitBase(size_t masterId = 0);
         SerializableUnitBase(const SerializableUnitBase &other);

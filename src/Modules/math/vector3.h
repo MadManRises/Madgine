@@ -39,8 +39,7 @@ namespace Engine {
 	scaling factors can be represented by a vector, depending on how
 	you interpret the values.
 	*/
-class MODULES_EXPORT Vector3 {
-public:
+struct MODULES_EXPORT Vector3 {
     float x, y, z;
 
 public:

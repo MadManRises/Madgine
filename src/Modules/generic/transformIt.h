@@ -4,20 +4,20 @@
 
 namespace Engine {
 
-template <class T, typename Converter>
+template <typename T, typename Converter>
 struct TransformItContainer : T {
     using iterator_traits = derive_iterator<T>;
 
     template <typename It>
-    class TransformIterator {
-    public:
+    struct TransformIterator
+    {
         using iterator_category = typename It::iterator_category;
         using value_type = typename std::remove_reference<decltype(std::declval<Converter>()(std::declval<typename It::reference>()))>::type;
         using difference_type = ptrdiff_t;
         using pointer = void;
         using reference = value_type;
 
-        TransformIterator(It &&it)
+        TransformIterator(It && it)
             : mIt(std::forward<It>(it))
         {
         }
@@ -103,39 +103,39 @@ public:
     }
 };
 
-template <typename Converter, class T>
+template <typename Converter, typename T>
 const TransformItContainer<T, Converter> &transformIt(const T &t)
 {
     return static_cast<const TransformItContainer<T, Converter> &>(t);
 }
 
-template <typename Converter, class T>
+template <typename Converter, typename T>
 TransformItContainer<T, Converter> &transformIt(T &t)
 {
     return static_cast<TransformItContainer<T, Converter> &>(t);
 }
 
-template <typename Converter, class T>
+template <typename Converter, typename T>
 const TransformItContainer<T, Converter> &transformIt(const T &&t)
 {
     static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt"); //Consider returning temporary
 }
 
-template <typename Converter, class T>
+template <typename Converter, typename T>
 TransformItContainer<T, Converter> &transformIt(T &&t)
 {
     static_assert(dependent_bool<T, false>::value, "rvalues are not allowed for transformIt"); //Consider returning temporary
 }
 
 struct ToPointerConverter {
-    template <class T>
+    template <typename T>
     T *operator()(T &t)
     {
         return &t;
     }
 };
 
-template <class T>
+template <typename T>
 decltype(auto) toPointer(T &&t)
 {
     return transformIt<ToPointerConverter>(std::forward<T>(t));
@@ -149,7 +149,7 @@ struct UniquePtrToPtrConverter {
     }
 };
 
-template <class T>
+template <typename T>
 decltype(auto) uniquePtrToPtr(T &&t)
 {
     return transformIt<UniquePtrToPtrConverter>(std::forward<T>(t));

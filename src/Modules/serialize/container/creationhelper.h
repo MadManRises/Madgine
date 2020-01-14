@@ -9,7 +9,7 @@ namespace Engine
 	namespace Serialize
 	{
 
-		template <class FirstCreator, class SecondCreator>
+		template <typename FirstCreator, typename SecondCreator>
 		struct PairCreator : private FirstCreator, private SecondCreator
 		{		
 			using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::ArgsTuple, typename SecondCreator::
@@ -22,7 +22,7 @@ namespace Engine
 			}
 		};
 
-		template <class... Args>
+		template <typename... Args>
 		struct DefaultCreator
 		{
 			using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<Args>>...>;
@@ -39,7 +39,7 @@ namespace Engine
 		};
 
 		/*namespace __creationhelper__impl__{
-			template <class R, class T, class... _Ty>
+			template <typename R, typename T, typename... _Ty>
 			struct _CustomCreator
 			{
 				using ArgsTuple = R;
@@ -65,7 +65,7 @@ namespace Engine
 		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;*/
 
 		namespace __creationhelper__impl__{
-			template <auto f, class R, class T, class... _Ty>
+                    template <auto f, typename R, typename T, typename... _Ty>
 			struct _ParentCreator
 			{	
 				using ArgsTuple = R;

@@ -9,9 +9,8 @@ namespace Engine
 		namespace Entity
 		{
 
-			class MADGINE_SCENE_EXPORT Animation : public EntityComponent<Animation>
-			{
-			public:
+			struct MADGINE_SCENE_EXPORT Animation : EntityComponent<Animation>
+			{			
 				using EntityComponent<Animation>::EntityComponent;
 				virtual ~Animation() = default;
 

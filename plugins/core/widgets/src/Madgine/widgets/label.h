@@ -7,8 +7,7 @@
 
 namespace Engine {
 namespace Widgets {
-    class MADGINE_WIDGETS_EXPORT Label : public Widget<Label> {
-    public:
+    struct MADGINE_WIDGETS_EXPORT Label : Widget<Label> {
         using Widget::Widget;
         virtual ~Label() = default;
 

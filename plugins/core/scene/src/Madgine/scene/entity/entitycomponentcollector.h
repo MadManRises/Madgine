@@ -23,8 +23,7 @@ namespace Scene {
         extern "C" DLL_EXPORT PluginEntityComponents *PLUGIN_LOCAL(pluginEntityComponents)();
 #endif
 
-        class MADGINE_SCENE_EXPORT EntityComponentCollector {
-        public:
+        struct MADGINE_SCENE_EXPORT EntityComponentCollector {        
             static bool existsComponent(const std::string &name);
 
             static std::set<std::string> registeredComponentNames();
@@ -58,16 +57,15 @@ namespace Scene {
 
 #endif
 
-            template <class T>
+            template <typename T>
             static std::unique_ptr<EntityComponentBase> createComponent_t(Entity &e, const ObjectPtr &table = {})
             {
                 return std::make_unique<T>(e, table);
             }
 
         public:
-            template <class T>
-            class ComponentRegistrator {
-            public:
+            template <typename T>
+            struct ComponentRegistrator {            
                 ComponentRegistrator()
                 {
                     const std::string name = T::componentName();

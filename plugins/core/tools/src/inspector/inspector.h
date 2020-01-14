@@ -8,8 +8,7 @@
 namespace Engine {
 namespace Tools {
 
-    class MADGINE_TOOLS_EXPORT Inspector : public Tool<Inspector> {
-    public:
+    struct MADGINE_TOOLS_EXPORT Inspector : Tool<Inspector> {
         Inspector(ImRoot &root);
         Inspector(const Inspector &) = delete;
         ~Inspector();

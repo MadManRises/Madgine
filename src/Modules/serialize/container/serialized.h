@@ -6,17 +6,16 @@
 namespace Engine {
 namespace Serialize {
     //TODO: Implement OffsetPtr interface
-    template <class T>
-    class Serialized : UnitHelper<T>, public SerializableBase {
-    public:
-        template <class... _Ty>
+    template <typename T>
+    struct Serialized : private UnitHelper<T>, SerializableBase {
+        template <typename... _Ty>
         Serialized(_Ty &&... args)
             : mData(std::forward<_Ty>(args)...)
         {
             //this->setParent(mData, unit());
         }
 
-        template <class Ty>
+        template <typename Ty>
         void operator=(Ty &&v)
         {
             mData = std::forward<Ty>(v);

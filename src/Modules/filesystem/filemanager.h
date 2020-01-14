@@ -5,8 +5,7 @@
 
 namespace Engine {
 namespace Filesystem {
-    class MODULES_EXPORT FileManager : public Serialize::SerializeManager {
-    public:
+    struct MODULES_EXPORT FileManager : Serialize::SerializeManager {    
         FileManager(const std::string &name);
         FileManager(const FileManager &) = delete;
         FileManager(FileManager &&) noexcept = default; 

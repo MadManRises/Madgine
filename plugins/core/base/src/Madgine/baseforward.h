@@ -6,13 +6,13 @@ namespace Engine
 	namespace App
 	{
 		struct AppSettings;
-		class Application;			
-		class GlobalAPIBase;
+		struct Application;			
+		struct GlobalAPIBase;
 	}
 
 	namespace Core
 	{
-		class Root;
+		struct Root;
 	}
 
 }

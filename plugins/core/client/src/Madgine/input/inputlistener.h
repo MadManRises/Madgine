@@ -3,8 +3,7 @@
 namespace Engine {
 namespace Input {
 
-    class InputListener {
-    public:
+    struct InputListener {
         virtual bool injectKeyPress(const KeyEventArgs &arg) { return false; };
         virtual bool injectKeyRelease(const KeyEventArgs &arg) { return false; }
         virtual bool injectPointerPress(const PointerEventArgs &arg) { return false; }

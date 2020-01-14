@@ -5,11 +5,10 @@
 namespace Engine {
 namespace Threading {
 
-    class MODULES_EXPORT ConnectionStore {
-    public:
+    struct MODULES_EXPORT ConnectionStore {    
         typedef std::list<std::shared_ptr<ConnectionBase>>::const_iterator const_iterator;
 
-        template <class Con, class... Args>
+        template <typename Con, typename... Args>
         static std::shared_ptr<Con> create(std::shared_ptr<ConnectionBase> *prev, Args &&... args)
         {
 
@@ -18,7 +17,7 @@ namespace Threading {
                     std::make_unique<Con>(prev, std::forward<Args>(args)...)));
         }
 
-        template <class Con, class... Args>
+        template <typename Con, typename... Args>
         std::weak_ptr<Con> emplace_front(Args &&... args)
         {
             std::lock_guard lock(mMutex);
@@ -42,7 +41,7 @@ namespace Threading {
 
 	DERIVE_FUNCTION(connectionStore);
 
-    template <class T>
+    template <typename T>
     using has_store = std::is_same<typename has_function_connectionStore<T>::return_type, ConnectionStore &>;
 
 }

@@ -9,8 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-    class MADGINE_SCENE_EXPORT SceneComponentBase : public Serialize::SerializableUnitBase, public ScopeBase, public MadgineObject {
-    public:
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : Serialize::SerializableUnitBase, ScopeBase, MadgineObject {    
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);
@@ -21,7 +20,7 @@ namespace Scene {
 
         const char *key() const;
 
-        template <class T>
+        template <typename T>
         T &getSceneComponent(bool init = true)
         {
             return static_cast<T &>(getSceneComponent(component_index<T>(), init));
@@ -29,7 +28,7 @@ namespace Scene {
 
         SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-        template <class T>
+        template <typename T>
         T &getGlobalAPIComponent(bool init = true)
         {
             return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));

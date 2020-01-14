@@ -6,9 +6,8 @@ namespace Engine
 	namespace Core
 	{
 
-		class MADGINE_BASE_EXPORT Root
-		{
-		public:
+		struct MADGINE_BASE_EXPORT Root
+		{		
 			Root(int argc = 0, char **argv = nullptr);
 			~Root();
 

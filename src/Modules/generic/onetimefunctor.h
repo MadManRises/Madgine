@@ -5,7 +5,7 @@
 namespace Engine {
 
 //TODO Maybe mutable lambda is enough
-template <class T, class... Ty>
+template <typename T, typename... Ty>
 struct OneTimeFunctor {
     OneTimeFunctor(void (T::*f)(Ty...), T *t, Ty &&... args)
         : mT(t)
@@ -51,7 +51,7 @@ private:
     mutable bool mCalled;
 };
 
-template <class T, class... Ty>
+template <typename T, typename... Ty>
 auto oneTimeFunctor(void (T::*f)(Ty...), T *t, Ty &&... args)
 {
     return OneTimeFunctor<T, Ty...> { f, t, std::forward<Ty>(args)... };

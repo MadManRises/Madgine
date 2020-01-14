@@ -36,7 +36,7 @@ namespace Serialize {
             read(t, nullptr);
         }
 
-        template <class T, typename... Args>
+        template <typename T, typename... Args>
         void read(T &t, const char *name, Args &&... args)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
@@ -97,7 +97,7 @@ namespace Serialize {
                 InStream::operator>>(t);
         }
 
-        template <class T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
+        template <typename T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
         void readUnformatted(T *&p)
         {
             SerializableUnitBase *unit;
@@ -116,7 +116,7 @@ namespace Serialize {
         std::string peekUntil(const char *set);
 
         void readRaw(void *buffer, size_t size);
-        template <class T>
+        template <typename T>
         void readRaw(T &t)
         {
             readRaw(&t, sizeof(T));
@@ -171,7 +171,7 @@ namespace Serialize {
             return *this;
         }
 
-        template <class T>
+        template <typename T>
         void write(const T &t, const char *name = nullptr)
         {
             if constexpr (PrimitiveTypesContain_v<T>) {
@@ -227,7 +227,7 @@ namespace Serialize {
         void writeUnformatted(const Filesystem::Path &p);
 
         void writeRaw(const void *buffer, size_t size);
-        template <class T>
+        template <typename T>
         void writeRaw(const T &t)
         {
             writeRaw(&t, sizeof(T));

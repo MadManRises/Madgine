@@ -7,21 +7,19 @@
 namespace Engine {
 namespace Tools {
 
-	struct XMLDocument {
+    struct XMLDocument {
         XMLDocument();
 
-		XMLDocument(XMLDocument &&) = default;
+        XMLDocument(XMLDocument &&) = default;
 
-		XMLDocument &operator=(XMLDocument &&) = default;
+        XMLDocument &operator=(XMLDocument &&) = default;
 
-		tinyxml2::XMLDocument *operator->() const { return mPtr.get(); }
+        tinyxml2::XMLDocument *operator->() const { return mPtr.get(); }
 
         std::unique_ptr<tinyxml2::XMLDocument> mPtr;
-	};
+    };
 
-    class LayoutLoader : public Resources::ResourceLoader<LayoutLoader, XMLDocument> {
-
-    public:
+    struct LayoutLoader : Resources::ResourceLoader<LayoutLoader, XMLDocument> {
         LayoutLoader();
 
         bool loadImpl(Data &data, ResourceType *res);

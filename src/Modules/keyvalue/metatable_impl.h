@@ -10,11 +10,11 @@
 
 namespace Engine {
 
-template <class T, typename = void>
+template <typename T, typename = void>
 struct is_typed_iterable : std::false_type {
 };
 
-template <class T>
+template <typename T>
 struct is_typed_iterable<T, std::void_t<decltype(std::declval<T>().typedBegin()), decltype(std::declval<T>().typedEnd())>> : std::true_type {
 };
 

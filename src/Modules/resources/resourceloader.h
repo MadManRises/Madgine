@@ -199,13 +199,13 @@ namespace Resources {
         typename Storage::template container_type<DataContainer> mData;
     };
 
-    template <class T, class _Data, typename Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
+    template <typename T, typename _Data, typename Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
     struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>> {
 
         using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>>::UniqueComponent;
     };
 
-    template <typename T, class _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
+    template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
     struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderBase> {
 
         using Data = _Data;

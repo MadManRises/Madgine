@@ -57,8 +57,7 @@ namespace Engine {
     @par
         The coordinate system is assumed to be <b>right-handed</b>.
 */
-class MODULES_EXPORT Matrix4 {
-public:
+struct MODULES_EXPORT Matrix4 {
     /** Default constructor.
         @note
             It does <b>NOT</b> initialize the matrix for efficiency.

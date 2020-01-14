@@ -50,7 +50,7 @@ struct container_traits<std::list<T>> {
             this->emplace(this->end(), item);
         }
 
-        template <class... _Ty>
+        template <typename... _Ty>
         std::pair<iterator, bool> emplace_back(_Ty &&... args)
         {
             return this->emplace(this->end(), std::forward<_Ty>(args)...);
@@ -205,7 +205,7 @@ struct container_traits<std::vector<T>> {
         }
     };
 
-    template <class... _Ty>
+    template <typename... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
@@ -296,7 +296,7 @@ struct container_traits<std::set<T, Cmp>> {
     template <typename C>
     using api = SortedContainerApi<C>;
 
-    template <class... _Ty>
+    template <typename... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return c.emplace(std::forward<_Ty>(args)...);
@@ -380,7 +380,7 @@ struct container_traits<std::map<K, T>> {
             return C::at(key);
         }
 
-        template <class... _Ty>
+        template <typename... _Ty>
         std::pair<iterator, bool> try_emplace(const K &key, _Ty &&... args)
         {
             auto it = C::lower_bound(key);
@@ -391,7 +391,7 @@ struct container_traits<std::map<K, T>> {
         }
     };
 
-    template <class... _Ty>
+    template <typename... _Ty>
     static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return c.emplace(std::forward<_Ty>(args)...);

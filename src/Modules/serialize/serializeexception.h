@@ -5,9 +5,8 @@ namespace Engine
 {
 	namespace Serialize
 	{
-		class SerializeException : public std::exception
-		{
-		public:
+		struct SerializeException : std::exception
+		{		
 			SerializeException(const std::string& msg) :
 				m_msg(msg)
 			{

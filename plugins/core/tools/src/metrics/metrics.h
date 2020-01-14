@@ -4,29 +4,23 @@
 
 #include "Modules/debug/history.h"
 
-namespace Engine
-{
-	namespace Tools
-	{
+namespace Engine {
+namespace Tools {
 
-		class Metrics : public Tool<Metrics>
-		{
-		public:
+    struct Metrics : Tool<Metrics> {
+        Metrics(ImRoot &root);
 
-			Metrics(ImRoot &root);
+        virtual void render() override;
+        virtual void update() override;
 
-			virtual void render() override;
-			virtual void update() override;
+        const char *key() const override;
 
-			const char* key() const override;
+    private:
+        Debug::History<float, 120> mFramesPerSecond;
 
-		private:
-			Debug::History<float, 120> mFramesPerSecond;
+        Debug::History<float, 100> mFramesTrend;
+        float mTimeBank;
+    };
 
-			Debug::History<float, 100> mFramesTrend;
-			float mTimeBank;
-
-		};
-
-	}
+}
 }

@@ -26,11 +26,10 @@
 
 namespace Engine {
 namespace Widgets {
-    class MADGINE_WIDGETS_EXPORT WidgetBase : public ScopeBase,
-                                             public Serialize::SerializableUnit<WidgetBase> {
+    struct MADGINE_WIDGETS_EXPORT WidgetBase : ScopeBase,
+                                               Serialize::SerializableUnit<WidgetBase> {
         SERIALIZABLEUNIT;
 
-    public:
         WidgetBase(const std::string &name, WidgetBase *parent);
 
         WidgetBase(const std::string &name, WidgetManager &manager);
@@ -112,11 +111,11 @@ namespace Widgets {
 
         void writeCreationData(Serialize::SerializeOutStream &of) const;
 
-		size_t depth();
+        size_t depth();
 
-		bool mVisible = true;
+        bool mVisible = true;
 
-		WidgetManager &manager();
+        WidgetManager &manager();
 
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
@@ -135,10 +134,9 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-		std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
-
         void destroyChild(WidgetBase *w);
 
         //KeyValueMapList maps() override;

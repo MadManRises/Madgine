@@ -34,13 +34,13 @@ namespace TupleUnpacker {
             std::make_index_sequence<S - 1 - I>());
     }
 
-    template <class F, size_t... S, class Tuple>
+    template <typename F, size_t... S, typename Tuple>
     decltype(auto) unpackTuple(F &&f, Tuple &&args, std::index_sequence<S...>)
     {
         return std::invoke(std::forward<F>(f), std::get<S>(std::forward<Tuple>(args))...);
     }
 
-    template <class F, class Tuple>
+    template <typename F, typename Tuple>
     decltype(auto) invokeFromTuple(F &&f, Tuple &&args)
     {
         return unpackTuple(std::forward<F>(f), std::forward<Tuple>(args),
@@ -72,7 +72,7 @@ namespace TupleUnpacker {
         return std::forward<R>(defaultValue);
     }
 
-    template <typename T, size_t... S, class Tuple>
+    template <typename T, size_t... S, typename Tuple>
     T constructUnpackTuple(Tuple &&args, std::index_sequence<S...>)
     {
         return T { std::get<S>(std::forward<Tuple>(args))... };

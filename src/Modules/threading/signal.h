@@ -5,9 +5,8 @@
 namespace Engine {
 namespace Threading {
 
-    template <class... _Ty>
-    class Signal : public SignalStub<_Ty...> {
-    public:
+    template <typename... _Ty>
+    struct Signal : SignalStub<_Ty...> {
         Signal() = default;
 
         Signal(const Signal<_Ty...> &other) = default;
@@ -30,12 +29,11 @@ namespace Threading {
                     if (marker < i)
                         this->mConnectedSlots[marker] = ptr;
                     ++marker;
-					(*ptr)(args...);                    
-                } 
+                    (*ptr)(args...);
+                }
             }
 
-			this->mConnectedSlots.erase(this->mConnectedSlots.begin() + marker, this->mConnectedSlots.begin() + end);
-
+            this->mConnectedSlots.erase(this->mConnectedSlots.begin() + marker, this->mConnectedSlots.begin() + end);
         }
     };
 }

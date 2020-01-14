@@ -6,7 +6,7 @@ namespace Engine
 {
 	namespace GUI
 	{
-		template <class T>
+		template <typename T>
 		struct ClassId
 		{
 		};

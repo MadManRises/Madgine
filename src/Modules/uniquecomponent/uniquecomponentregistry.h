@@ -8,20 +8,20 @@
 
 namespace Engine {
 
-template <class T, class Base, class... _Ty>
+template <typename T, typename Base, typename... _Ty>
 std::unique_ptr<Base> createComponent(_Ty... arg)
 {
     return std::make_unique<T>(std::forward<_Ty>(arg)...) ;
 }
 
-template <class Base, class... _Ty>
+template <typename Base, typename... _Ty>
 using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
-/*template <typename Container, class _Base, class... _Ty>
+/*template <typename Container, typename _Base, typename... _Ty>
 struct UniqueComponentContainer;*/
 
-template <class _Base, class... _Ty>
-class UniqueComponentSelector;
+template <typename _Base, typename... _Ty>
+struct UniqueComponentSelector;
 
 }
 
@@ -90,12 +90,12 @@ private:
     const TypeInfo *mTi;
 };
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 struct UniqueComponentRegistry;
 
 DLL_IMPORT_VARIABLE2(Registry, uniqueComponentRegistry, typename Registry);
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 struct UniqueComponentRegistry : ComponentRegistryBase {
 
     typedef _Base Base;
@@ -200,7 +200,7 @@ private:
 
 namespace Engine {
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 struct UniqueComponentRegistry {
 
     typedef _Base Base;

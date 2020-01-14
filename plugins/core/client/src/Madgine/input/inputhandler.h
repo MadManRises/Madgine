@@ -6,8 +6,7 @@
 
 namespace Engine {
 namespace Input {
-    class MADGINE_CLIENT_EXPORT InputHandler : public Threading::FrameListener {
-    public:
+    struct MADGINE_CLIENT_EXPORT InputHandler : Threading::FrameListener {    
         InputHandler(GUI::TopLevelWindow &window, InputListener *listener);
         virtual ~InputHandler();
 

@@ -2,19 +2,15 @@
 
 #include "widget.h"
 
-namespace Engine
-{
-namespace Widgets
-	{
-    class MADGINE_WIDGETS_EXPORT TabWidget : public Widget<TabWidget>
-		{
-		public:			
-			using Widget::Widget;
-			virtual ~TabWidget() = default;
+namespace Engine {
+namespace Widgets {
+    struct MADGINE_WIDGETS_EXPORT TabWidget : Widget<TabWidget> {
+        using Widget::Widget;
+        virtual ~TabWidget() = default;
 
-			virtual void addTab(Widget* w);
+        virtual void addTab(Widget *w);
 
-			virtual WidgetClass getClass() const override;
-		};
-	}
+        virtual WidgetClass getClass() const override;
+    };
+}
 }

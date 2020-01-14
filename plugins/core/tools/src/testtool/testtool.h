@@ -2,29 +2,21 @@
 
 #include "../toolscollector.h"
 
+namespace Engine {
+namespace Tools {
 
-namespace Engine
-{
-	namespace Tools
-	{
+    struct TestTool : Tool<TestTool> {
 
-		class TestTool : public Tool<TestTool>
-		{
-		public:
+        TestTool(ImRoot &root);
 
-			TestTool(ImRoot &root);
+        virtual void render() override;
+        virtual void update() override;
 
-			virtual void render() override;
-			virtual void update() override;
+        const char *key() const override;
 
-			const char* key() const override;
+        void logTest();
+        void logValue(const ValueType &v);
+    };
 
-			void logTest();
-            void logValue(const ValueType &v);
-
-		private:
-
-		};
-
-	}
+}
 }

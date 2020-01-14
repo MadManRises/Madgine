@@ -61,15 +61,14 @@ namespace GUI {
         }
     };
 
-    class MADGINE_CLIENT_EXPORT TopLevelWindow : public ScopeBase,
-                                                 public Input::InputListener,
-                                                 public Window::WindowEventListener,
-                                                 public Threading::FrameListener,
-                                                 public Serialize::TopLevelSerializableUnit<TopLevelWindow>,
-                                                 public MadgineObject {
+    struct MADGINE_CLIENT_EXPORT TopLevelWindow : ScopeBase,
+                                                  Input::InputListener,
+                                                  Window::WindowEventListener,
+                                                  Threading::FrameListener,
+                                                  Serialize::TopLevelSerializableUnit<TopLevelWindow>,
+                                                  MadgineObject {
         SERIALIZABLEUNIT;
 
-    public:
         TopLevelWindow(const Window::WindowSettings &settings);
         virtual ~TopLevelWindow();
 
@@ -100,7 +99,7 @@ namespace GUI {
         virtual bool frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
 
-        template <class T>
+        template <typename T>
         T &getWindowComponent(bool init = true)
         {
             return static_cast<T &>(getWindowComponent(component_index<T>(), init));

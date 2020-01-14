@@ -18,18 +18,18 @@ namespace Serialize {
         typedef SerializableUnitBase *type;
     };
 
-    template <class T, class = void>
+    template <typename T, typename = void>
     struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, typename SerializableUnitReducer<T>::type> {
     };
 
-    template <class T>
+    template <typename T>
     const constexpr size_t PrimitiveTypeIndex_v = PrimitiveTypeIndex<T>::value;
 
-    template <class T, class = void>
+    template <typename T, typename = void>
     struct PrimitiveTypesContain : type_pack_contains<SerializePrimitives, T> {
     };
 
-    template <class T>
+    template <typename T>
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value || std::is_convertible_v<T, SerializableUnitBase *>;
 
     template <typename T>

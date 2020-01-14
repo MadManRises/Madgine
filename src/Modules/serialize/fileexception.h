@@ -2,8 +2,7 @@
 
 namespace Engine {
 namespace Serialize {
-    class FileException : public std::exception {
-    public:
+    struct FileException : std::exception {
         FileException(const std::string &msg)
             : m_msg(msg)
         {

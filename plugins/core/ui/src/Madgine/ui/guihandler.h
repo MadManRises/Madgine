@@ -5,8 +5,7 @@
 
 namespace Engine {
 namespace UI {
-    class MADGINE_UI_EXPORT GuiHandlerBase : public Handler {
-    public:
+    struct MADGINE_UI_EXPORT GuiHandlerBase : Handler {    
         enum class WindowType {
             MODAL_OVERLAY,
             NONMODAL_OVERLAY,

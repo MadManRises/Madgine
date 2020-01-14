@@ -12,7 +12,7 @@
 
 namespace Engine {
 
-template <typename C, class _Base, class... _Ty>
+template <typename C, typename _Base, typename... _Ty>
 struct UniqueComponentContainerImpl : C {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
@@ -109,7 +109,7 @@ struct UniqueComponentContainerImpl : C {
         return { mSortedComponents.end(), Registry::sTables().end() };
     }
 
-    template <class T>
+    template <typename T>
     T &get()
     {
         return static_cast<T &>(get(component_index<T>()));
@@ -158,7 +158,7 @@ private:
 };
 
 
-template <typename C, class _Base, class... _Ty>
+template <typename C, typename _Base, typename... _Ty>
 using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<_Base>>, _Base, _Ty...>;
 
 }

@@ -4,8 +4,8 @@ namespace Engine {
 
 namespace GUI {
 
-    class TopLevelWindow;
-    class ToolWindow;
+    struct TopLevelWindow;
+    struct ToolWindow;
 
 	struct TopLevelWindowComponentBase;
     struct TopLevelWindowComponentComparator;
@@ -18,8 +18,8 @@ namespace Threading {
 }
 
 namespace Input {
-    class InputHandler;
-    class InputListener;
+    struct InputHandler;
+    struct InputListener;
 
     struct KeyEventArgs;
     struct PointerEventArgs;

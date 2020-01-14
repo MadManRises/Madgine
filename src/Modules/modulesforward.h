@@ -7,7 +7,7 @@ struct InvScopePtr;
 
 enum KeyValueValueFlags : uint8_t;
 
-class KeyValueVirtualIteratorBase;
+struct KeyValueVirtualIteratorBase;
 
 struct ScopeBase;
 struct MetaTable;
@@ -24,8 +24,8 @@ struct IndexHolder;
 struct UniqueComponentCollectorManager;
 template <typename T, typename _Collector, typename _Base = typename _Collector::Base>
 struct UniqueComponent;
-template <class T, class _Collector, typename Base = typename _Collector::Base>
-class VirtualUniqueComponentBase;
+template <typename T, typename _Collector, typename Base = typename _Collector::Base>
+struct VirtualUniqueComponentBase;
 
 struct ComponentRegistryBase;
 
@@ -59,7 +59,7 @@ namespace Debug {
     }
 
     namespace Profiler {
-        class Profiler;
+        struct Profiler;
         struct ProfilerThread;
     }
 }
@@ -72,14 +72,14 @@ namespace Ini {
 namespace Serialize {
     struct SerializeInStream;
     struct SerializeOutStream;
-    class SerializableUnitBase;
+    struct SerializableUnitBase;
     struct BufferedInOutStream;
     struct BufferedInStream;
     struct BufferedOutStream;
-    class TopLevelSerializableUnitBase;
+    struct TopLevelSerializableUnitBase;
     struct SyncableBase;
     struct SerializableBase;
-    class FileBuffer;
+    struct FileBuffer;
     struct MessageHeader;
     struct SerializeManager;
     struct SyncManager;
@@ -113,13 +113,13 @@ namespace Serialize {
 }
 
 namespace Network {
-    class NetworkManager;
+    struct NetworkManager;
 }
 
 namespace Plugins {
     struct PluginManager;
     struct Plugin;
-    class PluginSection;
+    struct PluginSection;
     struct PluginListener;
 
     struct BinaryInfo;
@@ -127,18 +127,18 @@ namespace Plugins {
 
 namespace Util {
 
-    class Log;
+    struct Log;
 
-    class LogListener;
+    struct LogListener;
 
-    class Process;
-    class StandardLog;
+    struct Process;
+    struct StandardLog;
 }
 
 namespace Threading {
-    class ConnectionBase;
-    template <class T, class... _Ty>
-    class ConnectionInstance;
+    struct ConnectionBase;
+    template <typename T, typename... _Ty>
+    struct ConnectionInstance;
     struct TaskQueue;
 }
 
@@ -184,24 +184,24 @@ namespace Render {
 namespace Resources {
     struct ResourceManager;
     template <typename Data, typename Container, typename Storage>
-    class Resource;
-    template <class T, class Data, typename Container, typename Storage>
+    struct Resource;
+    template <typename T, typename Data, typename Container, typename Storage>
     struct ResourceLoader;
-    template <typename T, class _Data, typename Container, typename Storage, typename Base>
+    template <typename T, typename _Data, typename Container, typename Storage, typename Base>
     struct ResourceLoaderImpl;
     struct ResourceBase;
 }
 
-class Vector2;
-class Vector3;
+struct Vector2;
+struct Vector3;
 
 struct Vector2i;
 struct Vector3i;
 
 struct Rect2i;
 
-class Matrix3;
-class Matrix4;
+struct Matrix3;
+struct Matrix4;
 
 struct TypeInfo;
 
@@ -211,5 +211,5 @@ struct Plane;
 struct AABB;
 struct BoundingBox;
 
-class MadgineObject;
+struct MadgineObject;
 }

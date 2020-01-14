@@ -6,8 +6,7 @@ namespace Engine {
 namespace Debug {
     namespace Profiler {
 
-        class MODULES_EXPORT ProcessStats {
-        public:
+        struct MODULES_EXPORT ProcessStats {        
             ProcessStats(const char *function);
             ProcessStats(const ProcessStats &) = delete;
             ProcessStats(ProcessStats &&) = delete;

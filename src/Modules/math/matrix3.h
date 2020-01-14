@@ -56,8 +56,7 @@ namespace Engine {
         @par
             The coordinate system is assumed to be <b>right-handed</b>.
     */
-class MODULES_EXPORT Matrix3 {
-public:
+struct MODULES_EXPORT Matrix3 {
     /** Default constructor.
             @note
                 It does <b>NOT</b> initialize the matrix for efficiency.
@@ -292,6 +291,6 @@ protected:
     float m[3][3];
 
     // for faster access
-    friend class Matrix4;
+    friend struct Matrix4;
 };
 }

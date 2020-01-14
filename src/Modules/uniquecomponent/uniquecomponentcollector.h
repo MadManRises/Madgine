@@ -4,20 +4,20 @@
 
 #if ENABLE_PLUGINS
 
-#include "../reflection/classname.h"
-#include "../keyvalue/metatable.h"
+#    include "../keyvalue/metatable.h"
+#    include "../reflection/classname.h"
 
-#include "indexholder.h"
+#    include "indexholder.h"
 
-#include "../reflection/decay.h"
+#    include "../reflection/decay.h"
 
-#include "../generic/derive.h"
+#    include "../generic/derive.h"
 
 namespace Engine {
 
-	DERIVE_TYPEDEF(VBase)
+DERIVE_TYPEDEF(VBase)
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 struct UniqueComponentCollector {
     typedef _Base Base;
     typedef std::tuple<_Ty...> Ty;
@@ -49,7 +49,7 @@ struct UniqueComponentCollector {
 private:
     CollectorInfo mInfo;
 
-    template <class T>
+    template <typename T>
     static size_t registerComponent()
     {
 
@@ -59,7 +59,7 @@ private:
         elementInfos.push_back(&typeInfo<T>());
         if constexpr (has_typedef_VBase_v<T>) {
             elementInfos.push_back(&typeInfo<typename T::VBase>());
-		}
+        }
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
         sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);
         return sInstance().mInfo.mComponents.size() - 1;
@@ -78,9 +78,8 @@ private:
     }
 
 public:
-    template <class T>
-    class ComponentRegistrator : public IndexHolder {
-    public:
+    template <typename T>
+    struct ComponentRegistrator : IndexHolder {    
         ComponentRegistrator()
             : mBaseIndex(baseIndex())
         {
@@ -105,7 +104,7 @@ public:
     };
 };
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 UniqueComponentCollector<_Base, _Ty...> &UniqueComponentCollector<_Base, _Ty...>::sInstance()
 {
     static UniqueComponentCollector dummy;
@@ -118,7 +117,7 @@ UniqueComponentCollector<_Base, _Ty...> &UniqueComponentCollector<_Base, _Ty...>
 
 namespace Engine {
 
-template <class _Base, class... _Ty>
+template <typename _Base, typename... _Ty>
 struct UniqueComponentCollector {
     typedef _Base Base;
     typedef std::tuple<_Ty...> Ty;

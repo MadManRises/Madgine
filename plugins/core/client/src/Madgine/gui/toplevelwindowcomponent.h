@@ -33,7 +33,7 @@ namespace GUI {
         const Rect2i &getClientSpace() const;
         virtual Rect2i getChildClientSpace();
 
-        template <class T>
+        template <typename T>
         T &getWindowComponent(bool init = true)
         {
             return static_cast<T &>(getWindowComponent(component_index<T>(), init));

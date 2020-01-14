@@ -9,9 +9,8 @@ namespace Engine
 		using SocketId = unsigned long long;
 		const constexpr SocketId Invalid_Socket = -1;
 
-		class INTERFACES_EXPORT SocketAPI
+		struct INTERFACES_EXPORT SocketAPI
 		{
-		public:
 			static bool init();
 			static void finalize();
 

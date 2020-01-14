@@ -14,9 +14,8 @@ namespace Engine
 		namespace Entity
 		{
 			
-			class MADGINE_SCENE_EXPORT Transform : public EntityComponent<Transform>
-			{
-			public:
+			struct MADGINE_SCENE_EXPORT Transform : EntityComponent<Transform>
+			{			
 				using EntityComponent<Transform>::EntityComponent;
 
 				const Vector3 &getPosition() const;

@@ -41,7 +41,7 @@ namespace UI {
 
         const char *key() const override;
 
-        template <class T>
+        template <typename T>
         T &getGuiHandler(bool init = true)
         {
             return static_cast<T &>(getGuiHandler(T::component_index(), init));
@@ -49,7 +49,7 @@ namespace UI {
 
         GuiHandlerBase &getGuiHandler(size_t i, bool = true);
 
-        template <class T>
+        template <typename T>
         T &getGameHandler(bool init = true)
         {
             return static_cast<T &>(getGameHandler(T::component_index(), init));

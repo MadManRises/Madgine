@@ -3,17 +3,15 @@
 #include "../toolscollector.h"
 
 namespace Engine {
-	namespace Tools {
+namespace Tools {
 
-		class ImGuiDemo : public Tool<ImGuiDemo>{
-		public:
-			ImGuiDemo(ImRoot &root);
+    struct ImGuiDemo : Tool<ImGuiDemo> {
+        ImGuiDemo(ImRoot &root);
 
-			void render() override;
+        void render() override;
 
-			const char *key() const override;
-		};
+        const char *key() const override;
+    };
 
-	}
 }
-
+}

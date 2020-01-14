@@ -2,7 +2,7 @@
 
 namespace Engine
 {
-	template <class T>
+template <typename T>
 	struct VirtualBase : virtual T
 	{	
 		using T::T;

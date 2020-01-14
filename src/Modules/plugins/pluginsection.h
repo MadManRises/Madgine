@@ -2,13 +2,12 @@
 
 #if ENABLE_PLUGINS
 
-#include "loadstate.h"
+#    include "loadstate.h"
 
 namespace Engine {
 namespace Plugins {
 
-    class MODULES_EXPORT PluginSection {
-    public:
+    struct MODULES_EXPORT PluginSection {
         PluginSection(PluginManager &mgr, const std::string &name);
 
         void setAtleastOne(bool atleastOne = true);
@@ -25,7 +24,7 @@ namespace Plugins {
         void addListener(PluginListener *listener);
         void removeListener(PluginListener *listener);
 
-        template <class T>
+        template <typename T>
         T *getUniqueSymbol(const std::string &name) const
         {
             return static_cast<T *>(getUniqueSymbol(name));

@@ -25,7 +25,7 @@ struct SortedContainerApi : C {
         return this->find(key) != this->end();
     }
 
-    template <class... _Ty>
+    template <typename... _Ty>
     std::pair<iterator, bool> emplace(_Ty &&... args)
     {
         return this->C::emplace(this->end(), std::forward<_Ty>(args)...);

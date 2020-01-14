@@ -4,8 +4,7 @@ namespace Engine {
 namespace Debug {
     namespace Profiler {
 
-        class MODULES_EXPORT Profiler {
-        public:
+        struct MODULES_EXPORT Profiler {
             Profiler();
             Profiler(const Profiler &) = delete;
             Profiler(Profiler &&) = delete;

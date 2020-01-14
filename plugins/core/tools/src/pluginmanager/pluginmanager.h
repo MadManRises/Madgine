@@ -9,8 +9,7 @@
 namespace Engine {
 namespace Tools {
 
-    class PluginManager : public Tool<PluginManager> {
-    public:
+    struct PluginManager : Tool<PluginManager> {
         PluginManager(ImRoot &root);
 
         virtual void render() override;

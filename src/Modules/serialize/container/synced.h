@@ -1,21 +1,20 @@
 #pragma once
 
 #include "../../generic/noopfunctor.h"
+#include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
-#include "../../generic/offsetptr.h"
 #include "unithelper.h"
 
 namespace Engine {
 namespace Serialize {
 
-#define SYNCED(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>) 
+#define SYNCED(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
 
-    template <class T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    class Synced : public Syncable<OffsetPtr>, public Serializable<OffsetPtr>, public UnitHelper<T>, private Observer {
-    public:
-        template <class... _Ty>
+    template <typename T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, UnitHelper<T>, private Observer {
+        template <typename... _Ty>
         Synced(_Ty &&... args)
             : mData(std::forward<_Ty>(args)...)
         {
@@ -26,7 +25,7 @@ namespace Serialize {
             return *this;
         }
 
-        template <class Ty>
+        template <typename Ty>
         void operator=(Ty &&v)
         {
             if (mData != v) {
@@ -36,7 +35,7 @@ namespace Serialize {
             }
         }
 
-        template <class Ty>
+        template <typename Ty>
         void operator+=(Ty &&v)
         {
             T old = mData;
@@ -44,7 +43,7 @@ namespace Serialize {
             notify(old);
         }
 
-        template <class Ty>
+        template <typename Ty>
         void operator-=(Ty &&v)
         {
             T old = mData;
@@ -70,7 +69,7 @@ namespace Serialize {
         void readRequest(BufferedInOutStream &in)
         {
             T old = mData;
-            in.read(mData);            
+            in.read(mData);
             notify(old);
         }
 
@@ -84,7 +83,7 @@ namespace Serialize {
         void readState(SerializeInStream &in, const char *name)
         {
             T old = mData;
-            in.read(mData, name);            
+            in.read(mData, name);
             notify(old);
         }
 

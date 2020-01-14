@@ -4,7 +4,7 @@ namespace Engine {
 namespace Debug {
     namespace Profiler {
 
-        template <class T>
+        template <typename T>
         struct ProfileGuard {
             ProfileGuard(T &t)
                 : mT(t)

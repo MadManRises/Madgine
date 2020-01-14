@@ -1,8 +1,7 @@
 #pragma once
 
 namespace Engine {
-class ValueTypeException : public std::exception {
-public:
+struct ValueTypeException : std::exception {
     ValueTypeException(const std::string &msg)
         : mMsg(msg)
     {

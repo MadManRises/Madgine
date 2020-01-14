@@ -11,7 +11,7 @@ namespace Server {
         ServerInstance() = delete;
         ServerInstance(const ServerInstance &) = delete;
 
-        template <class T>
+        template <typename T>
         ServerInstance(T &&initCallback)
             : mName("thread_"s + std::to_string(++sInstanceCounter))
             , mWorkGroup(&ServerInstance::go<T>, this, std::forward<T>(initCallback))
@@ -23,7 +23,7 @@ namespace Server {
         //ValueType toValueType() const;
 
     protected:
-        template <class T>
+        template <typename T>
         int go(T initCallback, Threading::WorkGroup &workgroup)
         {
             return TupleUnpacker::invokeDefaultResult(0, std::move(initCallback), workgroup, &mHandle);

@@ -5,16 +5,16 @@ namespace Engine {
 namespace Widgets {
     struct WidgetManager;
 
-	class WidgetBase;
-    class Bar;
-    class Button;
-    class SceneWindow;
-    class Checkbox;
-    class Combobox;
-    class TabWidget;
-    class Textbox;
-    class Label;
-    class Image;
+	struct WidgetBase;
+    struct Bar;
+    struct Button;
+    struct SceneWindow;
+    struct Checkbox;
+    struct Combobox;
+    struct TabWidget;
+    struct Textbox;
+    struct Label;
+    struct Image;
 
     enum class WidgetClass;
 

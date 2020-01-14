@@ -9,9 +9,7 @@
 namespace Engine {
 namespace GUI {
 
-    class MADGINE_CLIENT_EXPORT ToolWindow : public ScopeBase, public Window::WindowEventListener {
-
-    public:
+    struct MADGINE_CLIENT_EXPORT ToolWindow : ScopeBase, Window::WindowEventListener {    
         ToolWindow(TopLevelWindow &parent, const Window::WindowSettings &settings);
         virtual ~ToolWindow();
 

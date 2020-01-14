@@ -11,13 +11,12 @@ namespace Engine
 			MODULES_EXPORT void setLoggingPath(const std::string& path);
 
 
-			class StreamLog
-			{
-			public:
+			struct StreamLog
+			{			
 				StreamLog(SerializeInStream &stream);
 				StreamLog(SerializeOutStream &stream);
 
-				template <class T>
+				template <typename T>
 				void log(const T& v)
 				{
 					if (isLoggingEnabled())

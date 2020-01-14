@@ -3,9 +3,9 @@
 namespace Engine {
 
 namespace UI {
-    class Handler;
-    class GameHandlerBase;
-    class GuiHandlerBase;
+    struct Handler;
+    struct GameHandlerBase;
+    struct GuiHandlerBase;
     struct UIManager;
 }
 

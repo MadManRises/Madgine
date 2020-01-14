@@ -15,9 +15,8 @@ namespace Serialize {
             static constexpr bool sCallByMasterOnly = callByMasterOnly;
         };
 
-        template <auto f, class Config, typename OffsetPtr, class R, class T, class... _Ty>
-        class ActionImpl : public Syncable<OffsetPtr> {
-        public:
+        template <auto f, typename Config, typename OffsetPtr, typename R, typename T, typename... _Ty>
+        struct ActionImpl : Syncable<OffsetPtr> {        
             ActionImpl()
             {
             }
@@ -103,8 +102,8 @@ namespace Serialize {
     /*template <typename F, F f, class C>
 		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
 
-    template <auto f, class C, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    class Action : public MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C, OffsetPtr>::type {
+    template <auto f, typename C, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct Action : MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C, OffsetPtr>::type {
         using MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, f, C, OffsetPtr>::type::type;
     };
 

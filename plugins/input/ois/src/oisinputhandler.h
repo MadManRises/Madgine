@@ -7,8 +7,7 @@
 
 namespace Engine {
 namespace Input {
-    class MADGINE_OIS_EXPORT OISInputHandler : public OIS::KeyListener, public OIS::MouseListener, public InputHandlerComponent<OISInputHandler> {
-    public:
+    struct MADGINE_OIS_EXPORT OISInputHandler : OIS::KeyListener, OIS::MouseListener, InputHandlerComponent<OISInputHandler> {
         OISInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener);
         virtual ~OISInputHandler();
 

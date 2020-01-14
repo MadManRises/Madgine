@@ -11,12 +11,11 @@ namespace Scene {
 
         DLL_IMPORT_VARIABLE2(const char *const, _componentName, typename T);
 
-        template <class T, class Base>
+        template <typename T, typename Base>
         using EntityComponentVirtualImpl = Serialize::SerializableUnit<T, Base>;
 
-        template <class T, class Base = EntityComponentBase>
-        class EntityComponent : public Serialize::SerializableUnit<T, Base> {
-        public:
+        template <typename T, typename Base = EntityComponentBase>
+        struct EntityComponent : Serialize::SerializableUnit<T, Base> {
 			using Serialize::SerializableUnit<T, Base>::SerializableUnit;
 
             const char *key() const override

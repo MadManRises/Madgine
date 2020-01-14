@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-template <class T>
+template <typename T>
 struct ReverseItContainer : T {
 	using traits = derive_iterator<T>;
 

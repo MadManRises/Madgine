@@ -36,7 +36,7 @@ namespace Serialize {
 
             typedef SyncableContainerImpl<C, Config, Observer, OffsetPtr> container;
 
-            template <class... _Ty>
+            template <typename... _Ty>
             static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
             {
                 return c.emplace(where, std::forward<_Ty>(args)...);
@@ -52,7 +52,7 @@ namespace Serialize {
         typedef typename _traits::value_type value_type;
 
         struct Transaction {
-            template <class T>
+            template <typename T>
             Transaction(TransactionId id, T &&callback)
                 : mId(id)
                 , mCallback(std::forward<T>(callback))
@@ -73,7 +73,7 @@ namespace Serialize {
 
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
-        template <class T>
+        template <typename T>
         SyncableContainerImpl<C, Config, Observer, OffsetPtr> &operator=(T &&arg)
         {
             if (this->isMaster()) {
@@ -104,7 +104,7 @@ namespace Serialize {
             afterReset(wasActive);
         }
 
-        template <class... _Ty>
+        template <typename... _Ty>
         std::pair<iterator, bool> emplace(const iterator &where, _Ty &&... args)
         {
             std::pair<iterator, bool> it = std::make_pair(this->end(), false);
@@ -129,7 +129,7 @@ namespace Serialize {
             return it;
         }
 
-        template <class T, class... _Ty>
+        template <typename T, typename... _Ty>
         std::pair<iterator, bool> emplace_init(T &&init, const iterator &where, _Ty &&... args)
         {
             std::pair<iterator, bool> it = std::make_pair(this->end(), false);

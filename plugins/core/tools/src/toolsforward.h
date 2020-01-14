@@ -7,7 +7,7 @@ namespace Engine
 	{
 		struct ToolBase;
 		struct ImRoot;
-		class Inspector;
+		struct Inspector;
 
 		struct SceneEditor;
 	}

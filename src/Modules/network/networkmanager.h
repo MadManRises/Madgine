@@ -6,8 +6,7 @@
 
 namespace Engine {
 namespace Network {
-    class MODULES_EXPORT NetworkManager : public Serialize::SyncManager {
-    public:
+    struct MODULES_EXPORT NetworkManager : Serialize::SyncManager {
         NetworkManager(const std::string &name);
         NetworkManager(const NetworkManager &) = delete;
         NetworkManager(NetworkManager &&) noexcept;

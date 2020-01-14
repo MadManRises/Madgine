@@ -11,7 +11,7 @@ namespace Engine
 {
 	namespace App
 	{
-		template <class T>
+    template <typename T>
 		using GlobalAPI = GlobalAPIComponent<T>;
 	}
 }

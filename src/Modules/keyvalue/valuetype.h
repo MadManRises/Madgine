@@ -41,7 +41,7 @@ struct MODULES_EXPORT ValueType {
         ObjectPtr>;
 
 private:
-    template <class T>
+    template <typename T>
     struct _isValueType {
         const constexpr static bool value = variant_contains<Union, T>::value;
     };
@@ -68,7 +68,7 @@ public:
         MAX_VALUETYPE_TYPE
     };
 
-    template <class T>
+    template <typename T>
     struct isValueType {
         const constexpr static bool value = _isValueType<std::decay_t<T>>::value
             || std::is_enum<T>::value
@@ -81,13 +81,13 @@ public:
 
     ValueType(ValueType &&other) noexcept;
 
-    template <class T, class _ = std::enable_if_t<_isValueType<T>::value>>
+    template <typename T, typename _ = std::enable_if_t<_isValueType<T>::value>>
     explicit ValueType(const T &v)
         : mUnion(v)
     {
     }
 
-    template <class T, class _ = std::enable_if_t<std::is_enum<T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_enum<T>::value>>
     explicit ValueType(T val)
         : ValueType(static_cast<int>(val))
     {
@@ -95,13 +95,13 @@ public:
 
     explicit ValueType(const char *s);
 
-    template <class T, class _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
     explicit ValueType(T *val)
         : ValueType(TypedScopePtr(val))
     {
     }
 
-    template <class T, class _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
     explicit ValueType(T &val)
         : ValueType(TypedScopePtr(&val))
     {
@@ -113,7 +113,7 @@ public:
 
     void operator=(const ValueType &other);
 
-    template <class T, class _ = std::enable_if_t<isValueType<T>::value>>
+    template <typename T, typename _ = std::enable_if_t<isValueType<T>::value>>
     void operator=(T &&t)
     {
         mUnion = std::forward<T>(t);
@@ -175,7 +175,7 @@ public:
     }
 
 public:
-    template <class T>
+    template <typename T>
     bool is() const
     {
         if constexpr (_isValueType<std::decay_t<T>>::value) {
@@ -192,7 +192,7 @@ public:
         }
     }
 
-    template <class T>
+    template <typename T>
     decltype(auto) as() const
     {
         if constexpr (_isValueType<std::decay_t<T>>::value) {
@@ -218,13 +218,13 @@ public:
         }
     }
 
-    template <class T>
+    template <typename T>
     std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, T> as() const
     {
         return static_cast<T>(as<int>());
     }
 
-    template <class T>
+    template <typename T>
     std::enable_if_t<isValueType<T>::value, const T &> asDefault(const T &defaultValue)
     {
         if (!is<T>()) {

@@ -6,9 +6,8 @@ namespace Engine
 	{
 		namespace Entity
 		{
-			class ComponentException : public std::exception
-			{
-			public:
+			struct ComponentException : std::exception
+			{			
 				ComponentException(const std::string& msg) :
 					m_msg(msg)
 				{

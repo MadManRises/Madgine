@@ -4,9 +4,8 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class SceneException : public std::exception
-		{
-		public:
+		struct SceneException : std::exception
+		{		
 			SceneException(const std::string& msg) :
 				m_msg(msg)
 			{

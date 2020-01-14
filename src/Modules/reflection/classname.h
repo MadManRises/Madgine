@@ -23,7 +23,7 @@ DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfo, typename T);
 
 namespace Engine {
 
-template <class T>
+template <typename T>
 inline const char *typeName()
 {
     return typeInfo<T>().mTypeName;

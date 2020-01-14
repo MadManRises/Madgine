@@ -5,11 +5,10 @@
 namespace Engine {
 
 template <typename T, typename Cmp, typename It>
-class SetConstIterator;
+struct SetConstIterator;
 
 template <typename T, typename Cmp, typename It>
-class SetIterator {
-public:
+struct SetIterator {
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
     using difference_type = typename It::difference_type;
@@ -75,14 +74,13 @@ public:
     }
 
 private:
-    friend class SetConstIterator<T, Cmp, It>;
+    friend struct SetConstIterator<T, Cmp, It>;
 
     It mIterator;
 };
 
-template <class T, typename Cmp, typename It>
-class SetConstIterator {
-public:
+template <typename T, typename Cmp, typename It>
+struct SetConstIterator {
     using iterator_category = typename It::iterator_category;
     using value_type = typename It::value_type;
     using difference_type = typename It::difference_type;
@@ -140,7 +138,7 @@ public:
     }
 
 private:
-    friend class SetIterator<T, Cmp, It>;
+    friend struct SetIterator<T, Cmp, It>;
 
     It mIterator;
 };
@@ -175,7 +173,7 @@ struct KeyValueSet : std::set<T, Cmp> {
         template <template <typename> typename M>
         using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
 
-        template <class... _Ty>
+        template <typename... _Ty>
         static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
         {
             return c.emplace(std::forward<_Ty>(args)...);

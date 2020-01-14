@@ -15,7 +15,7 @@ struct ObservableContainer : C, Observer {
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
 
-        template <class... _Ty>
+        template <typename... _Ty>
         static std::pair<iterator, bool> emplace(container &c, const iterator &where, _Ty &&... args)
         {
             return c.emplace(where, std::forward<_Ty>(args)...);
@@ -25,7 +25,7 @@ struct ObservableContainer : C, Observer {
     typedef typename traits::iterator iterator;
     typedef typename traits::const_iterator const_iterator;
 
-    template <class... _Ty>
+    template <typename... _Ty>
     std::pair<iterator, bool> emplace(const iterator &where, _Ty &&... args)
     {
         Observer::operator()(where, BEFORE | INSERT_ITEM);

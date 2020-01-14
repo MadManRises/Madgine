@@ -10,9 +10,8 @@ namespace Engine
 {
 	namespace UI
 	{
-		class MADGINE_UI_EXPORT GameHandlerBase : public Handler
-		{
-		public:
+		struct MADGINE_UI_EXPORT GameHandlerBase : Handler
+		{		
 			GameHandlerBase(UIManager &ui, Threading::ContextMask context = Threading::ContextMask::SceneContext);
 
 			void abortDrag();

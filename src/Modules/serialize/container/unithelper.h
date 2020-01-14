@@ -10,8 +10,8 @@
 
 namespace Engine {
 namespace Serialize {
-    template <class T>
-    struct UnitHelperBase : public CopyTraits<T> {
+    template <typename T>
+    struct UnitHelperBase : CopyTraits<T> {
 
         static void write_creation(SerializeOutStream &out, const T &item)
         {
@@ -42,14 +42,14 @@ namespace Serialize {
         static void beginExtendedItem(SerializeInStream &in, const T &item) {}
     };
 
-    template <class T, bool b = isPrimitiveType_v<std::decay_t<T>>>
-    struct UnitHelper : public UnitHelperBase<T> {
+    template <typename T, bool b = isPrimitiveType_v<std::decay_t<T>>>
+    struct UnitHelper : UnitHelperBase<T> {
     };
 
 	MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, size_t id);
 
-    template <class T>
-    struct UnitHelper<T *, true> : public UnitHelperBase<T *> {        
+    template <typename T>
+    struct UnitHelper<T *, true> : UnitHelperBase<T *> {        
 
         static void applyMap(SerializeInStream &in, T *&item)
         {
@@ -126,8 +126,8 @@ namespace Serialize {
         static void beginExtendedItem(SerializeInStream &in, const SerializableBase &item);
     };
 
-    template <class T>
-    struct UnitHelper<T, false> : public CopyTraits<T>, public SerializeUnitHelper {
+    template <typename T>
+    struct UnitHelper<T, false> : CopyTraits<T>, SerializeUnitHelper {
 
         static void applyMap(SerializeInStream &in, T &item)
         {
@@ -158,8 +158,8 @@ namespace Serialize {
         }
     };
 
-    template <class U, class V>
-    struct UnitHelper<std::pair<U, V>, false> : public UnitHelperBase<std::pair<U, V>> {
+    template <typename U, typename V>
+    struct UnitHelper<std::pair<U, V>, false> : UnitHelperBase<std::pair<U, V>> {
 
         static void write_creation(SerializeOutStream &out, const std::pair<U, V> &item)
         {
@@ -209,8 +209,8 @@ namespace Serialize {
         }
     };
 
-    template <class Tuple, size_t... Is>
-    struct TupleUnitHelper : public UnitHelperBase<Tuple> {
+    template <typename Tuple, size_t... Is>
+    struct TupleUnitHelper : UnitHelperBase<Tuple> {
         using unpacker = bool[];
 
         static void write_creation(SerializeOutStream &out, const Tuple &item)
@@ -281,7 +281,7 @@ namespace Serialize {
     TupleUnitHelper<Tuple, Is...> tupleUnitHelperDeducer(
         std::index_sequence<Is...>);
 
-    template <class... Ty>
+    template <typename... Ty>
     struct UnitHelper<std::tuple<Ty...>, false> : public decltype(tupleUnitHelperDeducer<std::tuple<Ty...>>(
                                                       std::make_index_sequence<sizeof...(Ty)>())) {
     };

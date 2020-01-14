@@ -19,13 +19,13 @@ namespace Resources {
 
         void registerResourceLocation(const Filesystem::Path &path, int priority);
 
-        template <class Loader>
+        template <typename Loader>
         typename Loader::ResourceType *getResource(const std::string &name)
         {
             return mCollector.get<Loader>().get(name);
         }
 
-        template <class Loader>
+        template <typename Loader>
         Loader &get()
         {
             return mCollector.get<Loader>();

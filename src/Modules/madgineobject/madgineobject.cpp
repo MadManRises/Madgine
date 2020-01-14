@@ -3,7 +3,7 @@
 
 namespace Engine {
 
-class DependencyInitException {
+struct DependencyInitException {
 };
 
 bool MadgineObject::isInitialized() const

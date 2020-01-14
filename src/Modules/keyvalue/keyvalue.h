@@ -5,7 +5,7 @@
 
 namespace Engine {
 
-template <class T>
+template <typename T>
 struct FixString {
     static T apply(T &&t)
     {
@@ -21,7 +21,7 @@ struct FixString<const char *> {
     }
 };
 
-template <class T, typename = void>
+template <typename T, typename = void>
 struct KeyValue {
     static T &value(T &v)
     {
@@ -57,7 +57,7 @@ struct KeyValue<T, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
     }
 };
 
-template <class T>
+template <typename T>
 struct KeyValue<T *> {
     static T *value(T *v)
     {
@@ -70,7 +70,7 @@ struct KeyValue<T *> {
     }
 };
 
-template <class T>
+template <typename T>
 struct KeyValue<T *const> {
     static T *value(T *v)
     {
@@ -83,7 +83,7 @@ struct KeyValue<T *const> {
     }
 };
 
-template <class K, class T>
+template <typename K, typename T>
 struct KeyValue<std::pair<K, T>> {
     static T &value(std::pair<K, T> &p)
     {
@@ -96,7 +96,7 @@ struct KeyValue<std::pair<K, T>> {
     }
 };
 
-template <class K, class T>
+template <typename K, typename T>
 struct KeyValue<const std::pair<K, T>> {
     static const T &value(const std::pair<K, T> &p)
     {
@@ -135,13 +135,13 @@ struct KeyValue<const std::unique_ptr<T, D>> {
     }
 };
 
-template <class T>
+template <typename T>
 decltype(auto) kvValue(T &&v)
 {
     return KeyValue<std::remove_reference_t<T>>::value(std::forward<T>(v));
 }
 
-template <class T>
+template <typename T>
 decltype(auto) kvKey(T &&v)
 {
     return FixString<decltype(KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v)))>::apply(KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v)));
@@ -159,7 +159,7 @@ decltype(auto) kvKeys(T &v)
     return transformIt<Functor<kvKey<decltype(*v.begin())>>>(v);
 }
 
-template <class T, class K>
+template <typename T, typename K>
 struct Finder {
     static auto find(T &c, const K &key)
     {
@@ -167,7 +167,7 @@ struct Finder {
     }
 };
 
-template <class V, class K, class _K>
+template <typename V, typename K, typename _K>
 struct Finder<std::map<K, V>, _K> {
     static auto find(std::map<K, V> &c, const _K &key)
     {
@@ -175,7 +175,7 @@ struct Finder<std::map<K, V>, _K> {
     }
 };
 
-template <class V, class K, class _K>
+template <typename V, typename K, typename _K>
 struct Finder<const std::map<K, V>, _K> {
     static auto find(const std::map<K, V> &c, const _K &key)
     {
@@ -183,21 +183,21 @@ struct Finder<const std::map<K, V>, _K> {
     }
 };
 
-template <class T, class K>
+template <typename T, typename K>
 decltype(auto) kvFind(T &c, const K &key)
 {
     return Finder<T, K>::find(c, key);
 }
 
-template <class T>
+template <typename T>
 struct KeyType {
     typedef std::decay_t<decltype(kvKey(std::declval<T>()))> type;
 };
 
-template <class T>
+template <typename T>
 using KeyType_t = typename KeyType<T>::type;
 
-template <class _Ty, typename = void>
+template <typename _Ty, typename = void>
 struct KeyCompare {
     // functor for operator<
     typedef _Ty first_argument_type;
@@ -238,7 +238,7 @@ struct KeyCompare<T, std::enable_if_t<std::is_same_v<KeyType_t<T>, T>>> {
     }
 };
 
-template <class _Ty = void>
+template <typename _Ty = void>
 struct KeyHash {
     typedef _Ty argument_type;
     typedef size_t result_type;

@@ -8,11 +8,10 @@
 
 namespace Engine {
 namespace App {
-    class MADGINE_BASE_EXPORT GlobalAPIBase : public MadgineObject, public ScopeBase {
-    public:
+    struct MADGINE_BASE_EXPORT GlobalAPIBase : MadgineObject, ScopeBase {
         GlobalAPIBase(App::Application &app);
 
-        template <class T>
+        template <typename T>
         T &getGlobalAPIComponent(bool init = true)
         {
             return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));

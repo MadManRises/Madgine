@@ -3,22 +3,18 @@
 #include "../toolscollector.h"
 
 namespace Engine {
-	namespace Tools {
+namespace Tools {
 
-		class Profiler : public Tool<Profiler> 
-		{
-		public:
-			Profiler(ImRoot &root);
+    struct Profiler : Tool<Profiler> {
+        Profiler(ImRoot &root);
 
-			virtual void render() override;
+        virtual void render() override;
 
-			const char* key() const override;
+        const char *key() const override;
 
-			
+    private:
+        Debug::Profiler::Profiler &mProfiler;
+    };
 
-		private:
-			Debug::Profiler::Profiler &mProfiler;
-		};
-
-	}
+}
 }

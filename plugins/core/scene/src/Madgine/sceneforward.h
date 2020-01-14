@@ -4,22 +4,22 @@ namespace Engine
 {
 	namespace Scene
 	{
-		class SceneManager;
-		class SceneComponentBase;
+		struct SceneManager;
+		struct SceneComponentBase;
 
 		
 
 		namespace Entity
 		{
-			class Entity;
-			class EntityComponentBase;
-			class Transform;
-			class Animation;
+			struct Entity;
+			struct EntityComponentBase;
+			struct Transform;
+			struct Animation;
 			struct Mesh;
 		}
 
-		class LightManager;
-		class Light;
+		struct LightManager;
+		struct Light;
 	}
 
 }

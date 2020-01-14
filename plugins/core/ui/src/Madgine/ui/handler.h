@@ -21,9 +21,9 @@ namespace UI {
         std::function<bool(Widgets::WidgetBase *)> mInit;
     };
 
-    class MADGINE_UI_EXPORT Handler : public MadgineObject, public ScopeBase, public Serialize::SerializableUnit<Handler> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject, ScopeBase, Serialize::SerializableUnit<Handler> {
         SERIALIZABLEUNIT;
-    public:
+
         Handler(UIManager &ui);
         virtual ~Handler() = default;
 
@@ -40,7 +40,7 @@ namespace UI {
         virtual const MadgineObject *parent() const override;
         UIManager &ui(bool = true);
 
-        template <class T>
+        template <typename T>
         T &getGuiHandler(bool init = true)
         {
             return static_cast<T &>(getGuiHandler(component_index<T>(), init));
@@ -48,7 +48,7 @@ namespace UI {
 
         GuiHandlerBase &getGuiHandler(size_t i, bool = true);
 
-        template <class T>
+        template <typename T>
         T &getGameHandler(bool init = true)
         {
             return static_cast<T &>(getGameHandler(component_index<T>(), init));

@@ -26,8 +26,8 @@ DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
 
 #    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::VBase)
 
-template <class T, class _Collector, typename Base>
-class VirtualUniqueComponentBase : public Base {
+template <typename T, typename _Collector, typename Base>
+struct VirtualUniqueComponentBase : public Base {
 public:
     using Collector = _Collector;
 
@@ -62,7 +62,7 @@ struct UniqueComponent : _Base {
     }
 };
 
-template <class T>
+template <typename T>
 size_t component_index()
 {
     return T::component_index();
@@ -72,22 +72,22 @@ size_t component_index()
 #else
 
 namespace Engine {
-template <class T, class Base, typename _VBase = Base>
+template <typename T, typename Base, typename _VBase = Base>
 struct VirtualUniqueComponentImpl : Base {
 	using Base::Base;
 };
 
-template <class T, class Collector, typename Base>
+template <typename T, typename Collector, typename Base>
 struct VirtualUniqueComponentBase : Base {
     using Base::Base;
 };
 
-template <class T, class Collector, typename Base>
+template <typename T, typename Collector, typename Base>
 struct UniqueComponent : Base {
     using Base::Base;
 };
 
-template <class T>
+template <typename T>
 size_t component_index();
 }
 

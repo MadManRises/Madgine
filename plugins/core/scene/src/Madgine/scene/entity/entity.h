@@ -16,10 +16,9 @@ namespace Scene {
             void operator()(const typename KeyValueSet<std::unique_ptr<EntityComponentBase>>::iterator &it, int op);
         };
 
-        class MADGINE_SCENE_EXPORT Entity : public Serialize::SerializableUnit<Entity>, public ScopeBase {
+        struct MADGINE_SCENE_EXPORT Entity : Serialize::SerializableUnit<Entity>, ScopeBase {
             SERIALIZABLEUNIT;
-
-        public:
+        
             Entity(const Entity &, bool local);
             Entity(Entity &&, bool local);
 
@@ -31,19 +30,19 @@ namespace Scene {
 
             const char *key() const;
 
-            template <class T>
+            template <typename T>
             T *addComponent(const ObjectPtr &table = {})
             {
                 return static_cast<T *>(addComponent(T::componentName(), table));
             }
 
-            template <class T>
+            template <typename T>
             void removeComponent()
             {
                 removeComponent(T::componentName());
             }
 
-            template <class T>
+            template <typename T>
             T *getComponent()
             {
                 return static_cast<T *>(getComponent(T::componentName()));
@@ -56,7 +55,7 @@ namespace Scene {
                 return uniquePtrToPtr(mComponents);
             }
 
-            template <class T>
+            template <typename T>
             bool hasComponent()
             {
                 return hasComponent(T::componentName());
@@ -73,7 +72,7 @@ namespace Scene {
 
             bool isLocal() const;
 
-            template <class T>
+            template <typename T>
             T &getSceneComponent(bool init = true)
             {
                 return static_cast<T &>(getSceneComponent(T::component_index(), init));
@@ -81,7 +80,7 @@ namespace Scene {
 
             SceneComponentBase &getSceneComponent(size_t i, bool = true);
 
-            template <class T>
+            template <typename T>
             T &getGlobalAPIComponent(bool init = true)
             {
                 return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));

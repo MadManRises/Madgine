@@ -3,11 +3,11 @@
 namespace Engine {
 
 namespace Serialize {
-    template <class T>
+    template <typename T>
     struct NoParentUnit : T {
 		using decay_t = T;
 
-        template <class... Args>
+        template <typename... Args>
         NoParentUnit(Args &&... args)
             :  T(std::forward<Args>(args)...)
         {

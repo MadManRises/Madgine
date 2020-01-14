@@ -20,16 +20,15 @@
 
 namespace Engine {
 namespace Scene {
-    class MADGINE_SCENE_EXPORT SceneManager : public Serialize::TopLevelSerializableUnit<SceneManager>,
-                                              public App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
+    struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelSerializableUnit<SceneManager>,
+                                               App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
         SERIALIZABLEUNIT;
 
-    public:
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;
         ~SceneManager();
 
-        void update();        
+        void update();
 
         Entity::Entity *createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
@@ -42,7 +41,7 @@ namespace Scene {
 
         void clear();
 
-        template <class T>
+        template <typename T>
         T &getComponent(bool init = true)
         {
             return static_cast<T &>(getComponent(T::component_index(), init));
@@ -50,7 +49,7 @@ namespace Scene {
         SceneComponentBase &getComponent(size_t i, bool = true);
         size_t getComponentCount();
 
-        template <class T>
+        template <typename T>
         T &getGlobalAPIComponent(bool init = true)
         {
             return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
@@ -66,7 +65,7 @@ namespace Scene {
 
         void removeQueuedEntities();
 
-		Threading::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
+        Threading::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
 
     protected:
         virtual bool init() final;

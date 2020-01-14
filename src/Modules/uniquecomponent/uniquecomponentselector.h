@@ -6,9 +6,8 @@
 
 namespace Engine {
 
-template <class _Base, class... _Ty>
-class UniqueComponentSelector {
-public:
+template <typename _Base, typename... _Ty>
+struct UniqueComponentSelector {
     typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;

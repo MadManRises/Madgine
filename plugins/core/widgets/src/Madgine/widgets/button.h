@@ -8,8 +8,7 @@
 
 namespace Engine {
 namespace Widgets {
-    class MADGINE_WIDGETS_EXPORT Button : public Widget<Button> {
-    public:
+    struct MADGINE_WIDGETS_EXPORT Button : Widget<Button> {
         using Widget::Widget;
         virtual ~Button() = default;
 
@@ -25,10 +24,10 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-		std::string getFontName() const;
+        std::string getFontName() const;
         void setFontName(const std::string &name);
 
-		Font::FontLoader::ResourceType *getFont() const;
+        Font::FontLoader::ResourceType *getFont() const;
         void setFont(Font::FontLoader::ResourceType *font);
 
         std::string mText;

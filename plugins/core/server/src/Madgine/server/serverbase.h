@@ -21,7 +21,7 @@ namespace Server {
     protected:
         virtual void performCommand(const std::string &cmd);
 
-        template <class T>
+        template <typename T>
         void spawnInstance(T &&init)
         {
             mInstances.emplace_back(std::forward<T>(init));
