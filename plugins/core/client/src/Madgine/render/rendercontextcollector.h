@@ -5,4 +5,4 @@
 
 #include "rendercontext.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderContext, RenderContext, SignalSlot::TaskQueue *);
+DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderContext, RenderContext, Threading::TaskQueue *);

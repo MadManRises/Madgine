@@ -5,7 +5,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 		extern MODULES_EXPORT std::mutex sSignalConnectMutex;
 
@@ -57,7 +57,7 @@ namespace Engine
 				return conn;
 			}
 
-			//TODO how to deal with DefaultTaskQueue in SignalSlot
+			//TODO how to deal with DefaultTaskQueue in Threading
 			/*template <class T, class _ = std::enable_if_t<!has_store<T>::value>>
 			std::weak_ptr<ConnectionBase> connect(T&& slot, QueuedConnectionType)
 			{

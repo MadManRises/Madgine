@@ -2,13 +2,13 @@
 
 #include "Modules/math/vector2i.h"
 
-#include "Modules/signalslot/task.h"
+#include "Modules/threading/task.h"
 
 namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderContext {
-        RenderContext(SignalSlot::TaskQueue *queue);
+        RenderContext(Threading::TaskQueue *queue);
         virtual ~RenderContext();
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::Window *w) = 0;
@@ -33,14 +33,14 @@ namespace Render {
 
     protected:
         void checkThread();
-        static void queueRenderTask(SignalSlot::TaskHandle &&task);
+        static void queueRenderTask(Threading::TaskHandle &&task);
 
         static bool isRenderThread();
 
     protected:
         std::vector<RenderTarget *> mRenderTargets;
 
-        SignalSlot::TaskQueue *mRenderQueue = nullptr;
+        Threading::TaskQueue *mRenderQueue = nullptr;
         std::thread::id mRenderThread;
     };
 

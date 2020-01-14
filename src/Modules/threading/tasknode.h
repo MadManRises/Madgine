@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../signalslot/signal.h"
-#include "../signalslot/slot.h"
+#include "../threading/signal.h"
+#include "../threading/slot.h"
 #include "../generic/callable_traits.h"
 
 namespace Engine 
@@ -28,7 +28,7 @@ namespace Engine
 				mImpl(this, queue) {}
 
 		private:
-			SignalSlot::TaskState impl(Args&&... args)
+			Threading::TaskState impl(Args&&... args)
 			{
 				R result = (mT->*f)(std::forward<Args>(args)...);
 				mSignal.emit(result);
@@ -37,8 +37,8 @@ namespace Engine
 
 			T *mT;
 
-			SignalSlot::Slot<TaskNodeImpl<f, R, T, Args...>::impl> mImpl;
-			SignalSlot::Signal<R> mSignal;
+			Threading::Slot<TaskNodeImpl<f, R, T, Args...>::impl> mImpl;
+			Threading::Signal<R> mSignal;
 		};
 
 		template <auto f, typename R, typename Y, typename T, typename... Args>
@@ -49,7 +49,7 @@ namespace Engine
 				mImpl(this) {}
 
 		private:
-			SignalSlot::TaskState impl(Args&&... args)
+			Threading::TaskState impl(Args&&... args)
 			{
 				TaskResult<R, Y> result = (mT->*f)(std::forward<Args>(args)..., mYield);
 				switch (result.mState)
@@ -68,8 +68,8 @@ namespace Engine
 			std::optional<Y> mYield;
 			T *mT;
 
-			SignalSlot::Slot<TaskNodeImpl<f, R, T, Args...>::impl> mImpl;
-			SignalSlot::Signal<R> mSignal;
+			Threading::Slot<TaskNodeImpl<f, R, T, Args...>::impl> mImpl;
+			Threading::Signal<R> mSignal;
 		};
 
 		template <auto f>

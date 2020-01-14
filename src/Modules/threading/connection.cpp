@@ -3,7 +3,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 		ConnectionBase::ConnectionBase(std::shared_ptr<ConnectionBase> *prev) :
 			mNext(*prev),

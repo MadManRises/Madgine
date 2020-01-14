@@ -3,7 +3,7 @@
 #include "framelistener.h"
 #include "frameloop.h"
 
-#include "Modules/signalslot/taskqueue.h"
+#include "Modules/threading/taskqueue.h"
 
 #include "Modules/debug/profiler/profiler.h"
 
@@ -104,25 +104,25 @@ namespace Threading {
         return true;
     }
 
-    std::optional<SignalSlot::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
+    std::optional<Threading::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
     {
         if (running()) {
             while (mSetupState != mSetupSteps.end()) {
-                std::optional<SignalSlot::TaskHandle> init = std::move(mSetupState->first);
+                std::optional<Threading::TaskHandle> init = std::move(mSetupState->first);
                 ++mSetupState;
                 if (init) {
                     return wrapTask(std::move(*init));
                 }
             }
         }
-        if (std::optional<SignalSlot::TaskTracker> task = TaskQueue::fetch(nextTask, idleCount)) {
+        if (std::optional<Threading::TaskTracker> task = TaskQueue::fetch(nextTask, idleCount)) {
             return task;
         }
         if (!running() && nextTask == std::chrono::steady_clock::time_point::max()) {
 
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
-                SignalSlot::TaskHandle finalize = std::move(mSetupState->second);
+                Threading::TaskHandle finalize = std::move(mSetupState->second);
                 if (finalize) {
                     return wrapTask(std::move(finalize));
                 }
@@ -131,7 +131,7 @@ namespace Threading {
         return {};
     }
 
-    std::optional<SignalSlot::TaskTracker> FrameLoop::fetch_on_idle()
+    std::optional<Threading::TaskTracker> FrameLoop::fetch_on_idle()
     {
         /*return wrapTask([this]() {
             auto now = std::chrono::high_resolution_clock::now();
@@ -147,7 +147,7 @@ namespace Threading {
         return TaskQueue::idle() && mSetupState == mSetupSteps.begin();
     }
 
-    void FrameLoop::addSetupSteps(SignalSlot::TaskHandle &&init, SignalSlot::TaskHandle &&finalize)
+    void FrameLoop::addSetupSteps(Threading::TaskHandle &&init, Threading::TaskHandle &&finalize)
     {
         bool isItEnd = mSetupState == mSetupSteps.end();
         if (init && finalize) {
@@ -155,11 +155,11 @@ namespace Threading {
             std::future<bool> f = p.get_future();
             mSetupSteps.emplace_back(
                 [init { std::move(init) }, p { std::move(p) }]() mutable {
-                    SignalSlot::TaskState state;
+                    Threading::TaskState state;
                     try {
                         state = init();
-                        assert(state == SignalSlot::SUCCESS || state == SignalSlot::FAILURE);
-                        p.set_value(state == SignalSlot::SUCCESS);
+                        assert(state == Threading::SUCCESS || state == Threading::FAILURE);
+                        p.set_value(state == Threading::SUCCESS);
                     } catch (std::exception &) {
                         p.set_value(false);
                         throw;
@@ -169,7 +169,7 @@ namespace Threading {
                 [finalize { std::move(finalize) }, f { std::move(f) }]() mutable {
                     if (f.get())
                         return finalize();
-                    return SignalSlot::SUCCESS;
+                    return Threading::SUCCESS;
                 });
         } else {
             mSetupSteps.emplace_back(std::move(init), std::move(finalize));

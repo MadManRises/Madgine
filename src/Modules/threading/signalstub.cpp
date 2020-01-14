@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 		std::mutex sSignalConnectMutex;
 	}

@@ -6,7 +6,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 		struct DirectConnectionType	{};
 		struct QueuedConnectionType	{};

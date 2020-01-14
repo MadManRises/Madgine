@@ -3,7 +3,7 @@
 #if ENABLE_THREADING
 
 #    include "../generic/tupleunpacker.h"
-#    include "../signalslot/task.h"
+#    include "task.h"
 #    include "Interfaces/threading/threadapi.h"
 
 namespace Engine {
@@ -29,8 +29,8 @@ namespace Threading {
                 std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, name, std::forward<F>(main), std::forward<Args>(args)...));
         }
 
-        void addThreadInitializer(SignalSlot::TaskHandle &&task);
-        static void addStaticThreadInitializer(SignalSlot::TaskHandle &&task);
+        void addThreadInitializer(Threading::TaskHandle &&task);
+        static void addStaticThreadInitializer(Threading::TaskHandle &&task);
 
         bool singleThreaded();
         void checkThreadStates();
@@ -80,7 +80,7 @@ namespace Threading {
         std::string mName;
 
         std::vector<std::future<int>> mSubThreads;
-        std::vector<SignalSlot::TaskHandle> mThreadInitializers;
+        std::vector<Threading::TaskHandle> mThreadInitializers;
     };
 
 }

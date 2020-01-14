@@ -29,7 +29,7 @@ namespace Network {
         bool moveMasterStream(Serialize::ParticipantId streamId,
             NetworkManager *target);
 
-        SignalSlot::SignalStub<StreamError> &connectionResult();
+        Threading::SignalStub<StreamError> &connectionResult();
 
     protected:
         void onConnectionEstablished(TimeOut timeout);
@@ -44,7 +44,7 @@ namespace Network {
 
         //static constexpr UINT sMessageSignature = 1048;
 
-        SignalSlot::Signal<StreamError> mConnectionResult;
+        Threading::Signal<StreamError> mConnectionResult;
         Threading::Slot<&NetworkManager::onConnectionEstablished>
             mConnectionEstablished;
     };

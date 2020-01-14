@@ -23,7 +23,7 @@ namespace Tools {
 
         std::vector<std::string> projectConfigs() const;
 
-        SignalSlot::Signal<const Filesystem::Path &, const std::string &> mProjectChanged;
+        Threading::Signal<const Filesystem::Path &, const std::string &> mProjectChanged;
 
     private:
         Filesystem::Path mCurrentSelectionPath;

@@ -3,7 +3,7 @@
 #include "signalstub.h"
 
 namespace Engine {
-namespace SignalSlot {
+namespace Threading {
 
     template <class... _Ty>
     class Signal : public SignalStub<_Ty...> {

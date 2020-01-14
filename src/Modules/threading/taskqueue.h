@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 
 		struct MODULES_EXPORT TaskTracker 
@@ -65,7 +65,7 @@ namespace Engine
 			std::atomic<size_t> mTaskCount = 0;
 
 			struct RepeatedTask {
-				SignalSlot::TaskHandle mTask;
+				Threading::TaskHandle mTask;
 				std::chrono::steady_clock::duration mInterval = std::chrono::steady_clock::duration::zero();
 				std::chrono::steady_clock::time_point mNextExecuted = std::chrono::steady_clock::time_point::min();				
 			};

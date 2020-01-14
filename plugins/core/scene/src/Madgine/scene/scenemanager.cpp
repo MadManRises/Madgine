@@ -18,6 +18,8 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Modules/threading/defaulttaskqueue.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -185,7 +187,7 @@ RegisterType(Engine::Scene::SceneManager)
             return make_tuple(std::ref(*this), local, actualName);
         }
 
-        /*SignalSlot::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
+        /*Threading::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
     {
         return mEntities.observer().signal();
     }*/
@@ -249,7 +251,7 @@ RegisterType(Engine::Scene::SceneManager)
             }
         }
 
-        SignalSlot::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &Engine::Scene::SceneManager::entitiesSignal()
+        Threading::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &Engine::Scene::SceneManager::entitiesSignal()
         {
             return mEntities.observer().signal();
         }

@@ -20,7 +20,7 @@ RegisterType(Engine::Render::RenderContext)
 
         Threading::WorkgroupLocal<RenderContext *> sContext = nullptr;
 
-        RenderContext::RenderContext(SignalSlot::TaskQueue *queue)
+        RenderContext::RenderContext(Threading::TaskQueue *queue)
             : mRenderQueue(queue)
             , mRenderThread(std::this_thread::get_id())
         {
@@ -56,7 +56,7 @@ RegisterType(Engine::Render::RenderContext)
             assert(mRenderThread == std::this_thread::get_id());
         }
 
-        void RenderContext::queueRenderTask(SignalSlot::TaskHandle &&task)
+        void RenderContext::queueRenderTask(Threading::TaskHandle &&task)
         {
             assert(sContext);
             sContext->mRenderQueue->queue(std::move(task));

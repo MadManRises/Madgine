@@ -2,27 +2,15 @@
 
 #include "imroot.h"
 
-#ifdef BUILD_PLUGIN_OpenGL
-#    include "opengl/openglimguimanager.h"
-#endif
-
-#include "Modules/math/vector3.h"
-
 #include "Modules/debug/profiler/profiler.h"
 
 #include "../toolbase.h"
-
-#include "Modules/plugins/pluginmanager.h"
-
-#include "Modules/signalslot/taskqueue.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
-
-#include "Modules/keyvalue/scopeiterator.h"
 
 #include "Modules/serialize/streams/serializestream.h"
 #include "Modules/serialize/streams/wrappingserializestreambuf.h"
@@ -64,7 +52,6 @@ namespace Tools {
 
     void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entries into 'out_buf'
     {
-
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
         Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };

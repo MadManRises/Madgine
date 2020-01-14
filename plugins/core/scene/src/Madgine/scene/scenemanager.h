@@ -16,7 +16,7 @@
 
 #include "Modules/threading/datamutex.h"
 
-#include "Modules/signalslot/signalfunctor.h"
+#include "Modules/threading/signalfunctor.h"
 
 namespace Engine {
 namespace Scene {
@@ -66,7 +66,7 @@ namespace Scene {
 
         void removeQueuedEntities();
 
-		SignalSlot::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
+		Threading::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
 
     protected:
         virtual bool init() final;
@@ -86,7 +86,7 @@ namespace Scene {
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver>>);
 
     private:
-        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, SignalSlot::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
+        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
         std::list<Entity::Entity> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 
@@ -97,7 +97,7 @@ namespace Scene {
     public:
         decltype(mEntities) &entities();
 
-        //SignalSlot::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
+        //Threading::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };
 
 }

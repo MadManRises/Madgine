@@ -15,7 +15,7 @@
 #    include "Modules/reflection/classname.h"
 #    include "Modules/serialize/serializetable_impl.h"
 
-#    include "Modules/signalslot/taskguard.h"
+#    include "Modules/threading/taskguard.h"
 
 #    include "Interfaces/filesystem/api.h"
 
@@ -26,7 +26,7 @@ UNIQUECOMPONENT(Engine::Tools::PluginManager);
 namespace Engine {
 namespace Tools {
 
-    static SignalSlot::TaskGuard excludeFromExport {
+    static Threading::TaskGuard excludeFromExport {
         []() {
             skipUniqueComponentOnExport(&typeInfo<PluginManager>());
         },

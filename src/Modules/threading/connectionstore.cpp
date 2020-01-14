@@ -5,7 +5,7 @@
 namespace Engine
 {
 
-	namespace SignalSlot
+	namespace Threading
 	{
 		std::shared_ptr<ConnectionBase> ConnectionStore::make_shared_connection(std::unique_ptr<ConnectionBase> &&conn)
 		{

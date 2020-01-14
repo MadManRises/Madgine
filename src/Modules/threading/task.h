@@ -5,7 +5,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 
 		enum TaskState {

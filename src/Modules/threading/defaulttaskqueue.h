@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../signalslot/taskqueue.h"
+#include "../threading/taskqueue.h"
 
 namespace Engine {
 namespace Threading {
 
-	struct MODULES_EXPORT DefaultTaskQueue : SignalSlot::TaskQueue {
+	struct MODULES_EXPORT DefaultTaskQueue : Threading::TaskQueue {
     public:
         DefaultTaskQueue();
         DefaultTaskQueue(const DefaultTaskQueue &) = delete;

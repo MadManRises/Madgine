@@ -3,7 +3,7 @@
 #include "Modules/math/vector3.h"
 #include "Modules/serialize/container/synced.h"
 #include "Modules/serialize/serializableunit.h"
-#include "Modules/signalslot/signalfunctor.h"
+#include "Modules/threading/signalfunctor.h"
 #include "Modules/threading/slot.h"
 
 namespace Engine {

@@ -6,7 +6,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderContext : public RenderContextComponent<OpenGLRenderContext> {
-        OpenGLRenderContext(SignalSlot::TaskQueue *queue);
+        OpenGLRenderContext(Threading::TaskQueue *queue);
         ~OpenGLRenderContext();
 
 		virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::Window *w) override;

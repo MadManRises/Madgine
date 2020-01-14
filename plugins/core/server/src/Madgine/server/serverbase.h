@@ -5,12 +5,12 @@
 #    include "Modules/keyvalue/scopebase.h"
 #    include "serverlog.h"
 
-#    include "Modules/signalslot/taskqueue.h"
+#    include "Modules/threading/taskqueue.h"
 #    include "serverinstance.h"
 
 namespace Engine {
 namespace Server {
-    struct MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public SignalSlot::TaskQueue {    
+    struct MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public Threading::TaskQueue {    
         ServerBase(Threading::WorkGroup &workgroup);
         virtual ~ServerBase();
 

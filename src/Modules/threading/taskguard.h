@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-	namespace SignalSlot
+	namespace Threading
 	{
 		
 		struct TaskGuard

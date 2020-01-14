@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../signalslot/signal.h"
+#include "../threading/signal.h"
 
 #include "serializableids.h"
 

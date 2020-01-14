@@ -38,7 +38,7 @@ RegisterType(Engine::Render::OpenGLRenderContext)
 
 
 
-        OpenGLRenderContext::OpenGLRenderContext(SignalSlot::TaskQueue *queue) : UniqueComponent(queue)
+        OpenGLRenderContext::OpenGLRenderContext(Threading::TaskQueue *queue) : UniqueComponent(queue)
         {
         }
 

@@ -4,7 +4,7 @@
 
 #include "Madgine/input/inputevents.h"
 
-#include "Modules/signalslot/signal.h"
+#include "Modules/threading/signal.h"
 #include "widgetclass.h"
 
 #include "Modules/generic/transformIt.h"
@@ -88,11 +88,11 @@ namespace Widgets {
         virtual bool injectPointerEnter(const Input::PointerEventArgs &arg);
         virtual bool injectPointerLeave(const Input::PointerEventArgs &arg);
 
-        SignalSlot::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
-        SignalSlot::SignalStub<const Input::PointerEventArgs &> &pointerDownEvent();
-        SignalSlot::SignalStub<const Input::PointerEventArgs &> &pointerUpEvent();
-        SignalSlot::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
-        SignalSlot::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerDownEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerUpEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
 
         decltype(auto) children() const
         {
@@ -143,7 +143,7 @@ namespace Widgets {
 
         //KeyValueMapList maps() override;
 
-        SignalSlot::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
+        Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
 
     private:
         std::string mName;

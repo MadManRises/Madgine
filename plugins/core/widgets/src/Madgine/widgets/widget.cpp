@@ -360,27 +360,27 @@ namespace Widgets {
         return true;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
+    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
     {
         return mPointerMoveSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerDownEvent()
+    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerDownEvent()
     {
         return mPointerDownSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerUpEvent()
+    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerUpEvent()
     {
         return mPointerUpSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerEnterEvent()
+    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerEnterEvent()
     {
         return mPointerEnterSignal;
     }
 
-    SignalSlot::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerLeaveEvent()
+    Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerLeaveEvent()
     {
         return mPointerLeaveSignal;
     }

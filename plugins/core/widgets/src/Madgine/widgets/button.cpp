@@ -28,7 +28,7 @@ SERIALIZETABLE_END(Engine::Widgets::Button)
 namespace Engine {
 namespace Widgets {
 
-    SignalSlot::SignalStub<> &Button::clickEvent()
+    Threading::SignalStub<> &Button::clickEvent()
     {
         return mClicked;
     }

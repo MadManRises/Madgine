@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../signalslot/signal.h"
+#include "../threading/signal.h"
 
 #include "serializableids.h"
 
@@ -42,7 +42,7 @@ namespace Serialize {
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
 
-        SignalSlot::SignalStub<> &slaveStreamDisconnected();
+        Threading::SignalStub<> &slaveStreamDisconnected();
 
 		static ParticipantId getParticipantId(SyncManager *manager);
 
@@ -73,7 +73,7 @@ namespace Serialize {
 
         std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;
 
-        SignalSlot::Signal<> mSlaveStreamDisconnected;
+        Threading::Signal<> mSlaveStreamDisconnected;
 
         bool mSlaveStreamInvalid;
     };

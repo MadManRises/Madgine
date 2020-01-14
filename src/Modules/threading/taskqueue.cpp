@@ -3,7 +3,7 @@
 #include "taskqueue.h"
 
 namespace Engine {
-namespace SignalSlot {
+namespace Threading {
 
     TaskQueue::TaskQueue(const std::string &name)
         : mName(name)
@@ -54,7 +54,7 @@ namespace SignalSlot {
 
     void TaskQueue::update(std::chrono::steady_clock::time_point &nextAvailableTaskTime, int idleCount)
     {
-        while (std::optional<SignalSlot::TaskTracker> f = fetch(nextAvailableTaskTime, idleCount)) {
+        while (std::optional<Threading::TaskTracker> f = fetch(nextAvailableTaskTime, idleCount)) {
             f->mTask();
         }
     }

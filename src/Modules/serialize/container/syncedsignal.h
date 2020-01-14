@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../signalslot/signal.h"
+#include "../../threading/signal.h"
 #include "action.h"
 
 namespace Engine {
 namespace Serialize {
 
     template <typename Config, typename... _Ty>
-    struct ObservedSignal : SignalSlot::Signal<_Ty...> {
+    struct ObservedSignal : Threading::Signal<_Ty...> {
         ObservedSignal()
             : mAction(this)
 		{
@@ -20,7 +20,7 @@ namespace Serialize {
         }
 
     private:
-        Action<&SignalSlot::Signal<_Ty...>::emit, Config> mAction;
+        Action<&Threading::Signal<_Ty...>::emit, Config> mAction;
     };
 }
 }

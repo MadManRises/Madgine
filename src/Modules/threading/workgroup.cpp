@@ -14,9 +14,9 @@ namespace Threading {
 
     static std::atomic<size_t> sWorkgroupInstanceCounter = 0;
 
-    static std::vector<SignalSlot::TaskHandle> &sThreadInitializers()
+    static std::vector<Threading::TaskHandle> &sThreadInitializers()
     {
-        static std::vector<SignalSlot::TaskHandle> dummy;
+        static std::vector<Threading::TaskHandle> dummy;
         return dummy;
     }
 
@@ -35,12 +35,12 @@ namespace Threading {
         WorkGroupStorage::init(true);
         WorkGroupStorage::init(false);
 
-        for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
+        for (const Threading::TaskHandle &task : sThreadInitializers()) {
             task();
         }
 
         //Is that useful at all?
-        for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
+        for (const Threading::TaskHandle &task : mThreadInitializers) {
             task();
         }
     }
@@ -55,13 +55,13 @@ namespace Threading {
         finalizeThread();
     }
 
-    void WorkGroup::addThreadInitializer(SignalSlot::TaskHandle &&task)
+    void WorkGroup::addThreadInitializer(Threading::TaskHandle &&task)
     {
         assert(mSubThreads.empty());
         mThreadInitializers.emplace_back(std::move(task));
     }
 
-    void WorkGroup::addStaticThreadInitializer(SignalSlot::TaskHandle &&task)
+    void WorkGroup::addStaticThreadInitializer(Threading::TaskHandle &&task)
     {
         sThreadInitializers().emplace_back(std::move(task));
     }
@@ -101,11 +101,11 @@ namespace Threading {
 
         setCurrentThreadName(mName + "_" + name);
 
-        for (const SignalSlot::TaskHandle &task : sThreadInitializers()) {
+        for (const Threading::TaskHandle &task : sThreadInitializers()) {
             task();
         }
 
-        for (const SignalSlot::TaskHandle &task : mThreadInitializers) {
+        for (const Threading::TaskHandle &task : mThreadInitializers) {
             task();
         }
     }

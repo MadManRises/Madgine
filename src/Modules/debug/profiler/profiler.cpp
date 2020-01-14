@@ -6,7 +6,7 @@
 
 #include "../../threading/threadlocal.h"
 
-#include "../../signalslot/taskguard.h"
+#include "../../threading/taskguard.h"
 
 namespace Engine {
 
@@ -18,7 +18,7 @@ namespace Debug {
         sThread;
         Threading::WorkgroupLocal<Profiler> sProfiler;
 #if ENABLE_THREADING
-        SignalSlot::TaskGuard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
+        Threading::TaskGuard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
 #endif
 
         Profiler::Profiler()

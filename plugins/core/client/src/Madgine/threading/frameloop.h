@@ -1,13 +1,13 @@
 #pragma once
 
 #include "contextmasks.h"
-#include "Modules/signalslot/taskqueue.h"
+#include "Modules/threading/taskqueue.h"
 
 namespace Engine
 {
 	namespace Threading
 	{
-		struct MADGINE_CLIENT_EXPORT FrameLoop : SignalSlot::TaskQueue
+		struct MADGINE_CLIENT_EXPORT FrameLoop : Threading::TaskQueue
 		{
 		public:
 			
@@ -27,7 +27,7 @@ namespace Engine
 			void shutdown();
 			bool isShutdown() const;
 
-			void addSetupSteps(SignalSlot::TaskHandle &&init, SignalSlot::TaskHandle &&finalize = {});
+			void addSetupSteps(Threading::TaskHandle &&init, Threading::TaskHandle &&finalize = {});
 
 		protected:
 
@@ -36,14 +36,14 @@ namespace Engine
 			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, ContextMask context = ContextMask::SceneContext);
 			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 
-			virtual std::optional<SignalSlot::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount) override;
-			virtual std::optional<SignalSlot::TaskTracker> fetch_on_idle() override;
+			virtual std::optional<Threading::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount) override;
+			virtual std::optional<Threading::TaskTracker> fetch_on_idle() override;
 			virtual bool idle() const override;
 
 		private:			
 
-			std::list<std::pair<SignalSlot::TaskHandle, SignalSlot::TaskHandle>> mSetupSteps;
-			std::list<std::pair<SignalSlot::TaskHandle, SignalSlot::TaskHandle>>::iterator mSetupState;
+			std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>> mSetupSteps;
+			std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>>::iterator mSetupState;
 
 			std::vector<FrameListener*> mListeners;
 

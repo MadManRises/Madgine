@@ -387,7 +387,7 @@ namespace Serialize {
         return result;
     }
 
-    SignalSlot::SignalStub<> &SyncManager::slaveStreamDisconnected()
+    Threading::SignalStub<> &SyncManager::slaveStreamDisconnected()
     {
         return mSlaveStreamDisconnected;
     }

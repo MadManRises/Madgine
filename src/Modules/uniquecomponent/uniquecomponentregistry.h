@@ -2,7 +2,7 @@
 
 #include "../reflection/classname.h"
 
-#include "../signalslot/signal.h"
+#include "../threading/signal.h"
 
 #include "../plugins/binaryinfo.h"
 
@@ -179,7 +179,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         }
     }
 
-    static SignalSlot::SignalStub<CollectorInfo *, bool, const std::vector<F> &> &update()
+    static Threading::SignalStub<CollectorInfo *, bool, const std::vector<F> &> &update()
     {
         return sInstance().mUpdate;
     }
@@ -189,7 +189,7 @@ private:
 
     std::vector<F> mComponents;
     std::vector<const MetaTable *> mTables;
-    SignalSlot::Signal<CollectorInfo *, bool, const std::vector<F> &> mUpdate;
+    Threading::Signal<CollectorInfo *, bool, const std::vector<F> &> mUpdate;
 
     std::vector<CollectorInfo *> mUnloadedCollectors;
 };

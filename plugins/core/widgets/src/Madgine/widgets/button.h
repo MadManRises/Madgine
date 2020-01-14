@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "Modules/signalslot/signal.h"
+#include "Modules/threading/signal.h"
 
 #include "fontloader.h"
 
@@ -13,7 +13,7 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Button() = default;
 
-        SignalSlot::SignalStub<> &clickEvent();
+        Threading::SignalStub<> &clickEvent();
 
         std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
@@ -40,7 +40,7 @@ namespace Widgets {
     private:
         Font::FontLoader::HandleType mFont;
 
-        SignalSlot::Signal<> mClicked;
+        Threading::Signal<> mClicked;
 
         bool mHovered = false;
         bool mClicking = false;

@@ -4,8 +4,6 @@
 
 #include "../serializestream.h"
 
-#include "../../../keyvalue/valuetype.h"
-
 #include "../../serializemanager.h"
 
 #include "Interfaces/filesystem/api.h"

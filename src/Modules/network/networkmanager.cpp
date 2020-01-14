@@ -143,7 +143,7 @@ namespace Network {
         return SyncManager::moveMasterStream(streamId, target);
     }
 
-    SignalSlot::SignalStub<StreamError> &NetworkManager::connectionResult()
+    Threading::SignalStub<StreamError> &NetworkManager::connectionResult()
     {
         return mConnectionResult;
     }

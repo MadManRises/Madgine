@@ -126,7 +126,7 @@ namespace Util {
     class StandardLog;
 }
 
-namespace SignalSlot {
+namespace Threading {
     class ConnectionBase;
     template <class T, class... _Ty>
     class ConnectionInstance;
