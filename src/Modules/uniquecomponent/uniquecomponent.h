@@ -77,12 +77,12 @@ struct VirtualUniqueComponentImpl : Base {
 	using Base::Base;
 };
 
-template <class T, class Collector, typename Base = typename Collector::Base>
+template <class T, class Collector, typename Base>
 struct VirtualUniqueComponentBase : Base {
     using Base::Base;
 };
 
-template <class T, class Collector, typename Base = typename Collector::Base>
+template <class T, class Collector, typename Base>
 struct UniqueComponent : Base {
     using Base::Base;
 };
