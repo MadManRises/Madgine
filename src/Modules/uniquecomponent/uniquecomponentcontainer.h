@@ -6,6 +6,7 @@
 
 #include "../threading/slot.h"
 
+#include "../keyvalue/typedscopeptr.h"
 
 namespace Engine {
 
