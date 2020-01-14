@@ -8,6 +8,8 @@
 
 #include "../keyvalue/typedscopeptr.h"
 
+#include "uniquecomponent.h"
+
 namespace Engine {
 
 template <typename C, class _Base, class... _Ty>
