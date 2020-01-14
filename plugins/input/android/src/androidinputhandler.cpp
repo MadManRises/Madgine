@@ -2,7 +2,7 @@
 
 #include "androidinputhandler.h"
 
-#include "Modules/debug/profiler/profiler.h"
+#include "Modules/debug/profiler/profile.h"
 
 #include "Modules/math/vector2.h"
 
