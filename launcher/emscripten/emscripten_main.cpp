@@ -1,4 +1,5 @@
 #include "Madgine/clientlib.h"
+#include "Madgine/baselib.h"
 
 #if EMSCRIPTEN
 
