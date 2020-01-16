@@ -14,8 +14,6 @@
 #include "tabwidget.h"
 #include "textbox.h"
 
-#include "Madgine/app/application.h"
-
 #include "Modules/math/vector4.h"
 
 #include "vertex.h"

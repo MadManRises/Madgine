@@ -27,7 +27,7 @@ FolderSources(sources src OpenGL openglfontdata.h openglfontloader.cpp openglfon
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
-target_link_plugins(OpenGL Client MeshLoader ProgramLoader FontLoader)
+target_link_plugins(OpenGL Client)
 target_link_libraries(OpenGL PRIVATE freetype lib_msdfgen)
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})

@@ -37,7 +37,6 @@
 
 #include "Madgine/widgets/widgetmanager.h"
 
-#include "Madgine/app/application.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 

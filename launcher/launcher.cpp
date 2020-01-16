@@ -1,4 +1,5 @@
 #include "Madgine/clientlib.h"
+#include "Madgine/baselib.h"
 
 #include "Interfaces/window/windowapi.h"
 #include "Madgine/app/application.h"

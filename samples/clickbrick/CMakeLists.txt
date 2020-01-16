@@ -9,5 +9,3 @@ FolderSources(sources "" src brick.cpp brick.h mainmenuhandler.cpp mainmenuhandl
 add_plugin(ClickBrick ClickBrick Game ${sources} PRECOMPILED_HEADER src/clickbricklib.h)
 
 target_link_plugins(ClickBrick UI SceneRenderer)
-
-target_link_libraries(ClickBrick PUBLIC Modules)

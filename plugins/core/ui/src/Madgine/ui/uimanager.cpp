@@ -6,9 +6,6 @@
 
 #include "Madgine/widgets/widget.h"
 
-#include "Madgine/app/application.h"
-#include "Madgine/app/appsettings.h"
-
 #include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"

@@ -12,7 +12,7 @@ FolderSources(sources "" src)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 
-target_link_plugins(Client Base MeshLoader ImageLoader ProgramLoader TextureLoader FontLoader)
+target_link_plugins(Client MeshLoader ImageLoader ProgramLoader TextureLoader FontLoader)
 
 
 set(sources "")

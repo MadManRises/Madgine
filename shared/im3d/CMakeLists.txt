@@ -6,6 +6,6 @@ add_workspace_library(Im3D ${sources} SOURCE_ROOT ..)
 
 target_include_directories(Im3D PUBLIC $<TARGET_PROPERTY:FontLoader,INTERFACE_INCLUDE_DIRECTORIES>)
 
-target_link_libraries(Im3D PUBLIC Modules ImGui)
+target_link_libraries(Im3D PUBLIC ImGui)
 
 install_to_workspace(Shared EXPORT_LIB TARGETS Im3D)

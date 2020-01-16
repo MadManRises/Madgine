@@ -2,7 +2,7 @@
 
 /// @cond
 
-#include "Madgine/baselib.h"
+#include "Modules/moduleslib.h"
 
 #if defined(Server_EXPORTS)
 #    define MADGINE_SERVER_EXPORT DLL_EXPORT

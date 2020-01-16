@@ -8,7 +8,7 @@
 #    define MADGINE_CLIENT_EXPORT DLL_IMPORT
 #endif
 
-#include "Madgine/baselib.h"
+#include "Modules/moduleslib.h"
 #include "programloaderlib.h"
 #include "imageloaderlib.h"
 #include "meshloaderlib.h"
