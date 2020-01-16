@@ -8,7 +8,7 @@ namespace Render {
     OpenGLTexture::OpenGLTexture(GLenum type)
         : mType(type)
     {
-        glGenTextures(1, &mHandle);
+        glGenTextures(1, &mTextureHandle);
         GL_CHECK();
         setFilter(GL_NEAREST);
         bind();
@@ -17,14 +17,12 @@ namespace Render {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         GL_CHECK();
 #endif
-        mTextureHandle = mHandle;
     }
 
     OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
-        : Texture(std::move(other))
-        , mType(other.mType)
-        , mHandle(std::exchange(other.mHandle, 0))
+        : mType(other.mType)
     {
+        mTextureHandle = std::exchange(other.mTextureHandle, 0);
     }
 
     OpenGLTexture::~OpenGLTexture()
@@ -34,23 +32,23 @@ namespace Render {
 
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
-        std::swap(mHandle, other.mHandle);
+        std::swap(mTextureHandle, other.mTextureHandle);
         std::swap(mType, other.mType);
         return *this;
     }
 
     void OpenGLTexture::reset()
     {
-        if (mHandle) {
-            glDeleteTextures(1, &mHandle);
+        if (mTextureHandle) {
+            glDeleteTextures(1, &mTextureHandle);
             GL_CHECK();
-            mHandle = 0;
+            mTextureHandle = 0;
         }
     }
 
     void OpenGLTexture::bind() const
     {
-        glBindTexture(GL_TEXTURE_2D, mHandle);
+        glBindTexture(GL_TEXTURE_2D, mTextureHandle);
         GL_CHECK();
     }
 
@@ -89,7 +87,7 @@ namespace Render {
 
     GLuint OpenGLTexture::handle() const
     {
-        return mHandle;
+        return mTextureHandle;
     }
 
     void OpenGLTexture::setWrapMode(GLint mode)

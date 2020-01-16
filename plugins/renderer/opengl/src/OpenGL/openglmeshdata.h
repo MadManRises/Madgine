@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLMeshData : Resources::MeshData {
+    struct MADGINE_OPENGL_EXPORT OpenGLMeshData : MeshData {
 
         void reset()
         {

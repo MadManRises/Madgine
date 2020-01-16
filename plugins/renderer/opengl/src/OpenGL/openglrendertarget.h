@@ -20,9 +20,8 @@ namespace Render {
 
         virtual void setRenderSpace(const Rect2i &space) override;
         virtual void renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, unsigned int textureId = 0) override;
-        //virtual void renderInstancedMesh(RenderPassFlags flags, Resources::MeshData *meshData, const std::vector<Matrix4> &transforms) override;
-        virtual void renderMesh(Resources::MeshData *mesh) override;
+        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, TextureHandle texture = 0) override;
+        virtual void renderMesh(MeshData *mesh) override;
         virtual void clearDepthBuffer() override;
 
         //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;

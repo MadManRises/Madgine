@@ -167,18 +167,12 @@ namespace Threading {
     struct DataMutex;
 }
 
-namespace Font {
+namespace Render {
+    typedef uint32_t TextureHandle;
+    typedef int RenderPassFlags;
 
     struct Font;
     struct Glyph;
-
-}
-
-namespace Render {
-    /*struct Vertex;
-    struct Vertex2;
-    struct Vertex3;*/
-    typedef int RenderPassFlags;
 }
 
 namespace Resources {

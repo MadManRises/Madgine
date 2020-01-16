@@ -8,14 +8,13 @@ namespace Render {
         TextureFlag_IsDistanceField = 1 << 0
     };
 
-    typedef uint32_t TextureHandle;
     struct TextureDescriptor {
-        const Texture *mTexture;
+        TextureHandle mTextureHandle;
         TextureFlags mFlags = 0;
 
         bool operator<(const TextureDescriptor &other) const
         {
-            return mTexture < other.mTexture || (mTexture == other.mTexture && mFlags < other.mFlags);
+            return mTextureHandle < other.mTextureHandle || (mTextureHandle == other.mTextureHandle && mFlags < other.mFlags);
         }
     };
 

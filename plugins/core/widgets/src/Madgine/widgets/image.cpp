@@ -5,8 +5,8 @@
 #include "vertex.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 #include "widgetmanager.h"
 
@@ -68,7 +68,7 @@ namespace Widgets {
         result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 0 } });
-        return { { result, { mImage ? &manager().uiTexture() : nullptr } } };
+        return { { result, { mImage ? manager().uiTexture().mTextureHandle : 0 } } };
     }
     WidgetClass Image::getClass() const
     {

@@ -69,7 +69,7 @@ namespace Widgets {
 
         mProgram.setUniform("texture", 0);
 
-        mMesh = Resources::MeshLoader::loadManual("widgetMesh", {}, [](Resources::MeshLoader *loader, Resources::MeshData &mesh, Resources::MeshLoader::ResourceType *res) {
+        mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
             return loader->generate<GUI::Vertex>(mesh, 3, {});
         });
 
@@ -672,8 +672,8 @@ namespace Widgets {
 
                 mProgram.setUniform("hasDistanceField", bool(p.first.mFlags & Render::TextureFlag_IsDistanceField));
 
-                if (p.first.mTexture)
-                    Render::TextureLoader::getSingleton().bind(*p.first.mTexture);
+                if (p.first.mTextureHandle)
+                    Render::TextureLoader::getSingleton().bind(p.first.mTextureHandle);
                 else
                     mUIAtlasTexture.bind();
 

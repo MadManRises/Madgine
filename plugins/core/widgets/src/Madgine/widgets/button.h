@@ -27,8 +27,8 @@ namespace Widgets {
         std::string getFontName() const;
         void setFontName(const std::string &name);
 
-        Font::FontLoader::ResourceType *getFont() const;
-        void setFont(Font::FontLoader::ResourceType *font);
+        Render::FontLoader::ResourceType *getFont() const;
+        void setFont(Render::FontLoader::ResourceType *font);
 
         std::string mText;
         float mFontSize = 16;
@@ -37,7 +37,7 @@ namespace Widgets {
         void emitClicked();
 
     private:
-        Font::FontLoader::HandleType mFont;
+        Render::FontLoader::HandleType mFont;
 
         Threading::Signal<> mClicked;
 

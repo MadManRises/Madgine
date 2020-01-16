@@ -16,8 +16,8 @@ namespace Widgets {
         std::string getFontName() const;
         void setFontName(const std::string &name);
 
-        Font::FontLoader::ResourceType *getFont() const;
-        void setFont(Font::FontLoader::ResourceType *font);
+        Render::FontLoader::ResourceType *getFont() const;
+        void setFont(Render::FontLoader::ResourceType *font);
 
         std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
@@ -25,7 +25,7 @@ namespace Widgets {
         int mFontSize = 16;
 
     private:
-        Font::FontLoader::HandleType mFont;
+        Render::FontLoader::HandleType mFont;
     };
 }
 }

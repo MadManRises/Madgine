@@ -214,7 +214,7 @@ METATABLE_BEGIN(Engine::Render::OpenGLFontLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLFontLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLFontLoader::ResourceType, Engine::Font::FontLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLFontLoader::ResourceType, Engine::Render::FontLoader::ResourceType)
 METATABLE_END(Engine::Render::OpenGLFontLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLFontLoader);

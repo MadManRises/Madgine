@@ -152,7 +152,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount)
+    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned short *indices, size_t indexCount)
     {
         Im3DContext &c = *sContext;
 
@@ -191,7 +191,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned int *indices, size_t indexCount, Im3DTextureId texId)
+    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned short *indices, size_t indexCount, Im3DTextureId texId)
     {
         Im3DContext &c = *sContext;
 
@@ -261,7 +261,7 @@ namespace Im3D {
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Font::Glyph &g = font.mGlyphs[text[i]];
+            Render::Glyph &g = font.mGlyphs[text[i]];
 
             fullWidth += g.mSize.x * scale;
             maxY = max(maxY, g.mBearingY * scale);
@@ -274,12 +274,12 @@ namespace Im3D {
         float yTop = fullHeight * pivot.y;
 
         std::unique_ptr<Render::Vertex2[]> vertices = std::make_unique<Render::Vertex2[]>(4 * textLen);
-        std::unique_ptr<unsigned int[]> indices = std::make_unique<unsigned int[]>(6 * textLen);
+        std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(6 * textLen);
 
         float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Font::Glyph &g = font.mGlyphs[text[i]];
+            Render::Glyph &g = font.mGlyphs[text[i]];
 
             float width = g.mSize.x * scale;
             float height = g.mSize.y * scale;
@@ -423,7 +423,7 @@ namespace Im3D {
                 { corners[6], { 1, 1, 1, 1 }, { 0, 0, 0 } },
                 { corners[7], { 1, 1, 1, 1 }, { 0, 0, 0 } },
             };
-            unsigned int indices[] = {
+            unsigned short indices[] = {
                 0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
             };
             Mesh(IM3D_LINES, vertices, 8, transform, indices, 24);

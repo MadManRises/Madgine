@@ -196,7 +196,7 @@ namespace Tools {
 
             if (ImGui::BeginDragDropTarget()) {
                 Vector3 pos = ray.point(5.0f);
-                Resources::MeshLoader::ResourceType *resource;
+                Render::MeshLoader::ResourceType *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::Entity *e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
                     e->addComponent<Scene::Entity::Transform>()->setPosition(pos);
@@ -204,7 +204,7 @@ namespace Tools {
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
-                    Resources::MeshLoader::HandleType handle = resource->loadData();
+                    Render::MeshLoader::HandleType handle = resource->loadData();
                     Im3D::NativeMesh(handle, handle->mAABB, Matrix4::TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();

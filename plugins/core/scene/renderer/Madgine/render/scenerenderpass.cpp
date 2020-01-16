@@ -48,7 +48,7 @@ namespace Render {
             Scene::Entity::Mesh *mesh = e.getComponent<Scene::Entity::Mesh>();
             Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
             if (mesh && mesh->isVisible() && transform) {
-                Resources::MeshData *meshData = mesh->data();
+                MeshData *meshData = mesh->data();
                 if (meshData) {
 
                     mProgram.bind();

@@ -3,10 +3,10 @@
 #include "Modules/math/boundingbox.h"
 
 namespace Engine {
-namespace Resources {
+namespace Render {
 
 	struct MeshData {
-        unsigned int mTextureHandle = 0;
+        TextureHandle mTextureHandle = 0;
         AABB mAABB;
 	};
 

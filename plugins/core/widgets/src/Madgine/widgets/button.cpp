@@ -115,12 +115,12 @@ namespace Widgets {
         mFont.load(name);
     }
 
-    Font::FontLoader::ResourceType *Button::getFont() const
+    Render::FontLoader::ResourceType *Button::getFont() const
     {
         return mFont.resource();
     }
 
-    void Button::setFont(Font::FontLoader::ResourceType *font)
+    void Button::setFont(Render::FontLoader::ResourceType *font)
     {
         mFont = font;
     }

@@ -32,8 +32,7 @@ namespace Render {
         void setFilter(GLint filter);
 
     private:
-        GLenum mType;
-        GLuint mHandle = 0;
+        GLenum mType;        
         Vector2i mSize = { 0, 0 };
     };
 

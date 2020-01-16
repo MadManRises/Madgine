@@ -15,17 +15,17 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
-METATABLE_BEGIN(Engine::Resources::MeshLoader)
-METATABLE_END(Engine::Resources::MeshLoader)
+METATABLE_BEGIN(Engine::Render::MeshLoader)
+METATABLE_END(Engine::Render::MeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Resources::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Resources::MeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::MeshLoader::ResourceType)
 
-RegisterType(Engine::Resources::MeshLoader)
+RegisterType(Engine::Render::MeshLoader)
 
     namespace Engine
 {
-    namespace Resources {
+    namespace Render {
 
         MeshLoader::MeshLoader()
             : VirtualResourceLoaderBase({ ".fbx" })

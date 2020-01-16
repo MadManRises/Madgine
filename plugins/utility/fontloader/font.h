@@ -6,12 +6,9 @@
 
 namespace Engine {
 namespace Render {
-    struct Texture;
-}
-namespace Font {
 
     struct Font {
-        Render::Texture *mTexture;
+        TextureHandle mTextureHandle;
         Vector2i mTextureSize;
 
         std::array<Glyph, 128> mGlyphs;

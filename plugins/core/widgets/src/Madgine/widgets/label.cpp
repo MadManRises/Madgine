@@ -55,12 +55,12 @@ namespace Widgets {
         mFont.load(name);
     }
 	
-    Font::FontLoader::ResourceType *Label::getFont() const
+    Render::FontLoader::ResourceType *Label::getFont() const
     {
         return mFont.resource();
     }
 
-    void Label::setFont(Font::FontLoader::ResourceType *font)
+    void Label::setFont(Render::FontLoader::ResourceType *font)
     {
         mFont = font;
     }

@@ -20,10 +20,10 @@ enum Im3DMeshType {
     IM3D_MESHTYPE_COUNT
 };
 
-namespace Resources {
+namespace Render {
     struct MeshData;
 }
-typedef Resources::MeshData *Im3DNativeMesh;
+typedef Render::MeshData *Im3DNativeMesh;
 
 typedef uint32_t Im3DID;
 typedef unsigned int Im3DTextureId;
@@ -38,7 +38,7 @@ struct Im3DFont {
     Im3DTextureId mTexture;
     Vector2i mTextureSize;
 
-    Font::Glyph *mGlyphs;
+    Render::Glyph *mGlyphs;
 };
 
 struct Im3DIO {
@@ -64,8 +64,8 @@ namespace Im3D {
     MADGINE_IM3D_EXPORT void PushID(const void *ptr);
     MADGINE_IM3D_EXPORT void PopID();
 
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0);
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned int *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned short *indices = nullptr, size_t indexCount = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned short *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
 
     MADGINE_IM3D_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
 

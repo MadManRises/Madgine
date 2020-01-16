@@ -7,9 +7,10 @@ namespace Engine {
 namespace Render {
 
     struct OpenGLFontData : Font::Font {
-        OpenGLFontData() : mTexture(GL_UNSIGNED_BYTE)
+        OpenGLFontData()
+            : mTexture(GL_UNSIGNED_BYTE)
         {
-            Font::mTexture = &mTexture;
+            mTextureHandle = mTexture.handle();
         }
 
         OpenGLTexture mTexture;

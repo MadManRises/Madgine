@@ -20,7 +20,7 @@ namespace Scene {
                 setName(v.as<std::string>());
             }
         }
-        Resources::MeshData *Mesh::data() const
+        Render::MeshData *Mesh::data() const
         {
             return mMesh;
         }
@@ -49,17 +49,17 @@ namespace Scene {
             return mMesh->mAABB;
         }
 
-        void Mesh::setManual(Resources::MeshLoader::HandleType handle)
+        void Mesh::setManual(Render::MeshLoader::HandleType handle)
         {
             mMesh = handle;
         }
 
-        void Mesh::set(Resources::MeshLoader::ResourceType *res)
+        void Mesh::set(Render::MeshLoader::ResourceType *res)
         {
             mMesh = res;
         }
 
-        Resources::MeshLoader::ResourceType *Mesh::get() const
+        Render::MeshLoader::ResourceType *Mesh::get() const
         {
             return mMesh.resource();
         }

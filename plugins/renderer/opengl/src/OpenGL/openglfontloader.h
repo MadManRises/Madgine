@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLFontLoader : Resources::VirtualResourceLoaderImpl<OpenGLFontLoader, OpenGLFontData, Font::FontLoader>{
+    struct MADGINE_OPENGL_EXPORT OpenGLFontLoader : Resources::VirtualResourceLoaderImpl<OpenGLFontLoader, OpenGLFontData, FontLoader>{
         OpenGLFontLoader();
 
         bool loadImpl(OpenGLFontData &font, ResourceType *res);

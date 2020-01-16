@@ -57,7 +57,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(Resources::MeshData *m)
+    void OpenGLRenderTarget::renderMesh(MeshData *m)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
 
@@ -83,15 +83,6 @@ namespace Render {
         mesh->mVAO.unbind();
     }
 
-    /*void OpenGLRenderTexture::renderInstancedMesh(RenderPassFlags flags, Resources::MeshData *meshData, const std::vector<Matrix4> &transforms)
-    {
-        setupProgram(flags);
-
-        for (const Matrix4 &transform : transforms) {
-            renderMesh(meshData, transform);
-        }
-    }*/
-
     void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
@@ -104,13 +95,13 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, unsigned int textureId)
+    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
             OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
 
-            //setupProgram(flags, textureId);
+            tempMesh.mTextureHandle = texture;
 
             renderMesh(&tempMesh);
         }

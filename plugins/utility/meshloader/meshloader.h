@@ -14,11 +14,9 @@
 #include "meshdata.h"
 
 namespace Engine {
-namespace Resources {
+namespace Render {
 
-    struct MeshData;
-
-    struct MADGINE_MESHLOADER_EXPORT MeshLoader : VirtualResourceLoaderBase<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct MADGINE_MESHLOADER_EXPORT MeshLoader : Resources::VirtualResourceLoaderBase<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
 
         using Base = VirtualResourceLoaderBase<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 

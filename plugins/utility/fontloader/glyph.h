@@ -3,7 +3,7 @@
 #include "Modules/math/vector2i.h"
 
 namespace Engine {
-namespace Font {
+namespace Render {
 
 	struct Glyph {
         Vector2i mSize;

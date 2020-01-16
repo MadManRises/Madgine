@@ -7,7 +7,7 @@
 #include "font.h"
 
 namespace Engine {
-namespace Font {
+namespace Render {
 	
 	struct MADGINE_FONTLOADER_EXPORT FontLoader : Resources::VirtualResourceLoaderBase<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         using Resources::VirtualResourceLoaderBase<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage>::VirtualResourceLoaderBase;

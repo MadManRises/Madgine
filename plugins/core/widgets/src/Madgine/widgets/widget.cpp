@@ -501,7 +501,7 @@ namespace Widgets {
         of.write(getClass(), "type");
     }
 
-    std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Font::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
         std::vector<GUI::Vertex> result;
 
@@ -520,7 +520,7 @@ namespace Widgets {
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Font::Glyph &g = font->mGlyphs[text[i]];
+            Render::Glyph &g = font->mGlyphs[text[i]];
 
             fullWidth += g.mSize.x * scaleX;
             maxY = max(maxY, g.mBearingY * scaleY);
@@ -535,7 +535,7 @@ namespace Widgets {
         float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Font::Glyph &g = font->mGlyphs[text[i]];
+            Render::Glyph &g = font->mGlyphs[text[i]];
 
             float width = g.mSize.x * scaleX;
             float height = g.mSize.y * scaleY;
@@ -572,7 +572,7 @@ namespace Widgets {
 
             cursorX += g.mAdvance / 64.0f * scaleX;
         }
-        return { result, { font->mTexture, Render::TextureFlag_IsDistanceField } };
+        return { result, { font->mTextureHandle, Render::TextureFlag_IsDistanceField } };
     }
 
 }

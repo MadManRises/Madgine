@@ -15,10 +15,10 @@
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Resources::MeshLoader)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::MeshLoader)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Resources::MeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::MeshLoader::ResourceType)
 METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLMeshLoader);
@@ -30,7 +30,7 @@ namespace Render {
     {
     }
 
-    bool OpenGLMeshLoader::generateImpl(Resources::MeshData &_data, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices, const Filesystem::Path &texturePath)
+    bool OpenGLMeshLoader::generateImpl(MeshData &_data, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices, const Filesystem::Path &texturePath)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
         data.mAABB = bb;
@@ -71,7 +71,7 @@ namespace Render {
         return true;
     }
 
-    void OpenGLMeshLoader::updateImpl(Resources::MeshData &_data, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices)
+    void OpenGLMeshLoader::updateImpl(MeshData &_data, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
 
@@ -91,7 +91,7 @@ namespace Render {
         });
     }
 
-    void OpenGLMeshLoader::resetImpl(Resources::MeshData &data)
+    void OpenGLMeshLoader::resetImpl(MeshData &data)
     {
         static_cast<OpenGLMeshData &>(data).reset();
     }

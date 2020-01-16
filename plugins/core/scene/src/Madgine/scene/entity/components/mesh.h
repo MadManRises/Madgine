@@ -14,20 +14,20 @@ namespace Scene {
             std::string getName() const;
             void setName(const std::string &name);
 
-            Resources::MeshData *data() const;
+            Render::MeshData *data() const;
 
             AABB aabb() const;
 
-            void setManual(Resources::MeshLoader::HandleType handle);
-            void set(Resources::MeshLoader::ResourceType *res);
+            void setManual(Render::MeshLoader::HandleType handle);
+            void set(Render::MeshLoader::ResourceType *res);
 
-            Resources::MeshLoader::ResourceType *get() const;
+            Render::MeshLoader::ResourceType *get() const;
 
             void setVisible(bool vis);
             bool isVisible() const;
 
         private:
-            typename Resources::MeshLoader::HandleType mMesh;
+            typename Render::MeshLoader::HandleType mMesh;
         };
 
     }

@@ -114,7 +114,7 @@ namespace Widgets {
         void expandUIAtlas();
 
         Render::ProgramLoader::HandleType mProgram;
-        Resources::MeshLoader::HandleType mMesh;
+        Render::MeshLoader::HandleType mMesh;
 
         Render::TextureLoader::HandleType mUIAtlasTexture;
         Atlas2 mUIAtlas;

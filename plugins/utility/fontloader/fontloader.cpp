@@ -4,9 +4,9 @@
 
 #include "fontloader.h"
 
-METATABLE_BEGIN_BASE(Engine::Font::FontLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Font::FontLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::FontLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::FontLoader::ResourceType)
 
-RegisterType(Engine::Font::FontLoader)
-METATABLE_BEGIN(Engine::Font::FontLoader)
-METATABLE_END(Engine::Font::FontLoader)
+RegisterType(Engine::Render::FontLoader)
+METATABLE_BEGIN(Engine::Render::FontLoader)
+METATABLE_END(Engine::Render::FontLoader)

@@ -25,7 +25,7 @@ namespace Tools {
 
         mProgram.create("grid");
 
-        mMesh = Resources::MeshLoader::loadManual("grid", {}, [](Resources::MeshLoader *loader, Resources::MeshData &data, Resources::MeshLoader::ResourceType * res) {
+        mMesh = Render::MeshLoader::loadManual("grid", {}, [](Render::MeshLoader *loader, Render::MeshData &data, Render::MeshLoader::ResourceType * res) {
             std::vector<Compound<Render::VertexPos_4D>> vertices{
                 { { 0, 0, 0, 1 } },
                 { { 1, 0, 0, 0 } },
