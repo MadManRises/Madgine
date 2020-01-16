@@ -168,7 +168,7 @@ namespace Threading {
 }
 
 namespace Render {
-    typedef uint32_t TextureHandle;
+    typedef uintptr_t TextureHandle;
     typedef int RenderPassFlags;
 
     struct Font;

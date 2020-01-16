@@ -26,7 +26,7 @@ namespace Render {
 typedef Render::MeshData *Im3DNativeMesh;
 
 typedef uint32_t Im3DID;
-typedef unsigned int Im3DTextureId;
+typedef uintptr_t Im3DTextureId;
 typedef int Im3DBoundingObjectFlags;
 
 enum Im3DBoundingObjectFlags_ {

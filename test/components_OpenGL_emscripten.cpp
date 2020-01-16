@@ -1,21 +1,24 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_SceneRendererTools
-#    include "Madgine_Tools/scenerenderertoolslib.h"
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
+#endif
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
 #endif
-#ifdef BUILD_EmscriptenInput
-#    include "emscripteninputlib.h"
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_WidgetsTools
 #    include "Madgine_Tools/widgetstoolslib.h"
@@ -23,23 +26,20 @@
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
 #endif
+#ifdef BUILD_EmscriptenInput
+#    include "emscripteninputlib.h"
+#endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
-#endif
-#ifdef BUILD_Tools
-#    include "toolslib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
@@ -400,11 +400,11 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
 size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Font::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
 size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Resources::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
 size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 template <>

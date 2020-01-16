@@ -8,7 +8,9 @@ namespace Render {
     OpenGLTexture::OpenGLTexture(GLenum type)
         : mType(type)
     {
-        glGenTextures(1, &mTextureHandle);
+        GLuint temp;
+        glGenTextures(1, &temp);
+        mTextureHandle = temp;
         GL_CHECK();
         setFilter(GL_NEAREST);
         bind();
@@ -40,7 +42,8 @@ namespace Render {
     void OpenGLTexture::reset()
     {
         if (mTextureHandle) {
-            glDeleteTextures(1, &mTextureHandle);
+            GLuint temp = mTextureHandle;
+            glDeleteTextures(1, &temp);
             GL_CHECK();
             mTextureHandle = 0;
         }
