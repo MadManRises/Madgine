@@ -20,8 +20,8 @@
 #include "openglfontloader.h"
 #include "openglmeshloader.h"
 #include "openglprogramloader.h"
-#include "opengltextureloader.h"
 #include "openglshaderloader.h"
+#include "opengltextureloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
@@ -157,15 +157,21 @@ namespace Render {
     {
 #if WINDOWS
         HDC windowDC = GetDC((HWND)window->mHandle);
-        if (!wglMakeCurrent(windowDC, context))
-            exit(GetLastError());
+        if (!wglMakeCurrent(windowDC, context)) {
+            LOG_ERROR("Error-Code: " << GetLastError());
+            std::terminate();
+        }
 #elif LINUX
-        if (!glXMakeCurrent(Window::sDisplay(), window->mHandle, context))
-            exit(errno);
+        if (!glXMakeCurrent(Window::sDisplay(), window->mHandle, context)) {
+            LOG_ERROR("Error-Code: " << errno);
+            std::terminate();
+        }
 #elif ANDROID || EMSCRIPTEN
         EGLSurface surface = (EGLSurface)window->mHandle;
-        if (!eglMakeCurrent(Window::sDisplay, surface, surface, context))
-            exit(errno);
+        if (!eglMakeCurrent(Window::sDisplay, surface, surface, context)) {
+            LOG_ERROR("Error-Code: " << errno);
+            std::terminate();
+        }
 #endif
     }
 
@@ -246,7 +252,8 @@ namespace Render {
             };
 
             const EGLint contextAttribs[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 2,
+                EGL_CONTEXT_CLIENT_VERSION, 3,
+                EGL_CONTEXT_MINOR_VERSION, 0,
                 EGL_NONE
             };
 
@@ -384,7 +391,7 @@ namespace Render {
                 p.second.unloadData();
             }
 
-			for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &p : OpenGLTextureLoader::getSingleton()) {
+            for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &p : OpenGLTextureLoader::getSingleton()) {
                 p.second.unloadData();
             }
         }

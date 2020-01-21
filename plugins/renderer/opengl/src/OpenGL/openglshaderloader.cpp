@@ -15,7 +15,13 @@ namespace Engine {
 namespace Render {
 
     OpenGLShaderLoader::OpenGLShaderLoader()
-        : ResourceLoader({ ".glsl" })
+        : ResourceLoader({
+#if !OPENGL_ES
+            ".glsl"
+#else
+            ".glsl_es"
+#endif
+        })
     {
     }
 
@@ -28,7 +34,7 @@ namespace Render {
         if (StringUtil::endsWith(filename, "_VS")) {
             type = VertexShader;
         } else if (StringUtil::endsWith(filename, "_PS")) {
-            type = PixelShader;            
+            type = PixelShader;
         } else
             std::terminate();
 

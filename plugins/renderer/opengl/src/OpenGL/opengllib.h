@@ -19,7 +19,7 @@
 #    include "../glad/glad.h"
 #    define OPENGL_ES 0
 #else
-#    include <GLES2/gl2.h>
+#    include <GLES3/gl32.h>
 #    define OPENGL_ES 1
 #endif
 

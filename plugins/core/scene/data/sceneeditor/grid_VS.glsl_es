@@ -1,0 +1,17 @@
+#version 300 es
+
+layout (std140, binding = 1) uniform PerFrame
+{
+	mat4 vp;
+};
+
+
+layout(location = 0) in vec4 aPos;
+
+out vec4 worldPos;
+
+void main()
+{	
+	worldPos = aPos;
+    gl_Position = vp * worldPos;
+}
