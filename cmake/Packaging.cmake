@@ -88,8 +88,11 @@ macro(collect_data target)
 
 	generate_binary_info(${target})
 
-	if (NOT BUILD_SHARED_LIBS OR ANDROID OR EMSCRIPTEN)
-		if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
+	if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+		target_include_directories(${target} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/data>)
+
+		if (NOT BUILD_SHARED_LIBS OR ANDROID OR EMSCRIPTEN)
 			add_custom_command(
 				TARGET ${target} 
 				POST_BUILD 
