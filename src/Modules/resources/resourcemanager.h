@@ -37,7 +37,9 @@ namespace Resources {
 
         Filesystem::Path findResourceFile(const std::string &fileName);
 
+#if ENABLE_PLUGINS
         virtual int priority() const override;
+#endif
 
 #if ENABLE_PLUGINS
     protected:

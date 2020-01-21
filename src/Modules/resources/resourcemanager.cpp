@@ -152,7 +152,7 @@ namespace Resources {
         return loaderByExtension;
     }
 
-	bool ResourceManager::SubDirCompare::operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
+    bool ResourceManager::SubDirCompare::operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
     {
         auto [firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());
         if (firstEnd == first.str().end() || secondEnd == second.str().end())
@@ -160,10 +160,12 @@ namespace Resources {
         return first.str() < second.str();
     }
 
+#if ENABLE_PLUGINS
     int ResourceManager::priority() const
     {
         return 75;
     }
+#endif
 
 }
 }
