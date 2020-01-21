@@ -39,10 +39,10 @@ namespace Render {
             data.mVAO = create;
             data.mVAO.bind();
 
-            data.mVertices = create;
+            data.mVertices = GL_ARRAY_BUFFER;
 
             if (!indices.empty()) {
-                data.mIndices = create;
+                data.mIndices = GL_ELEMENT_ARRAY_BUFFER;
             }
 
             if (!texturePath.empty()) {
@@ -80,10 +80,10 @@ namespace Render {
 		OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
             data.mGroupSize = groupSize;
 
-            data.mVertices.setData(GL_ARRAY_BUFFER, vertices.mSize, vertices.mData);
+            data.mVertices.setData(vertices.mSize, vertices.mData);
 
             if (!indices.empty()) {
-                data.mIndices.setData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data());
+                data.mIndices.setData(sizeof(indices[0]) * indices.size(), indices.data());
                 data.mElementCount = indices.size();
             } else {
                 data.mElementCount = vertices.mSize / vertexSize;

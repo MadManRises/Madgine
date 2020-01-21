@@ -2,23 +2,23 @@
 
 #if ENABLE_PLUGINS
 
-#include "pluginsection.h"
+#    include "pluginsection.h"
 
-#include "plugin.h"
+#    include "plugin.h"
 
-#include "pluginmanager.h"
+#    include "pluginmanager.h"
 
-#include "Interfaces/exception.h"
+#    include "Interfaces/exception.h"
 
-#include "../threading/defaulttaskqueue.h"
+#    include "../threading/defaulttaskqueue.h"
 
-#include "pluginlistener.h"
+#    include "pluginlistener.h"
 
-#include "Interfaces/filesystem/runtime.h"
+#    include "Interfaces/filesystem/runtime.h"
 
-#include "../keyvalue/keyvalue.h"
+#    include "../keyvalue/keyvalue.h"
 
-#include "../ini/inisection.h"
+#    include "../ini/inisection.h"
 
 namespace Engine {
 namespace Plugins {
@@ -27,7 +27,7 @@ namespace Plugins {
         : mName(name)
         , mMgr(mgr)
     {
-        const std::regex e { SHARED_LIB_PREFIX "Plugin_([a-zA-Z]*)_" + mName + "_([a-zA-Z]*)\\" SHARED_LIB_SUFFIX };
+        const std::regex e { SHARED_LIB_PREFIX "Plugin_([a-zA-Z0-9]*)_" + mName + "_([a-zA-Z0-9]*)\\" SHARED_LIB_SUFFIX };
         std::smatch match;
         for (auto path : Filesystem::listSharedLibraries()) {
             if (std::regex_match(path.str(), match, e)) {
@@ -70,7 +70,7 @@ namespace Plugins {
                     else if (!unloadPlugin(&p.second))
                         throw exception("Failed to unload Plugin for exclusive Section: "s + p.first);
                 }
-            }            
+            }
         }
     }
 
@@ -113,7 +113,7 @@ namespace Plugins {
     void PluginSection::addListener(PluginListener *listener)
     {
         std::unique_lock lock(mMgr.mListenersMutex);
-        mListeners.push_back(listener);
+        mListeners.emplace(listener);
         for (const std::pair<const std::string, Plugins::Plugin> &p : *this) {
             if (p.second.isLoaded())
                 listener->onPluginLoad(&p.second);
@@ -127,7 +127,7 @@ namespace Plugins {
             if (p.second.isLoaded())
                 listener->aboutToUnloadPlugin(&p.second);
         }
-        mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
+        mListeners.erase(listener);            
     }
 
     Plugin *PluginSection::getPlugin(const std::string &name)
@@ -176,7 +176,7 @@ namespace Plugins {
                             listener->onPluginLoad(p);
                     }
 
-			        if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
+                    if (Plugin *toolPlugin = mMgr.section("Tools").getPlugin(p->name() + "Tools"))
                         return loadPlugin(toolPlugin);
 
                     return LOADED;
@@ -225,7 +225,7 @@ namespace Plugins {
 
         auto task = [=]() {
             LoadState result = p->unload();
-            auto task = [=]() {                
+            auto task = [=]() {
                 if (!p->isLoaded()) {
                     std::unique_lock lock(mMgr.mListenersMutex);
                     for (PluginListener *listener : mListeners)
@@ -305,6 +305,11 @@ namespace Plugins {
             }
         }
         return symbol;
+    }
+
+    bool PluginListenerCmp::operator()(PluginListener *first, PluginListener *second) const
+    {
+        return (first->priority() > second->priority()) || (first->priority() == second->priority() && first < second);
     }
 
 }

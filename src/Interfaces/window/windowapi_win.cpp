@@ -2,16 +2,16 @@
 
 #if WINDOWS
 
-#include "windowapi.h"
-#include "windoweventlistener.h"
+#    include "windowapi.h"
+#    include "windoweventlistener.h"
 
-#define NOMINMAX
-#include <Windows.h>
+#    define NOMINMAX
+#    include <Windows.h>
 
 namespace Engine {
 namespace Window {
 
-	DLL_EXPORT const PlatformCapabilities platformCapabilities {
+    DLL_EXPORT const PlatformCapabilities platformCapabilities {
         true
     };
 
@@ -33,9 +33,13 @@ namespace Window {
             case WM_DESTROY:
                 return false;
                 break;
-            case WM_PAINT:
+            case WM_PAINT: {
+                PAINTSTRUCT ps;
+                BeginPaint((HWND)mHandle, &ps);
                 onRepaint();
+                EndPaint((HWND)mHandle, &ps);
                 break;
+            }
             }
             return true;
         }
@@ -72,14 +76,8 @@ namespace Window {
             return rect.bottom - rect.top;
         }
 
-        virtual void beginFrame() override
+        virtual void swapBuffers() override
         {
-            BeginPaint((HWND)mHandle, &mPs);
-        }
-
-        virtual void endFrame() override
-        {
-            EndPaint((HWND)mHandle, &mPs);
             SwapBuffers(GetDC((HWND)mHandle));
         }
 
@@ -173,7 +171,6 @@ namespace Window {
             SetWindowTextA((HWND)mHandle, title);
         }
 
-        PAINTSTRUCT mPs;
     };
 
     static std::unordered_map<HWND, WindowsWindow> sWindows;

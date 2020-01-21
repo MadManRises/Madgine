@@ -15,6 +15,11 @@
 
 #include "Modules/generic/transformIt.h"
 
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER ui
+#include INCLUDE_SL_SHADER
+
 namespace Engine {
 namespace Widgets {
 
@@ -120,6 +125,8 @@ namespace Widgets {
         Atlas2 mUIAtlas;
         int mUIAtlasSize = 0;
         std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
+
+        WidgetsPerObject mParameters;
     };
 
 }

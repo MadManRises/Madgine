@@ -42,7 +42,7 @@ namespace Plugins {
         assert(!sSingleton);
         sSingleton = this;
 
-        const std::regex e { SHARED_LIB_PREFIX "Plugin_[a-zA-Z]*_([a-zA-Z]*)_[a-zA-Z]*\\" SHARED_LIB_SUFFIX };
+        const std::regex e { SHARED_LIB_PREFIX "Plugin_[a-zA-Z0-9]*_([a-zA-Z0-9]*)_[a-zA-Z0-9]*\\" SHARED_LIB_SUFFIX };
         std::smatch match;
         for (auto path : Filesystem::listSharedLibraries()) {
             if (std::regex_match(path.str(), match, e)) {

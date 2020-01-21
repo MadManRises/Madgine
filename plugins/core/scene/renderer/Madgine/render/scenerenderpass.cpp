@@ -14,6 +14,8 @@
 
 #include "textureloader.h"
 
+
+
 namespace Engine {
 namespace Render {
 
@@ -26,50 +28,52 @@ namespace Render {
     void SceneRenderPass::render(Render::RenderTarget *target)
     {
         if (!mProgram) {
-            mProgram.create("scene");
+            mProgram.create("scene");            
 
-            mProgram.setUniform("tex", 0);
+            Vector2i size = target->size();
 
-            mProgram.setUniform("lightColor", { 1.0f, 1.0f, 1.0f });
-            mProgram.setUniform("lightDir", Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy());
+            float aspectRatio = float(size.x) / size.y;
+
+            mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
+
+            mProgram.setParameters(mPerApplication, 0);
+
+            mPerFrame.lightColor = { 1.0f, 1.0f, 1.0f };
+            mPerFrame.lightDir = Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy();
         }
 
+        mPerFrame.v = mCamera->getViewMatrix();
 
-        Vector2i size = target->size();
-
-        float aspectRatio = float(size.x) / size.y;
-
-        mProgram.setUniform("v", mCamera->getViewMatrix());
-        mProgram.setUniform("p", mCamera->getProjectionMatrix(aspectRatio));
+        mProgram.setParameters(mPerFrame, 1);
 
         //TODO Culling
-        for (Scene::Entity::Entity &e : App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().entities()) {
+        Scene::SceneManager &sceneMgr = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
+
+        Threading::DataLock lock { sceneMgr.mutex(), Threading::AccessMode::READ };
+
+        for (Scene::Entity::Entity &e : sceneMgr.entities()) {
 
             Scene::Entity::Mesh *mesh = e.getComponent<Scene::Entity::Mesh>();
             Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
             if (mesh && mesh->isVisible() && transform) {
                 MeshData *meshData = mesh->data();
                 if (meshData) {
+                    mPerObject.hasLight = true;
 
-                    mProgram.bind();
+                    mPerObject.hasDistanceField = false;
 
-                    mProgram.setUniform("hasLight", true);
-
-                    mProgram.setUniform("hasDistanceField", false);
-
-                    mProgram.setUniform("hasTexture", meshData->mTextureHandle != 0);
+                    mPerObject.hasTexture = meshData->mTextureHandle != 0;
 
                     TextureLoader::getSingleton().bind(meshData->mTextureHandle);
 
-                    mProgram.setUniform("m", transform->matrix());
-                    mProgram.setUniform(
-                        "anti_m",
-                        transform->matrix()
-                            .ToMat3()
-                            .Inverse()
-                            .Transpose());
+                    mPerObject.m = transform->matrix();
+                    mPerObject.anti_m = transform->matrix()
+                                            .Inverse()
+                                            .Transpose();
 
-                    target->renderMesh(meshData);
+                    mProgram.setParameters(mPerObject, 2);
+
+                    target->renderMesh(meshData, mProgram);
                 }
             }
         }

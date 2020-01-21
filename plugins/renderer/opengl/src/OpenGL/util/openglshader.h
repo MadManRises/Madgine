@@ -12,7 +12,7 @@ namespace Engine {
 		struct OpenGLShader 
 		{
 			OpenGLShader() = default;
-			OpenGLShader(GLenum glType, ShaderType type);
+			OpenGLShader(ShaderType type);
                     OpenGLShader(const OpenGLShader &) = delete;
                         OpenGLShader(OpenGLShader &&);
 			~OpenGLShader();

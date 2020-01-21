@@ -1,22 +1,37 @@
-#version 100
+#version 420 core
 
-precision mediump float;
+layout (std140, binding = 0) uniform PerApplication
+{
+	mat4 p;	
+};
 
-//layout (location = 0) out vec4 FragColor;
+layout (std140, binding = 1) uniform PerFrame
+{
+	mat4 v;
 
-varying vec4 color;
-varying vec3 worldPos;
-varying vec3 normal;
-varying vec2 uv;
+	vec3 lightColor;
+	vec3 lightDir;
+};
 
-uniform vec3 lightColor;
-uniform vec3 lightDir;
+layout (std140, binding = 2) uniform PerObject
+{
+	mat4 m;
+	mat4 anti_m;
 
-uniform bool hasLight;
-uniform bool hasTexture;
-uniform bool hasDistanceField;
+	bool hasLight;
+	bool hasTexture;
+	bool hasDistanceField;
+};
 
-uniform sampler2D tex;
+layout(binding = 0) uniform sampler2D tex;
+
+
+in vec4 color;
+in vec3 worldPos;
+in vec3 normal;
+in vec2 uv;
+
+
 
 float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
@@ -30,8 +45,8 @@ void main()
 	if (hasTexture){
 		if (hasDistanceField){
 			vec2 msdfUnit = 4.0/vec2(512.0, 512.0);
-			vec4 sample = texture2D(tex, uv);
-			float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
+			vec4 sampled = texture2D(tex, uv);
+			float sigDist = median(sampled.r, sampled.g, sampled.b) - 0.5;
 			//sigDist *= dot(msdfUnit, vec2(0.5));
 			sigDist *= 4.0;
 			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);

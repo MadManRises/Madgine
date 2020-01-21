@@ -15,16 +15,18 @@ namespace Render {
 
     OpenGLProgram::OpenGLProgram(OpenGLProgram &&other)
         : mHandle(std::exchange(other.mHandle, 0))
+        , mUniformBuffers(std::move(other.mUniformBuffers))
     {
     }
 
     OpenGLProgram &OpenGLProgram::operator=(OpenGLProgram &&other)
     {
         std::swap(mHandle, other.mHandle);
+        std::swap(mUniformBuffers, other.mUniformBuffers);
         return *this;
     }
 
-    bool OpenGLProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char *> &attributeNames)
+    bool OpenGLProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader)
     {
         reset();
 
@@ -34,11 +36,6 @@ namespace Render {
         mHandle = glCreateProgram();
         glAttachShader(mHandle, vertexShader->mHandle);
         glAttachShader(mHandle, pixelShader->mHandle);
-
-        for (size_t i = 0; i < attributeNames.size(); ++i) {
-            glBindAttribLocation(mHandle, i, attributeNames[i]);
-            GL_CHECK();
-        }
 
         glLinkProgram(mHandle);
         // check for linking errors
@@ -66,41 +63,22 @@ namespace Render {
     {
         assert(mHandle);
         glUseProgram(mHandle);
+
+        for (size_t i = 0; i < mUniformBuffers.size(); ++i) {
+            glBindBufferBase(GL_UNIFORM_BUFFER, i, mUniformBuffers[i].handle());
+        }
     }
 
-    void OpenGLProgram::setUniform(const std::string &var, int value)
+    void OpenGLProgram::setParameters(const void *data, size_t size, size_t index)
     {
-        bind();
-        GLint location = glGetUniformLocation(mHandle, var.c_str());
-        glUniform1i(location, value);
-        GL_CHECK();
-    }
+        if (mUniformBuffers.size() <= index)
+            mUniformBuffers.resize(index + 1);
 
-    void OpenGLProgram::setUniform(const std::string &var,
-        const Matrix3 &value)
-    {
-        bind();
-        GLint location = glGetUniformLocation(mHandle, var.c_str());
-        Matrix3 transposed = value.Transpose();
-        glUniformMatrix3fv(location, 1, GL_FALSE, transposed[0]);
-        GL_CHECK();
-    }
+        if (!mUniformBuffers[index]) {
+            mUniformBuffers[index] = GL_UNIFORM_BUFFER;
+        }
 
-    void OpenGLProgram::setUniform(const std::string &var, const Matrix4 &value)
-    {
-        bind();
-        GLint location = glGetUniformLocation(mHandle, var.c_str());
-        Matrix4 transposed = value.Transpose();
-        glUniformMatrix4fv(location, 1, GL_FALSE, transposed[0]);
-        GL_CHECK();
-    }
-
-    void OpenGLProgram::setUniform(const std::string &var, const Vector3 &value)
-    {
-        bind();
-        GLint location = glGetUniformLocation(mHandle, var.c_str());
-        glUniform3fv(location, 1, value.ptr());
-        GL_CHECK();
+        mUniformBuffers[index].setData(size, data);
     }
 
 }

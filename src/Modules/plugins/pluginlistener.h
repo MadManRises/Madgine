@@ -11,6 +11,8 @@ namespace Engine {
 			virtual bool aboutToLoadPlugin(const Plugin *p) { return true; }
 			virtual void onPluginUnload(const Plugin *p) {}
 			virtual void onPluginLoad(const Plugin *p) {}
+
+			virtual int priority() const { return 50; }
 		};
 
 	}

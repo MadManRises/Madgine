@@ -30,7 +30,7 @@ namespace Render {
 
     Matrix4 Camera::getViewMatrix()
     {
-        Matrix4 rotate = Matrix4(mOrientation.inverse().toMatrix());
+        Matrix4 rotate = Matrix4(mOrientation.toMatrix());
 
         Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
 
@@ -45,7 +45,7 @@ namespace Render {
         Matrix4 p = {
             mN / r, 0, 0, 0,
             0, mN / t, 0, 0,
-            0, 0, -(mF + mN) / (mF - mN), 2 * mF * mN / (mF - mN),
+            0, 0, (mF + mN) / (mF - mN), -2 * mF * mN / (mF - mN),
             0, 0, 1, 0
         };
 

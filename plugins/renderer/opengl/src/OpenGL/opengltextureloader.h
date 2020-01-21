@@ -17,7 +17,7 @@ namespace Render {
         bool create(Texture &texture, DataFormat format) override;
 
         virtual void bind(const Texture &texture) override;
-        virtual void bind(unsigned int textureHandle) override;
+        virtual void bind(TextureHandle textureHandle) override;
 
 		virtual void setData(Texture &tex, Vector2i size, void *data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data) override;

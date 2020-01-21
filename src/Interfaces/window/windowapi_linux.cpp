@@ -99,11 +99,7 @@ namespace Window {
             return height();
         }
 
-        virtual void beginFrame() override
-        {
-        }
-
-        virtual void endFrame() override
+        virtual void swapBuffers() override
         {
             glXSwapBuffers(sDisplay(), mHandle);
         }

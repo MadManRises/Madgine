@@ -42,6 +42,9 @@ namespace Render {
         case FORMAT_UNSIGNED_BYTE:
             type = GL_UNSIGNED_BYTE;
             break;
+        case FORMAT_FLOAT8:
+            type = GL_FLOAT;
+            break;
         default:
             std::terminate();
         }
@@ -56,7 +59,7 @@ namespace Render {
         static_cast<const OpenGLTexture &>(texture).bind();
     }
 
-    void OpenGLTextureLoader::bind(unsigned int textureHandle)
+    void OpenGLTextureLoader::bind(TextureHandle textureHandle)
     {
         glBindTexture(GL_TEXTURE_2D, textureHandle);
         GL_CHECK();

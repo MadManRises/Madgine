@@ -19,9 +19,9 @@ namespace Render {
         virtual void beginFrame() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) override;
-        virtual void renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, TextureHandle texture = 0) override;
-        virtual void renderMesh(MeshData *mesh) override;
+        virtual void renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) override;
+        virtual void renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, TextureHandle texture = 0) override;
+        virtual void renderMesh(MeshData *mesh, Program *program) override;
         virtual void clearDepthBuffer() override;
 
         //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;

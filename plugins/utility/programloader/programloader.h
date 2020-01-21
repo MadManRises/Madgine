@@ -20,26 +20,21 @@ namespace Render {
             {
             }
 
-			void create(const std::string &name, ProgramLoader *loader = nullptr);
+            void create(const std::string &name, ProgramLoader *loader = nullptr);
 
-            void bind(ProgramLoader *loader = nullptr);
-
-            void setUniform(const std::string &var, int value, ProgramLoader *loader = nullptr);
-            void setUniform(const std::string &var, const Matrix3 &value, ProgramLoader *loader = nullptr);
-            void setUniform(const std::string &var, const Matrix4 &value, ProgramLoader *loader = nullptr);
-            void setUniform(const std::string &var, const Vector3 &value, ProgramLoader *loader = nullptr);
+            template <typename T>
+            void setParameters(const T &param, size_t index, ProgramLoader *loader = nullptr)
+            {
+                setParameters(&param, sizeof(T), index, loader);
+            }
+            void setParameters(const void *data, size_t size, size_t index, ProgramLoader *loader = nullptr);
         };
 
         ProgramLoader();
 
         virtual bool create(Program &program, const std::string &name) = 0;
 
-        virtual void bind(Program &program) = 0;
-
-        virtual void setUniform(Program &program, const std::string &var, int value) = 0;
-        virtual void setUniform(Program &program, const std::string &var, const Matrix3 &value) = 0;
-        virtual void setUniform(Program &program, const std::string &var, const Matrix4 &value) = 0;
-        virtual void setUniform(Program &program, const std::string &var, const Vector3 &value) = 0;
+        virtual void setParameters(Program &program, const void *data, size_t size, size_t index) = 0;
     };
 
 }

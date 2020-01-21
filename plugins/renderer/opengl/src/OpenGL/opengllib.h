@@ -45,6 +45,9 @@ inline void glCheck()
 
 #if WINDOWS
 
+#define NOMINMAX
+#include <Windows.h>
+
 #    undef NO_ERROR
 typedef HGLRC ContextHandle;
 

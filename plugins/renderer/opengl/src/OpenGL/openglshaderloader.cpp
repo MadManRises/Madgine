@@ -27,10 +27,8 @@ namespace Render {
         GLenum glType;
         if (StringUtil::endsWith(filename, "_VS")) {
             type = VertexShader;
-            glType = GL_VERTEX_SHADER;
         } else if (StringUtil::endsWith(filename, "_PS")) {
-            type = PixelShader;
-            glType = GL_FRAGMENT_SHADER;
+            type = PixelShader;            
         } else
             std::terminate();
 
@@ -38,7 +36,7 @@ namespace Render {
 
         const char *cSource = source.c_str();
 
-        OpenGLShader tempShader { glType, type };
+        OpenGLShader tempShader { type };
 
         GLuint handle = tempShader.mHandle;
 

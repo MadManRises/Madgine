@@ -2,7 +2,7 @@
 
 precision mediump float;
 
-varying vec4 worldPos;
+in vec4 worldPos;
 
 vec3 _smoothstep(float edge0, float edge1, vec3 x) {
 	vec3 t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);

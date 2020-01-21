@@ -71,10 +71,10 @@ struct MODULES_EXPORT Matrix4 {
     {
     }
     inline constexpr Matrix4(const float arr[4][4])
-        : m { { arr[0][0], arr[0][1], arr[0][2], arr[0][3] },
-            { arr[1][0], arr[1][1], arr[1][2], arr[1][3] },
-            { arr[2][0], arr[2][1], arr[2][2], arr[2][3] },
-            { arr[3][0], arr[3][1], arr[3][2], arr[3][3] } }
+        : m { { arr[0][0], arr[1][0], arr[2][0], arr[3][0] },
+            { arr[0][1], arr[1][1], arr[2][1], arr[3][1] },
+            { arr[0][2], arr[1][2], arr[2][2], arr[3][2] },
+            { arr[0][3], arr[1][3], arr[2][3], arr[3][3] } }
     {
     }
     inline Matrix4(const Matrix4 &rkMatrix)
@@ -85,10 +85,10 @@ struct MODULES_EXPORT Matrix4 {
         float fEntry10, float fEntry11, float fEntry12, float fEntry13,
         float fEntry20, float fEntry21, float fEntry22, float fEntry23,
         float fEntry30, float fEntry31, float fEntry32, float fEntry33)
-        : m { { fEntry00, fEntry01, fEntry02, fEntry03 },
-            { fEntry10, fEntry11, fEntry12, fEntry13 },
-            { fEntry20, fEntry21, fEntry22, fEntry23 },
-            { fEntry30, fEntry31, fEntry32, fEntry33 } }
+        : m { { fEntry00, fEntry10, fEntry20, fEntry30 },
+            { fEntry01, fEntry11, fEntry21, fEntry31 },
+            { fEntry02, fEntry12, fEntry22, fEntry32 },
+            { fEntry03, fEntry13, fEntry23, fEntry33 } }
     {
     }
 
@@ -115,9 +115,18 @@ struct MODULES_EXPORT Matrix4 {
     }
 
     /// Member access, allows use of construct mat[r][c]
-    inline const float *operator[](size_t iRow) const { return m[iRow]; }
+    inline const Vector4 operator[](size_t iRow) const { return { m[0][iRow], m[1][iRow], m[2][iRow], m[3][iRow] }; }
 
-    inline float *operator[](size_t iRow) { return m[iRow]; }
+    struct AccessHelper {
+        float &operator[](size_t iCol) { return m[iCol][row]; }
+        size_t row;
+        float (&m)[4][4];
+    };
+    inline AccessHelper operator[](size_t iRow) { return { iRow, m }; }
+
+    inline float* data() {
+        return &m[0][0];
+    }
 
     /*inline operator Real* ()
     {
@@ -260,11 +269,11 @@ struct MODULES_EXPORT Matrix4 {
     inline MODULES_EXPORT friend std::ostream &
     operator<<(std::ostream &o, const Matrix4 &mat)
     {
-        o << "Matrix4(" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2]
-          << ", " << mat[0][3] << ", " << mat[1][0] << ", " << mat[1][1] << ", "
-          << mat[1][2] << ", " << mat[1][3] << ", " << mat[2][0] << ", "
-          << mat[2][1] << ", " << mat[2][2] << ", " << mat[2][3] << ", "
-          << mat[3][0] << ", " << mat[3][1] << ", " << mat[3][2] << ", "
+        o << "Matrix4(" << mat[0][0] << ", " << mat[1][0] << ", " << mat[2][0]
+          << ", " << mat[3][0] << ", " << mat[0][1] << ", " << mat[1][1] << ", "
+          << mat[2][1] << ", " << mat[3][1] << ", " << mat[0][2] << ", "
+          << mat[1][2] << ", " << mat[2][2] << ", " << mat[3][2] << ", "
+          << mat[0][3] << ", " << mat[1][3] << ", " << mat[2][3] << ", "
           << mat[3][3] << ")";
         return o;
     }

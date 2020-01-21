@@ -30,7 +30,7 @@ namespace Core {
 		{
 #if ENABLE_PLUGINS                    
 
-        (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
+        (*mPluginManager)["Renderer"].loadPlugin("DirectX11");
         (*mPluginManager)["Renderer"].setExclusive();
         (*mPluginManager)["Renderer"].setAtleastOne();
 

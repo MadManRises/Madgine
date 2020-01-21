@@ -25,8 +25,8 @@ namespace Tools {
 
         mProgram.create("grid");
 
-        mMesh = Render::MeshLoader::loadManual("grid", {}, [](Render::MeshLoader *loader, Render::MeshData &data, Render::MeshLoader::ResourceType * res) {
-            std::vector<Compound<Render::VertexPos_4D>> vertices{
+        mMesh = Render::MeshLoader::loadManual("grid", {}, [](Render::MeshLoader *loader, Render::MeshData &data, Render::MeshLoader::ResourceType *res) {
+            std::vector<Compound<Render::VertexPos_4D>> vertices {
                 { { 0, 0, 0, 1 } },
                 { { 1, 0, 0, 0 } },
                 { { 0, 0, 1, 0 } },
@@ -34,7 +34,7 @@ namespace Tools {
                 { { 0, 0, -1, 0 } }
             };
 
-            std::vector<unsigned short> indices{
+            std::vector<unsigned short> indices {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1
             };
 
@@ -45,12 +45,13 @@ namespace Tools {
     void GridPass::render(Render::RenderTarget *target)
     {
         Vector2i size = target->size();
-        float aspectRatio = float(size.x) / size.y;
+        float aspectRatio = float(size.x) / size.y;        
 
-        mProgram.setUniform("mvp", mCamera->getViewProjectionMatrix(aspectRatio));
-        mProgram.bind();
+        mParameters.vp = mCamera->getViewProjectionMatrix(aspectRatio);
 
-        target->renderMesh(mMesh);
+        mProgram.setParameters(mParameters, 1);
+
+        target->renderMesh(mMesh, mProgram);
     }
 
     int GridPass::priority() const

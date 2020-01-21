@@ -173,15 +173,14 @@ namespace Render {
             font.mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
 
             Vector2i size = sizes[c];
-            Vector2i pos = entries[c].mArea.mTopLeft;
             if (entries[c].mFlipped)
                 std::swap(size.x, size.y);
-            pos = { pos.x, pos.y };
+            Vector2i pos = { entries[c].mArea.mTopLeft.x, areaSize * UNIT_SIZE - size.y - entries[c].mArea.mTopLeft.y };
 
             std::unique_ptr<unsigned char[]> colors = std::make_unique<unsigned char[]>(4 * size.x * size.y);
             for (int y = 0; y < size.y; ++y) {
                 for (int x = 0; x < size.x; ++x) {
-                    int index = y * size.x + x;
+                    int index = (size.y - 1 - y) * size.x + x;
                     int sourceIndex = entries[c].mFlipped ? x * size.y + y : y * size.x + x;
 
                     colors[4 * index] = clamp(buffer[sourceIndex].x, 0.0f, 1.0f) * 255;

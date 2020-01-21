@@ -19,43 +19,44 @@ namespace Render {
         , mPriority(priority)
     {
         mProgram.create("scene");
+        
+        mPerObject.hasLight = false;
+        mPerObject.hasDistanceField = false;
 
-        mProgram.setUniform("tex", 0);
+        mPerObject.m = Matrix4::IDENTITY;
+        mPerObject.anti_m = Matrix4::IDENTITY;
     }
 
     void Im3DRenderPass::render(RenderTarget *target)
     {
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
+        target->clearDepthBuffer();
+
         Vector2i size = target->size();
 
         float aspectRatio = float(size.x) / size.y;
 
-        mProgram.setUniform("v", mCamera->getViewMatrix());
-        mProgram.setUniform("p", mCamera->getProjectionMatrix(aspectRatio));
+        mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
 
-        mProgram.setUniform("hasLight", false);
+        mProgram.setParameters(mPerApplication, 0);
 
-        mProgram.setUniform("hasDistanceField", false);
+        mPerFrame.v = mCamera->getViewMatrix();
 
-        mProgram.setUniform("m", Matrix4::IDENTITY);
-        mProgram.setUniform(
-            "anti_m",
-            Matrix3::IDENTITY);
-
-        target->clearDepthBuffer();
+        mProgram.setParameters(mPerFrame, 1);
 
         /*for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(RenderPassFlags_NoLighting, p.first, p.second);*/
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-			mProgram.setUniform("hasTexture", p.first != 0);
+            mPerObject.hasTexture = p.first != 0;
+            mProgram.setParameters(mPerObject, 2);
             TextureLoader::getSingleton().bind(p.first);
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
-                target->renderVertices(p.second.mFlags, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
+                target->renderVertices(mProgram, p.second.mFlags, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
+                target->renderVertices(mProgram, p.second.mFlags, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
             }
         }
     }

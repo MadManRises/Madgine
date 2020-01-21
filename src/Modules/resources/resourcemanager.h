@@ -37,6 +37,8 @@ namespace Resources {
 
         Filesystem::Path findResourceFile(const std::string &fileName);
 
+        virtual int priority() const override;
+
 #if ENABLE_PLUGINS
     protected:
         void onPluginLoad(const Plugins::Plugin *plugin) override;

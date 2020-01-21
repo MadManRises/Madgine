@@ -7,6 +7,11 @@
 #include "meshloader.h"
 #include "programloader.h"
 
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER grid
+#include INCLUDE_SL_SHADER
+
 namespace Engine {
 namespace Tools {
 
@@ -21,6 +26,8 @@ namespace Tools {
     private:
         Render::MeshLoader::HandleType mMesh;
         Render::ProgramLoader::HandleType mProgram;
+
+        GridPerFrame mParameters;
 
 		Render::Camera *mCamera;
 

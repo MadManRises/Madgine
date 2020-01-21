@@ -13,9 +13,11 @@ namespace Render {
         AttributeDescriptor() = default;
 
         template <typename T, typename M, typename BaseType = T>
-        AttributeDescriptor(M T::*m, type_holder_t<BaseType> = {})
+        AttributeDescriptor(M T::*m, const char *semantic, size_t semanticIndex, type_holder_t<BaseType> = {})
             : mStride(sizeof(BaseType))
             , mOffset(reinterpret_cast<size_t>(&(reinterpret_cast<BaseType *>(0x1)->*m)) - 1)
+            , mSemantic(semantic)
+            , mSemanticIndex(semanticIndex)
         {
             if constexpr (std::is_same_v<M, Vector2>) {
                 mType = ATTRIBUTE_FLOAT;
@@ -35,6 +37,8 @@ namespace Render {
         AttributeType mType;
         size_t mStride;
         size_t mOffset;
+        const char *mSemantic;
+        size_t mSemanticIndex;
     };
 
 }

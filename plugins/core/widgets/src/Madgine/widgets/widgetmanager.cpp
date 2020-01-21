@@ -67,13 +67,11 @@ namespace Widgets {
             return loader->create(program, "ui");
         });
 
-        mProgram.setUniform("texture", 0);
-
         mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
             return loader->generate<GUI::Vertex>(mesh, 3, {});
         });
 
-        mUIAtlasTexture = Render::TextureLoader::loadManual("widgetUIAtlas", {}, [](Render::TextureLoader *loader, Render::Texture &tex, Render::TextureLoader::ResourceType *res) { return loader->create(tex, Render::FORMAT_UNSIGNED_BYTE); });
+        mUIAtlasTexture = Render::TextureLoader::loadManual("widgetUIAtlas", {}, [](Render::TextureLoader *loader, Render::Texture &tex, Render::TextureLoader::ResourceType *res) { return loader->create(tex, Render::FORMAT_FLOAT8); });
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
@@ -614,9 +612,7 @@ namespace Widgets {
     {
         Rect2i screenSpace = mClientSpace;
 
-        target->setRenderSpace(screenSpace);
-
-        mProgram.bind();
+        target->setRenderSpace(screenSpace);        
 
         std::map<Render::TextureDescriptor, std::vector<GUI::Vertex>> vertices;
 
@@ -670,7 +666,8 @@ namespace Widgets {
         for (std::pair<const Render::TextureDescriptor, std::vector<GUI::Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
-                mProgram.setUniform("hasDistanceField", bool(p.first.mFlags & Render::TextureFlag_IsDistanceField));
+                mParameters.hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
+                mProgram.setParameters(mParameters, 2);
 
                 if (p.first.mTextureHandle)
                     Render::TextureLoader::getSingleton().bind(p.first.mTextureHandle);
@@ -679,7 +676,7 @@ namespace Widgets {
 
                 mMesh.update(3, std::move(p.second));
 
-                target->renderMesh(mMesh);
+                target->renderMesh(mMesh, mProgram);
             }
         }
     }

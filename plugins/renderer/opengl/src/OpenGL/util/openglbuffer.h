@@ -6,7 +6,7 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLBuffer {
 
         OpenGLBuffer() = default;
-        OpenGLBuffer(create_t);
+        OpenGLBuffer(GLenum target);
         OpenGLBuffer(const OpenGLBuffer &) = delete;
         OpenGLBuffer(OpenGLBuffer &&);
         ~OpenGLBuffer();
@@ -16,15 +16,16 @@ namespace Render {
 
 		operator bool() const;
 
-        void bind(GLenum target) const;
+        void bind() const;
 
 		void reset();
-        void setData(GLenum target, GLsizei size, const void *data);
+        void setData(GLsizei size, const void *data);
 
         GLuint handle();
 
     private:
         GLuint mHandle = 0;
+        GLenum mTarget;
     };
 
 }

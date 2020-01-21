@@ -128,7 +128,7 @@ RegisterType(ClickBrick::UI::GameManager)
 
             Engine::Vector3 dir = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
             dir.normalize();
-            t->setPosition(dir * -10);
+            t->setPosition(dir * -10);            
 
             Engine::Vector3 orientation = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
             Engine::Quaternion q { static_cast<float>(rand()), orientation };

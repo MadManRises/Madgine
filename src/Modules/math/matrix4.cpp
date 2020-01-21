@@ -30,240 +30,211 @@ THE SOFTWARE.
 
 // Adapted from Matrix math by Wild Magic http://www.geometrictools.com/
 
-namespace Engine
-{
-    //const float Matrix4::EPSILON = 1e-06f;
-    /*const float Matrix4::msSvdEpsilon = 1e-04f;
+namespace Engine {
+//const float Matrix4::EPSILON = 1e-06f;
+/*const float Matrix4::msSvdEpsilon = 1e-04f;
     const unsigned int Matrix4::msSvdMaxIterations = 42;*/
 
-    //-----------------------------------------------------------------------
-	Vector4 Matrix4::GetColumn(size_t iCol) const
-	{
-		assert(iCol < 4);
-		return Vector4(m[0][iCol], m[1][iCol],
-			m[2][iCol], m[3][iCol]);
-    }
-    //-----------------------------------------------------------------------
-    void Matrix4::SetColumn(size_t iCol, const Vector4& vec)
-    {
-        assert( iCol < 4 );
-        m[0][iCol] = vec.x;
-        m[1][iCol] = vec.y;
-        m[2][iCol] = vec.z;
+//-----------------------------------------------------------------------
+Vector4 Matrix4::GetColumn(size_t iCol) const
+{
+    assert(iCol < 4);
+    return Vector4(m[iCol][0], m[iCol][1],
+        m[iCol][2], m[iCol][3]);
+}
+//-----------------------------------------------------------------------
+void Matrix4::SetColumn(size_t iCol, const Vector4 &vec)
+{
+    assert(iCol < 4);
+    m[iCol][0] = vec.x;
+    m[iCol][1] = vec.y;
+    m[iCol][2] = vec.z;
+    m[iCol][3] = vec.w;
+}
+//-----------------------------------------------------------------------
+void Matrix4::FromAxes(const Vector4 &xAxis, const Vector4 &yAxis, const Vector4 &zAxis, const Vector4 &wAxis)
+{
+    SetColumn(0, xAxis);
+    SetColumn(1, yAxis);
+    SetColumn(2, zAxis);
+    SetColumn(4, wAxis);
+}
 
-    }
-    //-----------------------------------------------------------------------
-    void Matrix4::FromAxes(const Vector4& xAxis, const Vector4& yAxis, const Vector4& zAxis, const Vector4& wAxis)
-    {
-        SetColumn(0, xAxis);
-        SetColumn(1, yAxis);
-        SetColumn(2, zAxis);
-		SetColumn(4, wAxis);
-    }
-
-    //-----------------------------------------------------------------------
-    bool Matrix4::operator== (const Matrix4& rkMatrix) const
-    {
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-            {
-                if ( m[iRow][iCol] != rkMatrix.m[iRow][iCol] )
-                    return false;
-            }
+//-----------------------------------------------------------------------
+bool Matrix4::operator==(const Matrix4 &rkMatrix) const
+{
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++) {
+            if (m[iRow][iCol] != rkMatrix.m[iRow][iCol])
+                return false;
         }
-
-        return true;
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::operator+ (const Matrix4& rkMatrix) const
-    {
-        Matrix4 kSum;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-            {
-                kSum.m[iRow][iCol] = m[iRow][iCol] +
-                    rkMatrix.m[iRow][iCol];
-            }
+
+    return true;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::operator+(const Matrix4 &rkMatrix) const
+{
+    Matrix4 kSum;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++) {
+            kSum.m[iRow][iCol] = m[iRow][iCol] + rkMatrix.m[iRow][iCol];
         }
-        return kSum;
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::operator- (const Matrix4& rkMatrix) const
-    {
-        Matrix4 kDiff;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-            {
-                kDiff.m[iRow][iCol] = m[iRow][iCol] -
-                    rkMatrix.m[iRow][iCol];
-            }
+    return kSum;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::operator-(const Matrix4 &rkMatrix) const
+{
+    Matrix4 kDiff;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++) {
+            kDiff.m[iRow][iCol] = m[iRow][iCol] - rkMatrix.m[iRow][iCol];
         }
-        return kDiff;
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::operator* (const Matrix4& rkMatrix) const
-    {
-        Matrix4 kProd;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-            {
-                kProd.m[iRow][iCol] =
-                    m[iRow][0]*rkMatrix.m[0][iCol] +
-                    m[iRow][1]*rkMatrix.m[1][iCol] +
-                    m[iRow][2]*rkMatrix.m[2][iCol] +
-					m[iRow][3]*rkMatrix.m[3][iCol];
-            }
+    return kDiff;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::operator*(const Matrix4 &rkMatrix) const
+{
+    Matrix4 kProd;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++) {
+            kProd.m[iCol][iRow] = m[0][iRow] * rkMatrix.m[iCol][0] + m[1][iRow] * rkMatrix.m[iCol][1] + m[2][iRow] * rkMatrix.m[iCol][2] + m[3][iRow] * rkMatrix.m[iCol][3];
         }
-        return kProd;
     }
-    //-----------------------------------------------------------------------
-    Vector4 Matrix4::operator* (const Vector4& rkPoint) const
-    {
-        Vector4 kProd;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            kProd[iRow] =
-                m[iRow][0]*rkPoint[0] +
-                m[iRow][1]*rkPoint[1] +
-                m[iRow][2]*rkPoint[2] +
-				m[iRow][3]*rkPoint[3];
-        }
-        return kProd;
+    return kProd;
+}
+//-----------------------------------------------------------------------
+Vector4 Matrix4::operator*(const Vector4 &rkPoint) const
+{
+    Vector4 kProd;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        kProd[iRow] = m[0][iRow] * rkPoint[0] + m[1][iRow] * rkPoint[1] + m[2][iRow] * rkPoint[2] + m[3][iRow] * rkPoint[3];
     }
-    //-----------------------------------------------------------------------
-    Vector4 operator* (const Vector4& rkPoint, const Matrix4& rkMatrix)
-    {
-        Vector4 kProd;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            kProd[iRow] =
-                rkPoint[0]*rkMatrix.m[0][iRow] +
-                rkPoint[1]*rkMatrix.m[1][iRow] +
-                rkPoint[2]*rkMatrix.m[2][iRow] +
-				rkPoint[3]*rkMatrix.m[3][iRow];
-        }
-        return kProd;
+    return kProd;
+}
+//-----------------------------------------------------------------------
+Vector4 operator*(const Vector4 &rkPoint, const Matrix4 &rkMatrix)
+{
+    Vector4 kProd;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        kProd[iRow] = rkPoint[0] * rkMatrix.m[iRow][0] + rkPoint[1] * rkMatrix.m[iRow][1] + rkPoint[2] * rkMatrix.m[iRow][2] + rkPoint[3] * rkMatrix.m[iRow][3];
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::operator- () const
-    {
-        Matrix4 kNeg;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-                kNeg[iRow][iCol] = -m[iRow][iCol];
-        }
-        return kNeg;
+    return kProd;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::operator-() const
+{
+    Matrix4 kNeg;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++)
+            kNeg[iRow][iCol] = -m[iRow][iCol];
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::operator* (float fScalar) const
-    {
-        Matrix4 kProd;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-                kProd[iRow][iCol] = fScalar*m[iRow][iCol];
-        }
-        return kProd;
+    return kNeg;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::operator*(float fScalar) const
+{
+    Matrix4 kProd;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++)
+            kProd[iRow][iCol] = fScalar * m[iRow][iCol];
     }
-    //-----------------------------------------------------------------------
-    Matrix4 operator* (float fScalar, const Matrix4& rkMatrix)
-    {
-        Matrix4 kProd;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-                kProd[iRow][iCol] = fScalar*rkMatrix.m[iRow][iCol];
-        }
-        return kProd;
+    return kProd;
+}
+//-----------------------------------------------------------------------
+Matrix4 operator*(float fScalar, const Matrix4 &rkMatrix)
+{
+    Matrix4 kProd;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++)
+            kProd[iRow][iCol] = fScalar * rkMatrix.m[iRow][iCol];
     }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::Transpose () const
-    {
-        Matrix4 kTranspose;
-        for (size_t iRow = 0; iRow < 4; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 4; iCol++)
-                kTranspose[iRow][iCol] = m[iCol][iRow];
-        }
-        return kTranspose;
+    return kProd;
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::Transpose() const
+{
+    Matrix4 kTranspose;
+    for (size_t iRow = 0; iRow < 4; iRow++) {
+        for (size_t iCol = 0; iCol < 4; iCol++)
+            kTranspose[iCol][iRow] = m[iRow][iCol];
     }
-    //-----------------------------------------------------------------------
-    void Matrix4::Inverse (Matrix4& rkInverse) const
-    {
-        float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
-        float m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
-        float m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
-        float m30 = m[3][0], m31 = m[3][1], m32 = m[3][2], m33 = m[3][3];
+    return kTranspose;
+}
+//-----------------------------------------------------------------------
+void Matrix4::Inverse(Matrix4 &rkInverse) const
+{
+    float m00 = m[0][0], m01 = m[1][0], m02 = m[2][0], m03 = m[3][0];
+    float m10 = m[0][1], m11 = m[1][1], m12 = m[2][1], m13 = m[3][1];
+    float m20 = m[0][2], m21 = m[1][2], m22 = m[2][2], m23 = m[3][2];
+    float m30 = m[0][3], m31 = m[1][3], m32 = m[2][3], m33 = m[3][3];
 
-        float v0 = m20 * m31 - m21 * m30;
-        float v1 = m20 * m32 - m22 * m30;
-        float v2 = m20 * m33 - m23 * m30;
-        float v3 = m21 * m32 - m22 * m31;
-        float v4 = m21 * m33 - m23 * m31;
-        float v5 = m22 * m33 - m23 * m32;
+    float v0 = m20 * m31 - m21 * m30;
+    float v1 = m20 * m32 - m22 * m30;
+    float v2 = m20 * m33 - m23 * m30;
+    float v3 = m21 * m32 - m22 * m31;
+    float v4 = m21 * m33 - m23 * m31;
+    float v5 = m22 * m33 - m23 * m32;
 
-        float t00 = +(v5 * m11 - v4 * m12 + v3 * m13);
-        float t10 = -(v5 * m10 - v2 * m12 + v1 * m13);
-        float t20 = +(v4 * m10 - v2 * m11 + v0 * m13);
-        float t30 = -(v3 * m10 - v1 * m11 + v0 * m12);
+    float t00 = +(v5 * m11 - v4 * m12 + v3 * m13);
+    float t10 = -(v5 * m10 - v2 * m12 + v1 * m13);
+    float t20 = +(v4 * m10 - v2 * m11 + v0 * m13);
+    float t30 = -(v3 * m10 - v1 * m11 + v0 * m12);
 
-        float invDet = 1 / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
+    float invDet = 1 / (t00 * m00 + t10 * m01 + t20 * m02 + t30 * m03);
 
-        float d00 = t00 * invDet;
-        float d10 = t10 * invDet;
-        float d20 = t20 * invDet;
-        float d30 = t30 * invDet;
+    float d00 = t00 * invDet;
+    float d10 = t10 * invDet;
+    float d20 = t20 * invDet;
+    float d30 = t30 * invDet;
 
-        float d01 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
-        float d11 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
-        float d21 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
-        float d31 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+    float d01 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    float d11 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    float d21 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    float d31 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-        v0 = m10 * m31 - m11 * m30;
-        v1 = m10 * m32 - m12 * m30;
-        v2 = m10 * m33 - m13 * m30;
-        v3 = m11 * m32 - m12 * m31;
-        v4 = m11 * m33 - m13 * m31;
-        v5 = m12 * m33 - m13 * m32;
+    v0 = m10 * m31 - m11 * m30;
+    v1 = m10 * m32 - m12 * m30;
+    v2 = m10 * m33 - m13 * m30;
+    v3 = m11 * m32 - m12 * m31;
+    v4 = m11 * m33 - m13 * m31;
+    v5 = m12 * m33 - m13 * m32;
 
-        float d02 = +(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
-        float d12 = -(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
-        float d22 = +(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
-        float d32 = -(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+    float d02 = +(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    float d12 = -(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    float d22 = +(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    float d32 = -(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-        v0 = m21 * m10 - m20 * m11;
-        v1 = m22 * m10 - m20 * m12;
-        v2 = m23 * m10 - m20 * m13;
-        v3 = m22 * m11 - m21 * m12;
-        v4 = m23 * m11 - m21 * m13;
-        v5 = m23 * m12 - m22 * m13;
+    v0 = m21 * m10 - m20 * m11;
+    v1 = m22 * m10 - m20 * m12;
+    v2 = m23 * m10 - m20 * m13;
+    v3 = m22 * m11 - m21 * m12;
+    v4 = m23 * m11 - m21 * m13;
+    v5 = m23 * m12 - m22 * m13;
 
-        float d03 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
-        float d13 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
-        float d23 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
-        float d33 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
+    float d03 = -(v5 * m01 - v4 * m02 + v3 * m03) * invDet;
+    float d13 = +(v5 * m00 - v2 * m02 + v1 * m03) * invDet;
+    float d23 = -(v4 * m00 - v2 * m01 + v0 * m03) * invDet;
+    float d33 = +(v3 * m00 - v1 * m01 + v0 * m02) * invDet;
 
-        rkInverse = {
-            d00, d01, d02, d03,
-            d10, d11, d12, d13,
-            d20, d21, d22, d23,
-            d30, d31, d32, d33
-        };
-    }
-    //-----------------------------------------------------------------------
-    Matrix4 Matrix4::Inverse () const
-    {
-        Matrix4 kInverse { Matrix4::ZERO };
-        Inverse(kInverse);
-        return kInverse;
-    }
-    //-----------------------------------------------------------------------
-	/*float Matrix4::Determinant () const
+    rkInverse = {
+        d00, d01, d02, d03,
+        d10, d11, d12, d13,
+        d20, d21, d22, d23,
+        d30, d31, d32, d33
+    };
+}
+//-----------------------------------------------------------------------
+Matrix4 Matrix4::Inverse() const
+{
+    Matrix4 kInverse { Matrix4::ZERO };
+    Inverse(kInverse);
+    return kInverse;
+}
+//-----------------------------------------------------------------------
+/*float Matrix4::Determinant () const
     {
 		float fCofactor00 = m[1][1]*m[2][2] -
             m[1][2]*m[2][1];
@@ -898,8 +869,8 @@ namespace Engine
 		float fNorm = Math::Sqrt(fPmax*fRoot);
         return fNorm;
     }*/
-    //-----------------------------------------------------------------------
-    /*void Matrix4::ToAngleAxis (Vector4& rkAxis, Radian& rfRadians) const
+//-----------------------------------------------------------------------
+/*void Matrix4::ToAngleAxis (Vector4& rkAxis, Radian& rfRadians) const
     {
         // Let (x,y,z) be the unit-length axis and let A be an angle of rotation.
         // The rotation matrix is R = I + sin(A)*P + (1-cos(A))*P^2 where
@@ -1351,8 +1322,8 @@ namespace Engine
 
         *this = kZMat*(kYMat*kXMat);
     }*/
-    //-----------------------------------------------------------------------
-    /*void Matrix4::Tridiagonal (float afDiag[4], float afSubDiag[4])
+//-----------------------------------------------------------------------
+/*void Matrix4::Tridiagonal (float afDiag[4], float afSubDiag[4])
     {
         // Householder reduction T = Q^t M Q
         //   Input:
@@ -1529,12 +1500,12 @@ namespace Engine
     //-----------------------------------------------------------------------
 	*/
 
-	Matrix4 Matrix4::TranslationMatrix(const Vector3 &t)
-    {
-            return { 1, 0, 0, t.x,
-                0, 1, 0, t.y,
-                0, 0, 1, t.z,
-                0, 0, 0, 1 };
-            ;
-    }
-    }
+Matrix4 Matrix4::TranslationMatrix(const Vector3 &t)
+{
+    return { 1, 0, 0, t.x,
+        0, 1, 0, t.y,
+        0, 0, 1, t.z,
+        0, 0, 0, 1 };
+    ;
+}
+}

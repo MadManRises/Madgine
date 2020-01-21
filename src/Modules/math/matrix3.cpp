@@ -34,23 +34,23 @@ namespace Engine
 {
     const Matrix3 Matrix3::ZERO(0,0,0,0,0,0,0,0,0);
     const Matrix3 Matrix3::IDENTITY(1,0,0,0,1,0,0,0,1);
-    const float Matrix3::msSvdEpsilon = 1e-04f;
-    const unsigned int Matrix3::msSvdMaxIterations = 32;
+    /*const float Matrix3::msSvdEpsilon = 1e-04f;
+    const unsigned int Matrix3::msSvdMaxIterations = 32;*/
 
     //-----------------------------------------------------------------------
     Vector3 Matrix3::GetColumn (size_t iCol) const
     {
         assert( iCol < 3 );
-        return Vector3(m[0][iCol],m[1][iCol],
-            m[2][iCol]);
+        return Vector3(m[iCol][0],m[iCol][1],
+            m[iCol][2]);
     }
     //-----------------------------------------------------------------------
     void Matrix3::SetColumn(size_t iCol, const Vector3& vec)
     {
         assert( iCol < 3 );
-        m[0][iCol] = vec.x;
-        m[1][iCol] = vec.y;
-        m[2][iCol] = vec.z;
+        m[iCol][0] = vec.x;
+        m[iCol][1] = vec.y;
+        m[iCol][2] = vec.z;
 
     }
     //-----------------------------------------------------------------------
@@ -114,10 +114,7 @@ namespace Engine
         {
             for (size_t iCol = 0; iCol < 3; iCol++)
             {
-                kProd.m[iRow][iCol] =
-                    m[iRow][0]*rkMatrix.m[0][iCol] +
-                    m[iRow][1]*rkMatrix.m[1][iCol] +
-                    m[iRow][2]*rkMatrix.m[2][iCol];
+                kProd.m[iCol][iRow] = m[0][iRow] * rkMatrix.m[iCol][0] + m[1][iRow] * rkMatrix.m[iCol][1] + m[2][iRow] * rkMatrix.m[iCol][2];
             }
         }
         return kProd;
@@ -128,10 +125,7 @@ namespace Engine
         Vector3 kProd;
         for (size_t iRow = 0; iRow < 3; iRow++)
         {
-            kProd[iRow] =
-                m[iRow][0]*rkPoint[0] +
-                m[iRow][1]*rkPoint[1] +
-                m[iRow][2]*rkPoint[2];
+            kProd[iRow] = m[0][iRow] * rkPoint[0] + m[1][iRow] * rkPoint[1] + m[2][iRow] * rkPoint[2];
         }
         return kProd;
     }
@@ -141,10 +135,7 @@ namespace Engine
         Vector3 kProd;
         for (size_t iRow = 0; iRow < 3; iRow++)
         {
-            kProd[iRow] =
-                rkPoint[0]*rkMatrix.m[0][iRow] +
-                rkPoint[1]*rkMatrix.m[1][iRow] +
-                rkPoint[2]*rkMatrix.m[2][iRow];
+            kProd[iRow] = rkPoint[0] * rkMatrix.m[iRow][0] + rkPoint[1] * rkMatrix.m[iRow][1] + rkPoint[2] * rkMatrix.m[iRow][2];
         }
         return kProd;
     }
@@ -188,7 +179,7 @@ namespace Engine
         for (size_t iRow = 0; iRow < 3; iRow++)
         {
             for (size_t iCol = 0; iCol < 3; iCol++)
-                kTranspose[iRow][iCol] = m[iCol][iRow];
+                kTranspose[iCol][iRow] = m[iRow][iCol];
         }
         return kTranspose;
     }
@@ -199,28 +190,28 @@ namespace Engine
         // the Numerical Recipes code which uses Gaussian elimination.
 
         rkInverse[0][0] = m[1][1]*m[2][2] -
-            m[1][2]*m[2][1];
-        rkInverse[0][1] = m[0][2]*m[2][1] -
-            m[0][1]*m[2][2];
-        rkInverse[0][2] = m[0][1]*m[1][2] -
-            m[0][2]*m[1][1];
-        rkInverse[1][0] = m[1][2]*m[2][0] -
+            m[2][1]*m[1][2];
+        rkInverse[1][0] = m[2][0]*m[1][2] -
             m[1][0]*m[2][2];
-        rkInverse[1][1] = m[0][0]*m[2][2] -
-            m[0][2]*m[2][0];
-        rkInverse[1][2] = m[0][2]*m[1][0] -
-            m[0][0]*m[1][2];
         rkInverse[2][0] = m[1][0]*m[2][1] -
-            m[1][1]*m[2][0];
-        rkInverse[2][1] = m[0][1]*m[2][0] -
+            m[2][0]*m[1][1];
+        rkInverse[0][1] = m[2][1]*m[0][2] -
+            m[0][1]*m[2][2];
+        rkInverse[1][1] = m[0][0]*m[2][2] -
+            m[2][0]*m[0][2];
+        rkInverse[2][1] = m[2][0]*m[0][1] -
             m[0][0]*m[2][1];
+        rkInverse[0][2] = m[0][1]*m[1][2] -
+            m[1][1]*m[0][2];
+        rkInverse[1][2] = m[1][0]*m[0][2] -
+            m[0][0]*m[1][2];
         rkInverse[2][2] = m[0][0]*m[1][1] -
-            m[0][1]*m[1][0];
+            m[1][0]*m[0][1];
 
 		float fDet =
             m[0][0]*rkInverse[0][0] +
-            m[0][1]*rkInverse[1][0]+
-            m[0][2]*rkInverse[2][0];
+            m[1][0]*rkInverse[0][1]+
+            m[2][0]*rkInverse[0][2];
 
         if ( isZero(fDet) )
             return false;
@@ -229,7 +220,7 @@ namespace Engine
         for (size_t iRow = 0; iRow < 3; iRow++)
         {
             for (size_t iCol = 0; iCol < 3; iCol++)
-                rkInverse[iRow][iCol] *= fInvDet;
+                rkInverse[iCol][iRow] *= fInvDet;
         }
 
         return true;
@@ -245,21 +236,21 @@ namespace Engine
 	float Matrix3::Determinant () const
     {
 		float fCofactor00 = m[1][1]*m[2][2] -
-            m[1][2]*m[2][1];
-		float fCofactor10 = m[1][2]*m[2][0] -
-            m[1][0]*m[2][2];
-		float fCofactor20 = m[1][0]*m[2][1] -
-            m[1][1]*m[2][0];
+            m[2][1]*m[1][2];
+		float fCofactor10 = m[2][1]*m[0][2] -
+            m[0][1]*m[2][2];
+		float fCofactor20 = m[0][1]*m[1][2] -
+            m[1][1]*m[0][2];
 
 		float fDet =
             m[0][0]*fCofactor00 +
-            m[0][1]*fCofactor10 +
-            m[0][2]*fCofactor20;
+            m[1][0]*fCofactor10 +
+            m[2][0]*fCofactor20;
 
         return fDet;
     }
     //-----------------------------------------------------------------------
-    void Matrix3::Bidiagonalize (Matrix3& kA, Matrix3& kL,
+    /*void Matrix3::Bidiagonalize (Matrix3& kA, Matrix3& kL,
         Matrix3& kR)
     {
 		float afV[3], afW[3];
@@ -878,7 +869,7 @@ namespace Engine
         return fNorm;
     }
     //-----------------------------------------------------------------------
-    /*void Matrix3::ToAngleAxis (Vector3& rkAxis, Radian& rfRadians) const
+    void Matrix3::ToAngleAxis (Vector3& rkAxis, Radian& rfRadians) const
     {
         // Let (x,y,z) be the unit-length axis and let A be an angle of rotation.
         // The rotation matrix is R = I + sin(A)*P + (1-cos(A))*P^2 where
@@ -1331,7 +1322,7 @@ namespace Engine
         *this = kZMat*(kYMat*kXMat);
     }*/
     //-----------------------------------------------------------------------
-    void Matrix3::Tridiagonal (float afDiag[3], float afSubDiag[3])
+    /*void Matrix3::Tridiagonal (float afDiag[3], float afSubDiag[3])
     {
         // Householder reduction T = Q^t M Q
         //   Input:
@@ -1504,6 +1495,6 @@ namespace Engine
             for (size_t iCol = 0; iCol < 3; iCol++)
                 rkProduct[iRow][iCol] = rkU[iRow]*rkV[iCol];
         }
-    }
+    }*/
     //-----------------------------------------------------------------------
 }

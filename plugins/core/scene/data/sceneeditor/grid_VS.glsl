@@ -1,16 +1,17 @@
-#version 100
+#version 420 core
 
-precision mediump float;
+layout (std140, binding = 1) uniform PerFrame
+{
+	mat4 vp;
+};
 
-attribute vec4 aPos;
 
-varying vec4 worldPos;
+layout(location = 0) in vec4 aPos;
 
-uniform mat4 mvp;
+out vec4 worldPos;
 
 void main()
 {	
 	worldPos = aPos;
-    gl_Position = mvp * worldPos;
-	gl_Position.z *= -1.0;
+    gl_Position = vp * worldPos;
 }

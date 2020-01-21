@@ -16,12 +16,7 @@ namespace Render {
         void unloadImpl(OpenGLProgram &program, ResourceType *res);
         bool create(Program &program, const std::string &name) override;
 
-        virtual void bind(Program &program) override;
-
-        virtual void setUniform(Program &program, const std::string &var, int value) override;
-        virtual void setUniform(Program &program, const std::string &var, const Matrix3 &value) override;
-        virtual void setUniform(Program &program, const std::string &var, const Matrix4 &value) override;
-        virtual void setUniform(Program &program, const std::string &var, const Vector3 &value) override;
+        virtual void setParameters(Program &program, const void *data, size_t size, size_t index) override;
     };
 }
 }

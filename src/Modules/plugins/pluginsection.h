@@ -7,6 +7,10 @@
 namespace Engine {
 namespace Plugins {
 
+    struct PluginListenerCmp {
+        bool operator()(PluginListener *first, PluginListener *second) const;
+    };
+
     struct MODULES_EXPORT PluginSection {
         PluginSection(PluginManager &mgr, const std::string &name);
 
@@ -49,7 +53,7 @@ namespace Plugins {
         friend struct Plugin;
 
         std::map<std::string, Plugin> mPlugins;
-        std::vector<PluginListener *> mListeners;
+        std::set<PluginListener *, PluginListenerCmp> mListeners;
 
         bool mAtleastOne = false;
         bool mExclusive = false;

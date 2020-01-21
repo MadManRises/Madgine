@@ -53,6 +53,7 @@ namespace Tools {
         ClientImRoot *root = static_cast<ClientImRoot *>(io.UserData);
         root->addViewportMapping(window->getRenderer(), vp);
         window->getRenderer()->addRenderPass(root);
+        vp->RendererUserData = window->getRenderer();
     }
     static void DestroyImGuiToolWindow(ImGuiViewport *vp)
     {
@@ -66,6 +67,7 @@ namespace Tools {
             vp->PlatformHandleRaw = nullptr;
             topLevel->destroyToolWindow(toolWindow);
 
+            vp->RendererUserData = nullptr;
             static_cast<ClientImRoot *>(io.UserData)->removeViewportMapping(toolWindow->getRenderer());
         }
     }
@@ -173,6 +175,7 @@ namespace Tools {
 
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->PlatformHandle = mWindow.window();
+            main_viewport->RendererUserData = mWindow.getRenderWindow();
         }
 
         //Input
@@ -235,8 +238,8 @@ namespace Tools {
 
                 ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
             } else {
-                ImGui::Render();            
-			}
+                ImGui::Render();
+            }
         } else {
             ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
         }

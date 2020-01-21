@@ -20,13 +20,10 @@ enum Im3DMeshType {
     IM3D_MESHTYPE_COUNT
 };
 
-namespace Render {
-    struct MeshData;
-}
-typedef Render::MeshData *Im3DNativeMesh;
+typedef uintptr_t Im3DNativeMesh;
+typedef uintptr_t Im3DTextureId;
 
 typedef uint32_t Im3DID;
-typedef uintptr_t Im3DTextureId;
 typedef int Im3DBoundingObjectFlags;
 
 enum Im3DBoundingObjectFlags_ {

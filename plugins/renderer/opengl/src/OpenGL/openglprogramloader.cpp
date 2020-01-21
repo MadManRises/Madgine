@@ -47,36 +47,15 @@ namespace Render {
         OpenGLShaderLoader::HandleType pixelShader;
         pixelShader.load(name + "_PS");
 
-        if (!program.link(vertexShader, pixelShader, { "aPos", "aPos2", "aColor", "aNormal", "aUV" }))
+        if (!program.link(vertexShader, pixelShader))
             std::terminate();
 
         return true;
     }
 
-    void OpenGLProgramLoader::bind(Program &program)
+    void OpenGLProgramLoader::setParameters(Program &program, const void *data, size_t size, size_t index)
     {
-        static_cast<OpenGLProgram &>(program).bind();
-    }
-
-    void OpenGLProgramLoader::setUniform(Program &program, const std::string &var, int value)
-    {
-        static_cast<OpenGLProgram &>(program).setUniform(var, value);
-    }
-
-    void OpenGLProgramLoader::setUniform(Program &program, const std::string &var,
-        const Matrix3 &value)
-    {
-        static_cast<OpenGLProgram &>(program).setUniform(var, value);
-    }
-
-    void OpenGLProgramLoader::setUniform(Program &program, const std::string &var, const Matrix4 &value)
-    {
-        static_cast<OpenGLProgram &>(program).setUniform(var, value);
-    }
-
-    void OpenGLProgramLoader::setUniform(Program &program, const std::string &var, const Vector3 &value)
-    {
-        static_cast<OpenGLProgram &>(program).setUniform(var, value);
+        static_cast<OpenGLProgram &>(program).setParameters(data, size, index);
     }
 
 }

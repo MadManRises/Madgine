@@ -160,6 +160,11 @@ namespace Resources {
         return first.str() < second.str();
     }
 
+    int ResourceManager::priority() const
+    {
+        return 75;
+    }
+
 }
 }
 

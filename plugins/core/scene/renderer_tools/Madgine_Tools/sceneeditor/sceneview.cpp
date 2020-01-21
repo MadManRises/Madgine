@@ -95,7 +95,7 @@ namespace Tools {
         if (ImGui::Begin("SceneView")) {
             ImVec2 region = ImGui::GetContentRegionAvail();
             mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
-            bool pressed = ImGui::ImageButton((void *)(uintptr_t)mRenderTarget->texture()->mTextureHandle, region, { 0, 1 }, { 1, 0 }, 0);
+            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture()->mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
 			if (pressed && !mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())
                     mEditor->deselect();

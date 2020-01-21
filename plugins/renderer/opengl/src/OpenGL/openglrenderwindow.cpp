@@ -396,8 +396,6 @@ namespace Render {
     {
         PROFILE();
 
-        mWindow->beginFrame();
-
         Engine::Render::makeCurrent(mWindow, mContext);
 
         OpenGLRenderTarget::beginFrame();
@@ -407,7 +405,7 @@ namespace Render {
     {
         OpenGLRenderTarget::endFrame();
 
-        mWindow->endFrame();
+        mWindow->swapBuffers();
     }
 
     Texture *OpenGLRenderWindow::texture() const
@@ -422,7 +420,7 @@ namespace Render {
 
     bool OpenGLRenderWindow::resize(const Vector2i &size)
     {
-        throw 0;
+        return true;
     }
 
 }

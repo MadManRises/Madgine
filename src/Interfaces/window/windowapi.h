@@ -50,9 +50,8 @@ namespace Window {
         {
             mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
         }
-
-        virtual void beginFrame() = 0;
-        virtual void endFrame() = 0;
+        
+        virtual void swapBuffers() = 0;
 
         virtual int width() = 0;
         virtual int height() = 0;

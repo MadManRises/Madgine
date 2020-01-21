@@ -1,0 +1,73 @@
+cbuffer PerApplication : register(b0)
+{
+    matrix p;
+}
+
+cbuffer PerFrame : register(b1)
+{   
+    matrix v;   
+
+    float3 lightColor;
+	float3 lightDir;
+}
+
+cbuffer PerObject : register(b2)
+{
+    matrix m;
+    matrix anti_m;
+
+	bool hasLight;
+	bool hasTexture;
+	bool hasDistanceField;
+}
+
+Texture2D tex : register(t0);
+SamplerState texSampler : register(s0);
+
+struct PixelShaderInput {
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float3 worldPos : POSITION;
+    float3 normal : NORMAL;
+    float2 uv : TEXCOORD;
+};
+
+float median(float r, float g, float b) {
+    return max(min(r, g), min(max(r, g), b));
+}
+
+float4 main(PixelShaderInput IN)
+    : SV_TARGET
+{
+    float4 colorAcc = IN.color;
+
+	if (hasTexture){
+		if (hasDistanceField){
+			float2 msdfUnit = 4.0/float2(512.0, 512.0);
+			float4 sample = tex.Sample(texSampler, IN.uv);
+			float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
+			//sigDist *= dot(msdfUnit, float2(0.5));
+			sigDist *= 4.0;
+			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
+			colorAcc = lerp(float4(0,0,0,0), colorAcc, opacity);
+		}
+		else
+		{
+			colorAcc = colorAcc * tex.Sample(texSampler, IN.uv);
+		}
+	}
+	
+	if (hasLight){
+		float ambientStrength = 0.4;
+		float3 ambient = ambientStrength * lightColor;
+
+		float diffuseStrength = 0.7;
+		float3 norm = normalize(IN.normal);
+		float diff = max(dot(norm, -lightDir), 0.0);
+		float3 diffuse = diffuseStrength * diff * lightColor;
+
+		colorAcc = float4(ambient + diffuse,1.0) * colorAcc;
+	}
+
+    return colorAcc;
+}

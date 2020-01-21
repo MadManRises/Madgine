@@ -1,0 +1,23 @@
+cbuffer PerFrame : register( b1 )
+{
+    matrix vp;
+}
+
+struct AppData
+{
+    float4 aPos : POSITION;    
+};
+
+struct VertexShaderOutput
+{
+    float4 pos : SV_POSITION;
+    float4 worldPos : POSITION;
+};
+
+VertexShaderOutput main( AppData IN )
+{
+    VertexShaderOutput OUT;
+    OUT.worldPos = IN.aPos;
+    OUT.pos = mul( vp, IN.aPos );
+    return OUT;
+}

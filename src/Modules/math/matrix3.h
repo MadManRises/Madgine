@@ -63,23 +63,23 @@ struct MODULES_EXPORT Matrix3 {
         */
     inline Matrix3() {}
     inline constexpr explicit Matrix3(const float arr[3][3])
-        : m { { arr[0][0], arr[0][1], arr[0][2] },
-            { arr[1][0], arr[1][1], arr[1][2] },
-            { arr[2][0], arr[2][1], arr[2][2] } }
+        : m { { arr[0][0], arr[1][0], arr[2][0] },
+            { arr[0][1], arr[1][1], arr[2][1] },
+            { arr[0][2], arr[1][2], arr[2][2] } }
     {
     }
     inline constexpr Matrix3(const Matrix3 &rkMatrix)
-        : m { { rkMatrix.m[0][0], rkMatrix.m[0][1], rkMatrix.m[0][2] },
-            { rkMatrix.m[1][0], rkMatrix.m[1][1], rkMatrix.m[1][2] },
-            { rkMatrix.m[2][0], rkMatrix.m[2][1], rkMatrix.m[2][2] } }
+        : m { { rkMatrix.m[0][0], rkMatrix.m[1][0], rkMatrix.m[2][0] },
+            { rkMatrix.m[0][1], rkMatrix.m[1][1], rkMatrix.m[2][1] },
+            { rkMatrix.m[0][2], rkMatrix.m[1][2], rkMatrix.m[2][2] } }
     {
     }
     constexpr Matrix3(float fEntry00, float fEntry01, float fEntry02,
         float fEntry10, float fEntry11, float fEntry12,
         float fEntry20, float fEntry21, float fEntry22)
-        : m { { fEntry00, fEntry01, fEntry02 },
-            { fEntry10, fEntry11, fEntry12 },
-            { fEntry20, fEntry21, fEntry22 } }
+        : m { { fEntry00, fEntry10, fEntry20 },
+            { fEntry01, fEntry11, fEntry21 },
+            { fEntry02, fEntry12, fEntry22 } }
     {
     }
 
@@ -99,14 +99,24 @@ struct MODULES_EXPORT Matrix3 {
     }
 
     /// Member access, allows use of construct mat[r][c]
-    inline constexpr const float *operator[](size_t iRow) const
+    inline constexpr const Vector3 operator[](size_t iRow) const
     {
-        return m[iRow];
+        return { m[0][iRow], m[1][iRow], m[2][iRow] };
     }
 
-    inline constexpr float *operator[](size_t iRow)
+    struct AccessHelper {
+        float &operator[](size_t iCol) { return m[iCol][row]; }
+        size_t row;
+        float (&m)[3][3];
+    };
+    inline AccessHelper operator[](size_t iRow)
     {
-        return m[iRow];
+        return { iRow, m };
+    }
+
+    inline float *data()
+    {
+        return &m[0][0];
     }
 
     /*inline operator Real* ()
@@ -170,7 +180,7 @@ struct MODULES_EXPORT Matrix3 {
     float Determinant() const;
 
     /// Singular value decomposition
-    void SingularValueDecomposition(Matrix3 &rkL, Vector3 &rkS,
+/*    void SingularValueDecomposition(Matrix3 &rkL, Vector3 &rkS,
         Matrix3 &rkR) const;
     void SingularValueComposition(const Matrix3 &rkL,
         const Vector3 &rkS, const Matrix3 &rkR);
@@ -182,7 +192,7 @@ struct MODULES_EXPORT Matrix3 {
     void QDUDecomposition(Matrix3 &rkQ, Vector3 &rkD,
         Vector3 &rkU) const;
 
-    float SpectralNorm() const;
+    float SpectralNorm() const;*/
 
     /*       /// Note: Matrix must be orthonormal
         void ToAngleAxis (Vector3& rkAxis, Radian& rfAngle) const;
@@ -225,13 +235,13 @@ struct MODULES_EXPORT Matrix3 {
     inline bool hasScale() const
     {
         // check magnitude of column vectors (==local axes)
-        float t = m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0];
+        float t = m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2];
         if (!isZero(t - 1.0f))
             return true;
-        t = m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1];
+        t = m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2];
         if (!isZero(t - 1.0f))
             return true;
-        t = m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2];
+        t = m[2][0] * m[2][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2];
         if (!isZero(t - 1.0f))
             return true;
 
@@ -242,9 +252,9 @@ struct MODULES_EXPORT Matrix3 {
         */
     inline MODULES_EXPORT friend std::ostream &operator<<(std::ostream &out, const Matrix3 &mat)
     {
-        return out << "[" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << ", "
-                   << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << ", "
-                   << mat[2][0] << ", " << mat[2][1] << ", " << mat[2][2] << "]";
+        return out << "[" << mat[0][0] << ", " << mat[1][0] << ", " << mat[2][0] << ", "
+                   << mat[0][1] << ", " << mat[1][1] << ", " << mat[2][1] << ", "
+                   << mat[0][2] << ", " << mat[1][2] << ", " << mat[2][2] << "]";
     }
 
     inline MODULES_EXPORT friend std::istream &operator>>(std::istream &in, Matrix3 &mat)
@@ -255,7 +265,7 @@ struct MODULES_EXPORT Matrix3 {
             std::terminate();
         for (int x = 0; x < 3; ++x) {
             for (int y = 0; y < 3; ++y) {
-                in >> mat[x][y];
+                in >> mat[y][x];
                 in >> c;
                 if (x != 2 || y != 2) {
                     if (c != ',')
@@ -274,7 +284,7 @@ struct MODULES_EXPORT Matrix3 {
 
 protected:
     // support for eigensolver
-    void Tridiagonal(float afDiag[3], float afSubDiag[3]);
+/*    void Tridiagonal(float afDiag[3], float afSubDiag[3]);
     bool QLAlgorithm(float afDiag[3], float afSubDiag[3]);
 
     // support for singular value decomposition
@@ -286,7 +296,7 @@ protected:
         Matrix3 &kR);
 
     // support for spectral norm
-    static float MaxCubicRoot(float afCoeff[3]);
+    static float MaxCubicRoot(float afCoeff[3]);*/
 
     float m[3][3];
 

@@ -202,6 +202,7 @@ namespace GUI {
 
     void TopLevelWindow::onResize(size_t width, size_t height)
     {
+        mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
         input()->onResize(width, height);
         applyClientSpaceResize();
     }

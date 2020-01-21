@@ -72,7 +72,7 @@ namespace Threading {
 
         operator T *() { return data(); }
 
-        T *operator&() { return data(); }
+        T **operator&() { return &data(); }
 
         void operator=(T *t) { data() = t; }
 

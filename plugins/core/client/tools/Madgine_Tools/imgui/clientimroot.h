@@ -9,7 +9,6 @@
 
 #include "Modules/math/vector2.h"
 
-
 struct ImGuiDockNode;
 struct ImGuiViewport;
 
@@ -53,7 +52,8 @@ namespace Tools {
         Rect2i getChildClientSpace() override;
 
     private:
-        std::map<Render::RenderTarget *, ImGuiViewport *> mViewportMappings;
+        std::map<Render::RenderTarget *, ImGuiViewport *>
+            mViewportMappings;
 
         Vector2 mAreaPos = Vector2::ZERO;
         Vector2 mAreaSize = Vector2::ZERO;

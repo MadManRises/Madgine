@@ -5,8 +5,19 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLShader::OpenGLShader(GLenum glType, ShaderType type)
-        : mHandle(glCreateShader(glType))
+    GLenum toGLType(ShaderType type) {
+        switch (type) {
+        case PixelShader:
+            return GL_FRAGMENT_SHADER;
+        case VertexShader:
+            return GL_VERTEX_SHADER;
+        default:
+            std::terminate();
+        }
+    }
+
+    OpenGLShader::OpenGLShader(ShaderType type)
+        : mHandle(glCreateShader(toGLType(type)))
         , mType(type)
     {
     }

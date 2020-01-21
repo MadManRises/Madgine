@@ -51,20 +51,20 @@ namespace Widgets {
 
         Vector4 color { 1, 1, 1, 1 };
 
-        unsigned int tex = mTarget ? mTarget->texture()->mTextureHandle : 0;
+        Render::TextureHandle tex = mTarget ? mTarget->texture()->mTextureHandle : 0;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
-        result.push_back({ v, color, { 0, 1 } });
-        v.x += size.x;
-        result.push_back({ v, color, { 1, 1 } });
-        v.y += size.y;
-        result.push_back({ v, color, { 1, 0 } });
-        result.push_back({ v, color, { 1, 0 } });
-        v.x -= size.x;
         result.push_back({ v, color, { 0, 0 } });
-        v.y -= size.y;
+        v.x += size.x;
+        result.push_back({ v, color, { 1, 0 } });
+        v.y += size.y;
+        result.push_back({ v, color, { 1, 1 } });
+        result.push_back({ v, color, { 1, 1 } });
+        v.x -= size.x;
         result.push_back({ v, color, { 0, 1 } });
+        v.y -= size.y;
+        result.push_back({ v, color, { 0, 0 } });
         return { { result, { tex } } };
     }
 

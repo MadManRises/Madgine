@@ -4,6 +4,11 @@
 
 #include "programloader.h"
 
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER im3d
+#include INCLUDE_SL_SHADER
+
 namespace Engine {
 namespace Render {
 
@@ -12,14 +17,18 @@ namespace Render {
 
         virtual void render(RenderTarget *target) override;
 
-		virtual int priority() const override;
+        virtual int priority() const override;
 
     private:
         ProgramLoader::HandleType mProgram;
 
         Camera *mCamera;
 
-		int mPriority;
+        int mPriority;
+
+        Im3DPerApplication mPerApplication;
+        Im3DPerFrame mPerFrame;
+        Im3DPerObject mPerObject;
     };
 
 }

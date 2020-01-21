@@ -29,39 +29,12 @@ RegisterType(Engine::Render::ProgramLoader)
                 loader);
         }
 
-        void ProgramLoader::HandleType::bind(ProgramLoader *loader)
+        void ProgramLoader::HandleType::setParameters(const void *data, size_t size, size_t index, ProgramLoader *loader)
         {
             if (!loader)
                 loader = &ProgramLoader::getSingleton();
-            loader->bind(getData(*this, loader));
+            loader->setParameters(getData(*this, loader), data, size, index);
         }
 
-        void ProgramLoader::HandleType::setUniform(const std::string &var, int value, ProgramLoader *loader)
-        {
-            if (!loader)
-                loader = &ProgramLoader::getSingleton();
-            loader->setUniform(getData(*this, loader), var, value);
-        }
-
-        void ProgramLoader::HandleType::setUniform(const std::string &var, const Matrix3 &value, ProgramLoader *loader)
-        {
-            if (!loader)
-                loader = &ProgramLoader::getSingleton();
-            loader->setUniform(getData(*this, loader), var, value);
-        }
-
-        void ProgramLoader::HandleType::setUniform(const std::string &var, const Matrix4 &value, ProgramLoader *loader)
-        {
-            if (!loader)
-                loader = &ProgramLoader::getSingleton();
-            loader->setUniform(getData(*this, loader), var, value);
-        }
-
-        void ProgramLoader::HandleType::setUniform(const std::string &var, const Vector3 &value, ProgramLoader *loader)
-        {
-            if (!loader)
-                loader = &ProgramLoader::getSingleton();
-            loader->setUniform(getData(*this, loader), var, value);
-        }
     }
 }

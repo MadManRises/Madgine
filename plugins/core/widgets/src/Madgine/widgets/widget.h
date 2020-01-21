@@ -24,6 +24,8 @@
 
 #include "Modules/serialize/serializableunit.h"
 
+
+
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT WidgetBase : ScopeBase,

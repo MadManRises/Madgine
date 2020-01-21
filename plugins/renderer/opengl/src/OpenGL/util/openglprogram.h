@@ -2,6 +2,8 @@
 
 #include "program.h"
 
+#include "openglbuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -13,19 +15,17 @@ namespace Render {
 
         OpenGLProgram &operator=(OpenGLProgram &&other);
 
-        bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader, const std::vector<const char *> &attributeNames);
+        bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader);
 
         void reset();
 
         void bind();
 
-        void setUniform(const std::string &var, int value);
-        void setUniform(const std::string &var, const Matrix3 &value);
-        void setUniform(const std::string &var, const Matrix4 &value);
-        void setUniform(const std::string &var, const Vector3 &value);
+        void setParameters(const void *data, size_t size, size_t index);
 
     private:
         GLuint mHandle = 0;
+        std::vector<OpenGLBuffer> mUniformBuffers;
     };
 
 }

@@ -9,7 +9,8 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLBuffer::OpenGLBuffer(create_t)
+    OpenGLBuffer::OpenGLBuffer(GLenum target)
+        : mTarget(target)
     {
         glGenBuffers(1, &mHandle);
         GL_CHECK();
@@ -17,6 +18,7 @@ namespace Render {
 
     OpenGLBuffer::OpenGLBuffer(OpenGLBuffer &&other)
         : mHandle(std::exchange(other.mHandle, 0))
+        , mTarget(std::exchange(other.mTarget, 0))
     {
     }
 
@@ -28,6 +30,7 @@ namespace Render {
     OpenGLBuffer &OpenGLBuffer::operator=(OpenGLBuffer &&other)
     {
         std::swap(mHandle, other.mHandle);
+        std::swap(mTarget, other.mTarget);
         return *this;
     }
 
@@ -36,15 +39,15 @@ namespace Render {
         return mHandle != 0;
     }
 
-    void OpenGLBuffer::bind(GLenum target) const
+    void OpenGLBuffer::bind() const
     {
-        glBindBuffer(target, mHandle);
-        GL_LOG("Bind Buffer " << target << " -> " << mHandle);
+        glBindBuffer(mTarget, mHandle);
+        GL_LOG("Bind Buffer " << mTarget << " -> " << mHandle);
         GL_CHECK();
 #if OPENGL_ES
-        if (target == GL_ELEMENT_ARRAY_BUFFER)
+        if (mTarget == GL_ELEMENT_ARRAY_BUFFER)
             OpenGLVertexArray::onBindEBO(mHandle);
-        if (target == GL_ARRAY_BUFFER)
+        if (mTarget == GL_ARRAY_BUFFER)
             OpenGLVertexArray::onBindVBO(mHandle);
 #endif
     }
@@ -55,13 +58,14 @@ namespace Render {
             glDeleteBuffers(1, &mHandle);
             GL_CHECK();
             mHandle = 0;
+            mTarget = 0;
         }
     }
 
-    void OpenGLBuffer::setData(GLenum target, GLsizei size, const void *data)
+    void OpenGLBuffer::setData(GLsizei size, const void *data)
     {
-        bind(target);
-        glBufferData(target, size, data, GL_STATIC_DRAW); 
+        bind();
+        glBufferData(mTarget, size, data, GL_STATIC_DRAW);
         GL_CHECK();
     }
 

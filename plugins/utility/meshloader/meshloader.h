@@ -66,27 +66,27 @@ namespace Render {
             std::vector<std::optional<Render::AttributeDescriptor>> attributeList;
 
             if constexpr (VertexType::template holds<Render::VertexPos_4D> || VertexType::template holds<Render::VertexPos_3D>)
-                attributeList.emplace_back(std::in_place, &VertexType::mPos, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mPos, "POSITION", 0, type_holder<VertexType>);
             else
                 attributeList.emplace_back();
 
             if constexpr (VertexType::template holds<Render::VertexPos2>)
-                attributeList.emplace_back(std::in_place, &VertexType::mPos2, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mPos2, "POSITION", 1, type_holder<VertexType>);
             else
                 attributeList.emplace_back();
 
             if constexpr (VertexType::template holds<Render::VertexColor>)
-                attributeList.emplace_back(std::in_place, &VertexType::mColor, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mColor, "COLOR", 0, type_holder<VertexType>);
             else
                 attributeList.emplace_back();
 
             if constexpr (VertexType::template holds<Render::VertexNormal>)
-                attributeList.emplace_back(std::in_place, &VertexType::mNormal, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mNormal, "NORMAL", 0, type_holder<VertexType>);
             else
                 attributeList.emplace_back();
 
             if constexpr (VertexType::template holds<Render::VertexUV>)
-                attributeList.emplace_back(std::in_place, &VertexType::mUV, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mUV, "TEXCOORD", 0, type_holder<VertexType>);
             else
                 attributeList.emplace_back();
 

@@ -57,14 +57,16 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(MeshData *m)
+    void OpenGLRenderTarget::renderMesh(MeshData *m, Program *p)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
+        OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
 
-		if (!mesh->mVAO)
+        if (!mesh->mVAO)
             return;
 
         mesh->mVAO.bind();
+        program->bind();
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -83,7 +85,7 @@ namespace Render {
         mesh->mVAO.unbind();
     }
 
-    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void OpenGLRenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
@@ -91,11 +93,11 @@ namespace Render {
 
             //setupProgram(flags);
 
-            renderMesh(&tempMesh);
+            renderMesh(&tempMesh, program);
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void OpenGLRenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
@@ -103,7 +105,7 @@ namespace Render {
 
             tempMesh.mTextureHandle = texture;
 
-            renderMesh(&tempMesh);
+            renderMesh(&tempMesh, program);
         }
     }
 
