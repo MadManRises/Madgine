@@ -252,8 +252,7 @@ namespace Render {
             };
 
             const EGLint contextAttribs[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 3,
-                EGL_CONTEXT_MINOR_VERSION, 0,
+                EGL_CONTEXT_CLIENT_VERSION, 3,                
                 EGL_NONE
             };
 
