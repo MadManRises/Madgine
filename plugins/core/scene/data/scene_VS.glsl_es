@@ -1,11 +1,11 @@
 #version 300 es
 
-layout (std140, binding = 0) uniform PerApplication
+uniform PerApplication
 {
 	mat4 p;	
 };
 
-layout (std140, binding = 1) uniform PerFrame
+uniform PerFrame
 {
 	mat4 v;
 
@@ -13,7 +13,7 @@ layout (std140, binding = 1) uniform PerFrame
 	vec3 lightDir;
 };
 
-layout (std140, binding = 2) uniform PerObject
+uniform PerObject
 {
 	mat4 m;
 	mat4 anti_m;

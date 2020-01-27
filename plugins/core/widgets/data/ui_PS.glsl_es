@@ -1,15 +1,18 @@
 #version 300 es
 
+precision highp float;
 
-layout (std140, binding = 2) uniform PerObject
+uniform PerObject
 {
 	bool hasDistanceField;
 };
 
-layout(binding = 0) uniform sampler2D tex;
+uniform sampler2D tex;
 
 in vec4 color;
 in vec2 uv;
+
+out vec4 fragColor;
 
 
 float median(float r, float g, float b) {
@@ -22,14 +25,14 @@ void main()
 	vec4 texColor;
 	if (hasDistanceField){
 		vec2 msdfUnit = 4.0/vec2(512.0, 512.0);
-		vec4 sampled = texture2D(tex, uv);
+		vec4 sampled = texture(tex, uv);
 		float sigDist = median(sampled.r, sampled.g, sampled.b) - 0.5;
 		//sigDist *= dot(msdfUnit, vec2(0.5));
 		sigDist *= 4.0;
 		float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-		texColor = mix(vec4(0,0,0,0), vec4(1.0), opacity);
+		texColor = mix(vec4(0), vec4(1.0), opacity);
 	} else {
-		texColor = texture2D(tex, uv);
+		texColor = texture(tex, uv);
 	}
-    gl_FragColor = color * texColor;
+    fragColor = color * texColor;
 }

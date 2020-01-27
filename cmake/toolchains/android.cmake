@@ -7,7 +7,7 @@ endif()
 
 set(ANDROID_NO_UNDEFINED report-all)
 set(ANDROID_PLATFORM android-21) # API level
-set(ANDROID_ABI x86_64)
+#specify ANDROID_ABI in arguments
 
 
 set(ANDROID_NDK ${ANDROID_SDK}/ndk-bundle)

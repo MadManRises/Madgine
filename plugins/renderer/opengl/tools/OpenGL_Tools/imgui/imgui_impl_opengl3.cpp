@@ -103,7 +103,7 @@ bool ImGui_ImplOpenGL3_Init(const char *glsl_version)
     // Store GLSL version string so we can refer to it later in case we recreate shaders. Note: GLSL version is NOT the same as GL version. Leave this to NULL if unsure.
 #if OPENGL_ES
     if (glsl_version == NULL)
-        glsl_version = "#version 100";
+        glsl_version = "#version 300 es";
 #else
     if (glsl_version == NULL)
         glsl_version = "#version 130";
@@ -480,7 +480,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                               "out vec4 Frag_Color;\n"
                                               "void main()\n"
                                               "{\n"
-                                              "    Frag_UV = vec2(UV.x, 1-UV.y);\n"
+                                              "    Frag_UV = vec2(UV.x, 1.0-UV.y);\n"
                                               "    Frag_Color = Color;\n"
                                               "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
                                               "}\n";

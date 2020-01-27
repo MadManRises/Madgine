@@ -50,7 +50,7 @@ void main()
 			//sigDist *= dot(msdfUnit, vec2(0.5));
 			sigDist *= 4.0;
 			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-			colorAcc = mix(vec4(0,0,0,0), colorAcc, opacity);
+			colorAcc = mix(vec4(0), colorAcc, opacity);
 		}
 		else
 		{

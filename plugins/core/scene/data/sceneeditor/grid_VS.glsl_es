@@ -1,6 +1,6 @@
 #version 300 es
 
-layout (std140, binding = 1) uniform PerFrame
+uniform PerFrame
 {
 	mat4 vp;
 };

@@ -48,6 +48,23 @@ namespace Render {
             LOG_ERROR(infoLog);
         }
 
+#if OPENGL_ES
+        GLuint perApplicationIndex = glGetUniformBlockIndex(mHandle, "PerApplication");
+        if (perApplicationIndex != GL_INVALID_INDEX) {
+            glUniformBlockBinding(mHandle, perApplicationIndex, 0);
+        }
+
+        GLuint perFrameIndex = glGetUniformBlockIndex(mHandle, "PerFrame");
+        if (perFrameIndex != GL_INVALID_INDEX) {
+            glUniformBlockBinding(mHandle, perFrameIndex, 1);
+        }
+
+        GLuint perObjectIndex = glGetUniformBlockIndex(mHandle, "PerObject");
+        if (perObjectIndex != GL_INVALID_INDEX) {
+            glUniformBlockBinding(mHandle, perObjectIndex, 2);
+        }
+#endif
+
         return success;
     }
 

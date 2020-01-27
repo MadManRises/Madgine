@@ -26,7 +26,7 @@ namespace Threading {
         void unlock(AccessMode mode);
 
     private:
-        std::atomic<std::thread::id> mCurrentHolder;
+        std::atomic<std::thread::id> mCurrentHolder = std::thread::id {};
         std::atomic<unsigned short> mReaderCount = 0;
         std::atomic_flag mConsidered = ATOMIC_FLAG_INIT;
     };

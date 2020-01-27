@@ -119,7 +119,7 @@ RegisterType(Engine::Scene::SceneManager)
         {
             return mMutex;
         }
-
+	
         void SceneManager::update()
         {
             PROFILE();

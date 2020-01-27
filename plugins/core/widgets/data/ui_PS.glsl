@@ -27,7 +27,7 @@ void main()
 		//sigDist *= dot(msdfUnit, vec2(0.5));
 		sigDist *= 4.0;
 		float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-		texColor = mix(vec4(0,0,0,0), vec4(1.0), opacity);
+		texColor = mix(vec4(0), vec4(1.0), opacity);
 	} else {
 		texColor = texture2D(tex, uv);
 	}
