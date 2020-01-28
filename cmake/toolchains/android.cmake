@@ -1,5 +1,14 @@
 
-set(ANDROID_SDK C:\\android-sdk)
+
+
+if(NOT ANDROID_SDK)
+    if(DEFINED ENV{ANDROID_SDK})
+        file(TO_CMAKE_PATH "$ENV{ANDROID_SDK}" ANDROID_SDK)
+    else()
+        set(ANDROID_SDK "C:\\android-sdk")
+    endif()
+endif()
+
 
 if (NOT EXISTS ${ANDROID_SDK})
 	MESSAGE(SEND_ERROR "Please set location of ANDROID_SDK")

@@ -26,7 +26,6 @@ namespace Render {
         , mTexture(Texture2D, FORMAT_FLOAT32, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE)
         , mSize({ 0, 0 })
     {
-
         resize(size);
     }
 

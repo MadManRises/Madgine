@@ -4,15 +4,18 @@
     [//toolchains
 		[
 			name : "clang-linux",
-			dockerImage : 'schuetzo/linux-test-env:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : ""
 		],
 		[
 			name : "clang-android",
-			dockerImage : 'schuetzo/linux-test-env:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : "-DANDROID_ABI=x86_64 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake"
 		],
 		[
 			name : "emscripten",
-			dockerImage : 'schuetzo/linux-test-env:latest'
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake"
 		]
 	],           
     [//configurations
@@ -77,9 +80,9 @@ def staticTask = {
 				cd ${name}
 				cmake .. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
-				-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
 				-DPLUGIN_DEFINITION_FILE=plugins.cfg \
 				-DBUILD_SHARED_LIBS=OFF \
+				${toolchain.args} \
 				${cmake_args}
 				"""						
 			}
@@ -136,8 +139,8 @@ def task = {
 					cd ${name}
 					cmake .. \
 					-DCMAKE_BUILD_TYPE=${configuration.name} \
-					-DCMAKE_TOOLCHAIN_FILE=~/toolchains/${toolchain.name}.cmake \
 					-DBUILD_SHARED_LIBS=ON \
+					${toolchain.args} \
 					${cmake_args}
 					"""
 				}
