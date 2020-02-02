@@ -220,6 +220,12 @@ namespace Tools {
 
         mRoot.callFinalize();
 
+        if (Window::platformCapabilities.mSupportMultipleWindows) {
+            ImGuiViewport *main_viewport = ImGui::GetMainViewport();
+            main_viewport->PlatformHandle = nullptr;
+            main_viewport->RendererUserData = nullptr;
+        }
+
         Im3D::DestroyContext();
         ImGui::DestroyContext();
     }

@@ -60,7 +60,7 @@ RegisterType(Engine::Scene::SceneManager)
 
             mLastFrame = std::chrono::steady_clock::now();
 
-            Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 10000 });
+            Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 10000 }, this);
 
             return true;
         }
@@ -68,6 +68,8 @@ RegisterType(Engine::Scene::SceneManager)
         void SceneManager::finalize()
         {
             clear();
+
+			Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
 
             for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
                 component->callFinalize();

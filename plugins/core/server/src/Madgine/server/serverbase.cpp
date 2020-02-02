@@ -21,6 +21,7 @@ namespace Server {
 
     ServerBase::~ServerBase()
     {
+        removeRepeatedTasks(this);
         mLog.stopConsole();
         mInstances.clear();
         Util::setLog(nullptr);

@@ -22,7 +22,12 @@ namespace Threading {
                 stop();
             mLastFrame = now;
         },
-            std::chrono::microseconds(1000000 / 60));
+            std::chrono::microseconds(1000000 / 60), this);
+    }
+
+    FrameLoop::~FrameLoop()
+    {
+        removeRepeatedTasks(this);
     }
 
     bool FrameLoop::singleFrame(std::chrono::microseconds timeSinceLastFrame)

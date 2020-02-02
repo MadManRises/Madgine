@@ -41,6 +41,12 @@ namespace Threading {
 
         T *operator&() { return &data(); }
 
+        Global<T, Storage> &operator=(const Global<T, Storage> &other)
+        {
+            data() = other.data();
+            return *this;
+        }
+
         Global<T, Storage> &operator=(const T &t)
         {
             data() = t;
@@ -48,6 +54,8 @@ namespace Threading {
         }
 
         T &data() { return Storage::localVariable(mIndex).template as<T>(); }
+
+        const T &data() const { return Storage::localVariable(mIndex).template as<T>(); }
 
     private:
         int mIndex;
@@ -74,9 +82,21 @@ namespace Threading {
 
         T **operator&() { return &data(); }
 
-        void operator=(T *t) { data() = t; }
+        Global<T *, Storage> &operator=(const Global<T *, Storage> &other)
+        {
+            data() = other.data();
+            return *this;
+        }
+
+        Global<T *, Storage> &operator=(T *t)
+        {
+            data() = t;
+            return *this;
+        }
 
         T *&data() { return Storage::localVariable(mIndex).template as<T *>(); }
+
+        T *const &data() const { return Storage::localVariable(mIndex).template as<T *>(); }
 
     private:
         int mIndex;

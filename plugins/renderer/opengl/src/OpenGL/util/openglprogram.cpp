@@ -70,6 +70,7 @@ namespace Render {
 
     void OpenGLProgram::reset()
     {
+        mUniformBuffers.clear();
         if (mHandle) {
             glDeleteProgram(mHandle);
             mHandle = 0;

@@ -13,7 +13,7 @@ namespace Engine
 			
 			FrameLoop();
 			FrameLoop(const FrameLoop &) = delete;
-			virtual ~FrameLoop() = default;
+			virtual ~FrameLoop();
 
 			FrameLoop &operator=(const FrameLoop&) = delete;
 

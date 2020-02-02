@@ -55,14 +55,14 @@ RegisterType(Engine::Tools::OpenGLImRoot)
                 };
             };
 
-            return true;
+			return true;
         }
 
         void OpenGLImRoot::finalize()
-        {
-            ImGui_ImplOpenGL3_Shutdown();
+        {           
+			ImGui_ImplOpenGL3_Shutdown();
 
-            ClientImRoot::finalize();
+			ClientImRoot::finalize();
         }
 
         void OpenGLImRoot::newFrame(float timeSinceLastFrame)

@@ -84,13 +84,19 @@ namespace Threading {
         queueInternal({ wrapTask(std::move(task)), time_point });
     }
 
-    void TaskQueue::addRepeatedTask(TaskHandle &&task, std::chrono::steady_clock::duration interval)
+    void TaskQueue::addRepeatedTask(TaskHandle &&task, std::chrono::steady_clock::duration interval, void *owner)
     {
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            mRepeatedTasks.emplace_back(RepeatedTask { std::move(task), interval });
+            mRepeatedTasks.emplace_back(RepeatedTask { std::move(task), owner, interval });
         }
         mCv.notify_one();
+    }
+
+    void TaskQueue::removeRepeatedTasks(void *owner)
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mRepeatedTasks.erase(std::remove_if(mRepeatedTasks.begin(), mRepeatedTasks.end(), [owner](const RepeatedTask &task) { return task.mOwner == owner; }), mRepeatedTasks.end());        
     }
 
     std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)

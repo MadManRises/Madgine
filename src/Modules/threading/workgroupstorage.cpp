@@ -1,15 +1,15 @@
 #include "../moduleslib.h"
 
-
 #if ENABLE_THREADING
 
-#include "workgroupstorage.h"
-#include "workgroup.h"
-#include "globalvariablemanager.h"
-
+#    include "globalvariablemanager.h"
+#    include "workgroup.h"
+#    include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {
+
+    std::shared_mutex sMutex;
 
     static std::vector<GlobalVariableManager> &sWorkgroupLocalBssConstructors()
     {
@@ -25,23 +25,27 @@ namespace Threading {
 
     int WorkGroupStorage::registerLocalBssVariable(std::function<Any()> ctor)
     {
+        std::unique_lock lock(sMutex);
         sWorkgroupLocalBssConstructors().emplace_back(std::move(ctor));
         return -static_cast<int>(sWorkgroupLocalBssConstructors().size());
     }
 
     void WorkGroupStorage::unregisterLocalBssVariable(int index)
     {
+        std::shared_lock lock(sMutex);
         sWorkgroupLocalBssConstructors()[-(index + 1)].reset();
     }
 
     int WorkGroupStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
+        std::unique_lock lock(sMutex);
         sWorkgroupLocalObjectConstructors().emplace_back(std::move(ctor));
         return sWorkgroupLocalObjectConstructors().size() - 1;
     }
 
     void WorkGroupStorage::unregisterLocalObjectVariable(int index)
     {
+        std::shared_lock lock(sMutex);
         sWorkgroupLocalObjectConstructors()[index].reset();
     }
 
@@ -51,6 +55,7 @@ namespace Threading {
         std::vector<GlobalVariableManager> &constructors = index < 0 ? sWorkgroupLocalBssConstructors() : sWorkgroupLocalObjectConstructors();
         if (index < 0)
             index = -(index + 1);
+        std::shared_lock lock(sMutex);
         GlobalVariableManager &m = constructors[index];
         return m[selfIndex];
     }
@@ -58,6 +63,7 @@ namespace Threading {
     void WorkGroupStorage::init(bool bss)
     {
         size_t selfIndex = WorkGroup::self().mInstanceCounter;
+        std::shared_lock lock(sMutex);
         if (bss) {
             for (GlobalVariableManager &m : sWorkgroupLocalBssConstructors()) {
                 m[selfIndex];
@@ -69,9 +75,10 @@ namespace Threading {
         }
     }
 
-	void WorkGroupStorage::finalize(bool bss)
+    void WorkGroupStorage::finalize(bool bss)
     {
         size_t selfIndex = WorkGroup::self().mInstanceCounter;
+        std::shared_lock lock(sMutex);
         if (bss) {
             for (GlobalVariableManager &m : sWorkgroupLocalBssConstructors()) {
                 m.remove(selfIndex);

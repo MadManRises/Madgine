@@ -125,7 +125,7 @@ namespace Plugins {
             }
         }
 
-        auto task = [=]() {
+        auto task = [this]() {
             clearDependencies();
             LOG("Unloading Plugin \"" << mName << "\"...");
             closeDll(mModule);
