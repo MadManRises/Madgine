@@ -6,12 +6,12 @@ namespace Engine {
 namespace TupleUnpacker {
 
 #define LIFT(fname)                                            \
-    [&](auto &&... args) -> decltype(auto) {                   \
+    [](auto &&... args) -> decltype(auto) {                    \
         return (fname)(std::forward<decltype(args)>(args)...); \
     }
 
 #define LIFT_MEMBER(fname)                                                                           \
-    [&](auto &&_this, auto &&... args) -> decltype(auto) {                                           \
+    [](auto &&_this, auto &&... args) -> decltype(auto) {                                            \
         return (std::forward<decltype(_this)>(_this)->fname)(std::forward<decltype(args)>(args)...); \
     }
 

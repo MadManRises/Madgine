@@ -411,7 +411,7 @@ namespace Serialize {
                 in.read(temp, "Item");
                 it = emplace_intern(where, std::move(temp));
             } else {
-                it = emplace_tuple_intern(where, creator.readCreationData(in));
+                it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_intern), this, where, creator.readCreationData(in));
                 in.read(*it.first, "Item");
             }
             assert(it.second);
@@ -449,15 +449,6 @@ namespace Serialize {
                 this->setParent(*it.first, OffsetPtr::parent(this));
             }
             return it;
-        }
-
-        template <typename... _Ty>
-        std::pair<iterator, bool> emplace_tuple_intern(const const_iterator &where, std::tuple<_Ty...> &&tuple)
-        {
-            return TupleUnpacker::invokeExpand(&SerializableContainerImpl<C, Observer, OffsetPtr>::template emplace_intern<_Ty...>,
-                this,
-                where,
-                std::forward<std::tuple<_Ty...>>(tuple));
         }
 
         iterator erase_intern(const iterator &it)
