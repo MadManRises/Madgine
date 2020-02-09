@@ -13,8 +13,6 @@ namespace ImGui {
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
     void draw(const Engine::TypedScopePtr &scope);
-    bool draw(Engine::InvScopePtr &p);
-    void draw(const Engine::InvScopePtr &p);
     bool draw(bool &b);
     void draw(const bool &b);
     bool draw(std::string &s);
@@ -27,6 +25,8 @@ struct IMGUI_API ValueTypeDrawer {
     void draw(const float &f);
     bool draw(Engine::Matrix3 &m);
     void draw(const Engine::Matrix3 &m);
+    bool draw(Engine::Matrix4 &m);
+    void draw(const Engine::Matrix4 &m);
     bool draw(Engine::Vector2 &v);
     void draw(const Engine::Vector2 &v);
     bool draw(Engine::Vector3 &v);
@@ -92,6 +92,8 @@ IMGUI_API void RightAlignText(const char *s, ...);
 
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
+IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *enabled = nullptr);
+IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *enabled = nullptr);
 
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 

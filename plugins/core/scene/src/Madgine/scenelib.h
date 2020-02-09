@@ -4,6 +4,8 @@
 
 #include "Madgine/baselib.h"
 #include "meshloaderlib.h"
+#include "skeletonloaderlib.h"
+#include "animationloaderlib.h"
 
 #if defined(Scene_EXPORTS)
 #    define MADGINE_SCENE_EXPORT DLL_EXPORT

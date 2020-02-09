@@ -230,7 +230,7 @@ namespace Render {
         mesh->mVAO.unbind();
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
@@ -242,7 +242,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;

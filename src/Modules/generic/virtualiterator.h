@@ -36,7 +36,7 @@ struct VirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
     virtual RefT get() const override
     {
-        return RefT{*mIt};
+        return RefT { *mIt };
     }
 
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
@@ -44,11 +44,11 @@ struct VirtualIteratorImpl : VirtualIteratorBase<RefT> {
         return std::make_unique<VirtualIteratorImpl<RefT, It>>(mIt, mEnd);
     }
 
-	virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
-	{
-            const VirtualIteratorImpl<RefT, It> *otherP = dynamic_cast<const VirtualIteratorImpl<RefT, It> *>(&other);
-                return otherP && mIt == otherP->mIt;
-	}
+    virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
+    {
+        const VirtualIteratorImpl<RefT, It> *otherP = dynamic_cast<const VirtualIteratorImpl<RefT, It> *>(&other);
+        return otherP && mIt == otherP->mIt;
+    }
 
 private:
     It mIt, mEnd;

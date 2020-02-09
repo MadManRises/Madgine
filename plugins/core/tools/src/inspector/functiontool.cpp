@@ -53,34 +53,34 @@ namespace Tools {
     {
         for (std::pair<std::string, ValueType> p : scope) {
             struct Visitor {
-                void operator()(BoundApiMethod &&m)
+                void operator()(const BoundApiMethod &m)
                 {
                     mTool->mMethodCache.emplace_back(std::move(mName), m);
                 }
-                void operator()(TypedScopePtr &&child)
+                void operator()(const TypedScopePtr &child)
                 {
                     mTool->parseMethods(child);
                 }
-                void operator()(KeyValueVirtualIterator &&it)
+                void operator()(KeyValueVirtualIterator it)
                 {
                     for (; it != VirtualIteratorEnd {}; ++it) {
-                        (*it).second.visit(*this);
+                        (*it).second.value().visit(*this);
                     }
                 }
 
-                void operator()(std::monostate &&) {}
-                void operator()(std::string &&) {}
-                void operator()(bool &&) {}
-                void operator()(int &&) {}
-                void operator()(size_t &&) {}
-                void operator()(float &&) {}
-                void operator()(InvScopePtr &&) {}
-                void operator()(Matrix3 &&) {}
-                void operator()(Quaternion &&) {}
-                void operator()(Vector4 &&) {}
-                void operator()(Vector3 &&) {}
-                void operator()(Vector2 &&) {}
-                void operator()(ObjectPtr &&) {}
+                void operator()(const std::monostate &) {}
+                void operator()(const std::string &) {}
+                void operator()(const bool &) {}
+                void operator()(const int &) {}
+                void operator()(const size_t &) {}
+                void operator()(const float &) {}
+                void operator()(const Matrix3 &) {}
+                void operator()(const Matrix4 &) {}
+                void operator()(const Quaternion &) {}
+                void operator()(const Vector4 &) {}
+                void operator()(const Vector3 &) {}
+                void operator()(const Vector2 &) {}
+                void operator()(const ObjectPtr &) {}
 
                 FunctionTool *mTool;
                 std::string mName;

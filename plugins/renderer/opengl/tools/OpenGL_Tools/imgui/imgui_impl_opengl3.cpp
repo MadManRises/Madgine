@@ -343,6 +343,8 @@ void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData *draw_data)
 #endif
     glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
     glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
+
+	GL_CHECK();
 }
 
 bool ImGui_ImplOpenGL3_CreateFontsTexture()

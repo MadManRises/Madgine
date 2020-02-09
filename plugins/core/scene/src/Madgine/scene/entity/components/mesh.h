@@ -18,10 +18,10 @@ namespace Scene {
 
             AABB aabb() const;
 
-            void setManual(Render::MeshLoader::HandleType handle);
-            void set(Render::MeshLoader::ResourceType *res);
+            void set(Render::MeshLoader::HandleType handle);            
 
             Render::MeshLoader::ResourceType *get() const;
+            const Render::MeshLoader::HandleType &handle() const;
 
             void setVisible(bool vis);
             bool isVisible() const;

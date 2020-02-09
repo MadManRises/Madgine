@@ -49,11 +49,11 @@ namespace Resources {
 
     private:
         void updateResources(const Filesystem::Path &path, int priority);
-        void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase *> &loaderByExtension);
+        void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension);
 
-        void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase *> &loaderByExtension);
+        void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension);
 
-        std::map<std::string, ResourceLoaderBase *> getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>> getLoaderByExtension();
 
     private:
         struct SubDirCompare {

@@ -6,6 +6,8 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Modules/math/transformation.h"
+
 namespace Engine {
 
 namespace Scene {
@@ -13,11 +15,7 @@ namespace Scene {
 
         Matrix4 Transform::matrix() const
         {
-            return Matrix4 { mScale.x, 0, 0, mPosition->x,
-                0, mScale.y, 0, mPosition->y,
-                0, 0, mScale.z, mPosition->z,
-                0, 0, 0, 1 }
-            * Matrix4 { mOrientation.toMatrix() };
+            return TransformMatrix(mPosition, mScale, mOrientation);
         }
 
         const Vector3 &Transform::getPosition() const

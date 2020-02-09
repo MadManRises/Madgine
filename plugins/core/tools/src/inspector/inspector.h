@@ -17,7 +17,7 @@ namespace Tools {
 
         void drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
         void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
-        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
+        //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
 
         void draw(TypedScopePtr scope, const char *layoutName = nullptr);
 
@@ -48,6 +48,8 @@ namespace Tools {
         void inheritLayout(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
         void drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
         void drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+
+		bool drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType &value, bool editable);
 
     private:
         std::map<std::string, InspectorLayout *> mAssociations;

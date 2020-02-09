@@ -3,6 +3,7 @@
 #include "../generic/templates.h"
 
 #include "../math/matrix3.h"
+#include "../math/matrix4.h"
 #include "../math/quaternion.h"
 #include "../math/vector2.h"
 #include "../math/vector3.h"
@@ -31,6 +32,7 @@ struct MODULES_EXPORT ValueType {
         float,
         TypedScopePtr,
         Matrix3,
+        Matrix4,
         Quaternion,
         Vector4,
         Vector3,
@@ -42,9 +44,7 @@ struct MODULES_EXPORT ValueType {
 
 private:
     template <typename T>
-    struct _isValueType {
-        const constexpr static bool value = variant_contains<Union, T>::value;
-    };
+    using _isValueType = variant_contains<Union, T>;
 
 public:
     enum class Type : unsigned char {
@@ -56,6 +56,7 @@ public:
         FloatValue,
         ScopeValue,
         Matrix3Value,
+        Matrix4Value,
         QuaternionValue,
         Vector4Value,
         Vector3Value,
@@ -146,6 +147,7 @@ public:
     ValueType operator*(const ValueType &other) const;
 
     std::string toString() const;
+    std::string toShortString() const;
 
     std::string getTypeString() const;
     static std::string getTypeString(Type type);
@@ -193,30 +195,7 @@ public:
     }
 
     template <typename T>
-    decltype(auto) as() const
-    {
-        if constexpr (_isValueType<std::decay_t<T>>::value) {
-            if (std::holds_alternative<std::decay_t<T>>(mUnion))
-                return std::get<std::decay_t<T>>(mUnion);
-            else
-                throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
-                    getTypeString(
-                        static_cast<Type>(variant_index<Union, std::decay_t<T>>::value))));
-        } else if constexpr (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>) {
-            if constexpr (std::is_pointer_v<T>) {
-                return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
-            } else {
-                static_assert(dependent_bool<T, false>::value, "References are currently not supported!");
-                return *std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
-            }
-        } else if constexpr (std::is_same_v<T, ValueType>) {
-            return *this;
-        } else if constexpr (std::is_enum_v<T>) {
-            return static_cast<T>(std::get<int>(mUnion));
-        } else {
-            static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
-        }
-    }
+    decltype(auto) as() const;
 
     template <typename T>
     std::enable_if_t<std::is_enum<T>::value && !_isValueType<T>::value, T> as() const
@@ -238,6 +217,70 @@ public:
 private:
     Union mUnion;
 };
+
+struct MODULES_EXPORT ValueTypeRef {
+
+private:
+    template <typename T>
+    void *toPtrHelper(T &val)
+    {
+        if constexpr (std::is_const_v<T> || std::is_base_of<ScopeBase, T>::value) {
+            return nullptr;
+        } else {
+            return &val;
+        }
+    }
+
+public:
+    template <typename T, typename _ = std::enable_if_t<ValueType::isValueType<T>::value || (std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value)>>
+    explicit ValueTypeRef(T &val)
+        : mValue(val)
+        , mData(toPtrHelper(val))
+    {
+    }
+
+    ValueTypeRef(const ValueTypeRef &) = delete;
+
+    ValueTypeRef &operator=(const ValueTypeRef &) = delete;
+
+    const ValueType &value() const;
+
+    operator const ValueType &() const;
+
+    bool isEditable() const;
+
+    ValueTypeRef &operator=(const ValueType &v);
+
+private:
+    ValueType mValue;
+    void *mData = nullptr;
+};
+
+template <typename T>
+decltype(auto) ValueType::as() const
+{
+    if constexpr (_isValueType<std::decay_t<T>>::value) {
+        if (std::holds_alternative<std::decay_t<T>>(mUnion))
+            return std::get<std::decay_t<T>>(mUnion);
+        else
+            throw ValueTypeException(Database::Exceptions::unexpectedValueType(getTypeString(),
+                getTypeString(
+                    static_cast<Type>(variant_index<Union, std::decay_t<T>>::value))));
+    } else if constexpr (std::is_base_of_v<ScopeBase, std::decay_t<std::remove_pointer_t<std::remove_reference_t<T>>>>) {
+        if constexpr (std::is_pointer_v<T>) {
+            return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
+        } else {
+            static_assert(dependent_bool<T, false>::value, "References are currently not supported!");
+            return *std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
+        }
+    } else if constexpr (std::is_same_v<T, ValueType>) {
+        return *this;
+    } else if constexpr (std::is_enum_v<T>) {
+        return static_cast<T>(std::get<int>(mUnion));
+    } else {
+        static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
+    }
+}
 }
 
 std::ostream &operator<<(std::ostream &stream,

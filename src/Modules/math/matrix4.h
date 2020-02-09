@@ -260,8 +260,8 @@ struct MODULES_EXPORT Matrix4 {
 
     Matrix3 ToMat3() const
     {
-        return Matrix3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2],
-            m[2][0], m[2][1], m[2][2]);
+        return Matrix3(m[0][0], m[1][0], m[2][0], m[0][1], m[1][1], m[2][1],
+            m[0][2], m[1][2], m[2][2]);
     }
 
     /** Function for writing to a stream.
@@ -277,8 +277,6 @@ struct MODULES_EXPORT Matrix4 {
           << mat[3][3] << ")";
         return o;
     }
-
-    static Matrix4 TranslationMatrix(const Vector3 &t);
 
     //static const float EPSILON;
     static constexpr float ZERO[4][4] { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };

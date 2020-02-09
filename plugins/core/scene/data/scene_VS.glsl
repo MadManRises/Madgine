@@ -42,5 +42,5 @@ void main()
     gl_Position = p * (v * vec4(worldPos, 1.0) + vec4(aPos2, 0.0, 0.0));	
     color = aColor;
 	normal = mat3(anti_m) * aNormal;
-	uv = aUV;
+	uv = vec2(aUV.x, 1.0 - aUV.y);
 }

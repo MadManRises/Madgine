@@ -349,8 +349,40 @@ namespace Im3D {
 
         Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, font.mTexture);
 
-		if (GetIO().mReleaseFont)
+        if (GetIO().mReleaseFont)
             GetIO().mReleaseFont(font);
+    }
+
+    void Arrow(Im3DMeshType type, float radius, float length, const Matrix4 &transform, const Vector4 &color)
+    {
+        const Render::Vertex vertices[]
+            = { { { 0, 0, 0 }, color, { 0, -1, 0 } },
+                  { { radius, radius, -radius }, color, { 1, 0, -1 } },
+                  { { radius, radius, radius }, color, { 1, 0, 1 } },
+                  { { -radius, radius, radius }, color, { -1, 0, 1 } },
+                  { { -radius, radius, -radius }, color, { -1, 0, -1 } },
+                  { { 0, length, 0 }, color, { 0, 1, 0 } } };
+
+        switch (type) {
+        case IM3D_TRIANGLES: {
+            constexpr unsigned short indices[] = {
+                0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
+            };
+
+            Im3D::Mesh(IM3D_TRIANGLES, vertices, 6, transform, indices, 24);
+            break;
+        }
+        case IM3D_LINES: {
+            constexpr unsigned short indices[] = {
+                0, 1, 0, 2, 0, 3, 0, 4, 1, 5, 2, 5, 3, 5, 4, 5, 1, 2, 2, 3, 3, 4, 4, 1
+            };
+
+            Im3D::Mesh(IM3D_LINES, vertices, 6, transform, indices, 24);
+            break;
+        }
+        default:
+            std::terminate();
+        }
     }
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)

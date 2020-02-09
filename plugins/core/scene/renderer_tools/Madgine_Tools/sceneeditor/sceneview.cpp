@@ -41,6 +41,8 @@
 
 #include "texture.h"
 
+#include "Modules/math/transformation.h"
+
 
 namespace Engine {
 namespace Tools {
@@ -170,7 +172,7 @@ namespace Tools {
             }
 
             if (mDragging[1]) {
-                mCamera.mOrientation = Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.mOrientation * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X };
+                mCamera.mOrientation = Quaternion { -dragDistance.y / 200.0f, Vector3::UNIT_X } * mCamera.mOrientation * Quaternion { -dragDistance.x / 200.0f, Vector3::UNIT_Y };
             }
 
             if (mDragging[0]) {
@@ -205,7 +207,7 @@ namespace Tools {
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
                     Render::MeshLoader::HandleType handle = resource->loadData();
-                    Im3D::NativeMesh(handle, handle->mAABB, Matrix4::TranslationMatrix(pos));
+                    Im3D::NativeMesh(handle, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

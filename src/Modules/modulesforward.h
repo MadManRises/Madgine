@@ -1,23 +1,32 @@
 #pragma once
 
 namespace Engine {
+
 struct ValueType;
-
-struct InvScopePtr;
-
-enum KeyValueValueFlags : uint8_t;
-
-struct KeyValueVirtualIteratorBase;
+struct ValueTypeRef;
 
 struct ScopeBase;
 struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
 struct TypedScopePtr;
+struct TypeInfo;
+struct ApiMethod;
+using ArgumentList = std::vector<ValueType>;
 
 struct ObjectInstance;
 struct ObjectPtr;
 struct ObjectFieldAccessor;
+
+template <typename RefT>
+struct VirtualIterator;
+
+enum KeyValueValueFlags : uint8_t;
+
+struct KeyValueVirtualIteratorBase;
+using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueTypeRef>>;
+
+struct MadgineObject;
 
 struct IndexHolder;
 
@@ -28,18 +37,6 @@ template <typename T, typename _Collector, typename Base = typename _Collector::
 struct VirtualUniqueComponentBase;
 
 struct ComponentRegistryBase;
-
-struct InStream;
-struct OutStream;
-
-template <typename RefT>
-struct VirtualIterator;
-
-using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueType>>;
-
-using ArgumentList = std::vector<ValueType>;
-
-struct ApiMethod;
 
 struct Any;
 
@@ -197,13 +194,12 @@ struct Rect2i;
 struct Matrix3;
 struct Matrix4;
 
-struct TypeInfo;
+struct Quaternion;
+
 
 struct Ray;
 struct Sphere;
 struct Plane;
 struct AABB;
 struct BoundingBox;
-
-struct MadgineObject;
 }

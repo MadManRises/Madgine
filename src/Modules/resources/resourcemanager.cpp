@@ -65,7 +65,7 @@ namespace Resources {
     {
         mInitialized = true;
 
-        std::map<std::string, ResourceLoaderBase *> loaderByExtension = getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension = getLoaderByExtension();
 
         for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
             updateResources(p.first, p.second, loaderByExtension);
@@ -86,7 +86,7 @@ namespace Resources {
 #if ENABLE_PLUGINS
     void ResourceManager::onPluginLoad(const Plugins::Plugin *plugin)
     {
-        std::map<std::string, ResourceLoaderBase *> loaderByExtension = getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension = getLoaderByExtension();
 
         if (mInitialized) {
             for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
@@ -114,39 +114,39 @@ namespace Resources {
         updateResources(path, priority, getLoaderByExtension());
     }
 
-    void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase *> &loaderByExtension)
+    void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension)
     {
         for (Filesystem::Path p : Filesystem::listFilesRecursive(path)) {
             updateResource(p, priority, loaderByExtension);
         }
     }
 
-    void ResourceManager::updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, ResourceLoaderBase *> &loaderByExtension)
+    void ResourceManager::updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension)
     {
         std::string extension = path.extension();
 
         auto it = loaderByExtension.find(extension);
         if (it != loaderByExtension.end()) {
-            auto [resource, b] = it->second->addResource(path);
+            for (ResourceLoaderBase *loader : it->second) {
+                auto [resource, b] = loader->addResource(path);
 
-            if (!b) {
-                int otherPriority = mResourcePaths.at(resource->path());
-                if (priority > otherPriority || (priority == otherPriority && it->second->extensionIndex(extension) < it->second->extensionIndex(resource->path().extension()))) {
-                    resource->updatePath(path);
+                if (!b) {
+                    int otherPriority = mResourcePaths.at(resource->path());
+                    if (priority > otherPriority || (priority == otherPriority && loader->extensionIndex(extension) < loader->extensionIndex(resource->path().extension()))) {
+                        resource->updatePath(path);
+                    }
                 }
             }
         }
     }
 
-    std::map<std::string, ResourceLoaderBase *> ResourceManager::getLoaderByExtension()
+    std::map<std::string, std::vector<ResourceLoaderBase *>> ResourceManager::getLoaderByExtension()
     {
-        std::map<std::string, ResourceLoaderBase *> loaderByExtension;
+        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension;
 
         for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
             for (const std::string &ext : loader->fileExtensions()) {
-                if (loaderByExtension[ext])
-                    LOG_WARNING("Double assigned extension: " << ext);
-                loaderByExtension[ext] = loader.get();
+                loaderByExtension[ext].push_back(loader.get());
             }
         }
         return loaderByExtension;

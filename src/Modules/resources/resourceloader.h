@@ -19,9 +19,9 @@ namespace Resources {
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderBase>
     struct ResourceLoaderImpl : _Base {
 
-		using Base = _Base;
+        using Base = _Base;
         using Data = _Data;
-        using Container = _Container;		
+        using Container = _Container;
 
         struct ResourceType;
 
@@ -32,7 +32,7 @@ namespace Resources {
         struct StorageUnit : Base::ResourceType {
             using Base::ResourceType::ResourceType;
 
-			using traits = container_traits<DataContainer>;
+            using traits = container_traits<DataContainer>;
 
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
@@ -61,10 +61,16 @@ namespace Resources {
                 unload(this);
             }
 
+            Data *dataPtr()
+            {
+                loadData();
+                return getDataPtr(this);
+            }
+
             Ctor mCtor;
             Dtor mDtor;
 
-			typename Storage::template container_type<typename container_traits<DataContainer>::position_handle> mHolder;
+            typename Storage::template container_type<typename container_traits<DataContainer>::position_handle> mHolder;
         };
 
         using Base::Base;
@@ -117,7 +123,7 @@ namespace Resources {
 
         static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
         {
-            HandleType handle { (typename container_traits<DataContainer>::handle) *resource->mData };
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
             if (!handle) {
                 if (!loader)
                     loader = &getSingleton();
@@ -131,7 +137,7 @@ namespace Resources {
 
         static void unload(ResourceType *resource, T *loader = nullptr)
         {
-            HandleType handle { (typename container_traits<DataContainer>::handle)*resource->mData };
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
             if (handle) {
                 if (!loader)
                     loader = &getSingleton();
@@ -155,6 +161,19 @@ namespace Resources {
             } else {
                 return handle.mData->second;
             }
+        }
+
+        static Data *getDataPtr(ResourceType *resource, T *loader = nullptr)
+        {
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            return getDataPtr(handle, loader);
+        }
+
+        static Data *getDataPtr(const HandleType &handle, T *loader = nullptr)
+        {
+            if (!handle)
+                return nullptr;
+            return &getData(handle, loader);
         }
 
         //bool load(Data &data, ResourceType *res) = 0;
@@ -189,9 +208,11 @@ namespace Resources {
             return result;
         }
 
-        virtual const MetaTable *resourceType() const override
+        virtual std::vector<const MetaTable *> resourceTypes() const override
         {
-            return &table<ResourceType>();
+            std::vector<const MetaTable *> result = Base::resourceTypes();
+            result.push_back(&table<ResourceType>());
+            return result;
         }
 
         std::map<std::string, ResourceType> mResources;
@@ -236,7 +257,7 @@ namespace Resources {
                 return unload(this);
             }
 
-			using traits = container_traits<DataContainer>;
+            using traits = container_traits<DataContainer>;
 
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
@@ -287,6 +308,19 @@ namespace Resources {
             }
         }
 
+        static Data *getDataPtr(ResourceType *resource, T *loader = nullptr)
+        {
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            return getDataPtr(handle, loader);
+        }
+
+        static Data *getDataPtr(const HandleType &handle, T *loader = nullptr)
+        {
+            if (!handle)
+                return nullptr;
+            return &getData(handle, loader);
+        }
+
         static ResourceType *get(const HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
@@ -298,6 +332,13 @@ namespace Resources {
             } else {
                 return handle.mData->first;
             }
+        }
+
+        virtual std::vector<const MetaTable *> resourceTypes() const override
+        {
+            std::vector<const MetaTable *> result = ResourceLoaderBase::resourceTypes();
+            result.push_back(&table<ResourceType>());
+            return result;
         }
 
         virtual HandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}) = 0;

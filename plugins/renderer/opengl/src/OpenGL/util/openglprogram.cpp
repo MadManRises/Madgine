@@ -81,9 +81,11 @@ namespace Render {
     {
         assert(mHandle);
         glUseProgram(mHandle);
+        GL_CHECK();
 
         for (size_t i = 0; i < mUniformBuffers.size(); ++i) {
             glBindBufferBase(GL_UNIFORM_BUFFER, i, mUniformBuffers[i].handle());
+            GL_CHECK();
         }
     }
 

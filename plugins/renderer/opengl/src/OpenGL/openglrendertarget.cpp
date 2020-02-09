@@ -85,19 +85,17 @@ namespace Render {
         mesh->mVAO.unbind();
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
             OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
 
-            //setupProgram(flags);
-
             renderMesh(&tempMesh, program);
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;

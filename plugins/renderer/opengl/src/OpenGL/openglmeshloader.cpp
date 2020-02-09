@@ -16,6 +16,7 @@
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::MeshLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::MeshLoader::ResourceType)

@@ -49,7 +49,7 @@ bool MetaTable::isEditable(const std::string &key) const
 {
     for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
         if (key == p->first) {
-            return p->second.mSetter;
+            return p->second.mSetter != nullptr;
         }
     }
     if (mBaseGetter) {

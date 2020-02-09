@@ -808,4 +808,9 @@ constexpr Vector3 max(const Vector3 &v1, const Vector3 &v2)
     };
 }
 
+constexpr Vector3 Lerp(const Vector3 &v1, const Vector3 &v2, float ratio)
+{
+    return (1.0f - ratio) * v1 + ratio * v2;
+}
+
 }

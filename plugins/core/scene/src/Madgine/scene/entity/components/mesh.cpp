@@ -49,14 +49,9 @@ namespace Scene {
             return mMesh->mAABB;
         }
 
-        void Mesh::setManual(Render::MeshLoader::HandleType handle)
+        void Mesh::set(Render::MeshLoader::HandleType handle)
         {
             mMesh = handle;
-        }
-
-        void Mesh::set(Render::MeshLoader::ResourceType *res)
-        {
-            mMesh = res;
         }
 
         Render::MeshLoader::ResourceType *Mesh::get() const

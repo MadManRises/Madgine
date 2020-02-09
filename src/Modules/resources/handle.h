@@ -29,6 +29,21 @@ namespace Resources {
             return *this = Loader::load(res);
         }
 
+        bool operator==(const Handle<Loader, Data> &other) const
+        {
+            return mData == other.mData;
+        }
+
+        bool operator!=(const Handle<Loader, Data> &other) const
+        {
+            return mData != other.mData;
+        }
+
+        bool operator<(const Handle<Loader, Data> &other) const
+        {
+            return mData < other.mData;
+        }
+
         decltype(auto) operator*() const
         {
             return Loader::getData(*this);
@@ -36,12 +51,12 @@ namespace Resources {
 
         auto operator-> () const
         {
-            return &**this;
+            return Loader::getDataPtr(*this);
         }
 
         operator typename Loader::Data *() const
         {
-            return &**this;
+            return Loader::getDataPtr(*this);
         }
 
         typename Loader::ResourceType *resource() const

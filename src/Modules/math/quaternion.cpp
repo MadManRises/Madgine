@@ -19,15 +19,15 @@ Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio)
         dot = -dot;
     }
 
-    /*const double DOT_THRESHOLD = 0.9995;
+    const float DOT_THRESHOLD = 0.9995f;
     if (dot > DOT_THRESHOLD) {
         // If the inputs are too close for comfort, linearly interpolate
         // and normalize the result.
 
-        Quaternion result = v0 + t * (v1 - v0);
+        Quaternion result = q1 + (q2 - q1) * ratio;
         result.normalize();
         return result;
-    }*/
+    }
 
     // Since dot is in range [0, DOT_THRESHOLD], acos is safe
     const float theta = acosf(dot);

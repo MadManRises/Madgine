@@ -22,6 +22,13 @@ struct Quaternion {
         v *= sinf(0.5f * radian);
     }
 
+    Quaternion(float w, float x, float y, float z)
+        : w(w)
+        , v(x, y, z)
+    {
+        normalize();
+    }
+
     static Quaternion FromRadian(const Vector3 &angles)
     {
         return Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.z, Vector3::UNIT_Z);
@@ -105,9 +112,9 @@ struct Quaternion {
     Matrix3 toMatrix() const
     {
         return Matrix3 {
-            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y - v.z * w), 2 * (v.x * v.z + v.y * w),
-            2 * (v.x * v.y + v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z - v.x * w),
-            2 * (v.x * v.z - v.y * w), 2 * (v.y * v.z + v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
+            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y + v.z * w), 2 * (v.x * v.z - v.y * w),
+            2 * (v.x * v.y - v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z + v.x * w),
+            2 * (v.x * v.z + v.y * w), 2 * (v.y * v.z - v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
         };
     }
 

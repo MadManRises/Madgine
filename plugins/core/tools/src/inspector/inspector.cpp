@@ -57,9 +57,11 @@ namespace Tools {
         }
 
         for (Resources::ResourceLoaderBase *loader : uniquePtrToPtr(Resources::ResourceManager::getSingleton().mCollector)) {
-            addObjectSuggestion(loader->resourceType(), [=]() {
-                return loader->resources();
-            });
+            for (const MetaTable *type : loader->resourceTypes()) {
+                addObjectSuggestion(type, [=]() {
+                    return loader->resources();
+                });
+            }
         }
     }
 
@@ -120,10 +122,12 @@ namespace Tools {
         std::string id = (showName ? std::string() : "##"s) + (*it).first;
         bool editable = parent.isEditable((*it).first);
 
-        drawValue(element, parent, id, (*it).first, (*it).second, editable);
+		ValueType value = (*it).second;
+		if (drawValueImpl(element, parent, id, value, editable))
+            parent.set((*it).first, value);
     }
 
-    void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable)
+    bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType &value, bool editable)
     {
         bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue || value.type() == Engine::ValueType::Type::BoundApiMethodValue;
 
@@ -178,8 +182,13 @@ namespace Tools {
                                                          bool b = ImGui::TreeNodeEx(id.c_str());
                                                          ImGui::DraggableValueTypeSource(id, parent, value);
                                                          if (b) {
+                                                             size_t i = 0;
                                                              for (; it != VirtualIteratorEnd {}; ++it) {
-                                                                 drawValue(element, parent, (*it).first.toString(), (*it).first.toString(), (*it).second, false);
+                                                                 ValueType value = (*it).second;
+                                                                 if (drawValueImpl(element, {}, (*it).first.toShortString() + "##" + std::to_string(i), value, /*editable && */ (*it).second.isEditable())) {
+                                                                     (*it).second = value;
+                                                                 }
+                                                                 ++i;
                                                              }
                                                              ImGui::TreePop();
                                                          }
@@ -198,8 +207,7 @@ namespace Tools {
         if (!editable && !cannotBeDisabled)
             ImGui::PopDisabled();
 
-        if (modified)
-            parent.set(key, value);
+        return modified;
     }
 
     void Inspector::draw(TypedScopePtr scope, const char *layoutName)

@@ -51,12 +51,13 @@ namespace Render {
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
             mPerObject.hasTexture = p.first != 0;
+            mPerObject.hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
             mProgram.setParameters(mPerObject, 2);
             TextureLoader::getSingleton().bind(p.first);
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-                target->renderVertices(mProgram, p.second.mFlags, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
-                target->renderVertices(mProgram, p.second.mFlags, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
+                target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
+                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
             }
         }
     }

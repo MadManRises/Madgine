@@ -14,8 +14,8 @@ namespace Render {
 
         void render();
         virtual void setRenderSpace(const Rect2i &space) = 0;
-        virtual void renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
-        virtual void renderVertices(Program *program, RenderPassFlags flags, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, TextureHandle texture = 0) = 0;
+        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
+        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, TextureHandle texture = 0) = 0;
         virtual void renderMesh(MeshData *mesh, Program *program) = 0;
         virtual void clearDepthBuffer() = 0;		
 

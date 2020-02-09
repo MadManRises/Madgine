@@ -218,6 +218,7 @@ ValueType ValueType::operator*(const ValueType &other) const
     return result;
 }
 
+
 std::string ValueType::toString() const
 {
     switch (type()) {
@@ -243,6 +244,48 @@ std::string ValueType::toString() const
         return "["s + std::to_string(std::get<Vector4>(mUnion)[0]) + ", " + std::to_string(std::get<Vector4>(mUnion)[1]) + ", " + std::to_string(std::get<Vector4>(mUnion)[2]) + ", " + std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
     case Type::QuaternionValue:
         return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
+    case Type::Matrix3Value:
+        return "[ ["s + std::to_string(std::get<Matrix3>(mUnion)[0][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[0][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[0][2]) + "], [" + std::to_string(std::get<Matrix3>(mUnion)[1][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[1][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[1][2]) + "], [" + std::to_string(std::get<Matrix3>(mUnion)[2][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[2][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[2][2]) + "] ]";
+    case Type::Matrix4Value:
+        return "[ ["s + std::to_string(std::get<Matrix4>(mUnion)[0][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[1][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[2][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[3][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][3]) + "] ]";
+    case Type::ApiMethodValue:
+        return "<method>";
+    case Type::BoundApiMethodValue:
+        return "<boundmethod>";
+    default:
+        throw ValueTypeException("Unknown Type!");
+    }
+}
+
+std::string ValueType::toShortString() const
+{
+    switch (type()) {
+    case Type::BoolValue:
+        return std::get<bool>(mUnion) ? "true" : "false";
+    case Type::StringValue:
+        return "\""s + std::get<std::string>(mUnion) + "\"";
+    case Type::IntValue:
+        return std::to_string(std::get<int>(mUnion));
+    case Type::UIntValue:
+        return std::to_string(std::get<size_t>(mUnion));
+    case Type::NullValue:
+        return "NULL";
+    case Type::ScopeValue:
+        return std::get<TypedScopePtr>(mUnion).name();
+    case Type::FloatValue:
+        return std::to_string(std::get<float>(mUnion));
+    case Type::Vector2Value:
+        return "["s + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y);
+    case Type::Vector3Value:
+        return "["s + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
+    case Type::Vector4Value:
+        return "["s + std::to_string(std::get<Vector4>(mUnion)[0]) + ", " + std::to_string(std::get<Vector4>(mUnion)[1]) + ", " + std::to_string(std::get<Vector4>(mUnion)[2]) + ", " + std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
+    case Type::QuaternionValue:
+        return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
+    case Type::Matrix3Value:
+        return "Matrix3[...]";
+    case Type::Matrix4Value:
+        return "Matrix4[...]";
     case Type::ApiMethodValue:
         return "<method>";
     case Type::BoundApiMethodValue:
@@ -301,6 +344,86 @@ ValueType::Type ValueType::type() const
 {
     return static_cast<Type>(mUnion.index());
 }
+
+
+const ValueType &ValueTypeRef::value() const
+{
+    return mValue;
+}
+
+ValueTypeRef::operator const ValueType &() const
+{
+    return mValue;
+}
+
+bool ValueTypeRef::isEditable() const
+{
+    return mData != nullptr;
+}
+
+ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
+{
+    if (v.type() != mValue.type())
+        std::terminate();
+
+    mValue = v;
+    mValue.visit(overloaded {
+        [](const std::monostate &) {
+
+        },
+        [this](const std::string &s) {
+            *static_cast<std::string *>(mData) = s;
+        },
+        [this](bool b) {
+            *static_cast<bool *>(mData) = b;
+        },
+        [this](int i) {
+            *static_cast<int *>(mData) = i;
+        },
+        [this](size_t s) {
+            *static_cast<size_t *>(mData) = s;
+        },
+        [this](float f) {
+            *static_cast<float *>(mData) = f;
+        },
+        [](const TypedScopePtr &b) {
+            std::terminate();
+        },
+        [this](const Matrix3 &m) {
+            *static_cast<Matrix3 *>(mData) = m;
+        },
+        [this](const Matrix4 &m) {
+            *static_cast<Matrix4 *>(mData) = m;
+        },
+        [this](const Quaternion &q) {
+            *static_cast<Quaternion *>(mData) = q;
+        },
+        [this](const Vector4 &v) {
+            *static_cast<Vector4 *>(mData) = v;
+        },
+        [this](const Vector3 &v) {
+            *static_cast<Vector3 *>(mData) = v;
+        },
+        [this](const Vector2 &v) {
+            *static_cast<Vector2 *>(mData) = v;
+        },
+        [this](const KeyValueVirtualIterator &it) {
+            *static_cast<KeyValueVirtualIterator *>(mData) = it;
+        },
+        [this](const BoundApiMethod &m) {
+            *static_cast<BoundApiMethod *>(mData) = m;
+        },
+        [this](const ApiMethod &m) {
+            *static_cast<ApiMethod *>(mData) = m;
+        },
+        [this](const ObjectPtr &o) {
+            *static_cast<ObjectPtr *>(mData) = o;
+        } });
+
+    return *this;
+}
+
+
 }
 
 std::ostream &operator<<(std::ostream &stream,

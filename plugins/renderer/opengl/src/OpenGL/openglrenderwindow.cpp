@@ -143,7 +143,7 @@ namespace Render {
 
     void resetContext()
     {
-
+        GL_LOG("Resetting Context");
 #if WINDOWS
         wglMakeCurrent(NULL, NULL);
 #elif LINUX
@@ -155,6 +155,7 @@ namespace Render {
 
     void makeCurrent(Window::Window *window, ContextHandle context)
     {
+        GL_LOG("Setting Context: " << context);
 #if WINDOWS
         HDC windowDC = GetDC((HWND)window->mHandle);
         if (!wglMakeCurrent(windowDC, context)) {
@@ -252,7 +253,7 @@ namespace Render {
             };
 
             const EGLint contextAttribs[] = {
-                EGL_CONTEXT_CLIENT_VERSION, 3,                
+                EGL_CONTEXT_CLIENT_VERSION, 3,
                 EGL_NONE
             };
 
@@ -412,6 +413,7 @@ namespace Render {
         OpenGLRenderTarget::endFrame();
 
         mWindow->swapBuffers();
+        GL_CHECK();
     }
 
     Texture *OpenGLRenderWindow::texture() const

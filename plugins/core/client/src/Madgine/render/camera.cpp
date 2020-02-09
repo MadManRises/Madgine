@@ -11,6 +11,8 @@
 
 #include "Modules/math/ray.h"
 
+#include "Modules/math/transformation.h"
+
 namespace Engine {
 namespace Render {
 
@@ -30,9 +32,9 @@ namespace Render {
 
     Matrix4 Camera::getViewMatrix()
     {
-        Matrix4 rotate = Matrix4(mOrientation.toMatrix());
+        Matrix4 rotate = Matrix4(mOrientation.toMatrix());		
 
-        Matrix4 translate = Matrix4::TranslationMatrix(-mPosition);
+        Matrix4 translate = TranslationMatrix(-mPosition);
 
         return rotate * translate;
     }

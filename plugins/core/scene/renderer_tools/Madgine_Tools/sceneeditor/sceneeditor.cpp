@@ -15,6 +15,8 @@
 #include "Madgine/scene/scenemanager.h"
 
 #include "Madgine/scene/entity/components/mesh.h"
+#include "Madgine/scene/entity/components/skeleton.h"
+#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/transform.h"
 
 #include "inspector/inspector.h"
@@ -217,9 +219,17 @@ namespace Tools {
                         entity->addComponent(componentName);
                         if (componentName == "Transform") {
                             entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
+                            entity->getComponent<Scene::Entity::Transform>()->setScale({ 0.01f, 0.01f, 0.01f });
                         }
                         if (componentName == "Mesh") {
-                            entity->getComponent<Scene::Entity::Mesh>()->setName("mage");
+                            entity->getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
+                        }
+                        if (componentName == "Skeleton") {
+                            entity->getComponent<Scene::Entity::Skeleton>()->setName("mage_animated");
+                        }
+                        if (componentName == "Animation") {
+                            entity->getComponent<Scene::Entity::Animation>()->setName("mage_animated");
+                            entity->getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("T-Pose");
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -235,19 +245,15 @@ namespace Tools {
                 { 0, 0, 0.5f, 0.5f }
             };
             constexpr Matrix4 transforms[] = {
-                Matrix4::IDENTITY,
                 { 0, 1, 0, 0,
                     1, 0, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1 },
-                { 0, 0, 1, 0,
+                Matrix4::IDENTITY,
+                { 1, 0, 0, 0,
+                    0, 0, 1, 0,
                     0, 1, 0, 0,
-                    1, 0, 0, 0,
                     0, 0, 0, 1 }
-            };
-
-            constexpr unsigned short indices[] = {
-                0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
 
             const char *labels[] = {
@@ -260,18 +266,25 @@ namespace Tools {
             mHoveredTransform = nullptr;
 
             for (size_t i = 0; i < 3; ++i) {
-                const Render::Vertex vertices[]
-                    = { { { 0, 0, 0 }, colors[i], { -1, 0, 0 } },
-                          { { 0.1, 0.1, -0.1 }, colors[i], { 0, 1, -1 } },
-                          { { 0.1, 0.1, 0.1 }, colors[i], { 0, 1, 1 } },
-                          { { 0.1, -0.1, 0.1 }, colors[i], { 0, -1, 1 } },
-                          { { 0.1, -0.1, -0.1 }, colors[i], { 0, -1, -1 } },
-                          { { 1, 0, 0 }, colors[i], { 1, 0, 0 } } };
-
-                Im3D::Mesh(IM3D_TRIANGLES, vertices, 6, t->matrix() * transforms[i], indices, 24);
+                Im3D::Arrow(IM3D_TRIANGLES, 0.1f, 1.0f, t->matrix() * transforms[i], colors[i]);
                 if (Im3D::BoundingBox(labels[i], 0, 2)) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;
+                }
+            }
+
+            if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
+                if (Render::SkeletonDescriptor *skeleton = s->data()) {
+                    for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
+                        const Engine::Render::Bone &bone = skeleton->mBones[i];
+                        Im3D::Text(bone.mName.c_str(), t->matrix() * s->matrices()[i], 2.0f);
+                        float length = 1.0f;
+                        if (bone.mFirstChild != std::numeric_limits<size_t>::max()) {
+                            Vector3 dist = s->matrices()[bone.mFirstChild].GetColumn(3).xyz() - s->matrices()[i].GetColumn(3).xyz();
+                            length = dist.length();
+                        }
+                        Im3D::Arrow(IM3D_LINES, 0.1f * length, length, t->matrix() * s->matrices()[i]);
+                    }
                 }
             }
         }

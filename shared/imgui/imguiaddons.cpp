@@ -34,25 +34,6 @@ void ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
     ImGui::Text("<scope>");
 }
 
-bool ValueTypeDrawer::draw(Engine::InvScopePtr &p)
-{
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<invptr>");
-    return false;
-}
-
-void ValueTypeDrawer::draw(const Engine::InvScopePtr &p)
-{
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<invptr>");
-}
-
 bool ValueTypeDrawer::draw(bool &b)
 {
     return ImGui::Checkbox(mName, &b);
@@ -124,6 +105,18 @@ void ValueTypeDrawer::draw(const Engine::Matrix3 &m)
 {
     PushDisabled();
     ImGui::DragMatrix3(mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
+    PopDisabled();
+}
+
+bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
+{
+    return ImGui::DragMatrix4(mName, &m, 0.15f);
+}
+
+void ValueTypeDrawer::draw(const Engine::Matrix4 &m)
+{
+    PushDisabled();
+    ImGui::DragMatrix4(mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
     PopDisabled();
 }
 
@@ -467,11 +460,12 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
     ImGuiContext &g = *GImGui;
     bool value_changed = false;
 
-    Text("%s", label);
+    const char *end = FindRenderedTextEnd(label);
+    TextEx(label, end);
     SameLine();
 
     BeginGroup();
-    PushID(m);
+    PushID(label);
 
     for (int i = 0; i < 3; ++i) {
         PushMultiItemsWidths(3, CalcItemWidth());
@@ -500,6 +494,51 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *ena
     float speeds[9];
     std::fill_n(speeds, 9, v_speed);
     return DragMatrix3(label, m, speeds, enabled);
+}
+
+bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *enabled)
+{
+    ImGuiWindow *window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    ImGuiContext &g = *GImGui;
+    bool value_changed = false;
+
+    const char *end = FindRenderedTextEnd(label);
+    TextEx(label, end);
+    SameLine();
+
+    BeginGroup();
+    PushID(label);
+
+    for (int i = 0; i < 4; ++i) {
+        PushMultiItemsWidths(4, CalcItemWidth());
+        for (int j = 0; j < 4; ++j) {
+            PushID(4 * i + j);
+            if (enabled && !enabled[4 * i + j])
+                PushDisabled();
+            value_changed |= DragFloat("", &(*m)[i][j], v_speeds[4 * i + j]);
+            if (enabled && !enabled[4 * i + j])
+                PopDisabled();
+            PopItemWidth();
+            PopID();
+            if (j < 3) {
+                SameLine(0, g.Style.ItemInnerSpacing.x);
+            }
+        }
+    }
+    PopID();
+    EndGroup();
+
+    return value_changed;
+}
+
+bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *enabled)
+{
+    float speeds[16];
+    std::fill_n(speeds, 16, v_speed);
+    return DragMatrix4(label, m, speeds, enabled);
 }
 
 bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter, int expectedArgumentCount)
