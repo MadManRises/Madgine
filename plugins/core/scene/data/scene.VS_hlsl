@@ -17,6 +17,10 @@ cbuffer PerObject : register(b2)
     matrix anti_m;
 }
 
+cbuffer PerObject : register(b3)
+{
+    matrix bones[32];
+}
 
 struct AppData {
 #ifdef HAS_POSITION0
@@ -33,6 +37,12 @@ struct AppData {
 #endif
 #ifdef HAS_TEXCOORD0
     float2 aUV : TEXCOORD;
+#endif
+#ifdef HAS_BONEINDICES0
+	int4 aBoneIDs : BONEINDICES;
+#endif
+#ifdef HAS_WEIGHTS0
+	float4 aWeights : WEIGHTS;
 #endif
 };
 
@@ -54,7 +64,16 @@ VertexShaderOutput main(AppData IN)
     float2 aPos2 = float2(0,0);
 #endif
 
-    OUT.worldPos = mul(m, float4(IN.aPos, 1.0)).xyz;
+#ifdef HAS_BONEINDICES0
+	matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0];
+	BoneTransform += bones[IN.aBoneIDs[1]] * IN.aWeights[1];
+	BoneTransform += bones[IN.aBoneIDs[2]] * IN.aWeights[2];
+	BoneTransform += bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+	OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0))).xyz;
+#else
+	OUT.worldPos = mul(m, float4(IN.aPos, 1.0)).xyz;
+#endif
+    
     OUT.position = mul(p, mul(v, float4(OUT.worldPos, 1) + float4(aPos2, 0.0, 0.0)));
     OUT.position.z += OUT.position.w;
     OUT.position.z /= 2;

@@ -60,7 +60,7 @@ namespace Scene {
                 mBoneMatrices.resize(mSkeleton->mBones.size());
 
 				for (size_t i = 0; i < mBoneMatrices.size(); ++i) {
-                    mBoneMatrices[i] = mSkeleton->mBones[i].mTTransform;
+                    mBoneMatrices[i] = mSkeleton->mBones[i].mTTransform/* * mSkeleton->mBones[i].mOffsetMatrix*/;
 				}
 			}
         }

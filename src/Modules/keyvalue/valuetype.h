@@ -38,7 +38,6 @@ struct MODULES_EXPORT ValueType {
         Vector3,
         Vector2,
         KeyValueVirtualIterator,
-        BoundApiMethod,
         ApiMethod,
         ObjectPtr>;
 
@@ -62,7 +61,6 @@ public:
         Vector3Value,
         Vector2Value,
         KeyValueVirtualIteratorValue,
-        BoundApiMethodValue,
         ApiMethodValue,
         ObjectValue,
 
@@ -240,6 +238,7 @@ public:
     }
 
     ValueTypeRef(const ValueTypeRef &) = delete;
+    ValueTypeRef(ValueTypeRef &&other);
 
     ValueTypeRef &operator=(const ValueTypeRef &) = delete;
 

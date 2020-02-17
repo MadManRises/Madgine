@@ -59,7 +59,7 @@ namespace Render {
 
             updateImpl(data, bb, groupSize, std::move(vertices), vertexSize, std::move(indices));
 
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < attributeList.size(); ++i) {
                 if (attributeList[i])
                     data.mVAO.enableVertexAttribute(i, *attributeList[i]);
                 else

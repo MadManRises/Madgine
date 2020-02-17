@@ -22,6 +22,7 @@ namespace Render {
         
         mPerObject.hasLight = false;
         mPerObject.hasDistanceField = false;
+        mPerObject.hasSkeleton = false;
 
         mPerObject.m = Matrix4::IDENTITY;
         mPerObject.anti_m = Matrix4::IDENTITY;

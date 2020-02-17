@@ -2,6 +2,9 @@
 
 #include "typedscopeptr.h"
 
+#include "../generic/proxy.h"
+#include "scopefield.h"
+
 namespace Engine {
 
 struct MODULES_EXPORT ScopeIterator {
@@ -12,7 +15,8 @@ struct MODULES_EXPORT ScopeIterator {
 
     bool operator!=(const ScopeIterator &other) const;
 
-    std::pair<const char *, ValueType> operator*() const;
+    ScopeField operator*() const;
+    Proxy<ScopeField> operator->() const;
 
     void operator++();
 

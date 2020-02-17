@@ -21,6 +21,7 @@ layout (std140, binding = 2) uniform PerObject
 	bool hasLight;
 	bool hasTexture;
 	bool hasDistanceField;
+	bool hasSkeleton;
 };
 
 layout(binding = 0) uniform sampler2D tex;

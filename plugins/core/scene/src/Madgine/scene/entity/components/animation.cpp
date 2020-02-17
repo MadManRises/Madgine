@@ -100,17 +100,17 @@ namespace Scene {
                             auto it_position_end = std::upper_bound(boneData.mPositions.begin(), boneData.mPositions.end(), step, [](float step, const Render::KeyFrame<Vector3> &k) { return step < k.mTime; });
                             assert(it_position_end != boneData.mPositions.end());
                             assert(it_position_end != boneData.mPositions.begin());
-                            auto it_position = std::prev(it_position_end);                            
-                            
+                            auto it_position = std::prev(it_position_end);
+
                             auto it_scale_end = std::upper_bound(boneData.mScalings.begin(), boneData.mScalings.end(), step, [](float step, const Render::KeyFrame<Vector3> &k) { return step < k.mTime; });
                             assert(it_scale_end != boneData.mScalings.end());
                             assert(it_scale_end != boneData.mScalings.begin());
-                            auto it_scale = std::prev(it_scale_end);                            
-                            
+                            auto it_scale = std::prev(it_scale_end);
+
                             auto it_orientation_end = std::upper_bound(boneData.mOrientations.begin(), boneData.mOrientations.end(), step, [](float step, const Render::KeyFrame<Quaternion> &k) { return step < k.mTime; });
                             assert(it_orientation_end != boneData.mOrientations.end());
                             assert(it_orientation_end != boneData.mOrientations.begin());
-                            auto it_orientation = std::prev(it_orientation_end);                            
+                            auto it_orientation = std::prev(it_orientation_end);
 
                             float position_blend = (step - it_position->mTime) / (it_position_end->mTime - it_position->mTime);
                             float scale_blend = (step - it_scale->mTime) / (it_scale_end->mTime - it_scale->mTime);
@@ -124,9 +124,13 @@ namespace Scene {
                             if (parent != std::numeric_limits<size_t>::max()) {
                                 matrices[i] = matrices[parent] * m;
                             } else {
-                                matrices[i] = mSkeletonCache->mBaseTransform * m;
+                                matrices[i] = mAnimationList->mBaseMatrix * m;
                             }
                         }
+                    }
+
+                    for (size_t i = 0; i < matrices.size(); ++i) {
+                        matrices[i] = matrices[i] * mSkeletonCache->mBones[i].mOffsetMatrix;
                     }
                 }
             }

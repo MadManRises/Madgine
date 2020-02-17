@@ -8,6 +8,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include "../assimptools.h"
+#include "Modules/math/transformation.h"
+
 UNIQUECOMPONENT(Engine::Render::AnimationLoader)
 
 METATABLE_BEGIN(Engine::Render::AnimationLoader)
@@ -69,6 +72,18 @@ RegisterType(Engine::Render::AnimationLoader)
                 return false;
             }
 
+            Matrix3 scale;            
+
+            assimpTraverseTree(
+                scene, [&](const aiNode *parentNode, const Matrix4 &matrix) {
+                    if (parentNode->mNumMeshes > 0) {
+						scale = ExtractScalingMatrix(matrix.ToMat3());
+                        animations.mBaseMatrix = matrix * Matrix4 { scale.Inverse() };    
+
+                        /*baseMatrix = baseMatrix * animations.mBaseRotation.Inverse();*/
+                    }
+                });
+
             for (size_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex) {
                 aiAnimation *anim = scene->mAnimations[animationIndex];
 
@@ -96,70 +111,19 @@ RegisterType(Engine::Render::AnimationLoader)
                         }
                     }
 
-                    std::transform(node->mPositionKeys, node->mPositionKeys + node->mNumPositionKeys, std::back_inserter(bone.mPositions), [](const aiVectorKey &key) {
-                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), &key.mValue.x };
+                    std::transform(node->mPositionKeys, node->mPositionKeys + node->mNumPositionKeys, std::back_inserter(bone.mPositions), [&](const aiVectorKey &key) {
+                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), scale * Vector3 { &key.mValue.x } };
                     });
 
-                    std::transform(node->mRotationKeys, node->mRotationKeys + node->mNumRotationKeys, std::back_inserter(bone.mOrientations), [](const aiQuatKey &key) {
-                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), { key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z } };
+                    std::transform(node->mRotationKeys, node->mRotationKeys + node->mNumRotationKeys, std::back_inserter(bone.mOrientations), [&](const aiQuatKey &key) {
+                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), Quaternion { key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z } };
                     });
 
-                    std::transform(node->mScalingKeys, node->mScalingKeys + node->mNumScalingKeys, std::back_inserter(bone.mScalings), [](const aiVectorKey &key) {
-                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), &key.mValue.x };
+                    std::transform(node->mScalingKeys, node->mScalingKeys + node->mNumScalingKeys, std::back_inserter(bone.mScalings), [&](const aiVectorKey &key) {
+                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), Vector3 { &key.mValue.x } };
                     });
                 }
             }
-
-            /*for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-                aiMesh *mesh = scene->mMeshes[meshIndex];
-
-                for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-                    aiBone *bone = mesh->mBones[boneIndex];
-                    aiNode *node = scene->mRootNode->FindNode(bone->mName);
-
-                    bool newBone = indices.try_emplace(node, skeleton.mBones.size()).second;
-                    if (newBone) {
-
-                        aiMatrix4x4 transform = node->mTransformation;
-
-                        while (node->mParent) {
-                            node = node->mParent;
-                            transform = node->mTransformation * transform;
-                        }
-
-                        skeleton.mBones.push_back(
-                            Bone {
-                                bone->mName.C_Str(),
-                                { bone->mOffsetMatrix.a1, bone->mOffsetMatrix.a2, bone->mOffsetMatrix.a3, bone->mOffsetMatrix.a4,
-                                    bone->mOffsetMatrix.b1, bone->mOffsetMatrix.b2, bone->mOffsetMatrix.b3, bone->mOffsetMatrix.b4,
-                                    bone->mOffsetMatrix.c1, bone->mOffsetMatrix.c2, bone->mOffsetMatrix.c3, bone->mOffsetMatrix.c4,
-                                    bone->mOffsetMatrix.d1, bone->mOffsetMatrix.d2, bone->mOffsetMatrix.d3, bone->mOffsetMatrix.d4 },
-                                { transform.a1, transform.a2, transform.a3, transform.a4,
-                                    transform.b1, transform.b2, transform.b3, transform.b4,
-                                    transform.c1, transform.c2, transform.c3, transform.c4,
-                                    transform.d1, transform.d2, transform.d3, transform.d4 } });
-                    }
-                }
-            }
-
-            for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-                aiMesh *mesh = scene->mMeshes[meshIndex];
-
-                for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-                    aiBone *bone = mesh->mBones[boneIndex];
-                    aiNode *node = scene->mRootNode->FindNode(bone->mName);
-
-					size_t index = indices.at(node);
-
-                    if (node->mParent && indices.count(node->mParent) > 0) {
-                        skeleton.mBones[index].mParent = indices.at(node->mParent);
-                    }
-
-                    if (node->mNumChildren > 0 && indices.count(node->mChildren[0]) > 0) {
-                        skeleton.mBones[index].mFirstChild = indices.at(node->mChildren[0]);
-					}
-                }
-            }*/
 
             return true;
         }
@@ -177,7 +141,7 @@ RegisterType(Engine::Render::AnimationLoader)
                 if (!consecutive) {
                     LOG_ERROR("Skeleton/Animation bone size mismatch!");
                     pib.first->second = std::make_unique<int[]>(handle->mBones.size());
-				}
+                }
                 for (i = 0; i < handle->mBones.size(); ++i) {
                     if (consecutive) {
                         if (mBoneNames[i] != handle->mBones[i].mName) {
@@ -185,8 +149,8 @@ RegisterType(Engine::Render::AnimationLoader)
                             pib.first->second = std::make_unique<int[]>(handle->mBones.size());
                             for (size_t j = 0; j < i; ++j) {
                                 pib.first->second[j] = j;
-							}
-						}
+                            }
+                        }
                     }
                     if (!consecutive) {
                         auto it = std::find(mBoneNames.begin(), mBoneNames.end(), handle->mBones[i].mName);
@@ -198,7 +162,7 @@ RegisterType(Engine::Render::AnimationLoader)
                             mapping = it - mBoneNames.begin();
                         }
                         pib.first->second[i] = mapping;
-					}
+                    }
                 }
             }
             return pib.first->second.get();

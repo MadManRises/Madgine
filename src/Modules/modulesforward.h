@@ -9,6 +9,7 @@ struct ScopeBase;
 struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
+struct ScopeField;
 struct TypedScopePtr;
 struct TypeInfo;
 struct ApiMethod;

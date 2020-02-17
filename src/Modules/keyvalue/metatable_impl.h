@@ -141,9 +141,9 @@ static ApiMethod wrapHelper(R (T::*f)(Args...))
 }
 
 template <auto F>
-static constexpr BoundApiMethod method(TypedScopePtr scope)
+static constexpr ApiMethod method(TypedScopePtr scope)
 {
-    return { wrapHelper<F>(F), scope };
+    return wrapHelper<F>(F);
 }
 
 }

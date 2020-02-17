@@ -250,8 +250,6 @@ std::string ValueType::toString() const
         return "[ ["s + std::to_string(std::get<Matrix4>(mUnion)[0][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[1][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[2][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[3][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][3]) + "] ]";
     case Type::ApiMethodValue:
         return "<method>";
-    case Type::BoundApiMethodValue:
-        return "<boundmethod>";
     default:
         throw ValueTypeException("Unknown Type!");
     }
@@ -288,8 +286,6 @@ std::string ValueType::toShortString() const
         return "Matrix4[...]";
     case Type::ApiMethodValue:
         return "<method>";
-    case Type::BoundApiMethodValue:
-        return "<boundmethod>";
     default:
         throw ValueTypeException("Unknown Type!");
     }
@@ -331,8 +327,6 @@ std::string ValueType::getTypeString(Type type)
         return "Method";
     case Type::KeyValueVirtualIteratorValue:
         return "Iterator";
-    case Type::BoundApiMethodValue:
-        return "Bound Method";
     case Type::ObjectValue:
         return "Object";
     default:
@@ -345,6 +339,12 @@ ValueType::Type ValueType::type() const
     return static_cast<Type>(mUnion.index());
 }
 
+
+ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
+    : mValue(std::move(other.mValue))
+    , mData(std::exchange(other.mData, nullptr))
+{
+}
 
 const ValueType &ValueTypeRef::value() const
 {

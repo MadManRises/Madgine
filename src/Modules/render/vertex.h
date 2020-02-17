@@ -36,6 +36,12 @@ namespace Render {
         Vector2 mUV;
     };
 
+    struct VertexBoneMappings {
+        using ctor = std::pair<int[4], float[4]>;
+        int mBoneIndices[4];
+        float mBoneWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    };
+
     //
 
     using Vertex = Compound<
@@ -54,6 +60,11 @@ namespace Render {
         VertexNormal,
         VertexUV>;
 
+	using Vertex4 = Compound<
+        VertexPos_3D,
+        VertexColor,
+        VertexNormal,
+        VertexBoneMappings>;
 
 }
 }

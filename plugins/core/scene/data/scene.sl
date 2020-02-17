@@ -19,5 +19,6 @@ parameters ScenePerObject {
 	bool(hasLight);
 	bool(hasTexture);
 	bool(hasDistanceField);
+	bool(hasSkeleton);
 
 };

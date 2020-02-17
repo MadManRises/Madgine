@@ -21,7 +21,7 @@ namespace Render {
     {
         Matrix4 m = Matrix4::IDENTITY;
         while (node) {
-            m = assimpConvertMatrix(node->mTransformation) * m;
+            m = m * assimpConvertMatrix(node->mTransformation);
             node = node->mParent;
         }
         return m;
@@ -36,7 +36,7 @@ namespace Render {
     template <typename F>
     void assimpTraverseTree(const aiNode *node, const F &f, Matrix4 m)
     {
-        m = m * assimpConvertMatrix(node->mTransformation);
+        m = assimpConvertMatrix(node->mTransformation) * m;
         TupleUnpacker::invoke(f, node, m);
         for (size_t i = 0; i < node->mNumChildren; ++i) {
             assimpTraverseTree(node->mChildren[i], f, m);

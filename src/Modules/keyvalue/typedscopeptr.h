@@ -53,9 +53,8 @@ struct MODULES_EXPORT TypedScopePtr {
     }
 
     ScopeIterator find(const std::string &key) const;
-    std::optional<ValueType> get(const std::string &key) const;
-    void set(const std::string &key, const ValueType &value);
-    bool isEditable(const std::string &key) const;
+    ScopeField operator[](const std::string &key) const;
+    //bool isEditable(const std::string &key) const;
     ScopeIterator begin() const;
     ScopeIterator end() const;
 

@@ -6,9 +6,8 @@ namespace Engine {
 namespace Render {
 
     struct Bone : ScopeBase {
-        Bone(std::string name, Matrix4 offsetMatrix)
+        Bone(std::string name)
             : mName(std::move(name))
-            , mOffsetMatrix(offsetMatrix)            
         {
         }
 
@@ -20,8 +19,7 @@ namespace Render {
     };
 
     struct SkeletonDescriptor : ScopeBase {
-        std::vector<Bone> mBones;
-        Matrix4 mBaseTransform;
+        std::vector<Bone> mBones;        
     };
 
 }

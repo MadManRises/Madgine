@@ -6,6 +6,7 @@
 #include "Madgine/scene/scenemanager.h"
 
 #include "Madgine/scene/entity/components/mesh.h"
+#include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
 #include "Madgine/scene/entity/entity.h"
 
@@ -13,8 +14,6 @@
 #include "meshdata.h"
 
 #include "textureloader.h"
-
-
 
 namespace Engine {
 namespace Render {
@@ -28,7 +27,7 @@ namespace Render {
     void SceneRenderPass::render(Render::RenderTarget *target)
     {
         if (!mProgram) {
-            mProgram.create("scene");            
+            mProgram.create("scene");
 
             Vector2i size = target->size();
 
@@ -71,7 +70,14 @@ namespace Render {
                                             .Inverse()
                                             .Transpose();
 
+                    Scene::Entity::Skeleton *skeleton = e.getComponent<Scene::Entity::Skeleton>();
+                    mPerObject.hasSkeleton = skeleton != nullptr;
+
                     mProgram.setParameters(mPerObject, 2);
+
+                    if (skeleton) {
+                        mProgram.setParameters(skeleton->matrices().data(), skeleton->matrices().size() * sizeof(Matrix4), 3);
+                    }
 
                     target->renderMesh(meshData, mProgram);
                 }

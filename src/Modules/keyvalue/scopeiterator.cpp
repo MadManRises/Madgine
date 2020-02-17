@@ -6,6 +6,8 @@
 
 #include "valuetype.h"
 
+#include "scopefield.h"
+
 namespace Engine {
 
 ScopeIterator::ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
@@ -39,9 +41,13 @@ bool ScopeIterator::operator!=(const ScopeIterator &other) const
         return mPointer->first;
 }
 
-std::pair<const char *, ValueType> ScopeIterator::operator*() const
+ScopeField ScopeIterator::operator*() const
 {
-    return { mPointer->first, mPointer->second.mGetter(mScope) };
+    return { mScope, mPointer };
+}
+
+Proxy<ScopeField> ScopeIterator::operator->() const {
+    return { mScope, mPointer };
 }
 
 void ScopeIterator::operator++()

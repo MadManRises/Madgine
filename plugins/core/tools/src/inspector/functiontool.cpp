@@ -12,6 +12,7 @@
 
 #include "Modules/keyvalue/keyvaluevirtualiterator.h"
 #include "Modules/keyvalue/scopeiterator.h"
+#include "Modules/keyvalue/scopefield.h"
 
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
@@ -51,7 +52,7 @@ namespace Tools {
 
     void FunctionTool::parseMethods(TypedScopePtr scope)
     {
-        for (std::pair<std::string, ValueType> p : scope) {
+        for (ScopeField f : scope) {
             struct Visitor {
                 void operator()(const BoundApiMethod &m)
                 {
@@ -64,7 +65,7 @@ namespace Tools {
                 void operator()(KeyValueVirtualIterator it)
                 {
                     for (; it != VirtualIteratorEnd {}; ++it) {
-                        (*it).second.value().visit(*this);
+                        it->second.value().visit(*this);
                     }
                 }
 
@@ -85,7 +86,7 @@ namespace Tools {
                 FunctionTool *mTool;
                 std::string mName;
             };
-            std::move(p.second).visit(Visitor { this, std::move(p.first) });
+            f.value().visit(Visitor { this, f.key() });
         }
     }
 
@@ -95,8 +96,10 @@ namespace Tools {
             bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &mCurrentFunction, &mCurrentFunctionName);
             if (ImGui::BeginDragDropTarget()) {
                 const ImGui::ValueTypePayload *payload;
-                if (ImGui::AcceptDraggableValueType(mCurrentFunction, &payload)) {
+                ApiMethod function;
+                if (ImGui::AcceptDraggableValueType(function, &payload)) {
                     mCurrentFunctionName = payload->mName;
+                    mCurrentFunction = { function, payload->mSender };
                     changed = true;
                 }
                 if (changed) {
@@ -131,14 +134,14 @@ namespace Tools {
 
             ImGui::Text(")");
 
-            if (!mCurrentFunction.method())
+            if (!mCurrentFunction.mMethod)
                 ImGui::PushDisabled();
 
             if (ImGui::Button("Call")) {
                 mCurrentFunction(mCurrentArguments);
             }
 
-            if (!mCurrentFunction.method())
+            if (!mCurrentFunction.mMethod)
                 ImGui::PopDisabled();
 
             if (ImGui::Button("Refresh Cache")) {

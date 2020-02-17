@@ -18,5 +18,6 @@ parameters Im3DPerObject {
 	bool(hasLight);
 	bool(hasTexture);
 	bool(hasDistanceField);
+	bool(hasSkeleton);
 
 };

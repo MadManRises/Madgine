@@ -4,6 +4,7 @@
 #include "scopeiterator.h"
 #include "accessor.h"
 #include "valuetype.h"
+#include "scopefield.h"
 
 namespace Engine {
 
@@ -21,13 +22,18 @@ ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
     }
 }
 
-std::optional<ValueType> MetaTable::get(const std::string &key, TypedScopePtr scope) const
+/*std::optional<ValueType> MetaTable::get(const std::string &key, TypedScopePtr scope) const
 {
-    ScopeIterator it = find(key, scope);
-    if (it != ScopeIterator { scope, nullptr })
-        return (*it).second;
-    else
+    for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
+        if (key == p->first) {
+            return p->second.mGetter(scope);            
+        }
+    }
+    if (mBaseGetter) {
+        return mBaseGetter().get(key, scope);
+    } else {
         return {};
+    }
 }
 
 void MetaTable::set(const std::string &key, const ValueType &value, TypedScopePtr scope) const
@@ -57,7 +63,7 @@ bool MetaTable::isEditable(const std::string &key) const
     } else {
         std::terminate();
     }
-}
+}*/
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
 {
@@ -66,9 +72,9 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
 
 std::string MetaTable::name(TypedScopePtr scope) const
 {
-    std::optional<ValueType> name = get("Name", scope);
-    if (name && name->is<std::string>()) {
-        return name->as<std::string>();
+    ScopeIterator name = find("Name", scope);
+    if (name != ScopeIterator{ scope, nullptr } && (*name).value().is<std::string>()) {
+        return (*name).value().as<std::string>();
     } else {
         return "<"s + mTypeName + ">";
     }

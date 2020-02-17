@@ -47,7 +47,7 @@ namespace Render {
             Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
             Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
 
-            for (const VertexType &v : vertices) {                
+            for (const VertexType &v : vertices) {
                 Vector3 pos;
                 if constexpr (VertexType::template holds<Render::VertexPos_3D>)
                     pos = v.mPos;
@@ -90,7 +90,15 @@ namespace Render {
             else
                 attributeList.emplace_back();
 
-			AABB aabb = calculateAABB(vertices);
+            if constexpr (VertexType::template holds<Render::VertexBoneMappings>) {
+                attributeList.emplace_back(std::in_place, &VertexType::mBoneIndices, "BONEINDICES", 0, type_holder<VertexType>);
+                attributeList.emplace_back(std::in_place, &VertexType::mBoneWeights, "WEIGHTS", 0, type_holder<VertexType>);
+            } else {
+                attributeList.emplace_back();
+                attributeList.emplace_back();
+            }
+
+            AABB aabb = calculateAABB(vertices);
             return generateImpl(mesh, attributeList, std::move(aabb), groupSize, std::move(vertices), sizeof(VertexType), std::move(indices), texturePath);
         }
 

@@ -23,8 +23,14 @@ Matrix3 ScalingMatrix(const Vector3 &v)
 }
 
 Matrix3 ExtractRotationMatrix(const Matrix3& m) {
-    Vector3 scalings = { 1 / m.GetColumn(0).length(), 1 / m.GetColumn(1).length(), 1 / m.GetColumn(2).length() };
-    return m * ScalingMatrix(scalings);
+    
+    return m * ExtractScalingMatrix(m).Inverse();
+}
+
+Matrix3 ExtractScalingMatrix(const Matrix3 &m)
+{
+    Vector3 scalings = { m.GetColumn(0).length(), m.GetColumn(1).length(), m.GetColumn(2).length() };
+    return ScalingMatrix(scalings);
 }
 
 }

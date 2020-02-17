@@ -14,6 +14,8 @@ namespace Render {
         switch (type) {
         case ATTRIBUTE_FLOAT:
             return GL_FLOAT;
+        case ATTRIBUTE_INT:
+			return GL_INT;
         default:
             std::terminate();
         }

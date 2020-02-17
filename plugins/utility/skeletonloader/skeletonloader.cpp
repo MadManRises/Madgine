@@ -31,7 +31,6 @@ METATABLE_END(Engine::Render::Bone)
 
 METATABLE_BEGIN(Engine::Render::SkeletonDescriptor)
 MEMBER(mBones)
-MEMBER(mBaseTransform)
 METATABLE_END(Engine::Render::SkeletonDescriptor)
 
 RegisterType(Engine::Render::SkeletonLoader)
@@ -74,19 +73,17 @@ RegisterType(Engine::Render::SkeletonLoader)
 
                     bool newBone = indices.try_emplace(node, skeleton.mBones.size()).second;
                     if (newBone) {
-
-                        skeleton.mBones.push_back(
-                            Bone {
-                                bone->mName.C_Str(),
-                                assimpConvertMatrix(bone->mOffsetMatrix) });
+                        skeleton.mBones.push_back(Bone { bone->mName.C_Str() });
                     }
                 }
             }
 
+			Matrix4 matrix, scale;
+            bool matrixSet = false;
+
             assimpTraverseTree(
-                scene, [&](const aiNode *parentNode, const Matrix4 &matrix) {
+                scene, [&](const aiNode *parentNode) {                    
                     for (size_t meshIndex = 0; meshIndex < parentNode->mNumMeshes; ++meshIndex) {
-                        skeleton.mBaseTransform = matrix;
 
                         aiMesh *mesh = scene->mMeshes[parentNode->mMeshes[meshIndex]];
 
@@ -96,25 +93,39 @@ RegisterType(Engine::Render::SkeletonLoader)
                                 aiBone *bone = mesh->mBones[boneIndex];
                                 aiNode *node = scene->mRootNode->FindNode(bone->mName);
 
+                                if (!matrixSet) {
+                                    matrixSet = true;
+                                    matrix = assimpCalculateTransformMatrix(node->mParent); 
+									scale = Matrix4 { ExtractScalingMatrix(matrix.ToMat3()) };
+
+									//matrix = assimpConvertMatrix(node->mParent->mTransformation);
+                                }
+
                                 size_t index = indices.at(node);
+
+                                skeleton.mBones[index].mTTransform = assimpConvertMatrix(node->mTransformation);
+                                skeleton.mBones[index].mOffsetMatrix = scale * assimpConvertMatrix(bone->mOffsetMatrix) * matrix.Inverse();
 
                                 if (node->mParent && indices.count(node->mParent) > 0) {
                                     size_t parentIndex = indices.at(node->mParent);
                                     skeleton.mBones[index].mParent = parentIndex;
                                     assert(parentIndex < index);
-                                    skeleton.mBones[index].mTTransform = skeleton.mBones[parentIndex].mTTransform * assimpConvertMatrix(node->mTransformation);
+                                    skeleton.mBones[index].mTTransform = skeleton.mBones[parentIndex].mTTransform * skeleton.mBones[index].mTTransform;
                                 } else {
-                                    skeleton.mBones[index].mTTransform = matrix * assimpConvertMatrix(node->mTransformation);
-                                }
+                                    //skeleton.mBones[index].mTTransform = matrix.Inverse() * skeleton.mBones[index].mTTransform;
+								}
 
                                 if (node->mNumChildren > 0 && indices.count(node->mChildren[0]) > 0) {
                                     skeleton.mBones[index].mFirstChild = indices.at(node->mChildren[0]);
-                                }                                
+                                }
                             }
                         }
                     }
-                },
-                Matrix4 { ScalingMatrix(0.01 * Vector3 { Vector3::UNIT_SCALE }) });
+                });
+
+            for (Bone &bone : skeleton.mBones) {
+                bone.mTTransform = matrix * bone.mTTransform * scale.Inverse() * bone.mOffsetMatrix;
+            }
 
             return true;
         }

@@ -125,6 +125,7 @@ RegisterType(ClickBrick::UI::GameManager)
             Engine::Scene::Entity::Entity *brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
             Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>();
+            t->setScale({ 0.01f, 0.01f, 0.01f });
 
             Engine::Vector3 dir = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
             dir.normalize();

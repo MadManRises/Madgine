@@ -8,9 +8,9 @@ struct MODULES_EXPORT MetaTable {
     const std::pair<const char *, Accessor> *mMember;
 
     ScopeIterator find(const std::string &key, TypedScopePtr scope) const;
-    std::optional<ValueType> get(const std::string &key, TypedScopePtr scope) const;
+    /*std::optional<ValueType> get(const std::string &key, TypedScopePtr scope) const;
     void set(const std::string &key, const ValueType &value, TypedScopePtr scope) const;
-    bool isEditable(const std::string &key) const;
+    bool isEditable(const std::string &key) const;*/
 
     template <typename T>
     bool isDerivedFrom() const;

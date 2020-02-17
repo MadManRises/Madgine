@@ -53,6 +53,15 @@ namespace Render {
             };
             return formats[desc.mArraySize - 1];
         }
+        case ATTRIBUTE_INT: {
+            constexpr DXGI_FORMAT formats[] = {
+                DXGI_FORMAT_R32_SINT,
+                DXGI_FORMAT_R32G32_SINT,
+                DXGI_FORMAT_R32G32B32_SINT,
+                DXGI_FORMAT_R32G32B32A32_SINT
+            };
+            return formats[desc.mArraySize - 1];
+        }
         }
         std::terminate();
     }

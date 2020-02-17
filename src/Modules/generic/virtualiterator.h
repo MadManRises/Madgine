@@ -1,5 +1,7 @@
 #pragma once
 
+#include "proxy.h"
+
 namespace Engine {
 
 struct VirtualIteratorEnd {
@@ -93,6 +95,11 @@ struct VirtualIterator {
     {
         return mImpl->get();
     }
+
+    Proxy<RefT, false> operator->() const
+    {
+        return mImpl->get();
+	}
 
     bool operator!=(const VirtualIteratorEnd &) const
     {

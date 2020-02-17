@@ -25,6 +25,7 @@
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/keyvalue/scopeiterator.h"
+#include "Modules/keyvalue/scopefield.h"
 
 #include "functiontool.h"
 
@@ -92,9 +93,9 @@ namespace Tools {
     {
 
         for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
-            if (drawn.find((*it).first) == drawn.end()) {
+            if (drawn.find(it->key()) == drawn.end()) {
                 drawValue(nullptr, scope, it);
-                drawn.insert((*it).first);
+                drawn.insert(it->key());
             }
         }
     }
@@ -119,17 +120,17 @@ namespace Tools {
     void Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it)
     {
         bool showName = !element || !style("noname", element);
-        std::string id = (showName ? std::string() : "##"s) + (*it).first;
-        bool editable = parent.isEditable((*it).first);
+        std::string id = (showName ? std::string() : "##"s) + it->key();
+        bool editable = it->isEditable();
 
-		ValueType value = (*it).second;
+		ValueType value = *it;
 		if (drawValueImpl(element, parent, id, value, editable))
-            parent.set((*it).first, value);
+             *it = value;
     }
 
     bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType &value, bool editable)
     {
-        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue || value.type() == Engine::ValueType::Type::BoundApiMethodValue;
+        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -184,9 +185,9 @@ namespace Tools {
                                                          if (b) {
                                                              size_t i = 0;
                                                              for (; it != VirtualIteratorEnd {}; ++it) {
-                                                                 ValueType value = (*it).second;
-                                                                 if (drawValueImpl(element, {}, (*it).first.toShortString() + "##" + std::to_string(i), value, /*editable && */ (*it).second.isEditable())) {
-                                                                     (*it).second = value;
+                                                                 ValueType value = it->second;
+                                                                 if (drawValueImpl(element, {}, it->first.toShortString() + "##" + std::to_string(i), value, /*editable && */ it->second.isEditable())) {
+                                                                     it->second = value;
                                                                  }
                                                                  ++i;
                                                              }
@@ -280,11 +281,11 @@ namespace Tools {
         const char *name = element->Attribute("name");
         bool draw = !name || ImGui::TreeNode(name);
         for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
-            if (drawn.find((*it).first) == drawn.end()) {
+            if (drawn.find(it->key()) == drawn.end()) {
                 bool skip = false;
                 for (tinyxml2::XMLElement *condition = element->FirstChildElement("Condition"); condition; condition = condition->NextSiblingElement("Condition")) {
                     const char *expectedType = condition->Attribute("type");
-                    std::string type = (*it).second.is<TypedScopePtr>() ? (*it).second.as<TypedScopePtr>().mType->mTypeName : "";
+                    std::string type = it->value().is<TypedScopePtr>() ? it->value().as<TypedScopePtr>().mType->mTypeName : "";
                     if (expectedType && type != expectedType) {
                         skip = true;
                         break;
@@ -297,13 +298,13 @@ namespace Tools {
                     tinyxml2::XMLElement *rule = nullptr;
                     for (tinyxml2::XMLElement *child = element->FirstChildElement("Rule"); child; child = child->NextSiblingElement("Rule")) {
                         const char *name = child->Attribute("name");
-                        if (!name || (*it).first == std::string(name)) {
+                        if (!name || it->key() == std::string(name)) {
                             rule = child;
                         }
                     }
                     drawValue(rule, scope, it);
                 }
-                drawn.insert((*it).first);
+                drawn.insert(it->key());
             }
         }
         if (draw && name)

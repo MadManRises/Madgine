@@ -6,7 +6,8 @@ namespace Engine {
 namespace Render {
 
     enum AttributeType {
-        ATTRIBUTE_FLOAT
+        ATTRIBUTE_FLOAT,
+		ATTRIBUTE_INT
     };
 
     struct AttributeDescriptor {
@@ -25,8 +26,11 @@ namespace Render {
             } else if constexpr (std::is_same_v<M, Vector3>) {
                 mType = ATTRIBUTE_FLOAT;
                 mArraySize = 3;
-            } else if constexpr (std::is_same_v<M, Vector4>) {
+            } else if constexpr (std::is_same_v<M, Vector4> || std::is_same_v<M, float[4]>) {
                 mType = ATTRIBUTE_FLOAT;
+                mArraySize = 4;
+            } else if constexpr (std::is_same_v<M, int[4]>) {
+                mType = ATTRIBUTE_INT;
                 mArraySize = 4;
             } else {
                 static_assert(dependent_bool<M, false>::value, "Unsupported Attribute type!");

@@ -219,7 +219,7 @@ namespace Tools {
                         entity->addComponent(componentName);
                         if (componentName == "Transform") {
                             entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
-                            entity->getComponent<Scene::Entity::Transform>()->setScale({ 0.01f, 0.01f, 0.01f });
+                            entity->getComponent<Scene::Entity::Transform>()->setScale({ 0.0001f, 0.0001f, 0.0001f });
                         }
                         if (componentName == "Mesh") {
                             entity->getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
@@ -229,7 +229,7 @@ namespace Tools {
                         }
                         if (componentName == "Animation") {
                             entity->getComponent<Scene::Entity::Animation>()->setName("mage_animated");
-                            entity->getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("T-Pose");
+                            entity->getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("Walk");
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -277,13 +277,18 @@ namespace Tools {
                 if (Render::SkeletonDescriptor *skeleton = s->data()) {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
-                        Im3D::Text(bone.mName.c_str(), t->matrix() * s->matrices()[i], 2.0f);
-                        float length = 1.0f;
+                        
+						Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse();
+						
+						Im3D::Text(bone.mName.c_str(), t->matrix() * m, 2.0f);
+                        float length = 0.1f;
+                        
                         if (bone.mFirstChild != std::numeric_limits<size_t>::max()) {
-                            Vector3 dist = s->matrices()[bone.mFirstChild].GetColumn(3).xyz() - s->matrices()[i].GetColumn(3).xyz();
+                            Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse();
+                            Vector3 dist = m_child.GetColumn(3).xyz() - m.GetColumn(3).xyz();
                             length = dist.length();
                         }
-                        Im3D::Arrow(IM3D_LINES, 0.1f * length, length, t->matrix() * s->matrices()[i]);
+                        Im3D::Arrow(IM3D_LINES, 0.1f * length, length, t->matrix() * m);
                     }
                 }
             }
