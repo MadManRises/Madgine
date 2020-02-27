@@ -21,7 +21,28 @@ uniform PerObject
 	bool hasLight;
 	bool hasTexture;
 	bool hasDistanceField;
+	bool hasSkeleton;
 };
+
+uniform SSBO_Info 
+{
+	uint SSBO_Offsets[1];
+};
+
+uniform SSBO
+{
+	vec4 SSBO_data[128];
+};
+
+mat4 getBone(int index){
+	uint index0 = uint(4 * index) + SSBO_Offsets[0];
+	return mat4(
+		SSBO_data[index0],
+		SSBO_data[index0 + uint(1)],
+		SSBO_data[index0 + uint(2)],
+		SSBO_data[index0 + uint(3)]
+	);
+}
 
 
 layout(location = 0) in vec3 aPos;
@@ -29,18 +50,28 @@ layout(location = 1) in vec2 aPos2;
 layout(location = 2) in vec4 aColor;
 layout(location = 3) in vec3 aNormal;
 layout(location = 4) in vec2 aUV;
+layout(location = 5) in ivec4 aBoneIDs;
+layout(location = 6) in vec4 aWeights;
 
 out vec4 color;
-out vec3 worldPos;
+out vec4 worldPos;
 out vec3 normal;
 out vec2 uv;
 
 
 void main()
 {
-	worldPos = vec3(m * vec4(aPos, 1.0));
-    gl_Position = p * (v * vec4(worldPos, 1.0) + vec4(aPos2, 0.0, 0.0));	
+	if (hasSkeleton){
+		mat4 BoneTransform = getBone(aBoneIDs[0]) * aWeights[0]
+		+ getBone(aBoneIDs[1]) * aWeights[1]
+		+ getBone(aBoneIDs[2]) * aWeights[2]
+		+ getBone(aBoneIDs[3]) * aWeights[3];
+		worldPos = m * BoneTransform * vec4(aPos, 1.0);
+	}else{
+		worldPos = m * vec4(aPos, 1.0);
+	}
+    gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
     color = aColor;
 	normal = mat3(anti_m) * aNormal;
-	uv = aUV;
+	uv = vec2(aUV.x, 1.0 - aUV.y);
 }

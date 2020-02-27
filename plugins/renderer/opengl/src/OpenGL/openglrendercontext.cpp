@@ -19,7 +19,6 @@
 
 #include "imagedata.h"
 
-#include "openglfontloader.h"
 #include "openglmeshloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
@@ -51,6 +50,11 @@ RegisterType(Engine::Render::OpenGLRenderContext)
             return std::make_unique<OpenGLRenderTexture>(this, size);
         }
 
+        OpenGLRenderContext &OpenGLRenderContext::getSingleton()
+        {
+            return static_cast<OpenGLRenderContext &>(RenderContext::getSingleton());
+        }
+
         std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderWindow(Window::Window *w)
         {
             checkThread();
@@ -62,7 +66,13 @@ RegisterType(Engine::Render::OpenGLRenderContext)
                     break;
 			}
 
-            return std::make_unique<OpenGLRenderWindow>(this, w, sharedContext);
+            std::unique_ptr<RenderTarget> window = std::make_unique<OpenGLRenderWindow>(this, w, sharedContext);
+
+			#if OPENGL_ES
+            mSSBOBuffer = { 3, 128 };
+			#endif
+
+			return window;
         }
 
     }

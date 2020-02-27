@@ -21,7 +21,7 @@ namespace Tools {
         ImGui::ShowDemoWindow(&mVisible);
     }
 
-    const char *ImGuiDemo::key() const
+    std::string_view ImGuiDemo::key() const
     {
         return "ImGuiDemo";
     }

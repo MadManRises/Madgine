@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    Matrix4 assimpConvertMatrix(const aiMatrix4x4 &m)
+    inline Matrix4 assimpConvertMatrix(const aiMatrix4x4 &m)
     {
         return {
             m.a1, m.a2, m.a3, m.a4,
@@ -17,7 +17,7 @@ namespace Render {
         };
     }
 
-    Matrix4 assimpCalculateTransformMatrix(aiNode *node)
+    inline Matrix4 assimpCalculateTransformMatrix(aiNode *node)
     {
         Matrix4 m = Matrix4::IDENTITY;
         while (node) {
@@ -26,13 +26,7 @@ namespace Render {
         }
         return m;
     }
-
-    template <typename F>
-    void assimpTraverseTree(const aiScene *scene, const F &f, const Matrix4 &m = Matrix4::IDENTITY)
-    {
-        assimpTraverseTree(scene->mRootNode, f, m);
-    }
-
+		
     template <typename F>
     void assimpTraverseTree(const aiNode *node, const F &f, Matrix4 m)
     {
@@ -40,7 +34,13 @@ namespace Render {
         TupleUnpacker::invoke(f, node, m);
         for (size_t i = 0; i < node->mNumChildren; ++i) {
             assimpTraverseTree(node->mChildren[i], f, m);
-		}
+        }
+    }
+
+    template <typename F>
+    void assimpTraverseTree(const aiScene *scene, const F &f, const Matrix4 &m = Matrix4::IDENTITY)
+    {
+        assimpTraverseTree(scene->mRootNode, f, m);
     }
 
 }

@@ -4,7 +4,7 @@
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
 #include "../../generic/offsetptr.h"
-#include "tupleserialize.h"
+#include "../tupleserialize.h"
 
 namespace Engine {
 namespace Serialize {

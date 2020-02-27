@@ -27,7 +27,7 @@ SamplerState texSampler : register(s0);
 struct PixelShaderInput {
     float4 position : SV_POSITION;
     float4 color : COLOR;
-    float3 worldPos : POSITION;
+    float4 worldPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
 };

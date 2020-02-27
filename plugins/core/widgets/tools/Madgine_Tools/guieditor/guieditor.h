@@ -19,7 +19,7 @@ namespace Tools {
         virtual void renderMenu() override;
         virtual void update() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
 		void saveLayout();
         void loadLayout();

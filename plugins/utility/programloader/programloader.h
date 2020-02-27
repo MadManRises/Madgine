@@ -28,6 +28,8 @@ namespace Render {
                 setParameters(&param, sizeof(T), index, loader);
             }
             void setParameters(const void *data, size_t size, size_t index, ProgramLoader *loader = nullptr);
+
+			void setDynamicParameters(const void *data, size_t size, size_t index, ProgramLoader *loader = nullptr);
         };
 
         ProgramLoader();
@@ -35,6 +37,8 @@ namespace Render {
         virtual bool create(Program &program, const std::string &name) = 0;
 
         virtual void setParameters(Program &program, const void *data, size_t size, size_t index) = 0;
+
+		virtual void setDynamicParameters(Program &program, const void *data, size_t size, size_t index) = 0;
     };
 
 }

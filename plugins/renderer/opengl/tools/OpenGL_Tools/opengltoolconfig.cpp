@@ -8,13 +8,12 @@
 
 #include "inspector/inspector.h"
 
-#include "OpenGL/openglfontdata.h"
-#include "OpenGL/openglfontloader.h"
-
 #include "imgui/imgui.h"
 
 #include "imageloaderlib.h"
 #include "imageloader.h"
+
+#include "fontloader.h"
 
 #include "imagedata.h"
 
@@ -30,9 +29,9 @@ namespace Tools {
     {
         mImageTexture = { GL_UNSIGNED_BYTE };
 
-        getTool<Inspector>().addPreviewDefinition<Render::OpenGLFontLoader::ResourceType>([](Render::OpenGLFontLoader::ResourceType *font) {
+        getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture.mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)font->loadData()->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
@@ -53,7 +52,7 @@ namespace Tools {
 		ToolBase::finalize();
     }
 
-    const char *OpenGLToolConfig::key() const
+    std::string_view OpenGLToolConfig::key() const
     {
         return "OpenGLToolConfig";
     }

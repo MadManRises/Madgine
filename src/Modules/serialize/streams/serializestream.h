@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../container/unithelper.h"
+#include "../unithelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
 #include "../serializeexception.h"
@@ -8,7 +8,7 @@
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
 #include "../../generic/iterator_traits.h"
-#include "../container/creationhelper.h"
+#include "../creationhelper.h"
 #include "../../generic/container_traits.h"
 
 namespace Engine {
@@ -61,7 +61,7 @@ namespace Serialize {
             }
         }
 
-        void read(ValueType &result, const char *name);
+        //void read(ValueType &result, const char *name);
 
 		template <typename C, typename Creator = DefaultCreator<>>
         void readContainer(C &container, const char *name = nullptr, Creator &&creator = {})
@@ -108,6 +108,7 @@ namespace Serialize {
         void readUnformatted(SerializableUnitBase *&p);
 
         void readUnformatted(std::string &s);
+        void readUnformatted(std::string_view &s) = delete;
         void readUnformatted(Filesystem::Path &p);
 
         std::string readN(size_t n);
@@ -224,6 +225,7 @@ namespace Serialize {
 
         void writeUnformatted(SerializableUnitBase *p);
         void writeUnformatted(const std::string &s);
+       // void writeUnformatted(const std::string_view &s);
         void writeUnformatted(const Filesystem::Path &p);
 
         void writeRaw(const void *buffer, size_t size);

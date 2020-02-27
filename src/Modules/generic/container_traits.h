@@ -24,7 +24,6 @@ struct container_traits<std::list<T>> {
     typedef iterator position_handle;
     typedef const_iterator const_position_handle;
     typedef typename container::value_type value_type;
-    typedef void key_type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::list<M<T>>>;
@@ -145,7 +144,6 @@ struct container_traits<std::vector<T>> {
     typedef handle_t position_handle;
     typedef handle_t const_position_handle;
     typedef typename container::value_type value_type;
-    typedef void key_type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::vector<M<T>>>;
@@ -260,19 +258,6 @@ struct container_traits<std::vector<T>> {
 };
 
 template <typename T, typename Cmp>
-struct cmp_type {
-    using type = typename Cmp::cmp_type;
-};
-
-template <typename T, typename V>
-struct cmp_type<T, std::less<V>> {
-    using type = T;
-};
-
-template <typename T, typename Cmp>
-using cmp_type_t = typename cmp_type<T, Cmp>::type;
-
-template <typename T, typename Cmp>
 struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
@@ -287,7 +272,7 @@ struct container_traits<std::set<T, Cmp>> {
     typedef const T *const_handle;
     typedef iterator position_handle;
     typedef const_iterator const_position_handle;
-    typedef cmp_type_t<T, Cmp> key_type;
+    typedef Cmp cmp_type;
     typedef const typename container::value_type value_type;
 
     template <template <typename> typename M>
@@ -338,13 +323,13 @@ struct container_traits<std::set<T, Cmp>> {
     }
 };
 
-template <typename K, typename T>
-struct container_traits<std::map<K, T>> {
+template <typename K, typename T, typename Cmp>
+struct container_traits<std::map<K, T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
 
-    typedef std::map<K, T> container;
+    typedef std::map<K, T, Cmp> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
     typedef typename container::reverse_iterator reverse_iterator;
@@ -353,9 +338,8 @@ struct container_traits<std::map<K, T>> {
     typedef const std::pair<const K, T> *const_handle;
     typedef iterator position_handle;
     typedef const_iterator const_position_handle;
-    typedef K key_type;
-    typedef T value_type;
-    typedef std::pair<const K, T> type;
+    typedef Cmp cmp_type;
+    typedef typename container::value_type value_type;
 
     template <template <typename> typename M>
     using rebind = container_traits<std::map<M<K>, M<T>>>;

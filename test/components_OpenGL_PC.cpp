@@ -1,6 +1,24 @@
 #include "Modules/moduleslib.h"
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
+#endif
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
+#endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloaderlib.h"
+#endif
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloaderlib.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
+#endif
+#ifdef BUILD_OISHandler
+#    include "oislib.h"
 #endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
@@ -8,38 +26,29 @@
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
-#ifdef BUILD_SceneRendererTools
-#    include "Madgine_Tools/scenerenderertoolslib.h"
-#endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
-#endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
-#endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
 #endif
-#ifdef BUILD_OISHandler
-#    include "oislib.h"
-#endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
+#endif
+#ifdef BUILD_FontLoader
+#    include "fontloaderlib.h"
+#endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/app/globalapicollector.h"
@@ -77,11 +86,11 @@
 #ifdef BUILD_ImageLoader
 #    include "imageloader.h"
 #endif
+#ifdef BUILD_FontLoader
+#    include "fontloader.h"
+#endif
 #ifdef BUILD_Tools
 #    include "inspector/layoutloader.h"
-#endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/openglfontloader.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/openglmeshloader.h"
@@ -94,6 +103,12 @@
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengltextureloader.h"
+#endif
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloader.h"
+#endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloader.h"
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenecomponentcollector.h"
@@ -344,15 +359,23 @@ const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderC
 #    ifdef BUILD_ImageLoader
 		&table<Engine::Resources::ImageLoader>(),
 #    endif
+#    ifdef BUILD_FontLoader
+		&table<Engine::Render::FontLoader>(),
+#    endif
 #    ifdef BUILD_Tools
 		&table<Engine::Tools::LayoutLoader>(),
 #    endif
 #    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLFontLoader>(),
 		&table<Engine::Render::OpenGLMeshLoader>(),
 		&table<Engine::Render::OpenGLProgramLoader>(),
 		&table<Engine::Render::OpenGLShaderLoader>(),
 		&table<Engine::Render::OpenGLTextureLoader>(),
+#    endif
+#    ifdef BUILD_SkeletonLoader
+		&table<Engine::Render::SkeletonLoader>(),
+#    endif
+#    ifdef BUILD_AnimationLoader
+		&table<Engine::Render::AnimationLoader>(),
 #    endif
 
 	}; 
@@ -365,15 +388,23 @@ std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Res
 #    ifdef BUILD_ImageLoader
 		createComponent<Engine::Resources::ImageLoader>,
 #    endif
+#    ifdef BUILD_FontLoader
+		createComponent<Engine::Render::FontLoader>,
+#    endif
 #    ifdef BUILD_Tools
 		createComponent<Engine::Tools::LayoutLoader>,
 #    endif
 #    ifdef BUILD_OpenGL
-		createComponent<Engine::Render::OpenGLFontLoader>,
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 		createComponent<Engine::Render::OpenGLProgramLoader>,
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 		createComponent<Engine::Render::OpenGLTextureLoader>,
+#    endif
+#    ifdef BUILD_SkeletonLoader
+		createComponent<Engine::Render::SkeletonLoader>,
+#    endif
+#    ifdef BUILD_AnimationLoader
+		createComponent<Engine::Render::AnimationLoader>,
 #    endif
 
 	}; 
@@ -388,6 +419,13 @@ size_t component_index<Engine::Resources::ImageLoader>() { return CollectorBaseI
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_ImageLoader + 1
 #    endif
+#    ifdef BUILD_FontLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_FontLoader = ACC;
+template <>
+size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_FontLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_FontLoader + 1
+#    endif
 #    ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
 template <>
@@ -398,25 +436,35 @@ size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseInde
 #    ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
-size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
+size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
 template <>
-size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
+size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 template <>
-size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
-template <>
-size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
-template <>
-size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
+size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 5
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4
+#    endif
+#    ifdef BUILD_SkeletonLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader = ACC;
+template <>
+size_t component_index<Engine::Render::SkeletonLoader>() { return CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader + 1
+#    endif
+#    ifdef BUILD_AnimationLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_AnimationLoader = ACC;
+template <>
+size_t component_index<Engine::Render::AnimationLoader>() { return CollectorBaseIndex_ResourceLoaderBase_AnimationLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_AnimationLoader + 1
 #    endif
 
 #    undef ACC

@@ -49,7 +49,7 @@ struct AppData {
 struct VertexShaderOutput {
     float4 position : SV_POSITION;
     float4 color : COLOR;
-    float3 worldPos : POSITION;
+    float4 worldPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
 };
@@ -65,16 +65,16 @@ VertexShaderOutput main(AppData IN)
 #endif
 
 #ifdef HAS_BONEINDICES0
-	matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0];
-	BoneTransform += bones[IN.aBoneIDs[1]] * IN.aWeights[1];
-	BoneTransform += bones[IN.aBoneIDs[2]] * IN.aWeights[2];
-	BoneTransform += bones[IN.aBoneIDs[3]] * IN.aWeights[3];
-	OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0))).xyz;
+	matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
+	+ bones[IN.aBoneIDs[1]] * IN.aWeights[1]
+	+ bones[IN.aBoneIDs[2]] * IN.aWeights[2]
+	+ bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+	OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0)));
 #else
-	OUT.worldPos = mul(m, float4(IN.aPos, 1.0)).xyz;
+	OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
 #endif
     
-    OUT.position = mul(p, mul(v, float4(OUT.worldPos, 1) + float4(aPos2, 0.0, 0.0)));
+    OUT.position = mul(p, mul(v, OUT.worldPos + float4(aPos2, 0.0, 0.0)));
     OUT.position.z += OUT.position.w;
     OUT.position.z /= 2;
     

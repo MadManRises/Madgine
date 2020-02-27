@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/keyvalue/scopebase.h"
-#include "Modules/plugins/pluginlistener.h"
+#include "../keyvalue/scopebase.h"
+#include "../plugins/pluginlistener.h"
 #include "resourceloadercollector.h"
 
 namespace Engine {

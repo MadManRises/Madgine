@@ -14,7 +14,7 @@ struct MODULES_EXPORT TypedScopePtr {
     {
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T>>>
+    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T> && std::is_base_of_v<ScopeBase, T>>>
     TypedScopePtr(T *t)
         : mScope(t)
         , mType(&table<T>())

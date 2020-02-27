@@ -61,7 +61,7 @@ namespace Tools {
         ToolBase::update();
     }
 
-    const char *Metrics::key() const
+    std::string_view Metrics::key() const
     {
         return "Metrics";
     }

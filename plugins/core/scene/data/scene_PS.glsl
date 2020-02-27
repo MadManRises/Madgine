@@ -28,7 +28,7 @@ layout(binding = 0) uniform sampler2D tex;
 
 
 in vec4 color;
-in vec3 worldPos;
+in vec4 worldPos;
 in vec3 normal;
 in vec2 uv;
 

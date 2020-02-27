@@ -70,5 +70,10 @@ RegisterType(Engine::Render::RenderContext)
             return sContext->mRenderThread == std::this_thread::get_id();
         }
 
+        RenderContext &RenderContext::getSingleton()
+        {
+            return *sContext;
+        }
+
     }
 }

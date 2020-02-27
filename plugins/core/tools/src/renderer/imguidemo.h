@@ -10,7 +10,7 @@ namespace Tools {
 
         void render() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
     };
 
 }

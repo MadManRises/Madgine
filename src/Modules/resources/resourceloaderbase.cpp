@@ -2,7 +2,7 @@
 
 #include "resourceloaderbase.h"
 
-#include "Modules/reflection/classname.h"
+#include "../reflection/classname.h"
 
 namespace Engine {
 namespace Resources {

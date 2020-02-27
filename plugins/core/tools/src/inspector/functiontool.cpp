@@ -24,7 +24,7 @@ namespace Tools {
     {
     }
 
-    const char *FunctionTool::key() const
+    std::string_view FunctionTool::key() const
     {
         return "FunctionTool";
     }
@@ -37,7 +37,7 @@ namespace Tools {
 
     void FunctionTool::setCurrentFunction(const std::string &name, const BoundApiMethod &method)
     {
-        setVisible(true);
+        mVisible = true;
         mCurrentFunctionName = name;
         mCurrentFunction = method;
         mCurrentArguments.clear();
@@ -71,6 +71,7 @@ namespace Tools {
 
                 void operator()(const std::monostate &) {}
                 void operator()(const std::string &) {}
+                void operator()(const std::string_view &) {}
                 void operator()(const bool &) {}
                 void operator()(const int &) {}
                 void operator()(const size_t &) {}

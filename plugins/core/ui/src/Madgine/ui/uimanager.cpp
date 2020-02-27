@@ -184,7 +184,7 @@ namespace UI {
         return mWindow;
     }
 
-    const char *UIManager::key() const
+    std::string_view UIManager::key() const
     {
         return "UI";
     }

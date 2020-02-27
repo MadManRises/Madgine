@@ -116,6 +116,8 @@
         var progressElement = document.getElementById('progress');
         var spinnerElement = document.getElementById('spinner');
 
+        Error.stackTraceLimit = Infinity;
+
         var Module = {
             preRun: [],
             postRun: [],

@@ -19,7 +19,7 @@ namespace Scene {
             void moveToEntity(Entity *ent);
             Entity &getEntity() const;
 
-            virtual const char *key() const = 0;
+            virtual std::string_view key() const = 0;
 
             template <typename T>
             T *getComponent()

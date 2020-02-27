@@ -5,13 +5,13 @@
 namespace Engine {
 namespace TupleUnpacker {
 
-#define LIFT(fname)                                            \
-    [](auto &&... args) -> decltype(auto) {                    \
+#define LIFT(fname, ...)                                       \
+    [__VA_ARGS__](auto &&... args) -> decltype(auto) {         \
         return (fname)(std::forward<decltype(args)>(args)...); \
     }
 
-#define LIFT_MEMBER(fname)                                                                           \
-    [](auto &&_this, auto &&... args) -> decltype(auto) {                                            \
+#define LIFT_MEMBER(fname, ...)                                                                      \
+    [__VA_ARGS__](auto &&_this, auto &&... args) -> decltype(auto) {                                 \
         return (std::forward<decltype(_this)>(_this)->fname)(std::forward<decltype(args)>(args)...); \
     }
 

@@ -161,7 +161,7 @@ namespace Tools {
         return ToolBase::init();
     }
 
-    const char *PluginManager::key() const
+    std::string_view PluginManager::key() const
     {
         return "Plugin Manager";
     }

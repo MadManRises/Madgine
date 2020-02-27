@@ -23,6 +23,7 @@ namespace Render {
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data) override;
 
 		virtual void setWrapMode(Texture &tex, WrapMode mode) override;
+        virtual void setMinMode(Texture &tex, MinMode mode) override;
 	};
 }
 }

@@ -36,7 +36,7 @@ namespace Render {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
         data.mAABB = bb;
 
-		OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
+        OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
             data.mVAO = create;
             data.mVAO.bind();
 
@@ -78,13 +78,13 @@ namespace Render {
 
         data.mAABB = bb;
 
-		OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
+        OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
             data.mGroupSize = groupSize;
 
-            data.mVertices.setData(vertices.mSize, vertices.mData);
+            data.mVertices.setData(vertices.mData, vertices.mSize);
 
             if (!indices.empty()) {
-                data.mIndices.setData(sizeof(indices[0]) * indices.size(), indices.data());
+                data.mIndices.setData(indices.data(), sizeof(indices[0]) * indices.size());
                 data.mElementCount = indices.size();
             } else {
                 data.mElementCount = vertices.mSize / vertexSize;

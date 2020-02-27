@@ -30,7 +30,7 @@ namespace ClickBrick
         {
         }
 
-        const char *GameOverHandler::key() const
+        std::string_view GameOverHandler::key() const
         {
             return "GameOverHandler";
         }

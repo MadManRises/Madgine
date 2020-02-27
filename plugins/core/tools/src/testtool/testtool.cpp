@@ -10,7 +10,6 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-
 #include "Interfaces/window/windowapi.h"
 
 #include "Modules/math/atlas2.h"
@@ -18,7 +17,6 @@
 #include "im3d/im3d.h"
 
 #include "Modules/render/vertex.h"
-
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
@@ -50,9 +48,9 @@ namespace Tools {
                 static_cast<const ClientImRoot&>(*mRoot.parent()).window().createToolWindow(settings);
             }*/
 
-			//Resources::ImageLoader::load("Grass-01", true);
+            //Resources::ImageLoader::load("Grass-01", true);
 
-			Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
+            Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
 
             static std::vector<Render::Vertex> vertices;
             static std::vector<unsigned short> indices;
@@ -100,6 +98,7 @@ namespace Tools {
 
             ImGui::Text("ValueType size: %u", (unsigned int)sizeof(ValueType));
             renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
+
         }
         ImGui::End();
     }
@@ -110,7 +109,7 @@ namespace Tools {
         ToolBase::update();
     }
 
-    const char *TestTool::key() const
+    std::string_view TestTool::key() const
     {
         return "TestTool";
     }

@@ -23,7 +23,7 @@ namespace Tools {
         virtual void renderMenu();
         virtual void update();
 
-        virtual const char *key() const = 0;
+        virtual std::string_view key() const = 0;
 
         bool isVisible();
         void setVisible(bool v);

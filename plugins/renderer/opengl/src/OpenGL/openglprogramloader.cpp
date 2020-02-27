@@ -14,9 +14,11 @@
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, Engine::Render::ProgramLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLProgramLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader::ResourceType, Engine::Render::ProgramLoader::ResourceType)
+READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Render::OpenGLProgramLoader::ResourceType)
 
 RegisterType(Engine::Render::OpenGLProgramLoader);
@@ -56,6 +58,11 @@ namespace Render {
     void OpenGLProgramLoader::setParameters(Program &program, const void *data, size_t size, size_t index)
     {
         static_cast<OpenGLProgram &>(program).setParameters(data, size, index);
+    }
+
+    void OpenGLProgramLoader::setDynamicParameters(Program &program, const void *data, size_t size, size_t index)
+    {
+        static_cast<OpenGLProgram &>(program).setDynamicParameters(data, size, index);
     }
 
 }

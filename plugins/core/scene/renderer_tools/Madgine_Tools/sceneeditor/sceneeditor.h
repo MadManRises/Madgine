@@ -20,7 +20,7 @@ namespace Tools {
         virtual void render() override;
         virtual void renderMenu() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
         std::vector<SceneView> &views()
         {

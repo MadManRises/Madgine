@@ -8,7 +8,7 @@
 
 #include "serializestreambuf.h"
 
-#include "../../keyvalue/valuetype.h"
+//#include "../../keyvalue/valuetype.h"
 
 #include "Interfaces/filesystem/path.h"
 
@@ -42,7 +42,7 @@ namespace Serialize {
         format().setupStream(mStream);
     }
 
-    void SerializeInStream::read(ValueType &result, const char *name)
+    /*void SerializeInStream::read(ValueType &result, const char *name)
     {
         ValueType::Type type;
         readRaw(type);
@@ -53,7 +53,8 @@ namespace Serialize {
             readRaw(b);
             result = b;
             break;
-        case ValueType::Type::StringValue: {
+        case ValueType::Type::OwningStringValue:
+        case ValueType::Type::NonOwningStringValue: {
             decltype(std::declval<std::string>().size()) size;
             readRaw(size);
             std::string temp(size, ' ');
@@ -101,7 +102,7 @@ namespace Serialize {
             throw SerializeException(Database::Exceptions::unknownDeserializationType);
         }
         //mLog.logRead(result);
-    }
+    }*/
 
     void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
     {

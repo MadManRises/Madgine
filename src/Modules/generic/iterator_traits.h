@@ -16,7 +16,6 @@ struct derive_iterator {
     using const_reverse_iterator = typename has_function_rbegin<const T>::return_type;
 };
 
-
 template <typename T>
 using is_iterable = std::bool_constant<has_function_begin_v<T> && has_function_end_v<T>>;
 

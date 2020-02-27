@@ -282,7 +282,7 @@ namespace Tools {
         return true;
     }
 
-    const char *ClientImRoot::key() const
+    std::string_view ClientImRoot::key() const
     {
         return "ClientImRoot";
     }

@@ -9,10 +9,9 @@
 
 #include "im3d/im3d.h"
 
-#include "OpenGL/openglfontloader.h"
-#include "OpenGL/openglfontdata.h"
-
 #include "Madgine/gui/toplevelwindow.h"
+
+#include "fontloader.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Tools::OpenGLImRoot)
 
@@ -45,11 +44,11 @@ RegisterType(Engine::Tools::OpenGLImRoot)
                 ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
 
             Im3D::GetIO().mFetchFont = [](const char *fontName) {
-                Render::OpenGLFontLoader::HandleType font;
+                Render::FontLoader::HandleType font;
 				font.load(fontName);
 
                 return Im3DFont {
-                    font->mTexture.mTextureHandle,
+                    font->mTextureHandle,
                     font->mTextureSize,
                     font->mGlyphs.data()
                 };

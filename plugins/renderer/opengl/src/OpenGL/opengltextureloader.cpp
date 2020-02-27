@@ -89,5 +89,19 @@ namespace Render {
         static_cast<OpenGLTexture &>(tex).setWrapMode(glMode);
     }
 
+    void OpenGLTextureLoader::setMinMode(Texture &tex, MinMode mode)
+    {
+        GLint glMode;
+        switch (mode) {
+        case MIN_NEAREST:
+            glMode = GL_LINEAR;
+            break;
+        default:
+            std::terminate();
+        }
+
+        static_cast<OpenGLTexture &>(tex).setFilter(glMode);
+    }
+
 }
 }

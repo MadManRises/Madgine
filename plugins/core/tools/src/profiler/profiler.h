@@ -10,7 +10,7 @@ namespace Tools {
 
         virtual void render() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
     private:
         Debug::Profiler::Profiler &mProfiler;

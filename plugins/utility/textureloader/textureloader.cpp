@@ -54,5 +54,12 @@ RegisterType(Engine::Render::TextureLoader)
             loader->setWrapMode(getData(*this, loader), mode);
         }
 
+        void TextureLoader::HandleType::setMinMode(MinMode mode, TextureLoader *loader)
+        {
+            if (!loader)
+                loader = &TextureLoader::getSingleton();
+            loader->setMinMode(getData(*this, loader), mode);
+        }
+
     }
 }

@@ -17,7 +17,7 @@
 
 #include "imagedata.h"
 
-#include "openglfontloader.h"
+#include "fontloader.h"
 #include "openglmeshloader.h"
 #include "openglprogramloader.h"
 #include "openglshaderloader.h"
@@ -362,6 +362,8 @@ namespace Render {
         glVertexAttrib2f(1, 0, 0);
         glVertexAttrib4f(2, 1, 1, 1, 1);
         glVertexAttrib2f(4, 0, 0);
+        glVertexAttribI4i(5, 0, 0, 0, 0);
+        glVertexAttrib4f(6, 0, 0, 0, 0);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -375,7 +377,7 @@ namespace Render {
     OpenGLRenderWindow::~OpenGLRenderWindow()
     {
         if (!mReusedContext) {
-            for (std::pair<const std::string, OpenGLFontLoader::ResourceType> &p : OpenGLFontLoader::getSingleton()) {
+            for (std::pair<const std::string, FontLoader::ResourceType> &p : FontLoader::getSingleton()) {
                 p.second.unloadData();
             }
 

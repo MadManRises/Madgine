@@ -17,9 +17,6 @@
 #include "openglmeshdata.h"
 #include "openglmeshloader.h"
 
-#include "openglfontdata.h"
-#include "openglfontloader.h"
-
 #include "openglrendercontext.h"
 
 namespace Engine {
@@ -67,6 +64,8 @@ namespace Render {
 
         mesh->mVAO.bind();
         program->bind();
+
+		program->verify();
 
         constexpr GLenum modes[] {
             GL_POINTS,

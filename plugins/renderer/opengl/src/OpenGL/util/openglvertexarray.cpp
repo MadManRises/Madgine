@@ -15,7 +15,7 @@ namespace Render {
         case ATTRIBUTE_FLOAT:
             return GL_FLOAT;
         case ATTRIBUTE_INT:
-			return GL_INT;
+            return GL_INT;
         default:
             std::terminate();
         }
@@ -113,10 +113,17 @@ namespace Render {
 
         for (size_t i = 0; i < mAttributes.size(); ++i) {
             if (mAttributes[i].mEnabled) {
-                glVertexAttribPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType), GL_FALSE, mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
+                if (mAttributes[i].mAttribute.mType == ATTRIBUTE_FLOAT) {
+                    glVertexAttribPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType), GL_FALSE, mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
+                    GL_LOG("Use " << i << " as vec" << mAttributes[i].mAttribute.mArraySize);
+                } else {
+                    glVertexAttribIPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType), mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
+                    GL_LOG("Use " << i << " as ivec" << mAttributes[i].mAttribute.mArraySize);
+                }
                 glEnableVertexAttribArray(i);
             } else {
                 glDisableVertexAttribArray(i);
+                GL_LOG("Dont use " << i);
             }
         }
         static int maxAttribs = []() {
@@ -124,8 +131,10 @@ namespace Render {
             glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &dummy);
             return dummy;
         }();
-        for (size_t i = mAttributes.size(); i < maxAttribs; ++i)
+        for (size_t i = mAttributes.size(); i < maxAttribs; ++i) {
             glDisableVertexAttribArray(i);
+            GL_LOG("Dont use " << i);
+        }
 
 #endif
     }
@@ -143,8 +152,11 @@ namespace Render {
 
     void OpenGLVertexArray::enableVertexAttribute(unsigned int index, AttributeDescriptor attribute)
     {
-
-        glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+        if (attribute.mType == ATTRIBUTE_FLOAT) {
+            glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+        } else {
+            glVertexAttribIPointer(index, attribute.mArraySize, glType(attribute.mType), attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+        }
         glEnableVertexAttribArray(index);
 
 #if OPENGL_ES

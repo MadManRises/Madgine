@@ -56,7 +56,7 @@ namespace Widgets {
         assert(mWidgets.empty());
     }
 
-    const char *WidgetManager::key() const
+    std::string_view WidgetManager::key() const
     {
         return "WidgetManager";
     }

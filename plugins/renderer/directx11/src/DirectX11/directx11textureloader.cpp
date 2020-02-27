@@ -79,5 +79,10 @@ namespace Render {
         static_cast<DirectX11Texture &>(tex).setWrapMode(glMode);*/
     }
 
+    void DirectX11TextureLoader::setMinMode(Texture &tex, MinMode mode)
+    {
+		//TODO
+    }
+
 }
 }

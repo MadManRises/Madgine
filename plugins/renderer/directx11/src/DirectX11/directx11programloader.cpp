@@ -58,5 +58,10 @@ namespace Render {
         static_cast<DirectX11Program &>(program).setParameters(data, size, index);
     }
 
+	void DirectX11ProgramLoader::setDynamicParameters(Program &program, const void *data, size_t size, size_t index)
+    {
+        static_cast<DirectX11Program &>(program).setDynamicParameters(data, size, index);
+    }
+
 }
 }

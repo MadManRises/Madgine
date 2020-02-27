@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../primitivetypes.h"
+#include "primitivetypes.h"
 
-#include "../../generic/copy_traits.h"
+#include "../generic/copy_traits.h"
 
-#include "../../generic/nullref.h"
+#include "../generic/nullref.h"
 
-#include "../../generic/iterator_traits.h"
+#include "../generic/iterator_traits.h"
 
 namespace Engine {
 namespace Serialize {

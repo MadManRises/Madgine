@@ -10,7 +10,7 @@ namespace Tools {
     struct MADGINE_TOOLS_EXPORT FunctionTool : Tool<FunctionTool> {
         FunctionTool(ImRoot &root);
 
-        const char *key() const override;
+        std::string_view key() const override;
 
         virtual bool init() override;
 

@@ -9,8 +9,8 @@
 
 #include "im3d/im3d.h"
 
-#include "DirectX11/directx11fontloader.h"
-#include "DirectX11/directx11fontdata.h"
+#include "fontloader.h"
+
 #include "DirectX11/directx11rendercontext.h"
 
 #include "Madgine/gui/toplevelwindow.h"
@@ -46,11 +46,11 @@ RegisterType(Engine::Tools::DirectX11ImRoot)
                 ImGui::GetIO().RenderDrawListsFn = ImGui_ImplDX11_RenderDrawData;
 
             Im3D::GetIO().mFetchFont = [](const char *fontName) {
-                Render::DirectX11FontLoader::HandleType font;
+                Render::FontLoader::HandleType font;
 				font.load(fontName);
 
                 return Im3DFont {
-                    font->mTexture.mTextureHandle,
+                    font->mTextureHandle,
                     font->mTextureSize,
                     font->mGlyphs.data()
                 };

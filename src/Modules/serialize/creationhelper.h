@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../generic/callable_traits.h"
-#include "../../generic/tupleunpacker.h"
+#include "../generic/callable_traits.h"
+#include "../generic/tupleunpacker.h"
 #include "tupleserialize.h"
 
 namespace Engine

@@ -18,7 +18,7 @@ namespace Scene {
 
         virtual void update(std::chrono::microseconds);
 
-        const char *key() const;
+        std::string_view key() const;
 
         template <typename T>
         T &getSceneComponent(bool init = true)

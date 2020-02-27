@@ -17,9 +17,6 @@
 #include "openglmeshdata.h"
 #include "openglmeshloader.h"
 
-#include "openglfontdata.h"
-#include "openglfontloader.h"
-
 namespace Engine {
 namespace Render {
 

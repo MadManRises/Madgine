@@ -10,7 +10,7 @@ namespace Tools {
     struct MADGINE_TOOLS_EXPORT ProjectManager : Tool<ProjectManager> {
         ProjectManager(ImRoot &root);
 
-        virtual const char *key() const override;
+        virtual std::string_view key() const override;
 
         virtual void renderMenu() override;
 

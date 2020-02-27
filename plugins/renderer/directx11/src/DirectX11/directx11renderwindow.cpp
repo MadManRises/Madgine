@@ -16,7 +16,8 @@
 
 #include "imagedata.h"
 
-#include "directx11fontloader.h"
+#include "fontloader.h"
+
 #include "directx11meshloader.h"
 #include "directx11pixelshaderloader.h"
 #include "directx11programloader.h"
@@ -135,7 +136,7 @@ RegisterType(Engine::Render::DirectX11RenderWindow)
             }
 
             if (!mReusedContext) {
-                for (std::pair<const std::string, DirectX11FontLoader::ResourceType> &p : DirectX11FontLoader::getSingleton()) {
+                for (std::pair<const std::string, FontLoader::ResourceType> &p : FontLoader::getSingleton()) {
                     p.second.unloadData();
                 }
 

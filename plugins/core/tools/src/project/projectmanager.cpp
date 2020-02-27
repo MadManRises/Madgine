@@ -35,7 +35,7 @@ RegisterType(Engine::Tools::ProjectManager)
         {
         }
 
-        const char *ProjectManager::key() const
+        std::string_view ProjectManager::key() const
         {
             return "ProjectManager";
         }

@@ -17,6 +17,8 @@ namespace Render {
         bool create(Program &program, const std::string &name) override;
 
         virtual void setParameters(Program &program, const void *data, size_t size, size_t index) override;
+
+		virtual void setDynamicParameters(Program &program, const void *data, size_t size, size_t index) override;
     };
 }
 }

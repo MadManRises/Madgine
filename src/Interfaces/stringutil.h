@@ -22,19 +22,16 @@ namespace StringUtil {
         return s;
     }
 
-    inline std::string &replace(std::string &s, std::string_view old, std::string_view rep)
+	template <typename String>
+    inline String &replace(String &s, std::string_view old, std::string_view rep)
     {
-        size_t index = 0;
+        size_t pos = s.find(old);
         size_t oldLen = old.size();
         size_t repLen = rep.size();
 
-        while (index + oldLen <= s.size()) {
-            if (std::string_view { &s[index], oldLen } == old) {
-                s.replace(index, oldLen, rep.data(), repLen);
-                index += oldLen;
-            } else {
-                ++index;
-            }
+        while (pos != std::string::npos) {
+            s.replace(pos, oldLen, rep);            
+            pos = s.find(old, pos + repLen);
         }
         return s;
     }

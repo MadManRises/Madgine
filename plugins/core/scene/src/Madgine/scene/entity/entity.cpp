@@ -66,9 +66,9 @@ namespace Scene {
         {
         }
 
-        const char *Entity::key() const
+        const std::string &Entity::key() const
         {
-            return mName.c_str();
+            return mName;
         }
 
         void Entity::writeCreationData(Serialize::SerializeOutStream &of) const

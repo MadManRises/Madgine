@@ -5,22 +5,6 @@
 
 namespace Engine {
 
-template <typename T>
-struct FixString {
-    static T apply(T &&t)
-    {
-        return std::forward<T>(t);
-    }
-};
-
-template <>
-struct FixString<const char *> {
-    static std::string apply(const char *s)
-    {
-        return s;
-    }
-};
-
 template <typename T, typename = void>
 struct KeyValue {
     static T &value(T &v)
@@ -31,16 +15,16 @@ struct KeyValue {
     static T value(T &&v)
     {
         return std::move(v);
-	}
-
-    static T &key(T &v)
-    {
-        return v;
     }
 
-	static T key(T &&v)
+    static std::monostate key(T &v)
     {
-        return std::move(v);
+        return {};
+    }
+
+    static std::monostate key(T &&v)
+    {
+        return {};
     }
 };
 
@@ -144,7 +128,7 @@ decltype(auto) kvValue(T &&v)
 template <typename T>
 decltype(auto) kvKey(T &&v)
 {
-    return FixString<decltype(KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v)))>::apply(KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v)));
+    return KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v));
 }
 
 template <typename T>
@@ -197,13 +181,18 @@ struct KeyType {
 template <typename T>
 using KeyType_t = typename KeyType<T>::type;
 
-template <typename _Ty, typename = void>
+template <typename _Ty>
 struct KeyCompare {
-    // functor for operator<
-    typedef _Ty first_argument_type;
-    typedef _Ty second_argument_type;
-    typedef KeyType_t<_Ty> cmp_type;
-    typedef bool result_type;
+
+    struct traits {
+        typedef KeyCompare<_Ty> cmp_type;
+        typedef KeyType_t<_Ty> type;
+
+        static decltype(auto) to_cmp_type(const _Ty &v)
+        {
+            return kvKey(v);
+        }
+    };
 
     using is_transparent = void;
 
@@ -221,20 +210,6 @@ struct KeyCompare {
     constexpr bool operator()(const _Ty &_Left, const KeyType_t<_Ty> &_Right) const
     {
         return (kvKey(_Left) < _Right);
-    }
-};
-
-template <typename T>
-struct KeyCompare<T, std::enable_if_t<std::is_same_v<KeyType_t<T>, T>>> {
-    // functor for operator<
-    typedef T first_argument_type;
-    typedef T second_argument_type;
-    typedef bool result_type;
-
-    constexpr bool operator()(const T &_Left, const T &_Right) const
-    {
-        // apply operator< to operands
-        return (kvKey(_Left) < kvKey(_Right));
     }
 };
 

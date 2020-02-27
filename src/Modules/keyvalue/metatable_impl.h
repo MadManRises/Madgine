@@ -67,7 +67,7 @@ constexpr Accessor property()
 
             if constexpr (ValueType::isValueType<T>::value) {
                 return ValueType { std::forward<T>(value) };
-            } else if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase&>){
+            } else if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
                 return ValueType { &value };
             } else if constexpr (is_typed_iterable<T>::value) {
                 return ValueType {
@@ -75,7 +75,7 @@ constexpr Accessor property()
                 };
             } else if constexpr (is_iterable<T>::value) {
                 return ValueType {
-                    KeyValueVirtualIterator { KeyValueIterator { value.begin() }, KeyValueIterator { value.end() } }
+                    KeyValueVirtualIterator { std::forward<T>(value), type_holder<KeyValueIterator<typename derive_iterator<T>::iterator>> }
                 };
             } else {
                 static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
@@ -146,6 +146,14 @@ static constexpr ApiMethod method(TypedScopePtr scope)
     return wrapHelper<F>(F);
 }
 
+/*template <typename T, size_t... Is>
+static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tuple_size_v<T> + 1> structMembers(std::index_sequence<Is...>)
+{
+    return {
+
+        { nullptr, nullptr }
+    };
+}*/
 }
 
 #define METATABLE_BEGIN(T) _METATABLE_BEGIN_IMPL(T, nullptr)
@@ -170,6 +178,15 @@ static constexpr ApiMethod method(TypedScopePtr scope)
     }                                 \
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG3({ #T, Meta_##T::baseClassGetter, Meta_##T::members }), T);
 
+/*#define STRUCT_METATABLE(T)                                                                                              \
+    namespace {                                                                                                          \
+        namespace Meta_##T                                                                                               \
+        {                                                                                                                \
+            constexpr const auto members = ::Engine::structMembers<T>(std::make_index_sequence<std::tuple_size_v<T>>()); \
+        }                                                                                                                \
+    }                                                                                                                    \
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG3({ #T, nullptr, Meta_##T::members.data() }), T);
+*/
 #define MEMBER(M) \
     { #M, ::Engine::member<Ty, &Ty::M>() },
 

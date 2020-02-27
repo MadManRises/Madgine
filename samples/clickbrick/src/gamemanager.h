@@ -17,7 +17,7 @@ namespace UI {
 
         virtual bool init() override;
 
-        virtual const char *key() const override;
+        virtual std::string_view key() const override;
 
         virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 

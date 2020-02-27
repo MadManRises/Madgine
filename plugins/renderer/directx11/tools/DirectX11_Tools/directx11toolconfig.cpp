@@ -8,13 +8,12 @@
 
 #include "inspector/inspector.h"
 
-#include "DirectX11/directx11fontdata.h"
-#include "DirectX11/directx11fontloader.h"
-
 #include "imgui/imgui.h"
 
 #include "imageloaderlib.h"
 #include "imageloader.h"
+
+#include "fontloader.h"
 
 #include "imagedata.h"
 
@@ -30,9 +29,9 @@ namespace Tools {
     {
         mImageTexture = { Render::Texture2D, Render::FORMAT_UNSIGNED_BYTE, D3D11_BIND_SHADER_RESOURCE, 100, 100 };
 
-        getTool<Inspector>().addPreviewDefinition<Render::DirectX11FontLoader::ResourceType>([](Render::DirectX11FontLoader::ResourceType *font) {
+        getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture.mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)font->loadData()->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
@@ -53,7 +52,7 @@ namespace Tools {
 		ToolBase::finalize();
     }
 
-    const char *DirectX11ToolConfig::key() const
+    std::string_view DirectX11ToolConfig::key() const
     {
         return "DirectX11ToolConfig";
     }

@@ -62,10 +62,19 @@ namespace Render {
         }
     }
 
-    void OpenGLBuffer::setData(GLsizei size, const void *data)
+    void OpenGLBuffer::setData(const void *data, GLsizei size)
     {
         bind();
         glBufferData(mTarget, size, data, GL_STATIC_DRAW);
+        GL_CHECK();
+        GL_LOG("Buffer-Data: " << size);
+    }
+
+    void OpenGLBuffer::setSubData(const void *data, unsigned int offset, GLsizei size)
+    {
+        bind();
+        glBufferSubData(mTarget, offset, size, data);
+        GL_LOG("Buffer-SubData: " << offset << ", " << size);
         GL_CHECK();
     }
 

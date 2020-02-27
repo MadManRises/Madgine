@@ -65,7 +65,7 @@ namespace Widgets {
         const std::string &getName() const;
         void setName(const std::string &name);
 
-        const char *key() const;
+        const std::string &key() const;
 
         WidgetBase *createChild(const std::string &name, WidgetClass _class);
         WidgetBase *createChildWidget(const std::string &name);

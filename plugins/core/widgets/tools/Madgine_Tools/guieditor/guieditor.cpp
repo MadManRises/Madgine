@@ -78,7 +78,7 @@ namespace Tools {
     {
         if (ImGui::BeginMenu("Layouts")) {
             for (Widgets::WidgetBase *w : mWidgetManager->widgets()) {
-                if (ImGui::MenuItem(w->key(), nullptr, w->mVisible)) {
+                if (ImGui::MenuItem(w->key().c_str(), nullptr, w->mVisible)) {
                     mWidgetManager->swapCurrentRoot(w);
                 }
             }
@@ -113,7 +113,7 @@ namespace Tools {
         ToolBase::update();
     }
 
-    const char *GuiEditor::key() const
+    std::string_view GuiEditor::key() const
     {
         return "GuiEditor";
     }

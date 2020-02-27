@@ -12,7 +12,7 @@ namespace Tools {
         virtual void render() override;
         virtual void update() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
         void logTest();
         void logValue(const ValueType &v);

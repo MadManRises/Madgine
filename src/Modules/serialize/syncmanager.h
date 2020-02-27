@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../threading/signal.h"
-
 #include "serializableids.h"
 
 #include "streams/bufferedstream.h"
@@ -42,8 +40,6 @@ namespace Serialize {
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
 
-        Threading::SignalStub<> &slaveStreamDisconnected();
-
 		static ParticipantId getParticipantId(SyncManager *manager);
 
     protected:
@@ -71,9 +67,7 @@ namespace Serialize {
         std::set<BufferedInOutStream, CompareStreamId> mMasterStreams;
         std::optional<BufferedInOutStream> mSlaveStream;
 
-        std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;
-
-        Threading::Signal<> mSlaveStreamDisconnected;
+        std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;        
 
         bool mSlaveStreamInvalid;
     };

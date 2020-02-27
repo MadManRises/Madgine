@@ -1,11 +1,11 @@
-#include "../../moduleslib.h"
+#include "../moduleslib.h"
 
 #include "unithelper.h"
 
-#include "../serializable.h"
-#include "../toplevelserializableunit.h"
+#include "serializable.h"
+#include "toplevelserializableunit.h"
 
-#include "../streams/serializestream.h"
+#include "streams/serializestream.h"
 
 namespace Engine {
 namespace Serialize {    

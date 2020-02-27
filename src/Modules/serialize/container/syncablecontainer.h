@@ -2,7 +2,7 @@
 
 #include "../../generic/noopfunctor.h"
 #include "../../generic/observerevent.h"
-#include "../../keyvalue/keyvalue.h"
+//#include "../../keyvalue/keyvalue.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
 #include "serializablecontainer.h"
@@ -438,11 +438,11 @@ namespace Serialize {
 
         iterator read_iterator(SerializeInStream &in)
         {
-            if constexpr (_traits::sorted) {
-                typename _traits::key_type key;
+            /*if constexpr (_traits::sorted) {
+                FixString_t<KeyType_t<typename _traits::value_type>> key;
                 in >> key;
                 return kvFind(*this, key);
-            } else {
+            } else*/ {
                 int i;
                 in >> i;
                 return std::next(Base::Base::begin(), i);
@@ -451,9 +451,9 @@ namespace Serialize {
 
         void write_iterator(SerializeOutStream &out, const const_iterator &it) const
         {
-            if constexpr (_traits::sorted) {
+            /*if constexpr (_traits::sorted) {
                 out << kvKey(*it);
-            } else {
+            } else*/ {
                 out << static_cast<int>(std::distance(Base::Base::begin(), it));
             }
         }

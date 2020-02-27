@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 layout (std140, binding = 0) uniform PerApplication
 {
@@ -24,7 +24,7 @@ layout (std140, binding = 2) uniform PerObject
 	bool hasSkeleton;
 };
 
-layout (std140, binding = 3) uniform Skeleton
+layout (std430, binding = 0) buffer Skeleton
 {
 	mat4 bones[];
 };
@@ -39,7 +39,7 @@ layout(location = 5) in ivec4 aBoneIDs;
 layout(location = 6) in vec4 aWeights;
 
 out vec4 color;
-out vec3 worldPos;
+out vec4 worldPos;
 out vec3 normal;
 out vec2 uv;
 
@@ -47,15 +47,15 @@ out vec2 uv;
 void main()
 {
 	if (hasSkeleton){
-		mat4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0];
-		BoneTransform += bones[aBoneIDs[1]] * aWeights[1];
-		BoneTransform += bones[aBoneIDs[2]] * aWeights[2];
-		BoneTransform += bones[aBoneIDs[3]] * aWeights[3];
-		worldPos = vec3(m * BoneTransform * vec4(aPos, 1.0));
+		mat4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]
+		+ bones[aBoneIDs[1]] * aWeights[1]
+		+ bones[aBoneIDs[2]] * aWeights[2]
+		+ bones[aBoneIDs[3]] * aWeights[3];
+		worldPos = m * BoneTransform * vec4(aPos, 1.0);
 	}else{
-		worldPos = vec3(m * vec4(aPos, 1.0));
+		worldPos = m * vec4(aPos, 1.0);
 	}
-    gl_Position = p * (v * vec4(worldPos, 1.0) + vec4(aPos2, 0.0, 0.0));	
+    gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
     color = aColor;
 	normal = mat3(anti_m) * aNormal;
 	uv = vec2(aUV.x, 1.0 - aUV.y);

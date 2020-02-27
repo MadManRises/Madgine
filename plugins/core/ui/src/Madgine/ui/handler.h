@@ -34,7 +34,7 @@ namespace UI {
 
         virtual void sizeChanged();
 
-        virtual const char *key() const = 0;
+        virtual std::string_view key() const = 0;
 
         //virtual App::Application &app(bool = true) override;
         virtual const MadgineObject *parent() const override;

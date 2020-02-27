@@ -18,7 +18,7 @@ struct UniqueComponentContainerImpl : C {
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
-	typedef typename C::value_type value_type;
+    typedef typename C::value_type value_type;
 
     typedef C Container;
 
@@ -65,6 +65,12 @@ struct UniqueComponentContainerImpl : C {
         using It = typename std::vector<Base *>::const_iterator;
         using TypeIt = typename std::vector<const MetaTable *>::const_iterator;
 
+        using iterator_category = typename It::iterator_category;
+        using value_type = TypedScopePtr;
+        using difference_type = typename It::difference_type;
+        using pointer = void;
+        using reference = void;
+
         typed_const_iterator(It &&it, TypeIt &&type)
             : mIt(std::move(it))
             , mType(std::move(type))
@@ -92,6 +98,11 @@ struct UniqueComponentContainerImpl : C {
         bool operator!=(const typed_const_iterator &other) const
         {
             return mIt != other.mIt;
+        }
+
+        difference_type operator-(const typed_const_iterator &other) const
+        {
+            return mIt - other.mIt;
         }
 
     private:
@@ -143,7 +154,7 @@ protected:
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                this->erase(std::find_if(Container::begin(), Container::end(), [&](value_type &p) { return p.get() == mSortedComponents[i]; }));
+                this->erase(std::find_if(Container::begin(), Container::end(), [&](const value_type &p) { return p.get() == mSortedComponents[i]; }));
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }
@@ -156,7 +167,6 @@ private:
 
 #endif
 };
-
 
 template <typename C, typename _Base, typename... _Ty>
 using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<_Base>>, _Base, _Ty...>;

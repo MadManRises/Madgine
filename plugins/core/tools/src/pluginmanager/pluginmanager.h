@@ -16,7 +16,7 @@ namespace Tools {
 
         virtual bool init() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
         void setCurrentConfig(const Filesystem::Path &path, const std::string &name);
 

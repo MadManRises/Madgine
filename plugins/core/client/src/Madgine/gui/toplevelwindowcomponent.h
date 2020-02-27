@@ -25,7 +25,7 @@ namespace GUI {
 
         TopLevelWindowComponentBase &getSelf(bool = true);
 
-        virtual const char *key() const = 0;
+        virtual std::string_view key() const = 0;
 
         virtual void onResize(const Rect2i &space);
 

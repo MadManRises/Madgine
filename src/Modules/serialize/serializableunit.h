@@ -9,6 +9,11 @@
 namespace Engine {
 namespace Serialize {
 
+	#define SERIALIZABLEUNIT_MEMBERS() \
+READONLY_PROPERTY(Synced, isSynced) \
+READONLY_PROPERTY(MasterId, masterId) \
+READONLY_PROPERTY(SlaveId, slaveId)
+
     struct MODULES_EXPORT SerializableUnitBase {
     protected:
         SerializableUnitBase(size_t masterId = 0);

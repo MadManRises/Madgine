@@ -2,6 +2,7 @@
 
 #include "../serialize/syncmanager.h"
 #include "../threading/slot.h"
+#include "../threading/signal.h"
 #include "networkbuffer.h"
 
 namespace Engine {

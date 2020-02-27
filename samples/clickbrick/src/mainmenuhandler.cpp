@@ -28,7 +28,7 @@ RegisterType(ClickBrick::UI::MainMenuHandler)
         {
         }
 
-        const char *MainMenuHandler::key() const
+        std::string_view MainMenuHandler::key() const
         {
             return "MainMenuHandler";
         }

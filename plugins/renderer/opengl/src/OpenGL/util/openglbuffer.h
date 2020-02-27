@@ -11,15 +11,16 @@ namespace Render {
         OpenGLBuffer(OpenGLBuffer &&);
         ~OpenGLBuffer();
 
-		OpenGLBuffer &operator=(const OpenGLBuffer &) = delete;
+        OpenGLBuffer &operator=(const OpenGLBuffer &) = delete;
         OpenGLBuffer &operator=(OpenGLBuffer &&);
 
-		operator bool() const;
+        operator bool() const;
 
         void bind() const;
 
-		void reset();
-        void setData(GLsizei size, const void *data);
+        void reset();
+        void setData(const void *data, GLsizei size);
+        void setSubData(const void *data, unsigned int offset, GLsizei size);
 
         GLuint handle();
 

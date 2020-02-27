@@ -63,8 +63,7 @@ namespace Resources {
 
             Data *dataPtr()
             {
-                loadData();
-                return getDataPtr(this);
+                return getDataPtr(loadData());
             }
 
             Ctor mCtor;

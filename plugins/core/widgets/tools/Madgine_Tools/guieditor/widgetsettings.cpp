@@ -37,7 +37,7 @@ namespace Tools {
             mWidget->setName(name);
 
         Matrix3 pos = mWidget->getPos();
-        Matrix3 size = mWidget->getSize();
+        Matrix3 size = mWidget->getSize();		
 
         bool enabled[9] = {
             true, true, true,
@@ -77,7 +77,7 @@ namespace Tools {
 
 		ImGui::Separator();
 
-		mInspector.draw({ mWidget, mWidget->type() });
+		mInspector.draw({ mWidget, mWidget->type() }, { "Pos", "Size" });
     }
 
     void WidgetSettings::saveGeometry()

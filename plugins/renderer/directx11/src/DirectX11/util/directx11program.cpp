@@ -88,5 +88,19 @@ namespace Render {
             mConstantBuffers[index].setData(size, data);
         }
     }
+
+	void DirectX11Program::setDynamicParameters(const void *data, size_t size, size_t index)
+    {
+            throw 0;
+
+        if (mConstantBuffers.size() <= index)
+            mConstantBuffers.resize(index + 1);
+
+        if (!mConstantBuffers[index]) {
+            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, size, data };
+        } else {
+            mConstantBuffers[index].setData(size, data);
+        }
+    }
 }
 }

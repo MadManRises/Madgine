@@ -2,7 +2,7 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "Modules/keyvalue/scopebase.h"
+#include "../keyvalue/scopebase.h"
 
 namespace Engine {
 namespace Resources {

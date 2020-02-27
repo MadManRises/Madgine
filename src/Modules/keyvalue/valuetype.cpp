@@ -17,10 +17,55 @@ ValueType::ValueType(ValueType &&other) noexcept
 {
 }
 
-ValueType::ValueType(const char *s)
-    : ValueType(std::string(s))
+ValueType::ValueType(std::string &&s)
+    : mUnion(std::in_place_type<HeapObject<std::string>>, std::move(s))
 {
 }
+
+ValueType::ValueType(const std::string &s)
+    : mUnion(std::in_place_type<std::string_view>, s)
+{
+}
+
+ValueType::ValueType(const std::string &&s)
+    : mUnion(std::in_place_type<HeapObject<std::string>>, s)
+{
+}
+
+ValueType::ValueType(Matrix3 &&m)
+    : mUnion(CoW<Matrix3> { std::move(m) })
+{
+}
+
+ValueType::ValueType(const Matrix3 &m)
+    : mUnion(CoW<Matrix3> { m })
+{
+}
+
+ValueType::ValueType(const Matrix3 &&m)
+    : mUnion(CoW<Matrix3> { std::move(m) })
+{
+}
+
+ValueType::ValueType(Matrix4 &&m)
+    : mUnion(CoW<Matrix4> { std::move(m) })
+{
+}
+
+ValueType::ValueType(const Matrix4 &m)
+    : mUnion(CoW<Matrix4> { m })
+{
+}
+
+ValueType::ValueType(const Matrix4 &&m)
+    : mUnion(CoW<Matrix4> { std::move(m) })
+{
+}
+
+/*ValueType::ValueType(const char *s)
+    : ValueType(std::string(s))
+{
+}*/
 
 ValueType::~ValueType()
 {
@@ -37,9 +82,28 @@ void ValueType::operator=(const ValueType &other)
     mUnion = other.mUnion;
 }
 
-void ValueType::operator=(const char *const s)
+void ValueType::operator=(const std::string &s)
 {
-    mUnion = std::string(s);
+    mUnion = Union { std::in_place_type<std::string_view>,
+        s };
+}
+
+void ValueType::operator=(std::string &s)
+{
+    mUnion = Union { std::in_place_type<std::string_view>,
+        s };
+}
+
+void ValueType::operator=(const std::string &&s)
+{
+    mUnion = Union { std::in_place_type<HeapObject<std::string>>,
+        s };
+}
+
+void ValueType::operator=(std::string &&s)
+{
+    mUnion = Union { std::in_place_type<HeapObject<std::string>>,
+        std::move(s) };
 }
 
 bool ValueType::operator==(const ValueType &other) const
@@ -55,10 +119,10 @@ bool ValueType::operator!=(const ValueType &other) const
 bool ValueType::operator<(const ValueType &other) const
 {
     switch (type()) {
-    case Type::StringValue:
+    case Type::OwningStringValue:
         switch (other.type()) {
-        case Type::StringValue:
-            return std::get<std::string>(mUnion) < std::get<std::string>(other.mUnion);
+        case Type::OwningStringValue:
+            return *std::get<HeapObject<std::string>>(mUnion) < *std::get<HeapObject<std::string>>(other.mUnion);
         default:
             throw ValueTypeException(Database::Exceptions::invalidValueType);
         }
@@ -84,13 +148,13 @@ bool ValueType::operator>(const ValueType &other) const
 void ValueType::operator+=(const ValueType &other)
 {
     switch (type()) {
-    case Type::StringValue:
+    case Type::OwningStringValue:
         switch (other.type()) {
-        case Type::StringValue:
-            std::get<std::string>(mUnion) += std::get<std::string>(other.mUnion);
+        case Type::OwningStringValue:
+            *std::get<HeapObject<std::string>>(mUnion) += *std::get<HeapObject<std::string>>(other.mUnion);
             return;
         case Type::IntValue:
-            std::get<std::string>(mUnion) += std::to_string(std::get<int>(other.mUnion));
+            *std::get<HeapObject<std::string>>(mUnion) += std::to_string(std::get<int>(other.mUnion));
         default:
             break;
         }
@@ -218,14 +282,15 @@ ValueType ValueType::operator*(const ValueType &other) const
     return result;
 }
 
-
 std::string ValueType::toString() const
 {
     switch (type()) {
     case Type::BoolValue:
         return std::get<bool>(mUnion) ? "true" : "false";
-    case Type::StringValue:
-        return "\""s + std::get<std::string>(mUnion) + "\"";
+    case Type::OwningStringValue:
+        return "\""s + *std::get<HeapObject<std::string>>(mUnion) + "\"";
+    case Type::NonOwningStringValue:
+        return "\""s + std::string { std::get<std::string_view>(mUnion) } + "\"";
     case Type::IntValue:
         return std::to_string(std::get<int>(mUnion));
     case Type::UIntValue:
@@ -245,9 +310,9 @@ std::string ValueType::toString() const
     case Type::QuaternionValue:
         return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
     case Type::Matrix3Value:
-        return "[ ["s + std::to_string(std::get<Matrix3>(mUnion)[0][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[0][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[0][2]) + "], [" + std::to_string(std::get<Matrix3>(mUnion)[1][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[1][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[1][2]) + "], [" + std::to_string(std::get<Matrix3>(mUnion)[2][0]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[2][1]) + ", " + std::to_string(std::get<Matrix3>(mUnion)[2][2]) + "] ]";
+        return "[ ["s + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][2]) + "] ]";
     case Type::Matrix4Value:
-        return "[ ["s + std::to_string(std::get<Matrix4>(mUnion)[0][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[0][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[1][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[1][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[2][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[2][3]) + "], [" + std::to_string(std::get<Matrix4>(mUnion)[3][0]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][1]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][2]) + ", " + std::to_string(std::get<Matrix4>(mUnion)[3][3]) + "] ]";
+        return "[ ["s + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][3]) + "] ]";
     case Type::ApiMethodValue:
         return "<method>";
     default:
@@ -260,8 +325,10 @@ std::string ValueType::toShortString() const
     switch (type()) {
     case Type::BoolValue:
         return std::get<bool>(mUnion) ? "true" : "false";
-    case Type::StringValue:
-        return "\""s + std::get<std::string>(mUnion) + "\"";
+    case Type::OwningStringValue:
+        return "\""s + *std::get<HeapObject<std::string>>(mUnion) + "\"";
+    case Type::NonOwningStringValue:
+        return "\""s + std::string { std::get<std::string_view>(mUnion) } + "\"";
     case Type::IntValue:
         return std::to_string(std::get<int>(mUnion));
     case Type::UIntValue:
@@ -311,7 +378,7 @@ std::string ValueType::getTypeString(Type type)
         return "Null-Type";
     case Type::ScopeValue:
         return "Scope";
-    case Type::StringValue:
+    case Type::OwningStringValue:
         return "String";
     case Type::Matrix3Value:
         return "Matrix3x3";
@@ -338,7 +405,6 @@ ValueType::Type ValueType::type() const
 {
     return static_cast<Type>(mUnion.index());
 }
-
 
 ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
     : mValue(std::move(other.mValue))
@@ -373,6 +439,9 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
         },
         [this](const std::string &s) {
             *static_cast<std::string *>(mData) = s;
+        },
+        [this](const std::string_view &s) {
+            *static_cast<std::string_view *>(mData) = s;
         },
         [this](bool b) {
             *static_cast<bool *>(mData) = b;
@@ -422,7 +491,6 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
 
     return *this;
 }
-
 
 }
 

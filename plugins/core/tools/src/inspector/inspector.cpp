@@ -24,8 +24,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalue/scopeiterator.h"
 #include "Modules/keyvalue/scopefield.h"
+#include "Modules/keyvalue/scopeiterator.h"
 
 #include "functiontool.h"
 
@@ -74,15 +74,15 @@ namespace Tools {
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
             if (ImGui::TreeNode("Application")) {
-                draw(&App::Application::getSingleton(), "Application");
+                draw(&App::Application::getSingleton(), {}, "Application");
                 ImGui::TreePop();
             }
             if (ImGui::TreeNode("TopLevelWindow")) {
-                draw(mRoot.toolsTopLevel(), "TopLevelWindow");
+                draw(mRoot.toolsTopLevel(), {}, "TopLevelWindow");
                 ImGui::TreePop();
             }
             if (ImGui::TreeNode("Resources")) {
-                draw(&Resources::ResourceManager::getSingleton(), "Resources");
+                draw(&Resources::ResourceManager::getSingleton(), {}, "Resources");
                 ImGui::TreePop();
             }
         }
@@ -93,7 +93,7 @@ namespace Tools {
     {
 
         for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
-            if (drawn.find(it->key()) == drawn.end()) {
+            if (drawn.count(it->key()) == 0) {
                 drawValue(nullptr, scope, it);
                 drawn.insert(it->key());
             }
@@ -123,12 +123,12 @@ namespace Tools {
         std::string id = (showName ? std::string() : "##"s) + it->key();
         bool editable = it->isEditable();
 
-		ValueType value = *it;
-		if (drawValueImpl(element, parent, id, value, editable))
-             *it = value;
+        ValueType value = *it;
+        if (drawValueImpl(element, parent, id, value, editable))
+            *it = value;
     }
 
-    bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, ValueType &value, bool editable)
+    bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable)
     {
         bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue;
 
@@ -173,7 +173,7 @@ namespace Tools {
 
                                                                  if (open) {
                                                                      if (scope) {
-                                                                         draw(scope, element ? element->Attribute("layout") : nullptr);
+                                                                         draw(scope, {}, element ? element->Attribute("layout") : nullptr);
                                                                      }
                                                                      ImGui::TreePop();
                                                                  }
@@ -186,7 +186,13 @@ namespace Tools {
                                                              size_t i = 0;
                                                              for (; it != VirtualIteratorEnd {}; ++it) {
                                                                  ValueType value = it->second;
-                                                                 if (drawValueImpl(element, {}, it->first.toShortString() + "##" + std::to_string(i), value, /*editable && */ it->second.isEditable())) {
+                                                                 std::string key = std::to_string(i);
+                                                                 if (!it->first.is<std::monostate>()) {
+                                                                     key = it->first.toShortString() + "##" + key;
+                                                                 } else if (it->second.value().is<TypedScopePtr>()) {
+                                                                     key = "[" + std::to_string(i) + "] " + it->second.value().as<TypedScopePtr>().name() + "##" + key;
+																 }
+                                                                 if (drawValueImpl(element, {}, key, value, /*editable && */ it->second.isEditable())) {
                                                                      it->second = value;
                                                                  }
                                                                  ++i;
@@ -211,25 +217,31 @@ namespace Tools {
         return modified;
     }
 
-    void Inspector::draw(TypedScopePtr scope, const char *layoutName)
+    void Inspector::draw(TypedScopePtr scope, std::set<std::string> drawn, const char *layoutName)
     {
         if (!scope) {
             ImGui::Text("<NULL>");
             return;
         }
 
-        std::set<std::string> drawn;
-        const char *type = scope.mType->mTypeName;
-        InspectorLayout *layout = nullptr;
-        auto it = mAssociations.find(type);
-        if (it != mAssociations.end()) {
-            layout = it->second;
-        } else {
-            if (layoutName)
-                layout = getLayout(layoutName);
-        }
-        if (layout) {
-            draw(layout, scope, drawn);
+        const MetaTable *type = scope.mType;
+        while (type) {
+            const char *typeName = type->mTypeName;
+            InspectorLayout *layout = nullptr;
+            auto it = mAssociations.find(typeName);
+            if (it != mAssociations.end()) {
+                layout = it->second;
+            } else {
+                if (layoutName)
+                    layout = getLayout(layoutName);
+            }
+            if (layout) {
+                draw(layout, scope, drawn);
+            }
+            if (type->mBaseGetter)
+                type = &type->mBaseGetter();
+            else
+                type = nullptr;
         }
         drawRemainingMembers(scope, drawn);
 
@@ -334,7 +346,7 @@ namespace Tools {
         int count = 0;
         for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
             ++count;
-        ImGui::PushMultiItemsWidths(count, 1.0f); //TODO
+        ImGui::PushMultiItemsWidths(count, 100.0f); //TODO
         for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement()) {
             drawElement(child, scope, drawn);
             if (--count > 0)
@@ -352,7 +364,7 @@ namespace Tools {
         return nullptr;
     }
 
-    const char *Inspector::key() const
+    std::string_view Inspector::key() const
     {
         return "Inspector";
     }

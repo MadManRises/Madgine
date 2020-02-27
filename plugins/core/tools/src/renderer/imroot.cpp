@@ -33,7 +33,7 @@ namespace Tools {
     {
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
-            if (streq(tool->key(), name))
+            if (tool->key() == name)
                 return tool;
         }
         return nullptr;
@@ -58,7 +58,8 @@ namespace Tools {
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
-            out_buf->appendf("[Tool][%s]\n", tool->key());
+            std::string name = std::string { tool->key() };
+            out_buf->appendf("[Tool][%s]\n", name.c_str());
 
             tool->writeState(out, nullptr, Serialize::StateTransmissionFlags_SkipId);
             out_buf->append(outBuffer->str().c_str());
@@ -161,7 +162,8 @@ namespace Tools {
             if (ImGui::BeginMenu("Tools")) {
                 for (const std::unique_ptr<ToolBase> &tool : mCollector) {
                     bool visible = tool->isVisible();
-                    ImGui::MenuItem(tool->key(), "", &visible);
+                    std::string name = std::string { tool->key() };
+                    ImGui::MenuItem(name.c_str(), "", &visible);
                     tool->setVisible(visible);
                 }
                 ImGui::EndMenu();

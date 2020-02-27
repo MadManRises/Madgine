@@ -240,7 +240,6 @@ namespace Serialize {
             }
             mSlaveStream->setId(0);
             mSlaveStream.reset();
-            mSlaveStreamDisconnected.emit();
         }
     }
 
@@ -379,11 +378,6 @@ namespace Serialize {
             result.push_back(stream.id());
         }
         return result;
-    }
-
-    Threading::SignalStub<> &SyncManager::slaveStreamDisconnected()
-    {
-        return mSlaveStreamDisconnected;
     }
 
     bool SyncManager::receiveMessages(BufferedInOutStream &stream,

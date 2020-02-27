@@ -16,8 +16,12 @@ namespace Render {
     };
 
     enum WrapMode {
-        WRAP_CLAMP_TO_EDGE
+        WRAP_CLAMP_TO_EDGE		
     };
+
+	enum MinMode {
+		MIN_NEAREST
+	};
 
     struct Texture;
 
@@ -41,6 +45,7 @@ namespace Render {
             void setSubData(Vector2i offset, Vector2i size, void *data, TextureLoader *loader = nullptr);
 
             void setWrapMode(WrapMode mode, TextureLoader *loader = nullptr);
+            void setMinMode(MinMode mode, TextureLoader *loader = nullptr);
         };
 
         TextureLoader();
@@ -54,6 +59,7 @@ namespace Render {
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data) = 0;
 
         virtual void setWrapMode(Texture &tex, WrapMode mode) = 0;
+        virtual void setMinMode(Texture &tex, MinMode mode) = 0;
     };
 
 }

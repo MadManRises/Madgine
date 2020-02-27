@@ -31,6 +31,8 @@ namespace Render {
             }
         }
 
+		static RenderContext &getSingleton();
+
     protected:
         void checkThread();
         static void queueRenderTask(Threading::TaskHandle &&task);

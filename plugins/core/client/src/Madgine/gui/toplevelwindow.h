@@ -53,12 +53,21 @@ namespace GUI {
     };
 
     struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentComparator {
-        using cmp_type = int;
 
         bool operator()(const std::unique_ptr<TopLevelWindowComponentBase> &first, const std::unique_ptr<TopLevelWindowComponentBase> &second) const
         {
             return first->mPriority < second->mPriority;
         }
+
+        struct traits {
+            using type = int;
+            using cmp_type = TopLevelWindowComponentComparator;
+
+            static int to_cmp_type(const std::unique_ptr<TopLevelWindowComponentBase> &value)
+            {
+                return value->mPriority;
+            }
+        };
     };
 
     struct MADGINE_CLIENT_EXPORT TopLevelWindow : ScopeBase,
@@ -145,7 +154,7 @@ namespace GUI {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        OFFSET_CONTAINER(mComponents, TopLevelWindowComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>>>);
+        OFFSET_CONTAINER(mComponents, TopLevelWindowComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>, KeyCompare<Placeholder<0>>>>);
 
         Threading::FrameLoop mLoop;
 

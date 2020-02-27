@@ -21,7 +21,7 @@ RegisterType(ClickBrick::UI::GameHandler)
         {
         }
 
-        const char *GameHandler::key() const
+        std::string_view GameHandler::key() const
         {
             return "GameHandler";
         }

@@ -70,7 +70,7 @@ namespace Tools {
         ImGui::End();
     }
 
-    const char *Profiler::key() const
+    std::string_view Profiler::key() const
     {
         return "Profiler";
     }

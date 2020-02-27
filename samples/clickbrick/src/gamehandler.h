@@ -11,7 +11,7 @@ namespace UI {
 
         GameHandler(Engine::UI::UIManager &ui);        
 
-        virtual const char *key() const override;		    
+        virtual std::string_view key() const override;		    
 
     };
 

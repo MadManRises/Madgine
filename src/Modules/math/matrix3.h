@@ -69,9 +69,9 @@ struct MODULES_EXPORT Matrix3 {
     {
     }
     inline constexpr Matrix3(const Matrix3 &rkMatrix)
-        : m { { rkMatrix.m[0][0], rkMatrix.m[1][0], rkMatrix.m[2][0] },
-            { rkMatrix.m[0][1], rkMatrix.m[1][1], rkMatrix.m[2][1] },
-            { rkMatrix.m[0][2], rkMatrix.m[1][2], rkMatrix.m[2][2] } }
+        : m { { rkMatrix.m[0][0], rkMatrix.m[0][1], rkMatrix.m[0][2] },
+            { rkMatrix.m[1][0], rkMatrix.m[1][1], rkMatrix.m[1][2] },
+            { rkMatrix.m[2][0], rkMatrix.m[2][1], rkMatrix.m[2][2] } }
     {
     }
     constexpr Matrix3(float fEntry00, float fEntry01, float fEntry02,

@@ -108,6 +108,9 @@ struct variant_contains<std::variant<_Ty...>, T> : type_pack_contains<type_pack<
 };
 
 template <typename V, typename T>
+constexpr bool variant_contains_v = variant_contains<V, T>::value;
+
+template <typename V, typename T>
 struct variant_index;
 
 template <typename T, typename... _Ty>

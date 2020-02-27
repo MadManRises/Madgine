@@ -88,13 +88,13 @@ RegisterType(Engine::Render::MeshLoader)
                                 aiColor4D *c = mesh->mColors[0];
                                 vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : diffuseColor;
                             }
-                            if constexpr (V::holds<VertexUV>) {
+                            if constexpr (V::template holds<VertexUV>) {
                                 aiVector3D &uv = mesh->mTextureCoords[0][vertexIndex];
                                 vertex.mUV = { uv.x, uv.y };
                             }
                         }
 
-                        if constexpr (V::holds<VertexBoneMappings>) {
+                        if constexpr (V::template holds<VertexBoneMappings>) {
                             for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
                                 aiBone *bone = mesh->mBones[boneIndex];
                                 size_t actualIndex = boneIndices.at(scene->mRootNode->FindNode(bone->mName));

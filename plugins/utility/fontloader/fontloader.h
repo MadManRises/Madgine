@@ -9,8 +9,11 @@
 namespace Engine {
 namespace Render {
 	
-	struct MADGINE_FONTLOADER_EXPORT FontLoader : Resources::VirtualResourceLoaderBase<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
-        using Resources::VirtualResourceLoaderBase<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage>::VirtualResourceLoaderBase;
+	struct MADGINE_FONTLOADER_EXPORT FontLoader : Resources::ResourceLoader<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+        FontLoader();
+
+		bool loadImpl(Font &font, ResourceType *res);
+        void unloadImpl(Font &font, ResourceType *res);
     };
 
 }

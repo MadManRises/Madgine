@@ -36,5 +36,12 @@ RegisterType(Engine::Render::ProgramLoader)
             loader->setParameters(getData(*this, loader), data, size, index);
         }
 
+        void ProgramLoader::HandleType::setDynamicParameters(const void *data, size_t size, size_t index, ProgramLoader *loader)
+        {
+            if (!loader)
+                loader = &ProgramLoader::getSingleton();
+            loader->setDynamicParameters(getData(*this, loader), data, size, index);
+        }
+
     }
 }

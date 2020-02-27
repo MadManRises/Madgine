@@ -47,7 +47,7 @@ namespace Widgets {
         void updateWidget(WidgetBase *w, const std::string &newName);
         void unregisterWidget(WidgetBase *w);
 
-        virtual const char *key() const override;
+        virtual std::string_view key() const override;
 
         virtual bool init() override;
         virtual void finalize() override;

@@ -12,9 +12,10 @@
 TEST(ValueType, Construct)
 {
 	using namespace Engine;
+	using namespace std::literals::string_view_literals;
 
 	ValueType test;
-	test = "abc";
+	test = "abc"sv;
 	test.clear(); //?
 	test = true;
 	test = 3;

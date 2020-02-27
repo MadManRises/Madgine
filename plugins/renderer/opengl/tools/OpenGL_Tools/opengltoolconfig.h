@@ -17,7 +17,7 @@ namespace Tools {
         virtual bool init() override;
         virtual void finalize() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
     private:
         Render::OpenGLTexture mImageTexture;

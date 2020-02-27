@@ -28,7 +28,7 @@ namespace Scene {
 
             void remove();
 
-            const char *key() const;
+            const std::string &key() const;
 
             template <typename T>
             T *addComponent(const ObjectPtr &table = {})

@@ -45,7 +45,7 @@ namespace Tools {
         void setMenuHeight(float h);
         void setCentralNode(ImGuiDockNode *node);
 
-        virtual const char *key() const override;
+        virtual std::string_view key() const override;
 
         ImRoot mRoot;
 

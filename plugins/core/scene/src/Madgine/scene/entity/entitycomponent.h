@@ -18,7 +18,7 @@ namespace Scene {
         struct EntityComponent : Serialize::SerializableUnit<T, Base> {
 			using Serialize::SerializableUnit<T, Base>::SerializableUnit;
 
-            const char *key() const override
+            std::string_view key() const override
             {
                 return componentName();
             }

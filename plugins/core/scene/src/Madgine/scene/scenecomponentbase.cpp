@@ -36,7 +36,7 @@ namespace Engine
 			return mSceneMgr.getSelf(init);
                 }
 
-                const char *SceneComponentBase::key() const
+                std::string_view SceneComponentBase::key() const
                 {
                     return serializeType()->mTypeName;
                 }

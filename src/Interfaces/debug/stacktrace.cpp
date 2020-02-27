@@ -3,6 +3,7 @@
 #include "memory/statsmemoryresource.h"
 #include "memory/untrackedmemoryresource.h"
 #include "stacktrace.h"
+#include "../stringutil.h"
 
 #if WINDOWS
 #include <Windows.h>
@@ -31,23 +32,6 @@ namespace Debug {
             return this == &res;
         }
     };
-
-    static void findAndReplaceAll(std::pmr::string &data, const char *toSearch, const char *replaceStr)
-    {
-        // Get the first occurrence
-        size_t pos = data.find(toSearch);
-
-        size_t toSearchSize = strlen(toSearch);
-        size_t replaceSize = strlen(replaceStr);
-
-        // Repeat till end is reached
-        while (pos != std::string::npos) {
-            // Replace this occurrence of Sub String
-            data.replace(pos, toSearchSize, replaceStr);
-            // Get the next occurrence from the current position
-            pos = data.find(toSearch, pos + replaceSize);
-        }
-    }
 
     void getStackTrace(size_t skip, void **buffer, size_t size)
     {
@@ -141,7 +125,7 @@ namespace Debug {
                     else
                         pib.first->second = BufferObject { resource, info->Name };
 
-                    findAndReplaceAll(pib.first->second->mFunction, "basic_string<char,std::char_traits<char>,std::allocator<char> >", "string");
+                    StringUtil::replace(pib.first->second->mFunction, "basic_string<char,std::char_traits<char>,std::allocator<char> >", "string");
 
                 } else {
                     pib.first->second = BufferObject { resource, "<Missing Data>" };

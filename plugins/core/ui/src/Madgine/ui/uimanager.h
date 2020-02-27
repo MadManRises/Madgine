@@ -6,6 +6,8 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
+#include "Modules/keyvalue/keyvalue.h"
+
 #include "Madgine/gui/toplevelwindowcomponentcollector.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
@@ -39,7 +41,7 @@ namespace UI {
 
         static const constexpr int sMaxInitOrder = 4;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
         template <typename T>
         T &getGuiHandler(bool init = true)
@@ -59,8 +61,8 @@ namespace UI {
 
         UIManager &getSelf(bool = true);
 
-        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>>);
-        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>>)
+        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver, KeyCompare<Placeholder<0>>>>);
+        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver, KeyCompare<Placeholder<0>>>>)
 
     protected:
         bool init() override;

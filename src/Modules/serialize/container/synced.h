@@ -5,7 +5,7 @@
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../syncable.h"
-#include "unithelper.h"
+#include "../unithelper.h"
 
 namespace Engine {
 namespace Serialize {

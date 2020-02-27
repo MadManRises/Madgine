@@ -25,13 +25,14 @@ bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
+bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<scope>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(bool &b)
@@ -39,11 +40,12 @@ bool ValueTypeDrawer::draw(bool &b)
     return ImGui::Checkbox(mName, &b);
 }
 
-void ValueTypeDrawer::draw(const bool &b)
+bool ValueTypeDrawer::draw(const bool &b)
 {
     PushDisabled();
     ImGui::Checkbox(mName, const_cast<bool *>(&b));
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(std::string &s)
@@ -51,13 +53,34 @@ bool ValueTypeDrawer::draw(std::string &s)
     return InputText(mName, &s);
 }
 
-void ValueTypeDrawer::draw(const std::string &s)
+bool ValueTypeDrawer::draw(const std::string &s)
 {
     if (mName) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("\"%s\"", s.c_str());
+    return false;
+}
+
+bool ValueTypeDrawer::draw(std::string_view &s)
+{
+    if (mName) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("\"%s\"", s.data());
+    return false;
+}
+
+bool ValueTypeDrawer::draw(const std::string_view &s)
+{
+    if (mName) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("\"%s\"", s.data());
+    return false;
 }
 
 bool ValueTypeDrawer::draw(int &i)
@@ -65,11 +88,12 @@ bool ValueTypeDrawer::draw(int &i)
     return DragInt(mName, &i);
 }
 
-void ValueTypeDrawer::draw(const int &i)
+bool ValueTypeDrawer::draw(const int &i)
 {
     PushDisabled();
     DragInt(mName, const_cast<int *>(&i));
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(size_t &i)
@@ -77,11 +101,12 @@ bool ValueTypeDrawer::draw(size_t &i)
     return ImGui::DragScalar(mName, ImGuiDataType_U32, &i, 1.0f);
 }
 
-void ValueTypeDrawer::draw(const size_t &i)
+bool ValueTypeDrawer::draw(const size_t &i)
 {
     PushDisabled();
     ImGui::DragScalar(mName, ImGuiDataType_U32, const_cast<size_t *>(&i), 1.0f);
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(float &f)
@@ -89,11 +114,12 @@ bool ValueTypeDrawer::draw(float &f)
     return ImGui::DragFloat(mName, &f, 0.15f);
 }
 
-void ValueTypeDrawer::draw(const float &f)
+bool ValueTypeDrawer::draw(const float &f)
 {
     PushDisabled();
     ImGui::DragFloat(mName, const_cast<float *>(&f), 0.15f);
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Matrix3 &m)
@@ -101,11 +127,22 @@ bool ValueTypeDrawer::draw(Engine::Matrix3 &m)
     return ImGui::DragMatrix3(mName, &m, 0.15f);
 }
 
-void ValueTypeDrawer::draw(const Engine::Matrix3 &m)
+bool ValueTypeDrawer::draw(const Engine::Matrix3 &m)
 {
     PushDisabled();
     ImGui::DragMatrix3(mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
     PopDisabled();
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::Matrix3 *m)
+{
+    return draw(*m);
+}
+
+bool ValueTypeDrawer::draw(const Engine::Matrix3 *m)
+{
+    return draw(*m);
 }
 
 bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
@@ -113,11 +150,22 @@ bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
     return ImGui::DragMatrix4(mName, &m, 0.15f);
 }
 
-void ValueTypeDrawer::draw(const Engine::Matrix4 &m)
+bool ValueTypeDrawer::draw(const Engine::Matrix4 &m)
 {
     PushDisabled();
     ImGui::DragMatrix4(mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
     PopDisabled();
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::Matrix4 *m)
+{
+    return draw(*m);
+}
+
+bool ValueTypeDrawer::draw(const Engine::Matrix4 *m)
+{
+    return draw(*m);
 }
 
 bool ValueTypeDrawer::draw(Engine::Vector2 &v)
@@ -125,11 +173,12 @@ bool ValueTypeDrawer::draw(Engine::Vector2 &v)
     return ImGui::DragFloat2(mName, v.ptr(), 0.15f);
 }
 
-void ValueTypeDrawer::draw(const Engine::Vector2 &v)
+bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 {
     PushDisabled();
     ImGui::DragFloat2(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Vector3 &v)
@@ -137,11 +186,12 @@ bool ValueTypeDrawer::draw(Engine::Vector3 &v)
     return ImGui::DragFloat3(mName, v.ptr(), 0.15f);
 }
 
-void ValueTypeDrawer::draw(const Engine::Vector3 &v)
+bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 {
     PushDisabled();
     ImGui::DragFloat3(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Vector4 &v)
@@ -149,11 +199,12 @@ bool ValueTypeDrawer::draw(Engine::Vector4 &v)
     return ImGui::DragFloat4(mName, v.ptr(), 0.15f);
 }
 
-void ValueTypeDrawer::draw(const Engine::Vector4 &v)
+bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 {
     PushDisabled();
     ImGui::DragFloat4(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualIterator &it)
@@ -166,13 +217,14 @@ bool ValueTypeDrawer::draw(Engine::KeyValueVirtualIterator &it)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::KeyValueVirtualIterator &it)
+bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualIterator &it)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<iterator>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::ApiMethod &m)
@@ -185,13 +237,14 @@ bool ValueTypeDrawer::draw(Engine::ApiMethod &m)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::ApiMethod &m)
+bool ValueTypeDrawer::draw(const Engine::ApiMethod &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<method>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::BoundApiMethod &m)
@@ -204,13 +257,14 @@ bool ValueTypeDrawer::draw(Engine::BoundApiMethod &m)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::BoundApiMethod &m)
+bool ValueTypeDrawer::draw(const Engine::BoundApiMethod &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<boundmethod>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(std::monostate &)
@@ -223,13 +277,14 @@ bool ValueTypeDrawer::draw(std::monostate &)
     return false;
 }
 
-void ValueTypeDrawer::draw(const std::monostate &)
+bool ValueTypeDrawer::draw(const std::monostate &)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<null>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Quaternion &q)
@@ -242,13 +297,14 @@ bool ValueTypeDrawer::draw(Engine::Quaternion &q)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::Quaternion &q)
+bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<quaternion>");
+    return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
@@ -261,13 +317,14 @@ bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
     return false;
 }
 
-void ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
+bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<object>");
+    return false;
 }
 
 bool InputText(const char *label, std::string *s)

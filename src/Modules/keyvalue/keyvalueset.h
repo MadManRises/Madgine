@@ -167,8 +167,8 @@ struct KeyValueSet : std::set<T, Cmp> {
         typedef const T *const_handle;
         typedef iterator position_handle;
         typedef const_iterator const_position_handle;
-        typedef cmp_type_t<T, Cmp> key_type;
-        typedef typename container::value_type value_type;
+        typedef Cmp cmp_type;        
+        typedef T value_type;
 
         template <template <typename> typename M>
         using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;

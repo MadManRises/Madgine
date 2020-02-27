@@ -85,7 +85,7 @@ namespace Tools {
         }
     }
 
-    const char *SceneEditor::key() const
+    std::string_view SceneEditor::key() const
     {
         return "SceneEditor";
     }
@@ -137,7 +137,7 @@ namespace Tools {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mHierarchyVisible)) {
 
             for (Scene::Entity::Entity &e : mSceneMgr->entities()) {
-                const char *name = e.key();
+                const char *name = e.key().c_str();
                 if (!name[0])
                     name = "<unnamed>";
 
@@ -200,10 +200,11 @@ namespace Tools {
         ImGui::InputText("Name", &entity->mName);
 
         for (Scene::Entity::EntityComponentBase *component : entity->components()) {
-            bool open = ImGui::TreeNode(component->key());
-            ImGui::DraggableValueTypeSource(component->key(), this, ValueType { component });
+            std::string name = std::string { component->key() };
+            bool open = ImGui::TreeNode(name.c_str());
+            ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { component });
             if (open) {
-                mInspector->draw({ component, Scene::Entity::EntityComponentCollector::getComponentType(component->key()) });
+                mInspector->draw({ component, Scene::Entity::EntityComponentCollector::getComponentType(name) });
                 ImGui::TreePop();
             }
         }

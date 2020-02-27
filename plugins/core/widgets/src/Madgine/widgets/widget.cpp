@@ -150,9 +150,9 @@ namespace Widgets {
         mName = name;
     }
 
-    const char *WidgetBase::key() const
+    const std::string &WidgetBase::key() const
     {
-        return mName.c_str();
+        return mName;
     }
 
     WidgetBase *WidgetBase::createChild(const std::string &name, WidgetClass _class)
