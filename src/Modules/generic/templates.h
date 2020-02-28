@@ -21,6 +21,9 @@ struct first {
 template <typename...>
 using void_t = void;
 
+template <typename T, typename...>
+using dependent_t = T;
+
 template <typename>
 struct type_holder_t {
 };
