@@ -19,8 +19,8 @@ namespace Render {
         void bind() const;
 
         void reset();
-        void setData(const void *data, GLsizei size);
-        void setSubData(const void *data, unsigned int offset, GLsizei size);
+        void setData(const ByteBuffer &data);
+        void setSubData(unsigned int offset, const ByteBuffer &data);
 
         GLuint handle();
 

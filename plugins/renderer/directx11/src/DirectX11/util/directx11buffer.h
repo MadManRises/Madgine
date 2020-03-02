@@ -6,7 +6,7 @@ namespace Render {
     struct MADGINE_DIRECTX11_EXPORT DirectX11Buffer {
 
         DirectX11Buffer() = default;
-        DirectX11Buffer(UINT bind, size_t size, const void *data);
+        DirectX11Buffer(UINT bind, const ByteBuffer &data);
         DirectX11Buffer(const DirectX11Buffer &) = delete;
         DirectX11Buffer(DirectX11Buffer &&);
         ~DirectX11Buffer();
@@ -20,7 +20,7 @@ namespace Render {
         void bindIndex() const;
 
         void reset();
-        void setData(size_t size, const void *data);
+        void setData(const ByteBuffer &data);
 
         ID3D11Buffer *handle();
 

@@ -6,6 +6,8 @@
 
 #include "textureloader.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -15,7 +17,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11Texture : Texture {
 
-        DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const void *data = nullptr);
+        DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const ByteBuffer &data = {});
         DirectX11Texture(TextureType type = Texture2D, DataFormat format = FORMAT_FLOAT8, UINT bind = D3D11_BIND_SHADER_RESOURCE);
         DirectX11Texture(const DirectX11Texture &) = delete;
         DirectX11Texture(DirectX11Texture &&);
@@ -27,8 +29,8 @@ namespace Render {
 
         void bind() const;
 
-        void setData(Vector2i size, void *data);
-        void setSubData(Vector2i offset, Vector2i size, void *data);
+        void setData(Vector2i size, const ByteBuffer &data);
+        void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
         void resize(Vector2i size);
 

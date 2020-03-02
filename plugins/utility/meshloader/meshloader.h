@@ -9,7 +9,7 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "Modules/render/bytebuffer.h"
+#include "Modules/generic/bytebuffer.h"
 
 #include "meshdata.h"
 
@@ -102,7 +102,7 @@ namespace Render {
             return generateImpl(mesh, attributeList, std::move(aabb), groupSize, std::move(vertices), sizeof(VertexType), std::move(indices), texturePath);
         }
 
-        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<Render::AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {}) = 0;
+        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<Render::AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {}) = 0;
 
         template <typename VertexType>
         void update(MeshData &mesh, size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {})
@@ -111,7 +111,7 @@ namespace Render {
             updateImpl(mesh, std::move(aabb), groupSize, std::move(vertices), sizeof(VertexType), std::move(indices));
         }
 
-        virtual void updateImpl(MeshData &mesh, const AABB &bb, size_t groupSize, Render::ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}) = 0;
+        virtual void updateImpl(MeshData &mesh, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}) = 0;
 
         virtual void resetImpl(MeshData &mesh) = 0;
     };

@@ -85,7 +85,7 @@ namespace Render {
 
         assert(width > 0 && height > 0);
 
-        mTexture.setData({ width, height }, nullptr);
+        mTexture.setData({ width, height }, {});
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         GL_CHECK();

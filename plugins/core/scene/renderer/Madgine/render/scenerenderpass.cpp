@@ -76,9 +76,9 @@ namespace Render {
                     mProgram.setParameters(mPerObject, 2);
 
                     if (skeleton) {
-                        mProgram.setDynamicParameters(skeleton->matrices().data(), skeleton->matrices().size() * sizeof(Matrix4), 0);
+                        mProgram.setDynamicParameters(skeleton->matrices(), 0);
                     } else {
-                        mProgram.setDynamicParameters(nullptr, 0, 0);
+                        mProgram.setDynamicParameters({}, 0);
 					}
 
                     target->renderMesh(meshData, mProgram);

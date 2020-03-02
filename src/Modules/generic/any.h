@@ -29,13 +29,13 @@ struct Any {
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>, typename... Args>
     Any(inplace_t<T>, Args &&... args)
-        : mData(std::make_unique<AnyHolder<std::remove_const_t<std::remove_reference_t<T>>>>(std::forward<Args>(args)...))
+        : mData(std::make_unique<AnyHolder<T>>(std::forward<Args>(args)...))
     {
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>>
     Any(T &&data)
-        : mData(std::make_unique<AnyHolder<std::remove_const_t<std::remove_reference_t<T>>>>(std::forward<T>(data)))
+        : mData(std::make_unique<AnyHolder<T>>(std::forward<T>(data)))
     {
     }
 

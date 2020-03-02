@@ -13,6 +13,7 @@ struct container_traits<std::list<T>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
+    static constexpr const bool is_fixed_size = false;
 
     typedef std::list<T> container;
     typedef typename container::iterator iterator;
@@ -113,6 +114,7 @@ struct container_traits<std::vector<T>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;
+    static constexpr const bool is_fixed_size = false;
 
     typedef std::vector<T> container;
     typedef typename container::iterator iterator;
@@ -262,6 +264,7 @@ struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
+    static constexpr const bool is_fixed_size = false;
 
     typedef std::set<T, Cmp> container;
     typedef typename container::iterator iterator;
@@ -328,6 +331,7 @@ struct container_traits<std::map<K, T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
+    static constexpr const bool is_fixed_size = false;
 
     typedef std::map<K, T, Cmp> container;
     typedef typename container::iterator iterator;
@@ -416,5 +420,113 @@ struct container_traits<std::map<K, T, Cmp>> {
         return std::next(handle);
     }
 };
+
+template <typename T, size_t Size>
+struct container_traits<std::array<T, Size>> {
+    static constexpr const bool sorted = false;
+    static constexpr const bool has_dependent_handle = true;
+    static constexpr const bool remove_invalidates_handles = false;
+    static constexpr const bool is_fixed_size = true;
+
+    typedef std::array<T, Size> container;
+    typedef typename container::iterator iterator;
+    typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+
+    struct handle_t {
+        handle_t(size_t index = std::numeric_limits<size_t>::max())
+            : mIndex(index)
+        {
+        }
+
+        operator size_t() const { return mIndex; }
+
+        void operator++() { ++mIndex; }
+        void operator--() { --mIndex; }
+        handle_t &operator-=(size_t s)
+        {
+            mIndex -= s;
+            return *this;
+        }
+
+        size_t mIndex;
+    };
+
+    typedef handle_t handle;
+    typedef handle_t const_handle;
+    typedef handle_t position_handle;
+    typedef handle_t const_position_handle;
+    typedef typename container::value_type value_type;
+
+    template <template <typename> typename M>
+    using rebind = container_traits<std::array<M<T>, Size>>;
+
+    template <typename C>
+    struct api : C {
+
+        using C::C;
+
+        using C::operator=;
+
+        /*void resize(size_t size)
+            {
+                C::resize(size);
+            }*/
+
+        value_type &at(size_t i)
+        {
+            return C::at(i);
+        }
+
+        const value_type &at(size_t i) const
+        {
+            return C::at(i);
+        }
+
+        value_type &operator[](size_t i)
+        {
+            return C::operator[](i);
+        }
+
+        const value_type &operator[](size_t i) const
+        {
+            return C::operator[](i);
+        }
+    };
+
+    static position_handle toPositionHandle(container &c, const iterator &it)
+    {
+        return std::distance(c.begin(), it);
+    }
+
+    static handle toHandle(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+    static handle toHandle(container &c, const iterator &it)
+    {
+        if (it == c.end())
+            return {};
+        return std::distance(c.begin(), it);
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+    static position_handle next(const position_handle &handle)
+    {
+        return handle + 1;
+    }
+};
+
 
 }

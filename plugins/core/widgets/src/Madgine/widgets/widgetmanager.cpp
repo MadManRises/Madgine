@@ -641,7 +641,7 @@ namespace Widgets {
                 if (it == mUIAtlasEntries.end()) {
                     Resources::ImageLoader::HandleType data = resource->loadData();
                     it = mUIAtlasEntries.try_emplace(resource, mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { expandUIAtlas(); })).first;
-                    mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, data->mBuffer);
+                    mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
                 }
 
                 for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
@@ -685,7 +685,7 @@ namespace Widgets {
     {
         if (mUIAtlasSize == 0) {
             mUIAtlasSize = 4;
-            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, nullptr);
+            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, {});
             for (int x = 0; x < mUIAtlasSize; ++x) {
                 for (int y = 0; y < mUIAtlasSize; ++y) {
                     mUIAtlas.addBin({ 512 * x, 512 * y });

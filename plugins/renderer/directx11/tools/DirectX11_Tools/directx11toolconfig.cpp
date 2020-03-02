@@ -38,7 +38,7 @@ namespace Tools {
             image->setPersistent(true);
             Resources::ImageLoader::HandleType data = image->loadData();
 
-            mImageTexture.setData({ data->mWidth, data->mHeight }, data->mBuffer);
+            mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
             ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
         });
 

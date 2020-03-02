@@ -46,10 +46,10 @@ namespace Serialize {
     struct UnitHelper : UnitHelperBase<T> {
     };
 
-	MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, size_t id);
+    MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, size_t id);
 
     template <typename T>
-    struct UnitHelper<T *, true> : UnitHelperBase<T *> {        
+    struct UnitHelper<T *, true> : UnitHelperBase<T *> {
 
         static void applyMap(SerializeInStream &in, T *&item)
         {
@@ -111,19 +111,40 @@ namespace Serialize {
 
         static bool filter(SerializeOutStream &out, const SerializableBase &item);
 
+        template <typename T>
+        static std::enable_if_t<std::is_trivially_copyable_v<T>, bool> filter(SerializeOutStream &out, const T &item)
+        {
+            return true;
+        }
+
         static void applyMap(SerializeInStream &in, SerializableUnitBase &item);
 
         static void applyMap(SerializeInStream &in, SerializableBase &item);
 
+        template <typename T>
+        static std::enable_if_t<std::is_trivially_copyable_v<T>> applyMap(SerializeInStream &in, T &item)
+        {
+            auto tuple = TupleUnpacker::toTuple(t);
+            UnitHelper<decltype(tuple)>::applyMap(in, tuple);
+        }
+
         static void setParent(SerializableUnitBase &item, SerializableUnitBase *parent);
 
         static void setParent(SerializableBase &item, SerializableUnitBase *parent);
+
+        template <typename T>
+        static std::enable_if_t<std::is_trivially_copyable_v<T>> setParent(T &item, SerializableUnitBase *parent) {}
 
         static void beginExtendedItem(SerializeOutStream &out, const SerializableUnitBase &item);
         static void beginExtendedItem(SerializeInStream &in, const SerializableUnitBase &item);
 
         static void beginExtendedItem(SerializeOutStream &out, const SerializableBase &item);
         static void beginExtendedItem(SerializeInStream &in, const SerializableBase &item);
+
+        template <typename T>
+        static std::enable_if_t<std::is_trivially_copyable_v<T>> beginExtendedItem(SerializeOutStream &out, const T &item) {}
+        template <typename T>
+        static std::enable_if_t<std::is_trivially_copyable_v<T>> beginExtendedItem(SerializeInStream &in, const T &item) {}
     };
 
     template <typename T>
@@ -136,25 +157,31 @@ namespace Serialize {
             } else if constexpr (is_iterable_v<T>) {
                 for (auto &t : item) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
-				}
-			}
+                }
+            }
         }
 
         static void write_creation(SerializeOutStream &out, const T &item)
         {
-            //Maybe remove the call for Serializables, implying default ctor for all Serializables.
-            //Only critical with containers containing serializables.
-            item.writeCreationData(out);
+            if constexpr (std::is_base_of_v<SerializableBase, T> || std::is_base_of_v<SerializableUnitBase, T>) {
+                //Maybe remove the call for Serializables, implying default ctor for all Serializables.
+                //Only critical with containers containing serializables.
+                item.writeCreationData(out);
+            }
         }
 
         static void setItemDataSynced(T &item, bool b)
         {
-            item.setDataSynced(b);
+            if constexpr (std::is_base_of_v<SerializableBase, T> || std::is_base_of_v<SerializableUnitBase, T>) {
+                item.setDataSynced(b);
+            }
         }
 
         static void setItemActive(T &item, bool active, bool existenceChanged)
         {
-            item.setActive(active, existenceChanged);
+            if constexpr (std::is_base_of_v<SerializableBase, T> || std::is_base_of_v<SerializableUnitBase, T>) {
+                item.setActive(active, existenceChanged);
+            }
         }
     };
 

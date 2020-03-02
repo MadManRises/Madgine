@@ -77,19 +77,19 @@ namespace Render {
         }
     }
 
-    void DirectX11Program::setParameters(const void *data, size_t size, size_t index)
+    void DirectX11Program::setParameters(const ByteBuffer &data, size_t index)
     {
         if (mConstantBuffers.size() <= index)
             mConstantBuffers.resize(index + 1);
 
         if (!mConstantBuffers[index]) {
-            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, size, data };
+            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
         } else {
-            mConstantBuffers[index].setData(size, data);
+            mConstantBuffers[index].setData(data);
         }
     }
 
-	void DirectX11Program::setDynamicParameters(const void *data, size_t size, size_t index)
+	void DirectX11Program::setDynamicParameters(const ByteBuffer &data, size_t index)
     {
             throw 0;
 
@@ -97,9 +97,9 @@ namespace Render {
             mConstantBuffers.resize(index + 1);
 
         if (!mConstantBuffers[index]) {
-            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, size, data };
+            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
         } else {
-            mConstantBuffers[index].setData(size, data);
+            mConstantBuffers[index].setData(data);
         }
     }
 }

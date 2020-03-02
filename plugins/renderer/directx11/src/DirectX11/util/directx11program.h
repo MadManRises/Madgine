@@ -21,9 +21,9 @@ namespace Render {
 
         void bind(DirectX11VertexArray *format);
 
-        void setParameters(const void *data, size_t size, size_t index);
+        void setParameters(const ByteBuffer &data, size_t index);
 
-		void setDynamicParameters(const void *data, size_t size, size_t index);
+		void setDynamicParameters(const ByteBuffer &data, size_t index);
 
     private:
         DirectX11VertexShader *mVertexShader = nullptr;

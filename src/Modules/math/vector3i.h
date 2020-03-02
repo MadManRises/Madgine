@@ -7,7 +7,7 @@ namespace Engine {
 struct Vector3i {
     int x, y, z;
 
-	Vector3i() {}
+    Vector3i() {}
 
     constexpr Vector3i(const int iX, const int iY, const int iZ)
         : x(iX)
@@ -43,6 +43,13 @@ struct Vector3i {
         return *(&x + i);
     }
 
+    int &operator[](const size_t i)
+    {
+        assert(i < 3);
+
+        return *(&x + i);
+    }
+
     /** Swizzle-like narrowing operations
 		*/
     Vector2i xy() const
@@ -51,6 +58,32 @@ struct Vector3i {
     }
 
     static const constexpr int ZERO[] { 0, 0, 0 };
+
+    friend std::ostream &operator<<(std::ostream &o, const Vector3i &v)
+    {
+        o << "[" << v.x << ", " << v.y << ", " << v.z << "]";
+        return o;
+    }
+
+    friend std::istream &operator>>(std::istream &in, Vector3i &v)
+    {
+        char c;
+        in >> c;
+        if (c != '[')
+            std::terminate();
+        for (int i = 0; i < 3; ++i) {
+            in >> v[i];
+            in >> c;
+            if (i != 2) {
+                if (c != ',')
+                    std::terminate();
+            } else {
+                if (c != ']')
+                    std::terminate();
+            }
+        }
+        return in;
+    }
 };
 
 }

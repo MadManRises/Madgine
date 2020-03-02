@@ -39,7 +39,7 @@ namespace Render {
         mSize = size;
 
         //mTexture.resize(size);
-        mTexture.setData(size, nullptr);
+        mTexture.setData(size, {});
 
         D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 

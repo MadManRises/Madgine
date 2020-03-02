@@ -547,8 +547,28 @@ public:
 		*/
     friend std::ostream &operator<<(std::ostream &o, const Vector2 &v)
     {
-        o << "Vector2(" << v.x << ", " << v.y << ")";
+        o << "[" << v.x << ", " << v.y << "]";
         return o;
+    }
+
+    friend std::istream &operator>>(std::istream &in, Vector2 &v)
+    {
+        char c;
+        in >> c;
+        if (c != '[')
+            std::terminate();
+        for (int i = 0; i < 2; ++i) {
+            in >> v[i];
+            in >> c;
+            if (i != 1) {
+                if (c != ',')
+                    std::terminate();
+            } else {
+                if (c != ']')
+                    std::terminate();
+            }
+        }
+        return in;
     }
 
     constexpr Vector2i floor() const

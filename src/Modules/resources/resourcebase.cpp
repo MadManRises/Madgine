@@ -46,13 +46,13 @@ namespace Resources {
 
     std::string ResourceBase::readAsText()
     {
-        InStream buffer = Filesystem::openFile(mPath);
+        InStream buffer = Filesystem::openFileRead(mPath);
         return std::string { buffer.iterator(), buffer.end() };
     }
 
     std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob()
     {
-        InStream buffer = Filesystem::openFile(mPath, true);
+        InStream buffer = Filesystem::openFileRead(mPath, true);
         return std::vector<unsigned char> { buffer.iterator(), buffer.end() };
     }
 

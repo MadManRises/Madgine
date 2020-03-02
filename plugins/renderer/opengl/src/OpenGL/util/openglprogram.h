@@ -23,8 +23,8 @@ namespace Render {
 
         void bind();
 
-        void setParameters(const void *data, size_t size, size_t index);
-        void setDynamicParameters(const void *data, size_t size, size_t index);
+        void setParameters(const ByteBuffer &data, size_t index);
+        void setDynamicParameters(const ByteBuffer &data, size_t index);
 
         struct UniformBufferDescriptor : ScopeBase {
             size_t mSlot;

@@ -116,6 +116,11 @@ OutStream::operator bool() const
     return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
 }
 
+std::unique_ptr<std::streambuf> OutStream::release()
+{
+    return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
+}
+
 Stream::Stream(std::unique_ptr<std::streambuf> &&buffer)
     : InStream(buffer.get())
     , OutStream(std::move(buffer))

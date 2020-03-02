@@ -43,8 +43,7 @@ namespace Render {
 
             data.mVertices = {
                 D3D11_BIND_VERTEX_BUFFER,
-                vertices.mSize,
-                vertices.mData
+                vertices
             };
             data.mVertices.bindVertex(data.mVAO.mStride);
             
@@ -53,8 +52,7 @@ namespace Render {
             }else{
                 data.mIndices = {
                     D3D11_BIND_INDEX_BUFFER,
-                    indices.size() * sizeof(unsigned short),
-                    indices.data()
+                    indices
                 };
                 data.mIndices.bindIndex();
                 data.mElementCount = indices.size();
@@ -65,7 +63,7 @@ namespace Render {
                 Resources::ImageLoader::HandleType tex;
                 tex.load(imageName);
 
-                data.mTexture = { Texture2D, FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), tex->mBuffer };
+                data.mTexture = { Texture2D, FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) } };
                 data.mTextureHandle = data.mTexture.handle();
             }
 
@@ -86,8 +84,7 @@ namespace Render {
 
             data.mVertices = {
                 D3D11_BIND_VERTEX_BUFFER,
-                vertices.mSize,
-                vertices.mData
+                vertices
             };
 
             if (indices.empty()) {
@@ -95,8 +92,7 @@ namespace Render {
             }else{
                 data.mIndices = {
                     D3D11_BIND_INDEX_BUFFER,
-                    indices.size() * sizeof(unsigned short),
-                    indices.data()
+                    indices
                 };
                 data.mElementCount = indices.size();
             } 

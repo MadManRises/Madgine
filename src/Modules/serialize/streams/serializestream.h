@@ -1,20 +1,18 @@
 #pragma once
 
-#include "../unithelper.h"
+#include "../../generic/container_traits.h"
+#include "../../generic/iterator_traits.h"
+#include "../creationhelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
 #include "../serializeexception.h"
 #include "../statetransmissionflags.h"
+#include "../unithelper.h"
 #include "Interfaces/streams/streams.h"
 #include "debugging/streamdebugging.h"
-#include "../../generic/iterator_traits.h"
-#include "../creationhelper.h"
-#include "../../generic/container_traits.h"
 
 namespace Engine {
 namespace Serialize {
-
-    
 
     struct MODULES_EXPORT SerializeInStream : InStream {
     public:
@@ -23,7 +21,7 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
-        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T>>>
+        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T> || is_tuple_v<T>>>
         SerializeInStream &operator>>(T &t)
         {
             read(t);
@@ -56,19 +54,39 @@ namespace Serialize {
                 read(*t, name, std::forward<Args>(args)...);
             } else if constexpr (is_iterable_v<T>) {
                 readContainer(t, name, std::forward<Args>(args)...);
+            } else if constexpr (std::is_trivially_copyable_v<T>) {
+                read(TupleUnpacker::toTuple(t), name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
         }
 
+        template <typename... Ty>
+        void read(std::tuple<Ty&...> t, const char *name = nullptr)
+        {
+            if (name)
+                format().beginCompound(*this, name);
+            TupleUnpacker::forEach(t, LIFT(read, this));
+            if (name)
+                format().endCompound(*this, name);
+        }
+
+        template <typename... Ty>
+        void read(std::tuple<Ty...> &t, const char *name = nullptr)
+        {
+            if (name)
+                format().beginCompound(*this, name);
+            TupleUnpacker::forEach(t, LIFT(read, this));
+            if (name)
+                format().endCompound(*this, name);
+        }
+        
         //void read(ValueType &result, const char *name);
 
-		template <typename C, typename Creator = DefaultCreator<>>
+        template <typename C, typename Creator = DefaultCreator<>>
         void readContainer(C &container, const char *name = nullptr, Creator &&creator = {})
         {
             using T = typename C::value_type;
-
-			container.clear();
 
             if (name)
                 format().beginExtendedCompound(*this, name);
@@ -76,14 +94,26 @@ namespace Serialize {
             read(size, "size");
             if (name)
                 format().beginCompound(*this, name);
-            while (size--){
-				//TODO use creator
-                UnitHelper<T>::beginExtendedItem(*this, nullref<T>);
-				auto pib = container_traits<C>::emplace(container, container.end());
-                assert(pib.second);
-                auto &t = *pib.first;                    
-                read(t, "Item");
+
+            
+            if constexpr (!container_traits<C>::is_fixed_size) {
+                container.clear();
+
+                while (size--) {
+                    //TODO use creator
+                    UnitHelper<T>::beginExtendedItem(*this, nullref<T>);
+                    auto pib = container_traits<C>::emplace(container, container.end());
+                    assert(pib.second);
+                    auto &t = *pib.first;
+                    read(t, "Item");
+                }
+            } else {
+                assert(container.size() == size);
+                for (T &t : container) {
+                    read(t, "Item");
+                }
             }
+
             if (name)
                 format().endCompound(*this, name);
         }
@@ -111,6 +141,8 @@ namespace Serialize {
         void readUnformatted(std::string_view &s) = delete;
         void readUnformatted(Filesystem::Path &p);
 
+        void readUnformatted(ByteBuffer &b);
+
         std::string readN(size_t n);
         std::string peekN(size_t n);
         std::string readUntil(const char *set);
@@ -137,17 +169,17 @@ namespace Serialize {
 
         SerializeStreambuf &buffer() const;
 
-		void setNextFormattedStringDelimiter(char c);
+        void setNextFormattedStringDelimiter(char c);
 
-		SerializableUnitBase *convertPtr(size_t ptr);
+        SerializableUnitBase *convertPtr(size_t ptr);
 
     protected:
-        SerializeInStream(SerializeStreambuf *buffer);        
+        SerializeInStream(SerializeStreambuf *buffer);
 
     protected:
         Debugging::StreamLog mLog;
 
-		char mNextFormattedStringDelimiter = 0;
+        char mNextFormattedStringDelimiter = 0;
     };
 
     struct MODULES_EXPORT SerializeOutStream : OutStream {
@@ -159,7 +191,7 @@ namespace Serialize {
 
         ParticipantId id() const;
 
-        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T>>>
+        template <typename T, typename = std::enable_if_t<isPrimitiveType_v<T> || std::is_base_of<SerializableBase, T>::value || std::is_base_of<SerializableUnitBase, T>::value || is_iterable_v<T> || is_tuple_v<T>>>
         SerializeOutStream &operator<<(const T &t)
         {
             write(t);
@@ -188,9 +220,19 @@ namespace Serialize {
                 write(*t, name);
             } else if constexpr (is_iterable_v<T>) {
                 writeContainer(t, name);
+            } else if constexpr (std::is_trivially_copyable_v<T>) {
+                write(TupleUnpacker::toTuple(t), name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
+        }
+
+        template <typename... Ty>
+        void write(const std::tuple<Ty...> &t, const char *name = nullptr)
+        {
+            format().beginCompound(*this, name);
+            TupleUnpacker::forEach(t, LIFT(write, this));
+            format().endCompound(*this, name);
         }
 
         template <typename C>
@@ -224,9 +266,12 @@ namespace Serialize {
         }
 
         void writeUnformatted(SerializableUnitBase *p);
+
         void writeUnformatted(const std::string &s);
-       // void writeUnformatted(const std::string_view &s);
+        // void writeUnformatted(const std::string_view &s);
         void writeUnformatted(const Filesystem::Path &p);
+
+        void writeUnformatted(const ByteBuffer &b);
 
         void writeRaw(const void *buffer, size_t size);
         template <typename T>

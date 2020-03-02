@@ -21,8 +21,8 @@ namespace Render {
 
         void bind() const;
 
-        void setData(Vector2i size, void *data);
-        void setSubData(Vector2i offset, Vector2i size, void *data);
+        void setData(Vector2i size, const ByteBuffer &data);
+        void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
 		void resize(Vector2i size);
 

@@ -53,7 +53,7 @@ namespace Render {
 
                 data.mTexture = { GL_UNSIGNED_BYTE };
                 data.mTexture.setFilter(GL_NEAREST);
-                data.mTexture.setData({ tex->mWidth, tex->mHeight }, tex->mBuffer);
+                data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
                 data.mTextureHandle = data.mTexture.handle();
             }
 
@@ -81,10 +81,10 @@ namespace Render {
         OpenGLRenderContext::execute([=, &data, vertices { std::move(vertices) }, indices { std::move(indices) }]() mutable {
             data.mGroupSize = groupSize;
 
-            data.mVertices.setData(vertices.mData, vertices.mSize);
+            data.mVertices.setData(vertices);
 
             if (!indices.empty()) {
-                data.mIndices.setData(indices.data(), sizeof(indices[0]) * indices.size());
+                data.mIndices.setData(indices);
                 data.mElementCount = indices.size();
             } else {
                 data.mElementCount = vertices.mSize / vertexSize;

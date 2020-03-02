@@ -159,6 +159,16 @@ struct is_instance<U<T...>, U> : public std::true_type {
 template <typename T, template <typename...> typename U>
 constexpr const bool is_instance_v = is_instance<T, U>::value;
 
+template <typename T>
+struct is_tuple : std::false_type {
+};
+
+template <typename... Ty>
+struct is_tuple<std::tuple<Ty...>> : std::true_type {
+};
+
+template <typename T>
+constexpr const bool is_tuple_v = is_tuple<T>::value;
 
 struct DefaultTag;
 

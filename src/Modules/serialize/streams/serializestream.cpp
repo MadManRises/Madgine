@@ -12,6 +12,8 @@
 
 #include "Interfaces/filesystem/path.h"
 
+#include "../../generic/bytebuffer.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -143,6 +145,16 @@ namespace Serialize {
         std::string s;
         readUnformatted(s);
         p = s;
+    }
+
+    void SerializeInStream::readUnformatted(ByteBuffer &b)
+    {
+        assert(format().mBinary);
+        size_t size;
+        readRaw(size);
+        std::unique_ptr<std::byte[]> buffer = std::make_unique<std::byte[]>(size);
+        readRaw(buffer.get(), size);
+        b = ByteBuffer { std::move(buffer), size };        
     }
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
@@ -372,6 +384,13 @@ namespace Serialize {
     void SerializeOutStream::writeUnformatted(const Filesystem::Path &p)
     {
         writeUnformatted(p.str());
+    }
+
+    void SerializeOutStream::writeUnformatted(const ByteBuffer &b)
+    {
+        assert(format().mBinary);
+        writeRaw(b.mSize);
+        writeRaw(b.mData, b.mSize);
     }
 
 }

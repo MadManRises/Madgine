@@ -29,18 +29,18 @@ RegisterType(Engine::Render::ProgramLoader)
                 loader);
         }
 
-        void ProgramLoader::HandleType::setParameters(const void *data, size_t size, size_t index, ProgramLoader *loader)
+        void ProgramLoader::HandleType::setParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader)
         {
             if (!loader)
                 loader = &ProgramLoader::getSingleton();
-            loader->setParameters(getData(*this, loader), data, size, index);
+            loader->setParameters(getData(*this, loader), data, index);
         }
 
-        void ProgramLoader::HandleType::setDynamicParameters(const void *data, size_t size, size_t index, ProgramLoader *loader)
+        void ProgramLoader::HandleType::setDynamicParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader)
         {
             if (!loader)
                 loader = &ProgramLoader::getSingleton();
-            loader->setDynamicParameters(getData(*this, loader), data, size, index);
+            loader->setDynamicParameters(getData(*this, loader), data, index);
         }
 
     }

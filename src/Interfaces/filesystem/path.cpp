@@ -106,51 +106,56 @@ namespace Filesystem {
     {
         std::string lastElement;
 
-        std::string s = std::move(mPath);
+        size_t size = mPath.size();
+        size_t cursor = 0;
 
-        size_t size = s.size();
-        mPath.reserve(size);
         bool hadSeparator = false;
         for (size_t i = 0; i < size; ++i) {
-            if (isSeparator(s[i])) {
+            if (isSeparator(mPath[i])) {
                 if (!hadSeparator) {
                     hadSeparator = true;
                     if (lastElement == ".") {
-                        if (!mPath.empty())
-                            mPath.pop_back();
-                    } else if (lastElement == ".." && !mPath.empty()) {
-                        mPath.pop_back();
-                        mPath.resize(mPath.rfind('/') + 1);
+                        if (cursor > 0)
+                            --cursor;
+                    } else if (lastElement == ".." && cursor > 0) {
+                        --cursor;
+                        cursor = mPath.rfind('/', cursor - 1) + 1;
                     } else {
-                        mPath += lastElement + "/";
+                        mPath.replace(cursor, lastElement.size(), lastElement.c_str());
+                        cursor += lastElement.size();
+                        mPath.replace(cursor, 1, "/");
+                        ++cursor;
                     }
                     lastElement.clear();
                 }
             } else {
                 hadSeparator = false;
-                lastElement.push_back(s[i]);
+                lastElement.push_back(mPath[i]);
             }
         }
 
         if (!lastElement.empty()) {
-            if (lastElement == "." && !mPath.empty()) {
-                mPath.pop_back();
-            } else if (lastElement == ".." && !mPath.empty()) {
-                mPath.pop_back();
-                size_t pos = mPath.rfind('/');
+            if (lastElement == "." && cursor > 0) {
+                --cursor;
+            } else if (lastElement == ".." && cursor > 0) {
+                --cursor;
+                size_t pos = mPath.rfind('/', cursor - 1);
                 if (pos != std::string::npos) {
-                    mPath.resize(pos);
+                    cursor = pos;
                 } else {
-                    mPath.clear();
+                    cursor = 0;
                 }
             } else {
-                mPath += lastElement;
+                mPath.replace(cursor, lastElement.size(), lastElement.c_str());
+                cursor += lastElement.size();
             }
         }
 
-        if (hadSeparator && mPath.size() > 1) {
-            mPath.pop_back();
+        if (hadSeparator && cursor > 0) {
+            --cursor;
         }
+
+        mPath.resize(cursor);
     }
 
     Path Path::filename() const

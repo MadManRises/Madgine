@@ -55,12 +55,12 @@ namespace Render {
         sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView*const*>(&textureHandle));
     }
 
-    void DirectX11TextureLoader::setData(Texture &tex, Vector2i size, void *data)
+    void DirectX11TextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
         static_cast<DirectX11Texture &>(tex).setData(size, data);
     }
 
-    void DirectX11TextureLoader::setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data)
+    void DirectX11TextureLoader::setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
         static_cast<DirectX11Texture &>(tex).setSubData(offset, size, data);
     }

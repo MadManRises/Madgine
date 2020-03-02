@@ -59,6 +59,8 @@ struct INTERFACES_EXPORT OutStream {
 
     operator bool() const;
 
+    std::unique_ptr<std::streambuf> release();
+
 protected:
     std::streambuf &buffer() const;
 

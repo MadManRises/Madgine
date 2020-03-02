@@ -41,8 +41,8 @@ namespace Render {
 
             void bind(TextureLoader *loader = nullptr);
 
-            void setData(Vector2i size, void *data, TextureLoader *loader = nullptr);
-            void setSubData(Vector2i offset, Vector2i size, void *data, TextureLoader *loader = nullptr);
+            void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
+            void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
 
             void setWrapMode(WrapMode mode, TextureLoader *loader = nullptr);
             void setMinMode(MinMode mode, TextureLoader *loader = nullptr);
@@ -55,8 +55,8 @@ namespace Render {
         virtual void bind(const Texture &tex) = 0;
         virtual void bind(TextureHandle textureHandle) = 0;
 
-        virtual void setData(Texture &tex, Vector2i size, void *data) = 0;
-        virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data) = 0;
+        virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) = 0;
+        virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) = 0;
 
         virtual void setWrapMode(Texture &tex, WrapMode mode) = 0;
         virtual void setMinMode(Texture &tex, MinMode mode) = 0;

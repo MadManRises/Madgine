@@ -136,7 +136,7 @@ namespace Render {
 #endif
     }
 
-    void OpenGLProgram::setParameters(const void *data, size_t size, size_t index)
+    void OpenGLProgram::setParameters(const ByteBuffer &data, size_t index)
     {
         if (mUniformBuffers.size() <= index)
             mUniformBuffers.resize(index + 1);
@@ -145,10 +145,10 @@ namespace Render {
             mUniformBuffers[index] = GL_UNIFORM_BUFFER;
         }
 
-        mUniformBuffers[index].setData(data, size);
+        mUniformBuffers[index].setData(data);
     }
 
-    void OpenGLProgram::setDynamicParameters(const void *data, size_t size, size_t index)
+    void OpenGLProgram::setDynamicParameters(const ByteBuffer &data, size_t index)
     {
         if (mShaderStorageBuffers.size() <= index)
             mShaderStorageBuffers.resize(index + 1);
@@ -159,7 +159,7 @@ namespace Render {
         }
 #endif
 
-        mShaderStorageBuffers[index].setData(data, size);
+        mShaderStorageBuffers[index].setData(data);
     }
 
     std::vector<OpenGLProgram::UniformBufferDescriptor> OpenGLProgram::uniformBuffers()

@@ -53,14 +53,14 @@ namespace Render {
         return true;
     }
 
-    void DirectX11ProgramLoader::setParameters(Program &program, const void *data, size_t size, size_t index)
+    void DirectX11ProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
     {
-        static_cast<DirectX11Program &>(program).setParameters(data, size, index);
+        static_cast<DirectX11Program &>(program).setParameters(data, index);
     }
 
-	void DirectX11ProgramLoader::setDynamicParameters(Program &program, const void *data, size_t size, size_t index)
+	void DirectX11ProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)
     {
-        static_cast<DirectX11Program &>(program).setDynamicParameters(data, size, index);
+        static_cast<DirectX11Program &>(program).setDynamicParameters(data, index);
     }
 
 }

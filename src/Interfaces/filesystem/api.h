@@ -27,7 +27,8 @@ namespace Filesystem {
     INTERFACES_EXPORT bool isSeparator(char c);
     INTERFACES_EXPORT bool isEqual(const Path &p1, const Path &p2);
 
-    INTERFACES_EXPORT InStream openFile(const Path &p, bool isBinary = false);
+    INTERFACES_EXPORT InStream openFileRead(const Path &p, bool isBinary = false);
+    INTERFACES_EXPORT OutStream openFileWrite(const Path &p, bool isBinary = false);
     INTERFACES_EXPORT FileInfo fileInfo(const Path &p);
 }
 }

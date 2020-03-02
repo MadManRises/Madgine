@@ -6,25 +6,27 @@
 
 #include "directx11vertexarray.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
-    DirectX11Buffer::DirectX11Buffer(UINT bind, size_t size, const void *data)
+    DirectX11Buffer::DirectX11Buffer(UINT bind, const ByteBuffer &data)
         : mBind(bind)
     {
-        if (data) {
+        if (data.mData) {
             D3D11_BUFFER_DESC vertexBufferDesc;
             ZeroMemory(&vertexBufferDesc, sizeof(D3D11_BUFFER_DESC));
 
             vertexBufferDesc.BindFlags = bind;
-            vertexBufferDesc.ByteWidth = size;
+            vertexBufferDesc.ByteWidth = data.mSize;
             vertexBufferDesc.CPUAccessFlags = 0;
             vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 
             D3D11_SUBRESOURCE_DATA resourceData;
             ZeroMemory(&resourceData, sizeof(D3D11_SUBRESOURCE_DATA));
 
-            resourceData.pSysMem = data;
+            resourceData.pSysMem = data.mData;
 
             HRESULT hr = sDevice->CreateBuffer(&vertexBufferDesc, &resourceData, &mBuffer);
             DX11_CHECK(hr);
@@ -77,9 +79,9 @@ namespace Render {
         }
     }
 
-    void DirectX11Buffer::setData(size_t size, const void *data)
+    void DirectX11Buffer::setData(const ByteBuffer &data)
     {
-        *this = { mBind, size, data };
+        *this = { mBind, data };
     }
 
     ID3D11Buffer *DirectX11Buffer::handle()

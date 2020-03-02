@@ -16,9 +16,9 @@ namespace Render {
         void unloadImpl(DirectX11Program &program, ResourceType *res);
         bool create(Program &program, const std::string &name) override;
 
-        virtual void setParameters(Program &program, const void *data, size_t size, size_t index) override;
+        virtual void setParameters(Program &program, const ByteBuffer &data, size_t index) override;
         
-        virtual void setDynamicParameters(Program &program, const void *data, size_t size, size_t index) override;
+        virtual void setDynamicParameters(Program &program, const ByteBuffer &data, size_t index) override;
     };
 }
 }

@@ -3,6 +3,8 @@
 #include "Modules/resources/resourceloader.h"
 #include "Modules/threading/workgroupstorage.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 #include "program.h"
 
 namespace Engine {
@@ -25,20 +27,20 @@ namespace Render {
             template <typename T>
             void setParameters(const T &param, size_t index, ProgramLoader *loader = nullptr)
             {
-                setParameters(&param, sizeof(T), index, loader);
+                setParameters({ &param, sizeof(T) }, index, loader);
             }
-            void setParameters(const void *data, size_t size, size_t index, ProgramLoader *loader = nullptr);
+            void setParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
 
-			void setDynamicParameters(const void *data, size_t size, size_t index, ProgramLoader *loader = nullptr);
+			void setDynamicParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
         };
 
         ProgramLoader();
 
         virtual bool create(Program &program, const std::string &name) = 0;
 
-        virtual void setParameters(Program &program, const void *data, size_t size, size_t index) = 0;
+        virtual void setParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
 
-		virtual void setDynamicParameters(Program &program, const void *data, size_t size, size_t index) = 0;
+		virtual void setDynamicParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
     };
 
 }

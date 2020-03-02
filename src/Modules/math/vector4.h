@@ -105,7 +105,7 @@ public:
     Vector3 xyz() const
     {
         return Vector3(x, y, z);
-	}
+    }
 
     /** Exchange the contents of this vector with another.
 		*/
@@ -817,8 +817,28 @@ public:
 		*/
     friend std::ostream &operator<<(std::ostream &o, const Vector4 &v)
     {
-        o << "Vector4(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
+        o << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]";
         return o;
+    }
+
+    friend std::istream &operator>>(std::istream &in, Vector4 &v)
+    {
+        char c;
+        in >> c;
+        if (c != '[')
+            std::terminate();
+        for (int i = 0; i < 4; ++i) {
+            in >> v[i];
+            in >> c;
+            if (i != 3) {
+                if (c != ',')
+                    std::terminate();
+            } else {
+                if (c != ']')
+                    std::terminate();
+            }
+        }
+        return in;
     }
 };
 

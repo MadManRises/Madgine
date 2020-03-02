@@ -150,11 +150,78 @@ namespace TupleUnpacker {
         }
     }
 
+	template <typename T>
+    auto toTupleImpl(T&& t, std::integral_constant<size_t, 3>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto& [a, b, c] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c);
+        } else {
+            auto&& [a, b, c] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c));
+        }
+    }
+
+    template <typename T>
+    auto toTupleImpl(T&& t, std::integral_constant<size_t, 4>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto& [a, b, c, d] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d);
+        } else {
+            auto&& [a, b, c, d] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d));
+        }
+    }
+
+	template <typename T>
+    auto toTupleImpl(T&& t, std::integral_constant<size_t, 5>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto& [a, b, c, d, e] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d, e);
+        } else {
+            auto&& [a, b, c, d, e] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e));
+        }
+    }
+
+    template <typename T>
+    auto toTupleImpl(T&& t, std::integral_constant<size_t, 6>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto& [a, b, c, d, e, f] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d, e, f);
+        } else {
+            auto&& [a, b, c, d, e, f] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f));
+        }
+    }
+
     template <typename T>
     auto toTuple(T&& t)
     {
         constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());
         return toTupleImpl(std::forward<T>(t), std::integral_constant<size_t, elementCount> {});
+    }
+
+    template <typename Tuple, typename F, size_t... Is>
+    void forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)
+    {
+        (f(std::get<Is>(std::forward<Tuple>(t))), ...);
+    }
+
+    template <typename Tuple, typename F>
+    void forEach(Tuple&& t, F&& f) {
+        forEach(std::forward<Tuple>(t), std::forward<F>(f), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
     }
 
 };

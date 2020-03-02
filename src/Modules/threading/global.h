@@ -66,7 +66,7 @@ namespace Threading {
 
         Global(T *initial = nullptr)
         {
-            mIndex = Storage::registerLocalBssVariable([=]() { return Any { initial }; });
+            mIndex = Storage::registerLocalBssVariable([=]() { return Any { (T *)initial }; });
         }
 
         ~Global()

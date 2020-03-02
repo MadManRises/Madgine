@@ -7,6 +7,13 @@
 #include "Modules/math/atlas2.h"
 #include "Modules/math/vector2i.h"
 
+#include "Modules/filesystem/filemanager.h"
+#include "Modules/serialize/formatter/safebinaryformatter.h"
+#include "Modules/serialize/streams/serializestream.h"
+
+#include "Modules/generic/areaview.h"
+#include "Modules/generic/bytebuffer.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
@@ -77,7 +84,7 @@ namespace Engine {
 namespace Render {
 
     FontLoader::FontLoader()
-        : ResourceLoader({ ".ttf" })
+        : ResourceLoader({ ".msdf", ".ttf" })
     {
     }
 
@@ -87,121 +94,155 @@ namespace Render {
         font.mTexture.setMinMode(MIN_NEAREST);
         font.mTextureHandle = font.mTexture->mTextureHandle;
 
-        FT_Library ft;
-        if (FT_Init_FreeType(&ft)) {
-            LOG_ERROR("FREETYPE: Could not init FreeType Library");
-            return {};
-        }
+        if (res->path().extension() == ".msdf") {
 
-        std::vector<unsigned char> fontBuffer = res->readAsBlob();
+            Filesystem::FileManager cache("msdf_cache");
+            Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            assert(in);
+            in >> font.mGlyphs;
+            in >> font.mTextureSize;
+            ByteBuffer b;
+            in >> b;
+            font.mTexture.setData(font.mTextureSize, b);
 
-        FT_Face face;
-        if (FT_New_Memory_Face(ft, fontBuffer.data(), fontBuffer.size(), 0, &face)) {
-            LOG_ERROR("FREETYPE: Failed to load font");
-        }
+        } else if (res->path().extension() == ".ttf") {
+            LOG("Creating Cache for " << res->path());
 
-        FT_Set_Pixel_Sizes(face, 0, 64);
-
-        std::vector<Vector2i> sizes;
-        sizes.resize(128);
-        std::vector<Vector2i> extendedSizes;
-        extendedSizes.resize(128);
-
-        for (unsigned char c = 0; c < 128; c++) {
-            // Load character glyph
-            if (FT_Load_Char(face, c, FT_LOAD_DEFAULT)) {
-                LOG_ERROR("FREETYTPE: Failed to load Glyph");
-                sizes[c] = { 0, 0 };
-                extendedSizes[c] = { 0, 0 };
-                continue;
+            FT_Library ft;
+            if (FT_Init_FreeType(&ft)) {
+                LOG_ERROR("FREETYPE: Could not init FreeType Library");
+                return false;
             }
-            sizes[c] = { static_cast<int>(face->glyph->bitmap.width) + 2, static_cast<int>(face->glyph->bitmap.rows) + 2 };
-            extendedSizes[c] = { static_cast<int>(face->glyph->bitmap.width) + 3, static_cast<int>(face->glyph->bitmap.rows) + 3 };
-        }
 
-        constexpr int UNIT_SIZE = 256;
+            std::vector<unsigned char> fontBuffer = res->readAsBlob();
 
-        Atlas2 atlas({ UNIT_SIZE, UNIT_SIZE });
-        atlas.addBin({ 0, 0 });
+            FT_Face face;
+            if (FT_New_Memory_Face(ft, fontBuffer.data(), fontBuffer.size(), 0, &face)) {
+                FT_Done_FreeType(ft);
+                LOG_ERROR("FREETYPE: Failed to load font");
+                return false;
+            }
 
-        int areaSize = 1;
+            FT_Set_Pixel_Sizes(face, 0, 64);
 
-        auto expand = [&]() {
-            for (int i = 0; i < areaSize; ++i) {
-                for (int j = 0; j < areaSize; ++j) {
-                    atlas.addBin({ j * UNIT_SIZE, (areaSize + i) * UNIT_SIZE });
-                    atlas.addBin({ (areaSize + j) * UNIT_SIZE, i * UNIT_SIZE });
-                    atlas.addBin({ (areaSize + j) * UNIT_SIZE, (areaSize + i) * UNIT_SIZE });
+            std::vector<Vector2i> sizes;
+            sizes.resize(128);
+            std::vector<Vector2i> extendedSizes;
+            extendedSizes.resize(128);
+
+            for (unsigned char c = 0; c < 128; c++) {
+                // Load character glyph
+                if (FT_Load_Char(face, c, FT_LOAD_DEFAULT)) {
+                    LOG_ERROR("FREETYTPE: Failed to load Glyph");
+                    sizes[c] = { 0, 0 };
+                    extendedSizes[c] = { 0, 0 };
+                    continue;
                 }
-            }
-            areaSize *= 2;
-        };
-
-        std::vector<Atlas2::Entry> entries = atlas.insert(
-            extendedSizes, expand, true);
-
-        font.mTextureSize = { areaSize * UNIT_SIZE,
-            areaSize * UNIT_SIZE };
-        font.mTexture.setData(font.mTextureSize, nullptr);
-
-        for (unsigned char c = 0; c < 128; c++) {
-
-            // Load character glyph
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-                LOG_ERROR("FREETYTPE: Failed to load Glyph");
-                continue;
+                sizes[c] = { static_cast<int>(face->glyph->bitmap.width) + 2, static_cast<int>(face->glyph->bitmap.rows) + 2 };
+                extendedSizes[c] = { static_cast<int>(face->glyph->bitmap.width) + 3, static_cast<int>(face->glyph->bitmap.rows) + 3 };
             }
 
-            std::unique_ptr<Vector3[]> buffer = std::make_unique<Vector3[]>(sizes[c].x * sizes[c].y);
+            constexpr int UNIT_SIZE = 256;
 
-            msdfgen::BitmapRef<float, 3> bm { buffer[0].ptr(), sizes[c].x, sizes[c].y };
+            Atlas2 atlas({ UNIT_SIZE, UNIT_SIZE });
+            atlas.addBin({ 0, 0 });
 
-            msdfgen::Shape shape;
-            shape.inverseYAxis = true;
+            int areaSize = 1;
 
-            msdfgen::FtContext context = {};
-            context.shape = &shape;
-            FT_Outline_Funcs ftFunctions;
-            ftFunctions.move_to = &msdfgen::ftMoveTo;
-            ftFunctions.line_to = &msdfgen::ftLineTo;
-            ftFunctions.conic_to = &msdfgen::ftConicTo;
-            ftFunctions.cubic_to = &msdfgen::ftCubicTo;
-            ftFunctions.shift = 0;
-            ftFunctions.delta = 0;
-            FT_Outline_Decompose(&face->glyph->outline, &ftFunctions, &context);
-
-            msdfgen::edgeColoringSimple(shape, 3);
-            msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
-
-            font.mGlyphs[c].mSize = sizes[c];
-            font.mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
-            font.mGlyphs[c].mFlipped = entries[c].mFlipped;
-            font.mGlyphs[c].mAdvance = face->glyph->advance.x;
-            font.mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
-
-            Vector2i size = sizes[c];
-            if (entries[c].mFlipped)
-                std::swap(size.x, size.y);
-            Vector2i pos = { entries[c].mArea.mTopLeft.x, areaSize * UNIT_SIZE - size.y - entries[c].mArea.mTopLeft.y };
-
-            std::unique_ptr<unsigned char[]> colors = std::make_unique<unsigned char[]>(4 * size.x * size.y);
-            for (int y = 0; y < size.y; ++y) {
-                for (int x = 0; x < size.x; ++x) {
-                    int index = (size.y - 1 - y) * size.x + x;
-                    int sourceIndex = entries[c].mFlipped ? x * size.y + y : y * size.x + x;
-
-                    colors[4 * index] = clamp(buffer[sourceIndex].x, 0.0f, 1.0f) * 255;
-                    colors[4 * index + 1] = clamp(buffer[sourceIndex].y, 0.0f, 1.0f) * 255;
-                    colors[4 * index + 2] = clamp(buffer[sourceIndex].z, 0.0f, 1.0f) * 255;
-                    colors[4 * index + 3] = 255;
+            auto expand = [&]() {
+                for (int i = 0; i < areaSize; ++i) {
+                    for (int j = 0; j < areaSize; ++j) {
+                        atlas.addBin({ j * UNIT_SIZE, (areaSize + i) * UNIT_SIZE });
+                        atlas.addBin({ (areaSize + j) * UNIT_SIZE, i * UNIT_SIZE });
+                        atlas.addBin({ (areaSize + j) * UNIT_SIZE, (areaSize + i) * UNIT_SIZE });
+                    }
                 }
+                areaSize *= 2;
+            };
+
+            std::vector<Atlas2::Entry> entries = atlas.insert(
+                extendedSizes, expand, true);
+
+            font.mTextureSize = { areaSize * UNIT_SIZE,
+                areaSize * UNIT_SIZE };
+            size_t byteSize = font.mTextureSize.x * font.mTextureSize.y;
+            std::unique_ptr<std::array<unsigned char, 4>[]> texBuffer = std::make_unique<std::array<unsigned char, 4>[]>(byteSize);
+            AreaView<std::array<unsigned char, 4>, 2> tex { texBuffer.get(), { static_cast<size_t>(font.mTextureSize.x), static_cast<size_t>(font.mTextureSize.y) } };
+            tex.flip(1);
+
+            for (unsigned char c = 0; c < 128; c++) {
+
+                // Load character glyph
+                if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+                    LOG_ERROR("FREETYTPE: Failed to load Glyph");
+                    continue;
+                }
+
+                std::unique_ptr<Vector3[]> buffer = std::make_unique<Vector3[]>(sizes[c].x * sizes[c].y);
+                AreaView<Vector3, 2> bufferView { buffer.get(), { static_cast<size_t>(sizes[c].x), static_cast<size_t>(sizes[c].y) } };
+
+                msdfgen::BitmapRef<float, 3>
+                    bm { buffer[0].ptr(), sizes[c].x, sizes[c].y };
+
+                msdfgen::Shape shape;
+                shape.inverseYAxis = true;
+
+                msdfgen::FtContext context = {};
+                context.shape = &shape;
+                FT_Outline_Funcs ftFunctions;
+                ftFunctions.move_to = &msdfgen::ftMoveTo;
+                ftFunctions.line_to = &msdfgen::ftLineTo;
+                ftFunctions.conic_to = &msdfgen::ftConicTo;
+                ftFunctions.cubic_to = &msdfgen::ftCubicTo;
+                ftFunctions.shift = 0;
+                ftFunctions.delta = 0;
+                FT_Outline_Decompose(&face->glyph->outline, &ftFunctions, &context);
+
+                msdfgen::edgeColoringSimple(shape, 3);
+                msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
+
+                font.mGlyphs[c].mSize = sizes[c];
+                font.mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
+                font.mGlyphs[c].mFlipped = entries[c].mFlipped;
+                font.mGlyphs[c].mAdvance = face->glyph->advance.x;
+                font.mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
+
+                Vector2i size = sizes[c];
+                if (entries[c].mFlipped)
+                    std::swap(size.x, size.y);
+                Vector2i pos = { entries[c].mArea.mTopLeft.x, entries[c].mArea.mTopLeft.y };
+
+                AreaView<std::array<unsigned char, 4>, 2> targetView = tex.subArea({ static_cast<size_t>(pos.x), static_cast<size_t>(pos.y) }, { static_cast<size_t>(size.x), static_cast<size_t>(size.y) });
+                if (entries[c].mFlipped)
+                    targetView.swapAxis(0, 1);
+
+                std::transform(bufferView.begin(), bufferView.end(), targetView.begin(),
+                    [](const Vector3 &v) {
+                        return std::array<unsigned char, 4> {
+                            static_cast<unsigned char>(clamp(v.x, 0.0f, 1.0f) * 255),
+                            static_cast<unsigned char>(clamp(v.y, 0.0f, 1.0f) * 255),
+                            static_cast<unsigned char>(clamp(v.z, 0.0f, 1.0f) * 255),
+                            255
+                        };
+                    });
             }
 
-            font.mTexture.setSubData(pos, size, colors.get());
-        }
+            FT_Done_Face(face);
+            FT_Done_FreeType(ft);
 
-        FT_Done_Face(face);
-        FT_Done_FreeType(ft);
+            font.mTexture.setData(font.mTextureSize, { texBuffer.get(), 4 * byteSize });
+
+            Filesystem::FileManager cache("msdf_cache");
+            Serialize::SerializeOutStream out = cache.openWrite(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            if (out) {
+                out << font.mGlyphs;
+                out << font.mTextureSize;
+                out << ByteBuffer { texBuffer.get(), 4 * byteSize };
+            }
+
+        } else {
+            std::terminate();
+        }
 
         return true;
     }

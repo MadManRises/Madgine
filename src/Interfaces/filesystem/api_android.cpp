@@ -253,14 +253,16 @@ namespace Filesystem {
         AAsset *mAsset;
     };
 
-    InStream openFile(const Path &p, bool isBinary)
+    InStream openFileRead(const Path &p, bool isBinary)
     {
         if (isAssetPath(p)) {
             return { std::make_unique<AAsset_Streambuf>(assetDir(p)) };
         } else {
             std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
-            buffer->open(p.c_str(), std::ios_base::in | (isBinary ? std::ios_base::binary : 0));
-            return { std::move(buffer) };
+            if (buffer->open(p.c_str(), std::ios_base::in | (isBinary ? std::ios_base::binary : 0)))
+                return { std::move(buffer) };
+            else
+                return {};
         }
     }
 

@@ -774,8 +774,28 @@ public:
 		*/
     friend std::ostream &operator<<(std::ostream &o, const Vector3 &v)
     {
-        o << "Vector3(" << v.x << ", " << v.y << ", " << v.z << ")";
+        o << "[" << v.x << ", " << v.y << ", " << v.z << "]";
         return o;
+    }
+
+    friend std::istream &operator>>(std::istream &in, Vector3 &v)
+    {
+        char c;
+        in >> c;
+        if (c != '[')
+            std::terminate();
+        for (int i = 0; i < 3; ++i) {
+            in >> v[i];
+            in >> c;
+            if (i != 2) {
+                if (c != ',')
+                    std::terminate();
+            } else {
+                if (c != ']')
+                    std::terminate();
+            }
+        }
+        return in;
     }
 };
 

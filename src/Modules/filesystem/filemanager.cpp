@@ -18,11 +18,11 @@ namespace Filesystem {
     {
     }
 
-    std::optional<Serialize::SerializeInStream> FileManager::openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::SerializeInStream FileManager::openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format)
     {
         assert(!getSlaveStreambuf());
 
-        InStream stream = openFile(path);
+        InStream stream = openFileRead(path, format->mBinary);
         if (stream) {
             Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(stream.release(), std::move(format), *this, createStreamId()) };
             setSlaveStreambuf(&in.buffer());
@@ -33,9 +33,14 @@ namespace Filesystem {
         }
     }
 
-    std::optional<Serialize::SerializeOutStream> FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::SerializeOutStream FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
     {
-        return {};
+        OutStream stream = openFileWrite(path, format->mBinary);
+        if (stream) {
+            return Serialize::SerializeOutStream { std::make_unique<Serialize::WrappingSerializeStreambuf>(stream.release(), std::move(format), *this, createStreamId()) };           
+        } else {
+            return {};
+        }        
     }
 
 }

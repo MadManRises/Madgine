@@ -41,6 +41,8 @@ struct ComponentRegistryBase;
 
 struct Any;
 
+struct ByteBuffer;
+
 namespace CLI {
     struct CLICore;
     struct ParameterBase;

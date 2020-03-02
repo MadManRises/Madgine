@@ -33,7 +33,7 @@ target_link_plugins(LibB LibA)
 
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)
-	FolderSources(sources "" generic tupleunpackertest.cpp valuetypetest.cpp)
+	FolderSources(sources "" generic areaviewtest.cpp tupleunpackertest.cpp valuetypetest.cpp)
 	FolderSources(sources "" network networkmanagertest.cpp)
 	FolderSources(sources "" serialize)
 		FolderSources(sources serialize container containertest.cpp)

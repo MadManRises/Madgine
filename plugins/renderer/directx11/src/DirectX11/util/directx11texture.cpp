@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const void *data)
+    DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const ByteBuffer &data)
         : mType(type)
         , mFormat(format)
         , mBind(bind)
@@ -50,12 +50,12 @@ namespace Render {
             textureDesc.Usage = D3D11_USAGE_DEFAULT;
 
             D3D11_SUBRESOURCE_DATA subResourceDesc;
-            subResourceDesc.pSysMem = data;
+            subResourceDesc.pSysMem = data.mData;
             subResourceDesc.SysMemPitch = width * byteCount;
             subResourceDesc.SysMemSlicePitch = 0;
 
             ID3D11Texture2D *tex;
-            HRESULT hr = sDevice->CreateTexture2D(&textureDesc, data ? &subResourceDesc : nullptr, &tex);
+            HRESULT hr = sDevice->CreateTexture2D(&textureDesc, data.mData ? &subResourceDesc : nullptr, &tex);
             mResource = tex;
             DX11_CHECK(hr);
 
@@ -149,12 +149,12 @@ namespace Render {
         sDeviceContext->PSSetSamplers(0, 1, &mSampler);
     }
 
-    void DirectX11Texture::setData(Vector2i size, void *data)
+    void DirectX11Texture::setData(Vector2i size, const ByteBuffer &data)
     {
         *this = DirectX11Texture { mType, mFormat, mBind, static_cast<size_t>(size.x), static_cast<size_t>(size.y), data };
     }
 
-    void DirectX11Texture::setSubData(Vector2i offset, Vector2i size, void *data)
+    void DirectX11Texture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
         size_t byteCount;
         switch (mFormat) {
@@ -179,7 +179,7 @@ namespace Render {
         box.front = 0;
         box.back = 1;
 
-        sDeviceContext->UpdateSubresource(mResource, 0, &box, data, size.x * byteCount, 0);
+        sDeviceContext->UpdateSubresource(mResource, 0, &box, data.mData, size.x * byteCount, 0);
     }
 
     void DirectX11Texture::resize(Vector2i size)

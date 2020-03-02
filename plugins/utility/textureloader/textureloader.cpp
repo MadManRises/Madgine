@@ -33,14 +33,14 @@ RegisterType(Engine::Render::TextureLoader)
             loader->bind(getData(*this, loader));
         }
 
-        void TextureLoader::HandleType::setData(Vector2i size, void *data, TextureLoader *loader)
+        void TextureLoader::HandleType::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();
             loader->setData(getData(*this, loader), size, data);
         }
 
-        void TextureLoader::HandleType::setSubData(Vector2i offset, Vector2i size, void *data, TextureLoader *loader)
+        void TextureLoader::HandleType::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();

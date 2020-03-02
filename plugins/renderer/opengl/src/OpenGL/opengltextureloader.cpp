@@ -65,12 +65,12 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLTextureLoader::setData(Texture &tex, Vector2i size, void *data)
+    void OpenGLTextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
         static_cast<OpenGLTexture &>(tex).setData(size, data);
     }
 
-    void OpenGLTextureLoader::setSubData(Texture &tex, Vector2i offset, Vector2i size, void *data)
+    void OpenGLTextureLoader::setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
         static_cast<OpenGLTexture &>(tex).setSubData(offset, size, data);
     }

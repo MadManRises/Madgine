@@ -2,6 +2,8 @@
 
 #include "opengltexture.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -55,18 +57,18 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLTexture::setData(Vector2i size, void *data)
+    void OpenGLTexture::setData(Vector2i size, const ByteBuffer &data)
     {
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, mType, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, mType, data.mData);
         GL_CHECK();
         mSize = size;
     }
 
-    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, void *data)
+    void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
         bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, mType, data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, mType, data.mData);
         GL_CHECK();
     }
 

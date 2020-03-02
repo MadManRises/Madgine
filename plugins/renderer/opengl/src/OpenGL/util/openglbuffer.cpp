@@ -2,6 +2,8 @@
 
 #include "openglbuffer.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 #if OPENGL_ES
 #    include "openglvertexarray.h"
 #endif
@@ -62,18 +64,18 @@ namespace Render {
         }
     }
 
-    void OpenGLBuffer::setData(const void *data, GLsizei size)
+    void OpenGLBuffer::setData(const ByteBuffer &data)
     {
         bind();
-        glBufferData(mTarget, size, data, GL_STATIC_DRAW);
+        glBufferData(mTarget, data.mSize, data.mData, GL_STATIC_DRAW);
         GL_CHECK();
         GL_LOG("Buffer-Data: " << size);
     }
 
-    void OpenGLBuffer::setSubData(const void *data, unsigned int offset, GLsizei size)
+    void OpenGLBuffer::setSubData(unsigned int offset, const ByteBuffer &data)
     {
         bind();
-        glBufferSubData(mTarget, offset, size, data);
+        glBufferSubData(mTarget, offset, data.mSize, data.mData);
         GL_LOG("Buffer-SubData: " << offset << ", " << size);
         GL_CHECK();
     }

@@ -55,14 +55,14 @@ namespace Render {
         return true;
     }
 
-    void OpenGLProgramLoader::setParameters(Program &program, const void *data, size_t size, size_t index)
+    void OpenGLProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
     {
-        static_cast<OpenGLProgram &>(program).setParameters(data, size, index);
+        static_cast<OpenGLProgram &>(program).setParameters(data, index);
     }
 
-    void OpenGLProgramLoader::setDynamicParameters(Program &program, const void *data, size_t size, size_t index)
+    void OpenGLProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)
     {
-        static_cast<OpenGLProgram &>(program).setDynamicParameters(data, size, index);
+        static_cast<OpenGLProgram &>(program).setDynamicParameters(data, index);
     }
 
 }
