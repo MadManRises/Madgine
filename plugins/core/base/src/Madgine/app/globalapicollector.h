@@ -12,6 +12,6 @@ namespace Engine
 	namespace App
 	{
     template <typename T>
-		using GlobalAPI = GlobalAPIComponent<T>;
+		using GlobalAPI = VirtualScope<T, GlobalAPIComponent<T>>;
 	}
 }

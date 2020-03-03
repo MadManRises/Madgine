@@ -8,7 +8,7 @@
 
 namespace Engine {
 namespace App {
-    struct MADGINE_BASE_EXPORT GlobalAPIBase : MadgineObject, ScopeBase {
+    struct MADGINE_BASE_EXPORT GlobalAPIBase : MadgineObject, VirtualScopeBase {
         GlobalAPIBase(App::Application &app);
 
         template <typename T>

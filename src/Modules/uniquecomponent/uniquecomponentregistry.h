@@ -11,7 +11,7 @@ namespace Engine {
 template <typename T, typename Base, typename... _Ty>
 std::unique_ptr<Base> createComponent(_Ty... arg)
 {
-    return std::make_unique<T>(std::forward<_Ty>(arg)...) ;
+    return std::make_unique<T>(std::forward<_Ty>(arg)...);
 }
 
 template <typename Base, typename... _Ty>
@@ -41,7 +41,6 @@ struct CollectorInfo {
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
     std::vector<std::vector<const TypeInfo *>> mElementInfos;
-    std::vector<const MetaTable *> mElementTables;
     size_t mBaseIndex = 0;
 };
 
@@ -109,7 +108,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
 
     static UniqueComponentRegistry &sInstance()
     {
-        return uniqueComponentRegistry<UniqueComponentRegistry<Base, _Ty...>>();
+        return uniqueComponentRegistry<UniqueComponentRegistry<_Base, _Ty...>>();
     }
 
     static std::vector<F> &sComponents()
@@ -137,9 +136,6 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                 for (F f : comps) {
                     mComponents.push_back(f);
                 }
-                for (const MetaTable *table : info->mElementTables) {
-                    mTables.push_back(table);
-                }
                 mUpdate.emit(info, true, comps);
                 it = mUnloadedCollectors.erase(it);
             } else {
@@ -162,7 +158,6 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                 mUnloadedCollectors.push_back(info);
                 it = mLoadedCollectors.erase(it);
                 mComponents.erase(mComponents.begin() + info->mBaseIndex, mComponents.begin() + info->mBaseIndex + info->mComponents.size());
-                mTables.erase(mTables.begin() + info->mBaseIndex, mTables.begin() + info->mBaseIndex + info->mComponents.size());
 
                 for (CollectorInfo *i : mLoadedCollectors) {
                     if (i->mBaseIndex >= info->mBaseIndex)
@@ -188,7 +183,6 @@ private:
     static inline UniqueComponentRegistry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
 
     std::vector<F> mComponents;
-    std::vector<const MetaTable *> mTables;
     Threading::Signal<CollectorInfo *, bool, const std::vector<F> &> mUpdate;
 
     std::vector<CollectorInfo *> mUnloadedCollectors;

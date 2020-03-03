@@ -15,13 +15,13 @@ namespace Engine
 	{
 
 		template <typename T>
-		using SceneComponent = Serialize::SerializableUnit<T, SceneComponentComponent<T>>;
+		using SceneComponent = VirtualScope<T, Serialize::SerializableUnit<T, SceneComponentComponent<T>>>;
 
 		template <typename T>
 		using VirtualSceneComponentBase = Serialize::SerializableUnit<T, SceneComponentVirtualBase<T>>;
 
 		template <typename T, typename Base>
-		using VirtualSceneComponentImpl = Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>;
+		using VirtualSceneComponentImpl = VirtualScope<T, Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>>;
 
 #define VIRTUALSCENECOMPONENTBASE(T) template <> TEMPLATE_INSTANCE constexpr size_t &Engine::Scene::VirtualSceneComponentBase<T>::sIndex(){static size_t index = -1; return index;};
 

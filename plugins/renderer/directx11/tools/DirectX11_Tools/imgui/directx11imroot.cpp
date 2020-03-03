@@ -27,7 +27,7 @@ RegisterType(Engine::Tools::DirectX11ImRoot)
     namespace Tools {
 
         DirectX11ImRoot::DirectX11ImRoot(GUI::TopLevelWindow &window)
-            : VirtualUniqueComponentImpl(window)
+            : VirtualScope(window)            
         {
         }
 

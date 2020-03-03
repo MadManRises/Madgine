@@ -25,7 +25,7 @@ RegisterType(Engine::Tools::OpenGLImRoot)
     namespace Tools {
 
         OpenGLImRoot::OpenGLImRoot(GUI::TopLevelWindow &window)
-            : VirtualUniqueComponentImpl(window)
+            : VirtualScope(window)
         {
         }
 

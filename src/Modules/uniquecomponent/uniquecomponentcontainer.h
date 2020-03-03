@@ -61,65 +61,6 @@ struct UniqueComponentContainerImpl : C {
         return Container::end();
     }
 
-    struct typed_const_iterator {
-        using It = typename std::vector<Base *>::const_iterator;
-        using TypeIt = typename std::vector<const MetaTable *>::const_iterator;
-
-        using iterator_category = typename It::iterator_category;
-        using value_type = TypedScopePtr;
-        using difference_type = typename It::difference_type;
-        using pointer = void;
-        using reference = void;
-
-        typed_const_iterator(It &&it, TypeIt &&type)
-            : mIt(std::move(it))
-            , mType(std::move(type))
-        {
-        }
-
-        void operator++()
-        {
-            ++mIt;
-            ++mType;
-        }
-
-        TypedScopePtr operator*() const
-        {
-            return {
-                *mIt, *mType
-            };
-        }
-
-        bool operator==(const typed_const_iterator &other) const
-        {
-            return mIt == other.mIt;
-        }
-
-        bool operator!=(const typed_const_iterator &other) const
-        {
-            return mIt != other.mIt;
-        }
-
-        difference_type operator-(const typed_const_iterator &other) const
-        {
-            return mIt - other.mIt;
-        }
-
-    private:
-        It mIt;
-        TypeIt mType;
-    };
-
-    typed_const_iterator typedBegin() const
-    {
-        return { mSortedComponents.begin(), Registry::sTables().begin() };
-    }
-
-    typed_const_iterator typedEnd() const
-    {
-        return { mSortedComponents.end(), Registry::sTables().end() };
-    }
-
     template <typename T>
     T &get()
     {
@@ -162,7 +103,7 @@ protected:
 
 private:
     //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainerImpl<C, Base, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentContainerImpl<C, _Base, _Ty...>::updateComponents> mUpdateSlot;
     std::tuple<_Ty...> mArg;
 
 #endif

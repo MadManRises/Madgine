@@ -23,7 +23,7 @@ namespace App {
         assert(!sApp);
         sApp = this;
 
-		 if (!callInit())
+        if (!callInit())
             throw exception("App Init Failed!");
     }
 

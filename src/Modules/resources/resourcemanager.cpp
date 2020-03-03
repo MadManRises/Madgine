@@ -144,7 +144,7 @@ namespace Resources {
     {
         std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension;
 
-        for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
+        for (const std::unique_ptr<ResourceLoaderBase> & loader : mCollector) {
             for (const std::string &ext : loader->fileExtensions()) {
                 loaderByExtension[ext].push_back(loader.get());
             }

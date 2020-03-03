@@ -16,7 +16,7 @@
 namespace Engine {
 namespace Resources {
 
-    template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderBase>
+    template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderCollector::Base>
     struct ResourceLoaderImpl : _Base {
 
         using Base = _Base;
@@ -40,7 +40,7 @@ namespace Resources {
         using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
         using Dtor = std::function<void(T *, Data &, ResourceType *)>;
 
-        using ResourceBaseType = std::conditional_t<std::is_same_v<ResourceLoaderBase, Base>, StorageUnit, typename Base::ResourceType>;
+        using ResourceBaseType = std::conditional_t<std::is_same_v<ResourceLoaderCollector::Base, Base>, StorageUnit, typename Base::ResourceType>;
 
         struct ResourceType : ResourceBaseType {
 
@@ -220,13 +220,13 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
-    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>> {
+    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>> {
 
-        using UniqueComponent<T, ResourceLoaderCollector, ResourceLoaderImpl<T, _Data, Container, Storage>>::UniqueComponent;
+        using UniqueComponent<T, ResourceLoaderCollector, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>>::UniqueComponent;
     };
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
-    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderBase> {
+    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector> {
 
         using Data = _Data;
         using Container = _Container;
@@ -261,7 +261,7 @@ namespace Resources {
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
 
-        using VirtualUniqueComponentBase<T, ResourceLoaderCollector, ResourceLoaderBase>::VirtualUniqueComponentBase;
+        using VirtualUniqueComponentBase<T, ResourceLoaderCollector>::VirtualUniqueComponentBase;
 
         static T &getSingleton()
         {
@@ -349,12 +349,12 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename _Base>
-    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, _Data, typename _Base::Container, typename _Base::Storage, _Base>, _Base> {
+    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, _Data, typename _Base::Container, typename _Base::Storage, _Base>>, _Base> {
 
         using Data = _Data;
         using Base = _Base;
 
-        using Self = VirtualUniqueComponentImpl<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>, _Base>;
+        using Self = VirtualUniqueComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, Data, typename Base::Container, typename Base::Storage, Base>>, _Base>;
 
         using Self::Self;
 

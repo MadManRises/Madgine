@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT SceneComponentBase : Serialize::SerializableUnitBase, ScopeBase, MadgineObject {    
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : Serialize::SerializableUnitBase, VirtualScopeBase, MadgineObject {    
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);

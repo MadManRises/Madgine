@@ -94,7 +94,7 @@ protected:
     }
 
 private:
-    Threading::Slot<&UniqueComponentSelector<Base, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentSelector<_Base, _Ty...>::updateComponents> mUpdateSlot;
 #endif
 };
 

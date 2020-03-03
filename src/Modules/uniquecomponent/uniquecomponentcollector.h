@@ -19,15 +19,16 @@ DERIVE_TYPEDEF(VBase)
 
 template <typename _Base, typename... _Ty>
 struct UniqueComponentCollector {
-    typedef _Base Base;
+    typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
+    typedef typename Registry::Base Base;
     typedef std::tuple<_Ty...> Ty;
     typedef Collector_F<Base, _Ty...> F;
-    typedef UniqueComponentRegistry<Base, _Ty...> Registry;
+    
 
     UniqueComponentCollector()
     {
         mInfo.mRegistryInfo = &typeInfo<Registry>();
-        mInfo.mBaseInfo = &typeInfo<Base>();
+        mInfo.mBaseInfo = &typeInfo<_Base>();
         mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
         Registry::sInstance().addCollector(&mInfo);
     }
@@ -61,7 +62,6 @@ private:
             elementInfos.push_back(&typeInfo<typename T::VBase>());
         }
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
-        sInstance().mInfo.mElementTables.push_back(std::is_base_of_v<Engine::ScopeBase, T> ? &table<decayed_t<T>>() : nullptr);
         return sInstance().mInfo.mComponents.size() - 1;
     }
 
@@ -69,7 +69,6 @@ private:
     {
         sInstance().mInfo.mComponents[i] = nullptr;
         sInstance().mInfo.mElementInfos[i].clear();
-        sInstance().mInfo.mElementTables[i] = nullptr;
     }
 
     static size_t &baseIndex()
@@ -79,7 +78,7 @@ private:
 
 public:
     template <typename T>
-    struct ComponentRegistrator : IndexHolder {    
+    struct ComponentRegistrator : IndexHolder {
         ComponentRegistrator()
             : mBaseIndex(baseIndex())
         {

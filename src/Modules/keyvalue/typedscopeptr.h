@@ -1,23 +1,33 @@
 #pragma once
 
 #include "metatable.h"
+#include "../generic/derive.h"
 
 namespace Engine {
 
-struct MODULES_EXPORT TypedScopePtr {
-    ScopeBase *mScope;
-    const MetaTable *mType;
+DERIVE_FUNCTION(customScopePtr);
 
-    constexpr TypedScopePtr()
-        : mScope(nullptr)
-        , mType(nullptr)
+struct MODULES_EXPORT TypedScopePtr {
+private:
+    template <typename T>
+    TypedScopePtr(T *t, std::true_type)
+        : TypedScopePtr(t->customScopePtr())
     {
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T> && std::is_base_of_v<ScopeBase, T>>>
-    TypedScopePtr(T *t)
+    template <typename T>
+    TypedScopePtr(T *t, std::false_type)
         : mScope(t)
         , mType(&table<T>())
+    {
+    }
+
+public:
+    constexpr TypedScopePtr() = default;
+
+    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T> && std::is_base_of_v<ScopeBase, T>>>
+    TypedScopePtr(T *t)
+        : TypedScopePtr(t, has_function_customScopePtr<T> {})
     {
     }
 
@@ -33,8 +43,7 @@ struct MODULES_EXPORT TypedScopePtr {
     {
     }
 
-    bool
-    operator==(const TypedScopePtr &other) const
+    bool operator==(const TypedScopePtr &other) const
     {
         return mScope == other.mScope && mType == other.mType;
     }
@@ -58,7 +67,10 @@ struct MODULES_EXPORT TypedScopePtr {
     ScopeIterator begin() const;
     ScopeIterator end() const;
 
-	std::string name() const;
+    std::string name() const;
+
+    ScopeBase *mScope = nullptr;
+    const MetaTable *mType = nullptr;
 };
 
 }

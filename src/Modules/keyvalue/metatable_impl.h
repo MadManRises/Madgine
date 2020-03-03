@@ -10,14 +10,6 @@
 
 namespace Engine {
 
-template <typename T, typename = void>
-struct is_typed_iterable : std::false_type {
-};
-
-template <typename T>
-struct is_typed_iterable<T, std::void_t<decltype(std::declval<T>().typedBegin()), decltype(std::declval<T>().typedEnd())>> : std::true_type {
-};
-
 template <typename Scope, auto Getter, auto Setter>
 constexpr Accessor property()
 {
@@ -69,10 +61,6 @@ constexpr Accessor property()
                 return ValueType { std::forward<T>(value) };
             } else if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
                 return ValueType { &value };
-            } else if constexpr (is_typed_iterable<T>::value) {
-                return ValueType {
-                    KeyValueVirtualIterator { KeyValueIterator { value.typedBegin() }, KeyValueIterator { value.typedEnd() } }
-                };
             } else if constexpr (is_iterable<T>::value) {
                 return ValueType {
                     KeyValueVirtualIterator { std::forward<T>(value), type_holder<KeyValueIterator<typename derive_iterator<T>::iterator>> }

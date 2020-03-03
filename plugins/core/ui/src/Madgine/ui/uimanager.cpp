@@ -9,8 +9,8 @@
 #include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
 #include "Modules/reflection/classname.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 UNIQUECOMPONENT(Engine::UI::UIManager)
 
@@ -31,7 +31,7 @@ namespace Engine {
 namespace UI {
 
     UIManager::UIManager(GUI::TopLevelWindow &window)
-        : SerializableUnit(window, 50)
+        : VirtualScope(window, 50)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
@@ -149,8 +149,6 @@ namespace UI {
         }
         return result;
     }
-
-
 
     bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {

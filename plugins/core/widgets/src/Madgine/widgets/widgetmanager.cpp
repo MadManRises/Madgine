@@ -46,7 +46,7 @@ namespace Engine {
 namespace Widgets {
 
     WidgetManager::WidgetManager(GUI::TopLevelWindow &window)
-        : SerializableUnit(window, 20)
+        : VirtualScope(window, 20)
         , mUIAtlas({ 512, 512 })
     {
     }

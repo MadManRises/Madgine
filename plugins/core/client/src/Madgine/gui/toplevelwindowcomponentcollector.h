@@ -11,7 +11,7 @@ namespace Engine {
 namespace GUI {
 
     template <typename T>
-    using TopLevelWindowComponent = Serialize::SerializableUnit<T, TopLevelWindowComponentComponent<T>>;
+    using TopLevelWindowComponent = VirtualScope<T, Serialize::SerializableUnit<T, TopLevelWindowComponentComponent<T>>>;
 
 	template <typename T>
     using TopLevelWindowVirtualBase = Serialize::SerializableUnit<T, TopLevelWindowComponentVirtualBase<T>>;

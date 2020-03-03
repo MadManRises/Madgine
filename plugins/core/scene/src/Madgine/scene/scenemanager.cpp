@@ -40,14 +40,14 @@ RegisterType(Engine::Scene::SceneManager)
 
         SceneManager::SceneManager(App::Application &app)
             : SerializableUnit(Serialize::SCENE_MANAGER)
-            , UniqueComponent(app)
+            , VirtualScope(app)
             , mApp(app)
             , mItemCount(0)
             , mSceneComponents(*this)
         {
         }
 
-		Engine::Scene::SceneManager::~SceneManager()
+        Engine::Scene::SceneManager::~SceneManager()
         {
         }
 
@@ -70,7 +70,7 @@ RegisterType(Engine::Scene::SceneManager)
         {
             clear();
 
-			Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
+            Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
 
             for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
                 component->callFinalize();
@@ -122,7 +122,7 @@ RegisterType(Engine::Scene::SceneManager)
         {
             return mMutex;
         }
-	
+
         void SceneManager::update()
         {
             PROFILE();

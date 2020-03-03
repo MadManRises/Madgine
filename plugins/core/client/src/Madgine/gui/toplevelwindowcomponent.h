@@ -15,7 +15,7 @@
 namespace Engine {
 namespace GUI {
 
-    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : ScopeBase, MadgineObject, Serialize::SerializableUnitBase, Input::InputListener {
+    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase, Input::InputListener {
         TopLevelWindowComponentBase(TopLevelWindow &window, int priority);
         virtual ~TopLevelWindowComponentBase() = default;
 

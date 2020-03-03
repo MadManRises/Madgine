@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct OpenGLImRoot : VirtualUniqueComponentImpl<OpenGLImRoot, ClientImRoot> {
+    struct OpenGLImRoot : VirtualScope<OpenGLImRoot, VirtualUniqueComponentImpl<OpenGLImRoot, ClientImRoot>> {
 
         OpenGLImRoot(GUI::TopLevelWindow &window);
         ~OpenGLImRoot();
