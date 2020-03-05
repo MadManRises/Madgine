@@ -1,5 +1,9 @@
 #pragma once
 
+#include "typedscopeptr.h"
+
+#include "../reflection/decay.h"
+
 namespace Engine {
 struct MODULES_EXPORT ScopeBase {
 };
