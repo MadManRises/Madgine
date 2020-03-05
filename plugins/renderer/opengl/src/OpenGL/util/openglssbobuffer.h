@@ -40,7 +40,7 @@ namespace Render {
 
 		void reset();
 
-		void setData(const void *data, size_t size);
+		void setData(const ByteBuffer &data);
 
 		size_t offset() const;
 

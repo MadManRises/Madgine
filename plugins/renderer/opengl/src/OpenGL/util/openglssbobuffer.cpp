@@ -5,6 +5,8 @@
 #    include "openglssbobuffer.h"
 #include "../openglrendercontext.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -59,8 +61,9 @@ namespace Render {
 		}
     }
 
-    void OpenGLSSBOBuffer::setData(const void *data, size_t size)
+    void OpenGLSSBOBuffer::setData(const ByteBuffer &data)
     {
+        size_t size = data.mSize;
         if (size == 0)
             return;
 		size = (size - 1) / 16 + 1;
@@ -70,7 +73,7 @@ namespace Render {
             mArea = storage.allocate(size);
         }
         GL_LOG("SSBO-Data: " << size);
-        storage.setData(data, mArea);		
+        storage.setData(data.Data, mArea);		
     }
 
     size_t OpenGLSSBOBuffer::offset() const
