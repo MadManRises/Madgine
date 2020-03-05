@@ -124,7 +124,7 @@ namespace Serialize {
         template <typename T>
         static std::enable_if_t<std::is_trivially_copyable_v<T>> applyMap(SerializeInStream &in, T &item)
         {
-            auto tuple = TupleUnpacker::toTuple(t);
+            auto tuple = TupleUnpacker::toTuple(item);
             UnitHelper<decltype(tuple)>::applyMap(in, tuple);
         }
 
