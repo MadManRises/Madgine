@@ -130,7 +130,7 @@ namespace Render {
         for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
             offsets[i++] = buffer.offset();
         }
-        mShaderStorageOffsetBuffer.setData(offsets.data(), size * sizeof(unsigned int));
+        mShaderStorageOffsetBuffer.setData(offsets);
         glBindBufferBase(GL_UNIFORM_BUFFER, 4, mShaderStorageOffsetBuffer.handle());
         GL_CHECK();
 #endif
