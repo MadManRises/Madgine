@@ -73,7 +73,7 @@ namespace Render {
             mArea = storage.allocate(size);
         }
         GL_LOG("SSBO-Data: " << size);
-        storage.setData(data.Data, mArea);		
+        storage.setData(data.mData, mArea);		
     }
 
     size_t OpenGLSSBOBuffer::offset() const

@@ -23,7 +23,7 @@ struct ByteBuffer {
     ByteBuffer() = default;
 
     template <typename T, typename SizeAccessor = ByteBufferSizeAccessor, typename DataAccessor = ByteBufferDataAccessor,
-        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<SizeAccessor, size_t> && !std::is_convertible_v<DataAccessor, const void *>>>
+        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<SizeAccessor, size_t> && !std::is_convertible_v<DataAccessor, const void *>>>
     ByteBuffer(T &&t, SizeAccessor &&sizeAccess = {}, DataAccessor &&dataAccess = {})
         : mKeep(std::forward<T>(t))
         , mSize(TupleUnpacker::invoke(std::forward<SizeAccessor>(sizeAccess), mKeep.as<T>()))
@@ -32,7 +32,7 @@ struct ByteBuffer {
     }
 
     template <typename T, typename DataAccessor = ByteBufferDataAccessor,
-        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<DataAccessor, const void *>>>
+        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<DataAccessor, const void *>>>
     ByteBuffer(T &&t, size_t size, DataAccessor &&dataAccess = {})
         : mKeep(std::forward<T>(t))
         , mSize(size)
@@ -40,7 +40,7 @@ struct ByteBuffer {
     {
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>>>>
+    template <typename T, typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !is_null_pointer_v<std::remove_reference_t<T>>>>
     ByteBuffer(T &&t, size_t size, const void *data)
         : mKeep(std::forward<T>(t))
         , mSize(size)
