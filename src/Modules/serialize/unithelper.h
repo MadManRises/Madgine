@@ -8,6 +8,8 @@
 
 #include "../generic/iterator_traits.h"
 
+#include "../generic/tupleunpacker.h"
+
 namespace Engine {
 namespace Serialize {
     template <typename T>
