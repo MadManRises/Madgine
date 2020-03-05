@@ -479,9 +479,6 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
         [this](const KeyValueVirtualIterator &it) {
             *static_cast<KeyValueVirtualIterator *>(mData) = it;
         },
-        [this](const BoundApiMethod &m) {
-            *static_cast<BoundApiMethod *>(mData) = m;
-        },
         [this](const ApiMethod &m) {
             *static_cast<ApiMethod *>(mData) = m;
         },

@@ -6,8 +6,6 @@ namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT ConnectionStore {    
-        typedef std::list<std::shared_ptr<ConnectionBase>>::const_iterator const_iterator;
-
         template <typename Con, typename... Args>
         static std::shared_ptr<Con> create(std::shared_ptr<ConnectionBase> *prev, Args &&... args)
         {

@@ -10,6 +10,8 @@
 #include "Modules/generic/templates.h"
 #include "Modules/keyvalue/typedscopeptr.h"
 
+#include "Modules/keyvalue/boundapimethod.h"
+
 DLL_EXPORT Engine::Threading::WorkgroupLocal<ImGuiContext *>
     GImGui;
 

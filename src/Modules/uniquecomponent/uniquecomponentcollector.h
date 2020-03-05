@@ -4,7 +4,6 @@
 
 #if ENABLE_PLUGINS
 
-#    include "../keyvalue/metatable.h"
 #    include "../reflection/classname.h"
 
 #    include "indexholder.h"

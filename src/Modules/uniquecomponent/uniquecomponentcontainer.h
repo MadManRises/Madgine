@@ -6,8 +6,6 @@
 
 #include "../threading/slot.h"
 
-#include "../keyvalue/typedscopeptr.h"
-
 #include "uniquecomponent.h"
 
 namespace Engine {

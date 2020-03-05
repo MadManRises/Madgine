@@ -13,6 +13,7 @@ struct ScopeField;
 struct TypedScopePtr;
 struct TypeInfo;
 struct ApiMethod;
+struct BoundApiMethod;
 using ArgumentList = std::vector<ValueType>;
 
 struct ObjectInstance;

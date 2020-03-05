@@ -27,7 +27,6 @@ THE SOFTWARE.
 */
 #pragma once
 
-#include "math.h"
 #include "vector3.h"
 
 // NB All code adapted from Wild Magic 0.2 Matrix math (free source code)

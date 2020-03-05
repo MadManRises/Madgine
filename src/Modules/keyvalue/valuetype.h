@@ -9,7 +9,7 @@
 #include "../math/vector3.h"
 #include "../math/vector4.h"
 
-#include "boundapimethod.h"
+#include "apimethod.h"
 
 #include "keyvaluevirtualiterator.h"
 

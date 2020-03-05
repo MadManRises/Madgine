@@ -27,7 +27,6 @@ THE SOFTWARE.
 */
 #pragma once
 
-#include "math.h"
 #include "matrix3.h"
 #include "vector4.h"
 
