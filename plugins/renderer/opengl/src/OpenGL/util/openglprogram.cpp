@@ -7,6 +7,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 METATABLE_BEGIN(Engine::Render::OpenGLProgram)
 READONLY_PROPERTY(UniformBuffers, uniformBuffers)
 METATABLE_END(Engine::Render::OpenGLProgram)
