@@ -12,7 +12,7 @@ namespace Render {
         : mSize(size)
     {
         mBuffer = GL_UNIFORM_BUFFER;
-        mBuffer.setData(nullptr, size * 16);
+        mBuffer.setData({ nullptr, size * 16 });
         glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, mBuffer.handle());
 		GL_CHECK();
     }
@@ -43,7 +43,7 @@ namespace Render {
 
     void OpenGLSSBOBufferStorage::setData(const void *data, const Area &area)
     {
-        mBuffer.setSubData(data, area.mIndex * 16, area.mSize * 16);
+        mBuffer.setSubData(area.mIndex * 16, { data, area.mSize * 16 });
     }	    
 
     OpenGLSSBOBuffer::~OpenGLSSBOBuffer()

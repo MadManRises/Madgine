@@ -137,6 +137,15 @@ namespace Filesystem {
             return {};
     }
 
+    OutStream openFileWrite(const Path &p, bool isBinary)
+    {
+        std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
+        if (buffer->open(p.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::out | (isBinary ? std::ios_base::binary : 0))))
+            return { std::move(buffer) };
+        else
+            return {};
+    }
+
 }
 }
 
