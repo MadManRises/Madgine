@@ -1,6 +1,8 @@
 #pragma once
 #include "../toolscollector.h"
 
+#include "Modules/keyvalue/typedscopeptr.h"
+
 //#include "inspectorlayout.h"
 
 namespace Engine {
