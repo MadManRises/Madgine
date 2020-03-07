@@ -13,9 +13,10 @@ namespace Tools {
         XMLDocument();
         ~XMLDocument();
 
-        XMLDocument(XMLDocument &&) = default;
+        XMLDocument(const XMLDocument &other) = delete;
+        XMLDocument(XMLDocument &&other);
 
-        XMLDocument &operator=(XMLDocument &&) = default;
+        XMLDocument &operator=(XMLDocument &&other);
 
         tinyxml2::XMLDocument *operator->() const { return mPtr.get(); }
 

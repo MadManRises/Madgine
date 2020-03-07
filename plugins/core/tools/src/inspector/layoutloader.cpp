@@ -38,6 +38,17 @@ namespace Tools {
     {
     }
 
+    XMLDocument::XMLDocument(XMLDocument &&other)
+        : mPtr(std::move(other.mPtr))
+    {
+    }
+
+    XMLDocument &XMLDocument::operator=(XMLDocument &&other)
+    {
+        mPtr = std::move(other.mPtr);
+        return *this;
+    }
+
 }
 }
 
