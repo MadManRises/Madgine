@@ -26,6 +26,10 @@ namespace Tools {
     {
     }
 
+    FunctionTool::~FunctionTool()
+    {
+    }
+
     std::string_view FunctionTool::key() const
     {
         return "FunctionTool";

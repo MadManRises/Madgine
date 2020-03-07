@@ -8,6 +8,7 @@ namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT FunctionTool : Tool<FunctionTool> {
         FunctionTool(ImRoot &root);
+        ~FunctionTool();
 
         std::string_view key() const override;
 
