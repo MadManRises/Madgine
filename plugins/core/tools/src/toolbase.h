@@ -6,6 +6,8 @@
 
 #include "Modules/serialize/serializableunit.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Tools {
 
