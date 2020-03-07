@@ -11,6 +11,7 @@ namespace Tools {
 
     struct XMLDocument {
         XMLDocument();
+        ~XMLDocument();
 
         XMLDocument(XMLDocument &&) = default;
 

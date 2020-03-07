@@ -34,6 +34,10 @@ namespace Tools {
     {
     }
 
+    XMLDocument::~XMLDocument()        
+    {
+    }
+
 }
 }
 
