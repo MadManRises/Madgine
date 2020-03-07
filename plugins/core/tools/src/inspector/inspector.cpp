@@ -8,23 +8,16 @@
 #include "../renderer/imroot.h"
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
-#include "Modules/keyvalue/keyvaluevirtualiterator.h"
 
 #include "Modules/plugins/plugin.h"
 
-#include "Modules/plugins/binaryinfo.h"
-
 #include "Modules/resources/resourcemanager.h"
-#include "layoutloader.h"
 
 #include "../tinyxml/tinyxml2.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalue/scopefield.h"
 #include "Modules/keyvalue/scopeiterator.h"
 
 #include "Modules/keyvalue/keyvaluepair.h"
@@ -32,6 +25,8 @@
 #include "functiontool.h"
 
 #include "Madgine/app/application.h"
+
+#include "inspectorlayout.h"
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 

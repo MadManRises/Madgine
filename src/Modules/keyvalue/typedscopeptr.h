@@ -1,7 +1,6 @@
 #pragma once
 
 #include "metatable.h"
-#include "../generic/derive.h"
 
 namespace Engine {
 

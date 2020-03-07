@@ -57,8 +57,6 @@ namespace Plugins {
 
 #else
 
-#include "Interfaces/macros.h"
-
 #define IF_PLUGIN(p) if constexpr (!Engine::streq("BUILD_" #p, STRINGIFY2(BUILD_##p)))
 #define THROW_PLUGIN(errorMsg) throw errorMsg
 

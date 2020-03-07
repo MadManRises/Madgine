@@ -1,7 +1,5 @@
 #pragma once
 
-#include "typedscopeptr.h"
-
 #include "../generic/proxy.h"
 #include "scopefield.h"
 

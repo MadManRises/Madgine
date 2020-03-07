@@ -1,7 +1,5 @@
 #pragma once
 
-#include "templates.h"
-
 namespace Engine {
 
 #define DERIVE_FUNCTION(Name)                                                                    \

@@ -1,20 +1,17 @@
 #pragma once
 
+namespace Engine {
+namespace Tools {
+    struct ToolBase;
+    struct ImRoot;
+    struct Inspector;
+    struct InspectorLayout;
 
-namespace Engine
-{
-	namespace Tools
-	{
-		struct ToolBase;
-		struct ImRoot;
-		struct Inspector;
-
-		struct SceneEditor;
-	}
+    struct SceneEditor;
+}
 }
 
-namespace tinyxml2
-{
-	class XMLDocument;
-	class XMLElement;
+namespace tinyxml2 {
+class XMLDocument;
+class XMLElement;
 }

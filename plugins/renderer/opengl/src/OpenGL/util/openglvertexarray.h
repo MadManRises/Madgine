@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/generic/templates.h"
-
 #include "Modules/math/vector4.h"
 
 #include "Modules/render/attributedescriptor.h"

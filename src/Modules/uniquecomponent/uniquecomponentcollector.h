@@ -8,10 +8,6 @@
 
 #    include "indexholder.h"
 
-#    include "../reflection/decay.h"
-
-#    include "../generic/derive.h"
-
 namespace Engine {
 
 DERIVE_TYPEDEF(VBase)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "container_traits.h"
 #include "observerevent.h"
 
 namespace Engine {

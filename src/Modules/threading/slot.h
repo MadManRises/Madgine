@@ -4,8 +4,6 @@
 
 #include "../generic/onetimefunctor.h"
 
-#include "../generic/callable_traits.h"
-
 #include "task.h"
 
 namespace Engine {

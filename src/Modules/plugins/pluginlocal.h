@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Interfaces/macros.h"
-
 #if ENABLE_PLUGINS
 #    if !defined(PROJECT_NAME)
 #        ifdef _MSC_VER

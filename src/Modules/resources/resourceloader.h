@@ -1,17 +1,12 @@
 #pragma once
 
-#include "../uniquecomponent/uniquecomponent.h"
 #include "resourcebase.h"
 #include "resourceloadercollector.h"
 #include "resourcemanager.h"
 
-#include "../generic/templates.h"
-
 #include "../threading/globalstorage.h"
 
 #include "handle.h"
-
-#include "../keyvalue/typedscopeptr.h"
 
 namespace Engine {
 namespace Resources {

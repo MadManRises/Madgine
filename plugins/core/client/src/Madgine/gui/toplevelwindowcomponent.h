@@ -2,7 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalue/scopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 #include "Modules/serialize/serializableunit.h"
 

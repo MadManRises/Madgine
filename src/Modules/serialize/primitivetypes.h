@@ -1,8 +1,5 @@
 #pragma once
 
-
-#include "../generic/templates.h"
-
 namespace Engine {
 namespace Serialize {
 

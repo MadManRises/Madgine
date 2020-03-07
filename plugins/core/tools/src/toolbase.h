@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Modules/reflection/classname.h"
-
 #include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/keyvalue/scopebase.h"
-
-#include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "Modules/serialize/serializableunit.h"
 

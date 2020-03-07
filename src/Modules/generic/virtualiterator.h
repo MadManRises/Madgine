@@ -2,8 +2,6 @@
 
 #include "proxy.h"
 
-#include "iterator_traits.h"
-
 #include "defaultassign.h"
 
 namespace Engine {

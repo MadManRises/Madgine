@@ -2,8 +2,6 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "../generic/container_traits.h"
-
 #include "../threading/slot.h"
 
 #include "uniquecomponent.h"

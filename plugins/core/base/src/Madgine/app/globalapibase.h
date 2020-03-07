@@ -2,9 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/uniquecomponent/uniquecomponent.h"
-
-#include "Modules/keyvalue/scopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 namespace Engine {
 namespace App {

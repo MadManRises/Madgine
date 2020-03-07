@@ -2,7 +2,6 @@
 
 #include "../threading/signal.h"
 #include "../threading/slot.h"
-#include "../generic/callable_traits.h"
 
 namespace Engine 
 {

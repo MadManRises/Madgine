@@ -1,7 +1,5 @@
 #pragma once
 
-#include "derive.h"
-
 namespace Engine {
 
 DERIVE_FUNCTION(begin);

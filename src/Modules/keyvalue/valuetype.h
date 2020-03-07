@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../generic/templates.h"
-
 #include "../math/matrix3.h"
 #include "../math/matrix4.h"
 #include "../math/quaternion.h"

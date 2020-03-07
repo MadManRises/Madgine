@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../generic/templates.h"
 #include "typedscopeptr.h"
 
 namespace Engine {

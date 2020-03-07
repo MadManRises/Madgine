@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Interfaces/stringutil.h"
-#include "Interfaces/macros.h"
 #include "decay.h"
 
 namespace Engine {

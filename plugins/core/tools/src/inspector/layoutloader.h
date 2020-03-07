@@ -2,7 +2,9 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "../tinyxml/tinyxml2.h"
+namespace tinyxml2 {
+class XMLDocument;
+}
 
 namespace Engine {
 namespace Tools {
