@@ -4,6 +4,8 @@
 
 #include "Modules/keyvalue/virtualscopebase.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace App {
     struct MADGINE_BASE_EXPORT GlobalAPIBase : MadgineObject, VirtualScopeBase {
