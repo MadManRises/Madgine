@@ -6,7 +6,10 @@
 #include "accessor.h"
 #include "keyvalueiterator.h"
 #include "metatable.h"
-#include "valuetype.h"
+#include "valuetype_forward.h"
+#include "apimethod.h"
+#include "../generic/virtualiterator.h"
+#include "typedscopeptr.h"
 
 namespace Engine {
 
@@ -17,7 +20,7 @@ constexpr Accessor property()
     using GetterScope = typename getter_traits::class_type;
     using T = typename getter_traits::return_type;
 
-    void (*setter)(TypedScopePtr, ValueType) = nullptr;
+    void (*setter)(TypedScopePtr, const ValueType &) = nullptr;
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
@@ -26,23 +29,23 @@ constexpr Accessor property()
         //TODO remove const in tuple types
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
-        setter = [](TypedScopePtr scope, ValueType v) {
+        setter = [](TypedScopePtr scope, const ValueType &v) {
             if constexpr (std::is_same_v<SetterScope, void>) {
                 using SetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>;
                 if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
-                    TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<std::remove_reference_t<T>>());
+                    TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), ValueType_as<std::decay_t<T>>(v));
                 } else {
-                    TupleUnpacker::invoke(Setter, scope, v.as<std::remove_reference_t<T>>());
+                    TupleUnpacker::invoke(Setter, scope, ValueType_as<std::decay_t<T>>(v));
                 }
             } else {
                 static_assert(std::is_convertible_v<Scope &, SetterScope &>);
-                TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), v.as<std::remove_reference_t<T>>());
+                TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), ValueType_as<std::decay_t<T>>(v));
             }
         };
     }
 
     return {
-        [](TypedScopePtr scope) {
+        [](ValueType &retVal, TypedScopePtr scope) {
             T value = [=]() -> T {
                 if constexpr (std::is_same_v<GetterScope, void>) {
                     using GetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename getter_traits::argument_types>>;
@@ -57,14 +60,13 @@ constexpr Accessor property()
                 }
             }();
 
-            if constexpr (ValueType::isValueType<T>::value) {
-                return ValueType { std::forward<T>(value) };
+            if constexpr (isValueType_v<std::decay_t<T>>) {
+                to_ValueType(retVal, std::forward<T>(value));
             } else if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
-                return ValueType { &value };
+                to_ValueType(retVal, &value);
             } else if constexpr (is_iterable<T>::value) {
-                return ValueType {
-                    KeyValueVirtualIterator { std::forward<T>(value), type_holder<KeyValueIterator<typename derive_iterator<T>::iterator>> }
-                };
+                to_ValueType(retVal,
+                    KeyValueVirtualIterator { std::forward<T>(value), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> });
             } else {
                 static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
             }
@@ -101,21 +103,21 @@ constexpr Accessor member()
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
-static ValueType unpackHelper(T *t, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackHelper(ValueType &retVal, T *t, const ArgumentList &args, std::index_sequence<I...>)
 {
     if constexpr (std::is_same_v<R, void>) {
-        (t->*F)(args.at(I).as<std::remove_cv_t<std::remove_reference_t<Args>>>()...);
-        return {};
+        (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
+        retVal.clear();
     } else {
-        return (t->*F)(args.at(I).as<std::remove_cv_t<std::remove_reference_t<Args>>>()...);
+        retVal = (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
     }
 }
 
 template <auto F, typename R, typename T, typename... Args>
-static ValueType unpackApiMethod(TypedScopePtr scope, const ArgumentList &args)
+static void unpackApiMethod(ValueType &retVal, TypedScopePtr scope, const ArgumentList &args)
 {
     T *t = scope.safe_cast<T>();
-    return unpackHelper<F, R, T, Args...>(t, args, std::make_index_sequence<sizeof...(Args)>());
+    return unpackHelper<F, R, T, Args...>(retVal, t, args, std::make_index_sequence<sizeof...(Args)>());
 }
 
 template <auto F, typename R, typename T, typename... Args>

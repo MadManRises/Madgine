@@ -348,16 +348,16 @@ bool InputText(const char *label, std::string *s)
 template <typename T>
 bool SelectValueTypeType(Engine::ValueType *v)
 {
-    bool result = Selectable(Engine::ValueType::getTypeString(static_cast<Engine::ValueType::Type>(Engine::variant_index<Engine::ValueType::Union, T>::value)).c_str(), v->is<T>());
+    bool result = Selectable(Engine::ValueType::getTypeString(static_cast<Engine::ValueType::Type>(Engine::type_pack_index_v<Engine::ValueTypeList, T>)).c_str(), v->is<T>());
     if (result)
         *v = T {};
     return result;
 }
 
-template <typename... T>
-bool SelectValueTypeTypes(std::variant<T...>, Engine::ValueType *v)
+template <typename... Ty>
+bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
 {
-    return (SelectValueTypeType<T>(v) | ...);
+    return (SelectValueTypeType<Ty>(v) | ...);
 }
 
 bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name)
@@ -378,7 +378,7 @@ bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name)
         ImGui::PopItemWidth();
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
-            SelectValueTypeTypes(Engine::ValueType::Union {}, v);
+            SelectValueTypeTypes(Engine::ValueTypeList {}, v);
             ImGui::EndCombo();
         }
         EndGroup();

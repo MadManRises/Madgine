@@ -17,7 +17,9 @@ ScopeField::ScopeField(const TypedScopePtr &ptr, const std::pair<const char *, A
 
 ValueType ScopeField::value() const
 {
-    return mPointer->second.mGetter(mScope);
+    ValueType result; 
+    mPointer->second.mGetter(result, mScope);
+    return result;
 }
 
 ScopeField::operator ValueType() const {

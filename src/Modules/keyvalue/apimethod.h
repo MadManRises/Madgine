@@ -3,7 +3,7 @@
 namespace Engine {
 
 struct ApiMethod {
-    typedef ValueType (*FPtr)(TypedScopePtr, const ArgumentList &);
+    typedef void (*FPtr)(ValueType &, TypedScopePtr, const ArgumentList &);
 
     bool operator==(const ApiMethod &other) const
     {

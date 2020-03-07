@@ -7,8 +7,8 @@
 
 namespace ImGui {
 
-    typedef int ImGuiDragDropFlags;
-    typedef int ImGuiTreeNodeFlags;
+typedef int ImGuiDragDropFlags;
+typedef int ImGuiTreeNodeFlags;
 
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
@@ -106,7 +106,7 @@ IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::
 IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags = 0);
 IMGUI_API const ValueTypePayload *GetValuetypePayload();
 IMGUI_API bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer = nullptr);
-template <typename T, typename Validator = bool(*)(const T&)>
+template <typename T, typename Validator = bool (*)(const T &)>
 bool AcceptDraggableValueType(
     T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
 {
@@ -117,7 +117,20 @@ bool AcceptDraggableValueType(
                 result = payload->mValue.as<T>();
                 return true;
             }
-        } 
+        }
+    }
+    return false;
+}
+template <typename Validator = bool (*)(const Engine::ValueType &)>
+bool AcceptDraggableValueType(
+    Engine::ValueType &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const Engine::ValueType &t) { return true; })
+{
+    const ValueTypePayload *payload = GetValuetypePayload();
+    if (payload) {
+        if (validate(payload->mValue) && AcceptDraggableValueType(payloadPointer)) {
+            result = payload->mValue;
+            return true;
+        }
     }
     return false;
 }
@@ -133,7 +146,7 @@ bool IsDraggableValueTypeBeingAccepted(
                 result = payload->mValue.as<T>();
                 return true;
             }
-        } 
+        }
     }
     return false;
 }

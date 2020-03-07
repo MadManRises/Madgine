@@ -4,6 +4,6 @@
 
 namespace Engine {
 
-using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueTypeRef>>;
+using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
 
 }

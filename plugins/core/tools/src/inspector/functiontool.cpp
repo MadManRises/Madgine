@@ -14,6 +14,8 @@
 #include "Modules/keyvalue/scopeiterator.h"
 #include "Modules/keyvalue/scopefield.h"
 
+#include "Modules/keyvalue/keyvaluepair.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {
@@ -65,7 +67,7 @@ namespace Tools {
                 void operator()(KeyValueVirtualIterator it)
                 {
                     for (; it != VirtualIteratorEnd {}; ++it) {
-                        it->second.value().visit(*this);
+                        it->mValue.value().visit(*this);
                     }
                 }
 
@@ -139,7 +141,8 @@ namespace Tools {
                 ImGui::PushDisabled();
 
             if (ImGui::Button("Call")) {
-                mCurrentFunction(mCurrentArguments);
+                ValueType result;
+                mCurrentFunction(result, mCurrentArguments);
             }
 
             if (!mCurrentFunction.mMethod)

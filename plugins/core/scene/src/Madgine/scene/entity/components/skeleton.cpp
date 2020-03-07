@@ -8,6 +8,8 @@
 
 #include "Modules/math/boundingbox.h"
 
+#include "Modules/keyvalue/valuetype.h"
+
 #include "skeletondescriptor.h"
 
 namespace Engine {

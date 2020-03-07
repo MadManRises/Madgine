@@ -32,7 +32,8 @@ template <typename T>
 const constexpr type_holder_t<T> type_holder = {};
 
 template <typename...>
-struct type_pack;
+struct type_pack {
+};
 
 template <size_t, typename T>
 struct select_type;

@@ -14,6 +14,8 @@
 #include "Modules/generic/areaview.h"
 #include "Modules/generic/bytebuffer.h"
 
+#include "Modules/math/vector3.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H

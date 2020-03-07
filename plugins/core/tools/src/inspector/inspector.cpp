@@ -27,6 +27,8 @@
 #include "Modules/keyvalue/scopefield.h"
 #include "Modules/keyvalue/scopeiterator.h"
 
+#include "Modules/keyvalue/keyvaluepair.h"
+
 #include "functiontool.h"
 
 #include "Madgine/app/application.h"
@@ -185,15 +187,15 @@ namespace Tools {
                                                          if (b) {
                                                              size_t i = 0;
                                                              for (; it != VirtualIteratorEnd {}; ++it) {
-                                                                 ValueType value = it->second;
+                                                                 ValueType value = it->mValue;
                                                                  std::string key = std::to_string(i);
-                                                                 if (!it->first.is<std::monostate>()) {
-                                                                     key = it->first.toShortString() + "##" + key;
-                                                                 } else if (it->second.value().is<TypedScopePtr>()) {
-                                                                     key = "[" + std::to_string(i) + "] " + it->second.value().as<TypedScopePtr>().name() + "##" + key;
+                                                                 if (!it->mKey.is<std::monostate>()) {
+                                                                     key = it->mKey.toShortString() + "##" + key;
+                                                                 } else if (value.is<TypedScopePtr>()) {
+                                                                     key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
 																 }
-                                                                 if (drawValueImpl(element, {}, key, value, /*editable && */ it->second.isEditable())) {
-                                                                     it->second = value;
+                                                                 if (drawValueImpl(element, {}, key, value, /*editable && */ it->mValue.isEditable())) {
+                                                                     it->mValue = value;
                                                                  }
                                                                  ++i;
                                                              }

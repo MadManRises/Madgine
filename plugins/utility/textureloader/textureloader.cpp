@@ -5,6 +5,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/reflection/classname.h"
 
+#include "Modules/math/vector2i.h"
+
 METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::TextureLoader::ResourceType)
 

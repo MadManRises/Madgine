@@ -5,9 +5,9 @@
 
 namespace Engine {
 
-ValueType BoundApiMethod::operator()(const ArgumentList &args) const
+void BoundApiMethod::operator()(ValueType &retVal, const ArgumentList &args) const
 {
-    return mMethod(mScope, args);
+    return mMethod(retVal, mScope, args);
 }
 
 }

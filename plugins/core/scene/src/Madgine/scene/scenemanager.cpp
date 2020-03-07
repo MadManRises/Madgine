@@ -200,11 +200,11 @@ RegisterType(Engine::Scene::SceneManager)
         Entity::Entity *SceneManager::createEntity(const std::string &behavior, const std::string &name,
             const std::function<void(Entity::Entity &)> &init)
         {
-            ValueType behaviorTable /* = app().table()[behavior]*/;
+            //ValueType behaviorTable /* = app().table()[behavior]*/;
             ObjectPtr table;
-            if (behaviorTable.is<ObjectPtr>()) {
+            /*if (behaviorTable.is<ObjectPtr>()) {
                 table = behaviorTable.as<ObjectPtr>();
-            } else {
+            } else*/ {
                 if (!behavior.empty())
                     LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
             }
@@ -217,11 +217,11 @@ RegisterType(Engine::Scene::SceneManager)
 
         Entity::Entity *SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
         {
-            ValueType behaviorTable /* = app().table()[behavior]*/;
+            //ValueType behaviorTable /* = app().table()[behavior]*/;
             ObjectPtr table;
-            if (behaviorTable.is<ObjectPtr>()) {
+            /*if (behaviorTable.is<ObjectPtr>()) {
                 table = behaviorTable.as<ObjectPtr>();
-            } else {
+            } else*/ {
                 if (!behavior.empty())
                     LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
             }

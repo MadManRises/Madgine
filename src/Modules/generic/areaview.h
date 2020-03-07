@@ -156,11 +156,11 @@ struct AreaView {
     }
 
 private:
+    T *mBuffer;
     std::array<size_t, Storage> mSizes;
     std::array<size_t, Storage> mFullSizes;
     std::array<bool, Storage> mFlipped;
     std::array<size_t, Storage> mAxisMapping;
-    T *mBuffer;
 };
 
 }

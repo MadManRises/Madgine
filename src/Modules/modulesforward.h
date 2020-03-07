@@ -4,6 +4,7 @@ namespace Engine {
 
 struct ValueType;
 struct ValueTypeRef;
+struct KeyValuePair;
 
 struct ScopeBase;
 struct MetaTable;
@@ -26,7 +27,7 @@ struct VirtualIterator;
 enum KeyValueValueFlags : uint8_t;
 
 struct KeyValueVirtualIteratorBase;
-using KeyValueVirtualIterator = VirtualIterator<std::pair<ValueType, ValueTypeRef>>;
+using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
 
 struct MadgineObject;
 
@@ -189,6 +190,7 @@ namespace Resources {
 
 struct Vector2;
 struct Vector3;
+struct Vector4;
 
 struct Vector2i;
 struct Vector3i;

@@ -4,6 +4,8 @@
 
 #include "iterator_traits.h"
 
+#include "defaultassign.h"
+
 namespace Engine {
 
 struct VirtualIteratorEnd {
@@ -14,12 +16,12 @@ struct VirtualIteratorBase {
     virtual ~VirtualIteratorBase() = default;
     virtual bool ended() const = 0;
     virtual void increment() = 0;
-    virtual RefT get() const = 0;
+    virtual void get(RefT &ref) const = 0;
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const = 0;
     virtual bool equals(const VirtualIteratorBase<RefT> &) const = 0;
 };
 
-template <typename RefT, typename It>
+template <typename RefT, typename It, typename Assign>
 struct NonOwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
     NonOwningVirtualIteratorImpl(It begin, It end)
@@ -38,19 +40,19 @@ struct NonOwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
         ++mIt;
     }
 
-    virtual RefT get() const override
+    virtual void get(RefT &ref) const override
     {
-        return RefT { *mIt };
+        Assign {}(ref, *mIt);
     }
 
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
     {
-        return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It>>(mIt, mEnd);
+        return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It, Assign>>(mIt, mEnd);
     }
 
     virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
     {
-        const NonOwningVirtualIteratorImpl<RefT, It> *otherP = dynamic_cast<const NonOwningVirtualIteratorImpl<RefT, It> *>(&other);
+        const NonOwningVirtualIteratorImpl<RefT, It, Assign> *otherP = dynamic_cast<const NonOwningVirtualIteratorImpl<RefT, It, Assign> *>(&other);
         return otherP && mIt == otherP->mIt;
     }
 
@@ -58,7 +60,7 @@ private:
     It mIt, mEnd;
 };
 
-template <typename RefT, typename It, typename T>
+template <typename RefT, typename It, typename Assign, typename T>
 struct OwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
     OwningVirtualIteratorImpl(T &&t)
@@ -70,7 +72,7 @@ struct OwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
     OwningVirtualIteratorImpl(const T &t, const It &it, const It &end)
         : mT(t)
-        , mIt(std::next(mT.begin(), std::distance(It { const_cast<T&>(t).begin() }, it)))
+        , mIt(std::next(mT.begin(), std::distance(It { const_cast<T &>(t).begin() }, it)))
         , mEnd(std::next(mT.begin(), std::distance(It { const_cast<T &>(t).begin() }, end)))
     {
     }
@@ -85,19 +87,19 @@ struct OwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
         ++mIt;
     }
 
-    virtual RefT get() const override
+    virtual void get(RefT &ref) const override
     {
-        return RefT { *mIt };
+        Assign {}(ref, *mIt);
     }
 
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
     {
-        return std::make_unique<OwningVirtualIteratorImpl<RefT, It, T>>(mT, mIt, mEnd);
+        return std::make_unique<OwningVirtualIteratorImpl<RefT, It, Assign, T>>(mT, mIt, mEnd);
     }
 
     virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
     {
-        const OwningVirtualIteratorImpl<RefT, It, T> *otherP = dynamic_cast<const OwningVirtualIteratorImpl<RefT, It, T> *>(&other);
+        const OwningVirtualIteratorImpl<RefT, It, Assign, T> *otherP = dynamic_cast<const OwningVirtualIteratorImpl<RefT, It, Assign, T> *>(&other);
         return otherP && mIt == otherP->mIt;
     }
 
@@ -110,25 +112,25 @@ template <typename RefT>
 struct VirtualIterator {
     VirtualIterator() = default;
 
-    template <typename It>
-    VirtualIterator(It &&begin, It &&end)
-        : mImpl(std::make_unique<NonOwningVirtualIteratorImpl<RefT, std::remove_reference_t<It>>>(std::forward<It>(begin), std::forward<It>(end)))
+    template <typename It, typename Assign = DefaultAssign>
+    VirtualIterator(It &&begin, It &&end, type_holder_t<Assign> = {})
+        : mImpl(std::make_unique<NonOwningVirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(begin), std::forward<It>(end)))
     {
     }
 
-    template <typename It, typename T>
+    template <typename It, typename Assign, typename T>
     static std::unique_ptr<VirtualIteratorBase<RefT>> implHelper(T &&t)
     {
         if constexpr (std::is_reference_v<T>) {
-            return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It>>(t.begin(), t.end());
+            return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It, Assign>>(t.begin(), t.end());
         } else {
-            return std::make_unique<OwningVirtualIteratorImpl<RefT, It, T>>(std::move(t));
+            return std::make_unique<OwningVirtualIteratorImpl<RefT, It, Assign, T>>(std::move(t));
         }
     }
 
-    template <typename T, typename = std::enable_if_t<is_iterable_v<T>>, typename It = typename derive_iterator<T>::iterator>
-    explicit VirtualIterator(T &&t, type_holder_t<It> = {})
-        : mImpl(implHelper<It>(std::forward<T>(t)))
+    template <typename T, typename = std::enable_if_t<is_iterable_v<T>>, typename Assign = DefaultAssign>
+    explicit VirtualIterator(T &&t, type_holder_t<Assign> = {})
+        : mImpl(implHelper<typename derive_iterator<T>::iterator, Assign>(std::forward<T>(t)))
     {
     }
 
@@ -159,12 +161,16 @@ struct VirtualIterator {
 
     RefT operator*() const
     {
-        return mImpl->get();
+        RefT result;
+        mImpl->get(result);
+        return result;
     }
 
     Proxy<RefT, false> operator->() const
     {
-        return mImpl->get();
+        RefT result;
+        mImpl->get(result);
+        return result;
     }
 
     bool operator!=(const VirtualIteratorEnd &) const

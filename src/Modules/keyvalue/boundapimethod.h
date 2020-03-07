@@ -17,7 +17,7 @@ struct MODULES_EXPORT BoundApiMethod {
         return mMethod.mArgumentsCount;
     }
 
-    ValueType operator()(const ArgumentList &args) const;
+    void operator()(ValueType &retVal, const ArgumentList &args) const;
 
 
 	ApiMethod mMethod;

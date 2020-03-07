@@ -82,6 +82,11 @@ void ValueType::operator=(const ValueType &other)
     mUnion = other.mUnion;
 }
 
+void ValueType::operator=(ValueType &&other)
+{
+    mUnion = std::move(other.mUnion);
+}
+
 void ValueType::operator=(const std::string &s)
 {
     mUnion = Union { std::in_place_type<std::string_view>,
@@ -366,36 +371,11 @@ std::string ValueType::getTypeString() const
 std::string ValueType::getTypeString(Type type)
 {
     switch (type) {
-    case Type::BoolValue:
-        return "Bool";
-    case Type::FloatValue:
-        return "Float";
-    case Type::IntValue:
-        return "Integer";
-    case Type::UIntValue:
-        return "Unsigned Integer";
-    case Type::NullValue:
-        return "Null-Type";
-    case Type::ScopeValue:
-        return "Scope";
-    case Type::OwningStringValue:
-        return "String";
-    case Type::Matrix3Value:
-        return "Matrix3x3";
-    case Type::Vector2Value:
-        return "Vector2";
-    case Type::Vector3Value:
-        return "Vector3";
-    case Type::Vector4Value:
-        return "Vector4";
-    case Type::QuaternionValue:
-        return "Quaternion";
-    case Type::ApiMethodValue:
-        return "Method";
-    case Type::KeyValueVirtualIteratorValue:
-        return "Iterator";
-    case Type::ObjectValue:
-        return "Object";
+#define VALUETYPE_SEP
+#define VALUETYPE_TYPE(T, Storage, Name) \
+    case Type::Name##Value:              \
+        return #Name;
+#include "valuetypedef.h"
     default:
         std::terminate();
     }
@@ -429,63 +409,25 @@ bool ValueTypeRef::isEditable() const
 
 ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
 {
-    if (v.type() != mValue.type())
+    if (v.type() != mValue.type() || v.is<TypedScopePtr>())
         std::terminate();
 
     mValue = v;
     mValue.visit(overloaded {
-        [](const std::monostate &) {
+#define VALUETYPE_SEP ,
+#define VALUETYPE_TYPE(T, Storage, Name) \
+    [this](const T &t) {                 \
+        *static_cast<T *>(mData) = t;    \
+    }
+#include "valuetypedef.h"
+    });
 
-        },
-        [this](const std::string &s) {
-            *static_cast<std::string *>(mData) = s;
-        },
-        [this](const std::string_view &s) {
-            *static_cast<std::string_view *>(mData) = s;
-        },
-        [this](bool b) {
-            *static_cast<bool *>(mData) = b;
-        },
-        [this](int i) {
-            *static_cast<int *>(mData) = i;
-        },
-        [this](size_t s) {
-            *static_cast<size_t *>(mData) = s;
-        },
-        [this](float f) {
-            *static_cast<float *>(mData) = f;
-        },
-        [](const TypedScopePtr &b) {
-            std::terminate();
-        },
-        [this](const Matrix3 &m) {
-            *static_cast<Matrix3 *>(mData) = m;
-        },
-        [this](const Matrix4 &m) {
-            *static_cast<Matrix4 *>(mData) = m;
-        },
-        [this](const Quaternion &q) {
-            *static_cast<Quaternion *>(mData) = q;
-        },
-        [this](const Vector4 &v) {
-            *static_cast<Vector4 *>(mData) = v;
-        },
-        [this](const Vector3 &v) {
-            *static_cast<Vector3 *>(mData) = v;
-        },
-        [this](const Vector2 &v) {
-            *static_cast<Vector2 *>(mData) = v;
-        },
-        [this](const KeyValueVirtualIterator &it) {
-            *static_cast<KeyValueVirtualIterator *>(mData) = it;
-        },
-        [this](const ApiMethod &m) {
-            *static_cast<ApiMethod *>(mData) = m;
-        },
-        [this](const ObjectPtr &o) {
-            *static_cast<ObjectPtr *>(mData) = o;
-        } });
+    return *this;
+}
 
+ValueTypeRef& ValueTypeRef::operator=(ValueTypeRef&& other) {
+    mValue = std::move(other.mValue);
+    mData = std::exchange(other.mData, nullptr);
     return *this;
 }
 

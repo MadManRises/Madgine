@@ -8,6 +8,8 @@
 
 #include "Modules/math/boundingbox.h"
 
+#include "Modules/keyvalue/valuetype.h"
+
 #include "meshdata.h"
 
 namespace Engine {
