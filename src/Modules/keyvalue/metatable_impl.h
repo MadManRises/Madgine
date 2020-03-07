@@ -1,12 +1,12 @@
 #pragma once
 
+#include "../generic/virtualiterator.h"
 #include "accessor.h"
+#include "apimethod.h"
 #include "keyvalueiterator.h"
 #include "metatable.h"
-#include "valuetype_forward.h"
-#include "apimethod.h"
-#include "../generic/virtualiterator.h"
 #include "typedscopeptr.h"
+#include "valuetype_forward.h"
 
 namespace Engine {
 
@@ -104,7 +104,7 @@ static void unpackHelper(ValueType &retVal, T *t, const ArgumentList &args, std:
 {
     if constexpr (std::is_same_v<R, void>) {
         (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
-        retVal.clear();
+        to_ValueType(retVal, std::monostate {});
     } else {
         retVal = (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
     }
