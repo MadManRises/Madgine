@@ -51,3 +51,8 @@ if (GCC OR CLANG)
 	endif()
 endif ()
 
+macro(cmake_log)
+	if (USE_CMAKE_LOG)
+		MESSAGE(STATUS "cmake diagnostics: " ${ARGN})
+	endif()
+endmacro(cmake_log)

@@ -225,7 +225,7 @@ pipeline {
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
-					cmake_args = ""
+					cmake_args = "-DUSE_CMAKE_LOG=1 "
 					if (params.timeTrace){
 						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
 					}

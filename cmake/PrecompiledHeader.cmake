@@ -66,12 +66,12 @@ function(add_precompiled_header target header)
 			if(source MATCHES \\.\(cc|cxx|cpp\)$)
 				list(APPEND object_depends "${output}")
 				set_source_files_properties(${source} PROPERTIES				
-					COMPILE_FLAGS "${compile_flags} ${flags}" #remove this when COMPILE_LANGUAGE is supported on test server
+					COMPILE_FLAGS "${compile_flags} ${pch_use_flags}" #remove this when COMPILE_LANGUAGE is supported on test server
 				)	
 			endif()
 			set_source_files_properties(${source} PROPERTIES
 				OBJECT_DEPENDS "${object_depends}"
-				#COMPILE_FLAGS "${compile_flags} $<$<COMPILE_LANGUAGE:CXX>:${flags}>"
+				#COMPILE_FLAGS "${compile_flags} $<$<COMPILE_LANGUAGE:CXX>:${pch_use_flags}>"
 			)	
 		endif()
     endforeach()
