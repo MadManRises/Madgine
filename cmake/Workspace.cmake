@@ -374,13 +374,8 @@ macro(add_workspace_library name)
 
 	if (LIB_CONFIG_PRECOMPILED_HEADER)
 		
-		get_filename_component(abs_precompile_include ${LIB_CONFIG_PRECOMPILED_HEADER} ABSOLUTE)
-		
-		file(RELATIVE_PATH precompile_include ${abs_source_root} ${abs_precompile_include})
-		
-		add_precompiled_header(${name} ${LIB_CONFIG_PRECOMPILED_HEADER} FORCEINCLUDE)
+		target_precompile_headers(${name} PRIVATE ${LIB_CONFIG_PRECOMPILED_HEADER})
 
-		set_target_properties(${name} PROPERTIES PRECOMPILED_HEADER ${precompile_include})
 	endif()
 
 endmacro(add_workspace_library)
