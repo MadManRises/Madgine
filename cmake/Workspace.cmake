@@ -374,7 +374,7 @@ macro(add_workspace_library name)
 
 	if (LIB_CONFIG_PRECOMPILED_HEADER)
 		
-		target_precompile_headers(${name} PRIVATE ${LIB_CONFIG_PRECOMPILED_HEADER})
+		target_precompile_headers(${name} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${LIB_CONFIG_PRECOMPILED_HEADER}>" )
 
 	endif()
 
