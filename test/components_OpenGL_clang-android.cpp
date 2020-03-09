@@ -5,11 +5,14 @@
 #ifdef BUILD_WidgetsTools
 #    include "Madgine_Tools/widgetstoolslib.h"
 #endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
-#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
+#endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloaderlib.h"
+#endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
@@ -17,14 +20,11 @@
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_AnimationLoader
-#    include "animationloaderlib.h"
-#endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"

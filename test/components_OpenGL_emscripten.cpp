@@ -8,26 +8,23 @@
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
 #endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloaderlib.h"
 #endif
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
 #endif
-#ifdef BUILD_Tools
-#    include "toolslib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_SkeletonLoader
-#    include "skeletonloaderlib.h"
-#endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
+#endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
+#endif
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
 #endif
 #ifdef BUILD_EmscriptenInput
 #    include "emscripteninputlib.h"
@@ -38,14 +35,17 @@
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
 #endif
+#ifdef BUILD_ImageLoader
+#    include "imageloaderlib.h"
+#endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
-#endif
-#ifdef BUILD_ImageLoader
-#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
