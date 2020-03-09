@@ -373,8 +373,10 @@ macro(add_workspace_library name)
 	set_target_properties(${name} PROPERTIES SOURCE_ROOT ${abs_source_root})
 
 	if (LIB_CONFIG_PRECOMPILED_HEADER)
-		
-		target_precompile_headers(${name} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${LIB_CONFIG_PRECOMPILED_HEADER}> )
+	
+		get_filename_component(pch_abs ${LIB_CONFIG_PRECOMPILED_HEADER} ABSOLUTE)
+
+		target_precompile_headers(${name} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${pch_abs}> )
 
 	endif()
 
