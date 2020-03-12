@@ -10,6 +10,8 @@ add_subdirectory(msdfgen)
 
 add_subdirectory(imgui)
 
+add_subdirectory(NodeEditor)
+
 add_subdirectory(im3d)
 
 add_subdirectory(stb)

@@ -4,16 +4,17 @@
 #include "uniquecomponentcontainer.h"
 
 //base is included in __VA_ARGS__ to circumvent the problem with empty __VA_ARGS__ and ,
-#define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base,*/...)                                \
-    namespace ns {                                                                        \
-    using prefix##Collector = Engine::UniqueComponentCollector<__VA_ARGS__>;              \
-    template <typename C>                                                                 \
-    using prefix##Container = Engine::UniqueComponentContainer<C, __VA_ARGS__>;           \
-    using prefix##Selector = Engine::UniqueComponentSelector<__VA_ARGS__>;                \
-    template <typename T>                                                                 \
-    using prefix##Component = Engine::UniqueComponent<T, prefix##Collector>;              \
-    template <typename T>                                                                 \
-    using prefix##VirtualBase = Engine::VirtualUniqueComponentBase<T, prefix##Collector>; \
+#define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base, */...)                                       \
+    namespace ns {                                                                                \
+    using prefix##Registry = Engine::UniqueComponentRegistry<__VA_ARGS__>;                        \
+    using prefix##Collector = Engine::UniqueComponentCollector<prefix##Registry, __VA_ARGS__>;    \
+    template <typename C>                                                                         \
+    using prefix##Container = Engine::UniqueComponentContainer<C, prefix##Registry, __VA_ARGS__>; \
+    using prefix##Selector = Engine::UniqueComponentSelector<prefix##Registry, __VA_ARGS__>;      \
+    template <typename T>                                                                         \
+    using prefix##Component = Engine::UniqueComponent<T, prefix##Collector>;                      \
+    template <typename T>                                                                         \
+    using prefix##VirtualBase = Engine::VirtualUniqueComponentBase<T, prefix##Collector>;         \
     }
 
 #if defined(STATIC_BUILD)
@@ -23,5 +24,5 @@
 #endif
 
 #define DEFINE_UNIQUE_COMPONENT(ns, prefix)        \
-    RegisterType(ns::prefix##Collector::Registry); \
-    EXPORT_REGISTRY(ns::prefix##Collector::Registry)
+    RegisterType(ns::prefix##Registry); \
+    EXPORT_REGISTRY(ns::prefix##Registry)

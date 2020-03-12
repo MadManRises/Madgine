@@ -20,7 +20,7 @@ using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 /*template <typename Container, typename _Base, typename... _Ty>
 struct UniqueComponentContainer;*/
 
-template <typename _Base, typename... _Ty>
+template <typename Registry, typename _Base, typename... _Ty>
 struct UniqueComponentSelector;
 
 }
@@ -29,14 +29,7 @@ struct UniqueComponentSelector;
 
 namespace Engine {
 
-struct CollectorInfo {
-#    ifdef _MSC_VER
-    typedef void *ComponentType;
-#    else
-    typedef Collector_F<void> ComponentType;
-#    endif
-
-    std::vector<ComponentType> mComponents;
+struct CollectorInfoBase {
     const TypeInfo *mRegistryInfo;
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
@@ -70,12 +63,12 @@ struct MODULES_EXPORT ComponentRegistryBase {
         return mTi;
     }
 
-    std::vector<CollectorInfo *>::iterator begin()
+    std::vector<CollectorInfoBase *>::iterator begin()
     {
         return mLoadedCollectors.begin();
     }
 
-    std::vector<CollectorInfo *>::iterator end()
+    std::vector<CollectorInfoBase *>::iterator end()
     {
         return mLoadedCollectors.end();
     }
@@ -83,7 +76,7 @@ struct MODULES_EXPORT ComponentRegistryBase {
     const Plugins::BinaryInfo *mBinary;
 
 protected:
-    std::vector<CollectorInfo *> mLoadedCollectors;
+    std::vector<CollectorInfoBase *> mLoadedCollectors;
 
 private:
     const TypeInfo *mTi;
@@ -100,6 +93,10 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     typedef _Base Base;
     typedef std::tuple<_Ty...> Ty;
     typedef Collector_F<Base, _Ty...> F;
+
+    struct CollectorInfo : CollectorInfoBase {
+        std::vector<F> mComponents;
+    };
 
     UniqueComponentRegistry()
         : ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>(), &Plugins::PLUGIN_LOCAL(binaryInfo))
@@ -144,7 +141,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         }
     }
 
-    void removeCollector(CollectorInfo *info)
+    void removeCollector(CollectorInfoBase *info)
     {
         //assert(std::find(mLoadedCollectors.begin(), mLoadedCollectors.end(), info) == mLoadedCollectors.end());
         mUnloadedCollectors.erase(std::remove(mUnloadedCollectors.begin(), mUnloadedCollectors.end(), info), mUnloadedCollectors.end());
@@ -153,13 +150,13 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     void onPluginUnload(const Plugins::BinaryInfo *bin)
     {
         for (auto it = mLoadedCollectors.begin(); it != mLoadedCollectors.end();) {
-            CollectorInfo *info = *it;
+            CollectorInfo *info = static_cast<CollectorInfo*>(*it);
             if (info->mBinary == bin) {
                 mUnloadedCollectors.push_back(info);
                 it = mLoadedCollectors.erase(it);
                 mComponents.erase(mComponents.begin() + info->mBaseIndex, mComponents.begin() + info->mBaseIndex + info->mComponents.size());
 
-                for (CollectorInfo *i : mLoadedCollectors) {
+                for (CollectorInfoBase *i : mLoadedCollectors) {
                     if (i->mBaseIndex >= info->mBaseIndex)
                         i->mBaseIndex -= info->mComponents.size();
                 }
@@ -174,7 +171,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         }
     }
 
-    static Threading::SignalStub<CollectorInfo *, bool, const std::vector<F> &> &update()
+    static Threading::SignalStub<CollectorInfoBase *, bool, const std::vector<F> &> &update()
     {
         return sInstance().mUpdate;
     }
@@ -183,7 +180,7 @@ private:
     static inline UniqueComponentRegistry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
 
     std::vector<F> mComponents;
-    Threading::Signal<CollectorInfo *, bool, const std::vector<F> &> mUpdate;
+    Threading::Signal<CollectorInfoBase *, bool, const std::vector<F> &> mUpdate;
 
     std::vector<CollectorInfo *> mUnloadedCollectors;
 };

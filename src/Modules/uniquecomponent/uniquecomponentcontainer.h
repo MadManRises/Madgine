@@ -8,9 +8,8 @@
 
 namespace Engine {
 
-template <typename C, typename _Base, typename... _Ty>
+template <typename C, typename Registry, typename... _Ty>
 struct UniqueComponentContainerImpl : C {
-    typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
@@ -74,7 +73,7 @@ private:
 #if ENABLE_PLUGINS
 
 protected:
-    void updateComponents(CollectorInfo *info, bool add, const std::vector<F> &vals)
+    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
     {
         if (add) {
             assert(this->size() == info->mBaseIndex);
@@ -99,13 +98,13 @@ protected:
 
 private:
     //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainerImpl<C, _Base, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentContainerImpl<C, Registry, _Ty...>::updateComponents> mUpdateSlot;
     std::tuple<_Ty...> mArg;
 
 #endif
 };
 
-template <typename C, typename _Base, typename... _Ty>
-using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<_Base>>, _Base, _Ty...>;
+template <typename C, typename Registry, typename __Base, typename... _Ty>
+using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<typename Registry::Base>>, Registry, _Ty...>;
 
 }

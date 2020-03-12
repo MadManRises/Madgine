@@ -89,7 +89,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
             continue;
         binaries.insert(reg->mBinary);
 
-        for (CollectorInfo *collector : *reg) {
+        for (CollectorInfoBase *collector : *reg) {
             if (!skipBinary(collector->mBinary))
                 binaries.insert(collector->mBinary);
         }
@@ -112,7 +112,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
             continue;
         include(file, fixInclude(reg->type_info()->mHeaderPath, bin), bin);
 
-        for (CollectorInfo *collector : *reg) {
+        for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
             for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
@@ -145,7 +145,7 @@ const std::vector<const Engine::MetaTable *> &)"
 	static std::vector<const Engine::MetaTable *> dummy = {
 )";
 
-        for (CollectorInfo *collector : *reg) {
+        for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
             GuardGuard g(file, collector->mBinary);
@@ -173,7 +173,7 @@ std::vector<)"
 	return {
 )";
 
-        for (CollectorInfo *collector : *reg) {
+        for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
             GuardGuard g(file, collector->mBinary);
@@ -193,7 +193,7 @@ std::vector<)"
 
 )";
 
-        for (CollectorInfo *collector : *reg) {
+        for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
             GuardGuard g(file, collector->mBinary);

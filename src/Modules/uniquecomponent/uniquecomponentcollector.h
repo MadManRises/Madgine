@@ -12,18 +12,16 @@ namespace Engine {
 
 DERIVE_TYPEDEF(VBase)
 
-template <typename _Base, typename... _Ty>
+template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector {
-    typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::Base Base;
     typedef std::tuple<_Ty...> Ty;
-    typedef Collector_F<Base, _Ty...> F;
-    
+    typedef typename Registry::F F;
 
     UniqueComponentCollector()
     {
         mInfo.mRegistryInfo = &typeInfo<Registry>();
-        mInfo.mBaseInfo = &typeInfo<_Base>();
+        mInfo.mBaseInfo = &typeInfo<Base>();
         mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
         Registry::sInstance().addCollector(&mInfo);
     }
@@ -43,14 +41,14 @@ struct UniqueComponentCollector {
     }
 
 private:
-    CollectorInfo mInfo;
+    typename Registry::CollectorInfo mInfo;
 
     template <typename T>
     static size_t registerComponent()
     {
 
         LOG("Registering Component: " << typeName<T>());
-        sInstance().mInfo.mComponents.emplace_back(reinterpret_cast<CollectorInfo::ComponentType>(&createComponent<T, Base, _Ty...>));
+        sInstance().mInfo.mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
         std::vector<const TypeInfo *> elementInfos;
         elementInfos.push_back(&typeInfo<T>());
         if constexpr (has_typedef_VBase_v<T>) {
@@ -76,8 +74,8 @@ public:
     struct ComponentRegistrator : IndexHolder {
         ComponentRegistrator()
             : mBaseIndex(baseIndex())
+            , mIndex(registerComponent<T>())
         {
-            mIndex = registerComponent<T>();
         }
 
         ~ComponentRegistrator()
@@ -98,8 +96,8 @@ public:
     };
 };
 
-template <typename _Base, typename... _Ty>
-UniqueComponentCollector<_Base, _Ty...> &UniqueComponentCollector<_Base, _Ty...>::sInstance()
+template <typename Registry, typename __Base, typename... _Ty>
+UniqueComponentCollector<Registry, __Base, _Ty...> &UniqueComponentCollector<Registry, __Base, _Ty...>::sInstance()
 {
     static UniqueComponentCollector dummy;
     return dummy;

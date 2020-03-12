@@ -1,4 +1,4 @@
-Project(ImGui)
+Project(Im3D)
 
 set(sources im3d.cpp im3d.h im3d_internal.h)
 	

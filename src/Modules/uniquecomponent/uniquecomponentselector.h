@@ -6,9 +6,8 @@
 
 namespace Engine {
 
-template <typename _Base, typename... _Ty>
+template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentSelector {
-    typedef UniqueComponentRegistry<_Base, _Ty...> Registry;
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
@@ -74,7 +73,7 @@ private:
 #if ENABLE_PLUGINS
 
 protected:
-    void updateComponents(CollectorInfo *info, bool add, const std::vector<F> &vals)
+    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
     {
         if (add) {
             if (mIndex == INVALID && vals.size() > 0) {
@@ -83,18 +82,19 @@ protected:
             }
         } else {
             if (mIndex != INVALID) {
-                if (mIndex >= info->mBaseIndex && mIndex < info->mBaseIndex + info->mComponents.size()) {
+                size_t count = static_cast<typename Registry::CollectorInfo *>(info)->mComponents.size();
+                if (mIndex >= info->mBaseIndex && mIndex < info->mBaseIndex + count) {
                     mValue.reset();
                     mIndex = INVALID;
-                } else if (mIndex >= info->mBaseIndex + info->mComponents.size()) {
-                    mIndex -= info->mComponents.size();
+                } else if (mIndex >= info->mBaseIndex + count) {
+                    mIndex -= count;
                 }
             }
         }
     }
 
 private:
-    Threading::Slot<&UniqueComponentSelector<_Base, _Ty...>::updateComponents> mUpdateSlot;
+    Threading::Slot<&UniqueComponentSelector<Registry, __Base, _Ty...>::updateComponents> mUpdateSlot;
 #endif
 };
 
