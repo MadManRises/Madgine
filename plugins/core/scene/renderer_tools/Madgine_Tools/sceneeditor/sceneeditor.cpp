@@ -204,7 +204,7 @@ namespace Tools {
             bool open = ImGui::TreeNode(name.c_str());
             ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { component });
             if (open) {
-                mInspector->draw({ component, Scene::Entity::EntityComponentCollector::getComponentType(name) });
+                mInspector->draw(component);
                 ImGui::TreePop();
             }
         }
@@ -214,21 +214,21 @@ namespace Tools {
         }
 
         if (ImGui::BeginPopup("add_component_popup")) {
-            for (const std::string &componentName : Scene::Entity::EntityComponentCollector::registeredComponentNames()) {
-                if (!entity->hasComponent(componentName)) {
-                    if (ImGui::Selectable(componentName.c_str())) {
-                        entity->addComponent(componentName);
-                        if (componentName == "Transform") {
+            for (const std::pair<std::string_view, IndexRef> &componentDesc : Scene::Entity::sComponentsByName()) {
+                if (componentDesc.second.isValid() && !entity->hasComponent(componentDesc.first)) {
+                    if (ImGui::Selectable(componentDesc.first.data())) {
+                        entity->addComponent(componentDesc.first);
+                        if (componentDesc.first == "Transform") {
                             entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
                             entity->getComponent<Scene::Entity::Transform>()->setScale({ 0.0001f, 0.0001f, 0.0001f });
                         }
-                        if (componentName == "Mesh") {
+                        if (componentDesc.first == "Mesh") {
                             entity->getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
                         }
-                        if (componentName == "Skeleton") {
+                        if (componentDesc.first == "Skeleton") {
                             entity->getComponent<Scene::Entity::Skeleton>()->setName("mage_animated");
                         }
-                        if (componentName == "Animation") {
+                        if (componentDesc.first == "Animation") {
                             entity->getComponent<Scene::Entity::Animation>()->setName("mage_animated");
                             entity->getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("Walk");
                         }

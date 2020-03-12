@@ -136,35 +136,7 @@ namespace Engine {
         if (skipBinary(reg->mBinary))
             continue;
         GuardGuard g2(file, reg->mBinary);
-
-        file << R"(template <>
-const std::vector<const Engine::MetaTable *> &)"
-             << name
-             << R"(::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-)";
-
-        for (CollectorInfoBase *collector : *reg) {
-            if (skipBinary(collector->mBinary))
-                continue;
-            GuardGuard g(file, collector->mBinary);
-            for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
-                const TypeInfo *typeInfo = typeInfos.front();
-                while (typeInfo->mDecayType)
-                    typeInfo = &typeInfo->mDecayType();
-                if (notInSkip(typeInfo))
-                    file << "		&table<"
-                         << typeInfo->mFullName << ">(),\n";
-            }
-        }
-
-        file << R"(
-	}; 
-	return dummy;
-}
-)";
-
+        
         file << R"(template <>
 std::vector<)"
              << name << "::F> " << name

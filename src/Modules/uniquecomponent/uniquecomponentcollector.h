@@ -73,24 +73,29 @@ public:
     template <typename T>
     struct ComponentRegistrator : IndexHolder {
         ComponentRegistrator()
-            : mBaseIndex(baseIndex())
-            , mIndex(registerComponent<T>())
+            : mIndex(registerComponent<T>())
+            , mBaseIndex(baseIndex())
         {
         }
 
         ~ComponentRegistrator()
         {
             unregisterComponent(mIndex);
-            mIndex = -1;
+            mIndex = std::numeric_limits<size_t>::max();
         }
 
-        size_t index() override
+        size_t index() const override
         {
             return mIndex + mBaseIndex;
         }
 
+        bool isValid() const override
+        {
+            return mIndex != std::numeric_limits<size_t>::max() && mBaseIndex != std::numeric_limits<size_t>::max();
+        }
+
     private:
-        size_t mIndex = -1;
+        size_t mIndex = std::numeric_limits<size_t>::max();
         //Make it a member to prevent problems through weak symbols during link time
         size_t &mBaseIndex;
     };
@@ -109,11 +114,11 @@ UniqueComponentCollector<Registry, __Base, _Ty...> &UniqueComponentCollector<Reg
 
 namespace Engine {
 
-template <typename _Base, typename... _Ty>
+template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector {
-    typedef _Base Base;
+    typedef typename Registry::Base Base;
     typedef std::tuple<_Ty...> Ty;
-    typedef UniqueComponentRegistry<Base, _Ty...> Registry;
+    typedef typename Registry::F F;
 };
 
 }

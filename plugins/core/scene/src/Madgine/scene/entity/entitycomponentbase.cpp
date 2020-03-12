@@ -34,14 +34,19 @@ namespace Scene {
             return *mEntity;
         }
 
-        EntityComponentBase *EntityComponentBase::getComponent(const std::string &name)
+        EntityComponentBase *EntityComponentBase::getComponent(const std::string_view &name)
         {
             return mEntity->getComponent(name);
         }
 
-        EntityComponentBase *EntityComponentBase::addComponent(const std::string &name, const ObjectPtr &init)
+        EntityComponentBase *EntityComponentBase::addComponent(const std::string_view &name, const ObjectPtr &init)
         {
             return mEntity->addComponent(name, init);
+        }
+
+        EntityComponentBase *EntityComponentBase::addComponent(size_t i, const std::string_view &name, const ObjectPtr &init)
+        {
+            return mEntity->addComponent(i, name, init);
         }
 
         SceneComponentBase &EntityComponentBase::getSceneComponent(size_t i, bool init)

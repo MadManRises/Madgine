@@ -34,7 +34,7 @@ struct CollectorInfoBase {
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
     std::vector<std::vector<const TypeInfo *>> mElementInfos;
-    size_t mBaseIndex = 0;
+    size_t mBaseIndex = std::numeric_limits<size_t>::max();
 };
 
 MODULES_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
@@ -112,9 +112,10 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     {
         return sInstance().mComponents;
     }
-    static const std::vector<const MetaTable *> &sTables()
+
+    static F getConstructor(size_t i)
     {
-        return sInstance().mTables;
+        return sInstance().mComponents[i];
     }
 
     void addCollector(CollectorInfo *info)
@@ -150,7 +151,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     void onPluginUnload(const Plugins::BinaryInfo *bin)
     {
         for (auto it = mLoadedCollectors.begin(); it != mLoadedCollectors.end();) {
-            CollectorInfo *info = static_cast<CollectorInfo*>(*it);
+            CollectorInfo *info = static_cast<CollectorInfo *>(*it);
             if (info->mBinary == bin) {
                 mUnloadedCollectors.push_back(info);
                 it = mLoadedCollectors.erase(it);
@@ -164,7 +165,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                 std::vector<F> clearV {};
                 mUpdate.emit(info, false, clearV);
 
-                info->mBaseIndex = -1;
+                info->mBaseIndex = std::numeric_limits<size_t>::max();
             } else {
                 ++it;
             }
@@ -199,7 +200,11 @@ struct UniqueComponentRegistry {
     typedef Collector_F<Base, _Ty...> F;
 
     static std::vector<F> sComponents();
-    static const std::vector<const MetaTable *> &sTables();
+
+    static F getConstructor(size_t i)
+    {
+        return sComponents()[i];
+    }
 };
 
 }

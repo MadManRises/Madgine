@@ -5,23 +5,14 @@
 #ifdef BUILD_WidgetsTools
 #    include "Madgine_Tools/widgetstoolslib.h"
 #endif
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
 #endif
-#ifdef BUILD_Tools
-#    include "toolslib.h"
-#endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
@@ -32,20 +23,29 @@
 #ifdef BUILD_AndroidInput
 #    include "androidinputlib.h"
 #endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
+#endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
 #endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
+#endif
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
@@ -109,6 +109,24 @@
 #endif
 #ifdef BUILD_AnimationLoader
 #    include "animationloader.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/entitycomponentcollector.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/animation.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/mesh.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/skeleton.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/transform.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "brick.h"
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenecomponentcollector.h"
@@ -179,18 +197,7 @@ namespace Engine {
 
 #ifdef BUILD_Base
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::App::GlobalAPICollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Scene
-		&table<Engine::Scene::SceneManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents()
+std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_Scene
@@ -217,24 +224,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowComponentCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_OpenGLTools
-		&table<Engine::Tools::OpenGLImRoot>(),
-#    endif
-#    ifdef BUILD_Widgets
-		&table<Engine::Widgets::WidgetManager>(),
-#    endif
-#    ifdef BUILD_UI
-		&table<Engine::UI::UIManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::GUI::TopLevelWindowComponentCollector::Registry::F> Engine::GUI::TopLevelWindowComponentCollector::Registry::sComponents()
+std::vector<Engine::GUI::TopLevelWindowComponentRegistry::F> Engine::GUI::TopLevelWindowComponentRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGLTools
@@ -281,18 +271,7 @@ size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopL
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Input::InputHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_AndroidInput
-		&table<Engine::Input::AndroidInputHandler>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents()
+std::vector<Engine::Input::InputHandlerRegistry::F> Engine::Input::InputHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_AndroidInput
@@ -317,18 +296,7 @@ size_t component_index<Engine::Input::AndroidInputHandler>() { return CollectorB
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Render::RenderContextCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLRenderContext>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Render::RenderContextCollector::Registry::F> Engine::Render::RenderContextCollector::Registry::sComponents()
+std::vector<Engine::Render::RenderContextRegistry::F> Engine::Render::RenderContextRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGL
@@ -353,36 +321,7 @@ size_t component_index<Engine::Render::OpenGLRenderContext>() { return Collector
 #endif
 #ifdef BUILD_Modules
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ImageLoader
-		&table<Engine::Resources::ImageLoader>(),
-#    endif
-#    ifdef BUILD_FontLoader
-		&table<Engine::Render::FontLoader>(),
-#    endif
-#    ifdef BUILD_Tools
-		&table<Engine::Tools::LayoutLoader>(),
-#    endif
-#    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLMeshLoader>(),
-		&table<Engine::Render::OpenGLProgramLoader>(),
-		&table<Engine::Render::OpenGLShaderLoader>(),
-		&table<Engine::Render::OpenGLTextureLoader>(),
-#    endif
-#    ifdef BUILD_SkeletonLoader
-		&table<Engine::Render::SkeletonLoader>(),
-#    endif
-#    ifdef BUILD_AnimationLoader
-		&table<Engine::Render::AnimationLoader>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents()
+std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::ResourceLoaderRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ImageLoader
@@ -472,15 +411,51 @@ size_t component_index<Engine::Render::AnimationLoader>() { return CollectorBase
 #endif
 #ifdef BUILD_Scene
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Scene::SceneComponentCollector::Registry::sTables() 
+std::vector<Engine::Scene::Entity::EntityComponentRegistry::F> Engine::Scene::Entity::EntityComponentRegistry::sComponents()
 {
-	static std::vector<const Engine::MetaTable *> dummy = {
+	return {
+#    ifdef BUILD_Scene
+		createComponent<Engine::Scene::Entity::Animation>,
+		createComponent<Engine::Scene::Entity::Mesh>,
+		createComponent<Engine::Scene::Entity::Skeleton>,
+		createComponent<Engine::Scene::Entity::Transform>,
+#    endif
+#    ifdef BUILD_ClickBrick
+		createComponent<ClickBrick::Scene::Brick>,
+#    endif
 
 	}; 
-	return dummy;
 }
+
+#    define ACC 0
+
+#    ifdef BUILD_Scene
+constexpr size_t CollectorBaseIndex_EntityComponentBase_Scene = ACC;
 template <>
-std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents()
+size_t component_index<Engine::Scene::Entity::Animation>() { return CollectorBaseIndex_EntityComponentBase_Scene + 0; }
+template <>
+size_t component_index<Engine::Scene::Entity::Mesh>() { return CollectorBaseIndex_EntityComponentBase_Scene + 1; }
+template <>
+size_t component_index<Engine::Scene::Entity::Skeleton>() { return CollectorBaseIndex_EntityComponentBase_Scene + 2; }
+template <>
+size_t component_index<Engine::Scene::Entity::Transform>() { return CollectorBaseIndex_EntityComponentBase_Scene + 3; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_EntityComponentBase_Scene + 4
+#    endif
+#    ifdef BUILD_ClickBrick
+constexpr size_t CollectorBaseIndex_EntityComponentBase_ClickBrick = ACC;
+template <>
+size_t component_index<ClickBrick::Scene::Brick>() { return CollectorBaseIndex_EntityComponentBase_ClickBrick + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_EntityComponentBase_ClickBrick + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_Scene
+template <>
+std::vector<Engine::Scene::SceneComponentRegistry::F> Engine::Scene::SceneComponentRegistry::sComponents()
 {
 	return {
 
@@ -495,33 +470,7 @@ std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::
 #endif
 #ifdef BUILD_Tools
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Tools
-		&table<Engine::Tools::FunctionTool>(),
-		&table<Engine::Tools::Inspector>(),
-		&table<Engine::Tools::Metrics>(),
-		&table<Engine::Tools::Profiler>(),
-		&table<Engine::Tools::ProjectManager>(),
-		&table<Engine::Tools::ImGuiDemo>(),
-		&table<Engine::Tools::TestTool>(),
-#    endif
-#    ifdef BUILD_OpenGLTools
-		&table<Engine::Tools::OpenGLToolConfig>(),
-#    endif
-#    ifdef BUILD_WidgetsTools
-		&table<Engine::Tools::GuiEditor>(),
-#    endif
-#    ifdef BUILD_SceneRendererTools
-		&table<Engine::Tools::SceneEditor>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsCollector::Registry::sComponents()
+std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_Tools
@@ -594,18 +543,7 @@ size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex
 #endif
 #ifdef BUILD_UI
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ClickBrick
-		&table<ClickBrick::UI::GameManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
+std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ClickBrick
@@ -630,20 +568,7 @@ size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_UI
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ClickBrick
-		&table<ClickBrick::UI::MainMenuHandler>(),
-		&table<ClickBrick::UI::GameHandler>(),
-		&table<ClickBrick::UI::GameOverHandler>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
+std::vector<Engine::UI::GuiHandlerRegistry::F> Engine::UI::GuiHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ClickBrick
@@ -674,21 +599,7 @@ size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBase
 #endif
 #ifdef BUILD_TestShared
 template <>
-const std::vector<const Engine::MetaTable *> &Test::TestCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_LibA
-		&table<LibAComponent>(),
-#    endif
-#    ifdef BUILD_LibB
-		&table<LibBComponent>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Test::TestCollector::Registry::F> Test::TestCollector::Registry::sComponents()
+std::vector<Test::TestRegistry::F> Test::TestRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_LibA

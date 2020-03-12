@@ -16,14 +16,24 @@
 
 #include "Modules/math/vector3.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-
 #undef INFINITE
 #include "msdfgen.h"
 
 #include "core/edge-coloring.h"
+
+#ifdef STATIC_BUILD
+#undef DLL_EXPORT
+#undef DLL_IMPORT
+#endif
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+
+#ifdef STATIC_BUILD
+#define DLL_EXPORT
+#define DLL_IMPORT
+#endif
 
 UNIQUECOMPONENT(Engine::Render::FontLoader)
 

@@ -77,7 +77,7 @@ namespace Scene {
             of << mName;
         }
 
-        EntityComponentBase *Entity::getComponent(const std::string &name)
+        EntityComponentBase *Entity::getComponent(const std::string_view &name)
         {
             auto it = mComponents.physical().find(name);
             if (it == mComponents.physical().end())
@@ -85,22 +85,27 @@ namespace Scene {
             return it->get();
         }
 
-        bool Entity::hasComponent(const std::string &name)
+        bool Entity::hasComponent(const std::string_view &name)
         {
             return mComponents.contains(name);
         }
 
-        EntityComponentBase *Entity::addComponent(const std::string &name, const ObjectPtr &table)
+        EntityComponentBase *Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
+        {
+            return addComponent(sComponentsByName().at(name), name, table);
+        }
+
+        EntityComponentBase *Entity::addComponent(size_t i, const std::string_view &name, const ObjectPtr &table)
         {
             auto it = mComponents.physical().find(name);
             if (it != mComponents.physical().end()) {
                 return it->get();
             } else {
-                return mComponents.emplace(EntityComponentCollector::createComponent(*this, name, table)).first->get();
+                return mComponents.emplace(EntityComponentRegistry::getConstructor(i)(*this, table)).first->get();
             }
         }
 
-        void Entity::removeComponent(const std::string &name)
+        void Entity::removeComponent(const std::string_view &name)
         {
             auto it = mComponents.find(name);
             assert(it != mComponents.end());
@@ -109,7 +114,7 @@ namespace Scene {
 
         std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
-            return make_tuple(EntityComponentCollector::createComponent(*this, name));
+            return make_tuple(EntityComponentRegistry::getConstructor(sComponentsByName().at(name))(*this, {}));
         }
 
         void Entity::remove()
@@ -127,7 +132,7 @@ namespace Scene {
             return mSceneManager.getGlobalAPIComponent(i, init);
         }
 
-        EntityComponentBase *Entity::addComponentSimple(const std::string &name, const ObjectPtr &table)
+        EntityComponentBase *Entity::addComponentSimple(const std::string_view &name, const ObjectPtr &table)
         {
             return addComponent(name, table);
         }

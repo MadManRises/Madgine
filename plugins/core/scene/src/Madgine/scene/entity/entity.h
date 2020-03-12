@@ -33,7 +33,7 @@ namespace Scene {
             template <typename T>
             T *addComponent(const ObjectPtr &table = {})
             {
-                return static_cast<T *>(addComponent(T::componentName(), table));
+                return static_cast<T *>(addComponent(component_index<T>(), T::componentName(), table));
             }
 
             template <typename T>
@@ -48,7 +48,7 @@ namespace Scene {
                 return static_cast<T *>(getComponent(T::componentName()));
             }
 
-            EntityComponentBase *getComponent(const std::string &name);
+            EntityComponentBase *getComponent(const std::string_view &name);
 
             decltype(auto) components()
             {
@@ -61,10 +61,11 @@ namespace Scene {
                 return hasComponent(T::componentName());
             }
 
-            bool hasComponent(const std::string &name);
+            bool hasComponent(const std::string_view &name);
 
-            EntityComponentBase *addComponent(const std::string &name, const ObjectPtr &table = {});
-            void removeComponent(const std::string &name);
+            EntityComponentBase *addComponent(const std::string_view &name, const ObjectPtr &table = {});
+            EntityComponentBase *addComponent(size_t i, const std::string_view &name, const ObjectPtr &table = {});
+            void removeComponent(const std::string_view &name);
 
             void writeCreationData(Serialize::SerializeOutStream &of) const;
 
@@ -75,7 +76,7 @@ namespace Scene {
             template <typename T>
             T &getSceneComponent(bool init = true)
             {
-                return static_cast<T &>(getSceneComponent(T::component_index(), init));
+                return static_cast<T &>(getSceneComponent(component_index<T>(), init));
             }
 
             SceneComponentBase &getSceneComponent(size_t i, bool = true);
@@ -83,15 +84,13 @@ namespace Scene {
             template <typename T>
             T &getGlobalAPIComponent(bool init = true)
             {
-                return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
+                return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
             }
 
             App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-            //App::Application &app(bool = true);
-
         protected:
-            EntityComponentBase *addComponentSimple(const std::string &name, const ObjectPtr &table = {});
+            EntityComponentBase *addComponentSimple(const std::string_view &name, const ObjectPtr &table = {});
 
         public:
             std::string mName;
