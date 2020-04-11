@@ -6,10 +6,10 @@
 
 namespace Engine {
 namespace Resources {
-    struct MODULES_EXPORT ResourceManager : ScopeBase
+    struct MODULES_EXPORT ResourceManager final : ScopeBase
 #if ENABLE_PLUGINS
         ,
-                                            Plugins::PluginListener
+                                                  Plugins::PluginListener
 #endif
     {
         static ResourceManager &getSingleton();
@@ -31,6 +31,11 @@ namespace Resources {
             return mCollector.get<Loader>();
         }
 
+        ResourceLoaderBase &get(size_t i)
+        {
+            return mCollector.get(i);
+        }
+
         void init();
 
         ResourceLoaderContainer<std::vector<Placeholder<0>>> mCollector;
@@ -38,7 +43,7 @@ namespace Resources {
         Filesystem::Path findResourceFile(const std::string &fileName);
 
 #if ENABLE_PLUGINS
-        virtual int priority() const override;
+        int priority() const override;
 #endif
 
 #if ENABLE_PLUGINS

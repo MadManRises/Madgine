@@ -41,7 +41,7 @@ namespace Tools {
         return true;
     }
 
-    void FunctionTool::setCurrentFunction(const std::string &name, const BoundApiMethod &method)
+    void FunctionTool::setCurrentFunction(const std::string &name, const BoundApiFunction &method)
     {
         mVisible = true;
         mCurrentFunctionName = name;
@@ -60,7 +60,7 @@ namespace Tools {
     {
         for (ScopeField f : scope) {
             struct Visitor {
-                void operator()(const BoundApiMethod &m)
+                void operator()(const BoundApiFunction &m)
                 {
                     mTool->mMethodCache.emplace_back(std::move(mName), m);
                 }
@@ -103,7 +103,7 @@ namespace Tools {
             bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &mCurrentFunction, &mCurrentFunctionName);
             if (ImGui::BeginDragDropTarget()) {
                 const ImGui::ValueTypePayload *payload;
-                ApiMethod function;
+                ApiFunction function;
                 if (ImGui::AcceptDraggableValueType(function, &payload)) {
                     mCurrentFunctionName = payload->mName;
                     mCurrentFunction = { function, payload->mSender };

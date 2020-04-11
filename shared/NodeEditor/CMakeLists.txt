@@ -22,11 +22,16 @@ set(_imgui_node_editor_Sources
     Source/imgui_node_editor_internal.inl
     Source/imgui_node_editor.cpp
     Support/imgui_node_editor.natvis
+    Source/Interop.h
+    #Source/ax/Builders.cpp
+    Source/ax/Drawing.cpp
+    Source/ax/Widgets.cpp
 )
 
-add_library(${PROJECT_NAME} STATIC ${_imgui_node_editor_Sources})
+add_workspace_library(${PROJECT_NAME} ${_imgui_node_editor_Sources} SOURCE_ROOT ..)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ImGui)
 
-target_include_directories(${PROJECT_NAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+
+install_to_workspace(Shared EXPORT_LIB TARGETS ${PROJECT_NAME})

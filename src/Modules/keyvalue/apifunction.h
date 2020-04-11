@@ -2,10 +2,10 @@
 
 namespace Engine {
 
-struct ApiMethod {
+struct ApiFunction {
     typedef void (*FPtr)(ValueType &, TypedScopePtr, const ArgumentList &);
 
-    bool operator==(const ApiMethod &other) const
+    bool operator==(const ApiFunction &other) const
     {
         return mFunction == other.mFunction;
     }
@@ -20,9 +20,10 @@ struct ApiMethod {
         return mFunction;
     }
 
+    size_t argumentsCount() const;
+
     FPtr mFunction = nullptr;
-    uint32_t mArgumentsCount = 0;
-    bool mIsVariadic = false;
+    const FunctionTable *mTable = nullptr;
 };
 
 }

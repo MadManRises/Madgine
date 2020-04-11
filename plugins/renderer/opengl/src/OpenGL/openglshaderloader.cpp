@@ -30,7 +30,6 @@ namespace Render {
         std::string filename = res->path().stem();
 
         ShaderType type;
-        GLenum glType;
         if (StringUtil::endsWith(filename, "_VS")) {
             type = VertexShader;
         } else if (StringUtil::endsWith(filename, "_PS")) {

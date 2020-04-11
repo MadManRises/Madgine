@@ -31,11 +31,11 @@ namespace Render {
     }
 
     DirectX11VertexArray::DirectX11VertexArray(DirectX11VertexArray &&other)
-        : mVBO(std::exchange(other.mVBO, nullptr))
-        , mEBO(std::exchange(other.mEBO, nullptr))
-        , mAttributes(std::move(other.mAttributes))
-        , mStride(std::exchange(other.mStride, 0))
+        : mStride(std::exchange(other.mStride, 0))
         , mFormat(std::exchange(other.mFormat, 0))
+        , mAttributes(std::move(other.mAttributes))
+        , mVBO(std::exchange(other.mVBO, nullptr))
+        , mEBO(std::exchange(other.mEBO, nullptr))
     {
     }
 

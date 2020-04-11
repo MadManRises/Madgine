@@ -17,7 +17,7 @@ private:
     template <typename T>
     TypedScopePtr(T *t, std::false_type)
         : mScope(t)
-        , mType(&table<T>())
+        , mType(&table<decayed_t<T>>())
     {
     }
 

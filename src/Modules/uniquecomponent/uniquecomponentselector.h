@@ -2,12 +2,14 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "../threading/slot.h"
-
 namespace Engine {
 
 template <typename Registry, typename __Base, typename... _Ty>
-struct UniqueComponentSelector {
+struct UniqueComponentSelector
+#if ENABLE_PLUGINS
+    : ComponentRegistryListener
+#endif
+{
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
@@ -16,33 +18,18 @@ struct UniqueComponentSelector {
     UniqueComponentSelector(_Ty... arg, size_t index = 0)
         : mIndex(INVALID)
         , mArg(arg...)
-#if ENABLE_PLUGINS
-        , mUpdateSlot(this)
-#endif
     {
         set(index);
 #if ENABLE_PLUGINS
-        Registry::update().connect(mUpdateSlot);
+        Registry::addListener({ this, &UniqueComponentSelector<Registry, __Base, _Ty...>::sUpdateComponents });
 #endif
     }
 
-    void set(size_t index)
+    ~UniqueComponentSelector()
     {
-        if (index >= Registry::sComponents().size())
-            index = INVALID;
-        if (index != mIndex) {
-            if (index != INVALID) {
-                mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
-            } else {
-                mValue.reset();
-            }
-            mIndex = index;
-        }
-    }
-
-    void reset()
-    {
-        set(INVALID);
+#if ENABLE_PLUGINS
+        Registry::removeListener(this);
+#endif
     }
 
     UniqueComponentSelector(const UniqueComponentSelector &)
@@ -64,15 +51,38 @@ struct UniqueComponentSelector {
         return mValue.get();
     }
 
+    void set(size_t index)
+    {
+        if (index >= Registry::sComponents().size())
+            index = INVALID;
+        if (index != mIndex) {
+            if (index != INVALID) {
+                mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
+            } else {
+                mValue.reset();
+            }
+            mIndex = index;
+        }
+    }
+
+    void reset()
+    {
+        set(INVALID);
+    }
+
 private:
     std::unique_ptr<Base> mValue;
     size_t mIndex;
-	std::tuple<_Ty...> mArg;
-    
+    std::tuple<_Ty...> mArg;
 
 #if ENABLE_PLUGINS
 
 protected:
+    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    {
+        static_cast<UniqueComponentSelector<Registry, __Base, _Ty...> *>(listener)->updateComponents(info, add, vals);
+    }
+
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
     {
         if (add) {
@@ -93,8 +103,6 @@ protected:
         }
     }
 
-private:
-    Threading::Slot<&UniqueComponentSelector<Registry, __Base, _Ty...>::updateComponents> mUpdateSlot;
 #endif
 };
 

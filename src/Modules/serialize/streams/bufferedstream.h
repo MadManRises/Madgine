@@ -35,8 +35,7 @@ namespace Serialize {
 
         int sendMessages();
 
-        BufferedOutStream &operator<<(BufferedInStream &in);
-        using SerializeOutStream::operator<<;
+        void pipe(BufferedInStream &in);
 
         template <typename... _Ty>
         void writeCommand(Command cmd, const _Ty &... args)

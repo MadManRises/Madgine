@@ -15,18 +15,20 @@ namespace Serialize {
 		virtual void setupStream(std::istream &) {};
         virtual void setupStream(std::ostream &) {}; 
 
-        virtual void beginExtendedCompound(Serialize::SerializeOutStream &, const char *name) {};
+        virtual void beginExtended(Serialize::SerializeOutStream &, const char *name) {};
+
         virtual void beginCompound(Serialize::SerializeOutStream &, const char *name) {};
         virtual void endCompound(Serialize::SerializeOutStream &, const char *name) {};
 
-		virtual void beginExtendedCompound(Serialize::SerializeInStream &, const char *name) {};
+		virtual void beginExtended(Serialize::SerializeInStream &, const char *name) {};
+
         virtual void beginCompound(Serialize::SerializeInStream &, const char *name) {};
         virtual void endCompound(Serialize::SerializeInStream &, const char *name) {};
 
-        virtual void beginPrimitive(SerializeOutStream &, const char *name, size_t typeId) {}
+        virtual void beginPrimitive(SerializeOutStream &, const char *name, size_t typeId, bool closeExtended = false) {}
         virtual void endPrimitive(SerializeOutStream &, const char *name, size_t typeId) {}
 
-        virtual void beginPrimitive(SerializeInStream &, const char *name, size_t typeId) {}
+        virtual void beginPrimitive(SerializeInStream &, const char *name, size_t typeId, bool closeExtended = false) {}
         virtual void endPrimitive(SerializeInStream &, const char *name, size_t typeId) {}
 
         virtual std::string lookupFieldName(SerializeInStream &)

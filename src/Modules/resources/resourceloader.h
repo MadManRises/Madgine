@@ -2,7 +2,6 @@
 
 #include "resourcebase.h"
 #include "resourceloadercollector.h"
-#include "resourcemanager.h"
 
 #include "../threading/globalstorage.h"
 
@@ -10,6 +9,8 @@
 
 namespace Engine {
 namespace Resources {
+
+    MODULES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderCollector::Base>
     struct ResourceLoaderImpl : _Base {
@@ -71,7 +72,7 @@ namespace Resources {
 
         static T &getSingleton()
         {
-            return Resources::ResourceManager::getSingleton().get<T>();
+            return static_cast<T&>(getLoaderByIndex(component_index<T>()));
         }
 
         static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
@@ -121,7 +122,7 @@ namespace Resources {
             if (!handle) {
                 if (!loader)
                     loader = &getSingleton();
-                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::pair<ResourceType *, Data> { resource, Data {} }).first);
+                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple()).first);
                 handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
                 *resource->mData = (decltype(*resource->mData))handle.mData;
                 resource->mCtor(loader, getData(handle, loader), resource);
@@ -205,7 +206,7 @@ namespace Resources {
         virtual std::vector<const MetaTable *> resourceTypes() const override
         {
             std::vector<const MetaTable *> result = Base::resourceTypes();
-            result.push_back(&table<ResourceType>());
+            result.push_back(&table<decayed_t<ResourceType>>());
             return result;
         }
 
@@ -260,7 +261,7 @@ namespace Resources {
 
         static T &getSingleton()
         {
-            return Resources::ResourceManager::getSingleton().get<T>();
+            return static_cast<T &>(getLoaderByIndex(component_index<T>()));
         }
 
         static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)

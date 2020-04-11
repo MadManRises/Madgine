@@ -22,12 +22,12 @@ namespace Serialize {
         void writeState(Serialize::SerializeOutStream &out, const char *name) const
         {
             if (name)
-                out.format().beginExtendedCompound(out, name);
+                out.format().beginExtended(out, name);
             out.write(this->size(), "size");
             if (name)
                 out.format().beginCompound(out, name);
-            for (const auto &t : *this) {
-                out.format().beginExtendedCompound(out, "Item");
+            for (const auto &t : *this) {          
+                this->beginExtendedItem(out, t);
                 out.write(comparator_traits<Cmp>::to_cmp_type(t), "key");
                 out.write(t, "Item");
             }
@@ -40,7 +40,7 @@ namespace Serialize {
             bool wasActive = this->beforeReset(true);
 
             if (name)
-                in.format().beginExtendedCompound(in, name);
+                in.format().beginExtended(in, name);
             decltype(this->size()) size;
             in.read(size, "size");
             if (name)

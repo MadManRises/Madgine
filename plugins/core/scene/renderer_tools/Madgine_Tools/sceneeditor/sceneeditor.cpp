@@ -69,11 +69,6 @@ namespace Tools {
 
     void SceneEditor::renderMenu()
     {
-        if (ImGui::BeginMenu("Scene")) {
-
-            ImGui::EndMenu();
-        }
-
         if (mVisible) {
 
             if (ImGui::BeginMenu("SceneEditor")) {

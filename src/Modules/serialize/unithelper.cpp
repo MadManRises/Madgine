@@ -36,12 +36,12 @@ namespace Serialize {
 
     void SerializeUnitHelper::beginExtendedItem(SerializeOutStream &out, const SerializableUnitBase &item)
     {
-        out.format().beginExtendedCompound(out, "Item");
+        out.format().beginExtended(out, "Item");
     }
 
     void SerializeUnitHelper::beginExtendedItem(SerializeInStream &in, const SerializableUnitBase &item)
     {
-        in.format().beginExtendedCompound(in, "Item");
+        in.format().beginExtended(in, "Item");
     }
 
     void SerializeUnitHelper::beginExtendedItem(SerializeOutStream &out, const SerializableBase &item)

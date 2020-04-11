@@ -2,9 +2,10 @@
 
 #include "../generic/virtualiterator.h"
 #include "accessor.h"
-#include "apimethod.h"
+#include "apifunction.h"
 #include "keyvalueiterator.h"
 #include "metatable.h"
+#include "functiontable.h"
 #include "typedscopeptr.h"
 #include "valuetype_forward.h"
 
@@ -118,17 +119,16 @@ static void unpackApiMethod(ValueType &retVal, TypedScopePtr scope, const Argume
 }
 
 template <auto F, typename R, typename T, typename... Args>
-static ApiMethod wrapHelper(R (T::*f)(Args...))
+static ApiFunction wrapHelper(R (T::*f)(Args...))
 {
-    return ApiMethod {
+    return ApiFunction {
         &unpackApiMethod<F, R, T, Args...>,
-        sizeof...(Args),
-        false
+        &function<F>()
     };
 }
 
 template <auto F>
-static constexpr ApiMethod method(TypedScopePtr scope)
+static constexpr ApiFunction method(TypedScopePtr scope)
 {
     return wrapHelper<F>(F);
 }

@@ -20,6 +20,17 @@
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
+
+METATABLE_BEGIN(Engine::Tools::TestTool)
+//FUNCTION(logTest)
+//FUNCTION(logValue)
+METATABLE_END(Engine::Tools::TestTool)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::TestTool)
+
+RegisterType(Engine::Tools::TestTool);
+
 namespace Engine {
 namespace Tools {
 
@@ -126,13 +137,3 @@ namespace Tools {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Tools::TestTool)
-FUNCTION(logTest)
-FUNCTION(logValue)
-METATABLE_END(Engine::Tools::TestTool)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
-SERIALIZETABLE_END(Engine::Tools::TestTool)
-
-RegisterType(Engine::Tools::TestTool);

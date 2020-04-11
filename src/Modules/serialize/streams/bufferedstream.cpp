@@ -129,10 +129,9 @@ namespace Serialize {
         return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
     }
 
-    BufferedOutStream &BufferedOutStream::operator<<(BufferedInStream &in)
+    void BufferedOutStream::pipe(BufferedInStream &in)
     {
         OutStream::operator<<(&in.buffer());
-        return *this;
     }
 
     BufferedInOutStream::BufferedInOutStream(

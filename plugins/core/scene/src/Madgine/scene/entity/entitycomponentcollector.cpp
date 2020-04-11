@@ -20,7 +20,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        std::map<std::string_view, IndexRef> &Engine::Scene::Entity::sComponentsByName()
+        std::map<std::string_view, IndexRef> &sComponentsByName()
         {
             static std::map<std::string_view, IndexRef> dummy;
             return dummy;

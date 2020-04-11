@@ -157,6 +157,10 @@ namespace Serialize {
         b = ByteBuffer { std::move(buffer), size };        
     }
 
+    void SerializeInStream::readUnformatted(std::monostate &)
+    {
+    }
+
     void SerializeInStream::readRaw(void *buffer, size_t size)
     {
         if (!InStream::readRaw(buffer, size))
@@ -391,6 +395,10 @@ namespace Serialize {
         assert(format().mBinary);
         writeRaw(b.mSize);
         writeRaw(b.mData, b.mSize);
+    }
+
+    void SerializeOutStream::writeUnformatted(const std::monostate &)
+    {
     }
 
 }

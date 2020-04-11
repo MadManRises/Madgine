@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../toolscollector.h"
-#include "Modules/keyvalue/boundapimethod.h"
+#include "Modules/keyvalue/boundapifunction.h"
 
 namespace Engine {
 namespace Tools {
@@ -16,7 +16,7 @@ namespace Tools {
 
         virtual void render() override;
 
-        void setCurrentFunction(const std::string &name, const BoundApiMethod &method);
+        void setCurrentFunction(const std::string &name, const BoundApiFunction &method);
 
     protected:
         void refreshMethodCache();
@@ -25,10 +25,10 @@ namespace Tools {
 
     private:
         std::string mCurrentFunctionName;
-        BoundApiMethod mCurrentFunction;
+        BoundApiFunction mCurrentFunction;
         ArgumentList mCurrentArguments;
 
-        std::vector<std::pair<std::string, BoundApiMethod>> mMethodCache;
+        std::vector<std::pair<std::string, BoundApiFunction>> mMethodCache;
     };
 
 }

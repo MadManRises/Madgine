@@ -2,8 +2,6 @@
 
 #include "../reflection/classname.h"
 
-#include "../threading/signal.h"
-
 #include "../plugins/binaryinfo.h"
 
 namespace Engine {
@@ -35,6 +33,20 @@ struct CollectorInfoBase {
     const Plugins::BinaryInfo *mBinary;
     std::vector<std::vector<const TypeInfo *>> mElementInfos;
     size_t mBaseIndex = std::numeric_limits<size_t>::max();
+};
+
+struct ComponentRegistryListener {
+};
+
+template <typename F>
+struct ComponentRegistryListenerEntry {
+    ComponentRegistryListener *mListener;
+    void (*mF)(ComponentRegistryListener *, CollectorInfoBase *, bool, const std::vector<F> &);
+
+    void operator()(CollectorInfoBase *info, bool add, const std::vector<F> &comps)
+    {
+        mF(mListener, info, add, comps);
+    }
 };
 
 MODULES_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
@@ -94,6 +106,8 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     typedef std::tuple<_Ty...> Ty;
     typedef Collector_F<Base, _Ty...> F;
 
+    using Listener = ComponentRegistryListenerEntry<F>;
+
     struct CollectorInfo : CollectorInfoBase {
         std::vector<F> mComponents;
     };
@@ -118,6 +132,14 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         return sInstance().mComponents[i];
     }
 
+    static void addListener(Listener listener) {
+        sInstance().mListeners.push_back(listener);
+    }
+
+    static void removeListener(ComponentRegistryListener* listener) {
+        sInstance().mListeners.erase(std::find_if(sInstance().mListeners.begin(), sInstance().mListeners.end(), [=](const Listener &l) { return l.mListener == listener; }));
+    }
+
     void addCollector(CollectorInfo *info)
     {
         mUnloadedCollectors.push_back(info);
@@ -134,7 +156,9 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                 for (F f : comps) {
                     mComponents.push_back(f);
                 }
-                mUpdate.emit(info, true, comps);
+                for (Listener &listener : mListeners) {
+                    listener(info, true, comps);
+                }
                 it = mUnloadedCollectors.erase(it);
             } else {
                 ++it;
@@ -163,7 +187,9 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                 }
 
                 std::vector<F> clearV {};
-                mUpdate.emit(info, false, clearV);
+                for (Listener &listener : mListeners) {
+                    listener(info, false, clearV);
+                }
 
                 info->mBaseIndex = std::numeric_limits<size_t>::max();
             } else {
@@ -172,16 +198,13 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         }
     }
 
-    static Threading::SignalStub<CollectorInfoBase *, bool, const std::vector<F> &> &update()
-    {
-        return sInstance().mUpdate;
-    }
+
 
 private:
     static inline UniqueComponentRegistry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
 
     std::vector<F> mComponents;
-    Threading::Signal<CollectorInfoBase *, bool, const std::vector<F> &> mUpdate;
+    std::vector<Listener> mListeners;
 
     std::vector<CollectorInfo *> mUnloadedCollectors;
 };

@@ -28,7 +28,7 @@ VALUETYPE_TYPE(Vector2, Vector2, Vector2)
 VALUETYPE_SEP
 VALUETYPE_TYPE(KeyValueVirtualIterator, KeyValueVirtualIterator, KeyValueVirtualIterator)
 VALUETYPE_SEP
-VALUETYPE_TYPE(ApiMethod, ApiMethod, ApiMethod)
+VALUETYPE_TYPE(ApiFunction, ApiFunction, ApiFunction)
 VALUETYPE_SEP
 VALUETYPE_TYPE(ObjectPtr, ObjectPtr, Object)
 

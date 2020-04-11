@@ -318,7 +318,7 @@ std::string ValueType::toString() const
         return "[ ["s + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][2]) + "] ]";
     case Type::Matrix4Value:
         return "[ ["s + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][3]) + "] ]";
-    case Type::ApiMethodValue:
+    case Type::ApiFunctionValue:
         return "<method>";
     default:
         throw ValueTypeException("Unknown Type!");
@@ -356,7 +356,7 @@ std::string ValueType::toShortString() const
         return "Matrix3[...]";
     case Type::Matrix4Value:
         return "Matrix4[...]";
-    case Type::ApiMethodValue:
+    case Type::ApiFunctionValue:
         return "<method>";
     default:
         throw ValueTypeException("Unknown Type!");
@@ -384,6 +384,22 @@ std::string ValueType::getTypeString(Type type)
 ValueType::Type ValueType::type() const
 {
     return static_cast<Type>(mUnion.index());
+}
+
+template <size_t... Is>
+static void setTypeHelper(ValueType::Union& v, ValueType::Type type, std::index_sequence<Is...>) {
+    using Ctor_Type = void(*)(ValueType::Union&);
+    static constexpr Ctor_Type ctors[] = {
+        [](ValueType::Union &v) { v.emplace<Is>(); }...
+    };
+    ctors[static_cast<unsigned char>(type)](v);
+}
+
+void ValueType::setType(Type type)
+{
+    if (static_cast<Type>(mUnion.index()) != type) {
+        setTypeHelper(mUnion, type, std::make_index_sequence<std::variant_size_v<Union>>());
+    }
 }
 
 ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
@@ -425,7 +441,8 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
     return *this;
 }
 
-ValueTypeRef& ValueTypeRef::operator=(ValueTypeRef&& other) {
+ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
+{
     mValue = std::move(other.mValue);
     mData = std::exchange(other.mData, nullptr);
     return *this;

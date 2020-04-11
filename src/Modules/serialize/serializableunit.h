@@ -9,10 +9,10 @@
 namespace Engine {
 namespace Serialize {
 
-	#define SERIALIZABLEUNIT_MEMBERS() \
-READONLY_PROPERTY(Synced, isSynced) \
-READONLY_PROPERTY(MasterId, masterId) \
-READONLY_PROPERTY(SlaveId, slaveId)
+#define SERIALIZABLEUNIT_MEMBERS()        \
+    READONLY_PROPERTY(Synced, isSynced)   \
+    READONLY_PROPERTY(MasterId, masterId) \
+    READONLY_PROPERTY(SlaveId, slaveId)
 
     struct MODULES_EXPORT SerializableUnitBase {
     protected:
@@ -50,7 +50,7 @@ READONLY_PROPERTY(SlaveId, slaveId)
 
         const SerializeTable *serializeType() const;
 
-		size_t moveMasterId(size_t newId = 0);
+        size_t moveMasterId(size_t newId = 0);
 
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
@@ -86,7 +86,7 @@ READONLY_PROPERTY(SlaveId, slaveId)
         size_t mMasterId;
         size_t mActiveIndex = 0;
 
-        bool mSynced = false;
+        bool mSynced = false; // Maybe move only into TopLevelUnit?
 
         const SerializeTable *mType = nullptr;
     };
@@ -98,6 +98,14 @@ READONLY_PROPERTY(SlaveId, slaveId)
     struct TableInitializer {
         template <typename... Args>
         TableInitializer(Args &&...)
+        {
+            static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+        TableInitializer(const TableInitializer &)
+        {
+            static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        };
+        TableInitializer(TableInitializer &&)
         {
             static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
         }

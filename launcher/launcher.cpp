@@ -45,10 +45,10 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
         window.frameLoop()
             .addSetupSteps([&]() {
                 Engine::Filesystem::FileManager mgr("Layout");
-                std::optional<Engine::Serialize::SerializeInStream> file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+                Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
                 if (file) {
-                    window.readState(*file);
+                    window.readState(file);
                     window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
                 }
             });

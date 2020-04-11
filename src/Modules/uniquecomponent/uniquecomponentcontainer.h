@@ -2,14 +2,17 @@
 
 #include "uniquecomponentregistry.h"
 
-#include "../threading/slot.h"
-
 #include "uniquecomponent.h"
 
 namespace Engine {
 
 template <typename C, typename Registry, typename... _Ty>
-struct UniqueComponentContainerImpl : C {
+struct UniqueComponentContainerImpl : C
+#if ENABLE_PLUGINS
+    ,
+                                      ComponentRegistryListener
+#endif
+{
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
@@ -24,8 +27,7 @@ struct UniqueComponentContainerImpl : C {
 
     UniqueComponentContainerImpl(_Ty... arg)
 #if ENABLE_PLUGINS
-        : mUpdateSlot(this)
-        , mArg(arg...)
+        : mArg(arg...)
 #endif
     {
         size_t count = Registry::sComponents().size();
@@ -39,7 +41,13 @@ struct UniqueComponentContainerImpl : C {
             traits::emplace(*this, Container::end(), std::move(p));
         }
 #if ENABLE_PLUGINS
-        Registry::update().connect(mUpdateSlot);
+        Registry::addListener({ this, &UniqueComponentContainerImpl<C, Registry, _Ty...>::sUpdateComponents });
+#endif
+    }
+
+    ~UniqueComponentContainerImpl() {
+#if ENABLE_PLUGINS
+        Registry::removeListener(this);
 #endif
     }
 
@@ -73,6 +81,11 @@ private:
 #if ENABLE_PLUGINS
 
 protected:
+    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    {
+        static_cast<UniqueComponentContainerImpl<C, Registry, _Ty...> *>(listener)->updateComponents(info, add, vals);
+    }
+
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
     {
         if (add) {
@@ -97,8 +110,6 @@ protected:
     }
 
 private:
-    //TODO Consider virtual calls instead
-    Threading::Slot<&UniqueComponentContainerImpl<C, Registry, _Ty...>::updateComponents> mUpdateSlot;
     std::tuple<_Ty...> mArg;
 
 #endif

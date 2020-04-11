@@ -97,18 +97,24 @@ struct MODULES_EXPORT Matrix3 {
         std::swap(m[2][2], other.m[2][2]);
     }
 
-    /// Member access, allows use of construct mat[r][c]
-    inline constexpr const Vector3 operator[](size_t iRow) const
-    {
-        return { m[0][iRow], m[1][iRow], m[2][iRow] };
-    }
-
     struct AccessHelper {
-        float &operator[](size_t iCol) { return m[iCol][row]; }
+        constexpr float &operator[](size_t iCol) { return m[iCol][row]; }
         size_t row;
         float (&m)[3][3];
     };
-    inline AccessHelper operator[](size_t iRow)
+
+    struct const_AccessHelper {
+        constexpr const float &operator[](size_t iCol) { return m[iCol][row]; }
+        size_t row;
+        const float (&m)[3][3];
+    };
+
+    inline constexpr AccessHelper operator[](size_t iRow)
+    {
+        return { iRow, m };
+    }
+
+    inline constexpr const_AccessHelper operator[](size_t iRow) const
     {
         return { iRow, m };
     }

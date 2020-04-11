@@ -1,0 +1,73 @@
+<Graph id=302>
+    <mNodes size=2>
+        <Item type="TestNode" id=303>
+            <mFlowOutPins size=1>
+                <Item>
+                    <Element>
+                        <Element>302</Element>
+                        <Element>0</Element>
+                    </Element>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins size=2>
+                <Item>
+                    <Element>
+                        <Element>304</Element>
+                        <Element>0</Element>
+                    </Element>
+                    <Element type=4>0</Element>
+                </Item>
+                <Item>
+                    <Element>
+                        <Element>0</Element>
+                        <Element>0</Element>
+                    </Element>
+                    <Element type=6>10.95</Element>
+                </Item>
+            </mDataInPins>
+        </Item>
+        <Item type="TestNode" id=304>
+            <mFlowOutPins size=1>
+                <Item>
+                    <Element>
+                        <Element>303</Element>
+                        <Element>0</Element>
+                    </Element>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins size=2>
+                <Item>
+                    <Element>
+                        <Element>302</Element>
+                        <Element>0</Element>
+                    </Element>
+                    <Element type=4>0</Element>
+                </Item>
+                <Item>
+                    <Element>
+                        <Element>0</Element>
+                        <Element>0</Element>
+                    </Element>
+                    <Element type=6>-4.2</Element>
+                </Item>
+            </mDataInPins>
+        </Item>
+    </mNodes>
+    <mFlowInPins size=1>
+        <Item>
+            <Element>
+                <Element>304</Element>
+                <Element>0</Element>
+            </Element>
+        </Item>
+    </mFlowInPins>
+    <mDataOutPins size=1>
+        <Item>
+            <Element>
+                <Element>303</Element>
+                <Element>0</Element>
+            </Element>
+            <Element type=0></Element>
+        </Item>
+    </mDataOutPins>
+</Graph>

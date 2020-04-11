@@ -127,7 +127,7 @@ namespace Tools {
 
     bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable)
     {
-        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiMethodValue;
+        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -198,7 +198,7 @@ namespace Tools {
                                                          }
                                                          return false;
                                                      },
-                                                     [&](BoundApiMethod &method) {
+                                                     [&](BoundApiFunction &method) {
                                                          std::string extended = "-> " + id;
                                                          if (ImGui::Button(extended.c_str())) {
                                                              getTool<FunctionTool>().setCurrentFunction(id, method);

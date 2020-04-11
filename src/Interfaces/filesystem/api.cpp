@@ -19,14 +19,24 @@ namespace Filesystem {
         return { path, true };
     }
 
+    FileQuery listFilesAndDirsRecursive(const Path &path)
+    {
+        return { path, true, true };
+    }
+
     FileQuery listFiles(const Path &path)
     {
         return { path, false };
     }
 
-    FileQuery listFolders(const Path &path)
+    FileQuery listDirs(const Path &path)
     {
         return { path, false, true, false };
+    }
+
+    FileQuery listFilesAndDirs(const Path &path)
+    {
+        return { path, false, true };
     }
 
     bool isSeparator(char c)

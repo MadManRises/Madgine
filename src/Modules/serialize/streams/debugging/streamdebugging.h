@@ -15,7 +15,7 @@ namespace Serialize {
             void log(const T &v)
             {
                 if (isLoggingEnabled())
-                    mLogger << std::setw(20) << typeid(T).name() << " " << v << std::endl;
+                    mLogger << std::setw(20) << typeid(T).name() << " " << static_cast<typename PrimitiveReducer<T>::type>(v) << std::endl;
             }
 
             void log(const ByteBuffer &buffer)

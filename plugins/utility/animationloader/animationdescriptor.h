@@ -38,7 +38,7 @@ namespace Render {
     };
 
     struct MADGINE_ANIMATIONLOADER_EXPORT AnimationList : ScopeBase {
-
+        AnimationList() = default;
 		AnimationList(const AnimationList &) = delete;
         AnimationList(AnimationList &&) = default;
 

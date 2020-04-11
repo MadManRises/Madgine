@@ -369,7 +369,7 @@ void ImGuiEx::Canvas::EnterLocalSpace()
 
     // Transform mouse position to local space.
     auto& io = ImGui::GetIO();
-    io.MousePos     = (m_MousePosBackup - m_ViewTransformPosition) * m_View.InvScale;
+    io.MousePos     = (m_MousePosBackup - m_ViewTransformPosition) * m_View.InvScale;    
     io.MousePosPrev = (m_MousePosPrevBackup - m_ViewTransformPosition) * m_View.InvScale;
     for (auto i = 0; i < IM_ARRAYSIZE(m_MouseClickedPosBackup); ++i)
         io.MouseClickedPos[i] = (m_MouseClickedPosBackup[i] - m_ViewTransformPosition) * m_View.InvScale;

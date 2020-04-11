@@ -178,6 +178,11 @@ struct container_traits<std::vector<T>> {
             emplace(this->end(), item);
         }
 
+        void push_back(value_type &&item)
+        {
+            emplace(this->end(), std::move(item));
+        }
+
         template <typename... _Ty>
         value_type &emplace_back(_Ty &&... args)
         {
@@ -527,6 +532,5 @@ struct container_traits<std::array<T, Size>> {
         return handle + 1;
     }
 };
-
 
 }

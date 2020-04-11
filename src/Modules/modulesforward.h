@@ -13,8 +13,9 @@ struct Accessor;
 struct ScopeField;
 struct TypedScopePtr;
 struct TypeInfo;
-struct ApiMethod;
-struct BoundApiMethod;
+struct ApiFunction;
+struct BoundApiFunction;
+struct FunctionTable;
 using ArgumentList = std::vector<ValueType>;
 
 struct ObjectInstance;

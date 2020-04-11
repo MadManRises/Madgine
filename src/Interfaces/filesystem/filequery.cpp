@@ -92,7 +92,7 @@ namespace Filesystem {
             if (currentIsDir()) {
                 if (mQuery->mRecursive) {
                     enterDir();
-                } else if (!mQuery->mShowFolders) {
+                } else if (!mQuery->mShowDirs) {
                     ++(*this);
                 }
             } else {

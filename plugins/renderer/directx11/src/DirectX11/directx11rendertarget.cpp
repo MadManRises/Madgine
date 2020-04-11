@@ -187,8 +187,6 @@ namespace Render {
 
     void DirectX11RenderTarget::setRenderSpace(const Rect2i &space)
     {
-        const Vector2i &screenSize = size();
-
         D3D11_VIEWPORT viewport;
         viewport.Width = static_cast<float>(space.mSize.x);
         viewport.Height = static_cast<float>(space.mSize.y);

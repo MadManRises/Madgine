@@ -94,7 +94,7 @@ struct TestBuf : Engine::Serialize::SerializeStreambuf {
         return traits_type::eof();
     }
 
-    SerializeStreambuf::int_type underflow()
+    SerializeStreambuf::int_type underflow() override
     {
         size_t index = 1;
         if (mBuffer.mWrittenCount[index] > (egptr() - eback())) {

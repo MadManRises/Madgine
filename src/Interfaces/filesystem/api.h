@@ -6,13 +6,15 @@
 namespace Engine {
 namespace Filesystem {
 
-	struct FileInfo {
+    struct FileInfo {
         size_t mSize;
-	};
+    };
 
     INTERFACES_EXPORT FileQuery listFilesRecursive(const Path &path);
+    INTERFACES_EXPORT FileQuery listFilesAndDirsRecursive(const Path &path);
     INTERFACES_EXPORT FileQuery listFiles(const Path &path);
-    INTERFACES_EXPORT FileQuery listFolders(const Path &path);
+    INTERFACES_EXPORT FileQuery listDirs(const Path &path);
+    INTERFACES_EXPORT FileQuery listFilesAndDirs(const Path &path);
     INTERFACES_EXPORT Path configPath();
 
     INTERFACES_EXPORT Path makeNormalized(const char *p);

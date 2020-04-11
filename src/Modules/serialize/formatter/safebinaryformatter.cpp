@@ -14,12 +14,12 @@ namespace Serialize {
     {
     }
 
-    void SafeBinaryFormatter::beginPrimitive(SerializeOutStream &out, const char *name, size_t typeId)
+    void SafeBinaryFormatter::beginPrimitive(SerializeOutStream &out, const char *name, size_t typeId, bool closeExtended)
     {
         out.writeRaw<size_t>(SERIALIZE_MAGIC_NUMBER + typeId);
     }
 
-    void SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, size_t typeId)
+    void SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, size_t typeId, bool closeExtended)
     {
         size_t type;
         in.readRaw(type);

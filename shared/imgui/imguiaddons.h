@@ -41,10 +41,10 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::Vector4 &v);
     bool draw(Engine::KeyValueVirtualIterator &it);
     bool draw(const Engine::KeyValueVirtualIterator &it);
-    bool draw(Engine::ApiMethod &m);
-    bool draw(const Engine::ApiMethod &m);
-    bool draw(Engine::BoundApiMethod &m);
-    bool draw(const Engine::BoundApiMethod &m);
+    bool draw(Engine::ApiFunction &m);
+    bool draw(const Engine::ApiFunction &m);
+    bool draw(Engine::BoundApiFunction &m);
+    bool draw(const Engine::BoundApiFunction &m);
     bool draw(std::monostate &);
     bool draw(const std::monostate &);
     bool draw(Engine::Quaternion &q);
@@ -53,6 +53,7 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::ObjectPtr &o);
 
     const char *mName;
+    bool mMinified;
 };
 
 struct ValueTypePayload {
@@ -67,21 +68,21 @@ namespace details {
 }
 
 template <typename F>
-bool ValueType(Engine::ValueType *v, F &&f, const char *name = "")
+bool ValueType(Engine::ValueType *v, F &&f, const char *name = "", bool minified = false)
 {
 
     return v->visit([&](auto &tmp) {
         if constexpr (Engine::can_apply<details::F_supports, F, decltype(tmp)>::value) {
             return f(std::forward<decltype(tmp)>(tmp));
         } else {
-            return ValueTypeDrawer { name }.draw(tmp);
+            return ValueTypeDrawer { name, minified }.draw(tmp);
         }
     });
 }
 
 IMGUI_API bool InputText(const char *label, std::string *s);
 
-IMGUI_API bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, const char *name = "");
+IMGUI_API bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, const char *name = "", bool minified = false);
 
 IMGUI_API void PushDisabled();
 IMGUI_API void PopDisabled();
@@ -101,7 +102,7 @@ IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speed
 IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *enabled = nullptr);
 IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *enabled = nullptr);
 
-IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
+IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
 IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags = 0);
 IMGUI_API const ValueTypePayload *GetValuetypePayload();
@@ -150,5 +151,8 @@ bool IsDraggableValueTypeBeingAccepted(
     }
     return false;
 }
+
+IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted);
+IMGUI_API bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool allowNewFile = false);
 
 }

@@ -9,7 +9,10 @@
 
 #include "Modules/keyvalue/typedscopeptr.h"
 
-#include "Modules/keyvalue/boundapimethod.h"
+#include "Modules/keyvalue/boundapifunction.h"
+
+#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/path.h"
 
 DLL_EXPORT Engine::Threading::WorkgroupLocal<ImGuiContext *>
     GImGui;
@@ -86,12 +89,14 @@ bool ValueTypeDrawer::draw(const std::string_view &s)
 
 bool ValueTypeDrawer::draw(int &i)
 {
+    PushItemWidth(100);
     return DragInt(mName, &i);
 }
 
 bool ValueTypeDrawer::draw(const int &i)
 {
     PushDisabled();
+    PushItemWidth(100);
     DragInt(mName, const_cast<int *>(&i));
     PopDisabled();
     return false;
@@ -99,12 +104,14 @@ bool ValueTypeDrawer::draw(const int &i)
 
 bool ValueTypeDrawer::draw(size_t &i)
 {
+    PushItemWidth(100);
     return ImGui::DragScalar(mName, ImGuiDataType_U32, &i, 1.0f);
 }
 
 bool ValueTypeDrawer::draw(const size_t &i)
 {
     PushDisabled();
+    PushItemWidth(100);
     ImGui::DragScalar(mName, ImGuiDataType_U32, const_cast<size_t *>(&i), 1.0f);
     PopDisabled();
     return false;
@@ -112,12 +119,14 @@ bool ValueTypeDrawer::draw(const size_t &i)
 
 bool ValueTypeDrawer::draw(float &f)
 {
+    PushItemWidth(100);
     return ImGui::DragFloat(mName, &f, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const float &f)
 {
     PushDisabled();
+    PushItemWidth(100);
     ImGui::DragFloat(mName, const_cast<float *>(&f), 0.15f);
     PopDisabled();
     return false;
@@ -171,12 +180,14 @@ bool ValueTypeDrawer::draw(const Engine::Matrix4 *m)
 
 bool ValueTypeDrawer::draw(Engine::Vector2 &v)
 {
+    PushItemWidth(100);
     return ImGui::DragFloat2(mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 {
     PushDisabled();
+    PushItemWidth(100);
     ImGui::DragFloat2(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
@@ -184,12 +195,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 
 bool ValueTypeDrawer::draw(Engine::Vector3 &v)
 {
+    PushItemWidth(100);
     return ImGui::DragFloat3(mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 {
     PushDisabled();
+    PushItemWidth(100);
     ImGui::DragFloat3(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
@@ -197,12 +210,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 
 bool ValueTypeDrawer::draw(Engine::Vector4 &v)
 {
+    PushItemWidth(100);
     return ImGui::DragFloat4(mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 {
     PushDisabled();
+    PushItemWidth(100);
     ImGui::DragFloat4(mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
@@ -228,7 +243,7 @@ bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualIterator &it)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::ApiMethod &m)
+bool ValueTypeDrawer::draw(Engine::ApiFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -238,7 +253,7 @@ bool ValueTypeDrawer::draw(Engine::ApiMethod &m)
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::ApiMethod &m)
+bool ValueTypeDrawer::draw(const Engine::ApiFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -248,7 +263,7 @@ bool ValueTypeDrawer::draw(const Engine::ApiMethod &m)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::BoundApiMethod &m)
+bool ValueTypeDrawer::draw(Engine::BoundApiFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -258,7 +273,7 @@ bool ValueTypeDrawer::draw(Engine::BoundApiMethod &m)
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::BoundApiMethod &m)
+bool ValueTypeDrawer::draw(const Engine::BoundApiFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -359,7 +374,7 @@ bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
     return (SelectValueTypeType<Ty>(v) | ...);
 }
 
-bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name)
+bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name, bool minified)
 {
     if (allowTypeSwitch) {
         const float width = CalcItemWidth() - GetFrameHeight();
@@ -370,7 +385,7 @@ bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name)
     }
 
     bool result = v->visit([&](auto &tmp) {
-        return ValueTypeDrawer { name }.draw(tmp);
+        return ValueTypeDrawer { name, minified }.draw(tmp);
     });
 
     if (allowTypeSwitch) {
@@ -402,7 +417,7 @@ void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags)
 {
     ImGui::PushID(label);
     ImGuiID id = ImGui::GetID("treeArrow");
-    
+
     ImGuiStorage *storage = ImGui::GetStateStorage();
     bool *opened = storage->GetBoolRef(id);
 
@@ -458,7 +473,8 @@ void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags
     }
 }
 
-bool EndSpanningTreeNode() {
+bool EndSpanningTreeNode()
+{
     return EndTreeArrow();
 }
 
@@ -526,7 +542,7 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
     PushID(label);
 
     for (int i = 0; i < 3; ++i) {
-        PushMultiItemsWidths(3, CalcItemWidth());
+        PushMultiItemsWidths(3, std::min(300.0f, CalcItemWidth()));
         for (int j = 0; j < 3; ++j) {
             PushID(3 * i + j);
             if (enabled && !enabled[3 * i + j])
@@ -571,7 +587,7 @@ bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *e
     PushID(label);
 
     for (int i = 0; i < 4; ++i) {
-        PushMultiItemsWidths(4, CalcItemWidth());
+        PushMultiItemsWidths(4, std::min(400.0f, CalcItemWidth()));
         for (int j = 0; j < 4; ++j) {
             PushID(4 * i + j);
             if (enabled && !enabled[4 * i + j])
@@ -599,7 +615,7 @@ bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *ena
     return DragMatrix4(label, m, speeds, enabled);
 }
 
-bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiMethod>> &methods, Engine::BoundApiMethod *m, std::string *currentName, std::string *filter, int expectedArgumentCount)
+bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter, int expectedArgumentCount)
 {
     bool result = false;
 
@@ -695,4 +711,134 @@ bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
     return false;
 }
 
+void BeginFilesystemPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection)
+{
+    if (path->empty())
+        *path = Engine::Filesystem::Path { "." }.absolute();
+    if (selection->empty())
+        *selection = Engine::Filesystem::Path { "." }.absolute();
+
+    if (ImGui::Button("Up")) {
+        *selection = *path;
+        *path = *path / "..";
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::BeginCombo("Current", path->c_str())) {
+
+        ImGui::EndCombo();
+    }
+}
+
+bool EndFilesystemPicker(bool valid, bool &accepted, bool askForConfirmation = false, bool alreadyClicked = false)
+{
+    bool closed = false;
+
+    if (ImGui::Button("Cancel")) {
+        accepted = false;
+        closed = true;
+    }
+    ImGui::SameLine();
+    if (!valid)
+        PushDisabled();
+    if (ImGui::Button("Open") || alreadyClicked) {
+        if (!askForConfirmation) {
+            accepted = true;
+            closed = true;
+        } else {
+            ImGui::OpenPopup("Confirmation");
+        }
+    }
+    if (!valid)
+        PopDisabled();
+
+    return closed;
+}
+
+bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted)
+{
+    BeginFilesystemPicker(path, selection);
+
+    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -ImGui::GetItemsLineHeightWithSpacing() })) {
+
+        for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listDirs(*path)) {
+
+            bool selected = *selection == result.path();
+
+            if (ImGui::Selectable(result.path().filename().c_str(), selected)) {
+                *selection = result.path();
+            }
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+                *path = result.path();
+            }
+        }
+
+        ImGui::EndChild();
+    }
+
+    return EndFilesystemPicker(true, accepted);
+}
+
+bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool openWrite)
+{
+    BeginFilesystemPicker(path, selection);
+
+    bool selectedIsFile = false;
+    bool selectedIsDir = false;
+    bool clicked = false;
+
+    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -2 * ImGui::GetItemsLineHeightWithSpacing() })) {
+
+        for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listFilesAndDirs(*path)) {
+
+            bool selected = *selection == result.path();
+            if (selected) {
+                if (result.isDir())
+                    selectedIsDir = true;
+                else
+                    selectedIsFile = true;
+            }
+
+            if (ImGui::Selectable(result.path().filename().c_str(), selected)) {
+                *selection = result.path();
+            }
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+                if (result.isDir()) {
+                    *path = result.path();
+                } else {
+                    *selection = result.path();
+                    clicked = true;
+                }
+            }
+        }
+
+        ImGui::EndChild();
+    }
+
+    std::string fileName = selection->relative(*path).str();
+    if (InputText("Filename:", &fileName)) {
+        *selection = *path / fileName;
+    }
+
+    bool confirmed = false;
+
+    if (ImGui::BeginPopup("Confirmation")) {
+        ImGui::Text("Are you sure you want to overwrite file '%s'?", selection->c_str());
+        if (ImGui::Button("Yes")) {
+            confirmed = true;
+            clicked = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("No")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    return EndFilesystemPicker(selectedIsFile || (openWrite && !selectedIsDir), accepted, openWrite && selectedIsFile && !confirmed, clicked);
+}
 }

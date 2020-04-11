@@ -12,7 +12,7 @@ namespace Ini {
     {
     }
 
-    void IniFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
+    void IniFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId, bool closeExtended)
     {
         out.writeUnformatted(std::string(name));
         out.writeUnformatted("="s);
@@ -23,7 +23,7 @@ namespace Ini {
         out.writeUnformatted("\n"s);
     }
 
-    void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
+    void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId, bool closeExtended)
     {
         std::string prefix = in.readN(strlen(name) + 1);
         if (prefix != std::string(name) + "=")

@@ -3,9 +3,9 @@
 #include "../../generic/noopfunctor.h"
 #include "../../generic/observerevent.h"
 #include "../../generic/offsetptr.h"
+#include "../creationhelper.h"
 #include "../serializable.h"
 #include "../streams/serializestream.h"
-#include "../creationhelper.h"
 #include "../unithelper.h"
 
 namespace Engine {
@@ -191,18 +191,15 @@ namespace Serialize {
 
         void writeState(SerializeOutStream &out, const char *name = nullptr) const
         {
-            if (name)
-                out.format().beginExtendedCompound(out, name);
+            out.format().beginExtended(out, name);
             out.write(Base::size(), "size");
-            if (name)
-                out.format().beginCompound(out, name);
+            out.format().beginCompound(out, name);
             for (const auto &t : physical()) {
                 if (this->filter(out, t)) {
                     write_item(out, t);
                 }
             }
-            if (name)
-                out.format().endCompound(out, name);
+            out.format().endCompound(out, name);
         }
 
         template <typename Creator = DefaultCreator<>>
@@ -386,17 +383,14 @@ namespace Serialize {
         {
             Base::clear();
             mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
-            if (name)
-                in.format().beginExtendedCompound(in, name);
+            in.format().beginExtended(in, name);
             decltype(Base::size()) count;
             in.read(count, "size");
-            if (name)
-                in.format().beginCompound(in, name);
+            in.format().beginCompound(in, name);
             while (count--) {
                 this->read_item_where_intern(in, Base::end(), std::forward<Creator>(creator));
             }
-            if (name)
-                in.format().endCompound(in, name);
+            in.format().endCompound(in, name);
         }
 
         template <typename Creator>

@@ -225,7 +225,6 @@ namespace Serialize {
             afterReset(wasActive);
         }
 
-        // Inherited via Observable
         template <typename Creator = DefaultCreator<>>
         void readRequest(BufferedInOutStream &inout, Creator &&creator = {})
         {
@@ -255,7 +254,7 @@ namespace Serialize {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << newId;
                     *out << op;
-                    *out << inout;
+                    out->pipe(inout);
                     out->endMessage();
 
                     if (id) {

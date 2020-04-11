@@ -1,16 +1,16 @@
 #include "../toolslib.h"
 
-#    include "projectmanager.h"
+#include "projectmanager.h"
 
-#    include "Modules/keyvalue/metatable_impl.h"
-#    include "Modules/serialize/serializetable_impl.h"
+#include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
-#    include "imgui/imgui.h"
-#    include "imgui/imguiaddons.h"
+#include "imgui/imgui.h"
+#include "imgui/imguiaddons.h"
 
-#    include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/api.h"
 
-#    include "Modules/resources/resourcemanager.h"
+#include "Modules/resources/resourcemanager.h"
 
 METATABLE_BEGIN(Engine::Tools::ProjectManager)
 METATABLE_END(Engine::Tools::ProjectManager)
@@ -42,56 +42,16 @@ RegisterType(Engine::Tools::ProjectManager)
 
         void ProjectManager::renderMenu()
         {
-#    if ENABLE_PLUGINS
+#if ENABLE_PLUGINS
             ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
             if (ImGui::BeginPopupModal("OpenFolder")) {
 
-                if (ImGui::Button("Up")) {
-                    mCurrentSelectionPath = mCurrentPath;
-                    mCurrentPath = mCurrentPath / "..";
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::BeginCombo("Current", mCurrentPath.c_str())) {
-
-                    ImGui::EndCombo();
-                }
-
-                if (ImGui::BeginChild("CurrentFolder", { 0.0f, -ImGui::GetItemsLineHeightWithSpacing() })) {
-
-                    for (Filesystem::FileQueryResult result : Filesystem::listFolders(mCurrentPath)) {
-
-                        bool selected = mCurrentSelectionPath == result.path();
-
-                        if (ImGui::Selectable(result.path().filename().c_str(), selected)) {
-                            mCurrentSelectionPath = result.path();
-                        }
-
-                        if (result.isDir()) {
-                            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                                mCurrentPath = result.path();
-                            }
-                        }
-                    }
-
-                    ImGui::EndChild();
-                }
-
-                bool hasValidPath = mCurrentSelectionPath != mCurrentPath;
-
-                if (ImGui::Button("Cancel")) {
+                bool accepted;
+                if (ImGui::DirectoryPicker(&mCurrentPath, &mCurrentSelectionPath, accepted)) {
+                    if (accepted)
+                        setProjectRoot(mCurrentSelectionPath);
                     ImGui::CloseCurrentPopup();
                 }
-                ImGui::SameLine();
-                if (!hasValidPath)
-                    ImGui::PushDisabled();
-                if (ImGui::Button("Open")) {
-                    setProjectRoot(mCurrentSelectionPath);
-                    ImGui::CloseCurrentPopup();
-                }
-                if (!hasValidPath)
-                    ImGui::PopDisabled();
                 ImGui::EndPopup();
             }
 
@@ -156,10 +116,10 @@ RegisterType(Engine::Tools::ProjectManager)
                 configNameBuffer.clear();
                 ImGui::OpenPopup("NewConfig");
             }
-#    endif
+#endif
         }
 
-#    if ENABLE_PLUGINS
+#if ENABLE_PLUGINS
         void ProjectManager::setProjectRoot(const Filesystem::Path &root)
         {
             if (mProjectRoot != root) {
@@ -203,16 +163,16 @@ RegisterType(Engine::Tools::ProjectManager)
                 mProjectChanged.emit(mProjectRoot, mConfig);
             }
         }
-#    endif
+#endif
 
         const Filesystem::Path &Engine::Tools::ProjectManager::projectRoot() const
-        {			
+        {
             return mProjectRoot;
         }
 
         const std::string &Engine::Tools::ProjectManager::config() const
         {
-            return mConfig;			
+            return mConfig;
         }
 
     }

@@ -9,9 +9,9 @@ namespace Render {
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const ByteBuffer &data)
         : mType(type)
+        , mSize({ static_cast<int>(width), static_cast<int>(height) })
         , mFormat(format)
         , mBind(bind)
-        , mSize({ static_cast<int>(width), static_cast<int>(height) })
     {
         DXGI_FORMAT xFormat;
         D3D11_SRV_DIMENSION dimension;
@@ -76,7 +76,7 @@ namespace Render {
         DX11_CHECK(hr);
 
         D3D11_SAMPLER_DESC samplerDesc;
-        
+
         samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
         samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
         samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -104,10 +104,10 @@ namespace Render {
     }
 
     DirectX11Texture::DirectX11Texture(DirectX11Texture &&other)
-        : mType(other.mType)
-        , mResource(std::exchange(other.mResource, nullptr))
-        , mBind(std::exchange(other.mBind, 0))
+        : mResource(std::exchange(other.mResource, nullptr))
+        , mType(other.mType)
         , mFormat(std::exchange(other.mFormat, {}))
+        , mBind(std::exchange(other.mBind, 0))
     {
         mTextureHandle = std::exchange(other.mTextureHandle, 0);
     }
@@ -158,7 +158,7 @@ namespace Render {
     {
         size_t byteCount;
         switch (mFormat) {
-        case FORMAT_UNSIGNED_BYTE:            
+        case FORMAT_UNSIGNED_BYTE:
             byteCount = 4;
             break;
         case FORMAT_FLOAT8:

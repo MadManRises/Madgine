@@ -34,8 +34,9 @@ namespace Render {
     }
 
     DirectX11Buffer::DirectX11Buffer(DirectX11Buffer &&other)
-        : mBuffer(std::exchange(other.mBuffer, nullptr))
-        , mBind(std::exchange(other.mBind, 0))
+        : mBind(std::exchange(other.mBind, 0))
+        , mBuffer(std::exchange(other.mBuffer, nullptr))
+
     {
     }
 

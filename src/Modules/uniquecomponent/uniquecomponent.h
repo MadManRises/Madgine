@@ -145,8 +145,30 @@ IndexRef virtualIndexRef()
 
 }
 
-
 #    define UNIQUECOMPONENT(Name)
 #    define VIRTUALUNIQUECOMPONENT(Name)
 
 #endif
+
+namespace Engine {
+
+DLL_IMPORT_VARIABLE2(const std::string_view, _componentName, typename T);
+
+template <typename T, typename Base>
+struct NamedComponent : Base {
+    using Base::Base;
+
+    static const std::string_view &componentName()
+    {
+        return _componentName<T>();
+    }
+};
+
+}
+
+#define COMPONENT_NAME(Name, FullType) \
+    DLL_EXPORT_VARIABLE2(constexpr, const std::string_view, Engine::, _componentName, #Name, FullType);
+
+#define NAMED_UNIQUECOMPONENT(Name, FullType) \
+    COMPONENT_NAME(Name, FullType)            \
+    UNIQUECOMPONENT(FullType)

@@ -38,21 +38,17 @@ namespace Serialize {
 
     void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
     {
-        if (name)
-            out.format().beginExtendedCompound(out, name);
+        out.format().beginExtended(out, name);
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId))
             out.write(mMasterId, "id");
-        if (name)
-            out.format().beginCompound(out, name);
+        out.format().beginCompound(out, name);
         mType->writeState(this, out);
-        if (name)
-            out.format().endCompound(out, name);
+        out.format().endCompound(out, name);
     }
 
     void SerializableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
     {
-        if (name)
-            in.format().beginExtendedCompound(in, name);
+        in.format().beginExtended(in, name);
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             size_t id;
             in.read(id, "id");
@@ -64,11 +60,9 @@ namespace Serialize {
                 }
             }
         }
-        if (name)
-            in.format().beginCompound(in, name);
+        in.format().beginCompound(in, name);
         mType->readState(this, in, flags);
-        if (name)
-            in.format().endCompound(in, name);
+        in.format().endCompound(in, name);
     }
 
     void SerializableUnitBase::readAction(BufferedInOutStream &in)
@@ -77,7 +71,7 @@ namespace Serialize {
     }
 
     void SerializableUnitBase::readRequest(BufferedInOutStream &in)
-    {        
+    {
         mType->readRequest(this, in);
     }
 
@@ -86,7 +80,7 @@ namespace Serialize {
         std::set<BufferedOutStream *, CompareStreamId> result;
         if (mSynced) {
             result = topLevel()->getMasterMessageTargets();
-		}
+        }
         return result;
     }
 

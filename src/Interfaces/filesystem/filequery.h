@@ -69,7 +69,7 @@ namespace Filesystem {
 
         Path mPath;
         bool mRecursive = false;
-        bool mShowFolders = false;
+        bool mShowDirs = false;
         bool mShowFiles = true;
     };
 

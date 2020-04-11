@@ -7,7 +7,7 @@
 #include "../math/vector3.h"
 #include "../math/vector4.h"
 
-#include "apimethod.h"
+#include "apifunction.h"
 
 #include "keyvaluevirtualiterator.h"
 
@@ -40,6 +40,56 @@ struct MODULES_EXPORT ValueType {
         MAX_VALUETYPE_TYPE
     };
 
+    enum class ExtendedTypeEnum : unsigned char {
+        VariadicListType = static_cast<unsigned char>(Type::MAX_VALUETYPE_TYPE),
+        VariadicPassthroughListType,
+        GenericType
+    };
+
+    struct ExtendedType {
+        ExtendedTypeEnum mType;
+
+        ExtendedType(Type t)
+            : mType(static_cast<ExtendedTypeEnum>(t))
+        {
+        }
+
+        ExtendedType(ExtendedTypeEnum t)
+            : mType(t)
+        {
+        }
+
+        bool canAccept(const ExtendedType& valueType) {
+            return mType == ExtendedTypeEnum::GenericType || *this == valueType;
+        }
+
+        bool isRegular() const {
+            return static_cast<Type>(mType) < Type::MAX_VALUETYPE_TYPE;
+        }
+
+        operator ExtendedTypeEnum() const
+        {
+            return mType;
+        }
+        operator Type() const
+        {
+            assert(isRegular());
+            return static_cast<Type>(mType);
+        }
+        bool operator==(const ExtendedType& other) const {
+            return mType == other.mType;
+        }
+    };
+
+    struct ExtendedTypeDesc {
+        ExtendedType mType;
+                
+        bool canAccept(const ExtendedTypeDesc &valueType)
+        {
+            return mType.canAccept(valueType.mType);
+        }
+    };
+
     ValueType();
 
     ValueType(const ValueType &other);
@@ -69,8 +119,6 @@ struct MODULES_EXPORT ValueType {
         : ValueType(static_cast<int>(val))
     {
     }
-
-    //ValueType(const char *s) = delete;
 
     template <typename T, typename _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
     explicit ValueType(T *val)
@@ -157,7 +205,6 @@ struct MODULES_EXPORT ValueType {
         return std::visit(std::forward<V>(visitor), std::move(mUnion));
     }
 
-public:
     template <typename T>
     bool is() const;
 
@@ -178,6 +225,8 @@ public:
 
     Type type() const;
 
+    void setType(Type type);
+
 private:
     Union mUnion;
 };
@@ -188,7 +237,7 @@ private:
     template <typename T>
     void *toPtrHelper(T &&val)
     {
-        if constexpr (!std::is_reference_v<T> || std::is_const_v<std::remove_reference_t<T>> ) {
+        if constexpr (!std::is_reference_v<T> || std::is_const_v<std::remove_reference_t<T>>) {
             return nullptr;
         } else {
             return &val;
@@ -264,7 +313,7 @@ ValueType_Return<T> ValueType::as() const
     } else if constexpr (isValueTypePrimitive_v<T>) {
         if constexpr (std::is_same_v<T, std::string_view>) {
             if (std::holds_alternative<HeapObject<std::string>>(mUnion)) {
-                return static_cast<const std::string&>(std::get<HeapObject<std::string>>(mUnion));
+                return static_cast<const std::string &>(std::get<HeapObject<std::string>>(mUnion));
             }
         }
         return std::get<T>(mUnion);

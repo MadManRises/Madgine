@@ -5,8 +5,6 @@
 
 DECLARE_UNIQUE_COMPONENT(Engine::App, GlobalAPI, GlobalAPIBase, Application &);
 
-
-
 namespace Engine
 {
 	namespace App

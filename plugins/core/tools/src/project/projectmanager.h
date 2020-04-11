@@ -4,6 +4,8 @@
 
 #include "Interfaces/filesystem/path.h"
 
+#include "Modules/threading/signal.h"
+
 namespace Engine {
 namespace Tools {
 

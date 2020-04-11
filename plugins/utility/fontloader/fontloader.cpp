@@ -22,8 +22,8 @@
 #include "core/edge-coloring.h"
 
 #ifdef STATIC_BUILD
-#undef DLL_EXPORT
-#undef DLL_IMPORT
+#    undef DLL_EXPORT
+#    undef DLL_IMPORT
 #endif
 
 #include <ft2build.h>
@@ -31,8 +31,8 @@
 #include FT_OUTLINE_H
 
 #ifdef STATIC_BUILD
-#define DLL_EXPORT
-#define DLL_IMPORT
+#    define DLL_EXPORT
+#    define DLL_IMPORT
 #endif
 
 UNIQUECOMPONENT(Engine::Render::FontLoader)
@@ -111,6 +111,8 @@ namespace Render {
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
+            TupleUnpacker::toTuple(font.mGlyphs.front());
+            TupleUnpacker::toTuple(Glyph {});
             in >> font.mGlyphs;
             in >> font.mTextureSize;
             ByteBuffer b;

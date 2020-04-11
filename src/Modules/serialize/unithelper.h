@@ -105,12 +105,15 @@ namespace Serialize {
 
     struct MODULES_EXPORT SerializeUnitHelper {
 
+        template <typename T>
+        static constexpr const bool is_tuple_v = TupleUnpacker::is_tuplefyable_v<T>;
+
         static bool filter(SerializeOutStream &out, const SerializableUnitBase &item);
 
         static bool filter(SerializeOutStream &out, const SerializableBase &item);
 
         template <typename T>
-        static std::enable_if_t<std::is_trivially_copyable_v<T>, bool> filter(SerializeOutStream &out, const T &item)
+        static std::enable_if_t<is_tuple_v<T>, bool> filter(SerializeOutStream &out, const T &item)
         {
             return true;
         }
@@ -120,7 +123,7 @@ namespace Serialize {
         static void applyMap(SerializeInStream &in, SerializableBase &item);
 
         template <typename T>
-        static std::enable_if_t<std::is_trivially_copyable_v<T>> applyMap(SerializeInStream &in, T &item)
+        static std::enable_if_t<is_tuple_v<T>> applyMap(SerializeInStream &in, T &item)
         {
             auto tuple = TupleUnpacker::toTuple(item);
             UnitHelper<decltype(tuple)>::applyMap(in, tuple);
@@ -131,7 +134,7 @@ namespace Serialize {
         static void setParent(SerializableBase &item, SerializableUnitBase *parent);
 
         template <typename T>
-        static std::enable_if_t<std::is_trivially_copyable_v<T>> setParent(T &item, SerializableUnitBase *parent) {}
+        static std::enable_if_t<is_tuple_v<T>> setParent(T &item, SerializableUnitBase *parent) {}
 
         static void beginExtendedItem(SerializeOutStream &out, const SerializableUnitBase &item);
         static void beginExtendedItem(SerializeInStream &in, const SerializableUnitBase &item);
@@ -140,9 +143,9 @@ namespace Serialize {
         static void beginExtendedItem(SerializeInStream &in, const SerializableBase &item);
 
         template <typename T>
-        static std::enable_if_t<std::is_trivially_copyable_v<T>> beginExtendedItem(SerializeOutStream &out, const T &item) {}
+        static std::enable_if_t<is_tuple_v<T>> beginExtendedItem(SerializeOutStream &out, const T &item) {}
         template <typename T>
-        static std::enable_if_t<std::is_trivially_copyable_v<T>> beginExtendedItem(SerializeInStream &in, const T &item) {}
+        static std::enable_if_t<is_tuple_v<T>> beginExtendedItem(SerializeInStream &in, const T &item) {}
     };
 
     template <typename T>
@@ -156,6 +159,10 @@ namespace Serialize {
                 for (auto &t : item) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
                 }
+            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+                TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
+                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
+                });
             }
         }
 
