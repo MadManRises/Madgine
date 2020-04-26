@@ -31,25 +31,32 @@ struct type_holder_t {
 template <typename T>
 const constexpr type_holder_t<T> type_holder = {};
 
+template <auto>
+struct auto_holder_t {
+};
+
+template <auto A>
+const constexpr auto_holder_t<A> auto_holder = {};
+
 template <typename...>
 struct type_pack {
 };
 
 template <size_t, typename T>
-struct select_type;
+struct type_pack_select;
 
 template <size_t I, typename Head, typename... Tail>
-struct select_type<I, type_pack<Head, Tail...>>
-    : select_type<I - 1, type_pack<Tail...>> {
+struct type_pack_select<I, type_pack<Head, Tail...>>
+    : type_pack_select<I - 1, type_pack<Tail...>> {
 };
 
 template <typename Head, typename... Tail>
-struct select_type<0, type_pack<Head, Tail...>> {
+struct type_pack_select<0, type_pack<Head, Tail...>> {
     typedef Head type;
 };
 
 template <size_t I, typename T>
-using select_type_t = typename select_type<I, T>::type;
+using type_pack_select_t = typename type_pack_select<I, T>::type;
 
 namespace __generic__impl__ {
     template <typename T, size_t n, size_t... Is>
@@ -59,12 +66,23 @@ namespace __generic__impl__ {
 
     template <typename T, size_t... Is>
     struct type_pack_selector<T, 0, Is...> {
-        using type = type_pack<typename select_type<Is, T>::type...>;
+        using type = type_pack<typename type_pack_select<Is, T>::type...>;
     };
 }
 
 template <size_t n, typename... _Ty>
 using type_pack_n = typename __generic__impl__::type_pack_selector<type_pack<_Ty...>, n>::type;
+
+template <template <typename> typename F, typename T>
+struct type_pack_apply;
+
+template <template <typename> typename F, typename... Ty>
+struct type_pack_apply<F, type_pack<Ty...>> {
+    typedef type_pack<F<Ty>...> type;
+};
+
+template <template <typename> typename F, typename T>
+using type_pack_apply_t = typename type_pack_apply<F, T>::type;
 
 template <typename Pack, typename T>
 struct type_pack_contains : std::false_type {
@@ -76,6 +94,10 @@ struct type_pack_contains<type_pack<T, V...>, T> : std::true_type {
 
 template <typename U, typename... V, typename T>
 struct type_pack_contains<type_pack<U, V...>, T> : type_pack_contains<type_pack<V...>, T> {
+};
+
+template <typename... U, typename... V, typename T>
+struct type_pack_contains<type_pack<type_pack<U...>, V...>, T> : type_pack_contains<type_pack<U..., V...>, T> {
 };
 
 template <typename Pack, typename T>
@@ -91,6 +113,21 @@ struct type_pack_index<type_pack<U, _Ty...>, T> : std::integral_constant<size_t,
 
 template <typename T, typename... _Ty>
 struct type_pack_index<type_pack<T, _Ty...>, T> : std::integral_constant<size_t, 0> {
+};
+
+template <typename T, typename RecPack, typename Pack, bool Selector = type_pack_contains_v<RecPack, T>>
+struct type_pack_index_recurse;
+
+template <typename T, typename RecPack, typename Pack>
+struct type_pack_index_recurse<T, RecPack, Pack, true> : std::integral_constant<size_t, 0> {
+};
+
+template <typename T, typename RecPack, typename Pack>
+struct type_pack_index_recurse<T, RecPack, Pack, false> : std::integral_constant<size_t, type_pack_index<Pack, T>::value + 1> {
+};
+
+template <typename T, typename... RecT, typename... _Ty>
+struct type_pack_index<type_pack<type_pack<RecT...>, _Ty...>, T> : type_pack_index_recurse<T, type_pack<RecT...>, type_pack<_Ty...>> {
 };
 
 template <typename Pack, typename T>
@@ -191,7 +228,7 @@ struct replace {
 template <typename Tag, size_t N> 
 struct replace<TaggedPlaceholder<Tag, N>> {
 	template <typename Tag2, typename... Args>
-	using tagged = std::conditional_t<std::is_same_v<Tag, Tag2>, select_type_t<N, type_pack<Args...>>, TaggedPlaceholder<Tag,N>>;
+	using tagged = std::conditional_t<std::is_same_v<Tag, Tag2>, type_pack_select_t<N, type_pack<Args...>>, TaggedPlaceholder<Tag,N>>;
 
     template <typename... Args>
     using type = tagged<DefaultTag, Args...>;

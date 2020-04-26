@@ -206,7 +206,7 @@ namespace Resources {
         virtual std::vector<const MetaTable *> resourceTypes() const override
         {
             std::vector<const MetaTable *> result = Base::resourceTypes();
-            result.push_back(&table<decayed_t<ResourceType>>());
+            result.push_back(table<decayed_t<ResourceType>>);
             return result;
         }
 
@@ -332,7 +332,7 @@ namespace Resources {
         virtual std::vector<const MetaTable *> resourceTypes() const override
         {
             std::vector<const MetaTable *> result = ResourceLoaderBase::resourceTypes();
-            result.push_back(&table<ResourceType>());
+            result.push_back(table<ResourceType>);
             return result;
         }
 

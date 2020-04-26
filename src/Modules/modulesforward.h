@@ -46,6 +46,8 @@ struct Any;
 
 struct ByteBuffer;
 
+struct CoWString;
+
 namespace CLI {
     struct CLICore;
     struct ParameterBase;

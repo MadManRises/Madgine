@@ -52,38 +52,18 @@ bool ValueTypeDrawer::draw(const bool &b)
     return false;
 }
 
-bool ValueTypeDrawer::draw(std::string &s)
+bool ValueTypeDrawer::draw(Engine::CoWString &s)
 {
     return InputText(mName, &s);
 }
 
-bool ValueTypeDrawer::draw(const std::string &s)
+bool ValueTypeDrawer::draw(const Engine::CoWString &s)
 {
     if (mName) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("\"%s\"", s.c_str());
-    return false;
-}
-
-bool ValueTypeDrawer::draw(std::string_view &s)
-{
-    if (mName) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("\"%s\"", s.data());
-    return false;
-}
-
-bool ValueTypeDrawer::draw(const std::string_view &s)
-{
-    if (mName) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("\"%s\"", s.data());
+    ImGui::Text("\"%.*s\"", static_cast<int>(s.size()), s.data());
     return false;
 }
 
@@ -343,6 +323,16 @@ bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
     return false;
 }
 
+void Text(const std::string &s)
+{
+    Text("%s", s.c_str());
+}
+
+void Text(const std::string_view &s)
+{
+    Text("%.*s", static_cast<int>(s.size()), s.data());
+}
+
 bool InputText(const char *label, std::string *s)
 {
     char buf[255];
@@ -359,10 +349,28 @@ bool InputText(const char *label, std::string *s)
     return false;
 }
 
+
+bool InputText(const char *label, Engine::CoWString *s)
+{
+    char buf[255];
+#if WINDOWS
+    strncpy_s(buf, sizeof(buf), s->data(), s->size());
+#else
+    strncpy(buf, s->data(), s->size());
+#endif
+
+    if (ImGui::InputText(label, buf, sizeof(buf))) {
+        *s = std::string_view { buf };
+        return true;
+    }
+    return false;
+}
+
+
 template <typename T>
 bool SelectValueTypeType(Engine::ValueType *v)
 {
-    bool result = Selectable(Engine::ValueType::getTypeString(static_cast<Engine::ValueType::Type>(Engine::type_pack_index_v<Engine::ValueTypeList, T>)).c_str(), v->is<T>());
+    bool result = Selectable(Engine::toValueTypeIndex<T>().toString().data(), v->is<T>());
     if (result)
         *v = T {};
     return result;
@@ -371,12 +379,12 @@ bool SelectValueTypeType(Engine::ValueType *v)
 template <typename... Ty>
 bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
 {
-    return (SelectValueTypeType<Ty>(v) | ...);
+    return (SelectValueTypeType<Engine::type_pack_select_t<0, Ty>>(v) | ...);
 }
 
-bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name, bool minified)
+bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const char *name, bool minified)
 {
-    if (allowTypeSwitch) {
+    if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
         const float width = CalcItemWidth() - GetFrameHeight();
 
         ImGui::PushID(name);
@@ -388,7 +396,7 @@ bool ValueType(Engine::ValueType *v, bool allowTypeSwitch, const char *name, boo
         return ValueTypeDrawer { name, minified }.draw(tmp);
     });
 
-    if (allowTypeSwitch) {
+    if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
         ImGui::PopItemWidth();
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
@@ -653,7 +661,7 @@ void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr sco
     if (ImGui::BeginDragDropSource(flags)) {
         ValueTypePayload payload { name, scope, value };
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
-        ImGui::Text("%s", name.c_str());
+        ImGui::Text(name);
         ImGui::EndDragDropSource();
     }
 }

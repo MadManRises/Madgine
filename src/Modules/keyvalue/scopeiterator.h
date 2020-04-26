@@ -22,6 +22,7 @@ private:
     void checkDerived();
 
     TypedScopePtr mScope;
+    const MetaTable *mCurrentTable;
     const std::pair<const char *, Accessor> *mPointer;
 };
 

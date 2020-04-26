@@ -16,6 +16,7 @@ namespace Tools {
 
         void logTest();
         void logValue(const ValueType &v);
+        int dummy();
     };
 
 }

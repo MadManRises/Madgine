@@ -1,36 +1,34 @@
-VALUETYPE_TYPE(std::monostate, std::monostate, Null)
+VALUETYPE_TYPE(Null, std::monostate, std::monostate)
 VALUETYPE_SEP
-VALUETYPE_TYPE(std::string, HeapObject<std::string>, OwningString)
+VALUETYPE_TYPE(String, CoWString, const CoWString&, std::string_view, std::string)
 VALUETYPE_SEP
-VALUETYPE_TYPE(std::string_view, std::string_view, NonOwningString)
+VALUETYPE_TYPE(Bool, bool, bool)
 VALUETYPE_SEP
-VALUETYPE_TYPE(bool, bool, Bool)
+VALUETYPE_TYPE(Int, int, int)
 VALUETYPE_SEP
-VALUETYPE_TYPE(int, int, Int)
+VALUETYPE_TYPE(UInt, size_t, size_t)
 VALUETYPE_SEP
-VALUETYPE_TYPE(size_t, size_t, UInt)
+VALUETYPE_TYPE(Float, float, float)
 VALUETYPE_SEP
-VALUETYPE_TYPE(float, float, Float)
+VALUETYPE_TYPE(Scope, TypedScopePtr, const TypedScopePtr&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(TypedScopePtr, TypedScopePtr, Scope)
+VALUETYPE_TYPE(Matrix3, CoW<Matrix3>, const Matrix3&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Matrix3, CoW<Matrix3>, Matrix3)
+VALUETYPE_TYPE(Matrix4, CoW<Matrix4>, const Matrix4&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Matrix4, CoW<Matrix4>, Matrix4)
+VALUETYPE_TYPE(Quaternion, Quaternion, const Quaternion&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Quaternion, Quaternion, Quaternion)
+VALUETYPE_TYPE(Vector4, Vector4, const Vector4&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Vector4, Vector4, Vector4)
+VALUETYPE_TYPE(Vector3, Vector3, const Vector3&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Vector3, Vector3, Vector3)
+VALUETYPE_TYPE(Vector2, Vector2, const Vector2&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Vector2, Vector2, Vector2)
+VALUETYPE_TYPE(KeyValueVirtualIterator, KeyValueVirtualIterator, const KeyValueVirtualIterator&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(KeyValueVirtualIterator, KeyValueVirtualIterator, KeyValueVirtualIterator)
+VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(ApiFunction, ApiFunction, ApiFunction)
-VALUETYPE_SEP
-VALUETYPE_TYPE(ObjectPtr, ObjectPtr, Object)
+VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr&)
 
 #undef VALUETYPE_TYPE
 #undef VALUETYPE_SEP

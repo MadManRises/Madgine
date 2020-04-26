@@ -85,6 +85,22 @@ namespace StringUtil {
         return ss.str();
     }
 
+    template <size_t S>
+    constexpr std::array<std::string_view, S> tokenize(std::string_view string, char token) {
+        std::array<std::string_view, S> result;
+        size_t pivot = 0;
+        for (size_t i = 0; i < S; ++i) {
+            size_t newPivot = string.find(token, pivot);
+            if ((i == S - 1) != (newPivot == std::string_view::npos))
+                throw 0;
+            if (newPivot == std::string_view::npos)
+                newPivot = string.size();
+            result[i] = string.substr(pivot, newPivot - pivot);
+            pivot = newPivot + 1;
+        }
+        return result;
+    }
+
 }
 
 constexpr size_t strlen(const char *s)

@@ -12,7 +12,7 @@ namespace Engine {
 namespace Tools {
 
 	template <typename T>
-	using Tool = Serialize::SerializableUnit<T, ToolsComponent<T>>;
+	using Tool = Serialize::SerializableUnit<T, VirtualScope<T, ToolsComponent<T>>>;
 
 }
 }

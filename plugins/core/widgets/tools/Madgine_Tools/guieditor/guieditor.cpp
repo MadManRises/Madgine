@@ -435,7 +435,7 @@ namespace Tools {
                     ImGui::OpenPopup("WidgetSelector");
                 drawWidget(root, hoveredWidget);
             } else {
-                ImGui::Text("%s", "Please select a root window under 'Layout' in the menu bar.");
+                ImGui::Text("Please select a root window under 'Layout' in the menu bar.");
             }
         }
         ImGui::End();

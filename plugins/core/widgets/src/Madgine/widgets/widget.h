@@ -28,7 +28,7 @@
 
 namespace Engine {
 namespace Widgets {
-    struct MADGINE_WIDGETS_EXPORT WidgetBase : ScopeBase,
+    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase>,
                                                Serialize::SerializableUnit<WidgetBase> {
         SERIALIZABLEUNIT;
 
@@ -107,8 +107,6 @@ namespace Widgets {
         void *userData();
         void setUserData(void *userData);
 
-        virtual const MetaTable *type();
-
         virtual Resources::ImageLoader::ResourceType *resource() const;
 
         void writeCreationData(Serialize::SerializeOutStream &of) const;
@@ -162,14 +160,9 @@ namespace Widgets {
     };
 
     template <typename T>
-    struct Widget : Serialize::SerializableUnit<T, WidgetBase> {
+    struct Widget : VirtualScope<T, Serialize::SerializableUnit<T, WidgetBase>> {
 
-        using Serialize::SerializableUnit<T, WidgetBase>::SerializableUnit;
-
-        virtual const MetaTable *type() override
-        {
-            return &table<T>();
-        }
+        using VirtualScope<T, Serialize::SerializableUnit<T, WidgetBase>>::VirtualScope;
     };
 }
 }

@@ -60,6 +60,18 @@
                                               DLL_EXPORT_VARIABLE Type (ns Name<__VA_ARGS__>) = Init;
 */
 
+#define DLL_IMPORT_VARIABLE(Type, Name, ArgumentType) \
+    template <ArgumentType T>                         \
+    extern DLL_IMPORT Type Name##_instance;           \
+    template <ArgumentType T>                         \
+    Type *Name = &Name##_instance<T>;                 \
+    template <ArgumentType T>                         \
+    constexpr Type **Name##_constexpr = &Name<T>;
+
+#define DLL_EXPORT_VARIABLE(qualifier, Type, ns, Name, Init, Argument) \
+    template <>                                                        \
+    DLL_EXPORT qualifier Type ns Name##_instance<Argument> = Init;
+
 #define DLL_IMPORT_VARIABLE2(Type, Name, ...) \
     template <__VA_ARGS__>                    \
     Type &Name();

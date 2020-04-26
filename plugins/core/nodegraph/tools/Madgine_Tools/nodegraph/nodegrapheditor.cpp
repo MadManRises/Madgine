@@ -33,10 +33,10 @@ static const int sPinIconSize = 24;
 namespace Engine {
 namespace Tools {
 
-    void ShowLabel(const char *label, ImColor color = { 0.0f, 0.0f, 0.0f })
+    void ShowLabel(std::string_view label, ImColor color = { 0.0f, 0.0f, 0.0f })
     {
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
-        auto size = ImGui::CalcTextSize(label);
+        auto size = ImGui::CalcTextSize(label.data(), label.data()+label.size());
 
         auto padding = ImGui::GetStyle().FramePadding;
         auto spacing = ImGui::GetStyle().ItemSpacing;
@@ -48,10 +48,10 @@ namespace Tools {
 
         auto drawList = ImGui::GetWindowDrawList();
         drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-        ImGui::TextUnformatted(label);
+        ImGui::TextUnformatted(label.data(), label.data()+label.size());
     };
 
-    void DataPinIcon(ValueType::ExtendedTypeDesc type, bool connected = false)
+    void DataPinIcon(ValueTypeDesc type, bool connected = false)
     {
         ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Circle, connected, ImColor { 255, 255, 255, 255 }, ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
@@ -89,7 +89,7 @@ namespace Tools {
         ed::EndPin();
     }
 
-    bool DataOutPin(const char *name, size_t nodeId, size_t pinId, ValueType::ExtendedTypeDesc type)
+    bool DataOutPin(const char *name, size_t nodeId, size_t pinId, ValueTypeDesc type)
     {
         ed::BeginPin(4000 * nodeId + NodeGraph::NodePrototypeBase::dataOutId(pinId), ed::PinKind::Output);
         if (name) {
@@ -101,7 +101,7 @@ namespace Tools {
         return ImGui::IsItemHovered();
     }
 
-    bool DataInPin(const char *name, size_t nodeId, size_t pinId, ValueType::ExtendedTypeDesc type, const NodeGraph::TargetPin &source, ValueType *v = nullptr)
+    bool DataInPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, const NodeGraph::TargetPin &source, ValueType *v = nullptr)
     {
         uintptr_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::dataInId(pinId);
         ed::BeginPin(id, ed::PinKind::Input);
@@ -113,7 +113,7 @@ namespace Tools {
         ed::EndPin();
         bool result = ImGui::IsItemHovered();
         if (v && !source && type.mType.isRegular()) {
-            v->setType(type.mType);
+            v->setType(type);
 
             ImGui::SameLine();
             ImGui::PushID(id);
@@ -123,12 +123,12 @@ namespace Tools {
         return result;
     }
 
-    void HoverPin(ValueType::ExtendedTypeDesc type)
+    void HoverPin(ExtendedValueTypeDesc type)
     {
         if (type.mType.isRegular()) {
             ImVec2 cursor = ImGui::GetCursorPos();
             ImGui::SetCursorScreenPos(ImGui::GetMousePos());
-            ShowLabel(ValueType::getTypeString(type.mType).c_str());
+            ShowLabel(type.toString());
             ImGui::SetCursorPos(cursor);
         }
     }
@@ -188,7 +188,7 @@ namespace Tools {
 
                 ed::SetCurrentEditor(mEditor);
 
-                std::optional<ValueType::ExtendedTypeDesc> hoveredPin;
+                std::optional<ExtendedValueTypeDesc> hoveredPin;
 
                 ed::Begin("Node editor");
 
@@ -240,7 +240,7 @@ namespace Tools {
                 pinId = 0;
                 for (NodeGraph::DataInPinPrototype &dataPin : mGraph->mDataOutPins) {
                     assert(dataPin.mSource && dataPin.mSource.mNode != &*mGraph);
-                    ValueType::ExtendedTypeDesc type = static_cast<NodeGraph::NodePrototypeBase *>(dataPin.mSource.mNode)->dataOutType(dataPin.mSource.mIndex);
+                    ExtendedValueTypeDesc type = static_cast<NodeGraph::NodePrototypeBase *>(dataPin.mSource.mNode)->dataOutType(dataPin.mSource.mIndex);
 
                     if (DataInPin(nullptr, 0, pinId, type, dataPin.mSource))
                         hoveredPin = type;
@@ -255,7 +255,7 @@ namespace Tools {
                 size_t nodeId = 1;
                 for (NodeGraph::NodePrototypeBase *node : uniquePtrToPtr(mGraph->nodes())) {
                     ed::BeginNode(4000 * nodeId);
-                    ImGui::Text("%s", node->name().data());
+                    ImGui::Text(node->name());
 
                     size_t inFlowCount = node->flowInCount();
                     size_t outFlowCount = node->flowOutCount();
@@ -273,7 +273,7 @@ namespace Tools {
                         if (dataIndex < inDataCount) {
                             NodeGraph::TargetPin source = node->dataInSource(dataIndex);
 
-                            ValueType::ExtendedTypeDesc type = source && source.mNode != &*mGraph ? static_cast<NodeGraph::NodePrototypeBase *>(source.mNode)->dataOutType(source.mIndex) : node->dataInExpectedType(dataIndex);
+                            ExtendedValueTypeDesc type = source && source.mNode != &*mGraph ? static_cast<NodeGraph::NodePrototypeBase *>(source.mNode)->dataOutType(source.mIndex) : node->dataInExpectedType(dataIndex);
 
                             if (DataInPin(node->dataInName(dataIndex).data(), nodeId, dataIndex, type, source, &node->dataInDefault(dataIndex)))
                                 hoveredPin = type;
@@ -281,7 +281,7 @@ namespace Tools {
                         if (dataIndex < min(inDataCount, outDataCount))
                             ImGui::SameLine();
                         if (dataIndex < outDataCount) {
-                            ValueType::ExtendedTypeDesc type = node->dataOutType(dataIndex);
+                            ExtendedValueTypeDesc type = node->dataOutType(dataIndex);
 
                             if (DataOutPin(node->dataOutName(dataIndex).data(), nodeId, dataIndex, type))
                                 hoveredPin = type;

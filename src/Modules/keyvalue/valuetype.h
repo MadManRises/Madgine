@@ -18,8 +18,9 @@
 #include "valuetypeexception.h"
 
 #include "../generic/cow.h"
-#include "../generic/heapobject.h"
+#include "../generic/cowstring.h"
 
+#include "valuetype_desc.h"
 #include "valuetype_forward.h"
 
 namespace Engine {
@@ -28,67 +29,9 @@ struct MODULES_EXPORT ValueType {
 
     using Union = std::variant<
 #define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Type, Storage, Name) Storage
+#define VALUETYPE_TYPE(Name, Storage, ...) Storage
 #include "valuetypedef.h"
-        >;
-
-    enum class Type : unsigned char {
-#define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Type, Storage, Name) Name##Value
-#include "valuetypedef.h"
-        ,
-        MAX_VALUETYPE_TYPE
-    };
-
-    enum class ExtendedTypeEnum : unsigned char {
-        VariadicListType = static_cast<unsigned char>(Type::MAX_VALUETYPE_TYPE),
-        VariadicPassthroughListType,
-        GenericType
-    };
-
-    struct ExtendedType {
-        ExtendedTypeEnum mType;
-
-        ExtendedType(Type t)
-            : mType(static_cast<ExtendedTypeEnum>(t))
-        {
-        }
-
-        ExtendedType(ExtendedTypeEnum t)
-            : mType(t)
-        {
-        }
-
-        bool canAccept(const ExtendedType& valueType) {
-            return mType == ExtendedTypeEnum::GenericType || *this == valueType;
-        }
-
-        bool isRegular() const {
-            return static_cast<Type>(mType) < Type::MAX_VALUETYPE_TYPE;
-        }
-
-        operator ExtendedTypeEnum() const
-        {
-            return mType;
-        }
-        operator Type() const
-        {
-            assert(isRegular());
-            return static_cast<Type>(mType);
-        }
-        bool operator==(const ExtendedType& other) const {
-            return mType == other.mType;
-        }
-    };
-
-    struct ExtendedTypeDesc {
-        ExtendedType mType;
-                
-        bool canAccept(const ExtendedTypeDesc &valueType)
-        {
-            return mType.canAccept(valueType.mType);
-        }
-    };
+        >;    
 
     ValueType();
 
@@ -96,23 +39,11 @@ struct MODULES_EXPORT ValueType {
 
     ValueType(ValueType &&other) noexcept;
 
-    template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<T>>>
-    explicit ValueType(const T &v)
-        : mUnion(v)
+    template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
+    explicit ValueType(T &&v)
+        : mUnion(std::forward<T>(v))
     {
     }
-
-    explicit ValueType(const char *) = delete;
-    explicit ValueType(std::string &&s);
-    explicit ValueType(const std::string &s);
-    explicit ValueType(const std::string &&s);
-
-    explicit ValueType(Matrix3 &&m);
-    explicit ValueType(const Matrix3 &m);
-    explicit ValueType(const Matrix3 &&m);
-    explicit ValueType(Matrix4 &&m);
-    explicit ValueType(const Matrix4 &m);
-    explicit ValueType(const Matrix4 &&m);
 
     template <typename T, typename _ = std::enable_if_t<std::is_enum<T>::value>>
     explicit ValueType(T val)
@@ -138,12 +69,6 @@ struct MODULES_EXPORT ValueType {
 
     void operator=(const ValueType &other);
     void operator=(ValueType &&other);
-
-    void operator=(const char *) = delete;
-    void operator=(std::string &&s);
-    void operator=(std::string &s);
-    void operator=(const std::string &s);
-    void operator=(const std::string &&s);
 
     template <typename T, typename _ = std::enable_if_t<isValueType_v<std::remove_reference_t<T>>>>
     void operator=(T &&t)
@@ -179,7 +104,6 @@ struct MODULES_EXPORT ValueType {
     std::string toShortString() const;
 
     std::string getTypeString() const;
-    static std::string getTypeString(Type type);
 
     template <typename V>
     decltype(auto) visit(V &&visitor) const &
@@ -212,9 +136,6 @@ struct MODULES_EXPORT ValueType {
     ValueType_Return<T> as() const;
 
     template <typename T>
-    std::enable_if_t<std::is_enum_v<T>, T> as() const;
-
-    template <typename T>
     ValueType_Return<T> asDefault(const T &defaultValue)
     {
         if (!is<T>()) {
@@ -223,9 +144,10 @@ struct MODULES_EXPORT ValueType {
         return as<T>();
     }
 
-    Type type() const;
-
-    void setType(Type type);
+    ValueTypeIndex index() const;
+    ValueTypeDesc type() const;
+    
+    void setType(ValueTypeDesc type);
 
 private:
     Union mUnion;
@@ -276,47 +198,15 @@ private:
 template <typename T>
 bool ValueType::is() const
 {
-    if constexpr (std::is_same_v<T, std::string>) {
-        return std::holds_alternative<HeapObject<std::string>>(mUnion);
-    } else if constexpr (std::is_same_v<T, Matrix3>) {
-        return std::holds_alternative<CoW<Matrix3>>(mUnion);
-    } else if constexpr (std::is_same_v<T, Matrix4>) {
-        return std::holds_alternative<CoW<Matrix4>>(mUnion);
-    } else if constexpr (isValueTypePrimitive<T>::value) {
-        if constexpr (std::is_same_v<T, std::string_view>) {
-            if (std::holds_alternative<HeapObject<std::string>>(mUnion)) {
-                return true;
-            }
-        }
-        return std::holds_alternative<T>(mUnion);
-    } else if constexpr (std::is_same_v<T, ValueType>) {
-        return true;
-    } else if constexpr (isScopeRef_v<T>) {
-        static_assert(!std::is_reference_v<T>, "References are currently not supported!");
-        return std::holds_alternative<TypedScopePtr>(mUnion) && std::get<TypedScopePtr>(mUnion).mType->isDerivedFrom<std::remove_pointer_t<T>>();
-    } else if constexpr (std::is_enum_v<T>) {
-        return std::holds_alternative<int>(mUnion);
-    } else {
-        static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
-    }
+    return toValueTypeDesc<T>().canAccept(type());
 }
 
 template <typename T>
 ValueType_Return<T> ValueType::as() const
 {
-    if constexpr (std::is_same_v<T, std::string>) {
-        return std::get<HeapObject<std::string>>(mUnion);
-    } else if constexpr (std::is_same_v<T, Matrix3>) {
-        return std::get<CoW<Matrix3>>(mUnion);
-    } else if constexpr (std::is_same_v<T, Matrix4>) {
-        return std::get<CoW<Matrix4>>(mUnion);
-    } else if constexpr (isValueTypePrimitive_v<T>) {
-        if constexpr (std::is_same_v<T, std::string_view>) {
-            if (std::holds_alternative<HeapObject<std::string>>(mUnion)) {
-                return static_cast<const std::string &>(std::get<HeapObject<std::string>>(mUnion));
-            }
-        }
-        return std::get<T>(mUnion);
+
+    if constexpr (isValueTypePrimitive_v<T>) {
+        return std::get<static_cast<size_t>(toValueTypeIndex<T>().mIndex)>(mUnion);
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return *this;
     } else if constexpr (isScopeRef_v<T>) {
@@ -331,12 +221,6 @@ ValueType_Return<T> ValueType::as() const
     } else {
         static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
     }
-}
-
-template <typename T>
-std::enable_if_t<std::is_enum_v<T>, T> ValueType::as() const
-{
-    return static_cast<T>(as<int>());
 }
 
 }

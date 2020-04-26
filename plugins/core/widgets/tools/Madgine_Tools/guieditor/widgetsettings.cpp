@@ -77,7 +77,7 @@ namespace Tools {
 
 		ImGui::Separator();
 
-		mInspector.draw({ mWidget, mWidget->type() }, { "Pos", "Size" });
+		mInspector.draw(mWidget, { "Pos", "Size" });
     }
 
     void WidgetSettings::saveGeometry()

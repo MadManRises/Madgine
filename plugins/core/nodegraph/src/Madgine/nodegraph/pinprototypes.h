@@ -22,7 +22,7 @@ namespace NodeGraph {
     };
 
     struct DataOutPinPrototype {
-        ValueType::ExtendedTypeDesc mType;
+        ExtendedValueTypeDesc mType;
     };
 
     enum class PinDir {

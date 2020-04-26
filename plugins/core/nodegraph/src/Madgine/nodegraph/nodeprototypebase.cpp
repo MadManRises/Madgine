@@ -71,7 +71,7 @@ namespace NodeGraph {
         return mDataOutPins.size();
     }
 
-    ValueType::ExtendedTypeDesc NodePrototypeBase::dataOutType(size_t index) const
+    ExtendedValueTypeDesc NodePrototypeBase::dataOutType(size_t index) const
     {
         return mDataOutPins[index].mType;
     }

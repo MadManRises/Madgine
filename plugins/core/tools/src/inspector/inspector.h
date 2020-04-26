@@ -36,7 +36,7 @@ namespace Tools {
         template <typename T>
         void addPreviewDefinition(std::function<void(T *)> preview)
         {
-            addPreviewDefinition(&table<T>(), [=](TypedScopePtr p) { preview(p.safe_cast<T>()); });
+            addPreviewDefinition(table<T>, [=](TypedScopePtr p) { preview(p.safe_cast<T>()); });
         }
 
     private:

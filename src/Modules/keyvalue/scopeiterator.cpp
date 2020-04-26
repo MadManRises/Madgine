@@ -13,6 +13,7 @@ namespace Engine {
 ScopeIterator::ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
     : mScope(scope)
     , mPointer(pointer)
+    , mCurrentTable(scope.mType)
 {
     if (mPointer) {
         checkDerived();
@@ -46,7 +47,8 @@ ScopeField ScopeIterator::operator*() const
     return { mScope, mPointer };
 }
 
-Proxy<ScopeField> ScopeIterator::operator->() const {
+Proxy<ScopeField> ScopeIterator::operator->() const
+{
     return { mScope, mPointer };
 }
 
@@ -59,9 +61,9 @@ void ScopeIterator::operator++()
 
 void ScopeIterator::checkDerived()
 {
-    while (!mPointer->first && mScope.mType->mBaseGetter) {
-        mScope.mType = &mScope.mType->mBaseGetter();
-        mPointer = mScope.mType->mMember;
+    while (!mPointer->first && mCurrentTable->mBase) {
+        mCurrentTable = *mCurrentTable->mBase;
+        mPointer = mCurrentTable->mMember;
     }
 }
 

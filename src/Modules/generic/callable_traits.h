@@ -11,7 +11,9 @@ struct CallableType {
     typedef std::tuple<_Ty...> argument_types;
     typedef std::tuple<std::decay_t<_Ty>...> decay_argument_types;
 
-    static constexpr size_t argument_count = sizeof...(_Ty) + (std::is_same_v<T, void> ? 0 : 1);
+    static constexpr const bool is_member_function = !std::is_same_v<T, void>;
+
+    static constexpr size_t argument_count = sizeof...(_Ty) + (is_member_function ? 1 : 0);
 
     template <template <typename, typename, typename...> typename C, typename... Args>
     struct instance {
@@ -46,17 +48,19 @@ namespace __generic__impl__ {
     template <typename F, typename R = makeStaticCallable<decltype(callableTypeDeducer(&F::operator()))>>
     R callableTypeDeducer(const F &);
 
-	CallableType<std::nullptr_t, void, void, void> callableTypeDeducer(std::nullptr_t);
+    CallableType<std::nullptr_t, void, void, void> callableTypeDeducer(std::nullptr_t);
 }
 
 template <typename F>
 using CallableTraits = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
 
 template <typename F, typename = void>
-struct callable_is_variadic : std::true_type {};
+struct callable_is_variadic : std::true_type {
+};
 
 template <typename F>
-struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::false_type {};
+struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::false_type {
+};
 
 template <typename F>
 constexpr const bool callable_is_variadic_v = callable_is_variadic<F>::value;
@@ -69,6 +73,18 @@ constexpr size_t callable_argument_count(size_t expected)
     } else {
         return CallableTraits<F>::argument_count;
     }
+}
+
+template <typename F>
+constexpr size_t callable_argument_count()
+{
+    return CallableTraits<F>::argument_count;
+}
+
+template <auto f>
+constexpr size_t callable_argument_count()
+{
+    return CallableTraits<decltype(f)>::argument_count;
 }
 
 template <template <auto, typename, typename, typename...> typename C, auto f>

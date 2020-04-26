@@ -17,11 +17,12 @@ struct MODULES_EXPORT BoundApiFunction {
         return mMethod.argumentsCount();
     }
 
-    void operator()(ValueType &retVal, const ArgumentList &args) const
+    bool isMemberFunction() const
     {
-        return mMethod(retVal, mScope, args);
+        return mMethod.isMemberFunction();
     }
 
+    void operator()(ValueType &retVal, const ArgumentList &args) const;
 
 	ApiFunction mMethod;
     TypedScopePtr mScope;

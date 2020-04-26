@@ -2,21 +2,25 @@
 
 #include "typedscopeptr.h"
 
+#include "valuetype_types.h"
+
+#include "../generic/functor.h"
+
 namespace Engine {
 
-using ValueTypeList = type_pack<
-#define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Type, Storage, Name) Type
-#include "valuetypedef.h"
-    >;
+    
+MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
+MODULES_EXPORT ValueTypeRef &KeyValuePair_value(KeyValuePair &p);
 
-enum class Type : unsigned char {
-#define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Type, Storage, Name) Name##Value
-#include "valuetypedef.h"
-    ,
-    MAX_VALUETYPE_TYPE
-};
+template <typename T>
+void to_KeyValuePair(KeyValuePair &p, T &&t)
+{
+    to_ValueType(KeyValuePair_key(p), kvKey(t));
+    to_ValueTypeRef(KeyValuePair_value(p), kvValue(std::forward<T>(t)));
+}
+
+MODULES_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
+
 
 template <typename T>
 using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
@@ -49,17 +53,30 @@ static constexpr bool isScopeRef_v = isScopeRef<T>::value;
 
 template <typename T>
 using isValueType = std::bool_constant<
-    isValueTypePrimitive_v<std::decay_t<T>> || std::is_enum_v<std::decay_t<T>> || isScopeRef_v<T>>;
+    isValueTypePrimitive_v<std::decay_t<T>> || std::is_enum_v<std::decay_t<T>> || isScopeRef_v<T> || is_iterable_v<T>>;
 
 template <typename T>
 static constexpr bool isValueType_v = isValueType<T>::value;
 
 template <typename T>
+using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<ValueTypeList, T>, ValueTypeList>;
+
+template <typename T>
+using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<ValueTypeList, T>, QualifiedValueTypeList>;
+
+template <typename T>
+struct ValueType_ReturnHelper {
+    typedef type_pack_select_t<type_pack_index_v<ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
+};
+
+template <typename T>
+struct ValueType_ReturnHelper<T *> {
+    typedef T *type;
+};
+
+template <typename T>
 using ValueType_Return = std::enable_if_t<isValueType_v<T>,
-    std::conditional_t<
-        isValueTypePrimitive_v<T> && !std::is_same_v<T, std::string_view>,
-        const T &,
-        T>>;
+    typename ValueType_ReturnHelper<T>::type>;
 
 template <typename T, typename = std::enable_if_t<isValueType_v<T>>>
 MODULES_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
@@ -69,7 +86,7 @@ decltype(auto) ValueType_as(const ValueType &v)
 {
     if constexpr (std::is_same_v<T, ValueType>) {
         return v;
-    } else if constexpr(isScopeRef_v<T>) {
+    } else if constexpr (isScopeRef_v<T>) {
         return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
     } else {
         return ValueType_as_impl<T>(v);
@@ -93,8 +110,10 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return TypedScopePtr { &t };
         }
+    } else if constexpr(is_iterable_v<T>){
+        return KeyValueVirtualIterator { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
     } else {
-        static_assert(dependent_bool<T, false>::value);
+        static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
 }
 
@@ -115,17 +134,5 @@ void to_ValueTypeRef(ValueTypeRef &v, T &&t)
 {
     to_ValueTypeRef_impl(v, convert_ValueType(std::forward<T>(t)));
 }
-
-MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
-MODULES_EXPORT ValueTypeRef &KeyValuePair_value(KeyValuePair &p);
-
-template <typename T>
-void to_KeyValuePair(KeyValuePair &p, T &&t)
-{
-    to_ValueType(KeyValuePair_key(p), kvKey(t));
-    to_ValueTypeRef(KeyValuePair_value(p), kvValue(std::forward<T>(t)));
-}
-
-MODULES_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
 
 }

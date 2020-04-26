@@ -52,7 +52,7 @@ namespace Tools {
         ImVec2 mPopupPosition;
 
         std::optional<NodeGraph::PinDesc> mDragPin;
-        std::optional<ValueType::ExtendedTypeDesc> mDragType;
+        std::optional<ExtendedValueTypeDesc> mDragType;
 
         bool mSaveQueued = false;
         bool mIsDirty = false;

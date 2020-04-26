@@ -15,10 +15,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::TypedScopePtr &scope);
     bool draw(bool &b);
     bool draw(const bool &b);
-    bool draw(std::string &s);
-    bool draw(const std::string &s);
-    bool draw(std::string_view &s);
-    bool draw(const std::string_view &s);
+    bool draw(Engine::CoWString &s);
+    bool draw(const Engine::CoWString &s);
     bool draw(int &i);
     bool draw(const int &i);
     bool draw(size_t &i);
@@ -80,9 +78,12 @@ bool ValueType(Engine::ValueType *v, F &&f, const char *name = "", bool minified
     });
 }
 
+IMGUI_API void Text(const std::string &s);
+IMGUI_API void Text(const std::string_view &s);
 IMGUI_API bool InputText(const char *label, std::string *s);
+IMGUI_API bool InputText(const char *label, Engine::CoWString *s);
 
-IMGUI_API bool ValueType(Engine::ValueType *v, bool allowTypeSwitch = false, const char *name = "", bool minified = false);
+IMGUI_API bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const char *name = "", bool minified = false);
 
 IMGUI_API void PushDisabled();
 IMGUI_API void PopDisabled();
@@ -124,11 +125,11 @@ bool AcceptDraggableValueType(
 }
 template <typename Validator = bool (*)(const Engine::ValueType &)>
 bool AcceptDraggableValueType(
-    Engine::ValueType &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const Engine::ValueType &t) { return true; })
+    Engine::ValueType &result, Engine::ExtendedValueTypeDesc type, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const Engine::ValueType &t) { return true; })
 {
     const ValueTypePayload *payload = GetValuetypePayload();
     if (payload) {
-        if (validate(payload->mValue) && AcceptDraggableValueType(payloadPointer)) {
+        if (validate(payload->mValue) && type.canAccept(payload->mValue.type()) && AcceptDraggableValueType(payloadPointer)) {
             result = payload->mValue;
             return true;
         }

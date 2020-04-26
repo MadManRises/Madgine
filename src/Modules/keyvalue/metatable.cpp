@@ -15,8 +15,8 @@ ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
             return { scope, p };
         }
     }
-    if (mBaseGetter) {
-        return mBaseGetter().find(key, scope);
+    if (mBase) {
+        return (*mBase)->find(key, scope);
     } else {
         return { scope, nullptr };
     }
@@ -67,7 +67,7 @@ bool MetaTable::isEditable(const std::string &key) const
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
 {
-    return this == baseType || (mBaseGetter && mBaseGetter().isDerivedFrom(baseType));
+    return this == baseType || (mBase && (*mBase)->isDerivedFrom(baseType));
 }
 
 std::string MetaTable::name(TypedScopePtr scope) const

@@ -1,9 +1,21 @@
 #pragma once
 
+#include "valuetype_desc.h"
+
 namespace Engine {
 
+struct FunctionArgument {
+    ExtendedValueTypeDesc mType;
+    std::string_view mName;
+};
+
 struct FunctionTable {
-    size_t mArgumentsCount = 0;
+    typedef void (*FPtr)(const FunctionTable *, ValueType &, const ArgumentList &);
+    FPtr mFunctionPtr;
+
+    size_t mArgumentsCount;
+    bool mIsMemberFunction;
+    const FunctionArgument *mArguments;
 };
 
 }

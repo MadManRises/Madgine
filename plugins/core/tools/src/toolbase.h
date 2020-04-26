@@ -2,7 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalue/scopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 #include "Modules/serialize/serializableunit.h"
 
@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : public MadgineObject, public ScopeBase, public Serialize::SerializableUnit<ToolBase> {
+    struct MADGINE_TOOLS_EXPORT ToolBase : public MadgineObject, public VirtualScopeBase, public Serialize::SerializableUnit<ToolBase> {
         SERIALIZABLEUNIT;
 
         ToolBase (ImRoot &root);

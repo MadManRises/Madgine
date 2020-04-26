@@ -22,8 +22,9 @@ UNIQUECOMPONENT(Engine::Tools::TestTool);
 
 
 METATABLE_BEGIN(Engine::Tools::TestTool)
-//FUNCTION(logTest)
-//FUNCTION(logValue)
+FUNCTION(logTest)
+FUNCTION(logValue, value)
+FUNCTION(dummy)
 METATABLE_END(Engine::Tools::TestTool)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
@@ -108,7 +109,7 @@ namespace Tools {
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
             ImGui::Text("ValueType size: %u", (unsigned int)sizeof(ValueType));
-            renderValuetypeSizes(std::make_index_sequence<size_t(ValueType::Type::MAX_VALUETYPE_TYPE)>());
+            renderValuetypeSizes(std::make_index_sequence<size_t(ValueTypeEnum::MAX_VALUETYPE_TYPE)>());
 
         }
         ImGui::End();
@@ -133,6 +134,11 @@ namespace Tools {
     void TestTool::logValue(const ValueType &v)
     {
         LOG(v.toString());
+    }
+
+    int TestTool::dummy()
+    {
+        return 42;
     }
 
 }

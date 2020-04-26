@@ -26,14 +26,14 @@ namespace NodeGraph {
 
         size_t dataInCount() const;
         virtual std::string_view dataInName(size_t index) const = 0;
-        virtual ValueType::ExtendedTypeDesc dataInExpectedType(size_t index) const = 0;
+        virtual ExtendedValueTypeDesc dataInExpectedType(size_t index) const = 0;
         TargetPin dataInSource(size_t index) const;
         ValueType &dataInDefault(size_t index);
         static uintptr_t dataInId(size_t index);
 
         size_t dataOutCount() const;
         virtual std::string_view dataOutName(size_t index) const = 0;
-        ValueType::ExtendedTypeDesc dataOutType(size_t index) const;
+        ExtendedValueTypeDesc dataOutType(size_t index) const;
         static uintptr_t dataOutId(size_t index);
 
         static PinDesc fromId(uintptr_t id);

@@ -482,11 +482,6 @@ namespace Widgets {
     {
     }
 
-    const MetaTable *WidgetBase::type()
-    {
-        return &table<WidgetBase>();
-    }
-
     Resources::ImageLoader::ResourceType *WidgetBase::resource() const
     {
         return nullptr;

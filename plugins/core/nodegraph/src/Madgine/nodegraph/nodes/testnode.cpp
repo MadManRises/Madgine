@@ -23,7 +23,7 @@ namespace NodeGraph {
     TestNode::TestNode()
     {
         mFlowOutPins.emplace_back();
-        mDataOutPins.emplace_back(DataOutPinPrototype { ValueType::Type::IntValue });
+        mDataOutPins.emplace_back(DataOutPinPrototype { ValueTypeIndex { ValueTypeEnum::IntValue } });
         mDataInPins.emplace_back();
         mDataInPins.emplace_back();
     }
@@ -58,9 +58,9 @@ namespace NodeGraph {
         throw 0;
     }
 
-    ValueType::ExtendedTypeDesc TestNode::dataInExpectedType(size_t index) const
+    ExtendedValueTypeDesc TestNode::dataInExpectedType(size_t index) const
     {
-        return { index == 0 ? ValueType::Type::IntValue : ValueType::Type::FloatValue };
+        return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
     }
 
 }

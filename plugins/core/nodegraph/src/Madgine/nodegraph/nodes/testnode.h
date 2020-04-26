@@ -15,7 +15,7 @@ namespace NodeGraph {
         virtual std::string_view flowOutName(size_t index) const override;
 
         virtual std::string_view dataInName(size_t index) const override;
-        virtual ValueType::ExtendedTypeDesc dataInExpectedType(size_t index) const override;
+        virtual ExtendedValueTypeDesc dataInExpectedType(size_t index) const override;
 
         virtual std::string_view dataOutName(size_t index) const override;
 

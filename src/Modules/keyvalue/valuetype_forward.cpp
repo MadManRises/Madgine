@@ -20,28 +20,31 @@ const ValueType &getArgument(const ArgumentList &args, size_t index)
 }
 
 #define VALUETYPE_SEP
-#define VALUETYPE_TYPE(Type, Storage, Name)                                                                            \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueType_impl<Type>(ValueType & v, Type && t) { v = std::move(t); }                        \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueType_impl<Type &>(ValueType & v, Type & t) { v = t; }                                  \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueType_impl<const Type>(ValueType & v, const Type &&t) { v = std::move(t); }             \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueType_impl<const Type &>(ValueType & v, const Type &t) { v = t; }                       \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueTypeRef_impl<Type>(ValueTypeRef & v, Type && t) { v = ValueTypeRef { std::move(t) }; } \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT void to_ValueTypeRef_impl<Type&>(ValueTypeRef & v, Type & t) { v = ValueTypeRef { t }; }             \
-                                                                                                                       \
-    template <>                                                                                                        \
-    MODULES_EXPORT ValueType_Return<Type> ValueType_as_impl<Type>(const ValueType &v) { return v.as<Type>(); }
+#define VALUETYPE_IMPL(Type)                                                                                                                       \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueType_impl<std::decay_t<Type>>(ValueType & v, std::decay_t<Type> && t) { v = std::move(t); }                        \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueType_impl<std::decay_t<Type> &>(ValueType & v, std::decay_t<Type> & t) { v = t; }                                  \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueType_impl<const std::decay_t<Type>>(ValueType & v, const std::decay_t<Type> &&t) { v = std::move(t); }             \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueType_impl<const std::decay_t<Type> &>(ValueType & v, const std::decay_t<Type> &t) { v = t; }                       \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueTypeRef_impl<std::decay_t<Type>>(ValueTypeRef & v, std::decay_t<Type> && t) { v = ValueTypeRef { std::move(t) }; } \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT void to_ValueTypeRef_impl<std::decay_t<Type> &>(ValueTypeRef & v, std::decay_t<Type> & t) { v = ValueTypeRef { t }; }           \
+                                                                                                                                                   \
+    template <>                                                                                                                                    \
+    MODULES_EXPORT ValueType_Return<std::decay_t<Type>> ValueType_as_impl<std::decay_t<Type>>(const ValueType &v) { return v.as<std::decay_t<Type>>(); }
+
+#define VALUETYPE_TYPE(Name, Storage, ...) FOR_EACH(VALUETYPE_IMPL, VALUETYPE_SEP, __VA_ARGS__)
 
 #include "valuetypedef.h"
+#undef VALUETYPE_IMPL
 
 }

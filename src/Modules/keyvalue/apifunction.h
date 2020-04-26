@@ -2,27 +2,23 @@
 
 namespace Engine {
 
-struct ApiFunction {
-    typedef void (*FPtr)(ValueType &, TypedScopePtr, const ArgumentList &);
+struct MODULES_EXPORT ApiFunction {    
 
     bool operator==(const ApiFunction &other) const
     {
-        return mFunction == other.mFunction;
+        return mTable == other.mTable;
     }
 
     operator bool() const
     {
-        return mFunction != nullptr;
+        return mTable != nullptr;
     }
 
-    operator FPtr() const
-    {
-        return mFunction;
-    }
+    void operator()(ValueType &retVal, const ArgumentList &args) const;
 
     size_t argumentsCount() const;
-
-    FPtr mFunction = nullptr;
+    bool isMemberFunction() const;
+    
     const FunctionTable *mTable = nullptr;
 };
 

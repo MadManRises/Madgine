@@ -17,7 +17,7 @@ private:
     template <typename T>
     TypedScopePtr(T *t, std::false_type)
         : mScope(t)
-        , mType(&table<decayed_t<T>>())
+        , mType(table<decayed_t<T>>)
     {
     }
 
@@ -69,7 +69,7 @@ public:
     std::string name() const;
 
     ScopeBase *mScope = nullptr;
-    const MetaTable *mType = nullptr;
+    const MetaTable * mType = nullptr;
 };
 
 }

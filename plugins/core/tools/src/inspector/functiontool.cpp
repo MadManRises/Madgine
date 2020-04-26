@@ -2,6 +2,8 @@
 
 #include "functiontool.h"
 
+#include "../renderer/imroot.h"
+
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
@@ -11,8 +13,8 @@
 //#include "Madgine/app/application.h"
 
 #include "Modules/keyvalue/keyvaluevirtualiterator.h"
-#include "Modules/keyvalue/scopeiterator.h"
 #include "Modules/keyvalue/scopefield.h"
+#include "Modules/keyvalue/scopeiterator.h"
 
 #include "Modules/keyvalue/keyvaluepair.h"
 
@@ -54,15 +56,16 @@ namespace Tools {
     {
         mMethodCache.clear();
         //parseMethods(&app());
+        parseMethods(mRoot.toolsTopLevel());
     }
 
     void FunctionTool::parseMethods(TypedScopePtr scope)
     {
         for (ScopeField f : scope) {
             struct Visitor {
-                void operator()(const BoundApiFunction &m)
+                void operator()(const ApiFunction &m)
                 {
-                    mTool->mMethodCache.emplace_back(std::move(mName), m);
+                    mTool->mMethodCache.emplace_back(std::move(mName), BoundApiFunction { m, mScope });
                 }
                 void operator()(const TypedScopePtr &child)
                 {
@@ -76,8 +79,7 @@ namespace Tools {
                 }
 
                 void operator()(const std::monostate &) {}
-                void operator()(const std::string &) {}
-                void operator()(const std::string_view &) {}
+                void operator()(const CoWString &) {}
                 void operator()(const bool &) {}
                 void operator()(const int &) {}
                 void operator()(const size_t &) {}
@@ -92,8 +94,9 @@ namespace Tools {
 
                 FunctionTool *mTool;
                 std::string mName;
+                TypedScopePtr mScope;
             };
-            f.value().visit(Visitor { this, f.key() });
+            f.value().visit(Visitor { this, f.key(), scope });
         }
     }
 
@@ -109,44 +112,49 @@ namespace Tools {
                     mCurrentFunction = { function, payload->mSender };
                     changed = true;
                 }
-                if (changed) {
-                    mCurrentArguments.clear();
-                    mCurrentArguments.resize(mCurrentFunction.argumentsCount());
-                }
                 ImGui::EndDragDropTarget();
             }
-            ImGui::SameLine();
-            ImGui::Text("(");
-            //ImGui::SameLine();
-
-            bool first = true;
-
-            int i = 0;
-            for (ValueType &arg : mCurrentArguments) {
-                if (first) {
-                    first = false;
-                } else {
-                    ImGui::SameLine();
-                    ImGui::Text(", ");
+            if (changed) {
+                mCurrentArguments.clear();
+                mCurrentArguments.resize(mCurrentFunction.argumentsCount());
+                if (mCurrentFunction.isMemberFunction()) {
+                    mCurrentArguments[0] = mCurrentFunction.mScope;
                 }
-                ImGui::PushID(i++);
-                ImGui::ValueType(&arg, true);
-                if (ImGui::BeginDragDropTarget()) {
-                    ImGui::AcceptDraggableValueType(arg);
-                    ImGui::EndDragDropTarget();
-                }
-                ImGui::PopID();
-                //ImGui::SameLine();
             }
 
-            ImGui::Text(")");
+            if (mCurrentFunction.mMethod) {
+
+                ImGui::SameLine();
+                ImGui::Text("(");
+                //ImGui::SameLine();
+
+                for (size_t i = 0; i < mCurrentFunction.argumentsCount(); ++i) {
+
+                    ImGui::Text(mCurrentFunction.mMethod.mTable->mArguments[i].mName);
+                    ImGui::SameLine();
+                    ImGui::Text(":");
+                    ImGui::SameLine();
+
+                    ImGui::PushID(i);
+                    ImGui::ValueType(&mCurrentArguments[i], mCurrentFunction.mMethod.mTable->mArguments[i].mType);
+                    if (ImGui::BeginDragDropTarget()) {
+                        ImGui::AcceptDraggableValueType(mCurrentArguments[i], mCurrentFunction.mMethod.mTable->mArguments[i].mType);
+                        ImGui::EndDragDropTarget();
+                    }
+                    ImGui::PopID();
+                    ImGui::SameLine();
+                    ImGui::Text(mCurrentFunction.mMethod.mTable->mArguments[i].mType.toString());
+                }
+
+                ImGui::Text(")");
+            }
 
             if (!mCurrentFunction.mMethod)
                 ImGui::PushDisabled();
 
             if (ImGui::Button("Call")) {
                 ValueType result;
-                mCurrentFunction(result, mCurrentArguments);
+                mCurrentFunction.mMethod(result, mCurrentArguments);
             }
 
             if (!mCurrentFunction.mMethod)

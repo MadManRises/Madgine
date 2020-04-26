@@ -127,7 +127,7 @@ namespace Tools {
 
     bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable)
     {
-        bool cannotBeDisabled = value.type() == Engine::ValueType::Type::ScopeValue || value.type() == Engine::ValueType::Type::KeyValueVirtualIteratorValue || value.type() == Engine::ValueType::Type::ApiFunctionValue;
+        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualIteratorValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -235,8 +235,8 @@ namespace Tools {
             if (layout) {
                 draw(layout, scope, drawn);
             }
-            if (type->mBaseGetter)
-                type = &type->mBaseGetter();
+            if (type->mBase)
+                type = *type->mBase;
             else
                 type = nullptr;
         }
@@ -263,7 +263,7 @@ namespace Tools {
             if (it->second)
                 (this->*it->second)(element, scope, drawn);
         } else {
-            ImGui::Text("%s", ("Unsupported Tag-Type: "s + element->Name()).c_str());
+            ImGui::Text("Unsupported Tag-Type: %s", element->Name());
         }
     }
 
@@ -279,7 +279,7 @@ namespace Tools {
             }
         } else {
             if (!style("optional", element)) {
-                ImGui::Text("%s", ("Required field not found: "s + name).c_str());
+                ImGui::Text("Required field not found: %s", name);
             }
         }
     }
@@ -327,7 +327,7 @@ namespace Tools {
         if (layout) {
             draw(layout, scope, drawn);
         } else {
-            ImGui::Text("%s", ("Layout not found: "s + element->Attribute("name")).c_str());
+            ImGui::Text("Layout not found: %s", element->Attribute("name"));
         }
     }
 
