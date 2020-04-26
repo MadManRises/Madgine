@@ -9,7 +9,8 @@
 namespace Engine {
 namespace Serialize {
 
-    void read(SerializeInStream &in, ValueType &v, const char *name)
+    template <>
+    void read<ValueType>(SerializeInStream &in, ValueType &v, const char *name)
     {
         in.format().beginExtended(in, name);
         ValueTypeEnum type;
@@ -26,7 +27,8 @@ namespace Serialize {
         });
     }
 
-    void write(SerializeOutStream &out, const ValueType &v, const char *name)
+    template <>
+    void write<ValueType>(SerializeOutStream &out, const ValueType &v, const char *name)
     {
         out.format().beginExtended(out, name);
         out.write(v.index().mIndex, "type");
