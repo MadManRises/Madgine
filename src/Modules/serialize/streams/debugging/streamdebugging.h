@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../primitivetypes.h"
+
 namespace Engine {
 namespace Serialize {
     namespace Debugging {

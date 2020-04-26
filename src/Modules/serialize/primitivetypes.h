@@ -28,11 +28,11 @@ namespace Serialize {
     const constexpr size_t PrimitiveTypeIndex_v = PrimitiveTypeIndex<T>::value;
 
     template <typename T, typename = void>
-    struct PrimitiveTypesContain : type_pack_contains<SerializePrimitives, T> {
+    struct PrimitiveTypesContain : type_pack_contains<SerializePrimitives, typename PrimitiveReducer<T>::type> {
     };
 
     template <typename T>
-    const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value || std::is_convertible_v<T, SerializableUnitBase *>;
+    const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     template <typename T>
     const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, SerializableUnitBase*> || std::is_enum_v<T>;
