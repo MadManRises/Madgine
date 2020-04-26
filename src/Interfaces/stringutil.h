@@ -87,7 +87,7 @@ namespace StringUtil {
 
     template <size_t S>
     constexpr std::array<std::string_view, S> tokenize(std::string_view string, char token) {
-        std::array<std::string_view, S> result;
+        std::array<std::string_view, S> result = {};
         size_t pivot = 0;
         for (size_t i = 0; i < S; ++i) {
             size_t newPivot = string.find(token, pivot);

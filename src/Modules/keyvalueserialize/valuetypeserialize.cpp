@@ -29,7 +29,7 @@ namespace Serialize {
     void write(SerializeOutStream &out, const ValueType &v, const char *name)
     {
         out.format().beginExtended(out, name);
-        out.write(v.index(), "type");
+        out.write(v.index().mIndex, "type");
         v.visit([&](const auto &value) {
             using T = std::remove_const_t<std::remove_reference_t<decltype(value)>>;
             if constexpr (isPrimitiveType_v<T>) {

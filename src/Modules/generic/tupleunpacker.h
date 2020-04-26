@@ -213,7 +213,7 @@ namespace TupleUnpacker {
     }
 
     template <typename T>
-    struct is_tuplefyable : std::is_standard_layout<T> {
+    struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copy_assignable_v<T> && std::is_trivially_copy_constructible_v<T>> {
     };
 
     template <typename T>
