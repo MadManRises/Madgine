@@ -175,12 +175,12 @@ struct container_traits<std::vector<T>> {
 
         void push_back(const value_type &item)
         {
-            emplace(this->end(), item);
+            this->emplace(this->end(), item);
         }
 
         void push_back(value_type &&item)
         {
-            emplace(this->end(), std::move(item));
+            this->emplace(this->end(), std::move(item));
         }
 
         template <typename... _Ty>
