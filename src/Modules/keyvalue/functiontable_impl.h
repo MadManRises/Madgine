@@ -1,5 +1,7 @@
 #pragma once
 
+#include "valuetype_forward.h"
+
 #include "Interfaces/stringutil.h"
 #include "functiontable.h"
 
@@ -32,7 +34,7 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 template <auto F, typename R, typename T, typename... Args, size_t... I>
 static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<TypedScopePtr>(args.front()).safe_cast<T>();
+    T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
     if constexpr (std::is_same_v<R, void>) {
         (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
         to_ValueType(retVal, std::monostate {});
