@@ -17,7 +17,7 @@ namespace Serialize {
         v.setType(ValueTypeDesc { type });
         v.visit([&](auto &value) {
             using T = std::remove_reference_t<decltype(value)>;
-            if constexpr (isPrimitiveType_v<T>) {
+            if constexpr (isPrimitiveType_v<T> && !std::is_same_v<T, std::string_view>) {
                 in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>, true);
                 in.readUnformatted(value);
                 in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);

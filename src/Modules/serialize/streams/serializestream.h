@@ -12,6 +12,18 @@
 namespace Engine {
 namespace Serialize {
 
+    template <typename T>
+    void read(SerializeInStream &in, T &t, const char *name = nullptr)
+    {
+        static_assert(dependent_bool<T, false>::value, "Invalid Type");
+    }
+
+    template <typename T>
+    void write(SerializeOutStream &out, const T &t, const char *name = nullptr)
+    {
+        static_assert(dependent_bool<T, false>::value, "Invalid Type");
+    }
+
     struct MODULES_EXPORT SerializeInStream : InStream {
     public:
         SerializeInStream();
@@ -119,9 +131,11 @@ namespace Serialize {
             }
         }
 
-        template <typename T, typename V = std::enable_if_t<std::is_base_of<SerializableUnitBase, T>::value>>
+        template <typename T>
         void readUnformatted(T *&p)
         {
+            static_assert(std::is_base_of<SerializableUnitBase, T>::value);
+
             SerializableUnitBase *unit;
             readUnformatted(unit);
             p = reinterpret_cast<T *>(reinterpret_cast<size_t>(unit));
@@ -287,16 +301,5 @@ namespace Serialize {
         Debugging::StreamLog mLog;
     };
 
-    template <typename T>
-    void read(SerializeInStream &in, T &t, const char *name = nullptr)
-    {
-        static_assert(dependent_bool<T, false>::value, "Invalid Type");
-    }
-
-    template <typename T>
-    void write(SerializeOutStream &out, const T &t, const char *name = nullptr)
-    {
-        static_assert(dependent_bool<T, false>::value, "Invalid Type");
-    }
 }
 }
