@@ -20,13 +20,6 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
         template <typename T>
-        SerializeInStream &operator>>(T &t)
-        {
-            read(*this, t);
-            return *this;
-        }
-
-        template <typename T>
         void readUnformatted(T &t)
         {
             if constexpr (std::is_enum_v<T>) {
@@ -108,19 +101,6 @@ namespace Serialize {
         SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
 
         ParticipantId id() const;
-
-        template <typename T>
-        SerializeOutStream &operator<<(const T &t)
-        {
-            write(*this, t);
-            return *this;
-        }
-
-        SerializeOutStream &operator<<(const char *s)
-        {
-            write(*this, std::string(s));
-            return *this;
-        }
 
         template <typename T, typename = std::enable_if_t<!std::is_pointer_v<T>>>
         void writeUnformatted(const T &t)
@@ -290,6 +270,26 @@ namespace Serialize {
         out.format().endCompound(out, name);
     }
 
+    
+    template <typename T>
+    SerializeInStream &operator>>(SerializeInStream &in, T &t)
+    {
+        read(in, t);
+        return in;
+    }
+
+        template <typename T>
+    SerializeOutStream &operator<<(SerializeOutStream &out, const T &t)
+    {
+        write(out, t);
+        return out;
+    }
+
+    SerializeOutStream &operator<<(SerializeOutStream &out, const char *s)
+    {
+        write(out, std::string { s });
+        return out;
+    }
 
 }
 }
