@@ -1,9 +1,10 @@
 #pragma once
 
-#if ENABLE_THREADING
+#include "task.h"
 
-#    include "task.h"
+#if ENABLE_THREADING
 #    include "Interfaces/threading/threadapi.h"
+#endif
 
 namespace Engine {
 namespace Threading {
@@ -15,6 +16,7 @@ namespace Threading {
 
         void operator=(const WorkGroup &) = delete;
 
+#if ENABLE_THREADING
         template <typename F, typename... Args>
         void createThread(F &&main, Args &&... args)
         {
@@ -28,13 +30,12 @@ namespace Threading {
                 std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, name, std::forward<F>(main), std::forward<Args>(args)...));
         }
 
-        void addThreadInitializer(Threading::TaskHandle &&task);
-        static void addStaticThreadInitializer(Threading::TaskHandle &&task);
-
-
-
         bool singleThreaded();
         void checkThreadStates();
+#endif
+
+        void addThreadInitializer(Threading::TaskHandle &&task);
+        static void addStaticThreadInitializer(Threading::TaskHandle &&task);
 
         const std::string &name() const;
 
@@ -45,6 +46,7 @@ namespace Threading {
         const std::vector<TaskQueue *> taskQueues() const;
 
     private:
+#if ENABLE_THREADING
         void initThread(const std::string &name);
         void finalizeThread();
 
@@ -76,6 +78,7 @@ namespace Threading {
                 throw;
             }
         }
+#endif
 
     private:
         friend struct WorkGroupStorage;
@@ -83,28 +86,12 @@ namespace Threading {
         size_t mInstanceCounter = 0;
         std::string mName;
 
+#if ENABLE_THREADING
         std::vector<std::future<int>> mSubThreads;
+#endif
         std::vector<TaskHandle> mThreadInitializers;
 
         std::vector<TaskQueue *> mTaskQueues;
     };
-
 }
 }
-
-#else
-
-#    include "../generic/proxy.h"
-
-namespace Engine {
-namespace Threading {
-
-    struct WorkGroup {
-        WorkGroup(const std::string &name = "") {};
-        ~WorkGroup() {};
-    };
-
-}
-}
-
-#endif

@@ -1,16 +1,21 @@
 #include "../moduleslib.h"
 
 #if ENABLE_THREADING
-
 #    include "threadlocal.h"
 #    include "threadstorage.h"
-#    include "workgroup.h"
-#    include "workgroupstorage.h"
+#endif
+
+#include "workgroup.h"
+#include "workgroupstorage.h"
 
 namespace Engine {
 namespace Threading {
 
+#if ENABLE_THREADING
     static THREADLOCAL(WorkGroup *) sSelf = nullptr;
+#else
+    static WorkGroup *sSelf = nullptr;
+#endif
 
     static std::atomic<size_t> sWorkgroupInstanceCounter = 0;
 
@@ -24,13 +29,15 @@ namespace Threading {
         : mInstanceCounter(sWorkgroupInstanceCounter.fetch_add(1))
         , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
     {
+#if ENABLE_THREADING
         ThreadStorage::init(true);
         ThreadStorage::init(false);
 
+        setCurrentThreadName(mName + "_Main");
+#endif
+
         assert(!sSelf);
         sSelf = this;
-
-        setCurrentThreadName(mName + "_Main");
 
         WorkGroupStorage::init(true);
         WorkGroupStorage::init(false);
@@ -52,7 +59,13 @@ namespace Threading {
         WorkGroupStorage::finalize(false);
         WorkGroupStorage::finalize(true);
 
-        finalizeThread();
+        assert(sSelf == this);
+        sSelf = nullptr;
+
+#if ENABLE_THREADING
+        ThreadStorage::finalize(false);
+        ThreadStorage::finalize(true);
+#endif
     }
 
     void WorkGroup::addThreadInitializer(Threading::TaskHandle &&task)
@@ -66,6 +79,12 @@ namespace Threading {
         sThreadInitializers().emplace_back(std::move(task));
     }
 
+    const std::string &WorkGroup::name() const
+    {
+        return mName;
+    }
+
+#if ENABLE_THREADING
     bool WorkGroup::singleThreaded()
     {
         return mSubThreads.empty();
@@ -83,11 +102,6 @@ namespace Threading {
         }
 
         mSubThreads.erase(pivot, mSubThreads.end());
-    }
-
-    const std::string &WorkGroup::name() const
-    {
-        return mName;
     }
 
     void WorkGroup::initThread(const std::string &name)
@@ -119,6 +133,7 @@ namespace Threading {
         ThreadStorage::finalize(false);
         ThreadStorage::finalize(true);
     }
+#endif
 
     WorkGroup &WorkGroup::self()
     {
@@ -143,5 +158,3 @@ namespace Threading {
 
 }
 }
-
-#endif

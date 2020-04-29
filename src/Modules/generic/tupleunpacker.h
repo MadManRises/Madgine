@@ -212,8 +212,9 @@ namespace TupleUnpacker {
         return toTupleImpl(std::forward<T>(t), std::integral_constant<size_t, elementCount> {});
     }
 
+    //TODO: Use only is_standard_layout as soon as UnitHelper is cleaned up
     template <typename T>
-    struct is_tuplefyable : std::is_standard_layout<T> {
+    struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T>> {
     };
 
     template <typename T>
