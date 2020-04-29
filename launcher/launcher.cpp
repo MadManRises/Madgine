@@ -54,7 +54,9 @@ int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, En
             });
 #endif
 
-        FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup, { &window.frameLoop() });
+        workGroup.addTaskQueue(&window.frameLoop());
+
+        FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup);
         return scheduler.go();
     } else {
         return root.errorCode();

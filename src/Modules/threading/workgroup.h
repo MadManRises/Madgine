@@ -31,6 +31,8 @@ namespace Threading {
         void addThreadInitializer(Threading::TaskHandle &&task);
         static void addStaticThreadInitializer(Threading::TaskHandle &&task);
 
+
+
         bool singleThreaded();
         void checkThreadStates();
 
@@ -38,6 +40,9 @@ namespace Threading {
 
         static WorkGroup &self();
         static bool isInitialized();
+
+        void addTaskQueue(TaskQueue *taskQueue);
+        const std::vector<TaskQueue *> taskQueues() const;
 
     private:
         void initThread(const std::string &name);
@@ -79,7 +84,9 @@ namespace Threading {
         std::string mName;
 
         std::vector<std::future<int>> mSubThreads;
-        std::vector<Threading::TaskHandle> mThreadInitializers;
+        std::vector<TaskHandle> mThreadInitializers;
+
+        std::vector<TaskQueue *> mTaskQueues;
     };
 
 }

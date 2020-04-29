@@ -4,7 +4,7 @@ namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT Scheduler {
-        Scheduler(WorkGroup &group, std::vector<Threading::TaskQueue *> additionalQueues = {});
+        Scheduler(WorkGroup &group);
 
         int go();
 
@@ -15,7 +15,6 @@ namespace Threading {
 
     private:
         WorkGroup &mWorkgroup;
-        std::vector<Threading::TaskQueue *> mAdditionalQueues;
     };
 
 }

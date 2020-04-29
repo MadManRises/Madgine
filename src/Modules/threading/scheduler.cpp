@@ -20,9 +20,8 @@ void emscriptenLoop(void *scheduler)
 namespace Engine {
 namespace Threading {
 
-    Scheduler::Scheduler(WorkGroup &group, std::vector<Threading::TaskQueue *> additionalQueues)
+    Scheduler::Scheduler(WorkGroup &group)
         : mWorkgroup(group)
-        , mAdditionalQueues(std::move(additionalQueues))
     {
     }
 
@@ -31,7 +30,7 @@ namespace Threading {
 #if EMSCRIPTEN
         emscripten_set_main_loop_arg(&emscriptenLoop, this, 0, false);
 #else
-        for (Threading::TaskQueue *queue : mAdditionalQueues) {
+        for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             mWorkgroup.createNamedThread(queue->name(), &Scheduler::schedulerLoop, this, queue);
         }
 
@@ -45,7 +44,7 @@ namespace Threading {
             mWorkgroup.checkThreadStates();
         } while (!queue->idle() || !mWorkgroup.singleThreaded());
 
-        for (Threading::TaskQueue *queue : mAdditionalQueues) {
+        for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             assert(queue->idle());
         }
         assert(queue->idle());
@@ -65,7 +64,7 @@ namespace Threading {
     void Scheduler::singleLoop()
     {
         DefaultTaskQueue::getSingleton().update(1);
-        for (Threading::TaskQueue *queue : mAdditionalQueues) {
+        for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             queue->update(1);
         }
     }

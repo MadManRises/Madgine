@@ -131,6 +131,16 @@ namespace Threading {
         return sSelf != nullptr;
     }
 
+    void WorkGroup::addTaskQueue(TaskQueue *taskQueue)
+    {
+        mTaskQueues.push_back(taskQueue);
+    }
+
+    const std::vector<TaskQueue *> WorkGroup::taskQueues() const
+    {
+        return mTaskQueues;
+    }
+
 }
 }
 

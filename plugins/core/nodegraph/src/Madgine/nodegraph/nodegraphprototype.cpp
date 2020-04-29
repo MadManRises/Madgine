@@ -1,5 +1,7 @@
 #include "../nodegraphlib.h"
 
+#include "Modules/keyvalueserialize/valuetypeserialize.h"
+
 #include "nodegraphprototype.h"
 
 #include "nodeprototypebase.h"
@@ -17,8 +19,6 @@
 #include "Modules/xml/xmlformatter.h"
 
 #include "nodeprototypecollector.h"
-
-#include "Modules/keyvalueserialize/valuetypeserialize.h"
 
 #include "nodegraphinstance.h"
 
