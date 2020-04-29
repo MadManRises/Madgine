@@ -112,7 +112,7 @@ namespace NodeGraph {
 
     void NodePrototypeBase::writeCreationData(Serialize::SerializeOutStream &of) const
     {
-        of.write(name(), "type");
+        write(of, name(), "type");
     }
 
 }

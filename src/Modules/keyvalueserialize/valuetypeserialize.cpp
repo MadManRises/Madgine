@@ -14,7 +14,7 @@ namespace Serialize {
     {
         in.format().beginExtended(in, name);
         ValueTypeEnum type;
-        in.read(type, "type");
+        read(in, type, "type");
         v.setType(ValueTypeDesc { type });
         v.visit([&](auto &value) {
             using T = std::remove_reference_t<decltype(value)>;
@@ -31,7 +31,7 @@ namespace Serialize {
     void write<ValueType>(SerializeOutStream &out, const ValueType &v, const char *name)
     {
         out.format().beginExtended(out, name);
-        out.write(v.index().mIndex, "type");
+        write(out, v.index().mIndex, "type");
         v.visit([&](const auto &value) {
             using T = std::remove_const_t<std::remove_reference_t<decltype(value)>>;
             if constexpr (isPrimitiveType_v<T>) {

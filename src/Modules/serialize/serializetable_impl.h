@@ -33,12 +33,12 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                out.write((unit->*Getter)(), name);
+                write(out, (unit->*Getter)(), name);
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
-                in.read(unit->*P, name);
+                read(in, unit->*P, name);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 throw "Unsupported";
@@ -87,12 +87,12 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                out.write((unit->*Getter)(), name);
+                write(out, (unit->*Getter)(), name);
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 T dummy;
-                in.read(dummy, name, TupleUnpacker::construct<Args>(unit)...);
+                read(in, dummy, name, TupleUnpacker::construct<Args>(unit)...);
                 (unit->*Setter)(std::move(dummy));
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
@@ -124,11 +124,11 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                out.write(unit->*P, name);
+                write(out, unit->*P, name);
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                in.read(unit->*P, name, TupleUnpacker::construct<Args>(unit)...);
+                read(in, unit->*P, name, TupleUnpacker::construct<Args>(unit)...);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)

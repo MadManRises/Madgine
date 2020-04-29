@@ -40,7 +40,7 @@ namespace Serialize {
     {
         out.format().beginExtended(out, name);
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId))
-            out.write(mMasterId, "id");
+            write(out, mMasterId, "id");
         out.format().beginCompound(out, name);
         mType->writeState(this, out);
         out.format().endCompound(out, name);
@@ -51,7 +51,7 @@ namespace Serialize {
         in.format().beginExtended(in, name);
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             size_t id;
-            in.read(id, "id");
+            read(in, id, "id");
 
             if (in.manager() && in.manager()->getSlaveStreambuf() == &in.buffer()) {
                 setSlaveId(id, in.manager());

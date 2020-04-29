@@ -192,7 +192,7 @@ namespace Serialize {
         void writeState(SerializeOutStream &out, const char *name = nullptr) const
         {
             out.format().beginExtended(out, name);
-            out.write(Base::size(), "size");
+            write(out, Base::size(), "size");
             out.format().beginCompound(out, name);
             for (const auto &t : physical()) {
                 if (this->filter(out, t)) {
@@ -385,7 +385,7 @@ namespace Serialize {
             mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
             in.format().beginExtended(in, name);
             decltype(Base::size()) count;
-            in.read(count, "size");
+            read(in, count, "size");
             in.format().beginCompound(in, name);
             while (count--) {
                 this->read_item_where_intern(in, Base::end(), std::forward<Creator>(creator));
@@ -400,11 +400,11 @@ namespace Serialize {
             std::pair<iterator, bool> it;
             if constexpr (std::is_const_v<value_type>) {
                 std::remove_const_t<value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<value_type>>(creator.readCreationData(in));
-                in.read(temp, "Item");
+                read(in, temp, "Item");
                 it = emplace_intern(where, std::move(temp));
             } else {
                 it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_intern), this, where, creator.readCreationData(in));
-                in.read(*it.first, "Item");
+                read(in, *it.first, "Item");
             }
             assert(it.second);
             return it;
@@ -414,7 +414,7 @@ namespace Serialize {
         {
             this->beginExtendedItem(out, t);
             this->write_creation(out, t);
-            out.write(t, "Item");
+            write(out, t, "Item");
         }
 
         bool isItemActive(const iterator &it)

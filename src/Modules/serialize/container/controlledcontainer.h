@@ -23,13 +23,13 @@ namespace Serialize {
         {
             if (name)
                 out.format().beginExtended(out, name);
-            out.write(this->size(), "size");
+            write(out, this->size(), "size");
             if (name)
                 out.format().beginCompound(out, name);
             for (const auto &t : *this) {          
                 this->beginExtendedItem(out, t);
-                out.write(comparator_traits<Cmp>::to_cmp_type(t), "key");
-                out.write(t, "Item");
+                write(out, comparator_traits<Cmp>::to_cmp_type(t), "key");
+                write(out, t, "Item");
             }
             if (name)
                 out.format().endCompound(out, name);
@@ -42,17 +42,17 @@ namespace Serialize {
             if (name)
                 in.format().beginExtended(in, name);
             decltype(this->size()) size;
-            in.read(size, "size");
+            read(in, size, "size");
             if (name)
                 in.format().beginCompound(in, name);
 
             FixString_t<typename comparator_traits<Cmp>::type> key;
             while (size--) {
                 this->beginExtendedItem(in, nullref<const typename Base::value_type>);
-                in.read(key, "key");
+                read(in, key, "key");
                 auto it = std::find_if(this->physical().begin(), this->physical().end(), [&](const auto &t) { return comparator_traits<Cmp>::to_cmp_type(t) == key; });
                 if (it != this->physical().end()) {
-                    in.read(*it, "Item");
+                    read(in, *it, "Item");
                 } else {
                     LOG_ERROR("Could not find '" << key << "'!");
                     std::terminate();

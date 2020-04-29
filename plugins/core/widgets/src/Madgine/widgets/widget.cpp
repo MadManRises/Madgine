@@ -490,8 +490,8 @@ namespace Widgets {
     void WidgetBase::writeCreationData(Serialize::SerializeOutStream &of) const
     {
         SerializableUnitBase::writeCreationData(of);
-        of.write(mName, "name");
-        of.write(getClass(), "type");
+        write(of, mName, "name");
+        write(of, getClass(), "type");
     }
 
     std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
