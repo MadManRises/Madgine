@@ -144,7 +144,6 @@ namespace Serialize {
         Debugging::StreamLog mLog;
     };
 
-    
     template <typename... Ty>
     void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name = nullptr)
     {
@@ -270,22 +269,21 @@ namespace Serialize {
         out.format().endCompound(out, name);
     }
 
-    
     template <typename T>
-    SerializeInStream &operator>>(SerializeInStream &in, T &t)
+    inline SerializeInStream &operator>>(SerializeInStream &in, T &t)
     {
         read(in, t);
         return in;
     }
 
-        template <typename T>
-    SerializeOutStream &operator<<(SerializeOutStream &out, const T &t)
+    template <typename T>
+    inline SerializeOutStream &operator<<(SerializeOutStream &out, const T &t)
     {
         write(out, t);
         return out;
     }
 
-    SerializeOutStream &operator<<(SerializeOutStream &out, const char *s)
+    inline SerializeOutStream &operator<<(SerializeOutStream &out, const char *s)
     {
         write(out, std::string { s });
         return out;
