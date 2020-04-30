@@ -1,7 +1,5 @@
 #pragma once
 
-#if ENABLE_THREADING
-
 #    include "global.h"
 #    include "workgroup.h"
 
@@ -44,21 +42,3 @@ namespace Threading {
 
 }
 }
-
-#else
-
-#    include "../generic/proxy.h"
-#    include "globalstorage.h"
-
-namespace Engine {
-namespace Threading {
-
-    using WorkGroupStorage = GlobalStorage;
-
-    template <typename T>
-    using WorkgroupLocal = Proxy<T>;
-
-}
-}
-
-#endif
