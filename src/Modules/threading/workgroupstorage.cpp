@@ -1,7 +1,5 @@
 #include "../moduleslib.h"
 
-#if ENABLE_THREADING
-
 #    include "globalvariablemanager.h"
 #    include "workgroup.h"
 #    include "workgroupstorage.h"
@@ -92,5 +90,3 @@ namespace Threading {
 
 }
 }
-
-#endif
