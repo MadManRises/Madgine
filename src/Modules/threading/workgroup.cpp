@@ -54,8 +54,6 @@ namespace Threading {
 
     WorkGroup::~WorkGroup()
     {
-        assert(singleThreaded());
-
         WorkGroupStorage::finalize(false);
         WorkGroupStorage::finalize(true);
 
@@ -65,12 +63,16 @@ namespace Threading {
 #if ENABLE_THREADING
         ThreadStorage::finalize(false);
         ThreadStorage::finalize(true);
+
+        assert(singleThreaded());
 #endif
     }
 
     void WorkGroup::addThreadInitializer(Threading::TaskHandle &&task)
     {
+#if ENABLE_THREADING
         assert(mSubThreads.empty());
+#endif
         mThreadInitializers.emplace_back(std::move(task));
     }
 
