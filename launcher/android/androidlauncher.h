@@ -14,7 +14,7 @@ namespace Android {
         AndroidLauncher(ANativeActivity *activity);
 
     protected:
-        void go(Threading::WorkGroup &workGroup);
+        void go();
 
         void onDestroy();
         void onNativeWindowCreated(ANativeWindow *window);

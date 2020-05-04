@@ -71,6 +71,7 @@ void skipUniqueComponentOnExport(const TypeInfo *t)
 void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
 {
     LOG("Exporting uniquecomponent configuration source file '" << outFile << "'");
+    LOG_WARNING("TODO: Export in alphabetical order to prevent changes in the version control.");
 
     std::set<const Plugins::BinaryInfo *> binaries;
 

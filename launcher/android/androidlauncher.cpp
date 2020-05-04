@@ -52,7 +52,7 @@ namespace Android {
         mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
     }
 
-    void AndroidLauncher::go(Threading::WorkGroup &workGroup)
+    void AndroidLauncher::go()
     {
         ANativeActivity *activity = mActivity;
 

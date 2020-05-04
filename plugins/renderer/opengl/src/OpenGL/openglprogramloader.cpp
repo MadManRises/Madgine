@@ -49,8 +49,10 @@ namespace Render {
         OpenGLShaderLoader::HandleType pixelShader;
         pixelShader.load(name + "_PS");
 
-        if (!program.link(vertexShader, pixelShader))
+        if (!vertexShader || !pixelShader || !program.link(vertexShader, pixelShader)) {
+            LOG_ERROR("Failed to load Program '" << name << "'!");
             std::terminate();
+        }
 
         return true;
     }
