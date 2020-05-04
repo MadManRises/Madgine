@@ -10,7 +10,7 @@ namespace Threading {
     WorkgroupLocal<DefaultTaskQueue> sSingleton;
 
     DefaultTaskQueue::DefaultTaskQueue()
-        : TaskQueue("Default")
+        : TaskQueue("Default", false)
     {
     }
 

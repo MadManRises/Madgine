@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Server {
     struct MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public Threading::TaskQueue {    
-        ServerBase(Threading::WorkGroup &workgroup);
+        ServerBase(const std::string &name);
         virtual ~ServerBase();
 
         ServerLog &log();
@@ -33,8 +33,6 @@ namespace Server {
         ServerLog mLog;
 
         std::list<ServerInstance> mInstances;
-
-        std::chrono::steady_clock::time_point mLastConsoleCheck;
     };
 
 }

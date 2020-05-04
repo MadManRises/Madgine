@@ -1,13 +1,16 @@
 #include "../moduleslib.h"
 
 #include "taskqueue.h"
+#include "workgroup.h"
 
 namespace Engine {
 namespace Threading {
 
-    TaskQueue::TaskQueue(const std::string &name)
+    TaskQueue::TaskQueue(const std::string &name, bool auto_register)
         : mName(name)
     {
+        if (auto_register)
+            WorkGroup::self().addTaskQueue(this);
     }
 
     void TaskQueue::queueInternal(ScheduledTask &&task)
@@ -35,17 +38,13 @@ namespace Threading {
         return mName;
     }
 
-    void TaskQueue::update(int idleCount)
+    std::chrono::steady_clock::time_point TaskQueue::update(int idleCount)
     {
-        std::chrono::steady_clock::time_point nextAvailableTaskTime;
-        update(nextAvailableTaskTime, idleCount);
-    }
-
-    void TaskQueue::update(std::chrono::steady_clock::time_point &nextAvailableTaskTime, int idleCount)
-    {
+        std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
         while (std::optional<Threading::TaskTracker> f = fetch(nextAvailableTaskTime, idleCount)) {
             f->mTask();
         }
+        return nextAvailableTaskTime;
     }
 
     void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
@@ -102,7 +101,7 @@ namespace Threading {
 
     std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
     {
-        std::chrono::steady_clock::time_point nextTaskTimepoint = std::chrono::steady_clock::time_point::max();
+        std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
         {
             std::lock_guard<std::mutex> lock(mMutex);
             if (!mQueue.empty()) {

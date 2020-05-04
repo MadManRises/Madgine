@@ -1,5 +1,5 @@
-#include "Madgine/clientlib.h"
 #include "Madgine/baselib.h"
+#include "Madgine/clientlib.h"
 
 #include "Interfaces/window/windowapi.h"
 #include "Madgine/app/application.h"
@@ -7,8 +7,8 @@
 #include "Madgine/core/root.h"
 #include "Madgine/gui/toplevelwindow.h"
 #include "Modules/cli/parameter.h"
-#include "Modules/threading/workgroup.h"
 #include "Modules/threading/scheduler.h"
+#include "Modules/threading/workgroup.h"
 
 #include "Madgine/widgetslib.h"
 #include "Madgine/widgets/widgetmanager.h"
@@ -26,41 +26,36 @@ Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If enabl
 #    define FIX_LOCAL
 #endif
 
-int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr)
+int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr)
 {
-    if (!toolMode) {
-        FIX_LOCAL Engine::App::AppSettings settings;
 
-        settings.mAppName = "Madgine Client";
-        FIX_LOCAL Engine::App::Application app { settings };
+    FIX_LOCAL Engine::App::AppSettings settings;
 
-        FIX_LOCAL Engine::Window::WindowSettings windowSettings;
-        windowSettings.mTitle = "Maditor";
-        FIX_LOCAL Engine::GUI::TopLevelWindow window { windowSettings };
+    settings.mAppName = "Madgine Client";
+    FIX_LOCAL Engine::App::Application app { settings };
 
-        if (topLevelPointer)
-            *topLevelPointer = &window;
+    FIX_LOCAL Engine::Window::WindowSettings windowSettings;
+    windowSettings.mTitle = "Maditor";
+    FIX_LOCAL Engine::GUI::TopLevelWindow window { windowSettings };
+
+    if (topLevelPointer)
+        *topLevelPointer = &window;
 
 #if !ENABLE_PLUGINS
-        window.frameLoop()
-            .addSetupSteps([&]() {
-                Engine::Filesystem::FileManager mgr("Layout");
-                Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+    window.frameLoop()
+        .addSetupSteps([&]() {
+            Engine::Filesystem::FileManager mgr("Layout");
+            Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
-                if (file) {
-                    window.readState(file);
-                    window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
-                }
-            });
+            if (file) {
+                window.readState(file);
+                window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
+            }
+        });
 #endif
 
-        workGroup.addTaskQueue(&window.frameLoop());
-
-        FIX_LOCAL Engine::Threading::Scheduler scheduler(workGroup);
-        return scheduler.go();
-    } else {
-        return root.errorCode();
-    }
+    FIX_LOCAL Engine::Threading::Scheduler scheduler;
+    return scheduler.go();
 }
 
 #if !EMSCRIPTEN
@@ -68,6 +63,10 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
 {
     Engine::Threading::WorkGroup workGroup("Launcher");
     Engine::Core::Root root { argc, argv };
-    return launch(workGroup, root);
+    if (!toolMode) {
+        return launch();
+    } else {
+        return root.errorCode();
+    }
 }
 #endif

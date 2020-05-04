@@ -12,7 +12,7 @@
 
 #include "Interfaces/threading/systemvariable.h"
 
-extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
+extern int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
 
 namespace Engine {
 namespace Filesystem {
@@ -58,7 +58,7 @@ namespace Android {
 
         static Engine::Core::Root root;
 
-		launch(workGroup, root, &mWindow);
+		launch(&mWindow);
 		
 		ANativeActivity_finish(activity);
     }

@@ -10,9 +10,9 @@
 
 namespace Engine {
 namespace Server {
-    ServerBase::ServerBase(Threading::WorkGroup &workgroup)
-        : TaskQueue("Default")
-        , mLog(workgroup.name() + "-Log")
+    ServerBase::ServerBase(const std::string &name)
+        : TaskQueue(name + "-Server")
+        , mLog(name + "-Log")
     {
         Util::setLog(&mLog);
         mLog.startConsole();
@@ -51,7 +51,6 @@ namespace Server {
         for (const std::string &cmd : mLog.update()) {
             performCommand(cmd);
         }
-        mLastConsoleCheck = std::chrono::steady_clock::now();
     }
 
 }

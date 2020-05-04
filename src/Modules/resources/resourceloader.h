@@ -81,7 +81,10 @@ namespace Resources {
                 loader = &getSingleton();
             if (name.empty())
                 return {};
-            return load(get(name, loader), persistent, loader);
+            ResourceType *res = get(name, loader);
+            if (!res)
+                return {};
+            return load(res, persistent, loader);
         }
 
         static ResourceType *get(const std::string &name, T *loader = nullptr)

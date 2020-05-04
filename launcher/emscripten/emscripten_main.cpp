@@ -9,7 +9,7 @@
 #    include "Modules/threading/workgroup.h"
 #    include <emscripten.h>
 
-extern int launch(Engine::Threading::WorkGroup &workGroup, Engine::Core::Root &root, Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
+extern int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
 
 EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
 {
@@ -24,7 +24,7 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
     },
         std::chrono::seconds { 15 });
     static Engine::Core::Root root;
-    return launch(workGroup, root);
+    return launch();
 }
 
 DLL_EXPORT_TAG int main(int argc, char **argv)

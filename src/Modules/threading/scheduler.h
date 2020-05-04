@@ -4,7 +4,7 @@ namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT Scheduler {
-        Scheduler(WorkGroup &group);
+        Scheduler();
 
         int go();
 

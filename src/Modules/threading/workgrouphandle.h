@@ -47,7 +47,7 @@ namespace Threading {
         {
             WorkGroup group;
             try {
-                int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)..., group);
+                int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
                 p.set_value(result);
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-MainThread!");

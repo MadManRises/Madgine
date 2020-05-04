@@ -20,8 +20,8 @@ void emscriptenLoop(void *scheduler)
 namespace Engine {
 namespace Threading {
 
-    Scheduler::Scheduler(WorkGroup &group)
-        : mWorkgroup(group)
+    Scheduler::Scheduler()
+        : mWorkgroup(WorkGroup::self())
     {
     }
 
@@ -37,8 +37,7 @@ namespace Threading {
         Threading::TaskQueue *queue = DefaultTaskQueue::getSingletonPtr();
 
         do {
-            std::chrono::steady_clock::time_point nextAvailableTaskTime;
-            queue->update(nextAvailableTaskTime);
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
             nextAvailableTaskTime = std::min(std::chrono::steady_clock::now() + std::chrono::milliseconds(200), nextAvailableTaskTime);
             queue->waitForTasks(nextAvailableTaskTime);
             mWorkgroup.checkThreadStates();
@@ -55,8 +54,7 @@ namespace Threading {
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
         while (!queue->idle() || queue->running()) {
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
-            queue->update(nextAvailableTaskTime);
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
             queue->waitForTasks(nextAvailableTaskTime);
         }
     }

@@ -18,7 +18,7 @@ namespace Threading {
     };
 
     struct MODULES_EXPORT TaskQueue {
-        TaskQueue(const std::string &name);
+        TaskQueue(const std::string &name, bool auto_register = true);
         virtual ~TaskQueue() = default;
 
         void queue(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies = {});
@@ -34,8 +34,7 @@ namespace Threading {
 
         const std::string &name() const;
 
-        void update(int idleCount = -1);
-        void update(std::chrono::steady_clock::time_point &nextAvailableTaskTime, int idleCount = -1);
+        std::chrono::steady_clock::time_point update(int idleCount = -1);
         void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
 
         bool running() const;
