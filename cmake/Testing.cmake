@@ -22,10 +22,16 @@ if (BUILD_TESTING)
 
 		target_link_libraries(${name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
-		if (NOT ANDROID AND NOT EMSCRIPTEN)
+		set (framework )
+
+		if (EMSCRIPTEN)
+			set (framework "node")
+		endif()
+
+		if (NOT ANDROID)
 			add_test(
 				NAME ${name}
-				COMMAND ${name} --gtest_output=xml:${name}.xml
+				COMMAND ${framework} ${name} --gtest_output=xml:${name}.xml
 				WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			)
 		endif()
