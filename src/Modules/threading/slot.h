@@ -50,7 +50,7 @@ namespace Threading {
 
         void queue(_Ty... args) const
         {
-            SlotBase::queue(oneTimeFunctor([args = std::forward_as_tuple(std::forward<_Ty>(args)...), this] { TupleUnpacker::invokeExpand(f, mItem, std::move(args)); }));
+            SlotBase::queue(oneTimeFunctor([args = std::make_tuple(std::forward<_Ty>(args)...), this] { TupleUnpacker::invokeExpand(f, mItem, std::move(args)); }));
         }
 
     private:
