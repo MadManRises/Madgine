@@ -48,8 +48,8 @@ struct BuilderImpl {
 
     template <typename T>
     struct appender {
-        template <typename Pack>
-        using type = type_pack_append_t<Pack, T>;
+        template <typename Pack2>
+        using type = type_pack_append_t<Pack2, T>;
     };
 
     template <size_t Dim = 0, typename T = void>

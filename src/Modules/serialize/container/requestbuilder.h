@@ -8,10 +8,10 @@ namespace Serialize {
     template <typename F, typename Builder = Builder<F, 3>>
     struct RequestBuilder : Builder{        
 
-        template <typename F>
-        auto onSuccess(F &&f) -> RequestBuilder<F, decltype(std::declval<Builder>().template append<1>(std::forward<F>(f)))>
+        template <typename C>
+        auto onSuccess(C &&c) -> RequestBuilder<F, decltype(std::declval<Builder>().template append<1>(std::forward<C>(c)))>
         {
-            return { this->template append<1>(std::forward<F>(f)) };
+            return { this->template append<1>(std::forward<C>(c)) };
         }
     };
 
