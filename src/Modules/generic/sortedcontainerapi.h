@@ -27,7 +27,7 @@ struct SortedContainerApi : C {
     }
 
     template <typename... _Ty>
-    std::pair<iterator, bool> emplace(_Ty &&... args)
+    auto emplace(_Ty &&... args)
     {
         return this->C::emplace(this->end(), std::forward<_Ty>(args)...);
     }

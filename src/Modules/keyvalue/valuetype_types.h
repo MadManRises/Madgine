@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../generic/type_pack.h"
+
 namespace Engine {
 
 using ValueTypeList = type_pack<

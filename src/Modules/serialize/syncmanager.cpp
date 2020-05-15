@@ -66,11 +66,15 @@ namespace Serialize {
             SerializableUnitBase *object = convertPtr(stream, header.mObject);
             stream.logReadHeader(header, typeid(*object).name());
             switch (header.mType) {
-            case ACTION:
-                object->readAction(stream);
+            case ACTION: {
+                PendingRequest *request = stream.fetchRequest(header.mTransaction);
+                object->readAction(stream, request);
+                if (request)
+                    stream.popRequest(header.mTransaction);
                 break;
+            }
             case REQUEST:
-                object->readRequest(stream);
+                object->readRequest(stream, header.mTransaction);
                 break;
             case STATE:
                 object->readState(stream);
@@ -439,7 +443,7 @@ namespace Serialize {
     void SyncManager::sendState(BufferedInOutStream &stream,
         SerializableUnitBase *unit)
     {
-        stream.beginMessage(unit, STATE);
+        stream.beginMessage(unit, STATE, 0);
         unit->writeState(stream);
         stream.endMessage();
     }

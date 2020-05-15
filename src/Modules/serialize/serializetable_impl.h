@@ -40,10 +40,10 @@ namespace Serialize {
                 (unit->*Setter)(nullptr);
                 read(in, unit->*P, name);
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
+            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
+            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
                 throw "Unsupported";
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in) {
@@ -95,10 +95,10 @@ namespace Serialize {
                 read(in, dummy, name, TupleUnpacker::construct<Args>(unit)...);
                 (unit->*Setter)(std::move(dummy));
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
+            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
+            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
                 throw "Unsupported";
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in) {
@@ -130,15 +130,15 @@ namespace Serialize {
                 Unit *unit = static_cast<Unit *>(_unit);
                 read(in, unit->*P, name, TupleUnpacker::construct<Args>(unit)...);
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
+            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readAction(in, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readAction(in, request, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
                 else
                     throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
+            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readRequest(inout, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readRequest(inout, id, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
                 else
                     throw "Unsupported";
             },

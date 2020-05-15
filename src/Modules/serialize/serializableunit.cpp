@@ -65,14 +65,14 @@ namespace Serialize {
         in.format().endCompound(in, name);
     }
 
-    void SerializableUnitBase::readAction(BufferedInOutStream &in)
+    void SerializableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
     {
-        mType->readAction(this, in);
+        mType->readAction(this, in, request);
     }
 
-    void SerializableUnitBase::readRequest(BufferedInOutStream &in)
+    void SerializableUnitBase::readRequest(BufferedInOutStream &in, TransactionId id)
     {
-        mType->readRequest(this, in);
+        mType->readRequest(this, in, id);
     }
 
     std::set<BufferedOutStream *, CompareStreamId> SerializableUnitBase::getMasterMessageTargets() const

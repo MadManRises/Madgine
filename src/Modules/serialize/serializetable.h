@@ -14,8 +14,8 @@ namespace Serialize {
         void writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const;
         void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0) const;
 
-        void readAction(SerializableUnitBase *unit, SerializeInStream &in) const;
-        void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in) const;
+        void readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
+        void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;
 
         void applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;

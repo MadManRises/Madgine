@@ -10,6 +10,7 @@ namespace Serialize {
         };
 
         size_t mObject;
+        TransactionId mTransaction;
     };
 
 }

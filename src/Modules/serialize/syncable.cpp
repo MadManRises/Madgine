@@ -1,19 +1,19 @@
 #include "../moduleslib.h"
 
-#include "syncable.h"
 #include "streams/bufferedstream.h"
+#include "syncable.h"
 #include "toplevelserializableunit.h"
 
 namespace Engine {
 namespace Serialize {
 
-    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index,
+    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index, ParticipantId answerTarget, TransactionId answerId,
         const std::set<ParticipantId> &targets) const
     {
         std::set<BufferedOutStream *, CompareStreamId> result = parent->getMasterMessageTargets();
         if (targets.empty()) {
             for (BufferedOutStream *out : result) {
-                out->beginMessage(parent, ACTION);
+                out->beginMessage(parent, ACTION, out->id() == answerTarget ? answerId : 0);
                 *out << index;
             }
         } else {
@@ -26,7 +26,7 @@ namespace Serialize {
                     ++it2;
                 }
                 if (*it2 == out->id()) {
-                    out->beginMessage(parent, ACTION);
+                    out->beginMessage(parent, ACTION, out->id() == answerTarget ? answerId : 0);
                     *out << index;
                     ++it2;
                     ++it1;
@@ -45,18 +45,29 @@ namespace Serialize {
         return parent->topLevel()->participantId();
     }
 
-    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index) const
+    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
         BufferedOutStream *out = parent->getSlaveMessageTarget();
-        out->beginMessage(parent, REQUEST);
+        out->beginMessage(parent, REQUEST, out->createRequest(requester, requesterTransactionId, std::move(callback)));
         *out << index;
         return out;
     }
 
-    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream) const
+    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream, TransactionId id) const
     {
-        stream->beginMessage(parent, ACTION);
+        stream->beginMessage(parent, ACTION, id);
         *stream << index;
+    }
+
+    BufferedOutStream *SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, ParticipantId stream, TransactionId id) const
+    {
+        for (BufferedOutStream *out : parent->getMasterMessageTargets()) {
+            if (out->id() == stream) {
+                beginActionResponseMessage(parent, index, out, id);
+                return out;
+            }
+        }
+        throw 0; //TODO: Client disconnected after request
     }
 
     bool SyncableBase::isMaster(const SerializableUnitBase *parent) const

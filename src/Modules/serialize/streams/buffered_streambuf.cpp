@@ -105,6 +105,21 @@ namespace Serialize {
         return !mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback();
     }
 
+    PendingRequest *buffered_streambuf::fetchRequest(TransactionId id)
+    {
+        if (id == 0)
+            return nullptr;
+        assert(mPendingRequests.front().mId == id);
+        return &mPendingRequests.front();
+    }
+
+    void buffered_streambuf::popRequest(TransactionId id)
+    {
+        assert(id != 0);
+        assert(mPendingRequests.front().mId == id);
+        mPendingRequests.pop();
+    }
+
     buffered_streambuf::int_type buffered_streambuf::overflow(int c)
     {
         if (c != EOF) {
@@ -119,6 +134,17 @@ namespace Serialize {
     int buffered_streambuf::sync()
     {
         return sendMessages() == 0 ? 0 : -1; // TODO return value
+    }
+
+    TransactionId buffered_streambuf::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+    {
+        if (requesterTransactionId == 0 && !callback)
+            return 0;
+
+        assert(callback || requester != 0);
+        TransactionId id = ++mRunningTransactionId;
+        mPendingRequests.push({ id, requester, requesterTransactionId, std::move(callback) });
+        return id;
     }
 
     void buffered_streambuf::beginMessage()

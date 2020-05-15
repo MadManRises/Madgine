@@ -2,8 +2,12 @@
 
 #include "serializestreambuf.h"
 
+#include "pendingrequest.h"
+
 namespace Engine {
 namespace Serialize {
+
+
     struct BufferedMessageHeader {
         size_t mMsgSize;
     };
@@ -16,7 +20,7 @@ namespace Serialize {
 
         virtual ~buffered_streambuf();
 
-		SyncManager *manager();
+        SyncManager *manager();
 
         virtual bool isClosed();
         virtual void close(StreamError cause = NO_ERROR);
@@ -24,14 +28,18 @@ namespace Serialize {
         //read
         bool isMessageAvailable();
 
+        PendingRequest *fetchRequest(TransactionId id);
+        void popRequest(TransactionId id);
+
         //write
+        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void*)> callback);
+
         void beginMessage();
         void endMessage();
 
         int sendMessages();
 
         StreamError closeCause() const;
-
 
     protected:
         virtual StreamError getError() = 0;
@@ -72,6 +80,9 @@ namespace Serialize {
         };
 
         std::list<BufferedSendMessage> mBufferedSendMsgs;
+
+        TransactionId mRunningTransactionId = 0;
+        std::queue<PendingRequest> mPendingRequests;
     };
-} 
-} 
+}
+}

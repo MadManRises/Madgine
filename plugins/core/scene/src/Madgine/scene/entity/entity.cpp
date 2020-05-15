@@ -90,19 +90,19 @@ namespace Scene {
             return mComponents.contains(name);
         }
 
-        EntityComponentBase *Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
+        Future<EntityComponentBase *> Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
         {
             return addComponent(sComponentsByName().at(name), name, table);
         }
 
-        EntityComponentBase *Entity::addComponent(size_t i, const std::string_view &name, const ObjectPtr &table)
+        Future<EntityComponentBase *> Entity::addComponent(size_t i, const std::string_view &name, const ObjectPtr &table)
         {
             auto it = mComponents.physical().find(name);
             if (it != mComponents.physical().end()) {
                 return it->get();
             } else {
-                return mComponents.emplace(EntityComponentRegistry::getConstructor(i)(*this, table)).first->get();
-            }
+                return mComponents.emplace(EntityComponentRegistry::getConstructor(i)(*this, table)).execute().then([](auto pib) { return pib.first->get(); });
+            }            
         }
 
         void Entity::removeComponent(const std::string_view &name)

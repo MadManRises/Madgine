@@ -4,8 +4,12 @@
 #include "../../generic/observerevent.h"
 //#include "../../keyvalue/keyvalue.h"
 #include "../streams/bufferedstream.h"
+#include "../streams/pendingrequest.h"
 #include "../syncable.h"
+#include "requestbuilder.h"
 #include "serializablecontainer.h"
+#include "../../generic/onetimefunctor.h"
+#include "../../generic/future.h"
 
 namespace Engine {
 namespace Serialize {
@@ -43,33 +47,15 @@ namespace Serialize {
             }
         };
 
-        typedef size_t TransactionId;
-
         typedef SerializableContainerImpl<C, Observer, OffsetPtr> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
         typedef typename _traits::value_type value_type;
 
-        struct Transaction {
-            template <typename T>
-            Transaction(TransactionId id, T &&callback)
-                : mId(id)
-                , mCallback(std::forward<T>(callback))
-            {
-            }
-
-            TransactionId mId;
-            std::function<void(const iterator &, bool)> mCallback;
-        };
-
         SyncableContainerImpl() = default;
 
-        SyncableContainerImpl(const SyncableContainerImpl &other)
-            : Base(other)
-            , mTransactionCounter(0)
-        {
-        }
+        SyncableContainerImpl(const SyncableContainerImpl &other) = default;
 
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
@@ -85,7 +71,6 @@ namespace Serialize {
                     Base temp(std::forward<T>(arg));
 
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << TransactionId(0);
                     *out << RESET;
                     temp.writeState(*out);
                     out->endMessage();
@@ -105,28 +90,33 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        std::pair<iterator, bool> emplace(const iterator &where, _Ty &&... args)
+        auto emplace(const iterator &where, _Ty &&... args)
         {
-            std::pair<iterator, bool> it = std::make_pair(this->end(), false);
+            return RequestBuilder {
+                [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<std::pair<iterator, bool>> {
+                    if (this->isMaster()) {
+                        beforeInsert(where);
+                        std::pair<iterator, bool> it = TupleUnpacker::invokeExpand(LIFT(Base::emplace_intern, this), where, std::move(args));
+                        afterInsert(it.second, it.first);
+                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                        return it;
+                    } else {
+                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
+                            std::promise<std::pair<iterator, bool>> p;
+                            Future<std::pair<iterator, bool>> future = p.get_future();
 
-            if (this->isMaster()) {
-                beforeInsert(where);
-                it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
-                afterInsert(it.second, it.first);
-            } else {
-                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    value_type temp(std::forward<_Ty>(args)...);
+                            BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            *out << INSERT_ITEM;
+                            write_item(*out, where, TupleUnpacker::constructFromTuple<value_type>(std::move(args)));
+                            out->endMessage();
 
-                    BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << TransactionId(0);
-                    *out << INSERT_ITEM;
-                    write_item(*out, where, temp);
-                    out->endMessage();
-                } else {
-                    std::terminate();
+                            return future;
+                        } else {
+                            std::terminate();
+                        }
+                    }
                 }
-            }
-            return it;
+            };
         }
 
         template <typename T, typename... _Ty>
@@ -148,7 +138,6 @@ namespace Serialize {
                     init(temp);
 
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << TransactionId(0);
                     *out << INSERT_ITEM;
                     write_item(*out, where, temp);
                     out->endMessage();
@@ -170,7 +159,6 @@ namespace Serialize {
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << TransactionId(0);
                     *out << REMOVE_ITEM;
                     this->write_iterator(*out, where);
                     out->endMessage();
@@ -192,7 +180,6 @@ namespace Serialize {
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << TransactionId(0);
                     *out << REMOVE_RANGE;
                     this->write_iterator(*out, from);
                     this->write_iterator(*out, to);
@@ -226,20 +213,16 @@ namespace Serialize {
         }
 
         template <typename Creator = DefaultCreator<>>
-        void readRequest(BufferedInOutStream &inout, Creator &&creator = {})
+        void readRequest(BufferedInOutStream &inout, TransactionId id, Creator &&creator = {})
         {
             bool accepted = (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
-
-            TransactionId id;
-            inout >> id;
 
             ObserverEvent op;
             inout >> reinterpret_cast<int &>(op);
 
             if (!accepted) {
                 if (id) {
-                    this->beginActionResponseMessage(&inout);
-                    inout << id;
+                    this->beginActionResponseMessage(&inout, id);
                     inout << (op | ABORTED);
                     inout.endMessage();
                 }
@@ -247,53 +230,31 @@ namespace Serialize {
                 if (this->isMaster()) {
                     performOperation(op, inout, std::forward<Creator>(creator), inout.id(), id);
                 } else {
-                    TransactionId newId = 0;
-                    if (id) {
-                        newId = ++mTransactionCounter;
-                    }
-                    BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << newId;
+                    BufferedOutStream *out = this->getSlaveActionMessageTarget(inout.id(), id);
                     *out << op;
                     out->pipe(inout);
                     out->endMessage();
-
-                    if (id) {
-                        mPassTransactions.emplace_back(newId, std::make_pair(inout.id(), id));
-                    }
                 }
             }
         }
 
         template <typename Creator = DefaultCreator<>>
-        void readAction(SerializeInStream &inout, Creator &&creator = {})
+        void readAction(SerializeInStream &inout, PendingRequest *request, Creator &&creator = {})
         {
-            TransactionId id;
-            inout >> id;
-
             ObserverEvent op;
             inout >> op;
 
-            bool accepted = id == 0 || (op & ~MASK) == AFTER;
-
-            iterator it = this->end();
-
-            std::pair<ParticipantId, TransactionId> sender = { 0, 0 };
-            if (id) {
-                if (!mPassTransactions.empty() && mPassTransactions.front().first == id) {
-                    sender = mPassTransactions.front().second;
-                    mPassTransactions.pop_front();
-                }
-            }
+            bool accepted = (op & ~MASK) != ABORTED;
 
             if (accepted) {
-                it = performOperation(ObserverEvent(op & MASK), inout, std::forward<Creator>(creator), sender.first, sender.second).first;
-            }
-
-            if (id) {
-                if (!mTransactions.empty()) {
-                    assert(mTransactions.front().mId == id);
-                    mTransactions.front().mCallback(it, accepted);
-                    mTransactions.pop_front();
+                std::pair<iterator, bool> it = performOperation(ObserverEvent(op & MASK), inout, std::forward<Creator>(creator), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+                if (request && request->mCallback)
+                    request->mCallback(&it);
+            } else {
+                if (request && request->mRequesterTransactionId) {
+                    BufferedOutStream *out = this->beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
+                    *out << op;
+                    out->endMessage();
                 }
             }
         }
@@ -343,6 +304,27 @@ namespace Serialize {
         }
 
     private:
+        template <typename T, typename... Callbacks>
+        static void executeCallbacks(const T &t, Callbacks &&... callbacks)
+        {
+            (TupleUnpacker::forEach(std::forward<Callbacks>(callbacks), [&](auto &&f) { f(t); }) , ...);
+        }
+
+        template <typename T, typename Then, typename OnSuccess, typename OnFailure>
+        std::function<void(void *)> generateCallback(std::promise<T> p, Then &&then, OnSuccess &&onSuccess, OnFailure &&onFailure)
+        {
+            return oneTimeFunctor([p = std::move(p), then = std::forward<Then>(then), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
+                if (data) {
+                    T *t = static_cast<T*>(data);
+                    executeCallbacks(*t, std::move(onSuccess), std::move(then));
+                    p.set_value(std::move(*t));
+                } else {
+                    TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
+                    TupleUnpacker::forEach(std::move(then), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
+                }
+            });
+        }
+
         void beforeInsert(const iterator &it)
         {
             Base::beforeInsert(it);
@@ -352,12 +334,7 @@ namespace Serialize {
         {
             if (inserted) {
                 if (this->isSynced()) {
-                    for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                        if (answerTarget == out->id()) {
-                            *out << answerId;
-                        } else {
-                            *out << TransactionId(0);
-                        }
+                    for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
                         *out << INSERT_ITEM;
                         write_item(*out, it, *it);
                         out->endMessage();
@@ -370,12 +347,7 @@ namespace Serialize {
         bool beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                    if (answerTarget == out->id()) {
-                        *out << answerId;
-                    } else {
-                        *out << TransactionId(0);
-                    }
+                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
                     *out << REMOVE_ITEM;
                     this->write_iterator(*out, it);
                     out->endMessage();
@@ -392,12 +364,7 @@ namespace Serialize {
         size_t beforeRemoveRange(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                    if (answerTarget == out->id()) {
-                        *out << answerId;
-                    } else {
-                        *out << TransactionId(0);
-                    }
+                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
                     *out << REMOVE_RANGE;
                     this->write_iterator(*out, from);
                     this->write_iterator(*out, to);
@@ -421,12 +388,7 @@ namespace Serialize {
         void afterReset(bool wasActive, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets()) {
-                    if (answerTarget == out->id()) {
-                        *out << answerId;
-                    } else {
-                        *out << TransactionId(0);
-                    }
+                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
                     *out << RESET;
                     this->writeState(*out);
                     out->endMessage();
@@ -441,7 +403,8 @@ namespace Serialize {
                 FixString_t<KeyType_t<typename _traits::value_type>> key;
                 in >> key;
                 return kvFind(*this, key);
-            } else*/ {
+            } else*/
+            {
                 int i;
                 in >> i;
                 return std::next(Base::Base::begin(), i);
@@ -452,7 +415,8 @@ namespace Serialize {
         {
             /*if constexpr (_traits::sorted) {
                 out << kvKey(*it);
-            } else*/ {
+            } else*/
+            {
                 out << static_cast<int>(std::distance(Base::Base::begin(), it));
             }
         }
@@ -476,12 +440,6 @@ namespace Serialize {
             }
             Base::write_item(out, t);
         }
-
-    private:
-        std::list<Transaction> mTransactions;
-        std::list<std::pair<TransactionId, std::pair<ParticipantId, TransactionId>>> mPassTransactions;
-
-        TransactionId mTransactionCounter = 0;
     };
 
     template <typename C, typename Config, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>

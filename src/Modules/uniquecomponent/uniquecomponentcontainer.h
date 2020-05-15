@@ -4,6 +4,8 @@
 
 #include "uniquecomponent.h"
 
+#include "../generic/replace.h"
+
 namespace Engine {
 
 template <typename C, typename Registry, typename... _Ty>

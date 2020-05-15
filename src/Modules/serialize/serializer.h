@@ -10,8 +10,8 @@ namespace Serialize {
         void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *name);
         void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *name);        
 
-		void (*mReadAction)(SerializableUnitBase *, SerializeInStream &);
-        void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &);
+		void (*mReadAction)(SerializableUnitBase *, SerializeInStream &, PendingRequest *);
+        void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &, TransactionId id);
 
 		void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &);
         void (*mSetDataSynced)(SerializableUnitBase *, bool);

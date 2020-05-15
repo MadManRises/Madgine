@@ -45,9 +45,9 @@ struct container_traits<std::list<T>> {
             }
         }
 
-        void push_back(const value_type &item)
+        auto push_back(const value_type &item)
         {
-            this->emplace(this->end(), item);
+            return this->emplace(this->end(), item);
         }
 
         template <typename... _Ty>

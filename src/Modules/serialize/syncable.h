@@ -12,12 +12,13 @@ namespace Serialize {
         virtual void readAction(SerializeInStream &in) = 0;*/
 
     protected:
-        BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index) const;
-        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index,
+        BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         ParticipantId participantId(const SerializableUnitBase *parent);
 
-        void beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream) const;
+        void beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream, TransactionId id) const;
+        BufferedOutStream *beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, ParticipantId stream, TransactionId id) const;
 
         bool isMaster(const SerializableUnitBase *parent) const;
     };
@@ -25,23 +26,28 @@ namespace Serialize {
     template <typename OffsetPtr>
     struct Syncable : SyncableBase {
     protected:
-        BufferedOutStream *getSlaveActionMessageTarget() const
+        BufferedOutStream *getSlaveActionMessageTarget(ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
         {
-            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
+            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), requester, requesterTransactionId, std::move(callback));
         }
-        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(
+        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget = 0, TransactionId answerId = 0,
             const std::set<ParticipantId> &targets = {}) const
         {
-            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), targets);
+            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), answerTarget, answerId, targets);
         }
         ParticipantId participantId()
         {
             return SyncableBase::participantId(parent());
         }
 
-        void beginActionResponseMessage(BufferedOutStream *stream) const
+        void beginActionResponseMessage(BufferedOutStream *stream, TransactionId id) const
         {
-            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream);
+            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
+        }
+
+        BufferedOutStream *beginActionResponseMessage(ParticipantId stream, TransactionId id) const
+        {
+            return SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
         }
 
         bool isMaster() const

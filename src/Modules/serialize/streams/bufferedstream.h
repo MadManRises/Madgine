@@ -17,6 +17,9 @@ namespace Serialize {
 
         SyncManager *manager() const;
 
+        PendingRequest *fetchRequest(TransactionId id);
+        void popRequest(TransactionId id);
+
     protected:
         BufferedInStream(buffered_streambuf *buffer);
 
@@ -29,7 +32,7 @@ namespace Serialize {
         BufferedOutStream(BufferedOutStream &&other);
         BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
 
-        void beginMessage(const SerializableUnitBase *unit, MessageType type);
+        void beginMessage(const SerializableUnitBase *unit, MessageType type, TransactionId id);
         void beginMessage(Command cmd);
         void endMessage();
 
@@ -48,6 +51,8 @@ namespace Serialize {
         }
 
         SyncManager *manager() const;
+
+        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback);
 
     protected:
         buffered_streambuf &buffer() const;

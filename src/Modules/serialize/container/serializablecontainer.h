@@ -7,6 +7,7 @@
 #include "../serializable.h"
 #include "../streams/serializestream.h"
 #include "../unithelper.h"
+#include "../../generic/replace.h"
 
 namespace Engine {
 namespace Serialize {

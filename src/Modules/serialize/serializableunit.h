@@ -27,8 +27,8 @@ namespace Serialize {
         void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0) const;
         void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0);
 
-        void readAction(BufferedInOutStream &in);
-        void readRequest(BufferedInOutStream &in);
+        void readAction(BufferedInOutStream &in, PendingRequest *request);
+        void readRequest(BufferedInOutStream &in, TransactionId id);
 
         void applySerializableMap(SerializeInStream &in);
 

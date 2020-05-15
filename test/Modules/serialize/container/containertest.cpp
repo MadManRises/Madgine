@@ -33,7 +33,7 @@ FIELD(list1)
 FIELD(list2)
 SERIALIZETABLE_END(TestUnit)
 
-TEST(Serialize_Container, Test1)
+TEST(Serialize_Container, SyncedUnit)
 {
 
     Engine::Serialize::Debugging::setLoggingEnabled(true);
@@ -64,15 +64,20 @@ TEST(Serialize_Container, Test1)
     ASSERT_EQ(unit1.list1, unit2.list1);
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    unit1.list2.push_back(6);
+    bool called = false;
+    unit1.list2.push_back(6).onSuccess([&](auto &&pib) {
+        called = true; 
+    });
+    ASSERT_TRUE(called);
     ASSERT_EQ(unit1.list2.back(), 6);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 1000ms);
+    mgr2.receiveMessages(1, 1000ms);    
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    unit2.list2.push_back(7);
+    called = false;
+    unit2.list2.push_back(7).onSuccess([&](auto &&pib) { called = true; });
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -82,9 +87,21 @@ TEST(Serialize_Container, Test1)
     ASSERT_EQ(unit1.list2.back(), 7);
 
     mgr1.sendMessages();
+    ASSERT_FALSE(called);
     mgr2.receiveMessages(1, 1000ms);
+    ASSERT_TRUE(called);
 
     ASSERT_EQ(unit1.list2, unit2.list2);
+
+}
+
+
+TEST(Serialize_Container, Array)
+{
+
+    Engine::Serialize::Debugging::setLoggingEnabled(true);
+
+    //Engine::Threading::WorkGroup wg;
 
     std::array<size_t, 128> array;
     for (size_t i = 0; i < 128; ++i)

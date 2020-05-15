@@ -57,6 +57,16 @@ namespace Serialize {
         return buffer().isMessageAvailable();
     }
 
+    PendingRequest *BufferedInStream::fetchRequest(TransactionId id)
+    {
+        return buffer().fetchRequest(id);
+    }
+
+    void BufferedInStream::popRequest(TransactionId id)
+    {
+        buffer().popRequest(id);
+    }
+
     BufferedInStream::BufferedInStream(buffered_streambuf *buffer)
         : SerializeInStream(buffer)
     {
@@ -91,11 +101,12 @@ namespace Serialize {
     }
 
     void BufferedOutStream::beginMessage(const SerializableUnitBase *unit,
-        MessageType type)
+        MessageType type, TransactionId id)
     {
         MessageHeader header;
         header.mType = type;
         header.mObject = SerializeManager::convertPtr(manager(), *this, unit);
+        header.mTransaction = id;
         mLog.logBeginMessage(header, typeid(*unit).name());
         buffer().beginMessage();
         writeRaw(header);
@@ -113,18 +124,24 @@ namespace Serialize {
 
     void BufferedOutStream::endMessage() { buffer().endMessage(); }
 
-    int BufferedOutStream::sendMessages() { 
-		if (!*this)
+    int BufferedOutStream::sendMessages()
+    {
+        if (!*this)
             return -1;
-		return buffer().sendMessages(); 
-	}
+        return buffer().sendMessages();
+    }
 
     SyncManager *BufferedOutStream::manager() const
-        {
-            return static_cast<SyncManager*>(SerializeOutStream::manager());
-        }
+    {
+        return static_cast<SyncManager *>(SerializeOutStream::manager());
+    }
 
-        buffered_streambuf &BufferedOutStream::buffer() const
+    TransactionId BufferedOutStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+    {
+        return buffer().createRequest(requester, requesterTransactionId, std::move(callback));
+    }
+
+    buffered_streambuf &BufferedOutStream::buffer() const
     {
         return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
     }

@@ -2,57 +2,43 @@
 
 namespace Engine {
 
-//TODO Maybe mutable lambda is enough
-template <typename T, typename... Ty>
+template <typename F>
 struct OneTimeFunctor {
-    OneTimeFunctor(void (T::*f)(Ty...), T *t, Ty &&... args)
-        : mT(t)
-        , mF(f)
-        , mData(std::forward<Ty>(args)...)
-        , mCalled(false)
+    OneTimeFunctor(F &&f)
+        : mF(std::forward<F>(f))
     {
     }
 
-    OneTimeFunctor(OneTimeFunctor<T, Ty...> &&other) noexcept
-        : mT(other.mT)
-        , mF(other.mF)
-        , mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData))
-        , mCalled(other.mCalled)
-    {
-        other.mCalled = true;
+    OneTimeFunctor(OneTimeFunctor<F> &&other) noexcept
+        : mF(std::move(other.mF))
+    {        
+        other.mF.reset();
     }
 
-    OneTimeFunctor(const OneTimeFunctor<T, Ty...> &other)
-        : mT(other.mT)
-        , mF(other.mF)
-        , mData(std::forward<std::tuple<std::remove_reference_t<Ty>...>>(other.mData))
-        , mCalled(other.mCalled)
+    OneTimeFunctor(const OneTimeFunctor<F> &other)
+        : mF(std::move(other.mF))                
     {
-        other.mCalled = true;
+        other.mF.reset();
     }
 
-    ~OneTimeFunctor()
+    template <typename... Args>
+    auto operator()(Args&&... args)
     {
+        assert(mF);
+        F f = *std::move(mF);
+        mF.reset();
+        return std::move(f)(std::forward<Args>(args)...);
     }
 
-    void operator()()
-    {
-        assert(!mCalled);
-        mCalled = true;
-        TupleUnpacker::invokeExpand(mF, mT, std::move(mData));
-    }
-
-private:
-    T *mT;
-    void (T::*mF)(Ty...);
-    mutable std::tuple<std::remove_reference_t<Ty>...> mData;
-    mutable bool mCalled;
+private:    
+    mutable std::optional<std::remove_reference_t<F>> mF;    
 };
 
-template <typename T, typename... Ty>
-auto oneTimeFunctor(void (T::*f)(Ty...), T *t, Ty &&... args)
+template <typename F>
+auto oneTimeFunctor(F &&f)
 {
-    return OneTimeFunctor<T, Ty...> { f, t, std::forward<Ty>(args)... };
+    static_assert(!std::is_reference_v<F>);
+    return OneTimeFunctor<F> { std::forward<F>(f) };
 }
 
 }

@@ -72,18 +72,18 @@ namespace Serialize {
 		}
     }
 
-    void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in) const
+    void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const
     {
         size_t index;
         in >> index;
-        get(index).mReadAction(unit, in);
+        get(index).mReadAction(unit, in, request);
     }
 
-    void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout) const
+    void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) const
     {
         size_t index;
         inout >> index;
-        get(index).mReadRequest(unit, inout);
+        get(index).mReadRequest(unit, inout, id);
     }
 
     void SerializeTable::applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const

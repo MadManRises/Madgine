@@ -96,7 +96,10 @@ namespace Serialize {
 
     struct CompareStreamId;
 
+    struct PendingRequest;
+
     typedef size_t ParticipantId;
+    typedef size_t TransactionId;
 
     struct buffered_streambuf;
 

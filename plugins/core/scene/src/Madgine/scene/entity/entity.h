@@ -8,6 +8,8 @@
 
 #include "Modules/keyvalue/keyvalueset.h"
 
+#include "Modules/generic/future.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -18,7 +20,7 @@ namespace Scene {
 
         struct MADGINE_SCENE_EXPORT Entity : Serialize::SerializableUnit<Entity>, ScopeBase {
             SERIALIZABLEUNIT;
-        
+
             Entity(const Entity &, bool local);
             Entity(Entity &&, bool local);
 
@@ -31,9 +33,9 @@ namespace Scene {
             const std::string &key() const;
 
             template <typename T>
-            T *addComponent(const ObjectPtr &table = {})
+            Future<T *> addComponent(const ObjectPtr &table = {})
             {
-                return static_cast<T *>(addComponent(component_index<T>(), T::componentName(), table));
+                return addComponent(component_index<T>(), T::componentName(), table).then([](EntityComponentBase *comp) { return static_cast<T *>(comp); });
             }
 
             template <typename T>
@@ -63,8 +65,8 @@ namespace Scene {
 
             bool hasComponent(const std::string_view &name);
 
-            EntityComponentBase *addComponent(const std::string_view &name, const ObjectPtr &table = {});
-            EntityComponentBase *addComponent(size_t i, const std::string_view &name, const ObjectPtr &table = {});
+            Future<EntityComponentBase *> addComponent(const std::string_view &name, const ObjectPtr &table = {});
+            Future<EntityComponentBase *> addComponent(size_t i, const std::string_view &name, const ObjectPtr &table = {});
             void removeComponent(const std::string_view &name);
 
             void writeCreationData(Serialize::SerializeOutStream &of) const;

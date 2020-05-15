@@ -1,5 +1,7 @@
 #pragma once
 
+#include "type_pack.h"
+
 namespace Engine {
 
 	template <typename T>

@@ -18,7 +18,7 @@
 
 #include "Modules/resources/resourcemanager.h"
 
-Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If enabled, no application will be started. Only the root will be initialized and then immediately shutdown again." };
+Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
 #if EMSCRIPTEN
 #    define FIX_LOCAL static
