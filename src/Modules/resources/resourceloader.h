@@ -125,7 +125,7 @@ namespace Resources {
             if (!handle) {
                 if (!loader)
                     loader = &getSingleton();
-                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple()).first);
+                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple()));
                 handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
                 *resource->mData = (decltype(*resource->mData))handle.mData;
                 resource->mCtor(loader, getData(handle, loader), resource);

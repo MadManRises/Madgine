@@ -178,9 +178,9 @@ namespace Serialize {
             while (size--) {
                 //TODO use creator
                 UnitHelper<T>::beginExtendedItem(in, nullref<T>);
-                auto pib = container_traits<C>::emplace(container, container.end());
-                assert(pib.second);
-                auto &t = *pib.first;
+                auto it = container_traits<C>::emplace(container, container.end());
+                assert(container_traits<C>::was_emplace_successful(it));
+                auto &t = *it;
                 read(in, t, "Item");
             }
         } else {

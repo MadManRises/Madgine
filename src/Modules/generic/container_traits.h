@@ -4,6 +4,42 @@
 
 namespace Engine {
 
+template <typename It>
+struct Pib {
+
+    Pib() = default;
+
+    template <typename It2>
+    Pib(std::pair<It2, bool> &&pib)
+        : first(std::move(pib.first))
+        , second(pib.second)
+    {
+    }
+
+    template <typename It2>
+    Pib(It2 &&it)
+        : first(std::forward<It2>(it))
+    {
+    }
+
+    decltype(auto) operator*() const
+    {
+        return *first;
+    }
+
+    operator const It &() const
+    {
+        return first;
+    }
+
+    bool success() const {
+        return second;
+    }
+
+    It first;
+    bool second = true;
+};
+
 template <typename C>
 struct container_traits : C::traits {
 };
@@ -26,6 +62,8 @@ struct container_traits<std::list<T>> {
     typedef const_iterator const_position_handle;
     typedef typename container::value_type value_type;
 
+    typedef iterator emplace_return;
+
     template <template <typename> typename M>
     using rebind = container_traits<std::list<M<T>>>;
 
@@ -47,11 +85,11 @@ struct container_traits<std::list<T>> {
 
         auto push_back(const value_type &item)
         {
-            return this->emplace(this->end(), item);
+            return emplace_back(item);
         }
 
         template <typename... _Ty>
-        std::pair<iterator, bool> emplace_back(_Ty &&... args)
+        auto emplace_back(_Ty &&... args)
         {
             return this->emplace(this->end(), std::forward<_Ty>(args)...);
         }
@@ -68,9 +106,14 @@ struct container_traits<std::list<T>> {
     };
 
     template <typename... _Ty>
-    static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
-        return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
+        return c.emplace(where, std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &)
+    {
+        return true;
     }
 
     static position_handle toPositionHandle(container &c, const iterator &it)
@@ -147,6 +190,8 @@ struct container_traits<std::vector<T>> {
     typedef handle_t const_position_handle;
     typedef typename container::value_type value_type;
 
+    typedef iterator emplace_return;
+
     template <template <typename> typename M>
     using rebind = container_traits<std::vector<M<T>>>;
 
@@ -173,20 +218,20 @@ struct container_traits<std::vector<T>> {
             }
         }
 
-        void push_back(const value_type &item)
+        auto push_back(const value_type &item)
         {
-            this->emplace(this->end(), item);
+            return emplace_back(item);
         }
 
-        void push_back(value_type &&item)
+        auto push_back(value_type &&item)
         {
-            this->emplace(this->end(), std::move(item));
+            return emplace_back(std::move(item));
         }
 
         template <typename... _Ty>
-        value_type &emplace_back(_Ty &&... args)
+        auto emplace_back(_Ty &&... args)
         {
-            return *this->emplace(this->end(), std::forward<_Ty>(args)...).first;
+            return this->emplace(this->end(), std::forward<_Ty>(args)...);
         }
 
         value_type &at(size_t i)
@@ -211,9 +256,14 @@ struct container_traits<std::vector<T>> {
     };
 
     template <typename... _Ty>
-    static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
-        return std::make_pair(c.emplace(where, std::forward<_Ty>(args)...), true);
+        return c.emplace(where, std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &)
+    {
+        return true;
     }
 
     static position_handle toPositionHandle(container &c, const iterator &it)
@@ -283,6 +333,8 @@ struct container_traits<std::set<T, Cmp>> {
     typedef Cmp cmp_type;
     typedef const typename container::value_type value_type;
 
+    typedef Pib<iterator> emplace_return;
+
     template <template <typename> typename M>
     using rebind = container_traits<std::set<M<T>, Cmp>>;
 
@@ -290,9 +342,14 @@ struct container_traits<std::set<T, Cmp>> {
     using api = SortedContainerApi<C>;
 
     template <typename... _Ty>
-    static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return c.emplace(std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &pib)
+    {
+        return pib.mSuccess;
     }
 
     static position_handle toPositionHandle(container &c, const iterator &it)
@@ -350,6 +407,8 @@ struct container_traits<std::map<K, T, Cmp>> {
     typedef Cmp cmp_type;
     typedef typename container::value_type value_type;
 
+    typedef Pib<iterator> emplace_return;
+
     template <template <typename> typename M>
     using rebind = container_traits<std::map<M<K>, M<T>>>;
 
@@ -385,9 +444,14 @@ struct container_traits<std::map<K, T, Cmp>> {
     };
 
     template <typename... _Ty>
-    static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return c.emplace(std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &pib)
+    {
+        return pib.mSuccess;
     }
 
     static position_handle toPositionHandle(container &c, const iterator &it)

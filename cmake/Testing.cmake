@@ -40,17 +40,17 @@ if (BUILD_TESTING)
 
 	function(add_gtest name)
 		add_test_impl(${name} ${ARGN})
-	    target_link_libraries(${name} PRIVATE gtest_main gtest)
+	    target_link_libraries(${name} PRIVATE Interfaces_gtest_main gtest)
 	endfunction(add_gtest)
 
 	function(add_gtestmock name)
 		add_test_impl(${name} ${ARGN})
-		target_link_libraries(${name} PRIVATE gmock_main gmock gtest)
+		target_link_libraries(${name} PRIVATE Interfaces_gmock_main gmock gtest)
 	endfunction(add_gtestmock)
 
 	function(add_gmock name)
 		add_test_impl(${name} ${ARGN})
-		target_link_libraries(${name} PRIVATE gmock_main gmock)
+		target_link_libraries(${name} PRIVATE Interfaces_gmock_main gmock)
 	endfunction(add_gmock)
 
 endif()

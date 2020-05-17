@@ -63,15 +63,13 @@ namespace Widgets {
 
     bool WidgetManager::init()
     {
-        mProgram = Render::ProgramLoader::loadManual("ui", {}, [](Render::ProgramLoader *loader, Render::Program &program, Render::ProgramLoader::ResourceType *res) {
-            return loader->create(program, "ui");
-        });
+        mProgram.create("ui");
 
         mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
             return loader->generate<GUI::Vertex>(mesh, 3, {});
         });
 
-        mUIAtlasTexture = Render::TextureLoader::loadManual("widgetUIAtlas", {}, [](Render::TextureLoader *loader, Render::Texture &tex, Render::TextureLoader::ResourceType *res) { return loader->create(tex, Render::FORMAT_FLOAT8); });
+        mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
@@ -190,7 +188,7 @@ namespace Widgets {
     WidgetBase *WidgetManager::createTopLevelWidget(const std::string &name)
     {
         std::unique_ptr<WidgetBase> w = createWidget(name);
-        return mTopLevelWidgets.emplace_back(std::move(w)).get();
+        return mTopLevelWidgets.emplace_back(std::move(w))->get();
     }
 
     Bar *WidgetManager::createTopLevelBar(const std::string &name)

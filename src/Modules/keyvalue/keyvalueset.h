@@ -170,13 +170,19 @@ struct KeyValueSet : std::set<T, Cmp> {
         typedef Cmp cmp_type;        
         typedef T value_type;
 
+        typedef Pib<iterator> emplace_return;
+
         template <template <typename> typename M>
         using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
 
         template <typename... _Ty>
-        static std::pair<iterator, bool> emplace(container &c, const const_iterator &where, _Ty &&... args)
+        static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
         {
             return c.emplace(std::forward<_Ty>(args)...);
+        }
+
+        static bool was_emplace_successful(const emplace_return& pib) {
+            return pib.success();
         }
 
         static position_handle toPositionHandle(container &c, const iterator &it)

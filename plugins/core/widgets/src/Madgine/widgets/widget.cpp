@@ -183,7 +183,7 @@ namespace Widgets {
 
     WidgetBase *WidgetBase::createChildWidget(const std::string &name)
     {
-        WidgetBase *w = mChildren.emplace_back(createWidget(name)).get();
+        WidgetBase *w = mChildren.emplace_back(createWidget(name))->get();
         w->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return w;
     }

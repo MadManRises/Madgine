@@ -5,18 +5,30 @@
 namespace Engine {
 namespace Serialize {
 
-    template <typename F, typename Builder = Builder<F, 3>>
+    template <typename Builder>
     struct RequestBuilder : Builder{        
 
         template <typename C>
-        auto onSuccess(C &&c) -> RequestBuilder<F, decltype(std::declval<Builder>().template append<1>(std::forward<C>(c)))>
+        auto then(C &&c)
         {
-            return { this->template append<1>(std::forward<C>(c)) };
+            return this->template append<0>(std::forward<C>(c));
+        }
+        
+        template <typename C>
+        auto onSuccess(C &&c)
+        {
+            return this->template append<1>(std::forward<C>(c));
+        }
+
+        template <typename C>
+        auto onFailure(C &&c)
+        {
+            return this->template append<2>(std::forward<C>(c));
         }
     };
 
     template <typename F>
-    RequestBuilder(F &&f)->RequestBuilder<F>;
+    RequestBuilder(F &&f)->RequestBuilder<Builder<F, RequestBuilder, 3>>;
 
 }
 }

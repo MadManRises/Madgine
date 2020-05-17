@@ -24,7 +24,7 @@ namespace Serialize {
             typedef SerializableContainerImpl<C, Observer, OffsetPtr> container;
 
             template <typename... _Ty>
-            static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::iterator &where, _Ty &&... args)
+            static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, _Ty &&... args)
             {
                 return c.emplace(where, std::forward<_Ty>(args)...);
             }
@@ -131,29 +131,28 @@ namespace Serialize {
         void clear()
         {
             bool wasActive = beforeReset();
-            Base::clear();
-            mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
+            clear_intern();
             afterReset(wasActive);
         }
 
         template <typename... _Ty>
-        std::pair<iterator, bool> emplace(const iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace(const iterator &where, _Ty &&... args)
         {
             beforeInsert(where);
-            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
-            afterInsert(it.second, it.first);
+            typename _traits::emplace_return it = emplace_intern(where, std::forward<_Ty>(args)...);
+            afterInsert(_traits::was_emplace_successful(it), it);
             return it;
         }
 
         template <typename T, typename... _Ty>
-        std::pair<iterator, bool> emplace_init(T &&init, const iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace_init(T &&init, const iterator &where, _Ty &&... args)
         {
             beforeInsert(where);
-            std::pair<iterator, bool> it = emplace_intern(where, std::forward<_Ty>(args)...);
-            if (it.second) {
-                init(*it.first);
+            typename _traits::emplace_return it = emplace_intern(where, std::forward<_Ty>(args)...);
+            if (_traits::was_emplace_successful(it)) {
+                init(*it);
             }
-            afterInsert(it.second, it.first);
+            afterInsert(_traits::was_emplace_successful(it), it);
             return it;
         }
 
@@ -395,19 +394,19 @@ namespace Serialize {
         }
 
         template <typename Creator>
-        std::pair<iterator, bool> read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
+        typename _traits::emplace_return read_item_where_intern(SerializeInStream &in, const const_iterator &where, Creator &&creator)
         {
             this->beginExtendedItem(in, nullref<const value_type>);
-            std::pair<iterator, bool> it;
+            typename _traits::emplace_return it;
             if constexpr (std::is_const_v<value_type>) {
                 std::remove_const_t<value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<value_type>>(creator.readCreationData(in));
                 read(in, temp, "Item");
                 it = emplace_intern(where, std::move(temp));
             } else {
                 it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_intern), this, where, creator.readCreationData(in));
-                read(in, *it.first, "Item");
+                read(in, *it, "Item");
             }
-            assert(it.second);
+            assert(_traits::was_emplace_successful(it));
             return it;
         }
 
@@ -431,15 +430,15 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        std::pair<iterator, bool> emplace_intern(const const_iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace_intern(const const_iterator &where, _Ty &&... args)
         {
-            std::pair<iterator, bool> it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
-            if (it.second) {
-                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, it.first);
-                position_handle newHandle = _traits::toPositionHandle(*this, it.first);
+            typename _traits::emplace_return it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
+            if (_traits::was_emplace_successful(it)) {
+                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, { it });
+                position_handle newHandle = _traits::toPositionHandle(*this, it);
                 if (_traits::next(newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
-                this->setParent(*it.first, OffsetPtr::parent(this));
+                this->setParent(*it, OffsetPtr::parent(this));
             }
             return it;
         }
@@ -470,6 +469,12 @@ namespace Serialize {
             else
                 _traits::revalidateHandleAfterRemove(mActiveIterator, *this, newIt, count);
             return newIt;
+        }
+
+        void clear_intern()
+        {
+            Base::clear();
+            mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
         }
 
     protected:
