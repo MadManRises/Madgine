@@ -28,9 +28,13 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Interfaces/interfaceslib.h"
+#include "Interfaces/filesystem/api.h"
 #include "gtest/gtest.h"
 #include <stdio.h>
 
+#if EMSCRIPTEN
+#    include <emscripten.h>
+#endif
 
 GTEST_API_ int main(int argc, char **argv)
 {
@@ -38,7 +42,7 @@ GTEST_API_ int main(int argc, char **argv)
 
 #if EMSCRIPTEN
 
-    LOG("Mount /cwd");
+    printf("Mount current working directory to /cwd\n");
 
     EM_ASM(
         FS.mkdir('/cwd');
