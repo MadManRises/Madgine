@@ -11,10 +11,10 @@
 set(CMAKE_SYSTEM_NAME Emscripten)
 
 if(NOT EMSCRIPTEN_PREFIX)
-    if(DEFINED ENV{EMSCRIPTEN})
-        file(TO_CMAKE_PATH "$ENV{EMSCRIPTEN}" EMSCRIPTEN_PREFIX)
+    if(DEFINED ENV{EMSDK})
+        file(TO_CMAKE_PATH "$ENV{EMSDK}/upstream/emscripten" EMSCRIPTEN_PREFIX)
     else()
-        set(EMSCRIPTEN_PREFIX "C:/emsdk/fastcomp/emscripten")
+        set(EMSCRIPTEN_PREFIX "C:/emsdk/upstream/emscripten")
     endif()
 endif()
 
@@ -49,7 +49,7 @@ set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_FIND_ROOT_PATH})
 # compiler and linker. The *_INIT variables are available since CMake 3.7, so
 # it won't work in earlier versions. Sorry.
 cmake_minimum_required(VERSION 3.7)
-set(CMAKE_CXX_FLAGS_INIT "-s WASM=1 -s USE_PTHREADS=0 -s BINARYEN_TRAP_MODE='clamp' -s ALLOW_MEMORY_GROWTH=1")
+set(CMAKE_CXX_FLAGS_INIT "-s WASM=1 -s USE_PTHREADS=0 -s -s ALLOW_MEMORY_GROWTH=1")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-s WASM=1 --emrun -s DEMANGLE_SUPPORT=1 -s USE_WEBGL2=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ALLOW_MEMORY_GROWTH=1")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "-s WASM=1 --emrun -s DEMANGLE_SUPPORT=1 -s USE_WEBGL2=1 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ALLOW_MEMORY_GROWTH=1")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-DNDEBUG -O3")

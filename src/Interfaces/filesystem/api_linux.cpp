@@ -77,8 +77,12 @@ namespace Filesystem {
 
     bool isDir(const FileQueryState &data)
     {
+        return isDir(data.mPath / data.mData->d_name);
+    }
+
+    bool isDir(const Path& p) {
         struct stat statbuffer;
-        auto result = stat((data.mPath / data.mData->d_name).c_str(), &statbuffer);
+        auto result = stat(p.c_str(), &statbuffer);
         assert(result != -1);
         return (statbuffer.st_mode & S_IFMT) == S_IFDIR;
     }

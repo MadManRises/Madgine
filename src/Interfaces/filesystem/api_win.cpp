@@ -67,6 +67,11 @@ namespace Filesystem {
         return (data.mData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
     }
 
+    bool isDir(const Path &p)
+    {
+        return (GetFileAttributesA(p.c_str()) & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    }
+
     const char *filename(const FileQueryState &data)
     {
         return data.mData.cFileName;

@@ -36,6 +36,10 @@ if (BUILD_TESTING)
 			)
 		endif()
 
+		if (EMSCRIPTEN)
+			target_link_libraries(${name} PRIVATE "nodefs.js")
+		endif()
+
 	endfunction()
 
 	function(add_gtest name)

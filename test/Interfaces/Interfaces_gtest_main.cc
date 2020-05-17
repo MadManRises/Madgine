@@ -34,23 +34,29 @@
 
 #if EMSCRIPTEN
 #    include <emscripten.h>
+#    include <filesystem>
 #endif
 
 GTEST_API_ int main(int argc, char **argv)
 {
     printf("Running main() from %s\n", __FILE__);
+    testing::InitGoogleTest(&argc, argv);
+    auto result = RUN_ALL_TESTS();    
 
 #if EMSCRIPTEN
 
-    printf("Mount current working directory to /cwd\n");
+    printf("Persist output-files...\n");
 
     EM_ASM(
         FS.mkdir('/cwd');
         FS.mount(NODEFS, { root : '.' }, '/cwd'););
 
-    Engine::Filesystem::setCwd("/cwd");
+    for (const Engine::Filesystem::Path &p : Engine::Filesystem::listFiles("."))
+        assert(Engine::Filesystem::copyFile(p, "/cwd"));
+
+    printf("Done\n");
+
 #endif
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();    
+    return result;
 }

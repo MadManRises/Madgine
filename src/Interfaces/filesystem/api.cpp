@@ -14,6 +14,19 @@ namespace Filesystem {
         }
     }
 
+    bool copyFile(const Path &p, const Path &target)
+    {
+        Path exactTarget = target;
+        if (isDir(exactTarget))
+            exactTarget /= p.filename();        
+        OutStream out = openFileWrite(exactTarget, true);
+        assert(out);
+        InStream in = openFileRead(p);
+        assert(in);        
+        out << in.release().get();
+        return true;
+    }
+
     FileQuery listFilesRecursive(const Path &path)
     {
         return { path, true };
