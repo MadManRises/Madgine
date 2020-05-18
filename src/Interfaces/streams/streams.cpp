@@ -111,6 +111,11 @@ std::streambuf &OutStream::buffer() const
     return *mStream.rdbuf();
 }
 
+void OutStream::pipe(InStream& in) 
+{
+    mStream << &in.buffer();
+}
+
 OutStream::operator bool() const
 {
     return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);

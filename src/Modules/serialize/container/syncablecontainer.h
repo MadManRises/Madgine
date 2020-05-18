@@ -279,10 +279,14 @@ namespace Serialize {
                 if (request && request->mCallback)
                     request->mCallback(&it);
             } else {
-                if (request && request->mRequesterTransactionId) {
-                    BufferedOutStream *out = this->beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
-                    *out << op;
-                    out->endMessage();
+                if (request) {
+                    if (request->mRequesterTransactionId) {
+                        BufferedOutStream *out = this->beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
+                        *out << op;
+                        out->endMessage();
+                    }
+                    if (request->mCallback)
+                        request->mCallback(nullptr);
                 }
             }
         }

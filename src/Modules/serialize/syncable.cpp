@@ -61,6 +61,7 @@ namespace Serialize {
 
     BufferedOutStream *SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, ParticipantId stream, TransactionId id) const
     {
+        //TODO: non-linear lookup?
         for (BufferedOutStream *out : parent->getMasterMessageTargets()) {
             if (out->id() == stream) {
                 beginActionResponseMessage(parent, index, out, id);

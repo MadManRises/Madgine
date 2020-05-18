@@ -38,6 +38,8 @@ protected:
 
     std::istream mStream;
 
+    friend struct OutStream;
+
 private:
     bool mOwning = true;
 };
@@ -60,6 +62,8 @@ struct INTERFACES_EXPORT OutStream {
     operator bool() const;
 
     std::unique_ptr<std::streambuf> release();
+
+    void pipe(InStream &in);
 
 protected:
     std::streambuf &buffer() const;

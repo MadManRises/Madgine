@@ -23,7 +23,7 @@ namespace Filesystem {
         assert(out);
         InStream in = openFileRead(p);
         assert(in);        
-        out << in.release().get();
+        out.pipe(in);
         return true;
     }
 

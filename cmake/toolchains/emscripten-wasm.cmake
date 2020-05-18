@@ -11,10 +11,13 @@
 set(CMAKE_SYSTEM_NAME Emscripten)
 
 if(NOT EMSCRIPTEN_PREFIX)
-    if(DEFINED ENV{EMSDK})
+
+    if(EXISTS "$ENV{EMSDK}/upstream/emscripten")
         file(TO_CMAKE_PATH "$ENV{EMSDK}/upstream/emscripten" EMSCRIPTEN_PREFIX)
+    elseif(EXISTS "$ENV{EMSDK}/fastcomp/emscripten")
+        file(TO_CMAKE_PATH "$ENV{EMSDK}/fastcomp/emscripten" EMSCRIPTEN_PREFIX)
     else()
-        set(EMSCRIPTEN_PREFIX "C:/emsdk/upstream/emscripten")
+        LOG(SEND_ERROR "Emscripten SDK not found! Please make sure the environment variable EMSDK was set properly using 'emsdk_env --global'")
     endif()
 endif()
 

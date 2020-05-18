@@ -38,8 +38,6 @@ namespace Serialize {
 
         int sendMessages();
 
-        void pipe(BufferedInStream &in);
-
         template <typename... _Ty>
         void writeCommand(Command cmd, const _Ty &... args)
         {
