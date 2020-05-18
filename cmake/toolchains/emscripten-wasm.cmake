@@ -17,7 +17,7 @@ if(NOT EMSCRIPTEN_PREFIX)
     elseif(EXISTS "$ENV{EMSDK}/fastcomp/emscripten")
         file(TO_CMAKE_PATH "$ENV{EMSDK}/fastcomp/emscripten" EMSCRIPTEN_PREFIX)
     else()
-        LOG(SEND_ERROR "Emscripten SDK not found! Please make sure the environment variable EMSDK was set properly using 'emsdk_env --global'")
+        MESSAGE(SEND_ERROR "Emscripten SDK not found! Please make sure the environment variable EMSDK was set properly using 'emsdk_env --global'")
     endif()
 endif()
 
