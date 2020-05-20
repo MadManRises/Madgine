@@ -52,11 +52,6 @@ namespace Filesystem {
         Path mPath;
     };
 
-    static bool isAssetQuery(const FileQueryState &data)
-    {
-        return isAssetPath(data.mPath);
-    }
-
     static bool skipSymbolic(void *handle, FileQueryState &data)
     {
         while (strcmp(data.mData->d_name, ".") == 0 || strcmp(data.mData->d_name, "..") == 0) {

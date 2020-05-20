@@ -95,12 +95,12 @@ namespace Network {
             return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
         }
 
-        if (preInitSock(s) != NO_ERROR) {
+        if (preInitSock(s) != StreamResult::SUCCESS) {
             close(s);
             return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
         }
 
-        if (postInitSock(s) != NO_ERROR) {
+        if (postInitSock(s) != StreamResult::SUCCESS) {
             close(s);
             return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
         }
@@ -141,7 +141,7 @@ namespace Network {
             if (socket >= 0)
                 return { socket, StreamResult::SUCCESS };
             else
-                return { Invalid_Socket, StreamResult::NO_CONNECTION };
+                return { Invalid_Socket, StreamResult::CONNECTION_REFUSED };
         } else {
             if (retval == 0)
                 return { Invalid_Socket, StreamResult::TIMEOUT };
