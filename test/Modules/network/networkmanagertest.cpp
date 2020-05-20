@@ -18,14 +18,9 @@ TEST(NetworkManager, Connect)
 
     bool done = false;
 
-    LOG(Engine::Network::NetworkManagerResult::SUCCESS);
-    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::SUCCESS });
-    LOG(Engine::Network::NetworkManagerResult::NO_SERVER);
-    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::NO_SERVER });
-    LOG(Engine::Network::NetworkManagerResult::CONNECTION_REFUSED);
-    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::CONNECTION_REFUSED });
-
     EXPECT_EQ(server.startServer(1234), Engine::Network::NetworkManagerResult::SUCCESS);
+
+    #if !EMSCRIPTEN
     auto future = wg.spawnTaskThread([&]() {
         Engine::Network::NetworkManagerResult result = server.acceptConnection(4000ms);
         while (!done) {
@@ -34,7 +29,7 @@ TEST(NetworkManager, Connect)
         }
         return result;
     });
-    Engine::Network::NetworkManager client("testNetworkServer");
+    Engine::Network::NetworkManager client("testNetworkClient");
 
     EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms), Engine::StreamResult::SUCCESS);
 
@@ -43,4 +38,5 @@ TEST(NetworkManager, Connect)
     done = true;
 
     EXPECT_EQ(future.get(), Engine::StreamResult::SUCCESS);
+    #endif
 }
