@@ -3,12 +3,16 @@
 namespace Engine {
 namespace StringUtil {
 
-    inline bool startsWith(const std::string &s, const std::string &prefix)
+    constexpr bool isspace(char c) {
+        return c == ' ';
+    }
+
+    inline bool startsWith(const std::string_view &s, const std::string_view &prefix)
     {
         return s.substr(0, prefix.size()) == prefix;
     }
 
-    inline bool endsWith(const std::string &s, const std::string &suffix)
+    inline bool endsWith(const std::string_view &s, const std::string_view &suffix)
     {
         return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
     }
@@ -90,12 +94,17 @@ namespace StringUtil {
         std::array<std::string_view, S> result = {};
         size_t pivot = 0;
         for (size_t i = 0; i < S; ++i) {
+            while (isspace(string[pivot]))
+                ++pivot;
             size_t newPivot = string.find(token, pivot);
             if ((i == S - 1) != (newPivot == std::string_view::npos))
                 throw 0;
             if (newPivot == std::string_view::npos)
                 newPivot = string.size();
-            result[i] = string.substr(pivot, newPivot - pivot);
+            size_t actualEnd = newPivot;
+            while (actualEnd > pivot && isspace(string[actualEnd - 1]))
+                --actualEnd;
+            result[i] = string.substr(pivot, actualEnd - pivot);
             pivot = newPivot + 1;
         }
         return result;

@@ -5,6 +5,8 @@ namespace Engine {
 template <typename T>
 struct Future {
 
+    Future() = default;
+
     Future(T value)
     {
         std::promise<T> p;

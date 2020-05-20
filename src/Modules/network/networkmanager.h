@@ -7,6 +7,12 @@
 
 namespace Engine {
 namespace Network {
+
+    ENUM_BASE(NetworkManagerResult, StreamResult,
+        ALREADY_CONNECTED, 
+        NO_SERVER
+    );
+
     struct MODULES_EXPORT NetworkManager : Serialize::SyncManager {
         NetworkManager(const std::string &name);
         NetworkManager(const NetworkManager &) = delete;
@@ -15,13 +21,12 @@ namespace Network {
 
         void operator=(const NetworkManager &) = delete;
 
-        bool startServer(int port);
-        StreamError connect(const std::string &url, int portNr, TimeOut timeout = {});
-        void connect_async(const std::string &url, int portNr, TimeOut timeout = {});
+        NetworkManagerResult startServer(int port);
+        NetworkManagerResult connect(const std::string &url, int portNr, TimeOut timeout = {});
 
         void close();
 
-        StreamError acceptConnection(TimeOut timeout);
+        NetworkManagerResult acceptConnection(TimeOut timeout);
         int acceptConnections(int limit = -1);
 
         bool isConnected() const;
@@ -29,7 +34,7 @@ namespace Network {
         bool moveMasterStream(Serialize::ParticipantId streamId,
             NetworkManager *target);
 
-        Threading::SignalStub<StreamError> &connectionResult();
+        Threading::SignalStub<NetworkManagerResult> &connectionResult();
 
     protected:
         void onConnectionEstablished(TimeOut timeout);
@@ -44,7 +49,7 @@ namespace Network {
 
         //static constexpr UINT sMessageSignature = 1048;
 
-        Threading::Signal<StreamError> mConnectionResult;
+        Threading::Signal<NetworkManagerResult> mConnectionResult;
         Threading::Slot<&NetworkManager::onConnectionEstablished>
             mConnectionEstablished;
     };

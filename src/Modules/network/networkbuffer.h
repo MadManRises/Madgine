@@ -14,7 +14,7 @@ namespace Network {
 
     protected:
         // Geerbt über buffered_streambuf
-        StreamError getError() override;
+        StreamResult getError() override;
 
         int recv(char *, size_t) override;
 

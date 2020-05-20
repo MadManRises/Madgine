@@ -17,7 +17,7 @@ constexpr typeMarker_t<T> typeMarker {};
 
 DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfo, typename T);
 
-#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfo, SINGLE_ARG3({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
+#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfo, SINGLE_ARG({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
 
 
 namespace Engine {

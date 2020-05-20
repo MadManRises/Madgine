@@ -4,6 +4,8 @@
 
 #include "../serialize/formatter/safebinaryformatter.h"
 
+#include "../threading/workgroup.h"
+
 namespace Engine {
 namespace Network {
     static int sManagerCount = 0;
@@ -39,28 +41,32 @@ namespace Network {
         }
     }
 
-    bool NetworkManager::startServer(int port)
+    NetworkManagerResult NetworkManager::startServer(int port)
     {
         if (isConnected())
-            return false;
+            return NetworkManagerResult::ALREADY_CONNECTED;
 
-        mSocket = SocketAPI::socket(port);
+        StreamResult error;
 
-        if (isConnected()) {
-            mIsServer = true;
-            return true;
+        std::tie(mSocket, error) = SocketAPI::socket(port);
+
+        if (!isConnected()) {
+            mConnectionResult.emit(error);
+            return error;
         }
-        return false;
+
+        mIsServer = true;
+        return NetworkManagerResult::SUCCESS;
     }
 
-    StreamError NetworkManager::connect(const std::string &url, int portNr, TimeOut timeout)
+    NetworkManagerResult NetworkManager::connect(const std::string &url, int portNr, TimeOut timeout)
     {
         if (isConnected()) {
-            mConnectionResult.emit(ALREADY_CONNECTED);
-            return ALREADY_CONNECTED;
+            mConnectionResult.emit(NetworkManagerResult::ALREADY_CONNECTED);
+            return NetworkManagerResult::ALREADY_CONNECTED;
         }
 
-        StreamError error;
+        StreamResult error;
 
         std::tie(mSocket, error) = SocketAPI::connect(url, portNr);
 
@@ -71,12 +77,7 @@ namespace Network {
 
         mConnectionEstablished.queue(timeout);
 
-        return NO_ERROR;
-    }
-
-    void NetworkManager::connect_async(const std::string &url, int portNr, TimeOut timeout)
-    {
-        std::thread(&NetworkManager::connect, this, url, portNr, timeout).detach();
+        return NetworkManagerResult::SUCCESS;
     }
 
     void NetworkManager::close()
@@ -94,42 +95,37 @@ namespace Network {
     int NetworkManager::acceptConnections(int limit)
     {
         int count = 0;
-        if (isConnected()) {
-            if (mIsServer) {
-                StreamError error;
-                SocketId sock;
-                std::tie(sock, error) = SocketAPI::accept(mSocket);
-                while (error != TIMEOUT && (limit == -1 || count < limit)) {
-                    if (sock != Invalid_Socket) {
-                        if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) })) {
-                            ++count;
-                        }
+        if (isConnected() && mIsServer) {
+            StreamResult error;
+            SocketId sock;
+            std::tie(sock, error) = SocketAPI::accept(mSocket);
+            while (error != StreamResult::TIMEOUT && (limit == -1 || count < limit)) {
+                if (sock != Invalid_Socket) {
+                    if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) })) {
+                        ++count;
                     }
-                    std::tie(sock, error) = SocketAPI::accept(mSocket);
                 }
+                std::tie(sock, error) = SocketAPI::accept(mSocket);
             }
         }
         return count;
     }
 
-    StreamError NetworkManager::acceptConnection(TimeOut timeout)
+    NetworkManagerResult NetworkManager::acceptConnection(TimeOut timeout)
     {
-        if (isConnected()) {
-            if (mIsServer) {
-                StreamError error;
-                SocketId sock;
-                std::tie(sock, error) = SocketAPI::accept(mSocket, timeout);
-                if (sock != Invalid_Socket) {
-                    Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) };
-                    if (addMasterStream(std::move(stream))) {
-                        return NO_ERROR;
-                    }
-                    error = stream.error();
-                }
-                return error;
+        NetworkManagerResult result;
+        if (!isConnected() || !mIsServer)
+            result = NetworkManagerResult::NO_SERVER;
+        else {
+            SocketId sock;
+            std::tie(sock, result) = SocketAPI::accept(mSocket, timeout);
+            if (sock != Invalid_Socket) {
+                Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) };
+                if (!addMasterStream(std::move(stream)))
+                    result = stream.state();
             }
         }
-        return NO_SERVER;
+        return result;
     }
 
     bool NetworkManager::isConnected() const
@@ -143,16 +139,16 @@ namespace Network {
         return SyncManager::moveMasterStream(streamId, target);
     }
 
-    Threading::SignalStub<StreamError> &NetworkManager::connectionResult()
+    Threading::SignalStub<NetworkManagerResult> &NetworkManager::connectionResult()
     {
         return mConnectionResult;
     }
 
     void NetworkManager::onConnectionEstablished(TimeOut timeout)
     {
-        bool success = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(mSocket, std::make_unique<Serialize::SafeBinaryFormatter>(), *this) }, true, timeout);
+        StreamResult error = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(mSocket, std::make_unique<Serialize::SafeBinaryFormatter>(), *this) }, true, timeout);
 
-        mConnectionResult.emit(success ? NO_ERROR : UNKNOWN_ERROR);
+        mConnectionResult.emit(error);
     }
 }
 }

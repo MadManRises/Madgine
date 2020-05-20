@@ -4,6 +4,8 @@
 
 #include "pendingrequest.h"
 
+#include "Interfaces/streams/streamresult.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -23,7 +25,7 @@ namespace Serialize {
         SyncManager *manager();
 
         virtual bool isClosed();
-        virtual void close(StreamError cause = NO_ERROR);
+        virtual void close(StreamResult cause = StreamResult::SUCCESS);
 
         //read
         bool isMessageAvailable();
@@ -39,10 +41,10 @@ namespace Serialize {
 
         int sendMessages();
 
-        StreamError closeCause() const;
+        StreamResult state() const;
 
     protected:
-        virtual StreamError getError() = 0;
+        virtual StreamResult getError() = 0;
         void handleError();
 
         pos_type seekoff(off_type off, std::ios_base::seekdir dir,
@@ -62,7 +64,7 @@ namespace Serialize {
 
     private:
         bool mIsClosed;
-        StreamError mCloseCause;
+        StreamResult mState = StreamResult::SUCCESS;
 
         //read
         size_t mBytesToRead;

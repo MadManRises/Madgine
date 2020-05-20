@@ -34,7 +34,7 @@ namespace Network {
         return SocketAPI::send(mSocket, buf, len);
     }
 
-    StreamError NetworkBuffer::getError()
+    StreamResult NetworkBuffer::getError()
     {
         return SocketAPI::getError();
     }

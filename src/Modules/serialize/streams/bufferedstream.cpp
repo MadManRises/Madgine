@@ -166,7 +166,7 @@ namespace Serialize {
     {
     }
 
-    StreamError BufferedInOutStream::error() const { return buffer().closeCause(); }
+    StreamResult BufferedInOutStream::state() const { return buffer().state(); }
 
     bool BufferedInOutStream::isClosed() const
     {

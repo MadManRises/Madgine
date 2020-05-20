@@ -12,29 +12,35 @@
 
 TEST(NetworkManager, Connect)
 {
-	Engine::Threading::WorkGroup wg;
+    Engine::Threading::WorkGroup wg;
 
-	Engine::Network::NetworkManager server("testNetworkServer");
+    Engine::Network::NetworkManager server("testNetworkServer");
 
-	bool done = false;
+    bool done = false;
 
-	ASSERT_TRUE(server.startServer(1234));
-	auto future = std::async(std::launch::async, [&]()
-	{
-		Engine::StreamError result = server.acceptConnection(4000ms);
-		while (!done)
-		{
-			server.sendMessages();
-			Engine::Threading::DefaultTaskQueue::getSingleton().update();
-		}
-		return result;
-	});
-	Engine::Network::NetworkManager client("testNetworkServer");
+    LOG(Engine::Network::NetworkManagerResult::SUCCESS);
+    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::SUCCESS });
+    LOG(Engine::Network::NetworkManagerResult::NO_SERVER);
+    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::NO_SERVER });
+    LOG(Engine::Network::NetworkManagerResult::CONNECTION_REFUSED);
+    LOG(Engine::Network::NetworkManagerResult { Engine::Network::NetworkManagerResult::CONNECTION_REFUSED });
 
-	EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms ), Engine::NO_ERROR);
+    EXPECT_EQ(server.startServer(1234), Engine::Network::NetworkManagerResult::SUCCESS);
+    auto future = wg.spawnTaskThread([&]() {
+        Engine::Network::NetworkManagerResult result = server.acceptConnection(4000ms);
+        while (!done) {
+            server.sendMessages();
+            Engine::Threading::DefaultTaskQueue::getSingleton().update();
+        }
+        return result;
+    });
+    Engine::Network::NetworkManager client("testNetworkServer");
 
-	done = true;
+    EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms), Engine::StreamResult::SUCCESS);
 
-	EXPECT_EQ(future.get(), Engine::NO_ERROR);
+    Engine::Threading::DefaultTaskQueue::getSingleton().update();
+
+    done = true;
+
+    EXPECT_EQ(future.get(), Engine::StreamResult::SUCCESS);
 }
-

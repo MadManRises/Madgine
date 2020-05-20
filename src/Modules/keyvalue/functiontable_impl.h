@@ -65,4 +65,4 @@ static constexpr typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
             static constexpr const auto args = metafunctionArgs(&F, #__VA_ARGS__); \
         };                                                                         \
     }                                                                              \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::FunctionTable, ::, function, SINGLE_ARG4({ ::Engine::wrapHelper<&F>(&F), ::Engine::CallableTraits<decltype(&F)>::argument_count, ::Engine::CallableTraits<decltype(&F)>::is_member_function, ::Engine::MetaFunctionLineStruct<__LINE__>::args.data() }), &F);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::FunctionTable, ::, function, SINGLE_ARG({ ::Engine::wrapHelper<&F>(&F), ::Engine::CallableTraits<decltype(&F)>::argument_count, ::Engine::CallableTraits<decltype(&F)>::is_member_function, ::Engine::MetaFunctionLineStruct<__LINE__>::args.data() }), &F);

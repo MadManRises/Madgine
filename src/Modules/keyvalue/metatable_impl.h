@@ -150,7 +150,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
     {                                                                           \
         static constexpr ::Engine::MetaTableLineStruct<__LINE__> sMembers = {}; \
     }                                                                           \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG4({ ::table_constexpr<T>, #T, ::Engine::MetaTableLineStruct<__LINE__>::baseClass, Meta_##T::sMembers.data() }), T);
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ ::table_constexpr<T>, #T, ::Engine::MetaTableLineStruct<__LINE__>::baseClass, Meta_##T::sMembers.data() }), T);
 
 /*#define STRUCT_METATABLE(T)                                                                                              \
     namespace {                                                                                                          \

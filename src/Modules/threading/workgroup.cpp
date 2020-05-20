@@ -95,8 +95,8 @@ namespace Threading {
     void WorkGroup::checkThreadStates()
     {
         auto pivot = std::remove_if(mSubThreads.begin(), mSubThreads.end(),
-            [](std::future<int> &f) {
-                return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
+            [](Future<int> &f) {
+                return f.isAvailable();
             });
 
         for (auto it = pivot; it != mSubThreads.end(); ++it) {
@@ -145,6 +145,7 @@ namespace Threading {
 
     bool WorkGroup::isInitialized()
     {
+        assert(sSelf.valid());
         return sSelf != nullptr;
     }
 

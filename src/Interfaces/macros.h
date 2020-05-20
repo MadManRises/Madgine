@@ -10,10 +10,7 @@
 #define CONCAT(a, b) a##b
 #define CONCAT2(a, b) CONCAT(a, b)
 
-#define SINGLE_ARG2(a, b) a, b
-#define SINGLE_ARG3(a, b, c) a, b, c
-#define SINGLE_ARG4(a, b, c, d) a, b, c, d
-#define SINGLE_ARG5(a, b, c, d, e) a, b, c, d, e
+#define SINGLE_ARG(...) __VA_ARGS__
 
 #define SELECT_0(a, ...) a
 #define SELECT_1(a, b, ...) b

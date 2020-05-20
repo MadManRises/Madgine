@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../generic/future.h"
 #include "task.h"
 
 #if ENABLE_THREADING
@@ -24,10 +25,22 @@ namespace Threading {
         }
 
         template <typename F, typename... Args>
-        void createNamedThread(const std::string &name, F &&main, Args &&... args)
+        void createNamedThread(std::string name, F &&main, Args &&... args)
         {
             mSubThreads.emplace_back(
-                std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, name, std::forward<F>(main), std::forward<Args>(args)...));
+                std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::move(name), std::forward<F>(main), std::forward<Args>(args)...));
+        }
+
+        template <typename F, typename... Args>
+        auto spawnTaskThread(F &&task, Args &&... args)
+        {
+            return spawnNamedTaskThread("task_" + std::to_string(++mInstanceCounter), std::forward<F>(task), std::forward<Args>(args)...);
+        }
+
+        template <typename F, typename... Args>
+        Future<std::invoke_result_t<F &&, Args &&...>> spawnNamedTaskThread(std::string name, F &&task, Args &&... args)
+        {
+            return std::async(std::launch::async, &WorkGroup::taskMain<F, std::decay_t<Args>...>, this, std::move(name), std::forward<F>(task), std::forward<Args>(args)...);
         }
 
         bool singleThreaded();
@@ -51,8 +64,8 @@ namespace Threading {
         void finalizeThread();
 
         struct ThreadGuard {
-            ThreadGuard(const std::string &name, WorkGroup *group)
-                : mGroup(*group)
+            ThreadGuard(const std::string &name, WorkGroup &group)
+                : mGroup(group)
             {
                 mGroup.initThread(name);
             }
@@ -69,11 +82,24 @@ namespace Threading {
         template <typename F, typename... Args>
         int threadMain(const std::string &name, F &&main, Args &&... args)
         {
-            ThreadGuard guard(name, this);
+            ThreadGuard guard(name, *this);
             try {
                 return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-Thread!");
+                LOG_EXCEPTION(e);
+                throw;
+            }
+        }
+
+        template <typename F, typename... Args>
+        auto taskMain(const std::string &name, F &&main, Args &&... args)
+        {
+            ThreadGuard guard(name, *this);
+            try {
+                return std::forward<F>(main)(std::forward<Args>(args)...);
+            } catch (std::exception &e) {
+                LOG_ERROR("Uncaught Exception in Workgroup-Task-Thread!");
                 LOG_EXCEPTION(e);
                 throw;
             }
@@ -87,7 +113,7 @@ namespace Threading {
         std::string mName;
 
 #if ENABLE_THREADING
-        std::vector<std::future<int>> mSubThreads;
+        std::vector<Future<int>> mSubThreads;
 #endif
         std::vector<TaskHandle> mThreadInitializers;
 

@@ -2,6 +2,8 @@
 
 #include "serializestream.h"
 
+#include "Interfaces/streams/streamresult.h"
+
 namespace Engine {
 namespace Serialize {
     struct MODULES_EXPORT BufferedInStream : SerializeInStream {
@@ -64,7 +66,7 @@ namespace Serialize {
         BufferedInOutStream(BufferedInOutStream &&other);
         BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
 
-        StreamError error() const;
+        StreamResult state() const;
         bool isClosed() const;
         void close();
 

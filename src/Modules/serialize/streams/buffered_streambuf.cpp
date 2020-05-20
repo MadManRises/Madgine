@@ -71,15 +71,13 @@ namespace Serialize {
 
     bool buffered_streambuf::isClosed()
     {
-        return mIsClosed;
+        return mState != StreamResult::SUCCESS;
     }
 
-    void buffered_streambuf::close(StreamError cause)
+    void buffered_streambuf::close(StreamResult cause)
     {
-        if (!mIsClosed) {
-            mIsClosed = true;
-            mCloseCause = cause;
-        }
+        assert(!isClosed());
+        mState = cause;        
     }
 
     void buffered_streambuf::extend()
@@ -97,7 +95,7 @@ namespace Serialize {
 
     bool buffered_streambuf::isMessageAvailable()
     {
-        if (mIsClosed)
+        if (isClosed())
             return false;
         if (!mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback())
             return true;
@@ -205,9 +203,9 @@ namespace Serialize {
         return 0;
     }
 
-    StreamError buffered_streambuf::closeCause() const
+    StreamResult buffered_streambuf::state() const
     {
-        return mCloseCause;
+        return mState;
     }
 
     buffered_streambuf::int_type buffered_streambuf::underflow()
@@ -266,12 +264,12 @@ namespace Serialize {
 
     void buffered_streambuf::handleError()
     {
-        StreamError error = getError();
+        StreamResult error = getError();
         switch (error) {
-        case WOULD_BLOCK:
+        case StreamResult::WOULD_BLOCK:
             break;
         default:
-            close(UNKNOWN_ERROR);
+            close(StreamResult::UNKNOWN_ERROR);
         }
     }
 } 

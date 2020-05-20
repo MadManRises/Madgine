@@ -22,7 +22,7 @@ FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforw
 	FolderSources(sources "" dl dlapi_unix.cpp dlapi_win.cpp dlapi.h)
 	FolderSources(sources "" filesystem api.cpp api.h api_android.cpp api_emscripten.cpp api_linux.cpp api_win.cpp filequery.cpp filequery.h path.cpp path.h runtime.cpp runtime.h runtime_unix.cpp runtime_win.cpp)
 	FolderSources(sources "" os osapi.h osapi_windows.cpp)
-	FolderSources(sources "" socket socketapi.cpp socketapi.h socketapi_unix.cpp socketapi_win.cpp)
+	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
 	FolderSources(sources "" streams streams.cpp streams.h)
 	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)

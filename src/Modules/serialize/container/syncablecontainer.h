@@ -112,7 +112,7 @@ namespace Serialize {
             return EmplaceRequestBuilder {
                 [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&then, auto &&onSuccess, auto &&onFailure, auto &&init) mutable -> Future<typename _traits::emplace_return> {
                     if (this->isMaster()) {
-                        typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT(emplace_impl, this), where, std::forward<decltype(init)>(init), std::move(args));
+                        typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_impl), this, where, std::forward<decltype(init)>(init), std::move(args));
                         executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
                         return it;
                     }

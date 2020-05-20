@@ -63,6 +63,8 @@ namespace Threading {
     template <typename T, typename Storage>
     struct Global<T *, Storage> {
 
+        static constexpr int INVALID = std::numeric_limits<int>::min();
+
         Global(T *initial = nullptr)
         {
             mIndex = Storage::registerLocalBssVariable([=]() { return Any { (T *)initial }; });
@@ -71,6 +73,7 @@ namespace Threading {
         ~Global()
         {
             Storage::unregisterLocalBssVariable(mIndex);
+            mIndex = INVALID;
         }
 
         T *operator->() { return data(); }
@@ -96,6 +99,10 @@ namespace Threading {
         T *&data() { return Storage::localVariable(mIndex).template as<T *>(); }
 
         T *const &data() const { return Storage::localVariable(mIndex).template as<T *>(); }
+
+        bool valid() const {
+            return mIndex != INVALID;
+        }
 
     private:
         int mIndex;

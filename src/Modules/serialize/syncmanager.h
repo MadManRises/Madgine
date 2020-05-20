@@ -10,8 +10,12 @@
 
 #include "serializemanager.h"
 
+#include "Interfaces/enum.h"
+
 namespace Engine {
 namespace Serialize {
+
+    ENUM(SyncManagerSetupResult, SUCCESS);
 
     struct MODULES_EXPORT SyncManager : SerializeManager {
         SyncManager(const std::string &name);
@@ -50,7 +54,7 @@ namespace Serialize {
         std::set<BufferedInOutStream, CompareStreamId> &getMasterStreams();
 
         void removeAllStreams();
-        StreamError setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        StreamResult setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
         void removeSlaveStream();
         bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
         bool moveMasterStream(ParticipantId streamId, SyncManager *target);
