@@ -12,7 +12,6 @@ option(INTERFACES_ENABLE_PROFILER "Activates the builtin runtime-profiler." ON)
 option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocations")
 
 
-
 set(sources)
 
 FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforward.h interfaceslib.h stringutil.h)
