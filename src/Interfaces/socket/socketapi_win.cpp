@@ -11,7 +11,7 @@
 
 namespace Engine {
 
-    SocketAPIResult toResult(int error)
+    SocketAPIResult toResult(int error, const char *op)
     {
         switch (error) {
         case WSAECONNREFUSED:
@@ -19,7 +19,7 @@ namespace Engine {
         case WSAEWOULDBLOCK:
             return SocketAPIResult::WOULD_BLOCK;
         default:
-            fprintf(stderr, "Unknown Windows Socket-Error-Code: %d\n", error);
+            fprintf(stderr, "Unknown Windows Socket-Error-Code from %s: %d\n", op, error);
             fflush(stderr);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
@@ -32,7 +32,7 @@ namespace Engine {
         int error = WSAStartup(MAKEWORD(2, 2), &w);
 
         if (error) {
-            return toResult(error);
+            return toResult(error, "WSAStartup");
         }
 
         if (w.wVersion != MAKEWORD(2, 2)) {
@@ -63,9 +63,9 @@ namespace Engine {
         return ::recv(id, buf, static_cast<int>(len), 0);
     }
 
-    SocketAPIResult SocketAPI::getError()
+    SocketAPIResult SocketAPI::getError(const char *op)
     {
-        return toResult(WSAGetLastError());
+        return toResult(WSAGetLastError(), op);
     }
 
     int SocketAPI::getOSError()
@@ -85,18 +85,18 @@ namespace Engine {
         SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
         if (s == INVALID_SOCKET) {
-            return { Invalid_Socket, getError() };
+            return { Invalid_Socket, getError("socket") };
         }
 
         if (bind(s, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
-            SocketAPIResult result = getError();
+            SocketAPIResult result = getError("bind");
             closeSocket(s);
             return { Invalid_Socket, result };
         }
 
         int result = listen(s, SOMAXCONN);
         if (result == SOCKET_ERROR) {
-            SocketAPIResult result = getError();
+            SocketAPIResult result = getError("listen");
             closeSocket(s);
             return { Invalid_Socket, result };
         }
@@ -121,13 +121,13 @@ namespace Engine {
             if (error == 0)
                 return { Invalid_Socket, SocketAPIResult::TIMEOUT };
             else
-                return { Invalid_Socket, getError() };
+                return { Invalid_Socket, getError("select") };
         }
 
         SocketId sock = ::accept(s, nullptr, nullptr);
         u_long iMode = 1;
         if (ioctlsocket(sock, FIONBIO, &iMode) == SOCKET_ERROR) {
-            SocketAPIResult result = getError();
+            SocketAPIResult result = getError("accept");
             closeSocket(sock);
             return { Invalid_Socket, result };
         }
@@ -146,20 +146,20 @@ namespace Engine {
         SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 
         if (s == INVALID_SOCKET) {
-            return { Invalid_Socket, getError() };
+            return { Invalid_Socket, getError("socket") };
         }
 
         //Try connecting...
 
         if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
-            SocketAPIResult error = getError();
+            SocketAPIResult error = getError("connect");
             closeSocket(s);
             return { Invalid_Socket, error };
         }
 
         u_long iMode = 1;
         if (ioctlsocket(s, FIONBIO, &iMode)) {
-            SocketAPIResult error = getError();
+            SocketAPIResult error = getError("ioctlsocket");
             closeSocket(s);
             return { Invalid_Socket, error };
         }

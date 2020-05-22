@@ -36,7 +36,7 @@ namespace Network {
     
     void NetworkBuffer::handleError()
     {
-        switch (SocketAPI::getError()) {
+        switch (SocketAPI::getError("unknown")) {
         case SocketAPIResult::WOULD_BLOCK:
             break;
         default:

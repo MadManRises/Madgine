@@ -30,7 +30,7 @@ namespace Engine {
         static int send(SocketId id, char *buf, size_t len);
         static int recv(SocketId id, char *buf, size_t len);
 
-        static SocketAPIResult getError();
+        static SocketAPIResult getError(const char *operation);
         static int getOSError();
     };
 
