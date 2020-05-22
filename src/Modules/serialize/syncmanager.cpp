@@ -172,20 +172,20 @@ namespace Serialize {
         mMasterStreams.clear();
     }
 
-    StreamResult SyncManager::setSlaveStream(BufferedInOutStream &&stream,
+    SyncManagerResult SyncManager::setSlaveStream(BufferedInOutStream &&stream,
         bool receiveState,
         TimeOut timeout)
     {
         if (mSlaveStream)
-            return StreamResult::UNKNOWN_ERROR;
+            return SyncManagerResult::UNKNOWN_ERROR;
 
-        StreamResult state = StreamResult::SUCCESS;
+        SyncManagerResult state = SyncManagerResult::SUCCESS;
 
         auto it = mTopLevelUnits.begin();
 
         for (; it != mTopLevelUnits.end(); ++it) {
             if (!(*it)->updateManagerType(this, false)) {
-                state = StreamResult::UNKNOWN_ERROR;
+                state = SyncManagerResult::UNKNOWN_ERROR;
                 break;
             }
         }
@@ -194,7 +194,7 @@ namespace Serialize {
         setSlaveStreambuf(&mSlaveStream->buffer());
 
         if (receiveState) {
-            if (state == StreamResult::SUCCESS) {
+            if (state == SyncManagerResult::SUCCESS) {
                 for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
                     unit->initSlaveId(this);
                 }
@@ -202,15 +202,15 @@ namespace Serialize {
                 while (mReceivingMasterState) {
                     int msgCount = -1;
                     if (!receiveMessages(*mSlaveStream, msgCount)) {
-                        state = mSlaveStream->state();
+                        state = recordStreamError(mSlaveStream->state());
                         mReceivingMasterState = false;
                     }
                     if (mReceivingMasterState && timeout.expired()) {
-                        state = StreamResult::TIMEOUT;
+                        state = SyncManagerResult::TIMEOUT;
                         mReceivingMasterState = false;
                     }
                 }
-                if (state != StreamResult::SUCCESS) {
+                if (state != SyncManagerResult::SUCCESS) {
                     while (!slavesMap().empty()) {
                         slavesMap().begin()->second->clearSlaveId(this);
                     }
@@ -218,7 +218,7 @@ namespace Serialize {
             }
         }
 
-        if (state != StreamResult::SUCCESS) {
+        if (state != SyncManagerResult::SUCCESS) {
             for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
                 bool result = (*it2)->updateManagerType(this, true);
                 assert(result);
@@ -246,7 +246,7 @@ namespace Serialize {
         }
     }
 
-    bool SyncManager::addMasterStream(BufferedInOutStream &&stream,
+    SyncManagerResult SyncManager::addMasterStream(BufferedInOutStream &&stream,
         bool sendStateFlag)
     {
         if (sendStateFlag && stream) {
@@ -257,21 +257,22 @@ namespace Serialize {
         }
 
         if (!stream)
-            return false;
+            return recordStreamError(stream.state());
 
         mMasterStreams.emplace(std::move(stream));
-        return true;
+        return SyncManagerResult::SUCCESS;
     }
 
-    bool SyncManager::moveMasterStream(ParticipantId streamId,
+    SyncManagerResult SyncManager::moveMasterStream(ParticipantId streamId,
         SyncManager *target)
     {
         auto it = mMasterStreams.find(streamId);
         if (it == mMasterStreams.end())
             std::terminate();
-        if (!target->addMasterStream(
-                std::move(const_cast<BufferedInOutStream &>(*it)), false))
-            return false;
+        if (SyncManagerResult result = target->addMasterStream(
+                std::move(const_cast<BufferedInOutStream &>(*it)), false);
+            result != SyncManagerResult::SUCCESS)
+            return result;
         BufferedInOutStream &stream = const_cast<BufferedInOutStream &>(
             *target->mMasterStreams.find(streamId));
         std::vector<TopLevelSerializableUnitBase *> newTopLevels;
@@ -282,7 +283,7 @@ namespace Serialize {
         for (TopLevelSerializableUnitBase *newTopLevel : newTopLevels) {
             sendState(stream, newTopLevel);
         }
-        return true;
+        return SyncManagerResult::SUCCESS;
     }
 
     ParticipantId SyncManager::getParticipantId(SyncManager *manager)
@@ -292,6 +293,11 @@ namespace Serialize {
         } else {
             return sLocalMasterParticipantId;
         }
+    }
+
+    StreamState SyncManager::getStreamError() const
+    {
+        return mStreamError;
     }
 
     void SyncManager::receiveMessages(int msgCount, TimeOut timeout)
@@ -394,9 +400,8 @@ namespace Serialize {
                 } catch (const SerializeException &e) {
                     LOG_ERROR(e.what());
                 }
-                if (msgCount > 0) {
+                if (msgCount > 0) 
                     --msgCount;
-                }
                 if (!timeout.isZero() && timeout.expired())
                     break;
             }
@@ -445,6 +450,12 @@ namespace Serialize {
         stream.beginMessage(unit, STATE, 0);
         unit->writeState(stream);
         stream.endMessage();
+    }
+
+    SyncManagerResult SyncManager::recordStreamError(StreamState error)
+    {
+        mStreamError = error;
+        return SyncManagerResult::STREAM_ERROR;
     }
 
 } // namespace Serialize

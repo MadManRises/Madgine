@@ -2,7 +2,7 @@
 
 #include "serializestream.h"
 
-#include "Interfaces/streams/streamresult.h"
+#include "Interfaces/streams/streamstate.h"
 
 namespace Engine {
 namespace Serialize {
@@ -66,7 +66,7 @@ namespace Serialize {
         BufferedInOutStream(BufferedInOutStream &&other);
         BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
 
-        StreamResult state() const;
+        StreamState state() const;
         bool isClosed() const;
         void close();
 

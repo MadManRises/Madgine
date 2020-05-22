@@ -33,10 +33,15 @@ namespace Network {
     {
         return SocketAPI::send(mSocket, buf, len);
     }
-
-    StreamResult NetworkBuffer::getError()
+    
+    void NetworkBuffer::handleError()
     {
-        return SocketAPI::getError();
+        switch (SocketAPI::getError()) {
+        case SocketAPIResult::WOULD_BLOCK:
+            break;
+        default:
+            close(StreamState::UNKNOWN_ERROR);
+        }
     }
 }
 }

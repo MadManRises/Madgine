@@ -10,12 +10,14 @@
 
 #include "serializemanager.h"
 
-#include "Interfaces/enum.h"
+#include "Interfaces/genericresult.h"
 
 namespace Engine {
 namespace Serialize {
 
-    ENUM(SyncManagerSetupResult, SUCCESS);
+    ENUM_BASE(SyncManagerResult, GenericResult,
+        STREAM_ERROR,
+        TIMEOUT);
 
     struct MODULES_EXPORT SyncManager : SerializeManager {
         SyncManager(const std::string &name);
@@ -46,6 +48,8 @@ namespace Serialize {
 
 		static ParticipantId getParticipantId(SyncManager *manager);
 
+        StreamState getStreamError() const;
+
     protected:
         bool receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
         bool sendAllMessages(BufferedInOutStream &stream, TimeOut timeout = {});
@@ -54,15 +58,17 @@ namespace Serialize {
         std::set<BufferedInOutStream, CompareStreamId> &getMasterStreams();
 
         void removeAllStreams();
-        StreamResult setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        SyncManagerResult setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
         void removeSlaveStream();
-        bool addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
-        bool moveMasterStream(ParticipantId streamId, SyncManager *target);
+        SyncManagerResult addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
+        SyncManagerResult moveMasterStream(ParticipantId streamId, SyncManager *target);
 
 
         const std::set<TopLevelSerializableUnitBase *> &getTopLevelUnits() const;
 
         void sendState(BufferedInOutStream &stream, SerializableUnitBase *unit);
+
+        SyncManagerResult recordStreamError(StreamState error);
 
     private:
 
@@ -71,9 +77,11 @@ namespace Serialize {
         std::set<BufferedInOutStream, CompareStreamId> mMasterStreams;
         std::optional<BufferedInOutStream> mSlaveStream;
 
-        std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;        
+        std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;    //TODO: Sort by MasterId    
 
         bool mSlaveStreamInvalid;
+
+        StreamState mStreamError = StreamState::OK;
     };
 }
 }

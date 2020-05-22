@@ -4,11 +4,11 @@
 
 #include "pendingrequest.h"
 
-#include "Interfaces/streams/streamresult.h"
+#include "Interfaces/streams/streamstate.h"
+#include "Interfaces/genericresult.h"
 
 namespace Engine {
 namespace Serialize {
-
 
     struct BufferedMessageHeader {
         size_t mMsgSize;
@@ -25,7 +25,7 @@ namespace Serialize {
         SyncManager *manager();
 
         virtual bool isClosed();
-        virtual void close(StreamResult cause = StreamResult::SUCCESS);
+        virtual void close(StreamState cause);
 
         //read
         bool isMessageAvailable();
@@ -41,11 +41,10 @@ namespace Serialize {
 
         int sendMessages();
 
-        StreamResult state() const;
+        StreamState state() const;
 
     protected:
-        virtual StreamResult getError() = 0;
-        void handleError();
+        virtual void handleError() = 0;
 
         pos_type seekoff(off_type off, std::ios_base::seekdir dir,
             std::ios_base::openmode mode = std::ios_base::in) override;
@@ -64,7 +63,7 @@ namespace Serialize {
 
     private:
         bool mIsClosed;
-        StreamResult mState = StreamResult::SUCCESS;
+        StreamState mState = StreamState::OK;
 
         //read
         size_t mBytesToRead;

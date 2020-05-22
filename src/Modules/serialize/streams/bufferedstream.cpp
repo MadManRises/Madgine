@@ -166,7 +166,7 @@ namespace Serialize {
     {
     }
 
-    StreamResult BufferedInOutStream::state() const { return buffer().state(); }
+    StreamState BufferedInOutStream::state() const { return buffer().state(); }
 
     bool BufferedInOutStream::isClosed() const
     {
@@ -176,7 +176,7 @@ namespace Serialize {
     void BufferedInOutStream::close()
     {
         writeCommand(STREAM_EOF);
-        buffer().close();
+        buffer().close(StreamState::CLOSED_BY_USER);
     }
 
     BufferedInOutStream::operator bool() const

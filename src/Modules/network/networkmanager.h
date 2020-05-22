@@ -1,17 +1,17 @@
 #pragma once
 
 #include "../serialize/syncmanager.h"
-#include "../threading/slot.h"
 #include "../threading/signal.h"
+#include "../threading/slot.h"
 #include "networkbuffer.h"
 
 namespace Engine {
 namespace Network {
 
-    ENUM_BASE(NetworkManagerResult, StreamResult,
-        ALREADY_CONNECTED, 
-        NO_SERVER
-    );
+    ENUM_BASE(NetworkManagerResult, Serialize::SyncManagerResult,
+        ALREADY_CONNECTED,
+        NO_SERVER,
+        SOCKET_ERROR);
 
     struct MODULES_EXPORT NetworkManager : Serialize::SyncManager {
         NetworkManager(const std::string &name);
@@ -31,18 +31,22 @@ namespace Network {
 
         bool isConnected() const;
 
-        bool moveMasterStream(Serialize::ParticipantId streamId,
+        NetworkManagerResult moveMasterStream(Serialize::ParticipantId streamId,
             NetworkManager *target);
 
         Threading::SignalStub<NetworkManagerResult> &connectionResult();
 
+        SocketAPIResult getSocketAPIError() const;
+
     protected:
-        void onConnectionEstablished(TimeOut timeout);
+        NetworkManagerResult recordSocketError(SocketAPIResult error);
 
     private:
         SocketId mSocket;
 
         bool mIsServer;
+
+        SocketAPIResult mSocketAPIError = SocketAPIResult::SUCCESS;
 
         //std::map<Serialize::ParticipantId, NetworkStream> mStreams;
         //std::unique_ptr<NetworkStream> mSlaveStream;
@@ -50,8 +54,6 @@ namespace Network {
         //static constexpr UINT sMessageSignature = 1048;
 
         Threading::Signal<NetworkManagerResult> mConnectionResult;
-        Threading::Slot<&NetworkManager::onConnectionEstablished>
-            mConnectionEstablished;
     };
 }
 }

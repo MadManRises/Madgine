@@ -30,6 +30,7 @@ namespace Threading {
             } else {
                 Storage::unregisterLocalObjectVariable(mIndex);
             }
+            mIndex = INVALID;
         }
 
         T *operator->() { return &data(); }
@@ -52,18 +53,31 @@ namespace Threading {
             return *this;
         }
 
-        T &data() { return Storage::localVariable(mIndex).template as<T>(); }
+        T &data()
+        {
+            assert(valid());
+            return Storage::localVariable(mIndex).template as<T>();
+        }
 
-        const T &data() const { return Storage::localVariable(mIndex).template as<T>(); }
+        const T &data() const
+        {
+            assert(valid());
+            return Storage::localVariable(mIndex).template as<T>();
+        }
+                
+        bool valid() const
+        {
+            return mIndex != INVALID;
+        }
 
     private:
+        static constexpr int INVALID = std::numeric_limits<int>::min();
+
         int mIndex;
     };
 
     template <typename T, typename Storage>
     struct Global<T *, Storage> {
-
-        static constexpr int INVALID = std::numeric_limits<int>::min();
 
         Global(T *initial = nullptr)
         {
@@ -96,15 +110,26 @@ namespace Threading {
             return *this;
         }
 
-        T *&data() { return Storage::localVariable(mIndex).template as<T *>(); }
+        T *&data()
+        {
+            assert(valid());
+            return Storage::localVariable(mIndex).template as<T *>();
+        }
 
-        T *const &data() const { return Storage::localVariable(mIndex).template as<T *>(); }
+        T *const &data() const
+        {
+            assert(valid());
+            return Storage::localVariable(mIndex).template as<T *>();
+        }
 
-        bool valid() const {
+        bool valid() const
+        {
             return mIndex != INVALID;
         }
 
     private:
+        static constexpr int INVALID = std::numeric_limits<int>::min();
+
         int mIndex;
     };
 

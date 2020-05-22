@@ -12,9 +12,8 @@ namespace Network {
         NetworkBuffer(NetworkBuffer &&other) noexcept;
         virtual ~NetworkBuffer();
 
-    protected:
-        // Geerbt über buffered_streambuf
-        StreamResult getError() override;
+    protected:        
+        void handleError() override;
 
         int recv(char *, size_t) override;
 

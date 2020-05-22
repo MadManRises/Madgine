@@ -20,9 +20,8 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
     {
     }
 
-    virtual Engine::StreamResult getError()
-    {
-        return Engine::StreamResult::WOULD_BLOCK;
+    virtual void handleError()
+    {        
     }
 
     virtual int recv(char *buffer, size_t count)

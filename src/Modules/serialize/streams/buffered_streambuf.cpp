@@ -71,12 +71,13 @@ namespace Serialize {
 
     bool buffered_streambuf::isClosed()
     {
-        return mState != StreamResult::SUCCESS;
+        return mState != StreamState::OK;
     }
 
-    void buffered_streambuf::close(StreamResult cause)
+    void buffered_streambuf::close(StreamState cause)
     {
         assert(!isClosed());
+        assert(cause != StreamState::OK);
         mState = cause;        
     }
 
@@ -190,7 +191,7 @@ namespace Serialize {
                 size_t count = it->mHeader.mMsgSize - it->mBytesSent;
                 int num = send(it->mData.data() + it->mBytesSent, count);
                 if (num == 0) {
-                    close();
+                    close(StreamState::SEND_FAILURE);
                     return -1;
                 }
                 if (num == -1) {
@@ -203,7 +204,7 @@ namespace Serialize {
         return 0;
     }
 
-    StreamResult buffered_streambuf::state() const
+    StreamState buffered_streambuf::state() const
     {
         return mState;
     }
@@ -226,7 +227,7 @@ namespace Serialize {
             assert(mBytesToRead > 0);
             int num = recv(reinterpret_cast<char *>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
             if (num == 0) {
-                close();
+                close(StreamState::RECEIVE_FAILURE);
                 return;
             }
             if (num == -1) {
@@ -243,7 +244,7 @@ namespace Serialize {
         if (!mRecBuffer.empty() && mBytesToRead > 0) {
             int num = recv(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
             if (num == 0) {
-                close();
+                close(StreamState::RECEIVE_FAILURE);
                 return;
             }
             if (num == -1) {
@@ -262,15 +263,5 @@ namespace Serialize {
         return static_cast<SyncManager*>(SerializeStreambuf::manager());
     }
 
-    void buffered_streambuf::handleError()
-    {
-        StreamResult error = getError();
-        switch (error) {
-        case StreamResult::WOULD_BLOCK:
-            break;
-        default:
-            close(StreamResult::UNKNOWN_ERROR);
-        }
-    }
 } 
 }
