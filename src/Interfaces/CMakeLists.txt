@@ -42,12 +42,15 @@ if (ANDROID)
 endif()
 
 if (UNIX)
-	if (NOT ANDROID AND NOT EMSCRIPTEN)
+	if (EMSCRIPTEN)
+		add_custom_command(TARGET Interfaces POST_BUILD
+			COMMAND npm install ws bufferutil utf-8-validate
+			WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+	elseif (ANDROID)
+	else ()
 		find_package(X11 REQUIRED)
 		find_package(OpenGL REQUIRED)
 		target_link_libraries (Interfaces PRIVATE dl X11 OpenGL::GLX)
-	else ()
-
 	endif()
 endif (UNIX)
 
