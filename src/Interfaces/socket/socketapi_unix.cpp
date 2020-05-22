@@ -52,6 +52,7 @@ namespace Engine {
             throw 0;
         default:
             fprintf(stderr, "Unknown Linux Socket-Error-Code: %d", error);
+            fflush(stderr);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
     }

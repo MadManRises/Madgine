@@ -20,6 +20,7 @@ namespace Engine {
             return SocketAPIResult::WOULD_BLOCK;
         default:
             fprintf(stderr, "Unknown Windows Socket-Error-Code: %d\n", error);
+            fflush(stderr);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
     }
