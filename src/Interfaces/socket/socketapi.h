@@ -10,7 +10,9 @@ namespace Network {
     ENUM_BASE(SocketAPIResult, GenericResult, 
         WOULD_BLOCK,
         TIMEOUT,
-        CONNECTION_REFUSED
+        CONNECTION_REFUSED,
+        ALREADY_IN_USE,
+        API_VERSION_MISMATCH
     );
 
 
@@ -18,7 +20,7 @@ namespace Network {
     const constexpr SocketId Invalid_Socket = -1;
 
     struct INTERFACES_EXPORT SocketAPI {
-        static bool init();
+        static SocketAPIResult init();
         static void finalize();
 
         static void closeSocket(SocketId id);

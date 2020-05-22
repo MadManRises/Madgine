@@ -14,9 +14,9 @@
 namespace Engine {
 namespace Network {
 
-    bool SocketAPI::init()
+    SocketAPIResult SocketAPI::init()
     {
-        return true;
+        return SocketAPIResult::SUCCESS;
     }
 
     void SocketAPI::finalize()
@@ -25,7 +25,8 @@ namespace Network {
 
     void SocketAPI::closeSocket(SocketId id)
     {
-        close(id);
+        int result = close(id);
+        assert(result == 0);
     }
 
     int SocketAPI::send(SocketId id, char *buf, size_t len)
@@ -42,10 +43,16 @@ namespace Network {
     {
         int error = errno;
         switch (error) {
-        case EWOULDBLOCK:
-            //case EAGAIN:
+        case EWOULDBLOCK:            
             return SocketAPIResult::WOULD_BLOCK;
+        case EADDRINUSE:
+            return SocketAPIResult::ALREADY_IN_USE;            
+        case EBADF:
+        case ENOTSOCK:
+        case EOPNOTSUPP:
+            throw 0;
         default:
+            printf("Unknown Linux Socket-Error-Code: %d", error);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
     }
@@ -59,10 +66,10 @@ namespace Network {
     {
         int on = 1;
         if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-            return SocketAPIResult::UNKNOWN_ERROR;
+            return getError();
         }
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-            return SocketAPIResult::UNKNOWN_ERROR;
+            return getError();
         }
 
         return SocketAPIResult::SUCCESS;
@@ -72,11 +79,11 @@ namespace Network {
     {
         int flags = fcntl(s, F_GETFL, 0);
         if (flags < 0) {
-            return SocketAPIResult::UNKNOWN_ERROR;
+            return getError();
         }
         flags |= O_NONBLOCK;
         if (fcntl(s, F_SETFL, flags) != 0) {
-            return SocketAPIResult::UNKNOWN_ERROR;
+            return getError();
         }
         return SocketAPIResult::SUCCESS;
     }
@@ -92,28 +99,30 @@ namespace Network {
 
         SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (s < 0) {
-            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, getError() };
         }
 
-        if (preInitSock(s) != SocketAPIResult::SUCCESS) {
-            close(s);
-            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
+        if (SocketAPIResult result = preInitSock(s); result != SocketAPIResult::SUCCESS) {
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }
 
-        if (postInitSock(s) != SocketAPIResult::SUCCESS) {
-            close(s);
-            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
+        if (SocketAPIResult result = postInitSock(s); result != SocketAPIResult::SUCCESS) {
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }
 
         if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-            close(s);
-            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
+            SocketAPIResult result = getError();
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }
 
         int result = listen(s, SOMAXCONN);
         if (result != 0) {
-            close(s);
-            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
+            SocketAPIResult result = getError();
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }        
         return { s, SocketAPIResult::SUCCESS };
     }
@@ -141,7 +150,7 @@ namespace Network {
             if (socket >= 0)
                 return { socket, SocketAPIResult::SUCCESS };
             else
-                return { Invalid_Socket, SocketAPIResult::CONNECTION_REFUSED };
+                return { Invalid_Socket, getError() };
         } else {
             if (retval == 0)
                 return { Invalid_Socket, SocketAPIResult::TIMEOUT };
@@ -167,24 +176,22 @@ namespace Network {
             return { Invalid_Socket, getError() };
         }
 
-        if (preInitSock(s) != SocketAPIResult::SUCCESS) {
-            SocketAPIResult error = getError();
-            close(s);
-            return { Invalid_Socket, error };
+        if (SocketAPIResult result = preInitSock(s); result != SocketAPIResult::SUCCESS) {            
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }
 
         //Try connecting...
 
         if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0) {
             SocketAPIResult error = getError();
-            close(s);
+            closeSocket(s);
             return { Invalid_Socket, error };
         }
 
-        if (postInitSock(s) != SocketAPIResult::SUCCESS) {
-            SocketAPIResult error = getError();
-            close(s);
-            return { Invalid_Socket, error };
+        if (SocketAPIResult result = postInitSock(s); result != SocketAPIResult::SUCCESS) {
+            closeSocket(s);
+            return { Invalid_Socket, result };
         }
 
         return { s, SocketAPIResult::SUCCESS };
