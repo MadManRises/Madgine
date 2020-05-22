@@ -4,7 +4,7 @@
 
 #include "pendingrequest.h"
 
-#include "Interfaces/streams/streamstate.h"
+#include "streamstate.h"
 #include "Interfaces/genericresult.h"
 
 namespace Engine {

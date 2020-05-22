@@ -38,15 +38,15 @@ namespace Network {
         return ::read(id, buf, len);
     }
 
-    StreamResult SocketAPI::getError()
+    SocketAPIResult SocketAPI::getError()
     {
         int error = errno;
         switch (error) {
         case EWOULDBLOCK:
             //case EAGAIN:
-            return StreamResult::WOULD_BLOCK;
+            return SocketAPIResult::WOULD_BLOCK;
         default:
-            return StreamResult::UNKNOWN_ERROR;
+            return SocketAPIResult::UNKNOWN_ERROR;
         }
     }
 
@@ -55,33 +55,33 @@ namespace Network {
         return errno;
     }
 
-    StreamResult preInitSock(SocketId s)
+    SocketAPIResult preInitSock(SocketId s)
     {
         int on = 1;
         if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-            return StreamResult::UNKNOWN_ERROR;
+            return SocketAPIResult::UNKNOWN_ERROR;
         }
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-            return StreamResult::UNKNOWN_ERROR;
+            return SocketAPIResult::UNKNOWN_ERROR;
         }
 
-        return StreamResult::SUCCESS;
+        return SocketAPIResult::SUCCESS;
     }
 
-    StreamResult postInitSock(SocketId s)
+    SocketAPIResult postInitSock(SocketId s)
     {
         int flags = fcntl(s, F_GETFL, 0);
         if (flags < 0) {
-            return StreamResult::UNKNOWN_ERROR;
+            return SocketAPIResult::UNKNOWN_ERROR;
         }
         flags |= O_NONBLOCK;
         if (fcntl(s, F_SETFL, flags) != 0) {
-            return StreamResult::UNKNOWN_ERROR;
+            return SocketAPIResult::UNKNOWN_ERROR;
         }
-        return StreamResult::SUCCESS;
+        return SocketAPIResult::SUCCESS;
     }
 
-    std::pair<SocketId, StreamResult> SocketAPI::socket(int port)
+    std::pair<SocketId, SocketAPIResult> SocketAPI::socket(int port)
     {
         struct sockaddr_in addr;
         memset(&addr, 0, sizeof(addr));
@@ -92,33 +92,33 @@ namespace Network {
 
         SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (s < 0) {
-            return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
         }
 
-        if (preInitSock(s) != StreamResult::SUCCESS) {
+        if (preInitSock(s) != SocketAPIResult::SUCCESS) {
             close(s);
-            return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
         }
 
-        if (postInitSock(s) != StreamResult::SUCCESS) {
+        if (postInitSock(s) != SocketAPIResult::SUCCESS) {
             close(s);
-            return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
         }
 
         if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
             close(s);
-            return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
         }
 
         int result = listen(s, SOMAXCONN);
         if (result != 0) {
             close(s);
-            return { Invalid_Socket, StreamResult::UNKNOWN_ERROR };
+            return { Invalid_Socket, SocketAPIResult::UNKNOWN_ERROR };
         }        
-        return { s, StreamResult::SUCCESS };
+        return { s, SocketAPIResult::SUCCESS };
     }
 
-    std::pair<SocketId, StreamResult> SocketAPI::accept(SocketId s, TimeOut timeout)
+    std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeout)
     {
         struct timeval tv;
         fd_set readfds;
@@ -139,18 +139,18 @@ namespace Network {
         if (retval > 0) {
             int socket = accept4(s, NULL, NULL, O_NONBLOCK);
             if (socket >= 0)
-                return { socket, StreamResult::SUCCESS };
+                return { socket, SocketAPIResult::SUCCESS };
             else
-                return { Invalid_Socket, StreamResult::CONNECTION_REFUSED };
+                return { Invalid_Socket, SocketAPIResult::CONNECTION_REFUSED };
         } else {
             if (retval == 0)
-                return { Invalid_Socket, StreamResult::TIMEOUT };
+                return { Invalid_Socket, SocketAPIResult::TIMEOUT };
             else
                 return { Invalid_Socket, getError() };
         }
     }
 
-    std::pair<SocketId, StreamResult> SocketAPI::connect(const std::string &url, int portNr)
+    std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
     {
         //Fill out the information needed to initialize a socket…
         struct sockaddr_in target; //Socket address information
@@ -167,8 +167,8 @@ namespace Network {
             return { Invalid_Socket, getError() };
         }
 
-        if (preInitSock(s) != StreamResult::SUCCESS) {
-            StreamResult error = getError();
+        if (preInitSock(s) != SocketAPIResult::SUCCESS) {
+            SocketAPIResult error = getError();
             close(s);
             return { Invalid_Socket, error };
         }
@@ -176,18 +176,18 @@ namespace Network {
         //Try connecting...
 
         if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0) {
-            StreamResult error = getError();
+            SocketAPIResult error = getError();
             close(s);
             return { Invalid_Socket, error };
         }
 
-        if (postInitSock(s) != StreamResult::SUCCESS) {
-            StreamResult error = getError();
+        if (postInitSock(s) != SocketAPIResult::SUCCESS) {
+            SocketAPIResult error = getError();
             close(s);
             return { Invalid_Socket, error };
         }
 
-        return { s, StreamResult::SUCCESS };
+        return { s, SocketAPIResult::SUCCESS };
     }
 
 }

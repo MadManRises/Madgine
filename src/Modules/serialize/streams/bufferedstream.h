@@ -2,7 +2,7 @@
 
 #include "serializestream.h"
 
-#include "Interfaces/streams/streamstate.h"
+#include "streamstate.h"
 
 namespace Engine {
 namespace Serialize {

@@ -40,7 +40,7 @@ namespace Network {
         case SocketAPIResult::WOULD_BLOCK:
             break;
         default:
-            close(StreamState::UNKNOWN_ERROR);
+            close(Serialize::StreamState::UNKNOWN_ERROR);
         }
     }
 }
