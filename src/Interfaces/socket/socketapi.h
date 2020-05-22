@@ -5,7 +5,6 @@
 #include "../genericresult.h"
 
 namespace Engine {
-namespace Network {
 
     ENUM_BASE(SocketAPIResult, GenericResult, 
         WOULD_BLOCK,
@@ -34,5 +33,5 @@ namespace Network {
         static SocketAPIResult getError();
         static int getOSError();
     };
-}
+
 }

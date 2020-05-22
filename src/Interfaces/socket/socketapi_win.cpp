@@ -10,7 +10,6 @@
 #    undef NO_ERROR
 
 namespace Engine {
-namespace Network {
 
     SocketAPIResult toResult(int error)
     {
@@ -166,7 +165,6 @@ namespace Network {
 
         return { s, SocketAPIResult::SUCCESS };
     }
-}
 }
 
 #endif

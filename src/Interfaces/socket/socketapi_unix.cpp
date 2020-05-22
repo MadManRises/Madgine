@@ -12,7 +12,6 @@
 #    include <unistd.h>
 
 namespace Engine {
-namespace Network {
 
     SocketAPIResult SocketAPI::init()
     {
@@ -66,10 +65,10 @@ namespace Network {
     {
         int on = 1;
         if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-            return getError();
+            return SocketAPI::getError();
         }
         if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-            return getError();
+            return SocketAPI::getError();
         }
 
         return SocketAPIResult::SUCCESS;
@@ -79,11 +78,11 @@ namespace Network {
     {
         int flags = fcntl(s, F_GETFL, 0);
         if (flags < 0) {
-            return getError();
+            return SocketAPI::getError();
         }
         flags |= O_NONBLOCK;
         if (fcntl(s, F_SETFL, flags) != 0) {
-            return getError();
+            return SocketAPI::getError();
         }
         return SocketAPIResult::SUCCESS;
     }
@@ -197,7 +196,6 @@ namespace Network {
         return { s, SocketAPIResult::SUCCESS };
     }
 
-}
 }
 
 #endif
