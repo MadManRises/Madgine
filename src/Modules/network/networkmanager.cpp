@@ -16,7 +16,7 @@ namespace Network {
         , mIsServer(false)
     {
         if (sManagerCount == 0) {
-            if (!SocketAPI::init())
+            if (SocketAPI::init() != SocketAPIResult::SUCCESS)
                 std::terminate();
         }
         ++sManagerCount;
