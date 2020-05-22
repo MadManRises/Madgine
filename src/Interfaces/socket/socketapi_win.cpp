@@ -19,7 +19,7 @@ namespace Engine {
         case WSAEWOULDBLOCK:
             return SocketAPIResult::WOULD_BLOCK;
         default:
-            printf("Unknown Windows Socket-Error-Code: %d\n", error);
+            fprintf(stderr, "Unknown Windows Socket-Error-Code: %d\n", error);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
     }

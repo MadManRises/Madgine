@@ -51,7 +51,7 @@ namespace Engine {
         case EOPNOTSUPP:
             throw 0;
         default:
-            printf("Unknown Linux Socket-Error-Code: %d", error);
+            fprintf(stderr, "Unknown Linux Socket-Error-Code: %d", error);
             return SocketAPIResult::UNKNOWN_ERROR;
         }
     }
