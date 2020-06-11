@@ -19,6 +19,9 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
 
         template <typename T>
+        SerializeInStream &operator>>(T &t);
+
+        template <typename T>
         void readUnformatted(T &t)
         {
             if constexpr (std::is_enum_v<T>) {
@@ -100,6 +103,11 @@ namespace Serialize {
         SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
 
         ParticipantId id() const;
+
+        template <typename T>
+        SerializeOutStream &operator<<(const T &t);
+
+        SerializeOutStream &operator<<(const char *s);
 
         template <typename T, typename = std::enable_if_t<!std::is_pointer_v<T>>>
         void writeUnformatted(const T &t)

@@ -20,7 +20,7 @@ struct INTERFACES_EXPORT InStream {
     std::istreambuf_iterator<char> iterator();
     std::istreambuf_iterator<char> end();
 
-    bool readRaw(void *buffer, size_t size);
+    std::ios::iostate readRaw(void *buffer, size_t size);
 
     operator bool() const;
 

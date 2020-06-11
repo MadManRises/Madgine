@@ -4,6 +4,8 @@
 
 #include "streamstate.h"
 
+#include "operations.h"
+
 namespace Engine {
 namespace Serialize {
     struct MODULES_EXPORT BufferedInStream : SerializeInStream {

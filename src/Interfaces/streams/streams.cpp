@@ -36,9 +36,9 @@ std::istreambuf_iterator<char> InStream::end()
     return std::istreambuf_iterator<char>();
 }
 
-bool InStream::readRaw(void *buffer, size_t size)
+std::ios::iostate InStream::readRaw(void *buffer, size_t size)
 {
-    return mStream.read(static_cast<char *>(buffer), size).good();
+    return mStream.read(static_cast<char *>(buffer), size).rdstate();
 }
 
 pos_type InStream::tell()

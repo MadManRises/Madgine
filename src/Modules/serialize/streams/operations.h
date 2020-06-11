@@ -149,23 +149,23 @@ namespace Serialize {
     }
 
     template <typename T>
-    inline SerializeInStream &operator>>(SerializeInStream &in, T &t)
+    inline SerializeInStream &SerializeInStream::operator>>(T &t)
     {
-        read(in, t);
-        return in;
+        read(*this, t);
+        return *this;
     }
 
     template <typename T>
-    inline SerializeOutStream &operator<<(SerializeOutStream &out, const T &t)
+    inline SerializeOutStream &SerializeOutStream::operator<<(const T &t)
     {
-        write(out, t);
-        return out;
+        write(*this, t);
+        return *this;
     }
 
-    inline SerializeOutStream &operator<<(SerializeOutStream &out, const char *s)
+    inline SerializeOutStream &SerializeOutStream::operator<<(const char *s)
     {
-        write(out, std::string { s });
-        return out;
+        write(*this, std::string { s });
+        return *this;
     }
 
 }
