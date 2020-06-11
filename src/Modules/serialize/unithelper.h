@@ -24,9 +24,9 @@ namespace Serialize {
         static void applyMap(SerializeInStream &in, T &item)
         {
             if constexpr (std::is_pointer_v<T>) {
-                UnitId id = reinterpret_cast<UnitId>(item);
-                if (id & 0x1) {
-                    id >>= 1;
+                uintptr_t ptr = reinterpret_cast<UnitId>(item);
+                if (ptr & 0x1) {
+                    UnitId id = (ptr >> 1);
                     item = static_cast<T>(convertPtr(in, id));
                 }
             } else if constexpr (has_function_applySerializableMap_v<T>) {
