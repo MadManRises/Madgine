@@ -27,7 +27,7 @@ namespace Serialize {
         bool filter(const SerializableUnitBase *unit, ParticipantId id);
         void addFilter(std::function<bool(const SerializableUnitBase *, ParticipantId)>);
 
-        static size_t convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SerializableUnitBase *unit);
+        static UnitId convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SerializableUnitBase *unit);
         SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
 
         const std::string &name() const;
@@ -39,7 +39,7 @@ namespace Serialize {
 
         static ParticipantId createStreamId();
 
-		SerializableUnitBase *getByMasterId(size_t unit);
+		SerializableUnitBase *getByMasterId(UnitId unit);
 
     private:
 

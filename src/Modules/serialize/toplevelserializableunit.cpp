@@ -5,7 +5,7 @@
 
 namespace Engine {
 namespace Serialize {
-    TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(size_t staticId)
+    TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(UnitId staticId)
         : SerializableUnitBase(staticId)
         , mStaticSlaveId(staticId)
     {
@@ -47,7 +47,7 @@ namespace Serialize {
     }
 
     void TopLevelSerializableUnitBase::setStaticSlaveId(
-        size_t staticId)
+        UnitId staticId)
     {
         assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE /* && staticId < RESERVED_ID_COUNT*/));
         mStaticSlaveId = staticId;

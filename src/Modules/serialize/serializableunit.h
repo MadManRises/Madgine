@@ -16,7 +16,7 @@ namespace Serialize {
 
     struct MODULES_EXPORT SerializableUnitBase {
     protected:
-        SerializableUnitBase(size_t masterId = 0);
+        SerializableUnitBase(UnitId masterId = 0);
         SerializableUnitBase(const SerializableUnitBase &other);
         SerializableUnitBase(SerializableUnitBase &&other) noexcept;
         ~SerializableUnitBase();
@@ -60,7 +60,7 @@ namespace Serialize {
         void setActive(bool active, bool existenceChanged);
         void setParent(SerializableUnitBase *parent);
 
-        bool isActive(size_t index) const;
+        bool isActive(uint8_t index) const;
 
         friend struct SyncManager;
         friend struct SerializeUnitHelper;
@@ -84,7 +84,7 @@ namespace Serialize {
 
         UnitId mSlaveId = 0;
         UnitId mMasterId;
-        size_t mActiveIndex = 0;
+        uint8_t mActiveIndex = 0;
 
         bool mSynced = false; // Maybe move only into TopLevelUnit?
 

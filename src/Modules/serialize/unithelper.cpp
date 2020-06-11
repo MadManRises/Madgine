@@ -10,7 +10,7 @@
 namespace Engine {
 namespace Serialize {    
 
-	SerializableUnitBase *Engine::Serialize::convertPtr(SerializeInStream &in, size_t id)
+	SerializableUnitBase *Engine::Serialize::convertPtr(SerializeInStream &in, UnitId id)
     {
         return in.convertPtr(id);
     }

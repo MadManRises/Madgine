@@ -340,7 +340,7 @@ namespace Serialize {
     }
 
     SerializableUnitBase *SyncManager::convertPtr(SerializeInStream &in,
-        size_t unit)
+        UnitId unit)
     {
         if (unit == NULL_UNIT_ID)
             return nullptr;

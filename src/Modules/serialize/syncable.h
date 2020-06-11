@@ -12,13 +12,13 @@ namespace Serialize {
         virtual void readAction(SerializeInStream &in) = 0;*/
 
     protected:
-        BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
-        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index, ParticipantId answerTarget, TransactionId answerId,
+        BufferedOutStream *getSlaveActionMessageTarget(const SerializableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SerializableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         ParticipantId participantId(const SerializableUnitBase *parent);
 
-        void beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream, TransactionId id) const;
-        BufferedOutStream *beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, ParticipantId stream, TransactionId id) const;
+        void beginActionResponseMessage(const SerializableUnitBase *parent, uint8_t index, BufferedOutStream *stream, TransactionId id) const;
+        BufferedOutStream *beginActionResponseMessage(const SerializableUnitBase *parent, uint8_t index, ParticipantId stream, TransactionId id) const;
 
         bool isMaster(const SerializableUnitBase *parent) const;
     };

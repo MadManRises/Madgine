@@ -43,7 +43,7 @@ namespace Serialize {
 
             SerializableUnitBase *unit;
             readUnformatted(unit);
-            p = reinterpret_cast<T *>(reinterpret_cast<size_t>(unit));
+            p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
         }
 
         void readUnformatted(SerializableUnitBase *&p);
@@ -84,7 +84,7 @@ namespace Serialize {
 
         void setNextFormattedStringDelimiter(char c);
 
-        SerializableUnitBase *convertPtr(size_t ptr);
+        SerializableUnitBase *convertPtr(UnitId ptr);
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);

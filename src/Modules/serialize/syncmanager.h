@@ -41,7 +41,7 @@ namespace Serialize {
         void sendMessages();
         void sendAndReceiveMessages();
 
-        SerializableUnitBase *convertPtr(SerializeInStream &in, size_t unit);
+        SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
 
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;

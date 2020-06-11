@@ -15,9 +15,9 @@ namespace Network {
     protected:        
         void handleError() override;
 
-        int recv(char *, size_t) override;
+        int recv(char *, uint64_t) override;
 
-        int send(char *, size_t) override;
+        int send(char *, uint64_t) override;
 
     private:
         SocketId mSocket; // = SOCKET

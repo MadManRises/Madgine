@@ -12,7 +12,7 @@
 namespace Engine {
 namespace Serialize {
 
-    SerializableUnitBase::SerializableUnitBase(size_t masterId)
+    SerializableUnitBase::SerializableUnitBase(UnitId masterId)
         : mMasterId(SerializeManager::generateMasterId(masterId, this))
     {
     }
@@ -164,7 +164,7 @@ namespace Serialize {
         mType->setActive(this, active, existenceChanged);
     }
 
-    bool SerializableUnitBase::isActive(size_t index) const
+    bool SerializableUnitBase::isActive(uint8_t index) const
     {
         return index < mActiveIndex;
     }

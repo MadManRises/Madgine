@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Serialize {
 
-    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, size_t index, ParticipantId answerTarget, TransactionId answerId,
+    std::set<BufferedOutStream *, CompareStreamId> SyncableBase::getMasterActionMessageTargets(const SerializableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
         const std::set<ParticipantId> &targets) const
     {
         std::set<BufferedOutStream *, CompareStreamId> result = parent->getMasterMessageTargets();
@@ -45,7 +45,7 @@ namespace Serialize {
         return parent->topLevel()->participantId();
     }
 
-    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, size_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
         BufferedOutStream *out = parent->getSlaveMessageTarget();
         out->beginMessage(parent, REQUEST, out->createRequest(requester, requesterTransactionId, std::move(callback)));
@@ -53,13 +53,13 @@ namespace Serialize {
         return out;
     }
 
-    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, BufferedOutStream *stream, TransactionId id) const
+    void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, uint8_t index, BufferedOutStream *stream, TransactionId id) const
     {
         stream->beginMessage(parent, ACTION, id);
         *stream << index;
     }
 
-    BufferedOutStream *SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, size_t index, ParticipantId stream, TransactionId id) const
+    BufferedOutStream *SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, uint8_t index, ParticipantId stream, TransactionId id) const
     {
         //TODO: non-linear lookup?
         for (BufferedOutStream *out : parent->getMasterMessageTargets()) {

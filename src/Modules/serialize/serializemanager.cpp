@@ -114,7 +114,7 @@ namespace Serialize {
         mFilters.push_back(f);
     }
 
-    size_t SerializeManager::convertPtr(const SerializeManager *mgr, SerializeOutStream &out,
+    UnitId SerializeManager::convertPtr(const SerializeManager *mgr, SerializeOutStream &out,
         const SerializableUnitBase *unit)
     {
         return unit == nullptr
@@ -156,7 +156,7 @@ namespace Serialize {
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }
 
-    SerializableUnitBase *SerializeManager::getByMasterId(size_t unit)
+    SerializableUnitBase *SerializeManager::getByMasterId(UnitId unit)
     {
         std::lock_guard guard(sMasterMappingMutex);
         return sMasterMappings.at(unit);

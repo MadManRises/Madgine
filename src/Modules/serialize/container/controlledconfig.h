@@ -36,7 +36,7 @@ namespace Serialize {
         }
 
         template <typename Op>
-        static void clear(Op &op, size_t expected)
+        static void clear(Op &op, uint32_t expected)
         {
             if (op.size() != expected)
                 std::terminate();

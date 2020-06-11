@@ -23,8 +23,8 @@ namespace Serialize {
 
         bool isInstance(SerializableUnitBase *unit) const;
 
-        size_t getIndex(size_t offset) const;
-        const Serializer &get(size_t index) const;
+        uint8_t getIndex(size_t offset) const;
+        const Serializer &get(uint8_t index) const;
     };
 
 }

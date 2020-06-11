@@ -24,12 +24,12 @@ namespace Network {
             SocketAPI::closeSocket(mSocket);
     }
 
-    int NetworkBuffer::recv(char *buf, size_t len)
+    int NetworkBuffer::recv(char *buf, uint64_t len)
     {
         return SocketAPI::recv(mSocket, buf, len);
     }
 
-    int NetworkBuffer::send(char *buf, size_t len)
+    int NetworkBuffer::send(char *buf, uint64_t len)
     {
         return SocketAPI::send(mSocket, buf, len);
     }

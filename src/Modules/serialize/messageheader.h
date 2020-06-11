@@ -9,7 +9,7 @@ namespace Serialize {
             Command mCmd;
         };
 
-        size_t mObject;
+        UnitId mObject;
         TransactionId mTransaction;
     };
 

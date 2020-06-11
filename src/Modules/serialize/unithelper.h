@@ -16,7 +16,7 @@ namespace Serialize {
     DERIVE_FUNCTION_ARGS(setActive, bool, bool);
     DERIVE_FUNCTION_ARGS(setParent, SerializableUnitBase *);
 
-    MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, size_t id);
+    MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId id);
 
     template <typename T>
     struct UnitHelper {
@@ -24,7 +24,7 @@ namespace Serialize {
         static void applyMap(SerializeInStream &in, T &item)
         {
             if constexpr (std::is_pointer_v<T>) {
-                size_t id = reinterpret_cast<size_t>(item);
+                UnitId id = reinterpret_cast<UnitId>(item);
                 if (id & 0x1) {
                     id >>= 1;
                     item = static_cast<T>(convertPtr(in, id));

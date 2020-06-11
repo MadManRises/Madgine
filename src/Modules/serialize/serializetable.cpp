@@ -74,14 +74,14 @@ namespace Serialize {
 
     void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const
     {
-        size_t index;
+        uint8_t index;
         in >> index;
         get(index).mReadAction(unit, in, request);
     }
 
     void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) const
     {
-        size_t index;
+        uint8_t index;
         inout >> index;
         get(index).mReadRequest(unit, inout, id);
     }
@@ -134,9 +134,9 @@ namespace Serialize {
         return !unit || unit->mType == this;
     }
 
-    size_t SerializeTable::getIndex(size_t offset) const
+    uint8_t SerializeTable::getIndex(size_t offset) const
     {
-        size_t index = 0;
+        uint8_t index = 0;
 
         std::stack<const SerializeTable *> tables;
         const SerializeTable *table = this;
@@ -159,7 +159,7 @@ namespace Serialize {
         std::terminate();
     }
 
-    const Serializer &SerializeTable::get(size_t index) const
+    const Serializer &SerializeTable::get(uint8_t index) const
     {
         std::stack<const SerializeTable *> tables;
         const SerializeTable *table = this;

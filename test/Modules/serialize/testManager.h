@@ -10,7 +10,7 @@ using namespace Engine::Serialize;
 
 struct Buffer {
     std::array<char, 4096> mBuffer[2];
-    size_t mWrittenCount[2] = { 0, 0 };
+    uint64_t mWrittenCount[2] = { 0, 0 };
 };
 
 struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
@@ -24,12 +24,12 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
     {        
     }
 
-    virtual int recv(char *buffer, size_t count)
+    virtual int recv(char *buffer, uint64_t count) override
     {
         size_t index = isMaster(StreamMode::READ) ? 0 : 1;
 
-        size_t avail = mBuffer.mWrittenCount[index] - mReadOffset;
-        size_t readCount = std::min(count, avail);
+        uint64_t avail = mBuffer.mWrittenCount[index] - mReadOffset;
+        uint64_t readCount = std::min(count, avail);
         if (readCount == 0)
             return -1;
         std::memcpy(buffer, mBuffer.mBuffer[index].data() + mReadOffset, readCount);
@@ -37,7 +37,7 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
         return static_cast<int>(readCount);
     }
 
-    virtual int send(char *buffer, size_t count)
+    virtual int send(char *buffer, uint64_t count) override
     {
         size_t index = isMaster(StreamMode::WRITE) ? 1 : 0;
 
@@ -48,7 +48,7 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
     }
 
     Buffer &mBuffer;
-    size_t mReadOffset = 0;
+    uint64_t mReadOffset = 0;
 };
 
 struct TestBuf : Engine::Serialize::SerializeStreambuf {
@@ -106,7 +106,6 @@ struct TestBuf : Engine::Serialize::SerializeStreambuf {
     }
 
     Buffer &mBuffer;
-    size_t mReadOffset = 0;
 };
 
 struct TestManager : Engine::Serialize::SyncManager {

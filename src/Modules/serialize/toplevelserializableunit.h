@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Serialize {
     struct MODULES_EXPORT TopLevelSerializableUnitBase : SerializableUnitBase {    
-        TopLevelSerializableUnitBase(size_t staticId = 0);
+        TopLevelSerializableUnitBase(UnitId staticId = 0);
         TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
         TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept;
         ~TopLevelSerializableUnitBase();
@@ -22,7 +22,7 @@ namespace Serialize {
 
         ParticipantId participantId() const;
 
-        void setStaticSlaveId(size_t staticId);
+        void setStaticSlaveId(UnitId staticId);
         void initSlaveId(SerializeManager *mgr);
 
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
@@ -30,7 +30,7 @@ namespace Serialize {
     private:
         std::vector<SyncManager *> mMasterManagers;
         SyncManager *mSlaveManager = nullptr;
-        size_t mStaticSlaveId;
+        UnitId mStaticSlaveId;
     };
 
     template <typename T>

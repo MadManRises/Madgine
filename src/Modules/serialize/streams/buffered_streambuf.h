@@ -11,7 +11,7 @@ namespace Engine {
 namespace Serialize {
 
     struct BufferedMessageHeader {
-        size_t mMsgSize;
+        uint64_t mMsgSize;
     };
 
     struct MODULES_EXPORT buffered_streambuf : SerializeStreambuf {
@@ -51,8 +51,8 @@ namespace Serialize {
         pos_type seekpos(pos_type pos,
             std::ios_base::openmode mode = std::ios_base::in) override;
 
-        virtual int recv(char *, size_t) = 0;
-        virtual int send(char *, size_t) = 0;
+        virtual int recv(char *, uint64_t) = 0;
+        virtual int send(char *, uint64_t) = 0;
 
         int_type overflow(int c = EOF) override;
         int_type underflow() override;
@@ -66,7 +66,7 @@ namespace Serialize {
         StreamState mState = StreamState::OK;
 
         //read
-        size_t mBytesToRead;
+        uint64_t mBytesToRead;
         BufferedMessageHeader mReceiveMessageHeader;
         std::vector<char> mRecBuffer;
 
@@ -76,7 +76,7 @@ namespace Serialize {
         struct BufferedSendMessage {
             bool mHeaderSent;
             BufferedMessageHeader mHeader;
-            size_t mBytesSent;
+            uint64_t mBytesSent;
             std::vector<char> mData;
         };
 
