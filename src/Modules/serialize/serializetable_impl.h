@@ -1,15 +1,15 @@
 #pragma once
 
 #include "../generic/offsetptr.h"
-#include "unithelper.h"
-#include "serializetable.h"
-#include "streams/serializestream.h"
 #include "serializer.h"
+#include "serializetable.h"
+#include "streams/operations.h"
+#include "unithelper.h"
 
 namespace Engine {
 namespace Serialize {
 
-    template <typename _disambiguate__dont_remove, auto P, auto Getter, auto Setter, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P, auto Getter, auto Setter>
     constexpr Serializer encapsulated_pointer(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -67,7 +67,7 @@ namespace Serialize {
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto Getter, auto Setter, typename... Args>
+    template <typename _disambiguate__dont_remove, auto Getter, auto Setter>
     constexpr Serializer encapsulated_field(const char *name)
     {
 
@@ -92,7 +92,7 @@ namespace Serialize {
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 T dummy;
-                read(in, dummy, name, TupleUnpacker::construct<Args>(unit)...);
+                read(in, dummy, name);
                 (unit->*Setter)(std::move(dummy));
             },
             [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
@@ -110,7 +110,7 @@ namespace Serialize {
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto P, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P>
     constexpr Serializer field(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -124,21 +124,21 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                write(out, unit->*P, name);
+                write(out, unit->*P, name, unit);
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                read(in, unit->*P, name, TupleUnpacker::construct<Args>(unit)...);
+                read(in, unit->*P, name, unit);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readAction(in, request, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readAction(in, request);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readRequest(inout, id, TupleUnpacker::construct<Args>(static_cast<Unit *>(unit))...);
+                    (static_cast<Unit *>(unit)->*P).readRequest(inout, id);
                 else
                     throw "Unsupported";
             },
@@ -205,26 +205,23 @@ namespace Serialize {
 #define SERIALIZETABLE_INHERIT_BEGIN(T, Base) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>)
 #define SERIALIZETABLE_BEGIN(T) SERIALIZETABLE_BEGIN_IMPL(T, nullptr)
 
-#define SERIALIZETABLE_END(T)                                    \
-    {                                                            \
-        nullptr, { nullptr, nullptr, nullptr, nullptr, nullptr } \
-    }                                                            \
-    }                                                            \
-    ;                                                            \
-    }                                                            \
-    ;                                                            \
-    }                                                            \
-    }                                                            \
+#define SERIALIZETABLE_END(T) \
+    {                         \
+        nullptr, { nullptr }  \
+    }                         \
+    }                         \
+    ;                         \
+    }                         \
+    ;                         \
+    }                         \
+    }                         \
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelSerializableUnitBase, T> }), T);
 
-//First argument M left out to prevent bug with empty __VA_ARGS__.
-//That way it contains at least one item
-#define FIELD(...) \
-    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
-//read:   #define FIELD(M, ...) { #M, ::Engine::Serialize::field<&Ty::M, __VA_ARGS__>(#M) },
+#define FIELD(M) \
+    { STRINGIFY2(M), ::Engine::Serialize::field<Ty, &Ty::M>(STRINGIFY2(M)) },
 
-#define SYNC(...) \
-    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
+#define SYNC(M) \
+    { STRINGIFY2(M), ::Engine::Serialize::sync<Ty, &Ty::M>(STRINGIFY2(M)) },
 
 #define ENCAPSULATED_FIELD(Name, Getter, Setter)                                            \
     {                                                                                       \

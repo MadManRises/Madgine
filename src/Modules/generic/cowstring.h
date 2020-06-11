@@ -76,10 +76,10 @@ struct CoWString {
     CoWString &operator=(const std::string &&s)
     {
         reset();
+        mSize = s.size();
         char *temp = new char[mSize];
         mString = temp;
         mOwning = true;
-        mSize = s.size();
         strncpy(temp, s.c_str(), mSize);
         return *this;
     }

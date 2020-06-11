@@ -15,7 +15,7 @@ namespace Serialize {
 
     static std::mutex sMasterMappingMutex;
     static SerializableUnitMap sMasterMappings;
-    static size_t sNextUnitId = RESERVED_ID_COUNT;
+    static UnitId sNextUnitId = RESERVED_ID_COUNT;
     static std::atomic<ParticipantId> sRunningStreamId = SerializeManager::sLocalMasterParticipantId;
 
     SerializeManager::SerializeManager(const std::string &name)
@@ -58,7 +58,7 @@ namespace Serialize {
         assert(result == 1);
     }
 
-    size_t SerializeManager::generateMasterId(size_t id,
+    UnitId SerializeManager::generateMasterId(UnitId id,
         SerializableUnitBase *unit)
     {
         if (id == 0) {
@@ -75,7 +75,7 @@ namespace Serialize {
         return id;
     }
 
-    void SerializeManager::deleteMasterId(size_t id, SerializableUnitBase *unit)
+    void SerializeManager::deleteMasterId(UnitId id, SerializableUnitBase *unit)
     {
         if (id >= RESERVED_ID_COUNT) {
             std::lock_guard guard(sMasterMappingMutex);
@@ -124,7 +124,7 @@ namespace Serialize {
     }
 
     SerializableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
-        size_t unit)
+        UnitId unit)
     {
         if (unit == NULL_UNIT_ID)
             return nullptr;

@@ -10,6 +10,7 @@ template <typename T>
 struct comparator_traits<std::less<T>> {
     using type = T;
 	using cmp_type = std::less<T>;
+    using item_type = T;
 
     static const T &to_cmp_type(const T &t)
     {

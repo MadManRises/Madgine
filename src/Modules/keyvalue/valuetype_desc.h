@@ -78,14 +78,29 @@ struct MODULES_EXPORT ExtendedValueTypeIndex {
         return mType == other.mType;
     }
 
+    constexpr bool operator!=(const ExtendedValueTypeIndex &other) const
+    {
+        return mType != other.mType;
+    }
+
     constexpr bool operator==(const ValueTypeIndex &other) const
     {
         return mType == other;
     }
 
+    constexpr bool operator!=(const ValueTypeIndex &other) const
+    {
+        return mType != other;
+    }
+
     constexpr bool operator==(const ExtendedValueTypeEnum &other) const
     {
         return mExtendedType == other;
+    }
+
+    constexpr bool operator!=(const ExtendedValueTypeEnum &other) const
+    {
+        return mExtendedType != other;
     }
 
     std::string_view toString() const;
@@ -94,7 +109,7 @@ struct MODULES_EXPORT ExtendedValueTypeIndex {
 union ValueTypeSecondaryTypeInfo {
 
     constexpr ValueTypeSecondaryTypeInfo()
-        : mDummy()
+        : mDummy(nullptr)
     {
     }
     constexpr ValueTypeSecondaryTypeInfo(const MetaTable **metaTable)
@@ -102,7 +117,17 @@ union ValueTypeSecondaryTypeInfo {
     {
     }
 
-    std::monostate mDummy;
+    bool operator==(const ValueTypeSecondaryTypeInfo &other) const
+    {
+        return mDummy == other.mDummy;
+    }
+
+    bool operator!=(const ValueTypeSecondaryTypeInfo &other) const
+    {
+        return mDummy == other.mDummy;
+    }
+
+    const void *mDummy;
     const MetaTable **mMetaTable;
     const FunctionTable **mFunctionTable;
 };
@@ -113,6 +138,15 @@ struct MODULES_EXPORT ValueTypeDesc {
 
     bool canAccept(const ValueTypeDesc &valueType);
     std::string toString() const;
+
+    bool operator==(const ValueTypeDesc& other) const {
+        return mType == other.mType && mSecondary == other.mSecondary;
+    }
+
+    bool operator!=(const ValueTypeDesc &other) const
+    {
+        return mType != other.mType || mSecondary != other.mSecondary;
+    }
 };
 
 struct MODULES_EXPORT ExtendedValueTypeDesc {
@@ -138,7 +172,7 @@ struct MODULES_EXPORT ExtendedValueTypeDesc {
 template <typename T>
 constexpr ValueTypeIndex toValueTypeIndex()
 {
-    return static_cast<ValueTypeEnum>(type_pack_index_v<ValueTypeList, T>);
+    return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
 }
 
 template <typename T>

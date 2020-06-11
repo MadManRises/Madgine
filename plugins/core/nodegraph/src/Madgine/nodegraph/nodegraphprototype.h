@@ -47,11 +47,12 @@ namespace NodeGraph {
     protected:
         std::unique_ptr<NodePrototypeBase> createNode(const std::string_view &name);
         std::tuple<std::unique_ptr<NodePrototypeBase>> createNodeTuple(const std::string &name);
+        std::tuple<std::pair<const char *, std::string_view>> storeNodeCreationData(const std::unique_ptr<NodePrototypeBase> &node) const;
 
     private:
         Filesystem::Path mPath;
 
-        SERIALIZABLE_CONTAINER(mNodes, std::vector<std::unique_ptr<NodePrototypeBase>>);
+        SERIALIZABLE_CONTAINER(mNodes, std::vector<std::unique_ptr<NodePrototypeBase>>, NoOpFunctor, Serialize::ParentCreator<&NodeGraphPrototype::createNodeTuple, &NodeGraphPrototype::storeNodeCreationData>);
     };
 
 }

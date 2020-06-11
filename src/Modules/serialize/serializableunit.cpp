@@ -7,6 +7,8 @@
 
 #include "streams/bufferedstream.h"
 
+#include "streams/operations.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -38,9 +40,10 @@ namespace Serialize {
 
     void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
     {
-        out.format().beginExtended(out, name);
-        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId))
+        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+            out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "id");
+        }
         out.format().beginCompound(out, name);
         mType->writeState(this, out);
         out.format().endCompound(out, name);
@@ -48,9 +51,9 @@ namespace Serialize {
 
     void SerializableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
     {
-        in.format().beginExtended(in, name);
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            size_t id;
+            in.format().beginExtended(in, name, 1);
+            UnitId id;
             read(in, id, "id");
 
             if (in.manager() && in.manager()->getSlaveStreambuf() == &in.buffer()) {
@@ -93,10 +96,6 @@ namespace Serialize {
         return result;
     }
 
-    void SerializableUnitBase::writeCreationData(SerializeOutStream &out) const
-    {
-    }
-
     const TopLevelSerializableUnitBase *SerializableUnitBase::topLevel() const
     {
         if (mType->mIsTopLevelUnit)
@@ -120,17 +119,17 @@ namespace Serialize {
         mParent = parent;
     }
 
-    size_t SerializableUnitBase::slaveId() const
+    UnitId SerializableUnitBase::slaveId() const
     {
         return mSlaveId;
     }
 
-    size_t SerializableUnitBase::masterId() const
+    UnitId SerializableUnitBase::masterId() const
     {
         return mMasterId;
     }
 
-    void SerializableUnitBase::setSlaveId(size_t id, SerializeManager *mgr)
+    void SerializableUnitBase::setSlaveId(UnitId id, SerializeManager *mgr)
     {
         if (mSlaveId != id) {
             if (mSlaveId != 0) {
@@ -195,17 +194,13 @@ namespace Serialize {
         return mType;
     }
 
-    size_t SerializableUnitBase::moveMasterId(size_t newId)
+    UnitId SerializableUnitBase::moveMasterId(UnitId newId)
     {
-        size_t oldId = mMasterId;
+        UnitId oldId = mMasterId;
         SerializeManager::deleteMasterId(mMasterId, this);
         mMasterId = SerializeManager::generateMasterId(newId, this);
         return oldId;
     }
 
-    /*bool SerializableUnitBase::filter(SerializeOutStream *stream) const
-    {
-        return true;
-    }*/
 } // namespace Serialize
 } // namespace Core

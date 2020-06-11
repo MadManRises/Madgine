@@ -54,8 +54,6 @@ namespace Scene {
 
             App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-            void writeCreationData(Serialize::SerializeOutStream &out) const;
-
         protected:
             const ObjectPtr &initTable();
 

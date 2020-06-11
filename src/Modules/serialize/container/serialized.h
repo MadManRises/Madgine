@@ -7,7 +7,7 @@ namespace Engine {
 namespace Serialize {
     //TODO: Implement OffsetPtr interface
     template <typename T>
-    struct Serialized : private UnitHelper<T>, SerializableBase {
+    struct Serialized : CopyTraits<T>, SerializableBase {
         template <typename... _Ty>
         Serialized(_Ty &&... args)
             : mData(std::forward<_Ty>(args)...)

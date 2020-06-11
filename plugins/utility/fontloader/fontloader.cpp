@@ -9,7 +9,7 @@
 
 #include "Modules/filesystem/filemanager.h"
 #include "Modules/serialize/formatter/safebinaryformatter.h"
-#include "Modules/serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/operations.h"
 
 #include "Modules/generic/areaview.h"
 #include "Modules/generic/bytebuffer.h"
@@ -111,8 +111,6 @@ namespace Render {
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
-            TupleUnpacker::toTuple(font.mGlyphs.front());
-            TupleUnpacker::toTuple(Glyph {});
             in >> font.mGlyphs;
             in >> font.mTextureSize;
             ByteBuffer b;

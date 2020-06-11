@@ -33,7 +33,7 @@ METATABLE_END(Engine::Widgets::WidgetBase)
 RegisterType(Engine::Widgets::WidgetBase);
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::createWidgetClassTuple>)
+FIELD(mChildren)
 FIELD(mPos)
 FIELD(mSize)
 FIELD(mName)
@@ -105,13 +105,13 @@ namespace Widgets {
     Vector3 WidgetBase::getActualSize() const
     {
         const Rect2i &screenSpace = mManager.getClientSpace();
-        return mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f };
+        return mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
     }
 
     Vector3 WidgetBase::getActualPosition() const
     {
         const Rect2i &screenSpace = mManager.getClientSpace();
-        return mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
+        return mAbsolutePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
     }
 
     void WidgetBase::updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize, const Matrix3 &parentPos)
@@ -119,7 +119,7 @@ namespace Widgets {
         mAbsoluteSize = mSize * parentSize;
         mAbsolutePos = mPos * parentSize + parentPos;
 
-        sizeChanged((mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f }).floor());
+        sizeChanged((mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
             child->updateGeometry(screenSpace, getAbsoluteSize(), getAbsolutePosition());
@@ -385,8 +385,8 @@ namespace Widgets {
 
     bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const
     {
-        Vector3 min = mAbsolutePos * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f } - extend;
-        Vector3 max = mAbsoluteSize * Vector3 { screenSpace.mSize, 1.0f } + min + 2 * extend;
+        Vector3 min = mAbsolutePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f } - extend;
+        Vector3 max = mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
@@ -438,6 +438,12 @@ namespace Widgets {
             createWidgetClass(name, _class)
         };
     }
+    std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> WidgetBase::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    {
+        return std::make_tuple(
+            std::make_pair("name", widget->getName()),
+            std::make_pair("type", widget->getClass()));
+    }
     std::unique_ptr<WidgetBase> WidgetBase::createWidget(const std::string &name)
     {
         return std::make_unique<WidgetBase>(name, this);
@@ -485,13 +491,6 @@ namespace Widgets {
     Resources::ImageLoader::ResourceType *WidgetBase::resource() const
     {
         return nullptr;
-    }
-
-    void WidgetBase::writeCreationData(Serialize::SerializeOutStream &of) const
-    {
-        SerializableUnitBase::writeCreationData(of);
-        write(of, mName, "name");
-        write(of, getClass(), "type");
     }
 
     std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)

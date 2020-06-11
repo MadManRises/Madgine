@@ -36,7 +36,7 @@
                                 </Item>
                                 <Item name="Life" type=8 id=282>
                                     <mFontSize>3</mFontSize>
-                                    <mText>Life: 99702</mText>
+                                    <mText>Life: 99999</mText>
                                     <mFont>OpenSans-Bold</mFont>
                                     <mChildren size=0>
                                     </mChildren>
@@ -85,14 +85,14 @@
         </Item>
         <Item key="UI" id=272>
             <mGuiHandlers size=3>
-                <Item key="MainMenuHandler" id=274>
-                    <mWidget>277</mWidget>
-                </Item>
                 <Item key="GameHandler" id=275>
                     <mWidget>279</mWidget>
                 </Item>
                 <Item key="GameOverHandler" id=276>
                     <mWidget>283</mWidget>
+                </Item>
+                <Item key="MainMenuHandler" id=274>
+                    <mWidget>277</mWidget>
                 </Item>
             </mGuiHandlers>
             <mGameHandlers size=1>

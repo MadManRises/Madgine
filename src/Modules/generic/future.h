@@ -7,26 +7,23 @@ struct Future {
 
     Future() = default;
 
-    Future(T value)
+    Future(T value) : mValue(std::move(value))
     {
-        std::promise<T> p;
-        p.set_value(value);
-        mFuture = p.get_future();
     }
 
     Future(std::future<T> future)
-        : mFuture(std::move(future))
+        : mValue(std::move(future))
     {
     }
 
     template <typename U, typename F>
     Future(Future<U> deferred, F &&f)
-        : mDeferred(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
+        : mValue(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
     {
     }
 
     template <typename F>
-    Future<std::invoke_result_t<F&&, T>> then(F &&f)
+    Future<std::invoke_result_t<F &&, T>> then(F &&f)
     {
         return { std::move(*this), std::forward<F>(f) };
     }
@@ -47,23 +44,20 @@ struct Future {
 
     T get()
     {
-        assert(mFuture.valid() != bool(mDeferred));
-        if (mFuture.valid()) {
-            return mFuture.get();
-        } else if (mDeferred) {
-            return mDeferred->get();
-        } else {
-            throw 0;
-        }
+         return std::visit(overloaded {
+                              [](const T &t) { return t; },
+                              [](std::future<T> &f) { return f.get(); },
+                              [](const std::unique_ptr<DeferredBase> &d) { return d->get(); } },
+            mValue);
     }
 
     bool isAvailable() const
     {
-        if (mFuture.valid()) {
-            return mFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
-        } else {
-            return mDeferred->isAvailable();
-        }
+        return std::visit(overloaded {
+                              [](const T &t) { return true; },
+                              [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::unique_ptr<DeferredBase> &d) { return d->isAvailable(); } },
+            mValue);
     }
 
 private:
@@ -98,8 +92,7 @@ private:
     };
 
 private:
-    std::future<T> mFuture;
-    std::unique_ptr<DeferredBase> mDeferred;
+    std::variant<T, std::future<T>, std::unique_ptr<DeferredBase>> mValue;
 };
 
 }

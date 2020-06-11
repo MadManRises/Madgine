@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-template <typename _Representation, typename Registry>
+template <typename _Representation>
 struct Enum : _Representation {
 
     using Representation = _Representation;
@@ -25,7 +25,7 @@ struct Enum : _Representation {
     static const std::string_view &toString(EnumType value)
     {
         assert(value > Representation::MIN && value < Representation::MAX);
-        return Registry::sIdentifiers[value - Representation::MIN - 1];
+        return Representation::sIdentifiers[value - Representation::MIN - 1];
     }
 
     const std::string_view &toString() const
@@ -38,24 +38,24 @@ struct Enum : _Representation {
         return stream << actualType << "::" << toString() << " (" << static_cast<int>(mValue) << ")";
     }
 
-    friend std::ostream &operator<<(std::ostream &stream, const Enum<Representation, Registry> &value)
+    friend std::ostream &operator<<(std::ostream &stream, const Enum<Representation> &value)
     {
         return value.print(stream, sTypeName());
     }
 
     static const std::string_view &sTypeName()
     {
-        return Registry::sName;
+        return Representation::sName;
     }
 
 protected:
     EnumType mValue;
 };
 
-template <typename _Representation, typename Registry, typename Base>
-struct BaseEnum : Enum<_Representation, Registry>, Base::Representation {
+template <typename _Representation, typename Base>
+struct BaseEnum : Enum<_Representation>, Base::Representation {
 private:
-    using EnumBase = Enum<_Representation, Registry>;
+    using EnumBase = Enum<_Representation>;
 
 public:
     using EnumType = typename EnumBase::EnumType;
@@ -68,6 +68,8 @@ public:
     static constexpr int COUNT = MAX - MIN - 1;
 
     using EnumBase::EnumBase;
+
+    //TODO: using might be enough
 
     template <typename T, typename = std::enable_if_t<std::is_constructible_v<Base, T>>>
     BaseEnum(T v)
@@ -101,7 +103,7 @@ public:
         return EnumBase::print(stream, actualType);
     }
 
-    friend std::ostream &operator<<(std::ostream &stream, const BaseEnum<_Representation, Registry, Base> &value)
+    friend std::ostream &operator<<(std::ostream &stream, const BaseEnum<_Representation, Base> &value)
     {
         return value.print(stream, EnumBase::sTypeName());
     }
@@ -129,20 +131,18 @@ private:
             MAX,                                                                                                                                             \
             COUNT = MAX - MIN - 1                                                                                                                            \
         };                                                                                                                                                   \
-    };                                                                                                                                                       \
-    struct Name##Registry {                                                                                                                                  \
         static inline const constexpr std::string_view sName = #Name;                                                                                        \
         static inline const constexpr auto sIdentifiers = Engine::StringUtil::tokenize<static_cast<size_t>(Name##Representation::COUNT)>(#__VA_ARGS__, ','); \
     };                                                                                                                                                       \
     inline std::ostream &operator<<(std::ostream &stream, typename Name##Representation::EnumType value)                                                     \
     {                                                                                                                                                        \
-        return stream << Engine::Enum<Name##Representation, Name##Registry> { value };                                                                       \
+        return stream << Engine::Enum<Name##Representation> { value };                                                                       \
     }
 
 #define ENUM_BASE(Name, Base, ...)                  \
     ENUM_REGISTRY(Name, Base::MAX - 1, __VA_ARGS__) \
-    using Name = Engine::BaseEnum<Name##Representation, Name##Registry, Base>;
+    using Name = Engine::BaseEnum<Name##Representation, Base>;
 
 #define ENUM(Name, ...)                  \
     ENUM_REGISTRY(Name, -1, __VA_ARGS__) \
-    using Name = Engine::Enum<Name##Representation, Name##Registry>;
+    using Name = Engine::Enum<Name##Representation>;

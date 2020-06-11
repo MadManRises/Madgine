@@ -37,7 +37,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::createWidgetClassTuple>)
+FIELD(mTopLevelWidgets)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 RegisterType(Engine::Widgets::WidgetManager);
@@ -73,7 +73,7 @@ namespace Widgets {
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
-		/*WidgetBase *loading = createTopLevelImage("Loading");
+        /*WidgetBase *loading = createTopLevelImage("Loading");
         WidgetBase *progress = loading->createChildBar("ProgressBar");
         progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
         progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
@@ -296,6 +296,13 @@ namespace Widgets {
         return { createWidgetClass(name, _class) };
     }
 
+    std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> WidgetManager::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    {
+        return std::make_tuple(
+            std::make_pair("name", widget->getName()),
+            std::make_pair("type", widget->getClass()));
+    }
+
     std::unique_ptr<WidgetBase> WidgetManager::createWidget(const std::string &name)
     {
         std::unique_ptr<WidgetBase> w = std::make_unique<WidgetBase>(name, *this);
@@ -395,7 +402,7 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= getScreenSpace().mTopLeft;
+        modArgs.position -= Vector2 { getScreenSpace().mTopLeft };
 
         Rect2i clientSpace = mClientSpace;
 
@@ -416,7 +423,7 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow.window()->renderX()), static_cast<float>(mWindow.window()->renderY()) } + mClientSpace.mTopLeft;
+        modArgs.position -= Vector2 { Vector2i { mWindow.window()->renderX(), mWindow.window()->renderY() } + mClientSpace.mTopLeft };
 
         Rect2i clientSpace = { { 0, 0 }, mClientSpace.mSize };
 
@@ -610,28 +617,27 @@ namespace Widgets {
     {
         Rect2i screenSpace = mClientSpace;
 
-        target->setRenderSpace(screenSpace);        
+        target->setRenderSpace(screenSpace);
 
         std::map<Render::TextureDescriptor, std::vector<GUI::Vertex>> vertices;
 
-        std::queue<std::pair<Widgets::WidgetBase *, int>> q;
+        std::queue<Widgets::WidgetBase *> q;
         for (Widgets::WidgetBase *w : widgets()) {
             if (w->mVisible) {
-                q.push(std::make_pair(w, 0));
+                q.push(w);
             }
         }
         while (!q.empty()) {
 
-            Widgets::WidgetBase *w = q.front().first;
-            int depth = q.front().second;
+            Widgets::WidgetBase *w = q.front();            
             q.pop();
 
             for (Widgets::WidgetBase *c : w->children()) {
                 if (c->mVisible)
-                    q.push(std::make_pair(c, depth + 1));
+                    q.push(c);
             }
 
-            std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(Vector3 { screenSpace.mSize, 1.0f });
+            std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
             Resources::ImageLoader::ResourceType *resource = w->resource();
             if (resource) {

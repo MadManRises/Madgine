@@ -109,8 +109,6 @@ namespace Widgets {
 
         virtual Resources::ImageLoader::ResourceType *resource() const;
 
-        void writeCreationData(Serialize::SerializeOutStream &of) const;
-
         size_t depth();
 
         bool mVisible = true;
@@ -120,6 +118,7 @@ namespace Widgets {
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
+        std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         virtual std::unique_ptr<Bar> createBar(const std::string &name);
@@ -149,7 +148,7 @@ namespace Widgets {
 
         WidgetManager &mManager;
 
-        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>);
+        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor, Serialize::ParentCreator<&WidgetBase::createWidgetClassTuple, &WidgetBase::storeWidgetCreationData>);
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;

@@ -187,6 +187,7 @@ struct KeyCompare {
     struct traits {
         typedef KeyCompare<_Ty> cmp_type;
         typedef KeyType_t<_Ty> type;
+        typedef _Ty item_type;
 
         static decltype(auto) to_cmp_type(const _Ty &v)
         {

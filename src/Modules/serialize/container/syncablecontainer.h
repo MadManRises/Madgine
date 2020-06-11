@@ -6,6 +6,7 @@
 #include "../../generic/future.h"
 #include "../../generic/onetimefunctor.h"
 #include "../streams/bufferedstream.h"
+#include "../streams/operations.h"
 #include "../streams/pendingrequest.h"
 #include "../syncable.h"
 #include "requestbuilder.h"
@@ -16,9 +17,9 @@ namespace Serialize {
 
     template <typename Builder>
     struct EmplaceRequestBuilder;
-    
+
     template <typename Builder>
-    struct EmplaceRequestBuilder : RequestBuilder<Builder>  {
+    struct EmplaceRequestBuilder : RequestBuilder<Builder> {
 
         template <typename C>
         auto init(C &&c)
@@ -29,7 +30,6 @@ namespace Serialize {
 
     template <typename F>
     EmplaceRequestBuilder(F &&f)->EmplaceRequestBuilder<Builder<F, EmplaceRequestBuilder, 4>>;
-
 
     namespace __syncablecontainer__impl__ {
         enum RequestMode {
@@ -48,14 +48,14 @@ namespace Serialize {
         using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
     };
 
-    template <typename C, typename Config, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, OffsetPtr>, Syncable<OffsetPtr> {
+    template <typename C, typename Config, typename Observer = NoOpFunctor, typename Serialize_Config = DefaultCreator<typename C::value_type>, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, Serialize_Config, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
 
         struct traits : _traits {
 
-            typedef SyncableContainerImpl<C, Config, Observer, OffsetPtr> container;
+            typedef SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr> container;
 
             template <typename... _Ty>
             static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
@@ -64,7 +64,7 @@ namespace Serialize {
             }
         };
 
-        typedef SerializableContainerImpl<C, Observer, OffsetPtr> Base;
+        typedef SerializableContainerImpl<C, Observer, Serialize_Config, OffsetPtr> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
@@ -77,12 +77,10 @@ namespace Serialize {
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
         template <typename T>
-        SyncableContainerImpl<C, Config, Observer, OffsetPtr> &operator=(T &&arg)
+        SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr> &operator=(T &&arg)
         {
             if (this->isMaster()) {
-                bool wasActive = beforeReset();
-                Base::operator=(std::forward<T>(arg));
-                afterReset(wasActive);
+                ResetOperation { *this } = std::forward<T>(arg);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     Base temp(std::forward<T>(arg));
@@ -100,45 +98,42 @@ namespace Serialize {
 
         void clear()
         {
-            bool wasActive = beforeReset();
-            Base::clear_intern();
-            afterReset(wasActive);
+            ResetOperation { *this }.clear();
         }
 
-        
         template <typename... _Ty>
         auto emplace(const iterator &where, _Ty &&... args)
         {
             return EmplaceRequestBuilder {
                 [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&then, auto &&onSuccess, auto &&onFailure, auto &&init) mutable -> Future<typename _traits::emplace_return> {
-                    if (this->isMaster()) {
-                        typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_impl), this, where, std::forward<decltype(init)>(init), std::move(args));
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
-                        return it;
-                    }
-                    else
-                    {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<typename _traits::emplace_return> p;
-                            Future<typename _traits::emplace_return> future = p.get_future();
-
-                            BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-                            *out << INSERT_ITEM;
-                            value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
-                            TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
-                            write_item(*out, where, temp);
-                            out->endMessage();
-
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
-                    }
-                }
-            };
+                                                                                                                                                        if (this->isMaster()) {
+                                                                                                                                                            typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_impl), this, where, std::forward<decltype(init)>(init), std::move(args));
+            executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+            return it;
         }
+        else
+        {
+            if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
+                std::promise<typename _traits::emplace_return> p;
+                Future<typename _traits::emplace_return> future = p.get_future();
 
-        /*template <typename T, typename... _Ty>
+                BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                *out << INSERT_ITEM;
+                value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
+                TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
+                write_item(*out, where, temp);
+                out->endMessage();
+
+                return future;
+            } else {
+                std::terminate();
+            }
+        }
+    }
+};
+}
+
+/*template <typename T, typename... _Ty>
         std::pair<iterator, bool> emplace_init(T &&init, const iterator &where, _Ty &&... args)
         {
             std::pair<iterator, bool> it = std::make_pair(this->end(), false);
@@ -167,63 +162,63 @@ namespace Serialize {
             return it;
         }*/
 
-        auto erase(const iterator &where)
-        {
-            return RequestBuilder {
-                [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
-                    if (this->isMaster()) {
-                        iterator it = erase_impl(where);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
-                        return it;
-                    } else {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<iterator> p;
-                            Future<iterator> future = p.get_future();
+auto erase(const iterator &where)
+{
+    return RequestBuilder {
+        [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
+            if (this->isMaster()) {
+                iterator it = erase_impl(where);
+                executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                return it;
+            } else {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
+                    std::promise<iterator> p;
+                    Future<iterator> future = p.get_future();
 
-                            BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-                            *out << REMOVE_ITEM;
-                            this->write_iterator(*out, where);
-                            out->endMessage();
+                    BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                    *out << REMOVE_ITEM;
+                    this->write_iterator(*out, where);
+                    out->endMessage();
 
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
-                    }
+                    return future;
+                } else {
+                    std::terminate();
                 }
-            };
+            }
         }
+    };
+}
 
-        auto erase(const iterator &from, const iterator &to)
-        {
-            iterator it = this->end();
-            return RequestBuilder {
-                [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
-                    if (this->isMaster()) {
-                        iterator it = erase_impl(from, to);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
-                        return it;
-                    } else {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<iterator> p;
-                            Future<iterator> future = p.get_future();
+auto erase(const iterator &from, const iterator &to)
+{
+    iterator it = this->end();
+    return RequestBuilder {
+        [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
+            if (this->isMaster()) {
+                iterator it = erase_impl(from, to);
+                executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                return it;
+            } else {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
+                    std::promise<iterator> p;
+                    Future<iterator> future = p.get_future();
 
-                            BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-                            *out << REMOVE_RANGE;
-                            this->write_iterator(*out, from);
-                            this->write_iterator(*out, to);
-                            out->endMessage();
+                    BufferedOutStream *out = this->getSlaveActionMessageTarget(0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                    *out << REMOVE_RANGE;
+                    this->write_iterator(*out, from);
+                    this->write_iterator(*out, to);
+                    out->endMessage();
 
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
-                    }
+                    return future;
+                } else {
+                    std::terminate();
                 }
-            };
+            }
         }
+    };
+}
 
-        /*std::pair<iterator, bool> read_item_where(BufferedInStream & in, const const_iterator &where)
+/*std::pair<iterator, bool> read_item_where(BufferedInStream & in, const const_iterator &where)
     {
         std::pair<iterator, bool> it = std::make_pair(this->end(), false);
         if (this->isMaster()) {
@@ -234,276 +229,287 @@ namespace Serialize {
         return it;
     }*/
 
-        template <typename Creator = DefaultCreator<>>
-        void readState(SerializeInStream &in, const char *name, Creator &&creator = {})
-        {
-            readState_impl(in, name, std::forward<Creator>(creator));
+/*void readState(SerializeInStream &in, const char *name)
+{
+    readState_impl(in, name);
+}*/
+
+void readRequest(BufferedInOutStream &inout, TransactionId id)
+{
+    bool accepted = (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
+
+    ObserverEvent op;
+    inout >> reinterpret_cast<int &>(op);
+
+    if (!accepted) {
+        if (id) {
+            this->beginActionResponseMessage(&inout, id);
+            inout << (op | ABORTED);
+            inout.endMessage();
         }
+    } else {
+        if (this->isMaster()) {
+            performOperation(op, inout, inout.id(), id);
+        } else {
+            BufferedOutStream *out = this->getSlaveActionMessageTarget(inout.id(), id);
+            *out << op;
+            out->pipe(inout);
+            out->endMessage();
+        }
+    }
+}
 
-        template <typename Creator = DefaultCreator<>>
-        void readRequest(BufferedInOutStream &inout, TransactionId id, Creator &&creator = {})
-        {
-            bool accepted = (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
+void readAction(SerializeInStream &inout, PendingRequest *request)
+{
+    ObserverEvent op;
+    inout >> op;
 
-            ObserverEvent op;
-            inout >> reinterpret_cast<int &>(op);
+    bool accepted = (op & ~MASK) != ABORTED;
 
-            if (!accepted) {
-                if (id) {
-                    this->beginActionResponseMessage(&inout, id);
-                    inout << (op | ABORTED);
-                    inout.endMessage();
-                }
-            } else {
-                if (this->isMaster()) {
-                    performOperation(op, inout, std::forward<Creator>(creator), inout.id(), id);
-                } else {
-                    BufferedOutStream *out = this->getSlaveActionMessageTarget(inout.id(), id);
-                    *out << op;
-                    out->pipe(inout);
+    if (accepted) {
+        typename _traits::emplace_return it = performOperation(ObserverEvent(op & MASK), inout, request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+        if (request && request->mCallback)
+            request->mCallback(&it);
+    } else {
+        if (request) {
+            if (request->mRequesterTransactionId) {
+                BufferedOutStream *out = this->beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
+                *out << op;
+                out->endMessage();
+            }
+            if (request->mCallback)
+                request->mCallback(nullptr);
+        }
+    }
+}
+
+typename _traits::emplace_return performOperation(ObserverEvent op, SerializeInStream &in, ParticipantId answerTarget, TransactionId answerId)
+{
+    typename _traits::emplace_return it = this->end();
+    switch (op) {
+    case INSERT_ITEM:
+        if constexpr (!_traits::sorted) {
+            it = read_iterator(in);
+        }
+        it = read_item_where_impl(in, it, answerTarget, answerId);
+        break;
+    case REMOVE_ITEM:
+        it = erase_impl(this->read_iterator(in), answerTarget, answerId);
+        break;
+    case REMOVE_RANGE: {
+        iterator from = this->read_iterator(in);
+        iterator to = this->read_iterator(in);
+        it = erase_impl(from, to, answerTarget, answerId);
+        break;
+    }
+    case RESET:
+        readState_impl(in, nullptr, answerTarget, answerId);
+        break;
+    default:
+        std::terminate();
+    }
+    return it;
+}
+
+struct InsertOperation : Base::InsertOperation {
+    InsertOperation(typename traits::container &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        : Base::InsertOperation(c, where)
+        , mAnswerTarget(answerTarget)
+        , mAnswerId(answerId)
+    {
+    }
+    ~InsertOperation()
+    {
+        assert(this->mTriggered == 1);
+        if (this->mLastInserted) {
+            if (this->mContainer.isSynced()) {
+                for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
+                    *out << INSERT_ITEM;
+                    container().write_item(*out, this->mLastIt, *this->mLastIt);
                     out->endMessage();
                 }
             }
         }
+    }
 
-        template <typename Creator = DefaultCreator<>>
-        void readAction(SerializeInStream &inout, PendingRequest *request, Creator &&creator = {})
-        {
-            ObserverEvent op;
-            inout >> op;
+    typename traits::container &container()
+    {
+        return static_cast<typename traits::container &>(this->mContainer);
+    }
 
-            bool accepted = (op & ~MASK) != ABORTED;
+private:
+    ParticipantId mAnswerTarget;
+    TransactionId mAnswerId;
+};
 
-            if (accepted) {
-                typename _traits::emplace_return it = performOperation(ObserverEvent(op & MASK), inout, std::forward<Creator>(creator), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
-                if (request && request->mCallback)
-                    request->mCallback(&it);
-            } else {
-                if (request) {
-                    if (request->mRequesterTransactionId) {
-                        BufferedOutStream *out = this->beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
-                        *out << op;
-                        out->endMessage();
-                    }
-                    if (request->mCallback)
-                        request->mCallback(nullptr);
-                }
+struct RemoveOperation : Base::RemoveOperation {
+    RemoveOperation(typename traits::container &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        : Base::RemoveOperation(c, it)
+    {
+        if (this->mContainer.isSynced()) {
+            for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
+                *out << REMOVE_ITEM;
+                container().write_iterator(*out, it);
+                out->endMessage();
             }
         }
+    }
 
-        template <typename Creator>
-        typename _traits::emplace_return performOperation(ObserverEvent op, SerializeInStream &in, Creator &&creator, ParticipantId answerTarget, TransactionId answerId)
-        {
-            typename _traits::emplace_return it = this->end();
-            switch (op) {
-            case INSERT_ITEM:
-                if constexpr (!_traits::sorted) {
-                    it = read_iterator(in);
-                }
-                it = read_item_where_impl(in, it, std::forward<Creator>(creator), answerTarget, answerId);
-                break;
-            case REMOVE_ITEM:
-                it = erase_impl(this->read_iterator(in), answerTarget, answerId);
-                break;
-            case REMOVE_RANGE: {
-                iterator from = this->read_iterator(in);
-                iterator to = this->read_iterator(in);
-                it = erase_impl(from, to, answerTarget, answerId);
-                break;
+    typename traits::container &container()
+    {
+        return static_cast<typename traits::container &>(this->mContainer);
+    }
+};
+
+struct RemoveRangeOperation : Base::RemoveRangeOperation {
+    RemoveRangeOperation(typename traits::container &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        : Base::RemoveRangeOperation(c, from, to)
+    {
+        if (this->mContainer.isSynced()) {
+            for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
+                *out << REMOVE_RANGE;
+                container().write_iterator(*out, from);
+                container().write_iterator(*out, to);
+                out->endMessage();
             }
-            case RESET:
-                readState_impl(in, nullptr, std::forward<Creator>(creator), answerTarget, answerId);
-                break;
-            default:
-                std::terminate();
+        }
+    }
+
+    typename traits::container &container()
+    {
+        return static_cast<typename traits::container &>(this->mContainer);
+    }
+};
+
+struct ResetOperation : Base::ResetOperation {
+    ResetOperation(typename traits::container &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        : Base::ResetOperation(c)
+        , mAnswerTarget(answerTarget)
+        , mAnswerId(answerId)
+    {
+    }
+    ~ResetOperation()
+    {
+        if (this->mContainer.isSynced()) {
+            for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
+                *out << RESET;
+                write(*out, this->mContainer, nullptr, OffsetPtr::parent(&this->mContainer));
+                out->endMessage();
             }
-            return it;
         }
+    }
 
-    private:
-        template <typename T, typename... Callbacks>
-        static void executeCallbacks(const T &t, Callbacks &&... callbacks)
-        {
-            (TupleUnpacker::forEach(std::forward<Callbacks>(callbacks), [&](auto &&f) { TupleUnpacker::invoke(f, t); }), ...);
+    typename traits::container &container()
+    {
+        return static_cast<typename traits::container &>(this->mContainer);
+    }
+
+private:
+    ParticipantId mAnswerTarget;
+    TransactionId mAnswerId;
+};
+
+private:
+template <typename T, typename... Callbacks>
+static void executeCallbacks(const T &t, Callbacks &&... callbacks)
+{
+    (TupleUnpacker::forEach(std::forward<Callbacks>(callbacks), [&](auto &&f) { TupleUnpacker::invoke(f, t); }), ...);
+}
+
+template <typename T, typename Then, typename OnSuccess, typename OnFailure>
+std::function<void(void *)> generateCallback(std::promise<T> p, Then &&then, OnSuccess &&onSuccess, OnFailure &&onFailure)
+{
+    return oneTimeFunctor([p = std::move(p), then = std::forward<Then>(then), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
+        if (data) {
+            T *t = static_cast<T *>(data);
+            executeCallbacks(*t, std::move(onSuccess), std::move(then));
+            p.set_value(std::move(*t));
+        } else {
+            TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
+            TupleUnpacker::forEach(std::move(then), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
         }
+    });
+}
 
-        template <typename T, typename Then, typename OnSuccess, typename OnFailure>
-        std::function<void(void *)> generateCallback(std::promise<T> p, Then &&then, OnSuccess &&onSuccess, OnFailure &&onFailure)
-        {
-            return oneTimeFunctor([p = std::move(p), then = std::forward<Then>(then), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
-                if (data) {
-                    T *t = static_cast<T *>(data);
-                    executeCallbacks(*t, std::move(onSuccess), std::move(then));
-                    p.set_value(std::move(*t));
-                } else {
-                    TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
-                    TupleUnpacker::forEach(std::move(then), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
-                }
-            });
-        }
-
-        void beforeInsert(const iterator &it)
-        {
-            Base::beforeInsert(it);
-        }
-
-        void afterInsert(bool inserted, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            if (inserted) {
-                if (this->isSynced()) {
-                    for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
-                        *out << INSERT_ITEM;
-                        write_item(*out, it, *it);
-                        out->endMessage();
-                    }
-                }
-            }
-            Base::afterInsert(inserted, it);
-        }
-
-        bool beforeRemove(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
-                    *out << REMOVE_ITEM;
-                    this->write_iterator(*out, it);
-                    out->endMessage();
-                }
-            }
-            return Base::beforeRemove(it);
-        }
-
-        void afterRemove(bool b, const iterator &it)
-        {
-            Base::afterRemove(b, it);
-        }
-
-        size_t beforeRemoveRange(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
-                    *out << REMOVE_RANGE;
-                    this->write_iterator(*out, from);
-                    this->write_iterator(*out, to);
-                    out->endMessage();
-                }
-            }
-
-            return Base::beforeRemoveRange(from, to);
-        }
-
-        void afterRemoveRange(size_t count, const iterator &it)
-        {
-            Base::afterRemoveRange(count, it);
-        }
-
-        bool beforeReset()
-        {
-            return Base::beforeReset();
-        }
-
-        void afterReset(bool wasActive, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            if (this->isSynced()) {
-                for (BufferedOutStream *out : this->getMasterActionMessageTargets(answerTarget, answerId)) {
-                    *out << RESET;
-                    this->writeState(*out);
-                    out->endMessage();
-                }
-            }
-            Base::afterReset(wasActive);
-        }
-
-        iterator read_iterator(SerializeInStream &in)
-        {
-            /*if constexpr (_traits::sorted) {
+iterator read_iterator(SerializeInStream &in)
+{
+    /*if constexpr (_traits::sorted) {
                 FixString_t<KeyType_t<typename _traits::value_type>> key;
                 in >> key;
                 return kvFind(*this, key);
             } else*/
-            {
-                int i;
-                in >> i;
-                return std::next(Base::Base::begin(), i);
-            }
-        }
+    {
+        int i;
+        in >> i;
+        return std::next(Base::Base::begin(), i);
+    }
+}
 
-        void write_iterator(SerializeOutStream &out, const const_iterator &it) const
-        {
-            /*if constexpr (_traits::sorted) {
+void write_iterator(SerializeOutStream &out, const const_iterator &it) const
+{
+    /*if constexpr (_traits::sorted) {
                 out << kvKey(*it);
             } else*/
-            {
-                out << static_cast<int>(std::distance(Base::Base::begin(), it));
-            }
-        }
+    {
+        out << static_cast<int>(std::distance(Base::Base::begin(), it));
+    }
+}
 
-        template <typename Creator>
-        std::pair<iterator, bool> read_item(SerializeInStream &in, Creator &&creator)
-        {
-            iterator it;
-            if constexpr (_traits::sorted) {
-                it = this->end();
-            } else {
-                it = read_iterator(in);
-            }
-            return Base::read_item_where_intern(in, it, std::forward<Creator>(creator));
-        }
+template <typename Creator>
+std::pair<iterator, bool> read_item(SerializeInStream &in, Creator &&creator)
+{
+    iterator it;
+    if constexpr (_traits::sorted) {
+        it = this->end();
+    } else {
+        it = read_iterator(in);
+    }
+    return Base::read_item_where_intern(in, it, std::forward<Creator>(creator));
+}
 
-        void write_item(SerializeOutStream &out, const const_iterator &it, const value_type &t) const
-        {
-            if constexpr (!_traits::sorted) {
-                write_iterator(out, it);
-            }
-            Base::write_item(out, t);
-        }
+void write_item(SerializeOutStream &out, const const_iterator &it, const value_type &t) const
+{
+    if constexpr (!_traits::sorted) {
+        write_iterator(out, it);
+    }
+    Base::write_item(out, t);
+}
 
-        template <typename Init, typename... _Ty>
-        typename _traits::emplace_return emplace_impl(const iterator &where, Init &&init, _Ty &&... args)
-        {
-            beforeInsert(where);
-            typename _traits::emplace_return it = Base::emplace_intern(where, std::forward<_Ty>(args)...);
-            TupleUnpacker::forEach(std::forward<Init>(init), [&](auto &&f) { TupleUnpacker::invoke(f, *it); });
-            afterInsert(_traits::was_emplace_successful(it), it);
-            return it;
-        }
+template <typename Init, typename... _Ty>
+typename _traits::emplace_return emplace_impl(const iterator &where, Init &&init, _Ty &&... args)
+{
+    InsertOperation op { *this, where };
+    typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
+    TupleUnpacker::forEach(std::forward<Init>(init), [&](auto &&f) { TupleUnpacker::invoke(f, *it); });
+    return it;
+}
 
-        iterator erase_impl(const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            bool b = beforeRemove(where, answerTarget, answerId);
-            iterator it = Base::erase_intern(where);
-            afterRemove(b, it);
-            return it;
-        }
+iterator erase_impl(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+{
+    return RemoveOperation { *this, it, answerTarget, answerId }.erase(it);
+}
 
-        iterator erase_impl(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            size_t count = beforeRemoveRange(from, to, answerTarget, answerId);
-            iterator it = Base::erase_intern(from, to);
-            afterRemoveRange(count, it);
-            return it;
-        }
+iterator erase_impl(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+{
+    return RemoveRangeOperation { *this, from, to, answerTarget, answerId }.erase(from, to);
+}
 
-        template <typename Creator = DefaultCreator<>>
-        void readState_impl(SerializeInStream &in, const char *name, Creator &&creator = {}, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            bool wasActive = beforeReset();
-            Base::readState_intern(in, name, std::forward<Creator>(creator));
-            afterReset(wasActive, answerTarget, answerId);
-        }
+void readState_impl(SerializeInStream &in, const char *name, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+{
+    ResetOperation op { *this, answerTarget, answerId };
+    readContainerOp<typename traits::container, typename Base::Config>(in, *this, name, op, OffsetPtr::parent(this));
+}
 
-        template <typename Creator>
-        typename _traits::emplace_return read_item_where_impl(SerializeInStream &in, const iterator &where, Creator &&creator, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-        {
-            beforeInsert(where);
-            typename _traits::emplace_return it = Base::read_item_where_intern(in, where, std::forward<Creator>(creator));
-            afterInsert(_traits::was_emplace_successful(it), it, answerTarget, answerId);
-            return it;
-        }
-    };
+typename _traits::emplace_return read_item_where_impl(SerializeInStream &in, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+{
+    InsertOperation op { *this, where, answerTarget, answerId };
+    return Base::read_item_where_intern(in, where, op);
+}
+}
+;
 
-    template <typename C, typename Config, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<C, Config, Observer, OffsetPtr>>;
+template <typename C, typename Config, typename Observer = NoOpFunctor, typename Serialize_Config = DefaultCreator<typename C::value_type>, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr>>;
 
 #define SYNCABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 }

@@ -5,17 +5,17 @@ namespace Serialize {
 
     struct Serializer {
         const char *mFieldName;
-        size_t (*mOffset)();
+        size_t (*mOffset)() = nullptr;
 
-        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *name);
-        void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *name);        
+        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *name) = nullptr;
+        void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *name) = nullptr;
 
-		void (*mReadAction)(SerializableUnitBase *, SerializeInStream &, PendingRequest *);
-        void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &, TransactionId id);
+        void (*mReadAction)(SerializableUnitBase *, SerializeInStream &, PendingRequest *) = nullptr;
+        void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &, TransactionId id) = nullptr;
 
-		void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &);
-        void (*mSetDataSynced)(SerializableUnitBase *, bool);
-        void (*mSetActive)(SerializableUnitBase *, bool, bool);
+        void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &) = nullptr;
+        void (*mSetDataSynced)(SerializableUnitBase *, bool) = nullptr;
+        void (*mSetActive)(SerializableUnitBase *, bool, bool) = nullptr;
     };
 
 }

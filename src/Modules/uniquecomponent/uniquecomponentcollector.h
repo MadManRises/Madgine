@@ -10,7 +10,7 @@
 
 namespace Engine {
 
-DERIVE_TYPEDEF(VBase)
+DERIVE_TYPENAME(VBase)
 
 template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector {
@@ -51,7 +51,7 @@ private:
         sInstance().mInfo.mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
         std::vector<const TypeInfo *> elementInfos;
         elementInfos.push_back(&typeInfo<T>());
-        if constexpr (has_typedef_VBase_v<T>) {
+        if constexpr (has_typename_VBase_v<T>) {
             elementInfos.push_back(&typeInfo<typename T::VBase>());
         }
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));

@@ -110,10 +110,5 @@ namespace NodeGraph {
         mDataInPins[index].mSource = {};
     }
 
-    void NodePrototypeBase::writeCreationData(Serialize::SerializeOutStream &of) const
-    {
-        write(of, name(), "type");
-    }
-
 }
 }

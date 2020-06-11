@@ -28,7 +28,7 @@ MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::createNonLocalEntityData>)
+FIELD(mEntities)
 FIELD(mSceneComponents)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -191,6 +191,12 @@ RegisterType(Engine::Scene::SceneManager)
             std::string actualName = name.empty() ? generateUniqueName() : name;
 
             return make_tuple(std::ref(*this), local, actualName);
+        }
+
+        std::tuple<std::pair<const char*, std::string>> SceneManager::storeEntityCreationData(const Entity::Entity &entity) const
+        {
+            return std::make_tuple(
+                std::make_pair("name", entity.name()));            
         }
 
         /*Threading::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()

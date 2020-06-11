@@ -13,7 +13,7 @@ namespace Serialize {
 #define SYNCED(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
 
     template <typename T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, UnitHelper<T>, private Observer {
+    struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, CopyTraits<T>, private Observer {
         template <typename... _Ty>
         Synced(_Ty &&... args)
             : mData(std::forward<_Ty>(args)...)

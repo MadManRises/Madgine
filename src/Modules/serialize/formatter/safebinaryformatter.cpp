@@ -7,21 +7,21 @@
 namespace Engine {
 namespace Serialize {
 
-    constexpr const size_t SERIALIZE_MAGIC_NUMBER = 0x12345678;
+    constexpr const uint16_t SERIALIZE_MAGIC_NUMBER = 0x5AFE;
 
     SafeBinaryFormatter::SafeBinaryFormatter()
         : Formatter(true)
     {
     }
 
-    void SafeBinaryFormatter::beginPrimitive(SerializeOutStream &out, const char *name, size_t typeId, bool closeExtended)
+    void SafeBinaryFormatter::beginPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
     {
-        out.writeRaw<size_t>(SERIALIZE_MAGIC_NUMBER + typeId);
+        out.writeRaw<uint16_t>(SERIALIZE_MAGIC_NUMBER + typeId);
     }
 
-    void SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, size_t typeId, bool closeExtended)
+    void SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
     {
-        size_t type;
+        uint16_t type;
         in.readRaw(type);
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)

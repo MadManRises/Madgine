@@ -18,8 +18,8 @@ namespace Serialize {
         void addSlaveMapping(SerializableUnitBase *item);
         void removeSlaveMapping(SerializableUnitBase *item);
 
-        static size_t generateMasterId(size_t id, SerializableUnitBase *unit);
-        static void deleteMasterId(size_t id, SerializableUnitBase *unit);
+        static UnitId generateMasterId(UnitId id, SerializableUnitBase *unit);
+        static void deleteMasterId(UnitId id, SerializableUnitBase *unit);
 
         bool isMaster(SerializeStreambuf *stream) const;
         bool isMaster() const;
@@ -28,7 +28,7 @@ namespace Serialize {
         void addFilter(std::function<bool(const SerializableUnitBase *, ParticipantId)>);
 
         static size_t convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SerializableUnitBase *unit);
-        SerializableUnitBase *convertPtr(SerializeInStream &in, size_t unit);
+        SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
 
         const std::string &name() const;
 

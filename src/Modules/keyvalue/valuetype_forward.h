@@ -59,14 +59,14 @@ template <typename T>
 static constexpr bool isValueType_v = isValueType<T>::value;
 
 template <typename T>
-using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<ValueTypeList, T>, ValueTypeList>;
+using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, ValueTypeList>;
 
 template <typename T>
-using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<ValueTypeList, T>, QualifiedValueTypeList>;
+using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, QualifiedValueTypeList>;
 
 template <typename T>
 struct ValueType_ReturnHelper {
-    typedef type_pack_select_t<type_pack_index_v<ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
+    typedef type_pack_select_t<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
 };
 
 template <typename T>

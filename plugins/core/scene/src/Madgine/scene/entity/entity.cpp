@@ -16,7 +16,7 @@ METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple>)
+FIELD(mComponents)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 RegisterType(Engine::Scene::Entity::Entity);
@@ -71,10 +71,9 @@ namespace Scene {
             return mName;
         }
 
-        void Entity::writeCreationData(Serialize::SerializeOutStream &of) const
+        const std::string &Entity::name() const
         {
-            SerializableUnitBase::writeCreationData(of);
-            of << mName;
+            return mName;
         }
 
         EntityComponentBase *Entity::getComponent(const std::string_view &name)
@@ -115,6 +114,11 @@ namespace Scene {
         std::tuple<std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
             return make_tuple(EntityComponentRegistry::getConstructor(sComponentsByName().at(name))(*this, {}));
+        }
+
+        std::tuple<std::pair<const char*, std::string_view>> Entity::storeComponentCreationData(const std::unique_ptr<EntityComponentBase> &comp) const
+        {
+            return std::make_tuple(std::make_pair("type", comp->key()));
         }
 
         void Entity::remove()

@@ -287,7 +287,6 @@ struct MODULES_EXPORT Matrix3 {
     static const Matrix3 ZERO;
     static const Matrix3 IDENTITY;
 
-protected:
     // support for eigensolver
 /*    void Tridiagonal(float afDiag[3], float afSubDiag[3]);
     bool QLAlgorithm(float afDiag[3], float afSubDiag[3]);

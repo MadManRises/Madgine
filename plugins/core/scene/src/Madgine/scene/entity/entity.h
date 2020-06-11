@@ -32,6 +32,8 @@ namespace Scene {
 
             const std::string &key() const;
 
+            const std::string &name() const;
+
             template <typename T>
             Future<T *> addComponent(const ObjectPtr &table = {})
             {
@@ -69,8 +71,6 @@ namespace Scene {
             Future<EntityComponentBase *> addComponent(size_t i, const std::string_view &name, const ObjectPtr &table = {});
             void removeComponent(const std::string_view &name);
 
-            void writeCreationData(Serialize::SerializeOutStream &of) const;
-
             SceneManager &sceneMgr(bool = true) const;
 
             bool isLocal() const;
@@ -99,10 +99,11 @@ namespace Scene {
 
         private:
             std::tuple<std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
+            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::unique_ptr<EntityComponentBase> &comp) const;
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, KeyValueSet<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
+            SYNCABLE_CONTAINER(mComponents, KeyValueSet<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver, Serialize::ParentCreator<&Entity::createComponentTuple, &Entity::storeComponentCreationData>);
 
             SceneManager &mSceneManager;
         };

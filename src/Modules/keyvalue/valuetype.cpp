@@ -311,22 +311,21 @@ ValueTypeIndex ValueType::index() const
     return static_cast<ValueTypeEnum>(mUnion.index());
 }
 
-/*template <size_t... Is>
-static void setTypeHelper(ValueType::Union &v, ValueType::Type type, std::index_sequence<Is...>)
+template <size_t... Is>
+static void setTypeHelper(ValueType::Union &v, ValueTypeDesc type, std::index_sequence<Is...>)
 {
     using Ctor_Type = void (*)(ValueType::Union &);
     static constexpr Ctor_Type ctors[] = {
         [](ValueType::Union &v) { v.emplace<Is>(); }...
     };
-    ctors[static_cast<unsigned char>(type)](v);
-}*/
+    ctors[static_cast<unsigned char>(type.mType.mIndex)](v);
+}
 
 void ValueType::setType(ValueTypeDesc type)
 {
-    /*if (static_cast<Type>(mUnion.index()) != type) {
+    if (this->type() != type) {
         setTypeHelper(mUnion, type, std::make_index_sequence<std::variant_size_v<Union>>());
-    }*/
-    throw "todo";
+    }
 }
 
 ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)

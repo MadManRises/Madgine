@@ -10,8 +10,6 @@
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/toplevelserializableunit.h"
 
-#include "Modules/serialize/container/controlledcontainer.h"
-
 #include "../render/rendercontextcollector.h"
 
 #include "../threading/frameloop.h"
@@ -23,6 +21,10 @@
 #include "Modules/keyvalue/scopebase.h"
 
 #include "Modules/madgineobject/madgineobject.h"
+
+#include "Modules/serialize/container/serializablecontainer.h"
+
+#include "Modules/serialize/container/controlledconfig.h"
 
 namespace Engine {
 namespace GUI {
@@ -62,8 +64,9 @@ namespace GUI {
         struct traits {
             using type = int;
             using cmp_type = TopLevelWindowComponentComparator;
+            using item_type = std::unique_ptr<TopLevelWindowComponentBase>;
 
-            static int to_cmp_type(const std::unique_ptr<TopLevelWindowComponentBase> &value)
+            static int to_cmp_type(const item_type &value)
             {
                 return value->mPriority;
             }
@@ -154,7 +157,7 @@ namespace GUI {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        OFFSET_CONTAINER(mComponents, TopLevelWindowComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>, KeyCompare<Placeholder<0>>>>);
+        OFFSET_CONTAINER(mComponents, TopLevelWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, TopLevelWindowComponentComparator>, TopLevelWindowComponentObserver<>, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>);
 
         Threading::FrameLoop mLoop;
 

@@ -5,7 +5,25 @@
 namespace Engine {
 namespace Serialize {
 
-	using SerializePrimitives = type_pack<bool, size_t, int, float, SerializableUnitBase *, std::string, std::string_view, Filesystem::Path, Vector2, Vector3, Vector2i, Vector3i, Matrix3, ByteBuffer, std::monostate>;
+	using SerializePrimitives = type_pack<
+        bool, 
+        uint8_t,
+        int8_t,
+        uint16_t,
+        int16_t,
+        uint32_t,
+        int32_t,
+        uint64_t,
+        int64_t,
+        float, 
+        SerializableUnitBase *, 
+        std::string, 
+        std::string_view,
+        ByteBuffer, 
+        std::monostate,
+        Filesystem::Path,
+        Matrix3
+    >;
 
     template <typename T, typename = void>
     struct PrimitiveReducer {
@@ -23,7 +41,7 @@ namespace Serialize {
     };
 
     template <typename T, typename = void>
-    struct PrimitiveTypeIndex : type_pack_index<SerializePrimitives, typename PrimitiveReducer<T>::type> {
+    struct PrimitiveTypeIndex : type_pack_index<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type> {
     };
 
     template <typename T>

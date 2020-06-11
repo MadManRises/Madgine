@@ -93,6 +93,7 @@ namespace Widgets {
 
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
+        std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
         std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         std::unique_ptr<Bar> createBar(const std::string &name);
@@ -108,7 +109,7 @@ namespace Widgets {
     private:
         std::map<std::string, WidgetBase *> mWidgets;
 
-        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>);
+        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor, Serialize::ParentCreator<&WidgetManager::createWidgetClassTuple, &WidgetManager::storeWidgetCreationData>);
 
         WidgetBase *mHoveredWidget = nullptr;
 

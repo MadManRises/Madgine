@@ -12,7 +12,11 @@
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 
-#include "Modules/serialize/container/controlledcontainer.h"
+#include "Modules/keyvalue/keyvalueset.h"
+
+#include "Modules/serialize/container/serializablecontainer.h"
+
+#include "Modules/serialize/container/controlledconfig.h"
 
 namespace Engine {
 namespace UI {
@@ -61,8 +65,8 @@ namespace UI {
 
         UIManager &getSelf(bool = true);
 
-        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver, KeyCompare<Placeholder<0>>>>);
-        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::ControlledContainer<std::vector<Placeholder<0>>, MadgineObjectObserver, KeyCompare<Placeholder<0>>>>)
+        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>);
+        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>)
 
     protected:
         bool init() override;

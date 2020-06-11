@@ -98,15 +98,18 @@ namespace Serialize {
 
     struct PendingRequest;
 
-    typedef size_t ParticipantId;
-    typedef size_t TransactionId;
+    typedef uint32_t ParticipantId;
+    typedef uint32_t TransactionId;
+    typedef uint32_t UnitId;
 
     struct buffered_streambuf;
 
     struct noparent_deleter;
 
     struct SerializeTable;
-    using SerializableUnitMap = std::map<size_t, SerializableUnitBase *>;
+
+    
+    using SerializableUnitMap = std::map<UnitId, SerializableUnitBase *>;
 
     enum MessageType {
         STATE,

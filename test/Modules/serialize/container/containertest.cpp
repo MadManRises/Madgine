@@ -103,7 +103,7 @@ TEST(Serialize_Container, Array)
 
     //Engine::Threading::WorkGroup wg;
 
-    std::array<size_t, 128> array;
+    std::array<uint32_t, 128> array;
     for (size_t i = 0; i < 128; ++i)
         array[i] = 2 * i;
 
@@ -117,7 +117,7 @@ TEST(Serialize_Container, Array)
 
     stream1 << array;
 
-    std::array<size_t, 128> array2;
+    std::array<uint32_t, 128> array2;
     stream2 >> array2;
 
     ASSERT_EQ(array, array2);

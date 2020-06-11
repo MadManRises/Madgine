@@ -26,7 +26,7 @@ METATABLE_BEGIN(Engine::NodeGraph::NodeGraphPrototype)
 METATABLE_END(Engine::NodeGraph::NodeGraphPrototype)
 
 SERIALIZETABLE_BEGIN(Engine::NodeGraph::NodeGraphPrototype)
-FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraphPrototype::createNodeTuple>)
+FIELD(mNodes)
 FIELD(mFlowInPins)
 FIELD(mDataOutPins)
 SERIALIZETABLE_END(Engine::NodeGraph::NodeGraphPrototype)
@@ -165,6 +165,11 @@ namespace NodeGraph {
     std::tuple<std::unique_ptr<NodePrototypeBase>> NodeGraphPrototype::createNodeTuple(const std::string &name)
     {
         return { createNode(name) };
+    }
+
+    std::tuple<std::pair<const char *, std::string_view>> NodeGraphPrototype::storeNodeCreationData(const std::unique_ptr<NodePrototypeBase> &node) const
+    {
+        return std::make_tuple(std::make_pair("type", node->name()));
     }
 
 }

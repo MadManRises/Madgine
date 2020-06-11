@@ -43,8 +43,6 @@ namespace NodeGraph {
         void connectData(size_t index, GraphExecutable *source, size_t sourceIndex);
         void disconnectData(size_t index);
 
-        void writeCreationData(Serialize::SerializeOutStream &of) const;
-
     protected:
         std::vector<FlowOutPinPrototype> mFlowOutPins;
         std::vector<DataInPinPrototype> mDataInPins;

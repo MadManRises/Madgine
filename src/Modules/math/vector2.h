@@ -67,7 +67,7 @@ public:
     {
     }
 
-    Vector2(const Vector2i &v)
+    explicit Vector2(const Vector2i &v)
         : x(static_cast<float>(v.x))
         , y(static_cast<float>(v.y))
     {

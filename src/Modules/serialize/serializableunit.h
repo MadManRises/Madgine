@@ -32,10 +32,8 @@ namespace Serialize {
 
         void applySerializableMap(SerializeInStream &in);
 
-        void writeCreationData(SerializeOutStream &out) const;
-
-        size_t slaveId() const;
-        size_t masterId() const;
+        UnitId slaveId() const;
+        UnitId masterId() const;
 
         bool isSynced() const;
         bool isMaster() const;
@@ -46,11 +44,11 @@ namespace Serialize {
 
         void setSynced(bool b);
 
-        void setSlaveId(size_t id, SerializeManager *mgr);
+        void setSlaveId(UnitId id, SerializeManager *mgr);
 
         const SerializeTable *serializeType() const;
 
-        size_t moveMasterId(size_t newId = 0);
+        UnitId moveMasterId(UnitId newId = 0);
 
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
@@ -60,6 +58,7 @@ namespace Serialize {
 
         void setDataSynced(bool b);
         void setActive(bool active, bool existenceChanged);
+        void setParent(SerializableUnitBase *parent);
 
         bool isActive(size_t index) const;
 
@@ -67,7 +66,7 @@ namespace Serialize {
         friend struct SerializeUnitHelper;
         friend struct SyncableBase;
         friend struct SerializeTable;
-        template <typename T, bool b>
+        template <typename T>
         friend struct UnitHelper;
         template <typename T, typename Base>
         friend struct TableInitializer;
@@ -76,14 +75,15 @@ namespace Serialize {
         template <typename T>
         friend struct Serializable;
 
-    protected:
-        void setParent(SerializableUnitBase *parent);
+        DERIVE_FRIEND(setDataSynced);
+        DERIVE_FRIEND(setActive);
+        DERIVE_FRIEND(setParent);
 
     private:
         SerializableUnitBase *mParent = nullptr;
 
-        size_t mSlaveId = 0;
-        size_t mMasterId;
+        UnitId mSlaveId = 0;
+        UnitId mMasterId;
         size_t mActiveIndex = 0;
 
         bool mSynced = false; // Maybe move only into TopLevelUnit?

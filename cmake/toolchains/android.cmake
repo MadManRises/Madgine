@@ -18,8 +18,13 @@ set(ANDROID_NO_UNDEFINED report-all)
 set(ANDROID_PLATFORM android-21) # API level
 #specify ANDROID_ABI in arguments
 
-
-set(ANDROID_NDK ${ANDROID_SDK}/ndk-bundle)
+if(NOT ANDROID_NDK)
+    if(DEFINED ENV{ANDROID_NDK})
+        file(TO_CMAKE_PATH "$ENV{ANDROID_NDK}" ANDROID_NDK)
+    else()
+        set(ANDROID_NDK ${ANDROID_SDK}/ndk-bundle)
+    endif()
+endif()
 
 set(ANDROID_TOOLCHAIN clang)
 

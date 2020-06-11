@@ -10,13 +10,13 @@
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 
-#include "Modules/serialize/container/controlledcontainer.h"
-
 #include "Modules/threading/datamutex.h"
 
 #include "Modules/threading/signalfunctor.h"
 
 #include "Modules/keyvalue/keyvalueset.h"
+
+#include "Modules/serialize/container/controlledconfig.h"
 
 namespace Engine {
 namespace Scene {
@@ -76,16 +76,16 @@ namespace Scene {
 
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-
+        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;
     private:
         App::Application &mApp;
         size_t mItemCount;
 
     public:
-        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::ControlledContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver>>);
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>);
 
     private:
-        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
+        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData, &SceneManager::storeEntityCreationData>);
         std::list<Entity::Entity> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 

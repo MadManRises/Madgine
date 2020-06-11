@@ -12,18 +12,18 @@ namespace Ini {
     {
     }
 
-    void IniFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId, bool closeExtended)
+    void IniFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, uint8_t typeId)
     {
         out.writeUnformatted(std::string(name));
         out.writeUnformatted("="s);
     }
 
-    void IniFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, size_t typeId)
+    void IniFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, uint8_t typeId)
     {
         out.writeUnformatted("\n"s);
     }
 
-    void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId, bool closeExtended)
+    void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, uint8_t typeId)
     {
         std::string prefix = in.readN(strlen(name) + 1);
         if (prefix != std::string(name) + "=")
@@ -33,7 +33,7 @@ namespace Ini {
         }
     }
 
-    void IniFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, size_t typeId)
+    void IniFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, uint8_t typeId)
     {
     }
 

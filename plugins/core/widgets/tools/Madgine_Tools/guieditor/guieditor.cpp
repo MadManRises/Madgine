@@ -37,7 +37,6 @@
 
 #include "Madgine/widgets/widgetmanager.h"
 
-
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {
@@ -142,12 +141,14 @@ namespace Tools {
             Filesystem::Path filePath = root / "data" / (config + ".layout");
 
             Filesystem::FileManager file("Layout");
-            std::optional<Serialize::SerializeInStream> in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
+            Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
 
-                mWindow->readState(*in);
+                mWindow->readState(in);
 
                 mWidgetManager->openStartupWidget();
+            } else {
+                throw 0;
             }
         }
     }
@@ -179,8 +180,8 @@ namespace Tools {
             if (mSelected) {
                 Widgets::WidgetBase *selectedWidget = mSelected->widget();
 
-                Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * Vector3 { screenSpace.mSize, 1.0f };
-                Vector3 absolutePos = selectedWidget->getAbsolutePosition() * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
+                Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+                Vector3 absolutePos = selectedWidget->getAbsolutePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
 
                 Math::Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
@@ -254,8 +255,8 @@ namespace Tools {
                     }
 
                     if (!mDragging) {
-                        Vector3 size = hoveredWidget->getAbsoluteSize() * Vector3 { screenSpace.mSize, 1.0f };
-                        Vector3 pos = hoveredWidget->getAbsolutePosition() * Vector3 { screenSpace.mSize, 1.0f } + Vector3 { screenSpace.mTopLeft, 0.0f };
+                        Vector3 size = hoveredWidget->getAbsoluteSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+                        Vector3 pos = hoveredWidget->getAbsolutePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
 
                         Math::Bounds bounds(pos.x, pos.y + size.y, pos.x + size.x, pos.y);
 
@@ -285,7 +286,7 @@ namespace Tools {
 
                     Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getAbsoluteSize() : Matrix3::IDENTITY;
 
-                    Vector2 relDragDistance = dragDistance / (parentSize * Vector3 { screenSpace.mSize, 1.0f }).xy();
+                    Vector2 relDragDistance = dragDistance / (parentSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).xy();
 
                     Matrix3 dragDistanceSize;
 

@@ -100,35 +100,35 @@ struct type_pack_contains<type_pack<type_pack<U...>, V...>, T> : type_pack_conta
 template <typename Pack, typename T>
 constexpr bool type_pack_contains_v = type_pack_contains<Pack, T>::value;
 
-template <typename Pack, typename T>
+template <typename IntType, typename Pack, typename T>
 struct type_pack_index {
 };
 
-template <typename T, typename U, typename... _Ty>
-struct type_pack_index<type_pack<U, _Ty...>, T> : std::integral_constant<size_t, type_pack_index<type_pack<_Ty...>, T>::value + 1> {
+template <typename IntType, typename T, typename U, typename... _Ty>
+struct type_pack_index<IntType, type_pack<U, _Ty...>, T> : std::integral_constant<IntType, type_pack_index<IntType, type_pack<_Ty...>, T>::value + 1> {
 };
 
-template <typename T, typename... _Ty>
-struct type_pack_index<type_pack<T, _Ty...>, T> : std::integral_constant<size_t, 0> {
+template <typename IntType, typename T, typename... _Ty>
+struct type_pack_index<IntType, type_pack<T, _Ty...>, T> : std::integral_constant<IntType, 0> {
 };
 
-template <typename T, typename RecPack, typename Pack, bool Selector = type_pack_contains_v<RecPack, T>>
+template <typename IntType, typename T, typename RecPack, typename Pack, bool Selector = type_pack_contains_v<RecPack, T>>
 struct type_pack_index_recurse;
 
-template <typename T, typename RecPack, typename Pack>
-struct type_pack_index_recurse<T, RecPack, Pack, true> : std::integral_constant<size_t, 0> {
+template <typename IntType, typename T, typename RecPack, typename Pack>
+struct type_pack_index_recurse<IntType, T, RecPack, Pack, true> : std::integral_constant<IntType, 0> {
 };
 
-template <typename T, typename RecPack, typename Pack>
-struct type_pack_index_recurse<T, RecPack, Pack, false> : std::integral_constant<size_t, type_pack_index<Pack, T>::value + 1> {
+template <typename IntType, typename T, typename RecPack, typename Pack>
+struct type_pack_index_recurse<IntType, T, RecPack, Pack, false> : std::integral_constant<IntType, type_pack_index<IntType, Pack, T>::value + 1> {
 };
 
-template <typename T, typename... RecT, typename... _Ty>
-struct type_pack_index<type_pack<type_pack<RecT...>, _Ty...>, T> : type_pack_index_recurse<T, type_pack<RecT...>, type_pack<_Ty...>> {
+template <typename IntType, typename T, typename... RecT, typename... _Ty>
+struct type_pack_index<IntType, type_pack<type_pack<RecT...>, _Ty...>, T> : type_pack_index_recurse<IntType, T, type_pack<RecT...>, type_pack<_Ty...>> {
 };
 
-template <typename Pack, typename T>
-constexpr size_t type_pack_index_v = type_pack_index<Pack, T>::value;
+template <typename IntType, typename Pack, typename T>
+constexpr IntType type_pack_index_v = type_pack_index<IntType, Pack, T>::value;
 
 namespace __generic_impl__ {
     template <typename T, size_t I>
@@ -182,7 +182,7 @@ template <typename V, typename T>
 struct variant_index;
 
 template <typename T, typename... _Ty>
-struct variant_index<std::variant<_Ty...>, T> : type_pack_index<type_pack<_Ty...>, T> {
+struct variant_index<std::variant<_Ty...>, T> : type_pack_index<size_t, type_pack<_Ty...>, T> {
 };
 
 

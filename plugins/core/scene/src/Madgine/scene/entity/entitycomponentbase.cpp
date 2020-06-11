@@ -69,11 +69,6 @@ namespace Scene {
             mEntity = entity;
         }
 
-        void EntityComponentBase::writeCreationData(Serialize::SerializeOutStream &out) const
-        {
-            out << key();
-        }
-
     }
 }
 }

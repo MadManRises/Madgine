@@ -24,7 +24,7 @@ ScopeIterator TypedScopePtr::find(const std::string &key) const
 
 ScopeIterator TypedScopePtr::begin() const
 {
-    return { *this, mType->mMember };
+    return { *this, mType ? mType->mMember : nullptr };
 }
 
 ScopeIterator TypedScopePtr::end() const

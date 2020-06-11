@@ -14,43 +14,5 @@ namespace Serialize {
     {
         return in.convertPtr(id);
     }
-
-    bool SerializeUnitHelper::filter(SerializeOutStream &out, const SerializableUnitBase &item)
-    {
-        return /*item.filter(&out)*/ true; //TODO
-    }
-
-    bool SerializeUnitHelper::filter(SerializeOutStream &out, const SerializableBase &item)
-    {
-        return true;
-    }
-
-    void SerializeUnitHelper::setParent(SerializableUnitBase &item, SerializableUnitBase *parent)
-    {
-        item.setParent(parent);
-    }
-
-    void SerializeUnitHelper::setParent(SerializableBase &item, SerializableUnitBase *parent)
-    {
-    }
-
-    void SerializeUnitHelper::beginExtendedItem(SerializeOutStream &out, const SerializableUnitBase &item)
-    {
-        out.format().beginExtended(out, "Item");
-    }
-
-    void SerializeUnitHelper::beginExtendedItem(SerializeInStream &in, const SerializableUnitBase &item)
-    {
-        in.format().beginExtended(in, "Item");
-    }
-
-    void SerializeUnitHelper::beginExtendedItem(SerializeOutStream &out, const SerializableBase &item)
-    {
-    }
-
-    void SerializeUnitHelper::beginExtendedItem(SerializeInStream &in, const SerializableBase &item)
-    {
-    }
-
 }
 }
