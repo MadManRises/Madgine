@@ -18,9 +18,9 @@
 
 #include "Modules/debug/profiler/profile.h"
 
-#include "Madgine/gui/toolwindow.h"
+#include "Madgine/window/toolwindow.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
@@ -40,12 +40,12 @@ namespace Tools {
     {
 
         ImGuiIO &io = ImGui::GetIO();
-        GUI::TopLevelWindow *topLevel = static_cast<GUI::TopLevelWindow *>(io.BackendPlatformUserData);
+        Window::MainWindow *topLevel = static_cast<Window::MainWindow *>(io.BackendPlatformUserData);
 
         Window::WindowSettings settings;
         settings.mHeadless = true;
         settings.mHidden = true;
-        GUI::ToolWindow *window = topLevel->createToolWindow(settings);
+        Window::ToolWindow *window = topLevel->createToolWindow(settings);
         vp->PlatformUserData = window;
         vp->PlatformHandle = window->window();
         vp->PlatformHandleRaw = reinterpret_cast<void *>(window->window()->mHandle);
@@ -59,9 +59,9 @@ namespace Tools {
     {
         if (vp->PlatformUserData) {
             ImGuiIO &io = ImGui::GetIO();
-            GUI::TopLevelWindow *topLevel = static_cast<GUI::TopLevelWindow *>(io.BackendPlatformUserData);
+            Window::MainWindow *topLevel = static_cast<Window::MainWindow *>(io.BackendPlatformUserData);
 
-            GUI::ToolWindow *toolWindow = static_cast<GUI::ToolWindow *>(vp->PlatformUserData);
+            Window::ToolWindow *toolWindow = static_cast<Window::ToolWindow *>(vp->PlatformUserData);
             vp->PlatformUserData = nullptr;
             vp->PlatformHandle = nullptr;
             vp->PlatformHandleRaw = nullptr;
@@ -121,9 +121,9 @@ namespace Tools {
         w->setTitle(title);
     }
 
-    ClientImRoot::ClientImRoot(GUI::TopLevelWindow &window)
+    ClientImRoot::ClientImRoot(Window::MainWindow &window)
         : SerializableUnit(window, 80)
-        , mRoot(this, &window)
+        , mRoot(this)
     {
     }
 

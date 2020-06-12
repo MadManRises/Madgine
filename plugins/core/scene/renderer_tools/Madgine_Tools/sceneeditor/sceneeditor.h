@@ -34,6 +34,8 @@ namespace Tools {
         void select(Render::Camera *camera);
         void select(Scene::Entity::Entity *entity);
 
+        Scene::SceneManager &sceneMgr();
+
     private:
         void renderSelection();
         void renderHierarchy();
@@ -41,7 +43,7 @@ namespace Tools {
         void renderCamera(Render::Camera *camera);
 
     private:
-        GUI::TopLevelWindow &mWindow;
+        Window::MainWindow &mWindow;
 
         std::vector<SceneView> mSceneViews;
 

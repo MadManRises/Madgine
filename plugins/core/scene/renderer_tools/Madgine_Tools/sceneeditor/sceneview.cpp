@@ -71,7 +71,7 @@ namespace Tools {
 
     SceneView::SceneView(SceneEditor *editor, Engine::Render::RenderContext *context)
         : mEditor(editor)
-        , mSceneRenderer(&mCamera, 25)
+        , mSceneRenderer(editor->sceneMgr(), &mCamera, 25)
         , mGridRenderer(&mCamera, 50)
         , mIm3DRenderer(&mCamera, 75)
     {

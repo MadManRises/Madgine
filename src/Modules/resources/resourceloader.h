@@ -84,10 +84,6 @@ namespace Resources {
             ResourceType *res = get(name, loader);
             if (!res) {
                 LOG_ERROR("No resource '" << name << "' available!");
-                LOG("Given resources:");
-                for (auto &p : loader->mResources) {
-                    LOG(p.first);
-                }
                 return {};
             }
             return load(res, persistent, loader);
@@ -131,7 +127,8 @@ namespace Resources {
             if (!handle) {
                 if (!loader)
                     loader = &getSingleton();
-                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple()));
+                typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple());
+                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
                 handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
                 *resource->mData = (decltype(*resource->mData))handle.mData;
                 resource->mCtor(loader, getData(handle, loader), resource);

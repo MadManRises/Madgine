@@ -12,7 +12,7 @@
 
 #include "Interfaces/threading/systemvariable.h"
 
-extern int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr);
+extern int launch(Engine::GUI::MainWindow **topLevelPointer = nullptr);
 
 namespace Engine {
 namespace Filesystem {

@@ -4,12 +4,12 @@
 
 #include "inputlistener.h"
 
-#include "../gui/toplevelwindow.h"
+#include "../window/mainwindow.h"
 
 namespace Engine {
 namespace Input {
 
-    InputHandler::InputHandler(GUI::TopLevelWindow &window, InputListener *listener)
+    InputHandler::InputHandler(Window::MainWindow &window, InputListener *listener)
         : mListener(listener)
         , mWindow(window)
     {

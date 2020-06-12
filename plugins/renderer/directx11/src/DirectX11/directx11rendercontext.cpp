@@ -1,25 +1,10 @@
 #include "directx11lib.h"
 
-#include "Madgine/gui/toplevelwindow.h"
 #include "directx11renderwindow.h"
-
-#include "Modules/debug/profiler/profiler.h"
-
-#include "Modules/math/vector2i.h"
-#include "Modules/math/vector3.h"
-#include "Modules/math/vector3i.h"
-#include "Modules/math/vector4.h"
-
-#include "directx11rendertexture.h"
-
-#include "Interfaces/window/windowapi.h"
-
-#include "imagedata.h"
-
-#include "directx11meshloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "directx11rendercontext.h"
+#include "directx11rendertexture.h"
 
 RegisterType(Engine::Render::DirectX11RenderContext)
 

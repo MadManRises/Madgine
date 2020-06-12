@@ -27,7 +27,7 @@
 
 #include "Modules/math/boundingbox.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "Madgine/scene/entity/entity.h"
 
@@ -114,6 +114,11 @@ namespace Tools {
         mSelectedEntity = entity;
         mSelectedCamera = nullptr;
         mHoveredAxis = -1;
+    }
+
+    Scene::SceneManager &SceneEditor::sceneMgr()
+    {
+        return *mSceneMgr;
     }
 
     void SceneEditor::renderSelection()

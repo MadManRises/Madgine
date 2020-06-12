@@ -202,7 +202,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
+const std::vector<const Engine::MetaTable *> &Engine::GUI::MainWindowCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_OpenGLTools
@@ -219,7 +219,7 @@ const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollect
 	return dummy;
 }
 template <>
-std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
+std::vector<Engine::GUI::MainWindowCollector::Registry::F> Engine::GUI::MainWindowCollector::Registry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGLTools
@@ -238,25 +238,25 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 #    define ACC 0
 
 #    ifdef BUILD_OpenGLTools
-constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools = ACC;
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
 template <>
-size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 0; }
+size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_OpenGLTools + 1
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
 #    endif
 #    ifdef BUILD_Widgets
-constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_Widgets = ACC;
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
 template <>
-size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Widgets + 0; }
+size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_Widgets + 1
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
 #    endif
 #    ifdef BUILD_UI
-constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_UI = ACC;
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
 template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_UI + 0; }
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_UI + 1
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
 #    endif
 
 #    undef ACC

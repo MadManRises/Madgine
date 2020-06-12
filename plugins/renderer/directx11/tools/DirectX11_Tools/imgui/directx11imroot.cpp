@@ -13,7 +13,7 @@
 
 #include "DirectX11/directx11rendercontext.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Tools::DirectX11ImRoot)
 
@@ -26,7 +26,7 @@ RegisterType(Engine::Tools::DirectX11ImRoot)
 {
     namespace Tools {
 
-        DirectX11ImRoot::DirectX11ImRoot(GUI::TopLevelWindow &window)
+        DirectX11ImRoot::DirectX11ImRoot(Window::MainWindow &window)
             : VirtualScope(window)            
         {
         }

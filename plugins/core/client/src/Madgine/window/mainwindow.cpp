@@ -1,6 +1,6 @@
 #include "../clientlib.h"
 
-#include "toplevelwindow.h"
+#include "mainwindow.h"
 
 #include "../input/inputhandler.h"
 
@@ -20,21 +20,20 @@
 
 #include "../render/rendertarget.h"
 
-METATABLE_BEGIN(Engine::GUI::TopLevelWindow)
+METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
-METATABLE_END(Engine::GUI::TopLevelWindow)
+METATABLE_END(Engine::Window::MainWindow)
 
-RegisterType(Engine::GUI::TopLevelWindow);
+RegisterType(Engine::Window::MainWindow);
 
-SERIALIZETABLE_BEGIN(Engine::GUI::TopLevelWindow)
+SERIALIZETABLE_BEGIN(Engine::Window::MainWindow)
 FIELD(mComponents)
-SERIALIZETABLE_END(Engine::GUI::TopLevelWindow)
+SERIALIZETABLE_END(Engine::Window::MainWindow)
 
 namespace Engine {
+namespace Window {
 
-namespace GUI {
-
-    TopLevelWindow::TopLevelWindow(const Window::WindowSettings &settings)
+    MainWindow::MainWindow(const WindowSettings &settings)
         : mComponents(*this)
         , mSettings(settings)
     {
@@ -51,26 +50,26 @@ namespace GUI {
             });
     }
 
-    TopLevelWindow::~TopLevelWindow()
+    MainWindow::~MainWindow()
     {
     }
 
-    Rect2i TopLevelWindow::getScreenSpace()
+    Rect2i MainWindow::getScreenSpace()
     {
         if (!mWindow)
             return { { 0, 0 }, { 0, 0 } };
         return { { mWindow->renderX(), mWindow->renderY() }, { mWindow->renderWidth(), mWindow->renderHeight() } };
     }
 
-    const MadgineObject *TopLevelWindow::parent() const
+    const MadgineObject *MainWindow::parent() const
     {
         return nullptr;
     }
 
-    bool TopLevelWindow::init()
+    bool MainWindow::init()
     {
 
-        mWindow = Window::sCreateWindow(mSettings);
+        mWindow = sCreateWindow(mSettings);
 
         mWindow->addListener(this);
 
@@ -84,7 +83,7 @@ namespace GUI {
         mRenderWindow = (*mRenderContext)->createRenderWindow(mWindow);
         addFrameListener(this);
 
-        for (TopLevelWindowComponentBase *comp : components()) {
+        for (MainWindowComponentBase *comp : components()) {
             bool result = comp->callInit();
             assert(result);
         }
@@ -92,9 +91,9 @@ namespace GUI {
         return true;
     }
 
-    void TopLevelWindow::finalize()
+    void MainWindow::finalize()
     {
-        for (TopLevelWindowComponentBase *comp : components()) {
+        for (MainWindowComponentBase *comp : components()) {
             comp->callFinalize();
         }
 
@@ -111,45 +110,45 @@ namespace GUI {
         }
     }
 
-    ToolWindow *TopLevelWindow::createToolWindow(const Window::WindowSettings &settings)
+    ToolWindow *MainWindow::createToolWindow(const WindowSettings &settings)
     {
         return mToolWindows.emplace_back(std::make_unique<ToolWindow>(*this, settings)).get();
     }
 
-    void TopLevelWindow::destroyToolWindow(ToolWindow *w)
+    void MainWindow::destroyToolWindow(ToolWindow *w)
     {
         auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const std::unique_ptr<ToolWindow> &ptr) { return ptr.get() == w; });
         assert(it != mToolWindows.end());
         mToolWindows.erase(it);
     }
 
-    Input::InputHandler *TopLevelWindow::input()
+    Input::InputHandler *MainWindow::input()
     {
         return mExternalInput ? mExternalInput : *mInputHandlerSelector;
     }
 
-    bool TopLevelWindow::injectKeyPress(const Input::KeyEventArgs &arg)
+    bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (comp->injectKeyPress(arg))
                 return true;
         }
         return false;
     }
 
-    bool TopLevelWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
+    bool MainWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
     {
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (comp->injectKeyRelease(arg))
                 return true;
         }
         return false;
     }
 
-    bool TopLevelWindow::injectPointerPress(const Input::PointerEventArgs &arg)
+    bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
 
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (comp->injectPointerPress(arg))
                 return true;
         }
@@ -157,10 +156,10 @@ namespace GUI {
         return false;
     }
 
-    bool TopLevelWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
+    bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
 
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (comp->injectPointerRelease(arg))
                 return true;
         }
@@ -168,10 +167,10 @@ namespace GUI {
         return false;
     }
 
-    bool TopLevelWindow::injectPointerMove(const Input::PointerEventArgs &arg)
+    bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
 
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (comp->injectPointerMove(arg))
                 return true;
         }
@@ -179,35 +178,35 @@ namespace GUI {
         return false;
     }
 
-    Window::Window *TopLevelWindow::window() const
+    Window *MainWindow::window() const
     {
         return mWindow;
     }
 
-    Render::RenderContext *TopLevelWindow::getRenderer()
+    Render::RenderContext *MainWindow::getRenderer()
     {
         return mRenderContext->get();
     }
 
-    void TopLevelWindow::onClose()
+    void MainWindow::onClose()
     {
         mWindow = nullptr;
         callFinalize();
     }
 
-    void TopLevelWindow::onRepaint()
+    void MainWindow::onRepaint()
     {
         //update();
     }
 
-    void TopLevelWindow::onResize(size_t width, size_t height)
+    void MainWindow::onResize(size_t width, size_t height)
     {
         mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
         input()->onResize(width, height);
         applyClientSpaceResize();
     }
 
-    void TopLevelWindow::applyClientSpaceResize(TopLevelWindowComponentBase *component)
+    void MainWindow::applyClientSpaceResize(MainWindowComponentBase *component)
     {
         if (!mWindow)
             return;
@@ -218,7 +217,7 @@ namespace GUI {
         else
             space = component->getChildClientSpace();
 
-        for (TopLevelWindowComponentBase *comp : reverseIt(components())) {
+        for (MainWindowComponentBase *comp : reverseIt(components())) {
             if (component) {
                 if (component == comp) {
                     component = nullptr;
@@ -230,59 +229,59 @@ namespace GUI {
         }
     }
 
-    bool TopLevelWindow::frameStarted(std::chrono::microseconds)
+    bool MainWindow::frameStarted(std::chrono::microseconds)
     {
         return true;
     }
 
-    bool TopLevelWindow::frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask)
+    bool MainWindow::frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask)
     {
 
         return mWindow;
     }
 
-    bool TopLevelWindow::frameEnded(std::chrono::microseconds)
+    bool MainWindow::frameEnded(std::chrono::microseconds)
     {
         (*mRenderContext)->render();
-        Window::sUpdate();
+        sUpdate();
         return mWindow;
     }
 
-    TopLevelWindowComponentBase &TopLevelWindow::getWindowComponent(size_t i, bool init)
+    MainWindowComponentBase &MainWindow::getWindowComponent(size_t i, bool init)
     {
-        TopLevelWindowComponentBase &component = mComponents.get(i);
+        MainWindowComponentBase &component = mComponents.get(i);
         if (init) {
             component.callInit();
         }
         return component.getSelf(init);
     }
 
-    void TopLevelWindow::addFrameListener(Threading::FrameListener *listener)
+    void MainWindow::addFrameListener(Threading::FrameListener *listener)
     {
         mLoop.addFrameListener(listener);
     }
 
-    void TopLevelWindow::removeFrameListener(Threading::FrameListener *listener)
+    void MainWindow::removeFrameListener(Threading::FrameListener *listener)
     {
         mLoop.removeFrameListener(listener);
     }
 
-    void TopLevelWindow::singleFrame()
+    void MainWindow::singleFrame()
     {
         mLoop.singleFrame();
     }
 
-    Threading::FrameLoop &TopLevelWindow::frameLoop()
+    Threading::FrameLoop &MainWindow::frameLoop()
     {
         return mLoop;
     }
 
-    void TopLevelWindow::shutdown()
+    void MainWindow::shutdown()
     {
         mLoop.shutdown();
     }
 
-    Render::RenderTarget *TopLevelWindow::getRenderWindow()
+    Render::RenderTarget *MainWindow::getRenderWindow()
     {
         return mRenderWindow.get();
     }

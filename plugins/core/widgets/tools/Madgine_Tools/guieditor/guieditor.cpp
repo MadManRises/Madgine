@@ -14,7 +14,7 @@
 #include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
 #include "Madgine/widgets/widgetmanager.h"
 

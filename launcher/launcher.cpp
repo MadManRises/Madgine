@@ -5,7 +5,7 @@
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 #include "Modules/cli/parameter.h"
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
@@ -26,7 +26,7 @@ Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, 
 #    define FIX_LOCAL
 #endif
 
-int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr)
+int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 {
 
     FIX_LOCAL Engine::App::AppSettings settings;
@@ -36,7 +36,7 @@ int launch(Engine::GUI::TopLevelWindow **topLevelPointer = nullptr)
 
     FIX_LOCAL Engine::Window::WindowSettings windowSettings;
     windowSettings.mTitle = "Maditor";
-    FIX_LOCAL Engine::GUI::TopLevelWindow window { windowSettings };
+    FIX_LOCAL Engine::Window::MainWindow window { windowSettings };
 
     if (topLevelPointer)
         *topLevelPointer = &window;

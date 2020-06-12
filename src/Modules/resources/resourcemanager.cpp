@@ -48,9 +48,6 @@ namespace Resources {
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)
     {
-        LOG(Filesystem::configPath());
-        LOG(Filesystem::configPath().parentPath());
-        LOG("Trying to register resource location at " << path);
         if (!exists(path))
             return;
 
@@ -119,7 +116,6 @@ namespace Resources {
     void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension)
     {
         for (Filesystem::Path p : Filesystem::listFilesRecursive(path)) {
-            LOG("Checking file " << p << " for resource");
             updateResource(p, priority, loaderByExtension);
         }
     }

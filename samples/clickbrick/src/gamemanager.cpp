@@ -43,7 +43,7 @@ RegisterType(ClickBrick::UI::GameManager)
             , mGameWindow(this, "GameView")
             , mScoreLabel(this, "Score")
             , mLifeLabel(this, "Life")
-            , mSceneRenderer(&mCamera, 50)
+            , mSceneRenderer(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>(), &mCamera, 50)
         {
         }
 

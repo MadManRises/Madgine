@@ -69,9 +69,8 @@ namespace Tools {
         }
     }
 
-    ImRoot::ImRoot(const MadgineObject *parent, TypedScopePtr toolsTopLevel)
+    ImRoot::ImRoot(const MadgineObject *parent)
         : mParent(parent)
-        , mToolsTopLevel(toolsTopLevel)
         , mCollector(*this)
     {
     }
@@ -211,11 +210,6 @@ namespace Tools {
     const MadgineObject *ImRoot::parent() const
     {
         return mParent;
-    }
-
-    const TypedScopePtr ImRoot::toolsTopLevel() const
-    {
-        return mToolsTopLevel;
     }
 
     ImGuiDockNode *ImRoot::dockNode() const

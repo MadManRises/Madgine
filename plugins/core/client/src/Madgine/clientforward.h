@@ -2,15 +2,13 @@
 
 namespace Engine {
 
-namespace GUI {
+namespace Window {
 
-    struct TopLevelWindow;
+    struct MainWindow;
     struct ToolWindow;
 
-	struct TopLevelWindowComponentBase;
-    struct TopLevelWindowComponentComparator;
-
-    struct WindowOverlay;
+	struct MainWindowComponentBase;
+    struct MainWindowComponentComparator;
 }
 
 namespace Threading {

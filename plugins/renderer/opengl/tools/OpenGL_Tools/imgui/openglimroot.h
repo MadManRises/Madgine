@@ -7,7 +7,7 @@ namespace Tools {
 
     struct OpenGLImRoot : VirtualScope<OpenGLImRoot, VirtualUniqueComponentImpl<OpenGLImRoot, ClientImRoot>> {
 
-        OpenGLImRoot(GUI::TopLevelWindow &window);
+        OpenGLImRoot(Window::MainWindow &window);
         ~OpenGLImRoot();
 
 		virtual bool init() override;

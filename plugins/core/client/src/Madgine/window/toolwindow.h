@@ -7,10 +7,10 @@
 #include "Modules/keyvalue/scopebase.h"
 
 namespace Engine {
-namespace GUI {
+namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT ToolWindow : ScopeBase, Window::WindowEventListener {    
-        ToolWindow(TopLevelWindow &parent, const Window::WindowSettings &settings);
+    struct MADGINE_CLIENT_EXPORT ToolWindow : ScopeBase, WindowEventListener {    
+        ToolWindow(MainWindow &parent, const WindowSettings &settings);
         virtual ~ToolWindow();
 
         void close();
@@ -19,7 +19,7 @@ namespace GUI {
 
         Input::InputHandler *input();
 
-        Window::Window *window();
+        Window *window();
 
         Render::RenderTarget *getRenderer();
 
@@ -32,7 +32,7 @@ namespace GUI {
 
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
 
-        Window::Window *mWindow = nullptr;
+        Window *mWindow = nullptr;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
     };

@@ -18,8 +18,9 @@
 namespace Engine {
 namespace Render {
 
-    SceneRenderPass::SceneRenderPass(Camera *camera, int priority)
-        : mCamera(camera)
+    SceneRenderPass::SceneRenderPass(Scene::SceneManager &scene, Camera *camera, int priority)
+        : mScene(scene)
+        , mCamera(camera)
         , mPriority(priority)
     {
     }
@@ -46,11 +47,10 @@ namespace Render {
         mProgram.setParameters(mPerFrame, 1);
 
         //TODO Culling
-        Scene::SceneManager &sceneMgr = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
 
-        Threading::DataLock lock { sceneMgr.mutex(), Threading::AccessMode::READ };
+        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
 
-        for (Scene::Entity::Entity &e : sceneMgr.entities()) {
+        for (Scene::Entity::Entity &e : mScene.entities()) {
 
             Scene::Entity::Mesh *mesh = e.getComponent<Scene::Entity::Mesh>();
             Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
@@ -79,7 +79,7 @@ namespace Render {
                         mProgram.setDynamicParameters(skeleton->matrices(), 0);
                     } else {
                         mProgram.setDynamicParameters({}, 0);
-					}
+                    }
 
                     target->renderMesh(meshData, mProgram);
                 }

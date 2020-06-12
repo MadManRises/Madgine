@@ -2,7 +2,7 @@
 
 #include "uimanager.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "Madgine/widgets/widget.h"
 
@@ -30,7 +30,7 @@ namespace Engine {
 
 namespace UI {
 
-    UIManager::UIManager(GUI::TopLevelWindow &window)
+    UIManager::UIManager(Window::MainWindow &window)
         : VirtualScope(window, 50)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
@@ -174,7 +174,7 @@ namespace UI {
             : mModalWindowList.top()->context();
     }*/
 
-    GUI::TopLevelWindow &UIManager::window(bool init) const
+    Window::MainWindow &UIManager::window(bool init) const
     {
         if (init) {
             checkInitState();

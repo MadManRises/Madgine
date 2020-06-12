@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Input {
     struct MADGINE_CLIENT_EXPORT InputHandler : Threading::FrameListener {    
-        InputHandler(GUI::TopLevelWindow &window, InputListener *listener);
+        InputHandler(Window::MainWindow &window, InputListener *listener);
         virtual ~InputHandler();
 
         //InputListener *listener();
@@ -25,7 +25,7 @@ namespace Input {
 
     private:
         InputListener *mListener;
-        GUI::TopLevelWindow &mWindow;
+        Window::MainWindow &mWindow;
     };
 }
 }

@@ -7,7 +7,7 @@ namespace Tools {
 
     struct DirectX11ImRoot : VirtualScope<DirectX11ImRoot, VirtualUniqueComponentImpl<DirectX11ImRoot, ClientImRoot>> {
 
-        DirectX11ImRoot(GUI::TopLevelWindow &window);
+        DirectX11ImRoot(Window::MainWindow &window);
         ~DirectX11ImRoot();
 
 		virtual bool init() override;

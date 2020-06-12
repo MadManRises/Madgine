@@ -74,10 +74,10 @@ namespace Tools {
                 draw(&App::Application::getSingleton(), {}, "Application");
                 ImGui::TreePop();
             }
-            if (ImGui::TreeNode("TopLevelWindow")) {
-                draw(mRoot.toolsTopLevel(), {}, "TopLevelWindow");
+            /*if (ImGui::TreeNode("MainWindow")) {
+                draw(mRoot.toolsTopLevel(), {}, "MainWindow");
                 ImGui::TreePop();
-            }
+            }*/
             if (ImGui::TreeNode("Resources")) {
                 draw(&Resources::ResourceManager::getSingleton(), {}, "Resources");
                 ImGui::TreePop();

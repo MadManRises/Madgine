@@ -130,7 +130,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollector::Registry::sTables() 
+const std::vector<const Engine::MetaTable *> &Engine::GUI::MainWindowCollector::Registry::sTables() 
 {
 	static std::vector<const Engine::MetaTable *> dummy = {
 #    ifdef BUILD_Client
@@ -141,7 +141,7 @@ const std::vector<const Engine::MetaTable *> &Engine::GUI::TopLevelWindowCollect
 	return dummy;
 }
 template <>
-std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopLevelWindowCollector::Registry::sComponents()
+std::vector<Engine::GUI::MainWindowCollector::Registry::F> Engine::GUI::MainWindowCollector::Registry::sComponents()
 {
 	return {
 #    ifdef BUILD_Client
@@ -154,11 +154,11 @@ std::vector<Engine::GUI::TopLevelWindowCollector::Registry::F> Engine::GUI::TopL
 #    define ACC 0
 
 #    ifdef BUILD_Client
-constexpr size_t CollectorBaseIndex_TopLevelWindowComponentBase_Client = ACC;
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Client = ACC;
 template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_TopLevelWindowComponentBase_Client + 0; }
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_Client + 0; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_TopLevelWindowComponentBase_Client + 1
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_Client + 1
 #    endif
 
 #    undef ACC

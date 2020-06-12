@@ -19,7 +19,7 @@ RegisterType(Engine::Input::OISInputHandler);
 
 namespace Engine {
 namespace Input {
-    OISInputHandler::OISInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener)
+    OISInputHandler::OISInputHandler(Window::MainWindow &topLevel, Window::Window *window, InputListener *listener)
         : UniqueComponent(topLevel, listener)
         , mWindow(window)
     {

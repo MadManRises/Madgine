@@ -18,7 +18,7 @@ namespace Engine {
 namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT ImRoot : MadgineObject, ScopeBase {
-        ImRoot(const MadgineObject *parent, TypedScopePtr toolsTopLevel);
+        ImRoot(const MadgineObject *parent);
         ~ImRoot();
 
         bool init() override;
@@ -35,13 +35,11 @@ namespace Tools {
         bool frame();
 
         virtual const MadgineObject *parent() const override;
-        const TypedScopePtr toolsTopLevel() const;
 
 		ImGuiDockNode *dockNode() const;
 
     private:
         const MadgineObject *mParent; //TODO Find proper solution
-        TypedScopePtr mToolsTopLevel;
 		
 		ToolsContainer<ObservableContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>> mCollector;		
 

@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Input {
     struct MADGINE_OIS_EXPORT OISInputHandler : OIS::KeyListener, OIS::MouseListener, InputHandlerComponent<OISInputHandler> {
-        OISInputHandler(GUI::TopLevelWindow &topLevel, Window::Window *window, InputListener *listener);
+        OISInputHandler(Window::MainWindow &topLevel, Window::Window *window, InputListener *listener);
         virtual ~OISInputHandler();
 
         virtual bool isKeyDown(Key key) override;

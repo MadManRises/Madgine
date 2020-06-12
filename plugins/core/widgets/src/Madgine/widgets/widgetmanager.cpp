@@ -24,7 +24,7 @@
 
 #include "vertex.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -45,7 +45,7 @@ RegisterType(Engine::Widgets::WidgetManager);
 namespace Engine {
 namespace Widgets {
 
-    WidgetManager::WidgetManager(GUI::TopLevelWindow &window)
+    WidgetManager::WidgetManager(Window::MainWindow &window)
         : VirtualScope(window, 20)
         , mUIAtlas({ 512, 512 })
     {
@@ -607,7 +607,7 @@ namespace Widgets {
 
     void WidgetManager::onResize(const Rect2i &space)
     {
-        TopLevelWindowComponentBase::onResize(space);
+        MainWindowComponentBase::onResize(space);
         for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
             topLevel->updateGeometry(space);
         }

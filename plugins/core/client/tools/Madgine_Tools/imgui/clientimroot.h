@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/gui/toplevelwindowcomponentcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/threading/framelistener.h"
 
 #include "renderer/imroot.h"
@@ -15,11 +15,11 @@ struct ImGuiViewport;
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : GUI::TopLevelWindowVirtualBase<ClientImRoot>,
+    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : Window::MainWindowVirtualBase<ClientImRoot>,
                                                       Threading::FrameListener,
                                                       Render::RenderPass {
 
-        ClientImRoot(GUI::TopLevelWindow &window);
+        ClientImRoot(Window::MainWindow &window);
         ~ClientImRoot();
 
         bool init() override;

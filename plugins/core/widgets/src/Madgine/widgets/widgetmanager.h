@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/gui/toplevelwindowcomponentcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
@@ -23,12 +23,12 @@
 namespace Engine {
 namespace Widgets {
 
-    struct MADGINE_WIDGETS_EXPORT WidgetManager : GUI::TopLevelWindowComponent<WidgetManager>,
+    struct MADGINE_WIDGETS_EXPORT WidgetManager : Window::MainWindowComponent<WidgetManager>,
                                                  Render::RenderPass {
 
         SERIALIZABLEUNIT;
 
-        WidgetManager(GUI::TopLevelWindow &window);
+        WidgetManager(Window::MainWindow &window);
         WidgetManager(const WidgetManager &) = delete;
         ~WidgetManager();
 

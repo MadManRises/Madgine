@@ -56,7 +56,7 @@ namespace Tools {
     {
         mMethodCache.clear();
         //parseMethods(&app());
-        parseMethods(mRoot.toolsTopLevel());
+        //parseMethods(mRoot.toolsTopLevel());
     }
 
     void FunctionTool::parseMethods(TypedScopePtr scope)

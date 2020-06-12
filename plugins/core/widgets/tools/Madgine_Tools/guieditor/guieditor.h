@@ -30,7 +30,7 @@ namespace Tools {
         bool drawWidget(Widgets::WidgetBase *w, Widgets::WidgetBase **hoveredWidget = nullptr);
 
     private:
-        GUI::TopLevelWindow *mWindow = nullptr;
+        Window::MainWindow *mWindow = nullptr;
         Widgets::WidgetManager *mWidgetManager = nullptr;
         WidgetSettings *mSelected = nullptr;
         std::list<WidgetSettings> mSettings;

@@ -260,7 +260,7 @@ struct container_traits<std::vector<T>> {
     {
         return c.emplace(where, std::forward<_Ty>(args)...);
     }
-
+    
     static bool was_emplace_successful(const emplace_return &)
     {
         return true;

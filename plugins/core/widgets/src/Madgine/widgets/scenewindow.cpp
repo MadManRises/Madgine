@@ -10,7 +10,7 @@
 
 #include "Madgine/render/camera.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "Madgine/render/rendercontext.h"
 

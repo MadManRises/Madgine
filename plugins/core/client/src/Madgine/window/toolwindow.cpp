@@ -2,7 +2,7 @@
 
 #include "toolwindow.h"
 
-#include "toplevelwindow.h"
+#include "mainwindow.h"
 
 #include "../input/inputhandler.h"
 
@@ -16,10 +16,10 @@
 
 namespace Engine {
 
-namespace GUI {
-    ToolWindow::ToolWindow(TopLevelWindow &parent, const Window::WindowSettings &settings)
+namespace Window {
+    ToolWindow::ToolWindow(MainWindow &parent, const WindowSettings &settings)
     {
-        mWindow = Window::sCreateWindow(settings);
+        mWindow = sCreateWindow(settings);
 
         mWindow->addListener(this);
 
@@ -37,15 +37,15 @@ namespace GUI {
 
     void ToolWindow::close()
     {
-        //mGui.closeTopLevelWindow(this);
+        //mGui.closeMainWindow(this);
     }
 
-    /*void TopLevelWindow::showCursor()
+    /*void MainWindow::showCursor()
 		{
 			setCursorVisibility(true);
 		}
 
-		void TopLevelWindow::hideCursor()
+		void MainWindow::hideCursor()
 		{
 			setCursorVisibility(false);
 		}*/
@@ -60,7 +60,7 @@ namespace GUI {
         return *mInputHandlerSelector;
     }
 
-    Window::Window *ToolWindow::window()
+    Window *ToolWindow::window()
     {
         return mWindow;
     }
@@ -90,7 +90,7 @@ namespace GUI {
 }
 }
 
-METATABLE_BEGIN(Engine::GUI::ToolWindow)
-METATABLE_END(Engine::GUI::ToolWindow)
+METATABLE_BEGIN(Engine::Window::ToolWindow)
+METATABLE_END(Engine::Window::ToolWindow)
 
-RegisterType(Engine::GUI::ToolWindow);
+RegisterType(Engine::Window::ToolWindow);

@@ -1,28 +1,10 @@
 #include "opengllib.h"
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 #include "openglrenderwindow.h"
-
-#include "Modules/debug/profiler/profiler.h"
-
-#include "Modules/math/vector2i.h"
-#include "Modules/math/vector3.h"
-#include "Modules/math/vector3i.h"
-#include "Modules/math/vector4.h"
-
-#include "openglrendertexture.h"
-
-#include "openglshaderloader.h"
-
-#include "util/openglshader.h"
-
-#include "Interfaces/window/windowapi.h"
-
-#include "imagedata.h"
-
-#include "openglmeshloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "openglrendercontext.h"
+#include "openglrendertexture.h"
 
 RegisterType(Engine::Render::OpenGLRenderContext)
 

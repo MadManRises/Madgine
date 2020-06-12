@@ -9,7 +9,7 @@
 
 #include "im3d/im3d.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "fontloader.h"
 
@@ -24,7 +24,7 @@ RegisterType(Engine::Tools::OpenGLImRoot)
 {
     namespace Tools {
 
-        OpenGLImRoot::OpenGLImRoot(GUI::TopLevelWindow &window)
+        OpenGLImRoot::OpenGLImRoot(Window::MainWindow &window)
             : VirtualScope(window)
         {
         }

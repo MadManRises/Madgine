@@ -5,10 +5,10 @@ Project(Client)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine clientforward.h clientlib.h)
-		FolderSources(sources Madgine gui toolwindow.cpp toolwindow.h toplevelwindow.cpp toplevelwindow.h toplevelwindowcomponent.cpp toplevelwindowcomponent.h toplevelwindowcomponentcollector.cpp toplevelwindowcomponentcollector.h)
 		FolderSources(sources Madgine input inputcollector.cpp inputcollector.h inputevents.h inputhandler.cpp inputhandler.h inputlistener.h)
 		FolderSources(sources Madgine render camera.cpp camera.h rendercontext.cpp rendercontext.h rendertarget.cpp rendertarget.h rendercontextcollector.cpp rendercontextcollector.h)	
 		FolderSources(sources Madgine threading framelistener.h frameloop.cpp frameloop.h)
+		FolderSources(sources Madgine window mainwindow.cpp mainwindow.h mainwindowcomponent.cpp mainwindowcomponent.h mainwindowcomponentcollector.cpp mainwindowcomponentcollector.h toolwindow.cpp toolwindow.h)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 

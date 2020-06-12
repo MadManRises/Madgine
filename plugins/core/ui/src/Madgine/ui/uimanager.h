@@ -8,7 +8,7 @@
 
 #include "Modules/keyvalue/keyvalue.h"
 
-#include "Madgine/gui/toplevelwindowcomponentcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 
@@ -20,11 +20,11 @@
 
 namespace Engine {
 namespace UI {
-    struct MADGINE_UI_EXPORT UIManager : GUI::TopLevelWindowComponent<UIManager>,
+    struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager>,
                                          Threading::FrameListener {
         SERIALIZABLEUNIT;
 
-        UIManager(GUI::TopLevelWindow &window);
+        UIManager(Window::MainWindow &window);
         ~UIManager();
 
         void clear();
@@ -38,7 +38,7 @@ namespace UI {
 
         //Scene::ContextMask currentContext();
 
-        GUI::TopLevelWindow &window(bool = true) const;
+        Window::MainWindow &window(bool = true) const;
 
         std::set<GameHandlerBase *> getGameHandlers();
         std::set<GuiHandlerBase *> getGuiHandlers();

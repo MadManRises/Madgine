@@ -1,6 +1,6 @@
 #include "../uilib.h"
 #include "handler.h"
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
 #include "uimanager.h"
 

@@ -15,7 +15,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_SCENE_RENDERER_EXPORT SceneRenderPass : RenderPass {
-        SceneRenderPass(Camera *camera, int priority);
+        SceneRenderPass(Scene::SceneManager &scene, Camera *camera, int priority);
 
         virtual void render(Render::RenderTarget *target) override;
 
@@ -23,6 +23,8 @@ namespace Render {
 
     private:
         ProgramLoader::HandleType mProgram;
+
+        Scene::SceneManager &mScene;
 
         Camera *mCamera;
 

@@ -13,17 +13,17 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
-namespace GUI {
+namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT TopLevelWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase, Input::InputListener {
-        TopLevelWindowComponentBase(TopLevelWindow &window, int priority);
-        virtual ~TopLevelWindowComponentBase() = default;
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase, Input::InputListener {
+        MainWindowComponentBase(MainWindow &window, int priority);
+        virtual ~MainWindowComponentBase() = default;
 
-        TopLevelWindow &window() const;
+        MainWindow &window() const;
 
         virtual const MadgineObject *parent() const override;
 
-        TopLevelWindowComponentBase &getSelf(bool = true);
+        MainWindowComponentBase &getSelf(bool = true);
 
         virtual std::string_view key() const = 0;
 
@@ -39,12 +39,12 @@ namespace GUI {
             return static_cast<T &>(getWindowComponent(component_index<T>(), init));
         }
 
-        TopLevelWindowComponentBase &getWindowComponent(size_t i, bool = true);
+        MainWindowComponentBase &getWindowComponent(size_t i, bool = true);
 
         const int mPriority;
 
     protected:
-        TopLevelWindow &mWindow;
+        MainWindow &mWindow;
         Rect2i mClientSpace;
     };
 
