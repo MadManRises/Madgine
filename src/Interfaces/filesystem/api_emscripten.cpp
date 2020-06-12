@@ -13,7 +13,7 @@ namespace Filesystem {
 
     Path configPath()
     {
-        return Path("/config");
+        return Path("/cwd");
     }
 
     struct FileQueryState {

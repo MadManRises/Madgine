@@ -151,7 +151,7 @@ namespace Filesystem {
             }
         }
 
-        if (hadSeparator && cursor > 0) {
+        if (hadSeparator && cursor > 1) {
             --cursor;
         }
 
