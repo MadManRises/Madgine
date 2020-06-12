@@ -13,7 +13,7 @@ UNIQUECOMPONENT(Engine::Input::EmscriptenInputHandler);
 namespace Engine {
 namespace Input {
 
-    EmscriptenInputHandler::EmscriptenInputHandler(GUI::MainWindow &topLevel, Window::Window *window, InputListener *listener)
+    EmscriptenInputHandler::EmscriptenInputHandler(Window::MainWindow &topLevel, Window::Window *window, InputListener *listener)
         : UniqueComponent(topLevel, listener)
         , mKeyDown {}
     {
