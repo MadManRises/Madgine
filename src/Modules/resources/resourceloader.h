@@ -77,13 +77,19 @@ namespace Resources {
 
         static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
         {
-            if (!loader)
-                loader = &getSingleton();
             if (name.empty())
                 return {};
+            if (!loader)
+                loader = &getSingleton();
             ResourceType *res = get(name, loader);
-            if (!res)
+            if (!res) {
+                LOG_ERROR("No resource '" << name << "' available!");
+                LOG("Given resources:");
+                for (auto &p : loader->mResources) {
+                    LOG(p.first);
+                }
                 return {};
+            }
             return load(res, persistent, loader);
         }
 

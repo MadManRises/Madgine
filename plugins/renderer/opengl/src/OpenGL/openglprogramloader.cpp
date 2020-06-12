@@ -46,13 +46,25 @@ namespace Render {
 
         OpenGLShaderLoader::HandleType vertexShader;
         vertexShader.load(name + "_VS");
+        if (!vertexShader) {
+            LOG_ERROR("Failed to load VS '" << name << "_VS'!");
+        }
+        
         OpenGLShaderLoader::HandleType pixelShader;
         pixelShader.load(name + "_PS");
-
-        if (!vertexShader || !pixelShader || !program.link(vertexShader, pixelShader)) {
+        if (!pixelShader) {
+            LOG_ERROR("Failed to load VS '" << name << "_PS'!");
+        }
+        
+        if (!vertexShader || !pixelShader) {
             LOG_ERROR("Failed to load Program '" << name << "'!");
             std::terminate();
         }
+
+        if (!program.link(vertexShader, pixelShader)) {
+            LOG_ERROR("Failed to link Program '" << name << "'!");
+            std::terminate();
+        }        
 
         return true;
     }
