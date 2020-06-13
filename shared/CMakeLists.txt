@@ -31,14 +31,15 @@ else()
 	add_library(SDL ALIAS SDL2-static)
 endif()
 
+if (NOT ANDROID AND NOT EMSCRIPTEN)
+	option(OIS_BUILD_SHARED_LIBS "Build shared libraries" ${BUILD_SHARED_LIBS})
+	option(OIS_BUILD_DEMOS "Build demo applications" OFF)
 
-option(OIS_BUILD_SHARED_LIBS "Build shared libraries" ${BUILD_SHARED_LIBS})
-option(OIS_BUILD_DEMOS "Build demo applications" OFF)
-
-add_subdirectory(ois)
-set_target_properties(OIS PROPERTIES EXCLUDE_FROM_ALL TRUE)
-if (BUILD_SHARED_LIBS)
-	set_target_properties(OIS PROPERTIES POSITION_INDEPENDENT_CODE ON)
+	add_subdirectory(ois)
+	set_target_properties(OIS PROPERTIES EXCLUDE_FROM_ALL TRUE)
+	if (BUILD_SHARED_LIBS)
+		set_target_properties(OIS PROPERTIES POSITION_INDEPENDENT_CODE ON)
+	endif()
 endif()
 
 export_to_workspace(Shared)
