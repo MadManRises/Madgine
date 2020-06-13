@@ -16,4 +16,13 @@ add_subdirectory(im3d)
 
 add_subdirectory(stb)
 
+
+add_subdirectory(SDL2-2.0.9)
+if (BUILD_SHARED_LIBS)
+	add_library(SDL ALIAS SDL2)
+else()
+	add_library(SDL ALIAS SDL2-static)
+endif()
+
+
 export_to_workspace(Shared)
