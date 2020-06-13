@@ -27,3 +27,5 @@ namespace Render {
 	};
 }
 }
+
+RegisterType(Engine::Render::DirectX11TextureLoader);

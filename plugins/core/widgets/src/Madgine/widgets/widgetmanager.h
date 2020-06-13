@@ -132,3 +132,5 @@ namespace Widgets {
 
 }
 }
+
+RegisterType(Engine::Widgets::WidgetManager);

@@ -102,7 +102,7 @@ namespace Widgets {
 
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
-        virtual std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
+        virtual std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
 
         void *userData();
         void setUserData(void *userData);
@@ -133,7 +133,7 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-        std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        std::pair<std::vector<Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
         void destroyChild(WidgetBase *w);
@@ -165,3 +165,5 @@ namespace Widgets {
     };
 }
 }
+
+RegisterType(Engine::Widgets::WidgetBase);

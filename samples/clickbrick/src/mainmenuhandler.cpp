@@ -12,7 +12,7 @@
 
 UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
 
-RegisterType(ClickBrick::UI::MainMenuHandler)
+
 
     METATABLE_BEGIN_BASE(ClickBrick::UI::MainMenuHandler, Engine::UI::GuiHandlerBase)
         METATABLE_END(ClickBrick::UI::MainMenuHandler)

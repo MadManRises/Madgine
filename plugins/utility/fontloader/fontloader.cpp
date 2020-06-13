@@ -40,7 +40,7 @@ UNIQUECOMPONENT(Engine::Render::FontLoader)
 METATABLE_BEGIN_BASE(Engine::Render::FontLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::FontLoader::ResourceType)
 
-RegisterType(Engine::Render::FontLoader)
+
     METATABLE_BEGIN(Engine::Render::FontLoader)
         MEMBER(mResources)
             METATABLE_END(Engine::Render::FontLoader)

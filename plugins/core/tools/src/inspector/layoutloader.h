@@ -32,3 +32,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::LayoutLoader);

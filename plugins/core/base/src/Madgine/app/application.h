@@ -44,3 +44,5 @@ namespace App {
     };
 }
 }
+
+RegisterType(Engine::App::Application);

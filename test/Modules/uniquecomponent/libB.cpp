@@ -11,4 +11,3 @@ UNIQUECOMPONENT(LibBComponent);
 METATABLE_BEGIN(LibBComponent)
 METATABLE_END(LibBComponent)
 
-RegisterType(LibBComponent);

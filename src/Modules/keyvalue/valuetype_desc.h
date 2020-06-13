@@ -181,7 +181,7 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
     if constexpr (std::is_same_v<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };
     } else if constexpr (std::is_pointer_v<T>) {
-        return { { ValueTypeEnum::ScopeValue }, table_constexpr<std::remove_pointer_t<T>> };
+        return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else if constexpr (std::is_same_v<T, TypedScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
     } else {

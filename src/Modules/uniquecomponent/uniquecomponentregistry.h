@@ -113,7 +113,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     };
 
     UniqueComponentRegistry()
-        : ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>(), &Plugins::PLUGIN_LOCAL(binaryInfo))
+        : ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>, &Plugins::PLUGIN_LOCAL(binaryInfo))
     {
     }
 

@@ -14,7 +14,7 @@
 
 UNIQUECOMPONENT(ClickBrick::UI::GameOverHandler)
 
-RegisterType(ClickBrick::UI::GameOverHandler)
+
 
 METATABLE_BEGIN_BASE(ClickBrick::UI::GameOverHandler, Engine::UI::GuiHandlerBase)
 METATABLE_END(ClickBrick::UI::GameOverHandler)

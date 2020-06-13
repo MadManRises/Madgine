@@ -84,4 +84,3 @@ METATABLE_END(Engine::Tools::Profiler)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Profiler, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Profiler)
 
-RegisterType(Engine::Tools::Profiler);

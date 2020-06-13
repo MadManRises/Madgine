@@ -75,4 +75,3 @@ METATABLE_END(Engine::Tools::Metrics)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Metrics, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Metrics)
 
-RegisterType(Engine::Tools::Metrics);

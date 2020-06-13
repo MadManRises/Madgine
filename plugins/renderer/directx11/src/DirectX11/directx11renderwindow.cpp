@@ -26,7 +26,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-RegisterType(Engine::Render::DirectX11RenderWindow)
+
 
     namespace Engine
 {

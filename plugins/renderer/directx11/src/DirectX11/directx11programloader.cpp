@@ -19,7 +19,7 @@ METATABLE_END(Engine::Render::DirectX11ProgramLoader)
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11ProgramLoader::ResourceType, Engine::Render::ProgramLoader::ResourceType)
 METATABLE_END(Engine::Render::DirectX11ProgramLoader::ResourceType)
 
-RegisterType(Engine::Render::DirectX11ProgramLoader);
+
 
 namespace Engine {
 namespace Render {

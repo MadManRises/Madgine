@@ -65,8 +65,6 @@
     extern DLL_IMPORT Type Name##_instance;           \
     template <ArgumentType T>                         \
     Type *Name = &Name##_instance<T>;                 \
-    template <ArgumentType T>                         \
-    constexpr Type **Name##_constexpr = &Name<T>;
 
 #define DLL_EXPORT_VARIABLE(qualifier, Type, ns, Name, Init, Argument) \
     template <>                                                        \

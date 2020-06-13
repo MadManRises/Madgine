@@ -40,7 +40,7 @@ FIELD(mStartupWidget)
 FIELD(mTopLevelWidgets)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
-RegisterType(Engine::Widgets::WidgetManager);
+
 
 namespace Engine {
 namespace Widgets {
@@ -66,7 +66,7 @@ namespace Widgets {
         mProgram.create("ui");
 
         mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
-            return loader->generate<GUI::Vertex>(mesh, 3, {});
+            return loader->generate<Vertex>(mesh, 3, {});
         });
 
         mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
@@ -619,7 +619,7 @@ namespace Widgets {
 
         target->setRenderSpace(screenSpace);
 
-        std::map<Render::TextureDescriptor, std::vector<GUI::Vertex>> vertices;
+        std::map<Render::TextureDescriptor, std::vector<Vertex>> vertices;
 
         std::queue<Widgets::WidgetBase *> q;
         for (Widgets::WidgetBase *w : widgets()) {
@@ -637,7 +637,7 @@ namespace Widgets {
                     q.push(c);
             }
 
-            std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
+            std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
             Resources::ImageLoader::ResourceType *resource = w->resource();
             if (resource) {
@@ -648,10 +648,10 @@ namespace Widgets {
                     mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
                 }
 
-                for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
+                for (std::pair<std::vector<Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
 
-                    std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const GUI::Vertex &v) {
-                        return GUI::Vertex {
+                    std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const Vertex &v) {
+                        return Vertex {
                             v.mPos,
                             v.mColor,
                             { (it->second.mArea.mSize.x / (512.f * mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (512.f * mUIAtlasSize),
@@ -661,13 +661,13 @@ namespace Widgets {
                 }
 
             } else {
-                for (std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
+                for (std::pair<std::vector<Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
                     std::move(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]));
                 }
             }
         }
 
-        for (std::pair<const Render::TextureDescriptor, std::vector<GUI::Vertex>> &p : vertices) {
+        for (std::pair<const Render::TextureDescriptor, std::vector<Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
                 mParameters.hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);

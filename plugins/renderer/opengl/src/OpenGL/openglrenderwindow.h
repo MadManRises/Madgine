@@ -36,3 +36,5 @@ namespace Render {
 
 }
 }
+
+RegisterType(Engine::Render::OpenGLRenderWindow);

@@ -70,4 +70,3 @@ METATABLE_END(Engine::Tools::OpenGLToolConfig)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::OpenGLToolConfig, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::OpenGLToolConfig)
 
-RegisterType(Engine::Tools::OpenGLToolConfig);

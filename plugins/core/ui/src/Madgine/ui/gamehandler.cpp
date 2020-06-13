@@ -12,7 +12,7 @@ DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
 METATABLE_BEGIN_BASE(Engine::UI::GameHandlerBase, Engine::UI::Handler)
 METATABLE_END(Engine::UI::GameHandlerBase)
 
-RegisterType(Engine::UI::GameHandlerBase);
+
 
 namespace Engine {
 namespace UI {

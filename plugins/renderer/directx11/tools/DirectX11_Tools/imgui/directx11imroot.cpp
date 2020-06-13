@@ -20,7 +20,7 @@ VIRTUALUNIQUECOMPONENT(Engine::Tools::DirectX11ImRoot)
 METATABLE_BEGIN_BASE(Engine::Tools::DirectX11ImRoot, Engine::Tools::ClientImRoot)
 METATABLE_END(Engine::Tools::DirectX11ImRoot)
 
-RegisterType(Engine::Tools::DirectX11ImRoot)
+
 
     namespace Engine
 {

@@ -30,7 +30,7 @@ METATABLE_END(Engine::Tools::TestTool)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::TestTool)
 
-RegisterType(Engine::Tools::TestTool);
+
 
 namespace Engine {
 namespace Tools {

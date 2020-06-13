@@ -45,3 +45,5 @@ namespace Render {
 
 }
 }
+
+RegisterType(Engine::Render::ProgramLoader);

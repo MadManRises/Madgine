@@ -30,7 +30,7 @@ READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
-RegisterType(Engine::Widgets::WidgetBase);
+
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
 FIELD(mChildren)
@@ -390,7 +390,7 @@ namespace Widgets {
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
     {
         return {};
     }
@@ -493,9 +493,9 @@ namespace Widgets {
         return nullptr;
     }
 
-    std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
-        std::vector<GUI::Vertex> result;
+        std::vector<Vertex> result;
 
         size_t textLen = text.size();
 

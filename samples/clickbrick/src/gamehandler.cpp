@@ -7,7 +7,7 @@
 
 UNIQUECOMPONENT(ClickBrick::UI::GameHandler)
 
-RegisterType(ClickBrick::UI::GameHandler)
+
 
     METATABLE_BEGIN_BASE(ClickBrick::UI::GameHandler, Engine::UI::GuiHandlerBase)
         METATABLE_END(ClickBrick::UI::GameHandler)

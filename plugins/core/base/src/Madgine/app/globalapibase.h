@@ -31,3 +31,5 @@ namespace App {
     };
 }
 }
+
+RegisterType(Engine::App::GlobalAPIBase);

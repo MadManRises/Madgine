@@ -109,4 +109,4 @@ UNIQUECOMPONENT(Engine::Input::SDLInputHandler);
 METATABLE_BEGIN(Engine::Input::SDLInputHandler)
 METATABLE_END(Engine::Input::SDLInputHandler)
 
-RegisterType(Engine::Input::SDLInputHandler);
+

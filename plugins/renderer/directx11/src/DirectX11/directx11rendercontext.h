@@ -23,3 +23,5 @@ namespace Render {
 
 }
 }
+
+RegisterType(Engine::Render::DirectX11RenderContext);

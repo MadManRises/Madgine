@@ -101,3 +101,6 @@ namespace Scene {
 
 }
 }
+
+RegisterType(Engine::Scene::SceneManager);
+RegisterType(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);

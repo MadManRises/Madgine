@@ -110,6 +110,7 @@ namespace Filesystem {
         size_t cursor = 0;
 
         bool hadSeparator = false;
+        bool canGoUp = false;
         for (size_t i = 0; i < size; ++i) {
             if (isSeparator(mPath[i])) {
                 if (!hadSeparator) {
@@ -117,7 +118,7 @@ namespace Filesystem {
                     if (lastElement == ".") {
                         if (cursor > 0)
                             --cursor;
-                    } else if (lastElement == ".." && cursor > 0) {
+                    } else if (lastElement == ".." && canGoUp) {
                         --cursor;
                         cursor = mPath.rfind('/', cursor - 1) + 1;
                     } else {
@@ -125,6 +126,7 @@ namespace Filesystem {
                         cursor += lastElement.size();
                         mPath.replace(cursor, 1, "/");
                         ++cursor;
+                        canGoUp = (lastElement != "..");
                     }
                     lastElement.clear();
                 }

@@ -14,7 +14,6 @@
 
 #include "Modules/threading/taskqueue.h"
 
-RegisterType(Engine::Render::RenderContext)
 
     namespace Engine
 {

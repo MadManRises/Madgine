@@ -6,7 +6,7 @@
 #include "directx11rendercontext.h"
 #include "directx11rendertexture.h"
 
-RegisterType(Engine::Render::DirectX11RenderContext)
+
 
     UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
 

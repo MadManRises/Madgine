@@ -33,7 +33,7 @@ METATABLE_BEGIN(Engine::Render::SkeletonDescriptor)
 MEMBER(mBones)
 METATABLE_END(Engine::Render::SkeletonDescriptor)
 
-RegisterType(Engine::Render::SkeletonLoader)
+
 
     namespace Engine
 {

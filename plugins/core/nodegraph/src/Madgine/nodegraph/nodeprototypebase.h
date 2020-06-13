@@ -4,6 +4,7 @@
 
 #include "graphexecutable.h"
 
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -51,3 +52,5 @@ namespace NodeGraph {
 
 }
 }
+
+RegisterType(Engine::NodeGraph::NodePrototypeBase);

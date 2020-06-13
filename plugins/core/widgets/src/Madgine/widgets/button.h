@@ -14,7 +14,7 @@ namespace Widgets {
 
         Threading::SignalStub<> &clickEvent();
 
-        std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
         bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
         bool injectPointerLeave(const Input::PointerEventArgs &arg) override;

@@ -21,7 +21,7 @@ METATABLE_END(Engine::Render::DirectX11MeshLoader)
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11MeshLoader::ResourceType, Engine::Render::MeshLoader::ResourceType)
 METATABLE_END(Engine::Render::DirectX11MeshLoader::ResourceType)
 
-RegisterType(Engine::Render::DirectX11MeshLoader);
+
 
 namespace Engine {
 namespace Render {

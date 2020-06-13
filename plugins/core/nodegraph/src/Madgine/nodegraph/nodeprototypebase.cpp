@@ -15,8 +15,6 @@ FIELD(mFlowOutPins)
 FIELD(mDataInPins)
 SERIALIZETABLE_END(Engine::NodeGraph::NodePrototypeBase)
 
-RegisterType(Engine::NodeGraph::NodePrototypeBase);
-
 namespace Engine {
 namespace NodeGraph {
 

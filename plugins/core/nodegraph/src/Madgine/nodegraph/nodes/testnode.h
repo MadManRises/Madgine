@@ -24,3 +24,5 @@ namespace NodeGraph {
 
 }
 }
+
+RegisterType(Engine::NodeGraph::TestNode);

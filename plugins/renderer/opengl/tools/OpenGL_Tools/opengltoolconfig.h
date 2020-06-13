@@ -25,3 +25,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::OpenGLToolConfig);

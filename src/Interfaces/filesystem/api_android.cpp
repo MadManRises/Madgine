@@ -158,9 +158,8 @@ namespace Filesystem {
         return ::remove(p.c_str());
     }
 
-    Path makeNormalized(const char *p)
-    {
-        return p;
+    void makeNormalized(Path &p)
+    {        
     }
 
     bool isAbsolute(const Path &p)

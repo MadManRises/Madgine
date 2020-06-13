@@ -151,4 +151,3 @@ METATABLE_END(Engine::Scene::Entity::Animation)
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Animation)
 SERIALIZETABLE_END(Engine::Scene::Entity::Animation)
 
-RegisterType(Engine::Scene::Entity::Animation);

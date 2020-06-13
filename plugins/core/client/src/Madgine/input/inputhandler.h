@@ -29,3 +29,5 @@ namespace Input {
     };
 }
 }
+
+RegisterType(Engine::Input::InputHandler);

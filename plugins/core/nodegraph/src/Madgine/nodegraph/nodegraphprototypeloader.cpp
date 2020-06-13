@@ -15,7 +15,7 @@ METATABLE_BEGIN_BASE(Engine::NodeGraph::NodeGraphPrototypeLoader::ResourceType, 
 READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::NodeGraph::NodeGraphPrototypeLoader::ResourceType)
 
-RegisterType(Engine::NodeGraph::NodeGraphPrototypeLoader)
+
 
     namespace Engine
 {

@@ -15,7 +15,7 @@ UNIQUECOMPONENT(Engine::Input::OISInputHandler);
 METATABLE_BEGIN(Engine::Input::OISInputHandler)
 METATABLE_END(Engine::Input::OISInputHandler)
 
-RegisterType(Engine::Input::OISInputHandler);
+
 
 namespace Engine {
 namespace Input {

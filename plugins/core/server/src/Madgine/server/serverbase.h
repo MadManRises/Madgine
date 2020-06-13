@@ -38,4 +38,6 @@ namespace Server {
 }
 }
 
+RegisterType(Engine::Server::ServerBase);
+
 #endif

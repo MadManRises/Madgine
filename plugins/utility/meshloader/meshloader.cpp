@@ -20,7 +20,7 @@ METATABLE_END(Engine::Render::MeshLoader)
 METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::MeshLoader::ResourceType)
 
-RegisterType(Engine::Render::MeshLoader)
+
 
     namespace Engine
 {

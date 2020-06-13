@@ -33,3 +33,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::FunctionTool);

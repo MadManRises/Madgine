@@ -122,7 +122,7 @@ namespace Input {
 }
 }
 
-RegisterType(Engine::Input::AndroidInputHandler);
+
 
 METATABLE_BEGIN(Engine::Input::AndroidInputHandler)
 METATABLE_END(Engine::Input::AndroidInputHandler)

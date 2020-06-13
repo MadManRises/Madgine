@@ -115,7 +115,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 
 #define METATABLE_BEGIN(T) _METATABLE_BEGIN_IMPL(T, nullptr)
 
-#define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, table_constexpr<Base>)
+#define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>)
 
 #define _METATABLE_BEGIN_IMPL(T, BasePtr)                                    \
     namespace Engine {                                                       \
@@ -150,7 +150,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
     {                                                                           \
         static constexpr ::Engine::MetaTableLineStruct<__LINE__> sMembers = {}; \
     }                                                                           \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ ::table_constexpr<T>, #T, ::Engine::MetaTableLineStruct<__LINE__>::baseClass, Meta_##T::sMembers.data() }), T);
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__LINE__>::baseClass, Meta_##T::sMembers.data() }), T);
 
 /*#define STRUCT_METATABLE(T)                                                                                              \
     namespace {                                                                                                          \

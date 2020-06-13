@@ -74,4 +74,6 @@ namespace Tools {
 }
 }
 
+RegisterType(Engine::Tools::MemoryViewer);
+
 #endif

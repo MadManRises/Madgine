@@ -19,7 +19,7 @@ SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
 FIELD(mComponents)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
-RegisterType(Engine::Scene::Entity::Entity);
+
 
 namespace Engine {
 

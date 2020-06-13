@@ -33,7 +33,7 @@ namespace Tools {
 
     static Threading::TaskGuard excludeFromExport {
         []() {
-            skipUniqueComponentOnExport(&typeInfo<PluginManager>());
+            skipUniqueComponentOnExport(&typeInfo<PluginManager>);
         },
         {}
     };

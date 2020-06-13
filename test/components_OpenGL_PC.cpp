@@ -5,17 +5,29 @@
 #ifdef BUILD_WidgetsTools
 #    include "Madgine_Tools/widgetstoolslib.h"
 #endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloaderlib.h"
+#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
 #endif
-#ifdef BUILD_Tools
-#    include "toolslib.h"
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
 #endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
+#ifdef BUILD_Tools
+#    include "toolslib.h"
+#endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
+#ifdef BUILD_OISHandler
+#    include "oislib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
@@ -23,29 +35,17 @@
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
 #endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
-#endif
-#ifdef BUILD_AnimationLoader
-#    include "animationloaderlib.h"
-#endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
-#endif
-#ifdef BUILD_OISHandler
-#    include "oislib.h"
-#endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
@@ -55,18 +55,6 @@
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenemanager.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/gui/toplevelwindowcomponentcollector.h"
-#endif
-#ifdef BUILD_OpenGLTools
-#    include "OpenGL_Tools/imgui/openglimroot.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgets/widgetmanager.h"
-#endif
-#ifdef BUILD_UI
-#    include "Madgine/ui/uimanager.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/input/inputcollector.h"
@@ -182,6 +170,18 @@
 #ifdef BUILD_ClickBrick
 #    include "gameoverhandler.h"
 #endif
+#ifdef BUILD_Client
+#    include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/imgui/openglimroot.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgets/widgetmanager.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/ui/uimanager.h"
+#endif
 #ifdef BUILD_TestShared
 #    include "uniquecomponent/uniquecomponentshared.h"
 #endif
@@ -217,53 +217,6 @@ template <>
 size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_GlobalAPIBase_Scene + 1
-#    endif
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-std::vector<Engine::GUI::MainWindowComponentRegistry::F> Engine::GUI::MainWindowComponentRegistry::sComponents()
-{
-	return {
-#    ifdef BUILD_OpenGLTools
-		createComponent<Engine::Tools::OpenGLImRoot>,
-#    endif
-#    ifdef BUILD_Widgets
-		createComponent<Engine::Widgets::WidgetManager>,
-#    endif
-#    ifdef BUILD_UI
-		createComponent<Engine::UI::UIManager>,
-#    endif
-
-	}; 
-}
-
-#    define ACC 0
-
-#    ifdef BUILD_OpenGLTools
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
-template <>
-size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
-template <>
-size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
-#    endif
-#    ifdef BUILD_Widgets
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
-template <>
-size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
-#    endif
-#    ifdef BUILD_UI
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
-template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
 #    endif
 
 #    undef ACC
@@ -592,6 +545,53 @@ template <>
 size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 2; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_GuiHandlerBase_ClickBrick + 3
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_Client
+template <>
+std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::MainWindowComponentRegistry::sComponents()
+{
+	return {
+#    ifdef BUILD_OpenGLTools
+		createComponent<Engine::Tools::OpenGLImRoot>,
+#    endif
+#    ifdef BUILD_Widgets
+		createComponent<Engine::Widgets::WidgetManager>,
+#    endif
+#    ifdef BUILD_UI
+		createComponent<Engine::UI::UIManager>,
+#    endif
+
+	}; 
+}
+
+#    define ACC 0
+
+#    ifdef BUILD_OpenGLTools
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
+template <>
+size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+template <>
+size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
+#    endif
+#    ifdef BUILD_Widgets
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
+template <>
+size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
+#    endif
+#    ifdef BUILD_UI
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
+template <>
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
 #    endif
 
 #    undef ACC

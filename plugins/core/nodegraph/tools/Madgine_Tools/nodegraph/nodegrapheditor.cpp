@@ -26,7 +26,7 @@ SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::NodeGraphEditor, Engine::Tools::Tool
 FIELD(mHierarchyVisible)
 SERIALIZETABLE_END(Engine::Tools::NodeGraphEditor)
 
-RegisterType(Engine::Tools::NodeGraphEditor);
+
 
 static const int sPinIconSize = 24;
 

@@ -17,3 +17,5 @@ namespace UI {
 
 }
 }
+
+RegisterType(ClickBrick::UI::GameHandler);

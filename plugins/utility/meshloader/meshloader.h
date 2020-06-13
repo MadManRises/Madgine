@@ -118,3 +118,5 @@ namespace Render {
 
 }
 }
+
+RegisterType(Engine::Render::MeshLoader);

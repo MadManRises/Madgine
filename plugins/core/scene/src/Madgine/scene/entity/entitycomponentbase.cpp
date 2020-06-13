@@ -79,4 +79,3 @@ METATABLE_END(Engine::Scene::Entity::EntityComponentBase)
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::EntityComponentBase)
 SERIALIZETABLE_END(Engine::Scene::Entity::EntityComponentBase)
 
-RegisterType(Engine::Scene::Entity::EntityComponentBase);

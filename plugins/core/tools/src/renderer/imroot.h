@@ -48,3 +48,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::ImRoot);

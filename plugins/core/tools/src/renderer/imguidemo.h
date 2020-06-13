@@ -15,3 +15,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::ImGuiDemo);

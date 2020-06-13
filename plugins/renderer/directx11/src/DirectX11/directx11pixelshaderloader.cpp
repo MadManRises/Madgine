@@ -118,4 +118,4 @@ METATABLE_END(Engine::Render::DirectX11PixelShaderLoader)
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11PixelShaderLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::DirectX11PixelShaderLoader::ResourceType)
 
-RegisterType(Engine::Render::DirectX11PixelShaderLoader);
+

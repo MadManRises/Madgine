@@ -10,7 +10,7 @@
 METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::TextureLoader::ResourceType)
 
-RegisterType(Engine::Render::TextureLoader)
+
 
     namespace Engine
 {

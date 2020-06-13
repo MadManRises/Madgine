@@ -97,4 +97,3 @@ METATABLE_BEGIN(Engine::App::Application)
 MEMBER(mGlobalAPIs)
 METATABLE_END(Engine::App::Application)
 
-RegisterType(Engine::App::Application);

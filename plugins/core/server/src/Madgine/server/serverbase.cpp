@@ -59,6 +59,6 @@ namespace Server {
 METATABLE_BEGIN(Engine::Server::ServerBase)
 METATABLE_END(Engine::Server::ServerBase)
 
-RegisterType(Engine::Server::ServerBase);
+
 
 #endif

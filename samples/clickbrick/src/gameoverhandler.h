@@ -29,3 +29,5 @@ namespace UI {
 
 }
 }
+
+RegisterType(ClickBrick::UI::GameOverHandler);

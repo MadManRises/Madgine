@@ -77,4 +77,3 @@ METATABLE_END(Engine::Render::OpenGLShaderLoader)
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLShaderLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::OpenGLShaderLoader::ResourceType)
 
-RegisterType(Engine::Render::OpenGLShaderLoader);

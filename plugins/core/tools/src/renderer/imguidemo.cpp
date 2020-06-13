@@ -37,4 +37,3 @@ METATABLE_END(Engine::Tools::ImGuiDemo)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ImGuiDemo, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::ImGuiDemo)
 
-RegisterType(Engine::Tools::ImGuiDemo);

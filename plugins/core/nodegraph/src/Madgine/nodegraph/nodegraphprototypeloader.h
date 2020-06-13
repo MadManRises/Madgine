@@ -32,3 +32,5 @@ namespace NodeGraph {
 
 }
 }
+
+RegisterType(Engine::NodeGraph::NodeGraphPrototypeLoader);

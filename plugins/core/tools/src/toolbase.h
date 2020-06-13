@@ -49,3 +49,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::ToolBase);

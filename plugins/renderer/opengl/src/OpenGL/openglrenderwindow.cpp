@@ -24,7 +24,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-RegisterType(Engine::Render::OpenGLRenderWindow)
+
 
 #if WINDOWS
     typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);

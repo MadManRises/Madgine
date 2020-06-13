@@ -42,4 +42,4 @@ METATABLE_END(Engine::Render::DirectX11VertexShaderLoader)
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11VertexShaderLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::DirectX11VertexShaderLoader::ResourceType)
 
-RegisterType(Engine::Render::DirectX11VertexShaderLoader);
+

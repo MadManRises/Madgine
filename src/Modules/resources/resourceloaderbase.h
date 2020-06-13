@@ -2,6 +2,8 @@
 
 #include "../keyvalue/virtualscopebase.h"
 
+#include "../reflection/classname.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -41,3 +43,6 @@ namespace Resources {
 
 }
 }
+
+
+RegisterType(Engine::Resources::ResourceLoaderBase);

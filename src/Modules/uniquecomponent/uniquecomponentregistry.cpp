@@ -46,7 +46,10 @@ struct GuardGuard {
 
 std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
 {
-    Filesystem::Path p = Filesystem::makeNormalized(pStr);
+    Filesystem::Path p = pStr;
+    if (p.isRelative())
+        p = Filesystem::Path { BINARY_OUT_DIR } / p;
+    Filesystem::makeNormalized(p);
     return p.relative(binInfo->mSourceRoot).str();
 };
 
@@ -185,7 +188,7 @@ size_t component_index<)"
                                  << collector->mBaseInfo->mTypeName << "_"
                                  << collector->mBinary->mName << " + " << i
                                  << "; }\n";
-                            typeInfo = typeInfo->mDecayType ? &typeInfo->mDecayType() : nullptr;
+                            typeInfo = typeInfo->mDecayType ? typeInfo->mDecayType : nullptr;
                         }
                     }
                     ++i;

@@ -22,3 +22,5 @@ namespace Render {
     };
 }
 }
+
+RegisterType(Engine::Render::OpenGLProgramLoader);

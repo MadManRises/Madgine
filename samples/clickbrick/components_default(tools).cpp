@@ -1,6 +1,27 @@
 #include "Modules/moduleslib.h"
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
+#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
+#endif
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
+#endif
+#ifdef BUILD_NodeGraph
+#    include "Madgine/nodegraphlib.h"
+#endif
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloaderlib.h"
+#endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloaderlib.h"
 #endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
@@ -8,32 +29,26 @@
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
-#endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
-#endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_SceneRendererTools
-#    include "Madgine_Tools/scenerenderertoolslib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
-#endif
 #ifdef BUILD_OISHandler
 #    include "oislib.h"
+#endif
+#ifdef BUILD_NodeGraphTools
+#    include "Madgine_Tools/nodegraphtoolslib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
 #endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
+#ifdef BUILD_FontLoader
+#    include "fontloaderlib.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
@@ -48,22 +63,16 @@
 #    include "Madgine/scene/scenemanager.h"
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/gui/toplevelwindowcomponent.h"
-#endif
-#ifdef BUILD_OpenGLTools
-#    include "OpenGL_Tools/imgui/openglimroot.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgets/widgetmanager.h"
-#endif
-#ifdef BUILD_UI
-#    include "Madgine/ui/uimanager.h"
-#endif
-#ifdef BUILD_Client
 #    include "Madgine/input/inputcollector.h"
 #endif
 #ifdef BUILD_OISHandler
 #    include "oisinputhandler.h"
+#endif
+#ifdef BUILD_NodeGraph
+#    include "Madgine/nodegraph/nodeprototypecollector.h"
+#endif
+#ifdef BUILD_NodeGraph
+#    include "Madgine/nodegraph/nodes/testnode.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/render/rendercontextcollector.h"
@@ -77,11 +86,11 @@
 #ifdef BUILD_ImageLoader
 #    include "imageloader.h"
 #endif
+#ifdef BUILD_FontLoader
+#    include "fontloader.h"
+#endif
 #ifdef BUILD_Tools
 #    include "inspector/layoutloader.h"
-#endif
-#ifdef BUILD_OpenGL
-#    include "OpenGL/openglfontloader.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/openglmeshloader.h"
@@ -94,6 +103,33 @@
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengltextureloader.h"
+#endif
+#ifdef BUILD_NodeGraph
+#    include "Madgine/nodegraph/nodegraphprototypeloader.h"
+#endif
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloader.h"
+#endif
+#ifdef BUILD_AnimationLoader
+#    include "animationloader.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/entitycomponentcollector.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/animation.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/mesh.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/skeleton.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scene/entity/components/transform.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "brick.h"
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenecomponentcollector.h"
@@ -125,6 +161,9 @@
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolconfig.h"
 #endif
+#ifdef BUILD_NodeGraphTools
+#    include "Madgine_Tools/nodegraph/nodegrapheditor.h"
+#endif
 #ifdef BUILD_SceneRendererTools
 #    include "Madgine_Tools/sceneeditor/sceneeditor.h"
 #endif
@@ -149,6 +188,18 @@
 #ifdef BUILD_ClickBrick
 #    include "gameoverhandler.h"
 #endif
+#ifdef BUILD_Client
+#    include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/imgui/openglimroot.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgets/widgetmanager.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/ui/uimanager.h"
+#endif
 #ifdef BUILD_TestShared
 #    include "uniquecomponent/uniquecomponentshared.h"
 #endif
@@ -164,18 +215,7 @@ namespace Engine {
 
 #ifdef BUILD_Base
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::App::GlobalAPICollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Scene
-		&table<Engine::Scene::SceneManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::App::GlobalAPICollector::Registry::F> Engine::App::GlobalAPICollector::Registry::sComponents()
+std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_Scene
@@ -202,80 +242,7 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::GUI::MainWindowCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_OpenGLTools
-		&table<Engine::Tools::OpenGLImRoot>(),
-#    endif
-#    ifdef BUILD_Widgets
-		&table<Engine::Widgets::WidgetManager>(),
-#    endif
-#    ifdef BUILD_UI
-		&table<Engine::UI::UIManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::GUI::MainWindowCollector::Registry::F> Engine::GUI::MainWindowCollector::Registry::sComponents()
-{
-	return {
-#    ifdef BUILD_OpenGLTools
-		createComponent<Engine::Tools::OpenGLImRoot>,
-#    endif
-#    ifdef BUILD_Widgets
-		createComponent<Engine::Widgets::WidgetManager>,
-#    endif
-#    ifdef BUILD_UI
-		createComponent<Engine::UI::UIManager>,
-#    endif
-
-	}; 
-}
-
-#    define ACC 0
-
-#    ifdef BUILD_OpenGLTools
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
-template <>
-size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
-#    endif
-#    ifdef BUILD_Widgets
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
-template <>
-size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
-#    endif
-#    ifdef BUILD_UI
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
-template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
-#    endif
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-const std::vector<const Engine::MetaTable *> &Engine::Input::InputHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_OISHandler
-		&table<Engine::Input::OISInputHandler>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Input::InputHandlerCollector::Registry::F> Engine::Input::InputHandlerCollector::Registry::sComponents()
+std::vector<Engine::Input::InputHandlerRegistry::F> Engine::Input::InputHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_OISHandler
@@ -298,20 +265,34 @@ size_t component_index<Engine::Input::OISInputHandler>() { return CollectorBaseI
 #    undef ACC
 
 #endif
-#ifdef BUILD_Client
+#ifdef BUILD_NodeGraph
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Render::RenderContextCollector::Registry::sTables() 
+std::vector<Engine::NodeGraph::NodePrototypeRegistry::F> Engine::NodeGraph::NodePrototypeRegistry::sComponents()
 {
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLRenderContext>(),
+	return {
+#    ifdef BUILD_NodeGraph
+		createComponent<Engine::NodeGraph::TestNode>,
 #    endif
 
 	}; 
-	return dummy;
 }
+
+#    define ACC 0
+
+#    ifdef BUILD_NodeGraph
+constexpr size_t CollectorBaseIndex_NodePrototypeBase_NodeGraph = ACC;
 template <>
-std::vector<Engine::Render::RenderContextCollector::Registry::F> Engine::Render::RenderContextCollector::Registry::sComponents()
+size_t component_index<Engine::NodeGraph::TestNode>() { return CollectorBaseIndex_NodePrototypeBase_NodeGraph + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_NodePrototypeBase_NodeGraph + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_Client
+template <>
+std::vector<Engine::Render::RenderContextRegistry::F> Engine::Render::RenderContextRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_OpenGL
@@ -336,42 +317,32 @@ size_t component_index<Engine::Render::OpenGLRenderContext>() { return Collector
 #endif
 #ifdef BUILD_Modules
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Resources::ResourceLoaderCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ImageLoader
-		&table<Engine::Resources::ImageLoader>(),
-#    endif
-#    ifdef BUILD_Tools
-		&table<Engine::Tools::LayoutLoader>(),
-#    endif
-#    ifdef BUILD_OpenGL
-		&table<Engine::Render::OpenGLFontLoader>(),
-		&table<Engine::Render::OpenGLMeshLoader>(),
-		&table<Engine::Render::OpenGLProgramLoader>(),
-		&table<Engine::Render::OpenGLShaderLoader>(),
-		&table<Engine::Render::OpenGLTextureLoader>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Resources::ResourceLoaderCollector::Registry::F> Engine::Resources::ResourceLoaderCollector::Registry::sComponents()
+std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::ResourceLoaderRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ImageLoader
 		createComponent<Engine::Resources::ImageLoader>,
 #    endif
+#    ifdef BUILD_FontLoader
+		createComponent<Engine::Render::FontLoader>,
+#    endif
 #    ifdef BUILD_Tools
 		createComponent<Engine::Tools::LayoutLoader>,
 #    endif
 #    ifdef BUILD_OpenGL
-		createComponent<Engine::Render::OpenGLFontLoader>,
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 		createComponent<Engine::Render::OpenGLProgramLoader>,
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 		createComponent<Engine::Render::OpenGLTextureLoader>,
+#    endif
+#    ifdef BUILD_NodeGraph
+		createComponent<Engine::NodeGraph::NodeGraphPrototypeLoader>,
+#    endif
+#    ifdef BUILD_SkeletonLoader
+		createComponent<Engine::Render::SkeletonLoader>,
+#    endif
+#    ifdef BUILD_AnimationLoader
+		createComponent<Engine::Render::AnimationLoader>,
 #    endif
 
 	}; 
@@ -386,6 +357,13 @@ size_t component_index<Engine::Resources::ImageLoader>() { return CollectorBaseI
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_ImageLoader + 1
 #    endif
+#    ifdef BUILD_FontLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_FontLoader = ACC;
+template <>
+size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_FontLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_FontLoader + 1
+#    endif
 #    ifdef BUILD_Tools
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
 template <>
@@ -396,17 +374,42 @@ size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseInde
 #    ifdef BUILD_OpenGL
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
-size_t component_index<Engine::Render::OpenGLFontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
+size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
+size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
-size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4; }
+size_t component_index<Engine::Render::OpenGLShaderLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 2; }
+template <>
+size_t component_index<Engine::Render::OpenGLTextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
+template <>
+size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 #        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 5
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4
+#    endif
+#    ifdef BUILD_NodeGraph
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_NodeGraph = ACC;
+template <>
+size_t component_index<Engine::NodeGraph::NodeGraphPrototypeLoader>() { return CollectorBaseIndex_ResourceLoaderBase_NodeGraph + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_NodeGraph + 1
+#    endif
+#    ifdef BUILD_SkeletonLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader = ACC;
+template <>
+size_t component_index<Engine::Render::SkeletonLoader>() { return CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader + 1
+#    endif
+#    ifdef BUILD_AnimationLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_AnimationLoader = ACC;
+template <>
+size_t component_index<Engine::Render::AnimationLoader>() { return CollectorBaseIndex_ResourceLoaderBase_AnimationLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_AnimationLoader + 1
 #    endif
 
 #    undef ACC
@@ -414,15 +417,51 @@ size_t component_index<Engine::Render::OpenGLTextureLoader>() { return Collector
 #endif
 #ifdef BUILD_Scene
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Scene::SceneComponentCollector::Registry::sTables() 
+std::vector<Engine::Scene::Entity::EntityComponentRegistry::F> Engine::Scene::Entity::EntityComponentRegistry::sComponents()
 {
-	static std::vector<const Engine::MetaTable *> dummy = {
+	return {
+#    ifdef BUILD_Scene
+		createComponent<Engine::Scene::Entity::Animation>,
+		createComponent<Engine::Scene::Entity::Mesh>,
+		createComponent<Engine::Scene::Entity::Skeleton>,
+		createComponent<Engine::Scene::Entity::Transform>,
+#    endif
+#    ifdef BUILD_ClickBrick
+		createComponent<ClickBrick::Scene::Brick>,
+#    endif
 
 	}; 
-	return dummy;
 }
+
+#    define ACC 0
+
+#    ifdef BUILD_Scene
+constexpr size_t CollectorBaseIndex_EntityComponentBase_Scene = ACC;
 template <>
-std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::SceneComponentCollector::Registry::sComponents()
+size_t component_index<Engine::Scene::Entity::Animation>() { return CollectorBaseIndex_EntityComponentBase_Scene + 0; }
+template <>
+size_t component_index<Engine::Scene::Entity::Mesh>() { return CollectorBaseIndex_EntityComponentBase_Scene + 1; }
+template <>
+size_t component_index<Engine::Scene::Entity::Skeleton>() { return CollectorBaseIndex_EntityComponentBase_Scene + 2; }
+template <>
+size_t component_index<Engine::Scene::Entity::Transform>() { return CollectorBaseIndex_EntityComponentBase_Scene + 3; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_EntityComponentBase_Scene + 4
+#    endif
+#    ifdef BUILD_ClickBrick
+constexpr size_t CollectorBaseIndex_EntityComponentBase_ClickBrick = ACC;
+template <>
+size_t component_index<ClickBrick::Scene::Brick>() { return CollectorBaseIndex_EntityComponentBase_ClickBrick + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_EntityComponentBase_ClickBrick + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_Scene
+template <>
+std::vector<Engine::Scene::SceneComponentRegistry::F> Engine::Scene::SceneComponentRegistry::sComponents()
 {
 	return {
 
@@ -437,33 +476,7 @@ std::vector<Engine::Scene::SceneComponentCollector::Registry::F> Engine::Scene::
 #endif
 #ifdef BUILD_Tools
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::Tools::ToolsCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_Tools
-		&table<Engine::Tools::FunctionTool>(),
-		&table<Engine::Tools::Inspector>(),
-		&table<Engine::Tools::Metrics>(),
-		&table<Engine::Tools::Profiler>(),
-		&table<Engine::Tools::ProjectManager>(),
-		&table<Engine::Tools::ImGuiDemo>(),
-		&table<Engine::Tools::TestTool>(),
-#    endif
-#    ifdef BUILD_OpenGLTools
-		&table<Engine::Tools::OpenGLToolConfig>(),
-#    endif
-#    ifdef BUILD_SceneRendererTools
-		&table<Engine::Tools::SceneEditor>(),
-#    endif
-#    ifdef BUILD_WidgetsTools
-		&table<Engine::Tools::GuiEditor>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsCollector::Registry::sComponents()
+std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_Tools
@@ -477,6 +490,9 @@ std::vector<Engine::Tools::ToolsCollector::Registry::F> Engine::Tools::ToolsColl
 #    endif
 #    ifdef BUILD_OpenGLTools
 		createComponent<Engine::Tools::OpenGLToolConfig>,
+#    endif
+#    ifdef BUILD_NodeGraphTools
+		createComponent<Engine::Tools::NodeGraphEditor>,
 #    endif
 #    ifdef BUILD_SceneRendererTools
 		createComponent<Engine::Tools::SceneEditor>,
@@ -516,6 +532,13 @@ size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBase
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
 #    endif
+#    ifdef BUILD_NodeGraphTools
+constexpr size_t CollectorBaseIndex_ToolBase_NodeGraphTools = ACC;
+template <>
+size_t component_index<Engine::Tools::NodeGraphEditor>() { return CollectorBaseIndex_ToolBase_NodeGraphTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ToolBase_NodeGraphTools + 1
+#    endif
 #    ifdef BUILD_SceneRendererTools
 constexpr size_t CollectorBaseIndex_ToolBase_SceneRendererTools = ACC;
 template <>
@@ -536,18 +559,7 @@ size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_T
 #endif
 #ifdef BUILD_UI
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GameHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ClickBrick
-		&table<ClickBrick::UI::GameManager>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GameHandlerCollector::Registry::F> Engine::UI::GameHandlerCollector::Registry::sComponents()
+std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ClickBrick
@@ -572,20 +584,7 @@ size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseInde
 #endif
 #ifdef BUILD_UI
 template <>
-const std::vector<const Engine::MetaTable *> &Engine::UI::GuiHandlerCollector::Registry::sTables() 
-{
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_ClickBrick
-		&table<ClickBrick::UI::MainMenuHandler>(),
-		&table<ClickBrick::UI::GameHandler>(),
-		&table<ClickBrick::UI::GameOverHandler>(),
-#    endif
-
-	}; 
-	return dummy;
-}
-template <>
-std::vector<Engine::UI::GuiHandlerCollector::Registry::F> Engine::UI::GuiHandlerCollector::Registry::sComponents()
+std::vector<Engine::UI::GuiHandlerRegistry::F> Engine::UI::GuiHandlerRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_ClickBrick
@@ -614,23 +613,56 @@ size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBase
 #    undef ACC
 
 #endif
-#ifdef BUILD_TestShared
+#ifdef BUILD_Client
 template <>
-const std::vector<const Engine::MetaTable *> &Test::TestCollector::Registry::sTables() 
+std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::MainWindowComponentRegistry::sComponents()
 {
-	static std::vector<const Engine::MetaTable *> dummy = {
-#    ifdef BUILD_LibA
-		&table<LibAComponent>(),
+	return {
+#    ifdef BUILD_OpenGLTools
+		createComponent<Engine::Tools::OpenGLImRoot>,
 #    endif
-#    ifdef BUILD_LibB
-		&table<LibBComponent>(),
+#    ifdef BUILD_Widgets
+		createComponent<Engine::Widgets::WidgetManager>,
+#    endif
+#    ifdef BUILD_UI
+		createComponent<Engine::UI::UIManager>,
 #    endif
 
 	}; 
-	return dummy;
 }
+
+#    define ACC 0
+
+#    ifdef BUILD_OpenGLTools
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
 template <>
-std::vector<Test::TestCollector::Registry::F> Test::TestCollector::Registry::sComponents()
+size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+template <>
+size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
+#    endif
+#    ifdef BUILD_Widgets
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
+template <>
+size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
+#    endif
+#    ifdef BUILD_UI
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
+template <>
+size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
+#    endif
+
+#    undef ACC
+
+#endif
+#ifdef BUILD_TestShared
+template <>
+std::vector<Test::TestRegistry::F> Test::TestRegistry::sComponents()
 {
 	return {
 #    ifdef BUILD_LibA

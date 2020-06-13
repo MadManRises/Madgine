@@ -88,4 +88,3 @@ METATABLE_END(Engine::Scene::SceneComponentBase)
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneComponentBase)
 SERIALIZETABLE_END(Engine::Scene::SceneComponentBase)
 
-RegisterType(Engine::Scene::SceneComponentBase);

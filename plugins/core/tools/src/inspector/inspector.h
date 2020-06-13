@@ -62,3 +62,5 @@ namespace Tools {
     };
 }
 }
+
+RegisterType(Engine::Tools::Inspector);

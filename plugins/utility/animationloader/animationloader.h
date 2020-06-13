@@ -29,3 +29,5 @@ namespace Render {
 
 }
 }
+
+RegisterType(Engine::Render::AnimationLoader);

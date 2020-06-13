@@ -20,8 +20,8 @@ struct UniqueComponentCollector {
 
     UniqueComponentCollector()
     {
-        mInfo.mRegistryInfo = &typeInfo<Registry>();
-        mInfo.mBaseInfo = &typeInfo<Base>();
+        mInfo.mRegistryInfo = &typeInfo<Registry>;
+        mInfo.mBaseInfo = &typeInfo<Base>;
         mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
         Registry::sInstance().addCollector(&mInfo);
     }
@@ -50,9 +50,9 @@ private:
         LOG("Registering Component: " << typeName<T>());
         sInstance().mInfo.mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
         std::vector<const TypeInfo *> elementInfos;
-        elementInfos.push_back(&typeInfo<T>());
+        elementInfos.push_back(&typeInfo<T>);
         if constexpr (has_typename_VBase_v<T>) {
-            elementInfos.push_back(&typeInfo<typename T::VBase>());
+            elementInfos.push_back(&typeInfo<typename T::VBase>);
         }
         sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
         return sInstance().mInfo.mComponents.size() - 1;

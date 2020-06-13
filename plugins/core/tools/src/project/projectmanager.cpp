@@ -24,7 +24,7 @@ SERIALIZETABLE_END(Engine::Tools::ProjectManager)
 
 UNIQUECOMPONENT(Engine::Tools::ProjectManager)
 
-RegisterType(Engine::Tools::ProjectManager)
+
 
     namespace Engine
 {

@@ -48,3 +48,6 @@ namespace Render {
 
 }
 }
+
+
+RegisterType(Engine::Render::RenderContext);

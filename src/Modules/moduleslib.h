@@ -67,6 +67,7 @@
 #include "generic/tupleunpacker.h"
 
 #include "reflection/decay.h"
+#include "reflection/classname.h"
 
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;

@@ -21,3 +21,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::TestTool);

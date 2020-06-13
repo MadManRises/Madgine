@@ -20,3 +20,5 @@ namespace Scene {
 
 }
 }
+
+RegisterType(ClickBrick::Scene::Brick);

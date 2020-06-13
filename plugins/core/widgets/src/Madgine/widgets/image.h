@@ -19,7 +19,7 @@ namespace Widgets {
 
         Resources::ImageLoader::ResourceType *resource() const override;
 
-        std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
         virtual WidgetClass getClass() const override;
 
@@ -28,3 +28,5 @@ namespace Widgets {
     };
 }
 }
+
+RegisterType(Engine::Widgets::Image);

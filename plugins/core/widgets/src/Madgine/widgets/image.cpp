@@ -17,7 +17,7 @@ METATABLE_END(Engine::Widgets::Image)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
 SERIALIZETABLE_END(Engine::Widgets::Image)
 
-RegisterType(Engine::Widgets::Image);
+
 
 namespace Engine {
 namespace Widgets {
@@ -47,9 +47,9 @@ namespace Widgets {
         return mImage;
     }
 
-    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
     {
-        std::vector<GUI::Vertex> result;
+        std::vector<Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;

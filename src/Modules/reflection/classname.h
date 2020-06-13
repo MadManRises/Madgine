@@ -1,23 +1,13 @@
 #pragma once
 
+#include "../generic/type_holder.h"
 #include "Interfaces/stringutil.h"
 #include "decay.h"
 
-namespace Engine {
-
-	template <typename T>
-struct typeMarker_t {
-};
-
 template <typename T>
-constexpr typeMarker_t<T> typeMarker {};
+extern const Engine::TypeInfo typeInfo;
 
-
-}
-
-DLL_IMPORT_VARIABLE2(const Engine::TypeInfo, typeInfo, typename T);
-
-#define RegisterType(T) DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::TypeInfo, ::, typeInfo, SINGLE_ARG({ #T, __FILE__, ::Engine::typeMarker<T> }), T)
+#define RegisterType(T) template <> inline constexpr const ::Engine::TypeInfo typeInfo<T> = { #T, __FILE__, ::Engine::type_holder<T> }
 
 
 namespace Engine {
@@ -25,7 +15,7 @@ namespace Engine {
 template <typename T>
 inline const char *typeName()
 {
-    return typeInfo<T>().mTypeName;
+    return typeInfo<T>.mTypeName;
 }
 
 struct TypeInfo {
@@ -37,7 +27,7 @@ struct TypeInfo {
     }
 
     template <typename T>
-    constexpr TypeInfo(const char *fullName, const char *headerPath, typeMarker_t<T> type)
+    constexpr TypeInfo(const char *fullName, const char *headerPath, type_holder_t<T> type)
         : mFullName(fullName)
         , mTypeName(fix(mFullName))
         , mHeaderPath(headerPath)
@@ -53,7 +43,7 @@ struct TypeInfo {
     const char *mFullName;
     const char *mTypeName;
     const char *mHeaderPath;
-    const TypeInfo &(*mDecayType)();
+    const TypeInfo *mDecayType;
 };
 
 

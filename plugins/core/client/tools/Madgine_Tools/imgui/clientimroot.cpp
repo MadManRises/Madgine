@@ -31,7 +31,7 @@ METATABLE_END(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
 
-RegisterType(Engine::Tools::ClientImRoot);
+
 
 namespace Engine {
 namespace Tools {

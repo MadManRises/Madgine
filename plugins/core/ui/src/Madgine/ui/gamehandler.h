@@ -76,6 +76,8 @@ namespace Engine
 
 }
 
+RegisterType(Engine::UI::GameHandlerBase);
+
 DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandler, GameHandlerBase, UIManager &);
 
 namespace Engine

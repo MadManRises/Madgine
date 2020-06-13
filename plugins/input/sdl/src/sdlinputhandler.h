@@ -32,3 +32,5 @@ namespace Input {
 
 }
 }
+
+RegisterType(Engine::Input::SDLInputHandler);

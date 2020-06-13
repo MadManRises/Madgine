@@ -64,4 +64,3 @@ METATABLE_END(Engine::Scene::Entity::Transform)
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)
 SERIALIZETABLE_END(Engine::Scene::Entity::Transform)
 
-RegisterType(Engine::Scene::Entity::Transform);

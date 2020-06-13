@@ -32,8 +32,7 @@ FIELD(mEntities)
 FIELD(mSceneComponents)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
-RegisterType(Engine::Scene::SceneManager)
-    RegisterType(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>)
+
 
         namespace Engine
 {

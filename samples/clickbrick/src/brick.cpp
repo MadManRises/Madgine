@@ -13,7 +13,7 @@ METATABLE_END(ClickBrick::Scene::Brick)
 SERIALIZETABLE_BEGIN(ClickBrick::Scene::Brick)
 SERIALIZETABLE_END(ClickBrick::Scene::Brick)
 
-RegisterType(ClickBrick::Scene::Brick)
+
 
 namespace ClickBrick {
 namespace Scene {

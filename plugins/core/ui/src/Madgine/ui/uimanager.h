@@ -78,3 +78,5 @@ namespace UI {
     };
 }
 }
+
+RegisterType(Engine::UI::UIManager);

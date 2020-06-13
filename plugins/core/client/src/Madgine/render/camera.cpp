@@ -83,4 +83,4 @@ MEMBER(mF)
 MEMBER(mFOV)
 METATABLE_END(Engine::Render::Camera)
 
-RegisterType(Engine::Render::Camera);
+

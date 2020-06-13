@@ -19,3 +19,5 @@ namespace Resources {
 
 }
 }
+
+RegisterType(Engine::Resources::ImageLoader);

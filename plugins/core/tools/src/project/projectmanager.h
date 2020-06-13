@@ -39,3 +39,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::ProjectManager);

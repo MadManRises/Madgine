@@ -44,3 +44,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::GuiEditor);

@@ -18,3 +18,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::DirectX11ImRoot);

@@ -21,7 +21,7 @@ METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader::ResourceType, Engine::
 READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Render::OpenGLProgramLoader::ResourceType)
 
-RegisterType(Engine::Render::OpenGLProgramLoader);
+
 
 namespace Engine {
 namespace Render {

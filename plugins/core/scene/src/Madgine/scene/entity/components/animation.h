@@ -40,3 +40,5 @@ namespace Scene {
     }
 }
 }
+
+RegisterType(Engine::Scene::Entity::Animation);

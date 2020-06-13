@@ -13,7 +13,7 @@ DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
 METATABLE_BEGIN_BASE(Engine::UI::GuiHandlerBase, Engine::UI::Handler)
 METATABLE_END(Engine::UI::GuiHandlerBase)
 
-RegisterType(Engine::UI::GuiHandlerBase);
+
 
 namespace Engine {
 namespace UI {

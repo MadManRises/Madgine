@@ -68,4 +68,4 @@ METATABLE_END(Engine::Tools::DirectX11ToolConfig)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::DirectX11ToolConfig, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::DirectX11ToolConfig)
 
-RegisterType(Engine::Tools::DirectX11ToolConfig);
+

@@ -91,4 +91,3 @@ SERIALIZETABLE_BEGIN(Engine::Tools::ToolBase)
 FIELD(mVisible)
 SERIALIZETABLE_END(Engine::Tools::ToolBase)
 
-RegisterType(Engine::Tools::ToolBase);

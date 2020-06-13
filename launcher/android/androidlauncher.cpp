@@ -6,13 +6,13 @@
 
 #include "Madgine/core/root.h"
 
-#include "Madgine/gui/toplevelwindow.h"
+#include "Madgine/window/mainwindow.h"
 
 #include <android/native_activity.h>
 
 #include "Interfaces/threading/systemvariable.h"
 
-extern int launch(Engine::GUI::MainWindow **topLevelPointer = nullptr);
+extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
 
 namespace Engine {
 namespace Filesystem {

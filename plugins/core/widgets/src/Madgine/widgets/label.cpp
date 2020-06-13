@@ -22,7 +22,7 @@ FIELD(mText)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
 SERIALIZETABLE_END(Engine::Widgets::Label)
 
-RegisterType(Engine::Widgets::Label);
+
 
 namespace Engine {
 namespace Widgets {
@@ -32,7 +32,7 @@ namespace Widgets {
         return WidgetClass::LABEL_CLASS;
     }
 
-    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> Label::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Label::vertices(const Vector3 &screenSize)
     {
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         pos.z = depth();

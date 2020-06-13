@@ -314,4 +314,3 @@ SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase
 FIELD(mHierarchyVisible)
 SERIALIZETABLE_END(Engine::Tools::SceneEditor)
 
-RegisterType(Engine::Tools::SceneEditor);

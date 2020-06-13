@@ -28,3 +28,5 @@ namespace Input {
 
 }
 }
+
+RegisterType(Engine::Input::EmscriptenInputHandler);

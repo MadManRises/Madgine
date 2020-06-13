@@ -33,3 +33,5 @@ namespace Scene {
     }
 }
 }
+
+RegisterType(Engine::Scene::Entity::Mesh);

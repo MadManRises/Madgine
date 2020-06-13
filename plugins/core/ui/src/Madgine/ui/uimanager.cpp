@@ -24,7 +24,7 @@ FIELD(mGuiHandlers)
 FIELD(mGameHandlers)
 SERIALIZETABLE_END(Engine::UI::UIManager)
 
-RegisterType(Engine::UI::UIManager);
+
 
 namespace Engine {
 

@@ -48,7 +48,7 @@ MEMBER(mTime)
 MEMBER(mValue)
 METATABLE_END(Engine::Render::QuaternionKeyFrame)
 
-RegisterType(Engine::Render::AnimationLoader)
+
 
     namespace Engine
 {

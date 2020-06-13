@@ -17,7 +17,7 @@ namespace Filesystem {
     INTERFACES_EXPORT FileQuery listFilesAndDirs(const Path &path);
     INTERFACES_EXPORT Path configPath();
 
-    INTERFACES_EXPORT Path makeNormalized(const char *p);
+    INTERFACES_EXPORT void makeNormalized(Path &p);
 
     INTERFACES_EXPORT Path getCwd();
     INTERFACES_EXPORT void setCwd(const Path &p);

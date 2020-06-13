@@ -452,4 +452,3 @@ SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
 FIELD(mHierarchyVisible)
 SERIALIZETABLE_END(Engine::Tools::GuiEditor)
 
-RegisterType(Engine::Tools::GuiEditor);

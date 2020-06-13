@@ -24,3 +24,5 @@ namespace Input {
 
 }
 }
+
+RegisterType(Engine::Input::AndroidInputHandler);

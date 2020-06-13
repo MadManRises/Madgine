@@ -175,4 +175,3 @@ METATABLE_END(Engine::Tools::FunctionTool)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::FunctionTool, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::FunctionTool)
 
-RegisterType(Engine::Tools::FunctionTool);

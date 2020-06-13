@@ -42,9 +42,9 @@ namespace Widgets {
     {
     }
 
-    std::vector<std::pair<std::vector<GUI::Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
     {
-        std::vector<GUI::Vertex> result;
+        std::vector<Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;

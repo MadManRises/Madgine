@@ -51,6 +51,8 @@ if (NOT BUILD_SHARED_LIBS)
 	add_definitions(-DSTATIC_BUILD=1)
 endif()
 
+add_definitions(-DBINARY_OUT_DIR="${CMAKE_BINARY_DIR}")
+
 if(MSVC)    
 	# Set compiler options.
 	set(variables

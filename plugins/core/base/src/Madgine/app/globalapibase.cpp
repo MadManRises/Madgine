@@ -54,4 +54,3 @@ namespace Engine
 METATABLE_BEGIN(Engine::App::GlobalAPIBase)
 METATABLE_END(Engine::App::GlobalAPIBase)
 
-RegisterType(Engine::App::GlobalAPIBase);

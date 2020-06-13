@@ -20,3 +20,5 @@ namespace Render {
     };
 }
 }
+
+RegisterType(Engine::Render::OpenGLMeshLoader);

@@ -3,7 +3,7 @@
 #include "Modules/render/vertex.h"
 
 namespace Engine {
-namespace GUI {
+namespace Widgets {
 
 	using Vertex = Compound<
 		Render::VertexPos_3D, 

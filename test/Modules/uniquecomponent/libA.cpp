@@ -9,4 +9,3 @@ UNIQUECOMPONENT(LibAComponent);
 METATABLE_BEGIN(LibAComponent)
 METATABLE_END(LibAComponent)
 
-RegisterType(LibAComponent);

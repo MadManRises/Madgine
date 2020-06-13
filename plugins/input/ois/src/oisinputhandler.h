@@ -41,3 +41,5 @@ namespace Input {
     };
 }
 }
+
+RegisterType(Engine::Input::OISInputHandler);

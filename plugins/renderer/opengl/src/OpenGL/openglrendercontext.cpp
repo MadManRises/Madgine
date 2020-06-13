@@ -6,7 +6,7 @@
 #include "openglrendercontext.h"
 #include "openglrendertexture.h"
 
-RegisterType(Engine::Render::OpenGLRenderContext)
+
 
     UNIQUECOMPONENT(Engine::Render::OpenGLRenderContext)
 

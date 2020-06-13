@@ -8,7 +8,7 @@
 
 #include "mainwindow.h"
 
-RegisterType(Engine::Window::MainWindowComponentBase);
+
 
 namespace Engine {
 namespace Window {

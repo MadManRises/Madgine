@@ -18,7 +18,7 @@ METATABLE_END(Engine::Render::DirectX11TextureLoader)
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11TextureLoader::ResourceType, Engine::Render::TextureLoader::ResourceType)
 METATABLE_END(Engine::Render::DirectX11TextureLoader::ResourceType)
 
-RegisterType(Engine::Render::DirectX11TextureLoader);
+
 
 namespace Engine {
 namespace Render {

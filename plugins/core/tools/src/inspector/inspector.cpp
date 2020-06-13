@@ -385,4 +385,3 @@ METATABLE_END(Engine::Tools::Inspector)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Inspector, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Inspector)
 
-RegisterType(Engine::Tools::Inspector);

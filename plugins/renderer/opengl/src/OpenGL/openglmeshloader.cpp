@@ -22,7 +22,7 @@ METATABLE_END(Engine::Render::OpenGLMeshLoader)
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::MeshLoader::ResourceType)
 METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
 
-RegisterType(Engine::Render::OpenGLMeshLoader);
+
 
 namespace Engine {
 namespace Render {

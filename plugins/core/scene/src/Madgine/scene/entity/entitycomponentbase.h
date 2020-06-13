@@ -64,3 +64,5 @@ namespace Scene {
     }
 }
 }
+
+RegisterType(Engine::Scene::Entity::EntityComponentBase);

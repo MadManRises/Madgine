@@ -103,13 +103,13 @@ namespace Filesystem {
         return DeleteFile(p.c_str());
     }
 
-    Path makeNormalized(const char *p)
+    void makeNormalized(Path &p)
     {
-        char buffer[512];
-        auto result = GetLongPathNameA(p, buffer, sizeof(buffer));
+        char buffer[1024];
+        auto result = GetLongPathNameA(p.c_str(), buffer, sizeof(buffer));
         assert(result > 0 && result < sizeof(buffer));
         buffer[0] = toupper(buffer[0]);
-        return { buffer };
+        p = buffer;
     }
 
     bool isAbsolute(const Path &p)

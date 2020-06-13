@@ -15,7 +15,7 @@ SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
 ENCAPSULATED_FIELD(Skeleton, getName, setName)
 SERIALIZETABLE_END(Engine::Scene::Entity::Skeleton)
 */
-RegisterType(Engine::NodeGraph::TestNode);
+
 
 namespace Engine {
 namespace NodeGraph {

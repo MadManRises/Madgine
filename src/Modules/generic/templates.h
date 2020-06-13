@@ -24,13 +24,6 @@ using void_t = void;
 template <typename T, typename...>
 using dependent_t = T;
 
-template <typename>
-struct type_holder_t {
-};
-
-template <typename T>
-const constexpr type_holder_t<T> type_holder = {};
-
 template <auto>
 struct auto_holder_t {
 };

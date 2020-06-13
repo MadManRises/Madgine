@@ -18,7 +18,7 @@ VIRTUALUNIQUECOMPONENT(Engine::Tools::OpenGLImRoot)
 METATABLE_BEGIN_BASE(Engine::Tools::OpenGLImRoot, Engine::Tools::ClientImRoot)
 METATABLE_END(Engine::Tools::OpenGLImRoot)
 
-RegisterType(Engine::Tools::OpenGLImRoot)
+
 
     namespace Engine
 {

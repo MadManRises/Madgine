@@ -30,4 +30,3 @@ namespace Resources {
 }
 }
 
-RegisterType(Engine::Resources::ResourceLoaderBase);
