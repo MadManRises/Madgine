@@ -4,7 +4,7 @@
 
 namespace Engine {
 namespace Input {
-    enum Key // Copied from OIS
+    enum Key : uint8_t // Copied from OIS
     {
         KC_UNASSIGNED = 0x00,
         KC_ESCAPE = 0x01,
