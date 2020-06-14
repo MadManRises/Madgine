@@ -10,6 +10,8 @@
 
 #include "../serialize/streams/serializestream.h"
 
+#include "../serialize/formatter.h"
+
 namespace Engine {
 namespace Filesystem {
 

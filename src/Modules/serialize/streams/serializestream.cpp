@@ -14,6 +14,8 @@
 
 #include "../../generic/bytebuffer.h"
 
+#include "../formatter.h"
+
 namespace Engine {
 namespace Serialize {
 

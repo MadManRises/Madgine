@@ -25,6 +25,8 @@ namespace Input {
     namespace MouseButton {
         enum MouseButton : unsigned char;
     }
+
+    enum Key;
 }
 
 namespace Render {

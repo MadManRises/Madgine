@@ -8,7 +8,6 @@
 #include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Input::OISInputHandler);
 

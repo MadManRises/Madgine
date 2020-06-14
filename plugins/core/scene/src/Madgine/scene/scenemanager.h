@@ -7,6 +7,7 @@
 #include "Modules/serialize/container/syncablecontainer.h"
 
 #include "Madgine/app/globalapicollector.h"
+#include "Madgine/app/globalapibase.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 

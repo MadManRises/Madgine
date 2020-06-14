@@ -9,7 +9,6 @@
 #include "util/directx11program.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX11ProgramLoader);
 

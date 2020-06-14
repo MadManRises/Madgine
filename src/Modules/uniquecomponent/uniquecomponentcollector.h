@@ -4,8 +4,6 @@
 
 #if ENABLE_PLUGINS
 
-#    include "../reflection/classname.h"
-
 #    include "indexholder.h"
 
 namespace Engine {

@@ -8,6 +8,8 @@
 
 #include "streams/buffered_streambuf.h"
 
+#include "serializeexception.h"
+
 namespace Engine {
 namespace Serialize {
 

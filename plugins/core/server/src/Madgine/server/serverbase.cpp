@@ -6,8 +6,6 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/reflection/classname.h"
-
 namespace Engine {
 namespace Server {
     ServerBase::ServerBase(const std::string &name)

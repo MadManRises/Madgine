@@ -12,7 +12,6 @@
 #    include "Modules/plugins/pluginmanager.h"
 
 #    include "Modules/keyvalue/metatable_impl.h"
-#    include "Modules/reflection/classname.h"
 #    include "Modules/serialize/serializetable_impl.h"
 
 #    include "Modules/threading/taskguard.h"

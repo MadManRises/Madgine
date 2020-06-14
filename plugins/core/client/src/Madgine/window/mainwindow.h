@@ -81,7 +81,7 @@ namespace Window {
                                                   MadgineObject {
         SERIALIZABLEUNIT;
 
-        MainWindow(const WindowSettings &settings);
+        MainWindow(const WindowSettings &settings, Input::InputHandler *input = nullptr);
         virtual ~MainWindow();
 
         Rect2i getScreenSpace();

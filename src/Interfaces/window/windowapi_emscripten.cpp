@@ -3,6 +3,7 @@
 #if EMSCRIPTEN
 
 #include "windowapi.h"
+#    include "windowsettings.h"
 
 #include <EGL/egl.h>
 

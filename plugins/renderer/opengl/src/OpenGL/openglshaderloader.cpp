@@ -7,7 +7,6 @@
 #include "util/openglshader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 

@@ -6,7 +6,6 @@
 #include "uimanager.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
 

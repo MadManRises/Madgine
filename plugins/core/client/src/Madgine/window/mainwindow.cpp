@@ -33,9 +33,10 @@ SERIALIZETABLE_END(Engine::Window::MainWindow)
 namespace Engine {
 namespace Window {
 
-    MainWindow::MainWindow(const WindowSettings &settings)
+    MainWindow::MainWindow(const WindowSettings &settings, Input::InputHandler *input)
         : mComponents(*this)
         , mSettings(settings)
+        , mExternalInput(input)
     {
 
         mLoop.addSetupSteps(
@@ -73,9 +74,7 @@ namespace Window {
 
         mWindow->addListener(this);
 
-        if (mSettings.mInput) {
-            mExternalInput = static_cast<Input::InputHandler *>(mSettings.mInput);
-        } else {
+        if (!mExternalInput) {
             mInputHandlerSelector.emplace(*this, mWindow, this, 0);
         }
 

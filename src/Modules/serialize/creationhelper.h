@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../generic/functor.h"
-
-#include "../generic/type_pack.h"
-
 #include "streams/serializestream.h"
 
 namespace Engine {

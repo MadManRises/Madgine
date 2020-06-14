@@ -13,6 +13,7 @@
 #include "util/openglshader.h"
 
 #include "Interfaces/window/windowapi.h"
+#include "Interfaces/window/windowsettings.h"
 
 #include "imagedata.h"
 

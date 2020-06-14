@@ -9,6 +9,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "globalapibase.h"
+
 namespace Engine {
 
 namespace App {

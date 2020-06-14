@@ -2,8 +2,6 @@
 
 #include "toolbase.h"
 
-#include "Modules/reflection/classname.h"
-
 #include "renderer/imroot.h"
 
 #include "Modules/keyvalue/metatable_impl.h"

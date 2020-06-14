@@ -7,7 +7,6 @@
 #include "Interfaces/filesystem/api.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "imagedata.h"
 

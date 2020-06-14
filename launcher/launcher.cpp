@@ -1,7 +1,7 @@
 #include "Madgine/baselib.h"
 #include "Madgine/clientlib.h"
 
-#include "Interfaces/window/windowapi.h"
+#include "Interfaces/window/windowsettings.h"
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"

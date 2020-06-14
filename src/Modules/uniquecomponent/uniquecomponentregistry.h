@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../reflection/classname.h"
-
 #include "../plugins/binaryinfo.h"
 
 namespace Engine {

@@ -3,7 +3,6 @@
 #include "opengltoolconfig.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/generic/bytebuffer.h"

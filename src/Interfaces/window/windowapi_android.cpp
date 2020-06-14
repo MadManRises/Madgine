@@ -3,6 +3,7 @@
 #if ANDROID
 
 #include "windowapi.h"
+#    include "windowsettings.h"
 
 #include <EGL/egl.h>
 #include <android/native_window.h>

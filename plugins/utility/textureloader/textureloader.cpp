@@ -3,7 +3,6 @@
 #include "textureloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "Modules/math/vector2i.h"
 

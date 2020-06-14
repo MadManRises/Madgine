@@ -8,8 +8,6 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "Modules/reflection/classname.h"
-
 #include "rendertarget.h"
 
 #include "Modules/threading/taskqueue.h"

@@ -11,7 +11,6 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/math/bounds.h"
-#include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Madgine/window/mainwindow.h"

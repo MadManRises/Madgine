@@ -1,8 +1,5 @@
 #pragma once
 
-#include "callable_traits.h"
-#include "functor.h"
-
 namespace Engine {
 
 #define DERIVE_FRIEND(Name)         \

@@ -5,9 +5,9 @@
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
+
+#include "Modules/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::Metrics);
 

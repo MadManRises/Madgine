@@ -9,6 +9,8 @@
 
 #include "streams/operations.h"
 
+#include "formatter.h"
+
 namespace Engine {
 namespace Serialize {
 

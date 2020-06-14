@@ -2,8 +2,6 @@
 
 #include "resourceloaderbase.h"
 
-#include "../reflection/classname.h"
-
 namespace Engine {
 namespace Resources {
 

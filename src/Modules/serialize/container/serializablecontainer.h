@@ -1,14 +1,13 @@
 #pragma once
 
-#include "../../generic/fixstring.h"
 #include "../../generic/noopfunctor.h"
 #include "../../generic/observerevent.h"
 #include "../../generic/offsetptr.h"
 #include "../../generic/replace.h"
 #include "../creationhelper.h"
 #include "../serializable.h"
-#include "../streams/serializestream.h"
 #include "../unithelper.h"
+#include "../../generic/copy_traits.h"
 
 namespace Engine {
 namespace Serialize {

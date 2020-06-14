@@ -11,7 +11,6 @@
 #include "Modules/debug/profiler/profile.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/threading/defaulttaskqueue.h"

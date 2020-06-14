@@ -5,7 +5,6 @@
 #include "Modules/math/matrix4.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "Modules/math/pi.h"
 

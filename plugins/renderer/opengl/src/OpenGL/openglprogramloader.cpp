@@ -9,7 +9,6 @@
 #include "util/openglprogram.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 

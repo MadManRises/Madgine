@@ -3,7 +3,6 @@
 #include "animationloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

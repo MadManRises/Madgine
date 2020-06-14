@@ -28,6 +28,19 @@
 
 #include "Interfaces/window/windowapi.h"
 
+
+#include "Modules/math/atlas2.h"
+
+#include "imageloader.h"
+#include "meshloader.h"
+#include "programloader.h"
+#include "textureloader.h"
+
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER ui
+#include INCLUDE_SL_SHADER
+
 UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
 
 METATABLE_BEGIN(Engine::Widgets::WidgetManager)
@@ -45,9 +58,47 @@ SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 namespace Engine {
 namespace Widgets {
 
+    struct WidgetManager::WidgetManagerData {
+
+        Render::ProgramLoader::HandleType mProgram;
+        Render::MeshLoader::HandleType mMesh;
+
+        Render::TextureLoader::HandleType mUIAtlasTexture;
+        Atlas2 mUIAtlas { { 512, 512 } };
+        int mUIAtlasSize = 0;
+        std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
+
+        WidgetsPerObject mParameters;
+
+        void expandUIAtlas()
+        {
+            if (mUIAtlasSize == 0) {
+                mUIAtlasSize = 4;
+                mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, {});
+                for (int x = 0; x < mUIAtlasSize; ++x) {
+                    for (int y = 0; y < mUIAtlasSize; ++y) {
+                        mUIAtlas.addBin({ 512 * x, 512 * y });
+                    }
+                }
+            } else {
+                /*for (int x = 0; x < mUIAtlasSize; ++x) {
+                for (int y = 0; y < mUIAtlasSize; ++y) {
+                    mUIAtlas.addBin({ 512 * x, 512 * (y + mUIAtlasSize) });
+                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * y });
+                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * (y + mUIAtlasSize) });
+                }
+            }
+            mUIAtlasSize *= 2;
+            mUIAtlasTexture.resize({ 512 * mUIAtlasSize, 512 * mUIAtlasSize });*/
+                throw "TODO";
+            }
+        }
+    };
+
+
     WidgetManager::WidgetManager(Window::MainWindow &window)
         : VirtualScope(window, 20)
-        , mUIAtlas({ 512, 512 })
+        , mData(std::make_unique<WidgetManagerData>())
     {
     }
 
@@ -63,13 +114,13 @@ namespace Widgets {
 
     bool WidgetManager::init()
     {
-        mProgram.create("ui");
+        mData->mProgram.create("ui");
 
-        mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
+        mData->mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
             return loader->generate<Vertex>(mesh, 3, {});
         });
 
-        mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
+        mData->mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
@@ -641,11 +692,11 @@ namespace Widgets {
 
             Resources::ImageLoader::ResourceType *resource = w->resource();
             if (resource) {
-                auto it = mUIAtlasEntries.find(resource);
-                if (it == mUIAtlasEntries.end()) {
+                auto it = mData->mUIAtlasEntries.find(resource);
+                if (it == mData->mUIAtlasEntries.end()) {
                     Resources::ImageLoader::HandleType data = resource->loadData();
-                    it = mUIAtlasEntries.try_emplace(resource, mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { expandUIAtlas(); })).first;
-                    mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
+                    it = mData->mUIAtlasEntries.try_emplace(resource, mData->mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { mData->expandUIAtlas(); })).first;
+                    mData->mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
                 }
 
                 for (std::pair<std::vector<Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
@@ -654,8 +705,8 @@ namespace Widgets {
                         return Vertex {
                             v.mPos,
                             v.mColor,
-                            { (it->second.mArea.mSize.x / (512.f * mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (512.f * mUIAtlasSize),
-                                (it->second.mArea.mSize.y / (512.f * mUIAtlasSize)) * v.mUV.y + it->second.mArea.mTopLeft.y / (512.f * mUIAtlasSize) }
+                            { (it->second.mArea.mSize.x / (512.f * mData->mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (512.f * mData->mUIAtlasSize),
+                                (it->second.mArea.mSize.y / (512.f * mData->mUIAtlasSize)) * v.mUV.y + it->second.mArea.mTopLeft.y / (512.f * mData->mUIAtlasSize) }
                         };
                     });
                 }
@@ -670,48 +721,26 @@ namespace Widgets {
         for (std::pair<const Render::TextureDescriptor, std::vector<Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
-                mParameters.hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
-                mProgram.setParameters(mParameters, 2);
+                mData->mParameters.hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
+                mData->mProgram.setParameters(mData->mParameters, 2);
 
                 if (p.first.mTextureHandle)
                     Render::TextureLoader::getSingleton().bind(p.first.mTextureHandle);
                 else
-                    mUIAtlasTexture.bind();
+                    mData->mUIAtlasTexture.bind();
 
-                mMesh.update(3, std::move(p.second));
+                mData->mMesh.update(3, std::move(p.second));
 
-                target->renderMesh(mMesh, mProgram);
+                target->renderMesh(mData->mMesh, mData->mProgram);
             }
         }
     }
 
-    void WidgetManager::expandUIAtlas()
-    {
-        if (mUIAtlasSize == 0) {
-            mUIAtlasSize = 4;
-            mUIAtlasTexture.setData({ mUIAtlasSize * 512, mUIAtlasSize * 512 }, {});
-            for (int x = 0; x < mUIAtlasSize; ++x) {
-                for (int y = 0; y < mUIAtlasSize; ++y) {
-                    mUIAtlas.addBin({ 512 * x, 512 * y });
-                }
-            }
-        } else {
-            /*for (int x = 0; x < mUIAtlasSize; ++x) {
-                for (int y = 0; y < mUIAtlasSize; ++y) {
-                    mUIAtlas.addBin({ 512 * x, 512 * (y + mUIAtlasSize) });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * y });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * (y + mUIAtlasSize) });
-                }
-            }
-            mUIAtlasSize *= 2;
-            mUIAtlasTexture.resize({ 512 * mUIAtlasSize, 512 * mUIAtlasSize });*/
-            throw "TODO";
-        }
-    }
+    
 
     Render::Texture &WidgetManager::uiTexture() const
     {
-        return *mUIAtlasTexture;
+        return *mData->mUIAtlasTexture;
     }
 
     int WidgetManager::priority() const
@@ -719,5 +748,6 @@ namespace Widgets {
         return mPriority;
     }
 
+    
 }
 }

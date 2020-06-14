@@ -4,6 +4,7 @@
 
 #    include "windowapi.h"
 #    include "windoweventlistener.h"
+#    include "windowsettings.h"
 
 #    define NOMINMAX
 #    include <Windows.h>
@@ -170,7 +171,6 @@ namespace Window {
         {
             SetWindowTextA((HWND)mHandle, title);
         }
-
     };
 
     static std::unordered_map<HWND, WindowsWindow> sWindows;

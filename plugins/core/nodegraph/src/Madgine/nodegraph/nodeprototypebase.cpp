@@ -2,8 +2,6 @@
 
 #include "nodeprototypebase.h"
 
-#include "Modules/reflection/classname.h"
-
 #include "Modules/serialize/streams/serializestream.h"
 
 #include "Modules/serialize/serializetable_impl.h"

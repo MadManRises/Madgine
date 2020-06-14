@@ -10,7 +10,6 @@
 #include "imgui/imgui_internal.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "Modules/serialize/streams/serializestream.h"
 #include "Modules/serialize/streams/wrappingserializestreambuf.h"

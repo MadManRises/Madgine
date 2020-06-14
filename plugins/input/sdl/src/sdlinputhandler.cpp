@@ -5,7 +5,6 @@
 #include "input/inputevents.h"
 
 #include "Interfaces/keyvalue/metatable_impl.h"
-#include "Interfaces/reflection/classname.h"
 
 #include "Interfaces/os/osapi.h"
 

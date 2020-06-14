@@ -3,6 +3,8 @@
 #include "../container/physical.h"
 #include "../creationhelper.h"
 #include "serializestream.h"
+#include "../statetransmissionflags.h"
+#include "../formatter.h"
 
 namespace Engine {
 namespace Serialize {

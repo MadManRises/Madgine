@@ -5,7 +5,6 @@
 #include "directx11meshdata.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "imageloaderlib.h"
 #include "imagedata.h"

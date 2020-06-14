@@ -9,7 +9,6 @@
 #include "directx11rendercontext.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 UNIQUECOMPONENT(Engine::Render::DirectX11PixelShaderLoader);
 

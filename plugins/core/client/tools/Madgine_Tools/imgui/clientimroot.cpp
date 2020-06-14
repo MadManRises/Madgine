@@ -2,6 +2,7 @@
 
 #include "clientimroot.h"
 
+#include "Interfaces/window/windowsettings.h"
 #include "Interfaces/window/windowapi.h"
 
 #include "imgui/imgui.h"
@@ -12,7 +13,6 @@
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 #include "Madgine/render/rendertarget.h"
 
@@ -21,6 +21,8 @@
 #include "Madgine/window/toolwindow.h"
 
 #include "Madgine/window/mainwindow.h"
+
+#include "Madgine/input/inputevents.h"
 
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 

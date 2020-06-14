@@ -4,21 +4,12 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
-#include "Modules/math/atlas2.h"
-
-#include "imageloader.h"
-#include "meshloader.h"
-#include "programloader.h"
-#include "textureloader.h"
 
 #include "Madgine/render/renderpass.h"
 
 #include "Modules/generic/transformIt.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
 
-#define SL_SHADER ui
-#include INCLUDE_SL_SHADER
 
 namespace Engine {
 namespace Widgets {
@@ -119,15 +110,9 @@ namespace Widgets {
 
         void expandUIAtlas();
 
-        Render::ProgramLoader::HandleType mProgram;
-        Render::MeshLoader::HandleType mMesh;
+        struct WidgetManagerData;
+        std::unique_ptr<WidgetManagerData> mData;
 
-        Render::TextureLoader::HandleType mUIAtlasTexture;
-        Atlas2 mUIAtlas;
-        int mUIAtlasSize = 0;
-        std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
-
-        WidgetsPerObject mParameters;
     };
 
 }

@@ -5,7 +5,6 @@
 #include "application.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 namespace Engine
 {

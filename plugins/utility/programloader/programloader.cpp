@@ -3,7 +3,6 @@
 #include "programloader.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/reflection/classname.h"
 
 METATABLE_BEGIN(Engine::Render::ProgramLoader)
 METATABLE_END(Engine::Render::ProgramLoader)
