@@ -1,6 +1,7 @@
 #pragma once
 
 #include "streams/serializestream.h"
+#include "formatter.h"
 
 namespace Engine {
 namespace Serialize {
