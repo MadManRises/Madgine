@@ -24,7 +24,7 @@ namespace Serialize {
                 readUnformatted(buffer);
                 t = static_cast<T>(buffer);
             } else {
-                if (format().mBinary)
+                if (isBinary())
                     readRaw(t);
                 else
                     InStream::operator>>(t);
@@ -72,6 +72,7 @@ namespace Serialize {
         ParticipantId id() const;
 
         Formatter &format() const;
+        bool isBinary() const;
 
         bool isMaster();
 
@@ -110,7 +111,7 @@ namespace Serialize {
             if constexpr (std::is_enum_v<T>) {
                 writeUnformatted(static_cast<int>(t));
             } else {
-                if (format().mBinary)
+                if (isBinary())
                     writeRaw(t);
                 else
                     OutStream::operator<<(t);
@@ -137,6 +138,7 @@ namespace Serialize {
         SerializeManager *manager() const;
 
         Formatter &format() const;
+        bool isBinary() const;
 
         bool isMaster();
 

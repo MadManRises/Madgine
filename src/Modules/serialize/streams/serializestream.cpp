@@ -205,6 +205,11 @@ namespace Serialize {
         return buffer().format();
     }
 
+    bool SerializeInStream::isBinary() const
+    {
+        return format().mBinary;
+    }
+
     SerializableUnitBase *SerializeInStream::convertPtr(UnitId ptr)
     {
         return manager()->convertPtr(*this, ptr);
@@ -275,6 +280,11 @@ namespace Serialize {
     Formatter &SerializeOutStream::format() const
     {
         return buffer().format();
+    }
+
+    bool SerializeOutStream::isBinary() const
+    {
+        return format().mBinary;
     }
 
     void SerializeOutStream::writeUnformatted(const std::string &s)
