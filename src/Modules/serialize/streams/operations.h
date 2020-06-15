@@ -25,7 +25,7 @@ namespace Serialize {
             return c;
     }
 
-    template <typename C, typename Config, typename... Args>
+    template <typename C, typename Config = DefaultCreator<typename C::value_type>, typename... Args>
     void readContainer(SerializeInStream &in, C &container, const char *name, Args &&... args);
 
     template <typename T, typename... Configs, typename... Args>
@@ -99,12 +99,15 @@ namespace Serialize {
         in.format().endCompound(in, name);
     }
 
-    template <typename C, typename Config = DefaultCreator<typename C::value_type>, typename... Args>
+    template <typename C, typename Config, typename... Args>
     void readContainer(SerializeInStream &in, C &container, const char *name, Args&&... args)
     {
         decltype(auto) op = resetOperation(container);
         readContainerOp<C, Config>(in, container, name, op, std::forward<Args>(args)...);
     }
+
+    template <typename C, typename Config = DefaultCreator<typename C::value_type>, typename... Args>
+    void writeContainer(SerializeOutStream &out, const C &container, const char *name, Args &&... args);
 
     template <typename T, typename... Configs, typename... Args>
     void write(SerializeOutStream &out, const T &t, const char *name, Args&&... args)
@@ -141,7 +144,7 @@ namespace Serialize {
         out.format().endCompound(out, name);
     }
 
-    template <typename C, typename Config = typename has_typename_Config<C>::template type<DefaultCreator<typename C::value_type>>, typename... Args>
+    template <typename C, typename Config, typename... Args>
     void writeContainer(SerializeOutStream &out, const C &container, const char *name, Args&&... args)
     {
         out.format().beginExtended(out, name, 1);
