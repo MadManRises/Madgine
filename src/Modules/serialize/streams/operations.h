@@ -25,6 +25,9 @@ namespace Serialize {
             return c;
     }
 
+    template <typename C, typename Config, typename... Args>
+    void readContainer(SerializeInStream &in, C &container, const char *name, Args &&... args);
+
     template <typename T, typename... Configs, typename... Args>
     void read(SerializeInStream &in, T &t, const char *name, Args&&... args)
     {
