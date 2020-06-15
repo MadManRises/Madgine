@@ -47,12 +47,10 @@ template <typename T, typename _Collector, typename Base>
 struct VirtualUniqueComponentBase;
 template <typename T, typename Base, typename _VBase = Base>
 struct VirtualUniqueComponentImpl;
-#if ENABLE_PLUGINS
 template <typename _Base, typename... _Ty>
 struct UniqueComponentRegistry;
 template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector;
-#endif
 
 
 struct ComponentRegistryBase;
