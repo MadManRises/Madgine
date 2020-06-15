@@ -110,7 +110,7 @@ namespace Serialize {
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto P>
+    template <typename _disambiguate__dont_remove, auto P, typename... Args>
     constexpr Serializer field(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -124,11 +124,11 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                write(out, unit->*P, name, unit);
+                write<T, Args...>(out, unit->*P, name, unit);
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                read(in, unit->*P, name, unit);
+                read<T, Args...>(in, unit->*P, name, unit);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
@@ -215,13 +215,13 @@ namespace Serialize {
     ;                         \
     }                         \
     }                         \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelSerializableUnitBase, T> }), T);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelSerializableUnitBase, T> }), T);
 
-#define FIELD(M) \
-    { STRINGIFY2(M), ::Engine::Serialize::field<Ty, &Ty::M>(STRINGIFY2(M)) },
+#define FIELD(...) \
+    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 
-#define SYNC(M) \
-    { STRINGIFY2(M), ::Engine::Serialize::sync<Ty, &Ty::M>(STRINGIFY2(M)) },
+#define SYNC(...) \
+    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
 
 #define ENCAPSULATED_FIELD(Name, Getter, Setter)                                            \
     {                                                                                       \

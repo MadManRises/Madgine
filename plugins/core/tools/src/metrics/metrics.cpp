@@ -8,6 +8,7 @@
 #include "Modules/serialize/serializetable_impl.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(Engine::Tools::Metrics);
 

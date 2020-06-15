@@ -2,9 +2,9 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "toolbase.h"
-
 #include "Modules/serialize/serializableunit.h"
+
+#include "Modules/keyvalue/virtualscopebase.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, ToolBase, ImRoot &);
 

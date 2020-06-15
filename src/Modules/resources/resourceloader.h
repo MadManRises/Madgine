@@ -7,6 +7,13 @@
 
 #include "handle.h"
 
+#include "resourceloaderbase.h"
+
+#include "../generic/replace.h"
+
+#include "../uniquecomponent/uniquecomponentcollector.h"
+#include "../uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -228,7 +235,7 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
-    struct VirtualResourceLoaderBase : VirtualUniqueComponentBase<T, ResourceLoaderCollector> {
+    struct VirtualResourceLoaderBase : ResourceLoaderVirtualBase<T> {
 
         using Data = _Data;
         using Container = _Container;
@@ -263,7 +270,7 @@ namespace Resources {
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
 
-        using VirtualUniqueComponentBase<T, ResourceLoaderCollector>::VirtualUniqueComponentBase;
+        using ResourceLoaderVirtualBase<T>::ResourceLoaderVirtualBase;
 
         static T &getSingleton()
         {

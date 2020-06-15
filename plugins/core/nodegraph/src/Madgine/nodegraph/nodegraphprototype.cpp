@@ -22,11 +22,13 @@
 
 #include "nodegraphinstance.h"
 
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraphPrototype)
 METATABLE_END(Engine::NodeGraph::NodeGraphPrototype)
 
 SERIALIZETABLE_BEGIN(Engine::NodeGraph::NodeGraphPrototype)
-FIELD(mNodes)
+FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraphPrototype::createNodeTuple, &Engine::NodeGraph::NodeGraphPrototype::storeNodeCreationData>)
 FIELD(mFlowInPins)
 FIELD(mDataOutPins)
 SERIALIZETABLE_END(Engine::NodeGraph::NodeGraphPrototype)

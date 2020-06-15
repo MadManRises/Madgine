@@ -1,8 +1,10 @@
 #pragma once
 
 #include "toolscollector.h"
+#include "toolbase.h"
 
 #include "Madgine/nodegraph/nodegraphprototypeloader.h"
+#include "Madgine/nodegraph/pinprototypes.h"
 
 namespace ed = ax::NodeEditor;
 

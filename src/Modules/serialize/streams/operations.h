@@ -25,8 +25,8 @@ namespace Serialize {
             return c;
     }
 
-    template <typename T, typename... Args>
-    void read(SerializeInStream &in, T &t, const char *name, Args &&... args)
+    template <typename T, typename... Configs, typename... Args>
+    void read(SerializeInStream &in, T &t, const char *name, Args&&... args)
     {
         if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>);
@@ -37,10 +37,10 @@ namespace Serialize {
             t.readState(in, name);
         } else if constexpr (has_function_readState2_v<T>) {
             t.readState(in, name, StateTransmissionFlags_DontApplyMap);
-        } else if constexpr (is_instance_v<T, std::unique_ptr>) {
+        } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
             read(in, *t, name);
         } else if constexpr (is_iterable_v<T>) {
-            readContainer(in, t, name, std::forward<Args>(args)...);
+            readContainer<T, Configs...>(in, t, name, std::forward<Args>(args)...);
         } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             read(in, TupleUnpacker::toTuple(t), name);
         } else {
@@ -48,10 +48,10 @@ namespace Serialize {
         }
     }
 
-    template <typename T>
-    void read(SerializeInStream &in, T &t)
+    template <typename T, typename... Configs, typename... Args>
+    void read(SerializeInStream &in, T &t, Args&&... args)
     {
-        read(in, t, nullptr);
+        read<T, Configs...>(in, t, static_cast<const char*>(nullptr), std::forward<Args>(args)...);
     }
 
     template <typename... Ty>
@@ -71,7 +71,7 @@ namespace Serialize {
     }
 
     template <typename C, typename Config, typename Op, typename... Args>
-    void readContainerOp(SerializeInStream &in, C &container, const char *name, Op &op, Args &&... args)
+    void readContainerOp(SerializeInStream &in, C &container, const char *name, Op &op, Args&&... args)
     {
         using T = typename C::value_type;
 
@@ -96,15 +96,15 @@ namespace Serialize {
         in.format().endCompound(in, name);
     }
 
-    template <typename C, typename Config = typename has_typename_Config<C>::template type<DefaultCreator<typename C::value_type>>, typename... Args>
-    void readContainer(SerializeInStream &in, C &container, const char *name, Args &&... args)
+    template <typename C, typename Config = DefaultCreator<typename C::value_type>, typename... Args>
+    void readContainer(SerializeInStream &in, C &container, const char *name, Args&&... args)
     {
         decltype(auto) op = resetOperation(container);
         readContainerOp<C, Config>(in, container, name, op, std::forward<Args>(args)...);
     }
 
-    template <typename T, typename... Args>
-    void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args)
+    template <typename T, typename... Configs, typename... Args>
+    void write(SerializeOutStream &out, const T &t, const char *name, Args&&... args)
     {
         if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -116,7 +116,7 @@ namespace Serialize {
         } else if constexpr (is_instance_v<T, std::unique_ptr>) {
             write(out, *t, name);
         } else if constexpr (is_iterable_v<T>) {
-            writeContainer(out, t, name, std::forward<Args>(args)...);
+            writeContainer<T, Configs...>(out, t, name, std::forward<Args>(args)...);
         } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
         } else {
@@ -124,10 +124,10 @@ namespace Serialize {
         }
     }
 
-    template <typename T>
-    void write(SerializeOutStream &out, const T &t)
+    template <typename T, typename... Configs, typename... Args>
+    void write(SerializeOutStream &out, const T &t, Args&&... args)
     {
-        write(out, t, nullptr);
+        write<T, Configs...>(out, t, static_cast<const char*>(nullptr), std::forward<Args>(args)...);
     }
 
     template <typename... Ty>
@@ -139,7 +139,7 @@ namespace Serialize {
     }
 
     template <typename C, typename Config = typename has_typename_Config<C>::template type<DefaultCreator<typename C::value_type>>, typename... Args>
-    void writeContainer(SerializeOutStream &out, const C &container, const char *name, Args &&... args)
+    void writeContainer(SerializeOutStream &out, const C &container, const char *name, Args&&... args)
     {
         out.format().beginExtended(out, name, 1);
         write<uint32_t>(out, container.size(), "size");

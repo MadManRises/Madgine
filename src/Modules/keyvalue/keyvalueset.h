@@ -155,71 +155,7 @@ struct KeyValueSet : std::set<T, Cmp> {
     typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::reverse_iterator> reverse_iterator;
     typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_reverse_iterator> const_reverse_iterator;
 
-    struct traits : _traits {
-
-        typedef KeyValueSet<T, Cmp> container;
-        typedef typename container::iterator iterator;
-        typedef typename container::const_iterator const_iterator;
-        typedef typename container::reverse_iterator reverse_iterator;
-        typedef typename container::const_reverse_iterator const_reverse_iterator;
-
-        typedef T *handle;
-        typedef const T *const_handle;
-        typedef iterator position_handle;
-        typedef const_iterator const_position_handle;
-        typedef Cmp cmp_type;        
-        typedef T value_type;
-
-        typedef Pib<iterator> emplace_return;
-
-        template <template <typename> typename M>
-        using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
-
-        template <typename... _Ty>
-        static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
-        {
-            return c.emplace(std::forward<_Ty>(args)...);
-        }
-
-        static bool was_emplace_successful(const emplace_return& pib) {
-            return pib.success();
-        }
-
-        static position_handle toPositionHandle(container &c, const iterator &it)
-        {
-            return it;
-        }
-
-        static handle toHandle(container &c, const iterator &it)
-        {
-            if (it == c.end())
-                return nullptr;
-            return &*it;
-        }
-
-        static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
-        {
-        }
-
-        static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
-        {
-        }
-
-        static iterator toIterator(container &c, const position_handle &handle)
-        {
-            return handle;
-        }
-
-        static const_iterator toIterator(const container &c, const const_position_handle &handle)
-        {
-            return handle;
-        }
-
-        static position_handle next(const position_handle &handle)
-        {
-            return std::next(handle);
-        }
-    };
+    
 
     template <typename Arg>
     iterator find(Arg &&arg)
@@ -271,6 +207,79 @@ struct KeyValueSet : std::set<T, Cmp> {
     const_reverse_iterator rend() const
     {
         return Base::rend();
+    }
+};
+
+template <typename T, typename Cmp>
+struct underlying_container<KeyValueSet<T, Cmp>> {
+    typedef std::set<T, Cmp> type;
+};
+
+template <typename T, typename Cmp>
+struct container_traits<KeyValueSet<T, Cmp>> : container_traits<std::set<T, Cmp>> {
+
+    typedef KeyValueSet<T, Cmp> container;
+    typedef typename container::iterator iterator;
+    typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+
+    typedef T *handle;
+    typedef const T *const_handle;
+    typedef iterator position_handle;
+    typedef const_iterator const_position_handle;
+    typedef Cmp cmp_type;
+    typedef T value_type;
+
+    typedef Pib<iterator> emplace_return;
+
+    template <template <typename> typename M>
+    using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
+
+    template <typename... _Ty>
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
+    {
+        return c.emplace(std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &pib)
+    {
+        return pib.success();
+    }
+
+    static position_handle toPositionHandle(container &c, const iterator &it)
+    {
+        return it;
+    }
+
+    static handle toHandle(container &c, const iterator &it)
+    {
+        if (it == c.end())
+            return nullptr;
+        return &*it;
+    }
+
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
+    {
+    }
+
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    {
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return handle;
+    }
+
+    static position_handle next(const position_handle &handle)
+    {
+        return std::next(handle);
     }
 };
 

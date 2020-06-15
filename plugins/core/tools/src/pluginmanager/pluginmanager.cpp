@@ -25,6 +25,8 @@
 
 #    include "Modules/ini/inifile.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {

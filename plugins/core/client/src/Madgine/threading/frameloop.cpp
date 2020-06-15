@@ -7,7 +7,7 @@
 
 #include "Modules/debug/profiler/profile.h"
 
-#include "Modules/generic/safeiterator.h"
+#include "Modules/generic/container/safeiterator.h"
 
 namespace Engine {
 namespace Threading {

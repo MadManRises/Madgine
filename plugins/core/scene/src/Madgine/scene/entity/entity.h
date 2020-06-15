@@ -103,7 +103,7 @@ namespace Scene {
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, KeyValueSet<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver, Serialize::ParentCreator<&Entity::createComponentTuple, &Entity::storeComponentCreationData>);
+            SYNCABLE_CONTAINER(mComponents, KeyValueSet<std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, EntityComponentObserver);
 
             SceneManager &mSceneManager;
         };

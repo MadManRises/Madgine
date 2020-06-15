@@ -1,6 +1,7 @@
 #pragma once
 
 #include "toolscollector.h"
+#include "toolbase.h"
 
 #include "OpenGL/util/opengltexture.h"
 

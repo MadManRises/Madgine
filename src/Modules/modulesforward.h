@@ -7,6 +7,8 @@ struct ValueTypeRef;
 struct KeyValuePair;
 
 struct ScopeBase;
+template <typename T, typename Base>
+struct VirtualScope;
 struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
@@ -35,10 +37,23 @@ struct MadgineObject;
 struct IndexHolder;
 
 struct UniqueComponentCollectorManager;
-template <typename T, typename _Collector, typename _Base = typename _Collector::Base>
+template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent;
-template <typename T, typename _Collector, typename Base = typename _Collector::Base>
+template <typename Registry, typename _Base, typename... _Ty>
+struct UniqueComponentSelector;
+template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+struct UniqueComponentContainer;
+template <typename T, typename _Collector, typename Base>
 struct VirtualUniqueComponentBase;
+template <typename T, typename Base, typename _VBase = Base>
+struct VirtualUniqueComponentImpl;
+#if ENABLE_PLUGINS
+template <typename _Base, typename... _Ty>
+struct UniqueComponentRegistry;
+template <typename Registry, typename __Base, typename... _Ty>
+struct UniqueComponentCollector;
+#endif
+
 
 struct ComponentRegistryBase;
 
@@ -195,6 +210,7 @@ namespace Resources {
     template <typename T, typename _Data, typename Container, typename Storage, typename Base>
     struct ResourceLoaderImpl;
     struct ResourceBase;
+    struct ResourceLoaderBase;
 }
 
 struct Vector2;

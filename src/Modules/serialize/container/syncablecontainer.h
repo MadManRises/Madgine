@@ -11,6 +11,7 @@
 #include "../syncable.h"
 #include "requestbuilder.h"
 #include "serializablecontainer.h"
+#include "../../generic/container/container_api.h"
 
 namespace Engine {
 namespace Serialize {
@@ -48,23 +49,13 @@ namespace Serialize {
         using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
     };
 
-    template <typename C, typename Config, typename Observer = NoOpFunctor, typename Serialize_Config = DefaultCreator<typename C::value_type>, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, Serialize_Config, OffsetPtr>, Syncable<OffsetPtr> {
+    template <typename C, typename Config, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, controlled, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
-
-        struct traits : _traits {
-
-            typedef SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr> container;
-
-            template <typename... _Ty>
-            static std::pair<typename _traits::iterator, bool> emplace(container &c, const typename _traits::const_iterator &where, _Ty &&... args)
-            {
-                return c.emplace(where, std::forward<_Ty>(args)...);
-            }
-        };
-
-        typedef SerializableContainerImpl<C, Observer, Serialize_Config, OffsetPtr> Base;
+        using container_t = SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>;
+        
+        typedef SerializableContainerImpl<C, Observer, controlled, OffsetPtr> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
@@ -77,7 +68,7 @@ namespace Serialize {
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
         template <typename T>
-        SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr> &operator=(T &&arg)
+        SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr> &operator=(T &&arg)
         {
             if (this->isMaster()) {
                 ResetOperation { *this } = std::forward<T>(arg);
@@ -121,7 +112,8 @@ namespace Serialize {
                 *out << INSERT_ITEM;
                 value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
                 TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
-                write_item(*out, where, temp);
+                //write_item(*out, where, temp);
+                throw "TODO";
                 out->endMessage();
 
                 return future;
@@ -291,7 +283,8 @@ typename _traits::emplace_return performOperation(ObserverEvent op, SerializeInS
         if constexpr (!_traits::sorted) {
             it = read_iterator(in);
         }
-        it = read_item_where_impl(in, it, answerTarget, answerId);
+        //it = read_item_where_impl(in, it, answerTarget, answerId);
+        throw "TODO";
         break;
     case REMOVE_ITEM:
         it = erase_impl(this->read_iterator(in), answerTarget, answerId);
@@ -303,7 +296,8 @@ typename _traits::emplace_return performOperation(ObserverEvent op, SerializeInS
         break;
     }
     case RESET:
-        readState_impl(in, nullptr, answerTarget, answerId);
+        //readState_impl(in, nullptr, answerTarget, answerId);
+        throw "TODO";
         break;
     default:
         std::terminate();
@@ -312,7 +306,7 @@ typename _traits::emplace_return performOperation(ObserverEvent op, SerializeInS
 }
 
 struct InsertOperation : Base::InsertOperation {
-    InsertOperation(typename traits::container &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+    InsertOperation(container_t &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         : Base::InsertOperation(c, where)
         , mAnswerTarget(answerTarget)
         , mAnswerId(answerId)
@@ -325,16 +319,17 @@ struct InsertOperation : Base::InsertOperation {
             if (this->mContainer.isSynced()) {
                 for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
                     *out << INSERT_ITEM;
-                    container().write_item(*out, this->mLastIt, *this->mLastIt);
+                    //container().write_item(*out, this->mLastIt, *this->mLastIt);
+                    throw "TODO";
                     out->endMessage();
                 }
             }
         }
     }
 
-    typename traits::container &container()
+    container_t &container()
     {
-        return static_cast<typename traits::container &>(this->mContainer);
+        return static_cast<container_t &>(this->mContainer);
     }
 
 private:
@@ -343,46 +338,48 @@ private:
 };
 
 struct RemoveOperation : Base::RemoveOperation {
-    RemoveOperation(typename traits::container &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+    RemoveOperation(container_t &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         : Base::RemoveOperation(c, it)
     {
         if (this->mContainer.isSynced()) {
             for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
                 *out << REMOVE_ITEM;
-                container().write_iterator(*out, it);
+                //container().write_iterator(*out, it);
+                throw "TODO";
                 out->endMessage();
             }
         }
     }
 
-    typename traits::container &container()
+    container_t &container()
     {
-        return static_cast<typename traits::container &>(this->mContainer);
+        return static_cast<container_t &>(this->mContainer);
     }
 };
 
 struct RemoveRangeOperation : Base::RemoveRangeOperation {
-    RemoveRangeOperation(typename traits::container &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+    RemoveRangeOperation(container_t &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         : Base::RemoveRangeOperation(c, from, to)
     {
         if (this->mContainer.isSynced()) {
             for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
                 *out << REMOVE_RANGE;
-                container().write_iterator(*out, from);
-                container().write_iterator(*out, to);
+                /*container().write_iterator(*out, from);
+                container().write_iterator(*out, to);*/
+                throw "TODO";
                 out->endMessage();
             }
         }
     }
 
-    typename traits::container &container()
+    container_t &container()
     {
-        return static_cast<typename traits::container &>(this->mContainer);
+        return static_cast<container_t &>(this->mContainer);
     }
 };
 
 struct ResetOperation : Base::ResetOperation {
-    ResetOperation(typename traits::container &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+    ResetOperation(container_t &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         : Base::ResetOperation(c)
         , mAnswerTarget(answerTarget)
         , mAnswerId(answerId)
@@ -393,15 +390,15 @@ struct ResetOperation : Base::ResetOperation {
         if (this->mContainer.isSynced()) {
             for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
                 *out << RESET;
-                write(*out, this->mContainer, nullptr, OffsetPtr::parent(&this->mContainer));
+                write(*out, this->mContainer, nullptr);
                 out->endMessage();
             }
         }
     }
 
-    typename traits::container &container()
+    container_t &container()
     {
-        return static_cast<typename traits::container &>(this->mContainer);
+        return static_cast<container_t &>(this->mContainer);
     }
 
 private:
@@ -445,11 +442,11 @@ iterator read_iterator(SerializeInStream &in)
     }
 }
 
-void write_iterator(SerializeOutStream &out, const const_iterator &it) const
+/*void write_iterator(SerializeOutStream &out, const const_iterator &it) const
 {
-    /*if constexpr (_traits::sorted) {
+    if constexpr (_traits::sorted) {
                 out << kvKey(*it);
-            } else*/
+            } else
     {
         out << static_cast<int>(std::distance(Base::Base::begin(), it));
     }
@@ -473,7 +470,7 @@ void write_item(SerializeOutStream &out, const const_iterator &it, const value_t
         write_iterator(out, it);
     }
     Base::write_item(out, t);
-}
+}*/
 
 template <typename Init, typename... _Ty>
 typename _traits::emplace_return emplace_impl(const iterator &where, Init &&init, _Ty &&... args)
@@ -494,23 +491,45 @@ iterator erase_impl(const iterator &from, const iterator &to, ParticipantId answ
     return RemoveRangeOperation { *this, from, to, answerTarget, answerId }.erase(from, to);
 }
 
-void readState_impl(SerializeInStream &in, const char *name, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+/*void readState_impl(SerializeInStream &in, const char *name, ParticipantId answerTarget = 0, TransactionId answerId = 0)
 {
     ResetOperation op { *this, answerTarget, answerId };
-    readContainerOp<typename traits::container, typename Base::Config>(in, *this, name, op, OffsetPtr::parent(this));
+    readContainerOp<container, typename Base::Config>(in, *this, name, op, OffsetPtr::parent(this));
 }
 
 typename _traits::emplace_return read_item_where_impl(SerializeInStream &in, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
 {
     InsertOperation op { *this, where, answerTarget, answerId };
     return Base::read_item_where_intern(in, where, op);
-}
+}*/
 }
 ;
 
-template <typename C, typename Config, typename Observer = NoOpFunctor, typename Serialize_Config = DefaultCreator<typename C::value_type>, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-using SyncableContainer = typename container_traits<C>::template api<SyncableContainerImpl<C, Config, Observer, Serialize_Config, OffsetPtr>>;
+template <typename C, typename Config, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+using SyncableContainer = container_api<SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>>;
 
 #define SYNCABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
+
 }
+
+
+template <typename C, typename Config, typename Observer, typename controlled, typename _OffsetPtr>
+struct underlying_container<Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr>> {
+    typedef C type;
+};
+
+template <typename C, typename Config, typename Observer, typename controlled, typename _OffsetPtr>
+struct container_traits<Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr>> : container_traits<C> {
+    typedef Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr> container;
+
+    using _traits = container_traits<C>;
+
+    template <typename... Args>
+    static typename _traits::emplace_return emplace(container& c, const typename _traits::iterator& where, Args&&... args) {
+        return c.emplace(where, std::forward<Args>(args)...);
+    }
+};
+
+
+
 }

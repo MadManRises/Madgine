@@ -1,5 +1,6 @@
 #pragma once
 #include "../toolscollector.h"
+#include "../toolbase.h"
 
 #include "Modules/keyvalue/typedscopeptr.h"
 

@@ -142,10 +142,7 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
-
                 mWindow->readState(in);
-
-                mWidgetManager->openStartupWidget();
             } else {
                 throw 0;
             }

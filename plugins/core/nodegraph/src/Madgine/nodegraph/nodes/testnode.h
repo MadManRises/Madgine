@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../nodeprototypecollector.h"
+#include "../nodeprototypebase.h"
 
 namespace Engine {
 namespace NodeGraph {

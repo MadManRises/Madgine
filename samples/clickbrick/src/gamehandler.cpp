@@ -4,6 +4,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(ClickBrick::UI::GameHandler)
 

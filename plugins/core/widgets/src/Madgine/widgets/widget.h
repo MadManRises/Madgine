@@ -7,7 +7,7 @@
 #include "Modules/threading/signal.h"
 #include "widgetclass.h"
 
-#include "Modules/generic/transformIt.h"
+#include "Modules/generic/container/transformIt.h"
 
 #include "Modules/keyvalue/scopebase.h"
 
@@ -148,7 +148,7 @@ namespace Widgets {
 
         WidgetManager &mManager;
 
-        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor, Serialize::ParentCreator<&WidgetBase::createWidgetClassTuple, &WidgetBase::storeWidgetCreationData>);
+        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor);
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;

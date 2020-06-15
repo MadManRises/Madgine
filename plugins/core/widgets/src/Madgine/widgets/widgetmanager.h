@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Madgine/window/mainwindowcomponentcollector.h"
+#include "Madgine/window/mainwindowcomponent.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
 
 #include "Madgine/render/renderpass.h"
 
-#include "Modules/generic/transformIt.h"
+#include "Modules/generic/container/transformIt.h"
 
 
 
@@ -100,7 +101,7 @@ namespace Widgets {
     private:
         std::map<std::string, WidgetBase *> mWidgets;
 
-        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor, Serialize::ParentCreator<&WidgetManager::createWidgetClassTuple, &WidgetManager::storeWidgetCreationData>);
+        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor);
 
         WidgetBase *mHoveredWidget = nullptr;
 
@@ -109,6 +110,7 @@ namespace Widgets {
         std::vector<WidgetBase *> mModalWidgetList;
 
         void expandUIAtlas();
+        void onActivate(bool active);
 
         struct WidgetManagerData;
         std::unique_ptr<WidgetManagerData> mData;

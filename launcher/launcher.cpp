@@ -10,8 +10,6 @@
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/widgetslib.h"
-#include "Madgine/widgets/widgetmanager.h"
 
 #include "Modules/filesystem/filemanager.h"
 #include "Modules/xml/xmlformatter.h"
@@ -49,7 +47,6 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 
             if (file) {
                 window.readState(file);
-                window.getWindowComponent<Engine::Widgets::WidgetManager>().openStartupWidget();
             }
         });
 #endif

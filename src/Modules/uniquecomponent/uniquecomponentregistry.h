@@ -13,12 +13,6 @@ std::unique_ptr<Base> createComponent(_Ty... arg)
 template <typename Base, typename... _Ty>
 using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
-/*template <typename Container, typename _Base, typename... _Ty>
-struct UniqueComponentContainer;*/
-
-template <typename Registry, typename _Base, typename... _Ty>
-struct UniqueComponentSelector;
-
 }
 
 #if ENABLE_PLUGINS
@@ -91,9 +85,6 @@ protected:
 private:
     const TypeInfo *mTi;
 };
-
-template <typename _Base, typename... _Ty>
-struct UniqueComponentRegistry;
 
 DLL_IMPORT_VARIABLE2(Registry, uniqueComponentRegistry, typename Registry);
 

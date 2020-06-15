@@ -2,9 +2,9 @@
 
 namespace Engine {
 
-#define DERIVE_FRIEND(Name)         \
+#define DERIVE_FRIEND(Name, ...)         \
     template <typename T, typename> \
-    friend struct has_function_##Name;
+    friend struct __VA_ARGS__ has_function_##Name;
 
 #define DERIVE_FUNCTION(Name)                                                                    \
     template <typename T, typename = void>                                                       \

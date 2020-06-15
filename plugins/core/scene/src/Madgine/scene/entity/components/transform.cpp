@@ -7,6 +7,8 @@
 
 #include "Modules/math/transformation.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 namespace Engine {
 
 namespace Scene {

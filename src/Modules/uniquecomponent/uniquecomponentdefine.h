@@ -1,7 +1,7 @@
 #pragma once
 
-#include "uniquecomponentcollector.h"
-#include "uniquecomponentcontainer.h"
+/*#include "uniquecomponentcollector.h"
+#include "uniquecomponentcontainer.h"*/
 
 //base is included in __VA_ARGS__ to circumvent the problem with empty __VA_ARGS__ and ,
 #define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base, */...)                                       \
@@ -11,10 +11,10 @@
     template <typename C>                                                                         \
     using prefix##Container = Engine::UniqueComponentContainer<C, prefix##Registry, __VA_ARGS__>; \
     using prefix##Selector = Engine::UniqueComponentSelector<prefix##Registry, __VA_ARGS__>;      \
-    template <typename T>                                                                         \
-    using prefix##Component = Engine::UniqueComponent<T, prefix##Collector>;                      \
-    template <typename T>                                                                         \
-    using prefix##VirtualBase = Engine::VirtualUniqueComponentBase<T, prefix##Collector>;         \
+    template <typename T, typename Base = FIRST(__VA_ARGS__)>                                     \
+    using prefix##Component = Engine::UniqueComponent<T, prefix##Collector, Base>;                \
+    template <typename T, typename Base = FIRST(__VA_ARGS__)>                                     \
+    using prefix##VirtualBase = Engine::VirtualUniqueComponentBase<T, prefix##Collector, Base>;   \
     }                                                                                             \
     RegisterType(ns::prefix##Registry);
 

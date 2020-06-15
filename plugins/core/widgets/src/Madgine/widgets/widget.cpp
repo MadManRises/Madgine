@@ -32,7 +32,7 @@ METATABLE_END(Engine::Widgets::WidgetBase)
 
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
 FIELD(mPos)
 FIELD(mSize)
 FIELD(mName)

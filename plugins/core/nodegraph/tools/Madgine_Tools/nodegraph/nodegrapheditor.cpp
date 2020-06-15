@@ -16,6 +16,8 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "Madgine/nodegraph/nodeprototypebase.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN(Engine::Tools::NodeGraphEditor)

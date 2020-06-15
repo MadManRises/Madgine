@@ -3,9 +3,9 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "scenecomponentbase.h"
 #include "Modules/serialize/serializableunit.h"
 
+#include "Modules/keyvalue/virtualscopebase.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &);
 

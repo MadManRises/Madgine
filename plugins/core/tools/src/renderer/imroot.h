@@ -4,7 +4,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/generic/observablecontainer.h"
+#include "Modules/generic/container/observablecontainer.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 

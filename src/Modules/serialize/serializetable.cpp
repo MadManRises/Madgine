@@ -110,8 +110,13 @@ namespace Serialize {
 
     void SerializeTable::setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const
     {
+        //TODO: call onActivate for ALL base classes
         if (active)
             assert(unit->mActiveIndex == 0);
+        else if (mCallbacks.onActivate)
+            mCallbacks.onActivate(unit, active, existenceChanged);
+
+        //TODO: Start with base
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
@@ -127,6 +132,8 @@ namespace Serialize {
         }
         if (!active)
             assert(unit->mActiveIndex == 0);
+        else if (mCallbacks.onActivate)
+            mCallbacks.onActivate(unit, active, existenceChanged);
     }
 
     bool SerializeTable::isInstance(SerializableUnitBase *unit) const

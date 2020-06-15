@@ -11,6 +11,7 @@
 #include "Interfaces/filesystem/api.h"
 
 #include "Modules/resources/resourcemanager.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 METATABLE_BEGIN(Engine::Tools::ProjectManager)
 METATABLE_END(Engine::Tools::ProjectManager)

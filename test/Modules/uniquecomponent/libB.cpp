@@ -6,6 +6,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(LibBComponent);
 
 METATABLE_BEGIN(LibBComponent)

@@ -1,7 +1,9 @@
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "nodeprototypebase.h"
 #include "Modules/threading/taskguard.h"
+
+#include "Modules/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/indexref.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::NodeGraph, NodePrototype, NodePrototypeBase);
 

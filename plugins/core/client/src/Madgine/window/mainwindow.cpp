@@ -16,9 +16,13 @@
 
 #include "Interfaces/exception.h"
 
-#include "Modules/generic/reverseIt.h"
+#include "Modules/generic/container/reverseIt.h"
 
 #include "../render/rendertarget.h"
+
+#include "mainwindowcomponent.h"
+
+#include "Modules/serialize/container/controlledconfig.h"
 
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
@@ -27,11 +31,21 @@ METATABLE_END(Engine::Window::MainWindow)
 RegisterType(Engine::Window::MainWindow);
 
 SERIALIZETABLE_BEGIN(Engine::Window::MainWindow)
-FIELD(mComponents)
+FIELD(mComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>>)
 SERIALIZETABLE_END(Engine::Window::MainWindow)
 
 namespace Engine {
 namespace Window {
+
+    bool MainWindowComponentComparator::operator()(const std::unique_ptr<MainWindowComponentBase> &first, const std::unique_ptr<MainWindowComponentBase> &second) const
+    {
+        return first->mPriority < second->mPriority;
+    }
+
+    int MainWindowComponentComparator::traits::to_cmp_type(const item_type &value)
+    {
+        return value->mPriority;
+    }
 
     MainWindow::MainWindow(const WindowSettings &settings, Input::InputHandler *input)
         : mComponents(*this)

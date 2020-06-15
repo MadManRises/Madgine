@@ -50,7 +50,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::createWidgetClassTuple, &Engine::Widgets::WidgetManager::storeWidgetCreationData>)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 
@@ -741,6 +741,12 @@ namespace Widgets {
     Render::Texture &WidgetManager::uiTexture() const
     {
         return *mData->mUIAtlasTexture;
+    }
+
+    void WidgetManager::onActivate(bool active)
+    {        
+        if (active)
+            openStartupWidget();
     }
 
     int WidgetManager::priority() const

@@ -52,7 +52,7 @@ namespace NodeGraph {
     private:
         Filesystem::Path mPath;
 
-        SERIALIZABLE_CONTAINER(mNodes, std::vector<std::unique_ptr<NodePrototypeBase>>, NoOpFunctor, Serialize::ParentCreator<&NodeGraphPrototype::createNodeTuple, &NodeGraphPrototype::storeNodeCreationData>);
+        SERIALIZABLE_CONTAINER(mNodes, std::vector<std::unique_ptr<NodePrototypeBase>>, NoOpFunctor);
     };
 
 }

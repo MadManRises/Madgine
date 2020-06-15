@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../generic/functor.h"
-#include "../generic/transformIt.h"
+#include "../generic/container/transformIt.h"
 
 namespace Engine {
 
@@ -19,11 +19,13 @@ struct KeyValue {
 
     static std::monostate key(T &v)
     {
+        static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return {};
     }
 
     static std::monostate key(T &&v)
     {
+        static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return {};
     }
 };

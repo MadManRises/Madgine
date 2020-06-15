@@ -8,62 +8,60 @@
 
 namespace Engine {
 
-template <typename C, typename Registry, typename... _Ty>
-struct UniqueComponentContainerImpl : C
+template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+struct UniqueComponentContainer : replace<C>::template type<std::unique_ptr<typename Registry::Base>>
 #if ENABLE_PLUGINS
     ,
                                       ComponentRegistryListener
 #endif
 {
+
+    typedef typename replace<C>::template type<std::unique_ptr<typename Registry::Base>> container;
+
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
-    typedef typename C::value_type value_type;
+    typedef typename container::value_type value_type;    
 
-    typedef C Container;
+    typedef typename container_traits<container>::const_iterator const_iterator;
 
-    struct traits : container_traits<Container> {
-    };
-
-    typedef typename traits::const_iterator const_iterator;
-
-    UniqueComponentContainerImpl(_Ty... arg)
+    UniqueComponentContainer(_Ty... arg)
 #if ENABLE_PLUGINS
         : mArg(arg...)
 #endif
     {
         size_t count = Registry::sComponents().size();
         mSortedComponents.reserve(count);
-        if constexpr (is_instance_v<C, std::vector>) {
+        if constexpr (is_instance_v<container, std::vector>) {
             this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {
             value_type p = f(arg...);
             mSortedComponents.push_back(p.get());
-            traits::emplace(*this, Container::end(), std::move(p));
+            container_traits<container>::emplace(*this, container::end(), std::move(p));
         }
 #if ENABLE_PLUGINS
-        Registry::addListener({ this, &UniqueComponentContainerImpl<C, Registry, _Ty...>::sUpdateComponents });
+        Registry::addListener({ this, &UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>::sUpdateComponents });
 #endif
     }
 
-    ~UniqueComponentContainerImpl() {
+    ~UniqueComponentContainer() {
 #if ENABLE_PLUGINS
         Registry::removeListener(this);
 #endif
     }
 
-    UniqueComponentContainerImpl(const UniqueComponentContainerImpl &) = delete;
-    void operator=(const UniqueComponentContainerImpl &) = delete;
+    UniqueComponentContainer(const UniqueComponentContainer &) = delete;
+    void operator=(const UniqueComponentContainer &) = delete;
 
     const_iterator begin() const
     {
-        return Container::begin();
+        return container::begin();
     }
 
     const_iterator end() const
     {
-        return Container::end();
+        return container::end();
     }
 
     template <typename T>
@@ -85,7 +83,7 @@ private:
 protected:
     static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals)
     {
-        static_cast<UniqueComponentContainerImpl<C, Registry, _Ty...> *>(listener)->updateComponents(info, add, vals);
+        static_cast<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...> *>(listener)->updateComponents(info, add, vals);
     }
 
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
@@ -93,19 +91,19 @@ protected:
         if (add) {
             assert(this->size() == info->mBaseIndex);
             mSortedComponents.reserve(info->mBaseIndex + vals.size());
-            if constexpr (is_instance_v<C, std::vector>) {
+            if constexpr (is_instance_v<container, std::vector>) {
                 this->reserve(info->mBaseIndex + vals.size());
             }
             for (const F &f : vals) {
                 value_type p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
-                traits::emplace(*this, Container::end(), std::move(p));
+                container_traits<container>::emplace(*this, container::end(), std::move(p));
             }
         } else {
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                this->erase(std::find_if(Container::begin(), Container::end(), [&](const value_type &p) { return p.get() == mSortedComponents[i]; }));
+                this->erase(std::find_if(container::begin(), container::end(), [&](const value_type &p) { return p.get() == mSortedComponents[i]; }));
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }
@@ -117,7 +115,9 @@ private:
 #endif
 };
 
-template <typename C, typename Registry, typename __Base, typename... _Ty>
-using UniqueComponentContainer = UniqueComponentContainerImpl<typename replace<C>::template type<std::unique_ptr<typename Registry::Base>>, Registry, _Ty...>;
+template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+struct underlying_container<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>> {
+    typedef typename replace<C>::template type<std::unique_ptr<typename Registry::Base>> type;
+};
 
 }

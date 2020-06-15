@@ -3,6 +3,7 @@
 #include "../keyvalue/scopebase.h"
 #include "../plugins/pluginlistener.h"
 #include "resourceloadercollector.h"
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 namespace Engine {
 namespace Resources {

@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-template <typename T, typename Base, typename _VBase = Base>
+template <typename T, typename Base, typename _VBase>
 struct VirtualUniqueComponentImpl : Base {
     using VBase = _VBase;
     using Base::Base;
@@ -68,38 +68,12 @@ size_t component_index()
     return T::component_index();
 }
 
-struct IndexRef {
-    IndexHolder *mHolder;
-
-    operator size_t() const
-    {
-        return mHolder->index();
-    }
-
-    bool isValid() const
-    {
-        return mHolder->isValid();
-    }
-};
-
-template <typename T>
-IndexRef indexRef()
-{
-    return { &_reg<T, typename T::Collector>() };
-}
-
-template <typename T>
-IndexRef virtualIndexRef()
-{
-    return { T::_preg() };
-}
-
 }
 
 #else
 
 namespace Engine {
-template <typename T, typename Base, typename _VBase = Base>
+template <typename T, typename Base, typename _VBase>
 struct VirtualUniqueComponentImpl : Base {
     using Base::Base;
 };

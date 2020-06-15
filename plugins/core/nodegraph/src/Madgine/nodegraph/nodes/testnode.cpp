@@ -3,6 +3,7 @@
 #include "testnode.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 //#include "Modules/serialize/serializetable_impl.h"
 
 NODE(TestNode, Engine::NodeGraph::TestNode)

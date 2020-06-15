@@ -132,21 +132,21 @@ namespace Serialize {
             }
         };
 
-        template <auto writer, typename R, typename T, typename... _Ty>
+        template <auto writer, typename R, typename T, typename Arg>
         struct _ParentCreatorWriter {
 
-            static void writeCreationData(SerializeOutStream &out, _Ty... t, T *parent)
+            static void writeCreationData(SerializeOutStream &out, Arg arg, T *parent)
             {
                 assert(parent);
                 out.format().beginExtended(out, "Item", std::tuple_size_v<R>);
-                R tuple = (parent->*writer)(t...);
+                R tuple = (parent->*writer)(arg);
                 TupleUnpacker::forEach(tuple, [&](auto &e) { write(out, e.second, e.first); });
             }
 
-            static void writeItem(SerializeOutStream &out, _Ty... t, T *parent)
+            static void writeItem(SerializeOutStream &out, Arg arg, T *parent)
             {
-                writeCreationData(out, t..., parent);
-                write(out, t..., "Item");
+                writeCreationData(out, arg, parent);
+                write(out, arg, "Item");
             }
         };
     }

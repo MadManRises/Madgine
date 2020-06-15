@@ -4,6 +4,10 @@
 
 #include "globalapicollector.h"
 
+#include "Modules/keyvalue/scopebase.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
+
 namespace Engine {
 namespace App {
 

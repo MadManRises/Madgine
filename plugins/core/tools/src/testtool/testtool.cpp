@@ -17,6 +17,8 @@
 
 #include "Modules/render/vertex.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
 

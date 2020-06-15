@@ -19,6 +19,10 @@
 
 #include "Modules/serialize/container/controlledconfig.h"
 
+#include "scenecomponentbase.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
+
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -83,10 +87,10 @@ namespace Scene {
         size_t mItemCount;
 
     public:
-        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>);
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
 
     private:
-        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>, Serialize::ParentCreator<&SceneManager::createNonLocalEntityData, &SceneManager::storeEntityCreationData>);
+        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
         std::list<Entity::Entity> mLocalEntities;
         std::list<Entity::Entity *> mEntityRemoveQueue;
 

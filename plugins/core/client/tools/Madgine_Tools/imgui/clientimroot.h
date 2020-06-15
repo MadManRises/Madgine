@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Madgine/window/mainwindowcomponentcollector.h"
+#include "Madgine/window/mainwindowcomponent.h"
+
 #include "Madgine/threading/framelistener.h"
 
 #include "renderer/imroot.h"

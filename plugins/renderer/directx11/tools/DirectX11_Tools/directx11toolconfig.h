@@ -1,6 +1,7 @@
 #pragma once
 
 #include "toolscollector.h"
+#include "toolbase.h"
 
 #include "DirectX11/util/directx11texture.h"
 

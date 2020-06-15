@@ -2,7 +2,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "mainwindowcomponent.h"
+#include "Modules/serialize/serializableunit.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Window, MainWindowComponent, MainWindowComponentBase, MainWindow &);
 

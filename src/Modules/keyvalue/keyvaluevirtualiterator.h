@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../generic/virtualiterator.h"
+#include "../generic/container/virtualiterator.h"
 
 namespace Engine {
 

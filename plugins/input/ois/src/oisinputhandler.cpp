@@ -9,6 +9,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Input::OISInputHandler);
 
 METATABLE_BEGIN(Engine::Input::OISInputHandler)

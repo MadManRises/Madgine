@@ -5,7 +5,7 @@
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Modules/generic/transformIt.h"
+#include "Modules/generic/container/transformIt.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/toplevelserializableunit.h"
@@ -24,7 +24,9 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/container/controlledconfig.h"
+#include "../threading/framelistener.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 namespace Engine {
 namespace Window {
@@ -56,20 +58,14 @@ namespace Window {
 
     struct MADGINE_CLIENT_EXPORT MainWindowComponentComparator {
 
-        bool operator()(const std::unique_ptr<MainWindowComponentBase> &first, const std::unique_ptr<MainWindowComponentBase> &second) const
-        {
-            return first->mPriority < second->mPriority;
-        }
+        bool operator()(const std::unique_ptr<MainWindowComponentBase> &first, const std::unique_ptr<MainWindowComponentBase> &second) const;
 
         struct traits {
             using type = int;
             using cmp_type = MainWindowComponentComparator;
             using item_type = std::unique_ptr<MainWindowComponentBase>;
 
-            static int to_cmp_type(const item_type &value)
-            {
-                return value->mPriority;
-            }
+            static int to_cmp_type(const item_type &value);
         };
     };
 
@@ -157,7 +153,7 @@ namespace Window {
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 
-        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, Serialize::ControlledConfig<KeyCompare<Placeholder<0>>>>>);
+        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
 
         Threading::FrameLoop mLoop;
 

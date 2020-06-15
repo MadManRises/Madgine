@@ -4,6 +4,7 @@
 
 #    include "../tinyxml/tinyxml2.h"
 #    include "../toolscollector.h"
+#include "../toolbase.h"
 #    include "Modules/threading/slot.h"
 
 namespace Engine {

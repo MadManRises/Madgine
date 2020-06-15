@@ -2,6 +2,8 @@
 
 #include "toolscollector.h"
 
+#include "toolbase.h"
+
 #include "sceneview.h"
 
 namespace Engine {

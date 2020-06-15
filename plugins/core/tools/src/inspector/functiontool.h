@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../toolscollector.h"
+#include "../toolbase.h"
 #include "Modules/keyvalue/boundapifunction.h"
 
 namespace Engine {

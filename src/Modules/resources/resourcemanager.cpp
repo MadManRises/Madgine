@@ -11,6 +11,8 @@
 
 #include "../keyvalue/metatable_impl.h"
 
+#include "resourceloaderbase.h"
+
 namespace Engine {
 namespace Resources {
 

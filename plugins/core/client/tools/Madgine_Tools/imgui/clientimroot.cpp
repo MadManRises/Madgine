@@ -23,6 +23,7 @@
 #include "Madgine/window/mainwindow.h"
 
 #include "Madgine/input/inputevents.h"
+#include "Madgine/input/inputhandler.h"
 
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 

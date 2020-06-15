@@ -19,8 +19,8 @@ MEMBER(mGameHandlers)
 METATABLE_END(Engine::UI::UIManager)
 
 SERIALIZETABLE_BEGIN(Engine::UI::UIManager)
-FIELD(mGuiHandlers)
-FIELD(mGameHandlers)
+FIELD(mGuiHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::UI::GuiHandlerBase>>>)
+FIELD(mGameHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::UI::GameHandlerBase>>>)
 SERIALIZETABLE_END(Engine::UI::UIManager)
 
 

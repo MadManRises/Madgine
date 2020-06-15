@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/render/rendercontextcollector.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "util/openglssbobuffer.h"
 

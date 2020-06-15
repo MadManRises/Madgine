@@ -4,6 +4,8 @@
 
 #include "widgetsettings.h"
 
+#include "toolbase.h"
+
 namespace Engine {
 namespace Tools {
 

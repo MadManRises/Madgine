@@ -18,6 +18,8 @@
 
 #include "Modules/keyvalue/keyvaluepair.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {

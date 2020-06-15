@@ -16,7 +16,7 @@
 
 #include "Modules/ini/iniformatter.h"
 
-#include "Modules/generic/safeiterator.h"
+#include "Modules/generic/container/safeiterator.h"
 
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)

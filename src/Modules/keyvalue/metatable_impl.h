@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../generic/linestruct.h"
-#include "../generic/virtualiterator.h"
+#include "../generic/container/virtualiterator.h"
 #include "accessor.h"
 #include "apifunction.h"
 #include "functiontable_impl.h"

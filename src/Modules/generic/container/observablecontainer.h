@@ -1,6 +1,6 @@
 #pragma once
 
-#include "observerevent.h"
+#include "../observerevent.h"
 
 namespace Engine {
 
@@ -8,21 +8,9 @@ template <typename C, typename Observer>
 struct ObservableContainer : C, Observer {
 
     using _traits = container_traits<C>;
-    struct traits : _traits {
-        typedef ObservableContainer<C, Observer> container;
-
-        typedef typename _traits::iterator iterator;
-        typedef typename _traits::const_iterator const_iterator;
-
-        template <typename... _Ty>
-        static typename _traits::emplace_return emplace(container &c, const iterator &where, _Ty &&... args)
-        {
-            return c.emplace(where, std::forward<_Ty>(args)...);
-        }
-    };
-
-    typedef typename traits::iterator iterator;
-    typedef typename traits::const_iterator const_iterator;
+    
+    typedef typename _traits::iterator iterator;
+    typedef typename _traits::const_iterator const_iterator;
 
     template <typename... _Ty>
     typename _traits::emplace_return emplace(const iterator &where, _Ty &&... args)
@@ -71,6 +59,22 @@ struct ObservableContainer : C, Observer {
         _traits::container::operator=(std::forward<T>(t));
         Observer::operator()(this->end(), AFTER | RESET);
         return *this;
+    }
+};
+
+template <typename C, typename Observer>
+struct container_traits<ObservableContainer<C, Observer>> : container_traits<C> {
+    typedef ObservableContainer<C, Observer> container;
+
+    using _traits = container_traits<C>;
+
+    typedef typename _traits::iterator iterator;
+    typedef typename _traits::const_iterator const_iterator;
+
+    template <typename... _Ty>
+    static typename _traits::emplace_return emplace(container &c, const iterator &where, _Ty &&... args)
+    {
+        return c.emplace(where, std::forward<_Ty>(args)...);
     }
 };
 

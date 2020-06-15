@@ -12,11 +12,13 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-FIELD(mComponents)
+FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple, &Engine::Scene::Entity::Entity::storeComponentCreationData>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 

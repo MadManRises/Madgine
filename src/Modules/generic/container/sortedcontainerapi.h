@@ -1,18 +1,19 @@
 #pragma once
 
-#include "comparator_traits.h"
+#include "../comparator_traits.h"
 
 namespace Engine {
+
+    template <typename C>
+struct container_traits;
+
 template <typename C>
 struct SortedContainerApi : C {
 
     using C::C;
     using C::operator=;
 
-    using traits = typename C::traits;
-
-    typedef typename traits::iterator iterator;
-    typedef typename traits::const_iterator const_iterator;
+    using traits = container_traits<C>;
 
     typedef typename comparator_traits<typename traits::cmp_type>::type cmp_type;    
 
@@ -37,5 +38,9 @@ struct SortedContainerApi : C {
 			{
 				return this->mData.find(v);
 			}*/
+};
+
+template <typename C>
+struct container_traits<SortedContainerApi<C>> : container_traits<C> {
 };
 }

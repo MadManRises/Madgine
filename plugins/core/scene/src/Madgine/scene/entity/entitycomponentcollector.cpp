@@ -2,17 +2,7 @@
 
 #include "entitycomponentcollector.h"
 
-#include "Modules/plugins/pluginmanager.h"
-
-#include "componentexception.h"
-
-#include "Modules/keyvalue/keyvalue.h"
-
-#include "entitycomponentbase.h"
-
-#include "Modules/plugins/pluginsection.h"
-
-#include "Modules/plugins/plugin.h"
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::Scene::Entity, EntityComponent)
 

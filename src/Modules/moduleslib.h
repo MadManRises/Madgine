@@ -59,10 +59,10 @@
 
 #include "util/utilmethods.h"
 
-#include "generic/container_traits.h"
+#include "generic/container/container_traits.h"
 #include "generic/templates.h"
 #include "generic/derive.h"
-#include "generic/iterator_traits.h"
+#include "generic/container/iterator_traits.h"
 #include "generic/callable_traits.h"
 #include "generic/tupleunpacker.h"
 

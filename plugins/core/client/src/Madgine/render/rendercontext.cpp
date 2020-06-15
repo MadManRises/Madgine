@@ -2,9 +2,9 @@
 
 #include "rendercontext.h"
 
-#include "Modules/generic/reverseIt.h"
+#include "Modules/generic/container/reverseIt.h"
 
-#include "Modules/generic/safeiterator.h"
+#include "Modules/generic/container/safeiterator.h"
 
 #include "Modules/threading/workgroupstorage.h"
 

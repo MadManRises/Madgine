@@ -11,6 +11,9 @@
 
 #include "uniquecomponentshared.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
+
 #include "libA.h"
 #include "libB.h"
 
