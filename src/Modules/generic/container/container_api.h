@@ -24,7 +24,7 @@ struct container_api_impl<C, std::list<Ty...>> : C {
 
     void remove(const typename C::value_type &item)
     {
-        for (iterator it = this->begin(); it != this->end();) {
+        for (typename C::iterator it = this->begin(); it != this->end();) {
             if (*it == item) {
                 it = this->erase(it);
             } else {
@@ -72,7 +72,7 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
 
     void remove(const value_type &item)
     {
-        for (const_iterator it = this->begin(); it != this->end();) {
+        for (typename C::const_iterator it = this->begin(); it != this->end();) {
             if (*it == item) {
                 it = erase(it);
             } else {
@@ -129,7 +129,7 @@ struct container_api_impl<C, std::map<K, T, Ty...>> : C {
 
     T &operator[](const K &key)
     {
-        iterator it = C::lower_bound(key);
+        typename C::iterator it = C::lower_bound(key);
         if (it == this->end() || it->first != key) {
             auto pib = try_emplace(key);
             assert(pib.second);
