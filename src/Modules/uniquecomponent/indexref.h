@@ -1,6 +1,6 @@
 #pragma once
 
-#include "indexholder.h"
+#include "uniquecomponent.h"
 
 namespace Engine {
 
