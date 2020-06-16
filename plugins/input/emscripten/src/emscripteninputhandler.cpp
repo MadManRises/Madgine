@@ -63,17 +63,14 @@ namespace Input {
 
         switch (eventType) {
         case EMSCRIPTEN_EVENT_MOUSEMOVE:
-            _this->injectPointerMove({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
-                { static_cast<float>(mouseEvent->movementX), static_cast<float>(mouseEvent->movementY) } });
-            return EM_TRUE;
+            return _this->injectPointerMove({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                { static_cast<float>(mouseEvent->movementX), static_cast<float>(mouseEvent->movementY) } });            
         case EMSCRIPTEN_EVENT_MOUSEDOWN:
-            _this->injectPointerPress({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+            return _this->injectPointerPress({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
                 convertMouseButton(mouseEvent->button) });
-            return EM_TRUE;
         case EMSCRIPTEN_EVENT_MOUSEUP:
-            _this->injectPointerRelease({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+            return _this->injectPointerRelease({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
                 convertMouseButton(mouseEvent->button) });
-            return EM_TRUE;
         }
 
         return EM_FALSE;
