@@ -4,19 +4,17 @@
 
 #include "uniquecomponent.h"
 
-#include "../generic/replace.h"
-
 namespace Engine {
 
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
-struct UniqueComponentContainer : replace<C>::template type<std::unique_ptr<typename Registry::Base>>
+struct UniqueComponentContainer : C
 #if ENABLE_PLUGINS
     ,
                                       ComponentRegistryListener
 #endif
 {
 
-    typedef typename replace<C>::template type<std::unique_ptr<typename Registry::Base>> container;
+    typedef C container;
 
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
@@ -36,7 +34,7 @@ struct UniqueComponentContainer : replace<C>::template type<std::unique_ptr<type
             this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {
-            value_type p = f(arg...);
+            auto p = f(arg...);
             mSortedComponents.push_back(p.get());
             container_traits<container>::emplace(*this, container::end(), std::move(p));
         }
@@ -95,7 +93,7 @@ protected:
                 this->reserve(info->mBaseIndex + vals.size());
             }
             for (const F &f : vals) {
-                value_type p = TupleUnpacker::invokeFromTuple(f, mArg);
+                auto p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
                 container_traits<container>::emplace(*this, container::end(), std::move(p));
             }
@@ -117,7 +115,7 @@ private:
 
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
 struct underlying_container<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>> {
-    typedef typename replace<C>::template type<std::unique_ptr<typename Registry::Base>> type;
+    typedef C type;
 };
 
 }

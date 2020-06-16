@@ -1,5 +1,7 @@
 #pragma once
 
+#include "replace.h"
+
 namespace Engine {
 
 struct OffsetPtrTag;

@@ -8,6 +8,8 @@
 #include "workgroup.h"
 #include "workgroupstorage.h"
 
+#include "task.h"
+
 namespace Engine {
 namespace Threading {
 

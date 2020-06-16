@@ -164,6 +164,7 @@ namespace Threading {
     template <typename T, typename... _Ty>
     struct ConnectionInstance;
     struct TaskQueue;
+    struct TaskHandle;
 }
 
 namespace Window {
