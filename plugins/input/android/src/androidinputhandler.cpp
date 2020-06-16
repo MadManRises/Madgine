@@ -75,19 +75,21 @@ namespace Input {
         std::stringstream ss;
         ss << position;
 
+        bool handled = false;
+
         switch (action & AMOTION_EVENT_ACTION_MASK) {
         case AMOTION_EVENT_ACTION_DOWN:
-            injectPointerMove({ position,
+            handled = injectPointerMove({ position,
                 Vector2 {} });
-            injectPointerPress({ position,
+            handled |= injectPointerPress({ position,
                 MouseButton::LEFT_BUTTON });
             break;
         case AMOTION_EVENT_ACTION_UP:
-            injectPointerRelease({ position,
+            handled = injectPointerRelease({ position,
                 MouseButton::LEFT_BUTTON });
             break;
         case AMOTION_EVENT_ACTION_MOVE:
-            injectPointerMove({ position,
+            handled = injectPointerMove({ position,
                 Vector2 {} });
             break;
         case AMOTION_EVENT_ACTION_CANCEL:
@@ -118,7 +120,7 @@ namespace Input {
             LOG_ERROR("Unknown Motion Event Type: " << (action & AMOTION_EVENT_ACTION_MASK));
             break;
         }
-        return true;
+        return handled;
     }
 
 }

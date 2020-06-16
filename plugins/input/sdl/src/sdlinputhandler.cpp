@@ -69,35 +69,30 @@ namespace Input {
 
     bool SDLInputHandler::keyPressed(const SDL_KeyboardEvent &event)
     {
-        injectKeyPress({ static_cast<Key>(event.keysym.scancode), static_cast<char>(event.keysym.sym) });
-        return true;
+        return injectKeyPress({ static_cast<Key>(event.keysym.scancode), static_cast<char>(event.keysym.sym) });
     }
 
     bool SDLInputHandler::keyReleased(const SDL_KeyboardEvent &event)
     {
-        injectKeyRelease({ static_cast<Key>(event.keysym.scancode), static_cast<char>(event.keysym.sym) });
-        return true;
+        return injectKeyRelease({ static_cast<Key>(event.keysym.scancode), static_cast<char>(event.keysym.sym) });        
     }
 
     bool SDLInputHandler::mouseMoved(const SDL_MouseMotionEvent &event)
     {
-        injectPointerMove({ { static_cast<float>(event.x), static_cast<float>(event.y) },
-            { static_cast<float>(event.xrel), static_cast<float>(event.yrel) } });
-        return true;
+        return injectPointerMove({ { static_cast<float>(event.x), static_cast<float>(event.y) },
+            { static_cast<float>(event.xrel), static_cast<float>(event.yrel) } });        
     }
 
     bool SDLInputHandler::mousePressed(const SDL_MouseButtonEvent &event)
     {
-        injectPointerPress({ { static_cast<float>(event.x), static_cast<float>(event.y) },
-            convertMouseButton(event.button) });
-        return true;
+        return injectPointerPress({ { static_cast<float>(event.x), static_cast<float>(event.y) },
+            convertMouseButton(event.button) });        
     }
 
     bool SDLInputHandler::mouseReleased(const SDL_MouseButtonEvent &event)
     {
-        injectPointerRelease({ { static_cast<float>(event.x), static_cast<float>(event.y) },
-            convertMouseButton(event.button) });
-        return true;
+        return injectPointerRelease({ { static_cast<float>(event.x), static_cast<float>(event.y) },
+            convertMouseButton(event.button) });        
     }
 
 }

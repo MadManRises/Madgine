@@ -88,38 +88,33 @@ namespace Input {
 
     bool OISInputHandler::keyPressed(const OIS::KeyEvent &arg)
     {
-        injectKeyPress({ static_cast<Key>(arg.key), static_cast<char>(arg.text) });
-        return true;
+        return injectKeyPress({ static_cast<Key>(arg.key), static_cast<char>(arg.text) });
     }
 
     bool OISInputHandler::keyReleased(const OIS::KeyEvent &arg)
     {
-        injectKeyRelease({ static_cast<Key>(arg.key) });
-        return true;
+        return injectKeyRelease({ static_cast<Key>(arg.key) });
     }
 
     bool OISInputHandler::mousePressed(const OIS::MouseEvent &arg,
         OIS::MouseButtonID id)
     {
-        injectPointerPress({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
+        return injectPointerPress({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
             convertMouseButton(id) });
-        return true;
     }
 
     bool OISInputHandler::mouseMoved(const OIS::MouseEvent &arg)
     {
-        injectPointerMove({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
+        return injectPointerMove({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
             { static_cast<float>(arg.state.X.rel * mMouseScale), static_cast<float>(arg.state.Y.rel * mMouseScale) },
             arg.state.Z.rel / 120.0f });
-        return true;
     }
 
     bool OISInputHandler::mouseReleased(const OIS::MouseEvent &arg,
         OIS::MouseButtonID id)
     {
-        injectPointerRelease({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
-            convertMouseButton(id) });
-        return true;
+        return injectPointerRelease({ { static_cast<float>(arg.state.X.abs + mWindow->renderX()), static_cast<float>(arg.state.Y.abs + mWindow->renderY()) },
+            convertMouseButton(id) });        
     }
 
     bool OISInputHandler::frameStarted(std::chrono::microseconds timeSinceLastFrame)

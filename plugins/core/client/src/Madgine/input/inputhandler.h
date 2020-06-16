@@ -16,11 +16,11 @@ namespace Input {
 		virtual bool isKeyDown(Key key) = 0;
 
     protected:
-        void injectKeyPress(const KeyEventArgs &arg);
-        void injectKeyRelease(const KeyEventArgs &arg);
-        void injectPointerPress(const PointerEventArgs &arg);
-        void injectPointerRelease(const PointerEventArgs &arg);
-        void injectPointerMove(const PointerEventArgs &arg);
+        bool injectKeyPress(const KeyEventArgs &arg);
+        bool injectKeyRelease(const KeyEventArgs &arg);
+        bool injectPointerPress(const PointerEventArgs &arg);
+        bool injectPointerRelease(const PointerEventArgs &arg);
+        bool injectPointerMove(const PointerEventArgs &arg);
 
     private:
         InputListener *mListener;

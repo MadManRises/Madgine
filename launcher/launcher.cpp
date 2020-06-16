@@ -10,6 +10,8 @@
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
 
+#include "Modules/serialize/streams/serializestream.h"
+
 
 #include "Modules/filesystem/filemanager.h"
 #include "Modules/xml/xmlformatter.h"

@@ -32,36 +32,40 @@ namespace Input {
     {
     }
 
-    void InputHandler::injectKeyPress(const KeyEventArgs &arg)
+    bool InputHandler::injectKeyPress(const KeyEventArgs &arg)
     {
-        if (mListener)
-            mListener->injectKeyPress(arg);
+        if (!mListener)
+            return false;
+        return mListener->injectKeyPress(arg);
     }
 
-    void InputHandler::injectKeyRelease(const KeyEventArgs &arg)
+    bool InputHandler::injectKeyRelease(const KeyEventArgs &arg)
     {
-        if (mListener)
-            mListener->injectKeyRelease(arg);
+        if (!mListener)
+            return false;
+        return mListener->injectKeyRelease(arg);
     }
 
-    void InputHandler::injectPointerPress(const PointerEventArgs &arg)
+    bool InputHandler::injectPointerPress(const PointerEventArgs &arg)
     {
-        if (mListener)
-            mListener->injectPointerPress(arg);
+        if (!mListener)
+            return false;
+        return mListener->injectPointerPress(arg);
     }
 
-    void InputHandler::injectPointerRelease(const PointerEventArgs &arg)
+    bool InputHandler::injectPointerRelease(const PointerEventArgs &arg)
     {
-        if (mListener)
-            mListener->injectPointerRelease(arg);
+        if (!mListener)
+            return false;
+        return mListener->injectPointerRelease(arg);
     }
 
-    void InputHandler::injectPointerMove(const PointerEventArgs &arg)
+    bool InputHandler::injectPointerMove(const PointerEventArgs &arg)
     {
-        if (mListener)
-            mListener->injectPointerMove(arg);
+        if (!mListener)
+            return false;
+        return mListener->injectPointerMove(arg);
     }
 
 }
 }
-
