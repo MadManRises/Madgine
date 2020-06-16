@@ -3,6 +3,7 @@
 #include "../../generic/comparator_traits.h"
 #include "physical.h"
 #include "../../generic/fixstring.h"
+#include "../streams/serializestream.h"
 
 namespace Engine {
 namespace Serialize {
