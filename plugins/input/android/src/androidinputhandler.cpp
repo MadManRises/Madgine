@@ -12,6 +12,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
+
 UNIQUECOMPONENT(Engine::Input::AndroidInputHandler);
 
 namespace Engine {
