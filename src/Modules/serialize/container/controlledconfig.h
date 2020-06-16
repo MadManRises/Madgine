@@ -4,6 +4,7 @@
 #include "physical.h"
 #include "../../generic/fixstring.h"
 #include "../streams/serializestream.h"
+#include "../formatter.h"
 
 namespace Engine {
 namespace Serialize {
