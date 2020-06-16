@@ -4,6 +4,8 @@ struct ALooper;
 struct AInputEvent;
 
 #include "Madgine/input/inputcollector.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
+#include "Madgine/input/inputhandler.h"
 
 namespace Engine {
 namespace Input {

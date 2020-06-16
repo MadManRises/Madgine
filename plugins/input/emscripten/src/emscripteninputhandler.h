@@ -4,6 +4,8 @@ struct ALooper;
 struct AInputEvent;
 
 #include "Madgine/input/inputcollector.h"
+#include "Madgine/input/inputhandler.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 #include <emscripten/html5.h>
 
 namespace Engine {
