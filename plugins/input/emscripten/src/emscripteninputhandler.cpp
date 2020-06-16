@@ -8,7 +8,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(Engine::Input::EmscriptenInputHandler);
 
