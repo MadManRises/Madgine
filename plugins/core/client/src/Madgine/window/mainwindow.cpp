@@ -48,8 +48,8 @@ namespace Window {
     }
 
     MainWindow::MainWindow(const WindowSettings &settings, Input::InputHandler *input)
-        : mComponents(*this)
-        , mSettings(settings)
+        : mSettings(settings)
+        , mComponents(*this)
         , mExternalInput(input)
     {
 

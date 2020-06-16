@@ -34,7 +34,7 @@ struct BuilderImpl {
         }
     }
 
-    auto execute()
+    decltype(auto) execute()
     {
         assert(mF);
         F f = *std::move(mF);
@@ -48,7 +48,7 @@ struct BuilderImpl {
     }
 
 protected:
-    template <size_t Dim = 0, typename T = void>
+    template <size_t Dim, typename T>
     auto append(T &&t)
     {
         static_assert(Dim < type_pack_size_v<Pack>);
@@ -62,7 +62,7 @@ private:
         using type = type_pack_append_t<Pack2, T>;
     };
 
-    template <size_t Dim, typename T = void, size_t... Is>
+    template <size_t Dim, typename T, size_t... Is>
     Facade<BuilderImpl<F, type_pack_apply_to_nth_t<appender<T>::template type, Pack, Dim>, Facade>> append_impl(T &&t, std::index_sequence<Is...>)
     {
         std::optional<F> f = std::move(mF);

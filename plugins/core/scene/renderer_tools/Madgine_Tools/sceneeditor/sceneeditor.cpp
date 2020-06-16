@@ -213,7 +213,7 @@ namespace Tools {
         }
 
         if (ImGui::BeginPopup("add_component_popup")) {
-            for (const std::pair<std::string_view, IndexRef> &componentDesc : Scene::Entity::sComponentsByName()) {
+            for (const std::pair<const std::string_view, IndexRef> &componentDesc : Scene::Entity::sComponentsByName()) {
                 if (componentDesc.second.isValid() && !entity->hasComponent(componentDesc.first)) {
                     if (ImGui::Selectable(componentDesc.first.data())) {
                         entity->addComponent(componentDesc.first);

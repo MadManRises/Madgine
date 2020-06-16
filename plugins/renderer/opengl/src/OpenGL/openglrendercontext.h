@@ -2,6 +2,7 @@
 
 #include "Madgine/render/rendercontextcollector.h"
 #include "Madgine/render/rendercontext.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "util/openglssbobuffer.h"
 

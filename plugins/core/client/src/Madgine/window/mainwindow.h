@@ -144,20 +144,20 @@ namespace Window {
         void onResize(size_t width, size_t height) override;
 
     private:
+        const WindowSettings &mSettings;
+
+        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
+
+        std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
+
+        Threading::FrameLoop mLoop;
+
         Window *mWindow = nullptr;
         std::optional<Render::RenderContextSelector> mRenderContext;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
         Input::InputHandler *mExternalInput = nullptr;
         std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
-
-        std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
-
-        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
-
-        Threading::FrameLoop mLoop;
-
-        const WindowSettings &mSettings;
 
         template <typename OffsetPtr>
         friend struct MainWindowComponentObserver;

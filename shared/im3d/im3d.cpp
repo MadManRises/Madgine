@@ -261,7 +261,7 @@ namespace Im3D {
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font.mGlyphs[text[i]];
+            Render::Glyph &g = font.mGlyphs[static_cast<uint8_t>(text[i])];
 
             fullWidth += g.mSize.x * scale;
             maxY = max(maxY, g.mBearingY * scale);
@@ -279,7 +279,7 @@ namespace Im3D {
         float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font.mGlyphs[text[i]];
+            Render::Glyph &g = font.mGlyphs[static_cast<uint8_t>(text[i])];
 
             float width = g.mSize.x * scale;
             float height = g.mSize.y * scale;
