@@ -6,6 +6,7 @@
 #include "../statetransmissionflags.h"
 #include "bufferedstream.h"
 #include "../../generic/container/observerevent.h"
+#include "pendingrequest.h"
 
 namespace Engine {
 namespace Serialize {
@@ -259,6 +260,9 @@ namespace Serialize {
 
 
     };
+
+    template <typename T, typename... Configs>
+    struct Operations;
 
     template <typename T, typename... Configs>
     struct BaseOperations {
