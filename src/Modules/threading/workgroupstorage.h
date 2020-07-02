@@ -1,7 +1,6 @@
 #pragma once
 
 #    include "global.h"
-#    include "workgroup.h"
 
 namespace Engine {
 namespace Threading {
@@ -14,12 +13,12 @@ namespace Threading {
 
             T *operator->()
             {
-                return &mData[&WorkGroup::self()];
+                return &mData[get()];
             }
 
             T &operator*()
             {
-                return mData[&WorkGroup::self()];
+                return mData[get()];
             }
 
         private:
@@ -35,6 +34,8 @@ namespace Threading {
 
         static void init(bool bss);
         static void finalize(bool bss);
+
+        static WorkGroup *get();
     };
 
     template <typename T>

@@ -88,5 +88,10 @@ namespace Threading {
         }
     }
 
+    WorkGroup *WorkGroupStorage::get()
+    {
+        return &WorkGroup::self();
+    }
+
 }
 }

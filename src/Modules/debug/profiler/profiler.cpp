@@ -10,6 +10,8 @@
 
 #include "profilerthread.h"
 
+#include "../../threading/workgroup.h"
+
 namespace Engine {
 
 namespace Debug {
