@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/math/vector4.h"
-
 #include "Modules/render/attributedescriptor.h"
 
 namespace Engine {
