@@ -1,5 +1,7 @@
 #include "opengllib.h"
 
+#include "Modules/generic/bytebuffer.h"
+
 #include "openglrendercontext.h"
 
 #include "openglrendertarget.h"

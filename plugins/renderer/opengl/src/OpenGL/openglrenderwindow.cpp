@@ -3,27 +3,15 @@
 
 #include "Modules/debug/profiler/profile.h"
 
-#include "Modules/math/vector2i.h"
-#include "Modules/math/vector3.h"
-#include "Modules/math/vector3i.h"
-#include "Modules/math/vector4.h"
-
-#include "openglrendertexture.h"
-
-#include "util/openglshader.h"
-
 #include "Interfaces/window/windowapi.h"
 #include "Interfaces/window/windowsettings.h"
 
-#include "imagedata.h"
 
 #include "fontloader.h"
 #include "openglmeshloader.h"
 #include "openglprogramloader.h"
 #include "openglshaderloader.h"
 #include "opengltextureloader.h"
-
-#include "Modules/keyvalue/metatable_impl.h"
 
 
 

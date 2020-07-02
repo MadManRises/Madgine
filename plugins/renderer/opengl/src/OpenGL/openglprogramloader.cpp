@@ -4,10 +4,6 @@
 
 #include "openglshaderloader.h"
 
-#include "util/openglshader.h"
-
-#include "util/openglprogram.h"
-
 #include "Modules/keyvalue/metatable_impl.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);

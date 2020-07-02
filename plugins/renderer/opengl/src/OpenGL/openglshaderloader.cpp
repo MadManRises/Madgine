@@ -10,6 +10,12 @@
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
+METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
+METATABLE_END(Engine::Render::OpenGLShaderLoader)
+
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLShaderLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::OpenGLShaderLoader::ResourceType)
+
 namespace Engine {
 namespace Render {
 
@@ -69,10 +75,4 @@ namespace Render {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
-METATABLE_END(Engine::Render::OpenGLShaderLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::OpenGLShaderLoader::ResourceType)
 
