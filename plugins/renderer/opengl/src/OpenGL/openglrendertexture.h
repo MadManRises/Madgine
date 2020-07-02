@@ -1,12 +1,7 @@
 #pragma once
 
 #include "openglrendertarget.h"
-#include "Modules/math/matrix4.h"
-#include "util/openglprogram.h"
-#include "util/openglbuffer.h"
 #include "util/opengltexture.h"
-
-#include "Modules/render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {
