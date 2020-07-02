@@ -103,6 +103,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
     assert(file);
 
     include(file, "Modules/moduleslib.h");
+    include(file, "Modules/uniquecomponent/uniquecomponentregistry.h");
 
     for (const Plugins::BinaryInfo *bin : binaries) {
         if (strlen(bin->mPrecompiledHeaderPath)) {
