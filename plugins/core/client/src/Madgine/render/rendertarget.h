@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Modules/render/vertex.h"
-//#include "Modules/render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

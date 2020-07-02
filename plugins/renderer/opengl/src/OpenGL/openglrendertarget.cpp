@@ -1,23 +1,11 @@
 #include "opengllib.h"
 
+#include "openglrendercontext.h"
+
 #include "openglrendertarget.h"
 
-#include "Modules/math/matrix4.h"
-#include "Modules/math/vector4.h"
-
-#include "openglrenderwindow.h"
-
-#include "openglshaderloader.h"
-
-#include "util/openglshader.h"
-
-#include "Madgine/render/camera.h"
-
-#include "Madgine/render/renderpass.h"
 #include "openglmeshdata.h"
 #include "openglmeshloader.h"
-
-#include "openglrendercontext.h"
 
 #include "Modules/math/rect2i.h"
 
