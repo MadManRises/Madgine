@@ -4,7 +4,7 @@
 #include "../creationhelper.h"
 #include "../formatter.h"
 #include "../statetransmissionflags.h"
-#include "serializestream.h"
+#include "bufferedstream.h"
 #include "../../generic/container/observerevent.h"
 
 namespace Engine {
@@ -57,6 +57,12 @@ namespace Serialize {
         else
             return c;
     }
+
+    template<typename T, typename... Configs, typename... Args>
+    void read(SerializeInStream &in, T &t, const char *name, Args &&... args);
+
+    template <typename T, typename... Configs, typename... Args>
+    void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args);
 
     template <typename C, typename Config = DefaultCreator<typename C::value_type>>
     struct ContainerOperations {
@@ -128,7 +134,7 @@ namespace Serialize {
                     it = readIterator(in, c);
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
-                typename container_traits<C>::const_iterator cit = static_cast<const container_traits<C>::iterator&>(it);
+                typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator&>(it);
                 it = TupleUnpacker::invoke(&Config::template readItem<C, InsertOperation_t<C>>, in, c, cit, op, std::forward<Args>(args)...);
                 break;
             }
