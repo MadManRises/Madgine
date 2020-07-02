@@ -1,6 +1,7 @@
 #include "../../moduleslib.h"
 #include "buffered_streambuf.h"
 #include "../syncmanager.h"
+#include "../formatter.h"
 
 namespace Engine {
 namespace Serialize {

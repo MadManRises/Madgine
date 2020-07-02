@@ -62,7 +62,7 @@ namespace Serialize {
 
         BufferedOutStream *beginActionResponseMessage(ParticipantId stream, TransactionId id) const
         {
-            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
+            return SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
         }   
 
         bool isMaster() const

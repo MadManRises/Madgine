@@ -11,9 +11,9 @@ namespace Serialize {
     struct MODULES_EXPORT SerializeStreambuf : std::basic_streambuf<char> {
     public:
         SerializeStreambuf(std::unique_ptr<Formatter> format);
-        SerializeStreambuf(SerializeStreambuf &&) = default;
+        SerializeStreambuf(SerializeStreambuf &&);
         SerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
-        virtual ~SerializeStreambuf() = default;
+        virtual ~SerializeStreambuf();
 
         void setManager(SerializeManager *mgr);
         SerializeManager *manager();

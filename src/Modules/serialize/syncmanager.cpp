@@ -10,6 +10,8 @@
 
 #include "serializeexception.h"
 
+#include "streams/operations.h"
+
 namespace Engine {
 namespace Serialize {
 

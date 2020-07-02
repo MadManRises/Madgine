@@ -3,6 +3,7 @@
 #include "streams/bufferedstream.h"
 #include "syncable.h"
 #include "toplevelserializableunit.h"
+#include "streams/operations.h"
 
 namespace Engine {
 namespace Serialize {

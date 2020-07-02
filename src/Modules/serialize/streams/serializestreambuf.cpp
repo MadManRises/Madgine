@@ -9,8 +9,12 @@
 namespace Engine {
 namespace Serialize {
 
-	SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
+    SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
         : mFormatter(std::move(format))
+    {
+    }
+
+    SerializeStreambuf::SerializeStreambuf(SerializeStreambuf &&)
     {
     }
 
@@ -18,6 +22,10 @@ namespace Serialize {
         : mManager(&mgr)
         , mId(id)
         , mFormatter(std::move(format))
+    {
+    }
+
+    SerializeStreambuf::~SerializeStreambuf()
     {
     }
 

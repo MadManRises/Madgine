@@ -63,7 +63,13 @@ namespace Serialize {
     void read(SerializeInStream &in, T &t, const char *name, Args &&... args);
 
     template <typename T, typename... Configs, typename... Args>
+    void read(SerializeInStream &in, T &t, Args &&... args);
+
+    template <typename T, typename... Configs, typename... Args>
     void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args);
+
+    template <typename T, typename... Configs, typename... Args>
+    void write(SerializeOutStream &out, const T &t, Args &&... args);
 
     template <typename C, typename Config = DefaultCreator<typename C::value_type>>
     struct ContainerOperations {
@@ -116,13 +122,13 @@ namespace Serialize {
         static typename C::iterator readIterator(SerializeInStream &in, C &c)
         {
             int32_t dist;
-            in >> dist;
+            Serialize::read(in, dist);            
             return std::next(c.begin(), dist);
         }
 
         static void writeIterator(SerializeOutStream &out, const C &c, const typename C::const_iterator &it)
         {
-            out << static_cast<int32_t>(std::distance(c.begin(), it));
+            Serialize::write<int32_t>(out, std::distance(c.begin(), it));
         }
 
         template <typename... Args>
@@ -165,7 +171,7 @@ namespace Serialize {
         {
 
             for (BufferedOutStream *out : c.getMasterActionMessageTargets(answerTarget, answerId)) {
-                *out << op;
+                Serialize::write(*out, op);
                 switch (op) {
                 case INSERT_ITEM: {
                     const typename C::iterator &it = *static_cast<const typename C::iterator *>(data);
@@ -243,7 +249,7 @@ namespace Serialize {
             if (!accepted) {
                 if (id) {
                     c.beginActionResponseMessage(&inout, id);
-                    inout << (op | ABORTED);
+                    Serialize::write(inout, op | ABORTED);
                     inout.endMessage();
                 }
             } else {
@@ -251,7 +257,7 @@ namespace Serialize {
                     performOperation(c, op, inout, inout.id(), id, std::forward<Args>(args)...);
                 } else {
                     BufferedOutStream *out = c.getSlaveActionMessageTarget(inout.id(), id);
-                    *out << op;
+                    Serialize::write(*out, op);
                     out->pipe(inout);
                     out->endMessage();
                 }
