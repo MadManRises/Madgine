@@ -75,10 +75,11 @@ namespace Serialize {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                     Base temp(std::forward<T>(arg));
 
-                    BufferedOutStream *out = this->getSlaveActionMessageTarget();
+                    /*BufferedOutStream *out = this->getSlaveActionMessageTarget();
                     *out << RESET;
                     temp.writeState(*out);
-                    out->endMessage();
+                    out->endMessage();*/
+                    this->writeRequest(RESET, &temp);
                 } else {
                     std::terminate();
                 }
@@ -218,13 +219,15 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
+                    /*for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
                         *out << REMOVE_RANGE;
-                        /*container().write_iterator(*out, from);
-                container().write_iterator(*out, to);*/
-                        throw "TODO";
+                        container().write_iterator(*out, from);
+                        container().write_iterator(*out, to);                        
                         out->endMessage();
-                    }
+                        
+                    }*/
+                    std::pair<const_iterator, const_iterator> data { from, to };
+                    this->writeAction(REMOVE_RANGE, &data, answerTarget, answerId);
                 }
             }
 
@@ -244,11 +247,13 @@ namespace Serialize {
             ~ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
-                    for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
+                    /*for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
                         *out << RESET;
                         write(*out, this->mContainer, nullptr);
                         out->endMessage();
-                    }
+
+                    }*/
+                    container().writeAction(RESET, &container(), mAnswerTarget, mAnswerId);
                 }
             }
 
