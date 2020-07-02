@@ -2,16 +2,6 @@
 
 #include "openglrendertarget.h"
 
-#include "util/openglprogram.h"
-#include "util/opengltexture.h"
-#include "util/openglvertexarray.h"
-#include "util/openglbuffer.h"
-
-#include "Modules/math/atlas2.h"
-
-#include "imageloaderlib.h"
-#include "imageloader.h"
-
 namespace Engine {
 namespace Render {
 

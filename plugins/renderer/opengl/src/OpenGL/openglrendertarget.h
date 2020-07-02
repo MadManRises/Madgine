@@ -1,12 +1,6 @@
 #pragma once
 
 #include "Madgine/render/rendertarget.h"
-#include "Modules/math/matrix4.h"
-#include "util/openglbuffer.h"
-#include "util/openglprogram.h"
-#include "util/opengltexture.h"
-
-#include "Modules/render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

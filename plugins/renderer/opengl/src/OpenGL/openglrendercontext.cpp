@@ -6,7 +6,7 @@
 #include "openglrendercontext.h"
 #include "openglrendertexture.h"
 
-
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
     UNIQUECOMPONENT(Engine::Render::OpenGLRenderContext)
 

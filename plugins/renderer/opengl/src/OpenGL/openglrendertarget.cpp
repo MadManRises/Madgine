@@ -19,6 +19,10 @@
 
 #include "openglrendercontext.h"
 
+#include "Modules/math/rect2i.h"
+
+#include "util/openglprogram.h"
+
 namespace Engine {
 namespace Render {
 
