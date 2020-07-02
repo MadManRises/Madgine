@@ -63,6 +63,9 @@ namespace Serialize {
                     (unit->*Setter)(nullptr);
                     unit->*P = val;
                 }
+            },
+            [](const SerializableUnitBase* unit, int op, const void* data, ParticipantId answerTarget, TransactionId answerId) {
+                throw "Unsupported";
             }
         };
     }
@@ -106,6 +109,9 @@ namespace Serialize {
             [](SerializableUnitBase *unit, bool b) {
             },
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
+            },
+            [](const SerializableUnitBase *unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
+                throw "Unsupported";
             }
         };
     }
@@ -130,15 +136,17 @@ namespace Serialize {
                 Unit *unit = static_cast<Unit *>(_unit);
                 read<T, Args...>(in, unit->*P, name, unit);
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
+                Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readAction(in, request);
+                    Operations<T, Args...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
+                Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    (static_cast<Unit *>(unit)->*P).readRequest(inout, id);
+                    Operations<T, Args...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
@@ -150,6 +158,20 @@ namespace Serialize {
             },
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
                 UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
+            },
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
+                const Unit *unit = static_cast<const Unit *>(_unit);
+                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                    Operations<T, Args...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
+                else
+                    throw "Unsupported";
+            },
+            [](const SerializableUnitBase* _unit, int op, const void* data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void*)> callback) {
+                const Unit *unit = static_cast<const Unit *>(_unit);
+                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                    Operations<T, Args...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
+                else
+                    throw "Unsupported";
             }
         };
     }

@@ -93,6 +93,18 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
+    called = false;
+    unit1.list2.erase(std::next(unit1.list2.begin())).onSuccess([&](auto &&pib) { called = true; });
+    ASSERT_TRUE(called);
+
+    ASSERT_EQ(unit1.list2.size(), 3);
+
+    mgr1.sendMessages();
+    mgr2.receiveMessages(1, 1000ms);
+
+    ASSERT_EQ(unit2.list2.size(), 3);
+    ASSERT_EQ(unit1.list2, unit2.list2);
+
 }
 
 

@@ -4,7 +4,7 @@
 
 #include "madgineobject.h"
 
-#include "../generic/observerevent.h"
+#include "../generic/container/observerevent.h"
 
 namespace Engine {
 

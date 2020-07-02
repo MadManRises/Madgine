@@ -45,12 +45,22 @@ namespace Serialize {
         return parent->topLevel()->participantId();
     }
 
+    void SyncableBase::writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
+    {
+        parent->serializeType()->writeAction(parent, index, op, data, answerTarget, answerId);
+    }
+
     BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SerializableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
         BufferedOutStream *out = parent->getSlaveMessageTarget();
         out->beginMessage(parent, REQUEST, out->createRequest(requester, requesterTransactionId, std::move(callback)));
         *out << index;
         return out;
+    }
+
+    void SyncableBase::writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    {
+        parent->serializeType()->writeRequest(parent, index, op, data, requester, requesterTransactionId, std::move(callback));
     }
 
     void SyncableBase::beginActionResponseMessage(const SerializableUnitBase *parent, uint8_t index, BufferedOutStream *stream, TransactionId id) const

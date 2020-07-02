@@ -110,7 +110,7 @@ namespace Serialize {
             }
 
             template <typename C, typename Op>
-            static typename container_traits<C>::emplace_return readItem(SerializeInStream &in, C &c, const typename C::iterator &where, Op &op, T *parent)
+            static typename container_traits<C>::emplace_return readItem(SerializeInStream &in, C &c, const typename C::const_iterator &where, Op &op, T *parent)
             {
                 typename container_traits<C>::emplace_return it;
                 if constexpr (std::is_const_v<typename C::value_type>) {

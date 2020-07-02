@@ -129,7 +129,7 @@ namespace Im3D {
         c.mIDStack.pop_back();
     }
 
-    Im3DObject *CreateNewObject(Im3DID id)
+    Im3DObject *CreateObject(Im3DID id)
     {
         Im3DContext &c = *sContext;
 
@@ -468,11 +468,7 @@ namespace Im3D {
     {
         Im3DContext &c = *sContext;
 
-        Im3DObject *object = FindObjectByID(id);
-        const bool object_just_created = (object == nullptr);
-        if (object_just_created) {
-            object = CreateNewObject(id);
-        }
+        Im3DObject *object = CreateObject(id);
 
         if (distance > 0.0f && ((priority == c.mNextHoveredPriority && distance < c.mNextHoveredDistance) || priority > c.mNextHoveredPriority)) {
             c.mNextHoveredObject = object;

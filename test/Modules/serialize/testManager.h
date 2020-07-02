@@ -20,7 +20,7 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
     {
     }
 
-    virtual void handleError()
+    virtual void handleError() override
     {        
     }
 

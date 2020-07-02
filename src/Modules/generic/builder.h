@@ -67,14 +67,14 @@ private:
     {
         std::optional<F> f = std::move(mF);
         mF.reset();
-        return { { { std::move(f),
+        return { std::move(f),
             std::forward_as_tuple(
                 [&]() {
                     if constexpr (Is == Dim)
                         return std::tuple_cat(std::get<Is>(std::move(mData)), std::forward_as_tuple(std::forward<T>(t)));
                     else
                         return std::get<Is>(std::move(mData));
-                }()...) } } };
+                }()...) };
     }
 
 private:

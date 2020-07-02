@@ -3,7 +3,7 @@
 #include "../../generic/container/container_api.h"
 #include "../../generic/copy_traits.h"
 #include "../../generic/noopfunctor.h"
-#include "../../generic/observerevent.h"
+#include "../../generic/container/observerevent.h"
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../unithelper.h"
@@ -156,34 +156,6 @@ namespace Serialize {
             op.erase(which);
             return temp;
         }
-
-        /*typename _traits::emplace_return read_item_where(SerializeInStream &in, const const_iterator &where)
-        {
-            beforeInsert(where);
-            typename _traits::emplace_return it = read_item_where_intern(in, where);
-            afterInsert(it.second, it.first);
-            return it;
-        }*/
-
-        /*void writeState(SerializeOutStream &out, const char *name = nullptr) const
-        {
-            out.format().beginExtended(out, name);
-            write(out, Base::size(), "size");
-            out.format().beginCompound(out, name);
-            for (const value_type &t : physical()) {
-                if (this->filter(out, t)) {
-                    this->beginExtendedItem(out, t);
-                    TupleUnpacker::invoke(&Config::writeItem, out, t, OffsetPtr::parent(this));
-                }
-            }
-            out.format().endCompound(out, name);
-        }
-
-        void readState(SerializeInStream &in, const char *name = nullptr)
-        {
-            ResetOperation op { *this };
-            readState_intern(in, name, op);
-        }*/
 
         void setActive(bool active, bool existenceChange)
         {
@@ -430,32 +402,6 @@ namespace Serialize {
         };
 
     protected:
-        /*void readState_intern(SerializeInStream &in, const char *name, Operation &op)
-        {
-            in.format().beginExtended(in, name);
-            decltype(Base::size()) count;
-            read(in, count, "size");
-            in.format().beginCompound(in, name);
-
-            TupleUnpacker::invoke(&Config::clear<Operation>, op, count);
-
-            while (count--) {
-                this->read_item_where_intern(in, Base::end(), op);
-            }
-
-            in.format().endCompound(in, name);
-        }*/
-
-        /*typename _traits::emplace_return read_item_where_intern(SerializeInStream &in, const iterator &where, EmplaceOperation &op)
-        {
-            return TupleUnpacker::invoke(&Config::template readItem<container, EmplaceOperation>, in, *this, where, op, OffsetPtr::parent(this));
-        }
-
-        void write_item(SerializeOutStream &out, const value_type &t) const
-        {
-            TupleUnpacker::invoke(&Config::writeItem, out, t, OffsetPtr::parent(this));
-        }
-        */
         bool isItemActive(const iterator &it)
         {
             typename Base::iterator active = _traits::toIterator(*this, mActiveIterator);

@@ -8,6 +8,8 @@ namespace Serialize {
     template <typename Builder>
     struct RequestBuilder : Builder{        
 
+        using Builder::Builder;
+
         template <typename C>
         auto then(C &&c)
         {

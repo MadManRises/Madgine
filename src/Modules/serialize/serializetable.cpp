@@ -136,6 +136,16 @@ namespace Serialize {
             mCallbacks.onActivate(unit, active, existenceChanged);
     }
 
+    void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
+    {
+        get(index).mWriteAction(parent, op, data, answerTarget, answerId);
+    }
+
+    void SerializeTable::writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    {
+        get(index).mWriteRequest(parent, op, data, requester, requesterTransactionId, std::move(callback));
+    }
+
     bool SerializeTable::isInstance(SerializableUnitBase *unit) const
     {
         return !unit || unit->mType == this;
