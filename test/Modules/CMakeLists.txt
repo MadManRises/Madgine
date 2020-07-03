@@ -34,7 +34,6 @@ target_link_plugins(LibB LibA)
 set(sources "")
 FolderSources(sources "" "" integrationtests.cpp)
 	FolderSources(sources "" generic areaviewtest.cpp tupleunpackertest.cpp valuetypetest.cpp)
-	FolderSources(sources "" network networkmanagertest.cpp)
 	FolderSources(sources "" serialize)
 		FolderSources(sources serialize container containertest.cpp)
 		FolderSources(sources serialize streams)
@@ -44,7 +43,7 @@ FolderSources(sources "" "" integrationtests.cpp)
 
 add_gtest(Modules_Test ${sources})
 
-target_link_libraries(Modules_Test PRIVATE Modules Network)
+target_link_libraries(Modules_Test PRIVATE Modules)
 
 target_link_plugins(Modules_Test LibB)
 

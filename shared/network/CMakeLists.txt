@@ -7,3 +7,7 @@ add_workspace_library(Network ${sources} SOURCE_ROOT ..)
 target_link_libraries(Network PUBLIC Modules)
 
 install_to_workspace(Madgine EXPORT_LIB TARGETS Network)
+
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif()
