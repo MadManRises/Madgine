@@ -3,8 +3,6 @@
 #include "framelistener.h"
 #include "frameloop.h"
 
-#include "Modules/threading/taskqueue.h"
-
 #include "Modules/debug/profiler/profile.h"
 
 #include "Modules/generic/container/safeiterator.h"
