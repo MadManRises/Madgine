@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Modules/moduleslib.h"
+#include "network/networklib.h"
 
 #include "network/networkmanager.h"
 

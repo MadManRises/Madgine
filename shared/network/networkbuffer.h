@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace Network {
-    struct MODULES_EXPORT NetworkBuffer : Serialize::buffered_streambuf {
+    struct MADGINE_NETWORK_EXPORT NetworkBuffer : Serialize::buffered_streambuf {
         NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id = 0);
         NetworkBuffer(const NetworkBuffer &) = delete;
         NetworkBuffer(NetworkBuffer &&other) noexcept;
