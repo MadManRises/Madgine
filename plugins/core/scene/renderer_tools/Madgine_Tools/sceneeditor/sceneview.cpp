@@ -201,8 +201,8 @@ namespace Tools {
                 Render::MeshLoader::ResourceType *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::Entity *e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
-                    e->addComponent<Scene::Entity::Transform>()->setPosition(pos);
-                    e->addComponent<Scene::Entity::Mesh>()->set(resource);
+                    e->addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
+                    e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);

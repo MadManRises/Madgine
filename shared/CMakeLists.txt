@@ -19,6 +19,20 @@ set_target_properties(imgui_node_editor imgui_canvas PROPERTIES EXCLUDE_FROM_ALL
 add_subdirectory(im3d)
 set_target_properties(Im3D PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
+add_subdirectory(ini)
+set_target_properties(Ini PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+add_subdirectory(xml)
+set_target_properties(Xml PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+add_subdirectory(render)
+
+add_subdirectory(network)
+set_target_properties(Network PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+add_subdirectory(filesystem)
+set_target_properties(Filesystem PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
 add_subdirectory(stb)
 set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
@@ -50,4 +64,3 @@ if (NOT ANDROID AND NOT EMSCRIPTEN)
 	endif()
 endif()
 
-export_to_workspace(Shared)

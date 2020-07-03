@@ -11,21 +11,21 @@ namespace Serialize {
         using Builder::Builder;
 
         template <typename C>
-        auto then(C &&c)
+        auto onResult(C &&c) &&
         {
-            return this->template append<0>(std::forward<C>(c));
+            return std::move(*this).template append<0>(std::forward<C>(c));
         }
         
         template <typename C>
-        auto onSuccess(C &&c)
+        auto onSuccess(C &&c) &&
         {
-            return this->template append<1>(std::forward<C>(c));
+            return std::move(*this).template append<1>(std::forward<C>(c));
         }
 
         template <typename C>
-        auto onFailure(C &&c)
+        auto onFailure(C &&c) &&
         {
-            return this->template append<2>(std::forward<C>(c));
+            return std::move(*this).template append<2>(std::forward<C>(c));
         }
     };
 

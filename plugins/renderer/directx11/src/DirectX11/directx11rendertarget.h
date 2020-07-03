@@ -6,7 +6,7 @@
 #include "util/directx11program.h"
 #include "util/directx11texture.h"
 
-#include "Modules/render/renderpassflags.h"
+#include "render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

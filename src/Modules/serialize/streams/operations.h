@@ -12,10 +12,10 @@ namespace Engine {
 namespace Serialize {
 
     DERIVE_TYPENAME(Config);
-    DERIVE_FUNCTION_ARGS(writeState, SerializeOutStream &, const char *)
-    DERIVE_FUNCTION_ARGS2(writeState, writeState2, SerializeOutStream &, const char *, StateTransmissionFlags)
-    DERIVE_FUNCTION_ARGS(readState, SerializeInStream &, const char *)
-    DERIVE_FUNCTION_ARGS2(readState, readState2, SerializeInStream &, const char *, StateTransmissionFlags)
+    DERIVE_FUNCTION(writeState, SerializeOutStream &, const char *)
+    //DERIVE_FUNCTION(writeState, writeState2, SerializeOutStream &, const char *, StateTransmissionFlags)
+    DERIVE_FUNCTION(readState, SerializeInStream &, const char *)
+    //DERIVE_FUNCTION(readState, readState2, SerializeInStream &, const char *, StateTransmissionFlags)
 
     DERIVE_TYPENAME(ResetOperation);
 
@@ -281,9 +281,7 @@ namespace Serialize {
                 in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
             } else if constexpr (has_function_readState_v<T>) {
-                t.readState(in, name);
-            } else if constexpr (has_function_readState2_v<T>) {
-                t.readState(in, name, StateTransmissionFlags_DontApplyMap);
+                TupleUnpacker::invoke(LIFT_MEMBER(readState), &t, in, name, StateTransmissionFlags_DontApplyMap);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 read(in, *t, name);
             } else if constexpr (is_iterable_v<T>) {
@@ -303,7 +301,7 @@ namespace Serialize {
                 out.writeUnformatted(t);
                 out.format().endPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
-            } else if constexpr (has_function_writeState_v<T> || has_function_writeState2_v<T>) {
+            } else if constexpr (has_function_writeState_v<T>) {
                 t.writeState(out, name);
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);

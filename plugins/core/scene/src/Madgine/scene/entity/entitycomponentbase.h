@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/keyvalue/virtualscopebase.h"
+#include "Modules/keyvalueutil/virtualscopebase.h"
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 

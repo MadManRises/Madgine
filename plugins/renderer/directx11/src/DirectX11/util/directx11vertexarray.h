@@ -2,7 +2,7 @@
 
 #include "Modules/math/vector4.h"
 
-#include "Modules/render/attributedescriptor.h"
+#include "render/attributedescriptor.h"
 
 namespace Engine {
 namespace Render {

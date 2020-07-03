@@ -15,7 +15,7 @@
 
 #include "im3d/im3d.h"
 
-#include "Modules/render/vertex.h"
+#include "render/vertex.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

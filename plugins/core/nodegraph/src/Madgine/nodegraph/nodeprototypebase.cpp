@@ -6,7 +6,7 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalueserialize/valuetypeserialize.h"
+#include "Modules/keyvalueutil/valuetypeserialize.h"
 
 SERIALIZETABLE_BEGIN(Engine::NodeGraph::NodePrototypeBase)
 FIELD(mFlowOutPins)

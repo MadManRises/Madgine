@@ -4,7 +4,7 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Modules/render/vertex.h"
+#include "render/vertex.h"
 
 #include "im3d_internal.h"
 

@@ -2,6 +2,7 @@
 
 #include "sortedcontainerapi.h"
 #include "underlying_container.h"
+#include "../then.h"
 
 namespace Engine {
 
@@ -33,13 +34,15 @@ struct container_api_impl<C, std::list<Ty...>> : C {
         }
     }
 
-    auto push_back(const typename C::value_type &item)
+    decltype(auto) push_back(const typename C::value_type &item)
     {
-        return emplace_back(item);
+        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
     }
 
     template <typename... _Ty>
-    auto emplace_back(_Ty &&... args)
+    decltype(auto) emplace_back(_Ty &&... args)
     {
         return this->emplace(this->end(), std::forward<_Ty>(args)...);
     }
@@ -81,18 +84,22 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
         }
     }
 
-    auto push_back(const value_type &item)
+    decltype(auto) push_back(const value_type &item)
     {
-        return emplace_back(item);
+        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
     }
 
-    auto push_back(value_type &&item)
+    decltype(auto) push_back(value_type &&item)
     {
-        return emplace_back(std::move(item));
+        return then(emplace_back(std::move(item)), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
     }
 
     template <typename... _Ty>
-    auto emplace_back(_Ty &&... args)
+    decltype(auto) emplace_back(_Ty &&... args)
     {
         return this->emplace(this->end(), std::forward<_Ty>(args)...);
     }
@@ -144,7 +151,7 @@ struct container_api_impl<C, std::map<K, T, Ty...>> : C {
     }
 
     template <typename... _Ty>
-    std::pair<typename C::iterator, bool> try_emplace(const K &key, _Ty &&... args)
+    auto try_emplace(const K &key, _Ty &&... args) -> decltype(C::emplace(C::lower_bound(key), std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...)))
     {
         auto it = C::lower_bound(key);
         if (it != this->end() && it->first == key) {

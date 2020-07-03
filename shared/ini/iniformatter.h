@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../serialize/formatter.h"
+#include "Modules/serialize/formatter.h"
 
 namespace Engine {
 namespace Ini {
 
-struct MODULES_EXPORT IniFormatter : Serialize::Formatter {
+struct MADGINE_INI_EXPORT IniFormatter : Serialize::Formatter {
         
 		IniFormatter();
 

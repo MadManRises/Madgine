@@ -1,4 +1,4 @@
-#include "../moduleslib.h"
+#include "filesystemlib.h"
 
 #include "filemanager.h"
 
@@ -6,11 +6,11 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "../serialize/streams/wrappingserializestreambuf.h"
+#include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
-#include "../serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/serializestream.h"
 
-#include "../serialize/formatter.h"
+#include "Modules/serialize/formatter.h"
 
 namespace Engine {
 namespace Filesystem {

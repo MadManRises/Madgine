@@ -1,8 +1,8 @@
-#include "../moduleslib.h"
+#include "inilib.h"
 
 #include "iniformatter.h"
 
-#include "../serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/serializestream.h"
 
 namespace Engine {
 namespace Ini {

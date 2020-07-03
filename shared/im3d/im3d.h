@@ -9,7 +9,7 @@
 #include "Modules/math/matrix4.h"
 #include "Modules/math/ray.h"
 #include "Modules/math/vector2i.h"
-#include "Modules/render/vertex.h"
+#include "render/vertex.h"
 
 namespace Engine {
 

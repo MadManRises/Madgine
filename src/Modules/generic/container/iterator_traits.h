@@ -20,4 +20,5 @@ using is_iterable = std::bool_constant<has_function_begin_v<T> && has_function_e
 template <typename T>
 constexpr const bool is_iterable_v = is_iterable<T>::value;
 
+
 }

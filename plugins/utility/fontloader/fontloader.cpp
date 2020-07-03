@@ -7,7 +7,8 @@
 #include "Modules/math/atlas2.h"
 #include "Modules/math/vector2i.h"
 
-#include "Modules/filesystem/filemanager.h"
+#include "filesystem/filesystemlib.h"
+#include "filesystem/filemanager.h"
 #include "Modules/serialize/formatter/safebinaryformatter.h"
 #include "Modules/serialize/streams/operations.h"
 

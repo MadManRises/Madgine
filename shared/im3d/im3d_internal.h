@@ -3,7 +3,7 @@
 #include "Modules/math/boundingbox.h"
 #include "Modules/math/sphere.h"
 
-#include "Modules/render/renderpassflags.h"
+#include "render/renderpassflags.h"
 
 namespace Engine {
 namespace Im3D {

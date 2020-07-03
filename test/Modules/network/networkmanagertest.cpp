@@ -2,7 +2,7 @@
 
 #include "Modules/moduleslib.h"
 
-#include "Modules/network/networkmanager.h"
+#include "network/networkmanager.h"
 
 #include "Modules/threading/workgroup.h"
 

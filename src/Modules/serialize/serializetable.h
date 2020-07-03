@@ -5,14 +5,13 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION_ARGS(onActivate, int);
-    DERIVE_FUNCTION_ARGS2(onActivate, onActivate2, int, int);
+    DERIVE_FUNCTION(onActivate);    
 
     struct SerializeTableCallbacks {
         template <typename T>
         constexpr SerializeTableCallbacks(type_holder_t<T>)
             : onActivate([](SerializableUnitBase *unit, int active, int existenceChanged) {
-                if constexpr (has_function_onActivate_v<T> || has_function_onActivate2_v<T>)
+                if constexpr (has_function_onActivate_upTo_v<T, 2>)
                     TupleUnpacker::invoke(&T::onActivate, static_cast<T*>(unit), active, existenceChanged);
             })
         {

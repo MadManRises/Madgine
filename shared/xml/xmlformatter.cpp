@@ -1,8 +1,8 @@
-#include "../moduleslib.h"
+#include "xmllib.h"
 
 #include "xmlformatter.h"
 
-#include "../serialize/streams/serializestream.h"
+#include "Modules/serialize/streams/serializestream.h"
 
 #include "Interfaces/stringutil.h"
 

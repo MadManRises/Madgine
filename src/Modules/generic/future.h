@@ -1,5 +1,7 @@
 #pragma once
 
+#include "wrapreference.h"
+
 namespace Engine {
 
 template <typename T>
@@ -29,13 +31,6 @@ struct Future {
     }
 
     operator T()
-    {
-        if (!isAvailable())
-            throw 0;
-        return get();
-    }
-
-    T operator->()
     {
         if (!isAvailable())
             throw 0;
@@ -92,7 +87,7 @@ private:
     };
 
 private:
-    std::variant<T, std::future<T>, std::unique_ptr<DeferredBase>> mValue;
+    std::variant<wrap_reference_t<T>, std::future<T>, std::unique_ptr<DeferredBase>> mValue;
 };
 
 }

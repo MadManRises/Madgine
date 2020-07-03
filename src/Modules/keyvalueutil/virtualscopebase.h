@@ -1,10 +1,10 @@
 #pragma once
 
-#include "typedscopeptr.h"
+#include "../keyvalue/typedscopeptr.h"
 
 #include "../reflection/decay.h"
 
-#include "scopebase.h"
+#include "../keyvalue/scopebase.h"
 
 namespace Engine {
 

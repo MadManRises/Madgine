@@ -44,7 +44,7 @@ FolderSources(sources "" "" integrationtests.cpp)
 
 add_gtest(Modules_Test ${sources})
 
-target_link_libraries(Modules_Test PRIVATE Modules)
+target_link_libraries(Modules_Test PRIVATE Modules Network)
 
 target_link_plugins(Modules_Test LibB)
 

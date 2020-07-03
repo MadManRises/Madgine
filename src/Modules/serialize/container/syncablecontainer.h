@@ -96,10 +96,10 @@ namespace Serialize {
         auto emplace(const iterator &where, _Ty &&... args)
         {
             return EmplaceRequestBuilder {
-                [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&then, auto &&onSuccess, auto &&onFailure, auto &&init) mutable -> Future<typename _traits::emplace_return> {
+                [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&onResult, auto &&onSuccess, auto &&onFailure, auto &&init) mutable -> Future<typename _traits::emplace_return> {
                     if (this->isMaster()) {
                         typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace_impl), this, where, std::forward<decltype(init)>(init), std::move(args));
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
                         if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
@@ -109,7 +109,7 @@ namespace Serialize {
                             value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
                             TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
                             std::pair<const_iterator, const value_type &> data { where, temp };
-                            this->writeRequest(INSERT_ITEM, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(INSERT_ITEM, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -123,17 +123,17 @@ namespace Serialize {
         auto erase(const iterator &where)
         {
             return RequestBuilder {
-                [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
+                [=](auto &&onResult, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
                     if (this->isMaster()) {
                         iterator it = erase_impl(where);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
                         if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
                             std::promise<iterator> p;
                             Future<iterator> future = p.get_future();
 
-                            this->writeRequest(REMOVE_ITEM, &where, 0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(REMOVE_ITEM, &where, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -148,10 +148,10 @@ namespace Serialize {
         {
             iterator it = this->end();
             return RequestBuilder {
-                [=](auto &&then, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
+                [=](auto &&onResult, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
                     if (this->isMaster()) {
                         iterator it = erase_impl(from, to);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(then)>(then));
+                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
                         if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
@@ -161,7 +161,7 @@ namespace Serialize {
                             std::pair<iterator, iterator> data { from,
                                 to };
 
-                            this->writeRequest(REMOVE_RANGE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(then)>(then), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(REMOVE_RANGE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -275,16 +275,16 @@ namespace Serialize {
         }
 
         template <typename T, typename Then, typename OnSuccess, typename OnFailure>
-        std::function<void(void *)> generateCallback(std::promise<T> p, Then &&then, OnSuccess &&onSuccess, OnFailure &&onFailure)
+        std::function<void(void *)> generateCallback(std::promise<T> p, Then &&onResult, OnSuccess &&onSuccess, OnFailure &&onFailure)
         {
-            return oneTimeFunctor([p = std::move(p), then = std::forward<Then>(then), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
+            return oneTimeFunctor([p = std::move(p), onResult = std::forward<Then>(onResult), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
                 if (data) {
                     T *t = static_cast<T *>(data);
-                    executeCallbacks(*t, std::move(onSuccess), std::move(then));
+                    executeCallbacks(*t, std::move(onSuccess), std::move(onResult));
                     p.set_value(std::move(*t));
                 } else {
                     TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
-                    TupleUnpacker::forEach(std::move(then), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
+                    TupleUnpacker::forEach(std::move(onResult), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
                 }
             });
         }

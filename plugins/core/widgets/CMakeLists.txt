@@ -20,4 +20,5 @@ FolderSources(sources "" tools)
 add_tools(Widgets ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/widgetstoolslib.h)
 
 target_link_plugins(WidgetsTools ClientTools)
+target_link_libraries(WidgetsTools PRIVATE Xml)
 

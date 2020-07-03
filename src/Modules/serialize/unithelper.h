@@ -5,10 +5,10 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION_ARGS(applySerializableMap, SerializeInStream &);
-    DERIVE_FUNCTION_ARGS(setDataSynced, bool);
-    DERIVE_FUNCTION_ARGS(setActive, bool, bool);
-    DERIVE_FUNCTION_ARGS(setParent, SerializableUnitBase *);
+    DERIVE_FUNCTION(applySerializableMap, SerializeInStream &);
+    DERIVE_FUNCTION(setDataSynced, bool);
+    DERIVE_FUNCTION(setActive, bool, bool);
+    DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
     MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId id);
 

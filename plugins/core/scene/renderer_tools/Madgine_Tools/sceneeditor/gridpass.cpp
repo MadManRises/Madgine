@@ -8,7 +8,7 @@
 
 #include "Madgine/render/camera.h"
 #include "Madgine/render/rendertarget.h"
-#include "Modules/render/vertex.h"
+#include "render/vertex.h"
 
 #include "meshloader.h"
 

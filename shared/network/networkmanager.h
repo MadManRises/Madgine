@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../serialize/syncmanager.h"
-#include "../threading/signal.h"
-#include "../threading/slot.h"
+#include "Modules/serialize/syncmanager.h"
+#include "Modules/threading/signal.h"
+#include "Modules/threading/slot.h"
 #include "networkbuffer.h"
 
 namespace Engine {

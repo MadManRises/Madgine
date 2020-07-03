@@ -12,9 +12,10 @@
 
 #include "Modules/serialize/streams/serializestream.h"
 
-
-#include "Modules/filesystem/filemanager.h"
-#include "Modules/xml/xmlformatter.h"
+#include "filesystem/filesystemlib.h"
+#include "filesystem/filemanager.h"
+#include "xml/xmllib.h"
+#include "xml/xmlformatter.h"
 
 #include "Modules/resources/resourcemanager.h"
 

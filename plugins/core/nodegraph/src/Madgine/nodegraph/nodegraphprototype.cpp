@@ -1,6 +1,6 @@
 #include "../nodegraphlib.h"
 
-#include "Modules/keyvalueserialize/valuetypeserialize.h"
+#include "Modules/keyvalueutil/valuetypeserialize.h"
 
 #include "nodegraphprototype.h"
 
@@ -10,13 +10,15 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "Modules/filesystem/filemanager.h"
+#include "filesystem/filesystemlib.h"
+#include "filesystem/filemanager.h"
 
 #include "Modules/serialize/streams/serializestream.h"
 
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "Modules/xml/xmlformatter.h"
+#include "xml/xmllib.h"
+#include "xml/xmlformatter.h"
 
 #include "nodeprototypecollector.h"
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../serialize/formatter.h"
+#include "Modules/serialize/formatter.h"
 
 namespace Engine {
 namespace XML {
 
-    struct MODULES_EXPORT XMLFormatter : Serialize::Formatter {
+    struct MADGINE_XML_EXPORT XMLFormatter : Serialize::Formatter {
 
         XMLFormatter();
 

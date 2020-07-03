@@ -1,10 +1,10 @@
-#include "../moduleslib.h"
+#include "networklib.h"
 
 #include "networkmanager.h"
 
-#include "../serialize/formatter/safebinaryformatter.h"
+#include "Modules/serialize/formatter/safebinaryformatter.h"
 
-#include "../threading/workgroup.h"
+#include "Modules/threading/workgroup.h"
 
 namespace Engine {
 namespace Network {

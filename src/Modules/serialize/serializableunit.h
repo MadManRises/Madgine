@@ -128,7 +128,6 @@ namespace Serialize {
     friend struct ::Engine::Serialize::__SerializeInstance<Self>; \
     friend struct ::Engine::Serialize::SerializeTableCallbacks;   \
     DERIVE_FRIEND(onActivate, ::Engine::Serialize::)                                     \
-    DERIVE_FRIEND(onActivate2, ::Engine::Serialize::)
 
 } // namespace Serialize
 } // namespace Core

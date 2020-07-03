@@ -4,7 +4,7 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
-#include "Modules/render/vertex.h"
+#include "render/vertex.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

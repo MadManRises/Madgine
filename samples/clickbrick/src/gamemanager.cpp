@@ -135,7 +135,7 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
             Engine::Quaternion q { static_cast<float>(rand()), orientation };
             t->setOrientation(q);
 
-            brick->addComponent<Engine::Scene::Entity::Mesh>()->setName("Brick");
+            brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
 
             Scene::Brick *b = brick->addComponent<Scene::Brick>();
             b->mSpeed = rand() / float(RAND_MAX) * 2.0f + 1.0f;

@@ -288,59 +288,6 @@ macro(load_workspace_package lib)
 
 endmacro(load_workspace_package)
 
-function(third_party_config export)
-
-	set (lib_code "")
-	set (targets_code "")
-
-	foreach(lib ${ARGN})
-
-		get_target_property(${lib}_INCLUDE_DIRECTORIES ${lib} INTERFACE_INCLUDE_DIRECTORIES)		
-
-		set (lib_code "${lib_code} 
-# Create imported target ${lib}
-add_library(${lib} SHARED IMPORTED)
-
-set_target_properties(${lib} PROPERTIES
-   INTERFACE_INCLUDE_DIRECTORIES \"${${lib}_INCLUDE_DIRECTORIES}\"
-#  INTERFACE_COMPILE_DEFINITIONS \"MADGINE_CLIENT_BUILD\"
-#  INTERFACE_LINK_LIBRARIES \"Base;Interfaces;C:/Users/schue/Desktop/Workspace/lib/OgreBites_d.lib;winmm;imm32;version;msimg32;C:/Users/schue/Desktop/Ogre/build/Dependencies/lib/SDL2main.lib;C:/Users/schue/Desktop/Ogre/build/Dependencies/lib/SDL2.lib;C:/Users/schue/Desktop/Workspace/lib/OgreHLMS_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreMeshLodGenerator_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreOverlay_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgrePaging_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreProperty_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreRTShaderSystem_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreTerrain_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreVolume_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreMain_d.lib;C:/Users/schue/Desktop/Workspace/lib/OgreTerrain_d.lib;C:/Users/schue/Desktop/Workspace/lib/debug/MyGUI.OgrePlatform_d.lib;C:/Users/schue/Desktop/Workspace/lib/debug/MyGUIEngine_d.lib\"
-)
-
-")
-
-		set (targets_code "${targets_code}
-# Import target \"${lib}\" for configuration \"$<CONFIG>\"
-set_property(TARGET ${lib} APPEND PROPERTY IMPORTED_CONFIGURATIONS $<UPPER_CASE:$<CONFIG>>)
-set_target_properties(${lib} PROPERTIES
-  IMPORTED_IMPLIB_$<UPPER_CASE:$<CONFIG>> \"$<TARGET_FILE:${lib}>\"
-  IMPORTED_LOCATION_$<UPPER_CASE:$<CONFIG>> \"$<TARGET_FILE:${lib}>\"
-#  IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG \"\"
-#  IMPORTED_LOCATION_DEBUG \"C:/Users/schue/Desktop/Workspace/bin/Interfaces_d.dll\"
-  )
-
-list(APPEND _IMPORT_CHECK_TARGETS ${lib} )
-list(APPEND _IMPORT_CHECK_FILES_FOR_${lib} \"$<TARGET_FILE:${lib}>\" )
-
-")
-
-		
-		
-	endforeach()
-
-	set(EXPORT_TARGETS ${ARGN})
-	configure_file(${workspace_file_dir}/thirdPartyExport.in ${CMAKE_CURRENT_BINARY_DIR}/${export}Config.cmake @ONLY)
-
-	file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${export}Config-$<CONFIG>.cmake CONTENT "${targets_code}")
-
-	install(
-		FILES ${CMAKE_CURRENT_BINARY_DIR}/${export}Config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${export}Config-$<CONFIG>.cmake 
-		DESTINATION ${export}/lib/cmake/${export}
-		COMPONENT dev
-	)
-	
-endfunction(third_party_config)
-
 #Customization-point for different platforms (e.g. Android)
 macro(add_workspace_application target)
 
@@ -387,6 +334,54 @@ macro(add_workspace_library name)
 	endif()
 
 endmacro(add_workspace_library)
+
+macro(add_workspace_interface_library name)
+
+	set(options)
+	set(oneValueArgs SOURCE_ROOT PRECOMPILED_HEADER)
+	set(multiValueArgs)
+	cmake_parse_arguments(LIB_CONFIG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
+	
+	add_library(${name} INTERFACE ${LIB_CONFIG_UNPARSED_ARGUMENTS})	
+
+	if (NOT LIB_CONFIG_SOURCE_ROOT)
+		MESSAGE(SEND_ERROR "Source directory must be always set for Interface Library '${name}'. Use SOURCE_ROOT to specify it.")
+	endif()
+	
+	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${LIB_CONFIG_SOURCE_ROOT}>)
+
+endmacro(add_workspace_interface_library)
+
+
+function(install_interface_to_workspace name)
+
+	set(options)
+	set(oneValueArgs SOURCE_ROOT)
+	set(multiValueArgs TARGETS)
+	cmake_parse_arguments(OPTIONS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+		install(
+			TARGETS ${OPTIONS_TARGETS} 
+			EXPORT ${name}
+		)
+
+	if (NOT OPTIONS_SOURCE_ROOT)
+		MESSAGE(SEND_ERROR "Source directory must be always set for Interface Library installs. Use SOURCE_ROOT to specify it.")
+	endif()
+
+	foreach(target ${OPTIONS_TARGETS})
+		
+		get_filename_component(TARGET_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/${OPTIONS_SOURCE_ROOT} ABSOLUTE)
+
+		if (EXISTS ${TARGET_SOURCE_DIR}/data)
+			install(DIRECTORY ${TARGET_SOURCE_DIR}/data DESTINATION . COMPONENT ${name})
+		endif()
+
+		target_include_directories(${target} INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${target}/include>)
+	endforeach()
+
+endfunction(install_to_workspace)
+
 
 #TODO Iterate over all files in subdirectory
 

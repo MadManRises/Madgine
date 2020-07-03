@@ -1,8 +1,8 @@
-#include "../moduleslib.h"
+#include "networklib.h"
 
 #include "networkbuffer.h"
 
-#include "../serialize/formatter.h"
+#include "Modules/serialize/formatter.h"
 
 namespace Engine {
 namespace Network {

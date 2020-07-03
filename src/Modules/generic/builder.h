@@ -47,9 +47,21 @@ struct BuilderImpl {
         return execute();
     }
 
+    template <typename G>
+    auto then(G &&g) &&
+    {
+        auto modified_f = [f { *std::move(mF) }, g { std::forward<G>(g) }](auto &&... args) mutable -> decltype(auto) {
+            return Engine::then(std::move(f)(std::forward<decltype(args)>(args)...), std::move(g));
+        };
+        return Facade<BuilderImpl<decltype(modified_f), Pack, Facade>> {
+            std::move(modified_f),
+            std::move(mData)
+        };
+    }
+
 protected:
     template <size_t Dim, typename T>
-    auto append(T &&t)
+    auto append(T &&t) &&
     {
         static_assert(Dim < type_pack_size_v<Pack>);
         return append_impl<Dim>(std::forward<T>(t), type_pack_indices_t<Pack> {});

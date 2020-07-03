@@ -4,7 +4,7 @@
 
 #include "Modules/serialize/serializableunit.h"
 
-#include "Modules/keyvalue/virtualscopebase.h"
+#include "Modules/keyvalueutil/virtualscopebase.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, ToolBase, ImRoot &);
 

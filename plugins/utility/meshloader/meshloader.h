@@ -2,8 +2,8 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "Modules/render/attributedescriptor.h"
-#include "Modules/render/vertex.h"
+#include "render/attributedescriptor.h"
+#include "render/vertex.h"
 
 #include "Modules/math/boundingbox.h"
 
