@@ -46,12 +46,12 @@ TEST(Serialize_Container, SyncedUnit)
     NoParentUnit<TestUnit> unit1;
     NoParentUnit<TestUnit> unit2;
 
-    unit1.list1.push_back(3);
-    unit1.list1.push_back(4);
-    unit1.list1.push_back(5);
+    unit1.list1.emplace_back(3);
+    unit1.list1.emplace_back(4);
+    unit1.list1.emplace_back(5);
 
-    unit1.list2.push_back(1);
-    unit1.list2.push_back(2);
+    unit1.list2.emplace_back(1);
+    unit1.list2.emplace_back(2);
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -65,7 +65,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
 
     bool called = false;
-    unit1.list2.push_back(6).onSuccess([&](auto &&pib) {
+    unit1.list2.emplace_back(6).onSuccess([&](auto &&pib) {
         called = true; 
     });
     ASSERT_TRUE(called);
@@ -77,7 +77,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
 
     called = false;
-    unit2.list2.push_back(7).onSuccess([&](auto &&pib) { called = true; });
+    unit2.list2.emplace_back(7).onSuccess([&](auto &&pib) { called = true; });
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
