@@ -4,12 +4,16 @@
 
 namespace Engine {
 
+    template <typename T, typename F>
+struct DeferredFuture;
+
 template <typename T>
 struct Future {
 
     Future() = default;
 
-    Future(T value) : mValue(std::move(value))
+    Future(T value)
+        : mValue(std::move(value))
     {
     }
 
@@ -24,8 +28,11 @@ struct Future {
     {
     }
 
+    template <typename, typename>
+    friend struct DeferredFuture;
+
     template <typename F>
-    Future<std::invoke_result_t<F &&, T>> then(F &&f)
+    DeferredFuture<T, F> then(F &&f)
     {
         return { std::move(*this), std::forward<F>(f) };
     }
@@ -39,7 +46,7 @@ struct Future {
 
     T get()
     {
-         return std::visit(overloaded {
+        return std::visit(overloaded {
                               [](const T &t) { return t; },
                               [](std::future<T> &f) { return f.get(); },
                               [](const std::unique_ptr<DeferredBase> &d) { return d->get(); } },
@@ -88,6 +95,37 @@ private:
 
 private:
     std::variant<wrap_reference_t<T>, std::future<T>, std::unique_ptr<DeferredBase>> mValue;
+};
+
+template <typename T, typename F>
+struct DeferredFuture {
+
+    DeferredFuture(Future<T> future, F &&f)
+        : mFuture(std::move(future))
+        , mF(std::forward<F>(f))
+    {
+    }
+
+    std::invoke_result_t<F, T> get()
+    {
+        return mF(mFuture.get());
+    }
+
+    operator Future<std::invoke_result_t<F, T>>() &&
+    {
+        return std::visit(overloaded {
+                              [this](T &&t) { return Future<std::invoke_result_t<F, T>> { mF(t) }; },
+                              [this](auto &&other) { return Future<std::invoke_result_t<F, T>> { std::move(mFuture), std::move(mF) }; } },
+            std::move(mFuture.mValue));
+    }
+
+    operator std::invoke_result_t<F, T>() {
+        return get();
+    }
+
+private:
+    Future<T> mFuture;
+    F mF;
 };
 
 }

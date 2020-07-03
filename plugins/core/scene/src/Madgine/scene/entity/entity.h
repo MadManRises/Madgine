@@ -35,7 +35,7 @@ namespace Scene {
             const std::string &name() const;
 
             template <typename T>
-            Future<T *> addComponent(const ObjectPtr &table = {})
+            auto addComponent(const ObjectPtr &table = {})
             {
                 return addComponent(component_index<T>(), T::componentName(), table).then([](EntityComponentBase *comp) { return static_cast<T *>(comp); });
             }
