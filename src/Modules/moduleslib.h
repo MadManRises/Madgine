@@ -59,8 +59,8 @@
 
 #include "util/utilmethods.h"
 
-#include "generic/container/container_traits.h"
 #include "generic/templates.h"
+#include "generic/container/container_traits.h"
 #include "generic/derive.h"
 #include "generic/container/iterator_traits.h"
 #include "generic/callable_traits.h"

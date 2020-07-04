@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../templates.h"
-
-
 namespace Engine {
 
 template <typename C>

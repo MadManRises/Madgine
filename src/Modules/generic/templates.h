@@ -92,12 +92,7 @@ template <typename T, template <typename...> typename U>
 constexpr const bool is_instance_v = is_instance<T, U>::value;
 
 template <typename T>
-struct is_tuple : std::false_type {
-};
-
-template <typename... Ty>
-struct is_tuple<std::tuple<Ty...>> : std::true_type {
-};
+using is_tuple = is_instance<T, std::tuple>;
 
 template <typename T>
 constexpr const bool is_tuple_v = is_tuple<T>::value;
