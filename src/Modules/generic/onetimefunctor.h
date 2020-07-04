@@ -22,7 +22,7 @@ struct OneTimeFunctor {
     }
 
     template <typename... Args>
-    auto operator()(Args&&... args)
+    decltype(auto) operator()(Args&&... args)
     {
         assert(mF);
         F f = *std::move(mF);
@@ -30,8 +30,12 @@ struct OneTimeFunctor {
         return std::move(f)(std::forward<Args>(args)...);
     }
 
+    operator bool() const {
+        return mF.has_value();
+    }
+
 private:    
-    mutable std::optional<std::remove_reference_t<F>> mF;    
+    mutable std::optional<F> mF;    
 };
 
 template <typename F>

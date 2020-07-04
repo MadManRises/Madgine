@@ -1,6 +1,7 @@
 #pragma once
 
 #include "type_pack.h"
+#include "onetimefunctor.h"
 
 namespace Engine {
 
@@ -14,18 +15,14 @@ struct BuilderImpl {
     {
     }
 
-    BuilderImpl(std::optional<F> f, Tuple data)
+    BuilderImpl(OneTimeFunctor<F> f, Tuple data)
         : mF(std::move(f))
         , mData(std::move(data))
     {
     }
 
-    BuilderImpl(BuilderImpl<F, Pack, Facade> &&other)
-        : mF(std::move(other.mF))
-        , mData(std::move(other.mData))
-    {
-        other.mF.reset();
-    }
+    BuilderImpl(const BuilderImpl<F, Pack, Facade> &) = delete;
+    BuilderImpl(BuilderImpl<F, Pack, Facade> &&other) = default;
 
     ~BuilderImpl()
     {
@@ -36,10 +33,7 @@ struct BuilderImpl {
 
     decltype(auto) execute()
     {
-        assert(mF);
-        F f = *std::move(mF);
-        mF.reset();
-        return TupleUnpacker::invokeFromTuple(std::move(f), std::move(mData));
+        return TupleUnpacker::invokeFromTuple(std::move(mF), std::move(mData));
     }
 
     operator decltype(TupleUnpacker::invokeFromTuple(std::declval<F &&>(), std::declval<Tuple &&>()))()
@@ -50,10 +44,9 @@ struct BuilderImpl {
     template <typename G>
     auto then(G &&g) &&
     {
-        auto modified_f = [f { *std::move(mF) }, g { std::forward<G>(g) }](auto &&... args) mutable -> decltype(auto) {
+        auto modified_f = [f { std::move(mF) }, g { std::forward<G>(g) }](auto &&... args) mutable -> decltype(auto) {
             return Engine::then(std::move(f)(std::forward<decltype(args)>(args)...), std::move(g));
         };
-        mF.reset();
         return Facade<BuilderImpl<decltype(modified_f), Pack, Facade>> {
             std::move(modified_f),
             std::move(mData)
@@ -78,9 +71,7 @@ private:
     template <size_t Dim, typename T, size_t... Is>
     Facade<BuilderImpl<F, type_pack_apply_to_nth_t<appender<T>::template type, Pack, Dim>, Facade>> append_impl(T &&t, std::index_sequence<Is...>)
     {
-        std::optional<F> f = std::move(mF);
-        mF.reset();
-        return { std::move(f),
+        return { std::move(mF),
             std::forward_as_tuple(
                 [&]() {
                     if constexpr (Is == Dim)
@@ -91,7 +82,7 @@ private:
     }
 
 private:
-    std::optional<F> mF;
+    OneTimeFunctor<F> mF;
     Tuple mData;
 };
 
