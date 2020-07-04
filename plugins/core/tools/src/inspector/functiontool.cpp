@@ -20,6 +20,9 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Modules/keyvalueutil/keyvalueregistry.h"
+#include "Modules/keyvalue/keyvaluescan.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {
@@ -57,49 +60,21 @@ namespace Tools {
     void FunctionTool::refreshMethodCache()
     {
         mMethodCache.clear();
-        //parseMethods(&app());
-        //parseMethods(mRoot.toolsTopLevel());
+        auto scan = [this](const std::map<TypedScopePtr, const char *> &items) {
+            for (const std::pair<const TypedScopePtr, const char *> &p : items) {
+                parseMethods(p.first);
+            }
+        };
+        scan(KeyValueRegistry::globals());
+        scan(KeyValueRegistry::workgroupLocals());
     }
 
     void FunctionTool::parseMethods(TypedScopePtr scope)
     {
-        for (ScopeField f : scope) {
-            struct Visitor {
-                void operator()(const ApiFunction &m)
-                {
-                    mTool->mMethodCache.emplace_back(std::move(mName), BoundApiFunction { m, mScope });
-                }
-                void operator()(const TypedScopePtr &child)
-                {
-                    mTool->parseMethods(child);
-                }
-                void operator()(KeyValueVirtualIterator it)
-                {
-                    for (; it != VirtualIteratorEnd {}; ++it) {
-                        it->mValue.value().visit(*this);
-                    }
-                }
-
-                void operator()(const std::monostate &) {}
-                void operator()(const CoWString &) {}
-                void operator()(const bool &) {}
-                void operator()(const int &) {}
-                void operator()(const size_t &) {}
-                void operator()(const float &) {}
-                void operator()(const Matrix3 &) {}
-                void operator()(const Matrix4 &) {}
-                void operator()(const Quaternion &) {}
-                void operator()(const Vector4 &) {}
-                void operator()(const Vector3 &) {}
-                void operator()(const Vector2 &) {}
-                void operator()(const ObjectPtr &) {}
-
-                FunctionTool *mTool;
-                std::string mName;
-                TypedScopePtr mScope;
-            };
-            f.value().visit(Visitor { this, f.key(), scope });
-        }
+        kvScan([this](const ApiFunction &m, std::string_view name, TypedScopePtr scope) {
+            mMethodCache.emplace_back(std::move(name), BoundApiFunction { m, scope });
+        },
+            scope);
     }
 
     void FunctionTool::render()

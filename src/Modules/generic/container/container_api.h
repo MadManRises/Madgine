@@ -36,15 +36,15 @@ struct container_api_impl<C, std::list<Ty...>> : C {
 
     decltype(auto) push_back(const typename C::value_type &item)
     {
-        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return emplace_back(item);
     }
 
     template <typename... _Ty>
     decltype(auto) emplace_back(_Ty &&... args)
     {
-        return this->emplace(this->end(), std::forward<_Ty>(args)...);
+        return then(this->emplace(this->end(), std::forward<_Ty>(args)...), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
     }
 
     const typename C::value_type &back() const

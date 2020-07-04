@@ -47,6 +47,15 @@ public:
         return mScope == other.mScope && mType == other.mType;
     }
 
+    bool operator<(const TypedScopePtr &other) const
+    {
+        if (mScope < other.mScope)
+            return true;
+        if (mScope > other.mScope)
+            return false;
+        return mType < other.mType;
+    }
+
     template <typename T>
     T *safe_cast() const
     {

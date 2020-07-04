@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-    template <typename T, typename F>
+template <typename T, typename F>
 struct DeferredFuture;
 
 template <typename T>
@@ -32,7 +32,7 @@ struct Future {
     friend struct DeferredFuture;
 
     template <typename F>
-    DeferredFuture<T, F> then(F &&f)
+    DeferredFuture<T, F> then(F &&f) &&
     {
         return { std::move(*this), std::forward<F>(f) };
     }
@@ -119,8 +119,18 @@ struct DeferredFuture {
             std::move(mFuture.mValue));
     }
 
-    operator std::invoke_result_t<F, T>() {
+    operator std::invoke_result_t<F, T>()
+    {
         return get();
+    }
+
+    template <typename G>
+    auto then(G &&g) &&
+    {
+        auto modified_f = [g { std::forward<G>(g) }, f { std::move(mF) }](auto &&arg) {
+            return g(f(std::forward<decltype(arg)>(arg)));
+        };
+        return DeferredFuture<T, decltype(modified_f)> { std::move(mFuture), std::move(modified_f) };
     }
 
 private:

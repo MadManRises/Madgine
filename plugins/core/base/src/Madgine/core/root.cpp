@@ -2,6 +2,8 @@
 
 #include "root.h"
 
+
+#include "Modules/keyvalueutil/keyvalueregistry.h"
 #include "Modules/resources/resourcemanager.h"
 #include "Interfaces/debug/memory/memory.h"
 #include "Modules/plugins/pluginmanager.h"
@@ -28,6 +30,8 @@ namespace Core {
 #endif
 			mResources(std::make_unique<Resources::ResourceManager>())
 		{
+
+            KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
 #if ENABLE_PLUGINS                    
 
         (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
@@ -45,6 +49,7 @@ namespace Core {
 
     Root::~Root()
     {
+        KeyValueRegistry::unregisterGlobal(mResources.get());
     }
 
     int Root::errorCode()

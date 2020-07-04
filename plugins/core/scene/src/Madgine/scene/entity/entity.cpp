@@ -15,6 +15,7 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
+READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)

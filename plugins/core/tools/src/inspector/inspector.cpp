@@ -28,6 +28,8 @@
 
 #include "inspectorlayout.h"
 
+#include "Modules/keyvalueutil/keyvalueregistry.h"
+
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
 namespace Engine {
@@ -70,18 +72,17 @@ namespace Tools {
     void Inspector::render()
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
-            if (ImGui::TreeNode("Application")) {
-                draw(&App::Application::getSingleton(), {}, "Application");
-                ImGui::TreePop();
-            }
-            /*if (ImGui::TreeNode("MainWindow")) {
-                draw(mRoot.toolsTopLevel(), {}, "MainWindow");
-                ImGui::TreePop();
-            }*/
-            if (ImGui::TreeNode("Resources")) {
-                draw(&Resources::ResourceManager::getSingleton(), {}, "Resources");
-                ImGui::TreePop();
-            }
+            auto drawList = [this](const std::map<TypedScopePtr, const char *> &items) {
+                for (const std::pair<const TypedScopePtr, const char *> &p : items) {
+                    if (ImGui::TreeNode(p.second)) {
+                        draw(p.first, {}, p.second);
+                        ImGui::TreePop();
+                    }
+                }
+            };
+
+            drawList(KeyValueRegistry::globals());
+            drawList(KeyValueRegistry::workgroupLocals());
         }
         ImGui::End();
     }

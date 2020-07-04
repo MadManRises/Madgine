@@ -9,7 +9,7 @@
 #include "Modules/cli/parameter.h"
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
-
+#include "Modules/keyvalueutil/keyvalueregistry.h"
 #include "Modules/serialize/streams/serializestream.h"
 
 #include "filesystem/filesystemlib.h"
@@ -33,11 +33,11 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
     FIX_LOCAL Engine::App::AppSettings settings;
 
     settings.mAppName = "Madgine Client";
-    FIX_LOCAL Engine::App::Application app { settings };
+    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::App::Application> app { "Application", settings };
 
     FIX_LOCAL Engine::Window::WindowSettings windowSettings;
     windowSettings.mTitle = "Maditor";
-    FIX_LOCAL Engine::Window::MainWindow window { windowSettings };
+    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
     if (topLevelPointer)
         *topLevelPointer = &window;
