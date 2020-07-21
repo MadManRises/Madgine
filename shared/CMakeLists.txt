@@ -43,7 +43,7 @@ set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
 set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
 add_subdirectory(bullet3-2.89)
-target_include_directories(Bullet3Common PUBLIC bullet3-2.89/src)
+target_include_directories(LinearMath PUBLIC ${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src)
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 
 add_subdirectory(SDL2-2.0.9)

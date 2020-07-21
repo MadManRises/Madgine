@@ -105,7 +105,7 @@ namespace Scene {
             return getComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentBase *Entity::toEntityComponentPtr(const std::pair<const size_t, std::unique_ptr<EntityComponentBase>> &p)
+        EntityComponentBase *Entity::toEntityComponentPtr(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &p)
         {
             return p.second.get();
         }
@@ -142,13 +142,13 @@ namespace Scene {
             mComponents.erase(it);
         }
 
-        std::tuple<size_t, std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
+        std::tuple<uint32_t, std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
-            size_t i = sComponentsByName().at(name);
+            uint32_t i = sComponentsByName().at(name);
             return make_tuple(i, EntityComponentRegistry::getConstructor(i)({}));
         }
 
-        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const std::pair<const size_t, std::unique_ptr<EntityComponentBase>> &comp) const
+        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &comp) const
         {
             return std::make_tuple(std::make_pair("type", comp.second->key()));
         }
@@ -190,7 +190,7 @@ namespace Scene {
             return mLocal;
         }
 
-        void Entity::handleEntityEvent(const typename std::map<size_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op)
+        void Entity::handleEntityEvent(const typename std::map<uint32_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op)
         {
             switch (op) {
             case BEFORE | RESET:

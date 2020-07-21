@@ -60,7 +60,7 @@ namespace Scene {
             EntityComponentBase *getComponent(const std::string_view &name);
             const EntityComponentBase *getComponent(const std::string_view &name) const;
 
-            static EntityComponentBase *toEntityComponentPtr(const std::pair<const size_t, std::unique_ptr<EntityComponentBase>> &p);
+            static EntityComponentBase *toEntityComponentPtr(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &p);
 
             decltype(auto) components()
             {
@@ -102,7 +102,7 @@ namespace Scene {
 
             void swap(Entity &other);
 
-            void handleEntityEvent(const typename std::map<size_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op);
+            void handleEntityEvent(const typename std::map<uint32_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op);
 
         protected:
             EntityComponentBase *addComponentSimple(const std::string_view &name, const ObjectPtr &table = {});
@@ -111,12 +111,12 @@ namespace Scene {
             std::string mName;
 
         private:
-            std::tuple<size_t, std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
-            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::pair<const size_t, std::unique_ptr<EntityComponentBase>> &comp) const;
+            std::tuple<uint32_t, std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
+            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &comp) const;
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, std::map<size_t, std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, ParentFunctor<&Entity::handleEntityEvent>);
+            SYNCABLE_CONTAINER(mComponents, std::map<uint32_t, std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, ParentFunctor<&Entity::handleEntityEvent>);
 
             SceneManager &mSceneManager;
         };
