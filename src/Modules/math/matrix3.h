@@ -262,9 +262,9 @@ struct MODULES_EXPORT Matrix3 {
         */
     inline MODULES_EXPORT friend std::ostream &operator<<(std::ostream &out, const Matrix3 &mat)
     {
-        return out << "[" << mat[0][0] << ", " << mat[1][0] << ", " << mat[2][0] << ", "
-                   << mat[0][1] << ", " << mat[1][1] << ", " << mat[2][1] << ", "
-                   << mat[0][2] << ", " << mat[1][2] << ", " << mat[2][2] << "]";
+        return out << "[" << mat[0][0] << ", " << mat[0][1] << ", " << mat[0][2] << ", "
+                   << mat[1][0] << ", " << mat[1][1] << ", " << mat[1][2] << ", "
+                   << mat[2][0] << ", " << mat[2][1] << ", " << mat[2][2] << "]";
     }
 
     inline MODULES_EXPORT friend std::istream &operator>>(std::istream &in, Matrix3 &mat)
@@ -275,7 +275,7 @@ struct MODULES_EXPORT Matrix3 {
             std::terminate();
         for (int x = 0; x < 3; ++x) {
             for (int y = 0; y < 3; ++y) {
-                in >> mat[y][x];
+                in >> mat[x][y];
                 in >> c;
                 if (x != 2 || y != 2) {
                     if (c != ',')

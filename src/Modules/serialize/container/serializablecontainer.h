@@ -231,7 +231,7 @@ namespace Serialize {
 
             size_t size()
             {
-                return mContainer.Base::size();
+                return this->mContainer.Base::size();
             }
 
             template <typename... Ty>

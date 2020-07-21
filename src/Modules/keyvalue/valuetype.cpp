@@ -228,7 +228,7 @@ std::string ValueType::toString() const
     case ValueTypeEnum::IntValue:
         return std::to_string(std::get<int>(mUnion));
     case ValueTypeEnum::UIntValue:
-        return std::to_string(std::get<size_t>(mUnion));
+        return std::to_string(std::get<uint64_t>(mUnion));
     case ValueTypeEnum::NullValue:
         return "NULL";
     case ValueTypeEnum::ScopeValue:
@@ -264,7 +264,7 @@ std::string ValueType::toShortString() const
     case ValueTypeEnum::IntValue:
         return std::to_string(std::get<int>(mUnion));
     case ValueTypeEnum::UIntValue:
-        return std::to_string(std::get<size_t>(mUnion));
+        return std::to_string(std::get<uint64_t>(mUnion));
     case ValueTypeEnum::NullValue:
         return "NULL";
     case ValueTypeEnum::ScopeValue:
@@ -351,7 +351,7 @@ bool ValueTypeRef::isEditable() const
 
 ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
 {
-    if (v.type().canAccept(mValue.type()) || v.is<TypedScopePtr>())
+    if (!v.type().canAccept(mValue.type()))
         std::terminate();
 
     mValue = v;

@@ -115,7 +115,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                     });
 
                     std::transform(node->mRotationKeys, node->mRotationKeys + node->mNumRotationKeys, std::back_inserter(bone.mOrientations), [&](const aiQuatKey &key) {
-                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), Quaternion { key.mValue.w, key.mValue.x, key.mValue.y, key.mValue.z } };
+                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), Quaternion { key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w } };
                     });
 
                     std::transform(node->mScalingKeys, node->mScalingKeys + node->mNumScalingKeys, std::back_inserter(bone.mScalings), [&](const aiVectorKey &key) {
