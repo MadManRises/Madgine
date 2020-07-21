@@ -19,8 +19,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::CoWString &s);
     bool draw(int &i);
     bool draw(const int &i);
-    bool draw(size_t &i);
-    bool draw(const size_t &i);
+    bool draw(uint64_t &i);
+    bool draw(const uint64_t &i);
     bool draw(float &f);
     bool draw(const float &f);
     bool draw(Engine::Matrix3 &m);

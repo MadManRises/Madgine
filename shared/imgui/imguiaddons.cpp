@@ -82,17 +82,17 @@ bool ValueTypeDrawer::draw(const int &i)
     return false;
 }
 
-bool ValueTypeDrawer::draw(size_t &i)
+bool ValueTypeDrawer::draw(uint64_t &i)
 {
     PushItemWidth(100);
-    return ImGui::DragScalar(mName, ImGuiDataType_U32, &i, 1.0f);
+    return ImGui::DragScalar(mName, ImGuiDataType_U64, &i, 1.0f);
 }
 
-bool ValueTypeDrawer::draw(const size_t &i)
+bool ValueTypeDrawer::draw(const uint64_t &i)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragScalar(mName, ImGuiDataType_U32, const_cast<size_t *>(&i), 1.0f);
+    ImGui::DragScalar(mName, ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
     PopDisabled();
     return false;
 }
