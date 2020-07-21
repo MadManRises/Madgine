@@ -66,8 +66,8 @@ else()
 endif()
 
 if (NOT ANDROID AND NOT EMSCRIPTEN)
-	option(OIS_BUILD_SHARED_LIBS "Build shared libraries" OFF)
-	option(OIS_BUILD_DEMOS "Build demo applications" OFF)
+	set(OIS_BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
+	set(OIS_BUILD_DEMOS OFF CACHE BOOL "Build demo applications" FORCE)
 
 	add_subdirectory(ois)
 	set_target_properties(OIS PROPERTIES EXCLUDE_FROM_ALL TRUE)
