@@ -20,29 +20,25 @@ namespace Engine {
 namespace Serialize {
 
     SerializeInStream::SerializeInStream()
-        : mLog(*this)
     {
-        format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer)
         : InStream(std::move(buffer))
-        , mLog(*this)
     {
         format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other)
         : InStream(std::move(other))
-        , mLog(*this)
     {
         format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other, SerializeManager *mgr)
-        : InStream(std::move(other))
-        , mLog((buffer().setManager(mgr), *this))
+        : InStream(std::move(other))        
     {
+        buffer().setManager(mgr);
         format().setupStream(mStream);
     }
 
@@ -169,11 +165,6 @@ namespace Serialize {
         return result;
     }
 
-    void SerializeInStream::logReadHeader(const MessageHeader &header, const std::string &object)
-    {
-        mLog.logBeginMessage(header, object);
-    }
-
     SerializeManager *SerializeInStream::manager() const
     {
         return buffer().manager();
@@ -196,7 +187,6 @@ namespace Serialize {
 
     SerializeInStream::SerializeInStream(SerializeStreambuf *buffer)
         : InStream(buffer)
-        , mLog(*this)
     {
     }
 
@@ -220,30 +210,26 @@ namespace Serialize {
         return static_cast<SerializeStreambuf &>(InStream::buffer());
     }
 
-    SerializeOutStream::SerializeOutStream()
-        : mLog(*this)
+    SerializeOutStream::SerializeOutStream()        
     {
-        format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer)
         : OutStream(std::move(buffer))
-        , mLog(*this)
     {
         format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other)
-        : OutStream(std::move(other))
-        , mLog(*this)
+        : OutStream(std::move(other))        
     {
         format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr)
-        : OutStream(std::move(other))
-        , mLog((buffer().setManager(mgr), *this))
+        : OutStream(std::move(other))        
     {
+        buffer().setManager(mgr);
         format().setupStream(mStream);
     }
 

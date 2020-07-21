@@ -38,11 +38,8 @@ namespace Render {
     {
         GLenum type;
         switch (format) {
-        case FORMAT_UNSIGNED_BYTE:
-            type = GL_UNSIGNED_BYTE;
-            break;
         case FORMAT_FLOAT8:
-            type = GL_FLOAT;
+            type = GL_UNSIGNED_BYTE;
             break;
         default:
             std::terminate();

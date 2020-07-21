@@ -9,6 +9,7 @@ template <typename F, typename Pack, template <typename Builder> typename Facade
 struct BuilderImpl {
 
     using Tuple = type_pack_as_tuple_t<type_pack_apply_t<type_pack_as_tuple_t, Pack>>;
+    using return_type = decltype(TupleUnpacker::invokeFromTuple(std::declval<F &&>(), std::declval<Tuple &&>()));
 
     BuilderImpl(F &&f)
         : mF(std::move(f))
@@ -36,8 +37,13 @@ struct BuilderImpl {
         return TupleUnpacker::invokeFromTuple(std::move(mF), std::move(mData));
     }
 
-    operator decltype(TupleUnpacker::invokeFromTuple(std::declval<F &&>(), std::declval<Tuple &&>()))()
+    operator return_type()
     {
+        return execute();
+    }
+
+    template <typename T, typename = std::enable_if_t<std::is_convertible_v<return_type, T>>>
+    operator T() {
         return execute();
     }
 

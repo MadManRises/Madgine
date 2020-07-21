@@ -26,11 +26,11 @@ namespace Tools {
 
     bool DirectX11ToolConfig::init()
     {
-        mImageTexture = { Render::Texture2D, Render::FORMAT_UNSIGNED_BYTE, D3D11_BIND_SHADER_RESOURCE, 100, 100 };
+        mImageTexture = { Render::Texture2D, Render::FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, 100, 100 };
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)*font->loadData()->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {

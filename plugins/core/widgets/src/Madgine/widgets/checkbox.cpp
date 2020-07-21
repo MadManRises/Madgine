@@ -5,7 +5,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::Widgets::Checkbox)
+METATABLE_BEGIN_BASE(Engine::Widgets::Checkbox, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::Checkbox)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Checkbox, Engine::Widgets::WidgetBase)

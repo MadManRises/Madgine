@@ -1,6 +1,7 @@
 #pragma once
 
 #include "objectptr.h"
+#include "valuetype.h"
 
 namespace Engine {
 

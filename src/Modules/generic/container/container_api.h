@@ -131,8 +131,8 @@ struct container_api_impl<C, std::set<Ty...>> : SortedContainerApi<C> {
 };
 
 template <typename C, typename K, typename T, typename... Ty>
-struct container_api_impl<C, std::map<K, T, Ty...>> : C {
-    using C::C;
+struct container_api_impl<C, std::map<K, T, Ty...>> : SortedContainerApi<C> {
+    using SortedContainerApi<C>::SortedContainerApi;
 
     T &operator[](const K &key)
     {
@@ -145,19 +145,11 @@ struct container_api_impl<C, std::map<K, T, Ty...>> : C {
         return it->second;
     }
 
-    const T &at(const std::string &key) const
-    {
-        return C::at(key);
-    }
-
     template <typename... _Ty>
-    auto try_emplace(const K &key, _Ty &&... args) -> decltype(C::emplace(C::lower_bound(key), std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...)))
+    auto try_emplace(const K &key, _Ty &&... args) -> decltype(C::emplace(C::lower_bound(key), std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...)))
     {
         auto it = C::lower_bound(key);
-        if (it != this->end() && it->first == key) {
-            return { it, false };
-        }
-        return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(args...));
+        return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...));
     }
 };
 

@@ -52,8 +52,7 @@ METATABLE_END(Engine::Render::MeshLoader::ResourceType)
 
             assimpTraverseTree(
                 scene, [&](const aiNode *node, const Matrix4 &t) {
-                    Matrix3 transform = t.ToMat3();
-                    Matrix3 transform_anti = transform.Inverse().Transpose();
+                    Matrix3 transform_anti = t.ToMat3().Inverse().Transpose();
 
                     for (size_t meshIndex = 0; meshIndex < node->mNumMeshes; ++meshIndex) {
                         unsigned short baseVertexIndex = vertices.size();
@@ -78,7 +77,7 @@ METATABLE_END(Engine::Render::MeshLoader::ResourceType)
                         for (size_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
                             V &vertex = vertices.emplace_back();
                             aiVector3D v = mesh->mVertices[vertexIndex];
-                            vertex.mPos = transform * Vector3 { v.x, v.y, v.z };
+                            vertex.mPos = (t * Vector4 { v.x, v.y, v.z, 1.0f }).xyz();
                             if constexpr (V::template holds<VertexNormal>) {
                                 aiVector3D n = mesh->mNormals[vertexIndex];
                                 vertex.mNormal = transform_anti * Vector3 { n.x, n.y, n.z };
@@ -89,7 +88,7 @@ METATABLE_END(Engine::Render::MeshLoader::ResourceType)
                             }
                             if constexpr (V::template holds<VertexUV>) {
                                 aiVector3D &uv = mesh->mTextureCoords[0][vertexIndex];
-                                vertex.mUV = { uv.x, uv.y };
+                                vertex.mUV = { uv.x, 1.0f - uv.y };
                             }
                         }
 

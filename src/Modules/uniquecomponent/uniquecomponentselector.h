@@ -78,12 +78,12 @@ private:
 #if ENABLE_PLUGINS
 
 protected:
-    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
-        static_cast<UniqueComponentSelector<Registry, __Base, _Ty...> *>(listener)->updateComponents(info, add, vals);
+        static_cast<UniqueComponentSelector<Registry, __Base, _Ty...> *>(listener)->updateComponents(info, add, vals, op);
     }
 
-    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
         if (add) {
             if (mIndex == INVALID && vals.size() > 0) {

@@ -200,7 +200,7 @@ namespace Tools {
                 Vector3 pos = ray.point(5.0f);
                 Render::MeshLoader::ResourceType *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
-                    Scene::Entity::Entity *e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
+                    Scene::Entity::EntityPtr e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
                     e->addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
                     e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);

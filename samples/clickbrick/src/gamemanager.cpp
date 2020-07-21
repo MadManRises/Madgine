@@ -27,6 +27,8 @@
 
 #include "Madgine/scene/entity/entity.h"
 
+#include "Modules/threading/datamutex.h"
+
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
 
@@ -43,7 +45,8 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
             , mGameWindow(this, "GameView")
             , mScoreLabel(this, "Score")
             , mLifeLabel(this, "Life")
-            , mSceneRenderer(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>(), &mCamera, 50)
+            , mSceneMgr(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>())
+            , mSceneRenderer(mSceneMgr, &mCamera, 50)
         {
         }
 
@@ -88,11 +91,13 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
             }
         }
 
-        void ClickBrick::UI::GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
+        void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
         {
+            Engine::Threading::DataLock lock { mSceneMgr.mutex(), Engine::Threading::AccessMode::WRITE };
+
             float ratio = (timeSinceLastFrame.count() / 1000000.0f);
 
-            mBricks.erase(std::remove_if(mBricks.begin(), mBricks.end(), [=](Engine::Scene::Entity::Entity *e) {
+            mBricks.erase(std::remove_if(mBricks.begin(), mBricks.end(), [=](const Engine::Scene::Entity::EntityPtr &e) {
                 Scene::Brick *brick = e->getComponent<Scene::Brick>();
                 Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
                 t->translate(brick->mSpeed * ratio * brick->mDir);
@@ -122,7 +127,7 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
         void ClickBrick::UI::GameManager::spawnBrick()
         {
-            Engine::Scene::Entity::Entity *brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
+            Engine::Scene::Entity::EntityPtr brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
             Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>();
             t->setScale({ 0.01f, 0.01f, 0.01f });
@@ -152,10 +157,10 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
         {
             Engine::Ray ray = mCamera.mousePointToRay(evt.position, mGameWindow->getActualSize().xy());
 
-            Engine::Scene::Entity::Entity *hit = nullptr;
+            Engine::Scene::Entity::EntityPtr hit;
             float distance = std::numeric_limits<float>::max();
 
-            for (Engine::Scene::Entity::Entity *e : mBricks) {
+            for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
                 const Engine::AABB &aabb = e->getComponent<Engine::Scene::Entity::Mesh>()->aabb();
                 Engine::BoundingBox bb = e->getComponent<Engine::Scene::Entity::Transform>()->matrix() * aabb;
                 if (Engine::UpTo<float, 2> hits = Engine::Intersect(ray, bb)) {
@@ -200,7 +205,10 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
             mLife = 3;
             mLifeLabel->mText = "Life: " + std::to_string(mLife);
 
-            for (Engine::Scene::Entity::Entity *brick : mBricks) {
+            Engine::Threading::DataLock lock { mSceneMgr.mutex(), Engine::Threading::AccessMode::WRITE };
+
+
+            for (const Engine::Scene::Entity::EntityPtr &brick : mBricks) {
                 brick->remove();
             }
             mBricks.clear();

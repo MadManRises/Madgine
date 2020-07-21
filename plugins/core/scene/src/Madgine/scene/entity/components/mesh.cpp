@@ -14,8 +14,8 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        Mesh::Mesh(Scene::Entity::Entity &e, const ObjectPtr &data)
-            : EntityComponent(e, data)
+        Mesh::Mesh(const ObjectPtr &data)
+            : EntityComponent(data)
         {
             if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
                 setName(v.as<std::string>());

@@ -23,6 +23,10 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/generic/container/generationvector.h"
+
+#include "entity/entityptr.h"
+
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -35,13 +39,13 @@ namespace Scene {
 
         void update();
 
-        Entity::Entity *createEntity(const std::string &behavior = "", const std::string &name = "",
+        Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
-        Entity::Entity *createLocalEntity(const std::string &behavior = "", const std::string &name = "");
-        Entity::Entity *findEntity(const std::string &name);
-        void removeLater(Entity::Entity *e);
+        Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
+        Entity::EntityPtr findEntity(const std::string &name);
+        void remove(Entity::Entity *e);
 
-        Entity::Entity *makeLocalCopy(Entity::Entity &e);
+        //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 
         void clear();
@@ -66,11 +70,11 @@ namespace Scene {
 
         virtual const MadgineObject *parent() const override;
 
-        Threading::DataMutex &mutex();
+        Threading::DataMutex &mutex();        
 
-        void removeQueuedEntities();
+        Threading::SignalStub<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
 
-        Threading::SignalStub<const std::list<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
+        Entity::EntityPtr toEntityPtr(Engine::Scene::Entity::Entity *e);
 
     protected:
         virtual bool init() final;
@@ -81,22 +85,21 @@ namespace Scene {
 
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;
-    private:
-        App::Application &mApp;
-        size_t mItemCount;
+        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;   
+        
 
     public:
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
 
     private:
-        SYNCABLE_CONTAINER(mEntities, std::list<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const std::list<Engine::Scene::Entity::Entity>::iterator &, int>);
-        std::list<Entity::Entity> mLocalEntities;
-        std::list<Entity::Entity *> mEntityRemoveQueue;
+        SYNCABLE_CONTAINER(mEntities, GenerationVector<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int>);
+        GenerationVector<Entity::Entity> mLocalEntities;
 
         Threading::DataMutex mMutex;
 
         std::chrono::steady_clock::time_point mLastFrame;
+
+        size_t mItemCount = 0;
 
     public:
         decltype(mEntities) &entities();

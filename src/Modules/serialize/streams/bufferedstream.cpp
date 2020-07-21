@@ -107,7 +107,6 @@ namespace Serialize {
         header.mType = type;
         header.mObject = SerializeManager::convertPtr(manager(), *this, unit);
         header.mTransaction = id;
-        mLog.logBeginMessage(header, typeid(*unit).name());
         buffer().beginMessage();
         writeRaw(header);
     }
@@ -116,8 +115,7 @@ namespace Serialize {
     {
         MessageHeader header;
         header.mCmd = cmd;
-        header.mObject = SERIALIZE_MANAGER;
-        mLog.logBeginMessage(header, manager()->name());
+        header.mObject = SERIALIZE_MANAGER;        
         buffer().beginMessage();
         writeRaw(header);
     }

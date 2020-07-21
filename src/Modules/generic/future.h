@@ -37,6 +37,11 @@ struct Future {
         return { std::move(*this), std::forward<F>(f) };
     }
 
+    template <typename U, typename = std::enable_if_t<std::is_constructible_v<U, T>>>
+    operator Future<U>()&& {
+        return std::move(*this).then([](T &&t) { return U { std::forward<T>(t) }; });
+    }
+
     operator T()
     {
         if (!isAvailable())
@@ -114,7 +119,7 @@ struct DeferredFuture {
     operator Future<std::invoke_result_t<F, T>>() &&
     {
         return std::visit(overloaded {
-                              [this](T &&t) { return Future<std::invoke_result_t<F, T>> { mF(t) }; },
+                              [this](T &&t) { return Future<std::invoke_result_t<F, T>> { mF(std::forward<T>(t)) }; },
                               [this](auto &&other) { return Future<std::invoke_result_t<F, T>> { std::move(mFuture), std::move(mF) }; } },
             std::move(mFuture.mValue));
     }

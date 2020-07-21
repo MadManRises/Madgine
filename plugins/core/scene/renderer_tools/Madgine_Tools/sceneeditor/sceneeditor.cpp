@@ -96,19 +96,19 @@ namespace Tools {
 
     void SceneEditor::deselect()
     {
-        mSelectedEntity = nullptr;
+        mSelectedEntity = {};
         mSelectedCamera = nullptr;
         mHoveredAxis = -1;
     }
 
     void SceneEditor::select(Render::Camera *camera)
     {
-        mSelectedEntity = nullptr;
+        mSelectedEntity = {};
         mSelectedCamera = camera;
         mHoveredAxis = -1;
     }
 
-    void SceneEditor::select(Scene::Entity::Entity *entity)
+    void SceneEditor::select(const Scene::Entity::EntityPtr &entity)
     {
         mSelectedEntity = entity;
         mSelectedCamera = nullptr;
@@ -135,21 +135,21 @@ namespace Tools {
     {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mHierarchyVisible)) {
 
-            for (Scene::Entity::Entity &e : mSceneMgr->entities()) {
-                const char *name = e.key().c_str();
+            for (typename GenerationVector<Scene::Entity::Entity>::iterator e = mSceneMgr->entities().begin(); e != mSceneMgr->entities().end(); ++e) {
+                const char *name = e->key().c_str();
                 if (!name[0])
                     name = "<unnamed>";
 
-                bool hovered = mSelectedEntity == &e;
+                bool hovered = mSelectedEntity == e;
 
                 ImGui::PushID(&e);
                 Im3D::PushID(&e);
 
-                if (e.hasComponent<Scene::Entity::Transform>()) {
-                    Engine::Matrix4 transform = e.getComponent<Scene::Entity::Transform>()->matrix();
+                if (e->hasComponent<Scene::Entity::Transform>()) {
+                    Engine::Matrix4 transform = e->getComponent<Scene::Entity::Transform>()->matrix();
                     Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-                    if (e.hasComponent<Scene::Entity::Mesh>())
-                        bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
+                    if (e->hasComponent<Scene::Entity::Mesh>() && e->getComponent<Scene::Entity::Mesh>()->data())
+                        bb = e->getComponent<Scene::Entity::Mesh>()->aabb();
 
                     Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
                     if (hovered)
@@ -157,16 +157,16 @@ namespace Tools {
 
                     if (Im3D::BoundingBox(name, bb, transform, flags)) {
                         if (ImGui::IsMouseClicked(0)) {
-                            select(&e);
+                            select(e);
                         }
                         hovered = true;
                     }
                 }
 
                 if (ImGui::Selectable(name, hovered)) {
-                    select(&e);
+                    select(e);
                 }
-                ImGui::DraggableValueTypeSource(name, this, ValueType { e });
+                ImGui::DraggableValueTypeSource(name, this, ValueType { *e });
                 ImGui::PopID();
                 Im3D::PopID();
             }
@@ -194,8 +194,20 @@ namespace Tools {
         ImGui::End();
     }
 
-    void SceneEditor::renderEntity(Scene::Entity::Entity *entity)
+    void SceneEditor::renderEntity(Scene::Entity::EntityPtr &entity)
     {
+        bool found = false;
+        for (Scene::Entity::Entity &e : mSceneMgr->entities()) {
+            if (&e == entity) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            entity = {};
+            return;
+        }
+
         ImGui::InputText("Name", &entity->mName);
 
         for (Scene::Entity::EntityComponentBase *component : entity->components()) {

@@ -42,20 +42,20 @@ namespace Serialize {
             write(out, t, "Item");
         }
 
-        template <typename C, typename Op>
-        static typename container_traits<C>::emplace_return readItem(SerializeInStream &in, C &c, const typename C::const_iterator &where, Op &op)
+        template <typename Op>
+        static typename container_traits<Op>::emplace_return readItem(SerializeInStream &in, Op &op, const typename container_traits<Op>::const_iterator &where)
         {
 
-            typename container_traits<C>::emplace_return it;
-            if constexpr (std::is_const_v<typename C::value_type>) {
-                std::remove_const_t<typename C::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename C::value_type>>(readCreationData(in));
+            typename container_traits<Op>::emplace_return it;
+            if constexpr (std::is_const_v<typename container_traits<Op>::value_type>) {
+                std::remove_const_t<typename container_traits<Op>::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename container_traits<Op>::value_type>>(readCreationData(in));
                 read(in, temp, "Item");
-                it = op.emplace(c, where, std::move(temp));
+                container_traits<Op>::emplace(op, where, std::move(temp));
             } else {
-                it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace), &op, where, readCreationData(in));
+                it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, readCreationData(in));
                 read(in, *it, "Item");
             }
-            assert(container_traits<C>::was_emplace_successful(it));
+            assert(container_traits<Op>::was_emplace_successful(it));
             return it;
         }
 
@@ -109,19 +109,19 @@ namespace Serialize {
                 return TupleUnpacker::invokeExpand(reader, parent, std::move(tuple));
             }
 
-            template <typename C, typename Op>
-            static typename container_traits<C>::emplace_return readItem(SerializeInStream &in, C &c, const typename C::const_iterator &where, Op &op, T *parent)
+            template <typename Op>
+            static typename container_traits<Op>::emplace_return readItem(SerializeInStream &in, Op &op, const typename container_traits<Op>::const_iterator &where, T *parent)
             {
-                typename container_traits<C>::emplace_return it;
-                if constexpr (std::is_const_v<typename C::value_type>) {
-                    std::remove_const_t<typename C::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename C::value_type>>(readCreationData(in, parent));
+                typename container_traits<Op>::emplace_return it;
+                if constexpr (std::is_const_v<typename container_traits<Op>::value_type>) {
+                    std::remove_const_t<typename container_traits<Op>::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename container_traits<Op>::value_type>>(readCreationData(in, parent));
                     read(in, temp, "Item");
-                    it = op.emplace(where, std::move(temp));
+                    it = container_traits<Op>::emplace(op, where, std::move(temp));
                 } else {
-                    it = TupleUnpacker::invokeExpand(LIFT_MEMBER(emplace), &op, where, readCreationData(in, parent));
+                    it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, readCreationData(in, parent));
                     read(in, *it, "Item");
                 }
-                assert(container_traits<C>::was_emplace_successful(it));
+                assert(container_traits<Op>::was_emplace_successful(it));
                 return it;
             }
 

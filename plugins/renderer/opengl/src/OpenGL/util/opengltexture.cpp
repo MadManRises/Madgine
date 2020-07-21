@@ -2,6 +2,7 @@
 
 #include "opengltexture.h"
 
+#include "Modules/generic/areaview.h"
 #include "Modules/generic/bytebuffer.h"
 
 namespace Engine {
@@ -59,16 +60,46 @@ namespace Render {
 
     void OpenGLTexture::setData(Vector2i size, const ByteBuffer &data)
     {
+        const void *ptr = data.mData;
+        std::vector<unsigned char> flippedData;
+        if (ptr) {
+            size_t byteWidth;
+            switch (mType) {
+            case GL_UNSIGNED_BYTE:
+                byteWidth = 4;
+                break;
+            default:
+                throw 0;
+            }
+            flippedData.reserve(size.x * size.y * byteWidth);
+            AreaView<const unsigned char, 2> view { static_cast<const unsigned char *>(data.mData), { size.x * byteWidth, static_cast<size_t>(size.y) } };
+            view.flip(1);
+            std::copy(view.begin(), view.end(), std::back_inserter(flippedData));
+            ptr = flippedData.data();
+        }
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, mType, data.mData);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, mType, ptr);
         GL_CHECK();
         mSize = size;
     }
 
     void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
+        std::vector<unsigned char> flippedData;
+        size_t byteWidth;
+        switch (mType) {
+        case GL_UNSIGNED_BYTE:
+            byteWidth = 4;
+            break;
+        default:
+            throw 0;
+        }
+        flippedData.reserve(size.x * size.y * byteWidth);
+        AreaView<const unsigned char, 2> view { static_cast<const unsigned char *>(data.mData), { size.x * byteWidth, static_cast<size_t>(size.y) } };
+        view.flip(1);
+        std::copy(view.begin(), view.end(), std::back_inserter(flippedData));
         bind();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, GL_RGBA, mType, data.mData);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, mSize.y - offset.y - size.y, size.x, size.y, GL_RGBA, mType, flippedData.data());
         GL_CHECK();
     }
 

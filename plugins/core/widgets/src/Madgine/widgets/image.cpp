@@ -11,11 +11,12 @@
 
 #include "widgetmanager.h"
 
-METATABLE_BEGIN(Engine::Widgets::Image)
+METATABLE_BEGIN_BASE(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
 PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::Widgets::Image)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
+ENCAPSULATED_FIELD(Image, getImageName, setImageByName)
 SERIALIZETABLE_END(Engine::Widgets::Image)
 
 
@@ -69,7 +70,7 @@ namespace Widgets {
         result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 0 } });
-        return { { result, { mImage ? manager().uiTexture().mTextureHandle : 0 } } };
+        return { { result, { 0 } } };
     }
     WidgetClass Image::getClass() const
     {

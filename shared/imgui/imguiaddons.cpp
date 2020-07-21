@@ -360,7 +360,7 @@ bool InputText(const char *label, Engine::CoWString *s)
 #endif
 
     if (ImGui::InputText(label, buf, sizeof(buf))) {
-        *s = std::string_view { buf };
+        *s = std::string { buf };
         return true;
     }
     return false;

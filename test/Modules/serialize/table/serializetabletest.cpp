@@ -33,8 +33,6 @@ SERIALIZETABLE_END(TestStruct)
 TEST(Serialize_Table, Test1)
 {
 
-		Engine::Serialize::Debugging::setLoggingEnabled(true);
-
     TestManager mgr1("table1");
     TestManager mgr2("table2");
 

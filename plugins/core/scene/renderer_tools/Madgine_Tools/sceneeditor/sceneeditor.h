@@ -6,6 +6,8 @@
 
 #include "sceneview.h"
 
+#include "Madgine/scene/entity/entityptr.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -34,14 +36,14 @@ namespace Tools {
 
         void deselect();
         void select(Render::Camera *camera);
-        void select(Scene::Entity::Entity *entity);
+        void select(const Scene::Entity::EntityPtr &entity);
 
         Scene::SceneManager &sceneMgr();
 
     private:
         void renderSelection();
         void renderHierarchy();
-        void renderEntity(Scene::Entity::Entity *entity);
+        void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
 
     private:
@@ -52,7 +54,7 @@ namespace Tools {
         Inspector *mInspector;
         Scene::SceneManager *mSceneMgr;
 
-        Scene::Entity::Entity *mSelectedEntity = nullptr;
+        Scene::Entity::EntityPtr mSelectedEntity;
         Render::Camera *mSelectedCamera = nullptr;
 
         bool mHierarchyVisible = false;

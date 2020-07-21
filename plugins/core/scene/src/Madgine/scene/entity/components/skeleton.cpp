@@ -14,8 +14,8 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        Skeleton::Skeleton(Scene::Entity::Entity &e, const ObjectPtr &data)
-            : EntityComponent(e, data)
+        Skeleton::Skeleton(const ObjectPtr &data)
+            : EntityComponent(data)
         {
             if (const Engine::ValueType &v = data["skeleton"]; v.is<std::string>()) {
                 setName(v.as<std::string>());

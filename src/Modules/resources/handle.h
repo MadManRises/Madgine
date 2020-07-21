@@ -80,6 +80,10 @@ namespace Resources {
             *this = Loader::load(name, loader);
         }
 
+        void reset() {
+            mData = Data {};
+        }
+
         Data mData;
     };
 

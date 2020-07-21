@@ -33,11 +33,11 @@ struct ComponentRegistryListener {
 template <typename F>
 struct ComponentRegistryListenerEntry {
     ComponentRegistryListener *mListener;
-    void (*mF)(ComponentRegistryListener *, CollectorInfoBase *, bool, const std::vector<F> &);
+    void (*mF)(ComponentRegistryListener *, CollectorInfoBase *, bool, const std::vector<F> &, CompoundAtomicOperation &);
 
-    void operator()(CollectorInfoBase *info, bool add, const std::vector<F> &comps)
+    void operator()(CollectorInfoBase *info, bool add, const std::vector<F> &comps, CompoundAtomicOperation &op)
     {
-        mF(mListener, info, add, comps);
+        mF(mListener, info, add, comps, op);
     }
 };
 
@@ -59,8 +59,8 @@ struct MODULES_EXPORT ComponentRegistryBase {
         registryRegistry().erase(mTi->mFullName);
     }
 
-    virtual void onPluginLoad(const Plugins::BinaryInfo *) = 0;
-    virtual void onPluginUnload(const Plugins::BinaryInfo *) = 0;
+    virtual void onPluginLoad(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
+    virtual void onPluginUnload(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
 
     const TypeInfo *type_info()
     {
@@ -134,7 +134,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         mUnloadedCollectors.push_back(info);
     }
 
-    void onPluginLoad(const Plugins::BinaryInfo *bin)
+    void onPluginLoad(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
     {
         for (auto it = mUnloadedCollectors.begin(); it != mUnloadedCollectors.end();) {
             CollectorInfo *info = *it;
@@ -146,7 +146,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                     mComponents.push_back(f);
                 }
                 for (Listener &listener : mListeners) {
-                    listener(info, true, comps);
+                    listener(info, true, comps, op);
                 }
                 it = mUnloadedCollectors.erase(it);
             } else {
@@ -161,7 +161,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
         mUnloadedCollectors.erase(std::remove(mUnloadedCollectors.begin(), mUnloadedCollectors.end(), info), mUnloadedCollectors.end());
     }
 
-    void onPluginUnload(const Plugins::BinaryInfo *bin)
+    void onPluginUnload(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
     {
         for (auto it = mLoadedCollectors.begin(); it != mLoadedCollectors.end();) {
             CollectorInfo *info = static_cast<CollectorInfo *>(*it);
@@ -177,7 +177,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
 
                 std::vector<F> clearV {};
                 for (Listener &listener : mListeners) {
-                    listener(info, false, clearV);
+                    listener(info, false, clearV, op);
                 }
 
                 info->mBaseIndex = std::numeric_limits<size_t>::max();

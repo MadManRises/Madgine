@@ -22,9 +22,9 @@ namespace Serialize {
         using RequestBuilder<Builder>::RequestBuilder;
 
         template <typename C>
-        auto init(C &&c)
+        auto init(C &&c) &&
         {
-            return this->template append<3>(std::forward<C>(c));
+            return std::move(*this).template append<3>(std::forward<C>(c));
         }
     };
 
@@ -84,6 +84,11 @@ namespace Serialize {
                     std::terminate();
                 }
             }
+            return *this;
+        }
+
+        SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>& operator=(SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>&& other) {
+            Base::operator=(std::move(other));
             return *this;
         }
 
@@ -172,19 +177,19 @@ namespace Serialize {
             };
         }
 
-        struct InsertOperation : Base::InsertOperation {
-            InsertOperation(container_t &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        struct _InsertOperation : Base::InsertOperation {
+            _InsertOperation(container_t &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
                 : Base::InsertOperation(c, where)
                 , mAnswerTarget(answerTarget)
                 , mAnswerId(answerId)
             {
             }
-            ~InsertOperation()
+            ~_InsertOperation()
             {
-                assert(this->mTriggered == 1);
-                if (this->mLastInserted) {
+                assert(this->mCalled);
+                if (this->mInserted) {
                     if (this->mContainer.isSynced()) {
-                        container().writeAction(INSERT_ITEM, &this->mLastIt, mAnswerTarget, mAnswerId);
+                        container().writeAction(INSERT_ITEM, &this->mIt, mAnswerTarget, mAnswerId);
                     }
                 }
             }
@@ -199,8 +204,8 @@ namespace Serialize {
             TransactionId mAnswerId;
         };
 
-        struct RemoveOperation : Base::RemoveOperation {
-            RemoveOperation(container_t &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        struct _RemoveOperation : Base::RemoveOperation {
+            _RemoveOperation(container_t &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
@@ -214,8 +219,8 @@ namespace Serialize {
             }
         };
 
-        struct RemoveRangeOperation : Base::RemoveRangeOperation {
-            RemoveRangeOperation(container_t &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        struct _RemoveRangeOperation : Base::RemoveRangeOperation {
+            _RemoveRangeOperation(container_t &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
@@ -237,14 +242,14 @@ namespace Serialize {
             }
         };
 
-        struct ResetOperation : Base::ResetOperation {
-            ResetOperation(container_t &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        struct _ResetOperation : Base::ResetOperation {
+            _ResetOperation(container_t &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
                 : Base::ResetOperation(c)
                 , mAnswerTarget(answerTarget)
                 , mAnswerId(answerId)
             {
             }
-            ~ResetOperation()
+            ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
                     /*for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
@@ -262,10 +267,18 @@ namespace Serialize {
                 return static_cast<container_t &>(this->mContainer);
             }
 
+            
+            using Base::ResetOperation::operator=;
+
         private:
             ParticipantId mAnswerTarget;
             TransactionId mAnswerId;
         };
+
+        using InsertOperation = AtomicContainerOperation<_InsertOperation>;
+        using RemoveOperation = AtomicContainerOperation<_RemoveOperation>;
+        using RemoveRangeOperation = AtomicContainerOperation<_RemoveRangeOperation>;
+        using ResetOperation = AtomicContainerOperation<_ResetOperation>;
 
     private:
         template <typename T, typename... Callbacks>

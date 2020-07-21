@@ -2,6 +2,11 @@
 
 #include "resourceloaderbase.h"
 
+#include "../keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Resources::ResourceLoaderBase)
+METATABLE_END(Engine::Resources::ResourceLoaderBase)
+
 namespace Engine {
 namespace Resources {
 

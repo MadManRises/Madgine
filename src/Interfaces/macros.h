@@ -28,6 +28,7 @@
 #define FOR_EACH1(f, sep, a) f(a)
 #define FOR_EACH2(f, sep, a, b) f(a) sep f(b)
 #define FOR_EACH3(f, sep, a, b, c) f(a) sep f(b) sep f(c)
+#define FOR_EACH4(f, sep, a, b, c, d) f(a) sep f(b) sep f(c) sep f(d)
 
 #define FOR_EACH(f, sep, ...) INVOKE(CONCAT2(FOR_EACH, NUM_ARGS(__VA_ARGS__)), f, sep, __VA_ARGS__)
 

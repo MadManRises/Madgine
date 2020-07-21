@@ -10,9 +10,8 @@ namespace Engine {
 
 namespace Scene {
     namespace Entity {
-        EntityComponentBase::EntityComponentBase(Entity &entity, const ObjectPtr &initTable)
-            : mEntity(&entity)
-            , mInitTable(initTable)
+        EntityComponentBase::EntityComponentBase(const ObjectPtr &initTable)
+            : mInitTable(initTable)
         {
         }
 
@@ -20,52 +19,17 @@ namespace Scene {
         {
         }
 
-        void EntityComponentBase::init()
+        void EntityComponentBase::init(const EntityPtr &entity)
         {
         }
 
-        void EntityComponentBase::finalize()
+        void EntityComponentBase::finalize(const EntityPtr &entity)
         {
-        }
-
-        Entity &EntityComponentBase::getEntity() const
-        {
-            return *mEntity;
-        }
-
-        EntityComponentBase *EntityComponentBase::getComponent(const std::string_view &name)
-        {
-            return mEntity->getComponent(name);
-        }
-
-        EntityComponentBase *EntityComponentBase::addComponent(const std::string_view &name, const ObjectPtr &init)
-        {
-            return mEntity->addComponent(name, init);
-        }
-
-        EntityComponentBase *EntityComponentBase::addComponent(size_t i, const std::string_view &name, const ObjectPtr &init)
-        {
-            return mEntity->addComponent(i, name, init);
-        }
-
-        SceneComponentBase &EntityComponentBase::getSceneComponent(size_t i, bool init)
-        {
-            return mEntity->getSceneComponent(i, init);
-        }
-
-        App::GlobalAPIBase &EntityComponentBase::getGlobalAPIComponent(size_t i, bool init)
-        {
-            return mEntity->getGlobalAPIComponent(i, init);
         }
 
         const ObjectPtr &EntityComponentBase::initTable()
         {
             return mInitTable;
-        }
-
-        void EntityComponentBase::moveToEntity(Entity *entity)
-        {
-            mEntity = entity;
         }
 
     }
@@ -77,4 +41,3 @@ METATABLE_END(Engine::Scene::Entity::EntityComponentBase)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::EntityComponentBase)
 SERIALIZETABLE_END(Engine::Scene::Entity::EntityComponentBase)
-

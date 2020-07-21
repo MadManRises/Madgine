@@ -134,6 +134,8 @@ UNIQUECOMPONENT(Engine::Tools::ProjectManager)
                 const std::vector<std::string> &configs = projectConfigs();
                 mConfig = configs.empty() ? "" : configs.front();
 
+                
+
                 mProjectChanged.emit(mProjectRoot, mConfig);
 
                 if (!mProjectRoot.empty()) {

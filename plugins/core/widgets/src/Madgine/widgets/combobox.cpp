@@ -5,7 +5,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::Widgets::Combobox)
+METATABLE_BEGIN_BASE(Engine::Widgets::Combobox, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::Combobox)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Combobox, Engine::Widgets::WidgetBase)

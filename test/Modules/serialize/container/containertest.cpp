@@ -36,8 +36,6 @@ SERIALIZETABLE_END(TestUnit)
 TEST(Serialize_Container, SyncedUnit)
 {
 
-    Engine::Serialize::Debugging::setLoggingEnabled(true);
-
     Engine::Threading::WorkGroup wg;
 
     TestManager mgr1("container1");
@@ -110,8 +108,6 @@ TEST(Serialize_Container, SyncedUnit)
 
 TEST(Serialize_Container, Array)
 {
-
-    Engine::Serialize::Debugging::setLoggingEnabled(true);
 
     //Engine::Threading::WorkGroup wg;
 

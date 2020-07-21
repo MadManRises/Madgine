@@ -10,7 +10,8 @@ out vec2 uv;
 
 void main()
 {
-   gl_Position = vec4((aPos * vec3(2,-2,-0.1)) - vec3(1,-1,0), 1.0);
+   gl_Position = vec4((aPos * vec3(2,-2,0)) - vec3(1,-1,0), 1.0);
+   gl_Position.z = 1.0 / (1.0 + aPos.z);
    color = aColor;
    uv = vec2(aUV.x, 1.0 - aUV.y);
 }

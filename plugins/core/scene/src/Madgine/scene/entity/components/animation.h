@@ -25,9 +25,10 @@ namespace Scene {
             void setStep(float step);
             float currentStep() const;
 
+            void applyTransform(const EntityPtr &entity);
+
         private:
             void refreshCache();
-            void applyTransform();
 
         private:
             Render::AnimationLoader::HandleType mAnimationList;

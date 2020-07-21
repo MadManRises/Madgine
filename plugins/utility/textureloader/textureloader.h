@@ -10,7 +10,6 @@ namespace Engine {
 namespace Render {
 
     enum DataFormat {
-        FORMAT_UNSIGNED_BYTE,
         FORMAT_FLOAT8,
         FORMAT_FLOAT32
     };

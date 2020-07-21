@@ -21,16 +21,16 @@ namespace Serialize {
             write(out, t, "Item");
         }
 
-        template <typename C, typename Op>
-        static typename C::iterator readItem(SerializeInStream& in, C &c) {
+        template <typename Op>
+        static typename container_traits<Op>::iterator readItem(SerializeInStream& in, Op &op) {
 
             in.format().beginExtended(in, "Item", 1);
             FixString_t<typename comparator_traits<Cmp>::type> key;
             read(in, key, "key");
-            typename C::iterator it = std::find_if(physical(c).begin(), physical(c).end(), [&](const auto &t) {
+            typename container_traits<Op>::iterator it = std::find_if(physical(op).begin(), physical(op).end(), [&](const auto &t) {
                 return comparator_traits<Cmp>::to_cmp_type(t) == key;
             });
-            if (it == physical(c).end())
+            if (it == physical(op).end())
                 std::terminate();
 
             read(in, *it, "Item");     
@@ -41,7 +41,7 @@ namespace Serialize {
         template <typename Op>
         static void clear(Op &op, uint32_t expected)
         {
-            if (op.size() != expected)
+            if (op.size() < expected) //TODO: ?
                 std::terminate();
         }
 

@@ -2,48 +2,50 @@
 
 #if ENABLE_PLUGINS
 
-#include "uniquecomponentcollectormanager.h"
+#    include "uniquecomponentcollectormanager.h"
 
-#include "uniquecomponentregistry.h"
+#    include "uniquecomponentregistry.h"
 
-#include "../plugins/pluginmanager.h"
+#    include "../plugins/pluginmanager.h"
 
-#include "../plugins/plugin.h"
+#    include "../plugins/plugin.h"
+
+#include "../generic/container/compoundatomicoperation.h"
 
 namespace Engine {
 
+UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr)
+    : mMgr(pluginMgr)
+{
+    mMgr.addListener(this);
+}
 
+UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
+{
+    mMgr.removeListener(this);
+}
 
-	UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager & pluginMgr) :
-		mMgr(pluginMgr)
-	{
-		mMgr.addListener(this);
-	}
+void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin *p)
+{
 
-	UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
-	{
-		mMgr.removeListener(this);
-	}
+    const Plugins::BinaryInfo *info = p->info();
 
-	void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin * p)
-	{
+    CompoundAtomicOperation op;
+    for (auto &[name, reg] : registryRegistry()) {
+        reg->onPluginLoad(info, op);
+    }
+}
 
-		const Plugins::BinaryInfo *info = p->info();
+bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
+{
+    const Plugins::BinaryInfo *info = p->info();
 
-		for (auto &[name, reg] : registryRegistry()) {
-			reg->onPluginLoad(info);
-		}
-	}
-
-	bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin * p)
-	{
-            const Plugins::BinaryInfo *info = p->info();
-
-		for (auto &[name, reg] : registryRegistry()) {
-			reg->onPluginUnload(info);
-		}
-		return true;
-	}
+    CompoundAtomicOperation op;
+    for (auto &[name, reg] : registryRegistry()) {
+        reg->onPluginUnload(info, op);
+    }
+    return true;
+}
 
 }
 

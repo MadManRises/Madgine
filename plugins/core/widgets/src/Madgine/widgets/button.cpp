@@ -13,20 +13,47 @@
 
 #include "fontloader.h"
 
-METATABLE_BEGIN(Engine::Widgets::Button)
+METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)
 MEMBER(mFontSize)
 PROPERTY(Font, getFont, setFont)
+PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::Widgets::Button)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
-FIELD(mFontSize)
 FIELD(mText)
+FIELD(mFontSize)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
+ENCAPSULATED_FIELD(Image, getImageName, setImageByName)
 SERIALIZETABLE_END(Engine::Widgets::Button)
 
 namespace Engine {
 namespace Widgets {
+
+        void Button::setImageByName(const std::string &name)
+    {
+        setImage(Resources::ImageLoader::getSingleton().get(name));
+    }
+
+    void Button::setImage(Resources::ImageLoader::ResourceType *image)
+    {
+        mImage = image;
+    }
+
+    std::string Button::getImageName() const
+    {
+        return mImage ? mImage->name() : "";
+    }
+
+    Resources::ImageLoader::ResourceType *Button::image() const
+    {
+        return mImage;
+    }
+
+    Resources::ImageLoader::ResourceType *Button::resource() const
+    {
+        return mImage;
+    }
 
     Threading::SignalStub<> &Button::clickEvent()
     {

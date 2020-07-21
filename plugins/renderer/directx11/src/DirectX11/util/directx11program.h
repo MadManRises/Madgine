@@ -29,6 +29,7 @@ namespace Render {
         DirectX11VertexShader *mVertexShader = nullptr;
         DirectX11PixelShader *mPixelShader = nullptr;
         std::vector<DirectX11Buffer> mConstantBuffers;
+        std::vector<DirectX11Buffer> mDynamicBuffers;
     };
 
 }

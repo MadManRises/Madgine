@@ -46,8 +46,9 @@ namespace UI {
         std::chrono::microseconds mSpawnInterval { 1000000 };
         std::chrono::microseconds mAcc { 0 };
 
-        std::list<Engine::Scene::Entity::Entity *> mBricks;
+        std::list<Engine::Scene::Entity::EntityPtr> mBricks;
 
+        Engine::Scene::SceneManager &mSceneMgr;
 		Engine::Render::SceneRenderPass mSceneRenderer;
     };
 

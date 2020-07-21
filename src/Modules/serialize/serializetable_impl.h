@@ -176,7 +176,7 @@ namespace Serialize {
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto P>
+    template <typename _disambiguate__dont_remove, auto P, typename... Args>
     constexpr Serializer sync(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -195,11 +195,13 @@ namespace Serialize {
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
 
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
-                (static_cast<Unit *>(unit)->*P).readAction(in);
+            [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
+                Unit *unit = static_cast<Unit *>(_unit);
+                Operations<T, Args...>::readAction(unit->*P, in, request, unit);
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout) {
-                (static_cast<Unit *>(unit)->*P).readRequest(inout);
+            [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
+                Unit *unit = static_cast<Unit *>(_unit);
+                Operations<T, Args...>::readRequest(unit->*P, inout, id, unit);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
             },
@@ -208,6 +210,14 @@ namespace Serialize {
             },
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
                 //UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
+            },
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
+                const Unit *unit = static_cast<const Unit *>(_unit);
+                Operations<T, Args...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
+            },
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
+                const Unit *unit = static_cast<const Unit *>(_unit);
+                Operations<T, Args...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
             }
         };
     }

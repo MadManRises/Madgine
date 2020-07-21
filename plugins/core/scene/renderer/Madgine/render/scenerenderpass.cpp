@@ -8,6 +8,7 @@
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
+#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/entity.h"
 
 #include "Madgine/render/rendertarget.h"
@@ -50,10 +51,13 @@ namespace Render {
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
 
-        for (Scene::Entity::Entity &e : mScene.entities()) {
+        for (typename GenerationVector<Scene::Entity::Entity>::iterator e = mScene.entities().begin(); e != mScene.entities().end(); ++e) {
+            Scene::Entity::Animation *anim = e->getComponent<Scene::Entity::Animation>();
+            if (anim)
+                anim->applyTransform(e);
 
-            Scene::Entity::Mesh *mesh = e.getComponent<Scene::Entity::Mesh>();
-            Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
+            Scene::Entity::Mesh *mesh = e->getComponent<Scene::Entity::Mesh>();
+            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
             if (mesh && mesh->isVisible() && transform) {
                 MeshData *meshData = mesh->data();
                 if (meshData) {
@@ -70,7 +74,7 @@ namespace Render {
                                             .Inverse()
                                             .Transpose();
 
-                    Scene::Entity::Skeleton *skeleton = e.getComponent<Scene::Entity::Skeleton>();
+                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
                     mPerObject.hasSkeleton = skeleton != nullptr;
 
                     mProgram.setParameters(mPerObject, 2);

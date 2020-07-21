@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../../generic/container/atomiccontaineroperation.h"
 #include "../../generic/container/container_api.h"
+#include "../../generic/container/observerevent.h"
 #include "../../generic/copy_traits.h"
 #include "../../generic/noopfunctor.h"
-#include "../../generic/container/observerevent.h"
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../unithelper.h"
@@ -15,7 +16,7 @@ namespace Serialize {
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
                                        CopyTraits<typename container_traits<C>::value_type>,
                                        C,
-                                       Observer {        
+                                       Observer {
 
         using _traits = container_traits<C>;
         using container = SerializableContainerImpl<C, Observer, controlled, OffsetPtr>;
@@ -51,9 +52,9 @@ namespace Serialize {
 
         SerializableContainerImpl(SerializableContainerImpl &&other)
         {
-            if (other.isSynced()) {
+            /*if (other.isSynced()) {
                 ContainerUnitHelper::setItemDataSynced(other, false);
-            }
+            }*/
             Base::operator=(std::move(other));
             mActiveIterator = std::move(other.mActiveIterator);
             ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
@@ -64,6 +65,16 @@ namespace Serialize {
         SerializableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(const Base &other)
         {
             ResetOperation { *this } = other;
+            return *this;
+        }
+
+        SerializableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(SerializableContainerImpl &&other)
+        {
+            Base::operator=(std::move(other));
+            mActiveIterator = std::move(other.mActiveIterator);
+            ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
+            other.Base::clear();
+            other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
             return *this;
         }
 
@@ -214,76 +225,136 @@ namespace Serialize {
             return it;
         }
 
-        struct Operation {
+        struct Operation : AtomicContainerOperationBase<container> {
 
-            Operation(container &c)
-                : mContainer(c)
-            {
-            }
+            using AtomicContainerOperationBase<container>::AtomicContainerOperationBase;
 
             size_t size()
             {
                 return mContainer.Base::size();
             }
 
-        protected:
-            container &mContainer;
+            template <typename... Ty>
+            auto emplace(const const_iterator &it, Ty &&... args)
+            {
+                return this->mContainer.emplace_intern(it, std::forward<Ty>(args)...);
+            }
+
+            decltype(auto) physical()
+            {
+                return Serialize::physical(this->mContainer);
+            }
         };
 
-        struct EmplaceOperation : Operation {
-            using Operation::Operation;
+        struct _InsertOperation : Operation {
+            _InsertOperation(container &c, const iterator &it)
+                : Operation(c)
+            {
+                if constexpr (!_traits::sorted) {
+                    if (this->mContainer.isItemActive(it)) {
+                        this->mContainer.Observer::operator()(it, BEFORE | INSERT_ITEM);
+                    }
+                }
+            }
 
             template <typename... Ty>
             auto emplace(const const_iterator &it, Ty &&... args)
             {
-                ++mTriggered;
-                auto retIt = this->mContainer.emplace_intern(it, std::forward<Ty>(args)...);
-                mLastIt = retIt;
-                mLastInserted = _traits::was_emplace_successful(retIt);
+                assert(!mCalled);
+                mCalled = true;
+                auto retIt = Operation::emplace(it, std::forward<Ty>(args)...);
+                mIt = retIt;
+                mInserted = _traits::was_emplace_successful(retIt);
                 return retIt;
             }
 
-        protected:
-            int mTriggered = 0;
-            bool mLastInserted;
-            iterator mLastIt;
-        };
-
-        /*struct EraseOperation : Operation {
-            using Operation::Operation;
-
-
-        };*/
-
-        struct InsertOperation : EmplaceOperation {
-            InsertOperation(container &c, const iterator &it)
-                : EmplaceOperation(c)
+            ~_InsertOperation()
             {
-                if (this->mContainer.isItemActive(it)) {
-                    this->mContainer.Observer::operator()(it, BEFORE | INSERT_ITEM);
+                assert(mCalled);
+                if constexpr (_traits::sorted) {
+                    if (this->mContainer.isItemActive(mIt)) {
+                        this->mContainer.Observer::operator()(std::next(mIt), BEFORE | INSERT_ITEM);
+                    }
                 }
-            }
-
-            ~InsertOperation()
-            {
-                assert(this->mTriggered == 1);
-                if (this->mLastInserted) {
+                if (mInserted) {
                     if (this->mContainer.isSynced())
-                        ItemUnitHelper::setItemDataSynced(*this->mLastIt, true);
+                        ItemUnitHelper::setItemDataSynced(*mIt, true);
                 }
-                if (this->mContainer.isItemActive(this->mLastIt)) {
-                    this->mContainer.Observer::operator()(this->mLastIt, (this->mLastInserted ? AFTER : ABORTED) | INSERT_ITEM);
-                    if (this->mLastInserted) {
-                        this->mContainer.Observer::operator()(this->mLastIt, BEFORE | ACTIVATE_ITEM);
-                        ItemUnitHelper::setItemActive(*this->mLastIt, true, true);
-                        this->mContainer.Observer::operator()(this->mLastIt, AFTER | ACTIVATE_ITEM);
+                if (this->mContainer.isItemActive(mIt)) {
+                    this->mContainer.Observer::operator()(mIt, (mInserted ? AFTER : ABORTED) | INSERT_ITEM);
+                    if (mInserted) {
+                        this->mContainer.Observer::operator()(mIt, BEFORE | ACTIVATE_ITEM);
+                        ItemUnitHelper::setItemActive(*mIt, true, true);
+                        this->mContainer.Observer::operator()(mIt, AFTER | ACTIVATE_ITEM);
                     }
                 }
             }
+
+        protected:
+            bool mCalled = false;
+            bool mInserted = false;
+            iterator mIt;
         };
 
-        struct RemoveOperation : Operation {
-            RemoveOperation(container &c, const iterator &it)
+        struct _MultiInsertOperation : Operation {
+            _MultiInsertOperation(container &c)
+                : Operation(c)
+            {
+            }
+
+            template <typename... Ty>
+            auto emplace(const const_iterator &it, Ty &&... args)
+            {
+                if constexpr (!_traits::sorted) {
+                    if (this->mContainer.isItemActive(it)) {
+                        this->mContainer.Observer::operator()(it, BEFORE | INSERT_ITEM);
+                    }
+                }
+                auto retIt = Operation::emplace(it, std::forward<Ty>(args)...);
+                bool wasInserted = _traits::was_emplace_successful(retIt);
+                if (wasInserted) {
+                    for (std::tuple<position_handle, bool, const_iterator> &handle : mIterators) {
+                        _traits::revalidateHandleAfterInsert(std::get<0>(handle), this->mContainer, static_cast<iterator>(retIt));
+                    }
+                }
+                mIterators.emplace_back(_traits::toPositionHandle(this->mContainer, retIt), wasInserted, it);
+                return retIt;
+            }
+
+            ~_MultiInsertOperation()
+            {
+                if constexpr (_traits::sorted) {
+                    for (std::tuple<position_handle, bool, const_iterator> &handle : mIterators) {
+                        iterator it = _traits::toIterator(this->mContainer, std::get<0>(handle));
+                        if (this->mContainer.isItemActive(it)) {
+                            this->mContainer.Observer::operator()(std::get<2>(handle), BEFORE | INSERT_ITEM);
+                        }
+                    }
+                }
+                for (std::tuple<position_handle, bool, const_iterator> &handle : mIterators) {
+                    iterator it = _traits::toIterator(this->mContainer, std::get<0>(handle));
+                    bool inserted = std::get<1>(handle);
+                    if (inserted) {
+                        if (this->mContainer.isSynced())
+                            ItemUnitHelper::setItemDataSynced(*it, true);
+                    }
+                    if (this->mContainer.isItemActive(it)) {
+                        this->mContainer.Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
+                        if (inserted) {
+                            this->mContainer.Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
+                            ItemUnitHelper::setItemActive(*it, true, true);
+                            this->mContainer.Observer::operator()(it, AFTER | ACTIVATE_ITEM);
+                        }
+                    }
+                }
+            }
+
+        protected:
+            std::vector<std::tuple<position_handle, bool, const_iterator>> mIterators;
+        };
+
+        struct _RemoveOperation : Operation {
+            _RemoveOperation(container &c, const iterator &it)
                 : Operation(c)
             {
                 if (this->mContainer.isSynced()) {
@@ -298,7 +369,7 @@ namespace Serialize {
                 }
             }
 
-            ~RemoveOperation()
+            ~_RemoveOperation()
             {
                 assert(mTriggered);
                 if (mWasActive) {
@@ -320,8 +391,8 @@ namespace Serialize {
             iterator mIt;
         };
 
-        struct RemoveRangeOperation : Operation {
-            RemoveRangeOperation(container &c, const iterator &from, const iterator &to)
+        struct _RemoveRangeOperation : Operation {
+            _RemoveRangeOperation(container &c, const iterator &from, const iterator &to)
                 : Operation(c)
             {
                 if (this->mContainer.isSynced()) {
@@ -338,7 +409,7 @@ namespace Serialize {
                 }
             }
 
-            ~RemoveRangeOperation()
+            ~_RemoveRangeOperation()
             {
                 assert(mTriggered);
                 for (size_t i = 0; i < mCount; ++i) {
@@ -360,9 +431,9 @@ namespace Serialize {
             iterator mIt;
         };
 
-        struct ResetOperation : EmplaceOperation {
-            ResetOperation(container &c)
-                : EmplaceOperation(c)
+        struct _ResetOperation : Operation {
+            _ResetOperation(container &c)
+                : Operation(c)
             {
                 if (this->mContainer.isSynced()) {
                     ContainerUnitHelper::setItemDataSynced(this->mContainer, false);
@@ -375,7 +446,7 @@ namespace Serialize {
                     mWasActive = true;
                 }
             }
-            ~ResetOperation()
+            ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
                     ContainerUnitHelper::setItemDataSynced(this->mContainer, true);
@@ -400,6 +471,12 @@ namespace Serialize {
         private:
             bool mWasActive = false;
         };
+
+        using InsertOperation = AtomicContainerOperation<_InsertOperation>;
+        using MultiInsertOperation = AtomicContainerOperation<_MultiInsertOperation>;
+        using RemoveOperation = AtomicContainerOperation<_RemoveOperation>;
+        using RemoveRangeOperation = AtomicContainerOperation<_RemoveRangeOperation>;
+        using ResetOperation = AtomicContainerOperation<_ResetOperation>;
 
     protected:
         bool isItemActive(const iterator &it)
@@ -474,13 +551,12 @@ namespace Serialize {
 }
 
 template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct underlying_container<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>> {
+struct underlying_container<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>, void> {
     typedef C type;
 };
 
-
 template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct container_traits<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>> : container_traits<C> {
+struct container_traits<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>, void> : container_traits<C> {
     typedef Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr> container;
 
     using _traits = container_traits<C>;
@@ -491,6 +567,5 @@ struct container_traits<Serialize::SerializableContainerImpl<C, Observer, contro
         return c.emplace(where, std::forward<Args>(args)...);
     }
 };
-
 
 }

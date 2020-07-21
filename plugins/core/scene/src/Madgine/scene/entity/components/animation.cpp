@@ -9,6 +9,10 @@
 
 #include "Modules/math/transformation.h"
 
+#include "../entity.h"
+
+#include "../entityptr.h"
+
 namespace Engine {
 
 namespace Scene {
@@ -43,7 +47,6 @@ namespace Scene {
         {
             mCurrentAnimation = desc;
             mCurrentStep = 0.0f;
-            applyTransform();
         }
 
         Render::AnimationDescriptor *Animation::currentAnimation() const
@@ -54,13 +57,11 @@ namespace Scene {
         void Animation::step(float delta)
         {
             mCurrentStep += delta;
-            applyTransform();
         }
 
         void Animation::setStep(float step)
         {
             mCurrentStep = step;
-            applyTransform();
         }
 
         float Animation::currentStep() const
@@ -79,18 +80,24 @@ namespace Scene {
             }
         }
 
-        void Animation::applyTransform()
+        void Animation::applyTransform(const EntityPtr &entity)
         {
             if (mAnimationList && mCurrentAnimation) {
-                if (getComponent<Skeleton>()->handle() != mSkeletonCache) {
-                    mSkeletonCache = getComponent<Skeleton>()->handle();
+                Skeleton *skeleton = entity->getComponent<Skeleton>();
+                if (!skeleton) {
+                    mSkeletonCache.reset();
+                    refreshCache();
+                    return;
+                }
+                if (skeleton->handle() != mSkeletonCache) {
+                    mSkeletonCache = entity->getComponent<Skeleton>()->handle();
                     refreshCache();
                 }
                 if (mSkeletonCache) {
                     float step = fmodf(mCurrentStep, mCurrentAnimation->mDuration);
                     if (step < 0.0f)
                         step += mCurrentAnimation->mDuration;
-                    std::vector<Matrix4> &matrices = getComponent<Skeleton>()->matrices();
+                    std::vector<Matrix4> &matrices = skeleton->matrices();
                     for (size_t i = 0; i < matrices.size(); ++i) {
                         int mappedBone = mBoneIndexMapping ? mBoneIndexMapping[i] : i;
                         if (mappedBone != -1) {

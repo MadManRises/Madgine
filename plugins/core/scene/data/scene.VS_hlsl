@@ -15,9 +15,14 @@ cbuffer PerObject : register(b2)
 {
     matrix m;
     matrix anti_m;
+
+    bool hasLight;
+	bool hasTexture;
+	bool hasDistanceField;
+	bool hasSkeleton;
 }
 
-cbuffer PerObject : register(b3)
+cbuffer Bones : register(b3)
 {
     matrix bones[32];
 }
@@ -65,11 +70,15 @@ VertexShaderOutput main(AppData IN)
 #endif
 
 #ifdef HAS_BONEINDICES0
-	matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
-	+ bones[IN.aBoneIDs[1]] * IN.aWeights[1]
-	+ bones[IN.aBoneIDs[2]] * IN.aWeights[2]
-	+ bones[IN.aBoneIDs[3]] * IN.aWeights[3];
-	OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0)));
+    if (hasSkeleton) {
+	    matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
+	    + bones[IN.aBoneIDs[1]] * IN.aWeights[1]
+	    + bones[IN.aBoneIDs[2]] * IN.aWeights[2]
+	    + bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+	    OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0)));
+    } else {
+        OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
+    }
 #else
 	OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
 #endif

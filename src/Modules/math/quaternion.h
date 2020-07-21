@@ -9,22 +9,22 @@ namespace Engine {
 struct Quaternion {
 
     Quaternion()
-        : w(1.0f)
-        , v(Vector3::ZERO)
+        : v(Vector3::ZERO)
+        , w(1.0f)
     {
     }
 
     Quaternion(float radian, const Vector3 &axis)
-        : w(cosf(0.5f * radian))
-        , v(axis)
+        : v(axis)
+        , w(cosf(0.5f * radian))
     {
         v.normalize();
         v *= sinf(0.5f * radian);
     }
 
-    Quaternion(float w, float x, float y, float z)
-        : w(w)
-        , v(x, y, z)
+    Quaternion(float x, float y, float z, float w)
+        : v(x, y, z)
+        , w(w)
     {
         normalize();
     }
@@ -140,8 +140,8 @@ struct Quaternion {
         w *= invNorm;
     }
 
-    float w;
     Vector3 v;
+    float w;
 };
 
 MODULES_EXPORT Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio);

@@ -38,6 +38,8 @@ namespace Serialize {
         bool isSynced() const;
         bool isMaster() const;
 
+        void swap(SerializableUnitBase &other);
+
     protected:
         void sync();
         void unsync();
@@ -96,15 +98,14 @@ namespace Serialize {
 
     template <typename T, typename Base>
     struct TableInitializer {
-        template <typename... Args>
-        TableInitializer(Args &&...)
+        TableInitializer()
         {
             static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
         }
         TableInitializer(const TableInitializer &)
         {
             static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
-        };
+        }
         TableInitializer(TableInitializer &&)
         {
             static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();

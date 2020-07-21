@@ -4,6 +4,8 @@
 
 #include "Modules/serialize/streams/serializestream.h"
 
+#include "Modules/serialize/primitivetypes.h"
+
 namespace Engine {
 namespace Ini {
 

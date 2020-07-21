@@ -93,6 +93,8 @@ void Atlas2::addBin(const Vector2i &origin)
 
 Atlas2::Entry Atlas2::insert(const Vector2i &size, const std::function<void()> &expand, bool allowFlip)
 {
+    assert(size.x <= mBinSize.x && size.y <= mBinSize.y);
+
     float score = 0;
     Bin *targetBin;
     int cornerIndex;
@@ -112,13 +114,7 @@ Atlas2::Entry Atlas2::insert(const Vector2i &size, const std::function<void()> &
         size_t store = mBins.size();
         expand();
         if (mBins.size() > store) {
-            auto [newScore, newCornerIndex, newFlipped] = getScore(mBins[store], mBinSize, size, allowFlip);
-            if (newScore > score) {
-                score = newScore;
-                cornerIndex = newCornerIndex;
-                targetBin = &mBins[store];
-                flipped = newFlipped;
-            }
+            return insert(size, expand, allowFlip);
         }
     }
 

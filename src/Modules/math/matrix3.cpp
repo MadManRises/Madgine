@@ -30,227 +30,227 @@ THE SOFTWARE.
 
 // Adapted from Matrix math by Wild Magic http://www.geometrictools.com/
 
-namespace Engine
-{
-    const Matrix3 Matrix3::ZERO(0,0,0,0,0,0,0,0,0);
-    const Matrix3 Matrix3::IDENTITY(1,0,0,0,1,0,0,0,1);
-    /*const float Matrix3::msSvdEpsilon = 1e-04f;
+namespace Engine {
+const Matrix3 Matrix3::ZERO(0, 0, 0, 0, 0, 0, 0, 0, 0);
+const Matrix3 Matrix3::IDENTITY(1, 0, 0, 0, 1, 0, 0, 0, 1);
+/*const float Matrix3::msSvdEpsilon = 1e-04f;
     const unsigned int Matrix3::msSvdMaxIterations = 32;*/
 
-    //-----------------------------------------------------------------------
-    Vector3 Matrix3::GetColumn (size_t iCol) const
-    {
-        assert( iCol < 3 );
-        return Vector3(m[iCol][0],m[iCol][1],
-            m[iCol][2]);
-    }
-    //-----------------------------------------------------------------------
-    void Matrix3::SetColumn(size_t iCol, const Vector3& vec)
-    {
-        assert( iCol < 3 );
-        m[iCol][0] = vec.x;
-        m[iCol][1] = vec.y;
-        m[iCol][2] = vec.z;
+//-----------------------------------------------------------------------
+Vector3 Matrix3::GetColumn(size_t iCol) const
+{
+    return &m00 + (iCol * 3);
+}
+//-----------------------------------------------------------------------
+void Matrix3::SetColumn(size_t iCol, const Vector3 &vec)
+{
+    assert(iCol < 3);
+    float *out = &m00 + (iCol * 3);
+    out[0] = vec.x;
+    out[1] = vec.y;
+    out[2] = vec.z;
+}
+//-----------------------------------------------------------------------
+void Matrix3::FromAxes(const Vector3 &xAxis, const Vector3 &yAxis, const Vector3 &zAxis)
+{
+    SetColumn(0, xAxis);
+    SetColumn(1, yAxis);
+    SetColumn(2, zAxis);
+}
 
-    }
-    //-----------------------------------------------------------------------
-    void Matrix3::FromAxes(const Vector3& xAxis, const Vector3& yAxis, const Vector3& zAxis)
-    {
-        SetColumn(0,xAxis);
-        SetColumn(1,yAxis);
-        SetColumn(2,zAxis);
+//-----------------------------------------------------------------------
+bool Matrix3::operator==(const Matrix3 &rkMatrix) const
+{
+    return m00 == rkMatrix.m00 && m01 == rkMatrix.m01 && m02 == rkMatrix.m02
+        && m10 == rkMatrix.m10 && m11 == rkMatrix.m11 && m12 == rkMatrix.m12
+        && m20 == rkMatrix.m20 && m21 == rkMatrix.m21 && m22 == rkMatrix.m22;
+}
+//-----------------------------------------------------------------------
+Matrix3 &Matrix3::operator+=(const Matrix3 &rkMatrix)
+{
+    m00 += rkMatrix.m00;
+    m01 += rkMatrix.m01;
+    m02 += rkMatrix.m02;
+    m10 += rkMatrix.m10;
+    m11 += rkMatrix.m11;
+    m12 += rkMatrix.m12;
+    m20 += rkMatrix.m20;
+    m21 += rkMatrix.m21;
+    m22 += rkMatrix.m22;
+    return *this;
+}
 
-    }
+Matrix3 Matrix3::operator+(const Matrix3 &rkMatrix) const
+{
+    Matrix3 kSum = *this;
+    kSum += rkMatrix;
+    return kSum;
+}
+//-----------------------------------------------------------------------
+Matrix3 &Matrix3::operator-=(const Matrix3 &rkMatrix)
+{
+    m00 -= rkMatrix.m00;
+    m01 -= rkMatrix.m01;
+    m02 -= rkMatrix.m02;
+    m10 -= rkMatrix.m10;
+    m11 -= rkMatrix.m11;
+    m12 -= rkMatrix.m12;
+    m20 -= rkMatrix.m20;
+    m21 -= rkMatrix.m21;
+    m22 -= rkMatrix.m22;
+    return *this;
+}
 
-    //-----------------------------------------------------------------------
-    bool Matrix3::operator== (const Matrix3& rkMatrix) const
-    {
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-            {
-                if ( m[iRow][iCol] != rkMatrix.m[iRow][iCol] )
-                    return false;
-            }
-        }
+Matrix3 Matrix3::operator-(const Matrix3 &rkMatrix) const
+{
+    Matrix3 kDiff = *this;
+    kDiff -= rkMatrix;
+    return kDiff;
+}
+//-----------------------------------------------------------------------
+Matrix3 Matrix3::operator*(const Matrix3 &rkMatrix) const
+{
+    return {
+        m00 * rkMatrix.m00 + m10 * rkMatrix.m01 + m20 * rkMatrix.m02,
+        m00 * rkMatrix.m10 + m10 * rkMatrix.m11 + m20 * rkMatrix.m12,
+        m00 * rkMatrix.m20 + m10 * rkMatrix.m21 + m20 * rkMatrix.m22,
+        m01 * rkMatrix.m00 + m11 * rkMatrix.m01 + m21 * rkMatrix.m02,
+        m01 * rkMatrix.m10 + m11 * rkMatrix.m11 + m21 * rkMatrix.m12,
+        m01 * rkMatrix.m20 + m11 * rkMatrix.m21 + m21 * rkMatrix.m22,
+        m02 * rkMatrix.m00 + m12 * rkMatrix.m01 + m22 * rkMatrix.m02,
+        m02 * rkMatrix.m10 + m12 * rkMatrix.m11 + m22 * rkMatrix.m12,
+        m02 * rkMatrix.m20 + m12 * rkMatrix.m21 + m22 * rkMatrix.m22
+    };
+}
+//-----------------------------------------------------------------------
+Vector3 Matrix3::operator*(const Vector3 &rkPoint) const
+{
+    return { m00 * rkPoint[0] + m10 * rkPoint[1] + m20 * rkPoint[2],
+        m01 * rkPoint[0] + m11 * rkPoint[1] + m21 * rkPoint[2],
+        m02 * rkPoint[0] + m12 * rkPoint[1] + m22 * rkPoint[2] };
+}
+//-----------------------------------------------------------------------
+Vector3 operator*(const Vector3 &rkPoint, const Matrix3 &rkMatrix)
+{
+    return { rkPoint[0] * rkMatrix.m00 + rkPoint[1] * rkMatrix.m01 + rkPoint[2] * rkMatrix.m02,
+        rkPoint[0] * rkMatrix.m10 + rkPoint[1] * rkMatrix.m11 + rkPoint[2] * rkMatrix.m12,
+        rkPoint[0] * rkMatrix.m20 + rkPoint[1] * rkMatrix.m21 + rkPoint[2] * rkMatrix.m22 };
+}
+//-----------------------------------------------------------------------
+Matrix3 Matrix3::operator-() const
+{
+    return {
+        -m00,
+        -m10,
+        -m20,
+        -m01,
+        -m11,
+        -m21,
+        -m02,
+        -m12,
+        -m22
+    };
+}
+//-----------------------------------------------------------------------
+Matrix3 Matrix3::operator*(float fScalar) const
+{
+    return {
+        fScalar * m00,
+        fScalar * m10,
+        fScalar * m20,
+        fScalar * m01,
+        fScalar * m11,
+        fScalar * m21,
+        fScalar * m02,
+        fScalar * m12,
+        fScalar * m22
+    };
+}
+//-----------------------------------------------------------------------
+Matrix3 operator*(float fScalar, const Matrix3 &rkMatrix)
+{
+    return {
+        fScalar * rkMatrix.m00,
+        fScalar * rkMatrix.m10,
+        fScalar * rkMatrix.m20,
+        fScalar * rkMatrix.m01,
+        fScalar * rkMatrix.m11,
+        fScalar * rkMatrix.m21,
+        fScalar * rkMatrix.m02,
+        fScalar * rkMatrix.m12,
+        fScalar * rkMatrix.m22
+    };
+}
+//-----------------------------------------------------------------------
+Matrix3 Matrix3::Transpose() const
+{
+    return {
+        m00,
+        m01,
+        m02,
+        m10,
+        m11,
+        m12,
+        m20,
+        m21,
+        m22
+    };
+}
+//-----------------------------------------------------------------------
+bool Matrix3::Inverse(Matrix3 &rkInverse, float fTolerance) const
+{
+    // Invert a 3x3 using cofactors.  This is about 8 times faster than
+    // the Numerical Recipes code which uses Gaussian elimination.
 
-        return true;
-    }
-    //-----------------------------------------------------------------------
-	Matrix3& Matrix3::operator+=(const Matrix3& rkMatrix) {
-            for (size_t iRow = 0; iRow < 3; iRow++) {
-                for (size_t iCol = 0; iCol < 3; iCol++) {
-                    m[iRow][iCol] += rkMatrix.m[iRow][iCol];
-                }
-            }
-            return *this;
-	}
+    rkInverse.m00 = m11 * m22 - m21 * m12;
+    rkInverse.m10 = m20 * m12 - m10 * m22;
+    rkInverse.m20 = m10 * m21 - m20 * m11;
+    rkInverse.m01 = m21 * m02 - m01 * m22;
+    rkInverse.m11 = m00 * m22 - m20 * m02;
+    rkInverse.m21 = m20 * m01 - m00 * m21;
+    rkInverse.m02 = m01 * m12 - m11 * m02;
+    rkInverse.m12 = m10 * m02 - m00 * m12;
+    rkInverse.m22 = m00 * m11 - m10 * m01;
 
-    Matrix3 Matrix3::operator+ (const Matrix3& rkMatrix) const
-    {
-        Matrix3 kSum = *this;
-        kSum += rkMatrix;
-        return kSum;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::operator- (const Matrix3& rkMatrix) const
-    {
-        Matrix3 kDiff;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-            {
-                kDiff.m[iRow][iCol] = m[iRow][iCol] -
-                    rkMatrix.m[iRow][iCol];
-            }
-        }
-        return kDiff;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::operator* (const Matrix3& rkMatrix) const
-    {
-        Matrix3 kProd;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-            {
-                kProd.m[iCol][iRow] = m[0][iRow] * rkMatrix.m[iCol][0] + m[1][iRow] * rkMatrix.m[iCol][1] + m[2][iRow] * rkMatrix.m[iCol][2];
-            }
-        }
-        return kProd;
-    }
-    //-----------------------------------------------------------------------
-    Vector3 Matrix3::operator* (const Vector3& rkPoint) const
-    {
-        Vector3 kProd;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            kProd[iRow] = m[0][iRow] * rkPoint[0] + m[1][iRow] * rkPoint[1] + m[2][iRow] * rkPoint[2];
-        }
-        return kProd;
-    }
-    //-----------------------------------------------------------------------
-    Vector3 operator* (const Vector3& rkPoint, const Matrix3& rkMatrix)
-    {
-        Vector3 kProd;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            kProd[iRow] = rkPoint[0] * rkMatrix.m[iRow][0] + rkPoint[1] * rkMatrix.m[iRow][1] + rkPoint[2] * rkMatrix.m[iRow][2];
-        }
-        return kProd;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::operator- () const
-    {
-        Matrix3 kNeg;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-                kNeg[iRow][iCol] = -m[iRow][iCol];
-        }
-        return kNeg;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::operator* (float fScalar) const
-    {
-        Matrix3 kProd;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-                kProd[iRow][iCol] = fScalar*m[iRow][iCol];
-        }
-        return kProd;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 operator* (float fScalar, const Matrix3& rkMatrix)
-    {
-        Matrix3 kProd;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-                kProd[iRow][iCol] = fScalar*rkMatrix.m[iRow][iCol];
-        }
-        return kProd;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::Transpose () const
-    {
-        Matrix3 kTranspose;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-                kTranspose[iCol][iRow] = m[iRow][iCol];
-        }
-        return kTranspose;
-    }
-    //-----------------------------------------------------------------------
-    bool Matrix3::Inverse (Matrix3& rkInverse, float fTolerance) const
-    {
-        // Invert a 3x3 using cofactors.  This is about 8 times faster than
-        // the Numerical Recipes code which uses Gaussian elimination.
+    float fDet = m00 * rkInverse.m00 + m10 * rkInverse.m01 + m20 * rkInverse.m02;
 
-        rkInverse[0][0] = m[1][1]*m[2][2] -
-            m[2][1]*m[1][2];
-        rkInverse[1][0] = m[2][0]*m[1][2] -
-            m[1][0]*m[2][2];
-        rkInverse[2][0] = m[1][0]*m[2][1] -
-            m[2][0]*m[1][1];
-        rkInverse[0][1] = m[2][1]*m[0][2] -
-            m[0][1]*m[2][2];
-        rkInverse[1][1] = m[0][0]*m[2][2] -
-            m[2][0]*m[0][2];
-        rkInverse[2][1] = m[2][0]*m[0][1] -
-            m[0][0]*m[2][1];
-        rkInverse[0][2] = m[0][1]*m[1][2] -
-            m[1][1]*m[0][2];
-        rkInverse[1][2] = m[1][0]*m[0][2] -
-            m[0][0]*m[1][2];
-        rkInverse[2][2] = m[0][0]*m[1][1] -
-            m[1][0]*m[0][1];
+    if (isZero(fDet))
+        return false;
 
-		float fDet =
-            m[0][0]*rkInverse[0][0] +
-            m[1][0]*rkInverse[0][1]+
-            m[2][0]*rkInverse[0][2];
+    float fInvDet = 1.0f / fDet;
+    rkInverse.m00 *= fInvDet;
+    rkInverse.m01 *= fInvDet;
+    rkInverse.m02 *= fInvDet;
+    rkInverse.m10 *= fInvDet;
+    rkInverse.m11 *= fInvDet;
+    rkInverse.m12 *= fInvDet;
+    rkInverse.m20 *= fInvDet;
+    rkInverse.m21 *= fInvDet;
+    rkInverse.m22 *= fInvDet;    
+    
 
-        if ( isZero(fDet) )
-            return false;
+    return true;
+}
+//-----------------------------------------------------------------------
+Matrix3 Matrix3::Inverse(float fTolerance) const
+{
+    Matrix3 kInverse = Matrix3::ZERO;
+    Inverse(kInverse, fTolerance);
+    return kInverse;
+}
+//-----------------------------------------------------------------------
+float Matrix3::Determinant() const
+{
+    float fCofactor00 = m11 * m22 - m21 * m12;
+    float fCofactor10 = m21 * m02 - m01 * m22;
+    float fCofactor20 = m01 * m12 - m11 * m02;
 
-		float fInvDet = 1.0f/fDet;
-        for (size_t iRow = 0; iRow < 3; iRow++)
-        {
-            for (size_t iCol = 0; iCol < 3; iCol++)
-                rkInverse[iCol][iRow] *= fInvDet;
-        }
+    float fDet = m00 * fCofactor00 + m10 * fCofactor10 + m20 * fCofactor20;
 
-        return true;
-    }
-    //-----------------------------------------------------------------------
-    Matrix3 Matrix3::Inverse (float fTolerance) const
-    {
-        Matrix3 kInverse = Matrix3::ZERO;
-        Inverse(kInverse,fTolerance);
-        return kInverse;
-    }
-    //-----------------------------------------------------------------------
-	float Matrix3::Determinant () const
-    {
-		float fCofactor00 = m[1][1]*m[2][2] -
-            m[2][1]*m[1][2];
-		float fCofactor10 = m[2][1]*m[0][2] -
-            m[0][1]*m[2][2];
-		float fCofactor20 = m[0][1]*m[1][2] -
-            m[1][1]*m[0][2];
-
-		float fDet =
-            m[0][0]*fCofactor00 +
-            m[1][0]*fCofactor10 +
-            m[2][0]*fCofactor20;
-
-        return fDet;
-    }
-    //-----------------------------------------------------------------------
-    /*void Matrix3::Bidiagonalize (Matrix3& kA, Matrix3& kL,
+    return fDet;
+}
+//-----------------------------------------------------------------------
+/*void Matrix3::Bidiagonalize (Matrix3& kA, Matrix3& kL,
         Matrix3& kR)
     {
 		float afV[3], afW[3];
@@ -965,8 +965,8 @@ namespace Engine
             rkAxis.z = 0.0;
         }
     }*/
-    //-----------------------------------------------------------------------
-    /*void Matrix3::FromAngleAxis (const Vector3& rkAxis, const Radian& fRadians)
+//-----------------------------------------------------------------------
+/*void Matrix3::FromAngleAxis (const Vector3& rkAxis, const Radian& fRadians)
     {
         Real fCos = Math::Cos(fRadians);
         Real fSin = Math::Sin(fRadians);
@@ -1321,8 +1321,8 @@ namespace Engine
 
         *this = kZMat*(kYMat*kXMat);
     }*/
-    //-----------------------------------------------------------------------
-    /*void Matrix3::Tridiagonal (float afDiag[3], float afSubDiag[3])
+//-----------------------------------------------------------------------
+/*void Matrix3::Tridiagonal (float afDiag[3], float afSubDiag[3])
     {
         // Householder reduction T = Q^t M Q
         //   Input:
@@ -1496,5 +1496,5 @@ namespace Engine
                 rkProduct[iRow][iCol] = rkU[iRow]*rkV[iCol];
         }
     }*/
-    //-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 }

@@ -24,9 +24,9 @@ namespace Server {
 
     protected:
         template <typename T>
-        int go(T initCallback, Threading::WorkGroup &workgroup)
+        int go(T initCallback)
         {
-            return TupleUnpacker::invokeDefaultResult(0, std::move(initCallback), workgroup, &mHandle);
+            return TupleUnpacker::invokeDefaultResult(0, std::move(initCallback), &mHandle);
         }
 
     private:

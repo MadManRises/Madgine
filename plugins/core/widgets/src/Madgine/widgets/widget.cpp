@@ -563,7 +563,7 @@ namespace Widgets {
 
             cursorX += g.mAdvance / 64.0f * scaleX;
         }
-        return { result, { font->mTextureHandle, Render::TextureFlag_IsDistanceField } };
+        return { result, { *font->mTextureHandle, Render::TextureFlag_IsDistanceField } };
     }
 
 }

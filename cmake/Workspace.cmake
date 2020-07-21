@@ -380,7 +380,7 @@ function(install_interface_to_workspace name)
 		target_include_directories(${target} INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${target}/include>)
 	endforeach()
 
-endfunction(install_to_workspace)
+endfunction(install_interface_to_workspace)
 
 
 #TODO Iterate over all files in subdirectory

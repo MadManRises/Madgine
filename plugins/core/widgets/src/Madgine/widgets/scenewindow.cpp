@@ -19,7 +19,7 @@
 
 #include "textureloader.h"
 
-METATABLE_BEGIN(Engine::Widgets::SceneWindow)
+METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::SceneWindow)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)

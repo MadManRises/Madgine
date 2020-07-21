@@ -25,7 +25,7 @@ namespace Derive_impl {
     template <typename...>       \
     friend struct __VA_ARGS__ Derive_impl_##Name##_def;
 
-#define DERIVE_FUNCTION(Name, ...)                                                                                                                                                               \
+#define DERIVE_FUNCTION2(Name, Fn, ...)                                                                                                                                                               \
     template <typename... Args>                                                                                                                                                                  \
     struct Derive_impl_##Name##_def {                                                                                                                                                            \
         template <typename T>                                                                                                                                                                    \
@@ -67,6 +67,8 @@ namespace Derive_impl {
     constexpr bool has_function_##Name##_v = has_function_##Name<T, Engine::Derive_impl::prio<0>, Args...>::value;                                                                               \
     template <typename T, size_t delim, typename... Args>                                                                                                                                                      \
     constexpr bool has_function_##Name##_upTo_v = has_function_##Name<T, Engine::Derive_impl::upToPrio<delim>, Args...>::value;
+
+#define DERIVE_FUNCTION(Name, ...) DERIVE_FUNCTION2(Name, Name, __VA_ARGS__)
 
 #define DERIVE_TYPENAME(Name)                                                  \
     template <typename T, typename = void>                                     \

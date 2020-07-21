@@ -115,13 +115,16 @@ namespace Threading {
                 }
             }
             if (mRunning) {
-                for (RepeatedTask &task : mRepeatedTasks) {
-                    if (task.mNextExecuted <= std::chrono::steady_clock::now()) {
-                        task.mNextExecuted = std::chrono::steady_clock::now() + task.mInterval;
-                        return wrapTask([&]() { task.mTask(); });
-                    } else {
-                        nextTaskTimepoint = std::min(task.mNextExecuted, nextTaskTimepoint);
+                RepeatedTask *nextTask = nullptr;
+                for (RepeatedTask &task : mRepeatedTasks) {                    
+                    if (task.mNextExecuted < nextTaskTimepoint) {
+                        nextTask = &task;
+                        nextTaskTimepoint = task.mNextExecuted;                    
                     }
+                }
+                if (nextTask && nextTaskTimepoint <= std::chrono::steady_clock::now()) {
+                    nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
+                    return wrapTask([=]() { nextTask->mTask(); });
                 }
             }
         }

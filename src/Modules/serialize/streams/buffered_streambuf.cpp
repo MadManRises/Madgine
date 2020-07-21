@@ -116,7 +116,7 @@ namespace Serialize {
     void buffered_streambuf::popRequest(TransactionId id)
     {
         assert(id != 0);
-        assert(mPendingRequests.front().mId == id);
+        assert(mPendingRequests.front().mId == id);        
         mPendingRequests.pop();
     }
 

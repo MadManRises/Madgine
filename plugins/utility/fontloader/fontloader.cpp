@@ -103,9 +103,9 @@ namespace Render {
 
     bool FontLoader::loadImpl(Font &font, ResourceType *res)
     {
-        font.mTexture.create(res->name(), FORMAT_UNSIGNED_BYTE);
+        font.mTexture.create(res->name(), FORMAT_FLOAT8);
         font.mTexture.setMinMode(MIN_NEAREST);
-        font.mTextureHandle = font.mTexture->mTextureHandle;
+        font.mTextureHandle = &font.mTexture->mTextureHandle;
 
         if (res->path().extension() == ".msdf") {
 
@@ -181,7 +181,6 @@ namespace Render {
             size_t byteSize = font.mTextureSize.x * font.mTextureSize.y;
             std::unique_ptr<std::array<unsigned char, 4>[]> texBuffer = std::make_unique<std::array<unsigned char, 4>[]>(byteSize);
             AreaView<std::array<unsigned char, 4>, 2> tex { texBuffer.get(), { static_cast<size_t>(font.mTextureSize.x), static_cast<size_t>(font.mTextureSize.y) } };
-            tex.flip(1);
 
             for (unsigned char c = 0; c < 128; c++) {
 

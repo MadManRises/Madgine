@@ -8,7 +8,6 @@
 #include "../renderer/imroot.h"
 #include "imgui/imguiaddons.h"
 
-
 #include "Modules/plugins/plugin.h"
 
 #include "Modules/resources/resourcemanager.h"
@@ -144,7 +143,7 @@ namespace Tools {
                                                                  if (hasSuggestions) {
                                                                      ImGui::BeginTreeArrow(id.c_str());
                                                                      ImGui::SameLine();
-                                                                     if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
+                                                                     if (ImGui::BeginCombo((id + "##suggestions").c_str(), scope.name().c_str())) {
                                                                          for (std::pair<std::string, TypedScopePtr> p : it->second()) {
                                                                              if (ImGui::Selectable(p.first.c_str())) {
                                                                                  value = p.second;
@@ -189,7 +188,7 @@ namespace Tools {
                                                                      key = it->mKey.toShortString() + "##" + key;
                                                                  } else if (value.is<TypedScopePtr>()) {
                                                                      key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
-																 }
+                                                                 }
                                                                  if (drawValueImpl(element, {}, key, value, /*editable && */ it->mValue.isEditable())) {
                                                                      it->mValue = value;
                                                                  }
@@ -385,4 +384,3 @@ METATABLE_END(Engine::Tools::Inspector)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Inspector, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Inspector)
-

@@ -50,8 +50,7 @@ namespace Serialize {
         MessageHeader header;
         stream.readHeader(header);
 
-        if (header.mObject == SERIALIZE_MANAGER) {
-            stream.logReadHeader(header, name());
+        if (header.mObject == SERIALIZE_MANAGER) {            
             ParticipantId id;
             switch (header.mCmd) {
             case INITIAL_STATE_DONE:
@@ -68,7 +67,6 @@ namespace Serialize {
             }
         } else {
             SerializableUnitBase *object = convertPtr(stream, header.mObject);
-            stream.logReadHeader(header, typeid(*object).name());
             switch (header.mType) {
             case ACTION: {
                 PendingRequest *request = stream.fetchRequest(header.mTransaction);

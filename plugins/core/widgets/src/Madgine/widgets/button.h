@@ -12,15 +12,17 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Button() = default;
 
+         void setImageByName(const std::string &name);
+        void setImage(Resources::ImageLoader::ResourceType *image);
+
+        std::string getImageName() const;
+        Resources::ImageLoader::ResourceType *image() const;
+
+                Resources::ImageLoader::ResourceType *resource() const override;
+
         Threading::SignalStub<> &clickEvent();
 
         std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
-
-        bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
-        bool injectPointerLeave(const Input::PointerEventArgs &arg) override;
-
-        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
-        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
 
         virtual WidgetClass getClass() const override;
 
@@ -34,10 +36,17 @@ namespace Widgets {
         float mFontSize = 16;
 
     protected:
+        bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
+        bool injectPointerLeave(const Input::PointerEventArgs &arg) override;
+
+        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
+        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
+
         void emitClicked();
 
     private:
         Render::FontLoader::HandleType mFont;
+        Resources::ImageLoader::ResourceType *mImage = nullptr;
 
         Threading::Signal<> mClicked;
 

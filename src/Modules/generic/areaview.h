@@ -62,6 +62,11 @@ struct AreaView {
         return mBuffer[index(indices)];
     }
 
+    const T &at(const std::array<size_t, Storage> &indices) const
+    {
+        return mBuffer[index(indices)];
+    }
+
     void flip(size_t dim)
     {
         mFlipped[mAxisMapping[dim]] = !mFlipped[mAxisMapping[dim]];
@@ -142,12 +147,80 @@ struct AreaView {
         std::array<size_t, Dim> mIndices;
     };
 
+    struct const_iterator {
+
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = const T;
+        using difference_type = ptrdiff_t;
+        using pointer = void;
+        using reference = const T &;
+
+        const_iterator(const AreaView<T, Dim> *view)
+            : mView(view)
+        {
+            mIndices.fill(0);
+        }
+
+        const_iterator(const AreaView<T, Dim> *view, const std::array<size_t, Dim> &indices)
+            : mView(view)
+            , mIndices(indices)
+        {
+        }
+
+        const T &operator*()
+        {
+            return mView->at(mIndices);
+        }
+
+        void operator++()
+        {
+            ++mIndices[0];
+            validate();
+        }
+
+        bool operator!=(const const_iterator &other)
+        {
+            return mView != other.mView || mIndices != other.mIndices;
+        }
+
+    private:
+        void validate()
+        {
+            assert(mIndices[Dim - 1] < mView->mSizes[mView->mAxisMapping[Dim - 1]]);
+            for (size_t i = 0; i < Dim - 1; ++i) {
+                size_t axis = mView->mAxisMapping[i];
+                assert(mIndices[i] <= mView->mSizes[axis]);
+                if (mIndices[i] == mView->mSizes[axis]) {
+                    mIndices[i] = 0;
+                    ++mIndices[i + 1];
+                }
+            }
+        }
+
+    private:
+        const AreaView<T, Dim, Storage> *mView;
+        std::array<size_t, Dim> mIndices;
+    };
+
     iterator begin()
     {
         return { this };
     }
 
     iterator end()
+    {
+        std::array<size_t, Dim> endSizes;
+        endSizes.fill(0);
+        endSizes[Dim - 1] = mSizes[Dim - 1];
+        return { this, endSizes };
+    }
+
+    const_iterator begin() const
+    {
+        return { this };
+    }
+
+    const_iterator end() const
     {
         std::array<size_t, Dim> endSizes;
         endSizes.fill(0);

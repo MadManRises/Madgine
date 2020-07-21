@@ -32,7 +32,7 @@ namespace Tools {
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)(uintptr_t)*font->loadData()->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {

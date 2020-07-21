@@ -11,7 +11,7 @@ namespace Render {
 
     struct Font {
         TextureLoader::HandleType mTexture;
-        TextureHandle mTextureHandle;
+        TextureHandle *mTextureHandle;
         Vector2i mTextureSize;
 
         std::array<Glyph, 128> mGlyphs;

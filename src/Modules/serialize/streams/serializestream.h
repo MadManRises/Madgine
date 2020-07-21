@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Interfaces/streams/streams.h"
-#include "debugging/streamdebugging.h"
 
 namespace Engine {
 namespace Serialize {
@@ -63,8 +62,6 @@ namespace Serialize {
             readRaw(&t, sizeof(T));
         }
 
-        void logReadHeader(const MessageHeader &header, const std::string &object);
-
         SerializeManager *manager() const;
 
         void setId(ParticipantId id);
@@ -86,8 +83,6 @@ namespace Serialize {
         SerializeInStream(SerializeStreambuf *buffer);
 
     protected:
-        Debugging::StreamLog mLog;
-
         char mNextFormattedStringDelimiter = 0;
     };
 
@@ -144,8 +139,6 @@ namespace Serialize {
 
         SerializeStreambuf &buffer() const;
 
-    protected:
-        Debugging::StreamLog mLog;
     };
 
 }

@@ -49,11 +49,15 @@ namespace Render {
                 std::string imageName = texturePath.stem();
                 Resources::ImageLoader::HandleType tex;
                 tex.load(imageName);
-
-                data.mTexture = { GL_UNSIGNED_BYTE };
-                data.mTexture.setFilter(GL_NEAREST);
-                data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
-                data.mTextureHandle = data.mTexture.handle();
+                
+                if (tex) {
+                    data.mTexture = { GL_UNSIGNED_BYTE };
+                    data.mTexture.setFilter(GL_NEAREST);
+                    data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
+                    data.mTextureHandle = data.mTexture.handle();
+                } else {
+                    LOG_ERROR("Failed to find texture '" << imageName << "' for mesh!");
+                }
             }
 
             updateImpl(data, bb, groupSize, std::move(vertices), vertexSize, std::move(indices));

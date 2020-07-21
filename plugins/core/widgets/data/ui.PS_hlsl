@@ -1,4 +1,4 @@
-cbuffer PerObject : register(b0)
+cbuffer PerObject : register(b2)
 {
 	bool hasDistanceField;
 }
@@ -19,7 +19,7 @@ float4 main(PixelShaderInput IN)
     : SV_TARGET
 {
     float4 texColor;
-	/*if (hasDistanceField){
+	if (hasDistanceField){
 		float2 msdfUnit = 4.0/float2(512.0, 512.0);
 		float4 sample = tex.Sample(texSampler, IN.uv);
 		float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
@@ -27,7 +27,7 @@ float4 main(PixelShaderInput IN)
 		sigDist *= 4.0;
 		float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
 		texColor = lerp(float4(0,0,0,0), float4(1,1,1,1), opacity);
-	} else*/ {
+	} else {
 		texColor = tex.Sample(texSampler, IN.uv);		
 	}
     return IN.color * texColor;	

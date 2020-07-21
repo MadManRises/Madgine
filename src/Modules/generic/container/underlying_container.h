@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-template <typename C>
+template <typename C, typename = void>
 struct underlying_container;
 
 template <typename C, typename = void>

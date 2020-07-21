@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-    template <typename C>
+    template <typename C, typename>
 struct container_traits;
 
 template <typename C>

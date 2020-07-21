@@ -16,6 +16,10 @@ namespace Engine
 			struct Transform;
 			struct Animation;
 			struct Mesh;
+
+			struct EntityPtr;
+			template <typename T>
+			using EntityComponentPtr = EntityPtr;
 		}
 
 		struct LightManager;

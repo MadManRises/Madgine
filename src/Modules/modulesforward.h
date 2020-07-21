@@ -20,6 +20,10 @@ struct BoundApiFunction;
 struct FunctionTable;
 using ArgumentList = std::vector<ValueType>;
 
+	
+template <typename C, typename Base>
+struct container_api_impl;
+
 struct ObjectInstance;
 struct ObjectPtr;
 struct ObjectFieldAccessor;
@@ -53,6 +57,9 @@ template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector;
 
 
+template <typename T>
+struct GenerationVector;
+
 struct ComponentRegistryBase;
 
 struct Any;
@@ -60,6 +67,8 @@ struct Any;
 struct ByteBuffer;
 
 struct CoWString;
+
+struct CompoundAtomicOperation;
 
 namespace CLI {
     struct CLICore;

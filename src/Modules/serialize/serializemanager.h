@@ -19,6 +19,7 @@ namespace Serialize {
         void removeSlaveMapping(SerializableUnitBase *item);
 
         static UnitId generateMasterId(UnitId id, SerializableUnitBase *unit);
+        static UnitId updateMasterId(UnitId id, SerializableUnitBase *unit);
         static void deleteMasterId(UnitId id, SerializableUnitBase *unit);
 
         bool isMaster(SerializeStreambuf *stream) const;

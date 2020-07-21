@@ -25,7 +25,12 @@ namespace Serialize {
     }
 
     SerializableUnitBase::SerializableUnitBase(SerializableUnitBase &&other) noexcept
-        : SerializableUnitBase()
+        : mParent(std::exchange(other.mParent, nullptr))
+        , mSlaveId(std::exchange(other.mSlaveId, 0))
+        , mMasterId(SerializeManager::updateMasterId(std::exchange(other.mMasterId, SerializeManager::generateMasterId(0, &other)), this))
+        , mActiveIndex(std::exchange(other.mActiveIndex, 0))
+        , mSynced(std::exchange(other.mSynced, false))
+        , mType(other.mType)        
     {
     }
 
@@ -189,6 +194,17 @@ namespace Serialize {
     bool SerializableUnitBase::isMaster() const
     {
         return mSlaveId == 0;
+    }
+
+    void SerializableUnitBase::swap(SerializableUnitBase &other)
+    {
+        std::swap(mParent, other.mParent);
+        std::swap(mSlaveId, other.mSlaveId);
+        std::swap(mMasterId, other.mMasterId);
+        SerializeManager::updateMasterId(mMasterId, this);
+        SerializeManager::updateMasterId(other.mMasterId, &other);
+        std::swap(mActiveIndex, other.mActiveIndex);
+        std::swap(mSynced, other.mSynced);
     }
 
     const SerializeTable *SerializableUnitBase::serializeType() const

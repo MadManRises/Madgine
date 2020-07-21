@@ -6,7 +6,7 @@ VALUETYPE_TYPE(Bool, bool, bool)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Int, int, int)
 VALUETYPE_SEP
-VALUETYPE_TYPE(UInt, size_t, size_t)
+VALUETYPE_TYPE(UInt, uint64_t, uint64_t, uint32_t)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Float, float, float)
 VALUETYPE_SEP

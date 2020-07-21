@@ -4,6 +4,10 @@
 
 #include "uniquecomponent.h"
 
+#if ENABLE_PLUGINS
+#include "../generic/container/compoundatomicoperation.h"
+#endif
+
 namespace Engine {
 
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
@@ -79,12 +83,12 @@ private:
 #if ENABLE_PLUGINS
 
 protected:
-    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
-        static_cast<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...> *>(listener)->updateComponents(info, add, vals);
+        static_cast<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...> *>(listener)->updateComponents(info, add, vals, op);
     }
 
-    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals)
+    void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
         if (add) {
             assert(this->size() == info->mBaseIndex);
@@ -92,16 +96,20 @@ protected:
             if constexpr (is_instance_v<container, std::vector>) {
                 this->reserve(info->mBaseIndex + vals.size());
             }
+            auto &insertOp = op.addMultiInsertOperation(*this);
             for (const F &f : vals) {
                 auto p = TupleUnpacker::invokeFromTuple(f, mArg);
                 mSortedComponents.push_back(p.get());
-                container_traits<container>::emplace(*this, container::end(), std::move(p));
+                container_traits<std::remove_reference_t<decltype(insertOp)>>::emplace(insertOp, container::end(), std::move(p));
             }
         } else {
+            //TODO: Is MultiRemove necessary?
             size_t from = info->mBaseIndex;
             size_t to = info->mBaseIndex + info->mElementInfos.size();
             for (size_t i = from; i != to; ++i) {
-                this->erase(std::find_if(container::begin(), container::end(), [&](const value_type &p) { return p.get() == mSortedComponents[i]; }));
+                auto it = std::find_if(container::begin(), container::end(), [&](const value_type &p) { return p.get() == mSortedComponents[i]; });
+                auto &&single_op = op.addRemoveOperation(*this, it);
+                single_op.erase(it);
             }
             mSortedComponents.erase(mSortedComponents.begin() + from, mSortedComponents.begin() + to);
         }

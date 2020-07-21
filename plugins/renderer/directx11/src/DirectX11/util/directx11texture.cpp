@@ -17,10 +17,6 @@ namespace Render {
         D3D11_SRV_DIMENSION dimension;
         size_t byteCount;
         switch (format) {
-        case FORMAT_UNSIGNED_BYTE:
-            xFormat = DXGI_FORMAT_R8G8B8A8_UINT;
-            byteCount = 4;
-            break;
         case FORMAT_FLOAT8:
             xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             byteCount = 4;
@@ -124,6 +120,8 @@ namespace Render {
         std::swap(mType, other.mType);
         std::swap(mBind, other.mBind);
         std::swap(mFormat, other.mFormat);
+        std::swap(mSampler, other.mSampler);
+        std::swap(mSize, other.mSize);
         return *this;
     }
 
@@ -158,9 +156,6 @@ namespace Render {
     {
         size_t byteCount;
         switch (mFormat) {
-        case FORMAT_UNSIGNED_BYTE:
-            byteCount = 4;
-            break;
         case FORMAT_FLOAT8:
             byteCount = 4;
             break;

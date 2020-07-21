@@ -39,7 +39,7 @@ namespace Render {
     bool DirectX11TextureLoader::create(Texture &tex, DataFormat format/*, D3D11_BIND_FLAG bind*/)
     {
         UINT bind = D3D11_BIND_SHADER_RESOURCE;
-        static_cast<DirectX11Texture &>(tex) = DirectX11Texture { Texture2D, format, bind, 1, 1 };
+        static_cast<DirectX11Texture &>(tex) = DirectX11Texture { Texture2D, format, bind };
 
         return true;
     }

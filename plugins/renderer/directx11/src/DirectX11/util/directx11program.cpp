@@ -75,6 +75,11 @@ namespace Render {
             sDeviceContext->VSSetConstantBuffers(i, 1, &buffer);
             sDeviceContext->PSSetConstantBuffers(i, 1, &buffer);
         }
+        for (size_t i = 0; i < mDynamicBuffers.size(); ++i) {
+            ID3D11Buffer *buffer = mDynamicBuffers[i].handle();
+            sDeviceContext->VSSetConstantBuffers(i+3, 1, &buffer);
+            sDeviceContext->PSSetConstantBuffers(i+3, 1, &buffer);
+        }
     }
 
     void DirectX11Program::setParameters(const ByteBuffer &data, size_t index)
@@ -91,15 +96,13 @@ namespace Render {
 
 	void DirectX11Program::setDynamicParameters(const ByteBuffer &data, size_t index)
     {
-            throw 0;
+        if (mDynamicBuffers.size() <= index)
+                mDynamicBuffers.resize(index + 1);
 
-        if (mConstantBuffers.size() <= index)
-            mConstantBuffers.resize(index + 1);
-
-        if (!mConstantBuffers[index]) {
-            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
+        if (!mDynamicBuffers[index]) {
+            mDynamicBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
         } else {
-            mConstantBuffers[index].setData(data);
+            mDynamicBuffers[index].setData(data);
         }
     }
 }

@@ -6,6 +6,8 @@
 
 #include "Interfaces/stringutil.h"
 
+#include "Modules/serialize/primitivetypes.h"
+
 namespace Engine {
 namespace XML {
 

@@ -75,6 +75,19 @@ namespace Serialize {
         return id;
     }
 
+    UnitId SerializeManager::updateMasterId(UnitId id, SerializableUnitBase *unit)
+    {
+        if (id >= RESERVED_ID_COUNT) {
+            std::lock_guard guard(sMasterMappingMutex);
+            auto it = sMasterMappings.find(id);
+            assert(it->second != unit);
+            it->second = unit;
+        } else {
+            assert(id >= BEGIN_STATIC_ID_SPACE);
+        }
+        return id;
+    }
+
     void SerializeManager::deleteMasterId(UnitId id, SerializableUnitBase *unit)
     {
         if (id >= RESERVED_ID_COUNT) {

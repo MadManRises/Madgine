@@ -206,6 +206,48 @@ namespace TupleUnpacker {
     }
 
     template <typename T>
+    auto toTupleImpl(T &&t, std::integral_constant<size_t, 7>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto &[a, b, c, d, e, f, g] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d, e, f, g);
+        } else {
+            auto &&[a, b, c, d, e, f, g] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g));
+        }
+    }
+
+    template <typename T>
+    auto toTupleImpl(T &&t, std::integral_constant<size_t, 8>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto &[a, b, c, d, e, f, g, h] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d, e, f, g, h);
+        } else {
+            auto &&[a, b, c, d, e, f, g, h] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g), std::forward<decltype(h)>(h));
+        }
+    }
+
+    template <typename T>
+    auto toTupleImpl(T &&t, std::integral_constant<size_t, 9>)
+    {
+        if constexpr (std::is_reference_v<T>) {
+            auto &[a, b, c, d, e, f, g, h, i] = std::forward<T>(t);
+
+            return returnAsTuple(a, b, c, d, e, f, g, h, i);
+        } else {
+            auto &&[a, b, c, d, e, f, g, h, i] = std::forward<T>(t);
+
+            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g), std::forward<decltype(h)>(h), std::forward<decltype(i)>(i));
+        }
+    }
+
+    template <typename T>
     auto toTuple(T &&t)
     {
         constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());
@@ -214,7 +256,7 @@ namespace TupleUnpacker {
 
     //TODO: Use only is_standard_layout as soon as UnitHelper is cleaned up
     template <typename T>
-    struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T> && !std::is_fundamental_v<T> && !std::is_pointer_v<T>> {
+    struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && /*std::is_trivially_copyable_v<T> && */!std::is_fundamental_v<T> && !std::is_pointer_v<T> && !std::is_enum_v<T>> {
     };
 
     template <typename T>

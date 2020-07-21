@@ -10,7 +10,7 @@ struct MODULES_EXPORT TypedScopePtr {
 private:
     template <typename T>
     TypedScopePtr(T *t, std::true_type)
-        : TypedScopePtr(t ? t->customScopePtr() : TypedScopePtr {})
+        : TypedScopePtr(t ? t->customScopePtr() : TypedScopePtr {nullptr, table<decayed_t<T>>})
     {
     }
 

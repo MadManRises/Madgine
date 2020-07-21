@@ -9,7 +9,7 @@ namespace Scene {
     namespace Entity {
 
         struct MADGINE_SCENE_EXPORT Skeleton : EntityComponent<Skeleton> {
-            Skeleton(Entity &e, const ObjectPtr &init);
+            Skeleton(const ObjectPtr &init);
 
             std::string getName() const;
             void setName(const std::string &name);

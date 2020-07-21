@@ -40,14 +40,14 @@ struct Pib {
     bool second = true;
 };
 
-template <typename C>
+template <typename C, typename = void>
 struct container_traits : container_traits<typename underlying_container<C>::type> {
     typedef C container;
 };
 
 
 template <typename T>
-struct container_traits<std::list<T>> {
+struct container_traits<std::list<T>, void> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -118,7 +118,7 @@ struct container_traits<std::list<T>> {
 };
 
 template <typename T>
-struct container_traits<std::vector<T>> {
+struct container_traits<std::vector<T>, void> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;
@@ -221,7 +221,7 @@ struct container_traits<std::vector<T>> {
 };
 
 template <typename T, typename Cmp>
-struct container_traits<std::set<T, Cmp>> {
+struct container_traits<std::set<T, Cmp>, void> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -292,7 +292,7 @@ struct container_traits<std::set<T, Cmp>> {
 };
 
 template <typename K, typename T, typename Cmp>
-struct container_traits<std::map<K, T, Cmp>> {
+struct container_traits<std::map<K, T, Cmp>, void> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -324,7 +324,7 @@ struct container_traits<std::map<K, T, Cmp>> {
 
     static bool was_emplace_successful(const emplace_return &pib)
     {
-        return pib.mSuccess;
+        return pib.success();
     }
 
     static position_handle toPositionHandle(container &c, const iterator &it)
@@ -364,7 +364,7 @@ struct container_traits<std::map<K, T, Cmp>> {
 };
 
 template <typename T, size_t Size>
-struct container_traits<std::array<T, Size>> {
+struct container_traits<std::array<T, Size>, void> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = false;

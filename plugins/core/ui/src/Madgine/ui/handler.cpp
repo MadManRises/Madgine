@@ -1,7 +1,7 @@
 #include "../uilib.h"
 #include "handler.h"
-#include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
+#include "Madgine/window/mainwindow.h"
 #include "uimanager.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
@@ -75,6 +75,9 @@ namespace UI {
     void Handler::finalize()
     {
         mWidget = nullptr;
+        for (const WindowDescriber &des : mWidgets) {
+            des.mInit(nullptr);
+        }
     }
 
     void Handler::setWidget(Widgets::WidgetBase *widget)
@@ -87,7 +90,7 @@ namespace UI {
             }
             mWidget = widget;
 
-			if (mWidget) {
+            if (mWidget) {
                 mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
                 mWidget->pointerDownEvent().connect(mPointerDownSlot);
                 mWidget->pointerUpEvent().connect(mPointerUpSlot);
@@ -99,6 +102,11 @@ namespace UI {
                         LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
                     }
                     if (!des.mInit(child))
+                        LOG_ERROR("ERROR");
+                }
+            } else {
+                for (const WindowDescriber &des : mWidgets) {                    
+                    if (!des.mInit(nullptr))
                         LOG_ERROR("ERROR");
                 }
             }

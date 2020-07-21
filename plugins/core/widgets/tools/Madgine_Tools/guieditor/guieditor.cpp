@@ -27,8 +27,6 @@
 #include "xml/xmllib.h"
 #include "xml/xmlformatter.h"
 
-#include "Modules/serialize/streams/debugging/streamdebugging.h"
-
 #include "Modules/serialize/serializemanager.h"
 
 #include "filesystem/filesystemlib.h"
@@ -120,8 +118,6 @@ namespace Tools {
 
     void GuiEditor::saveLayout()
     {
-        Engine::Serialize::Debugging::setLoggingEnabled(true);
-
         Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "data" / "default.layout";
 
         auto buf = std::make_unique<std::filebuf>();
@@ -145,8 +141,6 @@ namespace Tools {
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
                 mWindow->readState(in);
-            } else {
-                throw 0;
             }
         }
     }

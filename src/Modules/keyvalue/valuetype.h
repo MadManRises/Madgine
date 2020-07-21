@@ -41,7 +41,7 @@ struct MODULES_EXPORT ValueType {
 
     template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
     explicit ValueType(T &&v)
-        : mUnion(std::forward<T>(v))
+        : mUnion(static_cast<std::variant_alternative_t<type_pack_index_v<size_t, ValueTypeList, std::decay_t<T>>, Union>>(std::forward<T>(v)))
     {
     }
 

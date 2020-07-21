@@ -60,25 +60,33 @@ struct MODULES_EXPORT Matrix3 {
             @note
                 It does <b>NOT</b> initialize the matrix for efficiency.
         */
-    inline Matrix3() {}
+    inline Matrix3() { }
     inline constexpr explicit Matrix3(const float arr[3][3])
-        : m { { arr[0][0], arr[1][0], arr[2][0] },
-            { arr[0][1], arr[1][1], arr[2][1] },
-            { arr[0][2], arr[1][2], arr[2][2] } }
+        : m00 { arr[0][0] }
+        , m01 { arr[1][0] }
+        , m02 { arr[2][0] }
+        , m10 { arr[0][1] }
+        , m11 { arr[1][1] }
+        , m12 { arr[2][1] }
+        , m20 { arr[0][2] }
+        , m21 { arr[1][2] }
+        , m22 { arr[2][2] }
     {
     }
-    inline constexpr Matrix3(const Matrix3 &rkMatrix)
-        : m { { rkMatrix.m[0][0], rkMatrix.m[0][1], rkMatrix.m[0][2] },
-            { rkMatrix.m[1][0], rkMatrix.m[1][1], rkMatrix.m[1][2] },
-            { rkMatrix.m[2][0], rkMatrix.m[2][1], rkMatrix.m[2][2] } }
-    {
-    }
+    inline constexpr Matrix3(const Matrix3 &rkMatrix) = default;
+
     constexpr Matrix3(float fEntry00, float fEntry01, float fEntry02,
         float fEntry10, float fEntry11, float fEntry12,
         float fEntry20, float fEntry21, float fEntry22)
-        : m { { fEntry00, fEntry10, fEntry20 },
-            { fEntry01, fEntry11, fEntry21 },
-            { fEntry02, fEntry12, fEntry22 } }
+        : m00 { fEntry00 }
+        , m01 { fEntry10 }
+        , m02 { fEntry20 }
+        , m10 { fEntry01 }
+        , m11 { fEntry11 }
+        , m12 { fEntry21 }
+        , m20 { fEntry02 }
+        , m21 { fEntry12 }
+        , m22 { fEntry22 }
     {
     }
 
@@ -86,42 +94,42 @@ struct MODULES_EXPORT Matrix3 {
         */
     inline void swap(Matrix3 &other)
     {
-        std::swap(m[0][0], other.m[0][0]);
-        std::swap(m[0][1], other.m[0][1]);
-        std::swap(m[0][2], other.m[0][2]);
-        std::swap(m[1][0], other.m[1][0]);
-        std::swap(m[1][1], other.m[1][1]);
-        std::swap(m[1][2], other.m[1][2]);
-        std::swap(m[2][0], other.m[2][0]);
-        std::swap(m[2][1], other.m[2][1]);
-        std::swap(m[2][2], other.m[2][2]);
+        std::swap(m00, other.m00);
+        std::swap(m01, other.m01);
+        std::swap(m02, other.m02);
+        std::swap(m10, other.m10);
+        std::swap(m11, other.m11);
+        std::swap(m12, other.m12);
+        std::swap(m20, other.m20);
+        std::swap(m21, other.m21);
+        std::swap(m22, other.m22);
     }
 
     struct AccessHelper {
-        constexpr float &operator[](size_t iCol) { return m[iCol][row]; }
+        constexpr float &operator[](size_t iCol) { return m[3*iCol+row]; }
         size_t row;
-        float (&m)[3][3];
+        float *m;
     };
 
     struct const_AccessHelper {
-        constexpr const float &operator[](size_t iCol) { return m[iCol][row]; }
+        constexpr const float &operator[](size_t iCol) { return m[3*iCol+row]; }
         size_t row;
-        const float (&m)[3][3];
+        const float *m;
     };
 
     inline constexpr AccessHelper operator[](size_t iRow)
     {
-        return { iRow, m };
+        return { iRow, &m00 };
     }
 
     inline constexpr const_AccessHelper operator[](size_t iRow) const
     {
-        return { iRow, m };
+        return { iRow, &m00 };
     }
 
     inline float *data()
     {
-        return &m[0][0];
+        return &m00;
     }
 
     /*inline operator Real* ()
@@ -133,11 +141,7 @@ struct MODULES_EXPORT Matrix3 {
     void FromAxes(const Vector3 &xAxis, const Vector3 &yAxis, const Vector3 &zAxis);
 
     /// Assignment and comparison
-    inline Matrix3 &operator=(const Matrix3 &rkMatrix)
-    {
-        memcpy(m, rkMatrix.m, 9 * sizeof(float));
-        return *this;
-    }
+    inline Matrix3 &operator=(const Matrix3 &rkMatrix) = default;
 
     /** Tests 2 matrices for equality.
          */
@@ -158,6 +162,7 @@ struct MODULES_EXPORT Matrix3 {
 
     /** Matrix subtraction.
          */
+    Matrix3 &operator-=(const Matrix3 &rkMatrix);
     Matrix3 operator-(const Matrix3 &rkMatrix) const;
 
     /** Matrix concatenation using '*'.
@@ -185,7 +190,7 @@ struct MODULES_EXPORT Matrix3 {
     float Determinant() const;
 
     /// Singular value decomposition
-/*    void SingularValueDecomposition(Matrix3 &rkL, Vector3 &rkS,
+    /*    void SingularValueDecomposition(Matrix3 &rkL, Vector3 &rkS,
         Matrix3 &rkR) const;
     void SingularValueComposition(const Matrix3 &rkL,
         const Vector3 &rkS, const Matrix3 &rkR);
@@ -240,13 +245,13 @@ struct MODULES_EXPORT Matrix3 {
     inline bool hasScale() const
     {
         // check magnitude of column vectors (==local axes)
-        float t = m[0][0] * m[0][0] + m[0][1] * m[0][1] + m[0][2] * m[0][2];
+        float t = m00 * m00 + m01 * m01 + m02 * m02;
         if (!isZero(t - 1.0f))
             return true;
-        t = m[1][0] * m[1][0] + m[1][1] * m[1][1] + m[1][2] * m[1][2];
+        t = m10 * m10 + m11 * m11 + m12 * m12;
         if (!isZero(t - 1.0f))
             return true;
-        t = m[2][0] * m[2][0] + m[2][1] * m[2][1] + m[2][2] * m[2][2];
+        t = m20 * m20 + m21 * m21 + m22 * m22;
         if (!isZero(t - 1.0f))
             return true;
 
@@ -288,7 +293,7 @@ struct MODULES_EXPORT Matrix3 {
     static const Matrix3 IDENTITY;
 
     // support for eigensolver
-/*    void Tridiagonal(float afDiag[3], float afSubDiag[3]);
+    /*    void Tridiagonal(float afDiag[3], float afSubDiag[3]);
     bool QLAlgorithm(float afDiag[3], float afSubDiag[3]);
 
     // support for singular value decomposition
@@ -302,7 +307,7 @@ struct MODULES_EXPORT Matrix3 {
     // support for spectral norm
     static float MaxCubicRoot(float afCoeff[3]);*/
 
-    float m[3][3];
+    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
 
     // for faster access
     friend struct Matrix4;
