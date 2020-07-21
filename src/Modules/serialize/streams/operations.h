@@ -415,6 +415,26 @@ namespace Serialize {
         }
     };
 
+    template <typename U, typename V, typename... Configs>
+    struct Operations<std::pair<U,V>, Configs...> {
+
+        static void read(SerializeInStream &in, std::pair<U,V> &t, const char *name = nullptr)
+        {
+            in.format().beginCompound(in, name);
+            Serialize::read(in, t.first);             
+            Serialize::read(in, t.second);             
+            in.format().endCompound(in, name);
+        }
+
+        static void write(SerializeOutStream &out, const std::pair<U, V> &t, const char *name = nullptr)
+        {
+            out.format().beginCompound(out, name);
+            Serialize::write(out, t.first, "Element");
+            Serialize::write(out, t.second, "Element");            
+            out.format().endCompound(out, name);
+        }
+    };
+
     template <typename T, typename... Configs, typename... Args>
     void read(SerializeInStream &in, T &t, const char *name, Args &&... args)
     {
