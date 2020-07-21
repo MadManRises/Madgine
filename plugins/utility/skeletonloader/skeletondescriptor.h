@@ -14,8 +14,8 @@ namespace Render {
         std::string mName;
         Matrix4 mOffsetMatrix;
         Matrix4 mTTransform;
-        size_t mParent = std::numeric_limits<size_t>::max();
-        size_t mFirstChild = std::numeric_limits<size_t>::max();
+        uint32_t mParent = std::numeric_limits<uint32_t>::max();
+        uint32_t mFirstChild = std::numeric_limits<uint32_t>::max();
     };
 
     struct SkeletonDescriptor : ScopeBase {

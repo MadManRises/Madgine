@@ -152,7 +152,7 @@ namespace NodeGraph {
         }
     }
 
-    void NodeGraphPrototype::execute(NodeInstance *instance, size_t flowIndex, ArgumentList *out) const
+    void NodeGraphPrototype::execute(NodeInstance *instance, uint32_t flowIndex, ArgumentList *out) const
     {
     }
 

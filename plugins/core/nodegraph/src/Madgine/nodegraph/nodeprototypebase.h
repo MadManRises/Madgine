@@ -17,32 +17,32 @@ namespace NodeGraph {
         virtual const std::string_view &name() const = 0;
 
         virtual size_t flowInCount() const = 0;
-        virtual std::string_view flowInName(size_t index) const = 0;
-        static uintptr_t flowInId(size_t index);
+        virtual std::string_view flowInName(uint32_t index) const = 0;
+        static uint32_t flowInId(uint32_t index);
 
         size_t flowOutCount() const;
-        virtual std::string_view flowOutName(size_t index) const = 0;
-        TargetPin flowOutTarget(size_t index) const;
-        static uintptr_t flowOutId(size_t index);
+        virtual std::string_view flowOutName(uint32_t index) const = 0;
+        TargetPin flowOutTarget(uint32_t index) const;
+        static uint32_t flowOutId(uint32_t index);
 
         size_t dataInCount() const;
-        virtual std::string_view dataInName(size_t index) const = 0;
-        virtual ExtendedValueTypeDesc dataInExpectedType(size_t index) const = 0;
-        TargetPin dataInSource(size_t index) const;
-        ValueType &dataInDefault(size_t index);
-        static uintptr_t dataInId(size_t index);
+        virtual std::string_view dataInName(uint32_t index) const = 0;
+        virtual ExtendedValueTypeDesc dataInExpectedType(uint32_t index) const = 0;
+        TargetPin dataInSource(uint32_t index) const;
+        ValueType &dataInDefault(uint32_t index);
+        static uint32_t dataInId(uint32_t index);
 
         size_t dataOutCount() const;
-        virtual std::string_view dataOutName(size_t index) const = 0;
-        ExtendedValueTypeDesc dataOutType(size_t index) const;
-        static uintptr_t dataOutId(size_t index);
+        virtual std::string_view dataOutName(uint32_t index) const = 0;
+        ExtendedValueTypeDesc dataOutType(uint32_t index) const;
+        static uint32_t dataOutId(uint32_t index);
 
-        static PinDesc fromId(uintptr_t id);
+        static PinDesc fromId(uint32_t id);
 
-        void connectFlow(size_t index, GraphExecutable *target, size_t targetIndex);
-        void disconnectFlow(size_t index);
-        void connectData(size_t index, GraphExecutable *source, size_t sourceIndex);
-        void disconnectData(size_t index);
+        void connectFlow(uint32_t index, GraphExecutable *target, uint32_t targetIndex);
+        void disconnectFlow(uint32_t index);
+        void connectData(uint32_t index, GraphExecutable *source, uint32_t sourceIndex);
+        void disconnectData(uint32_t index);
 
     protected:
         std::vector<FlowOutPinPrototype> mFlowOutPins;

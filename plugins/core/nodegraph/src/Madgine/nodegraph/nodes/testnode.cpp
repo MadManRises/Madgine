@@ -33,32 +33,32 @@ namespace NodeGraph {
         return 1;
     }
 
-    std::string_view TestNode::flowInName(size_t index) const
+    std::string_view TestNode::flowInName(uint32_t index) const
     {
         return "execute";
     }
 
-    std::string_view TestNode::flowOutName(size_t index) const
+    std::string_view TestNode::flowOutName(uint32_t index) const
     {
         return "1";
     }
 
-    std::string_view TestNode::dataInName(size_t index) const
+    std::string_view TestNode::dataInName(uint32_t index) const
     {
         return "data_in";
     }
 
-    std::string_view TestNode::dataOutName(size_t index) const
+    std::string_view TestNode::dataOutName(uint32_t index) const
     {
         return "data_out";
     }
 
-    void TestNode::execute(NodeInstance *instance, size_t flowIndex, ArgumentList *out) const
+    void TestNode::execute(NodeInstance *instance, uint32_t flowIndex, ArgumentList *out) const
     {
         throw 0;
     }
 
-    ExtendedValueTypeDesc TestNode::dataInExpectedType(size_t index) const
+    ExtendedValueTypeDesc TestNode::dataInExpectedType(uint32_t index) const
     {
         return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
     }

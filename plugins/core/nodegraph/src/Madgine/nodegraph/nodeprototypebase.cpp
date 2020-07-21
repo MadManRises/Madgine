@@ -21,7 +21,7 @@ namespace NodeGraph {
         return mNode != nullptr;
     }
 
-    uintptr_t NodePrototypeBase::flowInId(size_t index)
+    uint32_t NodePrototypeBase::flowInId(uint32_t index)
     {
         return 1 + index;
     }
@@ -32,12 +32,12 @@ namespace NodeGraph {
         return mFlowOutPins.size();
     }
 
-    TargetPin NodePrototypeBase::flowOutTarget(size_t index) const
+    TargetPin NodePrototypeBase::flowOutTarget(uint32_t index) const
     {
         return mFlowOutPins[index].mTarget;
     }
 
-    uintptr_t NodePrototypeBase::flowOutId(size_t index)
+    uint32_t NodePrototypeBase::flowOutId(uint32_t index)
     {
         return 1001 + index;
     }
@@ -47,17 +47,17 @@ namespace NodeGraph {
         return mDataInPins.size();
     }
 
-    TargetPin NodePrototypeBase::dataInSource(size_t index) const
+    TargetPin NodePrototypeBase::dataInSource(uint32_t index) const
     {
         return mDataInPins[index].mSource;
     }
 
-    ValueType &NodePrototypeBase::dataInDefault(size_t index)
+    ValueType &NodePrototypeBase::dataInDefault(uint32_t index)
     {
         return mDataInPins[index].mDefaultValue;
     }
 
-    uintptr_t NodePrototypeBase::dataInId(size_t index)
+    uint32_t NodePrototypeBase::dataInId(uint32_t index)
     {
         return 2001 + index;
     }
@@ -67,17 +67,17 @@ namespace NodeGraph {
         return mDataOutPins.size();
     }
 
-    ExtendedValueTypeDesc NodePrototypeBase::dataOutType(size_t index) const
+    ExtendedValueTypeDesc NodePrototypeBase::dataOutType(uint32_t index) const
     {
         return mDataOutPins[index].mType;
     }
 
-    uintptr_t NodePrototypeBase::dataOutId(size_t index)
+    uint32_t NodePrototypeBase::dataOutId(uint32_t index)
     {
         return 3001 + index;
     }
 
-    PinDesc NodePrototypeBase::fromId(uintptr_t id)
+    PinDesc NodePrototypeBase::fromId(uint32_t id)
     {
         PinDesc desc;
         desc.mDir = ((id % 2000) < 1000 ? PinDir::In : PinDir::Out);
@@ -86,22 +86,22 @@ namespace NodeGraph {
         return desc;
     }
 
-    void NodePrototypeBase::connectFlow(size_t index, GraphExecutable *target, size_t targetIndex)
+    void NodePrototypeBase::connectFlow(uint32_t index, GraphExecutable *target, uint32_t targetIndex)
     {
         mFlowOutPins[index].mTarget = { target, targetIndex };
     }
 
-    void NodePrototypeBase::disconnectFlow(size_t index)
+    void NodePrototypeBase::disconnectFlow(uint32_t index)
     {
         mFlowOutPins[index].mTarget = {};
     }
 
-    void NodePrototypeBase::connectData(size_t index, GraphExecutable *source, size_t sourceIndex)
+    void NodePrototypeBase::connectData(uint32_t index, GraphExecutable *source, uint32_t sourceIndex)
     {
         mDataInPins[index].mSource = { source, sourceIndex };
     }
 
-    void NodePrototypeBase::disconnectData(size_t index)
+    void NodePrototypeBase::disconnectData(uint32_t index)
     {
         mDataInPins[index].mSource = {};
     }

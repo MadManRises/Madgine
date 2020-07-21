@@ -68,7 +68,7 @@ namespace Tools {
         ed::PinPivotRect(pos, pos);
     }
 
-    void FlowOutPin(const char *name, size_t nodeId, size_t pinId)
+    void FlowOutPin(const char *name, uint32_t nodeId, uint32_t pinId)
     {
         ed::BeginPin(4000 * nodeId + NodeGraph::NodePrototypeBase::flowOutId(pinId), ed::PinKind::Output);
         if (name) {
@@ -79,7 +79,7 @@ namespace Tools {
         ed::EndPin();
     }
 
-    void FlowInPin(const char *name, size_t nodeId, size_t pinId)
+    void FlowInPin(const char *name, uint32_t nodeId, uint32_t pinId)
     {
         ed::BeginPin(4000 * nodeId + NodeGraph::NodePrototypeBase::flowInId(pinId), ed::PinKind::Input);
         FlowPinIcon();
@@ -197,11 +197,11 @@ namespace Tools {
 
                 auto getNodeId = [&](NodeGraph::GraphExecutable *node) {
                     if (node == &*mGraph)
-                        return size_t { 0 };
+                        return uint32_t { 0 };
                     auto it = std::find_if(mGraph->nodes().begin(), mGraph->nodes().end(),
                         [&](const std::unique_ptr<NodeGraph::NodePrototypeBase> &ptr) { return ptr.get() == node; });
                     assert(it != mGraph->nodes().end());
-                    return static_cast<size_t>(it - mGraph->nodes().begin() + 1);
+                    return static_cast<uint32_t>(it - mGraph->nodes().begin() + 1);
                 };
 
                 ed::PushStyleVar(ed::StyleVar_NodePadding, { 0, 0, 0, 0 });
@@ -209,7 +209,7 @@ namespace Tools {
                 ed::SetNodePosition(std::numeric_limits<int>::max() - 1, { floorf(specialPosition.x), floorf(specialPosition.y) });
                 ed::BeginNode(std::numeric_limits<int>::max() - 1);
                 ImGui::Dummy({ sPinIconSize, 10 });
-                size_t pinId = 0;
+                uint32_t pinId = 0;
                 for (NodeGraph::FlowOutPinPrototype &flowPin : mGraph->mFlowInPins) {
                     FlowOutPin(nullptr, 0, pinId);
                     ++pinId;
@@ -253,14 +253,14 @@ namespace Tools {
                 ed::EndNode();
                 ed::PopStyleVar();
 
-                size_t nodeId = 1;
+                uint32_t nodeId = 1;
                 for (NodeGraph::NodePrototypeBase *node : uniquePtrToPtr(mGraph->nodes())) {
                     ed::BeginNode(4000 * nodeId);
                     ImGui::Text(node->name());
 
-                    size_t inFlowCount = node->flowInCount();
-                    size_t outFlowCount = node->flowOutCount();
-                    for (size_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
+                    uint32_t inFlowCount = node->flowInCount();
+                    uint32_t outFlowCount = node->flowOutCount();
+                    for (uint32_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
                         if (flowIndex < inFlowCount)
                             FlowInPin(node->flowInName(flowIndex).data(), nodeId, flowIndex);
                         if (flowIndex < min(inFlowCount, outFlowCount))
@@ -268,9 +268,9 @@ namespace Tools {
                         if (flowIndex < outFlowCount)
                             FlowOutPin(node->flowOutName(flowIndex).data(), nodeId, flowIndex);
                     }
-                    size_t inDataCount = node->dataInCount();
-                    size_t outDataCount = node->dataOutCount();
-                    for (size_t dataIndex = 0; dataIndex < max(inDataCount, outDataCount); ++dataIndex) {
+                    uint32_t inDataCount = node->dataInCount();
+                    uint32_t outDataCount = node->dataOutCount();
+                    for (uint32_t dataIndex = 0; dataIndex < max(inDataCount, outDataCount); ++dataIndex) {
                         if (dataIndex < inDataCount) {
                             NodeGraph::TargetPin source = node->dataInSource(dataIndex);
 
@@ -300,30 +300,30 @@ namespace Tools {
                 pinId = 0;
                 for (NodeGraph::FlowOutPinPrototype &pin : mGraph->mFlowInPins) {
                     assert(pin.mTarget);
-                    uintptr_t id = NodeGraph::NodePrototypeBase::flowOutId(pinId);
+                    uint32_t id = NodeGraph::NodePrototypeBase::flowOutId(pinId);
                     ed::Link(id, id, 4000 * getNodeId(pin.mTarget.mNode) + NodeGraph::NodePrototypeBase::flowInId(pin.mTarget.mIndex));
                     ++pinId;
                 }
                 pinId = 0;
                 for (NodeGraph::DataInPinPrototype &pin : mGraph->mDataOutPins) {
                     assert(pin.mSource);
-                    uintptr_t id = NodeGraph::NodePrototypeBase::dataInId(pinId);
+                    uint32_t id = NodeGraph::NodePrototypeBase::dataInId(pinId);
                     ed::Link(id, 4000 * getNodeId(pin.mSource.mNode) + NodeGraph::NodePrototypeBase::dataOutId(pin.mSource.mIndex), id);
                     ++pinId;
                 }
                 nodeId = 1;
                 for (NodeGraph::NodePrototypeBase *node : uniquePtrToPtr(mGraph->nodes())) {
-                    size_t outFlowCount = node->flowOutCount();
-                    for (size_t flowIndex = 0; flowIndex < outFlowCount; ++flowIndex) {
+                    uint32_t outFlowCount = node->flowOutCount();
+                    for (uint32_t flowIndex = 0; flowIndex < outFlowCount; ++flowIndex) {
                         if (NodeGraph::TargetPin target = node->flowOutTarget(flowIndex)) {
-                            uintptr_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::flowOutId(flowIndex);
+                            uint32_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::flowOutId(flowIndex);
                             ed::Link(id, id, 4000 * getNodeId(target.mNode) + NodeGraph::NodePrototypeBase::flowInId(target.mIndex));
                         }
                     }
-                    size_t inDataCount = node->dataInCount();
-                    for (size_t dataIndex = 0; dataIndex < inDataCount; ++dataIndex) {
+                    uint32_t inDataCount = node->dataInCount();
+                    for (uint32_t dataIndex = 0; dataIndex < inDataCount; ++dataIndex) {
                         if (NodeGraph::TargetPin source = node->dataInSource(dataIndex)) {
-                            uintptr_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::dataInId(dataIndex);
+                            uint32_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::dataInId(dataIndex);
                             ed::Link(id, 4000 * getNodeId(source.mNode) + NodeGraph::NodePrototypeBase::dataOutId(source.mIndex), id);
                         }
                     }

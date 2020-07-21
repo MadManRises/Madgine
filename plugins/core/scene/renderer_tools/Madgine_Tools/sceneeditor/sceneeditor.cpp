@@ -295,7 +295,7 @@ namespace Tools {
 						Im3D::Text(bone.mName.c_str(), t->matrix() * m, 2.0f);
                         float length = 0.1f;
                         
-                        if (bone.mFirstChild != std::numeric_limits<size_t>::max()) {
+                        if (bone.mFirstChild != std::numeric_limits<uint32_t>::max()) {
                             Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse();
                             Vector3 dist = m_child.GetColumn(3).xyz() - m.GetColumn(3).xyz();
                             length = dist.length();

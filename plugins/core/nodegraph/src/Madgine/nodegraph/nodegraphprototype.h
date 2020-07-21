@@ -35,7 +35,7 @@ namespace NodeGraph {
         void connectData(GraphExecutable *source, size_t sourceIndex, NodePrototypeBase *target, size_t targetIndex);
 
         
-        virtual void execute(NodeInstance *instance, size_t flowIndex, ArgumentList *out = nullptr) const override;
+        virtual void execute(NodeInstance *instance, uint32_t flowIndex, ArgumentList *out = nullptr) const override;
 
         NodeGraphInstance createInstance();
 

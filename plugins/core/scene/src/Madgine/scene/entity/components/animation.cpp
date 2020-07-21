@@ -126,8 +126,8 @@ namespace Scene {
                                 Lerp(it_position->mValue, it_position_end->mValue, position_blend),
                                 Lerp(it_scale->mValue, it_scale_end->mValue, scale_blend),
                                 Slerp(it_orientation->mValue, it_orientation_end->mValue, orientation_blend));
-                            size_t parent = mSkeletonCache->mBones[i].mParent;
-                            if (parent != std::numeric_limits<size_t>::max()) {
+                            uint32_t parent = mSkeletonCache->mBones[i].mParent;
+                            if (parent != std::numeric_limits<uint32_t>::max()) {
                                 matrices[i] = matrices[parent] * m;
                             } else {
                                 matrices[i] = mAnimationList->mBaseMatrix * m;
