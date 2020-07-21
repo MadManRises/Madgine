@@ -19,7 +19,7 @@ TEST(ValueType, Construct)
 	test.clear(); //?
 	test = true;
 	test = 3;
-	test = (size_t)4;
+	test = (uint64_t)4;
 	test = 5.0f;
 	test = Vector2(6.1f, 6.2f);
 	test = Vector3(7.1f, 7.2f, 7.3f);
