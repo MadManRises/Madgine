@@ -544,7 +544,7 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return get(mIndex) - get(other.mIndex);
+            return mVector->get(mIndex) - mVector->get(other.mIndex);
         }
 
         operator GenerationVectorIndex() const
