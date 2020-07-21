@@ -36,19 +36,6 @@ set_target_properties(Filesystem PROPERTIES EXCLUDE_FROM_ALL TRUE)
 add_subdirectory(stb)
 set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-set(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
-
-set(USE_MSVC_RUNTIME_LIBRARY_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF)
-
-set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
-set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
-set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
-add_subdirectory(bullet3-2.89)
-target_include_directories(LinearMath PUBLIC ${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src)
-set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
-
-
 add_subdirectory(SDL2-2.0.9)
 if (TARGET SDL2-static)
 	set_target_properties(SDL2-static PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -65,6 +52,20 @@ else()
 	add_library(SDL ALIAS SDL2-static)
 endif()
 
+
+######################## Static Libs #################
+
+set(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+
+set(USE_MSVC_RUNTIME_LIBRARY_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF)
+
+set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
+set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
+add_subdirectory(bullet3-2.89)
+target_include_directories(LinearMath PUBLIC ${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src)
+
 if (NOT ANDROID AND NOT EMSCRIPTEN)
 	set(OIS_BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 	set(OIS_BUILD_DEMOS OFF CACHE BOOL "Build demo applications" FORCE)
@@ -72,4 +73,9 @@ if (NOT ANDROID AND NOT EMSCRIPTEN)
 	add_subdirectory(ois)
 	set_target_properties(OIS PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
+
+set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
+
+
+
 
