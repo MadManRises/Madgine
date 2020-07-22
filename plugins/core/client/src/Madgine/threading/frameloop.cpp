@@ -10,7 +10,7 @@
 namespace Engine {
 namespace Threading {
     FrameLoop::FrameLoop()
-        : TaskQueue("FrameLoop")
+        : TaskQueue("FrameLoop", true)
         , mSetupState(mSetupSteps.begin())
         , mLastFrame(std::chrono::high_resolution_clock::now())
     {

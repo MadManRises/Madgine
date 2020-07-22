@@ -18,7 +18,7 @@ namespace Threading {
     };
 
     struct MODULES_EXPORT TaskQueue {
-        TaskQueue(const std::string &name, bool auto_register = true);
+        TaskQueue(const std::string &name, bool wantsMainThread = false);
         virtual ~TaskQueue() = default;
 
         void queue(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies = {});
@@ -39,6 +39,8 @@ namespace Threading {
 
         bool running() const;
         void stop();
+
+        bool wantsMainThread() const;
 
     protected:
         struct ScheduledTask {
@@ -69,6 +71,8 @@ namespace Threading {
         std::vector<RepeatedTask> mRepeatedTasks;
         mutable std::mutex mMutex;
         std::condition_variable mCv;
+
+        bool mWantsMainThread;
     };
 
 }

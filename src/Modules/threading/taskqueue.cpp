@@ -6,11 +6,15 @@
 namespace Engine {
 namespace Threading {
 
-    TaskQueue::TaskQueue(const std::string &name, bool auto_register)
-        : mName(name)
+    TaskQueue::TaskQueue(const std::string &name, bool wantsMainThread)
+        : mName(name), mWantsMainThread(wantsMainThread)
+    {        
+        WorkGroup::self().addTaskQueue(this);
+    }
+
+    bool TaskQueue::wantsMainThread() const
     {
-        if (auto_register)
-            WorkGroup::self().addTaskQueue(this);
+        return mWantsMainThread;
     }
 
     void TaskQueue::queueInternal(ScheduledTask &&task)

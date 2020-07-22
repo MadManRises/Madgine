@@ -4,11 +4,11 @@
 
 #include "workgroup.h"
 
-#include "defaulttaskqueue.h"
+#include "taskqueue.h"
 
 #if EMSCRIPTEN
 
-#include <emscripten.h>
+#    include <emscripten.h>
 
 void emscriptenLoop(void *scheduler)
 {
@@ -30,23 +30,41 @@ namespace Threading {
 #if EMSCRIPTEN
         emscripten_set_main_loop_arg(&emscriptenLoop, this, 0, false);
 #else
+
+        Threading::TaskQueue *main_queue = nullptr;
+
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            mWorkgroup.createNamedThread(queue->name(), &Scheduler::schedulerLoop, this, queue);
+            if (queue->wantsMainThread()) {
+                if (main_queue)
+                    throw 0;
+                main_queue = queue;
+            }
         }
 
-        Threading::TaskQueue *queue = DefaultTaskQueue::getSingletonPtr();
+        if (!main_queue)
+            main_queue = mWorkgroup.taskQueues().front();
+
+        for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
+            if (queue != main_queue)
+                mWorkgroup.createNamedThread(queue->name(), &Scheduler::schedulerLoop, this, queue);
+        }
 
         do {
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
             nextAvailableTaskTime = std::min(std::chrono::steady_clock::now() + std::chrono::milliseconds(200), nextAvailableTaskTime);
-            queue->waitForTasks(nextAvailableTaskTime);
+            main_queue->waitForTasks(nextAvailableTaskTime);
             mWorkgroup.checkThreadStates();
-        } while (!queue->idle() || !mWorkgroup.singleThreaded());
+            if (!main_queue->running()) {
+                for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
+                    queue->stop();
+                }
+            }
+        } while (!main_queue->idle() || !mWorkgroup.singleThreaded());
 
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             assert(queue->idle());
         }
-        assert(queue->idle());
+
 #endif
         return 0;
     }
@@ -61,7 +79,6 @@ namespace Threading {
 
     void Scheduler::singleLoop()
     {
-        DefaultTaskQueue::getSingleton().update(1);
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             queue->update(1);
         }
