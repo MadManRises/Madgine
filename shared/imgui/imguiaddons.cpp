@@ -14,8 +14,12 @@
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/filesystem/path.h"
 
-DLL_EXPORT Engine::Threading::WorkgroupLocal<ImGuiContext *>
-    GImGui;
+Engine::Threading::WorkgroupLocal<ImGuiContext *>
+    sContext;
+
+ImGuiContext*& getImGuiContext() {
+    return sContext;
+}
 
 namespace ImGui {
 

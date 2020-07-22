@@ -94,7 +94,7 @@ namespace Threading {
 
         T &operator*() { return *data(); }
 
-        operator T *() { return data(); }
+        operator T *&() { return data(); }
 
         T **operator&() { return &data(); }
 

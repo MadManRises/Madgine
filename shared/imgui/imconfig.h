@@ -100,5 +100,5 @@ namespace ImGui
 #include "Modules/threading/workgroupstorage.h"
 
 struct ImGuiContext;
-extern IMGUI_API Engine::Threading::WorkgroupLocal<ImGuiContext *> GImGui;
-#define GImGui GImGui
+IMGUI_API ImGuiContext *&getImGuiContext();
+#define GImGui getImGuiContext()
