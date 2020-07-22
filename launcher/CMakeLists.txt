@@ -18,7 +18,6 @@ if (EMSCRIPTEN)
 elseif (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android)	
 	target_link_plugins(MadgineLauncher AndroidInput)
-	set_target_properties(MadgineLauncher PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
 target_depend_on_all_plugins(MadgineLauncher)

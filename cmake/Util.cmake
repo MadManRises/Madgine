@@ -39,7 +39,11 @@ endif()
 set (CMAKE_CXX_VISIBILITY_PRESET hidden)
 set (CMAKE_C_VISIBILITY_PRESET hidden)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+if (ANDROID)
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+else()
+	set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+endif()
 
 if (GCC OR CLANG)
 	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization -Wno-dll-attribute-on-redeclaration -Wno-pragma-pack -Wno-undefined-var-template)	
