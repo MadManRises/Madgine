@@ -64,7 +64,7 @@
     template <ArgumentType T>                         \
     extern DLL_IMPORT Type Name##_instance;           \
     template <ArgumentType T>                         \
-    Type *Name = &Name##_instance<T>;                 \
+    Type *Name = &Name##_instance<T>;
 
 #define DLL_EXPORT_VARIABLE(qualifier, Type, ns, Name, Init, Argument) \
     template <>                                                        \
@@ -81,6 +81,15 @@
     {                                                                   \
         return CONCAT2(__##Name##_helper_, __LINE__);                   \
     }                                                                   \
+    template Type &ns Name<__VA_ARGS__>();
+
+#define DLL_EXPORT_VARIABLE2_ORDER(qualifier, Type, ns, Name, Init, ...) \
+    template <>                                                          \
+    DLL_EXPORT Type &ns Name<__VA_ARGS__>()                              \
+    {                                                                    \
+        static qualifier Type dummy = Init;                              \
+        return dummy;                                                    \
+    }                                                                    \
     template Type &ns Name<__VA_ARGS__>();
 
 /*#define TEMPLATE_INSTANTIATION(type) template type

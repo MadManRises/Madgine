@@ -20,7 +20,7 @@
 #if defined(STATIC_BUILD)
 #    define EXPORT_REGISTRY(Registry)
 #else
-#    define EXPORT_REGISTRY(Registry) DLL_EXPORT_VARIABLE2(, Registry, Engine::, uniqueComponentRegistry, {}, Registry)
+#    define EXPORT_REGISTRY(Registry) DLL_EXPORT_VARIABLE2_ORDER(, Registry, Engine::, uniqueComponentRegistry, {}, Registry)
 #endif
 
 #define DEFINE_UNIQUE_COMPONENT(ns, prefix) \
