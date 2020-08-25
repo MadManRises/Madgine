@@ -29,7 +29,7 @@ namespace Dl {
 
     SharedLibraryIterator::SharedLibraryIterator(const SharedLibraryQuery *query)
         : mQuery(query)
-        , mBuffer(createSharedLibraryQueryState(), destroySharedLibraryQueryState)
+        , mBuffer { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } }
         , mHandle(opendir(query->path().c_str()))
     {
         if (mHandle) {
@@ -50,11 +50,6 @@ namespace Dl {
         mBuffer->mData = readdir((DIR *)mHandle);
         if (!mBuffer->mData || !skipSymbolic(mHandle, *mBuffer))
             close();
-    }
-
-    SharedLibraryQueryStatePtr createSharedLibraryQueryState()
-    {
-        return { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } };
     }
 
     const char *filename(SharedLibraryQueryState &data)

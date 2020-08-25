@@ -11,8 +11,6 @@
 namespace Engine {
 namespace Dl {
 
-    extern SharedLibraryQueryStatePtr createSharedLibraryQueryState();
-
     struct SharedLibraryQueryState {
         WIN32_FIND_DATA mData;
     };
@@ -27,7 +25,7 @@ namespace Dl {
 
     SharedLibraryIterator::SharedLibraryIterator(const SharedLibraryQuery *query)
         : mQuery(query)
-        , mBuffer(createSharedLibraryQueryState())
+        , mBuffer { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } }
         , mHandle(FindFirstFile((query->path().str() + "/*").c_str(), &mBuffer->mData))
     {
         if (mHandle == INVALID_HANDLE_VALUE)
@@ -48,11 +46,6 @@ namespace Dl {
     {
         if (!FindNextFile(mHandle, &mBuffer->mData))
             close();
-    }
-
-    SharedLibraryQueryStatePtr createSharedLibraryQueryState()
-    {
-        return { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } };
     }
 
     const char *filename(SharedLibraryQueryState &data)
