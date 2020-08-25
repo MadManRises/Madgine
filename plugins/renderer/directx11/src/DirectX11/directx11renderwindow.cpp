@@ -32,7 +32,7 @@
 {
     namespace Render {
 
-        DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::Window *w, DirectX11RenderWindow *reusedResources)
+        DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w, DirectX11RenderWindow *reusedResources)
             : DirectX11RenderTarget(context)
             , mWindow(w)
             , mReusedContext(reusedResources)

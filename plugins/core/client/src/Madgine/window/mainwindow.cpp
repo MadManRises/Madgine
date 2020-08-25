@@ -56,8 +56,9 @@ namespace Window {
         mLoop.addSetupSteps(
             [this]() {
                 if (!callInit())
-                    throw exception("Window Init Failed!");
+                    return false;
                 sync();
+                return true;
             },
             [this]() {
                 unsync();
@@ -71,9 +72,9 @@ namespace Window {
 
     Rect2i MainWindow::getScreenSpace()
     {
-        if (!mWindow)
+        if (!mOsWindow)
             return { { 0, 0 }, { 0, 0 } };
-        return { { mWindow->renderX(), mWindow->renderY() }, { mWindow->renderWidth(), mWindow->renderHeight() } };
+        return { { mOsWindow->renderX(), mOsWindow->renderY() }, { mOsWindow->renderWidth(), mOsWindow->renderHeight() } };
     }
 
     const MadgineObject *MainWindow::parent() const
@@ -84,16 +85,21 @@ namespace Window {
     bool MainWindow::init()
     {
 
-        mWindow = sCreateWindow(mSettings);
+        mOsWindow = sCreateWindow(mSettings);
 
-        mWindow->addListener(this);
+        mOsWindow->addListener(this);
+        
+        assert(!mRenderContext);
+        mRenderContext.emplace(&mLoop);
+        mRenderWindow = (*mRenderContext)->createRenderWindow(mOsWindow);
+
 
         if (!mExternalInput) {
-            mInputHandlerSelector.emplace(*this, mWindow, this, 0);
+            mInputHandlerSelector.emplace(*this, mOsWindow, this, 0);
         }
 
-        mRenderContext.emplace(&mLoop);
-        mRenderWindow = (*mRenderContext)->createRenderWindow(mWindow);
+
+
         addFrameListener(this);
 
         for (MainWindowComponentBase *comp : components()) {
@@ -117,9 +123,9 @@ namespace Window {
 
         mInputHandlerSelector.reset();
 
-        if (mWindow) {
-            mWindow->removeListener(this);
-            mWindow->destroy();
+        if (mOsWindow) {
+            mOsWindow->removeListener(this);
+            mOsWindow->destroy();
         }
     }
 
@@ -191,19 +197,19 @@ namespace Window {
         return false;
     }
 
-    Window *MainWindow::window() const
+    OSWindow *MainWindow::osWindow() const
     {
-        return mWindow;
+        return mOsWindow;
     }
 
     Render::RenderContext *MainWindow::getRenderer()
     {
-        return mRenderContext->get();
+        return *mRenderContext;
     }
 
     void MainWindow::onClose()
     {
-        mWindow = nullptr;
+        mOsWindow = nullptr;
         callFinalize();
     }
 
@@ -221,12 +227,12 @@ namespace Window {
 
     void MainWindow::applyClientSpaceResize(MainWindowComponentBase *component)
     {
-        if (!mWindow)
+        if (!mOsWindow)
             return;
 
         Rect2i space;
         if (!component)
-            space = { { 0, 0 }, { mWindow->renderWidth(), mWindow->renderHeight() } };
+            space = { { 0, 0 }, { mOsWindow->renderWidth(), mOsWindow->renderHeight() } };
         else
             space = component->getChildClientSpace();
 
@@ -250,14 +256,16 @@ namespace Window {
     bool MainWindow::frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask)
     {
 
-        return mWindow;
+        return mOsWindow;
     }
 
     bool MainWindow::frameEnded(std::chrono::microseconds)
-    {
-        (*mRenderContext)->render();
+    {        
+        //TODO
+        if (mRenderContext)
+            (*mRenderContext)->render();
         sUpdate();
-        return mWindow;
+        return mOsWindow;
     }
 
     MainWindowComponentBase &MainWindow::getWindowComponent(size_t i, bool init)
@@ -298,6 +306,7 @@ namespace Window {
     {
         return mRenderWindow.get();
     }
+
 
 }
 }

@@ -11,8 +11,7 @@ FolderSources(sources src DirectX11 directx11forward.h directx11lib.h directx11m
 
 add_plugin(DirectX11 Madgine Renderer ${sources} PRECOMPILED_HEADER src/DirectX11/directx11lib.h)
 
-target_link_plugins(DirectX11 Client)
-target_link_libraries(DirectX11 PRIVATE d3d11 dxgi d3dcompiler)
+target_link_libraries(DirectX11 PRIVATE d3d11 dxgi d3dcompiler Client)
 
 
 set(sources "")

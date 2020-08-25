@@ -24,7 +24,7 @@ VALUETYPE_TYPE(Vector3, Vector3, const Vector3&)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Vector2, Vector2, const Vector2&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(KeyValueVirtualIterator, KeyValueVirtualIterator, const KeyValueVirtualIterator&)
+VALUETYPE_TYPE(KeyValueVirtualRange, KeyValueVirtualRange, const KeyValueVirtualRange&)
 VALUETYPE_SEP
 VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction&)
 VALUETYPE_SEP

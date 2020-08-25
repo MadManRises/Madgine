@@ -10,8 +10,7 @@
 namespace Engine {
 namespace Threading {
     FrameLoop::FrameLoop()
-        : TaskQueue("FrameLoop", true)
-        , mSetupState(mSetupSteps.begin())
+        : TaskQueue("FrameLoop", true)        
         , mLastFrame(std::chrono::high_resolution_clock::now())
     {
         addRepeatedTask([this]() {
@@ -107,33 +106,6 @@ namespace Threading {
         return true;
     }
 
-    std::optional<Threading::TaskTracker> FrameLoop::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount)
-    {
-        if (running()) {
-            while (mSetupState != mSetupSteps.end()) {
-                std::optional<Threading::TaskHandle> init = std::move(mSetupState->first);
-                ++mSetupState;
-                if (init) {
-                    return wrapTask(std::move(*init));
-                }
-            }
-        }
-        if (std::optional<Threading::TaskTracker> task = TaskQueue::fetch(nextTask, idleCount)) {
-            return task;
-        }
-        if (!running() && nextTask == std::chrono::steady_clock::time_point::max()) {
-
-            while (mSetupState != mSetupSteps.begin()) {
-                --mSetupState;
-                Threading::TaskHandle finalize = std::move(mSetupState->second);
-                if (finalize) {
-                    return wrapTask(std::move(finalize));
-                }
-            }
-        }
-        return {};
-    }
-
     std::optional<Threading::TaskTracker> FrameLoop::fetch_on_idle()
     {
         /*return wrapTask([this]() {
@@ -144,43 +116,7 @@ namespace Threading {
         });*/
         return {};
     }
-
-    bool FrameLoop::idle() const
-    {
-        return TaskQueue::idle() && mSetupState == mSetupSteps.begin();
-    }
-
-    void FrameLoop::addSetupSteps(Threading::TaskHandle &&init, Threading::TaskHandle &&finalize)
-    {
-        bool isItEnd = mSetupState == mSetupSteps.end();
-        if (init && finalize) {
-            std::promise<bool> p;
-            std::future<bool> f = p.get_future();
-            mSetupSteps.emplace_back(
-                [init { std::move(init) }, p { std::move(p) }]() mutable {
-                    Threading::TaskState state;
-                    try {
-                        state = init();
-                        assert(state == Threading::SUCCESS || state == Threading::FAILURE);
-                        p.set_value(state == Threading::SUCCESS);
-                    } catch (std::exception &) {
-                        p.set_value(false);
-                        throw;
-                    }
-                    return state;
-                },
-                [finalize { std::move(finalize) }, f { std::move(f) }]() mutable {
-                    if (f.get())
-                        return finalize();
-                    return Threading::SUCCESS;
-                });
-        } else {
-            mSetupSteps.emplace_back(std::move(init), std::move(finalize));
-        }
-        if (isItEnd) {
-            mSetupState = std::prev(mSetupState);
-        }
-    }
+    
 
 }
 }

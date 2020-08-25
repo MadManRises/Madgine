@@ -4,6 +4,7 @@
 
 #include "uniquecomponent.h"
 
+
 #if ENABLE_PLUGINS
 #include "../generic/container/compoundatomicoperation.h"
 #endif
@@ -91,7 +92,7 @@ protected:
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
         if (add) {
-            assert(this->size() == info->mBaseIndex);
+            //assert(this->size() == info->mBaseIndex);
             mSortedComponents.reserve(info->mBaseIndex + vals.size());
             if constexpr (is_instance_v<container, std::vector>) {
                 this->reserve(info->mBaseIndex + vals.size());

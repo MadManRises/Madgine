@@ -6,31 +6,39 @@
 
 namespace Engine {
 
-struct VirtualIteratorEnd {
-};
+template <typename RefT>
+struct VirtualRangeBase;
 
 template <typename RefT>
 struct VirtualIteratorBase {
     virtual ~VirtualIteratorBase() = default;
-    virtual bool ended() const = 0;
     virtual void increment() = 0;
     virtual void get(RefT &ref) const = 0;
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const = 0;
     virtual bool equals(const VirtualIteratorBase<RefT> &) const = 0;
+
+    const std::shared_ptr<VirtualRangeBase<RefT>> &container() const
+    {
+        return mContainer;
+    }
+
+protected:
+    VirtualIteratorBase(const std::shared_ptr<VirtualRangeBase<RefT>> &container)
+        : mContainer(container)
+    {
+    }
+
+    std::shared_ptr<VirtualRangeBase<RefT>> mContainer;
 };
 
 template <typename RefT, typename It, typename Assign>
-struct NonOwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
+struct VirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
-    NonOwningVirtualIteratorImpl(It begin, It end)
-        : mIt(std::move(begin))
-        , mEnd(std::move(end))
+    template <typename It2>
+    VirtualIteratorImpl(It2 &&it, const std::shared_ptr<VirtualRangeBase<RefT>> &container)
+        : VirtualIteratorBase<RefT>(container),
+        mIt(std::forward<It2>(it))        
     {
-    }
-
-    virtual bool ended() const override
-    {
-        return mIt == mEnd;
     }
 
     virtual void increment() override
@@ -45,90 +53,32 @@ struct NonOwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
     virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
     {
-        return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It, Assign>>(mIt, mEnd);
+        return std::make_unique<VirtualIteratorImpl<RefT, It, Assign>>(mIt, this->mContainer);
     }
 
     virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
     {
-        const NonOwningVirtualIteratorImpl<RefT, It, Assign> *otherP = dynamic_cast<const NonOwningVirtualIteratorImpl<RefT, It, Assign> *>(&other);
-        return otherP && mIt == otherP->mIt;
+        assert(this->mContainer == other.container());
+        const VirtualIteratorImpl<RefT, It, Assign> *otherP = static_cast<const VirtualIteratorImpl<RefT, It, Assign> *>(&other);
+        return mIt == otherP->mIt;
     }
 
 private:
-    It mIt, mEnd;
-};
-
-template <typename RefT, typename It, typename Assign, typename T>
-struct OwningVirtualIteratorImpl : VirtualIteratorBase<RefT> {
-
-    OwningVirtualIteratorImpl(T &&t)
-        : mT(std::move(t))
-        , mIt(mT.begin())
-        , mEnd(mT.end())
-    {
-    }
-
-    OwningVirtualIteratorImpl(const T &t, const It &it, const It &end)
-        : mT(t)
-        , mIt(std::next(mT.begin(), std::distance(It { const_cast<T &>(t).begin() }, it)))
-        , mEnd(std::next(mT.begin(), std::distance(It { const_cast<T &>(t).begin() }, end)))
-    {
-    }
-
-    virtual bool ended() const override
-    {
-        return mIt == mEnd;
-    }
-
-    virtual void increment() override
-    {
-        ++mIt;
-    }
-
-    virtual void get(RefT &ref) const override
-    {
-        Assign {}(ref, *mIt);
-    }
-
-    virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
-    {
-        return std::make_unique<OwningVirtualIteratorImpl<RefT, It, Assign, T>>(mT, mIt, mEnd);
-    }
-
-    virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
-    {
-        const OwningVirtualIteratorImpl<RefT, It, Assign, T> *otherP = dynamic_cast<const OwningVirtualIteratorImpl<RefT, It, Assign, T> *>(&other);
-        return otherP && mIt == otherP->mIt;
-    }
-
-private:
-    T mT;
-    It mIt, mEnd;
+    It mIt;
 };
 
 template <typename RefT>
 struct VirtualIterator {
-    VirtualIterator() = default;
+
+    using iterator_category = std::input_iterator_tag;
+    using value_type = RefT;
+    using difference_type = ptrdiff_t;
+    using pointer = void;
+    using reference = RefT;
 
     template <typename It, typename Assign = DefaultAssign>
-    VirtualIterator(It &&begin, It &&end, type_holder_t<Assign> = {})
-        : mImpl(std::make_unique<NonOwningVirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(begin), std::forward<It>(end)))
-    {
-    }
-
-    template <typename It, typename Assign, typename T>
-    static std::unique_ptr<VirtualIteratorBase<RefT>> implHelper(T &&t)
-    {
-        if constexpr (std::is_reference_v<T>) {
-            return std::make_unique<NonOwningVirtualIteratorImpl<RefT, It, Assign>>(t.begin(), t.end());
-        } else {
-            return std::make_unique<OwningVirtualIteratorImpl<RefT, It, Assign, T>>(std::move(t));
-        }
-    }
-
-    template <typename T, typename = std::enable_if_t<is_iterable_v<T>>, typename Assign = DefaultAssign>
-    explicit VirtualIterator(T &&t, type_holder_t<Assign> = {})
-        : mImpl(implHelper<typename derive_iterator<T>::iterator, Assign>(std::forward<T>(t)))
+    VirtualIterator(It &&it, const std::shared_ptr<VirtualRangeBase<RefT>> &container, type_holder_t<Assign> = {})
+        : mImpl(std::make_unique<VirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(it), container))
     {
     }
 
@@ -171,14 +121,14 @@ struct VirtualIterator {
         return result;
     }
 
-    bool operator!=(const VirtualIteratorEnd &) const
-    {
-        return !mImpl->ended();
-    }
-
     bool operator==(const VirtualIterator<RefT> &other) const
     {
         return mImpl->equals(*other.mImpl);
+    }
+
+    bool operator!=(const VirtualIterator<RefT> &other) const
+    {
+        return !mImpl->equals(*other.mImpl);
     }
 
 private:
@@ -186,25 +136,93 @@ private:
 };
 
 template <typename RefT>
-struct VirtualRange {
+struct VirtualRangeBase {
+    virtual ~VirtualRangeBase() = default;
+    virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
+    virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
+};
 
-    template <typename C>
-    VirtualRange(C &c)
-        : mRange(c.begin(), c.end())
+template <typename RefT, typename C, typename Assign>
+struct NonOwningVirtualRangeImpl : VirtualRangeBase<RefT> {
+
+    NonOwningVirtualRangeImpl(C &c)
+        : mContainer(c)
     {
     }
 
-    VirtualIterator<RefT> begin()
+    virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
     {
-        return mRange;
+        return { mContainer.begin(), self, type_holder<Assign> };
     }
 
-    VirtualIteratorEnd end()
+    virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
     {
-        return {};
+        return { mContainer.end(), self, type_holder<Assign> };
     }
 
 private:
-    VirtualIterator<RefT> mRange;
+    C &mContainer;
+};
+
+template <typename RefT, typename C, typename Assign>
+struct OwningVirtualRangeImpl : VirtualRangeBase<RefT> {
+
+    OwningVirtualRangeImpl(C &&c)
+        : mContainer(std::move(c))
+    {
+    }
+
+    virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
+    {
+        return { mContainer.begin(), self, type_holder<Assign> };
+    }
+
+    virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
+    {
+        return { mContainer.end(), self, type_holder<Assign> };
+    }
+
+private:
+    C mContainer;
+};
+
+template <typename RefT>
+struct VirtualRange {
+
+    template <typename C, typename Assign = DefaultAssign>
+    explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
+        : mRange(implHelper<Assign>(std::forward<C>(c)))
+    {
+    }
+
+    template <typename Assign, typename C>
+    static std::shared_ptr<VirtualRangeBase<RefT>> implHelper(C &&c)
+    {
+        if constexpr (std::is_reference_v<C>) {
+            return std::make_shared<NonOwningVirtualRangeImpl<RefT, C, Assign>>(c);
+        } else {
+            return std::make_shared<OwningVirtualRangeImpl<RefT, C, Assign>>(std::move(c));
+        }
+    }
+
+    VirtualIterator<RefT> begin() const
+    {
+        return mRange->begin(mRange);
+    }
+
+    VirtualIterator<RefT> end() const
+    {
+        return mRange->end(mRange);
+    }
+
+    bool operator==(const VirtualRange<RefT> &other) const
+    {
+        throw "TODO";
+        return false;
+        //return std::equal(begin(), end(), other.begin(), other.end());
+    }
+
+private:
+    std::shared_ptr<VirtualRangeBase<RefT>> mRange;
 };
 }

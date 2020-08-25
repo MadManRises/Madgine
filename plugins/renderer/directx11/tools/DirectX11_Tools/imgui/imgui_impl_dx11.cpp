@@ -597,7 +597,7 @@ bool ImGui_ImplDX11_Init(ID3D11Device *device, ID3D11DeviceContext *device_conte
 
 void ImGui_ImplDX11_Shutdown()
 {
-    ImGui_ImplDX11_ShutdownPlatformInterface();
+    //ImGui_ImplDX11_ShutdownPlatformInterface();
     ImGui_ImplDX11_InvalidateDeviceObjects();
     if (g_pFactory) {
         g_pFactory->Release();

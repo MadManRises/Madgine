@@ -21,26 +21,15 @@ namespace Threading {
         template <typename F, typename... Args>
         void createThread(F &&main, Args &&... args)
         {
-            createNamedThread("thread_" + std::to_string(++mInstanceCounter), std::forward<F>(main), std::forward<Args>(args)...);
-        }
-
-        template <typename F, typename... Args>
-        void createNamedThread(std::string name, F &&main, Args &&... args)
-        {
+            addThread();
             mSubThreads.emplace_back(
-                std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::move(name), std::forward<F>(main), std::forward<Args>(args)...));
+                std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::forward<F>(main), std::forward<Args>(args)...));
         }
 
         template <typename F, typename... Args>
         auto spawnTaskThread(F &&task, Args &&... args)
         {
-            return spawnNamedTaskThread("task_" + std::to_string(++mInstanceCounter), std::forward<F>(task), std::forward<Args>(args)...);
-        }
-
-        template <typename F, typename... Args>
-        Future<std::invoke_result_t<F &&, Args &&...>> spawnNamedTaskThread(std::string name, F &&task, Args &&... args)
-        {
-            return std::async(std::launch::async, &WorkGroup::taskMain<F, std::decay_t<Args>...>, this, std::move(name), std::forward<F>(task), std::forward<Args>(args)...);
+            return std::async(std::launch::async, &WorkGroup::taskMain<F, std::decay_t<Args>...>, this, std::forward<F>(task), std::forward<Args>(args)...);
         }
 
         bool singleThreaded();
@@ -56,18 +45,26 @@ namespace Threading {
         static bool isInitialized();
 
         void addTaskQueue(TaskQueue *taskQueue);
+        void removeTaskQueue(TaskQueue *taskQueue);
         const std::vector<TaskQueue *> taskQueues() const;
+
+        static Barrier &barrier(int flags = 0);
+        void enterCurrentBarrier(TaskQueue *queue, size_t queueIndex, bool isMain);
+
+        const std::atomic<bool> &hasInterrupt();
 
     private:
 #if ENABLE_THREADING
-        void initThread(const std::string &name);
+        void initThread();
         void finalizeThread();
 
+        void addThread();
+
         struct ThreadGuard {
-            ThreadGuard(const std::string &name, WorkGroup &group)
+            ThreadGuard(WorkGroup &group)
                 : mGroup(group)
             {
-                mGroup.initThread(name);
+                mGroup.initThread();
             }
 
             ~ThreadGuard()
@@ -80,9 +77,9 @@ namespace Threading {
         };
 
         template <typename F, typename... Args>
-        int threadMain(const std::string &name, F &&main, Args &&... args)
+        int threadMain(F &&main, Args &&... args)
         {
-            ThreadGuard guard(name, *this);
+            ThreadGuard guard(*this);
             try {
                 return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
             } catch (std::exception &e) {
@@ -93,9 +90,9 @@ namespace Threading {
         }
 
         template <typename F, typename... Args>
-        auto taskMain(const std::string &name, F &&main, Args &&... args)
+        auto taskMain(F &&main, Args &&... args)
         {
-            ThreadGuard guard(name, *this);
+            ThreadGuard guard(*this);
             try {
                 return std::forward<F>(main)(std::forward<Args>(args)...);
             } catch (std::exception &e) {
@@ -118,6 +115,11 @@ namespace Threading {
         std::vector<TaskHandle> mThreadInitializers;
 
         std::vector<TaskQueue *> mTaskQueues;
+
+        mutable std::mutex mMutex;
+        std::list<Barrier> mBarriers;
+
+        std::atomic<bool> mHasInterrupt;
     };
 }
 }

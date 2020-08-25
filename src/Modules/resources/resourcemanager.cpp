@@ -104,9 +104,9 @@ namespace Resources {
         //registerResourceLocation(binPath.parent_path() / "data" / plugin->());
     }
 
-    bool ResourceManager::aboutToUnloadPlugin(const Plugins::Plugin *plugin)
+    Future<void> ResourceManager::aboutToUnloadPlugin(const Plugins::Plugin *plugin)
     {
-        return false;
+        return {};
     }
 #endif
 

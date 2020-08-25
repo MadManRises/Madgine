@@ -6,6 +6,8 @@
 
 #include "taskqueue.h"
 
+#include "barrier.h"
+
 #if EMSCRIPTEN
 
 #    include <emscripten.h>
@@ -46,23 +48,27 @@ namespace Threading {
 
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             if (queue != main_queue)
-                mWorkgroup.createNamedThread(queue->name(), &Scheduler::schedulerLoop, this, queue);
+                mWorkgroup.createThread(&Scheduler::schedulerLoop, this, queue);
         }
 
+        setCurrentThreadName(mWorkgroup.name() + "_" + main_queue->name() + " (Main)");
+
         do {
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
-            nextAvailableTaskTime = std::min(std::chrono::steady_clock::now() + std::chrono::milliseconds(200), nextAvailableTaskTime);
-            main_queue->waitForTasks(nextAvailableTaskTime);
+            while (mWorkgroup.hasInterrupt()) {
+                mWorkgroup.enterCurrentBarrier(main_queue, 0, true);
+            }
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
+            main_queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
             mWorkgroup.checkThreadStates();
             if (!main_queue->running()) {
                 for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
                     queue->stop();
                 }
             }
-        } while (!main_queue->idle() || !mWorkgroup.singleThreaded());
+        } while (!main_queue->idle(TaskMask::DEFAULT) || !mWorkgroup.singleThreaded());
 
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            assert(queue->idle());
+            assert(queue->idle(TaskMask::DEFAULT));
         }
 
 #endif
@@ -71,16 +77,20 @@ namespace Threading {
 
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
-        while (!queue->idle() || queue->running()) {
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
-            queue->waitForTasks(nextAvailableTaskTime);
+        setCurrentThreadName(mWorkgroup.name() + "_" + queue->name());
+        while (!queue->idle(TaskMask::DEFAULT) || queue->running()) {
+            while (mWorkgroup.hasInterrupt()) {
+                mWorkgroup.enterCurrentBarrier(queue, 0, false);
+            }
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
+            queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
         }
     }
 
     void Scheduler::singleLoop()
     {
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            queue->update(1);
+            queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt(), 1, 1);
         }
     }
 

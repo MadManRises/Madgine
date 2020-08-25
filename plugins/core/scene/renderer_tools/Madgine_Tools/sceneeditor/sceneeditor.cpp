@@ -13,9 +13,9 @@
 #include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenemanager.h"
 
+#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
-#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/transform.h"
 
 #include "inspector/inspector.h"
@@ -135,41 +135,7 @@ namespace Tools {
     {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mHierarchyVisible)) {
 
-            for (typename GenerationVector<Scene::Entity::Entity>::iterator e = mSceneMgr->entities().begin(); e != mSceneMgr->entities().end(); ++e) {
-                const char *name = e->key().c_str();
-                if (!name[0])
-                    name = "<unnamed>";
-
-                bool hovered = mSelectedEntity == e;
-
-                ImGui::PushID(&e);
-                Im3D::PushID(&e);
-
-                if (e->hasComponent<Scene::Entity::Transform>()) {
-                    Engine::Matrix4 transform = e->getComponent<Scene::Entity::Transform>()->matrix();
-                    Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-                    if (e->hasComponent<Scene::Entity::Mesh>() && e->getComponent<Scene::Entity::Mesh>()->data())
-                        bb = e->getComponent<Scene::Entity::Mesh>()->aabb();
-
-                    Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
-                    if (hovered)
-                        flags |= Im3DBoundingObjectFlags_ShowOutline;
-
-                    if (Im3D::BoundingBox(name, bb, transform, flags)) {
-                        if (ImGui::IsMouseClicked(0)) {
-                            select(e);
-                        }
-                        hovered = true;
-                    }
-                }
-
-                if (ImGui::Selectable(name, hovered)) {
-                    select(e);
-                }
-                ImGui::DraggableValueTypeSource(name, this, ValueType { *e });
-                ImGui::PopID();
-                Im3D::PopID();
-            }
+            renderHierarchyEntity({});
 
             if (ImGui::Button("+ New Entity")) {
                 select(mSceneMgr->createEntity());
@@ -192,6 +158,77 @@ namespace Tools {
             }*/
         }
         ImGui::End();
+    }
+
+    void SceneEditor::renderHierarchyEntity(const Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> &parentTransform)
+    {
+        for (Engine::Scene::Entity::EntityPtr e = mSceneMgr->entities().begin(); e != mSceneMgr->entities().end(); ++e) {
+            Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> transform = e.getComponent<Scene::Entity::Transform>();
+            if ((!transform && parentTransform) || (transform && parentTransform != transform->parent()))
+                continue;
+
+            const char *name = e->key().c_str();
+            if (!name[0])
+                name = "<unnamed>";
+
+            bool hovered = mSelectedEntity == e;
+
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+            if (hovered)
+                flags |= ImGuiTreeNodeFlags_Selected;
+
+            bool hasChildren = false;
+            if (transform) {
+                for (Engine::Scene::Entity::EntityPtr child = mSceneMgr->entities().begin(); child != mSceneMgr->entities().end(); ++child) {
+                    Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = child.getComponent<Scene::Entity::Transform>();
+                    if (childTransform && transform == childTransform->parent()) {
+                        hasChildren = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasChildren)
+                flags |= ImGuiTreeNodeFlags_Leaf;
+
+            bool open = ImGui::TreeNodeEx(name, flags);
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
+                select(e);
+            }
+            if (transform) {
+                ImGui::DraggableValueTypeSource(name, this, ValueType { *e });
+                if (ImGui::BeginDragDropTarget()) {
+                    Engine::Scene::Entity::Entity *newChild;
+                    if (ImGui::AcceptDraggableValueType(newChild)) {
+                        Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = mSceneMgr->toEntityPtr(newChild).getComponent<Engine::Scene::Entity::Transform>();
+                        if (childTransform)
+                            childTransform->setParent(transform);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                Engine::Matrix4 transformM = transform->worldMatrix(mSceneMgr->entityComponentList<Engine::Scene::Entity::Transform>());
+                Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
+                if (e->hasComponent<Scene::Entity::Mesh>() && e.getComponent<Scene::Entity::Mesh>()->data())
+                    bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
+
+                Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
+                if (hovered)
+                    flags |= Im3DBoundingObjectFlags_ShowOutline;
+
+                if (Im3D::BoundingBox(name, bb, transformM, flags)) {
+                    if (ImGui::IsMouseClicked(0)) {
+                        select(e);
+                    }
+                    hovered = true;
+                }
+            }
+            if (open) {
+                if (transform)
+                    renderHierarchyEntity(transform);
+                ImGui::TreePop();
+            }
+        }
     }
 
     void SceneEditor::renderEntity(Scene::Entity::EntityPtr &entity)
@@ -228,20 +265,20 @@ namespace Tools {
             for (const std::pair<const std::string_view, IndexRef> &componentDesc : Scene::Entity::sComponentsByName()) {
                 if (componentDesc.second.isValid() && !entity->hasComponent(componentDesc.first)) {
                     if (ImGui::Selectable(componentDesc.first.data())) {
-                        entity->addComponent(componentDesc.first);
+                        entity.addComponent(componentDesc.first);
                         if (componentDesc.first == "Transform") {
-                            entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
-                            entity->getComponent<Scene::Entity::Transform>()->setScale({ 0.0001f, 0.0001f, 0.0001f });
+                            entity.getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
+                            entity.getComponent<Scene::Entity::Transform>()->setScale({ 0.0001f, 0.0001f, 0.0001f });
                         }
                         if (componentDesc.first == "Mesh") {
-                            entity->getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
+                            entity.getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
                         }
                         if (componentDesc.first == "Skeleton") {
-                            entity->getComponent<Scene::Entity::Skeleton>()->setName("mage_animated");
+                            entity.getComponent<Scene::Entity::Skeleton>()->setName("mage_animated");
                         }
                         if (componentDesc.first == "Animation") {
-                            entity->getComponent<Scene::Entity::Animation>()->setName("mage_animated");
-                            entity->getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("Walk");
+                            entity.getComponent<Scene::Entity::Animation>()->setName("mage_animated");
+                            entity.getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("Walk");
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -250,22 +287,16 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-        if (Scene::Entity::Transform *t = entity->getComponent<Scene::Entity::Transform>()) {
+        if (Scene::Entity::Transform *t = entity.getComponent<Scene::Entity::Transform>()) {
             constexpr Vector4 colors[] = {
                 { 0.5f, 0, 0, 0.5f },
                 { 0, 0.5f, 0, 0.5f },
                 { 0, 0, 0.5f, 0.5f }
             };
-            constexpr Matrix4 transforms[] = {
-                { 0, 1, 0, 0,
-                    1, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 0, 1 },
-                Matrix4::IDENTITY,
-                { 1, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 1, 0, 0,
-                    0, 0, 0, 1 }
+            constexpr Vector3 offsets[] = {
+                { 1, 0, 0 },
+                { 0, 1, 0 },
+                { 0, 0, 1 }
             };
 
             const char *labels[] = {
@@ -277,30 +308,35 @@ namespace Tools {
             mHoveredAxis = -1;
             mHoveredTransform = nullptr;
 
+            Vector3 pos = (t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
+
             for (size_t i = 0; i < 3; ++i) {
-                Im3D::Arrow(IM3D_TRIANGLES, 0.1f, 1.0f, t->matrix() * transforms[i], colors[i]);
+                Im3D::Arrow(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
                 if (Im3D::BoundingBox(labels[i], 0, 2)) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;
                 }
             }
 
-            if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
+            if (Scene::Entity::Skeleton *s = entity.getComponent<Scene::Entity::Skeleton>()) {
                 if (Render::SkeletonDescriptor *skeleton = s->data()) {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
-                        
-						Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse();
-						
-						Im3D::Text(bone.mName.c_str(), t->matrix() * m, 2.0f);
+
+                        Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse();
+                        Matrix4 world = t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>());
+
+                        Im3D::Text(bone.mName.c_str(), t->matrix() * m, 2.0f);
                         float length = 0.1f;
-                        
+                        Vector3 start = (world * m * Vector4::UNIT_W).xyz();
+                        Vector3 end = start + (world * m * Vector4 { 0, length, 0, 0 }).xyz();
+
                         if (bone.mFirstChild != std::numeric_limits<uint32_t>::max()) {
                             Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse();
-                            Vector3 dist = m_child.GetColumn(3).xyz() - m.GetColumn(3).xyz();
-                            length = dist.length();
+                            end = (world * m_child * Vector4::UNIT_W).xyz();
+                            length = (end - start).length();
                         }
-                        Im3D::Arrow(IM3D_LINES, 0.1f * length, length, t->matrix() * m);
+                        Im3D::Arrow(IM3D_LINES, 0.1f * length, start, end);
                     }
                 }
             }
@@ -324,4 +360,3 @@ METATABLE_END(Engine::Tools::SceneEditor)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 FIELD(mHierarchyVisible)
 SERIALIZETABLE_END(Engine::Tools::SceneEditor)
-

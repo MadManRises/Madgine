@@ -11,7 +11,7 @@ namespace Render {
         RenderContext(Threading::TaskQueue *queue);
         virtual ~RenderContext();
 
-        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::Window *w) = 0;
+        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w) = 0;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }) = 0;
 
         void addRenderTarget(RenderTarget *target);

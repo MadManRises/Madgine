@@ -473,7 +473,7 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { Vector2i { mWindow.window()->renderX(), mWindow.window()->renderY() } + mClientSpace.mTopLeft };
+        modArgs.position -= Vector2 { Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() } + mClientSpace.mTopLeft };
 
         Rect2i clientSpace = { { 0, 0 }, mClientSpace.mSize };
 
@@ -523,7 +523,7 @@ namespace Widgets {
     bool WidgetManager::injectPointerMove(const Input::PointerEventArgs &arg)
     {
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow.window()->renderX()), static_cast<float>(mWindow.window()->renderY()) };
+        modArgs.position -= Vector2 { static_cast<float>(mWindow.osWindow()->renderX()), static_cast<float>(mWindow.osWindow()->renderY()) };
 
         Rect2i clientSpace = mClientSpace;
 

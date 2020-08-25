@@ -5,7 +5,6 @@ struct CopyType {
 };
 
 struct NonCopyType {
-protected:
     NonCopyType() = default;
     NonCopyType(const NonCopyType &) = delete;
     void operator=(const NonCopyType &) = delete;

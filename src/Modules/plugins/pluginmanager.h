@@ -2,18 +2,16 @@
 
 #if ENABLE_PLUGINS
 
+#include "../generic/future.h"
+
 namespace Engine {
 namespace Plugins {
 
     struct MODULES_EXPORT PluginManager {
         static PluginManager &getSingleton();
 
-        PluginManager();
-        ~PluginManager();
-
-		void executeCLI();
-
-        bool isLoaded(const std::string &plugin) const;
+        PluginManager(const std::string &programName, bool loadCache = true, bool loadExe = true);
+        ~PluginManager();		
 
         PluginSection &section(const std::string &name);
         PluginSection &operator[](const std::string &name);
@@ -26,17 +24,27 @@ namespace Plugins {
         std::map<std::string, PluginSection>::iterator begin();
         std::map<std::string, PluginSection>::iterator end();
 
-        void saveSelection(Ini::IniFile &file, bool withTools);
-        void loadSelection(Ini::IniFile &file);
-
         void addListener(PluginListener *listener);
         void removeListener(PluginListener *listener);
 
+        Future<bool> loadFromFile(const Filesystem::Path &p);
+        void saveToFile(const Filesystem::Path &p, bool withTools);
+
         std::mutex mListenersMutex;
+        std::mutex mDependenciesMutex;
 
     protected:
         void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
         void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
+
+        void setupSection(const std::string &name, bool exclusive, bool atleastOne);
+
+        void saveSelection(Threading::Barrier &barrier, Ini::IniFile &file, bool withTools);
+        void loadSelection(Threading::Barrier &barrier, const Ini::IniFile &file, std::promise<bool> &&p);
+
+        void onUpdate(Threading::Barrier &barrier);
+
+        friend struct PluginSection;
 
     private:
         std::map<std::string, PluginSection> mSections;
@@ -46,6 +54,8 @@ namespace Plugins {
         static PluginManager *sSingleton;
 
         bool mLoadingSelectionFile = false;
+
+        std::string mCacheFileName;
     };
 
 }

@@ -14,6 +14,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "entitycomponentserialize.h"
+
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Scene::Entity::Entity)
@@ -36,7 +38,7 @@ namespace Scene {
 
         Entity::Entity(Entity &&other, bool local)
             : SerializableUnit(std::move(other))
-            , mName(other.mName)
+            , mName(std::move(other.mName))
             , mLocal(local)
             , mComponents(std::move(other.mComponents))
             , mSceneManager(other.mSceneManager)
@@ -67,6 +69,17 @@ namespace Scene {
 
         Entity::~Entity()
         {
+            while (!mComponents.empty())
+                removeComponent(mComponents.begin()->first);
+        }
+
+        Entity &Entity::operator=(Entity &&other)
+        {
+            assert(&mSceneManager == &other.mSceneManager);
+            SerializableUnit::operator=(std::move(other));
+            mName = std::move(other.mName);
+            mComponents = std::move(other.mComponents);            
+            return *this;
         }
 
         const std::string &Entity::key() const
@@ -79,35 +92,35 @@ namespace Scene {
             return mName;
         }
 
-        EntityComponentBase *Entity::getComponent(size_t i)
+        EntityComponentPtr<EntityComponentBase> Entity::getComponent(size_t i, const EntityPtr &self)
         {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
-                return nullptr;
-            return it->second.get();
+                return {};
+            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
         }
 
-        const EntityComponentBase *Entity::getComponent(size_t i) const
+        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(size_t i, const EntityPtr &self) const
         {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
-                return nullptr;
-            return it->second.get();
+                return {};
+            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
         }
 
-        EntityComponentBase *Entity::getComponent(const std::string_view &name)
+        EntityComponentPtr<EntityComponentBase> Entity::getComponent(const std::string_view &name, const EntityPtr &self)
         {
-            return getComponent(sComponentsByName()[name]);
+            return getComponent(sComponentsByName()[name], self);
         }
 
-        const EntityComponentBase *Entity::getComponent(const std::string_view &name) const
+        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(const std::string_view &name, const EntityPtr &self) const
         {
-            return getComponent(sComponentsByName()[name]);
+            return getComponent(sComponentsByName()[name], self);
         }
 
-        EntityComponentBase *Entity::toEntityComponentPtr(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &p)
+        EntityComponentBase *Entity::toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
         {
-            return p.second.get();
+            return mSceneManager.entityComponentList(p.first).get(p.second.mIndex);
         }
 
         bool Entity::hasComponent(size_t i)
@@ -120,42 +133,55 @@ namespace Scene {
             return hasComponent(sComponentsByName()[name]);
         }
 
-        Future<EntityComponentBase *> Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
+        Future<EntityComponentPtr<EntityComponentBase>> Entity::addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table)
         {
-            return addComponent(sComponentsByName().at(name), table);
+            return addComponent(sComponentsByName().at(name), self, table);
         }
 
-        Future<EntityComponentBase *> Entity::addComponent(size_t i, const ObjectPtr &table)
+        Future<EntityComponentPtr<EntityComponentBase>> Entity::addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table)
         {
             auto it = mComponents.physical().find(i);
             if (it != mComponents.physical().end()) {
-                return it->second.get();
+                return EntityComponentPtr<EntityComponentBase> { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
             } else {
-                return mComponents.try_emplace(i, EntityComponentRegistry::getConstructor(i)(table)).execute().then([](auto pib) { return pib.first->second.get(); });
+                return mComponents.try_emplace(i, mSceneManager.entityComponentList(i).emplace(table)).execute().then([=](auto pib) {
+                    return EntityComponentPtr<EntityComponentBase> { { self.sceneMgr()->entityComponentList(i)->copy(pib.first->second.mIndex) }, i, self };
+                });
             }
         }
 
         void Entity::removeComponent(const std::string_view &name)
         {
-            auto it = mComponents.find(sComponentsByName().at(name));
-            assert(it != mComponents.end());
+            removeComponent(sComponentsByName().at(name));
+        }
+
+        void Entity::removeComponent(size_t i)
+        {
+            auto it = mComponents.find(i);
+            assert(it != mComponents.physical().end());
+            mSceneManager.entityComponentList(i).erase(it->second.mIndex);
             mComponents.erase(it);
         }
 
-        std::tuple<uint32_t, std::unique_ptr<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
+        std::tuple<uint32_t, EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
             uint32_t i = sComponentsByName().at(name);
-            return make_tuple(i, EntityComponentRegistry::getConstructor(i)({}));
+            return std::make_tuple(i, mSceneManager.entityComponentList(i).emplace({}));
         }
 
-        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &comp) const
+        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &comp) const
         {
-            return std::make_tuple(std::make_pair("type", comp.second->key()));
+            for (const auto &p : sComponentsByName()) {
+                if (p.second == comp.first)
+                    return std::make_tuple(std::make_pair("type", p.first));
+            }
+            throw 0;
         }
 
         void Entity::remove()
         {
-            mSceneManager.remove(this);
+            EntityPtr p = mSceneManager.toEntityPtr(this);
+            mSceneManager.remove(p);
         }
 
         SceneComponentBase &Entity::getSceneComponent(size_t i, bool init)
@@ -168,18 +194,6 @@ namespace Scene {
             return mSceneManager.getGlobalAPIComponent(i, init);
         }
 
-        void Entity::swap(Entity &other)
-        {
-            std::swap(mName, other.mName);
-            std::swap(mComponents, other.mComponents);
-            SerializableUnit::swap(other);
-        }
-
-        EntityComponentBase *Entity::addComponentSimple(const std::string_view &name, const ObjectPtr &table)
-        {
-            return addComponent(name, table);
-        }
-
         SceneManager &Entity::sceneMgr(bool init) const
         {
             return mSceneManager.getSelf(init);
@@ -190,19 +204,26 @@ namespace Scene {
             return mLocal;
         }
 
-        void Entity::handleEntityEvent(const typename std::map<uint32_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op)
+        void Entity::handleEntityEvent(const typename std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op)
         {
             switch (op) {
             case BEFORE | RESET:
                 throw "TODO";
             case AFTER | RESET:
                 throw "TODO";
-            case AFTER | INSERT_ITEM:
-                it->second->init(mSceneManager.toEntityPtr(this));
+            case AFTER | EMPLACE:
+                mSceneManager.entityComponentList(it->first).get(it->second.mIndex)->init(mSceneManager.toEntityPtr(this));
                 break;
-            case BEFORE | REMOVE_ITEM:
-                it->second->finalize(mSceneManager.toEntityPtr(this));
+            case BEFORE | ERASE:
+                mSceneManager.entityComponentList(it->first).get(it->second.mIndex)->finalize(mSceneManager.toEntityPtr(this));
                 break;
+            }
+        }
+
+        void Entity::update()
+        {
+            for (const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>>& p : mComponents) {
+                mSceneManager.entityComponentList(p.first)->update(p.second.mIndex);
             }
         }
     }

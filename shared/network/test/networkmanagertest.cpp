@@ -6,13 +6,15 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Modules/threading/defaulttaskqueue.h"
+#include "Modules/threading/taskqueue.h"
 
 #include <future>
 
 TEST(NetworkManager, Connect)
 {
     Engine::Threading::WorkGroup wg;
+
+    Engine::Threading::TaskQueue taskQueue { "default" };
 
     Engine::Network::NetworkManager server("testNetworkServer");
 
@@ -25,7 +27,7 @@ TEST(NetworkManager, Connect)
         Engine::Network::NetworkManagerResult result = server.acceptConnection(400000ms);
         while (!done) {
             server.sendMessages();
-            Engine::Threading::DefaultTaskQueue::getSingleton().update();
+            taskQueue.update(Engine::Threading::TaskMask::DEFAULT, &wg.hasInterrupt());
         }
         return result;
     });
@@ -33,7 +35,7 @@ TEST(NetworkManager, Connect)
 
     EXPECT_EQ(client.connect("127.0.0.1", 1234, 200000ms), Engine::Network::NetworkManagerResult::SUCCESS) << "Stream-Error: " << server.getStreamError();
 
-    Engine::Threading::DefaultTaskQueue::getSingleton().update();
+    taskQueue.update(Engine::Threading::TaskMask::DEFAULT, &wg.hasInterrupt());
 
     done = true;
 

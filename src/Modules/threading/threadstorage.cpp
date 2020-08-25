@@ -13,6 +13,12 @@
 namespace Engine {
 namespace Threading {
 
+    static std::shared_mutex &sMutex()
+    {
+        static std::shared_mutex dummy;
+        return dummy;
+    }
+
     static std::vector<GlobalVariableManager> &sLocalBssVariableConstructors()
     {
         static std::vector<GlobalVariableManager> dummy;
@@ -30,6 +36,7 @@ namespace Threading {
         {
             mIndex = sCount.fetch_add(1);
 
+            std::shared_lock lock { sMutex() };
             for (GlobalVariableManager &m : sLocalBssVariableConstructors()) {
                 m[mIndex];
             }
@@ -37,6 +44,7 @@ namespace Threading {
 
         void init()
         {
+            std::shared_lock lock { sMutex() };
             for (GlobalVariableManager &m : sLocalObjectVariableConstructors()) {
                 m[mIndex];
             }
@@ -74,23 +82,27 @@ namespace Threading {
 
     int ThreadStorage::registerLocalBssVariable(std::function<Any()> ctor)
     {
+        std::unique_lock lock { sMutex() };
         sLocalBssVariableConstructors().emplace_back(std::move(ctor));
         return -static_cast<int>(sLocalBssVariableConstructors().size());
     }
 
     void ThreadStorage::unregisterLocalBssVariable(int index)
     {
+        std::shared_lock lock { sMutex() };
         sLocalBssVariableConstructors()[-(index + 1)].reset();
     }
 
     int ThreadStorage::registerLocalObjectVariable(std::function<Any()> ctor)
     {
+        std::unique_lock lock { sMutex() };
         sLocalObjectVariableConstructors().emplace_back(std::move(ctor));
         return sLocalObjectVariableConstructors().size() - 1;
     }
 
     void ThreadStorage::unregisterLocalObjectVariable(int index)
     {
+        std::shared_lock lock { sMutex() };
         sLocalObjectVariableConstructors()[index].reset();
     }
 
@@ -100,6 +112,7 @@ namespace Threading {
         std::vector<GlobalVariableManager> &constructors = index < 0 ? sLocalBssVariableConstructors() : sLocalObjectVariableConstructors();
         if (index < 0)
             index = -(index + 1);
+        std::shared_lock lock { sMutex() };
         GlobalVariableManager &m = constructors[index];
         return m[self];
     }
@@ -115,8 +128,11 @@ namespace Threading {
             pthread_setspecific(sKey(), new VariableStore);
 #    endif
 
+            size_t index = sLocalVariables().mIndex;
+
+            std::shared_lock lock { sMutex() };
             for (GlobalVariableManager &m : sLocalBssVariableConstructors()) {
-                m[sLocalVariables().mIndex];
+                m[index];
             }
         } else {
             sLocalVariables().init();
@@ -125,6 +141,7 @@ namespace Threading {
 
     void ThreadStorage::finalize(bool bss)
     {
+        std::shared_lock lock { sMutex() };
         if (bss) {
             for (GlobalVariableManager &m : sLocalBssVariableConstructors()) {
                 m.remove(sLocalVariables().mIndex);

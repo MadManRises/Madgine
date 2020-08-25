@@ -39,9 +39,9 @@ namespace Window {
         }
     } sDisplayGuard;
 
-    struct EmscriptenWindow : Window {
+    struct EmscriptenWindow : OSWindow {
         EmscriptenWindow(EGLSurface surface)
-            : Window((uintptr_t)surface)
+            : OSWindow((uintptr_t)surface)
         {
             EGLint width;
             EGLint height;
@@ -166,7 +166,7 @@ namespace Window {
         return true;
     }
 
-    Window *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings)
     {
         assert(sDisplay);
 
@@ -226,7 +226,7 @@ namespace Window {
 			}*/
     }
 
-    Window *sFromNative(uintptr_t handle)
+    OSWindow *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
     }

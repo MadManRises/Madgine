@@ -30,11 +30,13 @@ struct ObjectFieldAccessor;
 
 template <typename RefT>
 struct VirtualIterator;
+template <typename RefT>
+struct VirtualRange;
 
 enum KeyValueValueFlags : uint8_t;
 
-struct KeyValueVirtualIteratorBase;
 using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
+using KeyValueVirtualRange = VirtualRange<KeyValuePair>;
 
 struct MadgineObject;
 
@@ -43,7 +45,7 @@ struct IndexHolder;
 struct UniqueComponentCollectorManager;
 template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent;
-template <typename Registry, typename _Base, typename... _Ty>
+template <typename Observer, typename Registry, typename _Base, typename... _Ty>
 struct UniqueComponentSelector;
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
 struct UniqueComponentContainer;
@@ -174,11 +176,7 @@ namespace Threading {
     struct ConnectionInstance;
     struct TaskQueue;
     struct TaskHandle;
-}
-
-namespace Window {
-    struct WindowEventListener;
-    struct Window;
+    struct Barrier;
 }
 
 namespace Filesystem {

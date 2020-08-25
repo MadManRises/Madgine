@@ -316,7 +316,12 @@ static void setTypeHelper(ValueType::Union &v, ValueTypeDesc type, std::index_se
 {
     using Ctor_Type = void (*)(ValueType::Union &);
     static constexpr Ctor_Type ctors[] = {
-        [](ValueType::Union &v) { v.emplace<Is>(); }...
+        [](ValueType::Union &v) {
+            if constexpr (!type_pack_contains_v<ValueType::NonDefaultConstructibleTypes, std::variant_alternative_t<Is, ValueType::Union>>)
+                v.emplace<Is>();
+            else
+                throw 0;
+        }...
     };
     ctors[static_cast<unsigned char>(type.mType.mIndex)](v);
 }

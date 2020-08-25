@@ -14,7 +14,13 @@ struct VirtualUniqueComponentImpl : Base {
     struct Inner {
         Inner()
         {
+            assert(!Base::_preg());
             Base::_preg() = &reg;
+        }
+        ~Inner() 
+        {
+            assert(Base::_preg() == &reg);
+            Base::_preg() = nullptr;
         }
 
     private:
@@ -41,7 +47,7 @@ public:
 protected:
     static IndexHolder *&_preg()
     {
-        static IndexHolder *dummy;
+        static IndexHolder *dummy = nullptr;
         return dummy;
     }
 };
@@ -49,6 +55,7 @@ protected:
 DLL_IMPORT_VARIABLE2(typename Collector::template ComponentRegistrator<T>, _reg, typename T, typename Collector);
 
 #    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name, Name::Collector)
+#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name, Name::Collector)
 
 template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {

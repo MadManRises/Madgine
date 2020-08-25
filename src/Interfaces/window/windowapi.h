@@ -12,9 +12,9 @@ namespace Window {
     INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;
 
 
-    struct INTERFACES_EXPORT Window {
+    struct INTERFACES_EXPORT OSWindow {
 
-        Window(uintptr_t handle)
+        OSWindow(uintptr_t handle)
             : mHandle(handle)
         {
         }
@@ -85,9 +85,9 @@ namespace Window {
         std::vector<WindowEventListener *> mListeners;
     };
 
-    INTERFACES_EXPORT Window *sCreateWindow(const WindowSettings &settings);
+    INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings);
     INTERFACES_EXPORT void sUpdate();
-    INTERFACES_EXPORT Window *sFromNative(uintptr_t handle);
+    INTERFACES_EXPORT OSWindow *sFromNative(uintptr_t handle);
 
     struct MonitorInfo {
         int x, y;

@@ -8,7 +8,7 @@ namespace Engine
 
 		struct MADGINE_BASE_EXPORT Root
 		{		
-			Root(int argc = 0, char **argv = nullptr);
+			Root(const std::string &programName, int argc = 0, char **argv = nullptr);
 			~Root();
 
 			int errorCode();

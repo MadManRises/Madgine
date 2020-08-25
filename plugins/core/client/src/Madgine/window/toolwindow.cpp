@@ -19,20 +19,20 @@ namespace Engine {
 namespace Window {
     ToolWindow::ToolWindow(MainWindow &parent, const WindowSettings &settings)
     {
-        mWindow = sCreateWindow(settings);
+        mOsWindow = sCreateWindow(settings);
 
-        mWindow->addListener(this);
+        mOsWindow->addListener(this);
 
-        mInputHandlerSelector.emplace(parent, mWindow, &parent, 0);
+        mInputHandlerSelector.emplace(parent, mOsWindow, &parent, 0);
 
-        mRenderWindow = parent.getRenderer()->createRenderWindow(mWindow);
+        mRenderWindow = parent.getRenderer()->createRenderWindow(mOsWindow);
     }
 
     ToolWindow::~ToolWindow()
     {
-        mWindow->removeListener(this);
+        mOsWindow->removeListener(this);
 
-        mWindow->destroy();
+        mOsWindow->destroy();
     }
 
     void ToolWindow::close()
@@ -52,7 +52,7 @@ namespace Window {
 
     Vector3 ToolWindow::getScreenSize()
     {
-        return { (float)mWindow->renderWidth(), (float)mWindow->renderHeight(), 1.0f };
+        return { (float)mOsWindow->renderWidth(), (float)mOsWindow->renderHeight(), 1.0f };
     }
 
     Input::InputHandler *ToolWindow::input()
@@ -60,9 +60,9 @@ namespace Window {
         return *mInputHandlerSelector;
     }
 
-    Window *ToolWindow::window()
+    OSWindow *ToolWindow::osWindow()
     {
-        return mWindow;
+        return mOsWindow;
     }
 
     Render::RenderTarget *ToolWindow::getRenderer()

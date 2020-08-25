@@ -11,8 +11,8 @@ TEST(GenerationVector, Basic)
     Engine::GenerationVector<int> v;
 
     v.emplace(1);
-    Engine::GenerationVectorIndex i2 = v.emplace(2);
-    Engine::GenerationVectorIndex i3 = v.emplace(3);
+    Engine::GenerationVectorIndex i2 = v.emplace(2).copyIndex();
+    Engine::GenerationVectorIndex i3 = v.emplace(3).copyIndex();
 
     logContainer(v);
 

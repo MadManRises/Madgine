@@ -82,10 +82,16 @@ namespace Tools {
                         for (auto &[pluginName, plugin] : section) {
                             const std::string &project = plugin.project();
 
-                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::DELAYED) {
+                            if (plugin.isDependencyOf(PLUGIN_SELF)) {
                                 ImGui::PushDisabled();
                             }
-                            bool loaded = plugin.isLoaded() == Plugins::LOADED;
+                            bool loaded;
+                            Future<bool> state = plugin.state();
+                            bool available = state.isAvailable();
+                            if (available)
+                                loaded = state;
+                            else
+                                ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
                             bool clicked = false;
                             std::string displayName { pluginName + " (" + project + ")" };
                             if (section.isExclusive()) {
@@ -94,14 +100,18 @@ namespace Tools {
                                     loaded = true;
                             } else
                                 clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
-                            if (clicked) {
-                                if (loaded)
-                                    section.loadPlugin(pluginName);
-                                else
-                                    section.unloadPlugin(pluginName);
-                                updateConfigFile();
+                            if (available) {
+                                if (clicked) {
+                                    if (loaded)
+                                        section.loadPlugin(pluginName);
+                                    else
+                                        section.unloadPlugin(pluginName);
+                                    updateConfigFile();
+                                }
+                            } else {
+                                ImGui::PopItemFlag();
                             }
-                            if (plugin.isDependencyOf(PLUGIN_SELF) || plugin.isLoaded() == Plugins::DELAYED) {
+                            if (plugin.isDependencyOf(PLUGIN_SELF)) {
                                 ImGui::PopDisabled();
                             }
                         }
@@ -115,7 +125,7 @@ namespace Tools {
 
                 for (Plugins::PluginSection &section : kvValues(mManager)) {
                     for (auto &[pluginName, plugin] : section) {
-                        if (plugin.isLoaded() == Plugins::LOADED) {
+                        if (plugin.isLoaded()) {
                             const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
 
                             if (ImGui::TreeNode(pluginName.c_str())) {
@@ -172,8 +182,7 @@ namespace Tools {
         if (!name.empty()) {
             Filesystem::Path p = path / (name + ".cfg");
             if (Filesystem::exists(p)) {
-                Ini::IniFile file { p };
-                mManager.loadSelection(file);
+                mManager.loadFromFile(p);
             }
         }
         updateConfigFile();
@@ -184,11 +193,9 @@ namespace Tools {
         ProjectManager &project = getTool<ProjectManager>();
         if (!project.config().empty()) {
             Filesystem::Path p = project.projectRoot() / (project.config() + "(tools).cfg");
-            Ini::IniFile file { p };
-            mManager.saveSelection(file, true);
+            mManager.saveToFile(p, true);            
             Filesystem::Path p_notools = project.projectRoot() / (project.config() + ".cfg");
-            Ini::IniFile file_notools { p_notools };
-            mManager.saveSelection(file_notools, false);
+            mManager.saveToFile(p_notools, false);
         }
     }
 }

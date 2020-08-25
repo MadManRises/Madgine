@@ -46,25 +46,9 @@ namespace Physics {
     {
     }
 
-    void PhysicsManager::addRigidBody(RigidBody *body)
+    btDiscreteDynamicsWorld &Engine::Physics::PhysicsManager::world()
     {
-        mRigidBodies.push_back(body);
-
-        mData->mWorld.addRigidBody(body->get());
-    }
-
-    void PhysicsManager::removeRigidBody(RigidBody *body)
-    {
-        mData->mWorld.removeRigidBody(body->get());
-
-        mRigidBodies.erase(std::find(mRigidBodies.begin(), mRigidBodies.end(), body));
-    }
-
-    void PhysicsManager::updateRigidBody(RigidBody *body)
-    {
-        mData->mWorld.removeRigidBody(body->get());
-        mData->mWorld.addRigidBody(body->get());
-        body->get()->activate(true);
+        return mData->mWorld;
     }
 
     bool PhysicsManager::init()
@@ -84,6 +68,9 @@ namespace Physics {
     void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame)
     {
         mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
+        for (RigidBody &rigidBody : sceneMgr().entityComponentList<RigidBody>()) {
+            rigidBody.update();
+        }
     }
 
 }

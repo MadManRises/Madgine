@@ -36,7 +36,7 @@ void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin *p)
     }
 }
 
-bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
+Future<void> UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
 {
     const Plugins::BinaryInfo *info = p->info();
 
@@ -44,7 +44,7 @@ bool UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin 
     for (auto &[name, reg] : registryRegistry()) {
         reg->onPluginUnload(info, op);
     }
-    return true;
+    return {};
 }
 
 }

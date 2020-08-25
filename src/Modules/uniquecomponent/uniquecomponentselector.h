@@ -4,10 +4,11 @@
 
 namespace Engine {
 
-template <typename Registry, typename __Base, typename... _Ty>
-struct UniqueComponentSelector
+template <typename Observer, typename Registry, typename __Base, typename... _Ty>
+struct UniqueComponentSelector : Observer
 #if ENABLE_PLUGINS
-    : ComponentRegistryListener
+    ,
+                                 ComponentRegistryListener
 #endif
 {
     typedef typename Registry::F F;
@@ -21,7 +22,7 @@ struct UniqueComponentSelector
     {
         set(index);
 #if ENABLE_PLUGINS
-        Registry::addListener({ this, &UniqueComponentSelector<Registry, __Base, _Ty...>::sUpdateComponents });
+        Registry::addListener({ this, &UniqueComponentSelector<Observer, Registry, __Base, _Ty...>::sUpdateComponents });
 #endif
     }
 
@@ -56,12 +57,17 @@ struct UniqueComponentSelector
         if (index >= Registry::sComponents().size())
             index = INVALID;
         if (index != mIndex) {
-            if (index != INVALID) {
-                mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
-            } else {
+            if (mIndex != INVALID) {
+                Observer::operator()(mValue.get(), BEFORE | ERASE);
                 mValue.reset();
+                Observer::operator()(mValue.get(), AFTER | ERASE);
             }
             mIndex = index;
+            if (mIndex != INVALID) {
+                Observer::operator()(mValue.get(), BEFORE | EMPLACE);
+                mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
+                Observer::operator()(mValue.get(), AFTER | EMPLACE);
+            }
         }
     }
 
@@ -80,22 +86,20 @@ private:
 protected:
     static void sUpdateComponents(ComponentRegistryListener *listener, CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
-        static_cast<UniqueComponentSelector<Registry, __Base, _Ty...> *>(listener)->updateComponents(info, add, vals, op);
+        static_cast<UniqueComponentSelector<Observer, Registry, __Base, _Ty...> *>(listener)->updateComponents(info, add, vals, op);
     }
 
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
         if (add) {
             if (mIndex == INVALID && vals.size() > 0) {
-                mValue = TupleUnpacker::invokeFromTuple(vals[0], mArg);
-                mIndex = info->mBaseIndex;
+                set(info->mBaseIndex);
             }
         } else {
             if (mIndex != INVALID) {
                 size_t count = static_cast<typename Registry::CollectorInfo *>(info)->mComponents.size();
                 if (mIndex >= info->mBaseIndex && mIndex < info->mBaseIndex + count) {
-                    mValue.reset();
-                    mIndex = INVALID;
+                    reset();
                 } else if (mIndex >= info->mBaseIndex + count) {
                     mIndex -= count;
                 }

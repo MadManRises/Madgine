@@ -15,6 +15,8 @@ namespace Ini {
 
         std::map<std::string, std::string>::iterator begin();
         std::map<std::string, std::string>::iterator end();
+        std::map<std::string, std::string>::const_iterator begin() const;
+        std::map<std::string, std::string>::const_iterator end() const;
 
     private:
         std::map<std::string, std::string> mValues;

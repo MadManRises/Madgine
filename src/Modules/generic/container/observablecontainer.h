@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../container/observerevent.h"
+#include "../container/containerevent.h"
 
 namespace Engine {
 
@@ -15,33 +15,33 @@ struct ObservableContainer : C, Observer {
     template <typename... _Ty>
     typename _traits::emplace_return emplace(const iterator &where, _Ty &&... args)
     {
-        Observer::operator()(where, BEFORE | INSERT_ITEM);
+        Observer::operator()(where, BEFORE | EMPLACE);
         typename _traits::emplace_return it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
-        Observer::operator()(it, (_traits::was_emplace_successful(it) ? AFTER : ABORTED) | INSERT_ITEM);
+        Observer::operator()(it, (_traits::was_emplace_successful(it) ? AFTER : ABORTED) | EMPLACE);
         return it;
     }
 
     iterator erase(const iterator &where)
     {
-        Observer::operator()(where, BEFORE | REMOVE_ITEM);
+        Observer::operator()(where, BEFORE | ERASE);
         iterator it = _traits::container::erase(where);
-        Observer::operator()(it, AFTER | REMOVE_ITEM);
+        Observer::operator()(it, AFTER | ERASE);
         return it;
     }
 
     iterator erase(const iterator &from, const iterator &to)
     {
-        Observer::operator()(from, BEFORE | REMOVE_RANGE);
+        Observer::operator()(from, BEFORE | ERASE_RANGE);
         size_t count = 0;
         for (iterator it = from; it != to; ++it) {
-            Observer::operator()(it, BEFORE | REMOVE_ITEM);
+            Observer::operator()(it, BEFORE | ERASE);
             ++count;
         }
         iterator it = _traits::container::erase(from, to);
         for (; count > 0; --count) {
-            Observer::operator()(it, AFTER | REMOVE_ITEM);
+            Observer::operator()(it, AFTER | ERASE);
         }
-        Observer::operator()(it, AFTER | REMOVE_RANGE);
+        Observer::operator()(it, AFTER | ERASE_RANGE);
         return it;
     }
 

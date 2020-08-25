@@ -7,7 +7,7 @@ namespace Threading {
 
 	struct MODULES_EXPORT DefaultTaskQueue : Threading::TaskQueue {
     public:
-        DefaultTaskQueue();
+        DefaultTaskQueue(const std::string &name);
         DefaultTaskQueue(const DefaultTaskQueue &) = delete;
         ~DefaultTaskQueue();
 

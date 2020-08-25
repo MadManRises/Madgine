@@ -2,11 +2,10 @@
 
 #include "root.h"
 
-
-#include "Modules/keyvalueutil/keyvalueregistry.h"
-#include "Modules/resources/resourcemanager.h"
 #include "Interfaces/debug/memory/memory.h"
+#include "Modules/keyvalueutil/keyvalueregistry.h"
 #include "Modules/plugins/pluginmanager.h"
+#include "Modules/resources/resourcemanager.h"
 #include "Modules/threading/workgroup.h"
 
 #include "Modules/cli/cli.h"
@@ -16,33 +15,19 @@
 
 namespace Engine {
 namespace Core {
-    Root::Root(int argc, char **argv)
+    Root::Root(const std::string &programName, int argc, char **argv)
         : mCLI(std::make_unique<CLI::CLICore>(argc, argv))
-        ,
 #if ENABLE_PLUGINS
-        mPluginManager(std::make_unique<Plugins::PluginManager>())
+        , mPluginManager(std::make_unique<Plugins::PluginManager>(programName))
         , mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager))
-        ,
 #endif
 #if ENABLE_MEMTRACKING
-        mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>())
-        ,
+        , mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>())
 #endif
-			mResources(std::make_unique<Resources::ResourceManager>())
-		{
+        , mResources(std::make_unique<Resources::ResourceManager>())
+    {
 
-            KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
-#if ENABLE_PLUGINS                    
-
-        (*mPluginManager)["Renderer"].loadPlugin("OpenGL");
-        (*mPluginManager)["Renderer"].setExclusive();
-        (*mPluginManager)["Renderer"].setAtleastOne();
-
-        (*mPluginManager)["Input"].setExclusive();
-        (*mPluginManager)["Input"].setAtleastOne();
-
-		mPluginManager->executeCLI();
-#endif
+        KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
 
         mResources->init();
     }

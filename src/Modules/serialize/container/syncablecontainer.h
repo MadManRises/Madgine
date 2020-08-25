@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../generic/container/container_api.h"
-#include "../../generic/container/observerevent.h"
+#include "../../generic/container/containerevent.h"
 #include "../../generic/future.h"
 #include "../../generic/noopfunctor.h"
 #include "../../generic/onetimefunctor.h"
@@ -114,7 +114,7 @@ namespace Serialize {
                             value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
                             TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
                             std::pair<const_iterator, const value_type &> data { where, temp };
-                            this->writeRequest(INSERT_ITEM, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(EMPLACE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -138,7 +138,7 @@ namespace Serialize {
                             std::promise<iterator> p;
                             Future<iterator> future = p.get_future();
 
-                            this->writeRequest(REMOVE_ITEM, &where, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(ERASE, &where, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -166,7 +166,7 @@ namespace Serialize {
                             std::pair<iterator, iterator> data { from,
                                 to };
 
-                            this->writeRequest(REMOVE_RANGE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(ERASE_RANGE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -189,7 +189,7 @@ namespace Serialize {
                 assert(this->mCalled);
                 if (this->mInserted) {
                     if (this->mContainer.isSynced()) {
-                        container().writeAction(INSERT_ITEM, &this->mIt, mAnswerTarget, mAnswerId);
+                        container().writeAction(EMPLACE, &this->mIt, mAnswerTarget, mAnswerId);
                     }
                 }
             }
@@ -209,7 +209,7 @@ namespace Serialize {
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
-                    container().writeAction(REMOVE_ITEM, &it, answerTarget, answerId);
+                    container().writeAction(ERASE, &it, answerTarget, answerId);
                 }
             }
 

@@ -141,7 +141,7 @@ namespace Render {
 #endif
     }
 
-    void makeCurrent(Window::Window *window, ContextHandle context)
+    void makeCurrent(Window::OSWindow *window, ContextHandle context)
     {
         GL_LOG("Setting Context: " << context);
 #if WINDOWS
@@ -164,7 +164,7 @@ namespace Render {
 #endif
     }
 
-    ContextHandle setupWindowInternal(Window::Window *window, ContextHandle reusedContext)
+    ContextHandle setupWindowInternal(Window::OSWindow *window, ContextHandle reusedContext)
     {
 
 #if WINDOWS
@@ -268,7 +268,7 @@ namespace Render {
         return context;
     }
 
-    void shutdownWindow(Window::Window *window, ContextHandle context, bool reusedContext = false)
+    void shutdownWindow(Window::OSWindow *window, ContextHandle context, bool reusedContext = false)
     {
         if (!reusedContext)
             resetContext();
@@ -300,7 +300,7 @@ namespace Render {
             if (!init) {
                 Engine::Window::WindowSettings settings;
                 settings.mHidden = true;
-                Window::Window *tmp = Window::sCreateWindow(settings);
+                Window::OSWindow *tmp = Window::sCreateWindow(settings);
                 ContextHandle context = setupWindowInternal(tmp, nullptr);
 
 #    if WINDOWS
@@ -319,9 +319,9 @@ namespace Render {
     }
 #endif
 
-    OpenGLRenderWindow::OpenGLRenderWindow(OpenGLRenderContext *context, Window::Window *w, OpenGLRenderWindow *reusedResources)
+    OpenGLRenderWindow::OpenGLRenderWindow(OpenGLRenderContext *context, Window::OSWindow *w, OpenGLRenderWindow *reusedResources)
         : OpenGLRenderTarget(context)
-        , mWindow(w)
+        , mOsWindow(w)
         , mReusedContext(reusedResources)
     {
 #if !ANDROID && !EMSCRIPTEN
@@ -386,14 +386,14 @@ namespace Render {
             }
         }
 
-        shutdownWindow(mWindow, mContext, mReusedContext);
+        shutdownWindow(mOsWindow, mContext, mReusedContext);
     }
 
     void OpenGLRenderWindow::beginFrame()
     {
         PROFILE();
 
-        Engine::Render::makeCurrent(mWindow, mContext);
+        Engine::Render::makeCurrent(mOsWindow, mContext);
 
         OpenGLRenderTarget::beginFrame();
     }
@@ -402,7 +402,7 @@ namespace Render {
     {
         OpenGLRenderTarget::endFrame();
 
-        mWindow->swapBuffers();
+        mOsWindow->swapBuffers();
         GL_CHECK();
     }
 
@@ -413,7 +413,7 @@ namespace Render {
 
     Vector2i OpenGLRenderWindow::size() const
     {
-        return { mWindow->renderWidth(), mWindow->renderHeight() };
+        return { mOsWindow->renderWidth(), mOsWindow->renderHeight() };
     }
 
     bool OpenGLRenderWindow::resize(const Vector2i &size)

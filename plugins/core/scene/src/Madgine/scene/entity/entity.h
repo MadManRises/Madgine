@@ -10,6 +10,8 @@
 
 #include "Modules/generic/future.h"
 
+#include "entitycomponentptr.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -25,6 +27,8 @@ namespace Scene {
             Entity(const Entity &) = delete;
             ~Entity();
 
+            Entity &operator=(Entity &&other);
+
             void remove();
 
             const std::string &key() const;
@@ -32,9 +36,9 @@ namespace Scene {
             const std::string &name() const;
 
             template <typename T>
-            auto addComponent(const ObjectPtr &table = {})
+            auto addComponent(const EntityPtr &self, const ObjectPtr &table = {})
             {
-                return addComponent(component_index<T>(), table).then([](EntityComponentBase *comp) { return static_cast<T *>(comp); });
+                return addComponent(component_index<T>(), self, table).then([](const EntityComponentPtr<EntityComponentBase> &comp) { return static_cast<EntityComponentPtr<T>>(comp); });
             }
 
             template <typename T>
@@ -44,27 +48,34 @@ namespace Scene {
             }
 
             template <typename T>
-            T *getComponent()
+            EntityComponentPtr<T> getComponent(const EntityPtr &self)
             {
-                return static_cast<T *>(getComponent(component_index<T>()));
+                return static_cast<EntityComponentPtr<T>>(getComponent(component_index<T>(), self));
             }
 
             template <typename T>
-            const T *getComponent() const
+            EntityComponentPtr<const T> getComponent(const EntityPtr &self) const
             {
-                return static_cast<const T *>(getComponent(component_index<T>()));
+                return static_cast<EntityComponentPtr<const T>>(getComponent(component_index<T>(), self));
             }
 
-            EntityComponentBase *getComponent(size_t i);
-            const EntityComponentBase *getComponent(size_t i) const;
-            EntityComponentBase *getComponent(const std::string_view &name);
-            const EntityComponentBase *getComponent(const std::string_view &name) const;
+            EntityComponentPtr<EntityComponentBase> getComponent(size_t i, const EntityPtr &self);
+            EntityComponentPtr<const EntityComponentBase> getComponent(size_t i, const EntityPtr &self) const;
+            EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self);
+            EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self) const;
 
-            static EntityComponentBase *toEntityComponentPtr(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &p);
+            EntityComponentBase *toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p);
 
             decltype(auto) components()
             {
-                return transformIt<Functor<&toEntityComponentPtr>>(mComponents);
+                struct Helper {
+                    Entity *mEntity;
+                    EntityComponentBase *operator()(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
+                    {
+                        return mEntity->toEntityComponentPtr(p);
+                    }
+                };
+                return transformIt(mComponents, Helper { this });
             }
 
             template <typename T>
@@ -76,9 +87,10 @@ namespace Scene {
             bool hasComponent(size_t i);
             bool hasComponent(const std::string_view &name);
 
-            Future<EntityComponentBase *> addComponent(const std::string_view &name, const ObjectPtr &table = {});
-            Future<EntityComponentBase *> addComponent(size_t i, const ObjectPtr &table = {});
+            Future<EntityComponentPtr<EntityComponentBase>> addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table = {});
+            Future<EntityComponentPtr<EntityComponentBase>> addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table = {});
             void removeComponent(const std::string_view &name);
+            void removeComponent(size_t i);
 
             SceneManager &sceneMgr(bool = true) const;
 
@@ -100,30 +112,23 @@ namespace Scene {
 
             App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-            void swap(Entity &other);
+            void handleEntityEvent(const typename std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
 
-            void handleEntityEvent(const typename std::map<uint32_t, std::unique_ptr<EntityComponentBase>>::iterator &it, int op);
-
-        protected:
-            EntityComponentBase *addComponentSimple(const std::string_view &name, const ObjectPtr &table = {});
+            void update();
 
         public:
             std::string mName;
 
         private:
-            std::tuple<uint32_t, std::unique_ptr<EntityComponentBase>> createComponentTuple(const std::string &name);
-            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::pair<const uint32_t, std::unique_ptr<EntityComponentBase>> &comp) const;
+            std::tuple<uint32_t, EntityComponentOwningHandle<EntityComponentBase>> createComponentTuple(const std::string &name);
+            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &comp) const;
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, std::map<uint32_t, std::unique_ptr<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, ParentFunctor<&Entity::handleEntityEvent>);
+            SYNCABLE_CONTAINER(mComponents, std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, ParentFunctor<&Entity::handleEntityEvent>);
 
             SceneManager &mSceneManager;
         };
-
-        inline void swap(Entity& first, Entity& second) {
-            first.swap(second);
-        }
 
     }
 }

@@ -29,6 +29,12 @@ struct Quaternion {
         normalize();
     }
 
+    constexpr explicit Quaternion(float *const r)
+        : v(r)
+        , w(r[3])
+    {
+    }
+
     static Quaternion FromRadian(const Vector3 &angles)
     {
         return Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.z, Vector3::UNIT_Z);
@@ -37,6 +43,13 @@ struct Quaternion {
     static Quaternion FromDegrees(const Vector3 &angles)
     {
         return FromRadian(angles / 180.0f * PI);
+    }
+
+    static Quaternion FromMatrix(const Matrix3 &m)
+    {
+        float w = sqrtf(1.0 + m[0][0] + m[1][1] + m[2][2]) / 2.0f;
+        float w4 = 4.0f * w;
+        return { (m[2][1] - m[1][2]) / w4, (m[0][2] - m[2][0]) / w4, (m[1][0] - m[0][1]) / w4, w };
     }
 
     void operator*=(const Quaternion &other)
@@ -145,5 +158,4 @@ struct Quaternion {
 };
 
 MODULES_EXPORT Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio);
-
 }

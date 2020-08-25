@@ -90,7 +90,7 @@ namespace Window {
         bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
-        Window *window() const;
+        OSWindow *osWindow() const;
 
         decltype(auto) components()
         {
@@ -152,12 +152,12 @@ namespace Window {
 
         Threading::FrameLoop mLoop;
 
-        Window *mWindow = nullptr;
-        std::optional<Render::RenderContextSelector> mRenderContext;
+        OSWindow *mOsWindow = nullptr;
+        std::optional<Render::RenderContextSelector<>> mRenderContext;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
         Input::InputHandler *mExternalInput = nullptr;
-        std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
+        std::optional<Input::InputHandlerSelector<>> mInputHandlerSelector;
 
         template <typename OffsetPtr>
         friend struct MainWindowComponentObserver;

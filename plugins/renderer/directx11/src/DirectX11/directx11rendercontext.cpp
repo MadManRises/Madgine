@@ -44,7 +44,7 @@
             return std::make_unique<DirectX11RenderTexture>(this, size);
         }
 
-        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderWindow(Window::Window *w)
+        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderWindow(Window::OSWindow *w)
         {
             checkThread();
 

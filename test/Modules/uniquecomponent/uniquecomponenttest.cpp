@@ -14,6 +14,8 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/threading/taskqueue.h"
+
 #include "libA.h"
 #include "libB.h"
 
@@ -21,10 +23,12 @@ TEST(UniqueComponent, Registry)
 {
     Engine::Threading::WorkGroup wg;
 
+    Engine::Threading::TaskQueue taskQueue { "UniqueComponent" };
+
 	//TODO test properly
 
 #if ENABLE_PLUGINS
-    Engine::Plugins::PluginManager pmgr;
+    Engine::Plugins::PluginManager pmgr { "UniqueComponentTest", false, false };
 
     Engine::UniqueComponentCollectorManager cmgr { pmgr };
 
@@ -34,11 +38,19 @@ TEST(UniqueComponent, Registry)
 
     ASSERT_EQ(v.size(), 0);
 
-    ASSERT_EQ(pmgr["Test"].loadPlugin("LibA"), Engine::Plugins::LOADED);
+    Engine::Future<bool> f = pmgr["Test"].loadPlugin("LibA");
+    ASSERT_FALSE(f.isAvailable());
+    wg.enterCurrentBarrier(&taskQueue, 0, true);
+    ASSERT_TRUE(f.isAvailable());
+    ASSERT_EQ(f.get(), true);
 
     ASSERT_EQ(v.size(), 1);
 
-    ASSERT_EQ(pmgr["Test"].loadPlugin("LibB"), Engine::Plugins::LOADED);
+    f = pmgr["Test"].loadPlugin("LibB");
+    ASSERT_FALSE(f.isAvailable());
+    wg.enterCurrentBarrier(&taskQueue, 0, true);
+    ASSERT_TRUE(f.isAvailable());
+    ASSERT_EQ(f.get(), true);
 
 
     ASSERT_EQ(v.size(), 2);
@@ -49,7 +61,11 @@ TEST(UniqueComponent, Registry)
     ASSERT_NE(indexA, indexB);
 
 
-    ASSERT_EQ(pmgr["Test"].unloadPlugin("LibB"), Engine::Plugins::UNLOADED);
+    f = pmgr["Test"].unloadPlugin("LibB");
+    ASSERT_FALSE(f.isAvailable());
+    wg.enterCurrentBarrier(&taskQueue, 0, true);
+    ASSERT_TRUE(f.isAvailable());
+    ASSERT_EQ(f.get(), false);
 
     ASSERT_EQ(v.size(), 1);
 #endif

@@ -10,6 +10,7 @@
 #include "Modules/uniquecomponent/indexref.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Scene::Entity, EntityComponent, EntityComponentBase, const ObjectPtr &);
+DECLARE_UNIQUE_COMPONENT(Engine::Scene::Entity, EntityComponentList, EntityComponentListBase);
 
 
 namespace Engine {

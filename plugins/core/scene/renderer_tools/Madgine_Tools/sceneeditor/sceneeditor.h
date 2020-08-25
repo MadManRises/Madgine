@@ -8,10 +8,12 @@
 
 #include "Madgine/scene/entity/entityptr.h"
 
+#include "Madgine/scene/entity/entitycomponentptr.h"
+
 namespace Engine {
 namespace Tools {
 
-    struct SceneEditor : public Tool<SceneEditor> {
+    struct SceneEditor : Tool<SceneEditor> {
 
         SERIALIZABLEUNIT;
 
@@ -43,6 +45,7 @@ namespace Tools {
     private:
         void renderSelection();
         void renderHierarchy();
+        void renderHierarchyEntity(const Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> &parentTransform);
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
 

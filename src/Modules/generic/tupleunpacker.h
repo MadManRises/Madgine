@@ -58,17 +58,23 @@ namespace TupleUnpacker {
     }
 
     template <typename R, typename F, typename... Args>
-    std::enable_if_t<std::is_convertible_v<std::invoke_result_t<F &&, Args &&...>, R>, R> invokeDefaultResult(R &&, F &&f, Args &&... args)
+    R invokeDefaultResult(R &&defaultValue, F &&f, Args &&... args)
     {
-        return invoke(std::forward<F>(f), std::forward<Args>(args)...);
+        using result_t = decltype(TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...));
+        if constexpr (std::is_convertible_v<result_t, R>) {
+            return TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+        } else {
+            TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+            return std::forward<R>(defaultValue);
+        }
     }
 
-    template <typename R, typename F, typename... Args>
+    /*template <typename R, typename F, typename... Args>
     std::enable_if_t<!std::is_convertible_v<std::invoke_result_t<F&&, Args&&...>, R>, R> invokeDefaultResult(R &&defaultValue, F &&f, Args &&... args)
     {
         TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...);
         return std::forward<R>(defaultValue);
-    }
+    }*/
 
     template <typename T, size_t... S, typename Tuple>
     T constructUnpackTuple(Tuple &&args, std::index_sequence<S...>)

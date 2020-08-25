@@ -51,13 +51,15 @@ namespace Render {
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
 
-        for (typename GenerationVector<Scene::Entity::Entity>::iterator e = mScene.entities().begin(); e != mScene.entities().end(); ++e) {
-            Scene::Entity::Animation *anim = e->getComponent<Scene::Entity::Animation>();
+        for (Engine::Scene::Entity::EntityPtr e = mScene.entities().begin(); e != mScene.entities().end(); ++e) {
+            Scene::Entity::Animation *anim = e.getComponent<Scene::Entity::Animation>();
             if (anim)
                 anim->applyTransform(e);
 
-            Scene::Entity::Mesh *mesh = e->getComponent<Scene::Entity::Mesh>();
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            Scene::Entity::Mesh *mesh = e.getComponent<Scene::Entity::Mesh>();
+            Scene::Entity::Transform *transform = e.getComponent<Scene::Entity::Transform>();
+            if (transform)
+                transform->updateParent(mScene.entityComponentList<Scene::Entity::Transform>());
             if (mesh && mesh->isVisible() && transform) {
                 MeshData *meshData = mesh->data();
                 if (meshData) {
@@ -69,12 +71,12 @@ namespace Render {
 
                     TextureLoader::getSingleton().bind(meshData->mTextureHandle);
 
-                    mPerObject.m = transform->matrix();
-                    mPerObject.anti_m = transform->matrix()
+                    mPerObject.m = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
+                    mPerObject.anti_m = mPerObject.m.mValue
                                             .Inverse()
                                             .Transpose();
 
-                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+                    Scene::Entity::Skeleton *skeleton = e.getComponent<Scene::Entity::Skeleton>();
                     mPerObject.hasSkeleton = skeleton != nullptr;
 
                     mProgram.setParameters(mPerObject, 2);

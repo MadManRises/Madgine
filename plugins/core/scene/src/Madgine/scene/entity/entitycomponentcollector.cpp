@@ -5,6 +5,7 @@
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::Scene::Entity, EntityComponent)
+DEFINE_UNIQUE_COMPONENT(Engine::Scene::Entity, EntityComponentList)
 
 namespace Engine {
 namespace Scene {

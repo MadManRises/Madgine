@@ -33,6 +33,9 @@ struct MODULES_EXPORT ValueType {
 #include "valuetypedef.h"
         >;    
 
+    
+    using NonDefaultConstructibleTypes = Engine::type_pack<Engine::KeyValueVirtualRange>;
+
     ValueType();
 
     ValueType(const ValueType &other);

@@ -50,8 +50,8 @@ namespace Tools {
         settings.mHidden = true;
         Window::ToolWindow *window = topLevel->createToolWindow(settings);
         vp->PlatformUserData = window;
-        vp->PlatformHandle = window->window();
-        vp->PlatformHandleRaw = reinterpret_cast<void *>(window->window()->mHandle);
+        vp->PlatformHandle = window->osWindow();
+        vp->PlatformHandleRaw = reinterpret_cast<void *>(window->osWindow()->mHandle);
 
         ClientImRoot *root = static_cast<ClientImRoot *>(io.UserData);
         root->addViewportMapping(window->getRenderer(), vp);
@@ -76,51 +76,51 @@ namespace Tools {
     }
     static void ShowImGuiToolWindow(ImGuiViewport *vp)
     {
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         w->show();
     }
     static void SetImGuiToolWindowPos(ImGuiViewport *vp, ImVec2 pos)
     {
         ImGuiIO &io = ImGui::GetIO();
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         w->setRenderPos(static_cast<size_t>(pos.x * io.DisplayFramebufferScale.x), static_cast<size_t>(pos.y * io.DisplayFramebufferScale.y));
     }
     static ImVec2 GetImGuiToolWindowPos(ImGuiViewport *vp)
     {
         ImGuiIO &io = ImGui::GetIO();
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         return { static_cast<float>(w->renderX() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderY() / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowSize(ImGuiViewport *vp, ImVec2 size)
     {
         ImGuiIO &io = ImGui::GetIO();
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         w->setRenderSize(static_cast<size_t>(size.x * io.DisplayFramebufferScale.x), static_cast<size_t>(size.y * io.DisplayFramebufferScale.y));
     }
     static ImVec2 GetImGuiToolWindowSize(ImGuiViewport *vp)
     {
         ImGuiIO &io = ImGui::GetIO();
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         return { static_cast<float>(w->renderWidth() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderHeight() / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowFocus(ImGuiViewport *vp)
     {
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         w->focus();
     }
     static bool GetImGuiToolWindowFocus(ImGuiViewport *vp)
     {
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         return w->hasFocus();
     }
     static bool GetImGuiToolWindowMinimized(ImGuiViewport *vp)
     {
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         return w->isMinimized();
     }
     static void SetImGuiToolWindowTitle(ImGuiViewport *vp, const char *title)
     {
-        Window::Window *w = static_cast<Window::Window *>(vp->PlatformHandle);
+        Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
         w->setTitle(title);
     }
 
@@ -177,7 +177,7 @@ namespace Tools {
             }
 
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-            main_viewport->PlatformHandle = mWindow.window();
+            main_viewport->PlatformHandle = mWindow.osWindow();
             main_viewport->RendererUserData = mWindow.getRenderWindow();
         }
 
@@ -352,7 +352,7 @@ namespace Tools {
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
             io.MousePos = arg.position / io.DisplayFramebufferScale;
         else
-            io.MousePos = (arg.position - Vector2 { float(mWindow.window()->renderX()), float(mWindow.window()->renderY()) }) / io.DisplayFramebufferScale;
+            io.MousePos = (arg.position - Vector2 { float(mWindow.osWindow()->renderX()), float(mWindow.osWindow()->renderY()) }) / io.DisplayFramebufferScale;
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 

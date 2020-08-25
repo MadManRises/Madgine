@@ -9,8 +9,7 @@ namespace Engine
 
 		enum TaskState {
 			YIELD,
-			SUCCESS,
-			FAILURE
+			RETURN
 		};
 
 		struct Task {
@@ -29,7 +28,7 @@ namespace Engine
 
 			TaskState execute() override
 			{
-				return TupleUnpacker::invokeDefaultResult(SUCCESS, mF);
+				return TupleUnpacker::invokeDefaultResult(RETURN, mF);
 			}
 
 			std::unique_ptr<Task> clone() override

@@ -3,7 +3,7 @@
 #include "../filesystem/path.h"
 
 namespace Engine {
-namespace Plugins {
+namespace Dl {
 
     INTERFACES_EXPORT void *openDll(const std::string &name);
     INTERFACES_EXPORT void closeDll(void *handle);

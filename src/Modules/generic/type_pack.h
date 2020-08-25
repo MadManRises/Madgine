@@ -2,7 +2,6 @@
 
 namespace Engine {
 
-	
 template <typename...>
 struct type_pack {
 };
@@ -49,8 +48,7 @@ template <typename Pack, typename Is>
 struct type_pack_select_multiple;
 
 template <typename Pack, size_t... Is>
-struct type_pack_select_multiple<Pack, std::index_sequence<Is...>>
-{
+struct type_pack_select_multiple<Pack, std::index_sequence<Is...>> {
     using type = type_pack<typename type_pack_select<Is, Pack>::type...>;
 };
 
@@ -166,6 +164,53 @@ struct type_pack_append<type_pack<Ty...>, T> {
 template <typename Pack, typename T>
 using type_pack_append_t = typename type_pack_append<Pack, T>::type;
 
+template <typename Pack, typename... Filter>
+struct type_pack_filter;
+
+template <typename... Filter>
+struct type_pack_filter<type_pack<>, Filter...> {
+    using type = type_pack<>;
+};
+
+template <typename T, typename... Ty, typename... Filter>
+struct type_pack_filter<type_pack<T, Ty...>, Filter...> {
+private:
+    using base = typename type_pack_filter<type_pack<Ty...>, Filter...>::type;
+
+public:
+    using type = std::conditional_t<
+        type_pack_contains_v<type_pack<Filter...>, T>,
+        base,
+        type_pack_append_t<base, T>>;
+};
+
+template <typename Pack, typename... Filter>
+using type_pack_filter_t = typename type_pack_filter<Pack, Filter...>::type;
+
+template <typename Pack, template <typename> typename Filter>
+struct type_pack_filter_if;
+
+template <template <typename> typename Filter>
+struct type_pack_filter_if<type_pack<>, Filter> {
+    using type = type_pack<>;
+};
+
+template <typename T, typename... Ty, template <typename> typename Filter>
+struct type_pack_filter_if<type_pack<T, Ty...>, Filter> {
+private:
+    using base = typename type_pack_filter_if<type_pack<Ty...>, Filter>::type;
+
+public:
+    using type = std::conditional_t<
+        Filter<T>::value,
+        base,
+        type_pack_append_t<base, T>>;
+};
+
+template <typename Pack, template <typename> typename Filter>
+using type_pack_filter_if_t = typename type_pack_filter_if<Pack, Filter>::type;
+
+
 template <typename V, typename T>
 struct variant_contains;
 
@@ -182,6 +227,5 @@ struct variant_index;
 template <typename T, typename... _Ty>
 struct variant_index<std::variant<_Ty...>, T> : type_pack_index<size_t, type_pack<_Ty...>, T> {
 };
-
 
 }

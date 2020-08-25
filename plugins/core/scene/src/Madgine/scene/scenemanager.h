@@ -27,6 +27,8 @@
 
 #include "entity/entityptr.h"
 
+#include "entity/entitycomponentcollector.h"
+
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelSerializableUnit<SceneManager>,
@@ -43,7 +45,7 @@ namespace Scene {
             const std::function<void(Entity::Entity &)> &init = {});
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
-        void remove(Entity::Entity *e);
+        void remove(Entity::EntityPtr &e);
 
         //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
@@ -76,6 +78,16 @@ namespace Scene {
 
         Entity::EntityPtr toEntityPtr(Engine::Scene::Entity::Entity *e);
 
+        template <typename T>
+        Entity::EntityComponentList<T>& entityComponentList() {
+            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(T::component_index()));
+        }
+        
+        Entity::EntityComponentListBase &entityComponentList(size_t index)
+        {
+            return *mEntityComponentLists.at(index);
+        }
+
     protected:
         virtual bool init() final;
         virtual void finalize() final;
@@ -100,6 +112,8 @@ namespace Scene {
         std::chrono::steady_clock::time_point mLastFrame;
 
         size_t mItemCount = 0;
+
+        Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
     public:
         decltype(mEntities) &entities();

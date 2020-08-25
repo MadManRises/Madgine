@@ -9,6 +9,7 @@
 namespace Engine {
 
 struct MODULES_EXPORT VirtualScopeBase : ScopeBase {
+    using ScopeBase::ScopeBase;
     virtual ~VirtualScopeBase() = default;
     virtual TypedScopePtr customScopePtr() = 0;
 };

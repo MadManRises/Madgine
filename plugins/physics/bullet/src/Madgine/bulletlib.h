@@ -10,4 +10,6 @@
 
 #include "Madgine/scenelib.h"
 
+#include "bulletforward.h"
+
 /// @endcond

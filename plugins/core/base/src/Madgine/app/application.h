@@ -8,6 +8,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/threading/defaulttaskqueue.h"
+
 namespace Engine {
 namespace App {
 
@@ -18,9 +20,9 @@ namespace App {
         virtual ~Application();
 
         template <typename T>
-        T &getGlobalAPIComponent()
+        T &getGlobalAPIComponent(bool init = true)
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
         }
 
         GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
@@ -42,6 +44,8 @@ namespace App {
         const AppSettings &mSettings;
 
         int mGlobalAPIInitCounter;
+
+        Threading::DefaultTaskQueue mTaskQueue;
 
     public:
         GlobalAPIContainer<std::vector<Placeholder<0>>> mGlobalAPIs;

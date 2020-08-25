@@ -46,6 +46,7 @@ namespace Widgets {
 
     private:
         Render::FontLoader::HandleType mFont;
+        //TODO: Use HandleType
         Resources::ImageLoader::ResourceType *mImage = nullptr;
 
         Threading::Signal<> mClicked;

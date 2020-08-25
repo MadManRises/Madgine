@@ -9,7 +9,7 @@ namespace Engine {
 
 			size_t mMajorVersion;
 			size_t mMinorVersion;
-			size_t mPathNumber;
+			size_t mPatchNumber;
 
 			const char *mName;
 
@@ -21,6 +21,7 @@ namespace Engine {
 			const char *mPrecompiledHeaderPath;
 
 			const char **mPluginDependencies;
+            const char **mPluginGroupDependencies;
 
 			mutable Plugin *mSelf;
 

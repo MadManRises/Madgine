@@ -27,8 +27,7 @@ FolderSources(sources src OpenGL openglforward.h opengllib.h openglmeshdata.h op
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
-target_link_plugins(OpenGL Client)
-target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES} Client)
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
 

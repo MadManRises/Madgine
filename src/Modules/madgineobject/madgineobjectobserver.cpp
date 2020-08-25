@@ -4,18 +4,18 @@
 
 #include "madgineobject.h"
 
-#include "../generic/container/observerevent.h"
+#include "../generic/container/containerevent.h"
 
 namespace Engine {
 
 void MadgineObjectObserver::handle(MadgineObject *object, int event) const
 {
     switch (event) {
-    case AFTER | INSERT_ITEM:
+    case AFTER | EMPLACE:
         if (!object->parent() || object->parent()->isInitialized())
 			object->callInit();
         break;
-    case BEFORE | REMOVE_ITEM:
+    case BEFORE | ERASE:
         object->callFinalize();
         break;
     }

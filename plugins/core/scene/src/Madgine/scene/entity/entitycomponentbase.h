@@ -3,6 +3,7 @@
 #include "Modules/keyvalueutil/virtualscopebase.h"
 #include "Modules/serialize/serializableunit.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Modules/keyvalue/objectptr.h"
 

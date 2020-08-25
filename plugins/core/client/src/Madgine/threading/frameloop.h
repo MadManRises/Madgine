@@ -27,8 +27,6 @@ namespace Engine
 			void shutdown();
 			bool isShutdown() const;
 
-			void addSetupSteps(Threading::TaskHandle &&init, Threading::TaskHandle &&finalize = {});
-
 		protected:
 
 			bool sendFrameStarted(std::chrono::microseconds timeSinceLastFrame);
@@ -36,15 +34,11 @@ namespace Engine
 			bool sendFrameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, ContextMask context = ContextMask::SceneContext);
 			bool sendFrameEnded(std::chrono::microseconds timeSinceLastFrame);
 
-			virtual std::optional<Threading::TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount) override;
 			virtual std::optional<Threading::TaskTracker> fetch_on_idle() override;
-			virtual bool idle() const override;
 
 		private:			
 
-			std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>> mSetupSteps;
-			std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>>::iterator mSetupState;
-
+			
 			std::vector<FrameListener*> mListeners;
 
 			std::chrono::high_resolution_clock::time_point mLastFrame;

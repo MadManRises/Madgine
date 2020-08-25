@@ -51,5 +51,15 @@ namespace Ini {
         return mValues.end();
     }
 
+    std::map<std::string, std::string>::const_iterator IniSection::begin() const
+    {
+        return mValues.begin();
+    }
+
+    std::map<std::string, std::string>::const_iterator IniSection::end() const
+    {
+        return mValues.end();
+    }
+
 }
 }

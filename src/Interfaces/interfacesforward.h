@@ -19,7 +19,7 @@ namespace Debug {
 
 namespace Window {
     struct WindowEventListener;
-    struct Window;
+    struct OSWindow;
     struct WindowSettings;
 }
 

@@ -2,7 +2,7 @@
 
 #include "../../generic/container/atomiccontaineroperation.h"
 #include "../../generic/container/container_api.h"
-#include "../../generic/container/observerevent.h"
+#include "../../generic/container/containerevent.h"
 #include "../../generic/copy_traits.h"
 #include "../../generic/noopfunctor.h"
 #include "../../generic/offsetptr.h"
@@ -175,8 +175,8 @@ namespace Serialize {
                     iterator it = _traits::toIterator(*this, mActiveIterator);
                     ++mActiveIterator;
                     if (existenceChange) {
-                        Observer::operator()(it, BEFORE | INSERT_ITEM);
-                        Observer::operator()(it, AFTER | INSERT_ITEM);
+                        Observer::operator()(it, BEFORE | EMPLACE);
+                        Observer::operator()(it, AFTER | EMPLACE);
                     }
                     Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
                     ItemUnitHelper::setItemActive(*it, active, existenceChange || !controlled::value);
@@ -190,8 +190,8 @@ namespace Serialize {
                     ItemUnitHelper::setItemActive(*it, active, existenceChange || !controlled::value);
                     Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
                     if (existenceChange) {
-                        Observer::operator()(it, BEFORE | REMOVE_ITEM);
-                        Observer::operator()(it, AFTER | REMOVE_ITEM);
+                        Observer::operator()(it, BEFORE | ERASE);
+                        Observer::operator()(it, AFTER | ERASE);
                     }
                 }
             }
@@ -252,7 +252,7 @@ namespace Serialize {
             {
                 if constexpr (!_traits::sorted) {
                     if (this->mContainer.isItemActive(it)) {
-                        this->mContainer.Observer::operator()(it, BEFORE | INSERT_ITEM);
+                        this->mContainer.Observer::operator()(it, BEFORE | EMPLACE);
                     }
                 }
             }
@@ -273,7 +273,7 @@ namespace Serialize {
                 assert(mCalled);
                 if constexpr (_traits::sorted) {
                     if (this->mContainer.isItemActive(mIt)) {
-                        this->mContainer.Observer::operator()(std::next(mIt), BEFORE | INSERT_ITEM);
+                        this->mContainer.Observer::operator()(std::next(mIt), BEFORE | EMPLACE);
                     }
                 }
                 if (mInserted) {
@@ -281,7 +281,7 @@ namespace Serialize {
                         ItemUnitHelper::setItemDataSynced(*mIt, true);
                 }
                 if (this->mContainer.isItemActive(mIt)) {
-                    this->mContainer.Observer::operator()(mIt, (mInserted ? AFTER : ABORTED) | INSERT_ITEM);
+                    this->mContainer.Observer::operator()(mIt, (mInserted ? AFTER : ABORTED) | EMPLACE);
                     if (mInserted) {
                         this->mContainer.Observer::operator()(mIt, BEFORE | ACTIVATE_ITEM);
                         ItemUnitHelper::setItemActive(*mIt, true, true);
@@ -307,7 +307,7 @@ namespace Serialize {
             {
                 if constexpr (!_traits::sorted) {
                     if (this->mContainer.isItemActive(it)) {
-                        this->mContainer.Observer::operator()(it, BEFORE | INSERT_ITEM);
+                        this->mContainer.Observer::operator()(it, BEFORE | EMPLACE);
                     }
                 }
                 auto retIt = Operation::emplace(it, std::forward<Ty>(args)...);
@@ -327,7 +327,7 @@ namespace Serialize {
                     for (std::tuple<position_handle, bool, const_iterator> &handle : mIterators) {
                         iterator it = _traits::toIterator(this->mContainer, std::get<0>(handle));
                         if (this->mContainer.isItemActive(it)) {
-                            this->mContainer.Observer::operator()(std::get<2>(handle), BEFORE | INSERT_ITEM);
+                            this->mContainer.Observer::operator()(std::get<2>(handle), BEFORE | EMPLACE);
                         }
                     }
                 }
@@ -339,7 +339,7 @@ namespace Serialize {
                             ItemUnitHelper::setItemDataSynced(*it, true);
                     }
                     if (this->mContainer.isItemActive(it)) {
-                        this->mContainer.Observer::operator()(it, (inserted ? AFTER : ABORTED) | INSERT_ITEM);
+                        this->mContainer.Observer::operator()(it, (inserted ? AFTER : ABORTED) | EMPLACE);
                         if (inserted) {
                             this->mContainer.Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
                             ItemUnitHelper::setItemActive(*it, true, true);
@@ -364,7 +364,7 @@ namespace Serialize {
                     this->mContainer.Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
                     ItemUnitHelper::setItemActive(*it, false, true);
                     this->mContainer.Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
-                    this->mContainer.Observer::operator()(it, BEFORE | REMOVE_ITEM);
+                    this->mContainer.Observer::operator()(it, BEFORE | ERASE);
                     mWasActive = true;
                 }
             }
@@ -373,7 +373,7 @@ namespace Serialize {
             {
                 assert(mTriggered);
                 if (mWasActive) {
-                    this->mContainer.Observer::operator()(mIt, AFTER | REMOVE_ITEM);
+                    this->mContainer.Observer::operator()(mIt, AFTER | ERASE);
                 }
             }
 

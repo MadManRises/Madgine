@@ -4,6 +4,8 @@
 #include "entitycomponentbase.h"
 #include "entitycomponentcollector.h"
 
+#include "entitycomponentlist.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -21,7 +23,7 @@ namespace Scene {
             const std::string_view &key() const override
             {
                 return this->componentName();
-            }            
+            }
         };
 
 #define REGISTER_ENTITYCOMPONENT(Name, target) \
@@ -34,8 +36,10 @@ namespace Scene {
 #define ENTITYCOMPONENTVIRTUALIMPL_IMPL(Name) \
     VIRTUALUNIQUECOMPONENT(Name)
 
-#define ENTITYCOMPONENT_IMPL(Name, FullType) \
-    NAMED_UNIQUECOMPONENT(Name, FullType)    \
+#define ENTITYCOMPONENT_IMPL(Name, FullType)                                   \
+    NAMED_UNIQUECOMPONENT(Name, FullType)                                      \
+    RegisterType(Engine::Scene::Entity::EntityComponentList<FullType>);        \
+    UNIQUECOMPONENT2(Engine::Scene::Entity::EntityComponentList<FullType>, _2) \
     REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())
 
     }

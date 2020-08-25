@@ -16,9 +16,9 @@ namespace Window {
         true
     };
 
-    struct WindowsWindow : Window {
+    struct WindowsWindow : OSWindow {
         WindowsWindow(HWND hwnd)
-            : Window((uintptr_t)hwnd)
+            : OSWindow((uintptr_t)hwnd)
         {
         }
 
@@ -200,7 +200,7 @@ namespace Window {
         return wcex.lpszClassName;
     }
 
-    Window *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings)
     {
         HWND handle = (HWND)settings.mHandle;
         if (!handle) {
@@ -245,7 +245,7 @@ namespace Window {
         }
     }
 
-    Window *sFromNative(uintptr_t handle)
+    OSWindow *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((HWND)handle) : nullptr;
     }

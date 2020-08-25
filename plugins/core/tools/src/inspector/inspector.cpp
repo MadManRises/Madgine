@@ -127,7 +127,7 @@ namespace Tools {
 
     bool Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable)
     {
-        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualIteratorValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
+        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualRangeValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -176,21 +176,21 @@ namespace Tools {
                                                                  }
                                                                  return modified;
                                                              },
-                                                     [&](KeyValueVirtualIterator &it) {
+                                                     [&](const KeyValueVirtualRange &range) {
                                                          bool b = ImGui::TreeNodeEx(id.c_str());
                                                          ImGui::DraggableValueTypeSource(id, parent, value);
                                                          if (b) {
                                                              size_t i = 0;
-                                                             for (; it != VirtualIteratorEnd {}; ++it) {
-                                                                 ValueType value = it->mValue;
+                                                             for (auto [vKey, vValue] : range) {
+                                                                 ValueType value = vValue;
                                                                  std::string key = std::to_string(i);
-                                                                 if (!it->mKey.is<std::monostate>()) {
-                                                                     key = it->mKey.toShortString() + "##" + key;
+                                                                 if (!vKey.is<std::monostate>()) {
+                                                                     key = vKey.toShortString() + "##" + key;
                                                                  } else if (value.is<TypedScopePtr>()) {
                                                                      key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
                                                                  }
-                                                                 if (drawValueImpl(element, {}, key, value, /*editable && */ it->mValue.isEditable())) {
-                                                                     it->mValue = value;
+                                                                 if (drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable())) {
+                                                                     vValue = value;
                                                                  }
                                                                  ++i;
                                                              }

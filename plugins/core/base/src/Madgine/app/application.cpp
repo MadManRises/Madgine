@@ -11,6 +11,11 @@
 
 #include "globalapibase.h"
 
+#include "Modules/threading/defaulttaskqueue.h"
+
+#include "Modules/plugins/pluginmanager.h"
+#include "Modules/plugins/pluginsection.h"
+
 namespace Engine {
 
 namespace App {
@@ -20,19 +25,26 @@ namespace App {
     Application::Application(const AppSettings &settings)
         : mSettings(settings)
         , mGlobalAPIInitCounter(0)
+        , mTaskQueue("Application")
         , mGlobalAPIs(*this)
     {
         assert(!sApp);
         sApp = this;
 
-        if (!callInit())
-            throw exception("App Init Failed!");
+        mTaskQueue.addSetupSteps(
+            [this]() {
+                if (!callInit())
+                    throw exception("App Init Failed!");
+                //return false;
+                return true;
+            },
+            [this]() {
+                callFinalize();
+            });
     }
 
     Application::~Application()
     {
-        callFinalize();
-
         assert(sApp == this);
         sApp = nullptr;
     }
@@ -98,4 +110,3 @@ namespace App {
 METATABLE_BEGIN(Engine::App::Application)
 MEMBER(mGlobalAPIs)
 METATABLE_END(Engine::App::Application)
-

@@ -207,23 +207,23 @@ bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::KeyValueVirtualIterator &it)
+bool ValueTypeDrawer::draw(Engine::KeyValueVirtualRange &it)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<iterator>");
+    ImGui::Text("<range>");
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualIterator &it)
+bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualRange &it)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<iterator>");
+    ImGui::Text("<range>");
     return false;
 }
 
@@ -386,6 +386,12 @@ bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
     return (SelectValueTypeType<Engine::type_pack_select_t<0, Ty>>(v) | ...);
 }
 
+
+template <typename T>
+struct ValueTypeFilterImpl {
+    static constexpr bool value = Engine::type_pack_contains_v<Engine::ValueType::NonDefaultConstructibleTypes, Engine::type_pack_select_t<0, T>>;
+};
+
 bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const char *name, bool minified)
 {
     if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
@@ -404,7 +410,8 @@ bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const c
         ImGui::PopItemWidth();
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
-            SelectValueTypeTypes(Engine::ValueTypeList {}, v);
+
+            SelectValueTypeTypes(Engine::type_pack_filter_if_t<Engine::ValueTypeList, ValueTypeFilterImpl> {}, v);
             ImGui::EndCombo();
         }
         EndGroup();

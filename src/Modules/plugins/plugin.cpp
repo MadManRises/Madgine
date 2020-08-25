@@ -2,19 +2,36 @@
 
 #if ENABLE_PLUGINS
 
-#include "plugin.h"
+#    include "plugin.h"
 
-#include "Interfaces/dl/dlapi.h"
+#    include "Interfaces/dl/dlapi.h"
 
-#include "binaryinfo.h"
+#    include "binaryinfo.h"
 
-#include "pluginsection.h"
-#include "pluginmanager.h"
+#    include "pluginmanager.h"
+#    include "pluginsection.h"
 
-#include "../threading/defaulttaskqueue.h"
+#    include "../threading/defaulttaskqueue.h"
+
+#    include "../threading/barrier.h"
 
 namespace Engine {
 namespace Plugins {
+
+    Plugin::Plugin(std::string name, PluginSection *section, std::string project)
+        : mModule(nullptr)
+        , mProject(std::move(project))
+        , mSection(section)
+        , mName(std::move(name))
+#    if WINDOWS
+        , mPath(mName)
+#    elif UNIX
+        , mPath("lib" + mName + ".so")
+#    endif
+        , mState(false)
+    {
+        assert(!mName.empty());
+    }
 
     Plugin::Plugin(std::string name, PluginSection *section, std::string project, Filesystem::Path path)
         : mModule(nullptr)
@@ -22,147 +39,145 @@ namespace Plugins {
         , mSection(section)
         , mName(std::move(name))
         , mPath(std::move(path))
-        , mState(UNLOADED)
+        , mState(false)
     {
-        if (mPath.empty() && !mName.empty()) {
-#if WINDOWS
-            mPath = mName;
-#elif UNIX
-            mPath = "lib" + mName + ".so";
-#endif
-        }
+        assert(!mName.empty());
     }
 
     Plugin::~Plugin()
     {
+        if (mPath.empty()) {
+            Dl::closeDll(mModule);
+            mModule = nullptr;
+        }
         assert(!mModule);
         assert(mDependencies.empty());
         assert(mDependents.empty());
     }
 
-    LoadState Plugin::isLoaded() const
+    void Plugin::load(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise)
     {
-        return mState;
-    }
-
-    LoadState Plugin::load()
-    {
-        if (mState != UNLOADED)
-            return mState;
-
         LOG("Loading Plugin \"" << mName << "\"...");
 
         std::string errorMsg;
 
         try {
-            mModule = openDll(mPath.str());
+            mModule = Dl::openDll(mPath.str());
             if (mModule) {
                 const BinaryInfo *bin = info();
                 bin->mSelf = this;
 
                 for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
                     const char *dependencyName = *dep;
-                    addDependency(mSection->manager().getPlugin(dependencyName));
+                    addDependency(manager, manager.getPlugin(dependencyName));
                 }
 
-                mState = LOADED;
+                for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
+                    const char *dependencyName = *dep;
+                    addGroupDependency(manager, &manager.section(dependencyName));
+                }
             } else {
                 errorMsg = "Unkown";
             }
         } catch (const std::exception &e) {
             errorMsg = e.what();
             mModule = nullptr;
-            mState = UNLOADED;
         }
 
-        if (mState == UNLOADED) {
+        if (!mModule) {
             LOG_ERROR("Load of plugin \"" << mName << "\" failed with error: " << errorMsg);
+            promise.set_value(false);
+            return;
         } else {
 
-            for (Plugin *dep : mDependencies) {
-                LoadState result = dep->mSection->loadPlugin(dep);
-                if (result == UNLOADED) {
-                    mState = UNLOADED;
-                    break;
-                } else if (result == DELAYED) {
-                    mState = DELAYED;
+            std::vector<Future<bool>> dependencyList;
+            {
+                std::lock_guard lock { mMutex };
+                for (Plugin *dep : mDependencies) {
+                    dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
+                }
+                for (PluginSection *sec : mGroupDependencies) {
+                    dependencyList.emplace_back(sec->load(barrier));
                 }
             }
 
-            auto task = [this]() {
-                if (mState == LOADED) {
-                    LOG("Success");
-                } else if (mState == UNLOADED) {
-                    LOG_ERROR("Load of dependency for plugin \"" << mName << "\" failed!");
-                    clearDependencies();
-                    closeDll(mModule);
-                    mModule = nullptr;
+            barrier.queue(nullptr, [this, &manager, dependencyList { std::move(dependencyList) }, promise { std::move(promise) }, name { mName }]() mutable {
+                bool wait = false;
+                for (Future<bool> &f : dependencyList) {
+                    if (!f.isAvailable()) {
+                        wait = true;
+                    } else if (!f) {
+                        LOG_ERROR("Load of dependency for plugin \"" << mName << "\" failed!");
+                        clearDependencies(manager);
+                        Dl::closeDll(mModule);
+                        mModule = nullptr;
+                        promise.set_value(false);
+                        return Threading::RETURN;
+                    }
                 }
-            };
-            if (mState != DELAYED) {
-                task();
-            } else {
-                Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-            }
+                if (wait) {
+                    return Threading::YIELD;
+                } else {
+                    LOG("Success (" << name << ")");
+                    promise.set_value(true);
+                    return Threading::RETURN;
+                }
+            });
         }
-
-        return mState;
     }
 
-    LoadState Plugin::unload()
+    void Plugin::unload(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise)
     {
-        if (mState != LOADED)
-            return mState;
-
-		std::vector<Plugin *> dependents = mDependents; 
+        std::vector<Future<bool>> dependentList;
+        std::vector<Plugin *> dependents = mDependents;
         for (Plugin *dep : dependents) {
-            LoadState result = dep->mSection->unloadPlugin(dep);
-            if (result == LOADED) {
-                mState = LOADED;
-                return LOADED;
-            } else if (result == DELAYED) {
-                mState = DELAYED;
+            std::promise<bool> depPromise;
+            dependentList.emplace_back(dep->mSection->unloadPlugin(barrier, dep));
+        }
+
+        barrier.queue(nullptr, [this, &manager, dependentList { std::move(dependentList) }, promise { std::move(promise) }]() mutable {
+            bool wait = false;
+            for (Future<bool> &f : dependentList) {
+                if (!f.isAvailable()) {
+                    wait = true;
+                } else if (f) {
+                    LOG_ERROR("Unload of dependent for plugin \"" << mName << "\" failed!");
+                    promise.set_value(true);
+                    return Threading::RETURN;
+                }
             }
-        }
+            if (wait) {
+                return Threading::YIELD;
+            } else {
+                clearDependencies(manager);
+                LOG("Unloading Plugin \"" << mName << "\"...");
+                Dl::closeDll(mModule);
 
-        auto task = [this]() {
-            clearDependencies();
-            LOG("Unloading Plugin \"" << mName << "\"...");
-            closeDll(mModule);
-
-            mModule = nullptr;
-            mState = UNLOADED;
-        };
-
-        if (mState != DELAYED) {
-            task();
-        } else {
-            Threading::DefaultTaskQueue::getSingleton().queue(std::move(task));
-        }
-
-        return mState;        
+                mModule = nullptr;
+                promise.set_value(false);
+                return Threading::RETURN;
+            }
+        });
     }
 
     const void *Plugin::getSymbol(const std::string &name) const
     {
         std::string fullName = name + "_" + mName;
-        return getDllSymbol(mModule, fullName);
+        return Dl::getDllSymbol(mModule, fullName);
     }
 
     Filesystem::Path Plugin::fullPath() const
     {
-        if (mState != LOADED)
-            return {};
 
         std::string fullName = "binaryInfo_" + mName;
-        return getDllFullPath(mModule, fullName);
+        return Dl::getDllFullPath(mModule, fullName);
     }
 
     const std::string &Plugin::project() const
     {
         return mProject;
     }
-	
+
     const BinaryInfo *Plugin::info() const
     {
         return static_cast<const BinaryInfo *>(getSymbol("binaryInfo"));
@@ -184,14 +199,65 @@ namespace Plugins {
         return mName;
     }
 
-    void Plugin::addDependency(Plugin *dependency)
+    PluginSection *Plugin::section() const
     {
+        return mSection;
+    }
+
+    Future<bool> Plugin::startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<Future<bool>> &&future)
+    {
+        std::lock_guard lock { mMutex };
+        if (mState.isAvailable()) {
+            if (mState == (op == LOADING)) {
+                if (promise) {
+                    promise->set_value(mState);
+                    promise.reset();
+                }
+            } else {
+                if (!promise)
+                    promise.emplace();
+                mOperation = op;
+                if (future)
+                    mState = std::move(*future);
+                else
+                    mState = promise->get_future();
+            }
+        } else {
+            assert(!promise);
+            assert(mOperation == op);
+        }
+        return mState.share();
+    }
+
+    Future<bool> Plugin::state()
+    {
+        std::lock_guard lock { mMutex };
+        return mState.share();
+    }
+
+    Future<bool> Plugin::state(Operation op)
+    {
+        std::lock_guard lock { mMutex };
+        assert(mState.isAvailable() || mOperation == op);
+        return mState.share();
+    }
+
+    bool Plugin::isLoaded()
+    {
+        return mState.isAvailable() && mState;
+    }
+
+    void Plugin::addDependency(PluginManager &manager, Plugin * dependency)
+    {
+        std::lock_guard lock { manager.mDependenciesMutex };
+        checkCircularDependency(dependency);
         mDependencies.push_back(dependency);
         dependency->mDependents.push_back(this);
     }
 
-    void Plugin::removeDependency(Plugin *dependency)
+    void Plugin::removeDependency(PluginManager &manager, Plugin *dependency)
     {
+        std::lock_guard lock { manager.mDependenciesMutex };
         auto it = std::find(mDependencies.begin(), mDependencies.end(), dependency);
         assert(it != mDependencies.end());
 
@@ -199,11 +265,35 @@ namespace Plugins {
         assert(it2 != dependency->mDependents.end());
 
         mDependencies.erase(it);
-        dependency->mDependents.erase(it);
+        dependency->mDependents.erase(it2);
     }
 
-    void Plugin::clearDependencies()
+    void Plugin::addGroupDependency(PluginManager &manager, PluginSection *dependency)
     {
+        std::lock_guard lock { manager.mDependenciesMutex };
+        for (std::pair<const std::string, Plugin> &p : *dependency) {
+            checkCircularDependency(&p.second);
+        }
+        mGroupDependencies.push_back(dependency);
+        dependency->mDependents.push_back(this);
+    }
+
+    void Plugin::removeGroupDependency(PluginManager &manager, PluginSection *dependency)
+    {
+        std::lock_guard lock { manager.mDependenciesMutex };
+        auto it = std::find(mGroupDependencies.begin(), mGroupDependencies.end(), dependency);
+        assert(it != mGroupDependencies.end());
+
+        auto it2 = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+        assert(it2 != dependency->mDependents.end());
+
+        mGroupDependencies.erase(it);
+        dependency->mDependents.erase(it2);
+    }
+
+    void Plugin::clearDependencies(PluginManager &manager)
+    {
+        std::lock_guard lock { manager.mDependenciesMutex };
         while (!mDependencies.empty()) {
             Plugin *dependency = mDependencies.back();
 
@@ -213,6 +303,49 @@ namespace Plugins {
             mDependencies.pop_back();
             dependency->mDependents.erase(it);
         }
+
+        while (!mGroupDependencies.empty()) {
+            PluginSection *dependency = mGroupDependencies.back();
+
+            auto it = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+            assert(it != dependency->mDependents.end());
+
+            mGroupDependencies.pop_back();
+            dependency->mDependents.erase(it);
+        }
+    }
+
+    void Plugin::checkCircularDependency(Plugin *dependency)
+    {
+        std::vector<std::string_view> trace { mName };
+        if (checkCircularDependency(dependency, trace)) {
+            LOG_ERROR("Detected Circular Plugin-Dependency: " << StringUtil::join(trace, " -> "));
+            throw 0;
+        }
+    }
+
+    bool Plugin::checkCircularDependency(Plugin *dependency, std::vector<std::string_view> &trace)
+    {
+        trace.push_back(dependency->mName);
+        if (dependency == this)
+            return true;
+
+        for (Plugin *p : dependency->mDependencies) {
+            if (checkCircularDependency(p, trace))
+                return true;
+        }
+
+        for (PluginSection *sec : dependency->mGroupDependencies) {
+            trace.push_back(sec->mName);
+            for (std::pair<const std::string, Plugin> &p : *sec) {
+                if (checkCircularDependency(&p.second, trace))
+                    return true;
+            }
+            trace.pop_back();
+        }
+        trace.pop_back();
+
+        return false;
     }
 }
 }

@@ -9,12 +9,11 @@
 namespace Engine {
 namespace Serialize {
 
-    template <>
-    void read<ValueType>(SerializeInStream &in, ValueType &v, const char *name)
+    void Operations<ValueType>::read(SerializeInStream &in, ValueType &v, const char *name)
     {
         in.format().beginExtended(in, name, 1);
         ValueTypeEnum type;
-        read(in, type, "type");
+        Serialize::read(in, type, "type");
         v.setType(ValueTypeDesc { type });
         v.visit([&](auto &value) {
             using T = std::remove_reference_t<decltype(value)>;
@@ -27,11 +26,10 @@ namespace Serialize {
         });
     }
 
-    template <>
-    void write<ValueType>(SerializeOutStream &out, const ValueType &v, const char *name)
+    void Operations<ValueType>::write(SerializeOutStream &out, const ValueType &v, const char *name)
     {
         out.format().beginExtended(out, name, 1);
-        write(out, v.index().mIndex, "type");
+        Serialize::write(out, v.index().mIndex, "type");
         v.visit([&](const auto &value) {
             using T = std::remove_const_t<std::remove_reference_t<decltype(value)>>;
             if constexpr (isPrimitiveType_v<T>) {

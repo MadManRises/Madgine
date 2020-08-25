@@ -7,11 +7,13 @@
 namespace Engine {
 namespace Threading {
 
-    WorkgroupLocal<DefaultTaskQueue> sSingleton;
+    WorkgroupLocal<DefaultTaskQueue*> sSingleton;
 
-    DefaultTaskQueue::DefaultTaskQueue()
-        : TaskQueue("Default")
+    DefaultTaskQueue::DefaultTaskQueue(const std::string &name)
+        : TaskQueue(name)
     {
+        assert(!sSingleton);
+        sSingleton = this;
     }
 
     DefaultTaskQueue::~DefaultTaskQueue()
@@ -20,12 +22,12 @@ namespace Threading {
 
     DefaultTaskQueue &DefaultTaskQueue::getSingleton()
     {
-        return sSingleton;
+        return *sSingleton;
     }
 
     DefaultTaskQueue *DefaultTaskQueue::getSingletonPtr()
     {
-        return &getSingleton();
+        return sSingleton;
     }
 
 }

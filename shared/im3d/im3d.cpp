@@ -353,15 +353,38 @@ namespace Im3D {
             GetIO().mReleaseFont(font);
     }
 
-    void Arrow(Im3DMeshType type, float radius, float length, const Matrix4 &transform, const Vector4 &color)
+    void Line(const Vector3 &a, const Vector3 &b, const Vector4 &color)
     {
+        Line(a, b, color, color);
+    }
+
+    void Line(const Vector3 &a, const Vector3 &b, const Vector4 &colorA, const Vector4 &colorB)
+    {
+        Render::Vertex vertices[] = {
+            { a, colorA, Vector3::ZERO },
+            { b, colorB, Vector3::ZERO }
+        };
+        Mesh(IM3D_LINES, vertices, 2);        
+    }
+
+    void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Vector4 &color)
+    {
+        Vector3 dist = b - a;
+        Vector3 d1 = dist.perpendicular();
+        d1.normalize();
+        d1 *= radius;
+        Vector3 d2 = d1.crossProduct(dist);
+        d2.normalize();
+        d2 *= radius;
+        Vector3 d0 = radius * dist.normalizedCopy();
+
         const Render::Vertex vertices[]
-            = { { { 0, 0, 0 }, color, { 0, -1, 0 } },
-                  { { radius, radius, -radius }, color, { 1, 0, -1 } },
-                  { { radius, radius, radius }, color, { 1, 0, 1 } },
-                  { { -radius, radius, radius }, color, { -1, 0, 1 } },
-                  { { -radius, radius, -radius }, color, { -1, 0, -1 } },
-                  { { 0, length, 0 }, color, { 0, 1, 0 } } };
+            = { { a, color, -dist },
+                  { a + d0 + d1, color, d1 },
+                  { a + d0 + d2, color, d2 },
+                  { a + d0 - d1, color, -d1 },
+                  { a + d0 - d2, color, -d2 },
+                  { b, color, dist } };
 
         switch (type) {
         case IM3D_TRIANGLES: {
@@ -369,7 +392,7 @@ namespace Im3D {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
 
-            Im3D::Mesh(IM3D_TRIANGLES, vertices, 6, transform, indices, 24);
+            Mesh(IM3D_TRIANGLES, vertices, 6, Matrix4::IDENTITY, indices, 24);
             break;
         }
         case IM3D_LINES: {
@@ -377,7 +400,7 @@ namespace Im3D {
                 0, 1, 0, 2, 0, 3, 0, 4, 1, 5, 2, 5, 3, 5, 4, 5, 1, 2, 2, 3, 3, 4, 4, 1
             };
 
-            Im3D::Mesh(IM3D_LINES, vertices, 6, transform, indices, 24);
+            Mesh(IM3D_LINES, vertices, 6, Matrix4::IDENTITY, indices, 24);
             break;
         }
         default:

@@ -62,7 +62,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
     Engine::Threading::WorkGroup workGroup("Launcher");
-    Engine::Core::Root root { argc, argv };
+    Engine::Core::Root root { "MadgineLauncher", argc, argv };
     if (!toolMode) {
         return launch();
     } else {

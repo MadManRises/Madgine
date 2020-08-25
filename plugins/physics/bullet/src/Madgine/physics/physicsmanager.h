@@ -17,10 +17,7 @@ namespace Physics {
         PhysicsManager(Scene::SceneManager &sceneMgr);
         ~PhysicsManager();
 
-        void addRigidBody(RigidBody *body);
-        void removeRigidBody(RigidBody *body);
-
-        void updateRigidBody(RigidBody *body);
+        btDiscreteDynamicsWorld &world();
 
     protected:
         virtual bool init() override;
@@ -31,8 +28,6 @@ namespace Physics {
     private:
         struct PhysicsData;
         std::unique_ptr<PhysicsData> mData;
-
-        std::vector<RigidBody *> mRigidBodies;
     };
 
 }

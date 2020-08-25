@@ -7,8 +7,7 @@ namespace Ini {
 
     struct MODULES_EXPORT IniFile {
 
-        IniFile(const Filesystem::Path &path);
-        IniFile(const IniFile &) = delete;
+        IniFile();        
         ~IniFile();
 
 		IniFile &operator=(const IniFile &) = delete;
@@ -17,17 +16,15 @@ namespace Ini {
 
         void clear();
 
-        void saveToDisk() const;
-        void loadFromDisk();
-
-        const Filesystem::Path &path();
+        void saveToDisk(const Filesystem::Path &path) const;
+        bool loadFromDisk(const Filesystem::Path &path);
 
         std::map<std::string, IniSection>::iterator begin();
         std::map<std::string, IniSection>::iterator end();
+        std::map<std::string, IniSection>::const_iterator begin() const;
+        std::map<std::string, IniSection>::const_iterator end() const;
 
     private:
-        Filesystem::Path mPath;
-
         std::map<std::string, IniSection> mSections;
     };
 

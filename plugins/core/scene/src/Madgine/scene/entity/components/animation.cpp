@@ -83,14 +83,14 @@ namespace Scene {
         void Animation::applyTransform(const EntityPtr &entity)
         {
             if (mAnimationList && mCurrentAnimation) {
-                Skeleton *skeleton = entity->getComponent<Skeleton>();
+                Skeleton *skeleton = entity.getComponent<Skeleton>();
                 if (!skeleton) {
                     mSkeletonCache.reset();
                     refreshCache();
                     return;
                 }
                 if (skeleton->handle() != mSkeletonCache) {
-                    mSkeletonCache = entity->getComponent<Skeleton>()->handle();
+                    mSkeletonCache = entity.getComponent<Skeleton>()->handle();
                     refreshCache();
                 }
                 if (mSkeletonCache) {

@@ -111,7 +111,7 @@ decltype(auto) convert_ValueType(T &&t)
             return TypedScopePtr { &t };
         }
     } else if constexpr(is_iterable_v<T>){
-        return KeyValueVirtualIterator { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
+        return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
     } else {
         static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }

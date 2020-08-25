@@ -6,7 +6,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderWindow : OpenGLRenderTarget {
-		OpenGLRenderWindow(OpenGLRenderContext *context, Window::Window *w, OpenGLRenderWindow *sharedContext = nullptr);
+        OpenGLRenderWindow(OpenGLRenderContext *context, Window::OSWindow *w, OpenGLRenderWindow *sharedContext = nullptr);
         ~OpenGLRenderWindow();
 
         virtual void beginFrame() override;
@@ -20,7 +20,7 @@ namespace Render {
         ContextHandle mContext = 0;
     private:
 
-		Window::Window *mWindow;
+		Window::OSWindow *mOsWindow;
         bool mReusedContext;
     };
 

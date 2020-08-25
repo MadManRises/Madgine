@@ -12,7 +12,11 @@ FolderSources(sources "" src)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 
+plugin_group(Renderer EXCLUSIVE ATLEAST_ONE)
+plugin_group(Input EXCLUSIVE ATLEAST_ONE)
+
 target_link_plugins(Client MeshLoader ImageLoader ProgramLoader TextureLoader FontLoader)
+target_link_plugin_groups(Client Renderer Input)
 
 
 set(sources "")

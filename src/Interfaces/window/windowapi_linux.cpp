@@ -40,9 +40,9 @@ namespace Window {
 
     }
 
-    struct LinuxWindow : Window {
-        LinuxWindow(::Window hwnd, size_t width, size_t height)
-            : Window(hwnd)
+    struct LinuxWindow : OSWindow {
+        LinuxWindow(Window hwnd, size_t width, size_t height)
+            : OSWindow(hwnd)
             , mWidth(width)
             , mHeight(height)
         {
@@ -171,25 +171,25 @@ namespace Window {
             XDestroyWindow(sDisplay(), mHandle);
         }
 
-        using Window::onClose;
-        using Window::onRepaint;
-        using Window::onResize;
+        using OSWindow::onClose;
+        using OSWindow::onRepaint;
+        using OSWindow::onResize;
 
     private:
         int mWidth;
         int mHeight;
     };
 
-    static std::unordered_map<::Window, LinuxWindow> sWindows;
+    static std::unordered_map<Window, LinuxWindow> sWindows;
 
-    Window *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings)
     {
         assert(sDisplay());
 
         uintptr_t handle = settings.mHandle;
         if (!handle) {
 
-            static ::Window root = DefaultRootWindow(sDisplay());
+            static Window root = DefaultRootWindow(sDisplay());
 
             static int att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
@@ -243,9 +243,9 @@ namespace Window {
         }
     }
 
-    Window *sFromNative(uintptr_t handle)
+    OSWindow *sFromNative(uintptr_t handle)
     {
-        return handle ? &sWindows.at((::Window)handle) : nullptr;
+        return handle ? &sWindows.at((Window)handle) : nullptr;
     }
 
 	static std::vector<MonitorInfo> sBuffer;

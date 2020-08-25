@@ -79,7 +79,7 @@ public:
         z = static_cast<float>(v[2]);
     }
 
-    explicit Vector3(float *const r)
+    explicit constexpr Vector3(float *const r)
         : x(r[0])
         , y(r[1])
         , z(r[2])

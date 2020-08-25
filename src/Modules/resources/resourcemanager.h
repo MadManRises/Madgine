@@ -50,7 +50,7 @@ namespace Resources {
 #if ENABLE_PLUGINS
     protected:
         void onPluginLoad(const Plugins::Plugin *plugin) override;
-        bool aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
+        Future<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
 #endif
 
     private:

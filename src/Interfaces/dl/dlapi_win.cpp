@@ -9,7 +9,7 @@
 #include <DbgHelp.h>
 
 namespace Engine {
-namespace Plugins {
+namespace Dl {
 
     void *openDll(const std::string &name)
     {

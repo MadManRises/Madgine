@@ -19,7 +19,7 @@ namespace Window {
 
         Input::InputHandler *input();
 
-        Window *window();
+        OSWindow *osWindow();
 
         Render::RenderTarget *getRenderer();
 
@@ -30,9 +30,9 @@ namespace Window {
 
     private:
 
-        std::optional<Input::InputHandlerSelector> mInputHandlerSelector;
+        std::optional<Input::InputHandlerSelector<>> mInputHandlerSelector;
 
-        Window *mWindow = nullptr;
+        OSWindow *mOsWindow = nullptr;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
 
     };

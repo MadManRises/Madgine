@@ -45,6 +45,23 @@ namespace Serialize {
         SerializeManager::deleteMasterId(mMasterId, this);
     }
 
+    SerializableUnitBase &SerializableUnitBase::operator=(const SerializableUnitBase &other)
+    {
+        return *this;
+    }
+
+    SerializableUnitBase &SerializableUnitBase::operator=(SerializableUnitBase &&other)
+    {
+        mParent = std::exchange(other.mParent, nullptr);
+        mSlaveId = std::exchange(other.mSlaveId, 0);
+        std::swap(mMasterId, other.mMasterId);
+        SerializeManager::updateMasterId(mMasterId, this);
+        SerializeManager::updateMasterId(other.mMasterId, &other);
+        mActiveIndex = std::exchange(other.mActiveIndex, 0);
+        std::exchange(mSynced, other.mSynced);
+        return *this;
+    }
+
     void SerializableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
@@ -194,17 +211,6 @@ namespace Serialize {
     bool SerializableUnitBase::isMaster() const
     {
         return mSlaveId == 0;
-    }
-
-    void SerializableUnitBase::swap(SerializableUnitBase &other)
-    {
-        std::swap(mParent, other.mParent);
-        std::swap(mSlaveId, other.mSlaveId);
-        std::swap(mMasterId, other.mMasterId);
-        SerializeManager::updateMasterId(mMasterId, this);
-        SerializeManager::updateMasterId(other.mMasterId, &other);
-        std::swap(mActiveIndex, other.mActiveIndex);
-        std::swap(mSynced, other.mSynced);
     }
 
     const SerializeTable *SerializableUnitBase::serializeType() const

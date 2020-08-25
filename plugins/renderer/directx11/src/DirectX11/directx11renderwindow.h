@@ -16,7 +16,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11RenderWindow : DirectX11RenderTarget {
-		DirectX11RenderWindow(DirectX11RenderContext *context, Window::Window *w, DirectX11RenderWindow *sharedContext = nullptr);
+        DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w, DirectX11RenderWindow *sharedContext = nullptr);
         ~DirectX11RenderWindow();
 
         virtual void beginFrame() override;
@@ -29,7 +29,7 @@ namespace Render {
 
     private:
 
-		Window::Window *mWindow;
+		Window::OSWindow *mWindow;
         bool mReusedContext;
 
         IDXGISwapChain *mSwapChain;

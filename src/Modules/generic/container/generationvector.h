@@ -1,18 +1,23 @@
 #pragma once
 
-#if _DEBUG
+#if ENABLE_MEMTRACKING
 #    include "Interfaces/debug/stacktrace.h"
 #endif
+
+#include "containerevent.h"
 
 namespace Engine {
 
 struct GenerationVectorIndex {
+
+    static constexpr uint32_t INVALID_GENERATION = std::numeric_limits<uint32_t>::max();
+
     GenerationVectorIndex() = default;
     GenerationVectorIndex(const GenerationVectorIndex &) = delete;
     GenerationVectorIndex(GenerationVectorIndex &&other)
         : mIndex(std::exchange(other.mIndex, 0))
-        , mGeneration(std::exchange(other.mGeneration, 0))
-#if _DEBUG
+        , mGeneration(std::exchange(other.mGeneration, INVALID_GENERATION))
+#if ENABLE_MEMTRACKING
         , mDebugMarker(std::exchange(other.mDebugMarker, 0))
 #endif
     {
@@ -21,14 +26,14 @@ struct GenerationVectorIndex {
     ~GenerationVectorIndex()
     {
         assert(!*this);
-#if _DEBUG
+#if ENABLE_MEMTRACKING
         assert(mDebugMarker == 0);
 #endif
     }
 
     operator bool() const
     {
-        if (mGeneration != 0) {
+        if (mGeneration != INVALID_GENERATION) {
             return true;
         } else {
             assert(mIndex == 0);
@@ -38,7 +43,7 @@ struct GenerationVectorIndex {
 
     bool operator==(const GenerationVectorIndex &other) const
     {
-        if (mGeneration == 0 || other.mGeneration == 0)
+        if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
             return mGeneration == other.mGeneration;
         assert(mGeneration == other.mGeneration);
         return mIndex == other.mIndex;
@@ -46,7 +51,7 @@ struct GenerationVectorIndex {
 
     bool operator!=(const GenerationVectorIndex &other) const
     {
-        if (mGeneration == 0 || other.mGeneration == 0)
+        if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
             return mGeneration != other.mGeneration;
         assert(mGeneration == other.mGeneration);
         return mIndex != other.mIndex;
@@ -56,7 +61,7 @@ struct GenerationVectorIndex {
     {
         std::swap(mIndex, other.mIndex);
         std::swap(mGeneration, other.mGeneration);
-#if _DEBUG
+#if ENABLE_MEMTRACKING
         std::swap(mDebugMarker, other.mDebugMarker);
 #endif
     }
@@ -70,32 +75,23 @@ private:
     {
     }
 
-    void reset() const
+    void reset()
     {
         mIndex = 0;
-        mGeneration = 0;
+        mGeneration = INVALID_GENERATION;
     }
 
-    mutable uint32_t mIndex = 0;
-    mutable uint32_t mGeneration = 0;
+    uint32_t mIndex = 0;
+    uint32_t mGeneration = INVALID_GENERATION;
 
-#if _DEBUG
+#if ENABLE_MEMTRACKING
     mutable uint32_t mDebugMarker = 0;
 #endif
 };
 
 struct GenerationVectorBase {
-
-private:
-    enum Entry {
-        CLEAR = 1,
-        ERASE = 2,
-        SWAP_ERASE = 3
-    };
-
-public:
     GenerationVectorBase(size_t bufferSize = 64)
-        : mHistory(bufferSize * 2)
+        : mHistory(bufferSize)
     {
     }
 
@@ -104,79 +100,75 @@ public:
 
     ~GenerationVectorBase()
     {
-        assert(mGeneration == mLastKnownGeneration);
-        assert(mCurrentIndex == mStartIndex);
-        assert(mHistory[mCurrentIndex] == 0);
+        for (Entry &entry : mHistory)
+            assert(entry.mRefCount == 0);
     }
 
     GenerationVectorIndex generate(uint32_t index) const
     {
-        incRef();
-        GenerationVectorIndex result { index, mGeneration };
-#if _DEBUG
+        uint32_t gen = mGeneration;
+        incRef(gen);
+        GenerationVectorIndex result { index, gen };
+#if ENABLE_MEMTRACKING
+        std::lock_guard lock { mDebugMutex };
         result.mDebugMarker = ++mDebugCounter;
-        auto pib = mDebugTraces.try_emplace(result.mDebugMarker, std::make_pair(mGeneration, Debug::StackTrace<5>::getCurrent(1).calculateReadable()));
+        auto pib = mDebugTraces.try_emplace(result.mDebugMarker, std::make_pair(gen, Debug::StackTrace<5>::getCurrent(1).calculateReadable()));
         assert(pib.second);
 #endif
 
         return result;
     }
 
-    void reset(const GenerationVectorIndex &index) const
+    void reset(GenerationVectorIndex &index) const
     {
         if (index) {
-            if (index.mGeneration == mGeneration) {
-                decRef(mCurrentIndex);
-            } else {
-                uint32_t historyIndex = mStartIndex;
-                uint32_t gen = mLastKnownGeneration;
-                while (gen != index.mGeneration) {
-                    ++gen;
-                    incIndex(historyIndex);
-                }
-                decRef(historyIndex);
+            decRef(index.mGeneration);
+#if ENABLE_MEMTRACKING
+            {
+                std::lock_guard lock { mDebugMutex };
+                auto count = mDebugTraces.erase(index.mDebugMarker);
+                assert(count == 1);
+                index.mDebugMarker = 0;
             }
-#if _DEBUG
-            auto count = mDebugTraces.erase(index.mDebugMarker);
-            assert(count == 1);
-            index.mDebugMarker = 0;
 #endif
             index.reset();
         }
     }
 
-    GenerationVectorIndex copy(const GenerationVectorIndex &other) const
+    GenerationVectorIndex copy(GenerationVectorIndex &other) const
     {
         update(other);
+        if (!other)
+            return {};
         return generate(other.mIndex);
     }
 
-    void increment(GenerationVectorIndex &index, ptrdiff_t diff = 1) const
+    void increment(GenerationVectorIndex &index, size_t size, ptrdiff_t diff = 1) const
     {
         update(index);
         index.mIndex += diff;
+        assert(index.mIndex <= size || index.mIndex == std::numeric_limits<uint32_t>::max());
+        if (index.mIndex == size || index.mIndex == std::numeric_limits<uint32_t>::max())
+            reset(index);
     }
 
-    void update(const GenerationVectorIndex &index) const
+    void update(GenerationVectorIndex &index) const
     {
         if (index && index.mGeneration != mGeneration) {
-            uint32_t historyIndex = mStartIndex;
-            uint32_t gen = mLastKnownGeneration;
-            while (gen != index.mGeneration) {
-                ++gen;
-                incIndex(historyIndex);
-            }
-            decRef(historyIndex);
 
+            uint32_t oldGen = index.mGeneration;
 
             //Apply History
             uint32_t wrap = mHistory.size();
             while (index.mGeneration != mGeneration) {
-                ++index.mGeneration;
+                assert(index.mGeneration < mGeneration);
 
-                if (mHistory[(historyIndex + 1) % wrap] == CLEAR) {
+                const Entry &entry = mHistory[index.mGeneration % wrap];
+
+                if (entry.mOp == RESET) {
                     index.reset();
-#if _DEBUG
+#if ENABLE_MEMTRACKING
+                    std::lock_guard lock { mDebugMutex };
                     auto count = mDebugTraces.erase(index.mDebugMarker);
                     assert(count == 1);
                     index.mDebugMarker = 0;
@@ -184,29 +176,32 @@ public:
                     return;
                 }
 
-                if (index.mIndex == mHistory[(historyIndex + 2) % wrap]) {
+                assert(entry.mOp == ERASE || entry.mOp == SWAP_ERASE);
+                if (index.mIndex == entry.mArg1) {
                     index.reset();
-#if _DEBUG
+#if ENABLE_MEMTRACKING
+                    std::lock_guard lock { mDebugMutex };
                     auto count = mDebugTraces.erase(index.mDebugMarker);
                     assert(count == 1);
                     index.mDebugMarker = 0;
 #endif
                     return;
                 }
-                if (mHistory[(historyIndex + 1) % wrap] == SWAP_ERASE) {
-                    if (index.mIndex == mHistory[(historyIndex + 3) % wrap]) {
-                        index.mIndex = mHistory[(historyIndex + 2) % wrap];
+                if (entry.mOp == SWAP_ERASE) {
+                    if (index.mIndex == entry.mArg2) {
+                        index.mIndex = entry.mArg1;
                     }
                 } else {
-                    assert(mHistory[(historyIndex + 1) % wrap] == ERASE);
+                    assert(entry.mOp == ERASE);
                 }
-                incIndex(historyIndex);
+                ++index.mGeneration;
             }
 
-            
-            incRef();
+            incRef(index.mGeneration);
+            decRef(oldGen);
 
-#if _DEBUG
+#if ENABLE_MEMTRACKING
+            std::lock_guard lock { mDebugMutex };
             mDebugTraces.at(index.mDebugMarker).first = mGeneration;
 #endif
         }
@@ -215,80 +210,75 @@ public:
 protected:
     void onSwapErase(uint32_t index, uint32_t swapped)
     {
-        if (mHistory[mCurrentIndex] == 0 && mGeneration == mLastKnownGeneration)
-            return;
         uint32_t wrap = mHistory.size();
-        assert((mStartIndex + wrap - 1 - mCurrentIndex) % wrap >= 4);
-        mHistory[(mCurrentIndex + 1) % wrap] = SWAP_ERASE;
-        mHistory[(mCurrentIndex + 2) % wrap] = index;
-        mHistory[(mCurrentIndex + 3) % wrap] = swapped;
-        mCurrentIndex = (mCurrentIndex + 4) % wrap;
-        ++mGeneration;
-        mHistory[mCurrentIndex] = 0;
+        uint32_t gen = mGeneration.load();
+        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+            throw "Ring buffer is full!";
+        mHistory[gen % wrap].mOp = SWAP_ERASE;
+        mHistory[gen % wrap].mArg1 = index;
+        mHistory[gen % wrap].mArg2 = swapped;
+        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+            throw "Concurrent writes!!";
     }
 
     void onErase(uint32_t index)
     {
-        if (mHistory[mCurrentIndex] == 0 && mGeneration == mLastKnownGeneration)
-            return;
         uint32_t wrap = mHistory.size();
-        assert((mStartIndex + wrap - 1 - mCurrentIndex) % wrap >= 3);
-        mHistory[(mCurrentIndex + 1) % wrap] = ERASE;
-        mHistory[(mCurrentIndex + 2) % wrap] = index;
-        mCurrentIndex = (mCurrentIndex + 3) % wrap;
-        ++mGeneration;
-        mHistory[mCurrentIndex] = 0;
+        uint32_t gen = mGeneration.load();
+        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+            throw "Ring buffer is full!";
+        mHistory[gen % wrap].mOp = ERASE;
+        mHistory[gen % wrap].mArg1 = index;
+        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+            throw "Concurrent writes!!";
     }
 
     void onClear()
     {
-        if (mHistory[mCurrentIndex] == 0 && mGeneration == mLastKnownGeneration)
-            return;
         uint32_t wrap = mHistory.size();
-        assert((mStartIndex + wrap - 1 - mCurrentIndex) % wrap >= 2);
-        mHistory[(mCurrentIndex + 1) % wrap] = CLEAR;
-        mCurrentIndex = (mCurrentIndex + 2) % wrap;
-        ++mGeneration;
-        mHistory[mCurrentIndex] = 0;
+        uint32_t gen = mGeneration.load();
+        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+            throw "Ring buffer is full!";
+        mHistory[gen % wrap].mOp = RESET;
+        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+            throw "Concurrent writes!!";
     }
 
     uint32_t get(const GenerationVectorIndex &index) const
     {
+        assert(index);
         return index.mIndex;
     }
 
-private:
-    void incRef() const
+    uint32_t get(const GenerationVectorIndex &index, uint32_t end) const
     {
-        ++mHistory[mCurrentIndex];
+        return index ? index.mIndex : end;
+    }
+
+private:
+    void incRef(uint32_t index) const
+    {
+        ++mHistory[index % mHistory.size()].mRefCount;
     }
 
     void decRef(uint32_t index) const
     {
-        --mHistory[index];
-        if (index == mStartIndex) {
-            while (mHistory[mStartIndex] == 0 && mGeneration != mLastKnownGeneration) {
-                ++mLastKnownGeneration;
-                incIndex(mStartIndex);
-            }
-        }
+        --mHistory[index % mHistory.size()].mRefCount;
     }
 
-    void incIndex(uint32_t &index) const
-    {
-        uint32_t wrap = mHistory.size();
-        index = (index + 1 + mHistory[(index + 1) % wrap]) % wrap;
-    }
+    struct Entry {
+        mutable std::atomic<uint16_t> mRefCount = 0;
+        ContainerEvent mOp;
+        uint32_t mArg1, mArg2;
+    };
 
-    mutable std::vector<uint32_t> mHistory;
-    uint32_t mGeneration = 1;
-    uint32_t mCurrentIndex = 0;
-    mutable uint32_t mLastKnownGeneration = 1;
-    mutable uint32_t mStartIndex = 0;
+    std::vector<Entry> mHistory;
+    std::atomic<uint32_t> mGeneration = 0;
 
-#if _DEBUG
+#if ENABLE_MEMTRACKING
     mutable uint32_t mDebugCounter = 0;
     mutable std::unordered_map<uint32_t, std::pair<uint32_t, Debug::FullStackTrace>> mDebugTraces;
+    mutable std::mutex mDebugMutex;
 #endif
 };
 
@@ -316,7 +306,7 @@ struct GenerationVector : GenerationVectorBase {
         }
 
         iterator(const iterator &other)
-            : mIndex(other.mVector->copy(other.mIndex))
+            : mIndex(other.mIndex ? other.mVector->copy(other.mIndex) : GenerationVectorIndex {})
             , mVector(other.mVector)
         {
         }
@@ -350,7 +340,7 @@ struct GenerationVector : GenerationVectorBase {
 
         iterator &operator++()
         {
-            mVector->increment(mIndex);
+            mVector->increment(mIndex, mVector->size());
             return *this;
         }
 
@@ -379,35 +369,40 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(mIndex) - mVector->get(other.mIndex);
+            return mVector->get(mIndex, mVector->size()) - mVector->get(other.mIndex, mVector->size());
         }
 
         iterator &operator+=(ptrdiff_t diff)
         {
-            mVector->increment(mIndex, diff);
+            mVector->increment(mIndex, mVector->size(), diff);
             return *this;
         }
 
         iterator operator+(ptrdiff_t diff) const
         {
             GenerationVectorIndex index = mVector->copy(mIndex);
-            mVector->increment(index, diff);
+            mVector->increment(index, mVector->size(), diff);
             return { std::move(index), mVector };
         }
 
-        const GenerationVectorIndex &index() const &
+        void update() const
         {
             if (mVector)
                 mVector->update(mIndex);
-            return mIndex;
         }
 
-        operator GenerationVectorIndex() const
+        GenerationVectorIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        GenerationVectorIndex mIndex;
+        bool valid() const
+        {
+            update();
+            return mIndex;
+        }
+
+        mutable GenerationVectorIndex mIndex;
         GenerationVector<T> *mVector = nullptr;
     };
 
@@ -458,7 +453,7 @@ struct GenerationVector : GenerationVectorBase {
 
         const_iterator &operator++()
         {
-            mVector->increment(mIndex);
+            mVector->increment(mIndex, mVector->size());
             return *this;
         }
 
@@ -475,22 +470,22 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(mIndex) - mVector->get(other.mIndex);
+            return mVector->get(mIndex, mVector->size()) - mVector->get(other.mIndex, mVector->size());
         }
 
         const_iterator operator+(ptrdiff_t diff) const
         {
             GenerationVectorIndex index = mVector->copy(mIndex);
-            mVector->increment(index, diff);
+            mVector->increment(index, mVector->size(), diff);
             return { std::move(index), mVector };
         }
 
-        operator GenerationVectorIndex() const
+        GenerationVectorIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        GenerationVectorIndex mIndex;
+        mutable GenerationVectorIndex mIndex;
         const GenerationVector<T> *mVector;
     };
 
@@ -527,7 +522,7 @@ struct GenerationVector : GenerationVectorBase {
 
         reverse_iterator &operator++()
         {
-            mVector->increment(mIndex, -1);
+            mVector->increment(mIndex, mVector->size(), -1);
             return *this;
         }
 
@@ -544,15 +539,15 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(mIndex) - mVector->get(other.mIndex);
+            return mVector->get(other.mIndex, std::numeric_limits<uint32_t>::max()) - mVector->get(mIndex, std::numeric_limits<uint32_t>::max());
         }
 
-        operator GenerationVectorIndex() const
+        GenerationVectorIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        GenerationVectorIndex mIndex;
+        mutable GenerationVectorIndex mIndex;
         GenerationVector<T> *mVector;
     };
 
@@ -588,7 +583,7 @@ struct GenerationVector : GenerationVectorBase {
 
         const_reverse_iterator &operator++()
         {
-            mVector->increment(mIndex, -1);
+            mVector->increment(mIndex, mVector->size(), -1);
             return *this;
         }
 
@@ -600,12 +595,12 @@ struct GenerationVector : GenerationVectorBase {
             return mIndex != other.mIndex;
         }
 
-        operator GenerationVectorIndex() const
+        GenerationVectorIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        GenerationVectorIndex mIndex;
+        mutable GenerationVectorIndex mIndex;
         const GenerationVector<T> *mVector;
     };
 
@@ -619,10 +614,10 @@ struct GenerationVector : GenerationVectorBase {
 
     iterator erase(const iterator &it)
     {
-        return erase(it.index());
+        return erase(it.mIndex);
     }
 
-    iterator erase(const GenerationVectorIndex &it)
+    iterator erase(GenerationVectorIndex &it)
     {
         update(it);
 
@@ -659,58 +654,80 @@ struct GenerationVector : GenerationVectorBase {
         return mData.front();
     }
 
-    T &operator[](const GenerationVectorIndex &index)
+    T &operator[](GenerationVectorIndex &index)
     {
         update(index);
         assert(index);
         return mData[get(index)];
     }
 
-    const T &operator[](const GenerationVectorIndex &index) const
+    const T &operator[](GenerationVectorIndex &index) const
     {
         update(index);
         assert(index);
         return mData[get(index)];
+    }
+
+    T &at(GenerationVectorIndex &index)
+    {
+        update(index);
+        assert(index);
+        return mData.at(get(index));
+    }
+
+    const T &at(GenerationVectorIndex &index) const
+    {
+        update(index);
+        assert(index);
+        return mData.at(get(index));
     }
 
     iterator begin()
     {
+        if (mData.empty())
+            return end();
         return { generate(0), this };
     }
 
     iterator end()
     {
-        return { generate(size()), this };
+        return { {}, this };
     }
 
     const_iterator begin() const
     {
+        if (mData.empty())
+            return end();
         return { generate(0), this };
     }
 
     const_iterator end() const
     {
-        return { generate(size()), this };
+        return { {}, this };
     }
 
     reverse_iterator rbegin()
     {
+        if (mData.empty())
+            return rend();
         return { generate(size() - 1), this };
     }
 
     reverse_iterator rend()
     {
-        return { generate(-1), this };
+        return { {}, this };
     }
 
     const_reverse_iterator rbegin() const
     {
+        if (mData.empty())
+            return rend();
         return { generate(size() - 1), this };
     }
 
     const_reverse_iterator rend() const
     {
-        return { generate(-1), this };
+        return { {}, this };
     }
 
 private:

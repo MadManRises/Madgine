@@ -37,7 +37,7 @@
             return static_cast<OpenGLRenderContext &>(RenderContext::getSingleton());
         }
 
-        std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderWindow(Window::Window *w)
+        std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderWindow(Window::OSWindow *w)
         {
             checkThread();
 

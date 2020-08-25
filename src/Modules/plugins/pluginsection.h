@@ -2,6 +2,7 @@
 
 #if ENABLE_PLUGINS
 
+#    include "../generic/future.h"
 #    include "loadstate.h"
 
 namespace Engine {
@@ -12,16 +13,25 @@ namespace Plugins {
     };
 
     struct MODULES_EXPORT PluginSection {
-        PluginSection(PluginManager &mgr, const std::string &name);
-
-        void setAtleastOne(bool atleastOne = true);
+        PluginSection(PluginManager &mgr, const std::string &name, bool exclusive = false, bool atleastOne = false);
+        PluginSection(const PluginSection &) = delete;
+        ~PluginSection();
+        
         bool isAtleastOne() const;
-        void setExclusive(bool exclusive = true);
         bool isExclusive() const;
 
-        bool isLoaded(const std::string &name) const;
-        LoadState loadPlugin(const std::string &name);
-        LoadState unloadPlugin(const std::string &name);
+        Future<bool> load(Threading::Barrier &barrier);
+        Future<bool> unload(Threading::Barrier &barrier);
+
+        enum State {
+            LOADED,
+            UNLOADED,
+            UNDEFINED
+        };
+
+        State isLoaded(const std::string &name);
+        Future<bool> loadPlugin(const std::string &name);
+        Future<bool> unloadPlugin(const std::string &name);
 
         bool loadPluginByFilename(const std::string &name);
 
@@ -40,27 +50,30 @@ namespace Plugins {
         std::map<std::string, Plugin>::iterator begin();
         std::map<std::string, Plugin>::iterator end();
 
-        void loadFromIni(Ini::IniSection &sec);
+        Future<bool> loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec);
 
         PluginManager &manager();
 
         Plugin *getPlugin(const std::string &name);
 
     private:
-        LoadState loadPlugin(Plugin *p);
-        LoadState unloadPlugin(Plugin *p);
+        Future<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<Future<bool>> &&future = {});
+        Future<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<Future<bool>> &&future = {});
 
         friend struct Plugin;
 
         std::map<std::string, Plugin> mPlugins;
         std::set<PluginListener *, PluginListenerCmp> mListeners;
 
-        bool mAtleastOne = false;
-        bool mExclusive = false;
+        std::vector<Plugin *> mDependents;
 
         std::string mName;
 
         PluginManager &mMgr;
+
+        const bool mAtleastOne;
+        const bool mExclusive;
+
     };
 
 }

@@ -8,9 +8,9 @@ struct SafeIterator {
 
     using traits = derive_iterator<std::vector<value_type>>;
 
-    SafeIterator(T &t)
-        : mData(t.begin(), t.end())
-        , mContainer(t)
+    SafeIterator(T &&t)
+        : mContainer(std::forward<T>(t))
+        , mData(mContainer.begin(), mContainer.end())
     {
     }
 
@@ -54,7 +54,7 @@ struct SafeIterator {
 
     using iterator = iteratorImpl<typename traits::const_iterator>;
     using const_iterator = iteratorImpl<typename traits::const_iterator>;
-    using reverse_iterator = iteratorImpl<typename traits::const_reverse_iterator>;
+    using reverse_iterator = iteratorImpl<typename traits::reverse_iterator>;
     using const_reverse_iterator = iteratorImpl<typename traits::const_reverse_iterator>;
 
     iterator begin()
@@ -98,14 +98,14 @@ struct SafeIterator {
     };
 
 private:
+    T mContainer;
     std::vector<value_type> mData;
-    T &mContainer;
 };
 
 template <typename T>
-SafeIterator<T> safeIterate(T &t)
+SafeIterator<T> safeIterate(T &&t)
 {
-    return { t };
+    return { std::forward<T>(t) };
 }
 
 }

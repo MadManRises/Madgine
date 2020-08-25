@@ -43,13 +43,14 @@ namespace Scene {
     {
     }
 
-    Engine::Scene::SceneManager::~SceneManager()
+    SceneManager::~SceneManager()
     {
     }
 
     bool SceneManager::init()
     {
         markInitialized();
+
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             if (!component->callInit())
                 return false;
@@ -57,7 +58,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 10000 }, this);
+        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 30/*0000*/ }, this);
 
         return true;
     }
@@ -131,8 +132,11 @@ namespace Scene {
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
-            component->update(std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceLastFrame));
+            component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame));
         }
+
+        for (Entity::Entity &entity : mEntities)
+            entity.update();
 
     }
 
@@ -152,24 +156,13 @@ namespace Scene {
         return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
     }
 
-    void SceneManager::remove(Entity::Entity *e)
-    {
-        auto find = [&](const Entity::Entity &ent) { return &ent == e; };
+    void SceneManager::remove(Entity::EntityPtr &e)
+    {        
 
         if (e->isLocal()) {
-            auto ent = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), find);
-            if (ent != mLocalEntities.end()) {
-                mLocalEntities.erase(ent);
-            } else {
-                std::terminate();
-            }
+            mLocalEntities.erase(e.it());
         } else {
-            auto ent = std::find_if(mEntities.begin(), mEntities.end(), find);
-            if (ent != mEntities.end()) {
-                mEntities.erase(ent);
-            } else {
-                std::terminate();
-            }
+            mEntities.erase(e.it());
         }
     }
 

@@ -4,30 +4,37 @@
 
 #include "bullet3-2.89/src/btBulletDynamicsCommon.h"
 
-#include "Madgine/scene/entity/entityptr.h"
+#include "Madgine/scene/entity/entitycomponentptr.h"
+
+#include "Madgine/scene/entity/components/transform.h"
 
 namespace Engine {
 namespace Physics {
 
-    struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody>, btMotionState {
+    struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody> {
 
         RigidBody(const Engine::ObjectPtr &data = {});
+        RigidBody(RigidBody &&other) noexcept;
+        ~RigidBody();
+
+        RigidBody &operator=(RigidBody &&other);
 
         virtual void init(const Scene::Entity::EntityPtr &entity) override;
         virtual void finalize(const Scene::Entity::EntityPtr &entity) override;
 
-        virtual void setWorldTransform(const btTransform &transform) override;
-        virtual void getWorldTransform(btTransform &transform) const override;
-
         btRigidBody *get();
 
-        float getMass() const;
+        float mass() const;
         void setMass(float mass);
 
+        void update();
+
+        bool kinematic() const;
+        void setKinematic(bool kinematic);
+
     private:
-        btBoxShape mShape;
-        btRigidBody mRigidBody;
-        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mTransform;
+        struct Data;
+        std::unique_ptr<Data> mData;
     };
 
 }

@@ -21,6 +21,9 @@ namespace Serialize {
         SerializableUnitBase(SerializableUnitBase &&other) noexcept;
         ~SerializableUnitBase();
 
+        SerializableUnitBase &operator=(const SerializableUnitBase &other);
+        SerializableUnitBase &operator=(SerializableUnitBase &&other);
+
     public:
         const TopLevelSerializableUnitBase *topLevel() const;
 
@@ -37,8 +40,6 @@ namespace Serialize {
 
         bool isSynced() const;
         bool isMaster() const;
-
-        void swap(SerializableUnitBase &other);
 
     protected:
         void sync();
@@ -109,6 +110,14 @@ namespace Serialize {
         TableInitializer(TableInitializer &&)
         {
             static_cast<SerializableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+        TableInitializer &operator=(const TableInitializer &)
+        {
+            return *this;
+        }
+        TableInitializer &operator=(TableInitializer &&)
+        {
+            return *this;
         }
     };
 

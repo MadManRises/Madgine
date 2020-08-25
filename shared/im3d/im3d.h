@@ -68,7 +68,9 @@ namespace Im3D {
 
     MADGINE_IM3D_EXPORT void Text(const char *text, const Matrix4 &transform, float fontSize = 24, bool facingX = true, bool facingY = true, const char *fontName = "OpenSans-Regular", Vector2 pivot = { 0.5f, 0.5f });
 
-	MADGINE_IM3D_EXPORT void Arrow(Im3DMeshType type, float radius, float length, const Matrix4 &transform, const Vector4 &color = { 1, 1, 1, 1 });
+    MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const Vector4 &color = { 1, 1, 1, 1 });
+    MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const Vector4 &colorA, const Vector4 &colorB);
+    MADGINE_IM3D_EXPORT void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Vector4 &color = { 1, 1, 1, 1 });
 
     MADGINE_IM3D_EXPORT bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
     MADGINE_IM3D_EXPORT bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
