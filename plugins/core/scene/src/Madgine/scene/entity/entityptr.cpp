@@ -87,12 +87,12 @@ namespace Scene {
             return (*this)->getComponent(i, *this);
         }
 
-        inline Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(size_t i, const ObjectPtr &table) const
+        Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(size_t i, const ObjectPtr &table) const
         {
             return (*this)->addComponent(i, *this, table);
         }
 
-        inline Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(const std::string_view &name, const ObjectPtr &table) const
+        Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(const std::string_view &name, const ObjectPtr &table) const
         {
             return (*this)->addComponent(name, *this, table);
         }

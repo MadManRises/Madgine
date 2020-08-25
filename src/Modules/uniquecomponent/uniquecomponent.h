@@ -101,6 +101,7 @@ size_t component_index();
 }
 
 #    define UNIQUECOMPONENT(Name)
+#    define UNIQUECOMPONENT2(Name, ext)
 #    define VIRTUALUNIQUECOMPONENT(Name)
 
 #endif

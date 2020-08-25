@@ -80,7 +80,7 @@ namespace Scene {
 
         template <typename T>
         Entity::EntityComponentList<T>& entityComponentList() {
-            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(T::component_index()));
+            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(component_index<T>()));
         }
         
         Entity::EntityComponentListBase &entityComponentList(size_t index)
