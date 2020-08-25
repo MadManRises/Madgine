@@ -41,7 +41,7 @@ namespace Window {
     }
 
     struct LinuxWindow : OSWindow {
-        LinuxWindow(Window hwnd, size_t width, size_t height)
+        LinuxWindow(::Window hwnd, size_t width, size_t height)
             : OSWindow(hwnd)
             , mWidth(width)
             , mHeight(height)
@@ -189,7 +189,7 @@ namespace Window {
         uintptr_t handle = settings.mHandle;
         if (!handle) {
 
-            static Window root = DefaultRootWindow(sDisplay());
+            static ::Window root = DefaultRootWindow(sDisplay());
 
             static int att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
 
@@ -245,7 +245,7 @@ namespace Window {
 
     OSWindow *sFromNative(uintptr_t handle)
     {
-        return handle ? &sWindows.at((Window)handle) : nullptr;
+        return handle ? &sWindows.at((::Window)handle) : nullptr;
     }
 
 	static std::vector<MonitorInfo> sBuffer;

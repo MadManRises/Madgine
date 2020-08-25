@@ -11,7 +11,9 @@ namespace Threading {
         void singleLoop();
 
     private:
+#if !EMSCRIPTEN
         void schedulerLoop(Threading::TaskQueue *queue);
+#endif
 
     private:
         WorkGroup &mWorkgroup;

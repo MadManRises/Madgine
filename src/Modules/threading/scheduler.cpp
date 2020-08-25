@@ -75,6 +75,7 @@ namespace Threading {
         return 0;
     }
 
+#if !EMSCRIPTEN
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
         setCurrentThreadName(mWorkgroup.name() + "_" + queue->name());
@@ -86,6 +87,7 @@ namespace Threading {
             queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
         }
     }
+#endif
 
     void Scheduler::singleLoop()
     {
