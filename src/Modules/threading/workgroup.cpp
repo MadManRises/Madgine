@@ -141,7 +141,7 @@ namespace Threading {
     void WorkGroup::addThread()
     {
         std::lock_guard lock { mMutex };
-        for (Barrier& barrier : mBarriers) {
+        for (Barrier &barrier : mBarriers) {
             if (barrier.running())
                 barrier.addThread();
         }
@@ -181,7 +181,11 @@ namespace Threading {
     {
         WorkGroup &group = self();
         std::lock_guard lock { group.mMutex };
-        Barrier &barrier = group.mBarriers.emplace_back(flags, group.mSubThreads.size() + 1);
+        Barrier &barrier = group.mBarriers.emplace_back(flags,
+#if ENABLE_THREADING
+            group.mSubThreads.size() +
+#endif
+                1);
         if (!group.mHasInterrupt) {
             group.mHasInterrupt = true;
             for (TaskQueue *queue : group.mTaskQueues)
@@ -203,7 +207,7 @@ namespace Threading {
                 if (it == mBarriers.end())
                     return;
             }
-        }        
+        }
         it->enter(queue, queueIndex, isMain);
         if (isMain) {
             std::lock_guard lock { mMutex };

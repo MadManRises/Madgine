@@ -404,7 +404,7 @@ namespace Serialize {
                     this->mContainer.Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
                     ItemUnitHelper::setItemActive(*it, false, true);
                     this->mContainer.Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
-                    this->mContainer.Observer::operator()(it, BEFORE | REMOVE_ITEM);
+                    this->mContainer.Observer::operator()(it, BEFORE | ERASE);
                     ++mCount;
                 }
             }
@@ -413,7 +413,7 @@ namespace Serialize {
             {
                 assert(mTriggered);
                 for (size_t i = 0; i < mCount; ++i) {
-                    this->mContainer.Observer::operator()(mIt, AFTER | REMOVE_ITEM);
+                    this->mContainer.Observer::operator()(mIt, AFTER | ERASE);
                 }
             }
 
