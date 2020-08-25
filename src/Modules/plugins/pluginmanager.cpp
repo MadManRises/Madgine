@@ -8,7 +8,7 @@
 
 #    include "../uniquecomponent/uniquecomponentregistry.h"
 
-#    include "Interfaces/filesystem/runtime.h"
+#    include "Interfaces/dl/runtime.h"
 
 #    include "../keyvalue/keyvalue.h"
 
@@ -53,7 +53,7 @@ namespace Plugins {
 
         const std::regex e { SHARED_LIB_PREFIX "Plugin_[a-zA-Z0-9]*_([a-zA-Z0-9]*)_[a-zA-Z0-9]*\\" SHARED_LIB_SUFFIX };
         std::smatch match;
-        for (auto path : Filesystem::listSharedLibraries()) {
+        for (auto path : Dl::listSharedLibraries()) {
             if (std::regex_match(path.str(), match, e)) {
                 std::string section = match[1];
                 mSections.try_emplace(section, *this, section);

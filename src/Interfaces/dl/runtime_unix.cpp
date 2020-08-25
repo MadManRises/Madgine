@@ -10,7 +10,7 @@
 #    include <link.h>
 
 namespace Engine {
-namespace Filesystem {
+namespace Dl {
 
     struct SharedLibraryQueryState {
         dirent *mData;
@@ -52,14 +52,9 @@ namespace Filesystem {
             close();
     }
 
-    SharedLibraryQueryState *createSharedLibraryQueryState()
+    SharedLibraryQueryStatePtr createSharedLibraryQueryState()
     {
-        return new SharedLibraryQueryState;
-    }
-
-    void destroySharedLibraryQueryState(SharedLibraryQueryState *state)
-    {
-        delete state;
+        return { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } };
     }
 
     const char *filename(SharedLibraryQueryState &data)
@@ -76,9 +71,9 @@ namespace Filesystem {
         assert(result > 0);
         buffer[result] = '\0';
 
-        return SharedLibraryQuery { Path(buffer).parentPath() };
+        return SharedLibraryQuery { Filesystem::Path { buffer }.parentPath() };
 #    elif ANDROID
-        return SharedLibraryQuery { Path("/data/data/com.Madgine.MadgineLauncher/lib") }; //TODO
+        return SharedLibraryQuery { Filesystem::Path { "/data/data/com.Madgine.MadgineLauncher/lib" } }; //TODO
 #    elif EMSCRIPTEN
         std::terminate();
 #    else

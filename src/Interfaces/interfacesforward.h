@@ -27,7 +27,9 @@ namespace Filesystem {
     struct Path;
     struct FileQuery;
     struct FileQueryState;
+}
 
+namespace Dl {
     struct SharedLibraryQuery;
     struct SharedLibraryQueryState;
 }
