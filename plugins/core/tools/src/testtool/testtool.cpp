@@ -44,11 +44,11 @@ namespace Tools {
     template <size_t... Is>
     void renderValuetypeSizes(std::index_sequence<Is...>)
     {
-        std::vector<std::pair<const char *, size_t>> data = {
+        std::vector<std::pair<const char *, unsigned int>> data = {
             { typeid(std::get<Is>(std::declval<ValueType::Union>())).name(), sizeof(std::get<Is>(std::declval<ValueType::Union>())) }...
         };
         for (auto [name, size] : data) {
-            ImGui::Text("  %s size: %llu", name, size);
+            ImGui::Text("  %s size: %u", name, size);
         }
     }
 

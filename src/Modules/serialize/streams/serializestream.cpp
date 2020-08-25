@@ -100,10 +100,6 @@ namespace Serialize {
     void SerializeInStream::readRaw(void *buffer, size_t size)
     {
         if (std::ios::iostate state = InStream::readRaw(buffer, size); state) {
-            bool good = state & std::ios::goodbit;
-            bool eof = state & std::ios::eofbit;
-            bool fail = state & std::ios::failbit;
-            bool bad = state & std::ios::badbit;
             throw SerializeException(
                 Database::Exceptions::deserializationFailure);
             }
