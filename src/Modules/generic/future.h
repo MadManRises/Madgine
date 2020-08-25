@@ -1,6 +1,7 @@
 #pragma once
 
 #include "wrapreference.h"
+#include "copy_traits.h"
 
 namespace Engine {
 
