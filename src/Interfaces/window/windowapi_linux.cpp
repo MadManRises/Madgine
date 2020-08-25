@@ -180,7 +180,7 @@ namespace Window {
         int mHeight;
     };
 
-    static std::unordered_map<Window, LinuxWindow> sWindows;
+    static std::unordered_map<::Window, LinuxWindow> sWindows;
 
     OSWindow *sCreateWindow(const WindowSettings &settings)
     {
