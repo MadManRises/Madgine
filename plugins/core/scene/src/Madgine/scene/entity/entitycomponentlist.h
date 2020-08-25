@@ -2,6 +2,7 @@
 
 #include "entitycomponentlistbase.h"
 #include "Modules/generic/container/generationvector.h"
+#include "entitycomponentcollector.h"
 
 namespace Engine {
 namespace Scene {

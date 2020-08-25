@@ -82,6 +82,11 @@ namespace Scene {
             return *this;
         }
 
+        EntityComponentPtr<EntityComponentBase> EntityPtr::getComponent(size_t i) const
+        {
+            return (*this)->getComponent(i, *this);
+        }
+
         inline Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(size_t i, const ObjectPtr &table) const
         {
             return (*this)->addComponent(i, *this, table);

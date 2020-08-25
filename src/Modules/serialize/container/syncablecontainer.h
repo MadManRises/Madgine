@@ -232,7 +232,7 @@ namespace Serialize {
                         
                     }*/
                     std::pair<const_iterator, const_iterator> data { from, to };
-                    this->writeAction(REMOVE_RANGE, &data, answerTarget, answerId);
+                    this->writeAction(ERASE_RANGE, &data, answerTarget, answerId);
                 }
             }
 

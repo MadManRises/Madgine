@@ -36,12 +36,14 @@ namespace Scene {
 
             template <typename T>
             EntityComponentPtr<T> getComponent() const {
-                return (*this)->getComponent<T>(*this);
+                return EntityComponentPtr<T> { getComponent(component_index<T>()) };
             }
+
+            EntityComponentPtr<EntityComponentBase> getComponent(size_t i) const;
 
             template <typename T>
             Future<EntityComponentPtr<T>> addComponent(const ObjectPtr& table = {}) const {
-                return (*this)->addComponent<T>(*this, table);
+                return addComponent(component_index<T>(), table).then([](EntityComponentPtr<EntityComponentBase> &&p) { return EntityComponentPtr<T> { std::move(p) }; });
             }
 
             Future<EntityComponentPtr<EntityComponentBase>> addComponent(size_t i, const ObjectPtr &table = {}) const;

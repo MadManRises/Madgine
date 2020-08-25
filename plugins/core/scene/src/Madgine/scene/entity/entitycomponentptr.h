@@ -10,6 +10,15 @@ namespace Scene {
     namespace Entity {
 
         template <typename T>
+        struct EntityComponentPtrBase;
+
+        template <>
+        struct EntityComponentPtrBase<EntityComponentBase>;
+
+        template <>
+        struct EntityComponentPtrBase<const EntityComponentBase>;
+
+        template <typename T>
         struct EntityComponentPtrBase {
             EntityComponentPtrBase() = default;
 
@@ -23,7 +32,7 @@ namespace Scene {
                 : mHandle { other.handle().mIndex ? other.entity().sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) : GenerationVectorIndex {} }
                 , mEntity(other.entity())
             {
-                assert(!other || T::component_index() == other.index());
+                assert(!other || component_index<T>() == other.index());
             }
 
             template <typename U, typename = std::enable_if_t<std::is_convertible_v<T *, U *>>>
