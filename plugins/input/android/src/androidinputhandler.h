@@ -11,7 +11,7 @@ namespace Engine {
 namespace Input {
 
     struct MADGINE_ANDROIDINPUT_EXPORT AndroidInputHandler : public InputHandlerComponent<AndroidInputHandler> {
-        AndroidInputHandler(Window::MainWindow &topLevel, Window::Window *window, InputListener *listener);
+        AndroidInputHandler(Window::MainWindow &topLevel, Window::OSWindow *window, InputListener *listener);
         ~AndroidInputHandler();
 
         virtual bool isKeyDown(Key key) override;
