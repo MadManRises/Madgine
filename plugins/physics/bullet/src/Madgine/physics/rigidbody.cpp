@@ -79,7 +79,7 @@ namespace Physics {
     {
     }
 
-    RigidBody::RigidBody(RigidBody &&other) noexcept = default;
+    RigidBody::RigidBody(RigidBody &&other) = default;
 
     RigidBody::~RigidBody() = default;
 

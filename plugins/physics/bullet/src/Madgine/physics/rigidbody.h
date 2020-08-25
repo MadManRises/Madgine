@@ -14,7 +14,7 @@ namespace Physics {
     struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody> {
 
         RigidBody(const Engine::ObjectPtr &data = {});
-        RigidBody(RigidBody &&other) noexcept;
+        RigidBody(RigidBody &&other);
         ~RigidBody();
 
         RigidBody &operator=(RigidBody &&other);
