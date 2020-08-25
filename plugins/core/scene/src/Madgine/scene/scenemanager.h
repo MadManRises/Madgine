@@ -55,7 +55,7 @@ namespace Scene {
         template <typename T>
         T &getComponent(bool init = true)
         {
-            return static_cast<T &>(getComponent(T::component_index(), init));
+            return static_cast<T &>(getComponent(Engine::component_index<T>(), init));
         }
         SceneComponentBase &getComponent(size_t i, bool = true);
         size_t getComponentCount();
@@ -63,7 +63,7 @@ namespace Scene {
         template <typename T>
         T &getGlobalAPIComponent(bool init = true)
         {
-            return static_cast<T &>(getGlobalAPIComponent(T::component_index(), init));
+            return static_cast<T &>(getGlobalAPIComponent(Engine::component_index<T>(), init));
         }
 
         App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
@@ -80,7 +80,7 @@ namespace Scene {
 
         template <typename T>
         Entity::EntityComponentList<T>& entityComponentList() {
-            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(component_index<T>()));
+            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(Engine::component_index<T>()));
         }
         
         Entity::EntityComponentListBase &entityComponentList(size_t index)
