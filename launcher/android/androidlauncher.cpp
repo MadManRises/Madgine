@@ -56,7 +56,7 @@ namespace Android {
     {
         ANativeActivity *activity = mActivity;
 
-        static Engine::Core::Root root;
+        static Engine::Core::Root root { "MadgineLauncher" };
 
 		launch(&mWindow);
 		
