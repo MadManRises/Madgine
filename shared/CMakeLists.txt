@@ -36,22 +36,6 @@ set_target_properties(Filesystem PROPERTIES EXCLUDE_FROM_ALL TRUE)
 add_subdirectory(stb)
 set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-add_subdirectory(SDL2-2.0.9)
-if (TARGET SDL2-static)
-	set_target_properties(SDL2-static PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-if (TARGET SDL2)
-	set_target_properties(SDL2 PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-if (TARGET SDL2main)
-	set_target_properties(SDL2main PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-if (BUILD_SHARED_LIBS)
-	add_library(SDL ALIAS SDL2)
-else()
-	add_library(SDL ALIAS SDL2-static)
-endif()
-
 
 ######################## Static Libs #################
 

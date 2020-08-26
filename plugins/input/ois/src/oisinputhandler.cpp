@@ -67,7 +67,7 @@ namespace Input {
         mInputManager = nullptr;
     }
 
-    bool OISInputHandler::isKeyDown(Key key)
+    bool OISInputHandler::isKeyDown(Key::Key key)
     {
         return mKeyboard->isKeyDown(static_cast<OIS::KeyCode>(key));
     }
@@ -88,12 +88,12 @@ namespace Input {
 
     bool OISInputHandler::keyPressed(const OIS::KeyEvent &arg)
     {
-        return injectKeyPress({ static_cast<Key>(arg.key), static_cast<char>(arg.text) });
+        return injectKeyPress({ static_cast<Key::Key>(arg.key), static_cast<char>(arg.text) });
     }
 
     bool OISInputHandler::keyReleased(const OIS::KeyEvent &arg)
     {
-        return injectKeyRelease({ static_cast<Key>(arg.key) });
+        return injectKeyRelease({ static_cast<Key::Key>(arg.key) });
     }
 
     bool OISInputHandler::mousePressed(const OIS::MouseEvent &arg,

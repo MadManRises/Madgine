@@ -26,7 +26,9 @@ namespace Input {
         enum MouseButton : unsigned char;
     }
 
-    enum Key : uint8_t;
+    namespace Key {
+        enum Key : uint8_t;
+    }
 }
 
 namespace Render {

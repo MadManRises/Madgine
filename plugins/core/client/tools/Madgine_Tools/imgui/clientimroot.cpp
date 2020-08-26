@@ -2,8 +2,8 @@
 
 #include "clientimroot.h"
 
-#include "Interfaces/window/windowsettings.h"
 #include "Interfaces/window/windowapi.h"
+#include "Interfaces/window/windowsettings.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -33,8 +33,6 @@ METATABLE_END(Engine::Tools::ClientImRoot)
 
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
-
-
 
 namespace Engine {
 namespace Tools {
@@ -182,28 +180,28 @@ namespace Tools {
         }
 
         //Input
-        io.KeyMap[ImGuiKey_Tab] = Input::KC_TAB;
-        io.KeyMap[ImGuiKey_LeftArrow] = Input::KC_LEFT;
-        io.KeyMap[ImGuiKey_RightArrow] = Input::KC_RIGHT;
-        io.KeyMap[ImGuiKey_UpArrow] = Input::KC_UP;
-        io.KeyMap[ImGuiKey_DownArrow] = Input::KC_DOWN;
-        io.KeyMap[ImGuiKey_PageUp] = Input::KC_PGUP;
-        io.KeyMap[ImGuiKey_PageDown] = Input::KC_PGDOWN;
-        io.KeyMap[ImGuiKey_Home] = Input::KC_HOME;
-        io.KeyMap[ImGuiKey_End] = Input::KC_END;
-        io.KeyMap[ImGuiKey_Insert] = Input::KC_INSERT;
-        io.KeyMap[ImGuiKey_Delete] = Input::KC_DELETE;
-        io.KeyMap[ImGuiKey_Backspace] = Input::KC_BACK;
-        io.KeyMap[ImGuiKey_Space] = Input::KC_SPACE;
-        io.KeyMap[ImGuiKey_Enter] = Input::KC_RETURN;
-        io.KeyMap[ImGuiKey_Escape] = Input::KC_ESCAPE;
-        io.KeyMap[ImGuiKey_KeyPadEnter] = Input::KC_NUMPADENTER;
-        io.KeyMap[ImGuiKey_A] = Input::KC_A;
-        io.KeyMap[ImGuiKey_C] = Input::KC_C;
-        io.KeyMap[ImGuiKey_V] = Input::KC_V;
-        io.KeyMap[ImGuiKey_X] = Input::KC_X;
-        io.KeyMap[ImGuiKey_Y] = Input::KC_Y;
-        io.KeyMap[ImGuiKey_Z] = Input::KC_Z;
+        io.KeyMap[ImGuiKey_Tab] = Input::Key::Tabulator;
+        io.KeyMap[ImGuiKey_LeftArrow] = Input::Key::LeftArrow;
+        io.KeyMap[ImGuiKey_RightArrow] = Input::Key::RightArrow;
+        io.KeyMap[ImGuiKey_UpArrow] = Input::Key::UpArrow;
+        io.KeyMap[ImGuiKey_DownArrow] = Input::Key::DownArrow;
+        io.KeyMap[ImGuiKey_PageUp] = Input::Key::PageUp;
+        io.KeyMap[ImGuiKey_PageDown] = Input::Key::PageDown;
+        io.KeyMap[ImGuiKey_Home] = Input::Key::Home;
+        io.KeyMap[ImGuiKey_End] = Input::Key::End;
+        io.KeyMap[ImGuiKey_Insert] = Input::Key::Insert;
+        io.KeyMap[ImGuiKey_Delete] = Input::Key::Delete;
+        io.KeyMap[ImGuiKey_Backspace] = Input::Key::Backspace;
+        io.KeyMap[ImGuiKey_Space] = Input::Key::Space;
+        io.KeyMap[ImGuiKey_Enter] = Input::Key::Return;
+        io.KeyMap[ImGuiKey_Escape] = Input::Key::Escape;
+        io.KeyMap[ImGuiKey_KeyPadEnter] = Input::Key::Return;
+        io.KeyMap[ImGuiKey_A] = Input::Key::A;
+        io.KeyMap[ImGuiKey_C] = Input::Key::C;
+        io.KeyMap[ImGuiKey_V] = Input::Key::V;
+        io.KeyMap[ImGuiKey_X] = Input::Key::X;
+        io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
+        io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
 
         if (!mRoot.callInit())
             return false;
@@ -307,9 +305,9 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-        io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
-        io.KeyCtrl = mWindow.input()->isKeyDown(Input::KC_LCONTROL) || mWindow.input()->isKeyDown(Input::KC_RCONTROL);
-        io.KeyAlt = mWindow.input()->isKeyDown(Input::KC_LMENU) || mWindow.input()->isKeyDown(Input::KC_RMENU);
+        io.KeyShift = mWindow.input()->isKeyDown(Input::Key::LShift) || mWindow.input()->isKeyDown(Input::Key::RShift);
+        io.KeyCtrl = mWindow.input()->isKeyDown(Input::Key::LControl) || mWindow.input()->isKeyDown(Input::Key::RControl);
+        io.KeyAlt = mWindow.input()->isKeyDown(Input::Key::LAlt) || mWindow.input()->isKeyDown(Input::Key::RAlt);
 
         io.AddInputCharacter(arg.text);
 
@@ -322,9 +320,9 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = false;
 
-        io.KeyShift = mWindow.input()->isKeyDown(Input::KC_LSHIFT) || mWindow.input()->isKeyDown(Input::KC_RSHIFT);
-        io.KeyCtrl = mWindow.input()->isKeyDown(Input::KC_LCONTROL) || mWindow.input()->isKeyDown(Input::KC_RCONTROL);
-        io.KeyAlt = mWindow.input()->isKeyDown(Input::KC_LMENU) || mWindow.input()->isKeyDown(Input::KC_RMENU);
+        io.KeyShift = mWindow.input()->isKeyDown(Input::Key::LShift) || mWindow.input()->isKeyDown(Input::Key::RShift);
+        io.KeyCtrl = mWindow.input()->isKeyDown(Input::Key::LControl) || mWindow.input()->isKeyDown(Input::Key::RControl);
+        io.KeyAlt = mWindow.input()->isKeyDown(Input::Key::LAlt) || mWindow.input()->isKeyDown(Input::Key::RAlt);
 
         return io.WantCaptureKeyboard;
     }

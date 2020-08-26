@@ -12,7 +12,7 @@ namespace Input {
         OISInputHandler(Window::MainWindow &topLevel, Window::OSWindow *window, InputListener *listener);
         virtual ~OISInputHandler();
 
-        virtual bool isKeyDown(Key key) override;
+        virtual bool isKeyDown(Key::Key key) override;
 
     private:
         static MouseButton::MouseButton convertMouseButton(OIS::MouseButtonID id);

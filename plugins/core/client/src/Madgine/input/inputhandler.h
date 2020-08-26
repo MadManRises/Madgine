@@ -13,7 +13,7 @@ namespace Input {
 
         virtual void onResize(size_t width, size_t height);
 
-		virtual bool isKeyDown(Key key) = 0;
+		virtual bool isKeyDown(Key::Key key) = 0;
 
     protected:
         bool injectKeyPress(const KeyEventArgs &arg);

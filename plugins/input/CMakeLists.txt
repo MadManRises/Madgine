@@ -11,8 +11,3 @@ else()
 	add_subdirectory(ois)
 
 endif()
-
-option(PLUGINS_BUILD_SDLINPUT "Build the SDL-input plugin")
-if (PLUGINS_BUILD_SDLINPUT)
-	add_subdirectory(sdl)
-endif()
