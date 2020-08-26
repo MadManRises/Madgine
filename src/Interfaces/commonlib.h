@@ -90,7 +90,8 @@
         static qualifier Type dummy = Init;                              \
         return dummy;                                                    \
     }                                                                    \
-    template Type &ns Name<__VA_ARGS__>();
+    template Type &ns Name<__VA_ARGS__>();                               \
+    static Type &CONCAT2(__##Name##ext##_helper_, __LINE__) = ns Name<__VA_ARGS__>();
 
 #define DLL_EXPORT_VARIABLE2(qualifier, Type, ns, Name, Init, ...) DLL_EXPORT_VARIABLE3(qualifier, Type, ns, Name, , SINGLE_ARG(Init), __VA_ARGS__)
 

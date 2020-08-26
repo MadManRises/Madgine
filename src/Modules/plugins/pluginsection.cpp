@@ -209,7 +209,7 @@ namespace Plugins {
     {
         assert(p->section() == this);
 
-        Future<bool> result = p->startOperation(Plugin::LOADING, promise, std::move(future));
+        Future<bool> resultFuture = p->startOperation(Plugin::LOADING, promise, std::move(future));
 
         if (promise) {
             std::vector<Future<void>> listenerFeedbacks;
@@ -219,7 +219,7 @@ namespace Plugins {
                     listenerFeedbacks.emplace_back(listener->aboutToLoadPlugin(p));
             }
 
-            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }]() mutable {
+            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }, resultFuture { resultFuture.share() }]() mutable {
                 for (Future<void> &f : listenerFeedbacks)
                     if (!f.isAvailable())
                         return Threading::YIELD;
@@ -239,7 +239,7 @@ namespace Plugins {
                 if (unloadExclusive) {
                     result = unloadPlugin(barrier, unloadExclusive);
                 }
-                barrier.queue(nullptr, [this, unloadExclusive, p, &barrier, promise { std::move(promise) }, result { std::move(result) }]() mutable {
+                barrier.queue(nullptr, [this, unloadExclusive, p, &barrier, promise { std::move(promise) }, result { std::move(result) }, resultFuture { std::move(resultFuture) }]() mutable {
                     if (!result.isAvailable())
                         return Threading::YIELD;
                     if (unloadExclusive && result) {
@@ -250,7 +250,7 @@ namespace Plugins {
                     std::promise<bool> pluginPromise;
                     Future<bool> f { pluginPromise.get_future() };
                     p->load(mMgr, barrier, std::move(pluginPromise));
-                    barrier.queue(nullptr, [this, p, &barrier, promise { std::move(promise) }, f { std::move(f) }]() mutable {
+                    barrier.queue(nullptr, [this, p, &barrier, promise { std::move(promise) }, f { std::move(f) }, resultFuture { std::move(resultFuture) }]() mutable {
                         if (!f.isAvailable())
                             return Threading::YIELD;
 
@@ -267,9 +267,10 @@ namespace Plugins {
 
                         PluginSection &toolsSection = mMgr.section("Tools");
                         if (Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools")) {
-                            toolsSection.loadPlugin(barrier, toolPlugin);
+                            toolsSection.loadPlugin(barrier, toolPlugin, std::move(promise), std::move(resultFuture));
+                        } else {
+                            promise.set_value(true);
                         }
-                        promise.set_value(true);
 
                         return Threading::RETURN;
                     });
@@ -279,7 +280,7 @@ namespace Plugins {
             });
         }
 
-        return result;
+        return resultFuture;
     }
 
     Future<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<Future<bool>> &&future)
@@ -349,16 +350,15 @@ namespace Plugins {
         std::vector<std::pair<Future<bool>, bool>> futures;
 
         for (const std::pair<const std::string, std::string> &p : sec) {
-            auto it = mPlugins.find(p.first);
-            if (it == mPlugins.end()) {
+            Plugin *plugin = getPlugin(p.first);
+            if (!plugin) {
                 LOG("Could not find Plugin \"" << p.first << "\"!");
                 continue;
             }
-            Plugin &plugin = it->second;
             if (p.second.empty()) {
-                futures.emplace_back(unloadPlugin(barrier, &plugin), false);
+                futures.emplace_back(unloadPlugin(barrier, plugin), false);
             } else {
-                futures.emplace_back(loadPlugin(barrier, &plugin), true);
+                futures.emplace_back(loadPlugin(barrier, plugin), true);
             }
         }
 

@@ -51,6 +51,7 @@ struct MODULES_EXPORT ComponentRegistryBase {
         : mBinary(binary)
         , mTi(ti)
     {
+        LOG("Adding: " << ti->mTypeName);
         registryRegistry()[ti->mFullName] = this;
     }
 

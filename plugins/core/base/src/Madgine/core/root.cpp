@@ -27,6 +27,8 @@ namespace Core {
         , mResources(std::make_unique<Resources::ResourceManager>())
     {
 
+        mPluginManager->setup();
+
         KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
 
         mResources->init();

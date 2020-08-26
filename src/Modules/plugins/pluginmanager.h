@@ -10,8 +10,10 @@ namespace Plugins {
     struct MODULES_EXPORT PluginManager {
         static PluginManager &getSingleton();
 
-        PluginManager(const std::string &programName, bool loadCache = true, bool loadExe = true);
+        PluginManager(const std::string &programName);
         ~PluginManager();		
+
+        void setup(bool loadCache = true, bool loadExe = true);
 
         PluginSection &section(const std::string &name);
         PluginSection &operator[](const std::string &name);

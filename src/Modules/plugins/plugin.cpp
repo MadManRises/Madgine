@@ -67,14 +67,12 @@ namespace Plugins {
                 const BinaryInfo *bin = info();
                 bin->mSelf = this;
 
-                for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
-                    const char *dependencyName = *dep;
-                    addDependency(manager, manager.getPlugin(dependencyName));
+                for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {                    
+                    addDependency(manager, manager.getPlugin(*dep));
                 }
 
-                for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
-                    const char *dependencyName = *dep;
-                    addGroupDependency(manager, &manager.section(dependencyName));
+                for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {                    
+                    addGroupDependency(manager, &manager.section(*dep));
                 }
             } else {
                 errorMsg = "Unkown";
@@ -94,6 +92,8 @@ namespace Plugins {
             {
                 std::lock_guard lock { mMutex };
                 for (Plugin *dep : mDependencies) {
+                    if (mName == dep->mName + "Tools")
+                        continue;
                     dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
                 }
                 for (PluginSection *sec : mGroupDependencies) {

@@ -43,7 +43,7 @@ namespace Plugins {
         return *sSingleton;
     }
 
-    PluginManager::PluginManager(const std::string &programName, bool loadCache, bool loadExe)
+    PluginManager::PluginManager(const std::string &programName)
         : mCacheFileName(programName + ".cfg")
     {
         assert(!sSingleton);
@@ -59,7 +59,10 @@ namespace Plugins {
                 mSections.try_emplace(section, *this, section);
             }
         }
+    }
 
+    void PluginManager::setup(bool loadCache, bool loadExe)
+    {
         assert(Threading::WorkGroup::self().singleThreaded());
 
         Threading::Barrier barrier { Threading::Barrier::NO_FLAGS, 1 };
@@ -67,7 +70,7 @@ namespace Plugins {
         std::promise<bool> p1;
         Future<bool> f1 { p1.get_future() };
 
-        if (loadCache) {
+        if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
             barrier.queue(nullptr, [this, &barrier, p { std::move(p1) }]() mutable {
                 std::string pluginFile = !loadPlugins->empty() ? *loadPlugins : mCacheFileName;
 
@@ -239,9 +242,11 @@ namespace Plugins {
 
     void PluginManager::onUpdate(Threading::Barrier &barrier)
     {
-        Ini::IniFile file;
-        saveSelection(barrier, file, false);
-        file.saveToDisk(mCacheFileName);
+        if (!noPluginCache) {
+            Ini::IniFile file;
+            saveSelection(barrier, file, false);
+            file.saveToDisk(mCacheFileName);
+        }
     }
 
     void PluginManager::addListener(PluginListener *listener)

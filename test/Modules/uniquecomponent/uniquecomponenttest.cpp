@@ -28,7 +28,7 @@ TEST(UniqueComponent, Registry)
 	//TODO test properly
 
 #if ENABLE_PLUGINS
-    Engine::Plugins::PluginManager pmgr { "UniqueComponentTest", false, false };
+    Engine::Plugins::PluginManager pmgr { "UniqueComponentTest" };
 
     Engine::UniqueComponentCollectorManager cmgr { pmgr };
 
