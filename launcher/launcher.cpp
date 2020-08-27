@@ -50,7 +50,11 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 
             if (file) {
                 window.readState(file);
+                return true;
+            } else {
+                return false;
             }
+
         });
 #endif
 

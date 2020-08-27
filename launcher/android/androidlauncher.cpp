@@ -81,13 +81,13 @@ namespace Android {
 
     void AndroidLauncher::onInputQueueCreated(AInputQueue *queue)
     {
-        assert(!Input::sQueue);
+        assert(!Window::sQueue);
         Window::sQueue = queue;
     }
 
     void AndroidLauncher::onInputQueueDestroyed(AInputQueue *queue)
     {
-        assert(Input::sQueue == queue);
+        assert(Window::sQueue == queue);
         Window::sQueue = nullptr;
     }
 
