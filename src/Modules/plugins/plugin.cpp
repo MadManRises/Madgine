@@ -65,14 +65,20 @@ namespace Plugins {
             mModule = Dl::openDll(mPath.str());
             if (mModule) {
                 const BinaryInfo *bin = info();
-                bin->mSelf = this;
+                if (bin) {
+                    bin->mSelf = this;
 
-                for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {                    
-                    addDependency(manager, manager.getPlugin(*dep));
-                }
+                    for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
+                        addDependency(manager, manager.getPlugin(*dep));
+                    }
 
-                for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {                    
-                    addGroupDependency(manager, &manager.section(*dep));
+                    for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
+                        addGroupDependency(manager, &manager.section(*dep));
+                    }
+                } else {
+                    errorMsg = "Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your executable!";
+                    Dl::closeDll(mModule);
+                    mModule = nullptr;
                 }
             } else {
                 errorMsg = "Unkown";

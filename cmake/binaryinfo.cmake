@@ -10,6 +10,8 @@ macro(generate_binary_info target)
 
 		target_sources(${target} PRIVATE ${binaryinfo_dir}/binaryinfo.cpp)
 
+		set_target_properties(${target} PROPERTIES ENABLE_EXPORTS ON)
+
 		set (major_version ${PROJECT_VERSION_MAJOR})
 		if (NOT major_version)
 			set(major_version 1)
