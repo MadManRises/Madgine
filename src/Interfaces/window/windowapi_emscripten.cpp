@@ -157,7 +157,7 @@ namespace Window {
         virtual void destroy() override;
 
         //Input
-        virtual bool EmscriptenInputHandler::isKeyDown(Input::Key::Key key) override
+        virtual bool isKeyDown(Input::Key::Key key) override
         {
             return mKeyDown[key];
         }

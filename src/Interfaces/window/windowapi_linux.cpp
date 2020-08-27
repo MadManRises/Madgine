@@ -47,19 +47,7 @@ namespace Window {
         {
         }
 
-        virtual void sUpdate() override
-        {
-            //TODO: correct handling of different windows
-            XEvent event;
-            while (XPending(sDisplay())) {
-                XNextEvent(sDisplay(), &event);
-                auto it = sWindows.find(event.xany.window);
-                if (it != sWindows.end()) {
-                    if (!it->second.handle(event))
-                        sWindows.erase(it);
-                }
-            }
-        }
+        virtual void update() override;
 
         bool handle(const XEvent &e)
         {
@@ -202,6 +190,20 @@ namespace Window {
 
     static std::unordered_map<::Window, LinuxWindow> sWindows;
 
+    void LinuxWindow::update()
+    {
+        //TODO: correct handling of different windows
+        XEvent event;
+        while (XPending(sDisplay())) {
+            XNextEvent(sDisplay(), &event);
+            auto it = sWindows.find(event.xany.window);
+            if (it != sWindows.end()) {
+                if (!it->second.handle(event))
+                    sWindows.erase(it);
+            }
+        }
+    }
+
     OSWindow *sCreateWindow(const WindowSettings &settings)
     {
         assert(sDisplay());
@@ -223,7 +225,7 @@ namespace Window {
             swa.colormap = cmap;
             swa.event_mask = ExposureMask | KeyPressMask;
 
-            WindowSettings::WindowVector pos = settings.mPosition ? *settings.mPosition : WindowSettings::WindowVector { 0, 0 };
+            InterfacesVector pos = settings.mPosition ? *settings.mPosition : InterfacesVector { 0, 0 };
 
             handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 

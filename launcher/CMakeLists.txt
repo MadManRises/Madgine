@@ -17,7 +17,6 @@ if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")
 elseif (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android)	
-	target_link_plugins(MadgineLauncher AndroidInput)
 endif()
 
 target_depend_on_all_plugins(MadgineLauncher)
