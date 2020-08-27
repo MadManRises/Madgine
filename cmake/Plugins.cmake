@@ -74,14 +74,12 @@ macro(add_plugin name base type)
 
 	set(installPlugin TRUE)
 
-	if (NOT MODULES_ENABLE_PLUGINS)
-
-		if (NOT PLUGINSELECTION_${type}_${name})
-			MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
-			set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
-			set(installPlugin FALSE)
-		endif()
-
+	if (NOT MODULES_ENABLE_PLUGINS AND NOT PLUGINSELECTION_${type}_${name})		
+		MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
+		set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+		set(installPlugin FALSE)
+	else()
+		set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")	
 	endif()
 
 	if (installPlugin)
@@ -90,9 +88,7 @@ macro(add_plugin name base type)
 
 		cpack_add_component(${name} GROUP ${type})
 	endif()
-
-	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")
-
+	
 	#foreach(project ${PROJECTS_DEPENDING_ON_ALL_PLUGINS})
 	#	target_link_plugins(${project} ${name})
 	#endforeach()

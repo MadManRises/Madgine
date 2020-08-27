@@ -1,4 +1,3 @@
-#include "androidinputlib.h"
 #include "Madgine/clientlib.h"
 #include "Madgine/baselib.h"
 
@@ -21,9 +20,6 @@ namespace Filesystem {
 
 namespace Window {
     extern Threading::SystemVariable<ANativeWindow *> sNativeWindow;
-}
-
-namespace Input {
     extern AInputQueue *sQueue;
 }
 
@@ -86,13 +82,13 @@ namespace Android {
     void AndroidLauncher::onInputQueueCreated(AInputQueue *queue)
     {
         assert(!Input::sQueue);
-        Input::sQueue = queue;
+        Window::sQueue = queue;
     }
 
     void AndroidLauncher::onInputQueueDestroyed(AInputQueue *queue)
     {
         assert(Input::sQueue == queue);
-        Input::sQueue = nullptr;
+        Window::sQueue = nullptr;
     }
 
 }
