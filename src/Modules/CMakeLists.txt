@@ -38,9 +38,6 @@ if (INTERFACES_ENABLE_THREADING)
 	target_link_libraries (Modules PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if (ANDROID)
-	target_link_libraries(Modules PRIVATE log)	
-endif()
 
 
 generate_binary_info(Modules)

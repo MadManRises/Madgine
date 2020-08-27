@@ -36,7 +36,7 @@ if (WIN32)
 endif()
 
 if (ANDROID)
-	target_link_libraries(Interfaces PRIVATE android EGL)	
+	target_link_libraries(Interfaces PRIVATE android EGL log)	
 endif()
 
 if (UNIX)
