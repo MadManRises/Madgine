@@ -6,6 +6,7 @@
 #    include "windowsettings.h"
 
 #    include <EGL/egl.h>
+#    include <android/input.h>
 #    include <android/native_window.h>
 
 #    include "../threading/systemvariable.h"

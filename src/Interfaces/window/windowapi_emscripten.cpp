@@ -11,6 +11,8 @@
 
 #    include "../threading/systemvariable.h"
 
+#    include "../input/inputevents.h"
+
 namespace Engine {
 namespace Window {
 
@@ -61,8 +63,8 @@ namespace Window {
             emscripten_set_keyup_callback("#window", this, 0, EmscriptenWindow::handleKeyEvent);
         }
 
-        virtual void update() override {
-
+        virtual void update() override
+        {
         }
 
         virtual int width() override
