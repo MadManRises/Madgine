@@ -2,7 +2,7 @@
 
 #include "Modules/math/matrix3.h"
 
-#include "Madgine/input/inputevents.h"
+#include "Interfaces/input/inputevents.h"
 
 #include "Modules/threading/signal.h"
 #include "widgetclass.h"

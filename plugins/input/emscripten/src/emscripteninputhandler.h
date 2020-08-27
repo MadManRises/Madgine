@@ -25,7 +25,6 @@ namespace Input {
         static EM_BOOL handleMouseEvent(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData);
         static EM_BOOL handleKeyEvent(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData);
 
-		bool mKeyDown[512];
     };
 
 }

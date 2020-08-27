@@ -5,6 +5,26 @@ namespace Engine {
 struct Vector2i {
     int x, y;
 
+    Vector2i() = default;
+
+    constexpr Vector2i(int x, int y)
+        : x(x)
+        , y(y)
+    {
+    }
+
+    constexpr Vector2i(const InterfacesVector &v)
+        : x(v.x)
+        , y(v.y)
+    {
+    }
+
+    constexpr operator InterfacesVector() const {
+        return { x, y };
+    }
+
+    constexpr Vector2i(const Vector2i &) = default;
+
     constexpr Vector2i &operator+=(const Vector2i &other)
     {
         x += other.x;
@@ -15,6 +35,11 @@ struct Vector2i {
     constexpr Vector2i operator+(const Vector2i &other)
     {
         return { x + other.x, y + other.y };
+    }
+
+    constexpr Vector2i operator-(const Vector2i &other)
+    {
+        return { x - other.x, y - other.y };
     }
 
     constexpr bool operator==(const Vector2i &other) const

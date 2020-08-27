@@ -4,7 +4,9 @@
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "Madgine/threading/contextmasks.h"
 
-#include "Madgine/input/inputevents.h"
+#include "Interfaces/input/inputevents.h"
+
+#include "Modules/math/vector2.h"
 
 namespace Engine
 {

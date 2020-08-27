@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../input/inputcollector.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
@@ -17,11 +16,15 @@ namespace Window {
 
         Vector3 getScreenSize();
 
-        Input::InputHandler *input();
-
         OSWindow *osWindow();
 
         Render::RenderTarget *getRenderer();
+
+        bool injectKeyPress(const Input::KeyEventArgs &arg) override;
+        bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
+        bool injectPointerPress(const Input::PointerEventArgs &arg) override;
+        bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
+        bool injectPointerMove(const Input::PointerEventArgs &arg) override;
 
     protected:
         void onClose() override;
@@ -29,9 +32,7 @@ namespace Window {
         void onResize(size_t width, size_t height) override;
 
     private:
-
-        std::optional<Input::InputHandlerSelector<>> mInputHandlerSelector;
-
+        MainWindow &mParent;
         OSWindow *mOsWindow = nullptr;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
 

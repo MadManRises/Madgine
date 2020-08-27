@@ -8,14 +8,12 @@
 
 #include "Modules/math/rect2i.h"
 
-#include "../input/inputlistener.h"
-
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase, Input::InputListener {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
@@ -40,6 +38,12 @@ namespace Window {
         }
 
         MainWindowComponentBase &getWindowComponent(size_t i, bool = true);
+
+        virtual bool injectKeyPress(const Input::KeyEventArgs &arg) { return false; };
+        virtual bool injectKeyRelease(const Input::KeyEventArgs &arg) { return false; }
+        virtual bool injectPointerPress(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectPointerMove(const Input::PointerEventArgs &arg) { return false; }
 
         const int mPriority;
 

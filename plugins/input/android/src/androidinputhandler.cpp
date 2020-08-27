@@ -30,7 +30,7 @@ namespace Input {
     {
     }
 
-    bool AndroidInputHandler::isKeyDown(Key key)
+    bool AndroidInputHandler::isKeyDown(Key::Key key)
     {
         return false;
     }
@@ -64,64 +64,7 @@ namespace Input {
         return true;
     }
 
-    bool AndroidInputHandler::handleMotionEvent(const AInputEvent *event)
-    {
-        int32_t action = AMotionEvent_getAction(event);
-        size_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-        Vector2 position {
-            AMotionEvent_getX(event, pointer_index),
-            AMotionEvent_getY(event, pointer_index)
-        };
-        std::stringstream ss;
-        ss << position;
-
-        bool handled = false;
-
-        switch (action & AMOTION_EVENT_ACTION_MASK) {
-        case AMOTION_EVENT_ACTION_DOWN:
-            handled = injectPointerMove({ position,
-                Vector2 {} });
-            handled |= injectPointerPress({ position,
-                MouseButton::LEFT_BUTTON });
-            break;
-        case AMOTION_EVENT_ACTION_UP:
-            handled = injectPointerRelease({ position,
-                MouseButton::LEFT_BUTTON });
-            break;
-        case AMOTION_EVENT_ACTION_MOVE:
-            handled = injectPointerMove({ position,
-                Vector2 {} });
-            break;
-        case AMOTION_EVENT_ACTION_CANCEL:
-            LOG("Motion Cancel");
-            break;
-        case AMOTION_EVENT_ACTION_OUTSIDE:
-            LOG("Motion Outside");
-            break;
-        case AMOTION_EVENT_ACTION_POINTER_DOWN:
-            LOG("Motion Pointer Down");
-            break;
-        case AMOTION_EVENT_ACTION_POINTER_UP:
-            LOG("Motion Pointer Up");
-            break;
-        case AMOTION_EVENT_ACTION_HOVER_MOVE:
-            LOG("Motion Hover Move");
-            break;
-        case AMOTION_EVENT_ACTION_SCROLL:
-            LOG("Motion Scroll");
-            break;
-        case AMOTION_EVENT_ACTION_HOVER_ENTER:
-            LOG("Motion Hover Enter");
-            break;
-        case AMOTION_EVENT_ACTION_HOVER_EXIT:
-            LOG("Motion Hover Exit");
-            break;
-        default:
-            LOG_ERROR("Unknown Motion Event Type: " << (action & AMOTION_EVENT_ACTION_MASK));
-            break;
-        }
-        return handled;
-    }
+   
 
 }
 }

@@ -21,7 +21,7 @@ namespace Render {
     DirectX11RenderTexture::DirectX11RenderTexture(DirectX11RenderContext *context, const Vector2i &size)
         : DirectX11RenderTarget(context)
         , mTexture(Texture2D, FORMAT_FLOAT32, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE)
-        , mSize({ 0, 0 })
+        , mSize{ 0, 0 }
     {
         resize(size);
     }

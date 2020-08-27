@@ -10,7 +10,7 @@ namespace Render {
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size)
         : OpenGLRenderTarget(context)
         , mTexture(GL_UNSIGNED_BYTE)
-        , mSize({ 0, 0 })
+        , mSize{ 0, 0 }
     {
         mTexture.setWrapMode(GL_CLAMP_TO_EDGE);
         mTexture.setFilter(GL_NEAREST);

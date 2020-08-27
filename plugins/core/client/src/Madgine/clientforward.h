@@ -15,21 +15,7 @@ namespace Threading {
     enum class ContextMask : unsigned int;
 }
 
-namespace Input {
-    struct InputHandler;
-    struct InputListener;
 
-    struct KeyEventArgs;
-    struct PointerEventArgs;
-
-    namespace MouseButton {
-        enum MouseButton : unsigned char;
-    }
-
-    namespace Key {
-        enum Key : uint8_t;
-    }
-}
 
 namespace Render {
     struct RendererBase;

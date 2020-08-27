@@ -9,7 +9,7 @@ namespace Render {
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const ByteBuffer &data)
         : mType(type)
-        , mSize({ static_cast<int>(width), static_cast<int>(height) })
+        , mSize{ static_cast<int>(width), static_cast<int>(height) }
         , mFormat(format)
         , mBind(bind)
     {

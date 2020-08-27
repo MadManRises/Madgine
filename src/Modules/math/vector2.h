@@ -67,13 +67,13 @@ public:
     {
     }
 
-    explicit Vector2(const Vector2i &v)
+    Vector2(const Vector2i &v)
         : x(static_cast<float>(v.x))
         , y(static_cast<float>(v.y))
     {
     }
 
-    explicit Vector2(const int afCoordinate[2])
+    Vector2(const int afCoordinate[2])
     {
         x = static_cast<float>(afCoordinate[0]);
         y = static_cast<float>(afCoordinate[1]);

@@ -4,8 +4,6 @@
 
 #include "mainwindow.h"
 
-#include "../input/inputhandler.h"
-
 #include "Interfaces/window/windowapi.h"
 
 #include "../render/rendercontext.h"
@@ -18,12 +16,11 @@ namespace Engine {
 
 namespace Window {
     ToolWindow::ToolWindow(MainWindow &parent, const WindowSettings &settings)
+        : mParent(parent)
     {
         mOsWindow = sCreateWindow(settings);
 
         mOsWindow->addListener(this);
-
-        mInputHandlerSelector.emplace(parent, mOsWindow, &parent, 0);
 
         mRenderWindow = parent.getRenderer()->createRenderWindow(mOsWindow);
     }
@@ -55,11 +52,6 @@ namespace Window {
         return { (float)mOsWindow->renderWidth(), (float)mOsWindow->renderHeight(), 1.0f };
     }
 
-    Input::InputHandler *ToolWindow::input()
-    {
-        return *mInputHandlerSelector;
-    }
-
     OSWindow *ToolWindow::osWindow()
     {
         return mOsWindow;
@@ -83,10 +75,33 @@ namespace Window {
     void ToolWindow::onResize(size_t width, size_t height)
     {
         mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
-        input()->onResize(width, height);
-   }
+    }
 
- 
+    bool ToolWindow::injectKeyPress(const Input::KeyEventArgs &arg)
+    {
+        return mParent.injectKeyPress(arg);
+    }
+
+    bool ToolWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
+    {
+        return mParent.injectKeyRelease(arg);
+    }
+
+    bool ToolWindow::injectPointerPress(const Input::PointerEventArgs &arg)
+    {
+        return mParent.injectPointerPress(arg);
+    }
+
+    bool ToolWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
+    {
+        return mParent.injectPointerRelease(arg);
+    }
+
+    bool ToolWindow::injectPointerMove(const Input::PointerEventArgs &arg)
+    {
+        return mParent.injectPointerMove(arg);
+    }
+
 }
 }
 

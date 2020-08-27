@@ -2,21 +2,21 @@
 
 #if EMSCRIPTEN
 
-#include "windowapi.h"
+#    include "windowapi.h"
 #    include "windowsettings.h"
 
-#include <EGL/egl.h>
+#    include <EGL/egl.h>
 
-#include <emscripten/html5.h>
+#    include <emscripten/html5.h>
 
-#include "../threading/systemvariable.h"
+#    include "../threading/systemvariable.h"
 
 namespace Engine {
 namespace Window {
 
-	DLL_EXPORT const PlatformCapabilities platformCapabilities {
+    DLL_EXPORT const PlatformCapabilities platformCapabilities {
         false
-	};
+    };
 
     //DLL_EXPORT Threading::SystemVariable<ANativeWindow*> sNativeWindow = nullptr;
 
@@ -42,6 +42,7 @@ namespace Window {
     struct EmscriptenWindow : OSWindow {
         EmscriptenWindow(EGLSurface surface)
             : OSWindow((uintptr_t)surface)
+            , mKeyDown {}
         {
             EGLint width;
             EGLint height;
@@ -49,6 +50,19 @@ namespace Window {
                 std::terminate();
             mWidth = width;
             mHeight = height;
+
+            //Input
+            emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenWindow::handleMouseEvent);
+
+            emscripten_set_mousedown_callback("#canvas", this, 0, EmscriptenWindow::handleMouseEvent);
+            emscripten_set_mouseup_callback("#document", this, 0, EmscriptenWindow::handleMouseEvent);
+
+            emscripten_set_keydown_callback("#window", this, 0, EmscriptenWindow::handleKeyEvent);
+            emscripten_set_keyup_callback("#window", this, 0, EmscriptenWindow::handleKeyEvent);
+        }
+
+        virtual void update() override {
+
         }
 
         virtual int width() override
@@ -142,9 +156,66 @@ namespace Window {
 
         virtual void destroy() override;
 
+        //Input
+        virtual bool EmscriptenInputHandler::isKeyDown(Input::Key::Key key) override
+        {
+            return mKeyDown[key];
+        }
+
+        static Input::MouseButton::MouseButton convertMouseButton(unsigned short id)
+        {
+            switch (id) {
+            case 0:
+                return Input::MouseButton::LEFT_BUTTON;
+            case 1:
+                return Input::MouseButton::MIDDLE_BUTTON;
+            case 2:
+                return Input::MouseButton::RIGHT_BUTTON;
+            default:
+                std::terminate();
+            }
+        }
+
+        static EM_BOOL handleMouseEvent(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData)
+        {
+            EmscriptenWindow *_this = static_cast<EmscriptenWindow *>(userData);
+
+            switch (eventType) {
+            case EMSCRIPTEN_EVENT_MOUSEMOVE:
+                return _this->injectPointerMove({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                    { static_cast<float>(mouseEvent->movementX), static_cast<float>(mouseEvent->movementY) } });
+            case EMSCRIPTEN_EVENT_MOUSEDOWN:
+                return _this->injectPointerPress({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                    convertMouseButton(mouseEvent->button) });
+            case EMSCRIPTEN_EVENT_MOUSEUP:
+                return _this->injectPointerRelease({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                    convertMouseButton(mouseEvent->button) });
+            }
+
+            return EM_FALSE;
+        }
+        static EM_BOOL handleKeyEvent(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData)
+        {
+            EmscriptenWindow *_this = static_cast<EmscriptenWindow *>(userData);
+
+            switch (eventType) {
+            case EMSCRIPTEN_EVENT_KEYDOWN:
+                _this->mKeyDown[keyEvent->keyCode] = true;
+                return _this->injectKeyPress({ static_cast<Input::Key::Key>(keyEvent->code[0]), keyEvent->key[0] });
+            case EMSCRIPTEN_EVENT_KEYUP:
+                _this->mKeyDown[keyEvent->keyCode] = false;
+                return _this->injectKeyRelease({ static_cast<Input::Key::Key>(keyEvent->code[0]) });
+            }
+
+            return EM_FALSE;
+        }
+
     private:
         int mWidth;
         int mHeight;
+
+        //Input
+        bool mKeyDown[512];
     };
 
     static std::unordered_map<EGLSurface, EmscriptenWindow> sWindows;
@@ -218,27 +289,19 @@ namespace Window {
         return window;
     }
 
-    void sUpdate()
-    {
-        /*for (std::pair<const EGLSurface, EmscriptenWindow> &window : sWindows)
-			{
-				window.second.resizeIfDirty();
-			}*/
-    }
-
     OSWindow *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
     }
 
-	std::vector<MonitorInfo> listMonitors()
+    std::vector<MonitorInfo> listMonitors()
     {
         double w;
         double h;
 
         emscripten_get_element_css_size(nullptr, &w, &h);
-        
-		MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
+
+        MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
 
         return { info };
     }

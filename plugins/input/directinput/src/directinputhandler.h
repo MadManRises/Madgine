@@ -1,7 +1,5 @@
 #pragma once
 
-struct ALooper;
-struct AInputEvent;
 
 #include "Madgine/input/inputcollector.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
@@ -10,16 +8,14 @@ struct AInputEvent;
 namespace Engine {
 namespace Input {
 
-    struct MADGINE_ANDROIDINPUT_EXPORT AndroidInputHandler : public InputHandlerComponent<AndroidInputHandler> {
-        AndroidInputHandler(Window::MainWindow &topLevel, Window::OSWindow *window, InputListener *listener);
-        ~AndroidInputHandler();
+    struct MADGINE_DIRECTINPUT_EXPORT DirectInputHandler : public InputHandlerComponent<DirectInputHandler> {
+        DirectInputHandler(Window::MainWindow &topLevel, Window::OSWindow *window, InputListener *listener);
+        ~DirectInputHandler();
 
         virtual bool isKeyDown(Key::Key key) override;
 
     private:
         bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
-
-        bool handleMotionEvent(const AInputEvent *event);
 
     private:
     };
@@ -27,4 +23,4 @@ namespace Input {
 }
 }
 
-RegisterType(Engine::Input::AndroidInputHandler);
+RegisterType(Engine::Input::DirectInputHandler);

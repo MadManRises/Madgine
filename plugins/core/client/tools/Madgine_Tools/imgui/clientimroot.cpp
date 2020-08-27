@@ -22,8 +22,8 @@
 
 #include "Madgine/window/mainwindow.h"
 
-#include "Madgine/input/inputevents.h"
-#include "Madgine/input/inputhandler.h"
+#include "Interfaces/input/inputevents.h"
+
 
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
@@ -305,9 +305,9 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-        io.KeyShift = mWindow.input()->isKeyDown(Input::Key::LShift) || mWindow.input()->isKeyDown(Input::Key::RShift);
-        io.KeyCtrl = mWindow.input()->isKeyDown(Input::Key::LControl) || mWindow.input()->isKeyDown(Input::Key::RControl);
-        io.KeyAlt = mWindow.input()->isKeyDown(Input::Key::LAlt) || mWindow.input()->isKeyDown(Input::Key::RAlt);
+        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::LShift) || mWindow.osWindow()->isKeyDown(Input::Key::RShift);
+        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::LControl) || mWindow.osWindow()->isKeyDown(Input::Key::RControl);
+        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::LAlt) || mWindow.osWindow()->isKeyDown(Input::Key::RAlt);
 
         io.AddInputCharacter(arg.text);
 
@@ -320,9 +320,9 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = false;
 
-        io.KeyShift = mWindow.input()->isKeyDown(Input::Key::LShift) || mWindow.input()->isKeyDown(Input::Key::RShift);
-        io.KeyCtrl = mWindow.input()->isKeyDown(Input::Key::LControl) || mWindow.input()->isKeyDown(Input::Key::RControl);
-        io.KeyAlt = mWindow.input()->isKeyDown(Input::Key::LAlt) || mWindow.input()->isKeyDown(Input::Key::RAlt);
+        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::LShift) || mWindow.osWindow()->isKeyDown(Input::Key::RShift);
+        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::LControl) || mWindow.osWindow()->isKeyDown(Input::Key::RControl);
+        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::LAlt) || mWindow.osWindow()->isKeyDown(Input::Key::RAlt);
 
         return io.WantCaptureKeyboard;
     }
@@ -348,9 +348,9 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            io.MousePos = arg.position / io.DisplayFramebufferScale;
+            io.MousePos = Vector2 { arg.position } / io.DisplayFramebufferScale;
         else
-            io.MousePos = (arg.position - Vector2 { float(mWindow.osWindow()->renderX()), float(mWindow.osWindow()->renderY()) }) / io.DisplayFramebufferScale;
+            io.MousePos = (Vector2 { arg.position } - Vector2 { float(mWindow.osWindow()->renderX()), float(mWindow.osWindow()->renderY()) }) / io.DisplayFramebufferScale;
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 

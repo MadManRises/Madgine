@@ -438,7 +438,7 @@ namespace Widgets {
         if (!w->mVisible)
             return false;
 
-        if (!w->containsPoint(arg.position, screenSpace))
+        if (!w->containsPoint(Vector2 { arg.position }, screenSpace))
             return false;
 
         for (WidgetBase *c : w->children()) {
@@ -452,7 +452,7 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { getScreenSpace().mTopLeft };
+        modArgs.position = Vector2i { modArgs.position } - getScreenSpace().mTopLeft;
 
         Rect2i clientSpace = mClientSpace;
 
@@ -473,7 +473,7 @@ namespace Widgets {
     {
 
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() } + mClientSpace.mTopLeft };
+        modArgs.position = Vector2i { modArgs.position } - Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() } - mClientSpace.mTopLeft;
 
         Rect2i clientSpace = { { 0, 0 }, mClientSpace.mSize };
 
@@ -523,11 +523,11 @@ namespace Widgets {
     bool WidgetManager::injectPointerMove(const Input::PointerEventArgs &arg)
     {
         Input::PointerEventArgs modArgs = arg;
-        modArgs.position -= Vector2 { static_cast<float>(mWindow.osWindow()->renderX()), static_cast<float>(mWindow.osWindow()->renderY()) };
+        modArgs.position = Vector2i { modArgs.position } - Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() };
 
         Rect2i clientSpace = mClientSpace;
 
-        Vector2 mouse = modArgs.position - clientSpace.mTopLeft;
+        Vector2 mouse = Vector2 { modArgs.position } - clientSpace.mTopLeft;
 
         if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
             mHoveredWidget = nullptr;

@@ -1,52 +1,49 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
+#endif
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
+#endif
 #ifdef BUILD_Tools
 #    include "toolslib.h"
 #endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
+#ifdef BUILD_FontLoader
+#    include "fontloaderlib.h"
 #endif
-#ifdef BUILD_SceneRendererTools
-#    include "Madgine_Tools/scenerenderertoolslib.h"
-#endif
-#ifdef BUILD_EmscriptenInput
-#    include "emscripteninputlib.h"
+#ifdef BUILD_ImageLoader
+#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
 #endif
-#ifdef BUILD_FontLoader
-#    include "fontloaderlib.h"
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
 #endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
-#endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
 #endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
+#ifdef BUILD_SkeletonLoader
+#    include "skeletonloaderlib.h"
 #endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
 #endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
-#endif
-#ifdef BUILD_SkeletonLoader
-#    include "skeletonloaderlib.h"
-#endif
-#ifdef BUILD_ImageLoader
-#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
@@ -56,12 +53,6 @@
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenemanager.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/input/inputcollector.h"
-#endif
-#ifdef BUILD_EmscriptenInput
-#    include "emscripteninputhandler.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/render/rendercontextcollector.h"
@@ -236,31 +227,6 @@ template <>
 size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_GlobalAPIBase_Scene + 1
-#    endif
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-std::vector<Engine::Input::InputHandlerRegistry::F> Engine::Input::InputHandlerRegistry::sComponents()
-{
-	return {
-#    ifdef BUILD_EmscriptenInput
-		createComponent<Engine::Input::EmscriptenInputHandler>,
-#    endif
-
-	}; 
-}
-
-#    define ACC 0
-
-#    ifdef BUILD_EmscriptenInput
-constexpr size_t CollectorBaseIndex_InputHandler_EmscriptenInput = ACC;
-template <>
-size_t component_index<Engine::Input::EmscriptenInputHandler>() { return CollectorBaseIndex_InputHandler_EmscriptenInput + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_InputHandler_EmscriptenInput + 1
 #    endif
 
 #    undef ACC

@@ -1,16 +1,24 @@
 #pragma once
 
+
+
 namespace Engine {
 
-	namespace Window {
+namespace Window {
 
-		struct WindowEventListener {
-			virtual void onResize(size_t width, size_t height) {};
-			virtual void onClose() {};
-			virtual void onRepaint() {};
-			
-		};
+    struct WindowEventListener {
+        virtual void onResize(size_t width, size_t height) {};
+        virtual void onClose() {};
+        virtual void onRepaint() {};
 
-	}
+        //Input
+        virtual bool injectKeyPress(const Input::KeyEventArgs &arg) { return false; };
+        virtual bool injectKeyRelease(const Input::KeyEventArgs &arg) { return false; }
+        virtual bool injectPointerPress(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectPointerMove(const Input::PointerEventArgs &arg) { return false; }
+    };
+
+}
 
 }

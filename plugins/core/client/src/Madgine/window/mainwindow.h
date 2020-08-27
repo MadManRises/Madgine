@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../input/inputcollector.h"
-#include "../input/inputlistener.h"
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
@@ -70,19 +68,16 @@ namespace Window {
     };
 
     struct MADGINE_CLIENT_EXPORT MainWindow : ScopeBase,
-                                                  Input::InputListener,
                                                   WindowEventListener,
                                                   Threading::FrameListener,
                                                   Serialize::TopLevelSerializableUnit<MainWindow>,
                                                   MadgineObject {
         SERIALIZABLEUNIT;
 
-        MainWindow(const WindowSettings &settings, Input::InputHandler *input = nullptr);
+        MainWindow(const WindowSettings &settings);
         virtual ~MainWindow();
 
         Rect2i getScreenSpace();
-
-        Input::InputHandler *input();
 
         bool injectKeyPress(const Input::KeyEventArgs &arg) override;
         bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
@@ -155,9 +150,6 @@ namespace Window {
         OSWindow *mOsWindow = nullptr;
         std::optional<Render::RenderContextSelector<>> mRenderContext;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
-
-        Input::InputHandler *mExternalInput = nullptr;
-        std::optional<Input::InputHandlerSelector<>> mInputHandlerSelector;
 
         template <typename OffsetPtr>
         friend struct MainWindowComponentObserver;

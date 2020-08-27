@@ -2,13 +2,13 @@
 
 #if ANDROID
 
-#include "windowapi.h"
+#    include "windowapi.h"
 #    include "windowsettings.h"
 
-#include <EGL/egl.h>
-#include <android/native_window.h>
+#    include <EGL/egl.h>
+#    include <android/native_window.h>
 
-#include "../threading/systemvariable.h"
+#    include "../threading/systemvariable.h"
 
 namespace Engine {
 namespace Window {
@@ -20,6 +20,8 @@ namespace Window {
     DLL_EXPORT Threading::SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
 
     DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;
+
+    DLL_EXPORT AInputQueue *sQueue = nullptr;
 
     static struct DisplayGuard {
         DisplayGuard()
@@ -48,6 +50,33 @@ namespace Window {
                 std::terminate();
             mWidth = width;
             mHeight = height;
+        }
+
+        virtual void update() override
+        {
+            PROFILE();
+            if (sQueue) {
+                AInputEvent *event = NULL;
+                while (AInputQueue_getEvent(sQueue, &event) >= 0) {
+                    if (AInputQueue_preDispatchEvent(sQueue, event)) {
+                        continue;
+                    }
+                    bool handled = false;
+                    switch (AInputEvent_getType(event)) {
+                    case AINPUT_EVENT_TYPE_KEY:
+                        //TODO
+                        std::terminate();
+                        break;
+                    case AINPUT_EVENT_TYPE_MOTION:
+                        handled = handleMotionEvent(event);
+                        break;
+                    default:
+                        LOG_ERROR("Unknown Event Type: " << AInputEvent_getType(event));
+                        break;
+                    }
+                    AInputQueue_finishEvent(sQueue, event, handled);
+                }
+            }
         }
 
         virtual int width() override
@@ -140,9 +169,77 @@ namespace Window {
 
         virtual void destroy() override;
 
+        //Input
+        virtual bool isKeyDown(Input::Key::Key key) override
+        {
+            return false;
+        }
+
+        bool handleMotionEvent(const AInputEvent *event)
+        {
+            int32_t action = AMotionEvent_getAction(event);
+            size_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+            InterfacesVector position {
+                AMotionEvent_getX(event, pointer_index),
+                AMotionEvent_getY(event, pointer_index)
+            };
+
+            bool handled = false;
+
+            switch (action & AMOTION_EVENT_ACTION_MASK) {
+            case AMOTION_EVENT_ACTION_DOWN:
+                handled = injectPointerMove({ position,
+                    { position.x - mLastKnownMousePos.x, position.y - mLastKnownMousePos.y } });
+                handled |= injectPointerPress({ position,
+                    MouseButton::LEFT_BUTTON });
+                break;
+            case AMOTION_EVENT_ACTION_UP:
+                handled = injectPointerRelease({ position,
+                    MouseButton::LEFT_BUTTON });
+                break;
+            case AMOTION_EVENT_ACTION_MOVE:
+                handled = injectPointerMove({ position,
+                    { position.x - mLastKnownMousePos.x, position.y - mLastKnownMousePos.y } });
+                break;
+            case AMOTION_EVENT_ACTION_CANCEL:
+                LOG("Motion Cancel");
+                break;
+            case AMOTION_EVENT_ACTION_OUTSIDE:
+                LOG("Motion Outside");
+                break;
+            case AMOTION_EVENT_ACTION_POINTER_DOWN:
+                LOG("Motion Pointer Down");
+                break;
+            case AMOTION_EVENT_ACTION_POINTER_UP:
+                LOG("Motion Pointer Up");
+                break;
+            case AMOTION_EVENT_ACTION_HOVER_MOVE:
+                LOG("Motion Hover Move");
+                break;
+            case AMOTION_EVENT_ACTION_SCROLL:
+                LOG("Motion Scroll");
+                break;
+            case AMOTION_EVENT_ACTION_HOVER_ENTER:
+                LOG("Motion Hover Enter");
+                break;
+            case AMOTION_EVENT_ACTION_HOVER_EXIT:
+                LOG("Motion Hover Exit");
+                break;
+            default:
+                LOG_ERROR("Unknown Motion Event Type: " << (action & AMOTION_EVENT_ACTION_MASK));
+                break;
+            }
+
+            mLastKnownMousePos = position;
+            return handled;
+        }
+
     private:
         int mWidth;
         int mHeight;
+
+        //Input
+        InterfacesVector mLastKnownMousePos;
     };
 
     static std::unordered_map<EGLSurface, AndroidWindow> sWindows;
@@ -196,10 +293,6 @@ namespace Window {
         return &pib.first->second;
     }
 
-    void sUpdate()
-    {
-    }
-
     OSWindow *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
@@ -210,9 +303,9 @@ namespace Window {
         int width = ANativeWindow_getWidth(sNativeWindow);
         int height = ANativeWindow_getHeight(sNativeWindow);
 
-		MonitorInfo info { 0, 0, width, height };
+        MonitorInfo info { 0, 0, width, height };
 
-		return { info };
+        return { info };
     }
 
 }

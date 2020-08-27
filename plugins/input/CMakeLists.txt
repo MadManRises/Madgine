@@ -8,6 +8,6 @@ elseif (EMSCRIPTEN)
 
 else()
 
-	add_subdirectory(ois)
+	add_subdirectory(directinput)
 
 endif()

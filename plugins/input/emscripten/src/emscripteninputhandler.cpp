@@ -38,24 +38,8 @@ namespace Input {
         return true;
     }
 
-    MouseButton::MouseButton EmscriptenInputHandler::convertMouseButton(unsigned short id)
-    {
-        switch (id) {
-        case 0:
-            return MouseButton::LEFT_BUTTON;
-        case 1:
-            return MouseButton::MIDDLE_BUTTON;
-        case 2:
-            return MouseButton::RIGHT_BUTTON;
-        default:
-            std::terminate();
-        }
-    }
+    
 
-    bool EmscriptenInputHandler::isKeyDown(Key key)
-    {
-        return mKeyDown[key];
-    }
 
     EM_BOOL EmscriptenInputHandler::handleMouseEvent(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData)
     {

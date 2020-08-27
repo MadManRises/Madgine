@@ -29,6 +29,8 @@ namespace Window {
             mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
         }
         
+        virtual void update() = 0;
+
         virtual void swapBuffers() = 0;
 
         virtual int width() = 0;
@@ -59,6 +61,11 @@ namespace Window {
 
         virtual void destroy() = 0;
 
+
+        //Input
+        virtual bool isKeyDown(Input::Key::Key key) = 0;
+
+
         const uintptr_t mHandle;
 
     protected:
@@ -81,12 +88,48 @@ namespace Window {
                 listener->onRepaint();
         }
 
+        //Input
+        bool injectKeyPress(const Input::KeyEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectKeyPress(arg))
+                    return true;
+            return false;
+        }
+        bool injectKeyRelease(const Input::KeyEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectKeyRelease(arg))
+                    return true;
+            return false;
+        }
+        bool injectPointerPress(const Input::PointerEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectPointerPress(arg))
+                    return true;
+            return false;
+        }
+        bool injectPointerRelease(const Input::PointerEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectPointerRelease(arg))
+                    return true;
+            return false;
+        }
+        bool injectPointerMove(const Input::PointerEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectPointerMove(arg))
+                    return true;
+            return false;
+        }
+
     private:
         std::vector<WindowEventListener *> mListeners;
     };
 
     INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings);
-    INTERFACES_EXPORT void sUpdate();
     INTERFACES_EXPORT OSWindow *sFromNative(uintptr_t handle);
 
     struct MonitorInfo {

@@ -12,17 +12,11 @@
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
 #endif
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
-#ifdef BUILD_AndroidInput
-#    include "androidinputlib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
+#endif
+#ifdef BUILD_ImageLoader
+#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
@@ -33,20 +27,23 @@
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
 #endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
-#ifdef BUILD_OpenGLTools
-#    include "OpenGL_Tools/opengltoolslib.h"
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
 #endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
-#endif
-#ifdef BUILD_ImageLoader
-#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
@@ -56,12 +53,6 @@
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenemanager.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/input/inputcollector.h"
-#endif
-#ifdef BUILD_AndroidInput
-#    include "androidinputhandler.h"
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/render/rendercontextcollector.h"
@@ -236,31 +227,6 @@ template <>
 size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_GlobalAPIBase_Scene + 1
-#    endif
-
-#    undef ACC
-
-#endif
-#ifdef BUILD_Client
-template <>
-std::vector<Engine::Input::InputHandlerRegistry::F> Engine::Input::InputHandlerRegistry::sComponents()
-{
-	return {
-#    ifdef BUILD_AndroidInput
-		createComponent<Engine::Input::AndroidInputHandler>,
-#    endif
-
-	}; 
-}
-
-#    define ACC 0
-
-#    ifdef BUILD_AndroidInput
-constexpr size_t CollectorBaseIndex_InputHandler_AndroidInput = ACC;
-template <>
-size_t component_index<Engine::Input::AndroidInputHandler>() { return CollectorBaseIndex_InputHandler_AndroidInput + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_InputHandler_AndroidInput + 1
 #    endif
 
 #    undef ACC

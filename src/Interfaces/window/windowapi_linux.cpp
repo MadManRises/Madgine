@@ -2,16 +2,16 @@
 
 #if LINUX
 
-#include "windowapi.h"
+#    include "windowapi.h"
 #    include "windowsettings.h"
 
-#include <GL/glx.h>
-#include <X11/Xlib.h>
+#    include <GL/glx.h>
+#    include <X11/Xlib.h>
 
 namespace Engine {
 namespace Window {
 
-		DLL_EXPORT const PlatformCapabilities platformCapabilities {
+    DLL_EXPORT const PlatformCapabilities platformCapabilities {
         true
     };
 
@@ -36,8 +36,7 @@ namespace Window {
             Display *display;
         } sDisplayGuard;
 
-		return sDisplayGuard.display;
-
+        return sDisplayGuard.display;
     }
 
     struct LinuxWindow : OSWindow {
@@ -46,6 +45,20 @@ namespace Window {
             , mWidth(width)
             , mHeight(height)
         {
+        }
+
+        virtual void sUpdate() override
+        {
+            //TODO: correct handling of different windows
+            XEvent event;
+            while (XPending(sDisplay())) {
+                XNextEvent(sDisplay(), &event);
+                auto it = sWindows.find(event.xany.window);
+                if (it != sWindows.end()) {
+                    if (!it->second.handle(event))
+                        sWindows.erase(it);
+                }
+            }
         }
 
         bool handle(const XEvent &e)
@@ -105,7 +118,7 @@ namespace Window {
             glXSwapBuffers(sDisplay(), mHandle);
         }
 
-		virtual int x() override
+        virtual int x() override
         {
             return 0;
         }
@@ -175,6 +188,13 @@ namespace Window {
         using OSWindow::onRepaint;
         using OSWindow::onResize;
 
+        //Input
+
+        virtual bool isKeyDown(Input::Key::Key key) override
+        {
+            return false;
+        }
+
     private:
         int mWidth;
         int mHeight;
@@ -203,7 +223,7 @@ namespace Window {
             swa.colormap = cmap;
             swa.event_mask = ExposureMask | KeyPressMask;
 
-            WindowSettings::WindowVector pos = settings.mPosition ? *settings.mPosition : WindowSettings::WindowVector{ 0, 0 };
+            WindowSettings::WindowVector pos = settings.mPosition ? *settings.mPosition : WindowSettings::WindowVector { 0, 0 };
 
             handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
@@ -230,43 +250,29 @@ namespace Window {
         return &pib.first->second;
     }
 
-    void sUpdate()
-    {
-        XEvent event;
-        while (XPending(sDisplay())) {
-            XNextEvent(sDisplay(), &event);
-            auto it = sWindows.find(event.xany.window);
-            if (it != sWindows.end()) {
-                if (!it->second.handle(event))
-                    sWindows.erase(it);
-            }
-        }
-    }
-
     OSWindow *sFromNative(uintptr_t handle)
     {
         return handle ? &sWindows.at((::Window)handle) : nullptr;
     }
 
-	static std::vector<MonitorInfo> sBuffer;
+    static std::vector<MonitorInfo> sBuffer;
 
     static void updateMonitors()
     {
         sBuffer.clear();
         for (int i = 0; i < XScreenCount(sDisplay()); ++i) {
             Screen *screen = XScreenOfDisplay(sDisplay(), i);
-			//TODO position
-			sBuffer.push_back({ 0, 0, XWidthOfScreen(screen), XHeightOfScreen(screen) });
-		}
+            //TODO position
+            sBuffer.push_back({ 0, 0, XWidthOfScreen(screen), XHeightOfScreen(screen) });
+        }
     }
-	
+
     std::vector<MonitorInfo> listMonitors()
     {
         if (sBuffer.empty())
             updateMonitors();
         return sBuffer;
     }
-
 
 }
 }

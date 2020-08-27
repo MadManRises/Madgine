@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/math/vector2.h"
-
 namespace Engine {
 namespace Input {
     namespace Key {
@@ -153,23 +151,11 @@ namespace Input {
         };
     }
 
-    /*enum class EventType
-		{
-			ButtonClick,
-			CloseClicked,
-			CheckboxToggled,
-			TextChanged,
-			ComboboxSelectionChanged,
-			MouseEntered,
-			MouseLeft,
-			WindowResized
-		};*/
-
     struct KeyEventArgs {
         Key::Key scancode;
         char text;
 
-        KeyEventArgs(Key::Key key = static_cast<Key::Key>(0), char text = 0)
+        KeyEventArgs(Key::Key key, char text)
             : scancode(key)
             , text(text)
         {
@@ -177,14 +163,14 @@ namespace Input {
     };
 
     struct PointerEventArgs {
-        PointerEventArgs(const Vector2 &pos, MouseButton::MouseButton button)
+        PointerEventArgs(const InterfacesVector &pos, MouseButton::MouseButton button)
             : position(pos)
             , button(button)
             , scrollWheel(0.0f)
         {
         }
 
-        PointerEventArgs(const Vector2 &pos, const Vector2 &move, float scroll = 0.0f,
+        PointerEventArgs(const InterfacesVector &pos, const InterfacesVector &move, float scroll = 0.0f,
             MouseButton::MouseButton button = MouseButton::NO_BUTTON)
             : position(pos)
             , moveDelta(move)
@@ -193,7 +179,7 @@ namespace Input {
         {
         }
 
-        Vector2 position, moveDelta;
+        InterfacesVector position, moveDelta;
         MouseButton::MouseButton button;
         float scrollWheel;
     };

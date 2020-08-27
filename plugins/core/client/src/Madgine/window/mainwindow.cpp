@@ -2,8 +2,6 @@
 
 #include "mainwindow.h"
 
-#include "../input/inputhandler.h"
-
 #include "Interfaces/window/windowapi.h"
 
 #include "../render/rendercontext.h"
@@ -47,10 +45,9 @@ namespace Window {
         return value->mPriority;
     }
 
-    MainWindow::MainWindow(const WindowSettings &settings, Input::InputHandler *input)
+    MainWindow::MainWindow(const WindowSettings &settings)
         : mSettings(settings)
         , mComponents(*this)
-        , mExternalInput(input)
     {
 
         mLoop.addSetupSteps(
@@ -94,12 +91,6 @@ namespace Window {
         mRenderWindow = (*mRenderContext)->createRenderWindow(mOsWindow);
 
 
-        if (!mExternalInput) {
-            mInputHandlerSelector.emplace(*this, mOsWindow, this, 0);
-        }
-
-
-
         addFrameListener(this);
 
         for (MainWindowComponentBase *comp : components()) {
@@ -121,8 +112,6 @@ namespace Window {
         mRenderWindow.reset();
         mRenderContext.reset();
 
-        mInputHandlerSelector.reset();
-
         if (mOsWindow) {
             mOsWindow->removeListener(this);
             mOsWindow->destroy();
@@ -139,11 +128,6 @@ namespace Window {
         auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const std::unique_ptr<ToolWindow> &ptr) { return ptr.get() == w; });
         assert(it != mToolWindows.end());
         mToolWindows.erase(it);
-    }
-
-    Input::InputHandler *MainWindow::input()
-    {
-        return mExternalInput ? mExternalInput : *mInputHandlerSelector;
     }
 
     bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
@@ -221,7 +205,6 @@ namespace Window {
     void MainWindow::onResize(size_t width, size_t height)
     {
         mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
-        input()->onResize(width, height);
         applyClientSpaceResize();
     }
 
@@ -264,7 +247,9 @@ namespace Window {
         //TODO
         if (mRenderContext)
             (*mRenderContext)->render();
-        sUpdate();
+        mOsWindow->update();
+        for (std::unique_ptr<ToolWindow> &window : mToolWindows)
+            window->osWindow()->update();
         return mOsWindow;
     }
 

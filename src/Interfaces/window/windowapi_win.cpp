@@ -6,8 +6,11 @@
 #    include "windoweventlistener.h"
 #    include "windowsettings.h"
 
+#include "../input/inputevents.h"
+
 #    define NOMINMAX
 #    include <Windows.h>
+#include <windowsx.h>
 
 namespace Engine {
 namespace Window {
@@ -19,7 +22,17 @@ namespace Window {
     struct WindowsWindow : OSWindow {
         WindowsWindow(HWND hwnd)
             : OSWindow((uintptr_t)hwnd)
+            , mKeyDown {}
         {
+        }
+
+        virtual void update() override
+        {
+            MSG msg;
+            while (PeekMessage(&msg, (HWND)mHandle, 0U, 0U, PM_REMOVE)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
         }
 
         bool handle(UINT msg, WPARAM wParam, LPARAM lParam)
@@ -40,6 +53,19 @@ namespace Window {
                 onRepaint();
                 EndPaint((HWND)mHandle, &ps);
                 break;
+            case WM_LBUTTONDOWN:
+                injectPointerPress(Input::PointerEventArgs { {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}, Input::MouseButton::LEFT_BUTTON });
+                break;
+            case WM_LBUTTONUP:
+                injectPointerRelease(Input::PointerEventArgs { { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }, Input::MouseButton::LEFT_BUTTON });
+                break;
+            case WM_MOUSEMOVE: {
+                InterfacesVector pos = { GET_X_LPARAM(lParam) + renderX(), GET_Y_LPARAM(lParam) + renderY() };
+                injectPointerMove(Input::PointerEventArgs { pos, { pos.x - mLastKnownMousePos.x, pos.y - mLastKnownMousePos.y } });
+                mLastKnownMousePos = pos;
+                break;
+            }
+                
             }
             }
             return true;
@@ -171,6 +197,16 @@ namespace Window {
         {
             SetWindowTextA((HWND)mHandle, title);
         }
+
+        //Input
+        virtual bool isKeyDown(Input::Key::Key key) override
+        {
+            return mKeyDown[key];
+        }
+
+    private:
+        bool mKeyDown[512];
+        InterfacesVector mLastKnownMousePos;
     };
 
     static std::unordered_map<HWND, WindowsWindow> sWindows;
@@ -234,15 +270,6 @@ namespace Window {
         assert(pib.second);
 
         return &pib.first->second;
-    }
-
-    void sUpdate()
-    {
-        MSG msg;
-        while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
     }
 
     OSWindow *sFromNative(uintptr_t handle)

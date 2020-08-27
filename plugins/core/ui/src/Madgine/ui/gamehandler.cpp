@@ -57,8 +57,8 @@ namespace UI {
         Input::PointerEventArgs args = me;
         clampToWindow(args);
         if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON) {
-            args.button = mCurrentMouseButton;
-            if (!mDragging && mSingleClick && fabs(args.position[0] - mDragStart[0]) + fabs(args.position[1] - mDragStart[1]) > mDragStartThreshold) {
+            args.button = mCurrentMouseButton;            
+            if (!mDragging && mSingleClick && fabs(args.position.x - mDragStart.x) + fabs(args.position.y - mDragStart.y) > mDragStartThreshold) {
                 mSingleClick = false;
                 if (mPointerDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED) {
                     mDragging = true;
@@ -81,7 +81,7 @@ namespace UI {
         if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON) {
             mCurrentMouseButton = me.button;
             mSingleClick = true;
-            mDragStart = me.position;
+            mDragStart = Vector2 { me.position };
         }
     }
 

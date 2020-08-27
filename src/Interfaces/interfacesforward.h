@@ -2,6 +2,11 @@
 
 namespace Engine {
 
+struct InterfacesVector {
+    int x;
+    int y;
+};
+
 struct InStream;
 struct OutStream;
 
@@ -32,6 +37,19 @@ namespace Filesystem {
 namespace Dl {
     struct SharedLibraryQuery;
     struct SharedLibraryQueryState;
+}
+
+namespace Input {
+    struct KeyEventArgs;
+    struct PointerEventArgs;
+
+    namespace MouseButton {
+        enum MouseButton : unsigned char;
+    }
+
+    namespace Key {
+        enum Key : uint8_t;
+    }
 }
 
 }
