@@ -27,7 +27,7 @@ namespace Serialize {
         in.readRaw(type);
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)
-            throw SerializeException(Database::Exceptions::unknownSerializationType);
+            throw SerializeException("Unknown Serialization Type");
     }
 
 }

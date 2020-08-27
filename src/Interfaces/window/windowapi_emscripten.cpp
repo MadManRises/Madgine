@@ -184,13 +184,13 @@ namespace Window {
 
             switch (eventType) {
             case EMSCRIPTEN_EVENT_MOUSEMOVE:
-                return _this->injectPointerMove({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
-                    { static_cast<float>(mouseEvent->movementX), static_cast<float>(mouseEvent->movementY) } });
+                return _this->injectPointerMove({ { mouseEvent->canvasX, mouseEvent->canvasY },
+                    { mouseEvent->movementX, mouseEvent->movementY } });
             case EMSCRIPTEN_EVENT_MOUSEDOWN:
-                return _this->injectPointerPress({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                return _this->injectPointerPress({ { mouseEvent->canvasX, mouseEvent->canvasY },
                     convertMouseButton(mouseEvent->button) });
             case EMSCRIPTEN_EVENT_MOUSEUP:
-                return _this->injectPointerRelease({ { static_cast<float>(mouseEvent->canvasX), static_cast<float>(mouseEvent->canvasY) },
+                return _this->injectPointerRelease({ { mouseEvent->canvasX, mouseEvent->canvasY },
                     convertMouseButton(mouseEvent->button) });
             }
 

@@ -4,7 +4,7 @@
 
 namespace Engine {
 namespace Util {
-    struct MODULES_EXPORT StandardLog : Log {
+    struct INTERFACES_EXPORT StandardLog : Log {
         StandardLog(const std::string &name);
 
         static void sLog(const std::string &msg, MessageType lvl, const std::string &name = "Default");

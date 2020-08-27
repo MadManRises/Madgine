@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/debug/stacktrace.h"
+#include "../debug/stacktrace.h"
 
 namespace Engine {
 namespace Util {

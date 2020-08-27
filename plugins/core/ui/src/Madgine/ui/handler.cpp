@@ -99,7 +99,7 @@ namespace UI {
                     Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
 
                     if (!child) {
-                        LOG_ERROR(Database::Exceptions::windowNotFound(des.mWidgetName));
+                        LOG_ERROR("Window not found: \"" << des.mWidgetName << "\"");
                     }
                     if (!des.mInit(child))
                         LOG_ERROR("ERROR");

@@ -155,7 +155,7 @@ namespace Input {
         Key::Key scancode;
         char text;
 
-        KeyEventArgs(Key::Key key, char text)
+        KeyEventArgs(Key::Key key, char text = 0)
             : scancode(key)
             , text(text)
         {

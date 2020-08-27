@@ -60,7 +60,7 @@ bool ValueType::operator<(const ValueType &other) const
         case ValueTypeEnum::StringValue:
             return std::get<CoWString>(mUnion) < std::get<CoWString>(other.mUnion);
         default:
-            throw ValueTypeException(Database::Exceptions::invalidValueType);
+            throw ValueTypeException("Invalid types for operator<");
         }
     case ValueTypeEnum::IntValue:
         switch (other.index()) {
@@ -69,10 +69,10 @@ bool ValueType::operator<(const ValueType &other) const
         case ValueTypeEnum::FloatValue:
             return std::get<int>(mUnion) < std::get<float>(other.mUnion);
         default:
-            throw ValueTypeException(Database::Exceptions::invalidValueType);
+            throw ValueTypeException("Invalid types for operator<");
         }
     default:
-        throw ValueTypeException(Database::Exceptions::invalidValueType);
+        throw ValueTypeException("Invalid types for operator<");
     }
 }
 
@@ -107,7 +107,7 @@ void ValueType::operator+=(const ValueType &other)
         }
         break;
     default:
-        throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("+", getTypeString(), other.getTypeString()));
+        throw ValueTypeException("Invalid types for operator+");
     }
 }
 
@@ -133,7 +133,7 @@ void ValueType::operator-=(const ValueType &other)
         }
         break;
     default:
-        throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("-", getTypeString(), other.getTypeString()));
+        throw ValueTypeException("Invalid types for operator-");
     }
 }
 
@@ -170,7 +170,7 @@ void ValueType::operator/=(const ValueType &other)
         }
         break;
     default:
-        throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("/", getTypeString(), other.getTypeString()));
+        throw ValueTypeException("Invalid types for operator/");
     }
 }
 
@@ -207,7 +207,7 @@ void ValueType::operator*=(const ValueType &other)
         }
         break;
     default:
-        throw ValueTypeException(Database::Exceptions::invalidTypesForOperator("*", getTypeString(), other.getTypeString()));
+        throw ValueTypeException("Invalid types for operator*");
     }
 }
 

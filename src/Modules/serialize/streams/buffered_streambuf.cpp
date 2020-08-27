@@ -219,7 +219,7 @@ namespace Serialize {
     {
         if (!mRecBuffer.empty() && mBytesToRead == 0) {
             if (gptr() != egptr()) {
-                LOG_WARNING(Database::Exceptions::messageNotFullyRead(manager()->name()));
+                LOG_WARNING("Message not fully read! (" << manager()->name() << ")");
             }
             mRecBuffer.clear();
             mBytesToRead = sizeof mReceiveMessageHeader;

@@ -160,16 +160,6 @@ namespace Plugins {
     struct BinaryInfo;
 }
 
-namespace Util {
-
-    struct Log;
-
-    struct LogListener;
-
-    struct Process;
-    struct StandardLog;
-}
-
 namespace Threading {
     struct ConnectionBase;
     template <typename T, typename... _Ty>

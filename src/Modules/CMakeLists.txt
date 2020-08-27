@@ -24,7 +24,6 @@ endif()
 		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h serializestream.cpp serializestream.h serializestreambuf.cpp serializestreambuf.h wrappingserializestreambuf.cpp wrappingserializestreambuf.h)
 	FolderSources(sources "" threading barrier.cpp barrier.h connection.cpp connection.h connectionstore.cpp connectionstore.h datamutex.cpp datamutex.h defaulttaskqueue.cpp defaulttaskqueue.h global.h globalstorage.h scheduler.cpp scheduler.h signal.h signalrouter.h signalstub.cpp signalstub.h slot.cpp slot.h task.h taskqueue.cpp taskqueue.h tasknode.h threadlocal.h threadstorage.cpp threadstorage.h workgroup.cpp workgroup.h workgrouphandle.h workgroupstorage.cpp workgroupstorage.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
-	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
 	
 
 add_workspace_library(Modules ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER moduleslib.h)

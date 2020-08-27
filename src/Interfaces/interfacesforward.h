@@ -52,5 +52,13 @@ namespace Input {
     }
 }
 
+namespace Util {
+
+    struct Log;
+
+    struct LogListener;
+    struct StandardLog;
+}
+
 }
 

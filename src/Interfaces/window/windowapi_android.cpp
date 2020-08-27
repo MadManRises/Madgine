@@ -11,6 +11,10 @@
 
 #    include "../threading/systemvariable.h"
 
+#    include "../input/inputevents.h"
+
+#include "../util/utilmethods.h"
+
 namespace Engine {
 namespace Window {
 
@@ -55,7 +59,6 @@ namespace Window {
 
         virtual void update() override
         {
-            PROFILE();
             if (sQueue) {
                 AInputEvent *event = NULL;
                 while (AInputQueue_getEvent(sQueue, &event) >= 0) {
@@ -181,8 +184,8 @@ namespace Window {
             int32_t action = AMotionEvent_getAction(event);
             size_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
             InterfacesVector position {
-                AMotionEvent_getX(event, pointer_index),
-                AMotionEvent_getY(event, pointer_index)
+                static_cast<int>(AMotionEvent_getX(event, pointer_index)),
+                static_cast<int>(AMotionEvent_getY(event, pointer_index))
             };
 
             bool handled = false;
@@ -192,11 +195,11 @@ namespace Window {
                 handled = injectPointerMove({ position,
                     { position.x - mLastKnownMousePos.x, position.y - mLastKnownMousePos.y } });
                 handled |= injectPointerPress({ position,
-                    MouseButton::LEFT_BUTTON });
+                    Input::MouseButton::LEFT_BUTTON });
                 break;
             case AMOTION_EVENT_ACTION_UP:
                 handled = injectPointerRelease({ position,
-                    MouseButton::LEFT_BUTTON });
+                    Input::MouseButton::LEFT_BUTTON });
                 break;
             case AMOTION_EVENT_ACTION_MOVE:
                 handled = injectPointerMove({ position,

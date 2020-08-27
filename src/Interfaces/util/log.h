@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Util {
 
-    struct MODULES_EXPORT Log {
+    struct INTERFACES_EXPORT Log {
         virtual ~Log() = default;
         virtual void log(const std::string &msg, MessageType lvl);
         virtual std::string getName() = 0;

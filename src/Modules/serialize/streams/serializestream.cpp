@@ -101,7 +101,7 @@ namespace Serialize {
     {
         if (std::ios::iostate state = InStream::readRaw(buffer, size); state) {
             throw SerializeException(
-                Database::Exceptions::deserializationFailure);
+                "Deserialization Failure");
             }
     }
 
