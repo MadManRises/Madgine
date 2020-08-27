@@ -23,7 +23,7 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
                 }););
     },
         std::chrono::seconds { 15 });
-    static Engine::Core::Root root;
+    static Engine::Core::Root root { "MadgineLauncher" };
     return launch();
 }
 
