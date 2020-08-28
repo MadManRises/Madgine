@@ -12,11 +12,17 @@
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
 #endif
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
+#endif
 #ifdef BUILD_SceneRendererTools
 #    include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
+#endif
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
 #endif
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
@@ -24,26 +30,20 @@
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
 #endif
-#ifdef BUILD_WidgetsTools
-#    include "Madgine_Tools/widgetstoolslib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
-#endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
 #endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
 #ifdef BUILD_OpenGLTools
 #    include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
@@ -75,9 +75,6 @@
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengltextureloader.h"
 #endif
-#ifdef BUILD_Tools
-#    include "inspector/layoutloader.h"
-#endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloader.h"
 #endif
@@ -89,6 +86,9 @@
 #endif
 #ifdef BUILD_FontLoader
 #    include "fontloader.h"
+#endif
+#ifdef BUILD_Tools
+#    include "inspector/layoutloader.h"
 #endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/entity/entitycomponentcollector.h"
@@ -268,9 +268,6 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 		createComponent<Engine::Render::OpenGLTextureLoader>,
 #    endif
-#    ifdef BUILD_Tools
-		createComponent<Engine::Tools::LayoutLoader>,
-#    endif
 #    ifdef BUILD_SkeletonLoader
 		createComponent<Engine::Render::SkeletonLoader>,
 #    endif
@@ -282,6 +279,9 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 #    endif
 #    ifdef BUILD_FontLoader
 		createComponent<Engine::Render::FontLoader>,
+#    endif
+#    ifdef BUILD_Tools
+		createComponent<Engine::Tools::LayoutLoader>,
 #    endif
 
 	}; 
@@ -307,13 +307,6 @@ template <>
 size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4
-#    endif
-#    ifdef BUILD_Tools
-constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
-template <>
-size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
-#        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
 #    endif
 #    ifdef BUILD_SkeletonLoader
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader = ACC;
@@ -342,6 +335,13 @@ template <>
 size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_FontLoader + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_FontLoader + 1
+#    endif
+#    ifdef BUILD_Tools
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
+template <>
+size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
 #    endif
 
 #    undef ACC

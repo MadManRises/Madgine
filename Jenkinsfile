@@ -49,7 +49,7 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "../test/${staticConfig.name}.cfg"	
+	def staticConfigFile = "../test/${staticConfig.name}_base.cfg"	
 
     return {
         // This is where the important work happens for each combination
@@ -70,8 +70,8 @@ def staticTask = {
 					echo "Success"
 				else
 					echo "generating failed! Falling back to repository version"
-					cp -u ../test/${staticConfig.name}_${toolchain.name}.cfg plugins.cfg
-					cp -u ../test/components_${staticConfig.name}_${toolchain.name}.cpp components_plugins.cpp
+					cp -u ../test/${staticConfig.name}.cfg plugins.cfg
+					cp -u ../test/components_${staticConfig.name}.cpp components_plugins.cpp
 				fi
 				"""
 			}
