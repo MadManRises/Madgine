@@ -348,9 +348,9 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            io.MousePos = Vector2 { arg.position } / io.DisplayFramebufferScale;
+            io.MousePos = Vector2 { arg.screenPosition } / io.DisplayFramebufferScale;
         else
-            io.MousePos = (Vector2 { arg.position } - Vector2 { float(mWindow.osWindow()->renderX()), float(mWindow.osWindow()->renderY()) }) / io.DisplayFramebufferScale;
+            io.MousePos = Vector2 { arg.windowPosition } / io.DisplayFramebufferScale;
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 

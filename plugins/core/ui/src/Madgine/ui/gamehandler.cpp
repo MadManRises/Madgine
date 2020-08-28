@@ -58,7 +58,7 @@ namespace UI {
         clampToWindow(args);
         if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON) {
             args.button = mCurrentMouseButton;            
-            if (!mDragging && mSingleClick && fabs(args.position.x - mDragStart.x) + fabs(args.position.y - mDragStart.y) > mDragStartThreshold) {
+            if (!mDragging && mSingleClick && fabs(args.windowPosition.x - mDragStart.x) + fabs(args.windowPosition.y - mDragStart.y) > mDragStartThreshold) {
                 mSingleClick = false;
                 if (mPointerDragModes[mCurrentMouseButton] != MouseDragMode::DISABLED) {
                     mDragging = true;
@@ -81,7 +81,7 @@ namespace UI {
         if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON) {
             mCurrentMouseButton = me.button;
             mSingleClick = true;
-            mDragStart = Vector2 { me.position };
+            mDragStart = Vector2 { me.windowPosition };
         }
     }
 
@@ -131,14 +131,14 @@ namespace UI {
     void GameHandlerBase::clampToWindow(Input::PointerEventArgs &me)
     {
         Engine::Vector3 size = mWidget->getActualSize();
-        if (me.position.x < 0.0f)
-            me.position.x = 0.0f;
-        if (me.position.x > size.x)
-            me.position.x = size.x;
-        if (me.position.y < 0)
-            me.position.y = 0;
-        if (me.position.y > size.y)
-            me.position.y = size.y;
+        if (me.windowPosition.x < 0.0f)
+            me.windowPosition.x = 0.0f;
+        if (me.windowPosition.x > size.x)
+            me.windowPosition.x = size.x;
+        if (me.windowPosition.y < 0)
+            me.windowPosition.y = 0;
+        if (me.windowPosition.y > size.y)
+            me.windowPosition.y = size.y;
     }
 
     void GameHandlerBase::setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode)

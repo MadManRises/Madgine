@@ -158,7 +158,7 @@ UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
         void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
         {
-            Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2i { evt.position }, mGameWindow->getActualSize().xy());
+            Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { evt.windowPosition }, mGameWindow->getActualSize().xy());
 
             Engine::Scene::Entity::EntityPtr hit;
             float distance = std::numeric_limits<float>::max();

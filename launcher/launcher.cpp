@@ -45,7 +45,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 #if !ENABLE_PLUGINS
     window.frameLoop()
         .addSetupSteps([&]() {
-            Engine::Filesystem::FileManager mgr("Layout");
+            Engine::Filesystem::FileManager mgr { "Layout" };
             Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
             if (file) {
@@ -65,7 +65,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 #if !EMSCRIPTEN
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
-    Engine::Threading::WorkGroup workGroup("Launcher");
+    Engine::Threading::WorkGroup workGroup { "Launcher" };
     Engine::Core::Root root { "MadgineLauncher", argc, argv };
     if (!toolMode) {
         return launch();

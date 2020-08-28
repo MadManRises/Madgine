@@ -163,23 +163,25 @@ namespace Input {
     };
 
     struct PointerEventArgs {
-        PointerEventArgs(const InterfacesVector &pos, MouseButton::MouseButton button)
-            : position(pos)
+        PointerEventArgs(const InterfacesVector &windowPos, const InterfacesVector &screenPos, MouseButton::MouseButton button)
+            : windowPosition(windowPos)
+            , screenPosition(screenPos)
             , button(button)
             , scrollWheel(0.0f)
         {
         }
 
-        PointerEventArgs(const InterfacesVector &pos, const InterfacesVector &move, float scroll = 0.0f,
+        PointerEventArgs(const InterfacesVector &windowPos, const InterfacesVector &screenPos, const InterfacesVector &move, float scroll = 0.0f,
             MouseButton::MouseButton button = MouseButton::NO_BUTTON)
-            : position(pos)
+            : windowPosition(windowPos)
+            , screenPosition(screenPos)
             , moveDelta(move)
             , button(button)
             , scrollWheel(scroll)
         {
         }
 
-        InterfacesVector position, moveDelta;
+        InterfacesVector windowPosition, screenPosition, moveDelta;
         MouseButton::MouseButton button;
         float scrollWheel;
     };

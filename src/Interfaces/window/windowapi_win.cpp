@@ -6,11 +6,11 @@
 #    include "windoweventlistener.h"
 #    include "windowsettings.h"
 
-#include "../input/inputevents.h"
+#    include "../input/inputevents.h"
 
 #    define NOMINMAX
 #    include <Windows.h>
-#include <windowsx.h>
+#    include <windowsx.h>
 
 namespace Engine {
 namespace Window {
@@ -37,37 +37,42 @@ namespace Window {
 
         bool handle(UINT msg, WPARAM wParam, LPARAM lParam)
         {
-            switch (msg) {
-            case WM_SIZE:
-                onResize(LOWORD(lParam), HIWORD(lParam));
-                break;
-            case WM_CLOSE:
-                onClose();
-                break;
-            case WM_DESTROY:
-                return false;
-                break;
-            case WM_PAINT: {
-                PAINTSTRUCT ps;
-                BeginPaint((HWND)mHandle, &ps);
-                onRepaint();
-                EndPaint((HWND)mHandle, &ps);
-                break;
-            case WM_LBUTTONDOWN:
-                injectPointerPress(Input::PointerEventArgs { {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}, Input::MouseButton::LEFT_BUTTON });
-                break;
-            case WM_LBUTTONUP:
-                injectPointerRelease(Input::PointerEventArgs { { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }, Input::MouseButton::LEFT_BUTTON });
-                break;
-            case WM_MOUSEMOVE: {
-                InterfacesVector pos = { GET_X_LPARAM(lParam) + renderX(), GET_Y_LPARAM(lParam) + renderY() };
-                injectPointerMove(Input::PointerEventArgs { pos, { pos.x - mLastKnownMousePos.x, pos.y - mLastKnownMousePos.y } });
-                mLastKnownMousePos = pos;
-                break;
+            if (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST) {
+                InterfacesVector windowPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+                InterfacesVector screenPos = { windowPos.x + renderX(), windowPos.y + renderY() };
+                switch (msg) {
+                case WM_LBUTTONDOWN:
+                    injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
+                    break;
+                case WM_LBUTTONUP:
+                    injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
+                    break;
+                case WM_MOUSEMOVE:
+                    injectPointerMove(Input::PointerEventArgs { windowPos, screenPos, { windowPos.x - mLastKnownMousePos.x, windowPos.y - mLastKnownMousePos.y } });
+                    mLastKnownMousePos = windowPos;
+                    break;
+                }
+            } else {
+                switch (msg) {
+                case WM_SIZE:
+                    onResize(LOWORD(lParam), HIWORD(lParam));
+                    break;
+                case WM_CLOSE:
+                    onClose();
+                    break;
+                case WM_DESTROY:
+                    return false;
+                    break;
+                case WM_PAINT: {
+                    PAINTSTRUCT ps;
+                    BeginPaint((HWND)mHandle, &ps);
+                    onRepaint();
+                    EndPaint((HWND)mHandle, &ps);
+                    break;
+                }
+                }
             }
-                
-            }
-            }
+
             return true;
         }
 

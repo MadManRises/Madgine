@@ -433,16 +433,16 @@ namespace Widgets {
         return t;
     }
 
-    static bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, const Rect2i &screenSpace, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
+    bool WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
     {
         if (!w->mVisible)
             return false;
 
-        if (!w->containsPoint(Vector2 { arg.position }, screenSpace))
+        if (!w->containsPoint(Vector2 { arg.windowPosition }, { { 0, 0 }, mClientSpace.mSize }))
             return false;
 
         for (WidgetBase *c : w->children()) {
-            if (propagateInput(c, arg, screenSpace, f))
+            if (propagateInput(c, arg, f))
                 return true;
         }
         return (w->*f)(arg);
@@ -450,19 +450,16 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerPress(const Input::PointerEventArgs &arg)
     {
-
-        Input::PointerEventArgs modArgs = arg;
-        modArgs.position = Vector2i { modArgs.position } - getScreenSpace().mTopLeft;
-
-        Rect2i clientSpace = mClientSpace;
+        Input::PointerEventArgs widgetArg = arg;
+        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
         for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, modArgs, clientSpace, &WidgetBase::injectPointerPress))
+            if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerPress))
                 return true;
         }
 
         for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, modArgs, clientSpace, &WidgetBase::injectPointerPress))
+            if (propagateInput(w, widgetArg, &WidgetBase::injectPointerPress))
                 return true;
         }
 
@@ -471,82 +468,75 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
-
-        Input::PointerEventArgs modArgs = arg;
-        modArgs.position = Vector2i { modArgs.position } - Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() } - mClientSpace.mTopLeft;
-
-        Rect2i clientSpace = { { 0, 0 }, mClientSpace.mSize };
+        Input::PointerEventArgs widgetArg = arg;
+        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
         for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, modArgs, clientSpace, &WidgetBase::injectPointerRelease))
+            if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerRelease))
                 return true;
         }
 
         for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, modArgs, clientSpace, &WidgetBase::injectPointerRelease))
+            if (propagateInput(w, widgetArg, &WidgetBase::injectPointerRelease))
                 return true;
         }
 
         return false;
     }
 
-    static WidgetBase *getHoveredWidgetUp(const Vector2 &pos, const Rect2i &screenSpace, WidgetBase *current)
+    WidgetBase *WidgetManager::getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current)
     {
         if (!current) {
             return nullptr;
-        } else if (!current->mVisible || !current->containsPoint(pos, screenSpace)) {
-            return getHoveredWidgetUp(pos, screenSpace, current->getParent());
+        } else if (!current->mVisible || !current->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
+            return getHoveredWidgetUp(pos, current->getParent());
         } else {
             return current;
         }
     }
 
-    WidgetBase *WidgetManager::getHoveredWidgetDown(const Vector2 &pos, const Rect2i &screenSpace, WidgetBase *current)
+    WidgetBase *WidgetManager::getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current)
     {
         static auto &logOnce = LOG_WARNING("Handle modal widgets for hover");
 
         const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
 
         for (WidgetBase *w : widgets) {
-            if (w->mVisible && w->containsPoint(pos, screenSpace)) {
-                return getHoveredWidgetDown(pos, screenSpace, w);
+            if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
+                return getHoveredWidgetDown(pos, w);
             }
         }
         return current;
     }
 
-    WidgetBase *WidgetManager::getHoveredWidget(const Vector2 &pos, const Rect2i &screenSpace, WidgetBase *current)
+    WidgetBase *WidgetManager::getHoveredWidget(const Vector2 &pos, WidgetBase *current)
     {
-        return getHoveredWidgetDown(pos, screenSpace, getHoveredWidgetUp(pos, screenSpace, current));
+        return getHoveredWidgetDown(pos, getHoveredWidgetUp(pos, current));
     }
 
     bool WidgetManager::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-        Input::PointerEventArgs modArgs = arg;
-        modArgs.position = Vector2i { modArgs.position } - Vector2i { mWindow.osWindow()->renderX(), mWindow.osWindow()->renderY() };
-
-        Rect2i clientSpace = mClientSpace;
-
-        Vector2 mouse = Vector2 { modArgs.position } - clientSpace.mTopLeft;
-
         if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
             mHoveredWidget = nullptr;
 
-        WidgetBase *hoveredWidget = getHoveredWidget(mouse, clientSpace, mHoveredWidget);
+        Input::PointerEventArgs widgetArg = arg;
+        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
+
+        WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { widgetArg.windowPosition }, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 
             if (mHoveredWidget)
-                mHoveredWidget->injectPointerLeave(modArgs);
+                mHoveredWidget->injectPointerLeave(arg);
 
             mHoveredWidget = hoveredWidget;
 
             if (mHoveredWidget)
-                mHoveredWidget->injectPointerEnter(modArgs);
+                mHoveredWidget->injectPointerEnter(arg);
         }
 
         if (mHoveredWidget)
-            return mHoveredWidget->injectPointerMove(modArgs);
+            return mHoveredWidget->injectPointerMove(arg);
 
         return false;
     }
