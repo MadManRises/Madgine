@@ -147,8 +147,11 @@ endfunction(target_link_plugin_groups)
 	
 function(target_depend_on_all_plugins target)
 	
-	#target_link_plugins(${target} ${PLUGIN_LIST})
-	add_dependencies(${target} ${PLUGIN_LIST})
+	if (NOT MODULES_ENABLE_PLUGINS)
+		target_link_plugins(${target} PRIVATE ${PLUGIN_LIST})
+	else()
+		add_dependencies(${target} ${PLUGIN_LIST})
+	endif()
 
 	MESSAGE(STATUS "Linking ${target} -> ${PLUGIN_LIST}")
 

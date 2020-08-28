@@ -184,13 +184,13 @@ namespace Window {
 
             switch (eventType) {
             case EMSCRIPTEN_EVENT_MOUSEMOVE:
-                return _this->injectPointerMove({ { mouseEvent->canvasX, mouseEvent->canvasY },
+                return _this->injectPointerMove({ { mouseEvent->canvasX, mouseEvent->canvasY }, { mouseEvent->screenX, mouseEvent->screenY },
                     { mouseEvent->movementX, mouseEvent->movementY } });
             case EMSCRIPTEN_EVENT_MOUSEDOWN:
-                return _this->injectPointerPress({ { mouseEvent->canvasX, mouseEvent->canvasY },
+                return _this->injectPointerPress({ { mouseEvent->canvasX, mouseEvent->canvasY }, { mouseEvent->screenX, mouseEvent->screenY },
                     convertMouseButton(mouseEvent->button) });
             case EMSCRIPTEN_EVENT_MOUSEUP:
-                return _this->injectPointerRelease({ { mouseEvent->canvasX, mouseEvent->canvasY },
+                return _this->injectPointerRelease({ { mouseEvent->canvasX, mouseEvent->canvasY }, { mouseEvent->screenX, mouseEvent->screenY },
                     convertMouseButton(mouseEvent->button) });
             }
 
