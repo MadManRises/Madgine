@@ -148,7 +148,7 @@ endfunction(target_link_plugin_groups)
 function(target_depend_on_all_plugins target)
 	
 	if (NOT MODULES_ENABLE_PLUGINS)
-		target_link_plugins(${target} PRIVATE ${PLUGIN_LIST})
+		target_link_plugins(${target} ${PLUGIN_LIST})
 	else()
 		add_dependencies(${target} ${PLUGIN_LIST})
 	endif()
