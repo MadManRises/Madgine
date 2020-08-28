@@ -78,9 +78,9 @@ macro(add_plugin name base type)
 		MESSAGE (STATUS "Excluding Plugin '${name}' from ALL build.")
 		set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
 		set(installPlugin FALSE)
-	else()
-		set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")	
 	endif()
+
+	set(PLUGIN_LIST ${PLUGIN_LIST} ${name} CACHE INTERNAL "")	
 
 	if (installPlugin)
 		install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
