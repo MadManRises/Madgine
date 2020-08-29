@@ -51,7 +51,7 @@ namespace Window {
 
         virtual void update() override;
 
-        static Input::MouseButton convertMouseButton(int button)
+        static Input::MouseButton::MouseButton convertMouseButton(int button)
         {
             switch (button) {
             case 1:
