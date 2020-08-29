@@ -57,7 +57,6 @@ namespace Window {
             case MotionNotify: {
                 const XMotionEvent &xme = e.xmotion;
                 InterfacesVector mousePos { xme.x, xme.y };
-                LOG("Motion: " << mousePos.x << ", " << mousePos.y << " - " << xme.x_root << ", " << xme.y_root);
                 injectPointerMove({ mousePos, { xme.x_root, xme.y_root }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
                 mLastMousePosition = mousePos;
                 break;
@@ -242,6 +241,9 @@ namespace Window {
             handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
             XStoreName(sDisplay(), handle, settings.mTitle);
+
+            auto result = XSelectInput(sDisplay(), handle, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | KeyPressMask | KeyReleaseMask);
+            assert(result != BadWindow);                
 
             if (!handle)
                 return nullptr;
