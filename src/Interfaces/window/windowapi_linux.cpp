@@ -51,6 +51,20 @@ namespace Window {
 
         virtual void update() override;
 
+        static Input::MouseButton convertMouseButton(int button)
+        {
+            switch (button) {
+            case 1:
+                return Input::MouseButton::LEFT_BUTTON;
+            case 2:
+                return Input::MouseButton::MIDDLE_BUTTON;
+            case 3:
+                return Input::MouseButton::RIGHT_BUTTON;
+            default:
+                std::terminate();
+            }
+        }
+
         bool handle(const XEvent &e)
         {
             switch (e.type) {
@@ -59,6 +73,16 @@ namespace Window {
                 InterfacesVector mousePos { xme.x, xme.y };
                 injectPointerMove({ mousePos, { xme.x_root, xme.y_root }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
                 mLastMousePosition = mousePos;
+                break;
+            }
+            case ButtonPress: {
+                const XButtonEvent &xbe = e.xbutton;
+                injectPointerPress({ { xbe.x, xbe.y }, { xbe.x_root, xbe.y_root }, convertMouseButton(xbe.button) });
+                break;
+            }
+            case ButtonRelease: {
+                const XButtonEvent &xbe = e.xbutton;
+                injectPointerRelease({ { xbe.x, xbe.y }, { xbe.x_root, xbe.y_root }, convertMouseButton(xbe.button) });
                 break;
             }
             case ConfigureNotify: {
