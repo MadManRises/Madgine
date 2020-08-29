@@ -55,7 +55,7 @@ namespace Window {
             case MotionNotify: {
                 const XMotionEvent &xme = e.xmotion;
                 InterfacesVector mousePos { xme.x, xme.y };
-                injectPointerMove({ mousePos, { xme.x_screen, xme.y_screen }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
+                injectPointerMove({ mousePos, { xme.x_root, xme.y_root }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
                 mLastMousePosition = mousePos;
                 break;
             }
