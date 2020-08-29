@@ -70,8 +70,8 @@ def staticTask = {
 					echo "Success"
 				else
 					echo "generating failed! Falling back to repository version"
-					cp -u ../test/${staticConfig.name}.cfg plugins.cfg
-					cp -u ../test/components_${staticConfig.name}.cpp components_plugins.cpp
+					cp -u ../test/${staticConfig.name}.cfg plugins_tools.cfg
+					cp -u ../test/components_${staticConfig.name}.cpp components_plugins_tools.cpp
 				fi
 				"""
 			}
@@ -80,7 +80,7 @@ def staticTask = {
 				cd ${name}
 				cmake .. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
-				-DPLUGIN_DEFINITION_FILE=plugins.cfg \
+				-DPLUGIN_DEFINITION_FILE=plugins_tools.cfg \
 				-DBUILD_SHARED_LIBS=OFF \
 				${toolchain.args} \
 				${cmake_args}

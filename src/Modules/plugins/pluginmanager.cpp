@@ -108,15 +108,23 @@ namespace Plugins {
             barrier.queue(nullptr, [this, &barrier, f { std::move(f2) }]() mutable {
                 if (!f.isAvailable())
                     return Threading::YIELD;
+                
+                auto helper = [this, &barrier](const Filesystem::Path &path, bool hasTools) {
+                    Ini::IniFile file;
+                    LOG("Saving Plugins to '" << path << "'");
+                    saveSelection(barrier, file, hasTools);
+                    file.saveToDisk(path);
+
+                    Filesystem::Path exportPath = path.parentPath() / ("components_" + path.stem() + ".cpp");
+
+                    exportStaticComponentHeader(exportPath, hasTools); //TODO Consider using a signal to remove dependency plugin->uniquecomponent
+                };
+
                 Filesystem::Path p = *exportPlugins;
-                Ini::IniFile file;
-                LOG("Saving Plugins to '" << exportPlugins << "'");
-                saveSelection(barrier, file, true);
-                file.saveToDisk(p);
+                helper(p, false);
+                Filesystem::Path p_tools = p.parentPath() / (p.stem() + "_tools" + p.extension());
+                helper(p_tools, true);
 
-                Filesystem::Path exportPath = p.parentPath() / ("components_" + p.stem() + ".cpp");
-
-                exportStaticComponentHeader(exportPath, true); //TODO Consider using a signal to remove dependency plugin->uniquecomponent
                 return Threading::RETURN;
             });
         }
@@ -201,7 +209,7 @@ namespace Plugins {
     {
         file.clear();
         for (auto &[name, section] : mSections) {
-            if (!withTools && name == "Tools")
+            if (!withTools && StringUtil::endsWith(name, "Tools"))
                 continue;
             Ini::IniSection &iniSec = file[name];
             for (std::pair<const std::string, Plugin> &p : section) {

@@ -52,6 +52,13 @@ namespace Window {
         bool handle(const XEvent &e)
         {
             switch (e.type) {
+            case MotionNotify: {
+                const XMotionEvent &xme = e.xmotion;
+                InterfacesVector mousePos { xme.x, xme.y };
+                injectPointerMove({ mousePos, { xme.x_screen, xme.y_screen }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
+                mLastMousePosition = mousePos;
+                break;
+            }
             case ConfigureNotify: {
                 const XConfigureEvent &xce = e.xconfigure;
 
@@ -186,6 +193,8 @@ namespace Window {
     private:
         int mWidth;
         int mHeight;
+
+        InterfacesVector mLastMousePosition;
     };
 
     static std::unordered_map<::Window, LinuxWindow> sWindows;

@@ -1,7 +1,16 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/widgetstoolslib.h"
+#endif
+#ifdef BUILD_Tools
+#    include "toolslib.h"
+#endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
 #ifdef BUILD_FontLoader
 #    include "fontloaderlib.h"
@@ -29,6 +38,9 @@
 #endif
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolslib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
@@ -75,6 +87,9 @@
 #ifdef BUILD_FontLoader
 #    include "fontloader.h"
 #endif
+#ifdef BUILD_Tools
+#    include "inspector/layoutloader.h"
+#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scene/entity/entitycomponentcollector.h"
 #endif
@@ -114,6 +129,39 @@
 #ifdef BUILD_Scene
 #    include "Madgine/scene/scenecomponentcollector.h"
 #endif
+#ifdef BUILD_Tools
+#    include "toolscollector.h"
+#endif
+#ifdef BUILD_Tools
+#    include "inspector/functiontool.h"
+#endif
+#ifdef BUILD_Tools
+#    include "inspector/inspector.h"
+#endif
+#ifdef BUILD_Tools
+#    include "metrics/metrics.h"
+#endif
+#ifdef BUILD_Tools
+#    include "profiler/profiler.h"
+#endif
+#ifdef BUILD_Tools
+#    include "project/projectmanager.h"
+#endif
+#ifdef BUILD_Tools
+#    include "renderer/imguidemo.h"
+#endif
+#ifdef BUILD_Tools
+#    include "testtool/testtool.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/opengltoolconfig.h"
+#endif
+#ifdef BUILD_SceneRendererTools
+#    include "Madgine_Tools/sceneeditor/sceneeditor.h"
+#endif
+#ifdef BUILD_WidgetsTools
+#    include "Madgine_Tools/guieditor/guieditor.h"
+#endif
 #ifdef BUILD_UI
 #    include "Madgine/ui/gamehandler.h"
 #endif
@@ -134,6 +182,9 @@
 #endif
 #ifdef BUILD_Client
 #    include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#ifdef BUILD_OpenGLTools
+#    include "OpenGL_Tools/imgui/openglimroot.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgets/widgetmanager.h"
@@ -229,6 +280,9 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 #    ifdef BUILD_FontLoader
 		createComponent<Engine::Render::FontLoader>,
 #    endif
+#    ifdef BUILD_Tools
+		createComponent<Engine::Tools::LayoutLoader>,
+#    endif
 
 	}; 
 }
@@ -281,6 +335,13 @@ template <>
 size_t component_index<Engine::Render::FontLoader>() { return CollectorBaseIndex_ResourceLoaderBase_FontLoader + 0; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_FontLoader + 1
+#    endif
+#    ifdef BUILD_Tools
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
+template <>
+size_t component_index<Engine::Tools::LayoutLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Tools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_Tools + 1
 #    endif
 
 #    undef ACC
@@ -389,6 +450,79 @@ std::vector<Engine::Scene::SceneComponentRegistry::F> Engine::Scene::SceneCompon
 #    undef ACC
 
 #endif
+#ifdef BUILD_Tools
+template <>
+std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComponents()
+{
+	return {
+#    ifdef BUILD_Tools
+		createComponent<Engine::Tools::FunctionTool>,
+		createComponent<Engine::Tools::Inspector>,
+		createComponent<Engine::Tools::Metrics>,
+		createComponent<Engine::Tools::Profiler>,
+		createComponent<Engine::Tools::ProjectManager>,
+		createComponent<Engine::Tools::ImGuiDemo>,
+		createComponent<Engine::Tools::TestTool>,
+#    endif
+#    ifdef BUILD_OpenGLTools
+		createComponent<Engine::Tools::OpenGLToolConfig>,
+#    endif
+#    ifdef BUILD_SceneRendererTools
+		createComponent<Engine::Tools::SceneEditor>,
+#    endif
+#    ifdef BUILD_WidgetsTools
+		createComponent<Engine::Tools::GuiEditor>,
+#    endif
+
+	}; 
+}
+
+#    define ACC 0
+
+#    ifdef BUILD_Tools
+constexpr size_t CollectorBaseIndex_ToolBase_Tools = ACC;
+template <>
+size_t component_index<Engine::Tools::FunctionTool>() { return CollectorBaseIndex_ToolBase_Tools + 0; }
+template <>
+size_t component_index<Engine::Tools::Inspector>() { return CollectorBaseIndex_ToolBase_Tools + 1; }
+template <>
+size_t component_index<Engine::Tools::Metrics>() { return CollectorBaseIndex_ToolBase_Tools + 2; }
+template <>
+size_t component_index<Engine::Tools::Profiler>() { return CollectorBaseIndex_ToolBase_Tools + 3; }
+template <>
+size_t component_index<Engine::Tools::ProjectManager>() { return CollectorBaseIndex_ToolBase_Tools + 4; }
+template <>
+size_t component_index<Engine::Tools::ImGuiDemo>() { return CollectorBaseIndex_ToolBase_Tools + 5; }
+template <>
+size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_ToolBase_Tools + 6; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ToolBase_Tools + 7
+#    endif
+#    ifdef BUILD_OpenGLTools
+constexpr size_t CollectorBaseIndex_ToolBase_OpenGLTools = ACC;
+template <>
+size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
+#    endif
+#    ifdef BUILD_SceneRendererTools
+constexpr size_t CollectorBaseIndex_ToolBase_SceneRendererTools = ACC;
+template <>
+size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex_ToolBase_SceneRendererTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ToolBase_SceneRendererTools + 1
+#    endif
+#    ifdef BUILD_WidgetsTools
+constexpr size_t CollectorBaseIndex_ToolBase_WidgetsTools = ACC;
+template <>
+size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_ToolBase_WidgetsTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ToolBase_WidgetsTools + 1
+#    endif
+
+#    undef ACC
+
+#endif
 #ifdef BUILD_UI
 template <>
 std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry::sComponents()
@@ -450,6 +584,9 @@ template <>
 std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::MainWindowComponentRegistry::sComponents()
 {
 	return {
+#    ifdef BUILD_OpenGLTools
+		createComponent<Engine::Tools::OpenGLImRoot>,
+#    endif
 #    ifdef BUILD_Widgets
 		createComponent<Engine::Widgets::WidgetManager>,
 #    endif
@@ -462,6 +599,15 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 
 #    define ACC 0
 
+#    ifdef BUILD_OpenGLTools
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_OpenGLTools = ACC;
+template <>
+size_t component_index<Engine::Tools::OpenGLImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+template <>
+size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_OpenGLTools + 1
+#    endif
 #    ifdef BUILD_Widgets
 constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
 template <>

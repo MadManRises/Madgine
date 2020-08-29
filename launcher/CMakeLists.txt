@@ -12,7 +12,7 @@ endif(ANDROID)
 add_workspace_application(MadgineLauncher ${sources})
 
 target_link_plugins(MadgineLauncher Base Client)
-target_link_libraries(MadgineLauncher PRIVATE Modules)
+target_link_libraries(MadgineLauncher PRIVATE Xml)
 
 if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")
