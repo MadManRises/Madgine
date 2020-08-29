@@ -242,14 +242,11 @@ namespace Window {
 
             XStoreName(sDisplay(), handle, settings.mTitle);
 
-            auto result = XSelectInput(sDisplay(), handle, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | KeyPressMask | KeyReleaseMask);
-            assert(result != BadWindow);                
-
             if (!handle)
                 return nullptr;
         }
 
-        XSelectInput(sDisplay(), handle, StructureNotifyMask);
+        XSelectInput(sDisplay(), handle, StructureNotifyMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | KeyPressMask | KeyReleaseMask);
 
         XMapWindow(sDisplay(), handle);
 
