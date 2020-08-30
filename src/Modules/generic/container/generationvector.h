@@ -11,11 +11,12 @@ namespace Engine {
 struct GenerationVectorIndex {
 
     static constexpr uint32_t INVALID_GENERATION = std::numeric_limits<uint32_t>::max();
+    static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
     GenerationVectorIndex() = default;
     GenerationVectorIndex(const GenerationVectorIndex &) = delete;
     GenerationVectorIndex(GenerationVectorIndex &&other)
-        : mIndex(std::exchange(other.mIndex, 0))
+        : mIndex(std::exchange(other.mIndex, INVALID_INDEX))
         , mGeneration(std::exchange(other.mGeneration, INVALID_GENERATION))
 #if ENABLE_MEMTRACKING
         , mDebugMarker(std::exchange(other.mDebugMarker, 0))
@@ -36,7 +37,7 @@ struct GenerationVectorIndex {
         if (mGeneration != INVALID_GENERATION) {
             return true;
         } else {
-            assert(mIndex == 0);
+            assert(mIndex == INVALID_INDEX);
             return false;
         }
     }
@@ -77,11 +78,11 @@ private:
 
     void reset()
     {
-        mIndex = 0;
+        mIndex = INVALID_INDEX;
         mGeneration = INVALID_GENERATION;
     }
 
-    uint32_t mIndex = 0;
+    uint32_t mIndex = INVALID_INDEX;
     uint32_t mGeneration = INVALID_GENERATION;
 
 #if ENABLE_MEMTRACKING
@@ -146,6 +147,7 @@ struct GenerationVectorBase {
     void increment(GenerationVectorIndex &index, size_t size, ptrdiff_t diff = 1) const
     {
         update(index);
+        assert(index || diff == 0);
         index.mIndex += diff;
         assert(index.mIndex <= size || index.mIndex == std::numeric_limits<uint32_t>::max());
         if (index.mIndex == size || index.mIndex == std::numeric_limits<uint32_t>::max())
@@ -606,7 +608,7 @@ struct GenerationVector : GenerationVectorBase {
 
     template <typename... Args>
     iterator emplace(Args &&... args)
-    {
+    {        
         T *t = &mData.emplace_back(std::forward<Args>(args)...);
         uint32_t index = t - &mData.front();
         return { generate(index), this };

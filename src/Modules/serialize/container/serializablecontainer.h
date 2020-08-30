@@ -51,12 +51,14 @@ namespace Serialize {
         }
 
         SerializableContainerImpl(SerializableContainerImpl &&other)
+            : SerializableContainerImpl(std::move(other), other.mActiveIterator == _traits::toPositionHandle(other, other.Base::end()))
         {
-            /*if (other.isSynced()) {
-                ContainerUnitHelper::setItemDataSynced(other, false);
-            }*/
-            Base::operator=(std::move(other));
-            mActiveIterator = std::move(other.mActiveIterator);
+        }
+
+        SerializableContainerImpl(SerializableContainerImpl &&other, bool hasEndIterator)
+            : Base(std::move(other))
+            , mActiveIterator(hasEndIterator ? _traits::toPositionHandle(*this, Base::end()) : std::move(other.mActiveIterator))
+        {
             ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
             other.Base::clear();
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
@@ -70,8 +72,9 @@ namespace Serialize {
 
         SerializableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(SerializableContainerImpl &&other)
         {
+            bool hasEndIterator = other.mActiveIterator == _traits::toPositionHandle(other, other.Base::end());
             Base::operator=(std::move(other));
-            mActiveIterator = std::move(other.mActiveIterator);
+            mActiveIterator = hasEndIterator ? _traits::toPositionHandle(*this, Base::end()) : std::move(other.mActiveIterator);
             ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
             other.Base::clear();
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
@@ -501,6 +504,7 @@ namespace Serialize {
                 if (_traits::next(newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
                 ItemUnitHelper::setItemParent(*it, OffsetPtr::parent(this));
+                LOG(size());
             }
             return it;
         }
