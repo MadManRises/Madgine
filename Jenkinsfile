@@ -70,8 +70,8 @@ def staticTask = {
 					echo "Success"
 				else
 					echo "generating failed! Falling back to repository version"
-					cp -u ../test/${staticConfig.name}.cfg plugins_tools.cfg
-					cp -u ../test/components_${staticConfig.name}.cpp components_plugins_tools.cpp
+					cp -u ../test/${staticConfig.name}_tools.cfg plugins_tools.cfg
+					cp -u ../test/components_${staticConfig.name}_tools.cpp components_plugins_tools.cpp
 				fi
 				"""
 			}
