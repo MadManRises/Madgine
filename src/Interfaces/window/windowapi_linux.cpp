@@ -141,22 +141,30 @@ namespace Window {
 
         virtual int x() override
         {
-            return 0;
+            XWindowAttributes xwa;
+            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
+            return xwa.x;
         }
 
         virtual int y() override
         {
-            return 0;
+            XWindowAttributes xwa;
+            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
+            return xwa.y;
         }
 
         virtual int renderX() override
         {
-            return 0;
+            XWindowAttributes xwa;
+            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
+            return xwa.x + xwa.border_width;
         }
 
         virtual int renderY() override
         {
-            return 0;
+            XWindowAttributes xwa;
+            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
+            return xwa.x + xwa.border_width;
         }
 
         virtual void setSize(int width, int height) override
