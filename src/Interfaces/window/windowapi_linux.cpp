@@ -141,66 +141,30 @@ namespace Window {
 
         virtual int x() override
         {
-            ::Window root, parent, *children = NULL;
-            unsigned int num_children;
-
-            XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);                
-
-            int x, y;
-
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            ::Window child;
-            XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x, xwa.y, &x, &y, &child);)
-            return x;
+            return xwa.x;
         }
 
         virtual int y() override
         {
-            ::Window root, parent, *children = NULL;
-            unsigned int num_children;
-
-            XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
-
-            int x, y;
-
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            ::Window child;
-            XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x, xwa.y, &x, &y, &child);)
-            return y;
+            return xwa.y;
         }
 
         virtual int renderX() override
         {
-            ::Window root, parent, *children = NULL;
-            unsigned int num_children;
-
-            XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
-
-            int x, y;
-
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            ::Window child;
-            XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x + xwa.border_width, xwa.y + xwa.border_width, &x, &y, &child);)
-            return x;
+            return xwa.x + xwa.border_width;
         }
 
         virtual int renderY() override
         {
-            ::Window root, parent, *children = NULL;
-            unsigned int num_children;
-
-            XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
-
-            int x, y;
-
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            ::Window child;
-            XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x + xwa.border_width, xwa.y + xwa.border_width, &x, &y, &child);)
-            return y;
+            return xwa.x + xwa.border_width;
         }
 
         virtual void setSize(int width, int height) override
