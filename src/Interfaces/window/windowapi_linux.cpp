@@ -141,7 +141,7 @@ namespace Window {
 
         virtual int x() override
         {
-            Window root, parent, *children = NULL;
+            ::Window root, parent, *children = NULL;
             unsigned int num_children;
 
             XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);                
@@ -150,14 +150,14 @@ namespace Window {
 
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            Window child;
+            ::Window child;
             XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x, xwa.y, &x, &y, &child);)
             return x;
         }
 
         virtual int y() override
         {
-            Window root, parent, *children = NULL;
+            ::Window root, parent, *children = NULL;
             unsigned int num_children;
 
             XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
@@ -166,14 +166,14 @@ namespace Window {
 
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            Window child;
+            ::Window child;
             XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x, xwa.y, &x, &y, &child);)
             return y;
         }
 
         virtual int renderX() override
         {
-            Window root, parent, *children = NULL;
+            ::Window root, parent, *children = NULL;
             unsigned int num_children;
 
             XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
@@ -182,14 +182,14 @@ namespace Window {
 
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            Window child;
+            ::Window child;
             XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x + xwa.border_width, xwa.y + xwa.border_width, &x, &y, &child);)
             return x;
         }
 
         virtual int renderY() override
         {
-            Window root, parent, *children = NULL;
+            ::Window root, parent, *children = NULL;
             unsigned int num_children;
 
             XQueryTree(sDisplay(), mHandle, &root, &parent, &children, &num_children);
@@ -198,7 +198,7 @@ namespace Window {
 
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            Window child;
+            ::Window child;
             XTranslateCoordinates(sDisplay(), mHandle, root, xwa.x + xwa.border_width, xwa.y + xwa.border_width, &x, &y, &child);)
             return y;
         }
