@@ -504,7 +504,6 @@ namespace Serialize {
                 if (_traits::next(newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
                 ItemUnitHelper::setItemParent(*it, OffsetPtr::parent(this));
-                LOG(size());
             }
             return it;
         }
