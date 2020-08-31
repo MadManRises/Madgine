@@ -50,14 +50,6 @@ set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
 add_subdirectory(bullet3-2.89)
 target_include_directories(LinearMath PUBLIC ${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src)
 
-if (NOT ANDROID AND NOT EMSCRIPTEN)
-	set(OIS_BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
-	set(OIS_BUILD_DEMOS OFF CACHE BOOL "Build demo applications" FORCE)
-
-	add_subdirectory(ois)
-	set_target_properties(OIS PROPERTIES EXCLUDE_FROM_ALL TRUE)
-endif()
-
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 
 
