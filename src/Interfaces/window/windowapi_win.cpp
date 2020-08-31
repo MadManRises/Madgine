@@ -209,6 +209,14 @@ namespace Window {
             return mKeyDown[key];
         }
 
+        virtual void captureInput() override {
+            SetCapture((HWND)mHandle);
+        }
+
+        virtual void releaseInput() override {
+            ReleaseCapture();
+        }
+
     private:
         bool mKeyDown[512];
         InterfacesVector mLastKnownMousePos;

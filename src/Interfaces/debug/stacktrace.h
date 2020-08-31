@@ -23,7 +23,7 @@ namespace Debug {
         FullStackTrace calculateReadable(size_t count = S) const
         {
             size_t itemCount;
-            for (itemCount = count; itemCount > 0 && mTrace[itemCount - 1] == nullptr; --itemCount)
+            for (itemCount = 0; itemCount < S && mTrace[itemCount] != nullptr; ++itemCount)
                 ;
             return resolveSymbols(mTrace.data(), itemCount);
         }
@@ -40,6 +40,8 @@ namespace Debug {
             for (size_t i = 0; i < S; ++i) {
                 if (mTrace[i] != other.mTrace[i])
                     return false;
+                if (mTrace[i] == nullptr)
+                    break;
             }
             return true;
         }
@@ -60,6 +62,8 @@ struct hash<Engine::Debug::StackTrace<S>> {
     {
         size_t hash = 0;
         for (int i = 0; i < S && stacktrace.mTrace[i]; ++i) {
+            if (stacktrace.mTrace[i] == nullptr)
+                break;
             hash = reinterpret_cast<size_t>(stacktrace.mTrace[i]) + (hash << 6) + (hash << 16) - hash;
         }
         return hash;

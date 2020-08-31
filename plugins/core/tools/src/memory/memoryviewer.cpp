@@ -20,6 +20,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Tools::MemoryViewer);
 
 
@@ -461,7 +463,7 @@ namespace Engine
 			ImGui::End();
 		}
 
-		const char * MemoryViewer::key() const
+		std::string_view MemoryViewer::key() const
 		{
 			return "Memory Viewer";
 		}

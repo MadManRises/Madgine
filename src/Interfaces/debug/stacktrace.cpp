@@ -60,9 +60,10 @@ namespace Debug {
         std::pmr::memory_resource *resource = Memory::UntrackedMemoryResource::sInstance();
 #else
         static DefaultMemResource defMem;
-        std::pmr::memory_resource *resource = std::pmr::get_default_resource();
+        std::pmr::memory_resource *resource = &defMem;
 #endif
         FullStackTrace result(resource);
+        result.reserve(size);
 
 #if WINDOWS
         constexpr size_t BUFFERSIZE = 1024;
@@ -111,7 +112,7 @@ namespace Debug {
         size = 0;
 #endif
 
-        for (int i = 0; i < size && result.size() < 6; ++i) {
+        for (int i = 0; i < size; ++i) {
 #if WINDOWS
             auto pib = addressBuffer.try_emplace(data[i]);
             if (pib.second) {

@@ -238,6 +238,13 @@ namespace Window {
             return handled;
         }
 
+        virtual void captureInput() override {
+        }
+
+        virtual void releaseInput() override
+        {
+        }
+
     private:
         int mWidth;
         int mHeight;

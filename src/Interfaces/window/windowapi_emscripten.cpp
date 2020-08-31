@@ -211,6 +211,14 @@ namespace Window {
 
             return EM_FALSE;
         }
+        
+        virtual void captureInput() override
+        {
+        }
+
+        virtual void releaseInput() override
+        {
+        }
 
     private:
         int mWidth;

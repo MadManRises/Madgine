@@ -2,9 +2,11 @@
 
 #if ENABLE_MEMTRACKING
 
+#    include "../toolbase.h"
 #    include "../toolscollector.h"
 #    include "Interfaces/debug/memory/memory.h"
 #    include "Interfaces/debug/stacktrace.h"
+#    include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Tools {
@@ -49,7 +51,7 @@ namespace Tools {
 
         virtual void render() override;
 
-        const char *key() const override;
+        std::string_view key() const override;
 
     private:
         void traceDraw(const std::pmr::vector<Engine::Debug::TraceBack> &data, size_t size, int depth);

@@ -65,6 +65,8 @@ namespace Window {
         //Input
         virtual bool isKeyDown(Input::Key::Key key) = 0;
 
+        virtual void captureInput() = 0;
+        virtual void releaseInput() = 0;
 
         const uintptr_t mHandle;
 
@@ -105,6 +107,7 @@ namespace Window {
         }
         bool injectPointerPress(const Input::PointerEventArgs &arg)
         {
+            captureInput();
             for (WindowEventListener *listener : mListeners)
                 if (listener->injectPointerPress(arg))
                     return true;
@@ -112,6 +115,7 @@ namespace Window {
         }
         bool injectPointerRelease(const Input::PointerEventArgs &arg)
         {
+            releaseInput();
             for (WindowEventListener *listener : mListeners)
                 if (listener->injectPointerRelease(arg))
                     return true;
