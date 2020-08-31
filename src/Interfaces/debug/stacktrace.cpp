@@ -1,15 +1,15 @@
 #include "../interfaceslib.h"
 
+#include "../stringutil.h"
 #include "memory/statsmemoryresource.h"
 #include "memory/untrackedmemoryresource.h"
 #include "stacktrace.h"
-#include "../stringutil.h"
 
 #if WINDOWS
-#include <Windows.h>
-#include <DbgHelp.h>
+#    include <Windows.h>
+#    include <DbgHelp.h>
 #elif LINUX
-#include <execinfo.h>
+#    include <execinfo.h>
 #endif
 
 namespace Engine {
@@ -48,7 +48,7 @@ namespace Debug {
 #elif EMSCRIPTEN
         trace = 0;
 #else
-#error "Unsupported Platform!"
+#    error "Unsupported Platform!"
 #endif
         if (trace < size)
             buffer[trace] = nullptr;
@@ -60,7 +60,7 @@ namespace Debug {
         std::pmr::memory_resource *resource = Memory::UntrackedMemoryResource::sInstance();
 #else
         static DefaultMemResource defMem;
-        std::pmr::memory_resource *resource = &defMem;
+        std::pmr::memory_resource *resource = std::pmr::get_default_resource();
 #endif
         FullStackTrace result(resource);
 
@@ -143,7 +143,7 @@ namespace Debug {
             }
 #elif EMSCRIPTEN
 #else
-#error "Unsupported Platform!"
+#    error "Unsupported Platform!"
 #endif
         }
 #if LINUX

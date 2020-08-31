@@ -19,7 +19,7 @@ namespace Window {
         true
     };
 
-    struct WindowsWindow : OSWindow {
+    struct WindowsWindow final : OSWindow {
         WindowsWindow(HWND hwnd)
             : OSWindow((uintptr_t)hwnd)
             , mKeyDown {}

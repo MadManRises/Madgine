@@ -41,7 +41,7 @@ namespace Window {
         }
     } sDisplayGuard;
 
-    struct EmscriptenWindow : OSWindow {
+    struct EmscriptenWindow final : OSWindow {
         EmscriptenWindow(EGLSurface surface)
             : OSWindow((uintptr_t)surface)
             , mKeyDown {}

@@ -45,7 +45,7 @@ namespace Window {
         }
     } sDisplayGuard;
 
-    struct AndroidWindow : OSWindow {
+    struct AndroidWindow final : OSWindow {
         AndroidWindow(EGLSurface surface)
             : OSWindow((uintptr_t)surface)
         {

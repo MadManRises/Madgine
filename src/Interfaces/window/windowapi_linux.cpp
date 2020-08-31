@@ -41,7 +41,7 @@ namespace Window {
         return sDisplayGuard.display;
     }
 
-    struct LinuxWindow : OSWindow {
+    struct LinuxWindow final : OSWindow {
         LinuxWindow(::Window hwnd, size_t width, size_t height)
             : OSWindow(hwnd)
             , mWidth(width)
