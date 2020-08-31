@@ -66,9 +66,6 @@ struct container_traits<std::list<T>, void> {
 
     typedef iterator emplace_return;
 
-    template <template <typename> typename M>
-    using rebind = container_traits<std::list<M<T>>>;
-
     
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -157,9 +154,6 @@ struct container_traits<std::vector<T>, void> {
 
     typedef iterator emplace_return;
 
-    template <template <typename> typename M>
-    using rebind = container_traits<std::vector<M<T>>>;
-
 
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
@@ -241,9 +235,6 @@ struct container_traits<std::set<T, Cmp>, void> {
 
     typedef Pib<iterator> emplace_return;
 
-    template <template <typename> typename M>
-    using rebind = container_traits<std::set<M<T>, Cmp>>;
-
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
@@ -311,9 +302,6 @@ struct container_traits<std::map<K, T, Cmp>, void> {
     typedef typename container::value_type value_type;
 
     typedef Pib<iterator> emplace_return;
-
-    template <template <typename> typename M>
-    using rebind = container_traits<std::map<M<K>, M<T>>>;
 
     
     template <typename... _Ty>
@@ -402,9 +390,6 @@ struct container_traits<std::array<T, Size>, void> {
     typedef handle_t position_handle;
     typedef handle_t const_position_handle;
     typedef typename container::value_type value_type;
-
-    template <template <typename> typename M>
-    using rebind = container_traits<std::array<M<T>, Size>>;
 
     template <typename C>
     struct api : C {

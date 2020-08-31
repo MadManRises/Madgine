@@ -1,6 +1,7 @@
 #pragma once
 
-#include "noopfunctor.h"
+#include "functor.h"
+#include "derive.h"
 
 namespace Engine {
 

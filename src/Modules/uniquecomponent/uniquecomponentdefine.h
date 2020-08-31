@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../generic/replace.h"
-#include "../generic/noopfunctor.h"
+#include "../generic/functor.h"
 
 //base is included in __VA_ARGS__ to circumvent the problem with empty __VA_ARGS__ and ,
 #define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base, */...)                                                                                                                     \

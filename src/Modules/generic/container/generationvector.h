@@ -776,9 +776,6 @@ struct container_traits<GenerationVector<T>, void> {
 
     typedef iterator emplace_return;
 
-    template <template <typename> typename M>
-    using rebind = container_traits<GenerationVector<M<T>>>;
-
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {

@@ -233,9 +233,6 @@ struct container_traits<KeyValueSet<T, Cmp>> : container_traits<std::set<T, Cmp>
 
     typedef Pib<iterator> emplace_return;
 
-    template <template <typename> typename M>
-    using rebind = container_traits<M<KeyValueSet<T, Cmp>>>;
-
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {

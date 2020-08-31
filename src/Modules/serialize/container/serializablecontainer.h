@@ -4,7 +4,7 @@
 #include "../../generic/container/container_api.h"
 #include "../../generic/container/containerevent.h"
 #include "../../generic/copy_traits.h"
-#include "../../generic/noopfunctor.h"
+#include "../../generic/functor.h"
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../unithelper.h"

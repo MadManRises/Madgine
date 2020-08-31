@@ -4,8 +4,8 @@
 
 namespace Engine {
 
-	template <typename T>
-	using ctor_t = typename T::ctor;
+template <typename T>
+using ctor_t = typename T::ctor;
 
 template <typename... Ty>
 struct Compound : Ty... {

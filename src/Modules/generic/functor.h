@@ -4,21 +4,27 @@
 
 namespace Engine {
 
+    
+struct NoOpFunctor {
+    template <typename... Args>
+    void operator()(Args &&...) { }
+};
+
 template <auto F>
 struct Functor {
-    template <typename... Ty>
-    decltype(auto) operator()(Ty &&... args)
+    template <typename... Args>
+    decltype(auto) operator()(Args &&... args)
     {
-        return F(std::forward<Ty>(args)...);
+        return F(std::forward<Args>(args)...);
     }
 };
 
 template <auto F>
 struct MemberFunctor {
-    template <typename T, typename... Ty>
-    decltype(auto) operator()(T *t, Ty &&... args)
+    template <typename T, typename... Args>
+    decltype(auto) operator()(T *t, Args &&... args)
     {
-        return (t->*F)(std::forward<Ty>(args)...);
+        return (t->*F)(std::forward<Args>(args)...);
     }
 };
 

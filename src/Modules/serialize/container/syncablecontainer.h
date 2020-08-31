@@ -3,7 +3,7 @@
 #include "../../generic/container/container_api.h"
 #include "../../generic/container/containerevent.h"
 #include "../../generic/future.h"
-#include "../../generic/noopfunctor.h"
+#include "../../generic/functor.h"
 #include "../../generic/onetimefunctor.h"
 #include "../streams/pendingrequest.h"
 #include "../syncable.h"
