@@ -44,9 +44,9 @@ UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box)
     float tMin = std::numeric_limits<float>::lowest();
     float tMax = std::numeric_limits<float>::max();
 
-    if (auto intersection = Intersect(minX, ray))
+    if (auto intersection = Intersect(ray, minX))
         tMin = intersection[0];
-    if (auto intersection = Intersect(maxX, ray))
+    if (auto intersection = Intersect(ray, maxX))
         tMax = intersection[0];
 
     if (tMin > tMax)
@@ -58,9 +58,9 @@ UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box)
     float t2Min = std::numeric_limits<float>::lowest();
     float t2Max = std::numeric_limits<float>::max();
 
-    if (auto intersection = Intersect(minY, ray))
+    if (auto intersection = Intersect(ray, minY))
         t2Min = intersection[0];
-    if (auto intersection = Intersect(maxY, ray))
+    if (auto intersection = Intersect(ray, maxY))
         t2Max = intersection[0];
 
     if (t2Min > t2Max)
@@ -80,9 +80,9 @@ UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box)
     t2Min = std::numeric_limits<float>::lowest();
     t2Max = std::numeric_limits<float>::max();
 
-    if (auto intersection = Intersect(minZ, ray))
+    if (auto intersection = Intersect(ray, minZ))
         t2Min = intersection[0];
-    if (auto intersection = Intersect(maxZ, ray))
+    if (auto intersection = Intersect(ray, maxZ))
         t2Max = intersection[0];
 
     if (t2Min > t2Max)
@@ -102,7 +102,7 @@ UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box)
     return result;
 }
 
-UpTo<float, 1> Intersect(const Plane &plane, const Ray &ray)
+UpTo<float, 1> Intersect(const Ray &ray, const Plane &plane)
 {
     UpTo<float, 1> result;
 

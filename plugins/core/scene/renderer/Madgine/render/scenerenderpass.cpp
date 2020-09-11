@@ -61,7 +61,7 @@ namespace Render {
             if (transform)
                 transform->updateParent(mScene.entityComponentList<Scene::Entity::Transform>());
             if (mesh && mesh->isVisible() && transform) {
-                MeshData *meshData = mesh->data();
+                GPUMeshData *meshData = mesh->data();
                 if (meshData) {
                     mPerObject.hasLight = true;
 

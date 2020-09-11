@@ -18,6 +18,7 @@ namespace Filesystem {
     INTERFACES_EXPORT Path configPath();
 
     INTERFACES_EXPORT void makeNormalized(Path &p);
+    INTERFACES_EXPORT bool isValidPath(const std::string &p);
 
     INTERFACES_EXPORT Path getCwd();
     INTERFACES_EXPORT void setCwd(const Path &p);

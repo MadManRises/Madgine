@@ -5,8 +5,11 @@
 namespace Engine {
 namespace Filesystem {
 
-    INTERFACES_EXPORT FileQueryState *createQueryState();
-    INTERFACES_EXPORT void destroyQueryState(FileQueryState *state);
+    FileQueryState *createQueryState();
+    void destroyQueryState(FileQueryState *state);
+    struct FileQueryStateDeleter {
+        void operator()(FileQueryState *state) { destroyQueryState(state); }
+    };
 
     INTERFACES_EXPORT bool isDir(const FileQueryState &data);
     INTERFACES_EXPORT const char *filename(const FileQueryState &data);
@@ -59,7 +62,7 @@ namespace Filesystem {
     private:
         std::vector<FileQueryHandle> mHandles;
         const FileQuery *mQuery;
-        std::unique_ptr<FileQueryState, decltype(&Filesystem::destroyQueryState)> mBuffer;
+        std::unique_ptr<FileQueryState, FileQueryStateDeleter> mBuffer;
     };
 
     struct INTERFACES_EXPORT FileQuery {

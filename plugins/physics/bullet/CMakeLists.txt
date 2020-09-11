@@ -6,7 +6,7 @@ Project(Bullet)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine)
-		FolderSources(sources Madgine physics physicsmanager.cpp physicsmanager.h rigidbody.cpp rigidbody.h)
+		FolderSources(sources Madgine physics collisionshapemanager.cpp collisionshapemanager.h physicsmanager.cpp physicsmanager.h rigidbody.cpp rigidbody.h)
 
 
 add_plugin(Bullet Madgine Physics ${sources} PRECOMPILED_HEADER src/Madgine/bulletlib.h)

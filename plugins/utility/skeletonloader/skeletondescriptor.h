@@ -19,7 +19,8 @@ namespace Render {
     };
 
     struct SkeletonDescriptor : ScopeBase {
-        std::vector<Bone> mBones;        
+        std::vector<Bone> mBones;     
+        Matrix4 mMatrix;
     };
 
 }

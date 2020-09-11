@@ -126,7 +126,7 @@ namespace Tools {
 
                     Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                    if (auto intersection = Intersect(plane, mDragStartRay)) {
+                    if (auto intersection = Intersect(mDragStartRay, plane)) {
 
                         mMouseDown[0] = true;
                         mDragTransform = mEditor->hoveredTransform();
@@ -181,7 +181,7 @@ namespace Tools {
 
                 Plane targetPlane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                if (auto intersection = Intersect(targetPlane, ray)) {
+                if (auto intersection = Intersect(ray, targetPlane)) {
 
                     Vector3 distance = ray.point(intersection[0]) - mDragStoredPosition - mDragRelMousePosition;
 
@@ -198,7 +198,7 @@ namespace Tools {
 
             if (ImGui::BeginDragDropTarget()) {
                 Vector3 pos = ray.point(5.0f);
-                Render::MeshLoader::ResourceType *resource;
+                Render::GPUMeshLoader::ResourceType *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::EntityPtr e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
                     e.addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
@@ -206,7 +206,7 @@ namespace Tools {
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
-                    Render::MeshLoader::HandleType handle = resource->loadData();
+                    Render::GPUMeshLoader::HandleType handle = resource->loadData();
                     Im3D::NativeMesh(handle, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();

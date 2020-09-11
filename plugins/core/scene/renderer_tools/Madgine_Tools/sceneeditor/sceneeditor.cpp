@@ -60,6 +60,8 @@ namespace Tools {
         Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
         if (mHierarchyVisible)
             renderHierarchy();
+        if (mSettingsVisible)
+            renderSettings();
         renderSelection();
         for (SceneView &sceneView : mSceneViews) {
             sceneView.render();
@@ -73,6 +75,8 @@ namespace Tools {
             if (ImGui::BeginMenu("SceneEditor")) {
 
                 ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
+
+                ImGui::MenuItem("Settings", nullptr, &mSettingsVisible);
 
                 ImGui::EndMenu();
             }
@@ -156,6 +160,17 @@ namespace Tools {
             if (ImGui::Button("+ New Camera")) {
                 select(mSceneMgr->createCamera());
             }*/
+        }
+        ImGui::End();
+    }
+
+    void SceneEditor::renderSettings()
+    {
+        if (ImGui::Begin("SceneEditor - Settings", &mSettingsVisible)) {
+
+            ImGui::ValueTypeDrawer { "Bone-Forward" }.draw(mBoneForward);
+            ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
+            ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
         }
         ImGui::End();
     }
@@ -323,20 +338,23 @@ namespace Tools {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
 
-                        Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse();
+                        Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
                         Matrix4 world = t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>());
 
-                        Im3D::Text(bone.mName.c_str(), t->matrix() * m, 2.0f);
-                        float length = 0.1f;
-                        Vector3 start = (world * m * Vector4::UNIT_W).xyz();
-                        Vector3 end = start + (world * m * Vector4 { 0, length, 0, 0 }).xyz();
+                        if (mShowBoneNames)
+                            Im3D::Text(bone.mName.c_str(), world * m, 2.0f);
+
+                        Vector4 start = world * m * Vector4::UNIT_W;
+                        Vector4 end;
 
                         if (bone.mFirstChild != std::numeric_limits<uint32_t>::max()) {
-                            Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse();
-                            end = (world * m_child * Vector4::UNIT_W).xyz();
-                            length = (end - start).length();
+                            Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
+                            end = world * m_child * Vector4::UNIT_W;
+                        } else {
+                            end = world * m * skeleton->mMatrix * (mBoneForward * mDefaultBoneLength) + (1.0f - mBoneForward.w) * start;                  
                         }
-                        Im3D::Arrow(IM3D_LINES, 0.1f * length, start, end);
+                        float length = (end - start).xyz().length();
+                        Im3D::Arrow(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
                     }
                 }
             }

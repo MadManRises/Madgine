@@ -5,6 +5,7 @@
 #include "openglrendertarget.h"
 
 #include "openglmeshdata.h"
+#include "meshloader.h"
 #include "openglmeshloader.h"
 
 #include "Modules/math/rect2i.h"
@@ -46,7 +47,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(MeshData *m, Program *p)
+    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
         OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
@@ -80,7 +81,7 @@ namespace Render {
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
             renderMesh(&tempMesh, program);
         }
@@ -90,7 +91,7 @@ namespace Render {
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
+            OpenGLMeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
             tempMesh.mTextureHandle = texture;
 

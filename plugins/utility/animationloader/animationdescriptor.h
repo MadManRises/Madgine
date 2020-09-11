@@ -45,8 +45,6 @@ namespace Render {
         std::map<std::string, AnimationDescriptor> mAnimations;
         std::vector<std::string> mBoneNames;
 
-		Matrix4 mBaseMatrix;
-
 		std::map<SkeletonLoader::HandleType, std::unique_ptr<int[]>> mBoneMappings;
         int *generateBoneMappings(const SkeletonLoader::SkeletonLoader::HandleType &handle);
     };

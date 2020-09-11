@@ -32,107 +32,117 @@ METATABLE_BEGIN(Engine::Render::SkeletonDescriptor)
 MEMBER(mBones)
 METATABLE_END(Engine::Render::SkeletonDescriptor)
 
+namespace Engine {
+namespace Render {
 
+    SkeletonLoader::SkeletonLoader()
+        : ResourceLoader({ ".fbx", ".dae" })
+    {
+    }
 
-    namespace Engine
-{
-    namespace Render {
+    bool SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceType *res)
+    {
+        Assimp::Importer importer;
 
-        SkeletonLoader::SkeletonLoader()
-            : ResourceLoader({ ".fbx", ".dae" })
-        {
+        std::vector<unsigned char> buffer = res->readAsBlob();
+
+        const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
+
+        if (!scene) {
+            LOG_ERROR(importer.GetErrorString());
+            return false;
         }
 
-        bool SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceType *res)
-        {
-            Assimp::Importer importer;
+        if (scene->mNumMeshes == 0) {
+            LOG_ERROR("No mesh in file '" << res->path().str() << "'");
+            return false;
+        }
 
-            std::vector<unsigned char> buffer = res->readAsBlob();
+        std::map<aiNode *, size_t> indices;
 
-            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
+        for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+            aiMesh *mesh = scene->mMeshes[meshIndex];
 
-            if (!scene) {
-                LOG_ERROR(importer.GetErrorString());
-                return false;
-            }
+            for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+                aiBone *bone = mesh->mBones[boneIndex];
+                aiNode *node = scene->mRootNode->FindNode(bone->mName);
 
-            if (scene->mNumMeshes == 0) {
-                LOG_ERROR("No mesh in file '" << res->path().str() << "'");
-                return false;
-            }
-
-            std::map<aiNode *, size_t> indices;
-
-            for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-                aiMesh *mesh = scene->mMeshes[meshIndex];
-
-                for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-                    aiBone *bone = mesh->mBones[boneIndex];
-                    aiNode *node = scene->mRootNode->FindNode(bone->mName);
-
-                    bool newBone = indices.try_emplace(node, skeleton.mBones.size()).second;
-                    if (newBone) {
-                        skeleton.mBones.push_back(Bone { bone->mName.C_Str() });
-                    }
+                bool newBone = indices.try_emplace(node, skeleton.mBones.size()).second;
+                if (newBone) {
+                    skeleton.mBones.push_back(Bone { bone->mName.C_Str() });
                 }
             }
+        }
 
-			Matrix4 matrix, scale;
-            bool matrixSet = false;
 
-            assimpTraverseTree(
-                scene, [&](const aiNode *parentNode) {                    
-                    for (size_t meshIndex = 0; meshIndex < parentNode->mNumMeshes; ++meshIndex) {
 
-                        aiMesh *mesh = scene->mMeshes[parentNode->mMeshes[meshIndex]];
+        bool matrixSet = false;
 
-                        if (mesh->mNumBones > 0) {
+        assimpTraverseTree(
+            scene, [&](const aiNode *parentNode, const Matrix4 &t) {
+                Matrix4 anti_t = t.Inverse();
 
-                            for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-                                aiBone *bone = mesh->mBones[boneIndex];
-                                aiNode *node = scene->mRootNode->FindNode(bone->mName);
+                for (size_t meshIndex = 0; meshIndex < parentNode->mNumMeshes; ++meshIndex) {
 
-                                if (!matrixSet) {
-                                    matrixSet = true;
-                                    matrix = assimpCalculateTransformMatrix(node->mParent); 
-									scale = Matrix4 { ExtractScalingMatrix(matrix.ToMat3()) };
+                    aiMesh *mesh = scene->mMeshes[parentNode->mMeshes[meshIndex]];
 
-									//matrix = assimpConvertMatrix(node->mParent->mTransformation);
-                                }
+                    if (mesh->mNumBones > 0) {
 
-                                size_t index = indices.at(node);
+                        std::set<size_t> parentTransformToDos;
 
-                                skeleton.mBones[index].mTTransform = assimpConvertMatrix(node->mTransformation);
-                                skeleton.mBones[index].mOffsetMatrix = scale * assimpConvertMatrix(bone->mOffsetMatrix) * matrix.Inverse();
+                        for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+                            aiBone *bone = mesh->mBones[boneIndex];
+                            aiNode *node = scene->mRootNode->FindNode(bone->mName);
 
-                                if (node->mParent && indices.count(node->mParent) > 0) {
-                                    size_t parentIndex = indices.at(node->mParent);
-                                    skeleton.mBones[index].mParent = parentIndex;
-                                    assert(parentIndex < index);
+                            if (!matrixSet) {
+                                matrixSet = true;
+                                skeleton.mMatrix = t;
+                            }
+
+                            size_t index = indices.at(node);
+
+                            skeleton.mBones[index].mTTransform = assimpConvertMatrix(node->mTransformation);
+                            skeleton.mBones[index].mOffsetMatrix = assimpConvertMatrix(bone->mOffsetMatrix) * anti_t;
+
+                            if (node->mParent && indices.count(node->mParent) > 0) {
+                                size_t parentIndex = indices.at(node->mParent);
+                                skeleton.mBones[index].mParent = parentIndex;
+                                if (parentIndex < index && parentTransformToDos.count(parentIndex) == 0)
                                     skeleton.mBones[index].mTTransform = skeleton.mBones[parentIndex].mTTransform * skeleton.mBones[index].mTTransform;
-                                } else {
-                                    //skeleton.mBones[index].mTTransform = matrix.Inverse() * skeleton.mBones[index].mTTransform;
-								}
+                                else
+                                    parentTransformToDos.emplace(index);
+                            } 
 
-                                if (node->mNumChildren > 0 && indices.count(node->mChildren[0]) > 0) {
-                                    skeleton.mBones[index].mFirstChild = indices.at(node->mChildren[0]);
+                            if (node->mNumChildren > 0 && indices.count(node->mChildren[0]) > 0) {
+                                skeleton.mBones[index].mFirstChild = indices.at(node->mChildren[0]);
+                            }
+                        }
+                        while (!parentTransformToDos.empty()) {
+                            for (std::set<size_t>::iterator it = parentTransformToDos.begin(); it != parentTransformToDos.end();) {
+                                size_t parentIndex = skeleton.mBones[*it].mParent;
+                                if (parentTransformToDos.count(parentIndex) == 0) {
+                                    skeleton.mBones[*it].mTTransform = skeleton.mBones[parentIndex].mTTransform * skeleton.mBones[*it].mTTransform;
+                                    it = parentTransformToDos.erase(it);
+                                } else {
+                                    ++it;
                                 }
                             }
                         }
                     }
-                });
+                }
+            });
 
-            for (Bone &bone : skeleton.mBones) {
-                bone.mTTransform = matrix * bone.mTTransform * scale.Inverse() * bone.mOffsetMatrix;
-            }
-
-            return true;
+        for (Bone &bone : skeleton.mBones) {
+            bone.mTTransform = skeleton.mMatrix * bone.mTTransform * bone.mOffsetMatrix;
         }
 
-        void SkeletonLoader::unloadImpl(SkeletonDescriptor &data, ResourceType *res)
-        {
-            data.mBones.clear();
-        }
-
+        return true;
     }
+
+    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data, ResourceType *res)
+    {
+        data.mBones.clear();
+    }
+
+}
 }

@@ -2,21 +2,25 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "meshloader.h"
+#include "gpumeshloader.h"
 
 #include "directx11meshdata.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_DIRECTX11_EXPORT DirectX11MeshLoader : Resources::VirtualResourceLoaderImpl<DirectX11MeshLoader, DirectX11MeshData, MeshLoader> {
+    struct MADGINE_DIRECTX11_EXPORT DirectX11MeshLoader : Resources::VirtualResourceLoaderImpl<DirectX11MeshLoader, DirectX11MeshData, GPUMeshLoader> {
         DirectX11MeshLoader();
 
-        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {}) override;
+        void generateImpl(DirectX11MeshData &data, const MeshData &mesh);
+        virtual bool generate(GPUMeshData &data, const MeshData &mesh) override;
+        virtual bool generate(GPUMeshData &data, MeshData &&mesh) override;
 
-        virtual void updateImpl(MeshData &data, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}) override;
+        void updateImpl(DirectX11MeshData &data, const MeshData &mesh);
+        virtual void update(GPUMeshData &data, const MeshData &mesh) override;
+        virtual void update(GPUMeshData &data, MeshData &&mesh) override;
 
-		virtual void resetImpl(MeshData &data) override;
+		virtual void reset(GPUMeshData &data) override;
     };
 }
 }

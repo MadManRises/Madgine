@@ -45,6 +45,7 @@ namespace Tools {
     private:
         void renderSelection();
         void renderHierarchy();
+        void renderSettings();
         void renderHierarchyEntity(const Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> &parentTransform);
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
@@ -61,9 +62,15 @@ namespace Tools {
         Render::Camera *mSelectedCamera = nullptr;
 
         bool mHierarchyVisible = false;
+        bool mSettingsVisible = false;
 
         int mHoveredAxis = -1;
         Scene::Entity::Transform *mHoveredTransform = nullptr;
+
+        //Settings
+        Vector4 mBoneForward = { 1, 0, 0, 0 };
+        float mDefaultBoneLength = 1.0f;
+        bool mShowBoneNames = true;
     };
 
 }

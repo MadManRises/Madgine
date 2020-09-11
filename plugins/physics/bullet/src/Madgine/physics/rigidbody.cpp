@@ -21,6 +21,7 @@ ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 METATABLE_BEGIN(Engine::Physics::RigidBody)
 PROPERTY(Mass, mass, setMass)
 PROPERTY(Kinematic, kinematic, setKinematic)
+PROPERTY(Shape, getShape, setShape)
 METATABLE_END(Engine::Physics::RigidBody)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::RigidBody)
@@ -31,10 +32,9 @@ namespace Physics {
 
     struct RigidBody::Data : btMotionState {
 
-        Data(Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform)
+        Data(Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform, btCollisionShape *shape = nullptr)
             : mTransform(std::move(transform))
-            , mShape({ 0.5f, 0.5f, 0.5f })
-            , mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, &mShape, { 0.0f, 0.0f, 0.0f } })
+            , mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, shape, { 0.0f, 0.0f, 0.0f } })
         {
         }
 
@@ -70,7 +70,6 @@ namespace Physics {
         }
 
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mTransform;
-        btBoxShape mShape;
         btRigidBody mRigidBody;
     };
 
@@ -91,7 +90,9 @@ namespace Physics {
 
         assert(!mData);
 
-        mData = std::make_unique<Data>(entity.getComponent<Scene::Entity::Transform>());
+        mShapeHandle.load("Band");
+
+        mData = std::make_unique<Data>(entity.getComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get()->get() : nullptr);
 
         entity->sceneMgr().getComponent<PhysicsManager>().world().addRigidBody(&mData->mRigidBody);
     }
@@ -142,12 +143,12 @@ namespace Physics {
         mData->mTransform.update();
     }
 
-    bool Engine::Physics::RigidBody::kinematic() const
+    bool RigidBody::kinematic() const
     {
         return mData->mRigidBody.getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
     }
 
-    void Engine::Physics::RigidBody::setKinematic(bool kinematic)
+    void RigidBody::setKinematic(bool kinematic)
     {
         if (kinematic) {
             mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
@@ -156,6 +157,18 @@ namespace Physics {
             mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
             mData->mRigidBody.setActivationState(ACTIVE_TAG);
         }
+    }
+
+    void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
+    {
+        mShapeHandle = handle;
+
+        mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
+    }
+
+    CollisionShapeManager::ResourceType *Engine::Physics::RigidBody::getShape() const
+    {
+        return mShapeHandle.resource();
     }
 
 }

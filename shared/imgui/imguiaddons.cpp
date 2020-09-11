@@ -17,7 +17,8 @@
 Engine::Threading::WorkgroupLocal<ImGuiContext *>
     sContext;
 
-ImGuiContext*& getImGuiContext() {
+ImGuiContext *&getImGuiContext()
+{
     return sContext;
 }
 
@@ -289,22 +290,19 @@ bool ValueTypeDrawer::draw(const std::monostate &)
 
 bool ValueTypeDrawer::draw(Engine::Quaternion &q)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<quaternion>");
+    Engine::Vector3 v = q.toDegrees();
+
+    if (draw(v)) {
+        q = Engine::Quaternion::FromDegrees(v);
+        return true;
+    }    
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<quaternion>");
-    return false;
+    const Engine::Vector3 v= q.toDegrees();
+    return draw(v);
 }
 
 bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
@@ -353,7 +351,6 @@ bool InputText(const char *label, std::string *s)
     return false;
 }
 
-
 bool InputText(const char *label, Engine::CoWString *s)
 {
     char buf[255];
@@ -370,7 +367,6 @@ bool InputText(const char *label, Engine::CoWString *s)
     return false;
 }
 
-
 template <typename T>
 bool SelectValueTypeType(Engine::ValueType *v)
 {
@@ -385,7 +381,6 @@ bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
 {
     return (SelectValueTypeType<Engine::type_pack_select_t<0, Ty>>(v) | ...);
 }
-
 
 template <typename T>
 struct ValueTypeFilterImpl {
@@ -837,9 +832,15 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
         ImGui::EndChild();
     }
 
+    bool validPath = true;
+
     std::string fileName = selection->relative(*path).str();
     if (InputText("Filename:", &fileName)) {
-        *selection = *path / fileName;
+        Engine::Filesystem::Path p = fileName;
+        if (!p.empty() && p.isRelative())
+            *selection = *path / p;
+        else
+            validPath = false;
     }
 
     bool confirmed = false;
@@ -858,6 +859,6 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
         ImGui::EndPopup();
     }
 
-    return EndFilesystemPicker(selectedIsFile || (openWrite && !selectedIsDir), accepted, openWrite && selectedIsFile && !confirmed, clicked);
+    return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite && selectedIsFile && !confirmed, clicked);
 }
 }

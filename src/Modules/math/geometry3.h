@@ -8,6 +8,6 @@ MODULES_EXPORT float Distance(const Ray &ray, const Vector3 &point, float *rayCl
 
 MODULES_EXPORT UpTo<float, 2> Intersect(const Ray &ray, const Sphere &sphere);
 MODULES_EXPORT UpTo<float, 2> Intersect(const Ray &ray, const BoundingBox &box);
-MODULES_EXPORT UpTo<float, 1> Intersect(const Plane &plane, const Ray &ray);
+MODULES_EXPORT UpTo<float, 1> Intersect(const Ray &ray, const Plane &plane);
 
 }

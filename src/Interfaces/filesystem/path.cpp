@@ -104,6 +104,11 @@ namespace Filesystem {
 
     void Path::normalize()
     {
+        if (!isValidPath(mPath)) {
+            mPath.clear();
+            return;
+        }
+
         std::string lastElement;
 
         size_t size = mPath.size();

@@ -14,19 +14,21 @@
 #include "Modules/math/transformation.h"
 
 METATABLE_BEGIN(Engine::Render::MeshLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::MeshLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
+READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Render::MeshLoader::ResourceType)
 
-
+UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
     namespace Engine
 {
     namespace Render {
 
         MeshLoader::MeshLoader()
-            : VirtualResourceLoaderBase({ ".fbx", ".dae" })
+            : ResourceLoader({ ".fbx", ".dae" })
         {
         }
 
@@ -131,7 +133,8 @@ METATABLE_END(Engine::Render::MeshLoader::ResourceType)
                     }
                 });
 
-            return loader.generate(mesh, 3, std::move(vertices), std::move(indices), texturePath);
+            mesh = {3, std::move(vertices), std::move(indices), texturePath};
+            return true;
         }
 
         bool MeshLoader::loadImpl(MeshData &mesh, ResourceType *res)
@@ -192,7 +195,12 @@ METATABLE_END(Engine::Render::MeshLoader::ResourceType)
 
         void MeshLoader::unloadImpl(MeshData &data, ResourceType *res)
         {
-            resetImpl(data);
+            data.mAttributeList.clear();
+            data.mGroupSize = 0;
+            data.mIndices.clear();
+            data.mTexturePath.clear();
+            data.mVertexSize = 0;
+            data.mVertices.clear();            
         }
 
     }

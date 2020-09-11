@@ -69,19 +69,8 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
             if (!scene) {
                 LOG_ERROR(importer.GetErrorString());
                 return false;
-            }
+            }      
 
-            Matrix3 scale;            
-
-            assimpTraverseTree(
-                scene, [&](const aiNode *parentNode, const Matrix4 &matrix) {
-                    if (parentNode->mNumMeshes > 0) {
-						scale = ExtractScalingMatrix(matrix.ToMat3());
-                        animations.mBaseMatrix = matrix * Matrix4 { scale.Inverse() };    
-
-                        /*baseMatrix = baseMatrix * animations.mBaseRotation.Inverse();*/
-                    }
-                });
 
             for (size_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex) {
                 aiAnimation *anim = scene->mAnimations[animationIndex];
@@ -111,7 +100,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                     }
 
                     std::transform(node->mPositionKeys, node->mPositionKeys + node->mNumPositionKeys, std::back_inserter(bone.mPositions), [&](const aiVectorKey &key) {
-                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), scale * Vector3 { &key.mValue.x } };
+                        return KeyFrame<Vector3> { static_cast<float>(key.mTime), Vector3 { &key.mValue.x } };
                     });
 
                     std::transform(node->mRotationKeys, node->mRotationKeys + node->mNumRotationKeys, std::back_inserter(bone.mOrientations), [&](const aiQuatKey &key) {
@@ -152,7 +141,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                         }
                     }
                     if (!consecutive) {
-                        auto it = std::find(mBoneNames.begin(), mBoneNames.end(), handle->mBones[i].mName);
+                        auto it = std::find_if(mBoneNames.begin(), mBoneNames.end(), [&](const std::string &boneName) { return StringUtil::startsWith(handle->mBones[i].mName, boneName); });
                         int mapping;
                         if (it == mBoneNames.end()) {
                             mapping = -1;

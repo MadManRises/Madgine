@@ -2,21 +2,25 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "meshloader.h"
+#include "gpumeshloader.h"
 
 #include "openglmeshdata.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLMeshLoader : Resources::VirtualResourceLoaderImpl<OpenGLMeshLoader, OpenGLMeshData, MeshLoader> {
+    struct MADGINE_OPENGL_EXPORT OpenGLMeshLoader : Resources::VirtualResourceLoaderImpl<OpenGLMeshLoader, OpenGLMeshData, GPUMeshLoader> {
         OpenGLMeshLoader();
 
-        virtual bool generateImpl(MeshData &mesh, const std::vector<std::optional<AttributeDescriptor>> &attributeList, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}, const Filesystem::Path &texturePath = {}) override;
+        void generateImpl(OpenGLMeshData &data, const MeshData &mesh);
+        virtual bool generate(GPUMeshData &data, const MeshData &mesh) override;
+        virtual bool generate(GPUMeshData &data, MeshData &&mesh) override;
 
-        virtual void updateImpl(MeshData &data, const AABB &bb, size_t groupSize, ByteBuffer vertices, size_t vertexSize, std::vector<unsigned short> indices = {}) override;
+        void updateImpl(OpenGLMeshData &data, const MeshData &mesh);
+        virtual void update(GPUMeshData &data, const MeshData &mesh) override;
+        virtual void update(GPUMeshData &data, MeshData &&mesh) override;
 
-		virtual void resetImpl(MeshData &data) override;
+		virtual void reset(GPUMeshData &data) override;
     };
 }
 }

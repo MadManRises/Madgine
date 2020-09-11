@@ -10,7 +10,7 @@ namespace Engine {
 
 struct GenerationVectorIndex {
 
-    static constexpr uint32_t INVALID_GENERATION = std::numeric_limits<uint32_t>::max();
+    static constexpr uint16_t INVALID_GENERATION = std::numeric_limits<uint16_t>::max();
     static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
     GenerationVectorIndex() = default;
@@ -83,7 +83,7 @@ private:
     }
 
     uint32_t mIndex = INVALID_INDEX;
-    uint32_t mGeneration = INVALID_GENERATION;
+    uint16_t mGeneration = INVALID_GENERATION;
 
 #if ENABLE_MEMTRACKING
     mutable uint32_t mDebugMarker = 0;
@@ -91,9 +91,10 @@ private:
 };
 
 struct GenerationVectorBase {
-    GenerationVectorBase(size_t bufferSize = 64)
+    GenerationVectorBase(uint16_t bufferSize = 64)
         : mHistory(bufferSize)
     {
+        assert(bufferSize < GenerationVectorIndex::INVALID_GENERATION);
     }
 
     GenerationVectorBase(const GenerationVectorBase &) = delete;
@@ -107,7 +108,7 @@ struct GenerationVectorBase {
 
     GenerationVectorIndex generate(uint32_t index) const
     {
-        uint32_t gen = mGeneration;
+        uint16_t gen = mGeneration.load();
         incRef(gen);
         GenerationVectorIndex result { index, gen };
 #if ENABLE_MEMTRACKING
@@ -163,9 +164,8 @@ struct GenerationVectorBase {
             //Apply History
             uint32_t wrap = mHistory.size();
             while (index.mGeneration != mGeneration) {
-                assert(index.mGeneration < mGeneration);
 
-                const Entry &entry = mHistory[index.mGeneration % wrap];
+                const Entry &entry = mHistory[index.mGeneration];
 
                 if (entry.mOp == RESET) {
                     index.reset();
@@ -196,7 +196,7 @@ struct GenerationVectorBase {
                 } else {
                     assert(entry.mOp == ERASE);
                 }
-                ++index.mGeneration;
+                index.mGeneration = (index.mGeneration + 1) % wrap;
             }
 
             incRef(index.mGeneration);
@@ -212,37 +212,38 @@ struct GenerationVectorBase {
 protected:
     void onSwapErase(uint32_t index, uint32_t swapped)
     {
-        uint32_t wrap = mHistory.size();
-        uint32_t gen = mGeneration.load();
-        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+        uint16_t gen = mGeneration.load();
+        uint16_t nextGen = (gen + 1) % mHistory.size();
+        if (mHistory[nextGen].mRefCount != 0)
             throw "Ring buffer is full!";
-        mHistory[gen % wrap].mOp = SWAP_ERASE;
-        mHistory[gen % wrap].mArg1 = index;
-        mHistory[gen % wrap].mArg2 = swapped;
-        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+        mHistory[gen].mOp = SWAP_ERASE;
+        mHistory[gen].mArg1 = index;
+        mHistory[gen].mArg2 = swapped;
+        if (!mGeneration.compare_exchange_strong(gen, nextGen))
             throw "Concurrent writes!!";
     }
 
     void onErase(uint32_t index)
     {
-        uint32_t wrap = mHistory.size();
-        uint32_t gen = mGeneration.load();
-        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+        uint16_t gen = mGeneration.load();
+        uint16_t nextGen = (gen + 1) % mHistory.size();
+        if (mHistory[nextGen].mRefCount != 0)
             throw "Ring buffer is full!";
-        mHistory[gen % wrap].mOp = ERASE;
-        mHistory[gen % wrap].mArg1 = index;
-        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+        mHistory[gen].mOp = ERASE;
+        mHistory[gen].mArg1 = index;
+        if (!mGeneration.compare_exchange_strong(gen, nextGen))
             throw "Concurrent writes!!";
     }
 
     void onClear()
     {
-        uint32_t wrap = mHistory.size();
-        uint32_t gen = mGeneration.load();
-        if (mHistory[(gen + 1) % wrap].mRefCount != 0)
+
+        uint16_t gen = mGeneration.load();
+        uint16_t nextGen = (gen + 1) % mHistory.size();
+        if (mHistory[nextGen].mRefCount != 0)
             throw "Ring buffer is full!";
-        mHistory[gen % wrap].mOp = RESET;
-        if (!mGeneration.compare_exchange_strong(gen, gen + 1))
+        mHistory[gen].mOp = RESET;
+        if (!mGeneration.compare_exchange_strong(gen, nextGen))
             throw "Concurrent writes!!";
     }
 
@@ -258,14 +259,14 @@ protected:
     }
 
 private:
-    void incRef(uint32_t index) const
+    void incRef(uint16_t index) const
     {
-        ++mHistory[index % mHistory.size()].mRefCount;
+        ++mHistory[index].mRefCount;
     }
 
-    void decRef(uint32_t index) const
+    void decRef(uint16_t index) const
     {
-        --mHistory[index % mHistory.size()].mRefCount;
+        --mHistory[index].mRefCount;
     }
 
     struct Entry {
@@ -275,11 +276,11 @@ private:
     };
 
     std::vector<Entry> mHistory;
-    std::atomic<uint32_t> mGeneration = 0;
+    std::atomic<uint16_t> mGeneration = 0;
 
 #if ENABLE_MEMTRACKING
     mutable uint32_t mDebugCounter = 0;
-    mutable std::unordered_map<uint32_t, std::pair<uint32_t, Debug::FullStackTrace>> mDebugTraces;
+    mutable std::unordered_map<uint32_t, std::pair<uint16_t, Debug::FullStackTrace>> mDebugTraces;
     mutable std::mutex mDebugMutex;
 #endif
 };
@@ -608,7 +609,7 @@ struct GenerationVector : GenerationVectorBase {
 
     template <typename... Args>
     iterator emplace(Args &&... args)
-    {        
+    {
         T *t = &mData.emplace_back(std::forward<Args>(args)...);
         uint32_t index = t - &mData.front();
         return { generate(index), this };

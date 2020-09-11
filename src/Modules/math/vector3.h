@@ -107,6 +107,11 @@ public:
         return { x, y };
     }
 
+    Vector3 xyz() const
+    {
+        return { x, y, z };
+    }
+
     /** Exchange the contents of this vector with another.
 		*/
     void swap(Vector3 &other) noexcept

@@ -18,7 +18,7 @@ std::tuple<Vector3, Vector3, Quaternion> DecomposeTransformMatrix(const Matrix4 
     std::get<0>(result) = transform.GetColumn(3).xyz();
     Matrix3 m3 = transform.ToMat3();
     std::get<1>(result) = { m3.GetColumn(0).length(), m3.GetColumn(1).length(), m3.GetColumn(2).length() };
-    std::get<2>(result) = Quaternion::FromMatrix(ScalingMatrix(std::get<1>(result)).Inverse());
+    std::get<2>(result) = Quaternion::FromMatrix(ScalingMatrix(std::get<1>(result)).Inverse() * m3);
     return result;
 }
 

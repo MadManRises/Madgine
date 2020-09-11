@@ -2,7 +2,7 @@
 
 #include "../entitycomponent.h"
 
-#include "meshloader.h"
+#include "gpumeshloader.h"
 
 namespace Engine {
 namespace Scene {
@@ -14,20 +14,20 @@ namespace Scene {
             std::string getName() const;
             void setName(const std::string &name);
 
-            Render::MeshData *data() const;
+            Render::GPUMeshData *data() const;
 
             AABB aabb() const;
 
-            void set(Render::MeshLoader::HandleType handle);            
+            void set(Render::GPUMeshLoader::HandleType handle);            
 
-            Render::MeshLoader::ResourceType *get() const;
-            const Render::MeshLoader::HandleType &handle() const;
+            Render::GPUMeshLoader::ResourceType *get() const;
+            const Render::GPUMeshLoader::HandleType &handle() const;
 
             void setVisible(bool vis);
             bool isVisible() const;
 
         private:
-            typename Render::MeshLoader::HandleType mMesh;
+            typename Render::GPUMeshLoader::HandleType mMesh;
         };
 
     }

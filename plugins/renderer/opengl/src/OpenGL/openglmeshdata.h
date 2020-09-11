@@ -4,12 +4,12 @@
 #include "util/opengltexture.h"
 #include "util/openglvertexarray.h"
 
-#include "meshdata.h"
+#include "gpumeshdata.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_OPENGL_EXPORT OpenGLMeshData : MeshData {
+    struct MADGINE_OPENGL_EXPORT OpenGLMeshData : GPUMeshData {
 
         void reset()
         {

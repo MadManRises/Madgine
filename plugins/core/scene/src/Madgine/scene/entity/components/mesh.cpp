@@ -21,7 +21,7 @@ namespace Scene {
                 setName(v.as<std::string>());
             }
         }
-        Render::MeshData *Mesh::data() const
+        Render::GPUMeshData *Mesh::data() const
         {
             return mMesh;
         }
@@ -50,12 +50,12 @@ namespace Scene {
             return mMesh->mAABB;
         }
 
-        void Mesh::set(Render::MeshLoader::HandleType handle)
+        void Mesh::set(Render::GPUMeshLoader::HandleType handle)
         {
             mMesh = handle;
         }
 
-        Render::MeshLoader::ResourceType *Mesh::get() const
+        Render::GPUMeshLoader::ResourceType *Mesh::get() const
         {
             return mMesh.resource();
         }

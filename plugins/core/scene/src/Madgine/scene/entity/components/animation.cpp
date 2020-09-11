@@ -21,12 +21,15 @@ namespace Scene {
         void Animation::set(const Render::AnimationLoader::HandleType &handle)
         {
             mAnimationList = handle;
+            setCurrentAnimation(nullptr);
             refreshCache();
         }
 
         void Animation::setName(const std::string &name)
         {
             mAnimationList.load(name);
+            setCurrentAnimation(nullptr);
+            refreshCache();
         }
 
         Render::AnimationLoader::ResourceType *Animation::get() const
@@ -97,7 +100,10 @@ namespace Scene {
                     float step = fmodf(mCurrentStep, mCurrentAnimation->mDuration);
                     if (step < 0.0f)
                         step += mCurrentAnimation->mDuration;
+
                     std::vector<Matrix4> &matrices = skeleton->matrices();
+                    std::set<size_t> parentTransformToDos;
+
                     for (size_t i = 0; i < matrices.size(); ++i) {
                         int mappedBone = mBoneIndexMapping ? mBoneIndexMapping[i] : i;
                         if (mappedBone != -1) {
@@ -122,21 +128,36 @@ namespace Scene {
                             float scale_blend = (step - it_scale->mTime) / (it_scale_end->mTime - it_scale->mTime);
                             float orientation_blend = (step - it_orientation->mTime) / (it_orientation_end->mTime - it_orientation->mTime);
 
-                            Matrix4 m = TransformMatrix(
+                            matrices[i] = TransformMatrix(
                                 Lerp(it_position->mValue, it_position_end->mValue, position_blend),
                                 Lerp(it_scale->mValue, it_scale_end->mValue, scale_blend),
                                 Slerp(it_orientation->mValue, it_orientation_end->mValue, orientation_blend));
+
                             uint32_t parent = mSkeletonCache->mBones[i].mParent;
                             if (parent != std::numeric_limits<uint32_t>::max()) {
-                                matrices[i] = matrices[parent] * m;
+                                /*if (parent < i && parentTransformToDos.count(parent) == 0)
+                                    matrices[i] = matrices[parent] * matrices[i];
+                                else*/
+                                    parentTransformToDos.emplace(i);
+                            } 
+                        }
+                    }
+                    while (!parentTransformToDos.empty()) {
+                        for (std::set<size_t>::iterator it = parentTransformToDos.begin(); it != parentTransformToDos.end();) {
+                            size_t parentIndex = mSkeletonCache->mBones[*it].mParent;
+                            if (parentTransformToDos.count(parentIndex) == 0) {
+                                matrices[*it] = matrices[parentIndex] * matrices[*it];
+                                it = parentTransformToDos.erase(it);
                             } else {
-                                matrices[i] = mAnimationList->mBaseMatrix * m;
+                                ++it;
                             }
                         }
                     }
 
                     for (size_t i = 0; i < matrices.size(); ++i) {
-                        matrices[i] = matrices[i] * mSkeletonCache->mBones[i].mOffsetMatrix;
+                        int mappedBone = mBoneIndexMapping ? mBoneIndexMapping[i] : i;
+                        if (mappedBone != -1) 
+                            matrices[i] = mSkeletonCache->mMatrix * matrices[i] * mSkeletonCache->mBones[i].mOffsetMatrix;
                     }
                 }
             }

@@ -52,6 +52,12 @@ struct ByteBuffer {
     {
     }
 
+    void clear() {
+        mSize = 0;
+        mData = nullptr;
+        mKeep = {};
+    }
+
 private:
     Any mKeep;
 

@@ -34,7 +34,7 @@ namespace Filesystem {
 
     FileQueryIterator::FileQueryIterator(const FileQuery *query)
         : mQuery(query)
-        , mBuffer(createQueryState(), &destroyQueryState)
+        , mBuffer(createQueryState())
     {
     }
 

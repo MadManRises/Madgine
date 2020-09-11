@@ -5,6 +5,8 @@
 #include "Modules/math/matrix4.h"
 #include "Modules/math/vector4.h"
 
+#include "meshloader.h"
+
 #include "directx11renderwindow.h"
 
 #include "Madgine/render/camera.h"
@@ -197,7 +199,7 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(MeshData *m, Program *p)
+    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p)
     {
         DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
         DirectX11Program *program = static_cast<DirectX11Program *>(p);
@@ -229,7 +231,7 @@ namespace Render {
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
-            DirectX11MeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
+            DirectX11MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
             //setupProgram(flags);
 
@@ -241,7 +243,7 @@ namespace Render {
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
-            DirectX11MeshLoader::getSingleton().generate(tempMesh, groupSize, std::move(vertices), std::move(indices));
+            DirectX11MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
             tempMesh.mTextureHandle = texture;
 

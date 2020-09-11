@@ -262,7 +262,7 @@ namespace Resources {
 
             void unloadData()
             {
-                return unload(this);
+                unload(this);
             }
 
             using traits = container_traits<DataContainer>;

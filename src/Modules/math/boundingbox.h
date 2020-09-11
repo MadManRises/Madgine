@@ -2,10 +2,19 @@
 
 #include "matrix4.h"
 
+#include "../keyvalue/scopebase.h"
+
 namespace Engine {
 
-struct AABB {
+struct AABB : ScopeBase {
     Vector3 mMin, mMax;
+
+    AABB() = default;
+    AABB(const Vector3 &min, const Vector3 &max)
+        : mMin(min)
+        , mMax(max)
+    {
+    }
 
     constexpr float diameter() const
     {
@@ -17,7 +26,7 @@ struct AABB {
         return 0.5f * (mMax + mMin);
     }
 
-	std::array<Vector3, 8> corners() const
+    std::array<Vector3, 8> corners() const
     {
         std::array<Vector3, 8> result;
         result[0] = mMin;
@@ -63,9 +72,9 @@ struct BoundingBox {
         result[3] = mMax - dist.dotProduct(dirZ) * dirZ;
         result[4] = mMin + dist.dotProduct(dirZ) * dirZ;
         result[5] = mMax - dist.dotProduct(mDirY) * mDirY;
-		result[6] = mMax - dist.dotProduct(mDirX) * mDirX;        
-        result[7] = mMax;     
-		return result;
+        result[6] = mMax - dist.dotProduct(mDirX) * mDirX;
+        result[7] = mMax;
+        return result;
     }
 };
 

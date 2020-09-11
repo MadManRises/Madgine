@@ -47,9 +47,36 @@ namespace Window {
                 case WM_LBUTTONUP:
                     injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
                     break;
+                case WM_RBUTTONDOWN:
+                    injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON });
+                    break;
+                case WM_RBUTTONUP:
+                    injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON });
+                    break;
+                case WM_MBUTTONDOWN:
+                    injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON});
+                    break;
+                case WM_MBUTTONUP:
+                    injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON });
+                    break;
                 case WM_MOUSEMOVE:
                     injectPointerMove(Input::PointerEventArgs { windowPos, screenPos, { windowPos.x - mLastKnownMousePos.x, windowPos.y - mLastKnownMousePos.y } });
                     mLastKnownMousePos = windowPos;
+                    break;
+                case WM_MOUSEWHEEL:
+                    injectPointerMove(Input::PointerEventArgs { { windowPos.x - renderX(), windowPos.y - renderY() }, windowPos, { 0, 0 }, GET_WHEEL_DELTA_WPARAM(wParam) / float(WHEEL_DELTA) });
+                    break;
+                }
+            } else if (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) {
+                Input::Key::Key keycode = (Input::Key::Key)wParam;
+                switch (msg) {
+                case WM_KEYDOWN:
+                    mKeyDown[keycode] = true;
+                    injectKeyPress(Input::KeyEventArgs { keycode, isKeyDown(Input::Key::Shift) });
+                    break;
+                case WM_KEYUP:
+                    mKeyDown[keycode] = false;
+                    injectKeyRelease(Input::KeyEventArgs { keycode });
                     break;
                 }
             } else {
@@ -209,11 +236,13 @@ namespace Window {
             return mKeyDown[key];
         }
 
-        virtual void captureInput() override {
+        virtual void captureInput() override
+        {
             SetCapture((HWND)mHandle);
         }
 
-        virtual void releaseInput() override {
+        virtual void releaseInput() override
+        {
             ReleaseCapture();
         }
 

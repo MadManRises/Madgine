@@ -8,6 +8,8 @@
 
 #include "Madgine/scene/entity/components/transform.h"
 
+#include "collisionshapemanager.h"
+
 namespace Engine {
 namespace Physics {
 
@@ -32,7 +34,11 @@ namespace Physics {
         bool kinematic() const;
         void setKinematic(bool kinematic);
 
+        void setShape(typename CollisionShapeManager::HandleType handle);
+        CollisionShapeManager::ResourceType *getShape() const;
+
     private:
+        typename CollisionShapeManager::HandleType mShapeHandle;
         struct Data;
         std::unique_ptr<Data> mData;
     };

@@ -21,7 +21,6 @@
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
-
 METATABLE_BEGIN(Engine::Tools::TestTool)
 FUNCTION(logTest)
 FUNCTION(logValue, value)
@@ -30,8 +29,6 @@ METATABLE_END(Engine::Tools::TestTool)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::TestTool)
-
-
 
 namespace Engine {
 namespace Tools {
@@ -49,6 +46,19 @@ namespace Tools {
         };
         for (auto [name, size] : data) {
             ImGui::Text("  %s size: %u", name, size);
+        }
+    }
+
+    template <typename T, typename... Bases>
+    void renderVTableLayout(T& t) {
+        if (ImGui::TreeNode(typeid(T).name())) {
+            ImGui::Text("size: %u", sizeof(T));
+            uintptr_t *vtable = *reinterpret_cast<uintptr_t**>(&t);
+            if (ImGui::TreeNode("vtbl", "vtable: %p", vtable)) {
+                ImGui::TreePop();
+            }
+            (renderVTableLayout<Bases>(t), ...);
+            ImGui::TreePop();
         }
     }
 
@@ -109,9 +119,39 @@ namespace Tools {
 
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
-            ImGui::Text("ValueType size: %u", (unsigned int)sizeof(ValueType));
-            renderValuetypeSizes(std::make_index_sequence<size_t(ValueTypeEnum::MAX_VALUETYPE_TYPE)>());
+            if (ImGui::TreeNode("ValueType Sizes")) {
+                ImGui::Text("ValueType size: %u", (unsigned int)sizeof(ValueType));
+                renderValuetypeSizes(std::make_index_sequence<size_t(ValueTypeEnum::MAX_VALUETYPE_TYPE)>());
+                ImGui::TreePop();
+            }
 
+            if (ImGui::TreeNode("VTable")) {
+
+                struct Base1 {
+                    virtual void b1() { }
+                };
+
+                struct Base2 {
+                    virtual void b2() { }
+                };
+
+                struct Base3 : Base2 {
+                    virtual void b3() { }
+                    virtual void b2() override { }
+                };
+
+                struct Derived : Base1, Base3 {
+                    virtual void b1() override { }
+                };
+
+                Base3 b;
+                renderVTableLayout<Base3, Base2>(b);
+                Derived d;
+                renderVTableLayout<Derived, Base3, Base2, Base1>(d);
+
+
+                ImGui::TreePop();
+            }
         }
         ImGui::End();
     }

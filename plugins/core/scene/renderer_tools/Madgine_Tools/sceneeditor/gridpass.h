@@ -4,7 +4,7 @@
 /*#include "OpenGL/util/openglprogram.h"
 #include "OpenGL/util/openglbuffer.h"
 #include "OpenGL/util/openglvertexarray.h"*/
-#include "meshloader.h"
+#include "gpumeshloader.h"
 #include "programloader.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
@@ -21,17 +21,17 @@ namespace Tools {
 
         virtual void render(Render::RenderTarget *target) override;
 
-		virtual int priority() const override;
+        virtual int priority() const override;
 
     private:
-        Render::MeshLoader::HandleType mMesh;
+        Render::GPUMeshLoader::HandleType mMesh;
         Render::ProgramLoader::HandleType mProgram;
 
         GridPerFrame mParameters;
 
-		Render::Camera *mCamera;
+        Render::Camera *mCamera;
 
-		int mPriority;
+        int mPriority;
     };
 
 }

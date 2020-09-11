@@ -21,8 +21,10 @@ namespace Scene {
 
         EntityPtr &EntityPtr::operator=(const EntityPtr &other)
         {
-            other.mSceneMgr->entities().reset(mIndex);
-            mIndex = other.mSceneMgr->entities().copy(other.mIndex);
+            if (mIndex)
+                mSceneMgr->entities().reset(mIndex);
+            if (other.mIndex)
+                mIndex = other.mSceneMgr->entities().copy(other.mIndex);
             mSceneMgr = other.mSceneMgr;
             return *this;
         }

@@ -98,9 +98,13 @@ namespace Plugins {
             {
                 std::lock_guard lock { mMutex };
                 for (Plugin *dep : mDependencies) {
-                    if (mName == dep->mName + "Tools")
-                        continue;
-                    dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
+                    if (mName == dep->mName + "Tools") {
+                        Future<bool> f = dep->state();
+                        if (f.isAvailable() && !f)
+                            dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
+                    } else {
+                        dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
+                    }
                 }
                 for (PluginSection *sec : mGroupDependencies) {
                     dependencyList.emplace_back(sec->load(barrier));
@@ -253,7 +257,7 @@ namespace Plugins {
         return mState.isAvailable() && mState;
     }
 
-    void Plugin::addDependency(PluginManager &manager, Plugin * dependency)
+    void Plugin::addDependency(PluginManager &manager, Plugin *dependency)
     {
         std::lock_guard lock { manager.mDependenciesMutex };
         checkCircularDependency(dependency);

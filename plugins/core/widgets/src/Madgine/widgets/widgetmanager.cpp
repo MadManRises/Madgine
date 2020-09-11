@@ -5,7 +5,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "meshloader.h"
+#include "gpumeshloader.h"
 #include "programloader.h"
 
 #include "widget.h"
@@ -58,7 +58,7 @@ namespace Widgets {
     struct WidgetManager::WidgetManagerData {
 
         Render::ProgramLoader::HandleType mProgram;
-        Render::MeshLoader::HandleType mMesh;
+        Render::GPUMeshLoader::HandleType mMesh;
 
         Resources::ImageLoader::HandleType mDefaultTexture;
         Render::TextureLoader::HandleType mUIAtlasTexture;
@@ -113,8 +113,8 @@ namespace Widgets {
     {
         mData->mProgram.create("ui");
 
-        mData->mMesh = Render::MeshLoader::loadManual("widgetMesh", {}, [](Render::MeshLoader *loader, Render::MeshData &mesh, Render::MeshLoader::ResourceType *res) {
-            return loader->generate<Vertex>(mesh, 3, {});
+        mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceType *res) {
+            return loader->generate(mesh, {3, std::vector<Vertex>{}});
         });
 
         mData->mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
@@ -714,7 +714,7 @@ namespace Widgets {
                 else
                     mData->mUIAtlasTexture.bind();
 
-                mData->mMesh.update(3, std::move(p.second));
+                mData->mMesh.update({ 3, std::move(p.second) });
 
                 target->renderMesh(mData->mMesh, mData->mProgram);
             }

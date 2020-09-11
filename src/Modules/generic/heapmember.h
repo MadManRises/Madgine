@@ -3,28 +3,28 @@
 namespace Engine {
 
 template <typename T>
-struct HeapObject {
+struct HeapMember {
 
     template <typename... Args>
-    HeapObject(Args &&... args)
+    HeapMember(Args &&... args)
         : mObject(std::make_unique<T>(std::forward<Args>(args)...))
     {
     }
 
-    HeapObject(const HeapObject<T> &other)
+    HeapMember(const HeapMember<T> &other)
         : mObject(std::make_unique<T>(*other))
     {
     }
 
-	HeapObject(HeapObject<T> &&) = default;
+	HeapMember(HeapMember<T> &&) = default;
 
-    HeapObject<T> &operator=(const HeapObject<T> &other)
+    HeapMember<T> &operator=(const HeapMember<T> &other)
     {
         *mObject = *other;
         return *this;
     }
 
-    bool operator==(const HeapObject<T> &other) const
+    bool operator==(const HeapMember<T> &other) const
     {
         return *mObject == *other;
     }

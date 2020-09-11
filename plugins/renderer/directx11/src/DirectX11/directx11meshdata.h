@@ -4,12 +4,12 @@
 #include "util/directx11texture.h"
 #include "util/directx11vertexarray.h"
 
-#include "meshdata.h"
+#include "gpumeshdata.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_DIRECTX11_EXPORT DirectX11MeshData : MeshData {
+    struct MADGINE_DIRECTX11_EXPORT DirectX11MeshData : GPUMeshData {
 
         void reset()
         {

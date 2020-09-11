@@ -2,6 +2,8 @@
 
 #include "windoweventlistener.h"
 
+#include "../input/inputevents.h"
+
 namespace Engine {
 namespace Window {
 
@@ -93,6 +95,8 @@ namespace Window {
         //Input
         bool injectKeyPress(const Input::KeyEventArgs &arg)
         {
+            if (arg.scancode == Input::Key::Shift)
+                return false;
             for (WindowEventListener *listener : mListeners)
                 if (listener->injectKeyPress(arg))
                     return true;
@@ -100,6 +104,8 @@ namespace Window {
         }
         bool injectKeyRelease(const Input::KeyEventArgs &arg)
         {
+            if (arg.scancode == Input::Key::Shift)
+                return false;
             for (WindowEventListener *listener : mListeners)
                 if (listener->injectKeyRelease(arg))
                     return true;

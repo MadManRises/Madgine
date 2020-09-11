@@ -12,69 +12,14 @@
 
 #    include <direct.h>
 
+#include "../stringutil.h"
+
 namespace Engine {
 namespace Filesystem {
-
-    struct FileQueryState {
-        WIN32_FIND_DATA mData;
-    };
-
-    static bool skipSymbolic(void *handle, FileQueryState &data)
-    {
-        while (strcmp(data.mData.cFileName, ".") == 0 || strcmp(data.mData.cFileName, "..") == 0)
-            if (!FindNextFile(handle, &data.mData))
-                return false;
-        return true;
-    }
-
-    FileQueryHandle::FileQueryHandle(Path p, FileQueryState &data)
-        : mPath(std::move(p))
-        , mHandle(FindFirstFile((mPath.str() + "/*").c_str(), &data.mData))
-    {
-        if (mHandle == INVALID_HANDLE_VALUE)
-            mHandle = nullptr;
-        else if (!skipSymbolic(mHandle, data))
-            close();
-    }
-
-    void FileQueryHandle::close()
-    {
-        if (mHandle) {
-            FindClose(mHandle);
-            mHandle = nullptr;
-        }
-    }
-
-    bool FileQueryHandle::advance(FileQueryState &data)
-    {
-        if (!FindNextFile(mHandle, &data.mData))
-            return false;
-        return skipSymbolic(mHandle, data);
-    }
-
-    FileQueryState *createQueryState()
-    {
-        return new FileQueryState;
-    }
-
-    void destroyQueryState(FileQueryState *state)
-    {
-        delete state;
-    }
-
-    bool isDir(const FileQueryState &data)
-    {
-        return (data.mData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-    }
 
     bool isDir(const Path &p)
     {
         return (GetFileAttributesA(p.c_str()) & FILE_ATTRIBUTE_DIRECTORY) != 0;
-    }
-
-    const char *filename(const FileQueryState &data)
-    {
-        return data.mData.cFileName;
     }
 
     Path configPath()
@@ -112,13 +57,33 @@ namespace Filesystem {
         p = buffer;
     }
 
+    bool isValidPath(const std::string &p)
+    {
+        if (p.empty())
+            return true;
+        if (!std::isalnum(p[0]))
+            return false;
+        if (p.size() == 1)
+            return true;
+        if (!std::isalnum(p[1]) && !isSeparator(p[1]) && p[1] != ':')
+            return false;
+        for (const char *c = p.data() + 2; c < p.data() + p.size(); ++c)
+            if ((!std::isalnum(*c) && !isSeparator(*c) && !std::ispunct(*c) && *c != ' ')
+                || *c == '<'
+                || *c == '>'
+                || *c == ':'
+                || *c == '"'
+                || *c == '|'
+                || *c == '?'
+                || *c == '*')
+                return false;
+        return true;
+    }
+
     bool isAbsolute(const Path &p)
     {
         auto colon = p.str().find(':');
-        if (colon == std::string::npos)
-            return false;
-        auto sep = p.str().find('/');
-        return sep == std::string::npos || colon < sep;
+        return colon != std::string::npos;
     }
 
     static bool compareChar(char c1, char c2)
