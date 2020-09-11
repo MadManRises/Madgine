@@ -84,6 +84,21 @@ namespace Filesystem {
         else
             return {};
     }
+    
+    bool isValidPath(const std::string &p)
+    {
+        for (char c : p)
+            if ((!std::isalnum(c) && !isSeparator(c) && !std::ispunct(c) && c != ' ')
+                || c == '<'
+                || c == '>'
+                || c == ':'
+                || c == '"'
+                || c == '|'
+                || c == '?'
+                || c == '*')
+                return false;
+        return true;
+    }
 
 }
 }

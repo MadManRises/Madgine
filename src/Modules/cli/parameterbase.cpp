@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 #include "parameterbase.h"
 #include "cli.h"
 

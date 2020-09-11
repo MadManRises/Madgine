@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#include "../stringutil.h"
+#include "../util/stringutil.h"
 #include "memory/statsmemoryresource.h"
 #include "memory/untrackedmemoryresource.h"
 #include "stacktrace.h"

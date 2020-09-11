@@ -6,11 +6,11 @@
 
 #include "streams/comparestreamid.h"
 
-#include "Interfaces/timeout.h"
+#include "Interfaces/util/timeout.h"
 
 #include "serializemanager.h"
 
-#include "Interfaces/genericresult.h"
+#include "Interfaces/util/genericresult.h"
 
 namespace Engine {
 namespace Serialize {

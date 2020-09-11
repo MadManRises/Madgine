@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/enum.h"
+#include "Interfaces/util/enum.h"
 
 namespace Engine {
 namespace Serialize {

@@ -12,8 +12,6 @@
 
 #    include <direct.h>
 
-#include "../stringutil.h"
-
 namespace Engine {
 namespace Filesystem {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../timeout.h"
+#include "../util/timeout.h"
 
-#include "../genericresult.h"
+#include "../util/genericresult.h"
 
 namespace Engine {
 

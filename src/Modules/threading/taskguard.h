@@ -2,29 +2,26 @@
 
 #include "task.h"
 
-namespace Engine
-{
-	namespace Threading
-	{
-		
-		struct TaskGuard
-		{
-			TaskGuard(TaskHandle &&init, TaskHandle &&finalize) :
-				mFinalize(std::move(finalize))
-			{
-				if (init)
-					init();
-			}
+namespace Engine {
+namespace Threading {
 
-			~TaskGuard()
-			{
-				if (mFinalize)
-					mFinalize();
-			}
+    struct TaskGuard {
+        TaskGuard(TaskHandle &&init, TaskHandle &&finalize = {})
+            : mFinalize(std::move(finalize))
+        {
+            if (init)
+                init();
+        }
 
-		private:
-			TaskHandle mFinalize;
-		};
+        ~TaskGuard()
+        {
+            if (mFinalize)
+                mFinalize();
+        }
 
-	}
+    private:
+        TaskHandle mFinalize;
+    };
+
+}
 }

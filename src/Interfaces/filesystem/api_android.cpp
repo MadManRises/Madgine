@@ -8,7 +8,7 @@
 #    include <sys/stat.h>
 #    include <unistd.h>
 
-#    include "../stringutil.h"
+#include "../util//stringutil.h"
 
 #    include <android/asset_manager.h>
 
@@ -210,6 +210,25 @@ namespace Filesystem {
         auto result = getcwd(buffer, sizeof(buffer));
         assert(result);
         return buffer;
+    }
+
+    
+    bool isValidPath(const std::string &p)
+    {
+        const char *c = p.data();
+        if (StringUtil::startsWith(p, sAssetPrefix))
+            c += strlen(sAssetPrefix);
+        for (; c < p.data() + p.size(); ++c)
+            if ((!std::isalnum(*c) && !isSeparator(*c) && !std::ispunct(*c) && *c != ' ')
+                || *c == '<'
+                || *c == '>'
+                || *c == ':'
+                || *c == '"'
+                || *c == '|'
+                || *c == '?'
+                || *c == '*')
+                return false;
+        return true;
     }
 
 }

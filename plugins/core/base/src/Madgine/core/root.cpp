@@ -13,8 +13,11 @@
 
 #include "Modules/plugins/pluginsection.h"
 
+#include "Modules/threading/taskguard.h"
+
 namespace Engine {
 namespace Core {
+
     Root::Root(const std::string &programName, int argc, char **argv)
         : mCLI(std::make_unique<CLI::CLICore>(argc, argv))
 #if ENABLE_PLUGINS

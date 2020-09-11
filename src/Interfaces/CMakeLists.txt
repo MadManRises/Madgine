@@ -14,7 +14,7 @@ option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocatio
 
 set(sources)
 
-FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforward.h interfaceslib.h stringutil.h)
+FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" debug stacktrace.cpp stacktrace.h traceback.cpp traceback.h)
 		FolderSources(sources debug memory memory.cpp memory.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
 	FolderSources(sources "" dl dlapi_unix.cpp dlapi_win.cpp dlapi.h runtime.cpp runtime.h runtime_unix.cpp runtime_win.cpp)
@@ -22,7 +22,7 @@ FolderSources(sources "" "" commonlib.h exception.cpp exception.h interfacesforw
 	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
 	FolderSources(sources "" streams streams.cpp streams.h)
 	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
-	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)

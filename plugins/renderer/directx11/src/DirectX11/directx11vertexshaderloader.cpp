@@ -2,7 +2,7 @@
 
 #include "directx11vertexshaderloader.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 
 #include "util/directx11vertexshader.h"
 

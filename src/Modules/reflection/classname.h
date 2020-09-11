@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../generic/type_holder.h"
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 #include "decay.h"
 
 template <typename T>

@@ -7,10 +7,10 @@
 #include "Madgine/core/root.h"
 #include "Madgine/window/mainwindow.h"
 #include "Modules/cli/parameter.h"
-#include "Modules/threading/scheduler.h"
-#include "Modules/threading/workgroup.h"
 #include "Modules/keyvalueutil/keyvalueregistry.h"
 #include "Modules/serialize/streams/serializestream.h"
+#include "Modules/threading/scheduler.h"
+#include "Modules/threading/workgroup.h"
 
 #include "filesystem/filesystemlib.h"
 #include "filesystem/filemanager.h"
@@ -18,6 +18,9 @@
 #include "xml/xmlformatter.h"
 
 #include "Modules/resources/resourcemanager.h"
+
+#include "Interfaces/debug/stacktrace.h"
+#include "Modules/threading/taskguard.h"
 
 Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
@@ -54,7 +57,6 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
             } else {
                 return false;
             }
-
         });
 #endif
 
@@ -74,3 +76,17 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
     }
 }
 #endif
+
+void madgine_terminate_handler()
+{
+    {
+        Engine::Util::LogDummy cout { Engine::Util::ERROR_TYPE };
+        cout << "Terminate called! (Madgine-Handler)\n";
+        cout << "Stack-Trace:\n";
+        for (const Engine::Debug::TraceBack &trace : Engine::Debug::StackTrace<64>::getCurrent(1).calculateReadable())
+            cout << trace.mFunction << " (" << trace.mFile << ": " << trace.mLineNr << ")\n";
+    }
+    abort();
+}
+
+static Engine::Threading::TaskGuard global { []() { std::set_terminate(&madgine_terminate_handler); } };

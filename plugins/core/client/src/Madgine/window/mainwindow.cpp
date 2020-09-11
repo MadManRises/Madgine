@@ -12,7 +12,7 @@
 
 #include "toolwindow.h"
 
-#include "Interfaces/exception.h"
+#include "Interfaces/util/exception.h"
 
 #include "Modules/generic/container/reverseIt.h"
 

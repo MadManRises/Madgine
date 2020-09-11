@@ -4,7 +4,7 @@
 
 #include "Modules/serialize/streams/serializestream.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 
 #include "Modules/serialize/primitivetypes.h"
 

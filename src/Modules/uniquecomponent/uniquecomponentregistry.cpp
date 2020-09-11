@@ -6,7 +6,7 @@
 
 #    include "../plugins/binaryinfo.h"
 
-#    include "Interfaces/stringutil.h"
+#    include "Interfaces/util/stringutil.h"
 
 #    include "Interfaces/filesystem/api.h"
 

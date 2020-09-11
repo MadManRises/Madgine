@@ -2,7 +2,7 @@
 
 #include "directx11pixelshaderloader.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 
 #include "util/directx11pixelshader.h"
 

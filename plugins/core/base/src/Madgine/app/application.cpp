@@ -3,7 +3,7 @@
 
 #include "appsettings.h"
 
-#include "Interfaces/exception.h"
+#include "Interfaces/util/exception.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 

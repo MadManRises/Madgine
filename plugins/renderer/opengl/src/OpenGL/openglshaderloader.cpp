@@ -2,7 +2,7 @@
 
 #include "openglshaderloader.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 
 #include "util/openglshader.h"
 

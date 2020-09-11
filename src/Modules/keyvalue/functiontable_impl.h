@@ -2,7 +2,7 @@
 
 #include "valuetype_forward.h"
 
-#include "Interfaces/stringutil.h"
+#include "Interfaces/util/stringutil.h"
 #include "functiontable.h"
 
 namespace Engine {

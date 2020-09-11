@@ -20,8 +20,9 @@ namespace Filesystem {
 
         return Path(buffer).parentPath();
     }
-  
-    bool isDir(const Path& p) {
+
+    bool isDir(const Path &p)
+    {
         struct stat statbuffer;
         auto result = stat(p.c_str(), &statbuffer);
         assert(result != -1);
@@ -45,7 +46,7 @@ namespace Filesystem {
     }
 
     void makeNormalized(Path &p)
-    {        
+    {
     }
 
     bool isAbsolute(const Path &p)
@@ -88,6 +89,21 @@ namespace Filesystem {
         auto result = getcwd(buffer, sizeof(buffer));
         assert(result);
         return buffer;
+    }
+
+    bool isValidPath(const std::string &p)
+    {
+        for (char c : p)
+            if ((!std::isalnum(c) && !isSeparator(c) && !std::ispunct(c) && c != ' ')
+                || c == '<'
+                || c == '>'
+                || c == ':'
+                || c == '"'
+                || c == '|'
+                || c == '?'
+                || c == '*')
+                return false;
+        return true;
     }
 
 }

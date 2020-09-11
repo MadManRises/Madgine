@@ -5,7 +5,7 @@
 #include "pendingrequest.h"
 
 #include "streamstate.h"
-#include "Interfaces/genericresult.h"
+#include "Interfaces/util/genericresult.h"
 
 namespace Engine {
 namespace Serialize {

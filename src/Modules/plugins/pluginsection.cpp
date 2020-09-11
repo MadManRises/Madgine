@@ -8,7 +8,7 @@
 
 #    include "pluginmanager.h"
 
-#    include "Interfaces/exception.h"
+#    include "Interfaces/util/exception.h"
 
 #    include "../threading/defaulttaskqueue.h"
 
