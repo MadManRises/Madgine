@@ -59,13 +59,17 @@ namespace Filesystem {
     {
         if (p.empty())
             return true;
-        if (!std::isalnum(p[0]))
-            return false;
-        if (p.size() == 1)
-            return true;
-        if (!std::isalnum(p[1]) && !isSeparator(p[1]) && p[1] != ':')
-            return false;
-        for (const char *c = p.data() + 2; c < p.data() + p.size(); ++c)
+        const char *c = p.data();
+        if (p[0] != '.') {
+            if (!std::isalnum(p[0]))
+                return false;
+            if (p.size() == 1)
+                return true;
+            if (!std::isalnum(p[1]) && !isSeparator(p[1]) && p[1] != ':')
+                return false;
+            c = p.data() + 2;
+        }
+        for (; c < p.data() + p.size(); ++c)
             if ((!std::isalnum(*c) && !isSeparator(*c) && !std::ispunct(*c) && *c != ' ')
                 || *c == '<'
                 || *c == '>'

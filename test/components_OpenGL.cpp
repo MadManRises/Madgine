@@ -1,13 +1,10 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#ifdef BUILD_Scene
-#    include "Madgine/scenelib.h"
-#endif
-#ifdef BUILD_Modules
-#    include "Modules/moduleslib.h"
-#endif
 #ifdef BUILD_OpenGL
 #    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_Scene
+#    include "Madgine/scenelib.h"
 #endif
 #ifdef BUILD_Widgets
 #    include "Madgine/widgetslib.h"
@@ -18,11 +15,8 @@
 #ifdef BUILD_UI
 #    include "Madgine/uilib.h"
 #endif
-#ifdef BUILD_ClickBrick
-#    include "clickbricklib.h"
-#endif
-#ifdef BUILD_Client
-#    include "Madgine/clientlib.h"
+#ifdef BUILD_Modules
+#    include "Modules/moduleslib.h"
 #endif
 #ifdef BUILD_AnimationLoader
 #    include "animationloaderlib.h"
@@ -36,125 +30,131 @@
 #ifdef BUILD_ImageLoader
 #    include "imageloaderlib.h"
 #endif
+#ifdef BUILD_ClickBrick
+#    include "clickbricklib.h"
+#endif
+#ifdef BUILD_Client
+#    include "Madgine/clientlib.h"
+#endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_Base
-#    include ""
+#    include "Madgine/app/globalapicollector.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/scenemanager.h"
 #endif
 #ifdef BUILD_Client
-#    include ""
+#    include "Madgine/render/rendercontextcollector.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include ""
+#    include "OpenGL/openglrendercontext.h"
 #endif
 #ifdef BUILD_Modules
-#    include ""
+#    include "Modules/resources/resourceloadercollector.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include ""
+#    include "OpenGL/openglmeshloader.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include ""
+#    include "OpenGL/openglprogramloader.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include ""
+#    include "OpenGL/openglshaderloader.h"
 #endif
 #ifdef BUILD_OpenGL
-#    include ""
+#    include "OpenGL/opengltextureloader.h"
 #endif
 #ifdef BUILD_MeshLoader
-#    include ""
+#    include "meshloader.h"
 #endif
 #ifdef BUILD_SkeletonLoader
-#    include ""
+#    include "skeletonloader.h"
 #endif
 #ifdef BUILD_AnimationLoader
-#    include ""
+#    include "animationloader.h"
 #endif
 #ifdef BUILD_ImageLoader
-#    include ""
+#    include "imageloader.h"
 #endif
 #ifdef BUILD_FontLoader
-#    include ""
+#    include "fontloader.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/entitycomponentcollector.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/animation.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/mesh.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/skeleton.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/transform.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "brick.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/entitycomponentcollector.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/animation.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/mesh.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/skeleton.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/entity/components/transform.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "brick.h"
 #endif
 #ifdef BUILD_Scene
-#    include ""
+#    include "Madgine/scene/scenecomponentcollector.h"
 #endif
 #ifdef BUILD_UI
-#    include ""
+#    include "Madgine/ui/gamehandler.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "gamemanager.h"
 #endif
 #ifdef BUILD_UI
-#    include ""
+#    include "Madgine/ui/guihandler.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "mainmenuhandler.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "gamehandler.h"
 #endif
 #ifdef BUILD_ClickBrick
-#    include ""
+#    include "gameoverhandler.h"
 #endif
 #ifdef BUILD_Client
-#    include ""
+#    include "Madgine/window/mainwindowcomponentcollector.h"
 #endif
 #ifdef BUILD_Widgets
-#    include ""
+#    include "Madgine/widgets/widgetmanager.h"
 #endif
 #ifdef BUILD_UI
-#    include ""
+#    include "Madgine/ui/uimanager.h"
 #endif
 #ifdef BUILD_TestShared
-#    include ""
+#    include "uniquecomponent/uniquecomponentshared.h"
 #endif
 #ifdef BUILD_LibA
-#    include ""
+#    include "uniquecomponent/libA.h"
 #endif
 #ifdef BUILD_LibB
-#    include ""
+#    include "uniquecomponent/libB.h"
 #endif
 
 
