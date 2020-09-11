@@ -2,7 +2,7 @@
 
 #if LINUX
 
-#    include "filequery.h"
+#    include "api.h"
 
 #    include <dirent.h>
 #    include <sys/stat.h>
