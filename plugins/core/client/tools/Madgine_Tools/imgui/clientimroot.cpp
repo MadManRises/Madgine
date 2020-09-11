@@ -24,6 +24,7 @@
 
 #include "Interfaces/input/inputevents.h"
 
+#include "Interfaces/filesystem/api.h"
 
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
@@ -125,6 +126,7 @@ namespace Tools {
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
         : SerializableUnit(window, 80)
         , mRoot(this)
+        , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
     {
     }
 
@@ -139,6 +141,8 @@ namespace Tools {
 
         ImGuiIO &io = ImGui::GetIO();
         io.UserData = this;
+
+        io.IniFilename = mImGuiIniFilePath.c_str();
 
 #if ANDROID
         io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);

@@ -10,7 +10,7 @@ namespace Plugins {
     struct MODULES_EXPORT PluginManager {
         static PluginManager &getSingleton();
 
-        PluginManager(const std::string &programName);
+        PluginManager();
         ~PluginManager();		
 
         void setup(bool loadCache = true, bool loadExe = true);
@@ -56,8 +56,6 @@ namespace Plugins {
         static PluginManager *sSingleton;
 
         bool mLoadingSelectionFile = false;
-
-        std::string mCacheFileName;
     };
 
 }

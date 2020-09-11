@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Filesystem {
 
-    Path configPath()
+    Path executablePath()
     {
         char buffer[512];
 
@@ -19,6 +19,27 @@ namespace Filesystem {
         assert(result > 0);
 
         return Path(buffer).parentPath();
+    }
+
+    std::string executableName()
+    {
+        //TODO
+        char buffer[512];
+
+        auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
+        assert(result > 0);
+
+        return Path(buffer).stem();
+    }
+
+    Path appDataPath()
+    {
+        Path result { "~/." + executableName() };       
+
+        if (!exists(result))
+            createDirectory(result);
+
+        return result;
     }
 
     bool isDir(const Path &p)

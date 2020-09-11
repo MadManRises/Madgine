@@ -35,6 +35,10 @@ namespace Plugins {
     CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
     CLI::Parameter<std::string> exportPlugins { { "--export-plugins", "-ep" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file and will export a corresponding uniquecomponent configuration source file." };
 
+    static Filesystem::Path cacheFileName() {
+        return Filesystem::appDataPath() / ("plugins.cfg");
+    }
+
     PluginManager *PluginManager::sSingleton = nullptr;
 
     PluginManager &PluginManager::getSingleton()
@@ -43,8 +47,7 @@ namespace Plugins {
         return *sSingleton;
     }
 
-    PluginManager::PluginManager(const std::string &programName)
-        : mCacheFileName(programName + ".cfg")
+    PluginManager::PluginManager()
     {
         assert(!sSingleton);
         sSingleton = this;
@@ -72,7 +75,7 @@ namespace Plugins {
 
         if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
             barrier.queue(nullptr, [this, &barrier, p { std::move(p1) }]() mutable {
-                std::string pluginFile = !loadPlugins->empty() ? *loadPlugins : mCacheFileName;
+                Filesystem::Path pluginFile = !loadPlugins->empty() ? *loadPlugins : cacheFileName();
 
                 Ini::IniFile file;
                 if (file.loadFromDisk(pluginFile)) {
@@ -253,7 +256,7 @@ namespace Plugins {
         if (!noPluginCache) {
             Ini::IniFile file;
             saveSelection(barrier, file, false);
-            file.saveToDisk(mCacheFileName);
+            file.saveToDisk(cacheFileName());
         }
     }
 

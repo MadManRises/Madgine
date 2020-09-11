@@ -11,6 +11,8 @@
 
 #include "Modules/math/vector2.h"
 
+#include "Interfaces/filesystem/path.h"
+
 struct ImGuiDockNode;
 struct ImGuiViewport;
 
@@ -59,6 +61,8 @@ namespace Tools {
 
         Vector2 mAreaPos = Vector2::ZERO;
         Vector2 mAreaSize = Vector2::ZERO;
+
+        Filesystem::Path mImGuiIniFilePath;
     };
 
 }

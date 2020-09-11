@@ -16,6 +16,7 @@ namespace Engine {
 namespace Filesystem {
 
     DLL_EXPORT AAssetManager *sAssetManager = nullptr;
+    DLL_EXPORT Path sAppData;
 
     static const char sAssetPrefix[] = "assets:";
 
@@ -33,7 +34,7 @@ namespace Filesystem {
         return dir;
     }
 
-    Path configPath()
+    Path executablePath()
     {
         //TODO
         char buffer[512];
@@ -42,6 +43,26 @@ namespace Filesystem {
         assert(result > 0);
 
         return Path(buffer).parentPath();
+    }
+
+    std::string executableName() {
+        //TODO
+        char buffer[512];
+
+        auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
+        assert(result > 0);
+
+        return Path(buffer).stem();
+    }
+
+    Path appDataPath()
+    {
+        assert(!sAppData.empty());
+
+        if (!exists(sAppData))
+            createDirectory(sAppData);
+
+        return sAppData;
     }
 
     bool isDir(const Path& p) {

@@ -11,12 +11,23 @@
 namespace Engine {
 namespace Filesystem {
 
-    Path configPath()
+    Path executablePath()
     {
-        return Path("/cwd");
+        return Path { "/cwd" };
     }
 
-    bool isDir(const Path& p) {
+    std::string executableName()
+    {
+        return "MadgineExecutable";
+    }
+
+    Path appDataPath()
+    {
+        return Path { "/cwd" };
+    }
+
+    bool isDir(const Path &p)
+    {
         struct stat statbuffer;
         auto result = stat(p.c_str(), &statbuffer);
         assert(result != -1);
@@ -84,7 +95,7 @@ namespace Filesystem {
         else
             return {};
     }
-    
+
     bool isValidPath(const std::string &p)
     {
         for (char c : p)

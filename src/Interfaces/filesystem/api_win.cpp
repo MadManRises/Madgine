@@ -12,6 +12,8 @@
 
 #    include <direct.h>
 
+#    include <ShlObj.h>
+
 namespace Engine {
 namespace Filesystem {
 
@@ -20,7 +22,7 @@ namespace Filesystem {
         return (GetFileAttributesA(p.c_str()) & FILE_ATTRIBUTE_DIRECTORY) != 0;
     }
 
-    Path configPath()
+    Path executablePath()
     {
         char buffer[512];
 
@@ -28,6 +30,38 @@ namespace Filesystem {
         assert(result > 0);
 
         return Path(buffer).parentPath();
+    }
+
+    std::string executableName()
+    {
+        char buffer[512];
+
+        auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
+        assert(result > 0);
+
+        return Path(buffer).stem();
+    }
+
+    Path appDataPath()
+    {
+        wchar_t *wBuffer;
+        auto ret = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &wBuffer);
+        assert(SUCCEEDED(ret));
+
+        std::string buffer;
+        buffer.reserve(wcslen(wBuffer));
+        std::copy(wBuffer, wBuffer + wcslen(wBuffer), std::back_inserter(buffer));
+
+        Path result { std::move(buffer) };
+
+        CoTaskMemFree(wBuffer);
+
+        result /= executableName();
+
+        if (!exists(result))
+            createDirectory(result);
+
+        return result;
     }
 
     void createDirectory(const Path &p)

@@ -18,10 +18,10 @@
 namespace Engine {
 namespace Core {
 
-    Root::Root(const std::string &programName, int argc, char **argv)
+    Root::Root(int argc, char **argv)
         : mCLI(std::make_unique<CLI::CLICore>(argc, argv))
 #if ENABLE_PLUGINS
-        , mPluginManager(std::make_unique<Plugins::PluginManager>(programName))
+        , mPluginManager(std::make_unique<Plugins::PluginManager>())
         , mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager))
 #endif
 #if ENABLE_MEMTRACKING

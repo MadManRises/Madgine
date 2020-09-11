@@ -15,7 +15,9 @@ namespace Filesystem {
     INTERFACES_EXPORT FileQuery listFiles(const Path &path);
     INTERFACES_EXPORT FileQuery listDirs(const Path &path);
     INTERFACES_EXPORT FileQuery listFilesAndDirs(const Path &path);
-    INTERFACES_EXPORT Path configPath();
+    INTERFACES_EXPORT Path executablePath();
+    INTERFACES_EXPORT std::string executableName();
+    INTERFACES_EXPORT Path appDataPath();
 
     INTERFACES_EXPORT void makeNormalized(Path &p);
     INTERFACES_EXPORT bool isValidPath(const std::string &p);

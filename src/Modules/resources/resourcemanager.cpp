@@ -34,7 +34,7 @@ namespace Resources {
         Plugins::PluginManager::getSingleton().addListener(this);
 #endif
 
-        registerResourceLocation(Filesystem::configPath().parentPath() / "data", 50);
+        registerResourceLocation(Filesystem::executablePath().parentPath() / "data", 50);
 
 #if ANDROID
         registerResourceLocation("assets:", 25);
