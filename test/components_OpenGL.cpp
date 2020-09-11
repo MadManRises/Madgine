@@ -1,25 +1,22 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#ifdef BUILD_OpenGL
-#    include "OpenGL/opengllib.h"
-#endif
-#ifdef BUILD_FontLoader
-#    include "fontloaderlib.h"
-#endif
-#ifdef BUILD_Widgets
-#    include "Madgine/widgetslib.h"
-#endif
 #ifdef BUILD_Scene
 #    include "Madgine/scenelib.h"
-#endif
-#ifdef BUILD_UI
-#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_Modules
 #    include "Modules/moduleslib.h"
 #endif
-#ifdef BUILD_AnimationLoader
-#    include "animationloaderlib.h"
+#ifdef BUILD_OpenGL
+#    include "OpenGL/opengllib.h"
+#endif
+#ifdef BUILD_Widgets
+#    include "Madgine/widgetslib.h"
+#endif
+#ifdef BUILD_FontLoader
+#    include "fontloaderlib.h"
+#endif
+#ifdef BUILD_UI
+#    include "Madgine/uilib.h"
 #endif
 #ifdef BUILD_ClickBrick
 #    include "clickbricklib.h"
@@ -27,128 +24,137 @@
 #ifdef BUILD_Client
 #    include "Madgine/clientlib.h"
 #endif
-#ifdef BUILD_ImageLoader
-#    include "imageloaderlib.h"
+#ifdef BUILD_AnimationLoader
+#    include "animationloaderlib.h"
+#endif
+#ifdef BUILD_MeshLoader
+#    include "meshloaderlib.h"
 #endif
 #ifdef BUILD_SkeletonLoader
 #    include "skeletonloaderlib.h"
+#endif
+#ifdef BUILD_ImageLoader
+#    include "imageloaderlib.h"
 #endif
 #ifdef BUILD_Base
 #    include "Madgine/baselib.h"
 #endif
 #ifdef BUILD_Base
-#    include "Madgine/app/globalapicollector.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/scenemanager.h"
+#    include ""
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/render/rendercontextcollector.h"
+#    include ""
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/openglrendercontext.h"
+#    include ""
 #endif
 #ifdef BUILD_Modules
-#    include "Modules/resources/resourceloadercollector.h"
+#    include ""
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/openglmeshloader.h"
+#    include ""
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/openglprogramloader.h"
+#    include ""
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/openglshaderloader.h"
+#    include ""
 #endif
 #ifdef BUILD_OpenGL
-#    include "OpenGL/opengltextureloader.h"
+#    include ""
+#endif
+#ifdef BUILD_MeshLoader
+#    include ""
 #endif
 #ifdef BUILD_SkeletonLoader
-#    include "skeletonloader.h"
+#    include ""
 #endif
 #ifdef BUILD_AnimationLoader
-#    include "animationloader.h"
+#    include ""
 #endif
 #ifdef BUILD_ImageLoader
-#    include "imageloader.h"
+#    include ""
 #endif
 #ifdef BUILD_FontLoader
-#    include "fontloader.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/entitycomponentcollector.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/animation.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/mesh.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/skeleton.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/transform.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "brick.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/entitycomponentcollector.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/animation.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/mesh.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/skeleton.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/entity/components/transform.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "brick.h"
+#    include ""
 #endif
 #ifdef BUILD_Scene
-#    include "Madgine/scene/scenecomponentcollector.h"
+#    include ""
 #endif
 #ifdef BUILD_UI
-#    include "Madgine/ui/gamehandler.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "gamemanager.h"
+#    include ""
 #endif
 #ifdef BUILD_UI
-#    include "Madgine/ui/guihandler.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "mainmenuhandler.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "gamehandler.h"
+#    include ""
 #endif
 #ifdef BUILD_ClickBrick
-#    include "gameoverhandler.h"
+#    include ""
 #endif
 #ifdef BUILD_Client
-#    include "Madgine/window/mainwindowcomponentcollector.h"
+#    include ""
 #endif
 #ifdef BUILD_Widgets
-#    include "Madgine/widgets/widgetmanager.h"
+#    include ""
 #endif
 #ifdef BUILD_UI
-#    include "Madgine/ui/uimanager.h"
+#    include ""
 #endif
 #ifdef BUILD_TestShared
-#    include "uniquecomponent/uniquecomponentshared.h"
+#    include ""
 #endif
 #ifdef BUILD_LibA
-#    include "uniquecomponent/libA.h"
+#    include ""
 #endif
 #ifdef BUILD_LibB
-#    include "uniquecomponent/libB.h"
+#    include ""
 #endif
 
 
@@ -217,6 +223,9 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 		createComponent<Engine::Render::OpenGLShaderLoader>,
 		createComponent<Engine::Render::OpenGLTextureLoader>,
 #    endif
+#    ifdef BUILD_MeshLoader
+		createComponent<Engine::Render::MeshLoader>,
+#    endif
 #    ifdef BUILD_SkeletonLoader
 		createComponent<Engine::Render::SkeletonLoader>,
 #    endif
@@ -240,7 +249,7 @@ constexpr size_t CollectorBaseIndex_ResourceLoaderBase_OpenGL = ACC;
 template <>
 size_t component_index<Engine::Render::OpenGLMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
-size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
+size_t component_index<Engine::Render::GPUMeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 0; }
 template <>
 size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 template <>
@@ -253,6 +262,13 @@ template <>
 size_t component_index<Engine::Render::TextureLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 3; }
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_OpenGL + 4
+#    endif
+#    ifdef BUILD_MeshLoader
+constexpr size_t CollectorBaseIndex_ResourceLoaderBase_MeshLoader = ACC;
+template <>
+size_t component_index<Engine::Render::MeshLoader>() { return CollectorBaseIndex_ResourceLoaderBase_MeshLoader + 0; }
+#        undef ACC
+#        define ACC CollectorBaseIndex_ResourceLoaderBase_MeshLoader + 1
 #    endif
 #    ifdef BUILD_SkeletonLoader
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_SkeletonLoader = ACC;
