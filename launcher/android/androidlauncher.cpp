@@ -11,6 +11,8 @@
 
 #include "Interfaces/threading/systemvariable.h"
 
+#include "Interfaces/filesystem/path.h"
+
 extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
 
 namespace Engine {

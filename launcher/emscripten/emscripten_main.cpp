@@ -14,7 +14,7 @@ extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
 EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
 {
     emscripten_cancel_main_loop();
-    static Engine::Threading::WorkGroup workGroup("Launcher");
+    static Engine::Threading::WorkGroup workGroup { "Launcher" };
     Engine::Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([]() {
         EM_ASM(
             FS.syncfs(
@@ -23,7 +23,7 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
                 }););
     },
         std::chrono::seconds { 15 });
-    static Engine::Core::Root root { "MadgineLauncher" };
+    static Engine::Core::Root root;
     return launch();
 }
 
