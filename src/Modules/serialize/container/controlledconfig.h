@@ -2,7 +2,7 @@
 
 #include "../../generic/comparator_traits.h"
 #include "physical.h"
-#include "../../generic/fixstring.h"
+#include "../../generic/makeowning.h"
 #include "../streams/serializestream.h"
 #include "../formatter.h"
 
@@ -25,7 +25,7 @@ namespace Serialize {
         static typename container_traits<Op>::iterator readItem(SerializeInStream& in, Op &op) {
 
             in.format().beginExtended(in, "Item", 1);
-            FixString_t<typename comparator_traits<Cmp>::type> key;
+            MakeOwning_t<typename comparator_traits<Cmp>::type> key;
             read(in, key, "key");
             typename container_traits<Op>::iterator it = std::find_if(physical(op).begin(), physical(op).end(), [&](const auto &t) {
                 return comparator_traits<Cmp>::to_cmp_type(t) == key;

@@ -4,7 +4,7 @@ namespace Engine {
 
 	
 template <typename T>
-struct FixString {
+struct MakeOwning {
     static T apply(T &&t)
     {
         return std::forward<T>(t);
@@ -14,7 +14,7 @@ struct FixString {
 };
 
 template <>
-struct FixString<const char *> {
+struct MakeOwning<const char *> {
     static std::string apply(const char *s)
     {
         return s;
@@ -23,7 +23,7 @@ struct FixString<const char *> {
 };
 
 template <>
-struct FixString<std::string_view> {
+struct MakeOwning<std::string_view> {
     static std::string apply(const std::string_view &s)
     {
         return std::string { s };
@@ -32,7 +32,7 @@ struct FixString<std::string_view> {
 };
 
 template <typename T>
-using FixString_t = typename FixString<T>::type;
+using MakeOwning_t = typename MakeOwning<T>::type;
 
 
 }

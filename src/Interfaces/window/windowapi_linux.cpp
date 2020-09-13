@@ -213,8 +213,7 @@ namespace Window {
         }
 
     private:
-        int mWidth;
-        int mHeight;
+        InterfacesVector mSize;
 
         InterfacesVector mLastMousePosition;
     };
