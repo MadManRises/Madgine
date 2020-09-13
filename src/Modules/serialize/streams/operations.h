@@ -249,7 +249,7 @@ namespace Serialize {
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
-                Operations<decltype(TupleUnpacker::toTuple(t)), Configs...>::read(in, TupleUnpacker::toTuple(t), name);
+                Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -270,7 +270,7 @@ namespace Serialize {
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
-                Operations<decltype(TupleUnpacker::toTuple(t)), Configs...>::write(out, TupleUnpacker::toTuple(t), name);
+                Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -384,40 +384,64 @@ namespace Serialize {
     template <typename... Ty, typename... Configs>
     struct Operations<std::tuple<Ty...>, Configs...> {
 
-        template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, Args &&... args)
+        template <typename... Args, size_t... Is>
+        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
-            TupleUnpacker::forEach(t, [&](auto &e) { Serialize::read(in, e, nullptr, args...); });
+            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
             in.format().endCompound(in, name);
         }
 
         template <typename... Args>
-        static void write(SerializeOutStream &out, const std::tuple<Ty...> &t, const char *name, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
+        {
+            read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args, size_t... Is>
+        static void write(SerializeOutStream &out, const std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             out.format().beginCompound(out, name);
-            TupleUnpacker::forEach(t, [&](const auto &e) { Serialize::write(out, e, "Element", args...); });
+            (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
             out.format().endCompound(out, name);
+        }
+
+        template <typename... Args>
+        static void write(SerializeOutStream &out, const std::tuple<Ty &...> t, const char *name, Args &&... args)
+        {
+            write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
     };
 
     template <typename... Ty, typename... Configs>
     struct Operations<std::tuple<Ty &...>, Configs...> {
 
-        template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
+        template <typename... Args, size_t... Is>
+        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
-            TupleUnpacker::forEach(t, [&](auto &e) { Serialize::read(in, e, nullptr, args...); });
+            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
             in.format().endCompound(in, name);
         }
 
         template <typename... Args>
-        static void write(SerializeOutStream &out, const std::tuple<Ty &...> &t, const char *name, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
+        {
+            read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args, size_t... Is>
+        static void write(SerializeOutStream &out, const std::tuple<const Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             out.format().beginCompound(out, name);
-            TupleUnpacker::forEach(t, [&](const auto &e) { Serialize::write(out, e, "Element", args...); });
+            (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
             out.format().endCompound(out, name);
+        }
+
+        template <typename... Args>
+        static void write(SerializeOutStream &out, const std::tuple<const Ty &...> t, const char *name, Args &&... args)
+        {
+            write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
     };
 
@@ -427,16 +451,16 @@ namespace Serialize {
         static void read(SerializeInStream &in, std::pair<U, V> &t, const char *name = nullptr)
         {
             in.format().beginCompound(in, name);
-            Serialize::read(in, t.first);
-            Serialize::read(in, t.second);
+            Serialize::read<U>(in, t.first);
+            Serialize::read<V>(in, t.second);
             in.format().endCompound(in, name);
         }
 
         static void write(SerializeOutStream &out, const std::pair<U, V> &t, const char *name = nullptr)
         {
             out.format().beginCompound(out, name);
-            Serialize::write(out, t.first, "Element");
-            Serialize::write(out, t.second, "Element");
+            Serialize::write<U>(out, t.first, "Element");
+            Serialize::write<V>(out, t.second, "Element");
             out.format().endCompound(out, name);
         }
     };
