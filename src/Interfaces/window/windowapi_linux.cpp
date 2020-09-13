@@ -255,7 +255,7 @@ namespace Window {
             swa.colormap = cmap;
             swa.event_mask = ExposureMask | KeyPressMask;
 
-            InterfacesVector pos = settings.mData.mPosition.x < 0 || settings.mData.mPosition.y < 0 ? InterfacesVector { 0, 0 } : settings.mData.mPosition:;
+            InterfacesVector pos = settings.mData.mPosition.x < 0 || settings.mData.mPosition.y < 0 ? InterfacesVector { 0, 0 } : settings.mData.mPosition;
 
             handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mData.mSize.x, settings.mData.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
@@ -276,7 +276,7 @@ namespace Window {
             XWindowEvent(sDisplay(), handle, StructureNotifyMask, &event);
         } while (event.type != MapNotify);
 
-        auto pib = sWindows.try_emplace(handle, handle, settings.mSize.x, settings.mSize.y);
+        auto pib = sWindows.try_emplace(handle, handle, settings.mData.mSize.x, settings.mData.mSize.y);
         assert(pib.second);
 
         return &pib.first->second;
