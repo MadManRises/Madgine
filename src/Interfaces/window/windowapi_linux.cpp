@@ -281,7 +281,7 @@ namespace Window {
             XWindowEvent(sDisplay(), handle, StructureNotifyMask, &event);
         } while (event.type != MapNotify);
 
-        auto pib = sWindows.try_emplace(handle, handle, settings.mData.mSize.x, settings.mData.mSize.y);
+        auto pib = sWindows.try_emplace(handle, handle, settings.mData.mSize);
         assert(pib.second);
 
         return &pib.first->second;
