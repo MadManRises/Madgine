@@ -16,6 +16,7 @@ plugin_group(Renderer EXCLUSIVE ATLEAST_ONE)
 target_link_plugins(Client MeshLoader ImageLoader ProgramLoader TextureLoader FontLoader)
 target_link_plugin_groups(Client Renderer Input)
 
+target_link_libraries(Client PRIVATE Ini)
 
 set(sources "")
 FolderSources(sources "" tools)

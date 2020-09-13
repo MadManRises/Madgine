@@ -24,6 +24,13 @@
 
 #include "Interfaces/window/windowsettings.h"
 
+#include "filesystem/filesystemlib.h"
+#include "filesystem/filemanager.h"
+#include "Interfaces/filesystem/api.h"
+
+#include "ini/inilib.h"
+#include "ini/iniformatter.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
@@ -83,8 +90,15 @@ namespace Window {
 
     bool MainWindow::init()
     {
+        WindowSettings settings = mSettings;
 
-        mOsWindow = sCreateWindow(mSettings);
+        Filesystem::FileManager mgr{"MainWindow-Layout"};
+
+        if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Ini::IniFormatter>())) {
+            in >> settings.mData;
+        }
+
+        mOsWindow = sCreateWindow(settings);
 
         mOsWindow->addListener(this);
 
@@ -104,6 +118,12 @@ namespace Window {
 
     void MainWindow::finalize()
     {
+        Filesystem::FileManager mgr { "MainWindow-Layout" };
+
+        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Ini::IniFormatter>())) {
+            out << mOsWindow->data();
+        }
+
         for (MainWindowComponentBase *comp : components()) {
             comp->callFinalize();
         }

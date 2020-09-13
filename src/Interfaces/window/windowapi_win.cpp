@@ -189,6 +189,14 @@ namespace Window {
             return placement.showCmd == SW_MINIMIZE;
         }
 
+        virtual bool isMaximized() override 
+        {
+            WINDOWPLACEMENT placement;
+            auto result = GetWindowPlacement((HWND)mHandle, &placement);
+            assert(result);
+            return placement.showCmd == SW_MAXIMIZE;
+        }
+
         virtual bool isFullscreen() override
         {
             return false;
@@ -283,8 +291,9 @@ namespace Window {
                 return nullptr;
         }
 
+
         if (!settings.mHidden)
-            ShowWindow(handle, SW_SHOW);
+            ShowWindow(handle, settings.mData.mMaximized ? SW_SHOWMAXIMIZED : SW_SHOW);
 
         auto pib = sWindows.try_emplace(handle, handle);
         assert(pib.second);

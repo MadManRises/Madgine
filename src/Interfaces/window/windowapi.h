@@ -52,6 +52,7 @@ namespace Window {
 
         virtual void show() = 0;
         virtual bool isMinimized() = 0;
+        virtual bool isMaximized() = 0;
         virtual bool isFullscreen() = 0;
 
         virtual void focus() = 0;
@@ -73,7 +74,8 @@ namespace Window {
         {
             return {
                 pos(),
-                size(),
+                renderSize(),
+                isMaximized(),
                 isFullscreen()
             };
         }

@@ -420,7 +420,7 @@ namespace Serialize {
         static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
-            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
+            (Serialize::read<Ty>(in, std::get<Is>(t), static_cast<const char*>(nullptr), args...), ...);
             in.format().endCompound(in, name);
         }
 

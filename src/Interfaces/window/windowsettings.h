@@ -4,8 +4,9 @@ namespace Engine {
 namespace Window {
 
     struct WindowData {
-        InterfacesVector mSize = { 800, 600 };
         InterfacesVector mPosition = { -1, -1 };
+        InterfacesVector mSize = { 800, 600 };
+        bool mMaximized = false;
         bool mFullScreen = false;
     };
 

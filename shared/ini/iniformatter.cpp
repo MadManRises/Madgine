@@ -27,9 +27,15 @@ namespace Ini {
 
     void IniFormatter::beginPrimitive(Serialize::SerializeInStream &in, const char *name, uint8_t typeId)
     {
-        std::string prefix = in.readN(strlen(name) + 1);
-        if (prefix != std::string(name) + "=")
-            std::terminate();
+
+        std::string prefix;
+        if (name) {
+            prefix = in.readN(strlen(name) + 1);
+            if (prefix != std::string(name) + "=")
+                std::terminate();
+        } else
+            prefix = in.readUntil("=");
+
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
             in.setNextFormattedStringDelimiter('\n');
         }
