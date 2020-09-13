@@ -22,6 +22,8 @@
 
 #include "Modules/serialize/container/controlledconfig.h"
 
+#include "Interfaces/window/windowsettings.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
@@ -71,7 +73,7 @@ namespace Window {
     {
         if (!mOsWindow)
             return { { 0, 0 }, { 0, 0 } };
-        return { { mOsWindow->renderX(), mOsWindow->renderY() }, { mOsWindow->renderWidth(), mOsWindow->renderHeight() } };
+        return { mOsWindow->renderPos(), mOsWindow->renderSize() };
     }
 
     const MadgineObject *MainWindow::parent() const
@@ -85,11 +87,10 @@ namespace Window {
         mOsWindow = sCreateWindow(mSettings);
 
         mOsWindow->addListener(this);
-        
+
         assert(!mRenderContext);
         mRenderContext.emplace(&mLoop);
         mRenderWindow = (*mRenderContext)->createRenderWindow(mOsWindow);
-
 
         addFrameListener(this);
 
@@ -112,10 +113,10 @@ namespace Window {
         mRenderWindow.reset();
         mRenderContext.reset();
 
-        if (mOsWindow) {
-            mOsWindow->removeListener(this);
-            mOsWindow->destroy();
-        }
+        Engine::Window::WindowData windowData = mOsWindow->data();
+        mOsWindow->removeListener(this);
+        mOsWindow->destroy();
+        mOsWindow = nullptr;
     }
 
     ToolWindow *MainWindow::createToolWindow(const WindowSettings &settings)
@@ -193,7 +194,6 @@ namespace Window {
 
     void MainWindow::onClose()
     {
-        mOsWindow = nullptr;
         callFinalize();
     }
 
@@ -202,9 +202,9 @@ namespace Window {
         //update();
     }
 
-    void MainWindow::onResize(size_t width, size_t height)
+    void MainWindow::onResize(const InterfacesVector &size)
     {
-        mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
+        mRenderWindow->resize(size);
         applyClientSpaceResize();
     }
 
@@ -215,7 +215,7 @@ namespace Window {
 
         Rect2i space;
         if (!component)
-            space = { { 0, 0 }, { mOsWindow->renderWidth(), mOsWindow->renderHeight() } };
+            space = { { 0, 0 }, mOsWindow->renderSize() };
         else
             space = component->getChildClientSpace();
 
@@ -243,7 +243,7 @@ namespace Window {
     }
 
     bool MainWindow::frameEnded(std::chrono::microseconds)
-    {        
+    {
         //TODO
         if (mRenderContext)
             (*mRenderContext)->render();
@@ -291,7 +291,6 @@ namespace Window {
     {
         return mRenderWindow.get();
     }
-
 
 }
 }

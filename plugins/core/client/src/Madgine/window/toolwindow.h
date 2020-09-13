@@ -29,7 +29,7 @@ namespace Window {
     protected:
         void onClose() override;
         void onRepaint() override;
-        void onResize(size_t width, size_t height) override;
+        void onResize(const InterfacesVector &size) override;
 
     private:
         MainWindow &mParent;

@@ -82,25 +82,25 @@ namespace Tools {
     {
         ImGuiIO &io = ImGui::GetIO();
         Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
-        w->setRenderPos(static_cast<size_t>(pos.x * io.DisplayFramebufferScale.x), static_cast<size_t>(pos.y * io.DisplayFramebufferScale.y));
+        w->setRenderPos({ static_cast<int>(pos.x * io.DisplayFramebufferScale.x), static_cast<int>(pos.y * io.DisplayFramebufferScale.y) });
     }
     static ImVec2 GetImGuiToolWindowPos(ImGuiViewport *vp)
     {
         ImGuiIO &io = ImGui::GetIO();
         Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
-        return { static_cast<float>(w->renderX() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderY() / io.DisplayFramebufferScale.y) };
+        return { static_cast<float>(w->renderPos().x / io.DisplayFramebufferScale.x), static_cast<float>(w->renderPos().y / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowSize(ImGuiViewport *vp, ImVec2 size)
     {
         ImGuiIO &io = ImGui::GetIO();
         Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
-        w->setRenderSize(static_cast<size_t>(size.x * io.DisplayFramebufferScale.x), static_cast<size_t>(size.y * io.DisplayFramebufferScale.y));
+        w->setRenderSize({ static_cast<int>(size.x * io.DisplayFramebufferScale.x), static_cast<int>(size.y * io.DisplayFramebufferScale.y) });
     }
     static ImVec2 GetImGuiToolWindowSize(ImGuiViewport *vp)
     {
         ImGuiIO &io = ImGui::GetIO();
         Window::OSWindow *w = static_cast<Window::OSWindow *>(vp->PlatformHandle);
-        return { static_cast<float>(w->renderWidth() / io.DisplayFramebufferScale.x), static_cast<float>(w->renderHeight() / io.DisplayFramebufferScale.y) };
+        return { static_cast<float>(w->renderSize().x / io.DisplayFramebufferScale.x), static_cast<float>(w->renderSize().y / io.DisplayFramebufferScale.y) };
     }
     static void SetImGuiToolWindowFocus(ImGuiViewport *vp)
     {

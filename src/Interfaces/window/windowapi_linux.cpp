@@ -42,10 +42,9 @@ namespace Window {
     }
 
     struct LinuxWindow final : OSWindow {
-        LinuxWindow(::Window hwnd, size_t width, size_t height)
+        LinuxWindow(::Window hwnd, const InterfacesVector &size)
             : OSWindow(hwnd)
-            , mWidth(width)
-            , mHeight(height)
+            , mSize(size)            
         {
         }
 
@@ -71,7 +70,7 @@ namespace Window {
             case MotionNotify: {
                 const XMotionEvent &xme = e.xmotion;
                 InterfacesVector mousePos { xme.x, xme.y };
-                injectPointerMove({ mousePos, { xme.x_root, xme.y_root }, { mousePos.x - mLastMousePosition.x, mousePos.y - mLastMousePosition.y } });
+                injectPointerMove({ mousePos, { xme.x_root, xme.y_root }, mousePos - mLastMousePosition });
                 mLastMousePosition = mousePos;
                 break;
             }
@@ -92,10 +91,9 @@ namespace Window {
 					   happenings, so check whether the window has been
 					   resized. */
 
-                if (xce.width != mWidth || xce.height != mHeight) {
-                    mWidth = xce.width;
-                    mHeight = xce.height;
-                    onResize(mWidth, mHeight);
+                if (xce.width != mSize.x || xce.height != mSize.y) {
+                    mSize = { xce.width, xce.height };
+                    onResize(mSize);
                 }
                 break;
             }
@@ -112,26 +110,15 @@ namespace Window {
             return true;
         }
 
-        virtual int width() override
+        virtual InterfacesVector size() override
         {
-            return mWidth;
+            return mSize;
         }
 
-        virtual int height() override
-        {
-            return mHeight;
-        }
-
-        virtual int renderWidth() override
+        virtual InterfacesVector renderSize() override
         {
             //TODO
-            return width();
-        }
-
-        virtual int renderHeight() override
-        {
-            //TODO
-            return height();
+            return size();
         }
 
         virtual void swapBuffers() override
@@ -139,51 +126,39 @@ namespace Window {
             glXSwapBuffers(sDisplay(), mHandle);
         }
 
-        virtual int x() override
+        virtual InterfacesVector pos() override
         {
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            return xwa.x;
+            return { xwa.x, xwa.y };
         }
 
-        virtual int y() override
+        virtual InterfacesVector renderPos() override
         {
             XWindowAttributes xwa;
             XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            return xwa.y;
+            return { xwa.x + xwa.border_width, xwa.y + xwa.border_width };
         }
 
-        virtual int renderX() override
+        virtual void setSize(const InterfacesVector &size) override
         {
-            XWindowAttributes xwa;
-            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            return xwa.x + xwa.border_width;
+            mSize = size;
         }
 
-        virtual int renderY() override
+        virtual void setRenderSize(const InterfacesVector& size) override
         {
-            XWindowAttributes xwa;
-            XGetWindowAttributes(sDisplay(), mHandle, &xwa);
-            return xwa.x + xwa.border_width;
+            //TODO
+            setSize(size);
         }
 
-        virtual void setSize(int width, int height) override
+        virtual void setPos(const InterfacesVector &pos) override
         {
-            mWidth = width;
-            mHeight = height;
+            //TODO
         }
 
-        virtual void setRenderSize(int width, int height) override
+        virtual void setRenderPos(const InterfacesVector &pos) override
         {
-            setSize(width, height);
-        }
-
-        virtual void setPos(int width, int height) override
-        {
-        }
-
-        virtual void setRenderPos(int width, int height) override
-        {
+            //TODO
         }
 
         virtual void show() override
@@ -191,6 +166,11 @@ namespace Window {
         }
 
         virtual bool isMinimized() override
+        {
+            return false;
+        }
+
+        virtual bool isFullscreen() override
         {
             return false;
         }
@@ -276,9 +256,9 @@ namespace Window {
             swa.colormap = cmap;
             swa.event_mask = ExposureMask | KeyPressMask;
 
-            InterfacesVector pos = settings.mPosition ? *settings.mPosition : InterfacesVector { 0, 0 };
+            InterfacesVector pos = settings.mData.mPosition.x < 0 || settings.mData.mPosition.y < 0 ? InterfacesVector { 0, 0 } : settings.mData.mPosition:;
 
-            handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mSize.x, settings.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+            handle = XCreateWindow(sDisplay(), root, pos.x, pos.y, settings.mData.mSize.x, settings.mData.mSize.y, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
             XStoreName(sDisplay(), handle, settings.mTitle);
 

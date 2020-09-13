@@ -3,12 +3,16 @@
 namespace Engine {
 namespace Window {
 
+    struct WindowData {
+        InterfacesVector mSize = { 800, 600 };
+        InterfacesVector mPosition = { -1, -1 };
+        bool mFullScreen = false;
+    };
+
     struct WindowSettings {
         uintptr_t mHandle = 0;
 
-        InterfacesVector mSize = { 800, 600 };
-
-        std::optional<InterfacesVector> mPosition;
+        WindowData mData;
 
         const char *mTitle = "Interfaces - Window";
 

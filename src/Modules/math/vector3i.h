@@ -22,6 +22,13 @@ struct Vector3i {
         , z(afCoordinate[2])
     {
     }
+        
+    explicit Vector3i(const Vector2i &xy, const float z)
+        : x(xy.x)
+        , y(xy.y)
+        , z(z)
+    {
+    }
 
     constexpr Vector3i operator+(const Vector3i &other)
     {

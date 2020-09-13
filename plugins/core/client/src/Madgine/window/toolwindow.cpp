@@ -49,7 +49,7 @@ namespace Window {
 
     Vector3 ToolWindow::getScreenSize()
     {
-        return { (float)mOsWindow->renderWidth(), (float)mOsWindow->renderHeight(), 1.0f };
+        return Vector3{ Vector2 { mOsWindow->renderSize() }, 1.0f };
     }
 
     OSWindow *ToolWindow::osWindow()
@@ -72,9 +72,9 @@ namespace Window {
         //update();
     }
 
-    void ToolWindow::onResize(size_t width, size_t height)
+    void ToolWindow::onResize(const InterfacesVector &size)
     {
-        mRenderWindow->resize({ static_cast<int>(width), static_cast<int>(height) });
+        mRenderWindow->resize(size);
     }
 
     bool ToolWindow::injectKeyPress(const Input::KeyEventArgs &arg)

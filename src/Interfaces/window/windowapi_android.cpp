@@ -13,7 +13,7 @@
 
 #    include "../input/inputevents.h"
 
-#include "../util/utilmethods.h"
+#    include "../util/utilmethods.h"
 
 namespace Engine {
 namespace Window {
@@ -53,8 +53,7 @@ namespace Window {
             EGLint height;
             if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
                 std::terminate();
-            mWidth = width;
-            mHeight = height;
+            mSize = { width, height };
         }
 
         virtual void update() override
@@ -83,26 +82,15 @@ namespace Window {
             }
         }
 
-        virtual int width() override
+        virtual InterfacesVector size() override
         {
-            return mWidth;
+            return mSize;
         }
 
-        virtual int height() override
-        {
-            return mHeight;
-        }
-
-        virtual int renderWidth() override
+        virtual InterfacesVector renderSize() override
         {
             //TODO
-            return width();
-        }
-
-        virtual int renderHeight() override
-        {
-            //TODO
-            return height();
+            return size();
         }
 
         virtual void swapBuffers() override
@@ -110,42 +98,31 @@ namespace Window {
             eglSwapBuffers(sDisplay, (EGLSurface)mHandle);
         }
 
-        virtual int x() override
+        virtual InterfacesVector pos() override
         {
-            return 0;
+            return { 0, 0 };
         }
 
-        virtual int y() override
+        virtual InterfacesVector renderPos() override
         {
-            return 0;
+            return { 0, 0 };
         }
 
-        virtual int renderX() override
+        virtual void setSize(const InterfacesVector &size) override
         {
-            return 0;
+            mSize = size;
         }
 
-        virtual int renderY() override
+        virtual void setRenderSize(const InterfacesVector &size) override
         {
-            return 0;
+            setSize(size);
         }
 
-        virtual void setSize(int width, int height) override
-        {
-            mWidth = width;
-            mHeight = height;
-        }
-
-        virtual void setRenderSize(int width, int height) override
-        {
-            setSize(width, height);
-        }
-
-        virtual void setPos(int width, int height) override
+        virtual void setPos(const InterfacesVector &pos) override
         {
         }
 
-        virtual void setRenderPos(int width, int height) override
+        virtual void setRenderPos(const InterfacesVector &pos) override
         {
         }
 
@@ -156,6 +133,11 @@ namespace Window {
         virtual bool isMinimized() override
         {
             return false;
+        }
+
+        virtual bool isFullscreen() override
+        {
+            return true;
         }
 
         virtual void focus() override
@@ -193,7 +175,7 @@ namespace Window {
             switch (action & AMOTION_EVENT_ACTION_MASK) {
             case AMOTION_EVENT_ACTION_DOWN:
                 handled = injectPointerMove({ position, position,
-                    { position.x - mLastKnownMousePos.x, position.y - mLastKnownMousePos.y } });
+                    position - mLastKnownMousePos });
                 handled |= injectPointerPress({ position, position,
                     Input::MouseButton::LEFT_BUTTON });
                 break;
@@ -203,7 +185,7 @@ namespace Window {
                 break;
             case AMOTION_EVENT_ACTION_MOVE:
                 handled = injectPointerMove({ position, position,
-                    { position.x - mLastKnownMousePos.x, position.y - mLastKnownMousePos.y } });
+                    position - mLastKnownMousePos });
                 break;
             case AMOTION_EVENT_ACTION_CANCEL:
                 LOG("Motion Cancel");
@@ -238,7 +220,8 @@ namespace Window {
             return handled;
         }
 
-        virtual void captureInput() override {
+        virtual void captureInput() override
+        {
         }
 
         virtual void releaseInput() override
@@ -246,8 +229,7 @@ namespace Window {
         }
 
     private:
-        int mWidth;
-        int mHeight;
+        InterfacesVector mSize;
 
         //Input
         InterfacesVector mLastKnownMousePos;

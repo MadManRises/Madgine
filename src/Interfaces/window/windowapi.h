@@ -4,6 +4,8 @@
 
 #include "../input/inputevents.h"
 
+#include "windowsettings.h"
+
 namespace Engine {
 namespace Window {
 
@@ -12,7 +14,6 @@ namespace Window {
     };
 
     INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;
-
 
     struct INTERFACES_EXPORT OSWindow {
 
@@ -30,31 +31,28 @@ namespace Window {
         {
             mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
         }
-        
+
         virtual void update() = 0;
 
         virtual void swapBuffers() = 0;
 
-        virtual int width() = 0;
-        virtual int height() = 0;
+        virtual InterfacesVector size() = 0;
 
-        virtual int renderWidth() = 0;
-        virtual int renderHeight() = 0;
+        virtual InterfacesVector renderSize() = 0;
 
-        virtual int x() = 0;
-        virtual int y() = 0;
+        virtual InterfacesVector pos() = 0;
 
-        virtual int renderX() = 0;
-        virtual int renderY() = 0;
+        virtual InterfacesVector renderPos() = 0;
 
-        virtual void setSize(int width, int height) = 0;
-        virtual void setRenderSize(int width, int height) = 0;
+        virtual void setSize(const InterfacesVector &size) = 0;
+        virtual void setRenderSize(const InterfacesVector &size) = 0;
 
-        virtual void setPos(int x, int y) = 0;
-        virtual void setRenderPos(int x, int y) = 0;
+        virtual void setPos(const InterfacesVector &pos) = 0;
+        virtual void setRenderPos(const InterfacesVector &pos) = 0;
 
         virtual void show() = 0;
         virtual bool isMinimized() = 0;
+        virtual bool isFullscreen() = 0;
 
         virtual void focus() = 0;
         virtual bool hasFocus() = 0;
@@ -62,7 +60,6 @@ namespace Window {
         virtual void setTitle(const char *title) = 0;
 
         virtual void destroy() = 0;
-
 
         //Input
         virtual bool isKeyDown(Input::Key::Key key) = 0;
@@ -72,11 +69,20 @@ namespace Window {
 
         const uintptr_t mHandle;
 
+        WindowData data()
+        {
+            return {
+                pos(),
+                size(),
+                isFullscreen()
+            };
+        }
+
     protected:
-        void onResize(size_t width, size_t height)
+        void onResize(const InterfacesVector &size)
         {
             for (WindowEventListener *listener : mListeners)
-                listener->onResize(width, height);
+                listener->onResize(size);
         }
 
         void onClose()

@@ -5,6 +5,14 @@ namespace Engine {
 struct InterfacesVector {
     int x;
     int y;
+
+    InterfacesVector operator-(const InterfacesVector& other) const {
+        return { x - other.x, y - other.y };
+    }
+    InterfacesVector operator+(const InterfacesVector &other) const
+    {
+        return { x + other.x, y + other.y };
+    }
 };
 
 struct InStream;

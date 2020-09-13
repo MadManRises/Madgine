@@ -155,8 +155,8 @@ namespace Tools {
 
             Rect2i screenSpace = mWidgetManager->getClientSpace();
 
-            Vector3i windowPos = {
-                mWidgetManager->window().osWindow()->renderX(), mWidgetManager->window().osWindow()->renderY(), 0
+            Vector3i windowPos = Vector3i{
+                mWidgetManager->window().osWindow()->renderPos(), 0
             };
 
             ImGuiIO &io = ImGui::GetIO();

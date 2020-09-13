@@ -39,7 +39,7 @@ namespace Window {
         {
             if (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST) {
                 InterfacesVector windowPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-                InterfacesVector screenPos = { windowPos.x + renderX(), windowPos.y + renderY() };
+                InterfacesVector screenPos = windowPos + renderPos();
                 switch (msg) {
                 case WM_LBUTTONDOWN:
                     injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::LEFT_BUTTON });
@@ -54,17 +54,17 @@ namespace Window {
                     injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::RIGHT_BUTTON });
                     break;
                 case WM_MBUTTONDOWN:
-                    injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON});
+                    injectPointerPress(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON });
                     break;
                 case WM_MBUTTONUP:
                     injectPointerRelease(Input::PointerEventArgs { windowPos, screenPos, Input::MouseButton::MIDDLE_BUTTON });
                     break;
                 case WM_MOUSEMOVE:
-                    injectPointerMove(Input::PointerEventArgs { windowPos, screenPos, { windowPos.x - mLastKnownMousePos.x, windowPos.y - mLastKnownMousePos.y } });
+                    injectPointerMove(Input::PointerEventArgs { windowPos, screenPos, windowPos - mLastKnownMousePos });
                     mLastKnownMousePos = windowPos;
                     break;
                 case WM_MOUSEWHEEL:
-                    injectPointerMove(Input::PointerEventArgs { { windowPos.x - renderX(), windowPos.y - renderY() }, windowPos, { 0, 0 }, GET_WHEEL_DELTA_WPARAM(wParam) / float(WHEEL_DELTA) });
+                    injectPointerMove(Input::PointerEventArgs { windowPos - renderPos(), windowPos, { 0, 0 }, GET_WHEEL_DELTA_WPARAM(wParam) / float(WHEEL_DELTA) });
                     break;
                 }
             } else if (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) {
@@ -82,7 +82,7 @@ namespace Window {
             } else {
                 switch (msg) {
                 case WM_SIZE:
-                    onResize(LOWORD(lParam), HIWORD(lParam));
+                    onResize({ LOWORD(lParam), HIWORD(lParam) });
                     break;
                 case WM_CLOSE:
                     onClose();
@@ -103,36 +103,20 @@ namespace Window {
             return true;
         }
 
-        virtual int width() override
+        virtual InterfacesVector size() override
         {
             RECT rect;
             auto result = GetWindowRect((HWND)mHandle, &rect);
             assert(result);
-            return rect.right - rect.left;
+            return { rect.right - rect.left, rect.bottom - rect.top };
         }
 
-        virtual int height() override
-        {
-            RECT rect;
-            auto result = GetWindowRect((HWND)mHandle, &rect);
-            assert(result);
-            return rect.bottom - rect.top;
-        }
-
-        virtual int renderWidth() override
+        virtual InterfacesVector renderSize() override
         {
             RECT rect;
             auto result = GetClientRect((HWND)mHandle, &rect);
             assert(result);
-            return rect.right - rect.left;
-        }
-
-        virtual int renderHeight() override
-        {
-            RECT rect;
-            auto result = GetClientRect((HWND)mHandle, &rect);
-            assert(result);
-            return rect.bottom - rect.top;
+            return { rect.right - rect.left, rect.bottom - rect.top };
         }
 
         virtual void swapBuffers() override
@@ -145,39 +129,28 @@ namespace Window {
             DestroyWindow((HWND)mHandle);
         }
 
-        virtual int x() override
+        virtual InterfacesVector pos() override
         {
             RECT rect;
             auto result = GetWindowRect((HWND)mHandle, &rect);
             assert(result);
-            return rect.left;
+            return { rect.left, rect.top };
         }
-        virtual int y() override
-        {
-            RECT rect;
-            auto result = GetWindowRect((HWND)mHandle, &rect);
-            assert(result);
-            return rect.top;
-        }
-        virtual int renderX() override
+
+        virtual InterfacesVector renderPos() override
         {
             POINT p { 0, 0 };
             auto result = ClientToScreen((HWND)mHandle, &p);
             assert(result);
-            return p.x;
+            return { p.x, p.y };
         }
-        virtual int renderY() override
+
+        virtual void setSize(const InterfacesVector &size) override
         {
-            POINT p { 0, 0 };
-            auto result = ClientToScreen((HWND)mHandle, &p);
-            assert(result);
-            return p.y;
+            MoveWindow((HWND)mHandle, pos().x, pos().y, size.x, size.y, true);
         }
-        virtual void setSize(int width, int height) override
-        {
-            MoveWindow((HWND)mHandle, x(), y(), width, height, true);
-        }
-        virtual void setRenderSize(int width, int height) override
+
+        virtual void setRenderSize(const InterfacesVector &size) override
         {
             RECT r;
             auto result = GetClientRect((HWND)mHandle, &r);
@@ -185,13 +158,13 @@ namespace Window {
             RECT r2;
             result = GetWindowRect((HWND)mHandle, &r2);
             assert(result);
-            MoveWindow((HWND)mHandle, x(), y(), width + ((r2.right - r2.left) - (r.right - r.left)), height + ((r2.bottom - r2.top) - (r.bottom - r.top)), true);
+            MoveWindow((HWND)mHandle, pos().x, pos().y, size.x + ((r2.right - r2.left) - (r.right - r.left)), size.y + ((r2.bottom - r2.top) - (r.bottom - r.top)), true);
         }
-        virtual void setPos(int x, int y) override
+        virtual void setPos(const InterfacesVector &pos) override
         {
-            MoveWindow((HWND)mHandle, x, y, width(), height(), true);
+            MoveWindow((HWND)mHandle, pos.x, pos.y, size().x, size().y, true);
         }
-        virtual void setRenderPos(int x, int y) override
+        virtual void setRenderPos(const InterfacesVector &pos) override
         {
             RECT r;
             auto result = GetWindowRect((HWND)mHandle, &r);
@@ -199,7 +172,7 @@ namespace Window {
             POINT p { 0, 0 };
             result = ClientToScreen((HWND)mHandle, &p);
             assert(result);
-            result = MoveWindow((HWND)mHandle, x - (p.x - r.left), y - (p.y - r.top), width(), height(), true);
+            result = MoveWindow((HWND)mHandle, pos.x - (p.x - r.left), pos.y - (p.y - r.top), size().x, size().y, true);
             assert(result);
         }
 
@@ -214,6 +187,11 @@ namespace Window {
             auto result = GetWindowPlacement((HWND)mHandle, &placement);
             assert(result);
             return placement.showCmd == SW_MINIMIZE;
+        }
+
+        virtual bool isFullscreen() override
+        {
+            return false;
         }
 
         virtual void focus() override
@@ -286,12 +264,12 @@ namespace Window {
 
             // Create window
             HINSTANCE hInstance = GetModuleHandle(nullptr);
-            RECT rc = { 0, 0, (LONG)settings.mSize.x, (LONG)settings.mSize.y };
+            RECT rc = { 0, 0, (LONG)settings.mData.mSize.x, (LONG)settings.mData.mSize.y };
             AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
             int x = CW_USEDEFAULT, y = CW_USEDEFAULT;
-            if (settings.mPosition) {
-                x = settings.mPosition->x;
-                y = settings.mPosition->y;
+            if (settings.mData.mPosition.x >= 0 && settings.mData.mPosition.y >= 0) {
+                x = settings.mData.mPosition.x;
+                y = settings.mData.mPosition.y;
             }
             DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX | WS_MAXIMIZEBOX;
             if (settings.mHeadless) {
