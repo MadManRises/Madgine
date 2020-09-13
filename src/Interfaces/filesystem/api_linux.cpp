@@ -11,6 +11,10 @@
 namespace Engine {
 namespace Filesystem {
 
+    void setup(void *)
+    {
+    }
+
     Path executablePath()
     {
         char buffer[512];

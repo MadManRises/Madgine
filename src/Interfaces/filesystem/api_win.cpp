@@ -17,6 +17,10 @@
 namespace Engine {
 namespace Filesystem {
 
+    void setup(void*) {
+
+    }
+
     bool isDir(const Path &p)
     {
         return (GetFileAttributesA(p.c_str()) & FILE_ATTRIBUTE_DIRECTORY) != 0;

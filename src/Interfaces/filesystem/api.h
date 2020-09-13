@@ -10,6 +10,8 @@ namespace Filesystem {
         size_t mSize;
     };
 
+    INTERFACES_EXPORT void setup(void *data = nullptr);
+
     INTERFACES_EXPORT FileQuery listFilesRecursive(const Path &path);
     INTERFACES_EXPORT FileQuery listFilesAndDirsRecursive(const Path &path);
     INTERFACES_EXPORT FileQuery listFiles(const Path &path);
@@ -36,6 +38,8 @@ namespace Filesystem {
 
     INTERFACES_EXPORT InStream openFileRead(const Path &p, bool isBinary = false);
     INTERFACES_EXPORT OutStream openFileWrite(const Path &p, bool isBinary = false);
+    /*INTERFACES_EXPORT InStream openAppDataFileRead(const Path &p, bool isBinary = false);
+    INTERFACES_EXPORT OutStream openAppDataFileWrite(const Path &p, bool isBinary = false);*/
     INTERFACES_EXPORT FileInfo fileInfo(const Path &p);
 }
 }

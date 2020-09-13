@@ -12,11 +12,13 @@
 
 #    include <android/asset_manager.h>
 
+#include <android/native_activity.h>
+
 namespace Engine {
 namespace Filesystem {
 
-    DLL_EXPORT AAssetManager *sAssetManager = nullptr;
-    DLL_EXPORT Path sAppData;
+    AAssetManager *sAssetManager = nullptr;
+    Path sAppData;
 
     static const char sAssetPrefix[] = "assets:";
 
@@ -32,6 +34,13 @@ namespace Filesystem {
         if (isSeparator(*dir))
             ++dir;
         return dir;
+    }
+
+    void setup(void* _activity) {
+        ANativeActivity *activity = static_cast<ANativeActivity *>(_activity);
+
+        sAssetManager = activity->assetManager;
+        sAppData = activity->internalDataPath;
     }
 
     Path executablePath()

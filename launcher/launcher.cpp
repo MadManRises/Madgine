@@ -21,6 +21,7 @@
 
 #include "Interfaces/debug/stacktrace.h"
 #include "Modules/threading/taskguard.h"
+#include "Interfaces/filesystem/api.h"
 
 Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
@@ -67,6 +68,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
 #if !EMSCRIPTEN
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
+    Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
     Engine::Core::Root root { argc, argv };
     if (!toolMode) {

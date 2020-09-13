@@ -16,10 +16,6 @@
 extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
 
 namespace Engine {
-namespace Filesystem {
-    extern AAssetManager *sAssetManager;
-    extern Path sAppData;
-}
 
 namespace Window {
     extern Threading::SystemVariable<ANativeWindow *> sNativeWindow;
@@ -46,8 +42,7 @@ namespace Android {
         activity->callbacks->onInputQueueCreated = delegate<&AndroidLauncher::onInputQueueCreated, AInputQueue *>;
         activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue *>;
 
-        Engine::Filesystem::sAssetManager = activity->assetManager;
-        Engine::Filesystem::sAppData = activity->internalDataPath;
+        Engine::Filesystem::setup(activity);
 
         mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
     }

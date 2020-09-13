@@ -9,7 +9,21 @@
 #    include <unistd.h>
 
 namespace Engine {
-namespace Filesystem {
+namespace Filesystem {    
+
+    void setup(void *)
+    {
+        EM_ASM(
+            FS.mkdir('/cwd');
+            FS.mount(IDBFS, {}, '/cwd');
+
+            FS.syncfs(
+                true, function(err) {
+                    assert(!err);
+                    _mainImpl();
+                }););
+        setCwd("/cwd");
+    }
 
     Path executablePath()
     {

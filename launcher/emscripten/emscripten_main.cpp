@@ -29,16 +29,7 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
 
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
-    EM_ASM(
-        FS.mkdir('/cwd');
-        FS.mount(IDBFS, {}, '/cwd');
-
-        FS.syncfs(
-            true, function(err) {
-                assert(!err);
-                _mainImpl();
-            }););
-    Engine::Filesystem::setCwd("/cwd");
+    Engine::Filesystem::setup();
 
     emscripten_set_main_loop_arg([](void *) {}, nullptr, 0, false);
     return 0;
