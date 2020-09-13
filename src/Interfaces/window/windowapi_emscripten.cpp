@@ -120,9 +120,14 @@ namespace Window {
             return false;
         }
 
-        virtual bool isFullscreen() override
+        virtual bool isMaximized() override
         {
             return true;
+        }
+
+        virtual bool isFullscreen() override
+        {
+            return false;
         }
 
         virtual void focus() override
