@@ -7,6 +7,8 @@
 #    include <dirent.h>
 #    include <sys/stat.h>
 #    include <unistd.h>
+#    include <emscripten.h>
+
 
 namespace Engine {
 namespace Filesystem {    
@@ -23,6 +25,15 @@ namespace Filesystem {
                     _mainImpl();
                 }););
         setCwd("/cwd");
+    }
+
+    void sync()
+    {
+        EM_ASM(
+            FS.syncfs(
+                false, function(err) {
+                    assert(!err);
+                }););
     }
 
     Path executablePath()

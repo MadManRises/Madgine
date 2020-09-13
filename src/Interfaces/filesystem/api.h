@@ -11,6 +11,7 @@ namespace Filesystem {
     };
 
     INTERFACES_EXPORT void setup(void *data = nullptr);
+    INTERFACES_EXPORT void sync();
 
     INTERFACES_EXPORT FileQuery listFilesRecursive(const Path &path);
     INTERFACES_EXPORT FileQuery listFilesAndDirsRecursive(const Path &path);
