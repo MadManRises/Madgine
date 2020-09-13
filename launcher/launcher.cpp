@@ -1,6 +1,8 @@
 #include "Madgine/baselib.h"
 #include "Madgine/clientlib.h"
 
+#include "launcher.h"
+
 #include "Interfaces/window/windowsettings.h"
 #include "Madgine/app/application.h"
 #include "Madgine/app/appsettings.h"
@@ -31,7 +33,7 @@ Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, 
 #    define FIX_LOCAL
 #endif
 
-int launch(Engine::Window::MainWindow **topLevelPointer = nullptr)
+int launch(Engine::Window::MainWindow **topLevelPointer)
 {
 
     FIX_LOCAL Engine::App::AppSettings settings;

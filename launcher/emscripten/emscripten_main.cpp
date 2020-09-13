@@ -7,10 +7,16 @@
 #    include "Madgine/core/root.h"
 #    include "Modules/threading/defaulttaskqueue.h"
 #    include "Modules/threading/workgroup.h"
+#include "../launcher.h"
+#include <emscripten.h>
 
-extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
+namespace Engine {
+namespace Filesystem {
+    extern void sync();
+}
+}
 
-EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
+void mainImpl()
 {
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
@@ -19,12 +25,13 @@ EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" int mainImpl()
     },
         std::chrono::seconds { 15 });
     static Engine::Core::Root root;
-    return launch();
+    launch();
 }
 
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
-    Engine::Filesystem::setup();
+    void (*callback)() = &mainImpl;
+    Engine::Filesystem::setup(&callback);
 
     emscripten_set_main_loop_arg([](void *) {}, nullptr, 0, false);
     return 0;

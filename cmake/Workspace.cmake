@@ -44,7 +44,7 @@ get_property(support_shared GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
 
 if (NOT support_shared)
 	MESSAGE(STATUS "Forcing static libraries as shared libraries are not supported on that platform!")
-	set(BUILD_SHARED_LIBS OFF CACHE "" "" FORCE)
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif()
 
 if (NOT BUILD_SHARED_LIBS)

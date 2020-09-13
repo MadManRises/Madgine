@@ -13,8 +13,16 @@
 namespace Engine {
 namespace Filesystem {    
 
-    void setup(void *)
+    void (*sSetupSuccessFunction)() = nullptr;
+
+    EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" void setupDoneImpl() {
+        sSetupSuccessFunction();
+    }
+
+    DLL_EXPORT void setup(void *fn)
     {
+        sSetupSuccessFunction = *static_cast<void (**)()>(fn);
+
         EM_ASM(
             FS.mkdir('/cwd');
             FS.mount(IDBFS, {}, '/cwd');
@@ -22,7 +30,7 @@ namespace Filesystem {
             FS.syncfs(
                 true, function(err) {
                     assert(!err);
-                    _mainImpl();
+                    _setupDoneImpl();
                 }););
         setCwd("/cwd");
     }

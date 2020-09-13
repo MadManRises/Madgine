@@ -12,8 +12,7 @@
 #include "Interfaces/threading/systemvariable.h"
 
 #include "Interfaces/filesystem/api.h"
-
-extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
+#include "../launcher.h"
 
 namespace Engine {
 
