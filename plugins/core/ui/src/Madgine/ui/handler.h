@@ -9,14 +9,7 @@
 
 namespace Engine {
 namespace UI {
-    struct MADGINE_UI_EXPORT WindowDescriber {
-        WindowDescriber(const std::string &widgetName,
-            std::function<bool(Widgets::WidgetBase *)> init)
-            : mWidgetName(widgetName)
-            , mInit(init)
-        {
-        }
-
+    struct WindowDescriptor {
         std::string mWidgetName;
         std::function<bool(Widgets::WidgetBase *)> mInit;
     };
@@ -84,7 +77,7 @@ namespace UI {
         UIManager &mUI;
 
     private:
-        std::list<WindowDescriber> mWidgets;
+        std::list<WindowDescriptor> mWidgets;
 
         Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
         Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;

@@ -3,7 +3,6 @@
 #include "../../generic/container/atomiccontaineroperation.h"
 #include "../../generic/container/container_api.h"
 #include "../../generic/container/containerevent.h"
-#include "../../generic/copy_traits.h"
 #include "../../generic/functor.h"
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
@@ -14,7 +13,6 @@ namespace Serialize {
 
     template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
-                                       private CopyTraits<typename container_traits<C>::value_type>,
                                        C,
                                        Observer {
 

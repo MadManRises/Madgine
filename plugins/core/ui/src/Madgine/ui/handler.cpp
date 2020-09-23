@@ -75,7 +75,7 @@ namespace UI {
     void Handler::finalize()
     {
         mWidget = nullptr;
-        for (const WindowDescriber &des : mWidgets) {
+        for (const WindowDescriptor &des : mWidgets) {
             des.mInit(nullptr);
         }
     }
@@ -95,7 +95,7 @@ namespace UI {
                 mWidget->pointerDownEvent().connect(mPointerDownSlot);
                 mWidget->pointerUpEvent().connect(mPointerUpSlot);
 
-                for (const WindowDescriber &des : mWidgets) {
+                for (const WindowDescriptor &des : mWidgets) {
                     Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
 
                     if (!child) {
@@ -105,7 +105,7 @@ namespace UI {
                         LOG_ERROR("ERROR");
                 }
             } else {
-                for (const WindowDescriber &des : mWidgets) {                    
+                for (const WindowDescriptor &des : mWidgets) {                    
                     if (!des.mInit(nullptr))
                         LOG_ERROR("ERROR");
                 }
@@ -153,7 +153,7 @@ namespace UI {
     void Handler::registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init)
     {
         assert(!mWidget);
-        mWidgets.emplace_back(name, init);
+        mWidgets.push_back({ name, init });
     }
 
     void Handler::onMouseVisibilityChanged(bool b)

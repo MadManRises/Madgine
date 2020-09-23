@@ -29,6 +29,9 @@ namespace Resources {
         using DataContainer = typename replace<Container>::template type<std::pair<ResourceType *, Data>>;
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
+        
+        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
+        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
 
         struct StorageUnit : Base::ResourceType {
             using Base::ResourceType::ResourceType;
@@ -37,9 +40,6 @@ namespace Resources {
 
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
-
-        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
-        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
 
         using ResourceBaseType = std::conditional_t<std::is_same_v<ResourceLoaderCollector::Base, Base>, StorageUnit, typename Base::ResourceType>;
 
