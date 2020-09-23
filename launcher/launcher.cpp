@@ -55,7 +55,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
             Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
 
             if (file) {
-                window.readState(file, Serialize::StateTransmissionFlags_ApplyMap);
+                window.readState(file, nullptr, Engine::Serialize::StateTransmissionFlags_ApplyMap);
                 return true;
             } else {
                 return false;
