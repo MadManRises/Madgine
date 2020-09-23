@@ -200,7 +200,7 @@ namespace Tools {
                 Vector3 pos = ray.point(5.0f);
                 Render::GPUMeshLoader::ResourceType *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
-                    Scene::Entity::EntityPtr e = App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().createEntity();
+                    Scene::Entity::EntityPtr e = mEditor->sceneMgr().createEntity();
                     e.addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
                     e.addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);

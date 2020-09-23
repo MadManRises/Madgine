@@ -11,10 +11,11 @@
 
 #include "globalapibase.h"
 
-#include "Modules/threading/defaulttaskqueue.h"
 
-#include "Modules/plugins/pluginmanager.h"
-#include "Modules/plugins/pluginsection.h"
+METATABLE_BEGIN(Engine::App::Application)
+MEMBER(mGlobalAPIs)
+METATABLE_END(Engine::App::Application)
+
 
 namespace Engine {
 
@@ -24,7 +25,6 @@ namespace App {
 
     Application::Application(const AppSettings &settings)
         : mSettings(settings)
-        , mGlobalAPIInitCounter(0)
         , mTaskQueue("Application")
         , mGlobalAPIs(*this)
     {
@@ -35,7 +35,6 @@ namespace App {
             [this]() {
                 if (!callInit())
                     throw exception("App Init Failed!");
-                //return false;
                 return true;
             },
             [this]() {
@@ -73,7 +72,7 @@ namespace App {
 
     GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
     {
-        return getChild(mGlobalAPIs.get(i), init);
+        return getChild(mGlobalAPIs.get(i), mGlobalAPIInitCounter, init);
     }
 
     const AppSettings &Application::settings()
@@ -88,7 +87,3 @@ namespace App {
 }
 
 }
-
-METATABLE_BEGIN(Engine::App::Application)
-MEMBER(mGlobalAPIs)
-METATABLE_END(Engine::App::Application)

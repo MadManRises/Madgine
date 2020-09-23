@@ -34,7 +34,16 @@ struct MadgineObjectState {
         }
         return static_cast<U &>(u.getSelf(init));
     }
-
+            
+    template <typename U>
+    U &getChild(U &u, int &counter, bool init = true)
+    {
+        if (init) {
+            checkInitState();
+            u.callInit(counter);
+        }
+        return static_cast<U &>(u.getSelf(init));
+    }
 
 protected:
     ObjectState getState() const

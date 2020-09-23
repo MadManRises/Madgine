@@ -16,8 +16,7 @@ namespace App {
     struct MADGINE_BASE_EXPORT Application : ScopeBase,
                                              MadgineObject<Application> {
         Application(const AppSettings &settings);
-
-        virtual ~Application();
+        ~Application();
 
         template <typename T>
         T &getGlobalAPIComponent(bool init = true)
@@ -33,15 +32,13 @@ namespace App {
 
     protected:
         bool init();
-
         void finalize();
-
         friend struct MadgineObject<Application>;
 
     private:
         const AppSettings &mSettings;
 
-        int mGlobalAPIInitCounter;
+        int mGlobalAPIInitCounter = 0;
 
         Threading::DefaultTaskQueue mTaskQueue;
 
