@@ -11,7 +11,7 @@ struct MODULES_EXPORT MadgineObjectObserver {
     {
         switch (event) {
         case AFTER | EMPLACE:
-            if constexpr (object->hasParent()) {
+            if constexpr (T::hasParent()) {
                 if (object->getParent()->isInitialized())
                     object->callInit();
             } else {
