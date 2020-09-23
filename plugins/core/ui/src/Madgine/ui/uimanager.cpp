@@ -40,14 +40,6 @@ namespace UI {
     {
     }
 
-    UIManager &UIManager::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
     bool UIManager::init()
     {
         mWindow.addFrameListener(this);
@@ -188,22 +180,12 @@ namespace UI {
 
     GameHandlerBase &UIManager::getGameHandler(size_t i, bool init)
     {
-        GameHandlerBase &handler = mGameHandlers.get(i);
-        if (init) {
-            checkInitState();
-            handler.callInit();
-        }
-        return handler.getSelf(init);
+        return getChild(mGameHandlers.get(i), init);
     }
 
     GuiHandlerBase &UIManager::getGuiHandler(size_t i, bool init)
     {
-        GuiHandlerBase &handler = mGuiHandlers.get(i);
-        if (init) {
-            checkInitState();
-            handler.callInit();
-        }
-        return handler.getSelf(init);
+        return getChild(mGuiHandlers.get(i), init);
     }
 
 }

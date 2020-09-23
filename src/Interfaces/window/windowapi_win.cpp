@@ -189,7 +189,7 @@ namespace Window {
             return placement.showCmd == SW_MINIMIZE;
         }
 
-        virtual bool isMaximized() override 
+        virtual bool isMaximized() override
         {
             WINDOWPLACEMENT placement;
             auto result = GetWindowPlacement((HWND)mHandle, &placement);
@@ -232,6 +232,21 @@ namespace Window {
             ReleaseCapture();
         }
 
+        virtual WindowData data() override
+        {
+            WINDOWPLACEMENT wndpl;
+            wndpl.length = sizeof(WINDOWPLACEMENT);
+            GetWindowPlacement((HWND)mHandle, &wndpl);
+
+            return {
+                { wndpl.rcNormalPosition.left, wndpl.rcNormalPosition.top },
+                { wndpl.rcNormalPosition.right - wndpl.rcNormalPosition.left,
+                    wndpl.rcNormalPosition.bottom - wndpl.rcNormalPosition.top },
+                wndpl.showCmd == SW_MAXIMIZE,
+                isFullscreen()
+            };
+        }
+
     private:
         bool mKeyDown[512];
         InterfacesVector mLastKnownMousePos;
@@ -270,19 +285,21 @@ namespace Window {
         if (!handle) {
             static const char *windowClass = CreateWindowClass();
 
+            DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX | WS_MAXIMIZEBOX;
+            if (settings.mHeadless) {
+                style = WS_POPUP;
+            }
+
             // Create window
             HINSTANCE hInstance = GetModuleHandle(nullptr);
             RECT rc = { 0, 0, (LONG)settings.mData.mSize.x, (LONG)settings.mData.mSize.y };
-            AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+            AdjustWindowRect(&rc, style, FALSE);
             int x = CW_USEDEFAULT, y = CW_USEDEFAULT;
             if (settings.mData.mPosition.x >= 0 && settings.mData.mPosition.y >= 0) {
                 x = settings.mData.mPosition.x;
                 y = settings.mData.mPosition.y;
             }
-            DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX | WS_MAXIMIZEBOX;
-            if (settings.mHeadless) {
-                style = WS_POPUP;
-            }
+            
             handle = CreateWindow(windowClass, settings.mTitle,
                 style,
                 x, y, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
@@ -291,9 +308,24 @@ namespace Window {
                 return nullptr;
         }
 
-
-        if (!settings.mHidden)
-            ShowWindow(handle, settings.mData.mMaximized ? SW_SHOWMAXIMIZED : SW_SHOW);
+        if (!settings.mHidden) {
+            UINT showCmd = settings.mData.mMaximized ? SW_SHOWMAXIMIZED : SW_SHOW;
+            if (settings.mData.mPosition.x >= 0 && settings.mData.mPosition.y >= 0) {
+                WINDOWPLACEMENT wndpl {
+                    sizeof(WINDOWPLACEMENT),
+                    0,
+                    showCmd,
+                    { -1, -1 },
+                    { -1, -1 },
+                    { settings.mData.mPosition.x, settings.mData.mPosition.y,
+                        settings.mData.mPosition.x + settings.mData.mSize.x,
+                        settings.mData.mPosition.y + settings.mData.mSize.y }
+                };
+                SetWindowPlacement(handle, &wndpl);
+            } else {
+                ShowWindow(handle, showCmd);
+            }                        
+        }
 
         auto pib = sWindows.try_emplace(handle, handle);
         assert(pib.second);

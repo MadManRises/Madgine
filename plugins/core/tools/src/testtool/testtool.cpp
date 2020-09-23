@@ -117,6 +117,10 @@ namespace Tools {
 
             Im3D::Mesh(IM3D_LINES, vertices.data(), vertices.size(), Matrix4::IDENTITY, indices.data(), indices.size());
 
+            ImGui::DragInt("Sphere-Detail", &mSphereDetail, 1.0f, 0, 100);
+
+            Im3D::Sphere({ 0, 0, 0 }, 1.0f, { 1, 1, 1, 1 }, mSphereDetail);
+
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 
             if (ImGui::TreeNode("ValueType Sizes")) {

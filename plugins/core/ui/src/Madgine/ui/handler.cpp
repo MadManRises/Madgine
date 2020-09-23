@@ -54,18 +54,18 @@ namespace UI {
 			return mUI.app(init);
 		}*/
 
-    const MadgineObject *Handler::parent() const
+    const UIManager *Handler::parent() const
     {
         return &mUI;
     }
 
-    UIManager &Handler::ui(bool init)
+    /*UIManager &Handler::ui(bool init)
     {
         if (init) {
             checkInitState();
         }
         return mUI.getSelf(init);
-    }
+    }*/
 
     bool Handler::init()
     {

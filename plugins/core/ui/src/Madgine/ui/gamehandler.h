@@ -21,8 +21,6 @@ namespace Engine
 			void update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask);
 			void fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask);
 
-			GameHandlerBase &getSelf(bool = true);
-
 		protected:
 			void onPointerMove(const Input::PointerEventArgs& me) override;
 

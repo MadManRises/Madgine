@@ -75,7 +75,7 @@ namespace Resources {
             return mData != Data {};
         }
 
-        void load(const std::string &name, Loader *loader = nullptr)
+        void load(const std::string_view &name, Loader *loader = nullptr)
         {
             *this = Loader::load(name, loader);
         }

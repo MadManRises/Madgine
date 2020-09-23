@@ -14,6 +14,8 @@ namespace Scene {
             virtual EntityComponentBase *get(GenerationVectorIndex &index) = 0;
             virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table) = 0;
             virtual void erase(GenerationVectorIndex &index) = 0;
+            virtual bool empty() = 0;
+            virtual void clear() = 0;
         };
 
     }

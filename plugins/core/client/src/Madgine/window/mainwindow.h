@@ -71,7 +71,7 @@ namespace Window {
                                                   WindowEventListener,
                                                   Threading::FrameListener,
                                                   Serialize::TopLevelSerializableUnit<MainWindow>,
-                                                  MadgineObject {
+                                                  MadgineObject<MainWindow> {
         SERIALIZABLEUNIT;
 
         MainWindow(const WindowSettings &settings);
@@ -110,9 +110,8 @@ namespace Window {
 
         MainWindowComponentBase &getWindowComponent(size_t i, bool = true);
 
-        virtual const MadgineObject *parent() const override;
-        virtual bool init() override;
-        virtual void finalize() override;
+        bool init();
+        void finalize();
 
         /**
 			* \brief Adds a FrameListener to the application.

@@ -35,6 +35,7 @@ namespace Scene {
 
         Matrix4 Transform::parentMatrix(const EntityComponentList<Transform> &transforms) const
         {
+            transforms->update(mParent.mIndex);
             if (mParent.mIndex)
                 return transforms.get(mParent.mIndex)->worldMatrix(transforms);
             else

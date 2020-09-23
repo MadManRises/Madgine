@@ -26,17 +26,9 @@ namespace Window {
         return mWindow;
     }
 
-    const MadgineObject *MainWindowComponentBase::parent() const
+    const MainWindow *MainWindowComponentBase::parent() const
     {
         return &mWindow;
-    }
-
-    MainWindowComponentBase &MainWindowComponentBase::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
     }
 
     void MainWindowComponentBase::onResize(const Rect2i &space)

@@ -66,8 +66,6 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-        UIManager &getSelf(bool = true);
-
         OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
         OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>)
 

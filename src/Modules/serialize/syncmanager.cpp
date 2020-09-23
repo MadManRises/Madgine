@@ -79,7 +79,7 @@ namespace Serialize {
                 object->readRequest(stream, header.mTransaction);
                 break;
             case STATE:
-                object->readState(stream);
+                object->readState(stream, nullptr, StateTransmissionFlags_ApplyMap);
                 break;
             default:
                 throw SerializeException("Invalid Message-Type: " + std::to_string(header.mType));

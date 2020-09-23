@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../toolscollector.h"
 #include "../toolbase.h"
+#include "../toolscollector.h"
 
 namespace Engine {
 namespace Tools {
@@ -18,6 +18,9 @@ namespace Tools {
         void logTest();
         void logValue(const ValueType &v);
         int dummy();
+
+    private:
+        int mSphereDetail = 1;
     };
 
 }

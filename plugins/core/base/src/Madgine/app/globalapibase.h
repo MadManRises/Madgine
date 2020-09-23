@@ -8,7 +8,7 @@
 
 namespace Engine {
 namespace App {
-    struct MADGINE_BASE_EXPORT GlobalAPIBase : MadgineObject, VirtualScopeBase {
+    struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase<>, MadgineObject<GlobalAPIBase> {
         GlobalAPIBase(App::Application &app);
 
         template <typename T>
@@ -19,13 +19,13 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-        GlobalAPIBase &getSelf(bool = true);
-
-        virtual const MadgineObject *parent() const override;
+        const App::Application *parent() const;
 
     protected:
-        bool init() override;
-        void finalize() override;
+        virtual bool init();
+        virtual void finalize();
+
+        friend struct MadgineObject<GlobalAPIBase>;
 
         App::Application &mApp;
     };

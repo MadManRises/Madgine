@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Resources {
 
-    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase {
+    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase<> {
 
         using ResourceType = ResourceBase;
 
@@ -15,7 +15,7 @@ namespace Resources {
 
 		ResourceLoaderBase &operator=(const ResourceLoaderBase &) = delete;
 
-        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) = 0;
+        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) = 0;
 
         template <typename T>
         void resourceAdded(T *res)
@@ -28,9 +28,9 @@ namespace Resources {
 
         const std::vector<std::string> &fileExtensions() const;
 
-        size_t extensionIndex(const std::string &ext) const;
+        size_t extensionIndex(const std::string_view &ext) const;
 
-        virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() = 0;
+        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
 
     private:

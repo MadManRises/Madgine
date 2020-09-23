@@ -2,8 +2,7 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "bullet3-2.89/src/btBulletDynamicsCommon.h"
-
+class btCollisionShape;
 
 namespace Engine {
 namespace Physics {

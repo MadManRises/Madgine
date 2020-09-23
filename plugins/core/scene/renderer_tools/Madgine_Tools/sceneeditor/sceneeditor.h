@@ -46,7 +46,6 @@ namespace Tools {
         void renderSelection();
         void renderHierarchy();
         void renderSettings();
-        void renderHierarchyEntity(const Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> &parentTransform);
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
 
@@ -66,6 +65,20 @@ namespace Tools {
 
         int mHoveredAxis = -1;
         Scene::Entity::Transform *mHoveredTransform = nullptr;
+
+        //Entity-Cache
+        struct EntityNode {
+            Scene::Entity::EntityPtr mEntity;
+            std::list<EntityNode> mChildren;
+        };
+        std::list<EntityNode> mEntityCache;
+        std::vector<EntityNode *> mEntityMapping;
+
+        void updateEntityCache();
+        bool updateEntityCache(EntityNode &node, const Scene::Entity::EntityPtr &parent = {});
+        void createEntityMapping(size_t index);
+        void iterateMapping(EntityNode &node);
+        void renderHierarchyEntity(EntityNode &entity);
 
         //Settings
         Vector4 mBoneForward = { 1, 0, 0, 0 };

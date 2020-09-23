@@ -532,11 +532,11 @@ namespace Tools {
 
                 ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetItemsLineHeightWithSpacing() });
 
-                for (const std::pair<std::string, TypedScopePtr> &res : NodeGraph::NodeGraphPrototypeLoader::getSingleton().resources()) {
+                for (const std::pair<std::string_view, TypedScopePtr> &res : NodeGraph::NodeGraphPrototypeLoader::getSingleton().resources()) {
 
                     bool selected = mSelectionTargetBuffer == res.first;
 
-                    if (ImGui::Selectable(res.first.c_str(), selected)) {
+                    if (ImGui::Selectable(res.first.data(), selected)) {
                         mSelectionTargetBuffer = res.first;
                     }
 

@@ -21,7 +21,7 @@ namespace UI {
         std::function<bool(Widgets::WidgetBase *)> mInit;
     };
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject, ScopeBase, Serialize::SerializableUnit<Handler> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, ScopeBase, Serialize::SerializableUnit<Handler> {
         SERIALIZABLEUNIT;
 
         Handler(UIManager &ui);
@@ -37,8 +37,8 @@ namespace UI {
         virtual std::string_view key() const = 0;
 
         //virtual App::Application &app(bool = true) override;
-        virtual const MadgineObject *parent() const override;
-        UIManager &ui(bool = true);
+        const UIManager *parent() const;
+        //UIManager &ui(bool = true);
 
         template <typename T>
         T &getGuiHandler(bool init = true)
@@ -59,8 +59,10 @@ namespace UI {
         void registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init);
 
     protected:
-        bool init() override;
-        void finalize() override;
+        virtual bool init();
+        virtual void finalize();
+
+        friend struct MadgineObject<Handler>;
 
         virtual void onPointerMove(const Input::PointerEventArgs &me);
 

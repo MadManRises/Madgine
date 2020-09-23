@@ -6,7 +6,7 @@ namespace Window {
     struct WindowData {
         InterfacesVector mPosition = { -1, -1 };
         InterfacesVector mSize = { 800, 600 };
-        bool mMaximized = false;
+        bool mMaximized = true;
         bool mFullScreen = false;
     };
 

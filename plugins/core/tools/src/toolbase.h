@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : public MadgineObject, public VirtualScopeBase, public Serialize::SerializableUnit<ToolBase> {
+    struct MADGINE_TOOLS_EXPORT ToolBase : public VirtualScopeBase<>, Serialize::SerializableUnit<ToolBase>, MadgineObject<ToolBase> {
         SERIALIZABLEUNIT;
 
         ToolBase (ImRoot &root);
@@ -32,15 +32,16 @@ namespace Tools {
         {
             return static_cast<T &>(getToolComponent(component_index<T>()));
         }
-        ToolBase &getSelf(bool = true);
 		
 		//virtual App::Application &app(bool = true) override;
 
-    protected:
+        const ImRoot *parent() const;
 
-        virtual const MadgineObject *parent() const override;
-        virtual bool init() override;
-        virtual void finalize() override;
+    protected:
+        
+        virtual bool init();
+        virtual void finalize();
+        friend struct MadgineObject<ToolBase>;
 
 		bool mVisible = false;
         

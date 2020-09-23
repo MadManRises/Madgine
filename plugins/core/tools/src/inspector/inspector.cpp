@@ -144,8 +144,8 @@ namespace Tools {
                                                                      ImGui::BeginTreeArrow(id.c_str());
                                                                      ImGui::SameLine();
                                                                      if (ImGui::BeginCombo((id + "##suggestions").c_str(), scope.name().c_str())) {
-                                                                         for (std::pair<std::string, TypedScopePtr> p : it->second()) {
-                                                                             if (ImGui::Selectable(p.first.c_str())) {
+                                                                         for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
+                                                                             if (ImGui::Selectable(p.first.data())) {
                                                                                  value = p.second;
                                                                                  modified = true;
                                                                              }
@@ -366,7 +366,7 @@ namespace Tools {
         return "Inspector";
     }
 
-    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
+    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()> getter)
     {
         mObjectSuggestionsByType[type] = getter;
     }

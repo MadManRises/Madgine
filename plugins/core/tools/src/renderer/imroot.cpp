@@ -19,10 +19,11 @@
 
 #include "Modules/generic/container/safeiterator.h"
 
+/*
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImRoot)
-
+*/
 
 
 namespace Engine {
@@ -46,7 +47,7 @@ namespace Tools {
             Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            tool->readState(in, nullptr, Serialize::StateTransmissionFlags_DontApplyMap | Serialize::StateTransmissionFlags_SkipId);
+            tool->readState(in, nullptr, Serialize::StateTransmissionFlags_SkipId);
         }
     }
 
@@ -69,9 +70,9 @@ namespace Tools {
         }
     }
 
-    ImRoot::ImRoot(const MadgineObject *parent)
-        : mParent(parent)
-        , mCollector(*this)
+    ImRoot::ImRoot(MadgineObjectState *state)
+        : mState(state),
+        mCollector(*this)
     {
     }
 
@@ -199,22 +200,22 @@ namespace Tools {
 
     ToolBase &ImRoot::getToolComponent(size_t index, bool init)
     {
-        ToolBase &tool = mCollector.get(index);
-        if (init) {
-            checkInitState();
-            tool.callInit();
-        }
-        return tool.getSelf(init);
-    }
-
-    const MadgineObject *ImRoot::parent() const
-    {
-        return mParent;
+        return mState->getChild(mCollector.get(index), init);
     }
 
     ImGuiDockNode *ImRoot::dockNode() const
     {
         return mDockNode;
+    }
+
+    bool ImRoot::isInitialized() const
+    {
+        return mState->isInitialized();
+    }
+
+    void ImRoot::checkInitState()
+    {
+        mState->checkInitState();
     }
 
 }

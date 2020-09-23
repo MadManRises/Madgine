@@ -62,6 +62,8 @@ namespace Window {
 
         virtual void destroy() = 0;
 
+        virtual WindowData data() = 0;
+
         //Input
         virtual bool isKeyDown(Input::Key::Key key) = 0;
 
@@ -69,16 +71,6 @@ namespace Window {
         virtual void releaseInput() = 0;
 
         const uintptr_t mHandle;
-
-        WindowData data()
-        {
-            return {
-                pos(),
-                renderSize(),
-                isMaximized(),
-                isFullscreen()
-            };
-        }
 
     protected:
         void onResize(const InterfacesVector &size)

@@ -48,7 +48,7 @@ namespace Tools {
 
     bool GuiEditor::init()
     {
-        mWindow = &static_cast<const ClientImRoot &>(*mRoot.parent()).window();
+        mWindow = &static_cast<const ClientImRoot &>(mRoot).window();
         mWidgetManager = &mWindow->getWindowComponent<Widgets::WidgetManager>();
 
 #if ENABLE_PLUGINS
@@ -140,7 +140,7 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
-                mWindow->readState(in);
+                mWindow->readState(in, nullptr, Serialize::StateTransmissionFlags_ApplyMap);
             }
         }
     }

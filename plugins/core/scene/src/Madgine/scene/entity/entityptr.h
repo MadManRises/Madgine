@@ -23,7 +23,7 @@ namespace Scene {
 
             SceneManager *sceneMgr() const;
 
-            void update() const;
+            uint32_t update() const;
 
             operator bool() const;
 
@@ -48,6 +48,13 @@ namespace Scene {
 
             Future<EntityComponentPtr<EntityComponentBase>> addComponent(size_t i, const ObjectPtr &table = {}) const;
             Future<EntityComponentPtr<EntityComponentBase>> addComponent(const std::string_view &name, const ObjectPtr &table = {}) const;
+
+            template <typename T>
+            bool hasComponent() const {
+                return hasComponent(component_index<T>());
+            }
+
+            bool hasComponent(size_t i) const;
 
             typename GenerationVector<Entity>::iterator it();
             void remove();

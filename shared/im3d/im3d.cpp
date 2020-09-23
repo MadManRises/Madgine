@@ -17,6 +17,8 @@
 
 #include "glyph.h"
 
+#include "Modules/math/transformation.h"
+
 #include <numeric>
 
 namespace Engine {
@@ -364,7 +366,7 @@ namespace Im3D {
             { a, colorA, Vector3::ZERO },
             { b, colorB, Vector3::ZERO }
         };
-        Mesh(IM3D_LINES, vertices, 2);        
+        Mesh(IM3D_LINES, vertices, 2);
     }
 
     void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Vector4 &color)
@@ -408,6 +410,152 @@ namespace Im3D {
         }
     }
 
+    void Sphere(const Vector3 &center, float radius, const Vector4 &color, size_t detail)
+    {
+        size_t faceVertexCount = (detail + 2) * (detail + 3) / 2 - 3;
+        size_t vertexCount = 20 * faceVertexCount + 12;
+        std::unique_ptr<Render::Vertex[]> vertices = std::make_unique<Render::Vertex[]>(vertexCount);
+
+        size_t indexCount = 60 * (detail + 1) * (detail + 2);
+        std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(indexCount);
+
+        auto vertexIndex = [=](size_t face, size_t x, size_t y) {
+            return 12 + face * faceVertexCount + ((5 * y + 2 * detail * y - y * y) / 2) - (y > 0 ? 2 : 1) + x;
+        };
+
+        constexpr float coeff = (1.0f + sqrtf(5.0f)) / 2.0f;
+        constexpr float coeff2 = sqrtf(2.5f + sqrtf(5.0f) / 2.0f);
+        radius /= coeff2;
+        const float t = radius * coeff;        
+
+        vertices[0] = {
+            Vector3 { -radius, t, 0 },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[1] = {
+            Vector3 { radius, t, 0 },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[2] = {
+            Vector3 { -radius, -t, 0 },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[3] = {
+            Vector3 { radius, -t, 0 },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[4] = {
+            Vector3 { 0, -radius, t },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[5] = {
+            Vector3 { 0, radius, t },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[6] = {
+            Vector3 { 0, -radius, -t },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[7] = {
+            Vector3 { 0, radius, -t },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[8] = {
+            Vector3 { t, 0, -radius },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[9] = {
+            Vector3 { t, 0, radius },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[10] = {
+            Vector3 { -t, 0, -radius },
+            color,
+            { 1, 1, 1 }
+        };
+        vertices[11] = {
+            Vector3 { -t, 0, radius },
+            color,
+            { 1, 1, 1 }
+        };
+
+        constexpr unsigned short cornerIndices[20][3] = {
+            { 0, 11, 5 },
+            { 0, 5, 1 },
+            { 0, 1, 7 },
+            { 0, 7, 10 },
+            { 0, 10, 11 },
+            { 1, 5, 9 },
+            { 5, 11, 4 },
+            { 11, 10, 2 },
+            { 10, 7, 6 },
+            { 7, 1, 8 },
+            { 3, 9, 4 },
+            { 3, 4, 2 },
+            { 3, 2, 6 },
+            { 3, 6, 8 },
+            { 3, 8, 9 },
+            { 4, 9, 5 },
+            { 2, 4, 11 },
+            { 6, 2, 10 },
+            { 8, 6, 7 },
+            { 9, 8, 1 }
+        };
+
+        size_t vertexCounter = 12;
+        for (size_t face = 0; face < 20; ++face) {
+            Vector3 bottomLeft = vertices[cornerIndices[face][0]].mPos;
+            Vector3 bottomRight = vertices[cornerIndices[face][1]].mPos;
+            Vector3 top = vertices[cornerIndices[face][2]].mPos;
+            for (size_t y = 0; y <= detail + 1; ++y) {
+
+                Vector3 left = Slerp(bottomLeft, top, y / float(detail + 1));
+                Vector3 right = Slerp(bottomRight, top, y / float(detail + 1));
+
+                for (size_t x = 0; x <= detail + 1 - y; ++x) {
+                    if ((y == 0 && (x == 0 || x == detail + 1)) || y == detail + 1)
+                        continue;
+                    vertices[vertexCounter++] = {
+                        Slerp(left, right, x / float(detail + 1 - y)),
+                        color,
+                        { 1, 1, 1 }
+                    };
+                }
+            }
+        }
+        assert(vertexCounter == vertexCount);
+
+        size_t indexCounter = 0;
+        for (size_t face = 0; face < 20; ++face) {
+            for (size_t y = 0; y <= detail; ++y) {
+                for (size_t x = 0; x <= detail - y; ++x) {
+                    unsigned short bottomLeft = (x == 0 && y == 0) ? cornerIndices[face][0] : vertexIndex(face, x, y);
+                    unsigned short bottomRight = (x == detail && y == 0) ? cornerIndices[face][1] : vertexIndex(face, x + 1, y);
+                    unsigned short top = (y == detail) ? cornerIndices[face][2] : vertexIndex(face, x, y + 1);
+                    indices[indexCounter++] = bottomLeft;
+                    indices[indexCounter++] = bottomRight;
+                    indices[indexCounter++] = bottomLeft;
+                    indices[indexCounter++] = top;
+                    indices[indexCounter++] = top;
+                    indices[indexCounter++] = bottomRight;   
+                }                
+            }
+        }
+        assert(indexCounter == indexCount);
+
+        Mesh(IM3D_LINES, vertices.get(), vertexCount, TranslationMatrix(center), indices.get(), indexCounter);
+    }
+
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
     {
         return BoundingSphere(GetID(name), flags, priority);
@@ -428,7 +576,7 @@ namespace Im3D {
     {
         Im3DContext &c = *sContext;
 
-        Sphere bounds = { bb.center(),
+        Engine::Sphere bounds = { bb.center(),
             0.4f * bb.diameter() };
 
         //Check if Hovered

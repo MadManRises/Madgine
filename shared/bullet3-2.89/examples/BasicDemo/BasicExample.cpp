@@ -119,7 +119,7 @@ void BasicExample::renderScene()
 	CommonRigidBodyBase::renderScene();
 }
 
-CommonExampleInterface*		(CommonExampleOptions& options)
+CommonExampleInterface* BasicExampleCreateFunc(CommonExampleOptions& options)
 {
 	return new BasicExample(options.m_guiHelper);
 }

@@ -26,10 +26,12 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "toolbase.h"
+
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
 METATABLE_BEGIN(Engine::Tools::ClientImRoot)
-MEMBER(mRoot)
+READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ClientImRoot)
 
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
@@ -125,7 +127,7 @@ namespace Tools {
 
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
         : SerializableUnit(window, 80)
-        , mRoot(this)
+        , ImRoot(this)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
     {
     }
@@ -207,7 +209,7 @@ namespace Tools {
         io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
         io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
 
-        if (!mRoot.callInit())
+        if (!ImRoot::init())
             return false;
 
         mWindow.addFrameListener(this);
@@ -223,7 +225,7 @@ namespace Tools {
 
         mWindow.removeFrameListener(this);
 
-        mRoot.callFinalize();
+        ImRoot::finalize();
 
         if (Window::platformCapabilities.mSupportMultipleWindows) {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
@@ -280,9 +282,9 @@ namespace Tools {
 
     bool ClientImRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
     {
-        mRoot.frame();
+        frame();
 
-        setCentralNode(mRoot.dockNode());
+        setCentralNode(dockNode());
 
         return true;
     }

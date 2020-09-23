@@ -44,14 +44,6 @@ namespace UI {
             fixedUpdate(timeStep);
     }
 
-    GameHandlerBase &GameHandlerBase::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
     void GameHandlerBase::onPointerMove(const Input::PointerEventArgs &me)
     {
         Input::PointerEventArgs args = me;

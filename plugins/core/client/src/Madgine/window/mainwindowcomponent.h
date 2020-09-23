@@ -13,15 +13,16 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase, MadgineObject, Serialize::SerializableUnitBase {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase<>, Serialize::SerializableUnitBase, MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
         MainWindow &window() const;
 
-        virtual const MadgineObject *parent() const override;
+        const MainWindow *parent() const;
 
-        MainWindowComponentBase &getSelf(bool = true);
+        virtual bool init() = 0;
+        virtual void finalize() = 0;
 
         virtual std::string_view key() const = 0;
 

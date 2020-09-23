@@ -78,14 +78,6 @@ namespace UI {
         return mContext;
     }
 
-    GuiHandlerBase &GuiHandlerBase::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
     void GuiHandlerBase::setContext(Threading::ContextMask context)
     {
         mContext = context;

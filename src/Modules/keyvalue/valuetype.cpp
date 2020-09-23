@@ -220,74 +220,90 @@ ValueType ValueType::operator*(const ValueType &other) const
 
 std::string ValueType::toString() const
 {
-    switch (index()) {
-    case ValueTypeEnum::BoolValue:
-        return std::get<bool>(mUnion) ? "true" : "false";
-    case ValueTypeEnum::StringValue:
-        return "\""s + std::string { std::get<CoWString>(mUnion) } + "\"";
-    case ValueTypeEnum::IntValue:
-        return std::to_string(std::get<int>(mUnion));
-    case ValueTypeEnum::UIntValue:
-        return std::to_string(std::get<uint64_t>(mUnion));
-    case ValueTypeEnum::NullValue:
-        return "NULL";
-    case ValueTypeEnum::ScopeValue:
-        return std::get<TypedScopePtr>(mUnion).name();
-    case ValueTypeEnum::FloatValue:
-        return std::to_string(std::get<float>(mUnion));
-    case ValueTypeEnum::Vector2Value:
-        return "["s + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y);
-    case ValueTypeEnum::Vector3Value:
-        return "["s + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
-    case ValueTypeEnum::Vector4Value:
-        return "["s + std::to_string(std::get<Vector4>(mUnion)[0]) + ", " + std::to_string(std::get<Vector4>(mUnion)[1]) + ", " + std::to_string(std::get<Vector4>(mUnion)[2]) + ", " + std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
-    case ValueTypeEnum::QuaternionValue:
-        return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
-    case ValueTypeEnum::Matrix3Value:
-        return "[ ["s + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[0][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[1][2]) + "], [" + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix3>>(mUnion))[2][2]) + "] ]";
-    case ValueTypeEnum::Matrix4Value:
-        return "[ ["s + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[0][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[1][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[2][3]) + "], [" + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][0]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][1]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][2]) + ", " + std::to_string((*std::get<CoW<Matrix4>>(mUnion))[3][3]) + "] ]";
-    case ValueTypeEnum::ApiFunctionValue:
-        return "<method>";
-    default:
-        throw ValueTypeException("Unknown Type!");
-    }
+    return visit(overloaded {
+        [](bool b) {
+            return b ? "true"s : "false"s;
+        },
+        [](const CoWString &s) {
+            return "\"" + std::string { s } + "\"";
+        },
+        [](std::monostate) {
+            return "NULL"s;
+        },
+        [](const TypedScopePtr &scope) {
+            return scope.name();
+        },
+        [](const Vector2 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + "]";
+        },
+        [](const Vector3 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + "]";
+        },
+        [](const Vector4 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + "]";
+        },
+        [](const Quaternion &q) {
+            return "{"s + std::to_string(q.v.x) + ", " + std::to_string(q.v.y) + ", " + std::to_string(q.v.z) + ", " + std::to_string(q.w) + "}";
+        },
+        [](const CoW<Matrix3> &m) {
+            return "[ ["s + std::to_string((*m)[0][0]) + ", " + std::to_string((*m)[0][1]) + ", " + std::to_string((*m)[0][2]) + "], [" + std::to_string((*m)[1][0]) + ", " + std::to_string((*m)[1][1]) + ", " + std::to_string((*m)[1][2]) + "], [" + std::to_string((*m)[2][0]) + ", " + std::to_string((*m)[2][1]) + ", " + std::to_string((*m)[2][2]) + "] ]";
+        },
+        [](const CoW<Matrix4> &m) {
+            return "[ ["s + std::to_string((*m)[0][0]) + ", " + std::to_string((*m)[0][1]) + ", " + std::to_string((*m)[0][2]) + ", " + std::to_string((*m)[0][3]) + "], [" + std::to_string((*m)[1][0]) + ", " + std::to_string((*m)[1][1]) + ", " + std::to_string((*m)[1][2]) + ", " + std::to_string((*m)[1][3]) + "], [" + std::to_string((*m)[2][0]) + ", " + std::to_string((*m)[2][1]) + ", " + std::to_string((*m)[2][2]) + ", " + std::to_string((*m)[2][3]) + "], [" + std::to_string((*m)[3][0]) + ", " + std::to_string((*m)[3][1]) + ", " + std::to_string((*m)[3][2]) + ", " + std::to_string((*m)[3][3]) + "] ]";
+        },
+        [](const ApiFunction &) {
+            return "<function>"s;
+        },
+        [](const KeyValueVirtualRange &) {
+            return "<range>"s;
+        },
+        [](const auto &v) {
+            return std::to_string(v);
+        } });
 }
 
 std::string ValueType::toShortString() const
 {
-    switch (index()) {
-    case ValueTypeEnum::BoolValue:
-        return std::get<bool>(mUnion) ? "true" : "false";
-    case ValueTypeEnum::StringValue:
-        return "\""s + std::string { std::get<CoWString>(mUnion) } + "\"";
-    case ValueTypeEnum::IntValue:
-        return std::to_string(std::get<int>(mUnion));
-    case ValueTypeEnum::UIntValue:
-        return std::to_string(std::get<uint64_t>(mUnion));
-    case ValueTypeEnum::NullValue:
-        return "NULL";
-    case ValueTypeEnum::ScopeValue:
-        return std::get<TypedScopePtr>(mUnion).name();
-    case ValueTypeEnum::FloatValue:
-        return std::to_string(std::get<float>(mUnion));
-    case ValueTypeEnum::Vector2Value:
-        return "["s + std::to_string(std::get<Vector2>(mUnion).x) + ", " + std::to_string(std::get<Vector2>(mUnion).y) + "]";
-    case ValueTypeEnum::Vector3Value:
-        return "["s + std::to_string(std::get<Vector3>(mUnion).x) + ", " + std::to_string(std::get<Vector3>(mUnion).y) + ", " + std::to_string(std::get<Vector3>(mUnion).z) + "]";
-    case ValueTypeEnum::Vector4Value:
-        return "["s + std::to_string(std::get<Vector4>(mUnion)[0]) + ", " + std::to_string(std::get<Vector4>(mUnion)[1]) + ", " + std::to_string(std::get<Vector4>(mUnion)[2]) + ", " + std::to_string(std::get<Vector4>(mUnion)[3]) + "]";
-    case ValueTypeEnum::QuaternionValue:
-        return "{"s + std::to_string(std::get<Quaternion>(mUnion).v.x) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.y) + ", " + std::to_string(std::get<Quaternion>(mUnion).v.z) + ", " + std::to_string(std::get<Quaternion>(mUnion).w) + "}";
-    case ValueTypeEnum::Matrix3Value:
-        return "Matrix3[...]";
-    case ValueTypeEnum::Matrix4Value:
-        return "Matrix4[...]";
-    case ValueTypeEnum::ApiFunctionValue:
-        return "<method>";
-    default:
-        throw ValueTypeException("Unknown Type!");
-    }
+    return visit(overloaded {
+        [](bool b) {
+            return b ? "true"s : "false"s;
+        },
+        [](const CoWString &s) {
+            return "\"" + std::string { s } + "\"";
+        },
+        [](std::monostate) {
+            return "NULL"s;
+        },
+        [](const TypedScopePtr &scope) {
+            return scope.name();
+        },
+        [](const Vector2 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + "]";
+        },
+        [](const Vector3 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + "]";
+        },
+        [](const Vector4 &v) {
+            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + "]";
+        },
+        [](const Quaternion &q) {
+            return "{"s + std::to_string(q.v.x) + ", " + std::to_string(q.v.y) + ", " + std::to_string(q.v.z) + ", " + std::to_string(q.w) + "}";
+        },
+        [](const CoW<Matrix3> &) {
+            return "Matrix3[...]"s;
+        },
+        [](const CoW<Matrix4> &) {
+            return "Matrix4[...]"s;
+        },
+        [](const ApiFunction &) {
+            return "<function>"s;
+        },
+        [](const KeyValueVirtualRange &) {
+            return "<range>"s;
+        },
+        [](const auto &v) {
+            return std::to_string(v);
+        } });
 }
 
 std::string ValueType::getTypeString() const

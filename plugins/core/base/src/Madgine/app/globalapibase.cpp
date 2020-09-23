@@ -15,16 +15,7 @@ namespace Engine
 		{
 		}
 
-		GlobalAPIBase& GlobalAPIBase::getSelf(bool init)
-		{
-			if (init)
-			{
-				checkDependency();
-			}
-			return *this;
-		}
-
-		const MadgineObject * GlobalAPIBase::parent() const
+		const App::Application * GlobalAPIBase::parent() const
 		{
 			return &mApp;
 		}

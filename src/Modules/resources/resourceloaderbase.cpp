@@ -21,7 +21,7 @@ namespace Resources {
         return mExtensions;
     }
 
-    size_t ResourceLoaderBase::extensionIndex(const std::string &ext) const
+    size_t ResourceLoaderBase::extensionIndex(const std::string_view &ext) const
     {
         return std::find(mExtensions.begin(), mExtensions.end(), ext) - mExtensions.begin();
     }

@@ -20,6 +20,7 @@ ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 
 METATABLE_BEGIN(Engine::Physics::RigidBody)
 PROPERTY(Mass, mass, setMass)
+PROPERTY(Friction, friction, setFriction)
 PROPERTY(Kinematic, kinematic, setKinematic)
 PROPERTY(Shape, getShape, setShape)
 METATABLE_END(Engine::Physics::RigidBody)
@@ -36,6 +37,9 @@ namespace Physics {
             : mTransform(std::move(transform))
             , mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, shape, { 0.0f, 0.0f, 0.0f } })
         {
+            mRigidBody.setAngularFactor({ 0, 0, 1 });
+            mRigidBody.setLinearFactor({ 1, 1, 0 });
+            mRigidBody.setFriction(0.01f);
         }
 
         virtual void setWorldTransform(const btTransform &transform) override
@@ -69,6 +73,16 @@ namespace Physics {
             }
         }
 
+        void add()
+        {
+            mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().addRigidBody(&mRigidBody);
+        }
+
+        void remove()
+        {
+            mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().removeRigidBody(&mRigidBody);
+        }
+
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mTransform;
         btRigidBody mRigidBody;
     };
@@ -90,18 +104,18 @@ namespace Physics {
 
         assert(!mData);
 
-        mShapeHandle.load("Band");
+        mShapeHandle.load("Cube");
 
         mData = std::make_unique<Data>(entity.getComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get()->get() : nullptr);
 
-        entity->sceneMgr().getComponent<PhysicsManager>().world().addRigidBody(&mData->mRigidBody);
+        mData->add();
     }
 
     void RigidBody::finalize(const Scene::Entity::EntityPtr &entity)
     {
         assert(mData);
 
-        entity->sceneMgr().getComponent<PhysicsManager>().world().removeRigidBody(&mData->mRigidBody);
+        mData->remove();
 
         mData.reset();
 
@@ -113,6 +127,11 @@ namespace Physics {
         return &mData->mRigidBody;
     }
 
+    void RigidBody::activate()
+    {
+        mData->mRigidBody.activate(true);
+    }
+
     float RigidBody::mass() const
     {
         return mData->mRigidBody.getMass();
@@ -122,9 +141,11 @@ namespace Physics {
     {
         float oldMass = mData->mRigidBody.getMass();
         if (mass != oldMass) {
-            mData->mRigidBody.setMassProps(mass, { 0.0f, 0.0f, 0.0f });
-            mData->mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().removeRigidBody(&mData->mRigidBody);
-            mData->mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().addRigidBody(&mData->mRigidBody);
+            mData->remove();
+            btVector3 inertia;
+            mShapeHandle->get()->get()->calculateLocalInertia(mass, inertia);
+            mData->mRigidBody.setMassProps(mass, inertia);
+            mData->add();
             mData->mRigidBody.activate(true);
             if (oldMass == 0.0f) {
                 Engine::Scene::Entity::Transform *component = mData->mTransform;
@@ -155,13 +176,35 @@ namespace Physics {
             mData->mRigidBody.setActivationState(DISABLE_DEACTIVATION);
         } else {
             mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-            mData->mRigidBody.setActivationState(ACTIVE_TAG);
+            mData->mRigidBody.forceActivationState(ISLAND_SLEEPING);
+            if (mData->mRigidBody.getMass() > 0) {
+                mData->remove();
+                mData->mRigidBody.activate(true);
+                mData->add();
+            }
         }
+    }
+
+    float RigidBody::friction() const
+    {
+        return mData->mRigidBody.getFriction();
+    }
+
+    void RigidBody::setFriction(float friction)
+    {
+        mData->mRigidBody.setFriction(friction);
     }
 
     void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
     {
         mShapeHandle = handle;
+
+        mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
+    }
+
+    void RigidBody::setShapeName(const std::string_view &name)
+    {
+        mShapeHandle.load(name);
 
         mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
     }

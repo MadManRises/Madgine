@@ -40,6 +40,16 @@ namespace Scene {
                 mData.erase(index);
             }
 
+            bool empty() override final 
+            {
+                return mData.empty();
+            }
+
+            void clear() override final
+            {
+                mData.clear();
+            }
+
             typename GenerationVector<T>::iterator begin() {
                 return mData.begin();
             }

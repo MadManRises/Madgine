@@ -83,11 +83,6 @@ namespace Window {
         return { mOsWindow->renderPos(), mOsWindow->renderSize() };
     }
 
-    const MadgineObject *MainWindow::parent() const
-    {
-        return nullptr;
-    }
-
     bool MainWindow::init()
     {
         WindowSettings settings = mSettings;
@@ -275,11 +270,7 @@ namespace Window {
 
     MainWindowComponentBase &MainWindow::getWindowComponent(size_t i, bool init)
     {
-        MainWindowComponentBase &component = mComponents.get(i);
-        if (init) {
-            component.callInit();
-        }
-        return component.getSelf(init);
+        return getChild(mComponents.get(i), init);
     }
 
     void MainWindow::addFrameListener(Threading::FrameListener *listener)

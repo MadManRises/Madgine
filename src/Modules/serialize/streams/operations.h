@@ -245,7 +245,7 @@ namespace Serialize {
             } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
                 //Don't do anything here
             } else if constexpr (has_function_readState_v<T>) {
-                TupleUnpacker::invoke(&T::readState, &t, in, name, StateTransmissionFlags_DontApplyMap);
+                t.readState(in, name);
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {

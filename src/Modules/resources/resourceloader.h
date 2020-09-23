@@ -82,7 +82,7 @@ namespace Resources {
             return static_cast<T&>(getLoaderByIndex(component_index<T>()));
         }
 
-        static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
+        static HandleType load(const std::string_view &name, bool persistent = false, T *loader = nullptr)
         {
             if (name.empty())
                 return {};
@@ -96,7 +96,7 @@ namespace Resources {
             return load(res, persistent, loader);
         }
 
-        static ResourceType *get(const std::string &name, T *loader = nullptr)
+        static ResourceType *get(const std::string_view &name, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
@@ -121,11 +121,11 @@ namespace Resources {
             }
         }
 
-        static ResourceType *getOrCreateManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        static ResourceType *getOrCreateManual(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
-            return &loader->mResources.try_emplace(name, path, ctor, dtor).first->second;
+            return &loader->mResources.try_emplace(std::string { name }, path, ctor, dtor).first->second;
         }
 
         static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
@@ -153,11 +153,11 @@ namespace Resources {
             }
         }
 
-        static HandleType loadManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        static HandleType loadManual(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
-            return load(getOrCreateManual(name, path, ctor, dtor, loader), loader);
+            return load(getOrCreateManual(name, path, ctor, dtor, loader), true, loader);
         }
 
         static Data &getData(const HandleType &handle, T *loader = nullptr)
@@ -186,10 +186,9 @@ namespace Resources {
 
         //bool load(Data &data, ResourceType *res) = 0;
         //void unload(Data &data) = 0;
-        std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string &name = {}) override
+        std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) override
         {
-            std::string actualName = name.empty() ? path.stem() : name;
-            auto pib = mResources.try_emplace(actualName, path);
+            auto pib = mResources.try_emplace(name.empty() ? path.stem() : std::string { name }, path);
 
             if (pib.second)
                 this->resourceAdded(&pib.first->second);
@@ -207,11 +206,11 @@ namespace Resources {
             return mResources.end();
         }
 
-        virtual std::vector<std::pair<std::string, TypedScopePtr>> resources() override
+        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() override
         {
-            std::vector<std::pair<std::string, TypedScopePtr>> result;
+            std::vector<std::pair<std::string_view, TypedScopePtr>> result;
             std::transform(mResources.begin(), mResources.end(), std::back_inserter(result), [](std::pair<const std::string, ResourceType> &p) {
-                return std::make_pair(p.first, &p.second);
+                return std::make_pair(std::string_view { p.first }, &p.second);
             });
             return result;
         }
@@ -223,7 +222,7 @@ namespace Resources {
             return result;
         }
 
-        std::map<std::string, ResourceType> mResources;
+        std::map<std::string, ResourceType, std::less<>> mResources;
 
         typename Storage::template container_type<DataContainer> mData;
     };
@@ -277,7 +276,7 @@ namespace Resources {
             return static_cast<T &>(getLoaderByIndex(component_index<T>()));
         }
 
-        static HandleType load(const std::string &name, bool persistent = false, T *loader = nullptr)
+        static HandleType load(const std::string_view &name, bool persistent = false, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
@@ -298,7 +297,7 @@ namespace Resources {
             return loader->unloadVImpl(resource);
         }
 
-        static HandleType loadManual(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        static HandleType loadManual(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
@@ -349,8 +348,8 @@ namespace Resources {
             return result;
         }
 
-        virtual HandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}) = 0;
-        virtual HandleType loadVImpl(const std::string &name, bool persistent = false) = 0;
+        virtual HandleType loadManualVImpl(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}) = 0;
+        virtual HandleType loadVImpl(const std::string_view &name, bool persistent = false) = 0;
         virtual HandleType loadVImpl(ResourceType *resource, bool persistent = false) = 0;
         virtual void unloadVImpl(ResourceType *resource) = 0;
         virtual Data &getDataVImpl(const HandleType &handle) = 0;
@@ -367,11 +366,11 @@ namespace Resources {
 
         using Self::Self;
 
-        virtual typename Base::OriginalHandleType loadManualVImpl(const std::string &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
+        virtual typename Base::OriginalHandleType loadManualVImpl(const std::string_view &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
         {
             return Self::loadManual(name, path, ctor, dtor, static_cast<T *>(this));
         }
-        virtual typename Base::OriginalHandleType loadVImpl(const std::string &name, bool persistent = false) override
+        virtual typename Base::OriginalHandleType loadVImpl(const std::string_view &name, bool persistent = false) override
         {
             return Self::load(name, persistent, static_cast<T *>(this));
         }

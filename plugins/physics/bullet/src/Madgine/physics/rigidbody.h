@@ -25,6 +25,7 @@ namespace Physics {
         virtual void finalize(const Scene::Entity::EntityPtr &entity) override;
 
         btRigidBody *get();
+        void activate();
 
         float mass() const;
         void setMass(float mass);
@@ -34,7 +35,11 @@ namespace Physics {
         bool kinematic() const;
         void setKinematic(bool kinematic);
 
+        float friction() const;
+        void setFriction(float friction);
+
         void setShape(typename CollisionShapeManager::HandleType handle);
+        void setShapeName(const std::string_view &name);
         CollisionShapeManager::ResourceType *getShape() const;
 
     private:

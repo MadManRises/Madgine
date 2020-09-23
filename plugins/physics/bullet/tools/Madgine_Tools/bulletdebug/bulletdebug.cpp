@@ -14,8 +14,8 @@
 #include "im3d/im3d.h"
 
 #include "Madgine/app/application.h"
-#include "Madgine/scene/scenemanager.h"
 #include "Madgine/physics/physicsmanager.h"
+#include "Madgine/scene/scenemanager.h"
 
 namespace Engine {
 namespace Tools {
@@ -59,8 +59,8 @@ namespace Tools {
             ImGui::CheckboxFlags("DBG_FastWireframe", &mDebugMode, DBG_FastWireframe);
             ImGui::CheckboxFlags("DBG_DrawNormals", &mDebugMode, DBG_DrawNormals);
             ImGui::CheckboxFlags("DBG_DrawFrames", &mDebugMode, DBG_DrawFrames);
-            ImGui::End();
         }
+        ImGui::End();
     }
 
     void BulletDebug::renderMenu()
@@ -104,12 +104,12 @@ namespace Tools {
 
     void BulletDebug::drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
     {
-        throw 0;
+        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, Vector4 { Vector3 { color }, 1 }, 0);
     }
 
     void BulletDebug::reportErrorWarning(const char *warningString)
     {
-        throw 0;
+        LOG_WARNING(warningString);
     }
 
     void BulletDebug::draw3dText(const btVector3 &location, const char *textString)
@@ -122,7 +122,6 @@ namespace Tools {
         mDebugMode = debugMode;
     }
 
-   
 }
 }
 

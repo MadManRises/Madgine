@@ -46,15 +46,7 @@ namespace Tools {
         return mRoot.getToolComponent(index, init);
     }
 
-    ToolBase &ToolBase::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
-    const MadgineObject *ToolBase::parent() const
+    const ImRoot *ToolBase::parent() const
     {
         return &mRoot;
     }

@@ -196,7 +196,7 @@ namespace Scene {
 
         SceneManager &Entity::sceneMgr(bool init) const
         {
-            return mSceneManager.getSelf(init);
+            return static_cast<SceneManager&>(mSceneManager.getSelf(init));
         }
 
         bool Entity::isLocal() const

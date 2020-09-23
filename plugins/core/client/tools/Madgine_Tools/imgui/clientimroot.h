@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 
 #include "Madgine/threading/framelistener.h"
 
@@ -21,7 +21,8 @@ namespace Tools {
 
     struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : Window::MainWindowVirtualBase<ClientImRoot>,
                                                       Threading::FrameListener,
-                                                      Render::RenderPass {
+                                                      Render::RenderPass,
+                                                      ImRoot {
 
         ClientImRoot(Window::MainWindow &window);
         ~ClientImRoot();
@@ -51,9 +52,7 @@ namespace Tools {
 
         virtual std::string_view key() const override;
 
-        ImRoot mRoot;
-
-        Rect2i getChildClientSpace() override;
+        Rect2i getChildClientSpace() override;        
 
     private:
         std::map<Render::RenderTarget *, ImGuiViewport *>

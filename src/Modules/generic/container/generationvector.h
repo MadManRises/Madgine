@@ -1,4 +1,4 @@
-#pragma once
+#pragma once 
 
 #if ENABLE_MEMTRACKING
 #    include "Interfaces/debug/stacktrace.h"
@@ -114,7 +114,7 @@ struct GenerationVectorBase {
 #if ENABLE_MEMTRACKING
         std::lock_guard lock { mDebugMutex };
         result.mDebugMarker = ++mDebugCounter;
-        auto pib = mDebugTraces.try_emplace(result.mDebugMarker, std::make_pair(gen, Debug::StackTrace<5>::getCurrent(1).calculateReadable()));
+        auto pib = mDebugTraces.try_emplace(result.mDebugMarker, std::make_pair(gen, Debug::StackTrace<8>::getCurrent(1)));
         assert(pib.second);
 #endif
 
@@ -155,8 +155,9 @@ struct GenerationVectorBase {
             reset(index);
     }
 
-    void update(GenerationVectorIndex &index) const
+    uint32_t update(GenerationVectorIndex &index) const
     {
+        uint32_t oldIndex = index.mIndex;
         if (index && index.mGeneration != mGeneration) {
 
             uint32_t oldGen = index.mGeneration;
@@ -175,7 +176,7 @@ struct GenerationVectorBase {
                     assert(count == 1);
                     index.mDebugMarker = 0;
 #endif
-                    return;
+                    break;
                 }
 
                 assert(entry.mOp == ERASE || entry.mOp == SWAP_ERASE);
@@ -187,7 +188,7 @@ struct GenerationVectorBase {
                     assert(count == 1);
                     index.mDebugMarker = 0;
 #endif
-                    return;
+                    break;
                 }
                 if (entry.mOp == SWAP_ERASE) {
                     if (index.mIndex == entry.mArg2) {
@@ -199,14 +200,18 @@ struct GenerationVectorBase {
                 index.mGeneration = (index.mGeneration + 1) % wrap;
             }
 
-            incRef(index.mGeneration);
+            if (index)
+                incRef(index.mGeneration);
             decRef(oldGen);
 
 #if ENABLE_MEMTRACKING
-            std::lock_guard lock { mDebugMutex };
-            mDebugTraces.at(index.mDebugMarker).first = mGeneration;
+            if (index) {
+                std::lock_guard lock { mDebugMutex };
+                mDebugTraces.at(index.mDebugMarker).first = mGeneration;
+            }
 #endif
         }
+        return oldIndex;
     }
 
 protected:
@@ -280,7 +285,7 @@ private:
 
 #if ENABLE_MEMTRACKING
     mutable uint32_t mDebugCounter = 0;
-    mutable std::unordered_map<uint32_t, std::pair<uint16_t, Debug::FullStackTrace>> mDebugTraces;
+    mutable std::unordered_map<uint32_t, std::pair<uint16_t, Debug::StackTrace<8>>> mDebugTraces;
     mutable std::mutex mDebugMutex;
 #endif
 };
@@ -397,6 +402,11 @@ struct GenerationVector : GenerationVectorBase {
         GenerationVectorIndex copyIndex() const
         {
             return mVector->copy(mIndex);
+        }
+
+        uint32_t index() const
+        {
+            return mVector->get(mIndex);
         }
 
         bool valid() const
@@ -652,9 +662,23 @@ struct GenerationVector : GenerationVectorBase {
         return mData.size();
     }
 
+    bool empty() const
+    {
+        return mData.empty();
+    }
+
     T &front()
     {
         return mData.front();
+    }
+
+    T& operator[](size_t i) {
+        return mData[i];
+    }
+
+    const T &operator[](size_t i) const
+    {
+        return mData[i];
     }
 
     T &operator[](GenerationVectorIndex &index)
@@ -669,6 +693,16 @@ struct GenerationVector : GenerationVectorBase {
         update(index);
         assert(index);
         return mData[get(index)];
+    }
+
+    T &at(size_t i)
+    {
+        return mData.at(i);
+    }
+
+    const T &at(size_t i) const
+    {
+        return mData.at(i);
     }
 
     T &at(GenerationVectorIndex &index)
@@ -881,25 +915,11 @@ struct container_api_impl<C, GenerationVector<Ty...>> : C {
         return this->emplace(this->end(), std::forward<_Ty>(args)...);
     }*/
 
-    /*value_type &at(size_t i)
-    {
-        return C::at(i);
-    }*/
-
-    /*const value_type &at(size_t i) const
-    {
-        return C::at(i);
-    }*/
-
-    /*value_type &operator[](size_t i)
-    {
-        return C::operator[](i);
-    }*/
-
-    /*const value_type &operator[](size_t i) const
-    {
-        return C::operator[](i);
-    }*/
+    using C::at;
+    using C::operator[];
+    using C::copy;
+    using C::reset;
+    using C::update;
 };
 
 }

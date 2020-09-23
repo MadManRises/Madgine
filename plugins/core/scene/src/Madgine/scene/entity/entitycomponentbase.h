@@ -10,7 +10,7 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        struct MADGINE_SCENE_EXPORT EntityComponentBase : Serialize::SerializableUnitBase, VirtualScopeBase {        
+        struct MADGINE_SCENE_EXPORT EntityComponentBase : VirtualScopeBase<>, Serialize::SerializableUnitBase {        
             EntityComponentBase(const ObjectPtr &initTable = {});
             virtual ~EntityComponentBase() = 0;
 

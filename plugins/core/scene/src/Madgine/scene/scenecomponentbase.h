@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT SceneComponentBase : Serialize::SerializableUnitBase, VirtualScopeBase, MadgineObject {    
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SerializableUnitBase, MadgineObject<SceneComponentBase> {    
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);
@@ -35,13 +35,14 @@ namespace Scene {
         }
 
         App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
-        SceneComponentBase &getSelf(bool = true);
 
-        virtual const MadgineObject *parent() const override;
+        const SceneManager *parent() const;
 
     protected:
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual bool init();
+        virtual void finalize();
+
+        friend struct MadgineObject<SceneComponentBase>;
 
     private:
         SceneManager &mSceneMgr;

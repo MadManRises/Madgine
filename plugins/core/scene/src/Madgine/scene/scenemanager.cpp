@@ -58,7 +58,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 30/*0000*/ }, this);
+        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 30 /*0000*/ }, this);
 
         return true;
     }
@@ -81,12 +81,7 @@ namespace Scene {
 
     SceneComponentBase &SceneManager::getComponent(size_t i, bool init)
     {
-        SceneComponentBase &comp = mSceneComponents.get(i);
-        if (init) {
-            checkInitState();
-            comp.callInit();
-        }
-        return comp.getSelf(init);
+        return getChild(mSceneComponents.get(i), init);
     }
 
     size_t SceneManager::getComponentCount()
@@ -100,19 +95,6 @@ namespace Scene {
             checkInitState();
         }
         return mApp.getGlobalAPIComponent(i, init);
-    }
-
-    SceneManager &SceneManager::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
-    }
-
-    const MadgineObject *SceneManager::parent() const
-    {
-        return &mApp;
     }
 
     Threading::DataMutex &SceneManager::mutex()
@@ -137,7 +119,6 @@ namespace Scene {
 
         for (Entity::Entity &entity : mEntities)
             entity.update();
-
     }
 
     Entity::EntityPtr SceneManager::findEntity(const std::string &name)
@@ -157,7 +138,7 @@ namespace Scene {
     }
 
     void SceneManager::remove(Entity::EntityPtr &e)
-    {        
+    {
 
         if (e->isLocal()) {
             mLocalEntities.erase(e.it());
@@ -168,6 +149,9 @@ namespace Scene {
 
     void SceneManager::clear()
     {
+        //for (const std::unique_ptr<Entity::EntityComponentListBase> &list : mEntityComponentLists)
+        //    list->clear();
+
         mEntities.clear();
         mLocalEntities.clear();
     }

@@ -44,7 +44,7 @@ namespace Scene {
             return mSceneMgr;
         }
 
-        void EntityPtr::update() const
+        uint32_t EntityPtr::update() const
         {
             return mSceneMgr->entities().update(mIndex);
         }
@@ -97,6 +97,11 @@ namespace Scene {
         Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(const std::string_view &name, const ObjectPtr &table) const
         {
             return (*this)->addComponent(name, *this, table);
+        }
+
+        bool EntityPtr::hasComponent(size_t i) const
+        {
+            return (*this)->hasComponent(i);
         }
 
         GenerationVector<Entity>::iterator EntityPtr::it()

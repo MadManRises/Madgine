@@ -68,10 +68,6 @@ namespace Scene {
 
         App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-        SceneManager &getSelf(bool = true);
-
-        virtual const MadgineObject *parent() const override;
-
         Threading::DataMutex &mutex();        
 
         Threading::SignalStub<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
@@ -104,6 +100,8 @@ namespace Scene {
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
 
     private:
+        Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
+
         SYNCABLE_CONTAINER(mEntities, GenerationVector<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int>);
         GenerationVector<Entity::Entity> mLocalEntities;
 
@@ -112,8 +110,6 @@ namespace Scene {
         std::chrono::steady_clock::time_point mLastFrame;
 
         size_t mItemCount = 0;
-
-        Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
     public:
         decltype(mEntities) &entities();

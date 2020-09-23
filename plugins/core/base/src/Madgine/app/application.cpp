@@ -73,30 +73,12 @@ namespace App {
 
     GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
     {
-        GlobalAPIBase &api = mGlobalAPIs.get(i);
-        if (init) {
-            checkInitState();
-            api.callInit(mGlobalAPIInitCounter);
-        }
-        return api.getSelf(init);
-    }
-
-    Application &Application::getSelf(bool init)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return *this;
+        return getChild(mGlobalAPIs.get(i), init);
     }
 
     const AppSettings &Application::settings()
     {
         return mSettings;
-    }
-
-    const MadgineObject *Application::parent() const
-    {
-        return nullptr;
     }
 
     Application &Application::getSingleton()

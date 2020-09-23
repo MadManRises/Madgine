@@ -64,7 +64,7 @@ namespace Serialize {
             }
         }
 
-		if (!(flags & StateTransmissionFlags_DontApplyMap)) {
+		if (flags & StateTransmissionFlags_ApplyMap) {
             assert(in.manager());
             applySerializableMap(unit, in);
         }

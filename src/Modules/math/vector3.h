@@ -838,4 +838,13 @@ constexpr Vector3 Lerp(const Vector3 &v1, const Vector3 &v2, float ratio)
     return (1.0f - ratio) * v1 + ratio * v2;
 }
 
+inline Vector3 Slerp(const Vector3 &v1, const Vector3 &v2, float ratio)
+{
+    float theta = acosf(v1.normalizedCopy().dotProduct(v2.normalizedCopy()));
+    float sinTheta = sinf(theta);
+    float f1 = sinf((1.0f - ratio) * theta) / sinTheta;
+    float f2 = sinf(ratio * theta) / sinTheta;
+    return f1 * v1 + f2 * v2;
+}
+
 }

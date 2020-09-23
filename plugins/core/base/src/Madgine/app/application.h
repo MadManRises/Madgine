@@ -14,7 +14,7 @@ namespace Engine {
 namespace App {
 
     struct MADGINE_BASE_EXPORT Application : ScopeBase,
-                                             MadgineObject {
+                                             MadgineObject<Application> {
         Application(const AppSettings &settings);
 
         virtual ~Application();
@@ -27,18 +27,16 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
 
-        Application &getSelf(bool = true);
-
         const AppSettings &settings();
-
-        virtual const MadgineObject *parent() const override;
 
         static Application &getSingleton();
 
     protected:
-        bool init() override;
+        bool init();
 
-        void finalize() override;
+        void finalize();
+
+        friend struct MadgineObject<Application>;
 
     private:
         const AppSettings &mSettings;

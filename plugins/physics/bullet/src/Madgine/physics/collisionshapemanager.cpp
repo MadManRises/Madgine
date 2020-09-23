@@ -6,6 +6,9 @@
 
 #include "meshloader.h"
 
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
+
 UNIQUECOMPONENT(Engine::Physics::CollisionShapeManager);
 
 METATABLE_BEGIN(Engine::Physics::CollisionShapeManager::ResourceType)
@@ -19,14 +22,24 @@ namespace Engine {
 namespace Physics {
 
     struct MeshShape : CollisionShape {
-        static btTriangleIndexVertexArray *setup(btTriangleIndexVertexArray &array, const btIndexedMesh &meshData)
+
+        MeshShape(const ByteBuffer &vertexData, size_t vertexSize)
+            : mShape(static_cast<const float *>(vertexData.mData), vertexData.mSize / vertexSize, vertexSize)
         {
-            array.addIndexedMesh(meshData, PHY_SHORT);
-            return &array;
         }
 
-        MeshShape(const btIndexedMesh &meshData)
-            : mShape(setup(mVertexArray, meshData), true)
+        virtual btCollisionShape *get() override
+        {
+            return &mShape;
+        }
+        
+        btConvexHullShape mShape;
+    };
+
+    struct BoxShape : CollisionShape {
+
+        BoxShape()
+            : mShape({ 0.5f, 0.5f, 0.5f })
         {
         }
 
@@ -35,13 +48,18 @@ namespace Physics {
             return &mShape;
         }
 
-        btTriangleIndexVertexArray mVertexArray;
-        btBvhTriangleMeshShape mShape;
+        btBoxShape mShape;
     };
 
     CollisionShapeManager::CollisionShapeManager()
         : ResourceLoader({ ".fbx", ".dae" })
     {
+        getOrCreateManual(
+            "Cube", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+                data = std::make_unique<BoxShape>();
+                return true;
+            },
+            {}, this);
     }
 
     bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res)
@@ -51,17 +69,7 @@ namespace Physics {
         if (!mesh)
             return false;
 
-        assert(!mesh->mIndices.empty());
-
-        btIndexedMesh meshData;
-        meshData.m_numVertices = mesh->mVertices.mSize / mesh->mVertexSize;
-        meshData.m_numTriangles = mesh->mIndices.size() / mesh->mGroupSize;
-        meshData.m_triangleIndexBase = reinterpret_cast<unsigned char *>(mesh->mIndices.data());
-        meshData.m_triangleIndexStride = 3 * sizeof(unsigned short);
-        meshData.m_vertexBase = reinterpret_cast<const unsigned char *>(mesh->mVertices.mData);
-        meshData.m_vertexStride = mesh->mVertexSize;
-
-        shape = std::make_unique<MeshShape>(meshData);
+        shape = std::make_unique<MeshShape>(mesh->mVertices, mesh->mVertexSize);
         return true;
     }
 

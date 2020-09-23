@@ -17,12 +17,12 @@ struct ImGuiDockNode;
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ImRoot : MadgineObject, ScopeBase {
-        ImRoot(const MadgineObject *parent);
+    struct MADGINE_TOOLS_EXPORT ImRoot {
+        ImRoot(MadgineObjectState *state);
         ~ImRoot();
 
-        bool init() override;
-        void finalize() override;
+        virtual bool init();
+        virtual void finalize();
 
         const std::vector<std::unique_ptr<ToolBase>> &tools();
         ToolBase &getToolComponent(size_t index, bool = true);
@@ -34,16 +34,19 @@ namespace Tools {
 
         bool frame();
 
-        virtual const MadgineObject *parent() const override;
+        ImGuiDockNode *dockNode() const;
 
-		ImGuiDockNode *dockNode() const;
+        bool isInitialized() const;
+
+    protected:
+        void checkInitState();        
 
     private:
-        const MadgineObject *mParent; //TODO Find proper solution
-		
-		ToolsContainer<ObservableContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>> mCollector;		
+        MadgineObjectState *mState;
 
-		ImGuiDockNode *mDockNode = nullptr;
+        ToolsContainer<ObservableContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>> mCollector;
+
+        ImGuiDockNode *mDockNode = nullptr;
     };
 
 }

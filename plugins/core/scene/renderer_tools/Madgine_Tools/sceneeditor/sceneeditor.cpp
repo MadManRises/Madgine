@@ -35,7 +35,7 @@ namespace Tools {
 
     SceneEditor::SceneEditor(ImRoot &root)
         : Tool<SceneEditor>(root)
-        , mWindow(static_cast<const ClientImRoot &>(*root.parent()).window())
+        , mWindow(static_cast<const ClientImRoot &>(root).window())
     {
     }
 
@@ -139,27 +139,21 @@ namespace Tools {
     {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mHierarchyVisible)) {
 
-            renderHierarchyEntity({});
-
             if (ImGui::Button("+ New Entity")) {
                 select(mSceneMgr->createEntity());
             }
 
             ImGui::Separator();
 
-            /*for (Scene::Camera &camera : mSceneMgr->cameras()) {
-                std::string name = camera.mName;
-                if (name.empty())
-                    name = "<unnamed camera>";
-                if (ImGui::Selectable(name.c_str(), mSelectedCamera == &camera)) {
-                    select(&camera);
-                }
-                ImGui::DraggableValueTypeSource(name, this, ValueType { camera });
-            }
+            if (ImGui::BeginChild("EntityList")) {
 
-            if (ImGui::Button("+ New Camera")) {
-                select(mSceneMgr->createCamera());
-            }*/
+                updateEntityCache();
+
+                for (EntityNode &entity : mEntityCache)
+                    renderHierarchyEntity(entity);
+
+                ImGui::EndChild();
+            }
         }
         ImGui::End();
     }
@@ -175,74 +169,63 @@ namespace Tools {
         ImGui::End();
     }
 
-    void SceneEditor::renderHierarchyEntity(const Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> &parentTransform)
+    void SceneEditor::renderHierarchyEntity(EntityNode &node)
     {
-        for (Engine::Scene::Entity::EntityPtr e = mSceneMgr->entities().begin(); e != mSceneMgr->entities().end(); ++e) {
-            Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> transform = e.getComponent<Scene::Entity::Transform>();
-            if ((!transform && parentTransform) || (transform && parentTransform != transform->parent()))
-                continue;
 
-            const char *name = e->key().c_str();
-            if (!name[0])
-                name = "<unnamed>";
+        const char *name = node.mEntity->key().c_str();
+        if (!name[0])
+            name = "<unnamed>";
 
-            bool hovered = mSelectedEntity == e;
+        bool hovered = mSelectedEntity == node.mEntity;
 
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+        if (hovered)
+            flags |= ImGuiTreeNodeFlags_Selected;
+
+        if (node.mChildren.empty())
+            flags |= ImGuiTreeNodeFlags_Leaf;
+
+        bool open = ImGui::TreeNodeEx(name, flags);
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
+            select(node.mEntity);
+        }
+
+        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity.getComponent<Engine::Scene::Entity::Transform>();
+        if (transform) {
+            ImGui::DraggableValueTypeSource(name, this, ValueType { *node.mEntity });
+            if (ImGui::BeginDragDropTarget()) {
+                Scene::Entity::Entity *newChild;
+                if (ImGui::AcceptDraggableValueType(newChild)) {
+                    Scene::Entity::EntityPtr child = mSceneMgr->toEntityPtr(newChild);
+                    Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = child.getComponent<Engine::Scene::Entity::Transform>();
+                    assert(childTransform);
+                    childTransform->setParent(transform);
+
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            Matrix4 transformM = transform->worldMatrix(mSceneMgr->entityComponentList<Engine::Scene::Entity::Transform>());
+            AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
+            if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity.getComponent<Scene::Entity::Mesh>()->data())
+                bb = node.mEntity.getComponent<Scene::Entity::Mesh>()->aabb();
+
+            Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
             if (hovered)
-                flags |= ImGuiTreeNodeFlags_Selected;
+                flags |= Im3DBoundingObjectFlags_ShowOutline;
 
-            bool hasChildren = false;
-            if (transform) {
-                for (Engine::Scene::Entity::EntityPtr child = mSceneMgr->entities().begin(); child != mSceneMgr->entities().end(); ++child) {
-                    Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = child.getComponent<Scene::Entity::Transform>();
-                    if (childTransform && transform == childTransform->parent()) {
-                        hasChildren = true;
-                        break;
-                    }
+            if (Im3D::BoundingBox(name, bb, transformM, flags)) {
+                if (ImGui::IsMouseClicked(0)) {
+                    select(node.mEntity);
                 }
+                hovered = true;
             }
-            if (!hasChildren)
-                flags |= ImGuiTreeNodeFlags_Leaf;
-
-            bool open = ImGui::TreeNodeEx(name, flags);
-
-            if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
-                select(e);
-            }
-            if (transform) {
-                ImGui::DraggableValueTypeSource(name, this, ValueType { *e });
-                if (ImGui::BeginDragDropTarget()) {
-                    Engine::Scene::Entity::Entity *newChild;
-                    if (ImGui::AcceptDraggableValueType(newChild)) {
-                        Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = mSceneMgr->toEntityPtr(newChild).getComponent<Engine::Scene::Entity::Transform>();
-                        if (childTransform)
-                            childTransform->setParent(transform);
-                    }
-                    ImGui::EndDragDropTarget();
-                }
-
-                Engine::Matrix4 transformM = transform->worldMatrix(mSceneMgr->entityComponentList<Engine::Scene::Entity::Transform>());
-                Engine::AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-                if (e->hasComponent<Scene::Entity::Mesh>() && e.getComponent<Scene::Entity::Mesh>()->data())
-                    bb = e.getComponent<Scene::Entity::Mesh>()->aabb();
-
-                Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
-                if (hovered)
-                    flags |= Im3DBoundingObjectFlags_ShowOutline;
-
-                if (Im3D::BoundingBox(name, bb, transformM, flags)) {
-                    if (ImGui::IsMouseClicked(0)) {
-                        select(e);
-                    }
-                    hovered = true;
-                }
-            }
-            if (open) {
-                if (transform)
-                    renderHierarchyEntity(transform);
-                ImGui::TreePop();
-            }
+        }
+        if (open) {
+            for (EntityNode &node : node.mChildren)
+                renderHierarchyEntity(node);
+            ImGui::TreePop();
         }
     }
 
@@ -283,17 +266,6 @@ namespace Tools {
                         entity.addComponent(componentDesc.first);
                         if (componentDesc.first == "Transform") {
                             entity.getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
-                            entity.getComponent<Scene::Entity::Transform>()->setScale({ 0.0001f, 0.0001f, 0.0001f });
-                        }
-                        if (componentDesc.first == "Mesh") {
-                            entity.getComponent<Scene::Entity::Mesh>()->setName("mage_animated");
-                        }
-                        if (componentDesc.first == "Skeleton") {
-                            entity.getComponent<Scene::Entity::Skeleton>()->setName("mage_animated");
-                        }
-                        if (componentDesc.first == "Animation") {
-                            entity.getComponent<Scene::Entity::Animation>()->setName("mage_animated");
-                            entity.getComponent<Scene::Entity::Animation>()->setCurrentAnimationName("Walk");
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -351,7 +323,7 @@ namespace Tools {
                             Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
                             end = world * m_child * Vector4::UNIT_W;
                         } else {
-                            end = world * m * skeleton->mMatrix * (mBoneForward * mDefaultBoneLength) + (1.0f - mBoneForward.w) * start;                  
+                            end = world * m * skeleton->mMatrix * (mBoneForward * mDefaultBoneLength) + (1.0f - mBoneForward.w) * start;
                         }
                         float length = (end - start).xyz().length();
                         Im3D::Arrow(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
@@ -364,6 +336,77 @@ namespace Tools {
     void SceneEditor::renderCamera(Render::Camera *camera)
     {
         mInspector->draw(camera);
+    }
+
+    void SceneEditor::updateEntityCache()
+    {
+        //Update + Remove deleted Entities
+        mEntityCache.erase(std::remove_if(mEntityCache.begin(), mEntityCache.end(), [this](EntityNode &node) { return updateEntityCache(node); }), mEntityCache.end());
+
+        for (EntityNode &node : mEntityCache)
+            iterateMapping(node);
+
+        //Add missing Entities
+        size_t size = mSceneMgr->entities().size();
+        mEntityMapping.resize(size);
+        for (size_t i = 0; i < size; ++i) {
+            if (!mEntityMapping[i])
+                createEntityMapping(i);
+        }
+    }
+
+    bool SceneEditor::updateEntityCache(EntityNode &node, const Scene::Entity::EntityPtr &parent)
+    {
+        uint32_t oldIndex = node.mEntity.update();
+        if (!node.mEntity || 
+            (!node.mEntity.hasComponent<Scene::Entity::Transform>() && parent) || 
+            (node.mEntity.hasComponent<Scene::Entity::Transform>() && 
+                ((parent && parent.getComponent<Scene::Entity::Transform>() != node.mEntity.getComponent<Scene::Entity::Transform>()->parent()) ||
+                    (!parent && node.mEntity.getComponent<Scene::Entity::Transform>()->parent().mIndex)))) {
+            mEntityMapping[oldIndex] = nullptr;
+            return true;
+        } else if (node.mEntity.it().index() != oldIndex) {
+            mEntityMapping[oldIndex] = nullptr;
+        }
+        node.mChildren.erase(std::remove_if(node.mChildren.begin(), node.mChildren.end(), [&](EntityNode &childNode) { return updateEntityCache(childNode, node.mEntity); }), node.mChildren.end());
+        return false;
+    }
+
+    void SceneEditor::createEntityMapping(size_t index)
+    {
+        Scene::Entity::EntityPtr e = mSceneMgr->entities().begin() + index;
+
+        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = e.getComponent<Scene::Entity::Transform>();
+
+        Scene::Entity::EntityPtr parent;
+
+        if (transform) {
+            const Scene::Entity::EntityComponentHandle<Scene::Entity::Transform> &parentTransform = transform->parent();
+            if (parentTransform.mIndex) {
+                for (parent = mSceneMgr->entities().begin(); parent != mSceneMgr->entities().end(); ++parent) {
+                    if (parent.getComponent<Scene::Entity::Transform>() == parentTransform)
+                        break;
+                }
+            }
+        }
+
+        if (parent) {
+            uint32_t parentIndex = parent.it().index();
+            if (!mEntityMapping[parentIndex])
+                createEntityMapping(parentIndex);
+        }
+
+        std::list<EntityNode> &container = parent ? mEntityMapping[parent.it().index()]->mChildren : mEntityCache;
+
+        container.push_back({ std::move(e) });
+        mEntityMapping[index] = &container.back();
+    }
+
+    void SceneEditor::iterateMapping(EntityNode &node)
+    {
+        mEntityMapping[node.mEntity.it().index()] = &node;
+        for (EntityNode &node : node.mChildren)
+            iterateMapping(node);
     }
 
 }

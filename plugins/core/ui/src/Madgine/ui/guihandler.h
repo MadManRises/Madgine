@@ -22,8 +22,6 @@ namespace UI {
 
         Threading::ContextMask context() const;
 
-        GuiHandlerBase &getSelf(bool = true);
-
     protected:
         void setContext(Threading::ContextMask context);
 

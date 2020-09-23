@@ -14,7 +14,7 @@ namespace Serialize {
 
     template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
-                                       CopyTraits<typename container_traits<C>::value_type>,
+                                       private CopyTraits<typename container_traits<C>::value_type>,
                                        C,
                                        Observer {
 

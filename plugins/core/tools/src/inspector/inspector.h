@@ -26,9 +26,9 @@ namespace Tools {
 
         std::string_view key() const override;
 
-        void addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter);
+        void addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()> getter);
         template <typename T>
-        void addObjectSuggestion(std::function<std::vector<std::pair<std::string, TypedScopePtr>>()> getter)
+        void addObjectSuggestion(std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()> getter)
         {
             addObjectSuggestion(&table<T>(), std::move(getter));
         }
@@ -56,7 +56,7 @@ namespace Tools {
         std::map<std::string, InspectorLayout *> mAssociations;
         std::map<std::string, InspectorLayout> mLayouts;
 
-        std::map<const MetaTable *, std::function<std::vector<std::pair<std::string, TypedScopePtr>>()>> mObjectSuggestionsByType;
+        std::map<const MetaTable *, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()>> mObjectSuggestionsByType;
         std::map<const MetaTable *, std::function<void(TypedScopePtr)>> mPreviews;
 
         static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
