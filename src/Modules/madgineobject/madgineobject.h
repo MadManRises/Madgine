@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../generic/derive.h"
-#include "../keyvalueutil/virtualscopebase.h"
 #include "objectstate.h"
 
 namespace Engine {

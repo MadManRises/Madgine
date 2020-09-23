@@ -11,9 +11,6 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "Modules/keyvalue/metatable.h"
-
-#include "imageloaderlib.h"
 #include "imageloader.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"
