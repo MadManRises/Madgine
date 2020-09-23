@@ -9,8 +9,6 @@
 
 #include "resourceloaderbase.h"
 
-#include "../generic/replace.h"
-
 #include "../uniquecomponent/uniquecomponentcollector.h"
 #include "../uniquecomponent/uniquecomponent.h"
 
@@ -228,9 +226,9 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename Container = std::list<Placeholder<0>>, typename Storage = Threading::GlobalStorage>
-    struct ResourceLoader : public UniqueComponent<T, ResourceLoaderCollector, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>> {
+    struct ResourceLoader : ResourceLoaderComponent<T, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>> {
 
-        using UniqueComponent<T, ResourceLoaderCollector, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>>::UniqueComponent;
+        using ResourceLoaderComponent<T, VirtualScope<T, ResourceLoaderImpl<T, _Data, Container, Storage>>>::ResourceLoaderComponent;
     };
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>

@@ -2,16 +2,9 @@
 
 #include "Modules/resources/resourceloader.h"
 
-#include "render/attributedescriptor.h"
-#include "render/vertex.h"
-
-#include "Modules/math/boundingbox.h"
+#include "gpumeshdata.h"
 
 #include "Modules/threading/workgroupstorage.h"
-
-#include "Modules/generic/bytebuffer.h"
-
-#include "gpumeshdata.h"
 
 namespace Engine {
 namespace Render {

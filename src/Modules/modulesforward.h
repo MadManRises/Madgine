@@ -75,6 +75,10 @@ struct CoWString;
 
 struct CompoundAtomicOperation;
 
+struct OffsetPtrTag;
+template <typename T, size_t>
+struct TaggedPlaceholder;
+
 namespace CLI {
     struct CLICore;
     struct ParameterBase;
