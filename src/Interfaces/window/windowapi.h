@@ -62,7 +62,10 @@ namespace Window {
 
         virtual void destroy() = 0;
 
-        virtual WindowData data() = 0;
+        virtual WindowData data()
+        {
+            return {};
+        }
 
         //Input
         virtual bool isKeyDown(Input::Key::Key key) = 0;

@@ -23,11 +23,16 @@ if (EMSCRIPTEN)
 
 	endfunction (add_workspace_application)
 
-	function(target_link_libraries target vis)
+	function(target_link_libraries target)
+		if (NOT ARGN)
+			return ()
+		endif()
 		set(args ${ARGN})
+		list(GET args 0 vis)
 		if (NOT vis MATCHES "INTERFACE|PUBLIC|PRIVATE")
-			set(args ${vis} ${args})
 			set(vis PUBLIC)
+		else()
+			list(REMOVE_AT args 0)
 		endif()
 
 		foreach(lib ${args})
