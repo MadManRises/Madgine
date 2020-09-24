@@ -331,7 +331,7 @@ namespace Resources {
                 return nullptr;
             if constexpr (container_traits<typename Base::DataContainer>::has_dependent_handle) {
                 if (!loader)
-                    loader = &getSingleton();
+                    loader = &Base::getSingleton();
                 return loader->getVImpl(handle);
             } else {
                 return handle.mData->first;
