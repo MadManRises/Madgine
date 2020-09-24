@@ -54,7 +54,7 @@ namespace UI {
         template <typename T>
         T &getGuiHandler(bool init = true)
         {
-            return static_cast<T &>(getGuiHandler(component_index<T>(), init));
+            return static_cast<T &>(getGuiHandler(Engine::component_index<T>(), init));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i, bool = true);
@@ -62,7 +62,7 @@ namespace UI {
         template <typename T>
         T &getGameHandler(bool init = true)
         {
-            return static_cast<T &>(getGameHandler(component_index<T>(), init));
+            return static_cast<T &>(getGameHandler(Engine::component_index<T>(), init));
         }
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
