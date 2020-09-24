@@ -7,6 +7,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "Madgine/threading/contextmasks.h"
+
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
 
 METATABLE_BEGIN_BASE(Engine::UI::GuiHandlerBase, Engine::UI::Handler)

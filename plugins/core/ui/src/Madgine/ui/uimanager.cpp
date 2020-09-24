@@ -13,6 +13,9 @@
 
 #include "Modules/serialize/container/controlledconfig.h"
 
+#include "guihandler.h"
+#include "gamehandler.h"
+
 UNIQUECOMPONENT(Engine::UI::UIManager)
 
 METATABLE_BEGIN(Engine::UI::UIManager)

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "handler.h"
-#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "Madgine/threading/contextmasks.h"
 
 #include "Interfaces/input/inputevents.h"
 
 #include "Modules/math/vector2.h"
+
+#include "handlercollector.h"
 
 namespace Engine
 {
@@ -78,15 +79,4 @@ namespace Engine
 
 RegisterType(Engine::UI::GameHandlerBase);
 
-DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandler, GameHandlerBase, UIManager &);
 
-namespace Engine
-{
-	namespace UI
-	{
-
-		template <typename T>
-		using GameHandler = GameHandlerComponent<T>;
-
-	}
-}

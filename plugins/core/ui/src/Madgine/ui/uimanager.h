@@ -1,12 +1,7 @@
 #pragma once
 
 #include "Madgine/threading/framelistener.h"
-#include "gamehandler.h"
-#include "guihandler.h"
-
-#include "Modules/keyvalue/scopebase.h"
-
-#include "Modules/keyvalue/keyvalue.h"
+#include "handlercollector.h"
 
 #include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
@@ -20,6 +15,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/math/vector2.h"
+
 
 namespace Engine {
 namespace UI {
@@ -28,6 +25,8 @@ namespace UI {
         SERIALIZABLEUNIT;
 
         UIManager(Window::MainWindow &window);
+        UIManager(const UIManager &) = delete;
+
         ~UIManager();
 
         void clear();

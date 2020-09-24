@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "handler.h"
+
+#include "handlercollector.h"
 
 namespace Engine {
 namespace UI {
@@ -35,13 +36,3 @@ namespace UI {
 
 RegisterType(Engine::UI::GuiHandlerBase);
 
-DECLARE_UNIQUE_COMPONENT(Engine::UI, GuiHandler, GuiHandlerBase, UIManager &);
-
-namespace Engine {
-namespace UI {
-
-    template <typename T>
-    using GuiHandler = GuiHandlerComponent<T>;
-
-}
-}

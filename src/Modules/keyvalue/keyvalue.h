@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../generic/functor.h"
+#include "../generic/comparator_traits.h"
 #include "../generic/container/transformIt.h"
+#include "../generic/functor.h"
 
 namespace Engine {
 
@@ -104,6 +105,7 @@ struct KeyValue<std::unique_ptr<T, D>> {
 
     static decltype(auto) key(const std::unique_ptr<T, D> &p)
     {
+        static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return KeyValue<T>::key(*p);
     }
 };
@@ -117,6 +119,7 @@ struct KeyValue<const std::unique_ptr<T, D>> {
 
     static decltype(auto) key(const std::unique_ptr<T, D> &p)
     {
+        static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return KeyValue<T>::key(*p);
     }
 };
@@ -186,33 +189,32 @@ using KeyType_t = typename KeyType<T>::type;
 template <typename _Ty>
 struct KeyCompare {
 
-    struct traits {
-        typedef KeyCompare<_Ty> cmp_type;
-        typedef KeyType_t<_Ty> type;
-        typedef _Ty item_type;
-
-        static decltype(auto) to_cmp_type(const _Ty &v)
-        {
-            return kvKey(v);
-        }
-    };
-
     using is_transparent = void;
 
-    constexpr bool operator()(const _Ty &_Left, const _Ty &_Right) const
+    template <typename T1, typename T2>
+    constexpr bool operator()(const T1 &_Left, const T2 &_Right) const
     {
-        // apply operator< to operands
-        return (kvKey(_Left) < kvKey(_Right));
+        if constexpr (std::is_same_v<T1, KeyType_t<_Ty>> && std::is_same_v<T2, KeyType_t<_Ty>>)
+            return _Left < _Right;
+        else if constexpr (std::is_same_v<T1, KeyType_t<_Ty>>)
+            return _Left < kvKey(_Right);
+        else if constexpr (std::is_same_v<T2, KeyType_t<_Ty>>)
+            return kvKey(_Left) < _Right;
+        else
+            return kvKey(_Left) < kvKey(_Right);
     }
 
-    constexpr bool operator()(const KeyType_t<_Ty> &_Left, const _Ty &_Right) const
-    {
-        return (_Left < kvKey(_Right));
-    }
+};
 
-    constexpr bool operator()(const _Ty &_Left, const KeyType_t<_Ty> &_Right) const
+template <typename _Ty>
+struct comparator_traits<KeyCompare<_Ty>> {
+    typedef KeyCompare<_Ty> cmp_type;
+    typedef KeyType_t<_Ty> type;
+    typedef _Ty item_type;
+
+    static decltype(auto) to_cmp_type(const _Ty &v)
     {
-        return (kvKey(_Left) < _Right);
+        return kvKey(v);
     }
 };
 

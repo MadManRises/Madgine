@@ -13,16 +13,15 @@ struct SortedContainerApi : C {
     using C::C;
     using C::operator=;
 
-    using traits = container_traits<C>;
-
-    typedef typename comparator_traits<typename traits::cmp_type>::type cmp_type;    
+    using traits = container_traits<C>;    
 
     /*iterator find(const key_type& key)
 			{
 				return kvFind(this->mData, key);
 			}*/
 
-    bool contains(const cmp_type &key)
+    template <typename T>
+    bool contains(const T &key)
     {
         return this->find(key) != this->end();
     }
