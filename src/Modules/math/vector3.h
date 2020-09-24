@@ -47,9 +47,9 @@ public:
 		@note
 		It does <b>NOT</b> initialize the vector for efficiency.
 		*/
-    Vector3()
-    {
-    }
+    Vector3() = default;
+
+    constexpr Vector3(const Vector3 &) = default;
 
     constexpr Vector3(const float fX, const float fY, const float fZ)
         : x(fX)
@@ -151,14 +151,7 @@ public:
 		@param
 		rkVector The other vector
 		*/
-    constexpr Vector3 &operator=(const Vector3 &rkVector)
-    {
-        x = rkVector.x;
-        y = rkVector.y;
-        z = rkVector.z;
-
-        return *this;
-    }
+    constexpr Vector3 &operator=(const Vector3 &rkVector) = default;
 
     constexpr Vector3 &operator=(const float fScaler)
     {

@@ -91,7 +91,7 @@ constexpr Accessor member()
 
     if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
         return property<Scope, &getFieldPtr<P, DerivedScope, std::remove_reference_t<T>>, nullptr>();
-    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string&, T>)) {
+    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string &, T>) || TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
         return property<Scope, P, nullptr>();
     } else {
         return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();

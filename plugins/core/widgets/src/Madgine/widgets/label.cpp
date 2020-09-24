@@ -5,9 +5,9 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "vertex.h"
 
 #include "fontloader.h"
+
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Label, Engine::Widgets::WidgetBase)
 MEMBER(mText)

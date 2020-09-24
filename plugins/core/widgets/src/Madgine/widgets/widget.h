@@ -2,24 +2,19 @@
 
 #include "Modules/math/matrix3.h"
 
-#include "Interfaces/input/inputevents.h"
-
 #include "Modules/threading/signal.h"
 #include "widgetclass.h"
 
 #include "Modules/generic/container/transformIt.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 #include "Modules/serialize/container/serializablecontainer.h"
-
-#include "Madgine/render/texturedescriptor.h"
-
-#include "vertex.h"
 
 #include "Modules/serialize/serializableunit.h"
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
+
+#include "vertex.h"
+#include "render/texturedescriptor.h"
 
 namespace Engine {
 namespace Widgets {

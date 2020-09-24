@@ -2,6 +2,8 @@
 
 namespace Engine {
 namespace Widgets {
+
+    //TODO use Madgine-ENUM
     enum class WidgetClass {
         WIDGET_CLASS,
         SCENEWINDOW_CLASS,

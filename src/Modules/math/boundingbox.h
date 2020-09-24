@@ -2,19 +2,10 @@
 
 #include "matrix4.h"
 
-#include "../keyvalue/scopebase.h"
-
 namespace Engine {
 
-struct AABB : ScopeBase {
+struct AABB {
     Vector3 mMin, mMax;
-
-    AABB() = default;
-    AABB(const Vector3 &min, const Vector3 &max)
-        : mMin(min)
-        , mMax(max)
-    {
-    }
 
     constexpr float diameter() const
     {

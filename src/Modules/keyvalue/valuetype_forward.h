@@ -8,7 +8,6 @@
 
 namespace Engine {
 
-    
 MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
 MODULES_EXPORT ValueTypeRef &KeyValuePair_value(KeyValuePair &p);
 
@@ -20,7 +19,6 @@ void to_KeyValuePair(KeyValuePair &p, T &&t)
 }
 
 MODULES_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
-
 
 template <typename T>
 using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
@@ -75,25 +73,26 @@ struct ValueType_ReturnHelper<T *> {
 };
 
 template <typename T>
-using ValueType_Return = std::enable_if_t<isValueType_v<T>,
-    typename ValueType_ReturnHelper<T>::type>;
+using ValueType_Return = typename ValueType_ReturnHelper<T>::type;
 
-template <typename T, typename = std::enable_if_t<isValueType_v<T>>>
+template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<T>>>
 MODULES_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
 
-template <typename T, typename = std::enable_if_t<isValueType_v<T> || std::is_same_v<T, ValueType>>>
+template <typename T>
 decltype(auto) ValueType_as(const ValueType &v)
 {
     if constexpr (std::is_same_v<T, ValueType>) {
         return v;
     } else if constexpr (isScopeRef_v<T>) {
         return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
-    } else {
+    } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
+    } else {
+        static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
 }
 
-template <typename T, typename = std::enable_if_t<isValueType_v<T>>>
+template <typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
     if constexpr (isValueTypePrimitive_v<std::decay_t<T>>) {
@@ -110,8 +109,11 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return TypedScopePtr { &t };
         }
-    } else if constexpr(is_iterable_v<T>){
+    } else if constexpr (is_iterable_v<T>) {
         return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
+    } else if constexpr (TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
+        throw "TODO";
+        return 3;
     } else {
         static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
@@ -123,13 +125,13 @@ MODULES_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
 template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
 MODULES_EXPORT void to_ValueTypeRef_impl(ValueTypeRef &v, T &&t);
 
-template <typename T, typename = std::enable_if_t<isValueType_v<T>>>
+template <typename T>
 void to_ValueType(ValueType &v, T &&t)
 {
     to_ValueType_impl(v, convert_ValueType(std::forward<T>(t)));
 }
 
-template <typename T, typename = std::enable_if_t<isValueType_v<T>>>
+template <typename T>
 void to_ValueTypeRef(ValueTypeRef &v, T &&t)
 {
     to_ValueTypeRef_impl(v, convert_ValueType(std::forward<T>(t)));

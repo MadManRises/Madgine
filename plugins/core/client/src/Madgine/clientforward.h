@@ -23,6 +23,7 @@ namespace Render {
     struct RenderTarget;
     struct RenderPass;
     struct Camera;
+    struct TextureDescriptor;
 }
 
 }
