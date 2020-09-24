@@ -824,8 +824,6 @@ struct container_traits<GenerationVector<T>, void> {
 
     static position_handle toPositionHandle(container &c, const iterator &it)
     {
-        if (it == c.end())
-            return {};
         return std::distance(c.begin(), it);
     }
 
@@ -836,18 +834,22 @@ struct container_traits<GenerationVector<T>, void> {
 
     static handle toHandle(container &c, const iterator &it)
     {
-        if (it == c.end())
-            return {};
         return std::distance(c.begin(), it);
     }
 
     static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
+        size_t item = std::distance(c.begin(), it);
+        if (item <= handle)
+            ++handle;
     }
 
     static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
     {
-        throw "TODO";
+        size_t pivot = std::distance(c.begin(), it);
+        assert(handle < pivot || handle >= pivot + count);
+        if (handle > pivot)
+            handle -= count;
     }
 
     static iterator toIterator(container &c, const position_handle &handle)

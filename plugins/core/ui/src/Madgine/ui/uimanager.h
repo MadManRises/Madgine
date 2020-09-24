@@ -17,7 +17,6 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/container/controlledconfig.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
