@@ -12,13 +12,13 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Button() = default;
 
-         void setImageByName(const std::string &name);
-        void setImage(Resources::ImageLoader::ResourceType *image);
+        void setImageByName(const std::string &name);
+        void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
 
         std::string getImageName() const;
-        Resources::ImageLoader::ResourceType *image() const;
+        Resources::ResourceType<Resources::ImageLoader> *image() const;
 
-                Resources::ImageLoader::ResourceType *resource() const override;
+        Resources::ResourceType<Resources::ImageLoader> *resource() const override;
 
         Threading::SignalStub<> &clickEvent();
 
@@ -47,7 +47,7 @@ namespace Widgets {
     private:
         Render::FontLoader::HandleType mFont;
         //TODO: Use HandleType
-        Resources::ImageLoader::ResourceType *mImage = nullptr;
+        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;
 
         Threading::Signal<> mClicked;
 

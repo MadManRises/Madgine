@@ -9,9 +9,6 @@
 
 #include "Modules/math/atlas2.h"
 
-#include "imageloaderlib.h"
-#include "imageloader.h"
-
 namespace Engine {
 namespace Render {
 

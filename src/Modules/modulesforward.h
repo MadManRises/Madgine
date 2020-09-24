@@ -206,11 +206,11 @@ namespace Render {
 
 namespace Resources {
     struct ResourceManager;
-    template <typename Data, typename Container, typename Storage>
-    struct Resource;
+    template <typename Loader>
+    struct ResourceType;
     template <typename T, typename Data, typename Container, typename Storage>
     struct ResourceLoader;
-    template <typename T, typename _Data, typename Container, typename Storage, typename Base>
+    template <typename T, typename _Data, typename Base>
     struct ResourceLoaderImpl;
     struct ResourceBase;
     struct ResourceLoaderBase;

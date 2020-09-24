@@ -11,6 +11,8 @@
 
 #include "widgetmanager.h"
 
+#include "imageloader.h"
+
 METATABLE_BEGIN_BASE(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
 PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::Widgets::Image)

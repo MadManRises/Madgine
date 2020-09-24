@@ -2,8 +2,6 @@
 
 #include "widget.h"
 
-#include "imageloaderlib.h"
-#include "imageloader.h"
 
 namespace Engine {
 namespace Widgets {
@@ -12,19 +10,19 @@ namespace Widgets {
         virtual ~Image() = default;
 
         void setImageByName(const std::string &name);
-        void setImage(Resources::ImageLoader::ResourceType *image);
+        void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
 
         std::string getImageName() const;
-        Resources::ImageLoader::ResourceType *image() const;
+        Resources::ResourceType<Resources::ImageLoader> *image() const;
 
-        Resources::ImageLoader::ResourceType *resource() const override;
+        Resources::ResourceType<Resources::ImageLoader> *resource() const override;
 
         std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
 
         virtual WidgetClass getClass() const override;
 
     private:
-        Resources::ImageLoader::ResourceType *mImage = nullptr;
+        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;
     };
 }
 }

@@ -7,6 +7,8 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 METATABLE_BEGIN(Engine::UI::Handler)
 PROPERTY(Widget, widget, setWidget)
 METATABLE_END(Engine::UI::Handler)

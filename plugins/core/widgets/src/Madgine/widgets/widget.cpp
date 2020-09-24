@@ -487,7 +487,7 @@ namespace Widgets {
     {
     }
 
-    Resources::ImageLoader::ResourceType *WidgetBase::resource() const
+    Resources::ResourceType<Resources::ImageLoader> *WidgetBase::resource() const
     {
         return nullptr;
     }

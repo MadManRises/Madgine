@@ -21,6 +21,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+
 namespace Engine {
 namespace UI {
     struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager>,
@@ -53,7 +54,7 @@ namespace UI {
         template <typename T>
         T &getGuiHandler(bool init = true)
         {
-            return static_cast<T &>(getGuiHandler(T::component_index(), init));
+            return static_cast<T &>(getGuiHandler(component_index<T>(), init));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i, bool = true);
@@ -61,7 +62,7 @@ namespace UI {
         template <typename T>
         T &getGameHandler(bool init = true)
         {
-            return static_cast<T &>(getGameHandler(T::component_index(), init));
+            return static_cast<T &>(getGameHandler(component_index<T>(), init));
         }
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);

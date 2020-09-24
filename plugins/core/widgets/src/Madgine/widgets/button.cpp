@@ -13,6 +13,8 @@
 
 #include "fontloader.h"
 
+#include "imageloader.h"
+
 METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)
 MEMBER(mFontSize)

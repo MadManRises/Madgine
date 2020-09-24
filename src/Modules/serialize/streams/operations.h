@@ -6,7 +6,6 @@
 #include "../creationhelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
-#include "../statetransmissionflags.h"
 #include "bufferedstream.h"
 #include "pendingrequest.h"
 

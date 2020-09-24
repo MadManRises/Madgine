@@ -11,6 +11,7 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
+
 UNIQUECOMPONENT(Engine::UI::UIManager)
 
 METATABLE_BEGIN(Engine::UI::UIManager)

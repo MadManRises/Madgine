@@ -7,3 +7,5 @@
 #else
 #    define MADGINE_IMAGELOADER_EXPORT DLL_IMPORT
 #endif
+
+#include "imageloaderforward.h"

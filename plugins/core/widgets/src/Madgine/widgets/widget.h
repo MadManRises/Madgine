@@ -11,8 +11,6 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "imageloader.h"
-
 #include "Modules/serialize/container/serializablecontainer.h"
 
 #include "Madgine/render/texturedescriptor.h"
@@ -21,7 +19,7 @@
 
 #include "Modules/serialize/serializableunit.h"
 
-
+#include "Modules/keyvalueutil/virtualscopebase.h"
 
 namespace Engine {
 namespace Widgets {
@@ -104,7 +102,7 @@ namespace Widgets {
         void *userData();
         void setUserData(void *userData);
 
-        virtual Resources::ImageLoader::ResourceType *resource() const;
+        virtual Resources::ResourceType<Resources::ImageLoader> *resource() const;
 
         size_t depth();
 
@@ -117,16 +115,16 @@ namespace Widgets {
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
         std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
-        virtual std::unique_ptr<WidgetBase> createWidget(const std::string &name);
-        virtual std::unique_ptr<Bar> createBar(const std::string &name);
-        virtual std::unique_ptr<Button> createButton(const std::string &name);
-        virtual std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
-        virtual std::unique_ptr<Combobox> createCombobox(const std::string &name);
-        virtual std::unique_ptr<Image> createImage(const std::string &name);
-        virtual std::unique_ptr<Label> createLabel(const std::string &name);
-        virtual std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
-        virtual std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
-        virtual std::unique_ptr<Textbox> createTextbox(const std::string &name);
+        std::unique_ptr<WidgetBase> createWidget(const std::string &name);
+        std::unique_ptr<Bar> createBar(const std::string &name);
+        std::unique_ptr<Button> createButton(const std::string &name);
+        std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
+        std::unique_ptr<Combobox> createCombobox(const std::string &name);
+        std::unique_ptr<Image> createImage(const std::string &name);
+        std::unique_ptr<Label> createLabel(const std::string &name);
+        std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
+        std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
+        std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
@@ -134,8 +132,6 @@ namespace Widgets {
 
     protected:
         void destroyChild(WidgetBase *w);
-
-        //KeyValueMapList maps() override;
 
         Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
 
