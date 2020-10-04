@@ -30,9 +30,9 @@ namespace Serialize {
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets();
 
         void clearTopLevelItems();
-        bool addTopLevelItem(TopLevelSerializableUnitBase *unit, bool sendStateFlag = true);
-        void removeTopLevelItem(TopLevelSerializableUnitBase *unit);
-        void moveTopLevelItem(TopLevelSerializableUnitBase *oldUnit, TopLevelSerializableUnitBase *newUnit);
+        bool addTopLevelItem(TopLevelUnitBase *unit, bool sendStateFlag = true);
+        void removeTopLevelItem(TopLevelUnitBase *unit);
+        void moveTopLevelItem(TopLevelUnitBase *oldUnit, TopLevelUnitBase *newUnit);
 
         BufferedOutStream *getSlaveMessageTarget();
 
@@ -41,7 +41,7 @@ namespace Serialize {
         void sendMessages();
         void sendAndReceiveMessages();
 
-        SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
+        SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
 
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
@@ -64,9 +64,9 @@ namespace Serialize {
         SyncManagerResult moveMasterStream(ParticipantId streamId, SyncManager *target);
 
 
-        const std::set<TopLevelSerializableUnitBase *> &getTopLevelUnits() const;
+        const std::set<TopLevelUnitBase *> &getTopLevelUnits() const;
 
-        void sendState(BufferedInOutStream &stream, SerializableUnitBase *unit);
+        void sendState(BufferedInOutStream &stream, SyncableUnitBase *unit);
 
         SyncManagerResult recordStreamError(StreamState error);
 
@@ -77,7 +77,7 @@ namespace Serialize {
         std::set<BufferedInOutStream, CompareStreamId> mMasterStreams;
         std::optional<BufferedInOutStream> mSlaveStream;
 
-        std::set<TopLevelSerializableUnitBase *> mTopLevelUnits;    //TODO: Sort by MasterId    
+        std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    
 
         bool mSlaveStreamInvalid;
 

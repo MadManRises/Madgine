@@ -37,11 +37,10 @@ namespace Serialize {
         void applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
+        void setParent(SerializableUnitBase *unit) const;
 
         void writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const;
         void writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
-
-        bool isInstance(SerializableUnitBase *unit) const;
 
         uint8_t getIndex(size_t offset) const;
         const Serializer &get(uint8_t index) const;

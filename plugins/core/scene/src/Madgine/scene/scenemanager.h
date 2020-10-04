@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/serialize/toplevelserializableunit.h"
+#include "Modules/serialize/toplevelunit.h"
 
 #include "scenecomponentcollector.h"
 
@@ -31,7 +31,7 @@
 
 namespace Engine {
 namespace Scene {
-    struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelSerializableUnit<SceneManager>,
+    struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
                                                App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
         SERIALIZABLEUNIT;
 

@@ -64,7 +64,12 @@ namespace Serialize {
                     unit->*P = val;
                 }
             },
-            [](const SerializableUnitBase* unit, int op, const void* data, ParticipantId answerTarget, TransactionId answerId) {
+            [](SerializableUnitBase *unit) {
+            },
+            [](const SerializableUnitBase *unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
+                throw "Unsupported";
+            },
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
                 throw "Unsupported";
             }
         };
@@ -110,7 +115,12 @@ namespace Serialize {
             },
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
             },
+            [](SerializableUnitBase *unit) {
+            },
             [](const SerializableUnitBase *unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
+                throw "Unsupported";
+            },
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
                 throw "Unsupported";
             }
         };
@@ -159,6 +169,9 @@ namespace Serialize {
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
                 UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
             },
+            [](SerializableUnitBase *unit) {
+                UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
+            },
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
@@ -166,7 +179,7 @@ namespace Serialize {
                 else
                     throw "Unsupported";
             },
-            [](const SerializableUnitBase* _unit, int op, const void* data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void*)> callback) {
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Args...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
@@ -211,6 +224,9 @@ namespace Serialize {
             [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
                 //UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
             },
+            [](SerializableUnitBase *unit) {
+                //UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
+            },
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 Operations<T, Args...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
@@ -247,7 +263,7 @@ namespace Serialize {
     ;                         \
     }                         \
     }                         \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelSerializableUnitBase, T> }), T);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelUnitBase, T> }), T);
 
 #define FIELD(...) \
     { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },

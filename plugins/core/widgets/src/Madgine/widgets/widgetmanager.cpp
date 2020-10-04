@@ -497,7 +497,7 @@ namespace Widgets {
 
     WidgetBase *WidgetManager::getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current)
     {
-        static auto &logOnce = LOG_WARNING("Handle modal widgets for hover");
+        LOG_WARNING_ONCE("Handle modal widgets for hover");
 
         const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
 

@@ -109,10 +109,11 @@ namespace Serialize {
     struct SerializeInStream;
     struct SerializeOutStream;
     struct SerializableUnitBase;
+    struct SyncableUnitBase;
     struct BufferedInOutStream;
     struct BufferedInStream;
     struct BufferedOutStream;
-    struct TopLevelSerializableUnitBase;
+    struct TopLevelUnitBase;
     struct SyncableBase;
     struct SerializableBase;
     struct FileBuffer;
@@ -140,7 +141,7 @@ namespace Serialize {
     struct SerializeTable;
 
     
-    using SerializableUnitMap = std::map<UnitId, SerializableUnitBase *>;
+    using SyncableUnitMap = std::map<UnitId, SyncableUnitBase *>;
 
     enum MessageType {
         STATE,

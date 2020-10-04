@@ -34,7 +34,7 @@ namespace Serialize {
         BufferedOutStream(BufferedOutStream &&other);
         BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
 
-        void beginMessage(const SerializableUnitBase *unit, MessageType type, TransactionId id);
+        void beginMessage(const SyncableUnitBase *unit, MessageType type, TransactionId id);
         void beginMessage(Command cmd);
         void endMessage();
 

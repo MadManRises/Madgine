@@ -57,6 +57,11 @@ if (GCC OR CLANG)
 	endif()
 endif ()
 
+if (MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4217")
+endif ()
+
 macro(cmake_log)
 	if (USE_CMAKE_LOG)
 		MESSAGE(STATUS "cmake diagnostics: " ${ARGN})

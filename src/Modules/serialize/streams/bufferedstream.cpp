@@ -100,7 +100,7 @@ namespace Serialize {
     {
     }
 
-    void BufferedOutStream::beginMessage(const SerializableUnitBase *unit,
+    void BufferedOutStream::beginMessage(const SyncableUnitBase *unit,
         MessageType type, TransactionId id)
     {
         MessageHeader header;

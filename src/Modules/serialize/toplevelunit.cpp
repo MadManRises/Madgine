@@ -1,26 +1,27 @@
 #include "../moduleslib.h"
-#include "toplevelserializableunit.h"
+#include "toplevelunit.h"
 
 #include "syncmanager.h"
 
 namespace Engine {
 namespace Serialize {
-    TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(UnitId staticId)
-        : SerializableUnitBase(staticId)
+    TopLevelUnitBase::TopLevelUnitBase(UnitId staticId)
+        : SyncableUnitBase(staticId)
         , mStaticSlaveId(staticId)
     {
         assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
+        mTopLevel = this;
     }
 
-    TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other)
-        : SerializableUnitBase()
+    TopLevelUnitBase::TopLevelUnitBase(const TopLevelUnitBase &other)
+        : SyncableUnitBase()
         , mSlaveManager(nullptr)
         , mStaticSlaveId(other.mStaticSlaveId)
     {
     }
 
-    TopLevelSerializableUnitBase::TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept
-        : SerializableUnitBase(other.moveMasterId())
+    TopLevelUnitBase::TopLevelUnitBase(TopLevelUnitBase &&other) noexcept
+        : SyncableUnitBase(other.moveMasterId())
         , mStaticSlaveId(other.mStaticSlaveId)
     {
         if (other.mSlaveManager) {
@@ -31,7 +32,7 @@ namespace Serialize {
         }
     }
 
-    TopLevelSerializableUnitBase::~TopLevelSerializableUnitBase()
+    TopLevelUnitBase::~TopLevelUnitBase()
     {
         if (mSlaveManager) {
             mSlaveManager->removeTopLevelItem(this);
@@ -41,24 +42,24 @@ namespace Serialize {
         }
     }
 
-    ParticipantId TopLevelSerializableUnitBase::participantId() const
+    ParticipantId TopLevelUnitBase::participantId() const
     {
         return SyncManager::getParticipantId(mSlaveManager);
     }
 
-    void TopLevelSerializableUnitBase::setStaticSlaveId(
+    void TopLevelUnitBase::setStaticSlaveId(
         UnitId staticId)
     {
         assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE /* && staticId < RESERVED_ID_COUNT*/));
         mStaticSlaveId = staticId;
     }
 
-    void TopLevelSerializableUnitBase::initSlaveId(SerializeManager *mgr)
+    void TopLevelUnitBase::initSlaveId(SerializeManager *mgr)
     {
         setSlaveId(mStaticSlaveId ? mStaticSlaveId : masterId(), mgr);
     }
 
-    std::set<BufferedOutStream *, CompareStreamId> TopLevelSerializableUnitBase::getMasterMessageTargets() const
+    std::set<BufferedOutStream *, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const
     {
         std::set<BufferedOutStream *, CompareStreamId> result;
         for (SyncManager *mgr : mMasterManagers) {
@@ -71,7 +72,7 @@ namespace Serialize {
         return result;
     }
 
-    BufferedOutStream *TopLevelSerializableUnitBase::getSlaveMessageTarget() const
+    BufferedOutStream *TopLevelUnitBase::getSlaveMessageTarget() const
     {
         if (mSlaveManager) {
             return mSlaveManager->getSlaveMessageTarget();
@@ -79,17 +80,17 @@ namespace Serialize {
         return nullptr;
     }
 
-    const std::vector<SyncManager *> &TopLevelSerializableUnitBase::getMasterManagers() const
+    const std::vector<SyncManager *> &TopLevelUnitBase::getMasterManagers() const
     {
         return mMasterManagers;
     }
 
-    SyncManager *TopLevelSerializableUnitBase::getSlaveManager() const
+    SyncManager *TopLevelUnitBase::getSlaveManager() const
     {
         return mSlaveManager;
     }
 
-    bool TopLevelSerializableUnitBase::addManager(SyncManager *mgr)
+    bool TopLevelUnitBase::addManager(SyncManager *mgr)
     {
         if (mgr->isMaster()) {
             mMasterManagers.push_back(mgr);
@@ -101,7 +102,7 @@ namespace Serialize {
         return true;
     }
 
-    void TopLevelSerializableUnitBase::removeManager(SyncManager *mgr)
+    void TopLevelUnitBase::removeManager(SyncManager *mgr)
     {
         if (mgr->isMaster()) {
             mMasterManagers.erase(std::remove(mMasterManagers.begin(), mMasterManagers.end(), mgr), mMasterManagers.end());
@@ -111,7 +112,7 @@ namespace Serialize {
         }
     }
 
-    bool TopLevelSerializableUnitBase::updateManagerType(SyncManager *mgr, bool isMaster)
+    bool TopLevelUnitBase::updateManagerType(SyncManager *mgr, bool isMaster)
     {
         if (isMaster) {
             removeManager(mgr);

@@ -41,7 +41,7 @@ namespace Render {
     Matrix4 Camera::getProjectionMatrix(float aspectRatio)
     {
         float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
-        float t = r /* / aspectRatio*/;
+        float t = r / aspectRatio;
 
         Matrix4 p = {
             mN / r, 0, 0, 0,
@@ -58,7 +58,7 @@ namespace Render {
         float aspectRatio = viewportSize.x / viewportSize.y;
 
         float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
-        float t = r /* / aspectRatio*/;
+        float t = r / aspectRatio;
 
         Vector3 dir = mOrientation * Vector3 { (2.f * mousePos.x / viewportSize.x - 1.0f) * r, (1.0f - 2.f * mousePos.y / viewportSize.y) * t, mN };
         dir.normalize();

@@ -6,7 +6,7 @@
 #include "Modules/generic/container/transformIt.h"
 
 #include "Modules/madgineobject/madgineobjectobserver.h"
-#include "Modules/serialize/toplevelserializableunit.h"
+#include "Modules/serialize/toplevelunit.h"
 
 #include "../render/rendercontextcollector.h"
 
@@ -68,10 +68,10 @@ namespace Window {
     };
 
     struct MADGINE_CLIENT_EXPORT MainWindow : ScopeBase,
-                                                  WindowEventListener,
-                                                  Threading::FrameListener,
-                                                  Serialize::TopLevelSerializableUnit<MainWindow>,
-                                                  MadgineObject<MainWindow> {
+                                              WindowEventListener,
+                                              Threading::FrameListener,
+                                              Serialize::TopLevelUnit<MainWindow>,
+                                              MadgineObject<MainWindow> {
         SERIALIZABLEUNIT;
 
         MainWindow(const WindowSettings &settings);

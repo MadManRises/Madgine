@@ -384,7 +384,7 @@ namespace Serialize {
     struct Operations<std::tuple<Ty...>, Configs...> {
 
         template <typename... Args, size_t... Is>
-        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty ...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
             (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
@@ -392,13 +392,13 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty ...> &t, const char *name, Args &&... args)
         {
             read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
 
         template <typename... Args, size_t... Is>
-        static void write(SerializeOutStream &out, const std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static void write(SerializeOutStream &out, const std::tuple<Ty ...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             out.format().beginCompound(out, name);
             (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
@@ -406,7 +406,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void write(SerializeOutStream &out, const std::tuple<Ty &...> t, const char *name, Args &&... args)
+        static void write(SerializeOutStream &out, const std::tuple<Ty ...> &t, const char *name, Args &&... args)
         {
             write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }

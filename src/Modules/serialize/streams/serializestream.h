@@ -77,7 +77,7 @@ namespace Serialize {
 
         void setNextFormattedStringDelimiter(char c);
 
-        SerializableUnitBase *convertPtr(UnitId ptr);
+        SyncableUnitBase *convertPtr(UnitId ptr);
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
@@ -113,7 +113,7 @@ namespace Serialize {
             }
         }
 
-        void writeUnformatted(SerializableUnitBase *p);
+        void writeUnformatted(SyncableUnitBase *p);
 
         void writeUnformatted(const std::string &s);
         // void writeUnformatted(const std::string_view &s);

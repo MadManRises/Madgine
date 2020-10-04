@@ -2,7 +2,7 @@
 
 #include "serializemanager.h"
 
-#include "serializableunit.h"
+#include "syncableunit.h"
 
 #include "serializeexception.h"
 
@@ -14,7 +14,7 @@ namespace Engine {
 namespace Serialize {
 
     static std::mutex sMasterMappingMutex;
-    static SerializableUnitMap sMasterMappings;
+    static SyncableUnitMap sMasterMappings;
     static UnitId sNextUnitId = RESERVED_ID_COUNT;
     static std::atomic<ParticipantId> sRunningStreamId = SerializeManager::sLocalMasterParticipantId;
 
@@ -34,17 +34,17 @@ namespace Serialize {
 
     SerializeManager::~SerializeManager() {}
 
-    const SerializableUnitMap &SerializeManager::slavesMap() const
+    const SyncableUnitMap &SerializeManager::slavesMap() const
     {
         return mSlaveMappings;
     }
 
-	const SerializableUnitMap &SerializeManager::mastersMap() const
+	const SyncableUnitMap &SerializeManager::mastersMap() const
     {
         return sMasterMappings;
     }
 
-    void SerializeManager::addSlaveMapping(SerializableUnitBase *item)
+    void SerializeManager::addSlaveMapping(SyncableUnitBase *item)
     {
         assert(mSlaveMappings.find(item->slaveId()) == mSlaveMappings.end());
         mSlaveMappings[item->slaveId()] = item;
@@ -52,14 +52,14 @@ namespace Serialize {
         // typeid(*item).name() << std::endl;
     }
 
-    void SerializeManager::removeSlaveMapping(SerializableUnitBase *item)
+    void SerializeManager::removeSlaveMapping(SyncableUnitBase *item)
     {
         size_t result = mSlaveMappings.erase(item->slaveId());
         assert(result == 1);
     }
 
     UnitId SerializeManager::generateMasterId(UnitId id,
-        SerializableUnitBase *unit)
+        SyncableUnitBase *unit)
     {
         if (id == 0) {
             std::lock_guard guard(sMasterMappingMutex);
@@ -75,7 +75,7 @@ namespace Serialize {
         return id;
     }
 
-    UnitId SerializeManager::updateMasterId(UnitId id, SerializableUnitBase *unit)
+    UnitId SerializeManager::updateMasterId(UnitId id, SyncableUnitBase *unit)
     {
         if (id >= RESERVED_ID_COUNT) {
             std::lock_guard guard(sMasterMappingMutex);
@@ -88,7 +88,7 @@ namespace Serialize {
         return id;
     }
 
-    void SerializeManager::deleteMasterId(UnitId id, SerializableUnitBase *unit)
+    void SerializeManager::deleteMasterId(UnitId id, SyncableUnitBase *unit)
     {
         if (id >= RESERVED_ID_COUNT) {
             std::lock_guard guard(sMasterMappingMutex);
@@ -128,7 +128,7 @@ namespace Serialize {
     }
 
     UnitId SerializeManager::convertPtr(const SerializeManager *mgr, SerializeOutStream &out,
-        const SerializableUnitBase *unit)
+        const SyncableUnitBase *unit)
     {
         return unit == nullptr
             ? NULL_UNIT_ID
@@ -136,7 +136,7 @@ namespace Serialize {
                                                      : unit->slaveId();
     }
 
-    SerializableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
+    SyncableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
         UnitId unit)
     {
         if (unit == NULL_UNIT_ID)
@@ -169,7 +169,7 @@ namespace Serialize {
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }
 
-    SerializableUnitBase *SerializeManager::getByMasterId(UnitId unit)
+    SyncableUnitBase *SerializeManager::getByMasterId(UnitId unit)
     {
         std::lock_guard guard(sMasterMappingMutex);
         return sMasterMappings.at(unit);

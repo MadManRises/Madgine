@@ -196,7 +196,7 @@ namespace Serialize {
         return format().mBinary;
     }
 
-    SerializableUnitBase *SerializeInStream::convertPtr(UnitId ptr)
+    SyncableUnitBase *SerializeInStream::convertPtr(UnitId ptr)
     {
         return manager()->convertPtr(*this, ptr);
     }
@@ -234,7 +234,7 @@ namespace Serialize {
         return buffer().id();
     }
 
-    void SerializeOutStream::writeUnformatted(SerializableUnitBase *p)
+    void SerializeOutStream::writeUnformatted(SyncableUnitBase *p)
     {
         writeUnformatted(SerializeManager::convertPtr(manager(), *this, p));
     }

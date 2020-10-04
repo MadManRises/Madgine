@@ -18,12 +18,6 @@ namespace Scene {
             virtual void finalize(const EntityPtr &entity);
 
             virtual const std::string_view &key() const = 0;
-
-        protected:
-            const ObjectPtr &initTable();
-
-        private:
-            ObjectPtr mInitTable;
         };
     }
 }

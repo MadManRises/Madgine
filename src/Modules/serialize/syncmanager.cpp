@@ -2,7 +2,7 @@
 
 #include "syncmanager.h"
 
-#include "toplevelserializableunit.h"
+#include "toplevelunit.h"
 
 #include "messageheader.h"
 
@@ -28,7 +28,7 @@ namespace Serialize {
         , mTopLevelUnits(std::move(other.mTopLevelUnits))
         , mSlaveStreamInvalid(other.mSlaveStreamInvalid)
     {
-        for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+        for (TopLevelUnitBase *unit : mTopLevelUnits) {
             unit->removeManager(&other);
             bool result = unit->addManager(this);
             assert(result);
@@ -66,7 +66,7 @@ namespace Serialize {
                     "Unknown Builtin Command-Code for SerializeManager: " + std::to_string(header.mCmd));
             }
         } else {
-            SerializableUnitBase *object = convertPtr(stream, header.mObject);
+            SyncableUnitBase *object = convertPtr(stream, header.mObject);
             switch (header.mType) {
             case ACTION: {
                 PendingRequest *request = stream.fetchRequest(header.mTransaction);
@@ -105,13 +105,13 @@ namespace Serialize {
         while (!slavesMap().empty()) {
             slavesMap().begin()->second->clearSlaveId(this);
         }
-        for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+        for (TopLevelUnitBase *unit : mTopLevelUnits) {
             unit->removeManager(this);
         }
         mTopLevelUnits.clear();
     }
 
-    bool SyncManager::addTopLevelItem(TopLevelSerializableUnitBase *unit,
+    bool SyncManager::addTopLevelItem(TopLevelUnitBase *unit,
         bool sendStateFlag)
     {
         if (!unit->addManager(this))
@@ -130,7 +130,7 @@ namespace Serialize {
         return true;
     }
 
-    void SyncManager::removeTopLevelItem(TopLevelSerializableUnitBase *unit)
+    void SyncManager::removeTopLevelItem(TopLevelUnitBase *unit)
     {
         auto it2 = slavesMap().begin();
         while (it2 != slavesMap().end()) {
@@ -145,8 +145,8 @@ namespace Serialize {
         mTopLevelUnits.erase(unit);
     }
 
-    void SyncManager::moveTopLevelItem(TopLevelSerializableUnitBase *oldUnit,
-        TopLevelSerializableUnitBase *newUnit)
+    void SyncManager::moveTopLevelItem(TopLevelUnitBase *oldUnit,
+        TopLevelUnitBase *newUnit)
     {
         removeTopLevelItem(oldUnit);
         addTopLevelItem(newUnit, false);
@@ -197,7 +197,7 @@ namespace Serialize {
 
         if (receiveState) {
             if (state == SyncManagerResult::SUCCESS) {
-                for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+                for (TopLevelUnitBase *unit : mTopLevelUnits) {
                     unit->initSlaveId(this);
                 }
                 mReceivingMasterState = true;
@@ -240,7 +240,7 @@ namespace Serialize {
                 slavesMap().begin()->second->clearSlaveId(this);
                 assert(s > slavesMap().size());
             }
-            for (TopLevelSerializableUnitBase *topLevel : mTopLevelUnits) {
+            for (TopLevelUnitBase *topLevel : mTopLevelUnits) {
                 topLevel->updateManagerType(this, true);
             }
             mSlaveStream->setId(0);
@@ -252,7 +252,7 @@ namespace Serialize {
         bool sendStateFlag)
     {
         if (sendStateFlag && stream) {
-            for (TopLevelSerializableUnitBase *unit : mTopLevelUnits) {
+            for (TopLevelUnitBase *unit : mTopLevelUnits) {
                 sendState(stream, unit);
             }
             stream.writeCommand(INITIAL_STATE_DONE, stream.id());
@@ -277,12 +277,12 @@ namespace Serialize {
             return result;
         BufferedInOutStream &stream = const_cast<BufferedInOutStream &>(
             *target->mMasterStreams.find(streamId));
-        std::vector<TopLevelSerializableUnitBase *> newTopLevels;
+        std::vector<TopLevelUnitBase *> newTopLevels;
         newTopLevels.reserve(16);
         set_difference(target->getTopLevelUnits().begin(),
             target->getTopLevelUnits().end(), getTopLevelUnits().begin(),
             getTopLevelUnits().end(), back_inserter(newTopLevels));
-        for (TopLevelSerializableUnitBase *newTopLevel : newTopLevels) {
+        for (TopLevelUnitBase *newTopLevel : newTopLevels) {
             sendState(stream, newTopLevel);
         }
         return SyncManagerResult::SUCCESS;
@@ -341,7 +341,7 @@ namespace Serialize {
         sendMessages();
     }
 
-    SerializableUnitBase *SyncManager::convertPtr(SerializeInStream &in,
+    SyncableUnitBase *SyncManager::convertPtr(SerializeInStream &in,
         UnitId unit)
     {
         if (unit == NULL_UNIT_ID)
@@ -354,7 +354,7 @@ namespace Serialize {
                     assert(unit >= BEGIN_STATIC_ID_SPACE);
                     auto it = std::find_if(
                         mTopLevelUnits.begin(), mTopLevelUnits.end(),
-                        [unit](TopLevelSerializableUnitBase *topLevel) {
+                        [unit](TopLevelUnitBase *topLevel) {
                             return topLevel->masterId() == unit;
                         });
                     if (it == mTopLevelUnits.end()) {
@@ -364,7 +364,7 @@ namespace Serialize {
                     }
                     return *it;
                 } else {
-                    SerializableUnitBase *u = getByMasterId(unit);
+                    SyncableUnitBase *u = getByMasterId(unit);
                     if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end()) {
                         throw SerializeException(
                             "Illegal Toplevel-Id used! Possible configuration "
@@ -438,7 +438,7 @@ namespace Serialize {
         return mMasterStreams;
     }
 
-    const std::set<TopLevelSerializableUnitBase *> &
+    const std::set<TopLevelUnitBase *> &
     SyncManager::getTopLevelUnits() const
     {
         return mTopLevelUnits;
@@ -447,7 +447,7 @@ namespace Serialize {
     size_t SyncManager::clientCount() const { return mMasterStreams.size(); }
 
     void SyncManager::sendState(BufferedInOutStream &stream,
-        SerializableUnitBase *unit)
+        SyncableUnitBase *unit)
     {
         stream.beginMessage(unit, STATE, 0);
         unit->writeState(stream);

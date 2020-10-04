@@ -52,7 +52,7 @@ namespace Tools {
     template <typename T, typename... Bases>
     void renderVTableLayout(T& t) {
         if (ImGui::TreeNode(typeid(T).name())) {
-            ImGui::Text("size: %u", sizeof(T));
+            ImGui::Text("size: %lu", static_cast<unsigned long>(sizeof(T)));
             uintptr_t *vtable = *reinterpret_cast<uintptr_t**>(&t);
             if (ImGui::TreeNode("vtbl", "vtable: %p", vtable)) {
                 ImGui::TreePop();

@@ -9,14 +9,12 @@
 namespace Engine {
 namespace Serialize {
 
-#define SERIALIZABLEUNIT_MEMBERS()        \
-    READONLY_PROPERTY(Synced, isSynced)   \
-    READONLY_PROPERTY(MasterId, masterId) \
-    READONLY_PROPERTY(SlaveId, slaveId)
+#define SERIALIZABLEUNIT_MEMBERS() \
+    READONLY_PROPERTY(Synced, isSynced)
 
     struct MODULES_EXPORT SerializableUnitBase {
     protected:
-        SerializableUnitBase(UnitId masterId = 0);
+        SerializableUnitBase();
         SerializableUnitBase(const SerializableUnitBase &other);
         SerializableUnitBase(SerializableUnitBase &&other) noexcept;
         ~SerializableUnitBase();
@@ -25,21 +23,14 @@ namespace Serialize {
         SerializableUnitBase &operator=(SerializableUnitBase &&other);
 
     public:
-        const TopLevelSerializableUnitBase *topLevel() const;
+        const TopLevelUnitBase *topLevel() const;
 
         void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0) const;
         void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0);
 
-        void readAction(BufferedInOutStream &in, PendingRequest *request);
-        void readRequest(BufferedInOutStream &in, TransactionId id);
-
         void applySerializableMap(SerializeInStream &in);
 
-        UnitId slaveId() const;
-        UnitId masterId() const;
-
         bool isSynced() const;
-        bool isMaster() const;
 
     protected:
         void sync();
@@ -51,14 +42,7 @@ namespace Serialize {
 
         const SerializeTable *serializeType() const;
 
-        UnitId moveMasterId(UnitId newId = 0);
-
     private:
-        std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
-        BufferedOutStream *getSlaveMessageTarget() const;
-
-        void clearSlaveId(SerializeManager *mgr);
-
         void setDataSynced(bool b);
         void setActive(bool active, bool existenceChanged);
         void setParent(SerializableUnitBase *parent);
@@ -83,14 +67,13 @@ namespace Serialize {
         DERIVE_FRIEND(setParent);
 
     private:
-        SerializableUnitBase *mParent = nullptr;
+        friend struct TopLevelUnitBase;
+        const TopLevelUnitBase *mTopLevel = nullptr;
 
-        UnitId mSlaveId = 0;
-        UnitId mMasterId;
         uint8_t mActiveIndex = 0;
 
         bool mSynced = false; // Maybe move only into TopLevelUnit?
-
+    
         const SerializeTable *mType = nullptr;
     };
 
@@ -137,7 +120,7 @@ namespace Serialize {
 #define SERIALIZABLEUNIT                                          \
     friend struct ::Engine::Serialize::__SerializeInstance<Self>; \
     friend struct ::Engine::Serialize::SerializeTableCallbacks;   \
-    DERIVE_FRIEND(onActivate, ::Engine::Serialize::)                                     \
+    DERIVE_FRIEND(onActivate, ::Engine::Serialize::)
 
 } // namespace Serialize
 } // namespace Core

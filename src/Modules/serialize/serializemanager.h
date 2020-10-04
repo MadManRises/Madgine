@@ -12,15 +12,15 @@ namespace Serialize {
         SerializeManager(SerializeManager &&) noexcept;
         ~SerializeManager();
 
-        const SerializableUnitMap &slavesMap() const;
-        const SerializableUnitMap &mastersMap() const;
+        const SyncableUnitMap &slavesMap() const;
+        const SyncableUnitMap &mastersMap() const;
 
-        void addSlaveMapping(SerializableUnitBase *item);
-        void removeSlaveMapping(SerializableUnitBase *item);
+        void addSlaveMapping(SyncableUnitBase *item);
+        void removeSlaveMapping(SyncableUnitBase *item);
 
-        static UnitId generateMasterId(UnitId id, SerializableUnitBase *unit);
-        static UnitId updateMasterId(UnitId id, SerializableUnitBase *unit);
-        static void deleteMasterId(UnitId id, SerializableUnitBase *unit);
+        static UnitId generateMasterId(UnitId id, SyncableUnitBase *unit);
+        static UnitId updateMasterId(UnitId id, SyncableUnitBase *unit);
+        static void deleteMasterId(UnitId id, SyncableUnitBase *unit);
 
         bool isMaster(SerializeStreambuf *stream) const;
         bool isMaster() const;
@@ -28,8 +28,8 @@ namespace Serialize {
         bool filter(const SerializableUnitBase *unit, ParticipantId id);
         void addFilter(std::function<bool(const SerializableUnitBase *, ParticipantId)>);
 
-        static UnitId convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SerializableUnitBase *unit);
-        SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
+        static UnitId convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SyncableUnitBase *unit);
+        SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
 
         const std::string &name() const;
 
@@ -40,11 +40,11 @@ namespace Serialize {
 
         static ParticipantId createStreamId();
 
-		SerializableUnitBase *getByMasterId(UnitId unit);
+		SyncableUnitBase *getByMasterId(UnitId unit);
 
     private:
 
-        SerializableUnitMap mSlaveMappings;        
+        SyncableUnitMap mSlaveMappings;        
 
 		SerializeStreambuf *mSlaveStreambuf = nullptr;
 

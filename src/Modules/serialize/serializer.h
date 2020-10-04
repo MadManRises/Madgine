@@ -16,6 +16,7 @@ namespace Serialize {
         void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &) = nullptr;
         void (*mSetDataSynced)(SerializableUnitBase *, bool) = nullptr;
         void (*mSetActive)(SerializableUnitBase *, bool, bool) = nullptr;
+        void (*mSetParent)(SerializableUnitBase *) = nullptr;
 
         void (*mWriteAction)(const SerializableUnitBase *, int, const void *, ParticipantId, TransactionId) = nullptr;
         void (*mWriteRequest)(const SerializableUnitBase *, int, const void *, ParticipantId, TransactionId, std::function<void(void *)>) = nullptr;

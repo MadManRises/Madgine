@@ -10,7 +10,7 @@ namespace Serialize {
     DERIVE_FUNCTION(setActive, bool, bool);
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
-    MODULES_EXPORT SerializableUnitBase *convertPtr(SerializeInStream &in, UnitId id);
+    MODULES_EXPORT SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId id);
 
     template <typename T>
     struct UnitHelper {

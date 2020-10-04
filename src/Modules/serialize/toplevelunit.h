@@ -1,14 +1,14 @@
 #pragma once
 
-#include "serializableunit.h"
+#include "syncableunit.h"
 
 namespace Engine {
 namespace Serialize {
-    struct MODULES_EXPORT TopLevelSerializableUnitBase : SerializableUnitBase {    
-        TopLevelSerializableUnitBase(UnitId staticId = 0);
-        TopLevelSerializableUnitBase(const TopLevelSerializableUnitBase &other);
-        TopLevelSerializableUnitBase(TopLevelSerializableUnitBase &&other) noexcept;
-        ~TopLevelSerializableUnitBase();
+    struct MODULES_EXPORT TopLevelUnitBase : SyncableUnitBase {    
+        TopLevelUnitBase(UnitId staticId = 0);
+        TopLevelUnitBase(const TopLevelUnitBase &other);
+        TopLevelUnitBase(TopLevelUnitBase &&other) noexcept;
+        ~TopLevelUnitBase();
 
         BufferedOutStream *getSlaveMessageTarget() const;
 
@@ -34,6 +34,6 @@ namespace Serialize {
     };
 
     template <typename T>
-    using TopLevelSerializableUnit = SerializableUnit<T, TopLevelSerializableUnitBase>;
+    using TopLevelUnit = SerializableUnit<T, TopLevelUnitBase>;
 } // namespace Serialize
 } // namespace Core

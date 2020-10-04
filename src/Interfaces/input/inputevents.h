@@ -155,66 +155,12 @@ namespace Input {
         Key::Key scancode;
         char text = 0;
 
-        KeyEventArgs(Key::Key key, char text = 0)
+        KeyEventArgs(Key::Key key, char text)
             : scancode(key)
             , text(text)
         {
         }
 
-        KeyEventArgs(Key::Key key, bool shift)
-            : scancode(key)
-        {
-            if (key >= Key::A && key <= Key::Z) {
-                text = static_cast<char>(key);
-                if (!shift)
-                    text += 0x20;
-            } else if (key >= Key::Alpha0 && key <= Key::Alpha9) {
-                if (!shift) {
-                    text = static_cast<char>(key);
-                } else {
-                    switch (key) {
-                    case Key::Alpha0:
-                        text = '=';
-                        break;
-                    case Key::Alpha1:
-                        text = '!';
-                        break;
-                    case Key::Alpha2:
-                        text = '"';
-                        break;
-                    case Key::Alpha3:
-                        text = '\0';
-                        break;
-                    case Key::Alpha4:
-                        text = '$';
-                        break;
-                    case Key::Alpha5:
-                        text = '%';
-                        break;
-                    case Key::Alpha6:
-                        text = '&';
-                        break;
-                    case Key::Alpha7:
-                        text = '/';
-                        break;
-                    case Key::Alpha8:
-                        text = '(';
-                        break;
-                    case Key::Alpha9:
-                        text = ')';
-                        break;
-                    default: 
-                        std::terminate();
-                    }
-                }
-            } else {
-                switch (key) {
-                case Key::Period:
-                    text = shift ? ':' : '.';
-                    break;
-                }
-            }
-        }
     };
 
     struct PointerEventArgs {

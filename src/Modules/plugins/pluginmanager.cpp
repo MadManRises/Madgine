@@ -153,7 +153,7 @@ namespace Plugins {
 
         for (Future<bool> &result : results) {
             if (!result.isAvailable() || result)
-                throw 0;
+                std::terminate();
         }
     }
 

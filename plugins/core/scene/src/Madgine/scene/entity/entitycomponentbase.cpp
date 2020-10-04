@@ -11,7 +11,6 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         EntityComponentBase::EntityComponentBase(const ObjectPtr &initTable)
-            : mInitTable(initTable)
         {
         }
 
@@ -25,11 +24,6 @@ namespace Scene {
 
         void EntityComponentBase::finalize(const EntityPtr &entity)
         {
-        }
-
-        const ObjectPtr &EntityComponentBase::initTable()
-        {
-            return mInitTable;
         }
 
     }

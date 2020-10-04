@@ -3,7 +3,7 @@
 #include "Modules/keyvalue/scopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
 #include "Modules/threading/slot.h"
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/syncableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"

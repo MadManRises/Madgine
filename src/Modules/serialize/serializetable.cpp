@@ -138,6 +138,17 @@ namespace Serialize {
             mCallbacks.onActivate(unit, active, existenceChanged);
     }
 
+    void SerializeTable::setParent(SerializableUnitBase *unit) const
+    {
+        const SerializeTable *table = this;
+        while (table) {
+            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+                it->second.mSetParent(unit);
+            }
+            table = table->mBaseType ? &table->mBaseType() : nullptr;
+        }
+    }
+
     void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
     {
         get(index).mWriteAction(parent, op, data, answerTarget, answerId);
@@ -146,11 +157,6 @@ namespace Serialize {
     void SerializeTable::writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
         get(index).mWriteRequest(parent, op, data, requester, requesterTransactionId, std::move(callback));
-    }
-
-    bool SerializeTable::isInstance(SerializableUnitBase *unit) const
-    {
-        return !unit || unit->mType == this;
     }
 
     uint8_t SerializeTable::getIndex(size_t offset) const

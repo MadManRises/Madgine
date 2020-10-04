@@ -128,7 +128,6 @@ namespace Window {
         mRenderWindow.reset();
         mRenderContext.reset();
 
-        Engine::Window::WindowData windowData = mOsWindow->data();
         mOsWindow->removeListener(this);
         mOsWindow->destroy();
         mOsWindow = nullptr;

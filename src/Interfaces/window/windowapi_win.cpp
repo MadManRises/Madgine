@@ -69,14 +69,17 @@ namespace Window {
                 }
             } else if (msg >= WM_KEYFIRST && msg <= WM_KEYLAST) {
                 Input::Key::Key keycode = (Input::Key::Key)wParam;
+                UINT scancode = (lParam >> 16) & 0xFF;
                 switch (msg) {
                 case WM_KEYDOWN:
-                    mKeyDown[keycode] = true;
-                    injectKeyPress(Input::KeyEventArgs { keycode, isKeyDown(Input::Key::Shift) });
+                    mKeyDown[keycode] = std::numeric_limits<BYTE>::max();
+                    WORD buffer;
+                    ToAscii(keycode, scancode, mKeyDown, &buffer, 0);
+                    injectKeyPress(Input::KeyEventArgs { keycode, static_cast<char>(buffer) });
                     break;
                 case WM_KEYUP:
-                    mKeyDown[keycode] = false;
-                    injectKeyRelease(Input::KeyEventArgs { keycode });
+                    mKeyDown[keycode] = 0;
+                    injectKeyRelease(Input::KeyEventArgs { keycode, 0 });
                     break;
                 }
             } else {
@@ -248,7 +251,7 @@ namespace Window {
         }
 
     private:
-        bool mKeyDown[512];
+        BYTE mKeyDown[512];
         InterfacesVector mLastKnownMousePos;
     };
 

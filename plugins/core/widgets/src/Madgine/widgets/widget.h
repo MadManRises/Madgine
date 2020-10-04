@@ -9,7 +9,7 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/syncableunit.h"
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 
@@ -19,7 +19,7 @@
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase>,
-                                               Serialize::SerializableUnit<WidgetBase> {
+                                               Serialize::SerializableUnit<WidgetBase, Serialize::SyncableUnitBase> {
         SERIALIZABLEUNIT;
 
         WidgetBase(const std::string &name, WidgetBase *parent);

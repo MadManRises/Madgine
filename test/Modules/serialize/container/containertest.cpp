@@ -7,7 +7,7 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Modules/serialize/toplevelserializableunit.h"
+#include "Modules/serialize/toplevelunit.h"
 
 #include "Modules/serialize/container/noparent.h"
 
@@ -18,9 +18,9 @@
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-struct TestUnit : TopLevelSerializableUnit<TestUnit> {
+struct TestUnit : TopLevelUnit<TestUnit> {
     TestUnit()
-        : TopLevelSerializableUnit<TestUnit>(10)
+        : TopLevelUnit<TestUnit>(10)
     {
     }
 

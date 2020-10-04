@@ -16,7 +16,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        struct MADGINE_SCENE_EXPORT Entity : Serialize::SerializableUnit<Entity>, ScopeBase {
+        struct MADGINE_SCENE_EXPORT Entity : Serialize::SerializableUnit<Entity, Serialize::SyncableUnitBase>, ScopeBase {
             SERIALIZABLEUNIT;
 
             //Entity(const Entity &, bool local);

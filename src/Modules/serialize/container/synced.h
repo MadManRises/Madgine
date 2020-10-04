@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../generic/copy_traits.h"
-#include "../../generic/noopfunctor.h"
+#include "../../generic/functor.h"
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
@@ -119,6 +119,11 @@ namespace Serialize {
         void applySerializableMap(SerializeInStream &in)
         {
             UnitHelper<T>::applyMap(in, mData);
+        }
+
+        void setParent(SerializableUnitBase *parent)
+        {
+            UnitHelper<T>::setItemParent(mData, parent);
         }
 
     protected:
