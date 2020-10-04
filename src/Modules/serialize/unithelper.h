@@ -2,6 +2,8 @@
 
 #include "container/physical.h"
 
+#include "serializableunitptr.h"
+
 namespace Engine {
 namespace Serialize {
 
