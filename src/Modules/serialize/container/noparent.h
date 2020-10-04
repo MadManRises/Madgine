@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../serializableunitptr.h"
+
 namespace Engine {
 
 namespace Serialize {
@@ -11,12 +13,12 @@ namespace Serialize {
         NoParentUnit(Args &&... args)
             :  T(std::forward<Args>(args)...)
         {
-            this->sync();
+            SerializableUnitPtr { this, &serializeTable<T>() }.sync();
         }
 
         ~NoParentUnit()
         {
-            this->unsync();
+            SerializableUnitPtr { this, &serializeTable<T>() }.unsync();
         }
     };
 }

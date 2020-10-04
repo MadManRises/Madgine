@@ -72,7 +72,7 @@ namespace Window {
                                               Threading::FrameListener,
                                               Serialize::TopLevelUnit<MainWindow>,
                                               MadgineObject<MainWindow> {
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(MainWindow);
 
         MainWindow(const WindowSettings &settings);
         virtual ~MainWindow();

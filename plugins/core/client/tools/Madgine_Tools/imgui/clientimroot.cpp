@@ -126,7 +126,7 @@ namespace Tools {
     }
 
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
-        : SerializableUnit(window, 80)
+        : VirtualUnit(window, 80)
         , ImRoot(this)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
     {

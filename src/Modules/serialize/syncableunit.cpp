@@ -12,6 +12,8 @@
 
 #include "toplevelunit.h"
 
+#include "serializableunitptr.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -29,7 +31,7 @@ namespace Serialize {
     SyncableUnitBase::SyncableUnitBase(SyncableUnitBase &&other) noexcept
         : SerializableUnitBase(std::move(other))
         , mSlaveId(std::exchange(other.mSlaveId, 0))
-        , mMasterId(SerializeManager::updateMasterId(std::exchange(other.mMasterId, SerializeManager::generateMasterId(0, &other)), this))
+        , mMasterId(SerializeManager::updateMasterId(std::exchange(other.mMasterId, SerializeManager::generateMasterId(0, &other)), this))        
     {
     }
 
@@ -62,7 +64,7 @@ namespace Serialize {
             out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "id");
         }
-        SerializableUnitBase::writeState(out, name, flags);
+        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags);
     }
 
     void SyncableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
@@ -79,7 +81,7 @@ namespace Serialize {
                 }
             }
         }
-        SerializableUnitBase::readState(in, name, flags);
+        SerializableUnitPtr { this, mType }.readState(in, name, flags);
     }
 
     void SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
@@ -95,8 +97,8 @@ namespace Serialize {
     std::set<BufferedOutStream *, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const
     {
         std::set<BufferedOutStream *, CompareStreamId> result;
-        if (isSynced()) {
-            result = topLevel()->getMasterMessageTargets();
+        if (mSynced) {
+            result = mTopLevel->getMasterMessageTargets();
         }
         return result;
     }
@@ -104,8 +106,8 @@ namespace Serialize {
     BufferedOutStream *SyncableUnitBase::getSlaveMessageTarget() const
     {
         BufferedOutStream *result = nullptr;
-        if (isSynced()) {
-            result = topLevel()->getSlaveMessageTarget();
+        if (mSynced) {
+            result = mTopLevel->getSlaveMessageTarget();
         }
         return result;
     }
@@ -150,6 +152,11 @@ namespace Serialize {
         SerializeManager::deleteMasterId(mMasterId, this);
         mMasterId = SerializeManager::generateMasterId(newId, this);
         return oldId;
+    }
+        
+    const SerializeTable *SyncableUnitBase::serializeType() const
+    {
+        return mType;
     }
 
 }

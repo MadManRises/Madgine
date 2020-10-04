@@ -17,7 +17,7 @@ namespace Tools {
 
     struct NodeGraphEditor : public Tool<NodeGraphEditor> {
 
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(NodeGraphEditor);
 
         NodeGraphEditor(ImRoot &root);
         NodeGraphEditor(const NodeGraphEditor &) = delete;

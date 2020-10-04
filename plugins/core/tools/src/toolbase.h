@@ -4,15 +4,15 @@
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/virtualserializableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : public VirtualScopeBase<>, Serialize::SerializableUnit<ToolBase>, MadgineObject<ToolBase> {
-        SERIALIZABLEUNIT;
+    struct MADGINE_TOOLS_EXPORT ToolBase : VirtualScopeBase<Serialize::VirtualSerializableUnitBase<>>, MadgineObject<ToolBase> {
+        SERIALIZABLEUNIT(ToolBase);
 
         ToolBase (ImRoot &root);
         virtual ~ToolBase() = default;

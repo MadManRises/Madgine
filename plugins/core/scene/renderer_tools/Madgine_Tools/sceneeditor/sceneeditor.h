@@ -15,7 +15,7 @@ namespace Tools {
 
     struct SceneEditor : Tool<SceneEditor> {
 
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(SceneEditor);
 
         SceneEditor(ImRoot &root);
         SceneEditor(const SceneEditor &) = delete;

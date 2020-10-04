@@ -25,6 +25,8 @@ namespace Serialize {
                 }
             } else if constexpr (has_function_applySerializableMap_v<T>) {
                 item.applySerializableMap(in);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>){
+                SerializableUnitPtr { &item }.applySerializableMap(in);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::applyMap(in, *item);
             } else if constexpr (is_iterable_v<T>) {
@@ -44,6 +46,8 @@ namespace Serialize {
         {
             if constexpr (has_function_setDataSynced_v<T>) {
                 item.setDataSynced(b);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+                SerializableUnitPtr { &item }.setDataSynced(b);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemDataSynced(*item, b);
             } else if constexpr (is_iterable_v<T>) {
@@ -63,6 +67,8 @@ namespace Serialize {
         {
             if constexpr (has_function_setActive_v<T>) {
                 item.setActive(active, existenceChanged);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+                SerializableUnitPtr { &item }.setActive(active, existenceChanged);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {                
                 UnitHelper<typename T::element_type>::setItemActive(*item, active, existenceChanged);
             } else if constexpr (is_iterable_v<T>) {
@@ -82,6 +88,8 @@ namespace Serialize {
         {
             if constexpr (has_function_setParent_v<T>) {
                 item.setParent(parent);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+                SerializableUnitPtr { &item }.setParent(parent);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemParent(*item, parent);
             } else if constexpr (is_iterable_v<T>) {

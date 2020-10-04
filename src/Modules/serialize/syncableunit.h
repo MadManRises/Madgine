@@ -37,6 +37,8 @@ namespace Serialize {
     protected:
         void setSlaveId(UnitId id, SerializeManager *mgr);
 
+        const SerializeTable *serializeType() const;
+
         UnitId moveMasterId(UnitId newId = 0);
 
     private:
@@ -65,8 +67,45 @@ namespace Serialize {
     private:
         UnitId mSlaveId = 0;
         UnitId mMasterId;
+                
+        const SerializeTable *mType = nullptr;
     };
 
+    
+    template <typename T, typename Base>
+    struct SyncableUnit;
+
+    template <typename T, typename Base>
+    struct TableInitializer {
+        TableInitializer()
+        {
+            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+        TableInitializer(const TableInitializer &)
+        {
+            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+        TableInitializer(TableInitializer &&)
+        {
+            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+        }
+        TableInitializer &operator=(const TableInitializer &)
+        {
+            return *this;
+        }
+        TableInitializer &operator=(TableInitializer &&)
+        {
+            return *this;
+        }
+    };
+
+    template <typename T, typename _Base = SyncableUnitBase>
+    struct SyncableUnit : _Base, private TableInitializer<T, _Base> {
+    protected:
+        friend TableInitializer<T, _Base>;
+
+        using _Base::_Base;
+    };
    
 } // namespace Serialize
 } // namespace Core

@@ -5,12 +5,12 @@
 namespace Engine {
 namespace Tools {
 
-    struct OpenGLImRoot : VirtualScope<OpenGLImRoot, VirtualUniqueComponentImpl<OpenGLImRoot, ClientImRoot>> {
+    struct OpenGLImRoot : VirtualScope<OpenGLImRoot, Window::MainWindowVirtualImpl<OpenGLImRoot, ClientImRoot>> {
 
         OpenGLImRoot(Window::MainWindow &window);
         ~OpenGLImRoot();
 
-		virtual bool init() override;
+        virtual bool init() override;
         virtual void finalize() override;
 
         virtual void newFrame(float timeSinceLastFrame) override;

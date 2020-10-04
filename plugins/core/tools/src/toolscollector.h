@@ -2,7 +2,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/virtualserializableunit.h"
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 
@@ -12,7 +12,7 @@ namespace Engine {
 namespace Tools {
 
 	template <typename T>
-	using Tool = Serialize::SerializableUnit<T, VirtualScope<T, ToolsComponent<T>>>;
+	using Tool = Serialize::VirtualUnit<T, VirtualScope<T, ToolsComponent<T>>>;
 
 }
 }

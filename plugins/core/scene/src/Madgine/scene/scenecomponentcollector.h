@@ -3,7 +3,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/syncableunit.h"
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 
@@ -15,13 +15,13 @@ namespace Engine
 	{
 
 		template <typename T>
-		using SceneComponent = VirtualScope<T, Serialize::SerializableUnit<T, SceneComponentComponent<T>>>;
+		using SceneComponent = VirtualScope<T, Serialize::SyncableUnit<T, SceneComponentComponent<T>>>;
 
 		template <typename T>
-		using VirtualSceneComponentBase = Serialize::SerializableUnit<T, SceneComponentVirtualBase<T>>;
+		using VirtualSceneComponentBase = Serialize::SyncableUnit<T, SceneComponentVirtualBase<T>>;
 
 		template <typename T, typename Base>
-		using VirtualSceneComponentImpl = VirtualScope<T, Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>>;
+		using VirtualSceneComponentImpl = VirtualScope<T, Serialize::SyncableUnit<T, VirtualUniqueComponentImpl<T, Base>>>;
 
 #define VIRTUALSCENECOMPONENTBASE(T) template <> TEMPLATE_INSTANCE constexpr size_t &Engine::Scene::VirtualSceneComponentBase<T>::sIndex(){static size_t index = -1; return index;};
 

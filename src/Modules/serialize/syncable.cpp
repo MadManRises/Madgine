@@ -44,7 +44,7 @@ namespace Serialize {
 
     ParticipantId SyncableBase::participantId(const SerializableUnitBase *parent)
     {
-        return parent->topLevel()->participantId();
+        return parent->mTopLevel->participantId();
     }
 
     void SyncableBase::writeAction(const SyncableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
@@ -85,7 +85,7 @@ namespace Serialize {
 
     bool SyncableBase::isMaster(const SyncableUnitBase *parent) const
     {
-        return !parent->isSynced() || !parent->topLevel() || parent->topLevel()->isMaster();
+        return !parent->mSynced || !parent->mTopLevel || parent->mTopLevel->isMaster();
     }
 
 }

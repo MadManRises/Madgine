@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct DirectX11ImRoot : VirtualScope<DirectX11ImRoot, VirtualUniqueComponentImpl<DirectX11ImRoot, ClientImRoot>> {
+    struct DirectX11ImRoot : VirtualScope<DirectX11ImRoot, Window::MainWindowVirtualImpl<DirectX11ImRoot, ClientImRoot>> {
 
         DirectX11ImRoot(Window::MainWindow &window);
         ~DirectX11ImRoot();

@@ -4,6 +4,7 @@
 #include "uimanager.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
 
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
@@ -11,6 +12,8 @@ DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
 METATABLE_BEGIN_BASE(Engine::UI::GameHandlerBase, Engine::UI::Handler)
 METATABLE_END(Engine::UI::GameHandlerBase)
 
+SERIALIZETABLE_INHERIT_BEGIN(Engine::UI::GameHandlerBase, Engine::UI::Handler)
+SERIALIZETABLE_END(Engine::UI::GameHandlerBase)
 
 
 namespace Engine {

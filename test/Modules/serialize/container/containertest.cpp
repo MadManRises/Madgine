@@ -19,6 +19,8 @@ using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
 struct TestUnit : TopLevelUnit<TestUnit> {
+    SERIALIZABLEUNIT(TestUnit);
+
     TestUnit()
         : TopLevelUnit<TestUnit>(10)
     {

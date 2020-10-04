@@ -8,9 +8,9 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodePrototypeBase : Serialize::SerializableUnit<NodePrototypeBase, GraphExecutable> {
+    struct MADGINE_NODEGRAPH_EXPORT NodePrototypeBase : GraphExecutable {
 
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(NodePrototypeBase);
 
         virtual ~NodePrototypeBase() = default;
 

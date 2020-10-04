@@ -122,7 +122,7 @@ namespace Serialize {
             unit->initSlaveId(this);
         }
 
-        if (sendStateFlag && unit->isSynced()) {
+        if (sendStateFlag && unit->mSynced) {
             for (const BufferedInOutStream &stream : mMasterStreams) {
                 this->sendState(const_cast<BufferedInOutStream &>(stream), unit);
             }
@@ -134,7 +134,7 @@ namespace Serialize {
     {
         auto it2 = slavesMap().begin();
         while (it2 != slavesMap().end()) {
-            if (it2->second->topLevel() == unit) {
+            if (it2->second->mTopLevel == unit) {
                 it2++->second->clearSlaveId(this);
             } else {
                 ++it2;
@@ -365,7 +365,7 @@ namespace Serialize {
                     return *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
-                    if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->topLevel()) == mTopLevelUnits.end()) {
+                    if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->mTopLevel) == mTopLevelUnits.end()) {
                         throw SerializeException(
                             "Illegal Toplevel-Id used! Possible configuration "
                             "mismatch!");

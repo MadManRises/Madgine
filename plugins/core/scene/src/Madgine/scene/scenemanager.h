@@ -33,7 +33,7 @@ namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
                                                App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(SceneManager);
 
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;

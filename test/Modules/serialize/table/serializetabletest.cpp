@@ -10,7 +10,7 @@
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-struct S : SerializableUnit<S> {
+struct S : SerializableUnitBase {
     int j;
 };
 
@@ -18,7 +18,7 @@ SERIALIZETABLE_BEGIN(S)
 FIELD(j)
 SERIALIZETABLE_END(S)
 
-struct TestStruct : SerializableUnit<TestStruct> {
+struct TestStruct : SerializableUnitBase {
 
 	int i;
     S s;

@@ -37,7 +37,7 @@ namespace Scene {
         }*/
 
         Entity::Entity(Entity &&other, bool local)
-            : SerializableUnit(std::move(other))
+            : SyncableUnit(std::move(other))
             , mName(std::move(other.mName))
             , mLocal(local)
             , mComponents(std::move(other.mComponents))
@@ -76,7 +76,7 @@ namespace Scene {
         Entity &Entity::operator=(Entity &&other)
         {
             assert(&mSceneManager == &other.mSceneManager);
-            SerializableUnit::operator=(std::move(other));
+            SerializableUnitBase::operator=(std::move(other));
             mName = std::move(other.mName);
             mComponents = std::move(other.mComponents);            
             return *this;

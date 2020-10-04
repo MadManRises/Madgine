@@ -11,7 +11,7 @@ namespace Tools {
 
     struct GuiEditor : public Tool<GuiEditor> {    
 
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(GuiEditor);
 
         GuiEditor(ImRoot &root);
 

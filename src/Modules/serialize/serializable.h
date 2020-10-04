@@ -1,5 +1,7 @@
 #pragma once
 
+#include "serializableunitptr.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -11,12 +13,12 @@ namespace Serialize {
     struct Serializable : SerializableBase {
         bool isSynced() const
         {
-            return OffsetPtr::parent(this) && OffsetPtr::parent(this)->isSynced();
+            return OffsetPtr::parent(this) && OffsetPtr::parent(this)->mSynced;
         }
 
         bool isActive() const
         {
-            return !OffsetPtr::parent(this) || OffsetPtr::parent(this)->isActive(OffsetPtr::parent(this)->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
+            return !OffsetPtr::parent(this) || SerializableUnitConstPtr { OffsetPtr::parent(this) }.isActive(OffsetPtr::template offset<SerializableUnitBase>());            
         }
     };
 }

@@ -11,9 +11,9 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeGraphPrototype : ScopeBase, Serialize::SerializableUnit<NodeGraphPrototype, GraphExecutable> {
+    struct MADGINE_NODEGRAPH_EXPORT NodeGraphPrototype : ScopeBase, GraphExecutable {
 
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(NodeGraphPrototype);
 
         NodeGraphPrototype();
         NodeGraphPrototype(const NodeGraphPrototype &) = delete;

@@ -22,7 +22,7 @@ namespace Engine {
 namespace UI {
     struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager>,
                                          Threading::FrameListener {
-        SERIALIZABLEUNIT;
+        SERIALIZABLEUNIT(UIManager);
 
         UIManager(Window::MainWindow &window);
         UIManager(const UIManager &) = delete;

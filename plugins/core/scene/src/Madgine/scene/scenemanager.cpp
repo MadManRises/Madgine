@@ -37,7 +37,7 @@ namespace Engine {
 namespace Scene {
 
     SceneManager::SceneManager(App::Application &app)
-        : SerializableUnit(Serialize::SCENE_MANAGER)
+        : SyncableUnit(Serialize::SCENE_MANAGER)
         , VirtualScope(app)
         , mSceneComponents(*this)
     {

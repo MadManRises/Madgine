@@ -11,14 +11,14 @@ namespace Scene {
     namespace Entity {
 
         template <typename T, typename Base>
-        using VirtualEntityComponentImpl = VirtualScope<T, Serialize::SerializableUnit<T, VirtualUniqueComponentImpl<T, Base>>>;
+        using VirtualEntityComponentImpl = VirtualScope<T, VirtualUniqueComponentImpl<T, Base>>;
 
         template <typename T>
         using VirtualEntityComponentBase = NamedComponent<T, EntityComponentVirtualBase<T>>;
 
         template <typename T, typename Base = EntityComponentBase>
-        struct EntityComponent : VirtualScope<T, Serialize::SerializableUnit<T, NamedComponent<T, EntityComponentComponent<T, Base>>>> {
-            using VirtualScope<T, Serialize::SerializableUnit<T, NamedComponent<T, EntityComponentComponent<T, Base>>>>::VirtualScope;
+        struct EntityComponent : VirtualScope<T, NamedComponent<T, EntityComponentComponent<T, Base>>> {
+            using VirtualScope<T, NamedComponent<T, EntityComponentComponent<T, Base>>>::VirtualScope;
 
             const std::string_view &key() const override
             {

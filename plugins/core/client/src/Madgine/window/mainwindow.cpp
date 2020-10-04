@@ -31,6 +31,8 @@
 #include "ini/inilib.h"
 #include "ini/iniformatter.h"
 
+#include "Modules/serialize/serializableunitptr.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
@@ -63,11 +65,11 @@ namespace Window {
             [this]() {
                 if (!callInit())
                     return false;
-                sync();
+                Serialize::SerializableUnitPtr { this }.sync();
                 return true;
             },
             [this]() {
-                unsync();
+                Serialize::SerializableUnitPtr { this }.unsync();
                 callFinalize();
             });
     }

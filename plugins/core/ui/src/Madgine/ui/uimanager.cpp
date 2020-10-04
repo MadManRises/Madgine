@@ -35,7 +35,7 @@ namespace Engine {
 namespace UI {
 
     UIManager::UIManager(Window::MainWindow &window)
-        : VirtualScope(window, 50)
+        : VirtualUnit(window, 50)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {

@@ -10,12 +10,17 @@
 
 #include "gamemanager.h"
 
+#include "Modules/serialize/serializetable_impl.h"
+
 UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
 
 
 
     METATABLE_BEGIN_BASE(ClickBrick::UI::MainMenuHandler, Engine::UI::GuiHandlerBase)
         METATABLE_END(ClickBrick::UI::MainMenuHandler)
+
+    SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::UI::MainMenuHandler, Engine::UI::GuiHandlerBase)
+        SERIALIZETABLE_END(ClickBrick::UI::MainMenuHandler)
 
             namespace ClickBrick
 {

@@ -8,6 +8,7 @@
 #include "../primitivetypes.h"
 #include "bufferedstream.h"
 #include "pendingrequest.h"
+#include "../serializableunitptr.h"
 
 namespace Engine {
 namespace Serialize {
@@ -245,6 +246,8 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (has_function_readState_v<T>) {
                 t.readState(in, name);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+                SerializableUnitPtr { &t }.readState(in, name);
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
@@ -266,6 +269,8 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (has_function_writeState_v<T>) {
                 t.writeState(out, name);
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>){
+                SerializableUnitConstPtr { &t }.writeState(out, name);
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {

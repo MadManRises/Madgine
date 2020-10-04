@@ -2,14 +2,14 @@
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/syncableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SerializableUnitBase, MadgineObject<SceneComponentBase> {    
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SyncableUnitBase, MadgineObject<SceneComponentBase> {    
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);

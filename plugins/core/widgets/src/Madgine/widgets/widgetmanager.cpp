@@ -94,7 +94,7 @@ namespace Widgets {
     };
 
     WidgetManager::WidgetManager(Window::MainWindow &window)
-        : VirtualScope(window, 20)
+        : VirtualUnit(window, 20)
         , mData(std::make_unique<WidgetManagerData>())
     {
     }

@@ -9,7 +9,7 @@
 namespace Engine {
 
 template <typename _Base = std::monostate>
-struct VirtualScopeBase : _Base, ScopeBase {
+struct DLL_EXPORT VirtualScopeBase : _Base, ScopeBase {
     using _Base::_Base;
     inline virtual ~VirtualScopeBase() = default;
     virtual TypedScopePtr customScopePtr() = 0;
@@ -24,7 +24,5 @@ struct VirtualScope : _Base {
         return { this, table<decayed_t<T>> };
     }
 };
-
-template struct MODULES_EXPORT VirtualScopeBase<>;
 
 }

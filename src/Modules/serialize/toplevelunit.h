@@ -34,6 +34,6 @@ namespace Serialize {
     };
 
     template <typename T>
-    using TopLevelUnit = SerializableUnit<T, TopLevelUnitBase>;
+    using TopLevelUnit = SyncableUnit<T, TopLevelUnitBase>;
 } // namespace Serialize
 } // namespace Core
