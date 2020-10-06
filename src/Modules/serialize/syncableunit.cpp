@@ -31,7 +31,7 @@ namespace Serialize {
     SyncableUnitBase::SyncableUnitBase(SyncableUnitBase &&other) noexcept
         : SerializableUnitBase(std::move(other))
         , mSlaveId(std::exchange(other.mSlaveId, 0))
-        , mMasterId(SerializeManager::updateMasterId(std::exchange(other.mMasterId, SerializeManager::generateMasterId(0, &other)), this))        
+        , mMasterId(SerializeManager::updateMasterId(std::exchange(other.mMasterId, SerializeManager::generateMasterId(0, &other)), this))
     {
     }
 
@@ -64,7 +64,7 @@ namespace Serialize {
             out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "id");
         }
-        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags);
+        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags | StateTransmissionFlags_SkipId);
     }
 
     void SyncableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
@@ -81,7 +81,7 @@ namespace Serialize {
                 }
             }
         }
-        SerializableUnitPtr { this, mType }.readState(in, name, flags);
+        SerializableUnitPtr { this, mType }.readState(in, name, flags | StateTransmissionFlags_SkipId);
     }
 
     void SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
@@ -153,7 +153,7 @@ namespace Serialize {
         mMasterId = SerializeManager::generateMasterId(newId, this);
         return oldId;
     }
-        
+
     const SerializeTable *SyncableUnitBase::serializeType() const
     {
         return mType;

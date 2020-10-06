@@ -31,7 +31,7 @@ if (BUILD_TESTING)
 		if (NOT ANDROID)
 			add_test(
 				NAME ${name}
-				COMMAND ${framework} $<TARGET_FILE:${name}> --gtest_output=xml:${name}.xml
+				COMMAND ${framework} $<TARGET_FILE:${name}> --gtest_output=xml:${name}.xml -npc
 				WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			)
 		endif()

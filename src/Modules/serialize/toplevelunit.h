@@ -4,11 +4,14 @@
 
 namespace Engine {
 namespace Serialize {
-    struct MODULES_EXPORT TopLevelUnitBase : SyncableUnitBase {    
+    struct MODULES_EXPORT TopLevelUnitBase : SyncableUnitBase {
         TopLevelUnitBase(UnitId staticId = 0);
         TopLevelUnitBase(const TopLevelUnitBase &other);
         TopLevelUnitBase(TopLevelUnitBase &&other) noexcept;
         ~TopLevelUnitBase();
+
+        void sync();
+        void unsync();
 
         BufferedOutStream *getSlaveMessageTarget() const;
 

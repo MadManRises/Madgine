@@ -64,14 +64,14 @@ namespace Serialize {
             }
         }
 
-		if (flags & StateTransmissionFlags_ApplyMap) {
+        if (flags & StateTransmissionFlags_ApplyMap) {
             assert(in.manager());
             applySerializableMap(unit, in);
         }
 
-		if (wasActive) {
+        if (wasActive) {
             setActive(unit, true, false);
-		}
+        }
     }
 
     void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const

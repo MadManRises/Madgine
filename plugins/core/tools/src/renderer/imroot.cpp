@@ -19,6 +19,8 @@
 
 #include "Modules/generic/container/safeiterator.h"
 
+#include "Modules/serialize/streams/operations.h"
+
 /*
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
@@ -47,7 +49,7 @@ namespace Tools {
             Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            Serialize::SerializableUnitPtr { tool }.readState(in, nullptr, Serialize::StateTransmissionFlags_SkipId);
+            Serialize::read(in, *tool, nullptr, Serialize::StateTransmissionFlags_SkipId);
         }
     }
 
@@ -62,7 +64,7 @@ namespace Tools {
             std::string name = std::string { tool->key() };
             out_buf->appendf("[Tool][%s]\n", name.c_str());
 
-            Serialize::SerializableUnitPtr { tool }.writeState(out, nullptr, Serialize::StateTransmissionFlags_SkipId);
+            Serialize::write(out, *tool, nullptr, Serialize::StateTransmissionFlags_SkipId);
             out_buf->append(outBuffer->str().c_str());
             outBuffer->str("");
 

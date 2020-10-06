@@ -7,8 +7,8 @@
 namespace Engine {
 namespace Serialize {
 
-#define SYNCABLEUNIT_MEMBERS()        \
-    SERIALIZABLEUNIT_MEMBERS()   \
+#define SYNCABLEUNIT_MEMBERS()            \
+    SERIALIZABLEUNIT_MEMBERS()            \
     READONLY_PROPERTY(MasterId, masterId) \
     READONLY_PROPERTY(SlaveId, slaveId)
 
@@ -67,11 +67,10 @@ namespace Serialize {
     private:
         UnitId mSlaveId = 0;
         UnitId mMasterId;
-                
+
         const SerializeTable *mType = nullptr;
     };
 
-    
     template <typename T, typename Base>
     struct SyncableUnit;
 
@@ -106,6 +105,6 @@ namespace Serialize {
 
         using _Base::_Base;
     };
-   
+
 } // namespace Serialize
 } // namespace Core

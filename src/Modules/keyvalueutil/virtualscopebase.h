@@ -8,9 +8,15 @@
 
 namespace Engine {
 
-template <typename _Base = std::monostate>
+template <typename _Base = void>
 struct DLL_EXPORT VirtualScopeBase : _Base, ScopeBase {
     using _Base::_Base;
+    inline virtual ~VirtualScopeBase() = default;
+    virtual TypedScopePtr customScopePtr() = 0;
+};
+
+template <>
+struct DLL_EXPORT VirtualScopeBase<void> : ScopeBase {    
     inline virtual ~VirtualScopeBase() = default;
     virtual TypedScopePtr customScopePtr() = 0;
 };

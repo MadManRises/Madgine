@@ -12,7 +12,8 @@ namespace Serialize {
     DERIVE_FUNCTION(setActive, bool, bool);
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
-    MODULES_EXPORT SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId id);
+    MODULES_EXPORT SyncableUnitBase *convertSyncablePtr(SerializeInStream &in, UnitId id);
+    MODULES_EXPORT SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint64_t id);
 
     template <typename T>
     struct UnitHelper {
@@ -20,10 +21,29 @@ namespace Serialize {
         static void applyMap(SerializeInStream &in, T &item)
         {
             if constexpr (std::is_pointer_v<T>) {
+                static_assert(std::is_base_of_v<SerializableUnitBase, std::remove_pointer_t<T>>);
                 uintptr_t ptr = reinterpret_cast<uintptr_t>(item);
-                if (ptr & 0x1) {
-                    UnitId id = (ptr >> 1);
-                    item = static_cast<T>(convertPtr(in, id));
+                if (ptr & 0x3) {
+                    switch (static_cast<UnitIdTag>(ptr & 0x3)) {
+                    case UnitIdTag::SYNCABLE:
+                        if constexpr (std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                            UnitId id = (ptr >> 2);
+                            item = static_cast<T>(convertSyncablePtr(in, id));
+                        } else {
+                            throw 0;
+                        }
+                        break;
+                    case UnitIdTag::SERIALIZABLE:
+                        if constexpr (!std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                            uintptr_t id = (ptr >> 2);
+                            item = static_cast<T>(convertSerializablePtr(in, id));
+                        } else {
+                            throw 0;
+                        }
+                        break;
+                    default:
+                        throw 0;
+                    }                    
                 }
             } else if constexpr (has_function_applySerializableMap_v<T>) {
                 item.applySerializableMap(in);
@@ -44,7 +64,7 @@ namespace Serialize {
             }
         }
 
-        static void setItemDataSynced(T &item, bool b)
+                static void setItemDataSynced(T &item, bool b)
         {
             if constexpr (has_function_setDataSynced_v<T>) {
                 item.setDataSynced(b);

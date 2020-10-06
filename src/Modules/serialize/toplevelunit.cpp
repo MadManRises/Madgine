@@ -3,6 +3,8 @@
 
 #include "syncmanager.h"
 
+#include "serializableunitptr.h"
+
 namespace Engine {
 namespace Serialize {
     TopLevelUnitBase::TopLevelUnitBase(UnitId staticId)
@@ -40,6 +42,20 @@ namespace Serialize {
         while (!mMasterManagers.empty()) {
             mMasterManagers.front()->removeTopLevelItem(this);
         }
+    }
+
+    void TopLevelUnitBase::sync()
+    {
+        SerializableUnitPtr self { this, serializeType() };
+        self.setDataSynced(true);
+        self.setActive(true, true);
+    }
+
+    void TopLevelUnitBase::unsync()
+    {
+        SerializableUnitPtr self{ this, serializeType() };
+        self.setDataSynced(false);
+        self.setActive(false, true);
     }
 
     ParticipantId TopLevelUnitBase::participantId() const

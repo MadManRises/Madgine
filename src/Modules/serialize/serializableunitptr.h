@@ -131,11 +131,6 @@ namespace Serialize {
 
         void applySerializableMap(SerializeInStream &in) const;
 
-        void sync() const;
-        void unsync() const;
-
-        void setSynced(bool b) const;
-
         void setDataSynced(bool b) const;
         void setActive(bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *parent) const;

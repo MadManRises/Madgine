@@ -133,6 +133,11 @@ namespace Serialize {
     typedef uint32_t ParticipantId;
     typedef uint32_t TransactionId;
     typedef uint32_t UnitId;
+    enum class UnitIdTag {
+        NONE = 0,
+        SYNCABLE = 1,
+        SERIALIZABLE = 2
+    };
 
     struct buffered_streambuf;
 
@@ -142,6 +147,9 @@ namespace Serialize {
 
     
     using SyncableUnitMap = std::map<UnitId, SyncableUnitBase *>;
+    using SerializableUnitMap = std::map<uint64_t, SerializableUnitBase *>;
+
+    struct SerializableMapHolder;
 
     enum MessageType {
         STATE,

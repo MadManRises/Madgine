@@ -6,6 +6,8 @@
 
 #include "../formatter.h"
 
+#include "serializablemapholder.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -42,6 +44,21 @@ namespace Serialize {
     Formatter &SerializeStreambuf::format() const
     {
         return *mFormatter;
+    }
+
+    SerializableUnitMap &SerializeStreambuf::serializableMap()
+    {
+        assert(mSerializableMap);
+        return *mSerializableMap;
+    }
+
+    void SerializeStreambuf::startSerializableRead(SerializableMapHolder *map)
+    {
+        assert(!map->mBuffer);
+        if (!mSerializableMap) {
+            map->mBuffer = this;
+            mSerializableMap = &map->mMap;
+        }
     }
 
     bool SerializeStreambuf::isMaster(StreamMode mode)

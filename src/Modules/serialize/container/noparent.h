@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../serializableunitptr.h"
+#include "../unithelper.h"
 
 namespace Engine {
 
@@ -13,12 +13,18 @@ namespace Serialize {
         NoParentUnit(Args &&... args)
             :  T(std::forward<Args>(args)...)
         {
-            SerializableUnitPtr { this, &serializeTable<T>() }.sync();
+            if constexpr (std::is_base_of_v<TopLevelUnitBase, T>)
+                this->sync();
+            else
+                UnitHelper<T>::setItemActive(*this, true, true);
         }
 
         ~NoParentUnit()
         {
-            SerializableUnitPtr { this, &serializeTable<T>() }.unsync();
+            if constexpr (std::is_base_of_v<TopLevelUnitBase, T>)
+                this->unsync();
+            else
+                UnitHelper<T>::setItemActive(*this, false, true);
         }
     };
 }

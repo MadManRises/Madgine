@@ -38,7 +38,7 @@ namespace Serialize {
 
         uint8_t mActiveIndex = 0;
 
-        bool mSynced = false; // Maybe move only into TopLevelUnit?
+        bool mSynced = false;
     };
 
     template <typename>

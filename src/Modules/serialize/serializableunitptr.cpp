@@ -14,6 +14,8 @@
 
 #include "toplevelunit.h"
 
+#include "streams/serializablemapholder.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -25,6 +27,10 @@ namespace Serialize {
 
     void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
     {
+        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+            out.format().beginExtended(out, name, 1);
+            write(out, static_cast<uint64_t>(reinterpret_cast<uintptr_t>(mUnit)) >> 2, "id");
+        }
         out.format().beginCompound(out, name);
         mType->writeState(mUnit, out);
         out.format().endCompound(out, name);
@@ -32,6 +38,16 @@ namespace Serialize {
 
     void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags) const
     {
+        SerializableMapHolder holder;
+        in.startSerializableRead(&holder);
+
+        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+            in.format().beginExtended(in, name, 1);
+            uint64_t id;
+            read(in, id, "id");
+            bool result = in.serializableMap().try_emplace(id, unit()).second;
+            assert(result);
+        }
         in.format().beginCompound(in, name);
         mType->readState(unit(), in, flags);
         in.format().endCompound(in, name);
@@ -69,12 +85,6 @@ namespace Serialize {
         mType->applySerializableMap(unit(), in);
     }
 
-    void SerializableUnitPtr::setSynced(bool b) const
-    {
-        setDataSynced(b);
-        setActive(b, true);
-    }
-
     void SerializableUnitPtr::setDataSynced(bool b) const
     {
         assert(mUnit->mSynced != b);
@@ -88,17 +98,8 @@ namespace Serialize {
         mType->setActive(unit(), active, existenceChanged);
     }
 
-    void SerializableUnitPtr::sync() const
+    SerializableUnitBase *SerializableUnitPtr::unit() const
     {
-        setSynced(true);
-    }
-
-    void SerializableUnitPtr::unsync() const
-    {
-        setSynced(false);
-    }
-
-    SerializableUnitBase* SerializableUnitPtr::unit() const {
         return const_cast<SerializableUnitBase *>(mUnit);
     }
 

@@ -9,17 +9,16 @@
 
 #include "Modules/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/syncableunit.h"
+#include "Modules/serialize/virtualserializableunit.h"
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
 
-#include "vertex.h"
 #include "render/texturedescriptor.h"
+#include "vertex.h"
 
 namespace Engine {
 namespace Widgets {
-    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase>,
-                                               Serialize::SyncableUnit<WidgetBase> {
+    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, VirtualScopeBase<Serialize::VirtualUnit<WidgetBase>>> {
         SERIALIZABLEUNIT(WidgetBase);
 
         WidgetBase(const std::string &name, WidgetBase *parent);
@@ -147,9 +146,9 @@ namespace Widgets {
     };
 
     template <typename T>
-    struct Widget : VirtualScope<T, Serialize::SyncableUnit<T, WidgetBase>> {
+    struct Widget : VirtualScope<T, Serialize::VirtualUnit<T, WidgetBase>> {
 
-        using VirtualScope<T, Serialize::SyncableUnit<T, WidgetBase>>::VirtualScope;
+        using VirtualScope<T, Serialize::VirtualUnit<T, WidgetBase>>::VirtualScope;
     };
 }
 }

@@ -16,6 +16,8 @@
 
 #include "../formatter.h"
 
+#include "../serializableunit.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -42,12 +44,22 @@ namespace Serialize {
         format().setupStream(mStream);
     }
 
-    void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
+    void SerializeInStream::readUnformatted(SyncableUnitBase *&p)
     {
         UnitId ptr;
         readUnformatted(ptr);
         if (ptr)
-            ptr = (ptr << 1) | 0x1;
+            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
+        p = reinterpret_cast<SyncableUnitBase *>(ptr);
+    }
+
+    void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
+    {
+        uint64_t ptr;
+        readUnformatted(ptr);
+        assert(ptr <= (std::numeric_limits<uint64_t>::max() >> 2));
+        if (ptr)
+            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SERIALIZABLE);
         p = reinterpret_cast<SerializableUnitBase *>(ptr);
     }
 
@@ -196,14 +208,19 @@ namespace Serialize {
         return format().mBinary;
     }
 
-    SyncableUnitBase *SerializeInStream::convertPtr(UnitId ptr)
-    {
-        return manager()->convertPtr(*this, ptr);
-    }
-
     SerializeStreambuf &SerializeInStream::buffer() const
     {
         return static_cast<SerializeStreambuf &>(InStream::buffer());
+    }
+
+    SerializableUnitMap &SerializeInStream::serializableMap()
+    {
+        return buffer().serializableMap();
+    }
+
+    void SerializeInStream::startSerializableRead(SerializableMapHolder *map)
+    {
+        buffer().startSerializableRead(map);
     }
 
     SerializeOutStream::SerializeOutStream()        
@@ -234,9 +251,17 @@ namespace Serialize {
         return buffer().id();
     }
 
-    void SerializeOutStream::writeUnformatted(SyncableUnitBase *p)
+    void SerializeOutStream::writeUnformatted(const SyncableUnitBase *p)
     {
         writeUnformatted(SerializeManager::convertPtr(manager(), *this, p));
+    }
+
+    void SerializeOutStream::writeUnformatted(const SerializableUnitBase *p)
+    {
+        static_assert(std::alignment_of_v<SerializableUnitBase> >= 4);
+        uintptr_t ptr = reinterpret_cast<uintptr_t>(p);
+        assert((ptr & 0x3) == 0);
+        writeUnformatted(ptr >> 2);
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)

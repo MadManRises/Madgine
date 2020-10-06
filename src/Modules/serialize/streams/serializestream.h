@@ -33,13 +33,20 @@ namespace Serialize {
         template <typename T>
         void readUnformatted(T *&p)
         {
-            static_assert(std::is_base_of<SerializableUnitBase, T>::value);
+            static_assert(std::is_base_of_v<SerializableUnitBase, T>);
 
-            SerializableUnitBase *unit;
-            readUnformatted(unit);
-            p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
+            if constexpr (std::is_base_of_v<SyncableUnitBase, T>) {
+                SyncableUnitBase *unit;
+                readUnformatted(unit);
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
+            } else {
+                SerializableUnitBase *unit;
+                readUnformatted(unit);
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
+            }
         }
 
+        void readUnformatted(SyncableUnitBase *&p);
         void readUnformatted(SerializableUnitBase *&p);
 
         void readUnformatted(std::string &s);
@@ -77,7 +84,8 @@ namespace Serialize {
 
         void setNextFormattedStringDelimiter(char c);
 
-        SyncableUnitBase *convertPtr(UnitId ptr);
+        SerializableUnitMap &serializableMap();
+        void startSerializableRead(SerializableMapHolder *map);
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
@@ -113,7 +121,8 @@ namespace Serialize {
             }
         }
 
-        void writeUnformatted(SyncableUnitBase *p);
+        void writeUnformatted(const SyncableUnitBase *p);
+        void writeUnformatted(const SerializableUnitBase *p);
 
         void writeUnformatted(const std::string &s);
         // void writeUnformatted(const std::string_view &s);

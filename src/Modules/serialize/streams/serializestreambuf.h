@@ -24,10 +24,16 @@ namespace Serialize {
 
         Formatter &format() const;
 
+        SerializableUnitMap &serializableMap();
+        friend struct SerializableMapHolder;
+        void startSerializableRead(SerializableMapHolder *map);
+
     private:
         SerializeManager *mManager = nullptr;
         ParticipantId mId = 0;
         std::unique_ptr<Formatter> mFormatter;
+
+        SerializableUnitMap *mSerializableMap = nullptr;
     };
 
 }

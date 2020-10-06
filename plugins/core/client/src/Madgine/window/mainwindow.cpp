@@ -65,11 +65,11 @@ namespace Window {
             [this]() {
                 if (!callInit())
                     return false;
-                Serialize::SerializableUnitPtr { this }.sync();
+                sync();
                 return true;
             },
             [this]() {
-                Serialize::SerializableUnitPtr { this }.unsync();
+                unsync();
                 callFinalize();
             });
     }

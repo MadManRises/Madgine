@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Modules/keyvalueutil/virtualscopebase.h"
-#include "Modules/serialize/serializableunit.h"
+#include "Modules/serialize/virtualserializableunit.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -10,7 +10,7 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        struct MADGINE_SCENE_EXPORT EntityComponentBase : VirtualScopeBase<>, Serialize::SerializableUnitBase {        
+        struct MADGINE_SCENE_EXPORT EntityComponentBase : VirtualScopeBase<Serialize::VirtualSerializableUnitBase<>>{        
             EntityComponentBase(const ObjectPtr &initTable = {});
             virtual ~EntityComponentBase() = 0;
 

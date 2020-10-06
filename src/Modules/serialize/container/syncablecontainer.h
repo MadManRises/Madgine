@@ -224,13 +224,6 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    /*for (BufferedOutStream *out : container().getMasterActionMessageTargets(answerTarget, answerId)) {
-                        *out << REMOVE_RANGE;
-                        container().write_iterator(*out, from);
-                        container().write_iterator(*out, to);                        
-                        out->endMessage();
-                        
-                    }*/
                     std::pair<const_iterator, const_iterator> data { from, to };
                     this->writeAction(ERASE_RANGE, &data, answerTarget, answerId);
                 }

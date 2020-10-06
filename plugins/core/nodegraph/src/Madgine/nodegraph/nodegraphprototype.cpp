@@ -50,7 +50,7 @@ namespace NodeGraph {
         if (Filesystem::exists(mPath)) {
             Filesystem::FileManager mgr("Graph-Serializer");
             Serialize::SerializeInStream in = mgr.openRead(mPath, std::make_unique<XML::XMLFormatter>());
-            readState(in, "Graph", Serialize::StateTransmissionFlags_ApplyMap);
+            Serialize::read(in, *this, "Graph", Serialize::StateTransmissionFlags_ApplyMap);
             std::vector<bool> outFlows;
             std::vector<std::optional<DataOutPinPrototype>> inPins;
             for (NodePrototypeBase *node : uniquePtrToPtr(mNodes)) {
@@ -91,7 +91,7 @@ namespace NodeGraph {
     {
         Filesystem::FileManager mgr("Graph-Serializer");
         Serialize::SerializeOutStream out = mgr.openWrite(mPath, std::make_unique<XML::XMLFormatter>());
-        writeState(out, "Graph");
+        Serialize::write(out, *this, "Graph");
     }
 
     NodePrototypeBase *NodeGraphPrototype::addNode(std::unique_ptr<NodePrototypeBase> node)
