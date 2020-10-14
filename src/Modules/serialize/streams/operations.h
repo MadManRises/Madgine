@@ -27,13 +27,7 @@ namespace Serialize {
     void read(SerializeInStream &in, T &t, const char *name, Args &&... args);
 
     template <typename T, typename... Configs, typename... Args>
-    void read(SerializeInStream &in, T &t, Args &&... args);
-
-    template <typename T, typename... Configs, typename... Args>
     void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args);
-
-    template <typename T, typename... Configs, typename... Args>
-    void write(SerializeOutStream &out, const T &t, Args &&... args);
 
     template <typename C, typename Config = DefaultCreator<typename C::value_type>>
     struct ContainerOperations {
@@ -86,13 +80,13 @@ namespace Serialize {
         static typename C::iterator readIterator(SerializeInStream &in, C &c)
         {
             int32_t dist;
-            Serialize::read(in, dist);
+            Serialize::read(in, dist, "it");
             return std::next(c.begin(), dist);
         }
 
         static void writeIterator(SerializeOutStream &out, const C &c, const typename C::const_iterator &it)
         {
-            Serialize::write<int32_t>(out, std::distance(c.begin(), it));
+            Serialize::write<int32_t>(out, std::distance(c.begin(), it), "it");
         }
 
         template <typename... Args>
@@ -135,7 +129,7 @@ namespace Serialize {
         {
 
             for (BufferedOutStream *out : c.getMasterActionMessageTargets(answerTarget, answerId)) {
-                Serialize::write(*out, op);
+                Serialize::write(*out, op, "op");
                 switch (op) {
                 case EMPLACE: {
                     const typename C::iterator &it = *static_cast<const typename C::iterator *>(data);
@@ -213,7 +207,7 @@ namespace Serialize {
             if (!accepted) {
                 if (id) {
                     c.beginActionResponseMessage(&inout, id);
-                    Serialize::write(inout, op | ABORTED);
+                    Serialize::write(inout, op | ABORTED, "op");
                     inout.endMessage();
                 }
             } else {
@@ -221,7 +215,7 @@ namespace Serialize {
                     performOperation(c, op, inout, inout.id(), id, std::forward<Args>(args)...);
                 } else {
                     BufferedOutStream *out = c.getSlaveActionMessageTarget(inout.id(), id);
-                    Serialize::write(*out, op);
+                    Serialize::write(*out, op, "op");
                     out->pipe(inout);
                     out->endMessage();
                 }
@@ -476,40 +470,28 @@ namespace Serialize {
     }
 
     template <typename T, typename... Configs, typename... Args>
-    void read(SerializeInStream &in, T &t, Args &&... args)
-    {
-        read<T, Configs...>(in, t, static_cast<const char *>(nullptr), std::forward<Args>(args)...);
-    }
-
-    template <typename T, typename... Configs, typename... Args>
     void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args)
     {
         Operations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
     }
 
-    template <typename T, typename... Configs, typename... Args>
-    void write(SerializeOutStream &out, const T &t, Args &&... args)
-    {
-        write<T, Configs...>(out, t, static_cast<const char *>(nullptr), std::forward<Args>(args)...);
-    }
-
     template <typename T>
     inline SerializeInStream &SerializeInStream::operator>>(T &t)
     {
-        read(*this, t);
+        read(*this, t, nullptr);
         return *this;
     }
 
     template <typename T>
     inline SerializeOutStream &SerializeOutStream::operator<<(const T &t)
     {
-        write(*this, t);
+        write(*this, t, nullptr);
         return *this;
     }
 
     inline SerializeOutStream &SerializeOutStream::operator<<(const char *s)
     {
-        write(*this, std::string { s });
+        write(*this, std::string { s }, nullptr);
         return *this;
     }
 

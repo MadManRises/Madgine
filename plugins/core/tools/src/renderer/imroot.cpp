@@ -49,11 +49,11 @@ namespace Tools {
             Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            Serialize::read(in, *tool, nullptr, Serialize::StateTransmissionFlags_SkipId);
+            Serialize::SerializableUnitPtr { tool }.readState(in, nullptr, Serialize::StateTransmissionFlags_SkipId);
         }
     }
 
-    void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entries into 'out_buf'
+    void ToolWriteAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler, ImGuiTextBuffer *out_buf) // Write: Output every entry into 'out_buf'
     {
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
@@ -64,7 +64,7 @@ namespace Tools {
             std::string name = std::string { tool->key() };
             out_buf->appendf("[Tool][%s]\n", name.c_str());
 
-            Serialize::write(out, *tool, nullptr, Serialize::StateTransmissionFlags_SkipId);
+            Serialize::SerializableUnitPtr { tool }.writeState(out, nullptr, Serialize::StateTransmissionFlags_SkipId);
             out_buf->append(outBuffer->str().c_str());
             outBuffer->str("");
 
