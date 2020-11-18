@@ -163,6 +163,6 @@ namespace Serialize {
     }
 
     template <auto reader, auto writer, auto clear = nullptr>
-    using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, reader, typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreatorWriter, writer>::type, std::conditional_t<std::is_same_v<decltype(clear), nullptr_t>, __creationhelper__impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
+    using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, reader, typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreatorWriter, writer>::type, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __creationhelper__impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
 }
 }
