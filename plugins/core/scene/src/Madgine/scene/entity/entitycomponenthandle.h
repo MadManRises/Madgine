@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Modules/generic/container/generationvector.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 
 namespace Engine {
